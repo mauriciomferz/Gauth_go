@@ -1,0 +1,248 @@
+package auth
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/Gimel-Foundation/gauth/pkg/token"
+)
+
+// PowerEnforcementPoint defines the interface for power enforcement
+type PowerEnforcementPoint interface {
+	// SupplySide enforcement methods
+	ValidateClientDecision(ctx context.Context, token *token.EnhancedToken, decision string) error
+	EnforceClientObligations(ctx context.Context, token *token.EnhancedToken) error
+	VerifySigningAuthority(ctx context.Context, token *token.EnhancedToken, document string) error
+
+	// DemandSide enforcement methods
+	ValidateResourceAccess(ctx context.Context, token *token.EnhancedToken, resource string) error
+	VerifyClientAuthorization(ctx context.Context, token *token.EnhancedToken) error
+	EnforceResourceRestrictions(ctx context.Context, token *token.EnhancedToken, action string) error
+}
+
+// PowerOfAttorney represents comprehensive authorization powers
+type PowerOfAttorney struct {
+	// Basic identification
+	ID        string
+	IssuedAt  time.Time
+	ExpiresAt time.Time
+
+	// Authority levels
+	SigningAuthority    *SigningAuthority
+	DecisionAuthority   *DecisionAuthority
+	ExecutionAuthority  *ExecutionAuthority
+
+	// Obligations and restrictions
+	NeedToDoObligations []Obligation
+	DoUnlessRestrictions []Restriction
+	ComplianceRules     []ComplianceRule
+
+	// Legal framework
+	JurisdictionRules   *JurisdictionRules
+	FiduciaryDuties     []FiduciaryDuty
+	LegalBasis          string
+
+	// Commercial register details
+	RegisterEntry       *RegisterEntry
+	AuthorityScope     []string
+}
+
+// SigningAuthority defines what documents can be signed
+type SigningAuthority struct {
+	DocumentTypes     []string
+	ValueLimits      map[string]float64
+	RequiredCosigners []string
+	SignatureLevel    string // qualified, advanced, basic
+}
+
+// DecisionAuthority defines decision-making powers
+type DecisionAuthority struct {
+	DecisionTypes     []string
+	ApprovalLevels    map[string]ApprovalLevel
+	DelegationLimits  []string
+	EscalationRules   []string
+}
+
+// ExecutionAuthority defines action execution powers
+type ExecutionAuthority struct {
+	ActionTypes       []string
+	ResourceScopes    []string
+	TimeRestrictions  []TimeWindow
+	GeographicLimits  []string
+}
+
+// Obligation represents need-to-do requirements
+type Obligation struct {
+	Type             string
+	Description      string
+	Deadline         time.Time
+	ValidationRules  []string
+	EscalationPath   []string
+}
+
+// RegisterEntry represents commercial register details
+type RegisterEntry struct {
+	RegistryID       string
+	EntryType        string
+	AuthorityType    string
+	ValidFrom        time.Time
+	LastVerified     time.Time
+	VerificationProof string
+}
+
+// StandardPowerEnforcement implements PowerEnforcementPoint
+type StandardPowerEnforcement struct {
+	store       token.EnhancedStore
+	verifier    token.VerificationSystem
+	enforcer    *StandardAuthorizationEnforcer
+	register    *CommercialRegister
+}
+
+// CommercialRegister handles AI system registration
+type CommercialRegister struct {
+	// Registry operations
+	RegisterAI(ctx context.Context, token *token.EnhancedToken, entry *RegisterEntry) error
+	VerifyRegistration(ctx context.Context, registryID string) error
+	UpdateAuthority(ctx context.Context, registryID string, powers *PowerOfAttorney) error
+	RevokeRegistration(ctx context.Context, registryID string) error
+
+	// Power of attorney management
+	GrantPowerOfAttorney(ctx context.Context, power *PowerOfAttorney) error
+	VerifyPowerOfAttorney(ctx context.Context, powerID string) error
+	RevokePowerOfAttorney(ctx context.Context, powerID string) error
+}
+
+func NewStandardPowerEnforcement(
+	store token.EnhancedStore,
+	verifier token.VerificationSystem,
+	enforcer *StandardAuthorizationEnforcer,
+	register *CommercialRegister,
+) *StandardPowerEnforcement {
+	return &StandardPowerEnforcement{
+		store:    store,
+		verifier: verifier,
+		enforcer: enforcer,
+		register: register,
+	}
+}
+
+// Supply-side enforcement methods
+
+func (p *StandardPowerEnforcement) ValidateClientDecision(ctx context.Context, token *token.EnhancedToken, decision string) error {
+	// Verify decision authority
+	power, err := p.getPowerOfAttorney(ctx, token)
+	if err != nil {
+		return fmt.Errorf("failed to get power of attorney: %w", err)
+	}
+
+	// Check decision type is authorized
+	if !contains(power.DecisionAuthority.DecisionTypes, decision) {
+		return fmt.Errorf("unauthorized decision type: %s", decision)
+	}
+
+	// Enforce approval requirements
+	level := power.DecisionAuthority.ApprovalLevels[decision]
+	if err := p.enforcer.EnforceSecondLevelApproval(ctx, token, decision); err != nil {
+		return fmt.Errorf("approval requirements not met: %w", err)
+	}
+
+	// Check need-to-do obligations
+	if err := p.enforceObligations(ctx, token, power.NeedToDoObligations); err != nil {
+		return fmt.Errorf("obligations not met: %w", err)
+	}
+
+	return nil
+}
+
+func (p *StandardPowerEnforcement) EnforceClientObligations(ctx context.Context, token *token.EnhancedToken) error {
+	power, err := p.getPowerOfAttorney(ctx, token)
+	if err != nil {
+		return err
+	}
+
+	for _, obligation := range power.NeedToDoObligations {
+		if obligation.Deadline.Before(time.Now()) {
+			if err := p.validateObligation(ctx, token, &obligation); err != nil {
+				return fmt.Errorf("obligation not fulfilled: %w", err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func (p *StandardPowerEnforcement) VerifySigningAuthority(ctx context.Context, token *token.EnhancedToken, document string) error {
+	power, err := p.getPowerOfAttorney(ctx, token)
+	if err != nil {
+		return err
+	}
+
+	// Verify document type is authorized
+	if !contains(power.SigningAuthority.DocumentTypes, document) {
+		return fmt.Errorf("unauthorized document type: %s", document)
+	}
+
+	// Enforce cosigner requirements
+	for _, cosigner := range power.SigningAuthority.RequiredCosigners {
+		if err := p.verifyCosigner(ctx, token, cosigner); err != nil {
+			return fmt.Errorf("cosigner verification failed: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// Demand-side enforcement methods
+
+func (p *StandardPowerEnforcement) ValidateResourceAccess(ctx context.Context, token *token.EnhancedToken, resource string) error {
+	power, err := p.getPowerOfAttorney(ctx, token)
+	if err != nil {
+		return err
+	}
+
+	// Verify resource is within authorized scope
+	if !contains(power.ExecutionAuthority.ResourceScopes, resource) {
+		return fmt.Errorf("resource outside authorized scope: %s", resource)
+	}
+
+	// Check do-unless restrictions
+	for _, restriction := range power.DoUnlessRestrictions {
+		if err := p.validateRestriction(ctx, token, &restriction); err != nil {
+			return fmt.Errorf("restriction violated: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// Helper methods
+
+func (p *StandardPowerEnforcement) getPowerOfAttorney(ctx context.Context, token *token.EnhancedToken) (*PowerOfAttorney, error) {
+	// Implementation would retrieve power of attorney from store
+	return nil, nil
+}
+
+func (p *StandardPowerEnforcement) validateObligation(ctx context.Context, token *token.EnhancedToken, obligation *Obligation) error {
+	// Implementation would validate specific obligation
+	return nil
+}
+
+func (p *StandardPowerEnforcement) validateRestriction(ctx context.Context, token *token.EnhancedToken, restriction *Restriction) error {
+	// Implementation would validate specific restriction
+	return nil
+}
+
+func (p *StandardPowerEnforcement) verifyCosigner(ctx context.Context, token *token.EnhancedToken, cosigner string) error {
+	// Implementation would verify cosigner
+	return nil
+}
+
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
+}

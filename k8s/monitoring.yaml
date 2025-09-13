@@ -1,0 +1,80 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: gauth-monitor
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: gauth
+  namespaceSelector:
+    matchNames:
+      - gauth
+  endpoints:
+  - port: metrics
+    interval: 15s
+    path: /metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: gauth-alerts
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  groups:
+  - name: gauth.rules
+    rules:
+    - alert: GauthHighErrorRate
+      expr: |
+        sum(rate(gauth_auth_requests_total{status="error"}[5m])) 
+        / 
+        sum(rate(gauth_auth_requests_total[5m])) > 0.05
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: High error rate in authentication requests
+        description: "Error rate is {{ $value | humanizePercentage }} for the last 5m"
+    
+    - alert: GauthCircuitBreakerOpen
+      expr: gauth_circuit_breaker_state > 1
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: Circuit breaker is open
+        description: "Circuit breaker {{ $labels.name }} has been open for more than 1m"
+    
+    - alert: GauthHighLatency
+      expr: |
+        histogram_quantile(0.95, sum(rate(gauth_auth_latency_seconds_bucket[5m])) by (le)) > 0.5
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: High authentication latency
+        description: "95th percentile latency is above 500ms"
+    
+    - alert: GauthHighRateLimit
+      expr: |
+        sum(rate(gauth_rate_limit_rejects_total[5m])) > 100
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: High rate of rejected requests
+        description: "Rate limit is rejecting > 100 requests/s"
+
+    - alert: GauthPodRestarts
+      expr: |
+        increase(kube_pod_container_status_restarts_total{container="gauth"}[1h]) > 2
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Multiple pod restarts detected
+        description: "Pod {{ $labels.pod }} has restarted {{ $value }} times in the last hour"

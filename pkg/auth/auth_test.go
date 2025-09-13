@@ -1,0 +1,218 @@
+package auth
+
+import (
+	"context"
+	"strings"
+	"testing"
+	"time"
+)
+
+func TestBasicAuth(t *testing.T) {
+	config := Config{
+		Type:              TypeBasic,
+		AccessTokenExpiry: time.Hour,
+	}
+
+	auth, err := NewAuthenticator(config)
+	if err != nil {
+		t.Fatalf("Failed to create basic authenticator: %v", err)
+	}
+
+	basicAuth, ok := auth.(*basicAuthenticator)
+	if !ok {
+		t.Fatal("Expected basicAuthenticator")
+	}
+
+	// Add a test client
+	basicAuth.AddClient("testuser", "testpass")
+
+	t.Run("Validate Credentials", func(t *testing.T) {
+		// Test valid credentials
+		err := auth.ValidateCredentials(context.Background(), basicCredentials{
+			Username: "testuser",
+			Password: "testpass",
+		})
+		if err != nil {
+			t.Errorf("Expected valid credentials, got error: %v", err)
+		}
+
+		// Test invalid password
+		err = auth.ValidateCredentials(context.Background(), basicCredentials{
+			Username: "testuser",
+			Password: "wrongpass",
+		})
+		if err != ErrInvalidCredentials {
+			t.Errorf("Expected invalid credentials error, got: %v", err)
+		}
+
+		// Test invalid username
+		err = auth.ValidateCredentials(context.Background(), basicCredentials{
+			Username: "wronguser",
+			Password: "testpass",
+		})
+		if err != ErrInvalidCredentials {
+			t.Errorf("Expected invalid credentials error, got: %v", err)
+		}
+	})
+
+	t.Run("Token Generation and Validation", func(t *testing.T) {
+		// Generate a token
+		req := TokenRequest{
+			Subject: "testuser",
+			Scopes:  []string{"read", "write"},
+		}
+		resp, err := auth.GenerateToken(context.Background(), req)
+		if err != nil {
+			t.Fatalf("Token generation failed: %v", err)
+		}
+		if resp.Token == "" {
+			t.Error("Expected non-empty token")
+		}
+		if !strings.HasPrefix(resp.Token, "Basic ") {
+			t.Errorf("Expected Basic token, got: %s", resp.Token)
+		}
+
+		// Validate the token
+		data, err := auth.ValidateToken(context.Background(), resp.Token)
+		if err != nil {
+			t.Errorf("Token validation failed: %v", err)
+		}
+		if !data.Valid {
+			t.Error("Expected token to be valid")
+		}
+		if data.Subject != "testuser" {
+			t.Errorf("Expected subject 'testuser', got: %s", data.Subject)
+		}
+
+		// Test token expiration
+		config := Config{
+			Type:              TypeBasic,
+			AccessTokenExpiry: time.Millisecond,
+		}
+		shortAuth, _ := NewAuthenticator(config)
+		shortBasic := shortAuth.(*basicAuthenticator)
+		shortBasic.AddClient("testuser", "testpass")
+
+		resp, _ = shortAuth.GenerateToken(context.Background(), req)
+		time.Sleep(2 * time.Millisecond)
+
+		_, err = shortAuth.ValidateToken(context.Background(), resp.Token)
+		if err != ErrTokenExpired {
+			t.Errorf("Expected token expired error, got: %v", err)
+		}
+	})
+}
+
+func TestJWTAuth(t *testing.T) {
+	config := Config{
+		Type:              TypeJWT,
+		ClientID:          "testclient",
+		ClientSecret:      "testsecret",
+		AccessTokenExpiry: time.Hour,
+		TokenValidation: TokenValidationConfig{
+			ValidateSignature: true,
+			AllowedIssuers:    []string{"testclient"},
+			AllowedAudiences:  []string{"testapp"},
+			RequiredScopes:    []string{"read"},
+		},
+	}
+
+	auth, err := NewAuthenticator(config)
+	if err != nil {
+		t.Fatalf("Failed to create JWT authenticator: %v", err)
+	}
+
+	t.Run("Token Generation and Validation", func(t *testing.T) {
+		// Generate a token
+		req := TokenRequest{
+			Subject:  "testuser",
+			Audience: "testapp",
+			Scopes:   []string{"read", "write"},
+			Metadata: map[string]interface{}{
+				"role": "admin",
+			},
+		}
+		resp, err := auth.GenerateToken(context.Background(), req)
+		if err != nil {
+			t.Fatalf("Token generation failed: %v", err)
+		}
+		if resp.Token == "" {
+			t.Error("Expected non-empty token")
+		}
+		if resp.TokenType != "Bearer" {
+			t.Errorf("Expected Bearer token, got: %s", resp.TokenType)
+		}
+
+		// Validate the token
+		data, err := auth.ValidateToken(context.Background(), resp.Token)
+		if err != nil {
+			t.Errorf("Token validation failed: %v", err)
+		}
+		if !data.Valid {
+			t.Error("Expected token to be valid")
+		}
+		if data.Subject != "testuser" {
+			t.Errorf("Expected subject 'testuser', got: %s", data.Subject)
+		}
+		if data.Issuer != "testclient" {
+			t.Errorf("Expected issuer 'testclient', got: %s", data.Issuer)
+		}
+		if data.Audience != "testapp" {
+			t.Errorf("Expected audience 'testapp', got: %s", data.Audience)
+		}
+		if role, ok := data.Claims["role"].(string); !ok || role != "admin" {
+			t.Errorf("Expected role claim 'admin', got: %v", data.Claims["role"])
+		}
+
+		// Test token expiration
+		config := Config{
+			Type:              TypeJWT,
+			ClientID:          "testclient",
+			ClientSecret:      "testsecret",
+			AccessTokenExpiry: time.Millisecond,
+		}
+		shortAuth, _ := NewAuthenticator(config)
+
+		resp, _ = shortAuth.GenerateToken(context.Background(), req)
+		time.Sleep(2 * time.Millisecond)
+
+		_, err = shortAuth.ValidateToken(context.Background(), resp.Token)
+		if err != ErrTokenExpired {
+			t.Errorf("Expected token expired error, got: %v", err)
+		}
+	})
+
+	t.Run("Validation Rules", func(t *testing.T) {
+		// Test invalid issuer
+		config.TokenValidation.AllowedIssuers = []string{"otherclient"}
+		auth, _ = NewAuthenticator(config)
+		req := TokenRequest{
+			Subject:  "testuser",
+			Audience: "testapp",
+			Scopes:   []string{"read", "write"},
+		}
+		resp, _ := auth.GenerateToken(context.Background(), req)
+		_, err := auth.ValidateToken(context.Background(), resp.Token)
+		if err == nil || !strings.Contains(err.Error(), "invalid issuer") {
+			t.Errorf("Expected invalid issuer error, got: %v", err)
+		}
+
+		// Test invalid audience
+		config.TokenValidation.AllowedIssuers = []string{"testclient"}
+		config.TokenValidation.AllowedAudiences = []string{"otherapp"}
+		auth, _ = NewAuthenticator(config)
+		_, err = auth.ValidateToken(context.Background(), resp.Token)
+		if err == nil || !strings.Contains(err.Error(), "invalid audience") {
+			t.Errorf("Expected invalid audience error, got: %v", err)
+		}
+
+		// Test missing required scope
+		config.TokenValidation.AllowedAudiences = []string{"testapp"}
+		config.TokenValidation.RequiredScopes = []string{"admin"}
+		auth, _ = NewAuthenticator(config)
+		_, err = auth.ValidateToken(context.Background(), resp.Token)
+		if err == nil || !strings.Contains(err.Error(), "missing required scope") {
+			t.Errorf("Expected missing scope error, got: %v", err)
+		}
+	})
+}
