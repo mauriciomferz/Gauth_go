@@ -3,7 +3,7 @@ internal/
 
 # Ignore IDE/editor files
 .idea/
-.vscode/
+#.vscode/
 *.swp
 
 # Ignore binary files
