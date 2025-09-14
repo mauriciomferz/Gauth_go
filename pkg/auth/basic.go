@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -64,7 +65,7 @@ func (a *basicAuthenticator) ValidateCredentials(ctx context.Context, creds inte
 	}
 
 	if a.config.AuditLogger != nil {
-		a.config.AuditLogger.Log(audit.Event{
+		a.config.AuditLogger.Log(ctx, &audit.Entry{
 			Type:    audit.TypeAuth,
 			Action:  audit.ActionLogin,
 			ActorID: bc.Username,
@@ -81,9 +82,9 @@ func (a *basicAuthenticator) GenerateToken(ctx context.Context, req TokenRequest
 	token := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%d", req.Subject, time.Now().Unix())))
 
 	if a.config.AuditLogger != nil {
-		a.config.AuditLogger.Log(audit.Event{
+		a.config.AuditLogger.Log(ctx, &audit.Entry{
 			Type:    audit.TypeToken,
-			Action:  audit.ActionTokenGenerate,
+			Action:  "generate",
 			ActorID: req.Subject,
 			Result:  audit.ResultSuccess,
 			Metadata: map[string]string{
@@ -97,7 +98,7 @@ func (a *basicAuthenticator) GenerateToken(ctx context.Context, req TokenRequest
 		TokenType: "Basic",
 		ExpiresIn: int64(a.config.AccessTokenExpiry.Seconds()),
 		Scope:     req.Scopes,
-		Claims:    req.Metadata,
+		Claims:    nil, // No claims for basic auth
 	}, nil
 }
 
@@ -130,9 +131,9 @@ func (a *basicAuthenticator) ValidateToken(ctx context.Context, tokenStr string)
 	}
 
 	if a.config.AuditLogger != nil {
-		a.config.AuditLogger.Log(audit.Event{
+		a.config.AuditLogger.Log(ctx, &audit.Entry{
 			Type:    audit.TypeToken,
-			Action:  audit.ActionTokenValidate,
+			Action:  "validate", // No constant defined, use string
 			ActorID: username,
 			Result:  audit.ResultSuccess,
 		})
@@ -153,7 +154,7 @@ func (a *basicAuthenticator) RevokeToken(ctx context.Context, tokenStr string) e
 
 // Helper functions
 func parseTimestamp(s string) (time.Time, error) {
-	unix, err := fmt.ParseInt(s, 10, 64)
+	unix, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
 		return time.Time{}, err
 	}

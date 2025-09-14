@@ -98,6 +98,15 @@ curl -H "Authorization: Bearer YOUR_TOKEN_HERE" http://localhost:8080/protected
 
 Accesses a protected resource, using typed metadata to track access details.
 
+## Migration Note
+
+This example uses the latest GAuth APIs for token management:
+- `RequestToken` for token creation
+- `ValidateToken` for token validation
+- `InvalidateToken` for token revocation
+
+If you are migrating from an older version, see the Migration Guide in `docs/CODE_IMPROVEMENTS.md` for details on updating from legacy token and event APIs to the new type-safe patterns.
+
 ## Benefits Demonstrated
 
 1. **Type Safety** - Catch errors at compile time rather than runtime

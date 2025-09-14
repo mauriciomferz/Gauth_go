@@ -15,19 +15,13 @@ func main() {
 	// Create metrics collector
 	metrics := monitoring.NewMetricsCollector()
 
-	// Create rate limiter
+	// Create rate limiter (token bucket example)
 	config := rate.Config{
-		Algorithm:     rate.SlidingWindow,
-		Limit:         100,
-		Window:        time.Minute,
-		EnableMetrics: true,
+		Rate:      100,           // 100 requests
+		Window:    time.Minute,   // per minute
+		BurstSize: 20,            // allow bursts of 20
 	}
-	store := rate.NewMemoryStore()
-	limiter, err := rate.NewLimiter(config.Algorithm, config, store)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer limiter.Close()
+	limiter := rate.NewTokenBucket(config)
 
 	// Create handler with rate limiting and metrics
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -35,7 +29,7 @@ func main() {
 		start := time.Now()
 
 		// Try rate limit
-		quota, err := limiter.Allow(r.Context(), clientID)
+		err := limiter.Allow(r.Context(), clientID)
 
 		// Record request metric
 		metrics.Counter(monitoring.MetricRateLimitHits, 1, map[string]string{
@@ -50,20 +44,16 @@ func main() {
 		})
 
 		if err == rate.ErrLimitExceeded {
-			w.Header().Set("X-RateLimit-Limit", fmt.Sprintf("%d", config.Limit))
+			w.Header().Set("X-RateLimit-Limit", fmt.Sprintf("%d", config.Rate))
 			w.Header().Set("X-RateLimit-Remaining", "0")
-			w.Header().Set("X-RateLimit-Reset", fmt.Sprintf("%d", quota.ResetAt.Unix()))
-			w.Header().Set("Retry-After", fmt.Sprintf("%.0f", quota.RetryAfter.Seconds()))
 			http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
 			return
 		}
 
-		// Add rate limit headers
-		w.Header().Set("X-RateLimit-Limit", fmt.Sprintf("%d", config.Limit))
-		w.Header().Set("X-RateLimit-Remaining", fmt.Sprintf("%d", quota.Remaining))
-		w.Header().Set("X-RateLimit-Reset", fmt.Sprintf("%d", quota.ResetAt.Unix()))
-
-		fmt.Fprintf(w, "Hello, your quota: %+v\n", quota)
+		// Add rate limit headers (remaining is not tracked in this simple example)
+		w.Header().Set("X-RateLimit-Limit", fmt.Sprintf("%d", config.Rate))
+		w.Header().Set("X-RateLimit-Remaining", "unknown")
+		fmt.Fprintf(w, "Hello, your request is allowed!\n")
 	})
 
 	// Create metrics endpoint

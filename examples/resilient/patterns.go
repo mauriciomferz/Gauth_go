@@ -89,7 +89,7 @@ func RunExample() {
 				errString(err),
 				quota.Remaining,
 				quota.Total,
-				quota.ResetAt.Sub(time.Now()).Round(time.Second))
+				time.Until(quota.ResetAt).Round(time.Second))
 			time.Sleep(200 * time.Millisecond)
 		}
 	}()

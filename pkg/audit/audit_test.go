@@ -88,7 +88,7 @@ func TestFileStorage(t *testing.T) {
 
 		// Search by type
 		results, err := storage.Search(ctx, &Filter{
-			Types: []Type{TypeAuth},
+			Types: []string{TypeAuth},
 		})
 		require.NoError(t, err)
 		assert.Len(t, results, 2)

@@ -60,8 +60,8 @@ type OpenIDIntegration interface {
 	ManageSession(ctx context.Context, token *token.EnhancedToken) error
 }
 
-// ComplianceTracker handles detailed compliance monitoring
-type ComplianceTracker interface {
+// AITeamComplianceTracker handles detailed compliance monitoring for AI teams
+type AITeamComplianceTracker interface {
 	// TrackApprovalRule records rule application
 	TrackApprovalRule(ctx context.Context, rule *ApprovalRule, result bool) error
 
@@ -147,7 +147,7 @@ func (o *StandardOpenIDIntegration) MapAssuranceLevel(ctx context.Context, token
 	}
 }
 
-// StandardComplianceTracker implements ComplianceTracker
+// StandardComplianceTracker implements AITeamComplianceTracker
 type StandardComplianceTracker struct {
 	store    token.EnhancedStore
 	verifier token.VerificationSystem
@@ -187,13 +187,4 @@ func (c *StandardAITeamControls) hasAuthorizationDelegation(token *token.Enhance
 func (o *StandardOpenIDIntegration) determineAssuranceLevel(token *token.EnhancedToken) int {
 	// Implementation would determine appropriate ACR level
 	return 4
-}
-
-func contains(slice []string, item string) bool {
-	for _, s := range slice {
-		if s == item {
-			return true
-		}
-	}
-	return false
 }

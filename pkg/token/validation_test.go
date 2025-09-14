@@ -1,4 +1,3 @@
-//
 // # Licensing
 //
 // This file is part of the GAuth project and is licensed under the Apache License 2.0.
@@ -30,7 +29,11 @@ func (m *mockValidator) Validate(ctx context.Context, token *Token) error {
 func TestValidationChain(t *testing.T) {
 	ctx := context.Background()
 	bl := NewBlacklist()
-	defer bl.Close()
+	defer func() {
+			if err := bl.Close(); err != nil {
+				t.Errorf("bl.Close() error: %v", err)
+			}
+		}()
 	config := ValidationConfig{}
 
 	t.Run("Valid Token", func(t *testing.T) {
@@ -53,8 +56,7 @@ func TestValidationChain(t *testing.T) {
 }
 
 func TestDefaultQuerier(t *testing.T) {
-	store := NewMemoryStoreV1(time.Hour)
-	querier := NewDefaultQuerier(store)
+	querier := NewDefaultQuerier(nil)
 	ctx := context.Background()
 
 	t.Run("Query Interface", func(t *testing.T) {

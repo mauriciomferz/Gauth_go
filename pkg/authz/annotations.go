@@ -3,9 +3,14 @@ package authz
 import "fmt"
 
 // Annotation represents a typed value for access response annotations
+// Annotation represents a typed value for access response annotations.
+// Only one field should be non-zero at a time.
 type Annotation struct {
-	Type string      `json:"type"`
-	Data interface{} `json:"data"`
+	StringValue string  `json:"string_value,omitempty"`
+	IntValue    int     `json:"int_value,omitempty"`
+	FloatValue  float64 `json:"float_value,omitempty"`
+	BoolValue   bool    `json:"bool_value,omitempty"`
+	Type        string  `json:"type"`
 }
 
 // Annotations represents structured annotations for access responses
@@ -24,9 +29,7 @@ func NewAnnotations() *Annotations {
 // GetString retrieves a string annotation
 func (a *Annotations) GetString(key string) (string, bool) {
 	if val, ok := a.Values[key]; ok && val.Type == "string" {
-		if str, ok := val.Data.(string); ok {
-			return str, true
-		}
+		return val.StringValue, true
 	}
 	return "", false
 }
@@ -34,9 +37,7 @@ func (a *Annotations) GetString(key string) (string, bool) {
 // GetInt retrieves an integer annotation
 func (a *Annotations) GetInt(key string) (int, bool) {
 	if val, ok := a.Values[key]; ok && val.Type == "int" {
-		if i, ok := val.Data.(int); ok {
-			return i, true
-		}
+		return val.IntValue, true
 	}
 	return 0, false
 }
@@ -44,9 +45,7 @@ func (a *Annotations) GetInt(key string) (int, bool) {
 // GetFloat retrieves a float annotation
 func (a *Annotations) GetFloat(key string) (float64, bool) {
 	if val, ok := a.Values[key]; ok && val.Type == "float" {
-		if f, ok := val.Data.(float64); ok {
-			return f, true
-		}
+		return val.FloatValue, true
 	}
 	return 0, false
 }
@@ -54,9 +53,7 @@ func (a *Annotations) GetFloat(key string) (float64, bool) {
 // GetBool retrieves a boolean annotation
 func (a *Annotations) GetBool(key string) (bool, bool) {
 	if val, ok := a.Values[key]; ok && val.Type == "bool" {
-		if b, ok := val.Data.(bool); ok {
-			return b, true
-		}
+		return val.BoolValue, true
 	}
 	return false, false
 }
@@ -64,32 +61,32 @@ func (a *Annotations) GetBool(key string) (bool, bool) {
 // SetString sets a string annotation
 func (a *Annotations) SetString(key, value string) {
 	a.Values[key] = Annotation{
-		Type: "string",
-		Data: value,
+		Type:        "string",
+		StringValue: value,
 	}
 }
 
 // SetInt sets an integer annotation
 func (a *Annotations) SetInt(key string, value int) {
 	a.Values[key] = Annotation{
-		Type: "int",
-		Data: value,
+		Type:     "int",
+		IntValue: value,
 	}
 }
 
 // SetFloat sets a float annotation
 func (a *Annotations) SetFloat(key string, value float64) {
 	a.Values[key] = Annotation{
-		Type: "float",
-		Data: value,
+		Type:      "float",
+		FloatValue: value,
 	}
 }
 
 // SetBool sets a boolean annotation
 func (a *Annotations) SetBool(key string, value bool) {
 	a.Values[key] = Annotation{
-		Type: "bool",
-		Data: value,
+		Type:     "bool",
+		BoolValue: value,
 	}
 }
 
@@ -117,7 +114,18 @@ func (a *Annotations) GetKeys() []string {
 func (a *Annotations) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
 	for k, v := range a.Values {
-		result[k] = v.Data
+		switch v.Type {
+		case "string":
+			result[k] = v.StringValue
+		case "int":
+			result[k] = v.IntValue
+		case "float":
+			result[k] = v.FloatValue
+		case "bool":
+			result[k] = v.BoolValue
+		default:
+			result[k] = nil
+		}
 	}
 	return result
 }

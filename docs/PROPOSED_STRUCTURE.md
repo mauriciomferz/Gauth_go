@@ -41,12 +41,14 @@ Gauth_go/
 └── ...
 ```
 
+
 **Key Points:**
 - All library code is under `pkg/`, with each domain in its own package.
 - Demos and CLI entry points are under `cmd/`.
 - Examples are in `examples/` for discoverability.
 - Documentation is in `docs/` and at the root for onboarding.
 - No public `map[string]interface{}` in APIs—typed structs everywhere.
+- Rate limiting is enforced per user (OwnerID) and per client, using the OwnerID field of the token as the subject for rate limiting.
 - Package-level `doc.go` files for every major package.
 
 ---

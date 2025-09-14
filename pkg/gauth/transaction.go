@@ -15,6 +15,8 @@ const (
 	AuthorizationTransaction TransactionType = "authorization"
 	// ValidationTransaction represents a validation transaction
 	ValidationTransaction TransactionType = "validation"
+	// RefundTransaction represents a refund transaction
+	RefundTransaction TransactionType = "refund"
 )
 
 // TransactionStatus represents the status of a transaction

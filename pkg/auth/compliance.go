@@ -132,7 +132,12 @@ func (c *StandardComplianceChecker) ValidateRestrictions(ctx context.Context, re
 
 	// Check custom limits
 	if len(restrictions.CustomLimits) > 0 {
-		if err := c.checkCustomLimits(ctx, restrictions.CustomLimits, action); err != nil {
+		// Convert map[string]float64 to map[string]interface{} for compatibility
+		converted := make(map[string]interface{}, len(restrictions.CustomLimits))
+		for k, v := range restrictions.CustomLimits {
+			converted[k] = v
+		}
+		if err := c.checkCustomLimits(ctx, converted, action); err != nil {
 			return err
 		}
 	}

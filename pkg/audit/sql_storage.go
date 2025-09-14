@@ -237,7 +237,7 @@ func (s *SQLStorage) Search(ctx context.Context, filter *Filter) ([]*Entry, erro
 // GetByID implements the Storage interface
 func (s *SQLStorage) GetByID(ctx context.Context, id string) (*Entry, error) {
 	entries, err := s.Search(ctx, &Filter{
-		Metadata: []MetaFilter{{
+		Metadata: []MetadataFilter{{
 			Key:      "id",
 			Value:    id,
 			Operator: "eq",

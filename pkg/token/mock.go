@@ -1,7 +1,10 @@
+// Sign implements the crypto.Signer interface for compatibility
 package token
 
 import (
 	"context"
+	"crypto"
+	"io"
 	"sync"
 )
 
@@ -164,11 +167,26 @@ func (m *MockStore) checkError() error {
 	return m.err
 }
 
+
 // MockSigner provides a mock implementation for testing token signing
 type MockSigner struct {
 	SignFunc   func(token *Token) (string, error)
 	VerifyFunc func(tokenString string) (*Token, error)
 	err        error
+}
+
+// Sign implements the crypto.Signer interface for compatibility
+func (m *MockSigner) Sign(rand io.Reader, digest []byte, opts crypto.SignerOpts) ([]byte, error) {
+	// Return a dummy signature for testing
+	return []byte("mock-signature"), nil
+}
+
+// Sign implements the crypto.Signer interface for compatibility; returns dummy signature
+// (moved below the struct definition)
+
+// Public returns a dummy public key for compatibility with crypto.Signer
+func (m *MockSigner) Public() crypto.PublicKey {
+	return nil
 }
 
 // NewMockSigner creates a new mock signer instance

@@ -1,4 +1,3 @@
-package comprehensive
 package main
 
 import (
@@ -47,10 +46,10 @@ func main() {
 
 	// Create retry handler
 	retry := resilience.NewRetry(resilience.RetryConfig{
-		MaxAttempts:   3,
-		InitialDelay:  100 * time.Millisecond,
-		MaxDelay:      1 * time.Second,
-		Multiplier:    2.0,
+		MaxAttempts:  3,
+		InitialDelay: 100 * time.Millisecond,
+		MaxDelay:     1 * time.Second,
+		Multiplier:   2.0,
 	})
 
 	// Create timeout handler
@@ -70,7 +69,7 @@ func main() {
 	// HTTP handler using resilience patterns
 	http.HandleFunc("/resilient", func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		
+
 		err := combined.Execute(ctx, func(ctx context.Context) error {
 			return service.SlowCall()
 		})

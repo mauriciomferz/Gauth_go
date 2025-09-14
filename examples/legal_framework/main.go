@@ -9,6 +9,18 @@ import (
 	"github.com/Gimel-Foundation/gauth/pkg/auth"
 )
 
+// Strong typing for rule parameters
+type TransactionParameters struct {
+	Amount   float64 `json:"amount"`
+	Currency string  `json:"currency"`
+	Limit    float64 `json:"limit"`
+}
+
+type KYCParameters struct {
+	RequiredLevel string `json:"required_level"`
+	Status        string `json:"status"`
+}
+
 func main() {
 	// Create a new legal framework
 	framework := auth.NewLegalFramework(
@@ -79,28 +91,32 @@ func main() {
 	}
 	framework.AddDataSource(transactionDataSource)
 
-	// Add a validation rule
+	// Add a validation rule with typed parameters
 	transactionLimitRule := auth.ValidationRule{
 		Name:      "transaction-limit",
 		Predicate: "amount <= limit",
-		Parameters: map[string]interface{}{
-			"limit": 10000.00,
+		Parameters: auth.ValidationRuleParameters{
+			IntParams:    map[string]int{"limit": 10000},
+			StringParams: map[string]string{},
+			BoolParams:   map[string]bool{},
 		},
 	}
 	framework.ValidationRules = append(framework.ValidationRules, transactionLimitRule)
 
-	// Add a policy
+	// Add a policy with strongly typed conditions
 	highValueTransactionPolicy := auth.Policy{
-		ID:          "high-value-transaction-policy",
-		Name:        "High Value Transaction Policy",
-		Description: "Policy for transactions over $10,000",
+		ID:    "high-value-transaction-policy",
+		Name:  "High Value Transaction Policy",
+		Parameters: auth.ValidationRuleParameters{},
 		Rules: []auth.DecisionRule{
 			{
 				Condition: auth.Condition{
 					Type: "amount",
 					Rule: "amount > 10000",
-					Parameters: map[string]interface{}{
-						"currency": "USD",
+					Parameters: auth.ConditionParameters{
+						StringParams: map[string]string{"currency": "EURO"},
+						IntParams:    map[string]int{},
+						BoolParams:   map[string]bool{},
 					},
 				},
 				Effect:   "deny",
@@ -110,8 +126,10 @@ func main() {
 				Condition: auth.Condition{
 					Type: "kyc",
 					Rule: "kyc_status == 'verified'",
-					Parameters: map[string]interface{}{
-						"required_level": "full",
+					Parameters: auth.ConditionParameters{
+						StringParams: map[string]string{"required_level": "full"},
+						IntParams:    map[string]int{},
+						BoolParams:   map[string]bool{},
 					},
 				},
 				Effect:   "permit",
@@ -120,7 +138,6 @@ func main() {
 		},
 		Version: "1.0.0",
 		Created: time.Now(),
-		Updated: time.Now(),
 	}
 	framework.AddPolicy(highValueTransactionPolicy)
 

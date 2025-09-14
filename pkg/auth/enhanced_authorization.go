@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Gimel-Foundation/gauth/pkg/common"
 	"github.com/Gimel-Foundation/gauth/pkg/token"
 )
 
@@ -35,51 +36,6 @@ type JurisdictionRules struct {
 
 	// Required roles/positions for authorization
 	RequiredRoles []string
-}
-
-// SecondLevelApproval represents the dual control principle requirement
-type SecondLevelApproval struct {
-	// Primary approval details
-	PrimaryApprover     string
-	PrimaryApprovalTime time.Time
-	PrimaryRole         string
-
-	// Secondary approval details
-	SecondaryApprover     string
-	SecondaryApprovalTime time.Time
-	SecondaryRole         string
-
-	// Approval context
-	ApprovalLevel     ApprovalLevel
-	ApprovalScope     []string
-	ApprovalDuration  time.Duration
-	JurisdictionRules *JurisdictionRules
-}
-
-// HumanVerification ensures human accountability in the authorization chain
-type HumanVerification struct {
-	// Human identifier at the top of the chain
-	UltimateHumanID string
-
-	// Position/role of the human
-	Role string
-
-	// Legal capacity verification
-	LegalCapacityVerified    bool
-	CapacityVerificationTime time.Time
-	CapacityVerifier         string
-
-	// Chain of delegation
-	DelegationChain []DelegationLink
-}
-
-// DelegationLink represents one link in the authorization chain
-type DelegationLink struct {
-	FromID string
-	ToID   string
-	Type   string // "human-to-human", "human-to-ai", "ai-to-ai"
-	Level  int
-	Time   time.Time
 }
 
 // AuthorizationEnforcer handles enhanced authorization rules
@@ -115,7 +71,7 @@ func NewStandardAuthorizationEnforcer(
 
 // VerifyHumanInChain ensures there's always a human at the top of the authorization chain
 func (e *StandardAuthorizationEnforcer) VerifyHumanInChain(ctx context.Context, token *token.EnhancedToken) error {
-	verification, err := e.store.GetHumanVerification(ctx, token.ID)
+	verification, err := e.store.GetHumanVerification(ctx, token)
 	if err != nil {
 		return fmt.Errorf("failed to get human verification: %w", err)
 	}
@@ -149,7 +105,7 @@ func (e *StandardAuthorizationEnforcer) EnforceSecondLevelApproval(ctx context.C
 	// Determine required approval level
 	requiredLevel := rules.RequiredApprovals[action]
 	if requiredLevel >= DualApproval {
-		approval, err := e.store.GetSecondLevelApproval(ctx, token.ID)
+		approval, err := e.store.GetSecondLevelApproval(ctx, token)
 		if err != nil {
 			return fmt.Errorf("failed to get second level approval: %w", err)
 		}
@@ -195,7 +151,7 @@ func (e *StandardAuthorizationEnforcer) ValidateJurisdictionRules(ctx context.Co
 
 // Helper methods
 
-func (e *StandardAuthorizationEnforcer) verifyDelegationChain(ctx context.Context, chain []DelegationLink) error {
+func (e *StandardAuthorizationEnforcer) verifyDelegationChain(ctx context.Context, chain []common.DelegationLink) error {
 	if len(chain) == 0 {
 		return fmt.Errorf("empty delegation chain")
 	}
@@ -213,7 +169,7 @@ func (e *StandardAuthorizationEnforcer) verifyDelegationChain(ctx context.Contex
 	return nil
 }
 
-func (e *StandardAuthorizationEnforcer) verifyApproverRoles(ctx context.Context, approval *SecondLevelApproval, requiredRoles []string) bool {
+func (e *StandardAuthorizationEnforcer) verifyApproverRoles(ctx context.Context, approval *common.SecondLevelApproval, requiredRoles []string) bool {
 	// Implementation would verify that approvers have required roles
 	return true
 }

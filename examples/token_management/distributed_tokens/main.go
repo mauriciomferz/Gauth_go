@@ -10,18 +10,11 @@ import (
 )
 
 func main() {
-	// Create a Redis-backed token store
-	store, err := token.NewRedisStore(token.RedisConfig{
-		Addresses:  []string{"localhost:6379"},
-		KeyPrefix:  "example:",
-		DefaultTTL: time.Hour * 24,
-	})
-	if err != nil {
-		log.Fatalf("Failed to create token store: %v", err)
-	}
+	// Create a memory-based token store (replace with Redis if available)
+	store := token.NewMemoryStore(24 * time.Hour)
 	defer store.Close()
 
-	// Create a validation chain
+	// Create a validation chain (adjust config as needed)
 	validator := token.NewValidationChain(token.ValidationConfig{
 		AllowedIssuers:   []string{"example-service"},
 		AllowedAudiences: []string{"example-app"},
@@ -37,29 +30,32 @@ func main() {
 	// Create a token
 	fmt.Println("\n1. Creating a new token")
 	fmt.Println("----------------------")
+	deviceInfo := &token.DeviceInfo{
+		ID:        "device123",
+		UserAgent: "Example/1.0",
+		IPAddress: "192.168.1.1",
+	}
+	metadata := &token.Metadata{
+		Device: deviceInfo,
+		AppID: "example-app",
+		Labels: map[string]string{"environment": "test"},
+		Tags: []string{"demo"},
+		Attributes: map[string][]string{"roles": {"user"}},
+	}
 	newToken := &token.Token{
-		ID:      "example-token",
-		Value:   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...", // Usually from JWT creation
-		Type:    token.AccessToken,
-		Subject: "user123",
-		Issuer:  "example-service",
-		Claims: token.Claims{
-			Audience: []string{"example-app"},
-			Roles:    []string{"user"},
-		},
-		Scopes: []string{"read", "write"},
-		Metadata: token.Metadata{
-			DeviceInfo: &token.DeviceInfo{
-				ID:        "device123",
-				UserAgent: "Example/1.0",
-				IPAddress: "192.168.1.1",
-			},
-		},
+		ID:        "example-token",
+		Value:     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+		Type:      token.Access,
+		Subject:   "user123",
+		Issuer:    "example-service",
+		Audience:  []string{"example-app"},
+		Scopes:    []string{"read", "write"},
+		Metadata:  metadata,
 		IssuedAt:  time.Now(),
 		ExpiresAt: time.Now().Add(time.Hour),
 	}
 
-	if err := store.Save(ctx, newToken); err != nil {
+	if err := store.Save(ctx, newToken.ID, newToken); err != nil {
 		log.Fatalf("Failed to save token: %v", err)
 	}
 	fmt.Printf("Token created: %s\n", newToken.ID)
@@ -83,8 +79,8 @@ func main() {
 	fmt.Println("\n3. Listing user tokens")
 	fmt.Println("--------------------")
 	userTokens, err := store.List(ctx, token.Filter{
+		Types:   []token.Type{token.Access},
 		Subject: "user123",
-		Type:    token.AccessToken,
 	})
 	if err != nil {
 		log.Fatalf("Failed to list tokens: %v", err)
@@ -94,7 +90,13 @@ func main() {
 	// Revoke token
 	fmt.Println("\n4. Revoking token")
 	fmt.Println("---------------")
-	if err := store.Revoke(ctx, newToken.ID, "user logout"); err != nil {
+	// Set revocation status and revoke the token
+	newToken.RevocationStatus = &token.RevocationStatus{
+		RevokedAt: time.Now(),
+		Reason:    "user logout",
+		RevokedBy: "example-service",
+	}
+	if err := store.Revoke(ctx, newToken); err != nil {
 		log.Fatalf("Failed to revoke token: %v", err)
 	}
 	fmt.Println("Token revoked successfully")
@@ -104,9 +106,8 @@ func main() {
 	fmt.Println("---------------------")
 	revokedToken, err := store.Get(ctx, newToken.ID)
 	if err != nil {
-		log.Fatalf("Failed to get revoked token: %v", err)
-	}
-	if revokedToken.RevocationStatus != nil {
+		fmt.Printf("Token not found after revocation (expected if store deletes revoked tokens): %v\n", err)
+	} else if revokedToken.RevocationStatus != nil {
 		fmt.Printf("Token revoked at: %v\n", revokedToken.RevocationStatus.RevokedAt)
 		fmt.Printf("Revocation reason: %s\n", revokedToken.RevocationStatus.Reason)
 	}
@@ -116,11 +117,13 @@ func main() {
 	fmt.Println("--------------------------------")
 	invalidToken := &token.Token{
 		ID:        "invalid-token",
+		Type:      token.Access,
 		Subject:   "user123",
 		Issuer:    "unknown-service", // Not in allowed issuers
+		Audience:  []string{"example-app"},
 		IssuedAt:  time.Now(),
 		ExpiresAt: time.Now().Add(time.Hour),
-		Scopes:    []string{"write"}, // Missing required 'read' scope
+		Scopes:    []string{"read", "write"},
 	}
 
 	if err := validator.Validate(ctx, invalidToken); err != nil {

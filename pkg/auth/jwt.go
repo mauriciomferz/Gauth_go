@@ -89,16 +89,17 @@ func (a *jwtAuthenticator) GenerateToken(ctx context.Context, req TokenRequest) 
 	}
 
 	if a.config.AuditLogger != nil {
-		a.config.AuditLogger.Log(audit.Event{
+		entry := &audit.Entry{
 			Type:    audit.TypeToken,
 			Action:  audit.ActionTokenGenerate,
 			ActorID: req.Subject,
 			Result:  audit.ResultSuccess,
-			Metadata: map[string]string{
+			Metadata: audit.Metadata{
 				"audience": req.Audience,
 				"scope":    fmt.Sprintf("%v", req.Scopes),
 			},
-		})
+		}
+		a.config.AuditLogger.Log(ctx, entry)
 	}
 
 	return &TokenResponse{
@@ -179,17 +180,18 @@ func (a *jwtAuthenticator) ValidateToken(ctx context.Context, tokenStr string) (
 	}
 
 	if a.config.AuditLogger != nil {
-		a.config.AuditLogger.Log(audit.Event{
+		entry := &audit.Entry{
 			Type:    audit.TypeToken,
 			Action:  audit.ActionTokenValidate,
 			ActorID: claims.Subject,
 			Result:  audit.ResultSuccess,
-			Metadata: map[string]string{
+			Metadata: audit.Metadata{
 				"issuer":   claims.Issuer,
 				"audience": fmt.Sprintf("%v", claims.Audience),
 				"scope":    fmt.Sprintf("%v", claims.Scope),
 			},
-		})
+		}
+		a.config.AuditLogger.Log(ctx, entry)
 	}
 
 	return &TokenData{

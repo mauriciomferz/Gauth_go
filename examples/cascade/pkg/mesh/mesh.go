@@ -80,16 +80,10 @@ func (m *ServiceMesh) PrintHealthReport() {
 	defer m.mu.RUnlock()
 
 	for sType, svc := range m.services {
-		svc.Health.mu.RLock()
-		total := svc.Health.Successes + svc.Health.Failures
-		successRate := 100.0
-		if total > 0 {
-			successRate = float64(svc.Health.Successes) / float64(total) * 100
-		}
-		svc.Health.mu.RUnlock()
-
+		snapshot := svc.Health.GetSnapshot()
 		fmt.Printf("%s:\n", sType)
-		fmt.Printf("  - Success Rate: %.2f%%\n", successRate)
+		fmt.Printf("  - Success Rate: %.2f%%\n", snapshot.SuccessRate)
+		fmt.Printf("  - Total Requests: %d\n", snapshot.TotalRequests)
 		fmt.Printf("  - Load Factor: %.2f\n", svc.GetLoadFactor())
 	}
 }

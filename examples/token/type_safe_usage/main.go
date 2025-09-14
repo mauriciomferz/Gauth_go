@@ -10,19 +10,9 @@ import (
 )
 
 func main() {
-	// Create token store configuration with strong typing
-	config := token.Config{
-		SigningMethod:    token.RS256,
-		ValidityPeriod:   1 * time.Hour,
-		DefaultScopes:    []string{"read", "write"},
-		ValidateAudience: true,
-		ValidateIssuer:   true,
-		AllowedIssuers:   []string{"auth.example.com"},
-		AllowedAudiences: []string{"api.example.com"},
-	}
 
-	// Create a new memory-based token store
-	store := token.NewMemoryStore(config)
+	// Create a new memory-based token store with a 1 hour TTL
+	store := token.NewMemoryStore(1 * time.Hour)
 	ctx := context.Background()
 
 	// Create a strongly-typed token with metadata
@@ -64,13 +54,13 @@ func main() {
 		Metadata:  metadata,
 	}
 
-	// Save token
-	if err := store.Save(ctx, "user-123", newToken); err != nil {
+	// Save token using token.ID as the key
+	if err := store.Save(ctx, newToken.ID, newToken); err != nil {
 		log.Fatalf("Failed to save token: %v", err)
 	}
 
-	// Retrieve token
-	retrievedToken, err := store.Get(ctx, "user-123")
+	// Retrieve token using token.ID as the key
+	retrievedToken, err := store.Get(ctx, newToken.ID)
 	if err != nil {
 		log.Fatalf("Failed to retrieve token: %v", err)
 	}

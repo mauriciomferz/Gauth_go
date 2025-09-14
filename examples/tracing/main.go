@@ -1,4 +1,3 @@
-package tracing
 package main
 
 import (
@@ -10,66 +9,87 @@ import (
 
 	"go.opentelemetry.io/otel/attribute"
 
+	"github.com/Gimel-Foundation/gauth/internal/tracing"
 	"github.com/Gimel-Foundation/gauth/pkg/auth"
 	"github.com/Gimel-Foundation/gauth/pkg/authz"
 	"github.com/Gimel-Foundation/gauth/pkg/rate"
-	"github.com/Gimel-Foundation/gauth/internal/tracing"
 )
 
 func main() {
+	// Initialize Authorizer (in-memory)
+	var authorizer = authz.NewMemoryAuthorizer()
+
+	// Add a default allow policy so all requests are authorized for demo purposes
+	var err error
+	err = authorizer.AddPolicy(context.Background(), &authz.Policy{
+		ID:        "default-allow",
+		Version:   "1.0",
+		Name:      "Allow all",
+		Effect:    authz.Allow,
+		Subjects:  []authz.Subject{{ID: "*"}},
+		Resources: []authz.Resource{{ID: "*"}},
+		Actions:   []authz.Action{{Name: "*"}},
+		Priority:  1,
+		Status:    "active",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	})
+	if err != nil {
+		log.Fatalf("failed to add default policy: %v", err)
+	}
 	// Initialize tracer
 	tracer, err := tracing.NewTracerProvider(tracing.Config{
 		ServiceName:    "gauth-demo",
 		ServiceVersion: "1.0.0",
-		Environment:   "development",
+		Environment:    "development",
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer tracer.Shutdown(context.Background())
 
-	// Initialize services
-	authService := auth.New(auth.Config{
-		TokenType: auth.JWT,
-		TTL:      time.Hour,
+	// Initialize Authenticator (JWT)
+	authService, err := auth.NewAuthenticator(auth.Config{
+		Type: auth.TypeJWT,
+		AccessTokenExpiry: time.Hour,
 	})
+	if err != nil {
+		log.Fatalf("failed to create authenticator: %v", err)
+	}
 
-	authzService := authz.New(authz.Config{
-		PolicyStore: authz.NewMemoryPolicyStore(),
-	})
 
+	// Initialize Rate Limiter
 	rateLimiter := rate.NewTokenBucket(rate.Config{
-		Limit:  100,
-		Window: time.Minute,
+		Rate:      100,
+		Window:    time.Minute,
+		BurstSize: 100,
 	})
 
-	// Create handler with tracing
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Start root span
 		ctx, rootSpan := tracer.StartSpan(r.Context(), "handle_request",
 			attribute.String("path", r.URL.Path),
 			attribute.String("method", r.Method),
 		)
 		defer rootSpan.End()
 
-		// Extract client info
 		clientIP := r.RemoteAddr
 		userID := r.Header.Get("X-User-ID")
 		token := r.Header.Get("Authorization")
 
 		// 1. Rate limiting
 		ctx, rateSpan := tracer.StartSpan(ctx, "rate_limit_check")
-		quota, err := rateLimiter.Allow(ctx, clientIP)
+		err := rateLimiter.Allow(ctx, clientIP)
+		remaining := rateLimiter.GetRemainingRequests(clientIP)
 		if err != nil {
 			rateSpan.SetAttributes(
 				attribute.String("error", err.Error()),
-				attribute.Int64("remaining", quota.Remaining),
+				attribute.Int64("remaining", remaining),
 			)
 			rateSpan.End()
 			http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
 			return
 		}
-		rateSpan.SetAttributes(attribute.Int64("remaining", quota.Remaining))
+		rateSpan.SetAttributes(attribute.Int64("remaining", remaining))
 		rateSpan.End()
 
 		// 2. Authentication
@@ -83,24 +103,24 @@ func main() {
 		}
 		authSpan.SetAttributes(
 			attribute.String("user_id", claims.Subject),
-			attribute.String("token_id", claims.ID),
 		)
 		authSpan.End()
 
 		// 3. Authorization
 		ctx, authzSpan := tracer.StartSpan(ctx, "authorize")
-		allowed, err := authzService.IsAllowed(ctx, authz.Request{
-			Subject:  userID,
-			Resource: r.URL.Path,
-			Action:   r.Method,
-		})
+		accessReq := authz.NewAccessRequest(
+			authz.Subject{ID: userID},
+			authz.Resource{ID: r.URL.Path},
+			authz.Action{Name: r.Method},
+		)
+		decision, err := authorizer.Authorize(ctx, accessReq.Subject, accessReq.Action, accessReq.Resource)
 		if err != nil {
 			authzSpan.SetAttributes(attribute.String("error", err.Error()))
 			authzSpan.End()
 			http.Error(w, "Authorization error", http.StatusInternalServerError)
 			return
 		}
-		if !allowed {
+		if !decision.Allowed {
 			authzSpan.SetAttributes(attribute.Bool("allowed", false))
 			authzSpan.End()
 			http.Error(w, "Forbidden", http.StatusForbidden)
@@ -124,7 +144,6 @@ func main() {
 	// Add trace ID middleware
 	traced := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Get trace ID
 			ctx, span := tracer.StartSpan(r.Context(), "request")
 			defer span.End()
 

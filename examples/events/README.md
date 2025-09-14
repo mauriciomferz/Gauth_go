@@ -84,3 +84,7 @@ func (h *CustomHandler) Handle(event events.Event) {
     fmt.Printf("Received event: %s - %s\n", event.Type, event.Message)
 }
 ```
+
+## Migration Note
+
+This example uses the latest GAuth event system with strongly-typed metadata and event handlers. If you are migrating from code that used untyped `map[string]interface{}` for event metadata or legacy handler patterns, see the Migration Guide in `docs/CODE_IMPROVEMENTS.md` for details on updating to the new type-safe event system.

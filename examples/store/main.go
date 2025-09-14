@@ -94,7 +94,7 @@ func multipleTokensExample(ctx context.Context, tokenStore store.TokenStore) {
 
 	// Store the tokens with different types
 	tokenTypes := []string{"access", "refresh", "api_key"}
-	
+
 	fmt.Println("Storing multiple tokens for the same subject...")
 	for i, tokenValue := range tokens {
 		metadata := store.TokenMetadata{
@@ -106,7 +106,7 @@ func multipleTokensExample(ctx context.Context, tokenStore store.TokenStore) {
 			Type:      tokenTypes[i],
 			Status:    "active",
 		}
-		
+
 		if err := tokenStore.Store(ctx, tokenValue, metadata); err != nil {
 			log.Fatalf("Failed to store token %d: %v", i, err)
 		}
@@ -117,10 +117,10 @@ func multipleTokensExample(ctx context.Context, tokenStore store.TokenStore) {
 	if err != nil {
 		log.Fatalf("Failed to list tokens: %v", err)
 	}
-	
+
 	fmt.Printf("Found %d tokens for subject %s:\n", len(subjectTokens), subject)
 	for i, t := range subjectTokens {
-		fmt.Printf("  %d: ID=%s, Type=%s, Expires=%s\n", 
+		fmt.Printf("  %d: ID=%s, Type=%s, Expires=%s\n",
 			i+1, t.ID, t.Type, t.ExpiresAt.Format(time.RFC3339))
 	}
 }
@@ -129,10 +129,10 @@ func multipleTokensExample(ctx context.Context, tokenStore store.TokenStore) {
 func errorHandlingExample(ctx context.Context, tokenStore store.TokenStore) {
 	// Try to get a non-existent token
 	nonExistentToken := "this_token_does_not_exist"
-	
+
 	fmt.Printf("Attempting to get non-existent token: %s\n", nonExistentToken)
 	_, err := tokenStore.Get(ctx, nonExistentToken)
-	
+
 	if err != nil {
 		// Check if it's a StorageError and handle appropriately
 		if storageErr, ok := err.(*store.StorageError); ok {
@@ -160,33 +160,33 @@ func revocationExample(ctx context.Context, tokenStore store.TokenStore) {
 		Type:      "access",
 		Status:    "active",
 	}
-	
+
 	// Store the token
 	fmt.Println("Storing a token for revocation...")
 	if err := tokenStore.Store(ctx, token, metadata); err != nil {
 		log.Fatalf("Failed to store token: %v", err)
 	}
-	
+
 	// Check if token is revoked (should be false)
 	revoked, err := tokenStore.IsRevoked(ctx, token)
 	if err != nil {
 		log.Fatalf("Failed to check revocation status: %v", err)
 	}
 	fmt.Printf("Is token revoked? %v\n", revoked)
-	
+
 	// Revoke the token
 	fmt.Println("Revoking the token...")
 	if err := tokenStore.Revoke(ctx, token); err != nil {
 		log.Fatalf("Failed to revoke token: %v", err)
 	}
-	
+
 	// Check again if token is revoked (should be true)
 	revoked, err = tokenStore.IsRevoked(ctx, token)
 	if err != nil {
 		log.Fatalf("Failed to check revocation status: %v", err)
 	}
 	fmt.Printf("Is token revoked now? %v\n", revoked)
-	
+
 	// Try to use the revoked token
 	fmt.Println("Attempting to use revoked token...")
 	_, err = tokenStore.Get(ctx, token)
@@ -199,5 +199,4 @@ func revocationExample(ctx context.Context, tokenStore store.TokenStore) {
 	} else {
 		log.Fatal("ERROR: Revoked token was still usable!")
 	}
-}
 }

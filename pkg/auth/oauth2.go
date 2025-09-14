@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/Gimel-Foundation/gauth/pkg/audit"
+	"github.com/Gimel-Foundation/gauth/pkg/token"
 )
 
 // OAuth2 grant types
@@ -30,7 +31,7 @@ type OAuth2Config struct {
 	AuthorizeURL     string
 	RedirectURL      string
 	Endpoints        map[string]string
-	TokenStore       TokenStore
+	TokenStore       token.EnhancedStore
 	ValidateUserFunc func(context.Context, string, string) error
 }
 
@@ -171,7 +172,7 @@ func (a *oauth2Authenticator) GenerateToken(ctx context.Context, req TokenReques
 	}
 
 	if a.config.AuditLogger != nil {
-		a.config.AuditLogger.Log(audit.Event{
+		a.config.AuditLogger.Log(ctx, &audit.Entry{
 			Type:    audit.TypeToken,
 			Action:  audit.ActionTokenGenerate,
 			ActorID: req.Subject,
@@ -193,7 +194,8 @@ func (a *oauth2Authenticator) ValidateToken(ctx context.Context, tokenStr string
 		if err != nil {
 			return nil, fmt.Errorf("token not found in store: %w", err)
 		}
-		return data, nil
+		// Convert *token.Token to *auth.TokenData for compatibility
+		return ConvertTokenToTokenData(data), nil
 	}
 
 	// If no token store, validate against introspection endpoint
@@ -272,7 +274,7 @@ func (a *oauth2Authenticator) RevokeToken(ctx context.Context, tokenStr string) 
 	}
 
 	if a.config.AuditLogger != nil {
-		a.config.AuditLogger.Log(audit.Event{
+		a.config.AuditLogger.Log(ctx, &audit.Entry{
 			Type:   audit.TypeToken,
 			Action: audit.ActionTokenRevoke,
 			Result: audit.ResultSuccess,
@@ -280,4 +282,20 @@ func (a *oauth2Authenticator) RevokeToken(ctx context.Context, tokenStr string) 
 	}
 
 	return nil
+}
+
+// ConvertTokenToTokenData maps a *token.Token to a *auth.TokenData for compatibility
+func ConvertTokenToTokenData(t *token.Token) *TokenData {
+	if t == nil {
+		return nil
+	}
+	return &TokenData{
+		Subject:   t.Subject,
+		Issuer:    t.Issuer,
+		Audience:  "", // Not directly available
+		IssuedAt:  t.IssuedAt,
+		ExpiresAt: t.ExpiresAt,
+		Scope:     t.Scopes,
+		Claims:    Claims{}, // Not available on Token
+	}
 }

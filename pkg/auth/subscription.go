@@ -104,7 +104,7 @@ func (s *StandardSubscriptionService) RegisterOwnerAuthorizer(ctx context.Contex
 
 	// Verify registration if available
 	if info.RegistrationInfo != nil {
-		if err := s.verifier.(*token.StandardVerificationSystem).RegVerifier.VerifyRegistration(ctx, info.RegistrationInfo); err != nil {
+	if err := s.verifier.(*token.StandardVerificationSystem).RegVerifier().VerifyRegistration(ctx, info.RegistrationInfo); err != nil {
 			return fmt.Errorf("registration verification failed: %w", err)
 		}
 	}
@@ -127,7 +127,7 @@ func (s *StandardSubscriptionService) RegisterClientOwner(ctx context.Context, i
 
 	// Verify registration if available
 	if info.RegistrationInfo != nil {
-		if err := s.verifier.(*token.StandardVerificationSystem).RegVerifier.VerifyRegistration(ctx, info.RegistrationInfo); err != nil {
+	if err := s.verifier.(*token.StandardVerificationSystem).RegVerifier().VerifyRegistration(ctx, info.RegistrationInfo); err != nil {
 			return fmt.Errorf("registration verification failed: %w", err)
 		}
 	}

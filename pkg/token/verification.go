@@ -150,6 +150,11 @@ func (v *StandardVerificationSystem) VerifyVersionHistory(ctx context.Context, t
 	return nil
 }
 
+// RegVerifier returns the registry verifier (for subscription.go compatibility)
+func (v *StandardVerificationSystem) RegVerifier() RegistryVerifier {
+	return v.regVerifier
+}
+
 // Helper methods
 
 func (v *StandardVerificationSystem) verifyOwnerAuthorization(ctx context.Context, owner *OwnerInfo) error {

@@ -1,4 +1,3 @@
-package rate
 package main
 
 import (
@@ -31,7 +30,7 @@ func demoConcurrentClients(limiter *rate.Limiter) {
 	var wg sync.WaitGroup
 
 	fmt.Println("\nConcurrent Clients Demo:")
-	
+
 	// Start 3 concurrent clients
 	for i := 1; i <= 3; i++ {
 		wg.Add(1)
@@ -112,8 +111,8 @@ func main() {
 	// Create a rate limiter
 	config := &rate.Config{
 		RequestsPerSecond: 5,  // 5 requests per second
-		WindowSize:       2,   // Over a 2-second window
-		BurstSize:       10,  // Allow bursts up to 10
+		WindowSize:        2,  // Over a 2-second window
+		BurstSize:         10, // Allow bursts up to 10
 	}
 	limiter := rate.NewLimiter(config)
 	defer limiter.Close() // Ensure cleanup goroutine stops

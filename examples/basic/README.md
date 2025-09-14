@@ -18,50 +18,31 @@ This example demonstrates basic authentication using GAuth, including:
    - Burst allowance
 
 3. **Error Handling**
-   - Authentication errors
-   - Rate limit errors
-   - Token validation errors
+   # Basic GAuth CLI Example
 
-## Running the Example
+   This example demonstrates the core GAuth flow using a simple CLI program. It shows how to:
+   - Initialize a GAuth instance with typed configuration
+   - Request an authorization grant
+   - (Extendable) Issue and validate tokens, handle errors, and audit events
 
-1. **Start the Server**
-   ```bash
-   go run main.go
-   ```
+   ## Running the Example
 
-2. **Get a Token**
-   ```bash
-   curl -X POST http://localhost:8080/auth \
-     -H "Content-Type: application/json" \
-     -d '{"username":"test","password":"test123"}'
-   ```
-
-3. **Use the Token**
-   ```bash
-   curl -H "Authorization: Bearer <token>" \
-     http://localhost:8080/protected
-   ```
-
-## Code Structure
-
-```
-basic/
-  ├── main.go              # Server setup
-  ├── handlers/
-  │   └── auth.go         # Auth handlers
-  └── middleware/
-      └── auth.go         # Auth middleware
-```
-
-## Implementation Details
-
-1. **Authentication Setup**
-   ```go
-   auth := gauth.New(gauth.Config{
+   1. **Run the CLI Demo**
+      ```bash
+      go run main.go
        AuthServerURL: "http://localhost:8080",
-       ClientID:     "example-client",
-       ClientSecret: "example-secret",
-   })
+
+   2. **Observe Output**
+      - The program will print the steps of the authorization flow and the grant details.
+
+   ## Extending the Example
+
+   - Add token issuance and validation using the GAuth API.
+   - Integrate audit logging and error handling.
+   - See comments in `main.go` for extension points.
+
+   ---
+   For more, see the main project README and package documentation.
    ```
 
 2. **Rate Limiting**

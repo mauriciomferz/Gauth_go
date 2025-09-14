@@ -1,32 +1,15 @@
-
 // Package auth provides authentication and authorization functionality
+
 package auth
 
 import (
-    "context"
-    "fmt"
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/Gimel-Foundation/gauth/pkg/audit"
 )
 
-type TokenResponse struct {
-    // Token is the generated token string
-    Token string
-
-    // TokenType is the type of token (e.g., "Bearer")
-    TokenType string
-
-    // ExpiresIn is the token lifetime in seconds
-    ExpiresIn int64
-
-    // Scope contains the granted scopes
-    Scope []string
-
-    // Claims contains additional token claims
-	Claims *claims.Claims
-}m/mauricio.fernandez_fernandezsiemens.co/gauth/pkg/audit"
-	"github.com/Gimel-Foundation/gauth/pkg/auth/claims"
-)
-
-// Type represents the type of authorization
 type Type string
 
 const (
@@ -61,37 +44,32 @@ type Config struct {
 	AccessTokenExpiry time.Duration
 
 	// AuditLogger is the logger for audit events
-	AuditLogger *audit.Logger
+	AuditLogger *audit.AuditLogger
 
 	// TokenValidation holds token validation config
 	TokenValidation TokenValidationConfig
+
+	// ApprovalRules for compliance (added for RFC111/core example compatibility)
+	ApprovalRules []ApprovalRule
+
+	// ExtraConfig for OAuth2 and other advanced flows
+	ExtraConfig interface{}
 }
 
 // TokenValidationConfig holds token validation configuration
 type TokenValidationConfig struct {
-	// AllowedIssuers is a list of valid token issuers
-	AllowedIssuers []string
-
-	// AllowedAudiences is a list of valid token audiences
-	AllowedAudiences []string
-
-	// RequiredScopes are scopes that must be present
-	RequiredScopes []string
-
-	// RequiredClaims are claims that must be present and match
-	RequiredClaims map[string]interface{}
-
-	// ClockSkew allows for small time differences
-	ClockSkew time.Duration
-
-	// ValidateSignature indicates if signature validation is required
+	AllowedIssuers    []string
+	AllowedAudiences  []string
+	RequiredScopes    []string
+	RequiredClaims    Claims
+	ClockSkew         time.Duration
 	ValidateSignature bool
 }
 
 // Authenticator defines the interface for authentication operations
 type Authenticator interface {
 	// Initialize sets up any necessary resources
-	Initialize(context.Context) error
+	Initialize(ctx context.Context) error
 
 	// Close releases any held resources
 	Close() error
@@ -109,71 +87,49 @@ type Authenticator interface {
 	RevokeToken(ctx context.Context, token string) error
 }
 
+// Metadata represents additional metadata for a token request
+type Metadata struct {
+	IPAddress  string
+	Device     string
+	UserAgent  string
+	CustomData map[string]string
+}
+
 // TokenRequest represents a request for a new token
 type TokenRequest struct {
-	// GrantType is the type of grant being requested
 	GrantType string
-
-	// Scopes are the requested scopes
-	Scopes []string
-
-	// Audience is the intended audience for the token
-	Audience string
-
-	// Subject is the subject of the token
-	Subject string
-
-	// ExpiresIn is the requested token lifetime
+	Scopes    []string
+	Audience  string
+	Subject   string
 	ExpiresIn time.Duration
-
-	// Metadata is additional metadata to include
-	Metadata *Claims
+	Metadata  map[string]interface{}
 }
 
 // TokenResponse represents a successful token generation
 type TokenResponse struct {
-	// Token is the generated token string
-	Token string
-
-	// TokenType is the type of token (e.g., "Bearer")
+	Token     string
 	TokenType string
-
-	// ExpiresIn is the token lifetime in seconds
 	ExpiresIn int64
-
-	// Scope contains the granted scopes
-	Scope []string
-
-	// Claims contains additional token claims
-	Claims *Claims
+	Scope     []string
+	Claims    Claims
 }
 
 // TokenData represents validated token data
 type TokenData struct {
-	// Valid indicates if the token is valid
-	Valid bool
-
-	// Subject is the token subject
-	Subject string
-
-	// Issuer is the token issuer
-	Issuer string
-
-	// Audience is the token audience
-	Audience string
-
-	// IssuedAt is when the token was issued
-	IssuedAt time.Time
-
-	// ExpiresAt is when the token expires
+	Valid     bool
+	Subject   string
+	Issuer    string
+	Audience  string
+	IssuedAt  time.Time
 	ExpiresAt time.Time
-
-	// Scope contains the granted scopes
-	Scope []string
-
-	// Claims contains additional token claims
-	Claims map[string]interface{}
+	Scope     []string
+	Claims    Claims
 }
+
+// Claims is a type alias for map[string]interface{} for unified claims/metadata handling
+// This replaces the previous *Claims struct usage everywhere
+
+type Claims map[string]interface{}
 
 // NewAuthenticator creates a new authenticator based on the config
 func NewAuthenticator(config Config) (Authenticator, error) {
@@ -190,9 +146,3 @@ func NewAuthenticator(config Config) (Authenticator, error) {
 		return nil, fmt.Errorf("unsupported auth type: %s", config.Type)
 	}
 }
-
-// These are placeholder functions that will be implemented in separate files
-func newBasicAuthenticator(config Config) (Authenticator, error)  { return nil, nil }
-func newOAuth2Authenticator(config Config) (Authenticator, error) { return nil, nil }
-func newJWTAuthenticator(config Config) (Authenticator, error)    { return nil, nil }
-func newPasetoAuthenticator(config Config) (Authenticator, error) { return nil, nil }

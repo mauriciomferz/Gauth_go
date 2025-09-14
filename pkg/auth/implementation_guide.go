@@ -1,4 +1,3 @@
-package auth
 /*
  * Copyright (c) 2025 Gimel Foundation
  *

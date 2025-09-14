@@ -92,8 +92,8 @@ func (mesh *ServiceMesh) addService(sType ServiceType, name string, baseLatency 
 		resilience.WithCircuitBreaker(
 			5,              // threshold
 			10*time.Second, // reset timeout
-			func(name string, from, to resilience.State) {
-				fmt.Printf("[%s] Circuit state changed: %s -> %s\n", name, from, to)
+			func(name string, from, to resilience.CircuitState) {
+				fmt.Printf("[%s] Circuit state changed: %s -> %s\n", name, fmt.Sprint(from), fmt.Sprint(to))
 			},
 		),
 		resilience.WithRateLimit(

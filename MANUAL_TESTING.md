@@ -1,25 +1,31 @@
-# Manual Testing & Runtime Usage
+# Manual Testing & Familiarization Guide
 
-This guide helps you manually test and explore GAuth functionality.
+This guide helps you manually test and explore GAuth’s functionality using type-safe, modular APIs.
 
-## Running the Demo
+---
 
-1. Build and run the demo:
+## 1. Run the Demo
+- Go to `cmd/demo/` or `examples/` and run the provided `main.go`.
    ```sh
    cd cmd/demo
    go run main.go
    ```
-2. Try API endpoints or CLI commands as described in the README.
+- Observe the output for grant, token, and event flows.
 
-## Manual Scenarios
-- **Authorize:** Submit an authorization request and observe the grant and audit log.
-- **Token Issue:** Request a token and verify its structure and expiry.
-- **Audit Trail:** Check audit logs for compliance events.
-- **Rate Limiting:** Exceed rate limits and confirm correct error/audit behavior.
+## 2. Try Custom Grants/Tokens
+- Modify the example to create custom grants or tokens.
+- Test edge cases: expired tokens, revoked grants, invalid scopes.
 
-## Tips
-- Use the `examples/` directory for more usage patterns.
-- Logs and errors are printed to stdout or the configured audit backend.
+## 3. Audit Logging
+- Check that all actions (grant, token issue, resource access) are logged.
+- Try extending the audit logger for your own needs.
+
+## 4. Error Handling
+- Intentionally trigger errors (e.g., invalid client, revoked token) and observe responses.
+
+## 5. Extend the Library
+- Implement a custom token store or event type.
+- Add new roles or attributes as needed.
 
 ---
-For more, see `README.md` and `LIBRARY.md`.
+For more, see the package docs in `pkg/gauth/doc.go` and the README.

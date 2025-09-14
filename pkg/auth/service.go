@@ -10,7 +10,7 @@ import (
 )
 
 // AuthorizationRequest represents a request for authorization
-type AuthorizationRequest struct {
+type ServiceAuthorizationRequest struct {
 	// ClientID identifies the client making the request
 	ClientID string
 
@@ -40,9 +40,7 @@ type AuthorizationRequest struct {
 
 	// Display suggests the display mode for the authorization page
 	Display string
-
-	// MaxAge specifies the max age of the authentication
-	MaxAge int
+	MaxAge  int
 
 	// UILocales specifies the preferred languages for the UI
 	UILocales string
@@ -67,7 +65,6 @@ type DelegationContext struct {
 
 	// PowerType specifies the type of authority being delegated
 	PowerType string
-
 	// ResourceIDs specifies the resources included in the delegation
 	ResourceIDs []string
 
@@ -108,76 +105,40 @@ type AuthorizationResponse struct {
 	ErrorDescription string
 }
 
-// TokenRequest represents a request for a token
-type TokenRequest struct {
-	// GrantType defines the type of grant being used
-	GrantType string
-
-	// ClientID identifies the client making the request
-	ClientID string
-
-	// ClientSecret is the client's secret (for confidential clients)
-	ClientSecret string
-
-	// Code is the authorization code (for authorization code flow)
-	Code string
-
-	// RedirectURI must match the original authorization request
-	RedirectURI string
-
-	// Scope defines the requested access permissions
-	Scope string
-
-	// Username is used for password grant type
-	Username string
-
-	// Password is used for password grant type
-	Password string
-
-	// RefreshToken is used for refresh token grant type
-	RefreshToken string
-
-	// CodeVerifier is used for PKCE (Proof Key for Code Exchange)
-	CodeVerifier string
-
-	// DelegationContext contains information about delegation (RFC111)
+// ServiceTokenRequest represents a request for a token (service layer)
+type ServiceTokenRequest struct {
+	GrantType         string
+	ClientID          string
+	ClientSecret      string
+	Code              string
+	RedirectURI       string
+	Scope             string
+	Username          string
+	Password          string
+	RefreshToken      string
+	CodeVerifier      string
 	DelegationContext *DelegationContext
 }
 
-// TokenResponse represents the response to a token request
-type TokenResponse struct {
-	// AccessToken is the issued access token
-	AccessToken string
-
-	// TokenType is the type of token issued
-	TokenType string
-
-	// ExpiresIn is the lifetime of the access token in seconds
-	ExpiresIn int
-
-	// RefreshToken is the issued refresh token (if applicable)
-	RefreshToken string
-
-	// Scope defines the granted access permissions
-	Scope string
-
-	// IDToken is the identity token (for OpenID Connect)
-	IDToken string
-
-	// Error is the error code if the request failed
-	Error string
-
-	// ErrorDescription provides additional information about the error
+// ServiceTokenResponse represents the response to a token request (service layer)
+type ServiceTokenResponse struct {
+	AccessToken      string
+	TokenType        string
+	ExpiresIn        int
+	RefreshToken     string
+	Scope            string
+	IDToken          string
+	Error            string
 	ErrorDescription string
 }
 
 // Service provides authentication functionality
 type Service interface {
 	// Authorize handles authorization requests
-	Authorize(ctx context.Context, req *AuthorizationRequest) (*AuthorizationResponse, error)
+	Authorize(ctx context.Context, req *ServiceAuthorizationRequest) (*AuthorizationResponse, error)
 
 	// Token handles token requests
-	Token(ctx context.Context, req *TokenRequest) (*TokenResponse, error)
+	Token(ctx context.Context, req *ServiceTokenRequest) (*ServiceTokenResponse, error)
 
 	// Validate validates a token
 	Validate(ctx context.Context, tokenStr string, requiredScopes []string) (*token.Token, error)
@@ -191,18 +152,18 @@ type Service interface {
 
 // DefaultService is the default implementation of the Service interface
 type DefaultService struct {
-	tokenService token.Service
+	tokenService token.ServiceAPI
 }
 
 // NewService creates a new authentication service
-func NewService(tokenService token.Service) Service {
+func NewService(tokenService token.ServiceAPI) Service {
 	return &DefaultService{
 		tokenService: tokenService,
 	}
 }
 
 // Authorize implements the Service.Authorize method
-func (s *DefaultService) Authorize(ctx context.Context, req *AuthorizationRequest) (*AuthorizationResponse, error) {
+func (s *DefaultService) Authorize(ctx context.Context, req *ServiceAuthorizationRequest) (*AuthorizationResponse, error) {
 	// Validate the request
 	if req.ClientID == "" {
 		return nil, errors.New(errors.ErrInvalidRequest, "Missing client_id parameter").
@@ -247,7 +208,7 @@ func (s *DefaultService) Authorize(ctx context.Context, req *AuthorizationReques
 }
 
 // Token implements the Service.Token method
-func (s *DefaultService) Token(ctx context.Context, req *TokenRequest) (*TokenResponse, error) {
+func (s *DefaultService) Token(ctx context.Context, req *ServiceTokenRequest) (*ServiceTokenResponse, error) {
 	// Validate the request
 	if req.GrantType == "" {
 		return nil, errors.New(errors.ErrInvalidRequest, "Missing grant_type parameter").
@@ -280,33 +241,49 @@ func (s *DefaultService) Token(ctx context.Context, req *TokenRequest) (*TokenRe
 
 // Validate implements the Service.Validate method
 func (s *DefaultService) Validate(ctx context.Context, tokenStr string, requiredScopes []string) (*token.Token, error) {
-	// Delegate to token service
-	return s.tokenService.Validate(ctx, tokenStr, &token.ClaimRequirements{
-		RequiredScopes: requiredScopes,
-	})
+	// Retrieve the token by ID
+	t, err := s.tokenService.GetToken(ctx, tokenStr)
+	if err != nil {
+		return nil, err
+	}
+	// Validate the token
+	if err := s.tokenService.Validate(ctx, t); err != nil {
+		return nil, err
+	}
+	// Optionally, check requiredScopes here if needed
+	return t, nil
 }
 
 // Revoke implements the Service.Revoke method
 func (s *DefaultService) Revoke(ctx context.Context, tokenStr string, reason string) error {
-	// Delegate to token service
-	return s.tokenService.Revoke(ctx, tokenStr, reason)
+	// Retrieve the token by ID
+	t, err := s.tokenService.GetToken(ctx, tokenStr)
+	if err != nil {
+		return err
+	}
+	// Revoke the token
+	return s.tokenService.Revoke(ctx, t)
 }
 
 // Introspect implements the Service.Introspect method
 func (s *DefaultService) Introspect(ctx context.Context, tokenStr string) (*token.Token, error) {
-	// Delegate to token service
-	return s.tokenService.Introspect(ctx, tokenStr)
+	// Retrieve the token by ID
+	t, err := s.tokenService.GetToken(ctx, tokenStr)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
 }
 
 // Private methods
 
-func (s *DefaultService) generateAuthorizationCode(ctx context.Context, req *AuthorizationRequest) (string, error) {
+func (s *DefaultService) generateAuthorizationCode(ctx context.Context, req *ServiceAuthorizationRequest) (string, error) {
 	// Implement authorization code generation
 	// This is just a placeholder - real implementation would be more complex
 	return "authorization_code_placeholder", nil
 }
 
-func (s *DefaultService) generateImplicitToken(ctx context.Context, req *AuthorizationRequest) (*token.Token, error) {
+func (s *DefaultService) generateImplicitToken(ctx context.Context, req *ServiceAuthorizationRequest) (*token.Token, error) {
 	// Implement implicit token generation
 	// This is just a placeholder - real implementation would be more complex
 	return &token.Token{
@@ -315,10 +292,10 @@ func (s *DefaultService) generateImplicitToken(ctx context.Context, req *Authori
 	}, nil
 }
 
-func (s *DefaultService) handleAuthorizationCodeGrant(ctx context.Context, req *TokenRequest) (*TokenResponse, error) {
+func (s *DefaultService) handleAuthorizationCodeGrant(ctx context.Context, req *ServiceTokenRequest) (*ServiceTokenResponse, error) {
 	// Implement authorization code grant handling
 	// This is just a placeholder - real implementation would be more complex
-	return &TokenResponse{
+	return &ServiceTokenResponse{
 		AccessToken:  "access_token_placeholder",
 		TokenType:    "Bearer",
 		ExpiresIn:    3600,
@@ -326,10 +303,10 @@ func (s *DefaultService) handleAuthorizationCodeGrant(ctx context.Context, req *
 	}, nil
 }
 
-func (s *DefaultService) handleRefreshTokenGrant(ctx context.Context, req *TokenRequest) (*TokenResponse, error) {
+func (s *DefaultService) handleRefreshTokenGrant(ctx context.Context, req *ServiceTokenRequest) (*ServiceTokenResponse, error) {
 	// Implement refresh token grant handling
 	// This is just a placeholder - real implementation would be more complex
-	return &TokenResponse{
+	return &ServiceTokenResponse{
 		AccessToken:  "new_access_token_placeholder",
 		TokenType:    "Bearer",
 		ExpiresIn:    3600,
@@ -337,23 +314,38 @@ func (s *DefaultService) handleRefreshTokenGrant(ctx context.Context, req *Token
 	}, nil
 }
 
-func (s *DefaultService) handleClientCredentialsGrant(ctx context.Context, req *TokenRequest) (*TokenResponse, error) {
+func (s *DefaultService) handleClientCredentialsGrant(ctx context.Context, req *ServiceTokenRequest) (*ServiceTokenResponse, error) {
 	// Implement client credentials grant handling
 	// This is just a placeholder - real implementation would be more complex
-	return &TokenResponse{
+	return &ServiceTokenResponse{
 		AccessToken: "client_credentials_token_placeholder",
 		TokenType:   "Bearer",
 		ExpiresIn:   3600,
 	}, nil
 }
 
-func (s *DefaultService) handlePasswordGrant(ctx context.Context, req *TokenRequest) (*TokenResponse, error) {
-	// Implement password grant handling
-	// This is just a placeholder - real implementation would be more complex
-	return &TokenResponse{
-		AccessToken:  "password_grant_token_placeholder",
+func (s *DefaultService) handlePasswordGrant(ctx context.Context, req *ServiceTokenRequest) (*ServiceTokenResponse, error) {
+	// Issue a real token for password grant
+	tok := &token.Token{
+		ID:        token.GenerateID(),
+		Type:      token.Access,
+		IssuedAt:  time.Now(),
+		ExpiresAt: time.Now().Add(1 * time.Hour),
+		Issuer:    "auth-service",
+		Subject:   req.Username,
+		Audience:  []string{"example-app"},
+		Scopes:    []string{"read", "write"},
+	}
+	issued, err := s.tokenService.Issue(ctx, tok)
+	if err != nil {
+		return nil, err
+	}
+	return &ServiceTokenResponse{
+		AccessToken:  issued.Value,
 		TokenType:    "Bearer",
-		ExpiresIn:    3600,
+		ExpiresIn:    int(time.Until(issued.ExpiresAt).Seconds()),
 		RefreshToken: "password_grant_refresh_token_placeholder",
+		Scope:        "read write",
+		IDToken:      issued.ID, // Use IDToken field to return the token ID for validation
 	}, nil
 }

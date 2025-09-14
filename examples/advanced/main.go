@@ -28,12 +28,8 @@ func main() {
 
 	// Example 1: Multi-scope authorization
 	authReq := gauth.AuthorizationRequest{
-		ClientID:        "advanced-client",
-		ClientOwnerID:   "org-123",
-		ResourceOwnerID: "user-456",
-		Scopes:          []string{"read", "write"},
-		RequestDetails:  "High-privilege access request",
-		Timestamp:       time.Now().UnixNano() / 1e6,
+		ClientID: "advanced-client",
+		Scopes:   []string{"read", "write", "transaction:execute"},
 	}
 
 	grant, err := auth.InitiateAuthorization(authReq)
@@ -44,7 +40,7 @@ func main() {
 	// Example 2: Token request with restrictions
 	tokenReq := gauth.TokenRequest{
 		GrantID: grant.GrantID,
-		Scope:   grant.Scope,
+		Scope:   []string{"read", "write", "transaction:execute"},
 		Restrictions: []gauth.Restriction{
 			{
 				Type:  "ip_range",
@@ -68,16 +64,16 @@ func main() {
 			Type:       "payment",
 			Amount:     100.0,
 			ResourceID: "resource-1",
-			Metadata: map[string]string{
-				"currency": "USD",
-				"method":   "credit_card",
+			Currency:   "USD",
+			CustomMetadata: map[string]string{
+				"method": "credit_card",
 			},
 		},
 		{
 			Type:       "transfer",
 			Amount:     50.0,
 			ResourceID: "resource-2",
-			Metadata: map[string]string{
+			CustomMetadata: map[string]string{
 				"destination": "account-789",
 			},
 		},
@@ -100,33 +96,21 @@ func main() {
 	}
 
 	// Example 4: Error handling and token refresh
-	for {
-		_, err := server.ProcessTransaction(transactions[0], tokenResp.Token)
-		if err != nil {
-			// Check if token expired
-			if gauth.IsTokenExpiredError(err) {
-				// Request new token
-				newTokenResp, err := auth.RequestToken(tokenReq)
-				if err != nil {
-					log.Fatalf("Token refresh failed: %v", err)
-				}
-				tokenResp = newTokenResp
-				continue
-			}
-			log.Fatalf("Transaction failed: %v", err)
-		}
-		break
+	// Example 4: Error handling and token refresh
+	_, err = server.ProcessTransaction(transactions[0], tokenResp.Token)
+	if err != nil {
+		// TODO: Token expiration error handling (IsTokenExpiredError not implemented)
+		log.Fatalf("Transaction failed: %v", err)
 	}
 
-	// Example 5: Audit log analysis
-	events := server.GetAuditEvents(gauth.AuditQuery{
-		StartTime: time.Now().Add(-1 * time.Hour),
-		EndTime:   time.Now(),
-		Types:     []string{"transaction_start", "transaction_complete"},
-		ActorID:   "user-456",
-	})
-
-	for _, event := range events {
-		log.Printf("Audit event: %+v\n", event)
-	}
+	// Example 5: Audit log analysis (not implemented in this demo)
+	// events := server.GetAuditEvents(gauth.AuditQuery{
+	// 	StartTime: time.Now().Add(-1 * time.Hour),
+	// 	EndTime:   time.Now(),
+	// 	Types:     []string{"transaction_start", "transaction_complete"},
+	// 	ActorID:   "user-456",
+	// })
+	// for _, event := range events {
+	// 	log.Printf("Audit event: %+v\n", event)
+	// }
 }

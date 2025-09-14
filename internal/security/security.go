@@ -1,5 +1,4 @@
 package security
-package security
 
 import (
 	"context"
@@ -7,8 +6,8 @@ import (
 	"net"
 	"time"
 
-	"golang.org/x/crypto/bcrypt"
 	"github.com/hashicorp/vault/api"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // SecurityConfig holds security-related configuration
@@ -22,11 +21,11 @@ type SecurityConfig struct {
 
 // SecurityManager handles security-related operations
 type SecurityManager struct {
-	config     *SecurityConfig
-	vaultAPI   *api.Client
-	blacklist  map[string]time.Time
-	rateLimit  map[string][]time.Time
-	hashCosts  int
+	config    *SecurityConfig
+	vaultAPI  *api.Client
+	blacklist map[string]time.Time
+	rateLimit map[string][]time.Time
+	hashCosts int
 }
 
 // NewSecurityManager creates a new security manager
@@ -37,11 +36,11 @@ func NewSecurityManager(config *SecurityConfig) (*SecurityManager, error) {
 	}
 
 	return &SecurityManager{
-		config:     config,
-		vaultAPI:   vaultClient,
-		blacklist:  make(map[string]time.Time),
-		rateLimit:  make(map[string][]time.Time),
-		hashCosts:  12, // Adjust based on server capability
+		config:    config,
+		vaultAPI:  vaultClient,
+		blacklist: make(map[string]time.Time),
+		rateLimit: make(map[string][]time.Time),
+		hashCosts: 12, // Adjust based on server capability
 	}, nil
 }
 
@@ -122,10 +121,10 @@ func (sm *SecurityManager) ValidateToken(token string) (bool, error) {
 func (sm *SecurityManager) SecureHeaders() map[string]string {
 	return map[string]string{
 		"Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-		"X-Frame-Options":          "DENY",
-		"X-Content-Type-Options":   "nosniff",
-		"Content-Security-Policy":  "default-src 'self'",
-		"X-XSS-Protection":        "1; mode=block",
-		"Referrer-Policy":         "strict-origin-when-cross-origin",
+		"X-Frame-Options":           "DENY",
+		"X-Content-Type-Options":    "nosniff",
+		"Content-Security-Policy":   "default-src 'self'",
+		"X-XSS-Protection":          "1; mode=block",
+		"Referrer-Policy":           "strict-origin-when-cross-origin",
 	}
 }

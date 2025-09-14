@@ -136,3 +136,57 @@ Potential areas for further improvement:
 3. Consider creating a proper enumeration type for event types and statuses
 4. Further refactor large files into smaller, focused components
 5. Add more test coverage for the new typed structures
+
+# Migration Guide: Breaking API Changes and How to Update
+
+This section summarizes the most important breaking changes in recent GAuth releases and provides guidance for migrating your code and examples.
+
+## 1. Typed Metadata and Properties
+
+- **Old:** `map[string]interface{}` for event metadata and restriction properties.
+- **New:** Strongly-typed `*Metadata` and `*Properties` structs.
+- **Migration:**
+  - Replace all direct map usage with the new helper methods (`SetString`, `SetInt`, etc.).
+  - Update event and restriction struct initializations to use the new types.
+  - Example:
+    ```go
+    // Old
+    event.Metadata = map[string]interface{}{ "user_id": "abc" }
+    // New
+    event.Metadata = events.NewMetadata()
+    event.Metadata.SetString("user_id", "abc")
+    ```
+
+## 2. Token API Changes
+
+- **Old:** Direct struct manipulation and legacy token methods.
+- **New:** Use `RequestToken`, `ValidateToken`, and `InvalidateToken` methods for token lifecycle.
+- **Migration:**
+  - Replace direct token creation/validation with the new API methods.
+  - Example:
+    ```go
+    // Old
+    token := &token.Token{ ... }
+    // New
+    token, err := gauth.RequestToken(ctx, req)
+    ```
+
+## 3. Event Handling
+
+- **Old:** Unstructured event publishing and handling.
+- **New:** Typed event structs and handler registration.
+- **Migration:**
+  - Define event types as Go structs.
+  - Register handlers using the new event bus API.
+
+## 4. Example and Demo Updates
+
+- All examples in `examples/` have been updated to use the new APIs and type-safe patterns.
+- If you maintain custom examples, update them to:
+  - Use the new `main.go` structure and initialization patterns.
+  - Deprecated config fields and direct struct usage (such as `memoryStoreV1`) have been removed. Update any custom code to use the new APIs.
+
+## 5. Additional Notes
+
+- Type aliases and wrapper functions are provided for backward compatibility, but new code should use the updated APIs.
+- See `TYPED_STRUCTURES.md` and `EXAMPLES.md` for more details and code samples.

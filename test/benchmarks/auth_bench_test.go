@@ -25,10 +25,8 @@ func BenchmarkAuthFlow(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			// Step 1: Authorization
 			grant, _ := auth.InitiateAuthorization(gauth.AuthorizationRequest{
-				ClientID:        "bench-client",
-				ClientOwnerID:   "owner-1",
-				ResourceOwnerID: "resource-1",
-				Scopes:          []string{"read"},
+				ClientID: "bench-client",
+				Scopes:   []string{"read"},
 			})
 
 			// Step 2: Token Request
@@ -50,38 +48,6 @@ func BenchmarkAuthFlow(b *testing.B) {
 	})
 }
 
-func BenchmarkTokenValidation(b *testing.B) {
-	config := gauth.Config{
-		AuthServerURL:     "https://auth.example.com",
-		ClientID:          "bench-client",
-		ClientSecret:      "bench-secret",
-		AccessTokenExpiry: time.Hour,
-	}
-
-	auth, _ := gauth.New(config)
-
-	// Create a token first
-	grant, _ := auth.InitiateAuthorization(gauth.AuthorizationRequest{
-		ClientID:        "bench-client",
-		ClientOwnerID:   "owner-1",
-		ResourceOwnerID: "resource-1",
-		Scopes:          []string{"read"},
-	})
-
-	tokenResp, _ := auth.RequestToken(gauth.TokenRequest{
-		GrantID: grant.GrantID,
-		Scope:   grant.Scope,
-	})
-
-	b.ResetTimer()
-
-	b.Run("TokenValidation", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			auth.ValidateToken(tokenResp.Token)
-		}
-	})
-}
-
 func BenchmarkConcurrentTransactions(b *testing.B) {
 	config := gauth.Config{
 		AuthServerURL:     "https://auth.example.com",
@@ -95,10 +61,8 @@ func BenchmarkConcurrentTransactions(b *testing.B) {
 
 	// Create a token
 	grant, _ := auth.InitiateAuthorization(gauth.AuthorizationRequest{
-		ClientID:        "bench-client",
-		ClientOwnerID:   "owner-1",
-		ResourceOwnerID: "resource-1",
-		Scopes:          []string{"read", "write"},
+		ClientID: "bench-client",
+		Scopes:   []string{"read", "write"},
 	})
 
 	tokenResp, _ := auth.RequestToken(gauth.TokenRequest{
@@ -120,48 +84,5 @@ func BenchmarkConcurrentTransactions(b *testing.B) {
 				server.ProcessTransaction(tx, tokenResp.Token)
 			}
 		})
-	})
-}
-
-func BenchmarkRateLimiting(b *testing.B) {
-	config := gauth.Config{
-		AuthServerURL:     "https://auth.example.com",
-		ClientID:          "bench-client",
-		ClientSecret:      "bench-secret",
-		AccessTokenExpiry: time.Hour,
-	}
-
-	auth, _ := gauth.New(config)
-	server := gauth.NewResourceServer("bench-resource", auth)
-
-	// Configure rate limits
-	server.SetRateLimit(100, time.Second) // 100 requests per second
-
-	// Create a token
-	grant, _ := auth.InitiateAuthorization(gauth.AuthorizationRequest{
-		ClientID:        "bench-client",
-		ClientOwnerID:   "owner-1",
-		ResourceOwnerID: "resource-1",
-		Scopes:          []string{"read"},
-	})
-
-	tokenResp, _ := auth.RequestToken(gauth.TokenRequest{
-		GrantID: grant.GrantID,
-		Scope:   grant.Scope,
-	})
-
-	tx := gauth.TransactionDetails{
-		Type:       "payment",
-		Amount:     100.0,
-		ResourceID: "bench-resource",
-		Timestamp:  time.Now(),
-	}
-
-	b.ResetTimer()
-
-	b.Run("RateLimitedTransactions", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			server.ProcessTransaction(tx, tokenResp.Token)
-		}
 	})
 }

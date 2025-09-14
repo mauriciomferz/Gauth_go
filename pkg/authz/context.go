@@ -6,9 +6,15 @@ import (
 )
 
 // ContextValue represents a typed value for authorization context
+// ContextValue represents a typed value for authorization context.
+// Only one field should be non-zero at a time.
 type ContextValue struct {
-	Type string      `json:"type"`
-	Data interface{} `json:"data"`
+	StringValue string  `json:"string_value,omitempty"`
+	IntValue    int     `json:"int_value,omitempty"`
+	FloatValue  float64 `json:"float_value,omitempty"`
+	BoolValue   bool    `json:"bool_value,omitempty"`
+	TimeValue   string  `json:"time_value,omitempty"`
+	Type        string  `json:"type"`
 }
 
 // Context represents a structured authorization context
@@ -31,9 +37,7 @@ func NewContext() *Context {
 // GetString retrieves a string value from the context
 func (c *Context) GetString(key string) (string, bool) {
 	if val, ok := c.Values[key]; ok && val.Type == "string" {
-		if str, ok := val.Data.(string); ok {
-			return str, true
-		}
+		return val.StringValue, true
 	}
 	return "", false
 }
@@ -41,9 +45,7 @@ func (c *Context) GetString(key string) (string, bool) {
 // GetInt retrieves an integer value from the context
 func (c *Context) GetInt(key string) (int, bool) {
 	if val, ok := c.Values[key]; ok && val.Type == "int" {
-		if i, ok := val.Data.(int); ok {
-			return i, true
-		}
+		return val.IntValue, true
 	}
 	return 0, false
 }
@@ -51,9 +53,7 @@ func (c *Context) GetInt(key string) (int, bool) {
 // GetFloat retrieves a float value from the context
 func (c *Context) GetFloat(key string) (float64, bool) {
 	if val, ok := c.Values[key]; ok && val.Type == "float" {
-		if f, ok := val.Data.(float64); ok {
-			return f, true
-		}
+		return val.FloatValue, true
 	}
 	return 0, false
 }
@@ -61,9 +61,7 @@ func (c *Context) GetFloat(key string) (float64, bool) {
 // GetBool retrieves a boolean value from the context
 func (c *Context) GetBool(key string) (bool, bool) {
 	if val, ok := c.Values[key]; ok && val.Type == "bool" {
-		if b, ok := val.Data.(bool); ok {
-			return b, true
-		}
+		return val.BoolValue, true
 	}
 	return false, false
 }
@@ -71,7 +69,8 @@ func (c *Context) GetBool(key string) (bool, bool) {
 // GetTime retrieves a time value from the context
 func (c *Context) GetTime(key string) (time.Time, bool) {
 	if val, ok := c.Values[key]; ok && val.Type == "time" {
-		if t, ok := val.Data.(time.Time); ok {
+		t, err := time.Parse(time.RFC3339, val.TimeValue)
+		if err == nil {
 			return t, true
 		}
 	}
@@ -81,40 +80,40 @@ func (c *Context) GetTime(key string) (time.Time, bool) {
 // SetString sets a string value in the context
 func (c *Context) SetString(key, value string) {
 	c.Values[key] = ContextValue{
-		Type: "string",
-		Data: value,
+		Type:        "string",
+		StringValue: value,
 	}
 }
 
 // SetInt sets an integer value in the context
 func (c *Context) SetInt(key string, value int) {
 	c.Values[key] = ContextValue{
-		Type: "int",
-		Data: value,
+		Type:     "int",
+		IntValue: value,
 	}
 }
 
 // SetFloat sets a float value in the context
 func (c *Context) SetFloat(key string, value float64) {
 	c.Values[key] = ContextValue{
-		Type: "float",
-		Data: value,
+		Type:      "float",
+		FloatValue: value,
 	}
 }
 
 // SetBool sets a boolean value in the context
 func (c *Context) SetBool(key string, value bool) {
 	c.Values[key] = ContextValue{
-		Type: "bool",
-		Data: value,
+		Type:     "bool",
+		BoolValue: value,
 	}
 }
 
 // SetTime sets a time value in the context
 func (c *Context) SetTime(key string, value time.Time) {
 	c.Values[key] = ContextValue{
-		Type: "time",
-		Data: value,
+		Type:      "time",
+		TimeValue: value.Format(time.RFC3339),
 	}
 }
 
@@ -142,12 +141,32 @@ func (c *Context) GetKeys() []string {
 func (c *Context) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
 	for k, v := range c.Values {
-		result[k] = v.Data
+		switch v.Type {
+		case "string":
+			result[k] = v.StringValue
+		case "int":
+			result[k] = v.IntValue
+		case "float":
+			result[k] = v.FloatValue
+		case "bool":
+			result[k] = v.BoolValue
+		case "time":
+			t, err := time.Parse(time.RFC3339, v.TimeValue)
+			if err == nil {
+				result[k] = t
+			} else {
+				result[k] = v.TimeValue
+			}
+		default:
+			result[k] = nil
+		}
 	}
 	return result
 }
 
-// FromMap converts a map to a context for backward compatibility
+// Deprecated: FromMap converts a map to a context for backward compatibility.
+// This function exists only for migration from legacy code using map[string]interface{}.
+// Use strongly-typed Context methods instead.
 func FromMap(data map[string]interface{}) *Context {
 	ctx := NewContext()
 	for k, v := range data {

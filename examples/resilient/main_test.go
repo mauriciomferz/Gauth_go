@@ -1,7 +1,11 @@
 package resilient
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -9,6 +13,38 @@ import (
 	"github.com/Gimel-Foundation/gauth/internal/monitoring"
 	"github.com/Gimel-Foundation/gauth/pkg/gauth"
 )
+func TestMainDemoOutput(t *testing.T) {
+	origStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	defer func() {
+		os.Stdout = origStdout
+		if r := recover(); r != nil {
+			t.Errorf("MainDemo panicked: %v", r)
+		}
+	}()
+
+	MainDemo()
+
+	w.Close()
+	var buf bytes.Buffer
+	io.Copy(&buf, r)
+	output := buf.String()
+
+	if !strings.Contains(output, "Scenario 1: Token Bucket Rate Limiting") {
+		t.Errorf("Expected output to contain 'Scenario 1: Token Bucket Rate Limiting', got: %s", output)
+	}
+	if !strings.Contains(output, "Scenario 2: Sliding Window Rate Limiting") {
+		t.Errorf("Expected output to contain 'Scenario 2: Sliding Window Rate Limiting', got: %s", output)
+	}
+	if !strings.Contains(output, "Scenario 3: Circuit Breaker with Retry") {
+		t.Errorf("Expected output to contain 'Scenario 3: Circuit Breaker with Retry', got: %s", output)
+	}
+	if !strings.Contains(output, "Scenario 4: All Patterns Combined") {
+		t.Errorf("Expected output to contain 'Scenario 4: All Patterns Combined', got: %s", output)
+	}
+}
 
 // Helper functions for testing metrics
 func getMetricValue(metrics map[string]monitoring.Metric, name string, labels map[string]string) float64 {
@@ -61,19 +97,17 @@ func TestResilientService(t *testing.T) {
 	// Test successful transaction
 	t.Run("SuccessfulTransaction", func(t *testing.T) {
 		tx := gauth.TransactionDetails{
-			Type:   "payment",
+			Type:   gauth.PaymentTransaction,
 			Amount: 100.0,
-			Metadata: map[string]string{
+			CustomMetadata: map[string]string{
 				"test": "true",
 			},
 		}
 
 		// Get a test token
 		grant, err := auth.InitiateAuthorization(gauth.AuthorizationRequest{
-			ClientID:        "test-client",
-			ClientOwnerID:   "test-owner",
-			ResourceOwnerID: "test-resource",
-			Scopes:          []string{"transaction:execute"},
+			ClientID: "test-client",
+			Scopes:   []string{"transaction:execute"},
 		})
 		if err != nil {
 			t.Fatalf("Failed to initiate authorization: %v", err)
@@ -107,7 +141,7 @@ func TestResilientService(t *testing.T) {
 	t.Run("CircuitBreakerTrip", func(t *testing.T) {
 		tx := gauth.TransactionDetails{
 			ID:     "test-tx-2",
-			Type:   "failing",
+			Type:   gauth.PaymentTransaction,
 			Amount: 100,
 		}
 
@@ -135,10 +169,8 @@ func TestResilientService(t *testing.T) {
 		// Try a successful request with a proper token
 		tx.Type = "payment"
 		grant, err := auth.InitiateAuthorization(gauth.AuthorizationRequest{
-			ClientID:        "test-client",
-			ClientOwnerID:   "test-owner",
-			ResourceOwnerID: "test-resource",
-			Scopes:          []string{"transaction:execute"},
+			ClientID: "test-client",
+			Scopes:   []string{"transaction:execute"},
 		})
 		if err != nil {
 			t.Fatalf("Failed to initiate authorization: %v", err)
@@ -165,10 +197,8 @@ func TestResilientService(t *testing.T) {
 
 		// Get a valid token
 		grant, err := auth.InitiateAuthorization(gauth.AuthorizationRequest{
-			ClientID:        "test-client",
-			ClientOwnerID:   "test-owner",
-			ResourceOwnerID: "test-resource",
-			Scopes:          []string{"transaction:execute"},
+			ClientID: "test-client",
+			Scopes:   []string{"transaction:execute"},
 		})
 		if err != nil {
 			t.Fatalf("Failed to initiate authorization: %v", err)
@@ -182,40 +212,49 @@ func TestResilientService(t *testing.T) {
 			t.Fatalf("Failed to request token: %v", err)
 		}
 
-		// Perform mixed transactions
-		transactions := []struct {
-			tx    gauth.TransactionDetails
-			token string
-		}{
-			{
-				tx: gauth.TransactionDetails{
-					Type:     "payment",
-					Amount:   100,
-					Metadata: map[string]string{"test": "1"},
-				},
-				token: tokenResp.Token,
-			},
-			{
-				tx: gauth.TransactionDetails{
-					Type:     "refund",
-					Amount:   50,
-					Metadata: map[string]string{"test": "2"},
-				},
-				token: "invalid-token",
-			},
-			{
-				tx: gauth.TransactionDetails{
-					Type:     "payment",
-					Amount:   75,
-					Metadata: map[string]string{"test": "3"},
-				},
-				token: tokenResp.Token,
-			},
-		}
 
-		for _, tc := range transactions {
-			service.ProcessRequest(tc.tx, tc.token)
-		}
+			// Perform mixed transactions, including a failed refund
+			transactions := []struct {
+				tx    gauth.TransactionDetails
+				token string
+			}{
+				{
+					tx: gauth.TransactionDetails{
+						Type:           gauth.PaymentTransaction,
+						Amount:         100,
+						CustomMetadata: map[string]string{"test": "1"},
+					},
+					token: tokenResp.Token,
+				},
+				{
+					tx: gauth.TransactionDetails{
+						Type:           gauth.PaymentTransaction,
+						Amount:         50,
+						CustomMetadata: map[string]string{"test": "2"},
+					},
+					token: "invalid-token",
+				},
+				{
+					tx: gauth.TransactionDetails{
+						Type:           gauth.PaymentTransaction,
+						Amount:         75,
+						CustomMetadata: map[string]string{"test": "3"},
+					},
+					token: tokenResp.Token,
+				},
+				{
+					tx: gauth.TransactionDetails{
+						Type:           gauth.RefundTransaction,
+						Amount:         25,
+						CustomMetadata: map[string]string{"test": "refund"},
+					},
+					token: "invalid-token",
+				},
+			}
+
+			for _, tc := range transactions {
+				_ = service.ProcessRequest(tc.tx, tc.token)
+			}
 
 		metrics := service.metrics.GetAllMetrics()
 
@@ -249,10 +288,8 @@ func TestResilientService(t *testing.T) {
 
 		// Get a valid token for all requests
 		grant, err := auth.InitiateAuthorization(gauth.AuthorizationRequest{
-			ClientID:        "test-client",
-			ClientOwnerID:   "test-owner",
-			ResourceOwnerID: "test-resource",
-			Scopes:          []string{"transaction:execute"},
+			ClientID: "test-client",
+			Scopes:   []string{"transaction:execute"},
 		})
 		if err != nil {
 			t.Fatalf("Failed to initiate authorization: %v", err)
@@ -269,9 +306,9 @@ func TestResilientService(t *testing.T) {
 		for i := 0; i < numRequests; i++ {
 			go func(id int) {
 				tx := gauth.TransactionDetails{
-					Type:   "payment",
+					Type:   gauth.PaymentTransaction,
 					Amount: float64(id),
-					Metadata: map[string]string{
+					CustomMetadata: map[string]string{
 						"concurrent": "true",
 						"id":         fmt.Sprintf("%d", id),
 					},
@@ -304,14 +341,3 @@ func TestResilientService(t *testing.T) {
 	})
 }
 
-func labelsMatch(a, b map[string]string) bool {
-	if len(b) == 0 {
-		return true
-	}
-	for k, v := range b {
-		if a[k] != v {
-			return false
-		}
-	}
-	return true
-}
