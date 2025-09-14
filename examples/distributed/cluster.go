@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
 	"sync"
 	"time"
 
@@ -53,7 +54,7 @@ func (drm *DistributedResourceManager) RegisterNode(node *ResourceNode) error {
 	tx := gauth.TransactionDetails{
 		Type:       "node_registration",
 		ResourceID: node.ID,
-		Metadata: map[string]string{
+		CustomMetadata: map[string]string{
 			"region":       node.Region,
 			"capabilities": "," + string(node.Capabilities[0]),
 		},
@@ -61,9 +62,8 @@ func (drm *DistributedResourceManager) RegisterNode(node *ResourceNode) error {
 
 	// Request temporary token for node
 	authReq := gauth.AuthorizationRequest{
-		ClientID:        "cluster-manager",
-		ResourceOwnerID: node.ID,
-		Scopes:          []string{"node:register"},
+		ClientID: "cluster-manager",
+		Scopes:   []string{"node:register", "transaction:execute"},
 	}
 
 	grant, err := drm.auth.InitiateAuthorization(authReq)
@@ -73,11 +73,12 @@ func (drm *DistributedResourceManager) RegisterNode(node *ResourceNode) error {
 
 	tokenResp, err := drm.auth.RequestToken(gauth.TokenRequest{
 		GrantID: grant.GrantID,
-		Scope:   grant.Scope,
+		Scope:   append(grant.Scope, "transaction:execute"),
 	})
 	if err != nil {
 		return err
 	}
+	log.Printf("Granted token scopes: %v", tokenResp.Scope)
 
 	// Process registration
 	server := gauth.NewResourceServer("cluster-manager", drm.auth)
@@ -127,6 +128,71 @@ func (drm *DistributedResourceManager) FindAvailableNode(ctx context.Context, ca
 	}
 
 	return nil, fmt.Errorf("no available node found with required capabilities")
+}
+
+// SimulateDistributedAuthorization simulates distributed authorization requests routed to nodes
+func SimulateDistributedAuthorization(manager *DistributedResourceManager, numRequests int) {
+	nodeIDs := make([]string, 0)
+	manager.nodesMutex.RLock()
+	for id, node := range manager.nodes {
+		if node.IsHealthy {
+			nodeIDs = append(nodeIDs, id)
+		}
+	}
+	manager.nodesMutex.RUnlock()
+
+	if len(nodeIDs) == 0 {
+		log.Println("No healthy nodes available for simulation.")
+		return
+	}
+
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	for i := 0; i < numRequests; i++ {
+		nodeID := nodeIDs[rnd.Intn(len(nodeIDs))]
+		// No need to fetch node object here; nodeID is sufficient for simulation
+
+		// Simulate a resource access request
+		resourceID := fmt.Sprintf("resource-%d", i+1)
+		userID := fmt.Sprintf("user-%d", rnd.Intn(3)+1) // user-1, user-2, user-3
+
+		tx := gauth.TransactionDetails{
+			Type:       "resource_access",
+			ResourceID: resourceID,
+			CustomMetadata: map[string]string{
+				"requested_by": userID,
+				"node":        nodeID,
+			},
+		}
+
+		authReq := gauth.AuthorizationRequest{
+			ClientID: userID,
+			Scopes:   []string{"resource:access"},
+		}
+
+		grant, err := manager.auth.InitiateAuthorization(authReq)
+		if err != nil {
+			log.Printf("[Sim] Node %s failed to initiate auth for %s: %v", nodeID, userID, err)
+			continue
+		}
+
+		tokenResp, err := manager.auth.RequestToken(gauth.TokenRequest{
+			GrantID: grant.GrantID,
+			Scope:   grant.Scope,
+		})
+		if err != nil {
+			log.Printf("[Sim] Node %s failed to get token for %s: %v", nodeID, userID, err)
+			continue
+		}
+
+		server := gauth.NewResourceServer(nodeID, manager.auth)
+		result, err := server.ProcessTransaction(tx, tokenResp.Token)
+		if err != nil {
+			log.Printf("[Sim] Node %s denied access to %s for %s: %v", nodeID, userID, resourceID, err)
+		} else {
+			log.Printf("[Sim] Node %s ALLOWED access to %s for %s: %v", nodeID, userID, resourceID, result)
+		}
+	}
 }
 
 // healthCheckWorker performs periodic health checks on nodes
@@ -187,7 +253,7 @@ func main() {
 		AuthServerURL:     "https://auth.example.com",
 		ClientID:          "cluster-manager",
 		ClientSecret:      "cluster-secret",
-		Scopes:            []string{"node:register", "node:manage"},
+		Scopes:            []string{"node:register", "node:manage", "transaction:execute"},
 		AccessTokenExpiry: 24 * time.Hour,
 	}
 
@@ -203,12 +269,12 @@ func main() {
 	nodes := []*ResourceNode{
 		{
 			ID:           "node-1",
-			Region:       "us-west",
+			Region:       "EU-west",
 			Capabilities: []string{"compute", "storage"},
 		},
 		{
 			ID:           "node-2",
-			Region:       "us-east",
+			Region:       "EU-east",
 			Capabilities: []string{"compute", "memory"},
 		},
 	}
@@ -229,6 +295,10 @@ func main() {
 	} else {
 		log.Printf("Found suitable node: %s in region %s", node.ID, node.Region)
 	}
+
+	// Simulate distributed authorization requests
+	log.Println("\n--- Simulating distributed authorization requests ---")
+	SimulateDistributedAuthorization(manager, 5)
 
 	// Keep the program running
 	select {}

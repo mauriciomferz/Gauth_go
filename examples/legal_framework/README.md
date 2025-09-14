@@ -45,7 +45,7 @@ transactionLimitRule := auth.ValidationRule{
     Predicate: "amount <= limit",
     Parameters: &auth.RuleParameters{
         AmountLimit: 10000.00,
-        Currency:    "USD",
+        Currency:    "EURO",
     },
 }
 ```

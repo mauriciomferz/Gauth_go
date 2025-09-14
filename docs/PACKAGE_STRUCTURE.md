@@ -52,7 +52,7 @@ circuit/
 ```
 
 ### `rate/`
-Rate limiting implementation.
+Rate limiting implementation (per-user via OwnerID and per-client, type-safe APIs).
 ```go
 rate/
 ├── limiter.go    // Rate limiter core

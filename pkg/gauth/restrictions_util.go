@@ -91,6 +91,9 @@ func GetRateLimit(r Restriction) (limit int, duration time.Duration, ok bool) {
 }
 
 // LegacyCompatGetPropertiesMap gets a map representation for backward compatibility
+// Deprecated: LegacyCompatGetPropertiesMap gets a map representation for backward compatibility.
+// This function exists only for migration from legacy code using map[string]interface{}.
+// Use strongly-typed Properties methods instead.
 func LegacyCompatGetPropertiesMap(r Restriction) map[string]interface{} {
 	if r.Properties == nil {
 		return nil

@@ -61,10 +61,8 @@ func main() {
 
 	// Get authorization
 	authReq := gauth.AuthorizationRequest{
-		ClientID:        "custom-client",
-		ClientOwnerID:   "owner-1",
-		ResourceOwnerID: "resource-1",
-		Scopes:          []string{"custom:write"},
+		ClientID: "custom-client",
+		Scopes:   []string{"custom:write"},
 	}
 
 	grant, err := auth.InitiateAuthorization(authReq)
@@ -86,14 +84,14 @@ func main() {
 		{
 			Type:   "special_payment",
 			Amount: 150.0,
-			Metadata: map[string]string{
+			CustomMetadata: map[string]string{
 				"purpose": "premium_service",
 			},
 		},
 		{
 			Type:   "bulk_transfer",
 			Amount: 300.0,
-			Metadata: map[string]string{
+			CustomMetadata: map[string]string{
 				"recipients": "5",
 			},
 		},

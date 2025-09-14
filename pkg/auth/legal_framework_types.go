@@ -11,14 +11,24 @@ import (
 // Core type definitions for RFC111 compliance
 
 // Condition represents a condition that must be evaluated to determine access
+
+// ConditionParameters defines the allowed parameters for a Condition.
+type ConditionParameters struct {
+	StringParams map[string]string
+	IntParams    map[string]int
+	BoolParams   map[string]bool
+	// Add more typed fields as needed for your use cases
+}
+
 type Condition struct {
 	Type       string
 	Rule       string
-	Parameters map[string]interface{}
+	Parameters ConditionParameters
 }
 
 // NewCondition creates a new Condition with typed parameters
-func NewCondition(condType, rule string, parameters map[string]interface{}) *Condition {
+
+func NewCondition(condType, rule string, parameters ConditionParameters) *Condition {
 	return &Condition{
 		Type:       condType,
 		Rule:       rule,
@@ -27,38 +37,28 @@ func NewCondition(condType, rule string, parameters map[string]interface{}) *Con
 }
 
 // GetStringParam retrieves a string parameter with error handling
+
 func (c *Condition) GetStringParam(key string) (string, error) {
-	if val, ok := c.Parameters[key]; ok {
-		if strVal, ok := val.(string); ok {
-			return strVal, nil
-		}
-		return "", fmt.Errorf("parameter %s is not a string", key)
+	if val, ok := c.Parameters.StringParams[key]; ok {
+		return val, nil
 	}
 	return "", fmt.Errorf("parameter %s not found", key)
 }
 
 // GetIntParam retrieves an int parameter with error handling
+
 func (c *Condition) GetIntParam(key string) (int, error) {
-	if val, ok := c.Parameters[key]; ok {
-		if intVal, ok := val.(int); ok {
-			return intVal, nil
-		}
-		// Try float conversion
-		if floatVal, ok := val.(float64); ok {
-			return int(floatVal), nil
-		}
-		return 0, fmt.Errorf("parameter %s is not an integer", key)
+	if val, ok := c.Parameters.IntParams[key]; ok {
+		return val, nil
 	}
 	return 0, fmt.Errorf("parameter %s not found", key)
 }
 
 // GetBoolParam retrieves a bool parameter with error handling
+
 func (c *Condition) GetBoolParam(key string) (bool, error) {
-	if val, ok := c.Parameters[key]; ok {
-		if boolVal, ok := val.(bool); ok {
-			return boolVal, nil
-		}
-		return false, fmt.Errorf("parameter %s is not a boolean", key)
+	if val, ok := c.Parameters.BoolParams[key]; ok {
+		return val, nil
 	}
 	return false, fmt.Errorf("parameter %s not found", key)
 }
@@ -203,54 +203,40 @@ type EnforcementPoint struct {
 	Audit    *AuditLog
 }
 
-// ValidationRule represents a rule for validating data
+// ValidationRuleParameters defines allowed parameters for a ValidationRule.
+type ValidationRuleParameters struct {
+	StringParams map[string]string
+	IntParams    map[string]int
+	BoolParams   map[string]bool
+	// Add more typed fields as needed
+}
+
 type ValidationRule struct {
 	Name       string
 	Predicate  string
-	Parameters map[string]interface{}
-}
-
-// NewValidationRule creates a new ValidationRule
-func NewValidationRule(name, predicate string, parameters map[string]interface{}) *ValidationRule {
-	return &ValidationRule{
-		Name:       name,
-		Predicate:  predicate,
-		Parameters: parameters,
-	}
+	Parameters ValidationRuleParameters
 }
 
 // GetStringParam retrieves a string parameter with error handling
 func (r *ValidationRule) GetStringParam(key string) (string, error) {
-	if val, ok := r.Parameters[key]; ok {
-		if strVal, ok := val.(string); ok {
-			return strVal, nil
-		}
-		return "", fmt.Errorf("parameter %s is not a string", key)
+	if val, ok := r.Parameters.StringParams[key]; ok {
+		return val, nil
 	}
 	return "", fmt.Errorf("parameter %s not found", key)
 }
 
 // GetIntParam retrieves an int parameter with error handling
 func (r *ValidationRule) GetIntParam(key string) (int, error) {
-	if val, ok := r.Parameters[key]; ok {
-		if intVal, ok := val.(int); ok {
-			return intVal, nil
-		}
-		if floatVal, ok := val.(float64); ok {
-			return int(floatVal), nil
-		}
-		return 0, fmt.Errorf("parameter %s is not an integer", key)
+	if val, ok := r.Parameters.IntParams[key]; ok {
+		return val, nil
 	}
 	return 0, fmt.Errorf("parameter %s not found", key)
 }
 
 // GetBoolParam retrieves a bool parameter with error handling
 func (r *ValidationRule) GetBoolParam(key string) (bool, error) {
-	if val, ok := r.Parameters[key]; ok {
-		if boolVal, ok := val.(bool); ok {
-			return boolVal, nil
-		}
-		return false, fmt.Errorf("parameter %s is not a boolean", key)
+	if val, ok := r.Parameters.BoolParams[key]; ok {
+		return val, nil
 	}
 	return false, fmt.Errorf("parameter %s not found", key)
 }
@@ -281,13 +267,20 @@ type ApprovalStep struct {
 
 // Policy represents an access control policy
 type Policy struct {
-	ID          string
-	Name        string
-	Description string
-	Rules       []DecisionRule
-	Version     string
-	Created     time.Time
-	Updated     time.Time
+	ID         string
+	Name       string
+	Parameters ValidationRuleParameters
+	Rules      []DecisionRule
+	Version    string
+	Created    time.Time
+}
+
+func NewValidationRule(name, predicate string, parameters ValidationRuleParameters) *ValidationRule {
+	return &ValidationRule{
+		Name:       name,
+		Predicate:  predicate,
+		Parameters: parameters,
+	}
 }
 
 // AdminAction represents an administrative action
@@ -307,8 +300,6 @@ type TrustAnchor struct {
 	ValidFrom  time.Time
 	ValidUntil time.Time
 }
-
-// CertificateStore represents a store for certificates
 type CertificateStore struct {
 	Certificates   map[string]Certificate
 	RevocationList []string
@@ -324,22 +315,19 @@ type Certificate struct {
 	ValidUntil time.Time
 }
 
+// ValidatorParameters defines allowed parameters for a Validator.
+type ValidatorParameters struct {
+	StringParams map[string]string
+	IntParams    map[string]int
+	BoolParams   map[string]bool
+	// Add more typed fields as needed
+}
+
 // Validator represents a validator for credentials
 type Validator struct {
 	ID         string
 	Type       string
-	Parameters map[string]interface{}
-}
-
-// GetStringParam retrieves a string parameter with error handling
-func (v *Validator) GetStringParam(key string) (string, error) {
-	if val, ok := v.Parameters[key]; ok {
-		if strVal, ok := val.(string); ok {
-			return strVal, nil
-		}
-		return "", fmt.Errorf("parameter %s is not a string", key)
-	}
-	return "", fmt.Errorf("parameter %s not found", key)
+	Parameters ValidatorParameters
 }
 
 // EnforcementRule represents a rule for enforcing access control
@@ -352,10 +340,11 @@ type EnforcementRule struct {
 
 // Handler represents a handler for access control decisions
 type Handler struct {
-	ID       string
-	Type     string
-	Priority int
-	Callback func(context.Context, Decision) error
+	ID         string
+	Type       string
+	Priority   int
+	Callback   func(context.Context, Decision) error
+	Attributes DecisionAttributes
 }
 
 // AuditLog represents an audit log
@@ -367,7 +356,6 @@ type AuditLog struct {
 // AddEntry adds an entry to the audit log
 func (a *AuditLog) AddEntry(entry AuditEntry) {
 	a.Entries = append(a.Entries, entry)
-
 	// Maintain max size
 	if a.MaxSize > 0 && len(a.Entries) > a.MaxSize {
 		// Remove oldest entries
@@ -419,17 +407,26 @@ func (p *Power) HasAction(action string) bool {
 }
 
 // Decision represents an access control decision
+
+// DecisionAttributes defines the allowed attributes for a Decision.
+type DecisionAttributes struct {
+	StringAttrs map[string]string
+	IntAttrs    map[string]int
+	BoolAttrs   map[string]bool
+	// Add more typed fields as needed for your use cases
+}
+
 type Decision struct {
 	Effect     string
 	Resource   string
 	Action     string
 	Subject    string
 	Timestamp  time.Time
-	Attributes map[string]interface{}
+	Attributes DecisionAttributes
 }
 
 // NewDecision creates a new Decision
-func NewDecision(effect, resource, action, subject string, attributes map[string]interface{}) *Decision {
+func NewDecision(effect, resource, action, subject string, attributes DecisionAttributes) *Decision {
 	return &Decision{
 		Effect:     effect,
 		Resource:   resource,
@@ -442,11 +439,8 @@ func NewDecision(effect, resource, action, subject string, attributes map[string
 
 // GetStringAttribute retrieves a string attribute with error handling
 func (d *Decision) GetStringAttribute(key string) (string, error) {
-	if val, ok := d.Attributes[key]; ok {
-		if strVal, ok := val.(string); ok {
-			return strVal, nil
-		}
-		return "", fmt.Errorf("attribute %s is not a string", key)
+	if val, ok := d.Attributes.StringAttrs[key]; ok {
+		return val, nil
 	}
 	return "", fmt.Errorf("attribute %s not found", key)
 }

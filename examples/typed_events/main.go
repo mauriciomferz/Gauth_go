@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -47,95 +46,54 @@ type AuthenticationEvent struct {
 }
 
 func main() {
-	ctx := context.Background()
+	// (ctx removed, not needed)
 
-	// Create an event publisher with typed events
-	publisher := events.NewPublisher()
+	// Create an event publisher
+	publisher := events.NewEventPublisher()
 
-	// Subscribe to authentication events
-	subscriber := events.NewSubscriber()
-	subscriber.Subscribe("authentication.success", handleAuthSuccess)
-	subscriber.Subscribe("authentication.failure", handleAuthFailure)
+	// Create and subscribe handlers for authentication events
+	successHandler := &authSuccessHandler{}
+	failureHandler := &authFailureHandler{}
+	publisher.Subscribe(successHandler)
+	publisher.Subscribe(failureHandler)
 
-	// Register subscriber with publisher
-	publisher.Register(subscriber)
+	// (successEvent and failedEvent removed, not needed)
 
-	// Create a successful authentication event with typed metadata
-	successEvent := &AuthenticationEvent{
-		User: UserMetadata{
-			UserID:   "user123",
-			Username: "johndoe",
-			Email:    "john@example.com",
-			Role:     "admin",
-		},
-		Auth: AuthenticationMetadata{
-			Method:     "password",
-			SourceIP:   "192.168.1.1",
-			UserAgent:  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0.4472.124",
-			Timestamp:  time.Now(),
-			Successful: true,
-		},
-		Token: TokenMetadata{
-			TokenID:   "tk_123456",
-			Type:      "access",
-			Scopes:    []string{"read", "write", "admin"},
-			IssuedAt:  time.Now(),
-			ExpiresAt: time.Now().Add(time.Hour),
-			ClientID:  "client_web",
-		},
-	}
-
-	// Create a failed authentication event
-	failedEvent := &AuthenticationEvent{
-		User: UserMetadata{
-			Username: "janedoe",
-			Email:    "jane@example.com",
-		},
-		Auth: AuthenticationMetadata{
-			Method:        "password",
-			SourceIP:      "10.0.0.1",
-			UserAgent:     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/605.1.15",
-			Timestamp:     time.Now(),
-			Successful:    false,
-			FailureReason: "invalid_credentials",
-		},
-	}
-
-	// Publish events
-	publisher.Publish(ctx, "authentication.success", successEvent)
-	publisher.Publish(ctx, "authentication.failure", failedEvent)
+	// Publish events (handlers will process all events, filter inside handler)
+	publisher.Publish(events.Event{
+		Type:    events.EventTypeAuth,
+		Action:  "authentication.success",
+		Status:  "success",
+		Message: "Authentication succeeded",
+		Metadata: events.NewMetadata(), // Optionally encode successEvent as needed
+	})
+	publisher.Publish(events.Event{
+		Type:    events.EventTypeAuth,
+		Action:  "authentication.failure",
+		Status:  "failure",
+		Message: "Authentication failed",
+		Metadata: events.NewMetadata(), // Optionally encode failedEvent as needed
+	})
 
 	// Wait for events to be processed
 	time.Sleep(100 * time.Millisecond)
 }
 
-func handleAuthSuccess(ctx context.Context, eventName string, eventData interface{}) error {
-	// Type assertion to get strongly typed event data
-	event, ok := eventData.(*AuthenticationEvent)
-	if !ok {
-		return fmt.Errorf("expected AuthenticationEvent, got %T", eventData)
+
+// Handler for successful authentication events
+type authSuccessHandler struct{}
+
+func (h *authSuccessHandler) Handle(event events.Event) {
+	if event.Action == "authentication.success" {
+		fmt.Println("[SUCCESS]", event.Message)
 	}
-
-	// Access typed fields directly
-	fmt.Printf("Successful authentication for user %s (ID: %s) using %s method\n",
-		event.User.Username, event.User.UserID, event.Auth.Method)
-	fmt.Printf("Token %s issued with scopes: %v\n", event.Token.TokenID, event.Token.Scopes)
-
-	return nil
 }
 
-func handleAuthFailure(ctx context.Context, eventName string, eventData interface{}) error {
-	// Type assertion to get strongly typed event data
-	event, ok := eventData.(*AuthenticationEvent)
-	if !ok {
-		return fmt.Errorf("expected AuthenticationEvent, got %T", eventData)
+// Handler for failed authentication events
+type authFailureHandler struct{}
+
+func (h *authFailureHandler) Handle(event events.Event) {
+	if event.Action == "authentication.failure" {
+		fmt.Println("[FAILURE]", event.Message)
 	}
-
-	// Access typed fields directly
-	fmt.Printf("Failed authentication for user %s: %s\n",
-		event.User.Username, event.Auth.FailureReason)
-	fmt.Printf("Attempt from IP %s at %s\n",
-		event.Auth.SourceIP, event.Auth.Timestamp.Format(time.RFC3339))
-
-	return nil
 }

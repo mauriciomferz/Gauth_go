@@ -19,23 +19,21 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to generate key: %v", err)
 	}
+	fmt.Printf("privateKey type: %T, is nil: %v\n", privateKey, privateKey == nil)
 
 	// Create an event publisher for monitoring
-	publisher := events.NewPublisher()
-	publisher.Subscribe(&events.LogHandler{}) // Log all auth events
+	publisher := events.NewEventPublisher()
+	logHandler, err := events.NewLogHandler("auth_events.log")
+	if err != nil {
+		log.Fatalf("Failed to create log handler: %v", err)
+	}
+	publisher.Subscribe(logHandler) // Log all auth events
 
 	// Create a memory store for tokens
-	store, err := token.NewMemoryStore(
-		token.WithTTL(24 * time.Hour),
-		token.WithCleanup(15 * time.Minute),
-	)
-	if err != nil {
-		log.Fatalf("Failed to create store: %v", err)
-	}
-	defer store.Close()
+	store := token.NewMemoryStore(24 * time.Hour)
 
 	// Configure token service
-	tokenService := token.NewService(token.Config{
+	tokenConfig := token.Config{
 		SigningMethod:    token.RS256,
 		SigningKey:       privateKey,
 		ValidityPeriod:   time.Hour,
@@ -44,52 +42,32 @@ func main() {
 		ValidateIssuer:   true,
 		AllowedAudiences: []string{"example-app"},
 		AllowedIssuers:   []string{"auth-service"},
-	}, store)
+	}
+	tokenService := token.NewService(tokenConfig, store)
 
-	// Create auth service with basic provider
-	authService := auth.NewService(auth.Config{
-		TokenService: tokenService,
-		Provider:    auth.NewBasicProvider(validateCredentials),
-		EventHandler: publisher,
-	})
+	// Create auth service
+	authService := auth.NewService(tokenService)
 
 	ctx := context.Background()
 
-	// Attempt authentication
-	creds := auth.Credentials{
-		Username: "testuser",
-		Password: "testpass",
-		Metadata: &auth.AuthMetadata{
-			Device: &token.DeviceInfo{
-				ID:        "device123",
-				UserAgent: "ExampleApp/1.0",
-				Platform:  "iOS",
-			},
-			ClientID: "example-app",
-			Scopes:   []string{"read", "write"},
-		},
+	// Attempt authentication using password grant
+	tokenReq := &auth.ServiceTokenRequest{
+		GrantType: "password",
+		Username:  "testuser",
+		Password:  "testpass",
+		Scope:     "read write",
 	}
 
-	// Authenticate and get token
-	token, err := authService.Authenticate(ctx, creds)
+	tokenResp, err := authService.Token(ctx, tokenReq)
 	if err != nil {
 		log.Fatalf("Authentication failed: %v", err)
 	}
-	fmt.Printf("Authentication successful. Token: %s\n\n", token.Value)
+	fmt.Printf("Authentication successful. Token: %s\nToken ID: %s\n\n", tokenResp.AccessToken, tokenResp.IDToken)
 
-	// Validate the token
-	claims, err := authService.ValidateToken(ctx, token.Value)
+	// Validate the token using the token ID
+	validatedToken, err := authService.Validate(ctx, tokenResp.IDToken, []string{"read", "write"})
 	if err != nil {
 		log.Fatalf("Token validation failed: %v", err)
 	}
-	fmt.Printf("Token validated. Subject: %s, Scopes: %v\n", claims.Subject, claims.Scopes)
-}
-
-// validateCredentials simulates credential validation
-func validateCredentials(ctx context.Context, username, password string) error {
-	// In a real app, validate against a database
-	if username == "testuser" && password == "testpass" {
-		return nil
-	}
-	return auth.ErrInvalidCredentials
+	fmt.Printf("Token validated. Subject: %s, Scopes: %v\n", validatedToken.Subject, validatedToken.Scopes)
 }

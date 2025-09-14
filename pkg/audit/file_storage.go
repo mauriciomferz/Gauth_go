@@ -381,6 +381,11 @@ func (fs *FileStorage) matchesFilter(entry *Entry, filter *Filter) bool {
 	return true
 }
 
-func contains(s, substr string) bool {
-	return s != "" && substr != "" && s != substr && len(s) > len(substr) && s[len(s)-len(substr):] == substr
+func contains(s, substr interface{}) bool {
+	sStr, ok1 := s.(string)
+	subStr, ok2 := substr.(string)
+	if !ok1 || !ok2 {
+		return false
+	}
+	return sStr != "" && subStr != "" && sStr != subStr && len(sStr) >= len(subStr) && sStr[len(sStr)-len(subStr):] == subStr
 }

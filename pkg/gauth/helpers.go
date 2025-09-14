@@ -2,6 +2,7 @@ package gauth
 
 import (
 	"crypto/rand"
+	"crypto/subtle"
 	"encoding/base64"
 	"fmt"
 	"net/url"
@@ -82,7 +83,9 @@ func validateRedirectURI(redirectURI string, allowedURIs []string) bool {
 
 // Helper functions for response generation
 
-// generateError creates a standardized error response
+// generateError creates a standardized error response for internal use only.
+// NOTE: map[string]interface{} is used here only for error response formatting (not public API).
+// All public APIs use type-safe alternatives. Do not expose in new APIs.
 func generateError(code string, description string) map[string]interface{} {
 	return map[string]interface{}{
 		"error":             code,
@@ -112,8 +115,12 @@ func sanitizeScope(scope string) string {
 
 // validateClientCredentials validates client credentials securely
 func validateClientCredentials(providedSecret, storedHash string) bool {
-	// TODO: Implement secure password comparison
-	return false
+	// Use constant time comparison to prevent timing attacks
+	if len(providedSecret) != len(storedHash) {
+		return false
+	}
+	// Use crypto/subtle for constant time comparison
+	return subtle.ConstantTimeCompare([]byte(providedSecret), []byte(storedHash)) == 1
 }
 
 // sanitizeRedirectURI sanitizes and validates a redirect URI

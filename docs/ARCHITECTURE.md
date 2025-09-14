@@ -8,7 +8,12 @@ GAuth is designed with a modular, layered architecture that prioritizes:
 - Extensibility
 - Security best practices
 
+
 ## Architecture Layers
+
+**Note:**
+- All public APIs are type-safe (no public map[string]interface{}).
+- Rate limiting is enforced per user (OwnerID) and per client, using the OwnerID field of the token as the subject for rate limiting.
 
 ```
 ┌─────────────────────────────────────────┐

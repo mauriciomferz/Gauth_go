@@ -83,6 +83,8 @@ type StorageConfig struct {
 	CleanupInterval time.Duration `json:"cleanup_interval"`
 
 	// BackendOptions contains backend-specific options as a typed struct.
+	// NOTE: interface{} is used here only for backend plugin config flexibility.
+	// All public APIs use type-safe alternatives. Do not expose in new APIs.
 	// Use a concrete struct for each backend (e.g., MemoryOptions, RedisOptions, etc.)
 	BackendOptions interface{} `json:"backend_options,omitempty"`
 }

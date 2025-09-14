@@ -1,3 +1,36 @@
+# OAuth2 and PASETO Example Status
+
+## OAuth2 Example
+
+The `oauth2` example demonstrates how to use the GAuth library's OAuth2 authenticator. To run this example with real endpoints:
+
+1. Edit `oauth2/main.go` and set the following fields in the `auth.Config` struct:
+	- `AuthServerURL`: The URL of your OAuth2 authorization server.
+	- `ClientID`: Your OAuth2 client ID.
+	- `ClientSecret`: Your OAuth2 client secret.
+	- `Scopes`: The scopes you want to request.
+2. Ensure your OAuth2 server is running and accessible.
+3. Run the example:
+	```sh
+	go run oauth2/main.go
+	```
+
+The example will request a token and print the result. You may need to adjust the token request fields to match your server's requirements.
+
+## PASETO Example
+
+The `paseto` example is a stub. The GAuth library does not yet implement a PASETO authenticator. When support is added, the example will:
+
+- Generate a PASETO token using the library's API
+- Validate the token and print the claims
+
+Currently, running the example will print:
+
+```
+Failed to create PASETO authenticator: PASETO authenticator not implemented
+```
+
+No further action is required until PASETO support is implemented in the library.
 # Authentication Examples
 
 This directory contains examples demonstrating various authentication patterns.

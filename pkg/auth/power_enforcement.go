@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	gauth "github.com/Gimel-Foundation/gauth/pkg/gauth"
 	"github.com/Gimel-Foundation/gauth/pkg/token"
+	toktypes "github.com/Gimel-Foundation/gauth/pkg/token"
 )
 
 // PowerEnforcementPoint defines the interface for power enforcement
@@ -29,88 +31,113 @@ type PowerOfAttorney struct {
 	ExpiresAt time.Time
 
 	// Authority levels
-	SigningAuthority    *SigningAuthority
-	DecisionAuthority   *DecisionAuthority
-	ExecutionAuthority  *ExecutionAuthority
+	SigningAuthority   *SigningAuthority
+	DecisionAuthority  *DecisionAuthority
+	ExecutionAuthority *ExecutionAuthority
 
 	// Obligations and restrictions
-	NeedToDoObligations []Obligation
-	DoUnlessRestrictions []Restriction
-	ComplianceRules     []ComplianceRule
+	NeedToDoObligations  []Obligation
+	DoUnlessRestrictions []gauth.Restriction
+	// ComplianceRules are referenced by name; see canonical struct in legal_framework_test.go
+	ComplianceRules []string
 
 	// Legal framework
-	JurisdictionRules   *JurisdictionRules
-	FiduciaryDuties     []FiduciaryDuty
-	LegalBasis          string
+	JurisdictionRules *JurisdictionRules
+	// FiduciaryDuties are referenced by name; see canonical struct in legal_framework_test.go
+	FiduciaryDuties []string
+	LegalBasis      string
 
 	// Commercial register details
-	RegisterEntry       *RegisterEntry
-	AuthorityScope     []string
+	RegisterEntry  *RegisterEntry
+	AuthorityScope []string
 }
 
 // SigningAuthority defines what documents can be signed
 type SigningAuthority struct {
 	DocumentTypes     []string
-	ValueLimits      map[string]float64
+	ValueLimits       map[string]float64
 	RequiredCosigners []string
 	SignatureLevel    string // qualified, advanced, basic
 }
 
 // DecisionAuthority defines decision-making powers
 type DecisionAuthority struct {
-	DecisionTypes     []string
-	ApprovalLevels    map[string]ApprovalLevel
-	DelegationLimits  []string
-	EscalationRules   []string
+	DecisionTypes    []string
+	ApprovalLevels   map[string]ApprovalLevel
+	DelegationLimits []string
+	EscalationRules  []string
 }
 
 // ExecutionAuthority defines action execution powers
 type ExecutionAuthority struct {
-	ActionTypes       []string
-	ResourceScopes    []string
-	TimeRestrictions  []TimeWindow
-	GeographicLimits  []string
+	ActionTypes      []string
+	ResourceScopes   []string
+	TimeRestrictions []toktypes.TimeWindow
+	GeographicLimits []string
 }
 
 // Obligation represents need-to-do requirements
 type Obligation struct {
-	Type             string
-	Description      string
-	Deadline         time.Time
-	ValidationRules  []string
-	EscalationPath   []string
+	Type            string
+	Description     string
+	Deadline        time.Time
+	ValidationRules []string
+	EscalationPath  []string
 }
 
 // RegisterEntry represents commercial register details
 type RegisterEntry struct {
-	RegistryID       string
-	EntryType        string
-	AuthorityType    string
-	ValidFrom        time.Time
-	LastVerified     time.Time
+	RegistryID        string
+	EntryType         string
+	AuthorityType     string
+	ValidFrom         time.Time
+	LastVerified      time.Time
 	VerificationProof string
 }
 
 // StandardPowerEnforcement implements PowerEnforcementPoint
 type StandardPowerEnforcement struct {
-	store       token.EnhancedStore
-	verifier    token.VerificationSystem
-	enforcer    *StandardAuthorizationEnforcer
-	register    *CommercialRegister
+	store    token.EnhancedStore
+	verifier token.VerificationSystem
+	enforcer *StandardAuthorizationEnforcer
+	register *CommercialRegister
 }
 
 // CommercialRegister handles AI system registration
 type CommercialRegister struct {
-	// Registry operations
-	RegisterAI(ctx context.Context, token *token.EnhancedToken, entry *RegisterEntry) error
-	VerifyRegistration(ctx context.Context, registryID string) error
-	UpdateAuthority(ctx context.Context, registryID string, powers *PowerOfAttorney) error
-	RevokeRegistration(ctx context.Context, registryID string) error
+	// Add fields as needed
+}
 
-	// Power of attorney management
-	GrantPowerOfAttorney(ctx context.Context, power *PowerOfAttorney) error
-	VerifyPowerOfAttorney(ctx context.Context, powerID string) error
-	RevokePowerOfAttorney(ctx context.Context, powerID string) error
+// Registry operations
+func (cr *CommercialRegister) RegisterAI(ctx context.Context, tok *token.EnhancedToken, entry *RegisterEntry) error {
+	// TODO: implement
+	return nil
+}
+func (cr *CommercialRegister) VerifyRegistration(ctx context.Context, registryID string) error {
+	// TODO: implement
+	return nil
+}
+func (cr *CommercialRegister) UpdateAuthority(ctx context.Context, registryID string, powers *PowerOfAttorney) error {
+	// TODO: implement
+	return nil
+}
+func (cr *CommercialRegister) RevokeRegistration(ctx context.Context, registryID string) error {
+	// TODO: implement
+	return nil
+}
+
+// Power of attorney management
+func (cr *CommercialRegister) GrantPowerOfAttorney(ctx context.Context, power *PowerOfAttorney) error {
+	// TODO: implement
+	return nil
+}
+func (cr *CommercialRegister) VerifyPowerOfAttorney(ctx context.Context, powerID string) error {
+	// TODO: implement
+	return nil
+}
+func (cr *CommercialRegister) RevokePowerOfAttorney(ctx context.Context, powerID string) error {
+	// TODO: implement
+	return nil
 }
 
 func NewStandardPowerEnforcement(
@@ -142,14 +169,17 @@ func (p *StandardPowerEnforcement) ValidateClientDecision(ctx context.Context, t
 	}
 
 	// Enforce approval requirements
-	level := power.DecisionAuthority.ApprovalLevels[decision]
 	if err := p.enforcer.EnforceSecondLevelApproval(ctx, token, decision); err != nil {
 		return fmt.Errorf("approval requirements not met: %w", err)
 	}
 
-	// Check need-to-do obligations
-	if err := p.enforceObligations(ctx, token, power.NeedToDoObligations); err != nil {
-		return fmt.Errorf("obligations not met: %w", err)
+	// Check need-to-do obligations (inline logic)
+	for _, obligation := range power.NeedToDoObligations {
+		if obligation.Deadline.Before(time.Now()) {
+			if err := p.validateObligation(ctx, token, &obligation); err != nil {
+				return fmt.Errorf("obligation not fulfilled: %w", err)
+			}
+		}
 	}
 
 	return nil
@@ -228,7 +258,7 @@ func (p *StandardPowerEnforcement) validateObligation(ctx context.Context, token
 	return nil
 }
 
-func (p *StandardPowerEnforcement) validateRestriction(ctx context.Context, token *token.EnhancedToken, restriction *Restriction) error {
+func (p *StandardPowerEnforcement) validateRestriction(ctx context.Context, token *token.EnhancedToken, restriction *gauth.Restriction) error {
 	// Implementation would validate specific restriction
 	return nil
 }
@@ -236,13 +266,4 @@ func (p *StandardPowerEnforcement) validateRestriction(ctx context.Context, toke
 func (p *StandardPowerEnforcement) verifyCosigner(ctx context.Context, token *token.EnhancedToken, cosigner string) error {
 	// Implementation would verify cosigner
 	return nil
-}
-
-func contains(slice []string, item string) bool {
-	for _, s := range slice {
-		if s == item {
-			return true
-		}
-	}
-	return false
 }

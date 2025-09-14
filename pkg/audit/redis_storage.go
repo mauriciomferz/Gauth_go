@@ -11,7 +11,7 @@ import (
 
 // RedisStorage implements the Storage interface using Redis
 type RedisStorage struct {
-	client     *redis.Client
+	client     redis.UniversalClient
 	keyPrefix  string
 	expiration time.Duration
 }
@@ -49,14 +49,26 @@ func NewRedisStorage(config RedisConfig) (*RedisStorage, error) {
 		return nil, fmt.Errorf("no Redis addresses provided")
 	}
 
-	client := redis.NewClient(&redis.Options{
-		Addr:            config.Addresses[0], // TODO: Support cluster
-		Password:        config.Password,
-		DB:              config.DB,
-		MaxRetries:      config.MaxRetries,
-		MinRetryBackoff: config.MinRetryBackoff,
-		MaxRetryBackoff: config.MaxRetryBackoff,
-	})
+	var client redis.UniversalClient
+	if len(config.Addresses) > 1 {
+		// Use Redis Cluster
+		client = redis.NewClusterClient(&redis.ClusterOptions{
+			Addrs:          config.Addresses,
+			Password:       config.Password,
+			MaxRetries:     config.MaxRetries,
+			MinRetryBackoff: config.MinRetryBackoff,
+			MaxRetryBackoff: config.MaxRetryBackoff,
+		})
+	} else {
+		client = redis.NewClient(&redis.Options{
+			Addr:            config.Addresses[0],
+			Password:        config.Password,
+			DB:              config.DB,
+			MaxRetries:      config.MaxRetries,
+			MinRetryBackoff: config.MinRetryBackoff,
+			MaxRetryBackoff: config.MaxRetryBackoff,
+		})
+	}
 
 	// Test connection
 	if err := client.Ping(context.Background()).Err(); err != nil {
@@ -287,7 +299,7 @@ func (rs *RedisStorage) entryKey(id string) string {
 	return fmt.Sprintf("%sentry:%s", rs.keyPrefix, id)
 }
 
-func (rs *RedisStorage) typeKey(typ Type) string {
+func (rs *RedisStorage) typeKey(typ string) string {
 	return fmt.Sprintf("%stype:%s", rs.keyPrefix, typ)
 }
 
@@ -325,9 +337,43 @@ func (rs *RedisStorage) matchesFilter(entry *Entry, filter *Filter) bool {
 	if filter == nil {
 		return true
 	}
-
-	// Filter logic same as FileStorage
-	return true // TODO: Implement filter matching
+	// Type match
+	if len(filter.Types) > 0 {
+		found := false
+		for _, t := range filter.Types {
+			if entry.Type == t {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	// Actor match
+	if len(filter.ActorIDs) > 0 {
+		found := false
+		for _, a := range filter.ActorIDs {
+			if entry.ActorID == a {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	// Chain match
+	if filter.ChainID != "" && entry.ChainID != filter.ChainID {
+		return false
+	}
+	// Time range match
+	if filter.TimeRange != nil {
+		if entry.Timestamp.Before(filter.TimeRange.Start) || entry.Timestamp.After(filter.TimeRange.End) {
+			return false
+		}
+	}
+	return true
 }
 
 // Helper function to compute set intersection

@@ -2,12 +2,30 @@ package token
 
 import (
 	"context"
+	"crypto"
 	"crypto/rand"
+	"crypto/rsa"
 	"encoding/base64"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 )
+
+// splitScopes splits a comma-separated string into a slice of scopes
+func splitScopes(s string) []string {
+	return strings.Split(s, ",")
+}
+
+// ServiceAPI defines the interface for token management functionality
+type ServiceAPI interface {
+	GetToken(ctx context.Context, id string) (*Token, error)
+	Validate(ctx context.Context, token *Token) error
+	Revoke(ctx context.Context, token *Token) error
+	Issue(ctx context.Context, token *Token) (*Token, error)
+	Refresh(ctx context.Context, refreshToken *Token) (*Token, error)
+	List(ctx context.Context, filter Filter) ([]*Token, error)
+}
 
 // Service provides token management functionality
 type Service struct {
@@ -16,8 +34,13 @@ type Service struct {
 	mu     sync.RWMutex
 }
 
+// GetToken retrieves a token by its ID.
+func (s *Service) GetToken(ctx context.Context, id string) (*Token, error) {
+	return s.store.Get(ctx, id)
+}
+
 // NewService creates a new token service with the given configuration
-func NewService(config Config, store Store) *Service {
+func NewService(config Config, store Store) ServiceAPI {
 	svc := &Service{
 		config: config,
 		store:  store,
@@ -162,18 +185,36 @@ func (s *Service) Refresh(ctx context.Context, refreshToken *Token) (*Token, err
 	}
 
 	// Create new access token
-	accessToken := &Token{
-		ID:        GenerateID(),
-		Type:      Access,
-		IssuedAt:  time.Now(),
-		ExpiresAt: time.Now().Add(s.config.ValidityPeriod),
-		NotBefore: time.Now(),
-		Issuer:    refreshToken.Issuer,
-		Subject:   refreshToken.Subject,
-		Audience:  refreshToken.Audience,
-		Scopes:    refreshToken.Scopes,
-		Algorithm: s.config.SigningMethod,
-	}
+       var scopes []string
+       if refreshToken.Metadata != nil && refreshToken.Metadata.AppData != nil {
+	       if orig, ok := refreshToken.Metadata.AppData["original_scopes"]; ok && orig != "" {
+		       // Split comma-separated string into slice
+		       for _, s := range splitScopes(orig) {
+			       if s != "" {
+				       scopes = append(scopes, s)
+			       }
+		       }
+	       }
+       }
+       if len(scopes) == 0 {
+	       scopes = refreshToken.Scopes
+       }
+       accessToken := &Token{
+	       ID:        GenerateID(),
+	       Type:      Access,
+	       IssuedAt:  time.Now(),
+	       ExpiresAt: time.Now().Add(s.config.ValidityPeriod),
+	       NotBefore: time.Now(),
+	       Issuer:    refreshToken.Issuer,
+	       Subject:   refreshToken.Subject,
+	       Audience:  refreshToken.Audience,
+	       Scopes:    scopes,
+	       Algorithm: s.config.SigningMethod,
+       }
+
+       // Helper to split comma-separated scopes
+       // (define at file scope if not present)
+       // func splitScopes(s string) []string { return strings.Split(s, ",") }
 
 	// Issue new token
 	return s.Issue(ctx, accessToken)
@@ -203,7 +244,18 @@ func (s *Service) validateConfig(token *Token) error {
 func (s *Service) signToken(token *Token) (string, error) {
 	// This is a placeholder - actual signing would use JWT, PASETO, etc.
 	tokenBytes := []byte(fmt.Sprintf("%s.%s.%s", token.ID, token.Subject, token.Type))
-	signature, err := s.config.SigningKey.Sign(rand.Reader, tokenBytes, nil)
+
+	// Hash the tokenBytes using SHA256
+	hash := crypto.SHA256.New()
+	hash.Write(tokenBytes)
+	hashed := hash.Sum(nil)
+
+	// Use rsa.SignPKCS1v15 for signing
+	rsaPriv, ok := s.config.SigningKey.(*rsa.PrivateKey)
+	if !ok {
+		return "", fmt.Errorf("SigningKey is not an *rsa.PrivateKey")
+	}
+	signature, err := rsa.SignPKCS1v15(rand.Reader, rsaPriv, crypto.SHA256, hashed)
 	if err != nil {
 		return "", err
 	}

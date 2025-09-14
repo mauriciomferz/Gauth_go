@@ -28,7 +28,7 @@ type PowerArchitecture struct {
 }
 
 // AuthorizationRequest represents a GAuth authorization request
-type AuthorizationRequest struct {
+type EnhancedAuthorizationRequest struct {
 	// Client information
 	ClientID    string
 	ClientType  string // AI type (agent, robot, etc)
@@ -71,11 +71,11 @@ type EnhancedAuthService struct {
 	powerArchitecture PowerArchitecture
 
 	// Configuration
-	config *Config
+	config *EnhancedServiceConfig
 }
 
 // Config contains service configuration
-type Config struct {
+type EnhancedServiceConfig struct {
 	// Authorization server settings
 	AuthServerURL string
 	TrustProvider string
@@ -93,14 +93,18 @@ type Config struct {
 }
 
 // ApprovalRule defines a compliance rule
+type RuleConditions map[string]string
+
 type ApprovalRule struct {
-	Type       string                 // Rule type
-	Conditions map[string]interface{} // Rule conditions
-	Actions    []string               // Required actions
+	Type        string         // Rule type
+	Conditions  RuleConditions // Rule conditions
+	Actions     []string       // Required actions
+	ID          string         // Unique rule ID (added for pointer compatibility)
+	Description string         // Description (added for pointer compatibility)
 }
 
 // NewEnhancedAuthService creates a new enhanced auth service
-func NewEnhancedAuthService(store token.EnhancedStore, architecture PowerArchitecture, config *Config) *EnhancedAuthService {
+func NewEnhancedAuthService(store token.EnhancedStore, architecture PowerArchitecture, config *EnhancedServiceConfig) *EnhancedAuthService {
 	return &EnhancedAuthService{
 		tokenStore:        store,
 		powerArchitecture: architecture,
@@ -141,7 +145,7 @@ func (s *EnhancedAuthService) RegisterClientOwner(ctx context.Context, owner *to
 }
 
 // AuthorizeClient implements step V of the protocol
-func (s *EnhancedAuthService) AuthorizeClient(ctx context.Context, req *AuthorizationRequest) (*token.EnhancedToken, error) {
+func (s *EnhancedAuthService) AuthorizeClient(ctx context.Context, req *EnhancedAuthorizationRequest) (*token.EnhancedToken, error) {
 	// Verify client owner's authorization
 	if err := s.verifyClientOwnerAuthorization(ctx, req.ClientOwner); err != nil {
 		return nil, err

@@ -1,5 +1,3 @@
-// Package resilience provides type-safe implementations of common resilience patterns
-// like circuit breakers, rate limiting, retry with backoff, and bulkheads.
 package resilience
 
 import (
@@ -8,6 +6,89 @@ import (
 	"sync"
 	"time"
 )
+
+// --- BEGIN STUBS FOR EXAMPLES AND DOCS ---
+// RetryConfig is a stub for retry configuration
+type RetryConfig struct {
+	MaxAttempts  int
+	InitialDelay time.Duration
+	MaxDelay     time.Duration
+	Multiplier   float64
+}
+
+// TimeoutConfig is a stub for timeout configuration
+type TimeoutConfig struct {
+	Timeout time.Duration
+}
+
+// BulkheadConfig is a stub for bulkhead configuration
+type BulkheadConfig struct {
+	MaxConcurrent int
+	MaxWaitTime   time.Duration
+}
+
+// ErrBulkheadFull is a sentinel error for bulkhead full
+var ErrBulkheadFull = fmt.Errorf("bulkhead capacity exceeded")
+
+// Retry is a stub for retry pattern
+type Retry struct {
+	config RetryConfig
+}
+
+func NewRetry(config RetryConfig) *Retry {
+	return &Retry{config: config}
+}
+
+func (r *Retry) Execute(ctx context.Context, fn func(ctx context.Context) error) error {
+	// Minimal stub: just call fn once
+	return fn(ctx)
+}
+
+// Timeout is a stub for timeout pattern
+type Timeout struct {
+	config TimeoutConfig
+}
+
+func NewTimeout(config TimeoutConfig) *Timeout {
+	return &Timeout{config: config}
+}
+
+func (t *Timeout) Execute(ctx context.Context, fn func(ctx context.Context) error) error {
+	// Minimal stub: just call fn once
+	return fn(ctx)
+}
+
+// Bulkhead is a stub for bulkhead pattern
+type Bulkhead struct {
+	config BulkheadConfig
+}
+
+func NewBulkhead(config BulkheadConfig) *Bulkhead {
+	return &Bulkhead{config: config}
+}
+
+func (b *Bulkhead) Execute(ctx context.Context, fn func(ctx context.Context) error) error {
+	// Minimal stub: just call fn once
+	return fn(ctx)
+}
+
+// Combined is a stub for pattern composition
+type Combined struct {
+	patterns []interface{}
+}
+
+func Combine(patterns ...interface{}) *Combined {
+	return &Combined{patterns: patterns}
+}
+
+func (c *Combined) Execute(ctx context.Context, fn func(ctx context.Context) error) error {
+	// Minimal stub: just call fn once
+	return fn(ctx)
+}
+
+// --- END STUBS FOR EXAMPLES AND DOCS ---
+// Package resilience provides type-safe implementations of common resilience patterns
+// like circuit breakers, rate limiting, retry with backoff, and bulkheads.
 
 // State represents the state of a resilience pattern
 

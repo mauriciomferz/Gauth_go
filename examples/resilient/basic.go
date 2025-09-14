@@ -63,17 +63,17 @@ func (s *ResilientService) ProcessRequest(tx gauth.TransactionDetails, token str
 
 		duration := time.Since(start).Seconds()
 		s.metrics.Counter(string(monitoring.MetricTransactions), 1, map[string]string{
-			"type":   tx.Type,
+			"type":   string(tx.Type),
 			"status": map[bool]string{true: "success", false: "error"}[err == nil],
 		})
 
 		if err == nil {
 			s.metrics.Gauge(string(monitoring.MetricResponseTime), duration, map[string]string{
-				"type": tx.Type,
+				"type": string(tx.Type),
 			})
 		} else {
 			s.metrics.Counter(string(monitoring.MetricTransactionErrors), 1, map[string]string{
-				"type":  tx.Type,
+				"type":  string(tx.Type),
 				"error": err.Error(),
 			})
 			return err
@@ -126,19 +126,17 @@ func runBasicExample() {
 
 	// Example usage
 	tx := gauth.TransactionDetails{
-		Type:   "payment",
+		Type:   gauth.PaymentTransaction,
 		Amount: 100.0,
-		Metadata: map[string]string{
+		CustomMetadata: map[string]string{
 			"customer_id": "cust-123",
 		},
 	}
 
 	// Get a token
 	authReq := gauth.AuthorizationRequest{
-		ClientID:        "resilient-client",
-		ClientOwnerID:   "owner-1",
-		ResourceOwnerID: "resource-1",
-		Scopes:          []string{"transaction:execute"},
+		ClientID: "resilient-client",
+		Scopes:   []string{"transaction:execute"},
 	}
 
 	grant, err := auth.InitiateAuthorization(authReq)

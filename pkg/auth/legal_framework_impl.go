@@ -148,18 +148,29 @@ func (lf *LegalFramework) Authorize(ctx context.Context, subject, resource, acti
 	}
 
 	// Create final decision
+	attrs := DecisionAttributes{
+		StringAttrs: make(map[string]string),
+		IntAttrs:    make(map[string]int),
+		BoolAttrs:   make(map[string]bool),
+	}
+	for k, v := range enrichedContext {
+		switch val := v.(type) {
+		case string:
+			attrs.StringAttrs[k] = val
+		case int:
+			attrs.IntAttrs[k] = val
+		case bool:
+			attrs.BoolAttrs[k] = val
+			// Add more type cases as needed
+		}
+	}
 	decision := &Decision{
 		Effect:     finalEffect,
 		Resource:   resource,
 		Action:     action,
 		Subject:    subject,
 		Timestamp:  time.Now(),
-		Attributes: make(map[string]interface{}),
-	}
-
-	// Copy attributes from enriched context
-	for k, v := range enrichedContext {
-		decision.Attributes[k] = v
+		Attributes: attrs,
 	}
 
 	// Log decision
@@ -251,13 +262,29 @@ func (lf *LegalFramework) evaluatePolicies(ctx map[string]interface{}, subject, 
 			// TODO: Implement actual condition evaluation
 			// For now, we always apply the rule
 
+			attrs := DecisionAttributes{
+				StringAttrs: make(map[string]string),
+				IntAttrs:    make(map[string]int),
+				BoolAttrs:   make(map[string]bool),
+			}
+			for k, v := range ctx {
+				switch val := v.(type) {
+				case string:
+					attrs.StringAttrs[k] = val
+				case int:
+					attrs.IntAttrs[k] = val
+				case bool:
+					attrs.BoolAttrs[k] = val
+					// Add more type cases as needed
+				}
+			}
 			decision := Decision{
 				Effect:     rule.Effect,
 				Resource:   resource,
 				Action:     action,
 				Subject:    subject,
 				Timestamp:  time.Now(),
-				Attributes: make(map[string]interface{}),
+				Attributes: attrs,
 			}
 
 			decisions = append(decisions, decision)

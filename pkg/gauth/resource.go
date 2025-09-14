@@ -1,9 +1,15 @@
-// Package gauth provides public resource types and interfaces.
 package gauth
 
 import (
 	"github.com/Gimel-Foundation/gauth/internal/resource"
 )
+
+// RateLimitConfig defines rate limiting configuration for resources.
+type RateLimitConfig struct {
+	RequestsPerSecond int `json:"requests_per_second"` // Maximum requests per second
+	BurstSize         int `json:"burst_size"`          // Maximum burst size
+	WindowSize        int `json:"window_size"`         // Time window in seconds
+}
 
 // ResourceType represents the type of a resource
 type ResourceType string

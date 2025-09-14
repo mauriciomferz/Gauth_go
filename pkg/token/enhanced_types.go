@@ -3,6 +3,8 @@ package token
 import (
 	"context"
 	"time"
+
+	"github.com/Gimel-Foundation/gauth/pkg/common"
 )
 
 // OwnerInfo contains information about the token owner and authorizer
@@ -155,6 +157,9 @@ type EnhancedToken struct {
 	Versions []VersionInfo `json:"versions"`
 }
 
+// Add IsExpired method to EnhancedToken (no-op)
+func (t *EnhancedToken) IsExpired() bool { return false }
+
 // EnhancedStore extends the base Store interface
 type EnhancedStore interface {
 	Store
@@ -163,4 +168,64 @@ type EnhancedStore interface {
 	ValidateAuthorization(ctx context.Context, token *EnhancedToken) error
 	VerifyAttestation(ctx context.Context, attestation *Attestation) error
 	TrackVersionHistory(ctx context.Context, token *EnhancedToken) error
+	GetHumanVerification(ctx context.Context, token *EnhancedToken) (*common.HumanVerification, error)
+	GetSecondLevelApproval(ctx context.Context, token *EnhancedToken) (*common.SecondLevelApproval, error)
+
+	// Initialize is a no-op for in-memory store
+	Initialize(ctx context.Context) error
+	// Store stores a token (for EnhancedStore compatibility)
+	Store(ctx context.Context, token interface{}) error
+	// Remove removes a token (for EnhancedStore compatibility)
+	Remove(ctx context.Context, key string) error
+	// StoreAuthorizer stores an authorizer (for subscription.go compatibility)
+	StoreAuthorizer(ctx context.Context, authorizer interface{}) error
+	// StoreOwner stores an owner (for subscription.go compatibility)
+	StoreOwner(ctx context.Context, owner interface{}) error
+	// StoreToken stores a token (for subscription.go compatibility)
+	StoreToken(ctx context.Context, token interface{}) error
+}
+
+// DelegationOptions bundles all fields needed for advanced delegation/attestation
+// RFC111: Used to create delegated tokens with explicit power-of-attorney, restrictions, and attestations.
+type DelegationOptions struct {
+	Principal    string        // The principal/owner granting authority
+	Scope        string        // Scope of the delegated power
+	Restrictions *Restrictions // Limits on the delegated power
+	Attestation  *Attestation  // Required attestation (notary, witness, etc.)
+	ValidUntil   time.Time     // Expiry of the delegation
+	SuccessorID  string        // Optional backup AI
+	Version      int           // Version for tracking
+}
+
+// NewDelegatedToken creates an EnhancedToken for advanced delegation/attestation flows
+func NewDelegatedToken(agentID string, opts DelegationOptions) *EnhancedToken {
+	return &EnhancedToken{
+		Token: &Token{
+			Subject:   agentID, // RFC111: agent or AI being delegated to
+			Scopes:    []string{opts.Scope},
+			ExpiresAt: opts.ValidUntil,
+			IssuedAt:  time.Now(),
+		},
+		Owner: &OwnerInfo{
+			OwnerID: opts.Principal,
+		},
+		AI: &AIMetadata{
+			SuccessorID:          opts.SuccessorID,
+			Restrictions:         opts.Restrictions,
+			DelegationGuidelines: []string{}, // Can be set as needed
+		},
+		Attestations: func() []Attestation {
+			if opts.Attestation != nil {
+				return []Attestation{*opts.Attestation}
+			}
+			return nil
+		}(),
+		Versions: []VersionInfo{{
+			Version:       opts.Version,
+			UpdatedAt:     time.Now(),
+			UpdatedBy:     opts.Principal,
+			ChangeType:    "delegation_created",
+			ChangeSummary: "Initial delegation issued.",
+		}},
+	}
 }

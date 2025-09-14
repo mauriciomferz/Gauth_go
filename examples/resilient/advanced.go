@@ -2,7 +2,6 @@ package resilient
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -65,7 +64,7 @@ func NewHighlyResilientService(auth *gauth.GAuth) (*HighlyResilientService, erro
 func (s *HighlyResilientService) ProcessRequest(ctx context.Context, tx gauth.TransactionDetails, token string) error {
 	// Start tracing span
 	ctx, span := s.tracer.StartSpan(ctx, tracing.SpanTransaction,
-		tracing.AttributeTransactionType.String(tx.Type),
+		tracing.AttributeTransactionType.String(string(tx.Type)),
 		tracing.AttributeResourceID.String(tx.ResourceID),
 	)
 	defer span.End()
@@ -93,72 +92,4 @@ func (s *HighlyResilientService) ProcessRequest(ctx context.Context, tx gauth.Tr
 
 	span.SetStatus(codes.Ok, "")
 	return nil
-}
-
-func main() {
-	// Initialize GAuth
-	config := gauth.Config{
-		AuthServerURL:     "https://auth.example.com",
-		ClientID:          "resilient-client",
-		ClientSecret:      "resilient-secret",
-		Scopes:            []string{"transaction:execute"},
-		AccessTokenExpiry: time.Hour,
-	}
-
-	auth, err := gauth.New(config)
-	if err != nil {
-		log.Fatalf("Failed to initialize GAuth: %v", err)
-	}
-
-	// Create highly resilient service
-	service, err := NewHighlyResilientService(auth)
-	if err != nil {
-		log.Fatalf("Failed to create service: %v", err)
-	}
-
-	// Get authorization and token
-	ctx := context.Background()
-	authReq := gauth.AuthorizationRequest{
-		ClientID:        "resilient-client",
-		ClientOwnerID:   "owner-1",
-		ResourceOwnerID: "resource-1",
-		Scopes:          []string{"transaction:execute"},
-	}
-
-	grant, err := auth.InitiateAuthorization(authReq)
-	if err != nil {
-		log.Fatalf("Authorization failed: %v", err)
-	}
-
-	tokenResp, err := auth.RequestToken(gauth.TokenRequest{
-		GrantID: grant.GrantID,
-		Scope:   grant.Scope,
-	})
-	if err != nil {
-		log.Fatalf("Token request failed: %v", err)
-	}
-
-	// Process multiple requests with full resilience
-	for i := 0; i < 20; i++ {
-		tx := gauth.TransactionDetails{
-			Type:   "payment",
-			Amount: float64(100 + i),
-			Metadata: map[string]string{
-				"request_id": fmt.Sprintf("req-%d", i),
-			},
-		}
-
-		err := service.ProcessRequest(ctx, tx, tokenResp.Token)
-		if err != nil {
-			log.Printf("Request %d failed: %v", i, err)
-			time.Sleep(time.Second)
-			continue
-		}
-		log.Printf("Request %d succeeded", i)
-	}
-
-	// Graceful shutdown
-	if err := service.tracer.Shutdown(ctx); err != nil {
-		log.Printf("Error shutting down tracer: %v", err)
-	}
 }

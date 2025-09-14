@@ -8,7 +8,8 @@ type Restriction struct {
 	Type string `json:"type"`
 
 	// Value of the restriction (e.g., IP range, time window, etc.)
-	// TODO: Replace interface{} with type-safe alternatives
+	// NOTE: interface{} is used here only for backend plugin/migration flexibility.
+	// All public APIs use type-safe alternatives. Do not expose in new APIs.
 	Value interface{} `json:"value"`
 
 	// ValidFrom defines when the restriction starts being active

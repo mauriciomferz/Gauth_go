@@ -1,4 +1,24 @@
-// Package events provides a unified event system for GAuth authentication framework.
+// Package events/events.go: RFC111 Compliance Mapping
+//
+// This file implements the unified, type-safe event system as required by RFC111:
+//   - Typed event handling for authentication, authorization, token, and system events
+//   - All event types are enums/constants (no stringly-typed events)
+//   - Supports audit, compliance, and activity tracking for all protocol steps
+//
+// Relevant RFC111 Sections:
+//   - Section 6: How GAuth works (event, audit, compliance)
+//   - Section 7: Benefits (verifiability, auditability)
+//
+// Compliance:
+//   - All event types are enums/constants (no ambiguous types)
+//   - Event system is type-safe and covers all protocol steps
+//   - No exclusions (Web3, DNA, decentralized auth) are present
+//   - See README and docs/ for full protocol mapping
+//
+// License: Apache 2.0 (see LICENSE file)
+//
+// ---
+//
 // It supports typed event handling for authentication, authorization, token management,
 // user activity tracking, and system events.
 package events

@@ -44,11 +44,8 @@ func TestGAuth(t *testing.T) {
 		})
 
 		req := gauth.AuthorizationRequest{
-			ClientID:        "test-client",
-			ClientOwnerID:   "owner-1",
-			ResourceOwnerID: "resource-1",
-			Scopes:         []string{"read"},
-			Timestamp:      time.Now().UnixNano() / 1e6,
+			ClientID: "test-client",
+			Scopes:   []string{"read"},
 		}
 
 		grant, err := auth.InitiateAuthorization(req)

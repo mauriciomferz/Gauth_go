@@ -1,3 +1,26 @@
+# 2025 Migration & Breaking Changes
+
+## Example Isolation & API Modernization
+
+- All example logic with a `main` function is now in its own `main.go` under `examples/` or `examples/<category>/cmd/`.
+- All obsolete and duplicate example files have been removed for a clean build and test pass.
+- All examples are refactored for the new API and type-safe signatures.
+- Example code now matches the latest library usage and is runnable in isolation.
+
+## Type Safety & Helper Methods
+
+- All public APIs use explicit, strongly-typed structures (no `map[string]interface{}` in public APIs).
+- New helper methods for type-safe access to metadata, error details, and event data.
+
+
+## Breaking Changes
+
+- Example file locations and entry points have changed; see `README.md` and `LIBRARY.md` for new structure.
+- Some legacy helpers and types are now deprecated or removed.
+- All public APIs are type-safe (no public map[string]interface{}).
+- Rate limiting is now per-user (OwnerID) and per-client, using the OwnerID field of the token as the subject for rate limiting.
+
+---
 # Code Improvements Summary
 
 This document summarizes the improvements made to the GAuth codebase to enhance its organization, type safety, and maintainability, making it more approachable for open-source contributors.

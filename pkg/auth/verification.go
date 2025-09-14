@@ -1,5 +1,4 @@
 package auth
-p
 
 import (
 	"context"

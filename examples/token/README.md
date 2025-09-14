@@ -34,13 +34,19 @@ GAuth provides multiple store implementations for different use cases:
 
 ## Deprecated Implementations
 
-The following implementations are maintained for backwards compatibility but should not be used in new code:
-
-1. `memoryStoreV1`: Found in `memory_store.go`
-2. `token/store` subpackage: Contains duplicate implementations
+All deprecated in-memory store implementations (`memoryStoreV1`, `token/store`) have been removed as of the latest API migration. Please use the current token store APIs described below.
 
 ## Examples
 
 - `basic/main.go`: Shows basic token creation and validation
 - `type_safe_usage/main.go`: Demonstrates type-safe token operations
 - Other examples showcase specific token-related functionality
+
+## Migration Note
+
+GAuth now uses the following APIs for token management:
+- `RequestToken` for token creation
+- `ValidateToken` for token validation
+- `InvalidateToken` for token revocation
+
+If you are migrating from older code that directly manipulates token structs or uses legacy methods, see the Migration Guide in `docs/CODE_IMPROVEMENTS.md` for details on updating to the new API.

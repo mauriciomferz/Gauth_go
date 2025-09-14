@@ -55,13 +55,6 @@
 //   - import "github.com/Gimel-Foundation/gauth/pkg/token"
 //   - Use NewMemoryStore() to create a new instance
 //
-// DEPRECATED:
-// The package also contains legacy implementations that are kept for backward
-// compatibility but should not be used in new code:
-//
-// 1. memoryStoreV1: An older in-memory store implementation (memory_store.go)
-// 2. store subpackage: Contains duplicate store interfaces and implementations
-//
 // # Key Components
 //
 // 1. Token Types
@@ -142,6 +135,7 @@
 // All operations are thread-safe and can be used from multiple goroutines.
 // The implementation uses appropriate synchronization mechanisms.
 //
+// 1. [REMOVED] memoryStoreV1: An older in-memory store implementation (memory_store.go)
 // # Error Handling
 //
 // Clear error types for common scenarios:

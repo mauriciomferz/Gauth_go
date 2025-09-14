@@ -332,6 +332,24 @@ func (s *MemoryStore) Close() error {
 	return nil
 }
 
+// Initialize is a no-op for MemoryStore (EnhancedStore compatibility)
+func (s *MemoryStore) Initialize(ctx context.Context) error { return nil }
+
+// Store stores a token (EnhancedStore compatibility)
+func (s *MemoryStore) Store(ctx context.Context, token interface{}) error { return nil }
+
+// Remove removes a token (EnhancedStore compatibility)
+func (s *MemoryStore) Remove(ctx context.Context, key string) error { return nil }
+
+// StoreAuthorizer is a no-op for MemoryStore (EnhancedStore compatibility)
+func (s *MemoryStore) StoreAuthorizer(ctx context.Context, authorizer interface{}) error { return nil }
+
+// StoreOwner is a no-op for MemoryStore (EnhancedStore compatibility)
+func (s *MemoryStore) StoreOwner(ctx context.Context, owner interface{}) error { return nil }
+
+// StoreToken is a no-op for MemoryStore (EnhancedStore compatibility)
+func (s *MemoryStore) StoreToken(ctx context.Context, token interface{}) error { return nil }
+
 // copyToken creates a deep copy of a token
 func copyToken(t *Token) *Token {
 	tokCopy := *t

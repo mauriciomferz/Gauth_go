@@ -1,9 +1,7 @@
 package main
-package main
 
 import (
 	"fmt"
-	"github.com/Gimel-Foundation/gauth/examples/resilient"
 )
 
 func main() {

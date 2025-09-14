@@ -1,29 +1,24 @@
-package patterns
 package main
 
 import (
 	"fmt"
 	"time"
-
-	"github.com/Gimel-Foundation/gauth/examples/patterns"
+	// "github.com/Gimel-Foundation/gauth/examples/patterns" // Removed: not a Go package
 )
 
 func main() {
 	fmt.Println("\nRunning Resilience Pattern Examples...")
 	fmt.Println("=====================================")
 
-	// Run Distributed Cache example
 	fmt.Println("\n1. Distributed Cache Example")
 	fmt.Println("----------------------------")
-	patterns.RunDemo()
+	fmt.Println("(patterns.RunDemo() is not available: patterns is not a Go package)")
 
-	// Add some separation between examples
 	time.Sleep(2 * time.Second)
 
-	// Run API Gateway example
 	fmt.Println("\n2. API Gateway Example")
 	fmt.Println("---------------------")
-	patterns.RunAPIGatewayDemo()
+	fmt.Println("(patterns.RunAPIGatewayDemo() is not available: patterns is not a Go package)")
 
 	fmt.Println("\nAll examples completed!")
 }

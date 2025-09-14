@@ -19,59 +19,44 @@ type UserInfo struct {
 	Score     float64   `json:"score"`
 }
 
-func main() {
-	// Create a new event bus
-	bus := events.NewEventBus()
-
-	// Register our event handlers
-	bus.RegisterHandler(&MetadataLoggingHandler{name: "Metadata Logger"})
-
-	// Create an event with rich metadata
-	eventBuilder := events.NewEventBuilder().
-		WithType("user").
-		WithAction("login").
-		WithMessage("User logged in successfully")
-
-	// Add strongly typed metadata
-	metadata := events.NewMetadata()
-	metadata.SetString("user_id", "usr_12345")
-	metadata.SetString("username", "johndoe")
-	metadata.SetBool("successful", true)
-	metadata.SetInt("login_attempts", 1)
-	metadata.SetFloat("confidence_score", 0.95)
-	metadata.SetTime("login_time", time.Now())
-
-	// Add read-only metadata that cannot be modified
-	metadata.SetReadOnly("account_id", events.NewStringValue("acc_67890"))
-
-	// Build and dispatch the event
-	event := eventBuilder.WithMetadata(metadata).Build()
-	bus.Dispatch(event)
-
-	// --- Advanced usage with structured metadata ---
-
-	// Create user info
-	user := UserInfo{
-		ID:        "usr_12345",
-		Name:      "John Doe",
-		CreatedAt: time.Now().Add(-24 * time.Hour),
-		IsActive:  true,
-		Score:     0.85,
-	}
-
-	// Create a more complex event
-	advancedEvent := events.NewEventBuilder().
-		WithType("user").
-		WithAction("profile_update").
-		WithMessage("User profile updated").
-		WithMetadata(userInfoToMetadata(user)).
-		Build()
-
-	bus.Dispatch(advancedEvent)
-
-	// Demonstrate retrieving a complex structure
-	retrieveUserInfo(advancedEvent.Metadata)
-}
+// func main() {
+//   // Example main for enhanced typed metadata events
+//   // This is commented out to avoid duplicate main redeclaration errors.
+// }
+//   metadata.SetFloat("confidence_score", 0.95)
+//   metadata.SetTime("login_time", time.Now())
+//
+//   // Add read-only metadata that cannot be modified
+//   metadata.SetReadOnly("account_id", events.NewStringValue("acc_67890"))
+//
+//   // Build and dispatch the event
+//   event := eventBuilder.WithMetadata(metadata).Build()
+//   bus.Dispatch(event)
+//
+//   // --- Advanced usage with structured metadata ---
+//
+//   // Create user info
+//   user := UserInfo{
+//       ID:        "usr_12345",
+//       Name:      "John Doe",
+//       CreatedAt: time.Now().Add(-24 * time.Hour),
+//       IsActive:  true,
+//       Score:     0.85,
+//   }
+//
+//   // Create a more complex event
+//   advancedEvent := events.NewEventBuilder().
+//       WithType("user").
+//       WithAction("profile_update").
+//       WithMessage("User profile updated").
+//       WithMetadata(userInfoToMetadata(user)).
+//       Build()
+//
+//   bus.Dispatch(advancedEvent)
+//
+//   // Demonstrate retrieving a complex structure
+//   retrieveUserInfo(advancedEvent.Metadata)
+// }
 
 // MetadataLoggingHandler demonstrates how to work with typed metadata
 type MetadataLoggingHandler struct {
@@ -97,7 +82,7 @@ func (h *MetadataLoggingHandler) Handle(event events.Event) {
 
 		switch value.Type {
 		case "string":
-			val, _ := value.ToString()
+			val := value.ToString()
 			fmt.Printf("String(%s)\n", val)
 		case "int":
 			val, _ := value.ToInt()

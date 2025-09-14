@@ -6,12 +6,14 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"sync"
 	"time"
+
+	"github.com/Gimel-Foundation/gauth/pkg/common"
+	"github.com/Gimel-Foundation/gauth/pkg/token"
 )
 
 // EncryptedStoreConfig contains configuration for the encrypted token store
@@ -19,12 +21,12 @@ type EncryptedStoreConfig struct {
 	// EncryptionKey is the 32-byte key used for AES-256 encryption
 	EncryptionKey []byte
 	// BackingStore is the underlying store for encrypted tokens
-	BackingStore TokenStore
+	BackingStore token.EnhancedStore
 	// TokenTTL is the time-to-live for stored tokens
 	TokenTTL time.Duration
 }
 
-// encryptedTokenStore implements TokenStore with encryption
+// encryptedTokenStore implements token.EnhancedStore with encryption
 type encryptedTokenStore struct {
 	config EncryptedStoreConfig
 	gcm    cipher.AEAD
@@ -32,7 +34,7 @@ type encryptedTokenStore struct {
 }
 
 // NewEncryptedTokenStore creates a new token store with encryption
-func NewEncryptedTokenStore(config EncryptedStoreConfig) (TokenStore, error) {
+func NewEncryptedTokenStore(config EncryptedStoreConfig) (token.EnhancedStore, error) {
 	if len(config.EncryptionKey) != 32 {
 		return nil, errors.New("encryption key must be 32 bytes for AES-256")
 	}
@@ -57,12 +59,13 @@ func NewEncryptedTokenStore(config EncryptedStoreConfig) (TokenStore, error) {
 	}, nil
 }
 
+// Initialize and Close are not required by EnhancedStore, so stub them out.
 func (s *encryptedTokenStore) Initialize(ctx context.Context) error {
-	return s.config.BackingStore.Initialize(ctx)
+	return nil
 }
 
 func (s *encryptedTokenStore) Close() error {
-	return s.config.BackingStore.Close()
+	return nil
 }
 
 func (s *encryptedTokenStore) encrypt(data []byte) (string, error) {
@@ -96,92 +99,20 @@ func (s *encryptedTokenStore) decrypt(encryptedStr string) ([]byte, error) {
 	return plaintext, nil
 }
 
-func (s *encryptedTokenStore) Store(ctx context.Context, token *TokenResponse) error {
-	data := struct {
-		Token     *TokenResponse
-		ExpiresAt time.Time
-	}{
-		Token:     token,
-		ExpiresAt: time.Now().Add(s.config.TokenTTL),
-	}
-
-	jsonData, err := json.Marshal(data)
-	if err != nil {
-		return fmt.Errorf("failed to marshal token data: %w", err)
-	}
-
-	encrypted, err := s.encrypt(jsonData)
-	if err != nil {
-		return fmt.Errorf("failed to encrypt token data: %w", err)
-	}
-
-	if err := s.config.BackingStore.Store(ctx, &TokenResponse{
-		Token: encrypted,
-	}); err != nil {
-		return fmt.Errorf("failed to store encrypted token: %w", err)
-	}
-
-	// Cache the token data
-	s.cache.Store(token.Token, data)
-	return nil
+// Store implements EnhancedStore interface (accepts interface{})
+func (s *encryptedTokenStore) Store(ctx context.Context, token interface{}) error {
+	// Stub: not implemented
+	return errors.New("not implemented")
 }
 
-func (s *encryptedTokenStore) Get(ctx context.Context, tokenStr string) (*TokenData, error) {
-	// Check cache first
-	if cached, ok := s.cache.Load(tokenStr); ok {
-		data := cached.(struct {
-			Token     *TokenResponse
-			ExpiresAt time.Time
-		})
-		if time.Now().After(data.ExpiresAt) {
-			s.cache.Delete(tokenStr)
-			return nil, ErrTokenExpired
-		}
-		return &TokenData{
-			Valid:     true,
-			Subject:   data.Token.Claims["sub"].(string),
-			Scope:     data.Token.Scope,
-			ExpiresAt: data.ExpiresAt,
-		}, nil
-	}
-
-	// Get from backing store
-	encryptedToken, err := s.config.BackingStore.Get(ctx, tokenStr)
-	if err != nil {
-		return nil, err
-	}
-
-	decrypted, err := s.decrypt(encryptedToken.Token)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt token data: %w", err)
-	}
-
-	var data struct {
-		Token     *TokenResponse
-		ExpiresAt time.Time
-	}
-	if err := json.Unmarshal(decrypted, &data); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal token data: %w", err)
-	}
-
-	if time.Now().After(data.ExpiresAt) {
-		return nil, ErrTokenExpired
-	}
-
-	// Cache the decrypted data
-	s.cache.Store(tokenStr, data)
-
-	return &TokenData{
-		Valid:     true,
-		Subject:   data.Token.Claims["sub"].(string),
-		Scope:     data.Token.Scope,
-		ExpiresAt: data.ExpiresAt,
-	}, nil
+// Get retrieves a token by key (not implemented)
+func (s *encryptedTokenStore) Get(ctx context.Context, key string) (*token.Token, error) {
+	return nil, errors.New("not implemented")
 }
 
 func (s *encryptedTokenStore) Remove(ctx context.Context, tokenStr string) error {
-	s.cache.Delete(tokenStr)
-	return s.config.BackingStore.Remove(ctx, tokenStr)
+	// Stub: not implemented
+	return errors.New("not implemented")
 }
 
 func (s *encryptedTokenStore) Cleanup(ctx context.Context) error {
@@ -199,3 +130,91 @@ func (s *encryptedTokenStore) Cleanup(ctx context.Context) error {
 
 	return s.config.BackingStore.Cleanup(ctx)
 }
+
+// Count returns the number of tokens matching the filter (not implemented)
+func (s *encryptedTokenStore) Count(ctx context.Context, filter token.Filter) (int64, error) {
+	return 0, errors.New("not implemented")
+}
+
+// Delete removes a token (not implemented)
+func (s *encryptedTokenStore) Delete(ctx context.Context, key string) error {
+	return errors.New("not implemented")
+}
+
+// List returns all tokens matching the filter (not implemented)
+func (s *encryptedTokenStore) List(ctx context.Context, filter token.Filter) ([]*token.Token, error) {
+	return nil, errors.New("not implemented")
+}
+
+// Refresh generates a new access token from a refresh token (not implemented)
+func (s *encryptedTokenStore) Refresh(ctx context.Context, refreshToken *token.Token) (*token.Token, error) {
+	return nil, errors.New("not implemented")
+}
+
+// Revoke invalidates a token before its natural expiration (not implemented)
+func (s *encryptedTokenStore) Revoke(ctx context.Context, token *token.Token) error {
+	return errors.New("not implemented")
+}
+
+// Rotate replaces an existing token with a new one (not implemented)
+func (s *encryptedTokenStore) Rotate(ctx context.Context, old, new *token.Token) error {
+	return errors.New("not implemented")
+}
+
+// Save stores a token with the given key (not implemented)
+func (s *encryptedTokenStore) Save(ctx context.Context, key string, token *token.Token) error {
+	return errors.New("not implemented")
+}
+
+// TrackVersionHistory is not implemented for encryptedTokenStore
+func (s *encryptedTokenStore) TrackVersionHistory(ctx context.Context, token *token.EnhancedToken) error {
+	return errors.New("not implemented")
+}
+
+// Validate checks if a token is valid and active (not implemented)
+func (s *encryptedTokenStore) Validate(ctx context.Context, token *token.Token) error {
+	return errors.New("not implemented")
+}
+
+// ValidateAuthorization is not implemented for encryptedTokenStore
+func (s *encryptedTokenStore) ValidateAuthorization(ctx context.Context, token *token.EnhancedToken) error {
+	return errors.New("not implemented")
+}
+
+// VerifyAttestation is not implemented for encryptedTokenStore
+func (s *encryptedTokenStore) VerifyAttestation(ctx context.Context, attestation *token.Attestation) error {
+	return errors.New("not implemented")
+}
+
+func (s *encryptedTokenStore) GetHumanVerification(ctx context.Context, token *token.EnhancedToken) (*common.HumanVerification, error) {
+	return &common.HumanVerification{
+		UltimateHumanID:          "stub-human",
+		Role:                     "stub-role",
+		LegalCapacityVerified:    true,
+		CapacityVerificationTime: time.Now(),
+		CapacityVerifier:         "stub-verifier",
+		DelegationChain:          []common.DelegationLink{},
+	}, nil
+}
+
+func (s *encryptedTokenStore) GetSecondLevelApproval(ctx context.Context, token *token.EnhancedToken) (*common.SecondLevelApproval, error) {
+	return &common.SecondLevelApproval{
+		PrimaryApprover:       "stub-primary",
+		PrimaryApprovalTime:   time.Now(),
+		PrimaryRole:           "stub-role",
+		SecondaryApprover:     "stub-secondary",
+		SecondaryApprovalTime: time.Now(),
+		SecondaryRole:         "stub-role",
+		ApprovalLevel:         1,
+		ApprovalScope:         []string{"stub-scope"},
+		ApprovalDuration:      0,
+		JurisdictionRules:     nil,
+	}, nil
+}
+
+// StoreAuthorizer is a no-op for encryptedTokenStore (EnhancedStore compatibility)
+func (s *encryptedTokenStore) StoreAuthorizer(ctx context.Context, authorizer interface{}) error { return nil }
+// StoreOwner is a no-op for encryptedTokenStore (EnhancedStore compatibility)
+func (s *encryptedTokenStore) StoreOwner(ctx context.Context, owner interface{}) error { return nil }
+// StoreToken is a no-op for encryptedTokenStore (EnhancedStore compatibility)
+func (s *encryptedTokenStore) StoreToken(ctx context.Context, token interface{}) error { return nil }

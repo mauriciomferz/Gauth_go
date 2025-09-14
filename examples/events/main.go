@@ -27,7 +27,7 @@ func (h *CustomEventHandler) Handle(event events.Event) {
 			fmt.Printf("[%s] Login attempts: %d\n", h.name, attempts)
 		}
 
-		if timestamp, ok := event.Metadata.GetTime("last_login"); ok {
+		if timestamp, err := event.Metadata.GetTime("last_login"); err == nil {
 			fmt.Printf("[%s] Last login: %s\n", h.name, timestamp.Format(time.RFC3339))
 		}
 	}
