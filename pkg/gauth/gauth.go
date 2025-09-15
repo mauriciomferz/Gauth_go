@@ -1,9 +1,7 @@
-
 // Package gauth provides authentication and authorization primitives.
 //
 // See README.md and LIBRARY.md for usage and extension points.
 package gauth
-
 
 import (
 	"crypto/rand"
