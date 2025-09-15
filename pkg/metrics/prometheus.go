@@ -1,22 +1,14 @@
+
+
 package metrics
 
 import (
 	"context"
 	"time"
-
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 var (
-	// Authentication metrics
-	authAttempts = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "gauth_authentication_attempts_total",
-			Help: "Total number of authentication attempts",
-		},
-		[]string{"method", "status"},
-	)
-
 	authLatency = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "gauth_authentication_duration_seconds",
@@ -41,7 +33,22 @@ var (
 		},
 		[]string{"type", "error"},
 	)
-
+	// Authentication metrics
+	authAttempts = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "gauth_authentication_attempts_total",
+			Help: "Total number of authentication attempts",
+		},
+		[]string{"method", "status"},
+	)
+	// ... other metric vars ...
+	customMetrics = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "gauth_custom_metrics",
+			Help: "Custom metrics for GAuth resource/service usage.",
+		},
+		[]string{"name"},
+	)
 	activeTokens = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "gauth_active_tokens",
@@ -113,6 +120,11 @@ func init() {
 // MetricsCollector provides methods to record various metrics
 type MetricsCollector struct {
 	ctx context.Context
+}
+
+// RecordValue records a generic float64 value for a named metric (for resource/service metrics)
+func (m *MetricsCollector) RecordValue(name string, value float64) {
+	customMetrics.WithLabelValues(name).Set(value)
 }
 
 // NewMetricsCollector creates a new metrics collector

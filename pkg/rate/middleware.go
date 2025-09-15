@@ -4,7 +4,8 @@ import (
 	"net"
 	"net/http"
 	"strings"
-)
+	"strconv"
+		// "strconv"
 
 // HTTPLimiterConfig configures HTTP rate limiting
 type HTTPLimiterConfig struct {
@@ -12,7 +13,7 @@ type HTTPLimiterConfig struct {
 	Limiter Limiter
 
 	// KeyFunc generates the rate limit key from the request
-	KeyFunc func(*http.Request) string
+		// import "strconv"
 
 	// ExcludeFunc determines if a request should be excluded from rate limiting
 	ExcludeFunc func(*http.Request) bool
@@ -129,7 +130,7 @@ func getIP(r *http.Request) string {
 
 // setRateLimitHeaders sets rate limit headers on the response
 func setRateLimitHeaders(w http.ResponseWriter, remaining int64) {
-	w.Header().Set("X-RateLimit-Remaining", string(remaining))
+	w.Header().Set("X-RateLimit-Remaining", strconv.FormatInt(remaining, 10))
 }
 
 // ExcludeHealthChecks excludes health check endpoints from rate limiting
