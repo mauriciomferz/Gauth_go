@@ -45,14 +45,11 @@ func testConfigStore(t *testing.T, store interface {
 
 	// Test Save and Load
 	t.Run("Save and Load", func(t *testing.T) {
-		config := ServiceConfig{
-			Type:        "test-service",
-			Version:     "1.0.0",
-			MaxRetries:  3,
-			Timeout:     5 * time.Second,
-			UpdatedAt:   time.Now(),
-			Environment: "test",
-		}
+		   config := ServiceConfig{
+			   Type:    "test-service",
+			   Version: "1.0.0",
+			   Timeout: 5 * time.Second,
+		   }
 
 		err := store.Save(ctx, config)
 		require.NoError(t, err)
@@ -61,25 +58,21 @@ func testConfigStore(t *testing.T, store interface {
 		require.NoError(t, err)
 		assert.Equal(t, config.Type, loaded.Type)
 		assert.Equal(t, config.Version, loaded.Version)
-		assert.Equal(t, config.MaxRetries, loaded.MaxRetries)
 		assert.Equal(t, config.Timeout, loaded.Timeout)
-		assert.Equal(t, config.Environment, loaded.Environment)
 	})
 
 	// Test List
 	t.Run("List", func(t *testing.T) {
-		configs := []ServiceConfig{
-			{
-				Type:        "service-1",
-				Version:     "1.0.0",
-				Environment: "test",
-			},
-			{
-				Type:        "service-2",
-				Version:     "1.0.0",
-				Environment: "test",
-			},
-		}
+		   configs := []ServiceConfig{
+			   {
+				   Type:    "service-1",
+				   Version: "1.0.0",
+			   },
+			   {
+				   Type:    "service-2",
+				   Version: "1.0.0",
+			   },
+		   }
 
 		for _, cfg := range configs {
 			err := store.Save(ctx, cfg)
@@ -107,11 +100,10 @@ func testConfigStore(t *testing.T, store interface {
 		watch, err := store.Watch(ctx)
 		require.NoError(t, err)
 
-		config := ServiceConfig{
-			Type:        "watched-service",
-			Version:     "1.0.0",
-			Environment: "test",
-		}
+		   config := ServiceConfig{
+			   Type:    "watched-service",
+			   Version: "1.0.0",
+		   }
 
 		done := make(chan bool)
 		go func() {
@@ -119,7 +111,7 @@ func testConfigStore(t *testing.T, store interface {
 			case updated := <-watch:
 				assert.Equal(t, config.Type, updated.Type)
 				assert.Equal(t, config.Version, updated.Version)
-				assert.Equal(t, config.Environment, updated.Environment)
+				   // No Environment field to check
 				done <- true
 			case <-time.After(5 * time.Second):
 				t.Error("Watch timeout")

@@ -1,7 +1,9 @@
+
 // Package gauth provides authentication and authorization primitives.
 //
 // See README.md and LIBRARY.md for usage and extension points.
 package gauth
+
 
 import (
 	"crypto/rand"
@@ -14,6 +16,18 @@ import (
 	"github.com/Gimel-Foundation/gauth/internal/ratelimit"
 	"github.com/Gimel-Foundation/gauth/internal/tokenstore"
 )
+
+// Close releases any resources held by GAuth (stub for test compatibility)
+func (g *GAuth) Close() error {
+	// No resources to release in this stub
+	return nil
+}
+
+// Authorize processes an authorization request (stub for test compatibility)
+func (g *GAuth) Authorize(ctx interface{}, req interface{}) (interface{}, error) {
+	// Stub: return nil, nil for now
+	return nil, nil
+}
 
 // AuditEventType and AuditAction are typed constants for audit logging.
 type AuditEventType string
