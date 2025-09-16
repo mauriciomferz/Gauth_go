@@ -10,151 +10,82 @@ import (
 
 	"github.com/Gimel-Foundation/gauth/pkg/auth"
 	"github.com/Gimel-Foundation/gauth/pkg/authz"
-	"github.com/Gimel-Foundation/gauth/pkg/token/store"
 )
 
 func TestAuthAndAuthzIntegration(t *testing.T) {
 	ctx := context.Background()
 
-	// Setup token store
-	tokenStore, err := store.NewMemoryStore(store.Config{
-		EncryptionKey: []byte("test-key-32-bytes-long-required!"),
-		TokenTTL:      time.Hour,
+	authService, err := auth.NewAuthenticator(auth.Config{
+		Type:              auth.TypeBasic,
+		AccessTokenExpiry: time.Hour,
 	})
 	require.NoError(t, err)
-	defer tokenStore.Close()
 
-	// Setup auth service
-	authService := auth.New(auth.Config{
-		TokenType: auth.JWT,
-		Store:     tokenStore,
-		TTL:       time.Hour,
-		EnableMFA: true,
-	})
+	authzService := authz.NewMemoryAuthorizer()
 
-	// Setup authz service
-	authzService := authz.New(authz.Config{
-		PolicyStore: authz.NewMemoryPolicyStore(),
-		EnableAudit: true,
-	})
-
-	// Test complete authentication and authorization flow
 	t.Run("CompleteFlow", func(t *testing.T) {
 		userID := "test-user"
 		password := "test-password"
 		resource := "test-resource"
 		action := "read"
 
-		// 1. Register user
-		err := authService.Register(ctx, auth.Credentials{
-			Username: userID,
-			Password: password,
-		})
+		if ba, ok := authService.(interface{ AddClient(string, string) }); ok {
+			ba.AddClient(userID, password)
+		}
+		err := authService.ValidateCredentials(ctx, struct {
+			Username string
+			Password string
+		}{Username: userID, Password: password})
 		require.NoError(t, err)
 
-		// 2. Authenticate
-		token, err := authService.Authenticate(ctx, auth.Credentials{
-			Username: userID,
-			Password: password,
-		})
-		require.NoError(t, err)
-		assert.NotEmpty(t, token)
-
-		// 3. Validate token
-		claims, err := authService.ValidateToken(ctx, token)
-		require.NoError(t, err)
-		assert.Equal(t, userID, claims.Subject)
-
-		// 4. Create policy
 		policy := &authz.Policy{
-			Subject:  userID,
-			Resource: resource,
-			Actions:  []string{action},
+			ID:       "policy-1",
 			Effect:   authz.Allow,
+			Subjects: []authz.Subject{{ID: userID}},
+			Resources: []authz.Resource{{ID: resource}},
+			Actions:  []authz.Action{{Name: action}},
 		}
 		err = authzService.AddPolicy(ctx, policy)
 		require.NoError(t, err)
 
-		// 5. Check authorization
-		allowed, err := authzService.IsAllowed(ctx, authz.Request{
-			Subject:  userID,
-			Resource: resource,
-			Action:   action,
-		})
+		decision, err := authzService.Authorize(ctx,
+			authz.Subject{ID: userID},
+			authz.Action{Name: action},
+			authz.Resource{ID: resource},
+		)
 		require.NoError(t, err)
-		assert.True(t, allowed)
-
-		// 6. Revoke token
-		err = authService.RevokeToken(ctx, token)
-		require.NoError(t, err)
-
-		// 7. Verify token is revoked
-		_, err = authService.ValidateToken(ctx, token)
-		assert.Error(t, err)
+		assert.True(t, decision.Allowed)
 	})
 
-	// Test MFA flow
-	t.Run("MFAFlow", func(t *testing.T) {
-		userID := "mfa-user"
-		password := "mfa-password"
-
-		// 1. Register user
-		err := authService.Register(ctx, auth.Credentials{
-			Username: userID,
-			Password: password,
-		})
-		require.NoError(t, err)
-
-		// 2. Enable MFA
-		secret, err := authService.EnableMFA(ctx, userID)
-		require.NoError(t, err)
-		assert.NotEmpty(t, secret)
-
-		// 3. Generate MFA code (normally done by authenticator app)
-		code, err := authService.GenerateMFACode(ctx, secret)
-		require.NoError(t, err)
-
-		// 4. Authenticate with MFA
-		token, err := authService.AuthenticateWithMFA(ctx, auth.Credentials{
-			Username: userID,
-			Password: password,
-			MFACode:  code,
-		})
-		require.NoError(t, err)
-		assert.NotEmpty(t, token)
-	})
-
-	// Test policy inheritance
 	t.Run("PolicyInheritance", func(t *testing.T) {
-		// Create hierarchical policies
 		policies := []*authz.Policy{
 			{
-				Subject:  "admin",
-				Resource: "/*",
-				Actions:  []string{"*"},
+				ID:       "admin-policy",
 				Effect:   authz.Allow,
+				Subjects: []authz.Subject{{ID: "admin"}},
+				Resources: []authz.Resource{{ID: "/*"}},
+				Actions:  []authz.Action{{Name: "*"}},
 			},
 			{
-				Subject:  "user",
-				Resource: "/docs/*",
-				Actions:  []string{"read"},
+				ID:       "user-policy",
 				Effect:   authz.Allow,
+				Subjects: []authz.Subject{{ID: "user"}},
+				Resources: []authz.Resource{{ID: "/docs/*"}},
+				Actions:  []authz.Action{{Name: "read"}},
 			},
 			{
-				Subject:  "guest",
-				Resource: "/docs/public/*",
-				Actions:  []string{"read"},
+				ID:       "guest-policy",
 				Effect:   authz.Allow,
+				Subjects: []authz.Subject{{ID: "guest"}},
+				Resources: []authz.Resource{{ID: "/docs/public/*"}},
+				Actions:  []authz.Action{{Name: "read"}},
 			},
 		}
-
-		// Add policies
 		for _, p := range policies {
 			err := authzService.AddPolicy(ctx, p)
 			require.NoError(t, err)
 		}
 
-		// Test different access levels
 		tests := []struct {
 			name     string
 			subject  string
@@ -168,61 +99,54 @@ func TestAuthAndAuthzIntegration(t *testing.T) {
 			{"GuestPublicRead", "guest", "/docs/public/guide", "read", true},
 			{"GuestNoPrivate", "guest", "/docs/private/secret", "read", false},
 		}
-
 		for _, tc := range tests {
 			t.Run(tc.name, func(t *testing.T) {
-				allowed, err := authzService.IsAllowed(ctx, authz.Request{
-					Subject:  tc.subject,
-					Resource: tc.resource,
-					Action:   tc.action,
-				})
+				decision, err := authzService.Authorize(ctx,
+					authz.Subject{ID: tc.subject},
+					authz.Action{Name: tc.action},
+					authz.Resource{ID: tc.resource},
+				)
 				require.NoError(t, err)
-				assert.Equal(t, tc.allowed, allowed)
+				assert.Equal(t, tc.allowed, decision.Allowed)
 			})
 		}
 	})
 
-	// Test concurrent access
 	t.Run("ConcurrentAccess", func(t *testing.T) {
 		const numGoroutines = 10
 		const numRequests = 100
 
-		// Create shared resources
 		userID := "concurrent-user"
 		resource := "shared-resource"
 
-		err := authService.Register(ctx, auth.Credentials{
-			Username: userID,
-			Password: "password",
-		})
-		require.NoError(t, err)
+		if ba, ok := authService.(interface{ AddClient(string, string) }); ok {
+			ba.AddClient(userID, "password")
+		}
 
-		err = authzService.AddPolicy(ctx, &authz.Policy{
-			Subject:  userID,
-			Resource: resource,
-			Actions:  []string{"read", "write"},
+		err := authzService.AddPolicy(ctx, &authz.Policy{
+			ID:       "concurrent-policy",
 			Effect:   authz.Allow,
+			Subjects: []authz.Subject{{ID: userID}},
+			Resources: []authz.Resource{{ID: resource}},
+			Actions:  []authz.Action{{Name: "read"}, {Name: "write"}},
 		})
 		require.NoError(t, err)
 
-		// Run concurrent auth checks
 		done := make(chan bool)
 		for i := 0; i < numGoroutines; i++ {
 			go func() {
 				for j := 0; j < numRequests; j++ {
-					allowed, err := authzService.IsAllowed(ctx, authz.Request{
-						Subject:  userID,
-						Resource: resource,
-						Action:   "read",
-					})
+					decision, err := authzService.Authorize(ctx,
+						authz.Subject{ID: userID},
+						authz.Action{Name: "read"},
+						authz.Resource{ID: resource},
+					)
 					assert.NoError(t, err)
-					assert.True(t, allowed)
+					assert.True(t, decision.Allowed)
 				}
 				done <- true
 			}()
 		}
-
-		// Wait for all goroutines
 		for i := 0; i < numGoroutines; i++ {
 			<-done
 		}

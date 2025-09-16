@@ -79,17 +79,19 @@ func (s *Service) Process(ctx context.Context, action func() error) error {
 	s.updateLatencyMetrics(time.Since(start))
 	s.mu.Unlock()
 
-	// Publish event
-	event := events.Event{
-		Type:      events.RequestCompleted,
-		Timestamp: time.Now(),
-		Service:   s.config.Name,
-		Data: events.RequestData{
-			Duration: time.Since(start),
-			Error:    err,
-		},
-	}
-	s.eventBus.Publish(event)
+       // Publish event
+       meta := events.NewMetadata()
+	meta.SetString("duration", time.Since(start).String())
+       event := events.Event{
+	       Type:      events.EventTypeSystem,
+	       Timestamp: time.Now(),
+	       Resource:  s.config.Name,
+	       Metadata:  meta,
+       }
+       if err != nil {
+	       event.Error = err.Error()
+       }
+       s.eventBus.Publish(event)
 
 	return err
 }

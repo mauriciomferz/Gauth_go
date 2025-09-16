@@ -27,7 +27,7 @@ type JurisdictionRules struct {
 	RequiredApprovals map[string]ApprovalLevel
 
 	// Special requirements for this jurisdiction
-	FiduciaryDuties       []string
+		FiduciaryDuties       []FiduciaryDuty
 	IntegrityRequirements []string
 	ComplianceRules       []string
 
@@ -179,7 +179,7 @@ func (e *StandardAuthorizationEnforcer) getJurisdictionRules(ctx context.Context
 	return nil, nil
 }
 
-func (e *StandardAuthorizationEnforcer) verifyFiduciaryDuties(ctx context.Context, token *token.EnhancedToken, duties []string) error {
+func (e *StandardAuthorizationEnforcer) verifyFiduciaryDuties(ctx context.Context, token *token.EnhancedToken, duties []FiduciaryDuty) error {
 	// Implementation would verify fiduciary duties are met
 	return nil
 }

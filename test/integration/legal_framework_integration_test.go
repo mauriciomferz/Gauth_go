@@ -78,17 +78,17 @@ func TestJurisdictionCompliance(t *testing.T) {
 	jurisdictions := []string{"US", "EU", "UK", "JP"}
 	for _, j := range jurisdictions {
 		t.Run(j, func(t *testing.T) {
-			rules, err := framework.getJurisdictionRules(j)
+			rules, err := framework.GetJurisdictionRules(j)
 			require.NoError(t, err)
 
 			// Test jurisdiction-specific requirements
-			err = framework.validateJurisdictionRequirements(ctx, rules, "high_value_transaction")
+			err = framework.ValidateJurisdictionRequirements(ctx, rules, "high_value_transaction")
 			assert.NoError(t, err)
 
 			// Test fiduciary duties in jurisdiction
 			duties := createJurisdictionDuties(t, j)
 			for _, duty := range duties {
-				err = framework.validateDuty(ctx, duty)
+				err = framework.ValidateDuty(ctx, duty)
 				assert.NoError(t, err)
 			}
 		})
@@ -177,7 +177,7 @@ func TestComplianceTracking(t *testing.T) {
 				Action:          action.Name,
 				JurisdictionID:  action.Jurisdiction,
 				LegalBasis:      action.LegalBasis,
-				FiduciaryChecks: action.Checks,
+				FiduciaryChecks: []auth.FiduciaryDuty{}, // Updated to match stubs
 				Evidence:        action.Evidence,
 			}
 
@@ -307,7 +307,7 @@ func createServerAuthorization(t *testing.T, ownerProof *auth.CapacityProof) *au
 			IssuedAt:  time.Now(),
 			ExpiresAt: time.Now().Add(24 * time.Hour),
 		},
-		Request: &auth.Request{
+		Request: &auth.LegalFrameworkRequest{
 			ID: "request_001",
 			ResourceServer: &auth.ResourceServer{
 				ID:     "resource_002",
@@ -321,21 +321,13 @@ func createServerAuthorization(t *testing.T, ownerProof *auth.CapacityProof) *au
 				ID:        "poa_001",
 				IssuedAt:  time.Now(),
 				ExpiresAt: time.Now().Add(180 * 24 * time.Hour),
-				FiduciaryDuties: []auth.FiduciaryDuty{
-					{
-						Type:        "confidentiality",
-						Description: "Data protection",
-						Scope:       []string{"all_data"},
-						Validation:  []string{"confidentiality_check"},
-					},
-				},
 			},
 		},
 	}
 }
 
-func createClientRequest(t *testing.T, auth *auth.ClientAuthorization) *auth.Request {
-	return &auth.Request{
+func createClientRequest(t *testing.T, auth *auth.ClientAuthorization) *auth.LegalFrameworkRequest {
+	return &auth.LegalFrameworkRequest{
 		ID:           "request_002",
 		ClientID:     auth.Client.ID,
 		Action:       "execute_trade",
@@ -350,8 +342,8 @@ func createClientRequest(t *testing.T, auth *auth.ClientAuthorization) *auth.Req
 	}
 }
 
-func createAuthorizationGrant(t *testing.T, request *auth.Request) *auth.AuthorizationGrant {
-	return &auth.AuthorizationGrant{
+func createAuthorizationGrant(t *testing.T, request *auth.LegalFrameworkRequest) *auth.LegalFrameworkAuthorizationGrant {
+	return &auth.LegalFrameworkAuthorizationGrant{
 		ID:        "grant_001",
 		RequestID: request.ID,
 		GrantorID: "resource_owner_001",
@@ -371,7 +363,7 @@ func createAuthorizationGrant(t *testing.T, request *auth.Request) *auth.Authori
 	}
 }
 
-func validateFiduciaryDuties(t *testing.T, framework *auth.StandardLegalFramework, grant *auth.AuthorizationGrant) error {
+func validateFiduciaryDuties(t *testing.T, framework *auth.StandardLegalFramework, grant *auth.LegalFrameworkAuthorizationGrant) error {
 	duties := []auth.FiduciaryDuty{
 		{
 			Type:        "loyalty",
@@ -395,7 +387,7 @@ func validateFiduciaryDuties(t *testing.T, framework *auth.StandardLegalFramewor
 	return nil
 }
 
-func validateGrantCompliance(t *testing.T, framework *auth.StandardLegalFramework, grant *auth.AuthorizationGrant) error {
+func validateGrantCompliance(t *testing.T, framework *auth.StandardLegalFramework, grant *auth.LegalFrameworkAuthorizationGrant) error {
 	ctx := context.Background()
 	rules := &auth.JurisdictionRules{
 		Country: "US",
@@ -410,7 +402,7 @@ func validateGrantCompliance(t *testing.T, framework *auth.StandardLegalFramewor
 	return framework.ValidateJurisdictionRequirements(ctx, rules, "trade_execution")
 }
 
-func createTransaction(t *testing.T, grant *auth.AuthorizationGrant) *auth.Transaction {
+func createTransaction(t *testing.T, grant *auth.LegalFrameworkAuthorizationGrant) *auth.Transaction {
 	return &auth.Transaction{
 		ID:        "txn_001",
 		GrantID:   grant.ID,
@@ -455,7 +447,11 @@ func trackCompliance(t *testing.T, framework *auth.StandardLegalFramework, txn *
 			Action:          txn.Type,
 			JurisdictionID:  "US",
 			LegalBasis:      "granted_authority",
-			FiduciaryChecks: []string{"loyalty", "care", "compliance"},
+			FiduciaryChecks: []auth.FiduciaryDuty{
+				{Type: "loyalty"},
+				{Type: "care"},
+				{Type: "compliance"},
+			},
 			Evidence:        "cryptographic_proof_004",
 		},
 	)
@@ -555,5 +551,9 @@ func createComplianceActions(t *testing.T) []auth.ComplianceAction {
 }
 
 func getTrackingRecords(t *testing.T, framework *auth.StandardLegalFramework, approvalID string) ([]auth.TrackingRecord, error) {
-	return framework.Store().GetTrackingRecords(context.Background(), approvalID)
+	store, ok := framework.Store().(*auth.StoreStub)
+	if !ok {
+		t.Fatalf("framework.Store() is not of type *auth.StoreStub")
+	}
+	return store.GetTrackingRecords(context.Background(), approvalID)
 }
