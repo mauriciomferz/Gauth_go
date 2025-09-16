@@ -23,29 +23,29 @@ type AITeamControls interface {
 // AITeam represents an AI system's team structure
 type AITeam struct {
 	// Primary AI identification
-	TeamID    string
-	LeadAgent *AIAgent
-	Members   []*AIAgent
-
-	// Authorization structure
+	ID                   string
+	Jurisdiction         string
+	LeadAgent            *AIAgent
+	Members              []*AIAgent
 	AuthorizationMode    string // Must be "centralized"
 	CentralAuthPoint     string // GAuth server ID
 	InteractionPatterns  []string
 	RestrictedOperations []string
-
-	// Team verification
-	VerificationStatus  bool
-	LastVerified        time.Time
-	VerificationDetails string
+	VerificationStatus   bool
+	LastVerified         time.Time
+	VerificationDetails  string
 }
 
 // AIAgent represents a member of an AI team
 type AIAgent struct {
-	ID          string
-	Role        string
-	Type        string // "lead" or "member"
-	Permissions []string
-	ReportsTo   string
+	ID           string
+	Role         string
+	Type         string // "lead" or "member"
+	Permissions  []string
+	ReportsTo    string
+	Entity       *Entity
+	Jurisdiction string
+	Team         *AITeam
 }
 
 // OpenIDIntegration handles OpenID Connect specifics

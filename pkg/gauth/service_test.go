@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Gimel-Foundation/gauth/pkg/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -23,7 +24,7 @@ func TestNew(t *testing.T) {
 				ClientSecret:      "test-secret",
 				Scopes:            []string{"read", "write"},
 				AccessTokenExpiry: time.Hour,
-				RateLimit: RateLimitConfig{
+				   RateLimit: common.RateLimitConfig{
 					RequestsPerSecond: 100,
 					BurstSize:         10,
 					WindowSize:        60,
@@ -77,8 +78,13 @@ func TestNew(t *testing.T) {
 }
 
 func TestService_Authorize(t *testing.T) {
-	svc := setupTestService(t)
-	defer svc.Close()
+       svc := setupTestService(t)
+       t.Cleanup(func() {
+	       err := svc.Close()
+	       if err != nil {
+		       t.Errorf("error closing service: %v", err)
+	       }
+       })
 
 	ctx := context.Background()
 
@@ -129,8 +135,13 @@ func TestService_Authorize(t *testing.T) {
 }
 
 func TestService_RequestToken(t *testing.T) {
-	svc := setupTestService(t)
-	defer svc.Close()
+       svc := setupTestService(t)
+       t.Cleanup(func() {
+	       err := svc.Close()
+	       if err != nil {
+		       t.Errorf("error closing service: %v", err)
+	       }
+       })
 
 	ctx := context.Background()
 
@@ -183,8 +194,13 @@ func TestService_RequestToken(t *testing.T) {
 }
 
 func TestService_RevokeToken(t *testing.T) {
-	svc := setupTestService(t)
-	defer svc.Close()
+       svc := setupTestService(t)
+       t.Cleanup(func() {
+	       err := svc.Close()
+	       if err != nil {
+		       t.Errorf("error closing service: %v", err)
+	       }
+       })
 
 	ctx := context.Background()
 
@@ -219,7 +235,7 @@ func TestService_RateLimiting(t *testing.T) {
 		ClientID:          "test-client",
 		ClientSecret:      "test-secret",
 		AccessTokenExpiry: time.Hour,
-		RateLimit: RateLimitConfig{
+		RateLimit: common.RateLimitConfig{
 			RequestsPerSecond: 2,
 			BurstSize:         1,
 			WindowSize:        1,
@@ -258,14 +274,14 @@ func setupTestService(t *testing.T) *Service {
 		ClientID:          "test-client",
 		ClientSecret:      "test-secret",
 		AccessTokenExpiry: time.Hour,
-		RateLimit: RateLimitConfig{
+		RateLimit: common.RateLimitConfig{
 			RequestsPerSecond: 100,
 			BurstSize:         10,
 			WindowSize:        60,
 		},
 	}
 
-	svc, err := New(config)
+	svc, err := NewService(config)
 	require.NoError(t, err)
 	return svc
 }

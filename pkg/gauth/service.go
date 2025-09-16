@@ -45,6 +45,66 @@ type Service struct {
 	grants map[string]*AuthorizationGrant
 }
 
+// Adapter to wrap *RateLimiter as rate.Limiter
+type rateLimiterAdapter struct {
+	rl *rate.RateLimiter
+}
+
+// Implement Allow, GetRemainingRequests, Reset
+var _ rate.Limiter = (*rateLimiterAdapter)(nil)
+
+func (a *rateLimiterAdapter) Allow(ctx context.Context, id string) error {
+	if a.rl.IsAllowed(id) {
+		return nil
+	}
+	return fmt.Errorf("rate limit exceeded")
+}
+func (a *rateLimiterAdapter) GetRemainingRequests(id string) int64 {
+	state := a.rl.GetClientState(id)
+	if state == nil {
+		return int64(a.rl.Config.RequestsPerSecond + a.rl.Config.BurstSize)
+	}
+	remaining := int64(state.MaxRequests - state.Count + state.BurstTokens)
+	if remaining < 0 {
+		return 0
+	}
+	return remaining
+}
+func (a *rateLimiterAdapter) Reset(id string) {
+	// Not implemented in RateLimiter, so no-op
+}
+
+// NewService creates a new Service instance with the provided configuration.
+func NewService(config Config) (*Service, error) {
+	if err := validateConfig(config); err != nil {
+		return nil, err
+	}
+	baseLimiter := rate.NewRateLimiter(config.RateLimit)
+
+	// Construct token.Config from gauth.Config (add mapping as needed)
+	tokenConfig := token.Config{
+		ValidityPeriod: config.AccessTokenExpiry,
+	}
+
+	tokenStore := token.NewMemoryStore()
+	tokenSvcIface := token.NewService(tokenConfig, tokenStore)
+
+	var tokenSvc *token.Service
+	if svcImpl, ok := tokenSvcIface.(*token.Service); ok {
+		tokenSvc = svcImpl
+	}
+
+	svc := &Service{
+		config:      config,
+		grants:      make(map[string]*AuthorizationGrant),
+		rateLimiter: &rateLimiterAdapter{rl: baseLimiter},
+		tokenSvc:    tokenSvc,
+		eventBus:    events.NewEventBus(),
+		audit:       audit.NewAuditLogger(),
+	}
+	return svc, nil
+}
+
 // GetTokenByID retrieves a token by its ID using the underlying token service.
 func (s *Service) GetTokenByID(ctx context.Context, id string) (*token.Token, error) {
 	if s.tokenSvc == nil {

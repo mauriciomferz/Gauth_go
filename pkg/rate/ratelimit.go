@@ -20,7 +20,7 @@ type RateLimitEntry struct {
 
 // RateLimiter provides rate limiting functionality
 type RateLimiter struct {
-	config  common.RateLimitConfig
+	Config  common.RateLimitConfig
 	entries map[string]*RateLimitEntry
 	mutex   sync.RWMutex
 }
@@ -37,7 +37,7 @@ func NewRateLimiter(cfg common.RateLimitConfig) *RateLimiter {
 		cfg.RequestsPerSecond = 60
 	}
 	return &RateLimiter{
-		config:  cfg,
+		Config:  cfg,
 		entries: make(map[string]*RateLimitEntry),
 	}
 }
@@ -47,16 +47,16 @@ func (rl *RateLimiter) IsAllowed(clientID string) bool {
 	rl.mutex.Lock()
 	defer rl.mutex.Unlock()
 	now := time.Now()
-	windowDuration := time.Duration(rl.config.WindowSize) * time.Second
+	windowDuration := time.Duration(rl.Config.WindowSize) * time.Second
 	entry, exists := rl.entries[clientID]
 	if !exists {
 		entry = &RateLimitEntry{
 			Count:       1,
 			WindowStart: now,
 			LastAccess:  now,
-			BurstTokens: rl.config.BurstSize,
+			BurstTokens: rl.Config.BurstSize,
 			WindowSize:  windowDuration,
-			MaxRequests: rl.config.RequestsPerSecond,
+			MaxRequests: rl.Config.RequestsPerSecond,
 		}
 		rl.entries[clientID] = entry
 		return true
@@ -66,7 +66,7 @@ func (rl *RateLimiter) IsAllowed(clientID string) bool {
 		entry.Count = 1
 		entry.WindowStart = now
 		entry.LastAccess = now
-		entry.BurstTokens = rl.config.BurstSize
+		entry.BurstTokens = rl.Config.BurstSize
 		return true
 	}
 	// Check if within rate limit
@@ -97,7 +97,7 @@ func (rl *RateLimiter) Cleanup() {
 	rl.mutex.Lock()
 	defer rl.mutex.Unlock()
 	now := time.Now()
-	windowDuration := time.Duration(rl.config.WindowSize) * time.Second
+	windowDuration := time.Duration(rl.Config.WindowSize) * time.Second
 	for clientID, entry := range rl.entries {
 		if now.Sub(entry.LastAccess) > windowDuration*2 {
 			delete(rl.entries, clientID)
@@ -111,14 +111,14 @@ func (rl *RateLimiter) GetStats() map[string]interface{} {
 	defer rl.mutex.RUnlock()
 	stats := make(map[string]interface{})
 	stats["total_clients"] = len(rl.entries)
-	stats["requests_per_second"] = rl.config.RequestsPerSecond
-	stats["burst_size"] = rl.config.BurstSize
-	stats["window_size"] = rl.config.WindowSize
+	stats["requests_per_second"] = rl.Config.RequestsPerSecond
+	stats["burst_size"] = rl.Config.BurstSize
+	stats["window_size"] = rl.Config.WindowSize
 	active := 0
 	blocked := 0
 	now := time.Now()
 	for _, entry := range rl.entries {
-		if now.Sub(entry.LastAccess) < time.Duration(rl.config.WindowSize)*time.Second {
+	if now.Sub(entry.LastAccess) < time.Duration(rl.Config.WindowSize)*time.Second {
 			active++
 			if entry.Count >= entry.MaxRequests && entry.BurstTokens == 0 {
 				blocked++

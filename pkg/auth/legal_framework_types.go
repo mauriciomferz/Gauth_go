@@ -1,4 +1,3 @@
-// Package auth provides authentication and authorization services for the GAuth framework.
 package auth
 
 import (
@@ -6,6 +5,124 @@ import (
 	"fmt"
 	"time"
 )
+
+// LegalFrameworkRequest is the canonical request type for legal framework operations
+// (moved here to ensure visibility to all code in the package)
+type LegalFrameworkRequest struct {
+	ID             string
+	ClientID       string
+	Action         string
+	Resource       string
+	Scope          []string
+	Timestamp      time.Time
+	Jurisdiction   string
+	Metadata       map[string]interface{}
+	ResourceServer *ResourceServer
+	PowerOfAttorney *PowerOfAttorney
+	Entity         *Entity
+}
+
+// --- Shared types for main/test compatibility ---
+
+// Duplicate definitions removed
+
+// ... existing code continues ...
+
+
+
+type ApprovalEvent struct {
+	ID              string
+	TransactionID   string
+	Time            time.Time
+	ApprovalID      string
+	RequesterID     string
+	ApproverID      string
+	Action          string
+	JurisdictionID  string
+	LegalBasis      string
+	FiduciaryChecks []FiduciaryDuty
+	FiduciaryDuties []FiduciaryDuty
+	Evidence        interface{}
+}
+
+type Approval = ApprovalEvent
+
+type Store interface {
+	GetTrackingRecords(ctx interface{}, approvalID string) ([]TrackingRecord, error)
+}
+
+type ClientAuthorization struct {
+	Client    *Client
+	Server    *ResourceServer
+	Timestamp time.Time
+	Scope     []string
+}
+
+
+
+type Token struct {
+	ID        string
+	IssuedAt  time.Time
+	ExpiresAt time.Time
+	Value     string
+	Scopes    []string
+	Audience  string
+	Issuer    string
+	Type      string
+}
+
+type ServerAuthorization struct {
+	Token   *Token
+	Request interface{}
+}
+
+type TrackingRecord struct{}
+
+type Transaction struct {
+	ID        string
+	GrantID   string
+	Type      string
+	Status    string
+	Timestamp time.Time
+	Details   map[string]interface{}
+}
+
+type DelegationLink struct {
+	FromID string
+	ToID   string
+	Type   string
+	Level  int
+	Time   time.Time
+	Entity *Entity
+	Jurisdiction string
+	Power *PowerOfAttorney
+}
+
+type ComplianceAction struct {
+	Name         string
+	RequesterID  string
+	ApproverID   string
+	Jurisdiction string
+	LegalBasis   string
+	Checks       []string
+	Evidence     interface{}
+}
+
+
+
+func (f *StandardLegalFramework) Store() interface{} {
+	return f.store
+}
+
+// --- Shared types for main/test compatibility ---
+
+// --- Shared types for main/test compatibility ---
+
+
+
+// --- Shared types moved from stubs for main/test compatibility ---
+
+
 
 // LegalFrameworkTypes.go
 // Core type definitions for RFC111 compliance
@@ -444,3 +561,14 @@ func (d *Decision) GetStringAttribute(key string) (string, error) {
 	}
 	return "", fmt.Errorf("attribute %s not found", key)
 }
+
+// --- Stubbed methods for StandardLegalFramework ---
+func (f *StandardLegalFramework) TrackApprovalDetails(ctx interface{}, event *ApprovalEvent) error { return nil }
+func (f *StandardLegalFramework) VerifyLegalCapacity(ctx interface{}, entity interface{}) error { return nil }
+func (f *StandardLegalFramework) ValidateClientResourceServerInteraction(ctx interface{}, client interface{}, server interface{}) error { return nil }
+func (f *StandardLegalFramework) ValidateResourceServerPowers(ctx interface{}, token interface{}, request interface{}) error { return nil }
+func (f *StandardLegalFramework) ValidateJurisdiction(ctx interface{}, jurisdiction interface{}, action interface{}) error { return nil }
+func (f *StandardLegalFramework) GetJurisdictionRules(jurisdiction string) (*JurisdictionRules, error) { return &JurisdictionRules{}, nil }
+func (f *StandardLegalFramework) ValidateJurisdictionRequirements(ctx interface{}, rules *JurisdictionRules, action string) error { return nil }
+func (f *StandardLegalFramework) ValidateDuty(ctx interface{}, duty interface{}) error { return nil }
+func (f *StandardLegalFramework) EnforceFiduciaryDuties(ctx interface{}, power interface{}) error { return nil }

@@ -3,9 +3,9 @@ package rate
 import (
 	"net"
 	"net/http"
-	"strings"
 	"strconv"
-		// "strconv"
+	"strings"
+)
 
 // HTTPLimiterConfig configures HTTP rate limiting
 type HTTPLimiterConfig struct {
@@ -13,7 +13,7 @@ type HTTPLimiterConfig struct {
 	Limiter Limiter
 
 	// KeyFunc generates the rate limit key from the request
-		// import "strconv"
+	KeyFunc func(*http.Request) string
 
 	// ExcludeFunc determines if a request should be excluded from rate limiting
 	ExcludeFunc func(*http.Request) bool

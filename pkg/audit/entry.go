@@ -1,22 +1,3 @@
-// Package audit/entry.go: RFC111 Compliance Mapping
-//
-// This file implements the audit entry structure and builder as required by RFC111:
-//   - Type-safe, explicit audit entry struct for all protocol events
-//   - Builder methods for actor, action, target, and result fields
-//   - All audit entries are structured and verifiable
-//
-// Relevant RFC111 Sections:
-//   - Section 6: How GAuth works (audit, event, compliance)
-//   - Section 7: Benefits (verifiability, auditability)
-//
-// Compliance:
-//   - All fields are explicit and type-safe (no ambiguous types)
-//   - Audit entries are structured, verifiable, and cover all protocol steps
-//   - No exclusions (Web3, DNA, decentralized auth) are present
-//   - See README and docs/ for full protocol mapping
-//
-// License: Apache 2.0 (see LICENSE file)
-
 package audit
 
 import (
@@ -24,6 +5,36 @@ import (
 	"encoding/hex"
 	"time"
 )
+
+// Entry represents a single audit log entry.
+type Metadata map[string]string
+
+type Entry struct {
+	ID        string    `json:"id"`
+	Timestamp time.Time `json:"timestamp"`
+	Type      string    `json:"type"`
+	Action    string    `json:"action"`
+	Result    string    `json:"result"`
+	ActorID   string    `json:"actor_id"`
+	ChainID   string    `json:"chain_id,omitempty"`
+	Tags      []string  `json:"tags,omitempty"`
+	Metadata  Metadata  `json:"metadata,omitempty"`
+	// Fields for SQL storage compatibility
+	Level         string   `json:"level,omitempty"`
+	PrevHash      string   `json:"prev_hash,omitempty"`
+	ActorType     string   `json:"actor_type,omitempty"`
+	ActorName     string   `json:"actor_name,omitempty"`
+	SessionID     string   `json:"session_id,omitempty"`
+	ClientIP      string   `json:"client_ip,omitempty"`
+	ClientInfo    string   `json:"client_info,omitempty"`
+	TargetID      string   `json:"target_id,omitempty"`
+	TargetType    string   `json:"target_type,omitempty"`
+	TargetName    string   `json:"target_name,omitempty"`
+	TargetChanges Metadata `json:"target_changes,omitempty"`
+	Location      string   `json:"location,omitempty"`
+	TraceID       string   `json:"trace_id,omitempty"`
+	Error         string   `json:"error,omitempty"`
+}
 
 // NewEntry creates a new audit Entry with the given type.
 func NewEntry(typ string) *Entry {
@@ -68,8 +79,8 @@ func (e *Entry) WithMetadata(key string, value string) *Entry {
 	return e
 }
 
-// calculateHash computes a hash of the entry's core fields.
-func (e *Entry) calculateHash() string {
+// CalculateHash computes a hash of the entry's core fields.
+func (e *Entry) CalculateHash() string {
 	h := sha256.New()
 	h.Write([]byte(e.ID))
 	h.Write([]byte(e.Type))
