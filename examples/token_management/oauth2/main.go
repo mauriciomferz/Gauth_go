@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	token "github.com/Gimel-Foundation/gauth/pkg/token"
+	token "github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 // joinScopes joins a slice of scopes into a comma-separated string
@@ -38,7 +38,7 @@ func NewOAuth2Flow() *OAuth2Flow {
        if err != nil {
 	       panic("failed to generate test RSA key: " + err.Error())
        }
-       config := token.Config{
+	var config *token.Config = &token.Config{
 	       SigningMethod:    token.RS256,
 	       SigningKey:       privKey,
 		ValidityPeriod:   time.Hour,

@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/token"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 	redis "github.com/go-redis/redis/v8"
 )
 

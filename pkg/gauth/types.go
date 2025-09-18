@@ -50,6 +50,8 @@ type TokenResponse struct {
 }
 
 // Config represents the configuration for GAuth
+import "github.com/Gimel-Foundation/gauth/pkg/token"
+
 type Config struct {
 	AuthServerURL     string                 // URL of the authorization server
 	ClientID          string                 // Client identifier
@@ -57,4 +59,6 @@ type Config struct {
 	Scopes            []string               // Default scopes
 	RateLimit         common.RateLimitConfig // Rate limiting configuration
 	AccessTokenExpiry time.Duration          // Token expiry duration
+	TokenConfig       *token.Config          // Embedded token config (pointer)
+}
 }

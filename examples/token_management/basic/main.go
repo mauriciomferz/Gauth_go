@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"log"
 	"time"
+	"reflect"
 
-	token "github.com/Gimel-Foundation/gauth/pkg/token"
-)
+	token "github.com/mauriciomferz/Gauth_go/pkg/token"
 
 func main() {
 	// Generate RSA key pair for signing
@@ -19,7 +19,7 @@ func main() {
 	}
 
 	// Create token service configuration
-	config := token.Config{
+	var config *token.Config = &token.Config{
 		SigningMethod:    token.RS256,
 		SigningKey:       privateKey,
 		ValidityPeriod:   time.Hour,
@@ -35,6 +35,12 @@ func main() {
 
 	// Create memory store
 	store := token.NewMemoryStore()
+
+	// Print the type of config using reflection
+	fmt.Printf("DEBUG: reflect.TypeOf(config): %v\n", reflect.TypeOf(config))
+
+	// Compile-time assertion: this will fail to build if config is not *token.Config
+	var _ *token.Config = config // force type check
 
 	// Create token service with config and store
 	tokenService := token.NewService(config, store)

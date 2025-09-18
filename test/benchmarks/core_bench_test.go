@@ -14,7 +14,7 @@ func BenchmarkTokenGeneration(b *testing.B) {
        ctx := context.Background()
        signer := token.NewMockSigner()
        store := token.NewMemoryStore()
-       mgr := token.NewService(token.Config{
+	mgr := token.NewService(&token.Config{
 	       SigningKey: signer,
 	       Store:      store,
 	       SigningMethod: token.RS256,
@@ -41,7 +41,7 @@ func BenchmarkTokenValidation(b *testing.B) {
        ctx := context.Background()
        signer := token.NewMockSigner()
        store := token.NewMemoryStore()
-       mgr := token.NewService(token.Config{
+	mgr := token.NewService(&token.Config{
 	       SigningKey: signer,
 	       Store:      store,
 	       SigningMethod: token.RS256,
@@ -110,7 +110,7 @@ func BenchmarkParallelTokenGeneration(b *testing.B) {
        ctx := context.Background()
        signer := token.NewMockSigner()
        store := token.NewMemoryStore()
-       mgr := token.NewService(token.Config{
+	mgr := token.NewService(&token.Config{
 	       SigningKey: signer,
 	       Store:      store,
 	       SigningMethod: token.RS256,

@@ -7,15 +7,15 @@ import (
 	"log"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/common"
-	"github.com/Gimel-Foundation/gauth/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/common"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
 func main() {
 	fmt.Println("Starting GAuth Basic Example")
 
 	// Create a GAuth instance with typed configuration
-	config := gauth.Config{
+	config := &gauth.Config{
 		AuthServerURL:     "https://auth.example.com",
 		ClientID:          "example-client",
 		ClientSecret:      "example-secret",
@@ -26,6 +26,7 @@ func main() {
 			BurstSize:         5,
 			WindowSize:        1,
 		},
+		TokenConfig:       &token.Config{SigningMethod: token.RS256},
 	}
 	gauthService, err := gauth.New(config)
 	if err != nil {

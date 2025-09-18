@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	token "github.com/Gimel-Foundation/gauth/pkg/token"
+	token "github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 // TokenMonitor provides token lifecycle monitoring
@@ -101,7 +101,7 @@ func main() {
 		log.Fatalf("Failed to generate RSA key: %v", err)
 	}
 
-	config := token.Config{
+	var config *token.Config = &token.Config{
 		SigningMethod:    token.RS256,
 		SigningKey:       privateKey,
 		ValidityPeriod:   time.Hour,

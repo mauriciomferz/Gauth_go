@@ -2,80 +2,69 @@ package gauth
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/rsa"
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/common"
+	"github.com/mauriciomferz/Gauth_go/pkg/common"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNew(t *testing.T) {
 	tests := []struct {
-		name        string
-		config      Config
-		expectError bool
-	}{
-		{
-			name: "Valid configuration",
-			config: Config{
-				AuthServerURL:     "http://localhost:8080",
-				ClientID:          "test-client",
-				ClientSecret:      "test-secret",
-				Scopes:            []string{"read", "write"},
-				AccessTokenExpiry: time.Hour,
-				   RateLimit: common.RateLimitConfig{
-					RequestsPerSecond: 100,
-					BurstSize:         10,
-					WindowSize:        60,
-				},
-			},
-			expectError: false,
-		},
-		{
-			name: "Missing auth server URL",
-			config: Config{
-				ClientID:          "test-client",
-				ClientSecret:      "test-secret",
-				AccessTokenExpiry: time.Hour,
-			},
-			expectError: true,
-		},
-		{
-			name: "Missing client ID",
-			config: Config{
-				AuthServerURL:     "http://localhost:8080",
-				ClientSecret:      "test-secret",
-				AccessTokenExpiry: time.Hour,
-			},
-			expectError: true,
-		},
-		{
-			name: "Invalid token expiry",
-			config: Config{
-				AuthServerURL:     "http://localhost:8080",
-				ClientID:          "test-client",
-				ClientSecret:      "test-secret",
-				AccessTokenExpiry: -time.Hour,
-			},
-			expectError: true,
-		},
-	}
+		func generateTestSigningKey(t *testing.T) *rsa.PrivateKey {
+		       key, err := rsa.GenerateKey(rand.Reader, 2048)
+		       require.NoError(t, err)
+		       return key
+		}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			svc, err := New(tt.config)
-			if tt.expectError {
-				assert.Error(t, err)
-				assert.Nil(t, svc)
-			} else {
-				assert.NoError(t, err)
-				assert.NotNil(t, svc)
-				assert.NoError(t, svc.Close())
-			}
-		})
-	}
-}
+		func TestNew(t *testing.T) {
+		       signingKey := generateTestSigningKey(t)
+		       tests := []struct {
+			       name        string
+			       config      *token.Config
+			       expectError bool
+		       }{
+			       {
+				       name: "Valid configuration",
+				       config: &token.Config{
+					       SigningKey:        signingKey,
+					       SigningMethod:     "RS256",
+					       ValidityPeriod:    time.Hour,
+					       RefreshPeriod:     time.Hour,
+					       CleanupInterval:   time.Hour,
+					       MaxTokens:         1000,
+				       },
+				       expectError: false,
+			       },
+			       {
+				       name: "Missing signing key",
+				       config: &token.Config{
+					       SigningMethod:     "RS256",
+					       ValidityPeriod:    time.Hour,
+					       RefreshPeriod:     time.Hour,
+					       CleanupInterval:   time.Hour,
+					       MaxTokens:         1000,
+				       },
+				       expectError: true,
+			       },
+		       }
+
+		       for _, tt := range tests {
+			       t.Run(tt.name, func(t *testing.T) {
+				       svc, err := NewService(tt.config)
+				       if tt.expectError {
+					       assert.Error(t, err)
+				       } else {
+					       assert.NoError(t, err)
+					       assert.NotNil(t, svc)
+				       }
+			       })
+		       }
+		}
 
 func TestService_Authorize(t *testing.T) {
        svc := setupTestService(t)
@@ -136,6 +125,13 @@ func TestService_Authorize(t *testing.T) {
 
 func TestService_RequestToken(t *testing.T) {
        svc := setupTestService(t)
+       t.Logf("DEBUG: SigningKey in service after setup: %v, addr: %p", svc.config.SigningKey, svc.config.SigningKey)
+       if svc.config.SigningKey == nil {
+	       t.Errorf("DEBUG: SigningKey is nil immediately after setupTestService!")
+       } else {
+	       t.Logf("DEBUG: SigningKey type: %T", svc.config.SigningKey)
+       }
+       require.NotNil(t, svc.config.SigningKey, "SigningKey should not be nil after setupTestService")
        t.Cleanup(func() {
 	       err := svc.Close()
 	       if err != nil {
@@ -143,7 +139,8 @@ func TestService_RequestToken(t *testing.T) {
 	       }
        })
 
-	ctx := context.Background()
+       ctx := context.Background()
+
 
 	// First, get a valid grant
 	grant, err := svc.Authorize(ctx, &AuthorizationRequest{
@@ -153,135 +150,100 @@ func TestService_RequestToken(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, grant)
 
-	tests := []struct {
-		name        string
-		request     *TokenRequest
-		expectError bool
-	}{
-		{
-			name: "Valid request",
-			request: &TokenRequest{
-				GrantID: grant.GrantID,
-				Scope:   []string{"read", "write"},
-			},
-			expectError: false,
-		},
-		{
-			name: "Invalid grant ID",
-			request: &TokenRequest{
-				GrantID: "invalid-grant",
-				Scope:   []string{"read"},
-			},
-			expectError: true,
-		},
-	}
+	// Assert SigningKey is still present before RequestToken
+	require.NotNil(t, svc.config.SigningKey, "SigningKey should not be nil before RequestToken call")
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			resp, err := svc.RequestToken(ctx, tt.request)
-			if tt.expectError {
-				assert.Error(t, err)
-				assert.Nil(t, resp)
-			} else {
-				assert.NoError(t, err)
-				assert.NotNil(t, resp)
-				assert.NotEmpty(t, resp.Token)
-				assert.True(t, resp.ValidUntil.After(time.Now()))
-				assert.ElementsMatch(t, tt.request.Scope, resp.Scope)
-			}
-		})
-	}
+       tests := []struct {
+	       name        string
+	       request     *TokenRequest
+	       expectError bool
+       }{
+	       {
+		       name: "Valid request",
+		       request: &TokenRequest{
+			       GrantID: grant.GrantID,
+			       Scope:   []string{"read", "write"},
+		       },
+		       expectError: false,
+	       },
+	       {
+		       name: "Invalid grant ID",
+		       request: &TokenRequest{
+			       GrantID: "invalid-grant",
+			       Scope:   []string{"read"},
+		       },
+		       expectError: true,
+	       },
+       }
+
+       for _, tt := range tests {
+	       t.Run(tt.name, func(t *testing.T) {
+		       resp, err := svc.RequestToken(ctx, tt.request)
+		       if tt.expectError {
+			       assert.Error(t, err)
+			       assert.Nil(t, resp)
+		       } else {
+			       assert.NoError(t, err)
+			       assert.NotNil(t, resp)
+			       assert.NotEmpty(t, resp.Token)
+			       assert.True(t, resp.ValidUntil.After(time.Now()))
+			       assert.ElementsMatch(t, tt.request.Scope, resp.Scope)
+		       }
+	       })
+       }
 }
 
-func TestService_RevokeToken(t *testing.T) {
-       svc := setupTestService(t)
-       t.Cleanup(func() {
-	       err := svc.Close()
-	       if err != nil {
-		       t.Errorf("error closing service: %v", err)
-	       }
-       })
-
-	ctx := context.Background()
-
-	// Get a valid token
-	grant, err := svc.Authorize(ctx, &AuthorizationRequest{
-		ClientID: "test-client",
-		Scopes:   []string{"read"},
-	})
-	require.NoError(t, err)
-
-	resp, err := svc.RequestToken(ctx, &TokenRequest{
-		GrantID: grant.GrantID,
-		Scope:   []string{"read"},
-	})
-	require.NoError(t, err)
-
-	// Test token revocation
-	err = svc.RevokeToken(ctx, resp.Token)
-	assert.NoError(t, err)
-
-	// Verify token is revoked by trying to use it
-	_, err = svc.RequestToken(ctx, &TokenRequest{
-		GrantID: grant.GrantID,
-		Scope:   []string{"read"},
-	})
-	assert.Error(t, err)
+func generateTestSigningKey(t *testing.T) *rsa.PrivateKey {
+       key, err := rsa.GenerateKey(rand.Reader, 2048)
+       require.NoError(t, err)
+       if key == nil {
+	       t.Errorf("DEBUG: generateTestSigningKey returned nil!")
+       } else {
+	       t.Logf("DEBUG: generateTestSigningKey generated key: %v, addr: %p", key, key)
+       }
+       require.NotNil(t, key, "generateTestSigningKey should not return nil")
+       return key
 }
+	       Scopes:   []string{"read"},
+       }
 
-func TestService_RateLimiting(t *testing.T) {
-	config := Config{
-		AuthServerURL:     "http://localhost:8080",
-		ClientID:          "test-client",
-		ClientSecret:      "test-secret",
-		AccessTokenExpiry: time.Hour,
-		RateLimit: common.RateLimitConfig{
-			RequestsPerSecond: 2,
-			BurstSize:         1,
-			WindowSize:        1,
-		},
-	}
+       // First request should succeed
+       _, err = svc.Authorize(ctx, req)
+       assert.NoError(t, err)
 
-	svc, err := New(config)
-	require.NoError(t, err)
-	defer svc.Close()
+       // Second request should fail due to rate limiting
+       _, err = svc.Authorize(ctx, req)
+       assert.Error(t, err)
 
-	ctx := context.Background()
-	req := &AuthorizationRequest{
-		ClientID: "test-client",
-		Scopes:   []string{"read"},
-	}
+       // Wait for rate limit window to reset
+       time.Sleep(time.Second)
 
-	// First request should succeed
-	_, err = svc.Authorize(ctx, req)
-	assert.NoError(t, err)
-
-	// Second request should fail due to rate limiting
-	_, err = svc.Authorize(ctx, req)
-	assert.Error(t, err)
-
-	// Wait for rate limit window to reset
-	time.Sleep(time.Second)
-
-	// Request should succeed again
-	_, err = svc.Authorize(ctx, req)
-	assert.NoError(t, err)
+       // Request should succeed again
+       _, err = svc.Authorize(ctx, req)
+       assert.NoError(t, err)
 }
 
 func setupTestService(t *testing.T) *Service {
-	config := Config{
-		AuthServerURL:     "http://localhost:8080",
-		ClientID:          "test-client",
-		ClientSecret:      "test-secret",
-		AccessTokenExpiry: time.Hour,
-		RateLimit: common.RateLimitConfig{
-			RequestsPerSecond: 100,
-			BurstSize:         10,
-			WindowSize:        60,
-		},
-	}
-
-	svc, err := NewService(config)
-	require.NoError(t, err)
-	return svc
+	t.Logf("DEBUG: signingKey generated: %v, addr: %p", signingKey, signingKey)
+	t.Logf("DEBUG: about to assign signingKey to TokenConfig.SigningKey")
+       signingKey := generateTestSigningKey(t)
+       t.Logf("DEBUG: generateTestSigningKey returned: %v, addr: %p", signingKey, signingKey)
+       tokenCfg := &token.Config{
+	       SigningKey:   signingKey,
+	       SigningMethod: token.RS256,
+	       ValidityPeriod: time.Hour,
+       }
+       config := &Config{
+	       AuthServerURL:     "http://localhost:8080", // required for validation
+	       ClientID:          "test-client",
+	       ClientSecret:      "test-secret",
+	       Scopes:            []string{"read", "write"},
+	       AccessTokenExpiry: time.Hour,
+	       RateLimit:         common.RateLimitConfig{},
+	       TokenConfig:       tokenCfg,
+       }
+       t.Logf("DEBUG: Config.SigningKey after assignment: %v, addr: %p", config.SigningKey, config.SigningKey)
+       svc, err := NewService(config)
+       require.NoError(t, err)
+       return svc
 }

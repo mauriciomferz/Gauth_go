@@ -8,9 +8,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/auth"
-	"github.com/Gimel-Foundation/gauth/pkg/events"
-	"github.com/Gimel-Foundation/gauth/pkg/token"
+	"github.com/mauriciomferz/Gauth_go/pkg/auth"
+	"github.com/mauriciomferz/Gauth_go/pkg/events"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 func main() {
@@ -33,7 +33,7 @@ func main() {
 	store := token.NewMemoryStore(24 * time.Hour)
 
 	// Configure token service
-	tokenConfig := token.Config{
+	tokenConfig := &token.Config{
 		SigningMethod:    token.RS256,
 		SigningKey:       privateKey,
 		ValidityPeriod:   time.Hour,

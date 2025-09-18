@@ -40,7 +40,7 @@ func TestCompleteAuthorizationFlow(t *testing.T) {
 
 	// Step VIII: Resource server authorization
 	serverAuth := createServerAuthorization(t, resourceOwnerProof)
-	err = framework.ValidateResourceServerPowers(ctx, serverAuth.Token, serverAuth.Request)
+	err = framework.ValidateResourceServerPowers(ctx, serverAuth.Token, serverAuth.Request.(*auth.LegalFrameworkRequest))
 	require.NoError(t, err, "Resource server authorization should succeed")
 
 	// Test request-specific steps (a-i)
@@ -115,7 +115,7 @@ func TestPowerOfAttorneyChain(t *testing.T) {
 			assert.NoError(t, err)
 
 			// Verify fiduciary duties
-			err = framework.EnforceFiduciaryDuties(ctx, link.Power)
+			err = framework.EnforceFiduciaryDuties(ctx, auth.Power(*link.Power))
 			assert.NoError(t, err)
 		})
 	}
@@ -326,7 +326,7 @@ func createServerAuthorization(t *testing.T, ownerProof *auth.CapacityProof) *au
 	}
 }
 
-func createClientRequest(t *testing.T, auth *auth.ClientAuthorization) *auth.LegalFrameworkRequest {
+func createClientRequest(t *testing.T, authz *auth.ClientAuthorization) *auth.LegalFrameworkRequest {
 	return &auth.LegalFrameworkRequest{
 		ID:           "request_002",
 		ClientID:     auth.Client.ID,
@@ -483,6 +483,11 @@ func createDelegationChain(t *testing.T) []auth.DelegationLink {
 			Type:   "human-to-human",
 			Level:  1,
 			Time:   now.Add(-48 * time.Hour),
+			Power: &auth.Power{
+				Type:     "delegation",
+				Resource: "resource_001",
+				Actions:  []string{"read", "write"},
+			},
 		},
 		{
 			FromID: "client_owner_001",
@@ -490,6 +495,11 @@ func createDelegationChain(t *testing.T) []auth.DelegationLink {
 			Type:   "human-to-ai",
 			Level:  2,
 			Time:   now.Add(-24 * time.Hour),
+			Power: &auth.Power{
+				Type:     "delegation",
+				Resource: "resource_002",
+				Actions:  []string{"read"},
+			},
 		},
 	}
 }

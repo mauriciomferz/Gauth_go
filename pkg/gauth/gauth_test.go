@@ -10,12 +10,13 @@ import (
 func TestGAuth(t *testing.T) {
 	// Test configuration validation
 	t.Run("Config Validation", func(t *testing.T) {
-		validConfig := gauth.Config{
+		validConfig := &gauth.Config{
 			AuthServerURL:     "https://auth.example.com",
 			ClientID:          "test-client",
 			ClientSecret:      "test-secret",
 			Scopes:            []string{"read", "write"},
 			AccessTokenExpiry: time.Hour,
+			TokenConfig:       &token.Config{SigningMethod: token.RS256},
 		}
 
 		auth, err := gauth.New(validConfig)
@@ -26,7 +27,7 @@ func TestGAuth(t *testing.T) {
 			t.Error("Expected non-nil GAuth instance")
 		}
 
-		invalidConfig := gauth.Config{}
+		invalidConfig := &gauth.Config{}
 		if _, err := gauth.New(invalidConfig); err == nil {
 			t.Error("Expected error with invalid config")
 		}
@@ -34,12 +35,13 @@ func TestGAuth(t *testing.T) {
 
 	// Test authorization flow
 	t.Run("Authorization Flow", func(t *testing.T) {
-		auth, _ := gauth.New(gauth.Config{
+		auth, _ := gauth.New(&gauth.Config{
 			AuthServerURL:     "https://auth.example.com",
 			ClientID:          "test-client",
 			ClientSecret:      "test-secret",
 			Scopes:            []string{"read", "write"},
 			AccessTokenExpiry: time.Hour,
+			TokenConfig:       &token.Config{SigningMethod: token.RS256},
 		})
 
 		req := gauth.AuthorizationRequest{
@@ -61,12 +63,13 @@ func TestGAuth(t *testing.T) {
 
 	// Test token issuance and validation
 	t.Run("Token Operations", func(t *testing.T) {
-		auth, _ := gauth.New(gauth.Config{
+		auth, _ := gauth.New(&gauth.Config{
 			AuthServerURL:     "https://auth.example.com",
 			ClientID:          "test-client",
 			ClientSecret:      "test-secret",
 			Scopes:            []string{"read", "write"},
 			AccessTokenExpiry: time.Hour,
+			TokenConfig:       &token.Config{SigningMethod: token.RS256},
 		})
 
 		// Request a token
@@ -101,11 +104,12 @@ func TestGAuth(t *testing.T) {
 
 	// Test token expiration
 	t.Run("Token Expiration", func(t *testing.T) {
-		auth, _ := gauth.New(gauth.Config{
+		auth, _ := gauth.New(&gauth.Config{
 			AuthServerURL:     "https://auth.example.com",
 			ClientID:          "test-client",
 			ClientSecret:      "test-secret",
 			AccessTokenExpiry: 100 * time.Millisecond,
+			TokenConfig:       &token.Config{SigningMethod: token.RS256},
 		})
 
 		tokenReq := gauth.TokenRequest{

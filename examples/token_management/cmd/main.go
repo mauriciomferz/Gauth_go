@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/Gimel-Foundation/gauth/examples/token_management/demo"
+		"github.com/mauriciomferz/Gauth_go/examples/token_management/demo"
 )
 
 func main() {

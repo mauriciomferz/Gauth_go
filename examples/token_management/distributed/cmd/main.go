@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	token "github.com/Gimel-Foundation/gauth/pkg/token"
+	token "github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 // ClusterNode simulates a distributed node

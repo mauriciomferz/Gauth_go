@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Gimel-Foundation/gauth/internal/tokenstore"
+		"github.com/Gimel-Foundation/gauth/pkg/tokenstore"
 	"github.com/Gimel-Foundation/gauth/pkg/token"
 )
 

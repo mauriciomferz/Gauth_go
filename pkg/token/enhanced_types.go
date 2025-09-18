@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/common"
+	"github.com/mauriciomferz/Gauth_go/pkg/common"
 )
 
 // OwnerInfo contains information about the token owner and authorizer

@@ -4,17 +4,18 @@ import (
 	"log"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
 func main() {
 	// Create a GAuth instance with custom rate limits and token expiry
-	config := gauth.Config{
+	config := &gauth.Config{
 		AuthServerURL:     "https://auth.example.com",
 		ClientID:          "advanced-client",
 		ClientSecret:      "advanced-secret",
 		Scopes:            []string{"read", "write", "admin"},
 		AccessTokenExpiry: 30 * time.Minute,
+		TokenConfig:       &token.Config{SigningMethod: token.RS256},
 	}
 
 	auth, err := gauth.New(config)

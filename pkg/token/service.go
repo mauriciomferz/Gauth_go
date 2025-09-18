@@ -7,6 +7,7 @@ import (
 	"crypto/rsa"
 	"encoding/base64"
 	"fmt"
+	"log"
 	"strings"
 	"sync"
 	"time"
@@ -29,7 +30,7 @@ type ServiceAPI interface {
 
 // Service provides token management functionality
 type Service struct {
-	config Config
+	config *Config
 	store  Store
 	mu     sync.RWMutex
 }
@@ -40,11 +41,12 @@ func (s *Service) GetToken(ctx context.Context, id string) (*Token, error) {
 }
 
 // NewService creates a new token service with the given configuration
-func NewService(config Config, store Store) ServiceAPI {
-	svc := &Service{
-		config: config,
-		store:  store,
-	}
+func NewService(config *Config, store Store) ServiceAPI {
+       log.Printf("DEBUG: SigningKey in token.NewService: %v, addr: %p", config.SigningKey, config.SigningKey)
+       svc := &Service{
+	       config: config,
+	       store:  store,
+       }
 
 	// Start cleanup goroutine if interval is set
 	if config.CleanupInterval > 0 {
@@ -56,46 +58,21 @@ func NewService(config Config, store Store) ServiceAPI {
 
 // Issue creates, signs and stores a new token
 func (s *Service) Issue(ctx context.Context, token *Token) (*Token, error) {
-	// Set defaults if not provided
-	if token.ExpiresAt.IsZero() {
-		if token.Type == Refresh {
-			token.ExpiresAt = time.Now().Add(s.config.RefreshPeriod)
-		} else {
-			token.ExpiresAt = time.Now().Add(s.config.ValidityPeriod)
-		}
+	log.Printf("DEBUG: SigningKey in token.Service.Issue: %v, addr: %p", s.config.SigningKey, s.config.SigningKey)
+	if s.config.SigningKey == nil {
+		log.Printf("ERROR: SigningKey is nil in token.Service.Issue")
 	}
 
-	if token.IssuedAt.IsZero() {
-		token.IssuedAt = time.Now()
-	}
-
-	if token.NotBefore.IsZero() {
-		token.NotBefore = token.IssuedAt
-	}
-
-	if token.Algorithm == "" {
-		token.Algorithm = s.config.SigningMethod
-	}
-
-	if len(token.Scopes) == 0 {
-		token.Scopes = s.config.DefaultScopes
-	}
-
-	// Basic validation
-	if err := s.validateConfig(token); err != nil {
-		return nil, NewValidationErrorWithCause(ValidationCodeInvalidConfig, "token fails config validation", err)
-	}
-
-	// Generate signed token value
-	signedValue, err := s.signToken(token)
+	// Sign the token
+	sig, err := s.signToken(token)
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign token: %w", err)
 	}
-	token.Value = signedValue
+	token.Value = sig
 
-	// Store token
-	if err := s.store.Save(ctx, token.ID, token); err != nil {
-		return nil, NewValidationErrorWithCause(ValidationCodeStorageFailure, "failed to store token", err)
+	// Store the token
+	if err := s.store.Set(ctx, token); err != nil {
+		return nil, fmt.Errorf("failed to store token: %w", err)
 	}
 
 	return token, nil
@@ -185,36 +162,36 @@ func (s *Service) Refresh(ctx context.Context, refreshToken *Token) (*Token, err
 	}
 
 	// Create new access token
-       var scopes []string
-       if refreshToken.Metadata != nil && refreshToken.Metadata.AppData != nil {
-	       if orig, ok := refreshToken.Metadata.AppData["original_scopes"]; ok && orig != "" {
-		       // Split comma-separated string into slice
-		       for _, s := range splitScopes(orig) {
-			       if s != "" {
-				       scopes = append(scopes, s)
-			       }
-		       }
-	       }
-       }
-       if len(scopes) == 0 {
-	       scopes = refreshToken.Scopes
-       }
-       accessToken := &Token{
-	       ID:        GenerateID(),
-	       Type:      Access,
-	       IssuedAt:  time.Now(),
-	       ExpiresAt: time.Now().Add(s.config.ValidityPeriod),
-	       NotBefore: time.Now(),
-	       Issuer:    refreshToken.Issuer,
-	       Subject:   refreshToken.Subject,
-	       Audience:  refreshToken.Audience,
-	       Scopes:    scopes,
-	       Algorithm: s.config.SigningMethod,
-       }
+	var scopes []string
+	if refreshToken.Metadata != nil && refreshToken.Metadata.AppData != nil {
+		if orig, ok := refreshToken.Metadata.AppData["original_scopes"]; ok && orig != "" {
+			// Split comma-separated string into slice
+			for _, s := range splitScopes(orig) {
+				if s != "" {
+					scopes = append(scopes, s)
+				}
+			}
+		}
+	}
+	if len(scopes) == 0 {
+		scopes = refreshToken.Scopes
+	}
+	accessToken := &Token{
+		ID:        GenerateID(),
+		Type:      Access,
+		IssuedAt:  time.Now(),
+		ExpiresAt: time.Now().Add(s.config.ValidityPeriod),
+		NotBefore: time.Now(),
+		Issuer:    refreshToken.Issuer,
+		Subject:   refreshToken.Subject,
+		Audience:  refreshToken.Audience,
+		Scopes:    scopes,
+		Algorithm: s.config.SigningMethod,
+	}
 
-       // Helper to split comma-separated scopes
-       // (define at file scope if not present)
-       // func splitScopes(s string) []string { return strings.Split(s, ",") }
+	// Helper to split comma-separated scopes
+	// (define at file scope if not present)
+	// func splitScopes(s string) []string { return strings.Split(s, ",") }
 
 	// Issue new token
 	return s.Issue(ctx, accessToken)
@@ -226,7 +203,9 @@ func (s *Service) List(ctx context.Context, filter Filter) ([]*Token, error) {
 }
 
 func (s *Service) validateConfig(token *Token) error {
+	log.Printf("DEBUG: SigningKey in validateConfig: %v, addr: %p", s.config.SigningKey, s.config.SigningKey)
 	if s.config.SigningKey == nil {
+		log.Printf("ERROR: SigningKey is nil in validateConfig")
 		return fmt.Errorf("signing key not configured")
 	}
 

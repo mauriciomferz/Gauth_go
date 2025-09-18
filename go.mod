@@ -1,4 +1,5 @@
-module github.com/Gimel-Foundation/gauth
+replace github.com/mauriciomferz/Gauth_go => .
+module github.com/mauriciomferz/Gauth_go
 
 go 1.23.0
 

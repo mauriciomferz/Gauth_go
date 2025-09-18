@@ -15,7 +15,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/token"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 func main() {

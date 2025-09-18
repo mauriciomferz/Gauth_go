@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/token"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 // KeyRotator manages RSA key rotation and JWT signing

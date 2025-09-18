@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/errors"
+	"github.com/mauriciomferz/Gauth_go/pkg/errors"
 )
 
 // DEPRECATED: Use github.com/Gimel-Foundation/gauth/pkg/token.MemoryStore instead

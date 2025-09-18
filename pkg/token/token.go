@@ -1,3 +1,4 @@
+// ...existing code...
 // Package token/token.go: RFC111 Compliance Mapping
 //
 // This file implements the extended token model and lifecycle as defined in RFC111:

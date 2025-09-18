@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
 // ...existing code...

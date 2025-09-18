@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	token "github.com/Gimel-Foundation/gauth/pkg/token"
+	token "github.com/mauriciomferz/Gauth_go/pkg/token"
 	"github.com/go-redis/redis/v8"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"

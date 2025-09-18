@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
 // ResourceNode represents a distributed resource node
@@ -249,12 +249,13 @@ func (drm *DistributedResourceManager) checkNodeHealth(nodeID string) {
 
 func main() {
 	// Initialize GAuth
-	config := gauth.Config{
+	config := &gauth.Config{
 		AuthServerURL:     "https://auth.example.com",
 		ClientID:          "cluster-manager",
 		ClientSecret:      "cluster-secret",
 		Scopes:            []string{"node:register", "node:manage", "transaction:execute"},
 		AccessTokenExpiry: 24 * time.Hour,
+		TokenConfig:       &token.Config{SigningMethod: token.RS256},
 	}
 
 	auth, err := gauth.New(config)

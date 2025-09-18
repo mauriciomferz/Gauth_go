@@ -23,7 +23,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/errors"
+	"github.com/mauriciomferz/Gauth_go/pkg/errors"
 )
 
 // TokenMetadata contains structured metadata about a token

@@ -27,15 +27,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/audit"
-	"github.com/Gimel-Foundation/gauth/pkg/events"
-	"github.com/Gimel-Foundation/gauth/pkg/rate"
-	"github.com/Gimel-Foundation/gauth/pkg/token"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/events"
+	"github.com/mauriciomferz/Gauth_go/pkg/rate"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 // Service represents the main GAuth service
-type Service struct {
-	config      Config
+	config      *Config
 	rateLimiter rate.Limiter
 	tokenSvc    *token.Service
 	eventBus    *events.EventBus
@@ -75,34 +74,43 @@ func (a *rateLimiterAdapter) Reset(id string) {
 }
 
 // NewService creates a new Service instance with the provided configuration.
-func NewService(config Config) (*Service, error) {
+func NewService(config *Config) (*Service, error) {
+	fmt.Printf("DEBUG: GAuth config.TokenConfig.SigningKey before tokenConfig assignment: %v, addr: %p\n", config.TokenConfig.SigningKey, config.TokenConfig.SigningKey)
 	if err := validateConfig(config); err != nil {
 		return nil, err
 	}
-	baseLimiter := rate.NewRateLimiter(config.RateLimit)
+       baseLimiter := rate.NewRateLimiter(config.RateLimit)
 
-	// Construct token.Config from gauth.Config (add mapping as needed)
-	tokenConfig := token.Config{
-		ValidityPeriod: config.AccessTokenExpiry,
-	}
-
-	tokenStore := token.NewMemoryStore()
+       // Construct token.Config from gauth.Config (add mapping as needed)
+       tokenStore := token.NewMemoryStore()
+       fmt.Printf("DEBUG: SigningKey in gauth.NewService: %v, addr: %p\n", config.SigningKey, config.SigningKey)
+       var tokenConfig *token.Config
+       if config.TokenConfig != nil {
+	       tokenConfig = config.TokenConfig
+       } else {
+	       tokenConfig = &token.Config{}
+       }
+       fmt.Printf("DEBUG: tokenConfig.SigningKey after pointer assignment: %v, addr: %p\n", tokenConfig.SigningKey, tokenConfig.SigningKey)
+       tokenConfig.Store = tokenStore
+       tokenConfig.ValidityPeriod = config.AccessTokenExpiry
+       fmt.Printf("DEBUG: tokenConfig.SigningKey after setting Store/ValidityPeriod: %v, addr: %p\n", tokenConfig.SigningKey, tokenConfig.SigningKey)
+       fmt.Printf("DEBUG: tokenConfig.SigningKey after assignment: %v, addr: %p\n", tokenConfig.SigningKey, tokenConfig.SigningKey)
 	tokenSvcIface := token.NewService(tokenConfig, tokenStore)
 
-	var tokenSvc *token.Service
-	if svcImpl, ok := tokenSvcIface.(*token.Service); ok {
-		tokenSvc = svcImpl
-	}
+       var tokenSvc *token.Service
+       if svcImpl, ok := tokenSvcIface.(*token.Service); ok {
+	       tokenSvc = svcImpl
+       }
 
-	svc := &Service{
-		config:      config,
-		grants:      make(map[string]*AuthorizationGrant),
-		rateLimiter: &rateLimiterAdapter{rl: baseLimiter},
-		tokenSvc:    tokenSvc,
-		eventBus:    events.NewEventBus(),
-		audit:       audit.NewAuditLogger(),
-	}
-	return svc, nil
+       svc := &Service{
+	       config:      config,
+	       grants:      make(map[string]*AuthorizationGrant),
+	       rateLimiter: &rateLimiterAdapter{rl: baseLimiter},
+	       tokenSvc:    tokenSvc,
+	       eventBus:    events.NewEventBus(),
+	       audit:       audit.NewAuditLogger(),
+       }
+       return svc, nil
 }
 
 // GetTokenByID retrieves a token by its ID using the underlying token service.
@@ -138,12 +146,12 @@ func (s *Service) Authorize(ctx context.Context, req *AuthorizationRequest) (*Au
 	}
 
 	// Create grant
-	grant := &AuthorizationGrant{
-		GrantID:    generateGrantID(),
-		ClientID:   req.ClientID,
-		Scope:      req.Scopes,
-		ValidUntil: time.Now().Add(s.config.AccessTokenExpiry),
-	}
+       grant := &AuthorizationGrant{
+	       GrantID:    generateGrantID(),
+	       ClientID:   req.ClientID,
+	       Scope:      req.Scopes,
+	       ValidUntil: time.Now().Add(s.config.AccessTokenExpiry),
+       }
 
 	// Store grant
 	s.mu.Lock()
@@ -188,13 +196,14 @@ func (s *Service) RequestToken(ctx context.Context, req *TokenRequest) (*TokenRe
 
 	// Generate token
 
-	tok := &token.Token{
-		Subject:   grant.ClientID,
-		Scopes:    grant.Scope,
-		ExpiresAt: time.Now().Add(s.config.AccessTokenExpiry),
-		IssuedAt:  time.Now(),
-		Type:      token.Access,
-	}
+       tok := &token.Token{
+	       Subject:   grant.ClientID,
+	       Scopes:    grant.Scope,
+	       ExpiresAt: time.Now().Add(s.config.AccessTokenExpiry),
+	       IssuedAt:  time.Now(),
+	       Type:      token.Access,
+       }
+	fmt.Printf("DEBUG: GAuth Service.RequestToken SigningKey before Issue: %v, addr: %p\n", s.config.SigningKey, s.config.SigningKey)
 	issued, err := s.tokenSvc.Issue(ctx, tok)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate token: %w", err)
@@ -301,18 +310,24 @@ func (s *Service) handleTokenRevoke(data interface{}) {
 	// Handle token revocation event
 }
 
-func validateConfig(config Config) error {
-	if config.AuthServerURL == "" {
-		return fmt.Errorf("auth server URL is required")
-	}
-	if config.ClientID == "" {
-		return fmt.Errorf("client ID is required")
-	}
-	if config.ClientSecret == "" {
-		return fmt.Errorf("client secret is required")
-	}
-	if config.AccessTokenExpiry <= 0 {
-		return fmt.Errorf("access token expiry must be positive")
-	}
-	return nil
+func validateConfig(config *Config) error {
+       if config.AuthServerURL == "" {
+	       return fmt.Errorf("auth server URL is required")
+       }
+       if config.ClientID == "" {
+	       return fmt.Errorf("client ID is required")
+       }
+       if config.ClientSecret == "" {
+	       return fmt.Errorf("client secret is required")
+       }
+       if config.AccessTokenExpiry <= 0 {
+	       return fmt.Errorf("access token expiry must be positive")
+       }
+       if config.SigningKey == nil {
+	       return fmt.Errorf("signing key is required")
+       }
+       if config.SigningMethod == "" {
+	       return fmt.Errorf("signing method is required")
+       }
+       return nil
 }

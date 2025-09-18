@@ -127,7 +127,7 @@ examples/    - Standalone example applications
 	)
 
 	// Create token service
-	service := token.NewService(token.Config{
+	service := token.NewService(&token.Config{
 		SigningMethod: token.RS256,
 		SigningKey:    privateKey,
 		Store:        store.NewMemoryStore(),

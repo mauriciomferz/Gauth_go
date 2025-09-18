@@ -1,6 +1,7 @@
 package gauth
 
 import (
+	"strconv"
 	"time"
 )
 
@@ -22,11 +23,12 @@ func CreateTimeRangeRestriction(start, end time.Time) Restriction {
 }
 
 // CreateIPRangeRestriction creates a new IP-based restriction
+
 func CreateIPRangeRestriction(allowedRanges []string) Restriction {
 	props := NewProperties()
-	for i, ipRange := range allowedRanges {
-		props.SetString("range_"+string(i), ipRange)
-	}
+       for i, ipRange := range allowedRanges {
+	       props.SetString("range_"+strconv.Itoa(i), ipRange)
+       }
 
 	return Restriction{
 		Type:        "ip",

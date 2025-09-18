@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
 // CustomResourceServer extends the basic ResourceServer with additional functionality
@@ -43,12 +43,13 @@ func (c *CustomResourceServer) ProcessCustomTransaction(tx gauth.TransactionDeta
 
 func main() {
 	// Initialize GAuth
-	config := gauth.Config{
+	config := &gauth.Config{
 		AuthServerURL:     "https://auth.example.com",
 		ClientID:          "custom-client",
 		ClientSecret:      "custom-secret",
 		Scopes:            []string{"custom:write"},
 		AccessTokenExpiry: time.Hour,
+		TokenConfig:       &token.Config{SigningMethod: token.RS256},
 	}
 
 	auth, err := gauth.New(config)

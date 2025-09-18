@@ -79,7 +79,7 @@ GAuth uses a modular architecture where each component is independent:
 Each component can be used independently or together:
 
 	// Use just token management
-	tokenMgr := token.NewManager(token.Config{...})
+	tokenMgr := token.NewManager(&token.Config{...})
 
 	// Use just rate limiting
 	limiter := rate.NewSlidingWindow(rate.Config{...})

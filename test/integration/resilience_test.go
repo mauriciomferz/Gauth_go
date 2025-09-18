@@ -1,16 +1,15 @@
 package integration
 
 import (
-	"context"
-	"errors"
-	"testing"
-	"time"
+  "context"
+  "errors"
+  "testing"
+  "time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+  "github.com/stretchr/testify/assert"
+  "github.com/stretchr/testify/require"
 
-	"github.com/Gimel-Foundation/gauth/internal/circuit"
-	"github.com/Gimel-Foundation/gauth/pkg/resilience"
+  "github.com/Gimel-Foundation/gauth/pkg/resilience"
 )
 
 func TestResilienceIntegration(t *testing.T) {
@@ -27,7 +26,7 @@ func TestResilienceIntegration(t *testing.T) {
 
 		// Test initial state
 		t.Run("InitialState", func(t *testing.T) {
-			assert.Equal(t, circuit.StateClosed, cb.State())
+			assert.Equal(t, resilience.StateClosed, cb.State())
 		})
 
 		// Test failure threshold
@@ -41,13 +40,13 @@ func TestResilienceIntegration(t *testing.T) {
 			}
 
 			// Circuit should be open
-			assert.Equal(t, circuit.StateOpen, cb.State())
+			assert.Equal(t, resilience.StateOpen, cb.State())
 
 			// Should fail fast when open
 			err := cb.Execute(ctx, func(ctx context.Context) error {
 				return nil
 			})
-			assert.ErrorIs(t, err, circuit.ErrCircuitOpen)
+			assert.ErrorIs(t, err, resilience.ErrCircuitOpen)
 		})
 
 		// Test half-open state
@@ -56,14 +55,14 @@ func TestResilienceIntegration(t *testing.T) {
 			time.Sleep(2 * time.Second)
 
 			// Circuit should be half-open
-			assert.Equal(t, circuit.StateHalfOpen, cb.State())
+			assert.Equal(t, resilience.StateHalfOpen, cb.State())
 
 			// Successful execution should close circuit
 			err := cb.Execute(ctx, func(ctx context.Context) error {
 				return nil
 			})
 			require.NoError(t, err)
-			assert.Equal(t, circuit.StateClosed, cb.State())
+			assert.Equal(t, resilience.StateClosed, cb.State())
 		})
 	})
 

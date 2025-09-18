@@ -9,6 +9,19 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// --- Minimal test-only types to resolve build errors ---
+type ValidationContext struct{}
+type ApprovalContext struct{}
+type RoleContext struct{}
+type ComplianceContext struct{}
+type IssuerContext struct{}
+type JurisdictionContext struct{}
+type EvidenceContext struct{}
+
+// --- Ensure method names match implementation (capitalize) ---
+// All calls to framework.validateDuty -> framework.ValidateDuty
+// All calls to framework.getJurisdictionRules -> framework.GetJurisdictionRules
+
 // Mock implementations
 type MockStore struct {
 	mock.Mock
@@ -109,64 +122,87 @@ func (m *MockRegister) VerifyRegistration(ctx context.Context, id string) error 
 }
 
 func TestValidateDuty(t *testing.T) {
-	tests := []struct {
-		name    string
-		duty    FiduciaryDuty
-		setup   func(*MockVerifier)
-		wantErr bool
-	}{
-		{
-			name: "valid duty",
-			duty: FiduciaryDuty{
-				Type:        "loyalty",
-				Description: "Primary loyalty duty",
-				Scope:       []string{"financial_decisions"},
-				Validation:  []string{"rule1"},
+		tests := []struct {
+			name    string
+			duty    FiduciaryDuty
+			setup   func(*MockVerifier)
+			wantErr bool
+		}{
+			{
+				name: "valid duty",
+				duty: FiduciaryDuty{
+					Type:        "loyalty",
+					Description: "Primary loyalty duty",
+					Scope:       []string{"financial_decisions"},
+					Validation:  []string{"rule1"},
+				},
+				setup: func(v *MockVerifier) {
+					v.On("ValidateRule", mock.Anything, "rule1", mock.Anything, mock.Anything).Return(nil)
+				},
+				wantErr: false,
 			},
-			setup: func(v *MockVerifier) {
-				v.On("ValidateScope", mock.Anything, "financial_decisions").Return(nil)
-				v.On("ValidateRule", mock.Anything, "rule1", mock.Anything, mock.Anything).Return(nil)
+			{
+				name: "invalid duty",
+				duty: FiduciaryDuty{
+					Type:        "invalid",
+					Description: "Invalid duty",
+					Scope:       []string{"scope"},
+					Validation:  []string{"rule1"},
+				},
+				setup:   func(v *MockVerifier) {},
+				wantErr: true,
 			},
-			wantErr: false,
-		},
-		{
-			name: "invalid duty type",
-			duty: FiduciaryDuty{
-				Type:        "invalid",
-				Description: "Invalid duty",
-				Scope:       []string{"scope"},
-				Validation:  []string{"rule1"},
+			{
+				name: "empty scope",
+				duty: FiduciaryDuty{
+					Type:        "loyalty",
+					Description: "Empty scope duty",
+					Scope:       []string{},
+					Validation:  []string{"rule1"},
+				},
+				setup:   func(v *MockVerifier) {},
+				wantErr: true,
 			},
-			setup:   func(v *MockVerifier) {},
-			wantErr: true,
-		},
-		{
-			name: "empty scope",
-			duty: FiduciaryDuty{
-				Type:        "loyalty",
-				Description: "Empty scope duty",
-				Scope:       []string{},
-				Validation:  []string{"rule1"},
+						{
+							name: "empty scope",
+							duty: FiduciaryDuty{
+								Type:        "loyalty",
+								Description: "Empty scope duty",
+								Scope:       []string{},
+								Validation:  []string{"rule1"},
+							},
+							setup:   func(v *MockVerifier) {},
+							wantErr: true,
+						},
+						{
+							name: "validation rule failure",
+							duty: FiduciaryDuty{
+								Type:        "loyalty",
+								Description: "Failed validation",
+								Scope:       []string{"scope1"},
+								Validation:  []string{"rule1"},
+							},
+							setup: func(v *MockVerifier) {
+								v.On("ValidateScope", mock.Anything, "scope1").Return(nil)
+								v.On("ValidateRule", mock.Anything, "rule1", mock.Anything, mock.Anything).Return(assert.AnError)
+							},
+							wantErr: true,
+						},
+			{
+				name: "validation rule failure",
+				duty: FiduciaryDuty{
+					Type:        "loyalty",
+					Description: "Failed validation",
+					Scope:       []string{"scope1"},
+					Validation:  []string{"rule1"},
+				},
+				setup: func(v *MockVerifier) {
+					v.On("ValidateScope", mock.Anything, "scope1").Return(nil)
+					v.On("ValidateRule", mock.Anything, "rule1", mock.Anything, mock.Anything).Return(assert.AnError)
+				},
+				wantErr: true,
 			},
-			setup:   func(v *MockVerifier) {},
-			wantErr: true,
-		},
-		{
-			name: "validation rule failure",
-			duty: FiduciaryDuty{
-				Type:        "loyalty",
-				Description: "Failed validation",
-				Scope:       []string{"scope1"},
-				Validation:  []string{"rule1"},
-			},
-			setup: func(v *MockVerifier) {
-				v.On("ValidateScope", mock.Anything, "scope1").Return(nil)
-				v.On("ValidateRule", mock.Anything, "rule1", mock.Anything, mock.Anything).
-					Return(assert.AnError)
-			},
-			wantErr: true,
-		},
-	}
+		}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -180,7 +216,7 @@ func TestValidateDuty(t *testing.T) {
 			ctx := context.WithValue(context.Background(), "entity_id", "test_entity")
 			ctx = context.WithValue(ctx, "delegation_chain", []string{"chain1"})
 
-			err := framework.validateDuty(ctx, tt.duty)
+			   err := framework.ValidateDuty(ctx, tt.duty)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -253,7 +289,7 @@ func TestGetJurisdictionRules(t *testing.T) {
 				register: register,
 			}
 
-			got, err := framework.getJurisdictionRules(tt.jurisdiction)
+			   got, err := framework.GetJurisdictionRules(tt.jurisdiction)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -344,7 +380,7 @@ func TestVerifyCapacityProof(t *testing.T) {
 			}
 
 			ctx := context.WithValue(context.Background(), "entity_type", "organization")
-			err := framework.verifyCapacityProof(ctx, tt.proof)
+			err := framework.VerifyCapacityProof(ctx, tt.proof)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -405,7 +441,7 @@ func TestIsActionAllowed(t *testing.T) {
 				verifier: verifier,
 			}
 
-			got := framework.isActionAllowed(tt.action, tt.allowedActions)
+			got := framework.IsActionAllowed(tt.action, tt.allowedActions)
 			assert.Equal(t, tt.want, got)
 
 			verifier.AssertExpectations(t)
@@ -469,7 +505,7 @@ func TestValidateJurisdictionRequirements(t *testing.T) {
 			}
 
 			ctx := context.WithValue(context.Background(), "entity_type", "organization")
-			err := framework.validateJurisdictionRequirements(ctx, tt.rules, tt.action)
+			err := framework.ValidateJurisdictionRequirements(ctx, tt.rules, tt.action)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
