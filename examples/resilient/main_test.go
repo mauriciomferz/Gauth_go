@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/monitoring"
 	"github.com/mauriciomferz/Gauth_go/pkg/token"
@@ -94,7 +95,7 @@ func TestResilientService(t *testing.T) {
 	       },
        }
 
-       auth, err := gauth.New(&config)
+	auth, err := gauth.New(&config, audit.NewLogger(100))
        if err != nil {
 	       t.Fatalf("Failed to create GAuth instance: %v", err)
        }

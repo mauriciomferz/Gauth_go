@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
@@ -28,7 +29,7 @@ func main() {
 		AccessTokenExpiry: time.Hour,
 		RateLimit:         gauth.Config{}.RateLimit, // Use default zero value for demo
 	}
-	authService, err := gauth.New(&config)
+	authService, err := gauth.New(&config, audit.NewLogger(100))
 	if err != nil {
 		fmt.Println("Error creating GAuth instance:", err)
 		return

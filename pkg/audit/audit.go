@@ -63,7 +63,9 @@ func eventTypeFromString(s string) common.EventType {
 	}
 }
 
-// EventMetadata represents metadata for an audit event
+
+// EventMetadata represents metadata for an audit event.
+// Used for detailed audit logging and compliance.
 type EventMetadata struct {
 	Token      string
 	UserAgent  string
@@ -89,13 +91,54 @@ type securityEvent struct {
 }
 
 // Logger provides thread-safe audit logging capabilities
+	// ...existing code...
+
+// Logger provides thread-safe audit logging capabilities and implements the AuditLogger interface.
+// Use NewLogger to construct a Logger.
 type Logger struct {
 	mu      sync.RWMutex
 	events  []Event
 	maxSize int
 }
 
-// NewLogger creates a new audit logger with specified max event history
+// Log implements the AuditLogger interface for Logger.
+// Records an audit entry.
+func (l *Logger) Log(_ctx context.Context, entry *Entry) {
+	event := Event{
+		Type:     entry.Type,
+		ActorID:  entry.ActorID,
+		Action:   entry.Action,
+		Result:   entry.Result,
+		Metadata: entry.Metadata,
+	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	// Ensure timestamp is set
+	if eventTime, ok := event.Metadata["timestamp"]; !ok || eventTime == "" {
+		event.Metadata["timestamp"] = time.Now().Format(time.RFC3339)
+	}
+	l.events = append([]Event{event}, l.events...)
+	if len(l.events) > l.maxSize {
+		l.events = l.events[:l.maxSize]
+	}
+}
+
+// GetRecentEvents implements the AuditLogger interface for Logger.
+// Returns the n most recent audit events.
+func (l *Logger) GetRecentEvents(n int) []Event {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+	if n <= 0 || n > len(l.events) {
+		n = len(l.events)
+	}
+	result := make([]Event, n)
+	copy(result, l.events[:n])
+	return result
+}
+
+// NewLogger creates a new audit logger with specified max event history.
+// Example:
+//   logger := audit.NewLogger(100)
 func NewLogger(maxSize int) *Logger {
 	if maxSize <= 0 {
 		maxSize = 1000 // Default size if invalid
@@ -106,26 +149,10 @@ func NewLogger(maxSize int) *Logger {
 	}
 }
 
-// Log records a new audit event
-func (l *Logger) Log(event Event) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
+// ...existing code...
 
-	// Ensure timestamp is set
-	if eventTime, ok := event.Metadata["timestamp"]; !ok || eventTime == "" {
-		event.Metadata["timestamp"] = time.Now().Format(time.RFC3339)
-	}
-
-	// Add event to the front for most recent first
-	l.events = append([]Event{event}, l.events...)
-
-	// Trim if exceeding max size
-	if len(l.events) > l.maxSize {
-		l.events = l.events[:l.maxSize]
-	}
-}
-
-// GetRecent returns the n most recent events
+// GetRecent returns the n most recent events (legacy signature).
+// Prefer GetRecentEvents for new code.
 func (l *Logger) GetRecent(n int) []Event {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
@@ -139,11 +166,14 @@ func (l *Logger) GetRecent(n int) []Event {
 	return result
 }
 
-// AuditLogger handles security event logging and persistence
+
+// AuditLogger handles security event logging and persistence for compliance.
+// Use NewAuditLogger to construct an AuditLogger.
 type AuditLogger struct {
 	events []securityEvent
 	mu     sync.RWMutex // private mutex
 }
+
 
 // Close implements io.Closer for AuditLogger (no-op for in-memory logger).
 func (al *AuditLogger) Close() error {
@@ -167,14 +197,17 @@ func (al *AuditLogger) Log(_ctx context.Context, entry *Entry) {
 	})
 }
 
-// NewAuditLogger creates a new audit logger instance with optional storage
+// NewAuditLogger creates a new audit logger instance with optional storage.
+// Example:
+//   logger := audit.NewAuditLogger()
 func NewAuditLogger() *AuditLogger {
 	return &AuditLogger{
 		events: make([]securityEvent, 0),
 	}
 }
 
-// LogEvent records a security event with comprehensive context
+// LogEvent records a security event with comprehensive context.
+// Used for advanced compliance and monitoring.
 func (al *AuditLogger) LogEvent(evt common.EventType, transactionID, clientID string, meta EventMetadata) {
 	al.mu.Lock()
 	defer al.mu.Unlock()
@@ -207,7 +240,7 @@ func (al *AuditLogger) LogEvent(evt common.EventType, transactionID, clientID st
 	}
 }
 
-// GetRecentEvents retrieves recent security events
+// GetRecentEvents retrieves recent security events.
 func (al *AuditLogger) GetRecentEvents(limit int) []securityEvent {
 	al.mu.RLock()
 	defer al.mu.RUnlock()
@@ -222,7 +255,7 @@ func (al *AuditLogger) GetRecentEvents(limit int) []securityEvent {
 	return result
 }
 
-// PrintRecentEvents displays recent security events in a formatted way
+// PrintRecentEvents displays recent security events in a formatted way.
 func (al *AuditLogger) PrintRecentEvents(limit int) {
 	events := al.GetRecentEvents(limit)
 
@@ -253,7 +286,7 @@ func (al *AuditLogger) PrintRecentEvents(limit int) {
 	}
 }
 
-// GetEventsByClient filters events by client ID
+// GetEventsByClient filters events by client ID.
 func (al *AuditLogger) GetEventsByClient(clientID string) []securityEvent {
 	al.mu.RLock()
 	defer al.mu.RUnlock()
@@ -267,7 +300,7 @@ func (al *AuditLogger) GetEventsByClient(clientID string) []securityEvent {
 	return events
 }
 
-// GetEventsByTransaction filters events by transaction ID
+// GetEventsByTransaction filters events by transaction ID.
 func (al *AuditLogger) GetEventsByTransaction(transactionID string) []securityEvent {
 	al.mu.RLock()
 	defer al.mu.RUnlock()
@@ -281,7 +314,7 @@ func (al *AuditLogger) GetEventsByTransaction(transactionID string) []securityEv
 	return events
 }
 
-// GetFailedEvents returns all failed security events
+// GetFailedEvents returns all failed security events.
 func (al *AuditLogger) GetFailedEvents() []securityEvent {
 	al.mu.RLock()
 	defer al.mu.RUnlock()
@@ -295,7 +328,7 @@ func (al *AuditLogger) GetFailedEvents() []securityEvent {
 	return events
 }
 
-// ClearEvents removes all events older than the retention period
+// ClearEvents removes all events older than the retention period.
 func (al *AuditLogger) ClearEvents(retentionPeriod time.Duration) {
 	al.mu.Lock()
 	defer al.mu.Unlock()

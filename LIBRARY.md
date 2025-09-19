@@ -1,67 +1,44 @@
-# GAuth Library Usage Guide
+# GAuth Go Library: Usage & API Guide
 
-This document provides a concise overview for developers who want to use GAuth as a library in their own Go projects.
+Welcome to the GAuth Go library! This document is your entry point for understanding, using, and extending the core GAuth protocol implementation. It is designed for developers of all backgrounds, including those new to Go.
 
----
-
-**Type Safety & Legacy Helpers**
-- All public APIs are type-safe and use explicit, strongly-typed structures.
-- Legacy helpers using `map[string]interface{}` are marked as deprecated and should not be used in new code.
-
----
-
+## What is GAuth?
+GAuth is a centralized, auditable authorization protocol (GiFo-RfC 0111) designed for secure, type-safe, and extensible access control. This library provides a reference implementation in Go.
 
 ## Quick Start
+- See `examples/` for runnable demos and integration patterns.
+- Library code is in `pkg/gauth/` and related subpackages.
+- All protocol boundaries are clearly annotated with `[GAuth]` comments.
 
-1. **Install the package:**
-   ```sh
-   go get github.com/Gimel-Foundation/gauth
-   ```
-2. **Import and initialize:**
+## Key Packages
+- `pkg/gauth/` — Core protocol logic, types, and flows ([GAuth])
+- `pkg/token/`, `pkg/audit/`, `pkg/ratelimit/` — Supporting components ([GAuth])
+- `examples/` — Usage demos, not for production
+
+## How to Use
+1. Import the library:
    ```go
-   import "github.com/Gimel-Foundation/gauth/pkg/gauth"
-
-   svc, err := gauth.New(gauth.Config{ /* ... */ })
-   if err != nil {
-       // handle error
-   }
+   import "github.com/mauriciomferz/Gauth_go/pkg/gauth"
    ```
-3. **Use the service:**
-   - Authorize, issue tokens, audit, etc.
-   - See runnable, up-to-date examples in `examples/` and `examples/<category>/cmd/`.
+2. Initialize and configure your GAuth service or client.
+3. Use strongly-typed requests and responses (see `types.go`).
+4. See `README.md` and this file for more details.
 
+## Extending GAuth
+- Add new grant types, token types, or audit event types by extending the relevant structs and interfaces.
+- Follow the `[GAuth]` annotation pattern for protocol logic.
 
-## Package Structure
-- `pkg/gauth` — Main entry point for service usage
-- `pkg/token` — Token management
-- `pkg/tokenstore` — Token storage interfaces and implementations
-- `pkg/auth` / `pkg/authz` — Authentication/authorization
-- `pkg/audit` — Audit logging
-- `pkg/events` — Event system
-- `examples/` — All runnable examples, now isolated and up-to-date with the latest API
+## Manual Testing & Demos
+- See `MANUAL_TESTING.md` for runtime usage suggestions.
+- Run `go run examples/resilient/cascading.go` for a protocol-compliant simulation.
 
+## Contributing
+- Please see `CONTRIBUTING.md` for guidelines.
+- All contributions should maintain clear protocol boundaries and strong typing.
 
-## Example
-See `examples/basic/main.go` or any `examples/<category>/cmd/main.go` for a full, runnable example using the latest API.
-
-
-## Extending & Customizing
-- Implement your own token store by following the `tokenstore.Store` interface.
-- Add custom event handlers for audit or integration.
-- See package-level `doc.go` files for each package for more details.
-
+## Support
+- Issues and questions: open a GitHub issue or discussion.
 
 ---
 
-
-## Migration & Breaking Changes (2025)
-
-- All example logic with a `main` function is now in its own `main.go` under `examples/` or `examples/<category>/cmd/`.
-- All obsolete and duplicate example files have been removed.
-- All examples are refactored for the new API and type-safe signatures.
-- All public APIs are type-safe (no public map[string]interface{}).
-- Rate limiting is now per-user (OwnerID) and per-client, using the OwnerID field of the token as the subject for rate limiting.
-- Legacy helpers and types are deprecated or removed; use new type-safe alternatives.
-- See `docs/IMPROVEMENTS.md` for a summary of codebase modernization.
-
-For more, see the main `README.md`, [MANUAL_TESTING.md](./MANUAL_TESTING.md), and package-level `doc.go` files.
+For more, see the package-level `doc.go` files and inline code comments throughout the library.

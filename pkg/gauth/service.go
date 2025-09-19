@@ -1,4 +1,13 @@
-// Package gauth/service.go: RFC111 Compliance Mapping
+// GAuth Protocol Compliance: This file implements the GAuth protocol (GiFo-RfC 0111).
+//
+// Protocol Usage Declaration:
+//   - GAuth protocol: IMPLEMENTED throughout this file (see [GAuth] comments below)
+//   - OAuth 2.0:      NOT USED anywhere in this file
+//   - PKCE:           NOT USED anywhere in this file
+//   - OpenID:         NOT USED anywhere in this file
+//
+// [GAuth] = GAuth protocol logic (GiFo-RfC 0111)
+// [Other] = Placeholder for OAuth2, OpenID, PKCE, or other protocols (none present in this file)
 //
 // This file implements the core GAuth service logic as defined in RFC111:
 //   - Centralized authorization (PDP, PEP)
@@ -27,10 +36,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/audit"
-	"github.com/mauriciomferz/Gauth_go/pkg/events"
-	"github.com/mauriciomferz/Gauth_go/pkg/rate"
-	"github.com/mauriciomferz/Gauth_go/pkg/token"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"  // [GAuth]
+	"github.com/mauriciomferz/Gauth_go/pkg/events" // [GAuth]
+	"github.com/mauriciomferz/Gauth_go/pkg/rate"   // [GAuth]
+	"github.com/mauriciomferz/Gauth_go/pkg/token"  // [GAuth]
 )
 
 // Service represents the main GAuth service

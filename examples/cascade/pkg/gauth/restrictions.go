@@ -1,6 +1,10 @@
 package gauth
 
-import "time"
+import (
+	"time"
+
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+)
 
 // Restriction defines constraints and requirements for authentication or authorization
 type Restriction struct {
@@ -26,5 +30,5 @@ type Restriction struct {
 	StrictMode bool `json:"strict_mode"`
 
 	// Properties holds additional type-specific configuration
-	Properties map[string]interface{} `json:"properties,omitempty"`
+	Properties *gauth.Properties `json:"properties,omitempty"`
 }

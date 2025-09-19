@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/common"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/token"
@@ -29,10 +30,10 @@ func main() {
 		},
 		TokenConfig:       &token.Config{SigningMethod: token.RS256},
 	}
-	gauthService, err := gauth.New(&config)
-	if err != nil {
-		log.Fatalf("Failed to create GAuth service: %v", err)
-	}
+       gauthService, err := gauth.New(&config, audit.NewLogger(100))
+       if err != nil {
+	       log.Fatalf("Failed to create GAuth service: %v", err)
+       }
 
 	// Simulate an authorization request and grant
 	authReq := gauth.AuthorizationRequest{

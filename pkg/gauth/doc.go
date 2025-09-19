@@ -1,4 +1,9 @@
 /*
+Copyright (c) 2025 Gimel Foundation and the persons identified as the document authors.
+All rights reserved. This file is subject to the Gimel Foundation's Legal Provisions Relating to GiFo Documents.
+See http://GimelFoundation.com or https://github.com/Gimel-Foundation for details.
+Code Components extracted from GiFo-RfC 0111 must include this license text and are provided without warranty.
+
 Package gauth implements the GAuth authorization framework for AI power-of-attorney, as defined in RFC111 (GiFo-RfC 0111).
 
 GAuth enables AI systems to act on behalf of humans or organizations, with explicit, verifiable, and auditable power-of-attorney flows. It is designed for open source extensibility, type safety, and compliance with modern standards (OAuth, OpenID Connect, MCP).
@@ -203,6 +208,44 @@ See SECURITY.md for:
 This package implements the GiFo-RfC 0111 (GAuth) standard for AI power-of-attorney, delegation, and auditability.
 All protocol roles, flows, and exclusions are respected. See https://gimelfoundation.com for the full RFC.
 
+# Protocol Flow: Registration & Identity Proof (RFC 0111 I–VIII)
+
+The GAuth protocol defines a registration and identity proof flow, which MUST be followed for all onboarding and delegation events. The steps below are mapped to code and comments throughout the package:
+
+1. **Registration Request (I):**
+	- The client (human or AI) initiates a registration request using `AuthorizationRequest`.
+	- See: `pkg/gauth/types.go` (AuthorizationRequest), `Service.Authorize` and `GAuth.InitiateAuthorization`.
+
+2. **Identity Proof Submission (II):**
+	- The client MUST provide identity proof (e.g., credentials, cryptographic keys) as part of the request or via a configured provider.
+	- See: `validateAuthRequest` in `service.go` and `gauth.go` (enforces client ID and scope).
+
+3. **Verification (III):**
+	- The service MUST verify the provided identity using configured policies and, if required, external providers.
+	- See: `validateAuthRequest` and any custom provider logic.
+
+4. **Grant Issuance (IV):**
+	- If verification succeeds, an `AuthorizationGrant` is issued and stored.
+	- See: `Service.Authorize`, `GAuth.InitiateAuthorization`.
+
+5. **Attestation (V):**
+	- For high-assurance flows, an attestation MAY be required (see `Attestation` type in `types.go`).
+	- See: `AuthorizationGrant.Attestation`.
+
+6. **Delegation (VI):**
+	- Delegation MUST be explicit and auditable. The grant MAY include `DelegatedFrom` and version history fields.
+	- See: `AuthorizationGrant` struct in `types.go`.
+
+7. **Token Request (VII):**
+	- The client requests a token using the issued grant.
+	- See: `Service.RequestToken`, `GAuth.RequestToken`.
+
+8. **Token Issuance (VIII):**
+	- The service issues a token if the grant is valid and not revoked.
+	- See: `Service.RequestToken`, `GAuth.RequestToken`.
+
+All steps are logged via the audit/event system for full traceability. See `audit` and `events` packages for details.
+
 # Advanced Usage: Delegation & Attestation
 
 GAuth supports advanced delegation and attestation flows:
@@ -224,4 +267,24 @@ Example:
 
 See LIBRARY.md and examples/ for more advanced flows.
 */
+// Package gauth provides the core implementation of the GAuth protocol (GiFo-RfC 0111).
+//
+// GAuth is a centralized, auditable authorization protocol designed for secure, type-safe, and extensible access control.
+//
+// # Key Features
+//   - Centralized authorization and grant/token lifecycle
+//   - Strong typing and explicit protocol boundaries ([GAuth] comments)
+//   - Audit/event logging for all protocol steps
+//   - Extensible grant, token, and event types
+//
+// # Usage
+//
+//   import "github.com/mauriciomferz/Gauth_go/pkg/gauth"
+//
+// See LIBRARY.md and README.md for usage examples and integration patterns.
+//
+// # Protocol Boundaries
+// This package implements only the GAuth protocol. OAuth 2.0, PKCE, and OpenID are NOT used anywhere in this package.
+//
+// For more information, see the project documentation and inline code comments.
 package gauth

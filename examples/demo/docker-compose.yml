@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: gauth-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  gauth-demo:
+    build: .
+    container_name: gauth-demo
+    depends_on:
+      - redis
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    ports:
+      - "8080:8080"
+    command: ["/app/demo-server"]
+    restart: unless-stopped
+
+  example-client:
+    build: ./client
+    container_name: gauth-client
+    depends_on:
+      - gauth-demo
+    environment:
+      - API_URL=http://gauth-demo:8080
+    command: ["/app/client"]
+    restart: unless-stopped

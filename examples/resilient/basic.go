@@ -8,15 +8,11 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/circuit"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/monitoring"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-
-	// TODO: The following internal imports are not allowed in Go. Refactor to use public APIs or copy needed logic.
-	// "github.com/mauriciomferz/Gauth_go/internal/circuit"
-	// "github.com/mauriciomferz/Gauth_go/internal/monitoring"
-	// "github.com/mauriciomferz/Gauth_go/internal/monitoring/prometheus"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
 // ResilientService combines circuit breaker and monitoring
@@ -105,10 +101,10 @@ func runBasicExample() {
 		err error
 	)
 
-	auth, err := gauth.New(&config)
-	if err != nil {
-		log.Fatalf("Failed to initialize GAuth: %v", err)
-	}
+       auth, err := gauth.New(&config, audit.NewLogger(100))
+       if err != nil {
+	       log.Fatalf("Failed to initialize GAuth: %v", err)
+       }
 
 	// Create resilient service
 	service := NewResilientService(auth)

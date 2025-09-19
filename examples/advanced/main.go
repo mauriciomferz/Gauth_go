@@ -1,28 +1,41 @@
 package main
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
 	"log"
 	"time"
 
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 func main() {
 	// Create a GAuth instance with custom rate limits and token expiry
-	config := &gauth.Config{
-		AuthServerURL:     "https://auth.example.com",
-		ClientID:          "advanced-client",
-		ClientSecret:      "advanced-secret",
-		Scopes:            []string{"read", "write", "admin"},
-		AccessTokenExpiry: 30 * time.Minute,
-		TokenConfig:       &token.Config{SigningMethod: token.RS256},
-	}
 
-	auth, err := gauth.New(config)
-	if err != nil {
-		log.Fatalf("Failed to initialize GAuth: %v", err)
-	}
+       // Generate a real RSA key for signing
+       privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+       if err != nil {
+	       log.Fatalf("Failed to generate RSA key: %v", err)
+       }
+
+       config := &gauth.Config{
+	       AuthServerURL:     "https://auth.example.com",
+	       ClientID:          "advanced-client",
+	       ClientSecret:      "advanced-secret",
+	       Scopes:            []string{"read", "write", "admin"},
+	       AccessTokenExpiry: 30 * time.Minute,
+	       TokenConfig: &token.Config{
+		       SigningMethod: token.RS256,
+		       SigningKey:    privateKey,
+	       },
+       }
+
+       auth, err := gauth.New(config, audit.NewLogger(100))
+       if err != nil {
+	       log.Fatalf("Failed to initialize GAuth: %v", err)
+       }
 
 	// Create a resource server with custom settings
 	server := gauth.NewResourceServer("advanced-resource", auth)

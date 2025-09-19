@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/events"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
@@ -46,7 +47,7 @@ func main() {
 	       // ClientSecret:  "demo-secret",
 	       AccessTokenExpiry: time.Hour,
        }
-       auth, err := gauth.New(&cfg)
+	auth, err := gauth.New(&cfg, audit.NewLogger(100))
 	if err != nil {
 		log.Fatalf("failed to create GAuth instance: %v", err)
 	}

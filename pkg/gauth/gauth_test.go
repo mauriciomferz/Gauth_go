@@ -1,3 +1,15 @@
+// GAuth Protocol Compliance: This test file validates the GAuth protocol (GiFo-RfC 0111).
+//
+// Protocol Usage Declaration:
+//   - GAuth protocol: TESTED throughout this file (see [GAuth] comments below)
+//   - OAuth 2.0:      NOT USED anywhere in this file
+//   - PKCE:           NOT USED anywhere in this file
+//   - OpenID:         NOT USED anywhere in this file
+//
+// [GAuth] = GAuth protocol logic (GiFo-RfC 0111)
+// [Other] = Placeholder for OAuth2, OpenID, PKCE, or other protocols (none present in this file)
+//
+// [GAuth] Package gauth_test validates GAuth protocol compliance.
 package gauth_test
 
 import (
@@ -8,6 +20,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
@@ -42,7 +55,7 @@ func TestGAuth(t *testing.T) {
 			TokenConfig:       &token.Config{SigningMethod: token.RS256, SigningKey: newMockSigner()},
 		}
 
-		auth, err := gauth.New(validConfig)
+			   auth, err := gauth.New(validConfig, audit.NewLogger(100))
 		if err != nil {
 			t.Errorf("Failed to create GAuth with valid config: %v", err)
 		}
@@ -51,7 +64,7 @@ func TestGAuth(t *testing.T) {
 		}
 
 		invalidConfig := &gauth.Config{TokenConfig: &token.Config{SigningMethod: token.RS256, SigningKey: newMockSigner()}}
-		if _, err := gauth.New(invalidConfig); err == nil {
+			   if _, err := gauth.New(invalidConfig, audit.NewLogger(100)); err == nil {
 
 			t.Error("Expected error with invalid config")
 		}
@@ -59,14 +72,14 @@ func TestGAuth(t *testing.T) {
 
 	// Test authorization flow
 	t.Run("Authorization Flow", func(t *testing.T) {
-		auth, _ := gauth.New(&gauth.Config{
-			AuthServerURL:     "https://auth.example.com",
-			ClientID:          "test-client",
-			ClientSecret:      "test-secret",
-			Scopes:            []string{"read", "write"},
-			AccessTokenExpiry: time.Hour,
-			TokenConfig:       &token.Config{SigningMethod: token.RS256, SigningKey: newMockSigner()},
-		})
+			   auth, _ := gauth.New(&gauth.Config{
+		       AuthServerURL:     "https://auth.example.com",
+		       ClientID:          "test-client",
+		       ClientSecret:      "test-secret",
+		       Scopes:            []string{"read", "write"},
+		       AccessTokenExpiry: time.Hour,
+		       TokenConfig:       &token.Config{SigningMethod: token.RS256, SigningKey: newMockSigner()},
+	       }, audit.NewLogger(100))
 
 		req := gauth.AuthorizationRequest{
 			ClientID: "test-client",
@@ -87,14 +100,14 @@ func TestGAuth(t *testing.T) {
 
 	// Test token issuance and validation
 	t.Run("Token Operations", func(t *testing.T) {
-		auth, _ := gauth.New(&gauth.Config{
-			AuthServerURL:     "https://auth.example.com",
-			ClientID:          "test-client",
-			ClientSecret:      "test-secret",
-			Scopes:            []string{"read", "write"},
-			AccessTokenExpiry: time.Hour,
-			TokenConfig:       &token.Config{SigningMethod: token.RS256, SigningKey: newMockSigner()},
-		})
+			   auth, _ := gauth.New(&gauth.Config{
+		       AuthServerURL:     "https://auth.example.com",
+		       ClientID:          "test-client",
+		       ClientSecret:      "test-secret",
+		       Scopes:            []string{"read", "write"},
+		       AccessTokenExpiry: time.Hour,
+		       TokenConfig:       &token.Config{SigningMethod: token.RS256, SigningKey: newMockSigner()},
+	       }, audit.NewLogger(100))
 
 		// Request a token
 		tokenReq := gauth.TokenRequest{
@@ -128,13 +141,13 @@ func TestGAuth(t *testing.T) {
 
 	// Test token expiration
 	t.Run("Token Expiration", func(t *testing.T) {
-		auth, _ := gauth.New(&gauth.Config{
-			AuthServerURL:     "https://auth.example.com",
-			ClientID:          "test-client",
-			ClientSecret:      "test-secret",
-			AccessTokenExpiry: 100 * time.Millisecond,
-			TokenConfig:       &token.Config{SigningMethod: token.RS256, SigningKey: newMockSigner()},
-		})
+			   auth, _ := gauth.New(&gauth.Config{
+		       AuthServerURL:     "https://auth.example.com",
+		       ClientID:          "test-client",
+		       ClientSecret:      "test-secret",
+		       AccessTokenExpiry: 100 * time.Millisecond,
+		       TokenConfig:       &token.Config{SigningMethod: token.RS256, SigningKey: newMockSigner()},
+	       }, audit.NewLogger(100))
 
 		tokenReq := gauth.TokenRequest{
 			GrantID: "test-grant",

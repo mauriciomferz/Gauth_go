@@ -1,11 +1,26 @@
+// Copyright (c) 2025 Gimel Foundation and the persons identified as the document authors.
+// All rights reserved. This file is subject to the Gimel Foundation's Legal Provisions Relating to GiFo Documents.
+// See http://GimelFoundation.com or https://github.com/Gimel-Foundation for details.
+// Code Components extracted from GiFo-RfC 0111 must include this license text and are provided without warranty.
+//
 // Package gauth: RFC111 Compliance Mapping
 //
-// This file implements the core P*P (Power*Point) roles as defined in RFC111:
-//   - Power Enforcement Point (PEP): access control enforcement
-//   - Power Decision Point (PDP): authorization logic
-//   - Power Information Point (PIP): attribute gathering
-//   - Power Administration Point (PAP): policy management
-//   - Power Verification Point (PVP): token validation
+// This file implements the core P*P (Power*Point) roles as defined in GiFo-RfC 0111:
+//
+//   - Power Enforcement Point (PEP):
+//     Responsible for enforcing access control decisions. In GAuth, this is implemented by the PowerEnforcementPoint type, which MUST check if a token allows a specific action and enforce restrictions as required by the protocol.
+//
+//   - Power Decision Point (PDP):
+//     Responsible for making authorization decisions. In GAuth, this is implemented by the PowerDecisionPoint type, which MUST decide if a token grants access to a requested action, based on protocol rules and grant scopes.
+//
+//   - Power Information Point (PIP):
+//     Responsible for gathering attributes and contextual information needed for authorization decisions. In GAuth, this role is typically fulfilled by the GAuth instance and its configuration, which MAY provide additional context for PDP decisions.
+//
+//   - Power Administration Point (PAP):
+//     Responsible for policy management, including adding, updating, or revoking restrictions. In GAuth, this is implemented by the PowerAdministrationPoint type, which MAY add or update restrictions and MUST support token invalidation for revocation.
+//
+//   - Power Verification Point (PVP):
+//     Responsible for verifying the validity of tokens and identities. In GAuth, this is implemented by the PowerVerificationPoint type, which MUST validate tokens and MAY provide additional verification logic as required by the protocol.
 //
 // Relevant RFC111 Sections:
 //   - Section 3: Nomenclature (P*P roles)
@@ -23,11 +38,11 @@
 // ---
 //
 // The points system implements:
-//   - Power enforcement points for access control
-//   - Decision points for authorization logic
-//   - Information points for attribute gathering
-//   - Administration points for policy management
-//   - Verification points for token validation
+//   - PowerEnforcementPoint (PEP): Enforces access control
+//   - PowerDecisionPoint (PDP): Makes authorization decisions
+//   - PowerInformationPoint (PIP): Gathers attributes/context
+//   - PowerAdministrationPoint (PAP): Manages policies/revocation
+//   - PowerVerificationPoint (PVP): Verifies tokens/identities
 package gauth
 
 import (

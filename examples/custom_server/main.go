@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
@@ -53,10 +54,10 @@ func main() {
 		TokenConfig:       &token.Config{SigningMethod: token.RS256},
 	}
 
-	auth, err := gauth.New(config)
-	if err != nil {
-		log.Fatalf("Failed to initialize GAuth: %v", err)
-	}
+	auth, err := gauth.New(config, audit.NewLogger(100))
+       if err != nil {
+	       log.Fatalf("Failed to initialize GAuth: %v", err)
+       }
 
 	// Create custom resource server
 	server := NewCustomResourceServer("custom-resource", auth)

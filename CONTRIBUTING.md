@@ -63,7 +63,6 @@ GAuth follows a standard Go project layout:
 - **Library code** lives in `/pkg` and is designed for type safety, modularity, and reusability.
 - **Demo and example code** is in `/examples` and `/cmd/demo`, and should not be mixed with core library code.
 - All onboarding and usage examples reference the demo code for clarity.
-```
 
 ## Package Structure
 
@@ -154,5 +153,12 @@ In short, when you submit code changes, your submissions are understood to be un
 ## Report bugs using Github's [issue tracker](https://github.com/Gimel-Foundation/gauth/issues)
 We use GitHub issues to track public bugs. Report a bug by [opening a new issue](https://github.com/Gimel-Foundation/gauth/issues/new).
 
-## License
-By contributing, you agree that your contributions will be licensed under its MIT License.
+## Community Feedback & Involvement
+
+We encourage all users and contributors to:
+- Start or join discussions in the [GitHub Discussions](https://github.com/mauriciomferz/Gauth_go/discussions) tab.
+- Ask questions, share ideas, or propose improvements.
+- Open issues for bugs, feature requests, or documentation needs.
+- Help review pull requests and provide feedback.
+
+Your input shapes the future of GAuth—thank you for being part of the community!
