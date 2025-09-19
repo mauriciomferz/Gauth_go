@@ -1,15 +1,15 @@
 package integration
 
 import (
-  "context"
-  "errors"
-  "testing"
-  "time"
+	"context"
+	"errors"
+	"testing"
+	"time"
 
-  "github.com/stretchr/testify/assert"
-  "github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
-  "github.com/Gimel-Foundation/gauth/pkg/resilience"
+	"github.com/mauriciomferz/Gauth_go/pkg/resilience"
 )
 
 func TestResilienceIntegration(t *testing.T) {
@@ -50,20 +50,32 @@ func TestResilienceIntegration(t *testing.T) {
 		})
 
 		// Test half-open state
-		t.Run("HalfOpen", func(t *testing.T) {
-			// Wait for timeout
-			time.Sleep(2 * time.Second)
+	       t.Run("HalfOpen", func(t *testing.T) {
+		       // Wait for timeout
+		       time.Sleep(2 * time.Second)
 
-			// Circuit should be half-open
-			assert.Equal(t, resilience.StateHalfOpen, cb.State())
+		       // Trigger transition to half-open by calling Execute
+		       err := cb.Execute(ctx, func(ctx context.Context) error {
+			       return nil
+		       })
+		       require.NoError(t, err)
+		       // Circuit should now be half-open
+		       assert.Equal(t, resilience.StateHalfOpen, cb.State())
 
-			// Successful execution should close circuit
-			err := cb.Execute(ctx, func(ctx context.Context) error {
-				return nil
-			})
-			require.NoError(t, err)
-			assert.Equal(t, resilience.StateClosed, cb.State())
-		})
+		       // Make remaining successful executions in half-open
+		       for i := 1; i < 3; i++ {
+			       err := cb.Execute(ctx, func(ctx context.Context) error {
+				       return nil
+			       })
+			       require.NoError(t, err)
+			       // After first two, should still be half-open
+			       if i < 2 {
+				       assert.Equal(t, resilience.StateHalfOpen, cb.State())
+			       }
+		       }
+		       // After third, should be closed
+		       assert.Equal(t, resilience.StateClosed, cb.State())
+	       })
 	})
 
 	t.Run("RetryWithBackoff", func(t *testing.T) {
@@ -153,15 +165,15 @@ func TestResilienceIntegration(t *testing.T) {
 			}
 
 			// Collect results
-			var errors []error
+			var errs []error
 			for i := 0; i < 3; i++ {
-				errors = append(errors, <-complete)
+				errs = append(errs, <-complete)
 			}
 
 			// Should have one rejection and two successes
 			successes := 0
 			rejections := 0
-			for _, err := range errors {
+			for _, err := range errs {
 				if err == nil {
 					successes++
 				} else if errors.Is(err, resilience.ErrBulkheadFull) {
@@ -180,6 +192,7 @@ func TestResilienceIntegration(t *testing.T) {
 			resilience.NewCircuitBreaker(resilience.CircuitConfig{
 				MaxFailures: 2,
 				Timeout:     1 * time.Second,
+				Interval:    5 * time.Second,
 			}),
 			resilience.NewRetry(resilience.RetryConfig{
 				MaxAttempts:  2,

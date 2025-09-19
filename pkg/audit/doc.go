@@ -10,7 +10,7 @@
 //
 // # Quick Start
 //
-//	import "github.com/Gimel-Foundation/gauth/pkg/audit"
+//	import "github.com/mauriciomferz/Gauth_go/pkg/audit"
 //
 //	evt := audit.NewEvent(audit.EventTypeGrant, "user123", "token456")
 //	err := audit.DefaultLogger.Log(ctx, evt)

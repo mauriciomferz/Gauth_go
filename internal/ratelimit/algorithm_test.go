@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/internal/ratelimit"
+	"github.com/mauriciomferz/Gauth_go/internal/ratelimit"
 )
 
 // TestRateLimit tests both TokenBucket and SlidingWindow algorithms

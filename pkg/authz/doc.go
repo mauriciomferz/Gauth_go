@@ -2,7 +2,7 @@
 //
 // # Quick Start
 //
-//	import "github.com/Gimel-Foundation/gauth/pkg/authz"
+//	import "github.com/mauriciomferz/Gauth_go/pkg/authz"
 //
 //	az := authz.New(nil)
 //	req := &authz.Request{

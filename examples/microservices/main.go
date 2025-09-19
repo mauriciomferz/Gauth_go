@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/internal/circuit"
-	"github.com/Gimel-Foundation/gauth/internal/ratelimit"
-	"github.com/Gimel-Foundation/gauth/internal/resilience"
+	"github.com/mauriciomferz/Gauth_go/pkg/circuit"
+	"github.com/mauriciomferz/Gauth_go/pkg/ratelimit"
+	"github.com/mauriciomferz/Gauth_go/pkg/resilience"
 )
 
 // MicroserviceExample demonstrates resilience patterns in a microservices architecture
@@ -82,7 +82,10 @@ func NewServiceChain(services []*MicroserviceExample) *ServiceChain {
 	})
 
 	// Initialize bulkhead for concurrency control
-	bulkhead := resilience.NewBulkhead(5)
+	bulkhead := resilience.NewBulkhead(resilience.BulkheadConfig{
+		MaxConcurrent: 5,
+		MaxWaitTime:   0, // or set as needed
+	})
 
 	return &ServiceChain{
 		services: services,
@@ -100,11 +103,11 @@ func (sc *ServiceChain) ExecuteChain(ctx context.Context) error {
 	}
 
 	// Execute through bulkhead
-	return sc.bulkhead.Execute(ctx, func() error {
+	return sc.bulkhead.Execute(ctx, func(ctx context.Context) error {
 		// Call each service in the chain with retries and circuit breaking
 		for _, svc := range sc.services {
 			breaker := sc.breakers[svc.name]
-			err := sc.retry.Execute(ctx, func() error {
+			err := sc.retry.Do(func() error {
 				return breaker.Execute(func() error {
 					return svc.Call(ctx)
 				})

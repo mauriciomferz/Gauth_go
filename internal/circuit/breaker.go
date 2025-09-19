@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/internal/errors"
+	"github.com/mauriciomferz/Gauth_go/pkg/errors"
 )
 
 // State represents the state of the circuit breaker

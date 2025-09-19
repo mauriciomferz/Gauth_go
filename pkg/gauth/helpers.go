@@ -13,12 +13,12 @@ import (
 // Helper functions for grant generation and validation
 
 // generateGrantID creates a cryptographically secure random grant ID
-func generateGrantID() string {
-	b := make([]byte, 32)
-	if _, err := rand.Read(b); err != nil {
-		panic(fmt.Sprintf("failed to generate random grant ID: %v", err))
-	}
-	return base64.RawURLEncoding.EncodeToString(b)
+func generateGrantID() (string, error) {
+       b := make([]byte, 32)
+       if _, err := rand.Read(b); err != nil {
+	       return "", fmt.Errorf("failed to generate random grant ID: %w", err)
+       }
+       return base64.RawURLEncoding.EncodeToString(b), nil
 }
 
 // validateScope checks if all requested scopes are allowed

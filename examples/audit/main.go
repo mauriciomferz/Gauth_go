@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/Gimel-Foundation/gauth/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 )
 
 func main() {

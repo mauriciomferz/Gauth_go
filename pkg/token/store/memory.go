@@ -13,7 +13,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/errors"
 )
 
-// DEPRECATED: Use github.com/Gimel-Foundation/gauth/pkg/token.MemoryStore instead
+// DEPRECATED: Use github.com/mauriciomferz/Gauth_go/pkg/token.MemoryStore instead
 //
 // This implementation is kept for backward compatibility with older code.
 // New code should use the MemoryStore from the token package directly.

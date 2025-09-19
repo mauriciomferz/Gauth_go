@@ -1,9 +1,45 @@
-// Package legalframework provides types and functions for working with legal frameworks in the context of authentication and authorization.
 package legalframework
 
 import (
+	"context"
 	"time"
 )
+
+// DecisionAttributes represents attributes for a decision (minimal stub)
+type DecisionAttributes struct {
+	StringAttrs map[string]string
+	IntAttrs    map[string]int
+	BoolAttrs   map[string]bool
+}
+
+// IsExpired returns whether the cache entry is expired (stub implementation)
+func (e DataCacheEntry) IsExpired() bool {
+	return false
+}
+
+// AddEntry adds an entry to the audit log (stub implementation)
+func (a *AuditLog) AddEntry(entry AuditEntry) {
+	a.Entries = append(a.Entries, entry)
+}
+
+// Callback is a stub handler callback for Handler
+func (h Handler) Callback(ctx context.Context, decision interface{}) error {
+	return nil
+}
+
+// PowerAdministrationPoint represents a point for administering policies and actions
+type PowerAdministrationPoint struct {
+	Policies       []Policy
+	Administrators []string
+	AuditLog       []AdminAction
+}
+
+// ContextEnrichmentRule represents a rule for enriching authorization context
+type ContextEnrichmentRule struct {
+	Mapping map[string]string
+	Priority int
+}
+
 
 // Condition represents a condition that must be evaluated to determine access
 type Condition struct {
@@ -161,12 +197,12 @@ type Handler struct {
 
 // AuditLog represents an audit log
 type AuditLog struct {
-	Entries []LegalframeworkAuditEntry
+	Entries []AuditEntry
 	MaxSize int
 }
 
 // AuditEntry represents an entry in the audit log
-type LegalframeworkAuditEntry struct {
+type AuditEntry struct {
 	ID        string
 	Timestamp time.Time
 	Actor     string

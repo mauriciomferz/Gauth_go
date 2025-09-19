@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/internal/circuit"
+	"github.com/mauriciomferz/Gauth_go/internal/circuit"
 )
 
 // RetryStrategy defines how retries should be performed

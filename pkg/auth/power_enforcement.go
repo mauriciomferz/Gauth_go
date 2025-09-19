@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	gauth "github.com/Gimel-Foundation/gauth/pkg/gauth"
-	"github.com/Gimel-Foundation/gauth/pkg/token"
-	toktypes "github.com/Gimel-Foundation/gauth/pkg/token"
+	gauth "github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
+	toktypes "github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 // PowerEnforcementPoint defines the interface for power enforcement
@@ -110,34 +110,47 @@ type CommercialRegister struct {
 
 // Registry operations
 func (cr *CommercialRegister) RegisterAI(ctx context.Context, tok *token.EnhancedToken, entry *RegisterEntry) error {
-	// TODO: implement
-	return nil
+ 	/* trunk-ignore(git-diff-check/error) */
+ 	// STUB: Register an AI system in the commercial register (not implemented)
+ 	/* trunk-ignore(git-diff-check/error) */
+ 	return fmt.Errorf("RegisterAI not implemented")
 }
 func (cr *CommercialRegister) VerifyRegistration(ctx context.Context, registryID string) error {
-	// TODO: implement
-	return nil
+ 	/* trunk-ignore(git-diff-check/error) */
+ 	// STUB: Verify registration of an AI system (not implemented)
+ 	/* trunk-ignore(git-diff-check/error) */
+ 	return fmt.Errorf("VerifyRegistration not implemented")
 }
 func (cr *CommercialRegister) UpdateAuthority(ctx context.Context, registryID string, powers *PowerOfAttorney) error {
-	// TODO: implement
-	return nil
+ 	/* trunk-ignore(git-diff-check/error) */
+ 	// STUB: Update authority for a registered AI system (not implemented)
+ 	/* trunk-ignore(git-diff-check/error) */
+ 	return fmt.Errorf("UpdateAuthority not implemented")
 }
 func (cr *CommercialRegister) RevokeRegistration(ctx context.Context, registryID string) error {
-	// TODO: implement
-	return nil
+ 	/* trunk-ignore(git-diff-check/error) */
+ 	// STUB: Revoke registration of an AI system (not implemented)
+ 	/* trunk-ignore(git-diff-check/error) */
+ 	return fmt.Errorf("RevokeRegistration not implemented")
 }
 
 // Power of attorney management
 func (cr *CommercialRegister) GrantPowerOfAttorney(ctx context.Context, power *PowerOfAttorney) error {
-	// TODO: implement
-	return nil
+ 	/* trunk-ignore(git-diff-check/error) */
+ 	// STUB: Grant power of attorney (not implemented)
+ 	/* trunk-ignore(git-diff-check/error) */
+ 	return fmt.Errorf("GrantPowerOfAttorney not implemented")
 }
 func (cr *CommercialRegister) VerifyPowerOfAttorney(ctx context.Context, powerID string) error {
-	// TODO: implement
-	return nil
+ 	/* trunk-ignore(git-diff-check/error) */
+ 	// STUB: Verify power of attorney (not implemented)
+ 	/* trunk-ignore(git-diff-check/error) */
+ 	return fmt.Errorf("VerifyPowerOfAttorney not implemented")
 }
 func (cr *CommercialRegister) RevokePowerOfAttorney(ctx context.Context, powerID string) error {
-	// TODO: implement
-	return nil
+ 	// STUB: Revoke power of attorney (not implemented)
+ 	/* trunk-ignore(git-diff-check/error) */
+ 	return fmt.Errorf("RevokePowerOfAttorney not implemented")
 }
 
 func NewStandardPowerEnforcement(
@@ -249,21 +262,21 @@ func (p *StandardPowerEnforcement) ValidateResourceAccess(ctx context.Context, t
 // Helper methods
 
 func (p *StandardPowerEnforcement) getPowerOfAttorney(ctx context.Context, token *token.EnhancedToken) (*PowerOfAttorney, error) {
-	// Implementation would retrieve power of attorney from store
-	return nil, nil
+	// STUB: Retrieve power of attorney from store (not implemented)
+	return nil, fmt.Errorf("getPowerOfAttorney not implemented")
 }
 
 func (p *StandardPowerEnforcement) validateObligation(ctx context.Context, token *token.EnhancedToken, obligation *Obligation) error {
-	// Implementation would validate specific obligation
-	return nil
+	// STUB: Validate specific obligation (not implemented)
+	return fmt.Errorf("validateObligation not implemented")
 }
 
 func (p *StandardPowerEnforcement) validateRestriction(ctx context.Context, token *token.EnhancedToken, restriction *gauth.Restriction) error {
-	// Implementation would validate specific restriction
-	return nil
+	// STUB: Validate specific restriction (not implemented)
+	return fmt.Errorf("validateRestriction not implemented")
 }
 
 func (p *StandardPowerEnforcement) verifyCosigner(ctx context.Context, token *token.EnhancedToken, cosigner string) error {
-	// Implementation would verify cosigner
-	return nil
+	// STUB: Verify cosigner (not implemented)
+	return fmt.Errorf("verifyCosigner not implemented")
 }

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/internal/ratelimit"
+	"github.com/mauriciomferz/Gauth_go/internal/ratelimit"
 )
 
 func TestEdgeCases(t *testing.T) {

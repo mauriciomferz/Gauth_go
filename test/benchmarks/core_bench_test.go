@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/rate"
-	"github.com/Gimel-Foundation/gauth/pkg/token"
+	"github.com/mauriciomferz/Gauth_go/pkg/rate"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 // BenchmarkTokenGeneration benchmarks token generation performance

@@ -34,6 +34,7 @@ import (
 )
 
 // Service represents the main GAuth service
+type Service struct {
 	config      *Config
 	rateLimiter rate.Limiter
 	tokenSvc    *token.Service
@@ -83,7 +84,7 @@ func NewService(config *Config) (*Service, error) {
 
        // Construct token.Config from gauth.Config (add mapping as needed)
        tokenStore := token.NewMemoryStore()
-       fmt.Printf("DEBUG: SigningKey in gauth.NewService: %v, addr: %p\n", config.SigningKey, config.SigningKey)
+	fmt.Printf("DEBUG: SigningKey in gauth.NewService: %v, addr: %p\n", config.TokenConfig.SigningKey, config.TokenConfig.SigningKey)
        var tokenConfig *token.Config
        if config.TokenConfig != nil {
 	       tokenConfig = config.TokenConfig
@@ -146,12 +147,16 @@ func (s *Service) Authorize(ctx context.Context, req *AuthorizationRequest) (*Au
 	}
 
 	// Create grant
-       grant := &AuthorizationGrant{
-	       GrantID:    generateGrantID(),
-	       ClientID:   req.ClientID,
-	       Scope:      req.Scopes,
-	       ValidUntil: time.Now().Add(s.config.AccessTokenExpiry),
-       }
+	grantID, err := generateGrantID()
+	if err != nil {
+		 return nil, fmt.Errorf("failed to generate grant ID: %w", err)
+	}
+	grant := &AuthorizationGrant{
+		GrantID:    grantID,
+		ClientID:   req.ClientID,
+		Scope:      req.Scopes,
+		ValidUntil: time.Now().Add(s.config.AccessTokenExpiry),
+	}
 
 	// Store grant
 	s.mu.Lock()
@@ -203,7 +208,7 @@ func (s *Service) RequestToken(ctx context.Context, req *TokenRequest) (*TokenRe
 	       IssuedAt:  time.Now(),
 	       Type:      token.Access,
        }
-	fmt.Printf("DEBUG: GAuth Service.RequestToken SigningKey before Issue: %v, addr: %p\n", s.config.SigningKey, s.config.SigningKey)
+	fmt.Printf("DEBUG: GAuth Service.RequestToken SigningKey before Issue: %v, addr: %p\n", s.config.TokenConfig.SigningKey, s.config.TokenConfig.SigningKey)
 	issued, err := s.tokenSvc.Issue(ctx, tok)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate token: %w", err)
@@ -298,17 +303,6 @@ func (s *Service) validateAuthRequest(req *AuthorizationRequest) error {
 	return nil
 }
 
-func (s *Service) handleAuthGrant(data interface{}) {
-	// Handle authorization grant event
-}
-
-func (s *Service) handleTokenIssue(data interface{}) {
-	// Handle token issuance event
-}
-
-func (s *Service) handleTokenRevoke(data interface{}) {
-	// Handle token revocation event
-}
 
 func validateConfig(config *Config) error {
        if config.AuthServerURL == "" {
@@ -323,10 +317,10 @@ func validateConfig(config *Config) error {
        if config.AccessTokenExpiry <= 0 {
 	       return fmt.Errorf("access token expiry must be positive")
        }
-       if config.SigningKey == nil {
+	if config.TokenConfig == nil || config.TokenConfig.SigningKey == nil {
 	       return fmt.Errorf("signing key is required")
        }
-       if config.SigningMethod == "" {
+	if config.TokenConfig == nil || config.TokenConfig.SigningMethod == "" {
 	       return fmt.Errorf("signing method is required")
        }
        return nil

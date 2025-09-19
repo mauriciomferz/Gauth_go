@@ -72,19 +72,23 @@ func (n *ClusterNode) handleRevocation(tokenID string) {
 }
 
 func (n *ClusterNode) CreateToken(ctx context.Context, subject string) (*token.Token, string, error) {
-    t := &token.Token{
-        ID:        token.NewID(),
-        Type:      token.Access,
-        Subject:   subject,
-        Issuer:    fmt.Sprintf("node-%s", n.id),
-        IssuedAt:  time.Now(),
-        NotBefore: time.Now(),
-        ExpiresAt: time.Now().Add(time.Hour),
-        Scopes:    []string{"read", "write"},
-        Metadata: &token.Metadata{
-            AppData: map[string]string{"node": n.id},
-        },
-    }
+	id, err := token.NewID()
+	if err != nil {
+		return nil, "", err
+	}
+	t := &token.Token{
+		ID:        id,
+		Type:      token.Access,
+		Subject:   subject,
+		Issuer:    fmt.Sprintf("node-%s", n.id),
+		IssuedAt:  time.Now(),
+		NotBefore: time.Now(),
+		ExpiresAt: time.Now().Add(time.Hour),
+		Scopes:    []string{"read", "write"},
+		Metadata: &token.Metadata{
+			AppData: map[string]string{"node": n.id},
+		},
+	}
 
     // Store token
     if err := n.store.Save(ctx, t.ID, t); err != nil {

@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 )
 
 var (
@@ -20,7 +20,7 @@ var (
 )
 
 // basicCredentials represents username/password credentials
-type basicCredentials struct {
+type BasicCredentials struct {
 	Username string
 	Password string
 }
@@ -49,7 +49,7 @@ func (a *basicAuthenticator) Close() error {
 }
 
 func (a *basicAuthenticator) ValidateCredentials(ctx context.Context, creds interface{}) error {
-	bc, ok := creds.(basicCredentials)
+	bc, ok := creds.(BasicCredentials)
 	if !ok {
 		return fmt.Errorf("expected basicCredentials, got %T", creds)
 	}
@@ -79,7 +79,7 @@ func (a *basicAuthenticator) ValidateCredentials(ctx context.Context, creds inte
 func (a *basicAuthenticator) GenerateToken(ctx context.Context, req TokenRequest) (*TokenResponse, error) {
 	// For basic auth, we generate a simple base64 token
 	// In a real implementation, you'd want to use JWT or another token format
-	token := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%d", req.Subject, time.Now().Unix())))
+	token := "Basic " + base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%d", req.Subject, time.Now().Unix())))
 
 	if a.config.AuditLogger != nil {
 		a.config.AuditLogger.Log(ctx, &audit.Entry{

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 // CustomResourceServer extends the basic ResourceServer with additional functionality

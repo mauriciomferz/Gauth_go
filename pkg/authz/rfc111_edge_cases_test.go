@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/Gimel-Foundation/gauth/pkg/authz"
+	"github.com/mauriciomferz/Gauth_go/pkg/authz"
 )
 
 // TestCentralizationEnforcement ensures that only centralized authorization is allowed (RFC111 exclusion enforcement).

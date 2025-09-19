@@ -2,13 +2,56 @@ package resilience
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"time"
 )
 
-// --- BEGIN STUBS FOR EXAMPLES AND DOCS ---
-// RetryConfig is a stub for retry configuration
+// RetryStrategy is a legacy alias for RetryConfig for integration test compatibility
+type RetryStrategy struct {
+	MaxAttempts     int
+	InitialInterval time.Duration
+	MaxInterval     time.Duration
+	Multiplier      float64
+}
+
+// NewRetry creates a new retry handler from RetryStrategy or RetryConfig
+func NewRetry(strategy interface{}) *Retry {
+       switch cfg := strategy.(type) {
+       case RetryStrategy:
+	       return NewRetry(RetryConfig{
+		       MaxAttempts:  cfg.MaxAttempts,
+		       InitialDelay:  cfg.InitialInterval,
+		       MaxDelay:     cfg.MaxInterval,
+		       Multiplier:    cfg.Multiplier,
+	       })
+       case RetryConfig:
+	       return newRetryFromConfig(cfg)
+       default:
+	       return nil // unsupported type for NewRetry
+       }
+}
+
+// newRetryFromConfig is the original NewRetry implementation for RetryConfig
+func newRetryFromConfig(cfg RetryConfig) *Retry {
+	if cfg.MaxAttempts <= 0 {
+		cfg.MaxAttempts = 3
+	}
+	if cfg.InitialDelay <= 0 {
+		cfg.InitialDelay = time.Second
+	}
+	if cfg.MaxDelay <= 0 {
+		cfg.MaxDelay = 30 * time.Second
+	}
+	if cfg.Multiplier <= 1.0 {
+		cfg.Multiplier = 2.0
+	}
+	return &Retry{config: cfg}
+}
+
+
+// RetryConfig defines configuration for Retry
 type RetryConfig struct {
 	MaxAttempts  int
 	InitialDelay time.Duration
@@ -16,60 +59,126 @@ type RetryConfig struct {
 	Multiplier   float64
 }
 
-// TimeoutConfig is a stub for timeout configuration
+// TimeoutConfig defines configuration for Timeout
 type TimeoutConfig struct {
 	Timeout time.Duration
 }
 
-// BulkheadConfig is a stub for bulkhead configuration
+// ErrBulkheadFull is returned when bulkhead is full
+var ErrBulkheadFull = errors.New("bulkhead full")
+
+// Retry.Execute runs fn with retry logic and context
+func (r *Retry) Execute(ctx context.Context, fn func(ctx context.Context) error) error {
+       interval := r.config.InitialDelay
+       for attempt := 1; attempt <= r.config.MaxAttempts; attempt++ {
+	       err := fn(ctx)
+	       if err == nil {
+		       return nil
+	       }
+	       if attempt == r.config.MaxAttempts {
+		       return err
+	       }
+	       select {
+	       case <-time.After(interval):
+	       case <-ctx.Done():
+		       return ctx.Err()
+	       }
+	       interval = time.Duration(float64(interval) * r.config.Multiplier)
+	       if interval > r.config.MaxDelay {
+		       interval = r.config.MaxDelay
+	       }
+       }
+       return errors.New("retry attempts exhausted")
+}
+
+// Timeout implements a timeout pattern
+type Timeout struct {
+	timeout time.Duration
+}
+
+// NewTimeout creates a new Timeout handler
+func NewTimeout(cfg TimeoutConfig) *Timeout {
+	return &Timeout{timeout: cfg.Timeout}
+}
+
+// Timeout.Execute runs fn with a timeout using context
+func (t *Timeout) Execute(ctx context.Context, fn func(ctx context.Context) error) error {
+       ctxTimeout, cancel := context.WithTimeout(ctx, t.timeout)
+       defer cancel()
+       done := make(chan error, 1)
+       go func() {
+	       done <- fn(ctxTimeout)
+       }()
+       select {
+       case err := <-done:
+	       return err
+       case <-ctxTimeout.Done():
+	       return ctxTimeout.Err()
+       }
+}
+// BulkheadConfig defines configuration for Bulkhead
 type BulkheadConfig struct {
 	MaxConcurrent int
 	MaxWaitTime   time.Duration
 }
 
-// ErrBulkheadFull is a sentinel error for bulkhead full
-var ErrBulkheadFull = fmt.Errorf("bulkhead capacity exceeded")
-
-// Retry is a stub for retry pattern
+// Retry implements retry with exponential backoff
 type Retry struct {
-	config RetryConfig
+       config RetryConfig
 }
 
-func NewRetry(config RetryConfig) *Retry {
-	return &Retry{config: config}
-}
 
-func (r *Retry) Execute(ctx context.Context, fn func(ctx context.Context) error) error {
-	// Minimal stub: just call fn once
-	return fn(ctx)
-}
 
-// Timeout is a stub for timeout pattern
-type Timeout struct {
-	config TimeoutConfig
-}
-
-func NewTimeout(config TimeoutConfig) *Timeout {
-	return &Timeout{config: config}
-}
-
-func (t *Timeout) Execute(ctx context.Context, fn func(ctx context.Context) error) error {
-	// Minimal stub: just call fn once
-	return fn(ctx)
+// Do executes the function with retry logic (backward compatibility)
+func (r *Retry) Do(fn func() error) error {
+       interval := r.config.InitialDelay
+       for attempt := 1; attempt <= r.config.MaxAttempts; attempt++ {
+	       err := fn()
+	       if err == nil {
+		       return nil
+	       }
+	       if attempt == r.config.MaxAttempts {
+		       return err
+	       }
+	       time.Sleep(interval)
+	       interval = time.Duration(float64(interval) * r.config.Multiplier)
+	       if interval > r.config.MaxDelay {
+		       interval = r.config.MaxDelay
+	       }
+       }
+       return errors.New("retry attempts exhausted")
 }
 
 // Bulkhead is a stub for bulkhead pattern
 type Bulkhead struct {
-	config BulkheadConfig
+	maxConcurrent int
+	maxWaitTime   time.Duration
+	semaphore     chan struct{}
 }
 
 func NewBulkhead(config BulkheadConfig) *Bulkhead {
-	return &Bulkhead{config: config}
+	if config.MaxConcurrent <= 0 {
+		 config.MaxConcurrent = 1
+	}
+	return &Bulkhead{
+		 maxConcurrent: config.MaxConcurrent,
+		 maxWaitTime:   config.MaxWaitTime,
+		 semaphore:     make(chan struct{}, config.MaxConcurrent),
+	}
 }
 
 func (b *Bulkhead) Execute(ctx context.Context, fn func(ctx context.Context) error) error {
-	// Minimal stub: just call fn once
-	return fn(ctx)
+	timer := time.NewTimer(b.maxWaitTime)
+	defer timer.Stop()
+	select {
+	case b.semaphore <- struct{}{}:
+		 defer func() { <-b.semaphore }()
+		 return fn(ctx)
+	case <-timer.C:
+		 return ErrBulkheadFull
+	case <-ctx.Done():
+		 return ctx.Err()
+	}
 }
 
 // Combined is a stub for pattern composition
@@ -82,8 +191,26 @@ func Combine(patterns ...interface{}) *Combined {
 }
 
 func (c *Combined) Execute(ctx context.Context, fn func(ctx context.Context) error) error {
-	// Minimal stub: just call fn once
-	return fn(ctx)
+       wrapped := fn
+       // Apply patterns in reverse order so the first pattern wraps the rest
+       for i := len(c.patterns) - 1; i >= 0; i-- {
+	       p := c.patterns[i]
+	       switch pat := p.(type) {
+	       case interface{ Execute(context.Context, func(context.Context) error) error }:
+		       next := wrapped
+		       wrapped = func(ctx context.Context) error {
+			       err := pat.Execute(ctx, next)
+			       // If the error is ErrCircuitOpen, propagate immediately (do not retry)
+			       if errors.Is(err, ErrCircuitOpen) {
+				       return err
+			       }
+			       return err
+		       }
+	       default:
+		       // Ignore unknown pattern types
+	       }
+       }
+       return wrapped(ctx)
 }
 
 // --- END STUBS FOR EXAMPLES AND DOCS ---
@@ -120,7 +247,6 @@ type Patterns struct {
 
 	// Bulkhead
 	maxConcurrent    int
-	activeRequests   int
 	requestSemaphore chan struct{}
 }
 
@@ -299,7 +425,7 @@ func (p *Patterns) recordFailure() {
 	if (p.state == StateClosed || p.state == StateHalfOpen) && p.failures >= p.threshold {
 		p.changeState(StateOpen)
 		p.successes = 0
-		p.failures = 0
+		// Do NOT reset p.failures here; keep failures count to keep circuit open
 	}
 }
 

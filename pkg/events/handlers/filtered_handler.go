@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/Gimel-Foundation/gauth/pkg/events"
+	"github.com/mauriciomferz/Gauth_go/pkg/events"
 )
 
 // FilteredHandler filters events before passing them to the underlying handler

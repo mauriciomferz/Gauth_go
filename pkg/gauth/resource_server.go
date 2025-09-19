@@ -3,7 +3,7 @@ package gauth
 import (
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/internal/errors"
+	"github.com/mauriciomferz/Gauth_go/pkg/errors"
 )
 
 // SetRateLimit enables basic in-memory rate limiting for demonstration.

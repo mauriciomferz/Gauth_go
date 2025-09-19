@@ -135,17 +135,21 @@ func NewRotator(store Store, blacklist *Blacklist, config Config) *Rotator {
 // RotateToken creates a new token and revokes the old one
 func (r *Rotator) RotateToken(ctx context.Context, oldToken *Token) (*Token, error) {
 	// Create new token
-	newToken := &Token{
-		ID:        NewID(), // Implement NewID() helper
-		Type:      oldToken.Type,
-		Subject:   oldToken.Subject,
-		Issuer:    oldToken.Issuer,
-		IssuedAt:  time.Now(),
-		NotBefore: time.Now(),
-		ExpiresAt: time.Now().Add(r.config.ValidityPeriod),
-		Scopes:    oldToken.Scopes,
-		Metadata:  oldToken.Metadata,
-	}
+       id, err := NewID()
+       if err != nil {
+	       return nil, err
+       }
+       newToken := &Token{
+	       ID:        id, // Implement NewID() helper
+	       Type:      oldToken.Type,
+	       Subject:   oldToken.Subject,
+	       Issuer:    oldToken.Issuer,
+	       IssuedAt:  time.Now(),
+	       NotBefore: time.Now(),
+	       ExpiresAt: time.Now().Add(r.config.ValidityPeriod),
+	       Scopes:    oldToken.Scopes,
+	       Metadata:  oldToken.Metadata,
+       }
 
 	// Store new token
 	if err := r.store.Save(ctx, newToken.ID, newToken); err != nil {

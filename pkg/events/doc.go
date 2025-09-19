@@ -3,12 +3,12 @@ Package events provides a typed event system for GAuth with strong type safety.
 
 # Quick Start
 
-	import "github.com/Gimel-Foundation/gauth/pkg/events"
+	  import "github.com/mauriciomferz/Gauth_go/pkg/events"
 
-	publisher := events.NewPublisher()
-	evt := events.NewEvent(events.EventTypeToken, "token.issued").WithSubject("user123")
-	publisher.PublishEvent(evt)
-	// ...
+		publisher := events.NewPublisher()
+		evt := events.NewEvent(events.EventTypeToken, "token.issued").WithSubject("user123")
+		publisher.PublishEvent(evt)
+		// ...
 
 See runnable examples in examples/events/basic/main.go.
 

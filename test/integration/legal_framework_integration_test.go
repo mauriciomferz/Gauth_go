@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Gimel-Foundation/gauth/pkg/auth"
+	"github.com/mauriciomferz/Gauth_go/pkg/auth"
 )
 
 // TestCompleteAuthorizationFlow tests the complete RFC111 authorization flow
@@ -329,12 +329,12 @@ func createServerAuthorization(t *testing.T, ownerProof *auth.CapacityProof) *au
 func createClientRequest(t *testing.T, authz *auth.ClientAuthorization) *auth.LegalFrameworkRequest {
 	return &auth.LegalFrameworkRequest{
 		ID:           "request_002",
-		ClientID:     auth.Client.ID,
+		ClientID:     authz.Client.ID,
 		Action:       "execute_trade",
 		Resource:     "financial_data",
 		Scope:        []string{"trade_execution"},
 		Timestamp:    time.Now(),
-		Jurisdiction: auth.Client.Entity.JurisdictionID,
+		Jurisdiction: authz.Client.Entity.JurisdictionID,
 		Metadata: map[string]interface{}{
 			"trade_value": 1000000.0,
 			"trade_type":  "stock_purchase",
@@ -561,9 +561,9 @@ func createComplianceActions(t *testing.T) []auth.ComplianceAction {
 }
 
 func getTrackingRecords(t *testing.T, framework *auth.StandardLegalFramework, approvalID string) ([]auth.TrackingRecord, error) {
-	store, ok := framework.Store().(*auth.StoreStub)
-	if !ok {
-		t.Fatalf("framework.Store() is not of type *auth.StoreStub")
+	if framework.Store == nil {
+		t.Fatalf("framework.Store is nil")
 	}
-	return store.GetTrackingRecords(context.Background(), approvalID)
+	records, err := framework.Store.GetTrackingRecords(nil, approvalID)
+	return records, err
 }

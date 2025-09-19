@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/internal/circuit"
-	"github.com/Gimel-Foundation/gauth/internal/ratelimit"
-	"github.com/Gimel-Foundation/gauth/internal/resilience"
+	"github.com/mauriciomferz/Gauth_go/pkg/circuit"
+	"github.com/mauriciomferz/Gauth_go/pkg/ratelimit"
+	"github.com/mauriciomferz/Gauth_go/pkg/resilience"
 )
 
 // CacheEntry represents a cached item with expiration
@@ -74,7 +74,7 @@ func NewDistributedCache(nodeIDs []string) *DistributedCache {
 			breaker:  circuit.NewCircuitBreaker(cache.circuitConfig),
 			limiter:  ratelimit.WrapTokenBucket(cache.limiterConfig),
 			retry:    resilience.NewRetry(cache.retryConfig),
-			bulkhead: resilience.NewBulkhead(10),
+			   bulkhead: resilience.NewBulkhead(resilience.BulkheadConfig{MaxConcurrent: 10}),
 		}
 	}
 
@@ -117,27 +117,27 @@ func (dc *DistributedCache) Set(ctx context.Context, key string, value interface
 	}
 
 	// Execute with bulkhead pattern
-	return node.bulkhead.Execute(ctx, func() error {
-		// First check rate limiter
-		if err := node.limiter.Allow(ctx, "write"); err != nil {
-			return fmt.Errorf("rate limit exceeded on node %s: %w", nodeID, err)
-		}
+	   return node.bulkhead.Execute(ctx, func(ctx context.Context) error {
+		   // First check rate limiter
+		   if err := node.limiter.Allow(ctx, "write"); err != nil {
+			   return fmt.Errorf("rate limit exceeded on node %s: %w", nodeID, err)
+		   }
 
-		// Use retry with circuit breaker
-		return node.retry.Execute(ctx, func() error {
-			return node.breaker.Execute(func() error {
-				node.mu.Lock()
-				defer node.mu.Unlock()
+		   // Use retry with circuit breaker
+		   return node.retry.Do(func() error {
+			   return node.breaker.Execute(func() error {
+				   node.mu.Lock()
+				   defer node.mu.Unlock()
 
-				node.data[key] = CacheEntry{
-					Value:      value,
-					ExpiresAt:  time.Now().Add(ttl),
-					LastAccess: time.Now(),
-				}
-				return nil
-			})
-		})
-	})
+				   node.data[key] = CacheEntry{
+					   Value:      value,
+					   ExpiresAt:  time.Now().Add(ttl),
+					   LastAccess: time.Now(),
+				   }
+				   return nil
+			   })
+		   })
+	   })
 }
 
 func (dc *DistributedCache) Get(ctx context.Context, key string) (interface{}, error) {
@@ -148,31 +148,31 @@ func (dc *DistributedCache) Get(ctx context.Context, key string) (interface{}, e
 	}
 
 	var result interface{}
-	err := node.bulkhead.Execute(ctx, func() error {
-		if err := node.limiter.Allow(ctx, "read"); err != nil {
-			return fmt.Errorf("rate limit exceeded on node %s: %w", nodeID, err)
-		}
+	   err := node.bulkhead.Execute(ctx, func(ctx context.Context) error {
+		   if err := node.limiter.Allow(ctx, "read"); err != nil {
+			   return fmt.Errorf("rate limit exceeded on node %s: %w", nodeID, err)
+		   }
 
-		return node.retry.Execute(ctx, func() error {
-			return node.breaker.Execute(func() error {
-				node.mu.RLock()
-				defer node.mu.RUnlock()
+		   return node.retry.Do(func() error {
+			   return node.breaker.Execute(func() error {
+				   node.mu.RLock()
+				   defer node.mu.RUnlock()
 
-				entry, exists := node.data[key]
-				if !exists {
-					return fmt.Errorf("key %s not found", key)
-				}
+				   entry, exists := node.data[key]
+				   if !exists {
+					   return fmt.Errorf("key %s not found", key)
+				   }
 
-				if time.Now().After(entry.ExpiresAt) {
-					delete(node.data, key)
-					return fmt.Errorf("key %s expired", key)
-				}
+				   if time.Now().After(entry.ExpiresAt) {
+					   delete(node.data, key)
+					   return fmt.Errorf("key %s expired", key)
+				   }
 
-				result = entry.Value
-				return nil
-			})
-		})
-	})
+				   result = entry.Value
+				   return nil
+			   })
+		   })
+	   })
 
 	return result, err
 }

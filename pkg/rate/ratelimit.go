@@ -1,12 +1,15 @@
-// Package rate provides rate limiting functionality for the GAuth protocol.
 package rate
 
 import (
+	"context"
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/common"
+	"github.com/mauriciomferz/Gauth_go/pkg/common"
 )
+
+// Ensure RateLimiter implements the Limiter interface
+var _ Limiter = (*RateLimiter)(nil)
 
 // RateLimitEntry tracks per-client state.
 type RateLimitEntry struct {
@@ -85,6 +88,30 @@ func (rl *RateLimiter) IsAllowed(clientID string) bool {
 	return false
 }
 
+// Allow checks if a request is allowed for the given client ID
+func (rl *RateLimiter) Allow(ctx context.Context, id string) error {
+	if !rl.IsAllowed(id) {
+		return ErrRateLimitExceeded
+	}
+	return nil
+}
+
+// GetRemainingRequests returns the number of remaining requests for the client ID
+func (rl *RateLimiter) GetRemainingRequests(id string) int64 {
+	state := rl.GetClientState(id)
+	if state == nil {
+		return int64(rl.Config.RequestsPerSecond + rl.Config.BurstSize)
+	}
+	remaining := int64(state.MaxRequests - state.Count + state.BurstTokens)
+	if remaining < 0 {
+		return 0
+	}
+	return remaining
+}
+
+// Reset resets the rate limit for the given client ID (no-op for now)
+func (rl *RateLimiter) Reset(id string) {}
+
 // GetClientState returns rate limit state for a client.
 func (rl *RateLimiter) GetClientState(clientID string) *RateLimitEntry {
 	rl.mutex.RLock()
@@ -118,7 +145,7 @@ func (rl *RateLimiter) GetStats() map[string]interface{} {
 	blocked := 0
 	now := time.Now()
 	for _, entry := range rl.entries {
-	if now.Sub(entry.LastAccess) < time.Duration(rl.Config.WindowSize)*time.Second {
+		if now.Sub(entry.LastAccess) < time.Duration(rl.Config.WindowSize)*time.Second {
 			active++
 			if entry.Count >= entry.MaxRequests && entry.BurstTokens == 0 {
 				blocked++

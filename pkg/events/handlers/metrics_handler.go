@@ -3,7 +3,7 @@ package handlers
 import (
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/events"
+	"github.com/mauriciomferz/Gauth_go/pkg/events"
 )
 
 // MetricsHandler collects metrics from events

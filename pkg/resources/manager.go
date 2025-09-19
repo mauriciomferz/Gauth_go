@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/metrics"
+	"github.com/mauriciomferz/Gauth_go/pkg/metrics"
 )
 
 // Manager handles resource lifecycle and monitoring

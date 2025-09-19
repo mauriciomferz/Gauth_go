@@ -13,59 +13,72 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func generateTestSigningKey(t *testing.T) *rsa.PrivateKey {
+       key, err := rsa.GenerateKey(rand.Reader, 2048)
+       require.NoError(t, err)
+       return key
+}
+
 func TestNew(t *testing.T) {
-	tests := []struct {
-		func generateTestSigningKey(t *testing.T) *rsa.PrivateKey {
-		       key, err := rsa.GenerateKey(rand.Reader, 2048)
-		       require.NoError(t, err)
-		       return key
-		}
-
-		func TestNew(t *testing.T) {
-		       signingKey := generateTestSigningKey(t)
-		       tests := []struct {
-			       name        string
-			       config      *token.Config
-			       expectError bool
-		       }{
-			       {
-				       name: "Valid configuration",
-				       config: &token.Config{
-					       SigningKey:        signingKey,
-					       SigningMethod:     "RS256",
-					       ValidityPeriod:    time.Hour,
-					       RefreshPeriod:     time.Hour,
-					       CleanupInterval:   time.Hour,
-					       MaxTokens:         1000,
-				       },
-				       expectError: false,
+       signingKey := generateTestSigningKey(t)
+       tests := []struct {
+	       name        string
+	       config      *Config
+	       expectError bool
+       }{
+	       {
+		       name: "Valid configuration",
+		       config: &Config{
+			       AuthServerURL:     "http://localhost:8080",
+			       ClientID:          "test-client",
+			       ClientSecret:      "test-secret",
+			       Scopes:            []string{"read", "write"},
+			       AccessTokenExpiry: time.Hour,
+			       RateLimit:         common.RateLimitConfig{},
+			       TokenConfig: &token.Config{
+				       SigningKey:        signingKey,
+				       SigningMethod:     "RS256",
+				       ValidityPeriod:    time.Hour,
+				       RefreshPeriod:     time.Hour,
+				       CleanupInterval:   time.Hour,
+				       MaxTokens:         1000,
 			       },
-			       {
-				       name: "Missing signing key",
-				       config: &token.Config{
-					       SigningMethod:     "RS256",
-					       ValidityPeriod:    time.Hour,
-					       RefreshPeriod:     time.Hour,
-					       CleanupInterval:   time.Hour,
-					       MaxTokens:         1000,
-				       },
-				       expectError: true,
+		       },
+		       expectError: false,
+	       },
+	       {
+		       name: "Missing signing key",
+		       config: &Config{
+			       AuthServerURL:     "http://localhost:8080",
+			       ClientID:          "test-client",
+			       ClientSecret:      "test-secret",
+			       Scopes:            []string{"read", "write"},
+			       AccessTokenExpiry: time.Hour,
+			       RateLimit:         common.RateLimitConfig{},
+			       TokenConfig: &token.Config{
+				       SigningMethod:     "RS256",
+				       ValidityPeriod:    time.Hour,
+				       RefreshPeriod:     time.Hour,
+				       CleanupInterval:   time.Hour,
+				       MaxTokens:         1000,
 			       },
-		       }
+		       },
+		       expectError: true,
+	       },
+       }
 
-		       for _, tt := range tests {
-			       t.Run(tt.name, func(t *testing.T) {
-				       svc, err := NewService(tt.config)
-				       if tt.expectError {
-					       assert.Error(t, err)
-				       } else {
-					       assert.NoError(t, err)
-					       assert.NotNil(t, svc)
-				       }
-			       })
+       for _, tt := range tests {
+	       t.Run(tt.name, func(t *testing.T) {
+		       svc, err := NewService(tt.config)
+		       if tt.expectError {
+			       assert.Error(t, err)
+		       } else {
+			       assert.NoError(t, err)
+			       assert.NotNil(t, svc)
 		       }
-		}
-
+	       })
+       }
+}
 func TestService_Authorize(t *testing.T) {
        svc := setupTestService(t)
        t.Cleanup(func() {
@@ -125,13 +138,13 @@ func TestService_Authorize(t *testing.T) {
 
 func TestService_RequestToken(t *testing.T) {
        svc := setupTestService(t)
-       t.Logf("DEBUG: SigningKey in service after setup: %v, addr: %p", svc.config.SigningKey, svc.config.SigningKey)
-       if svc.config.SigningKey == nil {
+       t.Logf("DEBUG: SigningKey in service after setup: %v, addr: %p", svc.config.TokenConfig.SigningKey, svc.config.TokenConfig.SigningKey)
+       if svc.config.TokenConfig.SigningKey == nil {
 	       t.Errorf("DEBUG: SigningKey is nil immediately after setupTestService!")
        } else {
-	       t.Logf("DEBUG: SigningKey type: %T", svc.config.SigningKey)
+	       t.Logf("DEBUG: SigningKey type: %T", svc.config.TokenConfig.SigningKey)
        }
-       require.NotNil(t, svc.config.SigningKey, "SigningKey should not be nil after setupTestService")
+       require.NotNil(t, svc.config.TokenConfig.SigningKey, "SigningKey should not be nil after setupTestService")
        t.Cleanup(func() {
 	       err := svc.Close()
 	       if err != nil {
@@ -151,7 +164,7 @@ func TestService_RequestToken(t *testing.T) {
 	require.NotNil(t, grant)
 
 	// Assert SigningKey is still present before RequestToken
-	require.NotNil(t, svc.config.SigningKey, "SigningKey should not be nil before RequestToken call")
+	require.NotNil(t, svc.config.TokenConfig.SigningKey, "SigningKey should not be nil before RequestToken call")
 
        tests := []struct {
 	       name        string
@@ -193,43 +206,13 @@ func TestService_RequestToken(t *testing.T) {
        }
 }
 
-func generateTestSigningKey(t *testing.T) *rsa.PrivateKey {
-       key, err := rsa.GenerateKey(rand.Reader, 2048)
-       require.NoError(t, err)
-       if key == nil {
-	       t.Errorf("DEBUG: generateTestSigningKey returned nil!")
-       } else {
-	       t.Logf("DEBUG: generateTestSigningKey generated key: %v, addr: %p", key, key)
-       }
-       require.NotNil(t, key, "generateTestSigningKey should not return nil")
-       return key
-}
-	       Scopes:   []string{"read"},
-       }
-
-       // First request should succeed
-       _, err = svc.Authorize(ctx, req)
-       assert.NoError(t, err)
-
-       // Second request should fail due to rate limiting
-       _, err = svc.Authorize(ctx, req)
-       assert.Error(t, err)
-
-       // Wait for rate limit window to reset
-       time.Sleep(time.Second)
-
-       // Request should succeed again
-       _, err = svc.Authorize(ctx, req)
-       assert.NoError(t, err)
-}
 
 func setupTestService(t *testing.T) *Service {
-	t.Logf("DEBUG: signingKey generated: %v, addr: %p", signingKey, signingKey)
-	t.Logf("DEBUG: about to assign signingKey to TokenConfig.SigningKey")
        signingKey := generateTestSigningKey(t)
-       t.Logf("DEBUG: generateTestSigningKey returned: %v, addr: %p", signingKey, signingKey)
+       t.Logf("DEBUG: signingKey generated: %v, addr: %p", signingKey, signingKey)
+       t.Logf("DEBUG: about to assign signingKey to TokenConfig.SigningKey")
        tokenCfg := &token.Config{
-	       SigningKey:   signingKey,
+	       SigningKey:    signingKey,
 	       SigningMethod: token.RS256,
 	       ValidityPeriod: time.Hour,
        }
@@ -242,7 +225,7 @@ func setupTestService(t *testing.T) *Service {
 	       RateLimit:         common.RateLimitConfig{},
 	       TokenConfig:       tokenCfg,
        }
-       t.Logf("DEBUG: Config.SigningKey after assignment: %v, addr: %p", config.SigningKey, config.SigningKey)
+       t.Logf("DEBUG: Config.SigningKey after assignment: %v, addr: %p", config.TokenConfig.SigningKey, config.TokenConfig.SigningKey)
        svc, err := NewService(config)
        require.NoError(t, err)
        return svc

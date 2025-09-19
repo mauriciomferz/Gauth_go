@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/Gimel-Foundation/gauth/pkg/events"
+	"github.com/mauriciomferz/Gauth_go/pkg/events"
 )
 
 // MultiHandler combines multiple handlers

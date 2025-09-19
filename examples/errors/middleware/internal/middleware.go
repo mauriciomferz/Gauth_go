@@ -7,8 +7,8 @@ import (
 
 	stderrs "errors"
 
-	"github.com/Gimel-Foundation/gauth/pkg/errors"
 	"github.com/google/uuid"
+	"github.com/mauriciomferz/Gauth_go/pkg/errors"
 )
 
 // ErrorHandler is middleware that handles errors from downstream handlers

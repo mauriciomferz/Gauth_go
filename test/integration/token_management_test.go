@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-		"github.com/Gimel-Foundation/gauth/pkg/tokenstore"
-	"github.com/Gimel-Foundation/gauth/pkg/token"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
+	"github.com/mauriciomferz/Gauth_go/pkg/tokenstore"
 )
 
 func TestTokenManagementIntegration(t *testing.T) {

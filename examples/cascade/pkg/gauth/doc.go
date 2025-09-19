@@ -28,7 +28,7 @@
 //
 // Basic Usage
 //
-//	import "github.com/Gimel-Foundation/gauth/pkg/gauth"
+//	import "github.com/mauriciomferz/Gauth_go/pkg/gauth"
 //
 //	// Initialize GAuth with configuration
 //	auth := gauth.New(gauth.Config{

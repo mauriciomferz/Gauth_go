@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/resilience"
+	"github.com/mauriciomferz/Gauth_go/pkg/resilience"
 )
 
 // ServiceType represents different types of microservices

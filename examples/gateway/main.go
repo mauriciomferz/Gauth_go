@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/internal/circuit"
-	"github.com/Gimel-Foundation/gauth/internal/ratelimit"
-	"github.com/Gimel-Foundation/gauth/internal/resilience"
+	"github.com/mauriciomferz/Gauth_go/pkg/circuit"
+	"github.com/mauriciomferz/Gauth_go/pkg/ratelimit"
+	"github.com/mauriciomferz/Gauth_go/pkg/resilience"
 )
 
 // APIGateway demonstrates resilience patterns in an API Gateway
@@ -133,51 +133,54 @@ func (g *APIGateway) AddService(name, endpoint string, latency time.Duration, er
 }
 
 func (g *APIGateway) AddRoute(config *RouteConfig) {
-	g.routeRules[config.Path] = config
-	svc := g.services[config.Service]
-	if svc != nil {
-		svc.breaker = circuit.NewCircuitBreaker(config.CircuitBreaker)
-		svc.limiter = ratelimit.WrapTokenBucket(config.RateLimit)
-		svc.retry = resilience.NewRetry(config.RetryStrategy)
-		svc.bulkhead = resilience.NewBulkhead(config.BulkheadLimit)
-	}
+       g.routeRules[config.Path] = config
+       svc := g.services[config.Service]
+       if svc != nil {
+	       svc.breaker = circuit.NewCircuitBreaker(config.CircuitBreaker)
+	       svc.limiter = ratelimit.WrapTokenBucket(config.RateLimit)
+	       svc.retry = resilience.NewRetry(config.RetryStrategy)
+	       svc.bulkhead = resilience.NewBulkhead(resilience.BulkheadConfig{
+		       MaxConcurrent: config.BulkheadLimit,
+		       MaxWaitTime:   0, // or set as needed
+	       })
+       }
 }
 
 func (g *APIGateway) HandleRequest(ctx context.Context, req *RequestContext) error {
-	// Apply global rate limiting
-	if err := g.globalLimit.Allow(ctx, "global"); err != nil {
-		return fmt.Errorf("global rate limit exceeded: %w", err)
-	}
+       // Apply global rate limiting
+       if err := g.globalLimit.Allow(ctx, "global"); err != nil {
+	       return fmt.Errorf("global rate limit exceeded: %w", err)
+       }
 
-	// Get route configuration
-	route, exists := g.routeRules[req.Path]
-	if !exists {
-		return fmt.Errorf("route not found: %s", req.Path)
-	}
+       // Get route configuration
+       route, exists := g.routeRules[req.Path]
+       if !exists {
+	       return fmt.Errorf("route not found: %s", req.Path)
+       }
 
-	// Get service
-	svc, exists := g.services[route.Service]
-	if !exists {
-		return fmt.Errorf("service not found: %s", route.Service)
-	}
+       // Get service
+       svc, exists := g.services[route.Service]
+       if !exists {
+	       return fmt.Errorf("service not found: %s", route.Service)
+       }
 
-	// Create timeout context
-	ctx, cancel := context.WithTimeout(ctx, route.Timeout)
-	defer cancel()
+       // Create timeout context
+       ctx, cancel := context.WithTimeout(ctx, route.Timeout)
+       defer cancel()
 
-	// Execute request through all resilience patterns
-	return svc.bulkhead.Execute(ctx, func() error {
-		// Service-level rate limiting
-		if err := svc.limiter.Allow(ctx, req.ClientID); err != nil {
-			return fmt.Errorf("service rate limit exceeded: %w", err)
-		}
+       // Execute request through all resilience patterns
+       return svc.bulkhead.Execute(ctx, func(ctx context.Context) error {
+	       // Service-level rate limiting
+	       if err := svc.limiter.Allow(ctx, req.ClientID); err != nil {
+		       return fmt.Errorf("service rate limit exceeded: %w", err)
+	       }
 
-		return svc.retry.Execute(ctx, func() error {
-			return svc.breaker.Execute(func() error {
-				return svc.simulateRequest(ctx, req)
-			})
-		})
-	})
+	       return svc.retry.Do(func() error {
+		       return svc.breaker.Execute(func() error {
+			       return svc.simulateRequest(ctx, req)
+		       })
+	       })
+       })
 }
 
 func (s *BackendService) simulateRequest(ctx context.Context, req *RequestContext) error {

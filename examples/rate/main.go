@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/internal/rate"
+	"github.com/mauriciomferz/Gauth_go/internal/rate"
 )
 
 func demoBasicUsage(limiter *rate.Limiter) {

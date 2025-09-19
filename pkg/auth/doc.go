@@ -13,7 +13,7 @@
 //
 // To use the auth package in your application:
 //
-//	import "github.com/Gimel-Foundation/gauth/pkg/auth"
+//	import "github.com/mauriciomferz/Gauth_go/pkg/auth"
 //
 //	// Create auth service with options
 //	authService := auth.NewAuthService(auth.Options{

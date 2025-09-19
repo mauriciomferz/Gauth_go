@@ -9,10 +9,10 @@ import (
 
 	"go.opentelemetry.io/otel/attribute"
 
-	"github.com/Gimel-Foundation/gauth/internal/tracing"
-	"github.com/Gimel-Foundation/gauth/pkg/auth"
-	"github.com/Gimel-Foundation/gauth/pkg/authz"
-	"github.com/Gimel-Foundation/gauth/pkg/rate"
+	"github.com/mauriciomferz/Gauth_go/internal/tracing"
+	"github.com/mauriciomferz/Gauth_go/pkg/auth"
+	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	"github.com/mauriciomferz/Gauth_go/pkg/rate"
 )
 
 func main() {

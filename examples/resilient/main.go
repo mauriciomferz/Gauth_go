@@ -6,9 +6,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/internal/circuit"
-	"github.com/Gimel-Foundation/gauth/internal/ratelimit"
-	"github.com/Gimel-Foundation/gauth/internal/resilience"
+	"github.com/mauriciomferz/Gauth_go/pkg/circuit"
+	"github.com/mauriciomferz/Gauth_go/pkg/ratelimit"
+	"github.com/mauriciomferz/Gauth_go/pkg/resilience"
+	// TODO: The following internal imports are not allowed in Go. Refactor to use public APIs or copy needed logic.
 )
 
 // MainDemo runs the main demo scenarios for resilience patterns
@@ -50,7 +51,10 @@ func MainDemo() {
 	retry := resilience.NewRetry(retryStrategy)
 
 	// Set up bulkhead
-	bulkhead := resilience.NewBulkhead(2)
+	bulkhead := resilience.NewBulkhead(resilience.BulkheadConfig{
+		MaxConcurrent: 2,
+		MaxWaitTime:   0, // No wait
+	})
 
 	// Create example service
 	service := &ExampleService{}
@@ -101,7 +105,7 @@ func MainDemo() {
 		fmt.Println("\nScenario 3: Circuit Breaker with Retry")
 
 		for i := 1; i <= 8; i++ {
-			err := retry.Execute(ctx, func() error {
+			err := retry.Do(func() error {
 				return breaker.Execute(service.Call)
 			})
 
@@ -121,8 +125,8 @@ func MainDemo() {
 
 		for i := 1; i <= 5; i++ {
 			start := time.Now()
-			err := bulkhead.Execute(ctx, func() error {
-				return retry.Execute(ctx, func() error {
+			err := bulkhead.Execute(ctx, func(ctx context.Context) error {
+				return retry.Do(func() error {
 					if err := tokenBucket.Allow(ctx, "client4"); err != nil {
 						return err
 					}

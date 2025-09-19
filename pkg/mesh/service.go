@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/events"
-	"github.com/Gimel-Foundation/gauth/pkg/resources"
+	"github.com/mauriciomferz/Gauth_go/pkg/events"
+	"github.com/mauriciomferz/Gauth_go/pkg/resources"
 )
 
 // ServiceMesh coordinates services and their interactions

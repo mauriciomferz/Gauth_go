@@ -71,7 +71,6 @@ type memoryAuthorizer struct {
 	policies    sync.Map // map[string]*Policy
 	roles       sync.Map // map[Role][]Permission
 	assignments sync.Map // map[Subject][]Role
-	conditions  sync.Map // map[string]Condition
 }
 
 // NewMemoryAuthorizer creates a new in-memory authorizer
@@ -260,27 +259,41 @@ func subjectMatches(policySubjects []Subject, requestSubject Subject) bool {
 }
 
 func resourceMatches(policyResources []Resource, requestResource Resource) bool {
-	if len(policyResources) == 0 {
-		return true
-	}
-	for _, resource := range policyResources {
-		if resource.ID == "*" || resource.ID == requestResource.ID {
-			return true
-		}
-	}
-	return false
+       if len(policyResources) == 0 {
+	       return true
+       }
+       for _, resource := range policyResources {
+	       if resource.ID == "*" || resource.ID == requestResource.ID {
+		       return true
+	       }
+	       // Support prefix wildcard matching, e.g., "/docs/*" matches "/docs/secret"
+	       if len(resource.ID) > 1 && resource.ID[len(resource.ID)-1] == '*' && resource.ID[len(resource.ID)-2] == '/' {
+		       prefix := resource.ID[:len(resource.ID)-1]
+		       if len(requestResource.ID) >= len(prefix) && requestResource.ID[:len(prefix)] == prefix {
+			       return true
+		       }
+	       }
+       }
+       return false
 }
 
 func actionMatches(policyActions []Action, requestAction Action) bool {
-	if len(policyActions) == 0 {
-		return true
-	}
-	for _, action := range policyActions {
-		if action.Name == "*" || action.Name == requestAction.Name {
-			return true
-		}
-	}
-	return false
+       if len(policyActions) == 0 {
+	       return true
+       }
+       for _, action := range policyActions {
+	       if action.Name == "*" || action.Name == requestAction.Name {
+		       return true
+	       }
+	       // Support prefix wildcard matching for actions (if needed in future)
+	       if len(action.Name) > 1 && action.Name[len(action.Name)-1] == '*' {
+		       prefix := action.Name[:len(action.Name)-1]
+		       if len(requestAction.Name) >= len(prefix) && requestAction.Name[:len(prefix)] == prefix {
+			       return true
+		       }
+	       }
+       }
+       return false
 }
 
 func sortPoliciesByPriority(policies []*Policy) {

@@ -1,7 +1,7 @@
 package gauth
 
 import (
-	"github.com/Gimel-Foundation/gauth/internal/resource"
+	"github.com/mauriciomferz/Gauth_go/pkg/resource"
 )
 
 // RateLimitConfig defines rate limiting configuration for resources.

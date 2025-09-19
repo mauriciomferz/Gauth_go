@@ -22,7 +22,7 @@
 //
 // # Example
 //
-//	import "github.com/Gimel-Foundation/gauth/pkg/token"
+//	import "github.com/mauriciomferz/Gauth_go/pkg/token"
 //	claims := token.NewClaims()
 //	// ...
 //

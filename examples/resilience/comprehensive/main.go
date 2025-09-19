@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/resilience"
+	"github.com/mauriciomferz/Gauth_go/pkg/resilience"
 )
 
 // SimulatedService represents an external service that might fail
@@ -45,17 +45,15 @@ func main() {
 	})
 
 	// Create retry handler
-	retry := resilience.NewRetry(resilience.RetryConfig{
-		MaxAttempts:  3,
-		InitialDelay: 100 * time.Millisecond,
-		MaxDelay:     1 * time.Second,
-		Multiplier:   2.0,
-	})
+       retry := resilience.NewRetry(resilience.RetryConfig{
+	       MaxAttempts:  3,
+	       InitialDelay: 100 * time.Millisecond,
+	       MaxDelay:     1 * time.Second,
+	       Multiplier:   2.0,
+       })
 
-	// Create timeout handler
-	timeout := resilience.NewTimeout(resilience.TimeoutConfig{
-		Timeout: 150 * time.Millisecond,
-	})
+	// Timeout pattern is not implemented in patterns.go, so skip it for now
+	// timeout := ...
 
 	// Create bulkhead
 	bulkhead := resilience.NewBulkhead(resilience.BulkheadConfig{
@@ -63,8 +61,8 @@ func main() {
 		MaxWaitTime:   100 * time.Millisecond,
 	})
 
-	// Combine patterns
-	combined := resilience.Combine(cb, retry, timeout, bulkhead)
+	// Combine patterns (skip timeout)
+	combined := resilience.Combine(cb, retry, bulkhead)
 
 	// HTTP handler using resilience patterns
 	http.HandleFunc("/resilient", func(w http.ResponseWriter, r *http.Request) {
@@ -75,21 +73,24 @@ func main() {
 		})
 
 		if err != nil {
-			switch {
-			case errors.Is(err, context.DeadlineExceeded):
-				http.Error(w, "Request timed out", http.StatusGatewayTimeout)
-			case errors.Is(err, resilience.ErrCircuitOpen):
-				http.Error(w, "Service temporarily unavailable", http.StatusServiceUnavailable)
-			case errors.Is(err, resilience.ErrBulkheadFull):
-				http.Error(w, "Too many requests", http.StatusTooManyRequests)
-			default:
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
-			return
+		       switch {
+		       case errors.Is(err, context.DeadlineExceeded):
+			       http.Error(w, "Request timed out", http.StatusGatewayTimeout)
+		       case errors.Is(err, resilience.ErrCircuitOpen):
+			       http.Error(w, "Service temporarily unavailable", http.StatusServiceUnavailable)
+		       // Bulkhead full error: check error string
+		       case err.Error() == "bulkhead full for example-circuit" || err.Error() == "bulkhead full for Combined":
+			       http.Error(w, "Too many requests", http.StatusTooManyRequests)
+		       default:
+			       http.Error(w, err.Error(), http.StatusInternalServerError)
+		       }
+		       return
 		}
 
-		fmt.Fprintf(w, "Request successful! Service stats: %d successes, %d failures\n",
-			service.successCount, service.failureCount)
+	       if _, err := fmt.Fprintf(w, "Request successful! Service stats: %d successes, %d failures\n",
+		       service.successCount, service.failureCount); err != nil {
+		       log.Printf("Fprintf error: %v", err)
+	       }
 	})
 
 	// Start server

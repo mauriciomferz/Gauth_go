@@ -4,7 +4,7 @@ package audit
 import (
 	"context"
 
-	"github.com/Gimel-Foundation/gauth/internal/events"
+	"github.com/mauriciomferz/Gauth_go/internal/events"
 )
 
 // AuditLogger defines the interface for audit logging

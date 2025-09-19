@@ -1,6 +1,7 @@
 package token
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"testing"
@@ -19,7 +20,7 @@ func TestTokenServiceSigningKey(t *testing.T) {
 	}
 	ts := NewService(config, NewMemoryStore())
 	tok := &Token{Subject: "test", Type: Access}
-	_, err = ts.Issue(nil, tok)
+	_, err = ts.Issue(context.Background(), tok)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

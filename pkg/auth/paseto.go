@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/token"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 // newPasetoAuthenticator is a stub for PASETO support.

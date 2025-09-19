@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/common"
-	"github.com/Gimel-Foundation/gauth/pkg/token"
+	"github.com/mauriciomferz/Gauth_go/pkg/common"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 // ApprovalLevel represents the level of approval required

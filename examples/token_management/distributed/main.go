@@ -58,8 +58,12 @@ func (n *ClusterNode) handleRevocation(tokenID string) {
 }
 
 func (n *ClusterNode) CreateToken(ctx context.Context, subject string) (*token.Token, string, error) {
+	id, err := token.NewID()
+	if err != nil {
+		return nil, "", err
+	}
 	t := &token.Token{
-		ID:        token.NewID(),
+		ID:        id,
 		Type:      token.Access,
 		Subject:   subject,
 		Issuer:    fmt.Sprintf("node-%s", n.id),

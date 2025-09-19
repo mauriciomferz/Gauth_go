@@ -32,7 +32,9 @@ func main() {
 	ctx := context.Background()
 	store := token.NewMemoryStore(24 * time.Hour)
 	blacklist := token.NewBlacklist()
-	defer blacklist.Close()
+	defer func() {
+		_ = blacklist.Close()
+	}()
 
 	customValidator := NewCustomValidator([]string{"example-app", "partner-app"})
 	_ = token.NewValidationChain(token.ValidationConfig{
@@ -42,7 +44,7 @@ func main() {
 
 	tokens := []*token.Token{
 		{
-			ID:        token.GenerateID(),
+			ID: func() string { id, err := token.GenerateID(); if err != nil { log.Fatalf("Failed to generate token ID: %v", err) }; return id }(),
 			Type:      token.Access,
 			Subject:   "user1",
 			Issuer:    "example-app",
@@ -51,7 +53,7 @@ func main() {
 			Scopes:    []string{"read"},
 		},
 		{
-			ID:        token.GenerateID(),
+			ID: func() string { id, err := token.GenerateID(); if err != nil { log.Fatalf("Failed to generate token ID: %v", err) }; return id }(),
 			Type:      token.Access,
 			Subject:   "user1",
 			Issuer:    "partner-app",
@@ -60,7 +62,7 @@ func main() {
 			Scopes:    []string{"write"},
 		},
 		{
-			ID:        token.GenerateID(),
+			ID: func() string { id, err := token.GenerateID(); if err != nil { log.Fatalf("Failed to generate token ID: %v", err) }; return id }(),
 			Type:      token.Refresh,
 			Subject:   "user2",
 			Issuer:    "example-app",

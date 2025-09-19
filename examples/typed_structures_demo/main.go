@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/events"
-	"github.com/Gimel-Foundation/gauth/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/events"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
 // logEventHandler implements events.EventHandler for logging
@@ -39,13 +39,14 @@ func main() {
 	bus.Subscribe(eventHandler)
 
 	// Create a new GAuth instance (update config fields as needed)
-	auth, err := gauth.New(gauth.Config{
-		// Fill in required config fields if needed, e.g.:
-		// AuthServerURL: "http://localhost:8080",
-		// ClientID:      "demo-client",
-		// ClientSecret:  "demo-secret",
-		AccessTokenExpiry: time.Hour,
-	})
+       cfg := gauth.Config{
+	       // Fill in required config fields if needed, e.g.:
+	       // AuthServerURL: "http://localhost:8080",
+	       // ClientID:      "demo-client",
+	       // ClientSecret:  "demo-secret",
+	       AccessTokenExpiry: time.Hour,
+       }
+       auth, err := gauth.New(&cfg)
 	if err != nil {
 		log.Fatalf("failed to create GAuth instance: %v", err)
 	}
@@ -85,10 +86,12 @@ func main() {
 					Metadata: metadata,
 				})
 
-				fmt.Fprintf(w, "Token: %s\nExpires: %s\n",
-					tokenResp.Token,
-					tokenResp.ValidUntil.Format(time.RFC3339),
-				)
+		       if _, err := fmt.Fprintf(w, "Token: %s\nExpires: %s\n",
+			       tokenResp.Token,
+			       tokenResp.ValidUntil.Format(time.RFC3339),
+		       ); err != nil {
+			       log.Printf("Fprintf error: %v", err)
+		       }
 	})
 
 	http.HandleFunc("/token/validate", func(w http.ResponseWriter, r *http.Request) {
@@ -129,7 +132,9 @@ func main() {
 					return
 				}
 
-				fmt.Fprintf(w, "Token is valid\n")
+		       if _, err := fmt.Fprintf(w, "Token is valid\n"); err != nil {
+			       log.Printf("Fprintf error: %v", err)
+		       }
 	})
 
 	http.HandleFunc("/token/revoke", func(w http.ResponseWriter, r *http.Request) {
@@ -167,7 +172,9 @@ func main() {
 					Metadata: metadata,
 				})
 
-				fmt.Fprintf(w, "Token revoked successfully\n")
+		       if _, err := fmt.Fprintf(w, "Token revoked successfully\n"); err != nil {
+			       log.Printf("Fprintf error: %v", err)
+		       }
 	})
 
 	http.HandleFunc("/protected", func(w http.ResponseWriter, r *http.Request) {
@@ -207,7 +214,9 @@ func main() {
 				}
 
 				// If token is valid, show protected content
-				fmt.Fprintf(w, "Protected resource accessed successfully\n")
+		       if _, err := fmt.Fprintf(w, "Protected resource accessed successfully\n"); err != nil {
+			       log.Printf("Fprintf error: %v", err)
+		       }
 	})
 
 	// Start the server

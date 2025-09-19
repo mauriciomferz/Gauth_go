@@ -6,7 +6,7 @@ import (
 	"encoding/pem"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/token"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 // IdentityVerifier handles identity verification

@@ -101,7 +101,7 @@ func main() {
 		log.Fatalf("Failed to generate RSA key: %v", err)
 	}
 
-	var config *token.Config = &token.Config{
+	config := &token.Config{
 		SigningMethod:    token.RS256,
 		SigningKey:       privateKey,
 		ValidityPeriod:   time.Hour,
@@ -113,8 +113,12 @@ func main() {
 
 	tokenService := token.NewService(config, store)
 
+	id, err := token.GenerateID()
+	if err != nil {
+		log.Fatalf("Failed to generate token ID: %v", err)
+	}
 	t := &token.Token{
-		ID:        token.GenerateID(),
+		ID:        id,
 		Type:      token.Access,
 		Subject:   "user-monitor",
 		Issuer:    "monitoring-service",

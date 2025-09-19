@@ -7,8 +7,8 @@ import (
 	"log"
 	"time"
 
-	token "github.com/mauriciomferz/Gauth_go/pkg/token"
 	"github.com/go-redis/redis/v8"
+	token "github.com/mauriciomferz/Gauth_go/pkg/token"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
@@ -220,8 +220,12 @@ func main() {
 	}
 
 	// Example token
+	id, err := token.NewID()
+	if err != nil {
+		log.Fatalf("Failed to generate token ID: %v", err)
+	}
 	t := &token.Token{
-		ID:        token.NewID(),
+		ID:        id,
 		Type:      token.Access,
 		Subject:   "user123",
 		IssuedAt:  time.Now(),

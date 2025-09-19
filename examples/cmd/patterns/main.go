@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"time"
-	// "github.com/Gimel-Foundation/gauth/examples/patterns" // Removed: not a Go package
+	// "github.com/mauriciomferz/Gauth_go/examples/patterns" // Removed: not a Go package
 )
 
 func main() {

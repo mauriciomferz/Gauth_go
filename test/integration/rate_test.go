@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Gimel-Foundation/gauth/pkg/rate"
+	"github.com/mauriciomferz/Gauth_go/pkg/rate"
 )
 
 func TestRateLimiterIntegration(t *testing.T) {

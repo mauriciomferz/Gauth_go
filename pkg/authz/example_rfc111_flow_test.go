@@ -16,7 +16,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/authz"
+	"github.com/mauriciomferz/Gauth_go/pkg/authz"
 )
 
 func ExampleRFC111Flow() {
@@ -30,7 +30,7 @@ func ExampleRFC111Flow() {
 		"fmt"
 		"time"
 
-		"github.com/Gimel-Foundation/gauth/pkg/authz"
+		"github.com/mauriciomferz/Gauth_go/pkg/authz"
 	)
 
 	// ExampleRFC111Flow demonstrates a full GAuth protocol flow as described in RFC111:

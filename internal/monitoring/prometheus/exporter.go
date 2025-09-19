@@ -5,55 +5,33 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 
-	"github.com/Gimel-Foundation/gauth/internal/monitoring"
+	"github.com/mauriciomferz/Gauth_go/internal/monitoring"
 )
 
 var (
-	// Authentication metrics
-	authRequests = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name: "gauth_auth_requests_total",
-		Help: "Total number of authentication requests processed",
-	}, []string{"status", "client_id"})
+       transactions = promauto.NewCounterVec(prometheus.CounterOpts{
+	       Name: "gauth_transactions_total",
+	       Help: "Total number of transactions processed",
+       }, []string{"type", "status"})
 
-	tokensIssued = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name: "gauth_tokens_issued_total",
-		Help: "Total number of tokens issued",
-	}, []string{"type", "client_id"})
+       rateLimitHits = promauto.NewCounterVec(prometheus.CounterOpts{
+	       Name: "gauth_rate_limit_hits_total",
+	       Help: "Total number of rate limit hits",
+       }, []string{"resource_id"})
 
-	tokenValidations = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name: "gauth_token_validations_total",
-		Help: "Total number of token validations performed",
-	}, []string{"status"})
+       activeTokens = promauto.NewGaugeVec(prometheus.GaugeOpts{
+	       Name: "gauth_active_tokens",
+	       Help: "Current number of active tokens",
+       }, []string{"client_id"})
 
-	// Transaction metrics
-	transactions = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name: "gauth_transactions_total",
-		Help: "Total number of transactions processed",
-	}, []string{"type", "status"})
-
-	transactionDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
-		Name:    "gauth_transaction_duration_seconds",
-		Help:    "Transaction processing duration in seconds",
-		Buckets: prometheus.ExponentialBuckets(0.001, 2, 10), // From 1ms to ~1s
-	}, []string{"type"})
-
-	// Rate limiting metrics
-	rateLimitHits = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name: "gauth_rate_limit_hits_total",
-		Help: "Total number of rate limit hits",
-	}, []string{"resource_id"})
-
-	// Resource metrics
-	activeTokens = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "gauth_active_tokens",
-		Help: "Current number of active tokens",
-	}, []string{"client_id"})
-
-	resourceUtilization = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "gauth_resource_utilization",
-		Help: "Current resource utilization percentage",
-	}, []string{"resource_id", "type"})
+       transactionDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
+	       Name:    "gauth_transaction_duration_seconds",
+	       Help:    "Transaction processing duration in seconds",
+	       Buckets: prometheus.ExponentialBuckets(0.001, 2, 10),
+       }, []string{"type"})
 )
+
+
 
 // PrometheusExporter converts internal metrics to Prometheus format
 type PrometheusExporter struct {

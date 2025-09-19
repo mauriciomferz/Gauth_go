@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/common"
-	"github.com/Gimel-Foundation/gauth/pkg/token"
+	"github.com/mauriciomferz/Gauth_go/pkg/common"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 // EncryptedStoreConfig contains configuration for the encrypted token store

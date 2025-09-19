@@ -12,13 +12,12 @@ const (
 )
 
 // NewID generates a cryptographically secure random token ID
-func NewID() string {
-	b := make([]byte, DefaultIDLength)
-	if _, err := rand.Read(b); err != nil {
-		// If crypto/rand fails, this is a serious issue
-		panic(fmt.Sprintf("failed to generate secure token ID: %v", err))
-	}
-	return base64.RawURLEncoding.EncodeToString(b)
+func NewID() (string, error) {
+       b := make([]byte, DefaultIDLength)
+       if _, err := rand.Read(b); err != nil {
+	       return "", fmt.Errorf("failed to generate secure token ID: %w", err)
+       }
+       return base64.RawURLEncoding.EncodeToString(b), nil
 }
 
 //

@@ -12,7 +12,11 @@ import (
 func main() {
 	// Create a memory-based token store (replace with Redis if available)
 	store := token.NewMemoryStore(24 * time.Hour)
-	defer store.Close()
+	defer func() {
+		if err := store.Close(); err != nil {
+			log.Printf("store.Close() error: %v", err)
+		}
+	}()
 
 	// Create a validation chain (adjust config as needed)
 	validator := token.NewValidationChain(token.ValidationConfig{

@@ -58,8 +58,8 @@ type Limiter interface {
 
 // TokenBucket implements the token bucket algorithm
 type TokenBucket struct {
-	rate      int64
-	burstSize int64
+	rate      float64
+	burstSize float64
 	tokens    sync.Map
 	lastTime  sync.Map
 	mu        sync.RWMutex
@@ -67,9 +67,13 @@ type TokenBucket struct {
 
 // NewTokenBucket creates a new token bucket rate limiter
 func NewTokenBucket(cfg Config) *TokenBucket {
+	burst := float64(cfg.BurstSize)
+	if cfg.BurstSize < cfg.Rate {
+		burst = float64(cfg.Rate)
+	}
 	return &TokenBucket{
-		rate:      cfg.Rate,
-		burstSize: cfg.BurstSize,
+		rate:      float64(cfg.Rate),
+		burstSize: burst,
 	}
 }
 
@@ -82,15 +86,15 @@ func (tb *TokenBucket) Allow(ctx context.Context, id string) error {
 
 	// Load or initialize token count
 	tokensIface, _ := tb.tokens.LoadOrStore(id, tb.burstSize)
-	tokens := tokensIface.(int64)
+	tokens := tokensIface.(float64)
 
 	// Load last update time
 	lastIface, _ := tb.lastTime.LoadOrStore(id, now)
 	last := lastIface.(time.Time)
 
 	// Calculate token replenishment
-	elapsed := now.Sub(last)
-	newTokens := tokens + int64(elapsed.Seconds())*tb.rate
+	elapsed := now.Sub(last).Seconds()
+	newTokens := tokens + elapsed*tb.rate
 	if newTokens > tb.burstSize {
 		newTokens = tb.burstSize
 	}
@@ -114,9 +118,9 @@ func (tb *TokenBucket) GetRemainingRequests(id string) int64 {
 
 	tokensIface, ok := tb.tokens.Load(id)
 	if !ok {
-		return tb.burstSize
+		return int64(tb.burstSize)
 	}
-	return tokensIface.(int64)
+	return int64(tokensIface.(float64))
 }
 
 // Reset implements the Limiter interface

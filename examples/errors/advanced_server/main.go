@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	gauthErrors "github.com/Gimel-Foundation/gauth/pkg/errors"
+	gauthErrors "github.com/mauriciomferz/Gauth_go/pkg/errors"
 )
 
 // Define custom context keys

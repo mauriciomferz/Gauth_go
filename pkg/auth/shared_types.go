@@ -2,32 +2,12 @@ package auth
 
 import "time"
 
-// LegalFrameworkRequest is the canonical request type for legal framework operations
+// Only keep unique types or stubs required for test compatibility
 
+// Minimal TrackingRecord type for compatibility
+type TrackingRecord struct{}
 
-type Client struct {
-	ID           string
-	Type         string
-	OwnerID      string
-	Entity       *Entity
-	Capabilities []string
-}
-
-type Entity struct {
-	ID             string
-	Type           string
-	JurisdictionID string
-	LegalStatus    string
-	CapacityProofs []CapacityProof
-	FiduciaryDuties []FiduciaryDuty
-}
-
-type ResourceServer struct {
-	ID     string
-	Type   string
-	Entity *Entity
-	Scopes []string
-}
+// Minimal stubs for types required by the auth package
 
 type CapacityProof struct {
 	Type         string
@@ -46,12 +26,26 @@ type FiduciaryDuty struct {
 	Validation  []string
 }
 
-type StoreStub struct{}
-
-func (s *StoreStub) GetTrackingRecords(ctx interface{}, approvalID string) ([]TrackingRecord, error) {
-	return []TrackingRecord{}, nil
+type Entity struct {
+	ID             string
+	Type           string
+	JurisdictionID string
+	LegalStatus    string
+	CapacityProofs []CapacityProof
+	FiduciaryDuties []FiduciaryDuty
 }
 
-func NewMemoryStore() interface{}                  { return &StoreStub{} }
-func NewStandardVerificationSystem() interface{}  { return struct{}{} }
-func NewStandardCommercialRegister() interface{}  { return struct{}{} }
+type Client struct {
+	ID           string
+	Type         string
+	OwnerID      string
+	Entity       *Entity
+	Capabilities []string
+}
+
+type ResourceServer struct {
+	ID     string
+	Type   string
+	Entity *Entity
+	Scopes []string
+}

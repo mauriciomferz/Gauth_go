@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/internal/tokenstore"
+	"github.com/mauriciomferz/Gauth_go/internal/tokenstore"
 )
 
 func TestMemoryStore(t *testing.T) {

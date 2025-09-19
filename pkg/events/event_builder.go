@@ -91,11 +91,7 @@ func (e Event) WithBoolMetadata(key string, value bool) Event {
 	return e
 }
 
-// MergeMetadata merges the given metadata with existing metadata
-// MergeMetadata is removed: use type-safe setters instead
-func (e Event) MergeMetadata(metadata map[string]interface{}) Event {
-	panic("MergeMetadata is removed: use type-safe setters instead")
-}
+
 
 // WithTimeMetadata adds a time metadata to the event
 func (e Event) WithTimeMetadata(key string, value time.Time) Event {

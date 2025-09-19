@@ -1,7 +1,7 @@
 package gauth
 
 import (
-	"github.com/Gimel-Foundation/gauth/internal/errors"
+	"github.com/mauriciomferz/Gauth_go/pkg/errors"
 )
 
 // ResourceServer represents a server that provides protected resources

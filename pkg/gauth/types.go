@@ -4,7 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/common"
+	"github.com/mauriciomferz/Gauth_go/pkg/common"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 // AuthorizationRequest represents a request to initiate authorization (delegation)
@@ -50,7 +51,6 @@ type TokenResponse struct {
 }
 
 // Config represents the configuration for GAuth
-import "github.com/Gimel-Foundation/gauth/pkg/token"
 
 type Config struct {
 	AuthServerURL     string                 // URL of the authorization server
@@ -60,5 +60,4 @@ type Config struct {
 	RateLimit         common.RateLimitConfig // Rate limiting configuration
 	AccessTokenExpiry time.Duration          // Token expiry duration
 	TokenConfig       *token.Config          // Embedded token config (pointer)
-}
 }

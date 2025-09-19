@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/rate"
+	"github.com/mauriciomferz/Gauth_go/pkg/rate"
 )
 
 // RateLimitMiddleware wraps an http.Handler with rate limiting

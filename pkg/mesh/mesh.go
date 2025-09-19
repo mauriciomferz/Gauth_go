@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/auth"
-	"github.com/Gimel-Foundation/gauth/pkg/authz"
-	"github.com/Gimel-Foundation/gauth/pkg/metrics"
+	"github.com/mauriciomferz/Gauth_go/pkg/auth"
+	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	"github.com/mauriciomferz/Gauth_go/pkg/metrics"
 )
 
 // ServiceID uniquely identifies a service in the mesh

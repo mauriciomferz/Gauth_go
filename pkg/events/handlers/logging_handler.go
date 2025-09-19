@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/events"
+	"github.com/mauriciomferz/Gauth_go/pkg/events"
 )
 
 // LoggingHandler logs events to the standard logger

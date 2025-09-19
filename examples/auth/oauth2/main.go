@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Gimel-Foundation/gauth/pkg/auth"
+	"github.com/mauriciomferz/Gauth_go/pkg/auth"
 )
 
 func main() {

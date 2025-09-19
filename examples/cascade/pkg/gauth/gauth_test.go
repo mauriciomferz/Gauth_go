@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
 func TestGAuth(t *testing.T) {
@@ -19,7 +19,7 @@ func TestGAuth(t *testing.T) {
 			AccessTokenExpiry: time.Hour,
 		}
 
-		auth, err := gauth.New(validConfig)
+	auth, err := gauth.New(&validConfig)
 		if err != nil {
 			t.Errorf("Failed to create GAuth with valid config: %v", err)
 		}
@@ -28,7 +28,7 @@ func TestGAuth(t *testing.T) {
 		}
 
 		invalidConfig := gauth.Config{}
-		if _, err := gauth.New(invalidConfig); err == nil {
+	if _, err := gauth.New(&invalidConfig); err == nil {
 			t.Error("Expected error with invalid config")
 		}
 	})

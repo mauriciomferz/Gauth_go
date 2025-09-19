@@ -36,7 +36,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/common"
+	"github.com/mauriciomferz/Gauth_go/pkg/common"
 )
 
 // eventTypeFromString maps a string to a common.EventType.
@@ -86,6 +86,57 @@ type securityEvent struct {
 	ErrorMsg      string           `json:"error_message,omitempty"`
 	ResourceID    string           `json:"resource_id,omitempty"`
 	Scopes        []string         `json:"scopes,omitempty"`
+}
+
+// Logger provides thread-safe audit logging capabilities
+type Logger struct {
+	mu      sync.RWMutex
+	events  []Event
+	maxSize int
+}
+
+// NewLogger creates a new audit logger with specified max event history
+func NewLogger(maxSize int) *Logger {
+	if maxSize <= 0 {
+		maxSize = 1000 // Default size if invalid
+	}
+	return &Logger{
+		events:  make([]Event, 0, maxSize),
+		maxSize: maxSize,
+	}
+}
+
+// Log records a new audit event
+func (l *Logger) Log(event Event) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	// Ensure timestamp is set
+	if eventTime, ok := event.Metadata["timestamp"]; !ok || eventTime == "" {
+		event.Metadata["timestamp"] = time.Now().Format(time.RFC3339)
+	}
+
+	// Add event to the front for most recent first
+	l.events = append([]Event{event}, l.events...)
+
+	// Trim if exceeding max size
+	if len(l.events) > l.maxSize {
+		l.events = l.events[:l.maxSize]
+	}
+}
+
+// GetRecent returns the n most recent events
+func (l *Logger) GetRecent(n int) []Event {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+
+	if n <= 0 || n > len(l.events) {
+		n = len(l.events)
+	}
+
+	result := make([]Event, n)
+	copy(result, l.events[:n])
+	return result
 }
 
 // AuditLogger handles security event logging and persistence
@@ -260,7 +311,3 @@ func (al *AuditLogger) ClearEvents(retentionPeriod time.Duration) {
 
 	al.events = newEvents
 }
-
-// (Removed stray for-loop outside of function. If this was meant to be a function, please define it properly.)
-
-// (Removed stray code outside of function. If this was meant to be a function, please define it properly.)

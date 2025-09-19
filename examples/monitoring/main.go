@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/internal/monitoring"
-	"github.com/Gimel-Foundation/gauth/pkg/rate"
+	"github.com/mauriciomferz/Gauth_go/pkg/monitoring"
+	"github.com/mauriciomferz/Gauth_go/pkg/rate"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -53,7 +53,9 @@ func main() {
 		// Add rate limit headers (remaining is not tracked in this simple example)
 		w.Header().Set("X-RateLimit-Limit", fmt.Sprintf("%d", config.Rate))
 		w.Header().Set("X-RateLimit-Remaining", "unknown")
-		fmt.Fprintf(w, "Hello, your request is allowed!\n")
+		if _, err := fmt.Fprintf(w, "Hello, your request is allowed!\n"); err != nil {
+			log.Printf("Fprintf error: %v", err)
+		}
 	})
 
 	// Create metrics endpoint
@@ -66,7 +68,7 @@ func main() {
 		defer ticker.Stop()
 
 		for range ticker.C {
-			metrics := metrics.GetAllMetrics()
+			   metrics := metrics.GetAll()
 			log.Printf("Current Metrics:")
 			for name, metric := range metrics {
 				log.Printf("  %s: %.2f (labels: %v)", name, metric.Value, metric.Labels)

@@ -8,7 +8,7 @@
 //
 // Basic Usage:
 //
-//	import "github.com/Gimel-Foundation/gauth/internal/rate"
+//	import "github.com/mauriciomferz/Gauth_go/internal/rate"
 //
 //	// Create a rate limiter with configuration
 //	limiter := rate.NewLimiter(&rate.Config{

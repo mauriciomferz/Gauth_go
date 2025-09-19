@@ -41,14 +41,18 @@ func TestValidationChain(t *testing.T) {
 		validator2 := &mockValidator{shouldError: false}
 		chain := NewValidationChain(config, bl, validator1, validator2)
 
-		token := &Token{
-			ID:        NewID(),
-			IssuedAt:  time.Now(),
-			NotBefore: time.Now(),
-			ExpiresAt: time.Now().Add(time.Hour),
-		}
+	       id, err := NewID()
+	       if err != nil {
+		       t.Fatalf("failed to generate token ID: %v", err)
+	       }
+	       token := &Token{
+		       ID:        id,
+		       IssuedAt:  time.Now(),
+		       NotBefore: time.Now(),
+		       ExpiresAt: time.Now().Add(time.Hour),
+	       }
 
-		err := chain.Validate(ctx, token)
+			   err = chain.Validate(ctx, token)
 		if err != nil {
 			t.Errorf("Expected no error, got %v", err)
 		}

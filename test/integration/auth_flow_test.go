@@ -1,36 +1,49 @@
 package integration
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 func setupTestAuth(t *testing.T) *gauth.GAuth {
-	config := gauth.Config{
-		AuthServerURL:     "https://auth.example.com",
-		ClientID:          "test-client",
-		ClientSecret:      "test-secret",
-		Scopes:            []string{"read", "write", "admin"},
-		AccessTokenExpiry: time.Hour,
-	}
+       // Generate a minimal RSA key for signing
+       signingKey, err := rsa.GenerateKey(rand.Reader, 2048)
+       if err != nil {
+	       t.Fatalf("Failed to generate signing key: %v", err)
+       }
 
-	auth, err := gauth.New(config)
-	if err != nil {
-		t.Fatalf("Failed to create GAuth instance: %v", err)
-	}
-	return auth
+       config := gauth.Config{
+	       AuthServerURL:     "https://auth.example.com",
+	       ClientID:          "test-client",
+	       ClientSecret:      "test-secret",
+	       Scopes:            []string{"read", "write", "admin", "transaction:execute"},
+	       AccessTokenExpiry: time.Hour,
+	       TokenConfig: &token.Config{
+		       SigningKey:    signingKey,
+		       SigningMethod: token.RS256,
+	       },
+       }
+
+       auth, err := gauth.New(&config)
+       if err != nil {
+	       t.Fatalf("Failed to create GAuth instance: %v", err)
+       }
+       return auth
 }
 
 func TestCompleteAuthFlow(t *testing.T) {
 	auth := setupTestAuth(t)
 
 	// Step 1: Request Authorization
-	authReq := gauth.AuthorizationRequest{
-		ClientID: "test-client",
-		Scopes:   []string{"read", "write"},
-	}
+       authReq := gauth.AuthorizationRequest{
+	       ClientID: "test-client",
+	       Scopes:   []string{"read", "write", "transaction:execute"},
+       }
 
 	grant, err := auth.InitiateAuthorization(authReq)
 	if err != nil {
@@ -75,10 +88,10 @@ func TestConcurrentTransactions(t *testing.T) {
 	server := gauth.NewResourceServer("test-resource", auth)
 
 	// Get a valid token
-	grant, _ := auth.InitiateAuthorization(gauth.AuthorizationRequest{
-		ClientID: "test-client",
-		Scopes:   []string{"read", "write"},
-	})
+       grant, _ := auth.InitiateAuthorization(gauth.AuthorizationRequest{
+	       ClientID: "test-client",
+	       Scopes:   []string{"read", "write", "transaction:execute"},
+       })
 
 	tokenResp, _ := auth.RequestToken(gauth.TokenRequest{
 		GrantID: grant.GrantID,
@@ -106,7 +119,7 @@ func TestConcurrentTransactions(t *testing.T) {
 		}(i)
 	}
 
-	// Wait for all transactions
+	// Wait for all goroutines to finish
 	for i := 0; i < concurrency; i++ {
 		<-done
 	}
@@ -123,10 +136,10 @@ func TestResourceServerFailover(t *testing.T) {
 	}
 
 	// Get a valid token
-	grant, _ := auth.InitiateAuthorization(gauth.AuthorizationRequest{
-		ClientID: "test-client",
-		Scopes:   []string{"read", "write"},
-	})
+       grant, _ := auth.InitiateAuthorization(gauth.AuthorizationRequest{
+	       ClientID: "test-client",
+	       Scopes:   []string{"read", "write", "transaction:execute"},
+       })
 
 	tokenResp, _ := auth.RequestToken(gauth.TokenRequest{
 		GrantID: grant.GrantID,

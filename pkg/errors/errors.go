@@ -20,6 +20,7 @@ const (
 	ErrInvalidToken           ErrorCode = "invalid_token"
 	ErrInsufficientScope      ErrorCode = "insufficient_scope"
 	ErrRateLimited            ErrorCode = "rate_limited"
+	ErrRateLimitExceeded      ErrorCode = "rate_limited" // alias for compatibility
 	ErrInvalidRequest         ErrorCode = "invalid_request"
 	ErrInvalidClient          ErrorCode = "invalid_client"
 	ErrInvalidGrant           ErrorCode = "invalid_grant"
@@ -84,23 +85,17 @@ type ErrorDetails struct {
 	AdditionalInfo map[string]string
 }
 
-// Error is a structured error type for GAuth
+// Error represents a GAuth error with context
+
+// Error is the main error type for GAuth
 type Error struct {
-	// Code identifies the error type
-	Code ErrorCode
-
-	// Message is a human-readable error message
+	Code    ErrorCode
 	Message string
-
-	// Source indicates where the error originated
-	Source ErrorSource
-
-	// Details contains additional error information
 	Details *ErrorDetails
-
-	// Cause is the underlying error
-	Cause error
+	Source  ErrorSource
+	Cause   error
 }
+
 
 // New creates a new structured error
 func New(code ErrorCode, message string) *Error {

@@ -5,8 +5,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/errors"
-	"github.com/Gimel-Foundation/gauth/pkg/token"
+	"github.com/mauriciomferz/Gauth_go/pkg/errors"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 // AuthorizationRequest represents a request for authorization
@@ -326,16 +326,20 @@ func (s *DefaultService) handleClientCredentialsGrant(ctx context.Context, req *
 
 func (s *DefaultService) handlePasswordGrant(ctx context.Context, req *ServiceTokenRequest) (*ServiceTokenResponse, error) {
 	// Issue a real token for password grant
-	tok := &token.Token{
-		ID:        token.GenerateID(),
-		Type:      token.Access,
-		IssuedAt:  time.Now(),
-		ExpiresAt: time.Now().Add(1 * time.Hour),
-		Issuer:    "auth-service",
-		Subject:   req.Username,
-		Audience:  []string{"example-app"},
-		Scopes:    []string{"read", "write"},
-	}
+       id, err := token.GenerateID()
+       if err != nil {
+	       return nil, err
+       }
+       tok := &token.Token{
+	       ID:        id,
+	       Type:      token.Access,
+	       IssuedAt:  time.Now(),
+	       ExpiresAt: time.Now().Add(1 * time.Hour),
+	       Issuer:    "auth-service",
+	       Subject:   req.Username,
+	       Audience:  []string{"example-app"},
+	       Scopes:    []string{"read", "write"},
+       }
 	issued, err := s.tokenService.Issue(ctx, tok)
 	if err != nil {
 		return nil, err

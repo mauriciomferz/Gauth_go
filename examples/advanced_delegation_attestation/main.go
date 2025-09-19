@@ -2,22 +2,28 @@
 package main
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
 	"fmt"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 func main() {
+	// Generate a test RSA key for signing
+	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
+
 	// Initialize GAuth service
-		svc, err := gauth.New(&gauth.Config{
-			AuthServerURL:     "https://example-auth-server",
-			ClientID:          "test-client",
-			ClientSecret:      "supersecret",
-			Scopes:            []string{"sign_contract"},
-			AccessTokenExpiry: 24 * time.Hour,
-			TokenConfig:       &token.Config{SigningMethod: token.RS256},
-		})
+	svc, err := gauth.New(&gauth.Config{
+		AuthServerURL:     "https://example-auth-server",
+		ClientID:          "test-client",
+		ClientSecret:      "supersecret",
+		Scopes:            []string{"sign_contract"},
+		AccessTokenExpiry: 24 * time.Hour,
+		TokenConfig:       &token.Config{SigningMethod: token.RS256, SigningKey: priv},
+	})
 	if err != nil {
 		panic(fmt.Sprintf("Failed to initialize GAuth: %v", err))
 	}

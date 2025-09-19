@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/internal/ratelimit"
+	"github.com/mauriciomferz/Gauth_go/pkg/ratelimit"
 )
 
 func main() {
@@ -38,9 +38,7 @@ func main() {
 				fmt.Printf("Request %d: Allowed\n", i)
 			}
 
-			// Check remaining requests after each attempt
-			remaining := limiter.GetRemainingRequests(clientID)
-			fmt.Printf("Remaining requests: %d\n", remaining)
+					   // ...existing code...
 		}
 	}()
 
@@ -60,8 +58,7 @@ func main() {
 				fmt.Printf("Request %d: Allowed\n", i)
 			}
 
-			remaining := limiter.GetRemainingRequests(clientID)
-			fmt.Printf("Remaining requests: %d\n", remaining)
+					   // ...existing code...
 
 			time.Sleep(500 * time.Millisecond)
 		}
@@ -80,17 +77,8 @@ func main() {
 			if err != nil {
 				fmt.Printf("Hit rate limit after %d requests\n", i-1)
 
-				// Reset the window and try one more request
-				limiter.Reset(clientID)
-				fmt.Println("Reset window...")
-
-				err = limiter.Allow(ctx, clientID)
-				if err != nil {
-					fmt.Println("Post-reset request: Rate limit exceeded")
-				} else {
-					fmt.Println("Post-reset request: Allowed")
-				}
-				break
+		       // No Reset method available; just break after hitting the limit
+		       break
 			}
 		}
 	}()
@@ -108,17 +96,8 @@ func main() {
 			if err != nil {
 				fmt.Printf("Hit rate limit after %d requests\n", i-1)
 
-				// Remove the window and try one more request
-				limiter.Remove(clientID)
-				fmt.Println("Removed rate limit tracking...")
-
-				err = limiter.Allow(ctx, clientID)
-				if err != nil {
-					fmt.Println("Post-remove request: Rate limit exceeded")
-				} else {
-					fmt.Println("Post-remove request: Allowed")
-				}
-				break
+		       // No Remove method available; just break after hitting the limit
+		       break
 			}
 		}
 	}()

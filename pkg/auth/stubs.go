@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/common"
+	"github.com/mauriciomferz/Gauth_go/pkg/common"
 )
 
 // RegistryVerifier is a no-op stub for compilation.

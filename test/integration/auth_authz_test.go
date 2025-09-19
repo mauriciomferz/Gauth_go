@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Gimel-Foundation/gauth/pkg/auth"
-	"github.com/Gimel-Foundation/gauth/pkg/authz"
+	"github.com/mauriciomferz/Gauth_go/pkg/auth"
+	"github.com/mauriciomferz/Gauth_go/pkg/authz"
 )
 
 func TestAuthAndAuthzIntegration(t *testing.T) {
@@ -32,10 +32,10 @@ func TestAuthAndAuthzIntegration(t *testing.T) {
 		if ba, ok := authService.(interface{ AddClient(string, string) }); ok {
 			ba.AddClient(userID, password)
 		}
-		err := authService.ValidateCredentials(ctx, struct {
-			Username string
-			Password string
-		}{Username: userID, Password: password})
+	       err := authService.ValidateCredentials(ctx, auth.BasicCredentials{
+		       Username: userID,
+		       Password: password,
+	       })
 		require.NoError(t, err)
 
 		policy := &authz.Policy{

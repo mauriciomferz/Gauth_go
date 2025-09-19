@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 // ResourceNode represents a distributed resource node

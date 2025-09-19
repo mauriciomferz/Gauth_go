@@ -19,7 +19,7 @@ func BenchmarkBasicAuth(b *testing.B) {
 	ctx := context.Background()
 
 	b.Run("ValidateCredentials", func(b *testing.B) {
-		creds := basicCredentials{
+			   creds := BasicCredentials{
 			Username: "testuser",
 			Password: "testpass",
 		}

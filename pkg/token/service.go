@@ -70,10 +70,10 @@ func (s *Service) Issue(ctx context.Context, token *Token) (*Token, error) {
 	}
 	token.Value = sig
 
-	// Store the token
-	if err := s.store.Set(ctx, token); err != nil {
-		return nil, fmt.Errorf("failed to store token: %w", err)
-	}
+       // Store the token
+       if err := s.store.Save(ctx, token.ID, token); err != nil {
+	       return nil, fmt.Errorf("failed to store token: %w", err)
+       }
 
 	return token, nil
 }
@@ -176,18 +176,22 @@ func (s *Service) Refresh(ctx context.Context, refreshToken *Token) (*Token, err
 	if len(scopes) == 0 {
 		scopes = refreshToken.Scopes
 	}
-	accessToken := &Token{
-		ID:        GenerateID(),
-		Type:      Access,
-		IssuedAt:  time.Now(),
-		ExpiresAt: time.Now().Add(s.config.ValidityPeriod),
-		NotBefore: time.Now(),
-		Issuer:    refreshToken.Issuer,
-		Subject:   refreshToken.Subject,
-		Audience:  refreshToken.Audience,
-		Scopes:    scopes,
-		Algorithm: s.config.SigningMethod,
-	}
+       id, err := GenerateID()
+       if err != nil {
+	       return nil, fmt.Errorf("failed to generate token ID: %w", err)
+       }
+       accessToken := &Token{
+	       ID:        id,
+	       Type:      Access,
+	       IssuedAt:  time.Now(),
+	       ExpiresAt: time.Now().Add(s.config.ValidityPeriod),
+	       NotBefore: time.Now(),
+	       Issuer:    refreshToken.Issuer,
+	       Subject:   refreshToken.Subject,
+	       Audience:  refreshToken.Audience,
+	       Scopes:    scopes,
+	       Algorithm: s.config.SigningMethod,
+       }
 
 	// Helper to split comma-separated scopes
 	// (define at file scope if not present)
@@ -269,13 +273,13 @@ func (s *Service) periodicCleanup() {
 }
 
 // GenerateID generates a random token ID
-func GenerateID() string {
-	b := make([]byte, 16)
-	_, err := rand.Read(b)
-	if err != nil {
-		panic(err)
-	}
-	return base64.URLEncoding.EncodeToString(b)
+func GenerateID() (string, error) {
+       b := make([]byte, 16)
+       _, err := rand.Read(b)
+       if err != nil {
+	       return "", err
+       }
+       return base64.URLEncoding.EncodeToString(b), nil
 }
 
 //

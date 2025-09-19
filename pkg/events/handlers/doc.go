@@ -36,8 +36,8 @@ FilteredHandler:
 Usage Example:
 
 	import (
-		"github.com/Gimel-Foundation/gauth/pkg/events"
-		"github.com/Gimel-Foundation/gauth/pkg/events/handlers"
+			   "github.com/mauriciomferz/Gauth_go/pkg/events"
+			   "github.com/mauriciomferz/Gauth_go/pkg/events/handlers"
 	)
 
 	// Create handlers

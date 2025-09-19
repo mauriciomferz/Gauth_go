@@ -4,7 +4,7 @@ package gauth
 import (
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/internal/circuit"
+	"github.com/mauriciomferz/Gauth_go/pkg/circuit"
 )
 
 // CircuitBreakerState represents the state of a circuit breaker

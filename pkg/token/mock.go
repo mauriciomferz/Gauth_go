@@ -150,15 +150,19 @@ func (m *MockStore) Refresh(ctx context.Context, refreshToken *Token) (*Token, e
 		return nil, ErrInvalidType
 	}
 
-	return &Token{
-		ID:        GenerateID(),
-		Type:      Access,
-		Subject:   refreshToken.Subject,
-		Issuer:    refreshToken.Issuer,
-		Audience:  refreshToken.Audience,
-		Scopes:    refreshToken.Scopes,
-		Algorithm: refreshToken.Algorithm,
-	}, nil
+       id, err := GenerateID()
+       if err != nil {
+	       return nil, err
+       }
+       return &Token{
+	       ID:        id,
+	       Type:      Access,
+	       Subject:   refreshToken.Subject,
+	       Issuer:    refreshToken.Issuer,
+	       Audience:  refreshToken.Audience,
+	       Scopes:    refreshToken.Scopes,
+	       Algorithm: refreshToken.Algorithm,
+       }, nil
 }
 
 func (m *MockStore) checkError() error {

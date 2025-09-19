@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/store"
+	"github.com/mauriciomferz/Gauth_go/pkg/store"
 )
 
 func main() {

@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/internal/circuit"
-	"github.com/Gimel-Foundation/gauth/internal/ratelimit"
-	"github.com/Gimel-Foundation/gauth/internal/resilience"
+	"github.com/mauriciomferz/Gauth_go/pkg/circuit"
+	"github.com/mauriciomferz/Gauth_go/pkg/ratelimit"
+	"github.com/mauriciomferz/Gauth_go/pkg/resilience"
 )
 
 // ServiceType represents different types of microservices
@@ -116,7 +116,10 @@ func (mesh *ServiceMesh) addService(sType ServiceType, name string, baseLatency 
 		Multiplier:      2.0,
 	})
 
-	svc.Bulkhead = resilience.NewBulkhead(10)
+	 svc.Bulkhead = resilience.NewBulkhead(resilience.BulkheadConfig{
+		 MaxConcurrent: 10,
+		 MaxWaitTime:   0, // No wait
+	 })
 
 	mesh.services[sType] = svc
 }
@@ -155,19 +158,19 @@ func (s *Microservice) processRequest(ctx context.Context, mesh *ServiceMesh) er
 
 func (s *Microservice) call(ctx context.Context, mesh *ServiceMesh) error {
 	// Apply bulkhead pattern
-	return s.Bulkhead.Execute(ctx, func() error {
-		// Check rate limit
-		if err := s.Limiter.Allow(ctx, s.Name); err != nil {
-			return fmt.Errorf("rate limit exceeded for %s: %w", s.Name, err)
-		}
+	 return s.Bulkhead.Execute(ctx, func(ctx context.Context) error {
+		 // Check rate limit
+		 if err := s.Limiter.Allow(ctx, s.Name); err != nil {
+			 return fmt.Errorf("rate limit exceeded for %s: %w", s.Name, err)
+		 }
 
-		// Use retry with circuit breaker
-		return s.Retry.Execute(ctx, func() error {
-			return s.Breaker.Execute(func() error {
-				return s.processRequest(ctx, mesh)
-			})
-		})
-	})
+		 // Use retry with circuit breaker
+		 return s.Retry.Do(func() error {
+			 return s.Breaker.Execute(func() error {
+				 return s.processRequest(ctx, mesh)
+			 })
+		 })
+	 })
 }
 
 func (s *Microservice) recordSuccess() {

@@ -7,7 +7,7 @@ import (
 
 	"os"
 
-	"github.com/Gimel-Foundation/gauth/pkg/errors"
+	"github.com/mauriciomferz/Gauth_go/pkg/errors"
 )
 
 func main() {

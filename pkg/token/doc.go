@@ -2,7 +2,7 @@
 //
 // # Quick Start
 //
-//	import "github.com/Gimel-Foundation/gauth/pkg/token"
+//	import "github.com/mauriciomferz/Gauth_go/pkg/token"
 //
 //	store := token.NewMemoryStore(24 * time.Hour)
 //	t := &token.Token{
@@ -52,7 +52,7 @@
 // This package provides the following implementations:
 //
 // 1. MemoryStore: An in-memory token store with optional automatic cleanup
-//   - import "github.com/Gimel-Foundation/gauth/pkg/token"
+//   - import "github.com/mauriciomferz/Gauth_go/pkg/token"
 //   - Use NewMemoryStore() to create a new instance
 //
 // # Key Components

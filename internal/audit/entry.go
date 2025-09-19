@@ -2,9 +2,10 @@
 package audit
 
 import (
+	"strconv"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/internal/events"
+	"github.com/mauriciomferz/Gauth_go/internal/events"
 )
 
 // AuditType represents audit log entry types
@@ -103,7 +104,7 @@ func NewEntry(event *events.Event) *Entry {
 			entry.Message = "Token issued"
 			entry.Action = "issue"
 			entry.Metadata["token_type"] = details.TokenType
-			entry.Metadata["expires_in"] = string(details.ExpiresIn)
+			entry.Metadata["expires_in"] = strconv.FormatInt(details.ExpiresIn, 10)
 		}
 	case events.TokenRevoked:
 		entry.Type = AuditTypeToken

@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	mw "github.com/Gimel-Foundation/gauth/examples/errors/middleware/internal"
-	gautherr "github.com/Gimel-Foundation/gauth/pkg/errors"
+	mw "github.com/mauriciomferz/Gauth_go/examples/errors/middleware/internal"
+	gautherr "github.com/mauriciomferz/Gauth_go/pkg/errors"
 )
 
 // demoHandler is a sample handler that always returns an error
@@ -21,5 +21,7 @@ func main() {
 	errHandler := &mw.ErrorHandler{Next: mux}
 
 	log.Println("Starting error middleware demo server on :8080")
-	http.ListenAndServe(":8080", errHandler)
+       if err := http.ListenAndServe(":8080", errHandler); err != nil {
+	       log.Fatalf("Server failed: %v", err)
+       }
 }

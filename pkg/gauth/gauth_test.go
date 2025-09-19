@@ -1,11 +1,34 @@
 package gauth_test
 
 import (
+	"crypto"
+	"crypto/rand"
+	"crypto/rsa"
+	"io"
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
+
+func newMockSigner() crypto.Signer {
+	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
+	return &mockSigner{priv: priv}
+}
+
+// mockSigner is a minimal crypto.Signer for testing
+type mockSigner struct {
+	priv *rsa.PrivateKey
+}
+
+func (m *mockSigner) Public() crypto.PublicKey {
+	return m.priv.Public()
+}
+
+func (m *mockSigner) Sign(rand io.Reader, digest []byte, opts crypto.SignerOpts) ([]byte, error) {
+	return rsa.SignPKCS1v15(rand, m.priv, opts.HashFunc(), digest)
+}
 
 func TestGAuth(t *testing.T) {
 	// Test configuration validation
@@ -16,7 +39,7 @@ func TestGAuth(t *testing.T) {
 			ClientSecret:      "test-secret",
 			Scopes:            []string{"read", "write"},
 			AccessTokenExpiry: time.Hour,
-			TokenConfig:       &token.Config{SigningMethod: token.RS256},
+			TokenConfig:       &token.Config{SigningMethod: token.RS256, SigningKey: newMockSigner()},
 		}
 
 		auth, err := gauth.New(validConfig)
@@ -27,8 +50,9 @@ func TestGAuth(t *testing.T) {
 			t.Error("Expected non-nil GAuth instance")
 		}
 
-		invalidConfig := &gauth.Config{}
+		invalidConfig := &gauth.Config{TokenConfig: &token.Config{SigningMethod: token.RS256, SigningKey: newMockSigner()}}
 		if _, err := gauth.New(invalidConfig); err == nil {
+
 			t.Error("Expected error with invalid config")
 		}
 	})
@@ -41,7 +65,7 @@ func TestGAuth(t *testing.T) {
 			ClientSecret:      "test-secret",
 			Scopes:            []string{"read", "write"},
 			AccessTokenExpiry: time.Hour,
-			TokenConfig:       &token.Config{SigningMethod: token.RS256},
+			TokenConfig:       &token.Config{SigningMethod: token.RS256, SigningKey: newMockSigner()},
 		})
 
 		req := gauth.AuthorizationRequest{
@@ -69,7 +93,7 @@ func TestGAuth(t *testing.T) {
 			ClientSecret:      "test-secret",
 			Scopes:            []string{"read", "write"},
 			AccessTokenExpiry: time.Hour,
-			TokenConfig:       &token.Config{SigningMethod: token.RS256},
+			TokenConfig:       &token.Config{SigningMethod: token.RS256, SigningKey: newMockSigner()},
 		})
 
 		// Request a token
@@ -109,7 +133,7 @@ func TestGAuth(t *testing.T) {
 			ClientID:          "test-client",
 			ClientSecret:      "test-secret",
 			AccessTokenExpiry: 100 * time.Millisecond,
-			TokenConfig:       &token.Config{SigningMethod: token.RS256},
+			TokenConfig:       &token.Config{SigningMethod: token.RS256, SigningKey: newMockSigner()},
 		})
 
 		tokenReq := gauth.TokenRequest{

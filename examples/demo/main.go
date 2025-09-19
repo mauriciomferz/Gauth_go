@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/internal/circuit"
-	"github.com/Gimel-Foundation/gauth/internal/ratelimit"
-	"github.com/Gimel-Foundation/gauth/internal/resilience"
+	"github.com/mauriciomferz/Gauth_go/pkg/circuit"
+	"github.com/mauriciomferz/Gauth_go/pkg/ratelimit"
+	"github.com/mauriciomferz/Gauth_go/pkg/resilience"
 )
 
 // ExampleService simulates a service that might fail
@@ -68,7 +68,10 @@ func main() {
 	retry := resilience.NewRetry(retryStrategy)
 
 	// Set up bulkhead
-	bulkhead := resilience.NewBulkhead(2)
+	bulkhead := resilience.NewBulkhead(resilience.BulkheadConfig{
+		MaxConcurrent: 2,
+		MaxWaitTime:   0, // No wait
+	})
 
 	// Create example service
 	service := &ExampleService{}
@@ -119,7 +122,7 @@ func main() {
 		fmt.Println("\nScenario 3: Circuit Breaker with Retry")
 
 		for i := 1; i <= 8; i++ {
-			err := retry.Execute(ctx, func() error {
+			err := retry.Do(func() error {
 				return breaker.Execute(service.Call)
 			})
 
@@ -139,8 +142,8 @@ func main() {
 
 		for i := 1; i <= 5; i++ {
 			start := time.Now()
-			err := bulkhead.Execute(ctx, func() error {
-				return retry.Execute(ctx, func() error {
+			err := bulkhead.Execute(ctx, func(ctx context.Context) error {
+				return retry.Do(func() error {
 					if err := tokenBucket.Allow(ctx, "client4"); err != nil {
 						return err
 					}

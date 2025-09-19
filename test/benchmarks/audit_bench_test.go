@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 )
 
 func BenchmarkEntry(b *testing.B) {
@@ -39,7 +39,11 @@ func BenchmarkFileStorage(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	defer storage.Close()
+	defer func() {
+		if err := storage.Close(); err != nil {
+			b.Logf("storage.Close() error: %v", err)
+		}
+	}()
 
 	ctx := context.Background()
 
@@ -105,7 +109,11 @@ func BenchmarkRedisStorage(b *testing.B) {
 	if err != nil {
 		b.Skip("Redis not available:", err)
 	}
-	defer storage.Close()
+	defer func() {
+		if err := storage.Close(); err != nil {
+			b.Logf("storage.Close() error: %v", err)
+		}
+	}()
 
 	ctx := context.Background()
 
@@ -171,7 +179,11 @@ func BenchmarkSQLStorage(b *testing.B) {
 	if err != nil {
 		b.Skip("PostgreSQL not available:", err)
 	}
-	defer storage.Close()
+	defer func() {
+		if err := storage.Close(); err != nil {
+			b.Logf("storage.Close() error: %v", err)
+		}
+	}()
 
 	ctx := context.Background()
 

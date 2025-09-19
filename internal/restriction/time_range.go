@@ -3,7 +3,7 @@ package restriction
 import (
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/util"
+	"github.com/mauriciomferz/Gauth_go/pkg/util"
 )
 
 // TimeRange is an alias to util.TimeRange for better type safety

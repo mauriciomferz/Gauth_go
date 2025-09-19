@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/audit"
-	"github.com/Gimel-Foundation/gauth/pkg/token"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 // OAuth2 grant types
@@ -83,15 +83,15 @@ func (a *oauth2Authenticator) Close() error {
 }
 
 func (a *oauth2Authenticator) ValidateCredentials(ctx context.Context, creds interface{}) error {
-	switch c := creds.(type) {
-	case basicCredentials:
-		if a.config.ValidateUserFunc != nil {
-			return a.config.ValidateUserFunc(ctx, c.Username, c.Password)
-		}
-		return errors.New("no user validation function configured")
-	default:
-		return fmt.Errorf("unsupported credentials type: %T", creds)
-	}
+       switch c := creds.(type) {
+       case BasicCredentials:
+	       if a.config.ValidateUserFunc != nil {
+		       return a.config.ValidateUserFunc(ctx, c.Username, c.Password)
+	       }
+	       return errors.New("no user validation function configured")
+       default:
+	       return fmt.Errorf("unsupported credentials type: %T", creds)
+       }
 }
 
 func (a *oauth2Authenticator) GenerateToken(ctx context.Context, req TokenRequest) (*TokenResponse, error) {
@@ -99,24 +99,24 @@ func (a *oauth2Authenticator) GenerateToken(ctx context.Context, req TokenReques
 	data.Set("client_id", a.config.ClientID)
 	data.Set("client_secret", a.config.ClientSecret)
 
-	switch req.GrantType {
-	case GrantTypeClientCreds:
-		data.Set("grant_type", "client_credentials")
-		if len(req.Scopes) > 0 {
-			data.Set("scope", strings.Join(req.Scopes, " "))
-		}
+       switch req.GrantType {
+       case GrantTypeClientCreds:
+	       data.Set("grant_type", "client_credentials")
+	       if len(req.Scopes) > 0 {
+		       data.Set("scope", strings.Join(req.Scopes, " "))
+	       }
 
-	case GrantTypePassword:
-		creds, ok := req.Metadata["credentials"].(basicCredentials)
-		if !ok {
-			return nil, errors.New("invalid credentials for password grant")
-		}
-		data.Set("grant_type", "password")
-		data.Set("username", creds.Username)
-		data.Set("password", creds.Password)
-		if len(req.Scopes) > 0 {
-			data.Set("scope", strings.Join(req.Scopes, " "))
-		}
+       case GrantTypePassword:
+	       creds, ok := req.Metadata["credentials"].(BasicCredentials)
+	       if !ok {
+		       return nil, errors.New("invalid credentials for password grant")
+	       }
+	       data.Set("grant_type", "password")
+	       data.Set("username", creds.Username)
+	       data.Set("password", creds.Password)
+	       if len(req.Scopes) > 0 {
+		       data.Set("scope", strings.Join(req.Scopes, " "))
+	       }
 
 	case GrantTypeAuthCode:
 		code, ok := req.Metadata["code"].(string)

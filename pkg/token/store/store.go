@@ -1,7 +1,7 @@
 /*
 Package store provides token storage implementations for secure token management.
 
-DEPRECATED: Use github.com/Gimel-Foundation/gauth/pkg/token package instead.
+DEPRECATED: Use github.com/mauriciomferz/Gauth_go/pkg/token package instead.
 
 This package is kept for backward compatibility with older code.
 New code should use the token package directly.

@@ -19,7 +19,7 @@ The package supports several rate limiting strategies:
 
 Example usage:
 
-	import "github.com/Gimel-Foundation/gauth/pkg/rate"
+	import "github.com/mauriciomferz/Gauth_go/pkg/rate"
 
 	// Create a rate limiter
 	limiter := rate.NewTokenBucket(rate.Config{

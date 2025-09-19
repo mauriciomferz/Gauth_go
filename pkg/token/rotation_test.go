@@ -21,13 +21,17 @@ func TestBlacklist(t *testing.T) {
 	defer bl.Close()
 
 	t.Run("Add and Check Token", func(t *testing.T) {
-		token := &Token{
-			ID:        NewID(),
-			ExpiresAt: time.Now().Add(time.Hour),
-		}
+	       id, err := NewID()
+	       if err != nil {
+		       t.Fatalf("failed to generate token ID: %v", err)
+	       }
+	       token := &Token{
+		       ID:        id,
+		       ExpiresAt: time.Now().Add(time.Hour),
+	       }
 
 		// Add to blacklist
-		err := bl.Add(ctx, token, "test revocation")
+			   err = bl.Add(ctx, token, "test revocation")
 		if err != nil {
 			t.Fatalf("Failed to add token to blacklist: %v", err)
 		}
@@ -61,11 +65,15 @@ func TestBlacklist(t *testing.T) {
 
 	t.Run("Cleanup Expired", func(t *testing.T) {
 		// Add expired token
-		expiredToken := &Token{
-			ID:        NewID(),
-			ExpiresAt: time.Now().Add(-time.Hour),
-		}
-		bl.Add(ctx, expiredToken, "expired")
+	       id, err := NewID()
+	       if err != nil {
+		       t.Fatalf("failed to generate token ID: %v", err)
+	       }
+	       expiredToken := &Token{
+		       ID:        id,
+		       ExpiresAt: time.Now().Add(-time.Hour),
+	       }
+			   err = bl.Add(ctx, expiredToken, "expired")
 
 		// Force cleanup
 		bl.cleanup()
@@ -88,16 +96,20 @@ func TestRotator(t *testing.T) {
 
 	t.Run("Rotate Token", func(t *testing.T) {
 		// Create original token
-		original := &Token{
-			ID:        NewID(),
-			Type:      Access,
-			Subject:   "user123",
-			Issuer:    "test",
-			IssuedAt:  time.Now(),
-			ExpiresAt: time.Now().Add(time.Hour),
-			Scopes:    []string{"read", "write"},
-			Metadata:  &Metadata{AppData: map[string]string{"device": "mobile"}},
-		}
+	       id, err := NewID()
+	       if err != nil {
+		       t.Fatalf("failed to generate token ID: %v", err)
+	       }
+	       original := &Token{
+		       ID:        id,
+		       Type:      Access,
+		       Subject:   "user123",
+		       Issuer:    "test",
+		       IssuedAt:  time.Now(),
+		       ExpiresAt: time.Now().Add(time.Hour),
+		       Scopes:    []string{"read", "write"},
+		       Metadata:  &Metadata{AppData: map[string]string{"device": "mobile"}},
+	       }
 
 		// Store original
 		if err := store.Save(ctx, original.ID, original); err != nil {

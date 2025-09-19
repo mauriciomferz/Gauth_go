@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/util"
+	"github.com/mauriciomferz/Gauth_go/pkg/util"
 )
 
 // TimeRangeCondition allows access only during specific time periods

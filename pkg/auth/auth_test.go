@@ -28,7 +28,7 @@ func TestBasicAuth(t *testing.T) {
 
 	t.Run("Validate Credentials", func(t *testing.T) {
 		// Test valid credentials
-		err := auth.ValidateCredentials(context.Background(), basicCredentials{
+			   err := auth.ValidateCredentials(context.Background(), BasicCredentials{
 			Username: "testuser",
 			Password: "testpass",
 		})
@@ -37,7 +37,7 @@ func TestBasicAuth(t *testing.T) {
 		}
 
 		// Test invalid password
-		err = auth.ValidateCredentials(context.Background(), basicCredentials{
+			   err = auth.ValidateCredentials(context.Background(), BasicCredentials{
 			Username: "testuser",
 			Password: "wrongpass",
 		})
@@ -46,7 +46,7 @@ func TestBasicAuth(t *testing.T) {
 		}
 
 		// Test invalid username
-		err = auth.ValidateCredentials(context.Background(), basicCredentials{
+			   err = auth.ValidateCredentials(context.Background(), BasicCredentials{
 			Username: "wronguser",
 			Password: "testpass",
 		})

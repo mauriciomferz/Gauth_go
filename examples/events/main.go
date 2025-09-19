@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/events"
+	"github.com/mauriciomferz/Gauth_go/pkg/events"
 )
 
 // CustomEventHandler demonstrates how to implement an event handler

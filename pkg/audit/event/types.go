@@ -4,7 +4,7 @@ package event
 import (
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/token"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 // Type represents the type of event
@@ -141,10 +141,15 @@ func (b *Builder) WithError(err error) *Builder {
 
 // Build creates the final event
 func (b *Builder) Build() *Event {
-	if b.event.ID == "" {
-		b.event.ID = token.NewID()
-	}
-	return &b.event
+       if b.event.ID == "" {
+	       id, err := token.NewID()
+	       if err != nil {
+		       // Return nil to indicate failure instead of panicking
+		       return nil
+	       }
+	       b.event.ID = id
+       }
+       return &b.event
 }
 
 // String implements fmt.Stringer for Type

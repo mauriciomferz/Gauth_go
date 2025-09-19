@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
 func BenchmarkAuthFlow(b *testing.B) {
@@ -16,7 +16,7 @@ func BenchmarkAuthFlow(b *testing.B) {
 		AccessTokenExpiry: time.Hour,
 	}
 
-	auth, _ := gauth.New(config)
+	auth, _ := gauth.New(&config)
 	server := gauth.NewResourceServer("bench-resource", auth)
 
 	b.ResetTimer()
@@ -56,7 +56,7 @@ func BenchmarkConcurrentTransactions(b *testing.B) {
 		AccessTokenExpiry: time.Hour,
 	}
 
-	auth, _ := gauth.New(config)
+	auth, _ := gauth.New(&config)
 	server := gauth.NewResourceServer("bench-resource", auth)
 
 	// Create a token

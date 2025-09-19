@@ -122,8 +122,8 @@ examples/    - Standalone example applications
 1. Basic Token Management:
 
 	import (
-		"github.com/Gimel-Foundation/gauth/pkg/token"
-		"github.com/Gimel-Foundation/gauth/pkg/store"
+			   "github.com/mauriciomferz/Gauth_go/pkg/token"
+			   "github.com/mauriciomferz/Gauth_go/pkg/store"
 	)
 
 	// Create token service
@@ -142,7 +142,7 @@ examples/    - Standalone example applications
 
 2. HTTP Authentication:
 
-	import "github.com/Gimel-Foundation/gauth/pkg/auth"
+	import "github.com/mauriciomferz/Gauth_go/pkg/auth"
 
 	// Create auth middleware
 	auth := auth.NewMiddleware(auth.Config{
@@ -154,7 +154,7 @@ examples/    - Standalone example applications
 
 3. Event Monitoring:
 
-	import "github.com/Gimel-Foundation/gauth/pkg/events"
+	import "github.com/mauriciomferz/Gauth_go/pkg/events"
 
 	// Create event publisher
 	pub := events.NewPublisher()

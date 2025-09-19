@@ -6,10 +6,11 @@ import (
 	"crypto/rsa"
 	"fmt"
 	"log"
-	"time"
 	"reflect"
+	"time"
 
 	token "github.com/mauriciomferz/Gauth_go/pkg/token"
+)
 
 func main() {
 	// Generate RSA key pair for signing
@@ -48,8 +49,12 @@ func main() {
 	ctx := context.Background()
 
 	// Create a new access token
+	id, err := token.GenerateID()
+	if err != nil {
+		log.Fatalf("Failed to generate token ID: %v", err)
+	}
 	accessToken := &token.Token{
-		ID:        token.GenerateID(),
+		ID:        id,
 		Type:      token.Access,
 		Value:     "", // Will be set by service
 		IssuedAt:  time.Now(),

@@ -8,7 +8,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	"log"
+	"os"
 	"time"
 
 	token "github.com/mauriciomferz/Gauth_go/pkg/token"
@@ -133,17 +133,24 @@ func main() {
 	// Create encrypted store with a 32-byte key
 	key := make([]byte, 32)
 	if _, err := rand.Read(key); err != nil {
-		log.Fatalf("Failed to generate key: %v", err)
+		fmt.Fprintf(os.Stderr, "Failed to generate key: %v\n", err)
+		os.Exit(1)
 	}
 
 	encryptedStore, err := NewEncryptedStore(baseStore, key)
 	if err != nil {
-		log.Fatalf("Failed to create encrypted store: %v", err)
+		fmt.Fprintf(os.Stderr, "Failed to create encrypted store: %v\n", err)
+		os.Exit(1)
 	}
 
 	// Create a token with sensitive data
+	id, err := token.NewID()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to generate token ID: %v\n", err)
+		os.Exit(1)
+	}
 	t := &token.Token{
-		ID:      token.NewID(),
+		ID:      id,
 		Type:    token.Access,
 		Subject: "user123",
 		Value:   "sensitive-token-value",
@@ -159,14 +166,16 @@ func main() {
 
 	// Save encrypted token
 	if err := encryptedStore.Save(ctx, t); err != nil {
-		log.Fatalf("Failed to save token: %v", err)
+		fmt.Fprintf(os.Stderr, "Failed to save token: %v\n", err)
+		os.Exit(1)
 	}
 	fmt.Printf("Saved encrypted token: %s\n", t.ID)
 
 	// Retrieve and decrypt token
 	retrieved, err := encryptedStore.Get(ctx, t.ID)
 	if err != nil {
-		log.Fatalf("Failed to get token: %v", err)
+		fmt.Fprintf(os.Stderr, "Failed to get token: %v\n", err)
+		os.Exit(1)
 	}
 
 	fmt.Printf("\nRetrieved token:\n")

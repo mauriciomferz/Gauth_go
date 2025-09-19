@@ -9,13 +9,14 @@ import (
 
 	"github.com/mauriciomferz/Gauth_go/pkg/common"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 func main() {
 	fmt.Println("Starting GAuth Basic Example")
 
 	// Create a GAuth instance with typed configuration
-	config := &gauth.Config{
+	config := gauth.Config{
 		AuthServerURL:     "https://auth.example.com",
 		ClientID:          "example-client",
 		ClientSecret:      "example-secret",
@@ -28,7 +29,7 @@ func main() {
 		},
 		TokenConfig:       &token.Config{SigningMethod: token.RS256},
 	}
-	gauthService, err := gauth.New(config)
+	gauthService, err := gauth.New(&config)
 	if err != nil {
 		log.Fatalf("Failed to create GAuth service: %v", err)
 	}

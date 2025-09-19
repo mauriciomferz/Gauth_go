@@ -104,15 +104,19 @@ func main() {
 	for _, subject := range subjects {
 		for _, typ := range types {
 			// Create token with varying expiration
-			t := &token.Token{
-				ID:        token.NewID(),
-				Type:      typ,
-				Subject:   subject,
-				Issuer:    "token-monitor",
-				IssuedAt:  time.Now(),
-				ExpiresAt: time.Now().Add(time.Duration(30+len(subject)) * time.Minute),
-				Scopes:    []string{"read", "write"},
-			}
+			   id, err := token.NewID()
+			   if err != nil {
+				   log.Fatalf("failed to generate token ID: %v", err)
+			   }
+			   t := &token.Token{
+				   ID:        id,
+				   Type:      typ,
+				   Subject:   subject,
+				   Issuer:    "token-monitor",
+				   IssuedAt:  time.Now(),
+				   ExpiresAt: time.Now().Add(time.Duration(30+len(subject)) * time.Minute),
+				   Scopes:    []string{"read", "write"},
+			   }
 
 			// Store and track token
 			if err := store.Save(ctx, t.ID, t); err != nil {

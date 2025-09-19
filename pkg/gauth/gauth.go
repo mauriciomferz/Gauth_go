@@ -6,13 +6,14 @@ package gauth
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/internal/audit"
-	"github.com/Gimel-Foundation/gauth/internal/errors"
-	"github.com/Gimel-Foundation/gauth/internal/ratelimit"
-	"github.com/Gimel-Foundation/gauth/internal/tokenstore"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/errors"
+	"github.com/mauriciomferz/Gauth_go/pkg/ratelimit"
+	"github.com/mauriciomferz/Gauth_go/pkg/tokenstore"
 )
 
 // Close releases any resources held by GAuth (stub for test compatibility)
@@ -32,8 +33,8 @@ type AuditEventType string
 type AuditAction string
 
 const (
-	AuditTypeAuthRequest audit.Type = "auth_request"
-	AuditActionInitiate  audit.Action = "initiate_authorization"
+	AuditTypeAuthRequest = "auth_request"
+	AuditActionInitiate  = "initiate_authorization"
 )
 
 // AuthRequestMetadata is a typed struct for audit event metadata.
@@ -51,22 +52,22 @@ type GAuth struct {
 }
 
 // New creates a new GAuth instance with the provided configuration.
-func New(config Config) (*GAuth, error) {
-       if err := validateConfig(config); err != nil {
-	       return nil, err
-       }
-       auditLogger := audit.NewLogger(1000)
-       rateLimiter := ratelimit.NewLimiter(&ratelimit.Config{
-	       RequestsPerSecond: 10,
-	       BurstSize:         5,
-	       WindowSize:        60, // 60 seconds
-       })
-       return &GAuth{
-	       config:     config,
-	       TokenStore: tokenstore.NewMemoryStore(),
-	       auditLogger: auditLogger,
-	       rateLimiter: rateLimiter,
-       }, nil
+func New(config *Config) (*GAuth, error) {
+	if err := validateConfig(config); err != nil {
+		return nil, err
+	}
+	auditLogger := audit.NewLogger(1000)
+	rateLimiter := ratelimit.NewLimiter(&ratelimit.Config{
+		RequestsPerSecond: 10,
+		BurstSize:         5,
+		WindowSize:        60, // 60 seconds
+	})
+	return &GAuth{
+		config:      *config,
+		TokenStore:  tokenstore.NewMemoryStore(),
+		auditLogger: auditLogger,
+		rateLimiter: rateLimiter,
+	}, nil
 }
 
 // InitiateAuthorization starts the authorization process.
@@ -74,22 +75,25 @@ func (g *GAuth) InitiateAuthorization(req AuthorizationRequest) (*AuthorizationG
 	if err := g.validateAuthRequest(req); err != nil {
 		return nil, err
 	}
-	grantID := generateGrantID()
-	grant := &AuthorizationGrant{
-		GrantID:    grantID,
-		ClientID:   req.ClientID,
-		Scope:      req.Scopes,
-		ValidUntil: time.Now().Add(g.config.AccessTokenExpiry),
-	}
-       g.auditLogger.Log(audit.Event{
-	       Type:    AuditTypeAuthRequest,
-	       ActorID: req.ClientID,
-	       Action:  AuditActionInitiate,
-	       Status:  "granted",
-	       Metadata: map[string]string{
-		       "grant_id": grant.GrantID,
-	       },
-       })
+       grantID, err := generateGrantID()
+       if err != nil {
+	       return nil, fmt.Errorf("failed to generate grant ID: %w", err)
+       }
+       grant := &AuthorizationGrant{
+	       GrantID:    grantID,
+	       ClientID:   req.ClientID,
+	       Scope:      req.Scopes,
+	       ValidUntil: time.Now().Add(g.config.AccessTokenExpiry),
+       }
+	g.auditLogger.Log(audit.Event{
+		Type:     AuditTypeAuthRequest,
+		ActorID:  req.ClientID,
+		Action:   AuditActionInitiate,
+		Result:   "granted",
+		Metadata: map[string]string{
+			"grant_id": grant.GrantID,
+		},
+	})
 	return grant, nil
 }
 
@@ -100,7 +104,7 @@ func (g *GAuth) RequestToken(req TokenRequest) (*TokenResponse, error) {
 	}
 	token, err := generateToken()
 	if err != nil {
-		return nil, errors.New(errors.ErrInternalError, "failed to generate token")
+		return nil, errors.New(errors.ErrServerError, "failed to generate token")
 	}
 	tokenData := tokenstore.TokenData{
 		Valid:      true,
@@ -139,13 +143,13 @@ func (g *GAuth) GetAuditLogger() *audit.Logger {
 // validateAuthRequest validates the authorization request.
 func (g *GAuth) validateAuthRequest(req AuthorizationRequest) error {
 	if req.ClientID == "" {
-		return errors.New(errors.ErrInvalidConfig, "client ID is required")
+		return errors.New(errors.ErrInvalidClient, "client ID is required")
 	}
 	if req.ClientID != g.config.ClientID {
-		return errors.New(errors.ErrUnauthorized, "invalid client ID")
+		return errors.New(errors.ErrUnauthorizedClient, "invalid client ID")
 	}
 	if len(req.Scopes) == 0 {
-		return errors.New(errors.ErrInvalidConfig, "at least one scope is required")
+		return errors.New(errors.ErrInvalidScope, "at least one scope is required")
 	}
 	return nil
 }

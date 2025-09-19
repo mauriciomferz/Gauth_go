@@ -8,51 +8,51 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/mauriciomferz/Gauth_go/pkg/circuit"
+	"github.com/mauriciomferz/Gauth_go/pkg/monitoring"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/Gimel-Foundation/gauth/internal/circuit"
-	"github.com/Gimel-Foundation/gauth/internal/monitoring"
-	"github.com/Gimel-Foundation/gauth/internal/monitoring/prometheus"
-	"github.com/Gimel-Foundation/gauth/pkg/gauth"
+	// TODO: The following internal imports are not allowed in Go. Refactor to use public APIs or copy needed logic.
+	// "github.com/mauriciomferz/Gauth_go/internal/circuit"
+	// "github.com/mauriciomferz/Gauth_go/internal/monitoring"
+	// "github.com/mauriciomferz/Gauth_go/internal/monitoring/prometheus"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
 // ResilientService combines circuit breaker and monitoring
 type ResilientService struct {
-	auth         *gauth.GAuth
-	server       *gauth.ResourceServer
-	breaker      *circuit.CircuitBreaker
-	metrics      *monitoring.MetricsCollector
-	promExporter *prometheus.PrometheusExporter
+	auth    *gauth.GAuth
+	server  *gauth.ResourceServer
+	breaker *circuit.CircuitBreaker
+	metrics *monitoring.MetricsCollector
 }
 
 func NewResilientService(auth *gauth.GAuth) *ResilientService {
-	metrics := monitoring.NewMetricsCollector()
+       metrics := monitoring.NewMetricsCollector()
 
-	service := &ResilientService{
-		auth:         auth,
-		server:       gauth.NewResourceServer("resilient-service", auth),
-		metrics:      metrics,
-		promExporter: prometheus.NewPrometheusExporter(metrics),
-		breaker: circuit.NewCircuitBreaker(circuit.Options{
-			Name:             "auth-service",
-			FailureThreshold: 5,
-			ResetTimeout:     10 * time.Second,
-			HalfOpenLimit:    2,
-			OnStateChange: func(name string, from, to circuit.State) {
-				log.Printf("Circuit state changed from %v to %v", from, to)
-				metrics.Counter("circuit_state_changes_total", 1, map[string]string{
-					"name": name,
-					"from": from.String(),
-					"to":   to.String(),
-				})
-			},
-		}),
-	}
+       service := &ResilientService{
+	       auth:    auth,
+	       server:  gauth.NewResourceServer("resilient-service", auth),
+	       metrics: metrics,
+	       breaker: circuit.NewCircuitBreaker(circuit.Options{
+		       Name:             "auth-service",
+		       FailureThreshold: 5,
+		       ResetTimeout:     10 * time.Second,
+		       HalfOpenLimit:    2,
+		       OnStateChange: func(name string, from, to circuit.State) {
+			       log.Printf("Circuit state changed from %v to %v", from, to)
+			       metrics.Counter("circuit_state_changes_total", 1, map[string]string{
+				       "name": name,
+				       "from": from.String(),
+				       "to":   to.String(),
+			       })
+		       },
+	       }),
+       }
 
-	// Start metrics export
-	go service.exportMetrics()
+       // If you want to expose metrics to Prometheus, use promhttp.Handler() with your registry.
 
-	return service
+       return service
 }
 
 func (s *ResilientService) ProcessRequest(tx gauth.TransactionDetails, token string) error {
@@ -89,7 +89,7 @@ func (s *ResilientService) exportMetrics() {
 	defer ticker.Stop()
 
 	for range ticker.C {
-		s.promExporter.Export()
+			   // s.promExporter.Export() // removed: promExporter field no longer exists
 	}
 }
 
@@ -105,7 +105,7 @@ func runBasicExample() {
 		err error
 	)
 
-	auth, err := gauth.New(config)
+	auth, err := gauth.New(&config)
 	if err != nil {
 		log.Fatalf("Failed to initialize GAuth: %v", err)
 	}

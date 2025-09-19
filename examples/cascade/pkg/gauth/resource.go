@@ -2,7 +2,7 @@
 package gauth
 
 import (
-	"github.com/Gimel-Foundation/gauth/internal/resource"
+	"github.com/mauriciomferz/Gauth_go/pkg/resource"
 )
 
 // ResourceType represents the type of a resource
