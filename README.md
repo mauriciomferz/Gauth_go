@@ -62,6 +62,16 @@ func main() {
             SigningMethod: token.HS256,
             SigningKey:    []byte("your-signing-key"),
         },
+
+This diagram summarizes the main system components and their interactions. For a much more detailed, layered architecture—including the Public API, Core Services, Storage, and Integration layers—see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). That document also includes:
+
+- Layered architecture diagrams (ASCII and Mermaid)
+- Sequence diagrams for token and resource flows
+- Explanations of Power*Point (P*P) roles (PEP, PDP, PIP, PAP, PVP)
+- Data flow and extension points
+- Security, monitoring, and best practices
+
+Refer to [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full technical breakdown and visual diagrams.
     }
     auth, err := gauth.New(config, nil)
     if err != nil {
@@ -243,24 +253,44 @@ Below is a high-level architecture diagram of GAuth:
 
 For a detailed diagram, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
+
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for full guidelines. Here’s a summary of the most important points:
 
-### Development Setup
+- **Development Setup:**
+    1. Clone the repository
+    2. Install dependencies: `go mod download`
+    3. Run tests: `go test ./...`
+    4. Try examples: `cd examples/basic && go run main.go`
 
-1. Clone the repository
-2. Install dependencies: `go mod download`
-3. Run tests: `go test ./...`
-4. Try examples: `cd examples/basic && go run main.go`
+- **Code Organization:**
+    - Library code lives in `/pkg` (public API), `/internal` (private), `/examples` (demos), `/cmd` (CLI/demo apps)
+    - Each package uses `doc.go` for documentation, `interfaces.go` for public interfaces, and focused implementation files
+    - Tests are in `_test.go` files
 
-### Code Organization
+- **Code Style:**
+    - Follow standard Go conventions and use `gofmt`
+    - All exported functions/types must have GoDoc comments
+    - Use type-safe APIs (avoid `map[string]interface{}` in public APIs)
+    - Write meaningful commit messages and include tests for new features
 
-Each package follows these principles:
-- `doc.go`: Package documentation
-- `interfaces.go`: Public interfaces
-- Implementation files: Focused, single-responsibility
-- `_test.go`: Comprehensive tests
+- **Pull Requests:**
+    - Fork the repo, create a branch from `main`, and submit a PR via GitHub Flow
+    - Update documentation and tests as needed
+    - Ensure all CI checks pass before requesting review
+    - Update `README.md` and `CHANGELOG.md` for interface changes
+    - PRs require sign-off from two maintainers
+
+- **Issue Reporting:**
+    - Use [GitHub Issues](https://github.com/Gimel-Foundation/gauth/issues) to report bugs or request features
+    - Provide clear, actionable details in your report
+
+- **Community:**
+    - Join discussions, ask questions, and help review PRs
+    - Be respectful and constructive (see Code of Conduct if present)
+
+For more, see [CONTRIBUTING.md](CONTRIBUTING.md), [GETTING_STARTED.md](docs/GETTING_STARTED.md), and [LIBRARY.md](LIBRARY.md).
 
 ## Type Safety
 
@@ -313,9 +343,10 @@ go test ./internal/rate -run TestRateLimit
 
 MIT License - see [LICENSE](LICENSE)
 
+
 ## More Usage Examples
 
-GAuth comes with a rich set of real-world examples. See the [`examples/`](examples/) directory for runnable code. Here are a few highlights:
+GAuth provides a comprehensive set of real-world, runnable examples in the [`examples/`](examples/) directory. These cover everything from basic authentication to advanced delegation, restrictions, and batch operations. Below are some highlights and new advanced scenarios:
 
 ### Basic Authentication Example
 
@@ -348,6 +379,8 @@ func main() {
     // Use grant.GrantID to request tokens, etc.
 }
 ```
+
+See [`examples/basic/main.go`](examples/basic/main.go) for a full runnable example and comments.
 
 ### Advanced: Multi-Scope, Restrictions, and Batch Processing
 
@@ -384,4 +417,41 @@ func main() {
 }
 ```
 
-See [`examples/basic/main.go`](examples/basic/main.go) and [`examples/advanced/main.go`](examples/advanced/main.go) for full code and comments.
+See [`examples/advanced/main.go`](examples/advanced/main.go) for a full runnable example and comments.
+
+### Edge Case: Custom Restrictions and Delegation
+
+```go
+// ...imports...
+
+func main() {
+    // Custom restriction: Only allow transactions above a certain amount during business hours
+    grant, _ := auth.InitiateAuthorization(gauth.AuthorizationRequest{
+        ClientID: "custom-client",
+        Scopes:   []string{"transaction:execute"},
+        Restrictions: []gauth.Restriction{
+            {Type: "min_amount", Value: "100.00"},
+            {Type: "time_window", Value: "business_hours"},
+        },
+    })
+    // Delegation: Grant access to a sub-agent
+    delegatedGrant, _ := auth.DelegateAuthorization(gauth.DelegationRequest{
+        GrantID: grant.GrantID,
+        DelegateTo: "sub-agent-123",
+        Scopes: []string{"transaction:execute"},
+    })
+    // Use delegatedGrant.GrantID for sub-agent actions
+}
+```
+
+See [`examples/advanced_delegation_attestation/main.go`](examples/advanced_delegation_attestation/main.go) for a full example of delegation and attestation flows.
+
+For more, browse the [`examples/`](examples/) directory for topics such as:
+- Typed events and metadata
+- Error handling and propagation
+- Audit logging
+- Rate limiting
+- Resilience patterns
+- API gateway integration
+
+Each example is runnable and demonstrates a specific feature or integration pattern.

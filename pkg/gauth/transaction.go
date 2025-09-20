@@ -3,7 +3,8 @@ package gauth
 
 import "time"
 
-// TransactionType represents the type of transaction
+// TransactionType represents the type of transaction.
+// Used to distinguish between payment, transfer, authorization, etc.
 type TransactionType string
 
 const (
@@ -19,7 +20,8 @@ const (
 	RefundTransaction TransactionType = "refund"
 )
 
-// TransactionStatus represents the status of a transaction
+// TransactionStatus represents the status of a transaction.
+// Used to indicate whether a transaction is pending, successful, failed, or cancelled.
 type TransactionStatus string
 
 const (
@@ -34,6 +36,7 @@ const (
 )
 
 // TransactionDetails represents the details of a transaction with strong typing.
+// Includes all relevant fields for payments, transfers, authorizations, and more.
 //
 // Example usage:
 //   t := TransactionDetails{
@@ -48,7 +51,6 @@ const (
 //       Scopes: []string{"read", "write"},
 //       CustomMetadata: map[string]string{"order_id": "A1B2C3"},
 //   }
-//
 type TransactionDetails struct {
 	// ID uniquely identifies the transaction
 	ID string `json:"id"`

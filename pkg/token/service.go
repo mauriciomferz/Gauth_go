@@ -12,39 +12,50 @@ import (
 	"time"
 )
 
-// splitScopes splits a comma-separated string into a slice of scopes
+// splitScopes splits a comma-separated string into a slice of scopes.
+// Used internally for parsing scope lists.
 func splitScopes(s string) []string {
 	return strings.Split(s, ",")
 }
 
-// ServiceAPI defines the interface for token management functionality
+// ServiceAPI defines the interface for token management functionality.
+// Provides methods for issuing, validating, revoking, refreshing, and listing tokens.
 type ServiceAPI interface {
+	// GetToken retrieves a token by its ID.
 	GetToken(ctx context.Context, id string) (*Token, error)
+	// Validate checks if a token is valid.
 	Validate(ctx context.Context, token *Token) error
+	// Revoke invalidates a token.
 	Revoke(ctx context.Context, token *Token) error
+	// Issue creates, signs, and stores a new token.
 	Issue(ctx context.Context, token *Token) (*Token, error)
+	// Refresh issues a new token using a refresh token.
 	Refresh(ctx context.Context, refreshToken *Token) (*Token, error)
+	// List returns tokens matching a filter.
 	List(ctx context.Context, filter Filter) ([]*Token, error)
 }
 
-// Service provides token management functionality
+// Service provides token management functionality.
+// Implements ServiceAPI for issuing, validating, revoking, and refreshing tokens.
 type Service struct {
 	config *Config
 	store  Store
 }
 
 // GetToken retrieves a token by its ID.
+// Returns the token if found, or an error if not found.
 func (s *Service) GetToken(ctx context.Context, id string) (*Token, error) {
 	return s.store.Get(ctx, id)
 }
 
-// NewService creates a new token service with the given configuration
+// NewService creates a new token service with the given configuration and store.
+// Returns a ServiceAPI implementation. Starts a cleanup goroutine if CleanupInterval is set.
 func NewService(config *Config, store Store) ServiceAPI {
-       log.Printf("DEBUG: SigningKey in token.NewService: %v, addr: %p", config.SigningKey, config.SigningKey)
-       svc := &Service{
-	       config: config,
-	       store:  store,
-       }
+	   log.Printf("DEBUG: SigningKey in token.NewService: %v, addr: %p", config.SigningKey, config.SigningKey)
+	   svc := &Service{
+			   config: config,
+			   store:  store,
+	   }
 
 	// Start cleanup goroutine if interval is set
 	if config.CleanupInterval > 0 {

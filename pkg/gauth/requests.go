@@ -10,16 +10,18 @@ import (
 	"context"
 )
 
-// AuthorizationRequest represents a request to initiate authorization (delegation)
+// AuthorizationRequest represents a request to initiate authorization (delegation).
+// Used as input to GAuth.InitiateAuthorization. ClientID is the requesting client, Scopes are the requested permissions.
 type AuthorizationRequest struct {
-	ClientID string
-	Scopes   []string
+	ClientID string   // Unique client identifier
+	Scopes   []string // Requested scopes/permissions
 }
 
-// TokenRequest represents a request for a token
+// TokenRequest represents a request for a token.
+// Used as input to GAuth.RequestToken. GrantID is the authorization grant, Scope is the requested scope, Restrictions are optional constraints, and Context is for cancellation/deadline.
 type TokenRequest struct {
-	GrantID      string
-	Scope        []string
-	Restrictions []Restriction
-	Context      context.Context
+	GrantID      string            // Authorization grant ID
+	Scope        []string          // Requested scopes
+	Restrictions []Restriction     // Optional restrictions (e.g., IP, time window)
+	Context      context.Context   // Request context
 }

@@ -8,13 +8,16 @@ package gauth
 
 import (
 	"context"
+
 	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 )
 
 // AuditEventType is a string type for audit event types.
+// Used to categorize audit log entries (e.g., authorization requests).
 type AuditEventType string
 
 // AuditAction is a string type for audit actions.
+// Used to specify the action performed in an audit log entry (e.g., initiate authorization).
 type AuditAction string
 
 const (
@@ -25,15 +28,17 @@ const (
 )
 
 // AuthRequestMetadata contains metadata for an authorization request audit event.
+// Used to attach additional context (such as GrantID) to audit logs.
 type AuthRequestMetadata struct {
-	GrantID string
+	GrantID string // Unique grant identifier
 }
 
 // AuditLogger defines the interface for pluggable audit logging.
-// Implementations should be thread-safe.
+// Implementations should be thread-safe and support concurrent use.
+// Used by GAuth to record and retrieve audit events for compliance and monitoring.
 type AuditLogger interface {
 	// Log records an audit entry.
 	Log(ctx context.Context, entry *audit.Entry)
-	// GetRecentEvents returns the most recent audit events.
+	// GetRecentEvents returns the most recent audit events, up to the specified limit.
 	GetRecentEvents(limit int) []audit.Event
 }

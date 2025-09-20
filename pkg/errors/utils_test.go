@@ -8,6 +8,13 @@ import (
 	"testing"
 )
 
+
+type requestIDKeyType struct{}
+type userIDKeyType struct{}
+
+var requestIDKey = &requestIDKeyType{}
+var userIDKey = &userIDKeyType{}
+
 func TestWithStack(t *testing.T) {
 	err := New(ErrServerError, "Test error with stack")
 	err = err.WithStack()
@@ -68,10 +75,11 @@ func TestWithFields(t *testing.T) {
 func TestWithContext(t *testing.T) {
 	err := New(ErrServerError, "Test error with context")
 
-	// Create context with values using string keys (to match WithContext implementation)
+
+	// Create context with values using custom type keys to avoid collisions
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "request_id", "test-req-123")
-	ctx = context.WithValue(ctx, "user_id", "test-user-456")
+	ctx = context.WithValue(ctx, requestIDKey, "test-req-123")
+	ctx = context.WithValue(ctx, userIDKey, "test-user-456")
 
 	err = err.WithContext(ctx)
 

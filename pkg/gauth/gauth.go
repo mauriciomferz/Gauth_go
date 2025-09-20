@@ -32,6 +32,7 @@ import (
 
 // Close releases any resources held by GAuth.
 // For most in-memory/test use cases, this is a no-op.
+// Returns an error if cleanup fails (rare).
 func (g *GAuth) Close() error {
 	// No resources to release in this stub
 	return nil
@@ -41,19 +42,19 @@ func (g *GAuth) Close() error {
 
 
 
-// GAuth is the main authentication and authorization system for the GAuth protocol.
-// Use New to construct a GAuth instance.
+// GAuth is the main authentication and authorization system for the GAuth protocol (GiFo-RfC 0111).
+// Use New to construct a GAuth instance. Provides methods for authorization, token issuance, validation, and audit logging.
 type GAuth struct {
 	config      Config
 	TokenStore  tokenstore.Store // Exported for use in points.go
 	auditLogger AuditLogger      // Pluggable audit logger
 	rateLimiter *ratelimit.Limiter
-	// mu          sync.RWMutex // removed: unused
 }
 
 
 // New creates a new GAuth instance with the provided configuration and optional pluggable components.
 // If auditLogger is nil, a default in-memory logger is used.
+// Returns a pointer to GAuth and an error if configuration is invalid.
 //
 // Example:
 //   gauth, err := gauth.New(&gauth.Config{ClientID: "my-client", AccessTokenExpiry: time.Hour}, nil)
@@ -80,7 +81,7 @@ func New(config *Config, auditLogger AuditLogger) (*GAuth, error) {
 
 
 // InitiateAuthorization starts the authorization process for a client.
-// Returns an AuthorizationGrant if successful.
+// Returns an AuthorizationGrant if successful, or an error if the request is invalid.
 //
 // Example:
 //   grant, err := gauth.InitiateAuthorization(gauth.AuthorizationRequest{ClientID: "my-client", Scopes: []string{"read"}})
@@ -113,7 +114,7 @@ func (g *GAuth) InitiateAuthorization(req AuthorizationRequest) (*AuthorizationG
 
 
 // RequestToken issues a new token based on an authorization grant.
-// Returns a TokenResponse if successful.
+// Returns a TokenResponse if successful, or an error if the grant is invalid or rate-limited.
 //
 // Example:
 //   resp, err := gauth.RequestToken(gauth.TokenRequest{GrantID: grant.GrantID, Scope: []string{"read"}})
@@ -145,7 +146,7 @@ func (g *GAuth) RequestToken(req TokenRequest) (*TokenResponse, error) {
 
 
 // ValidateToken checks if a token is valid and returns its associated data.
-// Returns a TokenData pointer if valid, or an error if not.
+// Returns a TokenData pointer if valid, or an error if not (e.g., expired or not found).
 //
 // Example:
 //   data, err := gauth.ValidateToken(token)
@@ -163,6 +164,7 @@ func (g *GAuth) ValidateToken(token string) (*tokenstore.TokenData, error) {
 
 
 // GetAuditLogger returns the pluggable audit logger for inspection (RFC111: auditability).
+// Use this to access or replace the audit logger for compliance and monitoring.
 func (g *GAuth) GetAuditLogger() AuditLogger {
 	return g.auditLogger
 }

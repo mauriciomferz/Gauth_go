@@ -25,22 +25,25 @@ import (
 	"time"
 )
 
-// TokenData represents metadata associated with a token
+// TokenData represents metadata associated with a token.
+// Used for token lifecycle management, validation, and auditability.
+// Includes fields for delegation, restrictions, issuance, and expiry.
 type TokenData struct {
-	TokenID      string
-	UserID       string
-	ClientID     string
-	Scopes       []string
-	Restrictions *Restrictions // Use the type from enhanced_types.go
-	IssuedAt     time.Time
-	ExpiresAt    time.Time
+	TokenID      string         // Unique token identifier
+	UserID       string         // Subject/user for whom the token is issued
+	ClientID     string         // Client application identifier
+	Scopes       []string       // Authorized scopes
+	Restrictions *Restrictions  // Optional restrictions (e.g., IP, time window)
+	IssuedAt     time.Time      // Token issuance time
+	ExpiresAt    time.Time      // Token expiration time
 }
 
 // generateGrantID creates a unique grant identifier
 
 // generateToken creates a new secure token
 
-// convertTokenToTokenData maps a *Token to a *TokenData for compatibility
+// ConvertTokenToTokenData maps a *Token to a *TokenData for compatibility.
+// Returns a new TokenData struct or nil if input is nil.
 func ConvertTokenToTokenData(t *Token) *TokenData {
 	if t == nil {
 		return nil
