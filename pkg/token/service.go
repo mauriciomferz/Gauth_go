@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -32,7 +31,6 @@ type ServiceAPI interface {
 type Service struct {
 	config *Config
 	store  Store
-	mu     sync.RWMutex
 }
 
 // GetToken retrieves a token by its ID.
@@ -206,23 +204,6 @@ func (s *Service) List(ctx context.Context, filter Filter) ([]*Token, error) {
 	return s.store.List(ctx, filter)
 }
 
-func (s *Service) validateConfig(token *Token) error {
-	log.Printf("DEBUG: SigningKey in validateConfig: %v, addr: %p", s.config.SigningKey, s.config.SigningKey)
-	if s.config.SigningKey == nil {
-		log.Printf("ERROR: SigningKey is nil in validateConfig")
-		return fmt.Errorf("signing key not configured")
-	}
-
-	if s.config.ValidateIssuer && len(s.config.AllowedIssuers) == 0 {
-		return fmt.Errorf("issuer validation enabled but no allowed issuers configured")
-	}
-
-	if s.config.ValidateAudience && len(s.config.AllowedAudiences) == 0 {
-		return fmt.Errorf("audience validation enabled but no allowed audiences configured")
-	}
-
-	return nil
-}
 
 func (s *Service) signToken(token *Token) (string, error) {
 	// This is a placeholder - actual signing would use JWT, PASETO, etc.

@@ -110,10 +110,14 @@ func main() {
 	clientID := "client5"
 
 	// Fill up the window
-	for i := 1; i <= config.RequestsPerSecond; i++ {
-		limiter.Allow(ctx, clientID)
-		fmt.Printf("Initial request %d: Allowed\n", i)
-	}
+       for i := 1; i <= config.RequestsPerSecond; i++ {
+	       err := limiter.Allow(ctx, clientID)
+	       if err != nil {
+		       fmt.Printf("Initial request %d: Rate limit exceeded\n", i)
+	       } else {
+		       fmt.Printf("Initial request %d: Allowed\n", i)
+	       }
+       }
 
 	// Try one more request (should fail)
 	if err := limiter.Allow(ctx, clientID); err != nil {

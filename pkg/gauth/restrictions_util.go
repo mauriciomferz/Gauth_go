@@ -8,7 +8,11 @@ import (
 // RestrictionsUtil provides helper functions for working with restrictions
 // and helps transition from map[string]interface{} to typed Properties
 
-// CreateTimeRangeRestriction creates a new time-based restriction
+// CreateTimeRangeRestriction returns a Restriction that limits access to a specific time window.
+//
+// Example:
+//   r := CreateTimeRangeRestriction(time.Now(), time.Now().Add(1*time.Hour))
+//
 func CreateTimeRangeRestriction(start, end time.Time) Restriction {
 	props := NewProperties()
 	props.SetTime("start", start)
@@ -22,8 +26,11 @@ func CreateTimeRangeRestriction(start, end time.Time) Restriction {
 	}
 }
 
-// CreateIPRangeRestriction creates a new IP-based restriction
-
+// CreateIPRangeRestriction returns a Restriction that limits access to specific IP ranges.
+//
+// Example:
+//   r := CreateIPRangeRestriction([]string{"192.168.1.0/24", "10.0.0.0/8"})
+//
 func CreateIPRangeRestriction(allowedRanges []string) Restriction {
 	props := NewProperties()
        for i, ipRange := range allowedRanges {
@@ -38,7 +45,11 @@ func CreateIPRangeRestriction(allowedRanges []string) Restriction {
 	}
 }
 
-// CreateRateLimitRestriction creates a new rate limit restriction
+// CreateRateLimitRestriction returns a Restriction that limits the number of allowed actions per duration.
+//
+// Example:
+//   r := CreateRateLimitRestriction(100, time.Minute)
+//
 func CreateRateLimitRestriction(limit int, duration time.Duration) Restriction {
 	props := NewProperties()
 	props.SetInt("limit", limit)
@@ -52,7 +63,8 @@ func CreateRateLimitRestriction(limit int, duration time.Duration) Restriction {
 	}
 }
 
-// GetTimeRange extracts a time range from a restriction
+// GetTimeRange extracts the start and end time from a time-based Restriction.
+// Returns ok=false if the restriction is not time-based or missing properties.
 func GetTimeRange(r Restriction) (start, end time.Time, ok bool) {
 	if r.Type != "time" || r.Properties == nil {
 		return time.Time{}, time.Time{}, false
@@ -64,7 +76,8 @@ func GetTimeRange(r Restriction) (start, end time.Time, ok bool) {
 	return start, end, startOk && endOk
 }
 
-// GetIPRanges extracts IP ranges from a restriction
+// GetIPRanges extracts the allowed IP ranges from an IP-based Restriction.
+// Returns ok=false if the restriction is not IP-based or missing properties.
 func GetIPRanges(r Restriction) ([]string, bool) {
 	if r.Type != "ip" || r.Properties == nil {
 		return nil, false
@@ -80,7 +93,8 @@ func GetIPRanges(r Restriction) ([]string, bool) {
 	return ranges, len(ranges) > 0
 }
 
-// GetRateLimit extracts rate limit from a restriction
+// GetRateLimit extracts the rate limit and duration from a rate-based Restriction.
+// Returns ok=false if the restriction is not rate-based or missing properties.
 func GetRateLimit(r Restriction) (limit int, duration time.Duration, ok bool) {
 	if r.Type != "rate" || r.Properties == nil {
 		return 0, 0, false
@@ -92,9 +106,8 @@ func GetRateLimit(r Restriction) (limit int, duration time.Duration, ok bool) {
 	return limit, time.Duration(durationMs) * time.Millisecond, limitOk && durationOk
 }
 
-// LegacyCompatGetPropertiesMap gets a map representation for backward compatibility
-// Deprecated: LegacyCompatGetPropertiesMap gets a map representation for backward compatibility.
-// This function exists only for migration from legacy code using map[string]interface{}.
+// LegacyCompatGetPropertiesMap gets a map representation for backward compatibility.
+// Deprecated: This function exists only for migration from legacy code using map[string]interface{}.
 // Use strongly-typed Properties methods instead.
 func LegacyCompatGetPropertiesMap(r Restriction) map[string]interface{} {
 	if r.Properties == nil {

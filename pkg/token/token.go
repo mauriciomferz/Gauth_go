@@ -22,8 +22,6 @@
 package token
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"time"
 )
 
@@ -41,13 +39,6 @@ type TokenData struct {
 // generateGrantID creates a unique grant identifier
 
 // generateToken creates a new secure token
-func generateToken() (string, error) {
-	b := make([]byte, 48)
-	if _, err := rand.Read(b); err != nil {
-		return "", err
-	}
-	return base64.URLEncoding.EncodeToString(b), nil
-}
 
 // convertTokenToTokenData maps a *Token to a *TokenData for compatibility
 func ConvertTokenToTokenData(t *Token) *TokenData {

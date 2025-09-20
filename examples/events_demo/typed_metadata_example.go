@@ -1,0 +1,3 @@
+package main
+
+// ...move typed_metadata_example.go content here from examples/events/typed_metadata_example.go...

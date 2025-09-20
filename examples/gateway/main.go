@@ -29,7 +29,6 @@ type BackendService struct {
 	bulkhead  *resilience.Bulkhead
 	latency   time.Duration
 	errorRate float64
-	mu        sync.RWMutex
 }
 
 // RouteConfig defines routing and resilience configuration for a path

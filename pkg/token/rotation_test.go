@@ -73,7 +73,7 @@ func TestBlacklist(t *testing.T) {
 		       ID:        id,
 		       ExpiresAt: time.Now().Add(-time.Hour),
 	       }
-			   err = bl.Add(ctx, expiredToken, "expired")
+			   _ = bl.Add(ctx, expiredToken, "expired")
 
 		// Force cleanup
 		bl.cleanup()

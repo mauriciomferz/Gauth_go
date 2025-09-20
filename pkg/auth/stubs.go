@@ -2,67 +2,10 @@ package auth
 
 import (
 	"context"
-	"errors"
 	"time"
-
-	"github.com/mauriciomferz/Gauth_go/pkg/common"
 )
 
 // RegistryVerifier is a no-op stub for compilation.
-type RegistryVerifier interface {
-	VerifyRegistration(ctx context.Context, info interface{}) error
-	ValidateLegalStatus(ctx context.Context, ownerInfo interface{}) error
-}
-
-type noopRegistryVerifier struct{}
-
-func (n *noopRegistryVerifier) VerifyRegistration(ctx context.Context, info interface{}) error { return nil }
-func (n *noopRegistryVerifier) ValidateLegalStatus(ctx context.Context, ownerInfo interface{}) error { return nil }
-
-// IdentityVerificationService is a no-op stub for compilation.
-type IdentityVerificationService interface {
-	VerifyIdentity(ctx context.Context, id string) error
-}
-
-// ErrTokenNotFound is a stub error for compilation.
-var ErrTokenNotFound = errors.New("token not found")
-
-// --- Minimal no-op types for stubs ---
-
-type noopEnhancedToken struct{}
-type noopEnhancedStore struct{}
-
-type EnhancedToken struct{}
-
-// Add IsExpired to noopEnhancedToken
-func (t *noopEnhancedToken) IsExpired() bool { return false }
-
-// Update noopEnhancedStore methods to use common types
-func (s *noopEnhancedStore) GetHumanVerification(ctx context.Context, token *EnhancedToken) (*common.HumanVerification, error) {
-	return &common.HumanVerification{
-		UltimateHumanID:          "stub-human",
-		Role:                     "stub-role",
-		LegalCapacityVerified:    true,
-		CapacityVerificationTime: time.Now(),
-		CapacityVerifier:         "stub-verifier",
-		DelegationChain:          []common.DelegationLink{},
-	}, nil
-}
-
-func (s *noopEnhancedStore) GetSecondLevelApproval(ctx context.Context, token *EnhancedToken) (*common.SecondLevelApproval, error) {
-	return &common.SecondLevelApproval{
-		PrimaryApprover:       "stub-primary",
-		PrimaryApprovalTime:   time.Now(),
-		PrimaryRole:           "stub-role",
-		SecondaryApprover:     "stub-secondary",
-		SecondaryApprovalTime: time.Now(),
-		SecondaryRole:         "stub-role",
-		ApprovalLevel:         1,
-		ApprovalScope:         []string{"stub-scope"},
-		ApprovalDuration:      0,
-		JurisdictionRules:     nil,
-	}, nil
-}
 
 // AuditEvent stub for extended_controls.go
 // (Fields: Time, Type, RuleID, Result, Details, Evidence)

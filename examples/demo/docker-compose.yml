@@ -4,7 +4,7 @@ services:
     image: redis:7-alpine
     container_name: gauth-redis
     ports:
-      - "6379:6379"
+      - 6379:6379
     restart: unless-stopped
 
   gauth-demo:
@@ -15,8 +15,8 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379/0
     ports:
-      - "8080:8080"
-    command: ["/app/demo-server"]
+      - 8080:8080
+    command: [/app/demo-server]
     restart: unless-stopped
 
   example-client:
@@ -26,5 +26,5 @@ services:
       - gauth-demo
     environment:
       - API_URL=http://gauth-demo:8080
-    command: ["/app/client"]
+    command: [/app/client]
     restart: unless-stopped

@@ -1,15 +1,14 @@
+package events
+
+import "sync"
+
 // EventBus manages event publishing and subscriptions
 type EventBus struct {
 	handlers []EventHandler
 	mu       sync.RWMutex
 }
 
-// NewEventBus creates a new event bus
-func NewEventBus() *EventBus {
-	return &EventBus{
-		handlers: make([]EventHandler, 0),
-	}
-}
+// Use NewEventBus from events.go (SimpleEventBus) or rename this type if needed.
 
 // Subscribe adds a new event handler
 func (bus *EventBus) Subscribe(handler EventHandler) {
@@ -26,6 +25,6 @@ func (bus *EventBus) Publish(event Event) {
 	bus.mu.RUnlock()
 
 	for _, handler := range handlers {
-		handler.Handle(event)
+		 handler(event)
 	}
 }

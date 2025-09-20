@@ -4,11 +4,8 @@ import (
 	"context"
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/rand"
-	"encoding/base64"
 	"errors"
 	"fmt"
-	"io"
 	"sync"
 	"time"
 
@@ -68,36 +65,6 @@ func (s *encryptedTokenStore) Close() error {
 	return nil
 }
 
-func (s *encryptedTokenStore) encrypt(data []byte) (string, error) {
-	nonce := make([]byte, s.gcm.NonceSize())
-	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		return "", fmt.Errorf("failed to generate nonce: %w", err)
-	}
-
-	ciphertext := s.gcm.Seal(nonce, nonce, data, nil)
-	return base64.RawURLEncoding.EncodeToString(ciphertext), nil
-}
-
-func (s *encryptedTokenStore) decrypt(encryptedStr string) ([]byte, error) {
-	encrypted, err := base64.RawURLEncoding.DecodeString(encryptedStr)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode base64: %w", err)
-	}
-
-	if len(encrypted) < s.gcm.NonceSize() {
-		return nil, errors.New("encrypted data too short")
-	}
-
-	nonce := encrypted[:s.gcm.NonceSize()]
-	ciphertext := encrypted[s.gcm.NonceSize():]
-
-	plaintext, err := s.gcm.Open(nil, nonce, ciphertext, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt: %w", err)
-	}
-
-	return plaintext, nil
-}
 
 // Store implements EnhancedStore interface (accepts interface{})
 func (s *encryptedTokenStore) Store(ctx context.Context, token interface{}) error {

@@ -1,6 +1,7 @@
 package ratelimit
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -46,10 +47,12 @@ func NewHTTPRateLimitHandler(config HTTPRateLimitConfig) *HTTPRateLimitHandler {
 	// Use default rejection handler if none provided
 	onRejected := config.OnRejected
 	if onRejected == nil {
-		onRejected = func(w http.ResponseWriter, r *http.Request) {
+			onRejected = func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Retry-After", "60")
 			w.WriteHeader(http.StatusTooManyRequests)
-			w.Write([]byte("Rate limit exceeded. Please try again later."))
+			   if _, err := w.Write([]byte("Rate limit exceeded. Please try again later.")); err != nil {
+				   fmt.Printf("[RateLimitMiddleware] Write error: %v\n", err)
+			   }
 		}
 	}
 

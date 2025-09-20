@@ -8,12 +8,27 @@ import (
 	"time"
 )
 
-// Properties represents a collection of property values, keyed by string.
+// Properties represents a collection of strongly-typed property values, keyed by string.
+//
+// Example usage:
+//   props := NewProperties()
+//   props.SetString("foo", "bar")
+//   props.SetInt("count", 42)
+//   t, _ := time.Parse(time.RFC3339, "2025-09-20T12:00:00Z")
+//   props.SetTime("start", t)
+//   val, ok := props.GetString("foo")
+//
 type Properties struct {
 	values map[string]PropertyValue
 }
 
 // PropertyValue represents a strongly typed value for restriction properties.
+// Use the New*Property helpers to construct values of the correct type.
+//
+// Example:
+//   pv := NewIntProperty(42)
+//   s := pv.ToString() // "42"
+//
 type PropertyValue struct {
 	StringValue string    `json:"string_value,omitempty"`
 	IntValue    int       `json:"int_value,omitempty"`

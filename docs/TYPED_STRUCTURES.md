@@ -1,4 +1,19 @@
+
 # Using Type-Safe Structures in GAuth
+
+---
+
+## RFC 0111 Compliance & Legal Notice
+
+GAuth implements the GiFo-RfC 0111 (GAuth) standard for AI power-of-attorney, delegation, and auditability. All protocol roles, flows, and exclusions are respected. See https://gimelfoundation.com for the full RFC.
+
+**Exclusions:** GAuth MUST NOT include Web3, DNA-based identity, or decentralized auth logic. See RFC 0111 Section 2.
+
+**Licensing:** Code is subject to the Gimel Foundation's Legal Provisions Relating to GiFo Documents. See LICENSE, Apache 2.0, and referenced licenses for OAuth, OpenID Connect, and MCP.
+
+**P*P Roles:** GAuth implements Power*Point roles (PEP, PDP, PIP, PAP, PVP) as defined in RFC 0111. See the Architecture Guide for details.
+
+---
 
 GAuth provides strongly-typed structures for various components, making your code safer and easier to read. This guide explains how to use these typed structures effectively.
 

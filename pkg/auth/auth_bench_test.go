@@ -25,7 +25,9 @@ func BenchmarkBasicAuth(b *testing.B) {
 		}
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
-			auth.ValidateCredentials(ctx, creds)
+			   if err := auth.ValidateCredentials(ctx, creds); err != nil {
+				   b.Fatalf("ValidateCredentials failed: %v", err)
+			   }
 		}
 	})
 
@@ -36,7 +38,9 @@ func BenchmarkBasicAuth(b *testing.B) {
 		}
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
-			auth.GenerateToken(ctx, req)
+			   if _, err := auth.GenerateToken(ctx, req); err != nil {
+				   b.Fatalf("GenerateToken failed: %v", err)
+			   }
 		}
 	})
 
@@ -45,10 +49,15 @@ func BenchmarkBasicAuth(b *testing.B) {
 			Subject: "testuser",
 			Scopes:  []string{"read", "write"},
 		}
-		resp, _ := auth.GenerateToken(ctx, req)
+		resp, err := auth.GenerateToken(ctx, req)
+		if err != nil {
+			b.Fatalf("GenerateToken failed: %v", err)
+		}
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
-			auth.ValidateToken(ctx, resp.Token)
+			   if _, err := auth.ValidateToken(ctx, resp.Token); err != nil {
+				   b.Fatalf("ValidateToken failed: %v", err)
+			   }
 		}
 	})
 }
@@ -81,7 +90,9 @@ func BenchmarkJWTAuth(b *testing.B) {
 		}
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
-			auth.GenerateToken(ctx, req)
+			   if _, err := auth.GenerateToken(ctx, req); err != nil {
+				   b.Fatalf("GenerateToken failed: %v", err)
+			   }
 		}
 	})
 
@@ -94,10 +105,15 @@ func BenchmarkJWTAuth(b *testing.B) {
 				"role": "admin",
 			},
 		}
-		resp, _ := auth.GenerateToken(ctx, req)
+		resp, err := auth.GenerateToken(ctx, req)
+		if err != nil {
+			b.Fatalf("GenerateToken failed: %v", err)
+		}
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
-			auth.ValidateToken(ctx, resp.Token)
+			   if _, err := auth.ValidateToken(ctx, resp.Token); err != nil {
+				   b.Fatalf("ValidateToken failed: %v", err)
+			   }
 		}
 	})
 
@@ -110,10 +126,15 @@ func BenchmarkJWTAuth(b *testing.B) {
 				"role": "admin",
 			},
 		}
-		resp, _ := auth.GenerateToken(ctx, req)
+		resp, err := auth.GenerateToken(ctx, req)
+		if err != nil {
+			b.Fatalf("GenerateToken failed: %v", err)
+		}
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
-			auth.ValidateToken(ctx, resp.Token)
+			   if _, err := auth.ValidateToken(ctx, resp.Token); err != nil {
+				   b.Fatalf("ValidateToken failed: %v", err)
+			   }
 		}
 	})
 }

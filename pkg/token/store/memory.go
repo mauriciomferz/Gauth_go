@@ -204,9 +204,9 @@ func (s *MemoryStore) cleanupLoop() {
 	for {
 		select {
 		case <-ticker.C:
-			if err := s.Cleanup(context.Background()); err != nil {
-				// Log error
-			}
+			   if err := s.Cleanup(context.Background()); err != nil {
+				   fmt.Printf("[MemoryStore] Cleanup error: %v\n", err)
+			   }
 		case <-s.stopClean:
 			return
 		}

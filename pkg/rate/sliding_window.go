@@ -83,29 +83,3 @@ func (sw *SlidingWindow) Reset(id string) {
 	sw.counts.Store(id, &windowInfo{})
 }
 
-// cleanup periodically removes old entries
-func (sw *SlidingWindow) cleanup() {
-	ticker := time.NewTicker(sw.window)
-	defer ticker.Stop()
-
-	for range ticker.C {
-		now := time.Now()
-		cutoff := now.Add(-sw.window)
-
-		sw.counts.Range(func(key, value interface{}) bool {
-			info := value.(*windowInfo)
-			sw.mu.Lock()
-			validIdx := 0
-			for i, ts := range info.timestamps {
-				if ts.After(cutoff) {
-					validIdx = i
-					break
-				}
-			}
-			info.timestamps = info.timestamps[validIdx:]
-			info.count = int64(len(info.timestamps))
-			sw.mu.Unlock()
-			return true
-		})
-	}
-}

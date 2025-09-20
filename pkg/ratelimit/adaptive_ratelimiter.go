@@ -15,12 +15,11 @@ type AdaptiveConfig struct {
 }
 
 type AdaptiveRateLimiter struct {
-	mu           sync.RWMutex
-	currentLimit int
-	config       AdaptiveConfig
-	requestCount int
-	lastReset    time.Time
-	usageHistory []float64
+        mu           sync.RWMutex
+        currentLimit int
+        config       AdaptiveConfig
+        lastReset    time.Time
+        usageHistory []float64
 }
 
 func NewAdaptiveRateLimiter(config AdaptiveConfig) *AdaptiveRateLimiter {

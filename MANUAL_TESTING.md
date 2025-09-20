@@ -1,31 +1,23 @@
-# Manual Testing & Familiarization Guide
+# MANUAL_TESTING.md
 
-This guide helps you manually test and explore GAuth’s functionality using type-safe, modular APIs.
+## Manual Testing & Familiarization Guide
 
----
+This document provides suggestions for manually testing and exploring the GAuth Go library and its demo applications.
 
-## 1. Run the Demo
-- Go to `cmd/demo/` or `examples/` and run the provided `main.go`.
-   ```sh
-   cd cmd/demo
-   go run main.go
-   ```
-- Observe the output for grant, token, and event flows.
+### How to Run
+- Use the demo binaries in `cmd/demo/` or run example programs in `examples/`.
+- Build and run with `go run main.go` or `make` as appropriate.
 
-## 2. Try Custom Grants/Tokens
-- Modify the example to create custom grants or tokens.
-- Test edge cases: expired tokens, revoked grants, invalid scopes.
+### Suggested Manual Tests
+- Issue and verify tokens using the CLI or example scripts.
+- Test delegation, revocation, and attestation flows.
+- Explore error handling and edge cases.
 
-## 3. Audit Logging
-- Check that all actions (grant, token issue, resource access) are logged.
-- Try extending the audit logger for your own needs.
-
-## 4. Error Handling
-- Intentionally trigger errors (e.g., invalid client, revoked token) and observe responses.
-
-## 5. Extend the Library
-- Implement a custom token store or event type.
-- Add new roles or attributes as needed.
+### Tips for New Users
+- Start with the simplest example in `examples/basic/`.
+- Review logs and output for expected behavior.
+- Modify configuration or input data to observe different flows.
 
 ---
-For more, see the package docs in `pkg/gauth/doc.go` and the README.
+
+*This file is part of the RFC 0111 compliance and open source readiness effort.*

@@ -1,4 +1,3 @@
-package gauth
 package gauth_test
 
 import (

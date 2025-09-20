@@ -1,4 +1,17 @@
+
 # GAuth Architecture Guide
+
+---
+
+## RFC 0111 Compliance & Legal Notice
+
+GAuth implements the GiFo-RfC 0111 (GAuth) standard for AI power-of-attorney, delegation, and auditability. All protocol roles, flows, and exclusions are respected. See https://gimelfoundation.com for the full RFC.
+
+**Exclusions:** GAuth MUST NOT include Web3, DNA-based identity, or decentralized auth logic. See RFC 0111 Section 2.
+
+**Licensing:** Code is subject to the Gimel Foundation's Legal Provisions Relating to GiFo Documents. See LICENSE, Apache 2.0, and referenced licenses for OAuth, OpenID Connect, and MCP.
+
+---
 
 ## Overview
 
@@ -8,6 +21,21 @@ GAuth is designed with a modular, layered architecture that prioritizes:
 - Extensibility
 - Security best practices
 
+
+
+## P*P Roles (Power*Point Architecture)
+
+GAuth explicitly implements the Power*Point (P*P) roles as defined in RFC 0111:
+
+- **Power Enforcement Point (PEP):** Enforces access control decisions (see `PowerEnforcementPoint` in code).
+- **Power Decision Point (PDP):** Makes authorization decisions (see `PowerDecisionPoint`).
+- **Power Information Point (PIP):** Gathers attributes/context for decisions (see GAuth config and context).
+- **Power Administration Point (PAP):** Manages policies and revocation (see `PowerAdministrationPoint`).
+- **Power Verification Point (PVP):** Verifies tokens and identities (see `PowerVerificationPoint`).
+
+All logic is centralized and type-safe. Enforcement and decision logic is explicit and auditable.
+
+---
 
 ## Architecture Layers
 
@@ -38,7 +66,18 @@ GAuth is designed with a modular, layered architecture that prioritizes:
 └─────────┴─────────┴─────────┴──────────-┘
 ```
 
-## Key Components
+
+---
+
+## Delegation, Attestation, Versioning, Registration/Identity Proof
+
+- **Delegation:** Explicitly modeled in `AuthorizationGrant` (see code), with `DelegatedFrom` and related fields.
+- **Attestation:** Supported via `Attestation` type for notary/witness flows.
+- **Versioning:** All grants include version and version log fields for auditability.
+- **Revocation:** Grants include revocation status and metadata.
+- **Registration/Identity Proof:** Protocol flow I–VIII is documented in `doc.go` and mapped to code (see `AuthorizationRequest`, `validateAuthRequest`).
+
+---
 
 ### 1. Public API Layer
 

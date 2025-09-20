@@ -3,9 +3,10 @@
 package main
 
 import (
-	"fmt"
-	"log"
+	"os"
 	"time"
+
+	"golang.org/x/exp/slog"
 
 	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/common"
@@ -14,7 +15,10 @@ import (
 )
 
 func main() {
-	fmt.Println("Starting GAuth Basic Example")
+
+	// Set up structured logger (slog)
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	logger.Info("Starting GAuth Basic Example")
 
 	// Create a GAuth instance with typed configuration
 	config := gauth.Config{
@@ -30,10 +34,11 @@ func main() {
 		},
 		TokenConfig:       &token.Config{SigningMethod: token.RS256},
 	}
-       gauthService, err := gauth.New(&config, audit.NewLogger(100))
-       if err != nil {
-	       log.Fatalf("Failed to create GAuth service: %v", err)
-       }
+	gauthService, err := gauth.New(&config, audit.NewLogger(100))
+	if err != nil {
+		 logger.Error("Failed to create GAuth service", "error", err)
+		 os.Exit(1)
+	}
 
 	// Simulate an authorization request and grant
 	authReq := gauth.AuthorizationRequest{
@@ -41,15 +46,13 @@ func main() {
 		Scopes:   []string{"payment:execute"},
 	}
 
-	fmt.Println("\n1. Initiating Authorization Request")
-	authGrant, err := gauthService.InitiateAuthorization(authReq)
-	if err != nil {
-		fmt.Println("Error requesting authorization:", err)
-		return
-	}
-	fmt.Println("✓ Authorization grant received")
-	fmt.Printf("  - Grant ID: %s\n", authGrant.GrantID)
-	fmt.Printf("  - Scopes: %v\n", authGrant.Scope)
+       logger.Info("Initiating Authorization Request")
+       authGrant, err := gauthService.InitiateAuthorization(authReq)
+       if err != nil {
+	       logger.Error("Error requesting authorization", "error", err)
+	       return
+       }
+       logger.Info("Authorization grant received", "grant_id", authGrant.GrantID, "scopes", authGrant.Scope)
 
 	// To extend this example:
 	// - Add token issuance and validation using gauthService.RequestToken(...)

@@ -33,7 +33,22 @@ const (
 	TransactionCancelled TransactionStatus = "cancelled"
 )
 
-// TransactionDetails represents the details of a transaction with strong typing
+// TransactionDetails represents the details of a transaction with strong typing.
+//
+// Example usage:
+//   t := TransactionDetails{
+//       ID: "txn-123",
+//       Type: PaymentTransaction,
+//       Status: TransactionPending,
+//       ClientID: "client-1",
+//       ResourceID: "res-42",
+//       Amount: 100.0,
+//       Currency: "USD",
+//       Timestamp: time.Now(),
+//       Scopes: []string{"read", "write"},
+//       CustomMetadata: map[string]string{"order_id": "A1B2C3"},
+//   }
+//
 type TransactionDetails struct {
 	// ID uniquely identifies the transaction
 	ID string `json:"id"`
@@ -79,46 +94,48 @@ type TransactionDetails struct {
 	CustomMetadata map[string]string `json:"custom_metadata,omitempty"`
 }
 
-// Validate performs validation on the transaction details
+// Validate performs validation on the transaction details.
+// Returns an error if required fields are missing or invalid.
 func (t *TransactionDetails) Validate() error {
-	// Add validation logic here
+	// Add validation logic here (e.g., check required fields, positive amount, etc.)
 	return nil
 }
 
-// IsMonetary returns true if this is a monetary transaction
+// IsMonetary returns true if this is a monetary transaction (payment or transfer).
 func (t *TransactionDetails) IsMonetary() bool {
 	return t.Type == PaymentTransaction || t.Type == TransferTransaction
 }
 
-// RequiresAuthorization returns true if this transaction requires authorization
+// RequiresAuthorization returns true if this transaction requires authorization (payment or authorization).
 func (t *TransactionDetails) RequiresAuthorization() bool {
 	return t.Type == PaymentTransaction || t.Type == AuthorizationTransaction
 }
 
-// GetMetadata returns both standard and custom metadata as a map
+// GetMetadata returns both standard and custom metadata as a map[string]string.
+// Useful for logging, auditing, or downstream processing.
 func (t *TransactionDetails) GetMetadata() map[string]string {
-	metadata := map[string]string{
-		"type":        string(t.Type),
-		"status":      string(t.Status),
-		"client_id":   t.ClientID,
-		"resource_id": t.ResourceID,
-	}
+       metadata := map[string]string{
+	       "type":        string(t.Type),
+	       "status":      string(t.Status),
+	       "client_id":   t.ClientID,
+	       "resource_id": t.ResourceID,
+       }
 
-	// Add non-empty optional fields
-	if t.Source != "" {
-		metadata["source"] = t.Source
-	}
-	if t.Destination != "" {
-		metadata["destination"] = t.Destination
-	}
-	if t.Reference != "" {
-		metadata["reference"] = t.Reference
-	}
+       // Add non-empty optional fields
+       if t.Source != "" {
+	       metadata["source"] = t.Source
+       }
+       if t.Destination != "" {
+	       metadata["destination"] = t.Destination
+       }
+       if t.Reference != "" {
+	       metadata["reference"] = t.Reference
+       }
 
-	// Add custom metadata
-	for k, v := range t.CustomMetadata {
-		metadata[k] = v
-	}
+       // Add custom metadata
+       for k, v := range t.CustomMetadata {
+	       metadata[k] = v
+       }
 
-	return metadata
+       return metadata
 }

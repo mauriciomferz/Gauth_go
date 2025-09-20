@@ -21,10 +21,7 @@ package gauth
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/mauriciomferz/Gauth_go/pkg/audit"      // [GAuth]
@@ -40,40 +37,8 @@ func (g *GAuth) Close() error {
 	return nil
 }
 
-// Authorize processes an authorization request.
-// Deprecated: Use InitiateAuthorization and RequestToken for explicit flows.
-func (g *GAuth) Authorize(ctx interface{}, req interface{}) (interface{}, error) {
-	// Stub: return nil, nil for now
-	return nil, nil
-}
 
 
-// AuditEventType is a string type for audit event types.
-type AuditEventType string
-
-// AuditAction is a string type for audit actions.
-type AuditAction string
-
-const (
-	// AuditTypeAuthRequest is the event type for authorization requests.
-	AuditTypeAuthRequest = "auth_request"
-	// AuditActionInitiate is the action for initiating authorization.
-	AuditActionInitiate  = "initiate_authorization"
-)
-
-// AuthRequestMetadata contains metadata for an authorization request audit event.
-type AuthRequestMetadata struct {
-	GrantID string
-}
-
-// AuditLogger defines the interface for pluggable audit logging.
-// Implementations should be thread-safe.
-type AuditLogger interface {
-	// Log records an audit entry.
-	Log(ctx context.Context, entry *audit.Entry)
-	// GetRecentEvents returns the most recent audit events.
-	GetRecentEvents(limit int) []audit.Event
-}
 
 
 // GAuth is the main authentication and authorization system for the GAuth protocol.
@@ -83,7 +48,7 @@ type GAuth struct {
 	TokenStore  tokenstore.Store // Exported for use in points.go
 	auditLogger AuditLogger      // Pluggable audit logger
 	rateLimiter *ratelimit.Limiter
-	mu          sync.RWMutex // unexported: not part of public API
+	// mu          sync.RWMutex // removed: unused
 }
 
 
@@ -202,25 +167,4 @@ func (g *GAuth) GetAuditLogger() AuditLogger {
 	return g.auditLogger
 }
 
-// validateAuthRequest validates the authorization request.
-func (g *GAuth) validateAuthRequest(req AuthorizationRequest) error {
-	if req.ClientID == "" {
-		return errors.New(errors.ErrInvalidClient, "client ID is required")
-	}
-	if req.ClientID != g.config.ClientID {
-		return errors.New(errors.ErrUnauthorizedClient, "invalid client ID")
-	}
-	if len(req.Scopes) == 0 {
-		return errors.New(errors.ErrInvalidScope, "at least one scope is required")
-	}
-	return nil
-}
-
-// generateToken creates a random token string for demonstration/testing purposes.
-func generateToken() (string, error) {
-	b := make([]byte, 16)
-	if _, err := rand.Read(b); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(b), nil
-}
+// ...existing code...

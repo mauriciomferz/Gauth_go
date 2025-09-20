@@ -81,7 +81,12 @@ func TestTokenManagementIntegration(t *testing.T) {
 			Password:  "",
 			DB:        0,
 		})
-		defer store.Close()
+	       defer func() {
+		       err := store.Close()
+		       if err != nil {
+			       t.Errorf("failed to close store: %v", err)
+		       }
+	       }()
 
 		manager := token.NewManager(token.ManagerConfig{
 			Issuer:     "test-issuer",

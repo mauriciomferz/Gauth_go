@@ -1,43 +1,28 @@
-# GAuth Go Library: Usage & API Guide
+# LIBRARY.md
 
-Welcome to the GAuth Go library! This document is your entry point for understanding, using, and extending the core GAuth protocol implementation. It is designed for developers of all backgrounds, including those new to Go.
+## GAuth Go Library Usage
 
-## What is GAuth?
-GAuth is a centralized, auditable authorization protocol (GiFo-RfC 0111) designed for secure, type-safe, and extensible access control. This library provides a reference implementation in Go.
+This document provides an overview of the GAuth Go library, its main entry points, and guidance for developers who wish to use, modify, or extend the library in their own projects.
 
-## Quick Start
-- See `examples/` for runnable demos and integration patterns.
-- Library code is in `pkg/gauth/` and related subpackages.
-- All protocol boundaries are clearly annotated with `[GAuth]` comments.
+### Getting Started
+- Import the main package(s) from `pkg/` into your Go project.
+- Review the package-level documentation in each `doc.go` file for an overview of available features.
 
-## Key Packages
-- `pkg/gauth/` — Core protocol logic, types, and flows ([GAuth])
-- `pkg/token/`, `pkg/audit/`, `pkg/ratelimit/` — Supporting components ([GAuth])
-- `examples/` — Usage demos, not for production
+### Main Entry Points
+- Core types and interfaces are located in `pkg/gauth/`, `pkg/token/`, and related subpackages.
+- See the `examples/` directory for usage patterns and integration tips.
 
-## How to Use
-1. Import the library:
-   ```go
-   import "github.com/mauriciomferz/Gauth_go/pkg/gauth"
-   ```
-2. Initialize and configure your GAuth service or client.
-3. Use strongly-typed requests and responses (see `types.go`).
-4. See `README.md` and this file for more details.
+### Extending the Library
+- To add new features, create a new package under `pkg/` and follow Go module conventions.
+- Contributions should include tests and documentation.
 
-## Extending GAuth
-- Add new grant types, token types, or audit event types by extending the relevant structs and interfaces.
-- Follow the `[GAuth]` annotation pattern for protocol logic.
-
-## Manual Testing & Demos
-- See `MANUAL_TESTING.md` for runtime usage suggestions.
-- Run `go run examples/resilient/cascading.go` for a protocol-compliant simulation.
-
-## Contributing
+### Community & Contribution
 - Please see `CONTRIBUTING.md` for guidelines.
-- All contributions should maintain clear protocol boundaries and strong typing.
+- Issues and pull requests are welcome!
 
-## Support
-- Issues and questions: open a GitHub issue or discussion.
+---
+
+*This file is part of the RFC 0111 compliance and open source readiness effort.*
 
 ---
 

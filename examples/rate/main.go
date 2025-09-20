@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"sync"
 	"time"
 
@@ -59,10 +60,13 @@ func demoWindowSliding(limiter *rate.Limiter) {
 	fmt.Println("\nWindow Sliding Demo:")
 
 	// Fill up the window
-	for i := 1; i <= 5; i++ {
-		limiter.Allow(ctx, id)
-		fmt.Printf("Initial request %d: Allowed\n", i)
-	}
+       for i := 1; i <= 5; i++ {
+	       if err := limiter.Allow(ctx, id); err != nil {
+		       log.Printf("Initial request %d: Rate limit exceeded: %v\n", i, err)
+	       } else {
+		       fmt.Printf("Initial request %d: Allowed\n", i)
+	       }
+       }
 
 	// Try one more (should fail)
 	if err := limiter.Allow(ctx, id); err != nil {

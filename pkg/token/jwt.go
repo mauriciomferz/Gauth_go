@@ -176,10 +176,3 @@ func jwtSigningMethod(alg Algorithm) jwt.SigningMethod {
 	}
 }
 
-func isStandardClaim(claim string) bool {
-	standardClaims := map[string]bool{
-		"jti": true, "sub": true, "iss": true, "typ": true,
-		"iat": true, "nbf": true, "exp": true, "scp": true,
-	}
-	return standardClaims[claim]
-}

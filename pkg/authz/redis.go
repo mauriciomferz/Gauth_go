@@ -129,7 +129,9 @@ func (a *RedisAuthorizer) GetPolicy(ctx context.Context, policyID string) (*Poli
 	}
 
 	// Update local cache
-	a.memory.AddPolicy(ctx, &policy)
+	if err := a.memory.AddPolicy(ctx, &policy); err != nil {
+		return nil, fmt.Errorf("failed to add policy to memory: %w", err)
+	}
 
 	return &policy, nil
 }
@@ -175,7 +177,9 @@ func (a *RedisAuthorizer) IsAllowed(ctx context.Context, request *AccessRequest)
 
 	// Update local cache
 	for _, policy := range policies {
-		a.memory.AddPolicy(ctx, policy)
+			if err := a.memory.AddPolicy(ctx, policy); err != nil {
+				return nil, fmt.Errorf("failed to add policy to memory: %w", err)
+			}
 	}
 
 	return a.memory.IsAllowed(ctx, request)

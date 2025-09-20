@@ -74,15 +74,10 @@ type AITeamComplianceTracker interface {
 
 // StandardAITeamControls implements AITeamControls
 type StandardAITeamControls struct {
-	store    token.EnhancedStore
-	verifier token.VerificationSystem
 }
 
 func NewStandardAITeamControls(store token.EnhancedStore, verifier token.VerificationSystem) *StandardAITeamControls {
-	return &StandardAITeamControls{
-		store:    store,
-		verifier: verifier,
-	}
+	return &StandardAITeamControls{}
 }
 
 // ValidateTeamStructure ensures centralized authorization
@@ -129,8 +124,7 @@ func (c *StandardAITeamControls) EnforceCentralization(ctx context.Context, toke
 
 // StandardOpenIDIntegration implements OpenIDIntegration
 type StandardOpenIDIntegration struct {
-	store    token.EnhancedStore
-	verifier token.VerificationSystem
+	// (fields removed)
 }
 
 // MapAssuranceLevel implements OpenID ACR mapping
@@ -149,8 +143,7 @@ func (o *StandardOpenIDIntegration) MapAssuranceLevel(ctx context.Context, token
 
 // StandardComplianceTracker implements AITeamComplianceTracker
 type StandardComplianceTracker struct {
-	store    token.EnhancedStore
-	verifier token.VerificationSystem
+	// (fields removed)
 }
 
 // TrackApprovalRule implements detailed rule tracking

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	stderrors "errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -47,29 +46,14 @@ func main() {
 
 func tokenHandler(w http.ResponseWriter, r *http.Request) {
 	// Simulate token validation error
-	err := gauthErrors.New(gauthErrors.ErrInvalidToken, "The token provided is malformed or invalid")
-	err = err.WithSource(gauthErrors.SourceToken)
-	err = err.WithRequestInfo(r.Header.Get("X-Request-ID"), "client-456", "user-789")
-	err = err.WithHTTPInfo(r.URL.Path, r.Method, http.StatusUnauthorized, r.RemoteAddr)
-	err = err.AddInfo("token_hint", "Check token format and signature")
+// ...error construction removed (was unused)...
 
 	// middleware.ErrorResponse(w, r, err) // Not available: middleware package missing
 }
 
 func resourceHandler(w http.ResponseWriter, r *http.Request) {
 	// Simulate insufficient scope error
-	err := gauthErrors.New(gauthErrors.ErrInsufficientScope, "The token does not have the required scope")
-	err = err.WithSource(gauthErrors.SourceAuthorization)
-	err = err.WithRequestInfo(r.Header.Get("X-Request-ID"), "client-456", "user-789")
-	err = err.WithHTTPInfo(r.URL.Path, r.Method, http.StatusForbidden, r.RemoteAddr)
-
-	// Use WithFields to add multiple fields at once
-	err = err.WithFields(map[string]string{
-		"required_scope": "admin",
-		"provided_scope": "user",
-		"resource_id":    "resource-123",
-		"action":         "write",
-	})
+// ...error construction removed (was unused)...
 
 	// middleware.ErrorResponse(w, r, err) // Not available: middleware package missing
 }
@@ -101,13 +85,10 @@ func rateLimitedHandler(w http.ResponseWriter, r *http.Request) {
 
 func serverErrorHandler(w http.ResponseWriter, r *http.Request) {
 	// Example of wrapping a standard error
-	baseErr := stderrors.New("database connection failed: timeout")
+// ...baseErr removed (was unused)...
 
 	// Convert to structured error for more context
-	err := gauthErrors.New(gauthErrors.ErrServerError, "Database operation failed")
-	err = err.WithSource(gauthErrors.SourceStorage)
-	err = err.WithCause(baseErr)
-	err = err.WithHTTPInfo(r.URL.Path, r.Method, http.StatusInternalServerError, r.RemoteAddr)
+// ...error construction removed (was unused)...
 	// middleware.ErrorResponse(w, r, err) // Not available: middleware package missing
 }
 

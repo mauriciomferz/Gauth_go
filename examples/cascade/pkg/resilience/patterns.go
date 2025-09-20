@@ -1,14 +1,12 @@
-package resilience
 // Package resilience provides type-safe implementations of common resilience patterns.
 package resilience
 
 import (
 	"context"
-	"errors"
 	"sync"
 	"time"
 
-	"github.com/username/cascade/pkg/events"
+	"github.com/mauriciomferz/Gauth_go/examples/events"
 )
 
 // CircuitBreaker implements the circuit breaker pattern

@@ -15,6 +15,8 @@ var (
 	ErrInvalidToken = errors.New("invalid token")
 	// ErrTokenExpired indicates the token has expired
 	ErrTokenExpired = errors.New("token expired")
+	// ErrTokenNotFound indicates the token was not found in the store
+	ErrTokenNotFound = errors.New("token not found")
 	// ErrInvalidSignature indicates the token signature is invalid
 	ErrInvalidSignature = errors.New("invalid signature")
 	// ErrInvalidClaims indicates the token claims are invalid

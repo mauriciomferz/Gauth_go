@@ -124,11 +124,13 @@ func (fs *FileStorage) GetByID(ctx context.Context, id string) (*Entry, error) {
 				continue
 			}
 			if entry.ID == id {
-				f.Close()
-				return &entry, nil
+				   _ = f.Close()
+				   return &entry, nil
 			}
 		}
-		f.Close()
+		   if err := f.Close(); err != nil {
+			   fmt.Printf("[FileStorage] failed to close file: %v\n", err)
+		   }
 	}
 	return nil, fmt.Errorf("entry not found")
 }
@@ -155,12 +157,14 @@ func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
 		if err != nil {
 			continue
 		}
-		defer f.Close()
+			   // defer f.Close() -- replaced with explicit close and error check below
 
 		tmpFile := file + ".tmp"
 		out, err := os.OpenFile(tmpFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0640)
 		if err != nil {
-			f.Close()
+			   if err := f.Close(); err != nil {
+				   fmt.Printf("[FileStorage] failed to close file: %v\n", err)
+			   }
 			continue
 		}
 
@@ -177,20 +181,30 @@ func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
 				if err != nil {
 					continue
 				}
-				writer.Write(data)
-				writer.WriteString("\n")
+				if _, err := writer.Write(data); err != nil {
+					continue
+				}
+				if _, err := writer.WriteString("\n"); err != nil {
+					continue
+				}
 				kept++
 			}
 		}
-		writer.Flush()
-		f.Close()
-		out.Close()
+		_ = writer.Flush() // ignore error
+		   if err := f.Close(); err != nil {
+			   fmt.Printf("[FileStorage] failed to close input file: %v\n", err)
+		   }
+		   if err := out.Close(); err != nil {
+			   fmt.Printf("[FileStorage] failed to close output file: %v\n", err)
+		   }
 
 		if kept == 0 {
-			os.Remove(file)
-			os.Remove(tmpFile)
+			_ = os.Remove(file)
+			_ = os.Remove(tmpFile)
 		} else {
-			os.Rename(tmpFile, file)
+			   if err := os.Rename(tmpFile, file); err != nil {
+				   fmt.Printf("[FileStorage] Rename error: %v\n", err)
+			   }
 		}
 	}
 
@@ -238,7 +252,12 @@ func (fs *FileStorage) searchFile(ctx context.Context, filename string, filter *
 	if err != nil {
 		return fmt.Errorf("failed to open log file: %w", err)
 	}
-	defer file.Close()
+	   // defer file.Close() -- replaced with explicit close and error check below
+	   defer func() {
+		   if err := file.Close(); err != nil {
+			   fmt.Printf("[FileStorage] failed to close file: %v\n", err)
+		   }
+	   }()
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {

@@ -10,7 +10,7 @@ import (
 
 func main() {
 	store := token.NewMemoryStore(24 * time.Hour)
-	defer store.Close()
+       // ...defer removed, call store.Close() at end...
 
 	// Create token service
 
@@ -31,5 +31,9 @@ func main() {
 	if tokenData.ExpiresAt.Before(time.Now()) {
 		log.Fatalf("Token expired")
 	}
-	fmt.Println("Token validated successfully")
+       fmt.Println("Token validated successfully")
+
+       if err := store.Close(); err != nil {
+	       log.Println("failed to close store:", err)
+       }
 }

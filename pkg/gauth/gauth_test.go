@@ -92,8 +92,7 @@ func TestGAuth(t *testing.T) {
 		}
 		if grant == nil {
 			t.Error("Expected non-nil authorization grant")
-		}
-		if grant.ClientID != req.ClientID {
+		} else if grant.ClientID != req.ClientID {
 			t.Errorf("Expected client ID %s, got %s", req.ClientID, grant.ClientID)
 		}
 	})

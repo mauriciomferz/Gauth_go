@@ -1,3 +1,5 @@
+[![Go CI](https://github.com/mauriciomferz/Gauth_go/actions/workflows/go-ci.yml/badge.svg)](https://github.com/mauriciomferz/Gauth_go/actions/workflows/go-ci.yml) [![Go Report Card](https://goreportcard.com/badge/github.com/mauriciomferz/Gauth_go)](https://goreportcard.com/report/github.com/mauriciomferz/Gauth_go) [![codecov](https://codecov.io/gh/mauriciomferz/Gauth_go/branch/main/graph/badge.svg)](https://codecov.io/gh/mauriciomferz/Gauth_go)
+
 # GAuth: AI Power-of-Attorney Authorization Framework
 
 GAuth enables AI systems to act on behalf of humans or organizations, with explicit, verifiable, and auditable power-of-attorney flows. Built on OAuth, OpenID Connect, and MCP, GAuth is designed for open source, extensibility, and compliance with RFC111.
@@ -39,6 +41,37 @@ GAuth enables AI systems to act on behalf of humans or organizations, with expli
 2. See `pkg/gauth/` for core types and APIs.
 3. Extend or customize by implementing your own token store, audit logger, or event types.
 
+
+## Quick Start
+
+Here’s a minimal example to get started with GAuth:
+
+```go
+import (
+    "github.com/mauriciomferz/Gauth_go/pkg/gauth"
+    "github.com/mauriciomferz/Gauth_go/pkg/token"
+)
+
+func main() {
+    config := &gauth.Config{
+        AuthServerURL:     "https://auth.example.com",
+        ClientID:          "your-client-id",
+        ClientSecret:      "your-secret",
+        Scopes:            []string{"read", "write"},
+        TokenConfig: &token.Config{
+            SigningMethod: token.HS256,
+            SigningKey:    []byte("your-signing-key"),
+        },
+    }
+    auth, err := gauth.New(config, nil)
+    if err != nil {
+        panic(err)
+    }
+    // Use auth to initiate authorization, request tokens, etc.
+}
+```
+
+For more advanced usage, see the `examples/` directory.
 
 ## Manual Testing
 See `MANUAL_TESTING.md` for suggestions.
@@ -158,6 +191,7 @@ These demos use only the public, type-safe APIs and are a great starting point f
 4. **Resilience**: Built-in patterns for reliable operation.
 5. **Developer Experience**: Comprehensive examples and documentation.
 6. **Modularity**: Common utilities are centralized and reusable across packages.
+7. **Code Organization**: Library code and examples are clearly separated.
 
 ## Typed Structures
 
@@ -190,7 +224,24 @@ fmt.Println(authEvent.User.Username)  // No type assertions needed
 ```
 
 See the [typed_events example](examples/typed_events) for a complete demonstration.
-7. **Code Organization**: Library code and examples are clearly separated.
+
+## Architecture Diagram
+
+Below is a high-level architecture diagram of GAuth:
+
+```
++-------------------+        +-------------------+        +-------------------+
+|    Client App     | <----> |   GAuth Service   | <----> |   Token Store     |
++-------------------+        +-------------------+        +-------------------+
+        |                          |                              |
+        |   (OAuth2/OIDC/MCP)      |   (Audit/Event/Policy)       |
+        v                          v                              v
++-------------------+        +-------------------+        +-------------------+
+|   Resource/API    | <----> |   Audit Logger    | <----> |   Event System    |
++-------------------+        +-------------------+        +-------------------+
+```
+
+For a detailed diagram, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Contributing
 
@@ -261,3 +312,76 @@ go test ./internal/rate -run TestRateLimit
 ## License
 
 MIT License - see [LICENSE](LICENSE)
+
+## More Usage Examples
+
+GAuth comes with a rich set of real-world examples. See the [`examples/`](examples/) directory for runnable code. Here are a few highlights:
+
+### Basic Authentication Example
+
+```go
+import (
+    "github.com/mauriciomferz/Gauth_go/pkg/gauth"
+    "github.com/mauriciomferz/Gauth_go/pkg/token"
+)
+
+func main() {
+    config := &gauth.Config{
+        AuthServerURL:     "https://auth.example.com",
+        ClientID:          "example-client",
+        ClientSecret:      "example-secret",
+        Scopes:            []string{"transaction:execute", "read", "write"},
+        TokenConfig: &token.Config{SigningMethod: token.RS256},
+    }
+    auth, err := gauth.New(config, nil)
+    if err != nil {
+        panic(err)
+    }
+    // Initiate authorization
+    grant, err := auth.InitiateAuthorization(gauth.AuthorizationRequest{
+        ClientID: "example-client",
+        Scopes:   []string{"payment:execute"},
+    })
+    if err != nil {
+        panic(err)
+    }
+    // Use grant.GrantID to request tokens, etc.
+}
+```
+
+### Advanced: Multi-Scope, Restrictions, and Batch Processing
+
+```go
+// ...imports...
+
+func main() {
+    // ...config setup...
+    // Multi-scope authorization
+    grant, _ := auth.InitiateAuthorization(gauth.AuthorizationRequest{
+        ClientID: "advanced-client",
+        Scopes:   []string{"read", "write", "transaction:execute"},
+    })
+    // Token request with restrictions
+    tokenResp, _ := auth.RequestToken(gauth.TokenRequest{
+        GrantID: grant.GrantID,
+        Scope:   []string{"read", "write", "transaction:execute"},
+        Restrictions: []gauth.Restriction{
+            {Type: "ip_range", Value: "192.168.1.0/24"},
+            {Type: "time_window", Value: "business_hours"},
+        },
+    })
+    // Batch transaction processing
+    transactions := []gauth.TransactionDetails{
+        {Type: "payment", Amount: 100.0, ResourceID: "resource-1"},
+        {Type: "transfer", Amount: 50.0, ResourceID: "resource-2"},
+    }
+    for _, tx := range transactions {
+        _, err := server.ProcessTransaction(tx, tokenResp.Token)
+        if err != nil {
+            // handle error
+        }
+    }
+}
+```
+
+See [`examples/basic/main.go`](examples/basic/main.go) and [`examples/advanced/main.go`](examples/advanced/main.go) for full code and comments.

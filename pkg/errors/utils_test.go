@@ -68,7 +68,7 @@ func TestWithFields(t *testing.T) {
 func TestWithContext(t *testing.T) {
 	err := New(ErrServerError, "Test error with context")
 
-	// Create context with values
+	// Create context with values using string keys (to match WithContext implementation)
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, "request_id", "test-req-123")
 	ctx = context.WithValue(ctx, "user_id", "test-user-456")

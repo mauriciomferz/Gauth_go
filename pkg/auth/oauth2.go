@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/mauriciomferz/Gauth_go/pkg/audit"
@@ -48,8 +47,6 @@ type OAuth2TokenResponse struct {
 type oauth2Authenticator struct {
 	config      OAuth2Config
 	httpClient  *http.Client
-	tokenCache  sync.Map // map[string]*TokenResponse
-	refreshLock sync.Mutex
 }
 
 func newOAuth2Authenticator(config Config) (Authenticator, error) {

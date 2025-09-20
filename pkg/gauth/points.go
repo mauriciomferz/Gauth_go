@@ -49,13 +49,18 @@ import (
 	"fmt"
 )
 
-// PowerEnforcementPoint handles access control enforcement.
+// PowerEnforcementPoint (PEP) enforces access control decisions.
+//
+// Example usage:
+//   pep := PowerEnforcementPoint{GAuth: gauth}
+//   allowed, err := pep.EnforceRestrictions(token, ActionDetails{Type: "transaction:execute", Amount: 100})
 type PowerEnforcementPoint struct {
 	GAuth *GAuth
 }
 
 // EnforceRestrictions checks if a token allows a specific action.
 // actionDetails must specify the type and amount of the action.
+// Returns true if allowed, false otherwise.
 func (p *PowerEnforcementPoint) EnforceRestrictions(token string, actionDetails ActionDetails) (bool, error) {
 	if p.GAuth == nil {
 		return false, fmt.Errorf("GAuth instance not configured")
@@ -74,22 +79,35 @@ func (p *PowerEnforcementPoint) EnforceRestrictions(token string, actionDetails 
 }
 
 // PowerDecisionPoint handles authorization decisions.
-// PowerDecisionPoint handles authorization decisions.
+// PowerDecisionPoint (PDP) makes authorization decisions.
+//
+// Example usage:
+//   pdp := PowerDecisionPoint{GAuth: gauth}
+//   allowed := pdp.MakeAuthorizationDecision(token, "transaction:execute")
 type PowerDecisionPoint struct {
 	GAuth *GAuth
 }
 
-// PowerAdministrationPoint handles token administration.
+// PowerAdministrationPoint (PAP) manages policies and token administration.
+//
+// Example usage:
+//   pap := PowerAdministrationPoint{GAuth: gauth}
+//   err := pap.InvalidateToken(token)
 type PowerAdministrationPoint struct {
 	GAuth *GAuth
 }
 
-// PowerVerificationPoint handles token validation.
+// PowerVerificationPoint (PVP) verifies tokens and identities.
+//
+// Example usage:
+//   pvp := PowerVerificationPoint{GAuth: gauth}
+//   // Add custom verification logic as needed
 type PowerVerificationPoint struct {
 	GAuth *GAuth
 }
 
 // MakeAuthorizationDecision decides if a token grants access to an action.
+// MakeAuthorizationDecision returns true if a token grants access to the requested action.
 func (p *PowerDecisionPoint) MakeAuthorizationDecision(token string, requestedAction string) bool {
 	tokenData, err := p.GAuth.ValidateToken(token)
 	if err != nil {
@@ -104,12 +122,15 @@ func (p *PowerDecisionPoint) MakeAuthorizationDecision(token string, requestedAc
 }
 
 // AddTokenRestriction adds a new restriction to a token.
+// AddTokenRestriction adds a new restriction to a token.
+// Not implemented: tokenstore.TokenData does not support dynamic restrictions yet.
 func (p *PowerAdministrationPoint) AddTokenRestriction(token string, restriction Restriction) error {
 	// Not implemented: tokenstore.TokenData does not support dynamic restrictions. This is a placeholder for future extension.
 	return fmt.Errorf("AddTokenRestriction not implemented: tokenstore.TokenData does not support restrictions")
 }
 
 // InvalidateToken marks a token as invalid.
+// InvalidateToken marks a token as invalid in the TokenStore.
 func (p *PowerAdministrationPoint) InvalidateToken(token string) error {
 	// Use the TokenStore's Store method to mark as invalid
 	tokenData, err := p.GAuth.ValidateToken(token)
@@ -126,6 +147,8 @@ func (p *PowerAdministrationPoint) InvalidateToken(token string) error {
 // PowerVerificationPoint handles token validation.
 
 // UpdatePowerRestriction updates a power restriction for the given type.
+// UpdatePowerRestriction updates a power restriction for the given type.
+// Not implemented: add logic to update restrictions as needed.
 func (p *PowerAdministrationPoint) UpdatePowerRestriction(restriction PowerRestriction) error {
 	if p.GAuth == nil {
 		return fmt.Errorf("GAuth instance not configured")
@@ -136,12 +159,14 @@ func (p *PowerAdministrationPoint) UpdatePowerRestriction(restriction PowerRestr
 }
 
 // ActionDetails represents the details of an action for enforcement.
+//
+// Example:
+//   details := ActionDetails{Type: "transaction:execute", Amount: 100}
 type ActionDetails struct {
 	Type   string  // e.g., "transaction_type"
 	Amount float64 // e.g., transaction amount
 }
 
-// RestrictionValueType enumerates allowed value types for PowerRestriction.
 type RestrictionValueType int
 
 const (
@@ -151,6 +176,9 @@ const (
 
 // PowerRestriction represents a restriction to be applied or updated.
 // Only one of StringValue or FloatValue should be set, according to ValueType.
+//
+// Example:
+//   r := PowerRestriction{Type: "max_amount", FloatValue: 1000, ValueType: FloatValue}
 type PowerRestriction struct {
 	Type        string
 	StringValue string

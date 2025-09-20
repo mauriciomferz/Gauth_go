@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -70,5 +71,7 @@ func ErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Request-ID", r.Header.Get("X-Request-ID"))
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(errBody)
+       if err := json.NewEncoder(w).Encode(errBody); err != nil {
+	       log.Println("failed to encode error response:", err)
+       }
 }

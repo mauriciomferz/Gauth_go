@@ -54,19 +54,16 @@ type AuthorizationEnforcer interface {
 type StandardAuthorizationEnforcer struct {
 	store    token.EnhancedStore
 	verifier token.VerificationSystem
-	registry RegistryVerifier
 }
 
 func NewStandardAuthorizationEnforcer(
 	store token.EnhancedStore,
 	verifier token.VerificationSystem,
-	registry RegistryVerifier,
-) *StandardAuthorizationEnforcer {
-	return &StandardAuthorizationEnforcer{
-		store:    store,
-		verifier: verifier,
-		registry: registry,
-	}
+	) *StandardAuthorizationEnforcer {
+	       return &StandardAuthorizationEnforcer{
+		       store:    store,
+		       verifier: verifier,
+	       }
 }
 
 // VerifyHumanInChain ensures there's always a human at the top of the authorization chain

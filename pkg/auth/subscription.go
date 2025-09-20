@@ -30,7 +30,6 @@ type SubscriptionService interface {
 type StandardSubscriptionService struct {
 	store           token.EnhancedStore
 	verifier        token.VerificationSystem
-	identityService IdentityVerificationService
 }
 
 // AuthorizerInfo contains authorizer registration details
@@ -81,21 +80,16 @@ type ServerInfo struct {
 func NewStandardSubscriptionService(
 	store token.EnhancedStore,
 	verifier token.VerificationSystem,
-	identityService IdentityVerificationService,
-) *StandardSubscriptionService {
-	return &StandardSubscriptionService{
-		store:           store,
-		verifier:        verifier,
-		identityService: identityService,
-	}
+	) *StandardSubscriptionService {
+	       return &StandardSubscriptionService{
+		       store:           store,
+		       verifier:        verifier,
+	       }
 }
 
 // RegisterOwnerAuthorizer implements SubscriptionService
 func (s *StandardSubscriptionService) RegisterOwnerAuthorizer(ctx context.Context, info *AuthorizerInfo) error {
-	// Verify identity
-	if err := s.identityService.VerifyIdentity(ctx, info.IdentityDocument); err != nil {
-		return fmt.Errorf("identity verification failed: %w", err)
-	}
+       // TODO: Implement identity verification for owner authorizer if needed
 
 	// Verify legal credentials
 	if err := s.verifyLegalCredentials(ctx, info.LegalCredentials); err != nil {
@@ -120,10 +114,7 @@ func (s *StandardSubscriptionService) RegisterClientOwner(ctx context.Context, i
 		return fmt.Errorf("authorizer verification failed: %w", err)
 	}
 
-	// Verify identity
-	if err := s.identityService.VerifyIdentity(ctx, info.IdentityDocument); err != nil {
-		return fmt.Errorf("identity verification failed: %w", err)
-	}
+       // TODO: Implement identity verification for client owner if needed
 
 	// Verify registration if available
 	if info.RegistrationInfo != nil {

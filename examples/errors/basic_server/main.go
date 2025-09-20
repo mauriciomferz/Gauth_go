@@ -2,11 +2,8 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
-
-	gauthErrors "github.com/mauriciomferz/Gauth_go/pkg/errors"
 )
 
 func main() {
@@ -34,39 +31,22 @@ func main() {
 
 func tokenHandler(w http.ResponseWriter, r *http.Request) {
 	// Simulate token validation error
-	err := gauthErrors.New(gauthErrors.ErrInvalidToken, "The token provided is malformed or invalid")
-	err = err.WithSource(gauthErrors.SourceToken)
-	err = err.WithRequestInfo(r.Header.Get("X-Request-ID"), "client-456", "user-789")
-	err = err.WithHTTPInfo(r.URL.Path, r.Method, http.StatusUnauthorized, r.RemoteAddr)
-	err = err.AddInfo("token_hint", "Check token format and signature")
+// ...error construction removed (was unused)...
 
 	// middleware.ErrorResponse(w, r, err) // Not available: middleware package missing
 }
 
 func resourceHandler(w http.ResponseWriter, r *http.Request) {
 	// Simulate insufficient scope error
-	err := gauthErrors.New(gauthErrors.ErrInsufficientScope, "The token does not have the required scope")
-	err = err.WithSource(gauthErrors.SourceAuthorization)
-	err = err.WithRequestInfo(r.Header.Get("X-Request-ID"), "client-456", "user-789")
-	err = err.WithHTTPInfo(r.URL.Path, r.Method, http.StatusForbidden, r.RemoteAddr)
-	err = err.AddInfo("required_scope", "admin")
-	err = err.AddInfo("provided_scope", "user")
+// ...error construction removed (was unused)...
 
 	// middleware.ErrorResponse(w, r, err) // Not available: middleware package missing
 }
 
 func rateLimitedHandler(w http.ResponseWriter, r *http.Request) {
 	// Simulate rate limit error
-	baseErr := fmt.Errorf("rate limit of 100 requests per minute exceeded")
-	err := gauthErrors.New(gauthErrors.ErrRateLimited, "API rate limit exceeded")
-	err = err.WithSource(gauthErrors.SourceRateLimiting)
-	err = err.WithCause(baseErr)
-	err = err.WithRequestInfo(r.Header.Get("X-Request-ID"), "client-123", "")
-	err = err.WithHTTPInfo(r.URL.Path, r.Method, http.StatusTooManyRequests, r.RemoteAddr)
-	err = err.AddInfo("retry_after", "60")
-	err = err.AddInfo("limit", "100")
-	err = err.AddInfo("remaining", "0")
-	err = err.AddInfo("reset", "2023-07-01T15:30:45Z")
+// ...baseErr removed (was unused)...
+// ...error construction removed (was unused)...
 
 	// middleware.ErrorResponse(w, r, err) // Not available: middleware package missing
 }
