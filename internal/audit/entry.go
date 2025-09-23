@@ -2,6 +2,7 @@
 package audit
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/Gimel-Foundation/gauth/internal/events"
@@ -103,7 +104,7 @@ func NewEntry(event *events.Event) *Entry {
 			entry.Message = "Token issued"
 			entry.Action = "issue"
 			entry.Metadata["token_type"] = details.TokenType
-			entry.Metadata["expires_in"] = string(details.ExpiresIn)
+			entry.Metadata["expires_in"] = fmt.Sprintf("%d", details.ExpiresIn)
 		}
 	case events.TokenRevoked:
 		entry.Type = AuditTypeToken
