@@ -1,6 +1,7 @@
 package gauth
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -25,7 +26,7 @@ func CreateTimeRangeRestriction(start, end time.Time) Restriction {
 func CreateIPRangeRestriction(allowedRanges []string) Restriction {
 	props := NewProperties()
 	for i, ipRange := range allowedRanges {
-		props.SetString("range_"+string(i), ipRange)
+		props.SetString(fmt.Sprintf("range_%d", i), ipRange)
 	}
 
 	return Restriction{

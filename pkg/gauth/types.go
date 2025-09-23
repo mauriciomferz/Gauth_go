@@ -57,4 +57,5 @@ type Config struct {
 	Scopes            []string               // Default scopes
 	RateLimit         common.RateLimitConfig // Rate limiting configuration
 	AccessTokenExpiry time.Duration          // Token expiry duration
+	SigningKey        interface{}            // Signing key for token generation (crypto.Signer)
 }

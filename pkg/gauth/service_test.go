@@ -2,6 +2,8 @@ package gauth
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/rsa"
 	"testing"
 	"time"
 
@@ -269,11 +271,16 @@ func TestService_RateLimiting(t *testing.T) {
 }
 
 func setupTestService(t *testing.T) *Service {
+	// Generate a test RSA key for signing
+	testKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err)
+	
 	config := Config{
 		AuthServerURL:     "http://localhost:8080",
 		ClientID:          "test-client",
 		ClientSecret:      "test-secret",
 		AccessTokenExpiry: time.Hour,
+		SigningKey:        testKey, // Add signing key for tests
 		RateLimit: common.RateLimitConfig{
 			RequestsPerSecond: 100,
 			BurstSize:         10,
