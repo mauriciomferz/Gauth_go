@@ -23,6 +23,7 @@ package gauth
 
 import (
 	"context"
+	"crypto"
 	"fmt"
 	"sync"
 	"time"
@@ -84,6 +85,13 @@ func NewService(config Config) (*Service, error) {
 	// Construct token.Config from gauth.Config (add mapping as needed)
 	tokenConfig := token.Config{
 		ValidityPeriod: config.AccessTokenExpiry,
+	}
+	
+	// Set signing key if provided
+	if config.SigningKey != nil {
+		if signer, ok := config.SigningKey.(crypto.Signer); ok {
+			tokenConfig.SigningKey = signer
+		}
 	}
 
 	tokenStore := token.NewMemoryStore()
