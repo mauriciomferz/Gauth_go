@@ -19,7 +19,7 @@ type RedisLimiter struct {
 // NewRedisLimiter creates a new Redis-based rate limiter
 func NewRedisLimiter(cfg Config) (*RedisLimiter, error) {
 	if cfg.DistributedConfig == nil {
-		return nil, errors.New("Redis configuration is required")
+		return nil, errors.New("redis configuration is required")
 	}
 
 	client := redis.NewClient(&redis.Options{
@@ -136,7 +136,7 @@ type RedisClusterLimiter struct {
 // NewRedisClusterLimiter creates a new Redis Cluster-based rate limiter
 func NewRedisClusterLimiter(cfg Config) (*RedisClusterLimiter, error) {
 	if cfg.DistributedConfig == nil {
-		return nil, errors.New("Redis configuration is required")
+		return nil, errors.New("redis configuration is required")
 	}
 
 	cluster := redis.NewClusterClient(&redis.ClusterOptions{

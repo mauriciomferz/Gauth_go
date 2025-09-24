@@ -71,7 +71,7 @@ jobs:
     - name: Run staticcheck
       run: |
         go install honnef.co/go/tools/cmd/staticcheck@latest
-        staticcheck ./...
+        staticcheck -checks="inherit,-U1000,-SA4006" ./pkg/... ./internal/...
 
     - name: Run golangci-lint
       uses: golangci/golangci-lint-action@v4

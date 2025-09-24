@@ -26,7 +26,7 @@ type RedisAuthorizer struct {
 // NewRedisAuthorizer creates a new Redis-based authorizer
 func NewRedisAuthorizer(config RedisAuthorizerConfig) (Authorizer, error) {
 	if config.Client == nil {
-		return nil, fmt.Errorf("Redis client is required")
+		return nil, fmt.Errorf("redis client is required")
 	}
 
 	if config.KeyPrefix == "" {

@@ -32,7 +32,7 @@ type distributedValidator struct {
 // NewDistributedValidator creates a new distributed token validator
 func NewDistributedValidator(config DistributedValidatorConfig) (Authenticator, error) {
 	if config.RedisClient == nil {
-		return nil, errors.New("Redis client is required")
+		return nil, errors.New("redis client is required")
 	}
 
 	if config.BaseAuthenticator == nil {

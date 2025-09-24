@@ -29,7 +29,7 @@ type RedisRegistryConfig struct {
 // NewRedisRegistry creates a new Redis-based service registry
 func NewRedisRegistry(config RedisRegistryConfig) (ServiceRegistry, error) {
 	if config.Client == nil {
-		return nil, fmt.Errorf("Redis client is required")
+		return nil, fmt.Errorf("redis client is required")
 	}
 
 	if config.KeyPrefix == "" {

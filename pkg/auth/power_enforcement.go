@@ -7,7 +7,6 @@ import (
 
 	gauth "github.com/Gimel-Foundation/gauth/pkg/gauth"
 	"github.com/Gimel-Foundation/gauth/pkg/token"
-	toktypes "github.com/Gimel-Foundation/gauth/pkg/token"
 )
 
 // PowerEnforcementPoint defines the interface for power enforcement
@@ -72,7 +71,7 @@ type DecisionAuthority struct {
 type ExecutionAuthority struct {
 	ActionTypes      []string
 	ResourceScopes   []string
-	TimeRestrictions []toktypes.TimeWindow
+	TimeRestrictions []token.TimeWindow
 	GeographicLimits []string
 }
 
