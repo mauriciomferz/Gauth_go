@@ -15,7 +15,7 @@ We take the security of GAuth seriously. If you believe you have found a securit
 
 **Please do not report security vulnerabilities through public GitHub issues.**
 
-Instead, please report them via email to security@gimel-foundation.org (create this email or replace with appropriate contact).
+Instead, please report them via email to security@gimelfoundation.org (create this email or replace with appropriate contact).
 
 You should receive a response within 48 hours. If for some reason you do not, please follow up via email to ensure we received your original message.
 
