@@ -193,8 +193,9 @@ func TestResilientService(t *testing.T) {
 
 	// Test metrics collection
 	t.Run("MetricsCollection", func(t *testing.T) {
-		// Reset metrics
+		// Reset metrics and circuit breaker state
 		service.metrics = monitoring.NewMetricsCollector()
+		service.breaker.Reset()
 
 		// Get a valid token
 		grant, err := auth.InitiateAuthorization(gauth.AuthorizationRequest{
