@@ -18,7 +18,8 @@ var (
 
 	// ErrTokenExpired indicates the token has passed its expiration time
 	ErrTokenExpired = errors.New("token expired")
-
+	// ErrInvalidToken indicates the token is invalid or malformed
+	ErrInvalidToken = errors.New("invalid token")
 	// ErrTokenNotYetValid indicates the token is not yet valid (before nbf)
 	ErrTokenNotYetValid = errors.New("token not yet valid")
 
@@ -28,8 +29,6 @@ var (
 	// ErrTokenBlacklisted indicates the token is in the blacklist
 	ErrTokenBlacklisted = errors.New("token is blacklisted")
 
-	// ErrInvalidToken indicates the token fails basic validation
-	ErrInvalidToken = errors.New("invalid token")
 
 	// ErrInvalidSignature indicates token signature verification failed
 	ErrInvalidSignature = errors.New("invalid token signature")
