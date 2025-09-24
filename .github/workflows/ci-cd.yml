@@ -125,12 +125,15 @@ jobs:
         export GAUTH_TEST_TIMEOUT=30s
         export GAUTH_DISABLE_PARALLEL_TESTS=false
         
+        # Clear any cached test results
+        go clean -testcache
+        
         # Run tests with detailed output and timeout
         echo "Starting test execution..."
         go test -v -race -timeout=10m -coverprofile=coverage.out -covermode=atomic ./... 2>&1 | tee test_output.log
         
         # Check if tests completed successfully
-        test_exit_code=$?
+        test_exit_code=${PIPESTATUS[0]}
         echo "Test execution completed with exit code: $test_exit_code"
         
         if [ $test_exit_code -ne 0 ]; then
@@ -152,6 +155,12 @@ jobs:
             echo "🚨 Resilience test issues detected"
             grep -A5 -B5 "resilience" test_output.log || true
           fi
+          if grep -q "FAIL" test_output.log; then
+            echo "🚨 Test failures detected:"
+            grep -B2 -A2 "FAIL" test_output.log || true
+          fi
+          
+          exit $test_exit_code
         else
           echo "✅ All tests passed successfully"
         fi
@@ -307,7 +316,7 @@ jobs:
     
     steps:
     - name: Notify Slack (if configured)
-      if: always() && env.SLACK_WEBHOOK_URL != ''
+      if: always() && secrets.SLACK_WEBHOOK_URL
       continue-on-error: true
       uses: 8398a7/action-slack@v3
       with:
