@@ -1,4 +1,4 @@
-# GAuth: AI Power-of-Attorney Authorization Framework
+# GiFo RFC 0150 Go Implementation of GAuth 1.0
 
 **🚀 Enhanced with Interactive Demo Webapp & Modern API** | ✅ **Lint Compliant** | 📦 **Ready-to-Deploy Executables**
 
