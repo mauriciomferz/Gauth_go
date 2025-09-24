@@ -49,18 +49,36 @@ func (a *basicAuthenticator) Close() error {
 }
 
 func (a *basicAuthenticator) ValidateCredentials(ctx context.Context, creds interface{}) error {
-	bc, ok := creds.(basicCredentials)
-	if !ok {
-		return fmt.Errorf("expected basicCredentials, got %T", creds)
+	var username, password string
+	
+	switch c := creds.(type) {
+	case basicCredentials:
+		username = c.Username
+		password = c.Password
+	case struct{ Username, Password string }:
+		username = c.Username
+		password = c.Password
+	case map[string]string:
+		var ok bool
+		username, ok = c["username"]
+		if !ok {
+			return fmt.Errorf("missing username in credentials")
+		}
+		password, ok = c["password"]
+		if !ok {
+			return fmt.Errorf("missing password in credentials")
+		}
+	default:
+		return fmt.Errorf("expected basicCredentials or struct with Username/Password, got %T", creds)
 	}
 
 	// In a real implementation, this would validate against a user store
-	storedPassword, exists := a.clients.Load(bc.Username)
+	storedPassword, exists := a.clients.Load(username)
 	if !exists {
 		return ErrInvalidCredentials
 	}
 
-	if subtle.ConstantTimeCompare([]byte(bc.Password), []byte(storedPassword.(string))) != 1 {
+	if subtle.ConstantTimeCompare([]byte(password), []byte(storedPassword.(string))) != 1 {
 		return ErrInvalidCredentials
 	}
 
@@ -68,7 +86,7 @@ func (a *basicAuthenticator) ValidateCredentials(ctx context.Context, creds inte
 		a.config.AuditLogger.Log(ctx, &audit.Entry{
 			Type:    audit.TypeAuth,
 			Action:  audit.ActionLogin,
-			ActorID: bc.Username,
+			ActorID: username,
 			Result:  audit.ResultSuccess,
 		})
 	}

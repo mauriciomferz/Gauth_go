@@ -188,6 +188,16 @@ func (h *RFC111Handler) ProcessRFC111Authorization(c *gin.Context) {
 		return
 	}
 
+	// Validate business rules
+	if len(req.Scope) == 0 {
+		h.logger.Error("Empty scope provided in RFC111 authorization request")
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Error:   "invalid_scope",
+			Message: "Scope cannot be empty for RFC111 authorization",
+		})
+		return
+	}
+
 	h.logger.WithFields(logrus.Fields{
 		"client_id":    req.ClientID,
 		"scope":        req.Scope,
@@ -287,11 +297,31 @@ func (h *RFC111Handler) ValidateLegalFramework(c *gin.Context) {
 		return
 	}
 
+	// Validate business rules
+	if req.Jurisdiction == "" && req.ClientID == "" {
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Error:   "invalid_request", 
+			Message: "Missing required fields for legal framework validation",
+		})
+		return
+	}
+
 	// Implementation would validate using the legal framework service
+	var legalBasis string
+	if req.Metadata != nil {
+		if basis, ok := req.Metadata["legal_basis"].(string); ok {
+			legalBasis = basis
+		} else {
+			legalBasis = "default_legal_basis"
+		}
+	} else {
+		legalBasis = "default_legal_basis"
+	}
+	
 	validation := &services.LegalValidationResult{
 		Valid:             true,
 		JurisdictionID:    req.Jurisdiction,
-		LegalBasis:        req.Metadata["legal_basis"].(string),
+		LegalBasis:        legalBasis,
 		ComplianceLevel:   "rfc111_compliant",
 		ValidatedAt:       time.Now(),
 		ValidationID:      fmt.Sprintf("validation_%d", time.Now().UnixNano()),

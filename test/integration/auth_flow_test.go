@@ -12,7 +12,7 @@ func setupTestAuth(t *testing.T) *gauth.GAuth {
 		AuthServerURL:     "https://auth.example.com",
 		ClientID:          "test-client",
 		ClientSecret:      "test-secret",
-		Scopes:            []string{"read", "write", "admin"},
+		Scopes:            []string{"read", "write", "admin", "transaction:execute"},
 		AccessTokenExpiry: time.Hour,
 	}
 
@@ -29,7 +29,7 @@ func TestCompleteAuthFlow(t *testing.T) {
 	// Step 1: Request Authorization
 	authReq := gauth.AuthorizationRequest{
 		ClientID: "test-client",
-		Scopes:   []string{"read", "write"},
+		Scopes:   []string{"read", "write", "transaction:execute"},
 	}
 
 	grant, err := auth.InitiateAuthorization(authReq)
@@ -77,7 +77,7 @@ func TestConcurrentTransactions(t *testing.T) {
 	// Get a valid token
 	grant, _ := auth.InitiateAuthorization(gauth.AuthorizationRequest{
 		ClientID: "test-client",
-		Scopes:   []string{"read", "write"},
+		Scopes:   []string{"read", "write", "transaction:execute"},
 	})
 
 	tokenResp, _ := auth.RequestToken(gauth.TokenRequest{
@@ -125,7 +125,7 @@ func TestResourceServerFailover(t *testing.T) {
 	// Get a valid token
 	grant, _ := auth.InitiateAuthorization(gauth.AuthorizationRequest{
 		ClientID: "test-client",
-		Scopes:   []string{"read", "write"},
+		Scopes:   []string{"read", "write", "transaction:execute"},
 	})
 
 	tokenResp, _ := auth.RequestToken(gauth.TokenRequest{

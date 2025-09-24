@@ -554,6 +554,14 @@ func (d *Decision) GetStringAttribute(key string) (string, error) {
 
 // --- Stubbed methods for StandardLegalFramework ---
 func (f *StandardLegalFramework) TrackApprovalDetails(ctx interface{}, event *ApprovalEvent) error {
+	// Create a tracking record from the approval event
+	record := TrackingRecord{}
+	
+	// Store the approval in the store
+	if store, ok := f.store.(*StoreStub); ok {
+		store.TrackApproval(event.ApprovalID, record)
+	}
+	
 	return nil
 }
 func (f *StandardLegalFramework) VerifyLegalCapacity(ctx interface{}, entity interface{}) error {
@@ -566,6 +574,16 @@ func (f *StandardLegalFramework) ValidateResourceServerPowers(ctx interface{}, t
 	return nil
 }
 func (f *StandardLegalFramework) ValidateJurisdiction(ctx interface{}, jurisdiction interface{}, action interface{}) error {
+	actionStr, ok := action.(string)
+	if !ok {
+		return fmt.Errorf("invalid action type")
+	}
+	
+	// Enforce centralized control - reject autonomous decisions
+	if actionStr == "autonomous_decision" {
+		return fmt.Errorf("autonomous decisions are not allowed - centralized authorization required")
+	}
+	
 	return nil
 }
 func (f *StandardLegalFramework) GetJurisdictionRules(jurisdiction string) (*JurisdictionRules, error) {

@@ -112,7 +112,23 @@ func (h *WebSocketHandler) HandleEvents(c *gin.Context) {
 				}
 			case "subscribe":
 				// Handle subscription to specific event types
-				h.logger.Info("Client subscribed to events")
+				if eventTypes, ok := message["events"].([]interface{}); ok {
+					h.logger.WithField("events", eventTypes).Info("Client subscribed to events")
+					subscribeEvent := Event{
+						Type:      "subscription_confirmed",
+						Timestamp: time.Now(),
+						Data: map[string]interface{}{
+							"subscribed_events": eventTypes,
+						},
+					}
+					if err := conn.WriteJSON(subscribeEvent); err != nil {
+						h.logger.WithError(err).Error("Failed to send subscription confirmation")
+						h.removeClient(conn)
+						return
+					}
+				} else {
+					h.logger.Info("Client subscribed to events")
+				}
 			default:
 				h.logger.WithField("type", msgType).Debug("Received unknown message type")
 			}

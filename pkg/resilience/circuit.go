@@ -94,7 +94,7 @@ func (cb *CircuitBreaker) beforeExecute() error {
 		return nil
 
 	case StateHalfOpen:
-		return ErrCircuitOpen
+		return nil
 
 	default:
 		return nil

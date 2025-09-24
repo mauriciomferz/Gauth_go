@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 )
@@ -267,6 +268,24 @@ func resourceMatches(policyResources []Resource, requestResource Resource) bool 
 		if resource.ID == "*" || resource.ID == requestResource.ID {
 			return true
 		}
+		// Handle path pattern matching
+		if resourcePathMatches(resource.ID, requestResource.ID) {
+			return true
+		}
+	}
+	return false
+}
+
+// resourcePathMatches checks if a resource pattern matches a resource path
+func resourcePathMatches(pattern, path string) bool {
+	// Handle wildcard patterns like "/docs/*" matching "/docs/secret"
+	if strings.HasSuffix(pattern, "/*") {
+		prefix := strings.TrimSuffix(pattern, "/*")
+		return strings.HasPrefix(path, prefix+"/") || path == prefix
+	}
+	// Handle exact wildcards
+	if pattern == "*" {
+		return true
 	}
 	return false
 }

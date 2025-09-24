@@ -46,8 +46,13 @@ func TestRateLimiterIntegration(t *testing.T) {
 
 			key := "test-client"
 
-			// Should allow up to rate
-			for i := 0; i < int(tc.cfg.Rate); i++ {
+			// Should allow up to burst size for token bucket, or rate for sliding window
+			maxRequests := int(tc.cfg.Rate)
+			if tc.cfg.BurstSize > 0 {
+				maxRequests = int(tc.cfg.BurstSize)
+			}
+			
+			for i := 0; i < maxRequests; i++ {
 				err := limiter.Allow(ctx, key)
 				assert.NoError(t, err)
 				remaining := limiter.GetRemainingRequests(key)

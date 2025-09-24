@@ -58,10 +58,26 @@ type FiduciaryDuty struct {
 	Validation  []string
 }
 
-type StoreStub struct{}
+type StoreStub struct{
+	approvals map[string][]TrackingRecord
+}
 
 func (s *StoreStub) GetTrackingRecords(ctx interface{}, approvalID string) ([]TrackingRecord, error) {
-	return []TrackingRecord{}, nil
+	if s.approvals == nil {
+		s.approvals = make(map[string][]TrackingRecord)
+	}
+	records, exists := s.approvals[approvalID]
+	if !exists {
+		return []TrackingRecord{}, nil
+	}
+	return records, nil
+}
+
+func (s *StoreStub) TrackApproval(approvalID string, record TrackingRecord) {
+	if s.approvals == nil {
+		s.approvals = make(map[string][]TrackingRecord)
+	}
+	s.approvals[approvalID] = append(s.approvals[approvalID], record)
 }
 
 func NewMemoryStore() interface{}                { return &StoreStub{} }
