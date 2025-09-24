@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 env:
-  GO_VERSION: 1.23
+  GO_VERSION: "1.23.x"
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
@@ -69,9 +69,9 @@ jobs:
       run: go vet ./...
 
     - name: Run staticcheck
-      uses: dominikh/staticcheck-action@v1.3.0
-      with:
-        version: 2023.1.6
+      run: |
+        go install honnef.co/go/tools/cmd/staticcheck@latest
+        staticcheck ./...
 
     - name: Run golangci-lint
       uses: golangci/golangci-lint-action@v4
