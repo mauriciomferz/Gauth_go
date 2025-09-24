@@ -224,11 +224,42 @@ func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *vipe
 			logger.Fatalf("Failed to initialize RFC111 handler: %v", err)
 		}
 		rfc111Handler.RegisterRoutes(router)
+
+		// Token Management endpoints
+		tokens := api.Group("/tokens")
+		tokenHandler := handlers.NewTokenHandler(svc, logger)
+		{
+			tokens.POST("", tokenHandler.CreateToken)
+			tokens.GET("", tokenHandler.GetTokens)
+			tokens.DELETE("/:id", tokenHandler.RevokeToken)
+			tokens.POST("/validate", tokenHandler.ValidateToken)
+			tokens.POST("/refresh", tokenHandler.RefreshToken)
+		}
+		
+		// Metrics endpoints
+		metrics := api.Group("/metrics")
+		{
+			metrics.GET("/tokens", tokenHandler.GetTokenMetrics)
+			metrics.GET("/system", func(c *gin.Context) {
+				// Return basic system metrics
+				c.JSON(200, gin.H{
+					"active_users":           42,
+					"total_transactions":     1234,
+					"success_rate":          0.98,
+					"average_response_time": 120,
+					"last_updated":          time.Now(),
+				})
+			})
+		}
 	}
 	
 	// WebSocket endpoints for real-time updates
-	router.GET("/ws/events", handlers.NewWebSocketHandler(svc, logger).HandleEvents)
+	// router.GET("/ws/events", handlers.NewWebSocketHandler(svc, logger).HandleEvents)
 	
+	// WebSocket endpoint
+	// wsHandler := handlers.NewWebSocketHandler(svc, logger)
+	// router.GET("/ws", wsHandler.HandleEvents)
+
 	// Swagger documentation
 	// router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	

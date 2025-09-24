@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAuth Protocol - Enhanced Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .code-block {
+            background: #1a202c;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-5xl font-bold mb-4">🔐 GAuth Protocol</h1>
+            <p class="text-xl text-gray-200">Enhanced Authentication & Authorization Demo</p>
+            <div class="mt-4 flex justify-center space-x-4">
+                <span class="bg-green-500 px-3 py-1 rounded-full text-sm">✅ Token Management</span>
+                <span class="bg-blue-500 px-3 py-1 rounded-full text-sm">🔄 Key Rotation</span>
+                <span class="bg-purple-500 px-3 py-1 rounded-full text-sm">📊 Real-time Monitoring</span>
+                <span class="bg-yellow-500 px-3 py-1 rounded-full text-sm">⚖️ RFC111 Compliance</span>
+            </div>
+        </header>
+
+        <!-- API Status -->
+        <div class="card rounded-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4">🌐 API Status</h2>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <p class="mb-2"><strong>Health Status:</strong> <span id="health-status" class="text-yellow-400">Checking...</span></p>
+                    <p class="mb-2"><strong>Server:</strong> <span class="text-green-400">http://localhost:8080</span></p>
+                </div>
+                <div>
+                    <p class="mb-2"><strong>Timestamp:</strong> <span id="server-time" class="text-blue-400">-</span></p>
+                    <p class="mb-2"><strong>Uptime:</strong> <span class="text-purple-400">Active</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Token Management Demo -->
+        <div class="card rounded-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4">🎫 Token Management</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-lg font-semibold mb-3">Create Token</h3>
+                    <div class="space-y-3">
+                        <input type="text" id="token-subject" placeholder="Subject (e.g., demo_user)" 
+                               class="w-full px-3 py-2 bg-white bg-opacity-20 rounded border border-white border-opacity-30 text-white placeholder-gray-300">
+                        <input type="text" id="token-role" placeholder="Role (e.g., admin)" 
+                               class="w-full px-3 py-2 bg-white bg-opacity-20 rounded border border-white border-opacity-30 text-white placeholder-gray-300">
+                        <button onclick="createToken()" 
+                                class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded font-medium">
+                            Create Token
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-3">Token Output</h3>
+                    <div id="token-output" class="code-block min-h-[120px]">
+                        Click "Create Token" to generate a new token...
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6">
+                <h3 class="text-lg font-semibold mb-3">Validate Token</h3>
+                <div class="flex space-x-3">
+                    <input type="text" id="validate-token" placeholder="Paste token here..." 
+                           class="flex-1 px-3 py-2 bg-white bg-opacity-20 rounded border border-white border-opacity-30 text-white placeholder-gray-300">
+                    <button onclick="validateToken()" 
+                            class="bg-green-600 hover:bg-green-700 px-6 py-2 rounded font-medium">
+                        Validate
+                    </button>
+                </div>
+                <div id="validation-output" class="code-block mt-3 min-h-[60px]">
+                    Token validation results will appear here...
+                </div>
+            </div>
+        </div>
+
+        <!-- System Metrics -->
+        <div class="card rounded-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4">📊 System Metrics</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-blue-400" id="active-users">-</div>
+                    <div class="text-sm text-gray-300">Active Users</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-green-400" id="total-transactions">-</div>
+                    <div class="text-sm text-gray-300">Total Transactions</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-purple-400" id="success-rate">-</div>
+                    <div class="text-sm text-gray-300">Success Rate</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-yellow-400" id="response-time">-</div>
+                    <div class="text-sm text-gray-300">Avg Response (ms)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo Scenarios -->
+        <div class="card rounded-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4">🎭 Demo Scenarios</h2>
+            <div id="scenarios-list" class="space-y-4">
+                <div class="text-center text-gray-300">Loading scenarios...</div>
+            </div>
+        </div>
+
+        <!-- Legal Framework -->
+        <div class="card rounded-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4">⚖️ Legal Framework</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-lg font-semibold mb-3">Supported Jurisdictions</h3>
+                    <div id="jurisdictions-list" class="space-y-2">
+                        <div class="text-gray-300">Loading jurisdictions...</div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-3">RFC111/RFC115 Compliance</h3>
+                    <div class="space-y-2">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-green-400">✅</span>
+                            <span>Power of Attorney Protocol</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-green-400">✅</span>
+                            <span>Legal Entity Management</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-green-400">✅</span>
+                            <span>Compliance Auditing</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-green-400">✅</span>
+                            <span>Multi-Jurisdiction Support</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center text-gray-300">
+            <p>&copy; 2024 GAuth Protocol Demo - Enhanced Authentication & Authorization Framework</p>
+            <p class="text-sm mt-2">Built with Go, React, and modern web technologies</p>
+        </footer>
+    </div>
+
+    <script>
+        // API Base URL
+        const API_BASE = 'http://localhost:8080/api/v1';
+        
+        // Initialize the demo
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkHealth();
+            await loadMetrics();
+            await loadScenarios();
+            await loadJurisdictions();
+            
+            // Set up periodic updates
+            setInterval(loadMetrics, 10000); // Update metrics every 10 seconds
+        });
+
+        // Check API health
+        async function checkHealth() {
+            try {
+                const response = await fetch('http://localhost:8080/health');
+                const data = await response.json();
+                
+                document.getElementById('health-status').textContent = '🟢 Healthy';
+                document.getElementById('health-status').className = 'text-green-400';
+                document.getElementById('server-time').textContent = new Date(data.timestamp * 1000).toLocaleString();
+            } catch (error) {
+                document.getElementById('health-status').textContent = '🔴 Error';
+                document.getElementById('health-status').className = 'text-red-400';
+                console.error('Health check failed:', error);
+            }
+        }
+
+        // Load system metrics
+        async function loadMetrics() {
+            try {
+                const response = await fetch(`${API_BASE}/metrics/system`);
+                const data = await response.json();
+                
+                document.getElementById('active-users').textContent = data.active_users;
+                document.getElementById('total-transactions').textContent = data.total_transactions.toLocaleString();
+                document.getElementById('success-rate').textContent = (data.success_rate * 100).toFixed(1) + '%';
+                document.getElementById('response-time').textContent = data.average_response_time;
+            } catch (error) {
+                console.error('Failed to load metrics:', error);
+            }
+        }
+
+        // Load demo scenarios
+        async function loadScenarios() {
+            try {
+                const response = await fetch(`${API_BASE}/demo/scenarios`);
+                const data = await response.json();
+                
+                const container = document.getElementById('scenarios-list');
+                container.innerHTML = data.scenarios.map(scenario => `
+                    <div class="bg-white bg-opacity-10 p-4 rounded-lg">
+                        <h4 class="font-semibold text-lg">${scenario.name}</h4>
+                        <p class="text-gray-300 text-sm mt-1">${scenario.description}</p>
+                        <div class="mt-2">
+                            <span class="px-2 py-1 bg-blue-500 text-xs rounded">${scenario.status}</span>
+                            <span class="px-2 py-1 bg-gray-600 text-xs rounded ml-2">${scenario.steps.length} steps</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load scenarios:', error);
+            }
+        }
+
+        // Load jurisdictions
+        async function loadJurisdictions() {
+            try {
+                const response = await fetch(`${API_BASE}/legal/jurisdictions`);
+                const data = await response.json();
+                
+                const container = document.getElementById('jurisdictions-list');
+                container.innerHTML = data.jurisdictions.map(jurisdiction => `
+                    <div class="flex justify-between items-center bg-white bg-opacity-10 p-2 rounded">
+                        <span>${jurisdiction.name}</span>
+                        <span class="text-sm text-gray-400">${jurisdiction.type}</span>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load jurisdictions:', error);
+            }
+        }
+
+        // Create token
+        async function createToken() {
+            const subject = document.getElementById('token-subject').value || 'demo_user';
+            const role = document.getElementById('token-role').value || 'user';
+            
+            const payload = {
+                claims: {
+                    sub: subject,
+                    role: role
+                },
+                duration: 3600000000000 // 1 hour in nanoseconds
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/tokens`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                document.getElementById('token-output').innerHTML = `
+                    <strong>✅ Token Created Successfully!</strong><br>
+                    <strong>Token:</strong> ${data.token}<br>
+                    <strong>Expires:</strong> ${data.expires_at}<br>
+                    <strong>Claims:</strong> ${JSON.stringify(data.claims, null, 2)}
+                `;
+                
+                // Auto-populate validation field
+                document.getElementById('validate-token').value = data.token;
+            } catch (error) {
+                document.getElementById('token-output').textContent = '❌ Error: ' + error.message;
+                console.error('Token creation failed:', error);
+            }
+        }
+
+        // Validate token
+        async function validateToken() {
+            const token = document.getElementById('validate-token').value;
+            if (!token) {
+                document.getElementById('validation-output').textContent = '⚠️ Please enter a token to validate';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/tokens/validate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        access_token: token
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.valid) {
+                    document.getElementById('validation-output').innerHTML = `
+                        <strong>✅ Token Valid!</strong><br>
+                        <strong>Claims:</strong> ${JSON.stringify(data.claims, null, 2)}
+                    `;
+                } else {
+                    document.getElementById('validation-output').innerHTML = `
+                        <strong>❌ Token Invalid!</strong><br>
+                        <strong>Error:</strong> ${data.error}
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('validation-output').textContent = '❌ Validation Error: ' + error.message;
+                console.error('Token validation failed:', error);
+            }
+        }
+    </script>
+</body>
+</html>

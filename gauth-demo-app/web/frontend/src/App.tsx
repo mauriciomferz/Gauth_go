@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
@@ -16,7 +16,17 @@ import {
   Alert,
   Snackbar,
   Chip,
+  IconButton,
+  Badge,
+  Menu,
+  MenuItem,
+  Avatar,
+  Switch,
+  FormControlLabel,
+  CssBaseline,
+  Tooltip,
 } from '@mui/material';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import {
   Gavel,
   BusinessCenter,
@@ -27,7 +37,17 @@ import {
   Audit,
   SupervisorAccount,
   Policy,
+  Menu as MenuIcon,
+  Notifications,
+  Settings,
+  Logout,
+  Token,
+  Dashboard as DashboardIcon,
+  DarkMode,
+  LightMode,
 } from '@mui/icons-material';
+import { Toaster } from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import Dashboard from './components/Dashboard';
 import ParadigmComparison from './components/ParadigmComparison';
@@ -37,7 +57,10 @@ import RFC115Demo from './components/RFC115Demo';
 import BusinessOwners from './components/BusinessOwners';
 import ComplianceMonitor from './components/ComplianceMonitor';
 import AuditTrail from './components/AuditTrail';
+import TokenManagement from './components/TokenManagement';
 import WebSocketService from './services/WebSocketService';
+import { useAppStore } from './store/appStore';
+import { useAuthStore } from './store/authStore';
 
 const DRAWER_WIDTH = 280;
 
