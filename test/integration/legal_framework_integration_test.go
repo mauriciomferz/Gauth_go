@@ -326,15 +326,15 @@ func createServerAuthorization(t *testing.T, ownerProof *auth.CapacityProof) *au
 	}
 }
 
-func createClientRequest(t *testing.T, auth *auth.ClientAuthorization) *auth.LegalFrameworkRequest {
+func createClientRequest(t *testing.T, clientAuth *auth.ClientAuthorization) *auth.LegalFrameworkRequest {
 	return &auth.LegalFrameworkRequest{
 		ID:           "request_002",
-		ClientID:     auth.Client.ID,
+		ClientID:     clientAuth.Client.ID,
 		Action:       "execute_trade",
 		Resource:     "financial_data",
 		Scope:        []string{"trade_execution"},
 		Timestamp:    time.Now(),
-		Jurisdiction: auth.Client.Entity.JurisdictionID,
+		Jurisdiction: clientAuth.Client.Entity.JurisdictionID,
 		Metadata: map[string]interface{}{
 			"trade_value": 1000000.0,
 			"trade_type":  "stock_purchase",
