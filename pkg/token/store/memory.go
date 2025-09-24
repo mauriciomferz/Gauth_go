@@ -205,7 +205,8 @@ func (s *MemoryStore) cleanupLoop() {
 		select {
 		case <-ticker.C:
 			if err := s.Cleanup(context.Background()); err != nil {
-				// Log error
+				// Log cleanup error to prevent silent failures
+				fmt.Printf("Token cleanup error: %v\n", err)
 			}
 		case <-s.stopClean:
 			return

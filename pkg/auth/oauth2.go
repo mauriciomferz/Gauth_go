@@ -48,8 +48,8 @@ type OAuth2TokenResponse struct {
 type oauth2Authenticator struct {
 	config      OAuth2Config
 	httpClient  *http.Client
-	tokenCache  sync.Map // map[string]*TokenResponse
-	refreshLock sync.Mutex
+	tokenCache  sync.Map   //nolint:unused // map[string]*TokenResponse - reserved for token caching
+	refreshLock sync.Mutex //nolint:unused // reserved for concurrent token refresh
 }
 
 func newOAuth2Authenticator(config Config) (Authenticator, error) {

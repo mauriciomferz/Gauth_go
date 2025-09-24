@@ -14,11 +14,14 @@ type RegistryVerifier interface {
 	ValidateLegalStatus(ctx context.Context, ownerInfo interface{}) error
 }
 
+//nolint:unused // stub implementation for registry verification
 type noopRegistryVerifier struct{}
 
+//nolint:unused // stub implementation for registry verification
 func (n *noopRegistryVerifier) VerifyRegistration(ctx context.Context, info interface{}) error {
 	return nil
 }
+//nolint:unused // stub implementation for registry verification
 func (n *noopRegistryVerifier) ValidateLegalStatus(ctx context.Context, ownerInfo interface{}) error {
 	return nil
 }
@@ -33,15 +36,20 @@ var ErrTokenNotFound = errors.New("token not found")
 
 // --- Minimal no-op types for stubs ---
 
+//nolint:unused // stub implementation for enhanced tokens
 type noopEnhancedToken struct{}
+
+//nolint:unused // stub implementation for enhanced token store
 type noopEnhancedStore struct{}
 
 type EnhancedToken struct{}
 
 // Add IsExpired to noopEnhancedToken
+//nolint:unused // stub implementation for enhanced tokens
 func (t *noopEnhancedToken) IsExpired() bool { return false }
 
 // Update noopEnhancedStore methods to use common types
+//nolint:unused // stub implementation for enhanced token store
 func (s *noopEnhancedStore) GetHumanVerification(ctx context.Context, token *EnhancedToken) (*common.HumanVerification, error) {
 	return &common.HumanVerification{
 		UltimateHumanID:          "stub-human",
@@ -53,6 +61,7 @@ func (s *noopEnhancedStore) GetHumanVerification(ctx context.Context, token *Enh
 	}, nil
 }
 
+//nolint:unused // stub implementation for enhanced token store
 func (s *noopEnhancedStore) GetSecondLevelApproval(ctx context.Context, token *EnhancedToken) (*common.SecondLevelApproval, error) {
 	return &common.SecondLevelApproval{
 		PrimaryApprover:       "stub-primary",

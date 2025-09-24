@@ -68,6 +68,7 @@ func (s *encryptedTokenStore) Close() error {
 	return nil
 }
 
+//nolint:unused // reserved for token encryption
 func (s *encryptedTokenStore) encrypt(data []byte) (string, error) {
 	nonce := make([]byte, s.gcm.NonceSize())
 	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
@@ -78,6 +79,7 @@ func (s *encryptedTokenStore) encrypt(data []byte) (string, error) {
 	return base64.RawURLEncoding.EncodeToString(ciphertext), nil
 }
 
+//nolint:unused // reserved for token decryption
 func (s *encryptedTokenStore) decrypt(encryptedStr string) ([]byte, error) {
 	encrypted, err := base64.RawURLEncoding.DecodeString(encryptedStr)
 	if err != nil {

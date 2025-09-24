@@ -65,7 +65,9 @@ func TestBlacklist(t *testing.T) {
 			ID:        NewID(),
 			ExpiresAt: time.Now().Add(-time.Hour),
 		}
-		bl.Add(ctx, expiredToken, "expired")
+		if err := bl.Add(ctx, expiredToken, "expired"); err != nil {
+			t.Fatalf("Failed to add expired token: %v", err)
+		}
 
 		// Force cleanup
 		bl.cleanup()

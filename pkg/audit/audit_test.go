@@ -147,7 +147,7 @@ func TestFileStorage(t *testing.T) {
 		recent := NewEntry(TypeAuth)
 		require.NoError(t, storage.Store(ctx, recent))
 
-		err = storage.Cleanup(ctx, time.Now().Add(-12*time.Hour))
+		_ = storage.Cleanup(ctx, time.Now().Add(-12*time.Hour))
 		// File-based cleanup only removes files older than cutoff, so no error expected
 
 		// Old entry should be gone (not found)

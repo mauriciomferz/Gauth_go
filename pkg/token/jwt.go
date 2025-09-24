@@ -176,6 +176,7 @@ func jwtSigningMethod(alg Algorithm) jwt.SigningMethod {
 	}
 }
 
+//nolint:unused // helper function for future JWT validation
 func isStandardClaim(claim string) bool {
 	standardClaims := map[string]bool{
 		"jti": true, "sub": true, "iss": true, "typ": true,

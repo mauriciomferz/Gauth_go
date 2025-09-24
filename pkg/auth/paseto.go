@@ -29,26 +29,31 @@ type PASETOConfig struct {
 }
 
 // pasetoAuthenticator implements the Authenticator interface for PASETO
+//nolint:unused // reserved for PASETO token implementation
 type pasetoAuthenticator struct {
 	config PASETOConfig
 }
 
 // All PASETO methods are currently stubs. Uncomment and implement as needed.
 
+//nolint:unused // reserved for PASETO token implementation
 func newPASETOAuthenticator(config Config) (Authenticator, error) {
 	return nil, errors.New("PASETO authenticator not implemented")
 }
 
+//nolint:unused // reserved for PASETO token implementation
 func (a *pasetoAuthenticator) Initialize(ctx context.Context) error {
 	return nil
 }
 
+//nolint:unused // reserved for PASETO token implementation
 func (a *pasetoAuthenticator) Close() error {
 	return nil
 }
 
 // The following methods are intentionally left unimplemented for now.
 // Uncomment and implement as needed.
+//nolint:unused // reserved for PASETO token implementation
 func (a *pasetoAuthenticator) GenerateToken(ctx context.Context, req TokenRequest) (*TokenResponse, error) {
 	return nil, errors.New("not implemented")
 }
