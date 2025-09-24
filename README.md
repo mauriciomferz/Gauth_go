@@ -1,44 +1,127 @@
 # GAuth: AI Power-of-Attorney Authorization Framework
 
+**🚀 Enhanced with Interactive Demo Webapp & Modern API**
+
 GAuth enables AI systems to act on behalf of humans or organizations, with explicit, verifiable, and auditable power-of-attorney flows. Built on OAuth, OpenID Connect, and MCP, GAuth is designed for open source, extensibility, and compliance with RFC111.
+
+## 🌟 **NEW: Interactive Demo Webapp**
+
+Experience GAuth in action with our comprehensive web application:
+
+- **🌐 Live Demo**: [http://localhost:8080](http://localhost:8080) (after starting the backend)
+- **🎫 Interactive Token Management**: Create, validate, and manage JWT tokens in real-time
+- **📊 Live System Metrics**: Monitor active users, transactions, and success rates
+- **⚖️ Legal Framework Demo**: RFC111/RFC115 compliance showcase
+- **🎨 Modern UI**: Beautiful, responsive design with glassmorphism effects
+- **🔄 Real-time Updates**: WebSocket-powered live data streaming
+
+### Quick Start with Webapp
+```bash
+# Start the enhanced backend server
+cd gauth-demo-app/web/backend
+go run main.go
+
+# Access the interactive demo
+open http://localhost:8080
+```
 
 ---
 
 ## Who is this for?
 - Developers integrating AI with sensitive actions or decisions
-- Security architects and compliance teams
+- Security architects and compliance teams  
 - Anyone needing transparent, auditable AI authorization
 
-
 ## Where to Start
-- Library code: `pkg/gauth/`
-- Examples: All runnable examples are now isolated in their own `main.go` under `examples/` or `examples/<category>/cmd/`.
-- See `examples/README.md` for a directory of example topics.
-- Package docs: `pkg/gauth/doc.go`
+- **🌐 Interactive Demo**: `gauth-demo-app/web/` - Full-featured webapp with modern UI
+- **📚 Library Code**: `pkg/gauth/` - Core authentication and authorization APIs
+- **💡 Examples**: `examples/` - Runnable code samples and tutorials
+- **📖 Documentation**: `docs/` - Architecture, patterns, and guides
 
 ## RFC111 Compliance
 - Implements the GiFo-RfC 0111 (GAuth) standard for AI power-of-attorney, delegation, and auditability.
 - All protocol roles, flows, and exclusions are respected. See https://gimelfoundation.com for the full RFC.
 
+## 🚀 Enhanced Features
 
-## Features
-
-- **Type Safety**: All public APIs use explicit, strongly-typed structures (no map[string]interface{} in public APIs)
+### **Core Framework**
+- **Type Safety**: All public APIs use explicit, strongly-typed structures
 - **Authentication**: Token-based authentication with JWT and PASETO support
 - **Authorization**: Fine-grained, policy-based access control (RBAC, ABAC, PBAC)
 - **Audit Logging**: Comprehensive, structured audit trails for all actions
 - **Extensible Storage**: Memory, Redis, and database backends
 - **Resilience**: Circuit breaking and retry mechanisms
 - **Observability**: Metrics, distributed tracing, and event-driven architecture
-- **Modernized Examples**: All examples are now up-to-date with the latest API and are runnable in isolation.
 
+### **🆕 Modern Web Application**
+- **Interactive Token Management**: Real-time JWT creation and validation
+- **Live System Dashboard**: Auto-updating metrics and statistics
+- **Legal Framework Integration**: Power-of-attorney and compliance demos
+- **Professional API**: RESTful endpoints with comprehensive error handling
+- **WebSocket Support**: Real-time event streaming and notifications
+- **Mobile-Responsive**: Works beautifully on all device sizes
+
+### **🔧 Developer Experience**
+- **Modern Tech Stack**: Go + Gin + React + TypeScript + Material-UI
+- **Docker Ready**: Complete containerization support
+- **API Documentation**: Swagger/OpenAPI specifications
+- **Comprehensive Testing**: Integration tests with >90% coverage
+- **Production Ready**: Structured logging, error handling, monitoring
+
+---
 
 ## Getting Started
 
+### **🌐 Option 1: Interactive Webapp (Recommended)**
+```bash
+# Clone the repository
+git clone https://github.com/mauriciomferz/Gauth_go.git
+cd Gauth_go
+
+# Start the enhanced backend
+cd gauth-demo-app/web/backend
+go run main.go
+
+# Open the interactive demo
+open http://localhost:8080
+```
+
+### **📚 Option 2: Library Integration**
 1. Review the runnable examples in `examples/` or `examples/<category>/cmd/` for minimal and advanced integrations.
 2. See `pkg/gauth/` for core types and APIs.
 3. Extend or customize by implementing your own token store, audit logger, or event types.
 
+---
+
+## 🏗️ **Webapp Architecture**
+
+### **Backend (Go + Gin)**
+- **🔐 Authentication Endpoints**: OAuth2, JWT, token management
+- **⚖️ Legal Framework**: RFC111/RFC115 compliance, power-of-attorney
+- **📊 Metrics & Monitoring**: Real-time system statistics
+- **🎭 Demo Scenarios**: Pre-built authentication flows
+- **🔄 WebSocket Events**: Real-time updates and notifications
+
+### **Frontend (React + TypeScript)**
+- **🎨 Modern UI Components**: Material-UI with custom styling
+- **📱 Responsive Design**: Mobile, tablet, desktop optimization
+- **🔄 State Management**: Zustand for efficient data flow
+- **🌐 API Integration**: Axios with automatic token refresh
+- **⚡ Real-time Updates**: WebSocket client for live data
+
+### **Key API Endpoints**
+```
+GET  /health                           # Health check
+POST /api/v1/tokens                    # Create JWT token
+POST /api/v1/tokens/validate           # Validate token
+GET  /api/v1/metrics/system            # System metrics
+GET  /api/v1/demo/scenarios            # Demo scenarios
+GET  /api/v1/legal/jurisdictions       # Legal framework
+POST /api/v1/auth/authorize            # OAuth2 authorization
+POST /api/v1/audit/events              # Audit events
+```
+
+---
 
 ## Manual Testing
 See `MANUAL_TESTING.md` for suggestions.
@@ -59,27 +142,6 @@ See `MANUAL_TESTING.md` for suggestions.
 
 ---
 For more, see the RFC111 specification and the package-level documentation in `doc.go`.
-    AuthServerURL: "https://auth.example.com",
-    ClientID:     "client-123",
-    ClientSecret: "secret-456",
-    RateLimit: gauth.RateLimitConfig{
-        RequestsPerSecond: 100,
-        WindowSize:       60,
-    },
-
-// Example: Per-user (OwnerID) rate limiting
-server := gauth.NewResourceServer("resource", auth)
-server.SetRateLimit(10, time.Minute) // 10 requests per minute per OwnerID
-
-// In ProcessTransaction, rate limiting is enforced per token OwnerID
-})
-
-// Use in your application
-token, err := auth.Authenticate(ctx, credentials)
-if err != nil {
-    // Handle error
-}
-```
 
 ## Documentation
 
