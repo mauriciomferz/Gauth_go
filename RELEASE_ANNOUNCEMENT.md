@@ -1,6 +1,6 @@
 # GAuth v1.0.0 Release Announcement
 
-We are excited to announce the first open-source release of **GAuth** – a modular, type-safe, and auditable authorization framework for AI, digital agents, and modern applications, fully aligned with RFC111!
+We are excited to announce the first open-source release of **GAuth** – a modular, type-safe, and auditable authorization framework for AI, digital agents, and modern applications, fully aligned with GiFo-RFC-0111 !
 
 ## Highlights
 - **Modular Go library** with clear separation of core, demo, and internal code
@@ -8,7 +8,7 @@ We are excited to announce the first open-source release of **GAuth** – a modu
 - **Comprehensive onboarding**: `README.md`, `GETTING_STARTED.md`, `LIBRARY.md`, and package-level docs
 - **Demo apps**: Easy-to-run demos in `/demo` and `/cmd/demo`
 - **Audit and event system**: Full protocol traceability
-- **RFC111 compliance**: All protocol steps, roles, and exclusions mapped to code
+- **RFC111 compliance**: All protocol steps, roles, and Exclusions mapped to code
 - **Open for community contributions**: See `CONTRIBUTING.md`
 
 ## Get Started
