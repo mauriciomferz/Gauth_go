@@ -33,7 +33,7 @@ func RequestID() gin.HandlerFunc {
 		if requestID == "" {
 			requestID = uuid.New().String()
 		}
-		
+
 		c.Header("X-Request-ID", requestID)
 		c.Set("RequestID", requestID)
 		c.Next()
@@ -83,13 +83,13 @@ func RateLimit() gin.HandlerFunc {
 		// For demo purposes, we'll just log rate limiting
 		clientIP := c.ClientIP()
 		userAgent := c.GetHeader("User-Agent")
-		
+
 		// In a real implementation, you would check rate limits here
 		// For now, we'll just add some headers
 		c.Header("X-RateLimit-Limit", "1000")
 		c.Header("X-RateLimit-Remaining", "999")
 		c.Header("X-RateLimit-Reset", "3600")
-		
+
 		c.Set("ClientIP", clientIP)
 		c.Set("UserAgent", userAgent)
 		c.Next()

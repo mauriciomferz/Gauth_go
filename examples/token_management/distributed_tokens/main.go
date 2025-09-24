@@ -36,10 +36,10 @@ func main() {
 		IPAddress: "192.168.1.1",
 	}
 	metadata := &token.Metadata{
-		Device: deviceInfo,
-		AppID: "example-app",
-		Labels: map[string]string{"environment": "test"},
-		Tags: []string{"demo"},
+		Device:     deviceInfo,
+		AppID:      "example-app",
+		Labels:     map[string]string{"environment": "test"},
+		Tags:       []string{"demo"},
 		Attributes: map[string][]string{"roles": {"user"}},
 	}
 	newToken := &token.Token{

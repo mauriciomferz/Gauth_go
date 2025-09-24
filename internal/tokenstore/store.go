@@ -10,7 +10,7 @@ import (
 type TokenData struct {
 	Valid      bool
 	ValidUntil time.Time
-	CreatedAt  time.Time                  // When the token was created
+	CreatedAt  time.Time // When the token was created
 	ClientID   string
 	OwnerID    string
 	Scope      []string

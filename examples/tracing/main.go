@@ -50,13 +50,12 @@ func main() {
 
 	// Initialize Authenticator (JWT)
 	authService, err := auth.NewAuthenticator(auth.Config{
-		Type: auth.TypeJWT,
+		Type:              auth.TypeJWT,
 		AccessTokenExpiry: time.Hour,
 	})
 	if err != nil {
 		log.Fatalf("failed to create authenticator: %v", err)
 	}
-
 
 	// Initialize Rate Limiter
 	rateLimiter := rate.NewTokenBucket(rate.Config{

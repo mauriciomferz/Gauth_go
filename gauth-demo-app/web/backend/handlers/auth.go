@@ -97,10 +97,10 @@ func (h *AuthHandler) Validate(c *gin.Context) {
 
 	// For demo purposes, accept any bearer token
 	c.JSON(http.StatusOK, gin.H{
-		"valid":    true,
-		"user_id":  "demo_user",
+		"valid":     true,
+		"user_id":   "demo_user",
 		"client_id": "demo_client",
-		"scope":    "read write",
+		"scope":     "read write",
 	})
 }
 
@@ -308,10 +308,10 @@ func (h *LegalFrameworkHandler) ApproveRequest(c *gin.Context) {
 
 	// For demo purposes, return success
 	result := gin.H{
-		"request_id": id,
-		"decision":   approvalReq.Decision,
-		"comments":   approvalReq.Comments,
-		"status":     "approved",
+		"request_id":  id,
+		"decision":    approvalReq.Decision,
+		"comments":    approvalReq.Comments,
+		"status":      "approved",
 		"approved_at": "2024-01-01T00:00:00Z",
 	}
 

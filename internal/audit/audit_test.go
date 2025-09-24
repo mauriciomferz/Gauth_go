@@ -19,7 +19,7 @@ func TestAuditLogger(t *testing.T) {
 	// Test logging and retrieval
 	t.Run("Log and GetRecent", func(t *testing.T) {
 		logger := audit.NewLogger(5)
-		
+
 		events := []audit.Event{
 			{
 				ID:        "1",
@@ -103,12 +103,12 @@ func TestAuditLogger(t *testing.T) {
 	// Test clear functionality
 	t.Run("Clear Events", func(t *testing.T) {
 		logger := audit.NewLogger(10)
-		
+
 		logger.Log(audit.Event{ID: "1"})
 		logger.Log(audit.Event{ID: "2"})
-		
+
 		logger.Clear()
-		
+
 		events := logger.GetRecent(10)
 		if len(events) != 0 {
 			t.Error("Events remain after clear")

@@ -81,11 +81,11 @@ func (h *AuditHandler) GetEvent(c *gin.Context) {
 // GetComplianceReport handles compliance report generation
 func (h *AuditHandler) GetComplianceReport(c *gin.Context) {
 	report := gin.H{
-		"period":     "2024-01",
-		"total_events": 1500,
+		"period":                     "2024-01",
+		"total_events":               1500,
 		"successful_authentications": 1450,
 		"failed_authentications":     50,
-		"compliance_score":          97.5,
+		"compliance_score":           97.5,
 		"violations": []gin.H{
 			{
 				"type":        "rate_limit_exceeded",
@@ -212,16 +212,16 @@ func (h *RateHandler) GetStatus(c *gin.Context) {
 	status := gin.H{
 		"client_id": client,
 		"current_period": gin.H{
-			"requests_made":   45,
-			"requests_limit":  60,
+			"requests_made":      45,
+			"requests_limit":     60,
 			"requests_remaining": 15,
-			"reset_time":      "2024-01-01T00:01:00Z",
+			"reset_time":         "2024-01-01T00:01:00Z",
 		},
 		"daily_stats": gin.H{
-			"requests_made":  1500,
-			"requests_limit": 10000,
+			"requests_made":      1500,
+			"requests_limit":     10000,
 			"requests_remaining": 8500,
-			"reset_time":     "2024-01-02T00:00:00Z",
+			"reset_time":         "2024-01-02T00:00:00Z",
 		},
 		"last_request": "2024-01-01T00:00:30Z",
 	}
@@ -265,11 +265,11 @@ func (h *DemoHandler) RunScenario(c *gin.Context) {
 
 	// For demo purposes, simulate scenario execution
 	execution := gin.H{
-		"scenario_id":   id,
-		"execution_id":  "exec_" + id + "_" + strconv.FormatInt(12345, 10),
-		"status":        "running",
-		"started_at":    "2024-01-01T00:00:00Z",
-		"steps_total":   3,
+		"scenario_id":     id,
+		"execution_id":    "exec_" + id + "_" + strconv.FormatInt(12345, 10),
+		"status":          "running",
+		"started_at":      "2024-01-01T00:00:00Z",
+		"steps_total":     3,
 		"steps_completed": 0,
 	}
 

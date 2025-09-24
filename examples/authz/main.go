@@ -23,18 +23,18 @@ func runRBAC() {
 
 	// Represent roles as policies
 	adminPolicy := &authz.Policy{
-		ID:     "admin-role",
-		Effect: authz.Allow,
-		Subjects: []authz.Subject{{ID: "admin1", Roles: []string{"admin"}}},
+		ID:        "admin-role",
+		Effect:    authz.Allow,
+		Subjects:  []authz.Subject{{ID: "admin1", Roles: []string{"admin"}}},
 		Resources: []authz.Resource{{ID: "users"}},
-		Actions: []authz.Action{{Name: "read"}, {Name: "write"}},
+		Actions:   []authz.Action{{Name: "read"}, {Name: "write"}},
 	}
 	userPolicy := &authz.Policy{
-		ID:     "user-role",
-		Effect: authz.Allow,
-		Subjects: []authz.Subject{{ID: "user123", Roles: []string{"user"}}},
+		ID:        "user-role",
+		Effect:    authz.Allow,
+		Subjects:  []authz.Subject{{ID: "user123", Roles: []string{"user"}}},
 		Resources: []authz.Resource{{ID: "users"}},
-		Actions: []authz.Action{{Name: "read"}},
+		Actions:   []authz.Action{{Name: "read"}},
 	}
 	if err := az.AddPolicy(ctx, adminPolicy); err != nil {
 		log.Fatalf("AddPolicy admin: %v", err)
@@ -61,11 +61,11 @@ func runPolicy() {
 
 	// Define a policy that allows user123 to read documents
 	policy := &authz.Policy{
-		ID:      "policy1",
-		Effect:  authz.Allow,
-		Subjects: []authz.Subject{{ID: "user123"}},
+		ID:        "policy1",
+		Effect:    authz.Allow,
+		Subjects:  []authz.Subject{{ID: "user123"}},
 		Resources: []authz.Resource{{ID: "documents"}},
-		Actions: []authz.Action{{Name: "read"}},
+		Actions:   []authz.Action{{Name: "read"}},
 	}
 	if err := az.AddPolicy(ctx, policy); err != nil {
 		log.Fatalf("AddPolicy: %v", err)
@@ -89,11 +89,11 @@ func runABAC() {
 
 	// Define an ABAC policy: allow any user from department "engineering" to read any technical doc
 	policy := &authz.Policy{
-		ID:     "abac-policy-1",
-		Effect: authz.Allow,
-		Subjects: []authz.Subject{{ID: "*", Type: "user"}}, // Wildcard subject
+		ID:        "abac-policy-1",
+		Effect:    authz.Allow,
+		Subjects:  []authz.Subject{{ID: "*", Type: "user"}}, // Wildcard subject
 		Resources: []authz.Resource{{ID: "*", Type: "document", Attributes: map[string]string{"category": "technical"}}},
-		Actions: []authz.Action{{Name: "read"}},
+		Actions:   []authz.Action{{Name: "read"}},
 		Conditions: map[string]authz.Condition{
 			"department": attrEquals("department", "engineering"),
 		},
@@ -154,4 +154,3 @@ func runDistributed() {
 	fmt.Println("\n=== Distributed Example ===")
 	fmt.Println("Distributed authorization demo is a stub. Configure Redis and nodes for a real test.")
 }
-

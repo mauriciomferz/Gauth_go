@@ -65,9 +65,9 @@ func TestCompleteAuthFlow(t *testing.T) {
 	}
 
 	// Verify transaction result
-       if result == "" {
-	       t.Fatal("Expected non-empty transaction result")
-       }
+	if result == "" {
+		t.Fatal("Expected non-empty transaction result")
+	}
 }
 
 func TestConcurrentTransactions(t *testing.T) {

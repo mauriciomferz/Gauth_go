@@ -39,11 +39,11 @@ func TestAuthAndAuthzIntegration(t *testing.T) {
 		require.NoError(t, err)
 
 		policy := &authz.Policy{
-			ID:       "policy-1",
-			Effect:   authz.Allow,
-			Subjects: []authz.Subject{{ID: userID}},
+			ID:        "policy-1",
+			Effect:    authz.Allow,
+			Subjects:  []authz.Subject{{ID: userID}},
 			Resources: []authz.Resource{{ID: resource}},
-			Actions:  []authz.Action{{Name: action}},
+			Actions:   []authz.Action{{Name: action}},
 		}
 		err = authzService.AddPolicy(ctx, policy)
 		require.NoError(t, err)
@@ -60,25 +60,25 @@ func TestAuthAndAuthzIntegration(t *testing.T) {
 	t.Run("PolicyInheritance", func(t *testing.T) {
 		policies := []*authz.Policy{
 			{
-				ID:       "admin-policy",
-				Effect:   authz.Allow,
-				Subjects: []authz.Subject{{ID: "admin"}},
+				ID:        "admin-policy",
+				Effect:    authz.Allow,
+				Subjects:  []authz.Subject{{ID: "admin"}},
 				Resources: []authz.Resource{{ID: "/*"}},
-				Actions:  []authz.Action{{Name: "*"}},
+				Actions:   []authz.Action{{Name: "*"}},
 			},
 			{
-				ID:       "user-policy",
-				Effect:   authz.Allow,
-				Subjects: []authz.Subject{{ID: "user"}},
+				ID:        "user-policy",
+				Effect:    authz.Allow,
+				Subjects:  []authz.Subject{{ID: "user"}},
 				Resources: []authz.Resource{{ID: "/docs/*"}},
-				Actions:  []authz.Action{{Name: "read"}},
+				Actions:   []authz.Action{{Name: "read"}},
 			},
 			{
-				ID:       "guest-policy",
-				Effect:   authz.Allow,
-				Subjects: []authz.Subject{{ID: "guest"}},
+				ID:        "guest-policy",
+				Effect:    authz.Allow,
+				Subjects:  []authz.Subject{{ID: "guest"}},
 				Resources: []authz.Resource{{ID: "/docs/public/*"}},
-				Actions:  []authz.Action{{Name: "read"}},
+				Actions:   []authz.Action{{Name: "read"}},
 			},
 		}
 		for _, p := range policies {
@@ -124,11 +124,11 @@ func TestAuthAndAuthzIntegration(t *testing.T) {
 		}
 
 		err := authzService.AddPolicy(ctx, &authz.Policy{
-			ID:       "concurrent-policy",
-			Effect:   authz.Allow,
-			Subjects: []authz.Subject{{ID: userID}},
+			ID:        "concurrent-policy",
+			Effect:    authz.Allow,
+			Subjects:  []authz.Subject{{ID: userID}},
 			Resources: []authz.Resource{{ID: resource}},
-			Actions:  []authz.Action{{Name: "read"}, {Name: "write"}},
+			Actions:   []authz.Action{{Name: "read"}, {Name: "write"}},
 		})
 		require.NoError(t, err)
 

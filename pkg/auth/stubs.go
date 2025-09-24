@@ -16,8 +16,12 @@ type RegistryVerifier interface {
 
 type noopRegistryVerifier struct{}
 
-func (n *noopRegistryVerifier) VerifyRegistration(ctx context.Context, info interface{}) error { return nil }
-func (n *noopRegistryVerifier) ValidateLegalStatus(ctx context.Context, ownerInfo interface{}) error { return nil }
+func (n *noopRegistryVerifier) VerifyRegistration(ctx context.Context, info interface{}) error {
+	return nil
+}
+func (n *noopRegistryVerifier) ValidateLegalStatus(ctx context.Context, ownerInfo interface{}) error {
+	return nil
+}
 
 // IdentityVerificationService is a no-op stub for compilation.
 type IdentityVerificationService interface {
@@ -76,7 +80,9 @@ type AuditEvent struct {
 }
 
 // Add RecordAuditEvent to StandardComplianceTracker stub
-func (t *StandardComplianceTracker) RecordAuditEvent(ctx context.Context, event *AuditEvent) error { return nil }
+func (t *StandardComplianceTracker) RecordAuditEvent(ctx context.Context, event *AuditEvent) error {
+	return nil
+}
 
 // Fix: ApprovalRule pointer compatibility
 // Remove ApprovalRule redeclaration from stubs.go (should only exist in one place)

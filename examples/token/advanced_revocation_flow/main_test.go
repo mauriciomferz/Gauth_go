@@ -40,9 +40,9 @@ func TestAdvancedRevocationFlowOutput(t *testing.T) {
 	if !strings.Contains(output, "Delegated token for agent-2 revoked.") {
 		t.Errorf("Expected output to contain 'Delegated token for agent-2 revoked.', got: %s", output)
 	}
-       if !strings.Contains(output, "Get after revoke error for agent-2: token not found") {
-	       t.Errorf("Expected output to contain 'Get after revoke error for agent-2: token not found', got: %s", output)
-       }
+	if !strings.Contains(output, "Get after revoke error for agent-2: token not found") {
+		t.Errorf("Expected output to contain 'Get after revoke error for agent-2: token not found', got: %s", output)
+	}
 	if !strings.Contains(output, "Token for agent-1 valid: true") {
 		t.Errorf("Expected output to contain 'Token for agent-1 valid: true', got: %s", output)
 	}

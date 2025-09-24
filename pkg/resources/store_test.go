@@ -45,11 +45,11 @@ func testConfigStore(t *testing.T, store interface {
 
 	// Test Save and Load
 	t.Run("Save and Load", func(t *testing.T) {
-		   config := ServiceConfig{
-			   Type:    "test-service",
-			   Version: "1.0.0",
-			   Timeout: 5 * time.Second,
-		   }
+		config := ServiceConfig{
+			Type:    "test-service",
+			Version: "1.0.0",
+			Timeout: 5 * time.Second,
+		}
 
 		err := store.Save(ctx, config)
 		require.NoError(t, err)
@@ -63,16 +63,16 @@ func testConfigStore(t *testing.T, store interface {
 
 	// Test List
 	t.Run("List", func(t *testing.T) {
-		   configs := []ServiceConfig{
-			   {
-				   Type:    "service-1",
-				   Version: "1.0.0",
-			   },
-			   {
-				   Type:    "service-2",
-				   Version: "1.0.0",
-			   },
-		   }
+		configs := []ServiceConfig{
+			{
+				Type:    "service-1",
+				Version: "1.0.0",
+			},
+			{
+				Type:    "service-2",
+				Version: "1.0.0",
+			},
+		}
 
 		for _, cfg := range configs {
 			err := store.Save(ctx, cfg)
@@ -100,10 +100,10 @@ func testConfigStore(t *testing.T, store interface {
 		watch, err := store.Watch(ctx)
 		require.NoError(t, err)
 
-		   config := ServiceConfig{
-			   Type:    "watched-service",
-			   Version: "1.0.0",
-		   }
+		config := ServiceConfig{
+			Type:    "watched-service",
+			Version: "1.0.0",
+		}
 
 		done := make(chan bool)
 		go func() {
@@ -111,7 +111,7 @@ func testConfigStore(t *testing.T, store interface {
 			case updated := <-watch:
 				assert.Equal(t, config.Type, updated.Type)
 				assert.Equal(t, config.Version, updated.Version)
-				   // No Environment field to check
+				// No Environment field to check
 				done <- true
 			case <-time.After(5 * time.Second):
 				t.Error("Watch timeout")

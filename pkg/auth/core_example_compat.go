@@ -29,4 +29,3 @@ package auth
 // func (s *Service) ValidateToken(ctx context.Context, token string) (*TokenData, error) {
 // 	return &TokenData{Valid: true, Subject: "testuser", Issuer: "auth-service", Audience: "example-app", IssuedAt: time.Now(), ExpiresAt: time.Now().Add(time.Hour), Scope: []string{"read"}, Claims: Claims{"sub": "testuser"}}, nil
 // }
-

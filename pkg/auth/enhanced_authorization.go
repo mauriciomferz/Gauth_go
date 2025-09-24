@@ -27,7 +27,7 @@ type JurisdictionRules struct {
 	RequiredApprovals map[string]ApprovalLevel
 
 	// Special requirements for this jurisdiction
-		FiduciaryDuties       []FiduciaryDuty
+	FiduciaryDuties       []FiduciaryDuty
 	IntegrityRequirements []string
 	ComplianceRules       []string
 

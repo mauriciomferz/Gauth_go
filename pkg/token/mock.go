@@ -167,7 +167,6 @@ func (m *MockStore) checkError() error {
 	return m.err
 }
 
-
 // MockSigner provides a mock implementation for testing token signing
 type MockSigner struct {
 	SignFunc   func(token *Token) (string, error)

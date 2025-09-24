@@ -32,7 +32,7 @@ type AuditEventType string
 type AuditAction string
 
 const (
-	AuditTypeAuthRequest audit.Type = "auth_request"
+	AuditTypeAuthRequest audit.Type   = "auth_request"
 	AuditActionInitiate  audit.Action = "initiate_authorization"
 )
 
@@ -52,21 +52,21 @@ type GAuth struct {
 
 // New creates a new GAuth instance with the provided configuration.
 func New(config Config) (*GAuth, error) {
-       if err := validateConfig(config); err != nil {
-	       return nil, err
-       }
-       auditLogger := audit.NewLogger(1000)
-       rateLimiter := ratelimit.NewLimiter(&ratelimit.Config{
-	       RequestsPerSecond: 10,
-	       BurstSize:         5,
-	       WindowSize:        60, // 60 seconds
-       })
-       return &GAuth{
-	       config:     config,
-	       TokenStore: tokenstore.NewMemoryStore(),
-	       auditLogger: auditLogger,
-	       rateLimiter: rateLimiter,
-       }, nil
+	if err := validateConfig(config); err != nil {
+		return nil, err
+	}
+	auditLogger := audit.NewLogger(1000)
+	rateLimiter := ratelimit.NewLimiter(&ratelimit.Config{
+		RequestsPerSecond: 10,
+		BurstSize:         5,
+		WindowSize:        60, // 60 seconds
+	})
+	return &GAuth{
+		config:      config,
+		TokenStore:  tokenstore.NewMemoryStore(),
+		auditLogger: auditLogger,
+		rateLimiter: rateLimiter,
+	}, nil
 }
 
 // InitiateAuthorization starts the authorization process.
@@ -81,15 +81,15 @@ func (g *GAuth) InitiateAuthorization(req AuthorizationRequest) (*AuthorizationG
 		Scope:      req.Scopes,
 		ValidUntil: time.Now().Add(g.config.AccessTokenExpiry),
 	}
-       g.auditLogger.Log(audit.Event{
-	       Type:    AuditTypeAuthRequest,
-	       ActorID: req.ClientID,
-	       Action:  AuditActionInitiate,
-	       Status:  "granted",
-	       Metadata: map[string]string{
-		       "grant_id": grant.GrantID,
-	       },
-       })
+	g.auditLogger.Log(audit.Event{
+		Type:    AuditTypeAuthRequest,
+		ActorID: req.ClientID,
+		Action:  AuditActionInitiate,
+		Status:  "granted",
+		Metadata: map[string]string{
+			"grant_id": grant.GrantID,
+		},
+	})
 	return grant, nil
 }
 

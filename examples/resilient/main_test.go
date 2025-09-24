@@ -13,6 +13,7 @@ import (
 	"github.com/Gimel-Foundation/gauth/internal/monitoring"
 	"github.com/Gimel-Foundation/gauth/pkg/gauth"
 )
+
 func TestMainDemoOutput(t *testing.T) {
 	origStdout := os.Stdout
 	r, w, _ := os.Pipe()
@@ -212,49 +213,48 @@ func TestResilientService(t *testing.T) {
 			t.Fatalf("Failed to request token: %v", err)
 		}
 
+		// Perform mixed transactions, including a failed refund
+		transactions := []struct {
+			tx    gauth.TransactionDetails
+			token string
+		}{
+			{
+				tx: gauth.TransactionDetails{
+					Type:           gauth.PaymentTransaction,
+					Amount:         100,
+					CustomMetadata: map[string]string{"test": "1"},
+				},
+				token: tokenResp.Token,
+			},
+			{
+				tx: gauth.TransactionDetails{
+					Type:           gauth.PaymentTransaction,
+					Amount:         50,
+					CustomMetadata: map[string]string{"test": "2"},
+				},
+				token: "invalid-token",
+			},
+			{
+				tx: gauth.TransactionDetails{
+					Type:           gauth.PaymentTransaction,
+					Amount:         75,
+					CustomMetadata: map[string]string{"test": "3"},
+				},
+				token: tokenResp.Token,
+			},
+			{
+				tx: gauth.TransactionDetails{
+					Type:           gauth.RefundTransaction,
+					Amount:         25,
+					CustomMetadata: map[string]string{"test": "refund"},
+				},
+				token: "invalid-token",
+			},
+		}
 
-			// Perform mixed transactions, including a failed refund
-			transactions := []struct {
-				tx    gauth.TransactionDetails
-				token string
-			}{
-				{
-					tx: gauth.TransactionDetails{
-						Type:           gauth.PaymentTransaction,
-						Amount:         100,
-						CustomMetadata: map[string]string{"test": "1"},
-					},
-					token: tokenResp.Token,
-				},
-				{
-					tx: gauth.TransactionDetails{
-						Type:           gauth.PaymentTransaction,
-						Amount:         50,
-						CustomMetadata: map[string]string{"test": "2"},
-					},
-					token: "invalid-token",
-				},
-				{
-					tx: gauth.TransactionDetails{
-						Type:           gauth.PaymentTransaction,
-						Amount:         75,
-						CustomMetadata: map[string]string{"test": "3"},
-					},
-					token: tokenResp.Token,
-				},
-				{
-					tx: gauth.TransactionDetails{
-						Type:           gauth.RefundTransaction,
-						Amount:         25,
-						CustomMetadata: map[string]string{"test": "refund"},
-					},
-					token: "invalid-token",
-				},
-			}
-
-			for _, tc := range transactions {
-				_ = service.ProcessRequest(tc.tx, tc.token)
-			}
+		for _, tc := range transactions {
+			_ = service.ProcessRequest(tc.tx, tc.token)
+		}
 
 		metrics := service.metrics.GetAllMetrics()
 
@@ -340,4 +340,3 @@ func TestResilientService(t *testing.T) {
 		}
 	})
 }
-

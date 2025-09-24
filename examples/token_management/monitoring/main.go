@@ -30,17 +30,17 @@ type TokenMetrics struct {
 }
 
 func NewTokenMonitor(store token.Store, blacklist *token.Blacklist) *TokenMonitor {
-       return &TokenMonitor{
-	       store:     store,
-	       querier:   token.NewDefaultQuerier(store),
-	       blacklist: blacklist,
-	       metrics: &TokenMetrics{
-		       activeTokens:    make(map[string]int),
-		       tokensByType:    make(map[token.Type]int),
-		       expirationTimes: make(map[string]time.Time),
-		       creationHistory: make([]time.Time, 0),
-	       },
-       }
+	return &TokenMonitor{
+		store:     store,
+		querier:   token.NewDefaultQuerier(store),
+		blacklist: blacklist,
+		metrics: &TokenMetrics{
+			activeTokens:    make(map[string]int),
+			tokensByType:    make(map[token.Type]int),
+			expirationTimes: make(map[string]time.Time),
+			creationHistory: make([]time.Time, 0),
+		},
+	}
 }
 func (m *TokenMonitor) TrackToken(ctx context.Context, t *token.Token) {
 	m.metrics.mu.Lock()

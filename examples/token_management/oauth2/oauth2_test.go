@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-
 func TestOAuth2AuthorizationCodeFlow(t *testing.T) {
 	ctx := context.Background()
 	flow := NewOAuth2Flow()
@@ -39,7 +38,6 @@ func TestOAuth2AuthorizationCodeFlow(t *testing.T) {
 	assert.Equal(t, userID, refreshTokenObj.Subject)
 	assert.Equal(t, []string{"refresh"}, refreshTokenObj.Scopes)
 }
-
 
 func TestOAuth2RefreshTokenFlow(t *testing.T) {
 	ctx := context.Background()

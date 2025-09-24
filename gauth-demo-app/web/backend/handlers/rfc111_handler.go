@@ -228,19 +228,19 @@ func (h *RFC111Handler) ExchangeAuthorizationCode(c *gin.Context) {
 
 	// Implementation would exchange code for token
 	c.JSON(http.StatusOK, gin.H{
-		"access_token":      "enhanced_token_" + req.Code,
-		"token_type":        "Bearer",
-		"expires_in":        3600,
-		"refresh_token":     "refresh_" + req.Code,
+		"access_token":     "enhanced_token_" + req.Code,
+		"token_type":       "Bearer",
+		"expires_in":       3600,
+		"refresh_token":    "refresh_" + req.Code,
 		"scope":            "rfc111_compliant power_of_attorney",
-		"compliance_level":  "rfc111_rfc115_full",
+		"compliance_level": "rfc111_rfc115_full",
 	})
 }
 
 // GetLegalFrameworkInfo provides information about supported legal frameworks
 func (h *RFC111Handler) GetLegalFrameworkInfo(c *gin.Context) {
 	jurisdiction := c.Query("jurisdiction")
-	
+
 	info := gin.H{
 		"supported_jurisdictions": []string{"US", "EU", "UK", "CA", "AU"},
 		"legal_bases": []string{
@@ -262,13 +262,13 @@ func (h *RFC111Handler) GetLegalFrameworkInfo(c *gin.Context) {
 
 	if jurisdiction != "" {
 		info["jurisdiction_specific"] = gin.H{
-			"jurisdiction":        jurisdiction,
+			"jurisdiction":       jurisdiction,
 			"regulatory_context": fmt.Sprintf("%s_legal_framework", jurisdiction),
 			"required_documents": []string{"power_of_attorney", "identity_verification"},
 			"attestation_requirements": gin.H{
-				"minimum_level": "enhanced",
+				"minimum_level":      "enhanced",
 				"required_attesters": 2,
-				"validity_period": "365_days",
+				"validity_period":    "365_days",
 			},
 		}
 	}
@@ -347,25 +347,25 @@ func (h *RFC111Handler) CreateAdvancedDelegation(c *gin.Context) {
 // GetDelegation retrieves delegation information
 func (h *RFC111Handler) GetDelegation(c *gin.Context) {
 	delegationID := c.Param("id")
-	
+
 	// Implementation would retrieve from storage
 	delegation := gin.H{
-		"delegation_id":   delegationID,
-		"principal_id":    "principal_123",
-		"delegate_id":     "delegate_456",
-		"power_type":      "financial_transactions",
-		"scope":          []string{"banking", "investments", "real_estate"},
-		"status":         "active",
-		"created_at":     time.Now().Add(-time.Hour * 24),
-		"expires_at":     time.Now().Add(time.Hour * 24 * 365),
+		"delegation_id": delegationID,
+		"principal_id":  "principal_123",
+		"delegate_id":   "delegate_456",
+		"power_type":    "financial_transactions",
+		"scope":         []string{"banking", "investments", "real_estate"},
+		"status":        "active",
+		"created_at":    time.Now().Add(-time.Hour * 24),
+		"expires_at":    time.Now().Add(time.Hour * 24 * 365),
 		"compliance_status": gin.H{
-			"status":          "compliant",
+			"status":           "compliant",
 			"compliance_level": "rfc111_rfc115_full",
-			"last_verified":   time.Now().Add(-time.Hour),
+			"last_verified":    time.Now().Add(-time.Hour),
 		},
 		"restrictions": gin.H{
 			"amount_limits": gin.H{
-				"daily_limit":  50000,
+				"daily_limit":       50000,
 				"transaction_limit": 10000,
 			},
 			"time_windows": []gin.H{
@@ -396,13 +396,13 @@ func (h *RFC111Handler) GetDelegation(c *gin.Context) {
 // CreateEnhancedToken creates a new enhanced token with RFC111/RFC115 features
 func (h *RFC111Handler) CreateEnhancedToken(c *gin.Context) {
 	var req struct {
-		Subject              string                    `json:"subject" binding:"required"`
-		Scope                []string                  `json:"scope" binding:"required"`
+		Subject              string                      `json:"subject" binding:"required"`
+		Scope                []string                    `json:"scope" binding:"required"`
 		DelegationOptions    *services.DelegationOptions `json:"delegation_options,omitempty"`
-		AIMetadata          *services.AIMetadata       `json:"ai_metadata,omitempty"`
-		Restrictions        *services.Restrictions     `json:"restrictions,omitempty"`
-		RequiredAttestations []string                  `json:"required_attestations,omitempty"`
-		ValidityPeriod      time.Duration             `json:"validity_period"`
+		AIMetadata           *services.AIMetadata        `json:"ai_metadata,omitempty"`
+		Restrictions         *services.Restrictions      `json:"restrictions,omitempty"`
+		RequiredAttestations []string                    `json:"required_attestations,omitempty"`
+		ValidityPeriod       time.Duration               `json:"validity_period"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -440,7 +440,7 @@ func (h *RFC111Handler) CreateEnhancedToken(c *gin.Context) {
 // GetEnhancedToken retrieves enhanced token information
 func (h *RFC111Handler) GetEnhancedToken(c *gin.Context) {
 	tokenID := c.Param("id")
-	
+
 	// Implementation would retrieve from enhanced token store
 	token := gin.H{
 		"id":         tokenID,
@@ -451,14 +451,14 @@ func (h *RFC111Handler) GetEnhancedToken(c *gin.Context) {
 		"scope":      []string{"read", "write", "delegate"},
 		"delegation": gin.H{
 			"principal":       "principal_123",
-			"scope":          "financial_transactions",
-			"valid_until":    time.Now().Add(time.Hour * 23),
-			"chain_limit":    3,
+			"scope":           "financial_transactions",
+			"valid_until":     time.Now().Add(time.Hour * 23),
+			"chain_limit":     3,
 			"require_consent": true,
 		},
 		"ai": gin.H{
-			"ai_type":       "financial_advisor",
-			"capabilities":  []string{"portfolio_analysis", "risk_assessment", "trade_recommendations"},
+			"ai_type":          "financial_advisor",
+			"capabilities":     []string{"portfolio_analysis", "risk_assessment", "trade_recommendations"},
 			"compliance_level": "highest",
 		},
 		"restrictions": gin.H{
@@ -475,9 +475,9 @@ func (h *RFC111Handler) GetEnhancedToken(c *gin.Context) {
 		},
 		"compliance_status": "rfc111_rfc115_compliant",
 		"version": gin.H{
-			"version":      1,
-			"created_at":   time.Now().Add(-time.Hour),
-			"updated_at":   time.Now().Add(-time.Hour),
+			"version":       1,
+			"created_at":    time.Now().Add(-time.Hour),
+			"updated_at":    time.Now().Add(-time.Hour),
 			"change_reason": "initial_creation",
 		},
 	}
@@ -490,17 +490,17 @@ func (h *RFC111Handler) GetEnhancedToken(c *gin.Context) {
 // CreateAIPowerOfAttorney creates power of attorney specifically for AI agents
 func (h *RFC111Handler) CreateAIPowerOfAttorney(c *gin.Context) {
 	var req struct {
-		PrincipalID      string                    `json:"principal_id" binding:"required"`
-		AIAgentID        string                    `json:"ai_agent_id" binding:"required"`
-		AIType           string                    `json:"ai_type" binding:"required"`
-		Capabilities     []string                  `json:"capabilities" binding:"required"`
-		PowerType        string                    `json:"power_type" binding:"required"`
-		Scope            []string                  `json:"scope" binding:"required"`
-		Jurisdiction     string                    `json:"jurisdiction" binding:"required"`
-		Restrictions     *services.Restrictions    `json:"restrictions,omitempty"`
-		SuccessorPlan    *services.SuccessorPlan   `json:"successor_plan,omitempty"`
-		ValidityPeriod   time.Duration             `json:"validity_period"`
-		ComplianceLevel  string                    `json:"compliance_level"`
+		PrincipalID     string                  `json:"principal_id" binding:"required"`
+		AIAgentID       string                  `json:"ai_agent_id" binding:"required"`
+		AIType          string                  `json:"ai_type" binding:"required"`
+		Capabilities    []string                `json:"capabilities" binding:"required"`
+		PowerType       string                  `json:"power_type" binding:"required"`
+		Scope           []string                `json:"scope" binding:"required"`
+		Jurisdiction    string                  `json:"jurisdiction" binding:"required"`
+		Restrictions    *services.Restrictions  `json:"restrictions,omitempty"`
+		SuccessorPlan   *services.SuccessorPlan `json:"successor_plan,omitempty"`
+		ValidityPeriod  time.Duration           `json:"validity_period"`
+		ComplianceLevel string                  `json:"compliance_level"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -530,8 +530,8 @@ func (h *RFC111Handler) CreateAIPowerOfAttorney(c *gin.Context) {
 	response := gin.H{
 		"ai_power_of_attorney": aiPOA,
 		"ai_metadata": gin.H{
-			"ai_type":               req.AIType,
-			"capabilities":          req.Capabilities,
+			"ai_type":      req.AIType,
+			"capabilities": req.Capabilities,
 			"delegation_guidelines": []string{
 				"rfc111_compliant",
 				"ai_ethics_compliant",
@@ -540,11 +540,11 @@ func (h *RFC111Handler) CreateAIPowerOfAttorney(c *gin.Context) {
 			"compliance_level": req.ComplianceLevel,
 		},
 		"verification_requirements": gin.H{
-			"attestation_required": true,
-			"human_approval_required": true,
+			"attestation_required":     true,
+			"human_approval_required":  true,
 			"periodic_review_interval": "30_days",
 		},
-		"status": "created",
+		"status":     "created",
 		"created_at": time.Now(),
 	}
 
@@ -556,30 +556,30 @@ func (h *RFC111Handler) CreateAIPowerOfAttorney(c *gin.Context) {
 // GetComplianceStatus retrieves comprehensive compliance status
 func (h *RFC111Handler) GetComplianceStatus(c *gin.Context) {
 	clientID := c.Param("client_id")
-	
+
 	status := gin.H{
 		"client_id": clientID,
 		"compliance_status": gin.H{
 			"overall_status": "compliant",
 			"rfc111_compliance": gin.H{
-				"status": "compliant",
-				"legal_framework_validated": true,
+				"status":                     "compliant",
+				"legal_framework_validated":  true,
 				"power_of_attorney_verified": true,
-				"jurisdiction_compliance": "US_compliant",
-				"last_assessment": time.Now().Add(-time.Hour * 6),
+				"jurisdiction_compliance":    "US_compliant",
+				"last_assessment":            time.Now().Add(-time.Hour * 6),
 			},
 			"rfc115_compliance": gin.H{
-				"status": "compliant",
-				"attestation_verified": true,
+				"status":                 "compliant",
+				"attestation_verified":   true,
 				"delegation_chain_valid": true,
-				"verification_level": "highest",
-				"last_verification": time.Now().Add(-time.Hour * 2),
+				"verification_level":     "highest",
+				"last_verification":      time.Now().Add(-time.Hour * 2),
 			},
 		},
 		"active_delegations": 3,
-		"active_tokens": 5,
+		"active_tokens":      5,
 		"risk_assessment": gin.H{
-			"risk_level": "low",
+			"risk_level":   "low",
 			"risk_factors": []string{},
 			"mitigation_measures": []string{
 				"regular_compliance_review",
@@ -588,10 +588,10 @@ func (h *RFC111Handler) GetComplianceStatus(c *gin.Context) {
 			},
 		},
 		"audit_summary": gin.H{
-			"total_events": 157,
-			"recent_events": 23,
+			"total_events":          157,
+			"recent_events":         23,
 			"compliance_violations": 0,
-			"last_audit_date": time.Now().Add(-time.Hour * 24 * 7),
+			"last_audit_date":       time.Now().Add(-time.Hour * 24 * 7),
 		},
 	}
 

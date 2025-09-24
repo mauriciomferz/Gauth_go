@@ -29,7 +29,6 @@ var (
 	// ErrTokenBlacklisted indicates the token is in the blacklist
 	ErrTokenBlacklisted = errors.New("token is blacklisted")
 
-
 	// ErrInvalidSignature indicates token signature verification failed
 	ErrInvalidSignature = errors.New("invalid token signature")
 

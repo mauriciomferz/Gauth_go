@@ -185,36 +185,36 @@ func (s *Service) Refresh(ctx context.Context, refreshToken *Token) (*Token, err
 	}
 
 	// Create new access token
-       var scopes []string
-       if refreshToken.Metadata != nil && refreshToken.Metadata.AppData != nil {
-	       if orig, ok := refreshToken.Metadata.AppData["original_scopes"]; ok && orig != "" {
-		       // Split comma-separated string into slice
-		       for _, s := range splitScopes(orig) {
-			       if s != "" {
-				       scopes = append(scopes, s)
-			       }
-		       }
-	       }
-       }
-       if len(scopes) == 0 {
-	       scopes = refreshToken.Scopes
-       }
-       accessToken := &Token{
-	       ID:        GenerateID(),
-	       Type:      Access,
-	       IssuedAt:  time.Now(),
-	       ExpiresAt: time.Now().Add(s.config.ValidityPeriod),
-	       NotBefore: time.Now(),
-	       Issuer:    refreshToken.Issuer,
-	       Subject:   refreshToken.Subject,
-	       Audience:  refreshToken.Audience,
-	       Scopes:    scopes,
-	       Algorithm: s.config.SigningMethod,
-       }
+	var scopes []string
+	if refreshToken.Metadata != nil && refreshToken.Metadata.AppData != nil {
+		if orig, ok := refreshToken.Metadata.AppData["original_scopes"]; ok && orig != "" {
+			// Split comma-separated string into slice
+			for _, s := range splitScopes(orig) {
+				if s != "" {
+					scopes = append(scopes, s)
+				}
+			}
+		}
+	}
+	if len(scopes) == 0 {
+		scopes = refreshToken.Scopes
+	}
+	accessToken := &Token{
+		ID:        GenerateID(),
+		Type:      Access,
+		IssuedAt:  time.Now(),
+		ExpiresAt: time.Now().Add(s.config.ValidityPeriod),
+		NotBefore: time.Now(),
+		Issuer:    refreshToken.Issuer,
+		Subject:   refreshToken.Subject,
+		Audience:  refreshToken.Audience,
+		Scopes:    scopes,
+		Algorithm: s.config.SigningMethod,
+	}
 
-       // Helper to split comma-separated scopes
-       // (define at file scope if not present)
-       // func splitScopes(s string) []string { return strings.Split(s, ",") }
+	// Helper to split comma-separated scopes
+	// (define at file scope if not present)
+	// func splitScopes(s string) []string { return strings.Split(s, ",") }
 
 	// Issue new token
 	return s.Issue(ctx, accessToken)

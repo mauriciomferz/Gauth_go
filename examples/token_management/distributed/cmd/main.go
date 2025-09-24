@@ -41,16 +41,16 @@ func NewClusterNode(id string, sharedChan chan TokenEvent) *ClusterNode {
 	jwtSigner := token.NewJWTSigner(rsaKey, token.HS256).WithKeyID("cluster-key-1")
 
 	node := &ClusterNode{
-		id:        id,
-		store:     store,
-		blacklist: blacklist,
-		jwtSigner: jwtSigner,
+		id:          id,
+		store:       store,
+		blacklist:   blacklist,
+		jwtSigner:   jwtSigner,
 		tokenEvents: sharedChan,
 	}
 
 	node.validator = token.NewValidationChain(token.ValidationConfig{
 		AllowedIssuers: []string{"node-1", "node-2", "node-3"},
-		ClockSkew: 2 * time.Minute,
+		ClockSkew:      2 * time.Minute,
 	}, blacklist)
 	go node.handleEvents()
 	return node
@@ -72,55 +72,55 @@ func (n *ClusterNode) handleRevocation(tokenID string) {
 }
 
 func (n *ClusterNode) CreateToken(ctx context.Context, subject string) (*token.Token, string, error) {
-    t := &token.Token{
-        ID:        token.NewID(),
-        Type:      token.Access,
-        Subject:   subject,
-        Issuer:    fmt.Sprintf("node-%s", n.id),
-        IssuedAt:  time.Now(),
-        NotBefore: time.Now(),
-        ExpiresAt: time.Now().Add(time.Hour),
-        Scopes:    []string{"read", "write"},
-        Metadata: &token.Metadata{
-            AppData: map[string]string{"node": n.id},
-        },
-    }
+	t := &token.Token{
+		ID:        token.NewID(),
+		Type:      token.Access,
+		Subject:   subject,
+		Issuer:    fmt.Sprintf("node-%s", n.id),
+		IssuedAt:  time.Now(),
+		NotBefore: time.Now(),
+		ExpiresAt: time.Now().Add(time.Hour),
+		Scopes:    []string{"read", "write"},
+		Metadata: &token.Metadata{
+			AppData: map[string]string{"node": n.id},
+		},
+	}
 
-    // Store token
-    if err := n.store.Save(ctx, t.ID, t); err != nil {
-        return nil, "", err
-    }
+	// Store token
+	if err := n.store.Save(ctx, t.ID, t); err != nil {
+		return nil, "", err
+	}
 
-    // Sign token
-    signed, err := n.jwtSigner.SignToken(t)
-    if err != nil {
-        return nil, "", err
-    }
+	// Sign token
+	signed, err := n.jwtSigner.SignToken(t)
+	if err != nil {
+		return nil, "", err
+	}
 
-    // Broadcast creation event
-    n.tokenEvents <- TokenEvent{
-        Type:      "created",
-        TokenID:   t.ID,
-        Timestamp: time.Now(),
-    }
+	// Broadcast creation event
+	n.tokenEvents <- TokenEvent{
+		Type:      "created",
+		TokenID:   t.ID,
+		Timestamp: time.Now(),
+	}
 
-    return t, signed, nil
+	return t, signed, nil
 }
 
 func (n *ClusterNode) RevokeToken(ctx context.Context, tokenID string) error {
-    t, err := n.store.Get(ctx, tokenID)
-    if err != nil {
-        return err
-    }
-    if err := n.blacklist.Add(ctx, t, "cluster revocation"); err != nil {
-        return err
-    }
-    n.tokenEvents <- TokenEvent{
-        Type:      "revoked",
-        TokenID:   tokenID,
-        Timestamp: time.Now(),
-    }
-    return nil
+	t, err := n.store.Get(ctx, tokenID)
+	if err != nil {
+		return err
+	}
+	if err := n.blacklist.Add(ctx, t, "cluster revocation"); err != nil {
+		return err
+	}
+	n.tokenEvents <- TokenEvent{
+		Type:      "revoked",
+		TokenID:   tokenID,
+		Timestamp: time.Now(),
+	}
+	return nil
 }
 
 func main() {
@@ -142,25 +142,25 @@ func main() {
 	// Node 1: Create and share token
 	go func() {
 		defer wg.Done()
-		   token, signed, err := node1.CreateToken(ctx, "user123")
-		   if err != nil {
-			   log.Printf("Node 1 failed to create token: %v", err)
-			   return
-		   }
-		   fmt.Printf("Node 1 created token: %s\n", token.ID)
+		token, signed, err := node1.CreateToken(ctx, "user123")
+		if err != nil {
+			log.Printf("Node 1 failed to create token: %v", err)
+			return
+		}
+		fmt.Printf("Node 1 created token: %s\n", token.ID)
 
-		   // Simulate other nodes verifying the token
-		   if verified, err := node2.jwtSigner.VerifyToken(signed); err != nil {
-			   log.Printf("Node 2 failed to verify token: %v", err)
-		   } else {
-			   fmt.Printf("Node 2 verified token for subject: %s\n", verified.Subject)
-		   }
+		// Simulate other nodes verifying the token
+		if verified, err := node2.jwtSigner.VerifyToken(signed); err != nil {
+			log.Printf("Node 2 failed to verify token: %v", err)
+		} else {
+			fmt.Printf("Node 2 verified token for subject: %s\n", verified.Subject)
+		}
 
-		   if verified, err := node3.jwtSigner.VerifyToken(signed); err != nil {
-			   log.Printf("Node 3 failed to verify token: %v", err)
-		   } else {
-			   fmt.Printf("Node 3 verified token for subject: %s\n", verified.Subject)
-		   }
+		if verified, err := node3.jwtSigner.VerifyToken(signed); err != nil {
+			log.Printf("Node 3 failed to verify token: %v", err)
+		} else {
+			fmt.Printf("Node 3 verified token for subject: %s\n", verified.Subject)
+		}
 	}()
 
 	// Node 2: Revoke token and propagate

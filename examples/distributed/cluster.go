@@ -161,7 +161,7 @@ func SimulateDistributedAuthorization(manager *DistributedResourceManager, numRe
 			ResourceID: resourceID,
 			CustomMetadata: map[string]string{
 				"requested_by": userID,
-				"node":        nodeID,
+				"node":         nodeID,
 			},
 		}
 

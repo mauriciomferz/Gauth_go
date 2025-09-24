@@ -86,7 +86,7 @@ func NewService(config Config) (*Service, error) {
 	tokenConfig := token.Config{
 		ValidityPeriod: config.AccessTokenExpiry,
 	}
-	
+
 	// Set signing key if provided
 	if config.SigningKey != nil {
 		if signer, ok := config.SigningKey.(crypto.Signer); ok {

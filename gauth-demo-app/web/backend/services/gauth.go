@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"github.com/redis/go-redis/v9"
 )
 
 // GAuthService provides a comprehensive service layer for the GAuth protocol
@@ -30,7 +30,7 @@ func NewGAuthService(config *viper.Viper, logger *logrus.Logger) (*GAuthService,
 	// Test Redis connection
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	
+
 	if err := redisClient.Ping(ctx).Err(); err != nil {
 		logger.Warnf("Redis connection failed: %v", err)
 		// Continue without Redis for demo purposes
@@ -376,15 +376,15 @@ func (s *GAuthService) GetDemoScenarios(ctx context.Context) ([]*DemoScenario, e
 // Token management types
 type CreateTokenRequest struct {
 	Claims   map[string]interface{} `json:"claims"`
-	Duration time.Duration         `json:"duration"`
-	Scope    []string              `json:"scope"`
+	Duration time.Duration          `json:"duration"`
+	Scope    []string               `json:"scope"`
 }
 
 type CreateTokenResponse struct {
 	Token        string                 `json:"token"`
 	AccessToken  string                 `json:"access_token,omitempty"`
 	RefreshToken string                 `json:"refresh_token,omitempty"`
-	ExpiresAt    time.Time             `json:"expires_at"`
+	ExpiresAt    time.Time              `json:"expires_at"`
 	Claims       map[string]interface{} `json:"claims"`
 }
 
@@ -404,21 +404,21 @@ type TokenData struct {
 	ID        string                 `json:"id"`
 	OwnerID   string                 `json:"owner_id"`
 	ClientID  string                 `json:"client_id"`
-	Scope     []string              `json:"scope"`
+	Scope     []string               `json:"scope"`
 	Claims    map[string]interface{} `json:"claims"`
-	CreatedAt time.Time             `json:"created_at"`
-	ExpiresAt time.Time             `json:"expires_at"`
-	Valid     bool                  `json:"valid"`
-	Status    string                `json:"status"`
+	CreatedAt time.Time              `json:"created_at"`
+	ExpiresAt time.Time              `json:"expires_at"`
+	Valid     bool                   `json:"valid"`
+	Status    string                 `json:"status"`
 }
 
 type TokenMetrics struct {
-	ActiveTokens    int     `json:"active_tokens"`
-	ExpiredTokens   int     `json:"expired_tokens"`
-	RevokedTokens   int     `json:"revoked_tokens"`
-	TotalTokens     int     `json:"total_tokens"`
-	TokensCreated1h int     `json:"tokens_created_1h"`
-	SuccessRate     float64 `json:"success_rate"`
+	ActiveTokens    int       `json:"active_tokens"`
+	ExpiredTokens   int       `json:"expired_tokens"`
+	RevokedTokens   int       `json:"revoked_tokens"`
+	TotalTokens     int       `json:"total_tokens"`
+	TokensCreated1h int       `json:"tokens_created_1h"`
+	SuccessRate     float64   `json:"success_rate"`
 	LastUpdated     time.Time `json:"last_updated"`
 }
 
@@ -432,7 +432,7 @@ func (s *GAuthService) CreateToken(ctx context.Context, req CreateTokenRequest) 
 
 	// Generate unique token ID
 	tokenID := generateToken("token")
-	
+
 	// Create token data
 	tokenData := TokenData{
 		ID:        tokenID,
@@ -452,12 +452,12 @@ func (s *GAuthService) CreateToken(ctx context.Context, req CreateTokenRequest) 
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal token data: %w", err)
 		}
-		
+
 		key := fmt.Sprintf("token:%s", tokenID)
 		if err := s.redis.Set(ctx, key, data, req.Duration).Err(); err != nil {
 			s.logger.WithError(err).Error("Failed to store token in Redis")
 		}
-		
+
 		// Store in token index for listing
 		indexKey := fmt.Sprintf("token_index:%s", tokenData.OwnerID)
 		s.redis.SAdd(ctx, indexKey, tokenID)
@@ -474,7 +474,7 @@ func (s *GAuthService) CreateToken(ctx context.Context, req CreateTokenRequest) 
 // GetTokens retrieves a paginated list of tokens
 func (s *GAuthService) GetTokens(ctx context.Context, req GetTokensRequest) (*GetTokensResponse, error) {
 	tokens := []TokenData{}
-	
+
 	if s.redis != nil {
 		// Get all token IDs (simplified implementation)
 		pattern := "token:*"
@@ -519,7 +519,7 @@ func (s *GAuthService) GetTokens(ctx context.Context, req GetTokensRequest) (*Ge
 	// Apply pagination
 	start := (req.Page - 1) * req.PageSize
 	end := start + req.PageSize
-	
+
 	if start > len(tokens) {
 		start = len(tokens)
 	}
@@ -539,7 +539,7 @@ func (s *GAuthService) RevokeToken(ctx context.Context, tokenID string) error {
 
 	if s.redis != nil {
 		key := fmt.Sprintf("token:%s", tokenID)
-		
+
 		// Get existing token data
 		data, err := s.redis.Get(ctx, key).Result()
 		if err != nil {
@@ -624,7 +624,7 @@ func (s *GAuthService) GetTokenMetrics(ctx context.Context) (*TokenMetrics, erro
 	if s.redis != nil {
 		// Get all tokens and calculate metrics
 		keys, _ := s.redis.Keys(ctx, "token:*").Result()
-		
+
 		metrics := &TokenMetrics{
 			TotalTokens: len(keys),
 			LastUpdated: time.Now(),
@@ -708,7 +708,7 @@ func (s *GAuthService) getMockTokens() []TokenData {
 		{
 			ID:        "token_002",
 			OwnerID:   "user456",
-			ClientID:  "client002", 
+			ClientID:  "client002",
 			Scope:     []string{"read"},
 			Claims:    map[string]interface{}{"sub": "user456", "role": "user"},
 			CreatedAt: time.Now().Add(-time.Hour * 25),
@@ -737,12 +737,12 @@ func (s *GAuthService) exchangeCodeForToken(ctx context.Context, req *TokenReque
 		if err != nil {
 			return nil, fmt.Errorf("invalid authorization code")
 		}
-		
+
 		var authData map[string]interface{}
 		if err := json.Unmarshal([]byte(data), &authData); err != nil {
 			return nil, fmt.Errorf("invalid authorization code data")
 		}
-		
+
 		// Remove the used authorization code
 		s.redis.Del(ctx, fmt.Sprintf("auth_code:%s", req.Code))
 	}
@@ -778,7 +778,7 @@ func (s *GAuthService) refreshToken(ctx context.Context, req *TokenRequest) (*To
 		if err != nil {
 			return nil, fmt.Errorf("invalid refresh token")
 		}
-		
+
 		var tokenData map[string]interface{}
 		if err := json.Unmarshal([]byte(data), &tokenData); err != nil {
 			return nil, fmt.Errorf("invalid refresh token data")

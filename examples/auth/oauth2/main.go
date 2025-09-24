@@ -11,17 +11,17 @@ import (
 func main() {
 	// Prepare OAuth2 config
 	oauth2Cfg := auth.OAuth2Config{
-		TokenURL:     "https://example.com/oauth/token", // Replace with real endpoint
+		TokenURL:     "https://example.com/oauth/token",     // Replace with real endpoint
 		AuthorizeURL: "https://example.com/oauth/authorize", // Replace with real endpoint
 		RedirectURL:  "http://localhost:8080/callback",
 		Endpoints:    map[string]string{"introspection": "https://example.com/oauth/introspect"},
 	}
 
 	cfg := auth.Config{
-		Type:        auth.TypeOAuth2,
-		ClientID:    "your-client-id",
+		Type:         auth.TypeOAuth2,
+		ClientID:     "your-client-id",
 		ClientSecret: "your-client-secret",
-		ExtraConfig: oauth2Cfg,
+		ExtraConfig:  oauth2Cfg,
 	}
 	authenticator, err := auth.NewAuthenticator(cfg)
 	if err != nil {
