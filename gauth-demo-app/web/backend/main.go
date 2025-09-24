@@ -254,11 +254,9 @@ func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *vipe
 	}
 	
 	// WebSocket endpoints for real-time updates
-	// router.GET("/ws/events", handlers.NewWebSocketHandler(svc, logger).HandleEvents)
-	
-	// WebSocket endpoint
-	// wsHandler := handlers.NewWebSocketHandler(svc, logger)
-	// router.GET("/ws", wsHandler.HandleEvents)
+	wsHandler := handlers.NewWebSocketHandler(svc, logger)
+	router.GET("/ws", wsHandler.HandleEvents)
+	router.GET("/ws/events", wsHandler.HandleEvents)
 
 	// Swagger documentation
 	// router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
