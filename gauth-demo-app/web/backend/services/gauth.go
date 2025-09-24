@@ -373,6 +373,352 @@ func (s *GAuthService) GetDemoScenarios(ctx context.Context) ([]*DemoScenario, e
 	}, nil
 }
 
+// Token management types
+type CreateTokenRequest struct {
+	Claims   map[string]interface{} `json:"claims"`
+	Duration time.Duration         `json:"duration"`
+	Scope    []string              `json:"scope"`
+}
+
+type CreateTokenResponse struct {
+	Token        string                 `json:"token"`
+	AccessToken  string                 `json:"access_token,omitempty"`
+	RefreshToken string                 `json:"refresh_token,omitempty"`
+	ExpiresAt    time.Time             `json:"expires_at"`
+	Claims       map[string]interface{} `json:"claims"`
+}
+
+type GetTokensRequest struct {
+	Page     int    `json:"page"`
+	PageSize int    `json:"page_size"`
+	Status   string `json:"status,omitempty"`
+	OwnerID  string `json:"owner_id,omitempty"`
+}
+
+type GetTokensResponse struct {
+	Tokens []TokenData `json:"tokens"`
+	Total  int         `json:"total"`
+}
+
+type TokenData struct {
+	ID        string                 `json:"id"`
+	OwnerID   string                 `json:"owner_id"`
+	ClientID  string                 `json:"client_id"`
+	Scope     []string              `json:"scope"`
+	Claims    map[string]interface{} `json:"claims"`
+	CreatedAt time.Time             `json:"created_at"`
+	ExpiresAt time.Time             `json:"expires_at"`
+	Valid     bool                  `json:"valid"`
+	Status    string                `json:"status"`
+}
+
+type TokenMetrics struct {
+	ActiveTokens    int     `json:"active_tokens"`
+	ExpiredTokens   int     `json:"expired_tokens"`
+	RevokedTokens   int     `json:"revoked_tokens"`
+	TotalTokens     int     `json:"total_tokens"`
+	TokensCreated1h int     `json:"tokens_created_1h"`
+	SuccessRate     float64 `json:"success_rate"`
+	LastUpdated     time.Time `json:"last_updated"`
+}
+
+// CreateToken creates a new token with enhanced features
+func (s *GAuthService) CreateToken(ctx context.Context, req CreateTokenRequest) (*CreateTokenResponse, error) {
+	s.logger.WithFields(logrus.Fields{
+		"owner_id": req.Claims["sub"],
+		"duration": req.Duration,
+		"scope":    req.Scope,
+	}).Info("Creating new token")
+
+	// Generate unique token ID
+	tokenID := generateToken("token")
+	
+	// Create token data
+	tokenData := TokenData{
+		ID:        tokenID,
+		OwnerID:   extractStringClaim(req.Claims, "sub"),
+		ClientID:  extractStringClaim(req.Claims, "client_id"),
+		Scope:     req.Scope,
+		Claims:    req.Claims,
+		CreatedAt: time.Now(),
+		ExpiresAt: time.Now().Add(req.Duration),
+		Valid:     true,
+		Status:    "active",
+	}
+
+	// Store in Redis if available
+	if s.redis != nil {
+		data, err := json.Marshal(tokenData)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal token data: %w", err)
+		}
+		
+		key := fmt.Sprintf("token:%s", tokenID)
+		if err := s.redis.Set(ctx, key, data, req.Duration).Err(); err != nil {
+			s.logger.WithError(err).Error("Failed to store token in Redis")
+		}
+		
+		// Store in token index for listing
+		indexKey := fmt.Sprintf("token_index:%s", tokenData.OwnerID)
+		s.redis.SAdd(ctx, indexKey, tokenID)
+		s.redis.Expire(ctx, indexKey, req.Duration)
+	}
+
+	return &CreateTokenResponse{
+		Token:     tokenID,
+		ExpiresAt: tokenData.ExpiresAt,
+		Claims:    req.Claims,
+	}, nil
+}
+
+// GetTokens retrieves a paginated list of tokens
+func (s *GAuthService) GetTokens(ctx context.Context, req GetTokensRequest) (*GetTokensResponse, error) {
+	tokens := []TokenData{}
+	
+	if s.redis != nil {
+		// Get all token IDs (simplified implementation)
+		pattern := "token:*"
+		keys, err := s.redis.Keys(ctx, pattern).Result()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get token keys: %w", err)
+		}
+
+		// Retrieve token data
+		for _, key := range keys {
+			data, err := s.redis.Get(ctx, key).Result()
+			if err != nil {
+				continue // Skip invalid tokens
+			}
+
+			var tokenData TokenData
+			if err := json.Unmarshal([]byte(data), &tokenData); err != nil {
+				continue
+			}
+
+			// Apply filters
+			if req.Status != "" && tokenData.Status != req.Status {
+				continue
+			}
+			if req.OwnerID != "" && tokenData.OwnerID != req.OwnerID {
+				continue
+			}
+
+			// Update status based on expiration
+			if time.Now().After(tokenData.ExpiresAt) {
+				tokenData.Status = "expired"
+				tokenData.Valid = false
+			}
+
+			tokens = append(tokens, tokenData)
+		}
+	} else {
+		// Return mock data if Redis is not available
+		tokens = s.getMockTokens()
+	}
+
+	// Apply pagination
+	start := (req.Page - 1) * req.PageSize
+	end := start + req.PageSize
+	
+	if start > len(tokens) {
+		start = len(tokens)
+	}
+	if end > len(tokens) {
+		end = len(tokens)
+	}
+
+	return &GetTokensResponse{
+		Tokens: tokens[start:end],
+		Total:  len(tokens),
+	}, nil
+}
+
+// RevokeToken revokes a specific token
+func (s *GAuthService) RevokeToken(ctx context.Context, tokenID string) error {
+	s.logger.WithField("token_id", tokenID).Info("Revoking token")
+
+	if s.redis != nil {
+		key := fmt.Sprintf("token:%s", tokenID)
+		
+		// Get existing token data
+		data, err := s.redis.Get(ctx, key).Result()
+		if err != nil {
+			return fmt.Errorf("token not found: %w", err)
+		}
+
+		var tokenData TokenData
+		if err := json.Unmarshal([]byte(data), &tokenData); err != nil {
+			return fmt.Errorf("invalid token data: %w", err)
+		}
+
+		// Update token status
+		tokenData.Status = "revoked"
+		tokenData.Valid = false
+
+		// Store updated data
+		updatedData, err := json.Marshal(tokenData)
+		if err != nil {
+			return fmt.Errorf("failed to marshal updated token data: %w", err)
+		}
+
+		return s.redis.Set(ctx, key, updatedData, time.Hour*24).Err() // Keep for 24 hours
+	}
+
+	return nil // Success if no Redis
+}
+
+// ValidateToken validates a token and returns its claims
+func (s *GAuthService) ValidateToken(ctx context.Context, tokenID string) (map[string]interface{}, error) {
+	if s.redis != nil {
+		key := fmt.Sprintf("token:%s", tokenID)
+		data, err := s.redis.Get(ctx, key).Result()
+		if err != nil {
+			return nil, fmt.Errorf("token not found: %w", err)
+		}
+
+		var tokenData TokenData
+		if err := json.Unmarshal([]byte(data), &tokenData); err != nil {
+			return nil, fmt.Errorf("invalid token data: %w", err)
+		}
+
+		// Check if token is valid and not expired
+		if !tokenData.Valid || time.Now().After(tokenData.ExpiresAt) {
+			return nil, fmt.Errorf("token is invalid or expired")
+		}
+
+		if tokenData.Status == "revoked" {
+			return nil, fmt.Errorf("token has been revoked")
+		}
+
+		return tokenData.Claims, nil
+	}
+
+	// Return mock validation for demo
+	return map[string]interface{}{
+		"sub": "demo_user",
+		"iat": time.Now().Unix(),
+		"exp": time.Now().Add(time.Hour).Unix(),
+	}, nil
+}
+
+// RefreshToken creates a new access token from a refresh token
+func (s *GAuthService) RefreshToken(ctx context.Context, refreshTokenID string) (*CreateTokenResponse, error) {
+	// Validate refresh token (similar to ValidateToken)
+	claims, err := s.ValidateToken(ctx, refreshTokenID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid refresh token: %w", err)
+	}
+
+	// Create new access token
+	newReq := CreateTokenRequest{
+		Claims:   claims,
+		Duration: time.Hour, // 1 hour for access token
+		Scope:    []string{"read", "write"},
+	}
+
+	return s.CreateToken(ctx, newReq)
+}
+
+// GetTokenMetrics returns token-related metrics
+func (s *GAuthService) GetTokenMetrics(ctx context.Context) (*TokenMetrics, error) {
+	if s.redis != nil {
+		// Get all tokens and calculate metrics
+		keys, _ := s.redis.Keys(ctx, "token:*").Result()
+		
+		metrics := &TokenMetrics{
+			TotalTokens: len(keys),
+			LastUpdated: time.Now(),
+		}
+
+		active, expired, revoked := 0, 0, 0
+		tokensCreated1h := 0
+		oneHourAgo := time.Now().Add(-time.Hour)
+
+		for _, key := range keys {
+			data, err := s.redis.Get(ctx, key).Result()
+			if err != nil {
+				continue
+			}
+
+			var tokenData TokenData
+			if err := json.Unmarshal([]byte(data), &tokenData); err != nil {
+				continue
+			}
+
+			switch tokenData.Status {
+			case "active":
+				if time.Now().After(tokenData.ExpiresAt) {
+					expired++
+				} else {
+					active++
+				}
+			case "expired":
+				expired++
+			case "revoked":
+				revoked++
+			}
+
+			if tokenData.CreatedAt.After(oneHourAgo) {
+				tokensCreated1h++
+			}
+		}
+
+		metrics.ActiveTokens = active
+		metrics.ExpiredTokens = expired
+		metrics.RevokedTokens = revoked
+		metrics.TokensCreated1h = tokensCreated1h
+		metrics.SuccessRate = float64(active) / float64(len(keys))
+
+		return metrics, nil
+	}
+
+	// Return mock metrics
+	return &TokenMetrics{
+		ActiveTokens:    15,
+		ExpiredTokens:   3,
+		RevokedTokens:   2,
+		TotalTokens:     20,
+		TokensCreated1h: 5,
+		SuccessRate:     0.95,
+		LastUpdated:     time.Now(),
+	}, nil
+}
+
+// Helper functions
+func extractStringClaim(claims map[string]interface{}, key string) string {
+	if val, ok := claims[key].(string); ok {
+		return val
+	}
+	return ""
+}
+
+func (s *GAuthService) getMockTokens() []TokenData {
+	return []TokenData{
+		{
+			ID:        "token_001",
+			OwnerID:   "user123",
+			ClientID:  "client001",
+			Scope:     []string{"read", "write"},
+			Claims:    map[string]interface{}{"sub": "user123", "role": "admin"},
+			CreatedAt: time.Now().Add(-time.Hour * 2),
+			ExpiresAt: time.Now().Add(time.Hour * 22),
+			Valid:     true,
+			Status:    "active",
+		},
+		{
+			ID:        "token_002",
+			OwnerID:   "user456",
+			ClientID:  "client002", 
+			Scope:     []string{"read"},
+			Claims:    map[string]interface{}{"sub": "user456", "role": "user"},
+			CreatedAt: time.Now().Add(-time.Hour * 25),
+			ExpiresAt: time.Now().Add(-time.Hour),
+			Valid:     false,
+			Status:    "expired",
+		},
+	}
+}
+
 // Helper functions
 
 func (s *GAuthService) validateClient(ctx context.Context, clientID string) (*Client, error) {
