@@ -4,26 +4,52 @@
 
 GAuth enables AI systems to act on behalf of humans or organizations, with explicit, verifiable, and auditable power-of-attorney flows. Built on OAuth, OpenID Connect, and MCP, GAuth is designed for open source, extensibility, and compliance with RFC111.
 
-## 🌟 **NEW: Interactive Demo Webapp**
+## 🌟 **NEW: Enhanced Interactive Webapp with Real-time Features**
 
-Experience GAuth in action with our comprehensive web application:
+Experience GAuth in action with our cutting-edge web application featuring modern UI and live updates:
 
-- **🌐 Live Demo**: [http://localhost:8080](http://localhost:8080) (after starting the backend)
-- **🎫 Interactive Token Management**: Create, validate, and manage JWT tokens in real-time
-- **📊 Live System Metrics**: Monitor active users, transactions, and success rates
-- **⚖️ Legal Framework Demo**: RFC111/RFC115 compliance showcase
-- **🎨 Modern UI**: Beautiful, responsive design with glassmorphism effects
-- **🔄 Real-time Updates**: WebSocket-powered live data streaming
+### 🎫 **Interactive Token Management**
+- **Real-time Token Creation**: Generate JWT tokens with custom claims and instant feedback
+- **Live Validation**: Instant token validation with comprehensive claim inspection
+- **Auto-workflow**: Created tokens automatically populate validation fields
+- **Visual Feedback**: Beautiful loading states, success animations, and error handling
 
-### Quick Start with Webapp
+### 📊 **Live System Dashboard**
+- **Real-time Metrics**: Auto-updating system statistics (users, transactions, success rate)
+- **WebSocket Integration**: Live event streaming with automatic reconnection
+- **Health Monitoring**: Visual API and WebSocket connection status indicators
+- **Performance Tracking**: Response times and system performance metrics
+
+### 🎨 **Modern User Experience**
+- **Glassmorphism Design**: Beautiful modern UI with backdrop blur effects
+- **Mobile Responsive**: Perfect experience on mobile, tablet, and desktop
+- **Keyboard Shortcuts**: Ctrl/Cmd+Enter for quick actions and workflow efficiency
+- **Toast Notifications**: Real-time user feedback with professional animations
+- **Dark Mode**: Elegant gradient backgrounds with high contrast readability
+
+### 🌐 **Enhanced Technical Features**
+- **WebSocket Real-time Events**: Live updates for token operations and system events
+- **Advanced Error Handling**: Comprehensive error states with recovery suggestions
+- **Auto-reconnection**: Smart WebSocket reconnection with exponential backoff
+- **Progressive Enhancement**: Core functionality works even with JavaScript disabled
+
+### 🚀 Quick Start with Enhanced Webapp
 ```bash
-# Start the enhanced backend server
+# Start the enhanced backend server with WebSocket support
 cd gauth-demo-app/web/backend
-go run main.go
+go build -o gauth-enhanced-server main.go
+./gauth-enhanced-server
 
-# Access the interactive demo
+# Access the interactive demo with real-time features
 open http://localhost:8080
 ```
+
+**✨ Try these features immediately:**
+- Create tokens with custom subject and role
+- See real-time validation with detailed claim inspection  
+- Watch live system metrics auto-update every 5 seconds
+- Experience WebSocket real-time event notifications
+- Test mobile responsiveness on different devices
 
 ---
 
@@ -95,19 +121,21 @@ open http://localhost:8080
 
 ## 🏗️ **Webapp Architecture**
 
-### **Backend (Go + Gin)**
-- **🔐 Authentication Endpoints**: OAuth2, JWT, token management
-- **⚖️ Legal Framework**: RFC111/RFC115 compliance, power-of-attorney
-- **📊 Metrics & Monitoring**: Real-time system statistics
-- **🎭 Demo Scenarios**: Pre-built authentication flows
-- **🔄 WebSocket Events**: Real-time updates and notifications
+### **🔧 Enhanced Backend (Go + Gin)**
+- **🔐 Advanced Authentication**: OAuth2, JWT with key rotation, comprehensive token lifecycle
+- **⚖️ Legal Framework**: Full RFC111/RFC115 compliance with multi-jurisdiction support  
+- **📊 Real-time Monitoring**: Live system metrics with WebSocket streaming
+- **🎭 Interactive Scenarios**: Dynamic demo flows with real-time feedback
+- **🔄 WebSocket Server**: Real-time event broadcasting with auto-reconnection
+- **🛡️ Security Features**: Structured logging, CORS, comprehensive error handling
 
-### **Frontend (React + TypeScript)**
-- **🎨 Modern UI Components**: Material-UI with custom styling
-- **📱 Responsive Design**: Mobile, tablet, desktop optimization
-- **🔄 State Management**: Zustand for efficient data flow
-- **🌐 API Integration**: Axios with automatic token refresh
-- **⚡ Real-time Updates**: WebSocket client for live data
+### **🎨 Modern Frontend (HTML5 + ES6+ JavaScript)**
+- **💎 Glassmorphism UI**: Beautiful modern design with backdrop blur effects
+- **📱 Fully Responsive**: Optimized experience across all device sizes  
+- **⚡ Real-time WebSocket**: Live updates with automatic reconnection and status indicators
+- **🌐 Advanced API Integration**: Intelligent error handling and retry logic
+- **⌨️ Enhanced UX**: Keyboard shortcuts, toast notifications, loading animations
+- **🎯 Progressive Enhancement**: Works beautifully with and without JavaScript
 
 ### **Key API Endpoints**
 ```
