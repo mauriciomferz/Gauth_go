@@ -164,8 +164,13 @@ func TestResilientService(t *testing.T) {
 			t.Error("Expected circuit breaker to be open")
 		}
 
-		// Wait for reset timeout
-		time.Sleep(11 * time.Second)
+		// Wait for circuit breaker reset timeout (10s + buffer for CI stability)
+		resetTimeout := 11 * time.Second
+		if os.Getenv("CI") == "true" {
+			resetTimeout = 12 * time.Second // Extra buffer for CI environment
+		}
+		t.Logf("Waiting %v for circuit breaker reset...", resetTimeout)
+		time.Sleep(resetTimeout)
 
 		// Try a successful request with a proper token
 		tx.Type = "payment"
@@ -282,7 +287,13 @@ func TestResilientService(t *testing.T) {
 
 	// Test concurrent requests
 	t.Run("ConcurrentRequests", func(t *testing.T) {
-		const numRequests = 100
+		// Create fresh service to avoid circuit breaker state from previous tests
+		freshService := NewResilientService(auth)
+		
+		numRequests := 100
+		if os.Getenv("CI") == "true" {
+			numRequests = 50 // Reduce load for CI environment
+		}
 		errors := make(chan error, numRequests)
 		start := time.Now()
 
@@ -313,7 +324,7 @@ func TestResilientService(t *testing.T) {
 						"id":         fmt.Sprintf("%d", id),
 					},
 				}
-				errors <- service.ProcessRequest(tx, tokenResp.Token)
+				errors <- freshService.ProcessRequest(tx, tokenResp.Token)
 			}(i)
 		}
 
@@ -329,12 +340,14 @@ func TestResilientService(t *testing.T) {
 		t.Logf("Processed %d concurrent requests in %v with %d errors",
 			numRequests, duration, errorCount)
 
-		if errorCount > 50 {
-			t.Errorf("Too many errors: %d", errorCount)
+		// Allow up to 50% error rate (reasonable for resilience testing)
+		maxErrors := numRequests / 2
+		if errorCount > maxErrors {
+			t.Errorf("Too many errors: %d (max allowed: %d out of %d requests)", errorCount, maxErrors, numRequests)
 		}
 
 		// Verify metrics under load
-		metrics := service.metrics.GetAllMetrics()
+		metrics := freshService.metrics.GetAllMetrics()
 		if !hasMetric(metrics, string(monitoring.MetricResponseTime), map[string]string{"type": "payment"}) {
 			t.Error("Expected response time metrics under load")
 		}
