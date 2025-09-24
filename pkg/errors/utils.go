@@ -74,13 +74,21 @@ func (e *Error) WithFields(fields map[string]string) *Error {
 	return e
 }
 
+// Context key types to avoid collisions
+type contextKey string
+
+const (
+	requestIDKey contextKey = "request_id"
+	userIDKey    contextKey = "user_id"
+)
+
 // WithContext extracts relevant information from a context
 func (e *Error) WithContext(ctx context.Context) *Error {
 	// Example of extracting information from context
 	// In a real implementation, you'd extract your application-specific values
 
 	// Example: Extract request ID from context
-	if requestID, ok := ctx.Value("request_id").(string); ok && requestID != "" {
+	if requestID, ok := ctx.Value(requestIDKey).(string); ok && requestID != "" {
 		if e.Details == nil {
 			e.Details = &ErrorDetails{
 				Timestamp:      time.Now(),
@@ -91,7 +99,7 @@ func (e *Error) WithContext(ctx context.Context) *Error {
 	}
 
 	// Example: Extract user ID from context
-	if userID, ok := ctx.Value("user_id").(string); ok && userID != "" {
+	if userID, ok := ctx.Value(userIDKey).(string); ok && userID != "" {
 		if e.Details == nil {
 			e.Details = &ErrorDetails{
 				Timestamp:      time.Now(),
