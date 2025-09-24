@@ -31,10 +31,10 @@ func TestEntry(t *testing.T) {
 	t.Run("Hash Chain", func(t *testing.T) {
 		entry1 := NewEntry(TypeAuth)
 		entry2 := NewEntry(TypeAuth)
-	entry2.PrevHash = entry1.CalculateHash()
+		entry2.PrevHash = entry1.CalculateHash()
 
-	hash1 := entry1.CalculateHash()
-	hash2 := entry2.CalculateHash()
+		hash1 := entry1.CalculateHash()
+		hash2 := entry2.CalculateHash()
 
 		assert.NotEqual(t, hash1, hash2)
 		assert.Equal(t, hash1, entry2.PrevHash)

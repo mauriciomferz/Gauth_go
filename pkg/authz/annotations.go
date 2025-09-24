@@ -77,7 +77,7 @@ func (a *Annotations) SetInt(key string, value int) {
 // SetFloat sets a float annotation
 func (a *Annotations) SetFloat(key string, value float64) {
 	a.Values[key] = Annotation{
-		Type:      "float",
+		Type:       "float",
 		FloatValue: value,
 	}
 }
@@ -85,7 +85,7 @@ func (a *Annotations) SetFloat(key string, value float64) {
 // SetBool sets a boolean annotation
 func (a *Annotations) SetBool(key string, value bool) {
 	a.Values[key] = Annotation{
-		Type:     "bool",
+		Type:      "bool",
 		BoolValue: value,
 	}
 }

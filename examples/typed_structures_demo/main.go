@@ -12,6 +12,7 @@ import (
 
 // logEventHandler implements events.EventHandler for logging
 type logEventHandler struct{}
+
 func (h *logEventHandler) Handle(event events.Event) {
 	fmt.Printf("[%s] %s: %s - %s\n",
 		event.Type,
@@ -59,36 +60,36 @@ func main() {
 			return
 		}
 
-				// Create typed metadata for the token creation event
-				metadata := events.NewMetadata()
-				metadata.SetString("ip_address", r.RemoteAddr)
-				metadata.SetString("request_id", fmt.Sprintf("req-%d", time.Now().UnixNano()))
-				metadata.SetString("user_agent", r.UserAgent())
+		// Create typed metadata for the token creation event
+		metadata := events.NewMetadata()
+		metadata.SetString("ip_address", r.RemoteAddr)
+		metadata.SetString("request_id", fmt.Sprintf("req-%d", time.Now().UnixNano()))
+		metadata.SetString("user_agent", r.UserAgent())
 
-				// Create a token for user "demo-user"
-				tokenResp, err := auth.RequestToken(gauth.TokenRequest{
-					GrantID:   "demo-user",
-					Scope:     []string{"demo"},
-					Context:   r.Context(),
-				})
-				if err != nil {
-					http.Error(w, "Failed to create token: "+err.Error(), http.StatusInternalServerError)
-					return
-				}
+		// Create a token for user "demo-user"
+		tokenResp, err := auth.RequestToken(gauth.TokenRequest{
+			GrantID: "demo-user",
+			Scope:   []string{"demo"},
+			Context: r.Context(),
+		})
+		if err != nil {
+			http.Error(w, "Failed to create token: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-				// Log the event
-				bus.Publish(events.Event{
-					Type:     events.EventTypeToken,
-					Action:   "token.create",
-					Status:   "success",
-					Message:  "Token created",
-					Metadata: metadata,
-				})
+		// Log the event
+		bus.Publish(events.Event{
+			Type:     events.EventTypeToken,
+			Action:   "token.create",
+			Status:   "success",
+			Message:  "Token created",
+			Metadata: metadata,
+		})
 
-				fmt.Fprintf(w, "Token: %s\nExpires: %s\n",
-					tokenResp.Token,
-					tokenResp.ValidUntil.Format(time.RFC3339),
-				)
+		fmt.Fprintf(w, "Token: %s\nExpires: %s\n",
+			tokenResp.Token,
+			tokenResp.ValidUntil.Format(time.RFC3339),
+		)
 	})
 
 	http.HandleFunc("/token/validate", func(w http.ResponseWriter, r *http.Request) {
@@ -108,28 +109,28 @@ func main() {
 		metadata.SetString("ip_address", r.RemoteAddr)
 		metadata.SetInt("attempts", 1) // Could track actual attempts in a real app
 
-				// Validate the token
-				_, err := auth.ValidateToken(tokenStr)
-				status := "success"
-				if err != nil {
-					status = "failure"
-				}
+		// Validate the token
+		_, err := auth.ValidateToken(tokenStr)
+		status := "success"
+		if err != nil {
+			status = "failure"
+		}
 
-				// Log the event
-				bus.Publish(events.Event{
-					Type:     events.EventTypeToken,
-					Action:   "token.validate",
-					Status:   status,
-					Message:  "Token validation attempted",
-					Metadata: metadata,
-				})
+		// Log the event
+		bus.Publish(events.Event{
+			Type:     events.EventTypeToken,
+			Action:   "token.validate",
+			Status:   status,
+			Message:  "Token validation attempted",
+			Metadata: metadata,
+		})
 
-				if err != nil {
-					http.Error(w, "Error validating token: "+err.Error(), http.StatusUnauthorized)
-					return
-				}
+		if err != nil {
+			http.Error(w, "Error validating token: "+err.Error(), http.StatusUnauthorized)
+			return
+		}
 
-				fmt.Fprintf(w, "Token is valid\n")
+		fmt.Fprintf(w, "Token is valid\n")
 	})
 
 	http.HandleFunc("/token/revoke", func(w http.ResponseWriter, r *http.Request) {
@@ -150,24 +151,24 @@ func main() {
 		metadata.SetString("reason", r.FormValue("reason"))
 		metadata.SetTime("revocation_time", time.Now())
 
-				// Revoke the token (invalidate)
-				p := &gauth.PowerAdministrationPoint{GAuth: auth}
-				err := p.InvalidateToken(tokenStr)
-				if err != nil {
-					http.Error(w, "Error revoking token: "+err.Error(), http.StatusInternalServerError)
-					return
-				}
+		// Revoke the token (invalidate)
+		p := &gauth.PowerAdministrationPoint{GAuth: auth}
+		err := p.InvalidateToken(tokenStr)
+		if err != nil {
+			http.Error(w, "Error revoking token: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-				// Log the event
-				bus.Publish(events.Event{
-					Type:     events.EventTypeToken,
-					Action:   "token.revoke",
-					Status:   "success",
-					Message:  "Token revoked",
-					Metadata: metadata,
-				})
+		// Log the event
+		bus.Publish(events.Event{
+			Type:     events.EventTypeToken,
+			Action:   "token.revoke",
+			Status:   "success",
+			Message:  "Token revoked",
+			Metadata: metadata,
+		})
 
-				fmt.Fprintf(w, "Token revoked successfully\n")
+		fmt.Fprintf(w, "Token revoked successfully\n")
 	})
 
 	http.HandleFunc("/protected", func(w http.ResponseWriter, r *http.Request) {
@@ -185,29 +186,29 @@ func main() {
 		metadata.SetString("resource", r.URL.Path)
 		metadata.SetString("method", r.Method)
 
-				// Validate the token
-				_, err := auth.ValidateToken(tokenStr)
-				status := "success"
-				if err != nil {
-					status = "failure"
-				}
+		// Validate the token
+		_, err := auth.ValidateToken(tokenStr)
+		status := "success"
+		if err != nil {
+			status = "failure"
+		}
 
-				// Log the event
-				bus.Publish(events.Event{
-					Type:     events.EventTypeToken,
-					Action:   "token.access",
-					Status:   status,
-					Message:  "Token access attempted",
-					Metadata: metadata,
-				})
+		// Log the event
+		bus.Publish(events.Event{
+			Type:     events.EventTypeToken,
+			Action:   "token.access",
+			Status:   status,
+			Message:  "Token access attempted",
+			Metadata: metadata,
+		})
 
-				if err != nil {
-					http.Error(w, "Invalid token", http.StatusUnauthorized)
-					return
-				}
+		if err != nil {
+			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			return
+		}
 
-				// If token is valid, show protected content
-				fmt.Fprintf(w, "Protected resource accessed successfully\n")
+		// If token is valid, show protected content
+		fmt.Fprintf(w, "Protected resource accessed successfully\n")
 	})
 
 	// Start the server

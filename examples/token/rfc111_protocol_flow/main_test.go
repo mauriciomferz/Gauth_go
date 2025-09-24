@@ -46,7 +46,7 @@ func TestRFC111ProtocolFlowOutput(t *testing.T) {
 	if !strings.Contains(output, "Token revoked.") {
 		t.Errorf("Expected output to contain 'Token revoked.', got: %s", output)
 	}
-       if !strings.Contains(output, "Get after revoke error: token not found") {
-	       t.Errorf("Expected output to contain 'Get after revoke error: token not found', got: %s", output)
-       }
+	if !strings.Contains(output, "Get after revoke error: token not found") {
+		t.Errorf("Expected output to contain 'Get after revoke error: token not found', got: %s", output)
+	}
 }

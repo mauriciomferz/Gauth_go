@@ -19,7 +19,7 @@ func main() {
 	}
 
 	cfg := auth.Config{
-		Type:       auth.TypePaseto,
+		Type:        auth.TypePaseto,
 		ExtraConfig: pasetoCfg,
 	}
 	authenticator, err := auth.NewAuthenticator(cfg)

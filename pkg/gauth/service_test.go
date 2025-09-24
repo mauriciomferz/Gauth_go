@@ -26,7 +26,7 @@ func TestNew(t *testing.T) {
 				ClientSecret:      "test-secret",
 				Scopes:            []string{"read", "write"},
 				AccessTokenExpiry: time.Hour,
-				   RateLimit: common.RateLimitConfig{
+				RateLimit: common.RateLimitConfig{
 					RequestsPerSecond: 100,
 					BurstSize:         10,
 					WindowSize:        60,
@@ -80,13 +80,13 @@ func TestNew(t *testing.T) {
 }
 
 func TestService_Authorize(t *testing.T) {
-       svc := setupTestService(t)
-       t.Cleanup(func() {
-	       err := svc.Close()
-	       if err != nil {
-		       t.Errorf("error closing service: %v", err)
-	       }
-       })
+	svc := setupTestService(t)
+	t.Cleanup(func() {
+		err := svc.Close()
+		if err != nil {
+			t.Errorf("error closing service: %v", err)
+		}
+	})
 
 	ctx := context.Background()
 
@@ -137,13 +137,13 @@ func TestService_Authorize(t *testing.T) {
 }
 
 func TestService_RequestToken(t *testing.T) {
-       svc := setupTestService(t)
-       t.Cleanup(func() {
-	       err := svc.Close()
-	       if err != nil {
-		       t.Errorf("error closing service: %v", err)
-	       }
-       })
+	svc := setupTestService(t)
+	t.Cleanup(func() {
+		err := svc.Close()
+		if err != nil {
+			t.Errorf("error closing service: %v", err)
+		}
+	})
 
 	ctx := context.Background()
 
@@ -239,7 +239,7 @@ func TestService_RevokeToken(t *testing.T) {
 func TestService_RateLimiting(t *testing.T) {
 	// Skip this test for now as rate limiting implementation may vary
 	t.Skip("Rate limiting test requires specific configuration - skipping for now")
-	
+
 	config := Config{
 		AuthServerURL:     "http://localhost:8080",
 		ClientID:          "test-client",
@@ -284,7 +284,7 @@ func setupTestService(t *testing.T) *Service {
 	// Generate a test RSA key for signing
 	testKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	require.NoError(t, err)
-	
+
 	config := Config{
 		AuthServerURL:     "http://localhost:8080",
 		ClientID:          "test-client",

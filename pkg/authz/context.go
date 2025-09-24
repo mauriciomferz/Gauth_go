@@ -96,7 +96,7 @@ func (c *Context) SetInt(key string, value int) {
 // SetFloat sets a float value in the context
 func (c *Context) SetFloat(key string, value float64) {
 	c.Values[key] = ContextValue{
-		Type:      "float",
+		Type:       "float",
 		FloatValue: value,
 	}
 }
@@ -104,7 +104,7 @@ func (c *Context) SetFloat(key string, value float64) {
 // SetBool sets a boolean value in the context
 func (c *Context) SetBool(key string, value bool) {
 	c.Values[key] = ContextValue{
-		Type:     "bool",
+		Type:      "bool",
 		BoolValue: value,
 	}
 }

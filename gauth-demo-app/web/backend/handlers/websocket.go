@@ -14,12 +14,12 @@ import (
 
 // WebSocketHandler handles WebSocket connections for real-time updates
 type WebSocketHandler struct {
-	service     *services.GAuthService
-	logger      *logrus.Logger
-	upgrader    websocket.Upgrader
-	clients     map[*websocket.Conn]bool
+	service      *services.GAuthService
+	logger       *logrus.Logger
+	upgrader     websocket.Upgrader
+	clients      map[*websocket.Conn]bool
 	clientsMutex sync.RWMutex
-	broadcast   chan Event
+	broadcast    chan Event
 }
 
 // Event represents a real-time event
@@ -155,11 +155,11 @@ func (h *WebSocketHandler) sendDemoEvents(conn *websocket.Conn) {
 			Type:      "rfc111_authorization",
 			Timestamp: time.Now(),
 			Data: map[string]interface{}{
-				"ai_agent_id":     "corporate_ai_assistant_v3",
-				"business_owner":  "cfo_jane_smith",
-				"power_type":      "corporate_financial_authority",
-				"jurisdiction":    "US",
-				"status":          "authorized",
+				"ai_agent_id":    "corporate_ai_assistant_v3",
+				"business_owner": "cfo_jane_smith",
+				"power_type":     "corporate_financial_authority",
+				"jurisdiction":   "US",
+				"status":         "authorized",
 			},
 		},
 		{

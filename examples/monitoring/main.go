@@ -17,9 +17,9 @@ func main() {
 
 	// Create rate limiter (token bucket example)
 	config := rate.Config{
-		Rate:      100,           // 100 requests
-		Window:    time.Minute,   // per minute
-		BurstSize: 20,            // allow bursts of 20
+		Rate:      100,         // 100 requests
+		Window:    time.Minute, // per minute
+		BurstSize: 20,          // allow bursts of 20
 	}
 	limiter := rate.NewTokenBucket(config)
 

@@ -110,14 +110,14 @@ func getTraditionalLimitations(c *gin.Context) {
 		},
 		"issues": gin.H{
 			"processingTime": "4-8 hours for complex decisions",
-			"accuracy": "72% initial accuracy with no improvement",
-			"maintenance": "High - requires manual updates",
-			"scalability": "Poor - increases with complexity",
-			"transparency": "Low - opaque decision process",
+			"accuracy":       "72% initial accuracy with no improvement",
+			"maintenance":    "High - requires manual updates",
+			"scalability":    "Poor - increases with complexity",
+			"transparency":   "Low - opaque decision process",
 		},
 		"businessImpact": gin.H{
-			"agility": "Low - slow to adapt",
-			"compliance": "Challenging - manual verification",
+			"agility":        "Low - slow to adapt",
+			"compliance":     "Challenging - manual verification",
 			"costEfficiency": "Poor - high operational overhead",
 		},
 	}
@@ -141,14 +141,14 @@ func getGAuthBenefits(c *gin.Context) {
 		},
 		"advantages": gin.H{
 			"processingTime": "30 seconds average decision time",
-			"accuracy": "96% accuracy with continuous learning",
-			"maintenance": "Minimal - self-improving system",
-			"scalability": "Excellent - handles increasing complexity",
-			"transparency": "Complete - full decision visibility",
+			"accuracy":       "96% accuracy with continuous learning",
+			"maintenance":    "Minimal - self-improving system",
+			"scalability":    "Excellent - handles increasing complexity",
+			"transparency":   "Complete - full decision visibility",
 		},
 		"businessImpact": gin.H{
-			"agility": "High - instant adaptation",
-			"compliance": "Automated - real-time verification",
+			"agility":        "High - instant adaptation",
+			"compliance":     "Automated - real-time verification",
 			"costEfficiency": "Excellent - minimal operational overhead",
 		},
 	}
@@ -159,7 +159,7 @@ func getGAuthBenefits(c *gin.Context) {
 // Comprehensive benefits handler
 func getComprehensiveBenefits(c *gin.Context) {
 	data := gin.H{
-		"category": "Comprehensive Authorization",
+		"category":    "Comprehensive Authorization",
 		"description": "Server-based approval rules with learning mechanisms that adapt to organizational needs",
 		"features": []string{
 			"Multi-layered authorization framework",
@@ -170,23 +170,23 @@ func getComprehensiveBenefits(c *gin.Context) {
 			"Real-time authorization state management",
 		},
 		"metrics": gin.H{
-			"policyComplexity": "Handles 10,000+ concurrent authorization rules",
+			"policyComplexity":  "Handles 10,000+ concurrent authorization rules",
 			"contextualFactors": "Evaluates 50+ contextual parameters per decision",
 			"integrationPoints": "Connects with 15+ enterprise systems",
-			"responseTime": "< 200ms for 95% of authorization requests",
+			"responseTime":      "< 200ms for 95% of authorization requests",
 		},
 		"examples": []gin.H{
 			{
-				"scenario": "Financial Services AI Model Approval",
+				"scenario":    "Financial Services AI Model Approval",
 				"description": "Automated approval for AI models in financial risk assessment",
 				"improvement": "From 4 hours manual review to 30-second automated decision",
-				"accuracy": "96.3% accuracy with continuous learning",
+				"accuracy":    "96.3% accuracy with continuous learning",
 			},
 			{
-				"scenario": "Healthcare Data Access Authorization",
+				"scenario":    "Healthcare Data Access Authorization",
 				"description": "Patient data access control for research purposes",
 				"improvement": "From manual IRB review to instant compliance verification",
-				"accuracy": "99.1% compliance accuracy",
+				"accuracy":    "99.1% compliance accuracy",
 			},
 		},
 	}
@@ -197,7 +197,7 @@ func getComprehensiveBenefits(c *gin.Context) {
 // Verifiable benefits handler
 func getVerifiableBenefits(c *gin.Context) {
 	data := gin.H{
-		"category": "Verifiable Transparency",
+		"category":    "Verifiable Transparency",
 		"description": "Independent rule management with complete audit trails and accountability",
 		"features": []string{
 			"Immutable audit logs with cryptographic verification",
@@ -208,9 +208,9 @@ func getVerifiableBenefits(c *gin.Context) {
 			"Blockchain-based integrity assurance",
 		},
 		"metrics": gin.H{
-			"auditTrailCoverage": "100% of authorization decisions logged",
-			"verificationTime": "< 1 second for decision verification",
-			"integrityAssurance": "99.99% cryptographic integrity guarantee",
+			"auditTrailCoverage":  "100% of authorization decisions logged",
+			"verificationTime":    "< 1 second for decision verification",
+			"integrityAssurance":  "99.99% cryptographic integrity guarantee",
 			"complianceReporting": "Real-time regulatory compliance dashboard",
 		},
 		"complianceFrameworks": []string{
@@ -221,9 +221,9 @@ func getVerifiableBenefits(c *gin.Context) {
 			"ISO 27001 (Information Security Management)",
 		},
 		"benefits": gin.H{
-			"auditPreparation": "From weeks to minutes",
+			"auditPreparation":       "From weeks to minutes",
 			"complianceVerification": "Real-time vs. periodic assessments",
-			"riskReduction": "85% reduction in compliance-related risks",
+			"riskReduction":          "85% reduction in compliance-related risks",
 		},
 	}
 
@@ -233,7 +233,7 @@ func getVerifiableBenefits(c *gin.Context) {
 // Automated benefits handler
 func getAutomatedBenefits(c *gin.Context) {
 	data := gin.H{
-		"category": "Automated Learning",
+		"category":    "Automated Learning",
 		"description": "Experience-based decision improvement with continuous accuracy enhancement",
 		"features": []string{
 			"Machine learning-powered decision optimization",
@@ -245,21 +245,21 @@ func getAutomatedBenefits(c *gin.Context) {
 		},
 		"learningProgression": gin.H{
 			"initial": "85% accuracy (day 1)",
-			"month1": "91% accuracy (after 1 month)",
-			"month3": "94% accuracy (after 3 months)",
-			"month6": "96% accuracy (after 6 months)",
+			"month1":  "91% accuracy (after 1 month)",
+			"month3":  "94% accuracy (after 3 months)",
+			"month6":  "96% accuracy (after 6 months)",
 			"plateau": "96-98% sustained accuracy",
 		},
 		"improvementMetrics": gin.H{
-			"decisionSpeed": "+2500% faster than manual processes",
-			"errorReduction": "92% reduction in false positives",
-			"adaptabilityScore": "94% - excellent adaptation to new scenarios",
+			"decisionSpeed":      "+2500% faster than manual processes",
+			"errorReduction":     "92% reduction in false positives",
+			"adaptabilityScore":  "94% - excellent adaptation to new scenarios",
 			"learningEfficiency": "Incorporates new patterns within 24 hours",
 		},
 		"automation": gin.H{
-			"manualIntervention": "< 4% of decisions require human review",
+			"manualIntervention":  "< 4% of decisions require human review",
 			"continuousOperation": "24/7 automated authorization service",
-			"scalabilityFactor": "Linear scaling with infrastructure",
+			"scalabilityFactor":   "Linear scaling with infrastructure",
 		},
 	}
 
@@ -270,54 +270,54 @@ func getAutomatedBenefits(c *gin.Context) {
 func getScenarios(c *gin.Context) {
 	scenarios := []gin.H{
 		{
-			"id": "financial-ai-governance",
-			"title": "AI Governance in Financial Services",
+			"id":          "financial-ai-governance",
+			"title":       "AI Governance in Financial Services",
 			"description": "Automated approval system for AI models in financial risk assessment and trading algorithms",
-			"industry": "Financial Services",
-			"complexity": "High",
+			"industry":    "Financial Services",
+			"complexity":  "High",
 			"improvement": "4-8 hours → 30 seconds processing time",
-			"confidence": "96.3% decision accuracy",
+			"confidence":  "96.3% decision accuracy",
 			"details": gin.H{
 				"challenge": "Manual review of AI models causing deployment delays",
-				"solution": "GAuth-based automated approval with risk assessment",
-				"impact": "850x faster deployment, 96.3% accuracy, full audit trail",
+				"solution":  "GAuth-based automated approval with risk assessment",
+				"impact":    "850x faster deployment, 96.3% accuracy, full audit trail",
 			},
 		},
 		{
-			"id": "healthcare-data-access",
-			"title": "Healthcare AI with Learning Progression",
+			"id":          "healthcare-data-access",
+			"title":       "Healthcare AI with Learning Progression",
 			"description": "Patient data access control with continuous learning and compliance verification",
-			"industry": "Healthcare",
-			"complexity": "High",
+			"industry":    "Healthcare",
+			"complexity":  "High",
 			"improvement": "72% → 96% accuracy over 6 months",
-			"confidence": "99.1% compliance rate",
+			"confidence":  "99.1% compliance rate",
 			"details": gin.H{
 				"challenge": "Complex HIPAA compliance with research data access",
-				"solution": "Learning-based authorization with regulatory compliance",
-				"impact": "Automated compliance verification, continuous accuracy improvement",
+				"solution":  "Learning-based authorization with regulatory compliance",
+				"impact":    "Automated compliance verification, continuous accuracy improvement",
 			},
 		},
 		{
-			"id": "supply-chain-transparency",
-			"title": "Supply Chain Transparency",
+			"id":          "supply-chain-transparency",
+			"title":       "Supply Chain Transparency",
 			"description": "Vendor authorization and quality assurance with transparency requirements",
-			"industry": "Manufacturing",
-			"complexity": "Medium",
+			"industry":    "Manufacturing",
+			"complexity":  "Medium",
 			"improvement": "Manual verification → Real-time transparency",
-			"confidence": "94% partner confidence rating",
+			"confidence":  "94% partner confidence rating",
 			"details": gin.H{
 				"challenge": "Manual vendor verification and quality assurance",
-				"solution": "Transparent authorization with verifiable decision trails",
-				"impact": "Real-time verification, 94% partner confidence, full transparency",
+				"solution":  "Transparent authorization with verifiable decision trails",
+				"impact":    "Real-time verification, 94% partner confidence, full transparency",
 			},
 		},
 	}
 
 	data := gin.H{
-		"scenarios": scenarios,
+		"scenarios":      scenarios,
 		"totalScenarios": len(scenarios),
 		"avgImprovement": "750x performance improvement",
-		"avgAccuracy": "95.6% average accuracy",
+		"avgAccuracy":    "95.6% average accuracy",
 	}
 
 	c.JSON(http.StatusOK, data)
@@ -338,8 +338,8 @@ func getScenarioDetail(c *gin.Context) {
 			},
 			"metrics": gin.H{
 				"totalProcessingTime": gin.H{"traditional": "4-8 hours", "gauth": "< 2 minutes"},
-				"accuracy": gin.H{"traditional": "72%", "gauth": "96.3%"},
-				"auditTrail": gin.H{"traditional": "Manual documentation", "gauth": "Automated complete trail"},
+				"accuracy":            gin.H{"traditional": "72%", "gauth": "96.3%"},
+				"auditTrail":          gin.H{"traditional": "Manual documentation", "gauth": "Automated complete trail"},
 			},
 		},
 	}
@@ -367,11 +367,11 @@ func simulateTraditionalFlow(c *gin.Context) {
 	time.Sleep(2 * time.Second)
 
 	response := gin.H{
-		"flowType": "Traditional Authorization",
-		"scenario": request.Scenario,
+		"flowType":       "Traditional Authorization",
+		"scenario":       request.Scenario,
 		"processingTime": "4.5 hours",
-		"manualSteps": 12,
-		"accuracy": 72,
+		"manualSteps":    12,
+		"accuracy":       72,
 		"issues": []string{
 			"Manual policy interpretation required",
 			"Multiple stakeholder approvals needed",
@@ -408,11 +408,11 @@ func simulateGAuthFlow(c *gin.Context) {
 	time.Sleep(500 * time.Millisecond)
 
 	response := gin.H{
-		"flowType": "GAuth Authorization",
-		"scenario": request.Scenario,
-		"processingTime": "30 seconds",
+		"flowType":        "GAuth Authorization",
+		"scenario":        request.Scenario,
+		"processingTime":  "30 seconds",
 		"automationLevel": 96,
-		"accuracy": 96,
+		"accuracy":        96,
 		"benefits": []string{
 			"Automated policy application",
 			"Context-aware decision making",
@@ -430,7 +430,7 @@ func simulateGAuthFlow(c *gin.Context) {
 		"riskLevel": "Low",
 		"auditTrail": gin.H{
 			"decisionId": fmt.Sprintf("gauth-%d", time.Now().Unix()),
-			"timestamp": time.Now().Format(time.RFC3339),
+			"timestamp":  time.Now().Format(time.RFC3339),
 			"confidence": 96.3,
 			"reasoning": []string{
 				"Policy compliance verified",
@@ -449,18 +449,18 @@ func getPerformanceMetrics(c *gin.Context) {
 	data := gin.H{
 		"responseTime": gin.H{
 			"average": "247ms",
-			"p95": "450ms",
-			"p99": "800ms",
+			"p95":     "450ms",
+			"p99":     "800ms",
 		},
 		"throughput": gin.H{
 			"requestsPerSecond": 2500,
-			"dailyDecisions": 180000,
-			"monthlyDecisions": 5400000,
+			"dailyDecisions":    180000,
+			"monthlyDecisions":  5400000,
 		},
 		"availability": gin.H{
 			"uptime": "99.97%",
-			"mtbf": "2160 hours",
-			"mttr": "4.2 minutes",
+			"mtbf":   "2160 hours",
+			"mttr":   "4.2 minutes",
 		},
 	}
 
@@ -472,11 +472,11 @@ func getAccuracyMetrics(c *gin.Context) {
 	data := gin.H{
 		"currentAccuracy": "96.3%",
 		"improvementTrend": gin.H{
-			"week1": "85%",
-			"week2": "88%",
-			"week4": "91%",
-			"week8": "94%",
-			"week16": "96%",
+			"week1":   "85%",
+			"week2":   "88%",
+			"week4":   "91%",
+			"week8":   "94%",
+			"week16":  "96%",
 			"current": "96.3%",
 		},
 		"errorAnalysis": gin.H{
@@ -486,8 +486,8 @@ func getAccuracyMetrics(c *gin.Context) {
 		},
 		"learningMetrics": gin.H{
 			"patternsIdentified": 15420,
-			"rulesOptimized": 847,
-			"adaptationSpeed": "24 hours average",
+			"rulesOptimized":     847,
+			"adaptationSpeed":    "24 hours average",
 		},
 	}
 
@@ -498,26 +498,26 @@ func getAccuracyMetrics(c *gin.Context) {
 func getSystemMetrics(c *gin.Context) {
 	data := gin.H{
 		"system": gin.H{
-			"version": "GAuth RFC111 v2.1.0",
-			"uptime": "45 days, 12 hours",
+			"version":     "GAuth RFC111 v2.1.0",
+			"uptime":      "45 days, 12 hours",
 			"environment": "Production",
 		},
 		"resources": gin.H{
-			"cpuUsage": "23%",
-			"memoryUsage": "67%",
-			"diskUsage": "45%",
+			"cpuUsage":          "23%",
+			"memoryUsage":       "67%",
+			"diskUsage":         "45%",
 			"networkThroughput": "156 Mbps",
 		},
 		"database": gin.H{
-			"connections": 45,
+			"connections":      45,
 			"queriesPerSecond": 1250,
 			"averageQueryTime": "12ms",
 		},
 		"health": gin.H{
-			"status": "Healthy",
+			"status":          "Healthy",
 			"lastHealthCheck": time.Now().Format(time.RFC3339),
-			"criticalAlerts": 0,
-			"warningAlerts": 2,
+			"criticalAlerts":  0,
+			"warningAlerts":   2,
 		},
 	}
 

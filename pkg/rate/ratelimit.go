@@ -118,7 +118,7 @@ func (rl *RateLimiter) GetStats() map[string]interface{} {
 	blocked := 0
 	now := time.Now()
 	for _, entry := range rl.entries {
-	if now.Sub(entry.LastAccess) < time.Duration(rl.Config.WindowSize)*time.Second {
+		if now.Sub(entry.LastAccess) < time.Duration(rl.Config.WindowSize)*time.Second {
 			active++
 			if entry.Count >= entry.MaxRequests && entry.BurstTokens == 0 {
 				blocked++

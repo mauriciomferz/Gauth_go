@@ -10,13 +10,13 @@ import (
 
 func main() {
 	// Initialize GAuth service
-		svc, err := gauth.New(gauth.Config{
-			AuthServerURL:     "https://example-auth-server",
-			ClientID:          "test-client",
-			ClientSecret:      "supersecret",
-			Scopes:            []string{"sign_contract"},
-			AccessTokenExpiry: 24 * time.Hour,
-		})
+	svc, err := gauth.New(gauth.Config{
+		AuthServerURL:     "https://example-auth-server",
+		ClientID:          "test-client",
+		ClientSecret:      "supersecret",
+		Scopes:            []string{"sign_contract"},
+		AccessTokenExpiry: 24 * time.Hour,
+	})
 	if err != nil {
 		panic(fmt.Sprintf("Failed to initialize GAuth: %v", err))
 	}

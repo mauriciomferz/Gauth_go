@@ -15,13 +15,13 @@ type Properties struct {
 
 // PropertyValue represents a strongly typed value for restriction properties.
 type PropertyValue struct {
-	StringValue string    `json:"string_value,omitempty"`
-	IntValue    int       `json:"int_value,omitempty"`
-	Int64Value  int64     `json:"int64_value,omitempty"`
-	FloatValue  float64   `json:"float_value,omitempty"`
-	BoolValue   bool      `json:"bool_value,omitempty"`
-	TimeValue   string    `json:"time_value,omitempty"` // RFC3339 string
-	Type        string    `json:"type"`
+	StringValue string  `json:"string_value,omitempty"`
+	IntValue    int     `json:"int_value,omitempty"`
+	Int64Value  int64   `json:"int64_value,omitempty"`
+	FloatValue  float64 `json:"float_value,omitempty"`
+	BoolValue   bool    `json:"bool_value,omitempty"`
+	TimeValue   string  `json:"time_value,omitempty"` // RFC3339 string
+	Type        string  `json:"type"`
 }
 
 // NewStringProperty creates a new string property value
@@ -51,7 +51,7 @@ func NewInt64Property(value int64) PropertyValue {
 // NewFloatProperty creates a new float property value
 func NewFloatProperty(value float64) PropertyValue {
 	return PropertyValue{
-		Type:      "float",
+		Type:       "float",
 		FloatValue: value,
 	}
 }
@@ -59,7 +59,7 @@ func NewFloatProperty(value float64) PropertyValue {
 // NewBoolProperty creates a new boolean property value
 func NewBoolProperty(value bool) PropertyValue {
 	return PropertyValue{
-		Type:     "bool",
+		Type:      "bool",
 		BoolValue: value,
 	}
 }

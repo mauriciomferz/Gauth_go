@@ -440,19 +440,19 @@ func trackCompliance(t *testing.T, framework *auth.StandardLegalFramework, txn *
 	return framework.TrackApprovalDetails(
 		context.Background(),
 		&auth.Approval{
-			ID:              "approval_001",
-			TransactionID:   txn.ID,
-			RequesterID:     "ai_client_001",
-			ApproverID:      "resource_owner_001",
-			Action:          txn.Type,
-			JurisdictionID:  "US",
-			LegalBasis:      "granted_authority",
+			ID:             "approval_001",
+			TransactionID:  txn.ID,
+			RequesterID:    "ai_client_001",
+			ApproverID:     "resource_owner_001",
+			Action:         txn.Type,
+			JurisdictionID: "US",
+			LegalBasis:     "granted_authority",
 			FiduciaryChecks: []auth.FiduciaryDuty{
 				{Type: "loyalty"},
 				{Type: "care"},
 				{Type: "compliance"},
 			},
-			Evidence:        "cryptographic_proof_004",
+			Evidence: "cryptographic_proof_004",
 		},
 	)
 }

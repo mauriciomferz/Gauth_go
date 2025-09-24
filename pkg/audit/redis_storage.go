@@ -53,9 +53,9 @@ func NewRedisStorage(config RedisConfig) (*RedisStorage, error) {
 	if len(config.Addresses) > 1 {
 		// Use Redis Cluster
 		client = redis.NewClusterClient(&redis.ClusterOptions{
-			Addrs:          config.Addresses,
-			Password:       config.Password,
-			MaxRetries:     config.MaxRetries,
+			Addrs:           config.Addresses,
+			Password:        config.Password,
+			MaxRetries:      config.MaxRetries,
 			MinRetryBackoff: config.MinRetryBackoff,
 			MaxRetryBackoff: config.MaxRetryBackoff,
 		})

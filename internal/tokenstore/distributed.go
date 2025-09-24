@@ -56,7 +56,7 @@ func (d *DistributedStore) Delete(token string) error {
 func (d *DistributedStore) Cleanup() error {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	
+
 	now := time.Now()
 	for token, data := range d.store {
 		if now.After(data.ValidUntil) {

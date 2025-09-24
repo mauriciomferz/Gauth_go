@@ -198,26 +198,26 @@ func (m *meshImpl) Authenticate(ctx context.Context, serviceID ServiceID, creds 
 }
 
 func (m *meshImpl) Authorize(ctx context.Context, source, target ServiceID, action string) error {
-       subj := authz.Subject{ID: string(source), Type: "service"}
-       res := authz.Resource{ID: string(target), Type: "service"}
-       act := authz.Action{ID: action, Type: "operation"}
+	subj := authz.Subject{ID: string(source), Type: "service"}
+	res := authz.Resource{ID: string(target), Type: "service"}
+	act := authz.Action{ID: action, Type: "operation"}
 
-       decision, err := m.config.Authorizer.Authorize(ctx, subj, act, res)
-       if err != nil {
-	       return fmt.Errorf("authorization check failed: %w", err)
-       }
-       if decision == nil || !decision.Allowed {
-	       return fmt.Errorf("service %s not authorized to %s on %s: %s", source, action, target, decision.Reason)
-       }
-       return nil
+	decision, err := m.config.Authorizer.Authorize(ctx, subj, act, res)
+	if err != nil {
+		return fmt.Errorf("authorization check failed: %w", err)
+	}
+	if decision == nil || !decision.Allowed {
+		return fmt.Errorf("service %s not authorized to %s on %s: %s", source, action, target, decision.Reason)
+	}
+	return nil
 }
 
 func (m *meshImpl) ExecuteRequest(ctx context.Context, target ServiceID, req interface{}) (interface{}, error) {
 	// Get service info
-       _, err := m.GetService(ctx, target)
-       if err != nil {
-	       return nil, fmt.Errorf("service not found: %w", err)
-       }
+	_, err := m.GetService(ctx, target)
+	if err != nil {
+		return nil, fmt.Errorf("service not found: %w", err)
+	}
 
 	// Check service health
 	if status, ok := m.status.Load(target); ok {

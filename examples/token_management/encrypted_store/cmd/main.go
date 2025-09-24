@@ -84,13 +84,13 @@ func (s *EncryptedStore) Save(ctx context.Context, t *token.Token) error {
 
 	// Encrypt metadata (AppData only, for new API)
 	if t.Metadata != nil && t.Metadata.AppData != nil {
-		   for k, v := range t.Metadata.AppData {
-			   encrypted, err := s.encrypt([]byte(v))
-			   if err != nil {
-				   return fmt.Errorf("failed to encrypt metadata: %w", err)
-			   }
-			   t.Metadata.AppData[k] = encrypted
-		   }
+		for k, v := range t.Metadata.AppData {
+			encrypted, err := s.encrypt([]byte(v))
+			if err != nil {
+				return fmt.Errorf("failed to encrypt metadata: %w", err)
+			}
+			t.Metadata.AppData[k] = encrypted
+		}
 	}
 
 	return s.store.Save(ctx, t.ID, t)
@@ -112,13 +112,13 @@ func (s *EncryptedStore) Get(ctx context.Context, id string) (*token.Token, erro
 
 	// Decrypt metadata (AppData only, for new API)
 	if t.Metadata != nil && t.Metadata.AppData != nil {
-		   for k, v := range t.Metadata.AppData {
-			   decrypted, err := s.decrypt(v)
-			   if err != nil {
-				   return nil, fmt.Errorf("failed to decrypt metadata: %w", err)
-			   }
-			   t.Metadata.AppData[k] = string(decrypted)
-		   }
+		for k, v := range t.Metadata.AppData {
+			decrypted, err := s.decrypt(v)
+			if err != nil {
+				return nil, fmt.Errorf("failed to decrypt metadata: %w", err)
+			}
+			t.Metadata.AppData[k] = string(decrypted)
+		}
 	}
 
 	return t, nil

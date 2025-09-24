@@ -213,8 +213,12 @@ func (s *encryptedTokenStore) GetSecondLevelApproval(ctx context.Context, token 
 }
 
 // StoreAuthorizer is a no-op for encryptedTokenStore (EnhancedStore compatibility)
-func (s *encryptedTokenStore) StoreAuthorizer(ctx context.Context, authorizer interface{}) error { return nil }
+func (s *encryptedTokenStore) StoreAuthorizer(ctx context.Context, authorizer interface{}) error {
+	return nil
+}
+
 // StoreOwner is a no-op for encryptedTokenStore (EnhancedStore compatibility)
 func (s *encryptedTokenStore) StoreOwner(ctx context.Context, owner interface{}) error { return nil }
+
 // StoreToken is a no-op for encryptedTokenStore (EnhancedStore compatibility)
 func (s *encryptedTokenStore) StoreToken(ctx context.Context, token interface{}) error { return nil }

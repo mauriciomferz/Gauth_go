@@ -67,7 +67,7 @@ func NewService(name string, keyID string, signingKey []byte) *Service {
 
 	svc.validator = token.NewValidationChain(token.ValidationConfig{
 		AllowedIssuers: []string{name},
-		ClockSkew: 2 * time.Minute,
+		ClockSkew:      2 * time.Minute,
 	}, blacklist)
 	svc.setupEndpoints()
 	return svc

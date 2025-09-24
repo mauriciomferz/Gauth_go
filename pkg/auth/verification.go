@@ -24,8 +24,8 @@ type IdentityVerifier interface {
 // StandardIdentityVerifier implements IdentityVerifier
 type StandardIdentityVerifier struct {
 	trustProvider string
-	certPool     *x509.CertPool
-	verifyOpts   x509.VerifyOptions
+	certPool      *x509.CertPool
+	verifyOpts    x509.VerifyOptions
 }
 
 // NewStandardIdentityVerifier creates a new identity verifier
@@ -37,11 +37,11 @@ func NewStandardIdentityVerifier(trustProvider string, rootCerts []*x509.Certifi
 
 	return &StandardIdentityVerifier{
 		trustProvider: trustProvider,
-		certPool:     pool,
+		certPool:      pool,
 		verifyOpts: x509.VerifyOptions{
-			Roots:         pool,
-			CurrentTime:   time.Now(),
-			KeyUsages:     []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
+			Roots:       pool,
+			CurrentTime: time.Now(),
+			KeyUsages:   []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
 		},
 	}
 }

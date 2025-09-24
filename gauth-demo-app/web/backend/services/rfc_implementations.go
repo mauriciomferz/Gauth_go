@@ -12,7 +12,7 @@ import (
 type LegalFrameworkConfig struct {
 	JurisdictionRegistry string
 	ComplianceMode       string
-	AuditLevel          string
+	AuditLevel           string
 }
 
 type VerificationConfig struct {
@@ -128,10 +128,10 @@ func NewStandardVerificationSystem(config *VerificationConfig) *StandardVerifica
 
 func (s *StandardVerificationSystem) VerifyPowerOfAttorney(ctx context.Context, poa *RFC111PowerOfAttorney) (*PowerVerificationResult, error) {
 	s.logger.WithFields(logrus.Fields{
-		"poa_id":      poa.ID,
-		"principal":   poa.PrincipalID,
-		"agent":       poa.AgentID,
-		"power_type":  poa.PowerType,
+		"poa_id":     poa.ID,
+		"principal":  poa.PrincipalID,
+		"agent":      poa.AgentID,
+		"power_type": poa.PowerType,
 	}).Info("Verifying power of attorney")
 
 	// RFC115 verification logic

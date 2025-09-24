@@ -105,8 +105,8 @@ func main() {
 
 	// Add a policy with strongly typed conditions
 	highValueTransactionPolicy := auth.Policy{
-		ID:    "high-value-transaction-policy",
-		Name:  "High Value Transaction Policy",
+		ID:         "high-value-transaction-policy",
+		Name:       "High Value Transaction Policy",
 		Parameters: auth.ValidationRuleParameters{},
 		Rules: []auth.DecisionRule{
 			{

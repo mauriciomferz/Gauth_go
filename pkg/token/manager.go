@@ -14,14 +14,15 @@ type ManagerConfig struct {
 	KeyID      string
 	SigningKey []byte
 	Store      tokenstore.Store
-	Monitor    *Monitor}
+	Monitor    *Monitor
+}
 
 // Manager provides token management functionality
 type Manager struct {
-	config                ManagerConfig
-	keyRotationCompleted  bool
-	keyRotationTime       time.Time
-	mu                    sync.RWMutex
+	config               ManagerConfig
+	keyRotationCompleted bool
+	keyRotationTime      time.Time
+	mu                   sync.RWMutex
 }
 
 // NewManager creates a new token manager with the given configuration
@@ -86,14 +87,14 @@ func (m *Manager) ValidateToken(ctx context.Context, token string) (map[string]i
 
 	// Return original claims with updated values
 	claims := make(map[string]interface{})
-	
+
 	// Start with stored claims to preserve all original data
 	if data.Claims != nil {
 		for k, v := range data.Claims {
 			claims[k] = v
 		}
 	}
-	
+
 	// Only override specific standard claims if we have valid data
 	if data.OwnerID != "" {
 		claims["sub"] = data.OwnerID
@@ -117,12 +118,12 @@ func (m *Manager) ValidateToken(ctx context.Context, token string) (map[string]i
 // RevokeToken revokes a token
 func (m *Manager) RevokeToken(ctx context.Context, token string) error {
 	err := m.config.Store.Delete(token)
-	
+
 	// Update monitor if available and revocation was successful
 	if err == nil && m.config.Monitor != nil {
 		m.config.Monitor.IncrementTokensRevoked()
 	}
-	
+
 	return err
 }
 
@@ -184,11 +185,11 @@ func (m *Manager) extractScope(claims map[string]interface{}) []string {
 func (m *Manager) RotateKey(newKeyID string, newSigningKey []byte) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	m.config.KeyID = newKeyID
 	m.config.SigningKey = newSigningKey
 	m.keyRotationTime = time.Now()
-	
+
 	return nil
 }
 
@@ -196,9 +197,9 @@ func (m *Manager) RotateKey(newKeyID string, newSigningKey []byte) error {
 func (m *Manager) CompleteRotation() error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	m.keyRotationCompleted = true
-	
+
 	return nil
 }
 
@@ -228,7 +229,7 @@ type MonitorStats struct {
 func (m *Monitor) GetStats() MonitorStats {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	return MonitorStats{
 		TokensCreated:   m.tokensCreated,
 		TokensExpired:   m.tokensExpired,

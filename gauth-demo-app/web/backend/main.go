@@ -38,10 +38,10 @@ import (
 func main() {
 	// Initialize configuration
 	config := initConfig()
-	
+
 	// Initialize logger
 	logger := initLogger(config)
-	
+
 	// Initialize services
 	svc, err := services.NewGAuthService(config, logger)
 	if err != nil {
@@ -50,7 +50,7 @@ func main() {
 
 	// Initialize HTTP server
 	router := setupRouter(svc, logger, config)
-	
+
 	// Start server
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.GetInt("server.port")),
@@ -86,7 +86,7 @@ func main() {
 
 func initConfig() *viper.Viper {
 	config := viper.New()
-	
+
 	// Set defaults
 	config.SetDefault("server.port", 8080)
 	config.SetDefault("server.mode", "debug")
@@ -94,52 +94,52 @@ func initConfig() *viper.Viper {
 	config.SetDefault("redis.addr", "localhost:6379")
 	config.SetDefault("redis.password", "")
 	config.SetDefault("redis.db", 0)
-	
+
 	// Read configuration from file
 	config.SetConfigName("config")
 	config.SetConfigType("yaml")
 	config.AddConfigPath(".")
 	config.AddConfigPath("./config")
-	
+
 	// Read environment variables
 	config.AutomaticEnv()
-	
+
 	if err := config.ReadInConfig(); err != nil {
 		log.Printf("Warning: Could not read config file: %v", err)
 	}
-	
+
 	return config
 }
 
 func initLogger(config *viper.Viper) *logrus.Logger {
 	logger := logrus.New()
-	
+
 	// Set log level
 	level, err := logrus.ParseLevel(config.GetString("log.level"))
 	if err != nil {
 		level = logrus.InfoLevel
 	}
 	logger.SetLevel(level)
-	
+
 	// Set formatter
 	logger.SetFormatter(&logrus.JSONFormatter{
 		TimestampFormat: time.RFC3339,
 	})
-	
+
 	return logger
 }
 
 func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *viper.Viper) *gin.Engine {
 	// Set gin mode
 	gin.SetMode(gin.ReleaseMode)
-	
+
 	router := gin.New()
-	
+
 	// Middleware
 	router.Use(gin.Recovery())
 	router.Use(middleware.Logger(logger))
 	router.Use(middleware.RequestID())
-	
+
 	// CORS configuration
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = []string{"http://localhost:3000", "http://127.0.0.1:3000"}
@@ -147,15 +147,15 @@ func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *vipe
 	corsConfig.AllowHeaders = []string{"*"}
 	corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	router.Use(cors.New(corsConfig))
-	
+
 	// Health check
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"status": "ok",
+			"status":    "ok",
 			"timestamp": time.Now().Unix(),
 		})
 	})
-	
+
 	// API routes
 	api := router.Group("/api/v1")
 	{
@@ -169,7 +169,7 @@ func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *vipe
 			auth.GET("/userinfo", authHandler.UserInfo)
 			auth.POST("/validate", authHandler.Validate)
 		}
-		
+
 		// Legal Framework endpoints
 		legal := api.Group("/legal")
 		legalHandler := handlers.NewLegalFrameworkHandler(svc, logger)
@@ -177,19 +177,19 @@ func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *vipe
 			legal.POST("/entities", legalHandler.CreateEntity)
 			legal.GET("/entities/:id", legalHandler.GetEntity)
 			legal.POST("/entities/:id/verify", legalHandler.VerifyLegalCapacity)
-			
+
 			legal.POST("/power-of-attorney", legalHandler.CreatePowerOfAttorney)
 			legal.GET("/power-of-attorney/:id", legalHandler.GetPowerOfAttorney)
 			legal.POST("/power-of-attorney/:id/delegate", legalHandler.DelegatePower)
-			
+
 			legal.POST("/requests", legalHandler.CreateRequest)
 			legal.GET("/requests/:id", legalHandler.GetRequest)
 			legal.POST("/requests/:id/approve", legalHandler.ApproveRequest)
-			
+
 			legal.GET("/jurisdictions", legalHandler.GetJurisdictions)
 			legal.GET("/jurisdictions/:id/rules", legalHandler.GetJurisdictionRules)
 		}
-		
+
 		// Audit endpoints
 		audit := api.Group("/audit")
 		auditHandler := handlers.NewAuditHandler(svc, logger)
@@ -199,7 +199,7 @@ func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *vipe
 			audit.GET("/compliance", auditHandler.GetComplianceReport)
 			audit.GET("/trails/:entity", auditHandler.GetAuditTrail)
 		}
-		
+
 		// Rate limiting endpoints
 		rate := api.Group("/rate")
 		rateHandler := handlers.NewRateHandler(svc, logger)
@@ -208,7 +208,7 @@ func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *vipe
 			rate.POST("/limits", rateHandler.SetLimits)
 			rate.GET("/status/:client", rateHandler.GetStatus)
 		}
-		
+
 		// Demo scenarios endpoints
 		demo := api.Group("/demo")
 		demoHandler := handlers.NewDemoHandler(svc, logger)
@@ -217,7 +217,7 @@ func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *vipe
 			demo.POST("/scenarios/:id/run", demoHandler.RunScenario)
 			demo.GET("/scenarios/:id/status", demoHandler.GetScenarioStatus)
 		}
-		
+
 		// RFC111/RFC115 Compliance endpoints - Full RFC implementation
 		rfc111Handler, err := handlers.NewRFC111Handler(config, logger)
 		if err != nil {
@@ -235,7 +235,7 @@ func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *vipe
 			tokens.POST("/validate", tokenHandler.ValidateToken)
 			tokens.POST("/refresh", tokenHandler.RefreshToken)
 		}
-		
+
 		// Metrics endpoints
 		metrics := api.Group("/metrics")
 		{
@@ -243,8 +243,8 @@ func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *vipe
 			metrics.GET("/system", func(c *gin.Context) {
 				// Return basic system metrics
 				c.JSON(200, gin.H{
-					"active_users":           42,
-					"total_transactions":     1234,
+					"active_users":          42,
+					"total_transactions":    1234,
 					"success_rate":          0.98,
 					"average_response_time": 120,
 					"last_updated":          time.Now(),
@@ -252,7 +252,7 @@ func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *vipe
 			})
 		}
 	}
-	
+
 	// WebSocket endpoints for real-time updates
 	wsHandler := handlers.NewWebSocketHandler(svc, logger)
 	router.GET("/ws", wsHandler.HandleEvents)
@@ -260,13 +260,13 @@ func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *vipe
 
 	// Swagger documentation
 	// router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	
+
 	// Serve static files (React app)
 	router.Static("/static", "./static")
 	router.StaticFile("/", "./static/index.html")
 	router.NoRoute(func(c *gin.Context) {
 		c.File("./static/index.html")
 	})
-	
+
 	return router
 }

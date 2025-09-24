@@ -44,7 +44,7 @@ type PowerOfAttorney struct {
 	// Legal framework
 	JurisdictionRules *JurisdictionRules
 	// FiduciaryDuties are referenced by name; see canonical struct in legal_framework_test.go
-		FiduciaryDuties []FiduciaryDuty
+	FiduciaryDuties []FiduciaryDuty
 	LegalBasis      string
 
 	// Commercial register details

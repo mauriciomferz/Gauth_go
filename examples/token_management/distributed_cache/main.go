@@ -12,30 +12,30 @@ import (
 )
 
 // RedisStore implements token storage using Redis
-	type RedisStore struct {
-		client    redis.UniversalClient
-		expiry    time.Duration
-		keyPrefix string
-	}
+type RedisStore struct {
+	client    redis.UniversalClient
+	expiry    time.Duration
+	keyPrefix string
+}
 
-	// NewRedisStore creates a new Redis-backed token store
-	func NewRedisStore(opts *redis.UniversalOptions, expiry time.Duration) (*RedisStore, error) {
-		client := redis.NewUniversalClient(opts)
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		if err := client.Ping(ctx).Err(); err != nil {
-			return nil, fmt.Errorf("failed to connect to Redis: %w", err)
-		}
-		return &RedisStore{
-			client:    client,
-			expiry:    expiry,
-			keyPrefix: "token:",
-		}, nil
+// NewRedisStore creates a new Redis-backed token store
+func NewRedisStore(opts *redis.UniversalOptions, expiry time.Duration) (*RedisStore, error) {
+	client := redis.NewUniversalClient(opts)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := client.Ping(ctx).Err(); err != nil {
+		return nil, fmt.Errorf("failed to connect to Redis: %w", err)
 	}
+	return &RedisStore{
+		client:    client,
+		expiry:    expiry,
+		keyPrefix: "token:",
+	}, nil
+}
 
-	func (s *RedisStore) key(id string) string {
-		return s.keyPrefix + id
-	}
+func (s *RedisStore) key(id string) string {
+	return s.keyPrefix + id
+}
 
 func main() {
 	// Configure Redis connection (localhost:6379 by default)
@@ -84,7 +84,5 @@ func main() {
 	if err := json.Unmarshal([]byte(val), &retrieved); err != nil {
 		log.Fatalf("Failed to unmarshal token: %v", err)
 	}
-		fmt.Printf("Retrieved token: ID=%s, Subject=%s, ExpiresAt=%s\n", retrieved.ID, retrieved.Subject, retrieved.ExpiresAt)
-	}
-
-
+	fmt.Printf("Retrieved token: ID=%s, Subject=%s, ExpiresAt=%s\n", retrieved.ID, retrieved.Subject, retrieved.ExpiresAt)
+}

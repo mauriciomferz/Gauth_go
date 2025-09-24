@@ -195,8 +195,6 @@ func (s *RedisStore) updateMetrics(ctx context.Context) error {
 	return nil
 }
 
-
-
 func main() {
 	ctx := context.Background()
 

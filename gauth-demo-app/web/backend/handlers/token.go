@@ -31,7 +31,7 @@ func (h *TokenHandler) CreateToken(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.WithError(err).Error("Invalid token creation request")
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid request format",
+			"error":   "Invalid request format",
 			"details": err.Error(),
 		})
 		return
@@ -47,7 +47,7 @@ func (h *TokenHandler) CreateToken(c *gin.Context) {
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to create token")
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to create token",
+			"error":   "Failed to create token",
 			"details": err.Error(),
 		})
 		return
@@ -111,8 +111,8 @@ func (h *TokenHandler) RevokeToken(c *gin.Context) {
 
 	h.logger.WithField("token_id", tokenID).Info("Token revoked successfully")
 	c.JSON(http.StatusOK, gin.H{
-		"message":   "Token revoked successfully",
-		"token_id":  tokenID,
+		"message":    "Token revoked successfully",
+		"token_id":   tokenID,
 		"revoked_at": time.Now(),
 	})
 }
@@ -125,7 +125,7 @@ func (h *TokenHandler) ValidateToken(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid request format",
+			"error":   "Invalid request format",
 			"details": err.Error(),
 		})
 		return
@@ -155,7 +155,7 @@ func (h *TokenHandler) RefreshToken(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid request format",
+			"error":   "Invalid request format",
 			"details": err.Error(),
 		})
 		return

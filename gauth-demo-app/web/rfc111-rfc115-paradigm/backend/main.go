@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -42,12 +41,12 @@ type ITResponsibility struct {
 
 // ParadigmShift represents the transformation from P*P to P*P
 type ParadigmShift struct {
-	From        string    `json:"from"`
-	To          string    `json:"to"`
-	Impact      string    `json:"impact"`
-	Benefits    []string  `json:"benefits"`
-	Timeline    string    `json:"timeline"`
-	Confidence  int       `json:"confidence"`
+	From       string   `json:"from"`
+	To         string   `json:"to"`
+	Impact     string   `json:"impact"`
+	Benefits   []string `json:"benefits"`
+	Timeline   string   `json:"timeline"`
+	Confidence int      `json:"confidence"`
 }
 
 // AccountabilityTrail represents audit and accountability information
@@ -149,10 +148,10 @@ func getTraditionalParadigm(c *gin.Context) {
 			"Compliance challenges",
 		},
 		"burden": gin.H{
-			"itTeam": "100% - Full responsibility for all authorization decisions",
-			"businessTeam": "10% - Limited input in authorization rules",
+			"itTeam":          "100% - Full responsibility for all authorization decisions",
+			"businessTeam":    "10% - Limited input in authorization rules",
 			"decisionLatency": "4-8 hours for complex authorization changes",
-			"riskOwner": "IT Department (misaligned with business impact)",
+			"riskOwner":       "IT Department (misaligned with business impact)",
 		},
 	}
 
@@ -181,9 +180,9 @@ func getGAuthParadigm(c *gin.Context) {
 		},
 		"distribution": gin.H{
 			"businessOwnership": "85% - Business teams own authorization decisions",
-			"itInfrastructure": "15% - IT provides technical infrastructure",
-			"decisionLatency": "30 seconds for most authorization changes",
-			"riskOwner": "Business Department (aligned with business impact)",
+			"itInfrastructure":  "15% - IT provides technical infrastructure",
+			"decisionLatency":   "30 seconds for most authorization changes",
+			"riskOwner":         "Business Department (aligned with business impact)",
 		},
 	}
 
@@ -194,33 +193,33 @@ func getGAuthParadigm(c *gin.Context) {
 func getParadigmShift(c *gin.Context) {
 	data := gin.H{
 		"transformation": gin.H{
-			"from": "Policy-based Permission (P*P)",
-			"to": "Power-of-Attorney Protocol (P*P)",
+			"from":       "Policy-based Permission (P*P)",
+			"to":         "Power-of-Attorney Protocol (P*P)",
 			"revolution": "From IT-centric to Business-centric Authorization",
 		},
 		"impacts": []gin.H{
 			{
-				"area": "Decision Making",
-				"before": "IT teams make authorization decisions",
-				"after": "Business owners make authorization decisions",
+				"area":        "Decision Making",
+				"before":      "IT teams make authorization decisions",
+				"after":       "Business owners make authorization decisions",
 				"improvement": "850x faster decision implementation",
 			},
 			{
-				"area": "Accountability",
-				"before": "Unclear responsibility chains",
-				"after": "Clear legal accountability trails",
+				"area":        "Accountability",
+				"before":      "Unclear responsibility chains",
+				"after":       "Clear legal accountability trails",
 				"improvement": "99.9% traceability and auditability",
 			},
 			{
-				"area": "Business Alignment",
-				"before": "Technical constraints drive business rules",
-				"after": "Business needs drive technical implementation",
+				"area":        "Business Alignment",
+				"before":      "Technical constraints drive business rules",
+				"after":       "Business needs drive technical implementation",
 				"improvement": "96% reduction in business-IT misalignment",
 			},
 			{
-				"area": "Compliance",
-				"before": "Reactive compliance checking",
-				"after": "Built-in legal framework compliance",
+				"area":        "Compliance",
+				"before":      "Reactive compliance checking",
+				"after":       "Built-in legal framework compliance",
 				"improvement": "100% real-time compliance validation",
 			},
 		},
@@ -273,10 +272,10 @@ func getBusinessOwners(c *gin.Context) {
 	}
 
 	data := gin.H{
-		"owners": owners,
-		"totalOwners": len(owners),
+		"owners":             owners,
+		"totalOwners":        len(owners),
 		"averageDelegations": 2.3,
-		"coverage": "94% of business processes have identified owners",
+		"coverage":           "94% of business processes have identified owners",
 	}
 
 	c.JSON(http.StatusOK, data)
@@ -310,10 +309,10 @@ func createPowerOfAttorney(c *gin.Context) {
 	}
 
 	data := gin.H{
-		"poa": poa,
-		"created": time.Now(),
+		"poa":         poa,
+		"created":     time.Now(),
 		"legalStatus": "Legally binding under RFC115 framework",
-		"auditTrail": generateAuditTrail("POA_CREATED", request.BusinessOwner),
+		"auditTrail":  generateAuditTrail("POA_CREATED", request.BusinessOwner),
 	}
 
 	c.JSON(http.StatusOK, data)
@@ -345,9 +344,9 @@ func getDelegations(c *gin.Context) {
 	}
 
 	data := gin.H{
-		"delegations": delegations,
-		"totalActive": len(delegations),
-		"averageScope": "Medium complexity business processes",
+		"delegations":    delegations,
+		"totalActive":    len(delegations),
+		"averageScope":   "Medium complexity business processes",
 		"complianceRate": "100% - All delegations legally compliant",
 	}
 
@@ -393,19 +392,19 @@ func getITResponsibilities(c *gin.Context) {
 	data := gin.H{
 		"traditional": gin.H{
 			"responsibilities": traditional,
-			"totalBurden": "95% of authorization decisions",
-			"bottleneck": "IT becomes decision bottleneck",
-			"issues": "High complexity, misalignment, slow adaptation",
+			"totalBurden":      "95% of authorization decisions",
+			"bottleneck":       "IT becomes decision bottleneck",
+			"issues":           "High complexity, misalignment, slow adaptation",
 		},
 		"gauth": gin.H{
 			"responsibilities": gauth,
-			"totalBurden": "15% - Infrastructure provision only",
-			"enabler": "IT enables business decision-making",
-			"benefits": "Low complexity, aligned priorities, fast adaptation",
+			"totalBurden":      "15% - Infrastructure provision only",
+			"enabler":          "IT enables business decision-making",
+			"benefits":         "Low complexity, aligned priorities, fast adaptation",
 		},
 		"transformation": gin.H{
-			"burdenReduction": "80%",
-			"complexityReduction": "75%",
+			"burdenReduction":      "80%",
+			"complexityReduction":  "75%",
 			"alignmentImprovement": "96%",
 		},
 	}
@@ -418,23 +417,23 @@ func getITBurden(c *gin.Context) {
 	data := gin.H{
 		"traditional": gin.H{
 			"authorizationDecisions": 95,
-			"policyMaintenance": 80,
-			"businessTranslation": 90,
-			"complianceManagement": 85,
-			"overallBurden": "Very High - IT owns business authorization",
+			"policyMaintenance":      80,
+			"businessTranslation":    90,
+			"complianceManagement":   85,
+			"overallBurden":          "Very High - IT owns business authorization",
 		},
 		"gauth": gin.H{
 			"infrastructureProvision": 15,
-			"securityMonitoring": 10,
-			"systemMaintenance": 5,
-			"complianceSupport": 8,
-			"overallBurden": "Low - IT enables business authorization",
+			"securityMonitoring":      10,
+			"systemMaintenance":       5,
+			"complianceSupport":       8,
+			"overallBurden":           "Low - IT enables business authorization",
 		},
 		"impact": gin.H{
 			"itResourceFreed": "80%",
 			"businessAgility": "+850%",
-			"decisionSpeed": "+2500%",
-			"alignmentScore": "96%",
+			"decisionSpeed":   "+2500%",
+			"alignmentScore":  "96%",
 		},
 	}
 
@@ -445,41 +444,41 @@ func getITBurden(c *gin.Context) {
 func getPowerOfAttorneyRegistry(c *gin.Context) {
 	registry := []gin.H{
 		{
-			"id": "poa-001",
+			"id":            "poa-001",
 			"businessOwner": "Sarah Chen - Financial Services",
-			"delegate": "AI Governance System",
-			"scope": "AI model approvals",
-			"status": "Active",
-			"usage": "847 decisions this month",
-			"accuracy": "96.3%",
+			"delegate":      "AI Governance System",
+			"scope":         "AI model approvals",
+			"status":        "Active",
+			"usage":         "847 decisions this month",
+			"accuracy":      "96.3%",
 		},
 		{
-			"id": "poa-002",
+			"id":            "poa-002",
 			"businessOwner": "Michael Rodriguez - Healthcare",
-			"delegate": "Healthcare Authorization Bot",
-			"scope": "Research data access",
-			"status": "Active", 
-			"usage": "234 decisions this month",
-			"accuracy": "98.7%",
+			"delegate":      "Healthcare Authorization Bot",
+			"scope":         "Research data access",
+			"status":        "Active",
+			"usage":         "234 decisions this month",
+			"accuracy":      "98.7%",
 		},
 		{
-			"id": "poa-003",
+			"id":            "poa-003",
 			"businessOwner": "Emily Watson - Supply Chain",
-			"delegate": "Vendor Authorization System",
-			"scope": "Supplier approvals",
-			"status": "Active",
-			"usage": "156 decisions this month",
-			"accuracy": "94.8%",
+			"delegate":      "Vendor Authorization System",
+			"scope":         "Supplier approvals",
+			"status":        "Active",
+			"usage":         "156 decisions this month",
+			"accuracy":      "94.8%",
 		},
 	}
 
 	data := gin.H{
 		"registry": registry,
 		"statistics": gin.H{
-			"totalPOAs": len(registry),
-			"activeCount": 3,
+			"totalPOAs":        len(registry),
+			"activeCount":      3,
 			"monthlyDecisions": 1237,
-			"averageAccuracy": "96.6%",
+			"averageAccuracy":  "96.6%",
 			"businessCoverage": "94%",
 		},
 	}
@@ -502,16 +501,16 @@ func executePowerOfAttorney(c *gin.Context) {
 
 	// Simulate POA execution
 	execution := gin.H{
-		"executionId": generateID(),
-		"poaId": request.POAID,
-		"action": request.Action,
-		"context": request.Context,
-		"timestamp": time.Now(),
-		"result": "Approved",
-		"businessOwner": "Sarah Chen",
+		"executionId":     generateID(),
+		"poaId":           request.POAID,
+		"action":          request.Action,
+		"context":         request.Context,
+		"timestamp":       time.Now(),
+		"result":          "Approved",
+		"businessOwner":   "Sarah Chen",
 		"legalCompliance": "Verified under RFC115",
-		"auditTrail": generateAuditTrail("POA_EXECUTED", "System"),
-		"processingTime": "247ms",
+		"auditTrail":      generateAuditTrail("POA_EXECUTED", "System"),
+		"processingTime":  "247ms",
 	}
 
 	c.JSON(http.StatusOK, execution)
@@ -543,15 +542,15 @@ func getAccountabilityTrail(c *gin.Context) {
 	data := gin.H{
 		"trail": trail,
 		"statistics": gin.H{
-			"totalEntries": 1247,
-			"verificationRate": "100%",
+			"totalEntries":      1247,
+			"verificationRate":  "100%",
 			"averageResolution": "30 seconds",
-			"complianceScore": "99.9%",
+			"complianceScore":   "99.9%",
 		},
 		"legalFramework": gin.H{
-			"framework": "RFC115 Power-of-Attorney Protocol",
+			"framework":    "RFC115 Power-of-Attorney Protocol",
 			"jurisdiction": "Multi-jurisdictional compliance",
-			"attestation": "All entries legally binding and verifiable",
+			"attestation":  "All entries legally binding and verifiable",
 		},
 	}
 
@@ -580,7 +579,7 @@ func getLegalFramework(c *gin.Context) {
 	}
 
 	data := gin.H{
-		"framework": framework,
+		"framework":     framework,
 		"jurisdictions": jurisdictions,
 		"benefits": []string{
 			"Legal certainty in authorization decisions",
@@ -600,30 +599,30 @@ func getComplianceStatus(c *gin.Context) {
 		"overallScore": "99.9%",
 		"categories": gin.H{
 			"dataProtection": gin.H{
-				"score": "100%",
+				"score":      "100%",
 				"frameworks": []string{"GDPR", "CCPA", "PIPEDA"},
-				"status": "Fully Compliant",
+				"status":     "Fully Compliant",
 			},
 			"financialRegulation": gin.H{
-				"score": "99.8%",
+				"score":      "99.8%",
 				"frameworks": []string{"SOX", "MiFID II", "Basel III"},
-				"status": "Compliant",
+				"status":     "Compliant",
 			},
 			"healthcareCompliance": gin.H{
-				"score": "100%",
+				"score":      "100%",
 				"frameworks": []string{"HIPAA", "FDA 21 CFR Part 11"},
-				"status": "Fully Compliant",
+				"status":     "Fully Compliant",
 			},
 		},
 		"realtimeValidation": gin.H{
-			"enabled": true,
-			"latency": "< 50ms",
+			"enabled":  true,
+			"latency":  "< 50ms",
 			"accuracy": "99.9%",
 		},
 		"auditReadiness": gin.H{
 			"documentationComplete": "100%",
-			"trailIntegrity": "Cryptographically verified",
-			"responseTime": "Immediate audit trail access",
+			"trailIntegrity":        "Cryptographically verified",
+			"responseTime":          "Immediate audit trail access",
 		},
 	}
 
@@ -634,10 +633,10 @@ func getComplianceStatus(c *gin.Context) {
 func getEnterpriseScaling(c *gin.Context) {
 	data := gin.H{
 		"scalingMetrics": gin.H{
-			"supportedUsers": "1M+ concurrent users",
+			"supportedUsers":    "1M+ concurrent users",
 			"transactionVolume": "100K+ decisions/second",
-			"globalDeployment": "Multi-region, multi-cloud",
-			"availability": "99.99% SLA",
+			"globalDeployment":  "Multi-region, multi-cloud",
+			"availability":      "99.99% SLA",
 		},
 		"enterpriseFeatures": []string{
 			"Multi-tenant isolation with business context",
@@ -648,29 +647,29 @@ func getEnterpriseScaling(c *gin.Context) {
 		},
 		"deploymentOptions": []gin.H{
 			{
-				"type": "Cloud Native",
+				"type":        "Cloud Native",
 				"description": "Kubernetes-based deployment",
 				"scalability": "Auto-scaling based on load",
 				"timeToValue": "2-4 weeks",
 			},
 			{
-				"type": "Hybrid",
+				"type":        "Hybrid",
 				"description": "On-premises + cloud integration",
 				"scalability": "Manual scaling with cloud burst",
 				"timeToValue": "4-8 weeks",
 			},
 			{
-				"type": "On-Premises",
+				"type":        "On-Premises",
 				"description": "Full on-premises deployment",
 				"scalability": "Manual capacity management",
 				"timeToValue": "8-12 weeks",
 			},
 		},
 		"roi": gin.H{
-			"itCostReduction": "60-80%",
+			"itCostReduction":   "60-80%",
 			"complianceSavings": "75%",
-			"businessAgility": "+400%",
-			"paybackPeriod": "6-12 months",
+			"businessAgility":   "+400%",
+			"paybackPeriod":     "6-12 months",
 		},
 	}
 
@@ -693,27 +692,27 @@ func simulateEnterpriseDeployment(c *gin.Context) {
 	// Simulate deployment based on parameters
 	simulation := gin.H{
 		"simulationId": generateID(),
-		"parameters": request,
+		"parameters":   request,
 		"timeline": gin.H{
-			"planning": "2 weeks",
-			"infrastructure": "4 weeks",
+			"planning":           "2 weeks",
+			"infrastructure":     "4 weeks",
 			"businessOnboarding": "6 weeks",
-			"fullDeployment": "12 weeks",
+			"fullDeployment":     "12 weeks",
 		},
 		"projectedBenefits": gin.H{
 			"authorizationLatency": "4 hours → 30 seconds",
-			"itBurdenReduction": "85%",
-			"complianceCoverage": "60% → 99.9%",
-			"businessAgility": "+750%",
+			"itBurdenReduction":    "85%",
+			"complianceCoverage":   "60% → 99.9%",
+			"businessAgility":      "+750%",
 		},
 		"resourceRequirements": gin.H{
 			"infrastructure": "Moderate - leverages existing systems",
-			"personnel": "2-3 FTE for initial setup",
-			"training": "Business users: 4 hours, IT: 2 days",
+			"personnel":      "2-3 FTE for initial setup",
+			"training":       "Business users: 4 hours, IT: 2 days",
 		},
 		"riskAssessment": gin.H{
-			"technicalRisk": "Low - proven architecture",
-			"businessRisk": "Very Low - gradual migration possible",
+			"technicalRisk":  "Low - proven architecture",
+			"businessRisk":   "Very Low - gradual migration possible",
 			"complianceRisk": "Minimal - enhanced compliance posture",
 		},
 	}
@@ -732,10 +731,10 @@ func generateAccountabilityRef() string {
 
 func generateAuditTrail(action, actor string) gin.H {
 	return gin.H{
-		"timestamp": time.Now(),
-		"action": action,
-		"actor": actor,
-		"traceId": generateID(),
+		"timestamp":  time.Now(),
+		"action":     action,
+		"actor":      actor,
+		"traceId":    generateID(),
 		"compliance": "RFC115 verified",
 	}
 }

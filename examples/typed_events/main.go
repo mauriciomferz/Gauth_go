@@ -61,24 +61,23 @@ func main() {
 
 	// Publish events (handlers will process all events, filter inside handler)
 	publisher.Publish(events.Event{
-		Type:    events.EventTypeAuth,
-		Action:  "authentication.success",
-		Status:  "success",
-		Message: "Authentication succeeded",
+		Type:     events.EventTypeAuth,
+		Action:   "authentication.success",
+		Status:   "success",
+		Message:  "Authentication succeeded",
 		Metadata: events.NewMetadata(), // Optionally encode successEvent as needed
 	})
 	publisher.Publish(events.Event{
-		Type:    events.EventTypeAuth,
-		Action:  "authentication.failure",
-		Status:  "failure",
-		Message: "Authentication failed",
+		Type:     events.EventTypeAuth,
+		Action:   "authentication.failure",
+		Status:   "failure",
+		Message:  "Authentication failed",
 		Metadata: events.NewMetadata(), // Optionally encode failedEvent as needed
 	})
 
 	// Wait for events to be processed
 	time.Sleep(100 * time.Millisecond)
 }
-
 
 // Handler for successful authentication events
 type authSuccessHandler struct{}

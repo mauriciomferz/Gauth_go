@@ -30,10 +30,10 @@ func TestValidationChain(t *testing.T) {
 	ctx := context.Background()
 	bl := NewBlacklist()
 	defer func() {
-			if err := bl.Close(); err != nil {
-				t.Errorf("bl.Close() error: %v", err)
-			}
-		}()
+		if err := bl.Close(); err != nil {
+			t.Errorf("bl.Close() error: %v", err)
+		}
+	}()
 	config := ValidationConfig{}
 
 	t.Run("Valid Token", func(t *testing.T) {
