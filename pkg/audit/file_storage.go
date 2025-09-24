@@ -177,8 +177,12 @@ func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
 				if err != nil {
 					continue
 				}
-				writer.Write(data)
-				writer.WriteString("\n")
+				if _, err := writer.Write(data); err != nil {
+					continue // Skip this entry on write error
+				}
+				if _, err := writer.WriteString("\n"); err != nil {
+					continue // Skip this entry on write error
+				}
 				kept++
 			}
 		}
@@ -187,10 +191,13 @@ func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
 		out.Close()
 
 		if kept == 0 {
-			os.Remove(file)
-			os.Remove(tmpFile)
+			_ = os.Remove(file)
+			_ = os.Remove(tmpFile)
 		} else {
-			os.Rename(tmpFile, file)
+			if err := os.Rename(tmpFile, file); err != nil {
+				// If rename fails, try to cleanup temp file
+				_ = os.Remove(tmpFile)
+			}
 		}
 	}
 

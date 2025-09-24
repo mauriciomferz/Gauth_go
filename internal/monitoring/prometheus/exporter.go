@@ -10,17 +10,17 @@ import (
 
 var (
 	// Authentication metrics
-	authRequests = promauto.NewCounterVec(prometheus.CounterOpts{
+	authRequests = promauto.NewCounterVec(prometheus.CounterOpts{ //nolint:unused
 		Name: "gauth_auth_requests_total",
 		Help: "Total number of authentication requests processed",
 	}, []string{"status", "client_id"})
 
-	tokensIssued = promauto.NewCounterVec(prometheus.CounterOpts{
+	tokensIssued = promauto.NewCounterVec(prometheus.CounterOpts{ //nolint:unused
 		Name: "gauth_tokens_issued_total",
 		Help: "Total number of tokens issued",
 	}, []string{"type", "client_id"})
 
-	tokenValidations = promauto.NewCounterVec(prometheus.CounterOpts{
+	tokenValidations = promauto.NewCounterVec(prometheus.CounterOpts{ //nolint:unused
 		Name: "gauth_token_validations_total",
 		Help: "Total number of token validations performed",
 	}, []string{"status"})
@@ -49,7 +49,7 @@ var (
 		Help: "Current number of active tokens",
 	}, []string{"client_id"})
 
-	resourceUtilization = promauto.NewGaugeVec(prometheus.GaugeOpts{
+	resourceUtilization = promauto.NewGaugeVec(prometheus.GaugeOpts{ //nolint:unused
 		Name: "gauth_resource_utilization",
 		Help: "Current resource utilization percentage",
 	}, []string{"resource_id", "type"})

@@ -297,14 +297,17 @@ func (s *Service) validateAuthRequest(req *AuthorizationRequest) error {
 	return nil
 }
 
+//nolint:unused // reserved for event handling
 func (s *Service) handleAuthGrant(data interface{}) {
 	// Handle authorization grant event
 }
 
+//nolint:unused // reserved for event handling
 func (s *Service) handleTokenIssue(data interface{}) {
 	// Handle token issuance event
 }
 
+//nolint:unused // reserved for event handling
 func (s *Service) handleTokenRevoke(data interface{}) {
 	// Handle token revocation event
 }

@@ -49,7 +49,10 @@ func NewHTTPRateLimitHandler(config HTTPRateLimitConfig) *HTTPRateLimitHandler {
 		onRejected = func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Retry-After", "60")
 			w.WriteHeader(http.StatusTooManyRequests)
-			w.Write([]byte("Rate limit exceeded. Please try again later."))
+			if _, err := w.Write([]byte("Rate limit exceeded. Please try again later.")); err != nil {
+				// Log error but don't fail the handler
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+			}
 		}
 	}
 

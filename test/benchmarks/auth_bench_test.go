@@ -43,7 +43,7 @@ func BenchmarkAuthFlow(b *testing.B) {
 				Timestamp:  time.Now(),
 			}
 
-			server.ProcessTransaction(tx, tokenResp.Token)
+			_, _ = server.ProcessTransaction(tx, tokenResp.Token)
 		}
 	})
 }
@@ -81,7 +81,7 @@ func BenchmarkConcurrentTransactions(b *testing.B) {
 					ResourceID: "bench-resource",
 					Timestamp:  time.Now(),
 				}
-				server.ProcessTransaction(tx, tokenResp.Token)
+				_, _ = server.ProcessTransaction(tx, tokenResp.Token)
 			}
 		})
 	})

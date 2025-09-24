@@ -25,7 +25,7 @@ func BenchmarkBasicAuth(b *testing.B) {
 		}
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
-			auth.ValidateCredentials(ctx, creds)
+			_ = auth.ValidateCredentials(ctx, creds)
 		}
 	})
 
@@ -36,7 +36,7 @@ func BenchmarkBasicAuth(b *testing.B) {
 		}
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
-			auth.GenerateToken(ctx, req)
+			_, _ = auth.GenerateToken(ctx, req)
 		}
 	})
 
@@ -48,7 +48,7 @@ func BenchmarkBasicAuth(b *testing.B) {
 		resp, _ := auth.GenerateToken(ctx, req)
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
-			auth.ValidateToken(ctx, resp.Token)
+			_, _ = auth.ValidateToken(ctx, resp.Token)
 		}
 	})
 }
@@ -81,7 +81,7 @@ func BenchmarkJWTAuth(b *testing.B) {
 		}
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
-			auth.GenerateToken(ctx, req)
+			_, _ = auth.GenerateToken(ctx, req)
 		}
 	})
 
@@ -97,7 +97,7 @@ func BenchmarkJWTAuth(b *testing.B) {
 		resp, _ := auth.GenerateToken(ctx, req)
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
-			auth.ValidateToken(ctx, resp.Token)
+			_, _ = auth.ValidateToken(ctx, resp.Token)
 		}
 	})
 
@@ -113,7 +113,7 @@ func BenchmarkJWTAuth(b *testing.B) {
 		resp, _ := auth.GenerateToken(ctx, req)
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
-			auth.ValidateToken(ctx, resp.Token)
+			_, _ = auth.ValidateToken(ctx, resp.Token)
 		}
 	})
 }

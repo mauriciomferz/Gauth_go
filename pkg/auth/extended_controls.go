@@ -129,8 +129,8 @@ func (c *StandardAITeamControls) EnforceCentralization(ctx context.Context, toke
 
 // StandardOpenIDIntegration implements OpenIDIntegration
 type StandardOpenIDIntegration struct {
-	store    token.EnhancedStore
-	verifier token.VerificationSystem
+	store    token.EnhancedStore      //nolint:unused // reserved for token store integration
+	verifier token.VerificationSystem //nolint:unused // reserved for verification system
 }
 
 // MapAssuranceLevel implements OpenID ACR mapping
@@ -149,8 +149,8 @@ func (o *StandardOpenIDIntegration) MapAssuranceLevel(ctx context.Context, token
 
 // StandardComplianceTracker implements AITeamComplianceTracker
 type StandardComplianceTracker struct {
-	store    token.EnhancedStore
-	verifier token.VerificationSystem
+	store    token.EnhancedStore      //nolint:unused // reserved for token store integration
+	verifier token.VerificationSystem //nolint:unused // reserved for verification system
 }
 
 // TrackApprovalRule implements detailed rule tracking
