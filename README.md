@@ -1,6 +1,6 @@
 # GAuth: AI Power-of-Attorney Authorization Framework
 
-**🚀 Enhanced with Interactive Demo Webapp & Modern API**
+**🚀 Enhanced with Interactive Demo Webapp & Modern API** | ✅ **Lint Compliant**
 
 GAuth enables AI systems to act on behalf of humans or organizations, with explicit, verifiable, and auditable power-of-attorney flows. Built on OAuth, OpenID Connect, and MCP, GAuth is designed for open source, extensibility, and compliance with RFC111.
 
