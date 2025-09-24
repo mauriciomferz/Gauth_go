@@ -10,9 +10,11 @@ import (
 type TokenData struct {
 	Valid      bool
 	ValidUntil time.Time
+	CreatedAt  time.Time                  // When the token was created
 	ClientID   string
 	OwnerID    string
 	Scope      []string
+	Claims     map[string]interface{} // Store all original claims
 }
 
 // Store defines the interface for token storage implementations
