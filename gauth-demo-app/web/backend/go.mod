@@ -1,6 +1,6 @@
 module github.com/Gimel-Foundation/gauth/gauth-demo-app/web/backend
 
-go 1.23.0
+go 1.23
 
 require (
 	github.com/gin-contrib/cors v1.7.0
