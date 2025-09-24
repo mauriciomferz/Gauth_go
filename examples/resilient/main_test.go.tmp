@@ -194,7 +194,8 @@ func TestResilientService(t *testing.T) {
 	// Test metrics collection
 	t.Run("MetricsCollection", func(t *testing.T) {
 		// Reset metrics and circuit breaker state
-		freshService := NewResilientService(auth)
+		service.metrics = monitoring.NewMetricsCollector()
+		service.breaker.Reset()
 
 		// Get a valid token
 		grant, err := auth.InitiateAuthorization(gauth.AuthorizationRequest{
@@ -253,10 +254,10 @@ func TestResilientService(t *testing.T) {
 		}
 
 		for _, tc := range transactions {
-			_ = freshService.ProcessRequest(tc.tx, tc.token)
+			_ = service.ProcessRequest(tc.tx, tc.token)
 		}
 
-		metrics := freshService.metrics.GetAllMetrics()
+		metrics := service.metrics.GetAllMetrics()
 
 		// Verify transaction counts
 		paymentSuccess := getMetricValue(metrics, string(monitoring.MetricTransactions), map[string]string{
