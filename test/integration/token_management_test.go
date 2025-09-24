@@ -131,6 +131,9 @@ func TestTokenManagementIntegration(t *testing.T) {
 		oldToken, err := manager.CreateToken(ctx, claims, 1*time.Hour)
 		require.NoError(t, err)
 
+		// Small delay to ensure clear timestamp difference
+		time.Sleep(1 * time.Millisecond)
+
 		// Rotate key
 		err = manager.RotateKey("test-key-2", []byte("new-signing-key"))
 		require.NoError(t, err)

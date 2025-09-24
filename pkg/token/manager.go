@@ -87,17 +87,23 @@ func (m *Manager) ValidateToken(ctx context.Context, token string) (map[string]i
 	// Return original claims with updated values
 	claims := make(map[string]interface{})
 	
-	// Start with stored claims
+	// Start with stored claims to preserve all original data
 	if data.Claims != nil {
 		for k, v := range data.Claims {
 			claims[k] = v
 		}
 	}
 	
-	// Override with current data
-	claims["sub"] = data.OwnerID
-	claims["client_id"] = data.ClientID
-	claims["scope"] = data.Scope
+	// Only override specific standard claims if we have valid data
+	if data.OwnerID != "" {
+		claims["sub"] = data.OwnerID
+	}
+	if data.ClientID != "" {
+		claims["client_id"] = data.ClientID
+	}
+	if len(data.Scope) > 0 {
+		claims["scope"] = data.Scope
+	}
 	claims["exp"] = data.ValidUntil.Unix()
 
 	// Update monitor if available
