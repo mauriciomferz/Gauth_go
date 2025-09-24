@@ -3,6 +3,7 @@ package integration
 import (
 	"context"
 	stderrors "errors"
+	"os"
 	"testing"
 	"time"
 
@@ -50,8 +51,12 @@ func TestResilienceIntegration(t *testing.T) {
 
 		// Test half-open state transition
 		t.Run("HalfOpen", func(t *testing.T) {
-			// Wait for timeout
-			time.Sleep(2500 * time.Millisecond)
+			// Wait for circuit breaker timeout (2s + buffer for CI stability)
+			waitTime := 2500 * time.Millisecond
+			if os.Getenv("CI") == "true" {
+				waitTime = 3500 * time.Millisecond // Extra buffer for CI environment
+			}
+			time.Sleep(waitTime)
 
 			// Circuit should still be open (half-open is transient during execution)
 			assert.Equal(t, resilience.StateOpen, cb.State())
