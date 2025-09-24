@@ -134,15 +134,15 @@ sequenceDiagram
     API-->>-Client: Token Response
 ```
 
-2. **Resource Access Flow**
+2. **Resource Commit Flow**
 ```mermaid
 sequenceDiagram
-    Client->>+API: Access Resource
+    Client->>+API: Commit Resource
     API->>+AuthService: Validate Token
     AuthService->>+TokenStore: Get Token
     TokenStore-->>-AuthService: Token Info
-    AuthService->>+ResourceManager: Check Access
-    ResourceManager-->>-AuthService: Access Granted
+    AuthService->>+ResourceManager: Check Commit
+    ResourceManager-->>-AuthService: Commit Granted
     AuthService-->>-API: Authorized
     API-->>-Client: Resource Data
 ```
