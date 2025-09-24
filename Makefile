@@ -1,4 +1,4 @@
-.PHONY: all build test clean lint coverage examples docs
+.PHONY: all build test clean lint coverage examples docs help security deps bench
 
 # Go parameters
 GOCMD=go
@@ -9,43 +9,67 @@ GOGET=$(GOCMD) get
 GOMOD=$(GOCMD) mod
 BINARY_NAME=gauth
 
+# Build flags
+LDFLAGS=-ldflags="-s -w"
+
 all: test build
 
-build:
-	$(GOBUILD) -o $(BINARY_NAME) -v ./...
+build: ## Build all binaries
+	@echo "Building GAuth binaries..."
+	$(GOBUILD) $(LDFLAGS) -o $(BINARY_NAME)-server -v ./cmd/demo
+	$(GOBUILD) $(LDFLAGS) -o $(BINARY_NAME)-demo -v ./demo
+	@echo "✅ Build completed successfully!"
 
-test:
+test: ## Run all tests
 	$(GOTEST) -v ./...
 
-clean:
+clean: ## Clean build artifacts
 	$(GOCLEAN)
-	rm -f $(BINARY_NAME)
+	rm -f $(BINARY_NAME)-server
+	rm -f $(BINARY_NAME)-demo
 	rm -f coverage.out
+	rm -f *.html
 
-lint:
+lint: ## Run linter
 	golangci-lint run ./...
 
-coverage:
+coverage: ## Generate test coverage report
 	$(GOTEST) -coverprofile=coverage.out ./...
 	$(GOCMD) tool cover -html=coverage.out
 
-deps:
+deps: ## Download and tidy dependencies
 	$(GOMOD) download
 	$(GOMOD) tidy
+	$(GOMOD) verify
 
-examples: build
-	$(GOBUILD) -o examples/basic/basic ./examples/basic
-	$(GOBUILD) -o examples/advanced/advanced ./examples/advanced
+examples: ## Build example binaries (note: many examples don't have main packages)
+	@echo "Building available example binaries..."
+	@for dir in examples/*/; do \
+		if [ -f "$$dir/main.go" ]; then \
+			name=$$(basename "$$dir"); \
+			echo "Building example: $$name"; \
+			$(GOBUILD) -o "$$dir/$$name" "./$$dir" || echo "⚠️  Failed to build $$name"; \
+		fi \
+	done
 
-bench:
+bench: ## Run benchmarks
 	$(GOTEST) -bench=. -benchmem ./...
 
-docs:
+docs: ## Start documentation server
 	godoc -http=:6060
 
-# Security scanning
-security:
-	gosec ./...
+security: ## Run security scan
+	@if command -v gosec >/dev/null 2>&1; then \
+		gosec ./...; \
+	else \
+		echo "Installing gosec..."; \
+		go install github.com/securego/gosec/v2/cmd/gosec@latest; \
+		gosec ./...; \
+	fi
+
+help: ## Show this help message
+	@echo "Available targets:"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
 # Generate mocks for testing
 mocks:
