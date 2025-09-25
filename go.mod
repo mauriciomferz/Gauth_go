@@ -1,6 +1,6 @@
 module github.com/Gimel-Foundation/gauth
 
-go 1.24
+go 1.23.0
 
 require (
 	github.com/Gimel-Foundation/gauth/gauth-demo-app/web/backend v0.0.0
