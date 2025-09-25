@@ -1,3 +1,4 @@
+# Updated: September 25, 2025 - All CodeQL actions use v3
 name: CI/CD Pipeline
 
 on:
@@ -10,6 +11,8 @@ permissions:
   contents: read
   security-events: write
   actions: read
+  statuses: write
+  checks: write
 
 env:
   GO_VERSION: "1.23.x"
@@ -212,6 +215,7 @@ jobs:
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: gosec.sarif
+        category: gosec-analysis
       if: always()
       continue-on-error: true
 
@@ -228,6 +232,7 @@ jobs:
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: trivy-results.sarif
+        category: trivy-analysis
       if: always()
       continue-on-error: true
 
