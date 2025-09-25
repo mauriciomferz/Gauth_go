@@ -187,6 +187,7 @@ func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
 			continue // Skip tmp files outside our directory
 		}
 		
+		// #nosec G304 - Path is validated above for directory traversal
 		out, err := os.OpenFile(cleanTmpFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
 		if err != nil {
 			continue
