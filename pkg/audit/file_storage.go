@@ -168,17 +168,18 @@ func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
 		if err != nil {
 			continue
 		}
-		defer f.Close()
+		defer func() {
+			if closeErr := f.Close(); closeErr != nil {
+				// Log close error but continue with cleanup
+				fmt.Printf("Warning: failed to close file %s during cleanup: %v\n", cleanFile, closeErr)
+			}
+		}()
 
 		tmpFile := cleanFile + ".tmp"
-	out, err := os.OpenFile(tmpFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
-	if err != nil {
-		if closeErr := f.Close(); closeErr != nil {
-			// Log close error but continue with cleanup
-			fmt.Printf("Warning: failed to close file %s during cleanup: %v\n", cleanFile, closeErr)
+		out, err := os.OpenFile(tmpFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
+		if err != nil {
+			continue
 		}
-		continue
-	}
 
 		scanner := bufio.NewScanner(f)
 		writer := bufio.NewWriter(out)
@@ -202,26 +203,31 @@ func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
 				kept++
 			}
 		}
-	if err := writer.Flush(); err != nil {
-		// Log but continue with cleanup
-		fmt.Printf("Warning: failed to flush writer for %s: %v\n", cleanFile, err)
-	}
-	if err := f.Close(); err != nil {
-		// Log but continue with cleanup  
-		fmt.Printf("Warning: failed to close input file %s: %v\n", cleanFile, err)
-	}
-	if err := out.Close(); err != nil {
-		// Log but continue with cleanup
-		fmt.Printf("Warning: failed to close output file %s: %v\n", tmpFile, err)
-	}
+		if err := writer.Flush(); err != nil {
+			// Log but continue with cleanup
+			fmt.Printf("Warning: failed to flush writer for %s: %v\n", cleanFile, err)
+		}
+		if err := out.Close(); err != nil {
+			// Log but continue with cleanup
+			fmt.Printf("Warning: failed to close output file %s: %v\n", tmpFile, err)
+		}
 
 		if kept == 0 {
-			_ = os.Remove(file)
-			_ = os.Remove(tmpFile)
+			if err := os.Remove(file); err != nil {
+				// Log removal error but continue
+				fmt.Printf("Warning: failed to remove file %s: %v\n", file, err)
+			}
+			if err := os.Remove(tmpFile); err != nil {
+				// Log removal error but continue
+				fmt.Printf("Warning: failed to remove temp file %s: %v\n", tmpFile, err)
+			}
 		} else {
 			if err := os.Rename(tmpFile, file); err != nil {
 				// If rename fails, try to cleanup temp file
-				_ = os.Remove(tmpFile)
+				if removeErr := os.Remove(tmpFile); removeErr != nil {
+					// Log cleanup error but continue
+					fmt.Printf("Warning: failed to cleanup temp file %s: %v\n", tmpFile, removeErr)
+				}
 			}
 		}
 	}
@@ -284,6 +290,7 @@ func (fs *FileStorage) searchFile(ctx context.Context, filename string, filter *
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
+			// Continue processing
 		}
 
 		var entry Entry
@@ -303,6 +310,10 @@ func (fs *FileStorage) searchFile(ctx context.Context, filename string, filter *
 }
 
 func (fs *FileStorage) matchesFilter(entry *Entry, filter *Filter) bool {
+	if filter == nil {
+		return true
+	}
+
 	// Check actor IDs
 	if len(filter.ActorIDs) > 0 {
 		actorMatch := false
@@ -315,9 +326,6 @@ func (fs *FileStorage) matchesFilter(entry *Entry, filter *Filter) bool {
 		if !actorMatch {
 			return false
 		}
-	}
-	if filter == nil {
-		return true
 	}
 
 	// Check type
