@@ -11,6 +11,8 @@ permissions:
   security-events: write
   actions: read
   pull-requests: read
+  checks: write
+  statuses: write
 
 jobs:
   test:
@@ -136,18 +138,54 @@ jobs:
           echo "Warning: SARIF file not generated"
         fi
 
-    - name: Upload SARIF file
+    - name: Debug GitHub context
+      if: always()
+      run: |
+        echo "Event name: ${{ github.event_name }}"
+        echo "Ref: ${{ github.ref }}"
+        echo "Repository: ${{ github.repository }}"
+        echo "Actor: ${{ github.actor }}"
+
+    - name: Upload SARIF file to GitHub Security
       uses: github/codeql-action/upload-sarif@v3
-      if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && hashFiles('results.sarif') != ''
       with:
         sarif_file: results.sarif
         category: gosec
       continue-on-error: true
 
+    - name: Upload SARIF for Pull Requests (Alternative)
+      uses: actions/upload-artifact@v4
+      if: always() && github.event_name == 'pull_request' && hashFiles('results.sarif') != ''
+      with:
+        name: security-scan-results-pr-${{ github.event.number }}
+        path: results.sarif
+        retention-days: 30
+
     - name: Upload security results as artifact (fallback)
       uses: actions/upload-artifact@v4
-      if: always() && failure()
+      if: always() && hashFiles('results.sarif') != ''
       with:
         name: security-scan-results
         path: results.sarif
         retention-days: 30
+
+    - name: Security scan summary
+      if: always()
+      run: |
+        echo "🔒 Security Scan Summary:"
+        if [ -f "results.sarif" ]; then
+          echo "✅ SARIF file generated successfully"
+          echo "📊 File size: $(wc -c < results.sarif) bytes"
+          if command -v jq >/dev/null 2>&1; then
+            FINDINGS=$(jq -r '.runs[0].results | length' results.sarif 2>/dev/null || echo "0")
+            echo "🔍 Security findings: $FINDINGS"
+            if [ "$FINDINGS" = "0" ]; then
+              echo "🎉 No security issues found!"
+            else
+              echo "⚠️  Found $FINDINGS security issue(s)"
+            fi
+          fi
+        else
+          echo "❌ SARIF file not found"
+        fi
