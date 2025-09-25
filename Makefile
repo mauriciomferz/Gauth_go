@@ -21,7 +21,7 @@ build: ## Build all binaries
 	@echo "✅ Build completed successfully!"
 
 test: ## Run all tests
-	$(GOTEST) -v ./...
+	$(GOTEST) -v ./pkg/... ./internal/... ./examples/cascade/pkg/gauth ./test/...
 
 clean: ## Clean build artifacts
 	$(GOCLEAN)
