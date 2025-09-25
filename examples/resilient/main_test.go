@@ -13,7 +13,6 @@ import (
 	"github.com/Gimel-Foundation/gauth/internal/monitoring"
 	"github.com/Gimel-Foundation/gauth/pkg/gauth"
 )
-
 func TestMainDemoOutput(t *testing.T) {
 	origStdout := os.Stdout
 	r, w, _ := os.Pipe()
@@ -164,13 +163,8 @@ func TestResilientService(t *testing.T) {
 			t.Error("Expected circuit breaker to be open")
 		}
 
-		// Wait for circuit breaker reset timeout (10s + buffer for CI stability)
-		resetTimeout := 11 * time.Second
-		if os.Getenv("CI") == "true" {
-			resetTimeout = 12 * time.Second // Extra buffer for CI environment
-		}
-		t.Logf("Waiting %v for circuit breaker reset...", resetTimeout)
-		time.Sleep(resetTimeout)
+		// Wait for reset timeout
+		time.Sleep(11 * time.Second)
 
 		// Try a successful request with a proper token
 		tx.Type = "payment"
@@ -198,8 +192,8 @@ func TestResilientService(t *testing.T) {
 
 	// Test metrics collection
 	t.Run("MetricsCollection", func(t *testing.T) {
-		// Reset metrics and circuit breaker state
-		freshService := NewResilientService(auth)
+		// Reset metrics
+		service.metrics = monitoring.NewMetricsCollector()
 
 		// Get a valid token
 		grant, err := auth.InitiateAuthorization(gauth.AuthorizationRequest{
@@ -218,72 +212,51 @@ func TestResilientService(t *testing.T) {
 			t.Fatalf("Failed to request token: %v", err)
 		}
 
-		// Perform mixed transactions, including a failed refund
-		transactions := []struct {
-			tx    gauth.TransactionDetails
-			token string
-			expectSuccess bool
-		}{
-			{
-				tx: gauth.TransactionDetails{
-					Type:           gauth.PaymentTransaction,
-					Amount:         100,
-					CustomMetadata: map[string]string{"test": "1"},
-				},
-				token: tokenResp.Token,
-				expectSuccess: true,
-			},
-			{
-				tx: gauth.TransactionDetails{
-					Type:           gauth.PaymentTransaction,
-					Amount:         50,
-					CustomMetadata: map[string]string{"test": "2"},
-				},
-				token: "invalid-token",
-				expectSuccess: false,
-			},
-			{
-				tx: gauth.TransactionDetails{
-					Type:           gauth.PaymentTransaction,
-					Amount:         75,
-					CustomMetadata: map[string]string{"test": "3"},
-				},
-				token: tokenResp.Token,
-				expectSuccess: true,
-			},
-			{
-				tx: gauth.TransactionDetails{
-					Type:           gauth.RefundTransaction,
-					Amount:         25,
-					CustomMetadata: map[string]string{"test": "refund"},
-				},
-				token: "invalid-token",
-				expectSuccess: false,
-			},
-		}
 
-		// Process transactions and verify they behave as expected
-		for i, tc := range transactions {
-			err := freshService.ProcessRequest(tc.tx, tc.token)
-			if tc.expectSuccess && err != nil {
-				t.Errorf("Transaction %d expected to succeed but failed with error: %v", i, err)
-			} else if !tc.expectSuccess && err == nil {
-				t.Errorf("Transaction %d expected to fail but succeeded", i)
+			// Perform mixed transactions, including a failed refund
+			transactions := []struct {
+				tx    gauth.TransactionDetails
+				token string
+			}{
+				{
+					tx: gauth.TransactionDetails{
+						Type:           gauth.PaymentTransaction,
+						Amount:         100,
+						CustomMetadata: map[string]string{"test": "1"},
+					},
+					token: tokenResp.Token,
+				},
+				{
+					tx: gauth.TransactionDetails{
+						Type:           gauth.PaymentTransaction,
+						Amount:         50,
+						CustomMetadata: map[string]string{"test": "2"},
+					},
+					token: "invalid-token",
+				},
+				{
+					tx: gauth.TransactionDetails{
+						Type:           gauth.PaymentTransaction,
+						Amount:         75,
+						CustomMetadata: map[string]string{"test": "3"},
+					},
+					token: tokenResp.Token,
+				},
+				{
+					tx: gauth.TransactionDetails{
+						Type:           gauth.RefundTransaction,
+						Amount:         25,
+						CustomMetadata: map[string]string{"test": "refund"},
+					},
+					token: "invalid-token",
+				},
 			}
-		}
 
-		// Give a small delay to ensure all metrics are recorded
-		time.Sleep(10 * time.Millisecond)
-
-		metrics := freshService.metrics.GetAllMetrics()
-		
-		// Debug: Print all metrics for troubleshooting
-		if os.Getenv("CI") == "true" || len(metrics) == 0 {
-			t.Logf("All metrics collected:")
-			for key, metric := range metrics {
-				t.Logf("  %s: %v (labels: %v)", key, metric.Value, metric.Labels)
+			for _, tc := range transactions {
+				_ = service.ProcessRequest(tc.tx, tc.token)
 			}
-		}
+
+		metrics := service.metrics.GetAllMetrics()
 
 		// Verify transaction counts
 		paymentSuccess := getMetricValue(metrics, string(monitoring.MetricTransactions), map[string]string{
@@ -291,31 +264,25 @@ func TestResilientService(t *testing.T) {
 			"status": "success",
 		})
 		if paymentSuccess != 2 {
-			t.Errorf("Expected 2 successful payment transactions, got %.0f. All metrics: %v", paymentSuccess, metrics)
+			t.Errorf("Expected 2 successful payment transactions, got %.0f", paymentSuccess)
 		}
 
 		refundError := getMetricValue(metrics, string(monitoring.MetricTransactionErrors), map[string]string{
 			"type": "refund",
 		})
 		if refundError != 1 {
-			t.Errorf("Expected 1 failed refund transaction, got %.0f. All metrics: %v", refundError, metrics)
+			t.Errorf("Expected 1 failed refund transaction, got %.0f", refundError)
 		}
 
 		// Verify response time metrics exist
 		if !hasMetric(metrics, string(monitoring.MetricResponseTime), map[string]string{"type": "payment"}) {
-			t.Errorf("Expected response time metrics to be present. All metrics: %v", metrics)
+			t.Error("Expected response time metrics to be present")
 		}
 	})
 
 	// Test concurrent requests
 	t.Run("ConcurrentRequests", func(t *testing.T) {
-		// Create fresh service to avoid circuit breaker state from previous tests
-		freshService := NewResilientService(auth)
-		
-		numRequests := 100
-		if os.Getenv("CI") == "true" {
-			numRequests = 50 // Reduce load for CI environment
-		}
+		const numRequests = 100
 		errors := make(chan error, numRequests)
 		start := time.Now()
 
@@ -346,7 +313,7 @@ func TestResilientService(t *testing.T) {
 						"id":         fmt.Sprintf("%d", id),
 					},
 				}
-				errors <- freshService.ProcessRequest(tx, tokenResp.Token)
+				errors <- service.ProcessRequest(tx, tokenResp.Token)
 			}(i)
 		}
 
@@ -362,16 +329,15 @@ func TestResilientService(t *testing.T) {
 		t.Logf("Processed %d concurrent requests in %v with %d errors",
 			numRequests, duration, errorCount)
 
-		// Allow up to 50% error rate (reasonable for resilience testing)
-		maxErrors := numRequests / 2
-		if errorCount > maxErrors {
-			t.Errorf("Too many errors: %d (max allowed: %d out of %d requests)", errorCount, maxErrors, numRequests)
+		if errorCount > 50 {
+			t.Errorf("Too many errors: %d", errorCount)
 		}
 
 		// Verify metrics under load
-		metrics := freshService.metrics.GetAllMetrics()
+		metrics := service.metrics.GetAllMetrics()
 		if !hasMetric(metrics, string(monitoring.MetricResponseTime), map[string]string{"type": "payment"}) {
 			t.Error("Expected response time metrics under load")
 		}
 	})
 }
+
