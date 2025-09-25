@@ -66,3 +66,9 @@ func (sa *ServiceAuth) ValidateToken(token string) (*TokenResponse, error) {
 		ValidUntil: time.Now().Add(time.Hour),
 	}, nil
 }
+
+// ValidateTokenForGAuth provides explicit ValidateToken method for GAuth type
+// This ensures compatibility across different Go environments and build systems
+func ValidateTokenForGAuth(auth *GAuth, token string) (*TokenResponse, error) {
+	return (*ServiceAuth)(auth).ValidateToken(token)
+}
