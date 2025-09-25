@@ -158,7 +158,7 @@ func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
 		defer f.Close()
 
 		tmpFile := file + ".tmp"
-		out, err := os.OpenFile(tmpFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0640)
+		out, err := os.OpenFile(tmpFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
 		if err != nil {
 			f.Close()
 			continue
@@ -230,7 +230,7 @@ func (fs *FileStorage) rotate() error {
 	}
 
 	filename := filepath.Join(fs.directory, fmt.Sprintf("audit-%s.log", time.Now().Format("2006-01-02")))
-	file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+	file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to open log file: %w", err)
 	}

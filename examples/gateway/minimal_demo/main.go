@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 )
 
 func main() {
@@ -11,8 +12,15 @@ func main() {
 		fmt.Fprintf(w, "API Gateway is running! Path: %s", r.URL.Path)
 	})
 
+	server := &http.Server{
+		Addr:         ":8081",
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+	
 	log.Println("API Gateway listening on :8081")
-	if err := http.ListenAndServe(":8081", nil); err != nil {
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("Server failed: %v", err)
 	}
 }

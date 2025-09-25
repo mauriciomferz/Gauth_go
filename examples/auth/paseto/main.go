@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/Gimel-Foundation/gauth/pkg/auth"
@@ -11,10 +12,17 @@ import (
 
 func main() {
 	// Prepare PASETO config (stub, not implemented)
+	// Generate or load symmetric key from environment in production
+	symmetricKey := os.Getenv("PASETO_SYMMETRIC_KEY")
+	if symmetricKey == "" {
+		// Default for development only - never use this in production
+		symmetricKey = "32-byte-key-for-AES-256----------"
+	}
+	
 	pasetoCfg := auth.PASETOConfig{
 		Version:       "v2",
 		Purpose:       "local",
-		SymmetricKey:  []byte("32-byte-key-for-AES-256----------"),
+		SymmetricKey:  []byte(symmetricKey),
 		TokenValidity: time.Hour,
 	}
 

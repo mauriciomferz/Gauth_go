@@ -126,5 +126,13 @@ func main() {
 	log.Println("  GET /rotate - Rotate signing key")
 	log.Println("  GET /token?sub=<user> - Issue token for user")
 	log.Println("  GET /validate?token=<token> - Validate token")
-	log.Fatal(http.ListenAndServe(":8082", nil))
+	
+	server := &http.Server{
+		Addr:         ":8082",
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+	
+	log.Fatal(server.ListenAndServe())
 }

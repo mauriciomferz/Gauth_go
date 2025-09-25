@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
 	"log"
-	"math/rand"
+	"os"
 	"sync"
 	"time"
 
@@ -146,15 +147,21 @@ func SimulateDistributedAuthorization(manager *DistributedResourceManager, numRe
 		return
 	}
 
-	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-
 	for i := 0; i < numRequests; i++ {
-		nodeID := nodeIDs[rnd.Intn(len(nodeIDs))]
-		// No need to fetch node object here; nodeID is sufficient for simulation
-
+		// Use crypto secure random for node selection
+		var nodeIndexBytes [4]byte
+		rand.Read(nodeIndexBytes[:])
+		nodeIndex := int(nodeIndexBytes[0]) % len(nodeIDs)
+		nodeID := nodeIDs[nodeIndex]
+		
+		// Use crypto secure random for user selection
+		var userIndexBytes [4]byte  
+		rand.Read(userIndexBytes[:])
+		userIndex := int(userIndexBytes[0]) % 3 + 1
+		
 		// Simulate a resource access request
 		resourceID := fmt.Sprintf("resource-%d", i+1)
-		userID := fmt.Sprintf("user-%d", rnd.Intn(3)+1) // user-1, user-2, user-3
+		userID := fmt.Sprintf("user-%d", userIndex) // user-1, user-2, user-3
 
 		tx := gauth.TransactionDetails{
 			Type:       "resource_access",
@@ -248,11 +255,16 @@ func (drm *DistributedResourceManager) checkNodeHealth(nodeID string) {
 }
 
 func main() {
-	// Initialize GAuth
+	// Initialize GAuth with environment variables for secrets
+	clientSecret := os.Getenv("CLUSTER_CLIENT_SECRET")
+	if clientSecret == "" {
+		clientSecret = "cluster-secret" // Default for development only
+	}
+	
 	config := gauth.Config{
 		AuthServerURL:     "https://auth.example.com",
 		ClientID:          "cluster-manager",
-		ClientSecret:      "cluster-secret",
+		ClientSecret:      clientSecret,
 		Scopes:            []string{"node:register", "node:manage", "transaction:execute"},
 		AccessTokenExpiry: 24 * time.Hour,
 	}

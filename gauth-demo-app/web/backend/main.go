@@ -53,8 +53,11 @@ func main() {
 
 	// Start server
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", config.GetInt("server.port")),
-		Handler: router,
+		Addr:         fmt.Sprintf(":%d", config.GetInt("server.port")),
+		Handler:      router,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
 	}
 
 	// Graceful shutdown

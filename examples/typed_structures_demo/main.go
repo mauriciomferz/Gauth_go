@@ -219,7 +219,14 @@ func main() {
 	log.Println("  POST /token/revoke?token=<token>&reason=<reason> - Revoke a token with typed metadata")
 	log.Println("  GET /protected (with Authorization: Bearer <token>) - Access protected resource")
 
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	server := &http.Server{
+		Addr:         ":8080",
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+	
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("Server failed: %v", err)
 	}
 }

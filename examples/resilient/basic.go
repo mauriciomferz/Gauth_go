@@ -116,10 +116,17 @@ func runBasicExample() {
 	// Set up HTTP server with metrics endpoint
 	http.Handle("/metrics", promhttp.Handler())
 
-	// Start server
+	// Start server with timeouts
 	go func() {
+		server := &http.Server{
+			Addr:         ":8080",
+			ReadTimeout:  15 * time.Second,
+			WriteTimeout: 15 * time.Second,
+			IdleTimeout:  60 * time.Second,
+		}
+		
 		log.Printf("Starting server on :8080")
-		if err := http.ListenAndServe(":8080", nil); err != nil {
+		if err := server.ListenAndServe(); err != nil {
 			log.Fatalf("Server error: %v", err)
 		}
 	}()

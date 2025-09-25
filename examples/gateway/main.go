@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"math/rand"
+	"crypto/rand"
 	"sync"
 	"time"
 
@@ -188,8 +188,12 @@ func (s *BackendService) simulateRequest(ctx context.Context, req *RequestContex
 		return ctx.Err()
 	}
 
-	// Simulate random failures
-	if rand.Float64() < s.errorRate {
+	// Simulate random failures using crypto/rand
+	var randomBytes [8]byte
+	rand.Read(randomBytes[:])
+	randomFloat := float64(randomBytes[0]) / 255.0 // Convert to 0-1 range
+	
+	if randomFloat < s.errorRate {
 		return fmt.Errorf("%s: service temporarily unavailable", s.name)
 	}
 	return nil
