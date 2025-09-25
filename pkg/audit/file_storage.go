@@ -114,7 +114,12 @@ func (fs *FileStorage) GetByID(ctx context.Context, id string) (*Entry, error) {
 	}
 
 	for _, file := range files {
-		f, err := os.Open(file)
+		// Validate file path to prevent directory traversal
+		cleanFile := filepath.Clean(file)
+		if !strings.HasPrefix(cleanFile, filepath.Clean(fs.directory)) {
+			continue // Skip files outside our directory
+		}
+		f, err := os.Open(cleanFile)
 		if err != nil {
 			continue
 		}
@@ -261,7 +266,12 @@ func (fs *FileStorage) rotate() error {
 	}
 
 	filename := filepath.Join(fs.directory, fmt.Sprintf("audit-%s.log", time.Now().Format("2006-01-02")))
-	file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+	// Validate filename to prevent path traversal
+	cleanFilename := filepath.Clean(filename)
+	if !strings.HasPrefix(cleanFilename, filepath.Clean(fs.directory)) {
+		return fmt.Errorf("invalid file path: potential directory traversal")
+	}
+	file, err := os.OpenFile(cleanFilename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to open log file: %w", err)
 	}
