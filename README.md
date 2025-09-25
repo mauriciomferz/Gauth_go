@@ -370,3 +370,6 @@ go test ./internal/rate -run TestRateLimit
 ## License
 
 MIT License - see [LICENSE](LICENSE)
+
+---
+*Workflow updated: September 25, 2025 - CodeQL Action v3 implemented*
