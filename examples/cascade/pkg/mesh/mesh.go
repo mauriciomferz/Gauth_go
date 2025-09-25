@@ -3,6 +3,8 @@ package mesh
 import (
 	"fmt"
 	"sync"
+
+	"github.com/Gimel-Foundation/gauth/examples/cascade/pkg/resources"
 )
 
 // ServiceMesh coordinates all services and their interactions
@@ -42,6 +44,16 @@ func (m *ServiceMesh) addService(sType ServiceType, name string, deps []ServiceT
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.services[sType] = NewMicroservice(sType, name, deps)
+}
+
+// AddService adds a new service to the mesh with the given configuration
+func (m *ServiceMesh) AddService(config resources.ServiceConfig) *Microservice {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	service := NewMicroservice(config.Type, config.Name, config.Dependencies)
+	m.services[config.Type] = service
+	return service
 }
 
 // SetServiceLoad updates the load factor for a specific service

@@ -16,9 +16,16 @@ type RequestDetails struct {
 // ServiceConfig represents service configuration options
 type ServiceConfig struct {
 	Name              string
+	Type              ServiceType
+	Version           string
+	Dependencies      []ServiceType
+	CircuitBreaker    CircuitBreakerConfig
+	RateLimit         RateLimitConfig
 	MaxConcurrent     int
+	MaxConcurrency    int // Alias for MaxConcurrent
 	RequestsPerSecond int
 	TimeoutSeconds    int
+	Timeout           time.Duration
 	RetryAttempts     int
 	RetryBackoff      time.Duration
 }
@@ -61,4 +68,52 @@ func (st StatusType) String() string {
 	default:
 		return "Unknown"
 	}
+}
+
+// ServiceType represents different types of services in the mesh
+type ServiceType int
+
+const (
+	// Core Services
+	AuthService ServiceType = iota
+	UserService
+	OrderService
+	InventoryService
+	PaymentService
+	NotificationService
+	LogisticsService
+)
+
+// String returns the string representation of a ServiceType
+func (s ServiceType) String() string {
+	switch s {
+	case AuthService:
+		return "AuthService"
+	case UserService:
+		return "UserService"
+	case OrderService:
+		return "OrderService"
+	case InventoryService:
+		return "InventoryService"
+	case PaymentService:
+		return "PaymentService"
+	case NotificationService:
+		return "NotificationService"
+	case LogisticsService:
+		return "LogisticsService"
+	default:
+		return "UnknownService"
+	}
+}
+
+// CircuitBreakerConfig represents circuit breaker configuration
+type CircuitBreakerConfig struct {
+	ErrorThreshold int
+	ResetTimeout   time.Duration
+}
+
+// RateLimitConfig represents rate limiting configuration
+type RateLimitConfig struct {
+	RequestsPerSecond int
+	BurstSize         int
 }

@@ -9,9 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"cascade/pkg/events"
-	"cascade/pkg/mesh"
-	"cascade/pkg/resources"
+	"github.com/Gimel-Foundation/gauth/examples/cascade/pkg/events"
+	"github.com/Gimel-Foundation/gauth/examples/cascade/pkg/mesh"
+	"github.com/Gimel-Foundation/gauth/examples/cascade/pkg/resources"
 )
 
 // OrderService demonstrates a service with dependencies
@@ -64,22 +64,20 @@ type EventHandler struct {
 }
 
 func (h *EventHandler) Handle(e events.Event) {
-	// Log event with type-safe data
-	log := fmt.Sprintf("[%s] %s: ", e.Timestamp.Format(time.RFC3339), e.Service)
+	// Log event with available data
+	log := fmt.Sprintf("[%s] %s: ", e.Timestamp.Format(time.RFC3339), e.ServiceID)
 
 	switch e.Type {
 	case events.CircuitOpened:
-		data := e.Data.(events.CircuitBreakerData)
-		log += fmt.Sprintf("Circuit opened after %d failures", data.FailureCount)
+		log += "Circuit opened"
 	case events.RateLimitExceeded:
-		data := e.Data.(events.RateLimitData)
-		log += fmt.Sprintf("Rate limit exceeded: %.2f/s (limit: %.2f/s)", data.CurrentRate, data.Limit)
+		log += "Rate limit exceeded"
 	case events.RequestCompleted:
-		data := e.Data.(events.RequestData)
-		log += fmt.Sprintf("Request completed in %v", data.Duration)
+		log += fmt.Sprintf("Request completed in %v", e.Duration)
 	case events.RequestFailed:
-		data := e.Data.(events.RequestData)
-		log += fmt.Sprintf("Request failed: %v", data.Error)
+		log += fmt.Sprintf("Request failed: %v", e.Error)
+	default:
+		log += fmt.Sprintf("Event: %v", e.Type)
 	}
 
 	h.svc.eventLogs = append(h.svc.eventLogs, log)
@@ -88,15 +86,10 @@ func (h *EventHandler) Handle(e events.Event) {
 
 func main() {
 	// Create service mesh with monitoring
-	mesh := mesh.New(mesh.Config{
-		Name:           "demo-mesh",
-		MetricsEnabled: true,
-		TracingEnabled: true,
-		DefaultTimeout: 30 * time.Second,
-	})
+	serviceMesh := mesh.NewServiceMesh()
 
 	// Create services
-	orderSvc := NewOrderService(mesh)
+	orderSvc := NewOrderService(serviceMesh)
 
 	// Set up graceful shutdown
 	ctx, cancel := context.WithCancel(context.Background())
