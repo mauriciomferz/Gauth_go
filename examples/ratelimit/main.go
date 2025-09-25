@@ -132,8 +132,11 @@ func main() {
 
 	// Fill up the window
 	for i := 1; i <= config.RequestsPerSecond; i++ {
-		limiter.Allow(ctx, clientID)
-		fmt.Printf("Initial request %d: Allowed\n", i)
+		if err := limiter.Allow(ctx, clientID); err != nil {
+			fmt.Printf("Initial request %d: Error - %v\n", i, err)
+		} else {
+			fmt.Printf("Initial request %d: Allowed\n", i)
+		}
 	}
 
 	// Try one more request (should fail)
