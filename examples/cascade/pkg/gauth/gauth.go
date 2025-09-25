@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 	"time"
-	
+
 	"github.com/Gimel-Foundation/gauth/pkg/gauth"
 )
 
