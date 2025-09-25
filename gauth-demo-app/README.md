@@ -88,24 +88,28 @@ gauth-demo-app/
 
 ### Web Application
 ```bash
-# Start the web application
+# Quick start with pre-built executable (from project root)
+cd ..
+./gauth-http-server
+# Access at http://localhost:8080
+
+# OR build from source
 cd web
 make run
-
-# Access the application
-open http://localhost:3000
+# Access at http://localhost:3000
 ```
 
 ### Command Line Interface
 ```bash
-# Build and install CLI
+# Use pre-built executables from project root
+cd ..
+./gauth-server          # Basic console demo
+./gauth-http-server     # Web server demo
+
+# OR build CLI from source
 cd cli
 go build -o gauth-cli .
-
-# Run demo scenarios
 ./gauth-cli demo --scenario legal-framework
-./gauth-cli demo --scenario token-lifecycle
-./gauth-cli demo --scenario multi-jurisdiction
 ```
 
 ### Python SDK

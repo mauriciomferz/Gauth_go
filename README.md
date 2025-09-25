@@ -61,13 +61,14 @@ Experience GAuth in action with our cutting-edge web application featuring moder
 
 ### 🚀 Quick Start with Enhanced Webapp
 ```bash
-# Start the enhanced backend server with WebSocket support
-cd gauth-demo-app/web/backend
-go build -o gauth-enhanced-server main.go
-./gauth-enhanced-server
+# Option 1: Use the pre-built HTTP server
+./gauth-http-server
+# Access at http://localhost:8080
 
-# Access the interactive demo with real-time features
-open http://localhost:8080
+# Option 2: Build and run from source
+make build
+./gauth-web
+# Access at http://localhost:8080
 ```
 
 **✨ Try these features immediately:**
@@ -130,9 +131,12 @@ open http://localhost:8080
 git clone https://github.com/mauriciomferz/Gauth_go.git
 cd Gauth_go
 
-# Start the enhanced backend
-cd gauth-demo-app/web/backend
-go run main.go
+# Use pre-built executable (fastest)
+./gauth-http-server
+
+# OR build from source
+make build
+./gauth-web
 
 # Open the interactive demo
 open http://localhost:8080
@@ -247,22 +251,34 @@ For more, see the RFC111 specification and the package-level documentation in `d
 
 ## Demos and Examples
 
-Explore the `/demo` and `/cmd/demo` directories for runnable demonstration applications and usage examples:
+### Ready-to-Use Executables (No Build Required)
+```bash
+# Basic console demo - Shows GAuth protocol flow
+./gauth-server
 
-- `/demo/main.go`: End-to-end protocol demo (authorization, token, transaction, audit)
-- `/cmd/demo/main.go` and `/cmd/demo/improved_main.go`: CLI demo apps showing advanced flows
-
-To run a demo:
-
-```sh
-# Run the main demo
-cd demo
-go run main.go
-
-# Or run the CLI demo
-cd cmd/demo
-go run main.go
+# Full HTTP server with web interface
+./gauth-http-server
+# Access at http://localhost:8080
 ```
+
+### Build from Source
+```bash
+# Build all binaries
+make build
+
+# Run the CLI demo
+./gauth-server
+
+# Run the web server
+./gauth-web
+```
+
+### Code Examples
+Explore runnable code examples in:
+- `examples/basic/`: Simple authentication flows  
+- `examples/advanced/`: Complex integration patterns
+- `cmd/demo/`: Command-line demonstration apps
+- `gauth-demo-app/`: Full-featured web application
 
 These demos use only the public, type-safe APIs and are a great starting point for learning and extension.
 
