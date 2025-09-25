@@ -2,7 +2,7 @@
 
 **🚀 Enhanced with Interactive Demo Webapp & Modern API** | ✅ **Lint Compliant** | 📦 **Ready-to-Deploy Executables** | 🛡️ **Zero Vulnerabilities v1.0.5**
 
-[![Go Version](https://img.shields.io/badge/Go-1.25+-blue.svg)](https://golang.org/doc/devel/release.html)
+[![Go Version](https://img.shields.io/badge/Go-1.24+-blue.svg)](https://golang.org/doc/devel/release.html)
 [![Security Status](https://img.shields.io/badge/Security-🔒%20Zero%20Vulnerabilities-brightgreen.svg)](./RELEASE_NOTES_v1.0.5.md)
 [![Build Status](https://img.shields.io/badge/Build-✅%20Passing-green.svg)](#)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE)
