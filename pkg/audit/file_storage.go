@@ -220,7 +220,7 @@ func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
 		}
 		if err := out.Close(); err != nil {
 			// Log but continue with cleanup
-			fmt.Printf("Warning: failed to close output file %s: %v\n", tmpFile, err)
+			fmt.Printf("Warning: failed to close output file %s: %v\n", cleanTmpFile, err)
 		}
 
 		if kept == 0 {
@@ -228,16 +228,16 @@ func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
 				// Log removal error but continue
 				fmt.Printf("Warning: failed to remove file %s: %v\n", file, err)
 			}
-			if err := os.Remove(tmpFile); err != nil {
+			if err := os.Remove(cleanTmpFile); err != nil {
 				// Log removal error but continue
-				fmt.Printf("Warning: failed to remove temp file %s: %v\n", tmpFile, err)
+				fmt.Printf("Warning: failed to remove temp file %s: %v\n", cleanTmpFile, err)
 			}
 		} else {
-			if err := os.Rename(tmpFile, file); err != nil {
+			if err := os.Rename(cleanTmpFile, file); err != nil {
 				// If rename fails, try to cleanup temp file
-				if removeErr := os.Remove(tmpFile); removeErr != nil {
+				if removeErr := os.Remove(cleanTmpFile); removeErr != nil {
 					// Log cleanup error but continue
-					fmt.Printf("Warning: failed to cleanup temp file %s: %v\n", tmpFile, removeErr)
+					fmt.Printf("Warning: failed to cleanup temp file %s: %v\n", cleanTmpFile, removeErr)
 				}
 			}
 		}
