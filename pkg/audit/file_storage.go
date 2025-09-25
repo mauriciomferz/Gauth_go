@@ -180,14 +180,16 @@ func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
 			}
 		}()
 
-		// G304 - Validate tmpFile path for security
+		// G304 - Validate tmpFile path for security to prevent directory traversal
 		tmpFile := cleanFile + ".tmp"
 		cleanTmpFile := filepath.Clean(tmpFile)
+		// Security validation: ensure tmpFile is within our directory
 		if !strings.HasPrefix(cleanTmpFile, filepath.Clean(fs.directory)) {
-			continue // Skip tmp files outside our directory
+			continue // Skip tmp files outside our directory for security
 		}
 		
-		// #nosec G304 - Path is validated above for directory traversal
+		// #nosec G304 - Path is validated above for directory traversal attacks
+		// cleanTmpFile is sanitized and validated to be within allowed directory
 		out, err := os.OpenFile(cleanTmpFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
 		if err != nil {
 			continue

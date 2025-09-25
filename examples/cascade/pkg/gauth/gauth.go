@@ -72,3 +72,9 @@ func (sa *ServiceAuth) ValidateToken(token string) (*TokenResponse, error) {
 func ValidateTokenForGAuth(auth *GAuth, token string) (*TokenResponse, error) {
 	return (*ServiceAuth)(auth).ValidateToken(token)
 }
+
+// Explicit method forwarding for GAuth type to ensure CI/CD compatibility
+// This guarantees ValidateToken is available even in different build environments
+func (g *GAuth) ValidateTokenExplicit(token string) (*TokenResponse, error) {
+	return (*ServiceAuth)(g).ValidateToken(token)
+}
