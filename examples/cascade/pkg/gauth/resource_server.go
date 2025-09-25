@@ -1,7 +1,7 @@
 package gauth
 
 import (
-	"github.com/Gimel-Foundation/gauth/internal/errors"
+	"fmt"
 )
 
 // ResourceServer represents a server that provides protected resources
@@ -35,7 +35,7 @@ func (s *ResourceServer) ProcessTransaction(tx TransactionDetails, token string)
 		}
 	}
 	if !hasScope {
-		return "", errors.New(errors.ErrInsufficientScope, "token lacks transaction:execute scope")
+		return "", fmt.Errorf("insufficient scope: token lacks transaction:execute scope")
 	}
 
 	// In a real implementation, this would process the transaction

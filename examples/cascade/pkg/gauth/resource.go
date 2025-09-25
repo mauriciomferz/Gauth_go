@@ -1,24 +1,22 @@
 // Package gauth provides public resource types and interfaces.
 package gauth
 
-import (
-	"github.com/Gimel-Foundation/gauth/internal/resource"
-)
+import "fmt"
 
 // ResourceType represents the type of a resource
 type ResourceType string
 
 const (
 	// ResourceTypeAPI represents an API resource
-	ResourceTypeAPI = ResourceType(resource.TypeAPI)
+	ResourceTypeAPI ResourceType = "api"
 	// ResourceTypeService represents a service resource
-	ResourceTypeService = ResourceType(resource.TypeService)
+	ResourceTypeService ResourceType = "service"
 	// ResourceTypeEndpoint represents an endpoint resource
-	ResourceTypeEndpoint = ResourceType(resource.TypeEndpoint)
+	ResourceTypeEndpoint ResourceType = "endpoint"
 	// ResourceTypeData represents a data resource
-	ResourceTypeData = ResourceType(resource.TypeData)
+	ResourceTypeData ResourceType = "data"
 	// ResourceTypeFile represents a file resource
-	ResourceTypeFile = ResourceType(resource.TypeFile)
+	ResourceTypeFile ResourceType = "file"
 )
 
 // ResourceStatus represents the status of a resource
@@ -26,13 +24,13 @@ type ResourceStatus string
 
 const (
 	// ResourceStatusActive indicates an active resource
-	ResourceStatusActive = ResourceStatus(resource.StatusActive)
+	ResourceStatusActive ResourceStatus = "active"
 	// ResourceStatusInactive indicates an inactive resource
-	ResourceStatusInactive = ResourceStatus(resource.StatusInactive)
+	ResourceStatusInactive ResourceStatus = "inactive"
 	// ResourceStatusDeprecated indicates a deprecated resource
-	ResourceStatusDeprecated = ResourceStatus(resource.StatusDeprecated)
+	ResourceStatusDeprecated ResourceStatus = "deprecated"
 	// ResourceStatusMaintenance indicates a resource under maintenance
-	ResourceStatusMaintenance = ResourceStatus(resource.StatusMaintenance)
+	ResourceStatusMaintenance ResourceStatus = "maintenance"
 )
 
 // ResourceAccess represents resource access levels
@@ -40,13 +38,13 @@ type ResourceAccess string
 
 const (
 	// ResourceAccessPublic indicates a public resource
-	ResourceAccessPublic = ResourceAccess(resource.AccessPublic)
+	ResourceAccessPublic ResourceAccess = "public"
 	// ResourceAccessProtected indicates a protected resource
-	ResourceAccessProtected = ResourceAccess(resource.AccessProtected)
+	ResourceAccessProtected ResourceAccess = "protected"
 	// ResourceAccessPrivate indicates a private resource
-	ResourceAccessPrivate = ResourceAccess(resource.AccessPrivate)
+	ResourceAccessPrivate ResourceAccess = "private"
 	// ResourceAccessInternal indicates an internal resource
-	ResourceAccessInternal = ResourceAccess(resource.AccessInternal)
+	ResourceAccessInternal ResourceAccess = "internal"
 )
 
 // ResourceConfig represents resource configuration
@@ -95,34 +93,14 @@ func NewResource(id string, typ ResourceType) *ResourceConfig {
 
 // Validate checks if the resource configuration is valid
 func (r *ResourceConfig) Validate() error {
-	// Convert to internal type and validate
-	internal := &resource.Resource{
-		ID:          r.ID,
-		Type:        resource.Type(r.Type),
-		Name:        r.Name,
-		Description: r.Description,
-		Version:     r.Version,
-		Status:      resource.Status(r.Status),
-		OwnerID:     r.OwnerID,
-		AccessLevel: resource.AccessLevel(r.AccessLevel),
-		Scopes:      r.Scopes,
-		Path:        r.Path,
-		Methods:     r.Methods,
-		Region:      r.Region,
-		Environment: r.Environment,
-		Tags:        r.Tags,
-		Metadata:    r.Metadata,
+	// Simple validation for example purposes
+	if r.ID == "" {
+		return fmt.Errorf("resource ID is required")
 	}
-
-	if r.RateLimit != nil {
-		internal.RateLimit = &resource.RateLimit{
-			RequestsPerSecond: r.RateLimit.RequestsPerSecond,
-			BurstSize:         r.RateLimit.BurstSize,
-			WindowSize:        r.RateLimit.WindowSize,
-		}
+	if r.Name == "" {
+		return fmt.Errorf("resource name is required")
 	}
-
-	return internal.Validate()
+	return nil
 }
 
 // IsActive returns true if the resource is active

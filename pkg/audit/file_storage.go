@@ -180,8 +180,14 @@ func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
 			}
 		}()
 
+		// G304 - Validate tmpFile path for security
 		tmpFile := cleanFile + ".tmp"
-		out, err := os.OpenFile(tmpFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
+		cleanTmpFile := filepath.Clean(tmpFile)
+		if !strings.HasPrefix(cleanTmpFile, filepath.Clean(fs.directory)) {
+			continue // Skip tmp files outside our directory
+		}
+		
+		out, err := os.OpenFile(cleanTmpFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
 		if err != nil {
 			continue
 		}

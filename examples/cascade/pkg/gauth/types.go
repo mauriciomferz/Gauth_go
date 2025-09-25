@@ -65,15 +65,7 @@ type TokenResponse struct {
 	Restrictions []Restriction
 }
 
-// TransactionDetails represents the details of a transaction
-type TransactionDetails struct {
-	ID         string
-	Type       string
-	Amount     float64
-	ResourceID string
-	Metadata   map[string]string // Only place where we keep map for flexibility
-	Timestamp  time.Time
-}
+// Note: TransactionDetails is defined in transaction.go to avoid duplication
 
 // RateLimitConfig represents rate limiting configuration
 type RateLimitConfig struct {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Gimel-Foundation/gauth/examples/cascade/pkg/mesh"
+	"cascade/pkg/mesh"
 )
 
 // This example shows how to use individual resilience patterns
