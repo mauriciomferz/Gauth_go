@@ -3,11 +3,11 @@ package mesh
 import (
 	"sync"
 	"time"
+
+	"github.com/Gimel-Foundation/gauth/examples/cascade/pkg/resources"
 )
 
-import "github.com/Gimel-Foundation/gauth/examples/cascade/pkg/resources"
-
-// ServiceType is an alias for resources.ServiceType 
+// ServiceType is an alias for resources.ServiceType
 type ServiceType = resources.ServiceType
 
 // Re-export service type constants for convenience
