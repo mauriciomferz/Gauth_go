@@ -190,7 +190,9 @@ func (s *BackendService) simulateRequest(ctx context.Context, req *RequestContex
 
 	// Simulate random failures using crypto/rand
 	var randomBytes [8]byte
-	rand.Read(randomBytes[:])
+	if _, err := rand.Read(randomBytes[:]); err != nil {
+		return fmt.Errorf("failed to generate secure random: %w", err)
+	}
 	randomFloat := float64(randomBytes[0]) / 255.0 // Convert to 0-1 range
 	
 	if randomFloat < s.errorRate {

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"cascade/pkg/mesh"
+	"github.com/Gimel-Foundation/gauth/examples/cascade/pkg/mesh"
 )
 
 func main() {

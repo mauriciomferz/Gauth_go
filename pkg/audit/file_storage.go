@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 )
@@ -155,13 +156,19 @@ func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
 	}
 
 	for _, file := range files {
-		f, err := os.Open(file)
+		// Validate file path to prevent directory traversal
+		cleanFile := filepath.Clean(file)
+		if !strings.HasPrefix(cleanFile, filepath.Clean(fs.directory)) {
+			continue // Skip files outside our directory
+		}
+		
+		f, err := os.Open(cleanFile)
 		if err != nil {
 			continue
 		}
 		defer f.Close()
 
-		tmpFile := file + ".tmp"
+		tmpFile := cleanFile + ".tmp"
 		out, err := os.OpenFile(tmpFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
 		if err != nil {
 			if closeErr := f.Close(); closeErr != nil {
@@ -253,7 +260,13 @@ func (fs *FileStorage) rotate() error {
 }
 
 func (fs *FileStorage) searchFile(ctx context.Context, filename string, filter *Filter, results *[]*Entry) error {
-	file, err := os.Open(filename)
+	// Validate filename to prevent directory traversal
+	cleanFilename := filepath.Clean(filename)
+	if !strings.HasPrefix(cleanFilename, filepath.Clean(fs.directory)) {
+		return fmt.Errorf("invalid file path: access denied")
+	}
+	
+	file, err := os.Open(cleanFilename)
 	if err != nil {
 		return fmt.Errorf("failed to open log file: %w", err)
 	}

@@ -8,6 +8,9 @@ import (
 	"github.com/Gimel-Foundation/gauth/pkg/gauth"
 )
 
+// GAuth is an alias for ServiceAuth to maintain compatibility
+type GAuth = ServiceAuth
+
 // ServiceAuth wraps GAuth for service-to-service authentication
 type ServiceAuth struct {
 	client *gauth.GAuth

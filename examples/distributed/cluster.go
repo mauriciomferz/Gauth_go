@@ -150,13 +150,19 @@ func SimulateDistributedAuthorization(manager *DistributedResourceManager, numRe
 	for i := 0; i < numRequests; i++ {
 		// Use crypto secure random for node selection
 		var nodeIndexBytes [4]byte
-		rand.Read(nodeIndexBytes[:])
+		if _, err := rand.Read(nodeIndexBytes[:]); err != nil {
+			log.Printf("Failed to generate random node selection: %v", err)
+			continue
+		}
 		nodeIndex := int(nodeIndexBytes[0]) % len(nodeIDs)
 		nodeID := nodeIDs[nodeIndex]
 		
 		// Use crypto secure random for user selection
 		var userIndexBytes [4]byte  
-		rand.Read(userIndexBytes[:])
+		if _, err := rand.Read(userIndexBytes[:]); err != nil {
+			log.Printf("Failed to generate random user selection: %v", err)
+			continue
+		}
 		userIndex := int(userIndexBytes[0]) % 3 + 1
 		
 		// Simulate a resource access request

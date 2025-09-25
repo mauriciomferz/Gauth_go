@@ -66,8 +66,10 @@ func (et EventType) String() string {
 	}
 }
 
-// EventHandler represents a callback for handling service events
-type EventHandler func(Event)
+// EventHandler defines the interface for handling events
+type EventHandler interface {
+	Handle(Event)
+}
 
 // EventPublisher provides an interface for publishing events
 type EventPublisher interface {
@@ -81,8 +83,8 @@ type SimpleEventBus struct {
 	handlers []EventHandler
 }
 
-// NewEventBus creates a new SimpleEventBus
-func NewEventBus() *SimpleEventBus {
+// NewSimpleEventBus creates a new SimpleEventBus
+func NewSimpleEventBus() *SimpleEventBus {
 	return &SimpleEventBus{
 		handlers: make([]EventHandler, 0),
 	}
@@ -91,7 +93,7 @@ func NewEventBus() *SimpleEventBus {
 // PublishEvent publishes an event to all subscribers
 func (b *SimpleEventBus) PublishEvent(e Event) {
 	for _, handler := range b.handlers {
-		handler(e)
+		handler.Handle(e)
 	}
 }
 
