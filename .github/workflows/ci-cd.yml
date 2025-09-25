@@ -98,7 +98,14 @@ jobs:
     - name: Run go vet
       run: go vet ./...
 
-    - name: Install and run staticcheck
+    - name: Run golangci-lint
+      uses: golangci/golangci-lint-action@v6
+      with:
+        version: v1.64.8
+        args: --timeout=10m --out-format=colored-line-number
+      continue-on-error: true
+
+    - name: Install and run staticcheck  
       run: |
         # Install the latest staticcheck that supports Go 1.23
         go install honnef.co/go/tools/cmd/staticcheck@latest

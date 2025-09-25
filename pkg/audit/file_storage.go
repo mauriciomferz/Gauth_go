@@ -125,15 +125,17 @@ func (fs *FileStorage) GetByID(ctx context.Context, id string) (*Entry, error) {
 				continue
 			}
 			if entry.ID == id {
-				if err := f.Close(); err != nil {
-					// Log error but return the entry
-				}
-				return &entry, nil
+			if err := f.Close(); err != nil {
+				// Log error but return the entry anyway
+				fmt.Printf("Warning: failed to close file %s: %v\n", file, err)
 			}
+			return &entry, nil
 		}
-		if err := f.Close(); err != nil {
-			// Log error but continue
-		}
+	}
+	if err := f.Close(); err != nil {
+		// Log error but continue with the search
+		fmt.Printf("Warning: failed to close file %s: %v\n", file, err)
+	}
 	}
 	return nil, fmt.Errorf("entry not found")
 }
@@ -169,13 +171,14 @@ func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
 		defer f.Close()
 
 		tmpFile := cleanFile + ".tmp"
-		out, err := os.OpenFile(tmpFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
-		if err != nil {
-			if closeErr := f.Close(); closeErr != nil {
-				// Log error but continue
-			}
-			continue
+	out, err := os.OpenFile(tmpFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
+	if err != nil {
+		if closeErr := f.Close(); closeErr != nil {
+			// Log close error but continue with cleanup
+			fmt.Printf("Warning: failed to close file %s during cleanup: %v\n", cleanFile, closeErr)
 		}
+		continue
+	}
 
 		scanner := bufio.NewScanner(f)
 		writer := bufio.NewWriter(out)
@@ -199,15 +202,18 @@ func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
 				kept++
 			}
 		}
-		if err := writer.Flush(); err != nil {
-			// Log but continue with cleanup
-		}
-		if err := f.Close(); err != nil {
-			// Log but continue with cleanup
-		}
-		if err := out.Close(); err != nil {
-			// Log but continue with cleanup
-		}
+	if err := writer.Flush(); err != nil {
+		// Log but continue with cleanup
+		fmt.Printf("Warning: failed to flush writer for %s: %v\n", cleanFile, err)
+	}
+	if err := f.Close(); err != nil {
+		// Log but continue with cleanup  
+		fmt.Printf("Warning: failed to close input file %s: %v\n", cleanFile, err)
+	}
+	if err := out.Close(); err != nil {
+		// Log but continue with cleanup
+		fmt.Printf("Warning: failed to close output file %s: %v\n", tmpFile, err)
+	}
 
 		if kept == 0 {
 			_ = os.Remove(file)
