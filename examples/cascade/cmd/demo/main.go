@@ -118,13 +118,18 @@ func main() {
 	// Process orders with resilience patterns
 	for i := 0; ; i++ {
 		select {
-		case <-ctx.Done():
-			// Print final metrics
-			metrics := orderSvc.service.GetMetrics()
-			fmt.Printf("\nFinal Metrics:\n")
-			fmt.Printf("Total Requests: %d\n", metrics.TotalRequests)
-			fmt.Printf("Success Rate: %.2f%%\n", float64(metrics.SuccessfulCalls)/float64(metrics.TotalRequests)*100)
-			fmt.Printf("Average Latency: %v\n", metrics.AverageLatency)
+		case <-ctx.Done():		// Print final metrics  
+		metrics := orderSvc.service.GetMetrics()
+		fmt.Printf("\nFinal Metrics:\n")
+		if totalReq, ok := metrics["requests_processed"].(int); ok {
+			fmt.Printf("Total Requests: %d\n", totalReq)
+		}
+		if loadFactor, ok := metrics["load_factor"].(float64); ok {
+			fmt.Printf("Load Factor: %.2f\n", loadFactor)
+		}
+		if errors, ok := metrics["errors"].(int); ok {
+			fmt.Printf("Errors: %d\n", errors)
+		}
 			return
 		default:
 			// Process order with resilience patterns

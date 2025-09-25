@@ -17,10 +17,43 @@ const (
 
 // Service represents a service in the mesh
 type Service struct {
-	ID   string      `json:"id"`
-	Name string      `json:"name"`
-	Type ServiceType `json:"type"`
-	URL  string      `json:"url"`
+	ID         string      `json:"id"`
+	Name       string      `json:"name"`
+	Type       ServiceType `json:"type"`
+	URL        string      `json:"url"`
+	LoadFactor float64     `json:"load_factor"`
+}
+
+// SetLoadFactor sets the load factor for the service
+func (s *Service) SetLoadFactor(factor float64) {
+	s.LoadFactor = factor
+}
+
+// ProcessRequest processes a request for the service
+func (s *Service) ProcessRequest(ctx context.Context, data interface{}) (interface{}, error) {
+	// Mock implementation for demo purposes
+	return fmt.Sprintf("Processed request for %s service", s.Type), nil
+}
+
+// OnEvent handles events for the service with proper EventHandler interface
+func (s *Service) OnEvent(handler interface{}) {
+	// Mock implementation for demo purposes - accepts any handler
+	fmt.Printf("Service %s registered event handler\n", s.Name)
+}
+
+// GetMetrics returns service metrics (mock for demo)
+func (s *Service) GetMetrics() map[string]interface{} {
+	return map[string]interface{}{
+		"requests_processed": 42,
+		"errors":            0,
+		"load_factor":       s.LoadFactor,
+	}
+}
+
+// Process processes a request (alias for ProcessRequest)
+func (s *Service) Process(ctx context.Context, data interface{}) error {
+	_, err := s.ProcessRequest(ctx, data)
+	return err
 }
 
 // ServiceMesh manages the service mesh
@@ -78,19 +111,39 @@ func (sm *ServiceMesh) PrintHealthReport() {
 }
 
 // SetServiceLoad sets the load for a service (for demo purposes)
-func (sm *ServiceMesh) SetServiceLoad(serviceID string, load float64) error {
-	_, err := sm.GetService(serviceID)
-	if err != nil {
-		return err
+func (sm *ServiceMesh) SetServiceLoad(serviceType string, load float64) error {
+	// Find service by type
+	sm.mu.RLock()
+	defer sm.mu.RUnlock()
+	
+	for _, service := range sm.services {
+		if string(service.Type) == serviceType {
+			service.LoadFactor = load
+			fmt.Printf("Setting load %.2f for service type %s\n", load, serviceType)
+			return nil
+		}
 	}
 	
-	// Simulate setting service load
-	fmt.Printf("Setting load %.2f for service %s\n", load, serviceID)
-	return nil
+	return fmt.Errorf("service type not found: %s", serviceType)
+}
+
+// AddService adds a service to the mesh and returns it (used by demo)
+func (sm *ServiceMesh) AddService(config interface{}) *Service {
+	// Create a service based on config
+	service := &Service{
+		ID:         "demo-service",
+		Name:       "Demo Service",
+		Type:       OrderService,
+		URL:        "http://localhost:8080/demo",
+		LoadFactor: 0.0,
+	}
+	
+	sm.RegisterService(service)
+	return service
 }
 
 // NewMicroservice creates a new microservice
-func NewMicroservice(name string, serviceType ServiceType) *Service {
+func NewMicroservice(serviceType ServiceType, name string, config interface{}) *Service {
 	return &Service{
 		ID:   fmt.Sprintf("%s-%s", name, serviceType),
 		Name: name,

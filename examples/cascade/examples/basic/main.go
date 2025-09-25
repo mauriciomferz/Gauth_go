@@ -22,12 +22,12 @@ func main() {
 		// Process multiple requests
 		for i := 0; i < 10; i++ {
 			ctx := context.Background()
-			err := paymentSvc.ProcessRequest(ctx, nil)
+			result, err := paymentSvc.ProcessRequest(ctx, nil)
 
 			if err != nil {
 				fmt.Printf("Request %d failed: %v\n", i+1, err)
 			} else {
-				fmt.Printf("Request %d succeeded\n", i+1)
+				fmt.Printf("Request %d succeeded: %v\n", i+1, result)
 			}
 
 			time.Sleep(100 * time.Millisecond)
