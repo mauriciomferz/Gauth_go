@@ -21,7 +21,10 @@ build: ## Build all binaries
 	@echo "✅ Build completed successfully!"
 
 test: ## Run all tests
-	$(GOTEST) -v ./pkg/... ./internal/... ./examples/cascade/pkg/gauth ./test/...
+	@echo "🧪 Running comprehensive test suite..."
+	$(GOCLEAN) -testcache
+	$(GOTEST) -v -race -timeout=10m ./pkg/... ./internal/... ./examples/cascade/pkg/gauth ./test/...
+	@echo "✅ All tests completed successfully"
 
 clean: ## Clean build artifacts
 	$(GOCLEAN)

@@ -1,0 +1,73 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+server.log
+
+# Built executables
+gauth-server
+gauth-web
+gauth-http-server
+demo
+demo_cascade
+demo_cascade_build
+demo_executable
+gauth-original-demo
+gauth-server-cmd
+gauth-web-server
+main
+basic
+basic_example
+cascade_main
+
+# Temporary files
+*.tmp
+*.temp
+
+# Dependencies
+vendor/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Coverage files
+coverage.out
+coverage.html
+
+# Benchmark results
+benchmarks/
+
+# Test artifacts
+testdata/

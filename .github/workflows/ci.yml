@@ -30,7 +30,14 @@ jobs:
       run: go mod download
 
     - name: Run unit tests
-      run: make test
+      run: |
+        echo "🧪 Running comprehensive test suite with enhanced CI robustness..."
+        go clean -testcache
+        go clean -cache
+        export GOMAXPROCS=2
+        export GOMEMLIMIT=1GiB
+        go test -v -race -timeout=15m -parallel=2 ./pkg/... ./internal/... ./examples/cascade/pkg/gauth ./test/...
+        echo "✅ All tests completed successfully"
 
     - name: Run linter
       uses: golangci/golangci-lint-action@v6
