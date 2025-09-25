@@ -125,17 +125,17 @@ func (fs *FileStorage) GetByID(ctx context.Context, id string) (*Entry, error) {
 				continue
 			}
 			if entry.ID == id {
-			if err := f.Close(); err != nil {
-				// Log error but return the entry anyway
-				fmt.Printf("Warning: failed to close file %s: %v\n", file, err)
+				if err := f.Close(); err != nil {
+					// Log error but return the entry anyway
+					fmt.Printf("Warning: failed to close file %s: %v\n", file, err)
+				}
+				return &entry, nil
 			}
-			return &entry, nil
 		}
-	}
-	if err := f.Close(); err != nil {
-		// Log error but continue with the search
-		fmt.Printf("Warning: failed to close file %s: %v\n", file, err)
-	}
+		if err := f.Close(); err != nil {
+			// Log error but continue with the search
+			fmt.Printf("Warning: failed to close file %s: %v\n", file, err)
+		}
 	}
 	return nil, fmt.Errorf("entry not found")
 }
