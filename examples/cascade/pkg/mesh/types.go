@@ -5,18 +5,20 @@ import (
 	"time"
 )
 
-// ServiceType represents different types of microservices in the mesh
-type ServiceType int
+import "github.com/Gimel-Foundation/gauth/examples/cascade/pkg/resources"
 
+// ServiceType is an alias for resources.ServiceType 
+type ServiceType = resources.ServiceType
+
+// Re-export service type constants for convenience
 const (
-	// Core Services
-	AuthService ServiceType = iota
-	UserService
-	OrderService
-	InventoryService
-	PaymentService
-	NotificationService
-	LogisticsService
+	AuthService         = resources.AuthService
+	UserService         = resources.UserService
+	OrderService        = resources.OrderService
+	InventoryService    = resources.InventoryService
+	PaymentService      = resources.PaymentService
+	NotificationService = resources.NotificationService
+	LogisticsService    = resources.LogisticsService
 )
 
 // HealthMetrics tracks service health and performance metrics
@@ -82,24 +84,4 @@ type DependencyGraph struct {
 	dependencies map[ServiceType][]ServiceType
 }
 
-// String returns a human-readable name for the service type
-func (st ServiceType) String() string {
-	switch st {
-	case AuthService:
-		return "Auth"
-	case UserService:
-		return "User"
-	case OrderService:
-		return "Order"
-	case InventoryService:
-		return "Inventory"
-	case PaymentService:
-		return "Payment"
-	case NotificationService:
-		return "Notification"
-	case LogisticsService:
-		return "Logistics"
-	default:
-		return "Unknown"
-	}
-}
+

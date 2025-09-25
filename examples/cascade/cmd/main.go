@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"sync"
 	"time"
 
-	"cascade/pkg/mesh"
+	"github.com/Gimel-Foundation/gauth/examples/cascade/pkg/mesh"
 )
 
 func main() {
@@ -68,7 +69,9 @@ func runSimulationPhases(ctx context.Context, serviceMesh *mesh.ServiceMesh) {
 
 		// Set load factors for critical services
 		for _, svcType := range phase.services {
-			serviceMesh.SetServiceLoad(svcType, phase.loadFactor)
+			if err := serviceMesh.SetServiceLoad(svcType, phase.loadFactor); err != nil {
+				log.Printf("Warning: failed to set service load for %v: %v", svcType, err)
+			}
 		}
 
 		simulateTraffic(ctx, serviceMesh, 50)
