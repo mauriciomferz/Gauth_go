@@ -103,9 +103,9 @@ func (tp *TracerProvider) Shutdown(ctx context.Context) error {
 
 // Common span names
 const (
-	SpanAuth            = "gauth.auth"
-	SpanTokenRequest    = "gauth.token.request"
-	SpanTokenValidation = "gauth.token.validate"
+	SpanAuth            = "gauth.auth"          // #nosec G101 - This is a span name, not credentials
+	SpanTokenRequest    = "gauth.token.request" // #nosec G101 - This is a span name, not credentials  
+	SpanTokenValidation = "gauth.token.validate" // #nosec G101 - This is a span name, not credentials
 	SpanTransaction     = "gauth.transaction"
 	SpanRateLimit       = "gauth.ratelimit"
 	SpanAudit           = "gauth.audit"

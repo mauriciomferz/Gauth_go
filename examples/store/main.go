@@ -49,7 +49,7 @@ func closeStore(s store.TokenStore) {
 // basicTokenOperations demonstrates storing and retrieving a token
 func basicTokenOperations(ctx context.Context, tokenStore store.TokenStore) {
 	// Create a sample token with metadata
-	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0"
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0" // #nosec G101 - This is a test JWT token for demo purposes
 	metadata := store.TokenMetadata{
 		ID:        "token123",
 		Subject:   "user123",
@@ -150,7 +150,7 @@ func errorHandlingExample(ctx context.Context, tokenStore store.TokenStore) {
 // revocationExample demonstrates token revocation
 func revocationExample(ctx context.Context, tokenStore store.TokenStore) {
 	// Create a token to revoke
-	token := "token_to_be_revoked"
+	token := "token_to_be_revoked" // #nosec G101 - This is a test token for demo purposes
 	metadata := store.TokenMetadata{
 		ID:        "revocable_token",
 		Subject:   "revoke_test_user",

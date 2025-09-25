@@ -250,7 +250,15 @@ func (p *Patterns) Execute(ctx context.Context, fn func() error) error {
 				if safeAttempt > 30 { // 2^30 is large enough, prevents overflow
 					safeAttempt = 30
 				}
-				backoff := p.baseInterval * time.Duration(1<<uint(safeAttempt))
+				// Safely convert to uint to prevent integer overflow
+				var shiftAmount uint
+				if safeAttempt >= 0 && safeAttempt <= 63 {
+					shiftAmount = uint(safeAttempt)
+				} else {
+					// Cap at maximum safe shift to prevent overflow
+					shiftAmount = 30
+				}
+				backoff := p.baseInterval * time.Duration(1<<shiftAmount)
 				if backoff > p.maxInterval {
 					backoff = p.maxInterval
 				}
