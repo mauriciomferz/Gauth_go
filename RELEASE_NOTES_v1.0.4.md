@@ -21,16 +21,20 @@ This release focuses on addressing security vulnerabilities and improving system
 
 ### 🔐 **Cryptographic Security**
 - **Replaced `math/rand` with `crypto/rand`** in all examples and utilities
-  - `examples/distributed/cluster.go` - Secure node selection
-  - `examples/cascade/main.go` - Secure error simulation  
-  - `examples/gateway/main.go` - Secure failure generation
-  - `examples/microservices/main.go` - Secure random failures
-  - `examples/resilient/cascading.go` - Secure load simulation
+  - `examples/distributed/cluster.go` - Secure node selection with error handling
+  - `examples/cascade/main.go` - Secure error simulation with error handling
+  - `examples/gateway/main.go` - Secure failure generation with error handling
+  - `examples/microservices/main.go` - Secure random failures with error handling
+  - `examples/resilient/cascading.go` - Secure load simulation with error handling
+- **Fixed unhandled crypto/rand errors** in 6 locations with proper error handling
 
 ### 🔒 **File System Security**
 - **Fixed file permissions** from 0644/0640 to 0600 (owner read/write only)
   - `pkg/events/handlers.go` - Event log files
   - `pkg/audit/file_storage.go` - Audit storage files (2 locations)
+- **Added path validation** to prevent directory traversal attacks
+  - Path sanitization in file operations
+  - Input validation for user-provided file paths
 
 ### 🌐 **Network Security** 
 - **Added HTTP server timeouts** to prevent DoS attacks:
