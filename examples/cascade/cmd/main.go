@@ -69,7 +69,7 @@ func runSimulationPhases(ctx context.Context, serviceMesh *mesh.ServiceMesh) {
 
 		// Set load factors for critical services
 		for _, svcType := range phase.services {
-			if err := serviceMesh.SetServiceLoad(svcType, phase.loadFactor); err != nil {
+			if err := serviceMesh.SetServiceLoad(string(svcType), phase.loadFactor); err != nil {
 				log.Printf("Warning: failed to set service load for %v: %v", svcType, err)
 			}
 		}
@@ -88,12 +88,12 @@ func simulateTraffic(ctx context.Context, serviceMesh *mesh.ServiceMesh, numClie
 			defer wg.Done()
 
 			// Simulate a transaction starting with OrderService
-			if svc, exists := serviceMesh.GetService(mesh.OrderService); exists {
+			if svc, err := serviceMesh.GetService(string(mesh.OrderService)); err == nil {
 				start := time.Now()
-				err := svc.ProcessRequest(ctx, serviceMesh)
+				_, processErr := svc.ProcessRequest(ctx, serviceMesh)
 				duration := time.Since(start)
 
-				if err != nil {
+				if processErr != nil {
 					fmt.Printf("[Client %d] Failed after %v: %v\n",
 						clientID, duration.Round(time.Millisecond), err)
 				} else {
