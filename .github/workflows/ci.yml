@@ -75,11 +75,13 @@ jobs:
         
         echo "✅ All tests completed successfully"
 
+    - name: Install golangci-lint
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.61.0
+        
     - name: Run linter
-      uses: golangci/golangci-lint-action@v6
-      with:
-        version: v1.66.0
-        args: --timeout=10m
+      run: |
+        $(go env GOPATH)/bin/golangci-lint run --timeout=10m
 
   build:
     name: Build
