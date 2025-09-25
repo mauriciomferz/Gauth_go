@@ -60,8 +60,11 @@ func demoWindowSliding(limiter *rate.Limiter) {
 
 	// Fill up the window
 	for i := 1; i <= 5; i++ {
-		limiter.Allow(ctx, id)
-		fmt.Printf("Initial request %d: Allowed\n", i)
+		if err := limiter.Allow(ctx, id); err != nil {
+			fmt.Printf("Initial request %d: Error - %v\n", i, err)
+		} else {
+			fmt.Printf("Initial request %d: Allowed\n", i)
+		}
 	}
 
 	// Try one more (should fail)

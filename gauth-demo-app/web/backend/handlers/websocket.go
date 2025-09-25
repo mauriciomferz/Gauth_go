@@ -143,7 +143,9 @@ func (h *WebSocketHandler) handleBroadcast() {
 		for conn := range h.clients {
 			if err := conn.WriteJSON(event); err != nil {
 				h.logger.WithError(err).Error("Failed to broadcast event")
-				conn.Close()
+				if closeErr := conn.Close(); closeErr != nil {
+					h.logger.WithError(closeErr).Error("Failed to close WebSocket connection")
+				}
 				delete(h.clients, conn)
 			}
 		}

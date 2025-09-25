@@ -78,7 +78,9 @@ func NewSQLStorage(config SQLConfig) (*SQLStorage, error) {
 	}
 
 	if err := db.Ping(); err != nil {
-		db.Close()
+		if closeErr := db.Close(); closeErr != nil {
+			return nil, fmt.Errorf("failed to ping database: %w, and failed to close db: %w", err, closeErr)
+		}
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
@@ -88,7 +90,9 @@ func NewSQLStorage(config SQLConfig) (*SQLStorage, error) {
 
 	// Create table and indices
 	if _, err := db.Exec(createTableSQL); err != nil {
-		db.Close()
+		if closeErr := db.Close(); closeErr != nil {
+			return nil, fmt.Errorf("failed to create table: %w, and failed to close db: %w", err, closeErr)
+		}
 		return nil, fmt.Errorf("failed to create table: %w", err)
 	}
 

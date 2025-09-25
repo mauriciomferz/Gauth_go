@@ -245,7 +245,12 @@ func (p *Patterns) Execute(ctx context.Context, fn func() error) error {
 
 			// If not final attempt, wait with exponential backoff
 			if attempt < p.maxAttempts-1 {
-				backoff := p.baseInterval * time.Duration(1<<uint(attempt))
+				// Prevent overflow by limiting attempt value
+				safeAttempt := attempt
+				if safeAttempt > 30 { // 2^30 is large enough, prevents overflow
+					safeAttempt = 30
+				}
+				backoff := p.baseInterval * time.Duration(1<<uint(safeAttempt))
 				if backoff > p.maxInterval {
 					backoff = p.maxInterval
 				}

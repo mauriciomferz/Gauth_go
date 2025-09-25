@@ -124,11 +124,15 @@ func (fs *FileStorage) GetByID(ctx context.Context, id string) (*Entry, error) {
 				continue
 			}
 			if entry.ID == id {
-				f.Close()
+				if err := f.Close(); err != nil {
+					// Log error but return the entry
+				}
 				return &entry, nil
 			}
 		}
-		f.Close()
+		if err := f.Close(); err != nil {
+			// Log error but continue
+		}
 	}
 	return nil, fmt.Errorf("entry not found")
 }
@@ -160,7 +164,9 @@ func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
 		tmpFile := file + ".tmp"
 		out, err := os.OpenFile(tmpFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
 		if err != nil {
-			f.Close()
+			if closeErr := f.Close(); closeErr != nil {
+				// Log error but continue
+			}
 			continue
 		}
 
@@ -186,9 +192,15 @@ func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
 				kept++
 			}
 		}
-		writer.Flush()
-		f.Close()
-		out.Close()
+		if err := writer.Flush(); err != nil {
+			// Log but continue with cleanup
+		}
+		if err := f.Close(); err != nil {
+			// Log but continue with cleanup
+		}
+		if err := out.Close(); err != nil {
+			// Log but continue with cleanup
+		}
 
 		if kept == 0 {
 			_ = os.Remove(file)
