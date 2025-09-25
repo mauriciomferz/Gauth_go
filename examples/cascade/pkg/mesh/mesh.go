@@ -138,7 +138,11 @@ func (sm *ServiceMesh) AddService(config interface{}) *Service {
 		LoadFactor: 0.0,
 	}
 	
-	sm.RegisterService(service)
+	// Handle potential error from RegisterService
+	if err := sm.RegisterService(service); err != nil {
+		// Log error but continue - service creation shouldn't fail due to registration issues
+		fmt.Printf("Warning: failed to register service %s: %v\n", service.Name, err)
+	}
 	return service
 }
 
