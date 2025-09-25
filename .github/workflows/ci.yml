@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go-version: ['1.23']
+        go-version: ['1.23', '1.25']
 
     steps:
     - uses: actions/checkout@v4
@@ -26,8 +26,27 @@ jobs:
       with:
         go-version: ${{ matrix.go-version }}
 
+    - name: Start Redis for testing
+      uses: supercharge/redis-github-action@1.7.0
+      with:
+        redis-version: 7
+        redis-port: 6379
+
+    - name: Start PostgreSQL for testing
+      uses: harmon758/postgresql-action@v1
+      with:
+        postgresql version: '15'
+        postgresql db: 'gauth'
+        postgresql user: 'gauth'
+        postgresql password: 'gauth_test_pass'
+
     - name: Install dependencies
       run: go mod download
+
+    - name: Verify Go installation
+      run: |
+        go version
+        go env GOOS GOARCH
 
     - name: Run unit tests
       run: |
@@ -36,8 +55,30 @@ jobs:
         go clean -cache
         export GOMAXPROCS=2
         export GOMEMLIMIT=1GiB
-        go test -v -race -timeout=15m -parallel=2 ./pkg/... ./internal/... ./examples/cascade/pkg/gauth ./test/...
-        echo "✅ All tests completed successfully"
+        export CGO_ENABLED=1
+        
+        # Create a test runner script to handle exit codes properly
+        cat > test_runner.sh << 'EOF'
+        #!/bin/bash
+        set -euo pipefail
+        
+        echo "Starting Go test execution..."
+        echo "Go version: $(go version)"
+        echo "Testing packages: ./pkg/... ./internal/... ./examples/cascade/pkg/gauth ./test/..."
+        
+        # Run tests and capture output and exit code
+        if go test -v -race -timeout=15m -parallel=2 ./pkg/... ./internal/... ./examples/cascade/pkg/gauth ./test/...; then
+          echo "✅ All tests passed successfully"
+          exit 0
+        else
+          TEST_EXIT_CODE=$?
+          echo "❌ Tests failed with exit code: $TEST_EXIT_CODE"
+          exit $TEST_EXIT_CODE
+        fi
+        EOF
+        
+        chmod +x test_runner.sh
+        ./test_runner.sh
 
     - name: Run linter
       uses: golangci/golangci-lint-action@v6
