@@ -65,7 +65,11 @@ type TokenResponse struct {
 	Restrictions []Restriction
 }
 
-// Note: TransactionDetails is defined in transaction.go to avoid duplication
+// IMPORTANT: TransactionDetails is ONLY defined in transaction.go 
+// DO NOT add TransactionDetails type here - it will cause redeclaration errors
+// TransactionDetails struct is available through import from transaction.go
+
+//go:generate echo "TransactionDetails is defined in transaction.go - do not duplicate"
 
 // RateLimitConfig represents rate limiting configuration
 type RateLimitConfig struct {

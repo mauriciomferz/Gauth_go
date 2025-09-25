@@ -20,16 +20,22 @@ func NewResourceServer(name string, auth *GAuth) *ResourceServer {
 
 // ProcessTransaction processes a transaction with the given token
 func (s *ResourceServer) ProcessTransaction(tx TransactionDetails, token string) (string, error) {
-	// Validate token - use explicit validation for compatibility
+	// Validate token using multiple approaches for maximum compatibility
 	var tokenData *TokenResponse
 	var err error
 	
-	// Try direct method call first
+	// Approach 1: Try direct method call
 	if serviceAuth, ok := interface{}(s.auth).(*ServiceAuth); ok {
 		tokenData, err = serviceAuth.ValidateToken(token)
 	} else {
-		// Fallback to explicit function
-		tokenData, err = ValidateTokenForGAuth(s.auth, token)
+		// Approach 2: Try explicit method
+		if s.auth != nil {
+			tokenData, err = s.auth.ValidateTokenExplicit(token)
+		}
+		if err != nil || tokenData == nil {
+			// Approach 3: Use helper function
+			tokenData, err = ValidateTokenForGAuth(s.auth, token)
+		}
 	}
 	
 	if err != nil {
