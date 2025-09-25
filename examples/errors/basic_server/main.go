@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	gauthErrors "github.com/Gimel-Foundation/gauth/pkg/errors"
 )
@@ -27,7 +28,15 @@ func main() {
 	log.Println("  - GET /api/rate-limited - Rate limit error")
 	log.Println("  - GET /api/server-error - Internal server error")
 
-	if err := http.ListenAndServe(":8080", mux); err != nil {
+	server := &http.Server{
+		Addr:         ":8080",
+		Handler:      mux,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+	
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }

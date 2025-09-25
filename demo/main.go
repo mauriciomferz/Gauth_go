@@ -10,6 +10,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/Gimel-Foundation/gauth/pkg/gauth"
@@ -20,10 +21,16 @@ func main() {
 	fmt.Println("======================")
 
 	// Create a GAuth instance with config
+	// Use environment variables for secrets in production
+	clientSecret := os.Getenv("GAUTH_CLIENT_SECRET")
+	if clientSecret == "" {
+		clientSecret = "demo-secret" // Default for development only
+	}
+	
 	config := gauth.Config{
 		AuthServerURL:     "https://auth.example.com",
 		ClientID:          "demo-client",
-		ClientSecret:      "demo-secret",
+		ClientSecret:      clientSecret,
 		Scopes:            []string{"transaction:execute", "read", "write"},
 		AccessTokenExpiry: time.Hour,
 		RateLimit:         gauth.Config{}.RateLimit, // Use default zero value for demo

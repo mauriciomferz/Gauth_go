@@ -1,4 +1,3 @@
-package resilience
 // Package resilience provides type-safe implementations of common resilience patterns.
 package resilience
 
@@ -8,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/username/cascade/pkg/events"
+	"github.com/Gimel-Foundation/gauth/examples/cascade/pkg/events"
 )
 
 // CircuitBreaker implements the circuit breaker pattern

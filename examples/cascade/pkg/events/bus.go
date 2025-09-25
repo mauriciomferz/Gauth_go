@@ -1,3 +1,9 @@
+package events
+
+import (
+	"sync"
+)
+
 // EventBus manages event publishing and subscriptions
 type EventBus struct {
 	handlers []EventHandler

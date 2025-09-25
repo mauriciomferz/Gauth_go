@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	mw "github.com/Gimel-Foundation/gauth/examples/errors/middleware/internal"
 	gautherr "github.com/Gimel-Foundation/gauth/pkg/errors"
@@ -20,6 +21,14 @@ func main() {
 
 	errHandler := &mw.ErrorHandler{Next: mux}
 
+	server := &http.Server{
+		Addr:         ":8080",
+		Handler:      errHandler,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+
 	log.Println("Starting error middleware demo server on :8080")
-	http.ListenAndServe(":8080", errHandler)
+	server.ListenAndServe()
 }

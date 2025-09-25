@@ -3,7 +3,7 @@ package resilient
 import (
 	"context"
 	"fmt"
-	"math/rand"
+	"crypto/rand"
 	"sync"
 	"time"
 
@@ -144,7 +144,13 @@ func (s *Microservice) processRequest(ctx context.Context, mesh *ServiceMesh) er
 
 	// Higher chance of failure under high load
 	errorRate := 0.1 * (1 + loadFactor)
-	if rand.Float64() < errorRate {
+	
+	// Use crypto/rand for secure random generation
+	var randomBytes [8]byte
+	rand.Read(randomBytes[:])
+	randomFloat := float64(randomBytes[0]) / 255.0 // Convert to 0-1 range
+	
+	if randomFloat < errorRate {
 		s.recordFailure()
 		return fmt.Errorf("%s: service error under load %.2f", s.Name, loadFactor)
 	}
