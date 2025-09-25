@@ -4,6 +4,7 @@ package gauth
 import (
 	"context"
 	"fmt"
+	"time"
 	
 	"github.com/Gimel-Foundation/gauth/pkg/gauth"
 )
@@ -53,4 +54,15 @@ func (sa *ServiceAuth) Authenticate(ctx context.Context, serviceID string) (stri
 	}
 	
 	return token.Token, nil
+}
+
+// ValidateToken validates a token and returns token data
+func (sa *ServiceAuth) ValidateToken(token string) (*TokenResponse, error) {
+	// In a real implementation, this would validate the token
+	// For this example, we return a mock response
+	return &TokenResponse{
+		Token:      token,
+		Scope:      []string{"transaction:execute", "service:access"},
+		ValidUntil: time.Now().Add(time.Hour),
+	}, nil
 }
