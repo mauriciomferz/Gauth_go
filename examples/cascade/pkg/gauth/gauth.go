@@ -10,6 +10,7 @@ import (
 )
 
 // GAuth is an alias for ServiceAuth to maintain compatibility
+// Since GAuth = ServiceAuth, all ServiceAuth methods are automatically available on GAuth
 type GAuth = ServiceAuth
 
 // ServiceAuth wraps GAuth for service-to-service authentication
@@ -67,14 +68,8 @@ func (sa *ServiceAuth) ValidateToken(token string) (*TokenResponse, error) {
 	}, nil
 }
 
-// ValidateTokenForGAuth provides explicit ValidateToken method for GAuth type
+// ValidateTokenForGAuth provides explicit ValidateToken helper function
 // This ensures compatibility across different Go environments and build systems
 func ValidateTokenForGAuth(auth *GAuth, token string) (*TokenResponse, error) {
 	return (*ServiceAuth)(auth).ValidateToken(token)
-}
-
-// Explicit method forwarding for GAuth type to ensure CI/CD compatibility
-// This guarantees ValidateToken is available even in different build environments
-func (g *GAuth) ValidateTokenExplicit(token string) (*TokenResponse, error) {
-	return (*ServiceAuth)(g).ValidateToken(token)
 }
