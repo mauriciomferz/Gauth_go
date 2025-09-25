@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2025-09-25
+### Fixed
+- **CI/CD Pipeline Complete Stabilization** - All GitHub Actions workflows now pass reliably
+- **Build System**: Removed empty Go files causing compilation errors
+- **Dependency Management**: Go version standardized to 1.23 across entire toolchain
+- **Linter Integration**: Direct golangci-lint installation for consistent Go 1.23 compatibility
+- **Test Execution**: Simplified test runner with grouped package execution
+- **Release Workflow**: Added proper GitHub permissions for automated releases
+
+### Changed
+- All executables now build successfully: `gauth-server`, `gauth-web`, `gauth-http-server`
+- Comprehensive test suite passes with 0 failures across all packages
+- Documentation updated with correct executable names and Go version requirements
+- Module dependencies locked to Go 1.23 compatible versions
+
+### Added
+- External service testing support (Redis, PostgreSQL) in CI environment
+- Release workflow with binary artifact uploads
+- Comprehensive CI/CD documentation and fix summaries
+
 ## [1.0.5] - 2025-09-25
 ### Security
 - **ZERO VULNERABILITIES ACHIEVED** - Complete security audit resolution
