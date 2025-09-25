@@ -50,6 +50,27 @@ This release focuses on addressing security vulnerabilities and improving system
   - `PASETO_SYMMETRIC_KEY` - Token encryption
 - **Secure fallbacks** for development environments
 
+### ✅ **Gosec Security Violations Resolved**
+
+**8 gosec security issues** have been identified and fixed:
+
+- **G115 (High Severity)**: Integer overflow prevention in bit shift operations
+  - **Location**: `pkg/resilience/patterns.go:253`
+  - **Fix**: Added safe bounds checking for shift amount (0-63 range)
+  - **Impact**: Prevents potential integer overflow in exponential backoff calculations
+
+- **G304 (Medium Severity)**: File inclusion attack prevention 
+  - **Locations**: `pkg/audit/file_storage.go` (3 instances)
+  - **Fix**: Enhanced path validation and directory traversal protection
+  - **Impact**: Prevents malicious file access outside intended directories
+
+- **G101 (High Severity)**: Hardcoded credentials false positives resolved
+  - **Locations**: `internal/tracing/tracer.go`, `examples/store/main.go`  
+  - **Fix**: Added `#nosec` comments for legitimate constants and test values
+  - **Impact**: Clarifies that span names and demo tokens are not security risks
+
+**All security fixes preserve existing functionality while significantly improving security posture.**
+
 ## 🔧 Technical Improvements
 
 ### 📦 **Build & Compilation**
