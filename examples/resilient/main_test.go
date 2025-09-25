@@ -222,6 +222,7 @@ func TestResilientService(t *testing.T) {
 		transactions := []struct {
 			tx    gauth.TransactionDetails
 			token string
+			expectSuccess bool
 		}{
 			{
 				tx: gauth.TransactionDetails{
@@ -230,6 +231,7 @@ func TestResilientService(t *testing.T) {
 					CustomMetadata: map[string]string{"test": "1"},
 				},
 				token: tokenResp.Token,
+				expectSuccess: true,
 			},
 			{
 				tx: gauth.TransactionDetails{
@@ -238,6 +240,7 @@ func TestResilientService(t *testing.T) {
 					CustomMetadata: map[string]string{"test": "2"},
 				},
 				token: "invalid-token",
+				expectSuccess: false,
 			},
 			{
 				tx: gauth.TransactionDetails{
@@ -246,6 +249,7 @@ func TestResilientService(t *testing.T) {
 					CustomMetadata: map[string]string{"test": "3"},
 				},
 				token: tokenResp.Token,
+				expectSuccess: true,
 			},
 			{
 				tx: gauth.TransactionDetails{
@@ -254,14 +258,32 @@ func TestResilientService(t *testing.T) {
 					CustomMetadata: map[string]string{"test": "refund"},
 				},
 				token: "invalid-token",
+				expectSuccess: false,
 			},
 		}
 
-		for _, tc := range transactions {
-			_ = freshService.ProcessRequest(tc.tx, tc.token)
+		// Process transactions and verify they behave as expected
+		for i, tc := range transactions {
+			err := freshService.ProcessRequest(tc.tx, tc.token)
+			if tc.expectSuccess && err != nil {
+				t.Errorf("Transaction %d expected to succeed but failed with error: %v", i, err)
+			} else if !tc.expectSuccess && err == nil {
+				t.Errorf("Transaction %d expected to fail but succeeded", i)
+			}
 		}
 
+		// Give a small delay to ensure all metrics are recorded
+		time.Sleep(10 * time.Millisecond)
+
 		metrics := freshService.metrics.GetAllMetrics()
+		
+		// Debug: Print all metrics for troubleshooting
+		if os.Getenv("CI") == "true" || len(metrics) == 0 {
+			t.Logf("All metrics collected:")
+			for key, metric := range metrics {
+				t.Logf("  %s: %v (labels: %v)", key, metric.Value, metric.Labels)
+			}
+		}
 
 		// Verify transaction counts
 		paymentSuccess := getMetricValue(metrics, string(monitoring.MetricTransactions), map[string]string{
@@ -269,19 +291,19 @@ func TestResilientService(t *testing.T) {
 			"status": "success",
 		})
 		if paymentSuccess != 2 {
-			t.Errorf("Expected 2 successful payment transactions, got %.0f", paymentSuccess)
+			t.Errorf("Expected 2 successful payment transactions, got %.0f. All metrics: %v", paymentSuccess, metrics)
 		}
 
 		refundError := getMetricValue(metrics, string(monitoring.MetricTransactionErrors), map[string]string{
 			"type": "refund",
 		})
 		if refundError != 1 {
-			t.Errorf("Expected 1 failed refund transaction, got %.0f", refundError)
+			t.Errorf("Expected 1 failed refund transaction, got %.0f. All metrics: %v", refundError, metrics)
 		}
 
 		// Verify response time metrics exist
 		if !hasMetric(metrics, string(monitoring.MetricResponseTime), map[string]string{"type": "payment"}) {
-			t.Error("Expected response time metrics to be present")
+			t.Errorf("Expected response time metrics to be present. All metrics: %v", metrics)
 		}
 	})
 
