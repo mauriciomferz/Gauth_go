@@ -1,4 +1,3 @@
-package gauth
 package gauth_test
 
 import (
@@ -124,4 +123,4 @@ func TestGAuth(t *testing.T) {
 			t.Error("Expected error with expired token")
 		}
 	})
-})
+}

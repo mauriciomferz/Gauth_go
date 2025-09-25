@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"sync"
 	"time"
-	
+
 	"github.com/Gimel-Foundation/gauth/examples/cascade/pkg/events"
 )
 
