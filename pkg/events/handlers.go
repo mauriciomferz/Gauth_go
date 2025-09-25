@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -15,6 +17,14 @@ type LogHandler struct {
 
 // NewLogHandler creates a new log handler
 func NewLogHandler(path string) (*LogHandler, error) {
+	// Validate path to prevent directory traversal attacks
+	if filepath.IsAbs(path) {
+		cleanPath := filepath.Clean(path)
+		if !strings.HasPrefix(cleanPath, filepath.Clean(filepath.Dir(path))) {
+			return nil, fmt.Errorf("invalid log file path: potential directory traversal")
+		}
+	}
+	
 	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open log file: %w", err)

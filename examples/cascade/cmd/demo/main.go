@@ -9,9 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"cascade/pkg/events"
-	"cascade/pkg/mesh"
-	"cascade/pkg/resources"
+	"github.com/Gimel-Foundation/gauth/examples/cascade/pkg/events"
+	"github.com/Gimel-Foundation/gauth/examples/cascade/pkg/mesh"
+	"github.com/Gimel-Foundation/gauth/examples/cascade/pkg/resources"
 )
 
 // OrderService demonstrates a service with dependencies
