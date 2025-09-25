@@ -10,22 +10,47 @@ GAuth is a modern authentication library for Go applications. This guide will he
 go get github.com/Gimel-Foundation/gauth
 ```
 
+## Quick Start - No Build Required!
+
+### 1. **Ready-to-Use Demo Executables**
+
+```bash
+# Basic console demo - shows complete protocol flow
+./gauth-server
+
+# Interactive web interface with live features  
+./gauth-http-server
+# Open http://localhost:8080
+```
+
+### 2. **Build from Source (Optional)**
+
+```bash
+# Build all executables
+make build
+
+# Run the demos
+./gauth-server        # Console demo
+./gauth-web          # Web server
+```
+
 ## First Steps
 
-1. **Create a Simple Authentication Server**
+### 1. **Explore the Protocol Flow**
 
-Try the basic example in `examples/basic/main.go`:
+Try the basic example:
 ```bash
 cd examples/basic
 go run main.go
 ```
 
-This starts a server with:
-- Basic authentication
-- Rate limiting
-- Token management
+This demonstrates:
+- Authorization request and grant
+- JWT token issuance
+- Token validation
+- Transaction processing
 
-2. **Test the Rate Limiter**
+### 2. **Test Rate Limiting**
 
 Run the rate limiting example:
 ```bash
@@ -38,7 +63,7 @@ Watch how different patterns affect the rate limits:
 - Steady traffic
 - Multiple clients
 
-3. **Explore Token Management**
+### 3. **Explore Token Management**
 
 Try the token management example:
 ```bash
