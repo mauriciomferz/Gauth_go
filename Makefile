@@ -17,7 +17,7 @@ all: test build
 build: ## Build all binaries
 	@echo "Building GAuth binaries..."
 	$(GOBUILD) $(LDFLAGS) -o $(BINARY_NAME)-server -v ./cmd/demo
-	$(GOBUILD) $(LDFLAGS) -o $(BINARY_NAME)-demo -v ./demo
+	$(GOBUILD) $(LDFLAGS) -o $(BINARY_NAME)-web -v ./cmd/web
 	@echo "✅ Build completed successfully!"
 
 test: ## Run all tests
