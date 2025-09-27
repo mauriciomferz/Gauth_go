@@ -92,7 +92,7 @@ Overall Implementation:    █████████████████�
 # Open the enhanced standalone demo
 open standalone-demo.html
 # or
-python3 -m http.server 3000
+
 # Navigate to: http://localhost:3000/standalone-demo.html
 ```
 
