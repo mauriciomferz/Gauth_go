@@ -1,16 +1,6 @@
 package handlers
 
-import (
-	"fmt"
-	"net/http"
-	"strconv"
-	"time"
-
-	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
-
-	"github.com/Gimel-Foundation/gauth/gauth-demo-app/web/backend/services"
-)
+import (\n\t\"fmt\"\n\t\"net/http\"\n\t\"strconv\"\n\t\"strings\"\n\t\"time\"\n\n\t\"github.com/gin-gonic/gin\"\n\t\"github.com/sirupsen/logrus\"\n\n\t\"github.com/Gimel-Foundation/gauth/gauth-demo-app/web/backend/services\"\n)
 
 // AuditHandler handles audit related endpoints
 type AuditHandler struct {
@@ -500,52 +490,146 @@ func (h *AuditHandler) SimpleRFC111Authorize(c *gin.Context) {
 		return
 	}
 
-	// Extract fields from the complex payload
-	var issuer, aiSystem string
-	if clientID, ok := req["client_id"].(string); ok {
-		issuer = clientID
+	// Step A: Client requests authorization from resource owner
+	// Extract GAuth protocol fields from the authorization request
+	var clientID, resourceOwner, aiSystem string
+	if cid, ok := req["client_id"].(string); ok {
+		clientID = cid // AI client making the request
 	}
 	if principalID, ok := req["principal_id"].(string); ok && principalID != "" {
-		issuer = principalID
+		resourceOwner = principalID // Entity capable of granting access
 	}
 	if aiAgentID, ok := req["ai_agent_id"].(string); ok {
-		aiSystem = aiAgentID
+		aiSystem = aiAgentID // AI system identification
 	}
 
-	// Generate authorization response with 'code' field expected by frontend
-	authCode := fmt.Sprintf("auth_code_%d", time.Now().Unix())
+	// Step B: Client receives authorization grant (NOT authorization code yet)
+	// Generate authorization grant credential per GAuth RFC specification
+	authorizationGrant := fmt.Sprintf("grant_%d", time.Now().Unix())
 	response := gin.H{
-		"code":               authCode,                                      // Frontend expects this field
-		"status":             "authorized",
-		"authorization_code": authCode,                                      // Keep for backward compatibility
-		"authorization_id":   fmt.Sprintf("rfc111_auth_%d", time.Now().Unix()),
-		"issuer":             issuer,
-		"ai_system":          aiSystem,
-		"expires_in":         3600,
-		"timestamp":          time.Now().Format(time.RFC3339),
+		// RFC Steps A & B: Authorization request processing → Grant issued
+		"code":                 authorizationGrant,                           // Frontend expects this field (grant, not auth code)
+		"status":               "grant_issued",                              // Step B complete
+		"authorization_grant":  authorizationGrant,                          // GAuth authorization grant credential
+		"grant_type":           "power_of_attorney",                         // GAuth-specific grant type
+		"authorization_id":     fmt.Sprintf("rfc111_grant_%d", time.Now().Unix()),
+		"client_id":            clientID,                                    // AI client (application or AI system)
+		"resource_owner":       resourceOwner,                               // Entity granting access
+		"ai_system":            aiSystem,                                    // AI system details
+		"expires_in":           600,                                         // Grant expires in 10 minutes
+		"timestamp":            time.Now().Format(time.RFC3339),
+		"next_step":            "exchange_grant_for_extended_token",        // Step C guidance
+		"token_endpoint":       "/api/v1/rfc111/token",                     // Where to exchange grant
 		"compliance_status": gin.H{
 			"compliance_level": "full",
 			"rfc111_compliant": true,
+			"grant_validated":  true,
 		},
 		"legal_validation": gin.H{
-			"valid":      true,
-			"framework":  "corporate_power_of_attorney_act_2024",
-			"validated_by": "legal_compliance_engine",
+			"valid":           true,
+			"framework":       "corporate_power_of_attorney_act_2024",
+			"validated_by":    "legal_compliance_engine",
+			"validation_type": "authorization_grant",
 		},
-		"compliance": gin.H{
-			"rfc111":          "compliant",
-			"legal_framework": "validated",
-			"power_of_attorney": gin.H{
-				"granted": true,
-				"scope":   []string{"financial_operations", "contract_signing"},
-				"limitations": []string{
-					"business_hours_only",
-					"amount_limit_500k",
-				},
-			},
+		"power_of_attorney": gin.H{
+			"granted":     true,
+			"scope":       []string{"financial_operations", "contract_signing"},
+			"limitations": []string{"business_hours_only", "amount_limit_500k"},
+			"grant_basis": "delegated_authority",                           // P*P paradigm
 		},
 	}
 
+	// Store grant for Step C validation
+	if h.service != nil {
+		// Store grant data for token exchange validation
+		grantData := map[string]interface{}{
+			"client_id":      clientID,
+			"resource_owner": resourceOwner,
+			"ai_system":      aiSystem,
+			"scope":          req["scope"],
+			"created_at":     time.Now().Unix(),
+			"grant_type":     "power_of_attorney",
+		}
+		// This would be stored for Step D validation
+		_ = grantData // Store in Redis/database in real implementation
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// RFC111TokenExchange handles Steps C & D: Grant → Extended Token exchange
+func (h *AuditHandler) RFC111TokenExchange(c *gin.Context) {
+	var req map[string]interface{}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid token request format"})
+		return
+	}
+
+	// Step C: Client requests extended token by presenting authorization grant
+	grantType, _ := req["grant_type"].(string)
+	authorizationGrant, _ := req["authorization_grant"].(string)
+	clientID, _ := req["client_id"].(string)
+
+	if grantType != "authorization_grant" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":             "unsupported_grant_type",
+			"error_description": "Only 'authorization_grant' is supported",
+		})
+		return
+	}
+
+	if authorizationGrant == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":             "invalid_request",
+			"error_description": "Missing authorization_grant",
+		})
+		return
+	}
+
+	// Step D: Authorization server validates grant and issues extended token
+	// Validate authorization grant (in real implementation, check Redis/database)
+	if !strings.HasPrefix(authorizationGrant, "grant_") {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":             "invalid_grant",
+			"error_description": "Invalid authorization grant format",
+		})
+		return
+	}
+
+	// Generate extended token (GAuth-specific enhancement)
+	extendedToken := fmt.Sprintf("ext_token_%d", time.Now().Unix())
+	accessToken := fmt.Sprintf("access_%d", time.Now().Unix())
+
+	response := gin.H{
+		// Step D: Extended token issued after grant validation
+		"access_token":    accessToken,                              // Standard OAuth2 access token
+		"extended_token":  extendedToken,                           // GAuth extended token
+		"token_type":      "Bearer",
+		"expires_in":      3600,                                    // 1 hour
+		"scope":           "power_of_attorney financial_operations",
+		"client_id":       clientID,
+		"timestamp":       time.Now().Format(time.RFC3339),
+		"grant_validated": true,                                    // Step D validation complete
+		"token_features": gin.H{
+			"ai_authorization":    true,
+			"power_delegation":   true,
+			"legal_compliance":   true,
+			"audit_trail":       true,
+		},
+		"power_delegation": gin.H{
+			"delegated_powers": []string{"sign_contracts", "approve_transactions"},
+			"limitations":      []string{"business_hours", "amount_limit_500k"},
+			"accountability":   "resource_owner_responsible",
+		},
+		"compliance": gin.H{
+			"rfc111_compliant":     true,
+			"legal_framework":     "validated",
+			"power_of_attorney":   "active",
+			"extended_token_type": "power_delegation",
+		},
+	}
+
+	h.logger.Infof("RFC111 token exchange completed - Grant: %s, Client: %s", authorizationGrant, clientID)
 	c.JSON(http.StatusOK, response)
 }
 

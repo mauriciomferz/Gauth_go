@@ -223,12 +223,7 @@ func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *vipe
 			demo.GET("/scenarios/:id/status", demoHandler.GetScenarioStatus)
 		}
 
-		// RFC111/RFC115 Simple endpoints for web tests
-		rfc111 := api.Group("/rfc111")
-		{
-			rfc111.POST("/authorize", auditHandler.SimpleRFC111Authorize)
-			rfc111.POST("/authorize-simple", auditHandler.SimpleRFC111Authorize)
-		}
+				// RFC111/RFC115 Simple endpoints for web tests\n\t\trfc111 := api.Group(\"/rfc111\")\n\t\t{\n\t\t\t// Step A & B: Authorization request \u2192 Grant\n\t\t\trfc111.POST(\"/authorize\", auditHandler.SimpleRFC111Authorize)\n\t\t\trfc111.POST(\"/authorize-simple\", auditHandler.SimpleRFC111Authorize)\n\t\t\t// Step C & D: Grant \u2192 Extended Token exchange\n\t\t\trfc111.POST(\"/token\", auditHandler.RFC111TokenExchange)\n\t\t}
 
 		rfc115 := api.Group("/rfc115")
 		{

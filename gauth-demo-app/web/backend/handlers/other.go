@@ -1,16 +1,6 @@
 package handlers
 
-import (
-	"fmt"
-	"net/http"
-	"strconv"
-	"time"
-
-	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
-
-	"github.com/Gimel-Foundation/gauth/gauth-demo-app/web/backend/services"
-)
+import (\n\t\"fmt\"\n\t\"net/http\"\n\t\"strconv\"\n\t\"strings\"\n\t\"time\"\n\n\t\"github.com/gin-gonic/gin\"\n\t\"github.com/sirupsen/logrus\"\n\n\t\"github.com/Gimel-Foundation/gauth/gauth-demo-app/web/backend/services\"\n)
 
 // AuditHandler handles audit related endpoints
 type AuditHandler struct {
@@ -493,60 +483,7 @@ func (h *AuditHandler) ManageSuccessor(c *gin.Context) {
 }
 
 // SimpleRFC111Authorize handles simplified RFC111 authorization requests
-func (h *AuditHandler) SimpleRFC111Authorize(c *gin.Context) {
-	var req map[string]interface{}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
-		return
-	}
-
-	// Extract fields from the complex payload
-	var issuer, aiSystem string
-	if clientID, ok := req["client_id"].(string); ok {
-		issuer = clientID
-	}
-	if principalID, ok := req["principal_id"].(string); ok && principalID != "" {
-		issuer = principalID
-	}
-	if aiAgentID, ok := req["ai_agent_id"].(string); ok {
-		aiSystem = aiAgentID
-	}
-
-	// Generate authorization response with 'code' field expected by frontend
-	authCode := fmt.Sprintf("auth_code_%d", time.Now().Unix())
-	response := gin.H{
-		"code":               authCode,                                      // Frontend expects this field
-		"status":             "authorized",
-		"authorization_code": authCode,                                      // Keep for backward compatibility
-		"authorization_id":   fmt.Sprintf("rfc111_auth_%d", time.Now().Unix()),
-		"issuer":             issuer,
-		"ai_system":          aiSystem,
-		"expires_in":         3600,
-		"timestamp":          time.Now().Format(time.RFC3339),
-		"compliance_status": gin.H{
-			"compliance_level": "full",
-			"rfc111_compliant": true,
-		},
-		"legal_validation": gin.H{
-			"valid":      true,
-			"framework":  "corporate_power_of_attorney_act_2024",
-			"validated_by": "legal_compliance_engine",
-		},
-		"compliance": gin.H{
-			"rfc111":          "compliant",
-			"legal_framework": "validated",
-			"power_of_attorney": gin.H{
-				"granted": true,
-				"scope":   []string{"financial_operations", "contract_signing"},
-				"limitations": []string{
-					"business_hours_only",
-					"amount_limit_500k",
-				},
-			},
-		},
-	}
-
-	c.JSON(http.StatusOK, response)
+func (h *AuditHandler) SimpleRFC111Authorize(c *gin.Context) {\n\tvar req map[string]interface{}\n\tif err := c.ShouldBindJSON(&req); err != nil {\n\t\tc.JSON(http.StatusBadRequest, gin.H{\"error\": \"Invalid request format\"})\n\t\treturn\n\t}\n\n\t// Step A: Client requests authorization from resource owner\n\t// Extract GAuth protocol fields from the authorization request\n\tvar clientID, resourceOwner, aiSystem string\n\tif cid, ok := req[\"client_id\"].(string); ok {\n\t\tclientID = cid // AI client making the request\n\t}\n\tif principalID, ok := req[\"principal_id\"].(string); ok && principalID != \"\" {\n\t\tresourceOwner = principalID // Entity capable of granting access\n\t}\n\tif aiAgentID, ok := req[\"ai_agent_id\"].(string); ok {\n\t\taiSystem = aiAgentID // AI system identification\n\t}\n\n\t// Step B: Client receives authorization grant (NOT authorization code yet)\n\t// Generate authorization grant credential per GAuth RFC specification\n\tauthorizationGrant := fmt.Sprintf(\"grant_%d\", time.Now().Unix())\n\tresponse := gin.H{\n\t\t// RFC Steps A & B: Authorization request processing → Grant issued\n\t\t\"code\":                 authorizationGrant,                           // Frontend expects this field (grant, not auth code)\n\t\t\"status\":               \"grant_issued\",                              // Step B complete\n\t\t\"authorization_grant\":  authorizationGrant,                          // GAuth authorization grant credential\n\t\t\"grant_type\":           \"power_of_attorney\",                         // GAuth-specific grant type\n\t\t\"authorization_id\":     fmt.Sprintf(\"rfc111_grant_%d\", time.Now().Unix()),\n\t\t\"client_id\":            clientID,                                    // AI client (application or AI system)\n\t\t\"resource_owner\":       resourceOwner,                               // Entity granting access\n\t\t\"ai_system\":            aiSystem,                                    // AI system details\n\t\t\"expires_in\":           600,                                         // Grant expires in 10 minutes\n\t\t\"timestamp\":            time.Now().Format(time.RFC3339),\n\t\t\"next_step\":            \"exchange_grant_for_extended_token\",        // Step C guidance\n\t\t\"token_endpoint\":       \"/api/v1/rfc111/token\",                     // Where to exchange grant\n\t\t\"compliance_status\": gin.H{\n\t\t\t\"compliance_level\": \"full\",\n\t\t\t\"rfc111_compliant\": true,\n\t\t\t\"grant_validated\":  true,\n\t\t},\n\t\t\"legal_validation\": gin.H{\n\t\t\t\"valid\":           true,\n\t\t\t\"framework\":       \"corporate_power_of_attorney_act_2024\",\n\t\t\t\"validated_by\":    \"legal_compliance_engine\",\n\t\t\t\"validation_type\": \"authorization_grant\",\n\t\t},\n\t\t\"power_of_attorney\": gin.H{\n\t\t\t\"granted\":     true,\n\t\t\t\"scope\":       []string{\"financial_operations\", \"contract_signing\"},\n\t\t\t\"limitations\": []string{\"business_hours_only\", \"amount_limit_500k\"},\n\t\t\t\"grant_basis\": \"delegated_authority\",                           // P*P paradigm\n\t\t},\n\t}\n\n\t// Store grant for Step C validation\n\tif h.service != nil {\n\t\t// Store grant data for token exchange validation\n\t\tgrantData := map[string]interface{}{\n\t\t\t\"client_id\":      clientID,\n\t\t\t\"resource_owner\": resourceOwner,\n\t\t\t\"ai_system\":      aiSystem,\n\t\t\t\"scope\":          req[\"scope\"],\n\t\t\t\"created_at\":     time.Now().Unix(),\n\t\t\t\"grant_type\":     \"power_of_attorney\",\n\t\t}\n\t\t// This would be stored for Step D validation\n\t\t_ = grantData // Store in Redis/database in real implementation\n\t}\n\n\tc.JSON(http.StatusOK, response)"}
 }
 
 // SimpleRFC115Delegate handles simplified RFC115 delegation for web tests
