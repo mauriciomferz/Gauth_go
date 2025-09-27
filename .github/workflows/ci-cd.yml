@@ -161,10 +161,23 @@ jobs:
         flags: unittests
         name: codecov-umbrella
 
-    - name: Build binary
+    - name: Build binaries
       run: |
-        go build -v -o gauth-server ./cmd/demo
-        go build -v -o gauth-demo ./demo
+        # Build main demo application
+        go build -v -o gauth-demo ./cmd/demo
+        
+        # Build web backend application (has its own go.mod)
+        cd gauth-demo-app/web/backend
+        go build -v -o ../../../gauth-web-backend ./
+        cd ../../..
+        
+        # Build web application if cmd/web exists
+        if [ -d "./cmd/web" ]; then
+          go build -v -o gauth-web ./cmd/web
+        fi
+        
+        # Verify builds
+        ls -la gauth-*
 
   security:
     name: Security Scan
