@@ -1,6 +1,6 @@
 module github.com/Gimel-Foundation/gauth
 
-go 1.23.0
+go 1.23.3
 
 require (
 	github.com/Gimel-Foundation/gauth/gauth-demo-app/web/backend v0.0.0
@@ -23,7 +23,7 @@ require (
 
 require (
 	github.com/gorilla/websocket v1.5.3 // indirect
-	github.com/redis/go-redis/v9 v9.7.0 // indirect
+	github.com/redis/go-redis/v9 v9.7.1 // indirect
 )
 
 require (

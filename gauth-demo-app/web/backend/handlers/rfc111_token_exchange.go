@@ -1,4 +1,14 @@
-package handlers\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"time\"\n\n\t\"github.com/gin-gonic/gin\"\n)\n\n// RFC111TokenExchange handles Steps C & D: Grant → Extended Token exchange
+package handlers
+
+import (
+	"fmt"
+	"net/http"
+	"time"
+
+	"github.com/gin-gonic/gin"
+)
+
+// RFC111TokenExchange handles Steps C & D: Grant → Extended Token exchange
 // This implements the proper GAuth protocol flow as specified in the RFC
 func (h *AuditHandler) RFC111TokenExchange(c *gin.Context) {
 	var req map[string]interface{}
@@ -15,7 +25,7 @@ func (h *AuditHandler) RFC111TokenExchange(c *gin.Context) {
 	if grantType != "authorization_grant" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":             "unsupported_grant_type",
-			"error_description": "Only 'authorization_grant' is supported",
+			"error_description": "Only 'authorization_grant' is supported", 
 		})
 		return
 	}

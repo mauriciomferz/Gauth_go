@@ -56,7 +56,7 @@ func main() {
 	}
 
 	// Initialize HTTP server
-	router := setupRouter(svc, gauthPlusSvc, logger, config)
+	router := setupRouter(svc, logger, config, gauthPlusSvc)
 
 	// Start server
 	server := &http.Server{
@@ -139,7 +139,7 @@ func initLogger(config *viper.Viper) *logrus.Logger {
 	return logger
 }
 
-func setupRouter(svc *services.GAuthService, gauthPlusSvc *services.GAuthPlusService, logger *logrus.Logger, config *viper.Viper) *gin.Engine {
+func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *viper.Viper, gauthPlusSvc *services.GAuthPlusService) *gin.Engine {
 	// Set gin mode
 	gin.SetMode(gin.ReleaseMode)
 
@@ -229,7 +229,15 @@ func setupRouter(svc *services.GAuthService, gauthPlusSvc *services.GAuthPlusSer
 			demo.GET("/scenarios/:id/status", demoHandler.GetScenarioStatus)
 		}
 
-				// RFC111/RFC115 Simple endpoints for web tests\n\t\trfc111 := api.Group(\"/rfc111\")\n\t\t{\n\t\t\t// Step A & B: Authorization request \u2192 Grant\n\t\t\trfc111.POST(\"/authorize\", auditHandler.SimpleRFC111Authorize)\n\t\t\trfc111.POST(\"/authorize-simple\", auditHandler.SimpleRFC111Authorize)\n\t\t\t// Step C & D: Grant \u2192 Extended Token exchange\n\t\t\trfc111.POST(\"/token\", auditHandler.RFC111TokenExchange)\n\t\t}
+		// RFC111/RFC115 Simple endpoints for web tests
+		rfc111 := api.Group("/rfc111")
+		{
+			// Step A & B: Authorization request → Grant
+			rfc111.POST("/authorize", auditHandler.SimpleRFC111Authorize)
+			rfc111.POST("/authorize-simple", auditHandler.SimpleRFC111Authorize)
+			// Step C & D: Grant → Extended Token exchange
+			rfc111.POST("/token", auditHandler.RFC111TokenExchange)
+		}
 
 		rfc115 := api.Group("/rfc115")
 		{
