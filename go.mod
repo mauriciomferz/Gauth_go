@@ -6,7 +6,6 @@ require (
 	github.com/Gimel-Foundation/gauth/gauth-demo-app/web/backend v0.0.0
 	github.com/alicebob/miniredis/v2 v2.35.0
 	github.com/go-redis/redis/v8 v8.11.5
-	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/vault/api v1.20.0
@@ -23,7 +22,7 @@ require (
 
 require (
 	github.com/gorilla/websocket v1.5.3 // indirect
-	github.com/redis/go-redis/v9 v9.7.1 // indirect
+	github.com/redis/go-redis/v9 v9.14.0 // indirect
 )
 
 require (
