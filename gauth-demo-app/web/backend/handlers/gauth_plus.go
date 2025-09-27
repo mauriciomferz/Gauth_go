@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	
+
 	"github.com/Gimel-Foundation/gauth/gauth-demo-app/web/backend/services"
 )
 
