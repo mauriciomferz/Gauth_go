@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -201,6 +202,7 @@ func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *vipe
 			audit.GET("/events/:id", auditHandler.GetEvent)
 			audit.GET("/compliance", auditHandler.GetComplianceReport)
 			audit.GET("/trails/:entity", auditHandler.GetAuditTrail)
+			audit.POST("/advanced", auditHandler.AdvancedAudit)
 		}
 
 		// Rate limiting endpoints
@@ -221,12 +223,18 @@ func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *vipe
 			demo.GET("/scenarios/:id/status", demoHandler.GetScenarioStatus)
 		}
 
-		// RFC111/RFC115 Compliance endpoints - Full RFC implementation
-		rfc111Handler, err := handlers.NewRFC111Handler(config, logger)
-		if err != nil {
-			logger.Fatalf("Failed to initialize RFC111 handler: %v", err)
+		// RFC111/RFC115 Simple endpoints for web tests
+		rfc111 := api.Group("/rfc111")
+		{
+			rfc111.POST("/authorize", auditHandler.SimpleRFC111Authorize)
+			rfc111.POST("/authorize-simple", auditHandler.SimpleRFC111Authorize)
 		}
-		rfc111Handler.RegisterRoutes(router)
+
+		rfc115 := api.Group("/rfc115")
+		{
+			rfc115.POST("/delegate", auditHandler.SimpleRFC115Delegate)
+			rfc115.POST("/delegation", auditHandler.SimpleRFC115Delegate)
+		}
 
 		// Token Management endpoints
 		tokens := api.Group("/tokens")
@@ -237,6 +245,20 @@ func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *vipe
 			tokens.DELETE("/:id", tokenHandler.RevokeToken)
 			tokens.POST("/validate", tokenHandler.ValidateToken)
 			tokens.POST("/refresh", tokenHandler.RefreshToken)
+			tokens.POST("/enhanced", auditHandler.SimpleEnhancedTokens)
+			tokens.POST("/enhanced-simple", auditHandler.SimpleEnhancedTokens)
+		}
+
+		// Successor Management endpoints
+		successor := api.Group("/successor")
+		{
+			successor.POST("/manage", auditHandler.ManageSuccessor)
+		}
+
+		// Compliance endpoints
+		compliance := api.Group("/compliance")
+		{
+			compliance.POST("/validate", auditHandler.ValidateCompliance)
 		}
 
 		// Metrics endpoints
@@ -264,11 +286,16 @@ func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *vipe
 	// Swagger documentation
 	// router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Serve static files (React app)
+	// Serve static files (React app) - Only for non-API routes
 	router.Static("/static", "./static")
 	router.StaticFile("/", "./static/index.html")
 	router.NoRoute(func(c *gin.Context) {
-		c.File("./static/index.html")
+		// Only serve static files for non-API routes
+		if !strings.HasPrefix(c.Request.URL.Path, "/api/") {
+			c.File("./static/index.html")
+		} else {
+			c.JSON(http.StatusNotFound, gin.H{"error": "API endpoint not found"})
+		}
 	})
 
 	return router

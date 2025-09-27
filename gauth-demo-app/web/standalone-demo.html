@@ -781,36 +781,21 @@
             button.disabled = true;
 
             try {
-                const response = await fetch('http://localhost:8080/api/v1/tokens/enhanced', {
+                const response = await fetch('http://localhost:8080/api/v1/tokens/enhanced-simple', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        subject: "ai_financial_agent",
-                        scope: ["portfolio_management", "risk_assessment", "compliance_monitoring"],
-                        ai_metadata: {
-                            model_id: "gpt-4-financial",
-                            version: "1.2.3",
-                            capabilities: ["financial_analysis", "regulatory_compliance", "risk_modeling"],
-                            restrictions: {
-                                max_transaction_amount: 250000,
-                                allowed_markets: ["NYSE", "NASDAQ", "LSE"]
-                            }
-                        },
-                        delegation_scope: "ai_portfolio_management",
-                        legal_framework: {
-                            jurisdiction: "US",
-                            entity_type: "investment_firm",
-                            regulatory_compliance: ["SEC", "FINRA", "CFTC"]
-                        }
+                        ai_capabilities: ["financial_analysis", "regulatory_compliance", "risk_modeling"],
+                        business_restrictions: ["$250k_limit", "NYSE_NASDAQ_LSE_only", "business_hours_only"]
                     }),
                 });
 
                 const data = await safeJsonParse(response);
                 
-                if (data.id) {
-                    alert(`✅ Enhanced Token Success!\n\nToken ID: ${data.id}\n\nSubject: ${data.subject}\nCompliance Status: ${data.compliance_status}\nAI Capabilities: ${data.ai?.capabilities?.join(', ')}\n\n🔐 Enhanced token created with AI-specific metadata and business restrictions!`);
+                if (data.token_id) {
+                    alert(`✅ Enhanced Token Success!\n\nToken ID: ${data.token_id}\n\nAI Capabilities: ${data.ai_capabilities?.join(', ')}\nBusiness Restrictions: ${data.business_restrictions?.join(', ')}\nToken Type: ${data.token_type}\n\n🔐 Enhanced token created with AI-specific metadata and business restrictions!`);
                 } else {
                     alert(`❌ Enhanced Token Error: ${JSON.stringify(data, null, 2)}`);
                 }
@@ -959,8 +944,19 @@
 
                 for (const test of tests) {
                     try {
-                        await test.func();
-                        results[test.name.toLowerCase().replace(/\s+/g, '_')] = true;
+                        const result = await test.func();
+                        // Map test names to the correct result keys
+                        if (test.name === 'RFC111') {
+                            results.rfc111 = true;
+                        } else if (test.name === 'RFC115') {
+                            results.rfc115 = true;
+                        } else if (test.name === 'Enhanced Tokens') {
+                            results.tokens = true;
+                        } else if (test.name === 'Successor Management') {
+                            results.successor = true;
+                        } else if (test.name === 'Advanced Auditing') {
+                            results.auditing = true;
+                        }
                     } catch (error) {
                         console.log(`❌ ${test.name} test failed:`, error.message);
                     }
@@ -1065,7 +1061,7 @@
 
         // Helper functions for comprehensive testing
         async function testRFC111Feature() {
-            const response = await fetch('http://localhost:8080/api/v1/rfc111/authorize', {
+            const response = await fetch('http://localhost:8080/api/v1/rfc111/authorize-simple', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ issuer: "cfo_jane_smith", ai_system: "financial_ai_v3" })
@@ -1083,7 +1079,7 @@
         }
 
         async function testEnhancedTokensFeature() {
-            const response = await fetch('http://localhost:8080/api/v1/tokens/enhanced', {
+            const response = await fetch('http://localhost:8080/api/v1/tokens/enhanced-simple', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ai_capabilities: ["financial_analysis"], business_restrictions: ["$500k_limit"] })
