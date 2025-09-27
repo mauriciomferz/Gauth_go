@@ -49,8 +49,14 @@ func main() {
 		logger.Fatalf("Failed to initialize GAuth service: %v", err)
 	}
 
+	// Initialize GAuth+ comprehensive service
+	gauthPlusSvc, err := services.NewGAuthPlusService(config, logger)
+	if err != nil {
+		logger.Fatalf("Failed to initialize GAuth+ service: %v", err)
+	}
+
 	// Initialize HTTP server
-	router := setupRouter(svc, logger, config)
+	router := setupRouter(svc, gauthPlusSvc, logger, config)
 
 	// Start server
 	server := &http.Server{
@@ -133,7 +139,7 @@ func initLogger(config *viper.Viper) *logrus.Logger {
 	return logger
 }
 
-func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *viper.Viper) *gin.Engine {
+func setupRouter(svc *services.GAuthService, gauthPlusSvc *services.GAuthPlusService, logger *logrus.Logger, config *viper.Viper) *gin.Engine {
 	// Set gin mode
 	gin.SetMode(gin.ReleaseMode)
 
@@ -254,6 +260,18 @@ func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *vipe
 		compliance := api.Group("/compliance")
 		{
 			compliance.POST("/validate", auditHandler.ValidateCompliance)
+		}
+
+		// GAuth+ Comprehensive Authorization endpoints
+		gauthPlus := api.Group("/gauth-plus")
+		gauthPlusHandler := handlers.NewGAuthPlusHandler(gauthPlusSvc, logger)
+		{
+			gauthPlus.POST("/authorize", gauthPlusHandler.RegisterAIAuthorization)
+			gauthPlus.POST("/validate", gauthPlusHandler.ValidateAIAuthority)
+			gauthPlus.GET("/commercial-register/:ai_system_id", gauthPlusHandler.GetCommercialRegisterEntry)
+			gauthPlus.POST("/authorizing-party", gauthPlusHandler.CreateAuthorizingParty)
+			gauthPlus.GET("/cascade/:ai_system_id", gauthPlusHandler.GetAuthorizationCascade)
+			gauthPlus.GET("/commercial-register", gauthPlusHandler.QueryCommercialRegister)
 		}
 
 		// Metrics endpoints

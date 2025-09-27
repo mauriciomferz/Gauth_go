@@ -11,6 +11,8 @@
 
 GAuth enables AI systems to act on behalf of humans or organizations, with explicit, verifiable, and auditable power-of-attorney flows. Built on OAuth, OpenID Connect, and MCP, GAuth is designed for open source, extensibility, and compliance with RFC111.
 
+🌟 **NEW: GAuth+ Commercial Register** - The world's first blockchain-based commercial register for AI systems, providing comprehensive power-of-attorney management with dual control principles and global verification capabilities. [📖 Learn More](./GAUTH_PLUS_COMPREHENSIVE_GUIDE.md)
+
 ## 📦 **Ready-to-Use Executables**
 
 **No compilation needed!** Get started immediately with pre-built executables:
@@ -136,6 +138,14 @@ make build
 - **API Documentation**: Swagger/OpenAPI specifications
 - **Comprehensive Testing**: Integration tests with >90% coverage
 - **Production Ready**: Structured logging, error handling, monitoring
+
+### **🌟 GAuth+ Commercial Register** ✨ **NEW**
+- **Blockchain Registry**: First commercial register for AI systems with cryptographic verification
+- **Comprehensive Authorization**: Answers WHO, WHAT, TRANSACTIONS, and ACTIONS for AI power-of-attorney
+- **Dual Control Principle**: Second-level approval for sensitive operations with human accountability
+- **Global Verification**: Any relying party can verify AI authority against blockchain registry
+- **Legal Framework**: Full power-of-attorney integration with multi-jurisdictional compliance
+- **Authorization Cascade**: Ensures human authority at top of every delegation chain
 
 ---
 
