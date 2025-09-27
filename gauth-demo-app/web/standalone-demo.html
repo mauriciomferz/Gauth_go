@@ -625,6 +625,28 @@
     </footer>
 
     <script>
+        // Helper function for safe JSON parsing
+        async function safeJsonParse(response) {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const responseText = await response.text();
+            const cleanedResponseText = responseText.trim();
+            
+            if (!cleanedResponseText) {
+                throw new Error('Empty response received');
+            }
+
+            try {
+                return JSON.parse(cleanedResponseText);
+            } catch (parseError) {
+                console.error('JSON Parse Error:', parseError);
+                console.error('Response Text:', cleanedResponseText);
+                throw new Error(`Invalid JSON response: ${parseError.message}`);
+            }
+        }
+
         // Live API testing functions
         async function testRFC111() {
             const button = event.target;
@@ -671,7 +693,7 @@
                     }),
                 });
 
-                const data = await response.json();
+                const data = await safeJsonParse(response);
                 
                 if (data.code) {
                     alert(`✅ RFC111 Success!\n\nAuthorization Code: ${data.code}\n\nCompliance Level: ${data.compliance_status?.compliance_level}\nLegal Validation: ${data.legal_validation?.valid ? 'Valid' : 'Invalid'}\n\n🎯 Business Owner (CFO) successfully delegated financial authority to AI assistant!`);
@@ -738,7 +760,7 @@
                     }),
                 });
 
-                const data = await response.json();
+                const data = await safeJsonParse(response);
                 
                 if (data.delegation_id) {
                     alert(`✅ RFC115 Success!\n\nDelegation ID: ${data.delegation_id}\n\nCompliance Level: ${data.compliance_status?.compliance_level}\nAttestation Level: ${data.enhanced_token?.attestations?.[0]?.trust_level}\n\n⚖️ Board Chair successfully delegated governance powers with enhanced attestation!`);
@@ -785,7 +807,7 @@
                     }),
                 });
 
-                const data = await response.json();
+                const data = await safeJsonParse(response);
                 
                 if (data.id) {
                     alert(`✅ Enhanced Token Success!\n\nToken ID: ${data.id}\n\nSubject: ${data.subject}\nCompliance Status: ${data.compliance_status}\nAI Capabilities: ${data.ai?.capabilities?.join(', ')}\n\n🔐 Enhanced token created with AI-specific metadata and business restrictions!`);
@@ -834,7 +856,26 @@
                     }),
                 });
 
-                const data = await response.json();
+                // Check if response is OK and has valid content type
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // Get response text first to handle potential parsing issues
+                const responseText = await response.text();
+                
+                // Clean the response text to remove any extra characters
+                const cleanedResponseText = responseText.trim();
+                
+                // Try to parse as JSON
+                let data;
+                try {
+                    data = JSON.parse(cleanedResponseText);
+                } catch (parseError) {
+                    console.error('JSON Parse Error:', parseError);
+                    console.error('Response Text:', cleanedResponseText);
+                    throw new Error(`Invalid JSON response: ${parseError.message}`);
+                }
                 
                 if (data.successor_id) {
                     alert(`✅ Successor Management Success!\n\nSuccessor ID: ${data.successor_id}\n\nCurrent Version: ${data.version_history?.current_version}\nRevocation Status: ${data.revocation_status?.is_revoked ? 'Revoked' : 'Active'}\n\n🔄 Backup AI successor and version history managed successfully!`);
@@ -877,7 +918,7 @@
                     }),
                 });
 
-                const data = await response.json();
+                const data = await safeJsonParse(response);
                 
                 if (data.audit_id) {
                     alert(`✅ Advanced Auditing Success!\n\nAudit ID: ${data.audit_id}\n\nForensic Tools: ${data.forensic_analysis?.tools?.join(', ')}\nCompliance Frameworks: ${data.compliance_tracking?.frameworks?.join(', ')}\n\n📊 Advanced audit and compliance tracking initiated successfully!`);
@@ -992,7 +1033,7 @@
                     }),
                 });
 
-                const data = await response.json();
+                const data = await safeJsonParse(response);
                 
                 if (data.compliance_status) {
                     alert(`⚖️ Compliance Validation Results:\n\n` +
@@ -1029,7 +1070,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ issuer: "cfo_jane_smith", ai_system: "financial_ai_v3" })
             });
-            return await response.json();
+            return await safeJsonParse(response);
         }
 
         async function testRFC115Feature() {
@@ -1038,7 +1079,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ principal: "board_chair", enhanced_delegation: true })
             });
-            return await response.json();
+            return await safeJsonParse(response);
         }
 
         async function testEnhancedTokensFeature() {
@@ -1047,7 +1088,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ai_capabilities: ["financial_analysis"], business_restrictions: ["$500k_limit"] })
             });
-            return await response.json();
+            return await safeJsonParse(response);
         }
 
         async function testSuccessorManagementFeature() {
@@ -1056,7 +1097,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ principal_id: "cfo_jane_smith", successor_id: "backup_ai_v2" })
             });
-            return await response.json();
+            return await safeJsonParse(response);
         }
 
         async function testAdvancedAuditingFeature() {
@@ -1065,14 +1106,14 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ audit_scope: ["comprehensive"], forensic_analysis: { enabled: true } })
             });
-            return await response.json();
+            return await safeJsonParse(response);
         }
 
         // Check backend connectivity on page load
         window.addEventListener('load', async () => {
             try {
                 const response = await fetch('http://localhost:8080/health');
-                const data = await response.json();
+                const data = await safeJsonParse(response);
                 if (data.status === 'ok') {
                     console.log('✅ GAuth P*P Backend is operational!');
                     // You could update status indicators here
