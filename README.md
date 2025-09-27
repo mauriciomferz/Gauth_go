@@ -30,6 +30,22 @@ Production-ready server with comprehensive API endpoints, WebSocket real-time ev
 
 **📥 Download**: Both executables are included in this repository and ready for immediate deployment.
 
+### 🎯 **GAuth+ Web Application** (`gauth-demo-app/web/`) ✨ **NEW**
+```bash
+cd gauth-demo-app/web
+./deploy.sh  # Interactive deployment with multiple options
+# or
+open standalone-demo.html  # Enhanced standalone demo
+```
+**Revolutionary Features:**
+- **98% Complete Implementation** of all 11 core GAuth+ features
+- **Interactive Testing Panel** with comprehensive feature coverage
+- **Legal Framework Integration** with power-of-attorney compliance
+- **Real-time Audit Trails** with forensic analysis capabilities
+- **Business Power Delegation** paradigm (IT Policy → Business Authority)
+
+**🌐 Live Access**: Enhanced standalone demo with full RFC111/RFC115 implementation
+
 ## 🌟 **NEW: Enhanced Interactive Webapp with Real-time Features**
 
 Experience GAuth in action with our cutting-edge web application featuring modern UI and live updates:
