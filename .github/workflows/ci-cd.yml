@@ -304,7 +304,7 @@ jobs:
     
     steps:
     - name: Notify Slack (if configured)
-      if: always() && secrets.SLACK_WEBHOOK_URL
+      if: always()
       continue-on-error: true
       uses: 8398a7/action-slack@v3
       with:
