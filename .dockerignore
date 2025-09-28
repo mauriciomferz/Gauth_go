@@ -2,8 +2,18 @@
 .git
 .gitignore
 
-# Problematic local module directory (causes cache key calculation issues)
+# CRITICAL: Problematic local module directory that causes Docker cache key issues
+# This directory contains local module references that Docker cannot resolve
 gauth-demo-app/
+gauth-demo-app/**
+**/gauth-demo-app/
+**/gauth-demo-app/**
+
+# Additional problematic directories
+gimel-app-*/
+gimel-app-*/**
+**/gimel-app-*/
+**/gimel-app-*/**
 
 # Documentation and markdown files
 *.md

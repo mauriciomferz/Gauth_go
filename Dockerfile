@@ -11,15 +11,19 @@ WORKDIR /app
 COPY go.mod go.sum ./
 
 # Remove the problematic local module dependency that's not needed for cmd/demo
-# The gauth-demo-app directory is excluded via .dockerignore to prevent cache key issues
+# This prevents any Docker cache key issues with missing directories
 RUN sed -i '/github.com\/Gimel-Foundation\/gauth\/gauth-demo-app\/web\/backend/d' go.mod && \
     sed -i '/replace.*gauth-demo-app.*web.*backend/d' go.mod
 
 # Download dependencies (without the local backend module)
 RUN go mod download
 
-# Copy the source code (gauth-demo-app directory excluded via .dockerignore)
-COPY . ./
+# Copy only the specific directories needed for cmd/demo build
+# This completely avoids any cache key issues with gauth-demo-app directory
+COPY cmd/ ./cmd/
+COPY pkg/ ./pkg/
+COPY internal/ ./internal/
+COPY examples/ ./examples/
 
 # Verify dependencies
 RUN go mod verify
