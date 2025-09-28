@@ -7,6 +7,12 @@ import (
 	"github.com/Gimel-Foundation/gauth/internal/audit"
 )
 
+// Test constants
+const (
+	testTypeAuth = "auth"
+	testUser1    = "user1"
+)
+
 func TestAuditLogger(t *testing.T) {
 	// Test creation with different sizes
 	t.Run("Logger Creation", func(t *testing.T) {
@@ -80,13 +86,13 @@ func TestAuditLogger(t *testing.T) {
 		logger := audit.NewLogger(10)
 
 		// Log mix of events
-		logger.Log(audit.Event{Type: "auth", ActorID: "user1"})
+		logger.Log(audit.Event{Type: testTypeAuth, ActorID: testUser1})
 		logger.Log(audit.Event{Type: "transaction", ActorID: "user2"})
-		logger.Log(audit.Event{Type: "auth", ActorID: "user1"})
+		logger.Log(audit.Event{Type: testTypeAuth, ActorID: testUser1})
 
 		// Query for auth events by user1
 		results := logger.Query(func(e audit.Event) bool {
-			return e.Type == "auth" && e.ActorID == "user1"
+			return e.Type == testTypeAuth && e.ActorID == testUser1
 		})
 
 		if len(results) != 2 {

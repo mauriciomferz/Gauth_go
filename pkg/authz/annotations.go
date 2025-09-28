@@ -1,6 +1,10 @@
 package authz
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/Gimel-Foundation/gauth/pkg/events"
+)
 
 // Annotation represents a typed value for access response annotations
 // Annotation represents a typed value for access response annotations.
@@ -28,7 +32,7 @@ func NewAnnotations() *Annotations {
 
 // GetString retrieves a string annotation
 func (a *Annotations) GetString(key string) (string, bool) {
-	if val, ok := a.Values[key]; ok && val.Type == "string" {
+	if val, ok := a.Values[key]; ok && val.Type == events.MetadataTypeString {
 		return val.StringValue, true
 	}
 	return "", false
@@ -36,7 +40,7 @@ func (a *Annotations) GetString(key string) (string, bool) {
 
 // GetInt retrieves an integer annotation
 func (a *Annotations) GetInt(key string) (int, bool) {
-	if val, ok := a.Values[key]; ok && val.Type == "int" {
+	if val, ok := a.Values[key]; ok && val.Type == events.MetadataTypeInt {
 		return val.IntValue, true
 	}
 	return 0, false
@@ -44,7 +48,7 @@ func (a *Annotations) GetInt(key string) (int, bool) {
 
 // GetFloat retrieves a float annotation
 func (a *Annotations) GetFloat(key string) (float64, bool) {
-	if val, ok := a.Values[key]; ok && val.Type == "float" {
+	if val, ok := a.Values[key]; ok && val.Type == events.MetadataTypeFloat {
 		return val.FloatValue, true
 	}
 	return 0, false
@@ -52,7 +56,7 @@ func (a *Annotations) GetFloat(key string) (float64, bool) {
 
 // GetBool retrieves a boolean annotation
 func (a *Annotations) GetBool(key string) (bool, bool) {
-	if val, ok := a.Values[key]; ok && val.Type == "bool" {
+	if val, ok := a.Values[key]; ok && val.Type == events.MetadataTypeBool {
 		return val.BoolValue, true
 	}
 	return false, false

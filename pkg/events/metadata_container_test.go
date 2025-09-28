@@ -6,6 +6,12 @@ import (
 	"time"
 )
 
+// Test constants
+const (
+	testValueString    = "test"
+	testValueProtected = "protected"
+)
+
 // This test file verifies functionality of the metadata container
 // which stores strongly typed values and provides type-safe accessors.
 
@@ -26,8 +32,8 @@ func TestMetadataContainer(t *testing.T) {
 			t.Errorf("Expected string type, got %s", retrieved.Type)
 		}
 
-		if retrieved.Value.(string) != "test" {
-			t.Errorf("Expected value 'test', got %v", retrieved.Value)
+		if retrieved.Value.(string) != testValueString {
+			t.Errorf("Expected value '%s', got %v", testValueString, retrieved.Value)
 		}
 
 		// Test Has method
@@ -106,7 +112,7 @@ func TestMetadataContainer(t *testing.T) {
 		m := NewMetadata()
 
 		// Set a read-only value
-		m.SetReadOnly("readonly_key", NewStringValue("protected"))
+		m.SetReadOnly("readonly_key", NewStringValue(testValueProtected))
 
 		// Try to overwrite it
 		m.SetString("readonly_key", "new_value")
@@ -116,7 +122,7 @@ func TestMetadataContainer(t *testing.T) {
 		if !ok {
 			t.Error("Failed to retrieve read-only value")
 		}
-		if val != "protected" {
+		if val != testValueProtected {
 			t.Errorf("Expected read-only value to be unchanged, but got '%s'", val)
 		}
 

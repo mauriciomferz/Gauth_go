@@ -3,6 +3,8 @@ package authz
 import (
 	"fmt"
 	"time"
+
+	"github.com/Gimel-Foundation/gauth/pkg/events"
 )
 
 // ContextValue represents a typed value for authorization context
@@ -68,7 +70,7 @@ func (c *Context) GetBool(key string) (bool, bool) {
 
 // GetTime retrieves a time value from the context
 func (c *Context) GetTime(key string) (time.Time, bool) {
-	if val, ok := c.Values[key]; ok && val.Type == "time" {
+	if val, ok := c.Values[key]; ok && val.Type == events.MetadataTypeTime {
 		t, err := time.Parse(time.RFC3339, val.TimeValue)
 		if err == nil {
 			return t, true

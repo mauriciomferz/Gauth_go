@@ -4,13 +4,18 @@ import (
 	"testing"
 )
 
+// Test constants
+const (
+	testResourceName = "test-resource"
+)
+
 func TestResourceConfig(t *testing.T) {
 	config := NewResourceConfig()
 
 	// Test string values
-	config.SetString("name", "test-resource")
-	if val, ok := config.GetString("name"); !ok || val != "test-resource" {
-		t.Errorf("String value not set correctly: got %v, want %s", val, "test-resource")
+	config.SetString("name", testResourceName)
+	if val, ok := config.GetString("name"); !ok || val != testResourceName {
+		t.Errorf("String value not set correctly: got %v, want %s", val, testResourceName)
 	}
 
 	// Test int values

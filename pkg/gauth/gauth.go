@@ -13,6 +13,7 @@ import (
 	"github.com/Gimel-Foundation/gauth/internal/errors"
 	"github.com/Gimel-Foundation/gauth/internal/ratelimit"
 	"github.com/Gimel-Foundation/gauth/internal/tokenstore"
+	"github.com/Gimel-Foundation/gauth/pkg/metrics"
 )
 
 // Close releases any resources held by GAuth (stub for test compatibility)
@@ -55,6 +56,11 @@ func New(config Config) (*GAuth, error) {
 	if err := validateConfig(config); err != nil {
 		return nil, err
 	}
+	
+	// Register metrics (replaces removed init functions)
+	metrics.RegisterMetrics()
+	metrics.RegisterHTTPMetrics()
+	
 	auditLogger := audit.NewLogger(1000)
 	rateLimiter := ratelimit.NewLimiter(&ratelimit.Config{
 		RequestsPerSecond: 10,

@@ -44,7 +44,8 @@ var (
 	)
 )
 
-func init() {
+// RegisterHTTPMetrics registers all HTTP-related metrics with Prometheus
+func RegisterHTTPMetrics() {
 	// Register HTTP metrics
 	prometheus.MustRegister(
 		httpRequestsTotal,

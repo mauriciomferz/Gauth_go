@@ -8,6 +8,16 @@ import (
 	"time"
 )
 
+// Metadata type constants
+const (
+	MetadataTypeString = "string"
+	MetadataTypeInt    = "int"
+	MetadataTypeInt64  = "int64"
+	MetadataTypeFloat  = "float"
+	MetadataTypeBool   = "bool"
+	MetadataTypeTime   = "time"
+)
+
 // Clear removes all keys from the metadata, including read-only values
 func (m *Metadata) Clear() {
 	if m.values == nil {
@@ -55,7 +65,7 @@ type MetadataValue struct {
 // NewStringValue creates a new string metadata value
 func NewStringValue(value string) MetadataValue {
 	return MetadataValue{
-		Type:  "string",
+		Type:  MetadataTypeString,
 		Value: value,
 	}
 }
@@ -63,7 +73,7 @@ func NewStringValue(value string) MetadataValue {
 // NewIntValue creates a new integer metadata value
 func NewIntValue(value int) MetadataValue {
 	return MetadataValue{
-		Type:  "int",
+		Type:  MetadataTypeInt,
 		Value: value,
 	}
 }
@@ -71,7 +81,7 @@ func NewIntValue(value int) MetadataValue {
 // NewInt64Value creates a new int64 metadata value
 func NewInt64Value(value int64) MetadataValue {
 	return MetadataValue{
-		Type:  "int64",
+		Type:  MetadataTypeInt64,
 		Value: value,
 	}
 }
@@ -79,7 +89,7 @@ func NewInt64Value(value int64) MetadataValue {
 // NewFloatValue creates a new float metadata value
 func NewFloatValue(value float64) MetadataValue {
 	return MetadataValue{
-		Type:  "float",
+		Type:  MetadataTypeFloat,
 		Value: value,
 	}
 }
@@ -87,7 +97,7 @@ func NewFloatValue(value float64) MetadataValue {
 // NewBoolValue creates a new boolean metadata value
 func NewBoolValue(value bool) MetadataValue {
 	return MetadataValue{
-		Type:  "bool",
+		Type:  MetadataTypeBool,
 		Value: value,
 	}
 }
@@ -95,7 +105,7 @@ func NewBoolValue(value bool) MetadataValue {
 // NewTimeValue creates a new time metadata value
 func NewTimeValue(value time.Time) MetadataValue {
 	return MetadataValue{
-		Type:  "time",
+		Type:  MetadataTypeTime,
 		Value: value.Format(time.RFC3339),
 	}
 }
@@ -109,27 +119,27 @@ func NewReadOnlyValue(value MetadataValue) MetadataValue {
 // ToString converts the metadata value to string
 func (mv MetadataValue) ToString() string {
 	switch mv.Type {
-	case "string":
+	case MetadataTypeString:
 		if s, ok := mv.Value.(string); ok {
 			return s
 		}
-	case "int":
+	case MetadataTypeInt:
 		if i, ok := mv.Value.(int); ok {
 			return strconv.Itoa(i)
 		}
-	case "int64":
+	case MetadataTypeInt64:
 		if i, ok := mv.Value.(int64); ok {
 			return strconv.FormatInt(i, 10)
 		}
-	case "float":
+	case MetadataTypeFloat:
 		if f, ok := mv.Value.(float64); ok {
 			return strconv.FormatFloat(f, 'f', -1, 64)
 		}
-	case "bool":
+	case MetadataTypeBool:
 		if b, ok := mv.Value.(bool); ok {
 			return strconv.FormatBool(b)
 		}
-	case "time":
+	case MetadataTypeTime:
 		if t, ok := mv.Value.(string); ok {
 			return t
 		}
@@ -140,11 +150,11 @@ func (mv MetadataValue) ToString() string {
 // ToInt converts the metadata value to an integer
 func (mv MetadataValue) ToInt() (int, error) {
 	switch mv.Type {
-	case "int":
+	case MetadataTypeInt:
 		if i, ok := mv.Value.(int); ok {
 			return i, nil
 		}
-	case "string":
+	case MetadataTypeString:
 		if s, ok := mv.Value.(string); ok {
 			return strconv.Atoi(s)
 		}
@@ -155,11 +165,11 @@ func (mv MetadataValue) ToInt() (int, error) {
 // ToBool converts the metadata value to a boolean
 func (mv MetadataValue) ToBool() (bool, error) {
 	switch mv.Type {
-	case "bool":
+	case MetadataTypeBool:
 		if b, ok := mv.Value.(bool); ok {
 			return b, nil
 		}
-	case "string":
+	case MetadataTypeString:
 		if s, ok := mv.Value.(string); ok {
 			return strconv.ParseBool(s)
 		}
@@ -170,11 +180,11 @@ func (mv MetadataValue) ToBool() (bool, error) {
 // ToFloat converts the metadata value to a float
 func (mv MetadataValue) ToFloat() (float64, error) {
 	switch mv.Type {
-	case "float":
+	case MetadataTypeFloat:
 		if f, ok := mv.Value.(float64); ok {
 			return f, nil
 		}
-	case "int":
+	case MetadataTypeInt:
 		if i, ok := mv.Value.(int); ok {
 			return float64(i), nil
 		}
@@ -189,7 +199,7 @@ func (mv MetadataValue) ToFloat() (float64, error) {
 // ToTime converts the metadata value to time.Time
 func (mv MetadataValue) ToTime() (time.Time, error) {
 	switch mv.Type {
-	case "time":
+	case MetadataTypeTime:
 		if s, ok := mv.Value.(string); ok {
 			return time.Parse(time.RFC3339, s)
 		}

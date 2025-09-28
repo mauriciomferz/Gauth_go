@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+// Test constants
+const (
+	testProtectedValue = "protected"
+)
+
 func TestMetadataTypes(t *testing.T) {
 	// Create a new empty metadata
 	meta := NewMetadata()
@@ -29,15 +34,15 @@ func TestMetadataTypes(t *testing.T) {
 	}
 
 	// Test read-only values
-	meta.SetReadOnly("readonly", NewStringValue("protected"))
+	meta.SetReadOnly("readonly", NewStringValue(testProtectedValue))
 	if val, exists := meta.Get("readonly"); !exists || !val.ReadOnly {
 		t.Errorf("Read-only flag not set correctly: got %v, exists: %v, expected ReadOnly=true", val, exists)
 	}
 
 	// Try to update a read-only value (should not change)
 	meta.SetString("readonly", "changed")
-	if val, exists := meta.GetString("readonly"); !exists || val != "protected" {
-		t.Errorf("Read-only value incorrectly changed: got %v, expected 'protected'", val)
+	if val, exists := meta.GetString("readonly"); !exists || val != testProtectedValue {
+		t.Errorf("Read-only value incorrectly changed: got %v, expected '%s'", val, testProtectedValue)
 	}
 }
 
