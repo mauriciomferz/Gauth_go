@@ -92,5 +92,23 @@ yarn-error.log*
 *.cache
 
 # Build artifacts
-/build/
+/build/bin/
+/build/dist/
+/build/*.exe
+/build/*.bin
 /dist/
+
+# Reports and logs
+/reports/*.sarif
+/logs/*.log
+/logs/server.log
+
+# Demo and example binaries
+gauth-demo
+gauth-demo-*
+gauth-backend*
+gauth-enhanced-*
+gauth-rfc111-*
+*-server
+*-backend
+*-demo

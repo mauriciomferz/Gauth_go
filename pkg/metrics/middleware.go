@@ -55,7 +55,7 @@ func RegisterHTTPMetrics() {
 	if httpMetricsRegistered {
 		return
 	}
-	
+
 	// Register HTTP metrics
 	prometheus.MustRegister(
 		httpRequestsTotal,
@@ -63,7 +63,7 @@ func RegisterHTTPMetrics() {
 		httpResponseSize,
 		activeRequests,
 	)
-	
+
 	httpMetricsRegistered = true
 }
 

@@ -25,7 +25,7 @@ func (s *ResourceServer) ProcessTransaction(tx TransactionDetails, token string)
 	// SUPER ULTIMATE NUCLEAR SOLUTION: Direct interface method call
 	// Since GAuth interface explicitly defines ValidateToken, this MUST work
 	tokenData, err := s.auth.ValidateToken(token)
-	
+
 	if err != nil {
 		return "", err
 	}

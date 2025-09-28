@@ -56,11 +56,11 @@ func New(config Config) (*GAuth, error) {
 	if err := validateConfig(config); err != nil {
 		return nil, err
 	}
-	
+
 	// Register metrics (replaces removed init functions)
 	metrics.RegisterMetrics()
 	metrics.RegisterHTTPMetrics()
-	
+
 	auditLogger := audit.NewLogger(1000)
 	rateLimiter := ratelimit.NewLimiter(&ratelimit.Config{
 		RequestsPerSecond: 10,

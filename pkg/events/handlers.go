@@ -24,7 +24,7 @@ func NewLogHandler(path string) (*LogHandler, error) {
 			return nil, fmt.Errorf("invalid log file path: potential directory traversal")
 		}
 	}
-	
+
 	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open log file: %w", err)

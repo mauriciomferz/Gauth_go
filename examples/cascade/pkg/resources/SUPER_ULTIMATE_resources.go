@@ -22,7 +22,7 @@ const (
 	ResourceTypeCompute ResourceType = "compute"
 	ResourceTypeStorage ResourceType = "storage"
 	ResourceTypeNetwork ResourceType = "network"
-	ResourceTypeMemory  ResourceType = "memory" 
+	ResourceTypeMemory  ResourceType = "memory"
 )
 
 // Resource represents a system resource
@@ -55,10 +55,10 @@ func (rm *ResourceManager) AddResource(resource *Resource) error {
 	if resource.ID == "" {
 		return fmt.Errorf("resource ID cannot be empty")
 	}
-	
+
 	rm.mu.Lock()
 	defer rm.mu.Unlock()
-	
+
 	resource.LastUpdated = time.Now()
 	rm.resources[resource.ID] = resource
 	return nil
@@ -76,7 +76,7 @@ func (rm *ResourceManager) GetResource(id string) (*Resource, bool) {
 func (rm *ResourceManager) ListResources() []*Resource {
 	rm.mu.RLock()
 	defer rm.mu.RUnlock()
-	
+
 	resources := make([]*Resource, 0, len(rm.resources))
 	for _, resource := range rm.resources {
 		resources = append(resources, resource)
@@ -88,20 +88,20 @@ func (rm *ResourceManager) ListResources() []*Resource {
 func (rm *ResourceManager) AllocateResource(ctx context.Context, resourceID string, amount int64) error {
 	rm.mu.Lock()
 	defer rm.mu.Unlock()
-	
+
 	resource, exists := rm.resources[resourceID]
 	if !exists {
 		return fmt.Errorf("resource not found: %s", resourceID)
 	}
-	
+
 	if resource.Available < amount {
 		return fmt.Errorf("insufficient resource capacity: need %d, available %d", amount, resource.Available)
 	}
-	
+
 	resource.Used += amount
 	resource.Available -= amount
 	resource.LastUpdated = time.Now()
-	
+
 	return nil
 }
 
@@ -109,20 +109,20 @@ func (rm *ResourceManager) AllocateResource(ctx context.Context, resourceID stri
 func (rm *ResourceManager) ReleaseResource(ctx context.Context, resourceID string, amount int64) error {
 	rm.mu.Lock()
 	defer rm.mu.Unlock()
-	
+
 	resource, exists := rm.resources[resourceID]
 	if !exists {
 		return fmt.Errorf("resource not found: %s", resourceID)
 	}
-	
+
 	if resource.Used < amount {
 		return fmt.Errorf("cannot release more than allocated: trying to release %d, used %d", amount, resource.Used)
 	}
-	
+
 	resource.Used -= amount
 	resource.Available += amount
 	resource.LastUpdated = time.Now()
-	
+
 	return nil
 }
 

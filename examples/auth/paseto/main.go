@@ -18,7 +18,7 @@ func main() {
 		// Default for development only - never use this in production
 		symmetricKey = "32-byte-key-for-AES-256----------"
 	}
-	
+
 	pasetoCfg := auth.PASETOConfig{
 		Version:       "v2",
 		Purpose:       "local",

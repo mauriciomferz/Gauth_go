@@ -111,7 +111,7 @@ func RegisterMetrics() {
 	if metricsRegistered {
 		return
 	}
-	
+
 	// Register all metrics
 	prometheus.MustRegister(
 		authAttempts,
@@ -125,7 +125,7 @@ func RegisterMetrics() {
 		cacheOperations,
 		resourceAccess,
 	)
-	
+
 	metricsRegistered = true
 }
 

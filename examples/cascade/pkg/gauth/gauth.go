@@ -34,7 +34,7 @@ func NewServiceAuth(config *gauth.Config) (*ServiceAuth, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create gauth client: %w", err)
 	}
-	
+
 	return &ServiceAuth{
 		client: client,
 		config: config,
@@ -47,22 +47,22 @@ func (sa *ServiceAuth) Authenticate(ctx context.Context, serviceID string) (stri
 		ClientID: serviceID,
 		Scopes:   []string{"service:access"},
 	}
-	
+
 	grant, err := sa.client.InitiateAuthorization(req)
 	if err != nil {
 		return "", fmt.Errorf("failed to initiate authorization: %w", err)
 	}
-	
+
 	tokenReq := gauth.TokenRequest{
 		GrantID: grant.GrantID,
 		Scope:   grant.Scope,
 	}
-	
+
 	token, err := sa.client.RequestToken(tokenReq)
 	if err != nil {
 		return "", fmt.Errorf("failed to request token: %w", err)
 	}
-	
+
 	return token.Token, nil
 }
 
