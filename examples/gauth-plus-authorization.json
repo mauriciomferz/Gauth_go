@@ -1,0 +1,320 @@
+{
+  "ai_system_id": "enterprise_financial_ai_v1",
+  "authorizing_party": {
+    "id": "enterprise_corp_001",
+    "name": "Enterprise Financial Corporation",
+    "type": "corporation",
+    "registered_office": {
+      "address": "123 Business Ave, New York, NY 10001",
+      "jurisdiction": "Delaware",
+      "registration_number": "DE123456789",
+      "tax_id": "12-3456789",
+      "legal_form": "Inc"
+    },
+    "authorized_representative": {
+      "id": "cfo_001",
+      "name": "Jane Smith",
+      "position": "Chief Financial Officer",
+      "authority_scope": ["financial_operations", "contract_management"],
+      "valid_from": "2025-01-01T00:00:00Z",
+      "valid_until": "2025-12-31T23:59:59Z",
+      "verified_by": "legal_department"
+    },
+    "legal_capacity": {
+      "verified": true,
+      "verification_date": "2025-01-01T00:00:00Z",
+      "verified_by": "corporate_legal_counsel",
+      "jurisdiction": "US",
+      "legal_framework": "corporate_power_of_attorney_act_2024"
+    },
+    "authority_level": "primary",
+    "verification_status": "verified"
+  },
+  "authorization_grant": {
+    "type": "general",
+    "scope": ["financial_operations", "contract_management", "vendor_relations"],
+    "limitations": ["business_hours_only", "requires_dual_control_over_100k"],
+    "valid_from": "2025-01-01T00:00:00Z",
+    "valid_until": "2025-12-31T23:59:59Z",
+    "revocable": true
+  },
+  "powers_granted": {
+    "basic_powers": [
+      "financial_operations",
+      "contract_management",
+      "vendor_management",
+      "payment_processing"
+    ],
+    "derived_powers": [
+      "approve_invoices",
+      "sign_service_agreements",
+      "authorize_payments",
+      "manage_vendor_contracts"
+    ],
+    "power_derivation": {
+      "financial_operations": ["approve_invoices", "authorize_payments", "budget_management"],
+      "contract_management": ["sign_service_agreements", "modify_contract_terms", "terminate_contracts"],
+      "vendor_management": ["onboard_vendors", "manage_vendor_relationships", "vendor_performance_review"]
+    },
+    "standard_powers": {
+      "financial_powers": {
+        "signing_authority": {
+          "single_signature_limit": 50000.00,
+          "requires_dual_signing": 100000.00,
+          "authorized_documents": [
+            "invoices",
+            "purchase_orders",
+            "service_agreements",
+            "vendor_contracts"
+          ],
+          "prohibited_documents": [
+            "loan_agreements",
+            "investment_contracts",
+            "merger_documents"
+          ]
+        },
+        "approval_limits": {
+          "daily_limit": 100000.00,
+          "weekly_limit": 500000.00,
+          "monthly_limit": 2000000.00,
+          "annual_limit": 20000000.00,
+          "currency": "USD"
+        },
+        "investment_authority": [
+          "short_term_investments",
+          "treasury_bills"
+        ],
+        "banking_operations": [
+          "wire_transfers",
+          "ach_payments",
+          "check_processing"
+        ]
+      },
+      "contractual_powers": {
+        "contract_types": [
+          "service_agreements",
+          "vendor_contracts",
+          "software_licenses",
+          "consulting_agreements"
+        ],
+        "max_contract_value": 250000.00,
+        "requires_approval": true,
+        "approval_workflow": ["manager", "director", "legal_review"],
+        "contract_modification": {
+          "can_amend": true,
+          "can_terminate": true,
+          "can_renew": true,
+          "limitations": [
+            "value_increases_require_approval",
+            "term_extensions_require_approval"
+          ]
+        }
+      },
+      "operational_powers": {
+        "resource_management": [
+          "vendor_resource_allocation",
+          "budget_allocation",
+          "project_resource_planning"
+        ],
+        "process_control": [
+          "accounts_payable_process",
+          "vendor_onboarding_process",
+          "contract_approval_process"
+        ],
+        "data_access": [
+          "financial_data",
+          "vendor_data",
+          "contract_data"
+        ]
+      }
+    }
+  },
+  "decision_authority": {
+    "autonomous_decisions": [
+      "routine_invoice_approval",
+      "standard_vendor_payments",
+      "recurring_service_renewals",
+      "budget_variance_analysis"
+    ],
+    "approval_required": [
+      "new_vendor_onboarding",
+      "contract_modifications",
+      "budget_increases",
+      "investment_decisions"
+    ],
+    "decision_matrix": {
+      "routine_payments": "autonomous",
+      "large_payments": "requires_approval",
+      "new_contracts": "requires_approval",
+      "contract_terminations": "requires_dual_approval"
+    },
+    "escalation_rules": {
+      "threshold_triggers": {
+        "amount": 50000,
+        "risk_level": "high",
+        "vendor_type": "new"
+      },
+      "escalation_path": ["manager", "director", "cfo", "ceo"],
+      "response_time_requirements": {
+        "routine": "24_hours",
+        "urgent": "4_hours",
+        "critical": "1_hour"
+      },
+      "override_authority": ["cfo", "ceo"]
+    }
+  },
+  "transaction_rights": {
+    "allowed_transaction_types": [
+      "vendor_payments",
+      "service_fees",
+      "software_licenses",
+      "consulting_fees",
+      "utilities",
+      "office_supplies"
+    ],
+    "transaction_limits": {
+      "per_transaction": {
+        "daily_limit": 50000.00,
+        "weekly_limit": 200000.00,
+        "monthly_limit": 1000000.00,
+        "currency": "USD"
+      },
+      "cumulative": {
+        "daily_limit": 100000.00,
+        "weekly_limit": 500000.00,
+        "monthly_limit": 2000000.00,
+        "currency": "USD"
+      },
+      "frequency_limits": {
+        "per_hour": 10,
+        "per_day": 100,
+        "per_week": 500
+      }
+    },
+    "required_approvals": {
+      "large_payments": ["manager", "director"],
+      "new_vendors": ["procurement", "legal"],
+      "international_transfers": ["compliance", "cfo"]
+    },
+    "prohibited_transactions": [
+      "cryptocurrency_purchases",
+      "personal_expenses",
+      "political_donations",
+      "unregistered_investments"
+    ]
+  },
+  "action_permissions": {
+    "resource_actions": {
+      "financial_systems": ["read", "write", "approve"],
+      "vendor_database": ["read", "write", "create"],
+      "contract_repository": ["read", "write", "create", "archive"],
+      "payment_systems": ["read", "execute", "monitor"]
+    },
+    "human_interactions": {
+      "can_initiate_contact": true,
+      "authorized_channels": ["email", "slack", "phone"],
+      "requires_notification": true,
+      "interaction_limits": {
+        "daily_contacts": 50,
+        "max_duration": 60,
+        "allowed_time_slots": ["09:00-17:00"]
+      }
+    },
+    "agent_interactions": {
+      "can_authorize_agents": false,
+      "inter_agent_protocols": ["api_calls", "webhook_notifications"],
+      "authority_validation": {
+        "requires_blockchain_verification": true,
+        "validation_interval": 60,
+        "trusted_validators": ["blockchain_registry", "legal_system"]
+      }
+    },
+    "system_actions": [
+      "generate_reports",
+      "send_notifications",
+      "update_records",
+      "create_audit_logs"
+    ]
+  },
+  "dual_control_principle": {
+    "enabled": true,
+    "second_level_approvers": [
+      "cfo",
+      "legal_counsel",
+      "compliance_officer"
+    ],
+    "requires_dual_control": [
+      "payments_over_100k",
+      "new_vendor_contracts",
+      "contract_terminations",
+      "budget_modifications",
+      "investment_decisions"
+    ],
+    "approval_matrix": {
+      "payments_over_100k": ["cfo", "controller"],
+      "new_vendor_contracts": ["procurement", "legal"],
+      "contract_terminations": ["legal_counsel", "business_owner"],
+      "investment_decisions": ["cfo", "investment_committee"]
+    },
+    "control_mechanisms": {
+      "multi_signature_required": true,
+      "time_delayed_operations": {
+        "large_payments": 24,
+        "contract_changes": 48,
+        "investment_decisions": 72
+      },
+      "witness_requirements": {
+        "contract_signing": 1,
+        "large_payments": 1
+      },
+      "audit_trail_requirements": [
+        "all_financial_transactions",
+        "contract_modifications",
+        "approval_workflows"
+      ]
+    }
+  },
+  "authorization_cascade": {
+    "human_authority": {
+      "person_id": "ceo_001",
+      "name": "John Smith",
+      "position": "Chief Executive Officer",
+      "authority_source": "board_of_directors_resolution",
+      "verification_date": "2025-01-01T00:00:00Z",
+      "is_ultimate": true
+    },
+    "cascade_chain": [
+      {
+        "level": 1,
+        "authorizer_id": "ceo_001",
+        "authorizer_type": "human",
+        "authorized_id": "cfo_001",
+        "authorized_type": "human",
+        "granted_at": "2025-01-01T00:00:00Z",
+        "scope": ["financial_operations", "budget_management"]
+      },
+      {
+        "level": 2,
+        "authorizer_id": "cfo_001",
+        "authorizer_type": "human",
+        "authorized_id": "enterprise_financial_ai_v1",
+        "authorized_type": "ai_agent",
+        "granted_at": "2025-01-01T00:00:00Z",
+        "scope": ["routine_financial_operations", "vendor_management"]
+      }
+    ],
+    "ultimate_human": {
+      "person_id": "ceo_001",
+      "name": "John Smith",
+      "legal_authority": "chief_executive_officer",
+      "accountability_level": "ultimate_responsible_party",
+      "verification_proof": "board_resolution_2025_001"
+    },
+    "accountability_chain": [
+      "ceo_001",
+      "cfo_001",
+      "enterprise_financial_ai_v1"
+    ]
+  },
+  "expires_at": "2025-12-31T23:59:59Z"
+}
