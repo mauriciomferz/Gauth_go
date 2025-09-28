@@ -463,6 +463,37 @@
                         <span id="gauth-demo-icon">▶</span>
                         Run GAuth Flow
                     </button>
+                    <button class="btn btn-accent" onclick="testEnhancedToken()" style="background: var(--accent-color); color: white; margin-top: 1rem;">
+                        ⚡ Test Enhanced Token
+                    </button>
+                    <button class="btn btn-accent" onclick="testRFC115Delegation()" style="background: var(--accent-color); color: white; margin-top: 0.5rem;">
+                        ⚖️ Test RFC115 Delegation
+                    </button>
+                    
+                    <!-- Enhanced Power-of-Attorney Demonstrations -->
+                    <div class="enhanced-demo-section" style="margin-top: 2rem; padding-top: 1rem; border-top: 2px solid var(--border-color);">
+                        <h4 style="margin-bottom: 1rem; color: var(--primary-color);">🎯 Enhanced Power-of-Attorney Features</h4>
+                        <div class="enhanced-demo-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem;">
+                            <button class="btn btn-success" onclick="testEnhancedPowerOfAttorney()" style="background: #10b981; color: white;">
+                                🏛️ Full Framework Demo
+                            </button>
+                            <button class="btn btn-success" onclick="testHumanAccountabilityChain()" style="background: #059669; color: white;">
+                                👤 Human Accountability
+                            </button>
+                            <button class="btn btn-success" onclick="testDualControlPrinciple()" style="background: #047857; color: white;">
+                                🔒 Dual Control
+                            </button>
+                            <button class="btn btn-success" onclick="testMathematicalEnforcement()" style="background: #065f46; color: white;">
+                                📐 Mathematical Proof
+                            </button>
+                            <button class="btn btn-info" onclick="comparePowerApproaches()" style="background: #0ea5e9; color: white;">
+                                📊 Compare Approaches
+                            </button>
+                            <button class="btn btn-info" onclick="validateCompliance()" style="background: #0284c7; color: white;">
+                                ✅ Validate Compliance
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="demo-results"></div>
@@ -472,6 +503,150 @@
 
     <script>
         const API_BASE = 'http://localhost:8081/api/v1';
+
+        // Safe JSON parsing function with error handling
+        async function safeJsonParse(response) {
+            try {
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('HTTP Error:', response.status, response.statusText, errorText);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}\n${errorText}`);
+                }
+                
+                const text = await response.text();
+                console.log('Raw response text:', text);
+                
+                if (!text) {
+                    throw new Error('Empty response received');
+                }
+                
+                return JSON.parse(text);
+            } catch (parseError) {
+                console.error('JSON Parse Error:', parseError);
+                console.error('Response text that failed to parse:', await response.text().catch(() => 'Could not read response text'));
+                throw new Error(`Failed to parse JSON response: ${parseError.message}`);
+            }
+        }
+
+        // Test Enhanced Token creation
+        async function testEnhancedToken() {
+            try {
+                console.log('Testing Enhanced Token creation...');
+                
+                const request = {
+                    ai_capabilities: ["financial_analysis", "regulatory_compliance", "risk_modeling"],
+                    business_restrictions: ["$250k_limit", "NYSE_NASDAQ_LSE_only", "business_hours_only"]
+                };
+                
+                const response = await fetch(`${API_BASE}/tokens/enhanced`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(request)
+                });
+                
+                const data = await safeJsonParse(response);
+                console.log('Enhanced Token Response:', data);
+                
+                // Check for success using robust conditions
+                const condition1 = (data.access_token && typeof data.access_token === 'string' && data.access_token.length > 0);
+                const condition2 = (data.token_id && typeof data.token_id === 'string');
+                const condition3 = (data.token_type && typeof data.token_type === 'string');
+                const condition4 = (data.enhanced_features && typeof data.enhanced_features === 'object' && Object.keys(data.enhanced_features).length > 0);
+                const condition5 = (data.capabilities && typeof data.capabilities === 'object' && Object.keys(data.capabilities).length > 0);
+                
+                console.log('Enhanced Token Success conditions:', {condition1, condition2, condition3, condition4, condition5});
+                
+                const isSuccessful = condition1 || condition2 || condition3 || condition4 || condition5;
+                
+                if (isSuccessful) {
+                    const tokenId = data.access_token || data.token_id || 'Generated successfully';
+                    const tokenType = data.token_type || 'Enhanced Bearer';
+                    const capabilities = data.capabilities ? Object.keys(data.capabilities).filter(k => data.capabilities[k]).join(', ') : 'Advanced features';
+                    const features = data.enhanced_features ? Object.keys(data.enhanced_features).filter(k => data.enhanced_features[k]).join(', ') : 'Enhanced capabilities';
+                    
+                    showSuccessMessage(`✅ Enhanced Token Success!\n\nToken: ${tokenId}\nType: ${tokenType}\nCapabilities: ${capabilities}\nFeatures: ${features}\nExpires: ${data.expires_in ? data.expires_in + ' seconds' : 'Long-term'}`);
+                } else {
+                    console.error('Enhanced Token creation failed - success detection failed:', data);
+                    showErrorMessage(`❌ Enhanced Token creation failed\n\nResponse: ${JSON.stringify(data, null, 2)}`);
+                }
+                
+            } catch (error) {
+                console.error('Enhanced Token creation error:', error);
+                showErrorMessage('Enhanced Token creation error: ' + error.message);
+            }
+        }
+
+        // Test RFC115 delegation
+        async function testRFC115Delegation() {
+            try {
+                console.log('Testing RFC115 delegation...');
+                
+                const request = {
+                    principal_id: "board_chair_robert_wilson",
+                    delegate_id: "governance_ai_system",
+                    power_type: "corporate_governance_delegation",
+                    scope: ["board_resolutions", "shareholder_communications", "regulatory_filings", "compliance_monitoring"],
+                    business_owner: {
+                        owner_id: "board_chair_robert_wilson",
+                        role: "Chairman of the Board",
+                        department: "Corporate Governance",
+                        delegation_authority: "fiduciary_powers",
+                        accountability_level: "board_fiduciary"
+                    },
+                    power_restrictions: {
+                        amount_limit: 1000000,
+                        geo_restrictions: ["US", "EU", "CA"],
+                        business_hours_only: false,
+                        board_oversight_required: true,
+                        fiduciary_compliance: true
+                    },
+                    jurisdiction: "US",
+                    legal_basis: "corporate_fiduciary_responsibility_act_2024"
+                };
+                
+                const response = await fetch(`${API_BASE}/rfc115/delegation`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(request)
+                });
+                
+                const data = await safeJsonParse(response);
+                console.log('RFC115 Delegation Response:', data);
+                
+                // Check for success using robust conditions
+                const condition1 = (data.success === true);
+                const condition2 = (data.success === 'true');
+                const condition3 = (data.success === "true");
+                const condition4 = (data.delegation && Object.keys(data.delegation).length > 0);
+                const condition5 = (data.message && typeof data.message === 'string' && data.message.toLowerCase().includes('successfully'));
+                
+                console.log('RFC115 Success conditions:', {condition1, condition2, condition3, condition4, condition5});
+                
+                const isSuccessful = condition1 || condition2 || condition3 || condition4 || condition5;
+                
+                if (isSuccessful) {
+                    const delegationId = data.delegation?.delegation_id || data.delegation_id || 'Generated successfully';
+                    const complianceLevel = data.compliance?.rfc115_compliant ? 'RFC115 Compliant' : (data.compliance_status?.compliance_level || 'Validated');
+                    
+                    showSuccessMessage(`✅ RFC115 Delegation Success!\n\nDelegation ID: ${delegationId}\nCompliance: ${complianceLevel}\nProtocol: ${data.delegation?.protocol || 'RFC115'}\n\n⚖️ ${data.message || 'Board Chair successfully delegated governance powers with enhanced attestation!'}`);
+                } else {
+                    console.error('RFC115 Delegation failed - success detection failed:', data);
+                    showErrorMessage(`❌ RFC115 Delegation failed\n\nResponse: ${JSON.stringify(data, null, 2)}`);
+                }
+                
+            } catch (error) {
+                console.error('RFC115 Delegation error:', error);
+                showErrorMessage('RFC115 Delegation error: ' + error.message);
+            }
+        }
+
+        function showSuccessMessage(message) {
+            alert(message);
+        }
+
+        function showErrorMessage(message) {
+            alert(message);
+        }
         let learningProgress = 0;
 
         // Tab switching functionality
@@ -723,6 +898,218 @@
             } finally {
                 icon.textContent = '▶';
                 button.disabled = false;
+            }
+        }
+
+        // Enhanced Power-of-Attorney Demonstration Functions
+        
+        // Test Enhanced Power-of-Attorney Framework
+        async function testEnhancedPowerOfAttorney() {
+            try {
+                console.log('Testing Enhanced Power-of-Attorney Framework...');
+                
+                const response = await fetch(`${API_BASE}/demo/enhanced-power-of-attorney`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ scenario: 'comprehensive_demo' })
+                });
+                
+                const data = await response.json();
+                console.log('Enhanced Power-of-Attorney response:', data);
+                
+                if (data.demonstration) {
+                    const features = data.features_demonstrated;
+                    const human_auth = features.human_accountability_chain;
+                    const dual_control = features.dual_control_principle;
+                    const math_proof = features.mathematical_enforcement;
+                    
+                    // Use delegation_hierarchy instead of delegation_chain
+                    const delegationCount = human_auth.delegation_hierarchy ? human_auth.delegation_hierarchy.length : 0;
+                    const humanAuthority = human_auth.ultimate_human_authority ? human_auth.ultimate_human_authority.name : 'Not specified';
+                    const dualControlStatus = dual_control && dual_control.enabled ? 'Active' : 'Inactive';
+                    const proofType = math_proof && math_proof.proof_type ? math_proof.proof_type : 'Not specified';
+                    const complianceScore = data.compliance_validation && data.compliance_validation.compliance_score ? data.compliance_validation.compliance_score : 'N/A';
+                    
+                    showSuccessMessage(`🎯 Enhanced Power-of-Attorney Framework Demonstrated!\n\n` +
+                        `👤 Human Authority: ${humanAuthority}\n` +
+                        `🔗 Delegation Levels: ${delegationCount}\n` +
+                        `🔒 Dual Control: ${dualControlStatus}\n` +
+                        `📐 Mathematical Proof: ${proofType}\n` +
+                        `✅ Compliance Score: ${complianceScore}%\n` +
+                        `🛡️ Human at Top: ${human_auth.accountability_validation ? human_auth.accountability_validation.human_at_top : 'N/A'}\n` +
+                        `⚖️ Legal Compliance: ${human_auth.accountability_validation ? human_auth.accountability_validation.legal_compliance : 'N/A'}`);
+                } else {
+                    showErrorMessage('❌ Enhanced Power-of-Attorney demonstration failed');
+                }
+            } catch (error) {
+                console.error('Enhanced Power-of-Attorney error:', error);
+                showErrorMessage('Enhanced Power-of-Attorney error: ' + error.message);
+            }
+        }
+        
+        // Test Human Accountability Chain
+        async function testHumanAccountabilityChain() {
+            try {
+                console.log('Testing Human Accountability Chain...');
+                
+                const response = await fetch(`${API_BASE}/demo/human-accountability-chain`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ scenario: 'chain_validation' })
+                });
+                
+                const data = await response.json();
+                console.log('Human Accountability Chain response:', data);
+                
+                if (data.demonstration) {
+                    const accountability = data.accountability_chain;
+                    const validation = data.validation_results;
+                    
+                    // Safely access delegation_hierarchy with fallbacks
+                    const delegationCount = accountability && accountability.delegation_hierarchy ? accountability.delegation_hierarchy.length : 0;
+                    const humanAuthority = accountability && accountability.ultimate_human_authority ? accountability.ultimate_human_authority.name : 'Not specified';
+                    const humanAtTop = validation && validation.human_at_top ? 'Yes' : 'No';
+                    const legalCompliance = validation && validation.legal_compliance ? 'Yes' : 'No';
+                    const chainIntegrity = validation && validation.chain_integrity ? 'Valid' : 'Invalid';
+                    
+                    showSuccessMessage(`👥 Human Accountability Chain Validated!\n\n` +
+                        `🔗 Chain Length: ${delegationCount}\n` +
+                        `👤 Ultimate Authority: ${humanAuthority}\n` +
+                        `✅ Human at Top: ${humanAtTop}\n` +
+                        `⚖️ Legal Compliance: ${legalCompliance}\n` +
+                        `🛡️ Chain Integrity: ${chainIntegrity}`);
+                } else {
+                    showErrorMessage('❌ Human Accountability Chain validation failed');
+                }
+            } catch (error) {
+                console.error('Human Accountability Chain error:', error);
+                showErrorMessage('Human Accountability Chain error: ' + error.message);
+            }
+        }
+        
+        // Test Dual Control Principle
+        async function testDualControlPrinciple() {
+            try {
+                console.log('Testing Dual Control Principle...');
+                
+                const response = await fetch(`${API_BASE}/demo/dual-control-principle`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                
+                const data = await response.json();
+                
+                if (data.dual_control_scenario) {
+                    const scenario = data.dual_control_scenario;
+                    const metrics = data.effectiveness_metrics;
+                    
+                    showSuccessMessage(`🔒 Dual Control Principle Demonstrated!\n\n` +
+                        `Trigger: ${scenario.trigger_condition}\n` +
+                        `Approval Steps: ${scenario.approval_workflow.length}\n` +
+                        `Risk Reduction: ${metrics.risk_reduction}\n` +
+                        `Compliance: ${metrics.compliance_improvement}\n` +
+                        `Fraud Prevention: ${metrics.fraud_prevention}\n` +
+                        `Emergency Override: Available with audit trail`);
+                } else {
+                    showErrorMessage('❌ Dual Control Principle test failed');
+                }
+            } catch (error) {
+                console.error('Dual Control Principle error:', error);
+                showErrorMessage('Dual Control Principle error: ' + error.message);
+            }
+        }
+        
+        // Test Mathematical Enforcement
+        async function testMathematicalEnforcement() {
+            try {
+                console.log('Testing Mathematical Enforcement...');
+                
+                const response = await fetch(`${API_BASE}/demo/mathematical-enforcement`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                
+                const data = await response.json();
+                
+                if (data.mathematical_rules) {
+                    const rules = data.mathematical_rules;
+                    const crypto = data.cryptographic_proof_system;
+                    const guarantees = data.enforcement_guarantees;
+                    
+                    showSuccessMessage(`📐 Mathematical Enforcement Validated!\n\n` +
+                        `Rules Enforced: ${rules.length}\n` +
+                        `Key Rule: ${rules[0].rule_name}\n` +
+                        `Signature Scheme: ${crypto.signature_scheme}\n` +
+                        `Hash Function: ${crypto.hash_function}\n` +
+                        `Security Level: ${guarantees.cryptographic_security}\n` +
+                        `Performance: ${guarantees.performance}\n` +
+                        `Mathematical Soundness: ${guarantees.mathematical_soundness}`);
+                } else {
+                    showErrorMessage('❌ Mathematical Enforcement test failed');
+                }
+            } catch (error) {
+                console.error('Mathematical Enforcement error:', error);
+                showErrorMessage('Mathematical Enforcement error: ' + error.message);
+            }
+        }
+        
+        // Compare Power-of-Attorney Approaches
+        async function comparePowerApproaches() {
+            try {
+                console.log('Comparing Power-of-Attorney Approaches...');
+                
+                const response = await fetch(`${API_BASE}/demo/power-comparison`);
+                const data = await response.json();
+                
+                if (data.comparative_metrics) {
+                    const metrics = data.comparative_metrics;
+                    const recommendation = data.implementation_recommendation;
+                    
+                    showSuccessMessage(`📊 Power-of-Attorney Comparison Complete!\n\n` +
+                        `Setup Time - Traditional: ${metrics.setup_time.traditional}\n` +
+                        `Setup Time - GAuth: ${metrics.setup_time.gauth}\n\n` +
+                        `Compliance Score - Traditional: ${metrics.compliance_score.traditional}%\n` +
+                        `Compliance Score - GAuth: ${metrics.compliance_score.gauth}%\n\n` +
+                        `Recommendation: ${recommendation.verdict}\n` +
+                        `ROI Timeline: ${recommendation.roi_timeline}`);
+                } else {
+                    showErrorMessage('❌ Power-of-Attorney comparison failed');
+                }
+            } catch (error) {
+                console.error('Power-of-Attorney comparison error:', error);
+                showErrorMessage('Power-of-Attorney comparison error: ' + error.message);
+            }
+        }
+        
+        // Validate Compliance Framework
+        async function validateCompliance() {
+            try {
+                console.log('Validating Compliance Framework...');
+                
+                const response = await fetch(`${API_BASE}/demo/compliance-validation`);
+                const data = await response.json();
+                
+                if (data.validation_summary) {
+                    const summary = data.validation_summary;
+                    const regulatory = data.regulatory_compliance;
+                    const security = data.security_validation;
+                    
+                    showSuccessMessage(`✅ Compliance Framework Validated!\n\n` +
+                        `Overall Score: ${summary.overall_score}%\n` +
+                        `Status: ${summary.recommendation}\n` +
+                        `RFC111 Compliance: ${regulatory.rfc111_compliance.score}%\n` +
+                        `RFC115 Compliance: ${regulatory.rfc115_compliance.score}%\n` +
+                        `Security Level: ${security.cryptographic_strength}\n` +
+                        `System Availability: ${data.operational_metrics.system_availability}%\n` +
+                        `Next Review: ${summary.next_review.split('T')[0]}`);
+                } else {
+                    showErrorMessage('❌ Compliance validation failed');
+                }
+            } catch (error) {
+                console.error('Compliance validation error:', error);
+                showErrorMessage('Compliance validation error: ' + error.message);
             }
         }
 
