@@ -138,8 +138,35 @@ class ApiService {
     duration: string; 
     scope?: string[] 
   }) {
-    const response = await this.api.post('/tokens', data);
+    // Transform the data to match backend expected format
+    const backendData = {
+      type: "JWT", // Default token type
+      subject: data.claims.sub || data.claims.client_id || "anonymous",
+      scopes: data.scope || [],
+      claims: data.claims,
+      expires_in: this.parseDurationToSeconds(data.duration),
+    };
+    
+    const response = await this.api.post('/tokens', backendData);
     return response.data;
+  }
+
+  private parseDurationToSeconds(duration: string): number {
+    // Convert duration string like "1h", "30m", "24h" to seconds
+    const units: Record<string, number> = {
+      's': 1,
+      'm': 60,
+      'h': 3600,
+      'd': 86400
+    };
+    
+    const match = duration.match(/^(\d+)([smhd])$/);
+    if (!match) {
+      return 3600; // Default 1 hour in seconds
+    }
+    
+    const [, value, unit] = match;
+    return parseInt(value) * (units[unit] || 3600);
   }
 
   async revokeToken(tokenId: string) {
