@@ -34,6 +34,10 @@ import (
 	"fmt"
 )
 
+const (
+	TransactionExecuteScope = "transaction:execute"
+)
+
 // PowerEnforcementPoint handles access control enforcement.
 type PowerEnforcementPoint struct {
 	GAuth *GAuth
@@ -50,7 +54,7 @@ func (p *PowerEnforcementPoint) EnforceRestrictions(token string, actionDetails 
 		return false, err
 	}
 	for _, scope := range tokenData.Scope {
-		if scope == "transaction:execute" {
+		if scope == TransactionExecuteScope {
 			return true, nil
 		}
 	}

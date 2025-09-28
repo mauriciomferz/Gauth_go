@@ -31,6 +31,10 @@ const (
 	ResultError
 )
 
+const (
+	unknownString = "Unknown"
+)
+
 // Actor represents an entity that triggered the event
 type Actor struct {
 	ID        string            // Unique identifier
@@ -163,7 +167,7 @@ func (t Type) String() string {
 	case TypeAudit:
 		return "Audit"
 	default:
-		return "Unknown"
+		return unknownString
 	}
 }
 
@@ -179,6 +183,6 @@ func (r Result) String() string {
 	case ResultError:
 		return "Error"
 	default:
-		return "Unknown"
+		return unknownString
 	}
 }

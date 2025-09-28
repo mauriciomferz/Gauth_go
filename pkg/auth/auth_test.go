@@ -7,6 +7,11 @@ import (
 	"time"
 )
 
+const (
+	testUser = "testuser"
+	testPass = "testpass"
+)
+
 func TestBasicAuth(t *testing.T) {
 	config := Config{
 		Type:              TypeBasic,
@@ -80,8 +85,8 @@ func TestBasicAuth(t *testing.T) {
 			return
 		}
 		if data != nil && data.Valid {
-			if data.Subject != "testuser" {
-				t.Errorf("Expected subject 'testuser', got: %s", data.Subject)
+			if data.Subject != testUser {
+				t.Errorf("Expected subject '%s', got: %s", testUser, data.Subject)
 			}
 		}
 
@@ -152,8 +157,8 @@ func TestJWTAuth(t *testing.T) {
 		if !data.Valid {
 			t.Error("Expected token to be valid")
 		}
-		if data.Subject != "testuser" {
-			t.Errorf("Expected subject 'testuser', got: %s", data.Subject)
+		if data.Subject != testUser {
+			t.Errorf("Expected subject '%s', got: %s", testUser, data.Subject)
 		}
 		if data.Issuer != "testclient" {
 			t.Errorf("Expected issuer 'testclient', got: %s", data.Issuer)

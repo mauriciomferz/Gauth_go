@@ -19,6 +19,10 @@ var (
 	ErrInvalidCredentials = errors.New("invalid credentials")
 )
 
+const (
+	basicAuthScheme = "Basic"
+)
+
 // basicCredentials represents username/password credentials
 type basicCredentials struct {
 	Username string
@@ -113,7 +117,7 @@ func (a *basicAuthenticator) GenerateToken(ctx context.Context, req TokenRequest
 
 	return &TokenResponse{
 		Token:     token,
-		TokenType: "Basic",
+		TokenType: basicAuthScheme,
 		ExpiresIn: int64(a.config.AccessTokenExpiry.Seconds()),
 		Scope:     req.Scopes,
 		Claims:    nil, // No claims for basic auth
@@ -122,7 +126,7 @@ func (a *basicAuthenticator) GenerateToken(ctx context.Context, req TokenRequest
 
 func (a *basicAuthenticator) ValidateToken(ctx context.Context, tokenStr string) (*TokenData, error) {
 	parts := strings.SplitN(tokenStr, " ", 2)
-	if len(parts) != 2 || parts[0] != "Basic" {
+	if len(parts) != 2 || parts[0] != basicAuthScheme {
 		return nil, ErrInvalidToken
 	}
 

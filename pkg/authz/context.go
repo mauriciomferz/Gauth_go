@@ -38,7 +38,7 @@ func NewContext() *Context {
 
 // GetString retrieves a string value from the context
 func (c *Context) GetString(key string) (string, bool) {
-	if val, ok := c.Values[key]; ok && val.Type == "string" {
+	if val, ok := c.Values[key]; ok && val.Type == events.MetadataTypeString {
 		return val.StringValue, true
 	}
 	return "", false
@@ -46,7 +46,7 @@ func (c *Context) GetString(key string) (string, bool) {
 
 // GetInt retrieves an integer value from the context
 func (c *Context) GetInt(key string) (int, bool) {
-	if val, ok := c.Values[key]; ok && val.Type == "int" {
+	if val, ok := c.Values[key]; ok && val.Type == events.MetadataTypeInt {
 		return val.IntValue, true
 	}
 	return 0, false
@@ -54,7 +54,7 @@ func (c *Context) GetInt(key string) (int, bool) {
 
 // GetFloat retrieves a float value from the context
 func (c *Context) GetFloat(key string) (float64, bool) {
-	if val, ok := c.Values[key]; ok && val.Type == "float" {
+	if val, ok := c.Values[key]; ok && val.Type == events.MetadataTypeFloat {
 		return val.FloatValue, true
 	}
 	return 0, false
@@ -62,7 +62,7 @@ func (c *Context) GetFloat(key string) (float64, bool) {
 
 // GetBool retrieves a boolean value from the context
 func (c *Context) GetBool(key string) (bool, bool) {
-	if val, ok := c.Values[key]; ok && val.Type == "bool" {
+	if val, ok := c.Values[key]; ok && val.Type == events.MetadataTypeBool {
 		return val.BoolValue, true
 	}
 	return false, false

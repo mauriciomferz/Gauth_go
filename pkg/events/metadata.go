@@ -188,7 +188,7 @@ func (mv MetadataValue) ToFloat() (float64, error) {
 		if i, ok := mv.Value.(int); ok {
 			return float64(i), nil
 		}
-	case "string":
+	case MetadataTypeString:
 		if s, ok := mv.Value.(string); ok {
 			return strconv.ParseFloat(s, 64)
 		}
@@ -236,37 +236,37 @@ func (mv *MetadataValue) UnmarshalJSON(data []byte) error {
 	mv.ReadOnly = temp.ReadOnly
 
 	switch temp.Type {
-	case "string":
+	case MetadataTypeString:
 		var s string
 		if err := json.Unmarshal(temp.Value, &s); err != nil {
 			return err
 		}
 		mv.Value = s
-	case "int":
+	case MetadataTypeInt:
 		var i int
 		if err := json.Unmarshal(temp.Value, &i); err != nil {
 			return err
 		}
 		mv.Value = i
-	case "int64":
+	case MetadataTypeInt64:
 		var i int64
 		if err := json.Unmarshal(temp.Value, &i); err != nil {
 			return err
 		}
 		mv.Value = i
-	case "float":
+	case MetadataTypeFloat:
 		var f float64
 		if err := json.Unmarshal(temp.Value, &f); err != nil {
 			return err
 		}
 		mv.Value = f
-	case "bool":
+	case MetadataTypeBool:
 		var b bool
 		if err := json.Unmarshal(temp.Value, &b); err != nil {
 			return err
 		}
 		mv.Value = b
-	case "time":
+	case MetadataTypeTime:
 		var s string
 		if err := json.Unmarshal(temp.Value, &s); err != nil {
 			return err
@@ -355,7 +355,7 @@ func (m *Metadata) Get(key string) (MetadataValue, bool) {
 
 // GetString retrieves a string value
 func (m *Metadata) GetString(key string) (string, bool) {
-	if val, exists := m.Get(key); exists && val.Type == "string" {
+	if val, exists := m.Get(key); exists && val.Type == MetadataTypeString {
 		if s, ok := val.Value.(string); ok {
 			return s, true
 		}
@@ -365,7 +365,7 @@ func (m *Metadata) GetString(key string) (string, bool) {
 
 // GetInt retrieves an int value
 func (m *Metadata) GetInt(key string) (int, bool) {
-	if val, exists := m.Get(key); exists && val.Type == "int" {
+	if val, exists := m.Get(key); exists && val.Type == MetadataTypeInt {
 		if i, ok := val.Value.(int); ok {
 			return i, true
 		}
@@ -375,7 +375,7 @@ func (m *Metadata) GetInt(key string) (int, bool) {
 
 // GetBool retrieves a bool value
 func (m *Metadata) GetBool(key string) (bool, bool) {
-	if val, exists := m.Get(key); exists && val.Type == "bool" {
+	if val, exists := m.Get(key); exists && val.Type == MetadataTypeBool {
 		if b, ok := val.Value.(bool); ok {
 			return b, true
 		}

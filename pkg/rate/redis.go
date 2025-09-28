@@ -9,6 +9,45 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
+const (
+	// Lua script for sliding window rate limiting
+	slidingWindowScript = `
+		local key = KEYS[1]
+		local now = tonumber(ARGV[1])
+		local window = tonumber(ARGV[2])
+		local limit = tonumber(ARGV[3])
+
+		-- Clean old requests
+		redis.call('ZREMRANGEBYSCORE', key, 0, now - window)
+
+		-- Count requests in current window
+		local count = redis.call('ZCARD', key)
+
+		if count >= limit then
+			return 0
+		end
+
+		-- Add new request
+		redis.call('ZADD', key, now, now)
+		redis.call('EXPIRE', key, math.ceil(window/1000000000))
+
+		return limit - count
+	`
+
+	// Lua script for getting remaining requests
+	remainingRequestsScript = `
+		local key = KEYS[1]
+		local now = tonumber(ARGV[1])
+		local window = tonumber(ARGV[2])
+		local limit = tonumber(ARGV[3])
+
+		redis.call('ZREMRANGEBYSCORE', key, 0, now - window)
+		local count = redis.call('ZCARD', key)
+
+		return limit - count
+	`
+)
+
 // RedisLimiter implements distributed rate limiting using Redis
 type RedisLimiter struct {
 	client    *redis.Client
@@ -41,30 +80,8 @@ func (rl *RedisLimiter) Allow(ctx context.Context, id string) error {
 	now := time.Now().UnixNano()
 
 	// Lua script for sliding window rate limiting
-	script := `
-		local key = KEYS[1]
-		local now = tonumber(ARGV[1])
-		local window = tonumber(ARGV[2])
-		local limit = tonumber(ARGV[3])
 
-		-- Clean old requests
-		redis.call('ZREMRANGEBYSCORE', key, 0, now - window)
-
-		-- Count requests in current window
-		local count = redis.call('ZCARD', key)
-
-		if count >= limit then
-			return 0
-		end
-
-		-- Add new request
-		redis.call('ZADD', key, now, now)
-		redis.call('EXPIRE', key, math.ceil(window/1000000000))
-
-		return limit - count
-	`
-
-	result, err := rl.client.Eval(ctx, script, []string{key},
+	result, err := rl.client.Eval(ctx, slidingWindowScript, []string{key},
 		now,
 		rl.config.Window.Nanoseconds(),
 		rl.config.Rate).Result()
@@ -87,19 +104,7 @@ func (rl *RedisLimiter) GetRemainingRequests(id string) int64 {
 	now := time.Now().UnixNano()
 
 	// Clean old requests and count remaining
-	script := `
-		local key = KEYS[1]
-		local now = tonumber(ARGV[1])
-		local window = tonumber(ARGV[2])
-		local limit = tonumber(ARGV[3])
-
-		redis.call('ZREMRANGEBYSCORE', key, 0, now - window)
-		local count = redis.call('ZCARD', key)
-
-		return limit - count
-	`
-
-	result, err := rl.client.Eval(context.Background(), script, []string{key},
+	result, err := rl.client.Eval(context.Background(), remainingRequestsScript, []string{key},
 		now,
 		rl.config.Window.Nanoseconds(),
 		rl.config.Rate).Result()

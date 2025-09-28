@@ -10,6 +10,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	testRevocationReason = "test revocation"
+)
+
 //
 // # Licensing
 //
@@ -81,7 +85,7 @@ func TestRedisStore(t *testing.T) {
 			Value: "revoke-value",
 		}
 		require.NoError(t, store.Save(ctx, token))
-		reason := "test revocation"
+		reason := testRevocationReason
 		require.NoError(t, store.Revoke(ctx, token.ID, reason))
 		retrieved, err := store.Get(ctx, token.ID)
 		require.NoError(t, err)
