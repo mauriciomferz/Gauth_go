@@ -1,0 +1,81 @@
+# GolangCI-Lint Configuration for GAuth Project
+# This configuration excludes archived and historical files from linting
+
+run:
+  timeout: 10m
+  issues-exit-code: 1
+  tests: true
+  skip-dirs:
+    - archive/          # Skip archived files - historical reference only
+    - build/            # Skip build artifacts
+    - logs/             # Skip log directories
+    - reports/          # Skip report files
+  skip-files:
+    - ".*\\.pb\\.go$"   # Skip generated protobuf files
+    - ".*\\.gen\\.go$"  # Skip generated files
+
+issues:
+  exclude-rules:
+    # Exclude linting issues for archived demo files
+    - path: archive/
+      linters:
+        - unused
+        - deadcode
+        - varcheck
+        - structcheck
+        - ineffassign
+        - govet
+
+linters-settings:
+  govet:
+    check-shadowing: true
+  gocyclo:
+    min-complexity: 15
+  maligned:
+    suggest-new: true
+  dupl:
+    threshold: 100
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+
+linters:
+  enable:
+    - bodyclose
+    - deadcode
+    - depguard
+    - dogsled
+    - dupl
+    - errcheck
+    - gochecknoinits
+    - goconst
+    - gocritic
+    - gocyclo
+    - gofmt
+    - goimports
+    - golint
+    - gomnd
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - interfacer
+    - lll
+    - misspell
+    - nakedret
+    - rowserrcheck
+    - scopelint
+    - staticcheck
+    - structcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - varcheck
+    - whitespace
+
+  disable:
+    - maligned  # Disable struct alignment checks for demo code
+    - prealloc  # Disable preallocation hints for demo code
