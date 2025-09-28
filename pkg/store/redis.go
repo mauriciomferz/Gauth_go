@@ -308,11 +308,11 @@ func (s *RedisStore) Delete(ctx context.Context, token string) error {
 
 	// Deserialize metadata
 	var metadata TokenMetadata
-	if err := json.Unmarshal(metadataBytes, &metadata); err != nil {
+	if unmarshalErr := json.Unmarshal(metadataBytes, &metadata); unmarshalErr != nil {
 		return &StorageError{
 			Op:     "delete",
 			Key:    token,
-			Err:    err,
+			Err:    unmarshalErr,
 			Detail: "failed to deserialize token metadata",
 		}
 	}

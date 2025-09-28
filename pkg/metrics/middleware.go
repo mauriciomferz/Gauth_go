@@ -5,15 +5,29 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
+		"github.com/prometheus/client_golang/prometheus"
+)
+
+const (
+	// Common metric values
+	unknownValue = "unknown"
+	
+	// Prometheus configuration constants for duration buckets
+	defaultBucketStart = 0.001  // 1ms
+	bucketMultiplier   = 2      // 2x multiplier
+	defaultBucketCount = 10     // 10 buckets
+	
+	// Response size bucket constants
+	responseSizeStart      = 100  // 100 bytes
+	responseSizeMultiplier = 10   // 10x multiplier
+	responseSizeBuckets    = 8    // 8 buckets
 )
 
 // Registration state tracking
 var (
 	httpMetricsRegistered = false
-)
 
-var (
+	// HTTP metrics
 	httpRequestsTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "gauth_http_requests_total",
@@ -26,7 +40,7 @@ var (
 		prometheus.HistogramOpts{
 			Name:    "gauth_http_request_duration_seconds",
 			Help:    "HTTP request duration in seconds",
-			Buckets: prometheus.ExponentialBuckets(0.001, 2, 10), // from 1ms to ~1s
+			Buckets: prometheus.ExponentialBuckets(defaultBucketStart, bucketMultiplier, defaultBucketCount), // from 1ms to ~1s
 		},
 		[]string{"handler", "method"},
 	)
@@ -35,7 +49,7 @@ var (
 		prometheus.HistogramOpts{
 			Name:    "gauth_http_response_size_bytes",
 			Help:    "HTTP response size in bytes",
-			Buckets: prometheus.ExponentialBuckets(100, 10, 8), // from 100B to ~1GB
+			Buckets: prometheus.ExponentialBuckets(responseSizeStart, responseSizeMultiplier, responseSizeBuckets), // from 100B to ~1GB
 		},
 		[]string{"handler"},
 	)
@@ -62,6 +76,8 @@ func RegisterHTTPMetrics() {
 		httpRequestDuration,
 		httpResponseSize,
 		activeRequests,
+		authAttempts,
+		authLatency,
 	)
 
 	httpMetricsRegistered = true
@@ -147,7 +163,7 @@ func AuthMetricsMiddleware(handler string, next http.Handler) http.Handler {
 		// Record auth-specific metrics
 		method := r.Header.Get("X-Auth-Method")
 		if method == "" {
-			method = "unknown"
+			method = unknownValue
 		}
 
 		authAttempts.WithLabelValues(method, status).Inc()

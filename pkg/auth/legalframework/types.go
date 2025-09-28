@@ -161,12 +161,12 @@ type Handler struct {
 
 // AuditLog represents an audit log
 type AuditLog struct {
-	Entries []LegalframeworkAuditEntry
+	Entries []AuditEntry
 	MaxSize int
 }
 
 // AuditEntry represents an entry in the audit log
-type LegalframeworkAuditEntry struct {
+type AuditEntry struct {
 	ID        string
 	Timestamp time.Time
 	Actor     string

@@ -61,7 +61,7 @@ func (tb *TokenBucket) Allow(ctx context.Context, id string) error {
 		if maxTokens == 0 {
 			maxTokens = float64(tb.config.RequestsPerSecond)
 		}
-		b.tokens = min(maxTokens, b.tokens+tokensToAdd)
+		b.tokens = minFloat64(maxTokens, b.tokens+tokensToAdd)
 		b.lastFill = now
 	}
 
@@ -104,7 +104,7 @@ func (tb *TokenBucket) GetQuota(id string) Quota {
 	// Calculate current tokens
 	timePassed := now.Sub(b.lastFill).Seconds()
 	tokensToAdd := timePassed * float64(tb.config.RequestsPerSecond)
-	currentTokens := min(float64(tb.config.BurstSize), b.tokens+tokensToAdd)
+	currentTokens := minFloat64(float64(tb.config.BurstSize), b.tokens+tokensToAdd)
 
 	// Time until tokens are fully replenished
 	timeToReset := time.Duration(
@@ -137,7 +137,7 @@ func (tb *TokenBucket) Reset(id string) {
 	delete(tb.buckets, id)
 }
 
-func min(a, b float64) float64 {
+func minFloat64(a, b float64) float64 {
 	if a < b {
 		return a
 	}

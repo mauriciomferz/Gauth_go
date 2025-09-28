@@ -56,7 +56,7 @@ func NewMonitor() *Monitor {
 }
 
 // OnStateChange handles state transitions
-func (m *Monitor) OnStateChange(name string, from, to State, lastFailure time.Time) {
+func (m *Monitor) OnStateChange(name string, from, to State, _ time.Time) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
