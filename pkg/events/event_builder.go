@@ -93,7 +93,7 @@ func (e Event) WithBoolMetadata(key string, value bool) Event {
 
 // MergeMetadata merges the given metadata with existing metadata
 // MergeMetadata is removed: use type-safe setters instead
-func (e Event) MergeMetadata(metadata map[string]interface{}) Event {
+func (e Event) MergeMetadata(_ map[string]interface{}) Event {
 	panic("MergeMetadata is removed: use type-safe setters instead")
 }
 

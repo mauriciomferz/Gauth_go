@@ -36,7 +36,7 @@ func (c *IPRangeCondition) Evaluate(ctx context.Context, request *AccessRequest)
 	return false, nil
 }
 
-func (c *IPRangeCondition) isIPInRanges(ip string) bool {
+func (c *IPRangeCondition) isIPInRanges(_ string) bool {
 	// Implement IP range checking
 	return false
 }

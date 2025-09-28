@@ -1,4 +1,4 @@
-// Package audit provides audit logging functionality built on top of the events package.
+// Package audit provides audit logging fu	Type      AuditType `json:\"type\"`      // Entry typectionality built on top of the events package.
 package audit
 
 import (

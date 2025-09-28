@@ -115,7 +115,7 @@ func (a *memoryAuthorizer) GetPolicy(ctx context.Context, policyID string) (*Pol
 
 func (a *memoryAuthorizer) ListPolicies(ctx context.Context) ([]*Policy, error) {
 	var policies []*Policy
-	a.policies.Range(func(key, value interface{}) bool {
+	a.policies.Range(func(_, value interface{}) bool {
 		policy := value.(*Policy)
 		policies = append(policies, policy)
 		return true
@@ -127,7 +127,7 @@ func (a *memoryAuthorizer) IsAllowed(ctx context.Context, request *AccessRequest
 	var matchingPolicies []*Policy
 
 	// Collect all applicable policies
-	a.policies.Range(func(key, value interface{}) bool {
+	a.policies.Range(func(_, value interface{}) bool {
 		policy := value.(*Policy)
 
 		// Check if policy applies to this request
