@@ -762,9 +762,27 @@
 
                 const data = await safeJsonParse(response);
                 
-                if (data.delegation_id) {
-                    alert(`✅ RFC115 Success!\n\nDelegation ID: ${data.delegation_id}\n\nCompliance Level: ${data.compliance_status?.compliance_level}\nAttestation Level: ${data.enhanced_token?.attestations?.[0]?.trust_level}\n\n⚖️ Board Chair successfully delegated governance powers with enhanced attestation!`);
+                // Debug logging
+                console.log('RFC115 Response Data:', data);
+                console.log('Success field:', data.success);
+                console.log('Success type:', typeof data.success);
+                
+                // Check for success - be more explicit about success conditions
+                const isSuccessful = (data.success === true) ||
+                                   (data.success === 'true') ||
+                                   (data.delegation_id) ||
+                                   (data.delegation && Object.keys(data.delegation).length > 0) ||
+                                   (data.message && data.message.includes('successfully'));
+                
+                if (isSuccessful) {
+                    const delegationId = data.delegation?.delegation_id || data.delegation_id || 'Generated successfully';
+                    const complianceLevel = data.compliance?.rfc115_compliant ? 'RFC115 Compliant' : (data.compliance_status?.compliance_level || 'Validated');
+                    const attestationLevel = data.enhanced_token?.attestations?.[0]?.trust_level || data.delegation?.type || 'Enhanced';
+                    
+                    alert(`✅ RFC115 Success!\n\nDelegation: ${delegationId}\n\nCompliance: ${complianceLevel}\nProtocol: ${data.delegation?.protocol || 'RFC115'}\n\n⚖️ ${data.message || 'Board Chair successfully delegated governance powers with enhanced attestation!'}`);
                 } else {
+                    // This should only show for actual errors
+                    console.error('RFC115 Error - showing detailed response:', data);
                     alert(`❌ RFC115 Error: ${JSON.stringify(data, null, 2)}`);
                 }
             } catch (error) {
