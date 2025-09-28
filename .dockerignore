@@ -2,6 +2,9 @@
 .git
 .gitignore
 
+# Problematic local module directory (causes cache key calculation issues)
+gauth-demo-app/
+
 # Documentation and markdown files
 *.md
 docs/

@@ -7,16 +7,19 @@ RUN apk add --no-cache git ca-certificates tzdata sed
 # Set the working directory
 WORKDIR /app
 
-# Copy the entire source code first
-COPY . .
+# Copy go.mod and go.sum first for better layer caching
+COPY go.mod go.sum ./
 
 # Remove the problematic local module dependency that's not needed for cmd/demo
-# This prevents Docker cache key calculation issues with missing directories
+# The gauth-demo-app directory is excluded via .dockerignore to prevent cache key issues
 RUN sed -i '/github.com\/Gimel-Foundation\/gauth\/gauth-demo-app\/web\/backend/d' go.mod && \
     sed -i '/replace.*gauth-demo-app.*web.*backend/d' go.mod
 
 # Download dependencies (without the local backend module)
 RUN go mod download
+
+# Copy the source code (gauth-demo-app directory excluded via .dockerignore)
+COPY . ./
 
 # Verify dependencies
 RUN go mod verify
