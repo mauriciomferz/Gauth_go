@@ -1,0 +1,29 @@
+server:
+  port: 8080
+  mode: debug
+
+log:
+  level: info
+
+redis:
+  addr: localhost:6379
+  password: ""
+  db: 0
+
+auth:
+  jwt_secret: "demo_secret_key_change_in_production"
+  token_expiration: 3600s
+  refresh_expiration: 2592000s # 30 days
+
+audit:
+  log_level: info
+  storage: memory
+
+rate:
+  default_limit: 1000
+  window: 60s
+
+gauth:
+  base_url: "http://localhost:8080"
+  api_key: "demo_api_key"
+  timeout: 30s
