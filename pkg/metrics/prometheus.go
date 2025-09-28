@@ -7,6 +7,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+// Registration state tracking
+var (
+	metricsRegistered = false
+)
+
 var (
 	authLatency = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
@@ -101,7 +106,12 @@ var (
 )
 
 // RegisterMetrics registers all GAuth metrics with Prometheus
+// This function is idempotent and safe to call multiple times
 func RegisterMetrics() {
+	if metricsRegistered {
+		return
+	}
+	
 	// Register all metrics
 	prometheus.MustRegister(
 		authAttempts,
@@ -115,6 +125,8 @@ func RegisterMetrics() {
 		cacheOperations,
 		resourceAccess,
 	)
+	
+	metricsRegistered = true
 }
 
 // MetricsCollector provides methods to record various metrics

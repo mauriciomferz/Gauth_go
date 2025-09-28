@@ -8,9 +8,9 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-const (
-	unknownMethod = "unknown"
-	unknownPolicy = "unknown"
+// Registration state tracking
+var (
+	httpMetricsRegistered = false
 )
 
 var (
@@ -50,7 +50,12 @@ var (
 )
 
 // RegisterHTTPMetrics registers all HTTP-related metrics with Prometheus
+// This function is idempotent and safe to call multiple times
 func RegisterHTTPMetrics() {
+	if httpMetricsRegistered {
+		return
+	}
+	
 	// Register HTTP metrics
 	prometheus.MustRegister(
 		httpRequestsTotal,
@@ -58,6 +63,8 @@ func RegisterHTTPMetrics() {
 		httpResponseSize,
 		activeRequests,
 	)
+	
+	httpMetricsRegistered = true
 }
 
 // responseWriter wraps http.ResponseWriter to capture metrics
@@ -140,7 +147,7 @@ func AuthMetricsMiddleware(handler string, next http.Handler) http.Handler {
 		// Record auth-specific metrics
 		method := r.Header.Get("X-Auth-Method")
 		if method == "" {
-			method = unknownMethod
+			method = "unknown"
 		}
 
 		authAttempts.WithLabelValues(method, status).Inc()
@@ -173,7 +180,7 @@ func AuthzMetricsMiddleware(handler string, next http.Handler) http.Handler {
 		// Record authz-specific metrics
 		policy := r.Header.Get("X-Policy")
 		if policy == "" {
-			policy = unknownPolicy
+			policy = "unknown"
 		}
 
 		allowed := rw.status == http.StatusOK

@@ -45,8 +45,8 @@ var (
 
 	// Resource metrics
 	activeTokens = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "gauth_active_tokens",
-		Help: "Current number of active tokens",
+		Name: "gauth_client_active_tokens",
+		Help: "Current number of active tokens per client",
 	}, []string{"client_id"})
 
 	resourceUtilization = promauto.NewGaugeVec(prometheus.GaugeOpts{ //nolint:unused
