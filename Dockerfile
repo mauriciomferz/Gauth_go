@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.23.0-alpine AS builder
+FROM golang:1.23.3-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache git ca-certificates tzdata
@@ -7,20 +7,33 @@ RUN apk add --no-cache git ca-certificates tzdata
 # Set the working directory
 WORKDIR /app
 
-# Copy go mod files
+# Copy go mod files first for better layer caching
 COPY go.mod go.sum ./
 
-# Download dependencies
+# Copy the local module dependencies (backend module)
+COPY gauth-demo-app/web/backend/go.mod ./gauth-demo-app/web/backend/
+COPY gauth-demo-app/web/backend/go.sum ./gauth-demo-app/web/backend/
+
+# Copy the backend source code needed for local dependencies
+COPY gauth-demo-app/web/backend/ ./gauth-demo-app/web/backend/
+
+# Download dependencies (with local modules available)
 RUN go mod download
 
-# Copy source code
+# Copy the rest of the source code
 COPY . .
 
-# Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o gauth-server ./cmd/demo
+# Verify the build can complete
+RUN go mod verify
+
+# Build the application with optimizations
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+    -ldflags='-w -s -extldflags "-static"' \
+    -a -installsuffix cgo \
+    -o gauth-server ./cmd/demo
 
 # Final stage
-FROM alpine:latest
+FROM alpine:3.18.4
 
 # Install runtime dependencies
 RUN apk --no-cache add ca-certificates tzdata
@@ -43,6 +56,9 @@ USER gauth
 
 # Expose the port the app runs on
 EXPOSE 8080
+
+# Install wget for health checks
+RUN apk --no-cache add wget
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \

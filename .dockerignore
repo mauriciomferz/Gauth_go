@@ -1,0 +1,86 @@
+# Git files
+.git
+.gitignore
+
+# Documentation and markdown files
+*.md
+docs/
+
+# Test files and coverage reports
+*_test.go
+coverage.out
+coverage.html
+
+# Build artifacts and binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+gauth-*
+!gauth-server
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Node.js (for frontend builds)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Package files
+*.tar.gz
+*.zip
+
+# Log files
+*.log
+server.log
+
+# Local environment files
+.env
+.env.local
+.env.*.local
+
+# Demo and example output
+demo
+demo_*
+cascade_main
+main
+
+# Kubernetes configs
+k8s/
+
+# Monitoring files
+monitoring/
+
+# Scripts that aren't needed in container
+*.sh
+!start*.sh
+!deploy*.sh
+
+# SARIF files
+*.sarif
+
+# Backup files
+*_backup/
+_demo_backup/
