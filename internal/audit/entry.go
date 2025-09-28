@@ -84,7 +84,7 @@ func NewEntry(event *events.Event) *Entry {
 		if details, ok := event.Details.(*events.AuthEventDetails); ok {
 			entry.ActorID = details.ClientID
 			entry.Message = "Authentication successful"
-			entry.Action = "authenticate"
+			entry.Action = string(ActionAuthenticate)
 		}
 	case events.AuthFailure:
 		entry.Type = AuditTypeAuth
@@ -92,7 +92,7 @@ func NewEntry(event *events.Event) *Entry {
 		if details, ok := event.Details.(*events.AuthEventDetails); ok {
 			entry.ActorID = details.ClientID
 			entry.Message = "Authentication failed"
-			entry.Action = "authenticate"
+			entry.Action = string(ActionAuthenticate)
 			entry.Result = "failure"
 			entry.Metadata["error_code"] = details.ErrorCode
 			entry.Metadata["error_detail"] = details.ErrorDetail

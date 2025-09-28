@@ -100,7 +100,8 @@ var (
 	)
 )
 
-func init() {
+// RegisterMetrics registers all GAuth metrics with Prometheus
+func RegisterMetrics() {
 	// Register all metrics
 	prometheus.MustRegister(
 		authAttempts,

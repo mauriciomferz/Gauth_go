@@ -28,7 +28,7 @@ func (c *CustomResourceServer) ProcessCustomTransaction(tx gauth.TransactionDeta
 	}
 
 	// Process using base implementation
-	result, err := c.ProcessTransaction(tx, token)
+	result, err := c.ResourceServer.ProcessTransaction(tx, token)
 	if err != nil {
 		return err
 	}

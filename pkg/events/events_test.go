@@ -5,6 +5,11 @@ import (
 	"time"
 )
 
+// Test constants
+const (
+	testIPAddress = "192.168.1.1"
+)
+
 func TestEventCreation(t *testing.T) {
 	// Test basic event creation
 	evt := CreateEvent()
@@ -43,8 +48,8 @@ func TestEventCreation(t *testing.T) {
 		t.Errorf("Expected message %s, got %s", "User logged in successfully", loginEvent.Message)
 	}
 	ipAddress, ok := loginEvent.Metadata.GetString("ip_address")
-	if !ok || ipAddress != "192.168.1.1" {
-		t.Errorf("Expected metadata ip_address=%s, got %v", "192.168.1.1", ipAddress)
+	if !ok || ipAddress != testIPAddress {
+		t.Errorf("Expected metadata ip_address=%s, got %v", testIPAddress, ipAddress)
 	}
 }
 

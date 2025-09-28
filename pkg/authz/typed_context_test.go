@@ -6,14 +6,22 @@ import (
 	"time"
 )
 
+// Test constants
+const (
+	testUserJohn       = "john"
+	testDeptEngineering = "engineering"
+	testSourceAPI      = "api"
+	testSourceDatabase = "database"
+)
+
 func TestContext(t *testing.T) {
 	ctx := make(map[string]string)
 
 	// Test string values
-	ctx["user"] = "john"
+	ctx["user"] = testUserJohn
 	val, ok := ctx["user"]
-	if !ok || val != "john" {
-		t.Errorf("String value not set correctly: got %v, want %s", val, "john")
+	if !ok || val != testUserJohn {
+		t.Errorf("String value not set correctly: got %v, want %s", val, testUserJohn)
 	}
 
 	// Test int values (store as string)
@@ -69,10 +77,10 @@ func TestAnnotations(t *testing.T) {
 	annotations := make(map[string]string)
 
 	// Test string values
-	annotations["source"] = "api"
+	annotations["source"] = testSourceAPI
 	val, ok := annotations["source"]
-	if !ok || val != "api" {
-		t.Errorf("String value not set correctly: got %v, want %s", val, "api")
+	if !ok || val != testSourceAPI {
+		t.Errorf("String value not set correctly: got %v, want %s", val, testSourceAPI)
 	}
 
 	// Test int values (store as string)
@@ -132,14 +140,14 @@ func TestAccessRequest(t *testing.T) {
 	}
 
 	// Test adding context values (all as strings)
-	request.Context["department"] = "engineering"
+	request.Context["department"] = testDeptEngineering
 	request.Context["priority"] = strconv.Itoa(3)
 	request.Context["urgent"] = strconv.FormatBool(true)
 	request.Context["tags"] = "confidential,shared"
 
 	val, ok := request.Context["department"]
-	if !ok || val != "engineering" {
-		t.Errorf("Context string value incorrect: got %v, want %s", val, "engineering")
+	if !ok || val != testDeptEngineering {
+		t.Errorf("Context string value incorrect: got %v, want %s", val, testDeptEngineering)
 	}
 
 	// Context should exist and contain all values
@@ -157,13 +165,13 @@ func TestAccessResponse(t *testing.T) {
 	}
 
 	// Test adding annotations (all as strings)
-	response.Annotations["source"] = "database"
+	response.Annotations["source"] = testSourceDatabase
 	response.Annotations["expires"] = strconv.Itoa(3600)
 	response.Annotations["cached"] = strconv.FormatBool(false)
 
 	val, ok := response.Annotations["source"]
-	if !ok || val != "database" {
-		t.Errorf("Annotation string value incorrect: got %v, want %s", val, "database")
+	if !ok || val != testSourceDatabase {
+		t.Errorf("Annotation string value incorrect: got %v, want %s", val, testSourceDatabase)
 	}
 
 	ival, err := strconv.Atoi(response.Annotations["expires"])

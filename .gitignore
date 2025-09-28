@@ -72,3 +72,25 @@ benchmarks/
 # Test artifacts
 testdata/
 gauth-demo-app/web/backend/test-build
+
+# macOS system files
+.DS_Store
+.DS_Store?
+._*
+.Trashes
+
+# Node.js dependencies (for web frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.cache
+
+# Build artifacts
+/build/
+/dist/
