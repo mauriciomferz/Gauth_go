@@ -71,3 +71,4 @@ benchmarks/
 
 # Test artifacts
 testdata/
+gauth-demo-app/web/backend/test-build

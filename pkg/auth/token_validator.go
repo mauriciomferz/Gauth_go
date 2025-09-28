@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // TokenValidator handles token validation logic
@@ -33,9 +33,10 @@ func (v *TokenValidator) ValidateToken(ctx context.Context, tokenStr string) *Va
 		Valid: false,
 	}
 
-	// Parse token without validating signature first
-	token, _ := jwt.Parse(tokenStr, nil)
-	if token == nil {
+	// Parse token without validating signature first (for claim extraction)
+	parser := jwt.NewParser(jwt.WithoutClaimsValidation())
+	token, _, err := parser.ParseUnverified(tokenStr, jwt.MapClaims{})
+	if err != nil {
 		result.Error = ErrInvalidToken
 		return result
 	}

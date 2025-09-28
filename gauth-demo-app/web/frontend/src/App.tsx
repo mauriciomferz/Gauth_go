@@ -58,6 +58,7 @@ import BusinessOwners from './components/BusinessOwners';
 import ComplianceMonitor from './components/ComplianceMonitor';
 import AuditTrail from './components/AuditTrail';
 import TokenManagement from './components/TokenManagement';
+import GAuthPlusDemo from './components/GAuthPlusDemo';
 import WebSocketService from './services/WebSocketService';
 import { useAppStore } from './store/appStore';
 import { useAuthStore } from './store/authStore';
@@ -127,6 +128,13 @@ const navigationItems: NavigationItem[] = [
     icon: <Audit />, 
     path: '/audit', 
     description: 'Accountability',
+    paradigm: 'power'
+  },
+  { 
+    text: 'GAuth+ Register', 
+    icon: <BusinessCenter />, 
+    path: '/gauth-plus', 
+    description: 'AI Commercial Register',
     paradigm: 'power'
   },
 ];
@@ -359,6 +367,7 @@ const App: React.FC = () => {
             <Route path="/business-owners" element={<BusinessOwners />} />
             <Route path="/compliance" element={<ComplianceMonitor />} />
             <Route path="/audit" element={<AuditTrail />} />
+            <Route path="/gauth-plus" element={<GAuthPlusDemo />} />
           </Routes>
         </Container>
       </Box>
