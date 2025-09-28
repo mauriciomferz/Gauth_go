@@ -69,8 +69,24 @@ echo "   Image: gauth-demo:robust-build"
 echo "   Strategy: Copy only required directories (cmd, pkg, internal, examples)"
 echo ""
 
-# Build the Docker image
+# Try building with standard Dockerfile first
+echo "🔄 Attempting build with standard Dockerfile..."
 if docker build -t gauth-demo:robust-build -f Dockerfile .; then
+    BUILD_SUCCESS=true
+else
+    echo "⚠️  Standard build failed, trying minimal Dockerfile..."
+    echo "   This version avoids external dependencies that may cause Alpine issues"
+    
+    # Try with minimal Dockerfile
+    if docker build -t gauth-demo:robust-build -f Dockerfile.minimal .; then
+        BUILD_SUCCESS=true
+        echo "✅ Minimal build successful!"
+    else
+        BUILD_SUCCESS=false
+    fi
+fi
+
+if [ "$BUILD_SUCCESS" = true ]; then
     echo ""
     echo "✅ Docker build completed successfully!"
     

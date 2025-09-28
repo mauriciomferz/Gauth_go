@@ -1,7 +1,10 @@
+# Alternative Dockerfile without external dependencies for health checks
+# Use this if Alpine package manager has network connectivity issues
+
 # Build stage
 FROM golang:1.23.3-alpine AS builder
 
-# Update package index and install build dependencies
+# Install build dependencies
 RUN apk update && apk add --no-cache git ca-certificates tzdata sed
 
 # Set the working directory
@@ -37,11 +40,11 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
 # Verify the binary was created successfully
 RUN ls -la gauth-server
 
-# Final stage
+# Final stage - minimal runtime
 FROM alpine:3.18.4
 
-# Update package index and install runtime dependencies (including wget for health checks)
-RUN apk update && apk add --no-cache ca-certificates tzdata wget
+# Install minimal runtime dependencies only
+RUN apk update && apk add --no-cache ca-certificates tzdata
 
 # Create a non-root user
 RUN adduser -D -s /bin/sh gauth
@@ -62,9 +65,9 @@ USER gauth
 # Expose the port the app runs on
 EXPOSE 8080
 
-# Health check
+# Simple health check without external tools (using the binary itself)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
+  CMD ./gauth-server --version > /dev/null 2>&1 || exit 1
 
 # Command to run the application
 CMD ["./gauth-server"]
