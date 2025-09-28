@@ -32,7 +32,7 @@ func newMemoryStore(config *Config) *memoryStore {
 	}
 }
 
-func (s *memoryStore) Add(ctx context.Context, id string, t time.Time) error {
+func (s *memoryStore) Add(_ context.Context, id string, t time.Time) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

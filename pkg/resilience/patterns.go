@@ -203,7 +203,7 @@ func (p *Patterns) Execute(ctx context.Context, fn func() error) error {
 	now := time.Now()
 	elapsed := now.Sub(p.lastRequest)
 	newTokens := int(float64(p.reqPerSec) * elapsed.Seconds())
-	p.tokens = min(p.burst, p.tokens+newTokens)
+	p.tokens = minInt(p.burst, p.tokens+newTokens)
 	if p.tokens <= 0 {
 		p.mu.Unlock()
 		if p.onRateLimit != nil {
@@ -316,7 +316,7 @@ func (p *Patterns) recordFailure() {
 	}
 }
 
-func min(a, b int) int {
+func minInt(a, b int) int {
 	if a < b {
 		return a
 	}
