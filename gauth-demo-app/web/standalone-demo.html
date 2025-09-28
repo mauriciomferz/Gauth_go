@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>GAuth Power-of-Attorney Protocol (P*P) - Enterprise Demo</title>
     <style>
         :root {
@@ -766,13 +769,20 @@
                 console.log('RFC115 Response Data:', data);
                 console.log('Success field:', data.success);
                 console.log('Success type:', typeof data.success);
+                console.log('Message field:', data.message);
+                console.log('Delegation field:', data.delegation);
                 
                 // Check for success - be more explicit about success conditions
-                const isSuccessful = (data.success === true) || 
-                                   (data.success === 'true') || 
-                                   (data.delegation_id) || 
-                                   (data.delegation && Object.keys(data.delegation).length > 0) ||
-                                   (data.message && data.message.includes('successfully'));
+                const condition1 = (data.success === true);
+                const condition2 = (data.success === 'true');
+                const condition3 = (data.delegation_id);
+                const condition4 = (data.delegation && Object.keys(data.delegation).length > 0);
+                const condition5 = (data.message && data.message.includes('successfully'));
+                
+                console.log('Success conditions:', {condition1, condition2, condition3, condition4, condition5});
+                
+                const isSuccessful = condition1 || condition2 || condition3 || condition4 || condition5;
+                console.log('Final isSuccessful:', isSuccessful);
                 
                 if (isSuccessful) {
                     const delegationId = data.delegation?.delegation_id || data.delegation_id || 'Generated successfully';
