@@ -763,7 +763,31 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8082/api/v1';
+        const API_BASE = 'http://localhost:8080/api/v1';
+
+        // Safe JSON parsing function with error handling
+        async function safeJsonParse(response) {
+            try {
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('HTTP Error:', response.status, response.statusText, errorText);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}\n${errorText}`);
+                }
+                
+                const text = await response.text();
+                console.log('Raw response text:', text);
+                
+                if (!text) {
+                    throw new Error('Empty response received');
+                }
+                
+                return JSON.parse(text);
+            } catch (parseError) {
+                console.error('JSON Parse Error:', parseError);
+                console.error('Response text that failed to parse:', await response.text().catch(() => 'Could not read response text'));
+                throw new Error(`Failed to parse JSON response: ${parseError.message}`);
+            }
+        }
 
         // Tab switching functionality
         function switchTab(tabName) {
