@@ -68,6 +68,7 @@ const tokenSchema = yup.object({
   client_id: yup.string().required('Client ID is required'),
   scope: yup.array().min(1, 'At least one scope is required'),
   duration: yup.string().required('Duration is required'),
+  claims: yup.object().default({}),
 });
 
 const scopeOptions = [
@@ -126,6 +127,17 @@ export default function TokenManagement() {
     try {
       setAppLoading('createToken', true);
       
+      // Validate required fields
+      if (!data.owner_id) {
+        toast.error('Owner ID is required');
+        return;
+      }
+      
+      if (!data.client_id) {
+        toast.error('Client ID is required');
+        return;
+      }
+      
       // Convert custom claims to object
       const claims = { ...data.claims };
       customClaims.forEach(claim => {
@@ -140,10 +152,11 @@ export default function TokenManagement() {
           client_id: data.client_id,
           ...claims,
         },
-        duration: data.duration,
-        scope: data.scope,
+        duration: data.duration || '1h', // Default to 1 hour
+        scope: data.scope || [],
       };
 
+      console.log('Creating token with data:', tokenData);
       await apiService.createToken(tokenData);
       toast.success('Token created successfully');
       
@@ -151,9 +164,11 @@ export default function TokenManagement() {
       reset();
       setCustomClaims([]);
       loadTokens();
-    } catch (error) {
-      toast.error('Failed to create token');
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.details || error?.response?.data?.error || error?.message || 'Failed to create token';
+      toast.error(`Token creation failed: ${errorMessage}`);
       console.error('Error creating token:', error);
+      console.error('Error response:', error?.response?.data);
     } finally {
       setAppLoading('createToken', false);
     }
