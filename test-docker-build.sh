@@ -36,7 +36,8 @@ docker rmi gauth-demo:test 2>/dev/null || true
 
 echo "🔨 Building Docker image..."
 echo "   Image: gauth-demo:test"
-echo "   Context: ."
+echo "   Context: . (excluding gauth-demo-app/ via .dockerignore)"
+echo "   Strategy: Remove problematic local module dependency during build"
 echo ""
 
 # Build the Docker image
