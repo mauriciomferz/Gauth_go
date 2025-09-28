@@ -812,9 +812,26 @@
 
                 const data = await safeJsonParse(response);
                 
-                if (data.token_id) {
-                    alert(`✅ Enhanced Token Success!\n\nToken ID: ${data.token_id}\n\nAI Capabilities: ${data.ai_capabilities?.join(', ')}\nBusiness Restrictions: ${data.business_restrictions?.join(', ')}\nToken Type: ${data.token_type}\n\n🔐 Enhanced token created with AI-specific metadata and business restrictions!`);
+                // Debug logging
+                console.log('Enhanced Token Response Data:', data);
+                
+                // Check for success - look for access_token or other success indicators
+                const isSuccessful = (data.access_token) ||
+                                   (data.token_id) ||
+                                   (data.token_type) ||
+                                   (data.enhanced_features) ||
+                                   (data.capabilities);
+                
+                if (isSuccessful) {
+                    const tokenId = data.access_token || data.token_id || 'Generated successfully';
+                    const tokenType = data.token_type || 'Enhanced Bearer';
+                    const capabilities = data.capabilities ? Object.keys(data.capabilities).filter(k => data.capabilities[k]).join(', ') : 'Advanced features';
+                    const features = data.enhanced_features ? Object.keys(data.enhanced_features).filter(k => data.enhanced_features[k]).join(', ') : 'Enhanced capabilities';
+                    
+                    alert(`✅ Enhanced Token Success!\n\nToken: ${tokenId}\n\nType: ${tokenType}\nCapabilities: ${capabilities}\nFeatures: ${features}\nExpires: ${data.expires_in ? data.expires_in + ' seconds' : 'Long-term'}\n\n🔐 Enhanced token created with advanced AI capabilities and compliance features!`);
                 } else {
+                    // This should only show for actual errors
+                    console.error('Enhanced Token Error - showing detailed response:', data);
                     alert(`❌ Enhanced Token Error: ${JSON.stringify(data, null, 2)}`);
                 }
             } catch (error) {
