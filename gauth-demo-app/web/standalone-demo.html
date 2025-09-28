@@ -784,16 +784,28 @@
                 const isSuccessful = condition1 || condition2 || condition3 || condition4 || condition5;
                 console.log('Final isSuccessful:', isSuccessful);
                 
-                if (isSuccessful) {
-                    const delegationId = data.delegation?.delegation_id || data.delegation_id || 'Generated successfully';
-                    const complianceLevel = data.compliance?.rfc115_compliant ? 'RFC115 Compliant' : (data.compliance_status?.compliance_level || 'Validated');
-                    const attestationLevel = data.enhanced_token?.attestations?.[0]?.trust_level || data.delegation?.type || 'Enhanced';
-                    
-                    alert(`✅ RFC115 Success!\n\nDelegation: ${delegationId}\n\nCompliance: ${complianceLevel}\nProtocol: ${data.delegation?.protocol || 'RFC115'}\n\n⚖️ ${data.message || 'Board Chair successfully delegated governance powers with enhanced attestation!'}`);
-                } else {
-                    // This should only show for actual errors
-                    console.error('RFC115 Error - showing detailed response:', data);
-                    alert(`❌ RFC115 Error: ${JSON.stringify(data, null, 2)}`);
+                try {
+                    if (isSuccessful) {
+                        console.log('🎉 RFC115 SUCCESS DETECTED - Processing success message...');
+                        const delegationId = data.delegation?.delegation_id || data.delegation_id || 'Generated successfully';
+                        const complianceLevel = data.compliance?.rfc115_compliant ? 'RFC115 Compliant' : (data.compliance_status?.compliance_level || 'Validated');
+                        const attestationLevel = data.enhanced_token?.attestations?.[0]?.trust_level || data.delegation?.type || 'Enhanced';
+                        
+                        const successMessage = `✅ RFC115 Success!\n\nDelegation: ${delegationId}\n\nCompliance: ${complianceLevel}\nProtocol: ${data.delegation?.protocol || 'RFC115'}\n\n⚖️ ${data.message || 'Board Chair successfully delegated governance powers with enhanced attestation!'}`;
+                        console.log('Success message prepared:', successMessage);
+                        alert(successMessage);
+                    } else {
+                        // This should only show for actual errors
+                        console.error('❌ RFC115 FAILURE - All conditions failed:', {condition1, condition2, condition3, condition4, condition5});
+                        console.error('RFC115 Error - showing detailed response:', data);
+                        
+                        // Show a more informative error message
+                        const errorMessage = `❌ RFC115 Error - Success Detection Failed\n\nResponse Data: ${JSON.stringify(data, null, 2)}\n\nDebug Info:\n- success field: ${data.success} (${typeof data.success})\n- message field: ${data.message}\n- delegation exists: ${!!data.delegation}`;
+                        alert(errorMessage);
+                    }
+                } catch (successProcessingError) {
+                    console.error('❌ CRITICAL ERROR in RFC115 success processing:', successProcessingError);
+                    alert(`❌ RFC115 Critical Error: Failed to process response\n\nError: ${successProcessingError.message}\n\nResponse: ${JSON.stringify(data, null, 2)}`);
                 }
             } catch (error) {
                 alert(`❌ RFC115 Connection Error: ${error.message}\n\nMake sure the backend server is running on localhost:8080`);
@@ -824,25 +836,46 @@
                 
                 // Debug logging
                 console.log('Enhanced Token Response Data:', data);
+                console.log('Access Token field:', data.access_token);
+                console.log('Token Type field:', data.token_type);
+                console.log('Capabilities field:', data.capabilities);
+                console.log('Enhanced Features field:', data.enhanced_features);
                 
                 // Check for success - look for access_token or other success indicators
-                const isSuccessful = (data.access_token) ||
-                                   (data.token_id) ||
-                                   (data.token_type) ||
-                                   (data.enhanced_features) ||
-                                   (data.capabilities);
+                const tokenCondition1 = (data.access_token);
+                const tokenCondition2 = (data.token_id);
+                const tokenCondition3 = (data.token_type);
+                const tokenCondition4 = (data.enhanced_features);
+                const tokenCondition5 = (data.capabilities);
                 
-                if (isSuccessful) {
-                    const tokenId = data.access_token || data.token_id || 'Generated successfully';
-                    const tokenType = data.token_type || 'Enhanced Bearer';
-                    const capabilities = data.capabilities ? Object.keys(data.capabilities).filter(k => data.capabilities[k]).join(', ') : 'Advanced features';
-                    const features = data.enhanced_features ? Object.keys(data.enhanced_features).filter(k => data.enhanced_features[k]).join(', ') : 'Enhanced capabilities';
-                    
-                    alert(`✅ Enhanced Token Success!\n\nToken: ${tokenId}\n\nType: ${tokenType}\nCapabilities: ${capabilities}\nFeatures: ${features}\nExpires: ${data.expires_in ? data.expires_in + ' seconds' : 'Long-term'}\n\n🔐 Enhanced token created with advanced AI capabilities and compliance features!`);
-                } else {
-                    // This should only show for actual errors
-                    console.error('Enhanced Token Error - showing detailed response:', data);
-                    alert(`❌ Enhanced Token Error: ${JSON.stringify(data, null, 2)}`);
+                console.log('Enhanced Token Success conditions:', {tokenCondition1, tokenCondition2, tokenCondition3, tokenCondition4, tokenCondition5});
+                
+                const isSuccessful = tokenCondition1 || tokenCondition2 || tokenCondition3 || tokenCondition4 || tokenCondition5;
+                console.log('Enhanced Token Final isSuccessful:', isSuccessful);
+                
+                try {
+                    if (isSuccessful) {
+                        console.log('🎉 ENHANCED TOKEN SUCCESS DETECTED - Processing success message...');
+                        const tokenId = data.access_token || data.token_id || 'Generated successfully';
+                        const tokenType = data.token_type || 'Enhanced Bearer';
+                        const capabilities = data.capabilities ? Object.keys(data.capabilities).filter(k => data.capabilities[k]).join(', ') : 'Advanced features';
+                        const features = data.enhanced_features ? Object.keys(data.enhanced_features).filter(k => data.enhanced_features[k]).join(', ') : 'Enhanced capabilities';
+                        
+                        const successMessage = `✅ Enhanced Token Success!\n\nToken: ${tokenId}\n\nType: ${tokenType}\nCapabilities: ${capabilities}\nFeatures: ${features}\nExpires: ${data.expires_in ? data.expires_in + ' seconds' : 'Long-term'}\n\n🔐 Enhanced token created with advanced AI capabilities and compliance features!`;
+                        console.log('Enhanced Token Success message prepared:', successMessage);
+                        alert(successMessage);
+                    } else {
+                        // This should only show for actual errors
+                        console.error('❌ ENHANCED TOKEN FAILURE - All conditions failed:', {tokenCondition1, tokenCondition2, tokenCondition3, tokenCondition4, tokenCondition5});
+                        console.error('Enhanced Token Error - showing detailed response:', data);
+                        
+                        // Show a more informative error message
+                        const errorMessage = `❌ Enhanced Token Error - Success Detection Failed\n\nResponse Data: ${JSON.stringify(data, null, 2)}\n\nDebug Info:\n- access_token: ${data.access_token}\n- token_type: ${data.token_type}\n- has capabilities: ${!!data.capabilities}\n- has enhanced_features: ${!!data.enhanced_features}`;
+                        alert(errorMessage);
+                    }
+                } catch (tokenProcessingError) {
+                    console.error('❌ CRITICAL ERROR in Enhanced Token success processing:', tokenProcessingError);
+                    alert(`❌ Enhanced Token Critical Error: Failed to process response\n\nError: ${tokenProcessingError.message}\n\nResponse: ${JSON.stringify(data, null, 2)}`);
                 }
             } catch (error) {
                 alert(`❌ Enhanced Token Connection Error: ${error.message}\n\nMake sure the backend server is running on localhost:8080`);
