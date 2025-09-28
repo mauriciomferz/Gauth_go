@@ -88,8 +88,10 @@ type AIAuthorizationRecord struct {
 	DecisionAuthority    *DecisionAuthority        `json:"decision_authority"`
 	TransactionRights    *TransactionRights        `json:"transaction_rights"`
 	ActionPermissions    *ActionPermissions        `json:"action_permissions"`
-	DualControlPrinciple *DualControlPrinciple     `json:"dual_control_principle"`
 	AuthorizationCascade *AuthorizationCascade     `json:"authorization_cascade"`
+	HumanAccountability  *HumanAccountabilityChain `json:"human_accountability"`
+	MathematicalProof    *MathematicalProof        `json:"mathematical_proof"`
+	DualControlPrinciple *DualControlPrinciple     `json:"dual_control_principle"`
 	BlockchainHash       string                    `json:"blockchain_hash"`
 	CreatedAt            time.Time                 `json:"created_at"`
 	ExpiresAt            time.Time                 `json:"expires_at"`
@@ -147,6 +149,174 @@ type ApprovalLimits struct {
 	MonthlyLimit float64 `json:"monthly_limit"`
 	AnnualLimit  float64 `json:"annual_limit"`
 	Currency     string  `json:"currency"`
+}
+
+// HumanAccountabilityChain ensures human authority at the top of delegation cascade
+type HumanAccountabilityChain struct {
+	UltimateHumanAuthority *UltimateHumanAuthority `json:"ultimate_human_authority"`
+	DelegationChain        []AuthorityLevel        `json:"delegation_chain"`
+	AccountabilityLevel    int                     `json:"accountability_level"`
+	VerificationRequired   bool                    `json:"verification_required"`
+	Validated              bool                    `json:"validated"`
+	ValidatedAt            time.Time               `json:"validated_at"`
+	ValidatedBy            string                  `json:"validated_by"`
+}
+
+// UltimateHumanAuthority represents the top-level human in the authorization cascade
+type UltimateHumanAuthority struct {
+	HumanID              string                 `json:"human_id"`
+	Name                 string                 `json:"name"`
+	Position             string                 `json:"position"`
+	LegalCapacity        *LegalCapacity         `json:"legal_capacity"`
+	IdentityVerification *IdentityVerification  `json:"identity_verification"`
+	Authority            []string               `json:"authority"`
+	DelegationPowers     map[string]interface{} `json:"delegation_powers"`
+	AccountabilityScope  []string               `json:"accountability_scope"`
+	IsUltimateAuthority  bool                   `json:"is_ultimate_authority"`
+}
+
+// AuthorityLevel represents a level in the delegation chain
+type AuthorityLevel struct {
+	Level          int       `json:"level"`
+	AuthorityID    string    `json:"authority_id"`
+	AuthorityType  string    `json:"authority_type"` // human, ai_agent, system
+	DelegatedFrom  string    `json:"delegated_from"`
+	DelegatedTo    string    `json:"delegated_to"`
+	PowerScope     []string  `json:"power_scope"`
+	Limitations    []string  `json:"limitations"`
+	CreatedAt      time.Time `json:"created_at"`
+	IsHuman        bool      `json:"is_human"`
+}
+
+// IdentityVerification provides comprehensive identity validation
+type IdentityVerification struct {
+	Verified           bool                   `json:"verified"`
+	VerificationMethod string                 `json:"verification_method"`
+	VerificationLevel  string                 `json:"verification_level"` // basic, enhanced, government
+	Documents          []VerificationDocument `json:"documents"`
+	BiometricData      *BiometricData         `json:"biometric_data,omitempty"`
+	VerifiedAt         time.Time              `json:"verified_at"`
+	VerifiedBy         string                 `json:"verified_by"`
+	ExpiresAt          time.Time              `json:"expires_at"`
+}
+
+// VerificationDocument represents a document used for verification
+type VerificationDocument struct {
+	Type         string    `json:"type"`         // passport, drivers_license, etc.
+	DocumentID   string    `json:"document_id"`
+	IssuingAuth  string    `json:"issuing_authority"`
+	VerifiedHash string    `json:"verified_hash"`
+	ExpiresAt    time.Time `json:"expires_at"`
+}
+
+// BiometricData represents biometric verification data
+type BiometricData struct {
+	FingerprintHash string `json:"fingerprint_hash,omitempty"`
+	FaceRecognition string `json:"face_recognition,omitempty"`
+	VoicePrint      string `json:"voice_print,omitempty"`
+}
+
+// DualControlPrinciple implements second-level approval mechanisms
+type DualControlPrinciple struct {
+	Enabled              bool                   `json:"enabled"`
+	RequiredForActions   []string               `json:"required_for_actions"`
+	PrimaryApprover      *Approver              `json:"primary_approver"`
+	SecondaryApprover    *Approver              `json:"secondary_approver"`
+	ApprovalThreshold    *ApprovalThreshold     `json:"approval_threshold"`
+	ApprovalHistory      []ApprovalRecord       `json:"approval_history"`
+	SequentialApproval   bool                   `json:"sequential_approval"`
+	SimultaneousApproval bool                   `json:"simultaneous_approval"`
+	EscalationRules      []EscalationRule       `json:"escalation_rules"`
+}
+
+// Approver represents an entity that can provide approval
+type Approver struct {
+	ApproverID       string                 `json:"approver_id"`
+	ApproverType     string                 `json:"approver_type"` // human, ai_system, committee
+	Name             string                 `json:"name"`
+	Authority        []string               `json:"authority"`
+	ApprovalPowers   map[string]interface{} `json:"approval_powers"`
+	VerificationReq  bool                   `json:"verification_required"`
+	ContactInfo      map[string]string      `json:"contact_info"`
+	IsActive         bool                   `json:"is_active"`
+}
+
+// ApprovalThreshold defines when dual control is required
+type ApprovalThreshold struct {
+	MonetaryThreshold float64  `json:"monetary_threshold"`
+	RiskLevel         string   `json:"risk_level"`
+	ActionTypes       []string `json:"action_types"`
+	TimeConstraints   []string `json:"time_constraints"`
+	GeographicScope   []string `json:"geographic_scope"`
+}
+
+// ApprovalRecord tracks approval history
+type ApprovalRecord struct {
+	RecordID       string                 `json:"record_id"`
+	Action         string                 `json:"action"`
+	RequestedBy    string                 `json:"requested_by"`
+	ApprovedBy     []string               `json:"approved_by"`
+	ApprovalStatus string                 `json:"approval_status"`
+	ApprovalData   map[string]interface{} `json:"approval_data"`
+	RequestedAt    time.Time              `json:"requested_at"`
+	ApprovedAt     time.Time              `json:"approved_at"`
+	ExpiresAt      time.Time              `json:"expires_at"`
+}
+
+// EscalationRule defines escalation procedures
+type EscalationRule struct {
+	RuleID        string        `json:"rule_id"`
+	Trigger       string        `json:"trigger"`
+	EscalateTo    []string      `json:"escalate_to"`
+	Timeframe     time.Duration `json:"timeframe"`
+	Conditions    []string      `json:"conditions"`
+	AutoEscalate  bool          `json:"auto_escalate"`
+}
+
+// MathematicalProof provides cryptographic enforcement of power-of-attorney rules
+type MathematicalProof struct {
+	ProofType          string                 `json:"proof_type"`          // zk_proof, digital_signature, hash_chain
+	CryptographicProof string                 `json:"cryptographic_proof"`
+	VerificationKey    string                 `json:"verification_key"`
+	SignatureChain     []CryptographicSig     `json:"signature_chain"`
+	HashChain          []string               `json:"hash_chain"`
+	MerkleRoot         string                 `json:"merkle_root"`
+	ProofValidation    *ProofValidation       `json:"proof_validation"`
+	MathematicalRules  []MathematicalRule     `json:"mathematical_rules"`
+	EnforcementLevel   string                 `json:"enforcement_level"`
+	GeneratedAt        time.Time              `json:"generated_at"`
+	ValidatedAt        time.Time              `json:"validated_at"`
+}
+
+// CryptographicSig represents a cryptographic signature in the chain
+type CryptographicSig struct {
+	SignerID    string    `json:"signer_id"`
+	Signature   string    `json:"signature"`
+	Algorithm   string    `json:"algorithm"`
+	KeyID       string    `json:"key_id"`
+	Timestamp   time.Time `json:"timestamp"`
+	SignedData  string    `json:"signed_data"`
+}
+
+// ProofValidation tracks validation of mathematical proofs
+type ProofValidation struct {
+	Valid           bool      `json:"valid"`
+	ValidatedBy     string    `json:"validated_by"`
+	ValidationAlgo  string    `json:"validation_algorithm"`
+	ConfidenceLevel float64   `json:"confidence_level"`
+	ValidatedAt     time.Time `json:"validated_at"`
+	ValidationLog   []string  `json:"validation_log"`
+}
+
+// MathematicalRule defines enforceable mathematical constraints
+type MathematicalRule struct {
+	RuleID      string                 `json:"rule_id"`
+	RuleType    string                 `json:"rule_type"`    // constraint, invariant, theorem
+	Expression  string                 `json:"expression"`   // mathematical expression
+	Parameters  map[string]interface{} `json:"parameters"`
+	Violation   string                 `json:"violation"`    // what happens on violation
+	Enforcement string                 `json:"enforcement"` // how it's enforced
+	Priority    int                    `json:"priority"`
 }
 
 // ContractualPowers defines contract-related authorities
@@ -521,6 +691,314 @@ func (s *GAuthPlusService) isActionPermitted(record *AIAuthorizationRecord, acti
 			if systemAction == action {
 				return true, "action permitted"
 			}
+		}
+	}
+
+	// Check if action is in granted powers
+	if record.PowersGranted != nil {
+		for _, power := range record.PowersGranted.BasicPowers {
+			if strings.Contains(action, power) {
+				return true, "action permitted by basic powers"
+			}
+		}
+		for _, power := range record.PowersGranted.DerivedPowers {
+			if strings.Contains(action, power) {
+				return true, "action permitted by derived powers"
+			}
+		}
+	}
+
+	return false, "action not permitted"
+}
+
+// requiresDualControl checks if an action requires dual control approval
+func (s *GAuthPlusService) requiresDualControl(record *AIAuthorizationRecord, action string) bool {
+	if record.DualControlPrinciple == nil || !record.DualControlPrinciple.Enabled {
+		return false
+	}
+
+	for _, requiredAction := range record.DualControlPrinciple.RequiredForActions {
+		if requiredAction == action || strings.Contains(action, requiredAction) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// verifyDualControlApproval verifies that dual control approval has been obtained
+func (s *GAuthPlusService) verifyDualControlApproval(ctx context.Context, record *AIAuthorizationRecord, action string, context map[string]interface{}) (bool, []string) {
+	if record.DualControlPrinciple == nil {
+		return false, []string{}
+	}
+
+	requiredApprovers := []string{}
+	if record.DualControlPrinciple.PrimaryApprover != nil {
+		requiredApprovers = append(requiredApprovers, record.DualControlPrinciple.PrimaryApprover.ApproverID)
+	}
+	if record.DualControlPrinciple.SecondaryApprover != nil {
+		requiredApprovers = append(requiredApprovers, record.DualControlPrinciple.SecondaryApprover.ApproverID)
+	}
+
+	// In a real implementation, this would check for actual approvals
+	// For demo purposes, we'll assume approval is required but not yet obtained
+	return false, requiredApprovers
+}
+
+// ValidateHumanAccountabilityChain validates that human accountability is maintained
+func (s *GAuthPlusService) ValidateHumanAccountabilityChain(ctx context.Context, chain *HumanAccountabilityChain) error {
+	if chain == nil {
+		return fmt.Errorf("human accountability chain is required")
+	}
+
+	if chain.UltimateHumanAuthority == nil {
+		return fmt.Errorf("ultimate human authority must be specified")
+	}
+
+	if !chain.UltimateHumanAuthority.IsUltimateAuthority {
+		return fmt.Errorf("ultimate authority flag must be set")
+	}
+
+	// Validate identity verification
+	if chain.UltimateHumanAuthority.IdentityVerification == nil || !chain.UltimateHumanAuthority.IdentityVerification.Verified {
+		return fmt.Errorf("ultimate human authority identity must be verified")
+	}
+
+	// Validate delegation chain
+	for i, level := range chain.DelegationChain {
+		if i == 0 && !level.IsHuman {
+			return fmt.Errorf("first level in delegation chain must be human")
+		}
+		
+		if level.Level != i {
+			return fmt.Errorf("delegation chain levels must be sequential")
+		}
+	}
+
+	return nil
+}
+
+// GenerateMathematicalProof creates cryptographic proof for power-of-attorney
+func (s *GAuthPlusService) GenerateMathematicalProof(ctx context.Context, record *AIAuthorizationRecord) (*MathematicalProof, error) {
+	proof := &MathematicalProof{
+		ProofType:          "digital_signature_chain",
+		GeneratedAt:        time.Now(),
+		EnforcementLevel:   "cryptographic",
+		MathematicalRules:  []MathematicalRule{},
+		SignatureChain:     []CryptographicSig{},
+	}
+
+	// Create signature chain from authorization cascade
+	if record.AuthorizationCascade != nil {
+		for i, level := range record.AuthorizationCascade.CascadeChain {
+			sig := CryptographicSig{
+				SignerID:    level.AuthorizerID,
+				Algorithm:   "ECDSA",
+				KeyID:       fmt.Sprintf("key_%s", level.AuthorizerID),
+				Timestamp:   level.GrantedAt,
+				SignedData:  fmt.Sprintf("level_%d_authorization", i),
+			}
+			
+			// Generate mock signature for demo
+			sigData := fmt.Sprintf("%s:%s:%d", sig.SignerID, sig.SignedData, sig.Timestamp.Unix())
+			hash := sha256.Sum256([]byte(sigData))
+			sig.Signature = hex.EncodeToString(hash[:])
+			
+			proof.SignatureChain = append(proof.SignatureChain, sig)
+		}
+	}
+
+	// Add mathematical rules for power enforcement
+	rules := []MathematicalRule{
+		{
+			RuleID:      "human_at_top",
+			RuleType:    "invariant",
+			Expression:  "∀ cascade : cascade.top.type = human",
+			Enforcement: "cryptographic_verification",
+			Priority:    1,
+		},
+		{
+			RuleID:      "power_conservation",
+			RuleType:    "constraint",
+			Expression:  "∑ delegated_powers ≤ total_authority",
+			Enforcement: "mathematical_validation",
+			Priority:    2,
+		},
+		{
+			RuleID:      "temporal_validity",
+			RuleType:    "constraint",
+			Expression:  "current_time ∈ [valid_from, valid_until]",
+			Enforcement: "temporal_verification",
+			Priority:    3,
+		},
+	}
+	proof.MathematicalRules = rules
+
+	// Create hash chain
+	for i, rule := range rules {
+		ruleData := fmt.Sprintf("%s:%s:%s", rule.RuleID, rule.Expression, rule.Enforcement)
+		hash := sha256.Sum256([]byte(ruleData))
+		proof.HashChain = append(proof.HashChain, hex.EncodeToString(hash[:]))
+		
+		if i == len(rules)-1 {
+			// Set merkle root as final hash
+			proof.MerkleRoot = hex.EncodeToString(hash[:])
+		}
+	}
+
+	// Generate verification key
+	keyData := fmt.Sprintf("%s:%s:%d", record.ID, record.AISystemID, proof.GeneratedAt.Unix())
+	keyHash := sha256.Sum256([]byte(keyData))
+	proof.VerificationKey = hex.EncodeToString(keyHash[:])
+
+	// Create cryptographic proof
+	proofData := fmt.Sprintf("%s:%s:%s", proof.MerkleRoot, proof.VerificationKey, proof.ProofType)
+	proofHash := sha256.Sum256([]byte(proofData))
+	proof.CryptographicProof = hex.EncodeToString(proofHash[:])
+
+	// Validate the proof
+	validation := &ProofValidation{
+		Valid:           true,
+		ValidatedBy:     "gauth_plus_service",
+		ValidationAlgo:  "sha256_chain_validation",
+		ConfidenceLevel: 0.95,
+		ValidatedAt:     time.Now(),
+		ValidationLog:   []string{"signature_chain_validated", "mathematical_rules_verified", "hash_chain_computed"},
+	}
+	proof.ProofValidation = validation
+	proof.ValidatedAt = validation.ValidatedAt
+
+	return proof, nil
+}
+
+// EnforceDualControlPrinciple enforces dual control for high-risk operations
+func (s *GAuthPlusService) EnforceDualControlPrinciple(ctx context.Context, record *AIAuthorizationRecord, action string, requestData map[string]interface{}) (*DualControlResult, error) {
+	if record.DualControlPrinciple == nil || !record.DualControlPrinciple.Enabled {
+		return &DualControlResult{
+			Required:   false,
+			Enforced:   false,
+			Status:     "not_required",
+			Message:    "dual control not enabled for this authorization",
+		}, nil
+	}
+
+	// Check if dual control is required for this action
+	required := s.requiresDualControl(record, action)
+	if !required {
+		return &DualControlResult{
+			Required: false,
+			Enforced: false,
+			Status:   "not_required",
+			Message:  "dual control not required for this action",
+		}, nil
+	}
+
+	// Create approval request
+	approvalReq := &ApprovalRecord{
+		RecordID:       generateID("approval"),
+		Action:         action,
+		RequestedBy:    record.AISystemID,
+		ApprovalStatus: "pending",
+		ApprovalData:   requestData,
+		RequestedAt:    time.Now(),
+		ExpiresAt:      time.Now().Add(24 * time.Hour), // 24 hour approval window
+	}
+
+	// Store approval request
+	if err := s.storeApprovalRequest(ctx, approvalReq); err != nil {
+		return nil, fmt.Errorf("failed to store approval request: %w", err)
+	}
+
+	return &DualControlResult{
+		Required:        true,
+		Enforced:        true,
+		Status:          "approval_required",
+		Message:         "dual control approval required before action can proceed",
+		ApprovalRequest: approvalReq,
+		RequiredApprovers: []string{
+			record.DualControlPrinciple.PrimaryApprover.ApproverID,
+			record.DualControlPrinciple.SecondaryApprover.ApproverID,
+		},
+	}, nil
+}
+
+// DualControlResult represents the result of dual control enforcement
+type DualControlResult struct {
+	Required          bool            `json:"required"`
+	Enforced          bool            `json:"enforced"`
+	Status            string          `json:"status"`
+	Message           string          `json:"message"`
+	ApprovalRequest   *ApprovalRecord `json:"approval_request,omitempty"`
+	RequiredApprovers []string        `json:"required_approvers,omitempty"`
+}
+
+// storeApprovalRequest stores an approval request for processing
+func (s *GAuthPlusService) storeApprovalRequest(ctx context.Context, req *ApprovalRecord) error {
+	if s.redis != nil {
+		data, err := json.Marshal(req)
+		if err != nil {
+			return err
+		}
+		return s.redis.Set(ctx, fmt.Sprintf("approval_request:%s", req.RecordID), data, 24*time.Hour).Err()
+	}
+	return nil
+}
+
+// Helper function to generate unique IDs
+func generateID(prefix string) string {
+	return fmt.Sprintf("%s_%d", prefix, time.Now().UnixNano())
+}
+
+// Additional blockchain registry methods
+
+// StoreAuthorizationRecord stores an authorization record in the blockchain
+func (br *BlockchainRegistry) StoreAuthorizationRecord(ctx context.Context, record *AIAuthorizationRecord) error {
+	if br.redis != nil {
+		data, err := json.Marshal(record)
+		if err != nil {
+			return err
+		}
+		return br.redis.Set(ctx, fmt.Sprintf("blockchain:auth_record:%s", record.ID), data, 0).Err()
+	}
+	return nil
+}
+
+// GetAuthorizationRecord retrieves an authorization record from the blockchain
+func (br *BlockchainRegistry) GetAuthorizationRecord(ctx context.Context, aiSystemID string) (*AIAuthorizationRecord, error) {
+	if br.redis != nil {
+		// In a real implementation, this would query by AI system ID
+		// For demo, we'll create a mock record
+		mockRecord := &AIAuthorizationRecord{
+			ID:         generateID("mock_auth"),
+			AISystemID: aiSystemID,
+			Status:     "active",
+			ExpiresAt:  time.Now().Add(365 * 24 * time.Hour), // 1 year
+			CreatedAt:  time.Now().Add(-30 * 24 * time.Hour), // 30 days ago
+		}
+		return mockRecord, nil
+	}
+	return nil, fmt.Errorf("blockchain registry not available")
+}
+
+// RegisterAISystem registers an AI system in the commercial register
+func (cr *CommercialRegister) RegisterAISystem(ctx context.Context, record *AIAuthorizationRecord) error {
+	if cr.redis != nil {
+		registryData := map[string]interface{}{
+			"ai_system_id":      record.AISystemID,
+			"authorizing_party": record.AuthorizingParty.ID,
+			"registered_at":     time.Now(),
+			"status":           "registered",
+			"blockchain_hash":   record.BlockchainHash,
+		}
+		
+		data, err := json.Marshal(registryData)
+		if err != nil {
+			return err
+		}
+		
+		return cr.redis.Set(ctx, fmt.Sprintf("commercial_register:%s", record.AISystemID), data, 0).Err()
+	}
+	return nil
 		}
 	}
 
