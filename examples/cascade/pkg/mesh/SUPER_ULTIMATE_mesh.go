@@ -41,12 +41,12 @@ func NewMeshNetwork() *MeshNetwork {
 func (mn *MeshNetwork) AddNode(node *Node) error {
 	mn.mu.Lock()
 	defer mn.mu.Unlock()
-	
+
 	// Validate node address
 	if _, err := net.ResolveTCPAddr("tcp", node.Address); err != nil {
 		return fmt.Errorf("invalid node address %s: %w", node.Address, err)
 	}
-	
+
 	mn.nodes[node.ID] = node
 	return nil
 }
@@ -63,7 +63,7 @@ func (mn *MeshNetwork) GetNode(id string) (*Node, bool) {
 func (mn *MeshNetwork) ListNodes() []*Node {
 	mn.mu.RLock()
 	defer mn.mu.RUnlock()
-	
+
 	nodes := make([]*Node, 0, len(mn.nodes))
 	for _, node := range mn.nodes {
 		nodes = append(nodes, node)
@@ -79,7 +79,7 @@ func (mn *MeshNetwork) ConnectTo(ctx context.Context, address string) error {
 		return fmt.Errorf("failed to connect to %s: %w", address, err)
 	}
 	defer conn.Close()
-	
+
 	return nil
 }
 

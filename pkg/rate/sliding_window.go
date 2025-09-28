@@ -84,6 +84,7 @@ func (sw *SlidingWindow) Reset(id string) {
 }
 
 // cleanup periodically removes old entries
+//
 //nolint:unused // reserved for automatic cleanup
 func (sw *SlidingWindow) cleanup() {
 	ticker := time.NewTicker(sw.window)

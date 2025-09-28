@@ -124,7 +124,7 @@ func runBasicExample() {
 			WriteTimeout: 15 * time.Second,
 			IdleTimeout:  60 * time.Second,
 		}
-		
+
 		log.Printf("Starting server on :8080")
 		if err := server.ListenAndServe(); err != nil {
 			log.Fatalf("Server error: %v", err)

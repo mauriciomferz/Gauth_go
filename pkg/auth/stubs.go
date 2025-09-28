@@ -21,6 +21,7 @@ type noopRegistryVerifier struct{}
 func (n *noopRegistryVerifier) VerifyRegistration(ctx context.Context, info interface{}) error {
 	return nil
 }
+
 //nolint:unused // stub implementation for registry verification
 func (n *noopRegistryVerifier) ValidateLegalStatus(ctx context.Context, ownerInfo interface{}) error {
 	return nil
@@ -45,10 +46,12 @@ type noopEnhancedStore struct{}
 type EnhancedToken struct{}
 
 // Add IsExpired to noopEnhancedToken
+//
 //nolint:unused // stub implementation for enhanced tokens
 func (t *noopEnhancedToken) IsExpired() bool { return false }
 
 // Update noopEnhancedStore methods to use common types
+//
 //nolint:unused // stub implementation for enhanced token store
 func (s *noopEnhancedStore) GetHumanVerification(ctx context.Context, token *EnhancedToken) (*common.HumanVerification, error) {
 	return &common.HumanVerification{

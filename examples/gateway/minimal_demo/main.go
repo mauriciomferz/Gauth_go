@@ -18,7 +18,7 @@ func main() {
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,
 	}
-	
+
 	log.Println("API Gateway listening on :8081")
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("Server failed: %v", err)

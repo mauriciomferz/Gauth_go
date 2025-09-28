@@ -8,10 +8,10 @@ import (
 
 // Test constants
 const (
-	testUserJohn       = "john"
+	testUserJohn        = "john"
 	testDeptEngineering = "engineering"
-	testSourceAPI      = "api"
-	testSourceDatabase = "database"
+	testSourceAPI       = "api"
+	testSourceDatabase  = "database"
 )
 
 func TestContext(t *testing.T) {

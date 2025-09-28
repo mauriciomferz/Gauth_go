@@ -58,7 +58,7 @@ type FiduciaryDuty struct {
 	Validation  []string
 }
 
-type StoreStub struct{
+type StoreStub struct {
 	approvals map[string][]TrackingRecord
 }
 

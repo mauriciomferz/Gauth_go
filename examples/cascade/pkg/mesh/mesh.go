@@ -45,8 +45,8 @@ func (s *Service) OnEvent(handler interface{}) {
 func (s *Service) GetMetrics() map[string]interface{} {
 	return map[string]interface{}{
 		"requests_processed": 42,
-		"errors":            0,
-		"load_factor":       s.LoadFactor,
+		"errors":             0,
+		"load_factor":        s.LoadFactor,
 	}
 }
 
@@ -94,7 +94,7 @@ func (sm *ServiceMesh) CallService(ctx context.Context, serviceID string, data i
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Simulate service call
 	return fmt.Sprintf("Called %s service at %s", service.Name, service.URL), nil
 }
@@ -103,7 +103,7 @@ func (sm *ServiceMesh) CallService(ctx context.Context, serviceID string, data i
 func (sm *ServiceMesh) PrintHealthReport() {
 	sm.mu.RLock()
 	defer sm.mu.RUnlock()
-	
+
 	fmt.Println("Service Mesh Health Report:")
 	for id, service := range sm.services {
 		fmt.Printf("  Service %s (%s): %s - %s\n", id, service.Type, service.Name, service.URL)
@@ -115,7 +115,7 @@ func (sm *ServiceMesh) SetServiceLoad(serviceType string, load float64) error {
 	// Find service by type
 	sm.mu.RLock()
 	defer sm.mu.RUnlock()
-	
+
 	for _, service := range sm.services {
 		if string(service.Type) == serviceType {
 			service.LoadFactor = load
@@ -123,7 +123,7 @@ func (sm *ServiceMesh) SetServiceLoad(serviceType string, load float64) error {
 			return nil
 		}
 	}
-	
+
 	return fmt.Errorf("service type not found: %s", serviceType)
 }
 
@@ -137,7 +137,7 @@ func (sm *ServiceMesh) AddService(config interface{}) *Service {
 		URL:        "http://localhost:8080/demo",
 		LoadFactor: 0.0,
 	}
-	
+
 	// Handle potential error from RegisterService
 	if err := sm.RegisterService(service); err != nil {
 		// Log error but continue - service creation shouldn't fail due to registration issues

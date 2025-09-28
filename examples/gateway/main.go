@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"crypto/rand"
+	"fmt"
 	"sync"
 	"time"
 
@@ -194,7 +194,7 @@ func (s *BackendService) simulateRequest(ctx context.Context, req *RequestContex
 		return fmt.Errorf("failed to generate secure random: %w", err)
 	}
 	randomFloat := float64(randomBytes[0]) / 255.0 // Convert to 0-1 range
-	
+
 	if randomFloat < s.errorRate {
 		return fmt.Errorf("%s: service temporarily unavailable", s.name)
 	}

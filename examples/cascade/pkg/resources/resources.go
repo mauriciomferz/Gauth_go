@@ -27,14 +27,14 @@ type RateLimitConfig struct {
 
 // ServiceConfig represents service configuration
 type ServiceConfig struct {
-	Name           string                 `json:"name"`
-	Type           ServiceType            `json:"type"`
-	Version        string                 `json:"version"`
-	Dependencies   []ServiceType          `json:"dependencies"`
-	CircuitBreaker CircuitBreakerConfig   `json:"circuit_breaker"`
-	RateLimit      RateLimitConfig        `json:"rate_limit"`
-	MaxConcurrency int                    `json:"max_concurrency"`
-	Timeout        time.Duration          `json:"timeout"`
+	Name           string               `json:"name"`
+	Type           ServiceType          `json:"type"`
+	Version        string               `json:"version"`
+	Dependencies   []ServiceType        `json:"dependencies"`
+	CircuitBreaker CircuitBreakerConfig `json:"circuit_breaker"`
+	RateLimit      RateLimitConfig      `json:"rate_limit"`
+	MaxConcurrency int                  `json:"max_concurrency"`
+	Timeout        time.Duration        `json:"timeout"`
 }
 
 // Resources package for service configuration

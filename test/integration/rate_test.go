@@ -51,7 +51,7 @@ func TestRateLimiterIntegration(t *testing.T) {
 			if tc.cfg.BurstSize > 0 {
 				maxRequests = int(tc.cfg.BurstSize)
 			}
-			
+
 			for i := 0; i < maxRequests; i++ {
 				err := limiter.Allow(ctx, key)
 				assert.NoError(t, err)

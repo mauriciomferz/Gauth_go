@@ -168,7 +168,7 @@ func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
 		if !strings.HasPrefix(cleanFile, filepath.Clean(fs.directory)) {
 			continue // Skip files outside our directory
 		}
-		
+
 		f, err := os.Open(cleanFile)
 		if err != nil {
 			continue
@@ -182,31 +182,31 @@ func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
 
 		// SUPER ULTIMATE NUCLEAR SECURITY SOLUTION: Completely rebuild file handling
 		// to force CI recognition of security fixes
-		
+
 		// STEP 1: Create and validate temporary file path
 		tmpFile := cleanFile + ".tmp"
-		
+
 		// STEP 2: Apply comprehensive path cleaning and validation
 		cleanTmpFile := filepath.Clean(tmpFile)
 		cleanDirectory := filepath.Clean(fs.directory)
-		
+
 		// STEP 3: ULTIMATE SECURITY VALIDATION - Multiple layers of protection
 		// Layer 1: Prefix validation prevents directory traversal
 		if !strings.HasPrefix(cleanTmpFile, cleanDirectory) {
 			continue // SECURITY: Reject paths outside our directory
 		}
-		
+
 		// Layer 2: Additional validation with directory separator
 		if !strings.HasPrefix(cleanTmpFile, cleanDirectory+string(filepath.Separator)) && cleanTmpFile != cleanDirectory {
 			continue // SECURITY: Enhanced directory boundary validation
 		}
-		
+
 		// Layer 3: Relative path validation prevents .. attacks
 		relPath, err := filepath.Rel(cleanDirectory, cleanTmpFile)
 		if err != nil || strings.HasPrefix(relPath, "..") {
 			continue // SECURITY: Prevent parent directory access
 		}
-		
+
 		// SUPER ULTIMATE SECURITY: Triple-layer path validation complete
 		// All possible directory traversal attacks have been prevented
 		// #nosec G304 - SUPER ULTIMATE SECURITY: Triple-layer path validation applied above
@@ -316,7 +316,7 @@ func (fs *FileStorage) searchFile(ctx context.Context, filename string, filter *
 	if !strings.HasPrefix(cleanFilename, filepath.Clean(fs.directory)) {
 		return fmt.Errorf("invalid file path: access denied")
 	}
-	
+
 	file, err := os.Open(cleanFilename)
 	if err != nil {
 		return fmt.Errorf("failed to open log file: %w", err)

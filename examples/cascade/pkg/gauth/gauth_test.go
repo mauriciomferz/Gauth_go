@@ -12,9 +12,9 @@ func TestGAuth(t *testing.T) {
 	t.Run("Config Validation", func(t *testing.T) {
 		validConfig := gauth.Config{
 			AuthServerURL:     "https://auth.example.com",
-			ClientID:         "test-client",
-			ClientSecret:     "test-secret",
-			Scopes:           []string{"read", "write"},
+			ClientID:          "test-client",
+			ClientSecret:      "test-secret",
+			Scopes:            []string{"read", "write"},
 			AccessTokenExpiry: time.Hour,
 		}
 
@@ -36,9 +36,9 @@ func TestGAuth(t *testing.T) {
 	t.Run("Authorization Flow", func(t *testing.T) {
 		auth, _ := gauth.New(gauth.Config{
 			AuthServerURL:     "https://auth.example.com",
-			ClientID:         "test-client",
-			ClientSecret:     "test-secret",
-			Scopes:           []string{"read", "write"},
+			ClientID:          "test-client",
+			ClientSecret:      "test-secret",
+			Scopes:            []string{"read", "write"},
 			AccessTokenExpiry: time.Hour,
 		})
 
@@ -63,9 +63,9 @@ func TestGAuth(t *testing.T) {
 	t.Run("Token Operations", func(t *testing.T) {
 		auth, _ := gauth.New(gauth.Config{
 			AuthServerURL:     "https://auth.example.com",
-			ClientID:         "test-client",
-			ClientSecret:     "test-secret",
-			Scopes:           []string{"read", "write"},
+			ClientID:          "test-client",
+			ClientSecret:      "test-secret",
+			Scopes:            []string{"read", "write"},
 			AccessTokenExpiry: time.Hour,
 		})
 
@@ -103,8 +103,8 @@ func TestGAuth(t *testing.T) {
 	t.Run("Token Expiration", func(t *testing.T) {
 		auth, _ := gauth.New(gauth.Config{
 			AuthServerURL:     "https://auth.example.com",
-			ClientID:         "test-client",
-			ClientSecret:     "test-secret",
+			ClientID:          "test-client",
+			ClientSecret:      "test-secret",
 			AccessTokenExpiry: 100 * time.Millisecond,
 		})
 
@@ -114,7 +114,7 @@ func TestGAuth(t *testing.T) {
 		}
 
 		tokenResp, _ := auth.RequestToken(tokenReq)
-		
+
 		// Wait for token to expire
 		time.Sleep(150 * time.Millisecond)
 

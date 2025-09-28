@@ -1,4 +1,4 @@
-.PHONY: all build test clean lint coverage examples docs help security deps bench
+.PHONY: all build test clean lint coverage examples docs help security deps format
 
 # Go parameters
 GOCMD=go
@@ -7,99 +7,110 @@ GOTEST=$(GOCMD) test
 GOCLEAN=$(GOCMD) clean
 GOGET=$(GOCMD) get
 GOMOD=$(GOCMD) mod
-BINARY_NAME=gauth
+GOFMT=$(GOCMD) fmt
 
-# Build flags
+# Build configuration
+BINARY_NAME=gauth
+BINARY_DIR=build/bin
 LDFLAGS=-ldflags="-s -w"
 
-all: test build
+# Default target
+all: deps format test build
 
-build: ## Build all binaries
-	@echo "Building GAuth binaries..."
-	$(GOBUILD) $(LDFLAGS) -o $(BINARY_NAME)-server -v ./cmd/demo
-	$(GOBUILD) $(LDFLAGS) -o $(BINARY_NAME)-web -v ./cmd/web
-	@echo "✅ Build completed successfully!"
+## Build targets
+build: build-server build-web build-examples ## Build all binaries
 
+build-server: ## Build the demo server
+	@echo "🔧 Building GAuth demo server..."
+	mkdir -p $(BINARY_DIR)
+	$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-server ./cmd/demo
+
+build-web: ## Build the web server
+	@echo "🌐 Building GAuth web server..."
+	mkdir -p $(BINARY_DIR)
+	$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-web ./cmd/web
+
+build-examples: ## Build example applications
+	@echo "📚 Building example applications..."
+	mkdir -p $(BINARY_DIR)
+	$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/resilient-example ./examples/resilient/cmd
+	$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/basic-example ./examples/basic
+
+## Test targets
 test: ## Run all tests
-	@echo "🧪 Running comprehensive test suite..."
+	@echo "🧪 Running test suite..."
 	$(GOCLEAN) -testcache
-	$(GOTEST) -v -race -timeout=10m ./pkg/... ./internal/... ./examples/cascade/pkg/gauth ./test/...
-	@echo "✅ All tests completed successfully"
+	$(GOTEST) -v -race -timeout=30s ./...
 
-clean: ## Clean build artifacts
-	$(GOCLEAN)
-	rm -f $(BINARY_NAME)-server
-	rm -f $(BINARY_NAME)-demo
-	rm -f coverage.out
-	rm -f *.html
+test-coverage: ## Run tests with coverage
+	@echo "📊 Running tests with coverage..."
+	$(GOTEST) -v -race -coverprofile=coverage.out -covermode=atomic ./...
+	$(GOCMD) tool cover -html=coverage.out -o coverage.html
+	@echo "✅ Coverage report generated: coverage.html"
 
-lint: ## Run linter
+test-integration: ## Run integration tests
+	@echo "🔗 Running integration tests..."
+	$(GOTEST) -v -tags=integration ./test/integration/...
+
+## Code quality targets
+lint: ## Run linters
+	@echo "🔍 Running linters..."
 	golangci-lint run ./...
 
-coverage: ## Generate test coverage report
-	$(GOTEST) -coverprofile=coverage.out ./...
-	$(GOCMD) tool cover -html=coverage.out
+format: ## Format code
+	@echo "📝 Formatting code..."
+	$(GOFMT) ./...
+	$(GOCMD) mod tidy
 
-deps: ## Download and tidy dependencies
+security: ## Run security scans
+	@echo "🛡️  Running security scan..."
+	gosec ./...
+
+## Development targets
+deps: ## Install dependencies
+	@echo "📦 Installing dependencies..."
 	$(GOMOD) download
 	$(GOMOD) tidy
-	$(GOMOD) verify
 
-examples: ## Build example binaries (note: many examples don't have main packages)
-	@echo "Building available example binaries..."
-	@for dir in examples/*/; do \
-		if [ -f "$$dir/main.go" ]; then \
-			name=$$(basename "$$dir"); \
-			echo "Building example: $$name"; \
-			$(GOBUILD) -o "$$dir/$$name" "./$$dir" || echo "⚠️  Failed to build $$name"; \
-		fi \
-	done
+clean: ## Clean build artifacts
+	@echo "🧹 Cleaning build artifacts..."
+	$(GOCLEAN)
+	rm -rf $(BINARY_DIR)
+	rm -f coverage.out coverage.html
 
-bench: ## Run benchmarks
-	$(GOTEST) -bench=. -benchmem ./...
+## Docker targets
+docker-build: ## Build Docker image
+	@echo "🐳 Building Docker image..."
+	docker build -t gauth:latest .
 
-docs: ## Start documentation server
-	godoc -http=:6060
+docker-run: ## Run Docker container
+	@echo "🚀 Running Docker container..."
+	docker run -p 8080:8080 gauth:latest
 
-security: ## Run security scan
-	@if command -v gosec >/dev/null 2>&1; then \
-		gosec ./...; \
-	else \
-		echo "Installing gosec..."; \
-		go install github.com/securego/gosec/v2/cmd/gosec@latest; \
-		gosec ./...; \
-	fi
+## Utility targets
+run-server: build-server ## Build and run demo server
+	./$(BINARY_DIR)/$(BINARY_NAME)-server
+
+run-web: build-web ## Build and run web server
+	./$(BINARY_DIR)/$(BINARY_NAME)-web
+
+run-example: build-examples ## Build and run resilient example
+	./$(BINARY_DIR)/resilient-example
+
+## Documentation
+docs: ## Generate documentation
+	@echo "📖 Generating documentation..."
+	$(GOCMD) doc -all ./pkg/gauth > docs/api/gauth.md
+	$(GOCMD) doc -all ./pkg/auth > docs/api/auth.md
+	$(GOCMD) doc -all ./pkg/token > docs/api/token.md
 
 help: ## Show this help message
-	@echo "Available targets:"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
-
-# Generate mocks for testing
-mocks:
-	mockgen -destination internal/mocks/tokenstore_mock.go -package mocks github.com/Gimel-Foundation/gauth/internal/tokenstore Store
-	mockgen -destination internal/mocks/audit_mock.go -package mocks github.com/Gimel-Foundation/gauth/internal/audit Logger
-
-# Run all checks before committing
-pre-commit: lint test security
-
-# Install development tools
-install-tools:
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-	go install golang.org/x/tools/cmd/godoc@latest
-	go install github.com/securego/gosec/v2/cmd/gosec@latest
-	go install github.com/golang/mock/mockgen@latest
-
-# Format code
-fmt:
-	gofmt -s -w .
-	goimports -w .
-
-# Version management
-VERSION ?= $(shell git describe --tags --always --dirty)
-version:
-	@echo $(VERSION)
-
-# Create a new release tag
-tag:
-	git tag -a v$(VERSION) -m "Release v$(VERSION)"
-	git push origin v$(VERSION)
+	@echo "GAuth Makefile Commands:"
+	@echo ""
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@echo ""
+	@echo "Examples:"
+	@echo "  make build          # Build all binaries"
+	@echo "  make test           # Run all tests"
+	@echo "  make run-web        # Build and run web server"
+	@echo "  make docker-build   # Build Docker image"

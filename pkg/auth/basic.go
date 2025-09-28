@@ -54,7 +54,7 @@ func (a *basicAuthenticator) Close() error {
 
 func (a *basicAuthenticator) ValidateCredentials(ctx context.Context, creds interface{}) error {
 	var username, password string
-	
+
 	switch c := creds.(type) {
 	case basicCredentials:
 		username = c.Username

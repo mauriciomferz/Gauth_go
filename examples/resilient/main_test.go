@@ -13,6 +13,7 @@ import (
 	"github.com/Gimel-Foundation/gauth/internal/monitoring"
 	"github.com/Gimel-Foundation/gauth/pkg/gauth"
 )
+
 func TestMainDemoOutput(t *testing.T) {
 	origStdout := os.Stdout
 	r, w, _ := os.Pipe()
@@ -194,7 +195,7 @@ func TestResilientService(t *testing.T) {
 	t.Run("MetricsCollection", func(t *testing.T) {
 		// Reset metrics and ensure clean state
 		service.metrics = monitoring.NewMetricsCollector()
-		
+
 		// Add small delay to ensure clean state
 		time.Sleep(100 * time.Millisecond)
 
@@ -263,7 +264,7 @@ func TestResilientService(t *testing.T) {
 
 		// Wait for metrics to be fully recorded
 		time.Sleep(100 * time.Millisecond)
-		
+
 		metrics := service.metrics.GetAllMetrics()
 
 		// Debug output for CI troubleshooting
@@ -282,7 +283,7 @@ func TestResilientService(t *testing.T) {
 				paymentSuccess += metric.Value
 			}
 		}
-		
+
 		if paymentSuccess < 2 {
 			t.Errorf("Expected at least 2 successful payment transactions, got %.0f", paymentSuccess)
 		}
@@ -299,7 +300,7 @@ func TestResilientService(t *testing.T) {
 				}
 			}
 		}
-		
+
 		if refundError < 1 {
 			t.Errorf("Expected at least 1 failed refund transaction, got %.0f", refundError)
 		}
@@ -345,7 +346,7 @@ func TestResilientService(t *testing.T) {
 						return
 					}
 				}()
-				
+
 				tx := gauth.TransactionDetails{
 					Type:   gauth.PaymentTransaction,
 					Amount: float64(id + 1), // Avoid zero amounts
@@ -361,7 +362,7 @@ func TestResilientService(t *testing.T) {
 		// Collect errors with timeout
 		var errorCount int
 		timeout := time.After(30 * time.Second) // Increased timeout for CI
-		
+
 		for i := 0; i < numRequests; i++ {
 			select {
 			case err := <-errors:
@@ -386,13 +387,13 @@ func TestResilientService(t *testing.T) {
 
 		// Wait for metrics to be recorded
 		time.Sleep(100 * time.Millisecond)
-		
+
 		// Verify metrics under load with more flexible checking
 		metrics := service.metrics.GetAllMetrics()
 		hasResponseTimeMetrics := hasMetric(metrics, string(monitoring.MetricResponseTime), map[string]string{"type": "payment"}) ||
 			hasMetric(metrics, string(monitoring.MetricResponseTime), map[string]string{}) ||
 			len(metrics) > 0 // At least some metrics should be present
-			
+
 		if !hasResponseTimeMetrics {
 			t.Logf("Available metrics: %d", len(metrics))
 			for _, metric := range metrics {
@@ -402,4 +403,3 @@ func TestResilientService(t *testing.T) {
 		}
 	})
 }
-

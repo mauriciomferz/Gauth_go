@@ -155,14 +155,14 @@ func main() {
 
 	// Start server with timeouts
 	http.Handle("/api", traced(handler))
-	
+
 	server := &http.Server{
 		Addr:         ":8080",
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,
 	}
-	
+
 	log.Println("Starting server on :8080...")
 	log.Fatal(server.ListenAndServe())
 }

@@ -156,15 +156,15 @@ func SimulateDistributedAuthorization(manager *DistributedResourceManager, numRe
 		}
 		nodeIndex := int(nodeIndexBytes[0]) % len(nodeIDs)
 		nodeID := nodeIDs[nodeIndex]
-		
+
 		// Use crypto secure random for user selection
-		var userIndexBytes [4]byte  
+		var userIndexBytes [4]byte
 		if _, err := rand.Read(userIndexBytes[:]); err != nil {
 			log.Printf("Failed to generate random user selection: %v", err)
 			continue
 		}
-		userIndex := int(userIndexBytes[0]) % 3 + 1
-		
+		userIndex := int(userIndexBytes[0])%3 + 1
+
 		// Simulate a resource access request
 		resourceID := fmt.Sprintf("resource-%d", i+1)
 		userID := fmt.Sprintf("user-%d", userIndex) // user-1, user-2, user-3
@@ -266,7 +266,7 @@ func main() {
 	if clientSecret == "" {
 		clientSecret = "cluster-secret" // Default for development only
 	}
-	
+
 	config := gauth.Config{
 		AuthServerURL:     "https://auth.example.com",
 		ClientID:          "cluster-manager",
