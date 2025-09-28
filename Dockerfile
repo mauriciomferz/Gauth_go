@@ -2,35 +2,33 @@
 FROM golang:1.23.3-alpine AS builder
 
 # Install build dependencies
-RUN apk add --no-cache git ca-certificates tzdata
+RUN apk add --no-cache git ca-certificates tzdata sed
 
 # Set the working directory
 WORKDIR /app
 
-# Copy go mod files first for better layer caching
-COPY go.mod go.sum ./
-
-# Copy the local module dependencies (backend module)
-COPY gauth-demo-app/web/backend/go.mod ./gauth-demo-app/web/backend/
-COPY gauth-demo-app/web/backend/go.sum ./gauth-demo-app/web/backend/
-
-# Copy the backend source code needed for local dependencies
-COPY gauth-demo-app/web/backend/ ./gauth-demo-app/web/backend/
-
-# Download dependencies (with local modules available)
-RUN go mod download
-
-# Copy the rest of the source code
+# Copy the entire source code first
 COPY . .
 
-# Verify the build can complete
+# Remove the problematic local module dependency that's not needed for cmd/demo
+# This prevents Docker cache key calculation issues with missing directories
+RUN sed -i '/github.com\/Gimel-Foundation\/gauth\/gauth-demo-app\/web\/backend/d' go.mod && \
+    sed -i '/replace.*gauth-demo-app.*web.*backend/d' go.mod
+
+# Download dependencies (without the local backend module)
+RUN go mod download
+
+# Verify dependencies
 RUN go mod verify
 
-# Build the application with optimizations
+# Build the demo application with optimizations
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -ldflags='-w -s -extldflags "-static"' \
     -a -installsuffix cgo \
     -o gauth-server ./cmd/demo
+
+# Verify the binary was created successfully
+RUN ls -la gauth-server
 
 # Final stage
 FROM alpine:3.18.4
