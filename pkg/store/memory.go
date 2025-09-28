@@ -85,7 +85,7 @@ func (s *MemoryStore) Close() error {
 }
 
 // Store stores a token with its metadata
-func (s *MemoryStore) Store(ctx context.Context, token string, metadata TokenMetadata) error {
+func (s *MemoryStore) Store(_ context.Context, token string, metadata TokenMetadata) error {
 	if token == "" || metadata.ID == "" {
 		return &StorageError{
 			Op:     "store",
@@ -116,7 +116,7 @@ func (s *MemoryStore) Store(ctx context.Context, token string, metadata TokenMet
 }
 
 // Get retrieves token metadata by token string
-func (s *MemoryStore) Get(ctx context.Context, token string) (*TokenMetadata, error) {
+func (s *MemoryStore) Get(_ context.Context, token string) (*TokenMetadata, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
