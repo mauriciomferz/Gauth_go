@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Token Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .result { margin: 20px 0; padding: 15px; border-radius: 5px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        button { padding: 10px 20px; font-size: 16px; margin: 10px 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Enhanced Token Test</h1>
+    <p>This page tests the Enhanced Token endpoint directly</p>
+    
+    <button onclick="testEnhancedToken()">Test Enhanced Token</button>
+    <button onclick="clearResults()">Clear Results</button>
+    
+    <div id="results"></div>
+
+    <script>
+        async function safeJsonParse(response) {
+            try {
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('HTTP Error:', response.status, response.statusText, errorText);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}\n${errorText}`);
+                }
+                
+                const text = await response.text();
+                console.log('Raw response text:', text);
+                
+                if (!text) {
+                    throw new Error('Empty response received');
+                }
+                
+                return JSON.parse(text);
+            } catch (parseError) {
+                console.error('JSON Parse Error:', parseError);
+                console.error('Response text that failed to parse:', await response.text().catch(() => 'Could not read response text'));
+                throw new Error(`Failed to parse JSON response: ${parseError.message}`);
+            }
+        }
+
+        async function testEnhancedToken() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="result">Testing Enhanced Token...</div>';
+            
+            try {
+                console.log('Starting Enhanced Token test...');
+                
+                const requestBody = {
+                    ai_capabilities: ["financial_analysis", "regulatory_compliance", "risk_modeling"],
+                    business_restrictions: ["$250k_limit", "NYSE_NASDAQ_LSE_only", "business_hours_only"]
+                };
+                
+                console.log('Request body:', requestBody);
+                
+                const response = await fetch('http://localhost:8080/api/v1/tokens/enhanced-simple', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody),
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', [...response.headers.entries()]);
+                
+                const data = await safeJsonParse(response);
+                console.log('Parsed response data:', data);
+                
+                // Test success detection logic
+                const condition1 = (data.access_token && typeof data.access_token === 'string' && data.access_token.length > 0);
+                const condition2 = (data.token_id && typeof data.token_id === 'string');
+                const condition3 = (data.token_type && typeof data.token_type === 'string');
+                const condition4 = (data.enhanced_features && typeof data.enhanced_features === 'object' && Object.keys(data.enhanced_features).length > 0);
+                const condition5 = (data.capabilities && typeof data.capabilities === 'object' && Object.keys(data.capabilities).length > 0);
+                
+                console.log('Enhanced Token Debug - Individual conditions:');
+                console.log('- condition1 (has access_token):', condition1, data.access_token);
+                console.log('- condition2 (has token_id):', condition2, data.token_id);
+                console.log('- condition3 (has token_type):', condition3, data.token_type);
+                console.log('- condition4 (has enhanced_features):', condition4, data.enhanced_features);
+                console.log('- condition5 (has capabilities):', condition5, data.capabilities);
+                
+                const isSuccessful = condition1 || condition2 || condition3 || condition4 || condition5;
+                console.log('Enhanced Token Final isSuccessful:', isSuccessful);
+                
+                if (isSuccessful) {
+                    const tokenId = data.access_token || data.token_id || 'Generated successfully';
+                    const tokenType = data.token_type || 'Enhanced Bearer';
+                    const capabilities = data.capabilities ? Object.keys(data.capabilities).filter(k => data.capabilities[k]).join(', ') : 'Advanced features';
+                    const features = data.enhanced_features ? Object.keys(data.enhanced_features).filter(k => data.enhanced_features[k]).join(', ') : 'Enhanced capabilities';
+                    
+                    resultsDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ Enhanced Token Success!</h3>
+                            <p><strong>Token:</strong> ${tokenId}</p>
+                            <p><strong>Type:</strong> ${tokenType}</p>
+                            <p><strong>Capabilities:</strong> ${capabilities}</p>
+                            <p><strong>Features:</strong> ${features}</p>
+                            <p><strong>Expires:</strong> ${data.expires_in ? data.expires_in + ' seconds' : 'Long-term'}</p>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ Enhanced Token Failed</h3>
+                            <p>Success detection failed - all conditions returned false</p>
+                            <p><strong>Conditions:</strong></p>
+                            <ul>
+                                <li>condition1 (access_token): ${condition1}</li>
+                                <li>condition2 (token_id): ${condition2}</li>
+                                <li>condition3 (token_type): ${condition3}</li>
+                                <li>condition4 (enhanced_features): ${condition4}</li>
+                                <li>condition5 (capabilities): ${condition5}</li>
+                            </ul>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Enhanced Token test error:', error);
+                resultsDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Enhanced Token Error</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p>Check the browser console for more details.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

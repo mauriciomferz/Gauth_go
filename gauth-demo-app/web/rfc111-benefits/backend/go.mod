@@ -1,6 +1,6 @@
 module gauth-rfc111-benefits
 
-go 1.23
+go 1.23.0
 
 require (
 	github.com/gin-contrib/cors v1.7.6

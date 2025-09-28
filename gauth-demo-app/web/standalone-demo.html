@@ -772,14 +772,19 @@
                 console.log('Message field:', data.message);
                 console.log('Delegation field:', data.delegation);
                 
-                // Check for success - be more explicit about success conditions
+                // Check for success using EXACT SAME LOGIC as debug test that works
                 const condition1 = (data.success === true);
                 const condition2 = (data.success === 'true');
-                const condition3 = (data.delegation_id);
+                const condition3 = (data.success === "true");
                 const condition4 = (data.delegation && Object.keys(data.delegation).length > 0);
-                const condition5 = (data.message && data.message.includes('successfully'));
+                const condition5 = (data.message && typeof data.message === 'string' && data.message.toLowerCase().includes('successfully'));
                 
-                console.log('Success conditions:', {condition1, condition2, condition3, condition4, condition5});
+                console.log('RFC115 Debug - Individual conditions:');
+                console.log('- condition1 (success === true):', condition1);
+                console.log('- condition2 (success === "true"):', condition2);
+                console.log('- condition3 (success === "true" string):', condition3);
+                console.log('- condition4 (has delegation object):', condition4);
+                console.log('- condition5 (message includes "successfully"):', condition5);
                 
                 const isSuccessful = condition1 || condition2 || condition3 || condition4 || condition5;
                 console.log('Final isSuccessful:', isSuccessful);
@@ -841,16 +846,21 @@
                 console.log('Capabilities field:', data.capabilities);
                 console.log('Enhanced Features field:', data.enhanced_features);
                 
-                // Check for success - look for access_token or other success indicators
-                const tokenCondition1 = (data.access_token);
-                const tokenCondition2 = (data.token_id);
-                const tokenCondition3 = (data.token_type);
-                const tokenCondition4 = (data.enhanced_features);
-                const tokenCondition5 = (data.capabilities);
+                // Check for success using EXACT SAME LOGIC as debug test that works
+                const condition1 = (data.access_token && typeof data.access_token === 'string' && data.access_token.length > 0);
+                const condition2 = (data.token_id && typeof data.token_id === 'string');
+                const condition3 = (data.token_type && typeof data.token_type === 'string');
+                const condition4 = (data.enhanced_features && typeof data.enhanced_features === 'object' && Object.keys(data.enhanced_features).length > 0);
+                const condition5 = (data.capabilities && typeof data.capabilities === 'object' && Object.keys(data.capabilities).length > 0);
                 
-                console.log('Enhanced Token Success conditions:', {tokenCondition1, tokenCondition2, tokenCondition3, tokenCondition4, tokenCondition5});
+                console.log('Enhanced Token Debug - Individual conditions:');
+                console.log('- condition1 (has access_token):', condition1, data.access_token);
+                console.log('- condition2 (has token_id):', condition2, data.token_id);
+                console.log('- condition3 (has token_type):', condition3, data.token_type);
+                console.log('- condition4 (has enhanced_features):', condition4, data.enhanced_features);
+                console.log('- condition5 (has capabilities):', condition5, data.capabilities);
                 
-                const isSuccessful = tokenCondition1 || tokenCondition2 || tokenCondition3 || tokenCondition4 || tokenCondition5;
+                const isSuccessful = condition1 || condition2 || condition3 || condition4 || condition5;
                 console.log('Enhanced Token Final isSuccessful:', isSuccessful);
                 
                 try {
