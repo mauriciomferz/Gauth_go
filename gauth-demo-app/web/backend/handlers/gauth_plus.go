@@ -225,7 +225,7 @@ func (h *GAuthPlusHandler) GetCommercialRegisterEntry(c *gin.Context) {
 		},
 		"dual_control": gin.H{
 			"enabled":           record.Record.DualControlPrinciple.Enabled,
-			"requires_approval": record.Record.DualControlPrinciple.RequiresDualControl,
+			"requires_approval": record.Record.DualControlPrinciple.RequiredForActions,
 		},
 		"authorization_cascade": gin.H{
 			"ultimate_human":     record.Record.AuthorizationCascade.UltimateHuman,
