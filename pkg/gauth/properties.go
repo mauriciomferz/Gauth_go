@@ -8,6 +8,16 @@ import (
 	"time"
 )
 
+// Property type constants
+const (
+	PropertyTypeString = "string"
+	PropertyTypeInt    = "int"
+	PropertyTypeInt64  = "int64"
+	PropertyTypeFloat  = "float"
+	PropertyTypeBool   = "bool"
+	PropertyTypeTime   = "time"
+)
+
 // Properties represents a collection of property values, keyed by string.
 type Properties struct {
 	values map[string]PropertyValue
@@ -27,7 +37,7 @@ type PropertyValue struct {
 // NewStringProperty creates a new string property value
 func NewStringProperty(value string) PropertyValue {
 	return PropertyValue{
-		Type:        "string",
+		Type:        PropertyTypeString,
 		StringValue: value,
 	}
 }
@@ -35,7 +45,7 @@ func NewStringProperty(value string) PropertyValue {
 // NewIntProperty creates a new integer property value
 func NewIntProperty(value int) PropertyValue {
 	return PropertyValue{
-		Type:     "int",
+		Type:     PropertyTypeInt,
 		IntValue: value,
 	}
 }
@@ -43,7 +53,7 @@ func NewIntProperty(value int) PropertyValue {
 // NewInt64Property creates a new int64 property value
 func NewInt64Property(value int64) PropertyValue {
 	return PropertyValue{
-		Type:       "int64",
+		Type:       PropertyTypeInt64,
 		Int64Value: value,
 	}
 }
@@ -51,7 +61,7 @@ func NewInt64Property(value int64) PropertyValue {
 // NewFloatProperty creates a new float property value
 func NewFloatProperty(value float64) PropertyValue {
 	return PropertyValue{
-		Type:       "float",
+		Type:       PropertyTypeFloat,
 		FloatValue: value,
 	}
 }
@@ -59,7 +69,7 @@ func NewFloatProperty(value float64) PropertyValue {
 // NewBoolProperty creates a new boolean property value
 func NewBoolProperty(value bool) PropertyValue {
 	return PropertyValue{
-		Type:      "bool",
+		Type:      PropertyTypeBool,
 		BoolValue: value,
 	}
 }
@@ -67,7 +77,7 @@ func NewBoolProperty(value bool) PropertyValue {
 // NewTimeProperty creates a new time property value
 func NewTimeProperty(value time.Time) PropertyValue {
 	return PropertyValue{
-		Type:      "time",
+		Type:      PropertyTypeTime,
 		TimeValue: value.Format(time.RFC3339),
 	}
 }
@@ -75,17 +85,17 @@ func NewTimeProperty(value time.Time) PropertyValue {
 // ToString converts the property value to string
 func (pv PropertyValue) ToString() string {
 	switch pv.Type {
-	case "string":
+	case PropertyTypeString:
 		return pv.StringValue
-	case "int":
+	case PropertyTypeInt:
 		return strconv.Itoa(pv.IntValue)
-	case "int64":
+	case PropertyTypeInt64:
 		return strconv.FormatInt(pv.Int64Value, 10)
-	case "float":
+	case PropertyTypeFloat:
 		return strconv.FormatFloat(pv.FloatValue, 'f', -1, 64)
-	case "bool":
+	case PropertyTypeBool:
 		return strconv.FormatBool(pv.BoolValue)
-	case "time":
+	case PropertyTypeTime:
 		return pv.TimeValue
 	}
 	return ""
@@ -94,13 +104,13 @@ func (pv PropertyValue) ToString() string {
 // ToInt converts the property value to an integer
 func (pv PropertyValue) ToInt() (int, error) {
 	switch pv.Type {
-	case "int":
+	case PropertyTypeInt:
 		return pv.IntValue, nil
-	case "int64":
+	case PropertyTypeInt64:
 		return int(pv.Int64Value), nil
-	case "float":
+	case PropertyTypeFloat:
 		return int(pv.FloatValue), nil
-	case "string":
+	case PropertyTypeString:
 		return strconv.Atoi(pv.StringValue)
 	}
 	return 0, fmt.Errorf("cannot convert %s to int", pv.Type)
@@ -108,13 +118,13 @@ func (pv PropertyValue) ToInt() (int, error) {
 
 func (pv PropertyValue) ToInt64() (int64, error) {
 	switch pv.Type {
-	case "int64":
+	case PropertyTypeInt64:
 		return pv.Int64Value, nil
-	case "int":
+	case PropertyTypeInt:
 		return int64(pv.IntValue), nil
-	case "float":
+	case PropertyTypeFloat:
 		return int64(pv.FloatValue), nil
-	case "string":
+	case PropertyTypeString:
 		return strconv.ParseInt(pv.StringValue, 10, 64)
 	}
 	return 0, fmt.Errorf("cannot convert %s to int64", pv.Type)
@@ -123,13 +133,13 @@ func (pv PropertyValue) ToInt64() (int64, error) {
 // ToFloat converts the property value to a float
 func (pv PropertyValue) ToFloat() (float64, error) {
 	switch pv.Type {
-	case "float":
+	case PropertyTypeFloat:
 		return pv.FloatValue, nil
-	case "int":
+	case PropertyTypeInt:
 		return float64(pv.IntValue), nil
-	case "int64":
+	case PropertyTypeInt64:
 		return float64(pv.Int64Value), nil
-	case "string":
+	case PropertyTypeString:
 		return strconv.ParseFloat(pv.StringValue, 64)
 	}
 	return 0, fmt.Errorf("cannot convert %s to float", pv.Type)
@@ -138,9 +148,9 @@ func (pv PropertyValue) ToFloat() (float64, error) {
 // ToBool converts the property value to a boolean
 func (pv PropertyValue) ToBool() (bool, error) {
 	switch pv.Type {
-	case "bool":
+	case PropertyTypeBool:
 		return pv.BoolValue, nil
-	case "string":
+	case PropertyTypeString:
 		return strconv.ParseBool(pv.StringValue)
 	}
 	return false, fmt.Errorf("cannot convert %s to bool", pv.Type)
@@ -149,9 +159,9 @@ func (pv PropertyValue) ToBool() (bool, error) {
 // ToTime converts the property value to time.Time
 func (pv PropertyValue) ToTime() (time.Time, error) {
 	switch pv.Type {
-	case "time":
+	case PropertyTypeTime:
 		return time.Parse(time.RFC3339, pv.TimeValue)
-	case "string":
+	case PropertyTypeString:
 		return time.Parse(time.RFC3339, pv.StringValue)
 	}
 	return time.Time{}, fmt.Errorf("cannot convert %s to time", pv.Type)
@@ -353,17 +363,17 @@ func (p *Properties) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
 	for k, v := range p.values {
 		switch v.Type {
-		case "string":
+		case PropertyTypeString:
 			result[k] = v.StringValue
-		case "int":
+		case PropertyTypeInt:
 			result[k] = v.IntValue
-		case "int64":
+		case PropertyTypeInt64:
 			result[k] = v.Int64Value
-		case "float":
+		case PropertyTypeFloat:
 			result[k] = v.FloatValue
-		case "bool":
+		case PropertyTypeBool:
 			result[k] = v.BoolValue
-		case "time":
+		case PropertyTypeTime:
 			parsed, err := time.Parse(time.RFC3339, v.TimeValue)
 			if err == nil {
 				result[k] = parsed

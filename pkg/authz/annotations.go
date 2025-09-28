@@ -119,13 +119,13 @@ func (a *Annotations) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
 	for k, v := range a.Values {
 		switch v.Type {
-		case "string":
+		case events.MetadataTypeString:
 			result[k] = v.StringValue
-		case "int":
+		case events.MetadataTypeInt:
 			result[k] = v.IntValue
-		case "float":
+		case events.MetadataTypeFloat:
 			result[k] = v.FloatValue
-		case "bool":
+		case events.MetadataTypeBool:
 			result[k] = v.BoolValue
 		default:
 			result[k] = nil

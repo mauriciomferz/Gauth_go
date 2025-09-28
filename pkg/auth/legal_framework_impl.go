@@ -8,6 +8,11 @@ import (
 	"github.com/Gimel-Foundation/gauth/pkg/auth/legalframework"
 )
 
+const (
+	EffectDeny   = "deny"
+	EffectPermit = "permit"
+)
+
 // LegalFramework represents a legal framework for authorization decisions
 type LegalFramework struct {
 	ID                     string
@@ -326,14 +331,14 @@ func (lf *LegalFramework) enforce(decision Decision) error {
 // DenyOverridesCombiner combines decisions using deny-overrides algorithm
 func DenyOverridesCombiner(decisions []Decision) string {
 	for _, decision := range decisions {
-		if decision.Effect == "deny" {
-			return "deny"
+		if decision.Effect == EffectDeny {
+			return EffectDeny
 		}
 	}
 
 	for _, decision := range decisions {
-		if decision.Effect == "permit" {
-			return "permit"
+		if decision.Effect == EffectPermit {
+			return EffectPermit
 		}
 	}
 
@@ -343,14 +348,14 @@ func DenyOverridesCombiner(decisions []Decision) string {
 // PermitOverridesCombiner combines decisions using permit-overrides algorithm
 func PermitOverridesCombiner(decisions []Decision) string {
 	for _, decision := range decisions {
-		if decision.Effect == "permit" {
-			return "permit"
+		if decision.Effect == EffectPermit {
+			return EffectPermit
 		}
 	}
 
 	for _, decision := range decisions {
-		if decision.Effect == "deny" {
-			return "deny"
+		if decision.Effect == EffectDeny {
+			return EffectDeny
 		}
 	}
 

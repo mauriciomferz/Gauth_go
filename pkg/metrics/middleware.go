@@ -8,6 +8,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+const (
+	unknownMethod = "unknown"
+	unknownPolicy = "unknown"
+)
+
 var (
 	httpRequestsTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
@@ -135,7 +140,7 @@ func AuthMetricsMiddleware(handler string, next http.Handler) http.Handler {
 		// Record auth-specific metrics
 		method := r.Header.Get("X-Auth-Method")
 		if method == "" {
-			method = "unknown"
+			method = unknownMethod
 		}
 
 		authAttempts.WithLabelValues(method, status).Inc()
@@ -168,7 +173,7 @@ func AuthzMetricsMiddleware(handler string, next http.Handler) http.Handler {
 		// Record authz-specific metrics
 		policy := r.Header.Get("X-Policy")
 		if policy == "" {
-			policy = "unknown"
+			policy = unknownPolicy
 		}
 
 		allowed := rw.status == http.StatusOK

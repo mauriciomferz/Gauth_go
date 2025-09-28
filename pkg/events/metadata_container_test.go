@@ -28,7 +28,7 @@ func TestMetadataContainer(t *testing.T) {
 			t.Error("Expected key to exist, but it doesn't")
 		}
 
-		if retrieved.Type != "string" {
+		if retrieved.Type != MetadataTypeString {
 			t.Errorf("Expected string type, got %s", retrieved.Type)
 		}
 
