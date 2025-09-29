@@ -15,7 +15,7 @@ func main() {
 	// Create token service
 
 	// Create a new token using TokenData
-	tokenData := &token.TokenData{
+	tokenData := &token.Data{
 		TokenID:   "token123",
 		UserID:    "user123",
 		ClientID:  "example-app",

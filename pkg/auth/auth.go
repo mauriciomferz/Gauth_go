@@ -44,7 +44,7 @@ type Config struct {
 	AccessTokenExpiry time.Duration
 
 	// AuditLogger is the logger for audit events
-	AuditLogger *audit.AuditLogger
+	AuditLogger *audit.Logger
 
 	// TokenValidation holds token validation config
 	TokenValidation TokenValidationConfig
