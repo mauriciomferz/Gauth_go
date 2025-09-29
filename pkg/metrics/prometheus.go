@@ -139,7 +139,7 @@ func RegisterMetrics() {
 
 // Collector provides methods to record various metrics
 type Collector struct {
-	ctx context.Context
+	_ctx context.Context // reserved for context propagation
 }
 
 // RecordValue records a generic float64 value for a named metric (for resource/service metrics)

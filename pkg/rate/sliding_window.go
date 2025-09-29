@@ -83,10 +83,9 @@ func (sw *SlidingWindow) Reset(id string) {
 	sw.counts.Store(id, &windowInfo{})
 }
 
-// cleanup periodically removes old entries
-//
-//nolint:unused // reserved for automatic cleanup
-func (sw *SlidingWindow) cleanup() {
+// _cleanup periodically removes old entries
+// reserved for automatic cleanup
+func (sw *SlidingWindow) _cleanup() {
 	ticker := time.NewTicker(sw.window)
 	defer ticker.Stop()
 

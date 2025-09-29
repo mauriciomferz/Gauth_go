@@ -23,8 +23,8 @@ func generateGrantID() string {
 
 // validateScope checks if all requested scopes are allowed
 //
-//nolint:unused // reserved for OAuth2 scope validation
-func validateScope(requested, allowed []string) bool {
+// reserved for OAuth2 scope validation
+func _validateScope(requested, allowed []string) bool {
 	if len(requested) == 0 {
 		return false
 	}
@@ -43,10 +43,9 @@ func validateScope(requested, allowed []string) bool {
 	return true
 }
 
-// validateRedirectURI validates that the redirect URI is allowed for the client
-//
-//nolint:unused // reserved for OAuth2 redirect URI validation
-func validateRedirectURI(redirectURI string, allowedURIs []string) bool {
+// _validateRedirectURI validates that the redirect URI is allowed for the client
+// reserved for OAuth2 redirect URI validation
+func _validateRedirectURI(redirectURI string, allowedURIs []string) bool {
 	if redirectURI == "" || len(allowedURIs) == 0 {
 		return false
 	}
@@ -87,22 +86,20 @@ func validateRedirectURI(redirectURI string, allowedURIs []string) bool {
 
 // Helper functions for response generation
 
-// generateError creates a standardized error response for internal use only.
+// _generateError creates a standardized error response for internal use only.
 // NOTE: map[string]interface{} is used here only for error response formatting (not public API).
 // All public APIs use type-safe alternatives. Do not expose in new APIs.
-//
-//nolint:unused // reserved for OAuth2 error responses
-func generateError(code string, description string) map[string]interface{} {
+// reserved for OAuth2 error responses
+func _generateError(code string, description string) map[string]interface{} {
 	return map[string]interface{}{
 		"error":             code,
 		"error_description": description,
 	}
 }
 
-// sanitizeScope removes any invalid characters from scope strings
-//
-//nolint:unused // reserved for scope sanitization
-func sanitizeScope(scope string) string {
+// _sanitizeScope removes any invalid characters from scope strings
+// reserved for scope sanitization
+func _sanitizeScope(scope string) string {
 	return strings.Map(func(r rune) rune {
 		switch {
 		case r >= 'a' && r <= 'z':
@@ -121,10 +118,9 @@ func sanitizeScope(scope string) string {
 
 // Helper functions for security
 
-// validateClientCredentials validates client credentials securely
-//
-//nolint:unused // reserved for client credential validation
-func validateClientCredentials(providedSecret, storedHash string) bool {
+// _validateClientCredentials validates client credentials securely
+// reserved for client credential validation
+func _validateClientCredentials(providedSecret, storedHash string) bool {
 	// Use constant time comparison to prevent timing attacks
 	if len(providedSecret) != len(storedHash) {
 		return false
@@ -133,10 +129,9 @@ func validateClientCredentials(providedSecret, storedHash string) bool {
 	return subtle.ConstantTimeCompare([]byte(providedSecret), []byte(storedHash)) == 1
 }
 
-// sanitizeRedirectURI sanitizes and validates a redirect URI
-//
-//nolint:unused // reserved for redirect URI sanitization
-func sanitizeRedirectURI(uri string) (string, error) {
+// _sanitizeRedirectURI sanitizes and validates a redirect URI
+// reserved for redirect URI sanitization
+func _sanitizeRedirectURI(uri string) (string, error) {
 	if uri == "" {
 		return "", fmt.Errorf("empty redirect URI")
 	}
@@ -159,10 +154,9 @@ func sanitizeRedirectURI(uri string) (string, error) {
 
 // Helper functions for token management
 
-// isTokenExpired checks if a token has expired with a safety margin
-//
-//nolint:unused // reserved for token expiry checking
-func isTokenExpired(expiryTime int64, safetyMargin int64) bool {
+// _isTokenExpired checks if a token has expired with a safety margin
+// reserved for token expiry checking
+func _isTokenExpired(expiryTime int64, safetyMargin int64) bool {
 	now := TimeNow().Unix()
 	return now >= (expiryTime - safetyMargin)
 }

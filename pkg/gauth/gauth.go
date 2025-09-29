@@ -48,7 +48,7 @@ type GAuth struct {
 	TokenStore  tokenstore.Store // Exported for use in points.go
 	auditLogger *audit.Logger
 	rateLimiter *ratelimit.Limiter
-	mu          sync.RWMutex //nolint:unused // unexported: not part of public API, reserved for concurrent operations
+	_mu         sync.RWMutex // unexported: not part of public API, reserved for concurrent operations
 }
 
 // New creates a new GAuth instance with the provided configuration.
