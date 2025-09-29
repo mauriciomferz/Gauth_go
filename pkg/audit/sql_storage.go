@@ -141,6 +141,37 @@ func (s *SQLStorage) Store(ctx context.Context, entry *Entry) error {
 
 // Search implements the Storage interface
 func (s *SQLStorage) Search(ctx context.Context, filter *Filter) ([]*Entry, error) {
+	// Build WHERE conditions and arguments
+	conditions, args, argCount := s.buildWhereConditions(filter)
+
+	// Build complete query
+	query, args := s.buildQuery(conditions, args, argCount, filter)
+
+	// Execute query and return results
+	return s.executeQueryAndScanResults(ctx, query, args)
+}
+
+// GetByID implements the Storage interface
+func (s *SQLStorage) GetByID(ctx context.Context, id string) (*Entry, error) {
+	entries, err := s.Search(ctx, &Filter{
+		Metadata: []MetadataFilter{{
+			Key:      "id",
+			Value:    id,
+			Operator: "eq",
+		}},
+		Limit: 1,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if len(entries) == 0 {
+		return nil, fmt.Errorf("entry not found")
+	}
+	return entries[0], nil
+}
+
+// buildWhereConditions builds WHERE conditions and arguments for the SQL query
+func (s *SQLStorage) buildWhereConditions(filter *Filter) ([]string, []interface{}, int) {
 	var conditions []string
 	var args []interface{}
 	argCount := 1
@@ -177,6 +208,11 @@ func (s *SQLStorage) Search(ctx context.Context, filter *Filter) ([]*Entry, erro
 		argCount++
 	}
 
+	return conditions, args, argCount
+}
+
+// buildQuery builds the complete SQL query with ORDER BY and LIMIT/OFFSET
+func (s *SQLStorage) buildQuery(conditions []string, args []interface{}, argCount int, filter *Filter) (string, []interface{}) {
 	query := "SELECT * FROM audit_entries"
 	if len(conditions) > 0 {
 		query += " WHERE " + strings.Join(conditions, " AND ")
@@ -194,6 +230,11 @@ func (s *SQLStorage) Search(ctx context.Context, filter *Filter) ([]*Entry, erro
 		args = append(args, filter.Offset)
 	}
 
+	return query, args
+}
+
+// executeQueryAndScanResults executes the query and scans the results
+func (s *SQLStorage) executeQueryAndScanResults(ctx context.Context, query string, args []interface{}) ([]*Entry, error) {
 	rows, err := s.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query entries: %w", err)
@@ -236,25 +277,6 @@ func (s *SQLStorage) Search(ctx context.Context, filter *Filter) ([]*Entry, erro
 	}
 
 	return entries, nil
-}
-
-// GetByID implements the Storage interface
-func (s *SQLStorage) GetByID(ctx context.Context, id string) (*Entry, error) {
-	entries, err := s.Search(ctx, &Filter{
-		Metadata: []MetadataFilter{{
-			Key:      "id",
-			Value:    id,
-			Operator: "eq",
-		}},
-		Limit: 1,
-	})
-	if err != nil {
-		return nil, err
-	}
-	if len(entries) == 0 {
-		return nil, fmt.Errorf("entry not found")
-	}
-	return entries[0], nil
 }
 
 // GetChain implements the Storage interface

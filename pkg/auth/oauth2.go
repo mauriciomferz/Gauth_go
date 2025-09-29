@@ -95,96 +95,20 @@ func (a *oauth2Authenticator) ValidateCredentials(ctx context.Context, creds int
 }
 
 func (a *oauth2Authenticator) GenerateToken(ctx context.Context, req TokenRequest) (*TokenResponse, error) {
-	data := url.Values{}
-	data.Set("client_id", a.config.ClientID)
-	data.Set("client_secret", a.config.ClientSecret)
-
-	switch req.GrantType {
-	case GrantTypeClientCreds:
-		data.Set("grant_type", "client_credentials")
-		if len(req.Scopes) > 0 {
-			data.Set("scope", strings.Join(req.Scopes, " "))
-		}
-
-	case GrantTypePassword:
-		creds, ok := req.Metadata["credentials"].(basicCredentials)
-		if !ok {
-			return nil, errors.New("invalid credentials for password grant")
-		}
-		data.Set("grant_type", "password")
-		data.Set("username", creds.Username)
-		data.Set("password", creds.Password)
-		if len(req.Scopes) > 0 {
-			data.Set("scope", strings.Join(req.Scopes, " "))
-		}
-
-	case GrantTypeAuthCode:
-		code, ok := req.Metadata["code"].(string)
-		if !ok {
-			return nil, errors.New("authorization code required")
-		}
-		data.Set("grant_type", "authorization_code")
-		data.Set("code", code)
-		data.Set("redirect_uri", a.config.RedirectURL)
-
-	case GrantTypeRefreshToken:
-		refreshToken, ok := req.Metadata["refresh_token"].(string)
-		if !ok {
-			return nil, errors.New("refresh token required")
-		}
-		data.Set("grant_type", "refresh_token")
-		data.Set("refresh_token", refreshToken)
-
-	default:
-		return nil, fmt.Errorf("unsupported grant type: %s", req.GrantType)
-	}
-
-	resp, err := a.httpClient.PostForm(a.config.TokenURL, data)
+	// Prepare request data based on grant type
+	data, err := a.prepareTokenRequestData(req)
 	if err != nil {
-		return nil, fmt.Errorf("token request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("token request failed with status %d: %s", resp.StatusCode, body)
+		return nil, err
 	}
 
-	var oauthResp OAuth2TokenResponse
-	if err := json.NewDecoder(resp.Body).Decode(&oauthResp); err != nil {
-		return nil, fmt.Errorf("failed to decode token response: %w", err)
+	// Make HTTP request and get response
+	oauthResp, err := a.makeTokenRequest(data)
+	if err != nil {
+		return nil, err
 	}
 
-	tokenResp := &TokenResponse{
-		Token:     oauthResp.AccessToken,
-		TokenType: oauthResp.TokenType,
-		ExpiresIn: oauthResp.ExpiresIn,
-		Scope:     strings.Split(oauthResp.Scope, " "),
-		Claims: map[string]interface{}{
-			"refresh_token": oauthResp.RefreshToken,
-		},
-	}
-
-	if a.config.TokenStore != nil {
-		if err := a.config.TokenStore.Store(ctx, tokenResp); err != nil {
-			return nil, fmt.Errorf("failed to store token: %w", err)
-		}
-	}
-
-	if a.config.AuditLogger != nil {
-		a.config.AuditLogger.Log(ctx, &audit.Entry{
-			Type:    audit.TypeToken,
-			Action:  audit.ActionTokenGenerate,
-			ActorID: req.Subject,
-			Result:  audit.ResultSuccess,
-			Metadata: map[string]string{
-				"grant_type": req.GrantType,
-				"scope":      oauthResp.Scope,
-			},
-		})
-	}
-
-	return tokenResp, nil
+	// Create response and handle storage/audit
+	return a.createAndStoreTokenResponse(ctx, req, oauthResp)
 }
 
 func (a *oauth2Authenticator) ValidateToken(ctx context.Context, tokenStr string) (*TokenData, error) {
@@ -282,6 +206,110 @@ func (a *oauth2Authenticator) RevokeToken(ctx context.Context, tokenStr string) 
 	}
 
 	return nil
+}
+
+// prepareTokenRequestData prepares URL values based on grant type
+func (a *oauth2Authenticator) prepareTokenRequestData(req TokenRequest) (url.Values, error) {
+	data := url.Values{}
+	data.Set("client_id", a.config.ClientID)
+	data.Set("client_secret", a.config.ClientSecret)
+
+	switch req.GrantType {
+	case GrantTypeClientCreds:
+		data.Set("grant_type", "client_credentials")
+		if len(req.Scopes) > 0 {
+			data.Set("scope", strings.Join(req.Scopes, " "))
+		}
+
+	case GrantTypePassword:
+		creds, ok := req.Metadata["credentials"].(basicCredentials)
+		if !ok {
+			return nil, errors.New("invalid credentials for password grant")
+		}
+		data.Set("grant_type", "password")
+		data.Set("username", creds.Username)
+		data.Set("password", creds.Password)
+		if len(req.Scopes) > 0 {
+			data.Set("scope", strings.Join(req.Scopes, " "))
+		}
+
+	case GrantTypeAuthCode:
+		code, ok := req.Metadata["code"].(string)
+		if !ok {
+			return nil, errors.New("authorization code required")
+		}
+		data.Set("grant_type", "authorization_code")
+		data.Set("code", code)
+		data.Set("redirect_uri", a.config.RedirectURL)
+
+	case GrantTypeRefreshToken:
+		refreshToken, ok := req.Metadata["refresh_token"].(string)
+		if !ok {
+			return nil, errors.New("refresh token required")
+		}
+		data.Set("grant_type", "refresh_token")
+		data.Set("refresh_token", refreshToken)
+
+	default:
+		return nil, fmt.Errorf("unsupported grant type: %s", req.GrantType)
+	}
+
+	return data, nil
+}
+
+// makeTokenRequest makes HTTP request and handles response
+func (a *oauth2Authenticator) makeTokenRequest(data url.Values) (*OAuth2TokenResponse, error) {
+	resp, err := a.httpClient.PostForm(a.config.TokenURL, data)
+	if err != nil {
+		return nil, fmt.Errorf("token request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("token request failed with status %d: %s", resp.StatusCode, body)
+	}
+
+	var oauthResp OAuth2TokenResponse
+	if err := json.NewDecoder(resp.Body).Decode(&oauthResp); err != nil {
+		return nil, fmt.Errorf("failed to decode token response: %w", err)
+	}
+
+	return &oauthResp, nil
+}
+
+// createAndStoreTokenResponse creates response and handles storage/audit
+func (a *oauth2Authenticator) createAndStoreTokenResponse(ctx context.Context, req TokenRequest, oauthResp *OAuth2TokenResponse) (*TokenResponse, error) {
+	tokenResp := &TokenResponse{
+		Token:     oauthResp.AccessToken,
+		TokenType: oauthResp.TokenType,
+		ExpiresIn: oauthResp.ExpiresIn,
+		Scope:     strings.Split(oauthResp.Scope, " "),
+		Claims: map[string]interface{}{
+			"refresh_token": oauthResp.RefreshToken,
+		},
+	}
+
+	if a.config.TokenStore != nil {
+		if err := a.config.TokenStore.Store(ctx, tokenResp); err != nil {
+			return nil, fmt.Errorf("failed to store token: %w", err)
+		}
+	}
+
+	if a.config.AuditLogger != nil {
+		a.config.AuditLogger.Log(ctx, &audit.Entry{
+			Type:    audit.TypeToken,
+			Action:  audit.ActionTokenGenerate,
+			ActorID: req.Subject,
+			Result:  audit.ResultSuccess,
+			Metadata: map[string]string{
+				"grant_type": req.GrantType,
+				"scope":      oauthResp.Scope,
+			},
+		})
+	}
+
+	return tokenResp, nil
 }
 
 // ConvertTokenToTokenData maps a *token.Token to a *auth.TokenData for compatibility

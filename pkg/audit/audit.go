@@ -74,7 +74,7 @@ type EventMetadata struct {
 }
 
 // securityEvent represents a security audit event
-type securityEvent struct {
+type SecurityEvent struct {
 	Timestamp     time.Time        `json:"timestamp"`
 	EventType     common.EventType `json:"event_type"`
 	TransactionID string           `json:"transaction_id,omitempty"`
@@ -90,7 +90,7 @@ type securityEvent struct {
 
 // Logger handles security event logging and persistence
 type Logger struct {
-	events []securityEvent
+	events []SecurityEvent
 	mu     sync.RWMutex // private mutex
 }
 
@@ -104,7 +104,7 @@ func (al *Logger) Log(_ context.Context, entry *Entry) {
 	al.mu.Lock()
 	defer al.mu.Unlock()
 	// For demonstration, we only store minimal info. Extend as needed.
-	al.events = append(al.events, securityEvent{
+	al.events = append(al.events, SecurityEvent{
 		Timestamp:  entry.Timestamp,
 		EventType:  eventTypeFromString(entry.Type),
 		ClientID:   entry.ActorID,
@@ -118,7 +118,7 @@ func (al *Logger) Log(_ context.Context, entry *Entry) {
 // NewAuditLogger creates a new in-memory audit logger
 func NewAuditLogger() *Logger {
 	return &Logger{
-		events: make([]securityEvent, 0),
+		events: make([]SecurityEvent, 0),
 	}
 }
 
@@ -127,7 +127,7 @@ func (al *Logger) LogEvent(evt common.EventType, transactionID, clientID string,
 	al.mu.Lock()
 	defer al.mu.Unlock()
 
-	event := securityEvent{
+	event := SecurityEvent{
 		Timestamp:     time.Now(),
 		EventType:     evt,
 		TransactionID: transactionID,
@@ -156,7 +156,7 @@ func (al *Logger) LogEvent(evt common.EventType, transactionID, clientID string,
 }
 
 // GetRecentEvents retrieves recent security events
-func (al *Logger) GetRecentEvents(limit int) []securityEvent {
+func (al *Logger) GetRecentEvents(limit int) []SecurityEvent {
 	al.mu.RLock()
 	defer al.mu.RUnlock()
 
@@ -165,7 +165,7 @@ func (al *Logger) GetRecentEvents(limit int) []securityEvent {
 		start = 0
 	}
 
-	result := make([]securityEvent, len(al.events)-start)
+	result := make([]SecurityEvent, len(al.events)-start)
 	copy(result, al.events[start:])
 	return result
 }
@@ -202,11 +202,11 @@ func (al *Logger) PrintRecentEvents(limit int) {
 }
 
 // GetEventsByClient filters events by client ID
-func (al *Logger) GetEventsByClient(clientID string) []securityEvent {
+func (al *Logger) GetEventsByClient(clientID string) []SecurityEvent {
 	al.mu.RLock()
 	defer al.mu.RUnlock()
 
-	var events []securityEvent
+	var events []SecurityEvent
 	for _, event := range al.events {
 		if event.ClientID == clientID {
 			events = append(events, event)
@@ -216,11 +216,11 @@ func (al *Logger) GetEventsByClient(clientID string) []securityEvent {
 }
 
 // GetEventsByTransaction filters events by transaction ID
-func (al *Logger) GetEventsByTransaction(transactionID string) []securityEvent {
+func (al *Logger) GetEventsByTransaction(transactionID string) []SecurityEvent {
 	al.mu.RLock()
 	defer al.mu.RUnlock()
 
-	var events []securityEvent
+	var events []SecurityEvent
 	for _, event := range al.events {
 		if event.TransactionID == transactionID {
 			events = append(events, event)
@@ -230,11 +230,11 @@ func (al *Logger) GetEventsByTransaction(transactionID string) []securityEvent {
 }
 
 // GetFailedEvents returns all failed security events
-func (al *Logger) GetFailedEvents() []securityEvent {
+func (al *Logger) GetFailedEvents() []SecurityEvent {
 	al.mu.RLock()
 	defer al.mu.RUnlock()
 
-	var events []securityEvent
+	var events []SecurityEvent
 	for _, event := range al.events {
 		if !event.Success {
 			events = append(events, event)
@@ -249,7 +249,7 @@ func (al *Logger) ClearEvents(retentionPeriod time.Duration) {
 	defer al.mu.Unlock()
 
 	cutoff := time.Now().Add(-retentionPeriod)
-	var newEvents []securityEvent
+	var newEvents []SecurityEvent
 
 	for _, event := range al.events {
 		if event.Timestamp.After(cutoff) {

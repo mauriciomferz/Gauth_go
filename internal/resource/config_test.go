@@ -65,10 +65,8 @@ func testMapValues(t *testing.T, config *Config) {
 	config.SetMap("settings", mapVal)
 	if val, ok := config.GetMap("settings"); !ok {
 		t.Error("Map value not set correctly")
-	} else {
-		if val["key1"] != "value1" || val["key2"] != 123 {
-			t.Errorf("Map value content not correct: got %v", val)
-		}
+	} else if val["key1"] != "value1" || val["key2"] != 123 {
+		t.Errorf("Map value content not correct: got %v", val)
 	}
 }
 
@@ -77,10 +75,8 @@ func testSliceValues(t *testing.T, config *Config) {
 	config.SetSlice("list", sliceVal)
 	if val, ok := config.GetSlice("list"); !ok {
 		t.Error("Slice value not set correctly")
-	} else {
-		if len(val) != 3 || val[0] != "one" || val[1] != 2 || val[2] != true {
-			t.Errorf("Slice value content not correct: got %v", val)
-		}
+	} else if len(val) != 3 || val[0] != "one" || val[1] != 2 || val[2] != true {
+		t.Errorf("Slice value content not correct: got %v", val)
 	}
 }
 

@@ -15,43 +15,68 @@ const (
 )
 
 func TestContext(t *testing.T) {
-	ctx := make(map[string]string)
+	t.Run("String Values", testContextStringValues)
+	t.Run("Int Values", testContextIntValues)
+	t.Run("Float Values", testContextFloatValues)
+	t.Run("Bool Values", testContextBoolValues)
+	t.Run("Time Values", testContextTimeValues)
+	t.Run("Key Operations", testContextKeyOperations)
+}
 
-	// Test string values
+func testContextStringValues(t *testing.T) {
+	ctx := make(map[string]string)
 	ctx["user"] = testUserJohn
 	val, ok := ctx["user"]
 	if !ok || val != testUserJohn {
 		t.Errorf("String value not set correctly: got %v, want %s", val, testUserJohn)
 	}
+}
 
-	// Test int values (store as string)
+func testContextIntValues(t *testing.T) {
+	ctx := make(map[string]string)
 	ctx["age"] = strconv.Itoa(30)
 	ival, err := strconv.Atoi(ctx["age"])
 	if err != nil || ival != 30 {
 		t.Errorf("Int value not set correctly: got %v, want %d", ival, 30)
 	}
+}
 
-	// Test float values (store as string)
+func testContextFloatValues(t *testing.T) {
+	ctx := make(map[string]string)
 	ctx["score"] = strconv.FormatFloat(9.5, 'f', -1, 64)
 	fval, err := strconv.ParseFloat(ctx["score"], 64)
 	if err != nil || fval != 9.5 {
 		t.Errorf("Float value not set correctly: got %v, want %f", fval, 9.5)
 	}
+}
 
-	// Test bool values (store as string)
+func testContextBoolValues(t *testing.T) {
+	ctx := make(map[string]string)
 	ctx["admin"] = strconv.FormatBool(true)
 	bval, err := strconv.ParseBool(ctx["admin"])
 	if err != nil || bval != true {
 		t.Errorf("Bool value not set correctly: got %v, want %t", bval, true)
 	}
+}
 
-	// Test time values (store as string)
+func testContextTimeValues(t *testing.T) {
+	ctx := make(map[string]string)
 	now := time.Now().UTC()
 	ctx["timestamp"] = now.Format(time.RFC3339Nano)
 	tval, err := time.Parse(time.RFC3339Nano, ctx["timestamp"])
 	if err != nil || !tval.Equal(now) {
 		t.Errorf("Time value not set correctly: got %v, want %v", tval, now)
 	}
+}
+
+func testContextKeyOperations(t *testing.T) {
+	ctx := make(map[string]string)
+	ctx["user"] = testUserJohn
+	ctx["age"] = strconv.Itoa(30)
+	ctx["score"] = strconv.FormatFloat(9.5, 'f', -1, 64)
+	ctx["admin"] = strconv.FormatBool(true)
+	now := time.Now().UTC()
+	ctx["timestamp"] = now.Format(time.RFC3339Nano)
 
 	// Test key existence and removal
 	if _, ok := ctx["user"]; !ok {

@@ -36,7 +36,7 @@ type TypedMetadataAccessor struct {
 // NewTypedMetadataAccessor creates a new accessor for the given metadata
 func NewTypedMetadataAccessor(metadata *Metadata, prefix string) *TypedMetadataAccessor {
 	if prefix != "" && !strings.HasSuffix(prefix, ".") {
-		prefix = prefix + "."
+		prefix += "."
 	}
 
 	return &TypedMetadataAccessor{

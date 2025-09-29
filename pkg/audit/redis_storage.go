@@ -128,99 +128,25 @@ func (rs *RedisStorage) Store(ctx context.Context, entry *Entry) error {
 
 // Search implements the Storage interface
 func (rs *RedisStorage) Search(ctx context.Context, filter *Filter) ([]*Entry, error) {
-	// Start with all IDs or filtered by type
-	var ids []string
-	var err error
-
-	if len(filter.Types) > 0 {
-		// Union of all type sets
-		typeKeys := make([]string, len(filter.Types))
-		for i, t := range filter.Types {
-			typeKeys[i] = rs.typeKey(t)
-		}
-		ids, err = rs.client.SUnion(ctx, typeKeys...).Result()
-	} else {
-		// Get all entry IDs
-		pattern := rs.entryKey("*")
-		var cursor uint64
-		var keys []string
-		for {
-			keys, cursor, err = rs.client.Scan(ctx, cursor, pattern, 100).Result()
-			if err != nil {
-				return nil, fmt.Errorf("failed to scan entries: %w", err)
-			}
-			for _, key := range keys {
-				ids = append(ids, rs.extractID(key))
-			}
-			if cursor == 0 {
-				break
-			}
-		}
-	}
-
+	// Get initial IDs based on filter
+	ids, err := rs.getFilteredIDs(ctx, filter)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get entry IDs: %w", err)
+		return nil, err
 	}
 
-	// Filter by actor
-	if len(filter.ActorIDs) > 0 {
-		actorKeys := make([]string, len(filter.ActorIDs))
-		for i, actor := range filter.ActorIDs {
-			actorKeys[i] = rs.actorKey(actor)
-		}
-		actorIDs, err := rs.client.SUnion(ctx, actorKeys...).Result()
-		if err != nil {
-			return nil, fmt.Errorf("failed to get actor entries: %w", err)
-		}
-		ids = intersection(ids, actorIDs)
+	// Apply additional filters
+	ids, err = rs.applyActorFilter(ctx, ids, filter.ActorIDs)
+	if err != nil {
+		return nil, err
 	}
 
-	// Filter by time range
-	if filter.TimeRange != nil {
-		timeKeys := rs.timeKeysInRange(filter.TimeRange.Start, filter.TimeRange.End)
-		timeIDs, err := rs.client.SUnion(ctx, timeKeys...).Result()
-		if err != nil {
-			return nil, fmt.Errorf("failed to get time range entries: %w", err)
-		}
-		ids = intersection(ids, timeIDs)
+	ids, err = rs.applyTimeRangeFilter(ctx, ids, filter.TimeRange)
+	if err != nil {
+		return nil, err
 	}
 
-	// Get entries
-	var entries []*Entry
-	pipe := rs.client.Pipeline()
-	cmds := make([]*redis.StringCmd, len(ids))
-	for i, id := range ids {
-		cmds[i] = pipe.Get(ctx, rs.entryKey(id))
-	}
-	_, err = pipe.Exec(ctx)
-	if err != nil && err != redis.Nil {
-		return nil, fmt.Errorf("failed to get entries: %w", err)
-	}
-
-	for _, cmd := range cmds {
-		data, err := cmd.Bytes()
-		if err == redis.Nil {
-			continue
-		}
-		if err != nil {
-			return nil, fmt.Errorf("failed to get entry data: %w", err)
-		}
-
-		var entry Entry
-		if err := json.Unmarshal(data, &entry); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal entry: %w", err)
-		}
-
-		if rs.matchesFilter(&entry, filter) {
-			entries = append(entries, &entry)
-		}
-
-		if filter.Limit > 0 && len(entries) >= filter.Limit {
-			break
-		}
-	}
-
-	return entries, nil
+	// Fetch entries and apply final filtering
+	return rs.fetchAndFilterEntries(ctx, ids, filter)
 }
 
 // GetByID implements the Storage interface
@@ -390,4 +316,116 @@ func intersection(a, b []string) []string {
 		}
 	}
 	return result
+}
+
+// getFilteredIDs gets initial IDs based on type filter
+func (rs *RedisStorage) getFilteredIDs(ctx context.Context, filter *Filter) ([]string, error) {
+	var ids []string
+	var err error
+
+	if len(filter.Types) > 0 {
+		// Union of all type sets
+		typeKeys := make([]string, len(filter.Types))
+		for i, t := range filter.Types {
+			typeKeys[i] = rs.typeKey(t)
+		}
+		ids, err = rs.client.SUnion(ctx, typeKeys...).Result()
+	} else {
+		// Get all entry IDs
+		pattern := rs.entryKey("*")
+		var cursor uint64
+		var keys []string
+		for {
+			keys, cursor, err = rs.client.Scan(ctx, cursor, pattern, 100).Result()
+			if err != nil {
+				return nil, fmt.Errorf("failed to scan entries: %w", err)
+			}
+			for _, key := range keys {
+				ids = append(ids, rs.extractID(key))
+			}
+			if cursor == 0 {
+				break
+			}
+		}
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get entry IDs: %w", err)
+	}
+	return ids, nil
+}
+
+// applyActorFilter filters IDs by actor
+func (rs *RedisStorage) applyActorFilter(ctx context.Context, ids []string, actorIDs []string) ([]string, error) {
+	if len(actorIDs) == 0 {
+		return ids, nil
+	}
+
+	actorKeys := make([]string, len(actorIDs))
+	for i, actor := range actorIDs {
+		actorKeys[i] = rs.actorKey(actor)
+	}
+	
+	actorFilteredIDs, err := rs.client.SUnion(ctx, actorKeys...).Result()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get actor entries: %w", err)
+	}
+	
+	return intersection(ids, actorFilteredIDs), nil
+}
+
+// applyTimeRangeFilter filters IDs by time range
+func (rs *RedisStorage) applyTimeRangeFilter(ctx context.Context, ids []string, timeRange *TimeRange) ([]string, error) {
+	if timeRange == nil {
+		return ids, nil
+	}
+
+	timeKeys := rs.timeKeysInRange(timeRange.Start, timeRange.End)
+	timeFilteredIDs, err := rs.client.SUnion(ctx, timeKeys...).Result()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get time range entries: %w", err)
+	}
+	
+	return intersection(ids, timeFilteredIDs), nil
+}
+
+// fetchAndFilterEntries fetches entries and applies final filtering
+func (rs *RedisStorage) fetchAndFilterEntries(ctx context.Context, ids []string, filter *Filter) ([]*Entry, error) {
+	var entries []*Entry
+	pipe := rs.client.Pipeline()
+	cmds := make([]*redis.StringCmd, len(ids))
+	
+	for i, id := range ids {
+		cmds[i] = pipe.Get(ctx, rs.entryKey(id))
+	}
+	
+	_, err := pipe.Exec(ctx)
+	if err != nil && err != redis.Nil {
+		return nil, fmt.Errorf("failed to get entries: %w", err)
+	}
+
+	for _, cmd := range cmds {
+		data, err := cmd.Bytes()
+		if err == redis.Nil {
+			continue
+		}
+		if err != nil {
+			return nil, fmt.Errorf("failed to get entry data: %w", err)
+		}
+
+		var entry Entry
+		if err := json.Unmarshal(data, &entry); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal entry: %w", err)
+		}
+
+		if rs.matchesFilter(&entry, filter) {
+			entries = append(entries, &entry)
+		}
+
+		if filter.Limit > 0 && len(entries) >= filter.Limit {
+			break
+		}
+	}
+
+	return entries, nil
 }

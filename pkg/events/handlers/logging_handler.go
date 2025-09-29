@@ -27,6 +27,15 @@ func NewLoggingHandler() *LoggingHandler {
 
 // Handle implements the EventHandler interface
 func (h *LoggingHandler) Handle(event events.Event) {
+	// Build the log message
+	logMsg := h.buildLogMessage(event)
+
+	// Log with appropriate level
+	h.logWithLevel(logMsg)
+}
+
+// buildLogMessage constructs the log message from an event
+func (h *LoggingHandler) buildLogMessage(event events.Event) string {
 	// Basic log format
 	logMsg := string(event.Type) + ":" + event.Action + " - " + event.Message
 
@@ -69,7 +78,11 @@ func (h *LoggingHandler) Handle(event events.Event) {
 		logMsg += "}"
 	}
 
-	// Log with appropriate level
+	return logMsg
+}
+
+// logWithLevel logs the message with the appropriate level
+func (h *LoggingHandler) logWithLevel(logMsg string) {
 	switch h.LogLevel {
 	case "debug":
 		log.Printf("DEBUG: %s", logMsg)

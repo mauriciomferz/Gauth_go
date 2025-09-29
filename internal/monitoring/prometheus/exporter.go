@@ -56,19 +56,19 @@ var (
 )
 
 // PrometheusExporter converts internal metrics to Prometheus format
-type PrometheusExporter struct {
+type Exporter struct {
 	collector *monitoring.MetricsCollector
 }
 
-// NewPrometheusExporter creates a new Prometheus exporter
-func NewPrometheusExporter(collector *monitoring.MetricsCollector) *PrometheusExporter {
-	return &PrometheusExporter{
+// NewExporter creates a new Prometheus exporter
+func NewExporter(collector *monitoring.MetricsCollector) *Exporter {
+	return &Exporter{
 		collector: collector,
 	}
 }
 
 // Export converts and exports metrics to Prometheus
-func (e *PrometheusExporter) Export() {
+func (e *Exporter) Export() {
 	metrics := e.collector.GetAllMetrics()
 
 	for _, metric := range metrics {
@@ -84,7 +84,7 @@ func (e *PrometheusExporter) Export() {
 	}
 }
 
-func (e *PrometheusExporter) exportCounter(metric monitoring.Metric) {
+func (e *Exporter) exportCounter(metric monitoring.Metric) {
 	switch metric.Name {
 	case string(monitoring.MetricTransactions):
 		transactions.With(metric.Labels).Add(metric.Value)
@@ -93,16 +93,14 @@ func (e *PrometheusExporter) exportCounter(metric monitoring.Metric) {
 	}
 }
 
-func (e *PrometheusExporter) exportGauge(metric monitoring.Metric) {
-	switch metric.Name {
-	case string(monitoring.MetricActiveTokens):
+func (e *Exporter) exportGauge(metric monitoring.Metric) {
+	if metric.Name == string(monitoring.MetricActiveTokens) {
 		activeTokens.With(metric.Labels).Set(metric.Value)
 	}
 }
 
-func (e *PrometheusExporter) exportHistogram(metric monitoring.Metric) {
-	switch metric.Name {
-	case string(monitoring.MetricResponseTime):
+func (e *Exporter) exportHistogram(metric monitoring.Metric) {
+	if metric.Name == string(monitoring.MetricResponseTime) {
 		transactionDuration.With(metric.Labels).Observe(metric.Value)
 	}
 }

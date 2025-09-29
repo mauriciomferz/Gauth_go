@@ -79,7 +79,7 @@ func NewStandardComplianceChecker(config *Config, tracker ComplianceTracker) *St
 func (c *StandardComplianceChecker) CheckCompliance(ctx context.Context, token *token.EnhancedToken, action string) error {
 	// Check basic token validity
 	if token.IsExpired() {
-		return NewAuthError(ErrAuthorizationExpired, "token has expired", nil)
+		return NewError(ErrAuthorizationExpired, "token has expired", nil)
 	}
 
 	// Check AI restrictions
@@ -202,7 +202,7 @@ func (c *StandardComplianceChecker) checkTimeConstraints(ctx context.Context, co
 	now := time.Now()
 	loc, err := time.LoadLocation(constraints.TimeZone)
 	if err != nil {
-		return NewAuthError(ErrRuleViolation, "invalid timezone", err)
+		return NewError(ErrRuleViolation, "invalid timezone", err)
 	}
 
 	localNow := now.In(loc)
@@ -227,7 +227,7 @@ func (c *StandardComplianceChecker) checkTimeConstraints(ctx context.Context, co
 		}
 	}
 
-	return NewAuthError(ErrRuleViolation, "action not allowed at current time", nil)
+	return NewError(ErrRuleViolation, "action not allowed at current time", nil)
 }
 
 func (c *StandardComplianceChecker) checkCustomLimits(ctx context.Context, limits map[string]interface{}, action string) error {

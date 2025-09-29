@@ -300,7 +300,7 @@ func createResourceOwnerProof(t *testing.T, authorizer *auth.CapacityProof) *aut
 	}
 }
 
-func createServerAuthorization(t *testing.T, ownerProof *auth.CapacityProof) *auth.ServerAuthorization {
+func createServerAuthorization(_ *testing.T, ownerProof *auth.CapacityProof) *auth.ServerAuthorization {
 	return &auth.ServerAuthorization{
 		Token: &auth.Token{
 			ID:        "token_001",
@@ -326,7 +326,7 @@ func createServerAuthorization(t *testing.T, ownerProof *auth.CapacityProof) *au
 	}
 }
 
-func createClientRequest(t *testing.T, clientAuth *auth.ClientAuthorization) *auth.LegalFrameworkRequest {
+func createClientRequest(_ *testing.T, clientAuth *auth.ClientAuthorization) *auth.LegalFrameworkRequest {
 	return &auth.LegalFrameworkRequest{
 		ID:           "request_002",
 		ClientID:     clientAuth.Client.ID,
@@ -342,7 +342,7 @@ func createClientRequest(t *testing.T, clientAuth *auth.ClientAuthorization) *au
 	}
 }
 
-func createAuthorizationGrant(t *testing.T, request *auth.LegalFrameworkRequest) *auth.LegalFrameworkAuthorizationGrant {
+func createAuthorizationGrant(_ *testing.T, request *auth.LegalFrameworkRequest) *auth.LegalFrameworkAuthorizationGrant {
 	return &auth.LegalFrameworkAuthorizationGrant{
 		ID:        "grant_001",
 		RequestID: request.ID,

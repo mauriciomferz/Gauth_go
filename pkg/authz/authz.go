@@ -97,7 +97,7 @@ func (a *memoryAuthorizer) RemovePolicy(_ context.Context, policyID string) erro
 	return nil
 }
 
-func (a *memoryAuthorizer) UpdatePolicy(ctx context.Context, policy *Policy) error {
+func (a *memoryAuthorizer) UpdatePolicy(_ context.Context, policy *Policy) error {
 	if policy.ID == "" {
 		return errors.New("policy ID is required")
 	}
@@ -106,14 +106,14 @@ func (a *memoryAuthorizer) UpdatePolicy(ctx context.Context, policy *Policy) err
 	return nil
 }
 
-func (a *memoryAuthorizer) GetPolicy(ctx context.Context, policyID string) (*Policy, error) {
+func (a *memoryAuthorizer) GetPolicy(_ context.Context, policyID string) (*Policy, error) {
 	if val, ok := a.policies.Load(policyID); ok {
 		return val.(*Policy), nil
 	}
 	return nil, fmt.Errorf("policy %s not found", policyID)
 }
 
-func (a *memoryAuthorizer) ListPolicies(ctx context.Context) ([]*Policy, error) {
+func (a *memoryAuthorizer) ListPolicies(_ context.Context) ([]*Policy, error) {
 	var policies []*Policy
 	a.policies.Range(func(_, value interface{}) bool {
 		policy := value.(*Policy)

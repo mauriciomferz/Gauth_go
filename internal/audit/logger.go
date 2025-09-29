@@ -7,8 +7,8 @@ import (
 	"github.com/Gimel-Foundation/gauth/internal/events"
 )
 
-// AuditLogger defines the interface for audit logging
-type AuditLogger interface {
+// EventLogger defines the interface for audit logging
+type EventLogger interface {
 	// LogEvent logs a system event with audit context
 	LogEvent(ctx context.Context, event *events.Event) error
 

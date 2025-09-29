@@ -22,7 +22,7 @@ type ResilientService struct {
 	server       *gauth.ResourceServer
 	breaker      *circuit.Breaker
 	metrics      *monitoring.MetricsCollector
-	promExporter *prometheus.PrometheusExporter
+	promExporter *prometheus.Exporter
 }
 
 func NewResilientService(auth *gauth.GAuth) *ResilientService {
@@ -32,7 +32,7 @@ func NewResilientService(auth *gauth.GAuth) *ResilientService {
 		auth:         auth,
 		server:       gauth.NewResourceServer("resilient-service", auth),
 		metrics:      metrics,
-		promExporter: prometheus.NewPrometheusExporter(metrics),
+		promExporter: prometheus.NewExporter(metrics),
 		breaker: circuit.NewBreaker(circuit.Options{
 			Name:             "auth-service",
 			FailureThreshold: 5,

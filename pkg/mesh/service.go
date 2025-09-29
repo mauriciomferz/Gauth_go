@@ -110,7 +110,7 @@ func (s *Service) GetMetrics() resources.ServiceMetrics {
 
 func (s *Service) updateLatencyMetrics(duration time.Duration) {
 	s.metrics.AverageLatency = time.Duration(
-		(int64(s.metrics.AverageLatency)*int64(s.metrics.SuccessfulCalls-1) +
-			int64(duration)) / int64(s.metrics.SuccessfulCalls),
+		(int64(s.metrics.AverageLatency)*(s.metrics.SuccessfulCalls-1) +
+			int64(duration)) / s.metrics.SuccessfulCalls,
 	)
 }
