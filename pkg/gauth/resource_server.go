@@ -62,7 +62,7 @@ func NewResourceServer(name string, auth *GAuth) *ResourceServer {
 }
 
 // ProcessTransaction processes a transaction with the given token
-func (s *ResourceServer) ProcessTransaction(tx TransactionDetails, token string) (string, error) {
+func (s *ResourceServer) ProcessTransaction(_ TransactionDetails, token string) (string, error) {
 	// Validate token
 	tokenData, err := s.auth.ValidateToken(token)
 	if err != nil {

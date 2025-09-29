@@ -7,6 +7,14 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+// boolToString converts a boolean to a string
+func boolToString(b bool) string {
+	if b {
+		return "true"
+	}
+	return "false"
+}
+
 // Registration state tracking
 var (
 	metricsRegistered = false
@@ -129,88 +137,81 @@ func RegisterMetrics() {
 	metricsRegistered = true
 }
 
-// MetricsCollector provides methods to record various metrics
-type MetricsCollector struct {
+// Collector provides methods to record various metrics
+type Collector struct {
 	ctx context.Context
 }
 
 // RecordValue records a generic float64 value for a named metric (for resource/service metrics)
-func (m *MetricsCollector) RecordValue(name string, value float64) {
+func (m *Collector) RecordValue(name string, value float64) {
 	customMetrics.WithLabelValues(name).Set(value)
 }
 
-// NewMetricsCollector creates a new metrics collector
-func NewMetricsCollector(ctx context.Context) *MetricsCollector {
-	return &MetricsCollector{ctx: ctx}
+// NewCollector creates a new metrics collector
+func NewCollector() *Collector {
+	return &Collector{}
 }
 
 // RecordAuthAttempt records an authentication attempt
-func (m *MetricsCollector) RecordAuthAttempt(method, status string) {
+func (m *Collector) RecordAuthAttempt(method, status string) {
 	authAttempts.WithLabelValues(method, status).Inc()
 }
 
 // ObserveAuthLatency records authentication latency
-func (m *MetricsCollector) ObserveAuthLatency(method string, duration time.Duration) {
+func (m *Collector) ObserveAuthLatency(method string, duration time.Duration) {
 	authLatency.WithLabelValues(method).Observe(duration.Seconds())
 }
 
 // RecordTokenOperation records a token operation
-func (m *MetricsCollector) RecordTokenOperation(operation, tokenType, status string) {
+func (m *Collector) RecordTokenOperation(operation, tokenType, status string) {
 	tokenOperations.WithLabelValues(operation, tokenType, status).Inc()
 }
 
 // RecordTokenValidationError records a token validation error
-func (m *MetricsCollector) RecordTokenValidationError(tokenType, errorType string) {
+func (m *Collector) RecordTokenValidationError(tokenType, errorType string) {
 	tokenValidationErrors.WithLabelValues(tokenType, errorType).Inc()
 }
 
 // SetActiveTokens sets the number of active tokens
-func (m *MetricsCollector) SetActiveTokens(tokenType string, count float64) {
+func (m *Collector) SetActiveTokens(tokenType string, count float64) {
 	activeTokens.WithLabelValues(tokenType).Set(count)
 }
 
 // RecordAuthzDecision records an authorization decision
-func (m *MetricsCollector) RecordAuthzDecision(allowed bool, policy string) {
+func (m *Collector) RecordAuthzDecision(allowed bool, policy string) {
 	authzDecisions.WithLabelValues(boolToString(allowed), policy).Inc()
 }
 
 // ObserveAuthzLatency records authorization latency
-func (m *MetricsCollector) ObserveAuthzLatency(policy string, duration time.Duration) {
+func (m *Collector) ObserveAuthzLatency(policy string, duration time.Duration) {
 	authzLatency.WithLabelValues(policy).Observe(duration.Seconds())
 }
 
 // RecordPolicyEvaluation records a policy evaluation
-func (m *MetricsCollector) RecordPolicyEvaluation(policy string, result string) {
+func (m *Collector) RecordPolicyEvaluation(policy string, result string) {
 	policyEvaluations.WithLabelValues(policy, result).Inc()
 }
 
 // RecordCacheOperation records a cache operation
-func (m *MetricsCollector) RecordCacheOperation(operation, status string) {
+func (m *Collector) RecordCacheOperation(operation, status string) {
 	cacheOperations.WithLabelValues(operation, status).Inc()
 }
 
 // RecordResourceAccess records a resource access attempt
-func (m *MetricsCollector) RecordResourceAccess(resource, action string, allowed bool) {
+func (m *Collector) RecordResourceAccess(resource, action string, allowed bool) {
 	resourceAccess.WithLabelValues(resource, action, boolToString(allowed)).Inc()
-}
-
-func boolToString(b bool) string {
-	if b {
-		return "true"
-	}
-	return "false"
 }
 
 // Timer provides a convenient way to measure and record operation duration
 type Timer struct {
 	start     time.Time
 	method    string
-	collector *MetricsCollector
+	collector *Collector
 	isAuthz   bool
 }
 
 // NewTimer creates a new timer for measuring operation duration
-func (m *MetricsCollector) NewTimer(method string, isAuthz bool) *Timer {
+func (m *Collector) NewTimer(method string, isAuthz bool) *Timer {
 	return &Timer{
 		start:     time.Now(),
 		method:    method,

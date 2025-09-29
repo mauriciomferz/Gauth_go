@@ -8,8 +8,8 @@ import (
 	"github.com/Gimel-Foundation/gauth/internal/events"
 )
 
-// AuditType represents audit log entry types
-type AuditType string
+// Type represents audit log entry types
+type Type string
 
 const (
 	// AuditTypeAuth represents authentication audit entries

@@ -256,13 +256,13 @@ func (s *MemoryStore) decrypt(data []byte) (*TokenMetadata, error) {
 }
 
 // encode serializes token metadata to bytes (implementation omitted)
-func encode(metadata TokenMetadata) ([]byte, error) {
+func encode(_ TokenMetadata) ([]byte, error) {
 	// Implementation would use encoding/gob or similar
 	return nil, nil
 }
 
 // decode deserializes token metadata from bytes (implementation omitted)
-func decode(data []byte) (*TokenMetadata, error) {
+func decode(_ []byte) (*TokenMetadata, error) {
 	// Implementation would use encoding/gob or similar
 	return nil, nil
 }

@@ -206,7 +206,7 @@ func (s *InMemoryConfigStore) Save(ctx context.Context, config ServiceConfig) er
 
 func (s *InMemoryConfigStore) List(ctx context.Context) ([]ServiceConfig, error) {
 	var configs []ServiceConfig
-	s.configs.Range(func(key, value interface{}) bool {
+	s.configs.Range(func(_, value interface{}) bool {
 		configs = append(configs, value.(ServiceConfig))
 		return true
 	})

@@ -71,7 +71,7 @@ func (a *rateLimiterAdapter) GetRemainingRequests(id string) int64 {
 	}
 	return remaining
 }
-func (a *rateLimiterAdapter) Reset(id string) {
+func (a *rateLimiterAdapter) Reset(_ string) {
 	// Not implemented in RateLimiter, so no-op
 }
 
@@ -298,7 +298,7 @@ func (s *Service) validateAuthRequest(req *AuthorizationRequest) error {
 }
 
 //nolint:unused // reserved for event handling
-func (s *Service) handleAuthGrant(data interface{}) {
+func (s *Service) handleAuthGrant(_ interface{}) {
 	// Handle authorization grant event
 }
 

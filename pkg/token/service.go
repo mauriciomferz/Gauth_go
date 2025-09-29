@@ -225,7 +225,7 @@ func (s *Service) List(ctx context.Context, filter Filter) ([]*Token, error) {
 	return s.store.List(ctx, filter)
 }
 
-func (s *Service) validateConfig(token *Token) error {
+func (s *Service) validateConfig(_ *Token) error {
 	if s.config.SigningKey == nil {
 		return fmt.Errorf("signing key not configured")
 	}

@@ -39,7 +39,7 @@ func TestCentralizationEnforcement(t *testing.T) {
 }
 
 // TestForbiddenExclusions ensures forbidden features (Web3, DNA, AI-controlled GAuth) are not present.
-func TestForbiddenExclusions(t *testing.T) {
+func TestForbiddenExclusions(_ *testing.T) {
 	// This is a placeholder: forbidden features are excluded by design and code review.
 	// If any forbidden logic is added, this test should fail.
 	// Example: if web3/blockchain logic is detected, fail the test.
