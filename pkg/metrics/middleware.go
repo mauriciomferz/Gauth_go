@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-		"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 const (
@@ -76,9 +76,10 @@ func RegisterHTTPMetrics() {
 		httpRequestDuration,
 		httpResponseSize,
 		activeRequests,
-		authAttempts,
-		authLatency,
 	)
+
+	// Also register auth metrics (from prometheus.go) since middleware uses them
+	RegisterMetrics()
 
 	httpMetricsRegistered = true
 }
