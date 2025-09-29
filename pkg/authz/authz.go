@@ -197,7 +197,7 @@ func (a *memoryAuthorizer) AssignRole(_ context.Context, subject Subject, role R
 	return nil
 }
 
-func (a *memoryAuthorizer) UnassignRole(ctx context.Context, subject Subject, role Role) error {
+func (a *memoryAuthorizer) UnassignRole(_ context.Context, subject Subject, role Role) error {
 	if val, ok := a.assignments.Load(subject); ok {
 		roles := val.([]Role)
 		for i, r := range roles {

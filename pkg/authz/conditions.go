@@ -15,7 +15,7 @@ type TimeRangeCondition struct {
 	TimeZone  *time.Location
 }
 
-func (c *TimeRangeCondition) Evaluate(_ context.Context, request *AccessRequest) (bool, error) {
+func (c *TimeRangeCondition) Evaluate(_ context.Context, _ *AccessRequest) (bool, error) {
 	now := time.Now()
 	if c.TimeZone != nil {
 		now = now.In(c.TimeZone)
@@ -58,7 +58,7 @@ type RoleCondition struct {
 	RequiredRoles []Role
 }
 
-func (c *RoleCondition) Evaluate(ctx context.Context, request *AccessRequest) (bool, error) {
+func (c *RoleCondition) Evaluate(_ context.Context, request *AccessRequest) (bool, error) {
 	if rolesStr, ok := request.Context["roles"]; ok {
 		roles := strings.Split(rolesStr, ",")
 		for _, required := range c.RequiredRoles {
@@ -85,7 +85,7 @@ type AttributeCondition struct {
 	Operator  string // eq, ne, gt, lt, contains, etc.
 }
 
-func (c *AttributeCondition) Evaluate(ctx context.Context, request *AccessRequest) (bool, error) {
+func (c *AttributeCondition) Evaluate(_ context.Context, request *AccessRequest) (bool, error) {
 	if attr, ok := request.Context[c.Attribute]; ok {
 		attrStr := attr
 		valueStr := ""
