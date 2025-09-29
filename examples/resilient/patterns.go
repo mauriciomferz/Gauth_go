@@ -55,7 +55,7 @@ func RunExample() {
 			fmt.Printf("Circuit state changed from %s to %s\n", from, to)
 		},
 	}
-	breaker := circuit.NewCircuitBreaker(cbOpts)
+	breaker := circuit.NewBreaker(cbOpts)
 
 	// Set up retry strategy
 	retryStrategy := resilience.RetryStrategy{

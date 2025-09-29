@@ -23,7 +23,7 @@ type APIGateway struct {
 type BackendService struct {
 	name      string
 	endpoint  string
-	breaker   *circuit.CircuitBreaker
+	breaker   *circuit.Breaker
 	limiter   ratelimit.Algorithm
 	retry     *resilience.Retry
 	bulkhead  *resilience.Bulkhead
@@ -136,7 +136,7 @@ func (g *APIGateway) AddRoute(config *RouteConfig) {
 	g.routeRules[config.Path] = config
 	svc := g.services[config.Service]
 	if svc != nil {
-		svc.breaker = circuit.NewCircuitBreaker(config.CircuitBreaker)
+		svc.breaker = circuit.NewBreaker(config.CircuitBreaker)
 		svc.limiter = ratelimit.WrapTokenBucket(config.RateLimit)
 		svc.retry = resilience.NewRetry(config.RetryStrategy)
 		svc.bulkhead = resilience.NewBulkhead(config.BulkheadLimit)

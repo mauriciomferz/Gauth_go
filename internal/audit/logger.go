@@ -22,7 +22,7 @@ type AuditLogger interface {
 // Filter defines criteria for querying audit logs
 type Filter struct {
 	// Types filters by entry types
-	Types []AuditType
+	Types []Type
 
 	// Levels filters by severity levels
 	Levels []Level

@@ -13,7 +13,7 @@ import (
 // Manager handles resource lifecycle and monitoring
 type Manager struct {
 	services    sync.Map // map[ServiceType]*ServiceState
-	metrics     *metrics.MetricsCollector
+	metrics   *metrics.Collector
 	configStore ConfigStore
 	mu          sync.RWMutex
 }
@@ -45,7 +45,7 @@ type ConfigStore interface {
 }
 
 // NewManager creates a new resource manager
-func NewManager(store ConfigStore, metrics *metrics.MetricsCollector) *Manager {
+func NewManager(store ConfigStore, metrics *metrics.Collector) *Manager {
 	m := &Manager{
 		configStore: store,
 		metrics:     metrics,
