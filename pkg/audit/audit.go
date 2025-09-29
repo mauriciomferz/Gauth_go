@@ -101,7 +101,7 @@ func (al *AuditLogger) Close() error {
 
 // Log appends an audit Entry to the logger's event list (for compatibility with GAuth service).
 // Accepts context.Context for type safety.
-func (al *AuditLogger) Log(_ctx context.Context, entry *Entry) {
+func (al *AuditLogger) Log(_ context.Context, entry *Entry) {
 	al.mu.Lock()
 	defer al.mu.Unlock()
 	// For demonstration, we only store minimal info. Extend as needed.

@@ -112,7 +112,7 @@ func (sm *SecurityManager) RotateKeys(ctx context.Context) error {
 }
 
 // ValidateToken validates a JWT token
-func (sm *SecurityManager) ValidateToken(token string) (bool, error) {
+func (sm *SecurityManager) ValidateToken(_ string) (bool, error) {
 	// Implementation for token validation
 	return false, nil
 }

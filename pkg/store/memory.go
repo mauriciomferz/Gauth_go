@@ -174,7 +174,7 @@ func (s *MemoryStore) GetByID(ctx context.Context, id string) (*TokenMetadata, e
 }
 
 // Delete removes a token from storage
-func (s *MemoryStore) Delete(ctx context.Context, token string) error {
+func (s *MemoryStore) Delete(_ context.Context, token string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -197,7 +197,7 @@ func (s *MemoryStore) Delete(ctx context.Context, token string) error {
 }
 
 // List returns all tokens for a subject
-func (s *MemoryStore) List(ctx context.Context, subject string) ([]TokenMetadata, error) {
+func (s *MemoryStore) List(_ context.Context, subject string) ([]TokenMetadata, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -227,7 +227,7 @@ func (s *MemoryStore) List(ctx context.Context, subject string) ([]TokenMetadata
 }
 
 // Revoke marks a token as revoked
-func (s *MemoryStore) Revoke(ctx context.Context, token string) error {
+func (s *MemoryStore) Revoke(_ context.Context, token string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

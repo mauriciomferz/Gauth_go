@@ -302,6 +302,6 @@ func actionMatches(policyActions []Action, requestAction Action) bool {
 	return false
 }
 
-func sortPoliciesByPriority(policies []*Policy) {
+func sortPoliciesByPriority(_ []*Policy) {
 	// Implement sorting by priority (higher priority first)
 }

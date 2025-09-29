@@ -94,7 +94,7 @@ func (sw *SlidingWindow) cleanup() {
 		now := time.Now()
 		cutoff := now.Add(-sw.window)
 
-		sw.counts.Range(func(key, value interface{}) bool {
+		sw.counts.Range(func(_, value interface{}) bool {
 			info := value.(*windowInfo)
 			sw.mu.Lock()
 			validIdx := 0

@@ -227,7 +227,7 @@ func TestSQLStorage(t *testing.T) {
 func TestMetrics(t *testing.T) {
 	metrics := NewMetrics("test")
 
-	t.Run("Observe Entry", func(t *testing.T) {
+	t.Run("Observe Entry", func(_ *testing.T) {
 		entry := NewEntry(TypeAuth).
 			WithAction(ActionLogin).
 			WithResult(ResultSuccess)
@@ -236,7 +236,7 @@ func TestMetrics(t *testing.T) {
 		// Note: Can't easily test Prometheus metrics directly
 	})
 
-	t.Run("Storage Operations", func(t *testing.T) {
+	t.Run("Storage Operations", func(_ *testing.T) {
 		metrics.ObserveStorageOperation("store", "redis", time.Millisecond)
 		metrics.ObserveStorageError("store", "connection_failed")
 		metrics.SetBatchSize(10)

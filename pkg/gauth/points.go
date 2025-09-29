@@ -45,7 +45,7 @@ type PowerEnforcementPoint struct {
 
 // EnforceRestrictions checks if a token allows a specific action.
 // actionDetails must specify the type and amount of the action.
-func (p *PowerEnforcementPoint) EnforceRestrictions(token string, actionDetails ActionDetails) (bool, error) {
+func (p *PowerEnforcementPoint) EnforceRestrictions(token string, _ ActionDetails) (bool, error) {
 	if p.GAuth == nil {
 		return false, fmt.Errorf("GAuth instance not configured")
 	}

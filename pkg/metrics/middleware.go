@@ -11,7 +11,7 @@ import (
 const (
 	// Common metric values
 	unknownValue = "unknown"
-	
+
 	// Prometheus configuration constants for duration buckets
 	defaultBucketStart = 0.001  // 1ms
 	bucketMultiplier   = 2      // 2x multiplier
@@ -116,8 +116,8 @@ func (rw *responseWriter) Write(b []byte) (int, error) {
 	return n, err
 }
 
-// MetricsMiddleware wraps an http.Handler to collect metrics
-func MetricsMiddleware(handler string, next http.Handler) http.Handler {
+// Middleware creates a new HTTP middleware that tracks request metrics
+func Middleware(handler string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		rw := newResponseWriter(w)

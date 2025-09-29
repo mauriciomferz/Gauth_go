@@ -175,7 +175,7 @@ type MockSigner struct {
 }
 
 // Sign implements the crypto.Signer interface for compatibility
-func (m *MockSigner) Sign(rand io.Reader, digest []byte, opts crypto.SignerOpts) ([]byte, error) {
+func (m *MockSigner) Sign(_ io.Reader, digest []byte, opts crypto.SignerOpts) ([]byte, error) {
 	// Return a dummy signature for testing
 	return []byte("mock-signature"), nil
 }

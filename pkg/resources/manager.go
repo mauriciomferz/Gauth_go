@@ -124,7 +124,7 @@ func (m *Manager) GetService(serviceType ServiceType) (*ServiceState, error) {
 // ListServices returns all registered services
 func (m *Manager) ListServices() []ServiceState {
 	var services []ServiceState
-	m.services.Range(func(key, value interface{}) bool {
+	m.services.Range(func(_, value interface{}) bool {
 		services = append(services, *value.(*ServiceState))
 		return true
 	})
