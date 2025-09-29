@@ -68,8 +68,8 @@ func Example_rfc111TokenFlow() {
 	fmt.Printf("Token valid: %v\n", fetched != nil)
 
 	// 4. Revocation
-	if err := store.Revoke(ctx, tok); err != nil {
-		fmt.Println("Revoke error:", err)
+	if revokeErr := store.Revoke(ctx, tok); revokeErr != nil {
+		fmt.Println("Revoke error:", revokeErr)
 		return
 	}
 

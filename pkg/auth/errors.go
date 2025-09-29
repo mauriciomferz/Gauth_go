@@ -33,30 +33,30 @@ const (
 )
 
 // AuthError represents a GAuth-specific error
-type AuthError struct {
+type Error struct {
 	Code    ErrorCode
 	Message string
 	Cause   error
 }
 
-func (e *AuthError) Error() string {
+func (e *Error) Error() string {
 	if e.Cause != nil {
 		return fmt.Sprintf("%s: %s (cause: %v)", e.Code, e.Message, e.Cause)
 	}
 	return fmt.Sprintf("%s: %s", e.Code, e.Message)
 }
 
-func NewAuthError(code ErrorCode, message string, cause error) *AuthError {
-	return &AuthError{
+func NewError(code ErrorCode, message string, cause error) *Error {
+	return &Error{
 		Code:    code,
 		Message: message,
 		Cause:   cause,
 	}
 }
 
-// IsAuthError checks if an error is a specific auth error code
-func IsAuthError(err error, code ErrorCode) bool {
-	if authErr, ok := err.(*AuthError); ok {
+// IsError checks if an error is a specific auth error code
+func IsError(err error, code ErrorCode) bool {
+	if authErr, ok := err.(*Error); ok {
 		return authErr.Code == code
 	}
 	return false

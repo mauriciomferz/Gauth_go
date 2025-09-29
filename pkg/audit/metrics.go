@@ -85,7 +85,7 @@ func NewMetrics(namespace string) *Metrics {
 
 // ObserveEntry records metrics for an audit entry
 func (m *Metrics) ObserveEntry(entry *Entry, duration time.Duration) {
-	m.entriesTotal.WithLabelValues(string(entry.Type), string(entry.Action), string(entry.Result)).Inc()
+	m.entriesTotal.WithLabelValues(string(entry.Type), string(entry.Action), entry.Result).Inc()
 	m.entryLatency.WithLabelValues("process").Observe(duration.Seconds())
 }
 

@@ -230,8 +230,8 @@ func (a *RedisAuthorizer) AssignRole(ctx context.Context, subject Subject, role 
 		return fmt.Errorf("failed to get role assignments: %w", err)
 	}
 	if err != redis.Nil {
-		if err := json.Unmarshal(data, &roles); err != nil {
-			return fmt.Errorf("failed to unmarshal role assignments: %w", err)
+		if unmarshalErr := json.Unmarshal(data, &roles); unmarshalErr != nil {
+			return fmt.Errorf("failed to unmarshal role assignments: %w", unmarshalErr)
 		}
 	}
 
@@ -267,8 +267,8 @@ func (a *RedisAuthorizer) UnassignRole(ctx context.Context, subject Subject, rol
 		return fmt.Errorf("failed to get role assignments: %w", err)
 	}
 
-	if err := json.Unmarshal(data, &roles); err != nil {
-		return fmt.Errorf("failed to unmarshal role assignments: %w", err)
+	if unmarshalErr := json.Unmarshal(data, &roles); unmarshalErr != nil {
+		return fmt.Errorf("failed to unmarshal role assignments: %w", unmarshalErr)
 	}
 
 	found := false
@@ -285,8 +285,8 @@ func (a *RedisAuthorizer) UnassignRole(ctx context.Context, subject Subject, rol
 	}
 
 	if len(roles) == 0 {
-		if err := a.config.Client.Del(ctx, assignKey).Err(); err != nil {
-			return fmt.Errorf("failed to remove role assignments: %w", err)
+		if delErr := a.config.Client.Del(ctx, assignKey).Err(); delErr != nil {
+			return fmt.Errorf("failed to remove role assignments: %w", delErr)
 		}
 	} else {
 		data, err = json.Marshal(roles)

@@ -198,8 +198,7 @@ func (mv MetadataValue) ToFloat() (float64, error) {
 
 // ToTime converts the metadata value to time.Time
 func (mv MetadataValue) ToTime() (time.Time, error) {
-	switch mv.Type {
-	case MetadataTypeTime:
+	if mv.Type == MetadataTypeTime {
 		if s, ok := mv.Value.(string); ok {
 			return time.Parse(time.RFC3339, s)
 		}

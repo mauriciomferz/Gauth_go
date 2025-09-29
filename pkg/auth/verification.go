@@ -59,7 +59,7 @@ func (v *StandardIdentityVerifier) VerifyIdentity(ctx context.Context, owner *to
 	if owner.AuthorizationRef != "" {
 		doc, sig, err := v.fetchAuthDocument(ctx, owner.AuthorizationRef)
 		if err != nil {
-			return NewAuthError(ErrInvalidDocument, "failed to fetch authorization document", err)
+			return NewError(ErrInvalidDocument, "failed to fetch authorization document", err)
 		}
 
 		if err := v.VerifyDocument(ctx, doc, sig); err != nil {
@@ -75,28 +75,28 @@ func (v *StandardIdentityVerifier) VerifyDocument(ctx context.Context, doc []byt
 	// Decode PEM blocks
 	block, _ := pem.Decode(doc)
 	if block == nil {
-		return NewAuthError(ErrInvalidDocument, "failed to decode PEM document", nil)
+		return NewError(ErrInvalidDocument, "failed to decode PEM document", nil)
 	}
 
 	sigBlock, _ := pem.Decode(signature)
 	if sigBlock == nil {
-		return NewAuthError(ErrInvalidDocument, "failed to decode PEM signature", nil)
+		return NewError(ErrInvalidDocument, "failed to decode PEM signature", nil)
 	}
 
 	// Parse certificate
 	cert, err := x509.ParseCertificate(block.Bytes)
 	if err != nil {
-		return NewAuthError(ErrInvalidDocument, "failed to parse certificate", err)
+		return NewError(ErrInvalidDocument, "failed to parse certificate", err)
 	}
 
 	// Verify certificate chain
 	if _, err := cert.Verify(v.verifyOpts); err != nil {
-		return NewAuthError(ErrInvalidDocument, "certificate verification failed", err)
+		return NewError(ErrInvalidDocument, "certificate verification failed", err)
 	}
 
 	// Verify signature
 	if err := cert.CheckSignature(x509.SHA256WithRSA, doc, sigBlock.Bytes); err != nil {
-		return NewAuthError(ErrInvalidDocument, "signature verification failed", err)
+		return NewError(ErrInvalidDocument, "signature verification failed", err)
 	}
 
 	return nil
@@ -106,17 +106,17 @@ func (v *StandardIdentityVerifier) VerifyDocument(ctx context.Context, doc []byt
 func (v *StandardIdentityVerifier) VerifyRegistration(ctx context.Context, reg *token.RegistrationInfo) error {
 	// Check registration date
 	if reg.RegistrationDate.After(time.Now()) {
-		return NewAuthError(ErrInvalidRegistry, "registration date is in the future", nil)
+		return NewError(ErrInvalidRegistry, "registration date is in the future", nil)
 	}
 
 	// Verify with registry authority
 	valid, err := v.verifyWithRegistry(ctx, reg)
 	if err != nil {
-		return NewAuthError(ErrRegistryNotFound, "failed to verify with registry", err)
+		return NewError(ErrRegistryNotFound, "failed to verify with registry", err)
 	}
 
 	if !valid {
-		return NewAuthError(ErrInvalidRegistry, "invalid registry information", nil)
+		return NewError(ErrInvalidRegistry, "invalid registry information", nil)
 	}
 
 	return nil
@@ -168,7 +168,7 @@ func (v *StandardAttestationVerifier) VerifyAttestation(ctx context.Context, att
 
 	// Check attestation date
 	if attestation.AttestationDate.After(time.Now()) {
-		return NewAuthError(ErrInvalidAttestation, "attestation date is in the future", nil)
+		return NewError(ErrInvalidAttestation, "attestation date is in the future", nil)
 	}
 
 	// Verify evidence

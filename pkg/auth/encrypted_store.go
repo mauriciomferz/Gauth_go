@@ -159,7 +159,7 @@ func (s *encryptedTokenStore) Revoke(ctx context.Context, token *token.Token) er
 }
 
 // Rotate replaces an existing token with a new one (not implemented)
-func (s *encryptedTokenStore) Rotate(ctx context.Context, old, new *token.Token) error {
+func (s *encryptedTokenStore) Rotate(ctx context.Context, old, newToken *token.Token) error {
 	return errors.New("not implemented")
 }
 
