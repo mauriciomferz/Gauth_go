@@ -104,7 +104,9 @@ type ApprovalRule struct {
 }
 
 // NewEnhancedAuthService creates a new enhanced auth service
-func NewEnhancedAuthService(store token.EnhancedStore, architecture PowerArchitecture, config *EnhancedServiceConfig) *EnhancedAuthService {
+func NewEnhancedAuthService(
+	store token.EnhancedStore, architecture PowerArchitecture, config *EnhancedServiceConfig,
+) *EnhancedAuthService {
 	return &EnhancedAuthService{
 		tokenStore:        store,
 		powerArchitecture: architecture,
@@ -145,7 +147,9 @@ func (s *EnhancedAuthService) RegisterClientOwner(ctx context.Context, owner *to
 }
 
 // AuthorizeClient implements step V of the protocol
-func (s *EnhancedAuthService) AuthorizeClient(ctx context.Context, req *EnhancedAuthorizationRequest) (*token.EnhancedToken, error) {
+func (s *EnhancedAuthService) AuthorizeClient(
+	ctx context.Context, req *EnhancedAuthorizationRequest,
+) (*token.EnhancedToken, error) {
 	// Verify client owner's authorization
 	if err := s.verifyClientOwnerAuthorization(ctx, req.ClientOwner); err != nil {
 		return nil, err

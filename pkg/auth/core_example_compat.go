@@ -24,8 +24,11 @@ package auth
 // 	return &Service{}
 // }
 // func (s *Service) Authenticate(ctx context.Context, creds Credentials) (*TokenResponse, error) {
-// 	return &TokenResponse{Token: "dummy", TokenType: "bearer", ExpiresIn: 3600, Scope: []string{"read"}, Claims: Claims{"sub": creds.Username}}, nil
+// 	return &TokenResponse{Token: "dummy", TokenType: "bearer", ExpiresIn: 3600,
+// 		Scope: []string{"read"}, Claims: Claims{"sub": creds.Username}}, nil
 // }
 // func (s *Service) ValidateToken(ctx context.Context, token string) (*TokenData, error) {
-// 	return &TokenData{Valid: true, Subject: "testuser", Issuer: "auth-service", Audience: "example-app", IssuedAt: time.Now(), ExpiresAt: time.Now().Add(time.Hour), Scope: []string{"read"}, Claims: Claims{"sub": "testuser"}}, nil
+// 	return &TokenData{Valid: true, Subject: "testuser", Issuer: "auth-service",
+// 		Audience: "example-app", IssuedAt: time.Now(), ExpiresAt: time.Now().Add(time.Hour),
+// 		Scope: []string{"read"}, Claims: Claims{"sub": "testuser"}}, nil
 // }

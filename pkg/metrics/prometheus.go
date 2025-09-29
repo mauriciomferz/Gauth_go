@@ -138,7 +138,9 @@ func RegisterMetrics() {
 
 // Collector provides methods to record various metrics
 type Collector struct {
-}// RecordValue records a generic float64 value for a named metric (for resource/service metrics)
+}
+
+// RecordValue records a generic float64 value for a named metric (for resource/service metrics)
 func (m *Collector) RecordValue(name string, value float64) {
 	customMetrics.WithLabelValues(name).Set(value)
 }

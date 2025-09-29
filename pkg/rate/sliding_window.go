@@ -82,5 +82,3 @@ func (sw *SlidingWindow) GetRemainingRequests(id string) int64 {
 func (sw *SlidingWindow) Reset(id string) {
 	sw.counts.Store(id, &windowInfo{})
 }
-
-

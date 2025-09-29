@@ -1,7 +1,9 @@
 /*
 Package gauth implements the GAuth authorization framework for AI power-of-attorney, as defined in RFC111 (GiFo-RfC 0111).
 
-GAuth enables AI systems to act on behalf of humans or organizations, with explicit, verifiable, and auditable power-of-attorney flows. It is designed for open source extensibility, type safety, and compliance with modern standards (OAuth, OpenID Connect, MCP).
+GAuth enables AI systems to act on behalf of humans or organizations, with explicit,
+verifiable, and auditable power-of-attorney flows. It is designed for open source
+extensibility, type safety, and compliance with modern standards (OAuth, OpenID Connect, MCP).
 
 Key Features:
 - Typed APIs for grants, tokens, and events (no map[string]interface{} in public APIs)

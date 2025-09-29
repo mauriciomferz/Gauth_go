@@ -68,13 +68,13 @@ func TestRFC111Handler_ProcessRFC111Authorization(t *testing.T) {
 				ComplianceRequirement: "rfc111_compliant",
 				VerificationLevel:     "highest",
 				PowerOfAttorney: &services.RFC111PowerOfAttorney{
-					ID:             "poa_123",
-					PrincipalID:    "user123",
-					AgentID:        "ai_assistant_v2",
-					PowerType:      "financial_transactions",
-					Scope:          []string{"sign_contracts", "manage_investments", "authorize_payments"},
-					EffectiveDate:  time.Now().Add(-time.Hour), // Effective 1 hour ago
-					ExpirationDate: time.Now().Add(time.Hour * 24 * 365), // Expires in 1 year
+					ID:               "poa_123",
+					PrincipalID:      "user123",
+					AgentID:          "ai_assistant_v2",
+					PowerType:        "financial_transactions",
+					Scope:            []string{"sign_contracts", "manage_investments", "authorize_payments"},
+					EffectiveDate:    time.Now().Add(-time.Hour),           // Effective 1 hour ago
+					ExpirationDate:   time.Now().Add(time.Hour * 24 * 365), // Expires in 1 year
 					ComplianceStatus: "compliant",
 				},
 			},
@@ -83,18 +83,18 @@ func TestRFC111Handler_ProcessRFC111Authorization(t *testing.T) {
 				assert.Contains(t, response, "code")
 				assert.Contains(t, response, "legal_validation")
 				assert.Contains(t, response, "compliance_status")
-				
+
 				// Check code format
 				code, exists := response["code"].(string)
 				assert.True(t, exists)
 				assert.Contains(t, code, "rfc111_auth_")
-				
+
 				// Check legal validation
 				legalValidation, exists := response["legal_validation"].(map[string]interface{})
 				assert.True(t, exists)
 				assert.Equal(t, true, legalValidation["valid"])
 				assert.Equal(t, "US", legalValidation["jurisdiction_id"])
-				
+
 				// Check compliance status
 				complianceStatus, exists := response["compliance_status"].(map[string]interface{})
 				assert.True(t, exists)
@@ -123,7 +123,7 @@ func TestRFC111Handler_ProcessRFC111Authorization(t *testing.T) {
 			checkResponse: func(t *testing.T, response map[string]interface{}) {
 				assert.Contains(t, response, "code")
 				assert.Contains(t, response, "compliance_status")
-				
+
 				// Check compliance for AI agent
 				complianceStatus, exists := response["compliance_status"].(map[string]interface{})
 				assert.True(t, exists)
@@ -146,7 +146,7 @@ func TestRFC111Handler_ProcessRFC111Authorization(t *testing.T) {
 			expectedStatus: http.StatusOK,
 			checkResponse: func(t *testing.T, response map[string]interface{}) {
 				assert.Contains(t, response, "legal_validation")
-				
+
 				legalValidation, exists := response["legal_validation"].(map[string]interface{})
 				assert.True(t, exists)
 				assert.Equal(t, "EU", legalValidation["jurisdiction_id"])
@@ -187,21 +187,21 @@ func TestRFC111Handler_ProcessRFC111Authorization(t *testing.T) {
 			// Create request
 			req := httptest.NewRequest(http.MethodPost, "/api/v1/rfc111/authorize", bytes.NewBuffer(payloadBytes))
 			req.Header.Set("Content-Type", "application/json")
-			
+
 			// Create response recorder
 			w := httptest.NewRecorder()
-			
+
 			// Execute request
 			router.ServeHTTP(w, req)
-			
+
 			// Check status code
 			assert.Equal(t, tt.expectedStatus, w.Code)
-			
+
 			// Parse response
 			var response map[string]interface{}
 			err = json.Unmarshal(w.Body.Bytes(), &response)
 			require.NoError(t, err)
-			
+
 			// Run custom checks
 			if tt.checkResponse != nil {
 				tt.checkResponse(t, response)
@@ -236,19 +236,19 @@ func TestRFC111Handler_ExchangeAuthorizationCode(t *testing.T) {
 				assert.Contains(t, response, "refresh_token")
 				assert.Contains(t, response, "scope")
 				assert.Contains(t, response, "compliance_level")
-				
+
 				// Check token format
 				accessToken := response["access_token"].(string)
 				assert.Contains(t, accessToken, "enhanced_token_")
-				
+
 				// Check token type
 				assert.Equal(t, "Bearer", response["token_type"])
-				
+
 				// Check scope includes RFC111 compliance
 				scope := response["scope"].(string)
 				assert.Contains(t, scope, "rfc111_compliant")
 				assert.Contains(t, scope, "power_of_attorney")
-				
+
 				// Check compliance level
 				complianceLevel := response["compliance_level"].(string)
 				assert.Equal(t, "rfc111_rfc115_full", complianceLevel)
@@ -287,21 +287,21 @@ func TestRFC111Handler_ExchangeAuthorizationCode(t *testing.T) {
 			// Create request
 			req := httptest.NewRequest(http.MethodPost, "/api/v1/rfc111/token", bytes.NewBuffer(payloadBytes))
 			req.Header.Set("Content-Type", "application/json")
-			
+
 			// Create response recorder
 			w := httptest.NewRecorder()
-			
+
 			// Execute request
 			router.ServeHTTP(w, req)
-			
+
 			// Check status code
 			assert.Equal(t, tt.expectedStatus, w.Code)
-			
+
 			// Parse response
 			var response map[string]interface{}
 			err = json.Unmarshal(w.Body.Bytes(), &response)
 			require.NoError(t, err)
-			
+
 			// Run custom checks
 			if tt.checkResponse != nil {
 				tt.checkResponse(t, response)
@@ -328,19 +328,19 @@ func TestRFC111Handler_GetLegalFrameworkInfo(t *testing.T) {
 				assert.Contains(t, response, "legal_bases")
 				assert.Contains(t, response, "compliance_levels")
 				assert.Contains(t, response, "verification_methods")
-				
+
 				// Check supported jurisdictions
 				jurisdictions, exists := response["supported_jurisdictions"].([]interface{})
 				assert.True(t, exists)
 				assert.Contains(t, jurisdictions, "US")
 				assert.Contains(t, jurisdictions, "EU")
-				
+
 				// Check legal bases
 				legalBases, exists := response["legal_bases"].([]interface{})
 				assert.True(t, exists)
 				assert.Contains(t, legalBases, "corporate_power_of_attorney")
 				assert.Contains(t, legalBases, "ai_delegation_authority")
-				
+
 				// Check compliance levels
 				complianceLevels, exists := response["compliance_levels"].([]interface{})
 				assert.True(t, exists)
@@ -353,14 +353,14 @@ func TestRFC111Handler_GetLegalFrameworkInfo(t *testing.T) {
 			expectedStatus: http.StatusOK,
 			checkResponse: func(t *testing.T, response map[string]interface{}) {
 				assert.Contains(t, response, "jurisdiction_specific")
-				
+
 				jurisdictionInfo, exists := response["jurisdiction_specific"].(map[string]interface{})
 				assert.True(t, exists)
 				assert.Equal(t, "US", jurisdictionInfo["jurisdiction"])
 				assert.Contains(t, jurisdictionInfo, "regulatory_context")
 				assert.Contains(t, jurisdictionInfo, "required_documents")
 				assert.Contains(t, jurisdictionInfo, "attestation_requirements")
-				
+
 				// Check attestation requirements
 				attestationReqs, exists := jurisdictionInfo["attestation_requirements"].(map[string]interface{})
 				assert.True(t, exists)
@@ -376,7 +376,7 @@ func TestRFC111Handler_GetLegalFrameworkInfo(t *testing.T) {
 				jurisdictionInfo, exists := response["jurisdiction_specific"].(map[string]interface{})
 				assert.True(t, exists)
 				assert.Equal(t, "EU", jurisdictionInfo["jurisdiction"])
-				
+
 				regulatoryContext := jurisdictionInfo["regulatory_context"].(string)
 				assert.Equal(t, "EU_legal_framework", regulatoryContext)
 			},
@@ -388,21 +388,21 @@ func TestRFC111Handler_GetLegalFrameworkInfo(t *testing.T) {
 			// Create request
 			url := "/api/v1/rfc111/legal-framework" + tt.queryParams
 			req := httptest.NewRequest(http.MethodGet, url, nil)
-			
+
 			// Create response recorder
 			w := httptest.NewRecorder()
-			
+
 			// Execute request
 			router.ServeHTTP(w, req)
-			
+
 			// Check status code
 			assert.Equal(t, tt.expectedStatus, w.Code)
-			
+
 			// Parse response
 			var response map[string]interface{}
 			err := json.Unmarshal(w.Body.Bytes(), &response)
 			require.NoError(t, err)
-			
+
 			// Run custom checks
 			if tt.checkResponse != nil {
 				tt.checkResponse(t, response)
@@ -429,8 +429,8 @@ func TestRFC111Handler_ValidateLegalFramework(t *testing.T) {
 				Jurisdiction: "US",
 				Timestamp:    time.Now(),
 				Metadata: map[string]interface{}{
-					"legal_basis":           "corporate_power_of_attorney",
-					"verification_level":    "highest",
+					"legal_basis":            "corporate_power_of_attorney",
+					"verification_level":     "highest",
 					"compliance_requirement": "rfc111_compliant",
 				},
 			},
@@ -454,8 +454,8 @@ func TestRFC111Handler_ValidateLegalFramework(t *testing.T) {
 				Jurisdiction: "EU",
 				Timestamp:    time.Now(),
 				Metadata: map[string]interface{}{
-					"legal_basis":           "eu_power_directive",
-					"verification_level":    "enhanced",
+					"legal_basis":            "eu_power_directive",
+					"verification_level":     "enhanced",
 					"compliance_requirement": "gdpr_rfc111_compliant",
 				},
 			},
@@ -487,21 +487,21 @@ func TestRFC111Handler_ValidateLegalFramework(t *testing.T) {
 			// Create request
 			req := httptest.NewRequest(http.MethodPost, "/api/v1/rfc111/legal-framework/validate", bytes.NewBuffer(payloadBytes))
 			req.Header.Set("Content-Type", "application/json")
-			
+
 			// Create response recorder
 			w := httptest.NewRecorder()
-			
+
 			// Execute request
 			router.ServeHTTP(w, req)
-			
+
 			// Check status code
 			assert.Equal(t, tt.expectedStatus, w.Code)
-			
+
 			// Parse response
 			var response map[string]interface{}
 			err = json.Unmarshal(w.Body.Bytes(), &response)
 			require.NoError(t, err)
-			
+
 			// Run custom checks
 			if tt.checkResponse != nil {
 				tt.checkResponse(t, response)
@@ -527,9 +527,9 @@ func TestRFC111Handler_CreateAdvancedDelegation(t *testing.T) {
 				PowerType:   "advanced_financial_delegation",
 				Scope:       []string{"contract_signing", "investment_decisions", "regulatory_compliance"},
 				Restrictions: &services.Restrictions{
-					AmountLimits:     map[string]float64{"USD": 100000},
-					GeoConstraints:   []string{"US", "EU", "CA"},
-					TimeWindows:      []services.TimeWindow{
+					AmountLimits:   map[string]float64{"USD": 100000},
+					GeoConstraints: []string{"US", "EU", "CA"},
+					TimeWindows: []services.TimeWindow{
 						{
 							StartTime: time.Date(0, 1, 1, 9, 0, 0, 0, time.UTC),
 							EndTime:   time.Date(0, 1, 1, 17, 0, 0, 0, time.UTC),
@@ -557,18 +557,18 @@ func TestRFC111Handler_CreateAdvancedDelegation(t *testing.T) {
 				assert.Contains(t, response, "verification_proof")
 				assert.Contains(t, response, "status")
 				assert.Equal(t, "active", response["status"])
-				
+
 				// Check enhanced token
 				enhancedToken, exists := response["enhanced_token"].(map[string]interface{})
 				assert.True(t, exists)
 				assert.Contains(t, enhancedToken, "id")
 				assert.Equal(t, "delegated_bearer", enhancedToken["type"])
-				
+
 				// Check compliance status
 				complianceStatus, exists := response["compliance_status"].(map[string]interface{})
 				assert.True(t, exists)
 				assert.Equal(t, "compliant", complianceStatus["status"])
-				
+
 				// Check verification proof
 				verificationProof, exists := response["verification_proof"].(map[string]interface{})
 				assert.True(t, exists)
@@ -599,11 +599,11 @@ func TestRFC111Handler_CreateAdvancedDelegation(t *testing.T) {
 			expectedStatus: http.StatusCreated,
 			checkResponse: func(t *testing.T, response map[string]interface{}) {
 				assert.Contains(t, response, "attestations")
-				
+
 				attestations, exists := response["attestations"].([]interface{})
 				assert.True(t, exists)
 				assert.Greater(t, len(attestations), 0)
-				
+
 				// Check first attestation
 				if len(attestations) > 0 {
 					attestation := attestations[0].(map[string]interface{})
@@ -632,21 +632,21 @@ func TestRFC111Handler_CreateAdvancedDelegation(t *testing.T) {
 			// Create request
 			req := httptest.NewRequest(http.MethodPost, "/api/v1/rfc115/delegation", bytes.NewBuffer(payloadBytes))
 			req.Header.Set("Content-Type", "application/json")
-			
+
 			// Create response recorder
 			w := httptest.NewRecorder()
-			
+
 			// Execute request
 			router.ServeHTTP(w, req)
-			
+
 			// Check status code
 			assert.Equal(t, tt.expectedStatus, w.Code)
-			
+
 			// Parse response
 			var response map[string]interface{}
 			err = json.Unmarshal(w.Body.Bytes(), &response)
 			require.NoError(t, err)
-			
+
 			// Run custom checks
 			if tt.checkResponse != nil {
 				tt.checkResponse(t, response)
@@ -676,13 +676,13 @@ func TestRFC111Handler_GetDelegation(t *testing.T) {
 				assert.Contains(t, response, "scope")
 				assert.Contains(t, response, "status")
 				assert.Contains(t, response, "compliance_status")
-				
+
 				// Check compliance status
 				complianceStatus, exists := response["compliance_status"].(map[string]interface{})
 				assert.True(t, exists)
 				assert.Equal(t, "compliant", complianceStatus["status"])
 				assert.Equal(t, "rfc111_rfc115_full", complianceStatus["compliance_level"])
-				
+
 				// Check restrictions
 				restrictions, exists := response["restrictions"].(map[string]interface{})
 				assert.True(t, exists)
@@ -704,21 +704,21 @@ func TestRFC111Handler_GetDelegation(t *testing.T) {
 			// Create request
 			url := fmt.Sprintf("/api/v1/rfc115/delegation/%s", tt.delegationID)
 			req := httptest.NewRequest(http.MethodGet, url, nil)
-			
+
 			// Create response recorder
 			w := httptest.NewRecorder()
-			
+
 			// Execute request
 			router.ServeHTTP(w, req)
-			
+
 			// Check status code
 			assert.Equal(t, tt.expectedStatus, w.Code)
-			
+
 			// Parse response
 			var response map[string]interface{}
 			err := json.Unmarshal(w.Body.Bytes(), &response)
 			require.NoError(t, err)
-			
+
 			// Run custom checks
 			if tt.checkResponse != nil {
 				tt.checkResponse(t, response)
@@ -747,30 +747,30 @@ func TestRFC111Handler_GetComplianceStatus(t *testing.T) {
 				assert.Contains(t, response, "active_tokens")
 				assert.Contains(t, response, "risk_assessment")
 				assert.Contains(t, response, "audit_summary")
-				
+
 				// Check overall compliance status
 				complianceStatus, exists := response["compliance_status"].(map[string]interface{})
 				assert.True(t, exists)
 				assert.Equal(t, "compliant", complianceStatus["overall_status"])
-				
+
 				// Check RFC111 compliance
 				rfc111Compliance, exists := complianceStatus["rfc111_compliance"].(map[string]interface{})
 				assert.True(t, exists)
 				assert.Equal(t, "compliant", rfc111Compliance["status"])
 				assert.Equal(t, true, rfc111Compliance["legal_framework_validated"])
 				assert.Equal(t, true, rfc111Compliance["power_of_attorney_verified"])
-				
+
 				// Check RFC115 compliance
 				rfc115Compliance, exists := complianceStatus["rfc115_compliance"].(map[string]interface{})
 				assert.True(t, exists)
 				assert.Equal(t, "compliant", rfc115Compliance["status"])
 				assert.Equal(t, true, rfc115Compliance["attestation_verified"])
-				
+
 				// Check risk assessment
 				riskAssessment, exists := response["risk_assessment"].(map[string]interface{})
 				assert.True(t, exists)
 				assert.Equal(t, "low", riskAssessment["risk_level"])
-				
+
 				// Check audit summary
 				auditSummary, exists := response["audit_summary"].(map[string]interface{})
 				assert.True(t, exists)
@@ -784,7 +784,7 @@ func TestRFC111Handler_GetComplianceStatus(t *testing.T) {
 			expectedStatus: http.StatusOK,
 			checkResponse: func(t *testing.T, response map[string]interface{}) {
 				assert.Equal(t, "ai_agent_financial", response["client_id"])
-				
+
 				complianceStatus, exists := response["compliance_status"].(map[string]interface{})
 				assert.True(t, exists)
 				assert.Equal(t, "compliant", complianceStatus["overall_status"])
@@ -797,21 +797,21 @@ func TestRFC111Handler_GetComplianceStatus(t *testing.T) {
 			// Create request
 			url := fmt.Sprintf("/api/v1/compliance/status/%s", tt.clientID)
 			req := httptest.NewRequest(http.MethodGet, url, nil)
-			
+
 			// Create response recorder
 			w := httptest.NewRecorder()
-			
+
 			// Execute request
 			router.ServeHTTP(w, req)
-			
+
 			// Check status code
 			assert.Equal(t, tt.expectedStatus, w.Code)
-			
+
 			// Parse response
 			var response map[string]interface{}
 			err := json.Unmarshal(w.Body.Bytes(), &response)
 			require.NoError(t, err)
-			
+
 			// Run custom checks
 			if tt.checkResponse != nil {
 				tt.checkResponse(t, response)
@@ -848,17 +848,17 @@ func TestRFC111Handler_UnimplementedEndpoints(t *testing.T) {
 			} else {
 				req = httptest.NewRequest(endpoint.method, endpoint.path, nil)
 			}
-			
+
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)
-			
+
 			// Should return not implemented
 			assert.Equal(t, http.StatusNotImplemented, w.Code)
-			
+
 			var response map[string]interface{}
 			err := json.Unmarshal(w.Body.Bytes(), &response)
 			require.NoError(t, err)
-			
+
 			assert.Contains(t, response, "error")
 			assert.Equal(t, "Method not implemented yet", response["error"])
 		})

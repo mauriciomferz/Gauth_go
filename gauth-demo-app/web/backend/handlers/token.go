@@ -47,18 +47,18 @@ func (h *TokenHandler) CreateToken(c *gin.Context) {
 	token, err := h.service.CreateToken(c.Request.Context(), req)
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to create token")
-		
+
 		// Check if it's a validation error
 		errMsg := err.Error()
 		if strings.Contains(errMsg, "subject is required") ||
-		   strings.Contains(errMsg, "invalid token type") {
+			strings.Contains(errMsg, "invalid token type") {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error":   "Invalid request",
 				"details": errMsg,
 			})
 			return
 		}
-		
+
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error":   "Failed to create token",
 			"details": errMsg,
@@ -117,7 +117,7 @@ func (h *TokenHandler) GetTokens(c *gin.Context) {
 		if sub, ok := token.Claims["sub"].(string); ok {
 			subject = sub
 		}
-		
+
 		transformedTokens[i] = gin.H{
 			"id":         token.ID,
 			"owner_id":   token.OwnerID,
@@ -163,7 +163,7 @@ func (h *TokenHandler) RevokeToken(c *gin.Context) {
 	err := h.service.RevokeToken(c.Request.Context(), tokenID)
 	if err != nil {
 		h.logger.WithError(err).WithField("token_id", tokenID).Error("Failed to revoke token")
-		
+
 		// Check for specific error types
 		errMsg := err.Error()
 		if strings.Contains(errMsg, "token not found") || strings.Contains(errMsg, "not found") {
@@ -172,14 +172,14 @@ func (h *TokenHandler) RevokeToken(c *gin.Context) {
 			})
 			return
 		}
-		
+
 		if strings.Contains(errMsg, "unauthorized") || strings.Contains(errMsg, "access denied") {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "Unauthorized to revoke this token",
 			})
 			return
 		}
-		
+
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to revoke token",
 		})
@@ -226,7 +226,7 @@ func (h *TokenHandler) ValidateToken(c *gin.Context) {
 	claims, err := h.service.ValidateToken(c.Request.Context(), token)
 	if err != nil {
 		h.logger.WithError(err).Error("Token validation failed")
-		
+
 		// Check for specific token errors to return proper status codes
 		errMsg := err.Error()
 		if strings.Contains(errMsg, "invalid token") || strings.Contains(errMsg, "expired") {
@@ -236,7 +236,7 @@ func (h *TokenHandler) ValidateToken(c *gin.Context) {
 			})
 			return
 		}
-		
+
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"valid": false,
 			"error": errMsg,
@@ -282,7 +282,7 @@ func (h *TokenHandler) RefreshToken(c *gin.Context) {
 	}
 
 	h.logger.Info("Token refreshed successfully")
-	
+
 	// Return OAuth2-style response format expected by tests
 	expiresIn := int64(newToken.ExpiresAt.Sub(time.Now()).Seconds())
 	c.JSON(http.StatusOK, gin.H{

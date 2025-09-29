@@ -25,7 +25,7 @@ func (h *AuditHandler) RFC111TokenExchange(c *gin.Context) {
 	if grantType != "authorization_grant" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":             "unsupported_grant_type",
-			"error_description": "Only 'authorization_grant' is supported", 
+			"error_description": "Only 'authorization_grant' is supported",
 		})
 		return
 	}
@@ -55,19 +55,19 @@ func (h *AuditHandler) RFC111TokenExchange(c *gin.Context) {
 
 	response := gin.H{
 		// Step D: Extended token issued after grant validation
-		"access_token":    accessToken,                              // Standard OAuth2 access token
-		"extended_token":  extendedToken,                           // GAuth extended token
+		"access_token":    accessToken,   // Standard OAuth2 access token
+		"extended_token":  extendedToken, // GAuth extended token
 		"token_type":      "Bearer",
-		"expires_in":      3600,                                    // 1 hour
+		"expires_in":      3600, // 1 hour
 		"scope":           "power_of_attorney financial_operations",
 		"client_id":       clientID,
 		"timestamp":       time.Now().Format(time.RFC3339),
-		"grant_validated": true,                                    // Step D validation complete
+		"grant_validated": true, // Step D validation complete
 		"token_features": gin.H{
-			"ai_authorization":    true,
-			"power_delegation":   true,
-			"legal_compliance":   true,
-			"audit_trail":       true,
+			"ai_authorization": true,
+			"power_delegation": true,
+			"legal_compliance": true,
+			"audit_trail":      true,
 		},
 		"power_delegation": gin.H{
 			"delegated_powers": []string{"sign_contracts", "approve_transactions"},
@@ -75,7 +75,7 @@ func (h *AuditHandler) RFC111TokenExchange(c *gin.Context) {
 			"accountability":   "resource_owner_responsible",
 		},
 		"compliance": gin.H{
-			"rfc111_compliant":     true,
+			"rfc111_compliant":    true,
 			"legal_framework":     "validated",
 			"power_of_attorney":   "active",
 			"extended_token_type": "power_delegation",

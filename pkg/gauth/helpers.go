@@ -18,8 +18,6 @@ func generateGrantID() string {
 	return base64.RawURLEncoding.EncodeToString(b)
 }
 
-
-
 // TimeNow is a replaceable function to get the current time (useful for testing)
 var TimeNow = func() TimeFunc {
 	return timeNow{}

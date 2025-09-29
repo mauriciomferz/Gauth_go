@@ -69,9 +69,9 @@ type Role string
 
 // memoryAuthorizer implements Authorizer with in-memory storage
 type memoryAuthorizer struct {
-	policies     sync.Map // map[string]*Policy
-	roles        sync.Map // map[Role][]Permission
-	assignments  sync.Map // map[Subject][]Role
+	policies    sync.Map // map[string]*Policy
+	roles       sync.Map // map[Role][]Permission
+	assignments sync.Map // map[Subject][]Role
 }
 
 // NewMemoryAuthorizer creates a new in-memory authorizer

@@ -19,24 +19,24 @@ import (
 func setupTokenTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
-	
+
 	logger := logrus.New()
 	logger.SetLevel(logrus.ErrorLevel)
-	
+
 	// Create mock config for the service
 	config := viper.New()
 	config.SetDefault("redis.addr", "localhost:6379")
 	config.SetDefault("redis.password", "")
 	config.SetDefault("redis.db", 0)
-	
+
 	// Create GAuth service (will handle Redis connection failures gracefully)
 	mockService, err := services.NewGAuthService(config, logger)
 	if err != nil {
 		logger.WithError(err).Warn("Failed to create GAuth service for tests")
 	}
-	
+
 	tokenHandler := NewTokenHandler(mockService, logger)
-	
+
 	v1 := router.Group("/api/v1")
 	{
 		v1.POST("/tokens", tokenHandler.CreateToken)
@@ -45,7 +45,7 @@ func setupTokenTestRouter() *gin.Engine {
 		v1.DELETE("/tokens/:id", tokenHandler.RevokeToken)
 		v1.GET("/tokens", tokenHandler.ListTokens)
 	}
-	
+
 	return router
 }
 
@@ -60,9 +60,9 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		{
 			name: "Create JWT Token",
 			payload: map[string]interface{}{
-				"type":     "JWT",
-				"subject":  "user123",
-				"scopes":   []string{"read", "write"},
+				"type":       "JWT",
+				"subject":    "user123",
+				"scopes":     []string{"read", "write"},
 				"expires_in": 3600,
 			},
 			expectedStatus: http.StatusCreated,
@@ -129,12 +129,12 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				require.NoError(t, err)
-				
+
 				// The handler returns the token object directly, not wrapped in success structure
 				assert.Contains(t, response, "token")
 				assert.Contains(t, response, "expires_at")
 				assert.NotEmpty(t, response["token"])
-				
+
 				// Safely check claims if they exist
 				if claims, ok := response["claims"]; ok && claims != nil {
 					// Claims exist and are not nil
@@ -161,7 +161,7 @@ func TestTokenHandler_ValidateToken(t *testing.T) {
 			expectedStatus: http.StatusOK,
 		},
 		{
-			name: "Valid PASETO Token", 
+			name: "Valid PASETO Token",
 			payload: map[string]interface{}{
 				"token": "v2.local.test-paseto-token",
 			},
@@ -208,10 +208,10 @@ func TestTokenHandler_ValidateToken(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				require.NoError(t, err)
-				
+
 				assert.Contains(t, response, "valid")
 				assert.Contains(t, response, "token_info")
-				
+
 				if tokenInfo, ok := response["token_info"].(map[string]interface{}); ok {
 					assert.Contains(t, tokenInfo, "subject")
 					assert.Contains(t, tokenInfo, "scopes")
@@ -274,7 +274,7 @@ func TestTokenHandler_RefreshToken(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				require.NoError(t, err)
-				
+
 				assert.Contains(t, response, "access_token")
 				assert.Contains(t, response, "refresh_token")
 				assert.Contains(t, response, "expires_in")
@@ -316,7 +316,7 @@ func TestTokenHandler_RevokeToken(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			req, err := http.NewRequest("DELETE", "/api/v1/tokens/"+tt.tokenID, nil)
 			require.NoError(t, err)
-			
+
 			if tt.authHeader != "" {
 				req.Header.Set("Authorization", tt.authHeader)
 			}
@@ -330,7 +330,7 @@ func TestTokenHandler_RevokeToken(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				require.NoError(t, err)
-				
+
 				assert.Contains(t, response, "success")
 				assert.True(t, response["success"].(bool))
 				assert.Contains(t, response, "message")
@@ -384,7 +384,7 @@ func TestTokenHandler_ListTokens(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			req, err := http.NewRequest("GET", "/api/v1/tokens"+tt.queryParams, nil)
 			require.NoError(t, err)
-			
+
 			if tt.authHeader != "" {
 				req.Header.Set("Authorization", tt.authHeader)
 			}
@@ -398,12 +398,12 @@ func TestTokenHandler_ListTokens(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				require.NoError(t, err)
-				
+
 				assert.Contains(t, response, "tokens")
 				assert.Contains(t, response, "total")
 				assert.Contains(t, response, "page")
 				assert.Contains(t, response, "limit")
-				
+
 				if tokens, ok := response["tokens"].([]interface{}); ok {
 					// Verify token structure
 					for _, token := range tokens {

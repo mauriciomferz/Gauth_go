@@ -151,7 +151,7 @@ func TestWebSocketHandler_HandleEvents_Subscribe(t *testing.T) {
 
 	assert.Equal(t, "subscription_confirmed", confirmMsg.Type)
 	assert.Contains(t, confirmMsg.Data, "subscribed_events")
-	
+
 	subscribedEvents := confirmMsg.Data["subscribed_events"].([]interface{})
 	assert.Contains(t, subscribedEvents, "auth_request")
 	assert.Contains(t, subscribedEvents, "token_issued")
@@ -197,7 +197,7 @@ func TestWebSocketHandler_SendDemoEvents(t *testing.T) {
 				t.Logf("Error reading event: %v", err)
 				goto validateEvents
 			}
-			
+
 			// Filter out ping/pong and subscription messages
 			if event.Type != "pong" && event.Type != "subscription_confirmed" {
 				events = append(events, event)
@@ -214,12 +214,12 @@ validateEvents:
 	eventTypes := make(map[string]bool)
 	for _, event := range events {
 		eventTypes[event.Type] = true
-		
+
 		// Validate event structure
 		assert.NotEmpty(t, event.Type)
 		assert.False(t, event.Timestamp.IsZero())
 		assert.NotNil(t, event.Data)
-		
+
 		// Validate event-specific data
 		switch event.Type {
 		case "auth_request":
@@ -292,7 +292,7 @@ func TestWebSocketHandler_BroadcastEvent(t *testing.T) {
 
 	// Read broadcast event from both connections
 	var event1, event2 Event
-	
+
 	// Set timeouts to prevent hanging
 	conn1.SetReadDeadline(time.Now().Add(2 * time.Second))
 	conn2.SetReadDeadline(time.Now().Add(2 * time.Second))
@@ -350,10 +350,10 @@ func TestWebSocketHandler_ConnectionClosure(t *testing.T) {
 	// Give some time for cleanup
 	time.Sleep(200 * time.Millisecond)
 
-	// Note: In the current implementation, client cleanup happens when 
+	// Note: In the current implementation, client cleanup happens when
 	// trying to write to a closed connection, not immediately on close.
 	// We can test this by triggering a broadcast after closing.
-	
+
 	handler.BroadcastEvent("cleanup_test", map[string]interface{}{"test": "cleanup"})
 
 	// Give time for cleanup to happen
@@ -465,10 +465,10 @@ func TestWebSocketHandler_MultipleSubscriptions(t *testing.T) {
 
 			assert.Equal(t, "subscription_confirmed", confirmMsg.Type)
 			assert.Contains(t, confirmMsg.Data, "subscribed_events")
-			
+
 			subscribedEvents := confirmMsg.Data["subscribed_events"].([]interface{})
 			assert.Equal(t, len(tc.events), len(subscribedEvents))
-			
+
 			for _, expectedEvent := range tc.events {
 				assert.Contains(t, subscribedEvents, expectedEvent)
 			}

@@ -73,17 +73,17 @@ func (h *GAuthPlusHandler) RegisterAIAuthorization(c *gin.Context) {
 		"message":              "AI authorization successfully registered on blockchain commercial register",
 		"authorization_record": record,
 		"blockchain_hash":      record.BlockchainHash,
-		"commercial_register":  gin.H{
-			"registered":        true,
-			"registry_type":     "blockchain_commercial_register",
-			"verification":      "cryptographically_verified",
+		"commercial_register": gin.H{
+			"registered":    true,
+			"registry_type": "blockchain_commercial_register",
+			"verification":  "cryptographically_verified",
 		},
 		"compliance_status": gin.H{
-			"gauth_plus_compliant": true,
-			"power_of_attorney":    "verified",
-			"dual_control":         record.DualControlPrinciple.Enabled,
+			"gauth_plus_compliant":  true,
+			"power_of_attorney":     "verified",
+			"dual_control":          record.DualControlPrinciple.Enabled,
 			"authorization_cascade": "validated",
-			"ultimate_human":       record.AuthorizationCascade.UltimateHuman.Name,
+			"ultimate_human":        record.AuthorizationCascade.UltimateHuman.Name,
 		},
 		"authority_summary": h.generateAuthoritySummary(record),
 		"next_steps": []string{
@@ -145,21 +145,21 @@ func (h *GAuthPlusHandler) ValidateAIAuthority(c *gin.Context) {
 
 	// Return validation result
 	response := gin.H{
-		"validation_result": result,
+		"validation_result":   result,
 		"blockchain_verified": true,
 		"commercial_register": gin.H{
-			"verified":     result.Valid,
+			"verified":        result.Valid,
 			"registry_access": "public_blockchain_verification",
 		},
 	}
 
 	if result.Valid {
 		response["authority_confirmed"] = gin.H{
-			"authorized":         true,
-			"action":            action,
+			"authorized":           true,
+			"action":               action,
 			"authorization_source": "blockchain_commercial_register",
-			"verification_hash":  result.Record.BlockchainHash,
-			"ultimate_human":     result.Record.AuthorizationCascade.UltimateHuman.Name,
+			"verification_hash":    result.Record.BlockchainHash,
+			"ultimate_human":       result.Record.AuthorizationCascade.UltimateHuman.Name,
 		}
 		c.JSON(http.StatusOK, response)
 	} else {
@@ -183,7 +183,7 @@ func (h *GAuthPlusHandler) ValidateAIAuthority(c *gin.Context) {
 // @Router /api/v1/gauth-plus/commercial-register/{ai_system_id} [get]
 func (h *GAuthPlusHandler) GetCommercialRegisterEntry(c *gin.Context) {
 	aiSystemID := c.Param("ai_system_id")
-	
+
 	h.logger.WithFields(logrus.Fields{
 		"ai_system_id": aiSystemID,
 	}).Info("Retrieving commercial register entry")
@@ -204,14 +204,14 @@ func (h *GAuthPlusHandler) GetCommercialRegisterEntry(c *gin.Context) {
 		"commercial_register": gin.H{
 			"registration_type":   "blockchain_commercial_register",
 			"registration_date":   record.Record.CreatedAt,
-			"status":             record.Record.Status,
+			"status":              record.Record.Status,
 			"blockchain_hash":     record.Record.BlockchainHash,
 			"publicly_verifiable": true,
 		},
 		"authorizing_party": gin.H{
-			"name":               record.Record.AuthorizingParty.Name,
-			"type":               record.Record.AuthorizingParty.Type,
-			"registered_office":  record.Record.AuthorizingParty.RegisteredOffice,
+			"name":                record.Record.AuthorizingParty.Name,
+			"type":                record.Record.AuthorizingParty.Type,
+			"registered_office":   record.Record.AuthorizingParty.RegisteredOffice,
 			"verification_status": record.Record.AuthorizingParty.VerificationStatus,
 		},
 		"powers_registered": h.formatRegisteredPowers(record.Record.PowersGranted),
@@ -228,12 +228,12 @@ func (h *GAuthPlusHandler) GetCommercialRegisterEntry(c *gin.Context) {
 			"requires_approval": record.Record.DualControlPrinciple.RequiredForActions,
 		},
 		"authorization_cascade": gin.H{
-			"ultimate_human":     record.Record.AuthorizationCascade.UltimateHuman,
+			"ultimate_human":       record.Record.AuthorizationCascade.UltimateHuman,
 			"accountability_chain": record.Record.AuthorizationCascade.AccountabilityChain,
 		},
 		"verification": gin.H{
-			"blockchain_verifiable": true,
-			"global_access":        true,
+			"blockchain_verifiable":      true,
+			"global_access":              true,
 			"relying_party_verification": "enabled",
 		},
 	}
@@ -284,12 +284,12 @@ func (h *GAuthPlusHandler) CreateAuthorizingParty(c *gin.Context) {
 	party.VerificationStatus = "verified"
 
 	c.JSON(http.StatusOK, gin.H{
-		"success":          true,
+		"success":           true,
 		"authorizing_party": party,
 		"verification": gin.H{
 			"identity_verified": true,
-			"legal_capacity":   party.LegalCapacity.Verified,
-			"authority_level":  party.AuthorityLevel,
+			"legal_capacity":    party.LegalCapacity.Verified,
+			"authority_level":   party.AuthorityLevel,
 		},
 		"next_steps": []string{
 			"Authorizing party can now create AI authorizations",
@@ -300,7 +300,7 @@ func (h *GAuthPlusHandler) CreateAuthorizingParty(c *gin.Context) {
 }
 
 // GetAuthorizationCascade retrieves the authorization cascade for an AI system
-// @Summary Get Authorization Cascade  
+// @Summary Get Authorization Cascade
 // @Description Retrieve the complete authorization cascade showing human accountability chain
 // @Tags GAuth+
 // @Produce json
@@ -329,21 +329,21 @@ func (h *GAuthPlusHandler) GetAuthorizationCascade(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"ai_system_id": aiSystemID,
 		"authorization_cascade": gin.H{
-			"ultimate_human": cascade.UltimateHuman,
-			"human_authority": cascade.HumanAuthority,
-			"cascade_chain": cascade.CascadeChain,
+			"ultimate_human":       cascade.UltimateHuman,
+			"human_authority":      cascade.HumanAuthority,
+			"cascade_chain":        cascade.CascadeChain,
 			"accountability_chain": cascade.AccountabilityChain,
 		},
 		"verification": gin.H{
-			"human_at_top":       cascade.HumanAuthority.IsUltimate,
-			"cascade_validated":  true,
+			"human_at_top":        cascade.HumanAuthority.IsUltimate,
+			"cascade_validated":   true,
 			"blockchain_verified": true,
 		},
 		"compliance": gin.H{
-			"dual_control_principle": "enforced",
-			"human_accountability": "guaranteed",
+			"dual_control_principle":         "enforced",
+			"human_accountability":           "guaranteed",
 			"organizational_fault_reduction": "active",
-			"trust_preservation": "maintained",
+			"trust_preservation":             "maintained",
 		},
 	})
 }
@@ -364,16 +364,16 @@ func (h *GAuthPlusHandler) QueryCommercialRegister(c *gin.Context) {
 	authorizingParty := c.Query("authorizing_party")
 	powerType := c.Query("power_type")
 	status := c.Query("status")
-	
+
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 
 	h.logger.WithFields(logrus.Fields{
 		"authorizing_party": authorizingParty,
-		"power_type":       powerType,
-		"status":           status,
-		"page":             page,
-		"limit":            limit,
+		"power_type":        powerType,
+		"status":            status,
+		"page":              page,
+		"limit":             limit,
 	}).Info("Querying commercial register")
 
 	// Mock query results for demo
@@ -382,19 +382,19 @@ func (h *GAuthPlusHandler) QueryCommercialRegister(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"commercial_register_query": gin.H{
 			"total_entries": len(entries),
-			"page":         page,
-			"limit":        limit,
+			"page":          page,
+			"limit":         limit,
 			"filters": gin.H{
 				"authorizing_party": authorizingParty,
-				"power_type":       powerType,
-				"status":           status,
+				"power_type":        powerType,
+				"status":            status,
 			},
 		},
 		"entries": entries,
 		"registry_info": gin.H{
-			"type":               "blockchain_commercial_register",
+			"type":                 "blockchain_commercial_register",
 			"global_accessibility": true,
-			"verification_method": "cryptographic_proof",
+			"verification_method":  "cryptographic_proof",
 			"relying_party_access": "unrestricted",
 		},
 	})
@@ -416,7 +416,7 @@ func (h *GAuthPlusHandler) generateAuthoritySummary(record *services.AIAuthoriza
 		summary["approval_required_count"] = len(record.DecisionAuthority.ApprovalRequired)
 	}
 
-	// Categorize transactions  
+	// Categorize transactions
 	if record.TransactionRights != nil {
 		summary["allowed_transaction_types"] = record.TransactionRights.AllowedTransactionTypes
 		summary["prohibited_transactions"] = record.TransactionRights.ProhibitedTransactions
@@ -432,9 +432,9 @@ func (h *GAuthPlusHandler) formatRegisteredPowers(powers *services.PowersGranted
 	}
 
 	formatted := map[string]interface{}{
-		"basic_powers":      powers.BasicPowers,
-		"derived_powers":    powers.DerivedPowers,
-		"power_derivation":  powers.PowerDerivation,
+		"basic_powers":     powers.BasicPowers,
+		"derived_powers":   powers.DerivedPowers,
+		"power_derivation": powers.PowerDerivation,
 	}
 
 	if powers.StandardPowers != nil {
@@ -489,32 +489,32 @@ func (h *GAuthPlusHandler) generateMockRegisterEntries(authorizingParty, powerTy
 				"name": "Enterprise Financial Corp",
 				"type": "corporation",
 			},
-			"powers": []string{"financial_operations", "contract_signing"},
-			"status": "active",
+			"powers":            []string{"financial_operations", "contract_signing"},
+			"status":            "active",
 			"registration_date": time.Now().Add(-30 * 24 * time.Hour),
-			"blockchain_hash": "0x1234567890abcdef",
+			"blockchain_hash":   "0x1234567890abcdef",
 		},
 		{
-			"ai_system_id": "ai_legal_assistant_002", 
+			"ai_system_id": "ai_legal_assistant_002",
 			"authorizing_party": gin.H{
 				"name": "Law Firm Partners LLC",
 				"type": "corporation",
 			},
-			"powers": []string{"legal_research", "document_drafting"},
-			"status": "active",
+			"powers":            []string{"legal_research", "document_drafting"},
+			"status":            "active",
 			"registration_date": time.Now().Add(-15 * 24 * time.Hour),
-			"blockchain_hash": "0xabcdef1234567890",
+			"blockchain_hash":   "0xabcdef1234567890",
 		},
 		{
 			"ai_system_id": "ai_trading_bot_003",
 			"authorizing_party": gin.H{
 				"name": "Investment Management Inc",
-				"type": "corporation", 
+				"type": "corporation",
 			},
-			"powers": []string{"trading_operations", "portfolio_management"},
-			"status": "active",
+			"powers":            []string{"trading_operations", "portfolio_management"},
+			"status":            "active",
 			"registration_date": time.Now().Add(-7 * 24 * time.Hour),
-			"blockchain_hash": "0x567890abcdef1234",
+			"blockchain_hash":   "0x567890abcdef1234",
 		},
 	}
 
@@ -522,7 +522,7 @@ func (h *GAuthPlusHandler) generateMockRegisterEntries(authorizingParty, powerTy
 	filtered := []map[string]interface{}{}
 	for _, entry := range entries {
 		include := true
-		
+
 		if authorizingParty != "" {
 			if partyInfo, ok := entry["authorizing_party"].(gin.H); ok {
 				if name, ok := partyInfo["name"].(string); ok {
@@ -532,7 +532,7 @@ func (h *GAuthPlusHandler) generateMockRegisterEntries(authorizingParty, powerTy
 				}
 			}
 		}
-		
+
 		if powerType != "" {
 			if powers, ok := entry["powers"].([]string); ok {
 				found := false
@@ -547,11 +547,11 @@ func (h *GAuthPlusHandler) generateMockRegisterEntries(authorizingParty, powerTy
 				}
 			}
 		}
-		
+
 		if status != "" && entry["status"] != status {
 			include = false
 		}
-		
+
 		if include {
 			filtered = append(filtered, entry)
 		}
@@ -560,15 +560,15 @@ func (h *GAuthPlusHandler) generateMockRegisterEntries(authorizingParty, powerTy
 	// Apply pagination
 	startIdx := (page - 1) * limit
 	endIdx := startIdx + limit
-	
+
 	if startIdx >= len(filtered) {
 		return []map[string]interface{}{}
 	}
-	
+
 	if endIdx > len(filtered) {
 		endIdx = len(filtered)
 	}
-	
+
 	return filtered[startIdx:endIdx]
 }
 

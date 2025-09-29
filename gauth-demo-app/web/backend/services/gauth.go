@@ -148,12 +148,12 @@ func (s *GAuthService) Token(ctx context.Context, req *TokenRequest) (*TokenResp
 
 // Token management types
 type CreateTokenRequest struct {
-	Type      string                 `json:"type" binding:"required"`      // Token type (JWT, PASETO, etc.)
-	Subject   string                 `json:"subject" binding:"required"`   // Token subject (user, client, etc.)
-	Scopes    []string               `json:"scopes"`                       // Permissions/scopes
-	Claims    map[string]interface{} `json:"claims"`                       // Custom claims
-	Duration  time.Duration          `json:"duration"`                     // Token validity duration
-	ExpiresIn int64                  `json:"expires_in"`                   // Alternative way to specify duration in seconds
+	Type      string                 `json:"type" binding:"required"`    // Token type (JWT, PASETO, etc.)
+	Subject   string                 `json:"subject" binding:"required"` // Token subject (user, client, etc.)
+	Scopes    []string               `json:"scopes"`                     // Permissions/scopes
+	Claims    map[string]interface{} `json:"claims"`                     // Custom claims
+	Duration  time.Duration          `json:"duration"`                   // Token validity duration
+	ExpiresIn int64                  `json:"expires_in"`                 // Alternative way to specify duration in seconds
 }
 
 type CreateTokenResponse struct {
@@ -240,7 +240,7 @@ func (s *GAuthService) CreateToken(ctx context.Context, req CreateTokenRequest) 
 		"iat": time.Now().Unix(),
 		"exp": expiresAt.Unix(),
 	}
-	
+
 	// Add custom scopes if provided
 	if len(req.Scopes) > 0 {
 		claims["scope"] = req.Scopes
@@ -345,7 +345,7 @@ func (s *GAuthService) RevokeToken(ctx context.Context, tokenID string) error {
 		if err == nil && data != "" {
 			tokenExists = true
 		}
-		
+
 		// Remove from Redis
 		result := s.redis.Del(ctx, fmt.Sprintf("token:%s", tokenID))
 		if result.Err() == nil && result.Val() > 0 {
@@ -389,7 +389,7 @@ func (s *GAuthService) ValidateToken(ctx context.Context, accessToken string) (m
 						return nil, fmt.Errorf("token expired")
 					}
 				}
-				
+
 				if claims, ok := tokenData["claims"].(map[string]interface{}); ok {
 					return claims, nil
 				}
@@ -401,18 +401,18 @@ func (s *GAuthService) ValidateToken(ctx context.Context, accessToken string) (m
 	// Only accept tokens that look like proper JWT or PASETO tokens
 	if accessToken != "" {
 		// Reject specific invalid/expired test tokens
-		if strings.Contains(accessToken, "invalid") || 
-		   strings.Contains(accessToken, "expired") {
+		if strings.Contains(accessToken, "invalid") ||
+			strings.Contains(accessToken, "expired") {
 			return nil, fmt.Errorf("invalid token")
 		}
-		
+
 		// Accept tokens that look like proper JWT or PASETO tokens
 		if strings.HasPrefix(accessToken, "eyJ") || // JWT tokens start with eyJ
-		   strings.HasPrefix(accessToken, "v2.local.") || // PASETO v2 local tokens
-		   strings.HasPrefix(accessToken, "v2.public.") || // PASETO v2 public tokens
-		   strings.HasPrefix(accessToken, "token_") || // Our custom tokens
-		   strings.HasPrefix(accessToken, "valid_") { // Valid test tokens
-			
+			strings.HasPrefix(accessToken, "v2.local.") || // PASETO v2 local tokens
+			strings.HasPrefix(accessToken, "v2.public.") || // PASETO v2 public tokens
+			strings.HasPrefix(accessToken, "token_") || // Our custom tokens
+			strings.HasPrefix(accessToken, "valid_") { // Valid test tokens
+
 			// Return success for valid-looking tokens
 			return map[string]interface{}{
 				"valid":     true,
@@ -456,7 +456,7 @@ func (s *GAuthService) RefreshToken(ctx context.Context, refreshToken string) (*
 	// Generate new access token
 	tokenValue := generateToken("token")
 	expiresAt := time.Now().Add(time.Hour)
-	
+
 	claims := map[string]interface{}{
 		"sub":   "demo_user",
 		"iat":   time.Now().Unix(),

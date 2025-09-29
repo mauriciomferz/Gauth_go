@@ -365,17 +365,19 @@ func (rs *RedisStorage) applyActorFilter(ctx context.Context, ids []string, acto
 	for i, actor := range actorIDs {
 		actorKeys[i] = rs.actorKey(actor)
 	}
-	
+
 	actorFilteredIDs, err := rs.client.SUnion(ctx, actorKeys...).Result()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get actor entries: %w", err)
 	}
-	
+
 	return intersection(ids, actorFilteredIDs), nil
 }
 
 // applyTimeRangeFilter filters IDs by time range
-func (rs *RedisStorage) applyTimeRangeFilter(ctx context.Context, ids []string, timeRange *TimeRange) ([]string, error) {
+func (rs *RedisStorage) applyTimeRangeFilter(
+	ctx context.Context, ids []string, timeRange *TimeRange,
+) ([]string, error) {
 	if timeRange == nil {
 		return ids, nil
 	}
@@ -385,7 +387,7 @@ func (rs *RedisStorage) applyTimeRangeFilter(ctx context.Context, ids []string, 
 	if err != nil {
 		return nil, fmt.Errorf("failed to get time range entries: %w", err)
 	}
-	
+
 	return intersection(ids, timeFilteredIDs), nil
 }
 
@@ -394,11 +396,11 @@ func (rs *RedisStorage) fetchAndFilterEntries(ctx context.Context, ids []string,
 	var entries []*Entry
 	pipe := rs.client.Pipeline()
 	cmds := make([]*redis.StringCmd, len(ids))
-	
+
 	for i, id := range ids {
 		cmds[i] = pipe.Get(ctx, rs.entryKey(id))
 	}
-	
+
 	_, err := pipe.Exec(ctx)
 	if err != nil && err != redis.Nil {
 		return nil, fmt.Errorf("failed to get entries: %w", err)

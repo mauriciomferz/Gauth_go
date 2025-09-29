@@ -67,17 +67,17 @@ func setupOtherHandlersTestRouter(t *testing.T) (*gin.Engine, *AuditHandler, *Ra
 func createMockGAuthServiceForOther(t *testing.T) *services.GAuthService {
 	logger := logrus.New()
 	logger.SetLevel(logrus.ErrorLevel)
-	
+
 	config := viper.New()
 	config.SetDefault("redis.addr", "localhost:6379")
 	config.SetDefault("redis.password", "")
 	config.SetDefault("redis.db", 0)
-	
+
 	mockService, err := services.NewGAuthService(config, logger)
 	if err != nil {
 		logger.WithError(err).Warn("Failed to create GAuth service for tests")
 	}
-	
+
 	return mockService
 }
 
@@ -128,15 +128,15 @@ func TestAuditHandler_GetEvents(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/audit/events"+tt.query, nil)
 			w := httptest.NewRecorder()
-			
+
 			router.ServeHTTP(w, req)
-			
+
 			assert.Equal(t, tt.expectedStatus, w.Code)
-			
+
 			var response map[string]interface{}
 			err := json.Unmarshal(w.Body.Bytes(), &response)
 			require.NoError(t, err)
-			
+
 			if tt.checkResponse != nil {
 				tt.checkResponse(t, response)
 			}
@@ -180,16 +180,16 @@ func TestAuditHandler_GetEvent(t *testing.T) {
 			url := "/api/v1/audit/events/" + tt.eventID
 			req := httptest.NewRequest(http.MethodGet, url, nil)
 			w := httptest.NewRecorder()
-			
+
 			router.ServeHTTP(w, req)
-			
+
 			assert.Equal(t, tt.expectedStatus, w.Code)
-			
+
 			if tt.expectedStatus == http.StatusOK {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				require.NoError(t, err)
-				
+
 				if tt.checkResponse != nil {
 					tt.checkResponse(t, response)
 				}
@@ -203,11 +203,11 @@ func TestAuditHandler_GetComplianceReport(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/audit/compliance", nil)
 	w := httptest.NewRecorder()
-	
+
 	router.ServeHTTP(w, req)
-	
+
 	assert.Equal(t, http.StatusOK, w.Code)
-	
+
 	var response map[string]interface{}
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	require.NoError(t, err)
@@ -276,16 +276,16 @@ func TestAuditHandler_GetAuditTrail(t *testing.T) {
 			url := "/api/v1/audit/trails/" + tt.entityID
 			req := httptest.NewRequest(http.MethodGet, url, nil)
 			w := httptest.NewRecorder()
-			
+
 			router.ServeHTTP(w, req)
-			
+
 			assert.Equal(t, tt.expectedStatus, w.Code)
-			
+
 			if tt.expectedStatus == http.StatusOK {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				require.NoError(t, err)
-				
+
 				if tt.checkResponse != nil {
 					tt.checkResponse(t, response)
 				}
@@ -301,11 +301,11 @@ func TestRateHandler_GetLimits(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/rate/limits", nil)
 	w := httptest.NewRecorder()
-	
+
 	router.ServeHTTP(w, req)
-	
+
 	assert.Equal(t, http.StatusOK, w.Code)
-	
+
 	var response map[string]interface{}
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	require.NoError(t, err)
@@ -395,15 +395,15 @@ func TestRateHandler_SetLimits(t *testing.T) {
 			req := httptest.NewRequest(http.MethodPost, "/api/v1/rate/limits", bytes.NewBuffer(payloadBytes))
 			req.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
-			
+
 			router.ServeHTTP(w, req)
-			
+
 			assert.Equal(t, tt.expectedStatus, w.Code)
-			
+
 			var response map[string]interface{}
 			err = json.Unmarshal(w.Body.Bytes(), &response)
 			require.NoError(t, err)
-			
+
 			if tt.checkResponse != nil {
 				tt.checkResponse(t, response)
 			}
@@ -455,16 +455,16 @@ func TestRateHandler_GetStatus(t *testing.T) {
 			url := "/api/v1/rate/status/" + tt.clientID
 			req := httptest.NewRequest(http.MethodGet, url, nil)
 			w := httptest.NewRecorder()
-			
+
 			router.ServeHTTP(w, req)
-			
+
 			assert.Equal(t, tt.expectedStatus, w.Code)
-			
+
 			if tt.expectedStatus == http.StatusOK {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				require.NoError(t, err)
-				
+
 				if tt.checkResponse != nil {
 					tt.checkResponse(t, response)
 				}
@@ -480,11 +480,11 @@ func TestDemoHandler_GetScenarios(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/demo/scenarios", nil)
 	w := httptest.NewRecorder()
-	
+
 	router.ServeHTTP(w, req)
-	
+
 	assert.Equal(t, http.StatusOK, w.Code)
-	
+
 	var response map[string]interface{}
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	require.NoError(t, err)
@@ -530,16 +530,16 @@ func TestDemoHandler_RunScenario(t *testing.T) {
 			url := "/api/v1/demo/scenarios/" + tt.scenarioID + "/run"
 			req := httptest.NewRequest(http.MethodPost, url, nil)
 			w := httptest.NewRecorder()
-			
+
 			router.ServeHTTP(w, req)
-			
+
 			assert.Equal(t, tt.expectedStatus, w.Code)
-			
+
 			if tt.expectedStatus == http.StatusAccepted {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				require.NoError(t, err)
-				
+
 				if tt.checkResponse != nil {
 					tt.checkResponse(t, response)
 				}
@@ -589,7 +589,7 @@ func TestDemoHandler_GetScenarioStatus(t *testing.T) {
 				step2 := steps[1].(map[string]interface{})
 				assert.Equal(t, "step_2", step2["id"])
 				assert.Equal(t, "Token Exchange", step2["name"])
-				
+
 				step2Result := step2["result"].(map[string]interface{})
 				assert.Contains(t, step2Result, "access_token")
 
@@ -597,7 +597,7 @@ func TestDemoHandler_GetScenarioStatus(t *testing.T) {
 				step3 := steps[2].(map[string]interface{})
 				assert.Equal(t, "step_3", step3["id"])
 				assert.Equal(t, "User Info Retrieval", step3["name"])
-				
+
 				step3Result := step3["result"].(map[string]interface{})
 				assert.Contains(t, step3Result, "user_id")
 			},
@@ -614,16 +614,16 @@ func TestDemoHandler_GetScenarioStatus(t *testing.T) {
 			url := "/api/v1/demo/scenarios/" + tt.scenarioID + "/status"
 			req := httptest.NewRequest(http.MethodGet, url, nil)
 			w := httptest.NewRecorder()
-			
+
 			router.ServeHTTP(w, req)
-			
+
 			assert.Equal(t, tt.expectedStatus, w.Code)
-			
+
 			if tt.expectedStatus == http.StatusOK {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				require.NoError(t, err)
-				
+
 				if tt.checkResponse != nil {
 					tt.checkResponse(t, response)
 				}
@@ -687,9 +687,9 @@ func TestOtherHandlers_Integration(t *testing.T) {
 		t.Run(fmt.Sprintf("%s %s", endpoint.method, endpoint.path), func(t *testing.T) {
 			req := httptest.NewRequest(endpoint.method, endpoint.path, nil)
 			w := httptest.NewRecorder()
-			
+
 			router.ServeHTTP(w, req)
-			
+
 			assert.Equal(t, endpoint.expected, w.Code)
 		})
 	}

@@ -27,9 +27,15 @@
 //
 // This package implements the GAuth authorization protocol as defined in GiFo-RfC 0111 (September 2025):
 //
-//   - Power-of-attorney modeling: Types Subject, Resource, Action, Policy, AccessRequest, and AccessResponse represent the core entities and relationships for power delegation and enforcement.
-//   - P*P architecture: Interfaces and logic support Power Enforcement Point (PEP), Power Decision Point (PDP), Power Information Point (PIP), Power Administration Point (PAP), and Power Verification Point (PVP) roles.
-//   - Centralized authorization: All authorization decisions are enforced centrally; decentralized/team-based delegation is explicitly prevented (see enforcement in pkg/auth/extended_controls.go).
+//   - Power-of-attorney modeling: Types Subject, Resource, Action, Policy, AccessRequest,
+//     and AccessResponse represent the core entities and relationships for power delegation
+//     and enforcement.
+//   - P*P architecture: Interfaces and logic support Power Enforcement Point (PEP),
+//     Power Decision Point (PDP), Power Information Point (PIP), Power Administration
+//     Point (PAP), and Power Verification Point (PVP) roles.
+//   - Centralized authorization: All authorization decisions are enforced centrally;
+//     decentralized/team-based delegation is explicitly prevented (see enforcement
+//     in pkg/auth/extended_controls.go).
 //   - Exclusions: Web3/blockchain, DNA-based identity, and AI-controlled GAuth are strictly excluded, as required by RFC111.
 //   - Extended tokens, attestation, and versioning: Supported via integration with pkg/token and metadata types.
 //   - Audit, compliance, and transparency: All actions are auditable and traceable, supporting verifiability and compliance.

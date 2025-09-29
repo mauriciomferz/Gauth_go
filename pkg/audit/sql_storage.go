@@ -212,7 +212,9 @@ func (s *SQLStorage) buildWhereConditions(filter *Filter) ([]string, []interface
 }
 
 // buildQuery builds the complete SQL query with ORDER BY and LIMIT/OFFSET
-func (s *SQLStorage) buildQuery(conditions []string, args []interface{}, argCount int, filter *Filter) (string, []interface{}) {
+func (s *SQLStorage) buildQuery(
+	conditions []string, args []interface{}, argCount int, filter *Filter,
+) (string, []interface{}) {
 	query := "SELECT * FROM audit_entries"
 	if len(conditions) > 0 {
 		query += " WHERE " + strings.Join(conditions, " AND ")
@@ -234,7 +236,9 @@ func (s *SQLStorage) buildQuery(conditions []string, args []interface{}, argCoun
 }
 
 // executeQueryAndScanResults executes the query and scans the results
-func (s *SQLStorage) executeQueryAndScanResults(ctx context.Context, query string, args []interface{}) ([]*Entry, error) {
+func (s *SQLStorage) executeQueryAndScanResults(
+	ctx context.Context, query string, args []interface{},
+) ([]*Entry, error) {
 	rows, err := s.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query entries: %w", err)

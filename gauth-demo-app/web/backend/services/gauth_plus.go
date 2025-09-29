@@ -16,7 +16,7 @@ import (
 
 // GAuthPlusService provides comprehensive AI authorization with blockchain-based commercial register
 type GAuthPlusService struct {
-	*GAuthService // Embed existing service
+	*GAuthService      // Embed existing service
 	blockchainRegistry *BlockchainRegistry
 	commercialRegister *CommercialRegister
 }
@@ -37,35 +37,35 @@ type CommercialRegister struct {
 
 // AuthorizingParty represents an entity that can authorize AI systems
 type AuthorizingParty struct {
-	ID                    string                 `json:"id"`
-	Name                  string                 `json:"name"`
-	Type                  string                 `json:"type"` // individual, corporation, government
-	RegisteredOffice      *RegisteredOffice      `json:"registered_office,omitempty"`
+	ID                       string                    `json:"id"`
+	Name                     string                    `json:"name"`
+	Type                     string                    `json:"type"` // individual, corporation, government
+	RegisteredOffice         *RegisteredOffice         `json:"registered_office,omitempty"`
 	AuthorizedRepresentative *AuthorizedRepresentative `json:"authorized_representative,omitempty"`
-	LegalCapacity         *LegalCapacity         `json:"legal_capacity"`
-	AuthorityLevel        string                 `json:"authority_level"` // primary, secondary, delegated
-	VerificationStatus    string                 `json:"verification_status"`
-	CreatedAt             time.Time              `json:"created_at"`
+	LegalCapacity            *LegalCapacity            `json:"legal_capacity"`
+	AuthorityLevel           string                    `json:"authority_level"` // primary, secondary, delegated
+	VerificationStatus       string                    `json:"verification_status"`
+	CreatedAt                time.Time                 `json:"created_at"`
 }
 
 // RegisteredOffice represents the legal registered office of a company
 type RegisteredOffice struct {
-	Address      string `json:"address"`
-	Jurisdiction string `json:"jurisdiction"`
+	Address            string `json:"address"`
+	Jurisdiction       string `json:"jurisdiction"`
 	RegistrationNumber string `json:"registration_number"`
-	TaxID        string `json:"tax_id"`
-	LegalForm    string `json:"legal_form"` // LLC, Inc, GmbH, etc.
+	TaxID              string `json:"tax_id"`
+	LegalForm          string `json:"legal_form"` // LLC, Inc, GmbH, etc.
 }
 
 // AuthorizedRepresentative represents someone authorized to act on behalf of an entity
 type AuthorizedRepresentative struct {
-	ID           string    `json:"id"`
-	Name         string    `json:"name"`
-	Position     string    `json:"position"`
-	AuthorityScope []string `json:"authority_scope"`
-	ValidFrom    time.Time `json:"valid_from"`
-	ValidUntil   time.Time `json:"valid_until"`
-	VerifiedBy   string    `json:"verified_by"`
+	ID             string    `json:"id"`
+	Name           string    `json:"name"`
+	Position       string    `json:"position"`
+	AuthorityScope []string  `json:"authority_scope"`
+	ValidFrom      time.Time `json:"valid_from"`
+	ValidUntil     time.Time `json:"valid_until"`
+	VerifiedBy     string    `json:"verified_by"`
 }
 
 // LegalCapacity represents the legal capacity and verification of an entity
@@ -110,10 +110,10 @@ type AuthorizationGrant struct {
 
 // PowersGranted defines what powers have been granted to the AI
 type PowersGranted struct {
-	BasicPowers      []string            `json:"basic_powers"`
-	DerivedPowers    []string            `json:"derived_powers"`
-	PowerDerivation  map[string][]string `json:"power_derivation"` // basic power -> derived powers
-	StandardPowers   *StandardPowers     `json:"standard_powers"`
+	BasicPowers     []string            `json:"basic_powers"`
+	DerivedPowers   []string            `json:"derived_powers"`
+	PowerDerivation map[string][]string `json:"power_derivation"` // basic power -> derived powers
+	StandardPowers  *StandardPowers     `json:"standard_powers"`
 }
 
 // StandardPowers represents the comprehensive standard powers from which authorization can be derived
@@ -127,11 +127,11 @@ type StandardPowers struct {
 
 // FinancialPowers defines financial authority levels
 type FinancialPowers struct {
-	SigningAuthority       *SigningAuthority `json:"signing_authority,omitempty"`
-	ApprovalLimits        *ApprovalLimits   `json:"approval_limits,omitempty"`
-	InvestmentAuthority   []string          `json:"investment_authority,omitempty"`
-	BankingOperations     []string          `json:"banking_operations,omitempty"`
-	TreasuryManagement    []string          `json:"treasury_management,omitempty"`
+	SigningAuthority    *SigningAuthority `json:"signing_authority,omitempty"`
+	ApprovalLimits      *ApprovalLimits   `json:"approval_limits,omitempty"`
+	InvestmentAuthority []string          `json:"investment_authority,omitempty"`
+	BankingOperations   []string          `json:"banking_operations,omitempty"`
+	TreasuryManagement  []string          `json:"treasury_management,omitempty"`
 }
 
 // SigningAuthority defines signing limits and scope
@@ -177,15 +177,15 @@ type UltimateHumanAuthority struct {
 
 // AuthorityLevel represents a level in the delegation chain
 type AuthorityLevel struct {
-	Level          int       `json:"level"`
-	AuthorityID    string    `json:"authority_id"`
-	AuthorityType  string    `json:"authority_type"` // human, ai_agent, system
-	DelegatedFrom  string    `json:"delegated_from"`
-	DelegatedTo    string    `json:"delegated_to"`
-	PowerScope     []string  `json:"power_scope"`
-	Limitations    []string  `json:"limitations"`
-	CreatedAt      time.Time `json:"created_at"`
-	IsHuman        bool      `json:"is_human"`
+	Level         int       `json:"level"`
+	AuthorityID   string    `json:"authority_id"`
+	AuthorityType string    `json:"authority_type"` // human, ai_agent, system
+	DelegatedFrom string    `json:"delegated_from"`
+	DelegatedTo   string    `json:"delegated_to"`
+	PowerScope    []string  `json:"power_scope"`
+	Limitations   []string  `json:"limitations"`
+	CreatedAt     time.Time `json:"created_at"`
+	IsHuman       bool      `json:"is_human"`
 }
 
 // IdentityVerification provides comprehensive identity validation
@@ -202,7 +202,7 @@ type IdentityVerification struct {
 
 // VerificationDocument represents a document used for verification
 type VerificationDocument struct {
-	Type         string    `json:"type"`         // passport, drivers_license, etc.
+	Type         string    `json:"type"` // passport, drivers_license, etc.
 	DocumentID   string    `json:"document_id"`
 	IssuingAuth  string    `json:"issuing_authority"`
 	VerifiedHash string    `json:"verified_hash"`
@@ -218,27 +218,27 @@ type BiometricData struct {
 
 // DualControlPrinciple implements second-level approval mechanisms
 type DualControlPrinciple struct {
-	Enabled              bool                   `json:"enabled"`
-	RequiredForActions   []string               `json:"required_for_actions"`
-	PrimaryApprover      *Approver              `json:"primary_approver"`
-	SecondaryApprover    *Approver              `json:"secondary_approver"`
-	ApprovalThreshold    *ApprovalThreshold     `json:"approval_threshold"`
-	ApprovalHistory      []ApprovalRecord       `json:"approval_history"`
-	SequentialApproval   bool                   `json:"sequential_approval"`
-	SimultaneousApproval bool                   `json:"simultaneous_approval"`
-	EscalationRules      []EscalationRule       `json:"escalation_rules"`
+	Enabled              bool               `json:"enabled"`
+	RequiredForActions   []string           `json:"required_for_actions"`
+	PrimaryApprover      *Approver          `json:"primary_approver"`
+	SecondaryApprover    *Approver          `json:"secondary_approver"`
+	ApprovalThreshold    *ApprovalThreshold `json:"approval_threshold"`
+	ApprovalHistory      []ApprovalRecord   `json:"approval_history"`
+	SequentialApproval   bool               `json:"sequential_approval"`
+	SimultaneousApproval bool               `json:"simultaneous_approval"`
+	EscalationRules      []EscalationRule   `json:"escalation_rules"`
 }
 
 // Approver represents an entity that can provide approval
 type Approver struct {
-	ApproverID       string                 `json:"approver_id"`
-	ApproverType     string                 `json:"approver_type"` // human, ai_system, committee
-	Name             string                 `json:"name"`
-	Authority        []string               `json:"authority"`
-	ApprovalPowers   map[string]interface{} `json:"approval_powers"`
-	VerificationReq  bool                   `json:"verification_required"`
-	ContactInfo      map[string]string      `json:"contact_info"`
-	IsActive         bool                   `json:"is_active"`
+	ApproverID      string                 `json:"approver_id"`
+	ApproverType    string                 `json:"approver_type"` // human, ai_system, committee
+	Name            string                 `json:"name"`
+	Authority       []string               `json:"authority"`
+	ApprovalPowers  map[string]interface{} `json:"approval_powers"`
+	VerificationReq bool                   `json:"verification_required"`
+	ContactInfo     map[string]string      `json:"contact_info"`
+	IsActive        bool                   `json:"is_active"`
 }
 
 // ApprovalThreshold defines when dual control is required
@@ -265,37 +265,37 @@ type ApprovalRecord struct {
 
 // EscalationRule defines escalation procedures
 type EscalationRule struct {
-	RuleID        string        `json:"rule_id"`
-	Trigger       string        `json:"trigger"`
-	EscalateTo    []string      `json:"escalate_to"`
-	Timeframe     time.Duration `json:"timeframe"`
-	Conditions    []string      `json:"conditions"`
-	AutoEscalate  bool          `json:"auto_escalate"`
+	RuleID       string        `json:"rule_id"`
+	Trigger      string        `json:"trigger"`
+	EscalateTo   []string      `json:"escalate_to"`
+	Timeframe    time.Duration `json:"timeframe"`
+	Conditions   []string      `json:"conditions"`
+	AutoEscalate bool          `json:"auto_escalate"`
 }
 
 // MathematicalProof provides cryptographic enforcement of power-of-attorney rules
 type MathematicalProof struct {
-	ProofType          string                 `json:"proof_type"`          // zk_proof, digital_signature, hash_chain
-	CryptographicProof string                 `json:"cryptographic_proof"`
-	VerificationKey    string                 `json:"verification_key"`
-	SignatureChain     []CryptographicSig     `json:"signature_chain"`
-	HashChain          []string               `json:"hash_chain"`
-	MerkleRoot         string                 `json:"merkle_root"`
-	ProofValidation    *ProofValidation       `json:"proof_validation"`
-	MathematicalRules  []MathematicalRule     `json:"mathematical_rules"`
-	EnforcementLevel   string                 `json:"enforcement_level"`
-	GeneratedAt        time.Time              `json:"generated_at"`
-	ValidatedAt        time.Time              `json:"validated_at"`
+	ProofType          string             `json:"proof_type"` // zk_proof, digital_signature, hash_chain
+	CryptographicProof string             `json:"cryptographic_proof"`
+	VerificationKey    string             `json:"verification_key"`
+	SignatureChain     []CryptographicSig `json:"signature_chain"`
+	HashChain          []string           `json:"hash_chain"`
+	MerkleRoot         string             `json:"merkle_root"`
+	ProofValidation    *ProofValidation   `json:"proof_validation"`
+	MathematicalRules  []MathematicalRule `json:"mathematical_rules"`
+	EnforcementLevel   string             `json:"enforcement_level"`
+	GeneratedAt        time.Time          `json:"generated_at"`
+	ValidatedAt        time.Time          `json:"validated_at"`
 }
 
 // CryptographicSig represents a cryptographic signature in the chain
 type CryptographicSig struct {
-	SignerID    string    `json:"signer_id"`
-	Signature   string    `json:"signature"`
-	Algorithm   string    `json:"algorithm"`
-	KeyID       string    `json:"key_id"`
-	Timestamp   time.Time `json:"timestamp"`
-	SignedData  string    `json:"signed_data"`
+	SignerID   string    `json:"signer_id"`
+	Signature  string    `json:"signature"`
+	Algorithm  string    `json:"algorithm"`
+	KeyID      string    `json:"key_id"`
+	Timestamp  time.Time `json:"timestamp"`
+	SignedData string    `json:"signed_data"`
 }
 
 // ProofValidation tracks validation of mathematical proofs
@@ -311,20 +311,20 @@ type ProofValidation struct {
 // MathematicalRule defines enforceable mathematical constraints
 type MathematicalRule struct {
 	RuleID      string                 `json:"rule_id"`
-	RuleType    string                 `json:"rule_type"`    // constraint, invariant, theorem
-	Expression  string                 `json:"expression"`   // mathematical expression
+	RuleType    string                 `json:"rule_type"`  // constraint, invariant, theorem
+	Expression  string                 `json:"expression"` // mathematical expression
 	Parameters  map[string]interface{} `json:"parameters"`
-	Violation   string                 `json:"violation"`    // what happens on violation
+	Violation   string                 `json:"violation"`   // what happens on violation
 	Enforcement string                 `json:"enforcement"` // how it's enforced
 	Priority    int                    `json:"priority"`
 }
 
 // ContractualPowers defines contract-related authorities
 type ContractualPowers struct {
-	ContractTypes        []string          `json:"contract_types"`
-	MaxContractValue     float64           `json:"max_contract_value"`
-	RequiresApproval     bool              `json:"requires_approval"`
-	ApprovalWorkflow     []string          `json:"approval_workflow"`
+	ContractTypes        []string              `json:"contract_types"`
+	MaxContractValue     float64               `json:"max_contract_value"`
+	RequiresApproval     bool                  `json:"requires_approval"`
+	ApprovalWorkflow     []string              `json:"approval_workflow"`
 	ContractModification *ContractModification `json:"contract_modification,omitempty"`
 }
 
@@ -354,71 +354,71 @@ type RepresentationPowers struct {
 
 // CompliancePowers defines compliance and regulatory authorities
 type CompliancePowers struct {
-	RegulatoryReporting bool     `json:"regulatory_reporting"`
-	ComplianceMonitoring bool    `json:"compliance_monitoring"`
-	AuditCooperation    bool     `json:"audit_cooperation"`
-	LegalRepresentation []string `json:"legal_representation"`
+	RegulatoryReporting  bool     `json:"regulatory_reporting"`
+	ComplianceMonitoring bool     `json:"compliance_monitoring"`
+	AuditCooperation     bool     `json:"audit_cooperation"`
+	LegalRepresentation  []string `json:"legal_representation"`
 }
 
 // DecisionAuthority defines what decisions the AI can make
 type DecisionAuthority struct {
-	AutonomousDecisions []string            `json:"autonomous_decisions"`
-	ApprovalRequired    []string            `json:"approval_required"`
-	DecisionMatrix      map[string]string   `json:"decision_matrix"` // decision type -> authority level
-	EscalationRules     *EscalationRules    `json:"escalation_rules"`
+	AutonomousDecisions []string          `json:"autonomous_decisions"`
+	ApprovalRequired    []string          `json:"approval_required"`
+	DecisionMatrix      map[string]string `json:"decision_matrix"` // decision type -> authority level
+	EscalationRules     *EscalationRules  `json:"escalation_rules"`
 }
 
 // EscalationRules defines when decisions must be escalated
 type EscalationRules struct {
-	ThresholdTriggers  map[string]interface{} `json:"threshold_triggers"`
-	EscalationPath     []string               `json:"escalation_path"`
-	ResponseTimeReqs   map[string]string      `json:"response_time_requirements"`
-	OverrideAuthority  []string               `json:"override_authority"`
+	ThresholdTriggers map[string]interface{} `json:"threshold_triggers"`
+	EscalationPath    []string               `json:"escalation_path"`
+	ResponseTimeReqs  map[string]string      `json:"response_time_requirements"`
+	OverrideAuthority []string               `json:"override_authority"`
 }
 
 // TransactionRights defines transaction permissions
 type TransactionRights struct {
-	AllowedTransactionTypes []string        `json:"allowed_transaction_types"`
-	TransactionLimits       *TransactionLimits `json:"transaction_limits"`
+	AllowedTransactionTypes []string            `json:"allowed_transaction_types"`
+	TransactionLimits       *TransactionLimits  `json:"transaction_limits"`
 	RequiredApprovals       map[string][]string `json:"required_approvals"` // transaction type -> approvers
-	ProhibitedTransactions  []string        `json:"prohibited_transactions"`
+	ProhibitedTransactions  []string            `json:"prohibited_transactions"`
 }
 
 // TransactionLimits defines transaction value and frequency limits
 type TransactionLimits struct {
-	PerTransaction *ApprovalLimits `json:"per_transaction"`
-	Cumulative     *ApprovalLimits `json:"cumulative"`
-	FrequencyLimits map[string]int `json:"frequency_limits"` // time period -> max count
+	PerTransaction  *ApprovalLimits `json:"per_transaction"`
+	Cumulative      *ApprovalLimits `json:"cumulative"`
+	FrequencyLimits map[string]int  `json:"frequency_limits"` // time period -> max count
 }
 
 // ActionPermissions defines specific actions the AI can perform
 type ActionPermissions struct {
-	ResourceActions  map[string][]string `json:"resource_actions"` // resource -> actions
-	HumanInteractions *HumanInteractions `json:"human_interactions"`
-	AgentInteractions *AgentInteractions `json:"agent_interactions"`
-	SystemActions     []string           `json:"system_actions"`
+	ResourceActions   map[string][]string `json:"resource_actions"` // resource -> actions
+	HumanInteractions *HumanInteractions  `json:"human_interactions"`
+	AgentInteractions *AgentInteractions  `json:"agent_interactions"`
+	SystemActions     []string            `json:"system_actions"`
 }
 
 // HumanInteractions defines how AI can interact with humans
 type HumanInteractions struct {
-	CanInitiateContact   bool     `json:"can_initiate_contact"`
-	AuthorizedChannels   []string `json:"authorized_channels"`
-	RequiresNotification bool     `json:"requires_notification"`
+	CanInitiateContact   bool               `json:"can_initiate_contact"`
+	AuthorizedChannels   []string           `json:"authorized_channels"`
+	RequiresNotification bool               `json:"requires_notification"`
 	InteractionLimits    *InteractionLimits `json:"interaction_limits"`
 }
 
 // AgentInteractions defines how AI can interact with other agents
 type AgentInteractions struct {
-	CanAuthorizeAgents  bool                `json:"can_authorize_agents"`
-	DelegationLimits    *DelegationLimits   `json:"delegation_limits"`
-	InterAgentProtocols []string            `json:"inter_agent_protocols"`
+	CanAuthorizeAgents  bool                 `json:"can_authorize_agents"`
+	DelegationLimits    *DelegationLimits    `json:"delegation_limits"`
+	InterAgentProtocols []string             `json:"inter_agent_protocols"`
 	AuthorityValidation *AuthorityValidation `json:"authority_validation"`
 }
 
 // InteractionLimits defines limits on interactions
 type InteractionLimits struct {
-	DailyContacts   int      `json:"daily_contacts"`
-	MaxDuration     int      `json:"max_duration"` // in minutes
+	DailyContacts    int      `json:"daily_contacts"`
+	MaxDuration      int      `json:"max_duration"` // in minutes
 	AllowedTimeSlots []string `json:"allowed_time_slots"`
 }
 
@@ -439,18 +439,18 @@ type AuthorityValidation struct {
 
 // ControlMechanisms defines the dual control mechanisms
 type ControlMechanisms struct {
-	MultiSignatureRequired  bool     `json:"multi_signature_required"`
-	TimeDelayedOperations   map[string]int `json:"time_delayed_operations"` // operation -> delay in minutes
-	WitnessRequirements     map[string]int `json:"witness_requirements"`    // operation -> number of witnesses
-	AuditTrailRequirements  []string `json:"audit_trail_requirements"`
+	MultiSignatureRequired bool           `json:"multi_signature_required"`
+	TimeDelayedOperations  map[string]int `json:"time_delayed_operations"` // operation -> delay in minutes
+	WitnessRequirements    map[string]int `json:"witness_requirements"`    // operation -> number of witnesses
+	AuditTrailRequirements []string       `json:"audit_trail_requirements"`
 }
 
 // AuthorizationCascade tracks the chain of authorization
 type AuthorizationCascade struct {
-	HumanAuthority   *HumanAuthority   `json:"human_authority"`
-	CascadeChain     []*CascadeLevel   `json:"cascade_chain"`
-	UltimateHuman    *UltimateHuman    `json:"ultimate_human"`
-	AccountabilityChain []string       `json:"accountability_chain"`
+	HumanAuthority      *HumanAuthority `json:"human_authority"`
+	CascadeChain        []*CascadeLevel `json:"cascade_chain"`
+	UltimateHuman       *UltimateHuman  `json:"ultimate_human"`
+	AccountabilityChain []string        `json:"accountability_chain"`
 }
 
 // HumanAuthority represents the human at the top of the cascade
@@ -476,11 +476,11 @@ type CascadeLevel struct {
 
 // UltimateHuman represents the ultimate human authority
 type UltimateHuman struct {
-	PersonID          string    `json:"person_id"`
-	Name              string    `json:"name"`
-	LegalAuthority    string    `json:"legal_authority"`
-	AccountabilityLevel string  `json:"accountability_level"`
-	VerificationProof string    `json:"verification_proof"`
+	PersonID            string `json:"person_id"`
+	Name                string `json:"name"`
+	LegalAuthority      string `json:"legal_authority"`
+	AccountabilityLevel string `json:"accountability_level"`
+	VerificationProof   string `json:"verification_proof"`
 }
 
 // NewGAuthPlusService creates a new comprehensive GAuth+ service
@@ -760,7 +760,7 @@ func (s *GAuthPlusService) ValidateHumanAccountabilityChain(ctx context.Context,
 		if i == 0 && !level.IsHuman {
 			return fmt.Errorf("first level in delegation chain must be human")
 		}
-		
+
 		if level.Level != i {
 			return fmt.Errorf("delegation chain levels must be sequential")
 		}
@@ -772,29 +772,29 @@ func (s *GAuthPlusService) ValidateHumanAccountabilityChain(ctx context.Context,
 // GenerateMathematicalProof creates cryptographic proof for power-of-attorney
 func (s *GAuthPlusService) GenerateMathematicalProof(ctx context.Context, record *AIAuthorizationRecord) (*MathematicalProof, error) {
 	proof := &MathematicalProof{
-		ProofType:          "digital_signature_chain",
-		GeneratedAt:        time.Now(),
-		EnforcementLevel:   "cryptographic",
-		MathematicalRules:  []MathematicalRule{},
-		SignatureChain:     []CryptographicSig{},
+		ProofType:         "digital_signature_chain",
+		GeneratedAt:       time.Now(),
+		EnforcementLevel:  "cryptographic",
+		MathematicalRules: []MathematicalRule{},
+		SignatureChain:    []CryptographicSig{},
 	}
 
 	// Create signature chain from authorization cascade
 	if record.AuthorizationCascade != nil {
 		for i, level := range record.AuthorizationCascade.CascadeChain {
 			sig := CryptographicSig{
-				SignerID:    level.AuthorizerID,
-				Algorithm:   "ECDSA",
-				KeyID:       fmt.Sprintf("key_%s", level.AuthorizerID),
-				Timestamp:   level.GrantedAt,
-				SignedData:  fmt.Sprintf("level_%d_authorization", i),
+				SignerID:   level.AuthorizerID,
+				Algorithm:  "ECDSA",
+				KeyID:      fmt.Sprintf("key_%s", level.AuthorizerID),
+				Timestamp:  level.GrantedAt,
+				SignedData: fmt.Sprintf("level_%d_authorization", i),
 			}
-			
+
 			// Generate mock signature for demo
 			sigData := fmt.Sprintf("%s:%s:%d", sig.SignerID, sig.SignedData, sig.Timestamp.Unix())
 			hash := sha256.Sum256([]byte(sigData))
 			sig.Signature = hex.EncodeToString(hash[:])
-			
+
 			proof.SignatureChain = append(proof.SignatureChain, sig)
 		}
 	}
@@ -830,7 +830,7 @@ func (s *GAuthPlusService) GenerateMathematicalProof(ctx context.Context, record
 		ruleData := fmt.Sprintf("%s:%s:%s", rule.RuleID, rule.Expression, rule.Enforcement)
 		hash := sha256.Sum256([]byte(ruleData))
 		proof.HashChain = append(proof.HashChain, hex.EncodeToString(hash[:]))
-		
+
 		if i == len(rules)-1 {
 			// Set merkle root as final hash
 			proof.MerkleRoot = hex.EncodeToString(hash[:])
@@ -866,10 +866,10 @@ func (s *GAuthPlusService) GenerateMathematicalProof(ctx context.Context, record
 func (s *GAuthPlusService) EnforceDualControlPrinciple(ctx context.Context, record *AIAuthorizationRecord, action string, requestData map[string]interface{}) (*DualControlResult, error) {
 	if record.DualControlPrinciple == nil || !record.DualControlPrinciple.Enabled {
 		return &DualControlResult{
-			Required:   false,
-			Enforced:   false,
-			Status:     "not_required",
-			Message:    "dual control not enabled for this authorization",
+			Required: false,
+			Enforced: false,
+			Status:   "not_required",
+			Message:  "dual control not enabled for this authorization",
 		}, nil
 	}
 
@@ -973,15 +973,15 @@ func (cr *CommercialRegister) RegisterAISystem(ctx context.Context, record *AIAu
 			"ai_system_id":      record.AISystemID,
 			"authorizing_party": record.AuthorizingParty.ID,
 			"registered_at":     time.Now(),
-			"status":           "registered",
+			"status":            "registered",
 			"blockchain_hash":   record.BlockchainHash,
 		}
-		
+
 		data, err := json.Marshal(registryData)
 		if err != nil {
 			return err
 		}
-		
+
 		return cr.redis.Set(ctx, fmt.Sprintf("commercial_register:%s", record.AISystemID), data, 0).Err()
 	}
 	return nil

@@ -27,11 +27,7 @@ type PASETOConfig struct {
 	TokenValidity time.Duration
 }
 
-
-
 // All PASETO methods are currently stubs. Uncomment and implement as needed.
-
-
 
 // PASETO implementation reserved for future development
 

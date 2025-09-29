@@ -1,4 +1,5 @@
-// Package audit provides a comprehensive audit logging system for tracking security events and user actions in the GAuth framework.
+// Package audit provides a comprehensive audit logging system for tracking security
+// events and user actions in the GAuth framework.
 //
 // # RFC111 Mapping
 //

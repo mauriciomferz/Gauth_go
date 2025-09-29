@@ -45,8 +45,8 @@ type OAuth2TokenResponse struct {
 
 // oauth2Authenticator implements the Authenticator interface for OAuth2
 type oauth2Authenticator struct {
-	config       OAuth2Config
-	httpClient   *http.Client
+	config     OAuth2Config
+	httpClient *http.Client
 }
 
 func newOAuth2Authenticator(config Config) (Authenticator, error) {
@@ -276,7 +276,9 @@ func (a *oauth2Authenticator) makeTokenRequest(data url.Values) (*OAuth2TokenRes
 }
 
 // createAndStoreTokenResponse creates response and handles storage/audit
-func (a *oauth2Authenticator) createAndStoreTokenResponse(ctx context.Context, req TokenRequest, oauthResp *OAuth2TokenResponse) (*TokenResponse, error) {
+func (a *oauth2Authenticator) createAndStoreTokenResponse(
+	ctx context.Context, req TokenRequest, oauthResp *OAuth2TokenResponse,
+) (*TokenResponse, error) {
 	tokenResp := &TokenResponse{
 		Token:     oauthResp.AccessToken,
 		TokenType: oauthResp.TokenType,

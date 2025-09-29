@@ -76,10 +76,10 @@ type LegalFramework struct {
 
 // HumanAccountabilityChain represents the human accountability structure
 type HumanAccountabilityChain struct {
-	UltimateHumanAuthority Authority                  `json:"ultimate_human_authority"`
-	DelegationHierarchy    []DelegationLevel         `json:"delegation_hierarchy"`
-	AccountabilityRules    AccountabilityRules       `json:"accountability_rules"`
-	ValidationResults      AccountabilityValidation  `json:"accountability_validation"`
+	UltimateHumanAuthority Authority                `json:"ultimate_human_authority"`
+	DelegationHierarchy    []DelegationLevel        `json:"delegation_hierarchy"`
+	AccountabilityRules    AccountabilityRules      `json:"accountability_rules"`
+	ValidationResults      AccountabilityValidation `json:"accountability_validation"`
 }
 
 // Authority represents a human or system authority
@@ -94,75 +94,75 @@ type Authority struct {
 
 // DelegationLevel represents a level in the delegation hierarchy
 type DelegationLevel struct {
-	Level              int                `json:"level"`
-	Authority          Authority          `json:"authority"`
-	DelegatedPowers    []string          `json:"delegated_powers"`
-	Constraints        []string          `json:"constraints"`
-	AccountabilityPath []string          `json:"accountability_path"`
-	LegalBasis         string            `json:"legal_basis"`
+	Level              int       `json:"level"`
+	Authority          Authority `json:"authority"`
+	DelegatedPowers    []string  `json:"delegated_powers"`
+	Constraints        []string  `json:"constraints"`
+	AccountabilityPath []string  `json:"accountability_path"`
+	LegalBasis         string    `json:"legal_basis"`
 }
 
 // AccountabilityRules defines the rules for accountability
 type AccountabilityRules struct {
-	HumanAtTop            bool     `json:"human_at_top"`
-	MaxDelegationDepth    int      `json:"max_delegation_depth"`
-	RequiredApprovals     int      `json:"required_approvals"`
-	AuditTrailMandatory   bool     `json:"audit_trail_mandatory"`
-	EscalationProcedures  []string `json:"escalation_procedures"`
+	HumanAtTop           bool     `json:"human_at_top"`
+	MaxDelegationDepth   int      `json:"max_delegation_depth"`
+	RequiredApprovals    int      `json:"required_approvals"`
+	AuditTrailMandatory  bool     `json:"audit_trail_mandatory"`
+	EscalationProcedures []string `json:"escalation_procedures"`
 }
 
 // AccountabilityValidation represents validation results
 type AccountabilityValidation struct {
-	HumanAtTop      bool   `json:"human_at_top"`
-	LegalCompliance bool   `json:"legal_compliance"`
-	ChainIntegrity  bool   `json:"chain_integrity"`
-	AuditComplete   bool   `json:"audit_complete"`
-	ValidationScore int    `json:"validation_score"`
+	HumanAtTop      bool `json:"human_at_top"`
+	LegalCompliance bool `json:"legal_compliance"`
+	ChainIntegrity  bool `json:"chain_integrity"`
+	AuditComplete   bool `json:"audit_complete"`
+	ValidationScore int  `json:"validation_score"`
 }
 
 // DualControlPrinciple represents dual control implementation
 type DualControlPrinciple struct {
-	Enabled              bool                    `json:"enabled"`
-	RequiredApprovers    int                     `json:"required_approvers"`
-	ApprovalMatrix       []ApprovalRequirement  `json:"approval_matrix"`
-	SeparationOfDuties   bool                   `json:"separation_of_duties"`
-	ConflictResolution   ConflictResolution     `json:"conflict_resolution"`
-	ComplianceFramework  string                 `json:"compliance_framework"`
+	Enabled             bool                  `json:"enabled"`
+	RequiredApprovers   int                   `json:"required_approvers"`
+	ApprovalMatrix      []ApprovalRequirement `json:"approval_matrix"`
+	SeparationOfDuties  bool                  `json:"separation_of_duties"`
+	ConflictResolution  ConflictResolution    `json:"conflict_resolution"`
+	ComplianceFramework string                `json:"compliance_framework"`
 }
 
 // ApprovalRequirement defines approval requirements
 type ApprovalRequirement struct {
-	ActionType        string   `json:"action_type"`
-	MinimumApprovers  int      `json:"minimum_approvers"`
-	RequiredRoles     []string `json:"required_roles"`
-	EscalationLevel   int      `json:"escalation_level"`
-	TimeoutMinutes    int      `json:"timeout_minutes"`
+	ActionType       string   `json:"action_type"`
+	MinimumApprovers int      `json:"minimum_approvers"`
+	RequiredRoles    []string `json:"required_roles"`
+	EscalationLevel  int      `json:"escalation_level"`
+	TimeoutMinutes   int      `json:"timeout_minutes"`
 }
 
 // ConflictResolution defines conflict resolution mechanisms
 type ConflictResolution struct {
-	Mechanism         string   `json:"mechanism"`
-	TieBreaker        string   `json:"tie_breaker"`
-	EscalationPath    []string `json:"escalation_path"`
-	FinalAuthority    string   `json:"final_authority"`
+	Mechanism      string   `json:"mechanism"`
+	TieBreaker     string   `json:"tie_breaker"`
+	EscalationPath []string `json:"escalation_path"`
+	FinalAuthority string   `json:"final_authority"`
 }
 
 // MathematicalEnforcement represents mathematical proof mechanisms
 type MathematicalEnforcement struct {
-	ProofType          string                `json:"proof_type"`
-	CryptographicProof CryptographicProof   `json:"cryptographic_proof"`
-	BlockchainAnchor   BlockchainAnchor     `json:"blockchain_anchor"`
-	ZeroKnowledgeProof ZeroKnowledgeProof   `json:"zero_knowledge_proof"`
-	ComplianceScore    int                  `json:"compliance_score"`
+	ProofType          string             `json:"proof_type"`
+	CryptographicProof CryptographicProof `json:"cryptographic_proof"`
+	BlockchainAnchor   BlockchainAnchor   `json:"blockchain_anchor"`
+	ZeroKnowledgeProof ZeroKnowledgeProof `json:"zero_knowledge_proof"`
+	ComplianceScore    int                `json:"compliance_score"`
 }
 
 // CryptographicProof represents cryptographic validation
 type CryptographicProof struct {
-	Algorithm     string `json:"algorithm"`
-	HashFunction  string `json:"hash_function"`
-	Signature     string `json:"signature"`
-	PublicKey     string `json:"public_key"`
-	Verification  bool   `json:"verification"`
+	Algorithm    string `json:"algorithm"`
+	HashFunction string `json:"hash_function"`
+	Signature    string `json:"signature"`
+	PublicKey    string `json:"public_key"`
+	Verification bool   `json:"verification"`
 }
 
 // BlockchainAnchor represents blockchain-based validation
@@ -176,39 +176,39 @@ type BlockchainAnchor struct {
 
 // ZeroKnowledgeProof represents zero-knowledge proof validation
 type ZeroKnowledgeProof struct {
-	ProofSystem   string `json:"proof_system"`
-	Circuit       string `json:"circuit"`
-	PublicInputs  []string `json:"public_inputs"`
-	Proof         string `json:"proof"`
-	Verified      bool   `json:"verified"`
+	ProofSystem  string   `json:"proof_system"`
+	Circuit      string   `json:"circuit"`
+	PublicInputs []string `json:"public_inputs"`
+	Proof        string   `json:"proof"`
+	Verified     bool     `json:"verified"`
 }
 
 // CommercialRegister represents commercial register integration
 type CommercialRegister struct {
-	RegisteredEntity  RegisteredEntity  `json:"registered_entity"`
-	LegalPowers      []LegalPower      `json:"legal_powers"`
-	ComplianceStatus ComplianceStatus  `json:"compliance_status"`
-	VerificationHash string            `json:"verification_hash"`
+	RegisteredEntity RegisteredEntity `json:"registered_entity"`
+	LegalPowers      []LegalPower     `json:"legal_powers"`
+	ComplianceStatus ComplianceStatus `json:"compliance_status"`
+	VerificationHash string           `json:"verification_hash"`
 }
 
 // RegisteredEntity represents a legally registered entity
 type RegisteredEntity struct {
-	CompanyName     string `json:"company_name"`
-	RegistrationID  string `json:"registration_id"`
-	Jurisdiction    string `json:"jurisdiction"`
-	LegalForm       string `json:"legal_form"`
+	CompanyName      string `json:"company_name"`
+	RegistrationID   string `json:"registration_id"`
+	Jurisdiction     string `json:"jurisdiction"`
+	LegalForm        string `json:"legal_form"`
 	RegistrationDate string `json:"registration_date"`
-	Status          string `json:"status"`
+	Status           string `json:"status"`
 }
 
 // LegalPower represents legal powers and authorities
 type LegalPower struct {
-	PowerType     string   `json:"power_type"`
-	Description   string   `json:"description"`
-	Scope         []string `json:"scope"`
-	Limitations   []string `json:"limitations"`
-	ValidFrom     string   `json:"valid_from"`
-	ValidUntil    string   `json:"valid_until"`
+	PowerType   string   `json:"power_type"`
+	Description string   `json:"description"`
+	Scope       []string `json:"scope"`
+	Limitations []string `json:"limitations"`
+	ValidFrom   string   `json:"valid_from"`
+	ValidUntil  string   `json:"valid_until"`
 }
 
 // ComplianceStatus represents compliance validation
@@ -909,7 +909,7 @@ func generateAuditTrail(action, actor string) gin.H {
 // Demonstrate Enhanced Power-of-Attorney Framework
 func demonstrateEnhancedPowerOfAttorney(c *gin.Context) {
 	log.Printf("Demonstrating Enhanced Power-of-Attorney Framework...")
-	
+
 	humanAuthority := Authority{
 		ID:         "auth_001",
 		Name:       "Dr. Maria Rodriguez",
@@ -918,7 +918,7 @@ func demonstrateEnhancedPowerOfAttorney(c *gin.Context) {
 		Department: "Legal Affairs",
 		Role:       "Chief Legal Officer",
 	}
-	
+
 	aiSystem := Authority{
 		ID:         "ai_sys_001",
 		Name:       "GAuth AI Assistant",
@@ -927,7 +927,7 @@ func demonstrateEnhancedPowerOfAttorney(c *gin.Context) {
 		Department: "Technology",
 		Role:       "Automated Decision Support",
 	}
-	
+
 	delegationHierarchy := []DelegationLevel{
 		{
 			Level:     0,
@@ -965,16 +965,16 @@ func demonstrateEnhancedPowerOfAttorney(c *gin.Context) {
 			LegalBasis:         "AI Governance Policy v2.1",
 		},
 	}
-	
+
 	humanAccountabilityChain := HumanAccountabilityChain{
 		UltimateHumanAuthority: humanAuthority,
 		DelegationHierarchy:    delegationHierarchy,
 		AccountabilityRules: AccountabilityRules{
-			HumanAtTop:            true,
-			MaxDelegationDepth:    3,
-			RequiredApprovals:     2,
-			AuditTrailMandatory:   true,
-			EscalationProcedures:  []string{"Immediate escalation", "24h review", "Board notification"},
+			HumanAtTop:           true,
+			MaxDelegationDepth:   3,
+			RequiredApprovals:    2,
+			AuditTrailMandatory:  true,
+			EscalationProcedures: []string{"Immediate escalation", "24h review", "Board notification"},
 		},
 		ValidationResults: AccountabilityValidation{
 			HumanAtTop:      true,
@@ -984,17 +984,17 @@ func demonstrateEnhancedPowerOfAttorney(c *gin.Context) {
 			ValidationScore: 98,
 		},
 	}
-	
+
 	dualControlPrinciple := DualControlPrinciple{
 		Enabled:           true,
 		RequiredApprovers: 2,
 		ApprovalMatrix: []ApprovalRequirement{
 			{
-				ActionType:        "financial_transaction",
-				MinimumApprovers:  2,
-				RequiredRoles:     []string{"Finance Manager", "Legal Counsel"},
-				EscalationLevel:   1,
-				TimeoutMinutes:    30,
+				ActionType:       "financial_transaction",
+				MinimumApprovers: 2,
+				RequiredRoles:    []string{"Finance Manager", "Legal Counsel"},
+				EscalationLevel:  1,
+				TimeoutMinutes:   30,
 			},
 		},
 		SeparationOfDuties: true,
@@ -1006,7 +1006,7 @@ func demonstrateEnhancedPowerOfAttorney(c *gin.Context) {
 		},
 		ComplianceFramework: "SOX-404, RFC111, RFC115",
 	}
-	
+
 	mathematicalEnforcement := MathematicalEnforcement{
 		ProofType: "Cryptographic + Blockchain + Zero-Knowledge",
 		CryptographicProof: CryptographicProof{
@@ -1032,7 +1032,7 @@ func demonstrateEnhancedPowerOfAttorney(c *gin.Context) {
 		},
 		ComplianceScore: 96,
 	}
-	
+
 	response := gin.H{
 		"demonstration": true,
 		"timestamp":     time.Now().Unix(),
@@ -1042,10 +1042,10 @@ func demonstrateEnhancedPowerOfAttorney(c *gin.Context) {
 			"mathematical_enforcement":   mathematicalEnforcement,
 		},
 		"compliance_validation": gin.H{
-			"rfc111_compliant":   true,
-			"rfc115_compliant":   true,
-			"legal_compliant":    true,
-			"compliance_score":   97,
+			"rfc111_compliant": true,
+			"rfc115_compliant": true,
+			"legal_compliant":  true,
+			"compliance_score": 97,
 			"validation_details": []string{
 				"Human authority verified at top level",
 				"Dual control mechanisms active",
@@ -1061,14 +1061,14 @@ func demonstrateEnhancedPowerOfAttorney(c *gin.Context) {
 			"Monitor effectiveness metrics",
 		},
 	}
-	
+
 	c.JSON(http.StatusOK, response)
 }
 
 // Demonstrate Human Accountability Chain
 func demonstrateHumanAccountabilityChain(c *gin.Context) {
 	log.Printf("Demonstrating Human Accountability Chain...")
-	
+
 	ultimateAuthority := Authority{
 		ID:         "ceo_001",
 		Name:       "Sarah Chen",
@@ -1077,7 +1077,7 @@ func demonstrateHumanAccountabilityChain(c *gin.Context) {
 		Department: "Executive",
 		Role:       "Chief Executive Officer",
 	}
-	
+
 	delegationHierarchy := []DelegationLevel{
 		{
 			Level:     0,
@@ -1097,16 +1097,16 @@ func demonstrateHumanAccountabilityChain(c *gin.Context) {
 			LegalBasis:         "Corporate Bylaws Section 4.1",
 		},
 	}
-	
+
 	accountabilityChain := HumanAccountabilityChain{
 		UltimateHumanAuthority: ultimateAuthority,
 		DelegationHierarchy:    delegationHierarchy,
 		AccountabilityRules: AccountabilityRules{
-			HumanAtTop:            true,
-			MaxDelegationDepth:    5,
-			RequiredApprovals:     1,
-			AuditTrailMandatory:   true,
-			EscalationProcedures:  []string{"Real-time notification", "Executive review", "Board escalation"},
+			HumanAtTop:           true,
+			MaxDelegationDepth:   5,
+			RequiredApprovals:    1,
+			AuditTrailMandatory:  true,
+			EscalationProcedures: []string{"Real-time notification", "Executive review", "Board escalation"},
 		},
 		ValidationResults: AccountabilityValidation{
 			HumanAtTop:      true,
@@ -1116,17 +1116,17 @@ func demonstrateHumanAccountabilityChain(c *gin.Context) {
 			ValidationScore: 100,
 		},
 	}
-	
+
 	response := gin.H{
-		"demonstration":      true,
-		"timestamp":          time.Now().Unix(),
+		"demonstration":        true,
+		"timestamp":            time.Now().Unix(),
 		"accountability_chain": accountabilityChain,
 		"validation_results": gin.H{
-			"human_at_top":      true,
-			"legal_compliance":  true,
-			"chain_integrity":   true,
-			"audit_complete":    true,
-			"validation_score":  100,
+			"human_at_top":     true,
+			"legal_compliance": true,
+			"chain_integrity":  true,
+			"audit_complete":   true,
+			"validation_score": 100,
 		},
 		"compliance_details": []string{
 			"Ultimate human authority clearly defined",
@@ -1136,31 +1136,31 @@ func demonstrateHumanAccountabilityChain(c *gin.Context) {
 			"Audit trail complete and immutable",
 		},
 	}
-	
+
 	c.JSON(http.StatusOK, response)
 }
 
 // Demonstrate Dual Control Principle
 func demonstrateDualControlPrinciple(c *gin.Context) {
 	log.Printf("Demonstrating Dual Control Principle...")
-	
+
 	dualControl := DualControlPrinciple{
 		Enabled:           true,
 		RequiredApprovers: 2,
 		ApprovalMatrix: []ApprovalRequirement{
 			{
-				ActionType:        "high_value_transaction",
-				MinimumApprovers:  2,
-				RequiredRoles:     []string{"Finance Director", "Risk Manager"},
-				EscalationLevel:   2,
-				TimeoutMinutes:    60,
+				ActionType:       "high_value_transaction",
+				MinimumApprovers: 2,
+				RequiredRoles:    []string{"Finance Director", "Risk Manager"},
+				EscalationLevel:  2,
+				TimeoutMinutes:   60,
 			},
 			{
-				ActionType:        "system_configuration",
-				MinimumApprovers:  2,
-				RequiredRoles:     []string{"IT Manager", "Security Officer"},
-				EscalationLevel:   1,
-				TimeoutMinutes:    30,
+				ActionType:       "system_configuration",
+				MinimumApprovers: 2,
+				RequiredRoles:    []string{"IT Manager", "Security Officer"},
+				EscalationLevel:  1,
+				TimeoutMinutes:   30,
 			},
 		},
 		SeparationOfDuties: true,
@@ -1172,42 +1172,42 @@ func demonstrateDualControlPrinciple(c *gin.Context) {
 		},
 		ComplianceFramework: "SOX-404, ISO-27001, RFC111, RFC115",
 	}
-	
+
 	response := gin.H{
-		"demonstration":   true,
-		"timestamp":       time.Now().Unix(),
-		"dual_control":    dualControl,
+		"demonstration": true,
+		"timestamp":     time.Now().Unix(),
+		"dual_control":  dualControl,
 		"test_scenarios": []gin.H{
 			{
-				"scenario":          "Financial approval process",
+				"scenario":           "Financial approval process",
 				"required_approvers": 2,
-				"roles":             []string{"CFO", "Legal Counsel"},
-				"status":            "Active",
-				"compliance_score":  98,
+				"roles":              []string{"CFO", "Legal Counsel"},
+				"status":             "Active",
+				"compliance_score":   98,
 			},
 			{
-				"scenario":          "System access modification",
+				"scenario":           "System access modification",
 				"required_approvers": 2,
-				"roles":             []string{"CISO", "IT Director"},
-				"status":            "Active",
-				"compliance_score":  96,
+				"roles":              []string{"CISO", "IT Director"},
+				"status":             "Active",
+				"compliance_score":   96,
 			},
 		},
 		"validation_results": gin.H{
-			"separation_enforced": true,
-			"conflicts_resolved":  true,
+			"separation_enforced":  true,
+			"conflicts_resolved":   true,
 			"audit_trail_complete": true,
-			"compliance_verified": true,
+			"compliance_verified":  true,
 		},
 	}
-	
+
 	c.JSON(http.StatusOK, response)
 }
 
 // Demonstrate Mathematical Enforcement
 func demonstrateMathematicalEnforcement(c *gin.Context) {
 	log.Printf("Demonstrating Mathematical Enforcement...")
-	
+
 	mathEnforcement := MathematicalEnforcement{
 		ProofType: "Multi-layered Cryptographic Proof",
 		CryptographicProof: CryptographicProof{
@@ -1233,11 +1233,11 @@ func demonstrateMathematicalEnforcement(c *gin.Context) {
 		},
 		ComplianceScore: 99,
 	}
-	
+
 	response := gin.H{
-		"demonstration":         true,
-		"timestamp":             time.Now().Unix(),
-		"mathematical_proof":    mathEnforcement,
+		"demonstration":      true,
+		"timestamp":          time.Now().Unix(),
+		"mathematical_proof": mathEnforcement,
 		"verification_results": gin.H{
 			"cryptographic_valid": true,
 			"blockchain_anchored": true,
@@ -1253,14 +1253,14 @@ func demonstrateMathematicalEnforcement(c *gin.Context) {
 			"Tamper evidence cryptographically guaranteed",
 		},
 	}
-	
+
 	c.JSON(http.StatusOK, response)
 }
 
 // Demonstrate Commercial Register Integration
 func demonstrateCommercialRegister(c *gin.Context) {
 	log.Printf("Demonstrating Commercial Register Integration...")
-	
+
 	commercialRegister := CommercialRegister{
 		RegisteredEntity: RegisteredEntity{
 			CompanyName:      "Gimel Foundation Technologies GmbH",
@@ -1298,16 +1298,16 @@ func demonstrateCommercialRegister(c *gin.Context) {
 		},
 		VerificationHash: "sha256_commercial_register_0x1a2b3c4d5e6f7890abcdef123456789",
 	}
-	
+
 	response := gin.H{
 		"demonstration":       true,
 		"timestamp":           time.Now().Unix(),
 		"commercial_register": commercialRegister,
 		"verification_status": gin.H{
-			"entity_verified":     true,
-			"powers_validated":    true,
-			"compliance_current":  true,
-			"registration_valid":  true,
+			"entity_verified":    true,
+			"powers_validated":   true,
+			"compliance_current": true,
+			"registration_valid": true,
 		},
 		"integration_benefits": []string{
 			"Real-time legal entity verification",
@@ -1317,23 +1317,23 @@ func demonstrateCommercialRegister(c *gin.Context) {
 			"Regulatory reporting automation",
 		},
 	}
-	
+
 	c.JSON(http.StatusOK, response)
 }
 
 // Demonstrate Compliance Validation
 func demonstrateComplianceValidation(c *gin.Context) {
 	log.Printf("Demonstrating Compliance Validation...")
-	
+
 	response := gin.H{
 		"demonstration": true,
 		"timestamp":     time.Now().Unix(),
 		"compliance_framework": gin.H{
 			"rfc111_compliance": gin.H{
-				"status":      "Fully Compliant",
-				"score":       98,
-				"last_check":  time.Now().Format("2006-01-02 15:04:05"),
-				"violations":  []string{},
+				"status":     "Fully Compliant",
+				"score":      98,
+				"last_check": time.Now().Format("2006-01-02 15:04:05"),
+				"violations": []string{},
 				"strengths": []string{
 					"Clear accountability chains",
 					"Human authority verification",
@@ -1342,10 +1342,10 @@ func demonstrateComplianceValidation(c *gin.Context) {
 				},
 			},
 			"rfc115_compliance": gin.H{
-				"status":      "Fully Compliant",
-				"score":       97,
-				"last_check":  time.Now().Format("2006-01-02 15:04:05"),
-				"violations":  []string{},
+				"status":     "Fully Compliant",
+				"score":      97,
+				"last_check": time.Now().Format("2006-01-02 15:04:05"),
+				"violations": []string{},
 				"strengths": []string{
 					"Mathematical enforcement active",
 					"Cryptographic integrity verified",
@@ -1354,20 +1354,20 @@ func demonstrateComplianceValidation(c *gin.Context) {
 				},
 			},
 			"legal_compliance": gin.H{
-				"status":           "Compliant",
-				"score":            96,
-				"jurisdiction":     "EU, Germany",
-				"frameworks":       []string{"GDPR", "Corporate Law", "Financial Regulations"},
-				"last_audit":       "2024-09-01",
-				"next_audit":       "2025-03-01",
-				"compliance_gaps":  []string{},
+				"status":          "Compliant",
+				"score":           96,
+				"jurisdiction":    "EU, Germany",
+				"frameworks":      []string{"GDPR", "Corporate Law", "Financial Regulations"},
+				"last_audit":      "2024-09-01",
+				"next_audit":      "2025-03-01",
+				"compliance_gaps": []string{},
 			},
 		},
 		"overall_assessment": gin.H{
-			"overall_score":        97,
-			"risk_level":          "Low",
-			"recommendation":      "Maintain current compliance posture",
-			"next_review_date":    "2024-12-01",
+			"overall_score":         97,
+			"risk_level":            "Low",
+			"recommendation":        "Maintain current compliance posture",
+			"next_review_date":      "2024-12-01",
 			"continuous_monitoring": true,
 		},
 		"action_items": []string{
@@ -1377,14 +1377,14 @@ func demonstrateComplianceValidation(c *gin.Context) {
 			"Prepare for external audit in Q1 2025",
 		},
 	}
-	
+
 	c.JSON(http.StatusOK, response)
 }
 
 // Proxy function for RFC115 delegation to main backend
 func proxyRFC115Delegation(c *gin.Context) {
 	log.Printf("Proxying RFC115 delegation request to main backend...")
-	
+
 	// Read the request body
 	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {
@@ -1392,7 +1392,7 @@ func proxyRFC115Delegation(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to read request body"})
 		return
 	}
-	
+
 	// Create request to main backend
 	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/rfc115/delegation", bytes.NewBuffer(body))
 	if err != nil {
@@ -1400,10 +1400,10 @@ func proxyRFC115Delegation(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create proxy request"})
 		return
 	}
-	
+
 	// Copy headers
 	req.Header.Set("Content-Type", "application/json")
-	
+
 	// Make the request
 	client := &http.Client{Timeout: 30 * time.Second}
 	resp, err := client.Do(req)
@@ -1417,7 +1417,7 @@ func proxyRFC115Delegation(c *gin.Context) {
 			log.Printf("Error closing response body: %v", closeErr)
 		}
 	}()
-	
+
 	// Read response
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -1425,7 +1425,7 @@ func proxyRFC115Delegation(c *gin.Context) {
 		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to read backend response"})
 		return
 	}
-	
+
 	// Parse and forward response
 	var result map[string]interface{}
 	if err := json.Unmarshal(respBody, &result); err != nil {
@@ -1433,7 +1433,7 @@ func proxyRFC115Delegation(c *gin.Context) {
 		c.JSON(http.StatusBadGateway, gin.H{"error": "Invalid response from backend"})
 		return
 	}
-	
+
 	log.Printf("RFC115 delegation proxy successful: %v", result)
 	c.JSON(resp.StatusCode, result)
 }
@@ -1441,7 +1441,7 @@ func proxyRFC115Delegation(c *gin.Context) {
 // Proxy function for Enhanced Token creation to main backend
 func proxyEnhancedToken(c *gin.Context) {
 	log.Printf("Proxying Enhanced Token request to main backend...")
-	
+
 	// Read the request body
 	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {
@@ -1449,7 +1449,7 @@ func proxyEnhancedToken(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to read request body"})
 		return
 	}
-	
+
 	// Create request to main backend
 	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/tokens/enhanced-simple", bytes.NewBuffer(body))
 	if err != nil {
@@ -1457,10 +1457,10 @@ func proxyEnhancedToken(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create proxy request"})
 		return
 	}
-	
+
 	// Copy headers
 	req.Header.Set("Content-Type", "application/json")
-	
+
 	// Make the request
 	client := &http.Client{Timeout: 30 * time.Second}
 	resp, err := client.Do(req)
@@ -1474,7 +1474,7 @@ func proxyEnhancedToken(c *gin.Context) {
 			log.Printf("Error closing response body: %v", closeErr)
 		}
 	}()
-	
+
 	// Read response
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -1482,7 +1482,7 @@ func proxyEnhancedToken(c *gin.Context) {
 		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to read backend response"})
 		return
 	}
-	
+
 	// Parse and forward response
 	var result map[string]interface{}
 	if err := json.Unmarshal(respBody, &result); err != nil {
@@ -1490,7 +1490,7 @@ func proxyEnhancedToken(c *gin.Context) {
 		c.JSON(http.StatusBadGateway, gin.H{"error": "Invalid response from backend"})
 		return
 	}
-	
+
 	log.Printf("Enhanced Token proxy successful: %v", result)
 	c.JSON(resp.StatusCode, result)
 }
