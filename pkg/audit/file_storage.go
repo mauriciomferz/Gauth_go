@@ -163,110 +163,139 @@ func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
 	}
 
 	for _, file := range files {
-		// Validate file path to prevent directory traversal
-		cleanFile := filepath.Clean(file)
-		if !strings.HasPrefix(cleanFile, filepath.Clean(fs.directory)) {
-			continue // Skip files outside our directory
-		}
-
-		f, err := os.Open(cleanFile)
-		if err != nil {
-			continue
-		}
-		defer func() {
-			if closeErr := f.Close(); closeErr != nil {
-				// Log close error but continue with cleanup
-				fmt.Printf("Warning: failed to close file %s during cleanup: %v\n", cleanFile, closeErr)
-			}
-		}()
-
-		// SUPER ULTIMATE NUCLEAR SECURITY SOLUTION: Completely rebuild file handling
-		// to force CI recognition of security fixes
-
-		// STEP 1: Create and validate temporary file path
-		tmpFile := cleanFile + ".tmp"
-
-		// STEP 2: Apply comprehensive path cleaning and validation
-		cleanTmpFile := filepath.Clean(tmpFile)
-		cleanDirectory := filepath.Clean(fs.directory)
-
-		// STEP 3: ULTIMATE SECURITY VALIDATION - Multiple layers of protection
-		// Layer 1: Prefix validation prevents directory traversal
-		if !strings.HasPrefix(cleanTmpFile, cleanDirectory) {
-			continue // SECURITY: Reject paths outside our directory
-		}
-
-		// Layer 2: Additional validation with directory separator
-		if !strings.HasPrefix(cleanTmpFile, cleanDirectory+string(filepath.Separator)) && cleanTmpFile != cleanDirectory {
-			continue // SECURITY: Enhanced directory boundary validation
-		}
-
-		// Layer 3: Relative path validation prevents .. attacks
-		relPath, err := filepath.Rel(cleanDirectory, cleanTmpFile)
-		if err != nil || strings.HasPrefix(relPath, "..") {
-			continue // SECURITY: Prevent parent directory access
-		}
-
-		// SUPER ULTIMATE SECURITY: Triple-layer path validation complete
-		// All possible directory traversal attacks have been prevented
-		// #nosec G304 - SUPER ULTIMATE SECURITY: Triple-layer path validation applied above
-		out, err := os.OpenFile(cleanTmpFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
-		if err != nil {
-			continue
-		}
-
-		scanner := bufio.NewScanner(f)
-		writer := bufio.NewWriter(out)
-		kept := 0
-		for scanner.Scan() {
-			var entry Entry
-			if err := json.Unmarshal(scanner.Bytes(), &entry); err != nil {
-				continue
-			}
-			if entry.Timestamp.After(before) {
-				data, err := json.Marshal(entry)
-				if err != nil {
-					continue
-				}
-				if _, err := writer.Write(data); err != nil {
-					continue // Skip this entry on write error
-				}
-				if _, err := writer.WriteString("\n"); err != nil {
-					continue // Skip this entry on write error
-				}
-				kept++
-			}
-		}
-		if err := writer.Flush(); err != nil {
-			// Log but continue with cleanup
-			fmt.Printf("Warning: failed to flush writer for %s: %v\n", cleanFile, err)
-		}
-		if err := out.Close(); err != nil {
-			// Log but continue with cleanup
-			fmt.Printf("Warning: failed to close output file %s: %v\n", cleanTmpFile, err)
-		}
-
-		if kept == 0 {
-			if err := os.Remove(file); err != nil {
-				// Log removal error but continue
-				fmt.Printf("Warning: failed to remove file %s: %v\n", file, err)
-			}
-			if err := os.Remove(cleanTmpFile); err != nil {
-				// Log removal error but continue
-				fmt.Printf("Warning: failed to remove temp file %s: %v\n", cleanTmpFile, err)
-			}
-		} else {
-			if err := os.Rename(cleanTmpFile, file); err != nil {
-				// If rename fails, try to cleanup temp file
-				if removeErr := os.Remove(cleanTmpFile); removeErr != nil {
-					// Log cleanup error but continue
-					fmt.Printf("Warning: failed to cleanup temp file %s: %v\n", cleanTmpFile, removeErr)
-				}
-			}
+		if err := fs.cleanupFile(file, before); err != nil {
+			// Log error but continue with other files
+			fmt.Printf("Warning: failed to cleanup file %s: %v\n", file, err)
 		}
 	}
 
 	return nil
+}
+
+func (fs *FileStorage) cleanupFile(file string, before time.Time) error {
+	// Validate file path to prevent directory traversal
+	cleanFile := filepath.Clean(file)
+	if !strings.HasPrefix(cleanFile, filepath.Clean(fs.directory)) {
+		return fmt.Errorf("file outside directory")
+	}
+
+	f, err := os.Open(cleanFile)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if closeErr := f.Close(); closeErr != nil {
+			fmt.Printf("Warning: failed to close file %s during cleanup: %v\n", cleanFile, closeErr)
+		}
+	}()
+
+	tmpFile, err := fs.createSecureTempFile(cleanFile)
+	if err != nil {
+		return err
+	}
+
+	kept, err := fs.filterEntriesBeforeDate(f, tmpFile, before)
+	if err != nil {
+		fs.cleanupTempFile(tmpFile)
+		return err
+	}
+
+	return fs.finalizeCleanup(file, tmpFile, kept)
+}
+
+func (fs *FileStorage) createSecureTempFile(cleanFile string) (string, error) {
+	tmpFile := cleanFile + ".tmp"
+	cleanTmpFile := filepath.Clean(tmpFile)
+	cleanDirectory := filepath.Clean(fs.directory)
+
+	// Multiple layers of security validation
+	if !strings.HasPrefix(cleanTmpFile, cleanDirectory) {
+		return "", fmt.Errorf("temp file outside directory")
+	}
+
+	if !strings.HasPrefix(cleanTmpFile, cleanDirectory+string(filepath.Separator)) && cleanTmpFile != cleanDirectory {
+		return "", fmt.Errorf("invalid temp file path")
+	}
+
+	relPath, err := filepath.Rel(cleanDirectory, cleanTmpFile)
+	if err != nil || strings.HasPrefix(relPath, "..") {
+		return "", fmt.Errorf("invalid relative path")
+	}
+
+	return cleanTmpFile, nil
+}
+
+func (fs *FileStorage) filterEntriesBeforeDate(input *os.File, tmpFile string, before time.Time) (int, error) {
+	// #nosec G304 - Security validation performed in createSecureTempFile
+	out, err := os.OpenFile(tmpFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if closeErr := out.Close(); closeErr != nil {
+			fmt.Printf("Warning: failed to close output file %s: %v\n", tmpFile, closeErr)
+		}
+	}()
+
+	scanner := bufio.NewScanner(input)
+	writer := bufio.NewWriter(out)
+	kept := 0
+
+	for scanner.Scan() {
+		var entry Entry
+		if err := json.Unmarshal(scanner.Bytes(), &entry); err != nil {
+			continue
+		}
+		if entry.Timestamp.After(before) {
+			if err := fs.writeEntry(writer, &entry); err != nil {
+				continue
+			}
+			kept++
+		}
+	}
+
+	if err := writer.Flush(); err != nil {
+		return 0, err
+	}
+
+	return kept, scanner.Err()
+}
+
+func (fs *FileStorage) writeEntry(writer *bufio.Writer, entry *Entry) error {
+	data, err := json.Marshal(entry)
+	if err != nil {
+		return err
+	}
+	if _, err := writer.Write(data); err != nil {
+		return err
+	}
+	if _, err := writer.WriteString("\n"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (fs *FileStorage) finalizeCleanup(originalFile, tmpFile string, kept int) error {
+	if kept == 0 {
+		// Remove both original and temp files if no entries kept
+		if err := os.Remove(originalFile); err != nil {
+			fmt.Printf("Warning: failed to remove file %s: %v\n", originalFile, err)
+		}
+		fs.cleanupTempFile(tmpFile)
+	} else {
+		// Replace original with temp file
+		if err := os.Rename(tmpFile, originalFile); err != nil {
+			fs.cleanupTempFile(tmpFile)
+			return err
+		}
+	}
+	return nil
+}
+
+func (fs *FileStorage) cleanupTempFile(tmpFile string) {
+	if err := os.Remove(tmpFile); err != nil {
+		fmt.Printf("Warning: failed to remove temp file %s: %v\n", tmpFile, err)
+	}
 }
 
 // Close implements io.Closer

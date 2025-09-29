@@ -236,7 +236,7 @@ func (s *EnhancedAuthService) verifyClientOwnerAuthorization(ctx context.Context
 	return nil
 }
 
-func (s *EnhancedAuthService) generateAttestation(attestationType string) token.Attestation {
+func (s *EnhancedAuthService) generateAttestation(_ string) token.Attestation {
 	// Implement attestation generation logic
 	return token.Attestation{}
 }

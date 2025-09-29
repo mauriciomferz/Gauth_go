@@ -179,7 +179,7 @@ func (c *StandardAITeamControls) verifyCentralIssuer(ctx context.Context, token 
 	return nil
 }
 
-func (c *StandardAITeamControls) hasAuthorizationDelegation(token *token.EnhancedToken) bool {
+func (c *StandardAITeamControls) hasAuthorizationDelegation(_ *token.EnhancedToken) bool {
 	// Implementation would check for authorization delegation
 	return false
 }

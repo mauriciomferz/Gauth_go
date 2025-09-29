@@ -101,7 +101,7 @@ func (m *MockStore) List(ctx context.Context, filter Filter) ([]*Token, error) {
 }
 
 // Rotate mocks token rotation
-func (m *MockStore) Rotate(ctx context.Context, old, new *Token) error {
+func (m *MockStore) Rotate(ctx context.Context, old, newToken *Token) error {
 	if err := m.checkError(); err != nil {
 		return err
 	}
@@ -110,7 +110,7 @@ func (m *MockStore) Rotate(ctx context.Context, old, new *Token) error {
 		return err
 	}
 
-	return m.Save(ctx, new.ID, new)
+	return m.Save(ctx, newToken.ID, newToken)
 }
 
 // Revoke mocks token revocation

@@ -93,7 +93,7 @@ func (p *PowerDecisionPoint) MakeAuthorizationDecision(token string, requestedAc
 }
 
 // AddTokenRestriction adds a new restriction to a token.
-func (p *PowerAdministrationPoint) AddTokenRestriction(token string, restriction Restriction) error {
+func (p *PowerAdministrationPoint) AddTokenRestriction(_ string, restriction Restriction) error {
 	// Not implemented: tokenstore.TokenData does not support dynamic restrictions. This is a placeholder for future extension.
 	return fmt.Errorf("AddTokenRestriction not implemented: tokenstore.TokenData does not support restrictions")
 }
@@ -115,7 +115,7 @@ func (p *PowerAdministrationPoint) InvalidateToken(token string) error {
 // PowerVerificationPoint handles token validation.
 
 // UpdatePowerRestriction updates a power restriction for the given type.
-func (p *PowerAdministrationPoint) UpdatePowerRestriction(restriction PowerRestriction) error {
+func (p *PowerAdministrationPoint) UpdatePowerRestriction(_ PowerRestriction) error {
 	if p.GAuth == nil {
 		return fmt.Errorf("GAuth instance not configured")
 	}

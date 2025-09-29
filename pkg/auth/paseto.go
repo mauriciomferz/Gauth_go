@@ -9,7 +9,7 @@ import (
 )
 
 // newPasetoAuthenticator is a stub for PASETO support.
-func newPasetoAuthenticator(config Config) (Authenticator, error) {
+func newPasetoAuthenticator(_ Config) (Authenticator, error) {
 	return nil, errors.New("PASETO authenticator not implemented")
 }
 
@@ -38,7 +38,7 @@ type pasetoAuthenticator struct {
 // All PASETO methods are currently stubs. Uncomment and implement as needed.
 
 //nolint:unused // reserved for PASETO token implementation
-func newPASETOAuthenticator(config Config) (Authenticator, error) {
+func newPASETOAuthenticator(_ Config) (Authenticator, error) {
 	return nil, errors.New("PASETO authenticator not implemented")
 }
 

@@ -586,7 +586,7 @@ func (f *StandardLegalFramework) ValidateJurisdiction(ctx interface{}, jurisdict
 
 	return nil
 }
-func (f *StandardLegalFramework) GetJurisdictionRules(jurisdiction string) (*JurisdictionRules, error) {
+func (f *StandardLegalFramework) GetJurisdictionRules(_ string) (*JurisdictionRules, error) {
 	return &JurisdictionRules{}, nil
 }
 func (f *StandardLegalFramework) ValidateJurisdictionRequirements(ctx interface{}, rules *JurisdictionRules, action string) error {
