@@ -494,7 +494,7 @@ func createDelegationChain(_ *testing.T) []auth.DelegationLink {
 	}
 }
 
-func createAITeam(t *testing.T) *auth.AITeam {
+func createAITeam(_ *testing.T) *auth.AITeam {
 	return &auth.AITeam{
 		ID:           "team_001",
 		Jurisdiction: "US",
@@ -528,7 +528,7 @@ func createAITeam(t *testing.T) *auth.AITeam {
 	}
 }
 
-func createComplianceActions(t *testing.T) []auth.ComplianceAction {
+func createComplianceActions(_ *testing.T) []auth.ComplianceAction {
 	return []auth.ComplianceAction{
 		{
 			Name:         "high_value_trade",

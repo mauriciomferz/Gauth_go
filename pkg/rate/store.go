@@ -161,7 +161,7 @@ func (s *MemoryStore) Increment(_ context.Context, key string, expiry time.Durat
 }
 
 // Reset implements Store
-func (s *MemoryStore) Reset(ctx context.Context, key string) error {
+func (s *MemoryStore) Reset(_ context.Context, key string) error {
 	s.mu.Lock()
 	delete(s.counts, key)
 	delete(s.expires, key)

@@ -46,7 +46,7 @@ func (sw *SlidingWindow) startCleanup() {
 }
 
 // Allow implements Algorithm.Allow
-func (sw *SlidingWindow) Allow(ctx context.Context, id string) error {
+func (sw *SlidingWindow) Allow(_ context.Context, id string) error {
 	// Check for invalid configuration
 	if sw.config.RequestsPerSecond <= 0 || sw.config.WindowSize <= 0 {
 		return ErrRateLimitExceeded

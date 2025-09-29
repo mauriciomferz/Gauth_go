@@ -215,7 +215,7 @@ func (a *memoryAuthorizer) UnassignRole(_ context.Context, subject Subject, role
 	return fmt.Errorf("role %s not assigned to subject %s", role, subject)
 }
 
-func (a *memoryAuthorizer) GetRoles(ctx context.Context, subject Subject) ([]Role, error) {
+func (a *memoryAuthorizer) GetRoles(_ context.Context, subject Subject) ([]Role, error) {
 	if val, ok := a.assignments.Load(subject); ok {
 		return val.([]Role), nil
 	}
