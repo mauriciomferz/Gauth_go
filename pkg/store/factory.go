@@ -6,16 +6,16 @@ import (
 	"fmt"
 )
 
-// StoreType represents the type of token store
-type StoreType string
+// Type represents the type of store
+type Type string
 
 const (
-	// Memory represents an in-memory token store
-	Memory StoreType = "memory"
+	// MemoryStoreType represents an in-memory store
+	MemoryStoreType Type = "memory"
 	// Redis represents a Redis-backed token store
-	Redis StoreType = "redis"
+	Redis Type = "redis"
 	// Database represents a database-backed token store
-	Database StoreType = "database"
+	Database Type = "database"
 )
 
 // Common factory errors
@@ -26,9 +26,9 @@ var (
 )
 
 // NewTokenStore creates a new token store based on the provided configuration
-func NewTokenStore(storeType StoreType, config interface{}) (TokenStore, error) {
+func NewTokenStore(storeType Type, config interface{}) (TokenStore, error) {
 	switch storeType {
-	case Memory:
+	case MemoryStoreType:
 		// Handle memory store configuration
 		var cfg Config
 		if config != nil {

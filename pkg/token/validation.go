@@ -60,82 +60,115 @@ func NewValidationChain(config ValidationConfig, blacklist *Blacklist, validator
 
 // Validate runs all validators in sequence
 func (vc *ValidationChain) Validate(ctx context.Context, token *Token) error {
-	// Basic validation
-	if token == nil {
-		return ErrInvalidToken
+	if err := vc.validateBasicToken(token); err != nil {
+		return err
 	}
 
 	now := time.Now()
 
-	// Check if token is blacklisted
+	if err := vc.validateBlacklist(ctx, token); err != nil {
+		return err
+	}
+
+	if err := vc.validateTimeClaims(token, now); err != nil {
+		return err
+	}
+
+	if err := vc.validateIssuer(token); err != nil {
+		return err
+	}
+
+	if err := vc.validateAudience(token); err != nil {
+		return err
+	}
+
+	if err := vc.validateScopes(token); err != nil {
+		return err
+	}
+
+	if err := vc.validateClaims(token); err != nil {
+		return err
+	}
+
+	return vc.runCustomValidators(ctx, token)
+}
+
+func (vc *ValidationChain) validateBasicToken(token *Token) error {
+	if token == nil {
+		return ErrInvalidToken
+	}
+	return nil
+}
+
+func (vc *ValidationChain) validateBlacklist(ctx context.Context, token *Token) error {
 	if vc.blacklist != nil && vc.blacklist.IsBlacklisted(ctx, token.ID) {
 		return ErrTokenBlacklisted
 	}
+	return nil
+}
 
-	// Check expiration with clock skew
+func (vc *ValidationChain) validateTimeClaims(token *Token, now time.Time) error {
 	if token.ExpiresAt.Add(vc.config.ClockSkew).Before(now) {
 		return ErrTokenExpired
 	}
 
-	// Check not before with clock skew
 	if token.NotBefore.Add(-vc.config.ClockSkew).After(now) {
 		return ErrTokenNotYetValid
 	}
 
-	// Check issuer
-	if len(vc.config.AllowedIssuers) > 0 {
-		valid := false
-		for _, issuer := range vc.config.AllowedIssuers {
-			if token.Issuer == issuer {
-				valid = true
-				break
-			}
-		}
-		if !valid {
-			return ErrInvalidIssuer
-		}
+	return nil
+}
+
+func (vc *ValidationChain) validateIssuer(token *Token) error {
+	if len(vc.config.AllowedIssuers) == 0 {
+		return nil
 	}
 
-	// Check audience
-	if len(vc.config.AllowedAudiences) > 0 && len(token.Audience) > 0 {
-		valid := false
-		for _, reqAud := range vc.config.AllowedAudiences {
-			for _, tokenAud := range token.Audience {
-				if reqAud == tokenAud {
-					valid = true
-					break
-				}
-			}
-			if valid {
-				break
-			}
-		}
-		if !valid {
-			return ErrInvalidAudience
+	for _, issuer := range vc.config.AllowedIssuers {
+		if token.Issuer == issuer {
+			return nil
 		}
 	}
+	return ErrInvalidIssuer
+}
 
-	// Check required scopes
+func (vc *ValidationChain) validateAudience(token *Token) error {
+	if len(vc.config.AllowedAudiences) == 0 || len(token.Audience) == 0 {
+		return nil
+	}
+
+	for _, reqAud := range vc.config.AllowedAudiences {
+		for _, tokenAud := range token.Audience {
+			if reqAud == tokenAud {
+				return nil
+			}
+		}
+	}
+	return ErrInvalidAudience
+}
+
+func (vc *ValidationChain) validateScopes(token *Token) error {
 	for _, scope := range vc.config.RequiredScopes {
 		if !token.HasScope(scope) {
 			return ErrInsufficientScope
 		}
 	}
+	return nil
+}
 
-	// Check required claims
+func (vc *ValidationChain) validateClaims(token *Token) error {
 	if vc.config.RequiredClaims != nil {
-		if err := ValidateClaims(token, vc.config.RequiredClaims); err != nil {
-			return err
-		}
+		return ValidateClaims(token, vc.config.RequiredClaims)
 	}
+	return nil
+}
 
-	// Run custom validators
+func (vc *ValidationChain) runCustomValidators(ctx context.Context, token *Token) error {
 	for _, validator := range vc.validators {
 		if err := validator.Validate(ctx, token); err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 
@@ -190,8 +223,8 @@ type QueryResult struct {
 	HasMore bool
 }
 
-// TokenQuerier defines token search functionality
-type TokenQuerier interface {
+// Querier defines token search functionality
+type Querier interface {
 	// Query searches for tokens matching the criteria
 	Query(ctx context.Context, query Query, offset, limit int) (*QueryResult, error)
 
@@ -202,7 +235,7 @@ type TokenQuerier interface {
 	ListExpiringSoon(ctx context.Context, duration time.Duration) ([]*Token, error)
 }
 
-// DefaultQuerier implements TokenQuerier for Store
+// DefaultQuerier implements Querier for Store
 type DefaultQuerier struct {
 	store Store
 }

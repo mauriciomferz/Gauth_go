@@ -112,6 +112,26 @@ func (a *jwtAuthenticator) GenerateToken(ctx context.Context, req TokenRequest) 
 }
 
 func (a *jwtAuthenticator) ValidateToken(ctx context.Context, tokenStr string) (*TokenData, error) {
+	token, err := a.parseToken(tokenStr)
+	if err != nil {
+		return nil, err
+	}
+
+	claims, err := a.extractTokenClaims(token)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := a.validateTokenClaims(claims); err != nil {
+		return nil, err
+	}
+
+	a.logTokenValidation(ctx, claims)
+
+	return a.createTokenData(claims), nil
+}
+
+func (a *jwtAuthenticator) parseToken(tokenStr string) (*jwt.Token, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &jwtClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, ErrInvalidSignature
@@ -129,71 +149,97 @@ func (a *jwtAuthenticator) ValidateToken(ctx context.Context, tokenStr string) (
 		return nil, ErrInvalidToken
 	}
 
+	return token, nil
+}
+
+func (a *jwtAuthenticator) extractTokenClaims(token *jwt.Token) (*jwtClaims, error) {
 	claims, ok := token.Claims.(*jwtClaims)
 	if !ok {
 		return nil, ErrInvalidClaims
 	}
+	return claims, nil
+}
 
-	// Validate token configuration
-	if a.config.TokenValidation.ValidateSignature && !token.Valid {
-		return nil, ErrInvalidSignature
+func (a *jwtAuthenticator) validateTokenClaims(claims *jwtClaims) error {
+	if err := a.validateIssuerClaim(claims); err != nil {
+		return err
 	}
 
-	if len(a.config.TokenValidation.AllowedIssuers) > 0 {
-		valid := false
-		for _, issuer := range a.config.TokenValidation.AllowedIssuers {
-			if claims.Issuer == issuer {
-				valid = true
-				break
-			}
-		}
-		if !valid {
-			return nil, fmt.Errorf("invalid issuer: %s", claims.Issuer)
-		}
+	if err := a.validateAudienceClaim(claims); err != nil {
+		return err
 	}
 
-	if len(a.config.TokenValidation.AllowedAudiences) > 0 {
-		valid := false
-		for _, aud := range a.config.TokenValidation.AllowedAudiences {
-			if contains(claims.Audience, aud) {
-				valid = true
-				break
-			}
-		}
-		if !valid {
-			return nil, fmt.Errorf("invalid audience: %v", claims.Audience)
-		}
+	if err := a.validateScopesClaim(claims); err != nil {
+		return err
 	}
 
-	if len(a.config.TokenValidation.RequiredScopes) > 0 {
-		for _, scope := range a.config.TokenValidation.RequiredScopes {
-			if !contains(claims.Scope, scope) {
-				return nil, fmt.Errorf("missing required scope: %s", scope)
-			}
-		}
+	return a.validateCustomClaims(claims)
+}
+
+func (a *jwtAuthenticator) validateIssuerClaim(claims *jwtClaims) error {
+	if len(a.config.TokenValidation.AllowedIssuers) == 0 {
+		return nil
 	}
 
+	for _, issuer := range a.config.TokenValidation.AllowedIssuers {
+		if claims.Issuer == issuer {
+			return nil
+		}
+	}
+	return fmt.Errorf("invalid issuer: %s", claims.Issuer)
+}
+
+func (a *jwtAuthenticator) validateAudienceClaim(claims *jwtClaims) error {
+	if len(a.config.TokenValidation.AllowedAudiences) == 0 {
+		return nil
+	}
+
+	for _, aud := range a.config.TokenValidation.AllowedAudiences {
+		if contains(claims.Audience, aud) {
+			return nil
+		}
+	}
+	return fmt.Errorf("invalid audience: %v", claims.Audience)
+}
+
+func (a *jwtAuthenticator) validateScopesClaim(claims *jwtClaims) error {
+	for _, scope := range a.config.TokenValidation.RequiredScopes {
+		if !contains(claims.Scope, scope) {
+			return fmt.Errorf("missing required scope: %s", scope)
+		}
+	}
+	return nil
+}
+
+func (a *jwtAuthenticator) validateCustomClaims(claims *jwtClaims) error {
 	for claim, value := range a.config.TokenValidation.RequiredClaims {
 		if claims.Claims[claim] != value {
-			return nil, fmt.Errorf("invalid claim value for %s", claim)
+			return fmt.Errorf("invalid claim value for %s", claim)
 		}
 	}
+	return nil
+}
 
-	if a.config.AuditLogger != nil {
-		entry := &audit.Entry{
-			Type:    audit.TypeToken,
-			Action:  audit.ActionTokenValidate,
-			ActorID: claims.Subject,
-			Result:  audit.ResultSuccess,
-			Metadata: audit.Metadata{
-				"issuer":   claims.Issuer,
-				"audience": fmt.Sprintf("%v", claims.Audience),
-				"scope":    fmt.Sprintf("%v", claims.Scope),
-			},
-		}
-		a.config.AuditLogger.Log(ctx, entry)
+func (a *jwtAuthenticator) logTokenValidation(ctx context.Context, claims *jwtClaims) {
+	if a.config.AuditLogger == nil {
+		return
 	}
 
+	entry := &audit.Entry{
+		Type:    audit.TypeToken,
+		Action:  audit.ActionTokenValidate,
+		ActorID: claims.Subject,
+		Result:  audit.ResultSuccess,
+		Metadata: audit.Metadata{
+			"issuer":   claims.Issuer,
+			"audience": fmt.Sprintf("%v", claims.Audience),
+			"scope":    fmt.Sprintf("%v", claims.Scope),
+		},
+	}
+	a.config.AuditLogger.Log(ctx, entry)
+}
+
+func (a *jwtAuthenticator) createTokenData(claims *jwtClaims) *TokenData {
 	return &TokenData{
 		Valid:     true,
 		Subject:   claims.Subject,
@@ -203,7 +249,7 @@ func (a *jwtAuthenticator) ValidateToken(ctx context.Context, tokenStr string) (
 		ExpiresAt: claims.ExpiresAt.Time,
 		Scope:     claims.Scope,
 		Claims:    claims.Claims,
-	}, nil
+	}
 }
 
 func (a *jwtAuthenticator) RevokeToken(ctx context.Context, tokenStr string) error {

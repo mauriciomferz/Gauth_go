@@ -79,6 +79,21 @@ func (s *JWTSigner) SignToken(token *Token) (string, error) {
 
 // VerifyToken verifies and parses a JWT token string
 func (s *JWTSigner) VerifyToken(tokenString string) (*Token, error) {
+	jwtToken, err := s.parseJWTToken(tokenString)
+	if err != nil {
+		return nil, err
+	}
+
+	claims, err := s.extractClaims(jwtToken)
+	if err != nil {
+		return nil, err
+	}
+
+	token := s.createTokenFromClaims(tokenString, claims)
+	return token, nil
+}
+
+func (s *JWTSigner) parseJWTToken(tokenString string) (*jwt.Token, error) {
 	jwtToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if token.Method != jwtSigningMethod(s.signingAlg) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -94,17 +109,31 @@ func (s *JWTSigner) VerifyToken(tokenString string) (*Token, error) {
 		return nil, ErrInvalidToken
 	}
 
+	return jwtToken, nil
+}
+
+func (s *JWTSigner) extractClaims(jwtToken *jwt.Token) (jwt.MapClaims, error) {
 	claims, ok := jwtToken.Claims.(jwt.MapClaims)
 	if !ok {
 		return nil, fmt.Errorf("invalid claims type")
 	}
+	return claims, nil
+}
 
+func (s *JWTSigner) createTokenFromClaims(tokenString string, claims jwt.MapClaims) *Token {
 	token := &Token{
 		Algorithm: s.signingAlg,
 		Value:     tokenString,
+		Metadata:  &Metadata{},
 	}
 
-	// Parse standard claims
+	s.parseStandardClaims(token, claims)
+	s.parseCustomClaims(token, claims)
+
+	return token
+}
+
+func (s *JWTSigner) parseStandardClaims(token *Token, claims jwt.MapClaims) {
 	if id, ok := claims["jti"].(string); ok {
 		token.ID = id
 	}
@@ -117,6 +146,13 @@ func (s *JWTSigner) VerifyToken(tokenString string) (*Token, error) {
 	if iss, ok := claims["iss"].(string); ok {
 		token.Issuer = iss
 	}
+
+	s.parseAudienceClaim(token, claims)
+	s.parseTimeClaims(token, claims)
+	s.parseScopesClaim(token, claims)
+}
+
+func (s *JWTSigner) parseAudienceClaim(token *Token, claims jwt.MapClaims) {
 	if aud, ok := claims["aud"].([]interface{}); ok {
 		token.Audience = make([]string, len(aud))
 		for i, a := range aud {
@@ -125,6 +161,9 @@ func (s *JWTSigner) VerifyToken(tokenString string) (*Token, error) {
 			}
 		}
 	}
+}
+
+func (s *JWTSigner) parseTimeClaims(token *Token, claims jwt.MapClaims) {
 	if iat, ok := claims["iat"].(float64); ok {
 		token.IssuedAt = time.Unix(int64(iat), 0)
 	}
@@ -134,6 +173,9 @@ func (s *JWTSigner) VerifyToken(tokenString string) (*Token, error) {
 	if exp, ok := claims["exp"].(float64); ok {
 		token.ExpiresAt = time.Unix(int64(exp), 0)
 	}
+}
+
+func (s *JWTSigner) parseScopesClaim(token *Token, claims jwt.MapClaims) {
 	if scp, ok := claims["scp"].([]interface{}); ok {
 		token.Scopes = make([]string, len(scp))
 		for i, s := range scp {
@@ -142,9 +184,9 @@ func (s *JWTSigner) VerifyToken(tokenString string) (*Token, error) {
 			}
 		}
 	}
+}
 
-	// Extract metadata from 'meta' claim into strongly-typed Metadata
-	token.Metadata = &Metadata{}
+func (s *JWTSigner) parseCustomClaims(token *Token, claims jwt.MapClaims) {
 	if metaVal, ok := claims["meta"].(map[string]interface{}); ok {
 		appData := make(map[string]string, len(metaVal))
 		for k, v := range metaVal {
@@ -156,8 +198,6 @@ func (s *JWTSigner) VerifyToken(tokenString string) (*Token, error) {
 		}
 		token.Metadata.AppData = appData
 	}
-
-	return token, nil
 }
 
 // jwtSigningMethod converts our Algorithm type to jwt.SigningMethod

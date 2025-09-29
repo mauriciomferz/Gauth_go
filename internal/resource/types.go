@@ -83,7 +83,7 @@ type Resource struct {
 	// Additional metadata
 	Tags     []string          `json:"tags"`     // Resource tags
 	Metadata map[string]string `json:"metadata"` // Custom metadata
-	Config   *ResourceConfig   `json:"config"`   // Configuration
+	Config   *Config   `json:"config"`   // Configuration
 }
 
 // RateLimit represents rate limiting configuration

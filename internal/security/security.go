@@ -10,8 +10,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// SecurityConfig holds security-related configuration
-type SecurityConfig struct {
+// VaultConfig contains Vault configuration
+type VaultConfig struct {
+	Address string
+	Token   string
+}
+
+// Config defines the configuration for security features
+type Config struct {
 	TLSConfig      *tls.Config
 	VaultConfig    *api.Config
 	TokenLifetime  time.Duration
@@ -19,9 +25,9 @@ type SecurityConfig struct {
 	IPBlacklist    []net.IPNet
 }
 
-// SecurityManager handles security-related operations
-type SecurityManager struct {
-	config    *SecurityConfig
+// Manager handles security-related operations
+type Manager struct {
+	config    *Config
 	vaultAPI  *api.Client
 	blacklist map[string]time.Time
 	rateLimit map[string][]time.Time
@@ -29,13 +35,13 @@ type SecurityManager struct {
 }
 
 // NewSecurityManager creates a new security manager
-func NewSecurityManager(config *SecurityConfig) (*SecurityManager, error) {
+func NewSecurityManager(config *Config) (*Manager, error) {
 	vaultClient, err := api.NewClient(config.VaultConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	return &SecurityManager{
+	return &Manager{
 		config:    config,
 		vaultAPI:  vaultClient,
 		blacklist: make(map[string]time.Time),
@@ -45,7 +51,7 @@ func NewSecurityManager(config *SecurityConfig) (*SecurityManager, error) {
 }
 
 // HashPassword securely hashes a password using bcrypt
-func (sm *SecurityManager) HashPassword(password string) (string, error) {
+func (sm *Manager) HashPassword(password string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), sm.hashCosts)
 	if err != nil {
 		return "", err
@@ -53,14 +59,14 @@ func (sm *SecurityManager) HashPassword(password string) (string, error) {
 	return string(hash), nil
 }
 
-// ValidatePassword checks if a password matches its hash
-func (sm *SecurityManager) ValidatePassword(password, hash string) bool {
+// ValidatePassword validates a password against a hash
+func (sm *Manager) ValidatePassword(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }
 
 // IsIPAllowed checks if an IP is allowed based on blacklist and rate limiting
-func (sm *SecurityManager) IsIPAllowed(ip string) bool {
+func (sm *Manager) IsIPAllowed(ip string) bool {
 	// Check blacklist
 	if blockedUntil, exists := sm.blacklist[ip]; exists {
 		if time.Now().Before(blockedUntil) {
@@ -91,13 +97,13 @@ func (sm *SecurityManager) IsIPAllowed(ip string) bool {
 	return true
 }
 
-// BlacklistIP temporarily blacklists an IP
-func (sm *SecurityManager) BlacklistIP(ip string, duration time.Duration) {
+// BlacklistIP adds an IP to the blacklist
+func (sm *Manager) BlacklistIP(ip string, duration time.Duration) {
 	sm.blacklist[ip] = time.Now().Add(duration)
 }
 
 // GetSecret retrieves a secret from Vault
-func (sm *SecurityManager) GetSecret(ctx context.Context, path string) (string, error) {
+func (sm *Manager) GetSecret(ctx context.Context, path string) (string, error) {
 	secret, err := sm.vaultAPI.KVv2("secret").Get(ctx, path)
 	if err != nil {
 		return "", err
@@ -106,19 +112,19 @@ func (sm *SecurityManager) GetSecret(ctx context.Context, path string) (string, 
 }
 
 // RotateKeys rotates encryption keys
-func (sm *SecurityManager) RotateKeys(ctx context.Context) error {
+func (sm *Manager) RotateKeys(ctx context.Context) error {
 	// Implementation for key rotation
 	return nil
 }
 
 // ValidateToken validates a JWT token
-func (sm *SecurityManager) ValidateToken(_ string) (bool, error) {
+func (sm *Manager) ValidateToken(_ string) (bool, error) {
 	// Implementation for token validation
 	return false, nil
 }
 
 // SecureHeaders returns secure HTTP headers
-func (sm *SecurityManager) SecureHeaders() map[string]string {
+func (sm *Manager) SecureHeaders() map[string]string {
 	return map[string]string{
 		"Strict-Transport-Security": "max-age=31536000; includeSubDomains",
 		"X-Frame-Options":           "DENY",

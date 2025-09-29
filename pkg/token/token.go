@@ -26,8 +26,8 @@ import (
 	"time"
 )
 
-// TokenData represents metadata associated with a token
-type TokenData struct {
+// Data represents metadata associated with a token
+type Data struct {
 	TokenID      string
 	UserID       string
 	ClientID     string
@@ -48,12 +48,12 @@ func generateToken() (string, error) {
 	return base64.URLEncoding.EncodeToString(b), nil
 }
 
-// convertTokenToTokenData maps a *Token to a *TokenData for compatibility
-func ConvertTokenToTokenData(t *Token) *TokenData {
+// convertTokenToTokenData maps a *Token to a *Data for compatibility
+func ConvertTokenToTokenData(t *Token) *Data {
 	if t == nil {
 		return nil
 	}
-	return &TokenData {
+	return &Data {
 		TokenID:      t.ID,
 		UserID:       t.Subject,
 		ClientID:     "", // Not directly available; can be set if needed

@@ -18,15 +18,15 @@ type LimitEntry struct {
 	MaxRequests int
 }
 
-// RateLimiter provides rate limiting functionality
-type RateLimiter struct {
+// TokenBucketLimiter provides rate limiting functionality
+type TokenBucketLimiter struct {
 	Config  common.RateLimitConfig
 	entries map[string]*LimitEntry
 	mutex   sync.RWMutex
 }
 
 // NewRateLimiter creates a new rate limiter with the given configuration.
-func NewRateLimiter(cfg common.RateLimitConfig) *RateLimiter {
+func NewRateLimiter(cfg common.RateLimitConfig) *TokenBucketLimiter {
 	if cfg.WindowSize <= 0 {
 		cfg.WindowSize = 60
 	}
@@ -36,14 +36,14 @@ func NewRateLimiter(cfg common.RateLimitConfig) *RateLimiter {
 	if cfg.RequestsPerSecond <= 0 {
 		cfg.RequestsPerSecond = 60
 	}
-	return &RateLimiter{
+	return &TokenBucketLimiter{
 		Config:  cfg,
 		entries: make(map[string]*LimitEntry),
 	}
 }
 
-// IsAllowed checks if a client can make another request.
-func (rl *RateLimiter) IsAllowed(clientID string) bool {
+// IsAllowed checks if a client is allowed to proceed
+func (rl *TokenBucketLimiter) IsAllowed(clientID string) bool {
 	rl.mutex.Lock()
 	defer rl.mutex.Unlock()
 	now := time.Now()
@@ -85,15 +85,15 @@ func (rl *RateLimiter) IsAllowed(clientID string) bool {
 	return false
 }
 
-// GetClientState returns rate limit state for a client.
-func (rl *RateLimiter) GetClientState(clientID string) *LimitEntry {
+// GetClientState returns the current state for a client
+func (rl *TokenBucketLimiter) GetClientState(clientID string) *LimitEntry {
 	rl.mutex.RLock()
 	defer rl.mutex.RUnlock()
 	return rl.entries[clientID]
 }
 
-// Cleanup removes expired client entries.
-func (rl *RateLimiter) Cleanup() {
+// Cleanup removes expired entries from the rate limiter
+func (rl *TokenBucketLimiter) Cleanup() {
 	rl.mutex.Lock()
 	defer rl.mutex.Unlock()
 	now := time.Now()
@@ -105,8 +105,8 @@ func (rl *RateLimiter) Cleanup() {
 	}
 }
 
-// GetStats returns rate limiting statistics.
-func (rl *RateLimiter) GetStats() map[string]interface{} {
+// GetStats returns statistics about the rate limiter
+func (rl *TokenBucketLimiter) GetStats() map[string]interface{} {
 	rl.mutex.RLock()
 	defer rl.mutex.RUnlock()
 	stats := make(map[string]interface{})

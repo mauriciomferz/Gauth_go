@@ -12,31 +12,52 @@ const (
 func TestResourceConfig(t *testing.T) {
 	config := NewResourceConfig()
 
-	// Test string values
+	testPrimitiveTypes(t, config)
+	testComplexTypes(t, config)
+	testConfigOperations(t, config)
+}
+
+func testPrimitiveTypes(t *testing.T, config *Config) {
+	testStringValues(t, config)
+	testIntValues(t, config)
+	testFloatValues(t, config)
+	testBoolValues(t, config)
+}
+
+func testStringValues(t *testing.T, config *Config) {
 	config.SetString("name", testResourceName)
 	if val, ok := config.GetString("name"); !ok || val != testResourceName {
 		t.Errorf("String value not set correctly: got %v, want %s", val, testResourceName)
 	}
+}
 
-	// Test int values
+func testIntValues(t *testing.T, config *Config) {
 	config.SetInt("count", 42)
 	if val, ok := config.GetInt("count"); !ok || val != 42 {
 		t.Errorf("Int value not set correctly: got %v, want %d", val, 42)
 	}
+}
 
-	// Test float values
+func testFloatValues(t *testing.T, config *Config) {
 	config.SetFloat("ratio", 3.14)
 	if val, ok := config.GetFloat("ratio"); !ok || val != 3.14 {
 		t.Errorf("Float value not set correctly: got %v, want %f", val, 3.14)
 	}
+}
 
-	// Test bool values
+func testBoolValues(t *testing.T, config *Config) {
 	config.SetBool("enabled", true)
 	if val, ok := config.GetBool("enabled"); !ok || val != true {
 		t.Errorf("Bool value not set correctly: got %v, want %t", val, true)
 	}
+}
 
-	// Test map values
+func testComplexTypes(t *testing.T, config *Config) {
+	testMapValues(t, config)
+	testSliceValues(t, config)
+}
+
+func testMapValues(t *testing.T, config *Config) {
 	mapVal := map[string]interface{}{
 		"key1": "value1",
 		"key2": 123,
@@ -49,8 +70,9 @@ func TestResourceConfig(t *testing.T) {
 			t.Errorf("Map value content not correct: got %v", val)
 		}
 	}
+}
 
-	// Test slice values
+func testSliceValues(t *testing.T, config *Config) {
 	sliceVal := []interface{}{"one", 2, true}
 	config.SetSlice("list", sliceVal)
 	if val, ok := config.GetSlice("list"); !ok {
@@ -60,8 +82,14 @@ func TestResourceConfig(t *testing.T) {
 			t.Errorf("Slice value content not correct: got %v", val)
 		}
 	}
+}
 
-	// Test Has and Remove
+func testConfigOperations(t *testing.T, config *Config) {
+	testHasAndRemove(t, config)
+	testGetKeys(t, config)
+}
+
+func testHasAndRemove(t *testing.T, config *Config) {
 	if !config.Has("name") {
 		t.Error("Has failed to find existing key")
 	}
@@ -70,8 +98,9 @@ func TestResourceConfig(t *testing.T) {
 	if config.Has("name") {
 		t.Error("Remove failed to remove key")
 	}
+}
 
-	// Test GetKeys
+func testGetKeys(t *testing.T, config *Config) {
 	keys := config.GetKeys()
 	if len(keys) != 5 {
 		t.Errorf("GetKeys returned wrong number of keys: got %d, want %d", len(keys), 5)

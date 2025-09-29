@@ -194,7 +194,7 @@ func TestComplianceTracking(t *testing.T) {
 }
 
 // Helper functions for test setup and data creation
-func setupTestFramework(t *testing.T) *auth.StandardLegalFramework {
+func setupTestFramework(_ *testing.T) *auth.StandardLegalFramework {
 	store := auth.NewMemoryStore()
 	verifier := auth.NewStandardVerificationSystem()
 	register := auth.NewStandardCommercialRegister()
@@ -202,7 +202,7 @@ func setupTestFramework(t *testing.T) *auth.StandardLegalFramework {
 	return auth.NewStandardLegalFramework(store, verifier, register)
 }
 
-func createAuthorizerProof(t *testing.T) *auth.CapacityProof {
+func createAuthorizerProof(_ *testing.T) *auth.CapacityProof {
 	return &auth.CapacityProof{
 		Type:         "commercial_register",
 		IssuedAt:     time.Now().Add(-24 * time.Hour),
@@ -254,7 +254,7 @@ func createClientOwnerProof(t *testing.T, authorizer *auth.CapacityProof) *auth.
 	}
 }
 
-func createClientAuthorization(t *testing.T, ownerProof *auth.CapacityProof) *auth.ClientAuthorization {
+func createClientAuthorization(_ *testing.T, ownerProof *auth.CapacityProof) *auth.ClientAuthorization {
 	return &auth.ClientAuthorization{
 		Client: &auth.Client{
 			ID:           "ai_client_001",

@@ -184,7 +184,7 @@ func (c *StandardAITeamControls) hasAuthorizationDelegation(_ *token.EnhancedTok
 	return false
 }
 
-func (o *StandardOpenIDIntegration) determineAssuranceLevel(token *token.EnhancedToken) int {
+func (o *StandardOpenIDIntegration) determineAssuranceLevel(_ *token.EnhancedToken) int {
 	// Implementation would determine appropriate ACR level
 	return 4
 }
