@@ -6,7 +6,7 @@ import (
 )
 
 // RateLimitEntry tracks rate limit state for a client
-type RateLimitEntry struct {
+type Entry struct {
 	Count       int           // Number of requests in current window
 	MaxRequests int           // Maximum requests per window
 	WindowStart time.Time     // Start time of current window
@@ -16,7 +16,7 @@ type RateLimitEntry struct {
 // ClientRateLimiter provides rate limiting for multiple clients
 type ClientRateLimiter struct {
 	mutex           sync.RWMutex
-	clients         map[string]*RateLimitEntry
+	clients         map[string]*Entry
 	windowSize      time.Duration
 	maxReqPerWindow int
 	lastCleanup     time.Time
@@ -26,7 +26,7 @@ type ClientRateLimiter struct {
 // NewClientRateLimiter creates a new client-based rate limiter
 func NewClientRateLimiter(windowSize time.Duration, maxReqPerWindow int) *ClientRateLimiter {
 	return &ClientRateLimiter{
-		clients:         make(map[string]*RateLimitEntry),
+		clients:         make(map[string]*Entry),
 		windowSize:      windowSize,
 		maxReqPerWindow: maxReqPerWindow,
 		lastCleanup:     time.Now(),
@@ -47,7 +47,7 @@ func (rl *ClientRateLimiter) IsAllowed(clientID string) bool {
 	// Get or create client entry
 	entry, exists := rl.clients[clientID]
 	if !exists {
-		entry = &RateLimitEntry{
+		entry = &Entry{
 			Count:       0,
 			MaxRequests: rl.maxReqPerWindow,
 			WindowStart: time.Now(),
@@ -73,7 +73,7 @@ func (rl *ClientRateLimiter) IsAllowed(clientID string) bool {
 }
 
 // GetClientState returns the rate limit state for a client
-func (rl *ClientRateLimiter) GetClientState(clientID string) *RateLimitEntry {
+func (rl *ClientRateLimiter) GetClientState(clientID string) *Entry {
 	rl.mutex.RLock()
 	defer rl.mutex.RUnlock()
 
@@ -83,7 +83,7 @@ func (rl *ClientRateLimiter) GetClientState(clientID string) *RateLimitEntry {
 	}
 
 	// Return a copy to prevent concurrent modification
-	return &RateLimitEntry{
+	return &Entry{
 		Count:       entry.Count,
 		MaxRequests: entry.MaxRequests,
 		WindowStart: entry.WindowStart,

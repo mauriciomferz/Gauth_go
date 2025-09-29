@@ -115,7 +115,7 @@ type TokenQuery struct {
 }
 
 // StoreStats contains statistics about the token store
-type StoreStats struct {
+type Stats struct {
 	TotalTokens     int       `json:"total_tokens"`
 	ActiveTokens    int       `json:"active_tokens"`
 	RevokedTokens   int       `json:"revoked_tokens"`

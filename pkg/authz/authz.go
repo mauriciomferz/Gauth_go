@@ -80,7 +80,7 @@ func NewMemoryAuthorizer() Authorizer {
 	return &memoryAuthorizer{}
 }
 
-func (a *memoryAuthorizer) AddPolicy(ctx context.Context, policy *Policy) error {
+func (a *memoryAuthorizer) AddPolicy(_ context.Context, policy *Policy) error {
 	if policy == nil || policy.ID == "" {
 		return errors.New("policy ID is required")
 	}
@@ -90,7 +90,7 @@ func (a *memoryAuthorizer) AddPolicy(ctx context.Context, policy *Policy) error 
 	return nil
 }
 
-func (a *memoryAuthorizer) RemovePolicy(ctx context.Context, policyID string) error {
+func (a *memoryAuthorizer) RemovePolicy(_ context.Context, policyID string) error {
 	if _, exists := a.policies.LoadAndDelete(policyID); !exists {
 		return fmt.Errorf("policy %s not found", policyID)
 	}

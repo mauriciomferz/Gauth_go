@@ -263,7 +263,7 @@ func (s *Service) signToken(token *Token) (string, error) {
 	return base64.URLEncoding.EncodeToString(signature), nil
 }
 
-func (s *Service) verifySignature(token *Token) error {
+func (s *Service) verifySignature(_ *Token) error {
 	// This is a placeholder - actual verification would use JWT, PASETO, etc.
 	return nil
 }

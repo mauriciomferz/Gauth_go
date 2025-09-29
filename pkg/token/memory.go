@@ -195,93 +195,94 @@ func (s *MemoryStore) Refresh(ctx context.Context, refreshToken *Token) (*Token,
 
 // matchesFilter checks if a token matches the given filter criteria
 func matchesFilter(token *Token, filter Filter) bool {
-	// Check expiration
+	return matchesTimeFilter(token, filter) &&
+		matchesIdentityFilter(token, filter) &&
+		matchesTypeFilter(token, filter) &&
+		matchesScopeFilter(token, filter) &&
+		matchesActiveFilter(token, filter)
+}
+
+func matchesTimeFilter(token *Token, filter Filter) bool {
 	if !filter.ExpiresBefore.IsZero() && token.ExpiresAt.After(filter.ExpiresBefore) {
 		return false
 	}
 	if !filter.ExpiresAfter.IsZero() && token.ExpiresAt.Before(filter.ExpiresAfter) {
 		return false
 	}
-
-	// Check issuance
 	if !filter.IssuedBefore.IsZero() && token.IssuedAt.After(filter.IssuedBefore) {
 		return false
 	}
 	if !filter.IssuedAfter.IsZero() && token.IssuedAt.Before(filter.IssuedAfter) {
 		return false
 	}
+	return true
+}
 
-	// Check subject
+func matchesIdentityFilter(token *Token, filter Filter) bool {
 	if filter.Subject != "" && token.Subject != filter.Subject {
 		return false
 	}
-
-	// Check issuer
 	if filter.Issuer != "" && token.Issuer != filter.Issuer {
 		return false
 	}
+	return true
+}
 
-	// Check token types
-	if len(filter.Types) > 0 {
-		typeMatch := false
-		for _, t := range filter.Types {
-			if token.Type == t {
-				typeMatch = true
+func matchesTypeFilter(token *Token, filter Filter) bool {
+	if len(filter.Types) == 0 {
+		return true
+	}
+	for _, t := range filter.Types {
+		if token.Type == t {
+			return true
+		}
+	}
+	return false
+}
+
+func matchesScopeFilter(token *Token, filter Filter) bool {
+	if len(filter.Scopes) == 0 {
+		return true
+	}
+	if filter.RequireAllScopes {
+		return hasAllScopes(token.Scopes, filter.Scopes)
+	}
+	return hasAnyScope(token.Scopes, filter.Scopes)
+}
+
+func hasAllScopes(tokenScopes, requiredScopes []string) bool {
+	for _, required := range requiredScopes {
+		found := false
+		for _, scope := range tokenScopes {
+			if scope == required {
+				found = true
 				break
 			}
 		}
-		if !typeMatch {
+		if !found {
 			return false
 		}
 	}
-
-	// Check scopes
-	if len(filter.Scopes) > 0 {
-		if filter.RequireAllScopes {
-			// Must have all scopes
-			for _, required := range filter.Scopes {
-				found := false
-				for _, scope := range token.Scopes {
-					if scope == required {
-						found = true
-						break
-					}
-				}
-				if !found {
-					return false
-				}
-			}
-		} else {
-			// Must have at least one scope
-			found := false
-			for _, required := range filter.Scopes {
-				for _, scope := range token.Scopes {
-					if scope == required {
-						found = true
-						break
-					}
-				}
-				if found {
-					break
-				}
-			}
-			if !found {
-				return false
-			}
-		}
-	}
-
-	// Check active
-	if filter.Active {
-		if time.Now().After(token.ExpiresAt) || time.Now().Before(token.NotBefore) {
-			return false
-		}
-	}
-
-	// Check metadata (skipped: Metadata is now a strongly-typed struct)
-	// If you need to filter by metadata fields, add explicit checks here.
-
 	return true
+}
+
+func hasAnyScope(tokenScopes, requiredScopes []string) bool {
+	for _, required := range requiredScopes {
+		for _, scope := range tokenScopes {
+			if scope == required {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func matchesActiveFilter(token *Token, filter Filter) bool {
+	if !filter.Active {
+		return true
+	}
+	now := time.Now()
+	return now.Before(token.ExpiresAt) && now.After(token.NotBefore)
 }
 
 // Count returns the number of tokens matching the filter

@@ -353,117 +353,114 @@ func (fs *FileStorage) matchesFilter(entry *Entry, filter *Filter) bool {
 		return true
 	}
 
-	// Check actor IDs
-	if len(filter.ActorIDs) > 0 {
-		actorMatch := false
-		for _, id := range filter.ActorIDs {
-			if entry.ActorID == id {
-				actorMatch = true
-				break
+	return fs.matchesActorIDs(entry, filter) &&
+		fs.matchesTypes(entry, filter) &&
+		fs.matchesActions(entry, filter) &&
+		fs.matchesResults(entry, filter) &&
+		fs.matchesTimeRange(entry, filter) &&
+		fs.matchesChainID(entry, filter) &&
+		fs.matchesTags(entry, filter) &&
+		fs.matchesMetadata(entry, filter)
+}
+
+func (fs *FileStorage) matchesActorIDs(entry *Entry, filter *Filter) bool {
+	if len(filter.ActorIDs) == 0 {
+		return true
+	}
+	for _, id := range filter.ActorIDs {
+		if entry.ActorID == id {
+			return true
+		}
+	}
+	return false
+}
+
+func (fs *FileStorage) matchesTypes(entry *Entry, filter *Filter) bool {
+	if len(filter.Types) == 0 {
+		return true
+	}
+	for _, t := range filter.Types {
+		if entry.Type == t {
+			return true
+		}
+	}
+	return false
+}
+
+func (fs *FileStorage) matchesActions(entry *Entry, filter *Filter) bool {
+	if len(filter.Actions) == 0 {
+		return true
+	}
+	for _, a := range filter.Actions {
+		if entry.Action == a {
+			return true
+		}
+	}
+	return false
+}
+
+func (fs *FileStorage) matchesResults(entry *Entry, filter *Filter) bool {
+	if len(filter.Results) == 0 {
+		return true
+	}
+	for _, r := range filter.Results {
+		if entry.Result == r {
+			return true
+		}
+	}
+	return false
+}
+
+func (fs *FileStorage) matchesTimeRange(entry *Entry, filter *Filter) bool {
+	if filter.TimeRange == nil {
+		return true
+	}
+	return !entry.Timestamp.Before(filter.TimeRange.Start) &&
+		   !entry.Timestamp.After(filter.TimeRange.End)
+}
+
+func (fs *FileStorage) matchesChainID(entry *Entry, filter *Filter) bool {
+	return filter.ChainID == "" || entry.ChainID == filter.ChainID
+}
+
+func (fs *FileStorage) matchesTags(entry *Entry, filter *Filter) bool {
+	if len(filter.Tags) == 0 {
+		return true
+	}
+	for _, wantTag := range filter.Tags {
+		for _, tag := range entry.Tags {
+			if tag == wantTag {
+				return true
 			}
 		}
-		if !actorMatch {
-			return false
-		}
 	}
+	return false
+}
 
-	// Check type
-	if len(filter.Types) > 0 {
-		typeMatch := false
-		for _, t := range filter.Types {
-			if entry.Type == t {
-				typeMatch = true
-				break
-			}
-		}
-		if !typeMatch {
-			return false
-		}
-	}
-
-	// Check action
-	if len(filter.Actions) > 0 {
-		actionMatch := false
-		for _, a := range filter.Actions {
-			if entry.Action == a {
-				actionMatch = true
-				break
-			}
-		}
-		if !actionMatch {
-			return false
-		}
-	}
-
-	// Check result
-	if len(filter.Results) > 0 {
-		resultMatch := false
-		for _, r := range filter.Results {
-			if entry.Result == r {
-				resultMatch = true
-				break
-			}
-		}
-		if !resultMatch {
-			return false
-		}
-	}
-
-	// Check time range
-	if filter.TimeRange != nil {
-		if entry.Timestamp.Before(filter.TimeRange.Start) ||
-			entry.Timestamp.After(filter.TimeRange.End) {
-			return false
-		}
-	}
-
-	// Check chain ID
-	if filter.ChainID != "" && entry.ChainID != filter.ChainID {
-		return false
-	}
-
-	// Check tags
-	if len(filter.Tags) > 0 {
-		tagMatch := false
-		for _, wantTag := range filter.Tags {
-			for _, tag := range entry.Tags {
-				if tag == wantTag {
-					tagMatch = true
-					break
-				}
-			}
-			if tagMatch {
-				break
-			}
-		}
-		if !tagMatch {
-			return false
-		}
-	}
-
-	// Check metadata
+func (fs *FileStorage) matchesMetadata(entry *Entry, filter *Filter) bool {
 	for _, mf := range filter.Metadata {
 		value, exists := entry.Metadata[mf.Key]
 		if !exists {
 			return false
 		}
-		switch mf.Operator {
-		case "eq":
-			if value != mf.Value {
-				return false
-			}
-		case "ne":
-			if value == mf.Value {
-				return false
-			}
-		case "contains":
-			if !contains(value, mf.Value) {
-				return false
-			}
+		if !fs.matchesMetadataField(value, mf) {
+			return false
 		}
 	}
-
 	return true
+}
+
+func (fs *FileStorage) matchesMetadataField(value interface{}, mf MetadataFilter) bool {
+	switch mf.Operator {
+	case "eq":
+		return value == mf.Value
+	case "ne":
+		return value != mf.Value
+	case "contains":
+		return contains(value, mf.Value)
+	default:
+		return false
+	}
 }
 
 func contains(s, substr interface{}) bool {

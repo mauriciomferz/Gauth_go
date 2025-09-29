@@ -1,6 +1,5 @@
 // Package events provides a unified event system for GAuth
 // This file defines builder methods for the Event type
-
 package events
 
 import (

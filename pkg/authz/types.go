@@ -141,12 +141,12 @@ type PolicyEvaluator interface {
 }
 
 // AuthzError represents authorization specific errors (RFC111: error handling for compliance and audit)
-type AuthzError struct {
+type Error struct {
 	Code    string // Error code
 	Message string // Error message
 	Details string // Additional details
 }
 
-func (e *AuthzError) Error() string {
+func (e *Error) Error() string {
 	return "authz: " + e.Code + ": " + e.Message
 }

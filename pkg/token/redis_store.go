@@ -260,15 +260,66 @@ func (s *RedisStore) ttl(token *Token) time.Duration {
 }
 
 func (s *RedisStore) matchesFilter(token *Token, filter Filter) bool {
-	// Subject
+	return s.matchesTimeFilter(token, filter) &&
+		s.matchesIdentityFilter(token, filter) &&
+		s.matchesTypeFilter(token, filter) &&
+		s.matchesScopeFilter(token, filter) &&
+		s.matchesActiveFilter(token, filter)
+}
+
+func (s *RedisStore) matchesTimeFilter(token *Token, filter Filter) bool {
+	if !filter.ExpiresAfter.IsZero() && token.ExpiresAt.Before(filter.ExpiresAfter) {
+		return false
+	}
+	if !filter.ExpiresBefore.IsZero() && token.ExpiresAt.After(filter.ExpiresBefore) {
+		return false
+	}
+	if !filter.IssuedAfter.IsZero() && token.IssuedAt.Before(filter.IssuedAfter) {
+		return false
+	}
+	if !filter.IssuedBefore.IsZero() && token.IssuedAt.After(filter.IssuedBefore) {
+		return false
+	}
+	return true
+}
+
+func (s *RedisStore) matchesIdentityFilter(token *Token, filter Filter) bool {
 	if filter.Subject != "" && token.Subject != filter.Subject {
 		return false
 	}
-	// Types
-	if len(filter.Types) > 0 {
+	if filter.Issuer != "" && token.Issuer != filter.Issuer {
+		return false
+	}
+	return true
+}
+
+func (s *RedisStore) matchesTypeFilter(token *Token, filter Filter) bool {
+	if len(filter.Types) == 0 {
+		return true
+	}
+	for _, t := range filter.Types {
+		if token.Type == t {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *RedisStore) matchesScopeFilter(token *Token, filter Filter) bool {
+	if len(filter.Scopes) == 0 {
+		return true
+	}
+	if filter.RequireAllScopes {
+		return s.hasAllScopes(token.Scopes, filter.Scopes)
+	}
+	return s.hasAnyScope(token.Scopes, filter.Scopes)
+}
+
+func (s *RedisStore) hasAllScopes(tokenScopes, requiredScopes []string) bool {
+	for _, required := range requiredScopes {
 		found := false
-		for _, t := range filter.Types {
-			if token.Type == t {
+		for _, scope := range tokenScopes {
+			if scope == required {
 				found = true
 				break
 			}
@@ -277,64 +328,24 @@ func (s *RedisStore) matchesFilter(token *Token, filter Filter) bool {
 			return false
 		}
 	}
-	// Issuer
-	if filter.Issuer != "" && token.Issuer != filter.Issuer {
-		return false
-	}
-	// ExpiresAfter/ExpiresBefore
-	if !filter.ExpiresAfter.IsZero() && token.ExpiresAt.Before(filter.ExpiresAfter) {
-		return false
-	}
-	if !filter.ExpiresBefore.IsZero() && token.ExpiresAt.After(filter.ExpiresBefore) {
-		return false
-	}
-	// IssuedAfter/IssuedBefore
-	if !filter.IssuedAfter.IsZero() && token.IssuedAt.Before(filter.IssuedAfter) {
-		return false
-	}
-	if !filter.IssuedBefore.IsZero() && token.IssuedAt.After(filter.IssuedBefore) {
-		return false
-	}
-	// Scopes
-	if len(filter.Scopes) > 0 {
-		if filter.RequireAllScopes {
-			for _, required := range filter.Scopes {
-				found := false
-				for _, scope := range token.Scopes {
-					if scope == required {
-						found = true
-						break
-					}
-				}
-				if !found {
-					return false
-				}
-			}
-		} else {
-			found := false
-			for _, required := range filter.Scopes {
-				for _, scope := range token.Scopes {
-					if scope == required {
-						found = true
-						break
-					}
-				}
-				if found {
-					break
-				}
-			}
-			if !found {
-				return false
-			}
-		}
-	}
-	// Active
-	if filter.Active {
-		now := time.Now()
-		if now.After(token.ExpiresAt) || now.Before(token.NotBefore) {
-			return false
-		}
-	}
-	// Metadata (skipped: implement if needed)
 	return true
+}
+
+func (s *RedisStore) hasAnyScope(tokenScopes, requiredScopes []string) bool {
+	for _, required := range requiredScopes {
+		for _, scope := range tokenScopes {
+			if scope == required {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (s *RedisStore) matchesActiveFilter(token *Token, filter Filter) bool {
+	if !filter.Active {
+		return true
+	}
+	now := time.Now()
+	return now.Before(token.ExpiresAt) && now.After(token.NotBefore)
 }
