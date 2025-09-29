@@ -296,8 +296,6 @@ func (s *Service) validateAuthRequest(req *AuthorizationRequest) error {
 	return nil
 }
 
-
-
 func validateConfig(config Config) error {
 	if config.AuthServerURL == "" {
 		return fmt.Errorf("auth server URL is required")

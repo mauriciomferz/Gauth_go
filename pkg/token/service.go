@@ -30,7 +30,7 @@ type ServiceAPI interface {
 type Service struct {
 	config Config
 	store  Store
-}// GetToken retrieves a token by its ID.
+} // GetToken retrieves a token by its ID.
 func (s *Service) GetToken(ctx context.Context, id string) (*Token, error) {
 	return s.store.Get(ctx, id)
 }

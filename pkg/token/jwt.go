@@ -214,5 +214,3 @@ func jwtSigningMethod(alg Algorithm) jwt.SigningMethod {
 		return jwt.SigningMethodRS256
 	}
 }
-
-

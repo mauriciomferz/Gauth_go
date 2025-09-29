@@ -76,7 +76,9 @@ func NewStandardComplianceChecker(config *Config, tracker ComplianceTracker) *St
 }
 
 // CheckCompliance implements ComplianceChecker
-func (c *StandardComplianceChecker) CheckCompliance(ctx context.Context, token *token.EnhancedToken, action string) error {
+func (c *StandardComplianceChecker) CheckCompliance(
+	ctx context.Context, token *token.EnhancedToken, action string,
+) error {
 	// Check basic token validity
 	if token.IsExpired() {
 		return NewError(ErrAuthorizationExpired, "token has expired", nil)
@@ -108,7 +110,9 @@ func (c *StandardComplianceChecker) CheckCompliance(ctx context.Context, token *
 }
 
 // ValidateRestrictions implements ComplianceChecker
-func (c *StandardComplianceChecker) ValidateRestrictions(ctx context.Context, restrictions *token.Restrictions, action string) error {
+func (c *StandardComplianceChecker) ValidateRestrictions(
+	ctx context.Context, restrictions *token.Restrictions, action string,
+) error {
 	// Check value limits
 	if restrictions.ValueLimits != nil {
 		if err := c.checkValueLimits(ctx, restrictions.ValueLimits, action); err != nil {
@@ -146,7 +150,9 @@ func (c *StandardComplianceChecker) ValidateRestrictions(ctx context.Context, re
 }
 
 // TrackCompliance implements ComplianceChecker
-func (c *StandardComplianceChecker) TrackCompliance(ctx context.Context, token *token.EnhancedToken, action string, compliant bool) error {
+func (c *StandardComplianceChecker) TrackCompliance(
+	ctx context.Context, token *token.EnhancedToken, action string, compliant bool,
+) error {
 	event := ComplianceEvent{
 		TokenID:   token.ID,
 		Action:    action,
@@ -159,7 +165,9 @@ func (c *StandardComplianceChecker) TrackCompliance(ctx context.Context, token *
 
 // Helper methods
 
-func (c *StandardComplianceChecker) checkDelegationGuidelines(_ context.Context, token *token.EnhancedToken, _ string) error {
+func (c *StandardComplianceChecker) checkDelegationGuidelines(
+	_ context.Context, token *token.EnhancedToken, _ string,
+) error {
 	if token.AI == nil || len(token.AI.DelegationGuidelines) == 0 {
 		return nil
 	}

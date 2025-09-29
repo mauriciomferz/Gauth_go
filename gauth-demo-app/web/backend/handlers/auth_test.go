@@ -21,29 +21,29 @@ import (
 func setupTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
-	
+
 	// Mock logger
 	logger := logrus.New()
 	logger.SetLevel(logrus.ErrorLevel) // Suppress logs during tests
-	
+
 	// Create mock config for the service
 	config := viper.New()
 	config.SetDefault("redis.addr", "localhost:6379")
 	config.SetDefault("redis.password", "")
 	config.SetDefault("redis.db", 0)
-	
+
 	// Create GAuth service (will handle Redis connection failures gracefully)
 	mockService, err := services.NewGAuthService(config, logger)
 	if err != nil {
 		// In case of service creation failure, create a minimal handler anyway
 		logger.WithError(err).Warn("Failed to create GAuth service for tests")
 	}
-	
+
 	authHandler := &AuthHandler{
 		service: mockService,
 		logger:  logger,
 	}
-	
+
 	// Register routes using the actual available methods
 	v1 := router.Group("/api/v1")
 	{
@@ -53,7 +53,7 @@ func setupTestRouter() *gin.Engine {
 		v1.GET("/auth/validate", authHandler.Validate)
 		v1.GET("/auth/userinfo", authHandler.UserInfo)
 	}
-	
+
 	return router
 }
 
@@ -117,7 +117,7 @@ func TestAuthHandler_Authorize(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				require.NoError(t, err)
-				
+
 				// The authorize endpoint returns an authorization code, not access tokens
 				assert.Contains(t, response, "code")
 				assert.Contains(t, response, "redirect_uri")
@@ -127,15 +127,13 @@ func TestAuthHandler_Authorize(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				require.NoError(t, err)
-				
+
 				assert.Contains(t, response, "error")
 				assert.Contains(t, response["error"].(string), tt.expectedError)
 			}
 		})
 	}
 }
-
-
 
 func TestAuthHandler_Token(t *testing.T) {
 	router := setupTestRouter()
@@ -149,10 +147,10 @@ func TestAuthHandler_Token(t *testing.T) {
 			name: "Valid Token Request",
 			payload: map[string]interface{}{
 				"grant_type":    "authorization_code",
-				"code":         "test_auth_code_123",
-				"client_id":    "demo_client",
+				"code":          "test_auth_code_123",
+				"client_id":     "demo_client",
 				"client_secret": "demo_secret",
-				"redirect_uri": "http://localhost:3000/callback",
+				"redirect_uri":  "http://localhost:3000/callback",
 			},
 			expectedStatus: http.StatusOK,
 		},
@@ -170,7 +168,7 @@ func TestAuthHandler_Token(t *testing.T) {
 			name: "Invalid Grant Type",
 			payload: map[string]interface{}{
 				"grant_type": "invalid_grant",
-				"code":      "test_code",
+				"code":       "test_code",
 			},
 			expectedStatus: http.StatusBadRequest,
 		},
@@ -194,7 +192,7 @@ func TestAuthHandler_Token(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				require.NoError(t, err)
-				
+
 				assert.Contains(t, response, "access_token")
 				assert.Contains(t, response, "token_type")
 				assert.Contains(t, response, "expires_in")
@@ -237,7 +235,7 @@ func TestAuthHandler_ValidateToken(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			req, err := http.NewRequest("GET", "/api/v1/auth/validate", nil)
 			require.NoError(t, err)
-			
+
 			if tt.authHeader != "" {
 				req.Header.Set("Authorization", tt.authHeader)
 			}
@@ -251,7 +249,7 @@ func TestAuthHandler_ValidateToken(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				require.NoError(t, err)
-				
+
 				assert.Contains(t, response, "valid")
 				assert.True(t, response["valid"].(bool))
 				assert.Contains(t, response, "user_id")
@@ -312,7 +310,7 @@ func TestAuthHandler_Revoke(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				require.NoError(t, err)
-				
+
 				assert.Contains(t, response, "message")
 				assert.Equal(t, "Token revoked successfully", response["message"])
 			}

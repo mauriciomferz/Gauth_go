@@ -96,7 +96,9 @@ func (e *StandardAuthorizationEnforcer) VerifyHumanInChain(ctx context.Context, 
 }
 
 // EnforceSecondLevelApproval implements the dual control principle
-func (e *StandardAuthorizationEnforcer) EnforceSecondLevelApproval(ctx context.Context, token *token.EnhancedToken, action string) error {
+func (e *StandardAuthorizationEnforcer) EnforceSecondLevelApproval(
+	ctx context.Context, token *token.EnhancedToken, action string,
+) error {
 	rules, err := e.getJurisdictionRules(ctx, token)
 	if err != nil {
 		return fmt.Errorf("failed to get jurisdiction rules: %w", err)
@@ -130,7 +132,9 @@ func (e *StandardAuthorizationEnforcer) EnforceSecondLevelApproval(ctx context.C
 }
 
 // ValidateJurisdictionRules checks compliance with jurisdiction-specific requirements
-func (e *StandardAuthorizationEnforcer) ValidateJurisdictionRules(ctx context.Context, token *token.EnhancedToken, rules *JurisdictionRules) error {
+func (e *StandardAuthorizationEnforcer) ValidateJurisdictionRules(
+	ctx context.Context, token *token.EnhancedToken, rules *JurisdictionRules,
+) error {
 	// Verify fiduciary duties
 	if err := e.verifyFiduciaryDuties(ctx, token, rules.FiduciaryDuties); err != nil {
 		return fmt.Errorf("fiduciary duties not met: %w", err)

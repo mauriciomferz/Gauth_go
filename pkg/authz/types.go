@@ -64,7 +64,8 @@ type Policy struct {
 	Status string `json:"status"`
 }
 
-// AccessRequest represents a request to perform an action on a resource (RFC111: credentialized request, e.g. for transaction, decision, or action)
+// AccessRequest represents a request to perform an action on a resource
+// (RFC111: credentialized request, e.g. for transaction, decision, or action)
 type AccessRequest struct {
 	Subject  Subject           `json:"subject"`
 	Resource Resource          `json:"resource"`

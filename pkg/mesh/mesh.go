@@ -107,7 +107,7 @@ type meshImpl struct {
 	status    sync.Map // map[ServiceID]ServiceStatus
 	watchers  []chan<- ServiceInfo
 	watcherMu sync.RWMutex
-	metrics     *metrics.Collector
+	metrics   *metrics.Collector
 }
 
 // ServiceStatus represents the current status of a service

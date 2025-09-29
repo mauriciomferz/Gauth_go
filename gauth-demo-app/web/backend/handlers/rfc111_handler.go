@@ -300,7 +300,7 @@ func (h *RFC111Handler) ValidateLegalFramework(c *gin.Context) {
 	// Validate business rules
 	if req.Jurisdiction == "" && req.ClientID == "" {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:   "invalid_request", 
+			Error:   "invalid_request",
 			Message: "Missing required fields for legal framework validation",
 		})
 		return
@@ -317,7 +317,7 @@ func (h *RFC111Handler) ValidateLegalFramework(c *gin.Context) {
 	} else {
 		legalBasis = "default_legal_basis"
 	}
-	
+
 	validation := &services.LegalValidationResult{
 		Valid:             true,
 		JurisdictionID:    req.Jurisdiction,

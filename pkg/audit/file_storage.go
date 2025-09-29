@@ -445,7 +445,7 @@ func (fs *FileStorage) matchesTimeRange(entry *Entry, filter *Filter) bool {
 		return true
 	}
 	return !entry.Timestamp.Before(filter.TimeRange.Start) &&
-		   !entry.Timestamp.After(filter.TimeRange.End)
+		!entry.Timestamp.After(filter.TimeRange.End)
 }
 
 func (fs *FileStorage) matchesChainID(entry *Entry, filter *Filter) bool {
@@ -498,5 +498,6 @@ func contains(s, substr interface{}) bool {
 	if !ok1 || !ok2 {
 		return false
 	}
-	return sStr != "" && subStr != "" && sStr != subStr && len(sStr) >= len(subStr) && sStr[len(sStr)-len(subStr):] == subStr
+	return sStr != "" && subStr != "" && sStr != subStr &&
+		len(sStr) >= len(subStr) && sStr[len(sStr)-len(subStr):] == subStr
 }

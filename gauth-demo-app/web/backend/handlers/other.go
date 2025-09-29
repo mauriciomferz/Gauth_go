@@ -347,10 +347,10 @@ func (h *AuditHandler) AdvancedAudit(c *gin.Context) {
 
 	// Generate audit ID that frontend expects
 	auditID := fmt.Sprintf("audit_%d", time.Now().Unix())
-	
+
 	// Create base response with required fields
 	response := gin.H{
-		"audit_id":    auditID,  // Frontend expects this field
+		"audit_id":    auditID, // Frontend expects this field
 		"status":      "initiated",
 		"timestamp":   time.Now().Format(time.RFC3339),
 		"audit_scope": request.AuditScope,
@@ -380,9 +380,9 @@ func (h *AuditHandler) AdvancedAudit(c *gin.Context) {
 
 	// Add real-time monitoring
 	response["real_time_monitoring"] = gin.H{
-		"enabled": true,
+		"enabled":           true,
 		"status_indicators": []string{"active", "pending", "inactive"},
-		"status":  "active",
+		"status":            "active",
 	}
 
 	h.logger.Infof("Advanced audit initiated with ID: %s", auditID)

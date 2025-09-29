@@ -34,12 +34,12 @@ func (h *AuditHandler) SimpleRFC111Authorize(c *gin.Context) {
 	authorizationGrant := fmt.Sprintf("grant_%d", time.Now().Unix())
 	response := gin.H{
 		// RFC Steps A & B: Authorization request processing → Grant issued
-		"code":                authorizationGrant,                           // Frontend expects this field (grant, not auth code)
-		"status":              "grant_issued",                               // Step B complete
-		"authorization_grant": authorizationGrant,                          // GAuth authorization grant credential
-		"grant_type":          "power_of_attorney",                         // GAuth-specific grant type
+		"code":                authorizationGrant,  // Frontend expects this field (grant, not auth code)
+		"status":              "grant_issued",      // Step B complete
+		"authorization_grant": authorizationGrant,  // GAuth authorization grant credential
+		"grant_type":          "power_of_attorney", // GAuth-specific grant type
 		"authorization_id":    fmt.Sprintf("rfc111_grant_%d", time.Now().Unix()),
-		"client_id":           clientID,     // AI client (application or AI system)
+		"client_id":           clientID,      // AI client (application or AI system)
 		"resource_owner":      resourceOwner, // Entity granting access
 		"ai_system":           aiSystem,      // AI system details
 		"expires_in":          600,           // Grant expires in 10 minutes
@@ -96,14 +96,14 @@ func (h *AuditHandler) SimpleRFC115Delegate(c *gin.Context) {
 	}
 
 	response := gin.H{
-		"success":     true,
-		"message":     "RFC115 delegation processed successfully",
-		"principal":   request.Principal,
+		"success":   true,
+		"message":   "RFC115 delegation processed successfully",
+		"principal": request.Principal,
 		"delegation": gin.H{
-			"type":        "power_delegation",
-			"enhanced":    request.EnhancedDelegation,
-			"protocol":    "RFC115",
-			"timestamp":   time.Now().Format(time.RFC3339),
+			"type":      "power_delegation",
+			"enhanced":  request.EnhancedDelegation,
+			"protocol":  "RFC115",
+			"timestamp": time.Now().Format(time.RFC3339),
 			"delegated_powers": []string{
 				"contract_signing",
 				"financial_transactions",
@@ -138,42 +138,42 @@ func (h *AuditHandler) SimpleEnhancedTokens(c *gin.Context) {
 
 	// Create comprehensive response with all new power-of-attorney features
 	response := gin.H{
-		"access_token":     enhancedToken,
-		"token_type":       "Enhanced Bearer",
-		"expires_in":       7200, // 2 hours
-		"client_id":        clientID,
-		
+		"access_token": enhancedToken,
+		"token_type":   "Enhanced Bearer",
+		"expires_in":   7200, // 2 hours
+		"client_id":    clientID,
+
 		// Enhanced Power-of-Attorney Features
 		"enhanced_features": gin.H{
-			"ai_authorization":       true,
-			"power_delegation":      true,
-			"legal_compliance":      true,
+			"ai_authorization":     true,
+			"power_delegation":     true,
+			"legal_compliance":     true,
 			"audit_trail":          true,
-			"blockchain_verify":     true,
-			"human_accountability":  true,
+			"blockchain_verify":    true,
+			"human_accountability": true,
 			"dual_control":         true,
-			"mathematical_proof":    true,
+			"mathematical_proof":   true,
 		},
-		
+
 		// Comprehensive Capabilities
 		"capabilities": gin.H{
-			"gauth_plus":           true,
-			"commercial_register":  true,
+			"gauth_plus":          true,
+			"commercial_register": true,
 			"dual_control":        true,
 			"cascade_auth":        true,
 			"human_oversight":     true,
 			"cryptographic_proof": true,
 		},
-		
+
 		// Legal and Compliance Framework
 		"compliance": gin.H{
-			"legal_framework":     "comprehensive",
-			"audit_enabled":       true,
-			"verification":        "cryptographic",
-			"human_accountability": true,
+			"legal_framework":          "comprehensive",
+			"audit_enabled":            true,
+			"verification":             "cryptographic",
+			"human_accountability":     true,
 			"mathematical_enforcement": true,
 		},
-		
+
 		// Human Accountability Chain
 		"human_accountability": gin.H{
 			"ultimate_human_authority": gin.H{
@@ -203,13 +203,13 @@ func (h *AuditHandler) SimpleEnhancedTokens(c *gin.Context) {
 				},
 			},
 			"accountability_level": 2,
-			"validated":           true,
-			"validated_at":        time.Now().Format(time.RFC3339),
+			"validated":            true,
+			"validated_at":         time.Now().Format(time.RFC3339),
 		},
-		
+
 		// Dual Control Principle
 		"dual_control_principle": gin.H{
-			"enabled":            true,
+			"enabled":              true,
 			"required_for_actions": []string{"high_value_transactions", "contract_signing", "legal_representation"},
 			"primary_approver": gin.H{
 				"approver_id":   "cfo_001",
@@ -225,17 +225,17 @@ func (h *AuditHandler) SimpleEnhancedTokens(c *gin.Context) {
 			},
 			"approval_threshold": gin.H{
 				"monetary_threshold": 50000.0,
-				"risk_level":        "high",
-				"action_types":      []string{"financial_transactions", "legal_decisions"},
+				"risk_level":         "high",
+				"action_types":       []string{"financial_transactions", "legal_decisions"},
 			},
 		},
-		
+
 		// Mathematical Proof and Enforcement
 		"mathematical_proof": gin.H{
-			"proof_type":            "digital_signature_chain",
-			"cryptographic_proof":   fmt.Sprintf("sha256_%x", time.Now().Unix()),
-			"verification_key":      fmt.Sprintf("key_%s_%d", clientID, time.Now().Unix()),
-			"enforcement_level":     "cryptographic",
+			"proof_type":          "digital_signature_chain",
+			"cryptographic_proof": fmt.Sprintf("sha256_%x", time.Now().Unix()),
+			"verification_key":    fmt.Sprintf("key_%s_%d", clientID, time.Now().Unix()),
+			"enforcement_level":   "cryptographic",
 			"mathematical_rules": []gin.H{
 				{
 					"rule_id":     "human_at_top",
@@ -255,11 +255,11 @@ func (h *AuditHandler) SimpleEnhancedTokens(c *gin.Context) {
 			"validated":    true,
 			"validated_at": time.Now().Format(time.RFC3339),
 		},
-		
+
 		// Authorization Cascade
 		"authorization_cascade": gin.H{
 			"human_authority": gin.H{
-				"person_id":         "ceo_001",
+				"person_id":        "ceo_001",
 				"name":             "Chief Executive Officer",
 				"position":         "CEO",
 				"authority_source": "board_of_directors_resolution",
@@ -272,13 +272,13 @@ func (h *AuditHandler) SimpleEnhancedTokens(c *gin.Context) {
 					"authorizer_id":   "ceo_001",
 					"authorized_type": "ai_agent",
 					"authorized_id":   clientID,
-					"scope":          aiCapabilities,
-					"granted_at":     time.Now().Format(time.RFC3339),
+					"scope":           aiCapabilities,
+					"granted_at":      time.Now().Format(time.RFC3339),
 				},
 			},
 			"accountability_chain": []string{"ceo_001", clientID},
 		},
-		
+
 		// Powers Granted with Standard Framework
 		"powers_granted": gin.H{
 			"basic_powers":   []string{"data_analysis", "recommendation_generation", "automated_reporting"},
@@ -299,7 +299,7 @@ func (h *AuditHandler) SimpleEnhancedTokens(c *gin.Context) {
 					},
 				},
 				"operational_powers": gin.H{
-					"resource_management":    []string{"data_access", "compute_resources"},
+					"resource_management":   []string{"data_access", "compute_resources"},
 					"process_control":       []string{"automated_workflows", "decision_trees"},
 					"system_administration": []string{"monitoring", "logging"},
 				},
@@ -356,16 +356,16 @@ func (h *AuditHandler) ValidateCompliance(c *gin.Context) {
 		"compliance_type": complianceType,
 		"entity_id":       entityID,
 		"validation": gin.H{
-			"status":        "passed",
-			"framework":     "comprehensive",
-			"verified_by":   "gauth_plus_engine",
+			"status":             "passed",
+			"framework":          "comprehensive",
+			"verified_by":        "gauth_plus_engine",
 			"verification_level": "full",
 		},
 		"compliance_report": gin.H{
-			"legal_capacity":     "verified",
+			"legal_capacity":      "verified",
 			"authorization_chain": "validated",
-			"audit_trail":        "complete",
-			"blockchain_verify":  "confirmed",
+			"audit_trail":         "complete",
+			"blockchain_verify":   "confirmed",
 		},
 		"timestamp": time.Now().Format(time.RFC3339),
 	}

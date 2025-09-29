@@ -12,8 +12,6 @@ type RegistryVerifier interface {
 	ValidateLegalStatus(ctx context.Context, ownerInfo interface{}) error
 }
 
-
-
 // IdentityVerificationService is a no-op stub for compilation.
 type IdentityVerificationService interface {
 	VerifyIdentity(ctx context.Context, id string) error
@@ -24,15 +22,7 @@ var ErrTokenNotFound = errors.New("token not found")
 
 // --- Minimal no-op types for stubs ---
 
-
-
-
-
 type EnhancedToken struct{}
-
-
-
-
 
 // AuditEvent stub for extended_controls.go
 // (Fields: Time, Type, RuleID, Result, Details, Evidence)
