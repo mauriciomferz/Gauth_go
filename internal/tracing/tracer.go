@@ -70,7 +70,9 @@ func NewTracerProvider(cfg Config) (*TracerProvider, error) {
 }
 
 // StartSpan starts a new span with the given name and attributes
-func (tp *TracerProvider) StartSpan(ctx context.Context, name string, attrs ...attribute.KeyValue) (context.Context, trace.Span) {
+func (tp *TracerProvider) StartSpan(
+	ctx context.Context, name string, attrs ...attribute.KeyValue,
+) (context.Context, trace.Span) {
 	return tp.tracer.Start(ctx, name,
 		trace.WithAttributes(attrs...),
 		trace.WithTimestamp(time.Now()),

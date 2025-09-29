@@ -112,7 +112,7 @@ func (sm *Manager) GetSecret(ctx context.Context, path string) (string, error) {
 }
 
 // RotateKeys rotates encryption keys
-func (sm *Manager) RotateKeys(ctx context.Context) error {
+func (sm *Manager) RotateKeys(_ context.Context) error {
 	// Implementation for key rotation
 	return nil
 }

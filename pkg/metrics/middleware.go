@@ -13,14 +13,14 @@ const (
 	unknownValue = "unknown"
 
 	// Prometheus configuration constants for duration buckets
-	defaultBucketStart = 0.001  // 1ms
-	bucketMultiplier   = 2      // 2x multiplier
-	defaultBucketCount = 10     // 10 buckets
-	
+	defaultBucketStart = 0.001 // 1ms
+	bucketMultiplier   = 2     // 2x multiplier
+	defaultBucketCount = 10    // 10 buckets
+
 	// Response size bucket constants
-	responseSizeStart      = 100  // 100 bytes
-	responseSizeMultiplier = 10   // 10x multiplier
-	responseSizeBuckets    = 8    // 8 buckets
+	responseSizeStart      = 100 // 100 bytes
+	responseSizeMultiplier = 10  // 10x multiplier
+	responseSizeBuckets    = 8   // 8 buckets
 )
 
 // Registration state tracking
@@ -47,9 +47,10 @@ var (
 
 	httpResponseSize = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "gauth_http_response_size_bytes",
-			Help:    "HTTP response size in bytes",
-			Buckets: prometheus.ExponentialBuckets(responseSizeStart, responseSizeMultiplier, responseSizeBuckets), // from 100B to ~1GB
+			Name: "gauth_http_response_size_bytes",
+			Help: "HTTP response size in bytes",
+			Buckets: prometheus.ExponentialBuckets(
+				responseSizeStart, responseSizeMultiplier, responseSizeBuckets), // from 100B to ~1GB
 		},
 		[]string{"handler"},
 	)

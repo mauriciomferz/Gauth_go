@@ -13,7 +13,7 @@ import (
 // Manager handles resource lifecycle and monitoring
 type Manager struct {
 	services    sync.Map // map[ServiceType]*ServiceState
-	metrics   *metrics.Collector
+	metrics     *metrics.Collector
 	configStore ConfigStore
 	mu          sync.RWMutex
 }
