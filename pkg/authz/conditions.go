@@ -15,7 +15,7 @@ type TimeRangeCondition struct {
 	TimeZone  *time.Location
 }
 
-func (c *TimeRangeCondition) Evaluate(ctx context.Context, request *AccessRequest) (bool, error) {
+func (c *TimeRangeCondition) Evaluate(_ context.Context, request *AccessRequest) (bool, error) {
 	now := time.Now()
 	if c.TimeZone != nil {
 		now = now.In(c.TimeZone)
@@ -29,7 +29,7 @@ type IPRangeCondition struct {
 	AllowedRanges []string
 }
 
-func (c *IPRangeCondition) Evaluate(ctx context.Context, request *AccessRequest) (bool, error) {
+func (c *IPRangeCondition) Evaluate(_ context.Context, request *AccessRequest) (bool, error) {
 	if ip, ok := request.Context["ip"]; ok {
 		return c.isIPInRanges(ip), nil
 	}
@@ -46,7 +46,7 @@ type ResourceOwnerCondition struct {
 	OwnerIDField string
 }
 
-func (c *ResourceOwnerCondition) Evaluate(ctx context.Context, request *AccessRequest) (bool, error) {
+func (c *ResourceOwnerCondition) Evaluate(_ context.Context, request *AccessRequest) (bool, error) {
 	if ownerID, ok := request.Context[c.OwnerIDField]; ok {
 		return request.Subject.ID == ownerID, nil
 	}

@@ -45,7 +45,7 @@ func NewLimiter(config *Config) *Limiter {
 }
 
 // Allow checks if a request should be allowed based on the rate limit configuration
-func (l *Limiter) Allow(ctx context.Context, id string) error {
+func (l *Limiter) Allow(_ context.Context, id string) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 

@@ -161,21 +161,21 @@ func (a *memoryAuthorizer) IsAllowed(ctx context.Context, request *AccessRequest
 	}, nil
 }
 
-func (a *memoryAuthorizer) AddRole(ctx context.Context, role Role, permissions []Permission) error {
+func (a *memoryAuthorizer) AddRole(_ context.Context, role Role, permissions []Permission) error {
 	if _, exists := a.roles.LoadOrStore(role, permissions); exists {
 		return fmt.Errorf("role %s already exists", role)
 	}
 	return nil
 }
 
-func (a *memoryAuthorizer) RemoveRole(ctx context.Context, role Role) error {
+func (a *memoryAuthorizer) RemoveRole(_ context.Context, role Role) error {
 	if _, exists := a.roles.LoadAndDelete(role); !exists {
 		return fmt.Errorf("role %s not found", role)
 	}
 	return nil
 }
 
-func (a *memoryAuthorizer) AssignRole(ctx context.Context, subject Subject, role Role) error {
+func (a *memoryAuthorizer) AssignRole(_ context.Context, subject Subject, role Role) error {
 	// Check if role exists
 	if _, exists := a.roles.Load(role); !exists {
 		return fmt.Errorf("role %s not found", role)

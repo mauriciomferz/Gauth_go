@@ -228,7 +228,7 @@ func createAuthorizerProof(_ *testing.T) *auth.CapacityProof {
 	}
 }
 
-func createClientOwnerProof(t *testing.T, authorizer *auth.CapacityProof) *auth.CapacityProof {
+func createClientOwnerProof(_ *testing.T, authorizer *auth.CapacityProof) *auth.CapacityProof {
 	return &auth.CapacityProof{
 		Type:         "power_of_attorney",
 		IssuedAt:     time.Now().Add(-12 * time.Hour),
@@ -274,7 +274,7 @@ func createClientAuthorization(_ *testing.T, ownerProof *auth.CapacityProof) *au
 	}
 }
 
-func createResourceOwnerProof(t *testing.T, authorizer *auth.CapacityProof) *auth.CapacityProof {
+func createResourceOwnerProof(_ *testing.T, authorizer *auth.CapacityProof) *auth.CapacityProof {
 	return &auth.CapacityProof{
 		Type:         "legal_authority",
 		IssuedAt:     time.Now().Add(-24 * time.Hour),
@@ -363,7 +363,7 @@ func createAuthorizationGrant(_ *testing.T, request *auth.LegalFrameworkRequest)
 	}
 }
 
-func validateFiduciaryDuties(t *testing.T, framework *auth.StandardLegalFramework, grant *auth.LegalFrameworkAuthorizationGrant) error {
+func validateFiduciaryDuties(_ *testing.T, framework *auth.StandardLegalFramework, _ *auth.LegalFrameworkAuthorizationGrant) error {
 	duties := []auth.FiduciaryDuty{
 		{
 			Type:        "loyalty",
@@ -387,7 +387,7 @@ func validateFiduciaryDuties(t *testing.T, framework *auth.StandardLegalFramewor
 	return nil
 }
 
-func validateGrantCompliance(t *testing.T, framework *auth.StandardLegalFramework, grant *auth.LegalFrameworkAuthorizationGrant) error {
+func validateGrantCompliance(_ *testing.T, framework *auth.StandardLegalFramework, grant *auth.LegalFrameworkAuthorizationGrant) error {
 	ctx := context.Background()
 	rules := &auth.JurisdictionRules{
 		Country: "US",
@@ -402,7 +402,7 @@ func validateGrantCompliance(t *testing.T, framework *auth.StandardLegalFramewor
 	return framework.ValidateJurisdictionRequirements(ctx, rules, "trade_execution")
 }
 
-func createTransaction(t *testing.T, grant *auth.LegalFrameworkAuthorizationGrant) *auth.Transaction {
+func createTransaction(_ *testing.T, grant *auth.LegalFrameworkAuthorizationGrant) *auth.Transaction {
 	return &auth.Transaction{
 		ID:        "txn_001",
 		GrantID:   grant.ID,
@@ -419,7 +419,7 @@ func createTransaction(t *testing.T, grant *auth.LegalFrameworkAuthorizationGran
 	}
 }
 
-func validateTransaction(t *testing.T, framework *auth.StandardLegalFramework, txn *auth.Transaction) error {
+func validateTransaction(_ *testing.T, framework *auth.StandardLegalFramework, txn *auth.Transaction) error {
 	ctx := context.Background()
 	return framework.ValidateJurisdictionRequirements(
 		ctx,
@@ -436,7 +436,7 @@ func validateTransaction(t *testing.T, framework *auth.StandardLegalFramework, t
 	)
 }
 
-func trackCompliance(t *testing.T, framework *auth.StandardLegalFramework, txn *auth.Transaction) error {
+func trackCompliance(_ *testing.T, framework *auth.StandardLegalFramework, txn *auth.Transaction) error {
 	return framework.TrackApprovalDetails(
 		context.Background(),
 		&auth.Approval{
@@ -457,7 +457,7 @@ func trackCompliance(t *testing.T, framework *auth.StandardLegalFramework, txn *
 	)
 }
 
-func createJurisdictionDuties(t *testing.T, jurisdiction string) []auth.FiduciaryDuty {
+func createJurisdictionDuties(_ *testing.T, jurisdiction string) []auth.FiduciaryDuty {
 	return []auth.FiduciaryDuty{
 		{
 			Type:        "loyalty",
@@ -474,7 +474,7 @@ func createJurisdictionDuties(t *testing.T, jurisdiction string) []auth.Fiduciar
 	}
 }
 
-func createDelegationChain(t *testing.T) []auth.DelegationLink {
+func createDelegationChain(_ *testing.T) []auth.DelegationLink {
 	now := time.Now()
 	return []auth.DelegationLink{
 		{

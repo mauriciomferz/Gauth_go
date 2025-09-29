@@ -113,5 +113,4 @@ func TestEventWithTypedMetadata(t *testing.T) {
 	if rememberMe, exists := event.Metadata.GetBool("remember_me"); !exists || !rememberMe {
 		t.Errorf("Bool metadata not set correctly: got %v, want true", rememberMe)
 	}
-
 }
