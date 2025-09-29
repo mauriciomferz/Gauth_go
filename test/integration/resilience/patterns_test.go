@@ -124,7 +124,7 @@ func TestResiliencePatterns(t *testing.T) {
 
 	// Test circuit breaker state transitions
 	t.Run("CircuitBreakerTransitions", func(t *testing.T) {
-		breaker := circuit.NewCircuitBreaker(circuit.Options{
+		breaker := circuit.NewBreaker(circuit.Options{
 			Name:             "test-transitions",
 			FailureThreshold: 2,
 			ResetTimeout:     100 * time.Millisecond,
