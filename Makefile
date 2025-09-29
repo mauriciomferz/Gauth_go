@@ -28,7 +28,7 @@ build-server: ## Build the demo server
 build-web: ## Build the web server
 	@echo "🌐 Building GAuth web server..."
 	mkdir -p $(BINARY_DIR)
-	$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-web ./cmd/web
+	cd gauth-demo-app/web/backend && $(GOBUILD) $(LDFLAGS) -o ../../../$(BINARY_DIR)/$(BINARY_NAME)-web .
 
 build-examples: ## Build example applications
 	@echo "📚 Building example applications..."
