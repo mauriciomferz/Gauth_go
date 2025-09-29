@@ -14,10 +14,14 @@ type PowerEnforcementPoint interface {
 	// SupplySide enforcement methods
 	ValidateClientDecision(ctx context.Context, token *token.EnhancedToken, decision string) error
 	EnforceClientObligations(ctx context.Context, token *token.EnhancedToken) error
-	VerifySigningAuthority(ctx context.Context, token *token.EnhancedToken, document string) error
+	VerifySigningAuthority(
+		ctx context.Context, token *token.EnhancedToken, document string,
+	) error
 
 	// DemandSide enforcement methods
-	ValidateResourceAccess(ctx context.Context, token *token.EnhancedToken, resource string) error
+	ValidateResourceAccess(
+		ctx context.Context, token *token.EnhancedToken, resource string,
+	) error
 	VerifyClientAuthorization(ctx context.Context, token *token.EnhancedToken) error
 	EnforceResourceRestrictions(ctx context.Context, token *token.EnhancedToken, action string) error
 }
