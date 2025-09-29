@@ -140,7 +140,7 @@ func (rl *RateLimiter) Allow() bool {
 
 // Composite combines multiple resilience patterns
 type Composite struct {
-	breaker   *circuit.CircuitBreaker
+	breaker   *circuit.Breaker
 	bulkhead  *Bulkhead
 	retry     *Retry
 	rateLimit *RateLimiter
@@ -149,7 +149,7 @@ type Composite struct {
 // NewComposite creates a new composite resilience handler
 func NewComposite(opts CompositeOptions) *Composite {
 	return &Composite{
-		breaker:   circuit.NewCircuitBreaker(opts.CircuitOptions),
+		breaker:   circuit.NewBreaker(opts.CircuitOptions),
 		bulkhead:  NewBulkhead(opts.MaxConcurrent),
 		retry:     NewRetry(opts.RetryStrategy),
 		rateLimit: NewRateLimiter(opts.RateLimit, opts.BurstSize),

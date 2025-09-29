@@ -51,7 +51,7 @@ func (s *MicroserviceExample) Call(ctx context.Context) error {
 // ServiceChain represents a chain of dependent microservices
 type ServiceChain struct {
 	services []*MicroserviceExample
-	breakers map[string]*circuit.CircuitBreaker
+	breakers map[string]*circuit.Breaker
 	limiter  ratelimit.Algorithm
 	retry    *resilience.Retry
 	bulkhead *resilience.Bulkhead
@@ -59,9 +59,9 @@ type ServiceChain struct {
 
 func NewServiceChain(services []*MicroserviceExample) *ServiceChain {
 	// Initialize circuit breakers for each service
-	breakers := make(map[string]*circuit.CircuitBreaker)
+	breakers := make(map[string]*circuit.Breaker)
 	for _, svc := range services {
-		breakers[svc.name] = circuit.NewCircuitBreaker(circuit.Options{
+		breakers[svc.name] = circuit.NewBreaker(circuit.Options{
 			Name:             svc.name,
 			FailureThreshold: 3,
 			ResetTimeout:     5 * time.Second,

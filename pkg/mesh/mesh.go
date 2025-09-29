@@ -60,7 +60,7 @@ type MeshConfig struct {
 	Authorizer authz.Authorizer
 
 	// MetricsCollector for mesh metrics
-	MetricsCollector *metrics.MetricsCollector
+	MetricsCollector *metrics.Collector
 
 	// TLSConfig for secure communication
 	TLSConfig *tls.Config
@@ -107,7 +107,7 @@ type meshImpl struct {
 	status    sync.Map // map[ServiceID]ServiceStatus
 	watchers  []chan<- ServiceInfo
 	watcherMu sync.RWMutex
-	metrics   *metrics.MetricsCollector
+	metrics     *metrics.Collector
 }
 
 // ServiceStatus represents the current status of a service

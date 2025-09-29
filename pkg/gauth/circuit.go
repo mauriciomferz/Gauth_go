@@ -68,7 +68,7 @@ type CircuitBreakerConfig struct {
 
 // CircuitBreaker provides resilient service access
 type CircuitBreaker struct {
-	breaker *circuit.CircuitBreaker
+	breaker *circuit.Breaker
 	monitor *circuit.Monitor
 }
 
@@ -81,7 +81,7 @@ func NewCircuitBreaker(config CircuitBreakerConfig) *CircuitBreaker {
 		HalfOpenLimit:    config.MinimumRequests,
 	}
 
-	breaker := circuit.NewCircuitBreaker(opts)
+	breaker := circuit.NewBreaker(opts)
 	monitor := circuit.NewMonitor()
 
 	// Wire up monitoring

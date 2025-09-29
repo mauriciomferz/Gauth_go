@@ -1,4 +1,4 @@
-// Package audit provides audit logging fu	Type      AuditType `json:\"type\"`      // Entry typectionality built on top of the events package.
+// Package audit provides audit logging functionality built on top of the events package.
 package audit
 
 import (
@@ -8,18 +8,15 @@ import (
 	"github.com/Gimel-Foundation/gauth/internal/events"
 )
 
-// Type represents audit log entry types
-type Type string
-
 const (
 	// AuditTypeAuth represents authentication audit entries
-	AuditTypeAuth AuditType = "auth"
+	AuditTypeAuth Type = "auth"
 	// AuditTypeToken represents token-related audit entries
-	AuditTypeToken AuditType = "token"
+	AuditTypeToken Type = "token"
 	// AuditTypeResource represents resource access audit entries
-	AuditTypeResource AuditType = "resource"
+	AuditTypeResource Type = "resource"
 	// AuditTypeAdmin represents administrative audit entries
-	AuditTypeAdmin AuditType = "admin"
+	AuditTypeAdmin Type = "admin"
 )
 
 // Level represents audit log entry severity
@@ -40,7 +37,7 @@ const (
 type Entry struct {
 	// Core fields
 	ID        string    `json:"id"`        // Unique entry identifier
-	Type      AuditType `json:"type"`      // Entry type
+	Type      Type      `json:"type"`      // Entry type
 	Level     Level     `json:"level"`     // Entry severity level
 	Timestamp time.Time `json:"timestamp"` // When entry was created
 

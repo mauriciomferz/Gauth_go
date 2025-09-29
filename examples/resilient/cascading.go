@@ -36,7 +36,7 @@ type Microservice struct {
 	Name         string
 	Dependencies []ServiceType
 	Health       *HealthMetrics
-	Breaker      *circuit.CircuitBreaker
+	Breaker      *circuit.Breaker
 	Limiter      ratelimit.Algorithm
 	Retry        *resilience.Retry
 	Bulkhead     *resilience.Bulkhead
@@ -93,7 +93,7 @@ func (mesh *ServiceMesh) addService(sType ServiceType, name string, baseLatency 
 	}
 
 	// Configure resilience patterns
-	svc.Breaker = circuit.NewCircuitBreaker(circuit.Options{
+	svc.Breaker = circuit.NewBreaker(circuit.Options{
 		Name:             name,
 		FailureThreshold: 5,
 		ResetTimeout:     10 * time.Second,

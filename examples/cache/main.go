@@ -31,7 +31,7 @@ type DistributedCache struct {
 type CacheNode struct {
 	ID       string
 	data     map[string]CacheEntry
-	breaker  *circuit.CircuitBreaker
+	breaker  *circuit.Breaker
 	limiter  ratelimit.Algorithm
 	retry    *resilience.Retry
 	bulkhead *resilience.Bulkhead
@@ -71,7 +71,7 @@ func NewDistributedCache(nodeIDs []string) *DistributedCache {
 		cache.nodes[id] = &CacheNode{
 			ID:       id,
 			data:     make(map[string]CacheEntry),
-			breaker:  circuit.NewCircuitBreaker(cache.circuitConfig),
+			breaker:  circuit.NewBreaker(cache.circuitConfig),
 			limiter:  ratelimit.WrapTokenBucket(cache.limiterConfig),
 			retry:    resilience.NewRetry(cache.retryConfig),
 			bulkhead: resilience.NewBulkhead(10),
