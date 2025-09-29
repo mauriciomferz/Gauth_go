@@ -43,7 +43,6 @@ func (s *JWTSigner) WithKeyID(kid string) *JWTSigner {
 
 // SignToken signs a token using JWT
 func (s *JWTSigner) SignToken(token *Token) (string, error) {
-
 	claims := jwt.MapClaims{
 		"jti": token.ID,
 		"typ": string(token.Type),

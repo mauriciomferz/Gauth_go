@@ -237,7 +237,6 @@ func (s *Service) RequestToken(ctx context.Context, req *TokenRequest) (*TokenRe
 
 // RevokeToken revokes a token
 func (s *Service) RevokeToken(ctx context.Context, token string) error {
-
 	// Retrieve the token by value to get the full struct (including subject)
 	tok, err := s.tokenSvc.GetToken(ctx, token)
 	if err != nil {

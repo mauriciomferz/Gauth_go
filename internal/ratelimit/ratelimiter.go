@@ -40,7 +40,7 @@ func NewRateLimiter(config RateLimiterConfig) *RateLimiter {
 }
 
 // Allow checks if a request is allowed and increments the counter if it is
-func (r *RateLimiter) Allow(ctx context.Context) bool {
+func (r *RateLimiter) Allow(_ context.Context) bool {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

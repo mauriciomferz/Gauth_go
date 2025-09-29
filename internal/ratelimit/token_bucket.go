@@ -29,7 +29,7 @@ func NewTokenBucket(config *Config) *TokenBucket {
 }
 
 // Allow implements Algorithm.Allow
-func (tb *TokenBucket) Allow(ctx context.Context, id string) error {
+func (tb *TokenBucket) Allow(_ context.Context, id string) error {
 	// Check for invalid configuration
 	if tb.config.RequestsPerSecond <= 0 || tb.config.WindowSize <= 0 {
 		return ErrRateLimitExceeded
