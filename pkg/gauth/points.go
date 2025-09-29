@@ -58,7 +58,8 @@ func (p *PowerEnforcementPoint) EnforceRestrictions(token string, _ ActionDetail
 			return true, nil
 		}
 	}
-	// NOTE: tokenData.Restrictions is not present in tokenstore.TokenData, so this logic may need to be refactored if restrictions are required.
+	// NOTE: tokenData.Restrictions is not present in tokenstore.TokenData, so this
+	// logic may need to be refactored if restrictions are required.
 	return false, fmt.Errorf("action not allowed by token restrictions")
 }
 

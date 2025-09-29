@@ -47,7 +47,8 @@ func TestJWTSigner(t *testing.T) {
 		}
 	})
 
-	// The following test cases are commented out because the manager variable and full JWTSigner implementation are not available in this stub:
+	// The following test cases are commented out because the manager variable and full
+	// JWTSigner implementation are not available in this stub:
 	// t.Run("Invalid Signing Method", ...)
 	// t.Run("Expired Token", ...)
 

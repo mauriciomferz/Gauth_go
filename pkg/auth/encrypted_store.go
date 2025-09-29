@@ -199,7 +199,9 @@ func (s *encryptedTokenStore) GetHumanVerification(_ context.Context, _ *token.E
 	}, nil
 }
 
-func (s *encryptedTokenStore) GetSecondLevelApproval(_ context.Context, _ *token.EnhancedToken) (*common.SecondLevelApproval, error) {
+func (s *encryptedTokenStore) GetSecondLevelApproval(
+	_ context.Context, _ *token.EnhancedToken,
+) (*common.SecondLevelApproval, error) {
 	return &common.SecondLevelApproval{
 		PrimaryApprover:       "stub-primary",
 		PrimaryApprovalTime:   time.Now(),

@@ -178,12 +178,16 @@ func (e *StandardAuthorizationEnforcer) verifyApproverRoles(_ context.Context, _
 	return true
 }
 
-func (e *StandardAuthorizationEnforcer) getJurisdictionRules(_ context.Context, _ *token.EnhancedToken) (*JurisdictionRules, error) {
+func (e *StandardAuthorizationEnforcer) getJurisdictionRules(
+	_ context.Context, _ *token.EnhancedToken,
+) (*JurisdictionRules, error) {
 	// Implementation would get rules for token's jurisdiction
 	return nil, nil
 }
 
-func (e *StandardAuthorizationEnforcer) verifyFiduciaryDuties(_ context.Context, _ *token.EnhancedToken, _ []FiduciaryDuty) error {
+func (e *StandardAuthorizationEnforcer) verifyFiduciaryDuties(
+	_ context.Context, _ *token.EnhancedToken, _ []FiduciaryDuty,
+) error {
 	// Implementation would verify fiduciary duties are met
 	return nil
 }

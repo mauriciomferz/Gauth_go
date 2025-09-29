@@ -155,7 +155,9 @@ func NewStandardPowerEnforcement(
 
 // Supply-side enforcement methods
 
-func (p *StandardPowerEnforcement) ValidateClientDecision(ctx context.Context, token *token.EnhancedToken, decision string) error {
+func (p *StandardPowerEnforcement) ValidateClientDecision(
+	ctx context.Context, token *token.EnhancedToken, decision string,
+) error {
 	// Verify decision authority
 	power, err := p.getPowerOfAttorney(ctx, token)
 	if err != nil {

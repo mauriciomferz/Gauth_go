@@ -73,7 +73,8 @@ type AccessRequest struct {
 	Context  map[string]string `json:"context,omitempty"`
 }
 
-// AccessResponse represents the result of an access check (RFC111: result of PDP evaluation, with annotations for audit/compliance)
+// AccessResponse represents the result of an access check (RFC111: result of PDP
+// evaluation, with annotations for audit/compliance)
 type AccessResponse struct {
 	Allowed     bool              `json:"allowed"`
 	Reason      string            `json:"reason"`
