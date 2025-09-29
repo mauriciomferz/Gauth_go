@@ -119,9 +119,9 @@ type Patterns struct {
 	maxInterval  time.Duration
 
 	// Bulkhead
-	maxConcurrent    int
-	activeRequests   int //nolint:unused // reserved for future monitoring
-	requestSemaphore chan struct{}
+	maxConcurrent     int
+	_activeRequests   int // reserved for future monitoring
+	requestSemaphore  chan struct{}
 }
 
 // PatternsOption is a function that configures a Patterns instance

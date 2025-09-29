@@ -28,35 +28,33 @@ type PASETOConfig struct {
 	TokenValidity time.Duration
 }
 
-// pasetoAuthenticator implements the Authenticator interface for PASETO
-//
-//nolint:unused // reserved for PASETO token implementation
-type pasetoAuthenticator struct {
+// _pasetoAuthenticator implements the Authenticator interface for PASETO
+// reserved for PASETO token implementation
+type _pasetoAuthenticator struct {
 	config PASETOConfig
 }
 
 // All PASETO methods are currently stubs. Uncomment and implement as needed.
 
-//nolint:unused // reserved for PASETO token implementation
-func newPASETOAuthenticator(_ Config) (Authenticator, error) {
+// reserved for PASETO token implementation
+func _newPASETOAuthenticator(_ Config) (Authenticator, error) {
 	return nil, errors.New("PASETO authenticator not implemented")
 }
 
-//nolint:unused // reserved for PASETO token implementation
-func (a *pasetoAuthenticator) Initialize(ctx context.Context) error {
+// reserved for PASETO token implementation
+func (a *_pasetoAuthenticator) _initialize(ctx context.Context) error {
 	return nil
 }
 
-//nolint:unused // reserved for PASETO token implementation
-func (a *pasetoAuthenticator) Close() error {
+// reserved for PASETO token implementation
+func (a *_pasetoAuthenticator) _close() error {
 	return nil
 }
 
 // The following methods are intentionally left unimplemented for now.
 // Uncomment and implement as needed.
-//
-//nolint:unused // reserved for PASETO token implementation
-func (a *pasetoAuthenticator) GenerateToken(ctx context.Context, req TokenRequest) (*TokenResponse, error) {
+// reserved for PASETO token implementation
+func (a *_pasetoAuthenticator) _generateToken(ctx context.Context, req TokenRequest) (*TokenResponse, error) {
 	return nil, errors.New("not implemented")
 }
 

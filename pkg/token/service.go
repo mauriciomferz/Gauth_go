@@ -31,7 +31,7 @@ type ServiceAPI interface {
 type Service struct {
 	config Config
 	store  Store
-	mu     sync.RWMutex //nolint:unused // reserved for concurrent operations
+	_mu    sync.RWMutex // reserved for concurrent operations
 }
 
 // GetToken retrieves a token by its ID.
