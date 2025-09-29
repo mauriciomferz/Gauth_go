@@ -19,7 +19,7 @@ type mockValidator struct {
 	shouldError bool
 }
 
-func (m *mockValidator) Validate(ctx context.Context, token *Token) error {
+func (m *mockValidator) Validate(_ context.Context, _ *Token) error {
 	if m.shouldError {
 		return errors.New("mock validation error")
 	}

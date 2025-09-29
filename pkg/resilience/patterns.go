@@ -120,7 +120,6 @@ type Patterns struct {
 
 	// Bulkhead
 	maxConcurrent    int
-	_activeRequests  int // reserved for future monitoring
 	requestSemaphore chan struct{}
 }
 

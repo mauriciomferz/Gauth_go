@@ -62,7 +62,7 @@ type StoreStub struct {
 	approvals map[string][]TrackingRecord
 }
 
-func (s *StoreStub) GetTrackingRecords(ctx interface{}, approvalID string) ([]TrackingRecord, error) {
+func (s *StoreStub) GetTrackingRecords(_ interface{}, approvalID string) ([]TrackingRecord, error) {
 	if s.approvals == nil {
 		s.approvals = make(map[string][]TrackingRecord)
 	}

@@ -6,7 +6,6 @@ package gauth
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"sync"
 	"time"
 
 	"github.com/Gimel-Foundation/gauth/internal/audit"
@@ -23,7 +22,7 @@ func (g *GAuth) Close() error {
 }
 
 // Authorize processes an authorization request (stub for test compatibility)
-func (g *GAuth) Authorize(ctx interface{}, req interface{}) (interface{}, error) {
+func (g *GAuth) Authorize(_ interface{}, _ interface{}) (interface{}, error) {
 	// Stub: return nil, nil for now
 	return nil, nil
 }
@@ -48,10 +47,7 @@ type GAuth struct {
 	TokenStore  tokenstore.Store // Exported for use in points.go
 	auditLogger *audit.Logger
 	rateLimiter *ratelimit.Limiter
-	_mu         sync.RWMutex // unexported: not part of public API, reserved for concurrent operations
-}
-
-// New creates a new GAuth instance with the provided configuration.
+}// New creates a new GAuth instance with the provided configuration.
 func New(config Config) (*GAuth, error) {
 	if err := validateConfig(config); err != nil {
 		return nil, err

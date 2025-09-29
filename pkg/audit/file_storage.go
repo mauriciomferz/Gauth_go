@@ -58,7 +58,7 @@ func NewFileStorage(config FileConfig) (*FileStorage, error) {
 }
 
 // Store implements the Storage interface
-func (fs *FileStorage) Store(ctx context.Context, entry *Entry) error {
+func (fs *FileStorage) Store(_ context.Context, entry *Entry) error {
 	fs.mu.Lock()
 	defer fs.mu.Unlock()
 
@@ -104,7 +104,7 @@ func (fs *FileStorage) Search(ctx context.Context, filter *Filter) ([]*Entry, er
 }
 
 // GetByID implements the Storage interface
-func (fs *FileStorage) GetByID(ctx context.Context, id string) (*Entry, error) {
+func (fs *FileStorage) GetByID(_ context.Context, id string) (*Entry, error) {
 	fs.mu.Lock()
 	defer fs.mu.Unlock()
 
@@ -153,7 +153,7 @@ func (fs *FileStorage) GetChain(ctx context.Context, chainID string) ([]*Entry, 
 }
 
 // Cleanup implements the Storage interface
-func (fs *FileStorage) Cleanup(ctx context.Context, before time.Time) error {
+func (fs *FileStorage) Cleanup(_ context.Context, before time.Time) error {
 	fs.mu.Lock()
 	defer fs.mu.Unlock()
 

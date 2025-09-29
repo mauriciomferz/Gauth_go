@@ -151,7 +151,7 @@ func (e *StandardAuthorizationEnforcer) ValidateJurisdictionRules(ctx context.Co
 
 // Helper methods
 
-func (e *StandardAuthorizationEnforcer) verifyDelegationChain(ctx context.Context, chain []common.DelegationLink) error {
+func (e *StandardAuthorizationEnforcer) verifyDelegationChain(_ context.Context, chain []common.DelegationLink) error {
 	if len(chain) == 0 {
 		return fmt.Errorf("empty delegation chain")
 	}
@@ -169,27 +169,27 @@ func (e *StandardAuthorizationEnforcer) verifyDelegationChain(ctx context.Contex
 	return nil
 }
 
-func (e *StandardAuthorizationEnforcer) verifyApproverRoles(ctx context.Context, approval *common.SecondLevelApproval, requiredRoles []string) bool {
+func (e *StandardAuthorizationEnforcer) verifyApproverRoles(_ context.Context, _ *common.SecondLevelApproval, _ []string) bool {
 	// Implementation would verify that approvers have required roles
 	return true
 }
 
-func (e *StandardAuthorizationEnforcer) getJurisdictionRules(ctx context.Context, token *token.EnhancedToken) (*JurisdictionRules, error) {
+func (e *StandardAuthorizationEnforcer) getJurisdictionRules(_ context.Context, _ *token.EnhancedToken) (*JurisdictionRules, error) {
 	// Implementation would get rules for token's jurisdiction
 	return nil, nil
 }
 
-func (e *StandardAuthorizationEnforcer) verifyFiduciaryDuties(ctx context.Context, token *token.EnhancedToken, duties []FiduciaryDuty) error {
+func (e *StandardAuthorizationEnforcer) verifyFiduciaryDuties(_ context.Context, _ *token.EnhancedToken, _ []FiduciaryDuty) error {
 	// Implementation would verify fiduciary duties are met
 	return nil
 }
 
-func (e *StandardAuthorizationEnforcer) verifyIntegrityRequirements(ctx context.Context, token *token.EnhancedToken, requirements []string) error {
+func (e *StandardAuthorizationEnforcer) verifyIntegrityRequirements(_ context.Context, _ *token.EnhancedToken, _ []string) error {
 	// Implementation would verify integrity requirements
 	return nil
 }
 
-func (e *StandardAuthorizationEnforcer) verifyValueLimits(ctx context.Context, token *token.EnhancedToken, limits map[string]float64) error {
+func (e *StandardAuthorizationEnforcer) verifyValueLimits(_ context.Context, _ *token.EnhancedToken, _ map[string]float64) error {
 	// Implementation would verify value limits
 	return nil
 }

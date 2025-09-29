@@ -46,7 +46,7 @@ func newJWTAuthenticator(config Config) (Authenticator, error) {
 	}, nil
 }
 
-func (a *jwtAuthenticator) Initialize(ctx context.Context) error {
+func (a *jwtAuthenticator) Initialize(_ context.Context) error {
 	// No initialization needed for now
 	return nil
 }
@@ -56,7 +56,7 @@ func (a *jwtAuthenticator) Close() error {
 	return nil
 }
 
-func (a *jwtAuthenticator) ValidateCredentials(ctx context.Context, creds interface{}) error {
+func (a *jwtAuthenticator) ValidateCredentials(_ context.Context, _ interface{}) error {
 	// JWT authenticator doesn't handle credentials directly
 	return errors.New("credential validation not supported by JWT authenticator")
 }
@@ -252,7 +252,7 @@ func (a *jwtAuthenticator) createTokenData(claims *jwtClaims) *TokenData {
 	}
 }
 
-func (a *jwtAuthenticator) RevokeToken(ctx context.Context, tokenStr string) error {
+func (a *jwtAuthenticator) RevokeToken(_ context.Context, _ string) error {
 	// For a simple JWT implementation, we don't handle revocation
 	// In a real implementation, we would add the token to a blacklist
 	// or use a distributed token store for revocation

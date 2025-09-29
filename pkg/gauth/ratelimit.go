@@ -28,7 +28,7 @@ func NewRateLimiter(requestLimit int, resetInterval time.Duration, onRateExceede
 }
 
 // Allow checks if a request should be allowed under the current rate limit
-func (r *RateLimiter) Allow(ctx context.Context) bool {
+func (r *RateLimiter) Allow(_ context.Context) bool {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

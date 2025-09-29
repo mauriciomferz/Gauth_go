@@ -277,13 +277,13 @@ func (s *DefaultService) Introspect(ctx context.Context, tokenStr string) (*toke
 
 // Private methods
 
-func (s *DefaultService) generateAuthorizationCode(ctx context.Context, req *ServiceAuthorizationRequest) (string, error) {
+func (s *DefaultService) generateAuthorizationCode(_ context.Context, _ *ServiceAuthorizationRequest) (string, error) {
 	// Implement authorization code generation
 	// This is just a placeholder - real implementation would be more complex
 	return "authorization_code_placeholder", nil
 }
 
-func (s *DefaultService) generateImplicitToken(ctx context.Context, req *ServiceAuthorizationRequest) (*token.Token, error) {
+func (s *DefaultService) generateImplicitToken(_ context.Context, _ *ServiceAuthorizationRequest) (*token.Token, error) {
 	// Implement implicit token generation
 	// This is just a placeholder - real implementation would be more complex
 	return &token.Token{
@@ -292,7 +292,7 @@ func (s *DefaultService) generateImplicitToken(ctx context.Context, req *Service
 	}, nil
 }
 
-func (s *DefaultService) handleAuthorizationCodeGrant(ctx context.Context, req *ServiceTokenRequest) (*ServiceTokenResponse, error) {
+func (s *DefaultService) handleAuthorizationCodeGrant(_ context.Context, _ *ServiceTokenRequest) (*ServiceTokenResponse, error) {
 	// Implement authorization code grant handling
 	// This is just a placeholder - real implementation would be more complex
 	return &ServiceTokenResponse{
@@ -303,7 +303,7 @@ func (s *DefaultService) handleAuthorizationCodeGrant(ctx context.Context, req *
 	}, nil
 }
 
-func (s *DefaultService) handleRefreshTokenGrant(ctx context.Context, req *ServiceTokenRequest) (*ServiceTokenResponse, error) {
+func (s *DefaultService) handleRefreshTokenGrant(_ context.Context, _ *ServiceTokenRequest) (*ServiceTokenResponse, error) {
 	// Implement refresh token grant handling
 	// This is just a placeholder - real implementation would be more complex
 	return &ServiceTokenResponse{
@@ -314,7 +314,7 @@ func (s *DefaultService) handleRefreshTokenGrant(ctx context.Context, req *Servi
 	}, nil
 }
 
-func (s *DefaultService) handleClientCredentialsGrant(ctx context.Context, req *ServiceTokenRequest) (*ServiceTokenResponse, error) {
+func (s *DefaultService) handleClientCredentialsGrant(_ context.Context, _ *ServiceTokenRequest) (*ServiceTokenResponse, error) {
 	// Implement client credentials grant handling
 	// This is just a placeholder - real implementation would be more complex
 	return &ServiceTokenResponse{

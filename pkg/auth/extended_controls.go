@@ -129,12 +129,10 @@ func (c *StandardAITeamControls) EnforceCentralization(ctx context.Context, toke
 
 // StandardOpenIDIntegration implements OpenIDIntegration
 type StandardOpenIDIntegration struct {
-	_store    token.EnhancedStore      // reserved for token store integration
-	_verifier token.VerificationSystem // reserved for verification system
 }
 
 // MapAssuranceLevel implements OpenID ACR mapping
-func (o *StandardOpenIDIntegration) MapAssuranceLevel(ctx context.Context, token *token.EnhancedToken) (string, error) {
+func (o *StandardOpenIDIntegration) MapAssuranceLevel(_ context.Context, token *token.EnhancedToken) (string, error) {
 	// Map to OpenID ACR levels
 	level := o.determineAssuranceLevel(token)
 	switch level {
@@ -149,8 +147,6 @@ func (o *StandardOpenIDIntegration) MapAssuranceLevel(ctx context.Context, token
 
 // StandardComplianceTracker implements AITeamComplianceTracker
 type StandardComplianceTracker struct {
-	_store    token.EnhancedStore      // reserved for token store integration
-	_verifier token.VerificationSystem // reserved for verification system
 }
 
 // TrackApprovalRule implements detailed rule tracking
@@ -169,12 +165,12 @@ func (t *StandardComplianceTracker) TrackApprovalRule(ctx context.Context, rule 
 
 // Helper methods
 
-func (c *StandardAITeamControls) validateCentralOperations(ctx context.Context, team *AITeam) error {
+func (c *StandardAITeamControls) validateCentralOperations(_ context.Context, _ *AITeam) error {
 	// Implementation would verify all operations are centralized
 	return nil
 }
 
-func (c *StandardAITeamControls) verifyCentralIssuer(ctx context.Context, token *token.EnhancedToken) error {
+func (c *StandardAITeamControls) verifyCentralIssuer(_ context.Context, _ *token.EnhancedToken) error {
 	// Implementation would verify token issuer is central GAuth server
 	return nil
 }

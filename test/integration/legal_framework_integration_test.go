@@ -387,7 +387,7 @@ func validateFiduciaryDuties(_ *testing.T, framework *auth.StandardLegalFramewor
 	return nil
 }
 
-func validateGrantCompliance(_ *testing.T, framework *auth.StandardLegalFramework, grant *auth.LegalFrameworkAuthorizationGrant) error {
+func validateGrantCompliance(_ *testing.T, framework *auth.StandardLegalFramework, _ *auth.LegalFrameworkAuthorizationGrant) error {
 	ctx := context.Background()
 	rules := &auth.JurisdictionRules{
 		Country: "US",

@@ -334,22 +334,22 @@ func (s *MemoryStore) Close() error {
 }
 
 // Initialize is a no-op for MemoryStore (EnhancedStore compatibility)
-func (s *MemoryStore) Initialize(ctx context.Context) error { return nil }
+func (s *MemoryStore) Initialize(_ context.Context) error { return nil }
 
 // Store stores a token (EnhancedStore compatibility)
-func (s *MemoryStore) Store(ctx context.Context, token interface{}) error { return nil }
+func (s *MemoryStore) Store(_ context.Context, _ interface{}) error { return nil }
 
 // Remove removes a token (EnhancedStore compatibility)
-func (s *MemoryStore) Remove(ctx context.Context, key string) error { return nil }
+func (s *MemoryStore) Remove(_ context.Context, _ string) error { return nil }
 
 // StoreAuthorizer is a no-op for MemoryStore (EnhancedStore compatibility)
-func (s *MemoryStore) StoreAuthorizer(ctx context.Context, authorizer interface{}) error { return nil }
+func (s *MemoryStore) StoreAuthorizer(_ context.Context, _ interface{}) error { return nil }
 
 // StoreOwner is a no-op for MemoryStore (EnhancedStore compatibility)
-func (s *MemoryStore) StoreOwner(ctx context.Context, owner interface{}) error { return nil }
+func (s *MemoryStore) StoreOwner(_ context.Context, _ interface{}) error { return nil }
 
 // StoreToken is a no-op for MemoryStore (EnhancedStore compatibility)
-func (s *MemoryStore) StoreToken(ctx context.Context, token interface{}) error { return nil }
+func (s *MemoryStore) StoreToken(_ context.Context, _ interface{}) error { return nil }
 
 // copyToken creates a deep copy of a token
 func copyToken(t *Token) *Token {

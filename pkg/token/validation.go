@@ -246,7 +246,7 @@ func NewDefaultQuerier(store Store) *DefaultQuerier {
 }
 
 // Query implements token searching
-func (q *DefaultQuerier) Query(ctx context.Context, query Query, offset, limit int) (*QueryResult, error) {
+func (q *DefaultQuerier) Query(_ context.Context, _ Query, _, _ int) (*QueryResult, error) {
 	// Implementation depends on the store's capabilities
 	// For memory store, we'd scan all tokens and filter
 	// For database store, we'd build a SQL query
@@ -255,11 +255,11 @@ func (q *DefaultQuerier) Query(ctx context.Context, query Query, offset, limit i
 }
 
 // CountBySubject counts tokens for a subject
-func (q *DefaultQuerier) CountBySubject(ctx context.Context, subject string) (int, error) {
+func (q *DefaultQuerier) CountBySubject(_ context.Context, _ string) (int, error) {
 	return 0, errors.New("count not implemented by this store")
 }
 
 // ListExpiringSoon lists tokens expiring within duration
-func (q *DefaultQuerier) ListExpiringSoon(ctx context.Context, duration time.Duration) ([]*Token, error) {
+func (q *DefaultQuerier) ListExpiringSoon(_ context.Context, _ time.Duration) ([]*Token, error) {
 	return nil, errors.New("list expiring not implemented by this store")
 }

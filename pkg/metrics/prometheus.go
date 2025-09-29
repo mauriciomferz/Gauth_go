@@ -1,7 +1,6 @@
 package metrics
 
 import (
-	"context"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -139,10 +138,7 @@ func RegisterMetrics() {
 
 // Collector provides methods to record various metrics
 type Collector struct {
-	_ctx context.Context // reserved for context propagation
-}
-
-// RecordValue records a generic float64 value for a named metric (for resource/service metrics)
+}// RecordValue records a generic float64 value for a named metric (for resource/service metrics)
 func (m *Collector) RecordValue(name string, value float64) {
 	customMetrics.WithLabelValues(name).Set(value)
 }

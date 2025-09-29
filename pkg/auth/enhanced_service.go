@@ -206,32 +206,32 @@ func (s *EnhancedAuthService) ValidateAuthorization(ctx context.Context, token *
 }
 
 // Helper methods
-func (s *EnhancedAuthService) verifyIdentity(ctx context.Context, owner *token.OwnerInfo) error {
+func (s *EnhancedAuthService) verifyIdentity(_ context.Context, _ *token.OwnerInfo) error {
 	// Implement identity verification logic
 	return nil
 }
 
-func (s *EnhancedAuthService) verifyAuthorization(ctx context.Context, owner *token.OwnerInfo) error {
+func (s *EnhancedAuthService) verifyAuthorization(_ context.Context, _ *token.OwnerInfo) error {
 	// Implement authorization verification logic
 	return nil
 }
 
-func (s *EnhancedAuthService) verifyOwnerAuthorization(ctx context.Context, owner *token.OwnerInfo, authorizerID string) error {
+func (s *EnhancedAuthService) verifyOwnerAuthorization(_ context.Context, _ *token.OwnerInfo, _ string) error {
 	// Implement owner authorization verification logic
 	return nil
 }
 
-func (s *EnhancedAuthService) storeAuthorizer(ctx context.Context, authorizer *token.OwnerInfo) error {
+func (s *EnhancedAuthService) storeAuthorizer(_ context.Context, _ *token.OwnerInfo) error {
 	// Implement authorizer storage logic
 	return nil
 }
 
-func (s *EnhancedAuthService) storeOwner(ctx context.Context, owner *token.OwnerInfo) error {
+func (s *EnhancedAuthService) storeOwner(_ context.Context, _ *token.OwnerInfo) error {
 	// Implement owner storage logic
 	return nil
 }
 
-func (s *EnhancedAuthService) verifyClientOwnerAuthorization(ctx context.Context, owner *token.OwnerInfo) error {
+func (s *EnhancedAuthService) verifyClientOwnerAuthorization(_ context.Context, _ *token.OwnerInfo) error {
 	// Implement client owner authorization verification logic
 	return nil
 }
@@ -241,7 +241,7 @@ func (s *EnhancedAuthService) generateAttestation(_ string) token.Attestation {
 	return token.Attestation{}
 }
 
-func (s *EnhancedAuthService) checkApprovalRules(ctx context.Context, token *token.EnhancedToken, action string) error {
+func (s *EnhancedAuthService) checkApprovalRules(_ context.Context, _ *token.EnhancedToken, _ string) error {
 	// Implement approval rules checking logic
 	return nil
 }

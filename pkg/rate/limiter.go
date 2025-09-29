@@ -74,7 +74,7 @@ func NewTokenBucket(cfg Config) *TokenBucket {
 }
 
 // Allow implements the Limiter interface
-func (tb *TokenBucket) Allow(ctx context.Context, id string) error {
+func (tb *TokenBucket) Allow(_ context.Context, id string) error {
 	tb.mu.Lock()
 	defer tb.mu.Unlock()
 

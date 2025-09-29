@@ -190,7 +190,7 @@ func (lf *LegalFramework) Authorize(ctx context.Context, subject, resource, acti
 }
 
 // collectContextData collects data needed for authorization decision
-func (lf *LegalFramework) collectContextData(ctx context.Context, subject, resource, action string) (map[string]interface{}, error) {
+func (lf *LegalFramework) collectContextData(_ context.Context, subject, resource, action string) (map[string]interface{}, error) {
 	contextData := make(map[string]interface{})
 
 	// Add basic context
@@ -226,7 +226,7 @@ func (lf *LegalFramework) collectContextData(ctx context.Context, subject, resou
 }
 
 // enrichContext applies context enrichment rules
-func (lf *LegalFramework) enrichContext(ctx context.Context, data map[string]interface{}, subject, resource, action string) map[string]interface{} {
+func (lf *LegalFramework) enrichContext(_ context.Context, data map[string]interface{}, _, _, _ string) map[string]interface{} {
 	enriched := make(map[string]interface{})
 
 	// Copy original data
@@ -253,7 +253,7 @@ func (lf *LegalFramework) enrichContext(ctx context.Context, data map[string]int
 }
 
 // applyValidationRules applies validation rules to the context
-func (lf *LegalFramework) applyValidationRules(ctx map[string]interface{}) error {
+func (lf *LegalFramework) applyValidationRules(_ map[string]interface{}) error {
 	// TODO: Implement actual validation logic for ValidationRules
 	return nil
 }
