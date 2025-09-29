@@ -36,9 +36,11 @@
 //   - Centralized authorization: All authorization decisions are enforced centrally;
 //     decentralized/team-based delegation is explicitly prevented (see enforcement
 //     in pkg/auth/extended_controls.go).
-//   - Exclusions: Web3/blockchain, DNA-based identity, and AI-controlled GAuth are\n//     strictly excluded, as required by RFC111.
+//   - Exclusions: Web3/blockchain, DNA-based identity, and AI-controlled GAuth
+//     are strictly excluded, as required by RFC111.
 //   - Extended tokens, attestation, and versioning: Supported via integration with pkg/token and metadata types.
-//   - Audit, compliance, and transparency: All actions are auditable and traceable,\n//     supporting verifiability and compliance.
+//   - Audit, compliance, and transparency: All actions are auditable and
+//     traceable, supporting verifiability and compliance.
 //
 // For more details, see the RFC111 summary in the project root and the README.md for usage patterns.
 //

@@ -190,7 +190,9 @@ func (lf *LegalFramework) Authorize(ctx context.Context, subject, resource, acti
 }
 
 // collectContextData collects data needed for authorization decision
-func (lf *LegalFramework) collectContextData(_ context.Context, subject, resource, action string) (map[string]interface{}, error) {
+func (lf *LegalFramework) collectContextData(
+	_ context.Context, subject, resource, action string,
+) (map[string]interface{}, error) {
 	contextData := make(map[string]interface{})
 
 	// Add basic context

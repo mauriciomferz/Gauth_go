@@ -19,7 +19,8 @@ Getting Started:
 For more, see the full RFC111 specification and the package documentation in this file.
 
 License:
-GAuth is licensed under Apache 2.0. See LICENSE for details. OAuth, OpenID Connect, and MCP licenses apply to their respective components.
+GAuth is licensed under Apache 2.0. See LICENSE for details. OAuth, OpenID Connect,
+and MCP licenses apply to their respective components.
 
 	   // Protect an endpoint
 	   http.HandleFunc("/api", authService.Middleware(handler))

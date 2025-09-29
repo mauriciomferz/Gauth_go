@@ -128,7 +128,10 @@ func (m *Manager) RevokeToken(_ context.Context, token string) error {
 }
 
 // CreateTokenWithRefresh creates both access and refresh tokens
-func (m *Manager) CreateTokenWithRefresh(ctx context.Context, claims map[string]interface{}, accessDuration, refreshDuration time.Duration) (string, string, error) {
+func (m *Manager) CreateTokenWithRefresh(
+	ctx context.Context, claims map[string]interface{},
+	accessDuration, refreshDuration time.Duration,
+) (string, string, error) {
 	// Create access token
 	accessToken, err := m.CreateToken(ctx, claims, accessDuration)
 	if err != nil {

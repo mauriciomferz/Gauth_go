@@ -244,7 +244,9 @@ func (c *StandardComplianceChecker) checkCustomLimits(_ context.Context, _ map[s
 	return nil
 }
 
-func (c *StandardComplianceChecker) matchesRule(_ context.Context, _ ApprovalRule, _ *token.EnhancedToken, _ string) (bool, error) {
+func (c *StandardComplianceChecker) matchesRule(
+	_ context.Context, _ ApprovalRule, _ *token.EnhancedToken, _ string,
+) (bool, error) {
 	// Implement rule matching logic
 	return false, nil
 }
