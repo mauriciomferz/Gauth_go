@@ -138,7 +138,7 @@ type Store interface {
 	List(ctx context.Context, filter Filter) ([]*Token, error)
 
 	// Rotate replaces an existing token with a new one
-	Rotate(ctx context.Context, old, new *Token) error
+	Rotate(ctx context.Context, old, newToken *Token) error
 
 	// Revoke invalidates a token before its natural expiration
 	Revoke(ctx context.Context, token *Token) error

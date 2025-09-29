@@ -240,7 +240,7 @@ func (s *DefaultService) Token(ctx context.Context, req *ServiceTokenRequest) (*
 }
 
 // Validate implements the Service.Validate method
-func (s *DefaultService) Validate(ctx context.Context, tokenStr string, requiredScopes []string) (*token.Token, error) {
+func (s *DefaultService) Validate(ctx context.Context, tokenStr string, _ []string) (*token.Token, error) {
 	// Retrieve the token by ID
 	t, err := s.tokenService.GetToken(ctx, tokenStr)
 	if err != nil {
@@ -255,7 +255,7 @@ func (s *DefaultService) Validate(ctx context.Context, tokenStr string, required
 }
 
 // Revoke implements the Service.Revoke method
-func (s *DefaultService) Revoke(ctx context.Context, tokenStr string, reason string) error {
+func (s *DefaultService) Revoke(ctx context.Context, tokenStr string, _ string) error {
 	// Retrieve the token by ID
 	t, err := s.tokenService.GetToken(ctx, tokenStr)
 	if err != nil {

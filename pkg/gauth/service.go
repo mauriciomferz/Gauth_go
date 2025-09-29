@@ -303,12 +303,12 @@ func (s *Service) handleAuthGrant(_ interface{}) {
 }
 
 //nolint:unused // reserved for event handling
-func (s *Service) handleTokenIssue(data interface{}) {
+func (s *Service) handleTokenIssue(_ interface{}) {
 	// Handle token issuance event
 }
 
 //nolint:unused // reserved for event handling
-func (s *Service) handleTokenRevoke(data interface{}) {
+func (s *Service) handleTokenRevoke(_ interface{}) {
 	// Handle token revocation event
 }
 

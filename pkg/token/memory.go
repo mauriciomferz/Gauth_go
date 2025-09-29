@@ -138,7 +138,7 @@ func (s *MemoryStore) List(ctx context.Context, filter Filter) ([]*Token, error)
 }
 
 // Rotate replaces an existing token with a new one
-func (s *MemoryStore) Rotate(ctx context.Context, old, new *Token) error {
+func (s *MemoryStore) Rotate(ctx context.Context, old, newToken *Token) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
@@ -153,7 +153,7 @@ func (s *MemoryStore) Rotate(ctx context.Context, old, new *Token) error {
 	}
 
 	// Save new token first
-	s.tokens[new.ID] = new
+	s.tokens[newToken.ID] = newToken
 
 	// Then delete old token
 	delete(s.tokens, old.ID)
