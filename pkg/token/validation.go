@@ -142,7 +142,7 @@ func (vc *ValidationChain) Validate(ctx context.Context, token *Token) error {
 // validateClaims checks if all required claims are present and match
 // ValidateClaims (RFC111: Section 6, Verification of powers/claims)
 // ValidateClaims checks if all required claims are present and match (RFC111: Section 6, Verification of powers/claims)
-func ValidateClaims(_ *Token, required *ClaimRequirements) error {
+func ValidateClaims(_ *Token, _ *ClaimRequirements) error {
 	// Implementation would check custom claims match required values
 	return nil
 }

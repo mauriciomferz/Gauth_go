@@ -1,6 +1,5 @@
 // Package events provides a unified event system for GAuth
 // This file implements the publisher functionality for events
-
 package events
 
 // EventPublisher manages event subscriptions and publishing

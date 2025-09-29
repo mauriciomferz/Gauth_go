@@ -53,7 +53,7 @@ func ConvertTokenToTokenData(t *Token) *TokenData {
 	if t == nil {
 		return nil
 	}
-	return &TokenData{
+	return &TokenData {
 		TokenID:      t.ID,
 		UserID:       t.Subject,
 		ClientID:     "", // Not directly available; can be set if needed

@@ -251,7 +251,7 @@ func (p *Patterns) checkRateLimit() error {
 }
 
 // checkCircuitBreaker checks if the circuit breaker allows the request
-func (p *Patterns) checkCircuitBreaker(ctx context.Context) error {
+func (p *Patterns) checkCircuitBreaker(_ context.Context) error {
 	p.mu.RLock()
 	state := p.state
 	p.mu.RUnlock()

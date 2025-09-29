@@ -18,7 +18,7 @@ type LimitEntry struct {
 	MaxRequests int
 }
 
-// Limiter provides rate limiting functionality
+// RateLimiter provides rate limiting functionality
 type RateLimiter struct {
 	Config  common.RateLimitConfig
 	entries map[string]*LimitEntry
