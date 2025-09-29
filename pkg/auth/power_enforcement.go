@@ -108,33 +108,33 @@ type CommercialRegister struct {
 }
 
 // Registry operations
-func (cr *CommercialRegister) RegisterAI(ctx context.Context, tok *token.EnhancedToken, entry *RegisterEntry) error {
+func (cr *CommercialRegister) RegisterAI(_ context.Context, _ *token.EnhancedToken, _ *RegisterEntry) error {
 	// TODO: implement
 	return nil
 }
-func (cr *CommercialRegister) VerifyRegistration(ctx context.Context, registryID string) error {
+func (cr *CommercialRegister) VerifyRegistration(_ context.Context, _ string) error {
 	// TODO: implement
 	return nil
 }
-func (cr *CommercialRegister) UpdateAuthority(ctx context.Context, registryID string, powers *PowerOfAttorney) error {
+func (cr *CommercialRegister) UpdateAuthority(_ context.Context, _ string, _ *PowerOfAttorney) error {
 	// TODO: implement
 	return nil
 }
-func (cr *CommercialRegister) RevokeRegistration(ctx context.Context, registryID string) error {
+func (cr *CommercialRegister) RevokeRegistration(_ context.Context, _ string) error {
 	// TODO: implement
 	return nil
 }
 
 // Power of attorney management
-func (cr *CommercialRegister) GrantPowerOfAttorney(ctx context.Context, power *PowerOfAttorney) error {
+func (cr *CommercialRegister) GrantPowerOfAttorney(_ context.Context, _ *PowerOfAttorney) error {
 	// TODO: implement
 	return nil
 }
-func (cr *CommercialRegister) VerifyPowerOfAttorney(ctx context.Context, powerID string) error {
+func (cr *CommercialRegister) VerifyPowerOfAttorney(_ context.Context, _ string) error {
 	// TODO: implement
 	return nil
 }
-func (cr *CommercialRegister) RevokePowerOfAttorney(ctx context.Context, powerID string) error {
+func (cr *CommercialRegister) RevokePowerOfAttorney(_ context.Context, _ string) error {
 	// TODO: implement
 	return nil
 }
@@ -247,22 +247,22 @@ func (p *StandardPowerEnforcement) ValidateResourceAccess(ctx context.Context, t
 
 // Helper methods
 
-func (p *StandardPowerEnforcement) getPowerOfAttorney(ctx context.Context, token *token.EnhancedToken) (*PowerOfAttorney, error) {
+func (p *StandardPowerEnforcement) getPowerOfAttorney(_ context.Context, _ *token.EnhancedToken) (*PowerOfAttorney, error) {
 	// Implementation would retrieve power of attorney from store
 	return nil, nil
 }
 
-func (p *StandardPowerEnforcement) validateObligation(ctx context.Context, token *token.EnhancedToken, obligation *Obligation) error {
+func (p *StandardPowerEnforcement) validateObligation(_ context.Context, _ *token.EnhancedToken, _ *Obligation) error {
 	// Implementation would validate specific obligation
 	return nil
 }
 
-func (p *StandardPowerEnforcement) validateRestriction(ctx context.Context, token *token.EnhancedToken, restriction *gauth.Restriction) error {
+func (p *StandardPowerEnforcement) validateRestriction(_ context.Context, _ *token.EnhancedToken, _ *gauth.Restriction) error {
 	// Implementation would validate specific restriction
 	return nil
 }
 
-func (p *StandardPowerEnforcement) verifyCosigner(ctx context.Context, token *token.EnhancedToken, cosigner string) error {
+func (p *StandardPowerEnforcement) verifyCosigner(_ context.Context, _ *token.EnhancedToken, _ string) error {
 	// Implementation would verify cosigner
 	return nil
 }

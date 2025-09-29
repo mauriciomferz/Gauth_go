@@ -45,8 +45,8 @@ type ServiceRegistry interface {
 	Watch(ctx context.Context) (<-chan ServiceInfo, error)
 }
 
-// MeshConfig contains configuration for the service mesh
-type MeshConfig struct {
+// Configuration contains configuration for the service mesh
+type Configuration struct {
 	// ServiceID is the unique identifier for this service
 	ServiceID ServiceID
 
@@ -102,7 +102,7 @@ type Mesh interface {
 
 // meshImpl implements the Mesh interface
 type meshImpl struct {
-	config    MeshConfig
+	config    Configuration
 	services  sync.Map // map[ServiceID]*ServiceInfo
 	status    sync.Map // map[ServiceID]ServiceStatus
 	watchers  []chan<- ServiceInfo
@@ -119,7 +119,7 @@ type ServiceStatus struct {
 }
 
 // NewMesh creates a new service mesh instance
-func NewMesh(config MeshConfig) (Mesh, error) {
+func NewMesh(config Configuration) (Mesh, error) {
 	if config.Registry == nil {
 		return nil, errors.New("service registry is required")
 	}
@@ -261,7 +261,7 @@ func (m *meshImpl) runHealthChecks(ctx context.Context) {
 	}
 }
 
-func (m *meshImpl) checkServiceHealth(ctx context.Context, id ServiceID) {
+func (m *meshImpl) checkServiceHealth(_ context.Context, _ ServiceID) {
 	// Implement health check logic
 	// This is a placeholder for the actual implementation
 }

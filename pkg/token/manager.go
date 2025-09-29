@@ -33,7 +33,7 @@ func NewManager(config ManagerConfig) *Manager {
 }
 
 // CreateToken creates a new token with the given claims and duration
-func (m *Manager) CreateToken(ctx context.Context, claims map[string]interface{}, duration time.Duration) (string, error) {
+func (m *Manager) CreateToken(_ context.Context, claims map[string]interface{}, duration time.Duration) (string, error) {
 	// Generate a new token
 	token, err := generateToken()
 	if err != nil {
@@ -67,7 +67,7 @@ func (m *Manager) CreateToken(ctx context.Context, claims map[string]interface{}
 }
 
 // ValidateToken validates a token and returns its claims
-func (m *Manager) ValidateToken(ctx context.Context, token string) (map[string]interface{}, error) {
+func (m *Manager) ValidateToken(_ context.Context, token string) (map[string]interface{}, error) {
 	data, exists := m.config.Store.Get(token)
 	if !exists {
 		return nil, ErrInvalidToken
@@ -116,7 +116,7 @@ func (m *Manager) ValidateToken(ctx context.Context, token string) (map[string]i
 }
 
 // RevokeToken revokes a token
-func (m *Manager) RevokeToken(ctx context.Context, token string) error {
+func (m *Manager) RevokeToken(_ context.Context, token string) error {
 	err := m.config.Store.Delete(token)
 
 	// Update monitor if available and revocation was successful

@@ -181,7 +181,7 @@ func NewInMemoryRegistry() ServiceRegistry {
 	return &InMemoryRegistry{}
 }
 
-func (r *InMemoryRegistry) Register(ctx context.Context, info ServiceInfo) error {
+func (r *InMemoryRegistry) Register(_ context.Context, info ServiceInfo) error {
 	r.services.Store(info.ID, info)
 
 	r.watcherMu.RLock()
@@ -196,12 +196,12 @@ func (r *InMemoryRegistry) Register(ctx context.Context, info ServiceInfo) error
 	return nil
 }
 
-func (r *InMemoryRegistry) Unregister(ctx context.Context, id ServiceID) error {
+func (r *InMemoryRegistry) Unregister(_ context.Context, id ServiceID) error {
 	r.services.Delete(id)
 	return nil
 }
 
-func (r *InMemoryRegistry) GetService(ctx context.Context, id ServiceID) (*ServiceInfo, error) {
+func (r *InMemoryRegistry) GetService(_ context.Context, id ServiceID) (*ServiceInfo, error) {
 	if info, ok := r.services.Load(id); ok {
 		service := info.(ServiceInfo)
 		return &service, nil
@@ -209,7 +209,7 @@ func (r *InMemoryRegistry) GetService(ctx context.Context, id ServiceID) (*Servi
 	return nil, fmt.Errorf("service not found: %s", id)
 }
 
-func (r *InMemoryRegistry) ListServices(ctx context.Context) ([]ServiceInfo, error) {
+func (r *InMemoryRegistry) ListServices(_ context.Context) ([]ServiceInfo, error) {
 	var services []ServiceInfo
 	r.services.Range(func(_, value interface{}) bool {
 		services = append(services, value.(ServiceInfo))

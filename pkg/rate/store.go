@@ -170,7 +170,7 @@ func (s *MemoryStore) Reset(_ context.Context, key string) error {
 }
 
 // ResetAll implements Store
-func (s *MemoryStore) ResetAll(ctx context.Context) error {
+func (s *MemoryStore) ResetAll(_ context.Context) error {
 	s.mu.Lock()
 	s.counts = make(map[string]int)
 	s.expires = make(map[string]time.Time)
@@ -179,7 +179,7 @@ func (s *MemoryStore) ResetAll(ctx context.Context) error {
 }
 
 // Cleanup implements Store
-func (s *MemoryStore) Cleanup(ctx context.Context) error {
+func (s *MemoryStore) Cleanup(_ context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

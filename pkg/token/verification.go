@@ -117,7 +117,7 @@ func (v *StandardVerificationSystem) ValidateAttestation(ctx context.Context, at
 }
 
 // CheckRevocationStatus implements VerificationSystem
-func (v *StandardVerificationSystem) CheckRevocationStatus(ctx context.Context, token *EnhancedToken) error {
+func (v *StandardVerificationSystem) CheckRevocationStatus(_ context.Context, token *EnhancedToken) error {
 	// Check if token has been revoked using canonical field
 	if token.Token != nil && token.Token.RevocationStatus != nil && !token.Token.RevocationStatus.RevokedAt.IsZero() {
 		return fmt.Errorf("token has been revoked")
@@ -126,7 +126,7 @@ func (v *StandardVerificationSystem) CheckRevocationStatus(ctx context.Context, 
 }
 
 // VerifyVersionHistory implements VerificationSystem
-func (v *StandardVerificationSystem) VerifyVersionHistory(ctx context.Context, token *EnhancedToken) error {
+func (v *StandardVerificationSystem) VerifyVersionHistory(_ context.Context, token *EnhancedToken) error {
 	if len(token.Versions) == 0 {
 		return fmt.Errorf("token has no version history")
 	}
@@ -157,7 +157,7 @@ func (v *StandardVerificationSystem) RegVerifier() RegistryVerifier {
 
 // Helper methods
 
-func (v *StandardVerificationSystem) verifyOwnerAuthorization(ctx context.Context, owner *OwnerInfo) error {
+func (v *StandardVerificationSystem) verifyOwnerAuthorization(_ context.Context, owner *OwnerInfo) error {
 	// Verify authorization document
 	if owner.AuthorizationRef == "" {
 		return fmt.Errorf("missing authorization reference")
@@ -167,7 +167,7 @@ func (v *StandardVerificationSystem) verifyOwnerAuthorization(ctx context.Contex
 	return nil
 }
 
-func (v *StandardVerificationSystem) verifyAIMetadata(ctx context.Context, ai *AIMetadata) error {
+func (v *StandardVerificationSystem) verifyAIMetadata(_ context.Context, ai *AIMetadata) error {
 	if ai == nil {
 		return fmt.Errorf("missing AI metadata")
 	}
@@ -185,12 +185,12 @@ func (v *StandardVerificationSystem) verifyAIMetadata(ctx context.Context, ai *A
 	return nil
 }
 
-func (v *StandardVerificationSystem) verifyAttester(ctx context.Context, attesterID string) error {
+func (v *StandardVerificationSystem) verifyAttester(_ context.Context, _ string) error {
 	// Verify attester credentials would go here
 	return nil
 }
 
-func (v *StandardVerificationSystem) verifyEvidence(ctx context.Context, evidence string) error {
+func (v *StandardVerificationSystem) verifyEvidence(_ context.Context, _ string) error {
 	// Verify cryptographic evidence would go here
 	return nil
 }

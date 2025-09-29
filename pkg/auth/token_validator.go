@@ -28,7 +28,7 @@ type ValidationResult struct {
 }
 
 // ValidateToken performs comprehensive token validation
-func (v *TokenValidator) ValidateToken(ctx context.Context, tokenStr string) *ValidationResult {
+func (v *TokenValidator) ValidateToken(_ context.Context, tokenStr string) *ValidationResult {
 	result := &ValidationResult{
 		Valid: false,
 	}

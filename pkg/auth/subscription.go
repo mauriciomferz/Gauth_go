@@ -212,22 +212,22 @@ func (s *StandardSubscriptionService) AuthorizeResourceServer(ctx context.Contex
 
 // Helper methods
 
-func (s *StandardSubscriptionService) verifyAuthorizer(ctx context.Context, authorizerID string) error {
+func (s *StandardSubscriptionService) verifyAuthorizer(_ context.Context, _ string) error {
 	// Verify authorizer exists and is valid
 	return nil
 }
 
-func (s *StandardSubscriptionService) verifyOwner(ctx context.Context, ownerID string) error {
+func (s *StandardSubscriptionService) verifyOwner(_ context.Context, _ string) error {
 	// Verify owner exists and is valid
 	return nil
 }
 
-func (s *StandardSubscriptionService) verifyCapabilities(ctx context.Context, capabilities []string) error {
+func (s *StandardSubscriptionService) verifyCapabilities(_ context.Context, _ []string) error {
 	// Verify capabilities are valid
 	return nil
 }
 
-func (s *StandardSubscriptionService) verifyLegalCredentials(ctx context.Context, credentials string) error {
+func (s *StandardSubscriptionService) verifyLegalCredentials(_ context.Context, _ string) error {
 	// Verify legal credentials
 	return nil
 }

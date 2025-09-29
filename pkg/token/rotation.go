@@ -49,7 +49,7 @@ func NewBlacklist() *Blacklist {
 }
 
 // Add blacklists a token
-func (bl *Blacklist) Add(ctx context.Context, token *Token, reason string) error {
+func (bl *Blacklist) Add(_ context.Context, token *Token, reason string) error {
 	bl.mu.Lock()
 	defer bl.mu.Unlock()
 
@@ -63,7 +63,7 @@ func (bl *Blacklist) Add(ctx context.Context, token *Token, reason string) error
 }
 
 // IsBlacklisted checks if a token is revoked
-func (bl *Blacklist) IsBlacklisted(ctx context.Context, tokenID string) bool {
+func (bl *Blacklist) IsBlacklisted(_ context.Context, tokenID string) bool {
 	bl.mu.RLock()
 	defer bl.mu.RUnlock()
 
@@ -72,7 +72,7 @@ func (bl *Blacklist) IsBlacklisted(ctx context.Context, tokenID string) bool {
 }
 
 // GetBlacklistedToken retrieves blacklist details for a token
-func (bl *Blacklist) GetBlacklistedToken(ctx context.Context, tokenID string) (*BlacklistedToken, bool) {
+func (bl *Blacklist) GetBlacklistedToken(_ context.Context, tokenID string) (*BlacklistedToken, bool) {
 	bl.mu.RLock()
 	defer bl.mu.RUnlock()
 

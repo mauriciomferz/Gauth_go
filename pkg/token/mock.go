@@ -38,7 +38,7 @@ func (m *MockStore) Reset() {
 }
 
 // Save mocks storing a token
-func (m *MockStore) Save(ctx context.Context, key string, token *Token) error {
+func (m *MockStore) Save(_ context.Context, key string, token *Token) error {
 	if err := m.checkError(); err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func (m *MockStore) Save(ctx context.Context, key string, token *Token) error {
 }
 
 // Get mocks retrieving a token
-func (m *MockStore) Get(ctx context.Context, key string) (*Token, error) {
+func (m *MockStore) Get(_ context.Context, key string) (*Token, error) {
 	if err := m.checkError(); err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (m *MockStore) Get(ctx context.Context, key string) (*Token, error) {
 }
 
 // Delete mocks removing a token
-func (m *MockStore) Delete(ctx context.Context, key string) error {
+func (m *MockStore) Delete(_ context.Context, key string) error {
 	if err := m.checkError(); err != nil {
 		return err
 	}
@@ -83,7 +83,7 @@ func (m *MockStore) Delete(ctx context.Context, key string) error {
 }
 
 // List mocks listing tokens
-func (m *MockStore) List(ctx context.Context, filter Filter) ([]*Token, error) {
+func (m *MockStore) List(_ context.Context, filter Filter) ([]*Token, error) {
 	if err := m.checkError(); err != nil {
 		return nil, err
 	}
@@ -141,7 +141,7 @@ func (m *MockStore) Validate(ctx context.Context, token *Token) error {
 }
 
 // Refresh mocks token refresh
-func (m *MockStore) Refresh(ctx context.Context, refreshToken *Token) (*Token, error) {
+func (m *MockStore) Refresh(_ context.Context, refreshToken *Token) (*Token, error) {
 	if err := m.checkError(); err != nil {
 		return nil, err
 	}

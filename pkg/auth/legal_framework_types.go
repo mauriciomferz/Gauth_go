@@ -553,7 +553,7 @@ func (d *Decision) GetStringAttribute(key string) (string, error) {
 }
 
 // --- Stubbed methods for StandardLegalFramework ---
-func (f *StandardLegalFramework) TrackApprovalDetails(ctx interface{}, event *ApprovalEvent) error {
+func (f *StandardLegalFramework) TrackApprovalDetails(_ interface{}, event *ApprovalEvent) error {
 	// Create a tracking record from the approval event
 	record := TrackingRecord{}
 
@@ -564,16 +564,16 @@ func (f *StandardLegalFramework) TrackApprovalDetails(ctx interface{}, event *Ap
 
 	return nil
 }
-func (f *StandardLegalFramework) VerifyLegalCapacity(ctx interface{}, entity interface{}) error {
+func (f *StandardLegalFramework) VerifyLegalCapacity(_ interface{}, _ interface{}) error {
 	return nil
 }
-func (f *StandardLegalFramework) ValidateClientResourceServerInteraction(ctx interface{}, client interface{}, server interface{}) error {
+func (f *StandardLegalFramework) ValidateClientResourceServerInteraction(_ interface{}, _ interface{}, _ interface{}) error {
 	return nil
 }
-func (f *StandardLegalFramework) ValidateResourceServerPowers(ctx interface{}, token interface{}, request interface{}) error {
+func (f *StandardLegalFramework) ValidateResourceServerPowers(_ interface{}, _ interface{}, _ interface{}) error {
 	return nil
 }
-func (f *StandardLegalFramework) ValidateJurisdiction(ctx interface{}, jurisdiction interface{}, action interface{}) error {
+func (f *StandardLegalFramework) ValidateJurisdiction(_ interface{}, _ interface{}, action interface{}) error {
 	actionStr, ok := action.(string)
 	if !ok {
 		return fmt.Errorf("invalid action type")
@@ -589,10 +589,10 @@ func (f *StandardLegalFramework) ValidateJurisdiction(ctx interface{}, jurisdict
 func (f *StandardLegalFramework) GetJurisdictionRules(_ string) (*JurisdictionRules, error) {
 	return &JurisdictionRules{}, nil
 }
-func (f *StandardLegalFramework) ValidateJurisdictionRequirements(ctx interface{}, rules *JurisdictionRules, action string) error {
+func (f *StandardLegalFramework) ValidateJurisdictionRequirements(_ interface{}, _ *JurisdictionRules, _ string) error {
 	return nil
 }
-func (f *StandardLegalFramework) ValidateDuty(ctx interface{}, duty interface{}) error { return nil }
-func (f *StandardLegalFramework) EnforceFiduciaryDuties(ctx interface{}, power interface{}) error {
+func (f *StandardLegalFramework) ValidateDuty(_ interface{}, _ interface{}) error { return nil }
+func (f *StandardLegalFramework) EnforceFiduciaryDuties(_ interface{}, _ interface{}) error {
 	return nil
 }

@@ -89,7 +89,7 @@ type RequestInfo struct {
 }
 
 // ValidateTokenWithRequirements validates a token with detailed requirements
-func ValidateTokenWithRequirements(ctx context.Context, token *Token, requirements *ClaimRequirements) error {
+func ValidateTokenWithRequirements(_ context.Context, _ *Token, _ *ClaimRequirements) error {
 	// Legacy validation stub: always return nil (no validation)
 	return nil
 }

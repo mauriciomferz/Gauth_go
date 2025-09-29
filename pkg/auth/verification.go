@@ -71,7 +71,7 @@ func (v *StandardIdentityVerifier) VerifyIdentity(ctx context.Context, owner *to
 }
 
 // VerifyDocument implements IdentityVerifier
-func (v *StandardIdentityVerifier) VerifyDocument(ctx context.Context, doc []byte, signature []byte) error {
+func (v *StandardIdentityVerifier) VerifyDocument(_ context.Context, doc []byte, signature []byte) error {
 	// Decode PEM blocks
 	block, _ := pem.Decode(doc)
 	if block == nil {
@@ -124,13 +124,13 @@ func (v *StandardIdentityVerifier) VerifyRegistration(ctx context.Context, reg *
 
 // Helper methods
 
-func (v *StandardIdentityVerifier) fetchAuthDocument(ctx context.Context, ref string) ([]byte, []byte, error) {
+func (v *StandardIdentityVerifier) fetchAuthDocument(_ context.Context, _ string) ([]byte, []byte, error) {
 	// Implement document fetching from trust provider
 	// This would typically involve making an HTTP request to the trust provider
 	return nil, nil, nil
 }
 
-func (v *StandardIdentityVerifier) verifyWithRegistry(ctx context.Context, reg *token.RegistrationInfo) (bool, error) {
+func (v *StandardIdentityVerifier) verifyWithRegistry(_ context.Context, _ *token.RegistrationInfo) (bool, error) {
 	// Implement verification with official registry
 	// This would typically involve checking with a commercial register API
 	return false, nil
@@ -180,7 +180,7 @@ func (v *StandardAttestationVerifier) VerifyAttestation(ctx context.Context, att
 }
 
 // ValidateAttester implements AttestationVerifier
-func (v *StandardAttestationVerifier) ValidateAttester(ctx context.Context, attesterID string) error {
+func (v *StandardAttestationVerifier) ValidateAttester(_ context.Context, _ string) error {
 	// Verify attester's authority
 	// This would typically involve checking if the attester is authorized
 	// (e.g., a registered notary)
@@ -189,7 +189,7 @@ func (v *StandardAttestationVerifier) ValidateAttester(ctx context.Context, atte
 
 // Helper methods
 
-func (v *StandardAttestationVerifier) verifyEvidence(ctx context.Context, attestation *token.Attestation) error {
+func (v *StandardAttestationVerifier) verifyEvidence(_ context.Context, _ *token.Attestation) error {
 	// Implement evidence verification
 	// This would typically involve verifying digital signatures or other proofs
 	return nil

@@ -159,7 +159,7 @@ func (c *StandardComplianceChecker) TrackCompliance(ctx context.Context, token *
 
 // Helper methods
 
-func (c *StandardComplianceChecker) checkDelegationGuidelines(ctx context.Context, token *token.EnhancedToken, action string) error {
+func (c *StandardComplianceChecker) checkDelegationGuidelines(_ context.Context, token *token.EnhancedToken, _ string) error {
 	if token.AI == nil || len(token.AI.DelegationGuidelines) == 0 {
 		return nil
 	}
@@ -182,19 +182,19 @@ func (c *StandardComplianceChecker) checkApprovalRules(ctx context.Context, toke
 	return nil
 }
 
-func (c *StandardComplianceChecker) checkValueLimits(ctx context.Context, limits *token.ValueLimits, action string) error {
+func (c *StandardComplianceChecker) checkValueLimits(_ context.Context, _ *token.ValueLimits, _ string) error {
 	// Implement value limits checking
 	// This would typically involve checking transaction amounts against limits
 	return nil
 }
 
-func (c *StandardComplianceChecker) checkGeographicConstraints(ctx context.Context, constraints []string, action string) error {
+func (c *StandardComplianceChecker) checkGeographicConstraints(_ context.Context, _ []string, _ string) error {
 	// Implement geographic constraints checking
 	// This would typically involve checking location information
 	return nil
 }
 
-func (c *StandardComplianceChecker) checkTimeConstraints(ctx context.Context, constraints *token.TimeConstraints) error {
+func (c *StandardComplianceChecker) checkTimeConstraints(_ context.Context, constraints *token.TimeConstraints) error {
 	if len(constraints.AllowedTimeWindows) == 0 {
 		return nil
 	}
@@ -230,18 +230,18 @@ func (c *StandardComplianceChecker) checkTimeConstraints(ctx context.Context, co
 	return NewError(ErrRuleViolation, "action not allowed at current time", nil)
 }
 
-func (c *StandardComplianceChecker) checkCustomLimits(ctx context.Context, limits map[string]interface{}, action string) error {
+func (c *StandardComplianceChecker) checkCustomLimits(_ context.Context, _ map[string]interface{}, _ string) error {
 	// Implement custom limits checking
 	// This would typically involve checking against application-specific rules
 	return nil
 }
 
-func (c *StandardComplianceChecker) matchesRule(ctx context.Context, rule ApprovalRule, token *token.EnhancedToken, action string) (bool, error) {
+func (c *StandardComplianceChecker) matchesRule(_ context.Context, _ ApprovalRule, _ *token.EnhancedToken, _ string) (bool, error) {
 	// Implement rule matching logic
 	return false, nil
 }
 
-func (c *StandardComplianceChecker) enforceRule(ctx context.Context, rule ApprovalRule, token *token.EnhancedToken, action string) error {
+func (c *StandardComplianceChecker) enforceRule(_ context.Context, _ ApprovalRule, _ *token.EnhancedToken, _ string) error {
 	// Implement rule enforcement logic
 	return nil
 }

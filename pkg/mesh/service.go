@@ -61,7 +61,7 @@ func (m *ServiceMesh) AddService(config resources.ServiceConfig) *Service {
 }
 
 // Process executes a request with configured resilience patterns
-func (s *Service) Process(ctx context.Context, action func() error) error {
+func (s *Service) Process(_ context.Context, action func() error) error {
 	start := time.Now()
 
 	// Execute action

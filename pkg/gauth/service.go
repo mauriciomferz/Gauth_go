@@ -54,7 +54,7 @@ type rateLimiterAdapter struct {
 // Implement Allow, GetRemainingRequests, Reset
 var _ rate.Limiter = (*rateLimiterAdapter)(nil)
 
-func (a *rateLimiterAdapter) Allow(ctx context.Context, id string) error {
+func (a *rateLimiterAdapter) Allow(_ context.Context, id string) error {
 	if a.rl.IsAllowed(id) {
 		return nil
 	}
@@ -296,20 +296,7 @@ func (s *Service) validateAuthRequest(req *AuthorizationRequest) error {
 	return nil
 }
 
-// reserved for event handling
-func (s *Service) _handleAuthGrant(_ interface{}) {
-	// Handle authorization grant event
-}
 
-// reserved for event handling
-func (s *Service) _handleTokenIssue(_ interface{}) {
-	// Handle token issuance event
-}
-
-// reserved for event handling
-func (s *Service) _handleTokenRevoke(_ interface{}) {
-	// Handle token revocation event
-}
 
 func validateConfig(config Config) error {
 	if config.AuthServerURL == "" {

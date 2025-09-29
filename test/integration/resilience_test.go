@@ -33,7 +33,7 @@ func TestResilienceIntegration(t *testing.T) {
 		t.Run("FailureThreshold", func(t *testing.T) {
 			// Simulate failures
 			for i := 0; i < 3; i++ {
-				err := cb.Execute(ctx, func(ctx context.Context) error {
+				err := cb.Execute(ctx, func(_ context.Context) error {
 					return stderrors.New("test failure")
 				})
 				assert.Error(t, err)
@@ -43,7 +43,7 @@ func TestResilienceIntegration(t *testing.T) {
 			assert.Equal(t, resilience.StateOpen, cb.State())
 
 			// Should fail fast when open
-			err := cb.Execute(ctx, func(ctx context.Context) error {
+			err := cb.Execute(ctx, func(_ context.Context) error {
 				return nil
 			})
 			assert.ErrorIs(t, err, resilience.ErrCircuitOpen)
@@ -62,7 +62,7 @@ func TestResilienceIntegration(t *testing.T) {
 			assert.Equal(t, resilience.StateOpen, cb.State())
 
 			// Test successful call - this triggers half-open->closed transition
-			err := cb.Execute(ctx, func(ctx context.Context) error {
+			err := cb.Execute(ctx, func(_ context.Context) error {
 				return nil
 			})
 			assert.NoError(t, err)

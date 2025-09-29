@@ -29,7 +29,7 @@ type windowInfo struct {
 }
 
 // Allow implements the Limiter interface
-func (sw *SlidingWindow) Allow(ctx context.Context, id string) error {
+func (sw *SlidingWindow) Allow(_ context.Context, id string) error {
 	sw.mu.Lock()
 	defer sw.mu.Unlock()
 
@@ -83,30 +83,4 @@ func (sw *SlidingWindow) Reset(id string) {
 	sw.counts.Store(id, &windowInfo{})
 }
 
-// _cleanup periodically removes old entries
-// reserved for automatic cleanup
-func (sw *SlidingWindow) _cleanup() {
-	ticker := time.NewTicker(sw.window)
-	defer ticker.Stop()
 
-	for range ticker.C {
-		now := time.Now()
-		cutoff := now.Add(-sw.window)
-
-		sw.counts.Range(func(_, value interface{}) bool {
-			info := value.(*windowInfo)
-			sw.mu.Lock()
-			validIdx := 0
-			for i, ts := range info.timestamps {
-				if ts.After(cutoff) {
-					validIdx = i
-					break
-				}
-			}
-			info.timestamps = info.timestamps[validIdx:]
-			info.count = int64(len(info.timestamps))
-			sw.mu.Unlock()
-			return true
-		})
-	}
-}

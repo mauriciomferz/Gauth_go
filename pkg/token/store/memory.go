@@ -64,7 +64,7 @@ func NewMemoryStore(config Config) (*MemoryStore, error) {
 }
 
 // Save implements Store.Save
-func (s *MemoryStore) Save(ctx context.Context, token string, metadata TokenMetadata) error {
+func (s *MemoryStore) Save(_ context.Context, token string, metadata TokenMetadata) error {
 	if err := metadata.Validate(); err != nil {
 		return fmt.Errorf("invalid metadata: %w", err)
 	}
@@ -94,7 +94,7 @@ func (s *MemoryStore) Save(ctx context.Context, token string, metadata TokenMeta
 }
 
 // Get implements Store.Get
-func (s *MemoryStore) Get(ctx context.Context, token string) (*TokenMetadata, error) {
+func (s *MemoryStore) Get(_ context.Context, token string) (*TokenMetadata, error) {
 	s.RLock()
 	encrypted, ok := s.tokens[token]
 	s.RUnlock()
@@ -116,7 +116,7 @@ func (s *MemoryStore) Get(ctx context.Context, token string) (*TokenMetadata, er
 }
 
 // Delete implements Store.Delete
-func (s *MemoryStore) Delete(ctx context.Context, token string) error {
+func (s *MemoryStore) Delete(_ context.Context, token string) error {
 	s.Lock()
 	delete(s.tokens, token)
 	s.Unlock()
@@ -160,7 +160,7 @@ func (s *MemoryStore) UpdateLastUsed(ctx context.Context, token string) error {
 }
 
 // ListExpired implements Store.ListExpired
-func (s *MemoryStore) ListExpired(ctx context.Context) ([]string, error) {
+func (s *MemoryStore) ListExpired(_ context.Context) ([]string, error) {
 	var expired []string
 	now := time.Now()
 

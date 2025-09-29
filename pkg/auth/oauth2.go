@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/Gimel-Foundation/gauth/pkg/audit"
@@ -48,8 +47,6 @@ type OAuth2TokenResponse struct {
 type oauth2Authenticator struct {
 	config       OAuth2Config
 	httpClient   *http.Client
-	_tokenCache  sync.Map   // map[string]*TokenResponse - reserved for token caching
-	_refreshLock sync.Mutex // reserved for concurrent token refresh
 }
 
 func newOAuth2Authenticator(config Config) (Authenticator, error) {

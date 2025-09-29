@@ -181,7 +181,7 @@ func NewInMemoryConfigStore() *InMemoryConfigStore {
 	return &InMemoryConfigStore{}
 }
 
-func (s *InMemoryConfigStore) Load(ctx context.Context, serviceType ServiceType) (*ServiceConfig, error) {
+func (s *InMemoryConfigStore) Load(_ context.Context, serviceType ServiceType) (*ServiceConfig, error) {
 	if config, ok := s.configs.Load(serviceType); ok {
 		cfg := config.(ServiceConfig)
 		return &cfg, nil
@@ -189,7 +189,7 @@ func (s *InMemoryConfigStore) Load(ctx context.Context, serviceType ServiceType)
 	return nil, fmt.Errorf("configuration not found for service %s", serviceType)
 }
 
-func (s *InMemoryConfigStore) Save(ctx context.Context, config ServiceConfig) error {
+func (s *InMemoryConfigStore) Save(_ context.Context, config ServiceConfig) error {
 	s.configs.Store(config.Type, config)
 
 	s.mu.RLock()
@@ -204,7 +204,7 @@ func (s *InMemoryConfigStore) Save(ctx context.Context, config ServiceConfig) er
 	return nil
 }
 
-func (s *InMemoryConfigStore) List(ctx context.Context) ([]ServiceConfig, error) {
+func (s *InMemoryConfigStore) List(_ context.Context) ([]ServiceConfig, error) {
 	var configs []ServiceConfig
 	s.configs.Range(func(_, value interface{}) bool {
 		configs = append(configs, value.(ServiceConfig))

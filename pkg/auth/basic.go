@@ -42,7 +42,7 @@ func newBasicAuthenticator(config Config) (Authenticator, error) {
 	}, nil
 }
 
-func (a *basicAuthenticator) Initialize(ctx context.Context) error {
+func (a *basicAuthenticator) Initialize(_ context.Context) error {
 	// No initialization needed for now
 	return nil
 }
@@ -169,7 +169,7 @@ func (a *basicAuthenticator) ValidateToken(ctx context.Context, tokenStr string)
 	}, nil
 }
 
-func (a *basicAuthenticator) RevokeToken(ctx context.Context, tokenStr string) error {
+func (a *basicAuthenticator) RevokeToken(_ context.Context, _ string) error {
 	// Basic auth doesn't support token revocation
 	return errors.New("token revocation not supported by basic authenticator")
 }
