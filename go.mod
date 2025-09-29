@@ -3,7 +3,6 @@ module github.com/Gimel-Foundation/gauth
 go 1.23.3
 
 require (
-	github.com/Gimel-Foundation/gauth/gauth-demo-app/web/backend v0.0.0
 	github.com/alicebob/miniredis/v2 v2.35.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang-jwt/jwt/v5 v5.3.0
