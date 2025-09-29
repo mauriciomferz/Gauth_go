@@ -13,7 +13,7 @@ import (
 // TokenMonitor provides token lifecycle monitoring
 type TokenMonitor struct {
 	store     token.Store
-	querier   token.TokenQuerier
+	querier   token.Querier
 	blacklist *token.Blacklist
 	metrics   *TokenMetrics
 }

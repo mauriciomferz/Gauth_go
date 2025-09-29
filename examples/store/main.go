@@ -11,7 +11,7 @@ import (
 
 func main() {
 	// Create a memory store with default configuration
-	memoryStore, err := store.NewTokenStore(store.Memory, nil)
+	memoryStore, err := store.NewTokenStore(store.MemoryStoreType, nil)
 	if err != nil {
 		log.Fatalf("Failed to create memory store: %v", err)
 	}

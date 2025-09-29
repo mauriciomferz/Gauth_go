@@ -40,15 +40,15 @@ type Service struct {
 	rateLimiter rate.Limiter
 	tokenSvc    *token.Service
 	eventBus    *events.EventBus
-	audit       *audit.AuditLogger
+	audit       *audit.Logger
 
 	mu     sync.RWMutex
 	grants map[string]*AuthorizationGrant
 }
 
-// Adapter to wrap *RateLimiter as rate.Limiter
+// Adapter to wrap *TokenBucketLimiter as rate.Limiter
 type rateLimiterAdapter struct {
-	rl *rate.RateLimiter
+	rl *rate.TokenBucketLimiter
 }
 
 // Implement Allow, GetRemainingRequests, Reset
