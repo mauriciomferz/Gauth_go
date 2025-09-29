@@ -29,13 +29,8 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -a -installsuffix cgo \
     -o gauth-server ./cmd/demo
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
-    -ldflags='-w -s -extldflags "-static"' \
-    -a -installsuffix cgo \
-    -o gauth-web ./cmd/web
-
-# Verify binaries
-RUN ls -la gauth-server gauth-web
+# Verify binary
+RUN ls -la gauth-server
 
 # Production stage
 FROM alpine:3.18.4
@@ -49,9 +44,8 @@ RUN adduser -D -s /bin/sh gauth
 # Set working directory
 WORKDIR /app
 
-# Copy binaries from builder
+# Copy binary from builder
 COPY --from=builder /app/gauth-server .
-COPY --from=builder /app/gauth-web .
 
 # Create necessary directories
 RUN mkdir -p ./configs ./logs && \
@@ -68,4 +62,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
 
 # Default command (can be overridden)
-CMD ["./gauth-web"]
+CMD ["./gauth-server"]
