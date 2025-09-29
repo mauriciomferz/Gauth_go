@@ -8,8 +8,8 @@ import (
 	"github.com/Gimel-Foundation/gauth/pkg/common"
 )
 
-// RateLimitEntry tracks per-client state.
-type RateLimitEntry struct {
+// LimitEntry tracks per-client state.
+type LimitEntry struct {
 	Count       int
 	WindowStart time.Time
 	LastAccess  time.Time
@@ -18,10 +18,10 @@ type RateLimitEntry struct {
 	MaxRequests int
 }
 
-// RateLimiter provides rate limiting functionality
+// Limiter provides rate limiting functionality
 type RateLimiter struct {
 	Config  common.RateLimitConfig
-	entries map[string]*RateLimitEntry
+	entries map[string]*LimitEntry
 	mutex   sync.RWMutex
 }
 
@@ -38,7 +38,7 @@ func NewRateLimiter(cfg common.RateLimitConfig) *RateLimiter {
 	}
 	return &RateLimiter{
 		Config:  cfg,
-		entries: make(map[string]*RateLimitEntry),
+		entries: make(map[string]*LimitEntry),
 	}
 }
 
@@ -50,7 +50,7 @@ func (rl *RateLimiter) IsAllowed(clientID string) bool {
 	windowDuration := time.Duration(rl.Config.WindowSize) * time.Second
 	entry, exists := rl.entries[clientID]
 	if !exists {
-		entry = &RateLimitEntry{
+		entry = &LimitEntry{
 			Count:       1,
 			WindowStart: now,
 			LastAccess:  now,
@@ -86,7 +86,7 @@ func (rl *RateLimiter) IsAllowed(clientID string) bool {
 }
 
 // GetClientState returns rate limit state for a client.
-func (rl *RateLimiter) GetClientState(clientID string) *RateLimitEntry {
+func (rl *RateLimiter) GetClientState(clientID string) *LimitEntry {
 	rl.mutex.RLock()
 	defer rl.mutex.RUnlock()
 	return rl.entries[clientID]

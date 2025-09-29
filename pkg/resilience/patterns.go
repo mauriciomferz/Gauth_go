@@ -188,34 +188,70 @@ func WithBulkhead(maxConcurrent int) PatternsOption {
 
 // Execute runs a function with all resilience patterns applied
 func (p *Patterns) Execute(ctx context.Context, fn func() error) error {
-	// Try bulkhead
+	if err := p.checkBulkhead(ctx); err != nil {
+		return err
+	}
+	defer func() { <-p.requestSemaphore }()
+
+	if err := p.checkRateLimit(); err != nil {
+		return err
+	}
+
+	if err := p.checkCircuitBreaker(ctx); err != nil {
+		return err
+	}
+
+	return p.executeWithRetry(ctx, fn)
+}
+
+func (p *Patterns) changeState(newState CircuitState) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.state != newState {
+		oldState := p.state
+		p.state = newState
+		if p.onState != nil {
+			p.onState(p.name, oldState, newState)
+		}
+	}
+}
+
+// checkBulkhead checks if the bulkhead allows the request
+func (p *Patterns) checkBulkhead(ctx context.Context) error {
 	select {
 	case p.requestSemaphore <- struct{}{}:
-		defer func() { <-p.requestSemaphore }()
+		return nil
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
 		return fmt.Errorf("bulkhead full for %s", p.name)
 	}
+}
 
-	// Check rate limit
+// checkRateLimit checks if the rate limit allows the request
+func (p *Patterns) checkRateLimit() error {
 	p.mu.Lock()
+	defer p.mu.Unlock()
+	
 	now := time.Now()
 	elapsed := now.Sub(p.lastRequest)
 	newTokens := int(float64(p.reqPerSec) * elapsed.Seconds())
 	p.tokens = minInt(p.burst, p.tokens+newTokens)
+	
 	if p.tokens <= 0 {
-		p.mu.Unlock()
 		if p.onRateLimit != nil {
 			p.onRateLimit(p.name)
 		}
 		return fmt.Errorf("rate limit exceeded for %s", p.name)
 	}
+	
 	p.tokens--
 	p.lastRequest = now
-	p.mu.Unlock()
+	return nil
+}
 
-	// Check circuit breaker
+// checkCircuitBreaker checks if the circuit breaker allows the request
+func (p *Patterns) checkCircuitBreaker(ctx context.Context) error {
 	p.mu.RLock()
 	state := p.state
 	p.mu.RUnlock()
@@ -235,33 +271,19 @@ func (p *Patterns) Execute(ctx context.Context, fn func() error) error {
 			return fmt.Errorf("circuit breaker half-open, at test limit for %s", p.name)
 		}
 	}
+	return nil
+}
 
-	// Apply retry with backoff
+// executeWithRetry executes the function with retry and exponential backoff
+func (p *Patterns) executeWithRetry(ctx context.Context, fn func() error) error {
 	var lastErr error
 	for attempt := 0; attempt < p.maxAttempts; attempt++ {
 		if err := fn(); err != nil {
 			lastErr = err
 			p.recordFailure()
 
-			// If not final attempt, wait with exponential backoff
 			if attempt < p.maxAttempts-1 {
-				// Prevent overflow by limiting attempt value
-				safeAttempt := attempt
-				if safeAttempt > 30 { // 2^30 is large enough, prevents overflow
-					safeAttempt = 30
-				}
-				// Safely convert to uint to prevent integer overflow
-				var shiftAmount uint
-				if safeAttempt >= 0 && safeAttempt <= 63 {
-					shiftAmount = uint(safeAttempt)
-				} else {
-					// Cap at maximum safe shift to prevent overflow
-					shiftAmount = 30
-				}
-				backoff := p.baseInterval * time.Duration(1<<shiftAmount)
-				if backoff > p.maxInterval {
-					backoff = p.maxInterval
-				}
+				backoff := p.calculateBackoff(attempt)
 				select {
 				case <-time.After(backoff):
 				case <-ctx.Done():
@@ -275,20 +297,28 @@ func (p *Patterns) Execute(ctx context.Context, fn func() error) error {
 		p.recordSuccess()
 		return nil
 	}
-
 	return lastErr
 }
 
-func (p *Patterns) changeState(newState CircuitState) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	if p.state != newState {
-		oldState := p.state
-		p.state = newState
-		if p.onState != nil {
-			p.onState(p.name, oldState, newState)
-		}
+// calculateBackoff calculates exponential backoff duration
+func (p *Patterns) calculateBackoff(attempt int) time.Duration {
+	safeAttempt := attempt
+	if safeAttempt > 30 { // 2^30 is large enough, prevents overflow
+		safeAttempt = 30
 	}
+	
+	var shiftAmount uint
+	if safeAttempt >= 0 && safeAttempt <= 63 {
+		shiftAmount = uint(safeAttempt)
+	} else {
+		shiftAmount = 30 // Cap at maximum safe shift
+	}
+	
+	backoff := p.baseInterval * time.Duration(1<<shiftAmount)
+	if backoff > p.maxInterval {
+		backoff = p.maxInterval
+	}
+	return backoff
 }
 
 func (p *Patterns) recordSuccess() {
