@@ -119,9 +119,9 @@ type Patterns struct {
 	maxInterval  time.Duration
 
 	// Bulkhead
-	maxConcurrent     int
-	_activeRequests   int // reserved for future monitoring
-	requestSemaphore  chan struct{}
+	maxConcurrent    int
+	_activeRequests  int // reserved for future monitoring
+	requestSemaphore chan struct{}
 }
 
 // PatternsOption is a function that configures a Patterns instance
@@ -152,7 +152,9 @@ func NewPatterns(name string, opts ...PatternsOption) *Patterns {
 }
 
 // WithCircuitBreaker configures circuit breaker settings
-func WithCircuitBreaker(threshold int, timeout time.Duration, onState func(name string, from, to CircuitState)) PatternsOption {
+func WithCircuitBreaker(
+	threshold int, timeout time.Duration, onState func(name string, from, to CircuitState),
+) PatternsOption {
 	return func(p *Patterns) {
 		p.threshold = threshold
 		p.timeout = timeout
@@ -232,19 +234,19 @@ func (p *Patterns) checkBulkhead(ctx context.Context) error {
 func (p *Patterns) checkRateLimit() error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	
+
 	now := time.Now()
 	elapsed := now.Sub(p.lastRequest)
 	newTokens := int(float64(p.reqPerSec) * elapsed.Seconds())
 	p.tokens = minInt(p.burst, p.tokens+newTokens)
-	
+
 	if p.tokens <= 0 {
 		if p.onRateLimit != nil {
 			p.onRateLimit(p.name)
 		}
 		return fmt.Errorf("rate limit exceeded for %s", p.name)
 	}
-	
+
 	p.tokens--
 	p.lastRequest = now
 	return nil
@@ -306,14 +308,14 @@ func (p *Patterns) calculateBackoff(attempt int) time.Duration {
 	if safeAttempt > 30 { // 2^30 is large enough, prevents overflow
 		safeAttempt = 30
 	}
-	
+
 	var shiftAmount uint
 	if safeAttempt >= 0 && safeAttempt <= 63 {
 		shiftAmount = uint(safeAttempt)
 	} else {
 		shiftAmount = 30 // Cap at maximum safe shift
 	}
-	
+
 	backoff := p.baseInterval * time.Duration(1<<shiftAmount)
 	if backoff > p.maxInterval {
 		backoff = p.maxInterval

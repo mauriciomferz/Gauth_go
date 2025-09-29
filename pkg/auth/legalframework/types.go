@@ -1,4 +1,5 @@
-// Package legalframework provides types and functions for working with legal frameworks in the context of authentication and authorization.
+// Package legalframework provides types and functions for working with legal frameworks
+// in the context of authentication and authorization.
 package legalframework
 
 import (

@@ -118,7 +118,7 @@ func (s *RedisStore) ResetAll(ctx context.Context) error {
 }
 
 // Cleanup implements Store
-func (s *RedisStore) Cleanup(ctx context.Context) error {
+func (s *RedisStore) Cleanup(_ context.Context) error {
 	// Redis handles expiration automatically
 	return nil
 }
@@ -139,7 +139,7 @@ func NewMemoryStore() *MemoryStore {
 }
 
 // GetCount implements Store
-func (s *MemoryStore) GetCount(ctx context.Context, key string) (int, error) {
+func (s *MemoryStore) GetCount(_ context.Context, key string) (int, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
