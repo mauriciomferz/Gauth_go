@@ -203,7 +203,9 @@ func (p *StandardPowerEnforcement) EnforceClientObligations(ctx context.Context,
 	return nil
 }
 
-func (p *StandardPowerEnforcement) VerifySigningAuthority(ctx context.Context, token *token.EnhancedToken, document string) error {
+func (p *StandardPowerEnforcement) VerifySigningAuthority(
+	ctx context.Context, token *token.EnhancedToken, document string,
+) error {
 	power, err := p.getPowerOfAttorney(ctx, token)
 	if err != nil {
 		return err
@@ -226,7 +228,9 @@ func (p *StandardPowerEnforcement) VerifySigningAuthority(ctx context.Context, t
 
 // Demand-side enforcement methods
 
-func (p *StandardPowerEnforcement) ValidateResourceAccess(ctx context.Context, token *token.EnhancedToken, resource string) error {
+func (p *StandardPowerEnforcement) ValidateResourceAccess(
+	ctx context.Context, token *token.EnhancedToken, resource string,
+) error {
 	power, err := p.getPowerOfAttorney(ctx, token)
 	if err != nil {
 		return err
