@@ -10,7 +10,9 @@ import (
 )
 
 // Authorize determines if a subject can perform an action on a resource
-func (a *memoryAuthorizer) Authorize(ctx context.Context, subject Subject, action Action, resource Resource) (*Decision, error) {
+func (a *memoryAuthorizer) Authorize(
+	ctx context.Context, subject Subject, action Action, resource Resource,
+) (*Decision, error) {
 	req := &AccessRequest{
 		Subject:  subject,
 		Action:   action,

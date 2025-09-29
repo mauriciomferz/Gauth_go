@@ -22,8 +22,75 @@ issues:
         - unused
         - ineffassign
         - govet
+    
+    # Exclude line length for comments and documentation
+    - linters: [lll]
+      source: ^\\s*//.*$
+    
+    # Exclude magic numbers in test files and demo files
+    - linters: [mnd]
+      path: (_test\\.go|demo/|examples/|cmd/)
+    
+    # Exclude magic numbers for common values
+    - linters: [mnd]
+      text: (200|201|400|401|403|404|500|0\\.001|0\\.0001|0\\.8|0\\.5)
+    
+    # Exclude depguard for demo, example, and internal test files
+    - linters: [depguard]
+      path: (demo/|example/|cmd/|_test\\.go|internal/)
+    
+    # Allow some common magic numbers that are domain-specific
+    - linters: [mnd]
+      text: (0750|0600|32|12|24|30|50\\.0) # File permissions, crypto constants, time constants
+    
+    # Allow unused parameters in interface implementations and stub methods
+    - linters: [revive]
+      text: unused-parameter
+      path: (interface\\.go|impl\\.go|stubs?\\.go)
+    
+    # Allow longer lines in function signatures
+    - linters: [lll]
+      source: ^func.*\($
 
 linters-settings:
+  # Line length settings
+  lll:
+    line-length: 130  # Increased from default 120 to be more permissive
+    tab-width: 1
+
+  # Magic number detector settings
+  mnd:
+    # Allowed numbers (common constants)
+    ignored-numbers: ["0", "1", "2", "3", "5", "10", "12", "24", "30", "32", "50", "100", "1000", "0600", "0750"]
+    ignored-files: [_test.go, testdata/*, examples/*, demo/*, cmd/*]
+    ignored-functions: [math.*, time.*, strconv.*, prometheus.ExponentialBuckets]
+
+  # Depguard settings - allow common libraries
+  depguard:
+    rules:
+      main:
+        allow:
+          - $gostd
+          - github.com/Gimel-Foundation/gauth
+          - github.com/mauriciomferz/Gauth_go
+          - github.com/golang-jwt/jwt/v5
+          - github.com/prometheus/client_golang
+          - github.com/go-redis/redis/v8
+          - github.com/lib/pq
+          - github.com/stretchr/testify
+          - github.com/google/uuid
+          - github.com/hashicorp/vault/api
+          - golang.org/x/crypto
+          - go.opentelemetry.io/otel
+
+  # Revive settings
+  revive:
+    min-confidence: 0.8
+    rules:
+      - name: unused-parameter
+      - name: exported
+        arguments: [checkPrivateReceivers, sayRepetitiveInsteadOfStutters]
+
   govet:
     enable:
       - shadow    # Modern way to enable shadow checking

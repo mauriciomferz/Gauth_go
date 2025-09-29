@@ -342,7 +342,9 @@ func createClientRequest(_ *testing.T, clientAuth *auth.ClientAuthorization) *au
 	}
 }
 
-func createAuthorizationGrant(_ *testing.T, request *auth.LegalFrameworkRequest) *auth.LegalFrameworkAuthorizationGrant {
+func createAuthorizationGrant(
+	_ *testing.T, request *auth.LegalFrameworkRequest,
+) *auth.LegalFrameworkAuthorizationGrant {
 	return &auth.LegalFrameworkAuthorizationGrant{
 		ID:        "grant_001",
 		RequestID: request.ID,
@@ -363,7 +365,9 @@ func createAuthorizationGrant(_ *testing.T, request *auth.LegalFrameworkRequest)
 	}
 }
 
-func validateFiduciaryDuties(_ *testing.T, framework *auth.StandardLegalFramework, _ *auth.LegalFrameworkAuthorizationGrant) error {
+func validateFiduciaryDuties(
+	_ *testing.T, framework *auth.StandardLegalFramework, _ *auth.LegalFrameworkAuthorizationGrant,
+) error {
 	duties := []auth.FiduciaryDuty{
 		{
 			Type:        "loyalty",
@@ -387,7 +391,9 @@ func validateFiduciaryDuties(_ *testing.T, framework *auth.StandardLegalFramewor
 	return nil
 }
 
-func validateGrantCompliance(_ *testing.T, framework *auth.StandardLegalFramework, _ *auth.LegalFrameworkAuthorizationGrant) error {
+func validateGrantCompliance(
+	_ *testing.T, framework *auth.StandardLegalFramework, _ *auth.LegalFrameworkAuthorizationGrant,
+) error {
 	ctx := context.Background()
 	rules := &auth.JurisdictionRules{
 		Country: "US",
@@ -550,7 +556,9 @@ func createComplianceActions(_ *testing.T) []auth.ComplianceAction {
 	}
 }
 
-func getTrackingRecords(t *testing.T, framework *auth.StandardLegalFramework, approvalID string) ([]auth.TrackingRecord, error) {
+func getTrackingRecords(
+	t *testing.T, framework *auth.StandardLegalFramework, approvalID string,
+) ([]auth.TrackingRecord, error) {
 	store, ok := framework.Store().(*auth.StoreStub)
 	if !ok {
 		t.Fatalf("framework.Store() is not of type *auth.StoreStub")
