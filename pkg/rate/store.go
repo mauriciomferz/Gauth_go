@@ -151,7 +151,7 @@ func (s *MemoryStore) GetCount(_ context.Context, key string) (int, error) {
 }
 
 // Increment implements Store
-func (s *MemoryStore) Increment(ctx context.Context, key string, expiry time.Duration) error {
+func (s *MemoryStore) Increment(_ context.Context, key string, expiry time.Duration) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

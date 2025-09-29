@@ -50,7 +50,9 @@ var (
 			Name: "gauth_http_response_size_bytes",
 			Help: "HTTP response size in bytes",
 			Buckets: prometheus.ExponentialBuckets(
-				responseSizeStart, responseSizeMultiplier, responseSizeBuckets), // from 100B to ~1GB
+				responseSizeStart,
+				responseSizeMultiplier,
+				responseSizeBuckets), // from 100B to ~1GB
 		},
 		[]string{"handler"},
 	)

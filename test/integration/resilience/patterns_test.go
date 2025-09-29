@@ -20,7 +20,7 @@ func TestResiliencePatterns(t *testing.T) {
 
 func testCompositeResilience(t *testing.T) {
 	composite := createCompositeResiliencePattern()
-	
+
 	testSuccessfulExecution(t, composite)
 	testRateLimiting(t, composite)
 	testCircuitBreakerFailures(t, composite)
