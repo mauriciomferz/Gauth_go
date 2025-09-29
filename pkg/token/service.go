@@ -103,55 +103,79 @@ func (s *Service) Issue(ctx context.Context, token *Token) (*Token, error) {
 
 // Validate checks if a token is valid
 func (s *Service) Validate(ctx context.Context, token *Token) error {
-	// Check signature
+	if err := s.validateSignature(token); err != nil {
+		return err
+	}
+
+	if err := s.validateTimeClaims(token); err != nil {
+		return err
+	}
+
+	if err := s.validateIssuerAndAudience(token); err != nil {
+		return err
+	}
+
+	return s.validateTokenStorage(ctx, token)
+}
+
+func (s *Service) validateSignature(token *Token) error {
 	if err := s.verifySignature(token); err != nil {
 		return NewValidationErrorWithCause(ValidationCodeInvalidSignature, "invalid token signature", err)
 	}
+	return nil
+}
 
-	// Check expiry
-	if time.Now().After(token.ExpiresAt) {
+func (s *Service) validateTimeClaims(token *Token) error {
+	now := time.Now()
+
+	if now.After(token.ExpiresAt) {
 		return NewValidationError(ValidationCodeExpired, "token has expired")
 	}
 
-	// Check not before
-	if time.Now().Before(token.NotBefore) {
+	if now.Before(token.NotBefore) {
 		return NewValidationError(ValidationCodeNotYetValid, "token not yet valid")
 	}
 
-	// Check issuer
-	if s.config.ValidateIssuer {
-		validIssuer := false
-		for _, iss := range s.config.AllowedIssuers {
-			if token.Issuer == iss {
-				validIssuer = true
-				break
-			}
-		}
-		if !validIssuer {
-			return NewValidationError(ValidationCodeInvalidIssuer, "token issuer not allowed")
-		}
+	return nil
+}
+
+func (s *Service) validateIssuerAndAudience(token *Token) error {
+	if err := s.validateTokenIssuer(token); err != nil {
+		return err
 	}
 
-	// Check audience
-	if s.config.ValidateAudience {
-		validAudience := false
-		for _, aud := range token.Audience {
-			for _, allowed := range s.config.AllowedAudiences {
-				if aud == allowed {
-					validAudience = true
-					break
-				}
-			}
-			if validAudience {
-				break
-			}
-		}
-		if !validAudience {
-			return NewValidationError(ValidationCodeInvalidAudience, "token audience not allowed")
-		}
+	return s.validateTokenAudience(token)
+}
+
+func (s *Service) validateTokenIssuer(token *Token) error {
+	if !s.config.ValidateIssuer {
+		return nil
 	}
 
-	// Check if revoked
+	for _, iss := range s.config.AllowedIssuers {
+		if token.Issuer == iss {
+			return nil
+		}
+	}
+	return NewValidationError(ValidationCodeInvalidIssuer, "token issuer not allowed")
+}
+
+func (s *Service) validateTokenAudience(token *Token) error {
+	if !s.config.ValidateAudience {
+		return nil
+	}
+
+	for _, aud := range token.Audience {
+		for _, allowed := range s.config.AllowedAudiences {
+			if aud == allowed {
+				return nil
+			}
+		}
+	}
+	return NewValidationError(ValidationCodeInvalidAudience, "token audience not allowed")
+}
+
+func (s *Service) validateTokenStorage(ctx context.Context, token *Token) error {
 	stored, err := s.store.Get(ctx, token.ID)
 	if err != nil {
 		if err == ErrTokenNotFound {
@@ -160,7 +184,6 @@ func (s *Service) Validate(ctx context.Context, token *Token) error {
 		return NewValidationErrorWithCause(ValidationCodeStorageFailure, "failed to verify token status", err)
 	}
 
-	// Compare with stored token
 	if stored.Value != token.Value {
 		return NewValidationError(ValidationCodeInvalid, "token does not match stored value")
 	}

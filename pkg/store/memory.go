@@ -248,7 +248,7 @@ func (s *MemoryStore) Revoke(_ context.Context, token string) error {
 }
 
 // IsRevoked checks if a token is revoked
-func (s *MemoryStore) IsRevoked(ctx context.Context, token string) (bool, error) {
+func (s *MemoryStore) IsRevoked(_ context.Context, token string) (bool, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -267,7 +267,7 @@ func (s *MemoryStore) IsRevoked(ctx context.Context, token string) (bool, error)
 }
 
 // Cleanup removes expired tokens
-func (s *MemoryStore) Cleanup(ctx context.Context) error {
+func (s *MemoryStore) Cleanup(_ context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

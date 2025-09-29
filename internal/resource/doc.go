@@ -9,7 +9,7 @@ implements the core functionality and data structures.
 Key types in this package:
 
   - Resource: The main resource type that contains identification and metadata
-  - ResourceConfig: Strongly-typed configuration for resources with type safety
+  - Config: Strongly-typed configuration for resources with type safety
   - ResourceType: Enumerated resource types (API, Service, Database, etc.)
   - RateLimit: Type-safe configuration for rate limiting on resources
   - Attributes: Strongly typed resource attributes
@@ -19,7 +19,7 @@ Key types in this package:
 Usage example:
 
 	// Create a new API resource with typed configuration
-	config := &ResourceConfig{
+	config := &Config{
 		Version:        "v1",
 		Public:         true,
 		MaxConnections: 100,

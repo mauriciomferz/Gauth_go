@@ -93,7 +93,7 @@ func (p *PowerDecisionPoint) MakeAuthorizationDecision(token string, requestedAc
 }
 
 // AddTokenRestriction adds a new restriction to a token.
-func (p *PowerAdministrationPoint) AddTokenRestriction(_ string, restriction Restriction) error {
+func (p *PowerAdministrationPoint) AddTokenRestriction(_ string, _ Restriction) error {
 	// Not implemented: tokenstore.TokenData does not support dynamic restrictions. This is a placeholder for future extension.
 	return fmt.Errorf("AddTokenRestriction not implemented: tokenstore.TokenData does not support restrictions")
 }

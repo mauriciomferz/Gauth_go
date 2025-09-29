@@ -183,7 +183,7 @@ func (m *meshImpl) GetService(ctx context.Context, id ServiceID) (*ServiceInfo, 
 	return m.config.Registry.GetService(ctx, id)
 }
 
-func (m *meshImpl) Authenticate(ctx context.Context, serviceID ServiceID, creds interface{}) error {
+func (m *meshImpl) Authenticate(ctx context.Context, _ ServiceID, creds interface{}) error {
 	if err := m.config.Authenticator.ValidateCredentials(ctx, creds); err != nil {
 		if m.metrics != nil {
 			m.metrics.RecordAuthAttempt("mesh", "failure")
@@ -212,7 +212,7 @@ func (m *meshImpl) Authorize(ctx context.Context, source, target ServiceID, acti
 	return nil
 }
 
-func (m *meshImpl) ExecuteRequest(ctx context.Context, target ServiceID, req interface{}) (interface{}, error) {
+func (m *meshImpl) ExecuteRequest(ctx context.Context, target ServiceID, _ interface{}) (interface{}, error) {
 	// Get service info
 	_, err := m.GetService(ctx, target)
 	if err != nil {
@@ -253,7 +253,7 @@ func (m *meshImpl) runHealthChecks(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			m.services.Range(func(key, value interface{}) bool {
+			m.services.Range(func(key, _ interface{}) bool {
 				go m.checkServiceHealth(ctx, key.(ServiceID))
 				return true
 			})

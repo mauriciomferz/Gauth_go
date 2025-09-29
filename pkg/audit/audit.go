@@ -88,20 +88,19 @@ type securityEvent struct {
 	Scopes        []string         `json:"scopes,omitempty"`
 }
 
-// AuditLogger handles security event logging and persistence
-type AuditLogger struct {
+// Logger handles security event logging and persistence
+type Logger struct {
 	events []securityEvent
 	mu     sync.RWMutex // private mutex
 }
 
-// Close implements io.Closer for AuditLogger (no-op for in-memory logger).
-func (al *AuditLogger) Close() error {
+// Close implements io.Closer for Logger (no-op for in-memory logger).
+func (al *Logger) Close() error {
 	return nil
 }
 
-// Log appends an audit Entry to the logger's event list (for compatibility with GAuth service).
-// Accepts context.Context for type safety.
-func (al *AuditLogger) Log(_ context.Context, entry *Entry) {
+// Log logs a security event
+func (al *Logger) Log(_ context.Context, entry *Entry) {
 	al.mu.Lock()
 	defer al.mu.Unlock()
 	// For demonstration, we only store minimal info. Extend as needed.
@@ -116,15 +115,15 @@ func (al *AuditLogger) Log(_ context.Context, entry *Entry) {
 	})
 }
 
-// NewAuditLogger creates a new audit logger instance with optional storage
-func NewAuditLogger() *AuditLogger {
-	return &AuditLogger{
+// NewAuditLogger creates a new in-memory audit logger
+func NewAuditLogger() *Logger {
+	return &Logger{
 		events: make([]securityEvent, 0),
 	}
 }
 
 // LogEvent records a security event with comprehensive context
-func (al *AuditLogger) LogEvent(evt common.EventType, transactionID, clientID string, meta EventMetadata) {
+func (al *Logger) LogEvent(evt common.EventType, transactionID, clientID string, meta EventMetadata) {
 	al.mu.Lock()
 	defer al.mu.Unlock()
 
@@ -157,7 +156,7 @@ func (al *AuditLogger) LogEvent(evt common.EventType, transactionID, clientID st
 }
 
 // GetRecentEvents retrieves recent security events
-func (al *AuditLogger) GetRecentEvents(limit int) []securityEvent {
+func (al *Logger) GetRecentEvents(limit int) []securityEvent {
 	al.mu.RLock()
 	defer al.mu.RUnlock()
 
@@ -172,7 +171,7 @@ func (al *AuditLogger) GetRecentEvents(limit int) []securityEvent {
 }
 
 // PrintRecentEvents displays recent security events in a formatted way
-func (al *AuditLogger) PrintRecentEvents(limit int) {
+func (al *Logger) PrintRecentEvents(limit int) {
 	events := al.GetRecentEvents(limit)
 
 	if len(events) == 0 {
@@ -203,7 +202,7 @@ func (al *AuditLogger) PrintRecentEvents(limit int) {
 }
 
 // GetEventsByClient filters events by client ID
-func (al *AuditLogger) GetEventsByClient(clientID string) []securityEvent {
+func (al *Logger) GetEventsByClient(clientID string) []securityEvent {
 	al.mu.RLock()
 	defer al.mu.RUnlock()
 
@@ -217,7 +216,7 @@ func (al *AuditLogger) GetEventsByClient(clientID string) []securityEvent {
 }
 
 // GetEventsByTransaction filters events by transaction ID
-func (al *AuditLogger) GetEventsByTransaction(transactionID string) []securityEvent {
+func (al *Logger) GetEventsByTransaction(transactionID string) []securityEvent {
 	al.mu.RLock()
 	defer al.mu.RUnlock()
 
@@ -231,7 +230,7 @@ func (al *AuditLogger) GetEventsByTransaction(transactionID string) []securityEv
 }
 
 // GetFailedEvents returns all failed security events
-func (al *AuditLogger) GetFailedEvents() []securityEvent {
+func (al *Logger) GetFailedEvents() []securityEvent {
 	al.mu.RLock()
 	defer al.mu.RUnlock()
 
@@ -245,7 +244,7 @@ func (al *AuditLogger) GetFailedEvents() []securityEvent {
 }
 
 // ClearEvents removes all events older than the retention period
-func (al *AuditLogger) ClearEvents(retentionPeriod time.Duration) {
+func (al *Logger) ClearEvents(retentionPeriod time.Duration) {
 	al.mu.Lock()
 	defer al.mu.Unlock()
 

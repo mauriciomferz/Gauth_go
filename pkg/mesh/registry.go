@@ -211,7 +211,7 @@ func (r *InMemoryRegistry) GetService(ctx context.Context, id ServiceID) (*Servi
 
 func (r *InMemoryRegistry) ListServices(ctx context.Context) ([]ServiceInfo, error) {
 	var services []ServiceInfo
-	r.services.Range(func(key, value interface{}) bool {
+	r.services.Range(func(_, value interface{}) bool {
 		services = append(services, value.(ServiceInfo))
 		return true
 	})

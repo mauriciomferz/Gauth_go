@@ -110,6 +110,18 @@ func TestBasicAuth(t *testing.T) {
 }
 
 func TestJWTAuth(t *testing.T) {
+	auth := createJWTAuthenticator(t)
+
+	t.Run("Token Generation and Validation", func(t *testing.T) {
+		testTokenGenerationAndValidation(t, auth)
+	})
+
+	t.Run("Validation Rules", func(t *testing.T) {
+		testValidationRules(t)
+	})
+}
+
+func createJWTAuthenticator(t *testing.T) Authenticator {
 	config := Config{
 		Type:              TypeJWT,
 		ClientID:          "testclient",
@@ -127,98 +139,153 @@ func TestJWTAuth(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create JWT authenticator: %v", err)
 	}
+	return auth
+}
 
-	t.Run("Token Generation and Validation", func(t *testing.T) {
-		// Generate a token
-		req := TokenRequest{
-			Subject:  "testuser",
-			Audience: "testapp",
-			Scopes:   []string{"read", "write"},
-			Metadata: map[string]interface{}{
-				"role": "admin",
-			},
-		}
-		resp, err := auth.GenerateToken(context.Background(), req)
-		if err != nil {
-			t.Fatalf("Token generation failed: %v", err)
-		}
-		if resp.Token == "" {
-			t.Error("Expected non-empty token")
-		}
-		if resp.TokenType != "Bearer" {
-			t.Errorf("Expected Bearer token, got: %s", resp.TokenType)
-		}
+func testTokenGenerationAndValidation(t *testing.T, auth Authenticator) {
+	req := createTokenRequest()
+	resp := generateTestToken(t, auth, req)
+	validateTokenResponse(t, resp)
 
-		// Validate the token
-		data, err := auth.ValidateToken(context.Background(), resp.Token)
-		if err != nil {
-			t.Errorf("Token validation failed: %v", err)
-		}
-		if !data.Valid {
-			t.Error("Expected token to be valid")
-		}
-		if data.Subject != testUser {
-			t.Errorf("Expected subject '%s', got: %s", testUser, data.Subject)
-		}
-		if data.Issuer != "testclient" {
-			t.Errorf("Expected issuer 'testclient', got: %s", data.Issuer)
-		}
-		if data.Audience != "testapp" {
-			t.Errorf("Expected audience 'testapp', got: %s", data.Audience)
-		}
-		if role, ok := data.Claims["role"].(string); !ok || role != "admin" {
-			t.Errorf("Expected role claim 'admin', got: %v", data.Claims["role"])
-		}
+	data := validateGeneratedToken(t, auth, resp.Token)
+	verifyTokenClaims(t, data)
 
-		// Test token expiration
-		config := Config{
-			Type:              TypeJWT,
-			ClientID:          "testclient",
-			ClientSecret:      "testsecret",
-			AccessTokenExpiry: time.Millisecond,
-		}
-		shortAuth, _ := NewAuthenticator(config)
+	testTokenExpiration(t, req)
+}
 
-		resp, _ = shortAuth.GenerateToken(context.Background(), req)
-		time.Sleep(2 * time.Millisecond)
+func createTokenRequest() TokenRequest {
+	return TokenRequest{
+		Subject:  "testuser",
+		Audience: "testapp",
+		Scopes:   []string{"read", "write"},
+		Metadata: map[string]interface{}{
+			"role": "admin",
+		},
+	}
+}
 
-		_, err = shortAuth.ValidateToken(context.Background(), resp.Token)
-		if err != ErrTokenExpired {
-			t.Errorf("Expected token expired error, got: %v", err)
-		}
-	})
+func generateTestToken(t *testing.T, auth Authenticator, req TokenRequest) *TokenResponse {
+	resp, err := auth.GenerateToken(context.Background(), req)
+	if err != nil {
+		t.Fatalf("Token generation failed: %v", err)
+	}
+	return resp
+}
 
-	t.Run("Validation Rules", func(t *testing.T) {
-		// Test invalid issuer
-		config.TokenValidation.AllowedIssuers = []string{"otherclient"}
-		auth, _ = NewAuthenticator(config)
-		req := TokenRequest{
-			Subject:  "testuser",
-			Audience: "testapp",
-			Scopes:   []string{"read", "write"},
-		}
-		resp, _ := auth.GenerateToken(context.Background(), req)
-		_, err := auth.ValidateToken(context.Background(), resp.Token)
-		if err == nil || !strings.Contains(err.Error(), "invalid issuer") {
-			t.Errorf("Expected invalid issuer error, got: %v", err)
-		}
+func validateTokenResponse(t *testing.T, resp *TokenResponse) {
+	if resp.Token == "" {
+		t.Error("Expected non-empty token")
+	}
+	if resp.TokenType != "Bearer" {
+		t.Errorf("Expected Bearer token, got: %s", resp.TokenType)
+	}
+}
 
-		// Test invalid audience
-		config.TokenValidation.AllowedIssuers = []string{"testclient"}
-		config.TokenValidation.AllowedAudiences = []string{"otherapp"}
-		auth, _ = NewAuthenticator(config)
-		_, err = auth.ValidateToken(context.Background(), resp.Token)
-		if err == nil || !strings.Contains(err.Error(), "invalid audience") {
-			t.Errorf("Expected invalid audience error, got: %v", err)
-		}
+func validateGeneratedToken(t *testing.T, auth Authenticator, token string) *TokenData {
+	data, err := auth.ValidateToken(context.Background(), token)
+	if err != nil {
+		t.Errorf("Token validation failed: %v", err)
+	}
+	if !data.Valid {
+		t.Error("Expected token to be valid")
+	}
+	return data
+}
 
-		// Test missing required scope
-		config.TokenValidation.AllowedAudiences = []string{"testapp"}
-		config.TokenValidation.RequiredScopes = []string{"admin"}
-		auth, _ = NewAuthenticator(config)
-		_, err = auth.ValidateToken(context.Background(), resp.Token)
-		if err == nil || !strings.Contains(err.Error(), "missing required scope") {
-			t.Errorf("Expected missing scope error, got: %v", err)
-		}
-	})
+func verifyTokenClaims(t *testing.T, data *TokenData) {
+	if data.Subject != testUser {
+		t.Errorf("Expected subject '%s', got: %s", testUser, data.Subject)
+	}
+	if data.Issuer != "testclient" {
+		t.Errorf("Expected issuer 'testclient', got: %s", data.Issuer)
+	}
+	if data.Audience != "testapp" {
+		t.Errorf("Expected audience 'testapp', got: %s", data.Audience)
+	}
+	if role, ok := data.Claims["role"].(string); !ok || role != "admin" {
+		t.Errorf("Expected role claim 'admin', got: %v", data.Claims["role"])
+	}
+}
+
+func testTokenExpiration(t *testing.T, req TokenRequest) {
+	config := Config{
+		Type:              TypeJWT,
+		ClientID:          "testclient",
+		ClientSecret:      "testsecret",
+		AccessTokenExpiry: time.Millisecond,
+	}
+	shortAuth, _ := NewAuthenticator(config)
+
+	resp, _ := shortAuth.GenerateToken(context.Background(), req)
+	time.Sleep(2 * time.Millisecond)
+
+	_, err := shortAuth.ValidateToken(context.Background(), resp.Token)
+	if err != ErrTokenExpired {
+		t.Errorf("Expected token expired error, got: %v", err)
+	}
+}
+
+func testValidationRules(t *testing.T) {
+	testInvalidIssuer(t)
+	testInvalidAudience(t)
+	testMissingRequiredScope(t)
+}
+
+func testInvalidIssuer(t *testing.T) {
+	config := createTestConfig()
+	config.TokenValidation.AllowedIssuers = []string{"otherclient"}
+	auth, _ := NewAuthenticator(config)
+
+	req := createTokenRequest()
+	resp, _ := auth.GenerateToken(context.Background(), req)
+	_, err := auth.ValidateToken(context.Background(), resp.Token)
+
+	if err == nil || !strings.Contains(err.Error(), "invalid issuer") {
+		t.Errorf("Expected invalid issuer error, got: %v", err)
+	}
+}
+
+func testInvalidAudience(t *testing.T) {
+	config := createTestConfig()
+	config.TokenValidation.AllowedIssuers = []string{"testclient"}
+	config.TokenValidation.AllowedAudiences = []string{"otherapp"}
+	auth, _ := NewAuthenticator(config)
+
+	req := createTokenRequest()
+	resp, _ := auth.GenerateToken(context.Background(), req)
+	_, err := auth.ValidateToken(context.Background(), resp.Token)
+
+	if err == nil || !strings.Contains(err.Error(), "invalid audience") {
+		t.Errorf("Expected invalid audience error, got: %v", err)
+	}
+}
+
+func testMissingRequiredScope(t *testing.T) {
+	config := createTestConfig()
+	config.TokenValidation.AllowedAudiences = []string{"testapp"}
+	config.TokenValidation.RequiredScopes = []string{"admin"}
+	auth, _ := NewAuthenticator(config)
+
+	req := createTokenRequest()
+	resp, _ := auth.GenerateToken(context.Background(), req)
+	_, err := auth.ValidateToken(context.Background(), resp.Token)
+
+	if err == nil || !strings.Contains(err.Error(), "missing required scope") {
+		t.Errorf("Expected missing scope error, got: %v", err)
+	}
+}
+
+func createTestConfig() Config {
+	return Config{
+		Type:              TypeJWT,
+		ClientID:          "testclient",
+		ClientSecret:      "testsecret",
+		AccessTokenExpiry: time.Hour,
+		TokenValidation: TokenValidationConfig{
+			ValidateSignature: true,
+			AllowedIssuers:    []string{"testclient"},
+			AllowedAudiences:  []string{"testapp"},
+			RequiredScopes:    []string{"read"},
+		},
+	}
 }
