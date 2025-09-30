@@ -1,0 +1,191 @@
+name: GAuth CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+  pull-requests: read
+  checks: write
+  statuses: write
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: ['1.23']
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ matrix.go-version }}
+
+    - name: Start Redis for testing
+      uses: supercharge/redis-github-action@1.7.0
+      with:
+        redis-version: 7
+        redis-port: 6379
+
+    - name: Start PostgreSQL for testing
+      uses: harmon758/postgresql-action@v1
+      with:
+        postgresql version: '15'
+        postgresql db: 'gauth'
+        postgresql user: 'gauth'
+        postgresql password: 'gauth_test_pass'
+
+    - name: Install dependencies
+      run: go mod download
+
+    - name: Verify Go installation
+      run: |
+        go version
+        go env GOOS GOARCH
+
+    - name: Run unit tests
+      run: |
+        echo "🧪 Running comprehensive test suite with enhanced CI robustness..."
+        go clean -testcache
+        go clean -cache
+        export GOMAXPROCS=2
+        export GOMEMLIMIT=1GiB
+        export CGO_ENABLED=1
+        
+        echo "Starting Go test execution..."
+        echo "Go version: $(go version)"
+        
+        # Run tests in groups to better isolate any issues
+        echo "Testing core packages..."
+        go test -v -timeout=10m ./pkg/...
+        
+        echo "Testing internal packages..."
+        go test -v -timeout=10m ./internal/...
+        
+        echo "Testing cascade example..."
+        go test -v -timeout=5m ./examples/cascade/pkg/gauth
+        
+        echo "Testing integration tests..."
+        go test -v -timeout=10m ./test/...
+        
+        echo "✅ All tests completed successfully"
+
+    - name: Install golangci-lint
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.61.0
+        
+    - name: Run linter
+      run: |
+        $(go env GOPATH)/bin/golangci-lint run --timeout=10m
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23'
+
+    - name: Build
+      run: make build
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23'
+
+    - name: Install dependencies
+      run: go mod download
+
+    - name: Run Gosec Security Scanner
+      uses: securego/gosec@master
+      with:
+        args: '-no-fail -fmt sarif -out results.sarif ./...'
+
+    - name: Display security scan results
+      if: always()
+      run: |
+        echo "Security scan completed. Checking results..."
+        if [ -f "results.sarif" ]; then
+          echo "SARIF file generated successfully"
+          echo "File size: $(wc -c < results.sarif) bytes"
+          # Show summary of findings
+          if command -v jq >/dev/null 2>&1; then
+            echo "Security findings summary:"
+            jq -r '.runs[0].results | length' results.sarif 2>/dev/null || echo "No security issues found"
+          fi
+        else
+          echo "Warning: SARIF file not generated"
+        fi
+
+    - name: Debug GitHub context
+      if: always()
+      run: |
+        echo "Event name: ${{ github.event_name }}"
+        echo "Ref: ${{ github.ref }}"
+        echo "Repository: ${{ github.repository }}"
+        echo "Actor: ${{ github.actor }}"
+
+    - name: Upload SARIF file to GitHub Security
+      uses: github/codeql-action/upload-sarif@v3
+      if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && hashFiles('results.sarif') != ''
+      with:
+        sarif_file: results.sarif
+        category: gosec
+      continue-on-error: true
+
+    - name: Upload SARIF for Pull Requests (Alternative)
+      uses: actions/upload-artifact@v4
+      if: always() && github.event_name == 'pull_request' && hashFiles('results.sarif') != ''
+      with:
+        name: security-scan-results-pr-${{ github.event.number }}
+        path: results.sarif
+        retention-days: 30
+
+    - name: Upload security results as artifact (fallback)
+      uses: actions/upload-artifact@v4
+      if: always() && hashFiles('results.sarif') != ''
+      with:
+        name: security-scan-results
+        path: results.sarif
+        retention-days: 30
+
+    - name: Security scan summary
+      if: always()
+      run: |
+        echo "🔒 Security Scan Summary:"
+        if [ -f "results.sarif" ]; then
+          echo "✅ SARIF file generated successfully"
+          echo "📊 File size: $(wc -c < results.sarif) bytes"
+          if command -v jq >/dev/null 2>&1; then
+            FINDINGS=$(jq -r '.runs[0].results | length' results.sarif 2>/dev/null || echo "0")
+            echo "🔍 Security findings: $FINDINGS"
+            if [ "$FINDINGS" = "0" ]; then
+              echo "🎉 No security issues found!"
+            else
+              echo "⚠️  Found $FINDINGS security issue(s)"
+            fi
+          fi
+        else
+          echo "❌ SARIF file not found"
+        fi
