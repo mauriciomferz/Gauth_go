@@ -86,6 +86,35 @@ npm install && npm start &
 cd .. && python3 -m http.server 3000 &
 
 # Access: http://localhost:3000/standalone-demo.html
+
+---
+**Troubleshooting Port 3000 Conflicts:**
+
+If you see an error like:
+```bash
+OSError: [Errno 48] Address already in use
+```
+it means another process is using port 3000. To resolve:
+
+1. **Find the process using port 3000:**
+	```bash
+	lsof -i :3000
+	```
+2. **Kill the process (replace <PID> with the actual number):**
+	```bash
+	kill -9 <PID>
+	```
+3. **Restart the Python server:**
+	```bash
+	python3 -m http.server 3000
+	```
+
+**Alternatively, use a different port (e.g., 3001):**
+```bash
+python3 -m http.server 3001
+open http://localhost:3001/standalone-demo.html
+```
+Update the browser URL to match the port you choose.
 ```
 
 ## 🎯 Demonstrated Capabilities
@@ -141,6 +170,14 @@ cd ..
 cd web
 make run
 # Access at http://localhost:3000
+
+## Note:
+The backend server must be started from the `backend` directory:
+```bash
+cd backend
+go run main.go
+# Access at http://localhost:8080
+```
 ```
 
 ### Command Line Interface
