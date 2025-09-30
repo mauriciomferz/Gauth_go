@@ -165,7 +165,6 @@ Update the browser URL to match the port you choose.
 cd ..
 ./gauth-http-server
 # Access at http://localhost:8080
-
 # OR build from source
 cd web
 make run

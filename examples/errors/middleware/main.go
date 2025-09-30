@@ -18,6 +18,7 @@ func demoHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/demo", demoHandler)
+	mux.HandleFunc("/audit", mw.AuditHandler)
 
 	errHandler := &mw.ErrorHandler{Next: mux}
 

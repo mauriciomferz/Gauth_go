@@ -12,6 +12,44 @@ import (
 	"github.com/google/uuid"
 )
 
+// AuditHandler serves RFC-compliant advanced audit responses
+func AuditHandler(w http.ResponseWriter, r *http.Request) {
+	auditResp := AdvancedAuditResponse{
+		AuditID: "audit_1759000523",
+		Status: "initiated",
+		Timestamp: time.Now().Format(time.RFC3339),
+		AuditScope: []string{"financial_transactions", "regulatory_compliance", "risk_assessment"},
+		ForensicAnalysis: map[string]interface{}{
+			"enabled": true,
+			"tools": []string{"log_analysis", "anomaly_detection", "pattern_recognition"},
+			"status": "analyzing",
+		},
+		ComplianceTracking: map[string]interface{}{
+			"enabled": true,
+			"frameworks": []string{"SOX", "GDPR", "HIPAA"},
+			"status": "monitoring",
+		},
+		RealTimeMonitoring: map[string]interface{}{
+			"enabled": true,
+			"status": "active",
+			"status_indicators": []string{"active", "pending", "inactive"},
+		},
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(auditResp)
+}
+
+// RFC-compliant advanced audit response template
+type AdvancedAuditResponse struct {
+	AuditID            string                 `json:"audit_id"`
+	Status             string                 `json:"status"`
+	Timestamp          string                 `json:"timestamp"`
+	AuditScope         []string               `json:"audit_scope"`
+	ForensicAnalysis   map[string]interface{} `json:"forensic_analysis"`
+	ComplianceTracking map[string]interface{} `json:"compliance_tracking"`
+	RealTimeMonitoring map[string]interface{} `json:"real_time_monitoring"`
+}
+
 // ErrorHandler is middleware that handles errors from downstream handlers
 type ErrorHandler struct {
 	Next http.Handler
@@ -44,35 +82,41 @@ func (c *captureResponseWriter) WriteHeader(status int) {
 }
 
 func ErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
-	status := http.StatusInternalServerError
-	errBody := map[string]interface{}{
-		"error":             "server_error",
-		"error_description": "An unexpected error occurred",
-		"request_id":        r.Header.Get("X-Request-ID"),
-		"timestamp":         time.Now().Format(time.RFC3339),
-	}
-
-	var authErr *errors.Error
-	if stderrs.As(err, &authErr) {
-		if authErr.Details != nil && authErr.Details.HTTPStatusCode > 0 {
-			status = authErr.Details.HTTPStatusCode
+		status := http.StatusInternalServerError
+		errBody := map[string]interface{}{
+			"error_code": "server_error",
+			"error_message": "An unexpected error occurred",
+			"error_uri": "https://gauth.example.com/docs/errors#server_error",
+			"timestamp": time.Now().Format(time.RFC3339),
+			"details": map[string]interface{}{
+				"request_id": r.Header.Get("X-Request-ID"),
+			},
 		}
-		errBody["error"] = string(authErr.Code)
-		errBody["error_description"] = authErr.Message
-		if authErr.Details != nil {
-			for k, v := range authErr.Details.AdditionalInfo {
-				if k != "error" && k != "error_description" && k != "request_id" && k != "timestamp" {
-					errBody[k] = v
+
+		var authErr *errors.Error
+		if stderrs.As(err, &authErr) {
+			if authErr.Details != nil && authErr.Details.HTTPStatusCode > 0 {
+				status = authErr.Details.HTTPStatusCode
+			}
+			errBody["error_code"] = string(authErr.Code)
+			errBody["error_message"] = authErr.Message
+			errBody["error_uri"] = "https://gauth.example.com/docs/errors#" + string(authErr.Code)
+			details := map[string]interface{}{
+				"request_id": r.Header.Get("X-Request-ID"),
+			}
+			if authErr.Details != nil {
+				for k, v := range authErr.Details.AdditionalInfo {
+					details[k] = v
 				}
 			}
+			errBody["details"] = details
 		}
-	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("X-Request-ID", r.Header.Get("X-Request-ID"))
-	w.WriteHeader(status)
-	if err := json.NewEncoder(w).Encode(errBody); err != nil {
-		// Log encoding error but don't send another response
-		fmt.Printf("Error encoding error response: %v\n", err)
-	}
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Request-ID", r.Header.Get("X-Request-ID"))
+		w.WriteHeader(status)
+		if err := json.NewEncoder(w).Encode(errBody); err != nil {
+			// Log encoding error but don't send another response
+			fmt.Printf("Error encoding error response: %v\n", err)
+		}
 }

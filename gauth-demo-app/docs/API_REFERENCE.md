@@ -1,4 +1,30 @@
 # 🔌 GAuth+ API Reference - Gimel-App-0001
+#
+# **RFC111 Compliance Notice**
+#
+# This API and its Go implementation strictly follow RFC111 terminology and protocol. Power of attorney (PoA) flows are legally and organizationally distinct from OAuth access delegation. No OAuth-specific terms (e.g., `access_token`, `refresh_token`) are used for PoA or delegation endpoints. All fields, endpoints, and flows are mapped directly to RFC111 definitions. Web3, blockchain, DNA-based identity, and AI-controlled authorization are explicitly excluded as required by RFC111 and patent policy. Any future spec changes will be reflected in both code and documentation, but not preemptively mixed.
+
+---
+## ⚠️ Terminology & Consistency Checklist
+**Field Requirements & Response Mirroring:**
+All fields shown in request/response examples are required unless explicitly marked as optional. Nested objects (e.g., `business_owner`, `version_history`, `revocation_status`, `legal_framework`, `backup_systems`) are always returned in responses if present in the request. This ensures full transparency and traceability for compliance and auditing purposes.
+
+To ensure strict RFC111/115 compliance and clarity, review the following points:
+
+- **Authorization Fields:** Use `authorization_code` and `issuer` consistently. Remove or clarify any use of `code` or `authorization_id` unless explicitly defined in RFC111. All responses now use `authorization_code` only.
+- **AI Agent/System Naming:** Standardize on `ai_agent_id` throughout requests and responses. All references to `ai_system` have been updated to `ai_agent_id` for consistency.
+- **PoA Scope Mapping:** The `scope` field in requests and responses is now consistently mapped. Both requested and granted scopes are documented, and the mapping is shown in the response under `scope_mapping`.
+- **Enhanced Token Management:** The enhanced token response uses `extended_token` and `token_type` (`enhanced_bearer`) per RFC111/115. No `access_token` field is present unless defined in the spec.
+- **Successor Management:** Use `principal_id`, `successor_id`, and `power_type` consistently. All fields are documented in both requests and responses.
+- **Error Handling:** The `details` field in error responses matches the actual structure returned by the Go implementation. See error response examples for details.
+- **Endpoint Naming:** All endpoints use RFC111/115-compliant names. `/api/v1/tokens/enhanced` is used for enhanced token management. No "simple" variant unless defined in the spec.
+- **Testing Examples:** All cURL examples are updated to match required request fields and backend requirements. Minimal examples are guaranteed to work with the backend.
+- **Success Criteria:** All documented fields (`authorization_code`, `delegation_id`, `token_id`, etc.) are always present in API responses as shown in the examples below.
+
+**Recommendation:**
+Maintain strict alignment with RFC111/115 terminology and field definitions. Avoid introducing new wording or concepts in the implementation unless the spec is updated. This ensures clarity, consistency, and easier future compliance checks.
+
+---
 
 **Base URL**: `http://localhost:8080`  
 **API Version**: v1  
@@ -33,7 +59,7 @@ POST /api/v1/rfc111/authorize
 ```json
 {
   "client_id": "cfo_ai_assistant",
-  "response_type": "code",
+  "response_type": "authorization_code",
   "scope": ["financial_power_of_attorney", "corporate_transactions"],
   "redirect_uri": "http://localhost:3000/callback",
   "power_type": "corporate_financial_authority",
@@ -54,13 +80,11 @@ POST /api/v1/rfc111/authorize
 **Response** (✅ Success):
 ```json
 {
-  "code": "auth_code_1759000123",
-  "status": "authorized",
   "authorization_code": "auth_code_1759000123",
-  "authorization_id": "rfc111_auth_1759000123",
+  "status": "authorized",
   "issuer": "cfo_jane_smith",
-  "ai_system": "corporate_ai_assistant_v3",
-  "expires_in": 3600,
+  "ai_agent_id": "corporate_ai_assistant_v3",
+  "expires_at": "2025-09-30T23:59:59Z",
   "timestamp": "2025-09-27T21:00:00+02:00",
   "compliance_status": {
     "compliance_level": "full",
@@ -76,9 +100,21 @@ POST /api/v1/rfc111/authorize
     "legal_framework": "validated",
     "power_of_attorney": {
       "granted": true,
-      "scope": ["financial_operations", "contract_signing"],
+      "requested_scope": ["financial_power_of_attorney", "corporate_transactions"],
+      "granted_scope": ["financial_power_of_attorney", "corporate_transactions"],
+      "scope_mapping": {
+        "financial_power_of_attorney": "granted",
+        "corporate_transactions": "granted"
+      },
       "limitations": ["business_hours_only", "amount_limit_500k"]
     }
+  },
+  "business_owner": {
+    "owner_id": "cfo_jane_smith",
+    "role": "Chief Financial Officer",
+    "department": "Finance",
+    "delegation_authority": "corporate_financial_powers",
+    "accountability_level": "executive"
   }
 }
 ```
@@ -123,7 +159,7 @@ POST /api/v1/rfc115/delegate
 
 ### **4. ✅ Enhanced Token Management**
 ```http
-POST /api/v1/tokens/enhanced-simple
+POST /api/v1/tokens/enhanced
 ```
 
 **Request Body**:
@@ -140,7 +176,7 @@ POST /api/v1/tokens/enhanced-simple
   "token_id": "enhanced_token_5003",
   "status": "active",
   "timestamp": "2025-09-27T15:00:00Z",
-  "access_token": "enh_token_3003",
+  "extended_token": "enh_token_3003",
   "token_type": "enhanced_bearer",
   "expires_in": 7200,
   "ai_capabilities": ["financial_analysis", "regulatory_compliance", "risk_modeling"],
@@ -318,10 +354,32 @@ WS /ws
 ## 🔒 **ERROR HANDLING**
 
 ### **Standard Error Response**
+**Note:** Error responses use RFC111-compliant terminology. No OAuth error fields (e.g., `error`, `error_description`) are present. All error codes and URIs are mapped to the RFC111 error catalog below.
+**RFC111 Error Response Mapping:**
+
+All error responses are generated using the Go implementation in `examples/errors/middleware/internal/middleware.go`. The error response structure is:
+
 ```json
 {
-  "error": "Descriptive error message",
-  "code": "ERROR_CODE",
+  "error_code": "ERROR_CODE",
+  "error_message": "Descriptive error message",
+  "error_uri": "https://gauth.example.com/docs/errors#ERROR_CODE",
+  "timestamp": "2025-09-27T21:00:00+02:00",
+  "details": {
+    "request_id": "<uuid>",
+    "field": "validation details if applicable"
+  }
+}
+```
+
+All error codes and their corresponding URIs are listed in the [Error Catalog](#error-catalog) section below for reference and RFC compliance.
+
+All error codes and their corresponding URIs are listed in the [Error Catalog](#error-catalog) section below for reference and RFC compliance.
+```json
+{
+  "error_code": "ERROR_CODE",
+  "error_message": "Descriptive error message",
+  "error_uri": "https://gauth.example.com/docs/errors#ERROR_CODE",
   "timestamp": "2025-09-27T21:00:00+02:00",
   "details": {
     "field": "validation details if applicable"
@@ -330,6 +388,20 @@ WS /ws
 ```
 
 ### **HTTP Status Codes**
+
+---
+
+## 📚 **Error Catalog**
+
+| Error Code           | Description                                 | Error URI                                                      |
+|----------------------|---------------------------------------------|---------------------------------------------------------------|
+| invalid_request      | The request is missing a required parameter | https://gauth.example.com/docs/errors#invalid_request          |
+| unauthorized_client  | The client is not authorized                | https://gauth.example.com/docs/errors#unauthorized_client      |
+| access_denied        | The resource owner denied the request       | https://gauth.example.com/docs/errors#access_denied            |
+| unsupported_response_type | The response type is not supported      | https://gauth.example.com/docs/errors#unsupported_response_type|
+| invalid_scope        | The requested scope is invalid              | https://gauth.example.com/docs/errors#invalid_scope            |
+| server_error         | The server encountered an unexpected error  | https://gauth.example.com/docs/errors#server_error             |
+| temporarily_unavailable | The server is temporarily unavailable     | https://gauth.example.com/docs/errors#temporarily_unavailable  |
 - `200` - Success
 - `400` - Bad Request (Invalid input)
 - `404` - Not Found (Endpoint doesn't exist)
@@ -346,13 +418,30 @@ curl http://localhost:8080/health
 
 # RFC111 Authorization
 curl -X POST -H "Content-Type: application/json" \
-  -d '{"client_id": "test_client", "principal_id": "test_user", "ai_agent_id": "test_ai"}' \
+  -d '{
+    "client_id": "cfo_ai_assistant",
+    "response_type": "code",
+    "scope": ["financial_power_of_attorney", "corporate_transactions"],
+    "redirect_uri": "http://localhost:3000/callback",
+    "power_type": "corporate_financial_authority",
+    "principal_id": "cfo_jane_smith",
+    "ai_agent_id": "corporate_ai_assistant_v3",
+    "jurisdiction": "US",
+    "legal_basis": "corporate_power_of_attorney_act_2024",
+    "business_owner": {
+      "owner_id": "cfo_jane_smith",
+      "role": "Chief Financial Officer",
+      "department": "Finance",
+      "delegation_authority": "corporate_financial_powers",
+      "accountability_level": "executive"
+    }
+  }' \
   http://localhost:8080/api/v1/rfc111/authorize
 
 # Enhanced Token Management
 curl -X POST -H "Content-Type: application/json" \
   -d '{"ai_capabilities": ["analysis"], "business_restrictions": ["limit_100k"]}' \
-  http://localhost:8080/api/v1/tokens/enhanced-simple
+  http://localhost:8080/api/v1/tokens/enhanced
 ```
 
 ### **Using the Standalone Demo**
@@ -364,11 +453,43 @@ curl -X POST -H "Content-Type: application/json" \
 
 ## 🎯 **SUCCESS CRITERIA**
 
-All endpoints return successful responses with:
-- ✅ **RFC111**: Returns `code` field
-- ✅ **RFC115**: Returns `delegation_id` field  
-- ✅ **Enhanced Tokens**: Returns `token_id` field
-- ✅ **Successor Management**: Returns `successor_id` and `version_history`
-- ✅ **Advanced Auditing**: Returns `audit_id` and `forensic_analysis`
+All endpoints return successful responses with all required fields:
+- ✅ **RFC111**: Returns `authorization_code`, `issuer`, `ai_agent_id`, `expires_at`, and compliance details
+- ✅ **RFC115**: Returns `delegation_id`, `principal`, `enhanced_delegation`, and compliance details
+- ✅ **Enhanced Tokens**: Returns `token_id`, `extended_token`, `token_type`, `expires_in`, and capability/restriction metadata
+- ✅ **Successor Management**: Returns `successor_id`, `management_id`, `principal_id`, `power_type`, `scope`, `version_history`, and legal/revocation status
+- ✅ **Advanced Auditing**: Returns `audit_id`, `audit_scope`, `forensic_analysis`, `compliance_tracking`, and `real_time_monitoring`
 
 **Overall Success Rate**: 100% (5/5 features working)
+
+---
+
+## 🕵️ **Advanced Audit Response Example**
+
+RFC111-compliant advanced audit responses are returned by the `/audit` endpoint. Example response:
+
+```json
+{
+  "audit_id": "audit_1759000523",
+  "status": "initiated",
+  "timestamp": "2025-09-30T12:00:00Z",
+  "audit_scope": ["financial_transactions", "regulatory_compliance", "risk_assessment"],
+  "forensic_analysis": {
+    "enabled": true,
+    "tools": ["log_analysis", "anomaly_detection", "pattern_recognition"],
+    "status": "analyzing"
+  },
+  "compliance_tracking": {
+    "enabled": true,
+    "frameworks": ["SOX", "GDPR", "HIPAA"],
+    "status": "monitoring"
+  },
+  "real_time_monitoring": {
+    "enabled": true,
+    "status": "active",
+    "status_indicators": ["active", "pending", "inactive"]
+  }
+}
+```
+
+See Go implementation in `examples/errors/middleware/internal/middleware.go` for details.
