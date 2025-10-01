@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>GAuth Debug Test - Simple</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-button { padding: 10px 20px; margin: 10px; background: #1976d2; color: white; border: none; cursor: pointer; }
+        .result { margin: 20px 0; padding: 15px; border: 1px solid #ccc; background: #f9f9f9; }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+    </style>
+</head>
+<body>
+    <h1>🔍 GAuth Success Detection Test</h1>
+    
+    <p><strong>Test Time:</strong> <span id="timestamp"></span></p>
+    
+    <button class="test-button" onclick="testRFC115()">Test RFC115 Logic</button>
+    <button class="test-button" onclick="testEnhancedToken()">Test Enhanced Token Logic</button>
+    <button class="test-button" onclick="clearResults()">Clear Results</button>
+    
+    <div id="results"></div>
+
+    <script>
+        // Update timestamp to show when page loaded
+        document.getElementById('timestamp').textContent = new Date().toLocaleString();
+        
+        function addResult(title, content, isSuccess = false) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${isSuccess ? 'success' : 'error'}`;
+            div.innerHTML = `<h3>${title}</h3><pre>${content}</pre>`;
+            results.appendChild(div);
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        function testRFC115() {
+            console.log('🧪 Testing RFC115 Logic...');
+            
+            // Your exact response data
+            const data = {
+                "compliance": {
+                    "audit_trail": "enabled",
+                    "legal_framework": "validated",
+                    "rfc115_compliant": true
+                },
+                "delegation": {
+                    "delegated_powers": [
+                        "contract_signing",
+                        "financial_transactions",
+                        "legal_representation"
+                    ],
+                    "enhanced": false,
+                    "protocol": "RFC115",
+                    "timestamp": "2025-09-28T18:19:11+02:00",
+                    "type": "power_delegation"
+                },
+                "message": "RFC115 delegation processed successfully",
+                "principal": "",
+                "success": true
+            };
+
+            // Test conditions exactly as in standalone-demo.html
+            const condition1 = (data.success === true);
+            const condition2 = (data.success === 'true');
+            const condition3 = (data.delegation_id);
+            const condition4 = (data.delegation && Object.keys(data.delegation).length > 0);
+            const condition5 = (data.message && data.message.includes('successfully'));
+            
+            const isSuccessful = condition1 || condition2 || condition3 || condition4 || condition5;
+            
+            const testResult = {
+                'Response Success Field': data.success,
+                'Response Message': data.message,
+                'Condition 1 (success === true)': condition1,
+                'Condition 2 (success === "true")': condition2,
+                'Condition 3 (has delegation_id)': condition3,
+                'Condition 4 (has delegation object)': condition4,
+                'Condition 5 (message includes "successfully")': condition5,
+                'Final Result': isSuccessful ? 'SUCCESS ✅' : 'FAILURE ❌'
+            };
+            
+            console.log('RFC115 Test Result:', testResult);
+            addResult('RFC115 Logic Test', JSON.stringify(testResult, null, 2), isSuccessful);
+        }
+
+        function testEnhancedToken() {
+            console.log('🧪 Testing Enhanced Token Logic...');
+            
+            // Your exact response data
+            const data = {
+                "access_token": "enhanced_token_1759076425_",
+                "capabilities": {
+                    "cascade_auth": true,
+                    "commercial_register": true,
+                    "dual_control": true,
+                    "gauth_plus": true
+                },
+                "client_id": "",
+                "compliance": {
+                    "audit_enabled": true,
+                    "legal_framework": "comprehensive",
+                    "verification": "cryptographic"
+                },
+                "enhanced_features": {
+                    "ai_authorization": true,
+                    "audit_trail": true,
+                    "blockchain_verify": true,
+                    "legal_compliance": true,
+                    "power_delegation": true
+                },
+                "expires_in": 7200,
+                "timestamp": "2025-09-28T18:20:25+02:00",
+                "token_type": "Enhanced Bearer"
+            };
+
+            // Test conditions exactly as in standalone-demo.html
+            const tokenCondition1 = (data.access_token);
+            const tokenCondition2 = (data.token_id);
+            const tokenCondition3 = (data.token_type);
+            const tokenCondition4 = (data.enhanced_features);
+            const tokenCondition5 = (data.capabilities);
+            
+            const isSuccessful = tokenCondition1 || tokenCondition2 || tokenCondition3 || tokenCondition4 || tokenCondition5;
+            
+            const testResult = {
+                'Response Access Token': data.access_token,
+                'Response Token Type': data.token_type,
+                'Has Capabilities': !!data.capabilities,
+                'Has Enhanced Features': !!data.enhanced_features,
+                'Condition 1 (has access_token)': tokenCondition1,
+                'Condition 2 (has token_id)': tokenCondition2,
+                'Condition 3 (has token_type)': tokenCondition3,
+                'Condition 4 (has enhanced_features)': tokenCondition4,
+                'Condition 5 (has capabilities)': tokenCondition5,
+                'Final Result': isSuccessful ? 'SUCCESS ✅' : 'FAILURE ❌'
+            };
+            
+            console.log('Enhanced Token Test Result:', testResult);
+            addResult('Enhanced Token Logic Test', JSON.stringify(testResult, null, 2), isSuccessful);
+        }
+    </script>
+</body>
+</html>

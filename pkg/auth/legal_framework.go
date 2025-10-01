@@ -1,0 +1,3 @@
+package auth
+
+// ...existing code for interfaces, services, and RFC111 logic...
