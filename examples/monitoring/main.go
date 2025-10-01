@@ -1,0 +1,88 @@
+package main
+
+import (
+	"fmt"
+	"log"
+	"net/http"
+	"time"
+
+	"github.com/Gimel-Foundation/gauth/internal/monitoring"
+	"github.com/Gimel-Foundation/gauth/pkg/rate"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+)
+
+func main() {
+	// Create metrics collector
+	metrics := monitoring.NewMetricsCollector()
+
+	// Create rate limiter (token bucket example)
+	config := rate.Config{
+		Rate:      100,         // 100 requests
+		Window:    time.Minute, // per minute
+		BurstSize: 20,          // allow bursts of 20
+	}
+	limiter := rate.NewTokenBucket(config)
+
+	// Create handler with rate limiting and metrics
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		clientID := r.RemoteAddr
+		start := time.Now()
+
+		// Try rate limit
+		err := limiter.Allow(r.Context(), clientID)
+
+		// Record request metric
+		metrics.Counter(monitoring.MetricRateLimitHits, 1, map[string]string{
+			"client_id": clientID,
+			"allowed":   fmt.Sprintf("%t", err == nil),
+		})
+
+		// Record response time
+		metrics.Gauge(monitoring.MetricResponseTime, time.Since(start).Seconds(), map[string]string{
+			"client_id": clientID,
+			"endpoint":  r.URL.Path,
+		})
+
+		if err == rate.ErrLimitExceeded {
+			w.Header().Set("X-RateLimit-Limit", fmt.Sprintf("%d", config.Rate))
+			w.Header().Set("X-RateLimit-Remaining", "0")
+			http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
+			return
+		}
+
+		// Add rate limit headers (remaining is not tracked in this simple example)
+		w.Header().Set("X-RateLimit-Limit", fmt.Sprintf("%d", config.Rate))
+		w.Header().Set("X-RateLimit-Remaining", "unknown")
+		fmt.Fprintf(w, "Hello, your request is allowed!\n")
+	})
+
+	// Create metrics endpoint
+	http.Handle("/metrics", promhttp.Handler())
+	http.Handle("/api", handler)
+
+	// Start monitoring printout
+	go func() {
+		ticker := time.NewTicker(5 * time.Second)
+		defer ticker.Stop()
+
+		for range ticker.C {
+			metrics := metrics.GetAllMetrics()
+			log.Printf("Current Metrics:")
+			for name, metric := range metrics {
+				log.Printf("  %s: %.2f (labels: %v)", name, metric.Value, metric.Labels)
+			}
+		}
+	}()
+
+	// Start server with timeouts
+	server := &http.Server{
+		Addr:         ":8080",
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+
+	log.Println("Starting server on :8080...")
+	log.Println("Metrics available at /metrics")
+	log.Fatal(server.ListenAndServe())
+}
