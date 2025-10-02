@@ -5,6 +5,9 @@ as defined in GiFo-RFC-0111 and GiFo-RFC-0115.
 Copyright (c) 2025 Gimel Foundation gGmbH i.G.
 Licensed under Apache 2.0
 
+Demo Implementation Author: Mauricio Fernandez
+GitHub: https://github.com/mauriciomferz
+
 Gimel Foundation gGmbH i.G., www.GimelFoundation.com
 Operated by Gimel Technologies GmbH
 MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert
