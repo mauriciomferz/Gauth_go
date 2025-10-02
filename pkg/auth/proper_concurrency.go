@@ -380,78 +380,10 @@ func (wp *WorkerPool) Stop() {
 	wp.started = false
 }
 
-// CircuitBreaker implements the circuit breaker pattern
-type CircuitBreaker struct {
-	mu           sync.RWMutex
-	state        CircuitState
-	failures     int64
-	lastFailure  time.Time
-	nextAttempt  time.Time
-	maxFailures  int64
-	resetTimeout time.Duration
-}
-
-// CircuitState represents the state of the circuit breaker
-type CircuitState int
-
-const (
-	CircuitClosed CircuitState = iota
-	CircuitOpen
-	CircuitHalfOpen
-)
-
-// NewCircuitBreaker creates a new circuit breaker
-func NewCircuitBreaker(maxFailures int64, resetTimeout time.Duration) *CircuitBreaker {
-	return &CircuitBreaker{
-		state:        CircuitClosed,
-		maxFailures:  maxFailures,
-		resetTimeout: resetTimeout,
-	}
-}
-
-// Execute executes a function with circuit breaker protection
-func (cb *CircuitBreaker) Execute(fn func() error) error {
-	if !cb.allowRequest() {
-		return fmt.Errorf("circuit breaker is open")
-	}
-	
-	err := fn()
-	cb.recordResult(err)
-	return err
-}
-
-// allowRequest checks if request should be allowed
-func (cb *CircuitBreaker) allowRequest() bool {
-	cb.mu.RLock()
-	defer cb.mu.RUnlock()
-	
-	switch cb.state {
-	case CircuitClosed:
-		return true
-	case CircuitOpen:
-		return time.Now().After(cb.nextAttempt)
-	case CircuitHalfOpen:
-		return true
-	default:
-		return false
-	}
-}
-
-// recordResult records the result of an operation
-func (cb *CircuitBreaker) recordResult(err error) {
-	cb.mu.Lock()
-	defer cb.mu.Unlock()
-	
-	if err != nil {
-		cb.failures++
-		cb.lastFailure = time.Now()
-		
-		if cb.failures >= cb.maxFailures {
-			cb.state = CircuitOpen
-			cb.nextAttempt = time.Now().Add(cb.resetTimeout)
-		}
-	} else {
-		cb.failures = 0
-		cb.state = CircuitClosed
-	}
-}
+// NOTE: CircuitBreaker implementation removed to avoid conflicts
+// Real circuit breaker functionality is available in:
+// - pkg/resilience/circuit.go (working implementation)
+// - internal/circuit/breaker.go (internal implementation)
+// 
+// This duplicate definition was causing naming conflicts.
+// Use pkg/resilience.CircuitBreaker for actual circuit breaking functionality.
