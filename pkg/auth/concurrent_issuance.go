@@ -21,22 +21,22 @@ import (
 
 // ConcurrentTokenIssuer prevents race conditions in token issuance
 type ConcurrentTokenIssuer struct {
-	mu                  sync.RWMutex
-	issuanceQueue       map[string]*IssuanceRequest
-	rateLimiter         map[string]*RateLimit
-	noncePrevention     map[string]time.Time
-	sequentialNonce     uint64
-	sequentialMutex     sync.Mutex
+	mu              sync.RWMutex
+	issuanceQueue   map[string]*IssuanceRequest
+	rateLimiter     map[string]*RateLimit
+	noncePrevention map[string]time.Time
+	sequentialNonce uint64
+	sequentialMutex sync.Mutex
 }
 
 // IssuanceRequest represents a token issuance request
 type IssuanceRequest struct {
-	RequestID   string
-	ClientID    string
-	Scopes      []string
-	Timestamp   time.Time
-	Status      string
-	ResultChan  chan *IssuanceResult
+	RequestID  string
+	ClientID   string
+	Scopes     []string
+	Timestamp  time.Time
+	Status     string
+	ResultChan chan *IssuanceResult
 }
 
 // IssuanceResult contains the result of token issuance
@@ -94,7 +94,7 @@ func (c *ConcurrentTokenIssuer) IssueTokenSafe(
 
 	// Serialize token issuance
 	c.mu.Lock()
-	
+
 	// Check for duplicate requests
 	if existing, exists := c.issuanceQueue[clientID]; exists {
 		c.mu.Unlock()
@@ -135,9 +135,9 @@ func (c *ConcurrentTokenIssuer) processIssuanceRequest(
 ) {
 	// Simulate token creation with timing attack prevention
 	start := time.Now()
-	
+
 	token, err := c.createToken(ctx, request.ClientID, request.Scopes)
-	
+
 	// Constant-time response to prevent timing attacks
 	elapsed := time.Since(start)
 	if elapsed < time.Millisecond*100 {
@@ -193,7 +193,7 @@ func (c *ConcurrentTokenIssuer) generateSecureRequestID() (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("%d-%s-%d", 
+	return fmt.Sprintf("%d-%s-%d",
 		nonce, hex.EncodeToString(randomBytes), time.Now().UnixNano()), nil
 }
 
@@ -201,7 +201,7 @@ func (c *ConcurrentTokenIssuer) generateSecureRequestID() (string, error) {
 func (c *ConcurrentTokenIssuer) generateTokenID() string {
 	c.sequentialMutex.Lock()
 	defer c.sequentialMutex.Unlock()
-	
+
 	c.sequentialNonce++
 	return fmt.Sprintf("token-%d-%d", c.sequentialNonce, time.Now().UnixNano())
 }
@@ -239,7 +239,7 @@ func (c *ConcurrentTokenIssuer) checkRateLimit(clientID string) error {
 		limit = &RateLimit{
 			Count:       0,
 			WindowStart: now,
-			MaxRequests: 10,          // 10 requests per minute
+			MaxRequests: 10, // 10 requests per minute
 			WindowSize:  time.Minute,
 		}
 		c.rateLimiter[clientID] = limit
@@ -253,7 +253,7 @@ func (c *ConcurrentTokenIssuer) checkRateLimit(clientID string) error {
 
 	// Check limit
 	if limit.Count >= limit.MaxRequests {
-		return fmt.Errorf("rate limit exceeded: %d requests in %v", 
+		return fmt.Errorf("rate limit exceeded: %d requests in %v",
 			limit.Count, limit.WindowSize)
 	}
 

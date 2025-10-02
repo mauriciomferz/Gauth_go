@@ -13,10 +13,10 @@ import (
 type ProfessionalAuthService interface {
 	// CreateToken creates a JWT token for a user with specified scopes
 	CreateToken(userID string, scopes []string, duration time.Duration) (string, error)
-	
+
 	// ValidateToken validates a JWT token and returns claims
 	ValidateToken(tokenString string) (*CustomClaims, error)
-	
+
 	// ValidateServiceToken validates service-to-service authentication
 	ValidateServiceToken(ctx context.Context, token string) (*ServiceClaims, error)
 }
@@ -35,11 +35,11 @@ type ProfessionalConfig struct {
 	Issuer      string        `json:"issuer"`
 	Audience    string        `json:"audience"`
 	TokenExpiry time.Duration `json:"token_expiry"`
-	
+
 	// Service Configuration
 	ServiceID string `json:"service_id"`
 	MeshID    string `json:"mesh_id"`
-	
+
 	// Security Configuration
 	UseSecureDefaults bool `json:"use_secure_defaults"`
 }
@@ -62,14 +62,14 @@ func (p *professionalAuthServiceAdapter) ValidateServiceToken(ctx context.Contex
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Create service claims from custom claims
 	serviceClaims := &ServiceClaims{
 		CustomClaims: claims,
 		ServiceID:    p.config.ServiceID,
 		Mesh:         p.config.MeshID,
 	}
-	
+
 	return serviceClaims, nil
 }
 
@@ -79,9 +79,9 @@ func NewProfessionalAuthServiceAdapter(config ProfessionalConfig) (ProfessionalA
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &professionalAuthServiceAdapter{
 		ProperJWTService: jwtService,
-		config:          config,
+		config:           config,
 	}, nil
 }

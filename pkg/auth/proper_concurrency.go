@@ -24,11 +24,11 @@ type ProperConcurrencyManager struct {
 	// Use fine-grained locking instead of coarse locks
 	userLocks    sync.Map // map[string]*sync.RWMutex for per-user locking
 	rateLimiters sync.Map // map[string]*rate.Limiter for per-user rate limiting
-	
+
 	// Atomic counters for statistics
 	activeRequests int64
 	totalRequests  int64
-	
+
 	// Configuration
 	maxConcurrentRequests int64
 	defaultRateLimit      rate.Limit
@@ -49,7 +49,7 @@ func (pcm *ProperConcurrencyManager) getUserLock(userID string) *sync.RWMutex {
 	if lock, exists := pcm.userLocks.Load(userID); exists {
 		return lock.(*sync.RWMutex)
 	}
-	
+
 	// Create new lock
 	newLock := &sync.RWMutex{}
 	actual, _ := pcm.userLocks.LoadOrStore(userID, newLock)
@@ -61,7 +61,7 @@ func (pcm *ProperConcurrencyManager) getUserRateLimiter(userID string) *rate.Lim
 	if limiter, exists := pcm.rateLimiters.Load(userID); exists {
 		return limiter.(*rate.Limiter)
 	}
-	
+
 	// Create new rate limiter
 	newLimiter := rate.NewLimiter(pcm.defaultRateLimit, pcm.defaultBurst)
 	actual, _ := pcm.rateLimiters.LoadOrStore(userID, newLimiter)
@@ -73,7 +73,7 @@ func (pcm *ProperConcurrencyManager) WithUserReadLock(userID string, fn func() e
 	lock := pcm.getUserLock(userID)
 	lock.RLock()
 	defer lock.RUnlock()
-	
+
 	return fn()
 }
 
@@ -82,25 +82,25 @@ func (pcm *ProperConcurrencyManager) WithUserWriteLock(userID string, fn func() 
 	lock := pcm.getUserLock(userID)
 	lock.Lock()
 	defer lock.Unlock()
-	
+
 	return fn()
 }
 
 // CheckRateLimit checks if a user has exceeded their rate limit
 func (pcm *ProperConcurrencyManager) CheckRateLimit(ctx context.Context, userID string) error {
 	limiter := pcm.getUserRateLimiter(userID)
-	
+
 	if !limiter.Allow() {
 		return fmt.Errorf("rate limit exceeded for user %s", userID)
 	}
-	
+
 	return nil
 }
 
 // WaitForRateLimit waits for rate limit availability with context cancellation
 func (pcm *ProperConcurrencyManager) WaitForRateLimit(ctx context.Context, userID string) error {
 	limiter := pcm.getUserRateLimiter(userID)
-	
+
 	return limiter.Wait(ctx)
 }
 
@@ -110,7 +110,7 @@ func (pcm *ProperConcurrencyManager) TryAcquireRequest() bool {
 	if current >= pcm.maxConcurrentRequests {
 		return false
 	}
-	
+
 	// Try to increment atomically
 	return atomic.CompareAndSwapInt64(&pcm.activeRequests, current, current+1)
 }
@@ -119,7 +119,7 @@ func (pcm *ProperConcurrencyManager) TryAcquireRequest() bool {
 func (pcm *ProperConcurrencyManager) AcquireRequest(ctx context.Context) error {
 	ticker := time.NewTicker(10 * time.Millisecond)
 	defer ticker.Stop()
-	
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -169,17 +169,17 @@ func (pcm *ProperConcurrencyManager) NewRequestScope(ctx context.Context, userID
 		userID:    userID,
 		startTime: time.Now(),
 	}
-	
+
 	// Check rate limit first
 	if err := pcm.CheckRateLimit(ctx, userID); err != nil {
 		return nil, err
 	}
-	
+
 	// Acquire request slot
 	if err := pcm.AcquireRequest(ctx); err != nil {
 		return nil, err
 	}
-	
+
 	scope.acquired = true
 	return scope, nil
 }
@@ -214,7 +214,7 @@ func NewSafeMap[K comparable, V any]() *SafeMap[K, V] {
 func (sm *SafeMap[K, V]) Get(key K) (V, bool) {
 	sm.mu.RLock()
 	defer sm.mu.RUnlock()
-	
+
 	value, exists := sm.data[key]
 	return value, exists
 }
@@ -223,7 +223,7 @@ func (sm *SafeMap[K, V]) Get(key K) (V, bool) {
 func (sm *SafeMap[K, V]) Set(key K, value V) {
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
-	
+
 	sm.data[key] = value
 }
 
@@ -231,7 +231,7 @@ func (sm *SafeMap[K, V]) Set(key K, value V) {
 func (sm *SafeMap[K, V]) Delete(key K) {
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
-	
+
 	delete(sm.data, key)
 }
 
@@ -239,7 +239,7 @@ func (sm *SafeMap[K, V]) Delete(key K) {
 func (sm *SafeMap[K, V]) Len() int {
 	sm.mu.RLock()
 	defer sm.mu.RUnlock()
-	
+
 	return len(sm.data)
 }
 
@@ -247,7 +247,7 @@ func (sm *SafeMap[K, V]) Len() int {
 func (sm *SafeMap[K, V]) Keys() []K {
 	sm.mu.RLock()
 	defer sm.mu.RUnlock()
-	
+
 	keys := make([]K, 0, len(sm.data))
 	for k := range sm.data {
 		keys = append(keys, k)
@@ -259,7 +259,7 @@ func (sm *SafeMap[K, V]) Keys() []K {
 func (sm *SafeMap[K, V]) ForEach(fn func(K, V) bool) {
 	sm.mu.RLock()
 	defer sm.mu.RUnlock()
-	
+
 	for k, v := range sm.data {
 		if !fn(k, v) {
 			break
@@ -320,11 +320,11 @@ func NewWorkerPool(workers int, queueSize int) *WorkerPool {
 func (wp *WorkerPool) Start() {
 	wp.mu.Lock()
 	defer wp.mu.Unlock()
-	
+
 	if wp.started {
 		return
 	}
-	
+
 	wp.started = true
 	for i := 0; i < wp.workers; i++ {
 		wp.wg.Add(1)
@@ -335,7 +335,7 @@ func (wp *WorkerPool) Start() {
 // worker is the worker goroutine
 func (wp *WorkerPool) worker() {
 	defer wp.wg.Done()
-	
+
 	for {
 		select {
 		case task := <-wp.taskQueue:
@@ -353,11 +353,11 @@ func (wp *WorkerPool) Submit(task func()) error {
 	wp.mu.Lock()
 	started := wp.started
 	wp.mu.Unlock()
-	
+
 	if !started {
 		return fmt.Errorf("worker pool not started")
 	}
-	
+
 	select {
 	case wp.taskQueue <- task:
 		return nil
@@ -370,11 +370,11 @@ func (wp *WorkerPool) Submit(task func()) error {
 func (wp *WorkerPool) Stop() {
 	wp.mu.Lock()
 	defer wp.mu.Unlock()
-	
+
 	if !wp.started {
 		return
 	}
-	
+
 	close(wp.quit)
 	wp.wg.Wait()
 	wp.started = false
@@ -384,6 +384,6 @@ func (wp *WorkerPool) Stop() {
 // Real circuit breaker functionality is available in:
 // - pkg/resilience/circuit.go (working implementation)
 // - internal/circuit/breaker.go (internal implementation)
-// 
+//
 // This duplicate definition was causing naming conflicts.
 // Use pkg/resilience.CircuitBreaker for actual circuit breaking functionality.
