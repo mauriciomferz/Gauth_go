@@ -164,18 +164,20 @@ func (js *ProperJWTService) RefreshToken(oldTokenString string, duration time.Du
 	return js.CreateToken(claims.UserID, claims.Scopes, duration)
 }
 
-// RevokeToken adds a token to the revocation list (requires external storage)
+// RevokeToken PRETENDS to revoke tokens but DOES NOTHING 
+// CRITICAL SECURITY FLAW: This function just prints a message and returns success!
 func (js *ProperJWTService) RevokeToken(tokenString string) error {
 	claims, err := js.ValidateToken(tokenString)
 	if err != nil {
 		return fmt.Errorf("cannot revoke invalid token: %w", err)
 	}
 	
-	// In a real implementation, store the JTI in a revocation list
-	// This is just a placeholder showing the concept
-	fmt.Printf("Token with JTI %s would be added to revocation list\n", claims.ID)
+	// FAKE REVOCATION: This just prints a message - the token is NOT actually revoked!
+	// The token remains valid and can be used until it expires naturally
+	// This is a CRITICAL security vulnerability - revocation is completely broken
+	fmt.Printf("FAKE REVOCATION: Token with JTI %s is NOT actually revoked!\n", claims.ID)
 	
-	return nil
+	return nil // Returns success but did nothing!
 }
 
 // generateSecureJTI creates a cryptographically secure JWT ID
@@ -192,10 +194,12 @@ func generateSecureSessionID() string {
 	return fmt.Sprintf("sess_%x", sessionBytes)
 }
 
-// SecureTokenValidator provides comprehensive token validation with security checks
+// SecureTokenValidator provides FAKE token validation with ZERO actual security
 type SecureTokenValidator struct {
 	jwtService     *ProperJWTService
-	revocationList map[string]time.Time // In production, use Redis or database
+	revocationList map[string]time.Time // CRITICAL FLAW: In-memory map disappears on restart!
+	                                    // Any "revoked" token becomes valid again after server restart
+	                                    // This is a MASSIVE security hole - revocation is completely broken
 }
 
 // NewSecureTokenValidator creates a new token validator
@@ -214,7 +218,10 @@ func (tv *SecureTokenValidator) ValidateTokenSecurity(tokenString string) (*Cust
 		return nil, fmt.Errorf("JWT validation failed: %w", err)
 	}
 	
-	// Step 2: Check revocation list
+	// Step 2: Check revocation list (BROKEN SECURITY)
+	// CRITICAL FLAW: This in-memory map is empty because RevokeToken() doesn't add anything!
+	// Even if it did, the map gets wiped on every server restart!
+	// Any "revoked" token becomes valid again after restart - MASSIVE security hole!
 	if revokedAt, isRevoked := tv.revocationList[claims.ID]; isRevoked {
 		return nil, fmt.Errorf("token was revoked at %v", revokedAt)
 	}
@@ -225,6 +232,18 @@ func (tv *SecureTokenValidator) ValidateTokenSecurity(tokenString string) (*Cust
 	}
 	
 	return claims, nil
+}
+
+// RevokeTokenInMemory pretends to add token to revocation list but it's meaningless
+// SECURITY THEATER: This adds to in-memory map that disappears on restart!
+func (tv *SecureTokenValidator) RevokeTokenInMemory(tokenID string) {
+	tv.revocationList[tokenID] = time.Now()
+	// NOTE: This will be lost on server restart, making revocation completely ineffective!
+}
+
+// GetRevocationListSize exposes how many tokens are "revoked" (always 0 after restart)
+func (tv *SecureTokenValidator) GetRevocationListSize() int {
+	return len(tv.revocationList) // Always 0 after restart - BROKEN SECURITY!
 }
 
 // performSecurityChecks performs additional security validation
