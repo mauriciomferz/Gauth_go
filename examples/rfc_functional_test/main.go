@@ -39,20 +39,15 @@ func main() {
 		AIAgentID:    "ai_trading_assistant_v2",
 		Jurisdiction: "US",
 		LegalBasis:   "power_of_attorney_act_2024",
-		LegalFramework: auth.LegalFramework{
-			Jurisdiction:         "US",
-			EntityType:          "corporation",
-			CapacityVerification: true,
-			RegulationFramework:  "SOX",
-		},
-		RequestedPowers: []string{"sign_contracts", "manage_investments"},
-		Restrictions: auth.PowerRestrictions{
-			AmountLimit: 50000.0,
-			GeoRestrictions: []string{"US", "EU"},
+		PoADefinition: auth.PoADefinition{
+			Principal: auth.Principal{
+				Identity: "corp_ceo_123",
+				Type:     auth.PrincipalTypeIndividual,
+			},
 		},
 	}
 
-	poaResponse, err := rfcService.AuthorizePowerOfAttorney(ctx, validPOARequest)
+	poaResponse, err := rfcService.AuthorizeGAuth(ctx, validPOARequest)
 	if err != nil {
 		fmt.Printf("❌ Valid request failed: %v\n", err)
 	} else {
@@ -67,9 +62,9 @@ func main() {
 	fmt.Println("=" + strings.Repeat("=", 55))
 	
 	invalidJurisdictionRequest := validPOARequest
-	invalidJurisdictionRequest.LegalFramework.Jurisdiction = "INVALID_COUNTRY"
+	invalidJurisdictionRequest.Jurisdiction = "INVALID_COUNTRY"
 	
-	_, err = rfcService.AuthorizePowerOfAttorney(ctx, invalidJurisdictionRequest)
+	_, err = rfcService.AuthorizeGAuth(ctx, invalidJurisdictionRequest)
 	if err != nil {
 		fmt.Printf("✅ Correctly rejected invalid jurisdiction: %v\n", err)
 	} else {
@@ -81,9 +76,9 @@ func main() {
 	fmt.Println("=" + strings.Repeat("=", 56))
 	
 	invalidAIRequest := validPOARequest
-	invalidAIRequest.RequestedPowers = []string{"nuclear_launch_codes"} // AI doesn't have this capability
+	invalidAIRequest.AIAgentID = "invalid_ai_agent" // Invalid AI agent
 	
-	_, err = rfcService.AuthorizePowerOfAttorney(ctx, invalidAIRequest)
+	_, err = rfcService.AuthorizeGAuth(ctx, invalidAIRequest)
 	if err != nil {
 		fmt.Printf("✅ Correctly rejected invalid AI capabilities: %v\n", err)
 	} else {
