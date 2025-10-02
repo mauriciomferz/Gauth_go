@@ -16,6 +16,14 @@ import (
 	"time"
 )
 
+// Context key types to avoid staticcheck violations
+type contextKey string
+
+const (
+	requestIDKey contextKey = "request_id"
+	userIDKey    contextKey = "user_id"
+)
+
 // ProperError provides structured error handling with context and security considerations
 // This replaces the generic error handling throughout the codebase
 type ProperError struct {
@@ -358,12 +366,12 @@ func NewErrorMiddleware(handler *ErrorHandler) *ErrorMiddleware {
 
 // WithRequestID adds request ID to context
 func WithRequestID(ctx context.Context, requestID string) context.Context {
-	return context.WithValue(ctx, "request_id", requestID)
+	return context.WithValue(ctx, requestIDKey, requestID)
 }
 
 // GetRequestID retrieves request ID from context
 func GetRequestID(ctx context.Context) string {
-	if requestID, ok := ctx.Value("request_id").(string); ok {
+	if requestID, ok := ctx.Value(requestIDKey).(string); ok {
 		return requestID
 	}
 	return ""
@@ -371,12 +379,12 @@ func GetRequestID(ctx context.Context) string {
 
 // WithUserID adds user ID to context
 func WithUserID(ctx context.Context, userID string) context.Context {
-	return context.WithValue(ctx, "user_id", userID)
+	return context.WithValue(ctx, userIDKey, userID)
 }
 
 // GetUserID retrieves user ID from context
 func GetUserID(ctx context.Context) string {
-	if userID, ok := ctx.Value("user_id").(string); ok {
+	if userID, ok := ctx.Value(userIDKey).(string); ok {
 		return userID
 	}
 	return ""

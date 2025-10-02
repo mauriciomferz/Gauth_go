@@ -19,6 +19,12 @@ import (
 	"golang.org/x/time/rate"
 )
 
+// Environment constants
+const (
+	envProduction  = "production"
+	envDevelopment = "development"
+)
+
 // ProperConfig provides structured configuration management
 // This replaces hardcoded values throughout the codebase
 type ProperConfig struct {
@@ -362,12 +368,12 @@ func (c *ProperConfig) GetSigningKey() ([]byte, error) {
 
 // IsProduction returns true if running in production environment
 func (c *ProperConfig) IsProduction() bool {
-	return c.Server.Environment == "production"
+	return c.Server.Environment == envProduction
 }
 
 // IsDevelopment returns true if running in development environment
 func (c *ProperConfig) IsDevelopment() bool {
-	return c.Server.Environment == "development"
+	return c.Server.Environment == envDevelopment
 }
 
 // Helper functions for environment variable parsing
