@@ -5,9 +5,9 @@
 ### Traditional IT Authorization Model
 **Policy-based Permission (P*P) - OLD MODEL**
 ```
-┌─────────────────┐    ┌──────────────┐    ┌─────────────────┐
-│   User Request  │ → │  IT Policies │ → │ IT Grants Access│
-└─────────────────┘    └──────────────┘    └─────────────────┘
+┌─────────────────┐    ┌──────────────┐    ┌──────────────────┐
+│   User Request  │ →  │  IT Policies │ →  │ IT Grants Access.│
+└─────────────────┘    └──────────────┘    └──────────────────┘
 ```
 - IT department creates and manages **policies**
 - Access decisions based on **technical rules**
@@ -19,7 +19,7 @@
 **Power-of-Attorney Protocol (P*P) - NEW MODEL**
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌──────────────────┐
-│Business Request │ → │  Power Delegation│ → │Business Authority│
+│Business Request │ →  │  Power Delegation│ →. │Business Authority│
 └─────────────────┘    └──────────────────┘    └──────────────────┘
 ```
 - Business owners **delegate specific powers**
