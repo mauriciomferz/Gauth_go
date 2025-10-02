@@ -21,7 +21,7 @@ import (
 // Additional error codes for system management
 const (
 	ErrMemoryLimit      ErrorCode = "MEMORY_LIMIT"
-	ErrConfigValidation ErrorCode = "CONFIG_VALIDATION" 
+	ErrConfigValidation ErrorCode = "CONFIG_VALIDATION"
 	ErrCleanupFailed    ErrorCode = "CLEANUP_FAILED"
 )
 
@@ -37,10 +37,10 @@ type MemoryManager struct {
 
 // TokenEntry represents a stored token with metadata
 type TokenEntry struct {
-	Token       *token.Token
-	CreatedAt   time.Time
+	Token        *token.Token
+	CreatedAt    time.Time
 	LastAccessed time.Time
-	AccessCount int64
+	AccessCount  int64
 }
 
 // NewMemoryManager creates a memory manager with cleanup
@@ -51,11 +51,11 @@ func NewMemoryManager(cleanupInterval time.Duration, maxEntries int) *MemoryMana
 		maxEntries:      maxEntries,
 		stopCh:          make(chan struct{}),
 	}
-	
+
 	// Start cleanup goroutine
 	mm.wg.Add(1)
 	go mm.cleanupLoop()
-	
+
 	return mm
 }
 
@@ -129,7 +129,7 @@ func (mm *MemoryManager) RemoveToken(ctx context.Context, tokenID string) error 
 // cleanupLoop runs periodic cleanup
 func (mm *MemoryManager) cleanupLoop() {
 	defer mm.wg.Done()
-	
+
 	ticker := time.NewTicker(mm.cleanupInterval)
 	defer ticker.Stop()
 
@@ -213,19 +213,19 @@ func (mm *MemoryManager) GetStats() map[string]interface{} {
 	runtime.ReadMemStats(&memStats)
 
 	return map[string]interface{}{
-		"total_tokens":    len(mm.tokenStore),
-		"expired_tokens":  expiredCount,
-		"total_accesses":  totalAccess,
-		"memory_alloc":    memStats.Alloc,
-		"memory_sys":      memStats.Sys,
-		"num_gc":          memStats.NumGC,
+		"total_tokens":   len(mm.tokenStore),
+		"expired_tokens": expiredCount,
+		"total_accesses": totalAccess,
+		"memory_alloc":   memStats.Alloc,
+		"memory_sys":     memStats.Sys,
+		"num_gc":         memStats.NumGC,
 	}
 }
 
 // Shutdown gracefully shuts down the memory manager
 func (mm *MemoryManager) Shutdown(ctx context.Context) error {
 	close(mm.stopCh)
-	
+
 	// Wait for cleanup goroutine to stop
 	done := make(chan struct{})
 	go func() {
@@ -256,9 +256,9 @@ type ConfigValidator struct {
 func NewConfigValidator() *ConfigValidator {
 	cv := &ConfigValidator{
 		requiredFields: map[string]bool{
-			"auth_server_url":     true,
-			"token_expiry":        true,
-			"rate_limit":          true,
+			"auth_server_url":      true,
+			"token_expiry":         true,
+			"rate_limit":           true,
 			"max_delegation_depth": true,
 		},
 		validators: make(map[string]func(interface{}) error),
@@ -282,7 +282,7 @@ func (cv *ConfigValidator) ValidateConfig(config map[string]interface{}) error {
 	// Check required fields
 	for field := range cv.requiredFields {
 		if _, exists := config[field]; !exists {
-			return NewError(ErrConfigValidation, 
+			return NewError(ErrConfigValidation,
 				fmt.Sprintf("required field missing: %s", field), nil)
 		}
 	}
@@ -291,7 +291,7 @@ func (cv *ConfigValidator) ValidateConfig(config map[string]interface{}) error {
 	for field, value := range config {
 		if validator, exists := cv.validators[field]; exists {
 			if err := validator(value); err != nil {
-				return NewError(ErrConfigValidation, 
+				return NewError(ErrConfigValidation,
 					fmt.Sprintf("invalid %s", field), err)
 			}
 		}

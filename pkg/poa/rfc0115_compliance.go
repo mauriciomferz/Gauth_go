@@ -8,12 +8,12 @@ import (
 
 // RFC0115Config represents RFC-0115 compliance configuration
 type RFC0115Config struct {
-	EnableWeb3Integration    bool     `json:"enable_web3_integration"`
-	EnableAIOperators       bool     `json:"enable_ai_operators"`
-	EnableDNAIdentities     bool     `json:"enable_dna_identities"`
-	AllowedAITypes          []string `json:"allowed_ai_types"`
-	RequiredExclusions      []string `json:"required_exclusions"`
-	MandatoryCompliance     bool     `json:"mandatory_compliance"`
+	EnableWeb3Integration bool     `json:"enable_web3_integration"`
+	EnableAIOperators     bool     `json:"enable_ai_operators"`
+	EnableDNAIdentities   bool     `json:"enable_dna_identities"`
+	AllowedAITypes        []string `json:"allowed_ai_types"`
+	RequiredExclusions    []string `json:"required_exclusions"`
+	MandatoryCompliance   bool     `json:"mandatory_compliance"`
 }
 
 // ValidateRFC0115Compliance validates RFC-0115 compliance according to Section 2
@@ -21,7 +21,7 @@ func ValidateRFC0115Compliance(config RFC0115Config) error {
 	var violations []string
 
 	// Section 2: Limitations on the right to make derivative works (Exclusions)
-	
+
 	// Check Web3 exclusion
 	if config.EnableWeb3Integration {
 		violations = append(violations, "RFC-0115 Section 2: Web3/blockchain technology integration is prohibited")

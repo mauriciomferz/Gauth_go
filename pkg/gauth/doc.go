@@ -1,5 +1,6 @@
 /*
-Package gauth implements the GAuth authorization framework for AI power-of-attorney, as defined in GiFo-RFC-0111 and GiFo-RFC-0115.
+Package gauth implements the GAuth authorization framework for AI power-of-attorney,
+as defined in GiFo-RFC-0111 and GiFo-RFC-0115.
 
 Copyright (c) 2025 Gimel Foundation gGmbH i.G.
 Licensed under Apache 2.0

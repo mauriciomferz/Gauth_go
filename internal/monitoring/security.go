@@ -67,24 +67,24 @@ type AlertHandler interface {
 
 // SecurityAlert represents a security incident
 type SecurityAlert struct {
-	Type        string
-	Severity    string
-	Message     string
-	ClientID    string
-	SourceIP    string
-	Timestamp   time.Time
-	Metadata    map[string]interface{}
+	Type      string
+	Severity  string
+	Message   string
+	ClientID  string
+	SourceIP  string
+	Timestamp time.Time
+	Metadata  map[string]interface{}
 }
 
 // NewSecurityMonitor creates a new security monitor with default thresholds
 func NewSecurityMonitor() *SecurityMonitor {
 	return &SecurityMonitor{
 		alertThresholds: map[string]int{
-			"auth_failures":              10,  // Alert after 10 failures
-			"suspicious_requests":        5,   // Alert after 5 suspicious requests
-			"rate_limit_violations":      20,  // Alert after 20 rate limit hits
-			"privilege_escalation":       1,   // Alert immediately
-			"audit_tamper_attempts":      1,   // Alert immediately
+			"auth_failures":         10, // Alert after 10 failures
+			"suspicious_requests":   5,  // Alert after 5 suspicious requests
+			"rate_limit_violations": 20, // Alert after 20 rate limit hits
+			"privilege_escalation":  1,  // Alert immediately
+			"audit_tamper_attempts": 1,  // Alert immediately
 		},
 		alertHandlers: []AlertHandler{},
 	}
@@ -98,7 +98,7 @@ func (sm *SecurityMonitor) AddAlertHandler(handler AlertHandler) {
 // RecordAuthFailure records an authentication failure and checks for alerts
 func (sm *SecurityMonitor) RecordAuthFailure(clientID, reason, sourceIP string) {
 	authFailures.WithLabelValues(clientID, reason, sourceIP).Inc()
-	
+
 	// Check if threshold exceeded
 	if sm.shouldAlert("auth_failures", clientID) {
 		alert := SecurityAlert{
@@ -109,7 +109,7 @@ func (sm *SecurityMonitor) RecordAuthFailure(clientID, reason, sourceIP string) 
 			SourceIP:  sourceIP,
 			Timestamp: time.Now(),
 			Metadata: map[string]interface{}{
-				"reason": reason,
+				"reason":             reason,
 				"threshold_exceeded": sm.alertThresholds["auth_failures"],
 			},
 		}
@@ -120,7 +120,7 @@ func (sm *SecurityMonitor) RecordAuthFailure(clientID, reason, sourceIP string) 
 // RecordSuspiciousRequest records a suspicious token request
 func (sm *SecurityMonitor) RecordSuspiciousRequest(clientID, attackType, sourceIP string) {
 	suspiciousTokenRequests.WithLabelValues(clientID, attackType, sourceIP).Inc()
-	
+
 	if sm.shouldAlert("suspicious_requests", clientID) {
 		alert := SecurityAlert{
 			Type:      "suspicious_requests",
@@ -140,7 +140,7 @@ func (sm *SecurityMonitor) RecordSuspiciousRequest(clientID, attackType, sourceI
 // RecordAuditTamperAttempt records an audit log tampering attempt
 func (sm *SecurityMonitor) RecordAuditTamperAttempt(sourceIP string) {
 	auditLogTamperAttempts.Inc()
-	
+
 	// Always alert on audit tampering attempts
 	alert := SecurityAlert{
 		Type:      "audit_tamper",
@@ -158,7 +158,7 @@ func (sm *SecurityMonitor) RecordAuditTamperAttempt(sourceIP string) {
 // RecordRateLimitViolation records a rate limit violation
 func (sm *SecurityMonitor) RecordRateLimitViolation(clientID, endpoint, sourceIP string) {
 	rateLimitExceeded.WithLabelValues(clientID, endpoint, sourceIP).Inc()
-	
+
 	if sm.shouldAlert("rate_limit_violations", clientID) {
 		alert := SecurityAlert{
 			Type:      "rate_limit_violation",
@@ -178,7 +178,7 @@ func (sm *SecurityMonitor) RecordRateLimitViolation(clientID, endpoint, sourceIP
 // RecordPrivilegeEscalationAttempt records a privilege escalation attempt
 func (sm *SecurityMonitor) RecordPrivilegeEscalationAttempt(clientID, requestedScope, sourceIP string) {
 	privilegeEscalationAttempts.WithLabelValues(clientID, requestedScope, sourceIP).Inc()
-	
+
 	// Always alert on privilege escalation attempts
 	alert := SecurityAlert{
 		Type:      "privilege_escalation",
@@ -203,7 +203,7 @@ func (sm *SecurityMonitor) shouldAlert(alertType, clientID string) bool {
 	if !exists {
 		return false
 	}
-	
+
 	// Simplified check - in practice, you'd query Prometheus metrics
 	// or maintain internal counters
 	return threshold > 0 // Placeholder logic
@@ -212,7 +212,7 @@ func (sm *SecurityMonitor) shouldAlert(alertType, clientID string) bool {
 // sendAlert sends an alert to all registered handlers
 func (sm *SecurityMonitor) sendAlert(alert SecurityAlert) {
 	ctx := context.Background()
-	
+
 	for _, handler := range sm.alertHandlers {
 		go func(h AlertHandler) {
 			if err := h.HandleAlert(ctx, alert); err != nil {
@@ -270,12 +270,12 @@ func NewSecurityDashboard(monitor *SecurityMonitor) *SecurityDashboard {
 // GetSecurityMetrics returns current security metrics for dashboard
 func (sd *SecurityDashboard) GetSecurityMetrics() map[string]interface{} {
 	return map[string]interface{}{
-		"auth_failures":              "query from Prometheus",
-		"suspicious_requests":        "query from Prometheus", 
-		"rate_limit_violations":      "query from Prometheus",
+		"auth_failures":                 "query from Prometheus",
+		"suspicious_requests":           "query from Prometheus",
+		"rate_limit_violations":         "query from Prometheus",
 		"privilege_escalation_attempts": "query from Prometheus",
-		"audit_tamper_attempts":      "query from Prometheus",
-		"active_alerts":              "count of active alerts",
-		"last_incident":              "timestamp of last incident",
+		"audit_tamper_attempts":         "query from Prometheus",
+		"active_alerts":                 "count of active alerts",
+		"last_incident":                 "timestamp of last incident",
 	}
 }

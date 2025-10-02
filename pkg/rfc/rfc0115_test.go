@@ -15,6 +15,15 @@ import (
 	"time"
 )
 
+// Test constants to avoid goconst violations
+const (
+	testPEPRole         = "PEP"
+	testHighLevel       = "high"
+	testActiveStatus    = "active"
+	testTokenResponse   = "token"
+	testDevelopmentEnv  = "development"
+)
+
 func TestRFC0115_PoADefinition_Creation(t *testing.T) {
 	poa := CreateRFC0115PoADefinition()
 	
@@ -148,12 +157,12 @@ func TestRFC0115_GAuthIntegration(t *testing.T) {
 	poa := CreateRFC0115PoADefinition()
 	
 	// Test GAuth context integration
-	poa.GAuthContext.PPArchitectureRole = "PEP"
+	poa.GAuthContext.PPArchitectureRole = testPEPRole
 	poa.GAuthContext.ExclusionsCompliant = true
 	poa.GAuthContext.ExtendedTokenScope = []string{"financial_decisions", "contract_execution"}
-	poa.GAuthContext.AIGovernanceLevel = "high"
+	poa.GAuthContext.AIGovernanceLevel = testHighLevel
 	
-	if poa.GAuthContext.PPArchitectureRole != "PEP" {
+	if poa.GAuthContext.PPArchitectureRole != testPEPRole {
 		t.Error("PP architecture role should be PEP")
 	}
 	
@@ -257,9 +266,9 @@ func TestRFC0115_PowerOfAttorneyLifecycle(t *testing.T) {
 	}
 	
 	// Test operational status
-	poa.Parties.AuthorizedClient.OperationalStatus = "active"
+	poa.Parties.AuthorizedClient.OperationalStatus = testActiveStatus
 	
-	if poa.Parties.AuthorizedClient.OperationalStatus != "active" {
+	if poa.Parties.AuthorizedClient.OperationalStatus != testActiveStatus {
 		t.Error("Client operational status should be active")
 	}
 }
@@ -283,7 +292,7 @@ func Example_rfc0115PoADefinition() {
 	poa.Parties.AuthorizedClient.Type = RFC0115ClientTypeAgenticAI
 	poa.Parties.AuthorizedClient.Identity = "gauth-ai-agent-v1.0"
 	poa.Parties.AuthorizedClient.Version = "1.0.0"
-	poa.Parties.AuthorizedClient.OperationalStatus = "active"
+	poa.Parties.AuthorizedClient.OperationalStatus = testActiveStatus
 	
 	// Configure authorization scope
 	poa.Authorization.ApplicableSectors = []RFC0115IndustrySector{

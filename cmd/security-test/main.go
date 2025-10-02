@@ -214,7 +214,7 @@ func testPrivilegeEscalation() bool {
 	for _, test := range testCases {
 		result := checkAuthorization(test.clientID, test.scopes)
 		if result != test.expected {
-			log.Printf("Privilege escalation test failed for client %s with scopes %v", 
+			log.Printf("Privilege escalation test failed for client %s with scopes %v",
 				test.clientID, test.scopes)
 			return false
 		}

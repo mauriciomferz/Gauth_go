@@ -56,7 +56,7 @@ func (v *DelegationChainValidator) ValidateDelegationChain(
 	// 2. Detect cycles using graph traversal
 	visited := make(map[string]bool)
 	inProgress := make(map[string]bool)
-	
+
 	for _, link := range chain {
 		if err := v.detectCycle(link.FromID, chain, visited, inProgress); err != nil {
 			return fmt.Errorf("delegation cycle detected: %w", err)
@@ -164,7 +164,7 @@ func (v *DelegationChainValidator) validateDelegationType(delegationType string,
 func (v *DelegationChainValidator) computeChainHash(chain []common.DelegationLink) string {
 	result := ""
 	for _, link := range chain {
-		result += fmt.Sprintf("%s-%s-%s-%d-", 
+		result += fmt.Sprintf("%s-%s-%s-%d-",
 			link.FromID, link.ToID, link.Type, link.Level)
 	}
 	return result
@@ -185,16 +185,16 @@ type ScopeEscalationPrevention struct {
 	mu                    sync.RWMutex
 	allowedCombinations   map[string][]string
 	forbiddenCombinations map[string][]string
-	scopeHierarchy       map[string]int
+	scopeHierarchy        map[string]int
 }
 
 // NewScopeEscalationPrevention creates scope escalation prevention system
 func NewScopeEscalationPrevention() *ScopeEscalationPrevention {
 	return &ScopeEscalationPrevention{
 		allowedCombinations: map[string][]string{
-			"read":   {"read", "audit"},
-			"write":  {"read", "write"},
-			"admin":  {"read", "write", "admin"},
+			"read":  {"read", "audit"},
+			"write": {"read", "write"},
+			"admin": {"read", "write", "admin"},
 		},
 		forbiddenCombinations: map[string][]string{
 			"read":  {"admin", "delete", "system"},
@@ -227,7 +227,7 @@ func (s *ScopeEscalationPrevention) ValidateScopeComposition(
 		for _, scope := range baseScopes {
 			for _, forbiddenScope := range forbidden {
 				if scope == forbiddenScope {
-					return fmt.Errorf("forbidden scope combination: %s with %s", 
+					return fmt.Errorf("forbidden scope combination: %s with %s",
 						requested, forbiddenScope)
 				}
 			}
@@ -249,7 +249,7 @@ func (s *ScopeEscalationPrevention) ValidateScopeComposition(
 
 			// Prevent escalation to higher privilege level
 			if requestedLevel > baseLevel+1 {
-				return fmt.Errorf("scope escalation prevented: %s (%d) > %s (%d)", 
+				return fmt.Errorf("scope escalation prevented: %s (%d) > %s (%d)",
 					requested, requestedLevel, base, baseLevel)
 			}
 		}

@@ -569,7 +569,7 @@ func ValidateRFC0111Config(config RFC0111Config) error {
 	
 	// Validate Extended Tokens
 	if err := ValidateRFC0111ExtendedTokens(config.ExtendedTokens); err != nil {
-		return fmt.Errorf("Extended Tokens validation failed: %w", err)
+		return fmt.Errorf("extended tokens validation failed: %w", err)
 	}
 	
 	return nil
@@ -609,10 +609,10 @@ func ValidateRFC0111PPArchitecture(pp RFC0111PPArchitecture) error {
 		return fmt.Errorf("PEP demand side entity must be specified")
 	}
 	if pp.PDP.PrimaryPDP == "" {
-		return fmt.Errorf("Primary PDP must be specified")
+		return fmt.Errorf("primary PDP must be specified")
 	}
 	if pp.PIP.AuthorizationServer == "" {
-		return fmt.Errorf("Authorization server in PIP must be specified")
+		return fmt.Errorf("authorization server in PIP must be specified")
 	}
 	return nil
 }
@@ -620,13 +620,13 @@ func ValidateRFC0111PPArchitecture(pp RFC0111PPArchitecture) error {
 // ValidateRFC0111ExtendedTokens validates extended tokens configuration
 func ValidateRFC0111ExtendedTokens(tokens RFC0111ExtendedTokens) error {
 	if tokens.TokenType == "" {
-		return fmt.Errorf("Token type must be specified")
+		return fmt.Errorf("token type must be specified")
 	}
 	if len(tokens.Scope) == 0 {
-		return fmt.Errorf("Token scope must be specified")
+		return fmt.Errorf("token scope must be specified")
 	}
 	if tokens.Duration <= 0 {
-		return fmt.Errorf("Token duration must be positive")
+		return fmt.Errorf("token duration must be positive")
 	}
 	return nil
 }
@@ -635,18 +635,18 @@ func ValidateRFC0111ExtendedTokens(tokens RFC0111ExtendedTokens) error {
 func ValidateRFC0115PoADefinition(poa RFC0115PoADefinition) error {
 	// Validate parties
 	if poa.Parties.Principal.Identity == "" {
-		return fmt.Errorf("Principal identity is required")
+		return fmt.Errorf("principal identity is required")
 	}
 	if poa.Parties.AuthorizedClient.Identity == "" {
-		return fmt.Errorf("Authorized client identity is required")
+		return fmt.Errorf("authorized client identity is required")
 	}
 	
 	// Validate authorization scope
 	if len(poa.Authorization.ApplicableSectors) == 0 {
-		return fmt.Errorf("At least one applicable sector is required")
+		return fmt.Errorf("at least one applicable sector is required")
 	}
 	if len(poa.Authorization.ApplicableRegions) == 0 {
-		return fmt.Errorf("At least one applicable region is required")
+		return fmt.Errorf("at least one applicable region is required")
 	}
 	
 	// Validate GAuth integration
