@@ -6,6 +6,9 @@
 // Copyright (c) 2025 Gimel Foundation gGmbH i.G.
 // Licensed under Apache 2.0 (building blocks: OAuth, OpenID Connect, MCP)
 // Built on the excellent professional JWT foundation
+//
+// Demo Implementation Author: Mauricio Fernandez
+// GitHub: https://github.com/mauriciomferz
 
 package auth
 

@@ -5,6 +5,9 @@
 **Copyright (c) 2025 Gimel Foundation gGmbH i.G.**  
 Licensed under Apache 2.0
 
+**Demo Implementation Author**: [Mauricio Fernandez](https://github.com/mauriciomferz)  
+GitHub: https://github.com/mauriciomferz
+
 **Gimel Foundation gGmbH i.G.**, www.GimelFoundation.com  
 Operated by Gimel Technologies GmbH  
 MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert  
