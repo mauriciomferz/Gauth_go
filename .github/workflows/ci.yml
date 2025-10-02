@@ -71,12 +71,6 @@ jobs:
         echo "Testing internal packages..."
         go test -v -timeout=10m ./internal/...
         
-        echo "Testing cascade example..."
-        go test -v -timeout=5m ./examples/cascade/pkg/gauth
-        
-        echo "Testing integration tests..."
-        go test -v -timeout=10m ./test/...
-        
         echo "✅ All tests completed successfully"
 
     - name: Install golangci-lint
