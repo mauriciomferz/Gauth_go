@@ -1,8 +1,27 @@
-# 🎯 GAuth+ Demo Application - Gimel-App-0001
+# GAuth Demo Application
 
-**Application ID**: Gimel-App-0001  
-**Version**: v1.2.0  
-**Status**: Production Ready  
+**🏗️ Development Prototype** | **🏆 RFC-0115 Demo** | **⚠️ No Security**
+
+**Copyright (c) 2025 Gimel Foundation gGmbH i.G.**  
+Licensed under Apache 2.0
+
+**Gimel Foundation gGmbH i.G.**, www.GimelFoundation.com  
+Operated by Gimel Technologies GmbH  
+MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert  
+Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com
+
+**Technology Stack**: Go + HTML5/JavaScript + Docker  
+**Status**: ⚠️ **NO SECURITY - DEMO ONLY**  
+**Purpose**: Educational demonstration of RFC-0115 PoA-Definition concepts
+
+## 🚨 **SECURITY WARNING**
+
+**THIS DEMO HAS ZERO SECURITY:**
+- No cryptography (all stubbed)
+- No authentication (anyone can impersonate anyone)  
+- No authorization (only checks non-empty strings)
+- No compliance (hardcoded responses)
+- **DO NOT USE FOR ANYTHING REQUIRING REAL SECURITY**  
 **Success Rate**: 100% (5/5 features)  
 **Repository**: https://github.com/Gimel-Foundation/Gimel-App-0001  
 
@@ -23,7 +42,7 @@ GAuth+ transforms AI authorization from traditional IT policies to legitimate bu
 - **📈 Live Audit Trail**: Real-time monitoring of authorization events with forensic analysis
 - **✅ Compliance Dashboard**: Multi-jurisdiction regulatory compliance validation
 - **🔐 Enhanced Token Management**: AI-specific metadata with business restrictions
-- **🛡️ Advanced Security Controls**: Enterprise-grade rate limiting and access control
+- **⚠️ Mock Security Controls**: Demo-only responses with no real rate limiting or access control
 
 ### Command Line Interface
 - **Complete Protocol Demo**: Run full GAuth authorization flows
@@ -66,8 +85,7 @@ gauth-demo-app/
 cd gauth-demo-app/web
 
 # 2. Start Python server
-python3 -m http.server 3000
-
+pcd
 # 3. Open in browser
 open http://localhost:3000/standalone-demo.html
 ```

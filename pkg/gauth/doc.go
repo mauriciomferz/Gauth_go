@@ -1,9 +1,17 @@
 /*
-Package gauth implements the GAuth authorization framework for AI power-of-attorney, as defined in RFC111 (GiFo-RfC 0111).
+Package gauth implements the GAuth authorization framework for AI power-of-attorney, as defined in GiFo-RFC-0111 and GiFo-RFC-0115.
+
+Copyright (c) 2025 Gimel Foundation gGmbH i.G.
+Licensed under Apache 2.0
+
+Gimel Foundation gGmbH i.G., www.GimelFoundation.com
+Operated by Gimel Technologies GmbH
+MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert
+Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com
 
 GAuth enables AI systems to act on behalf of humans or organizations, with explicit,
-verifiable, and auditable power-of-attorney flows. It is designed for open source
-extensibility, type safety, and compliance with modern standards (OAuth, OpenID Connect, MCP).
+verifiable, and auditable power-of-attorney flows. Features complete RFC-0115 PoA-Definition
+implementation with type safety and compliance with modern standards.
 
 Key Features:
 - Typed APIs for grants, tokens, and events (no map[string]interface{} in public APIs)
@@ -176,7 +184,7 @@ examples/    - Standalone example applications
   - Minimal cross-package dependencies
   - Clean interfaces for extension
 
-3. Production Ready
+3. Development Prototype
   - Built-in monitoring
   - Resilience patterns
   - Performance optimizations

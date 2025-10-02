@@ -1,6 +1,28 @@
 # GAuth Examples
 
-This directory contains examples demonstrating different features and use cases of GAuth. Each example is self-contained and includes detailed documentation.
+**Copyright (c) 2025 Gimel Foundation gGmbH i.G.**  
+Licensed under Apache 2.0
+
+**Gimel Foundation gGmbH i.G.**, www.GimelFoundation.com  
+Operated by Gimel Technologies GmbH  
+MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert  
+Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com
+
+This directory contains examples demonstrating RFC-0115 PoA-Definition implementation and other GAuth features. Each example is self-contained with detailed documentation.
+
+## ⭐ **Featured Example - RFC-0115 PoA-Definition**
+
+**[RFC-0115 PoA-Definition Implementation](rfc_0115_poa_definition/README.md)** ✅ **COMPLETE**
+- Complete GiFo-RFC-0115 PoA-Definition structure
+- Full type safety with Go type system
+- JSON serialization and validation
+- Gimel Foundation compliance demonstration
+- **Status**: Fully functional and tested
+
+```bash
+cd examples/rfc_0115_poa_definition
+go run main.go
+```
 
 ## Quick Start Examples
 

@@ -1,6 +1,24 @@
-# GAuth Examples Guide
+# GAuth RFC-0115 Examples Documentation
 
-This document provides an overview of the examples included in the GAuth codebase, highlighting how they demonstrate best practices and showcase the library's capabilities.
+**🏗️ DEVELOPMENT PROTOTYPE** | **🏆 RFC-0115 COMPLETE** | **🏢 GIMEL FOUNDATION**
+
+**Copyright (c) 2025 Gimel Foundation gGmbH i.G.**  
+Licensed under Apache 2.0
+
+**Gimel Foundation gGmbH i.G.**, www.GimelFoundation.com  
+Operated by Gimel Technologies GmbH  
+MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert  
+Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com
+
+This document describes the working examples demonstrating RFC-0115 PoA-Definition implementation and related functionality.
+
+## ✅ **WORKING EXAMPLES**
+
+### **RFC-0115 PoA-Definition Implementation** ⭐
+- **Location**: `examples/rfc_0115_poa_definition/`  
+- **Status**: ✅ **FULLY FUNCTIONAL**
+- **Description**: Complete demonstration of GiFo-RFC-0115 PoA-Definition structure
+- **Features**: Full type safety, JSON serialization, Gimel Foundation compliance
 
 ## Example Structure
 

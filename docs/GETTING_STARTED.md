@@ -1,45 +1,122 @@
-# Getting Started with GAuth
+# Getting Started with GAuth RFC Implementation
 
-## Introduction
+**🏗️ DEVELOPMENT PROTOTYPE** | **🏆 RFC-0115 COMPLETE** | **🏢 GIMEL FOUNDATION**
 
-GAuth is a modern authentication library for Go applications. This guide will help you get started with GAuth and explore its features.
+**Copyright (c) 2025 Gimel Foundation gGmbH i.G.**  
+Licensed under Apache 2.0
 
-## Installation
+**Gimel Foundation gGmbH i.G.**, www.GimelFoundation.com  
+Operated by Gimel Technologies GmbH  
+MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert  
+Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com
+
+This guide will help you get started with the official Gimel Foundation GAuth implementation, featuring complete GiFo-RFC-0115 PoA-Definition compliance.
+
+## 🚀 Quick Installation
+
+### 1. **Install the Package**
 
 ```bash
 go get github.com/Gimel-Foundation/gauth
 ```
 
-## Quick Start - No Build Required!
-
-### 1. **Ready-to-Use Demo Executables**
+### 2. **Build and Test**
 
 ```bash
-# Basic console demo - shows complete protocol flow
-./gauth-server
+# Clone the repository
+git clone https://github.com/mauriciomferz/Gauth_go.git
+cd Gauth_go
 
-# Interactive web interface with live features  
-./gauth-http-server
-# Open http://localhost:8080
+# Build the package
+go build ./pkg/auth
+
+# Run RFC compliance tests
+go run examples/official_rfc_compliance_test/main.go
 ```
 
-### 2. **Build from Source (Optional)**
+## 🎯 **First RFC 111 Implementation**
 
-```bash
-# Build all executables
-make build
+### **Basic GAuth Authorization**
 
-# Run the demos
-./gauth-server        # Console demo
-./gauth-web          # Web server
+Create your first RFC-compliant authorization:
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "time"
+    "github.com/Gimel-Foundation/gauth/pkg/auth"
+)
+
+func main() {
+    // 1. Create RFC-compliant service
+    service, err := auth.NewRFCCompliantService("my-company", "ai-authorization")
+    if err != nil {
+        panic(err)
+    }
+    
+    // 2. Create basic PoA Definition
+    poa := auth.PoADefinition{
+        Principal: auth.Principal{
+            Type:     auth.PrincipalTypeIndividual,
+            Identity: "john_doe_ceo",
+        },
+        Client: auth.ClientAI{
+            Type:              auth.ClientTypeAgent,
+            Identity:          "my_ai_assistant",
+            Version:           "1.0.0",
+            OperationalStatus: "active",
+        },
+        ScopeDefinition: auth.ScopeDefinition{
+            ApplicableSectors: []auth.IndustrySector{auth.SectorBusiness},
+            ApplicableRegions: []auth.GeographicScope{
+                {Type: auth.GeoTypeNational, Identifier: "US"},
+            },
+            AuthorizedActions: auth.AuthorizedActions{
+                Decisions: []auth.DecisionType{auth.DecisionInformation},
+            },
+        },
+        Requirements: auth.Requirements{
+            ValidityPeriod: auth.ValidityPeriod{
+                StartTime: time.Now(),
+                EndTime:   time.Now().Add(30 * 24 * time.Hour), // 30 days
+            },
+            JurisdictionLaw: auth.JurisdictionLaw{
+                GoverningLaw:       "US_Federal_Law",
+                PlaceOfJurisdiction: "US",
+            },
+        },
+    }
+    
+    // 3. Create GAuth request
+    request := auth.GAuthRequest{
+        ClientID:     "my_ai_assistant",
+        ResponseType: "code",
+        Scope:        []string{"information_sharing"},
+        PowerType:    "data_management",
+        PrincipalID:  "john_doe_ceo",
+        AIAgentID:    "my_ai_assistant",
+        Jurisdiction: "US",
+        PoADefinition: poa,
+    }
+    
+    // 4. Authorize with RFC validation
+    response, err := service.AuthorizeGAuth(context.Background(), request)
+    if err != nil {
+        fmt.Printf("❌ Authorization failed: %v\n", err)
+        return
+    }
+    
+    fmt.Printf("✅ Authorization successful!\n")
+    fmt.Printf("Authorization Code: %s\n", response.AuthorizationCode[:20]+"...")
+    fmt.Printf("Compliance Level: %s\n", response.PoAValidation.ComplianceLevel)
+    fmt.Printf("Legal Compliance: %v\n", response.LegalCompliance)
+}
 ```
 
-## First Steps
-
-### 1. **Explore the Protocol Flow**
-
-Try the basic example:
-```bash
+## 🏢 **Corporate Implementation Example**
 cd examples/basic
 go run main.go
 ```

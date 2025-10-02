@@ -1,323 +1,391 @@
 package main
 
 import (
-	"context"
-	"fmt"
+	"encoding/json"
 	"log"
+	"math/rand"
 	"net/http"
-	"os"
-	"os/signal"
 	"strings"
-	"syscall"
 	"time"
 
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
+	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 
-	"github.com/Gimel-Foundation/gauth/gauth-demo-app/web/backend/handlers"
-	"github.com/Gimel-Foundation/gauth/gauth-demo-app/web/backend/middleware"
-	"github.com/Gimel-Foundation/gauth/gauth-demo-app/web/backend/services"
+	"github.com/Gimel-Foundation/gauth/pkg/rfc"
 )
 
-// @title GAuth Demo API
-// @version 1.0
-// @description Comprehensive demonstration of GAuth protocol capabilities
-// @termsOfService https://gimelfoundation.com/terms
+// DemoScenario represents a demo scenario for the web app
+type DemoScenario struct {
+	ID          string                 `json:"id"`
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	Config      map[string]interface{} `json:"config"`
+	RFCType     string                 `json:"rfc_type"`
+}
 
-// @contact.name GAuth Support
-// @contact.url https://gimelfoundation.com/support
-// @contact.email support@gimelfoundation.com
+// AuthResponse represents an authentication response
+type AuthResponse struct {
+	Success  bool                   `json:"success"`
+	Token    string                 `json:"token,omitempty"`
+	Message  string                 `json:"message"`
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
+	RFCType  string                 `json:"rfc_type"`
+}
 
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+var demoScenarios = []DemoScenario{
+	{
+		ID:          "rfc0111-basic",
+		Name:        "RFC-0111 Basic GAuth 1.0",
+		Description: "Basic RFC-0111 GAuth 1.0 scenario with P*P Architecture",
+		Config: map[string]interface{}{
+			"p2p_enabled":     true,
+			"exclusions":      []string{"resource1", "resource2"},
+			"extended_tokens": true,
+			"ai_client":       false,
+		},
+		RFCType: "RFC-0111",
+	},
+	{
+		ID:          "rfc0111-ai",
+		Name:        "RFC-0111 AI Client",
+		Description: "RFC-0111 with AI client capabilities enabled",
+		Config: map[string]interface{}{
+			"p2p_enabled":     true,
+			"exclusions":      []string{},
+			"extended_tokens": true,
+			"ai_client":       true,
+		},
+		RFCType: "RFC-0111",
+	},
+	{
+		ID:          "rfc0115-basic",
+		Name:        "RFC-0115 Basic PoA Definition",
+		Description: "Basic RFC-0115 Power of Attorney definition scenario",
+		Config: map[string]interface{}{
+			"parties": map[string]interface{}{
+				"grantor": "User A",
+				"grantee": "User B",
+				"witness": "System",
+			},
+			"authorization_type": "limited",
+			"legal_framework":    "standard",
+		},
+		RFCType: "RFC-0115",
+	},
+	{
+		ID:          "rfc0115-advanced",
+		Name:        "RFC-0115 Advanced PoA",
+		Description: "Advanced RFC-0115 with complex authorization requirements",
+		Config: map[string]interface{}{
+			"parties": map[string]interface{}{
+				"grantor": "Corporation A",
+				"grantee": "Agent B",
+				"witness": "Legal System",
+				"notary":  "Certified Notary",
+			},
+			"authorization_type": "full",
+			"legal_framework":    "enterprise",
+		},
+		RFCType: "RFC-0115",
+	},
+	{
+		ID:          "combined-demo",
+		Name:        "Combined RFC Demo",
+		Description: "Demonstration of combined RFC-0111 and RFC-0115 functionality",
+		Config: map[string]interface{}{
+			"rfc0111": map[string]interface{}{
+				"p2p_enabled":     true,
+				"exclusions":      []string{"restricted"},
+				"extended_tokens": true,
+				"ai_client":       true,
+			},
+			"rfc0115": map[string]interface{}{
+				"parties": map[string]interface{}{
+					"grantor": "System",
+					"grantee": "Client",
+				},
+				"authorization_type": "limited",
+			},
+		},
+		RFCType: "Combined",
+	},
+}
 
-// @host localhost:8080
-// @BasePath /api/v1
+// HealthStatus represents the health status response
+type HealthStatus struct {
+	Status    string    `json:"status"`
+	Timestamp time.Time `json:"timestamp"`
+	Service   string    `json:"service"`
+	Version   string    `json:"version"`
+}
+
+// healthHandler handles health check requests for Kubernetes liveness probes
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	
+	response := HealthStatus{
+		Status:    "healthy",
+		Timestamp: time.Now(),
+		Service:   "gauth-demo-backend",
+		Version:   "1.0.0",
+	}
+	
+	json.NewEncoder(w).Encode(response)
+}
+
+// readyHandler handles readiness check requests for Kubernetes readiness probes
+func readyHandler(w http.ResponseWriter, r *http.Request) {
+	// In a real application, you would check if the service is ready to serve traffic
+	// For example: database connections, external service availability, etc.
+	
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	
+	response := HealthStatus{
+		Status:    "ready",
+		Timestamp: time.Now(),
+		Service:   "gauth-demo-backend",
+		Version:   "1.0.0",
+	}
+	
+	json.NewEncoder(w).Encode(response)
+}
 
 func main() {
-	// Initialize configuration
-	config := initConfig()
-
-	// Initialize logger
-	logger := initLogger(config)
-
-	// Initialize services
-	svc, err := services.NewGAuthService(config, logger)
-	if err != nil {
-		logger.Fatalf("Failed to initialize GAuth service: %v", err)
-	}
-
-	// Initialize GAuth+ comprehensive service
-	gauthPlusSvc, err := services.NewGAuthPlusService(config, logger)
-	if err != nil {
-		logger.Fatalf("Failed to initialize GAuth+ service: %v", err)
-	}
-
-	// Initialize HTTP server
-	router := setupRouter(svc, logger, config, gauthPlusSvc)
-
-	// Start server
-	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", config.GetInt("server.port")),
-		Handler:      router,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
-		IdleTimeout:  60 * time.Second,
-	}
-
-	// Graceful shutdown
-	go func() {
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Fatalf("Failed to start server: %v", err)
-		}
-	}()
-
-	logger.Infof("GAuth Demo Server started on port %d", config.GetInt("server.port"))
-
-	// Wait for interrupt signal to gracefully shutdown the server
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-
-	logger.Info("Shutting down server...")
-
-	// The context is used to inform the server it has 5 seconds to finish
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	if err := server.Shutdown(ctx); err != nil {
-		logger.Fatalf("Server forced to shutdown: %v", err)
-	}
-
-	logger.Info("Server exited")
-}
-
-func initConfig() *viper.Viper {
-	config := viper.New()
-
-	// Set defaults
-	config.SetDefault("server.port", 8080)
-	config.SetDefault("server.mode", "debug")
-	config.SetDefault("log.level", "info")
-	config.SetDefault("redis.addr", "localhost:6379")
-	config.SetDefault("redis.password", "")
-	config.SetDefault("redis.db", 0)
-
-	// Read configuration from file
-	config.SetConfigName("config")
-	config.SetConfigType("yaml")
-	config.AddConfigPath(".")
-	config.AddConfigPath("./config")
-
-	// Read environment variables
-	config.AutomaticEnv()
-
-	if err := config.ReadInConfig(); err != nil {
-		log.Printf("Warning: Could not read config file: %v", err)
-	}
-
-	return config
-}
-
-func initLogger(config *viper.Viper) *logrus.Logger {
-	logger := logrus.New()
-
-	// Set log level
-	level, err := logrus.ParseLevel(config.GetString("log.level"))
-	if err != nil {
-		level = logrus.InfoLevel
-	}
-	logger.SetLevel(level)
-
-	// Set formatter
-	logger.SetFormatter(&logrus.JSONFormatter{
-		TimestampFormat: time.RFC3339,
-	})
-
-	return logger
-}
-
-func setupRouter(svc *services.GAuthService, logger *logrus.Logger, config *viper.Viper, gauthPlusSvc *services.GAuthPlusService) *gin.Engine {
-	// Set gin mode
-	gin.SetMode(gin.ReleaseMode)
-
-	router := gin.New()
-
-	// Middleware
-	router.Use(gin.Recovery())
-	router.Use(middleware.Logger(logger))
-	router.Use(middleware.RequestID())
+	router := mux.NewRouter()
 
 	// CORS configuration
-	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{"http://localhost:3000", "http://127.0.0.1:3000"}
-	corsConfig.AllowCredentials = true
-	corsConfig.AllowHeaders = []string{"*"}
-	corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
-	router.Use(cors.New(corsConfig))
-
-	// Health check
-	router.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"status":    "ok",
-			"timestamp": time.Now().Unix(),
-		})
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
 	})
 
-	// API routes
-	api := router.Group("/api/v1")
-	{
-		// Authentication endpoints
-		auth := api.Group("/auth")
-		authHandler := handlers.NewAuthHandler(svc, logger)
-		{
-			auth.POST("/authorize", authHandler.Authorize)
-			auth.POST("/token", authHandler.Token)
-			auth.POST("/revoke", authHandler.Revoke)
-			auth.GET("/userinfo", authHandler.UserInfo)
-			auth.POST("/validate", authHandler.Validate)
-		}
+	// Health endpoints for Kubernetes
+	router.HandleFunc("/health", healthHandler).Methods("GET")
+	router.HandleFunc("/ready", readyHandler).Methods("GET")
+	router.HandleFunc("/healthz", healthHandler).Methods("GET")
+	router.HandleFunc("/readyz", readyHandler).Methods("GET")
 
-		// Legal Framework endpoints
-		legal := api.Group("/legal")
-		legalHandler := handlers.NewLegalFrameworkHandler(svc, logger)
-		{
-			legal.POST("/entities", legalHandler.CreateEntity)
-			legal.GET("/entities/:id", legalHandler.GetEntity)
-			legal.POST("/entities/:id/verify", legalHandler.VerifyLegalCapacity)
+	// Routes
+	router.HandleFunc("/scenarios", getScenariosHandler).Methods("GET")
+	router.HandleFunc("/authenticate", authenticateHandler).Methods("POST")
+	router.HandleFunc("/validate", validateHandler).Methods("POST")
+	router.HandleFunc("/rfc0111/config", rfc0111ConfigHandler).Methods("POST")
+	router.HandleFunc("/rfc0115/poa", rfc0115PoAHandler).Methods("POST")
+	router.HandleFunc("/combined/demo", combinedDemoHandler).Methods("POST")
 
-			legal.POST("/power-of-attorney", legalHandler.CreatePowerOfAttorney)
-			legal.GET("/power-of-attorney/:id", legalHandler.GetPowerOfAttorney)
-			legal.POST("/power-of-attorney/:id/delegate", legalHandler.DelegatePower)
+	// Serve static files
+	router.PathPrefix("/").Handler(http.FileServer(http.Dir("../frontend/")))
 
-			legal.POST("/requests", legalHandler.CreateRequest)
-			legal.GET("/requests/:id", legalHandler.GetRequest)
-			legal.POST("/requests/:id/approve", legalHandler.ApproveRequest)
+	handler := c.Handler(router)
 
-			legal.GET("/jurisdictions", legalHandler.GetJurisdictions)
-			legal.GET("/jurisdictions/:id/rules", legalHandler.GetJurisdictionRules)
-		}
+	log.Println("Server starting on :8080")
+	log.Fatal(http.ListenAndServe(":8080", handler))
+}
 
-		// Audit endpoints
-		audit := api.Group("/audit")
-		auditHandler := handlers.NewAuditHandler(svc, logger)
-		{
-			audit.GET("/events", auditHandler.GetEvents)
-			audit.GET("/events/:id", auditHandler.GetEvent)
-			audit.GET("/compliance", auditHandler.GetComplianceReport)
-			audit.GET("/trails/:entity", auditHandler.GetAuditTrail)
-			audit.POST("/advanced", auditHandler.AdvancedAudit)
-		}
+func getScenariosHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(demoScenarios)
+}
 
-		// Rate limiting endpoints
-		rate := api.Group("/rate")
-		rateHandler := handlers.NewRateHandler(svc, logger)
-		{
-			rate.GET("/limits", rateHandler.GetLimits)
-			rate.POST("/limits", rateHandler.SetLimits)
-			rate.GET("/status/:client", rateHandler.GetStatus)
-		}
+func authenticateHandler(w http.ResponseWriter, r *http.Request) {
+	var req map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
 
-		// Demo scenarios endpoints
-		demo := api.Group("/demo")
-		demoHandler := handlers.NewDemoHandler(svc, logger)
-		{
-			demo.GET("/scenarios", demoHandler.GetScenarios)
-			demo.POST("/scenarios/:id/run", demoHandler.RunScenario)
-			demo.GET("/scenarios/:id/status", demoHandler.GetScenarioStatus)
-		}
+	scenarioID, ok := req["scenario_id"].(string)
+	if !ok {
+		http.Error(w, "Missing scenario_id", http.StatusBadRequest)
+		return
+	}
 
-		// RFC111/RFC115 Simple endpoints for web tests
-		rfc111 := api.Group("/rfc111")
-		{
-			// Step A & B: Authorization request → Grant
-			rfc111.POST("/authorize", auditHandler.SimpleRFC111Authorize)
-			rfc111.POST("/authorize-simple", auditHandler.SimpleRFC111Authorize)
-			// Step C & D: Grant → Extended Token exchange
-			rfc111.POST("/token", auditHandler.RFC111TokenExchange)
-		}
-
-		rfc115 := api.Group("/rfc115")
-		{
-			rfc115.POST("/delegate", auditHandler.SimpleRFC115Delegate)
-			rfc115.POST("/delegation", auditHandler.SimpleRFC115Delegate)
-		}
-
-		// Token Management endpoints
-		tokens := api.Group("/tokens")
-		tokenHandler := handlers.NewTokenHandler(svc, logger)
-		{
-			tokens.POST("", tokenHandler.CreateToken)
-			tokens.GET("", tokenHandler.GetTokens)
-			tokens.DELETE("/:id", tokenHandler.RevokeToken)
-			tokens.POST("/validate", tokenHandler.ValidateToken)
-			tokens.POST("/refresh", tokenHandler.RefreshToken)
-			tokens.POST("/enhanced", auditHandler.SimpleEnhancedTokens)
-			tokens.POST("/enhanced-simple", auditHandler.SimpleEnhancedTokens)
-		}
-
-		// Successor Management endpoints
-		successor := api.Group("/successor")
-		{
-			successor.POST("/manage", auditHandler.ManageSuccessor)
-		}
-
-		// Compliance endpoints
-		compliance := api.Group("/compliance")
-		{
-			compliance.POST("/validate", auditHandler.ValidateCompliance)
-		}
-
-		// GAuth+ Comprehensive Authorization endpoints
-		gauthPlus := api.Group("/gauth-plus")
-		gauthPlusHandler := handlers.NewGAuthPlusHandler(gauthPlusSvc, logger)
-		{
-			gauthPlus.POST("/authorize", gauthPlusHandler.RegisterAIAuthorization)
-			gauthPlus.POST("/validate", gauthPlusHandler.ValidateAIAuthority)
-			gauthPlus.GET("/commercial-register/:ai_system_id", gauthPlusHandler.GetCommercialRegisterEntry)
-			gauthPlus.POST("/authorizing-party", gauthPlusHandler.CreateAuthorizingParty)
-			gauthPlus.GET("/cascade/:ai_system_id", gauthPlusHandler.GetAuthorizationCascade)
-			gauthPlus.GET("/commercial-register", gauthPlusHandler.QueryCommercialRegister)
-		}
-
-		// Metrics endpoints
-		metrics := api.Group("/metrics")
-		{
-			metrics.GET("/tokens", tokenHandler.GetTokenMetrics)
-			metrics.GET("/system", func(c *gin.Context) {
-				// Return basic system metrics
-				c.JSON(200, gin.H{
-					"active_users":          42,
-					"total_transactions":    1234,
-					"success_rate":          0.98,
-					"average_response_time": 120,
-					"last_updated":          time.Now(),
-				})
-			})
+	// Find scenario
+	var scenario *DemoScenario
+	for i := range demoScenarios {
+		if demoScenarios[i].ID == scenarioID {
+			scenario = &demoScenarios[i]
+			break
 		}
 	}
 
-	// WebSocket endpoints for real-time updates
-	wsHandler := handlers.NewWebSocketHandler(svc, logger)
-	router.GET("/ws", wsHandler.HandleEvents)
-	router.GET("/ws/events", wsHandler.HandleEvents)
+	if scenario == nil {
+		http.Error(w, "Scenario not found", http.StatusNotFound)
+		return
+	}
 
-	// Swagger documentation
-	// router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	// Generate mock token
+	token := generateMockToken()
 
-	// Serve static files (React app) - Only for non-API routes
-	router.Static("/static", "./static")
-	router.StaticFile("/", "./static/index.html")
-	router.NoRoute(func(c *gin.Context) {
-		// Only serve static files for non-API routes
-		if !strings.HasPrefix(c.Request.URL.Path, "/api/") {
-			c.File("./static/index.html")
-		} else {
-			c.JSON(http.StatusNotFound, gin.H{"error": "API endpoint not found"})
-		}
-	})
+	response := AuthResponse{
+		Success: true,
+		Token:   token,
+		Message: "Authentication successful for " + scenario.Name,
+		Metadata: map[string]interface{}{
+			"scenario":  scenario.Name,
+			"rfc_type":  scenario.RFCType,
+			"timestamp": time.Now().Unix(),
+			"config":    scenario.Config,
+		},
+		RFCType: scenario.RFCType,
+	}
 
-	return router
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }
+
+func validateHandler(w http.ResponseWriter, r *http.Request) {
+	var req map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	token, ok := req["token"].(string)
+	if !ok {
+		http.Error(w, "Missing token", http.StatusBadRequest)
+		return
+	}
+
+	// Mock validation
+	isValid := strings.HasPrefix(token, "gauth_") && len(token) > 20
+
+	response := map[string]interface{}{
+		"valid":     isValid,
+		"message":   getValidationMessage(isValid),
+		"timestamp": time.Now().Unix(),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func rfc0111ConfigHandler(w http.ResponseWriter, r *http.Request) {
+	var req map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Create RFC-0111 configuration using the actual structure
+	config := rfc.CreateRFC0111Config()
+	
+	// Apply user settings to the created config
+	if p2pEnabled := getBoolFromMap(req, "p2p_enabled", true); p2pEnabled {
+		config.Status = "p2p_enabled"
+	}
+	
+	response := map[string]interface{}{
+		"success":     true,
+		"message":     "RFC-0111 configuration created successfully",
+		"config":      config,
+		"rfc_version": "RFC-0111",
+		"timestamp":   time.Now().Unix(),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func rfc0115PoAHandler(w http.ResponseWriter, r *http.Request) {
+	var req map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Create RFC-0115 PoA definition using factory function
+	poaDef := rfc.CreateRFC0115PoADefinition()
+	
+	// Apply user configurations (simplified demo)
+	if authType := getStringFromMap(req, "authorization_type", ""); authType != "" {
+		// Note: The actual structure is complex, this is a demo representation
+		poaDef.GAuthContext.AIGovernanceLevel = authType
+	}
+
+	response := map[string]interface{}{
+		"success":        true,
+		"message":        "RFC-0115 Power of Attorney definition created successfully",
+		"poa_definition": poaDef,
+		"rfc_version":    "RFC-0115",
+		"timestamp":      time.Now().Unix(),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func combinedDemoHandler(w http.ResponseWriter, r *http.Request) {
+	var req map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Create combined configuration using factory function
+	combinedConfig := rfc.CreateCombinedRFCConfig()
+	
+	// Apply user configurations (simplified for demo)
+	rfc0111Map, _ := req["rfc0111"].(map[string]interface{})
+	rfc0115Map, _ := req["rfc0115"].(map[string]interface{})
+	
+	if len(rfc0111Map) > 0 {
+		combinedConfig.IntegrationLevel = "rfc0111_enabled"
+	}
+	if len(rfc0115Map) > 0 {
+		combinedConfig.IntegrationLevel = "combined_rfc"
+	}
+
+	// Validate combined configuration  
+	if err := rfc.ValidateCombinedRFCConfig(combinedConfig); err != nil {
+		http.Error(w, "Invalid combined configuration: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	response := map[string]interface{}{
+		"success":         true,
+		"message":         "Combined RFC configuration validated successfully",
+		"combined_config": combinedConfig,
+		"rfc_versions":    []string{"RFC-0111", "RFC-0115"},
+		"timestamp":       time.Now().Unix(),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// Helper functions
+func generateMockToken() string {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, 32)
+	for i := range b {
+		b[i] = charset[rand.Intn(len(charset))]
+	}
+	return "gauth_" + string(b)
+}
+
+func getValidationMessage(isValid bool) string {
+	if isValid {
+		return "Token is valid"
+	}
+	return "Token is invalid"
+}
+
+func getBoolFromMap(m map[string]interface{}, key string, defaultValue bool) bool {
+	if val, ok := m[key].(bool); ok {
+		return val
+	}
+	return defaultValue
+}
+
+func getStringFromMap(m map[string]interface{}, key string, defaultValue string) string {
+	if val, ok := m[key].(string); ok {
+		return val
+	}
+	return defaultValue
+}
+

@@ -1,47 +1,31 @@
 #!/bin/bash
 
-# GAuth Demo Application - RFC111 & RFC115 Full Implementation Test Suite
-# This script demonstrates the complete flesh functionalities of RFC_111 and RFC_115
+# GAuth Demo Application - RFC-0111 & RFC-0115 Implementation Test Suite
+# This script demonstrates the available demo functionalities
 
 echo "=================================="
-echo "GAuth RFC111 & RFC115 Demo Suite"
+echo "GAuth RFC-0111 & RFC-0115 Demo Suite"
 echo "=================================="
 echo "Server: http://localhost:8080"
 echo ""
 
-# Check server health
-echo "1. Server Health Check:"
-echo "------------------------"
-curl -s http://localhost:8080/health | jq .
+# Get available scenarios
+echo "1. Available Demo Scenarios:"
+echo "-----------------------------"
+curl -s http://localhost:8080/scenarios | jq .
 echo ""
 
-# Test RFC111 Authorization
-echo "2. RFC111 Authorization (AI Power-of-Attorney):"
-echo "------------------------------------------------"
-curl -X POST http://localhost:8080/api/v1/rfc111/authorize \
+# Test Authentication with RFC-0111 scenario  
+echo "2. RFC-0111 Authentication Demo:"
+echo "--------------------------------"
+curl -X POST http://localhost:8080/authenticate \
   -H "Content-Type: application/json" \
   -d '{
-    "client_id": "demo_ai_client",
-    "response_type": "code", 
-    "scope": ["ai_power_of_attorney", "legal_framework", "financial_transactions"],
-    "redirect_uri": "http://localhost:3000/callback",
-    "power_type": "financial_transactions",
-    "principal_id": "user123",
-    "ai_agent_id": "ai_assistant_v2",
-    "jurisdiction": "US",
-    "legal_basis": "power_of_attorney_act_2024",
-    "legal_framework": {
-      "jurisdiction": "US",
-      "entity_type": "corporation", 
-      "capacity_verification": true
-    },
-    "requested_powers": ["sign_contracts", "manage_investments", "authorize_payments"],
-    "restrictions": {
-      "amount_limit": 50000,
-      "geo_restrictions": ["US", "EU"],
-      "time_restrictions": {
-        "business_hours_only": true
-      }
+    "scenario_id": "rfc0111-basic",
+    "user_id": "demo_user",
+    "client_info": {
+      "type": "web_demo",
+      "version": "1.0"
     }
   }' | jq .
 echo ""
