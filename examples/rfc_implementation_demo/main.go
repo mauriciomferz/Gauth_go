@@ -45,28 +45,12 @@ func main() {
 		Jurisdiction: "US",
 		LegalBasis:  "power_of_attorney_act_2024",
 		
-		// Legal Framework Validation
-		LegalFramework: auth.LegalFramework{
-			Jurisdiction:         "US",
-			EntityType:          "corporation",
-			CapacityVerification: true,
-			RegulationFramework:  "SEC_AI_Trading_2024",
-			ComplianceLevel:     "enhanced",
-		},
-		
-		// Requested Powers and Restrictions
-		RequestedPowers: []string{"sign_contracts", "manage_investments", "authorize_payments"},
-		Restrictions: auth.PowerRestrictions{
-			AmountLimit:     50000.0,
-			GeoRestrictions: []string{"US", "EU"},
-			TimeRestrictions: auth.TimeRestrictions{
-				BusinessHoursOnly: true,
-				WeekdaysOnly:     true,
-				StartTime:        "09:00",
-				EndTime:          "17:00",
-				Timezone:         "EST",
+		// PoA Definition Structure
+		PoADefinition: auth.PoADefinition{
+			Principal: auth.Principal{
+				Identity: "ai_trading_corp",
+				Type:     auth.PrincipalTypeOrganization,
 			},
-			ScopeRestrictions: []string{"trading_only", "no_withdrawals"},
 		},
 	}
 
@@ -75,10 +59,10 @@ func main() {
 	fmt.Printf("   AI Agent: %s\n", poaRequest.AIAgentID)
 	fmt.Printf("   Power Type: %s\n", poaRequest.PowerType)
 	fmt.Printf("   Jurisdiction: %s\n", poaRequest.Jurisdiction)
-	fmt.Printf("   Amount Limit: $%.2f\n", poaRequest.Restrictions.AmountLimit)
+	fmt.Printf("   Legal Basis: %s\n", poaRequest.LegalBasis)
 
 	// Execute RFC 111 authorization
-	poaResponse, err := rfcService.AuthorizePowerOfAttorney(ctx, poaRequest)
+	poaResponse, err := rfcService.AuthorizeGAuth(ctx, poaRequest)
 	if err != nil {
 		log.Fatalf("❌ RFC 111 authorization failed: %v", err)
 	}

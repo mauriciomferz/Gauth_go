@@ -48,10 +48,13 @@ func main() {
 	}
 	defer tracer.Shutdown(context.Background())
 
-	// Initialize Authenticator (JWT)
-	authService, err := auth.NewAuthenticator(auth.Config{
-		Type:              auth.TypeJWT,
-		AccessTokenExpiry: time.Hour,
+	// Initialize Professional Auth Service
+	authService, err := auth.NewProfessionalAuthService(auth.ProfessionalConfig{
+		Issuer:            "gauth-tracing-demo",
+		Audience:          "tracing-service",
+		TokenExpiry:       time.Hour,
+		ServiceID:         "tracing-demo",
+		UseSecureDefaults: true,
 	})
 	if err != nil {
 		log.Fatalf("failed to create authenticator: %v", err)
@@ -93,7 +96,7 @@ func main() {
 
 		// 2. Authentication
 		ctx, authSpan := tracer.StartSpan(ctx, "authenticate")
-		claims, err := authService.ValidateToken(ctx, token)
+		claims, err := authService.ValidateToken(token)
 		if err != nil {
 			authSpan.SetAttributes(attribute.String("error", err.Error()))
 			authSpan.End()
