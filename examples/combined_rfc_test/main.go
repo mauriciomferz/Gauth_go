@@ -1,4 +1,3 @@
-package combinedrfctest
 // Simple Combined RFC Test
 package main
 

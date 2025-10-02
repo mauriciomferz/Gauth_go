@@ -1,7 +1,5 @@
-package professionalinterfacesdemo
 // Professional Interface Usage Example
 // Shows how to use the new professional interfaces
-
 package main
 
 import (

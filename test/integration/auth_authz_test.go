@@ -15,9 +15,12 @@ import (
 func TestAuthAndAuthzIntegration(t *testing.T) {
 	ctx := context.Background()
 
-	authService, err := auth.NewAuthenticator(auth.Config{
-		Type:              auth.TypeBasic,
-		AccessTokenExpiry: time.Hour,
+	authService, err := auth.NewProfessionalAuthService(auth.ProfessionalConfig{
+		Issuer:            "test-issuer",
+		Audience:          "test-audience",
+		TokenExpiry:       time.Hour,
+		ServiceID:         "integration-test",
+		UseSecureDefaults: true,
 	})
 	require.NoError(t, err)
 
@@ -25,18 +28,17 @@ func TestAuthAndAuthzIntegration(t *testing.T) {
 
 	t.Run("CompleteFlow", func(t *testing.T) {
 		userID := "test-user"
-		password := "test-password"
 		resource := "test-resource"
 		action := "read"
 
-		if ba, ok := authService.(interface{ AddClient(string, string) }); ok {
-			ba.AddClient(userID, password)
-		}
-		err := authService.ValidateCredentials(ctx, struct {
-			Username string
-			Password string
-		}{Username: userID, Password: password})
+		// Create a token for the user
+		token, err := authService.CreateToken(userID, []string{"test_scope"}, time.Hour)
 		require.NoError(t, err)
+		
+		// Validate the token
+		claims, err := authService.ValidateToken(token)
+		require.NoError(t, err)
+		require.Equal(t, userID, claims.Subject)
 
 		policy := &authz.Policy{
 			ID:        "policy-1",

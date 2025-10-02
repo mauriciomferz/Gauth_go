@@ -52,7 +52,7 @@ Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com
 ├─────────────┬─────────────┬──────────────┬────────────────────-─┤
 │   JWT       │   Crypto    │   Audit      │     Rate Limiting    │
 │   Service   │   Services  │   System     │     & Resilience     │
-│   Mock-Only  │   No Security│   Demo Only  │     Educational      │
+│   Mock-Only │  No Security│   Demo Only  │     Educational      │
 └─────────────┴─────────────┴──────────────┴────────────────────-─┘
           │            │          │
 ┌─────────────────────────────────────────┐
