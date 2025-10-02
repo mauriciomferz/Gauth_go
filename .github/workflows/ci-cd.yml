@@ -185,15 +185,8 @@ jobs:
         # Build main demo application
         go build -v -o gauth-demo ./cmd/demo
         
-        # Build web backend application (has its own go.mod)
-        cd gauth-demo-app/web/backend
-        go build -v -o ../../../gauth-web-backend ./
-        cd ../../..
-        
-        # Build web application if cmd/web exists
-        if [ -d "./cmd/web" ]; then
-          go build -v -o gauth-web ./cmd/web
-        fi
+        # Build security test application
+        go build -v -o gauth-security-test ./cmd/security-test
         
         # Verify builds
         ls -la gauth-*
