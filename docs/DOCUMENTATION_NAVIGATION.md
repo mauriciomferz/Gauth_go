@@ -114,7 +114,7 @@ import "github.com/Gimel-Foundation/gauth/pkg/auth"
 ### **Development Status**
 - **Go Library**: RFC-compliant implementation (development prototype)
 - **Web Demo**: Educational demonstration only
-- **Security**: Both are development/demo implementations - not production ready
+- **Security**: Both are development/demo implementations - development framework only
 
 ### **Support**
 

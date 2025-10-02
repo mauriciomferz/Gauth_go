@@ -138,7 +138,7 @@ kubectl delete namespace gauth-development
 
 ## Development Notes
 
-- This is a **development prototype** - not production ready
+- This is a **development prototype** - development framework only
 - Health endpoints are implemented and functional
 - Image references point to local builds
 - TLS certificates and production security features may need additional setup
