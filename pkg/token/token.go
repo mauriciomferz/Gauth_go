@@ -1,20 +1,20 @@
-// Package token/token.go: RFC111 Compliance Mapping
+// Package token/token.go: RFC111 Implementation Attempt
 //
-// This file implements the extended token model and lifecycle as defined in RFC111:
-//   - Explicit, type-safe token struct (TokenData) for all protocol flows
+// This file attempts to implement token model patterns similar to RFC111:
+//   - Type-safe token struct (TokenData) for protocol flows
 //   - Delegation, attestation, restrictions, issuance, and revocation fields
-//   - Secure token generation and metadata
+//   - Token generation and metadata handling
 //
-// Relevant RFC111 Sections:
+// Relevant RFC111 Sections Referenced:
 //   - Section 3: Nomenclature (extended token, grant)
 //   - Section 5: What GAuth is (token structure, delegation)
 //   - Section 6: How GAuth works (token issuance, validation, revocation)
 //
-// Compliance:
-//   - All fields are explicit and type-safe (no public map[string]interface{})
+// Implementation Notes:
+//   - Fields are explicit and type-safe (no public map[string]interface{})
 //   - Delegation, attestation, and restrictions are modeled as explicit types
-//   - No exclusions (Web3, DNA, decentralized auth) are present
-//   - See README and docs/ for full protocol mapping
+//   - WARNING: Compliance not validated by legal experts
+//   - See README and docs/ for implementation details
 //
 // License: Apache 2.0 (see LICENSE file)
 

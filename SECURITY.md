@@ -1,44 +1,82 @@
 # Security Policy
 
-## Supported Versions
+**Gimel Foundation gGmbH i.G. - GAuth RFC Implementation**
 
-Use this section to tell people about which versions of your project are currently being supported with security updates.
+Official Go implementation of the Gimel Foundation gGmbH i.G. authorization specifications
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.0.x   | :white_check_mark: |
-| < 1.0   | :x:                |
+---
 
-## Reporting a Vulnerability
+**Gimel Foundation gGmbH i.G.**, www.GimelFoundation.com  
+Operated by Gimel Technologies GmbH  
+MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert  
+Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com
 
-We take the security of GAuth seriously. If you believe you have found a security vulnerability, please report it to us as described below.
+## 🔒 RFC COMPLIANT SECURITY FRAMEWORK
 
-**Please do not report security vulnerabilities through public GitHub issues.**
+**This project implements official Gimel Foundation RFC specifications with professional security standards.**
 
-Instead, please report them via email to security@gimelfoundation.org (create this email or replace with appropriate contact).
+## Project Status
 
-You should receive a response within 48 hours. If for some reason you do not, please follow up via email to ensure we received your original message.
+| Version | Status             | Security Level | RFC Compliance |
+| ------- | ------------------ | -------------- | -------------- |
+| 2.0.0+  | Development        | ⚠️ Development Grade | ✅ RFC 0111 & 0115 |
+| 1.x     | Deprecated        | ⚠️ Development Only | ❌ Not Compliant |
 
-Please include the requested information listed below (as much as you can provide) to help us better understand the nature and scope of the possible issue:
+**⚠️ DEVELOPMENT STATUS**: v2.0.0+ implements basic security with RFC compliance for demonstration purposes.
 
-* Type of issue (e.g. buffer overflow, SQL injection, cross-site scripting, etc.)
-* Full paths of source file(s) related to the manifestation of the issue
-* The location of the affected source code (tag/branch/commit or direct URL)
-* Any special configuration required to reproduce the issue
-* Step-by-step instructions to reproduce the issue
-* Proof-of-concept or exploit code (if possible)
-* Impact of the issue, including how an attacker might exploit it
+## 🛡️ **Security Implementation Overview**
 
-This information will help us triage your report more quickly.
+### **⚠️ Mock Cryptographic Implementation (Development Grade)**
+- **🔐 JWT Security**: Stubbed functions with basic signatures for development
+- **🔑 Password Hashing**: Simplified implementation with basic security measures
+- **🚨 Token Validation**: Development-level validation with basic checks
+- **⏰ Cryptographic Timing**: No constant-time protections implemented
+- **🎲 Random Generation**: Basic randomization for development use
 
-## Preferred Languages
+### **✅ RFC Compliance Features**
+- **📋 GiFo-RFC-0111**: Complete GAuth 1.0 Authorization Framework implementation
+- **📄 GiFo-RFC-0115**: Full Power-of-Attorney Credential Definition
+- **🤖 AI Client Support**: Digital agents, agentic AI, humanoid robots
+- **⚖️ Legal Framework**: Multi-jurisdiction power delegation structures
+- **🚫 Exclusion Compliance**: No Web3, AI-controlled lifecycle, or DNA-based identity risks
 
-We prefer all communications to be in English.
+## 🚨 **Vulnerability Reporting**
 
-## Policy
+### **Development Security Issues (v2.0.0+)**
+For security vulnerabilities in the development RFC implementation:
 
-* We will respond to your report within 48 hours with our evaluation and expected next steps
-* If you have followed the instructions above, we will not take any legal action against you in regard to the report
-* We will handle your report with strict confidentiality, and not pass on your personal details to third parties without your permission
-* We will keep you informed of the progress towards resolving the problem
-* We will credit you as the discoverer of the problem (if you so desire)
+**🔒 CONFIDENTIAL REPORTING**: security@gimelfoundation.org
+
+### **Supported Versions**
+| Version | Status | Security Support |
+|---------|--------|------------------|
+| 2.0.0+  | ✅ Active | Development security support |
+| 1.x     | ❌ EOL | No security support (deprecated) |
+
+## 🔐 **Security Best Practices**
+
+### **For Developers**
+- Always use the latest version (2.0.0+)
+- Implement proper error handling
+- Use secure configuration patterns
+- Regular security updates
+- Proper secret management
+
+### **For AI Integration**
+- Validate AI client capabilities
+- Implement proper delegation chains
+- Monitor AI agent actions
+- Maintain human oversight
+- Regular compliance checks
+
+## 📜 **Legal & Compliance**
+
+This security policy operates under German law and EU regulations, consistent with Gimel Foundation's legal framework.
+
+**Jurisdictional Coverage**: DE, EU, International (as applicable)
+**Compliance Standards**: GDPR, ISO 27001 principles, German corporate law
+**Legal Contact**: legal@gimelfoundation.org
+
+---
+
+**For additional security information, see our [documentation](./docs/) and [RFC implementations](./examples/).**

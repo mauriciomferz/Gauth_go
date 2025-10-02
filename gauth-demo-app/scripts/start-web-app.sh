@@ -1,63 +1,48 @@
 #!/bin/bash
 
-# GAuth+ Web Application Startup Script
-# Starts both frontend and backend with proper configuration
+# GAuth Demo Application Startup Script
+# Starts backend and serves static frontend
 
 set -e
 
-echo "🚀 Starting GAuth+ Web Application..."
+echo "🚀 Starting GAuth Demo Application..."
 
-# Check if Node.js and Go are available
-if ! command -v node &> /dev/null; then
-    echo "❌ Node.js is not installed. Please install Node.js first."
-    exit 1
-fi
-
+# Check if Go and Python are available
 if ! command -v go &> /dev/null; then
     echo "❌ Go is not installed. Please install Go first."
     exit 1
 fi
 
-# Set working directory
-cd "$(dirname "$0")"
-
-# Start Redis if needed (in background)
-echo "🔄 Checking Redis connection..."
-if ! redis-cli ping &> /dev/null; then
-    echo "⚠️  Redis not running. Starting Redis..."
-    if command -v redis-server &> /dev/null; then
-        redis-server --daemonize yes --port 6379
-        sleep 2
-        echo "✅ Redis started on port 6379"
-    else
-        echo "⚠️  Redis not found. Install Redis or use embedded memory store."
-    fi
-else
-    echo "✅ Redis is already running"
+if ! command -v python3 &> /dev/null; then
+    echo "❌ Python 3 is not installed. Please install Python 3 first."
+    exit 1
 fi
+
+# Set working directory to the parent of scripts folder
+cd "$(dirname "$0")/.."
 
 # Start backend server
-echo "🏗️  Starting GAuth+ backend server..."
+echo "🏗️  Starting Go backend server..."
 cd web/backend
-if [ ! -f gauth-backend ]; then
-    echo "📦 Building backend..."
-    go build -o gauth-backend ./
-fi
+
+# Install dependencies
+echo "📦 Installing Go dependencies..."
+go mod tidy
 
 # Start backend in background
-./gauth-backend &
+go run main.go &
 BACKEND_PID=$!
 echo "✅ Backend started (PID: $BACKEND_PID) on http://localhost:8080"
+
+# Navigate back to web directory
+cd ..
 
 # Wait a moment for backend to start
 sleep 3
 
-# Start frontend
-echo "🎨 Starting React frontend..."
-cd ../frontend
-
-# Start frontend in background
-npm start &
+# Start static file server for frontend
+echo "🎨 Starting static file server for frontend..."
+python3 -m http.server 3000 &
 FRONTEND_PID=$!
 echo "✅ Frontend started (PID: $FRONTEND_PID) on http://localhost:3000"
 
@@ -73,7 +58,7 @@ cleanup() {
         kill $FRONTEND_PID 2>/dev/null || true
         echo "✅ Frontend stopped"
     fi
-    echo "👋 GAuth+ Web Application stopped"
+    echo "👋 GAuth Demo Application stopped"
     exit 0
 }
 
@@ -81,24 +66,26 @@ cleanup() {
 trap cleanup SIGINT SIGTERM EXIT
 
 echo ""
-echo "🎉 GAuth+ Web Application is running!"
+echo "🎉 GAuth Demo Application is running!"
 echo ""
 echo "📊 Available Services:"
 echo "   - Backend API: http://localhost:8080"
 echo "   - Frontend UI: http://localhost:3000"
-echo "   - Health Check: http://localhost:8080/health"
-echo "   - GAuth+ Demo: http://localhost:3000/gauth-plus"
+echo "   - Demo Interface: http://localhost:3000"
 echo ""
 echo "🔧 API Endpoints:"
-echo "   - Register AI: POST http://localhost:8080/api/v1/gauth-plus/authorize"
-echo "   - Validate Authority: POST http://localhost:8080/api/v1/gauth-plus/validate"
-echo "   - Commercial Register: GET http://localhost:8080/api/v1/gauth-plus/commercial-register"
+echo "   - Get Scenarios: GET http://localhost:8080/scenarios"
+echo "   - Authenticate: POST http://localhost:8080/authenticate"
+echo "   - Validate: POST http://localhost:8080/validate"
+echo "   - RFC-0111 Config: POST http://localhost:8080/rfc0111/config"
+echo "   - RFC-0115 PoA: POST http://localhost:8080/rfc0115/poa"
+echo "   - Combined Demo: POST http://localhost:8080/combined/demo"
 echo ""
 echo "💡 Features:"
-echo "   ✅ Blockchain-based AI authorization registry"
-echo "   ✅ Comprehensive power-of-attorney framework"
-echo "   ✅ Dual control principle with human accountability"
-echo "   ✅ Global commercial register with cryptographic verification"
+echo "   ✅ RFC-0111 and RFC-0115 demo scenarios"
+echo "   ✅ Mock authentication and validation"
+echo "   ✅ Combined RFC implementation demonstration"
+echo "   ❌ Educational demo only - NOT for production use"
 echo ""
 echo "Press Ctrl+C to stop all services..."
 

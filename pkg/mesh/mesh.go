@@ -24,7 +24,7 @@ type ServiceInfo struct {
 	Endpoints   []string           `json:"endpoints"`
 	Metadata    map[string]string  `json:"metadata"`
 	Permissions []authz.Permission `json:"permissions"`
-	AuthConfig  *auth.Config       `json:"auth_config"`
+	AuthConfig  *auth.ProperConfig `json:"auth_config"`
 }
 
 // ServiceRegistry manages service registration and discovery
@@ -54,7 +54,7 @@ type Configuration struct {
 	Registry ServiceRegistry
 
 	// Authenticator handles service-to-service authentication
-	Authenticator auth.Authenticator
+	Authenticator auth.Service
 
 	// Authorizer handles service-to-service authorization
 	Authorizer authz.Authorizer
@@ -184,7 +184,16 @@ func (m *meshImpl) GetService(ctx context.Context, id ServiceID) (*ServiceInfo, 
 }
 
 func (m *meshImpl) Authenticate(ctx context.Context, _ ServiceID, creds interface{}) error {
-	if err := m.config.Authenticator.ValidateCredentials(ctx, creds); err != nil {
+	// Convert credentials to token string
+	tokenStr, ok := creds.(string)
+	if !ok {
+		if m.metrics != nil {
+			m.metrics.RecordAuthAttempt("mesh", "failure")
+		}
+		return fmt.Errorf("invalid credentials format: expected string token")
+	}
+
+	if _, err := m.config.Authenticator.Validate(ctx, tokenStr, []string{}); err != nil {
 		if m.metrics != nil {
 			m.metrics.RecordAuthAttempt("mesh", "failure")
 		}

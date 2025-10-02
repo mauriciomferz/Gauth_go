@@ -7,6 +7,17 @@ import (
 	"github.com/Gimel-Foundation/gauth/pkg/token"
 )
 
+// FiduciaryDuty represents a fiduciary duty requirement
+type FiduciaryDuty struct {
+	Type        string   `json:"type"`        // e.g., "loyalty", "care", "disclosure"
+	Description string   `json:"description"` // Human-readable description
+	Scope       []string `json:"scope"`       // Areas where duty applies
+	Validation  []string `json:"validation"`  // Validation requirements
+}
+
+// RegistryVerifier interface import from token package
+type RegistryVerifier = token.RegistryVerifier
+
 // PowerArchitecture represents the P*P architecture roles
 type PowerArchitecture struct {
 	// PEP roles

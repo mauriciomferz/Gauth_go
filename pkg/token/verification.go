@@ -19,7 +19,7 @@ type VerificationSystem interface {
 	// VerifyPowerValidity checks if the token's power of attorney is valid
 	VerifyPowerValidity(ctx context.Context, token *EnhancedToken) error
 
-	// VerifyPrincipalStatus checks the legal status of the principal
+	// VerifyPrincipalStatus checks the basic status of the principal (NOT legal validation)
 	VerifyPrincipalStatus(ctx context.Context, token *EnhancedToken) error
 
 	// ValidateAttestation verifies attestation authenticity
@@ -41,7 +41,7 @@ type StandardVerificationSystem struct {
 // RegistryVerifier handles commercial registry verification
 type RegistryVerifier interface {
 	VerifyRegistration(ctx context.Context, info *RegistrationInfo) error
-	ValidateLegalStatus(ctx context.Context, ownerInfo *OwnerInfo) error
+	ValidateBasicStatus(ctx context.Context, ownerInfo *OwnerInfo) error // NOT legal validation
 }
 
 // NewStandardVerificationSystem creates a new verification system
@@ -81,8 +81,8 @@ func (v *StandardVerificationSystem) VerifyPowerValidity(ctx context.Context, to
 
 // VerifyPrincipalStatus implements VerificationSystem
 func (v *StandardVerificationSystem) VerifyPrincipalStatus(ctx context.Context, token *EnhancedToken) error {
-	// Verify owner's legal status
-	if err := v.regVerifier.ValidateLegalStatus(ctx, token.Owner); err != nil {
+	// Verify owner's basic status (NOT legal validation - requires legal expert)
+	if err := v.regVerifier.ValidateBasicStatus(ctx, token.Owner); err != nil {
 		return fmt.Errorf("principal status invalid: %w", err)
 	}
 
