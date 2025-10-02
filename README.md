@@ -33,6 +33,8 @@ This repository contains a **development prototype** and **educational reference
 
 **ESTIMATED COST TO MAKE THIS REAL:** $2-5 million, 18-24 months, team of security experts
 
+**🚨 CRITICAL EXAMPLE**: Token revocation just prints "revoked" but tokens remain valid! Any "revoked" token becomes valid again after server restart. See [CRITICAL_SECURITY_ANALYSIS.md](CRITICAL_SECURITY_ANALYSIS.md) for detailed breakdown of this dangerous security theater.
+
 
 
 ## 🏗️ Project Structure
