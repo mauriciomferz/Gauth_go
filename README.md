@@ -60,7 +60,7 @@ This implementation provides:
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Go 1.24+ 
+- Go 1.23+ 
 - Docker (optional)
 - Kubernetes cluster (optional)
 
