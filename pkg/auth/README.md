@@ -1,53 +1,103 @@
-# Authentication Package
+# GAuth Authentication Package
 
-The `auth` package provides secure, flexible authentication for Go applications.
+**Official Gimel Foundation RFC Implementation**
 
-## Overview
+The `auth` package provides the official Go implementation of:
+- **GiFo-RFC-0111**: GAuth 1.0 Authorization Framework
+- **GiFo-RFC-0115**: Power-of-Attorney Credential Definition
 
-This package offers:
-- Token-based authentication (JWT, PASETO)
-- Multiple authentication methods
-- Secure token storage
-- Session management
-- Token revocation
-- Distributed support
+## 🎯 RFC Compliance Overview
 
-## Getting Started
+This package implements the complete Gimel Foundation authorization specifications for AI systems, providing:
 
-### Basic Usage
+- **🏗️ P*P Architecture**: Power*Point implementation (PEP, PDP, PIP, PAP, PVP)
+- **🎫 Extended Token System**: Comprehensive power-of-attorney metadata beyond OAuth
+- **🏛️ Authorization Server**: "Commercial register for AI systems"
+- **🤖 AI Agent Authorization**: Legal power-of-attorney for AI systems
+- **⚖️ Multi-Jurisdiction Support**: US, EU, CA, UK, AU legal frameworks
+- **⚠️ No Security**: Mock cryptographic implementation for demo purposes
+
+## 🚀 Quick Start
+
+### RFC 111 - Basic GAuth Authorization
 
 ```go
 import "github.com/Gimel-Foundation/gauth/pkg/auth"
 
-// Create authenticator
-auth := auth.New(auth.Config{
-    TokenType: auth.JWT,
-    Secret:   []byte("your-secret"),
-    TTL:      24 * time.Hour,
-})
-
-// Authenticate user
-token, err := auth.Authenticate(ctx, "username", "password")
+// Create RFC-compliant service
+service, err := auth.NewRFCCompliantService("my-issuer", "my-audience")
 if err != nil {
-    // Handle error
+    return err
 }
 
-// Validate token
-claims, err := auth.ValidateToken(ctx, token)
-if err != nil {
-    // Handle error
+// Create GAuth request with PoA Definition
+request := auth.GAuthRequest{
+    ClientID:     "ai_agent_v1",
+    ResponseType: "code",
+    Scope:        []string{"financial_advisory"},
+    PowerType:    "financial_advisory_powers",
+    PrincipalID:  "corp_ceo_123",
+    AIAgentID:    "ai_financial_advisor",
+    Jurisdiction: "US",
+    PoADefinition: auth.PoADefinition{
+        // RFC 115 structure...
+    },
 }
+
+// Authorize with full RFC validation
+response, err := service.AuthorizeGAuth(ctx, request)
 ```
 
-### Available Token Types
+### RFC 115 - Complete PoA Definition
 
-1. JWT (JSON Web Tokens)
 ```go
-auth := auth.New(auth.Config{
-    TokenType: auth.JWT,
-    Secret:   jwtKey,
-    TTL:      time.Hour,
-})
+// Create comprehensive PoA Definition per RFC 115
+poaDefinition := auth.PoADefinition{
+    // A. Parties (RFC 115 Section 3.A)
+    Principal: auth.Principal{
+        Type:     auth.PrincipalTypeOrganization,
+        Identity: "GlobalTech-Corp-2025",
+        Organization: &auth.Organization{
+            Type:                auth.OrgTypeCommercial,
+            Name:                "GlobalTech Corporation",
+            RegisteredAuthority: true,
+        },
+    },
+    Client: auth.ClientAI{
+        Type:              auth.ClientTypeAgenticAI,
+        Identity:          "ai_financial_advisor_v3",
+        Version:           "3.2.1-prod",
+        OperationalStatus: "active",
+    },
+    
+    // B. Type and Scope of Authorization (RFC 115 Section 3.B)
+    ScopeDefinition: auth.ScopeDefinition{
+        ApplicableSectors: []auth.IndustrySector{
+            auth.SectorFinancial, auth.SectorICT,
+        },
+        ApplicableRegions: []auth.GeographicScope{
+            {Type: auth.GeoTypeNational, Identifier: "US"},
+        },
+        AuthorizedActions: auth.AuthorizedActions{
+            Transactions: []auth.TransactionType{auth.TransactionPurchase},
+            Decisions:    []auth.DecisionType{auth.DecisionFinancial},
+        },
+    },
+    
+    // C. Requirements (RFC 115 Section 3.C)
+    Requirements: auth.Requirements{
+        PowerLimits: auth.PowerLimits{
+            PowerLevels: []auth.PowerLevel{
+                {Type: "transaction_value", Limit: 500000.0, Currency: "USD"},
+            },
+            QuantumResistance: true,
+        },
+        JurisdictionLaw: auth.JurisdictionLaw{
+            GoverningLaw:       "Delaware_Corporate_Law",
+            PlaceOfJurisdiction: "US",
+        },
+    },
+}
 ```
 
 2. PASETO (Platform-Agnostic Security Tokens)

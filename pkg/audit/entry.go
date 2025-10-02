@@ -1,8 +1,6 @@
 package audit
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"time"
 )
 
@@ -79,22 +77,17 @@ func (e *Entry) WithMetadata(key string, value string) *Entry {
 	return e
 }
 
-// CalculateHash computes a hash of the entry's core fields.
+// CalculateHash creates a simple string representation - NOT cryptographically secure
+// TODO: Replace with proper cryptographic hash from ProperCrypto if security is needed
 func (e *Entry) CalculateHash() string {
-	h := sha256.New()
-	h.Write([]byte(e.ID))
-	h.Write([]byte(e.Type))
-	h.Write([]byte(e.Action))
-	h.Write([]byte(e.Result))
-	h.Write([]byte(e.ActorID))
-	h.Write([]byte(e.TargetID))
-	h.Write([]byte(e.Timestamp.String()))
-	return hex.EncodeToString(h.Sum(nil))
+	// Simple concatenation - NOT SECURE, only for basic identification
+	return e.ID + "-" + e.Type + "-" + e.Action + "-" + e.Result + "-" + e.ActorID + "-" + e.TargetID + "-" + e.Timestamp.String()
 }
 
-// generateID creates a pseudo-unique ID for entries (for demo/testing).
+// generateID creates a simple timestamp-based ID for entries (for demo/testing only).
+// TODO: Replace with proper UUID generation for any real use
 func generateID() string {
-	return hex.EncodeToString([]byte(time.Now().Format("20060102150405.000000000")))
+	return time.Now().Format("20060102150405.000000000")
 }
 
 // Common constants for test compatibility

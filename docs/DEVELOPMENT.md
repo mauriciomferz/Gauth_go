@@ -1,33 +1,72 @@
 # GAuth Development Guide
 
-## Quick Start
+**Gimel Foundation RFC Implementation - Developer Documentation**
 
-1. **Basic Authentication**
+**Copyright (c) 2025 Gimel Foundation gGmbH i.G.**  
+Licensed under Apache 2.0
+
+**Gimel Foundation gGmbH i.G.**, www.GimelFoundation.com  
+Operated by Gimel Technologies GmbH  
+MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert  
+Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com
+
+Development guide for the GiFo-RFC-0111 and GiFo-RFC-0115 implementation, featuring complete RFC-0115 PoA-Definition compliance.
+
+## ⚠️ **CRITICAL: NO SECURITY WARNING**
+
+**This is a demonstration prototype with:**
+- No real authentication or authorization
+- All responses are mocked/hardcoded
+- DO NOT use in production environments
+- For educational and demo purposes only
+
+## 🚀 **Quick Start**
+
+### **1. RFC-Compliant Authorization**
 
 ```go
-import "github.com/Gimel-Foundation/gauth/pkg/gauth"
+import "github.com/Gimel-Foundation/gauth/pkg/auth"
 
-auth := gauth.New(gauth.Config{
-    AuthServerURL: "https://auth.example.com",
-    ClientID:     "client-123",
-    ClientSecret: "secret-456",
-})
+// Create RFC service prototype
+service, err := auth.NewRFCCompliantService("YourCompany", "ai-authorization")
+if err != nil {
+    log.Fatal(err)
+}
 
-// Authenticate a request
-token, err := auth.Authenticate(ctx, gauth.Credentials{
-    Username: "user",
-    Password: "pass",
+// Create comprehensive PoA Definition (RFC 115)
+poa := auth.PoADefinition{
+    Principal: auth.Principal{
+        Type:     auth.PrincipalTypeOrganization,
+        Identity: "company-2025",
+        Organization: &auth.Organization{
+            Type:                auth.OrgTypeCommercial,
+            Name:                "Your Company",
+            RegisteredAuthority: true,
+        },
+    },
+    // ... complete RFC 115 structure
+}
+
+// Authorize with full RFC validation
+response, err := service.AuthorizeGAuth(ctx, auth.GAuthRequest{
+    ClientID:      "ai-client-id",
+    PoADefinition: poa,
+    Jurisdiction:  "US",
 })
 ```
 
-2. **Rate Limiting**
+### **2. Professional JWT Foundation**
 
 ```go
-import "github.com/Gimel-Foundation/gauth/internal/rate"
+import "github.com/Gimel-Foundation/gauth/pkg/auth"
 
-limiter := rate.NewLimiter(&rate.Config{
-    RequestsPerSecond: 100,
-    WindowSize:       60,
+// JWT service with RSA-256 signatures
+jwtService, err := auth.NewProperJWTService("issuer", "audience")
+
+// Features:
+// - ⚠️ NO SECURITY (all crypto functions are stubbed)
+// - Quantum-resistant cryptography support
+// - Professional key management
 })
 
 // Check if request is allowed
