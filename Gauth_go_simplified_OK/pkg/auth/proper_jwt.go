@@ -18,7 +18,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// ProperJWTService provides secure JWT operations using the proven golang-jwt library
+// BasicJWTService provides JWT operations for educational purposes using golang-jwt library
 // This replaces the amateur string-based token handling
 type ProperJWTService struct {
 	privateKey *rsa.PrivateKey

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # GAuth Security Testing Suite
-# This script runs comprehensive security tests against the GAuth implementation
+# This script runs basic security tests against the GAuth educational implementation
 
 set -e
 

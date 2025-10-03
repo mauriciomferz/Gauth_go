@@ -231,7 +231,7 @@ go run main.go
 - **Structured Delegation**: Clear authority chains with legal backing
 - **Capability Limits**: Defined operational boundaries
 - **Compliance Tracking**: Comprehensive audit trails
-- **Security Standards**: Professional-grade security compliance
+- **Security Notice**: Educational implementation only - NOT for production use
 - **Interoperability**: OAuth 2.0, OpenID Connect, and MCP integration
 
 ## 📖 **Documentation Structure**

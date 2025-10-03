@@ -5,7 +5,7 @@
 //
 // Copyright (c) 2025 Gimel Foundation gGmbH i.G.
 // Licensed under Apache 2.0 (building blocks: OAuth, OpenID Connect, MCP)
-// Built on the excellent professional JWT foundation
+// Built on a basic JWT implementation for educational purposes
 //
 // Demo Implementation Author: Mauricio Fernandez
 // GitHub: https://github.com/mauriciomferz
@@ -468,7 +468,7 @@ type TimeWindow struct {
 
 // Professional RFC Implementation Service
 
-// RFCCompliantService implements RFC 111 & 115 on top of professional JWT
+// RFCCompliantService implements RFC 111 & 115 on top of basic JWT implementation
 type RFCCompliantService struct {
 	jwtService         *ProperJWTService
 	legalValidator     *LegalFrameworkValidator
@@ -559,9 +559,9 @@ func (s *RFCCompliantService) CreatePowerOfAttorneyToken(ctx context.Context, au
 	}
 
 	// Enhanced metadata will be embedded in JWT claims during token creation
-	// The professional JWT service handles the actual token creation
+	// The basic JWT implementation handles the token creation (educational only)
 
-	// Use professional JWT service to create token
+	// Use basic JWT service to create token
 	tokenString, err := s.jwtService.CreateToken(authData.PrincipalID, authData.Scope, time.Hour)
 	if err != nil {
 		return nil, fmt.Errorf("token creation failed: %w", err)
