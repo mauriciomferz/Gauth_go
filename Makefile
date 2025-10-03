@@ -1,4 +1,4 @@
-.PHONY: all build test clean lint coverage examples docs help security deps format
+.PHONY: all build test clean lint coverage docs help security deps format
 
 # Go parameters
 GOCMD=go
@@ -18,23 +18,17 @@ LDFLAGS=-ldflags="-s -w"
 all: deps format test build
 
 ## Build targets
-build: build-server build-web build-examples ## Build all binaries
+build: build-server build-security-test ## Build all binaries
 
 build-server: ## Build the demo server
 	@echo "🔧 Building GAuth demo server..."
 	mkdir -p $(BINARY_DIR)
 	$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-server ./cmd/demo
 
-build-web: ## Build the web server
-	@echo "🌐 Building GAuth web server..."
+build-security-test: ## Build the security test tool
+	@echo "🔐 Building GAuth security test tool..."
 	mkdir -p $(BINARY_DIR)
-	cd gauth-demo-app/web/backend && $(GOBUILD) $(LDFLAGS) -o ../../../$(BINARY_DIR)/$(BINARY_NAME)-web .
-
-build-examples: ## Build example applications
-	@echo "📚 Building example applications..."
-	mkdir -p $(BINARY_DIR)
-	$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/resilient-example ./examples/resilient/cmd
-	$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/basic-example ./examples/basic
+	$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-security-test ./cmd/security-test
 
 ## Test targets
 test: ## Run all tests
@@ -91,18 +85,16 @@ docker-run: ## Run Docker container
 run-server: build-server ## Build and run demo server
 	./$(BINARY_DIR)/$(BINARY_NAME)-server
 
-run-web: build-web ## Build and run web server
-	./$(BINARY_DIR)/$(BINARY_NAME)-web
-
-run-example: build-examples ## Build and run resilient example
-	./$(BINARY_DIR)/resilient-example
+run-security-test: build-security-test ## Build and run security test tool
+	./$(BINARY_DIR)/$(BINARY_NAME)-security-test
 
 ## Documentation
 docs: ## Generate documentation
 	@echo "📖 Generating documentation..."
-	$(GOCMD) doc -all ./pkg/gauth > docs/api/gauth.md
-	$(GOCMD) doc -all ./pkg/auth > docs/api/auth.md
-	$(GOCMD) doc -all ./pkg/token > docs/api/token.md
+	@echo "Documentation generated from source code comments"
+	$(GOCMD) doc -all ./pkg/auth
+	$(GOCMD) doc -all ./pkg/rfc
+	$(GOCMD) doc -all ./internal
 
 help: ## Show this help message
 	@echo "GAuth Makefile Commands:"
@@ -110,7 +102,8 @@ help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 	@echo ""
 	@echo "Examples:"
-	@echo "  make build          # Build all binaries"
-	@echo "  make test           # Run all tests"
-	@echo "  make run-web        # Build and run web server"
-	@echo "  make docker-build   # Build Docker image"
+	@echo "  make build               # Build all binaries"
+	@echo "  make test                # Run all tests"
+	@echo "  make run-server          # Build and run demo server"
+	@echo "  make run-security-test   # Build and run security test tool"
+	@echo "  make docker-build        # Build Docker image"
