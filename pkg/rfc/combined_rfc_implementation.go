@@ -36,31 +36,31 @@ import (
 // OAuth 2.0, OpenID Connect, and MCP protocols with AI governance
 type RFC0111Config struct {
 	// RFC-0111 Core Components
-	PPArchitecture  RFC0111PPArchitecture  `json:"pp_architecture"`
-	Exclusions      RFC0111Exclusions      `json:"exclusions"`
-	ExtendedTokens  RFC0111ExtendedTokens  `json:"extended_tokens"`
-	GAuthRoles      RFC0111GAuthRoles      `json:"gauth_roles"`
-	
+	PPArchitecture RFC0111PPArchitecture `json:"pp_architecture"`
+	Exclusions     RFC0111Exclusions     `json:"exclusions"`
+	ExtendedTokens RFC0111ExtendedTokens `json:"extended_tokens"`
+	GAuthRoles     RFC0111GAuthRoles     `json:"gauth_roles"`
+
 	// Configuration Metadata
-	Version         string            `json:"version"`
-	Status          string            `json:"status"`
-	CreatedAt       time.Time         `json:"created_at"`
-	UpdatedAt       time.Time         `json:"updated_at"`
+	Version   string    `json:"version"`
+	Status    string    `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // RFC0111PPArchitecture represents the Power*Point architecture as defined in RFC-0111
 type RFC0111PPArchitecture struct {
-	PEP RFC0111PowerEnforcementPoint  `json:"pep"` // Power Enforcement Point
-	PDP RFC0111PowerDecisionPoint     `json:"pdp"` // Power Decision Point  
-	PIP RFC0111PowerInformationPoint  `json:"pip"` // Power Information Point
+	PEP RFC0111PowerEnforcementPoint    `json:"pep"` // Power Enforcement Point
+	PDP RFC0111PowerDecisionPoint       `json:"pdp"` // Power Decision Point
+	PIP RFC0111PowerInformationPoint    `json:"pip"` // Power Information Point
 	PAP RFC0111PowerAdministrationPoint `json:"pap"` // Power Administration Point
-	PVP RFC0111PowerVerificationPoint `json:"pvp"` // Power Verification Point
+	PVP RFC0111PowerVerificationPoint   `json:"pvp"` // Power Verification Point
 }
 
 // RFC0111PowerEnforcementPoint represents the PEP in GAuth P*P architecture
 type RFC0111PowerEnforcementPoint struct {
-	SupplySide  RFC0111PEPSide `json:"supply_side"`  // Client-side enforcement
-	DemandSide  RFC0111PEPSide `json:"demand_side"`  // Resource server-side enforcement
+	SupplySide RFC0111PEPSide `json:"supply_side"` // Client-side enforcement
+	DemandSide RFC0111PEPSide `json:"demand_side"` // Resource server-side enforcement
 }
 
 type RFC0111PEPSide struct {
@@ -71,23 +71,23 @@ type RFC0111PEPSide struct {
 
 // RFC0111PowerDecisionPoint represents authorization decision-making instance
 type RFC0111PowerDecisionPoint struct {
-	PrimaryPDP    string `json:"primary_pdp"`    // Usually client owner
-	SecondaryPDP  string `json:"secondary_pdp"`  // Resource owner if resource server is AI
+	PrimaryPDP    string   `json:"primary_pdp"`   // Usually client owner
+	SecondaryPDP  string   `json:"secondary_pdp"` // Resource owner if resource server is AI
 	DecisionRules []string `json:"decision_rules"`
 }
 
 // RFC0111PowerInformationPoint represents data providers for approval decisions
 type RFC0111PowerInformationPoint struct {
 	AuthorizationServer string   `json:"authorization_server"`
-	DataSources        []string `json:"data_sources"`
-	InfoTypes          []string `json:"info_types"`
+	DataSources         []string `json:"data_sources"`
+	InfoTypes           []string `json:"info_types"`
 }
 
 // RFC0111PowerAdministrationPoint represents administrative level for authorization policies
 type RFC0111PowerAdministrationPoint struct {
 	ClientOwnerAuthorizer   string   `json:"client_owner_authorizer"`
 	ResourceOwnerAuthorizer string   `json:"resource_owner_authorizer"`
-	PolicyManagement       []string `json:"policy_management"`
+	PolicyManagement        []string `json:"policy_management"`
 }
 
 // RFC0111PowerVerificationPoint represents identity verification in GAuth processing
@@ -99,11 +99,11 @@ type RFC0111PowerVerificationPoint struct {
 
 // RFC0111Exclusions represents mandatory exclusions as per RFC-0111 Section 2
 type RFC0111Exclusions struct {
-	Web3Blockchain       RFC0111ExclusionRule `json:"web3_blockchain"`
-	AIOperators          RFC0111ExclusionRule `json:"ai_operators"`
-	DNABasedIdentities   RFC0111ExclusionRule `json:"dna_based_identities"`
-	DecentralizedAuth    RFC0111ExclusionRule `json:"decentralized_auth"`
-	EnforcementLevel     string               `json:"enforcement_level"`
+	Web3Blockchain     RFC0111ExclusionRule `json:"web3_blockchain"`
+	AIOperators        RFC0111ExclusionRule `json:"ai_operators"`
+	DNABasedIdentities RFC0111ExclusionRule `json:"dna_based_identities"`
+	DecentralizedAuth  RFC0111ExclusionRule `json:"decentralized_auth"`
+	EnforcementLevel   string               `json:"enforcement_level"`
 }
 
 type RFC0111ExclusionRule struct {
@@ -115,11 +115,11 @@ type RFC0111ExclusionRule struct {
 
 // RFC0111ExtendedTokens represents GAuth extended tokens beyond OAuth access tokens
 type RFC0111ExtendedTokens struct {
-	TokenType        string                    `json:"token_type"`
-	Scope            []string                  `json:"scope"`
-	Duration         time.Duration             `json:"duration"`
-	Authorization    RFC0111TokenAuthorization `json:"authorization"`
-	Compliance       RFC0111TokenCompliance    `json:"compliance"`
+	TokenType     string                    `json:"token_type"`
+	Scope         []string                  `json:"scope"`
+	Duration      time.Duration             `json:"duration"`
+	Authorization RFC0111TokenAuthorization `json:"authorization"`
+	Compliance    RFC0111TokenCompliance    `json:"compliance"`
 }
 
 type RFC0111TokenAuthorization struct {
@@ -131,27 +131,27 @@ type RFC0111TokenAuthorization struct {
 
 type RFC0111TokenCompliance struct {
 	ComplianceTracking bool     `json:"compliance_tracking"`
-	AuditTrail        []string `json:"audit_trail"`
-	RevocationStatus  string   `json:"revocation_status"`
+	AuditTrail         []string `json:"audit_trail"`
+	RevocationStatus   string   `json:"revocation_status"`
 }
 
 // RFC0111GAuthRoles represents the enhanced role definitions from RFC-0111
 type RFC0111GAuthRoles struct {
-	ResourceOwner       RFC0111ResourceOwner    `json:"resource_owner"`
-	ResourceServer      RFC0111ResourceServer   `json:"resource_server"`
-	Client              RFC0111Client           `json:"client"`
-	AuthorizationServer RFC0111AuthServer       `json:"authorization_server"`
-	ClientOwner         RFC0111ClientOwner      `json:"client_owner"`
-	OwnerAuthorizer     RFC0111OwnerAuthorizer  `json:"owner_authorizer"`
+	ResourceOwner       RFC0111ResourceOwner   `json:"resource_owner"`
+	ResourceServer      RFC0111ResourceServer  `json:"resource_server"`
+	Client              RFC0111Client          `json:"client"`
+	AuthorizationServer RFC0111AuthServer      `json:"authorization_server"`
+	ClientOwner         RFC0111ClientOwner     `json:"client_owner"`
+	OwnerAuthorizer     RFC0111OwnerAuthorizer `json:"owner_authorizer"`
 }
 
 // RFC0111ResourceOwner extends OAuth resource owner for AI governance
 type RFC0111ResourceOwner struct {
-	Identity            string   `json:"identity"`
-	LegalCapacity       bool     `json:"legal_capacity"`
+	Identity             string   `json:"identity"`
+	LegalCapacity        bool     `json:"legal_capacity"`
 	TransactionAuthority []string `json:"transaction_authority"`
-	DecisionAcceptance  []string `json:"decision_acceptance"`
-	ActionImpact        []string `json:"action_impact"`
+	DecisionAcceptance   []string `json:"decision_acceptance"`
+	ActionImpact         []string `json:"action_impact"`
 }
 
 // RFC0111ResourceServer extends OAuth resource server for AI interactions
@@ -165,19 +165,19 @@ type RFC0111ResourceServer struct {
 
 // RFC0111Client represents AI clients (digital agents, agentic AI, humanoid robots)
 type RFC0111Client struct {
-	Type              RFC0111ClientType `json:"type"`
-	Identity          string            `json:"identity"`
-	AICapabilities    []string          `json:"ai_capabilities"`
-	AutonomyLevel     string            `json:"autonomy_level"`
-	RequestTypes      []string          `json:"request_types"`
-	ComplianceMode    string            `json:"compliance_mode"`
+	Type           RFC0111ClientType `json:"type"`
+	Identity       string            `json:"identity"`
+	AICapabilities []string          `json:"ai_capabilities"`
+	AutonomyLevel  string            `json:"autonomy_level"`
+	RequestTypes   []string          `json:"request_types"`
+	ComplianceMode string            `json:"compliance_mode"`
 }
 
 type RFC0111ClientType string
 
 const (
 	RFC0111ClientTypeDigitalAgent  RFC0111ClientType = "digital_agent"
-	RFC0111ClientTypeAgenticAI     RFC0111ClientType = "agentic_ai"      // team of agents
+	RFC0111ClientTypeAgenticAI     RFC0111ClientType = "agentic_ai" // team of agents
 	RFC0111ClientTypeHumanoidRobot RFC0111ClientType = "humanoid_robot"
 	RFC0111ClientTypeLLM           RFC0111ClientType = "llm"
 	RFC0111ClientTypeOther         RFC0111ClientType = "other"
@@ -194,10 +194,10 @@ type RFC0111AuthServer struct {
 
 // RFC0111ClientOwner represents the owner of the AI system
 type RFC0111ClientOwner struct {
-	Identity          string   `json:"identity"`
-	AuthorizationLevel string  `json:"authorization_level"`
-	AISystemOwnership []string `json:"ai_system_ownership"`
-	DelegatedPowers   []string `json:"delegated_powers"`
+	Identity           string   `json:"identity"`
+	AuthorizationLevel string   `json:"authorization_level"`
+	AISystemOwnership  []string `json:"ai_system_ownership"`
+	DelegatedPowers    []string `json:"delegated_powers"`
 }
 
 // RFC0111OwnerAuthorizer represents the authorizer of client/resource owners
@@ -217,13 +217,13 @@ type RFC0111OwnerAuthorizer struct {
 type RFC0115PoADefinition struct {
 	// A. Parties
 	Parties RFC0115Parties `json:"parties"`
-	
+
 	// B. Type and Scope of Authorization
 	Authorization RFC0115AuthorizationScope `json:"authorization"`
-	
+
 	// C. Requirements
 	Requirements RFC0115Requirements `json:"requirements"`
-	
+
 	// RFC-0111 Integration Context
 	GAuthContext RFC0115GAuthIntegration `json:"gauth_context"`
 }
@@ -238,9 +238,9 @@ type RFC0115GAuthIntegration struct {
 
 // RFC0115Parties represents all parties involved in the PoA as per RFC-0115 Section 3.A
 type RFC0115Parties struct {
-	Principal         RFC0115Principal         `json:"principal"`
-	Representative    *RFC0115Representative   `json:"representative,omitempty"` // Only if principal is organization
-	AuthorizedClient  RFC0115AuthorizedClient  `json:"authorized_client"`
+	Principal        RFC0115Principal        `json:"principal"`
+	Representative   *RFC0115Representative  `json:"representative,omitempty"` // Only if principal is organization
+	AuthorizedClient RFC0115AuthorizedClient `json:"authorized_client"`
 }
 
 // RFC0115Principal represents the principal party (Individual or Organization)
@@ -276,19 +276,19 @@ type RFC0115Organization struct {
 type RFC0115OrgType string
 
 const (
-	RFC0115OrgTypeCommercial  RFC0115OrgType = "commercial_enterprise"    // AG, Ltd., partnership, etc.
-	RFC0115OrgTypePublic      RFC0115OrgType = "public_authority"         // federal, state, municipal, etc.
-	RFC0115OrgTypeNonProfit   RFC0115OrgType = "non_profit_organization"  // foundation, non-profit association, gGmbH, etc.
-	RFC0115OrgTypeAssociation RFC0115OrgType = "other_association"        // non-profit or non-charitable
+	RFC0115OrgTypeCommercial  RFC0115OrgType = "commercial_enterprise"   // AG, Ltd., partnership, etc.
+	RFC0115OrgTypePublic      RFC0115OrgType = "public_authority"        // federal, state, municipal, etc.
+	RFC0115OrgTypeNonProfit   RFC0115OrgType = "non_profit_organization" // foundation, non-profit association, gGmbH, etc.
+	RFC0115OrgTypeAssociation RFC0115OrgType = "other_association"       // non-profit or non-charitable
 	RFC0115OrgTypeOther       RFC0115OrgType = "other"                   // church, cooperative, community of interest, etc.
 )
 
 // RFC0115Representative represents the representative/authorizer when principal is organization
 type RFC0115Representative struct {
-	ClientOwner          *RFC0115ClientOwnerInfo       `json:"client_owner,omitempty"`
-	OwnerAuthorizer      *RFC0115OwnerAuthorizerInfo   `json:"owner_authorizer,omitempty"`
-	OtherRepresentatives []RFC0115OtherRepresentative  `json:"other_representatives,omitempty"`
-	Other                string                        `json:"other,omitempty"`
+	ClientOwner          *RFC0115ClientOwnerInfo      `json:"client_owner,omitempty"`
+	OwnerAuthorizer      *RFC0115OwnerAuthorizerInfo  `json:"owner_authorizer,omitempty"`
+	OtherRepresentatives []RFC0115OtherRepresentative `json:"other_representatives,omitempty"`
+	Other                string                       `json:"other,omitempty"`
 }
 
 type RFC0115ClientOwnerInfo struct {
@@ -326,17 +326,17 @@ type RFC0115ClientType string
 const (
 	RFC0115ClientTypeLLM           RFC0115ClientType = "llm"
 	RFC0115ClientTypeDigitalAgent  RFC0115ClientType = "digital_agent"
-	RFC0115ClientTypeAgenticAI     RFC0115ClientType = "agentic_ai"      // team of agents
+	RFC0115ClientTypeAgenticAI     RFC0115ClientType = "agentic_ai" // team of agents
 	RFC0115ClientTypeHumanoidRobot RFC0115ClientType = "humanoid_robot"
 	RFC0115ClientTypeOther         RFC0115ClientType = "other"
 )
 
 // RFC0115AuthorizationScope represents Type and Scope of Authorization as per RFC-0115 Section 3.B
 type RFC0115AuthorizationScope struct {
-	AuthorizationType     RFC0115AuthorizationType     `json:"authorization_type"`
-	ApplicableSectors     []RFC0115IndustrySector      `json:"applicable_sectors"`
-	ApplicableRegions     []RFC0115GeographicScope     `json:"applicable_regions"`
-	AuthorizedActions     RFC0115AuthorizedActions     `json:"authorized_actions"`
+	AuthorizationType RFC0115AuthorizationType `json:"authorization_type"`
+	ApplicableSectors []RFC0115IndustrySector  `json:"applicable_sectors"`
+	ApplicableRegions []RFC0115GeographicScope `json:"applicable_regions"`
+	AuthorizedActions RFC0115AuthorizedActions `json:"authorized_actions"`
 }
 
 // RFC0115AuthorizationType represents the type of authorization as per RFC-0115
@@ -344,7 +344,7 @@ type RFC0115AuthorizationType struct {
 	RepresentationType RFC0115RepresentationType `json:"representation_type"` // sole or joint
 	Restrictions       []string                  `json:"restrictions,omitempty"`
 	SubProxyAuthority  bool                      `json:"sub_proxy_authority"`
-	SignatureType      RFC0115SignatureType     `json:"signature_type"`
+	SignatureType      RFC0115SignatureType      `json:"signature_type"`
 	Other              string                    `json:"other,omitempty"`
 }
 
@@ -367,27 +367,27 @@ const (
 type RFC0115IndustrySector string
 
 const (
-	RFC0115SectorAgriculture           RFC0115IndustrySector = "agriculture_forestry_fishing"
-	RFC0115SectorMining                RFC0115IndustrySector = "mining_quarrying"
-	RFC0115SectorManufacturing         RFC0115IndustrySector = "manufacturing"
-	RFC0115SectorEnergySupply          RFC0115IndustrySector = "energy_supply"
-	RFC0115SectorWaterSupply           RFC0115IndustrySector = "water_supply"
-	RFC0115SectorWasteManagement       RFC0115IndustrySector = "waste_management"
-	RFC0115SectorConstruction          RFC0115IndustrySector = "construction"
-	RFC0115SectorTrade                 RFC0115IndustrySector = "trade"
-	RFC0115SectorVehicleMaintenance    RFC0115IndustrySector = "vehicle_maintenance_repair"
-	RFC0115SectorTransportStorage      RFC0115IndustrySector = "transport_storage"
-	RFC0115SectorHospitality           RFC0115IndustrySector = "hospitality"
-	RFC0115SectorInformationComm       RFC0115IndustrySector = "information_communication"
-	RFC0115SectorFinancialInsurance    RFC0115IndustrySector = "financial_insurance_services"
-	RFC0115SectorRealEstate            RFC0115IndustrySector = "real_estate"
-	RFC0115SectorProfessional          RFC0115IndustrySector = "professional_scientific_technical"
-	RFC0115SectorBusinessServices      RFC0115IndustrySector = "other_business_services"
-	RFC0115SectorPublicAdmin           RFC0115IndustrySector = "public_administration_defence"
-	RFC0115SectorEducation             RFC0115IndustrySector = "education"
-	RFC0115SectorHealthSocial          RFC0115IndustrySector = "health_social_work"
-	RFC0115SectorArtsEntertainment     RFC0115IndustrySector = "arts_entertainment_recreation"
-	RFC0115SectorOtherServices         RFC0115IndustrySector = "other_services_sectors"
+	RFC0115SectorAgriculture        RFC0115IndustrySector = "agriculture_forestry_fishing"
+	RFC0115SectorMining             RFC0115IndustrySector = "mining_quarrying"
+	RFC0115SectorManufacturing      RFC0115IndustrySector = "manufacturing"
+	RFC0115SectorEnergySupply       RFC0115IndustrySector = "energy_supply"
+	RFC0115SectorWaterSupply        RFC0115IndustrySector = "water_supply"
+	RFC0115SectorWasteManagement    RFC0115IndustrySector = "waste_management"
+	RFC0115SectorConstruction       RFC0115IndustrySector = "construction"
+	RFC0115SectorTrade              RFC0115IndustrySector = "trade"
+	RFC0115SectorVehicleMaintenance RFC0115IndustrySector = "vehicle_maintenance_repair"
+	RFC0115SectorTransportStorage   RFC0115IndustrySector = "transport_storage"
+	RFC0115SectorHospitality        RFC0115IndustrySector = "hospitality"
+	RFC0115SectorInformationComm    RFC0115IndustrySector = "information_communication"
+	RFC0115SectorFinancialInsurance RFC0115IndustrySector = "financial_insurance_services"
+	RFC0115SectorRealEstate         RFC0115IndustrySector = "real_estate"
+	RFC0115SectorProfessional       RFC0115IndustrySector = "professional_scientific_technical"
+	RFC0115SectorBusinessServices   RFC0115IndustrySector = "other_business_services"
+	RFC0115SectorPublicAdmin        RFC0115IndustrySector = "public_administration_defence"
+	RFC0115SectorEducation          RFC0115IndustrySector = "education"
+	RFC0115SectorHealthSocial       RFC0115IndustrySector = "health_social_work"
+	RFC0115SectorArtsEntertainment  RFC0115IndustrySector = "arts_entertainment_recreation"
+	RFC0115SectorOtherServices      RFC0115IndustrySector = "other_services_sectors"
 )
 
 // RFC0115GeographicScope represents applicable regions as per RFC-0115
@@ -400,10 +400,10 @@ type RFC0115GeographicScope struct {
 type RFC0115GeoType string
 
 const (
-	RFC0115GeoTypeGlobal       RFC0115GeoType = "global"
-	RFC0115GeoTypeNational     RFC0115GeoType = "national"
-	RFC0115GeoTypeRegional     RFC0115GeoType = "regional"
-	RFC0115GeoTypeSubnational  RFC0115GeoType = "subnational"
+	RFC0115GeoTypeGlobal      RFC0115GeoType = "global"
+	RFC0115GeoTypeNational    RFC0115GeoType = "national"
+	RFC0115GeoTypeRegional    RFC0115GeoType = "regional"
+	RFC0115GeoTypeSubnational RFC0115GeoType = "subnational"
 )
 
 // RFC0115AuthorizedActions represents specific actions the AI is authorized to perform
@@ -454,15 +454,15 @@ type RFC0115FormalRequirements struct {
 
 // RFC0115PowerLimits represents limits of powers as per RFC-0115
 type RFC0115PowerLimits struct {
-	PowerLevels         []string `json:"power_levels,omitempty"`
-	InteractionBounds   []string `json:"interaction_boundaries,omitempty"`
-	ToolLimitations     []string `json:"tool_limitations,omitempty"`
-	OutcomeLimitations  []string `json:"outcome_limitations,omitempty"`
-	ModelLimits         []string `json:"model_limits,omitempty"`
-	BehaviouralLimits   []string `json:"behavioural_limits,omitempty"`
-	QuantumResistance   bool     `json:"quantum_resistance"`
-	ExplicitExclusions  []string `json:"explicit_exclusions,omitempty"`
-	Other               string   `json:"other,omitempty"`
+	PowerLevels        []string `json:"power_levels,omitempty"`
+	InteractionBounds  []string `json:"interaction_boundaries,omitempty"`
+	ToolLimitations    []string `json:"tool_limitations,omitempty"`
+	OutcomeLimitations []string `json:"outcome_limitations,omitempty"`
+	ModelLimits        []string `json:"model_limits,omitempty"`
+	BehaviouralLimits  []string `json:"behavioural_limits,omitempty"`
+	QuantumResistance  bool     `json:"quantum_resistance"`
+	ExplicitExclusions []string `json:"explicit_exclusions,omitempty"`
+	Other              string   `json:"other,omitempty"`
 }
 
 // RFC0115RightsObligations represents specific rights and obligations
@@ -476,8 +476,8 @@ type RFC0115RightsObligations struct {
 // RFC0115SpecialConditions represents special conditions
 type RFC0115SpecialConditions struct {
 	ConditionalEffectiveness []string `json:"conditional_effectiveness,omitempty"`
-	ImmediateNotification   []string `json:"immediate_notification,omitempty"`
-	Other                   string   `json:"other,omitempty"`
+	ImmediateNotification    []string `json:"immediate_notification,omitempty"`
+	Other                    string   `json:"other,omitempty"`
 }
 
 // RFC0115DeathIncapacityRules represents rules for death or incapacity
@@ -519,10 +519,10 @@ type RFC0115ConflictResolution struct {
 type CombinedRFCConfig struct {
 	// RFC-0111 Configuration
 	RFC0111 RFC0111Config `json:"rfc_0111"`
-	
+
 	// RFC-0115 Configuration
 	RFC0115 *RFC0115PoADefinition `json:"rfc_0115,omitempty"`
-	
+
 	// Integration Metadata
 	IntegrationLevel string            `json:"integration_level"`
 	CombinedVersion  string            `json:"combined_version"`
@@ -539,19 +539,19 @@ func ValidateCombinedRFCConfig(config CombinedRFCConfig) error {
 	if err := ValidateRFC0111Config(config.RFC0111); err != nil {
 		return fmt.Errorf("RFC-0111 validation failed: %w", err)
 	}
-	
+
 	// Validate RFC-0115 configuration if present
 	if config.RFC0115 != nil {
 		if err := ValidateRFC0115PoADefinition(*config.RFC0115); err != nil {
 			return fmt.Errorf("RFC-0115 validation failed: %w", err)
 		}
-		
+
 		// Validate integration compatibility
 		if err := ValidateRFCIntegration(config.RFC0111, *config.RFC0115); err != nil {
 			return fmt.Errorf("RFC integration validation failed: %w", err)
 		}
 	}
-	
+
 	return nil
 }
 
@@ -561,17 +561,17 @@ func ValidateRFC0111Config(config RFC0111Config) error {
 	if err := ValidateRFC0111Exclusions(config.Exclusions); err != nil {
 		return fmt.Errorf("RFC-0111 exclusions validation failed: %w", err)
 	}
-	
+
 	// Validate PP Architecture
 	if err := ValidateRFC0111PPArchitecture(config.PPArchitecture); err != nil {
 		return fmt.Errorf("PP Architecture validation failed: %w", err)
 	}
-	
+
 	// Validate Extended Tokens
 	if err := ValidateRFC0111ExtendedTokens(config.ExtendedTokens); err != nil {
 		return fmt.Errorf("extended tokens validation failed: %w", err)
 	}
-	
+
 	return nil
 }
 
@@ -581,22 +581,22 @@ func ValidateRFC0111Exclusions(exclusions RFC0111Exclusions) error {
 	if !exclusions.Web3Blockchain.Prohibited {
 		return fmt.Errorf("RFC-0111 violation: Web3/blockchain technology must be prohibited for extended tokens")
 	}
-	
+
 	// AI Operators exclusions
 	if !exclusions.AIOperators.Prohibited {
 		return fmt.Errorf("RFC-0111 violation: AI-controlled deployment lifecycle must be prohibited")
 	}
-	
+
 	// DNA-based identities exclusions
 	if !exclusions.DNABasedIdentities.Prohibited {
 		return fmt.Errorf("RFC-0111 violation: DNA-based identities must be prohibited")
 	}
-	
+
 	// Decentralized authorization exclusions
 	if !exclusions.DecentralizedAuth.Prohibited {
 		return fmt.Errorf("RFC-0111 violation: Decentralized AI authorization must be prohibited")
 	}
-	
+
 	return nil
 }
 
@@ -640,7 +640,7 @@ func ValidateRFC0115PoADefinition(poa RFC0115PoADefinition) error {
 	if poa.Parties.AuthorizedClient.Identity == "" {
 		return fmt.Errorf("authorized client identity is required")
 	}
-	
+
 	// Validate authorization scope
 	if len(poa.Authorization.ApplicableSectors) == 0 {
 		return fmt.Errorf("at least one applicable sector is required")
@@ -648,12 +648,12 @@ func ValidateRFC0115PoADefinition(poa RFC0115PoADefinition) error {
 	if len(poa.Authorization.ApplicableRegions) == 0 {
 		return fmt.Errorf("at least one applicable region is required")
 	}
-	
+
 	// Validate GAuth integration
 	if !poa.GAuthContext.ExclusionsCompliant {
 		return fmt.Errorf("PoA Definition must be RFC-0111 exclusions compliant")
 	}
-	
+
 	return nil
 }
 
@@ -663,22 +663,22 @@ func ValidateRFCIntegration(rfc0111 RFC0111Config, rfc0115 RFC0115PoADefinition)
 	if rfc0115.Parties.AuthorizedClient.Type == "" {
 		return fmt.Errorf("RFC-0115 client type must be specified for integration")
 	}
-	
+
 	// Ensure exclusions compliance across both specifications
 	if !rfc0115.GAuthContext.ExclusionsCompliant {
 		return fmt.Errorf("RFC-0115 must be compliant with RFC-0111 exclusions")
 	}
-	
+
 	// Validate PP Architecture role consistency
 	if rfc0115.GAuthContext.PPArchitectureRole == "" {
 		return fmt.Errorf("RFC-0115 must specify PP Architecture role for integration")
 	}
-	
+
 	// Validate token scope consistency
 	if len(rfc0115.GAuthContext.ExtendedTokenScope) == 0 {
 		return fmt.Errorf("RFC-0115 must specify extended token scope for integration")
 	}
-	
+
 	return nil
 }
 
@@ -835,10 +835,10 @@ func CreateRFC0111GAuthRoles() RFC0111GAuthRoles {
 			ExclusionsEnforced:    true,
 		},
 		ClientOwner: RFC0111ClientOwner{
-			Identity:          "client_owner_id",
+			Identity:           "client_owner_id",
 			AuthorizationLevel: "full",
-			AISystemOwnership: []string{"digital_agent_1", "digital_agent_2"},
-			DelegatedPowers:   []string{"transaction_approval", "decision_making"},
+			AISystemOwnership:  []string{"digital_agent_1", "digital_agent_2"},
+			DelegatedPowers:    []string{"transaction_approval", "decision_making"},
 		},
 		OwnerAuthorizer: RFC0111OwnerAuthorizer{
 			Identity:           "owner_authorizer_id",
