@@ -707,6 +707,8 @@ func generateSecureDelegationID() string {
 }
 
 // generateAuthorizationCode creates a secure authorization code
+//
+//nolint:unused // Part of comprehensive API implementation - may be used in future features
 func (s *RFCCompliantService) generateAuthorizationCode(ctx context.Context, req PowerOfAttorneyRequest) (string, error) {
 	bytes := make([]byte, 32)
 	if _, err := rand.Read(bytes); err != nil {
@@ -1072,6 +1074,7 @@ func (s *RFCCompliantService) validatePrincipalCapacity(ctx context.Context, pri
 	return nil
 }
 
+//nolint:unused // Part of comprehensive RFC 111 implementation - for future AI agent validation
 func (s *RFCCompliantService) validateAIAgentCapabilities(ctx context.Context, agentID string, powers []string) error {
 	// RFC 111 Requirement: Validate AI agent capabilities match requested powers
 
@@ -1191,7 +1194,10 @@ func (s *RFCCompliantService) validateDelegationRequest(ctx context.Context, req
 	return nil
 }
 
-func (s *RFCCompliantService) createPowerOfAttorneyAuditRecord(ctx context.Context, req PowerOfAttorneyRequest, authCode string) *AuditRecord {
+//nolint:unused // Part of comprehensive audit framework - for Power of Attorney audit records
+func (s *RFCCompliantService) createPowerOfAttorneyAuditRecord(
+	ctx context.Context, req PowerOfAttorneyRequest, authCode string,
+) *AuditRecord {
 	// RFC 111 Requirement: Create comprehensive audit record
 
 	// Generate secure audit ID
