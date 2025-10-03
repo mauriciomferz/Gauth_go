@@ -83,13 +83,14 @@ func main() {
 	fmt.Printf("Failed: %d\n", failed)
 	fmt.Printf("Warnings: %d\n", warnings)
 
-	if failed > 0 {
+	switch {
+	case failed > 0:
 		fmt.Println("\n❌ Security tests failed. Review and fix issues before deployment.")
 		os.Exit(1)
-	} else if warnings > 0 {
+	case warnings > 0:
 		fmt.Println("\n⚠️  Security tests passed with warnings. Review recommendations.")
 		os.Exit(0)
-	} else {
+	default:
 		fmt.Println("\n✅ All security tests passed!")
 		os.Exit(0)
 	}

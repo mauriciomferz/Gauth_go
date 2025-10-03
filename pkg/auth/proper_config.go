@@ -30,22 +30,22 @@ const (
 type ProperConfig struct {
 	// Server configuration
 	Server ServerConfig `json:"server"`
-	
+
 	// Security configuration
 	Security SecurityConfig `json:"security"`
-	
+
 	// Database configuration
 	Database DatabaseConfig `json:"database"`
-	
+
 	// Redis configuration
 	Redis RedisConfig `json:"redis"`
-	
+
 	// Rate limiting configuration
 	RateLimit RateLimitConfig `json:"rate_limit"`
-	
+
 	// Logging configuration
 	Logging LoggingConfig `json:"logging"`
-	
+
 	// Compliance configuration
 	Compliance ComplianceConfig `json:"compliance"`
 }
@@ -63,27 +63,27 @@ type ServerConfig struct {
 // SecurityConfig holds security-related configuration
 type SecurityConfig struct {
 	// JWT configuration
-	JWTIssuer          string        `json:"jwt_issuer"`
-	JWTAudience        string        `json:"jwt_audience"`
-	JWTExpiration      time.Duration `json:"jwt_expiration"`
-	JWTRefreshWindow   time.Duration `json:"jwt_refresh_window"`
-	
+	JWTIssuer        string        `json:"jwt_issuer"`
+	JWTAudience      string        `json:"jwt_audience"`
+	JWTExpiration    time.Duration `json:"jwt_expiration"`
+	JWTRefreshWindow time.Duration `json:"jwt_refresh_window"`
+
 	// Cryptographic keys (base64 encoded)
-	HMACKey        string `json:"hmac_key"`
-	EncryptionKey  string `json:"encryption_key"`
-	SigningKey     string `json:"signing_key"`
-	
+	HMACKey       string `json:"hmac_key"`
+	EncryptionKey string `json:"encryption_key"`
+	SigningKey    string `json:"signing_key"`
+
 	// Security policies
-	MaxTokenAge           time.Duration `json:"max_token_age"`
-	RequireHTTPS          bool          `json:"require_https"`
-	EnableCSRFProtection  bool          `json:"enable_csrf_protection"`
-	EnableCORSProtection  bool          `json:"enable_cors_protection"`
-	MaxSessionAge         time.Duration `json:"max_session_age"`
-	
+	MaxTokenAge          time.Duration `json:"max_token_age"`
+	RequireHTTPS         bool          `json:"require_https"`
+	EnableCSRFProtection bool          `json:"enable_csrf_protection"`
+	EnableCORSProtection bool          `json:"enable_cors_protection"`
+	MaxSessionAge        time.Duration `json:"max_session_age"`
+
 	// Password policies
-	MinPasswordLength     int           `json:"min_password_length"`
-	RequireStrongPassword bool          `json:"require_strong_password"`
-	PasswordHashCost      int           `json:"password_hash_cost"`
+	MinPasswordLength     int  `json:"min_password_length"`
+	RequireStrongPassword bool `json:"require_strong_password"`
+	PasswordHashCost      int  `json:"password_hash_cost"`
 }
 
 // DatabaseConfig holds database configuration
@@ -101,41 +101,41 @@ type DatabaseConfig struct {
 
 // RedisConfig holds Redis configuration
 type RedisConfig struct {
-	Host            string        `json:"host"`
-	Port            int           `json:"port"`
-	Password        string        `json:"password"`
-	Database        int           `json:"database"`
-	MaxRetries      int           `json:"max_retries"`
-	RetryDelay      time.Duration `json:"retry_delay"`
-	PoolSize        int           `json:"pool_size"`
-	MinIdleConns    int           `json:"min_idle_conns"`
-	MaxConnAge      time.Duration `json:"max_conn_age"`
-	PoolTimeout     time.Duration `json:"pool_timeout"`
-	IdleTimeout     time.Duration `json:"idle_timeout"`
-	IdleCheckFreq   time.Duration `json:"idle_check_freq"`
+	Host          string        `json:"host"`
+	Port          int           `json:"port"`
+	Password      string        `json:"password"`
+	Database      int           `json:"database"`
+	MaxRetries    int           `json:"max_retries"`
+	RetryDelay    time.Duration `json:"retry_delay"`
+	PoolSize      int           `json:"pool_size"`
+	MinIdleConns  int           `json:"min_idle_conns"`
+	MaxConnAge    time.Duration `json:"max_conn_age"`
+	PoolTimeout   time.Duration `json:"pool_timeout"`
+	IdleTimeout   time.Duration `json:"idle_timeout"`
+	IdleCheckFreq time.Duration `json:"idle_check_freq"`
 }
 
 // RateLimitConfig holds rate limiting configuration
 type RateLimitConfig struct {
 	// Global rate limits
-	GlobalRequestsPerSecond rate.Limit   `json:"global_requests_per_second"`
-	GlobalBurst             int          `json:"global_burst"`
-	
+	GlobalRequestsPerSecond rate.Limit `json:"global_requests_per_second"`
+	GlobalBurst             int        `json:"global_burst"`
+
 	// Per-user rate limits
-	UserRequestsPerSecond   rate.Limit   `json:"user_requests_per_second"`
-	UserBurst               int          `json:"user_burst"`
-	
+	UserRequestsPerSecond rate.Limit `json:"user_requests_per_second"`
+	UserBurst             int        `json:"user_burst"`
+
 	// Per-IP rate limits
-	IPRequestsPerSecond     rate.Limit   `json:"ip_requests_per_second"`
-	IPBurst                 int          `json:"ip_burst"`
-	
+	IPRequestsPerSecond rate.Limit `json:"ip_requests_per_second"`
+	IPBurst             int        `json:"ip_burst"`
+
 	// Cleanup settings
-	CleanupInterval         time.Duration `json:"cleanup_interval"`
-	LimiterExpiry           time.Duration `json:"limiter_expiry"`
-	
+	CleanupInterval time.Duration `json:"cleanup_interval"`
+	LimiterExpiry   time.Duration `json:"limiter_expiry"`
+
 	// Circuit breaker settings
-	MaxFailures             int64         `json:"max_failures"`
-	ResetTimeout            time.Duration `json:"reset_timeout"`
+	MaxFailures  int64         `json:"max_failures"`
+	ResetTimeout time.Duration `json:"reset_timeout"`
 }
 
 // LoggingConfig holds logging configuration
@@ -235,17 +235,17 @@ func LoadConfig() (*ProperConfig, error) {
 			EnableEncryption:    getEnvBool("ENABLE_ENCRYPTION", true),
 		},
 	}
-	
+
 	// Generate or load cryptographic keys
 	if err := config.loadOrGenerateKeys(); err != nil {
 		return nil, fmt.Errorf("failed to load cryptographic keys: %w", err)
 	}
-	
+
 	// Validate configuration
 	if err := config.Validate(); err != nil {
 		return nil, fmt.Errorf("configuration validation failed: %w", err)
 	}
-	
+
 	return config, nil
 }
 
@@ -259,7 +259,7 @@ func (c *ProperConfig) loadOrGenerateKeys() error {
 		}
 		c.Security.HMACKey = key
 	}
-	
+
 	// Encryption Key
 	if c.Security.EncryptionKey = os.Getenv("ENCRYPTION_KEY"); c.Security.EncryptionKey == "" {
 		key, err := generateSecureKey(32)
@@ -268,7 +268,7 @@ func (c *ProperConfig) loadOrGenerateKeys() error {
 		}
 		c.Security.EncryptionKey = key
 	}
-	
+
 	// Signing Key
 	if c.Security.SigningKey = os.Getenv("SIGNING_KEY"); c.Security.SigningKey == "" {
 		key, err := generateSecureKey(64)
@@ -277,7 +277,7 @@ func (c *ProperConfig) loadOrGenerateKeys() error {
 		}
 		c.Security.SigningKey = key
 	}
-	
+
 	return nil
 }
 
@@ -296,26 +296,26 @@ func (c *ProperConfig) Validate() error {
 	if c.Server.Port < 1 || c.Server.Port > 65535 {
 		return fmt.Errorf("invalid server port: %d", c.Server.Port)
 	}
-	
+
 	// Validate security configuration
 	if c.Security.JWTExpiration < time.Minute {
 		return fmt.Errorf("JWT expiration too short: %v", c.Security.JWTExpiration)
 	}
-	
+
 	if c.Security.MinPasswordLength < 8 {
 		return fmt.Errorf("minimum password length too short: %d", c.Security.MinPasswordLength)
 	}
-	
+
 	// Validate cryptographic keys
 	if err := c.validateKeys(); err != nil {
 		return fmt.Errorf("key validation failed: %w", err)
 	}
-	
+
 	// Validate rate limiting
 	if c.RateLimit.GlobalRequestsPerSecond <= 0 {
 		return fmt.Errorf("global rate limit must be positive")
 	}
-	
+
 	return nil
 }
 
@@ -329,7 +329,7 @@ func (c *ProperConfig) validateKeys() error {
 	if len(hmacKey) < 32 {
 		return fmt.Errorf("HMAC key too short: %d bytes (minimum 32)", len(hmacKey))
 	}
-	
+
 	// Validate encryption key
 	encKey, err := base64.StdEncoding.DecodeString(c.Security.EncryptionKey)
 	if err != nil {
@@ -338,7 +338,7 @@ func (c *ProperConfig) validateKeys() error {
 	if len(encKey) != 32 {
 		return fmt.Errorf("encryption key must be exactly 32 bytes, got %d", len(encKey))
 	}
-	
+
 	// Validate signing key
 	sigKey, err := base64.StdEncoding.DecodeString(c.Security.SigningKey)
 	if err != nil {
@@ -347,7 +347,7 @@ func (c *ProperConfig) validateKeys() error {
 	if len(sigKey) < 32 {
 		return fmt.Errorf("signing key too short: %d bytes (minimum 32)", len(sigKey))
 	}
-	
+
 	return nil
 }
 
