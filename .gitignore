@@ -132,3 +132,4 @@ gauth-rfc111-*
 *-server
 *-backend
 *-demo
+.trunk/
