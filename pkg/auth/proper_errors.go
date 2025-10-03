@@ -34,7 +34,7 @@ type ProperError struct {
 	Timestamp time.Time         `json:"timestamp"`
 	RequestID string            `json:"request_id,omitempty"`
 	UserID    string            `json:"user_id,omitempty"`
-	
+
 	// Internal fields (not exposed in JSON for security)
 	InternalMessage string `json:"-"`
 	StackTrace      string `json:"-"`
@@ -45,15 +45,15 @@ type ProperError struct {
 type ErrorType string
 
 const (
-	ErrorTypeAuthentication  ErrorType = "authentication"
-	ErrorTypeAuthorization   ErrorType = "authorization"
-	ErrorTypeValidation      ErrorType = "validation"
-	ErrorTypeConfiguration   ErrorType = "configuration"
-	ErrorTypeInternal        ErrorType = "internal"
-	ErrorTypeExternal        ErrorType = "external"
-	ErrorTypeRateLimit       ErrorType = "rate_limit"
-	ErrorTypeCryptographic   ErrorType = "cryptographic"
-	ErrorTypeCompliance      ErrorType = "compliance"
+	ErrorTypeAuthentication ErrorType = "authentication"
+	ErrorTypeAuthorization  ErrorType = "authorization"
+	ErrorTypeValidation     ErrorType = "validation"
+	ErrorTypeConfiguration  ErrorType = "configuration"
+	ErrorTypeInternal       ErrorType = "internal"
+	ErrorTypeExternal       ErrorType = "external"
+	ErrorTypeRateLimit      ErrorType = "rate_limit"
+	ErrorTypeCryptographic  ErrorType = "cryptographic"
+	ErrorTypeCompliance     ErrorType = "compliance"
 )
 
 // Error implements the error interface
@@ -79,13 +79,13 @@ func (pe *ProperError) Is(target error) bool {
 func NewProperError(errorType ErrorType, code, message string) *ProperError {
 	// Get stack trace for debugging (only first 3 frames to avoid noise)
 	stackTrace := getStackTrace(3)
-	
+
 	return &ProperError{
-		Type:      errorType,
-		Code:      code,
-		Message:   message,
-		Timestamp: time.Now().UTC(),
-		Details:   make(map[string]string),
+		Type:       errorType,
+		Code:       code,
+		Message:    message,
+		Timestamp:  time.Now().UTC(),
+		Details:    make(map[string]string),
 		StackTrace: stackTrace,
 	}
 }
@@ -130,7 +130,7 @@ func (pe *ProperError) IsSensitive() bool {
 		ErrorTypeCryptographic,
 		ErrorTypeCompliance,
 	}
-	
+
 	for _, sensitiveType := range sensitiveTypes {
 		if pe.Type == sensitiveType {
 			return true
@@ -241,21 +241,21 @@ func NewErrorHandler(logger Logger, metrics MetricsCollector, environment string
 // HandleError processes errors with appropriate logging and metrics
 func (eh *ErrorHandler) HandleError(ctx context.Context, err error) *ProperError {
 	var properErr *ProperError
-	
+
 	// Convert to ProperError if it isn't already
 	if !errors.As(err, &properErr) {
 		properErr = NewProperError(ErrorTypeInternal, "UNKNOWN_ERROR", err.Error()).
 			WithCause(err)
 	}
-	
+
 	// Record metrics
 	if eh.metrics != nil {
 		eh.metrics.IncrementErrorCounter(string(properErr.Type), properErr.Code)
 	}
-	
+
 	// Log error with appropriate level
 	eh.logError(ctx, properErr)
-	
+
 	return properErr
 }
 
@@ -264,27 +264,27 @@ func (eh *ErrorHandler) logError(ctx context.Context, err *ProperError) {
 	if eh.logger == nil {
 		return
 	}
-	
+
 	// Prepare log fields
 	fields := map[string]interface{}{
-		"error_type":  err.Type,
-		"error_code":  err.Code,
-		"timestamp":   err.Timestamp,
-		"request_id":  err.RequestID,
-		"user_id":     err.UserID,
+		"error_type": err.Type,
+		"error_code": err.Code,
+		"timestamp":  err.Timestamp,
+		"request_id": err.RequestID,
+		"user_id":    err.UserID,
 	}
-	
+
 	// Add details if not sensitive
 	if !err.IsSensitive() {
 		fields["details"] = err.Details
 	}
-	
+
 	// Add stack trace in development
 	if eh.environment == "development" {
 		fields["stack_trace"] = err.StackTrace
 		fields["internal_message"] = err.InternalMessage
 	}
-	
+
 	// Choose log level based on error type
 	switch err.Type {
 	case ErrorTypeInternal, ErrorTypeCryptographic:
@@ -300,7 +300,7 @@ func (eh *ErrorHandler) logError(ctx context.Context, err *ProperError) {
 func (eh *ErrorHandler) RecoverFromPanic(ctx context.Context) *ProperError {
 	if r := recover(); r != nil {
 		var err *ProperError
-		
+
 		switch v := r.(type) {
 		case error:
 			err = NewProperError(ErrorTypeInternal, "PANIC_RECOVERED", "Panic recovered").
@@ -310,10 +310,10 @@ func (eh *ErrorHandler) RecoverFromPanic(ctx context.Context) *ProperError {
 		default:
 			err = NewProperError(ErrorTypeInternal, "PANIC_RECOVERED", "Unknown panic occurred")
 		}
-		
+
 		// Log critical error
 		eh.logError(ctx, err)
-		
+
 		return err
 	}
 	return nil

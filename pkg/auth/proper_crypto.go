@@ -33,10 +33,10 @@ type ProperCrypto struct {
 // NewProperCrypto creates a new cryptographic service with secure defaults
 func NewProperCrypto() *ProperCrypto {
 	return &ProperCrypto{
-		argonTime:    1,     // Number of iterations
+		argonTime:    1,         // Number of iterations
 		argonMemory:  64 * 1024, // Memory usage in KiB
-		argonThreads: 4,     // Number of threads
-		argonKeyLen:  32,    // Length of derived key
+		argonThreads: 4,         // Number of threads
+		argonKeyLen:  32,        // Length of derived key
 	}
 }
 
@@ -46,7 +46,7 @@ func (pc *ProperCrypto) SecureHash(data, salt []byte) ([]byte, error) {
 	if len(salt) == 0 {
 		return nil, fmt.Errorf("salt cannot be empty for secure hashing")
 	}
-	
+
 	// Use Argon2id (recommended by OWASP)
 	hash := argon2.IDKey(data, salt, pc.argonTime, pc.argonMemory, pc.argonThreads, pc.argonKeyLen)
 	return hash, nil
@@ -73,17 +73,17 @@ func (pc *ProperCrypto) EncryptData(plaintext, key []byte) ([]byte, error) {
 	if len(key) != chacha20poly1305.KeySize {
 		return nil, fmt.Errorf("key must be exactly %d bytes", chacha20poly1305.KeySize)
 	}
-	
+
 	aead, err := chacha20poly1305.New(key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create cipher: %w", err)
 	}
-	
+
 	nonce := make([]byte, aead.NonceSize())
 	if _, err := rand.Read(nonce); err != nil {
 		return nil, fmt.Errorf("failed to generate nonce: %w", err)
 	}
-	
+
 	ciphertext := aead.Seal(nonce, nonce, plaintext, nil)
 	return ciphertext, nil
 }
@@ -93,22 +93,22 @@ func (pc *ProperCrypto) DecryptData(ciphertext, key []byte) ([]byte, error) {
 	if len(key) != chacha20poly1305.KeySize {
 		return nil, fmt.Errorf("key must be exactly %d bytes", chacha20poly1305.KeySize)
 	}
-	
+
 	aead, err := chacha20poly1305.New(key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create cipher: %w", err)
 	}
-	
+
 	if len(ciphertext) < aead.NonceSize() {
 		return nil, fmt.Errorf("ciphertext too short")
 	}
-	
+
 	nonce, ciphertext := ciphertext[:aead.NonceSize()], ciphertext[aead.NonceSize():]
 	plaintext, err := aead.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decrypt: %w", err)
 	}
-	
+
 	return plaintext, nil
 }
 
@@ -130,7 +130,7 @@ func (stg *SecureTokenGenerator) GenerateToken() (string, error) {
 	if _, err := rand.Read(tokenBytes); err != nil {
 		return "", fmt.Errorf("failed to generate secure token: %w", err)
 	}
-	
+
 	// Use URL-safe base64 encoding
 	token := base64.URLEncoding.EncodeToString(tokenBytes)
 	return token, nil
@@ -151,42 +151,42 @@ type TokenClaims struct {
 // Validate performs comprehensive token claims validation
 func (tc *TokenClaims) Validate() error {
 	now := time.Now()
-	
+
 	// Check expiration
 	if tc.ExpiresAt.Before(now) {
 		return fmt.Errorf("token has expired")
 	}
-	
+
 	// Check not before
 	if tc.NotBefore.After(now) {
 		return fmt.Errorf("token not yet valid")
 	}
-	
+
 	// Check required fields
 	if tc.Subject == "" {
 		return fmt.Errorf("subject is required")
 	}
-	
+
 	if tc.Issuer == "" {
 		return fmt.Errorf("issuer is required")
 	}
-	
+
 	if tc.JTI == "" {
 		return fmt.Errorf("JWT ID is required for revocation support")
 	}
-	
+
 	// Validate token age (prevent very old tokens)
 	maxAge := 24 * time.Hour // Configurable
 	if now.Sub(tc.IssuedAt) > maxAge {
 		return fmt.Errorf("token is too old")
 	}
-	
+
 	return nil
 }
 
 // SecureAuditLog provides tamper-evident logging using proven cryptographic techniques
 type SecureAuditLog struct {
-	crypto *ProperCrypto
+	crypto  *ProperCrypto
 	hmacKey []byte
 }
 
@@ -195,7 +195,7 @@ func NewSecureAuditLog(hmacKey []byte) (*SecureAuditLog, error) {
 	if len(hmacKey) < 32 {
 		return nil, fmt.Errorf("HMAC key must be at least 32 bytes")
 	}
-	
+
 	return &SecureAuditLog{
 		crypto:  NewProperCrypto(),
 		hmacKey: hmacKey,
@@ -228,12 +228,12 @@ func (sal *SecureAuditLog) GenerateHMAC(entry *LogEntry) (string, error) {
 		entry.Timestamp.UTC().Format(time.RFC3339Nano),
 		len(entry.Details), // Include details count for integrity
 	)
-	
+
 	// Use HMAC-SHA256 for integrity protection
 	h := hmac.New(sha256.New, sal.hmacKey)
 	h.Write([]byte(data))
 	mac := h.Sum(nil)
-	
+
 	return base64.StdEncoding.EncodeToString(mac), nil
 }
 
@@ -243,11 +243,11 @@ func (sal *SecureAuditLog) VerifyEntry(entry *LogEntry) error {
 	if err != nil {
 		return fmt.Errorf("failed to generate HMAC for verification: %w", err)
 	}
-	
+
 	if !sal.crypto.SecureCompare([]byte(entry.HMAC), []byte(expectedHMAC)) {
 		return fmt.Errorf("log entry integrity verification failed")
 	}
-	
+
 	return nil
 }
 
@@ -265,22 +265,22 @@ func (cc *CryptoConfig) ValidateConfig() error {
 	if len(cc.HMACKey) < 32 {
 		return fmt.Errorf("HMAC key must be at least 256 bits (32 bytes)")
 	}
-	
+
 	if len(cc.EncryptionKey) != chacha20poly1305.KeySize {
 		return fmt.Errorf("encryption key must be exactly %d bytes", chacha20poly1305.KeySize)
 	}
-	
+
 	if len(cc.TokenSigningKey) < 32 {
 		return fmt.Errorf("token signing key must be at least 256 bits (32 bytes)")
 	}
-	
+
 	if cc.MaxTokenAge < time.Minute {
 		return fmt.Errorf("max token age must be at least 1 minute")
 	}
-	
+
 	if cc.MaxTokenAge > 24*time.Hour {
 		return fmt.Errorf("max token age should not exceed 24 hours for security")
 	}
-	
+
 	return nil
 }

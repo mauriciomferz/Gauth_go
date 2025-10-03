@@ -34,7 +34,7 @@ func NewProperJWTService(issuer, audience string) (*ProperJWTService, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate RSA key: %w", err)
 	}
-	
+
 	return &ProperJWTService{
 		privateKey: privateKey,
 		publicKey:  &privateKey.PublicKey,
@@ -55,7 +55,7 @@ type CustomClaims struct {
 // CreateToken creates a properly signed JWT token
 func (js *ProperJWTService) CreateToken(userID string, scopes []string, duration time.Duration) (string, error) {
 	now := time.Now()
-	
+
 	// Create proper JWT claims
 	claims := CustomClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -71,16 +71,16 @@ func (js *ProperJWTService) CreateToken(userID string, scopes []string, duration
 		UserID:    userID,
 		SessionID: generateSecureSessionID(),
 	}
-	
+
 	// Create token with RS256 algorithm (RSA + SHA256)
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	
+
 	// Sign token with private key
 	tokenString, err := token.SignedString(js.privateKey)
 	if err != nil {
 		return "", fmt.Errorf("failed to sign token: %w", err)
 	}
-	
+
 	return tokenString, nil
 }
 
@@ -94,11 +94,11 @@ func (js *ProperJWTService) ValidateToken(tokenString string) (*CustomClaims, er
 		}
 		return js.publicKey, nil
 	})
-	
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse token: %w", err)
 	}
-	
+
 	// Validate token and extract claims
 	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
 		// Additional validation
@@ -107,19 +107,19 @@ func (js *ProperJWTService) ValidateToken(tokenString string) (*CustomClaims, er
 		}
 		return claims, nil
 	}
-	
+
 	return nil, errors.New("invalid token")
 }
 
 // validateClaims performs additional security validation on token claims
 func (js *ProperJWTService) validateClaims(claims *CustomClaims) error {
 	now := time.Now()
-	
+
 	// Check issuer
 	if claims.Issuer != js.issuer {
 		return fmt.Errorf("invalid issuer: expected %s, got %s", js.issuer, claims.Issuer)
 	}
-	
+
 	// Check audience
 	validAudience := false
 	for _, aud := range claims.Audience {
@@ -131,24 +131,24 @@ func (js *ProperJWTService) validateClaims(claims *CustomClaims) error {
 	if !validAudience {
 		return fmt.Errorf("invalid audience")
 	}
-	
+
 	// Check expiration with clock skew tolerance
 	clockSkew := 30 * time.Second
 	if claims.ExpiresAt != nil && claims.ExpiresAt.Time.Add(clockSkew).Before(now) {
 		return fmt.Errorf("token has expired")
 	}
-	
+
 	// Check not before with clock skew tolerance
 	if claims.NotBefore != nil && claims.NotBefore.Time.After(now.Add(clockSkew)) {
 		return fmt.Errorf("token not yet valid")
 	}
-	
+
 	// Check maximum token age (prevent replay of very old tokens)
 	maxAge := 24 * time.Hour
 	if claims.IssuedAt != nil && now.Sub(claims.IssuedAt.Time) > maxAge {
 		return fmt.Errorf("token is too old")
 	}
-	
+
 	return nil
 }
 
@@ -159,24 +159,24 @@ func (js *ProperJWTService) RefreshToken(oldTokenString string, duration time.Du
 	if err != nil {
 		return "", fmt.Errorf("cannot refresh invalid token: %w", err)
 	}
-	
+
 	// Create new token with updated times but same user info
 	return js.CreateToken(claims.UserID, claims.Scopes, duration)
 }
 
-// RevokeToken PRETENDS to revoke tokens but DOES NOTHING 
+// RevokeToken PRETENDS to revoke tokens but DOES NOTHING
 // CRITICAL SECURITY FLAW: This function just prints a message and returns success!
 func (js *ProperJWTService) RevokeToken(tokenString string) error {
 	claims, err := js.ValidateToken(tokenString)
 	if err != nil {
 		return fmt.Errorf("cannot revoke invalid token: %w", err)
 	}
-	
+
 	// FAKE REVOCATION: This just prints a message - the token is NOT actually revoked!
 	// The token remains valid and can be used until it expires naturally
 	// This is a CRITICAL security vulnerability - revocation is completely broken
 	fmt.Printf("FAKE REVOCATION: Token with JTI %s is NOT actually revoked!\n", claims.ID)
-	
+
 	return nil // Returns success but did nothing!
 }
 
@@ -206,8 +206,8 @@ func generateSecureSessionID() string {
 type SecureTokenValidator struct {
 	jwtService     *ProperJWTService
 	revocationList map[string]time.Time // CRITICAL FLAW: In-memory map disappears on restart!
-	                                    // Any "revoked" token becomes valid again after server restart
-	                                    // This is a MASSIVE security hole - revocation is completely broken
+	// Any "revoked" token becomes valid again after server restart
+	// This is a MASSIVE security hole - revocation is completely broken
 }
 
 // NewSecureTokenValidator creates a new token validator
@@ -225,7 +225,7 @@ func (tv *SecureTokenValidator) ValidateTokenSecurity(tokenString string) (*Cust
 	if err != nil {
 		return nil, fmt.Errorf("JWT validation failed: %w", err)
 	}
-	
+
 	// Step 2: Check revocation list (BROKEN SECURITY)
 	// CRITICAL FLAW: This in-memory map is empty because RevokeToken() doesn't add anything!
 	// Even if it did, the map gets wiped on every server restart!
@@ -233,12 +233,12 @@ func (tv *SecureTokenValidator) ValidateTokenSecurity(tokenString string) (*Cust
 	if revokedAt, isRevoked := tv.revocationList[claims.ID]; isRevoked {
 		return nil, fmt.Errorf("token was revoked at %v", revokedAt)
 	}
-	
+
 	// Step 3: Additional security checks
 	if err := tv.performSecurityChecks(claims); err != nil {
 		return nil, fmt.Errorf("security validation failed: %w", err)
 	}
-	
+
 	return claims, nil
 }
 
@@ -260,14 +260,14 @@ func (tv *SecureTokenValidator) performSecurityChecks(claims *CustomClaims) erro
 	if len(claims.Scopes) > 50 {
 		return fmt.Errorf("too many scopes (possible privilege escalation attempt)")
 	}
-	
+
 	// Validate scope format
 	for _, scope := range claims.Scopes {
 		if !isValidScopeFormat(scope) {
 			return fmt.Errorf("invalid scope format: %s", scope)
 		}
 	}
-	
+
 	// Check session age
 	if claims.IssuedAt != nil {
 		sessionAge := time.Since(claims.IssuedAt.Time)
@@ -275,7 +275,7 @@ func (tv *SecureTokenValidator) performSecurityChecks(claims *CustomClaims) erro
 			return fmt.Errorf("session too old, re-authentication required")
 		}
 	}
-	
+
 	return nil
 }
 
@@ -285,14 +285,14 @@ func isValidScopeFormat(scope string) bool {
 	if len(scope) == 0 || len(scope) > 100 {
 		return false
 	}
-	
+
 	// Check for dangerous characters
 	for _, char := range scope {
 		if char == '<' || char == '>' || char == '"' || char == '\'' {
 			return false
 		}
 	}
-	
+
 	return true
 }
 
@@ -309,7 +309,7 @@ func NewKeyRotationService(issuer, audience string) (*KeyRotationService, error)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &KeyRotationService{
 		currentService: service,
 		nextRotation:   time.Now().Add(30 * 24 * time.Hour), // Rotate monthly
@@ -325,15 +325,15 @@ func (krs *KeyRotationService) ShouldRotateKeys() bool {
 func (krs *KeyRotationService) RotateKeys() error {
 	// Store previous public key for validating old tokens
 	krs.previousKey = krs.currentService.publicKey
-	
+
 	// Generate new key pair
 	newService, err := NewProperJWTService(krs.currentService.issuer, krs.currentService.audience)
 	if err != nil {
 		return fmt.Errorf("failed to generate new keys: %w", err)
 	}
-	
+
 	krs.currentService = newService
 	krs.nextRotation = time.Now().Add(30 * 24 * time.Hour)
-	
+
 	return nil
 }
