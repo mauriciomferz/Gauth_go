@@ -13,7 +13,7 @@ Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com
 
 ## 🔒 RFC COMPLIANT SECURITY FRAMEWORK
 
-**This project implements official Gimel Foundation RFC specifications with professional security standards.**
+**This project implements official Gimel Foundation RFC specifications as an educational demonstration. NOT FOR PRODUCTION USE.**
 
 ## Project Status
 

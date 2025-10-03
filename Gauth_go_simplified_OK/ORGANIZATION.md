@@ -45,7 +45,7 @@ GAuth_go/
 - **5 YAML files** for configuration
 - **Clean separation** between public API and internal implementation
 - **No binary files or backups** in repository
-- **Professional structure** ready for both repositories
+- **Educational structure** for learning and demonstration
 
 ---
 

@@ -1,4 +1,4 @@
-**GAuth Go - Development Implementation Suite**
+**GAuth Go - Educational Implementation**
 
 **⚠️ DEVELOPMENT VERSION - NOT FOR PRODUCTION USE ⚠️**
 
