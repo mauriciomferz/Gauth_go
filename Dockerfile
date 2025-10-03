@@ -18,7 +18,6 @@ RUN go mod download
 COPY cmd/ ./cmd/
 COPY pkg/ ./pkg/
 COPY internal/ ./internal/
-COPY examples/ ./examples/
 
 # Verify dependencies
 RUN go mod verify
