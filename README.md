@@ -49,12 +49,12 @@ This implementation provides:
 │   ├── auth/           # Authentication components
 │   ├── token/          # Token management
 │   └── monitoring/     # Observability components
-├── internal/           # Private implementation details
-├── docs/               # Comprehensive documentation (36+ files)
-├── examples/           # Demo applications and usage examples
-├── k8s/                # Kubernetes manifests (development-ready)
-├── gauth-demo-app/     # Web demo applications
-└── monitoring/         # Prometheus/Grafana configuration
+├── internal/           # Private implementation details  
+├── cmd/                # Command-line applications
+├── README.md           # Project documentation
+├── CONTRIBUTORS.md     # Author attribution
+├── SECURITY.md         # Security policy
+└── ORGANIZATION.md     # Project structure guide
 ```
 
 ## 🚀 Quick Start
@@ -93,7 +93,7 @@ go run main.go
 ### ✅ Functional Components
 - **Go Package Structure**: 28 properly organized packages
 - **Health Endpoints**: Working `/health` and `/ready` for Kubernetes
-- **Demo Applications**: Multiple working examples
+- **Command Applications**: Demo and security testing tools
 - **Documentation**: Comprehensive guides and API references
 - **Docker Support**: Container builds and runs successfully
 - **Kubernetes Ready**: Deployable manifests with proper health checks

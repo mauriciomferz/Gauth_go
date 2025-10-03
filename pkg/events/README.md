@@ -139,4 +139,4 @@ func (h *AuditLogHandler) Handle(event events.Event) {
 
 ## Examples
 
-See the [events example](../../examples/events/) for a complete demonstration of the event system.
+See the cmd/demo application for a demonstration of the event system.

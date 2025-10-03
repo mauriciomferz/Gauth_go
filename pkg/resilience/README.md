@@ -134,7 +134,7 @@ The resilience patterns expose metrics for monitoring:
 
 ## Examples
 
-See the `/examples/resilience` directory for comprehensive examples of:
+The resilience package provides comprehensive patterns for:
 
 - Basic pattern usage
 - Pattern composition
@@ -155,6 +155,6 @@ When contributing to this package:
 ## See Also
 
 - [Package Reference](https://pkg.go.dev/github.com/Gimel-Foundation/gauth/pkg/resilience)
-- [Example Applications](../examples/resilience)
+- [Demo Application](../../cmd/demo)
 - [Design Patterns Guide](../docs/PATTERNS_GUIDE.md)
 - [Integration Tests](../test/integration)
