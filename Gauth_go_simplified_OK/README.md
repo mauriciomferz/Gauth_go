@@ -381,7 +381,7 @@ cmd/                    # Applications
 examples/               # Comprehensive examples (40+)
 ├── rfc_0115_poa_definition/    # ✅ RFC-0115 complete impl
 ├── basic/, advanced/           # Learning examples
-├── microservices/              # Production patterns
+├── microservices/              # Architecture patterns
 └── ...                         # Specialized use cases
 ```
 

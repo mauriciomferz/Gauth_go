@@ -20,7 +20,7 @@ func main() {
 		Audience:          "service-mesh",
 		TokenExpiry:       30 * time.Minute,
 		ServiceID:         "api-service-1",
-		MeshID:            "production-mesh",
+		MeshID:            "demo-mesh", // Educational demo mesh ID
 		UseSecureDefaults: true,
 	}
 

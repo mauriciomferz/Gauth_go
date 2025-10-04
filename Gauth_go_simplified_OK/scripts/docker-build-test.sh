@@ -79,7 +79,7 @@ print_status "🧹 Cleaning up test artifacts..." "$YELLOW"
 docker rmi gauth-test &> /dev/null || true
 
 print_status "🎉 Docker build test completed successfully!" "$GREEN"
-print_status "Your Dockerfile is ready for production deployment!" "$GREEN"
+print_status "⚠️  Dockerfile build verified - FOR EDUCATIONAL USE ONLY" "$YELLOW"
 
 echo ""
 echo "To build and run manually:"

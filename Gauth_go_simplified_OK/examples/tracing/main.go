@@ -83,7 +83,7 @@ func main() {
 
 	fmt.Printf("✅ Authorization successful with tracing!\n")
 	fmt.Printf("   Authorization Code: %s...\n", gauthResponse.AuthorizationCode[:20])
-	fmt.Printf("   Legal Compliance: %s\n", gauthResponse.LegalCompliance)
+	fmt.Printf("   Legal Compliance: %t\n", gauthResponse.LegalCompliance)
 	fmt.Printf("   Audit Record ID: %s\n", gauthResponse.AuditRecordID)
 
 	// Demonstrate traced token operations

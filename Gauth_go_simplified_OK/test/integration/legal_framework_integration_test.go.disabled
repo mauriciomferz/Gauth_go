@@ -194,20 +194,18 @@ func TestComplianceTracking(t *testing.T) {
 }
 
 // Helper functions for test setup and data creation
-func setupTestFramework(_ *testing.T) *auth.StandardLegalFramework {
-	store := auth.NewMemoryStore()
-	verifier := auth.NewStandardVerificationSystem()
-	register := auth.NewStandardCommercialRegister()
-
-	return auth.NewStandardLegalFramework(store, verifier, register)
+func setupTestFramework(_ *testing.T) *auth.LegalFrameworkValidator {
+	validator := &auth.LegalFrameworkValidator{}
+	validator.Initialize()
+	return validator
 }
 
-func createAuthorizerProof(_ *testing.T) *auth.CapacityProof {
-	return &auth.CapacityProof{
-		Type:         "commercial_register",
-		IssuedAt:     time.Now().Add(-24 * time.Hour),
-		ExpiresAt:    time.Now().Add(365 * 24 * time.Hour),
-		IssuerID:     "commercial_registry_001",
+func createAuthorizerProof(_ *testing.T) *auth.LegalFramework {
+	return &auth.LegalFramework{
+		Jurisdiction:     "US",
+		EntityType:       "corporation",
+		LegalAuthority:   "commercial_registry_001",
+		ComplianceLevel:  "full",
 		Proof:        "cryptographic_proof_001",
 		Jurisdiction: "US",
 		Entity: &auth.Entity{

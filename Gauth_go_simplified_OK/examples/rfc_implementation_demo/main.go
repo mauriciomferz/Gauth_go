@@ -21,6 +21,7 @@ func main() {
 	ctx := context.Background()
 
 	// Create RFC-compliant service built on development JWT foundation
+	// Note: "production" is just a configuration parameter name, NOT for actual production use
 	rfcService, err := auth.NewRFCCompliantService("gauth-rfc", "production")
 	if err != nil {
 		log.Fatalf("❌ Failed to create RFC service: %v", err)

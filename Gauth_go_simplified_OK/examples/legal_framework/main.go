@@ -52,7 +52,7 @@ func main() {
 
 	fmt.Printf("✅ Legal authorization successful!\n")
 	fmt.Printf("   Authorization Code: %s\n", gauthResponse.AuthorizationCode)
-	fmt.Printf("   Legal Compliance: %s\n", gauthResponse.LegalCompliance)
+	fmt.Printf("   Legal Compliance: %t\n", gauthResponse.LegalCompliance)
 	fmt.Printf("   Audit Record ID: %s\n", gauthResponse.AuditRecordID)
 
 	// Create a PoA definition with comprehensive legal framework
