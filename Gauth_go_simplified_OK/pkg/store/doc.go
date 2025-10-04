@@ -66,7 +66,7 @@ Storage Types:
     store := store.NewMemoryStore()
 
  2. Redis Store:
-    Distributed storage for production deployments.
+    Distributed storage for scalable deployments (educational demonstration).
 
     store := store.NewRedisStore(store.RedisConfig{
     Addresses: []string{"localhost:6379"},
