@@ -1,7 +1,5 @@
-package professionalinterfacesdemo
 // Professional Interface Usage Example
 // Shows how to use the new professional interfaces
-
 package main
 
 import (
@@ -36,7 +34,7 @@ func main() {
 	// Create a service token
 	userID := "service-user-123"
 	scopes := []string{"service:read", "service:write", "mesh:communicate"}
-	
+
 	fmt.Printf("\n📝 Creating service token...\n")
 	fmt.Printf("   Service ID: %s\n", config.ServiceID)
 	fmt.Printf("   Mesh ID: %s\n", config.MeshID)

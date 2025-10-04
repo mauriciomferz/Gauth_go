@@ -4,165 +4,101 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net/http"
 	"time"
 
-	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/Gimel-Foundation/gauth/internal/tracing"
 	"github.com/Gimel-Foundation/gauth/pkg/auth"
-	"github.com/Gimel-Foundation/gauth/pkg/authz"
-	"github.com/Gimel-Foundation/gauth/pkg/rate"
 )
 
 func main() {
-	// Initialize Authorizer (in-memory)
-	var authorizer = authz.NewMemoryAuthorizer()
+	fmt.Println("🔍 GAuth Tracing Integration Demo")
+	fmt.Println("=================================")
 
-	// Add a default allow policy so all requests are authorized for demo purposes
-	var err error
-	err = authorizer.AddPolicy(context.Background(), &authz.Policy{
-		ID:        "default-allow",
-		Version:   "1.0",
-		Name:      "Allow all",
-		Effect:    authz.Allow,
-		Subjects:  []authz.Subject{{ID: "*"}},
-		Resources: []authz.Resource{{ID: "*"}},
-		Actions:   []authz.Action{{Name: "*"}},
-		Priority:  1,
-		Status:    "active",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	})
-	if err != nil {
-		log.Fatalf("failed to add default policy: %v", err)
-	}
-	// Initialize tracer
-	tracer, err := tracing.NewTracerProvider(tracing.Config{
-		ServiceName:    "gauth-demo",
-		ServiceVersion: "1.0.0",
-		Environment:    "development",
-	})
+	// Initialize OpenTelemetry
+	fmt.Println("\n1. Initializing OpenTelemetry tracing...")
+	exporter, err := stdouttrace.New(stdouttrace.WithPrettyPrint())
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer tracer.Shutdown(context.Background())
+	defer func() {
+		if err := exporter.Shutdown(context.Background()); err != nil {
+			log.Printf("Error shutting down exporter: %v", err)
+		}
+	}()
 
-	// Initialize Authenticator (JWT)
-	authService, err := auth.NewAuthenticator(auth.Config{
-		Type:              auth.TypeJWT,
-		AccessTokenExpiry: time.Hour,
-	})
+	tp := trace.NewTracerProvider(
+		trace.WithBatcher(exporter),
+	)
+	defer func() {
+		if err := tp.Shutdown(context.Background()); err != nil {
+			log.Printf("Error shutting down tracer provider: %v", err)
+		}
+	}()
+
+	otel.SetTracerProvider(tp)
+	tracer := otel.Tracer("gauth-demo")
+
+	// Initialize RFC Compliant Service
+	fmt.Println("\n2. Initializing RFC Compliant Service...")
+	authService, err := auth.NewRFCCompliantService("tracing-issuer", "tracing-audience")
 	if err != nil {
-		log.Fatalf("failed to create authenticator: %v", err)
+		log.Fatalf("failed to create RFC service: %v", err)
 	}
 
-	// Initialize Rate Limiter
-	rateLimiter := rate.NewTokenBucket(rate.Config{
-		Rate:      100,
-		Window:    time.Minute,
-		BurstSize: 100,
-	})
+	// Create a traced context
+	ctx, span := tracer.Start(context.Background(), "gauth-authorization-flow")
+	defer span.End()
 
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx, rootSpan := tracer.StartSpan(r.Context(), "handle_request",
-			attribute.String("path", r.URL.Path),
-			attribute.String("method", r.Method),
-		)
-		defer rootSpan.End()
+	// Demonstrate traced GAuth operations
+	fmt.Println("\n3. Executing traced GAuth operations...")
 
-		clientIP := r.RemoteAddr
-		userID := r.Header.Get("X-User-ID")
-		token := r.Header.Get("Authorization")
+	// Create a Power of Attorney request with tracing
+	_, childSpan := tracer.Start(ctx, "create-poa-request")
+	poaRequest := auth.PowerOfAttorneyRequest{
+		ClientID:     "traced-client-123",
+		ResponseType: "code",
+		Scope:        []string{"traced_operations", "audit_logging"},
+		RedirectURI:  "https://traced-app.example.com/callback",
+		State:        "traced-state-456",
+		PowerType:    "traced_power_of_attorney",
+		PrincipalID:  "traced-principal",
+		AIAgentID:    "traced-ai-agent",
+		Jurisdiction: "US",
+		LegalBasis:   "tracing_compliance_act",
+	}
+	childSpan.End()
 
-		// 1. Rate limiting
-		ctx, rateSpan := tracer.StartSpan(ctx, "rate_limit_check")
-		err := rateLimiter.Allow(ctx, clientIP)
-		remaining := rateLimiter.GetRemainingRequests(clientIP)
-		if err != nil {
-			rateSpan.SetAttributes(
-				attribute.String("error", err.Error()),
-				attribute.Int64("remaining", remaining),
-			)
-			rateSpan.End()
-			http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
-			return
-		}
-		rateSpan.SetAttributes(attribute.Int64("remaining", remaining))
-		rateSpan.End()
+	// Execute authorization with tracing
+	_, authSpan := tracer.Start(ctx, "authorize-gauth")
+	gauthResponse, err := authService.AuthorizeGAuth(ctx, poaRequest)
+	authSpan.End()
 
-		// 2. Authentication
-		ctx, authSpan := tracer.StartSpan(ctx, "authenticate")
-		claims, err := authService.ValidateToken(ctx, token)
-		if err != nil {
-			authSpan.SetAttributes(attribute.String("error", err.Error()))
-			authSpan.End()
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-		authSpan.SetAttributes(
-			attribute.String("user_id", claims.Subject),
-		)
-		authSpan.End()
-
-		// 3. Authorization
-		ctx, authzSpan := tracer.StartSpan(ctx, "authorize")
-		accessReq := authz.NewAccessRequest(
-			authz.Subject{ID: userID},
-			authz.Resource{ID: r.URL.Path},
-			authz.Action{Name: r.Method},
-		)
-		decision, err := authorizer.Authorize(ctx, accessReq.Subject, accessReq.Action, accessReq.Resource)
-		if err != nil {
-			authzSpan.SetAttributes(attribute.String("error", err.Error()))
-			authzSpan.End()
-			http.Error(w, "Authorization error", http.StatusInternalServerError)
-			return
-		}
-		if !decision.Allowed {
-			authzSpan.SetAttributes(attribute.Bool("allowed", false))
-			authzSpan.End()
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			return
-		}
-		authzSpan.SetAttributes(attribute.Bool("allowed", true))
-		authzSpan.End()
-
-		// Process request
-		ctx, processSpan := tracer.StartSpan(ctx, "process_request")
-		// ... process request ...
-		processSpan.SetAttributes(
-			attribute.String("status", "success"),
-			attribute.String("operation", "example"),
-		)
-		processSpan.End()
-
-		fmt.Fprintf(w, "Request processed successfully\n")
-	})
-
-	// Add trace ID middleware
-	traced := func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx, span := tracer.StartSpan(r.Context(), "request")
-			defer span.End()
-
-			traceID := tracing.TraceID(ctx)
-			w.Header().Set("X-Trace-ID", traceID)
-
-			next.ServeHTTP(w, r.WithContext(ctx))
-		})
+	if err != nil {
+		fmt.Printf("❌ Authorization failed: %v\n", err)
+		return
 	}
 
-	// Start server with timeouts
-	http.Handle("/api", traced(handler))
+	fmt.Printf("✅ Authorization successful with tracing!\n")
+	fmt.Printf("   Authorization Code: %s...\n", gauthResponse.AuthorizationCode[:20])
+	fmt.Printf("   Legal Compliance: %s\n", gauthResponse.LegalCompliance)
+	fmt.Printf("   Audit Record ID: %s\n", gauthResponse.AuditRecordID)
 
-	server := &http.Server{
-		Addr:         ":8080",
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
-		IdleTimeout:  60 * time.Second,
-	}
+	// Demonstrate traced token operations
+	fmt.Println("\n4. Demonstrating traced token lifecycle...")
 
-	log.Println("Starting server on :8080...")
-	log.Fatal(server.ListenAndServe())
+	_, tokenSpan := tracer.Start(ctx, "token-operations")
+	defer tokenSpan.End()
+
+	// Simulate token operations with tracing context
+	fmt.Printf("   🔍 Trace ID: %s\n", span.SpanContext().TraceID().String())
+	fmt.Printf("   📊 Span ID: %s\n", span.SpanContext().SpanID().String())
+
+	// Add artificial delay to show tracing duration
+	time.Sleep(100 * time.Millisecond)
+
+	fmt.Println("\n✅ Tracing Integration Demo Completed!")
+	fmt.Println("📈 Check the console output above for detailed trace information.")
 }

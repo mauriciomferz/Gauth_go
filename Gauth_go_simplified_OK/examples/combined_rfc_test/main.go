@@ -1,4 +1,3 @@
-package combinedrfctest
 // Simple Combined RFC Test
 package main
 
@@ -16,16 +15,16 @@ func main() {
 	// Test RFC-0111 Configuration
 	fmt.Println("\n📋 Testing RFC-0111 Configuration...")
 	rfc0111Config := rfc.CreateRFC0111Config()
-	
+
 	if err := rfc.ValidateRFC0111Config(rfc0111Config); err != nil {
 		log.Fatalf("❌ RFC-0111 validation failed: %v", err)
 	}
 	fmt.Println("✅ RFC-0111 configuration validated successfully")
 
-	// Test RFC-0115 Configuration  
+	// Test RFC-0115 Configuration
 	fmt.Println("\n📋 Testing RFC-0115 Configuration...")
 	rfc0115Config := rfc.CreateRFC0115PoADefinition()
-	
+
 	if err := rfc.ValidateRFC0115PoADefinition(*rfc0115Config); err != nil {
 		log.Fatalf("❌ RFC-0115 validation failed: %v", err)
 	}
@@ -34,7 +33,7 @@ func main() {
 	// Test Combined Configuration
 	fmt.Println("\n📋 Testing Combined RFC Configuration...")
 	combinedConfig := rfc.CreateCombinedRFCConfig()
-	
+
 	if err := rfc.ValidateCombinedRFCConfig(combinedConfig); err != nil {
 		log.Fatalf("❌ Combined RFC validation failed: %v", err)
 	}
@@ -51,7 +50,7 @@ func main() {
 	fmt.Println("\n🤝 Integration Status:")
 	fmt.Printf("  🔗 Integration Level: %s\n", combinedConfig.IntegrationLevel)
 	fmt.Printf("  📦 Combined Version: %s\n", combinedConfig.CombinedVersion)
-	
+
 	if combinedConfig.RFC0115 != nil {
 		fmt.Printf("  ✅ RFC-0115 PoA Definition: Included\n")
 		fmt.Printf("  🤖 Authorized Client Type: %s\n", combinedConfig.RFC0115.Parties.AuthorizedClient.Type)

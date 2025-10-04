@@ -4,189 +4,123 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/Gimel-Foundation/gauth/pkg/auth"
 )
 
-// Strong typing for rule parameters
-type TransactionParameters struct {
-	Amount   float64 `json:"amount"`
-	Currency string  `json:"currency"`
-	Limit    float64 `json:"limit"`
-}
-
-type KYCParameters struct {
+// Example compliance record for demonstration
+type ComplianceRecord struct {
+	ID            string `json:"id"`
+	Framework     string `json:"framework"`
 	RequiredLevel string `json:"required_level"`
 	Status        string `json:"status"`
 }
 
 func main() {
-	// Create a new legal framework
-	framework := auth.NewLegalFramework(
-		"financial-services-framework",
-		"Financial Services Regulatory Framework",
-		"1.0.0",
-	)
+	fmt.Println("🏛️ Legal Framework Integration Demo")
+	fmt.Println("===================================")
 
-	// Configure the policy decision point to use deny-overrides
-	framework.PDP.RuleCombiner = auth.DenyOverridesCombiner
-
-	// Add a central authority
-	centralAuthority := auth.Authority{
-		ID:    "financial-regulator",
-		Type:  "government",
-		Level: 100,
-		Powers: []auth.Power{
-			{
-				Type:     "regulation",
-				Resource: "financial-transactions",
-				Actions:  []string{"approve", "deny", "audit"},
-			},
-		},
-	}
-	framework.AddAuthority(centralAuthority)
-
-	// Add a delegated authority
-	delegatedAuthority := auth.Authority{
-		ID:        "bank-compliance",
-		Type:      "organization",
-		Level:     50,
-		Delegator: "financial-regulator",
-		Powers: []auth.Power{
-			{
-				Type:     "compliance",
-				Resource: "customer-transactions",
-				Actions:  []string{"review", "report"},
-			},
-		},
-	}
-	framework.AddAuthority(delegatedAuthority)
-
-	// Add a data source
-	customerDataSource := auth.DataSource{
-		ID:       "customer-database",
-		Type:     "sql",
-		Endpoint: "mysql://customer-db:3306/customers",
-		Credentials: &auth.Credentials{
-			Type:       "basic",
-			ID:         "service-account",
-			Secret:     "password",
-			Expiration: time.Now().Add(24 * time.Hour),
-		},
-	}
-	framework.AddDataSource(customerDataSource)
-
-	// Add a transaction history data source
-	transactionDataSource := auth.DataSource{
-		ID:       "transaction-history",
-		Type:     "api",
-		Endpoint: "https://api.bank.example/transactions/v1",
-		Credentials: &auth.Credentials{
-			Type:       "oauth2",
-			ID:         "service-client",
-			Secret:     "client-secret",
-			Expiration: time.Now().Add(1 * time.Hour),
-		},
-	}
-	framework.AddDataSource(transactionDataSource)
-
-	// Add a validation rule with typed parameters
-	transactionLimitRule := auth.ValidationRule{
-		Name:      "transaction-limit",
-		Predicate: "amount <= limit",
-		Parameters: auth.ValidationRuleParameters{
-			IntParams:    map[string]int{"limit": 10000},
-			StringParams: map[string]string{},
-			BoolParams:   map[string]bool{},
-		},
-	}
-	framework.ValidationRules = append(framework.ValidationRules, transactionLimitRule)
-
-	// Add a policy with strongly typed conditions
-	highValueTransactionPolicy := auth.Policy{
-		ID:         "high-value-transaction-policy",
-		Name:       "High Value Transaction Policy",
-		Parameters: auth.ValidationRuleParameters{},
-		Rules: []auth.DecisionRule{
-			{
-				Condition: auth.Condition{
-					Type: "amount",
-					Rule: "amount > 10000",
-					Parameters: auth.ConditionParameters{
-						StringParams: map[string]string{"currency": "EURO"},
-						IntParams:    map[string]int{},
-						BoolParams:   map[string]bool{},
-					},
-				},
-				Effect:   "deny",
-				Priority: 10,
-			},
-			{
-				Condition: auth.Condition{
-					Type: "kyc",
-					Rule: "kyc_status == 'verified'",
-					Parameters: auth.ConditionParameters{
-						StringParams: map[string]string{"required_level": "full"},
-						IntParams:    map[string]int{},
-						BoolParams:   map[string]bool{},
-					},
-				},
-				Effect:   "permit",
-				Priority: 5,
-			},
-		},
-		Version: "1.0.0",
-		Created: time.Now(),
-	}
-	framework.AddPolicy(highValueTransactionPolicy)
-
-	// Add a handler for audit logging
-	auditHandler := auth.Handler{
-		ID:       "audit-handler",
-		Type:     "log",
-		Priority: 1,
-		Callback: func(ctx context.Context, decision auth.Decision) error {
-			log.Printf(
-				"AUDIT: %s action %s on %s by %s (Effect: %s)",
-				decision.Timestamp.Format(time.RFC3339),
-				decision.Action,
-				decision.Resource,
-				decision.Subject,
-				decision.Effect,
-			)
-			return nil
-		},
-	}
-	framework.AddHandler(auditHandler)
-
-	// Add a handler for notifications
-	notificationHandler := auth.Handler{
-		ID:       "notification-handler",
-		Type:     "notify",
-		Priority: 2,
-		Callback: func(ctx context.Context, decision auth.Decision) error {
-			if decision.Action == "transfer" && decision.Effect == "deny" {
-				log.Printf(
-					"NOTIFICATION: Denied transfer by %s - sending compliance alert",
-					decision.Subject,
-				)
-			}
-			return nil
-		},
-	}
-	framework.AddHandler(notificationHandler)
-
-	// Example usage: Make an authorization decision
-	ctx := context.Background()
-	decision, err := framework.Authorize(ctx, "customer-123", "account-456", "transfer")
+	// Create RFC compliant service which includes legal framework validation
+	rfcService, err := auth.NewRFCCompliantService("demo-issuer", "demo-audience")
 	if err != nil {
-		log.Fatalf("Authorization failed: %v", err)
+		log.Fatalf("Failed to create RFC service: %v", err)
 	}
 
-	fmt.Printf("Authorization decision: %s\n", decision.Effect)
-	fmt.Printf("Subject: %s\n", decision.Subject)
-	fmt.Printf("Resource: %s\n", decision.Resource)
-	fmt.Printf("Action: %s\n", decision.Action)
-	fmt.Printf("Timestamp: %s\n", decision.Timestamp.Format(time.RFC3339))
+	// Create a power of attorney request with legal framework compliance
+	fmt.Println("\n1. Creating Power of Attorney Request with Legal Framework...")
+	poaRequest := auth.PowerOfAttorneyRequest{
+		ClientID:     "legal-client-123",
+		ResponseType: "code",
+		Scope:        []string{"legal-transactions", "document-signing"},
+		RedirectURI:  "https://legal-app.example.com/callback",
+		State:        "legal-state-456",
+		PowerType:    "legal_power_of_attorney",
+		PrincipalID:  "principal-legal-entity",
+		AIAgentID:    "legal-ai-agent-789",
+		Jurisdiction: "EU",
+		LegalBasis:   "GDPR Article 6(1)(a)",
+	}
+
+	// Test authorization with legal framework compliance
+	fmt.Println("\n2. Testing Authorization with Legal Framework...")
+	ctx := context.Background()
+	gauthResponse, err := rfcService.AuthorizeGAuth(ctx, poaRequest)
+	if err != nil {
+		fmt.Printf("❌ Legal framework authorization failed: %v\n", err)
+		return
+	}
+
+	fmt.Printf("✅ Legal authorization successful!\n")
+	fmt.Printf("   Authorization Code: %s\n", gauthResponse.AuthorizationCode)
+	fmt.Printf("   Legal Compliance: %s\n", gauthResponse.LegalCompliance)
+	fmt.Printf("   Audit Record ID: %s\n", gauthResponse.AuditRecordID)
+
+	// Create a PoA definition with comprehensive legal framework
+	fmt.Println("\n3. Creating Comprehensive PoA Definition...")
+	poaDefinition := auth.PoADefinition{
+		Principal: auth.Principal{
+			Type:     auth.PrincipalTypeOrganization,
+			Identity: "Legal Corp Inc.",
+			Organization: &auth.Organization{
+				Type:                auth.OrgTypeCommercial,
+				Name:                "Legal Corporation Inc.",
+				RegisterEntry:       "REG-12345-EU",
+				ManagingDirector:    "John Legal Director",
+				RegisteredAuthority: true,
+			},
+		},
+		Client: auth.ClientAI{
+			Type:              auth.ClientTypeLLM,
+			Identity:          "legal-ai-agent-789",
+			Version:           "2.1.0",
+			OperationalStatus: "active",
+		},
+		AuthorizationType: auth.AuthorizationType{
+			RepresentationType:     auth.RepresentationSole,
+			RestrictionsExclusions: []string{"no_financial_transfers", "no_asset_disposal"},
+			SubProxyAuthority:      false,
+			SignatureType:          auth.SignatureSingle,
+		},
+		ScopeDefinition: auth.ScopeDefinition{
+			ApplicableSectors: []auth.IndustrySector{auth.SectorFinancial, auth.SectorProfessional},
+			ApplicableRegions: []auth.GeographicScope{
+				{Type: auth.GeoTypeRegional, Identifier: "EU", Description: "European Union"},
+			},
+			AuthorizedActions: auth.AuthorizedActions{
+				Decisions:          []auth.DecisionType{auth.DecisionLegal, auth.DecisionInformation},
+				NonPhysicalActions: []auth.NonPhysicalAction{auth.ActionResearch, auth.ActionSharing},
+			},
+		},
+		Requirements: auth.Requirements{
+			JurisdictionLaw: auth.JurisdictionLaw{
+				Language:            "en",
+				GoverningLaw:        "EU Digital Services Act",
+				PlaceOfJurisdiction: "European Union",
+				AttachedDocuments:   []string{"legal-framework-v1.pdf", "compliance-cert.pdf"},
+			},
+			SecurityCompliance: auth.SecurityCompliance{
+				CommunicationProtocols: []string{"HTTPS", "TLS1.3"},
+				SecurityProperties:     []string{"encryption", "audit_logging", "legal_compliance"},
+				ComplianceInfo:         []string{"GDPR", "eIDAS 2.0", "RFC-0111", "RFC-0115"},
+				UpdateMechanism:        "automatic_with_legal_review",
+			},
+		},
+	}
+
+	// Show the created PoA definition structure
+	fmt.Println("\n4. PoA Definition Created Successfully!")
+	fmt.Printf("   Principal Type: %s\n", poaDefinition.Principal.Type)
+	fmt.Printf("   Client AI Type: %s\n", poaDefinition.Client.Type)
+	fmt.Printf("   Authorization Type: %s\n", poaDefinition.AuthorizationType.RepresentationType)
+	fmt.Printf("   Applicable Sectors: %v\n", poaDefinition.ScopeDefinition.ApplicableSectors)
+	fmt.Printf("   Governing Law: %s\n", poaDefinition.Requirements.JurisdictionLaw.GoverningLaw)
+
+	// Show compliance information
+	fmt.Println("\n📋 Legal Framework Compliance:")
+	fmt.Printf("   • Jurisdiction: %s\n", poaDefinition.Requirements.JurisdictionLaw.PlaceOfJurisdiction)
+	fmt.Printf("   • Language: %s\n", poaDefinition.Requirements.JurisdictionLaw.Language)
+	fmt.Printf("   • Security Protocols: %v\n", poaDefinition.Requirements.SecurityCompliance.CommunicationProtocols)
+	fmt.Printf("   • Compliance Standards: %v\n", poaDefinition.Requirements.SecurityCompliance.ComplianceInfo)
+
+	fmt.Println("\n✅ Legal Framework Integration Demo Completed Successfully!")
 }

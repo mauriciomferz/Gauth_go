@@ -147,6 +147,11 @@ const (
 	RepresentationJoint RepresentationType = "joint"
 )
 
+// Authorization Type Constants
+const (
+	AuthorizationTypePowerOfAttorney = "power_of_attorney"
+)
+
 type SignatureType string
 
 const (
@@ -1597,5 +1602,152 @@ func (s *RFCCompliantService) extractLegalFramework(poa PoADefinition) LegalFram
 		CapacityVerification: true, // Always required in RFC
 		RegulationFramework:  poa.Requirements.JurisdictionLaw.GoverningLaw,
 		ComplianceLevel:      "rfc115_compliant",
+	}
+}
+
+// ComplianceInfo contains RFC compliance metadata
+type ComplianceInfo struct {
+	RFC0111Compliant bool      `json:"rfc0111_compliant"`
+	RFC0115Compliant bool      `json:"rfc0115_compliant"`
+	IssuedAt         time.Time `json:"issued_at"`
+	ValidUntil       time.Time `json:"valid_until"`
+	Authority        string    `json:"authority"`
+}
+
+// AuthorizePowerOfAttorney processes RFC-0111/0115 compliant power of attorney requests
+func (s *RFCCompliantService) AuthorizePowerOfAttorney(ctx context.Context, req PowerOfAttorneyRequest) (*PowerOfAttorneyResponse, error) {
+	// Step 1: Validate the request structure (PowerOfAttorneyRequest = GAuthRequest)
+	if err := s.validatePowerOfAttorneyRequest(req); err != nil {
+		return nil, fmt.Errorf("power of attorney request validation failed: %w", err)
+	}
+
+	// Step 2: Use existing AuthorizeGAuth method since PowerOfAttorneyRequest = GAuthRequest
+	gauthResp, err := s.AuthorizeGAuth(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("GAuth authorization failed: %w", err)
+	}
+
+	// Step 3: Convert GAuth response to PowerOfAttorney response using existing fields
+	response := &PowerOfAttorneyResponse{
+		AuthorizationCode: gauthResp.AuthorizationCode,
+		State:             gauthResp.State,
+		LegalCompliance:   gauthResp.LegalCompliance,
+		AuditRecordID:     gauthResp.AuditRecordID,
+		ExpiresIn:         gauthResp.ExpiresIn,
+		Scope:             gauthResp.Scope,
+	}
+
+	return response, nil
+}
+
+// validatePowerOfAttorneyRequest validates a power of attorney request
+func (s *RFCCompliantService) validatePowerOfAttorneyRequest(req PowerOfAttorneyRequest) error {
+	var violations []string
+
+	// Validate required fields (PowerOfAttorneyRequest = GAuthRequest)
+	if req.ClientID == "" {
+		violations = append(violations, "client_id is required")
+	}
+
+	if req.AIAgentID == "" {
+		violations = append(violations, "ai_agent_id is required")
+	}
+
+	if req.PrincipalID == "" {
+		violations = append(violations, "principal_id is required")
+	}
+
+	if req.PowerType == "" {
+		violations = append(violations, "power_type is required")
+	}
+
+	if req.Jurisdiction == "" {
+		violations = append(violations, "jurisdiction is required")
+	}
+
+	if len(req.Scope) == 0 {
+		violations = append(violations, "scope cannot be empty")
+	}
+
+	// Validate RFC-0111 exclusions
+	if err := s.validateRFC0111Exclusions(req); err != nil {
+		violations = append(violations, err.Error())
+	}
+
+	if len(violations) > 0 {
+		return fmt.Errorf("validation failures: %s", strings.Join(violations, ", "))
+	}
+
+	return nil
+}
+
+// validateRFC0111Exclusions checks for prohibited features per RFC-0111 Section 2
+func (s *RFCCompliantService) validateRFC0111Exclusions(req PowerOfAttorneyRequest) error {
+	// Check for Web3/blockchain exclusions in scope
+	for _, scope := range req.Scope {
+		lowerScope := strings.ToLower(scope)
+		if strings.Contains(lowerScope, "web3") ||
+			strings.Contains(lowerScope, "blockchain") ||
+			strings.Contains(lowerScope, "ethereum") ||
+			strings.Contains(lowerScope, "bitcoin") ||
+			strings.Contains(lowerScope, "crypto") {
+			return fmt.Errorf("RFC-0111 Section 2 violation: Web3/blockchain features are prohibited")
+		}
+	}
+
+	// Check for DNA-based identity exclusions
+	if strings.Contains(strings.ToLower(req.PrincipalID), "dna") ||
+		strings.Contains(strings.ToLower(req.AIAgentID), "genetic") {
+		return fmt.Errorf("RFC-0111 Section 2 violation: DNA-based identities are prohibited")
+	}
+
+	// Check for AI-controlled GAuth exclusions
+	if req.PowerType == "ai_controlled_auth" {
+		return fmt.Errorf("RFC-0111 Section 2 violation: AI-controlled GAuth logic is prohibited")
+	}
+
+	return nil
+}
+
+// createPoADefinitionFromRequest creates a PoA Definition from a request
+func (s *RFCCompliantService) createPoADefinitionFromRequest(req PowerOfAttorneyRequest) PoADefinition {
+	// Create basic authorized actions from scope
+	authorizedActions := AuthorizedActions{
+		NonPhysicalActions: []NonPhysicalAction{ActionResearch, ActionSharing},
+		Decisions:          []DecisionType{DecisionInformation},
+	}
+
+	return PoADefinition{
+		Principal: Principal{
+			Type:     PrincipalTypeIndividual, // Default, could be enhanced
+			Identity: req.PrincipalID,
+		},
+		Client: ClientAI{
+			Type:     ClientTypeLLM, // Default, could be enhanced
+			Identity: req.AIAgentID,
+		},
+		AuthorizationType: AuthorizationType{
+			RepresentationType: RepresentationSole,
+			SignatureType:      SignatureSingle,
+			SubProxyAuthority:  false,
+		},
+		ScopeDefinition: ScopeDefinition{
+			AuthorizedActions: authorizedActions,
+			ApplicableSectors: []IndustrySector{SectorICT}, // Default to ICT
+			ApplicableRegions: []GeographicScope{{Type: GeoTypeGlobal, Identifier: "global"}},
+		},
+		Requirements: Requirements{
+			JurisdictionLaw: JurisdictionLaw{
+				PlaceOfJurisdiction: req.Jurisdiction,
+				GoverningLaw:        req.LegalBasis,
+				Language:            "en", // Default language
+			},
+			SecurityCompliance: SecurityCompliance{
+				CommunicationProtocols: []string{"HTTPS", "TLS"},
+				SecurityProperties:     []string{"encryption", "audit_logging"},
+				ComplianceInfo:         []string{"RFC-0111", "RFC-0115", "GDPR"},
+				UpdateMechanism:        "automatic",
+			},
+		},
 	}
 }
