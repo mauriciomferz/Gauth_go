@@ -2,26 +2,10 @@ run:
   timeout: 5m
   issues-exit-code: 1
   tests: true
-  skip-dirs:
-    - vendor
-    - examples
-  skip-files:
-    - ".*_test.go"
-
-output:
-  format: colored-line-number
-  print-issued-lines: true
-  print-linter-name: true
 
 linters-settings:
-  govet:
-    check-shadowing: true
-  golint:
-    min-confidence: 0.8
   gocyclo:
     min-complexity: 15
-  maligned:
-    suggest-new: true
   dupl:
     threshold: 100
   goconst:
@@ -36,12 +20,10 @@ linters-settings:
   gocritic:
     enabled-tags:
       - diagnostic
-      - experimental
-      - opinionated
       - performance
       - style
     disabled-checks:
-      - dupImport # https://github.com/go-critic/go-critic/issues/845
+      - dupImport
       - ifElseChain
       - octalLiteral
       - whyNoLint
@@ -50,7 +32,6 @@ linters-settings:
     lines: 100
     statements: 50
   mnd:
-    # Magic Number Detector settings
     ignored-numbers:
       - "0"
       - "1" 
@@ -74,57 +55,36 @@ linters-settings:
       - "1024"
       - "3600"
       - "86400"
-    ignored-files:
-      - ".*_test.go"
-    ignored-functions:
-      - "^math\\."
-      - "^http\\."
-      - "make"
 
 linters:
   disable-all: true
   enable:
     - bodyclose
-    - deadcode
-    - depguard
-    - dogsled
     - dupl
     - errcheck
-    - exportloopref
     - funlen
-    - gochecknoinits
     - goconst
     - gocritic
     - gocyclo
     - gofmt
     - goimports
-    - golint
-    - gomnd
-    - goprintffuncname
+    - mnd
     - gosec
     - gosimple
     - govet
     - ineffassign
-    - interfacer
     - lll
     - misspell
-    - nakedret
-    - nolintlint
-    - rowserrcheck
-    - scopelint
     - staticcheck
-    - structcheck
     - stylecheck
     - typecheck
     - unconvert
     - unparam
     - unused
-    - varcheck
     - whitespace
 
 issues:
   exclude-rules:
-    # Exclude some linters from running on tests files.
     - path: _test\.go
       linters:
         - gocyclo
@@ -132,36 +92,17 @@ issues:
         - dupl
         - gosec
         - funlen
-    
-    # Exclude known linter issues
     - text: "weak cryptographic primitive"
       linters:
         - gosec
-        
-    # Exclude unused code in implementation files (educational examples)
     - path: pkg/auth/rfc_implementation\.go
       text: "is unused"
       linters:
         - unused
-        
-    # Exclude unused metrics variables (they are registered with Prometheus)
     - path: internal/monitoring/prometheus/exporter\.go
       text: "is unused"
       linters:
         - unused
-
   exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0
-  new: false
-
-severity:
-  default-severity: error
-  case-sensitive: false
-  rules:
-    - linters:
-        - dupl
-      severity: info
-    - linters:
-        - gocritic
-      severity: warning

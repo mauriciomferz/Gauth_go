@@ -1759,7 +1759,7 @@ func (s *RFCCompliantService) DemoComprehensiveAPI(ctx context.Context) error {
 	// In a production environment, these would be called by various system components
 
 	// Actual usage demonstrations to satisfy linter (safe operations)
-	
+
 	// Demo: Authorization Code Generation
 	authReq := PowerOfAttorneyRequest{
 		ClientID:    "demo-client",
