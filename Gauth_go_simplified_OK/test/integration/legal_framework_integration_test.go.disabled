@@ -202,12 +202,12 @@ func setupTestFramework(_ *testing.T) *auth.LegalFrameworkValidator {
 
 func createAuthorizerProof(_ *testing.T) *auth.LegalFramework {
 	return &auth.LegalFramework{
-		Jurisdiction:     "US",
-		EntityType:       "corporation",
-		LegalAuthority:   "commercial_registry_001",
-		ComplianceLevel:  "full",
-		Proof:        "cryptographic_proof_001",
-		Jurisdiction: "US",
+		Jurisdiction:    "US",
+		EntityType:      "corporation",
+		LegalAuthority:  "commercial_registry_001",
+		ComplianceLevel: "full",
+		Proof:           "cryptographic_proof_001",
+		Jurisdiction:    "US",
 		Entity: &auth.Entity{
 			ID:             "authorizer_001",
 			Type:           "organization",
