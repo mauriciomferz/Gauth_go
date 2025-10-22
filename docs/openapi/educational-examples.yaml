@@ -1,0 +1,176 @@
+openapi: 3.0.3
+info:
+  title: GAuth Educational Examples API (Deprecated)
+  version: 0.1.0
+  description: |
+    DEPRECATED: Educational endpoints retained temporarily for backward compatibility.
+    Use the Beta Examples API instead. This legacy spec will be removed in a future release.
+    NOTE: This API is unauthenticated and **NOT PRODUCTION READY**.
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/v1/educational/health:
+    get:
+      summary: Health probe
+      deprecated: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      uptime: { type: string }
+  /api/v1/educational/examples/catalog:
+    get:
+      summary: List available examples
+      deprecated: true
+      responses:
+        '200':
+          description: Example catalog
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  count: { type: integer }
+                  examples:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ExampleMeta'
+  /api/v1/educational/examples/run:
+    post:
+      summary: Start an example job
+      deprecated: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: string
+                  description: Example identifier
+      responses:
+        '202':
+          description: Job accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  job_id: { type: string }
+                  state: { type: string }
+        '400': { description: Invalid request }
+  /api/v1/educational/examples/run/{id}/status:
+    get:
+      summary: Get job status
+      deprecated: true
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  job: { $ref: '#/components/schemas/ExampleJob' }
+        '404': { description: Job not found }
+  /api/v1/educational/examples/run/{id}/logs:
+    get:
+      summary: Stream job logs (SSE)
+      deprecated: true
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: SSE stream of job logs
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        '404': { description: Job not found }
+  /api/v1/educational/examples/run/jobs/{id}/cancel:
+    post:
+      summary: Cancel a running job
+      deprecated: true
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Cancel requested }
+        '404': { description: Job not found }
+  /api/v1/poa/authorize:
+    post:
+      summary: Educational PoA authorization stub (deprecated)
+      deprecated: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                client_id: { type: string }
+      responses:
+        '200': { description: Authorization success }
+        '400': { description: Authorization failure }
+  /api/v1/poa/metrics:
+    get:
+      summary: PoA metrics
+      deprecated: true
+      responses:
+        '200':
+          description: Metrics payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  metrics:
+                    type: object
+                    properties:
+                      total_requests: { type: integer }
+components:
+  schemas:
+    ExampleMeta:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        group: { type: string }
+        estimated_seconds: { type: integer }
+    ExampleJob:
+      type: object
+      properties:
+        id: { type: string }
+        example_id: { type: string }
+        state: { type: string, enum: [queued, running, done, failed, timeout] }
+        output: { type: string }
+        error: { type: string }
+        started_at: { type: string, format: date-time }
+        finished_at: { type: string, format: date-time }
+        logs:
+          type: array
+          items: { type: string }

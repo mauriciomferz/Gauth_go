@@ -1,14 +1,17 @@
 # Security Policy
 
+> Last Updated: 2025-10-17
+> Status: Active
+
 **Gimel Foundation gGmbH i.G. - GAuth RFC Implementation**
 
 Official Go implementation of the Gimel Foundation gGmbH i.G. authorization specifications
 
 ---
 
-**Gimel Foundation gGmbH i.G.**, www.GimelFoundation.com  
-Operated by Gimel Technologies GmbH  
-MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert  
+**Gimel Foundation gGmbH i.G.**, www.GimelFoundation.com
+Operated by Gimel Technologies GmbH
+MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert
 Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com
 
 ## 🔒 RFC COMPLIANT SECURITY FRAMEWORK
@@ -26,7 +29,6 @@ Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com
 
 ## 🛡️ **Security Implementation Overview**
 
-### **🚨 ZERO SECURITY - EVERYTHING IS FAKE**
 - **🔐 JWT Security**: Completely stubbed - returns hardcoded "valid" responses
 - **🔑 Password Hashing**: Mock functions that don't actually hash passwords
 - **🚨 Token Validation**: Always returns success regardless of token content
@@ -82,3 +84,6 @@ This security policy operates under German law and EU regulations, consistent wi
 ---
 
 **For additional security information, see our [documentation](./docs/) and [RFC implementations](./examples/).**
+
+---
+Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md

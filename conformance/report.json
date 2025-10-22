@@ -1,0 +1,784 @@
+{
+  "generated_at": "2025-10-18T23:14:40Z",
+  "clauses": [
+    {
+      "id": "0111:rfc-0111-(placeholder-extract)",
+      "title": "RFC 0111 (Placeholder Extract)",
+      "rfc": "0111",
+      "line_from": 1,
+      "line_to": 1
+    },
+    {
+      "id": "0115:rfc-0115-(placeholder-extract)",
+      "title": "RFC 0115 (Placeholder Extract)",
+      "rfc": "0115",
+      "line_from": 1,
+      "line_to": 1
+    },
+    {
+      "id": "0111:1.-introduction",
+      "title": "1. Introduction",
+      "rfc": "0111",
+      "line_from": 3,
+      "line_to": 3
+    },
+    {
+      "id": "0115:1.-power-of-attorney-structure",
+      "title": "1. Power of Attorney Structure",
+      "rfc": "0115",
+      "line_from": 3,
+      "line_to": 3
+    },
+    {
+      "id": "0111:2.-policy-bundle-integrity",
+      "title": "2. Policy Bundle Integrity",
+      "rfc": "0111",
+      "line_from": 6,
+      "line_to": 6
+    },
+    {
+      "id": "0115:2.-scope-semantics",
+      "title": "2. Scope Semantics",
+      "rfc": "0115",
+      "line_from": 7,
+      "line_to": 7
+    },
+    {
+      "id": "0111:3.-delegation-\u0026-revocation",
+      "title": "3. Delegation \u0026 Revocation",
+      "rfc": "0111",
+      "line_from": 10,
+      "line_to": 10
+    },
+    {
+      "id": "0115:3.-validity-period",
+      "title": "3. Validity Period",
+      "rfc": "0115",
+      "line_from": 11,
+      "line_to": 11
+    },
+    {
+      "id": "0111:4.-audit-logging",
+      "title": "4. Audit Logging",
+      "rfc": "0111",
+      "line_from": 15,
+      "line_to": 15
+    },
+    {
+      "id": "0115:4.-formal-requirements",
+      "title": "4. Formal Requirements",
+      "rfc": "0115",
+      "line_from": 15,
+      "line_to": 15
+    },
+    {
+      "id": "0111:5.-replay-protection",
+      "title": "5. Replay Protection",
+      "rfc": "0111",
+      "line_from": 19,
+      "line_to": 19
+    },
+    {
+      "id": "0115:5.-power-limits",
+      "title": "5. Power Limits",
+      "rfc": "0115",
+      "line_from": 18,
+      "line_to": 18
+    },
+    {
+      "id": "0111:6.-cryptographic-requirements",
+      "title": "6. Cryptographic Requirements",
+      "rfc": "0111",
+      "line_from": 22,
+      "line_to": 22
+    },
+    {
+      "id": "0115:6.-rights-\u0026-obligations",
+      "title": "6. Rights \u0026 Obligations",
+      "rfc": "0115",
+      "line_from": 21,
+      "line_to": 21
+    },
+    {
+      "id": "0115:7.-special-conditions",
+      "title": "7. Special Conditions",
+      "rfc": "0115",
+      "line_from": 24,
+      "line_to": 24
+    },
+    {
+      "id": "0115:8.-joint-signatures",
+      "title": "8. Joint Signatures",
+      "rfc": "0115",
+      "line_from": 27,
+      "line_to": 27
+    },
+    {
+      "id": "0115:9.-canonical-serialization",
+      "title": "9. Canonical Serialization",
+      "rfc": "0115",
+      "line_from": 30,
+      "line_to": 30
+    },
+    {
+      "id": "0115:10.-revocation-semantics",
+      "title": "10. Revocation Semantics",
+      "rfc": "0115",
+      "line_from": 33,
+      "line_to": 33
+    }
+  ],
+  "failures": null,
+  "summary": {
+    "mapped_clauses": 8,
+    "mapped_clauses_found": 8,
+    "required_symbols": 24,
+    "symbols_found": 24,
+    "clauses_with_tests": 8,
+    "clauses_tests_found": 8,
+    "coverage_percent": 100,
+    "missing_clauses": 0,
+    "missing_symbols": 0,
+    "missing_tests": 0,
+    "gap_total": 43,
+    "gap_implemented": 6,
+    "gap_partial": 17,
+    "gap_missing": 20
+  },
+  "evidence": {
+    "AddBundle": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/engine.go:79"
+    ],
+    "AuditEvents": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:1053"
+    ],
+    "CanonicalPOADigest": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/canonical.go:32",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/canonical.go:32",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/canonical.go:32"
+    ],
+    "CreateDelegation": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:641"
+    ],
+    "FileLogger": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit/file_logger.go:21"
+    ],
+    "MemoryLogger": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit/audit.go:84"
+    ],
+    "POAStatus": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa/poa.go:16",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:39"
+    ],
+    "PowerOfAttorney": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:48"
+    ],
+    "ReplayStore": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth/gauth.go:182",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:520"
+    ],
+    "RevocationChain": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/delegation/revocation_chain.go:63"
+    ],
+    "RevokeDelegation": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:974"
+    ],
+    "ValidateDelegation": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:761"
+    ],
+    "ValidateMultiSignature": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:82"
+    ],
+    "VerifyChain": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit/audit.go:151",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit/audit.go:151",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit/file_logger.go:137",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit/file_logger.go:137",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/delegation/delegation.go:76",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/delegation/delegation.go:76",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger/anchor.go:40",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger/anchor.go:40",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger/bolt.go:166",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger/bolt.go:166",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger/ledger.go:147",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger/ledger.go:147",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/engine.go:114",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/engine.go:114",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/store.go:35",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/store.go:35",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/store_file.go:162",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/store_file.go:162"
+    ],
+    "VerifyIntegrity": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:1100"
+    ],
+    "VerifyToken": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/examples/token_management/paseto/main.go:73",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:361"
+    ],
+    "WithReplayProtection": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:614"
+    ],
+    "computeHash": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:1174"
+    ],
+    "policy.Registry": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics/prometheus_adapter.go:252",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/compliance/compliance.go:25",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/engine.go:72",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/store.go:36",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/store_file.go:167"
+    ],
+    "validateDelegationRequest": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:1180"
+    ],
+    "verifyPOASignature": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:577"
+    ]
+  },
+  "failure_categories": {
+    "clause_missing": [],
+    "symbol_missing": [],
+    "tests_missing": []
+  },
+  "gap_matrix": {
+    "generated": "2025-10-17",
+    "version": "beta-refactor",
+    "sections": [
+      {
+        "id": "sec1",
+        "name": "Cryptographic \u0026 Authenticity",
+        "items": [
+          {
+            "id": "sec1.item1",
+            "requirement": "Mandatory POA signature at issuance",
+            "status": "Implemented",
+            "gap": "Need configurable algorithms (Ed25519 only)",
+            "evidence": [
+              "docs/GAP_MATRIX.md:12",
+              "pkg/rfc0111/signature_negative_test.go"
+            ],
+            "priority": "P0"
+          },
+          {
+            "id": "sec1.item2",
+            "requirement": "Full JWT/PASETO claims",
+            "status": "Partial",
+            "gap": "sub,scope,exp,iat,iss,aud,jti,nbf implemented; missing advanced (claims set metadata, structured nested PASETO footer, typ semantic enforcement)",
+            "evidence": [
+              "pkg/gauth/gauth.go",
+              "pkg/gauth/gauth_claims_test.go"
+            ],
+            "priority": "P0"
+          },
+          {
+            "id": "sec1.item3",
+            "requirement": "Robust JSON parsing",
+            "status": "Partial",
+            "gap": "Manual string scanning; property + fuzz tests cover legacy parser for safety",
+            "evidence": [
+              "pkg/gauth/gauth.go",
+              "pkg/gauth/gauth_prop_test.go",
+              "pkg/gauth/gauth_fuzz_test.go"
+            ],
+            "priority": "P0"
+          },
+          {
+            "id": "sec1.item4",
+            "requirement": "Key rotation \u0026 lifecycle",
+            "status": "Partial",
+            "gap": "Scheduler + disk persistence implemented (env driven); missing multi-tenant segregation \u0026 external HSM integration",
+            "evidence": [
+              "internal/crypto/keys.go",
+              "internal/crypto/keys_persist_test.go"
+            ],
+            "priority": "P1"
+          },
+          {
+            "id": "sec1.item5",
+            "requirement": "Public verifiable token integrity",
+            "status": "Partial",
+            "gap": "Local symmetric only; no detached signature",
+            "evidence": [
+              "docs/GAP_MATRIX.md:14"
+            ],
+            "priority": "P0"
+          },
+          {
+            "id": "sec1.item6",
+            "requirement": "Canonical digest stability fuzzing",
+            "status": "Implemented",
+            "gap": "Property + fuzz tests validate determinism \u0026 mutable field exclusion",
+            "evidence": [
+              "docs/GAP_MATRIX.md:15",
+              "pkg/rfc0111/canonical.go",
+              "pkg/rfc0111/canonical_prop_test.go",
+              "pkg/rfc0111/canonical_fuzz_test.go"
+            ],
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "id": "sec2",
+        "name": "Authorization Engine",
+        "items": [
+          {
+            "id": "sec2.item1",
+            "requirement": "PDP combining algorithms",
+            "status": "Implemented",
+            "gap": "Need richer conflict diagnostics",
+            "evidence": [
+              "docs/GAP_MATRIX.md:20"
+            ],
+            "priority": "P0"
+          },
+          {
+            "id": "sec2.item2",
+            "requirement": "ABAC expression evaluation",
+            "status": "Implemented",
+            "gap": "No extensible function registry",
+            "evidence": [
+              "docs/GAP_MATRIX.md:21"
+            ],
+            "priority": "P0"
+          },
+          {
+            "id": "sec2.item3",
+            "requirement": "Obligations \u0026 advice processing",
+            "status": "Missing",
+            "gap": "Concept only, not executed",
+            "evidence": [
+              "docs/GAP_MATRIX.md:25"
+            ],
+            "priority": "P2"
+          },
+          {
+            "id": "sec2.item4",
+            "requirement": "Policy versioning \u0026 rollback",
+            "status": "Missing",
+            "gap": "No version metadata",
+            "evidence": [
+              "docs/GAP_MATRIX.md:23"
+            ],
+            "priority": "P1"
+          },
+          {
+            "id": "sec2.item5",
+            "requirement": "Distributed PDP \u0026 caching",
+            "status": "Missing",
+            "gap": "No clustering or cache invalidation",
+            "evidence": [
+              "docs/GAP_MATRIX.md:24"
+            ],
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "id": "sec3",
+        "name": "PoA Definition (RFC0115)",
+        "items": [
+          {
+            "id": "sec3.item1",
+            "requirement": "Full semantic validation",
+            "status": "Partial",
+            "gap": "BasicPoAValidator only",
+            "evidence": [
+              "docs/GAP_MATRIX.md:32",
+              "pkg/rfc0111/validator.go"
+            ],
+            "priority": "P0"
+          },
+          {
+            "id": "sec3.item2",
+            "requirement": "Embed full PoA in token",
+            "status": "Missing",
+            "gap": "Envelope lacks full definition",
+            "evidence": [
+              "docs/GAP_MATRIX.md:33"
+            ],
+            "priority": "P1"
+          },
+          {
+            "id": "sec3.item3",
+            "requirement": "Joint/collective signature enforcement",
+            "status": "Missing",
+            "gap": "No multi-signer aggregation",
+            "evidence": [
+              "docs/GAP_MATRIX.md:33"
+            ],
+            "priority": "P1"
+          },
+          {
+            "id": "sec3.item4",
+            "requirement": "Conditional/special conditions evaluation",
+            "status": "Missing",
+            "gap": "No runtime interpreter",
+            "evidence": [
+              "docs/GAP_MATRIX.md:34"
+            ],
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "id": "sec4",
+        "name": "Legal / Jurisdiction / Compliance",
+        "items": [
+          {
+            "id": "sec4.item1",
+            "requirement": "Jurisdiction-specific enforcement",
+            "status": "Missing",
+            "gap": "No runtime branching",
+            "evidence": [
+              "docs/GAP_MATRIX.md:40"
+            ],
+            "priority": "P1"
+          },
+          {
+            "id": "sec4.item2",
+            "requirement": "Compliance attestation proof",
+            "status": "Missing",
+            "gap": "No evidence ingestion",
+            "evidence": [
+              "docs/GAP_MATRIX.md:41"
+            ],
+            "priority": "P2"
+          },
+          {
+            "id": "sec4.item3",
+            "requirement": "Arbitration / dispute hooks",
+            "status": "Missing",
+            "gap": "No code path",
+            "evidence": [
+              "docs/GAP_MATRIX.md:42"
+            ],
+            "priority": "P3"
+          }
+        ]
+      },
+      {
+        "id": "sec5",
+        "name": "Persistence \u0026 Durability",
+        "items": [
+          {
+            "id": "sec5.item1",
+            "requirement": "Immutable audit ledger",
+            "status": "Partial",
+            "gap": "BoltDB lacks signatures \u0026 external anchor",
+            "evidence": [
+              "docs/GAP_MATRIX.md:48"
+            ],
+            "priority": "P0"
+          },
+          {
+            "id": "sec5.item2",
+            "requirement": "Delegation storage durability",
+            "status": "Partial",
+            "gap": "No indexing or pruning",
+            "evidence": [
+              "docs/GAP_MATRIX.md:49"
+            ],
+            "priority": "P2"
+          },
+          {
+            "id": "sec5.item3",
+            "requirement": "Revocation anchoring",
+            "status": "Partial",
+            "gap": "No external notarization",
+            "evidence": [
+              "docs/GAP_MATRIX.md:50"
+            ],
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "id": "sec6",
+        "name": "Replay \u0026 Token Security",
+        "items": [
+          {
+            "id": "sec6.item1",
+            "requirement": "Fail-closed replay mode",
+            "status": "Partial",
+            "gap": "In-memory JTI map + optional ReplayStore reject duplicates/errors; missing durable persistence \u0026 eviction controls",
+            "evidence": [
+              "pkg/gauth/gauth.go",
+              "pkg/gauth/gauth_claims_test.go"
+            ],
+            "priority": "P1"
+          },
+          {
+            "id": "sec6.item2",
+            "requirement": "JTI format validation",
+            "status": "Implemented",
+            "gap": "Need skew checks",
+            "evidence": [
+              "docs/GAP_MATRIX.md:56"
+            ],
+            "priority": "P2"
+          },
+          {
+            "id": "sec6.item3",
+            "requirement": "Replay persistence recovery",
+            "status": "Missing",
+            "gap": "No WAL snapshot",
+            "evidence": [
+              "docs/GAP_MATRIX.md:57"
+            ],
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "id": "sec7",
+        "name": "Observability \u0026 Metrics",
+        "items": [
+          {
+            "id": "sec7.item1",
+            "requirement": "Decision metrics (allow/deny by policy)",
+            "status": "Partial",
+            "gap": "No action/resource dimension",
+            "evidence": [
+              "docs/GAP_MATRIX.md:62"
+            ],
+            "priority": "P2"
+          },
+          {
+            "id": "sec7.item2",
+            "requirement": "Metrics export adapter",
+            "status": "Partial",
+            "gap": "No collector registration",
+            "evidence": [
+              "docs/GAP_MATRIX.md:63"
+            ],
+            "priority": "P3"
+          },
+          {
+            "id": "sec7.item3",
+            "requirement": "Violation counters",
+            "status": "Partial",
+            "gap": "Categorized counters implemented + JSON snapshot endpoint (/api/v1/beta/metrics/violations) with timestamp/total; still missing Prometheus collector registration, OTEL exporter, anomaly detection, semantic PoA reason granularity",
+            "evidence": [
+              "internal/observability/violations.go",
+              "pkg/gauth/gauth.go",
+              "web/server_clean.go",
+              "web/violation_metrics_endpoint_test.go"
+            ],
+            "priority": "P2"
+          },
+          {
+            "id": "sec7.item4",
+            "requirement": "Distributed tracing",
+            "status": "Missing",
+            "gap": "No span linking",
+            "evidence": [
+              "docs/GAP_MATRIX.md:65"
+            ],
+            "priority": "P3"
+          }
+        ]
+      },
+      {
+        "id": "sec8",
+        "name": "Key \u0026 Secret Management",
+        "items": [
+          {
+            "id": "sec8.item1",
+            "requirement": "Secure secret storage",
+            "status": "Missing",
+            "gap": "No vault/HSM provider",
+            "evidence": [
+              "docs/GAP_MATRIX.md:70"
+            ],
+            "priority": "P0"
+          },
+          {
+            "id": "sec8.item2",
+            "requirement": "Rotation audit trail",
+            "status": "Partial",
+            "gap": "JSON rotation log + hash chain (prev_hash -\u003e hash) implemented; still missing external append-only sink \u0026 multi-tenant segregation",
+            "evidence": [
+              "internal/crypto/keys.go",
+              "internal/crypto/keys_rotation_log_test.go",
+              "internal/crypto/keys_rotation_hash_chain_test.go"
+            ],
+            "priority": "P1"
+          }
+        ]
+      },
+      {
+        "id": "sec9",
+        "name": "Testing \u0026 Conformance",
+        "items": [
+          {
+            "id": "sec9.item1",
+            "requirement": "Clause-to-test mapping",
+            "status": "Partial",
+            "gap": "Harness maps 8 mapped clause entries (100% of declared set); broader RFC sections still unmapped",
+            "evidence": [
+              "docs/GAP_MATRIX.md:76",
+              "conformance/clause_map.json",
+              "report.md"
+            ],
+            "priority": "P0"
+          },
+          {
+            "id": "sec9.item2",
+            "requirement": "Fuzzing / property tests",
+            "status": "Partial",
+            "gap": "Canonical digest covered; parsing \u0026 semantic validators still lack property tests",
+            "evidence": [
+              "docs/GAP_MATRIX.md:77",
+              "pkg/rfc0111/canonical_prop_test.go",
+              "pkg/rfc0111/canonical_fuzz_test.go"
+            ],
+            "priority": "P1"
+          },
+          {
+            "id": "sec9.item3",
+            "requirement": "Load/stress benchmarks",
+            "status": "Missing",
+            "gap": "No high-load harness",
+            "evidence": [
+              "docs/GAP_MATRIX.md:78"
+            ],
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "id": "sec10",
+        "name": "Interoperability / External Interfaces",
+        "items": [
+          {
+            "id": "sec10.item1",
+            "requirement": "OpenAPI for PoA \u0026 delegation",
+            "status": "Missing",
+            "gap": "No documented contract",
+            "evidence": [
+              "docs/GAP_MATRIX.md:83"
+            ],
+            "priority": "P1"
+          },
+          {
+            "id": "sec10.item2",
+            "requirement": "Well-known discovery endpoints",
+            "status": "Implemented",
+            "gap": "jwks_uri + revocation endpoints exposed; missing oauth2 revocation + introspection standardization",
+            "evidence": [
+              "web/server_clean.go",
+              "web/jwks_integrity_test.go"
+            ],
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "id": "sec11",
+        "name": "AI Capability \u0026 Governance",
+        "items": [
+          {
+            "id": "sec11.item1",
+            "requirement": "Capability matrix enforcement",
+            "status": "Missing",
+            "gap": "No runtime enforcement",
+            "evidence": [
+              "docs/GAP_MATRIX.md:90"
+            ],
+            "priority": "P1"
+          },
+          {
+            "id": "sec11.item2",
+            "requirement": "Model limit checks",
+            "status": "Missing",
+            "gap": "No metadata evaluation",
+            "evidence": [
+              "docs/GAP_MATRIX.md:91"
+            ],
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "id": "sec12",
+        "name": "Advanced Delegation Lifecycle",
+        "items": [
+          {
+            "id": "sec12.item1",
+            "requirement": "Suspension / partial revocation",
+            "status": "Missing",
+            "gap": "Only revoked/expired statuses",
+            "evidence": [
+              "docs/GAP_MATRIX.md:96"
+            ],
+            "priority": "P2"
+          },
+          {
+            "id": "sec12.item2",
+            "requirement": "Delegation chaining depth limits",
+            "status": "Missing",
+            "gap": "No depth enforcement",
+            "evidence": [
+              "docs/GAP_MATRIX.md:97"
+            ],
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "id": "sec13",
+        "name": "Data Hygiene \u0026 Validation",
+        "items": [
+          {
+            "id": "sec13.item1",
+            "requirement": "UTF-8 \u0026 control char filtering",
+            "status": "Partial",
+            "gap": "No metrics instrumentation",
+            "evidence": [
+              "docs/GAP_MATRIX.md:102"
+            ],
+            "priority": "P3"
+          },
+          {
+            "id": "sec13.item2",
+            "requirement": "Structured numeric limit parsing",
+            "status": "Missing",
+            "gap": "Amounts not parsed/enforced",
+            "evidence": [
+              "docs/GAP_MATRIX.md:103"
+            ],
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "id": "sec14",
+        "name": "Risk \u0026 Threat Modeling",
+        "items": [
+          {
+            "id": "sec14.item1",
+            "requirement": "Threat model synchronization",
+            "status": "Partial",
+            "gap": "No mitigations matrix",
+            "evidence": [
+              "docs/GAP_MATRIX.md:108"
+            ],
+            "priority": "P2"
+          },
+          {
+            "id": "sec14.item2",
+            "requirement": "Residual risk register",
+            "status": "Missing",
+            "gap": "No tracking of remaining exposures",
+            "evidence": [
+              "docs/GAP_MATRIX.md:109"
+            ],
+            "priority": "P3"
+          }
+        ]
+      }
+    ]
+  }
+}

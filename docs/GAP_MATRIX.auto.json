@@ -1,0 +1,402 @@
+{
+  "capabilities_schema_version": 1,
+  "counts": {
+    "conceptual": 0,
+    "implemented": 8,
+    "missing": 16,
+    "partial": 19
+  },
+  "drift_items": null,
+  "entries": [
+    {
+      "section": "Cryptographic \u0026 Authenticity",
+      "id": "sec1.item1",
+      "requirement": "Mandatory POA signature at issuance",
+      "status": "Implemented",
+      "priority": "P0",
+      "gap": "Need configurable algorithms (Ed25519 only)",
+      "evidence": "docs/GAP_MATRIX.md:12|pkg/rfc0111/signature_negative_test.go"
+    },
+    {
+      "section": "Cryptographic \u0026 Authenticity",
+      "id": "sec1.item2",
+      "requirement": "Full JWT/PASETO claims",
+      "status": "Partial",
+      "priority": "P0",
+      "gap": "sub,scope,exp,iat,iss,aud,jti,nbf implemented; missing advanced (claims set metadata, structured nested PASETO footer, typ semantic enforcement)",
+      "evidence": "pkg/gauth/gauth.go|pkg/gauth/gauth_claims_test.go"
+    },
+    {
+      "section": "Cryptographic \u0026 Authenticity",
+      "id": "sec1.item3",
+      "requirement": "Robust JSON parsing",
+      "status": "Partial",
+      "priority": "P0",
+      "gap": "Manual string scanning; property + fuzz tests cover legacy parser for safety",
+      "evidence": "pkg/gauth/gauth.go|pkg/gauth/gauth_prop_test.go|pkg/gauth/gauth_fuzz_test.go"
+    },
+    {
+      "section": "Cryptographic \u0026 Authenticity",
+      "id": "sec1.item4",
+      "requirement": "Key rotation \u0026 lifecycle",
+      "status": "Partial",
+      "priority": "P1",
+      "gap": "Scheduler + disk persistence implemented (env driven); missing multi-tenant segregation \u0026 external HSM integration",
+      "evidence": "internal/crypto/keys.go|internal/crypto/keys_persist_test.go"
+    },
+    {
+      "section": "Cryptographic \u0026 Authenticity",
+      "id": "sec1.item5",
+      "requirement": "Public verifiable token integrity",
+      "status": "Implemented",
+      "priority": "P0",
+      "gap": "Detached signature (EnvelopeV2: detached_sig+alg+kid) implemented; remaining: alt algs (ecdsa/bls/batch) \u0026 property/fuzz tests \u0026 mandatory enforcement flag",
+      "evidence": "docs/GAP_MATRIX.md:14|pkg/rfc0111/rfc0111_detached_signature_test.go"
+    },
+    {
+      "section": "Cryptographic \u0026 Authenticity",
+      "id": "sec1.item6",
+      "requirement": "Canonical digest stability fuzzing",
+      "status": "Implemented",
+      "priority": "P2",
+      "gap": "Property + fuzz tests validate determinism \u0026 mutable field exclusion",
+      "evidence": "docs/GAP_MATRIX.md:15|pkg/rfc0111/canonical.go|pkg/rfc0111/canonical_prop_test.go|pkg/rfc0111/canonical_fuzz_test.go"
+    },
+    {
+      "section": "Authorization Engine",
+      "id": "sec2.item1",
+      "requirement": "PDP combining algorithms",
+      "status": "Implemented",
+      "priority": "P0",
+      "gap": "Need richer conflict diagnostics",
+      "evidence": "docs/GAP_MATRIX.md:20"
+    },
+    {
+      "section": "Authorization Engine",
+      "id": "sec2.item2",
+      "requirement": "ABAC expression evaluation",
+      "status": "Implemented",
+      "priority": "P0",
+      "gap": "No extensible function registry",
+      "evidence": "docs/GAP_MATRIX.md:21"
+    },
+    {
+      "section": "Authorization Engine",
+      "id": "sec2.item3",
+      "requirement": "Obligations \u0026 advice processing",
+      "status": "Partial",
+      "priority": "P2",
+      "gap": "Executor skeleton present; lacks advice emission semantics \u0026 persistent audit channel",
+      "evidence": "docs/GAP_MATRIX.md:25"
+    },
+    {
+      "section": "Authorization Engine",
+      "id": "sec2.item4",
+      "requirement": "Policy versioning \u0026 rollback",
+      "status": "Missing",
+      "priority": "P1",
+      "gap": "No version metadata",
+      "evidence": "docs/GAP_MATRIX.md:23"
+    },
+    {
+      "section": "Authorization Engine",
+      "id": "sec2.item5",
+      "requirement": "Distributed PDP \u0026 caching",
+      "status": "Missing",
+      "priority": "P2",
+      "gap": "No clustering or cache invalidation",
+      "evidence": "docs/GAP_MATRIX.md:24"
+    },
+    {
+      "section": "PoA Definition (RFC0115)",
+      "id": "sec3.item1",
+      "requirement": "Full semantic validation",
+      "status": "Partial",
+      "priority": "P0",
+      "gap": "BasicPoAValidator only",
+      "evidence": "docs/GAP_MATRIX.md:32|pkg/rfc0111/validator.go"
+    },
+    {
+      "section": "PoA Definition (RFC0115)",
+      "id": "sec3.item2",
+      "requirement": "Embed full PoA in token",
+      "status": "Missing",
+      "priority": "P1",
+      "gap": "Envelope lacks full definition",
+      "evidence": "docs/GAP_MATRIX.md:33"
+    },
+    {
+      "section": "PoA Definition (RFC0115)",
+      "id": "sec3.item3",
+      "requirement": "Joint/collective signature enforcement",
+      "status": "Partial",
+      "priority": "P1",
+      "gap": "No aggregated digest signature (batch/compact) \u0026 multi-algorithm sets",
+      "evidence": "docs/GAP_MATRIX.md:33"
+    },
+    {
+      "section": "PoA Definition (RFC0115)",
+      "id": "sec3.item4",
+      "requirement": "Conditional/special conditions evaluation",
+      "status": "Missing",
+      "priority": "P2",
+      "gap": "No runtime interpreter",
+      "evidence": "docs/GAP_MATRIX.md:34"
+    },
+    {
+      "section": "Legal / Jurisdiction / Compliance",
+      "id": "sec4.item1",
+      "requirement": "Jurisdiction-specific enforcement",
+      "status": "Missing",
+      "priority": "P1",
+      "gap": "No runtime branching",
+      "evidence": "docs/GAP_MATRIX.md:40"
+    },
+    {
+      "section": "Legal / Jurisdiction / Compliance",
+      "id": "sec4.item2",
+      "requirement": "Compliance attestation proof",
+      "status": "Missing",
+      "priority": "P2",
+      "gap": "No evidence ingestion",
+      "evidence": "docs/GAP_MATRIX.md:41"
+    },
+    {
+      "section": "Legal / Jurisdiction / Compliance",
+      "id": "sec4.item3",
+      "requirement": "Arbitration / dispute hooks",
+      "status": "Missing",
+      "priority": "P3",
+      "gap": "No code path",
+      "evidence": "docs/GAP_MATRIX.md:42"
+    },
+    {
+      "section": "Persistence \u0026 Durability",
+      "id": "sec5.item1",
+      "requirement": "Immutable audit ledger",
+      "status": "Partial",
+      "priority": "P0",
+      "gap": "BoltDB lacks signatures \u0026 external anchor",
+      "evidence": "docs/GAP_MATRIX.md:48"
+    },
+    {
+      "section": "Persistence \u0026 Durability",
+      "id": "sec5.item2",
+      "requirement": "Delegation storage durability",
+      "status": "Partial",
+      "priority": "P2",
+      "gap": "No indexing or pruning",
+      "evidence": "docs/GAP_MATRIX.md:49"
+    },
+    {
+      "section": "Persistence \u0026 Durability",
+      "id": "sec5.item3",
+      "requirement": "Revocation anchoring",
+      "status": "Partial",
+      "priority": "P2",
+      "gap": "No external notarization",
+      "evidence": "docs/GAP_MATRIX.md:50"
+    },
+    {
+      "section": "Replay \u0026 Token Security",
+      "id": "sec6.item1",
+      "requirement": "Fail-closed replay mode",
+      "status": "Partial",
+      "priority": "P1",
+      "gap": "In-memory JTI map + optional ReplayStore reject duplicates/errors; missing durable persistence \u0026 eviction controls",
+      "evidence": "pkg/gauth/gauth.go|pkg/gauth/gauth_claims_test.go"
+    },
+    {
+      "section": "Replay \u0026 Token Security",
+      "id": "sec6.item2",
+      "requirement": "JTI format validation",
+      "status": "Implemented",
+      "priority": "P2",
+      "gap": "Need skew checks",
+      "evidence": "docs/GAP_MATRIX.md:56"
+    },
+    {
+      "section": "Replay \u0026 Token Security",
+      "id": "sec6.item3",
+      "requirement": "Replay persistence recovery",
+      "status": "Missing",
+      "priority": "P2",
+      "gap": "No WAL snapshot",
+      "evidence": "docs/GAP_MATRIX.md:57"
+    },
+    {
+      "section": "Observability \u0026 Metrics",
+      "id": "sec7.item1",
+      "requirement": "Decision metrics (allow/deny + action/resource labels)",
+      "status": "Implemented",
+      "priority": "P2",
+      "gap": "Reason taxonomy limited; no JSON labeled export yet",
+      "evidence": "docs/GAP_MATRIX.md:62|internal/metrics/prometheus_adapter.go|docs/OBSERVABILITY.md"
+    },
+    {
+      "section": "Observability \u0026 Metrics",
+      "id": "sec7.item2",
+      "requirement": "Metrics export adapter",
+      "status": "Partial",
+      "priority": "P3",
+      "gap": "No collector registration",
+      "evidence": "docs/GAP_MATRIX.md:63"
+    },
+    {
+      "section": "Observability \u0026 Metrics",
+      "id": "sec7.item3",
+      "requirement": "Violation \u0026 semantic counters (adaptive anomaly)",
+      "status": "Implemented",
+      "priority": "P2",
+      "gap": "Counters + per-category 60s/300s rates + adaptive anomaly detector (EWMA + Welford variance) with z-score export via JSON/Prometheus/OTEL; anomaly EWMA state persisted \u0026 restored with hash chain verification. Remaining gaps: external anchoring \u0026 archival rotation of semantic snapshots, historical rate archive beyond EWMA, surge alert hooks.",
+      "evidence": "internal/observability/violations.go|pkg/gauth/gauth.go|pkg/rfc0111/rfc0111.go|web/server_clean.go|docs/OBSERVABILITY.md|web/persistence_verify_test.go|web/server_anomaly_test.go|web/server_semantic_persistence_test.go"
+    },
+    {
+      "section": "Observability \u0026 Metrics",
+      "id": "sec7.item4",
+      "requirement": "Distributed tracing",
+      "status": "Missing",
+      "priority": "P3",
+      "gap": "No span linking",
+      "evidence": "docs/GAP_MATRIX.md:65"
+    },
+    {
+      "section": "Key \u0026 Secret Management",
+      "id": "sec8.item1",
+      "requirement": "Secure secret storage",
+      "status": "Missing",
+      "priority": "P0",
+      "gap": "No vault/HSM provider",
+      "evidence": "docs/GAP_MATRIX.md:70"
+    },
+    {
+      "section": "Key \u0026 Secret Management",
+      "id": "sec8.item2",
+      "requirement": "Rotation audit trail",
+      "status": "Partial",
+      "priority": "P1",
+      "gap": "JSON rotation log + hash chain (prev_hash -\u003e hash) implemented; still missing external append-only sink \u0026 multi-tenant segregation",
+      "evidence": "internal/crypto/keys.go|internal/crypto/keys_rotation_log_test.go|internal/crypto/keys_rotation_hash_chain_test.go"
+    },
+    {
+      "section": "Testing \u0026 Conformance",
+      "id": "sec9.item1",
+      "requirement": "Clause-to-test mapping",
+      "status": "Partial",
+      "priority": "P0",
+      "gap": "Harness maps 8 mapped clause entries (100% of declared set); broader RFC sections still unmapped",
+      "evidence": "docs/GAP_MATRIX.md:76|conformance/clause_map.json|report.md"
+    },
+    {
+      "section": "Testing \u0026 Conformance",
+      "id": "sec9.item2",
+      "requirement": "Fuzzing / property tests",
+      "status": "Partial",
+      "priority": "P1",
+      "gap": "Canonical digest covered; parsing \u0026 semantic validators still lack property tests",
+      "evidence": "docs/GAP_MATRIX.md:77|pkg/rfc0111/canonical_prop_test.go|pkg/rfc0111/canonical_fuzz_test.go"
+    },
+    {
+      "section": "Testing \u0026 Conformance",
+      "id": "sec9.item3",
+      "requirement": "Load/stress benchmarks",
+      "status": "Missing",
+      "priority": "P2",
+      "gap": "No high-load harness",
+      "evidence": "docs/GAP_MATRIX.md:78"
+    },
+    {
+      "section": "Interoperability / External Interfaces",
+      "id": "sec10.item1",
+      "requirement": "OpenAPI for PoA \u0026 delegation",
+      "status": "Partial",
+      "priority": "P1",
+      "gap": "Spec published (issue/validate/status/delegation/metrics); missing error schemas \u0026 provenance/audit endpoints",
+      "evidence": "docs/GAP_MATRIX.md:83|docs/openapi.yaml|web/server_clean.go"
+    },
+    {
+      "section": "Interoperability / External Interfaces",
+      "id": "sec10.item2",
+      "requirement": "Well-known discovery endpoints",
+      "status": "Partial",
+      "priority": "P2",
+      "gap": "Missing JWKS integrity signature \u0026 structured deprecation metadata (deprecated_after/sunset_after)",
+      "evidence": "web/server_clean.go|web/jwks_integrity_test.go"
+    },
+    {
+      "section": "AI Capability \u0026 Governance",
+      "id": "sec11.item1",
+      "requirement": "Capability matrix enforcement",
+      "status": "Missing",
+      "priority": "P1",
+      "gap": "No runtime enforcement",
+      "evidence": "docs/GAP_MATRIX.md:90"
+    },
+    {
+      "section": "AI Capability \u0026 Governance",
+      "id": "sec11.item2",
+      "requirement": "Model limit checks",
+      "status": "Missing",
+      "priority": "P2",
+      "gap": "No metadata evaluation",
+      "evidence": "docs/GAP_MATRIX.md:91"
+    },
+    {
+      "section": "Advanced Delegation Lifecycle",
+      "id": "sec12.item1",
+      "requirement": "Suspension / partial revocation",
+      "status": "Missing",
+      "priority": "P2",
+      "gap": "Only revoked/expired statuses",
+      "evidence": "docs/GAP_MATRIX.md:96"
+    },
+    {
+      "section": "Advanced Delegation Lifecycle",
+      "id": "sec12.item2",
+      "requirement": "Delegation chaining depth limits",
+      "status": "Missing",
+      "priority": "P2",
+      "gap": "No depth enforcement",
+      "evidence": "docs/GAP_MATRIX.md:97"
+    },
+    {
+      "section": "Data Hygiene \u0026 Validation",
+      "id": "sec13.item1",
+      "requirement": "UTF-8 \u0026 control char filtering",
+      "status": "Partial",
+      "priority": "P3",
+      "gap": "No metrics instrumentation",
+      "evidence": "docs/GAP_MATRIX.md:102"
+    },
+    {
+      "section": "Data Hygiene \u0026 Validation",
+      "id": "sec13.item2",
+      "requirement": "Structured numeric limit parsing",
+      "status": "Partial",
+      "priority": "P2",
+      "gap": "No multi-period limits; lacks currency conversion \u0026 audit persistence",
+      "evidence": "docs/GAP_MATRIX.md:103"
+    },
+    {
+      "section": "Risk \u0026 Threat Modeling",
+      "id": "sec14.item1",
+      "requirement": "Threat model synchronization",
+      "status": "Partial",
+      "priority": "P2",
+      "gap": "No mitigations matrix",
+      "evidence": "docs/GAP_MATRIX.md:108"
+    },
+    {
+      "section": "Risk \u0026 Threat Modeling",
+      "id": "sec14.item2",
+      "requirement": "Residual risk register",
+      "status": "Missing",
+      "priority": "P3",
+      "gap": "No tracking of remaining exposures",
+      "evidence": "docs/GAP_MATRIX.md:109"
+    }
+  ],
+  "generated_at": "2025-10-22T06:28:32Z",
+  "schema_version": 1,
+  "total": 43
+}

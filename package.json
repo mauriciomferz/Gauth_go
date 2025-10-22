@@ -1,0 +1,24 @@
+{
+  "type": "module",
+  "name": "gauth-web-modular",
+  "version": "1.0.0",
+  "description": "Modularized GAuth web frontend",
+  "main": "web/static/js/modules/main.js",
+  "scripts": {
+    "lint": "eslint web/static/js/modules/*.js web/static/js/app.js",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config jest.config.cjs",
+    "build": "node web/static/js/build.js",
+    "ui:test": "playwright test",
+    "ui:report": "playwright show-report"
+  },
+  "dependencies": {
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.10",
+    "eslint": "^8.0.0",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
+    "@playwright/test": "^1.48.0"
+  }
+}

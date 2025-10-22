@@ -1,0 +1,55 @@
+package token
+
+import "time"
+
+// Envelope is a draft structured token payload (Milestone 2A scaffold).
+// Not yet wired into issuance; future versions will sign + serialize this.
+type Envelope struct {
+	Version         string            `json:"ver"`
+	KeyID           string            `json:"kid,omitempty"`
+	DelegationID    string            `json:"delegation_id"`
+	Grantor         string            `json:"grantor"`
+	Grantee         string            `json:"grantee"`
+	Scope           []string          `json:"scope"`
+	Restrictions    map[string]string `json:"restrictions,omitempty"`
+	Status          string            `json:"status,omitempty"`
+	IssuedAt        time.Time         `json:"iat"`
+	ExpiresAt       time.Time         `json:"exp"`
+	IssuanceChain   string            `json:"iss_chain_tip,omitempty"`
+	RevocationChain string            `json:"rev_chain_tip,omitempty"`
+	JTI             string            `json:"jti,omitempty"` // unique token identifier (replay protection)
+}
+
+// EnvelopeV2 introduces explicit canonical POA digest and satisfied multi-signature metadata.
+// It embeds a minimal subset of POA fields required for validation while allowing future
+// expansion (e.g., policy versioning) without breaking legacy consumers. Tokens issued
+// with GAUTH_POA_ENVELOPE_V2=1 will serialize this structure instead of Envelope.
+type EnvelopeV2 struct {
+	Version             string            `json:"ver"`
+	KeyID               string            `json:"kid,omitempty"`
+	DelegationID        string            `json:"delegation_id"`
+	Grantor             string            `json:"grantor"`
+	Grantee             string            `json:"grantee"`
+	Scope               []string          `json:"scope"`
+	Restrictions        map[string]string `json:"restrictions,omitempty"`
+	Status              string            `json:"status,omitempty"`
+	IssuedAt            time.Time         `json:"iat"`
+	ExpiresAt           time.Time         `json:"exp"`
+	IssuanceChain       string            `json:"iss_chain_tip,omitempty"`
+	RevocationChain     string            `json:"rev_chain_tip,omitempty"`
+	JTI                 string            `json:"jti,omitempty"`
+	CanonicalDigest     string            `json:"canonical_digest,omitempty"` // hex digest of canonical POA representation
+	SatisfiedWeight     int               `json:"satisfied_weight,omitempty"`
+	SatisfiedSignatures int               `json:"satisfied_signatures,omitempty"`
+	// PoAVersion records the schema version of embedded POA serialization (e.g. "poa/v1").
+	PoAVersion string `json:"poa_version,omitempty"`
+	// RawPOA is a deterministic JSON serialization of the PowerOfAttorney used to derive CanonicalDigest.
+	// Provided for auditing and external verification replay. Omitted if size exceeds policy limits.
+	RawPOA string `json:"raw_poa,omitempty"`
+	// Detached signature (optional, feature gated by GAUTH_DETACHED_SIGNATURE=1). This is an Ed25519 (or future) signature
+	// over the canonical POA JSON bytes (the exact same bytes whose SHA-256 hex is CanonicalDigest). The intent is to
+	// provide a publicly verifiable integrity proof decoupled from the embedded (or absent) POA signature object.
+	DetachedSignature    string `json:"detached_sig,omitempty"`
+	DetachedSignatureAlg string `json:"detached_sig_alg,omitempty"`
+	DetachedSignatureKid string `json:"detached_sig_kid,omitempty"`
+}

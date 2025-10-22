@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "capabilities": [
+    {"id": "cap.transfer", "version": "1.0", "stable": true},
+    {"id": "cap.issue", "version": "1.0", "stable": true},
+    {"id": "cap.delegation.create", "version": "1.0", "stable": true},
+    {"id": "cap.delegation.revoke", "version": "1.0", "stable": true}
+  ],
+  "action_mappings": {
+    "transaction:execute": ["cap.transfer"],
+    "transaction:pay": ["cap.transfer"],
+    "transaction:issue": ["cap.issue"],
+    "delegation:create": ["cap.delegation.create"],
+    "delegation:revoke": ["cap.delegation.revoke"]
+  }
+}

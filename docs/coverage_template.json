@@ -1,0 +1,19 @@
+{
+  "generated": "",
+  "rfc": {
+    "0111": {
+      "sections": [
+        {"id": "0111:authz-combining", "title": "Combining Algorithms", "expected": ["deny_overrides", "permit_overrides", "first_applicable"], "tests": []},
+        {"id": "0111:jti-format", "title": "JTI Format Validation", "expected": ["uuidv4"], "tests": []},
+        {"id": "0111:replay-protection", "title": "Replay Protection", "expected": ["first-seen", "fail-open", "latency-metrics"], "tests": []}
+      ]
+    },
+    "0115": {
+      "sections": [
+        {"id": "0115:poa-structure", "title": "PoA Structural Fields", "expected": ["parties", "scope", "requirements"], "tests": []},
+        {"id": "0115:poa-semantic", "title": "Semantic Validation Rules", "expected": ["non-self-delegation", "transaction-currency", "temporal-invariants", "numeric-limits"], "tests": []},
+        {"id": "0115:canonical-digest", "title": "Canonical Digest Stability", "expected": ["stable-permutation", "domain-separation"], "tests": []}
+      ]
+    }
+  }
+}

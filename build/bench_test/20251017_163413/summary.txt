@@ -1,0 +1,4 @@
+[run_benchmarks] Running benchmarks (count=5)
+[run_benchmarks] Package: ./pkg/rfc0111
+
+[run_benchmarks] Complete. Key results:

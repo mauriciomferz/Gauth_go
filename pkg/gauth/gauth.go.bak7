@@ -1,0 +1,200 @@
+package gauth
+
+import (
+	"time"
+)
+
+// Config represents the configuration for GAuth
+type Config struct {
+	AuthServerURL     string
+	ClientID          string
+	ClientSecret      string
+	Scopes            []string
+	AccessTokenExpiry time.Duration
+	RateLimit         interface{} // Placeholder for rate limit config
+}
+
+// AuthorizationRequest represents an authorization request
+type AuthorizationRequest struct {
+	ClientID string
+	Scopes   []string
+}
+
+// AuthorizationGrant represents an authorization grant
+type AuthorizationGrant struct {
+	GrantID      string
+	Scope        []string
+	ValidUntil   time.Time
+	Restrictions interface{}
+	ClientID     string // Add ClientID field
+}
+
+// TokenRequest represents a token request
+type TokenRequest struct {
+	GrantID      string
+	Scope        []string
+	Restrictions interface{}
+	Context      interface{}
+}
+
+// TokenResponse represents a token response
+type TokenResponse struct {
+	Token      string
+	Scope      []string
+	ValidUntil time.Time
+}
+
+// TransactionType represents different types of transactions
+type TransactionType string
+
+const (
+	PaymentTransaction TransactionType = "payment"
+)
+
+// TransactionStatus represents transaction status
+type TransactionStatus string
+
+const (
+	TransactionPending TransactionStatus = "pending"
+)
+
+// TransactionDetails represents transaction details
+type TransactionDetails struct {
+	ID             string
+	Type           TransactionType
+	Status         TransactionStatus
+	ClientID       string
+	ResourceID     string
+	Scopes         []string
+	Amount         float64
+	Currency       string
+	Timestamp      time.Time
+	Source         string
+	Destination    string
+	Description    string
+	CustomMetadata map[string]interface{} // Add CustomMetadata field
+}
+
+// GAuth represents the main GAuth interface
+type GAuth interface {
+	InitiateAuthorization(req AuthorizationRequest) (*AuthorizationGrant, error)
+	RequestToken(req TokenRequest) (*TokenResponse, error)
+	ValidateToken(token string) (bool, error)
+}
+
+// Restriction represents authorization restrictions
+type Restriction struct {
+	Type   string
+	Value  interface{}
+	Scopes []string
+}
+
+// GAuthService represents the main GAuth service
+type GAuthService struct {
+	config Config
+}
+
+// New creates a new GAuth instance
+func New(config Config) (*GAuthService, error) {
+	return &GAuthService{config: config}, nil
+}
+
+// InitiateAuthorization initiates an authorization flow
+func (g *GAuthService) InitiateAuthorization(req AuthorizationRequest) (*AuthorizationGrant, error) {
+	return &AuthorizationGrant{
+		GrantID:      "grant-123",
+		Scope:        req.Scopes,
+		ValidUntil:   time.Now().Add(time.Hour),
+		Restrictions: nil,
+		ClientID:     req.ClientID, // Set ClientID
+	}, nil
+}
+
+// RequestToken requests a token using an authorization grant
+func (g *GAuthService) RequestToken(req TokenRequest) (*TokenResponse, error) {
+	return &TokenResponse{
+		Token:      "token-abc123",
+		Scope:      req.Scope,
+		ValidUntil: time.Now().Add(g.config.AccessTokenExpiry),
+	}, nil
+}
+
+// ValidateToken validates a token
+func (g *GAuthService) ValidateToken(token string) (bool, error) {
+	// Simple validation - in real implementation would verify signature, expiry, etc.
+	if token == "" {
+		return ErrInvalidToken
+	}
+	return nil
+}
+
+// ResourceServer represents a resource server
+type ResourceServer struct {
+	name    string
+	service *GAuthService
+}
+
+// NewResourceServer creates a new resource server
+func NewResourceServer(name string, service *GAuthService) *ResourceServer {
+	return &ResourceServer{
+		name:    name,
+		service: service,
+	}
+}
+
+// ProcessTransaction processes a transaction
+func (rs *ResourceServer) ProcessTransaction(transaction TransactionDetails, token string) (string, error) {
+	// Validate token first
+	if err := rs.service.ValidateToken(token); err != nil {
+		return "", err
+	}
+	
+	// Simulate transaction processing
+	return "Transaction processed successfully", nil
+}
+
+// RateLimit represents rate limit configuration
+type RateLimit struct {
+	RequestsPerSecond int
+	BurstSize         int
+	Window            time.Duration
+}
+
+// SetRateLimit sets rate limiting for the resource server with multiple parameter support
+func (rs *ResourceServer) SetRateLimit(args ...interface{}) {
+	// Handle different argument patterns for backwards compatibility
+	if len(args) == 2 {
+		// SetRateLimit(100, time.Second) pattern
+		if rps, ok := args[0].(int); ok {
+			if window, ok := args[1].(time.Duration); ok {
+				// Create rate limit config
+				_ = RateLimit{
+					RequestsPerSecond: rps,
+					Window:            window,
+				}
+			}
+		}
+	} else if len(args) == 1 {
+		// SetRateLimit(interface{}) pattern
+		_ = args[0]
+	}
+	// Placeholder implementation - store the rate limit config if needed
+}
+
+// Error definitions
+var (
+	ErrInvalidToken = &GAuthError{Code: "invalid_token", Message: "Invalid token"}
+)
+
+// GAuthError represents a GAuth error
+type GAuthError struct {
+	Code    string
+	Message string
+}
+
+func (e *GAuthError) Error() string {
+	return e.Message
+}
+
+// Ensure GAuthService implements GAuth interface
+var _ GAuth = (*GAuthService)(nil)

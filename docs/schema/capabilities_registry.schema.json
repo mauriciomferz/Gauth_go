@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://gimelfoundation.com/schema/capabilities_registry.json",
+  "title": "CapabilitiesRegistrySnapshot",
+  "type": "object",
+  "required": ["success", "capabilities"],
+  "properties": {
+    "success": {"type": "boolean"},
+    "capability_registry_hash": {"type": "string", "pattern": "^[a-f0-9]{6,64}$"},
+    "capability_registry_prev_hash": {"type": "string"},
+    "capability_registry_last_changed_at": {"type": "string", "format": "date-time"},
+    "capabilities": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/CapabilityDescriptor"}
+    },
+    "count": {"type": "integer", "minimum": 0}
+  },
+  "definitions": {
+    "CapabilityDescriptor": {
+      "type": "object",
+      "required": ["id", "version", "stable"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "stable": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

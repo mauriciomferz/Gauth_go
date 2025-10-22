@@ -1,0 +1,55 @@
+# syntax=docker/dockerfile:1
+
+ARG GO_VERSION=1.25
+FROM golang:${GO_VERSION}-alpine AS dev
+
+WORKDIR /app
+
+# ------------------------------------------------------------
+# Base tools needed for go install (git is NOT in alpine image)
+# ------------------------------------------------------------
+RUN apk add --no-cache git ca-certificates && update-ca-certificates
+
+# Optionally allow proxy overrides (can be passed at build time)
+ARG GOPROXY
+ENV GOPROXY=${GOPROXY:-https://proxy.golang.org,direct}
+
+# Pin Air version for reproducibility (override with --build-arg AIR_VERSION=vX.Y.Z)
+# Upstream module path migrated to github.com/air-verse/air (old path github.com/cosmtrek/air now redirects but some caches may still reference it).
+# NOTE: Air >= v1.52 requires Go 1.22+. For older Go, set AIR_VERSION=v1.49.0.
+ARG AIR_VERSION=v1.52.3
+ARG INSTALL_AIR=true
+RUN if [ "$INSTALL_AIR" = "true" ]; then \
+		echo "Installing Air ${AIR_VERSION}"; \
+		set -eux; \
+		go env GOPATH; \
+		if go install github.com/air-verse/air@${AIR_VERSION}; then \
+			echo "Installed air-verse path"; \
+		else \
+			echo "Primary module path failed – attempting legacy path github.com/cosmtrek/air" >&2; \
+			go install github.com/cosmtrek/air@${AIR_VERSION}; \
+			echo "Installed legacy cosmtrek path"; \
+		fi; \
+		which air || echo "Air binary not on PATH (check GOPATH/bin)"; \
+	else \
+		echo "Skipping Air install (INSTALL_AIR=${INSTALL_AIR})"; \
+	fi
+
+# Copy go mod/sum and download deps early to leverage Docker layer cache
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy the rest of the source
+COPY . .
+
+# Pre-create tmp directory for Air build output (avoids race on first run)
+RUN mkdir -p /app/tmp
+
+# Expose default port
+EXPOSE 8080
+
+# Environment hint (opt-in beta UI or other flags can be added when running)
+ENV GAUTH_ENV=dev
+
+# Entrypoint for hot reload (edit .air.toml as needed)
+CMD ["air", "-c", ".air.toml"]

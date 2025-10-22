@@ -1,15 +1,18 @@
 # Contributors
 
+> Last Updated: 2025-10-17
+> Status: Active
+
 ## Demo Implementation
 
 **Mauricio Fernandez**
 - GitHub: https://github.com/mauriciomferz
 - Role: Demo Implementation Author
-- Contributions: 
+- Contributions:
   - Go implementation of GAuth framework demo
   - Code quality improvements and linting fixes
   - Docker containerization and build system
-  - Educational documentation and examples
+  - Beta demonstration documentation and examples
 
 ## Original Framework
 
@@ -30,7 +33,10 @@ This demo implementation is built on top of excellent open-source foundations:
 
 ---
 
-**Copyright (c) 2025 Gimel Foundation gGmbH i.G.**  
+**Copyright (c) 2025 Gimel Foundation gGmbH i.G.**
 Licensed under Apache 2.0
 
 **Demo Implementation**: Mauricio Fernandez - https://github.com/mauriciomferz
+
+---
+Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md
