@@ -1,188 +1,378 @@
-// Package errors provides structured error handling for GAuth
 package errors
 
 import (
 	"fmt"
+	"net/http"
+	"runtime"
 	"time"
 )
 
-// ErrorCode represents a specific error type
+// ErrorCode represents different types of errors
 type ErrorCode string
 
-// Error implements the error interface for ErrorCode
-func (e ErrorCode) Error() string {
-	return string(e)
-}
-
-// Predefined error codes
 const (
-	ErrTokenExpired           ErrorCode = "token_expired"
-	ErrInvalidToken           ErrorCode = "invalid_token"
-	ErrInsufficientScope      ErrorCode = "insufficient_scope"
-	ErrRateLimited            ErrorCode = "rate_limited"
-	ErrInvalidRequest         ErrorCode = "invalid_request"
-	ErrInvalidClient          ErrorCode = "invalid_client"
-	ErrInvalidGrant           ErrorCode = "invalid_grant"
-	ErrUnauthorizedClient     ErrorCode = "unauthorized_client"
-	ErrInvalidScope           ErrorCode = "invalid_scope"
-	ErrServerError            ErrorCode = "server_error"
-	ErrTemporarilyUnavailable ErrorCode = "temporarily_unavailable"
+	// Source constants for compatibility with examples
+	SourceToken         = "token"
+	SourceAuthorization = "authorization"
+	SourceRateLimiting  = "rate_limiting"
+	SourceStorage       = "storage" // legacy example expects this
+	// Authentication errors
+	ErrCodeUnauthenticated ErrorCode = "UNAUTHENTICATED"
+	ErrCodeUnauthorized    ErrorCode = "UNAUTHORIZED"
+	ErrCodeInvalidToken    ErrorCode = "INVALID_TOKEN"
+	ErrCodeExpiredToken    ErrorCode = "EXPIRED_TOKEN"
+	// Legacy alias expectations
+	ErrServerError  ErrorCode = "INTERNAL_ERROR" // alias used in examples
+	ErrTokenExpired ErrorCode = "EXPIRED_TOKEN"  // alias used in examples
 
-	// Token store related errors
-	ErrMissingEncryptionKey ErrorCode = "missing_encryption_key"
-	ErrMissingUserID        ErrorCode = "missing_user_id"
-	ErrMissingClientID      ErrorCode = "missing_client_id"
-	ErrMissingExpiry        ErrorCode = "missing_expiry"
+	// Validation errors
+	ErrCodeValidation     ErrorCode = "VALIDATION_ERROR"
+	ErrCodeInvalidRequest ErrorCode = "INVALID_REQUEST"
+	ErrCodeMissingField   ErrorCode = "MISSING_FIELD"
+
+	// System errors
+	ErrCodeInternal  ErrorCode = "INTERNAL_ERROR"
+	ErrCodeNotFound  ErrorCode = "NOT_FOUND"
+	ErrCodeConflict  ErrorCode = "CONFLICT"
+	ErrCodeRateLimit ErrorCode = "RATE_LIMIT"
+	ErrCodeTimeout   ErrorCode = "TIMEOUT"
+
+	// Legacy/example specific codes
+	ErrCodeInsufficientScope ErrorCode = "INSUFFICIENT_SCOPE"
+
+	// Network errors
+	ErrCodeNetworkError ErrorCode = "NETWORK_ERROR"
+	ErrCodeServiceDown  ErrorCode = "SERVICE_DOWN"
 )
 
-// ErrorSource indicates where the error originated
-type ErrorSource string
-
-// Predefined error sources
-const (
-	SourceAuthentication ErrorSource = "authentication"
-	SourceAuthorization  ErrorSource = "authorization"
-	SourceToken          ErrorSource = "token"
-	SourceStorage        ErrorSource = "storage"
-	SourceRateLimiting   ErrorSource = "rate_limiting"
-	SourceCircuitBreaker ErrorSource = "circuit_breaker"
-	SourceValidation     ErrorSource = "validation"
-	SourceProtocol       ErrorSource = "protocol"
-	SourceResourceServer ErrorSource = "resource_server"
-)
-
-// ErrorDetails contains structured information about an error
+// ErrorDetails represents structured error details
 type ErrorDetails struct {
-	// Timestamp when the error occurred
-	Timestamp time.Time
-
-	// RequestID associated with the error
-	RequestID string
-
-	// ClientID involved in the error
-	ClientID string
-
-	// UserID affected by the error
-	UserID string
-
-	// ResourceID being accessed when error occurred
-	ResourceID string
-
-	// IPAddress of the client
-	IPAddress string
-
-	// Path being accessed
-	Path string
-
-	// Method being used (HTTP method, etc)
-	Method string
-
-	// HTTPStatusCode if applicable
-	HTTPStatusCode int
-
-	// AdditionalInfo contains any extra information
-	AdditionalInfo map[string]string
+	Timestamp      time.Time              `json:"timestamp"`
+	AdditionalInfo map[string]interface{} `json:"additional_info,omitempty"`
+	RequestID      string                 `json:"request_id,omitempty"`
+	UserID         string                 `json:"user_id,omitempty"`
+	ClientID       string                 `json:"client_id,omitempty"`
+	HTTPMethod     string                 `json:"http_method,omitempty"`
+	HTTPPath       string                 `json:"http_path,omitempty"`
+	HTTPStatusCode int                    `json:"http_status_code,omitempty"` // legacy compatibility
 }
 
-// Error is a structured error type for GAuth
-type Error struct {
-	// Code identifies the error type
-	Code ErrorCode
-
-	// Message is a human-readable error message
-	Message string
-
-	// Source indicates where the error originated
-	Source ErrorSource
-
-	// Details contains additional error information
-	Details *ErrorDetails
-
-	// Cause is the underlying error
-	Cause error
+// GAuthError represents a structured error
+type GAuthError struct {
+	Code      ErrorCode     `json:"code"`
+	Message   string        `json:"message"`
+	Details   *ErrorDetails `json:"details,omitempty"`
+	Source    string        `json:"source,omitempty"`
+	Timestamp time.Time     `json:"timestamp"`
+	File      string        `json:"file,omitempty"`
+	Line      int           `json:"line,omitempty"`
 }
 
-// New creates a new structured error
-func New(code ErrorCode, message string) *Error {
-	return &Error{
-		Code:    code,
-		Message: message,
-		Details: &ErrorDetails{
-			Timestamp:      time.Now(),
-			AdditionalInfo: make(map[string]string),
-		},
+// Error is a compatibility type alias expected by legacy examples.
+type Error = GAuthError
+
+// Error implements the error interface
+func (e *GAuthError) Error() string {
+	if e.File != "" && e.Line != 0 {
+		return fmt.Sprintf("[%s] %s (%s:%d)", e.Code, e.Message, e.File, e.Line)
 	}
+	return fmt.Sprintf("[%s] %s", e.Code, e.Message)
 }
 
-// WithSource adds a source to the error
-func (e *Error) WithSource(source ErrorSource) *Error {
-	e.Source = source
+// WithDetails adds details to the error
+func (e *GAuthError) WithDetails(details interface{}) *GAuthError {
+	if e.Details == nil {
+		e.Details = &ErrorDetails{Timestamp: e.Timestamp}
+	}
+	// Store in AdditionalInfo
+	if e.Details.AdditionalInfo == nil {
+		e.Details.AdditionalInfo = make(map[string]interface{})
+	}
+	e.Details.AdditionalInfo["details"] = details
 	return e
 }
 
 // WithCause adds a cause to the error
-func (e *Error) WithCause(cause error) *Error {
-	e.Cause = cause
-	return e
-}
-
-// WithDetails adds details to the error
-func (e *Error) WithDetails(details *ErrorDetails) *Error {
-	if details != nil {
-		// Preserve timestamp if not set in the new details
-		if details.Timestamp.IsZero() && e.Details != nil {
-			details.Timestamp = e.Details.Timestamp
-		}
-		e.Details = details
-	}
-	return e
-}
-
-// WithRequestInfo adds request info to the error details
-func (e *Error) WithRequestInfo(requestID, clientID, userID string) *Error {
+func (e *GAuthError) WithCause(cause error) *GAuthError {
 	if e.Details == nil {
-		e.Details = &ErrorDetails{
-			Timestamp:      time.Now(),
-			AdditionalInfo: make(map[string]string),
-		}
+		e.Details = &ErrorDetails{Timestamp: e.Timestamp}
 	}
-	e.Details.RequestID = requestID
-	e.Details.ClientID = clientID
-	e.Details.UserID = userID
+	if e.Details.AdditionalInfo == nil {
+		e.Details.AdditionalInfo = make(map[string]interface{})
+	}
+	e.Details.AdditionalInfo["cause"] = cause.Error()
 	return e
 }
 
-// WithHTTPInfo adds HTTP-specific info to the error
-func (e *Error) WithHTTPInfo(path, method string, statusCode int, ipAddress string) *Error {
+// WithFields adds fields to the error (accepts both map[string]interface{} and map[string]string)
+func (e *GAuthError) WithFields(fields interface{}) *GAuthError {
 	if e.Details == nil {
-		e.Details = &ErrorDetails{
-			Timestamp:      time.Now(),
-			AdditionalInfo: make(map[string]string),
+		e.Details = &ErrorDetails{Timestamp: e.Timestamp}
+	}
+	if e.Details.AdditionalInfo == nil {
+		e.Details.AdditionalInfo = make(map[string]interface{})
+	}
+
+	// Handle map[string]interface{}
+	if interfaceFields, ok := fields.(map[string]interface{}); ok {
+		for k, v := range interfaceFields {
+			e.Details.AdditionalInfo[k] = v
+		}
+	} else if stringFields, ok := fields.(map[string]string); ok {
+		// Handle map[string]string for compatibility
+		for k, v := range stringFields {
+			e.Details.AdditionalInfo[k] = v
 		}
 	}
-	e.Details.Path = path
-	e.Details.Method = method
-	e.Details.HTTPStatusCode = statusCode
-	e.Details.IPAddress = ipAddress
 	return e
 }
 
-// AddInfo adds additional info to the error
-func (e *Error) AddInfo(key, value string) *Error {
+// --- Compatibility chain methods (no-op enrichers used by examples) ---
+func (e *GAuthError) WithSource(source string) *GAuthError {
+	e.Source = source
+	return e
+}
+
+func (e *GAuthError) WithRequestInfo(parts ...interface{}) *GAuthError {
 	if e.Details == nil {
-		e.Details = &ErrorDetails{
-			Timestamp:      time.Now(),
-			AdditionalInfo: make(map[string]string),
-		}
+		e.Details = &ErrorDetails{Timestamp: e.Timestamp}
 	}
-	e.Details.AdditionalInfo[key] = value
+	if e.Details.AdditionalInfo == nil {
+		e.Details.AdditionalInfo = map[string]interface{}{}
+	}
+	e.Details.AdditionalInfo["request_info"] = parts
 	return e
 }
 
-// Error returns the error message
-func (e *Error) Error() string {
-	if e.Cause != nil {
-		return fmt.Sprintf("%s: %s: %v", e.Code, e.Message, e.Cause)
+func (e *GAuthError) WithHTTPInfo(parts ...interface{}) *GAuthError {
+	if e.Details == nil {
+		e.Details = &ErrorDetails{Timestamp: e.Timestamp}
 	}
-	return fmt.Sprintf("%s: %s", e.Code, e.Message)
+	if e.Details.AdditionalInfo == nil {
+		e.Details.AdditionalInfo = map[string]interface{}{}
+	}
+	e.Details.AdditionalInfo["http_info"] = parts
+	// Best-effort: detect numeric status code in parts
+	for _, p := range parts {
+		if code, ok := p.(int); ok && code >= 100 && code < 600 {
+			e.Details.HTTPStatusCode = code
+		}
+	}
+	return e
+}
+
+func (e *GAuthError) AddInfo(k string, v interface{}) *GAuthError {
+	if e.Details == nil {
+		e.Details = &ErrorDetails{Timestamp: e.Timestamp}
+	}
+	if e.Details.AdditionalInfo == nil {
+		e.Details.AdditionalInfo = map[string]interface{}{}
+	}
+	e.Details.AdditionalInfo[k] = v
+	return e
+}
+
+// New creates a new GAuthError
+func New(codeOrError interface{}, message string) *GAuthError {
+	_, file, line, _ := runtime.Caller(1)
+
+	// Handle case where first argument is a *GAuthError (for compatibility with examples)
+	if gErr, ok := codeOrError.(*GAuthError); ok {
+		newErr := &GAuthError{
+			Code:      gErr.Code,
+			Message:   message,
+			Timestamp: time.Now(),
+			File:      file,
+			Line:      line,
+		}
+		newErr.Details = &ErrorDetails{Timestamp: newErr.Timestamp}
+		return newErr
+	}
+
+	// Handle normal case where first argument is an ErrorCode
+	if code, ok := codeOrError.(ErrorCode); ok {
+		newErr := &GAuthError{
+			Code:      code,
+			Message:   message,
+			Timestamp: time.Now(),
+			File:      file,
+			Line:      line,
+		}
+		newErr.Details = &ErrorDetails{Timestamp: newErr.Timestamp}
+		return newErr
+	}
+
+	// Fallback to internal error
+	newErr := &GAuthError{
+		Code:      ErrCodeInternal,
+		Message:   message,
+		Timestamp: time.Now(),
+		File:      file,
+		Line:      line,
+	}
+	newErr.Details = &ErrorDetails{Timestamp: newErr.Timestamp}
+	return newErr
+}
+
+// Newf creates a new GAuthError with formatted message
+func Newf(code ErrorCode, format string, args ...interface{}) *GAuthError {
+	return New(code, fmt.Sprintf(format, args...))
+}
+
+// IsRateLimitError checks if an error is a rate limit error
+func IsRateLimitError(err error) bool {
+	if gErr, ok := err.(*GAuthError); ok {
+		return gErr.Code == ErrCodeRateLimit
+	}
+	return false
+}
+
+// GetRetryAfter extracts retry-after duration from error details
+func GetRetryAfter(err error) time.Duration {
+	if gErr, ok := err.(*GAuthError); ok {
+		if gErr.Details != nil && gErr.Details.AdditionalInfo != nil {
+			if retryAfter, ok := gErr.Details.AdditionalInfo["retry_after"]; ok {
+				if duration, ok := retryAfter.(time.Duration); ok {
+					return duration
+				}
+			}
+		}
+	}
+	return 0
+}
+
+// Wrap wraps an existing error with additional context
+func Wrap(err error, code ErrorCode, message string) *GAuthError {
+	if gErr, ok := err.(*GAuthError); ok {
+		// If it's already a GAuthError, preserve the original but add context
+		newErr := &GAuthError{
+			Code:      code,
+			Message:   fmt.Sprintf("%s: %s", message, gErr.Message),
+			Timestamp: time.Now(),
+		}
+		newErr.Details = &ErrorDetails{
+			Timestamp: newErr.Timestamp,
+			AdditionalInfo: map[string]interface{}{
+				"wrapped_error": gErr,
+			},
+		}
+		return newErr
+	}
+
+	_, file, line, _ := runtime.Caller(1)
+	return &GAuthError{
+		Code:      code,
+		Message:   fmt.Sprintf("%s: %v", message, err),
+		Timestamp: time.Now(),
+		File:      file,
+		Line:      line,
+	}
+}
+
+// IsCode checks if the error has a specific code
+func IsCode(err error, code ErrorCode) bool {
+	if gErr, ok := err.(*GAuthError); ok {
+		return gErr.Code == code
+	}
+	return false
+}
+
+// GetCode extracts the error code from an error
+func GetCode(err error) ErrorCode {
+	if gErr, ok := err.(*GAuthError); ok {
+		return gErr.Code
+	}
+	return ErrCodeInternal
+}
+
+// Additional predefined errors for common cases
+var (
+	ErrUnauthenticated = New(ErrCodeUnauthenticated, "authentication required")
+	ErrUnauthorized    = New(ErrCodeUnauthorized, "insufficient permissions")
+	ErrNotFound        = New(ErrCodeNotFound, "resource not found")
+	ErrInternal        = New(ErrCodeInternal, "internal server error")
+	ErrRateLimit       = New(ErrCodeRateLimit, "rate limit exceeded")
+	ErrTimeout         = New(ErrCodeTimeout, "operation timed out")
+	// Legacy/example exported errors for compatibility
+	ErrInvalidToken      = New(ErrCodeInvalidToken, "invalid token")
+	ErrInsufficientScope = New(ErrCodeInsufficientScope, "insufficient scope")
+	ErrRateLimited       = ErrRateLimit
+)
+
+// ValidationError represents a validation error with field-specific information
+type ValidationError struct {
+	Field   string      `json:"field"`
+	Value   interface{} `json:"value,omitempty"`
+	Message string      `json:"message"`
+}
+
+// Error implements the error interface
+func (v *ValidationError) Error() string {
+	return fmt.Sprintf("validation error on field '%s': %s", v.Field, v.Message)
+}
+
+// NewValidationError creates a new validation error
+func NewValidationError(field, message string) *ValidationError {
+	return &ValidationError{
+		Field:   field,
+		Message: message,
+	}
+}
+
+// MultiError holds multiple errors
+type MultiError struct {
+	Errors []error `json:"errors"`
+}
+
+// Error implements the error interface
+func (m *MultiError) Error() string {
+	if len(m.Errors) == 0 {
+		return "no errors"
+	}
+	if len(m.Errors) == 1 {
+		return m.Errors[0].Error()
+	}
+	return fmt.Sprintf("multiple errors: %d total", len(m.Errors))
+}
+
+// Add adds an error to the multi-error
+func (m *MultiError) Add(err error) {
+	if err != nil {
+		m.Errors = append(m.Errors, err)
+	}
+}
+
+// HasErrors returns true if there are any errors
+func (m *MultiError) HasErrors() bool {
+	return len(m.Errors) > 0
+}
+
+// NewMultiError creates a new multi-error
+func NewMultiError() *MultiError {
+	return &MultiError{
+		Errors: make([]error, 0),
+	}
+}
+
+// Common error constructors
+
+// Middleware creates an error handling middleware function
+func Middleware() func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			defer func() {
+				if err := recover(); err != nil {
+					var gErr *GAuthError
+					if e, ok := err.(*GAuthError); ok {
+						gErr = New(ErrCodeInternal, fmt.Sprintf("Internal server error: %v", e))
+					} else {
+						gErr = New(ErrCodeInternal, fmt.Sprintf("Internal server error: %v", err))
+					}
+					http.Error(w, gErr.Error(), http.StatusInternalServerError)
+				}
+			}()
+
+			next.ServeHTTP(w, r)
+		})
+	}
 }

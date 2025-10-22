@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://gimelfoundation.com/schema/decision_metrics.json",
+  "title": "DecisionMetricsSnapshot",
+  "type": "object",
+  "required": ["success", "decisions"],
+  "properties": {
+    "success": {"type": "boolean"},
+    "decisions": {
+      "type": "object",
+      "required": ["counts"],
+      "properties": {
+        "counts": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/DecisionCount"}
+        },
+        "reasons": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/DecisionReasonCount"}
+        },
+        "available": {"type": "boolean"}
+      }
+    }
+  },
+  "definitions": {
+    "DecisionCount": {
+      "type": "object",
+      "required": ["action", "resource", "outcome", "count"],
+      "properties": {
+        "action": {"type": "string", "minLength": 1},
+        "resource": {"type": "string", "minLength": 1},
+        "outcome": {"type": "string", "minLength": 1},
+        "count": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "DecisionReasonCount": {
+      "type": "object",
+      "required": ["action", "resource", "outcome", "reason", "count"],
+      "properties": {
+        "action": {"type": "string", "minLength": 1},
+        "resource": {"type": "string", "minLength": 1},
+        "outcome": {"type": "string", "minLength": 1},
+        "reason": {"type": "string", "enum": [
+          "init", "status_change", "noop", "maintenance", "rate_limited", "policy_violation", "invalid_transition", "unsupported_status", "invalid_payload", "not_found"
+        ]},
+        "count": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GAuth Beta Demo – RFC-0150 implementation showcasing AI-native authorization, delegation (PoA), audit, events, and token management.">
+    <title>GAuth Beta Demo - RFC-0150 Implementation</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen" role="document">
+    <a href="#overview" class="skip-link">Skip to main content</a>
+    <!-- Beta Warning Banner -->
+    <!-- Adjusted banner for better contrast (removed forced white text) -->
+    <div class="bg-orange-100 border border-orange-300 px-4 py-2 text-center">
+        <div class="flex items-center justify-center space-x-2" role="status" aria-label="Beta demonstration notice">
+            <i class="fas fa-exclamation-triangle text-orange-700" aria-hidden="true"></i>
+            <span class="font-semibold text-orange-900">⚠️ BETA DEMO</span>
+            <span class="hidden md:inline text-orange-800">Pre-release implementation, NOT for production use</span>
+        </div>
+    </div>
+
+    <!-- Navigation Header -->
+    <nav class="bg-white shadow-lg" aria-label="Primary" role="navigation">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-bold text-gray-900">
+                            <i class="fas fa-shield-alt text-blue-600" aria-hidden="true"></i>
+                            <span>GAuth Beta Demo</span>
+                        </h1>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-8" id="mobileNavMenu">
+                    <a href="#overview" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Overview</a>
+                    <a href="#demo" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Interactive Demo</a>
+                    <a href="#architecture" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Architecture</a>
+                    <a href="#examples" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Examples</a>
+                </div>
+                <div class="flex items-center">
+                    <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                        RFC-0150 Compliant
+                    </span>
+                    <button id="themeToggle" type="button" aria-pressed="false" class="ml-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Toggle color theme">
+                        <i class="fas fa-sun mr-2" aria-hidden="true"></i>Light
+                    </button>
+                    <button id="mobileNavButton" type="button" class="ml-2 md:hidden inline-flex items-center justify-center p-2 rounded text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" aria-controls="mobileNavMenu" aria-expanded="false" aria-label="Toggle navigation menu">
+                        <span class="sr-only">Open main menu</span>
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="py-20" role="banner">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 class="text-5xl md:text-7xl font-extrabold mb-6">
+                    GAuth Framework
+                </h1>
+            </div>
+            <p class="text-xl md:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto">
+                Beta Demonstration of RFC-0150 Authorization Framework
+                <br>
+                <span class="text-lg text-gray-500">Learn AI-Native Authorization Concepts & Power-of-Attorney Flows</span>
+            </p>
+            
+            <!-- Status Cards -->
+            <div class="grid md:grid-cols-3 gap-6 mb-12 max-w-4xl mx-auto" role="list" aria-label="Status highlights">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="text-3xl mb-2">🎓</div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Beta Demonstration Purpose</h3>
+                    <p class="text-gray-600 text-sm">Designed for learning and demonstration</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="text-3xl mb-2">🔐</div>
+                    <h3 class="font-semibold text-gray-900 mb-2">RFC Compliant</h3>
+                    <p class="text-gray-600 text-sm">Follows GiFo-RFC-0111 & RFC-0115 standards</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="text-3xl mb-2">⚡</div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Interactive Demo</h3>
+                    <p class="text-gray-600 text-sm">Hands-on learning with real examples</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button data-action="scroll-to-demo" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition-all transform hover:scale-105">
+                    <i class="fas fa-play mr-2"></i>
+                    Start Interactive Demo
+                </button>
+                     <a href="https://github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0" 
+                         target="_blank" rel="noopener noreferrer"
+                         class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-4 px-8 rounded-lg text-lg transition-all transform hover:scale-105">
+                    <i class="fab fa-github mr-2"></i>
+                    View Source Code
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ledger & Security Metrics Section -->
+    <section id="ledger-security" class="py-12 bg-white border-t border-gray-200" aria-labelledby="ledger-security-heading" role="region">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-8 text-center">
+                <h2 id="ledger-security-heading" class="text-3xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-3"><i class="fas fa-lock text-blue-600" aria-hidden="true"></i><span>Ledger & Security Metrics</span></h2>
+                <p class="text-gray-600">Live rotation summary, violation counters & semantic (RFC0111) metrics.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" aria-label="Ledger security panels">
+                <!-- Rotation Summary Panel -->
+                <div id="rotation-summary-panel" class="bg-gray-50 rounded-xl shadow border border-gray-200 p-5">
+                    <h3 class="text-lg font-semibold mb-3 flex items-center gap-2"><i class="fas fa-sync text-indigo-600" aria-hidden="true"></i><span>Key Rotation Summary</span><span id="rotation-anchored-badge" class="hidden px-2 py-0.5 rounded text-xs bg-green-600 text-white">Anchored</span></h3>
+                    <div id="rotation-summary-status" class="text-xs text-gray-600 mb-2" aria-live="polite">Initializing…</div>
+                    <div class="text-xs space-y-1 font-mono break-all">
+                        <div><span class="text-gray-500">Head:</span> <span id="rotation-head-hash">—</span></div>
+                        <div><span class="text-gray-500">Aggregate:</span> <span id="rotation-aggregate-hash">—</span></div>
+                        <div><span class="text-gray-500">Chain Length:</span> <span id="rotation-chain-length">0</span></div>
+                        <div><span class="text-gray-500">Signature Kid:</span> <span id="rotation-signature-kid">—</span></div>
+                        <div><span class="text-gray-500">Signature Hash:</span> <span id="rotation-signature-hash">—</span></div>
+                    </div>
+                    <p class="mt-3 text-[10px] text-gray-500">Values derive from /api/v1/beta/rotations/summary. Head and aggregate hashes are deterministic (canonical payload ordering).</p>
+                </div>
+                <!-- Violation Metrics Panel -->
+                <div id="violation-metrics-panel" class="bg-gray-50 rounded-xl shadow border border-gray-200 p-5">
+                    <h3 class="text-lg font-semibold mb-3 flex items-center gap-2"><i class="fas fa-bug text-red-600" aria-hidden="true"></i><span>Token Violation Metrics</span><span id="violation-surge-flag" class="px-2 py-0.5 rounded bg-green-600 text-white text-xs">Normal</span></h3>
+                    <div id="violation-metrics-status" class="text-xs text-gray-600 mb-2" aria-live="polite">Initializing…</div>
+                    <div class="grid grid-cols-3 gap-2 text-center text-[11px] mb-3">
+                        <div class="p-2 bg-white rounded border"><div class="text-gray-500">Total</div><div id="violation-total" class="font-bold">0</div></div>
+                        <div class="p-2 bg-white rounded border"><div class="text-gray-500">Rate 60s</div><div id="violation-rate-60" class="font-bold">0.00</div></div>
+                        <div class="p-2 bg-white rounded border"><div class="text-gray-500">Rate 300s</div><div id="violation-rate-300" class="font-bold">0.00</div></div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-[11px]"><thead><tr><th class="text-left px-2 py-1 font-semibold text-gray-700">Category</th><th class="text-right px-2 py-1 font-semibold text-gray-700">Count</th></tr></thead><tbody id="violation-counters-tbody"><tr><td colspan="2" class="text-center text-gray-400 py-2">Loading…</td></tr></tbody></table>
+                    </div>
+                    <p class="mt-3 text-[10px] text-gray-500">Surge flag triggers when short-term rate exceeds configured threshold in backend anomaly logic.</p>
+                </div>
+                <!-- Semantic Metrics Panel -->
+                <div id="semantic-metrics-panel" class="bg-gray-50 rounded-xl shadow border border-gray-200 p-5">
+                    <h3 class="text-lg font-semibold mb-3 flex items-center gap-2"><i class="fas fa-language text-green-600" aria-hidden="true"></i><span>Semantic Counters (RFC0111)</span></h3>
+                    <div id="semantic-metrics-status" class="text-xs text-gray-600 mb-2" aria-live="polite">Initializing…</div>
+                    <div id="semantic-rate-badge" class="text-[11px] bg-white border rounded px-2 py-1 inline-block mb-2">No rates</div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-[11px]"><thead><tr><th class="text-left px-2 py-1 font-semibold text-gray-700">Counter</th><th class="text-right px-2 py-1 font-semibold text-gray-700">Value</th></tr></thead><tbody id="semantic-counters-tbody"><tr><td colspan="2" class="text-center text-gray-400 py-2">Loading…</td></tr></tbody></table>
+                    </div>
+                    <p class="mt-3 text-[10px] text-gray-500">Counters and derived 60s rates sampled from /api/v1/beta/metrics/poa/semantics.</p>
+                </div>
+                <!-- Capability Anchor Status Panel -->
+                <div id="capability-anchor-panel" class="bg-gray-50 rounded-xl shadow border border-gray-200 p-5 lg:col-span-3 md:col-span-2">
+                    <h3 class="text-lg font-semibold mb-3 flex items-center gap-2"><i class="fas fa-anchor text-blue-600" aria-hidden="true"></i><span>Capability Anchor Status</span><span id="cap-anchor-stale-badge" class="hidden px-2 py-0.5 rounded text-xs">—</span></h3>
+                    <div id="cap-anchor-status" class="text-xs text-gray-600 mb-2" aria-live="polite">Initializing…</div>
+                    <div class="grid sm:grid-cols-3 gap-4 text-xs mb-4">
+                        <div class="space-y-1">
+                            <div><span class="text-gray-500">Registry Hash:</span> <span id="cap-anchor-registry-hash" class="font-mono break-all">—</span></div>
+                            <div><span class="text-gray-500">Last Write:</span> <span id="cap-anchor-last-write" class="font-mono">—</span></div>
+                            <div><span class="text-gray-500">Age:</span> <span id="cap-anchor-age">—</span></div>
+                        </div>
+                        <div class="space-y-1">
+                            <div><span class="text-gray-500">Emitted Total:</span> <span id="cap-anchor-emitted">0</span></div>
+                            <div><span class="text-gray-500">Skipped Total:</span> <span id="cap-anchor-skipped">0</span></div>
+                            <div><span class="text-gray-500">Hash Changed Total:</span> <span id="cap-anchor-hash-changed">0</span></div>
+                        </div>
+                        <div class="space-y-1">
+                            <div><span class="text-gray-500">Notarized At:</span> <span id="cap-anchor-notarized-at" class="font-mono">—</span></div>
+                            <div><span class="text-gray-500">Notarized Age:</span> <span id="cap-anchor-notarized-age">—</span></div>
+                            <div><span class="text-gray-500">Provider:</span> <span id="cap-anchor-notary-provider">—</span></div>
+                        </div>
+                    </div>
+                    <p class="mt-1 text-[10px] text-gray-500">Status derived from /api/v1/beta/capabilities/anchor/status. Age and stale flags reflect backend SLA thresholds; notarization fields appear only when external notarization is enabled.</p>
+                    <div id="revocation-transparency" class="panel bg-white dark:bg-gray-800 p-4 rounded shadow">
+                        <h2 class="text-lg font-semibold mb-2 flex items-center gap-2"><span class="fa fa-ban text-red-600" aria-hidden="true"></span>Revocation Transparency</h2>
+                        <div id="revocation-transparency-content" class="text-sm space-y-1" aria-live="polite">
+                            <div><span class="font-medium">Chain Head:</span> <span id="rev-chain-head" class="font-mono break-all text-xs">(loading)</span></div>
+                            <div><span class="font-medium">Chain Length:</span> <span id="rev-chain-length" class="font-mono">(loading)</span></div>
+                            <div><span class="font-medium">Aggregate Hash:</span> <span id="rev-chain-aggregate" class="font-mono break-all text-xs">(loading)</span></div>
+                            <div><span class="font-medium">Verified:</span> <span id="rev-chain-verified" class="px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-700">(loading)</span></div>
+                            <div><span class="font-medium">Merkle Root:</span> <span id="rev-merkle-root" class="font-mono break-all text-xs">(loading)</span></div>
+                            <div><span class="font-medium">Tree Heads:</span> <span id="rev-tree-heads-count" class="font-mono">(loading)</span></div>
+                            <div><span class="font-medium">Latest Tree Head Timestamp:</span> <span id="rev-tree-head-timestamp" class="font-mono text-xs">(loading)</span> (<span id="rev-tree-head-age">age: ?</span>)</div>
+                            <div><span class="font-medium">Signature Threshold:</span> <span id="rev-threshold" class="font-mono">(loading)</span> (<span class="font-medium">Satisfied:</span> <span id="rev-satisfied-weight" class="font-mono">(loading)</span> / <span id="rev-total-weight" class="font-mono">(loading)</span>)</div>
+                            <div><span class="font-medium">Proof Endpoints:</span> <span id="rev-proof-endpoints" class="font-mono text-xs">(loading)</span></div>
+                            <div><span class="font-medium">Consistency Endpoint:</span> <span id="rev-consistency-endpoint" class="font-mono text-xs">(loading)</span></div>
+                            <div id="rev-staleness" class="hidden"><span class="font-medium">Staleness:</span> <span id="rev-stale-flag" class="px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-700">fresh</span></div>
+                            <hr class="my-2" />
+                            <div class="space-y-1">
+                                <div class="font-medium">Generate Merkle Proof</div>
+                                <div class="flex flex-wrap gap-2 items-center">
+                                    <input id="rev-proof-input" type="text" placeholder="event id | index | hash" class="border rounded px-2 py-1 text-xs flex-grow" aria-label="Revocation event identifier for proof" />
+                                    <button id="rev-proof-btn" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1 rounded" aria-label="Generate Merkle proof">Proof</button>
+                                </div>
+                                <div id="rev-proof-result" class="font-mono text-xs whitespace-pre-wrap bg-gray-50 dark:bg-gray-900 p-2 rounded border border-gray-200 dark:border-gray-700" aria-live="polite">(no proof requested)</div>
+                                <hr class="my-3" />
+                                <div class="font-medium flex items-center gap-2"><span>Consistency & Verification</span><span id="rev-verify-status" class="text-[10px] text-gray-500">idle</span></div>
+                                <p class="text-[10px] text-gray-500">Verify inclusion by recomputing root locally. Consistency proofs show append-only growth from an earlier tree head.</p>
+                                <div class="grid sm:grid-cols-2 gap-2 text-xs mt-1">
+                                    <div>
+                                        <label for="rev-consistency-start" class="block text-gray-600 mb-1">Start Index</label>
+                                        <input id="rev-consistency-start" type="number" min="0" value="0" class="border rounded px-2 py-1 w-full" aria-label="Starting leaf index for consistency proof" />
+                                    </div>
+                                    <div>
+                                        <label for="rev-consistency-target" class="block text-gray-600 mb-1">Target Length</label>
+                                        <input id="rev-consistency-target" type="number" min="0" value="0" class="border rounded px-2 py-1 w-full" aria-label="Target chain length (0 = latest)" />
+                                    </div>
+                                </div>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <button id="rev-consistency-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-1 rounded" aria-label="Fetch consistency proof">Consistency</button>
+                                    <button id="rev-verify-btn" class="bg-green-600 hover:bg-green-700 text-white text-xs font-semibold px-3 py-1 rounded" aria-label="Verify last Merkle proof" disabled>Verify Proof</button>
+                                    <button id="rev-consistency-verify-btn" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold px-3 py-1 rounded" aria-label="Verify consistency proof" disabled>Verify Consistency</button>
+                                </div>
+                                <div id="rev-consistency-result" class="mt-2 font-mono text-[10px] whitespace-pre-wrap bg-gray-50 dark:bg-gray-900 p-2 rounded border border-gray-200 dark:border-gray-700" aria-live="polite">(no consistency proof)</div>
+                                <div id="rev-consistency-verify-result" class="mt-2 font-mono text-[10px] whitespace-pre-wrap bg-gray-50 dark:bg-gray-900 p-2 rounded border border-gray-200 dark:border-gray-700" aria-live="polite">(no consistency verification)</div>
+                                <div id="rev-verify-result" class="mt-2 font-mono text-[10px] whitespace-pre-wrap bg-gray-50 dark:bg-gray-900 p-2 rounded border border-gray-200 dark:border-gray-700" aria-live="polite">(no verification)</div>
+                            </div>
+                        </div>
+                            <!-- Multi-Signature Tree Head Panel -->
+                            <div id="multisig-panel" class="mt-4 text-xs bg-gray-50 dark:bg-gray-900 p-3 rounded border border-gray-200 dark:border-gray-700" aria-live="polite" aria-label="Multi-signature tree head status">
+                              (multi-sig status loading)
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Overview Section -->
+    <section id="overview" class="py-16 bg-white" role="region" aria-labelledby="overview-heading">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">What is GAuth?</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    GAuth is a next-generation authorization framework designed specifically for AI systems that need to act on behalf of humans with explicit delegation and full auditability.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="text-center">
+                    <div class="bg-blue-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-handshake text-3xl text-blue-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Explicit Delegation</h3>
+                    <p class="text-gray-600">Clear, verifiable power-of-attorney flows with transparent authorization chains</p>
+                </div>
+                <div class="text-center">
+                    <div class="bg-green-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search text-3xl text-green-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Full Auditability</h3>
+                    <p class="text-gray-600">Complete transparency in authorization decisions with structured logging</p>
+                </div>
+                <div class="text-center">
+                    <div class="bg-purple-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-robot text-3xl text-purple-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">AI-Native Design</h3>
+                    <p class="text-gray-600">Built specifically for modern AI systems and automated workflows</p>
+                </div>
+                <div class="text-center">
+                    <div class="bg-red-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-balance-scale text-3xl text-red-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">RFC Compliance</h3>
+                    <p class="text-gray-600">Adheres to GiFo-RFC-0111 and GiFo-RFC-0115 standards</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Observability Section (Unified Metrics) -->
+    <section id="observability" class="py-16 bg-gray-50 border-t border-gray-200" aria-labelledby="observability-heading" role="region">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-10 text-center">
+                <h2 id="observability-heading" class="text-4xl font-bold text-gray-900 mb-3 flex items-center justify-center gap-3"><i class="fas fa-chart-area text-blue-600" aria-hidden="true"></i><span>Observability & Metrics</span></h2>
+                <p class="text-gray-600 text-lg max-w-3xl mx-auto">Real-time instrumentation for authorization and experimental policy engine decisions. Updated automatically. Histograms show latency distribution (ns upper bounds).</p>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-8" aria-label="Metrics panels">
+                <!-- Authorization Metrics Panel (moved from authz demo for unified view) -->
+                <div class="bg-white rounded-xl shadow border border-gray-200 p-6" id="authz-observe-panel">
+                    <h3 class="text-xl font-semibold mb-2 flex items-center gap-2"><i class="fas fa-shield-alt text-purple-600" aria-hidden="true"></i><span>Authorization Metrics</span></h3>
+                    <div id="authz-metrics-panel" class="text-xs text-gray-700 mb-3" aria-live="polite">Loading metrics...</div>
+                    <span id="authz-metrics-annc" class="sr-only" aria-live="polite" aria-atomic="false"></span>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center text-[11px]" id="authz-metrics-cards">
+                        <div class="p-2 bg-gray-50 rounded"><div class="text-gray-500">Decisions</div><div id="m-authz-decisions" class="font-bold">-</div></div>
+                        <div class="p-2 bg-gray-50 rounded"><div class="text-gray-500">Cache Hit%</div><div id="m-authz-cache-hit" class="font-bold">-</div></div>
+                        <div class="p-2 bg-gray-50 rounded"><div class="text-gray-500">Conflicts</div><div id="m-authz-conflicts" class="font-bold">-</div></div>
+                        <div class="p-2 bg-gray-50 rounded"><div class="text-gray-500">Avg µs</div><div id="m-authz-lat-avg" class="font-bold">-</div></div>
+                        <div class="p-2 bg-gray-50 rounded"><div class="text-gray-500">P99 µs</div><div id="m-authz-lat-p99" class="font-bold">-</div></div>
+                        <div class="p-2 bg-gray-50 rounded"><div class="text-gray-500">Regex Size</div><div id="m-authz-regex-size" class="font-bold">-</div></div>
+                        <div class="p-2 bg-gray-50 rounded"><div class="text-gray-500">Regex Evict</div><div id="m-authz-regex-evict" class="font-bold">-</div></div>
+                        <div class="p-2 bg-gray-50 rounded"><div class="text-gray-500">Regex Match</div><div id="m-authz-regex-matches" class="font-bold">-</div></div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] text-gray-500">Latency Histogram</span>
+                            <p id="authz-lat-hist-desc" class="sr-only">Authorization latency histogram uses nanosecond upper bounds per bucket. Relative bar height encodes frequency; last text label shows max bucket upper bound.</p>
+                            <svg id="authz-latency-histogram" role="img" aria-label="Authorization latency histogram" aria-describedby="authz-lat-hist-desc" width="260" height="60" viewBox="0 0 260 60" class="border border-gray-200 rounded">
+                                <title>Authorization latency distribution</title>
+                                <desc>Bar histogram of authorization decision latency bucket counts; taller bars represent higher frequency for given upper bound in nanoseconds.</desc>
+                            </svg>
+                            <span id="authz-latency-updated" class="text-[10px] text-gray-400" aria-live="polite"></span>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-[10px] text-gray-500">Metrics are in-memory and reset on restart.</div>
+                </div>
+                <!-- Policy Metrics Panel -->
+                <div class="bg-white rounded-xl shadow border border-gray-200 p-6" id="policy-metrics-panel">
+                    <h3 class="text-xl font-semibold mb-2 flex items-center gap-2"><i class="fas fa-link text-green-600" aria-hidden="true"></i><span>Policy Metrics (Experimental)</span></h3>
+                    <span id="policy-metrics-annc" class="sr-only" aria-live="polite" aria-atomic="false"></span>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center text-[11px]">
+                        <div class="p-2 bg-gray-50 rounded"><div class="text-gray-500">Total</div><div id="m-policy-total" class="font-bold">-</div></div>
+                        <div class="p-2 bg-gray-50 rounded"><div class="text-gray-500">Allow</div><div id="m-policy-allow" class="font-bold text-green-600">-</div></div>
+                        <div class="p-2 bg-gray-50 rounded"><div class="text-gray-500">Deny</div><div id="m-policy-deny" class="font-bold text-red-600">-</div></div>
+                        <div class="p-2 bg-gray-50 rounded"><div class="text-gray-500">P99 µs</div><div id="m-policy-p99" class="font-bold">-</div></div>
+                        <div class="p-2 bg-gray-50 rounded col-span-2 md:col-span-4"><div class="text-gray-500">Last Reason</div><div id="m-policy-last-reason" class="font-mono break-all text-[10px]">-</div></div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] text-gray-500">Latency Histogram</span>
+                            <p id="policy-lat-hist-desc" class="sr-only">Policy evaluation latency histogram shows decision evaluation durations in nanoseconds; each bar corresponds to a bucket upper bound.</p>
+                            <svg id="policy-latency-histogram" role="img" aria-label="Policy evaluation latency histogram" aria-describedby="policy-lat-hist-desc" width="260" height="60" viewBox="0 0 260 60" class="border border-gray-200 rounded">
+                                <title>Policy evaluation latency distribution</title>
+                                <desc>Bar histogram of policy evaluation latency bucket counts; each bar shows cumulative decisions under an upper bound in nanoseconds.</desc>
+                            </svg>
+                            <span id="policy-latency-updated" class="text-[10px] text-gray-400" aria-live="polite"></span>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-[10px] text-gray-500">Experimental metrics may change without notice.</div>
+                </div>
+                <!-- Decision Metrics Panel (New) -->
+                <div class="bg-white rounded-xl shadow border border-gray-200 p-6" id="decision-metrics-panel">
+                    <h3 class="text-xl font-semibold mb-2 flex items-center gap-2"><i class="fas fa-scale-balanced text-indigo-600" aria-hidden="true"></i><span>Decision Metrics</span></h3>
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <button id="export-decisions-json" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-2 py-1 rounded" aria-label="Export decision metrics JSON">Export JSON</button>
+                        <button id="export-decisions-csv" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-2 py-1 rounded" aria-label="Export decision metrics CSV">Export CSV</button>
+                    </div>
+                    <div id="decision-metrics-status" class="text-xs text-gray-600 mb-3" aria-live="polite">Initializing…</div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-xs" aria-describedby="decision-metrics-status">
+                            <caption class="sr-only">Authorization decision counts by action, resource, and outcome</caption>
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">Action</th>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">Resource</th>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">Outcome</th>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">Count</th>
+                                </tr>
+                            </thead>
+                            <tbody id="decision-counts-tbody">
+                                <tr><td colspan="4" class="text-center text-gray-400 py-4">Loading…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="decision-metrics-live" class="sr-only" aria-live="polite" aria-atomic="false">Decision metrics updating</div>
+                    <div class="mt-4 overflow-x-auto">
+                        <table class="min-w-full text-xs" aria-describedby="decision-metrics-status">
+                            <caption class="sr-only">Authorization decision reason counts</caption>
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">Action</th>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">Resource</th>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">Outcome</th>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">Reason</th>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">Count</th>
+                                </tr>
+                            </thead>
+                            <tbody id="decision-reasons-tbody">
+                                <tr><td colspan="5" class="text-center text-gray-400 py-4">Loading…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="decision-reasons-live" class="sr-only" aria-live="polite" aria-atomic="false">Decision reason metrics updating</div>
+                    <div class="mt-3 text-[10px] text-gray-500">Reason badges colored by semantic category (init, status_change, noop, maintenance, rate_limited, policy_violation).</div>
+                </div>
+            </div>
+            <!-- Governance & Audit Section -->
+            <div class="mt-12 grid lg:grid-cols-3 gap-8" aria-label="Governance panels">
+                <!-- Capability Governance Panel -->
+                <div id="capability-governance-panel" class="bg-white rounded-xl shadow border border-gray-200 p-6">
+                    <h3 class="text-xl font-semibold mb-3 flex items-center gap-2"><i class="fas fa-fingerprint text-blue-600" aria-hidden="true"></i><span>Capability Registry</span></h3>
+                    <div class="text-xs text-gray-600 mb-4">Integrity hashes for loaded capabilities. Changes on reload are reflected below.</div>
+                    <div class="grid grid-cols-1 gap-2 text-xs">
+                        <div><span class="text-gray-500">Current Hash:</span> <span id="cap-registry-hash" class="font-mono break-all">—</span></div>
+                        <div><span class="text-gray-500">Previous Hash:</span> <span id="cap-registry-prev-hash" class="font-mono break-all">—</span></div>
+                        <div><span class="text-gray-500">Last Changed:</span> <span id="cap-registry-changed-at" class="font-mono">—</span></div>
+                    </div>
+                    <div class="mt-4">
+                        <h4 class="text-sm font-semibold mb-2">Registered Capabilities</h4>
+                        <ul id="cap-registry-list" class="space-y-1 text-xs"></ul>
+                    </div>
+                </div>
+                <!-- Audit Preview Panel -->
+                <div class="bg-white rounded-xl shadow border border-gray-200 p-6" id="audit-preview-panel">
+                    <h3 class="text-xl font-semibold mb-3 flex items-center gap-2"><i class="fas fa-clipboard-list text-purple-600" aria-hidden="true"></i><span>Recent Audit Actions</span></h3>
+                    <div class="flex flex-wrap gap-2 mb-2">
+                        <button id="export-audit-json" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold px-2 py-1 rounded" aria-label="Export audit log JSON">Export JSON</button>
+                        <button id="export-audit-csv" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-2 py-1 rounded" aria-label="Export audit log CSV">Export CSV</button>
+                    </div>
+                    <div id="audit-preview-status" class="text-xs text-gray-600 mb-2" aria-live="polite">Initializing…</div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-[11px]" aria-describedby="audit-preview-status">
+                            <caption class="sr-only">Recent audit log entries</caption>
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">ID</th>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">Action</th>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">Resource</th>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">Outcome</th>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">Reason</th>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">At</th>
+                                </tr>
+                            </thead>
+                            <tbody id="audit-preview-tbody">
+                                <tr><td colspan="6" class="text-center text-gray-400 py-4">Loading…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="audit-preview-live" class="sr-only" aria-live="polite" aria-atomic="false">Audit preview updating</div>
+                    <div class="mt-3 text-[10px] text-gray-500">Full audit export available via API; this preview auto-refreshes.</div>
+                </div>
+                <!-- Lifecycle Timeline Panel -->
+                <div class="bg-white rounded-xl shadow border border-gray-200 p-6" id="lifecycle-timeline-panel">
+                    <h3 class="text-xl font-semibold mb-3 flex items-center gap-2"><i class="fas fa-stream text-green-600" aria-hidden="true"></i><span>Lifecycle Timeline</span></h3>
+                    <div class="flex flex-wrap gap-2 mb-2">
+                        <button id="export-lifecycle-json" class="bg-green-600 hover:bg-green-700 text-white text-xs font-semibold px-2 py-1 rounded" aria-label="Export lifecycle timeline JSON">Export JSON</button>
+                        <button id="export-lifecycle-csv" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-2 py-1 rounded" aria-label="Export lifecycle timeline CSV">Export CSV</button>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-3 mb-3 text-xs">
+                        <div>
+                            <label class="block text-gray-600 mb-1" for="lifecycle-filter-type">Entity Type</label>
+                            <select id="lifecycle-filter-type" class="border border-gray-300 rounded px-2 py-1 text-xs">
+                                <option value="">All</option>
+                                <option value="token">Token</option>
+                                <option value="delegation">Delegation</option>
+                            </select>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-gray-600 mb-1" for="lifecycle-filter-id">Entity ID</label>
+                            <input id="lifecycle-filter-id" type="text" placeholder="Optional id filter" class="w-full border border-gray-300 rounded px-2 py-1 text-xs" />
+                        </div>
+                        <div class="flex items-end">
+                            <button id="lifecycle-refresh-btn" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded">Refresh</button>
+                        </div>
+                    </div>
+                    <div id="lifecycle-timeline-status" class="text-xs text-gray-600 mb-2" aria-live="polite">Initializing…</div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-[11px]" aria-describedby="lifecycle-timeline-status">
+                            <caption class="sr-only">Recent lifecycle events</caption>
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">Type</th>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">ID</th>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">Old</th>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">New</th>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">Outcome</th>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">Reason</th>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">Latency (ns)</th>
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700">At</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lifecycle-timeline-tbody">
+                                <tr><td colspan="8" class="text-center text-gray-400 py-4">Loading…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="lifecycle-timeline-live" class="sr-only" aria-live="polite" aria-atomic="false">Lifecycle timeline updating</div>
+                    <div class="mt-3 text-[10px] text-gray-500">Latency values are raw nanoseconds per transition; reason codes mirror decision metrics labeling.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Job Log Streaming Section -->
+    <section id="job-logs" class="py-16 bg-gray-50 border-t border-gray-200" aria-labelledby="job-logs-heading" role="region">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-8 text-center">
+                <h2 id="job-logs-heading" class="text-3xl font-bold text-gray-900 mb-2">Live Job Log Streaming (Experimental)</h2>
+                <p class="text-gray-600">Stream output from an executed example job using Server-Sent Events (SSE).</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6 space-y-4">
+                <div class="flex flex-col sm:flex-row gap-4 items-end">
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1" for="logJobId">Job ID</label>
+                        <input id="logJobId" type="text" placeholder="Enter job id (after running an example)" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="startLogStream" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-md shadow disabled:opacity-50">Start Stream</button>
+                        <button id="stopLogStream" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold px-4 py-2 rounded-md shadow disabled:opacity-50" disabled>Stop</button>
+                    </div>
+                </div>
+                <div class="text-xs text-gray-500">Run an example first to obtain a job ID, then paste it here to view its output.</div>
+                <div id="logStatus" class="text-sm text-gray-600"></div>
+                <pre id="logOutput" class="bg-black text-green-300 p-4 rounded-md h-64 overflow-auto font-mono text-sm" aria-live="polite"><code>// Logs will appear here...</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- <script src="/static/js/log_stream_panel.js"></script> -->
+
+    <!-- Interactive Demo Section -->
+    <section id="demo" class="py-16 bg-gray-50" role="main" aria-labelledby="demo-heading">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Interactive Demo</h2>
+                <p class="text-xl text-gray-600">Explore GAuth concepts through hands-on examples</p>
+                <div class="mt-4 p-4 bg-orange-100 border border-orange-200 rounded-lg inline-block">
+                    <p class="text-orange-800 font-medium">
+                        <i class="fas fa-graduation-cap mr-2"></i>
+                        Beta Demo - Not for Production Use
+                    </p>
+                </div>
+            </div>
+
+            <!-- Demo Tabs -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="border-b border-gray-200">
+                    <nav class="flex" aria-label="Interactive demo tabs" role="tablist">
+                        <button data-tab="token-demo" class="tab-button active flex-1 py-4 px-6 text-center font-medium" type="button" aria-selected="true" aria-controls="token-demo" id="tab-token-demo">
+                            <i class="fas fa-key mr-2"></i>Token Management
+                        </button>
+                        <button data-tab="authz-demo" class="tab-button flex-1 py-4 px-6 text-center font-medium" type="button" aria-selected="false" aria-controls="authz-demo" id="tab-authz-demo" tabindex="-1">
+                            <i class="fas fa-shield-alt mr-2"></i>Authorization
+                        </button>
+                        <button data-tab="event-demo" class="tab-button flex-1 py-4 px-6 text-center font-medium" type="button" aria-selected="false" aria-controls="event-demo" id="tab-event-demo" tabindex="-1">
+                            <i class="fas fa-stream mr-2"></i>Event System
+                        </button>
+                        <button data-tab="audit-demo" class="tab-button flex-1 py-4 px-6 text-center font-medium" type="button" aria-selected="false" aria-controls="audit-demo" id="tab-audit-demo" tabindex="-1">
+                            <i class="fas fa-clipboard-list mr-2"></i>Audit Trail
+                        </button>
+                        <button data-tab="policy-demo" data-testid="policy-tab" aria-label="Policy Experimental Tab" class="tab-button flex-1 py-4 px-6 text-center font-medium" type="button" aria-selected="false" aria-controls="policy-demo" id="tab-policy-demo" tabindex="-1">
+                            <i class="fas fa-link mr-2" aria-hidden="true"></i><span>Policy (Experimental)</span>
+                        </button>
+                        <button data-tab="samples-demo" class="tab-button flex-1 py-4 px-6 text-center font-medium" type="button" aria-selected="false" aria-controls="samples-demo" id="tab-samples-demo" tabindex="-1">
+                            <i class="fas fa-flask mr-2"></i>Samples
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Samples Demo -->
+                <div id="samples-demo" class="tab-content hidden p-8">
+                                        <div class="mb-6">
+                        <h3 class="text-2xl font-bold mb-2">Run GAuth Samples</h3>
+                                                <p class="text-gray-600 mb-4">Browse and execute 37+ working Go examples. Output appears below.</p>
+                                                <div class="grid md:grid-cols-4 gap-4 mb-4">
+                                                    <div class="md:col-span-2">
+                                                        <input id="samples-search" type="text" placeholder="Search examples..." class="w-full border border-gray-300 rounded-lg px-3 py-2" />
+                                                    </div>
+                                                    <div class="flex items-center gap-3 text-sm flex-wrap md:col-span-2">
+                                                        <label class="inline-flex items-center gap-1"><input type="checkbox" id="filter-advanced" class="rounded" /> <span>Advanced</span></label>
+                                                        <label class="inline-flex items-center gap-1"><input type="checkbox" id="filter-negative" class="rounded" /> <span>Negative Cases</span></label>
+                                                        <label class="inline-flex items-center gap-1"><input type="checkbox" id="filter-basics" class="rounded" checked /> <span>Basics</span></label>
+                                                    </div>
+                                                </div>
+                        <div class="flex flex-wrap gap-2 mb-3 items-center">
+                            <button data-action="run-all-samples" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-2 rounded shadow">
+                                <i class="fas fa-layer-group mr-1"></i>Run All Samples
+                            </button>
+                            <button data-action="cancel-all-samples" class="bg-gray-300 hover:bg-gray-400 text-gray-800 text-xs font-semibold px-3 py-2 rounded shadow hidden" id="cancel-all-samples-btn">
+                                <i class="fas fa-stop mr-1"></i>Cancel
+                            </button>
+                            <button data-action="run-all-basics" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded shadow">
+                                <i class="fas fa-list mr-1"></i>Run Basics
+                            </button>
+                            <button data-action="run-advanced-suite" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold px-3 py-2 rounded shadow">
+                                <i class="fas fa-flask mr-1"></i>Run Advanced Suite
+                            </button>
+                            <span id="all-samples-progress" class="text-xs text-gray-600 ml-2"></span>
+                        </div>
+                        <div id="samples-list" class="bg-white border border-gray-200 rounded-lg overflow-auto max-h-64 mb-4">
+                            <div class="text-center text-gray-400 py-8">Loading examples...</div>
+                        </div>
+                                                <div id="poa-metrics" class="bg-white border border-gray-200 rounded-lg p-4 mb-4 hidden">
+                                                    <div class="flex items-center justify-between mb-2">
+                                                        <h4 class="font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-chart-bar text-blue-600"></i>POA Metrics</h4>
+                                                        <span id="poa-metrics-updated" class="text-xs text-gray-400"></span>
+                                                    </div>
+                                                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-center text-sm mb-2">
+                                                        <div><div class="text-gray-500">Requests</div><div id="m-poa-req" class="font-bold">-</div></div>
+                                                        <div><div class="text-gray-500">Success</div><div id="m-poa-ok" class="font-bold text-green-600">-</div></div>
+                                                        <div><div class="text-gray-500">Jurisdiction</div><div id="m-poa-jur" class="font-bold text-red-600">-</div></div>
+                                                        <div><div class="text-gray-500">Scope</div><div id="m-poa-scope" class="font-bold text-red-600">-</div></div>
+                                                        <div><div class="text-gray-500">Missing</div><div id="m-poa-missing" class="font-bold text-yellow-600">-</div></div>
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <div class="flex items-center gap-2">
+                                                            <span class="text-xs text-gray-500">POA Duration (s):</span>
+                                                            <svg id="poa-duration-sparkline" width="120" height="24" viewBox="0 0 120 24" class="align-middle"></svg>
+                                                            <span id="poa-duration-last" class="text-xs text-gray-700"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                    </div>
+                    <div class="bg-gray-900 rounded-lg p-4 h-64 overflow-auto">
+                        <div class="text-green-400 font-mono text-sm" aria-label="Samples console">
+                            <div id="samples-output" role="log" aria-live="polite" aria-atomic="false">
+                                <span class="text-gray-500"># Samples Console</span><br>
+                                <span class="text-gray-500"># Select and run a sample to see output</span><br>
+                                <span class="text-blue-400">gauth-samples></span> <span class="blinking-cursor">_</span>
+                                <div id="composite-export-buttons" class="mt-4 hidden">
+                                    <button id="download-composite-json" class="bg-green-600 hover:bg-green-700 text-white font-semibold text-xs py-1 px-3 rounded shadow mr-2"><i class="fas fa-file-code mr-1"></i>Download JSON</button>
+                                    <button id="download-composite-csv" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs py-1 px-3 rounded shadow"><i class="fas fa-file-csv mr-1"></i>Download CSV</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Job Panel -->
+                    <div class="mt-10">
+                        <h3 class="text-xl font-bold mb-2 flex items-center gap-2"><i class="fas fa-tasks text-blue-600"></i>Job Panel</h3>
+                        <p class="text-gray-600 mb-2">Monitor and manage running jobs. <span class="text-xs text-gray-500">(Auto-refreshes every 2s)</span></p>
+                        <div class="overflow-x-auto rounded-lg shadow border border-gray-200 bg-white">
+                            <table class="min-w-full divide-y divide-gray-200 text-sm" id="job-table">
+                                <caption class="sr-only">Active example jobs status</caption>
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-3 py-2 text-left font-semibold text-gray-700">Job ID</th>
+                                        <th class="px-3 py-2 text-left font-semibold text-gray-700">Example</th>
+                                        <th class="px-3 py-2 text-left font-semibold text-gray-700">State</th>
+                                        <th class="px-3 py-2 text-left font-semibold text-gray-700">Started</th>
+                                        <th class="px-3 py-2 text-left font-semibold text-gray-700">Duration</th>
+                                        <th class="px-3 py-2 text-left font-semibold text-gray-700">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="job-table-body">
+                                    <tr><td colspan="6" class="text-center text-gray-400 py-4">Loading jobs...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-2" id="job-panel-msg"></div>
+                    </div>
+                </div>
+
+                <!-- Token Management Demo -->
+                <div id="token-demo" class="tab-content p-8">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4">Token Lifecycle Demo</h3>
+                            <p class="text-gray-600 mb-6">Experience the complete token management lifecycle with creation, validation, and revocation.</p>
+                            
+                            <div class="space-y-4">
+                                <button data-action="create-token" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg">
+                                    <i class="fas fa-plus mr-2"></i>Create Beta Token
+                                </button>
+                                <button data-action="validate-token" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg">
+                                    <i class="fas fa-check mr-2"></i>Validate Token
+                                </button>
+                                <button data-action="revoke-token" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg">
+                                    <i class="fas fa-times mr-2"></i>Revoke Token
+                                </button>
+                            </div>
+
+                            <div class="mt-4">
+                                <button id="show-token-metrics" class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded mb-2">Show Token Metrics</button>
+                                <div id="token-metrics-panel" class="mt-2 text-xs text-gray-700"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="bg-gray-900 rounded-lg p-4 h-64 overflow-auto" aria-label="Token management console">
+                                <div class="text-green-400 font-mono text-sm">
+                                    <div id="token-output" role="log" aria-live="polite" aria-atomic="false">
+                                        <span class="text-gray-500"># Token Management Console</span><br>
+                                        <span class="text-gray-500"># Click buttons to see demo operations</span><br>
+                                        <span class="text-blue-400">gauth-demo></span> <span class="blinking-cursor">_</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Authorization Demo -->
+                <div id="authz-demo" class="tab-content hidden p-8">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4">Authorization Flow Demo</h3>
+                            <p class="text-gray-600 mb-6">Demonstrate power-of-attorney flows and authorization decision making.</p>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Resource Action</label>
+                                    <select id="resource-action" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                                        <option value="read">Read Document</option>
+                                        <option value="write">Write Document</option>
+                                        <option value="admin">Admin Access</option>
+                                        <option value="delegate">Delegate Authority</option>
+                                    </select>
+                                </div>
+                                <button data-action="check-authorization" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg">
+                                    <i class="fas fa-gavel mr-2"></i>Check Authorization
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="bg-gray-900 rounded-lg p-4 h-64 overflow-auto" aria-label="Authorization console">
+                                <div class="text-green-400 font-mono text-sm">
+                                    <div id="authz-output" role="log" aria-live="polite" aria-atomic="false">
+                                        <span class="text-gray-500"># Authorization Console</span><br>
+                                        <span class="text-gray-500"># Select action and check authorization</span><br>
+                                        <span class="text-blue-400">gauth-authz></span> <span class="blinking-cursor">_</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Embedded Authorizer Evaluation (Metrics moved to Observability section) -->
+                            <div class="mt-8 bg-white rounded-lg shadow border border-gray-200 p-4">
+                                <h5 class="font-semibold text-gray-800 mb-2 text-sm flex items-center gap-1"><i class="fas fa-vial text-indigo-600"></i> Evaluate (Embedded)</h5>
+                                <form id="authz-eval-form" class="grid grid-cols-2 gap-2 text-[11px]">
+                                    <input name="subject" value="alice@example.com" placeholder="Subject" class="border border-gray-300 rounded px-2 py-1" />
+                                    <input name="resource" value="report:finance" placeholder="Resource" class="border border-gray-300 rounded px-2 py-1" />
+                                    <input name="action" value="read" placeholder="Action" class="border border-gray-300 rounded px-2 py-1" />
+                                    <input name="department" value="finance" placeholder="Context: department" class="border border-gray-300 rounded px-2 py-1" />
+                                    <input name="classification" value="public" placeholder="Context: classification" class="border border-gray-300 rounded px-2 py-1" />
+                                    <input name="roles" value="" placeholder="Context: roles (comma)" class="border border-gray-300 rounded px-2 py-1" />
+                                    <div class="col-span-2">
+                                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 rounded">Evaluate</button>
+                                    </div>
+                                </form>
+                                <div id="authz-eval-result" class="mt-2 text-[11px] text-gray-700"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event System Demo -->
+                <div id="event-demo" class="tab-content hidden p-8">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4">Event System Demo</h3>
+                            <p class="text-gray-600 mb-6">Experience the typed event system with structured metadata handling.</p>
+                            
+                            <div class="space-y-4">
+                                <button data-action="publish-event" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg">
+                                    <i class="fas fa-broadcast-tower mr-2"></i>Publish Event
+                                </button>
+                                <button data-action="subscribe-events" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-lg">
+                                    <i class="fas fa-bell mr-2"></i>Subscribe to Events
+                                </button>
+                                <div class="flex flex-wrap items-center gap-2 mt-2">
+                                    <button id="startEventStream" class="bg-blue-700 hover:bg-blue-800 text-white font-semibold px-4 py-2 rounded shadow">Start Event Stream</button>
+                                    <button id="stopEventStream" class="bg-gray-700 hover:bg-gray-800 text-white font-semibold px-4 py-2 rounded shadow" disabled>Stop</button>
+                                    <span id="event-stream-status" class="px-2 py-0.5 text-xs rounded font-semibold bg-gray-400 text-white">Disconnected</span>
+                                    <button id="download-event-log" class="ml-auto bg-green-700 hover:bg-green-800 text-white font-semibold px-3 py-2 rounded shadow text-xs">Download Log</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="bg-gray-900 rounded-lg p-4 h-64 overflow-auto" aria-label="Event system console">
+                                <div class="text-green-400 font-mono text-sm">
+                                    <div id="event-output" role="log" aria-live="polite" aria-atomic="false">
+                                        <span class="text-gray-500"># Event System Console</span><br>
+                                        <span class="text-gray-500"># Demonstrates typed events and metadata</span><br>
+                                        <span class="text-blue-400">gauth-events></span> <span class="blinking-cursor">_</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audit Trail Demo -->
+                <div id="audit-demo" class="tab-content hidden p-8">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4">Audit Trail Demo</h3>
+                            <p class="text-gray-600 mb-6">View comprehensive audit logging and compliance tracking.</p>
+                            
+                            <div class="space-y-4">
+                                <button data-action="view-audit-log" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-6 rounded-lg">
+                                    <i class="fas fa-history mr-2"></i>View Audit Log
+                                </button>
+                                <button data-action="generate-report" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg">
+                                    <i class="fas fa-chart-bar mr-2"></i>Generate Report
+                                </button>
+                                <div class="flex flex-wrap items-center gap-2 mt-2">
+                                    <button id="startAuditStream" class="bg-blue-700 hover:bg-blue-800 text-white font-semibold px-4 py-2 rounded shadow">Start Audit Stream</button>
+                                    <button id="stopAuditStream" class="bg-gray-700 hover:bg-gray-800 text-white font-semibold px-4 py-2 rounded shadow" disabled>Stop</button>
+                                    <span id="audit-stream-status" class="px-2 py-0.5 text-xs rounded font-semibold bg-gray-400 text-white">Disconnected</span>
+                                    <button id="download-audit-log" class="ml-auto bg-green-700 hover:bg-green-800 text-white font-semibold px-3 py-2 rounded shadow text-xs">Download Log</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="bg-gray-900 rounded-lg p-4 h-64 overflow-auto" aria-label="Audit trail console">
+                                <div class="text-green-400 font-mono text-sm">
+                                    <div id="audit-output" role="log" aria-live="polite" aria-atomic="false">
+                                        <span class="text-gray-500"># Audit Console</span><br>
+                                        <span class="text-gray-500"># Beta audit trail demonstration</span><br>
+                                        <span class="text-blue-400">gauth-audit></span> <span class="blinking-cursor">_</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Policy Engine Experimental Demo -->
+                <div id="policy-demo" class="tab-content hidden p-8">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4">Policy Engine (Experimental)</h3>
+                            <p class="text-gray-600 mb-4 text-sm">Interact with the hash‑chained in‑memory policy bundles. All data is ephemeral.</p>
+                            <div class="bg-white border border-green-200 rounded-lg p-4 mb-4 space-y-2" id="policy-governance-panel" aria-label="Policy governance status">
+                                <h4 class="font-semibold text-gray-800 flex items-center gap-2 text-sm"><i class="fas fa-gavel text-green-600" aria-hidden="true"></i><span>Governance Status</span></h4>
+                                <div class="grid grid-cols-2 gap-2 text-[11px]">
+                                    <div><span class="text-gray-500">Revisions Total:</span> <span id="pg-revisions-total" class="font-mono">0</span></div>
+                                    <div><span class="text-gray-500">Active Version:</span> <span id="pg-active-version" class="font-mono">-</span></div>
+                                    <div class="col-span-2"><span class="text-gray-500">Head Hash:</span> <span id="pg-head-hash" class="font-mono break-all">—</span></div>
+                                    <div class="col-span-2"><span class="text-gray-500">Chain Verified:</span> <span id="pg-chain-verified" class="px-2 py-0.5 rounded bg-gray-100 text-gray-700 text-xs">pending</span></div>
+                                </div>
+                                <div class="mt-2 flex items-end gap-2">
+                                    <div class="flex-1">
+                                        <label for="pg-rollback-version" class="block text-[11px] text-gray-600 mb-1">Rollback Version</label>
+                                        <input id="pg-rollback-version" type="number" min="1" placeholder="e.g. 2" class="w-full border-gray-300 rounded px-2 py-1 text-xs" />
+                                    </div>
+                                    <button data-action="policy-rollback" class="bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-3 py-2 rounded mt-auto" aria-label="Perform rollback">Rollback</button>
+                                </div>
+                                <p class="text-[10px] text-gray-500">Rollback sets a historical bundle as effective head until next append. Appending any new bundle clears rollback automatically.</p>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+                                    <h4 class="font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-fingerprint text-blue-600"></i>Provenance & Chain</h4>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button data-action="policy-provenance" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2 px-3 rounded">Provenance</button>
+                                        <button data-action="policy-consistency" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-2 px-3 rounded">Consistency</button>
+                                    </div>
+                                    <div class="flex gap-2 items-end">
+                                        <div class="flex-1">
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Offset</label>
+                                            <input id="pol-chain-offset" type="number" value="0" class="w-full border-gray-300 rounded px-2 py-1 text-sm" />
+                                        </div>
+                                        <div class="flex-1">
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Limit</label>
+                                            <input id="pol-chain-limit" type="number" value="10" class="w-full border-gray-300 rounded px-2 py-1 text-sm" />
+                                        </div>
+                                        <button data-action="policy-chain-page" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold py-2 px-3 rounded">Chain Page</button>
+                                    </div>
+                                    <!-- Compact Revisions Timeline -->
+                                    <div class="mt-3 border-t pt-3">
+                                      <h5 class="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1"><i class="fas fa-stream text-green-600" aria-hidden="true"></i><span>Revisions Timeline</span></h5>
+                                      <div id="pg-timeline" class="text-[10px] font-mono space-y-1" aria-live="polite" aria-label="Policy revisions timeline">
+                                        <div class="text-gray-400">(loading timeline)</div>
+                                      </div>
+                                      <p class="mt-1 text-[9px] text-gray-500">Shows all bundle versions with short hash & creation time. <span class="inline-block px-1 rounded bg-green-100 text-green-700">A</span> = active; <span class="inline-block px-1 rounded bg-yellow-100 text-yellow-700">R</span> = rollback active.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+                                    <h4 class="font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-play text-green-600"></i>Evaluate</h4>
+                                    <div class="grid grid-cols-2 gap-2 text-xs">
+                                        <div>
+                                            <label class="block mb-1 text-gray-600">Subject</label>
+                                            <input id="pol-subject" value="alice@example.com" class="w-full border-gray-300 rounded px-2 py-1" />
+                                        </div>
+                                        <div>
+                                            <label class="block mb-1 text-gray-600">Action</label>
+                                            <input id="pol-action" value="read" class="w-full border-gray-300 rounded px-2 py-1" />
+                                        </div>
+                                        <div class="col-span-2">
+                                            <label class="block mb-1 text-gray-600">Resource</label>
+                                            <input id="pol-resource" value="report:finance" class="w-full border-gray-300 rounded px-2 py-1" />
+                                        </div>
+                                        <div class="col-span-2">
+                                            <label class="block mb-1 text-gray-600">Attrs (JSON)</label>
+                                            <textarea id="pol-attrs" rows="2" class="w-full border-gray-300 rounded px-2 py-1 font-mono text-xs">{"department":"finance"}</textarea>
+                                        </div>
+                                    </div>
+                                    <button data-action="policy-evaluate" class="w-full bg-green-600 hover:bg-green-700 text-white text-xs font-semibold py-2 px-3 rounded">Evaluate</button>
+                                    <div class="flex items-center justify-between mt-2">
+                                        <button id="policy-trace-toggle" type="button" aria-pressed="true" class="bg-gray-700 hover:bg-gray-800 text-white text-xs font-semibold py-1 px-2 rounded">Hide Trace Details</button>
+                                        <div id="policy-trace-legend" class="text-[10px] text-gray-500 flex items-center gap-2" aria-label="Policy decision legend">
+                                            <span class="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-green-600 text-white" aria-label="Allow decision badge">ALLOW</span>
+                                            <span class="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-red-600 text-white" aria-label="Deny decision badge">DENY</span>
+                                            <span class="sr-only">Allow (green) means authorization granted; Deny (red) means blocked.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+                                    <h4 class="font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-upload text-yellow-600"></i>Submit Bundle</h4>
+                                    <div class="text-xs text-gray-500">Optional admin token required if server set <code>GAUTH_POLICY_ADMIN_TOKEN</code>.</div>
+                                    <input id="pol-admin-token" placeholder="Admin token (optional)" class="w-full border-gray-300 rounded px-2 py-1 text-xs mb-2" />
+                                    <textarea id="pol-bundle-json" rows="6" class="w-full border-gray-300 rounded px-2 py-1 font-mono text-xs">{
+  "id": "bundle-web",
+  "policies": [
+    {
+      "id": "allow-finance-reports",
+      "subjects": ["alice@example.com"],
+      "rules": [
+        {"actions":["read"],"resources":["report:finance"],"effect":"allow","expr":"department == 'finance'"}
+      ]
+    }
+  ]
+}</textarea>
+                                    <button data-action="policy-submit-bundle" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white text-xs font-semibold py-2 px-3 rounded">Submit Bundle</button>
+                                </div>
+                                <p class="text-xs text-gray-500">All policy operations are in-memory and reset on server restart.</p>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="bg-gray-900 rounded-lg p-4 h-96 overflow-auto" aria-label="Policy engine console">
+                                <div class="text-green-400 font-mono text-sm">
+                                    <div id="policy-output" role="log" aria-live="polite" aria-atomic="false">
+                                        <span class="text-gray-500"># Policy Engine Console</span><br>
+                                        <span class="text-gray-500"># Use buttons to inspect provenance, chain, evaluate, submit bundles</span><br>
+                                        <span class="text-blue-400">gauth-policy></span> <span class="blinking-cursor">_</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture Section -->
+    <section id="architecture" class="py-16 bg-white" role="region" aria-labelledby="architecture-heading">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">System Architecture</h2>
+                <p class="text-xl text-gray-600">Understanding the GAuth framework structure and components</p>
+            </div>
+
+            <!-- Architecture Diagram -->
+            <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 mb-12">
+                <div class="flex flex-col lg:flex-row items-center justify-center space-y-8 lg:space-y-0 lg:space-x-8">
+                    <!-- Client Layer -->
+                    <div class="text-center">
+                        <div class="bg-blue-500 text-white rounded-lg p-4 mb-4">
+                            <i class="fas fa-desktop text-2xl mb-2"></i>
+                            <div class="font-semibold">Client/API</div>
+                        </div>
+                        <p class="text-sm text-gray-600">Web Interface<br>REST/GraphQL</p>
+                    </div>
+
+                    <div class="text-4xl text-gray-400">→</div>
+
+                    <!-- GAuth Core -->
+                    <div class="text-center">
+                        <div class="bg-purple-500 text-white rounded-lg p-4 mb-4">
+                            <i class="fas fa-shield-alt text-2xl mb-2"></i>
+                            <div class="font-semibold">GAuth Core</div>
+                        </div>
+                        <p class="text-sm text-gray-600">Authorization<br>Token Management</p>
+                    </div>
+
+                    <div class="text-4xl text-gray-400">→</div>
+
+                    <!-- Backend Systems -->
+                    <div class="text-center">
+                        <div class="bg-green-500 text-white rounded-lg p-4 mb-4">
+                            <i class="fas fa-database text-2xl mb-2"></i>
+                            <div class="font-semibold">Backend</div>
+                        </div>
+                        <p class="text-sm text-gray-600">Storage<br>Services</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-8">
+                    <div class="bg-orange-500 text-white rounded-lg p-4 inline-block">
+                        <i class="fas fa-clipboard-list text-2xl mb-2 text-white"></i>
+                        <div class="font-semibold">Audit & Events</div>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-2">Compliance & Monitoring</p>
+                </div>
+            </div>
+
+            <!-- Component Details -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                    <div class="text-blue-600 text-2xl mb-4">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Token Management</h3>
+                    <p class="text-gray-600 text-sm mb-4">Complete token lifecycle with creation, validation, revocation, and refresh capabilities.</p>
+                    <ul class="text-sm text-gray-500 space-y-1">
+                        <li>• JWT/PASETO support</li>
+                        <li>• Automatic expiration</li>
+                        <li>• Blacklist management</li>
+                        <li>• Key rotation</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                    <div class="text-purple-600 text-2xl mb-4">
+                        <i class="fas fa-gavel"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Authorization Engine</h3>
+                    <p class="text-gray-600 text-sm mb-4">Advanced authorization with power-of-attorney flows and policy enforcement.</p>
+                    <ul class="text-sm text-gray-500 space-y-1">
+                        <li>• RBAC/ABAC models</li>
+                        <li>• Delegation chains</li>
+                        <li>• Policy evaluation</li>
+                        <li>• Context awareness</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                    <div class="text-green-600 text-2xl mb-4">
+                        <i class="fas fa-stream"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Event System</h3>
+                    <p class="text-gray-600 text-sm mb-4">Typed event system with structured metadata for real-time monitoring.</p>
+                    <ul class="text-sm text-gray-500 space-y-1">
+                        <li>• Typed events</li>
+                        <li>• Pub/Sub pattern</li>
+                        <li>• Event handlers</li>
+                        <li>• Metadata enrichment</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                    <div class="text-red-600 text-2xl mb-4">
+                        <i class="fas fa-shield-virus"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Resilience Patterns</h3>
+                    <p class="text-gray-600 text-sm mb-4">Built-in resilience with circuit breakers, rate limiting, and retry mechanisms.</p>
+                    <ul class="text-sm text-gray-500 space-y-1">
+                        <li>• Circuit breakers</li>
+                        <li>• Rate limiting</li>
+                        <li>• Retry policies</li>
+                        <li>• Bulkhead isolation</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                    <div class="text-orange-600 text-2xl mb-4">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Audit Trail</h3>
+                    <p class="text-gray-600 text-sm mb-4">Comprehensive audit logging for compliance and security monitoring.</p>
+                    <ul class="text-sm text-gray-500 space-y-1">
+                        <li>• Structured logging</li>
+                        <li>• Compliance tracking</li>
+                        <li>• Event correlation</li>
+                        <li>• Tamper evidence</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                    <div class="text-indigo-600 text-2xl mb-4">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Configuration</h3>
+                    <p class="text-gray-600 text-sm mb-4">Flexible configuration with environment-specific settings and runtime updates.</p>
+                    <ul class="text-sm text-gray-500 space-y-1">
+                        <li>• YAML/JSON config</li>
+                        <li>• Environment variables</li>
+                        <li>• Hot reloading</li>
+                        <li>• Validation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Examples Section -->
+    <section id="examples" class="py-16 bg-gray-50" role="region" aria-labelledby="examples-heading">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Learning Examples</h2>
+                <p class="text-xl text-gray-600">Explore 37+ working examples demonstrating GAuth concepts</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Featured Examples -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="bg-blue-600 text-white p-4">
+                        <i class="fas fa-graduation-cap text-2xl mb-2"></i>
+                        <h3 class="font-semibold">RFC-0115 PoA Definition</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-gray-600 mb-4">Complete implementation of Power-of-Attorney definition structures according to RFC-0115.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Working</span>
+                            <button data-action="view-example" data-example="rfc-0115" class="text-blue-600 hover:text-blue-800 font-medium">
+                                View Example →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="bg-purple-600 text-white p-4">
+                        <i class="fas fa-stream text-2xl mb-2"></i>
+                        <h3 class="font-semibold">Typed Events Demo</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-gray-600 mb-4">Demonstrates typed event system with structured metadata handling and pub/sub patterns.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Working</span>
+                            <button data-action="view-example" data-example="typed-events" class="text-blue-600 hover:text-blue-800 font-medium">
+                                View Example →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="bg-green-600 text-white p-4">
+                        <i class="fas fa-key text-2xl mb-2"></i>
+                        <h3 class="font-semibold">Token Revocation Flow</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-gray-600 mb-4">Advanced token management with revocation flows and blacklist handling.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Working</span>
+                            <button data-action="view-example" data-example="token-revocation" class="text-blue-600 hover:text-blue-800 font-medium">
+                                View Example →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="bg-red-600 text-white p-4">
+                        <i class="fas fa-shield-virus text-2xl mb-2"></i>
+                        <h3 class="font-semibold">Resilience Patterns</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-gray-600 mb-4">Circuit breakers, rate limiting, and retry mechanisms for robust systems.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Working</span>
+                            <button data-action="view-example" data-example="resilience" class="text-blue-600 hover:text-blue-800 font-medium">
+                                View Example →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="p-4 bg-orange-50 border-b border-orange-300">
+                        <i class="fas fa-sitemap text-2xl mb-2 text-orange-600"></i>
+                        <h3 class="font-semibold text-orange-900">Cascade Patterns</h3>
+                    </div>
+                    <div class="p-6 text-gray-800">
+                        <p class="mb-4">Complex authorization flows with cascading permissions and delegation chains.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Working</span>
+                            <button data-action="view-example" data-example="cascade" class="text-blue-700 hover:text-blue-900 font-semibold">
+                                View Example →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="bg-indigo-600 text-white p-4">
+                        <i class="fas fa-microchip text-2xl mb-2"></i>
+                        <h3 class="font-semibold">Microservices Auth</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-gray-600 mb-4">Service-to-service authentication patterns for distributed architectures.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">Beta</span>
+                            <button data-action="view-example" data-example="microservices" class="text-blue-600 hover:text-blue-800 font-medium">
+                                View Example →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View All Examples Button -->
+            <div class="text-center mt-12">
+                <a href="https://github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/tree/main/examples" 
+                   target="_blank"
+                   class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-4 px-8 rounded-lg text-lg transition-all transform hover:scale-105">
+                    <i class="fas fa-folder-open mr-2"></i>
+                    Browse All 37+ Examples
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12" role="contentinfo">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">GAuth Beta Demo</h3>
+                    <p class="text-gray-400 text-sm">
+                        RFC-0150 compliant authorization framework implementation for learning and demonstration purposes.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Learning Resources</h4>
+                    <ul class="text-gray-400 text-sm space-y-2">
+                        <li><a href="#" class="hover:text-white">Getting Started Guide</a></li>
+                        <li><a href="#" class="hover:text-white">API Documentation</a></li>
+                        <li><a href="#" class="hover:text-white">Architecture Guide</a></li>
+                        <li><a href="#" class="hover:text-white">Examples Repository</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">RFC Standards</h4>
+                    <ul class="text-gray-400 text-sm space-y-2">
+                        <li><a href="#" class="hover:text-white">GiFo-RFC-0111</a></li>
+                        <li><a href="#" class="hover:text-white">GiFo-RFC-0115</a></li>
+                        <li><a href="#" class="hover:text-white">GiFo-RFC-0150</a></li>
+                        <li><a href="#" class="hover:text-white">Compliance Guide</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Beta Notice</h4>
+                    <div class="bg-orange-600 text-white p-3 rounded text-sm">
+                        <i class="fas fa-exclamation-triangle mb-2"></i>
+                        <p class="font-medium">For Beta Demonstration Use Only</p>
+                        <p class="text-xs mt-1">This implementation is designed for learning and should not be used in production environments.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <div class="text-gray-400 text-sm">
+                    © 2025 Gimel Foundation gGmbH i.G. Licensed under Apache 2.0
+                </div>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="https://github.com/Gimel-Foundation" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                    <a href="https://gimelfoundation.com" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-globe text-xl"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <!-- Production bundle (ESBuild) -->
+        <script src="/static/js/bundle.js"></script>
+        <!-- ARIA tabs enhancement (kept separate to avoid modifying legacy app.js until refactor) -->
+    <script src="/static/js/aria-tabs.js"></script>
+    <!-- New modular script entry (ensures policy module loaded even if bundle missing policy code) -->
+    <script type="module" src="/static/js/modules/main.js"></script>
+    <script type="module" src="/static/js/modules/ui.js"></script>
+        <!-- Decision Metrics & Governance Modules -->
+        <script type="module" src="/static/js/modules/refresh.js" defer></script>
+        <!-- Unified entry point (main.js) loads dependent panel modules internally -->
+        <script type="module" src="/static/js/modules/main.js" defer></script>
+    <!-- <script src="/static/js/job_panel.js"></script> -->
+</body>
+</html>

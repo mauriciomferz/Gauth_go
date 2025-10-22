@@ -26,7 +26,7 @@ RUN go mod verify
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -ldflags='-w -s -extldflags "-static"' \
     -a -installsuffix cgo \
-    -o gauth-server ./cmd/demo
+    -o gauth-server ./cmd/gauth-server
 
 # Verify binary
 RUN ls -la gauth-server

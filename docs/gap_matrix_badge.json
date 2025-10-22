@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "implemented": 7,
+  "partial": 19,
+  "missing": 17,
+  "conceptual": 0,
+  "total": 43,
+  "implemented_pct": 16.28,
+  "with_partial_pct": 60.47,
+  "coverage_score": "16% Implemented / 60% w+Partial",
+  "generated": "2025-10-22T04:41:11Z"
+}

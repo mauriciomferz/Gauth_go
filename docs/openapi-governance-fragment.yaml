@@ -1,0 +1,92 @@
+openapi: 3.0.3
+info:
+  title: GAuth Governance & Observability Fragment
+  version: 0.3.1-beta-refactor
+  description: |
+    This fragment documents governance and observability endpoints for integration.
+    Combine with the core security/token management specification.
+paths:
+  /api/v1/beta/metrics/decisions:
+    get:
+      summary: Decision Metrics Snapshot
+      operationId: getDecisionMetrics
+      tags: [governance]
+      responses:
+        '200':
+          description: Metrics snapshot (may indicate available=false while warming)
+          content:
+            application/json:
+              schema:
+                $ref: './schema/decision_metrics.schema.json'
+  /api/v1/beta/capabilities:
+    get:
+      summary: Capability Registry Snapshot
+      operationId: getCapabilitiesRegistry
+      tags: [governance]
+      responses:
+        '200':
+          description: Current capability registry with integrity hashes
+          content:
+            application/json:
+              schema:
+                $ref: './schema/capabilities_registry.schema.json'
+  /api/v1/audit/logs:
+    get:
+      summary: Recent Audit Log Entries
+      operationId: getAuditLogs
+      tags: [audit]
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+          description: Max entries to return (default 100)
+        - in: query
+          name: since
+          schema:
+            type: string
+            format: date-time
+          description: Return only entries with timestamp >= since
+      responses:
+        '200':
+          description: Ordered audit entries (most recent first)
+          content:
+            application/json:
+              schema:
+                $ref: './schema/audit_logs.schema.json'
+  /api/v1/beta/lifecycle/timeline:
+    get:
+      summary: Lifecycle Transition Timeline
+      operationId: getLifecycleTimeline
+      tags: [governance]
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+          description: Max events to return (default 100)
+        - in: query
+          name: entity_type
+          schema:
+            type: string
+            enum: [token, delegation]
+          description: Filter to a specific entity type
+      responses:
+        '200':
+          description: Ordered lifecycle events (most recent first)
+          content:
+            application/json:
+              schema:
+                $ref: './schema/lifecycle_timeline.schema.json'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []

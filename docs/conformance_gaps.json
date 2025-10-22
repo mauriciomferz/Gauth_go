@@ -1,0 +1,133 @@
+{
+  "generated": "2025-10-21",
+  "version": "beta-refactor",
+  "sections": [
+    {
+      "id": "sec1",
+      "name": "Cryptographic & Authenticity",
+      "items": [
+  {"id": "sec1.item1", "requirement": "Mandatory POA signature at issuance", "status": "Implemented", "gap": "Need configurable algorithms (Ed25519 only)", "evidence": ["docs/GAP_MATRIX.md:12", "pkg/rfc0111/signature_negative_test.go"], "priority": "P0"},
+  {"id": "sec1.item2", "requirement": "Full JWT/PASETO claims", "status": "Partial", "gap": "sub,scope,exp,iat,iss,aud,jti,nbf implemented; missing advanced (claims set metadata, structured nested PASETO footer, typ semantic enforcement)", "evidence": ["pkg/gauth/gauth.go", "pkg/gauth/gauth_claims_test.go"], "priority": "P0"},
+  {"id": "sec1.item3", "requirement": "Robust JSON parsing", "status": "Partial", "gap": "Manual string scanning; property + fuzz tests cover legacy parser for safety", "evidence": ["pkg/gauth/gauth.go", "pkg/gauth/gauth_prop_test.go", "pkg/gauth/gauth_fuzz_test.go"], "priority": "P0"},
+  {"id": "sec1.item4", "requirement": "Key rotation & lifecycle", "status": "Partial", "gap": "Scheduler + disk persistence implemented (env driven); missing multi-tenant segregation & external HSM integration", "evidence": ["internal/crypto/keys.go", "internal/crypto/keys_persist_test.go"], "priority": "P1"},
+        {"id": "sec1.item5", "requirement": "Public verifiable token integrity", "status": "Partial", "gap": "Local symmetric only; no detached signature", "evidence": ["docs/GAP_MATRIX.md:14"], "priority": "P0"},
+  {"id": "sec1.item6", "requirement": "Canonical digest stability fuzzing", "status": "Implemented", "gap": "Property + fuzz tests validate determinism & mutable field exclusion", "evidence": ["docs/GAP_MATRIX.md:15", "pkg/rfc0111/canonical.go", "pkg/rfc0111/canonical_prop_test.go", "pkg/rfc0111/canonical_fuzz_test.go"], "priority": "P2"}
+      ]
+    },
+    {
+      "id": "sec2",
+      "name": "Authorization Engine",
+      "items": [
+        {"id": "sec2.item1", "requirement": "PDP combining algorithms", "status": "Implemented", "gap": "Need richer conflict diagnostics", "evidence": ["docs/GAP_MATRIX.md:20"], "priority": "P0"},
+        {"id": "sec2.item2", "requirement": "ABAC expression evaluation", "status": "Implemented", "gap": "No extensible function registry", "evidence": ["docs/GAP_MATRIX.md:21"], "priority": "P0"},
+        {"id": "sec2.item3", "requirement": "Obligations & advice processing", "status": "Missing", "gap": "Concept only, not executed", "evidence": ["docs/GAP_MATRIX.md:25"], "priority": "P2"},
+        {"id": "sec2.item4", "requirement": "Policy versioning & rollback", "status": "Missing", "gap": "No version metadata", "evidence": ["docs/GAP_MATRIX.md:23"], "priority": "P1"},
+        {"id": "sec2.item5", "requirement": "Distributed PDP & caching", "status": "Missing", "gap": "No clustering or cache invalidation", "evidence": ["docs/GAP_MATRIX.md:24"], "priority": "P2"}
+      ]
+    },
+    {
+      "id": "sec3",
+      "name": "PoA Definition (RFC0115)",
+      "items": [
+  {"id": "sec3.item1", "requirement": "Full semantic validation", "status": "Partial", "gap": "AdvancedPoAValidator adds extended rules; lacking warning channel & persistence of daily limits", "evidence": ["docs/GAP_MATRIX.md:32", "pkg/rfc0111/validator.go", "pkg/rfc0111/rfc0111.go"], "priority": "P0"},
+  {"id": "sec3.item2", "requirement": "Embed full PoA in token", "status": "Partial", "gap": "RawPOA + PoAVersion embedding implemented behind GAUTH_EMBED_FULL_POA with size cap GAUTH_MAX_RAW_POA_BYTES; remaining gaps: verifier exposure helper, CBOR option, streaming for large PoAs, warning channel & audit persistence", "evidence": ["docs/GAP_MATRIX.md:33", "pkg/rfc0111/rfc0111.go", "internal/metrics/metrics.go"], "priority": "P1"},
+        {"id": "sec3.item3", "requirement": "Joint/collective signature enforcement", "status": "Missing", "gap": "No multi-signer aggregation", "evidence": ["docs/GAP_MATRIX.md:33"], "priority": "P1"},
+        {"id": "sec3.item4", "requirement": "Conditional/special conditions evaluation", "status": "Missing", "gap": "No runtime interpreter", "evidence": ["docs/GAP_MATRIX.md:34"], "priority": "P2"}
+      ]
+    },
+    {
+      "id": "sec4",
+      "name": "Legal / Jurisdiction / Compliance",
+      "items": [
+        {"id": "sec4.item1", "requirement": "Jurisdiction-specific enforcement", "status": "Missing", "gap": "No runtime branching", "evidence": ["docs/GAP_MATRIX.md:40"], "priority": "P1"},
+        {"id": "sec4.item2", "requirement": "Compliance attestation proof", "status": "Missing", "gap": "No evidence ingestion", "evidence": ["docs/GAP_MATRIX.md:41"], "priority": "P2"},
+        {"id": "sec4.item3", "requirement": "Arbitration / dispute hooks", "status": "Missing", "gap": "No code path", "evidence": ["docs/GAP_MATRIX.md:42"], "priority": "P3"}
+      ]
+    },
+    {
+      "id": "sec5",
+      "name": "Persistence & Durability",
+      "items": [
+        {"id": "sec5.item1", "requirement": "Immutable audit ledger", "status": "Partial", "gap": "BoltDB lacks signatures & external anchor", "evidence": ["docs/GAP_MATRIX.md:48"], "priority": "P0"},
+        {"id": "sec5.item2", "requirement": "Delegation storage durability", "status": "Partial", "gap": "No indexing or pruning", "evidence": ["docs/GAP_MATRIX.md:49"], "priority": "P2"},
+        {"id": "sec5.item3", "requirement": "Revocation anchoring", "status": "Partial", "gap": "No external notarization", "evidence": ["docs/GAP_MATRIX.md:50"], "priority": "P2"}
+      ]
+    },
+    {
+      "id": "sec6",
+      "name": "Replay & Token Security",
+      "items": [
+  {"id": "sec6.item1", "requirement": "Fail-closed replay mode", "status": "Partial", "gap": "In-memory JTI map + optional ReplayStore reject duplicates/errors; missing durable persistence & eviction controls", "evidence": ["pkg/gauth/gauth.go", "pkg/gauth/gauth_claims_test.go"], "priority": "P1"},
+        {"id": "sec6.item2", "requirement": "JTI format validation", "status": "Implemented", "gap": "Need skew checks", "evidence": ["docs/GAP_MATRIX.md:56"], "priority": "P2"},
+        {"id": "sec6.item3", "requirement": "Replay persistence recovery", "status": "Missing", "gap": "No WAL snapshot", "evidence": ["docs/GAP_MATRIX.md:57"], "priority": "P2"}
+      ]
+    },
+    {
+      "id": "sec7",
+      "name": "Observability & Metrics",
+      "items": [
+  {"id": "sec7.item1", "requirement": "Decision metrics (allow/deny + action/resource labels)", "status": "Implemented", "gap": "Reason taxonomy limited; no JSON labeled export yet", "evidence": ["docs/GAP_MATRIX.md:62", "internal/metrics/prometheus_adapter.go", "docs/OBSERVABILITY.md"], "priority": "P2"},
+        {"id": "sec7.item2", "requirement": "Metrics export adapter", "status": "Partial", "gap": "No collector registration", "evidence": ["docs/GAP_MATRIX.md:63"], "priority": "P3"},
+  {"id": "sec7.item3", "requirement": "Violation & semantic counters (adaptive anomaly)", "status": "Implemented", "gap": "Counters + per-category 60s/300s rates + adaptive anomaly detector (EWMA + Welford variance) with z-score export via JSON/Prometheus/OTEL; anomaly EWMA state persisted & restored with hash chain verification. Remaining gaps: external anchoring & archival rotation of semantic snapshots, historical rate archive beyond EWMA, surge alert hooks.", "evidence": ["internal/observability/violations.go", "pkg/gauth/gauth.go", "pkg/rfc0111/rfc0111.go", "web/server_clean.go", "docs/OBSERVABILITY.md", "web/persistence_verify_test.go", "web/server_anomaly_test.go", "web/server_semantic_persistence_test.go"], "priority": "P2"},
+       {"id": "sec7.item4", "requirement": "Distributed tracing", "status": "Missing", "gap": "No span linking", "evidence": ["docs/GAP_MATRIX.md:65"], "priority": "P3"}
+      ]
+    },
+    {
+      "id": "sec8",
+      "name": "Key & Secret Management",
+      "items": [
+        {"id": "sec8.item1", "requirement": "Secure secret storage", "status": "Missing", "gap": "No vault/HSM provider", "evidence": ["docs/GAP_MATRIX.md:70"], "priority": "P0"},
+  {"id": "sec8.item2", "requirement": "Rotation audit trail", "status": "Partial", "gap": "JSON rotation log + hash chain (prev_hash -> hash) implemented; still missing external append-only sink & multi-tenant segregation", "evidence": ["internal/crypto/keys.go", "internal/crypto/keys_rotation_log_test.go", "internal/crypto/keys_rotation_hash_chain_test.go"], "priority": "P1"}
+      ]
+    },
+    {
+      "id": "sec9",
+      "name": "Testing & Conformance",
+      "items": [
+  {"id": "sec9.item1", "requirement": "Clause-to-test mapping", "status": "Partial", "gap": "Harness maps 8 mapped clause entries (100% of declared set); broader RFC sections still unmapped", "evidence": ["docs/GAP_MATRIX.md:76", "conformance/clause_map.json", "report.md"], "priority": "P0"},
+  {"id": "sec9.item2", "requirement": "Fuzzing / property tests", "status": "Partial", "gap": "Canonical digest covered; parsing & semantic validators still lack property tests", "evidence": ["docs/GAP_MATRIX.md:77", "pkg/rfc0111/canonical_prop_test.go", "pkg/rfc0111/canonical_fuzz_test.go"], "priority": "P1"},
+        {"id": "sec9.item3", "requirement": "Load/stress benchmarks", "status": "Missing", "gap": "No high-load harness", "evidence": ["docs/GAP_MATRIX.md:78"], "priority": "P2"}
+      ]
+    },
+    {
+      "id": "sec10",
+      "name": "Interoperability / External Interfaces",
+      "items": [
+        {"id": "sec10.item1", "requirement": "OpenAPI for PoA & delegation", "status": "Missing", "gap": "No documented contract", "evidence": ["docs/GAP_MATRIX.md:83"], "priority": "P1"},
+  {"id": "sec10.item2", "requirement": "Well-known discovery endpoints", "status": "Implemented", "gap": "jwks_uri + revocation endpoints exposed; missing oauth2 revocation + introspection standardization", "evidence": ["web/server_clean.go", "web/jwks_integrity_test.go"], "priority": "P2"}
+      ]
+    },
+    {
+      "id": "sec11",
+      "name": "AI Capability & Governance",
+      "items": [
+        {"id": "sec11.item1", "requirement": "Capability matrix enforcement", "status": "Missing", "gap": "No runtime enforcement", "evidence": ["docs/GAP_MATRIX.md:90"], "priority": "P1"},
+        {"id": "sec11.item2", "requirement": "Model limit checks", "status": "Missing", "gap": "No metadata evaluation", "evidence": ["docs/GAP_MATRIX.md:91"], "priority": "P2"}
+      ]
+    },
+    {
+      "id": "sec12",
+      "name": "Advanced Delegation Lifecycle",
+      "items": [
+        {"id": "sec12.item1", "requirement": "Suspension / partial revocation", "status": "Missing", "gap": "Only revoked/expired statuses", "evidence": ["docs/GAP_MATRIX.md:96"], "priority": "P2"},
+        {"id": "sec12.item2", "requirement": "Delegation chaining depth limits", "status": "Missing", "gap": "No depth enforcement", "evidence": ["docs/GAP_MATRIX.md:97"], "priority": "P2"}
+      ]
+    },
+    {
+      "id": "sec13",
+      "name": "Data Hygiene & Validation",
+      "items": [
+        {"id": "sec13.item1", "requirement": "UTF-8 & control char filtering", "status": "Partial", "gap": "No metrics instrumentation", "evidence": ["docs/GAP_MATRIX.md:102"], "priority": "P3"},
+        {"id": "sec13.item2", "requirement": "Structured numeric limit parsing", "status": "Missing", "gap": "Amounts not parsed/enforced", "evidence": ["docs/GAP_MATRIX.md:103"], "priority": "P2"}
+      ]
+    },
+    {
+      "id": "sec14",
+      "name": "Risk & Threat Modeling",
+      "items": [
+        {"id": "sec14.item1", "requirement": "Threat model synchronization", "status": "Partial", "gap": "No mitigations matrix", "evidence": ["docs/GAP_MATRIX.md:108"], "priority": "P2"},
+        {"id": "sec14.item2", "requirement": "Residual risk register", "status": "Missing", "gap": "No tracking of remaining exposures", "evidence": ["docs/GAP_MATRIX.md:109"], "priority": "P3"}
+      ]
+    }
+  ]
+}

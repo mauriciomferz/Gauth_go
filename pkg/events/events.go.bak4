@@ -1,0 +1,108 @@
+// Package events provides an event system for the GAuth framework
+package events
+
+import (
+	"sync"
+	"time"
+)
+
+// EventType represents the type of event
+type EventType string
+
+const (
+	EventTypeToken  EventType = "token"
+	EventTypeAuth   EventType = "auth"
+	EventTypeSystem EventType = "system"
+)
+
+// Metadata provides structured metadata with helper methods
+type Metadata struct {
+	data map[string]interface{}
+}
+
+// NewMetadata creates a new metadata instance
+func NewMetadata() *Metadata {
+	return &Metadata{
+		data: make(map[string]interface{}),
+	}
+}
+
+// SetString sets a string value
+func (m *Metadata) SetString(key, value string) {
+	m.data[key] = value
+}
+
+// SetInt sets an integer value
+func (m *Metadata) SetInt(key string, value int) {
+	m.data[key] = value
+}
+
+// GetString gets a string value
+func (m *Metadata) GetString(key string) (string, bool) {
+	if val, ok := m.data[key]; ok {
+		if str, ok := val.(string); ok {
+			return str, true
+		}
+	}
+	return "", false
+}
+
+// GetInt gets an integer value
+func (m *Metadata) GetInt(key string) (int, bool) {
+	if val, ok := m.data[key]; ok {
+		if i, ok := val.(int); ok {
+			return i, true
+		}
+	}
+	return 0, false
+}
+
+// Event represents a system event
+type Event struct {
+	Type      EventType `json:"type"`
+	Action    string    `json:"action"`
+	Status    string    `json:"status"`
+	Message   string    `json:"message"`
+	Timestamp time.Time `json:"timestamp"`
+	Metadata  *Metadata `json:"metadata"`
+}
+
+// EventHandler defines the interface for event handlers
+type EventHandler interface {
+	Handle(event Event)
+}
+
+// EventBus manages event distribution
+type EventBus struct {
+	mu       sync.RWMutex
+	handlers []EventHandler
+}
+
+// NewEventBus creates a new event bus
+func NewEventBus() *EventBus {
+	return &EventBus{
+		handlers: make([]EventHandler, 0),
+	}
+}
+
+// Subscribe adds an event handler to the bus
+func (eb *EventBus) Subscribe(handler EventHandler) {
+	eb.mu.Lock()
+	defer eb.mu.Unlock()
+	eb.handlers = append(eb.handlers, handler)
+}
+
+// Publish sends an event to all registered handlers
+func (eb *EventBus) Publish(event Event) {
+	eb.mu.RLock()
+	defer eb.mu.RUnlock()
+	
+	// Set timestamp if not already set
+	if event.Timestamp.IsZero() {
+		event.Timestamp = time.Now()
+	}
+	
+	for _, handler := range eb.handlers {
+		handler.Handle(event)
+	}
+}

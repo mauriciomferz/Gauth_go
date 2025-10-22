@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://gimelfoundation.com/schema/audit_logs.json",
+  "title": "AuditLogsSnapshot",
+  "type": "object",
+  "required": ["success", "entries"],
+  "properties": {
+    "success": {"type": "boolean"},
+    "entries": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/AuditEntry"}
+    },
+    "count": {"type": "integer", "minimum": 0}
+  },
+  "definitions": {
+    "AuditEntry": {
+      "type": "object",
+      "required": ["id", "action", "resource", "outcome", "reason", "at"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "action": {"type": "string", "minLength": 1},
+        "resource": {"type": "string", "minLength": 1},
+        "outcome": {"type": "string", "minLength": 1},
+        "reason": {"type": "string", "enum": ["init", "status_change", "noop", "invalid_transition", "unsupported_status", "invalid_payload", "not_found", "maintenance", "rate_limited", "policy_violation"]},
+        "at": {"type": "string", "format": "date-time"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

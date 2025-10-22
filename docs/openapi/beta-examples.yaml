@@ -1,0 +1,162 @@
+openapi: 3.0.3
+info:
+  title: GAuth Beta Examples API
+  version: 0.3.0
+  description: |
+    Minimal OpenAPI specification for the embedded beta demonstration server.
+    NOTE: This API is unauthenticated and **NOT PRODUCTION READY**.
+    Legacy educational endpoints are deprecated and will be removed in a future release.
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/v1/beta/health:
+    get:
+      summary: Health probe
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      uptime: { type: string }
+  /api/v1/beta/examples/catalog:
+    get:
+      summary: List available examples
+      responses:
+        '200':
+          description: Example catalog
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  count: { type: integer }
+                  examples:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ExampleMeta'
+  /api/v1/beta/examples/run:
+    post:
+      summary: Start an example job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: string
+                  description: Example identifier
+      responses:
+        '202':
+          description: Job accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  job_id: { type: string }
+                  state: { type: string }
+        '400': { description: Invalid request }
+  /api/v1/beta/examples/run/{id}/status:
+    get:
+      summary: Get job status
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  job: { $ref: '#/components/schemas/ExampleJob' }
+        '404': { description: Job not found }
+  /api/v1/beta/examples/run/{id}/logs:
+    get:
+      summary: Stream job logs (SSE)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: SSE stream of job logs
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        '404': { description: Job not found }
+  /api/v1/beta/examples/run/jobs/{id}/cancel:
+    post:
+      summary: Cancel a running job
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Cancel requested }
+        '404': { description: Job not found }
+  /api/v1/poa/authorize:
+    post:
+      summary: Beta PoA authorization stub
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                client_id: { type: string }
+      responses:
+        '200': { description: Authorization success }
+        '400': { description: Authorization failure }
+  /api/v1/poa/metrics:
+    get:
+      summary: PoA metrics
+      responses:
+        '200':
+          description: Metrics payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  metrics:
+                    type: object
+                    properties:
+                      total_requests: { type: integer }
+components:
+  schemas:
+    ExampleMeta:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        group: { type: string }
+        estimated_seconds: { type: integer }
+    ExampleJob:
+      type: object
+      properties:
+        id: { type: string }
+        example_id: { type: string }
+        state: { type: string, enum: [queued, running, done, failed, timeout] }
+        output: { type: string }

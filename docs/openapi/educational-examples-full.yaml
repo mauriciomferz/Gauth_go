@@ -1,0 +1,232 @@
+openapi: 3.0.3
+info:
+  title: GAuth Educational Examples API (Full)
+  version: 0.2.0
+  description: |
+    Aggregated OpenAPI spec for the educational demo server, including planned/future endpoints.
+    NOT PRODUCTION READY.
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/v1/educational/health:
+    get:
+      summary: Health probe
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      uptime: { type: string }
+  /api/v1/educational/info:
+    get:
+      summary: Info endpoint
+      responses:
+        '200':
+          description: Info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  go_version: { type: string }
+                  features:
+                    type: array
+                    items: { type: string }
+                  disclaimer: { type: string }
+  /api/v1/educational/examples/catalog:
+    get:
+      summary: List available examples
+      responses:
+        '200':
+          description: Example catalog
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  count: { type: integer }
+                  examples:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ExampleMeta'
+  /api/v1/educational/examples/run:
+    post:
+      summary: Start an example job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: string
+                  description: Example identifier
+      responses:
+        '202':
+          description: Job accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  job_id: { type: string }
+                  state: { type: string }
+        '400': { description: Invalid request }
+  /api/v1/educational/examples/run/{id}/status:
+    get:
+      summary: Get job status
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  job: { $ref: '#/components/schemas/ExampleJob' }
+        '404': { description: Job not found }
+  /api/v1/educational/examples/run/{id}/logs:
+    get:
+      summary: Stream job logs (SSE)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: SSE stream of job logs
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        '404': { description: Job not found }
+  /api/v1/educational/examples/run/jobs/{id}/cancel:
+    post:
+      summary: Cancel a running job
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Cancel requested }
+        '404': { description: Job not found }
+  /api/v1/educational/examples/export:
+    get:
+      summary: Export all example results (future)
+      responses:
+        '200':
+          description: Exported data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  jobs:
+                    type: array
+                    items: { $ref: '#/components/schemas/ExampleJob' }
+  /api/v1/educational/examples/export/composite:
+    get:
+      summary: Export composite results (future)
+      responses:
+        '200':
+          description: Composite export
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+  /api/v1/educational/examples/metrics:
+    get:
+      summary: Example metrics (future)
+      responses:
+        '200':
+          description: Metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  metrics:
+                    type: object
+                    properties:
+                      total_jobs: { type: integer }
+                      running: { type: integer }
+                      done: { type: integer }
+                      failed: { type: integer }
+  /api/v1/poa/authorize:
+    post:
+      summary: Educational PoA authorization stub
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                client_id: { type: string }
+      responses:
+        '200': { description: Authorization success }
+        '400': { description: Authorization failure }
+  /api/v1/poa/metrics:
+    get:
+      summary: PoA metrics
+      responses:
+        '200':
+          description: Metrics payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  metrics:
+                    type: object
+                    properties:
+                      total_requests: { type: integer }
+components:
+  schemas:
+    ExampleMeta:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        group: { type: string }
+        estimated_seconds: { type: integer }
+    ExampleJob:
+      type: object
+      properties:
+        id: { type: string }
+        example_id: { type: string }
+        state: { type: string, enum: [queued, running, done, failed, timeout] }
+        output: { type: string }
+        error: { type: string }
+        started_at: { type: string, format: date-time }
+        finished_at: { type: string, format: date-time }
+        logs:
+          type: array
+          items: { type: string }

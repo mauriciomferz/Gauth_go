@@ -1,0 +1,17 @@
+{
+  "schema_version": "v1",
+  "capabilities": [
+    { "id": "issue_basic_token", "description": "Allow issuing basic delegation tokens" },
+    { "id": "delegation_create", "description": "Permit creation of new delegations" },
+    { "id": "delegation_revoke", "description": "Permit revocation of existing delegations" },
+    { "id": "audit_capability_export", "description": "Access capability audit export endpoint" },
+    { "id": "reload_capabilities", "description": "Allow triggering registry reload from file" }
+  ],
+  "action_mappings": {
+    "token_issue": ["issue_basic_token"],
+    "delegation_create": ["delegation_create"],
+    "delegation_revoke": ["delegation_revoke"],
+    "capabilities_reload": ["reload_capabilities"],
+    "audit_capabilities_export": ["audit_capability_export"]
+  }
+}

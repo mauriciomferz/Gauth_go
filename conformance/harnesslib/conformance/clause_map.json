@@ -1,0 +1,1 @@
+{"entries":[{"clause_prefix":"0111:fake-clause","symbols":["DefinitelyNotPresent__XYZ__"],"tests_glob":"**/nonexistent_test.go"}]}

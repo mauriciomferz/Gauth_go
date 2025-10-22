@@ -1,0 +1,20 @@
+mode: set
+official-rfc0111-implementation/main.go:28.13,34.66 5 0
+official-rfc0111-implementation/main.go:34.66,36.6 1 0
+official-rfc0111-implementation/main.go:37.5,72.19 9 0
+official-rfc0111-implementation/main.go:72.19,74.6 1 0
+official-rfc0111-implementation/main.go:75.5,78.113 2 0
+official-rfc0111-implementation/main.go:78.113,80.6 1 0
+official-rfc0111-implementation/main.go:81.5,84.106 2 0
+official-rfc0111-implementation/main.go:84.106,86.6 1 0
+official-rfc0111-implementation/main.go:86.11,88.6 1 0
+official-rfc0111-implementation/main.go:91.5,101.24 6 0
+official-rfc0111-implementation/main.go:101.24,103.6 1 0
+official-rfc0111-implementation/main.go:103.11,105.6 1 0
+official-rfc0111-implementation/main.go:108.5,108.80 1 0
+official-rfc0111-implementation/main.go:108.80,110.6 1 0
+official-rfc0111-implementation/main.go:111.5,113.113 2 0
+official-rfc0111-implementation/main.go:113.113,115.6 1 0
+official-rfc0111-implementation/main.go:115.11,117.6 1 0
+official-rfc0111-implementation/main.go:119.5,119.96 1 0
+official-rfc0111-implementation/main.go:122.51,137.2 1 0

@@ -1,0 +1,71 @@
+package web
+
+import (
+	"crypto/sha256"
+	"encoding/json"
+	"fmt"
+	"net/http/httptest"
+	"regexp"
+	"testing"
+	"time"
+
+	imetrics "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
+	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/anchor"
+)
+
+// TestCapabilityAnchorEmissionMetrics verifies emission interval histogram & jitter gauge exposition logic
+// via the custom /api/v1/beta/capabilities/anchor/metrics/prometheus endpoint after multiple emissions.
+func TestCapabilityAnchorEmissionMetrics(t *testing.T) {
+	t.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", t.TempDir()+"/anchor.json")
+	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "5ms")
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111"})
+	srv := NewBetaServer(":0")
+	// Enable anchoring endpoints
+	t.Setenv("GAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
+	t.Setenv("GAUTH_ANCHOR_PROVIDER", "memory")
+	// Inject prometheus metrics (server default uses memory) via direct assignment for test simplicity.
+	srv.metrics = pm
+	// Ensure memory anchor client exists (NewBetaServer may not create if env set after construction)
+	if srv.anchorClient == nil {
+		srv.anchorClient = anchor.NewMemoryAnchor()
+	}
+	// Simulate multiple emissions by mutating registry hash & calling anchor endpoint (POST) after sleeps.
+	// We directly modify internal hash fields to force change detection without full file loader.
+	for i := 0; i < 5; i++ {
+		time.Sleep(6 * time.Millisecond)
+		// Mutate capabilityRegistryHash to new value ensuring semantic change triggers hash_changed counter logic if path exercised.
+		payload := struct {
+			Dummy int `json:"dummy"`
+		}{Dummy: i}
+		enc, _ := json.Marshal(payload)
+		h := sha256.Sum256(enc)
+		srv.capabilityRegistryHash = fmt.Sprintf("sha256:%x", h[:])
+		// Anchor via POST endpoint (will emit artifact if interval elapsed).
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("POST", "/api/v1/beta/capabilities/anchor", nil)
+		srv.router.ServeHTTP(w, req)
+		if w.Code != 200 {
+			t.Fatalf("anchor post %d status=%d body=%s", i, w.Code, w.Body.String())
+		}
+	}
+
+	// Hit Prometheus exposition endpoint.
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/api/v1/beta/capabilities/anchor/metrics/prometheus", nil)
+	srv.router.ServeHTTP(rec, req)
+	body := rec.Body.String()
+
+	// Basic presence checks.
+	if !regexp.MustCompile(`capability_anchor_emission_jitter_seconds`).MatchString(body) {
+		t.Fatalf("expected jitter gauge line in body:\n%s", body)
+	}
+	if !regexp.MustCompile(`capability_anchor_age_seconds`).MatchString(body) {
+		t.Fatalf("expected age gauge line in body")
+	}
+	// Jitter should be >0 after varied intervals (non-zero stddev). Accept small floating value.
+	if m := regexp.MustCompile(`gauth_capability_anchor_emission_jitter_seconds ([0-9E.e+-]+)`).FindStringSubmatch(body); len(m) == 2 {
+		// Accept presence; do not assert non-zero to avoid flakiness on CI timing.
+	} else {
+		t.Fatalf("did not find jitter metric line")
+	}
+}

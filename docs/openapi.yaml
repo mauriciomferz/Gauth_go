@@ -1,0 +1,873 @@
+openapi: 3.1.0
+info:
+  title: GAuth Demo API
+  version: 0.3.1-beta
+  description: |
+    Core GAuth demo endpoints including token issuance, validation, revocation,
+    delegation status, lifecycle timeline, policy evaluation & metrics, examples,
+    JWKS publication, discovery metadata and audit/event streaming. Arrays are
+    bounded to prevent unbounded growth. This spec is normalized for lint rules.
+
+servers:
+  - url: /
+    description: Root (relative paths)
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/v1/token/create:
+    post:
+      summary: Issue a new token
+      operationId: issueToken
+      tags: [tokens]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenIssueRequest'
+            examples:
+              minimal:
+                value:
+                  subject: alice@example.com
+                  ttl_seconds: 3600
+      responses:
+        '200':
+          description: Token issued
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TokenIssueResponse' }
+              examples:
+                success:
+                  value:
+                    token: eyJhbGciOi...demo
+                    token_id: tok_123
+                    issued_at: 2025-10-18T12:00:00Z
+                    expires_at: 2025-10-18T13:00:00Z
+        '400':
+          description: Validation failure
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+              examples:
+                missing_subject:
+                  value:
+                    error: invalid_request
+                    message: subject field required
+                    code: invalid_request
+  /api/v1/token/metrics:
+    get:
+      summary: Token metrics snapshot
+      operationId: getTokenMetrics
+      tags: [tokens]
+      responses:
+        '200':
+          description: Token metrics
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+  /api/v1/poa/authorize:
+    post:
+      summary: Authorize Power-of-Attorney request
+      operationId: authorizePOA
+      tags: [poa]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        '200': { description: Authorization decision }
+  /api/v1/poa/metrics:
+    get:
+      summary: PoA metrics
+      operationId: getPOAMetrics
+      tags: [poa]
+      responses:
+        '200': { description: PoA metrics snapshot }
+  /api/v1/events/emit:
+    post:
+      summary: Emit an event
+      operationId: emitEvent
+      tags: [events]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        '200': { description: Event accepted }
+  /api/v1/events/stream:
+    get:
+      summary: Stream events (SSE)
+      operationId: streamEvents
+      tags: [events]
+      responses:
+        '200': { description: Event stream }
+  /api/v1/audit/stream:
+    get:
+      summary: Stream audit log (SSE)
+      operationId: streamAudit
+      tags: [audit]
+      responses:
+        '200': { description: Audit event stream }
+  /api/v1/beta/metrics/lifecycle:
+    get:
+      summary: Lifecycle metrics snapshot
+      operationId: getLifecycleMetrics
+      tags: [metrics]
+      responses:
+        '200': { description: Lifecycle metrics }
+  /api/v1/beta/authz/evaluate:
+    post:
+      summary: Evaluate authorization (memory authorizer)
+      operationId: evaluateAuthz
+      tags: [authz]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        '200': { description: Authorization result }
+  /api/v1/beta/authz/metrics:
+    get:
+      summary: Authz metrics snapshot
+      operationId: getAuthzMetrics
+      tags: [authz]
+      responses:
+        '200': { description: Metrics map }
+  /api/v1/beta/authz/metrics/prometheus:
+    get:
+      summary: Authz Prometheus metrics
+      operationId: getAuthzMetricsPrometheus
+      tags: [authz]
+      responses:
+        '200': { description: Prometheus metrics text }
+  /api/v1/beta/policy/chain:
+    get:
+      summary: Policy chain entries (paginated)
+      operationId: getPolicyChain
+      tags: [policy]
+      parameters:
+        - in: query
+          name: offset
+          schema: { type: integer, minimum: 0 }
+          description: Zero-based offset into chain hash list (default 0)
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 200 }
+          description: Maximum number of hashes to return (default 50)
+      responses:
+        '200':
+          description: Policy chain list
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+              examples:
+                sample:
+                  value:
+                    hashes: ["fedbe3", "47ac91"]
+                    next_offset: 2
+  /api/v1/beta/policy/head/policies:
+    get:
+      summary: Policies at current head
+      operationId: getPolicyHeadPolicies
+      tags: [policy]
+      responses:
+        '200': { description: Policies array }
+  /api/v1/beta/policy/bundles:
+    post:
+      summary: Add policy bundle
+      operationId: addPolicyBundle
+      tags: [policy]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        '200': { description: Bundle added }
+  /api/v1/beta/policy/bundles/{hash}:
+    get:
+      summary: Fetch policy bundle by hash
+      operationId: getPolicyBundle
+      tags: [policy]
+      parameters:
+        - in: path
+          name: hash
+          required: true
+          description: Content hash (e.g. SHA256 hex) identifying the stored policy bundle
+          schema: { type: string }
+      responses:
+        '200':
+          description: Policy bundle
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+              examples:
+                sample:
+                  value:
+                    hash: "fedbe39fbf53f5fd9868554fc342e6d36167d2f1521b56cd8a5754ed82f147ee"
+                    policies:
+                      - id: "allow-read"
+                        effect: "allow"
+                        action: "read"
+                        resource: "doc:123"
+                      - id: "deny-write"
+                        effect: "deny"
+                        action: "write"
+                        resource: "doc:123"
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+              examples:
+                not_found:
+                  value:
+                    error: not_found
+                    message: policy bundle not found
+                    code: not_found
+  /api/v1/beta/policy/audit-consistency:
+    get:
+      summary: Policy/audit consistency check
+      operationId: getPolicyAuditConsistency
+      tags: [policy]
+      responses:
+        '200': { description: Consistency result }
+  /api/v1/beta/ping:
+    get:
+      summary: Liveness ping
+      operationId: getPing
+      tags: [health]
+      responses:
+        '200': { description: Pong }
+  /api/v1/beta/health:
+    get:
+      summary: Health status
+      operationId: getHealth
+      tags: [health]
+      responses:
+        '200': { description: Health ok }
+  /api/v1/beta/info:
+    get:
+      summary: Build & version info
+      operationId: getInfo
+      tags: [health]
+      responses:
+        '200': { description: Info object }
+  /api/v1/openapi:
+    get:
+      summary: OpenAPI spec (JSON)
+      operationId: getOpenAPIJSON
+      tags: [discovery]
+      responses:
+        '200': { description: OpenAPI JSON }
+        '304': { description: Not Modified }
+  /openapi.yaml:
+    get:
+      summary: OpenAPI spec (YAML)
+      operationId: getOpenAPIYAML
+      tags: [discovery]
+      responses:
+        '200': { description: OpenAPI YAML }
+        '304': { description: Not Modified }
+  /api/v1/beta/examples/catalog:
+    get:
+      summary: Examples catalog
+      operationId: getExamplesCatalog
+      tags: [examples]
+      responses:
+        '200': { description: Catalog list }
+  /api/v1/beta/examples/run:
+    post:
+      summary: Run example
+      operationId: runExample
+      tags: [examples]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        '200': { description: Run accepted }
+  /api/v1/beta/examples/run/jobs:
+    get:
+      summary: List running example jobs
+      operationId: listExampleJobs
+      tags: [examples]
+      responses:
+        '200': { description: Jobs list }
+  /api/v1/beta/examples/composite/export/json:
+    post:
+      summary: Export composite example (JSON)
+      operationId: exportExampleCompositeJSON
+      tags: [examples]
+      requestBody:
+        required: false
+      responses:
+        '200': { description: Export JSON started }
+  /api/v1/beta/examples/composite/export/csv:
+    post:
+      summary: Export composite example (CSV)
+      operationId: exportExampleCompositeCSV
+      tags: [examples]
+      requestBody:
+        required: false
+      responses:
+        '200': { description: Export CSV started }
+  /api/v1/beta/examples/run/jobs/{id}/cancel:
+    post:
+      summary: Cancel example job
+      operationId: cancelExampleJob
+      tags: [examples]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Unique job identifier returned from runExample (catalog execution)
+          schema: { type: string }
+      responses:
+        '200':
+          description: Cancel result
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+              examples:
+                success:
+                  value:
+                    success: true
+                    status: cancelled
+  /api/v1/beta/examples/run/{id}/status:
+    get:
+      summary: Example job status
+      operationId: getExampleJobStatus
+      tags: [examples]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Unique job identifier returned from runExample
+          schema: { type: string }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+              examples:
+                running:
+                  value:
+                    status: running
+                    progress_pct: 42
+                    started_at: 2025-10-18T12:00:00Z
+  /api/v1/beta/examples/run/{id}/logs:
+    get:
+      summary: Example job logs
+      operationId: getExampleJobLogs
+      tags: [examples]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Unique job identifier whose logs are streamed (SSE)
+          schema: { type: string }
+      responses:
+        '200':
+          description: Logs
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+              examples:
+                sample:
+                  value:
+                    lines:
+                      - "starting execution"
+                      - "fetching policies"
+                      - "completed"
+  /api/v1/token/validate:
+    post:
+      summary: Validate a token
+      operationId: validateToken
+      tags: [tokens]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token: { type: string }
+              required: [token]
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid: { type: boolean }
+                  expires_at: { type: string, format: date-time }
+                  reasons:
+                    type: array
+                    maxItems: 50
+                    items: { type: string }
+                  status: { type: string }
+              examples:
+                valid:
+                  value:
+                    valid: true
+                    expires_at: 2025-10-18T13:00:00Z
+                    reasons: []
+                    status: valid
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+              examples:
+                malformed:
+                  value:
+                    error: invalid_request
+                    message: token field missing or empty
+                    code: invalid_request
+  /api/v1/token/status/update:
+    post:
+      summary: Update token status (e.g., revoke)
+      operationId: updateTokenStatus
+      tags: [tokens]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StatusUpdateRequest' }
+      responses:
+        '200':
+          description: Status updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusUpdateResponse' }
+              examples:
+                success:
+                  value:
+                    success: true
+                    status: revoked
+        '400':
+          description: Invalid transition
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+              examples:
+                invalid_transition:
+                  value:
+                    error: invalid_transition
+                    message: terminated tokens cannot transition
+                    code: invalid_transition
+        '404':
+          description: Token not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+              examples:
+                not_found:
+                  value:
+                    error: not_found
+                    message: token not found
+                    code: not_found
+  /api/v1/delegation/status/update:
+    post:
+      summary: Update delegation status
+      operationId: updateDelegationStatus
+      tags: [delegation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StatusUpdateRequest' }
+      responses:
+        '200': { description: Delegation status updated }
+        '400':
+          description: Invalid transition
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+              examples:
+                invalid_transition:
+                  value:
+                    error: invalid_transition
+                    message: terminated delegations cannot transition
+                    code: invalid_transition
+        '404':
+          description: Delegation not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+              examples:
+                not_found:
+                  value:
+                    error: not_found
+                    message: delegation not found
+                    code: not_found
+  /api/v1/beta/lifecycle/timeline:
+    get:
+      summary: Fetch lifecycle timeline entries
+      operationId: getLifecycleTimeline
+      tags: [lifecycle]
+      parameters:
+        - in: query
+          name: entity_type
+          schema: { type: string, enum: [token, delegation] }
+          description: Filter events by entity type (token or delegation)
+        - in: query
+          name: entity_id
+          schema: { type: string }
+          description: Restrict to a single entity identifier
+        - in: query
+          name: since
+          schema: { type: integer, minimum: 0 }
+          description: Unix timestamp (seconds); only include events at or after this time
+        - in: query
+          name: outcome
+          schema: { type: string, enum: [success, failure, noop] }
+          description: Filter by transition outcome classification
+        - in: query
+          name: reason
+          schema: { type: string }
+          description: Filter by lifecycle transition reason (e.g. status_change, invalid_transition)
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 250 }
+          description: Maximum number of events to return (default 100)
+      responses:
+        '200':
+          description: Timeline entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entries:
+                    type: array
+                    maxItems: 500
+                    items: { $ref: '#/components/schemas/TimelineEntry' }
+                  truncated: { type: boolean }
+              examples:
+                sample:
+                  value:
+                    entries:
+                      - id: "tok_123"
+                        kind: token
+                        status: revoked
+                        at_unix: 1697635200
+                        reason: status_change
+                    truncated: false
+  /api/v1/beta/policy/metrics:
+    get:
+      summary: Policy decision & lifecycle metrics snapshot (JSON)
+      operationId: getPolicyMetrics
+      tags: [policy]
+      responses:
+        '200': { description: Metrics snapshot }
+  /api/v1/beta/policy/metrics/prometheus:
+    get:
+      summary: Prometheus text exposition
+      operationId: getPolicyMetricsPrometheus
+      tags: [policy]
+      responses:
+        '200': { description: Prometheus metrics text }
+  /api/v1/token/revoke:
+    post:
+      summary: Revoke a token
+      operationId: revokeToken
+      tags: [revocation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TokenRevokeRequest' }
+      responses:
+        '200':
+          description: Token revoked
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TokenRevokeResponse' }
+              examples:
+                revoked:
+                  value:
+                    success: true
+                    status: revoked
+        '404':
+          description: Token not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+              examples:
+                not_found:
+                  value:
+                    error: not_found
+                    message: token not found
+                    code: not_found
+  /api/v1/token/revocation/head:
+    get:
+      summary: Get revocation chain head
+      operationId: getRevocationHead
+      tags: [revocation]
+      responses:
+        '200':
+          description: Revocation head hash
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RevocationHeadResponse' }
+              examples:
+                example:
+                  value:
+                    head: abc123
+                    aggregate: aggdeadbeef
+                    length: 10
+                    verified: true
+  /api/v1/token/introspect:
+    post:
+      summary: Introspect a token (if enabled)
+      operationId: introspectToken
+      tags: [tokens]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token: { type: string }
+              required: [token]
+      responses:
+        '200':
+          description: Introspection result
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TokenIntrospectionResponse' }
+              examples:
+                inactive:
+                  value:
+                    active: false
+                    reasons: [expired]
+  /api/v1/beta/policy/evaluate:
+    post:
+      summary: Evaluate a policy decision
+      operationId: evaluatePolicy
+      tags: [policy]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PolicyEvaluateRequest' }
+      responses:
+        '200': { description: Evaluation response }
+  /api/v1/beta/policy/provenance:
+    get:
+      summary: Fetch policy provenance summary
+      operationId: getPolicyProvenance
+      tags: [policy]
+      responses:
+        '200': { description: Provenance information }
+  /api/v1/audit/record:
+    post:
+      summary: Append an audit record
+      operationId: recordAudit
+      tags: [audit]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AuditRecordRequest' }
+      responses:
+        '200': { description: Audit record stored }
+  /api/v1/audit/logs:
+    get:
+      summary: List audit log entries
+      operationId: listAuditLogs
+      tags: [audit]
+      responses:
+        '200':
+          description: Audit log list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuditLogListResponse' }
+  /.well-known/gauth-configuration:
+    get:
+      summary: Discovery metadata
+      operationId: getDiscovery
+      tags: [discovery]
+      responses:
+        '200': { description: Discovery document }
+  /.well-known/jwks.json:
+    get:
+      summary: JWKS publication endpoint
+      operationId: getJWKS
+      tags: [jwks]
+      responses:
+        '200': { description: JSON Web Key Set }
+        '304': { description: Not Modified }
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    TokenIssueRequest:
+      type: object
+      properties:
+        subject: { type: string, description: Principal (user or system) requesting token }
+        scopes:
+          type: array
+          maxItems: 50
+          items: { type: string, description: Scope string granting permission (demo semantics) }
+          description: List of scope strings granting permissions
+        ttl_seconds: { type: integer, minimum: 1, description: Time-to-live (seconds) for issued token }
+      required: [subject]
+    TokenIssueResponse:
+      type: object
+      properties:
+        token: { type: string, description: Raw issued token (demo JWT or internal format) }
+        token_id: { type: string, description: Internal token identifier }
+        issued_at: { type: string, format: date-time, description: RFC3339 issuance timestamp }
+        expires_at: { type: string, format: date-time, description: RFC3339 expiration timestamp }
+      required: [token, token_id, issued_at, expires_at]
+    StatusUpdateRequest:
+      type: object
+      properties:
+        id: { type: string, description: Target entity identifier (token or delegation id) }
+        status: { type: string, description: Requested status value (active|suspended|revoked|terminated) }
+        reason: { type: string, description: Optional human-readable reason for status change }
+      required: [id, status]
+    StatusUpdateResponse:
+      type: object
+      properties:
+        success: { type: boolean, description: Indicates status was applied successfully }
+        status: { type: string, description: Final status after update }
+      required: [success, status]
+    TimelineEntry:
+      type: object
+      properties:
+        id: { type: string, description: Entity identifier whose lifecycle changed }
+        kind: { type: string, enum: [token, delegation], description: Entity type }
+        status: { type: string, description: Resulting status after transition }
+        at_unix: { type: integer, description: Transition time (unix seconds) }
+        reason: { type: string, description: Cause categorization (e.g. status_change, invalid_transition) }
+      required: [id, kind, status, at_unix]
+    StandardError:
+      type: object
+      description: Standard error envelope with optional machine-readable code.
+      properties:
+        error: { type: string, description: Short error category }
+        message: { type: string, description: Human-readable detail message }
+        code: { type: string, description: Machine-readable error code }
+        details: { type: object, additionalProperties: true, description: Optional structured details map }
+      required: [error]
+    TokenRevokeRequest:
+      type: object
+      properties:
+        token_id: { type: string, description: Identifier of token to revoke }
+        reason: { type: string, description: Optional reason for revocation }
+      required: [token_id]
+    TokenRevokeResponse:
+      type: object
+      properties:
+        success: { type: boolean, description: Indicates revocation succeeded }
+        status: { type: string, description: Resulting token status (revoked) }
+      required: [success, status]
+    PolicyEvaluateRequest:
+      type: object
+      properties:
+        subject: { type: string, description: Principal performing the action }
+        action: { type: string, description: Verb being authorized (read|write...) }
+        resource: { type: string, description: Resource identifier or ARN-like string }
+        context: { type: object, additionalProperties: true, description: Supplemental key/value context for policy evaluation }
+      required: [subject, action, resource]
+    PolicyEvaluateResponse:
+      type: object
+      properties:
+        decision: { type: string, enum: [allow, deny], description: Final authorization decision }
+        reasons:
+          type: array
+          maxItems: 50
+          items: { type: string, description: Explanation fragments contributing to decision }
+          description: Ordered list of explanatory fragments supporting decision
+        latency_ms: { type: number, description: Evaluation latency (milliseconds) }
+      required: [decision]
+    AuditRecordRequest:
+      type: object
+      properties:
+        event: { type: string, description: Audit event type label }
+        actor: { type: string, description: Initiating principal or system }
+        target: { type: string, description: Target entity/resource of event }
+        metadata: { type: object, additionalProperties: true, description: Additional structured metadata }
+      required: [event]
+    AuditLogEntry:
+      type: object
+      properties:
+        id: { type: string, description: Unique audit log entry identifier }
+        at: { type: string, format: date-time, description: Event timestamp (RFC3339) }
+        event: { type: string, description: Event type }
+        actor: { type: string, description: Principal initiating the event }
+        target: { type: string, description: Primary target of event }
+        metadata: { type: object, additionalProperties: true, description: Structured event metadata }
+      required: [id, at, event]
+    AuditLogListResponse:
+      type: object
+      properties:
+        entries:
+          type: array
+          maxItems: 500
+          items: { $ref: '#/components/schemas/AuditLogEntry', description: Audit log entries returned }
+          description: Page of audit log entries matching query
+        total: { type: integer, description: Total entries across all pages }
+      required: [entries]
+    RevocationHeadResponse:
+      type: object
+      properties:
+        head: { type: string, description: Current head hash of revocation chain }
+        aggregate: { type: string, description: Aggregate hash summarizing entire chain }
+        length: { type: integer, description: Number of revocation entries in chain }
+        verified: { type: boolean, description: Indicates chain integrity verification success }
+      required: [head]
+    PolicyProvenanceResponse:
+      type: object
+      properties:
+        chain_head_hash: { type: string, description: Head hash of policy chain }
+        policies_count: { type: integer, description: Total number of policies registered }
+        verified: { type: boolean, description: Indicates chain verification success }
+        last_updated: { type: string, format: date-time, description: Timestamp of last modification }
+      required: [chain_head_hash]
+    TokenIntrospectionResponse:
+      type: object
+      properties:
+        active: { type: boolean, description: Whether token is currently active }
+        token_id: { type: string, description: Internal token identifier }
+        subject: { type: string, description: Subject claim or internal subject }
+        scopes:
+          type: array
+          maxItems: 50
+          items: { type: string, description: Granted scope string }
+          description: Current granted scope set (may shrink if partially revoked)
+        issued_at: { type: string, format: date-time, description: Issuance time }
+        expires_at: { type: string, format: date-time, description: Expiration time }
+        reasons:
+          type: array
+          maxItems: 50
+          items: { type: string, description: Reason codes for inactive state }
+          description: List of reason codes explaining inactive or partially limited state
+      required: [active]
+    JWKSResponse:
+      type: object
+      properties:
+        keys:
+          type: array
+          maxItems: 10
+          items: { type: object, additionalProperties: true, description: JWK objects (public keys) }
+          description: Published JSON Web Keys available for signature verification
+      required: [keys]
