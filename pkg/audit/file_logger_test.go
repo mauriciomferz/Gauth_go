@@ -7,6 +7,11 @@ import (
 	"testing"
 )
 
+const (
+	testSubject = "tester"
+	testObject  = "obj"
+)
+
 func TestFileLoggerAppendAndReload(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "audit.log")
@@ -60,8 +65,8 @@ func TestFileLoggerReloadIntegrity(t *testing.T) {
 	}
 	for i := 0; i < 5; i++ {
 		ev := NewEvent(EventTypeAuthorization, "phase1", ResultSuccess)
-		ev.Subject = "tester"
-		ev.Object = "obj"
+		ev.Subject = testSubject
+		ev.Object = testObject
 		if err := fl.Log(context.Background(), ev); err != nil {
 			t.Fatalf("log phase1 %d: %v", i, err)
 		}
@@ -77,8 +82,8 @@ func TestFileLoggerReloadIntegrity(t *testing.T) {
 	}
 	for i := 0; i < 3; i++ {
 		ev := NewEvent(EventTypeAuthorization, "phase2", ResultSuccess)
-		ev.Subject = "tester"
-		ev.Object = "obj"
+		ev.Subject = testSubject
+		ev.Object = testObject
 		if err := fl2.Log(context.Background(), ev); err != nil {
 			t.Fatalf("log phase2 %d: %v", i, err)
 		}
@@ -107,7 +112,7 @@ func TestFileLoggerReloadIntegrity(t *testing.T) {
 	}
 
 	// Query all events (nil filters)
-	queried, qerr := fl3.Query(nil, nil)
+	queried, qerr := fl3.Query(context.TODO(), nil)
 	if qerr != nil {
 		t.Fatalf("query: %v", qerr)
 	}

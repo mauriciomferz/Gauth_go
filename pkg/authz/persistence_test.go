@@ -17,8 +17,8 @@ const (
 func writeTempPolicies(t *testing.T, dir string, content string) string {
 	t.Helper()
 	path := filepath.Join(dir, "policies.json")
-	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
-		t.Fatalf("write file: %v", err)
+	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+		t.Fatalf("Failed to write test policy: %v", err)
 	}
 	return path
 }
@@ -90,7 +90,7 @@ func TestPersistentAuthorizerReload(t *testing.T) {
 	}
 
 	// modify file to new policy set denying access
-	if err := os.WriteFile(path, []byte(policyDenyAlice), 0o644); err != nil {
+	if err := os.WriteFile(path, []byte(policyDenyAlice), 0o600); err != nil {
 		t.Fatalf("write updated: %v", err)
 	}
 	// bump mod time explicitly
@@ -212,7 +212,7 @@ func TestFsnotifyWatchReload(t *testing.T) {
 
 	// change policy to deny
 	newContent := `[{"id":"p2","subject":"alice","resource":"vault","actions":["read"],"effect":"deny"}]`
-	if err := os.WriteFile(path, []byte(newContent), 0o644); err != nil {
+	if err := os.WriteFile(path, []byte(newContent), 0o600); err != nil {
 		t.Fatalf("write: %v", err)
 	}
 	// wait for watcher to process (small sleep)
@@ -228,7 +228,7 @@ func TestFsnotifyWatchReload(t *testing.T) {
 func TestReloadMetric(t *testing.T) {
 	tmpFile := filepath.Join(t.TempDir(), "policies.json")
 	initial := []byte(`[{"id":"x1","subject":"alice","resource":"r1","actions":["read"],"effect":"allow"}]`)
-	if err := os.WriteFile(tmpFile, initial, 0o644); err != nil {
+	if err := os.WriteFile(tmpFile, initial, 0o600); err != nil {
 		t.Fatalf("write: %v", err)
 	}
 	store, err := NewFilePolicyStore(tmpFile)

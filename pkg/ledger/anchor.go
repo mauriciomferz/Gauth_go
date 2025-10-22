@@ -2,6 +2,7 @@ package ledger
 
 import (
 	"context"
+	"fmt"
 )
 
 // AnchorClient defines an external timestamp anchoring interface.
@@ -39,7 +40,7 @@ func (a *AnchoringStore) Append(ctx context.Context, e *Entry) error {
 	tip := ChainTip(a.inner)
 	if tip != "" {
 		if err := a.anchor.Anchor(tip); err != nil {
-			// best-effort anchoring; log via context if available (placeholder)
+			return fmt.Errorf("anchoring failed: %w", err)
 		}
 	}
 	return nil

@@ -44,7 +44,7 @@ func main() {
 			continue
 		}
 		badgePath := filepath.Join(outDir, pkgFileName(p)+".svg")
-		if err := os.WriteFile(badgePath, []byte(renderBadge(p, cov)), 0o644); err != nil {
+		if err := os.WriteFile(badgePath, []byte(renderBadge(p, cov)), 0o600); err != nil {
 			fmt.Fprintf(os.Stderr, "ERROR: write badge %s: %v\n", badgePath, err)
 			continue
 		}
@@ -52,7 +52,7 @@ func main() {
 		fmt.Printf("badge: %s %.1f%%\n", p, cov)
 	}
 	idx := filepath.Join(outDir, "index.txt")
-	_ = os.WriteFile(idx, []byte(strings.Join(overall, "\n")), 0o644)
+	_ = os.WriteFile(idx, []byte(strings.Join(overall, "\n")), 0o600)
 }
 
 func listPackages() ([]string, error) {
@@ -128,7 +128,10 @@ func coverageFor(pkg string) (float64, error) {
 	for _, line := range strings.Split(string(funcOut), "\n") {
 		line = strings.TrimSpace(line)
 		if m := reTotal.FindStringSubmatch(line); m != nil {
-			fmt.Sscanf(m[1], "%f", &cov)
+			if _, err := fmt.Sscanf(m[1], "%f", &cov); err != nil {
+				// Log error but continue with cov = 0
+				fmt.Printf("Warning: failed to parse coverage value %q: %v\n", m[1], err)
+			}
 			break
 		}
 	}

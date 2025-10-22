@@ -39,7 +39,9 @@ func TestModelLimitsStrictUnknownMetric(t *testing.T) {
 	body := recM.Body.String()
 	if !strings.Contains(body, "gauth_rfc0111_model_unknown_total") {
 		// Provide small snippet for debugging.
-		if len(body) > 1000 { body = body[:1000] }
+		if len(body) > 1000 {
+			body = body[:1000]
+		}
 		t.Fatalf("missing model_unknown_total counter in metrics output snippet=%s", body)
 	}
 }

@@ -23,16 +23,20 @@ func TestModelLimitSurgeDetection(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMIT_SURGE_MIN_EVENTS", "3")
 	bs := NewBetaServer("")
 	mem, ok := bs.metrics.(*imetrics.Memory)
-	if !ok { t.Fatalf("expected memory metrics implementation") }
+	if !ok {
+		t.Fatalf("expected memory metrics implementation")
+	}
 	before := mem.SnapshotEx()
 	// Fire multiple exceed events rapidly.
 	for i := 0; i < 6; i++ {
 		w := httptest.NewRecorder()
-		body, _ := json.Marshal(map[string]any{"model_id":"surge-model","input_tokens":50})
+		body, _ := json.Marshal(map[string]any{"model_id": "surge-model", "input_tokens": 50})
 		req, _ := http.NewRequest(http.MethodPost, "/api/v1/model/validate", bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
 		bs.router.ServeHTTP(w, req)
-		if w.Code != 400 { t.Fatalf("expected exceed 400 code=%d body=%s", w.Code, w.Body.String()) }
+		if w.Code != 400 {
+			t.Fatalf("expected exceed 400 code=%d body=%s", w.Code, w.Body.String())
+		}
 	}
 	// Allow goroutine surge recording to flush
 	time.Sleep(100 * time.Millisecond)

@@ -27,7 +27,7 @@ func TestCapabilityAnchorNotarizationMetrics(t *testing.T) {
 	tmpDir := t.TempDir()
 	anchorPath := tmpDir + "/anchor.json"
 	capsPath := tmpDir + "/caps.json"
-		// Minimal capabilities file triggers initial load emission.
+	// Minimal capabilities file triggers initial load emission.
 	if err := os.WriteFile(capsPath, []byte(testutil.CapAlphaV1), 0o600); err != nil {
 		t.Fatalf("write caps: %v", err)
 	}

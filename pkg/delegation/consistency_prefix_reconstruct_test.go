@@ -1,5 +1,6 @@
 package delegation
 
+
 import (
 	"crypto/sha256"
 	"encoding/hex"
@@ -9,6 +10,8 @@ import (
 	"testing"
 	"time"
 )
+
+const deadbeefValue = "deadbeef"
 
 // buildPrefixDecomposition replicates generation logic for tests (power-of-two blocks left to right).
 func buildPrefixDecomposition(events []RevocationEvent, startLen int) ([]string, []int) {
@@ -156,7 +159,7 @@ func TestFastReconstructionTamperBridge(t *testing.T) {
 	}
 	roots, sizes := buildPrefixDecomposition(c.Events(), 7)
 	bridges := buildBridges(roots, sizes)
-	bridges[0] = "deadbeef" // tamper
+	bridges[0] = deadbeefValue // tamper
 	fast := ReconstructStartRootFromPrefixBlocks(roots, sizes, 7, bridges)
 	if fast != "" {
 		t.Fatal("expected empty due to tampered bridge hash")

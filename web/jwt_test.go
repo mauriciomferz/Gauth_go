@@ -123,7 +123,7 @@ func TestJWTValidatePositive(t *testing.T) {
 		t.Fatalf("unexpected error in validation: %v", vbody)
 	}
 	if vbody["status"] != statusValidJWT {
-			t.Fatalf("expected status=%s got %v", statusValidJWT, vbody["status"])
+		t.Fatalf("expected status=%s got %v", statusValidJWT, vbody["status"])
 	}
 }
 

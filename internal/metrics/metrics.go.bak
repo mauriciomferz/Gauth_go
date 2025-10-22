@@ -1,5 +1,5 @@
 package metrics
-
+const unknownOutcome = "unknown"
 import (
 	"encoding/json"
 	"math"
@@ -12,8 +12,6 @@ import (
 
 	observability "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/observability"
 )
-
-const unknownOutcome = "unknown"
 
 // Metrics defines the minimal instrumentation surface for early Phase 2.
 type Metrics interface {

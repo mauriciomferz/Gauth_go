@@ -1,0 +1,39 @@
+# Simplified GolangCI-Lint Configuration
+run:
+  timeout: 5m
+  issues-exit-code: 1
+  tests: true
+
+issues:
+  exclude-dirs:
+    - archive/
+    - build/
+    - logs/
+    - reports/
+    - node_modules/
+  exclude-files:
+    - ".*\\.pb\\.go$"
+    - ".*\\.gen\\.go$"
+  max-issues-per-linter: 10
+  max-same-issues: 5
+
+linters-settings:
+  errcheck:
+    check-type-assertions: false
+    check-blank: false
+  gosec:
+    excludes:
+      - G114 # Use of net/http serve function that has no support for setting timeouts
+      - G112 # Potential Slowloris Attack because ReadHeaderTimeout is not configured
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+
+linters:
+  enable:
+    - errcheck
+    - gosec
+    - goconst
+    - gofmt
+    - typecheck
+  disable-all: false

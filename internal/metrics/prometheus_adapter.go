@@ -30,10 +30,10 @@ import (
 
 // Receipt chain integrity status constants (avoid goconst duplication):
 const (
-	receiptsIntegrityOK          = "ok"
-	receiptsIntegrityMismatch    = "mismatch"
+	receiptsIntegrityOK           = "ok"
+	receiptsIntegrityMismatch     = "mismatch"
 	receiptsIntegrityUnconfigured = "unconfigured"
-	receiptsIntegrityLegacy      = "legacy" // treated same as unconfigured
+	receiptsIntegrityLegacy       = "legacy" // treated same as unconfigured
 )
 
 // PrometheusMetrics implements Metrics backed by Prometheus collectors.
@@ -77,25 +77,25 @@ type PrometheusMetrics struct {
 	expiredDelegations                     prom.Counter
 	revokedDelegations                     prom.Counter
 	// Capability enforcement decision counters
-	capabilityEnforceAllowed               prom.Counter
-	capabilityEnforceDenied                prom.Counter
-	modelLimitExceeded                     prom.Counter
-	modelOutputLimitExceeded               prom.Counter
-	modelRateLimitExceeded                 prom.Counter
-	modelUserInputLimitExceeded            prom.Counter
-	modelUserOutputLimitExceeded           prom.Counter
-	modelUserRateLimitExceeded             prom.Counter
-	modelUnknown                           prom.Counter
-	modelLimitSurges                       prom.Counter
-	delegationStatusTransitions            prom.Counter
-	delegationStatusTransitionFailures     prom.Counter
-	tokenStatusTransitions                 prom.Counter
-	tokenStatusTransitionFailures          prom.Counter
-	capabilityAnchorEmitted                prom.Counter
-	capabilityAnchorSkipped                prom.Counter
-	capabilityRegistryHashChanged          prom.Counter
-	obligationsExecuted                    prom.Counter
-	obligationsFailed                      prom.Counter
+	capabilityEnforceAllowed           prom.Counter
+	capabilityEnforceDenied            prom.Counter
+	modelLimitExceeded                 prom.Counter
+	modelOutputLimitExceeded           prom.Counter
+	modelRateLimitExceeded             prom.Counter
+	modelUserInputLimitExceeded        prom.Counter
+	modelUserOutputLimitExceeded       prom.Counter
+	modelUserRateLimitExceeded         prom.Counter
+	modelUnknown                       prom.Counter
+	modelLimitSurges                   prom.Counter
+	delegationStatusTransitions        prom.Counter
+	delegationStatusTransitionFailures prom.Counter
+	tokenStatusTransitions             prom.Counter
+	tokenStatusTransitionFailures      prom.Counter
+	capabilityAnchorEmitted            prom.Counter
+	capabilityAnchorSkipped            prom.Counter
+	capabilityRegistryHashChanged      prom.Counter
+	obligationsExecuted                prom.Counter
+	obligationsFailed                  prom.Counter
 	// RawPOA embedding counters
 	envelopeRawPOAEmbedded               prom.Counter
 	envelopeRawPOATooLarge               prom.Counter
@@ -250,14 +250,14 @@ func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 		revokedDelegations:                     fqCounter("revoked_delegations_total", "Revoked delegations encountered in validation"),
 		capabilityEnforceAllowed:               fqCounter("capability_enforce_allowed_total", "Capability enforcement allow decisions"),
 		capabilityEnforceDenied:                fqCounter("capability_enforce_denied_total", "Capability enforcement denied decisions"),
-			modelLimitExceeded:                     fqCounter("model_limit_exceeded_total", "Model input token limit exceeded decisions"),
-			modelOutputLimitExceeded:               fqCounter("model_output_limit_exceeded_total", "Model output token limit exceeded decisions"),
-			modelRateLimitExceeded:                 fqCounter("model_rate_limit_exceeded_total", "Model per-minute request rate limit exceeded decisions"),
-			modelUserInputLimitExceeded:            fqCounter("model_user_input_limit_exceeded_total", "Per-user scoped model input token limit exceeded decisions"),
-			modelUserOutputLimitExceeded:           fqCounter("model_user_output_limit_exceeded_total", "Per-user scoped model output token limit exceeded decisions"),
-			modelUserRateLimitExceeded:             fqCounter("model_user_rate_limit_exceeded_total", "Per-user scoped model per-minute request rate limit exceeded decisions"),
-			modelUnknown:                           fqCounter("model_unknown_total", "Unknown model validation requests denied due to strict mode"),
-			modelLimitSurges:                       fqCounter("model_limit_exceed_surge_total", "Model limit exceed surge detection triggers"),
+		modelLimitExceeded:                     fqCounter("model_limit_exceeded_total", "Model input token limit exceeded decisions"),
+		modelOutputLimitExceeded:               fqCounter("model_output_limit_exceeded_total", "Model output token limit exceeded decisions"),
+		modelRateLimitExceeded:                 fqCounter("model_rate_limit_exceeded_total", "Model per-minute request rate limit exceeded decisions"),
+		modelUserInputLimitExceeded:            fqCounter("model_user_input_limit_exceeded_total", "Per-user scoped model input token limit exceeded decisions"),
+		modelUserOutputLimitExceeded:           fqCounter("model_user_output_limit_exceeded_total", "Per-user scoped model output token limit exceeded decisions"),
+		modelUserRateLimitExceeded:             fqCounter("model_user_rate_limit_exceeded_total", "Per-user scoped model per-minute request rate limit exceeded decisions"),
+		modelUnknown:                           fqCounter("model_unknown_total", "Unknown model validation requests denied due to strict mode"),
+		modelLimitSurges:                       fqCounter("model_limit_exceed_surge_total", "Model limit exceed surge detection triggers"),
 		delegationStatusTransitions:            fqCounter("delegation_status_transitions_total", "Successful delegation status transitions"),
 		delegationStatusTransitionFailures:     fqCounter("delegation_status_transition_failures_total", "Failed delegation status transitions"),
 		tokenStatusTransitions:                 fqCounter("token_status_transitions_total", "Successful token status transitions"),
@@ -612,16 +612,56 @@ func (p *PrometheusMetrics) IncDelegationStatusTransitions() { p.delegationStatu
 func (p *PrometheusMetrics) IncDelegationStatusTransitionFailures() {
 	p.delegationStatusTransitionFailures.Inc()
 }
-func (p *PrometheusMetrics) IncCapabilityEnforceAllowed() { if p.capabilityEnforceAllowed != nil { p.capabilityEnforceAllowed.Inc() } }
-func (p *PrometheusMetrics) IncCapabilityEnforceDenied()  { if p.capabilityEnforceDenied != nil { p.capabilityEnforceDenied.Inc() } }
-func (p *PrometheusMetrics) IncModelLimitExceeded() { if p.modelLimitExceeded != nil { p.modelLimitExceeded.Inc() } }
-func (p *PrometheusMetrics) IncModelOutputLimitExceeded() { if p.modelOutputLimitExceeded != nil { p.modelOutputLimitExceeded.Inc() } }
-func (p *PrometheusMetrics) IncModelRateLimitExceeded() { if p.modelRateLimitExceeded != nil { p.modelRateLimitExceeded.Inc() } }
-func (p *PrometheusMetrics) IncModelUserInputLimitExceeded() { if p.modelUserInputLimitExceeded != nil { p.modelUserInputLimitExceeded.Inc() } }
-func (p *PrometheusMetrics) IncModelUserOutputLimitExceeded() { if p.modelUserOutputLimitExceeded != nil { p.modelUserOutputLimitExceeded.Inc() } }
-func (p *PrometheusMetrics) IncModelUserRateLimitExceeded() { if p.modelUserRateLimitExceeded != nil { p.modelUserRateLimitExceeded.Inc() } }
-func (p *PrometheusMetrics) IncModelUnknown() { if p.modelUnknown != nil { p.modelUnknown.Inc() } }
-func (p *PrometheusMetrics) IncModelLimitSurge() { if p.modelLimitSurges != nil { p.modelLimitSurges.Inc() } }
+func (p *PrometheusMetrics) IncCapabilityEnforceAllowed() {
+	if p.capabilityEnforceAllowed != nil {
+		p.capabilityEnforceAllowed.Inc()
+	}
+}
+func (p *PrometheusMetrics) IncCapabilityEnforceDenied() {
+	if p.capabilityEnforceDenied != nil {
+		p.capabilityEnforceDenied.Inc()
+	}
+}
+func (p *PrometheusMetrics) IncModelLimitExceeded() {
+	if p.modelLimitExceeded != nil {
+		p.modelLimitExceeded.Inc()
+	}
+}
+func (p *PrometheusMetrics) IncModelOutputLimitExceeded() {
+	if p.modelOutputLimitExceeded != nil {
+		p.modelOutputLimitExceeded.Inc()
+	}
+}
+func (p *PrometheusMetrics) IncModelRateLimitExceeded() {
+	if p.modelRateLimitExceeded != nil {
+		p.modelRateLimitExceeded.Inc()
+	}
+}
+func (p *PrometheusMetrics) IncModelUserInputLimitExceeded() {
+	if p.modelUserInputLimitExceeded != nil {
+		p.modelUserInputLimitExceeded.Inc()
+	}
+}
+func (p *PrometheusMetrics) IncModelUserOutputLimitExceeded() {
+	if p.modelUserOutputLimitExceeded != nil {
+		p.modelUserOutputLimitExceeded.Inc()
+	}
+}
+func (p *PrometheusMetrics) IncModelUserRateLimitExceeded() {
+	if p.modelUserRateLimitExceeded != nil {
+		p.modelUserRateLimitExceeded.Inc()
+	}
+}
+func (p *PrometheusMetrics) IncModelUnknown() {
+	if p.modelUnknown != nil {
+		p.modelUnknown.Inc()
+	}
+}
+func (p *PrometheusMetrics) IncModelLimitSurge() {
+	if p.modelLimitSurges != nil {
+		p.modelLimitSurges.Inc()
+	}
+}
 func (p *PrometheusMetrics) IncTokenStatusTransitions()        { p.tokenStatusTransitions.Inc() }
 func (p *PrometheusMetrics) IncTokenStatusTransitionFailures() { p.tokenStatusTransitionFailures.Inc() }
 func (p *PrometheusMetrics) IncCapabilityAnchorEmitted()       { p.capabilityAnchorEmitted.Inc() }
@@ -909,7 +949,7 @@ func (p *PrometheusMetrics) RecordDecision(action, resource, outcome string) {
 		resource = "_"
 	}
 	if outcome == "" {
-		outcome = "unknown"
+		outcome = unknownOutcome
 	}
 	p.decisionCounter.WithLabelValues(action, resource, outcome).Inc()
 }
@@ -923,7 +963,7 @@ func (p *PrometheusMetrics) RecordDecisionWithReason(action, resource, outcome, 
 		resource = "_"
 	}
 	if outcome == "" {
-		outcome = "unknown"
+		outcome = unknownOutcome
 	}
 	if reason == "" {
 		reason = "_"
@@ -942,7 +982,7 @@ func (p *PrometheusMetrics) RecordLifecycleTransition(entityType, oldStatus, new
 		newStatus = "_"
 	}
 	if outcome == "" {
-		outcome = "unknown"
+		outcome = unknownOutcome
 	}
 	switch entityType {
 	case "token":
@@ -964,7 +1004,7 @@ func (p *PrometheusMetrics) ObserveLifecycleTransitionLatency(entityType, outcom
 		entityType = "_"
 	}
 	if outcome == "" {
-		outcome = "unknown"
+		outcome = unknownOutcome
 	}
 	if p.lifecycleTransitionLatency != nil {
 		p.lifecycleTransitionLatency.WithLabelValues(entityType, outcome).Observe(d.Seconds())

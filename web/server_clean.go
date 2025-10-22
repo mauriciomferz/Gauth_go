@@ -110,10 +110,10 @@ type SignedAnchorWrapper struct {
 // Optional signature fields (signature, sig_kid, sig_mode) are added only when
 // GAUTH_MODEL_LIMIT_ATTEST_SIGN=1 and a GlobalEdDSARegistry active key exists.
 type modelLimitsAttestation struct {
-	Success       bool   `json:"success"`
-	Configured    bool   `json:"configured"`
-	Reason        string `json:"reason,omitempty"`
-	Snapshot      struct {
+	Success    bool   `json:"success"`
+	Configured bool   `json:"configured"`
+	Reason     string `json:"reason,omitempty"`
+	Snapshot   struct {
 		Hash        string `json:"hash"`
 		GeneratedAt string `json:"generated_at"`
 	} `json:"snapshot"`
@@ -126,15 +126,15 @@ type modelLimitsAttestation struct {
 		Entries    int    `json:"entries"`
 		Interval   int    `json:"interval"`
 	} `json:"anchor,omitempty"`
-	StrictUnknown bool   `json:"strict_unknown"`
-	Surge *struct {
-		ModelID   string `json:"model_id"`
-		Last10Sec int    `json:"last_10s_exceed_events"`
+	StrictUnknown bool `json:"strict_unknown"`
+	Surge         *struct {
+		ModelID   string  `json:"model_id"`
+		Last10Sec int     `json:"last_10s_exceed_events"`
 		AvgActive float64 `json:"avg_active_seconds"`
 		Factor    float64 `json:"factor"`
-		MinEvents int    `json:"min_events"`
-		Triggered bool   `json:"triggered"`
-		At        string `json:"triggered_at,omitempty"`
+		MinEvents int     `json:"min_events"`
+		Triggered bool    `json:"triggered"`
+		At        string  `json:"triggered_at,omitempty"`
 	} `json:"surge,omitempty"`
 	Notarization *struct {
 		Provider       string  `json:"provider"`
@@ -142,23 +142,23 @@ type modelLimitsAttestation struct {
 		LatencySeconds float64 `json:"latency_seconds"`
 		Success        bool    `json:"success"`
 	} `json:"notarization,omitempty"`
-	Signature     string `json:"signature,omitempty"`
-	SigKid        string `json:"sig_kid,omitempty"`
-	SigMode       string `json:"sig_mode,omitempty"`
+	Signature string `json:"signature,omitempty"`
+	SigKid    string `json:"sig_kid,omitempty"`
+	SigMode   string `json:"sig_mode,omitempty"`
 }
 
 // Common literal constants (deduplicated for lint goconst and clarity)
 const (
-	integrityOK = "ok"
-	integrityMismatch = "mismatch"
-	integrityLegacy = "legacy"
+	integrityOK           = "ok"
+	integrityMismatch     = "mismatch"
+	integrityLegacy       = "legacy"
 	integrityUnconfigured = "unconfigured"
-	formatHashChain = "hash_chain"
-	defaultDemoKey = "demo-key"
-	sigModeEdDSA = "eddsa"
+	formatHashChain       = "hash_chain"
+	defaultDemoKey        = "demo-key"
+	sigModeEdDSA          = "eddsa"
 	// Action literals (deduplicated for audit + capability enforcement paths)
-	actionDelegationCreate = "delegation_create"
-	actionDelegationRevoke = "delegation_revoke"
+	actionDelegationCreate  = "delegation_create"
+	actionDelegationRevoke  = "delegation_revoke"
 	actionCapabilityEnforce = "capability_enforce"
 	// Algorithm literals (deduplicated for goconst)
 	algRS256 = "RS256"
@@ -168,12 +168,16 @@ const (
 	// Demo dev secret placeholder (long repeated literal)
 	devSecretDemo = "dev-secret-demo-00000000000000000000000000000000"
 	// Lifecycle / decision reason literals (standardized with JSON Schemas)
-	reasonMaintenance = "maintenance"
-	reasonRateLimited = "rate_limited"
+	reasonMaintenance     = "maintenance"
+	reasonRateLimited     = "rate_limited"
 	reasonPolicyViolation = "policy_violation"
-	statusSuspended = "suspended"
-	statusActive = "active"
-	statusValidJWT = "valid_jwt"
+	statusSuspended       = "suspended"
+	statusActive          = "active"
+        statusTerminated      = "terminated"
+	statusValidJWT        = "valid_jwt"
+        memoryProvider        = "memory"
+        tsaStubProvider       = "tsa-stub"
+        emptyValue            = "empty"
 )
 
 // anomalyPersist defines persistence format for EWMA semantic anomaly stats.
@@ -401,16 +405,22 @@ type BetaServer struct {
 	modelRateMu         sync.Mutex
 	modelRateLimits     map[string]int // model_id -> max_requests_per_minute
 	modelRateStateMu    sync.Mutex
-	modelRateState      map[string]struct{ WindowStart time.Time; Count int } // sliding 60s window per model
+	modelRateState      map[string]struct {
+		WindowStart time.Time
+		Count       int
+	} // sliding 60s window per model
 	// Per-user scoped model limits (compound model_id + user_id governance)
-	modelUserLimitsMu   sync.Mutex
-	modelUserLimits     map[string]map[string]struct{ InputLimit, OutputLimit, RateLimit int } // model_id -> user_id -> limits
+	modelUserLimitsMu    sync.Mutex
+	modelUserLimits      map[string]map[string]struct{ InputLimit, OutputLimit, RateLimit int } // model_id -> user_id -> limits
 	modelUserRateStateMu sync.Mutex
-	modelUserRateState   map[string]map[string]struct{ WindowStart time.Time; Count int } // model_id -> user_id -> rate window state
+	modelUserRateState   map[string]map[string]struct {
+		WindowStart time.Time
+		Count       int
+	} // model_id -> user_id -> rate window state
 	// Model limit exceed audit chain (sec11.item2 governance)
-	modelLimitAuditPath    string
-	modelLimitAuditPrevHash string
-	modelLimitAuditMu       sync.Mutex
+	modelLimitAuditPath       string
+	modelLimitAuditPrevHash   string
+	modelLimitAuditMu         sync.Mutex
 	modelLimitAuditEntryCount int // in-memory count of audit entries appended this process
 	// Dynamic model limits reload
 	modelLimitsPath           string
@@ -420,12 +430,12 @@ type BetaServer struct {
 	modelLimitsSnapshotAt     time.Time
 	modelLimitsStrictUnknown  bool
 	// Exceed surge detection state (per model rolling per-second counts for last 60s)
-	modelLimitSurgeMu    sync.Mutex
-	modelLimitSurgeState map[string][]int // index 0..59 per-second counts
-	modelLimitSurgeLast  map[string]time.Time // last write second per model
-	modelLimitSurgeLastTrigger time.Time      // last global trigger time
-	modelLimitSurgeFactor float64 // multiplier threshold (default 3.0)
-	modelLimitSurgeMinEvents int  // minimum events in last window slice
+	modelLimitSurgeMu          sync.Mutex
+	modelLimitSurgeState       map[string][]int     // index 0..59 per-second counts
+	modelLimitSurgeLast        map[string]time.Time // last write second per model
+	modelLimitSurgeLastTrigger time.Time            // last global trigger time
+	modelLimitSurgeFactor      float64              // multiplier threshold (default 3.0)
+	modelLimitSurgeMinEvents   int                  // minimum events in last window slice
 	// Periodic anchoring of the model limit audit chain (external attest facilitation)
 	modelLimitAnchorPath     string
 	modelLimitAnchorPrevHash string
@@ -442,7 +452,9 @@ type BetaServer struct {
 // loadModelLimitsFromDisk loads the model limits JSON file and atomically swaps internal maps.
 // Returns true on success, false on failure (leaves prior state untouched on failure).
 func (s *BetaServer) loadModelLimitsFromDisk() bool {
-	if s.modelLimitsPath == "" { return false }
+	if s.modelLimitsPath == "" {
+		return false
+	}
 	b, err := os.ReadFile(s.modelLimitsPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "[model-limits] read failed path=%s err=%v\n", s.modelLimitsPath, err)
@@ -459,23 +471,35 @@ func (s *BetaServer) loadModelLimitsFromDisk() bool {
 	newRate := make(map[string]int)
 	newUser := make(map[string]map[string]struct{ InputLimit, OutputLimit, RateLimit int })
 	for id, lim := range raw.ModelLimits {
-		if lim.MaxInputTokens > 0 { newInput[id] = lim.MaxInputTokens }
-		if lim.MaxOutputTokens > 0 { newOutput[id] = lim.MaxOutputTokens }
-		if lim.MaxRequestsPerMinute > 0 { newRate[id] = lim.MaxRequestsPerMinute }
+		if lim.MaxInputTokens > 0 {
+			newInput[id] = lim.MaxInputTokens
+		}
+		if lim.MaxOutputTokens > 0 {
+			newOutput[id] = lim.MaxOutputTokens
+		}
+		if lim.MaxRequestsPerMinute > 0 {
+			newRate[id] = lim.MaxRequestsPerMinute
+		}
 	}
 	for mid, users := range raw.UserLimits {
 		for uid, ulim := range users {
-			if newUser[mid] == nil { newUser[mid] = make(map[string]struct{ InputLimit, OutputLimit, RateLimit int }) }
+			if newUser[mid] == nil {
+				newUser[mid] = make(map[string]struct{ InputLimit, OutputLimit, RateLimit int })
+			}
 			newUser[mid][uid] = struct{ InputLimit, OutputLimit, RateLimit int }{InputLimit: ulim.MaxInputTokens, OutputLimit: ulim.MaxOutputTokens, RateLimit: ulim.MaxRequestsPerMinute}
 		}
 	}
 	// Swap under locks
-	s.modelOutputLimitsMu.Lock(); s.modelRateMu.Lock(); s.modelUserLimitsMu.Lock()
+	s.modelOutputLimitsMu.Lock()
+	s.modelRateMu.Lock()
+	s.modelUserLimitsMu.Lock()
 	s.modelLimits = newInput
 	s.modelOutputLimits = newOutput
 	s.modelRateLimits = newRate
 	s.modelUserLimits = newUser
-	s.modelUserLimitsMu.Unlock(); s.modelRateMu.Unlock(); s.modelOutputLimitsMu.Unlock()
+	s.modelUserLimitsMu.Unlock()
+	s.modelRateMu.Unlock()
+	s.modelOutputLimitsMu.Unlock()
 	fmt.Fprintf(os.Stderr, "[model-limits] reloaded entries=%d path=%s\n", len(raw.ModelLimits), s.modelLimitsPath)
 	return true
 }
@@ -483,7 +507,9 @@ func (s *BetaServer) loadModelLimitsFromDisk() bool {
 // modelLimitsReloader periodically polls the limits file for mtime changes and reloads.
 func (s *BetaServer) modelLimitsReloader() {
 	interval := s.modelLimitsReloadInterval
-	if interval <= 0 { return }
+	if interval <= 0 {
+		return
+	}
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 	for {
@@ -492,7 +518,9 @@ func (s *BetaServer) modelLimitsReloader() {
 			return
 		case <-ticker.C:
 			fi, err := os.Stat(s.modelLimitsPath)
-			if err != nil { continue }
+			if err != nil {
+				continue
+			}
 			mt := fi.ModTime()
 			if mt.After(s.modelLimitsLastMtime) {
 				if s.loadModelLimitsFromDisk() {
@@ -520,14 +548,33 @@ func (s *BetaServer) computeModelLimitsSnapshot() (snap struct {
 	} `json:"user_limits"`
 }, hash string) {
 	// Copy maps under locks
-	s.modelOutputLimitsMu.Lock(); outCopy := make(map[string]int); for k,v := range s.modelOutputLimits { outCopy[k]=v }; s.modelOutputLimitsMu.Unlock()
-	s.modelRateMu.Lock(); rateCopy := make(map[string]int); for k,v := range s.modelRateLimits { rateCopy[k]=v }; s.modelRateMu.Unlock()
-	s.modelUserLimitsMu.Lock(); userCopy := make(map[string]map[string]struct{InputLimit,OutputLimit,RateLimit int});
-	for mid, inner := range s.modelUserLimits { m2 := make(map[string]struct{InputLimit,OutputLimit,RateLimit int}); for uid, lim := range inner { m2[uid]=lim }; userCopy[mid]=m2 }
+	s.modelOutputLimitsMu.Lock()
+	outCopy := make(map[string]int)
+	for k, v := range s.modelOutputLimits {
+		outCopy[k] = v
+	}
+	s.modelOutputLimitsMu.Unlock()
+	s.modelRateMu.Lock()
+	rateCopy := make(map[string]int)
+	for k, v := range s.modelRateLimits {
+		rateCopy[k] = v
+	}
+	s.modelRateMu.Unlock()
+	s.modelUserLimitsMu.Lock()
+	userCopy := make(map[string]map[string]struct{ InputLimit, OutputLimit, RateLimit int })
+	for mid, inner := range s.modelUserLimits {
+		m2 := make(map[string]struct{ InputLimit, OutputLimit, RateLimit int })
+		for uid, lim := range inner {
+			m2[uid] = lim
+		}
+		userCopy[mid] = m2
+	}
 	s.modelUserLimitsMu.Unlock()
 	// Models ordering
-	modelKeys := make([]string,0,len(s.modelLimits))
-	for k := range s.modelLimits { modelKeys = append(modelKeys,k) }
+	modelKeys := make([]string, 0, len(s.modelLimits))
+	for k := range s.modelLimits {
+		modelKeys = append(modelKeys, k)
+	}
 	sort.Strings(modelKeys)
 	for _, mid := range modelKeys {
 		entry := struct {
@@ -539,13 +586,17 @@ func (s *BetaServer) computeModelLimitsSnapshot() (snap struct {
 		snap.Models = append(snap.Models, entry)
 	}
 	// User limits ordering (model then user)
-	userModelKeys := make([]string,0,len(userCopy))
-	for mid := range userCopy { userModelKeys = append(userModelKeys, mid) }
+	userModelKeys := make([]string, 0, len(userCopy))
+	for mid := range userCopy {
+		userModelKeys = append(userModelKeys, mid)
+	}
 	sort.Strings(userModelKeys)
 	for _, mid := range userModelKeys {
 		inner := userCopy[mid]
-		userIDs := make([]string,0,len(inner))
-		for uid := range inner { userIDs = append(userIDs, uid) }
+		userIDs := make([]string, 0, len(inner))
+		for uid := range inner {
+			userIDs = append(userIDs, uid)
+		}
 		sort.Strings(userIDs)
 		for _, uid := range userIDs {
 			lim := inner[uid]
@@ -643,11 +694,15 @@ func (s *BetaServer) Shutdown() {
 	}
 	// Flush metrics persistence if enabled
 	if mm, ok := s.metrics.(*metrics.Memory); ok {
-		if mErr := mm.Save(); mErr != nil { fmt.Fprintf(os.Stderr, "[shutdown] metrics persistence failed: %v\n", mErr) }
+		if mErr := mm.Save(); mErr != nil {
+			fmt.Fprintf(os.Stderr, "[shutdown] metrics persistence failed: %v\n", mErr)
+		}
 	}
 	// Flush limits persistence (best-effort)
 	if lm := limits.GetManager(); lm != nil {
-		if err := lm.Close(); err != nil { log.Printf("limits manager close error: %v", err) }
+		if err := lm.Close(); err != nil {
+			log.Printf("limits manager close error: %v", err)
+		}
 	}
 }
 
@@ -774,11 +829,16 @@ func (s *BetaServer) apiModelValidate(c *gin.Context) {
 	limit, ok := s.modelLimits[in.ModelID]
 	if !ok || limit <= 0 {
 		if s.modelLimitsStrictUnknown {
-			if s.metrics != nil { s.metrics.RecordDecision("model_validate", in.ModelID, "deny"); s.metrics.IncModelUnknown() }
+			if s.metrics != nil {
+				s.metrics.RecordDecision("model_validate", in.ModelID, "deny")
+				s.metrics.IncModelUnknown()
+			}
 			c.JSON(400, gin.H{"success": false, "error": "model_unknown", "model_id": in.ModelID})
 			return
 		}
-		if s.metrics != nil { s.metrics.RecordDecision("model_validate", in.ModelID, "allow") }
+		if s.metrics != nil {
+			s.metrics.RecordDecision("model_validate", in.ModelID, "allow")
+		}
 		c.JSON(200, gin.H{"success": true, "model_id": in.ModelID, "input_tokens": in.InputTokens, "limit_enforced": false})
 		return
 	}
@@ -791,7 +851,9 @@ func (s *BetaServer) apiModelValidate(c *gin.Context) {
 		}
 		s.modelUserLimitsMu.Unlock()
 		if uLim.InputLimit > 0 && in.InputTokens > uLim.InputLimit {
-			if s.modelLimitAuditPath != "" { s.writeModelLimitAudit(in.ModelID, "user_input", in.InputTokens, uLim.InputLimit, 0, 0, in.UserID) }
+			if s.modelLimitAuditPath != "" {
+				s.writeModelLimitAudit(in.ModelID, "user_input", in.InputTokens, uLim.InputLimit, 0, 0, in.UserID)
+			}
 			if s.metrics != nil {
 				s.metrics.RecordDecision("model_validate", in.ModelID+":"+in.UserID, "deny")
 				s.metrics.IncModelUserInputLimitExceeded()
@@ -801,7 +863,9 @@ func (s *BetaServer) apiModelValidate(c *gin.Context) {
 		}
 		// Capture per-user output limit override if present later
 		if uLim.OutputLimit > 0 && in.OutputTokens > uLim.OutputLimit {
-			if s.modelLimitAuditPath != "" { s.writeModelLimitAudit(in.ModelID, "user_output", in.OutputTokens, uLim.OutputLimit, 0, 0, in.UserID) }
+			if s.modelLimitAuditPath != "" {
+				s.writeModelLimitAudit(in.ModelID, "user_output", in.OutputTokens, uLim.OutputLimit, 0, 0, in.UserID)
+			}
 			if s.metrics != nil {
 				s.metrics.RecordDecision("model_validate", in.ModelID+":"+in.UserID, "deny")
 				s.metrics.IncModelUserOutputLimitExceeded()
@@ -812,8 +876,18 @@ func (s *BetaServer) apiModelValidate(c *gin.Context) {
 		if uLim.RateLimit > 0 {
 			now := time.Now()
 			s.modelUserRateStateMu.Lock()
-			if s.modelUserRateState == nil { s.modelUserRateState = make(map[string]map[string]struct{ WindowStart time.Time; Count int }) }
-			if s.modelUserRateState[in.ModelID] == nil { s.modelUserRateState[in.ModelID] = make(map[string]struct{ WindowStart time.Time; Count int }) }
+			if s.modelUserRateState == nil {
+				s.modelUserRateState = make(map[string]map[string]struct {
+					WindowStart time.Time
+					Count       int
+				})
+			}
+			if s.modelUserRateState[in.ModelID] == nil {
+				s.modelUserRateState[in.ModelID] = make(map[string]struct {
+					WindowStart time.Time
+					Count       int
+				})
+			}
 			st := s.modelUserRateState[in.ModelID][in.UserID]
 			if st.WindowStart.IsZero() || now.Sub(st.WindowStart) >= time.Minute {
 				st.WindowStart = now
@@ -824,7 +898,9 @@ func (s *BetaServer) apiModelValidate(c *gin.Context) {
 			exceeded := st.Count > uLim.RateLimit
 			s.modelUserRateStateMu.Unlock()
 			if exceeded {
-				if s.modelLimitAuditPath != "" { s.writeModelLimitAudit(in.ModelID, "user_rate", st.Count, uLim.RateLimit, st.WindowStart.Unix(), 60, in.UserID) }
+				if s.modelLimitAuditPath != "" {
+					s.writeModelLimitAudit(in.ModelID, "user_rate", st.Count, uLim.RateLimit, st.WindowStart.Unix(), 60, in.UserID)
+				}
 				if s.metrics != nil {
 					s.metrics.RecordDecision("model_validate", in.ModelID+":"+in.UserID, "deny")
 					s.metrics.IncModelUserRateLimitExceeded()
@@ -835,7 +911,9 @@ func (s *BetaServer) apiModelValidate(c *gin.Context) {
 		}
 	}
 	if in.InputTokens > limit {
-		if s.modelLimitAuditPath != "" { s.writeModelLimitAudit(in.ModelID, "input", in.InputTokens, limit, 0, 0, "") }
+		if s.modelLimitAuditPath != "" {
+			s.writeModelLimitAudit(in.ModelID, "input", in.InputTokens, limit, 0, 0, "")
+		}
 		if s.metrics != nil {
 			s.metrics.RecordDecision("model_validate", in.ModelID, "deny")
 			s.metrics.IncModelLimitExceeded()
@@ -846,10 +924,14 @@ func (s *BetaServer) apiModelValidate(c *gin.Context) {
 	// Optional output token enforcement
 	var outLimit int
 	s.modelOutputLimitsMu.Lock()
-	if s.modelOutputLimits != nil { outLimit = s.modelOutputLimits[in.ModelID] }
+	if s.modelOutputLimits != nil {
+		outLimit = s.modelOutputLimits[in.ModelID]
+	}
 	s.modelOutputLimitsMu.Unlock()
 	if outLimit > 0 && in.OutputTokens > outLimit {
-		if s.modelLimitAuditPath != "" { s.writeModelLimitAudit(in.ModelID, "output", in.OutputTokens, outLimit, 0, 0, "") }
+		if s.modelLimitAuditPath != "" {
+			s.writeModelLimitAudit(in.ModelID, "output", in.OutputTokens, outLimit, 0, 0, "")
+		}
 		if s.metrics != nil {
 			s.metrics.RecordDecision("model_validate", in.ModelID, "deny")
 			s.metrics.IncModelOutputLimitExceeded()
@@ -860,12 +942,19 @@ func (s *BetaServer) apiModelValidate(c *gin.Context) {
 	// Rate limiting (per-minute window)
 	var rateLimit int
 	s.modelRateMu.Lock()
-	if s.modelRateLimits != nil { rateLimit = s.modelRateLimits[in.ModelID] }
+	if s.modelRateLimits != nil {
+		rateLimit = s.modelRateLimits[in.ModelID]
+	}
 	s.modelRateMu.Unlock()
 	if rateLimit > 0 {
 		now := time.Now()
 		s.modelRateStateMu.Lock()
-		if s.modelRateState == nil { s.modelRateState = make(map[string]struct{ WindowStart time.Time; Count int }) }
+		if s.modelRateState == nil {
+			s.modelRateState = make(map[string]struct {
+				WindowStart time.Time
+				Count       int
+			})
+		}
 		st := s.modelRateState[in.ModelID]
 		if st.WindowStart.IsZero() || now.Sub(st.WindowStart) >= time.Minute {
 			st.WindowStart = now
@@ -876,7 +965,9 @@ func (s *BetaServer) apiModelValidate(c *gin.Context) {
 		exceeded := st.Count > rateLimit
 		s.modelRateStateMu.Unlock()
 		if exceeded {
-			if s.modelLimitAuditPath != "" { s.writeModelLimitAudit(in.ModelID, "rate", st.Count, rateLimit, st.WindowStart.Unix(), 60, "") }
+			if s.modelLimitAuditPath != "" {
+				s.writeModelLimitAudit(in.ModelID, "rate", st.Count, rateLimit, st.WindowStart.Unix(), 60, "")
+			}
 			if s.metrics != nil {
 				s.metrics.RecordDecision("model_validate", in.ModelID, "deny")
 				s.metrics.IncModelRateLimitExceeded()
@@ -885,7 +976,9 @@ func (s *BetaServer) apiModelValidate(c *gin.Context) {
 			return
 		}
 	}
-	if s.metrics != nil { s.metrics.RecordDecision("model_validate", in.ModelID, "allow") }
+	if s.metrics != nil {
+		s.metrics.RecordDecision("model_validate", in.ModelID, "allow")
+	}
 	c.JSON(200, gin.H{"success": true, "model_id": in.ModelID, "input_tokens": in.InputTokens, "output_tokens": in.OutputTokens, "input_limit": limit, "output_limit": outLimit, "rate_limit": rateLimit, "limit_enforced": true})
 }
 
@@ -893,7 +986,9 @@ func (s *BetaServer) apiModelValidate(c *gin.Context) {
 // kind: input|output|rate; provided: observed value; limit: configured limit.
 // windowStart/windowSeconds only populated for rate events (else 0).
 func (s *BetaServer) writeModelLimitAudit(modelID, kind string, provided, limit int, windowStart int64, windowSeconds int, userID string) {
-	if s.modelLimitAuditPath == "" { return }
+	if s.modelLimitAuditPath == "" {
+		return
+	}
 	// Build entry while holding lock for chain state update
 	s.modelLimitAuditMu.Lock()
 	entry := struct {
@@ -909,11 +1004,17 @@ func (s *BetaServer) writeModelLimitAudit(modelID, kind string, provided, limit 
 		Hash          string `json:"hash"`
 	}{TS: time.Now().Unix(), ModelID: modelID, UserID: userID, Kind: kind, Provided: provided, Limit: limit, WindowStart: windowStart, WindowSeconds: windowSeconds, PrevHash: s.modelLimitAuditPrevHash}
 	raw, err := json.Marshal(entry)
-	if err != nil { s.modelLimitAuditMu.Unlock(); return }
+	if err != nil {
+		s.modelLimitAuditMu.Unlock()
+		return
+	}
 	h := sha256.Sum256(append([]byte(s.modelLimitAuditPrevHash), raw...))
 	entry.Hash = fmt.Sprintf("sha256:%x", h[:])
 	final, err := json.Marshal(entry)
-	if err != nil { s.modelLimitAuditMu.Unlock(); return }
+	if err != nil {
+		s.modelLimitAuditMu.Unlock()
+		return
+	}
 	if f, err := os.OpenFile(s.modelLimitAuditPath, os.O_APPEND|os.O_WRONLY, 0600); err == nil {
 		_, _ = f.Write(append(final, '\n'))
 		f.Close()
@@ -939,16 +1040,20 @@ func (s *BetaServer) recordModelLimitExceed(modelID string) {
 	sec := now.Unix()
 	s.modelLimitSurgeMu.Lock()
 	state := s.modelLimitSurgeState[modelID]
-	if len(state) == 0 { state = make([]int, 60) }
+	if len(state) == 0 {
+		state = make([]int, 60)
+	}
 	lastT := s.modelLimitSurgeLast[modelID]
 	if !lastT.IsZero() {
 		elapsed := sec - lastT.Unix()
 		if elapsed > 0 {
 			if elapsed >= 60 {
-				for i := range state { state[i] = 0 }
+				for i := range state {
+					state[i] = 0
+				}
 			} else {
 				for i := int64(1); i <= elapsed; i++ {
-					idx := int((lastT.Unix()+i) % 60)
+					idx := int((lastT.Unix() + i) % 60)
 					state[idx] = 0
 				}
 			}
@@ -960,15 +1065,24 @@ func (s *BetaServer) recordModelLimitExceed(modelID string) {
 	s.modelLimitSurgeLast[modelID] = now
 	// Compute baseline average and last 10s sum
 	var total, counted int
-	for _, v := range state { if v > 0 { total += v; counted++ } }
+	for _, v := range state {
+		if v > 0 {
+			total += v
+			counted++
+		}
+	}
 	var last10 int
 	for k := int64(0); k < 10; k++ {
 		idxK := int((sec - k) % 60)
-		if idxK < 0 { idxK += 60 }
+		if idxK < 0 {
+			idxK += 60
+		}
 		last10 += state[idxK]
 	}
 	avg := 0.0
-	if counted > 0 { avg = float64(total) / float64(counted) }
+	if counted > 0 {
+		avg = float64(total) / float64(counted)
+	}
 	trigger := false
 	if last10 >= s.modelLimitSurgeMinEvents && avg > 0 && float64(last10) > avg*s.modelLimitSurgeFactor {
 		if time.Since(s.modelLimitSurgeLastTrigger) > 15*time.Second {
@@ -977,7 +1091,9 @@ func (s *BetaServer) recordModelLimitExceed(modelID string) {
 	}
 	if trigger {
 		s.modelLimitSurgeLastTrigger = now
-		if s.metrics != nil { s.metrics.IncModelLimitSurge() }
+		if s.metrics != nil {
+			s.metrics.IncModelLimitSurge()
+		}
 		// Stream attestation update for surge detection
 		go s.emitAttestation("surge_trigger")
 	}
@@ -988,31 +1104,48 @@ func (s *BetaServer) recordModelLimitExceed(modelID string) {
 // Response: {"success":true,"entries":N,"last_hash":"sha256:...","valid":true}
 func (s *BetaServer) apiModelLimitAuditVerify(c *gin.Context) {
 	path := s.modelLimitAuditPath
-	if path == "" { c.JSON(200, gin.H{"success": false, "error": "audit_disabled"}); return }
+	if path == "" {
+		c.JSON(200, gin.H{"success": false, "error": "audit_disabled"})
+		return
+	}
 	b, err := os.ReadFile(path)
-	if err != nil { c.JSON(500, gin.H{"success": false, "error": "read_failed"}); return }
+	if err != nil {
+		c.JSON(500, gin.H{"success": false, "error": "read_failed"})
+		return
+	}
 	lines := strings.Split(strings.TrimSpace(string(b)), "\n")
 	prev := ""
 	valid := true
 	var lastHash string
 	for _, ln := range lines {
-		if strings.TrimSpace(ln) == "" { continue }
+		if strings.TrimSpace(ln) == "" {
+			continue
+		}
 		var e struct {
 			PrevHash string `json:"prev_hash"`
 			Hash     string `json:"hash"`
 		}
-		if json.Unmarshal([]byte(ln), &e) != nil { valid = false; break }
+		if json.Unmarshal([]byte(ln), &e) != nil {
+			valid = false
+			break
+		}
 		// recompute
 		// Re-marshal excluding hash field to recompute chain digest.
 		var full map[string]any
-		if json.Unmarshal([]byte(ln), &full) != nil { valid = false; break }
+		if json.Unmarshal([]byte(ln), &full) != nil {
+			valid = false
+			break
+		}
 		fullHash := full["hash"].(string)
 		// For anchor chain recomputation we mirror original hashing which marshaled struct with empty hash value ("")
 		full["hash"] = ""
 		tmp, _ := json.Marshal(full)
 		hh := sha256.Sum256(append([]byte(e.PrevHash), tmp...))
 		recomputed := fmt.Sprintf("sha256:%x", hh[:])
-		if recomputed != fullHash || e.PrevHash != prev { valid = false; break }
+		if recomputed != fullHash || e.PrevHash != prev {
+			valid = false
+			break
+		}
 		prev = fullHash
 		lastHash = fullHash
 	}
@@ -1024,9 +1157,15 @@ func (s *BetaServer) apiModelLimitAuditVerify(c *gin.Context) {
 // Anchor entry JSON schema (JSONL per line):
 // {"ts":1670000000,"audit_last_hash":"sha256:..","audit_entries":123,"prev_hash":"sha256:..","hash":"sha256:.."}
 func (s *BetaServer) anchorModelLimitAuditIfNeeded(auditLastHash string, auditEntries int) {
-	if s.modelLimitAnchorPath == "" || s.modelLimitAnchorInterval <= 0 { return }
-	if auditEntries == 0 || auditEntries%s.modelLimitAnchorInterval != 0 { return }
-	if auditLastHash == "" { return }
+	if s.modelLimitAnchorPath == "" || s.modelLimitAnchorInterval <= 0 {
+		return
+	}
+	if auditEntries == 0 || auditEntries%s.modelLimitAnchorInterval != 0 {
+		return
+	}
+	if auditLastHash == "" {
+		return
+	}
 	s.modelLimitAnchorMu.Lock()
 	defer s.modelLimitAnchorMu.Unlock()
 	// Recompute modulo with potentially updated prev anchor hash not needed; snapshot is fine to avoid duplicate writes.
@@ -1038,11 +1177,15 @@ func (s *BetaServer) anchorModelLimitAuditIfNeeded(auditLastHash string, auditEn
 		Hash          string `json:"hash"`
 	}{TS: time.Now().Unix(), AuditLastHash: auditLastHash, AuditEntries: auditEntries, PrevHash: s.modelLimitAnchorPrevHash}
 	raw, err := json.Marshal(anchor)
-	if err != nil { return }
+	if err != nil {
+		return
+	}
 	h := sha256.Sum256(append([]byte(s.modelLimitAnchorPrevHash), raw...))
 	anchor.Hash = fmt.Sprintf("sha256:%x", h[:])
 	final, err := json.Marshal(anchor)
-	if err != nil { return }
+	if err != nil {
+		return
+	}
 	if f, err := os.OpenFile(s.modelLimitAnchorPath, os.O_APPEND|os.O_WRONLY, 0600); err == nil {
 		_, _ = f.Write(append(final, '\n'))
 		f.Close()
@@ -1056,15 +1199,23 @@ func (s *BetaServer) anchorModelLimitAuditIfNeeded(auditLastHash string, auditEn
 // Response: {"success":true,"entries":N,"last_hash":"sha256:..","valid":true}
 func (s *BetaServer) apiModelLimitAuditAnchorVerify(c *gin.Context) {
 	path := s.modelLimitAnchorPath
-	if path == "" { c.JSON(200, gin.H{"success": false, "error": "anchor_disabled"}); return }
+	if path == "" {
+		c.JSON(200, gin.H{"success": false, "error": "anchor_disabled"})
+		return
+	}
 	b, err := os.ReadFile(path)
-	if err != nil { c.JSON(500, gin.H{"success": false, "error": "read_failed"}); return }
+	if err != nil {
+		c.JSON(500, gin.H{"success": false, "error": "read_failed"})
+		return
+	}
 	lines := strings.Split(strings.TrimSpace(string(b)), "\n")
 	prev := ""
 	valid := true
 	var lastHash string
 	for _, ln := range lines {
-		if strings.TrimSpace(ln) == "" { continue }
+		if strings.TrimSpace(ln) == "" {
+			continue
+		}
 		var full struct {
 			TS            int64  `json:"ts"`
 			AuditLastHash string `json:"audit_last_hash"`
@@ -1072,14 +1223,20 @@ func (s *BetaServer) apiModelLimitAuditAnchorVerify(c *gin.Context) {
 			PrevHash      string `json:"prev_hash"`
 			Hash          string `json:"hash"`
 		}
-		if json.Unmarshal([]byte(ln), &full) != nil { valid = false; break }
+		if json.Unmarshal([]byte(ln), &full) != nil {
+			valid = false
+			break
+		}
 		// Reconstruct original raw form (hash empty string) used for hashing.
 		rawStruct := full
 		rawStruct.Hash = ""
 		rawBytes, _ := json.Marshal(rawStruct)
 		hh := sha256.Sum256(append([]byte(full.PrevHash), rawBytes...))
 		recomputed := fmt.Sprintf("sha256:%x", hh[:])
-		if recomputed != full.Hash || full.PrevHash != prev { valid = false; break }
+		if recomputed != full.Hash || full.PrevHash != prev {
+			valid = false
+			break
+		}
 		prev = full.Hash
 		lastHash = full.Hash
 	}
@@ -1108,95 +1265,158 @@ func (s *BetaServer) apiModelLimitsAttestation(c *gin.Context) {
 // buildUnsignedModelLimitsAttestation constructs the core attestation structure without performing
 // optional surge, notarization, or signing augmentation. It returns the unsigned attestation and any error.
 func (s *BetaServer) buildUnsignedModelLimitsAttestation() (modelLimitsAttestation, error) {
-    _, snapHash := s.computeModelLimitsSnapshot()
-    now := time.Now().UTC().Format(time.RFC3339Nano)
-    att := modelLimitsAttestation{}
-    att.Success = true
-    att.Snapshot.Hash = snapHash
-    att.Snapshot.GeneratedAt = now
-    att.StrictUnknown = s.modelLimitsStrictUnknown
-    auditPath := s.modelLimitAuditPath
-    anchorPath := s.modelLimitAnchorPath
-    if auditPath == "" {
-        att.Configured = false
-        att.Reason = "audit_disabled"
-        return att, nil
-    }
-    auditBytes, err := os.ReadFile(auditPath)
-    if err != nil { return att, fmt.Errorf("audit_read_failed") }
-    auditLines := strings.Split(strings.TrimSpace(string(auditBytes)), "\n")
-    head := ""
-    count := 0
-    for _, ln := range auditLines {
-        ln = strings.TrimSpace(ln)
-        if ln == "" { continue }
-        count++
-        var e struct{ Hash string `json:"hash"` }
-        if json.Unmarshal([]byte(ln), &e) == nil { head = e.Hash }
-    }
-    att.Audit = &struct { HeadHash string `json:"head_hash"`; Entries int `json:"entries"` }{HeadHash: head, Entries: count}
-    if anchorPath != "" {
-        if b, err := os.ReadFile(anchorPath); err == nil {
-            lines := strings.Split(strings.TrimSpace(string(b)), "\n")
-            aHead := ""; aCount := 0
-            for _, ln := range lines {
-                ln = strings.TrimSpace(ln)
-                if ln == "" { continue }
-                aCount++
-                var e struct{ Hash string `json:"hash"` }
-                if json.Unmarshal([]byte(ln), &e) == nil { aHead = e.Hash }
-            }
-            att.Anchor = &struct { LatestHash string `json:"latest_hash"`; Entries int `json:"entries"`; Interval int `json:"interval"` }{LatestHash: aHead, Entries: aCount, Interval: s.modelLimitAnchorInterval}
-        }
-    }
-    att.Configured = true
-    return att, nil
+	_, snapHash := s.computeModelLimitsSnapshot()
+	now := time.Now().UTC().Format(time.RFC3339Nano)
+	att := modelLimitsAttestation{}
+	att.Success = true
+	att.Snapshot.Hash = snapHash
+	att.Snapshot.GeneratedAt = now
+	att.StrictUnknown = s.modelLimitsStrictUnknown
+	auditPath := s.modelLimitAuditPath
+	anchorPath := s.modelLimitAnchorPath
+	if auditPath == "" {
+		att.Configured = false
+		att.Reason = "audit_disabled"
+		return att, nil
+	}
+	auditBytes, err := os.ReadFile(auditPath)
+	if err != nil {
+		return att, fmt.Errorf("audit_read_failed")
+	}
+	auditLines := strings.Split(strings.TrimSpace(string(auditBytes)), "\n")
+	head := ""
+	count := 0
+	for _, ln := range auditLines {
+		ln = strings.TrimSpace(ln)
+		if ln == "" {
+			continue
+		}
+		count++
+		var e struct {
+			Hash string `json:"hash"`
+		}
+		if json.Unmarshal([]byte(ln), &e) == nil {
+			head = e.Hash
+		}
+	}
+	att.Audit = &struct {
+		HeadHash string `json:"head_hash"`
+		Entries  int    `json:"entries"`
+	}{HeadHash: head, Entries: count}
+	if anchorPath != "" {
+		if b, err := os.ReadFile(anchorPath); err == nil {
+			lines := strings.Split(strings.TrimSpace(string(b)), "\n")
+			aHead := ""
+			aCount := 0
+			for _, ln := range lines {
+				ln = strings.TrimSpace(ln)
+				if ln == "" {
+					continue
+				}
+				aCount++
+				var e struct {
+					Hash string `json:"hash"`
+				}
+				if json.Unmarshal([]byte(ln), &e) == nil {
+					aHead = e.Hash
+				}
+			}
+			att.Anchor = &struct {
+				LatestHash string `json:"latest_hash"`
+				Entries    int    `json:"entries"`
+				Interval   int    `json:"interval"`
+			}{LatestHash: aHead, Entries: aCount, Interval: s.modelLimitAnchorInterval}
+		}
+	}
+	att.Configured = true
+	return att, nil
 }
 
 // maybeAugmentAndSignAttestation attaches surge stats, notarization receipt, and signature if enabled.
 func (s *BetaServer) maybeAugmentAndSignAttestation(att modelLimitsAttestation) modelLimitsAttestation {
-    if att.Configured {
-        // Surge analysis
-        s.modelLimitSurgeMu.Lock()
-        var topModel string; var topLast10 int; var topAvg float64
-        if time.Since(s.modelLimitSurgeLastTrigger) < 5*time.Second {
-            for mid, counts := range s.modelLimitSurgeState {
-                last10 := 0; total := 0; nonzero := 0
-                for i := 0; i < len(counts); i++ { v := counts[i]; total += v; if v > 0 { nonzero++ } }
-                for i := 0; i < 10 && i < len(counts); i++ { last10 += counts[len(counts)-1-i] }
-                avg := 0.0; if nonzero > 0 { avg = float64(total)/float64(nonzero) }
-                if last10 >= s.modelLimitSurgeMinEvents && avg > 0 && float64(last10) > avg*s.modelLimitSurgeFactor {
-                    if last10 > topLast10 { topLast10 = last10; topAvg = avg; topModel = mid }
-                }
-            }
-        }
-        s.modelLimitSurgeMu.Unlock()
-        if topModel != "" {
-            att.Surge = &struct { ModelID string `json:"model_id"`; Last10Sec int `json:"last_10s_exceed_events"`; AvgActive float64 `json:"avg_active_seconds"`; Factor float64 `json:"factor"`; MinEvents int `json:"min_events"`; Triggered bool `json:"triggered"`; At string `json:"triggered_at,omitempty"` }{ModelID: topModel, Last10Sec: topLast10, AvgActive: topAvg, Factor: s.modelLimitSurgeFactor, MinEvents: s.modelLimitSurgeMinEvents, Triggered: true, At: time.Now().UTC().Format(time.RFC3339Nano)}
-        }
-        if os.Getenv("GAUTH_MODEL_LIMIT_ATTEST_NOTARIZE") == "1" && s.notarizer != nil && att.Snapshot.Hash != "" {
-            auditHead := ""; if att.Audit != nil { auditHead = att.Audit.HeadHash }
-            anchorHead := ""; if att.Anchor != nil { anchorHead = att.Anchor.LatestHash }
-            seed := fmt.Sprintf("attest|%s|%s|%s", att.Snapshot.Hash, auditHead, anchorHead)
-            h := sha256.Sum256([]byte(seed))
-            combinedHash := fmt.Sprintf("sha256:%x", h[:])
-            if receipt, nErr := s.notarizer.Notarize(combinedHash); nErr == nil {
-                att.Notarization = &struct { Provider string `json:"provider"`; Timestamp string `json:"timestamp"`; LatencySeconds float64 `json:"latency_seconds"`; Success bool `json:"success"` }{Provider: receipt.Provider, Timestamp: receipt.Timestamp, LatencySeconds: receipt.LatencySeconds, Success: receipt.Success}
-            }
-        }
-    }
-    if os.Getenv("GAUTH_MODEL_LIMIT_ATTEST_SIGN") == "1" && crypto.GlobalEdDSARegistry != nil {
-        if active := crypto.GlobalEdDSARegistry.Active(); active != nil && len(active.Private) == ed25519.PrivateKeySize {
-            unsigned := att; unsigned.Signature = ""; unsigned.SigKid = ""; unsigned.SigMode = ""
-            if raw, jerr := json.Marshal(unsigned); jerr == nil {
-                sig := ed25519.Sign(active.Private, raw)
-                att.Signature = base64.RawStdEncoding.EncodeToString(sig)
-                att.SigKid = active.ID
-                att.SigMode = sigModeEdDSA
-            }
-        }
-    }
-    return att
+	if att.Configured {
+		// Surge analysis
+		s.modelLimitSurgeMu.Lock()
+		var topModel string
+		var topLast10 int
+		var topAvg float64
+		if time.Since(s.modelLimitSurgeLastTrigger) < 5*time.Second {
+			for mid, counts := range s.modelLimitSurgeState {
+				last10 := 0
+				total := 0
+				nonzero := 0
+				for i := 0; i < len(counts); i++ {
+					v := counts[i]
+					total += v
+					if v > 0 {
+						nonzero++
+					}
+				}
+				for i := 0; i < 10 && i < len(counts); i++ {
+					last10 += counts[len(counts)-1-i]
+				}
+				avg := 0.0
+				if nonzero > 0 {
+					avg = float64(total) / float64(nonzero)
+				}
+				if last10 >= s.modelLimitSurgeMinEvents && avg > 0 && float64(last10) > avg*s.modelLimitSurgeFactor {
+					if last10 > topLast10 {
+						topLast10 = last10
+						topAvg = avg
+						topModel = mid
+					}
+				}
+			}
+		}
+		s.modelLimitSurgeMu.Unlock()
+		if topModel != "" {
+			att.Surge = &struct {
+				ModelID   string  `json:"model_id"`
+				Last10Sec int     `json:"last_10s_exceed_events"`
+				AvgActive float64 `json:"avg_active_seconds"`
+				Factor    float64 `json:"factor"`
+				MinEvents int     `json:"min_events"`
+				Triggered bool    `json:"triggered"`
+				At        string  `json:"triggered_at,omitempty"`
+			}{ModelID: topModel, Last10Sec: topLast10, AvgActive: topAvg, Factor: s.modelLimitSurgeFactor, MinEvents: s.modelLimitSurgeMinEvents, Triggered: true, At: time.Now().UTC().Format(time.RFC3339Nano)}
+		}
+		if os.Getenv("GAUTH_MODEL_LIMIT_ATTEST_NOTARIZE") == "1" && s.notarizer != nil && att.Snapshot.Hash != "" {
+			auditHead := ""
+			if att.Audit != nil {
+				auditHead = att.Audit.HeadHash
+			}
+			anchorHead := ""
+			if att.Anchor != nil {
+				anchorHead = att.Anchor.LatestHash
+			}
+			seed := fmt.Sprintf("attest|%s|%s|%s", att.Snapshot.Hash, auditHead, anchorHead)
+			h := sha256.Sum256([]byte(seed))
+			combinedHash := fmt.Sprintf("sha256:%x", h[:])
+			if receipt, nErr := s.notarizer.Notarize(combinedHash); nErr == nil {
+				att.Notarization = &struct {
+					Provider       string  `json:"provider"`
+					Timestamp      string  `json:"timestamp"`
+					LatencySeconds float64 `json:"latency_seconds"`
+					Success        bool    `json:"success"`
+				}{Provider: receipt.Provider, Timestamp: receipt.Timestamp, LatencySeconds: receipt.LatencySeconds, Success: receipt.Success}
+			}
+		}
+	}
+	if os.Getenv("GAUTH_MODEL_LIMIT_ATTEST_SIGN") == "1" && crypto.GlobalEdDSARegistry != nil {
+		if active := crypto.GlobalEdDSARegistry.Active(); active != nil && len(active.Private) == ed25519.PrivateKeySize {
+			unsigned := att
+			unsigned.Signature = ""
+			unsigned.SigKid = ""
+			unsigned.SigMode = ""
+			if raw, jerr := json.Marshal(unsigned); jerr == nil {
+				sig := ed25519.Sign(active.Private, raw)
+				att.Signature = base64.RawStdEncoding.EncodeToString(sig)
+				att.SigKid = active.ID
+				att.SigMode = sigModeEdDSA
+			}
+		}
+	}
+	return att
 }
 
 // ===== Attestation Streaming (SSE) =====
@@ -1221,19 +1441,28 @@ func (s *BetaServer) unsubscribeAttestation(ch chan modelLimitsAttestation) {
 
 // emitAttestation attempts to build & broadcast a fresh attestation to subscribers.
 func (s *BetaServer) emitAttestation(reason string) {
-	if os.Getenv("GAUTH_ATTEST_STREAM_ENABLE") != "1" { return }
+	if os.Getenv("GAUTH_ATTEST_STREAM_ENABLE") != "1" {
+		return
+	}
 	att, err := s.buildUnsignedModelLimitsAttestation()
-	if err != nil { return }
+	if err != nil {
+		return
+	}
 	att = s.maybeAugmentAndSignAttestation(att)
 	// Embed lightweight reason marker in Reason field if not already set
-	if att.Reason == "" { att.Reason = reason }
+	if att.Reason == "" {
+		att.Reason = reason
+	}
 	// Increment reason counter
 	s.attestStreamCountsMu.Lock()
 	s.attestStreamCounts[reason]++
 	s.attestStreamCountsMu.Unlock()
 	s.attestStreamSubsMu.Lock()
 	for ch := range s.attestStreamSubs {
-		select { case ch <- att: default: }
+		select {
+		case ch <- att:
+		default:
+		}
 	}
 	s.attestStreamSubsMu.Unlock()
 }
@@ -1283,7 +1512,7 @@ func (s *BetaServer) apiModelLimitsAttestationKeys(c *gin.Context) {
 		return
 	}
 	keys := crypto.GlobalEdDSARegistry.ListCurrent()
-	out := make([]map[string]any,0,len(keys))
+	out := make([]map[string]any, 0, len(keys))
 	for _, k := range keys {
 		if len(k.Public) == ed25519.PublicKeySize {
 			out = append(out, map[string]any{"kid": k.ID, "public_b64": base64.RawStdEncoding.EncodeToString(k.Public)})
@@ -1298,46 +1527,116 @@ func (s *BetaServer) apiModelLimitsAttestationKeys(c *gin.Context) {
 // combined_hash = sha256(attest|snapshot.hash|audit.head_hash|anchor.latest_hash)
 func (s *BetaServer) apiModelLimitsAttestationVerify(c *gin.Context) {
 	var att struct {
-		Success    bool `json:"success"`
-		Configured bool `json:"configured"`
+		Success    bool   `json:"success"`
+		Configured bool   `json:"configured"`
 		Reason     string `json:"reason,omitempty"`
-		Snapshot   struct { Hash string `json:"hash"`; GeneratedAt string `json:"generated_at"` } `json:"snapshot"`
-		Audit *struct { HeadHash string `json:"head_hash"`; Entries int `json:"entries"` } `json:"audit,omitempty"`
-		Anchor *struct { LatestHash string `json:"latest_hash"`; Entries int `json:"entries"`; Interval int `json:"interval"` } `json:"anchor,omitempty"`
+		Snapshot   struct {
+			Hash        string `json:"hash"`
+			GeneratedAt string `json:"generated_at"`
+		} `json:"snapshot"`
+		Audit *struct {
+			HeadHash string `json:"head_hash"`
+			Entries  int    `json:"entries"`
+		} `json:"audit,omitempty"`
+		Anchor *struct {
+			LatestHash string `json:"latest_hash"`
+			Entries    int    `json:"entries"`
+			Interval   int    `json:"interval"`
+		} `json:"anchor,omitempty"`
 		StrictUnknown bool `json:"strict_unknown"`
-		Surge *struct { ModelID string `json:"model_id"`; Last10Sec int `json:"last_10s_exceed_events"`; AvgActive float64 `json:"avg_active_seconds"`; Factor float64 `json:"factor"`; MinEvents int `json:"min_events"`; Triggered bool `json:"triggered"`; At string `json:"triggered_at,omitempty"` } `json:"surge,omitempty"`
-		Notarization *struct { Provider string `json:"provider"`; Timestamp string `json:"timestamp"`; LatencySeconds float64 `json:"latency_seconds"`; Success bool `json:"success"` } `json:"notarization,omitempty"`
+		Surge         *struct {
+			ModelID   string  `json:"model_id"`
+			Last10Sec int     `json:"last_10s_exceed_events"`
+			AvgActive float64 `json:"avg_active_seconds"`
+			Factor    float64 `json:"factor"`
+			MinEvents int     `json:"min_events"`
+			Triggered bool    `json:"triggered"`
+			At        string  `json:"triggered_at,omitempty"`
+		} `json:"surge,omitempty"`
+		Notarization *struct {
+			Provider       string  `json:"provider"`
+			Timestamp      string  `json:"timestamp"`
+			LatencySeconds float64 `json:"latency_seconds"`
+			Success        bool    `json:"success"`
+		} `json:"notarization,omitempty"`
 		Signature string `json:"signature"`
 		SigKid    string `json:"sig_kid"`
 		SigMode   string `json:"sig_mode"`
 	}
 	body, err := io.ReadAll(c.Request.Body)
-	if err != nil { c.JSON(400, gin.H{"success": false, "error": "read_body_failed"}); return }
-	if json.Unmarshal(body, &att) != nil { c.JSON(400, gin.H{"success": false, "error": "invalid_json"}); return }
-	if att.Signature == "" || att.SigKid == "" || att.SigMode != sigModeEdDSA { c.JSON(200, gin.H{"success": true, "valid": false, "error": "missing_signature_fields"}); return }
-	if crypto.GlobalEdDSARegistry == nil { c.JSON(200, gin.H{"success": true, "valid": false, "error": "no_key_registry"}); return }
+	if err != nil {
+		c.JSON(400, gin.H{"success": false, "error": "read_body_failed"})
+		return
+	}
+	if json.Unmarshal(body, &att) != nil {
+		c.JSON(400, gin.H{"success": false, "error": "invalid_json"})
+		return
+	}
+	if att.Signature == "" || att.SigKid == "" || att.SigMode != sigModeEdDSA {
+		c.JSON(200, gin.H{"success": true, "valid": false, "error": "missing_signature_fields"})
+		return
+	}
+	if crypto.GlobalEdDSARegistry == nil {
+		c.JSON(200, gin.H{"success": true, "valid": false, "error": "no_key_registry"})
+		return
+	}
 	key := crypto.GlobalEdDSARegistry.FindByID(att.SigKid)
-	if key == nil { c.JSON(200, gin.H{"success": true, "valid": false, "error": "unknown_kid"}); return }
+	if key == nil {
+		c.JSON(200, gin.H{"success": true, "valid": false, "error": "unknown_kid"})
+		return
+	}
 	// Reconstruct unsigned object with identical field order
 	type unsignedStruct struct {
-		Success    bool `json:"success"`
-		Configured bool `json:"configured"`
+		Success    bool   `json:"success"`
+		Configured bool   `json:"configured"`
 		Reason     string `json:"reason,omitempty"`
-		Snapshot   struct { Hash string `json:"hash"`; GeneratedAt string `json:"generated_at"` } `json:"snapshot"`
-		Audit *struct { HeadHash string `json:"head_hash"`; Entries int `json:"entries"` } `json:"audit,omitempty"`
-		Anchor *struct { LatestHash string `json:"latest_hash"`; Entries int `json:"entries"`; Interval int `json:"interval"` } `json:"anchor,omitempty"`
+		Snapshot   struct {
+			Hash        string `json:"hash"`
+			GeneratedAt string `json:"generated_at"`
+		} `json:"snapshot"`
+		Audit *struct {
+			HeadHash string `json:"head_hash"`
+			Entries  int    `json:"entries"`
+		} `json:"audit,omitempty"`
+		Anchor *struct {
+			LatestHash string `json:"latest_hash"`
+			Entries    int    `json:"entries"`
+			Interval   int    `json:"interval"`
+		} `json:"anchor,omitempty"`
 		StrictUnknown bool `json:"strict_unknown"`
-		Surge *struct { ModelID string `json:"model_id"`; Last10Sec int `json:"last_10s_exceed_events"`; AvgActive float64 `json:"avg_active_seconds"`; Factor float64 `json:"factor"`; MinEvents int `json:"min_events"`; Triggered bool `json:"triggered"`; At string `json:"triggered_at,omitempty"` } `json:"surge,omitempty"`
-		Notarization *struct { Provider string `json:"provider"`; Timestamp string `json:"timestamp"`; LatencySeconds float64 `json:"latency_seconds"`; Success bool `json:"success"` } `json:"notarization,omitempty"`
+		Surge         *struct {
+			ModelID   string  `json:"model_id"`
+			Last10Sec int     `json:"last_10s_exceed_events"`
+			AvgActive float64 `json:"avg_active_seconds"`
+			Factor    float64 `json:"factor"`
+			MinEvents int     `json:"min_events"`
+			Triggered bool    `json:"triggered"`
+			At        string  `json:"triggered_at,omitempty"`
+		} `json:"surge,omitempty"`
+		Notarization *struct {
+			Provider       string  `json:"provider"`
+			Timestamp      string  `json:"timestamp"`
+			LatencySeconds float64 `json:"latency_seconds"`
+			Success        bool    `json:"success"`
+		} `json:"notarization,omitempty"`
 	}
 	u := unsignedStruct{Success: att.Success, Configured: att.Configured, Reason: att.Reason, Snapshot: att.Snapshot, Audit: att.Audit, Anchor: att.Anchor, StrictUnknown: att.StrictUnknown, Surge: att.Surge, Notarization: att.Notarization}
 	raw, _ := json.Marshal(u)
 	sigBytes, err := base64.RawStdEncoding.DecodeString(att.Signature)
-	if err != nil { c.JSON(200, gin.H{"success": true, "valid": false, "error": "bad_signature_base64"}); return }
+	if err != nil {
+		c.JSON(200, gin.H{"success": true, "valid": false, "error": "bad_signature_base64"})
+		return
+	}
 	valid := ed25519.Verify(key.Public, raw, sigBytes)
 	// Compute combined hash triple for external linking
-	auditHead := ""; if att.Audit != nil { auditHead = att.Audit.HeadHash }
-	anchorHead := ""; if att.Anchor != nil { anchorHead = att.Anchor.LatestHash }
+	auditHead := ""
+	if att.Audit != nil {
+		auditHead = att.Audit.HeadHash
+	}
+	anchorHead := ""
+	if att.Anchor != nil {
+		anchorHead = att.Anchor.LatestHash
+	}
 	seed := fmt.Sprintf("attest|%s|%s|%s", att.Snapshot.Hash, auditHead, anchorHead)
 	ch := sha256.Sum256([]byte(seed))
 	c.JSON(200, gin.H{"success": true, "valid": valid, "kid": att.SigKid, "sig_mode": att.SigMode, "combined_hash": fmt.Sprintf("sha256:%x", ch[:])})
@@ -1937,9 +2236,9 @@ func getExtProviderLabel(s *BetaServer) string {
 	// Normalization map (extendable): env value -> metrics label
 	switch raw {
 	case "tsa_stub":
-		return "tsa-stub"
-	case "memory":
-		return "memory"
+		return tsaStubProvider
+	case memoryProvider:
+		return memoryProvider
 	default:
 		// Replace underscores with dashes for generic normalization, lowercase already enforced by env usage.
 		return strings.ReplaceAll(raw, "_", "-")
@@ -2030,10 +2329,14 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 	s.modelLimitSurgeFactor = 3.0
 	s.modelLimitSurgeMinEvents = 5
 	if raw := os.Getenv("GAUTH_MODEL_LIMIT_SURGE_FACTOR"); raw != "" {
-		if v, err := strconv.ParseFloat(raw, 64); err == nil && v > 0 { s.modelLimitSurgeFactor = v }
+		if v, err := strconv.ParseFloat(raw, 64); err == nil && v > 0 {
+			s.modelLimitSurgeFactor = v
+		}
 	}
 	if raw := os.Getenv("GAUTH_MODEL_LIMIT_SURGE_MIN_EVENTS"); raw != "" {
-		if v, err := strconv.Atoi(raw); err == nil && v > 0 { s.modelLimitSurgeMinEvents = v }
+		if v, err := strconv.Atoi(raw); err == nil && v > 0 {
+			s.modelLimitSurgeMinEvents = v
+		}
 	}
 	if os.Getenv("GAUTH_CAPABILITY_ENFORCE") == "1" {
 		s.capEnforce = true
@@ -2056,7 +2359,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 		s.modelLimitsPath = mlPath
 		if s.loadModelLimitsFromDisk() {
 			// record initial mtime for reload
-			if fi, err := os.Stat(mlPath); err == nil { s.modelLimitsLastMtime = fi.ModTime() }
+			if fi, err := os.Stat(mlPath); err == nil {
+				s.modelLimitsLastMtime = fi.ModTime()
+			}
 		}
 		// configure reload interval (seconds)
 		if raw := os.Getenv("GAUTH_MODEL_LIMITS_RELOAD_INTERVAL"); raw != "" {
@@ -2069,7 +2374,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 		}
 	}
 	// Strict unknown-model enforcement can be enabled regardless of whether an initial limits file is provided.
-	if os.Getenv("GAUTH_MODEL_LIMITS_STRICT_UNKNOWN") == "1" { s.modelLimitsStrictUnknown = true }
+	if os.Getenv("GAUTH_MODEL_LIMITS_STRICT_UNKNOWN") == "1" {
+		s.modelLimitsStrictUnknown = true
+	}
 	// Optional model limit exceed audit chain
 	if auditPath := os.Getenv("GAUTH_MODEL_LIMIT_AUDIT_PATH"); auditPath != "" {
 		// touch file if not exists
@@ -2089,9 +2396,13 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 			// Parse interval (entries) env if supplied
 			interval := 0
 			if raw := os.Getenv("GAUTH_MODEL_LIMIT_ANCHOR_INTERVAL"); raw != "" {
-				if v, err := strconv.Atoi(raw); err == nil && v > 0 { interval = v }
+				if v, err := strconv.Atoi(raw); err == nil && v > 0 {
+					interval = v
+				}
 			}
-			if interval == 0 { interval = 100 } // default conservative anchor cadence
+			if interval == 0 {
+				interval = 100
+			} // default conservative anchor cadence
 			s.modelLimitAnchorInterval = interval
 			fmt.Fprintf(os.Stderr, "[model-limits] audit anchor enabled path=%s interval=%d\n", anchorPath, interval)
 		} else {
@@ -2511,9 +2822,13 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 				semanticRateGauges300 := make(map[string]metric.Float64ObservableGauge)
 				semanticAnomalyGauges := make(map[string]metric.Float64ObservableGauge)
 				violationIntegrityGauge, gErr1 := s.otelMeter.Int64ObservableGauge("gauth_persistence_integrity_violation")
-				if gErr1 != nil { log.Printf("otel gauge create failed (violation): %v", gErr1) }
+				if gErr1 != nil {
+					log.Printf("otel gauge create failed (violation): %v", gErr1)
+				}
 				semanticIntegrityGauge, gErr2 := s.otelMeter.Int64ObservableGauge("gauth_persistence_integrity_semantic")
-				if gErr2 != nil { log.Printf("otel gauge create failed (semantic): %v", gErr2) }
+				if gErr2 != nil {
+					log.Printf("otel gauge create failed (semantic): %v", gErr2)
+				}
 				counterKeys := []string{"sig_invalid", "expired", "not_yet_valid", "issuer_mismatch", "replay_detected", "audience_mismatch", "missing_claim", "unknown"}
 				for _, k := range counterKeys {
 					name := "gauth_violation_counter_" + k
@@ -2551,11 +2866,17 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 					}
 				}
 				revEmit, revEmitErr := s.otelMeter.Int64ObservableGauge("gauth_revocation_auto_sign_emitted")
-				if revEmitErr != nil { log.Printf("otel gauge create failed (revocation emitted): %v", revEmitErr) }
+				if revEmitErr != nil {
+					log.Printf("otel gauge create failed (revocation emitted): %v", revEmitErr)
+				}
 				revSkipEmpty, revSkipEmptyErr := s.otelMeter.Int64ObservableGauge("gauth_revocation_auto_sign_skipped_empty")
-				if revSkipEmptyErr != nil { log.Printf("otel gauge create failed (revocation skipped empty): %v", revSkipEmptyErr) }
+				if revSkipEmptyErr != nil {
+					log.Printf("otel gauge create failed (revocation skipped empty): %v", revSkipEmptyErr)
+				}
 				revSkipDup, revSkipDupErr := s.otelMeter.Int64ObservableGauge("gauth_revocation_auto_sign_skipped_duplicate")
-				if revSkipDupErr != nil { log.Printf("otel gauge create failed (revocation skipped duplicate): %v", revSkipDupErr) }
+				if revSkipDupErr != nil {
+					log.Printf("otel gauge create failed (revocation skipped duplicate): %v", revSkipDupErr)
+				}
 				s.otelSemanticCounters = semanticGauges
 				s.otelSemanticRates60 = semanticRateGauges60
 				s.otelSemanticRates300 = semanticRateGauges300
@@ -2628,7 +2949,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 					}
 					return nil
 				})
-				if cbErr != nil { log.Printf("otel callback registration failed: %v", cbErr) }
+				if cbErr != nil {
+					log.Printf("otel callback registration failed: %v", cbErr)
+				}
 			} else {
 				fmt.Fprintf(os.Stderr, "[otel-metrics] initialization failed: %v\n", err)
 			}
@@ -2769,7 +3092,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 		}
 	}
 	// Initialize memory anchor client if GAUTH_ANCHOR_PROVIDER=memory (prototype)
-	if os.Getenv("GAUTH_ANCHOR_PROVIDER") == "memory" {
+	if os.Getenv("GAUTH_ANCHOR_PROVIDER") == memoryProvider {
 		s.anchorClient = anchor.NewMemoryAnchor()
 		if p := os.Getenv("GAUTH_ANCHOR_PERSIST_PATH"); p != "" {
 			if err := s.anchorClient.EnablePersistence(p); err != nil {
@@ -2784,7 +3107,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 	// Environment: GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER = memory|tsa_stub
 	if prov := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER"); prov != "" {
 		switch prov {
-		case "memory":
+		case memoryProvider:
 			s.externalAnchorProvider = anchorint.NewMemoryProvider()
 			fmt.Fprintln(os.Stderr, "[ext-anchor] memory provider initialized")
 		case "tsa_stub":
@@ -2928,10 +3251,10 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 	if os.Getenv("GAUTH_CAP_ANCHOR_NOTARIZE") == "1" {
 		provider := os.Getenv("GAUTH_CAP_ANCHOR_NOTARY_PROVIDER")
 		if provider == "" {
-			provider = "memory"
+			provider = memoryProvider
 		}
 		switch provider {
-		case "memory":
+		case memoryProvider:
 			s.notarizer = notary.NewMemory()
 			fmt.Fprintln(os.Stderr, "[notary] memory notarizer initialized")
 		case "external_stub":
@@ -3579,14 +3902,14 @@ func (s *BetaServer) appendCapabilityAudit(e *AuditEntry) {
 			Hash      string          `json:"hash"`
 			Timestamp string          `json:"timestamp"`
 		}{Payload: enc, PrevHash: s.capAuditPrevHash, Hash: curHash, Timestamp: time.Now().UTC().Format(time.RFC3339Nano)}
-				if wb, werr := json.Marshal(wrapper); werr == nil {
-					dir := filepath.Dir(s.capAuditPersistPath)
-					if mkErr := os.MkdirAll(dir, 0o755); mkErr != nil {
-						fmt.Fprintf(os.Stderr, "[cap-audit] mkdir failed path=%s err=%v\n", dir, mkErr)
-					} else if awErr := os.WriteFile(s.capAuditPersistPath, wb, 0o600); awErr != nil {
-						fmt.Fprintf(os.Stderr, "[cap-audit] write failed path=%s err=%v\n", s.capAuditPersistPath, awErr)
-					}
-				}
+		if wb, werr := json.Marshal(wrapper); werr == nil {
+			dir := filepath.Dir(s.capAuditPersistPath)
+			if mkErr := os.MkdirAll(dir, 0o755); mkErr != nil {
+				fmt.Fprintf(os.Stderr, "[cap-audit] mkdir failed path=%s err=%v\n", dir, mkErr)
+			} else if awErr := os.WriteFile(s.capAuditPersistPath, wb, 0o600); awErr != nil {
+				fmt.Fprintf(os.Stderr, "[cap-audit] write failed path=%s err=%v\n", s.capAuditPersistPath, awErr)
+			}
+		}
 	}
 	s.capAuditPrevHash = curHash
 }
@@ -3736,10 +4059,10 @@ func (s *BetaServer) apiExternalAnchorReceiptLatest(c *gin.Context) {
 	}
 	rec := s.externalAnchorProvider.Latest()
 	if rec.Hash == "" {
-		c.JSON(200, gin.H{"success": true, "configured": true, "empty": true})
+		c.JSON(200, gin.H{"success": true, "configured": true, emptyValue: true})
 		return
 	}
-	c.JSON(200, gin.H{"success": true, "configured": true, "empty": false, "receipt": gin.H{"hash": rec.Hash, "timestamp": rec.Timestamp.UTC().Format(time.RFC3339Nano), "provider": rec.Provider, "version": rec.Version}})
+	c.JSON(200, gin.H{"success": true, "configured": true, emptyValue: false, "receipt": gin.H{"hash": rec.Hash, "timestamp": rec.Timestamp.UTC().Format(time.RFC3339Nano), "provider": rec.Provider, "version": rec.Version}})
 }
 
 // apiExternalAnchorVerify performs a basic verification of the latest receipt via provider.Verify.
@@ -3751,7 +4074,7 @@ func (s *BetaServer) apiExternalAnchorVerify(c *gin.Context) {
 	}
 	rec := s.externalAnchorProvider.Latest()
 	if rec.Hash == "" {
-		c.JSON(200, gin.H{"success": true, "configured": true, "empty": true})
+		c.JSON(200, gin.H{"success": true, "configured": true, emptyValue: true})
 		return
 	}
 	if err := s.externalAnchorProvider.Verify(rec); err != nil {
@@ -3769,10 +4092,10 @@ func (s *BetaServer) apiNotarizationReceiptLatest(c *gin.Context) {
 	}
 	latest := s.receiptStore.Latest()
 	if latest.Timestamp == "" {
-		c.JSON(200, gin.H{"success": true, "configured": true, "empty": true})
+		c.JSON(200, gin.H{"success": true, "configured": true, emptyValue: true})
 		return
 	}
-	c.JSON(200, gin.H{"success": true, "configured": true, "empty": false, "receipt": latest})
+	c.JSON(200, gin.H{"success": true, "configured": true, emptyValue: false, "receipt": latest})
 }
 
 // apiNotarizationReceiptsChain returns a lightweight summary of the receipt chain (hashes only) for integrity verification tooling.
@@ -3799,7 +4122,7 @@ func (s *BetaServer) verifyReceiptChain() string {
 	}
 	entries := s.receiptStore.Entries()
 	if len(entries) == 0 {
-		s.receiptIntegrityStatus = "empty"
+		s.receiptIntegrityStatus = emptyValue
 		// map empty to unconfigured for Prom gauge numeric (-1)
 		if pm, ok := s.metrics.(interface{ SetCapabilityAnchorNotarizationReceiptsIntegrity(string) }); ok {
 			pm.SetCapabilityAnchorNotarizationReceiptsIntegrity("unconfigured")
@@ -3834,7 +4157,7 @@ func (s *BetaServer) verifyReceiptChain() string {
 	// Update Prometheus gauge if present
 	if pm, ok := s.metrics.(interface{ SetCapabilityAnchorNotarizationReceiptsIntegrity(string) }); ok {
 		mapped := s.receiptIntegrityStatus
-		if mapped == "empty" {
+		if mapped == emptyValue {
 			mapped = "unconfigured"
 		}
 		pm.SetCapabilityAnchorNotarizationReceiptsIntegrity(mapped)
@@ -3851,8 +4174,8 @@ func (s *BetaServer) apiNotarizationReceiptsVerify(c *gin.Context) {
 	}
 	entries := s.receiptStore.Entries()
 	if len(entries) == 0 {
-		s.receiptIntegrityStatus = "empty"
-		c.JSON(200, gin.H{"success": true, "configured": true, "integrity": "empty", "total": 0})
+		s.receiptIntegrityStatus = emptyValue
+		c.JSON(200, gin.H{"success": true, "configured": true, "integrity": emptyValue, "total": 0})
 		return
 	}
 	prev := ""
@@ -3903,7 +4226,7 @@ func (s *BetaServer) verifyExternalReceiptChain() string {
 	}
 	entries := s.externalReceiptStore.Entries()
 	if len(entries) == 0 {
-		s.externalReceiptIntegrityStatus = "empty"
+		s.externalReceiptIntegrityStatus = emptyValue
 		if pm, ok := s.metrics.(interface{ SetExternalAnchorReceiptsIntegrity(string) }); ok {
 			pm.SetExternalAnchorReceiptsIntegrity("unconfigured")
 		}
@@ -3934,7 +4257,7 @@ func (s *BetaServer) verifyExternalReceiptChain() string {
 	}
 	if pm, ok := s.metrics.(interface{ SetExternalAnchorReceiptsIntegrity(string) }); ok {
 		mapped := s.externalReceiptIntegrityStatus
-		if mapped == "empty" {
+		if mapped == emptyValue {
 			mapped = "unconfigured"
 		}
 		pm.SetExternalAnchorReceiptsIntegrity(mapped)
@@ -3954,10 +4277,10 @@ func (s *BetaServer) apiExternalAnchorReceiptsLatest(c *gin.Context) {
 	}
 	latest := s.externalReceiptStore.Latest()
 	if latest.Hash == "" {
-		c.JSON(200, gin.H{"success": true, "configured": true, "empty": true})
+		c.JSON(200, gin.H{"success": true, "configured": true, emptyValue: true})
 		return
 	}
-	c.JSON(200, gin.H{"success": true, "configured": true, "empty": false, "receipt": latest})
+	c.JSON(200, gin.H{"success": true, "configured": true, emptyValue: false, "receipt": latest})
 }
 
 // apiExternalAnchorReceiptsChain returns summary chain list.
@@ -3982,8 +4305,8 @@ func (s *BetaServer) apiExternalAnchorReceiptsVerify(c *gin.Context) {
 	}
 	entries := s.externalReceiptStore.Entries()
 	if len(entries) == 0 {
-		s.externalReceiptIntegrityStatus = "empty"
-		c.JSON(200, gin.H{"success": true, "configured": true, "integrity": "empty", "total": 0})
+		s.externalReceiptIntegrityStatus = emptyValue
+		c.JSON(200, gin.H{"success": true, "configured": true, "integrity": emptyValue, "total": 0})
 		return
 	}
 	prev := ""
@@ -4763,7 +5086,7 @@ func (s *BetaServer) routes() {
 		keyRotation := gin.H{"automatic": rotationDays > 0, "interval_days": rotationDays}
 
 		// External anchoring status (future provider integration)
-		anchorProvider := os.Getenv("GAUTH_ANCHOR_PROVIDER") // e.g., "memory", "demo-ledger"
+		anchorProvider := os.Getenv("GAUTH_ANCHOR_PROVIDER") // e.g., memoryProvider, "demo-ledger"
 		anchoring := gin.H{"enabled": anchorProvider != "", "provider": anchorProvider}
 		if s.anchorClient != nil {
 			latest, _ := s.anchorClient.LatestAnchor()
@@ -4832,7 +5155,7 @@ func (s *BetaServer) routes() {
 			"eddsa_keys":           eddsaKeys,
 			"eddsa_rotation_hours": eddsaRotationHours,
 			"detached_signature": gin.H{ // advertisement for detached signature hardening (Option C)
-				"enabled":   os.Getenv("GAUTH_DETACHED_SIGNATURE") == "1",
+				"enabled":    os.Getenv("GAUTH_DETACHED_SIGNATURE") == "1",
 				"algorithms": []string{"Ed25519"},
 				"mode":       "canonical_poa_v1",
 			},
@@ -5793,7 +6116,9 @@ func (s *BetaServer) apiDelegationCreate(c *gin.Context) {
 		// Increment capability_denied via generic violation hook
 		s.metrics.IncViolation("capability_denied")
 		// Explicit capability enforcement denied counter (new dedicated metric)
-		if s.metrics != nil { s.metrics.IncCapabilityEnforceDenied() }
+		if s.metrics != nil {
+			s.metrics.IncCapabilityEnforceDenied()
+		}
 		// Audit capability denial
 		if s.audit != nil {
 			meta := map[string]any{"delegation_id": in.DelegationID, "missing": missing, "action": "delegation:create"}
@@ -5826,7 +6151,9 @@ func (s *BetaServer) apiDelegationCreate(c *gin.Context) {
 		return
 	}
 	// Track status as active
-	if s.metrics != nil { s.metrics.IncCapabilityEnforceAllowed() }
+	if s.metrics != nil {
+		s.metrics.IncCapabilityEnforceAllowed()
+	}
 	s.delegationStatusMu.Lock()
 	s.delegationStatus[in.DelegationID] = "active"
 	s.delegationStatusMu.Unlock()
@@ -5857,7 +6184,9 @@ func (s *BetaServer) apiDelegationRevoke(c *gin.Context) {
 	if !allowed {
 		// Increment capability_denied via generic violation hook
 		s.metrics.IncViolation("capability_denied")
-		if s.metrics != nil { s.metrics.IncCapabilityEnforceDenied() }
+		if s.metrics != nil {
+			s.metrics.IncCapabilityEnforceDenied()
+		}
 		if s.audit != nil {
 			meta := map[string]any{"delegation_id": in.DelegationID, "missing": missing, "action": "delegation:revoke"}
 			caps := capability.DefaultRegistry().List()
@@ -5889,7 +6218,7 @@ func (s *BetaServer) apiDelegationRevoke(c *gin.Context) {
 	}
 	s.delegationStatusMu.Lock()
 	prev := s.delegationStatus[in.DelegationID]
-	s.delegationStatus[in.DelegationID] = "terminated"
+	s.delegationStatus[in.DelegationID] = statusTerminated
 	s.delegationStatusMu.Unlock()
 	meta := map[string]any{"delegation_id": in.DelegationID, "prev_status": prev, "reason": in.Reason}
 	if in.Claims != nil {
@@ -5897,9 +6226,11 @@ func (s *BetaServer) apiDelegationRevoke(c *gin.Context) {
 			meta["caps"] = caps
 		}
 	}
-	s.appendCapabilityAudit(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: "revoker", Action: actionDelegationRevoke, Resource: "delegation", Outcome: "terminated", Meta: meta})
-	if s.metrics != nil { s.metrics.IncCapabilityEnforceAllowed() }
-	c.JSON(200, gin.H{"success": true, "delegation_id": in.DelegationID, "status": "terminated"})
+	s.appendCapabilityAudit(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: "revoker", Action: actionDelegationRevoke, Resource: "delegation", Outcome: statusTerminated, Meta: meta})
+	if s.metrics != nil {
+		s.metrics.IncCapabilityEnforceAllowed()
+	}
+	c.JSON(200, gin.H{"success": true, "delegation_id": in.DelegationID, "status": statusTerminated})
 }
 
 // apiAuditCapabilities exports capability enforcement related audit entries (create/revoke + denials)
@@ -8021,7 +8352,7 @@ func (ts *TokenStore) Validate(idOrVal string) (string, *Token) {
 		return TokenStatusNotFound, nil
 	}
 	now := time.Now()
-	if t.RevokedAt != nil || t.Status == "terminated" {
+	if t.RevokedAt != nil || t.Status == statusTerminated {
 		ts.mu.RUnlock()
 		return TokenStatusRevoked, t
 	}
@@ -8412,7 +8743,7 @@ func (s *BetaServer) apiTokenStatusUpdate(c *gin.Context) {
 		c.JSON(400, gin.H{"success": false, "message": "invalid payload", "reason": "invalid_payload"})
 		return
 	}
-	if req.NewStatus != statusActive && req.NewStatus != statusSuspended && req.NewStatus != "terminated" {
+	if req.NewStatus != statusActive && req.NewStatus != statusSuspended && req.NewStatus != statusTerminated {
 		if s.metrics != nil {
 			s.metrics.IncTokenStatusTransitionFailures()
 			s.metrics.RecordLifecycleTransition("token", "_", req.NewStatus, "failure")
@@ -8443,7 +8774,7 @@ func (s *BetaServer) apiTokenStatusUpdate(c *gin.Context) {
 		return
 	}
 	old := tok.Status
-	if old == "terminated" && req.NewStatus != "terminated" {
+	if old == statusTerminated && req.NewStatus != statusTerminated {
 		if s.metrics != nil {
 			s.metrics.IncTokenStatusTransitionFailures()
 			s.metrics.RecordLifecycleTransition("token", old, req.NewStatus, "failure")
@@ -8554,7 +8885,7 @@ func (s *BetaServer) apiDelegationStatusUpdate(c *gin.Context) {
 		c.JSON(400, gin.H{"success": false, "message": "invalid payload", "reason": "invalid_payload"})
 		return
 	}
-	if req.NewStatus != statusActive && req.NewStatus != statusSuspended && req.NewStatus != "terminated" {
+	if req.NewStatus != statusActive && req.NewStatus != statusSuspended && req.NewStatus != statusTerminated {
 		if s.metrics != nil {
 			s.metrics.IncDelegationStatusTransitionFailures()
 			s.metrics.RecordLifecycleTransition("delegation", "_", req.NewStatus, "failure")
@@ -8577,8 +8908,8 @@ func (s *BetaServer) apiDelegationStatusUpdate(c *gin.Context) {
 	s.delegationStatusMu.Lock()
 	old := s.delegationStatus[req.DelegationID]
 	if old == "" { // initialization
-		if req.NewStatus == "terminated" {
-			s.delegationStatus[req.DelegationID] = "terminated"
+		if req.NewStatus == statusTerminated {
+			s.delegationStatus[req.DelegationID] = statusTerminated
 		} else {
 			s.delegationStatus[req.DelegationID] = req.NewStatus
 		}
@@ -8608,7 +8939,7 @@ func (s *BetaServer) apiDelegationStatusUpdate(c *gin.Context) {
 	}
 
 	// Terminal state guard
-	if old == "terminated" && req.NewStatus != "terminated" {
+	if old == statusTerminated && req.NewStatus != statusTerminated {
 		s.delegationStatusMu.Unlock()
 		if s.metrics != nil {
 			s.metrics.IncDelegationStatusTransitionFailures()
@@ -8633,15 +8964,15 @@ func (s *BetaServer) apiDelegationStatusUpdate(c *gin.Context) {
 	valid := false
 	switch old {
 	case "active":
-		if req.NewStatus == statusSuspended || req.NewStatus == "terminated" || req.NewStatus == statusActive {
+		if req.NewStatus == statusSuspended || req.NewStatus == statusTerminated || req.NewStatus == statusActive {
 			valid = true
 		}
 	case statusSuspended:
-		if req.NewStatus == statusActive || req.NewStatus == "terminated" || req.NewStatus == statusSuspended {
+		if req.NewStatus == statusActive || req.NewStatus == statusTerminated || req.NewStatus == statusSuspended {
 			valid = true
 		}
-	case "terminated":
-		valid = (req.NewStatus == "terminated")
+	case statusTerminated:
+		valid = (req.NewStatus == statusTerminated)
 	default:
 		valid = true // treat unknown as re-initialization possibility
 	}
@@ -8941,12 +9272,16 @@ func (s *BetaServer) Run() error {
 	// Normalize address: allow plain numeric port (e.g. 8080) by prefixing ':'; if host:port already present leave unchanged.
 	// This mirrors normalization logic used in the constructor.
 	if !strings.Contains(addr, ":") { // no colon implies just digits
-		addr = ":" + addr
-	}
-	srv := &http.Server{Addr: addr, Handler: s.router}
-	fmt.Printf("[startup] BetaServer starting PID=%d on http://localhost%s at %s\n", os.Getpid(), addr, time.Now().Format(time.RFC3339))
-
-	// Signal handling for graceful shutdown
+        addr = ":" + addr
+        }
+        srv := &http.Server{
+                Addr:           addr,
+                Handler:        s.router,
+                ReadTimeout:    30 * time.Second,
+                WriteTimeout:   30 * time.Second,
+                ReadHeaderTimeout: 10 * time.Second,
+        }
+        fmt.Printf("[startup] BetaServer starting PID=%d on http://localhost%s at %s\n", os.Getpid(), addr, time.Now().Format(time.RFC3339))	// Signal handling for graceful shutdown
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 

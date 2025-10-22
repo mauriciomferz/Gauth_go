@@ -57,7 +57,7 @@ func TestJWTHMACAlgMismatch(t *testing.T) {
 	var vbody map[string]any
 	_ = json.Unmarshal(vw.Body.Bytes(), &vbody)
 	if vbody["error"] != ErrInvalidAlgorithm {
-			t.Fatalf("expected %s got body=%s", ErrInvalidAlgorithm, vw.Body.String())
+		t.Fatalf("expected %s got body=%s", ErrInvalidAlgorithm, vw.Body.String())
 	}
 	detail := vbody["detail"].(string)
 	if !strings.Contains(detail, "invalid_algorithm: header alg RS256 rejected (expected HS256)") {

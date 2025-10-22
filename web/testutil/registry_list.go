@@ -73,4 +73,3 @@ func CanonicalizeRegistry(raw string) string {
 	}
 	return string(out)
 }
-

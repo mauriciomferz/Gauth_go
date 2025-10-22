@@ -9,6 +9,14 @@ import (
 	"time"
 )
 
+// Delegation status constants
+const (
+	StatusActive     = "active"
+	StatusSuspended  = "suspended"
+	StatusTerminated = "terminated"
+	StatusPending    = "pending"
+)
+
 // Delegation represents a POA/delegation grant from Subject to Delegate over Scope until ExpiresAt.
 // Chain fields (PrevHash, Hash) allow sequencing and tamper detection similar to policy bundles.
 type Delegation struct {
@@ -50,7 +58,7 @@ func (c *Chain) Append(d Delegation) (Delegation, error) {
 		return Delegation{}, errors.New("cannot append expired delegation")
 	}
 	if d.Status == "" {
-		d.Status = "active"
+		d.Status = StatusActive
 	}
 	if !validDelegationStatus(d.Status) {
 		return Delegation{}, errors.New("invalid status")
@@ -118,7 +126,7 @@ func ValidateScopeNarrowing(parent, child Delegation) error {
 // validDelegationStatus reports whether status value is supported.
 func validDelegationStatus(s string) bool {
 	switch s {
-	case "active", "suspended", "terminated", "pending":
+	case StatusActive, StatusSuspended, StatusTerminated, StatusPending:
 		return true
 	default:
 		return false
@@ -133,10 +141,10 @@ func ValidateDelegationStatusTransition(old, new string) error {
 	if old == new {
 		return nil
 	}
-	if old == "terminated" && new != "terminated" {
+	if old == StatusTerminated && new != StatusTerminated {
 		return errors.New("terminated delegations cannot transition")
 	}
-	if old == "active" && new == "pending" {
+	if old == StatusActive && new == StatusPending {
 		return errors.New("cannot revert to pending from active")
 	}
 	return nil

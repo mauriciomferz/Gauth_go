@@ -38,7 +38,7 @@ const (
 	capabilitiesPath = "config/capabilities.json"
 	markdownPath     = "docs/GAP_MATRIX.md"
 	outMarkdownPath  = "docs/GAP_MATRIX.auto.md"
-	outJSONPath       = "docs/GAP_MATRIX.auto.json"
+	outJSONPath      = "docs/GAP_MATRIX.auto.json"
 )
 
 // gapRow represents one flattened GAP entry from CSV.
@@ -271,24 +271,26 @@ func writeAutoJSON(rows []gapRow, caps capabilitiesFile, drift []string) error {
 		Gap         string `json:"gap"`
 		Evidence    string `json:"evidence"`
 	}
-	counts := map[string]int{"implemented":0, "partial":0, "missing":0, "conceptual":0}
+	counts := map[string]int{"implemented": 0, "partial": 0, "missing": 0, "conceptual": 0}
 	outRows := make([]jsonRow, 0, len(rows))
 	for _, r := range rows {
 		counts[normalizeStatus(r.Status)]++
-		outRows = append(outRows, jsonRow{Section:r.Section, ID:r.ID, Requirement:r.Requirement, Status:r.Status, Priority:r.Priority, Gap:r.Gap, Evidence:r.Evidence})
+		outRows = append(outRows, jsonRow{Section: r.Section, ID: r.ID, Requirement: r.Requirement, Status: r.Status, Priority: r.Priority, Gap: r.Gap, Evidence: r.Evidence})
 	}
 	total := len(rows)
 	payload := map[string]any{
-		"generated_at": time.Now().UTC().Format(time.RFC3339),
-		"schema_version": 1,
-		"counts": counts,
-		"total": total,
-		"drift_items": drift,
+		"generated_at":                time.Now().UTC().Format(time.RFC3339),
+		"schema_version":              1,
+		"counts":                      counts,
+		"total":                       total,
+		"drift_items":                 drift,
 		"capabilities_schema_version": caps.SchemaVersion,
-		"entries": outRows,
+		"entries":                     outRows,
 	}
 	b, err := json.MarshalIndent(payload, "", "  ")
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	return os.WriteFile(outJSONPath, b, 0o644)
 }
 

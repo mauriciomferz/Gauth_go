@@ -40,7 +40,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("marshal index: %v", err)
 	}
-	if err := os.WriteFile(*out, b, 0o644); err != nil {
+	if err := os.WriteFile(*out, b, 0o600); err != nil {
 		log.Fatalf("write index: %v", err)
 	}
 	fmt.Printf("wrote clause index: %s (clauses=%d)\n", *out, len(all))

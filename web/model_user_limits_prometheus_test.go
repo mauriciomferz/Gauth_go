@@ -16,9 +16,13 @@ import (
 func TestModelUserLimitsPrometheusExposition(t *testing.T) {
 	// Prepare limits with per-user overrides to force exceeds.
 	f, err := os.CreateTemp(t.TempDir(), "model_user_prom_*.json")
-	if err != nil { t.Fatalf("temp file: %v", err) }
+	if err != nil {
+		t.Fatalf("temp file: %v", err)
+	}
 	limitsJSON := `{"model_limits":{"demo-model":{"max_input_tokens":200,"max_output_tokens":150,"max_requests_per_minute":10}},"user_limits":{"demo-model":{"alice":{"max_input_tokens":100,"max_output_tokens":80,"max_requests_per_minute":1}}}}`
-	if _, err := f.Write([]byte(limitsJSON)); err != nil { t.Fatalf("write: %v", err) }
+	if _, err := f.Write([]byte(limitsJSON)); err != nil {
+		t.Fatalf("write: %v", err)
+	}
 	f.Close()
 	// Set path env before server init so loader picks it up.
 	// Use short rate limit for alice to guarantee a rate exceed quickly.
@@ -29,16 +33,18 @@ func TestModelUserLimitsPrometheusExposition(t *testing.T) {
 	regMetrics := pm.NewPrometheusMetrics(pm.PrometheusAdapterOptions{})
 	srv.metrics = regMetrics
 	// Trigger user input exceed (expects 400)
-	doMV(t, srv, map[string]any{"model_id":"demo-model","user_id":"alice","input_tokens":120,"output_tokens":10})
+	doMV(t, srv, map[string]any{"model_id": "demo-model", "user_id": "alice", "input_tokens": 120, "output_tokens": 10})
 	// Trigger user output exceed (expects 400)
-	doMV(t, srv, map[string]any{"model_id":"demo-model","user_id":"alice","input_tokens":10,"output_tokens":120})
+	doMV(t, srv, map[string]any{"model_id": "demo-model", "user_id": "alice", "input_tokens": 10, "output_tokens": 120})
 	// Trigger user rate exceed (limit=1: first ok, second 429)
-	doMV(t, srv, map[string]any{"model_id":"demo-model","user_id":"alice","input_tokens":10,"output_tokens":10})
-	doMV(t, srv, map[string]any{"model_id":"demo-model","user_id":"alice","input_tokens":10,"output_tokens":10})
+	doMV(t, srv, map[string]any{"model_id": "demo-model", "user_id": "alice", "input_tokens": 10, "output_tokens": 10})
+	doMV(t, srv, map[string]any{"model_id": "demo-model", "user_id": "alice", "input_tokens": 10, "output_tokens": 10})
 	// Fetch metrics exposition
 	// Use new generic Prometheus exposition endpoint
 	w := performRequest(srv.router, "GET", "/api/v1/beta/metrics/prometheus")
-	if w.Code != 200 { t.Fatalf("metrics exposition status=%d body=%s", w.Code, w.Body.String()) }
+	if w.Code != 200 {
+		t.Fatalf("metrics exposition status=%d body=%s", w.Code, w.Body.String())
+	}
 	body := w.Body.String()
 	want := []string{
 		"gauth_rfc0111_model_user_input_limit_exceeded_total",
@@ -48,7 +54,9 @@ func TestModelUserLimitsPrometheusExposition(t *testing.T) {
 	for _, m := range want {
 		if !regexp.MustCompile(m + " ").MatchString(body) {
 			// Body includes many metrics; print truncated prefix for debug
-			if len(body) > 800 { body = body[:800] }
+			if len(body) > 800 {
+				body = body[:800]
+			}
 			t.Fatalf("expected metric %s in exposition body prefix:\n%s", m, body)
 		}
 	}

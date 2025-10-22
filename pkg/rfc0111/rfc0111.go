@@ -450,15 +450,26 @@ func WithKMS(kms cr.KMS) Option {
 }
 
 // kmsKeyProviderAdapter adapts a KMS to KeyProvider for verification.
-type kmsKeyProviderAdapter struct { kms cr.KMS }
+type kmsKeyProviderAdapter struct{ kms cr.KMS }
+
 func (a *kmsKeyProviderAdapter) ActiveSigner() (cr.Signer, error) { return a.kms.ActiveSigner() }
-func (a *kmsKeyProviderAdapter) PublicKey(id string) ([]byte, string, error) { return a.kms.PublicKey(id) }
+func (a *kmsKeyProviderAdapter) PublicKey(id string) ([]byte, string, error) {
+	return a.kms.PublicKey(id)
+}
 func (a *kmsKeyProviderAdapter) VerifyWith(msg, sig []byte, keyID string) error {
 	pk, algo, err := a.kms.PublicKey(keyID)
-	if err != nil { return err }
-	if algo != cr.AlgoEd25519 { return fmt.Errorf("unsupported algo %s", algo) }
-	if len(sig) != ed25519.SignatureSize { return errors.New("invalid signature length") }
-	if !ed25519.Verify(ed25519.PublicKey(pk), msg, sig) { return errors.New("invalid signature") }
+	if err != nil {
+		return err
+	}
+	if algo != cr.AlgoEd25519 {
+		return fmt.Errorf("unsupported algo %s", algo)
+	}
+	if len(sig) != ed25519.SignatureSize {
+		return errors.New("invalid signature length")
+	}
+	if !ed25519.Verify(ed25519.PublicKey(pk), msg, sig) {
+		return errors.New("invalid signature")
+	}
 	return nil
 }
 
@@ -846,54 +857,54 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 	if useV2 && env2.DetachedSignature != "" && env2.DetachedSignatureKid != "" && env2.CanonicalDigest != "" {
 		// Recompute canonical digest + bytes from stored POA (repository copy) for authenticity binding.
 		if dig, canon, derr := CanonicalPOADigest(poa); derr == nil {
-				if dig == env2.CanonicalDigest { // only attempt if digest aligns
-					// locate public key (keyProvider preferred then keyRing) matching detached kid
-					var pub []byte
-					if s.keyProvider != nil {
-						if pkBytes, algo, err := s.keyProvider.PublicKey(env2.DetachedSignatureKid); err == nil && algo == cr.AlgoEd25519 && len(pkBytes) == ed25519.PublicKeySize {
-							pub = pkBytes
-						}
+			if dig == env2.CanonicalDigest { // only attempt if digest aligns
+				// locate public key (keyProvider preferred then keyRing) matching detached kid
+				var pub []byte
+				if s.keyProvider != nil {
+					if pkBytes, algo, err := s.keyProvider.PublicKey(env2.DetachedSignatureKid); err == nil && algo == cr.AlgoEd25519 && len(pkBytes) == ed25519.PublicKeySize {
+						pub = pkBytes
 					}
-					if len(pub) == 0 && s.keyRing != nil {
-						if ak := s.keyRing.Active(); ak != nil && ak.ID == env2.DetachedSignatureKid {
-							pub = ak.Material
-						}
-						if len(pub) == 0 {
-							for _, pk := range s.keyRing.Previous() {
-								if pk != nil && pk.ID == env2.DetachedSignatureKid {
-									pub = pk.Material
-									break
-								}
-							}
-						}
-					}
-					if len(pub) == ed25519.PublicKeySize {
-						sigBytes, decErr := base64.StdEncoding.DecodeString(env2.DetachedSignature)
-						if decErr == nil && len(sigBytes) == ed25519.SignatureSize && ed25519.Verify(ed25519.PublicKey(pub), canon, sigBytes) {
-							res.DetachedSignatureValid = true
-							if s.metrics != nil {
-								s.metrics.IncSignatureVerifications()
-							}
-							incDetachedVerify("success")
-						} else if s.metrics != nil { // verification failure
-							s.metrics.IncSignatureVerificationFailures()
-							if decErr != nil {
-								incDetachedVerify("invalid_signature")
-							} else {
-								incDetachedVerify("invalid_signature")
-							}
-						}
-					} else if s.metrics != nil { // missing public key
-						s.metrics.IncSignaturePublicKeyMissing()
-						incDetachedVerify("pubkey_missing")
-					}
-				} else { // digest mismatch
-					if s.metrics != nil {
-						s.metrics.IncSignatureVerificationFailures()
-						s.metrics.IncEnvelopeDigestMismatch()
-					}
-					incDetachedVerify("digest_mismatch")
 				}
+				if len(pub) == 0 && s.keyRing != nil {
+					if ak := s.keyRing.Active(); ak != nil && ak.ID == env2.DetachedSignatureKid {
+						pub = ak.Material
+					}
+					if len(pub) == 0 {
+						for _, pk := range s.keyRing.Previous() {
+							if pk != nil && pk.ID == env2.DetachedSignatureKid {
+								pub = pk.Material
+								break
+							}
+						}
+					}
+				}
+				if len(pub) == ed25519.PublicKeySize {
+					sigBytes, decErr := base64.StdEncoding.DecodeString(env2.DetachedSignature)
+					if decErr == nil && len(sigBytes) == ed25519.SignatureSize && ed25519.Verify(ed25519.PublicKey(pub), canon, sigBytes) {
+						res.DetachedSignatureValid = true
+						if s.metrics != nil {
+							s.metrics.IncSignatureVerifications()
+						}
+						incDetachedVerify("success")
+					} else if s.metrics != nil { // verification failure
+						s.metrics.IncSignatureVerificationFailures()
+						if decErr != nil {
+							incDetachedVerify("invalid_signature")
+						} else {
+							incDetachedVerify("invalid_signature")
+						}
+					}
+				} else if s.metrics != nil { // missing public key
+					s.metrics.IncSignaturePublicKeyMissing()
+					incDetachedVerify("pubkey_missing")
+				}
+			} else { // digest mismatch
+				if s.metrics != nil {
+					s.metrics.IncSignatureVerificationFailures()
+					s.metrics.IncEnvelopeDigestMismatch()
+				}
+				incDetachedVerify("digest_mismatch")
+			}
 		} // end canonical digest recompute block
 	}
 	if poa.Threshold > 1 {
@@ -1433,20 +1444,20 @@ func (s *Service) ValidateDelegationCtx(ctx context.Context, poaID, grantee, act
 	// before revocation / status checks so integrity/authenticity failures are surfaced distinctly.
 	if poa.Signature != nil {
 		if dig, canon, derr := CanonicalPOADigest(poa); derr == nil {
-				if dig != poa.Signature.DigestHex {
-					if s.metrics != nil {
-						var class string
-						// Heuristic classification: same length implies domain conflict, otherwise potential tamper.
-						if len(poa.Signature.DigestHex) == len(dig) {
-							class = reasonDomainConflict
-						} else {
-							class = reasonTamperSuspected
-						}
-						s.metrics.IncEnvelopeDigestMismatch()
-						s.metrics.IncEnvelopeDigestMismatchReason(class)
+			if dig != poa.Signature.DigestHex {
+				if s.metrics != nil {
+					var class string
+					// Heuristic classification: same length implies domain conflict, otherwise potential tamper.
+					if len(poa.Signature.DigestHex) == len(dig) {
+						class = reasonDomainConflict
+					} else {
+						class = reasonTamperSuspected
 					}
-					return rfc.New(rfc.ErrIntegrityFailure, errPOADigestMismatch)
+					s.metrics.IncEnvelopeDigestMismatch()
+					s.metrics.IncEnvelopeDigestMismatchReason(class)
 				}
+				return rfc.New(rfc.ErrIntegrityFailure, errPOADigestMismatch)
+			}
 			// Attempt to locate public key by KeyID in keyRing.
 			if s.keyRing != nil && poa.Signature.KeyID != "" {
 				var pub []byte

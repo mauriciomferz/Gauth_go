@@ -40,6 +40,6 @@ func TestTokenIntegrityPublicRS256(t *testing.T) {
 	var vbody map[string]any
 	_ = json.Unmarshal(w2.Body.Bytes(), &vbody)
 	if vbody["status"] != statusValidJWT {
-			t.Fatalf("expected %s got %v", statusValidJWT, vbody["status"])
+		t.Fatalf("expected %s got %v", statusValidJWT, vbody["status"])
 	}
 }

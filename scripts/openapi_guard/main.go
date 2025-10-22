@@ -20,7 +20,11 @@ var errGuard = errors.New("openapi spec guard failure")
 func main() {
 	if err := run(); err != nil {
 		var exit int
-		if errors.Is(err, errGuard) { exit = 2 } else { exit = 3 }
+		if errors.Is(err, errGuard) {
+			exit = 2
+		} else {
+			exit = 3
+		}
 		fmt.Fprintf(os.Stderr, "openapi_guard: %v\n", err)
 		os.Exit(exit)
 	}
@@ -31,17 +35,28 @@ func run() error {
 	var content string
 	for _, p := range paths {
 		b, err := os.ReadFile(p)
-		if err == nil { content = string(b); break }
+		if err == nil {
+			content = string(b)
+			break
+		}
 	}
-	if content == "" { return fmt.Errorf("%w: spec not found", errGuard) }
+	if content == "" {
+		return fmt.Errorf("%w: spec not found", errGuard)
+	}
 	hasOpenAPI := false
 	hasPaths := false
 	s := bufio.NewScanner(strings.NewReader(content))
 	for s.Scan() {
 		line := strings.TrimSpace(s.Text())
-		if strings.HasPrefix(line, "openapi:") { hasOpenAPI = true }
-		if line == "paths:" || strings.HasPrefix(line, "paths:") { hasPaths = true }
-		if hasOpenAPI && hasPaths { break }
+		if strings.HasPrefix(line, "openapi:") {
+			hasOpenAPI = true
+		}
+		if line == "paths:" || strings.HasPrefix(line, "paths:") {
+			hasPaths = true
+		}
+		if hasOpenAPI && hasPaths {
+			break
+		}
 	}
 	if !hasOpenAPI || !hasPaths {
 		return fmt.Errorf("%w: missing openapi:%v paths:%v", errGuard, hasOpenAPI, hasPaths)

@@ -19,7 +19,9 @@ func TestAttestationStreamSurgeTrigger(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMIT_SURGE_MIN_EVENTS", "2")
 	// Prepare audit file (required for configured=true)
 	auditFile, err := os.CreateTemp(t.TempDir(), "audit-*.jsonl")
-	if err != nil { t.Fatalf("audit temp: %v", err) }
+	if err != nil {
+		t.Fatalf("audit temp: %v", err)
+	}
 	_, _ = auditFile.WriteString("{\"hash\":\"h0\"}\n")
 	_ = auditFile.Close()
 	os.Setenv("GAUTH_MODEL_LIMIT_AUDIT_PATH", auditFile.Name())
@@ -28,7 +30,9 @@ func TestAttestationStreamSurgeTrigger(t *testing.T) {
 	live := httptest.NewServer(ts.router)
 	defer live.Close()
 	resp, err := live.Client().Get(live.URL + "/api/v1/model/limits/attestation/stream")
-	if err != nil { t.Fatalf("stream open: %v", err) }
+	if err != nil {
+		t.Fatalf("stream open: %v", err)
+	}
 	defer resp.Body.Close()
 	scan := bufio.NewScanner(resp.Body)
 	deadline := time.Now().Add(2 * time.Second)
@@ -49,9 +53,14 @@ func TestAttestationStreamSurgeTrigger(t *testing.T) {
 		if strings.HasPrefix(l, "event: attestation") {
 			if scan.Scan() {
 				data := scan.Text()
-				if strings.Contains(data, "\"reason\":\"surge_trigger\"") { foundSurge = true; break }
+				if strings.Contains(data, "\"reason\":\"surge_trigger\"") {
+					foundSurge = true
+					break
+				}
 			}
 		}
 	}
-	if !foundSurge { t.Fatalf("did not observe surge_trigger attestation event") }
+	if !foundSurge {
+		t.Fatalf("did not observe surge_trigger attestation event")
+	}
 }

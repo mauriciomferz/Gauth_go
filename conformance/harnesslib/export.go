@@ -53,10 +53,10 @@ func (r Report) SymbolEvidenceCSV() string {
 
 // WriteGapCSV writes the gap items CSV to the given path.
 func WriteGapCSV(path string, r Report) error {
-	return os.WriteFile(path, []byte(r.GapItemsCSV()), 0o644)
+	return os.WriteFile(path, []byte(r.GapItemsCSV()), 0o600)
 }
 
 // WriteSymbolEvidenceCSV writes the symbol evidence CSV to the given path.
 func WriteSymbolEvidenceCSV(path string, r Report) error {
-	return os.WriteFile(path, []byte(r.SymbolEvidenceCSV()), 0o644)
+	return os.WriteFile(path, []byte(r.SymbolEvidenceCSV()), 0o600)
 }

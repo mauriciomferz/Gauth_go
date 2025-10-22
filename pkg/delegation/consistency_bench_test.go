@@ -11,9 +11,9 @@ func seedBenchChain(n int) *RevocationChain {
 	c := NewRevocationChain()
 	for i := 0; i < n; i++ {
 		id := fmt.Sprintf("B%06d", i)
-		c.Append(RevocationEvent{ID: id, DelegationID: id})
+		_, _ = c.Append(RevocationEvent{ID: id, DelegationID: id})
 	}
-	c.SignTreeHead()
+	_, _ = c.SignTreeHead()
 	return c
 }
 

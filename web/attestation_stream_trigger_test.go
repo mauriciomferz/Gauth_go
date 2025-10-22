@@ -16,7 +16,9 @@ func TestAttestationStreamAuditTrigger(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMIT_ATTEST_NOTARIZE", "0")
 	// Prepare temp audit path
 	auditFile, err := os.CreateTemp(t.TempDir(), "audit-*.jsonl")
-	if err != nil { t.Fatalf("audit temp: %v", err) }
+	if err != nil {
+		t.Fatalf("audit temp: %v", err)
+	}
 	// seed one entry so configured=true
 	_, _ = auditFile.WriteString("{\"hash\":\"h0\"}\n")
 	_ = auditFile.Close()
@@ -27,7 +29,9 @@ func TestAttestationStreamAuditTrigger(t *testing.T) {
 	defer live.Close()
 	// Open stream
 	resp, err := live.Client().Get(live.URL + "/api/v1/model/limits/attestation/stream")
-	if err != nil { t.Fatalf("stream open: %v", err) }
+	if err != nil {
+		t.Fatalf("stream open: %v", err)
+	}
 	defer resp.Body.Close()
 	scan := bufio.NewScanner(resp.Body)
 	deadline := time.Now().Add(3 * time.Second)
@@ -37,11 +41,16 @@ func TestAttestationStreamAuditTrigger(t *testing.T) {
 		if strings.HasPrefix(l, "event: attestation") {
 			if scan.Scan() {
 				data := scan.Text()
-				if strings.Contains(data, "\"reason\":\"open\"") { foundOpen = true; break }
+				if strings.Contains(data, "\"reason\":\"open\"") {
+					foundOpen = true
+					break
+				}
 			}
 		}
 	}
-	if !foundOpen { t.Fatalf("did not see initial attestation with reason open") }
+	if !foundOpen {
+		t.Fatalf("did not see initial attestation with reason open")
+	}
 	// Append an audit exceed event by calling writeModelLimitAudit through validation path causing exceed (simulate input limit exceed)
 	// Simplify by directly invoking writeModelLimitAudit (acceptable for unit test) for a new model id.
 	ts.writeModelLimitAudit("m1", "input", 999, 10, 0, 0, "")
@@ -53,9 +62,14 @@ func TestAttestationStreamAuditTrigger(t *testing.T) {
 		if strings.HasPrefix(l, "event: attestation") {
 			if scan.Scan() {
 				data := scan.Text()
-				if strings.Contains(data, "\"reason\":\"audit_append\"") { foundAudit = true; break }
+				if strings.Contains(data, "\"reason\":\"audit_append\"") {
+					foundAudit = true
+					break
+				}
 			}
 		}
 	}
-	if !foundAudit { t.Fatalf("did not observe audit_append attestation event") }
+	if !foundAudit {
+		t.Fatalf("did not observe audit_append attestation event")
+	}
 }

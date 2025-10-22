@@ -49,6 +49,35 @@ func main() {
 	}
 }
 
+// applyTestMarkers applies test markers to RFC sections
+func applyTestMarkers(tpl *Template, markers map[string][]TestRef) {
+	for rfcID, r := range tpl.RFC {
+		for i, sec := range r.Sections {
+			if refs, ok := markers[sec.ID]; ok {
+				sec.Tests = append(sec.Tests, refs...)
+			}
+			r.Sections[i] = sec
+		}
+		tpl.RFC[rfcID] = r
+	}
+}
+
+// calculateCoverage calculates test coverage statistics
+func calculateCoverage(tpl Template) (covered, total int, pct float64) {
+	for _, r := range tpl.RFC {
+		for _, s := range r.Sections {
+			if len(s.Tests) > 0 {
+				covered++
+			}
+			total++
+		}
+	}
+	if total > 0 {
+		pct = (float64(covered) / float64(total)) * 100
+	}
+	return covered, total, pct
+}
+
 func run() error {
 	cwd, _ := os.Getwd()
 	// Relative paths based on repo root assumption
@@ -87,29 +116,8 @@ func run() error {
 		return fmt.Errorf("walk: %w", err)
 	}
 
-	for rfcID, r := range tpl.RFC {
-		for i, sec := range r.Sections {
-			if refs, ok := markers[sec.ID]; ok {
-				sec.Tests = append(sec.Tests, refs...)
-			}
-			r.Sections[i] = sec
-		}
-		tpl.RFC[rfcID] = r
-	}
-
-	covered, total := 0, 0
-	for _, r := range tpl.RFC {
-		for _, s := range r.Sections {
-			if len(s.Tests) > 0 {
-				covered++
-			}
-			total++
-		}
-	}
-	pct := 0.0
-	if total > 0 {
-		pct = (float64(covered) / float64(total)) * 100
-	}
+	applyTestMarkers(&tpl, markers)
+	covered, total, pct := calculateCoverage(tpl)
 
 	tpl.Generated = time.Now().UTC().Format(time.RFC3339)
 
@@ -117,7 +125,7 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("marshal output: %w", err)
 	}
-	if err := os.WriteFile(outPath, out, 0o644); err != nil {
+	if err := os.WriteFile(outPath, out, 0o600); err != nil {
 		return fmt.Errorf("write output: %w", err)
 	}
 

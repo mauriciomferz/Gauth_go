@@ -20,7 +20,7 @@ func buildChainWithN(n int) *RevocationChain {
 	rc := NewRevocationChain()
 	for i := 0; i < n; i++ {
 		ev := RevocationEvent{ID: randStr(12), DelegationID: randStr(8), Reason: string(RevocationReasonUserRequest)}
-		rc.Append(ev)
+		_, _ = rc.Append(ev) // ignore error in benchmark
 		if (i+1)%16 == 0 { // manually record a SignedTreeHead snapshot
 			rc.treeHeads = append(rc.treeHeads, newSTH(rc))
 		}

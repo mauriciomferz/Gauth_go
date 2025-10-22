@@ -23,6 +23,31 @@ import (
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/verification"
 )
 
+// handleReceiptVerification handles receipt chain verification logic
+func handleReceiptVerification(base, receipts string, receiptsURL, jsonOut, quiet bool) {
+	status, total, head, err := verifyReceipts(base, receipts, receiptsURL)
+	exit := 3 // default error
+	switch status {
+	case "ok":
+		exit = 0
+	case "mismatch":
+		exit = 1
+	case "unconfigured", "empty":
+		exit = 2
+	}
+	if jsonOut {
+		enc := map[string]interface{}{"mode": "receipts", "status": status, "total": total, "head": head}
+		b, _ := json.Marshal(enc)
+		fmt.Println(string(b))
+	} else if !(status == "ok" && quiet) {
+		fmt.Printf("[receipts] status=%s total=%d head=%s\n", status, total, head)
+	}
+	if err != nil && status == "error" {
+		fmt.Fprintf(os.Stderr, "[receipts] error: %v\n", err)
+	}
+	os.Exit(exit)
+}
+
 func main() {
 	base := flag.String("base", "http://localhost:8080", "Base URL of GAuth server")
 	hash := flag.String("hash", "", "Revocation event hash to verify (optional)")
@@ -34,27 +59,7 @@ func main() {
 
 	// If receipt-file OR receipt-remote flags used, perform receipt chain integrity verification.
 	if *receipts != "" || *receiptsURL {
-		status, total, head, err := verifyReceipts(*base, *receipts, *receiptsURL)
-		exit := 3 // default error
-		switch status {
-		case "ok":
-			exit = 0
-		case "mismatch":
-			exit = 1
-		case "unconfigured", "empty":
-			exit = 2
-		}
-		if *jsonOut {
-			enc := map[string]interface{}{"mode": "receipts", "status": status, "total": total, "head": head}
-			b, _ := json.Marshal(enc)
-			fmt.Println(string(b))
-		} else if !(status == "ok" && *quiet) {
-			fmt.Printf("[receipts] status=%s total=%d head=%s\n", status, total, head)
-		}
-		if err != nil && status == "error" {
-			fmt.Fprintf(os.Stderr, "[receipts] error: %v\n", err)
-		}
-		os.Exit(exit)
+		handleReceiptVerification(*base, *receipts, *receiptsURL, *jsonOut, *quiet)
 	}
 
 	// Fallback to legacy revocation event verification flow.

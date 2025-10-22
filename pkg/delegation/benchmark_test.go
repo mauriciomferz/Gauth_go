@@ -41,11 +41,11 @@ func BenchmarkSignTreeHeadSingleSig(b *testing.B) {
 	cryptoInt.GlobalEdDSARegistry = km
 	chain := NewRevocationChain()
 	for i := 0; i < 1500; i++ {
-		chain.Append(RevocationEvent{ID: randomHex(8), DelegationID: randomHex(6)})
+		_, _ = chain.Append(RevocationEvent{ID: randomHex(8), DelegationID: randomHex(6)})
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		chain.SignTreeHead()
+		_, _ = chain.SignTreeHead()
 	}
 }
 
@@ -56,21 +56,21 @@ func BenchmarkGenerateConsistencyProof(b *testing.B) {
 	chain := NewRevocationChain()
 	// Build initial events and sign first tree head
 	for i := 0; i < 1000; i++ {
-		chain.Append(RevocationEvent{ID: randomHex(8), DelegationID: randomHex(6)})
+		_, _ = chain.Append(RevocationEvent{ID: randomHex(8), DelegationID: randomHex(6)})
 	}
-	chain.SignTreeHead()
+	_, _ = chain.SignTreeHead()
 	// Append additional events and sign latest
 	for i := 0; i < 500; i++ {
-		chain.Append(RevocationEvent{ID: randomHex(8), DelegationID: randomHex(6)})
+		_, _ = chain.Append(RevocationEvent{ID: randomHex(8), DelegationID: randomHex(6)})
 	}
-	chain.SignTreeHead()
+	_, _ = chain.SignTreeHead()
 	if len(chain.TreeHeads()) < 2 {
 		b.Fatalf("expected at least two tree heads")
 	}
 	startIndex := 0
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		chain.GenerateConsistencyProof(startIndex)
+		_, _ = chain.GenerateConsistencyProof(startIndex)
 	}
 }
 

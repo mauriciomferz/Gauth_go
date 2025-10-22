@@ -157,12 +157,12 @@ type Condition struct {
 // MemoryAuthorizer implements Authorizer using in-memory policies
 type MemoryAuthorizer struct {
 	policies []Policy
-	version  int64 // monotonically increasing policy set version
+	version  int64      // monotonically increasing policy set version
 	versions []struct { // snapshot history for rollback (shallow copy of slice)
 		version  int64
 		policies []Policy
 	}
-	roles    map[string][]string // subject -> roles
+	roles map[string][]string // subject -> roles
 	// caching fields
 	cacheEnabled bool
 	cacheTTL     time.Duration
@@ -202,9 +202,12 @@ type MemoryAuthorizer struct {
 // NewMemoryAuthorizer creates a new in-memory authorizer
 func NewMemoryAuthorizer() *MemoryAuthorizer {
 	return &MemoryAuthorizer{
-		policies:            make([]Policy, 0),
-		version:             1,
-		versions:            make([]struct{ version int64; policies []Policy }, 0, 8),
+		policies: make([]Policy, 0),
+		version:  1,
+		versions: make([]struct {
+			version  int64
+			policies []Policy
+		}, 0, 8),
 		roles:               make(map[string][]string),
 		cache:               make(map[string]cachedDecision),
 		combining:           DenyOverrides, // sensible secure default
@@ -398,7 +401,10 @@ func (ma *MemoryAuthorizer) AddPolicy(policy Policy) {
 func (ma *MemoryAuthorizer) Snapshot() int64 {
 	snap := make([]Policy, len(ma.policies))
 	copy(snap, ma.policies)
-	ma.versions = append(ma.versions, struct{ version int64; policies []Policy }{version: ma.version, policies: snap})
+	ma.versions = append(ma.versions, struct {
+		version  int64
+		policies []Policy
+	}{version: ma.version, policies: snap})
 	ma.version++
 	return ma.version - 1
 }
@@ -406,13 +412,15 @@ func (ma *MemoryAuthorizer) Snapshot() int64 {
 // ListVersions returns known snapshot version numbers in ascending order (excluding current working set if not snapshotted yet).
 func (ma *MemoryAuthorizer) ListVersions() []int64 {
 	out := make([]int64, 0, len(ma.versions))
-	for _, v := range ma.versions { out = append(out, v.version) }
+	for _, v := range ma.versions {
+		out = append(out, v.version)
+	}
 	return out
 }
 
 // Rollback replaces current policies with the snapshot of the specified version.
 func (ma *MemoryAuthorizer) Rollback(version int64) error {
-	for i := len(ma.versions)-1; i >=0; i-- { // reverse search (likely latest requested)
+	for i := len(ma.versions) - 1; i >= 0; i-- { // reverse search (likely latest requested)
 		if ma.versions[i].version == version {
 			snap := make([]Policy, len(ma.versions[i].policies))
 			copy(snap, ma.versions[i].policies)

@@ -113,7 +113,7 @@ func (b *boltStore) Append(ctx context.Context, e *Entry) error {
 		k, v := c.Last()
 		if k != nil && v != nil {
 			var prev Entry
-			if err := json.Unmarshal(v, &prev); err == nil {
+			if unmarshalErr := json.Unmarshal(v, &prev); unmarshalErr == nil {
 				prevHash = prev.Hash
 			}
 		}

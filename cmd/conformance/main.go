@@ -40,8 +40,10 @@ func main() {
 	flag.StringVar(&jsonOut, "json-out", "", "path to write JSON report (optional)")
 	flag.StringVar(&trendOut, "trend-markdown-out", "", "path to write trend dashboard markdown (requires --history-file)")
 	flag.IntVar(&trendWindow, "trend-window", 10, "window size for moving coverage average (default 10, <=0 means all runs)")
-	flag.StringVar(&rfcFilesCSV, "rfc-files", "", "comma separated list of RFC markdown files to scan (assign prefix from filename like rfc0115.md -> 0115)")
-	flag.BoolVar(&autoScan, "auto-scan-rfcs", true, "automatically scan known RFC markdown under docs/rfc if no --rfc-files provided")
+	flag.StringVar(&rfcFilesCSV, "rfc-files", "",
+		"comma separated list of RFC markdown files to scan (assign prefix from filename like rfc0115.md -> 0115)")
+	flag.BoolVar(&autoScan, "auto-scan-rfcs", true,
+		"automatically scan known RFC markdown under docs/rfc if no --rfc-files provided")
 	flag.StringVar(&symbolLocOut, "symbol-locations-out", "", "path to write condensed symbol locations markdown (optional)")
 	flag.Parse()
 

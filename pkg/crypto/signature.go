@@ -42,8 +42,8 @@ type KeyProvider interface {
 type KMS interface {
 	ActiveSigner() (Signer, error)
 	PublicKey(keyID string) ([]byte, string, error)
-	Rotate() (string, error)              // optional; implementations may return an error if unsupported
-	ListKeys() ([]KeyMetadata, error)     // metadata enumeration
+	Rotate() (string, error)          // optional; implementations may return an error if unsupported
+	ListKeys() ([]KeyMetadata, error) // metadata enumeration
 }
 
 // KeyMetadata captures descriptive information about a managed key.

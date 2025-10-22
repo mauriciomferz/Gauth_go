@@ -177,8 +177,10 @@ func readCapabilities(p string) (capabilitiesFile, error) {
 
 // parseCuratedMarkdown attempts to extract requirement rows from the human‑maintained
 // GAP_MATRIX.md. It supports two layouts:
-//  (1) Original: | Requirement | Current Implementation | Gap | Status | Priority | ... |
-//  (2) ID-first: | ID | Requirement | Current Implementation | Gap | Status | Priority | ... |
+//
+//	(1) Original: | Requirement | Current Implementation | Gap | Status | Priority | ... |
+//	(2) ID-first: | ID | Requirement | Current Implementation | Gap | Status | Priority | ... |
+//
 // It returns two maps: by ID (if present) and by Requirement text.
 func parseCuratedMarkdown(p string) (map[string]parsedRequirement, map[string]parsedRequirement, error) {
 	f, err := os.Open(p)
@@ -390,16 +392,16 @@ func esc(s string) string { return strings.ReplaceAll(s, "|", "\\|") }
 func writeAutoJSON(rows []gapRow, caps capabilitiesFile, drift []string, counts statusCounts) error {
 	// Enrich evidence for each row.
 	type evidenceDetail struct {
-		Raw            string   `json:"raw"`
-		Files          []string `json:"files"`
-		Existing       []string `json:"existing"`
-		Missing        []string `json:"missing"`
-		TestFiles      []string `json:"test_files"`
-		CodeFiles      []string `json:"code_files"`
-		ExistingCount  int      `json:"existing_count"`
-		MissingCount   int      `json:"missing_count"`
-		TestFileCount  int      `json:"test_file_count"`
-		CodeFileCount  int      `json:"code_file_count"`
+		Raw           string   `json:"raw"`
+		Files         []string `json:"files"`
+		Existing      []string `json:"existing"`
+		Missing       []string `json:"missing"`
+		TestFiles     []string `json:"test_files"`
+		CodeFiles     []string `json:"code_files"`
+		ExistingCount int      `json:"existing_count"`
+		MissingCount  int      `json:"missing_count"`
+		TestFileCount int      `json:"test_file_count"`
+		CodeFileCount int      `json:"code_file_count"`
 	}
 	type enrichedRow struct {
 		gapRow
@@ -459,16 +461,17 @@ func writeAutoJSON(rows []gapRow, caps capabilitiesFile, drift []string, counts 
 // writeBadgeJSON emits a compact JSON structure suitable for consumption by
 // shields.io dynamic endpoint badges or other dashboards.
 // Shape (example):
-// {
-//   "schema": 1,
-//   "implemented": 12,
-//   "partial": 8,
-//   "missing": 4,
-//   "conceptual": 1,
-//   "total": 25,
-//   "implemented_pct": 48.0,
-//   "coverage_score": "48% Implemented / 80% w+Partial"
-// }
+//
+//	{
+//	  "schema": 1,
+//	  "implemented": 12,
+//	  "partial": 8,
+//	  "missing": 4,
+//	  "conceptual": 1,
+//	  "total": 25,
+//	  "implemented_pct": 48.0,
+//	  "coverage_score": "48% Implemented / 80% w+Partial"
+//	}
 func writeBadgeJSON(counts statusCounts) error {
 	type badge struct {
 		Schema         int     `json:"schema"`

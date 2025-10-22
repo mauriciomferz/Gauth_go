@@ -93,7 +93,7 @@ func BuildSymbolIndex(root string) (map[string][]string, []string) {
 	var goFiles []string
 	var parseErrors []string
 	includeTests := os.Getenv("CONFORMANCE_INCLUDE_TESTS") == "1"
-	filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+	if err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return nil
 		}
@@ -110,7 +110,9 @@ func BuildSymbolIndex(root string) (map[string][]string, []string) {
 			goFiles = append(goFiles, path)
 		}
 		return nil
-	})
+	}); err != nil {
+		parseErrors = append(parseErrors, fmt.Sprintf("WalkDir error: %v", err))
+	}
 	fset := token.NewFileSet()
 	symbolLoc := map[string][]string{}
 	for _, gf := range goFiles {
