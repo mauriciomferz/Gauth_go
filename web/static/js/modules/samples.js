@@ -77,7 +77,7 @@ function runSample(id) {
 	if (!samplesOutput) return Promise.reject(new Error('missing samples-output'));
 	stopManualJobStream();
 	if (currentSampleStreamJob) currentSampleStreamJob = null;
-	samplesOutput.innerHTML = `<span class='text-gray-400'>[Queued ${id}]</span><br><span class='text-yellow-400'>Submitting job...</span><br><span class='text-blue-400'>gauth-samples></span> <span class='blinking-cursor'>_</span>`;
+	samplesOutput.innerHTML = `<span class='text-gray-400'>[Queued ${escapeHtml(id)}]</span><br><span class='text-yellow-400'>Submitting job...</span><br><span class='text-blue-400'>gauth-samples></span> <span class='blinking-cursor'>_</span>`;
 	return fetch("/api/v1/beta/examples/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) })
 		.then(res => res.json())
 		.then(data => {
