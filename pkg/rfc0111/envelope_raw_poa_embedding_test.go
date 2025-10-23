@@ -54,7 +54,7 @@ func TestRawPOAEmbeddingEnabled(t *testing.T) {
 	if holder.RawPOA == "" {
 		t.Fatalf("expected RawPOA populated")
 	}
-	if holder.PoAVersion != "poa/v1" {
+	if holder.PoAVersion != poaVersionV1 {
 		t.Fatalf("expected PoAVersion poa/v1 got %s", holder.PoAVersion)
 	}
 	if holder.CanonicalDigest == "" {

@@ -107,7 +107,7 @@ func TestModelLimitsAttestationSignature(t *testing.T) {
 		t.Fatalf("signature verify failed")
 	}
 	// Tamper check
-	unsigned.Snapshot.Hash += "tamper"
+	unsigned.Snapshot.Hash += testTamper
 	tamperedRaw, _ := json.Marshal(unsigned)
 	if ed25519.Verify(pub, tamperedRaw, sigBytes) {
 		t.Fatalf("tamper should fail verification")

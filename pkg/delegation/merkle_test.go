@@ -74,7 +74,7 @@ func TestMerkleProofTamper(t *testing.T) {
 	if len(proof) == 0 {
 		t.Fatalf("expected at least one proof step")
 	}
-	proof[0].Sibling = "deadbeef" // invalid digest (nolint:goconst -- test sentinel value)
+	proof[0].Sibling = deadbeefValue // invalid digest
 	if VerifyProof(LeafDigestForEventHash("a"), proof, root) {
 		t.Fatalf("expected tampered proof to fail")
 	}

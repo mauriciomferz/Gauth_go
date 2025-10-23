@@ -42,7 +42,7 @@ func TestDigestMismatchReasonHeuristics(t *testing.T) {
 		sig := ed25519.Sign(priv, canon)
 		poa.Signature = &POASignature{Algorithm: algEd25519, KeyID: "test", DigestHex: dig, SigBase64: base64.StdEncoding.EncodeToString(sig), Canonical: canon}
 	}
-	poa.Signature.DigestHex = "deadbeefcafebabe" // change length (likely different from canonical length)
+	poa.Signature.DigestHex = testDeadbeefCafebabe // change length (likely different from canonical length)
 	_, _ = svc.VerifyToken(context.Background(), resp.AuthToken)
 	reasons := mem.EnvelopeDigestMismatchReasonsSnapshot()
 	if reasons["tamper_suspected"] == 0 {

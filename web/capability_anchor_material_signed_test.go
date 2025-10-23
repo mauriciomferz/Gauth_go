@@ -76,7 +76,7 @@ func TestCapabilityAnchorMaterialSigned(t *testing.T) {
 	if err := json.Unmarshal(wrapper.Artifact, &artifact); err != nil {
 		t.Fatalf("unmarshal artifact: %v", err)
 	}
-	if artifact.Type != "capability_registry_anchor" {
+	if artifact.Type != testCapRegistryAnchor {
 		t.Fatalf("unexpected artifact type %s", artifact.Type)
 	}
 	if artifact.RegistryHash == "" {

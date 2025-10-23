@@ -45,12 +45,12 @@ func TestExternalAnchorMetricsConsistency(t *testing.T) {
 	for _, m := range attemptsProv.Metric {
 		prov := ""
 		for _, lp := range m.Label {
-			if lp.GetName() == "provider" {
+			if lp.GetName() == labelProvider {
 				prov = lp.GetValue()
 				break
 			}
 		}
-		if prov == "memory" {
+		if prov == memoryProvider {
 			labeledAttempts = m.Counter.GetValue()
 		}
 	}
@@ -74,12 +74,12 @@ func TestExternalAnchorMetricsConsistency(t *testing.T) {
 	for _, m := range latHistProv.Metric {
 		prov := ""
 		for _, lp := range m.Label {
-			if lp.GetName() == "provider" {
+			if lp.GetName() == labelProvider {
 				prov = lp.GetValue()
 				break
 			}
 		}
-		if prov == "memory" {
+		if prov == memoryProvider {
 			labeledSamples = m.Histogram.GetSampleCount()
 		}
 	}

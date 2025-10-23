@@ -18,7 +18,7 @@ func TestCapabilityNegotiationStrictLifecycle(t *testing.T) {
 	capability.Reset([]capability.Capability{})
 	srv := NewBetaServer(":0")
 	// Manually register a capability with deprecated_after in the past.
-	past := "2025-01-01T00:00:00Z"
+	past := testPastTime
 	capability.Register(capability.Capability{ID: "cap.deprecated.demo", Version: "1.0", Stable: false, DeprecatedAfter: past})
 	// Recompute registry hash to reflect change (simplified: invoke load logic manually by mimicking hash recompute used for static seed).
 	caps := capability.DefaultRegistry().List()
@@ -66,7 +66,7 @@ func TestCapabilityNegotiationNonStrictLifecycle(t *testing.T) {
 	os.Unsetenv("GAUTH_CAP_LIFECYCLE_STRICT")
 	capability.Reset([]capability.Capability{})
 	srv := NewBetaServer(":0")
-	past := "2025-01-01T00:00:00Z"
+	past := testPastTime
 	capability.Register(capability.Capability{ID: "cap.deprecated.demo2", Version: "1.0", Stable: false, DeprecatedAfter: past})
 	// Recompute registry hash
 	caps := capability.DefaultRegistry().List()

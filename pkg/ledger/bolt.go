@@ -163,12 +163,12 @@ func (b *boltStore) Append(ctx context.Context, e *Entry) error {
 						Signature  string `json:"signature,omitempty"`
 						Writes     uint64 `json:"writes"`
 					}{
-					Hash:       tip,
-					AnchoredAt: time.Now().UTC().Format(time.RFC3339),
-					KeyID:      b.keyID,
-					Signature:  sigB64,
-					Writes:     atomic.AddUint64(&b.anchorWrites, 1),
-				}
+						Hash:       tip,
+						AnchoredAt: time.Now().UTC().Format(time.RFC3339),
+						KeyID:      b.keyID,
+						Signature:  sigB64,
+						Writes:     atomic.AddUint64(&b.anchorWrites, 1),
+					}
 					if data, mErr := json.Marshal(anchor); mErr != nil {
 						fmt.Fprintf(os.Stderr, "[bolt-ledger] anchor marshal error: %v\n", mErr)
 					} else if wErr := os.WriteFile(b.anchorFilePath, data, 0o600); wErr != nil {

@@ -175,9 +175,39 @@ const (
 	statusActive          = "active"
 	statusTerminated      = "terminated"
 	statusValidJWT        = "valid_jwt"
+	statusDeprecated      = "deprecated"
+	statusSunset          = "sunset"
 	memoryProvider        = "memory"
 	tsaStubProvider       = "tsa-stub"
 	emptyValue            = "empty"
+	// Source/provider literals
+	capSourceStatic       = "static"
+	capSourceFile         = "file"
+	capSourceExternal     = "external_stub"
+	providerTSAStub       = "tsa_stub"
+	// Port literals
+	defaultPort           = ":8080"
+	// Metric kind literals
+	metricKindOutput      = "output"
+	// Content type literals
+	contentTypeCSV        = "application/csv"
+	// Environment mode literals
+	envModeDevelopment    = "development"
+	// Change reason literals
+	changeReasonStatus    = "status_change"
+	changeReasonNoop      = "noop"
+	// Algorithm literals
+	algHMACSHA256         = algHMACSHA256
+	// Label literals
+	labelProvider         = "provider"
+	// Action literals
+	actionEvaluate        = "evaluate"
+	// Test sentinels
+	testPastTime          = "2025-01-01T00:00:00Z"
+	testDemoHashValue     = "demo-hash-value"
+	testDeadbeefCafebabe  = "deadbeefcafebabe"
+	testTamper            = "tamper"
+	testCapRegistryAnchor = "capability_registry_anchor"
 )
 
 // anomalyPersist defines persistence format for EWMA semantic anomaly stats.
@@ -1029,7 +1059,7 @@ func (s *BetaServer) writeModelLimitAudit(modelID, kind string, provided, limit 
 	// Attempt anchoring using snapshot values (non-blocking if disabled)
 	s.anchorModelLimitAuditIfNeeded(auditLastHash, auditEntries)
 	// Record exceed event for surge detection (primary kinds only)
-	if kind == "input" || kind == "output" || kind == "rate" {
+	if kind == "input" || kind == metricKindOutput || kind == "rate" {
 		go s.recordModelLimitExceed(modelID)
 	}
 }
@@ -2235,7 +2265,7 @@ func getExtProviderLabel(s *BetaServer) string {
 	}
 	// Normalization map (extendable): env value -> metrics label
 	switch raw {
-	case "tsa_stub":
+	case providerTSAStub:
 		return tsaStubProvider
 	case memoryProvider:
 		return memoryProvider
@@ -2296,7 +2326,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 	r := gin.New()
 	// Normalize port: allow ":8080" or "8080"
 	if port == "" {
-		port = ":8080"
+		port = defaultPort
 	} else if !strings.HasPrefix(port, ":") {
 		port = ":" + port
 	}
@@ -2416,7 +2446,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 		capability.Register(capability.Capability{ID: "cap.issue", Version: "1.0", Stable: true})
 		capability.Register(capability.Capability{ID: "cap.delegation.create", Version: "1.0", Stable: true})
 		capability.Register(capability.Capability{ID: "cap.delegation.revoke", Version: "1.0", Stable: true})
-		s.capSource = "static"
+		s.capSource = capSourceStatic
 		// Compute canonical hash for static seed (mirrors file-backed canonicalization logic)
 		caps := capability.DefaultRegistry().List()
 		sorted := make([]capability.Capability, len(caps))
@@ -2440,9 +2470,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 			capability.Register(capability.Capability{ID: "cap.issue", Version: "1.0", Stable: true})
 			capability.Register(capability.Capability{ID: "cap.delegation.create", Version: "1.0", Stable: true})
 			capability.Register(capability.Capability{ID: "cap.delegation.revoke", Version: "1.0", Stable: true})
-			s.capSource = "static"
+			s.capSource = capSourceStatic
 		} else {
-			s.capSource = "file"
+			s.capSource = capSourceFile
 			fmt.Fprintf(os.Stderr, "[capabilities] loaded from file path=%s capabilities=%d\n", capPath, len(capability.DefaultRegistry().List()))
 		}
 	}
@@ -3257,7 +3287,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 		case memoryProvider:
 			s.notarizer = notary.NewMemory()
 			fmt.Fprintln(os.Stderr, "[notary] memory notarizer initialized")
-		case "external_stub":
+		case capSourceExternal:
 			s.notarizer = notary.NewExternalStub()
 			fmt.Fprintln(os.Stderr, "[notary] external stub notarizer initialized (simulated latency)")
 		default:
@@ -3278,7 +3308,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 				fmt.Fprintf(os.Stderr, "[notary] receipt store ready path=%s\n", rp)
 			}
 			// Initialize integrity status
-			s.receiptIntegrityStatus = "unconfigured"
+			s.receiptIntegrityStatus = integrityUnconfigured
 		}
 		// Optional rotation ledger initialization (independent chain of descriptors)
 		if lp := os.Getenv("GAUTH_ROTATION_LEDGER_PATH"); lp != "" {
@@ -4130,7 +4160,7 @@ func (s *BetaServer) verifyReceiptChain() string {
 		return s.receiptIntegrityStatus
 	}
 	prev := ""
-	s.receiptIntegrityStatus = "ok"
+	s.receiptIntegrityStatus = integrityOK
 	for _, e := range entries {
 		// reconstruct base used for hashing
 		tmp := struct {
@@ -4144,12 +4174,12 @@ func (s *BetaServer) verifyReceiptChain() string {
 		}{Hash: e.Hash, Timestamp: e.Timestamp, Provider: e.Provider, Version: e.Version, Success: e.Success, LatencySeconds: e.LatencySeconds, PrevHash: e.PrevHash}
 		enc, err := json.Marshal(tmp)
 		if err != nil {
-			s.receiptIntegrityStatus = "mismatch"
+			s.receiptIntegrityStatus = integrityMismatch
 			break
 		}
 		expected := fmt.Sprintf("%x", sha256.Sum256(append([]byte(e.PrevHash), enc...)))
 		if expected != e.ChainHash || e.PrevHash != prev {
-			s.receiptIntegrityStatus = "mismatch"
+			s.receiptIntegrityStatus = integrityMismatch
 			break
 		}
 		prev = expected
@@ -5278,7 +5308,7 @@ func (s *BetaServer) routes() {
 			h.Write(canonical)
 			sig := h.Sum(nil)
 			cfg["signature"] = base64.RawURLEncoding.EncodeToString(sig)
-			cfg["signature_alg"] = "HMAC-SHA256"
+			cfg["signature_alg"] = algHMACSHA256
 		}
 		c.Header("Cache-Control", "no-store")
 		c.Header("ETag", etag)
@@ -5426,7 +5456,7 @@ func (s *BetaServer) routes() {
 			}
 		}
 		// EdDSA publication (OKP JWK). We derive key list from in-memory manager via global accessor.
-		if mode == "eddsa" {
+		if mode == sigModeEdDSA {
 			if km := crypto.GlobalEdDSARegistry; km != nil {
 				for _, k := range km.ListCurrent() {
 					keys = append(keys, gin.H{"kty": "OKP", "crv": "Ed25519", "alg": "EdDSA", "kid": k.ID, "use": "sig", "x": base64.RawURLEncoding.EncodeToString(k.Public), "expires_at": k.ExpiresAt.Format(time.RFC3339)})
@@ -5461,7 +5491,7 @@ func (s *BetaServer) routes() {
 			mac := hmac.New(sha256.New, []byte(key))
 			mac.Write(raw)
 			c.Header("X-JWKS-Signature", base64.RawURLEncoding.EncodeToString(mac.Sum(nil)))
-			c.Header("X-JWKS-Signature-Alg", "HMAC-SHA256")
+			c.Header("X-JWKS-Signature-Alg", algHMACSHA256)
 		}
 		c.JSON(200, payload)
 	})
@@ -5702,7 +5732,7 @@ func (s *BetaServer) routes() {
 	// POST /api/v1/token/revocation/seed?count=<n>&sign=1
 	// Requires GAUTH_MODE=development; appends synthetic revocation events for demo/testing
 	s.router.POST("/api/v1/token/revocation/seed", func(c *gin.Context) {
-		if os.Getenv("GAUTH_MODE") != "development" {
+		if os.Getenv("GAUTH_MODE") != envModeDevelopment {
 			c.JSON(403, gin.H{"success": false, "message": "forbidden"})
 			return
 		}
@@ -5744,7 +5774,7 @@ func (s *BetaServer) routes() {
 
 	// GET variant for convenience (same semantics as POST)
 	s.router.GET("/api/v1/token/revocation/seed", func(c *gin.Context) {
-		if os.Getenv("GAUTH_MODE") != "development" {
+		if os.Getenv("GAUTH_MODE") != envModeDevelopment {
 			c.JSON(403, gin.H{"success": false, "message": "forbidden"})
 			return
 		}
@@ -5787,7 +5817,7 @@ func (s *BetaServer) routes() {
 	// Development-only diagnostics endpoint to introspect revocation environment & counts
 	// GET /api/v1/token/revocation/debug (GAUTH_MODE=development only)
 	s.router.GET("/api/v1/token/revocation/debug", func(c *gin.Context) {
-		if os.Getenv("GAUTH_MODE") != "development" {
+		if os.Getenv("GAUTH_MODE") != envModeDevelopment {
 			c.JSON(403, gin.H{"success": false, "message": "forbidden"})
 			return
 		}
@@ -5811,7 +5841,7 @@ func (s *BetaServer) routes() {
 	// GET  /api/v1/crypto/rotate same semantics for convenience
 	// Returns: keys (kid, expires_at), rotations_performed, threshold, weights_map, latest_tree_head (if sign=1)
 	s.router.Any("/api/v1/crypto/rotate", func(c *gin.Context) {
-		if os.Getenv("GAUTH_MODE") != "development" {
+		if os.Getenv("GAUTH_MODE") != envModeDevelopment {
 			c.JSON(403, gin.H{"success": false, "message": "forbidden"})
 			return
 		}
@@ -5884,7 +5914,7 @@ func (s *BetaServer) routes() {
 	// Ensure multi-sig threshold satisfied by rotating up to max times (development only)
 	// GET /api/v1/crypto/ensure-threshold?max=<n>
 	s.router.GET("/api/v1/crypto/ensure-threshold", func(c *gin.Context) {
-		if os.Getenv("GAUTH_MODE") != "development" {
+		if os.Getenv("GAUTH_MODE") != envModeDevelopment {
 			c.JSON(403, gin.H{"success": false, "message": "forbidden"})
 			return
 		}
@@ -6132,15 +6162,15 @@ func (s *BetaServer) apiDelegationCreate(c *gin.Context) {
 			var lifecycle []map[string]any
 			for _, need := range s.requiredActionCaps["delegation:create"] {
 				co := reg[need]
-				phase := "active"
+				phase := statusActive
 				if co.DeprecatedAfter != "" {
 					if t, err := time.Parse(time.RFC3339, co.DeprecatedAfter); err == nil && time.Now().After(t) {
-						phase = "deprecated"
+						phase = statusDeprecated
 					}
 				}
 				if co.SunsetAfter != "" {
 					if t, err := time.Parse(time.RFC3339, co.SunsetAfter); err == nil && time.Now().After(t) {
-						phase = "sunset"
+						phase = statusSunset
 					}
 				}
 				lifecycle = append(lifecycle, map[string]any{"id": need, "deprecated_after": co.DeprecatedAfter, "sunset_after": co.SunsetAfter, "phase": phase})
@@ -6201,12 +6231,12 @@ func (s *BetaServer) apiDelegationRevoke(c *gin.Context) {
 				phase := "active"
 				if co.DeprecatedAfter != "" {
 					if t, err := time.Parse(time.RFC3339, co.DeprecatedAfter); err == nil && time.Now().After(t) {
-						phase = "deprecated"
+						phase = statusDeprecated
 					}
 				}
 				if co.SunsetAfter != "" {
 					if t, err := time.Parse(time.RFC3339, co.SunsetAfter); err == nil && time.Now().After(t) {
-						phase = "sunset"
+						phase = statusSunset
 					}
 				}
 				lifecycle = append(lifecycle, map[string]any{"id": need, "deprecated_after": co.DeprecatedAfter, "sunset_after": co.SunsetAfter, "phase": phase})
@@ -7176,12 +7206,12 @@ func (s *BetaServer) apiPolicyAuditConsistency(c *gin.Context) {
 		c.JSON(200, gin.H{"success": true, "evaluations": 0, "consistent": true, "message": "no policy chain"})
 		return
 	}
-	// Find latest audit entry with action == "evaluate" and meta containing chain_head
+	// Find latest audit entry with action == actionEvaluate and meta containing chain_head
 	entries := s.audit.List(0) // all
 	var latest *AuditEntry
 	for i := len(entries) - 1; i >= 0; i-- { // reverse scan
 		e := entries[i]
-		if e.Action == "evaluate" {
+		if e.Action == actionEvaluate {
 			latest = e
 			break
 		}
@@ -7340,7 +7370,7 @@ func (s *BetaServer) apiDecisionMetrics(c *gin.Context) {
 		// Split by comma; handle quality parameters; match text/csv or application/csv case-insensitively.
 		for _, part := range strings.Split(accept, ",") {
 			p := strings.ToLower(strings.TrimSpace(strings.Split(part, ";")[0]))
-			if p == "text/csv" || p == "application/csv" {
+			if p == "text/csv" || p == contentTypeCSV {
 				return true
 			}
 		}
@@ -8102,7 +8132,7 @@ func (s *BetaServer) apiAuditList(c *gin.Context) {
 		}
 		for _, part := range strings.Split(accept, ",") {
 			p := strings.ToLower(strings.TrimSpace(strings.Split(part, ";")[0]))
-			if p == "text/csv" || p == "application/csv" {
+			if p == "text/csv" || p == contentTypeCSV {
 				return true
 			}
 		}
@@ -8667,7 +8697,7 @@ func (s *BetaServer) apiTokenRevoke(c *gin.Context) {
 	status := s.tokens.Revoke(req.TokenID)
 	s.audit.Append(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: "api", Action: "token_revoke", Resource: req.TokenID, Outcome: status})
 	s.events.Emit(&Event{ID: randomNonce(6), At: time.Now(), Type: "token_revoked", Data: gin.H{"id": req.TokenID, "outcome": status}})
-	c.JSON(200, gin.H{"success": status == "revoked" || status == "already_revoked", "status": status})
+	c.JSON(200, gin.H{"success": status == "revoked" || status == TokenStatusAlreadyRevoked, "status": status})
 }
 
 func (s *BetaServer) apiTokenMetrics(c *gin.Context) {
@@ -8794,7 +8824,7 @@ func (s *BetaServer) apiTokenStatusUpdate(c *gin.Context) {
 	}
 	if old == req.NewStatus {
 		// Enhanced taxonomy: detect maintenance window or rate limiting via env toggles (demo logic)
-		reason := "noop"
+		reason := changeReasonNoop
 		if os.Getenv("GAUTH_MAINTENANCE_WINDOW") == "1" {
 			reason = reasonMaintenance
 		}
@@ -8829,7 +8859,7 @@ func (s *BetaServer) apiTokenStatusUpdate(c *gin.Context) {
 	s.audit.Append(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: "api", Action: "token_status_update", Resource: tok.ID, Outcome: "success", Meta: gin.H{"old": old, "new": tok.Status, "reason": "status_change"}})
 	// Emit lifecycle change event with reason metadata
 	s.events.Emit(&Event{ID: randomNonce(6), At: time.Now(), Type: "token_status_changed", Data: gin.H{"token_id": tok.ID, "old_status": old, "new_status": tok.Status, "reason": "status_change"}})
-	changeReason := "status_change"
+	changeReason := changeReasonStatus
 	if os.Getenv("GAUTH_POLICY_VIOLATION") == "1" {
 		changeReason = reasonPolicyViolation
 	}
@@ -8999,7 +9029,7 @@ func (s *BetaServer) apiDelegationStatusUpdate(c *gin.Context) {
 	}
 
 	if old == req.NewStatus { // noop
-		reason := "noop"
+		reason := changeReasonNoop
 		if os.Getenv("GAUTH_MAINTENANCE_WINDOW") == "1" {
 			reason = reasonMaintenance
 		}
@@ -9031,7 +9061,7 @@ func (s *BetaServer) apiDelegationStatusUpdate(c *gin.Context) {
 	s.delegationStatusMu.Unlock()
 	s.audit.Append(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: "api", Action: "delegation_status_update", Resource: req.DelegationID, Outcome: "success", Meta: gin.H{"old": old, "new": req.NewStatus, "reason": "status_change"}})
 	s.events.Emit(&Event{ID: randomNonce(6), At: time.Now(), Type: "delegation_status_changed", Data: gin.H{"delegation_id": req.DelegationID, "old_status": old, "new_status": req.NewStatus, "reason": "status_change"}})
-	changeReason := "status_change"
+	changeReason := changeReasonStatus
 	if os.Getenv("GAUTH_POLICY_VIOLATION") == "1" {
 		changeReason = reasonPolicyViolation
 	}
@@ -9174,7 +9204,7 @@ func (s *BetaServer) apiLifecycleTimeline(c *gin.Context) {
 		}
 		for _, part := range strings.Split(accept, ",") {
 			p := strings.ToLower(strings.TrimSpace(strings.Split(part, ";")[0]))
-			if p == "text/csv" || p == "application/csv" {
+			if p == "text/csv" || p == contentTypeCSV {
 				return true
 			}
 		}

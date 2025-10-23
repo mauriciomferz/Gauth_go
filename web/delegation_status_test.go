@@ -42,7 +42,7 @@ func TestDelegationStatusLifecycle(t *testing.T) {
 	if err := json.Unmarshal(rrSusp.Body.Bytes(), &suspResp); err != nil {
 		t.Fatalf("decode suspend: %v", err)
 	}
-	if !suspResp.Success || suspResp.OldStatus != "active" || suspResp.NewStatus != "suspended" {
+	if !suspResp.Success || suspResp.OldStatus != statusActive || suspResp.NewStatus != statusSuspended {
 		t.Fatalf("bad suspend resp: %+v", suspResp)
 	}
 
@@ -76,7 +76,7 @@ func TestDelegationStatusLifecycle(t *testing.T) {
 	if err := json.Unmarshal(rrTerm.Body.Bytes(), &termResp); err != nil {
 		t.Fatalf("decode terminate: %v", err)
 	}
-	if !termResp.Success || termResp.OldStatus != "active" || termResp.NewStatus != "terminated" {
+	if !termResp.Success || termResp.OldStatus != statusActive || termResp.NewStatus != statusTerminated {
 		t.Fatalf("bad terminate resp: %+v", termResp)
 	}
 

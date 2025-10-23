@@ -28,7 +28,7 @@ func TestTSAAnchorAndVerify(t *testing.T) {
 	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
 		t.Fatalf("unmarshal anchor: %v", err)
 	}
-	if !resp.Success || resp.Receipt["hash"] != "demo-hash-value" {
+	if !resp.Success || resp.Receipt["hash"] != testDemoHashValue {
 		t.Fatalf("unexpected receipt %+v", resp.Receipt)
 	}
 	// Verify receipt (should fail hash mismatch if capabilityRegistryHash differs)
@@ -50,7 +50,7 @@ func TestTSAAnchorAndVerify(t *testing.T) {
 	if !vresp.Success {
 		t.Fatalf("verify not success")
 	}
-	if vresp.Verified && s.capabilityRegistryHash != "demo-hash-value" {
+	if vresp.Verified && s.capabilityRegistryHash != testDemoHashValue {
 		t.Fatalf("expected mismatch verify=false reason=%s", vresp.Reason)
 	}
 	// Basic latency metric sanity: we can't scrape Prometheus adapter directly here without instrumentation; ensure processing time < 1s
