@@ -75,8 +75,12 @@ jobs:
 
     - name: Install golangci-lint from source
       run: |
+        # Ensure clean installation - remove any cached version
+        rm -f $(go env GOPATH)/bin/golangci-lint
         # Install golangci-lint from source to ensure it's built with Go 1.25
         go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
+        # Verify the version and Go compatibility
+        $(go env GOPATH)/bin/golangci-lint version
         
     - name: Run linter
       run: |
