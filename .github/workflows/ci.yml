@@ -85,15 +85,28 @@ jobs:
           echo "$INTERNAL_TEST_OUTPUT" | tail -10  # Show summary
         else
           echo "❌ Internal tests failed (exit code: $INTERNAL_TEST_EXIT_CODE)"
-          echo "� Full test output:"
+          echo "🔍 Full test output:"
           echo "$INTERNAL_TEST_OUTPUT"
           echo ""
-          echo "� Environment diagnostics:"
+          echo "🔍 Environment diagnostics:"
           echo "📊 Go version: $(go version)"
           echo "📊 GOMAXPROCS: ${GOMAXPROCS:-default}"
           echo "📊 CGO_ENABLED: ${CGO_ENABLED:-default}"
-          echo "� Current directory: $(pwd)"
+          echo "🔍 Current directory: $(pwd)"
           echo "📊 Disk space: $(df -h . 2>/dev/null | tail -1 || echo 'N/A')"
+          echo "📊 Memory info: $(free -h 2>/dev/null | head -2 || echo 'N/A')"
+          echo "📊 CPU info: $(nproc 2>/dev/null || echo 'N/A') cores"
+          echo ""
+          echo "🧪 Running isolated test to identify failing package..."
+          # Run our isolated test script for more detailed analysis
+          if [ -f "scripts/test-internal-isolated.sh" ]; then
+            chmod +x scripts/test-internal-isolated.sh
+            echo "🔬 Isolated test runner output:"
+            ./scripts/test-internal-isolated.sh || echo "Isolated runner also failed"
+          fi
+          echo ""
+          echo "🔍 Checking for specific failure patterns..."
+          echo "$INTERNAL_TEST_OUTPUT" | grep -E "(FAIL|panic|fatal|error)" || echo "No obvious error patterns found"
           exit 1
         fi
         
