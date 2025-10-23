@@ -28,7 +28,11 @@ func main() {
 		os.Exit(1)
 	}
 	rel, _ := filepath.Rel(".", out)
-	fmt.Printf("OpenAPI coverage report written: %s (missing=%d extra=%d coverage=%.2f path_param_desc=%.2f query_param_desc=%.2f schema_prop_desc=%.2f op_example=%.2f err_example=%.2f)\n", rel, len(rep.MissingPaths), len(rep.ExtraSpecPaths), rep.CoveredRatio, rep.ParamDescriptionCoverage, rep.QueryParamDescriptionCoverage, rep.SchemaPropDescriptionCoverage, rep.OperationExampleCoverage, rep.ErrorResponseExampleCoverage)
+	fmt.Printf("OpenAPI coverage report written: %s (missing=%d extra=%d coverage=%.2f "+
+		"path_param_desc=%.2f query_param_desc=%.2f schema_prop_desc=%.2f op_example=%.2f err_example=%.2f)\n",
+		rel, len(rep.MissingPaths), len(rep.ExtraSpecPaths), rep.CoveredRatio,
+		rep.ParamDescriptionCoverage, rep.QueryParamDescriptionCoverage,
+		rep.SchemaPropDescriptionCoverage, rep.OperationExampleCoverage, rep.ErrorResponseExampleCoverage)
 	if len(rep.MissingPaths) > 0 {
 		fmt.Println("Missing paths:")
 		for _, p := range rep.MissingPaths {

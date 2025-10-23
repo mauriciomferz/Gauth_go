@@ -31,7 +31,8 @@ func NewPatterns(name string, opts ...PatternOption) *Patterns {
 }
 
 // WithCircuitBreaker returns a PatternOption for circuit breaker
-func WithCircuitBreaker(threshold int, resetTimeout time.Duration, onStateChange func(name string, from, to interface{})) PatternOption {
+func WithCircuitBreaker(threshold int, resetTimeout time.Duration,
+	onStateChange func(name string, from, to interface{})) PatternOption {
 	return func(p *Patterns) {
 		p.circuitBreaker = &CircuitBreakerConfig{
 			Threshold:     threshold,

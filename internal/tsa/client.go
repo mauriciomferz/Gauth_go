@@ -38,7 +38,12 @@ type HTTPClient struct {
 }
 
 func NewHTTPClient(baseURL, providerID string) *HTTPClient {
-	return &HTTPClient{BaseURL: baseURL, ProviderID: providerID, HTTP: &http.Client{Timeout: 10 * time.Second}, Timeout: 10 * time.Second}
+	return &HTTPClient{
+		BaseURL:    baseURL,
+		ProviderID: providerID,
+		HTTP:       &http.Client{Timeout: 10 * time.Second},
+		Timeout:    10 * time.Second,
+	}
 }
 
 func (c *HTTPClient) Submit(ctx context.Context, hash string) (Receipt, error) {

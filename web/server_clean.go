@@ -613,7 +613,7 @@ func (s *BetaServer) computeModelLimitsSnapshot() (snap struct {
 	enc, _ := json.Marshal(snap)
 	h := sha256.Sum256(enc)
 	hash = fmt.Sprintf("sha256:%x", h[:])
-	return
+	return snap, hash
 }
 
 // apiModelLimitsSnapshot returns current limits and a canonical hash for drift detection.
@@ -4498,6 +4498,7 @@ func (s *BetaServer) apiCapabilityAnchorPrometheus(c *gin.Context) {
 			expected := hex.EncodeToString(h[:])
 			if prev == "" && i == 0 {
 				// First entry semantics already align with verifyReceiptChain.
+				// No additional processing needed for the initial entry.
 			}
 			if expected != e.ChainHash || e.PrevHash != prev {
 				s.receiptIntegrityStatus = "mismatch"

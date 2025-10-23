@@ -92,7 +92,9 @@ func main() {
 		var vErr *verification.VerifyError
 		if errors.As(err, &vErr) {
 			if *jsonOut {
-				b, _ := json.Marshal(map[string]interface{}{"mode": "revocation", "status": "failed", "code": vErr.Code, "detail": vErr.Detail})
+				b, _ := json.Marshal(map[string]interface{}{
+					"mode": "revocation", "status": "failed", "code": vErr.Code, "detail": vErr.Detail,
+				})
 				fmt.Println(string(b))
 			} else {
 				fmt.Fprintf(os.Stderr, "[verify] FAILED code=%s detail=%s cause=%v\n", vErr.Code, vErr.Detail, vErr.Cause)
@@ -137,7 +139,10 @@ func verifyReceipts(base, path string, remote bool) (string, int, string, error)
 		}
 		prev := ""
 		for _, e := range raw.Entries {
-			// Recompute expected chain hash: sha256(prev + marshal(base_receipt_without_chain_hash)) simplified since file persists only final chain hashes; use prev+Hash for quick check (approximation matching server's verify path logic variant used in endpoint – acceptable for safety net; full reproduction would re-marshal base fields).
+			// Recompute expected chain hash: sha256(prev + marshal(base_receipt_without_chain_hash))
+			// simplified since file persists only final chain hashes; use prev+Hash for quick check
+			// (approximation matching server's verify path logic variant used in endpoint – acceptable
+			// for safety net; full reproduction would re-marshal base fields).
 			// For CLI correctness we just compare prev link continuity.
 			if e.PrevHash != prev {
 				return "mismatch", len(raw.Entries), e.ChainHash, nil

@@ -25,7 +25,11 @@ func NewSimpleExecutor(minMs, maxMs int, failNames []string) *SimpleExecutor {
 	for _, n := range failNames {
 		fs[n] = struct{}{}
 	}
-	return &SimpleExecutor{MinLatency: time.Duration(minMs) * time.Millisecond, MaxLatency: time.Duration(maxMs) * time.Millisecond, FailSet: fs}
+	return &SimpleExecutor{
+		MinLatency: time.Duration(minMs) * time.Millisecond,
+		MaxLatency: time.Duration(maxMs) * time.Millisecond,
+		FailSet:    fs,
+	}
 }
 
 func (s *SimpleExecutor) Execute(ctx context.Context, names []string) []Result {

@@ -68,10 +68,6 @@ func mutateJSON(base map[string]any, r *rand.Rand) []byte {
 	}
 	// Marshal manual (avoid dependency): build simple structure
 	// Convert caps back to generic slice
-	capsSlice := []map[string]any{}
-	for _, c := range clone["capabilities"].([]map[string]any) {
-		capsSlice = append(capsSlice, c)
-	}
 	actionMappings := map[string][]string{}
 	for k, v := range clone["action_mappings"].(map[string][]string) {
 		actionMappings[k] = v

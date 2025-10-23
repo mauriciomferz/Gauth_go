@@ -104,7 +104,8 @@ func (v *MemoryVerifier) Verify(ctx context.Context, req *TimestampRequest, resp
 
 func (v *MemoryVerifier) TrustAnchorID() string { return v.anchorID }
 
-func (v *MemoryVerifier) VerifyDetailed(ctx context.Context, req *TimestampRequest, resp *TimestampResponse) (*ReceiptVerificationResult, error) {
+func (v *MemoryVerifier) VerifyDetailed(ctx context.Context, req *TimestampRequest,
+	resp *TimestampResponse) (*ReceiptVerificationResult, error) {
 	if req == nil || resp == nil {
 		return &ReceiptVerificationResult{Valid: false, Reason: "nil_request_or_response"}, ErrInvalidRequest
 	}
@@ -120,7 +121,12 @@ func (v *MemoryVerifier) VerifyDetailed(ctx context.Context, req *TimestampReque
 			}
 		}
 	}
-	res := &ReceiptVerificationResult{Valid: valid, Reason: "ok", IssuedAt: resp.IssuedAt, DriftSeconds: time.Now().UTC().Unix() - resp.IssuedAt.Unix()}
+	res := &ReceiptVerificationResult{
+		Valid:        valid,
+		Reason:       "ok",
+		IssuedAt:     resp.IssuedAt,
+		DriftSeconds: time.Now().UTC().Unix() - resp.IssuedAt.Unix(),
+	}
 	if !valid {
 		res.Reason = "digest_mismatch"
 	}
