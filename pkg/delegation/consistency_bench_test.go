@@ -117,8 +117,12 @@ func BenchmarkStartRootReconstruction(b *testing.B) {
 			hashes[i] = ev.Hash
 		}
 		// Generate proof (provides prefix blocks & bridges) for start snapshot relative to itself by appending one element.
-		chain.Append(RevocationEvent{ID: "bench-extra", DelegationID: "bench-extra"})
-		chain.SignTreeHead()
+		if _, err := chain.Append(RevocationEvent{ID: "bench-extra", DelegationID: "bench-extra"}); err != nil {
+			b.Fatalf("append extra: %v", err)
+		}
+		if _, err := chain.SignTreeHead(); err != nil {
+			b.Fatalf("sign tree head: %v", err)
+		}
 		proof, err := chain.GenerateConsistencyProofV2(0)
 		if err != nil {
 			b.Fatalf("proof gen: %v", err)

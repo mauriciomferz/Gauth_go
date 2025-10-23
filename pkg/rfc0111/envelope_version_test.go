@@ -90,7 +90,7 @@ func TestEnvelopeV2IncludesSatisfiedFields(t *testing.T) {
 	svc := NewService(audit.NewMemoryLogger(nil), ma, WithMetrics(mem))
 	// Construct POA manually with multi-sig satisfied fields set to simulate prior verification path (simpler than generating signatures in this test scope).
 	poa := &PowerOfAttorney{ID: "poa_test_v2", Grantor: "g@example.com", Grantee: "h@example.com", Scope: []string{"x"}, ValidFrom: time.Now(), ValidUntil: time.Now().Add(time.Hour), Status: POAStatusActive, SatisfiedWeight: 7, SatisfiedSignatures: 3}
-	svc.repo.Create(poa)
+	if err := svc.repo.Create(poa); err != nil { t.Fatalf("Failed to create POA: %v", err) }
 	tok := generateAuthToken(svc, poa)
 	if tok == "" {
 		t.Fatalf("empty token v2 synthetic multi-sig")

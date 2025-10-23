@@ -383,7 +383,7 @@ func writeAutoMarkdown(rows []gapRow, caps capabilitiesFile, drift []string, cou
 		}
 		fmt.Fprintf(&b, "\n")
 	}
-	return os.WriteFile(outMarkdownPath, []byte(b.String()), 0o644)
+	return os.WriteFile(outMarkdownPath, []byte(b.String()), 0o600)
 }
 
 func esc(s string) string { return strings.ReplaceAll(s, "|", "\\|") }
@@ -455,7 +455,7 @@ func writeAutoJSON(rows []gapRow, caps capabilitiesFile, drift []string, counts 
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(outJSONPath, b, 0o644)
+	return os.WriteFile(outJSONPath, b, 0o600)
 }
 
 // writeBadgeJSON emits a compact JSON structure suitable for consumption by
@@ -506,7 +506,7 @@ func writeBadgeJSON(counts statusCounts) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(outBadgeJSONPath, data, 0o644)
+	return os.WriteFile(outBadgeJSONPath, data, 0o600)
 }
 
 func round2(f float64) float64 { return float64(int(f*100+0.5)) / 100 }
@@ -559,7 +559,7 @@ func appendHistory(counts statusCounts) error {
 	if err != nil {
 		return err
 	}
-	f, err := os.OpenFile(historyPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	f, err := os.OpenFile(historyPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
 	if err != nil {
 		return err
 	}
@@ -595,7 +595,7 @@ func appendStatusHistory(rows []gapRow) error {
 	if err != nil {
 		return err
 	}
-	f, err := os.OpenFile(statusHistoryPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	f, err := os.OpenFile(statusHistoryPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
 	if err != nil {
 		return err
 	}

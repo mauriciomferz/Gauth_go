@@ -107,7 +107,7 @@ func TestJSONParseProperty(t *testing.T) {
 		case 1: // drop last segment entirely
 			token = token[:strings.LastIndex(token, ".")]
 		case 2: // corrupt base64 by appending '=' causing decode mismatch maybe
-			token = token + "="
+			token += "="
 		}
 		// Execute validation
 		res, vErr := svc.ValidateToken(token)

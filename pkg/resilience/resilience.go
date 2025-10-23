@@ -356,7 +356,7 @@ func (p *Patterns) Execute(ctx context.Context, fn func() error) error {
 		// Retry delay
 		if p.retry != nil && i < attempts-1 {
 			time.Sleep(delay)
-			delay = delay * 2
+			delay *= 2
 			if delay > 100*time.Millisecond {
 				delay = 100 * time.Millisecond
 			}

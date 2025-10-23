@@ -246,7 +246,7 @@ func New(config Config, opts ...Option) (*Service, error) {
 			keyMaterial = config.ClientSecret
 		}
 		if len(keyMaterial) < 32 {
-			keyMaterial = keyMaterial + strings.Repeat("0", 32-len(keyMaterial))
+			keyMaterial += strings.Repeat("0", 32-len(keyMaterial))
 		}
 	}
 	svc.signingKey = []byte(keyMaterial)

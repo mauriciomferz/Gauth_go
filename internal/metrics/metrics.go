@@ -1,5 +1,6 @@
 package metrics
 
+const reasonOther = reasonOther
 import (
 	"encoding/json"
 	"math"
@@ -505,7 +506,7 @@ func (m *Memory) IncEnvelopeRawPOAEmbedded() { atomic.AddUint64(&m.envelopeRawPO
 func (m *Memory) IncEnvelopeRawPOATooLarge() { atomic.AddUint64(&m.envelopeRawPOATooLarge, 1) }
 func (m *Memory) IncEnvelopeDigestMismatchReason(reason string) {
 	if reason == "" {
-		reason = "other"
+		reason = reasonOther
 	}
 	m.envelopeDigestMismatchReasonsMu.Lock()
 	if m.envelopeDigestMismatchReasons == nil {

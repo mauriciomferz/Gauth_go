@@ -22,7 +22,7 @@ func TestModelLimitsAttestationSignature(t *testing.T) {
 	auditFile, _ := os.CreateTemp(t.TempDir(), "audit_*.jsonl")
 	anchorFile, _ := os.CreateTemp(t.TempDir(), "anchor_*.jsonl")
 	limitsFile, _ := os.CreateTemp(t.TempDir(), "limits_*.json")
-	limitsFile.Write([]byte(`{"model_limits":{"demo":{"max_input_tokens":5}}}`))
+	_ = limitsFile.Write([]byte(`{"model_limits":{"demo":{"max_input_tokens":5}}}`))
 	limitsFile.Close()
 	os.Setenv("GAUTH_MODEL_LIMITS_PATH", limitsFile.Name())
 	os.Setenv("GAUTH_MODEL_LIMIT_AUDIT_PATH", auditFile.Name())
@@ -107,7 +107,7 @@ func TestModelLimitsAttestationSignature(t *testing.T) {
 		t.Fatalf("signature verify failed")
 	}
 	// Tamper check
-	unsigned.Snapshot.Hash = unsigned.Snapshot.Hash + "tamper"
+	unsigned.Snapshot.Hash += "tamper"
 	tamperedRaw, _ := json.Marshal(unsigned)
 	if ed25519.Verify(pub, tamperedRaw, sigBytes) {
 		t.Fatalf("tamper should fail verification")

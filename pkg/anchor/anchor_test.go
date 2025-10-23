@@ -1,6 +1,5 @@
 package anchor
 
-
 import "testing"
 
 const testHashValue = "abc123"

@@ -104,7 +104,7 @@ func TestModelLimitsAttestationVerify(t *testing.T) {
 	if err := json.Unmarshal(attBytes, &attStruct); err != nil {
 		t.Fatalf("unmarshal struct: %v", err)
 	}
-	attStruct.Snapshot.Hash = attStruct.Snapshot.Hash + "tamper"
+	attStruct.Snapshot.Hash += "tamper"
 	tamperedBytes, _ := json.Marshal(attStruct)
 	w4 := httptest.NewRecorder()
 	req4, _ := http.NewRequest(http.MethodPost, "/api/v1/model/limits/attestation/verify", bytes.NewReader(tamperedBytes))

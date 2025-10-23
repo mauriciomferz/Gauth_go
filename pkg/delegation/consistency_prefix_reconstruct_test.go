@@ -26,7 +26,7 @@ func buildPrefixDecomposition(events []RevocationEvent, startLen int) ([]string,
 	largestPow2 := func(n int) int {
 		p := 1
 		for p<<1 <= n {
-			p = p << 1
+			p <<= 1
 		}
 		return p
 	}

@@ -1,5 +1,6 @@
 package limits
 
+const limitsSnapshotType = limitsSnapshotType
 // Package limits provides a lightweight persistent numeric counters facility used to track
 // system-wide limit consumption (e.g. tokens_issued_total, delegations_revoked_total, policy_revisions_total).
 // It is intentionally decoupled from the metrics interface to avoid inflating in-memory atomic surfaces.
@@ -112,7 +113,7 @@ func (s *Store) LedgerEntry() map[string]any {
 	for k, v := range snap {
 		out[k] = v
 	}
-	out["_type"] = "limits_snapshot"
+	out["_type"] = limitsSnapshotType
 	return out
 }
 

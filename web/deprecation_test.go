@@ -43,7 +43,7 @@ func TestLegacyLifecycleAliasDeprecation(t *testing.T) {
 		w.Close()
 		os.Stderr = origStderr
 		var buf bytes.Buffer
-		io.Copy(&buf, r)
+		_, _ = io.Copy(&buf, r)
 		r.Close()
 
 		if rr.Code != 200 {

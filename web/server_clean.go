@@ -173,11 +173,11 @@ const (
 	reasonPolicyViolation = "policy_violation"
 	statusSuspended       = "suspended"
 	statusActive          = "active"
-        statusTerminated      = "terminated"
+	statusTerminated      = "terminated"
 	statusValidJWT        = "valid_jwt"
-        memoryProvider        = "memory"
-        tsaStubProvider       = "tsa-stub"
-        emptyValue            = "empty"
+	memoryProvider        = "memory"
+	tsaStubProvider       = "tsa-stub"
+	emptyValue            = "empty"
 )
 
 // anomalyPersist defines persistence format for EWMA semantic anomaly stats.
@@ -3720,7 +3720,7 @@ func (s *BetaServer) loadCapabilitiesFromFile(path string) error {
 				// Notify observers (non-blocking best-effort)
 				for _, obs := range s.capAnchorObservers {
 					func(o CapabilityAnchorObserver, material AnchorMaterial, signed *SignedAnchorWrapper) {
-						defer func() { recover() }() // observer panic isolation
+						defer func() { _ = recover() }() // observer panic isolation
 						_ = o.OnAnchor(material, signed)
 					}(obs, am, signed)
 				}
@@ -9272,16 +9272,16 @@ func (s *BetaServer) Run() error {
 	// Normalize address: allow plain numeric port (e.g. 8080) by prefixing ':'; if host:port already present leave unchanged.
 	// This mirrors normalization logic used in the constructor.
 	if !strings.Contains(addr, ":") { // no colon implies just digits
-        addr = ":" + addr
-        }
-        srv := &http.Server{
-                Addr:           addr,
-                Handler:        s.router,
-                ReadTimeout:    30 * time.Second,
-                WriteTimeout:   30 * time.Second,
-                ReadHeaderTimeout: 10 * time.Second,
-        }
-        fmt.Printf("[startup] BetaServer starting PID=%d on http://localhost%s at %s\n", os.Getpid(), addr, time.Now().Format(time.RFC3339))	// Signal handling for graceful shutdown
+		addr = ":" + addr
+	}
+	srv := &http.Server{
+		Addr:              addr,
+		Handler:           s.router,
+		ReadTimeout:       30 * time.Second,
+		WriteTimeout:      30 * time.Second,
+		ReadHeaderTimeout: 10 * time.Second,
+	}
+	fmt.Printf("[startup] BetaServer starting PID=%d on http://localhost%s at %s\n", os.Getpid(), addr, time.Now().Format(time.RFC3339)) // Signal handling for graceful shutdown
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 

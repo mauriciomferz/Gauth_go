@@ -1,5 +1,6 @@
 package secrets
 
+const testSecret = testSecret
 import (
 	"crypto/rand"
 	"os"
@@ -25,12 +26,12 @@ func TestFilesystemProviderLifecycle(t *testing.T) {
 		t.Fatalf("backend mismatch")
 	}
 	// store
-	if err := p.Store("api_key", []byte("super-secret")); err != nil {
+	if err := p.Store("api_key", []byte(testSecret)); err != nil {
 		t.Fatalf("store: %v", err)
 	}
 	// get
 	val, err := p.Get("api_key")
-	if err != nil || string(val) != "super-secret" {
+	if err != nil || string(val) != testSecret {
 		t.Fatalf("get mismatch: %v val=%s", err, string(val))
 	}
 	// rotate
@@ -39,7 +40,7 @@ func TestFilesystemProviderLifecycle(t *testing.T) {
 		t.Fatalf("rotate: %v", err)
 	}
 	val2, err := p.Get("api_key")
-	if err != nil || string(val2) != "super-secret" {
+	if err != nil || string(val2) != testSecret {
 		t.Fatalf("post-rotate mismatch: %v val=%s", err, string(val2))
 	}
 	// delete

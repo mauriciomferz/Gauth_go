@@ -110,7 +110,7 @@ func (t *MerkleTree) GenerateProof(leafIndex int) ([]MerkleProofStep, string, er
 		// If odd last and idx is that last, it was promoted—no sibling at this level.
 		if idx == len(nodes)-1 && len(nodes)%2 == 1 {
 			// promoted node: just move to next level index = idx/2
-			idx = idx / 2
+			idx /= 2
 			continue
 		}
 		// Determine sibling
@@ -126,7 +126,7 @@ func (t *MerkleTree) GenerateProof(leafIndex int) ([]MerkleProofStep, string, er
 		if siblingIdx < len(nodes) {
 			proof = append(proof, MerkleProofStep{Sibling: nodes[siblingIdx].digest, Position: pos})
 		}
-		idx = idx / 2 // move up
+		idx /= 2 // move up
 	}
 	return proof, t.Root(), nil
 }

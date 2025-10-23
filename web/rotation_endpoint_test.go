@@ -104,6 +104,6 @@ func TestRotationsVerificationEndpoint(t *testing.T) {
 		}
 	} else {
 		// metrics endpoint not exposed; skip metrics assertion gracefully
-		io.Copy(io.Discard, metricsW.Body)
+		_, _ = io.Copy(io.Discard, metricsW.Body)
 	}
 }

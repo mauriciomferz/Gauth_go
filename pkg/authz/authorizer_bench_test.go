@@ -52,7 +52,7 @@ func BenchmarkAuthorize_Mixed(b *testing.B) {
 	req := Request{Subject: "alice", Resource: "vault", Action: "read"}
 	ctx := context.Background()
 	// Warm once
-	ma.Authorize(ctx, req)
+	_, _ = ma.Authorize(ctx, req)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		if i%10 == 0 { // force periodic miss

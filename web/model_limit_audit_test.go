@@ -13,7 +13,7 @@ import (
 // TestModelLimitAuditChain ensures audit entries are chained for input + rate exceed.
 func TestModelLimitAuditChain(t *testing.T) {
 	limitsFile, _ := os.CreateTemp(t.TempDir(), "limits.json")
-	limitsFile.WriteString(`{"model_limits":{"demo-model":{"max_input_tokens":10,"max_requests_per_minute":1}}}`)
+	_ = limitsFile.WriteString(`{"model_limits":{"demo-model":{"max_input_tokens":10,"max_requests_per_minute":1}}}`)
 	limitsFile.Close()
 	auditFile, _ := os.CreateTemp(t.TempDir(), "audit.jsonl")
 	auditFile.Close()

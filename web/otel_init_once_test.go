@@ -33,7 +33,7 @@ func TestOTELInitOnce(t *testing.T) {
 	w.Close()
 	os.Stderr = orig
 	var buf bytes.Buffer
-	io.Copy(&buf, r)
+	_, _ = io.Copy(&buf, r)
 	output := buf.String()
 
 	// Count init lines

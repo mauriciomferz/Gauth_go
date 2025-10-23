@@ -118,7 +118,7 @@ func FuzzCapabilityReload(f *testing.F) {
 		var base map[string]any
 		if err := json.Unmarshal(input, &base); err != nil {
 			// fallback to seed decode
-			json.Unmarshal(seed, &base)
+			_ = json.Unmarshal(seed, &base)
 		}
 		// Ensure required structural fields for mutation helper
 		if _, ok := base["capabilities"].([]any); !ok {
@@ -175,7 +175,7 @@ func FuzzCapabilityReload(f *testing.F) {
 		// If semantic differences introduced (e.g., added capability) we expect hash change; heuristic: count capabilities.
 		disc2 := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
 		var doc2 map[string]any
-		json.Unmarshal(disc2.Body.Bytes(), &doc2)
+		_ = json.Unmarshal(disc2.Body.Bytes(), &doc2)
 		capsAny, _ := doc2["capability_registry"].([]any)
 		// If capability count differs from original (base had 2) then hash must differ.
 		if len(capsAny) != 2 && newHash == originalHash {

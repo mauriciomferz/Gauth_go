@@ -842,8 +842,8 @@ func (c *RevocationChain) GenerateConsistencyProofV2(startIndex int) (*Consisten
 			sibling := nodes[oldIdx-1].digest
 			path = append(path, sibling)
 			positions = append(positions, "L")
-			oldIdx = oldIdx / 2
-			newIdx = newIdx / 2
+			oldIdx /= 2
+			newIdx /= 2
 			level++
 			continue
 		}
@@ -852,8 +852,8 @@ func (c *RevocationChain) GenerateConsistencyProofV2(startIndex int) (*Consisten
 			path = append(path, sibling)
 			positions = append(positions, "R")
 		}
-		oldIdx = oldIdx / 2
-		newIdx = newIdx / 2
+		oldIdx /= 2
+		newIdx /= 2
 		level++
 	}
 	for level < maxLevel {
@@ -863,7 +863,7 @@ func (c *RevocationChain) GenerateConsistencyProofV2(startIndex int) (*Consisten
 			path = append(path, sibling)
 			positions = append(positions, "R")
 		}
-		newIdx = newIdx / 2
+		newIdx /= 2
 		level++
 	}
 	proof := &ConsistencyProofV2{StartLength: oldSize, EndLength: newSize, Path: path, Positions: positions, StartRoot: start.MerkleRoot, EndRoot: latest.MerkleRoot, PrefixRoots: prefixRoots, PrefixSizes: prefixSizes, PrefixBridges: prefixBridges}
@@ -958,7 +958,7 @@ func VerifyConsistencyProofV2(proof *ConsistencyProofV2, allEventHashes []string
 	}
 	// Logarithmic bound check on path size.
 	maxAllowed := 2
-	for x := proof.EndLength; x > 1; x = x / 2 {
+	for x := proof.EndLength; x > 1; x /= 2 {
 		maxAllowed++
 	}
 	if len(proof.Path) > maxAllowed {
