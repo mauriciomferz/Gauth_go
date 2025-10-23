@@ -73,9 +73,10 @@ jobs:
         
         echo "✅ All tests completed successfully"
 
-    - name: Install golangci-lint
+    - name: Install golangci-lint from source
       run: |
-        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.64.8
+        # Install golangci-lint from source to ensure it's built with Go 1.25
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
         
     - name: Run linter
       run: |
