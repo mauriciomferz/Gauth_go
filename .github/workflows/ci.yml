@@ -223,76 +223,172 @@ jobs:
     needs: test
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Ensure complete repository checkout
 
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
         go-version: '1.25'
 
-    - name: Build
+    - name: Verify Repository Checkout
       run: |
-        echo "🚀 CI Build with Direct Implementation (bypassing Make)"
-        echo "======================================================"
+        echo "� Comprehensive Repository Checkout Verification"
+        echo "================================================="
         echo "📍 Working Directory: $(pwd)"
-        echo "👤 User: $(whoami)"
-        echo "🏠 Home: $HOME"
+        echo "� Git Status: $(git status --porcelain | wc -l) uncommitted files"
+        echo "📊 Git Branch: $(git branch --show-current 2>/dev/null || echo 'detached HEAD')"
+        echo "📊 Git Commit: $(git rev-parse --short HEAD 2>/dev/null || echo 'no commit')"
         echo ""
-        echo "📂 Directory Structure Check:"
-        ls -la . | head -10
+        echo "📂 Complete Workspace Structure:"
+        find . -maxdepth 3 -type d | head -20
         echo ""
-        echo "📂 cmd Directory Check:"
+        echo "📂 cmd Directory Detailed Check:"
         if [ -d "cmd" ]; then
-          echo "✅ cmd directory found"
-          ls -la cmd/ | head -10
-        else
-          echo "❌ cmd directory not found"
-        fi
-        echo ""
-        echo "🔍 Searching for gauth-server source..."
-        
-        # Method 1: Standard relative path  
-        if [ -f "./cmd/gauth-server/main.go" ]; then
-          SOURCE_PATH="./cmd/gauth-server"
-          echo "✅ Method 1: Found ./cmd/gauth-server/main.go"
-        # Method 2: No leading dot
-        elif [ -f "cmd/gauth-server/main.go" ]; then
-          SOURCE_PATH="cmd/gauth-server"  
-          echo "✅ Method 2: Found cmd/gauth-server/main.go"
-        # Method 3: Search filesystem
-        else
-          echo "🔍 Method 3: Searching filesystem..."
-          MAIN_GO_PATH=$(find . -name "main.go" -path "*/gauth-server/*" 2>/dev/null | head -1)
-          if [ -n "$MAIN_GO_PATH" ]; then
-            SOURCE_PATH=$(dirname "$MAIN_GO_PATH")
-            echo "✅ Method 3: Found $MAIN_GO_PATH"
+          echo "✅ cmd directory exists"
+          echo "📊 cmd contents:"
+          ls -la cmd/
+          echo ""
+          echo "📊 gauth-server directory check:"
+          if [ -d "cmd/gauth-server" ]; then
+            echo "✅ gauth-server directory exists"
+            echo "📄 gauth-server contents:"
+            ls -la cmd/gauth-server/
+            echo ""
+            echo "📄 main.go check:"
+            if [ -f "cmd/gauth-server/main.go" ]; then
+              echo "✅ main.go exists"
+              echo "� File size: $(wc -c < cmd/gauth-server/main.go) bytes"
+              echo "📊 File permissions: $(ls -la cmd/gauth-server/main.go)"
+              echo "🔍 First 3 lines of main.go:"
+              head -3 cmd/gauth-server/main.go
+            else
+              echo "❌ main.go missing in cmd/gauth-server/"
+            fi
           else
-            echo "❌ ERROR: Cannot find gauth-server/main.go anywhere"
-            echo "📋 Available main.go files:"
-            find . -name "main.go" 2>/dev/null | head -10 || echo "No main.go files found"
-            echo "📋 Available gauth-server directories:"  
-            find . -name "*gauth-server*" -type d 2>/dev/null | head -5 || echo "No gauth-server directories found"
-            exit 1
+            echo "❌ gauth-server directory missing in cmd/"
           fi
+        else
+          echo "❌ cmd directory missing"
+        fi
+
+    - name: Enhanced Build with Bulletproof Source Detection
+      run: |
+        echo "🚀 Enhanced CI Build with Comprehensive Source Detection"
+        echo "========================================================"
+        
+        # Use our proven ci-build.sh script if available
+        if [ -f "scripts/ci-build.sh" ]; then
+          echo "🎯 Using proven ci-build.sh script"
+          chmod +x scripts/ci-build.sh
+          exec ./scripts/ci-build.sh
         fi
         
-        echo "🏗️ Building gauth-server..."
-        echo "📁 Source path: $SOURCE_PATH"
+        # Fallback to inline implementation with enhanced detection
+        echo "🔧 Using inline enhanced build implementation"
+        
+        # Function to find gauth-server source (from proven script)
+        find_gauth_server() {
+          # Method 1: Standard relative path
+          if [ -f "./cmd/gauth-server/main.go" ]; then
+            echo "✅ Method 1: Found ./cmd/gauth-server/main.go" >&2
+            echo "./cmd/gauth-server"
+            return 0
+          fi
+          
+          # Method 2: Without leading dot
+          if [ -f "cmd/gauth-server/main.go" ]; then
+            echo "✅ Method 2: Found cmd/gauth-server/main.go" >&2
+            echo "cmd/gauth-server"
+            return 0
+          fi
+          
+          # Method 3: Filesystem search
+          local main_go_path=$(find . -name "main.go" -path "*/cmd/gauth-server/*" 2>/dev/null | head -1)
+          if [ -n "$main_go_path" ]; then
+            local source_path=$(dirname "$main_go_path")
+            echo "✅ Method 3: Found $main_go_path" >&2
+            echo "$source_path"
+            return 0
+          fi
+          
+          # Method 4: Directory search
+          local gauth_dir=$(find . -name "gauth-server" -type d -path "*/cmd/*" 2>/dev/null | head -1)
+          if [ -n "$gauth_dir" ] && [ -f "$gauth_dir/main.go" ]; then
+            echo "✅ Method 4: Found directory $gauth_dir with main.go" >&2
+            echo "$gauth_dir"
+            return 0
+          fi
+          
+          return 1
+        }
+        
+        # Find source path
+        echo "🔍 Searching for gauth-server source..."
+        SOURCE_PATH=$(find_gauth_server)
+        
+        if [ $? -ne 0 ] || [ -z "$SOURCE_PATH" ]; then
+          echo "❌ ERROR: Could not find cmd/gauth-server/main.go"
+          echo ""
+          echo "🐛 Enhanced Diagnostic Information"
+          echo "================================="
+          echo "📍 Working Directory: $(pwd)"
+          echo "� User: $(whoami)"
+          echo "💻 System: $(uname -a)"
+          echo ""
+          echo "📁 Complete Directory Contents:"
+          find . -type f -name "*.go" | grep -E "(main\.go|gauth)" | sort
+          echo ""
+          echo "📂 cmd Directory Analysis:"
+          find . -name "cmd" -type d -exec ls -la {} \;
+          echo ""
+          echo "🔍 All main.go files:"
+          find . -name "main.go" 2>/dev/null
+          echo ""
+          echo "� All gauth-server directories:"
+          find . -name "*gauth-server*" -type d 2>/dev/null
+          echo ""
+          echo "🔍 Git Checkout Verification:"
+          echo "Repository URL: $(git config --get remote.origin.url 2>/dev/null || echo 'N/A')"
+          echo "Current commit: $(git log --oneline -1 2>/dev/null || echo 'N/A')"
+          echo "Tracked files count: $(git ls-files | wc -l 2>/dev/null || echo 'N/A')"
+          echo ""
+          exit 1
+        fi
+        
+        echo "✅ Using source path: $SOURCE_PATH"
+        
+        # Create output directory
+        echo "📁 Creating build directory..."
         mkdir -p build/bin
         
+        # Build the server
+        echo "🔧 Building gauth-server from: $SOURCE_PATH"
         if go build -ldflags="-s -w" -o build/bin/gauth-server "$SOURCE_PATH"; then
           echo "✅ Build successful!"
           echo "📊 Binary info:"
           ls -la build/bin/gauth-server
+          
+          # Test the binary
           echo "🧪 Testing binary..."
-          if ./build/bin/gauth-server --help >/dev/null 2>&1 || ./build/bin/gauth-server -h >/dev/null 2>&1; then
-            echo "✅ Binary test passed"
+          if ./build/bin/gauth-server --help >/dev/null 2>&1; then
+            echo "✅ Binary test successful!"
           else
-            echo "⚠️ Binary test failed (may be normal for some binaries)"
+            echo "⚠️ Binary test failed (may be normal for some flags)"
           fi
         else
-          echo "❌ Build failed with source path: $SOURCE_PATH"
+          echo "❌ Build failed!"
+          echo "🔍 Additional debugging info:"
+          echo "Source path exists: $([ -d "$SOURCE_PATH" ] && echo 'YES' || echo 'NO')"
+          echo "main.go exists: $([ -f "$SOURCE_PATH/main.go" ] && echo 'YES' || echo 'NO')"
+          echo "Go version: $(go version)"
+          echo "GOPATH: $(go env GOPATH)"
+          echo "GOROOT: $(go env GOROOT)"
           exit 1
         fi
+        
+        echo ""
+        echo "🎉 Enhanced CI Build completed successfully!"
 
   security-scan:
     name: Security Scan

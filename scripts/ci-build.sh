@@ -71,12 +71,31 @@ show_diagnostics() {
 
 # Main execution
 echo "📍 Current working directory: $(pwd)"
+echo "🔍 Repository status check..."
+if command -v git >/dev/null 2>&1; then
+    echo "📊 Git branch: $(git branch --show-current 2>/dev/null || echo 'detached HEAD')"
+    echo "📊 Git commit: $(git rev-parse --short HEAD 2>/dev/null || echo 'no commit')"
+    echo "📊 Tracked files: $(git ls-files | wc -l 2>/dev/null || echo 'N/A')"
+fi
 
 # Find the source path
 echo "🔍 Searching for gauth-server source..."
 SOURCE_PATH=$(find_gauth_server)
 if [ $? -ne 0 ] || [ -z "$SOURCE_PATH" ]; then
     echo "❌ ERROR: Could not find cmd/gauth-server/main.go"
+    echo ""
+    echo "🔍 Enhanced Search Analysis:"
+    echo "============================"
+    echo "📂 All Go files containing 'gauth':"
+    find . -name "*.go" | grep -i gauth | head -10 || echo "None found"
+    echo ""
+    echo "📂 Complete cmd directory structure:"
+    if [ -d "cmd" ]; then
+        find cmd -type f -name "*.go" | head -15 || echo "No Go files in cmd"
+    else
+        echo "cmd directory does not exist"
+    fi
+    echo ""
     show_diagnostics
     exit 1
 fi
