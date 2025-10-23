@@ -11,8 +11,10 @@ WORKDIR /app
 # Copy go modules files first for better caching
 COPY go.mod go.sum ./
 
-# Download dependencies
-RUN go mod download
+# Download dependencies with verbose output
+RUN echo "=== Downloading Go modules ===" && \
+    go mod download && \
+    echo "=== Go modules downloaded successfully ==="
 
 # Copy source code
 COPY cmd/ ./cmd/
@@ -20,16 +22,28 @@ COPY pkg/ ./pkg/
 COPY internal/ ./internal/
 
 # Verify dependencies
-RUN go mod verify
+RUN echo "=== Verifying Go modules ===" && \
+    go mod verify && \
+    echo "=== Go modules verified successfully ==="
 
-# Build the applications
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+# Verify source files are present
+RUN echo "=== Checking source files ===" && \
+    ls -la ./cmd/gauth-server/ && \
+    echo "=== Source files verified ==="
+
+# Build the applications with verbose output
+RUN echo "=== Starting Go build ===" && \
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v \
     -ldflags='-w -s -extldflags "-static"' \
     -a -installsuffix cgo \
-    -o gauth-server ./cmd/gauth-server
+    -o gauth-server ./cmd/gauth-server && \
+    echo "=== Build completed successfully ==="
 
 # Verify binary
-RUN ls -la gauth-server
+RUN echo "=== Verifying binary ===" && \
+    ls -la gauth-server && \
+    file gauth-server && \
+    echo "=== Binary verified ==="
 
 # Production stage
 FROM alpine:3.18.4
