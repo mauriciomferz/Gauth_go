@@ -31,7 +31,9 @@ func BenchmarkMerkleGenerateProof(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		idx := idxRng.Intn(size)
-		mt.GenerateProof(idx)
+		if _, err := mt.GenerateProof(idx); err != nil {
+			b.Fatalf("Failed to generate proof: %v", err)
+		}
 	}
 }
 

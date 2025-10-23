@@ -54,7 +54,9 @@ func TestFastReconstructionMatchesFullTree(t *testing.T) {
 		c := NewRevocationChain()
 		for i := 0; i < n; i++ {
 			id := fmt.Sprintf("X%d", i)
-			c.Append(RevocationEvent{ID: id, DelegationID: id})
+			if err := c.Append(RevocationEvent{ID: id, DelegationID: id}); err != nil {
+				t.Fatalf("Failed to append revocation event: %v", err)
+			}
 		}
 		roots, sizes := buildPrefixDecomposition(c.Events(), n)
 		fullTree := NewMerkleTree()
@@ -92,7 +94,9 @@ func TestFastReconstructionRandomSizes(t *testing.T) {
 		c := NewRevocationChain()
 		for j := 0; j < n; j++ {
 			id := fmt.Sprintf("R%d_%d", i, j)
-			c.Append(RevocationEvent{ID: id, DelegationID: id})
+			if err := c.Append(RevocationEvent{ID: id, DelegationID: id}); err != nil {
+				t.Fatalf("Failed to append revocation event: %v", err)
+			}
 		}
 		roots, sizes := buildPrefixDecomposition(c.Events(), n)
 		bridges := buildBridges(roots, sizes)
@@ -155,7 +159,9 @@ func TestFastReconstructionTamperBridge(t *testing.T) {
 	c := NewRevocationChain()
 	for i := 0; i < 7; i++ {
 		id := fmt.Sprintf("TB%d", i)
-		c.Append(RevocationEvent{ID: id, DelegationID: id})
+		if err := c.Append(RevocationEvent{ID: id, DelegationID: id}); err != nil {
+			t.Fatalf("Failed to append revocation event: %v", err)
+		}
 	}
 	roots, sizes := buildPrefixDecomposition(c.Events(), 7)
 	bridges := buildBridges(roots, sizes)
