@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -153,7 +154,7 @@ func listTokens() {
 		}
 
 		// Store it (for demonstration)
-		err := store.Save(nil, tokenObj.Value, tokenObj)
+		err := store.Save(context.TODO(), tokenObj.Value, tokenObj)
 		if err != nil {
 			fmt.Printf("  ⚠️  Error storing demo token %s: %v\n", tok.id, err)
 			continue
@@ -224,7 +225,7 @@ func runDemo() {
 		ExpiresAt: time.Now().Add(30 * time.Minute),
 	}
 
-	err = store.Save(nil, storedToken.Value, storedToken)
+	err = store.Save(context.TODO(), storedToken.Value, storedToken)
 	if err != nil {
 		fmt.Printf("   ⚠️  Storage error: %v\n", err)
 	} else {
@@ -232,7 +233,7 @@ func runDemo() {
 	}
 
 	// Retrieve it
-	retrieved, err := store.Get(nil, storedToken.Value)
+	retrieved, err := store.Get(context.TODO(), storedToken.Value)
 	if err != nil {
 		fmt.Printf("   ⚠️  Retrieval error: %v\n", err)
 	} else if retrieved != nil {

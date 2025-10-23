@@ -13,6 +13,7 @@ import (
 
 // Advanced RFC 111 Power of Attorney (POA) scenario demonstrating negative cases and compliance checks.
 
+//nolint:unused // Example function for documentation purposes
 func runAdvancedPOAExample() {
 	ctx := context.Background()
 	svc := auth.NewRFCCompliantService()

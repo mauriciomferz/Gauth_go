@@ -61,6 +61,8 @@ func resourceHandler(w http.ResponseWriter, r *http.Request) {
 	err = err.AddInfo("provided_scope", "user")
 
 	// middleware.ErrorResponse(w, r, err) // Not available: middleware package missing
+	// For demonstration, write error to response
+	http.Error(w, err.Error(), http.StatusForbidden)
 }
 
 func rateLimitedHandler(w http.ResponseWriter, r *http.Request) {
@@ -77,6 +79,8 @@ func rateLimitedHandler(w http.ResponseWriter, r *http.Request) {
 	err = err.AddInfo("reset", "2023-07-01T15:30:45Z")
 
 	// middleware.ErrorResponse(w, r, err) // Not available: middleware package missing
+	// For demonstration, write error to response
+	http.Error(w, err.Error(), http.StatusTooManyRequests)
 }
 
 func serverErrorHandler(w http.ResponseWriter, r *http.Request) {

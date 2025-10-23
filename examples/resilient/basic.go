@@ -61,6 +61,8 @@ func (s *ResilientService) ProcessRequest(tx gauth.TransactionDetails, token str
 	})
 }
 
+// runBasicExample demonstrates basic resilient service usage
+//nolint:unused // Example function for documentation purposes
 func runBasicExample() {
 	// This is a stub for demonstration. See NewResilientService for usage.
 }

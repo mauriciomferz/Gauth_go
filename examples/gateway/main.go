@@ -181,9 +181,15 @@ func (g *APIGateway) HandleRequest(ctx context.Context, req *RequestContext) err
 }
 
 func (s *BackendService) simulateRequest(ctx context.Context, req *RequestContext) error {
+	// Thread-safe access to service configuration
+	s.mu.RLock()
+	latency := s.latency
+	errorRate := s.errorRate
+	s.mu.RUnlock()
+
 	// Simulate processing time
 	select {
-	case <-time.After(s.latency):
+	case <-time.After(latency):
 	case <-ctx.Done():
 		return ctx.Err()
 	}
@@ -195,7 +201,7 @@ func (s *BackendService) simulateRequest(ctx context.Context, req *RequestContex
 	}
 	randomFloat := float64(randomBytes[0]) / 255.0 // Convert to 0-1 range
 
-	if randomFloat < s.errorRate {
+	if randomFloat < errorRate {
 		return fmt.Errorf("%s: service temporarily unavailable", s.name)
 	}
 	return nil

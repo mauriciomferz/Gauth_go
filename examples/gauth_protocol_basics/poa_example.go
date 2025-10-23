@@ -10,6 +10,7 @@ import (
 	auth "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/auth"
 )
 
+//nolint:unused // Example function for documentation purposes
 func runPOAExample() {
 	ctx := context.Background()
 	svc := auth.NewRFCCompliantService()
