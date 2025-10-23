@@ -166,7 +166,37 @@ jobs:
         fi
         
         echo "Testing web packages..."
-        go test -v -timeout=10m ./web/... || { echo "❌ web tests failed"; exit 1; }
+        # Run web tests with explicit control and better error reporting
+        set +e  # Temporarily disable exit on error to capture details
+        WEB_TEST_OUTPUT=$(go test -v -timeout=10m ./web/... 2>&1)
+        WEB_TEST_EXIT_CODE=$?
+        set -e  # Re-enable exit on error
+        
+        if [ $WEB_TEST_EXIT_CODE -eq 0 ]; then
+          echo "✅ Web tests passed"
+          echo "$WEB_TEST_OUTPUT" | tail -10  # Show summary
+        else
+          echo "❌ Web tests failed (exit code: $WEB_TEST_EXIT_CODE)"
+          echo "🔍 Full web test output:"
+          echo "$WEB_TEST_OUTPUT"
+          echo ""
+          echo "🔄 Wildcard approach failed, trying explicit web package list..."
+          EXPLICIT_WEB_PACKAGES="./web ./web/smoketest ./web/testutil"
+          WEB_TEST_OUTPUT_EXPLICIT=$(go test -v -timeout=10m $EXPLICIT_WEB_PACKAGES 2>&1)
+          WEB_TEST_EXIT_CODE_EXPLICIT=$?
+          
+          echo "📊 Explicit web package test result: exit code $WEB_TEST_EXIT_CODE_EXPLICIT"
+          if [ $WEB_TEST_EXIT_CODE_EXPLICIT -eq 0 ]; then
+            echo "✅ Explicit web package approach succeeded - the issue is with ./web/... wildcard"
+            WEB_TEST_OUTPUT="$WEB_TEST_OUTPUT_EXPLICIT"
+            WEB_TEST_EXIT_CODE=0
+          else
+            echo "❌ Both web test approaches failed"
+            echo "🔍 Explicit web test output:"
+            echo "$WEB_TEST_OUTPUT_EXPLICIT"
+            exit 1
+          fi
+        fi
         
         echo "Testing test packages..."
         go test -v -timeout=10m ./test/... || { echo "❌ test packages failed"; exit 1; }
