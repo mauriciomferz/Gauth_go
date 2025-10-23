@@ -24,7 +24,16 @@ jobs:
       - name: Run tests
         run: go test ./... -v
       - name: Build
-        run: make build
+        run: |
+          echo "🚀 Building release binaries..."
+          if make build 2>/dev/null; then
+            echo "✅ Standard build succeeded"
+          elif make build-fallback 2>/dev/null; then
+            echo "✅ Fallback build succeeded"
+          else
+            echo "⚠️ Using standalone build script..."
+            ./scripts/ci-build.sh
+          fi
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:

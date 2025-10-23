@@ -13,7 +13,7 @@ crypto-test: ## Run EdDSA-focused tests only
 	@echo "🧪 Running EdDSA test subset..."; \
 	GAUTH_TOKEN_SIG_MODE=eddsa $(GOTEST) -run TestEdDSA ./pkg/gauth -count=1; \
 	echo "✅ EdDSA tests passed";
-.PHONY: all build test clean lint coverage docs help security deps format ci verify-csp verify-build-env debug-ci-env build-ci-adaptive build-fallback ci-build
+.PHONY: all build test clean lint coverage docs help security deps format ci verify-csp verify-build-env debug-ci-env build-ci-adaptive build-fallback ci-build build-server-adaptive
 .PHONY: gap-matrix gap-matrix-check openapi-guard
 .PHONY: js-lint js-test js-build
 .PHONY: js-bundle
@@ -109,7 +109,7 @@ build-ci-adaptive: ## CI-adaptive build that handles nested directory structures
 	mkdir -p $(BINARY_DIR); \
 	$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-server "$$SOURCE_PATH"
 
-build: verify-build-env build-server build-security-test ## Build all binaries
+build: verify-build-env build-server-adaptive build-security-test ## Build all binaries
 
 build-fallback: ## Fallback build method for CI environments with path issues
 	@echo "🔧 Fallback Build Method"
@@ -130,26 +130,43 @@ ci-build: ## Recommended build target for CI/CD environments
 	@echo "🏗️ Building with adaptive method:"
 	@$(MAKE) build-ci-adaptive
 
-build-server: ## Build the CLI demo server (cmd/gauth-server)
-	@echo "🔧 Building GAuth demo server..."
+build-server-adaptive: ## Build gauth-server with adaptive path detection (recommended)
+	@echo "🔧 Building GAuth demo server (adaptive method)..."
 	@echo "📍 Current working directory: $$(pwd)"
-	@echo "📂 Searching for gauth-server source..."
-	@if [ -d "./cmd/gauth-server" ] && [ -f "./cmd/gauth-server/main.go" ]; then \
-		echo "✅ Found cmd/gauth-server with main.go"; \
-		mkdir -p $(BINARY_DIR); \
-		$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-server ./cmd/gauth-server; \
+	@echo "� Searching for gauth-server source..."
+	@SOURCE_PATH=""; \
+	if [ -f "./cmd/gauth-server/main.go" ]; then \
+		SOURCE_PATH="./cmd/gauth-server"; \
+		echo "✅ Method 1: Found ./cmd/gauth-server/main.go"; \
+	elif [ -f "cmd/gauth-server/main.go" ]; then \
+		SOURCE_PATH="cmd/gauth-server"; \
+		echo "✅ Method 2: Found cmd/gauth-server/main.go"; \
 	else \
-		echo "❌ ERROR: cmd/gauth-server not found or missing main.go"; \
+		FOUND_PATH=$$(find . -name "main.go" -path "*/cmd/gauth-server/*" 2>/dev/null | head -1); \
+		if [ -n "$$FOUND_PATH" ]; then \
+			SOURCE_PATH=$$(dirname "$$FOUND_PATH"); \
+			echo "✅ Method 3: Found $$FOUND_PATH"; \
+		fi; \
+	fi; \
+	if [ -n "$$SOURCE_PATH" ]; then \
+		echo "🏗️ Building with source path: $$SOURCE_PATH"; \
+		mkdir -p $(BINARY_DIR); \
+		$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-server "$$SOURCE_PATH"; \
+		echo "✅ Build completed successfully"; \
+	else \
+		echo "❌ ERROR: Cannot find gauth-server source code"; \
 		echo "📋 Current directory contents:"; \
 		ls -la . | head -10; \
-		echo "📋 Looking for cmd directory:"; \
-		find . -name "cmd" -type d 2>/dev/null | head -5 || echo "No cmd directories found"; \
-		echo "📋 Looking for gauth-server directory:"; \
+		echo "📋 cmd directory contents:"; \
+		ls -la cmd/ 2>/dev/null || echo "No cmd directory found"; \
+		echo "📋 Search results for gauth-server directories:"; \
 		find . -name "gauth-server" -type d 2>/dev/null | head -5 || echo "No gauth-server directories found"; \
-		echo "📋 Looking for main.go in gauth-server:"; \
-		find . -name "main.go" -path "*/gauth-server/*" 2>/dev/null | head -5 || echo "No gauth-server main.go found"; \
 		exit 1; \
 	fi
+
+build-server: ## Build the CLI demo server (legacy - calls adaptive version)
+	@echo "🔄 Redirecting to adaptive build method..."
+	@$(MAKE) build-server-adaptive
 
 build-web: js-build ## Build the web demo server (cmd/web-server) (includes JS bundle embed)
 	@echo "🌐 Building web demo server..."
