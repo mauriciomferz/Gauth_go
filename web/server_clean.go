@@ -6062,6 +6062,50 @@ func (s *BetaServer) routes() {
 			fmt.Fprintf(os.Stderr, "[error] write embedded bundle.js failed: %v\n", err)
 		}
 	})
+
+	// Serve documentation files from docs directory
+	s.router.GET("/docs/*filepath", func(c *gin.Context) {
+		filepath := c.Param("filepath")
+		if filepath == "" {
+			c.String(400, "missing filepath")
+			return
+		}
+		// Remove leading slash
+		if filepath[0] == '/' {
+			filepath = filepath[1:]
+		}
+		
+		// Get working directory
+		wd, err := os.Getwd()
+		if err != nil {
+			c.String(500, "failed to get working directory")
+			return
+		}
+		
+		// Construct full path
+		fullPath := wd + "/docs/" + filepath
+		
+		// Read file
+		content, err := os.ReadFile(fullPath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "[docs] file not found: %s (error: %v)\n", fullPath, err)
+			c.String(404, "documentation file not found")
+			return
+		}
+		
+		// Determine content type based on extension
+		contentType := "text/plain; charset=utf-8"
+		if len(filepath) > 3 && filepath[len(filepath)-3:] == ".md" {
+			contentType = "text/markdown; charset=utf-8"
+		} else if len(filepath) > 5 && filepath[len(filepath)-5:] == ".html" {
+			contentType = "text/html; charset=utf-8"
+		} else if len(filepath) > 4 && filepath[len(filepath)-4:] == ".pdf" {
+			contentType = "application/pdf"
+		}
+		
+		fmt.Fprintf(os.Stderr, "[docs] serving %s (%d bytes)\n", filepath, len(content))
+		c.Data(200, contentType, content)
+	})
 }
 
 // apiCapabilities returns registered capabilities (demo governance surface)

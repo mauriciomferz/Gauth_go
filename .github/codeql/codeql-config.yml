@@ -1,0 +1,49 @@
+name: "GAuth CodeQL Configuration"
+
+# Paths to analyze
+paths:
+  - 'cmd/**'
+  - 'internal/**'
+  - 'pkg/**'
+  - 'web/**'
+  - 'examples/**'
+  - 'conformance/**'
+
+# Paths to exclude from analysis
+paths-ignore:
+  - 'test/**'
+  - 'node_modules/**'
+  - '**/*_test.go'
+  - 'vendor/**'
+  - '.github/**'
+  - 'docs/**'
+  - 'scripts/**'
+  - 'build/**'
+  - 'bin/**'
+  - 'tmp/**'
+  - 'artifacts/**'
+  - 'playwright-report/**'
+  - 'test-results/**'
+  - 'ui-tests/**'
+
+# Query suites to run
+queries:
+  - uses: security-extended
+  - uses: security-and-quality
+
+# Disable default queries and only use the ones specified above
+disable-default-queries: false
+
+# Query filters
+query-filters:
+  - exclude:
+      id: go/path-injection
+      # Exclude path injection for docs serving route (controlled input)
+  - exclude:
+      id: go/log-injection
+      # Development logging is intentionally verbose for beta demo
+
+# External queries (optional - add custom security patterns)
+# external-repository-token: ${{ secrets.GITHUB_TOKEN }}
+# external-queries:
+#   - uses: custom/security-queries@main
