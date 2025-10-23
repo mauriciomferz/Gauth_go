@@ -277,15 +277,62 @@ jobs:
         echo "🚀 Enhanced CI Build with Comprehensive Source Detection"
         echo "========================================================"
         
-        # Use our proven ci-build.sh script if available
+        # Use our proven ci-build.sh script if available, but with error capture
         if [ -f "scripts/ci-build.sh" ]; then
           echo "🎯 Using proven ci-build.sh script"
           chmod +x scripts/ci-build.sh
-          exec ./scripts/ci-build.sh
+          
+          # Run the script and capture both success and failure
+          if ./scripts/ci-build.sh; then
+            echo "✅ ci-build.sh completed successfully"
+            exit 0
+          else
+            echo "❌ ci-build.sh failed, trying inline fallback..."
+            echo ""
+          fi
+        else
+          echo "⚠️ ci-build.sh not found, using inline implementation"
         fi
         
         # Fallback to inline implementation with enhanced detection
         echo "🔧 Using inline enhanced build implementation"
+        
+        # Immediate checkout verification
+        echo "🔍 Immediate Checkout Verification:"
+        echo "Working directory: $(pwd)"
+        echo "Directory listing:"
+        ls -la . | head -15
+        echo ""
+        echo "Looking for cmd directory:"
+        if [ -d "cmd" ]; then
+          echo "✅ cmd directory found"
+          echo "cmd contents:"
+          ls -la cmd/ | head -10
+          echo ""
+          echo "Looking for gauth-server in cmd:"
+          if [ -d "cmd/gauth-server" ]; then
+            echo "✅ cmd/gauth-server directory found"
+            echo "gauth-server contents:"
+            ls -la cmd/gauth-server/
+            echo ""
+            if [ -f "cmd/gauth-server/main.go" ]; then
+              echo "✅ main.go found!"
+              echo "File info: $(ls -la cmd/gauth-server/main.go)"
+              echo "File size: $(wc -c < cmd/gauth-server/main.go) bytes"
+            else
+              echo "❌ main.go NOT found in cmd/gauth-server/"
+            fi
+          else
+            echo "❌ cmd/gauth-server directory NOT found"
+            echo "Available directories in cmd:"
+            ls -la cmd/ 2>/dev/null || echo "Cannot list cmd contents"
+          fi
+        else
+          echo "❌ cmd directory NOT found"
+          echo "Available directories in root:"
+          find . -maxdepth 1 -type d | head -10
+        fi
+        echo ""
         
         # Function to find gauth-server source (from proven script)
         find_gauth_server() {

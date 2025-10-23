@@ -78,23 +78,96 @@ if command -v git >/dev/null 2>&1; then
     echo "📊 Tracked files: $(git ls-files | wc -l 2>/dev/null || echo 'N/A')"
 fi
 
-# Find the source path
+# Find the source path with enhanced error handling
 echo "🔍 Searching for gauth-server source..."
-SOURCE_PATH=$(find_gauth_server)
-if [ $? -ne 0 ] || [ -z "$SOURCE_PATH" ]; then
-    echo "❌ ERROR: Could not find cmd/gauth-server/main.go"
+
+# First, let's ensure we can see what's happening
+echo "🔍 Pre-search verification:"
+echo "  Current directory: $(pwd)"
+echo "  Directory contents:"
+ls -la . | head -10
+echo "  cmd directory check:"
+if [ -d "cmd" ]; then
+    echo "  ✅ cmd directory exists"
+    ls -la cmd/ | head -10
+else
+    echo "  ❌ cmd directory missing"
+fi
+
+# Try each method individually with detailed logging
+echo ""
+echo "🔍 Method-by-method search:"
+
+# Method 1
+echo "  🔍 Method 1: Testing ./cmd/gauth-server/main.go"
+if [ -f "./cmd/gauth-server/main.go" ]; then
+    SOURCE_PATH="./cmd/gauth-server"
+    echo "  ✅ Method 1: Found ./cmd/gauth-server/main.go"
+else
+    echo "  ❌ Method 1: ./cmd/gauth-server/main.go not found"
+    
+    # Method 2
+    echo "  🔍 Method 2: Testing cmd/gauth-server/main.go"
+    if [ -f "cmd/gauth-server/main.go" ]; then
+        SOURCE_PATH="cmd/gauth-server"
+        echo "  ✅ Method 2: Found cmd/gauth-server/main.go"
+    else
+        echo "  ❌ Method 2: cmd/gauth-server/main.go not found"
+        
+        # Method 3
+        echo "  🔍 Method 3: Searching filesystem..."
+        MAIN_GO_PATH=$(find . -name "main.go" -path "*/cmd/gauth-server/*" 2>/dev/null | head -1)
+        if [ -n "$MAIN_GO_PATH" ]; then
+            SOURCE_PATH=$(dirname "$MAIN_GO_PATH")
+            echo "  ✅ Method 3: Found $MAIN_GO_PATH"
+        else
+            echo "  ❌ Method 3: No main.go found in */cmd/gauth-server/* pattern"
+            
+            # Method 4
+            echo "  🔍 Method 4: Directory search..."
+            GAUTH_DIR=$(find . -name "gauth-server" -type d -path "*/cmd/*" 2>/dev/null | head -1)
+            if [ -n "$GAUTH_DIR" ] && [ -f "$GAUTH_DIR/main.go" ]; then
+                SOURCE_PATH="$GAUTH_DIR"
+                echo "  ✅ Method 4: Found directory $GAUTH_DIR with main.go"
+            else
+                echo "  ❌ Method 4: No gauth-server directory with main.go found"
+                SOURCE_PATH=""
+            fi
+        fi
+    fi
+fi
+
+# Check if we found anything
+if [ -z "$SOURCE_PATH" ]; then
+    echo ""
+    echo "❌ ERROR: Could not find cmd/gauth-server/main.go using any method"
     echo ""
     echo "🔍 Enhanced Search Analysis:"
     echo "============================"
     echo "📂 All Go files containing 'gauth':"
-    find . -name "*.go" | grep -i gauth | head -10 || echo "None found"
+    find . -name "*.go" 2>/dev/null | grep -i gauth | head -10 || echo "None found"
+    echo ""
+    echo "📂 All main.go files:"
+    find . -name "main.go" 2>/dev/null | head -15 || echo "No main.go files found"
+    echo ""
+    echo "📂 All directories named gauth-server:"
+    find . -name "*gauth-server*" -type d 2>/dev/null || echo "No gauth-server directories found"
     echo ""
     echo "📂 Complete cmd directory structure:"
     if [ -d "cmd" ]; then
-        find cmd -type f -name "*.go" | head -15 || echo "No Go files in cmd"
+        echo "cmd directory contents:"
+        find cmd -type f -name "*.go" 2>/dev/null | head -15 || echo "No Go files in cmd"
+        echo ""
+        echo "cmd subdirectories:"
+        find cmd -type d 2>/dev/null | head -10 || echo "No subdirectories in cmd"
     else
         echo "cmd directory does not exist"
     fi
+    echo ""
+    echo "📂 File system analysis:"
+    echo "Total files in workspace: $(find . -type f 2>/dev/null | wc -l)"
+    echo "Total Go files: $(find . -name "*.go" 2>/dev/null | wc -l)"
+    echo "Files in root: $(ls -1 . 2>/dev/null | wc -l)"
     echo ""
     show_diagnostics
     exit 1
