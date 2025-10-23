@@ -108,36 +108,67 @@ jobs:
 
     - name: Build
       run: |
-        echo "🚀 Starting CI-adaptive build process..."
-        if make ci-build 2>/dev/null; then
-          echo "✅ CI build succeeded with enhanced method"
-        elif make build-fallback 2>/dev/null; then
-          echo "✅ Fallback build method succeeded"
-        elif ./scripts/ci-build.sh; then
-          echo "✅ Standalone script build succeeded"
+        echo "🚀 CI Build with Direct Implementation (bypassing Make)"
+        echo "======================================================"
+        echo "📍 Working Directory: $(pwd)"
+        echo "👤 User: $(whoami)"
+        echo "🏠 Home: $HOME"
+        echo ""
+        echo "📂 Directory Structure Check:"
+        ls -la . | head -10
+        echo ""
+        echo "📂 cmd Directory Check:"
+        if [ -d "cmd" ]; then
+          echo "✅ cmd directory found"
+          ls -la cmd/ | head -10
         else
-          echo "❌ All build methods failed, trying diagnostics..."
-          echo "📊 Environment Debug Information:"
-          pwd
-          ls -la . | head -10
-          ls -la cmd/ 2>/dev/null || echo "No cmd directory found"
-          find . -name "gauth-server" -type d 2>/dev/null | head -5 || echo "No gauth-server directories found"
-          find . -name "main.go" -path "*/gauth-server/*" 2>/dev/null | head -5 || echo "No gauth-server main.go found"
-          echo "🔧 Attempting manual build..."
-          mkdir -p build/bin
-          if [ -f "./cmd/gauth-server/main.go" ]; then
-            go build -ldflags="-s -w" -o build/bin/gauth-server ./cmd/gauth-server
-          elif [ -f "cmd/gauth-server/main.go" ]; then
-            go build -ldflags="-s -w" -o build/bin/gauth-server cmd/gauth-server
+          echo "❌ cmd directory not found"
+        fi
+        echo ""
+        echo "🔍 Searching for gauth-server source..."
+        
+        # Method 1: Standard relative path  
+        if [ -f "./cmd/gauth-server/main.go" ]; then
+          SOURCE_PATH="./cmd/gauth-server"
+          echo "✅ Method 1: Found ./cmd/gauth-server/main.go"
+        # Method 2: No leading dot
+        elif [ -f "cmd/gauth-server/main.go" ]; then
+          SOURCE_PATH="cmd/gauth-server"  
+          echo "✅ Method 2: Found cmd/gauth-server/main.go"
+        # Method 3: Search filesystem
+        else
+          echo "🔍 Method 3: Searching filesystem..."
+          MAIN_GO_PATH=$(find . -name "main.go" -path "*/gauth-server/*" 2>/dev/null | head -1)
+          if [ -n "$MAIN_GO_PATH" ]; then
+            SOURCE_PATH=$(dirname "$MAIN_GO_PATH")
+            echo "✅ Method 3: Found $MAIN_GO_PATH"
           else
-            SOURCE_PATH=$(find . -name "main.go" -path "*/gauth-server/*" 2>/dev/null | head -1 | xargs dirname)
-            if [ -n "$SOURCE_PATH" ]; then
-              go build -ldflags="-s -w" -o build/bin/gauth-server "$SOURCE_PATH"
-            else
-              echo "❌ Cannot find gauth-server source code"
-              exit 1
-            fi
+            echo "❌ ERROR: Cannot find gauth-server/main.go anywhere"
+            echo "📋 Available main.go files:"
+            find . -name "main.go" 2>/dev/null | head -10 || echo "No main.go files found"
+            echo "📋 Available gauth-server directories:"  
+            find . -name "*gauth-server*" -type d 2>/dev/null | head -5 || echo "No gauth-server directories found"
+            exit 1
           fi
+        fi
+        
+        echo "🏗️ Building gauth-server..."
+        echo "📁 Source path: $SOURCE_PATH"
+        mkdir -p build/bin
+        
+        if go build -ldflags="-s -w" -o build/bin/gauth-server "$SOURCE_PATH"; then
+          echo "✅ Build successful!"
+          echo "📊 Binary info:"
+          ls -la build/bin/gauth-server
+          echo "🧪 Testing binary..."
+          if ./build/bin/gauth-server --help >/dev/null 2>&1 || ./build/bin/gauth-server -h >/dev/null 2>&1; then
+            echo "✅ Binary test passed"
+          else
+            echo "⚠️ Binary test failed (may be normal for some binaries)"
+          fi
+        else
+          echo "❌ Build failed with source path: $SOURCE_PATH"
+          exit 1
         fi
 
   security-scan:
