@@ -13,7 +13,7 @@ crypto-test: ## Run EdDSA-focused tests only
 	@echo "🧪 Running EdDSA test subset..."; \
 	GAUTH_TOKEN_SIG_MODE=eddsa $(GOTEST) -run TestEdDSA ./pkg/gauth -count=1; \
 	echo "✅ EdDSA tests passed";
-.PHONY: all build test clean lint coverage docs help security deps format ci verify-csp
+.PHONY: all build test clean lint coverage docs help security deps format ci verify-csp verify-build-env debug-ci-env
 .PHONY: gap-matrix gap-matrix-check openapi-guard
 .PHONY: js-lint js-test js-build
 .PHONY: js-bundle
@@ -47,12 +47,90 @@ ci: ## Run full CI suite locally (format check, vet, lint, race tests)
 	echo "✅ CI suite passed"
 
 ## Build targets
-build: build-server build-security-test ## Build all binaries
+verify-build-env: ## Verify build environment and directory structure
+	@echo "🔍 Verifying build environment..."
+	@echo "📍 Current working directory: $$(pwd)"
+	@echo "📂 Repository structure verification:"
+	@test -d "./cmd" || (echo "❌ ./cmd directory missing" && exit 1)
+	@test -d "./cmd/gauth-server" || (echo "❌ ./cmd/gauth-server directory missing" && exit 1)
+	@test -f "./cmd/gauth-server/main.go" || (echo "❌ ./cmd/gauth-server/main.go missing" && exit 1)
+	@test -f "./go.mod" || (echo "❌ ./go.mod missing" && exit 1)
+	@echo "✅ Build environment verified successfully"
+
+debug-ci-env: ## Debug CI environment (detailed diagnostics)
+	@echo "🐛 CI Environment Debug Information"
+	@echo "=================================="
+	@echo "📍 Working Directory: $$(pwd)"
+	@echo "🏠 Home Directory: $$HOME"
+	@echo "👤 Current User: $$(whoami)"
+	@echo "💻 System: $$(uname -a)"
+	@echo ""
+	@echo "📁 Directory Structure:"
+	@ls -la . | head -20
+	@echo ""
+	@echo "📂 cmd/ Directory:"
+	@if [ -d "./cmd" ]; then ls -la ./cmd/; else echo "❌ ./cmd directory not found"; fi
+	@echo ""
+	@echo "🔍 Go Environment:"
+	@go version || echo "❌ Go not found"
+	@echo "GOPATH: $$GOPATH"
+	@echo "GOROOT: $$GOROOT"
+	@echo ""
+	@echo "📋 go.mod Information:"
+	@if [ -f "./go.mod" ]; then head -5 ./go.mod; else echo "❌ ./go.mod not found"; fi
+
+build-ci-adaptive: ## CI-adaptive build that handles nested directory structures
+	@echo "🔧 CI-Adaptive Build for GAuth Server"
+	@echo "======================================"
+	@echo "📍 Working Directory: $$(pwd)"
+	@echo ""
+	@echo "🔍 Searching for source files..."
+	@if [ -f "./cmd/gauth-server/main.go" ]; then \
+		echo "✅ Method 1: Found ./cmd/gauth-server/main.go"; \
+		SOURCE_PATH="./cmd/gauth-server"; \
+	elif [ -f "cmd/gauth-server/main.go" ]; then \
+		echo "✅ Method 2: Found cmd/gauth-server/main.go"; \
+		SOURCE_PATH="cmd/gauth-server"; \
+	else \
+		echo "🔍 Method 3: Searching filesystem..."; \
+		MAIN_GO_PATH=$$(find . -name "main.go" -path "*/cmd/gauth-server/*" 2>/dev/null | head -1); \
+		if [ -n "$$MAIN_GO_PATH" ]; then \
+			SOURCE_PATH=$$(dirname "$$MAIN_GO_PATH"); \
+			echo "✅ Method 3: Found $$MAIN_GO_PATH"; \
+			echo "✅ Using source path: $$SOURCE_PATH"; \
+		else \
+			echo "❌ FAILED: Cannot find gauth-server/main.go anywhere"; \
+			echo "📋 Available main.go files:"; \
+			find . -name "main.go" 2>/dev/null | head -10 || echo "No main.go files found"; \
+			exit 1; \
+		fi; \
+	fi; \
+	echo "🏗️ Building with source path: $$SOURCE_PATH"; \
+	mkdir -p $(BINARY_DIR); \
+	$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-server "$$SOURCE_PATH"
+
+build: verify-build-env build-server build-security-test ## Build all binaries
 
 build-server: ## Build the CLI demo server (cmd/gauth-server)
 	@echo "🔧 Building GAuth demo server..."
-	mkdir -p $(BINARY_DIR)
-	$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-server ./cmd/gauth-server
+	@echo "📍 Current working directory: $$(pwd)"
+	@echo "📂 Searching for gauth-server source..."
+	@if [ -d "./cmd/gauth-server" ] && [ -f "./cmd/gauth-server/main.go" ]; then \
+		echo "✅ Found cmd/gauth-server with main.go"; \
+		mkdir -p $(BINARY_DIR); \
+		$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-server ./cmd/gauth-server; \
+	else \
+		echo "❌ ERROR: cmd/gauth-server not found or missing main.go"; \
+		echo "📋 Current directory contents:"; \
+		ls -la . | head -10; \
+		echo "📋 Looking for cmd directory:"; \
+		find . -name "cmd" -type d 2>/dev/null | head -5 || echo "No cmd directories found"; \
+		echo "📋 Looking for gauth-server directory:"; \
+		find . -name "gauth-server" -type d 2>/dev/null | head -5 || echo "No gauth-server directories found"; \
+		echo "📋 Looking for main.go in gauth-server:"; \
+		find . -name "main.go" -path "*/gauth-server/*" 2>/dev/null | head -5 || echo "No gauth-server main.go found"; \
+		exit 1; \
+	fi
 
 build-web: js-build ## Build the web demo server (cmd/web-server) (includes JS bundle embed)
 	@echo "🌐 Building web demo server..."
