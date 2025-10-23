@@ -25,7 +25,7 @@ func TestTokenIssuanceReplayNonce(t *testing.T) {
 		// Emulate rejection response
 		w := httptest.NewRecorder()
 		w.WriteHeader(409)
-		_ = w.Write([]byte(`{"success":false,"error":"replay"}`))
+		_, _ = w.Write([]byte(`{"success":false,"error":"replay"}`))
 		var body map[string]any
 		if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
 			t.Fatalf("json: %v", err)

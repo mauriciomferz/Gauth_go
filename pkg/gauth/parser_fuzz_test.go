@@ -16,6 +16,6 @@ func FuzzParseClaims(f *testing.F) {
 		f.Add(s)
 	}
 	f.Fuzz(func(t *testing.T, data []byte) {
-		_ = ParseClaims(data) // ignore result; panic is failure
+		_, _ = ParseClaims(data) // ignore result; panic is failure
 	})
 }

@@ -12,7 +12,7 @@ import (
 // TestModelLimitsStrictUnknown verifies that unknown model is denied when strict mode is enabled.
 func TestModelLimitsStrictUnknown(t *testing.T) {
 	f, _ := os.CreateTemp(t.TempDir(), "model_limits_strict_*.json")
-	_ = f.Write([]byte(`{"model_limits":{"known-model":{"max_input_tokens":100}}}`))
+	_, _ = f.Write([]byte(`{"model_limits":{"known-model":{"max_input_tokens":100}}}`))
 	f.Close()
 	os.Setenv("GAUTH_MODEL_LIMITS_PATH", f.Name())
 	os.Setenv("GAUTH_MODEL_LIMITS_STRICT_UNKNOWN", "1")

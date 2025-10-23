@@ -14,7 +14,7 @@ func seedChain(n int) *RevocationChain {
 	c := NewRevocationChain()
 	for i := 0; i < n; i++ {
 		id := time.Now().UTC().Format("150405.000000") + string(rune('a'+(i%26))) + "-" + string(rune('A'+(i%26)))
-		if _, err := c.Append(RevocationEvent{ID: id, DelegationID: id}); err != nil { t.Fatalf("Failed to append: %v", err) }
+			_, _ = c.Append(RevocationEvent{ID: id, DelegationID: id})
 		time.Sleep(200 * time.Microsecond)
 	}
 	return c

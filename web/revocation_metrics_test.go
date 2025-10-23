@@ -61,7 +61,7 @@ func TestRevocationAutoSignMetrics(t *testing.T) {
 	if s.revocationChain == nil {
 		s.revocationChain = delegation.NewRevocationChain()
 	}
-	_ = s.revocationChain.Append(delegation.RevocationEvent{ID: "rev-1", DelegationID: "del-1", Reason: string(delegation.RevocationReasonUserRequest)})
+	_, _ = s.revocationChain.Append(delegation.RevocationEvent{ID: "rev-1", DelegationID: "del-1", Reason: string(delegation.RevocationReasonUserRequest)})
 	triggerRevocationAutoSign(s)
 	e, se, sd = parseProm()
 	if e != 1 || se != 1 || sd != 0 {
@@ -76,7 +76,7 @@ func TestRevocationAutoSignMetrics(t *testing.T) {
 	}
 
 	// 4. Add second event -> expect emitted=2
-	_ = s.revocationChain.Append(delegation.RevocationEvent{ID: "rev-2", DelegationID: "del-2", Reason: string(delegation.RevocationReasonUserRequest)})
+	_, _ = s.revocationChain.Append(delegation.RevocationEvent{ID: "rev-2", DelegationID: "del-2", Reason: string(delegation.RevocationReasonUserRequest)})
 	triggerRevocationAutoSign(s)
 	e, se, sd = parseProm()
 	if e != 2 || se != 1 || sd != 1 {

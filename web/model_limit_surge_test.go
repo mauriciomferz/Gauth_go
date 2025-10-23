@@ -16,7 +16,7 @@ import (
 func TestModelLimitSurgeDetection(t *testing.T) {
 	f, _ := os.CreateTemp(t.TempDir(), "limits_*.json")
 	// Low limit to force exceed easily.
-	_ = f.Write([]byte(`{"model_limits":{"surge-model":{"max_input_tokens":5}}}`))
+	_, _ = f.Write([]byte(`{"model_limits":{"surge-model":{"max_input_tokens":5}}}`))
 	f.Close()
 	os.Setenv("GAUTH_MODEL_LIMITS_PATH", f.Name())
 	os.Setenv("GAUTH_MODEL_LIMIT_SURGE_FACTOR", "1.0") // make threshold easier (last10 > avg*1)

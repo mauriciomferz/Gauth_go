@@ -23,7 +23,7 @@ func TestRevocationAutoSignPrometheusMetrics(t *testing.T) {
 	// 1. Empty chain rotation -> skipped_empty++
 	triggerRevocationAutoSign(s)
 	// 2. Add first event -> emitted++
-	_ = s.revocationChain.Append(delegation.RevocationEvent{ID: "rev-1", DelegationID: "del-1", Reason: string(delegation.RevocationReasonUserRequest)})
+	_, _ = s.revocationChain.Append(delegation.RevocationEvent{ID: "rev-1", DelegationID: "del-1", Reason: string(delegation.RevocationReasonUserRequest)})
 	triggerRevocationAutoSign(s)
 	// 3. Duplicate rotation -> skipped_duplicate++
 	triggerRevocationAutoSign(s)
