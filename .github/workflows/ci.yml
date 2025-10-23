@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go-version: ['1.24']
+        go-version: ['1.25']
 
     steps:
     - uses: actions/checkout@v4
@@ -79,7 +79,7 @@ jobs:
         
     - name: Run linter
       run: |
-        GOROOT=$(go env GOROOT) GOVERSION=1.24.0 $(go env GOPATH)/bin/golangci-lint run --timeout=10m
+        GOROOT=$(go env GOROOT) GOVERSION=1.25.1 $(go env GOPATH)/bin/golangci-lint run --timeout=10m
 
   build:
     name: Build
@@ -91,7 +91,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
-        go-version: '1.23'
+        go-version: '1.25'
 
     - name: Build
       run: make build
@@ -106,7 +106,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
-        go-version: '1.23'
+        go-version: '1.25'
 
     - name: Install dependencies
       run: go mod download

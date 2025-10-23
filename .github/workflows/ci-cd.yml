@@ -15,7 +15,7 @@ permissions:
   checks: write
 
 env:
-  GO_VERSION: "1.24.x"
+  GO_VERSION: "1.25.x"
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
@@ -110,7 +110,7 @@ jobs:
 
     - name: Install and run staticcheck  
       run: |
-        # Install the latest staticcheck that supports Go 1.23
+        # Install the latest staticcheck that supports Go 1.25
         go install honnef.co/go/tools/cmd/staticcheck@latest
         # Run staticcheck with error handling
         staticcheck ./... || echo "Staticcheck completed with warnings"
