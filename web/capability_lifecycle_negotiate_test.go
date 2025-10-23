@@ -11,6 +11,8 @@ import (
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/capability"
 )
 
+const testPastTime = "2025-01-01T00:00:00Z"
+
 // TestCapabilityNegotiationStrictLifecycle ensures deprecated capabilities are excluded when strict flag set.
 func TestCapabilityNegotiationStrictLifecycle(t *testing.T) {
 	// Set lifecycle strict flag and start with clean registry

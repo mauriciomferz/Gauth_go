@@ -89,3 +89,5 @@ func TestCapabilityAnchorMaterialSigned(t *testing.T) {
 		t.Fatalf("anchored_at empty")
 	}
 }
+
+const testCapRegistryAnchor = "capability_registry_anchor"

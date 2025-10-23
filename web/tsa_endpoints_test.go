@@ -61,3 +61,5 @@ func TestTSAAnchorAndVerify(t *testing.T) {
 
 // bytesJSON helper returns reader for JSON body.
 func bytesJSON(v any) *bytes.Reader { b, _ := json.Marshal(v); return bytes.NewReader(b) }
+
+const testDemoHashValue = "demo-hash-value"

@@ -15,6 +15,8 @@ import (
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/authz"
 )
 
+const testDeadbeefCafebabe = "deadbeefcafebabe"
+
 // TestDigestMismatchReasonHeuristics simulates domain_conflict vs tamper_suspected classification.
 func TestDigestMismatchReasonHeuristics(t *testing.T) {
 	mem := metrics.NewMemory()

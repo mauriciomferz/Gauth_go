@@ -197,17 +197,11 @@ const (
 	changeReasonStatus    = "status_change"
 	changeReasonNoop      = "noop"
 	// Algorithm literals
-	algHMACSHA256         = algHMACSHA256
+	algHMACSHA256         = "HMAC-SHA256"
 	// Label literals
 	labelProvider         = "provider"
 	// Action literals
 	actionEvaluate        = "evaluate"
-	// Test sentinels
-	testPastTime          = "2025-01-01T00:00:00Z"
-	testDemoHashValue     = "demo-hash-value"
-	testDeadbeefCafebabe  = "deadbeefcafebabe"
-	testTamper            = "tamper"
-	testCapRegistryAnchor = "capability_registry_anchor"
 )
 
 // anomalyPersist defines persistence format for EWMA semantic anomaly stats.

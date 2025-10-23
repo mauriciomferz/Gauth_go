@@ -113,3 +113,5 @@ func TestModelLimitsAttestationSignature(t *testing.T) {
 		t.Fatalf("tamper should fail verification")
 	}
 }
+
+const testTamper = "tamper"
