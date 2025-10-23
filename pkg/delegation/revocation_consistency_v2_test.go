@@ -14,7 +14,7 @@ func seedChain(n int) *RevocationChain {
 	c := NewRevocationChain()
 	for i := 0; i < n; i++ {
 		id := time.Now().UTC().Format("150405.000000") + string(rune('a'+(i%26))) + "-" + string(rune('A'+(i%26)))
-			_, _ = c.Append(RevocationEvent{ID: id, DelegationID: id})
+		_, _ = c.Append(RevocationEvent{ID: id, DelegationID: id})
 		time.Sleep(200 * time.Microsecond)
 	}
 	return c
@@ -26,7 +26,9 @@ func TestConsistencyProofV2BasicGrowth(t *testing.T) {
 	if _, err := chain.SignTreeHead(); err != nil {
 		t.Fatalf("sign head1: %v", err)
 	}
-	if _, err := chain.Append(RevocationEvent{ID: "extra-1", DelegationID: "extra-1"}); err != nil { t.Fatalf("Failed to append extra-1: %v", err) }
+	if _, err := chain.Append(RevocationEvent{ID: "extra-1", DelegationID: "extra-1"}); err != nil {
+		t.Fatalf("Failed to append extra-1: %v", err)
+	}
 	if _, err := chain.SignTreeHead(); err != nil {
 		t.Fatalf("sign head2: %v", err)
 	}
@@ -61,7 +63,9 @@ func TestConsistencyProofV2VariousSizes(t *testing.T) {
 			t.Fatalf("sign initial: %v", err)
 		}
 		// grow
-		if _, err := chain.Append(RevocationEvent{ID: "grow-x", DelegationID: "grow-x"}); err != nil { t.Fatalf("Failed to append grow-x: %v", err) }
+		if _, err := chain.Append(RevocationEvent{ID: "grow-x", DelegationID: "grow-x"}); err != nil {
+			t.Fatalf("Failed to append grow-x: %v", err)
+		}
 		if _, err := chain.SignTreeHead(); err != nil {
 			t.Fatalf("sign second: %v", err)
 		}
@@ -104,7 +108,7 @@ func TestConsistencyProofV2WithKeyManager(t *testing.T) {
 	if _, err := chain.SignTreeHead(); err != nil {
 		t.Fatalf("sign 1: %v", err)
 	}
-	chain.Append(RevocationEvent{ID: "x2", DelegationID: "x2"})
+	_, _ = chain.Append(RevocationEvent{ID: "x2", DelegationID: "x2"})
 	if _, err := chain.SignTreeHead(); err != nil {
 		t.Fatalf("sign 2: %v", err)
 	}
@@ -168,7 +172,7 @@ func TestConsistencyProofV2PrefixTamper(t *testing.T) {
 	if _, err := chain.SignTreeHead(); err != nil {
 		t.Fatalf("sign initial: %v", err)
 	}
-	chain.Append(RevocationEvent{ID: "extra-a", DelegationID: "extra-a"})
+	_, _ = chain.Append(RevocationEvent{ID: "extra-a", DelegationID: "extra-a"})
 	if _, err := chain.SignTreeHead(); err != nil {
 		t.Fatalf("sign second: %v", err)
 	}

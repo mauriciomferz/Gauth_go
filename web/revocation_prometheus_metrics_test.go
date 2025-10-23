@@ -28,7 +28,7 @@ func TestRevocationAutoSignPrometheusMetrics(t *testing.T) {
 	// 3. Duplicate rotation -> skipped_duplicate++
 	triggerRevocationAutoSign(s)
 	// 4. Add second event -> emitted++ (emitted=2, skipped_empty=1, skipped_duplicate=1)
-	s.revocationChain.Append(delegation.RevocationEvent{ID: "rev-2", DelegationID: "del-2", Reason: string(delegation.RevocationReasonUserRequest)})
+	_, _ = s.revocationChain.Append(delegation.RevocationEvent{ID: "rev-2", DelegationID: "del-2", Reason: string(delegation.RevocationReasonUserRequest)})
 	triggerRevocationAutoSign(s)
 
 	req := httptest.NewRequest("GET", "/api/v1/beta/metrics/revocation/auto-sign/prometheus", nil)
