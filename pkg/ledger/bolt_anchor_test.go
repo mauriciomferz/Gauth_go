@@ -34,7 +34,13 @@ func TestBoltAnchorFileEmission(t *testing.T) {
 	}
 	// Append several entries spaced out to trigger writes.
 	for i := 0; i < 3; i++ {
-		e := &Entry{ID: time.Now().Format("20060102150405") + "-" + string(rune('a'+i)), TS: time.Now().UTC(), Type: "test", Subject: "sub", Object: "obj"}
+			e := &Entry{
+				ID:       time.Now().Format("20060102150405") + "-" + string(rune('a'+i)),
+				TS:       time.Now().UTC(),
+				Type:     "test",
+				Subject:  "sub",
+				Object:   "obj",
+			}
 		if err := st.Append(context.TODO(), e); err != nil {
 			t.Fatalf("append %d: %v", i, err)
 		}

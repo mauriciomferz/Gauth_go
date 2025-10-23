@@ -27,7 +27,17 @@ func buildTestServer(rc *delegation.RevocationChain, enableConsistency bool) *ht
 		}
 		sthJSON := map[string]any{}
 		if sth != nil {
-			sthJSON = map[string]any{"version": sth.Version, "merkle_root": sth.MerkleRoot, "chain_length": sth.ChainLength, "aggregate_hash": sth.AggregateHash, "timestamp": sth.Timestamp.Format(time.RFC3339), "signatures": sigs, "threshold": sth.Threshold, "weights_total": sth.WeightsTotal, "satisfied_weight": sth.SatisfiedWeight}
+			sthJSON = map[string]any{
+				"version":          sth.Version,
+				"merkle_root":      sth.MerkleRoot,
+				"chain_length":     sth.ChainLength,
+				"aggregate_hash":   sth.AggregateHash,
+				"timestamp":        sth.Timestamp.Format(time.RFC3339),
+				"signatures":       sigs,
+				"threshold":        sth.Threshold,
+				"weights_total":    sth.WeightsTotal,
+				"satisfied_weight": sth.SatisfiedWeight,
+			}
 		}
 		historySize := len(rc.TreeHeads())
 		writeJSON(w, map[string]any{"revocation_support": map[string]any{"sth_latest": sthJSON, "sth_history_size": historySize}})
@@ -38,7 +48,13 @@ func buildTestServer(rc *delegation.RevocationChain, enableConsistency bool) *ht
 		for i, e := range events {
 			evJSON = append(evJSON, map[string]any{"id": e.ID, "hash": e.Hash, "index": i})
 		}
-		writeJSON(w, map[string]any{"success": true, "events": evJSON, "length": len(events), "verified": true, "aggregate_hash": rc.AggregateHash()})
+			writeJSON(w, map[string]any{
+				"success":        true,
+				"events":         evJSON,
+				"length":         len(events),
+				"verified":       true,
+				"aggregate_hash": rc.AggregateHash(),
+			})
 	})
 	mux.HandleFunc("/api/v1/token/revocation/proof", func(w http.ResponseWriter, r *http.Request) {
 		hash := r.URL.Query().Get("hash")
@@ -62,7 +78,12 @@ func buildTestServer(rc *delegation.RevocationChain, enableConsistency bool) *ht
 		keys := []map[string]any{}
 		if km != nil && km.Active() != nil {
 			k := km.Active()
-			keys = append(keys, map[string]any{"kty": "OKP", "crv": "Ed25519", "kid": k.ID, "x": base64.RawURLEncoding.EncodeToString(k.Public)})
+			keys = append(keys, map[string]any{
+				"kty": "OKP",
+				"crv": "Ed25519",
+				"kid": k.ID,
+				"x":   base64.RawURLEncoding.EncodeToString(k.Public),
+			})
 		}
 		writeJSON(w, map[string]any{"keys": keys})
 	})
@@ -73,7 +94,13 @@ func buildTestServer(rc *delegation.RevocationChain, enableConsistency bool) *ht
 				writeJSON(w, map[string]any{"success": false})
 				return
 			}
-			writeJSON(w, map[string]any{"success": true, "proof": proof, "latest_tree_head": map[string]any{"merkle_root": rc.LatestTreeHead().MerkleRoot}})
+			writeJSON(w, map[string]any{
+				"success": true,
+				"proof":   proof,
+				"latest_tree_head": map[string]any{
+					"merkle_root": rc.LatestTreeHead().MerkleRoot,
+				},
+			})
 		})
 	}
 	return httptest.NewServer(mux)

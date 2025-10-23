@@ -1,7 +1,9 @@
 package verification
 
 // Reusable verification utilities extracted from cmd/verify for programmatic usage and unit testing.
-// Provides higher-level orchestration (VerifyAll) and granular helpers (FetchDiscovery, FetchEvents, FetchProofByHash, FetchConsistency, LoadJWKS, VerifyInclusion, VerifySTHMultiSig).
+// Reusable verification utilities extracted from cmd/verify for programmatic usage and unit testing.
+// Provides higher-level orchestration (VerifyAll) and granular helpers (FetchDiscovery, FetchEvents,
+// FetchProofByHash, FetchConsistency, LoadJWKS, VerifyInclusion, VerifySTHMultiSig).
 
 import (
 	"encoding/base64"

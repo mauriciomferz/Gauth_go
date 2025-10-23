@@ -88,7 +88,11 @@ type memoryStore struct {
 
 // NewMemoryStore creates a new in-memory ledger store.
 func NewMemoryStore() Store {
-	return &memoryStore{indexByID: make(map[string]*Entry), indexSubject: make(map[string][]*Entry), indexObject: make(map[string][]*Entry)}
+	return &memoryStore{
+		indexByID:      make(map[string]*Entry),
+		indexSubject:   make(map[string][]*Entry),
+		indexObject:    make(map[string][]*Entry),
+	}
 }
 
 // ConfigureEd25519Signer installs an Ed25519 signer for automatic entry signatures.

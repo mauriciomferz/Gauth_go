@@ -12,9 +12,10 @@ import (
 )
 
 const (
-rotationsSummaryPath = "/api/v1/beta/rotations/summary"
-jwksPath = "/.well-known/jwks.json"
+	rotationsSummaryPath = "/api/v1/beta/rotations/summary"
+	jwksPath             = "/.well-known/jwks.json"
 )
+
 // mock server returning a deterministic signed rotation summary using ephemeral key
 func TestVerifyRotationSummary_Success(t *testing.T) {
 	pub, priv, _ := ed25519.GenerateKey(rand.Reader)
