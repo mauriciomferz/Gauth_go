@@ -4517,7 +4517,7 @@ func (s *BetaServer) apiCapabilityAnchorPrometheus(c *gin.Context) {
 	if s.receiptIntegrityStatus == "" && s.receiptStore != nil {
 		entries := s.receiptStore.Entries()
 		prev := ""
-		for i, e := range entries {
+		for _, e := range entries {
 			// Compute expected chain hash: sha256(prev + e.Hash)
 			h := sha256.Sum256([]byte(prev + e.Hash))
 			expected := hex.EncodeToString(h[:])
