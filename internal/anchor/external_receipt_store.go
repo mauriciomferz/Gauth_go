@@ -80,7 +80,7 @@ func (rs *ExternalReceiptStore) Load() error {
 		return errors.New("external receipt store path empty")
 	}
 	// Ensure parent directory exists (it may not yet if path configured but never written).
-	if err := os.MkdirAll(filepath.Dir(rs.path), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(rs.path), 0o750); err != nil {
 		return err
 	}
 	b, err := os.ReadFile(rs.path)
@@ -113,7 +113,7 @@ func (rs *ExternalReceiptStore) Append(r ExternalAnchorReceipt) (StoredExternalA
 		return StoredExternalAnchorReceipt{}, errors.New("external receipt store path empty")
 	}
 	// Create parent directory if missing to avoid transient write failures under concurrent test temp dir creation.
-	if err := os.MkdirAll(filepath.Dir(rs.path), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(rs.path), 0o750); err != nil {
 		return StoredExternalAnchorReceipt{}, err
 	}
 	sr := StoredExternalAnchorReceipt{ExternalAnchorReceipt: r, PrevHash: rs.headHash}

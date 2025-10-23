@@ -244,7 +244,7 @@ func TestReloadMetric(t *testing.T) {
 	// Modify file after brief delay
 	time.Sleep(150 * time.Millisecond)
 	updated := []byte(`[{"id":"x2","subject":"alice","resource":"r2","actions":["read"],"effect":"deny"}]`)
-	if err := os.WriteFile(tmpFile, updated, 0o644); err != nil {
+	if err := os.WriteFile(tmpFile, updated, 0o600); err != nil {
 		t.Fatalf("write update: %v", err)
 	}
 	// Wait for poll to detect
@@ -258,7 +258,7 @@ func TestReloadMetric(t *testing.T) {
 		t.Fatalf("start watch: %v", err)
 	}
 	third := []byte(`[{"id":"x3","subject":"alice","resource":"r3","actions":["read"],"effect":"allow"}]`)
-	if err := os.WriteFile(tmpFile, third, 0o644); err != nil {
+	if err := os.WriteFile(tmpFile, third, 0o600); err != nil {
 		t.Fatalf("write third: %v", err)
 	}
 	time.Sleep(200 * time.Millisecond)
@@ -286,7 +286,7 @@ func TestPolicyDiffOnReload(t *testing.T) {
 	}
 	// modify file: remove b, add c
 	newContent := `[{"id":"a","subject":"alice","resource":"r1","actions":["read"],"effect":"allow"},{"id":"c","subject":"alice","resource":"r3","actions":["read"],"effect":"deny"}]`
-	if err := os.WriteFile(path, []byte(newContent), 0o644); err != nil {
+	if err := os.WriteFile(path, []byte(newContent), 0o600); err != nil {
 		t.Fatalf("write: %v", err)
 	}
 	// trigger reload directly

@@ -74,7 +74,7 @@ func TestViolationPersistenceVerify(t *testing.T) {
 	if payload.Counters == nil {
 		payload.Counters = map[string]uint64{}
 	}
-	payload.Counters["sig_invalid"] = payload.Counters["sig_invalid"] + 1 // increment one counter
+	payload.Counters["sig_invalid"]++ // increment one counter
 	// Re-marshal mutated payload but keep original wrapper.Hash (expected to mismatch now)
 	mutatedPayload, err := json.Marshal(payload)
 	if err != nil {
@@ -163,7 +163,7 @@ func TestSemanticPersistenceVerify(t *testing.T) {
 	if inner.Counters == nil {
 		inner.Counters = map[string]uint64{}
 	}
-	inner.Counters["scope_violation"] = inner.Counters["scope_violation"] + 1
+	inner.Counters["scope_violation"]++
 	mutatedPayload, marshalErr2 := json.Marshal(inner)
 	if marshalErr2 != nil {
 		t.Fatalf("marshal mutated inner semantic payload: %v", marshalErr2)

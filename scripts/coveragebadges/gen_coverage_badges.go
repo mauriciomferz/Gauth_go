@@ -28,7 +28,7 @@ func main() {
 	if outDir == "" {
 		outDir = filepath.Join("build", "badges")
 	}
-	if err := os.MkdirAll(outDir, 0o755); err != nil {
+	if err := os.MkdirAll(outDir, 0o750); err != nil {
 		fatalf("create output dir: %v", err)
 	}
 	pkgs, err := listPackages()
