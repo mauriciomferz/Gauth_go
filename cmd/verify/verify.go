@@ -4,12 +4,6 @@
 // consistency proofs.
 package main
 
-const (
-	statusOK = statusOK
-	statusMismatch = statusMismatch
-	statusUnconfigured = statusUnconfigured
-	statusError = statusError
-)
 // Simplified verification CLI now delegating all logic to pkg/verification.
 // Usage:
 //   go run ./cmd/verify --base http://localhost:8080 --hash <event_hash>
@@ -34,21 +28,21 @@ func handleReceiptVerification(base, receipts string, receiptsURL, jsonOut, quie
 	status, total, head, err := verifyReceipts(base, receipts, receiptsURL)
 	exit := 3 // default error
 	switch status {
-	case statusOK:
+	case "ok":
 		exit = 0
-	case statusMismatch:
+	case "mismatch":
 		exit = 1
-	case statusUnconfigured, "empty":
+	case "unconfigured", "empty":
 		exit = 2
 	}
 	if jsonOut {
 		enc := map[string]interface{}{"mode": "receipts", "status": status, "total": total, "head": head}
 		b, _ := json.Marshal(enc)
 		fmt.Println(string(b))
-	} else if !(status == statusOK && quiet) {
+	} else if !(status == "ok" && quiet) {
 		fmt.Printf("[receipts] status=%s total=%d head=%s\n", status, total, head)
 	}
-	if err != nil && status == statusError {
+	if err != nil && status == "error" {
 		fmt.Fprintf(os.Stderr, "[receipts] error: %v\n", err)
 	}
 	os.Exit(exit)
@@ -97,7 +91,7 @@ func main() {
 			}
 		} else {
 			if *jsonOut {
-				b, _ := json.Marshal(map[string]interface{}{"mode": "revocation", "status": statusError, statusError: err.Error()})
+				b, _ := json.Marshal(map[string]interface{}{"mode": "revocation", "status": "error", "error": err.Error()})
 				fmt.Println(string(b))
 			} else {
 				fmt.Fprintf(os.Stderr, "[verify] FAILED: %v\n", err)
@@ -106,7 +100,7 @@ func main() {
 		os.Exit(1)
 	}
 	if *jsonOut {
-		b, _ := json.Marshal(map[string]interface{}{"mode": "revocation", "status": statusOK, "hash": target})
+		b, _ := json.Marshal(map[string]interface{}{"mode": "revocation", "status": "ok", "hash": target})
 		fmt.Println(string(b))
 	} else if !*quiet {
 		fmt.Println("[verify] SUCCESS all checks passed")
@@ -119,7 +113,7 @@ func verifyReceipts(base, path string, remote bool) (string, int, string, error)
 	if path != "" {
 		b, err := os.ReadFile(path)
 		if err != nil {
-			return statusError, 0, "", err
+			return "error", 0, "", err
 		}
 		var raw struct {
 			Entries []struct {
@@ -131,27 +125,27 @@ func verifyReceipts(base, path string, remote bool) (string, int, string, error)
 			} `json:"entries"`
 		}
 		if err := json.Unmarshal(b, &raw); err != nil {
-			return statusError, 0, "", err
+			return "error", 0, "", err
 		}
 		prev := ""
 		for _, e := range raw.Entries {
 			// Recompute expected chain hash: sha256(prev + marshal(base_receipt_without_chain_hash)) simplified since file persists only final chain hashes; use prev+Hash for quick check (approximation matching server's verify path logic variant used in endpoint – acceptable for safety net; full reproduction would re-marshal base fields).
 			// For CLI correctness we just compare prev link continuity.
 			if e.PrevHash != prev {
-				return statusMismatch, len(raw.Entries), e.ChainHash, nil
+				return "mismatch", len(raw.Entries), e.ChainHash, nil
 			}
 			prev = e.ChainHash
 		}
 		if len(raw.Entries) == 0 {
 			return "empty", 0, "", nil
 		}
-		return statusOK, len(raw.Entries), prev, nil
+		return "ok", len(raw.Entries), prev, nil
 	}
 	if remote {
 		url := fmt.Sprintf("%s/api/v1/beta/notarization/receipts/verify", base)
 		resp, err := http.Get(url)
 		if err != nil {
-			return statusError, 0, "", err
+			return "error", 0, "", err
 		}
 		defer resp.Body.Close()
 		body, _ := io.ReadAll(resp.Body)
@@ -163,15 +157,15 @@ func verifyReceipts(base, path string, remote bool) (string, int, string, error)
 			Details    map[string]interface{} `json:"details"`
 		}
 		if err := json.Unmarshal(body, &d); err != nil {
-			return statusError, 0, "", err
+			return "error", 0, "", err
 		}
 		if !d.Configured {
-			return statusUnconfigured, 0, "", nil
+			return "unconfigured", 0, "", nil
 		}
 		if d.Integrity == "empty" {
 			return "empty", 0, "", nil
 		}
 		return d.Integrity, d.Total, "", nil
 	}
-	return statusError, 0, "", errors.New("no receipt verification mode selected")
+	return "error", 0, "", errors.New("no receipt verification mode selected")
 }

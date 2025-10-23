@@ -1,9 +1,5 @@
 package policy
 
-const (
-	reasonDeniedByPolicy = reasonDeniedByPolicy
-	reasonAllowed = reasonAllowed
-)
 import (
 	"context"
 	"crypto/sha256"
@@ -427,10 +423,10 @@ func (e *ChainEngine) Evaluate(ctx context.Context, req EvalRequest) (EvalDecisi
 	}
 	if dec.Deny {
 		dec.Allow = false
-		dec.Reason = reasonDeniedByPolicy
+		dec.Reason = "denied by policy"
 	} else if len(dec.Matched) > 0 {
 		dec.Allow = true
-		dec.Reason = reasonAllowed
+		dec.Reason = "allowed"
 	} else {
 		dec.Allow = false
 		dec.Reason = "no matching policy"
