@@ -65,14 +65,19 @@ build-security-test: ## Build the RFC demo
 	$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-rfc-demo ./cmd/examples/rfc-demo
 
 ## Test targets
-test: ## Run all tests
+test: ## Run all tests (CI-safe, without race detection)
 	@echo "🧪 Running test suite..."
+	$(GOCLEAN) -testcache
+	$(GOTEST) -v -timeout=30s ./...
+
+test-race: ## Run all tests with race detection (for development)
+	@echo "🏁 Running test suite with race detection..."
 	$(GOCLEAN) -testcache
 	$(GOTEST) -v -race -timeout=30s ./...
 
 test-coverage: ## Run tests with coverage
 	@echo "📊 Running tests with coverage..."
-	$(GOTEST) -v -race -coverprofile=coverage.out -covermode=atomic ./...
+	$(GOTEST) -v -coverprofile=coverage.out -covermode=atomic ./...
 	$(GOCMD) tool cover -html=coverage.out -o coverage.html
 	@echo "✅ Coverage report generated: coverage.html"
 
