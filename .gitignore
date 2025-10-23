@@ -129,7 +129,9 @@ gauth-demo-*
 gauth-backend*
 gauth-enhanced-*
 gauth-rfc111-*
-*-server
+# Ignore built server binaries but not source directories
+bin/*-server
+build/*-server
 *-backend
 *-demo
 .trunk/
