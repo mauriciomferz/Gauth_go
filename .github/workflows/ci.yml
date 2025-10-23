@@ -54,6 +54,7 @@ jobs:
 
     - name: Run unit tests
       run: |
+        set -e
         echo "🧪 Running comprehensive test suite with enhanced CI robustness..."
         go clean -testcache
         go clean -cache
@@ -66,16 +67,16 @@ jobs:
         
         # Run tests in groups to better isolate any issues
         echo "Testing core packages..."
-        go test -v -timeout=10m ./pkg/...
+        go test -v -timeout=10m ./pkg/... || { echo "❌ pkg tests failed"; exit 1; }
         
         echo "Testing internal packages..."
-        go test -v -timeout=10m ./internal/...
+        go test -v -timeout=10m ./internal/... || { echo "❌ internal tests failed"; exit 1; }
         
         echo "Testing web packages..."
-        go test -v -timeout=10m ./web/...
+        go test -v -timeout=10m ./web/... || { echo "❌ web tests failed"; exit 1; }
         
         echo "Testing test packages..."
-        go test -v -timeout=10m ./test/...
+        go test -v -timeout=10m ./test/... || { echo "❌ test packages failed"; exit 1; }
         
         echo "✅ All tests completed successfully"
 
