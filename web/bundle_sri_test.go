@@ -21,7 +21,7 @@ func TestApplyBundleSubstitutionSRI(t *testing.T) {
 	if err := os.WriteFile(manifestPath, []byte(manifest), 0o644); err != nil {
 		t.Fatalf("write manifest: %v", err)
 	}
-	defer os.Remove(manifestPath)
+	defer func() { _ = os.Remove(manifestPath) }()
 
 	page := []byte(`<script src="/static/js/__APP_BUNDLE__" integrity="__APP_SRI__"></script>`)
 	out := string(bs.applyBundleSubstitution(page))

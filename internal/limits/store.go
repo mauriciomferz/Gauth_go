@@ -104,6 +104,8 @@ func (s *Store) load() error {
 	return nil
 }
 
+const SnapshotType = "limits_snapshot"
+
 // LedgerEntry produces a structured object suitable for inclusion in an audit ledger.
 // Callers JSON-encode the returned map under a ledger event type (e.g. limits_snapshot).
 func (s *Store) LedgerEntry() map[string]any {
@@ -112,7 +114,7 @@ func (s *Store) LedgerEntry() map[string]any {
 	for k, v := range snap {
 		out[k] = v
 	}
-	out["_type"] = "limits_snapshot"
+	out["_type"] = SnapshotType
 	return out
 }
 

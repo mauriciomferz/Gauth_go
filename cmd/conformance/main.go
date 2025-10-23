@@ -93,7 +93,7 @@ func main() {
 	if markdownOut != "" {
 		md := rep.ToMarkdown()
 		fmt.Fprintf(os.Stderr, "[conformance-debug] writing markdown to %s bytes=%d generated_at=%s mapped=%d/%d symbols=%d/%d\n", markdownOut, len(md), rep.GeneratedAt, rep.Summary.MappedClausesFound, rep.Summary.MappedClauses, rep.Summary.SymbolsFound, rep.Summary.RequiredSymbols)
-		if err := os.WriteFile(markdownOut, []byte(md), 0o644); err != nil {
+		if err := os.WriteFile(markdownOut, []byte(md), 0o600); err != nil {
 			fmt.Fprintf(os.Stderr, "[conformance-debug] write error: %v\n", err)
 		}
 	}
@@ -101,20 +101,20 @@ func main() {
 		jb, jErr := rep.ToJSON()
 		if jErr != nil {
 			fmt.Fprintf(os.Stderr, "[conformance-debug] json encode error: %v\n", jErr)
-		} else if wErr := os.WriteFile(jsonOut, jb, 0o644); wErr != nil {
+		} else if wErr := os.WriteFile(jsonOut, jb, 0o600); wErr != nil {
 			fmt.Fprintf(os.Stderr, "[conformance-debug] json write error: %v\n", wErr)
 		}
 	}
 	if symbolLocOut != "" {
 		md := rep.ToSymbolLocationsMarkdown()
-		if err := os.WriteFile(symbolLocOut, []byte(md), 0o644); err != nil {
+		if err := os.WriteFile(symbolLocOut, []byte(md), 0o600); err != nil {
 			fmt.Fprintf(os.Stderr, "symbol locations write error: %v\n", err)
 		}
 	}
 
 	// CSV exports
 	if csvOut != "" {
-		if err := os.MkdirAll(csvOut, 0o755); err != nil {
+		if err := os.MkdirAll(csvOut, 0o750); err != nil {
 			fmt.Fprintf(os.Stderr, "csv out mkdir: %v\n", err)
 		}
 		if err := harnesslib.WriteGapCSV(filepath.Join(csvOut, "gap_matrix.csv"), rep); err != nil {
@@ -141,7 +141,7 @@ func main() {
 			} else {
 				tm := harnesslib.ComputeTrend(entries, trendWindow)
 				md := harnesslib.RenderTrendMarkdown(entries, tm)
-				if err := os.WriteFile(outPath, []byte(md), 0o644); err != nil {
+				if err := os.WriteFile(outPath, []byte(md), 0o600); err != nil {
 					fmt.Fprintf(os.Stderr, "trend write error: %v\n", err)
 				}
 			}
@@ -158,7 +158,7 @@ func appendHistory(path string, rep harnesslib.Report) {
 	if _, err := os.Stat(path); err != nil {
 		newFile = true
 	}
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o600)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "history open: %v\n", err)
 		return

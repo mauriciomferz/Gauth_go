@@ -22,7 +22,7 @@ func TestCSPHeaders(t *testing.T) {
 		}
 		t.Fatalf("failed to GET index.html: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	csp := resp.Header.Get("Content-Security-Policy")
 	if csp == "" {
 		t.Fatalf("missing Content-Security-Policy header")

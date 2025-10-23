@@ -13,7 +13,10 @@ import (
 	observability "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/observability"
 )
 
-const unknownOutcome = "unknown"
+const (
+	unknownOutcome = "unknown"
+	otherReason    = "other"
+)
 
 // Metrics defines the minimal instrumentation surface for early Phase 2.
 type Metrics interface {
@@ -391,7 +394,7 @@ func (m *Memory) Save() error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	if _, err := f.Write(b); err != nil {
 		return err
 	}
@@ -505,7 +508,7 @@ func (m *Memory) IncEnvelopeRawPOAEmbedded() { atomic.AddUint64(&m.envelopeRawPO
 func (m *Memory) IncEnvelopeRawPOATooLarge() { atomic.AddUint64(&m.envelopeRawPOATooLarge, 1) }
 func (m *Memory) IncEnvelopeDigestMismatchReason(reason string) {
 	if reason == "" {
-		reason = "other"
+		reason = otherReason
 	}
 	m.envelopeDigestMismatchReasonsMu.Lock()
 	if m.envelopeDigestMismatchReasons == nil {

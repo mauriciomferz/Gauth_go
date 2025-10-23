@@ -24,10 +24,11 @@ import (
 )
 
 const (
-	statusOK           = "ok"
-	statusMismatch     = "mismatch"
-	statusUnconfigured = "unconfigured"
-	statusError        = "error"
+	statusOK           = "OK"
+	statusMismatch     = "MISMATCH"
+	statusUnconfigured = "UNCONFIGURED"
+	statusError        = "ERROR"
+	statusEmpty        = "empty"
 )
 
 // handleReceiptVerification handles receipt chain verification logic
@@ -39,7 +40,7 @@ func handleReceiptVerification(base, receipts string, receiptsURL, jsonOut, quie
 		exit = 0
 	case statusMismatch:
 		exit = 1
-	case statusUnconfigured, "empty":
+	case statusUnconfigured, statusEmpty:
 		exit = 2
 	}
 	if jsonOut {
@@ -144,7 +145,7 @@ func verifyReceipts(base, path string, remote bool) (string, int, string, error)
 			prev = e.ChainHash
 		}
 		if len(raw.Entries) == 0 {
-			return "empty", 0, "", nil
+			return statusEmpty, 0, "", nil
 		}
 		return "ok", len(raw.Entries), prev, nil
 	}
@@ -169,8 +170,8 @@ func verifyReceipts(base, path string, remote bool) (string, int, string, error)
 		if !d.Configured {
 			return statusUnconfigured, 0, "", nil
 		}
-		if d.Integrity == "empty" {
-			return "empty", 0, "", nil
+		if d.Integrity == statusEmpty {
+			return statusEmpty, 0, "", nil
 		}
 		return d.Integrity, d.Total, "", nil
 	}

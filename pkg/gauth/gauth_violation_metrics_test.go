@@ -21,7 +21,7 @@ func (m *testMetrics) IncTokenValidationFailures() { m.failures++ }
 func TestViolationCounters(t *testing.T) {
 	// Force EdDSA mode so signature manipulation path exercises SigInvalid reliably.
 	os.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
-	defer os.Unsetenv("GAUTH_TOKEN_SIG_MODE")
+	defer func() { _ = os.Unsetenv("GAUTH_TOKEN_SIG_MODE") }()
 	cfg := Config{ClientID: "demo", ClientSecret: strings.Repeat("x", 32), AuthServerURL: "https://auth.example", AccessTokenExpiry: time.Minute}
 	svc, err := New(cfg, WithMetrics(&testMetrics{}))
 	if err != nil {

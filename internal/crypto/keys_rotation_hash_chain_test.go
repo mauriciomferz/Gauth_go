@@ -22,7 +22,7 @@ func TestRotationLogHashChain(t *testing.T) {
 		t.Fatalf("close temp: %v", cerr)
 	}
 	os.Setenv("GAUTH_EDDSA_ROTATION_LOG", path)
-	defer os.Unsetenv("GAUTH_EDDSA_ROTATION_LOG")
+	defer func() { _ = os.Unsetenv("GAUTH_EDDSA_ROTATION_LOG") }()
 
 	// Short TTL to force multiple rotations quickly
 	m, err := NewManager(200 * time.Millisecond)

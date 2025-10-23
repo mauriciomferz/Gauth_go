@@ -70,9 +70,11 @@ const (
 
 // Literal outcome/status strings reused across decision recording and combining strategies.
 const (
-	outcomeAllow      = "allow"
-	outcomeDeny       = "deny"
-	defaultDenyReason = "No matching policy - default deny"
+	outcomeAllow         = "allow"
+	outcomeDeny          = "deny"
+	defaultDenyReason    = "No matching policy - default deny"
+	denyPolicyReason     = "Denied by deny policy"
+	allowPolicyReason    = "Allowed by allow policy"
 )
 
 // CombiningStrategy defines policy result combination behavior.
@@ -297,14 +299,14 @@ func (DenyOverridesStrategy) Combine(steps []EvaluationStep) (Effect, []string, 
 	var allowIDs, denyIDs []string
 	for _, s := range steps {
 		switch s.Effect {
-		case "deny":
+		case outcomeDeny:
 			denyIDs = append(denyIDs, s.PolicyID)
-		case "allow":
+		case outcomeAllow:
 			allowIDs = append(allowIDs, s.PolicyID)
 		}
 	}
 	if len(denyIDs) > 0 {
-		return EffectDeny, allowIDs, denyIDs, "Denied by deny policy"
+		return EffectDeny, allowIDs, denyIDs, denyPolicyReason
 	}
 	if len(allowIDs) > 0 {
 		return EffectAllow, allowIDs, denyIDs, "Allowed by policy"
@@ -327,10 +329,10 @@ func (PermitOverridesStrategy) Combine(steps []EvaluationStep) (Effect, []string
 		}
 	}
 	if len(allowIDs) > 0 {
-		return EffectAllow, allowIDs, denyIDs, "Allowed by allow policy"
+		return EffectAllow, allowIDs, denyIDs, allowPolicyReason
 	}
 	if len(denyIDs) > 0 {
-		return EffectDeny, allowIDs, denyIDs, "Denied by deny policy"
+		return EffectDeny, allowIDs, denyIDs, denyPolicyReason
 	}
 	return EffectDeny, nil, nil, defaultDenyReason
 }

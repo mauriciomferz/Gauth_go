@@ -10,7 +10,7 @@ func TestAnalyzeMappingFailures(t *testing.T) {
 	// Create temporary clause map with a fake symbol & test glob.
 	_ = t.TempDir() // reserved if future temp artifacts needed
 	cm := `{"entries":[{"clause_prefix":"0111:fake-clause","symbols":["DefinitelyNotPresent__XYZ__"],"tests_glob":"**/nonexistent_test.go"}]}`
-	if err := os.MkdirAll("conformance", 0o755); err != nil {
+	if err := os.MkdirAll("conformance", 0o750); err != nil {
 		t.Fatalf("mkdir: %v", err)
 	}
 	if err := os.WriteFile("conformance/clause_map.json", []byte(cm), 0o644); err != nil {

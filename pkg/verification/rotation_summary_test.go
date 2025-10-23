@@ -11,6 +11,10 @@ import (
 	"time"
 )
 
+const (
+rotationsSummaryPath = "/api/v1/beta/rotations/summary"
+jwksPath = "/.well-known/jwks.json"
+)
 // mock server returning a deterministic signed rotation summary using ephemeral key
 func TestVerifyRotationSummary_Success(t *testing.T) {
 	pub, priv, _ := ed25519.GenerateKey(rand.Reader)
@@ -41,9 +45,9 @@ func TestVerifyRotationSummary_Success(t *testing.T) {
 	}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case "/api/v1/beta/rotations/summary":
+		case rotationsSummaryPath:
 			_ = json.NewEncoder(w).Encode(summary)
-		case "/.well-known/jwks.json":
+		case jwksPath:
 			_ = json.NewEncoder(w).Encode(map[string]any{"keys": []map[string]any{{
 				"kty": "OKP", "crv": "Ed25519", "alg": "EdDSA", "use": "sig", "kid": kid, "x": base64.RawURLEncoding.EncodeToString(pub),
 			}}})
@@ -93,9 +97,9 @@ func TestVerifyRotationSummary_BadSignature(t *testing.T) {
 	}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case "/api/v1/beta/rotations/summary":
+		case rotationsSummaryPath:
 			_ = json.NewEncoder(w).Encode(summary)
-		case "/.well-known/jwks.json":
+		case jwksPath:
 			_ = json.NewEncoder(w).Encode(map[string]any{"keys": []map[string]any{{
 				"kty": "OKP", "crv": "Ed25519", "alg": "EdDSA", "use": "sig", "kid": kid, "x": base64.RawURLEncoding.EncodeToString(pub),
 			}}})

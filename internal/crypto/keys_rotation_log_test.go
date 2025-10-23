@@ -14,7 +14,7 @@ func TestRotationAuditTrail(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "rotation.log")
 	os.Setenv("GAUTH_EDDSA_ROTATION_LOG", logPath)
-	defer os.Unsetenv("GAUTH_EDDSA_ROTATION_LOG")
+	defer func() { _ = os.Unsetenv("GAUTH_EDDSA_ROTATION_LOG") }()
 	m, err := NewManager(1 * time.Hour)
 	if err != nil {
 		t.Fatalf("manager: %v", err)

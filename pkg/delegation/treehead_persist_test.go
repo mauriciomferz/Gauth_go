@@ -15,7 +15,7 @@ func TestSignedTreeHeadPersistence(t *testing.T) {
 	if err != nil {
 		t.Fatalf("temp file: %v", err)
 	}
-	defer os.Remove(tmpFile.Name())
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
 	os.Setenv("GAUTH_STH_PERSIST_PATH", tmpFile.Name())
 	km, err := cryptoInt.NewManager(24 * time.Hour)
 	if err != nil {
@@ -50,7 +50,7 @@ func TestSignedTreeHeadPersistenceMultiSig(t *testing.T) {
 	if err != nil {
 		t.Fatalf("temp file: %v", err)
 	}
-	defer os.Remove(tmpFile.Name())
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
 	os.Setenv("GAUTH_STH_PERSIST_PATH", tmpFile.Name())
 	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "2")
 	km, err := cryptoInt.NewManager(24 * time.Hour)

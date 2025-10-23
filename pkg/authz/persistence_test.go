@@ -10,7 +10,8 @@ import (
 
 // Reusable test JSON policy fragments to reduce duplication.
 const (
-	policyAllowAlice = `[{"id":"p1","subject":"alice","resource":"vault","actions":["read"],"effect":"allow"}]`
+	testPolicyID     = "p1"
+	policyAllowAlice = `[{"id":"` + testPolicyID + `","subject":"alice","resource":"vault","actions":["read"],"effect":"allow"}]`
 	policyDenyAlice  = `[{"id":"p2","subject":"alice","resource":"vault","actions":["read"],"effect":"deny"}]`
 )
 
@@ -54,7 +55,7 @@ func TestFilePolicyStoreLoadValid(t *testing.T) {
 	if len(policies) != 1 {
 		t.Fatalf("expected 1 policy got %d", len(policies))
 	}
-	if policies[0].ID != "p1" {
+	if policies[0].ID != testPolicyID {
 		t.Fatalf("unexpected policy id %s", policies[0].ID)
 	}
 }

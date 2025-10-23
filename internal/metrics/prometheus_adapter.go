@@ -522,7 +522,7 @@ func (p *PrometheusMetrics) IncEnvelopeDigestMismatch() {
 func (p *PrometheusMetrics) IncEnvelopeDigestMismatchReason(reason string) {
 	if p.envelopeDigestMismatchReason != nil {
 		if reason == "" {
-			reason = "other"
+			reason = otherReason
 		}
 		p.envelopeDigestMismatchReason.WithLabelValues(reason).Inc()
 	}

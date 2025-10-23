@@ -2496,7 +2496,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 				meta[k] = v
 			}
 			// Append audit entry (non-blocking safety already in audit Append)
-			s.audit.Append(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: "system", Action: "limits_snapshot", Resource: "limits_store", Outcome: "success", Meta: meta})
+			s.audit.Append(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: "system", Action: limits.SnapshotType, Resource: "limits_store", Outcome: "success", Meta: meta})
 		})
 		// HTTP endpoint registered via helper to keep routing centralized
 		s.registerLimitsDiagnostics(r)

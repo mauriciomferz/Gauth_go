@@ -51,7 +51,7 @@ func TestBoltStoreEntrySignature(t *testing.T) {
 	}
 	bs := storeIface.(*boltStore)
 	bs.ConfigureEd25519Signer(priv, pub, "testkey")
-	defer bs.Close()
+	defer func() { _ = bs.Close() }()
 	ctx := context.Background()
 	e := &Entry{ID: "sig2", TS: time.Now(), Type: "test", Subject: "alice", Object: "obj"}
 	if err := bs.Append(ctx, e); err != nil {

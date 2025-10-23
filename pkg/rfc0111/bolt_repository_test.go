@@ -36,7 +36,7 @@ func TestBoltRepositoryCRUD(t *testing.T) {
 	if err != nil {
 		t.Fatalf("open bolt repo: %v", err)
 	}
-	defer repo.Close()
+	defer func() { _ = repo.Close() }()
 	p := fabricatePOA("alice", "bob", time.Hour)
 	if err := repo.Create(p); err != nil {
 		t.Fatalf("create: %v", err)
@@ -86,7 +86,7 @@ func TestBoltRepositoryPersistenceAcrossReopen(t *testing.T) {
 	if err != nil {
 		t.Fatalf("reopen: %v", err)
 	}
-	defer repo2.Close()
+	defer func() { _ = repo2.Close() }()
 	got, ok := repo2.Get(p.ID)
 	if !ok || got == nil {
 		t.Fatalf("reloaded get failed")
@@ -102,7 +102,7 @@ func TestBoltRepositoryMissingRecord(t *testing.T) {
 	if err != nil {
 		t.Fatalf("open: %v", err)
 	}
-	defer repo.Close()
+	defer func() { _ = repo.Close() }()
 	if _, ok := repo.Get("nonexistent"); ok {
 		t.Fatalf("expected not found")
 	}
@@ -118,7 +118,7 @@ func TestBoltRepositoryConcurrentReads(t *testing.T) {
 	if err != nil {
 		t.Fatalf("open: %v", err)
 	}
-	defer repo.Close()
+	defer func() { _ = repo.Close() }()
 	// Seed several POAs
 	for i := 0; i < 10; i++ {
 		p := fabricatePOA("eve", "user%d"+string(rune('A'+i)), time.Hour)

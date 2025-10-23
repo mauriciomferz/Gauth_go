@@ -7,26 +7,26 @@ import (
 )
 
 func TestGet(t *testing.T) {
-	os.Unsetenv("CFG_TEST_A")
+	_ = os.Unsetenv("CFG_TEST_A")
 	if v := Get("CFG_TEST_A", "default"); v != "default" {
 		t.Fatalf("expected default got %s", v)
 	}
-	os.Setenv("CFG_TEST_A", "value")
+	_ = os.Setenv("CFG_TEST_A", "value")
 	if v := Get("CFG_TEST_A", "default"); v != "value" {
 		t.Fatalf("expected value got %s", v)
 	}
 }
 
 func TestGetInt(t *testing.T) {
-	os.Unsetenv("CFG_INT")
+	_ = os.Unsetenv("CFG_INT")
 	if v := GetInt("CFG_INT", 42); v != 42 {
 		t.Fatalf("expected default 42 got %d", v)
 	}
-	os.Setenv("CFG_INT", "notnum")
+	_ = os.Setenv("CFG_INT", "notnum")
 	if v := GetInt("CFG_INT", 42); v != 42 {
 		t.Fatalf("invalid parse should fallback 42 got %d", v)
 	}
-	os.Setenv("CFG_INT", "-1")
+	_ = os.Setenv("CFG_INT", "-1")
 	if v := GetInt("CFG_INT", 42); v != 42 {
 		t.Fatalf("negative should fallback 42 got %d", v)
 	}
@@ -45,7 +45,7 @@ func TestEphemeralSecretProvided(t *testing.T) {
 }
 
 func TestEphemeralSecretGenerated(t *testing.T) {
-	os.Unsetenv("CFG_SECRET")
+	_ = os.Unsetenv("CFG_SECRET")
 	sec, gen, warn := EphemeralSecret("CFG_SECRET", 16)
 	if !gen {
 		t.Fatalf("expected generation")

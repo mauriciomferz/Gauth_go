@@ -19,7 +19,7 @@ func TestFileLoggerAppendAndReload(t *testing.T) {
 	if err != nil {
 		t.Fatalf("open: %v", err)
 	}
-	defer fl.Close()
+	defer func() { _ = fl.Close() }()
 	// Append events
 	for i := 0; i < 3; i++ {
 		ev := NewEvent(EventTypeAuthorization, "action", ResultSuccess)
@@ -43,7 +43,7 @@ func TestFileLoggerAppendAndReload(t *testing.T) {
 	if err != nil {
 		t.Fatalf("reopen: %v", err)
 	}
-	defer fl2.Close()
+	defer func() { _ = fl2.Close() }()
 	if len(fl2.Events()) != 3 {
 		t.Fatalf("reloaded events mismatch: %d", len(fl2.Events()))
 	}
@@ -103,7 +103,7 @@ func TestFileLoggerReloadIntegrity(t *testing.T) {
 	if err != nil {
 		t.Fatalf("reopen phase3: %v", err)
 	}
-	defer fl3.Close()
+	defer func() { _ = fl3.Close() }()
 	if len(fl3.Events()) != 8 {
 		t.Fatalf("expected 8 events phase3, got %d", len(fl3.Events()))
 	}

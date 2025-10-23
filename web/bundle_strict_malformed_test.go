@@ -25,7 +25,7 @@ func TestStrictMalformedManifest(t *testing.T) {
 	if err := os.WriteFile(manifestPath, []byte(`{"app":"file.js",`), 0o644); err != nil {
 		t.Fatalf("write manifest: %v", err)
 	}
-	defer os.Remove(manifestPath)
+	defer func() { _ = os.Remove(manifestPath) }()
 	page := []byte(`<script src="/static/js/__APP_BUNDLE__" integrity="__APP_SRI__"></script>`)
 	out := string(bs.applyBundleSubstitution(page))
 	if !strings.Contains(out, "STRICT_ASSET_FAILURE: invalid manifest JSON") {
@@ -55,7 +55,7 @@ func TestStrictMissingFieldsManifest(t *testing.T) {
 	if err := os.WriteFile(manifestPath, []byte(`{"app":"file.js"}`), 0o644); err != nil {
 		t.Fatalf("write manifest: %v", err)
 	}
-	defer os.Remove(manifestPath)
+	defer func() { _ = os.Remove(manifestPath) }()
 	page := []byte(`<script src="/static/js/__APP_BUNDLE__" integrity="__APP_SRI__"></script>`)
 	out := string(bs.applyBundleSubstitution(page))
 	if !strings.Contains(out, "STRICT_ASSET_FAILURE: missing required fields") {

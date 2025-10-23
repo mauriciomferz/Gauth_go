@@ -24,7 +24,7 @@ func fetchIndexHTML(t *testing.T) string {
 		}
 		t.Fatalf("GET %s failed: %v", url, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != 200 {
 		t.Fatalf("unexpected status %d from %s", resp.StatusCode, url)
 	}

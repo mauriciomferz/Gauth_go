@@ -33,7 +33,7 @@ func TestAttestationStreamSurgeTrigger(t *testing.T) {
 	if err != nil {
 		t.Fatalf("stream open: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	scan := bufio.NewScanner(resp.Body)
 	deadline := time.Now().Add(2 * time.Second)
 	for time.Now().Before(deadline) && scan.Scan() { // consume initial open attestation

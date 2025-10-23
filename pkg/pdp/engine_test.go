@@ -53,7 +53,7 @@ func TestFirstApplicableStrategy(t *testing.T) {
 	if dec.Allow {
 		t.Fatalf("expected deny due to first applicable deny")
 	}
-	if dec.Reason == "" || dec.Reason == "No matching policy - default deny" {
+	if dec.Reason == "" || dec.Reason == defaultDenyReason {
 		t.Fatalf("unexpected reason: %s", dec.Reason)
 	}
 }

@@ -83,7 +83,7 @@ func TestLedgerEntryFormat(t *testing.T) {
 	st.Inc("tokens", 3)
 	st.Inc("delegations", 1)
 	le := st.LedgerEntry()
-	if le["_type"] != "limits_snapshot" {
+	if le["_type"] != SnapshotType {
 		t.Fatalf("missing _type limits_snapshot: %#v", le)
 	}
 	if le["tokens"] != uint64(3) || le["delegations"] != uint64(1) {

@@ -16,14 +16,14 @@ func TestBoltStoreAppendAndVerify(t *testing.T) {
 	}
 	path := f.Name()
 	f.Close()
-	defer os.Remove(path)
+	defer func() { _ = os.Remove(path) }()
 
 	storeIface, err := NewBoltStore(path)
 	if err != nil {
 		t.Fatalf("new bolt store: %v", err)
 	}
 	bs := storeIface.(*boltStore)
-	defer bs.Close()
+	defer func() { _ = bs.Close() }()
 
 	ctx := context.Background()
 	// Append a few entries

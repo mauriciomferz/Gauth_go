@@ -32,7 +32,7 @@ func TestAttestationStreamAuditTrigger(t *testing.T) {
 	if err != nil {
 		t.Fatalf("stream open: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	scan := bufio.NewScanner(resp.Body)
 	deadline := time.Now().Add(3 * time.Second)
 	foundOpen := false
