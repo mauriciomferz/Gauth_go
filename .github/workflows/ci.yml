@@ -65,12 +65,37 @@ jobs:
         echo "Starting Go test execution..."
         echo "Go version: $(go version)"
         
+        # Clean test cache to avoid any stale state issues
+        echo "🧹 Cleaning test cache..."  
+        go clean -testcache
+        
         # Run tests in groups to better isolate any issues
         echo "Testing core packages..."
         go test -v -timeout=10m ./pkg/... || { echo "❌ pkg tests failed"; exit 1; }
         
         echo "Testing internal packages..."
-        go test -v -timeout=10m ./internal/... || { echo "❌ internal tests failed"; exit 1; }
+        # Run internal tests with explicit control and better error reporting
+        set +e  # Temporarily disable exit on error to capture details
+        INTERNAL_TEST_OUTPUT=$(go test -v -timeout=10m -count=1 ./internal/... 2>&1)
+        INTERNAL_TEST_EXIT_CODE=$?
+        set -e  # Re-enable exit on error
+        
+        if [ $INTERNAL_TEST_EXIT_CODE -eq 0 ]; then
+          echo "✅ Internal tests passed"
+          echo "$INTERNAL_TEST_OUTPUT" | tail -10  # Show summary
+        else
+          echo "❌ Internal tests failed (exit code: $INTERNAL_TEST_EXIT_CODE)"
+          echo "� Full test output:"
+          echo "$INTERNAL_TEST_OUTPUT"
+          echo ""
+          echo "� Environment diagnostics:"
+          echo "📊 Go version: $(go version)"
+          echo "📊 GOMAXPROCS: ${GOMAXPROCS:-default}"
+          echo "📊 CGO_ENABLED: ${CGO_ENABLED:-default}"
+          echo "� Current directory: $(pwd)"
+          echo "📊 Disk space: $(df -h . 2>/dev/null | tail -1 || echo 'N/A')"
+          exit 1
+        fi
         
         echo "Testing web packages..."
         go test -v -timeout=10m ./web/... || { echo "❌ web tests failed"; exit 1; }
