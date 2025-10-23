@@ -494,6 +494,15 @@ func WithSemanticValidator(v PoAValidator) Option {
 	}
 }
 
+// WithEnhancedValidator installs the enhanced PoA validator with warning collection and daily limits.
+func WithEnhancedValidator(v *EnhancedPoAValidator) Option {
+	return func(s *Service) {
+		if v != nil {
+			s.enhancedValidator = v
+		}
+	}
+}
+
 // WithMandatorySignatures enforces that every issuance must be successfully signed; failures abort CreateDelegation.
 func WithMandatorySignatures() Option { return func(s *Service) { s.mandatorySignatures = true } }
 
@@ -606,9 +615,10 @@ func (f *GAuth10Framework) GetStatus() map[string]interface{} {
 
 // DelegationResponse represents the response to a delegation request
 type DelegationResponse struct {
-	POA       PowerOfAttorney `json:"power_of_attorney"`
-	AuthToken string          `json:"auth_token"`
-	ExpiresAt time.Time       `json:"expires_at"`
+	POA       PowerOfAttorney     `json:"power_of_attorney"`
+	AuthToken string              `json:"auth_token"`
+	ExpiresAt time.Time           `json:"expires_at"`
+	Warnings  []ValidationWarning `json:"warnings,omitempty"` // validation warnings from enhanced validator
 }
 
 // ValidationContext carries structured inputs for delegation validation beyond simple action string.
@@ -638,7 +648,8 @@ type TokenVerificationResult struct {
 	RawPOA     string `json:"raw_poa,omitempty"`
 	PoAVersion string `json:"poa_version,omitempty"`
 	// DetachedSignatureValid indicates the optional detached signature (when present) verified successfully.
-	DetachedSignatureValid bool `json:"detached_signature_valid,omitempty"`
+	DetachedSignatureValid bool                `json:"detached_signature_valid,omitempty"`
+	Warnings               []ValidationWarning `json:"warnings,omitempty"` // validation warnings from enhanced validator
 }
 
 // VerifyToken parses & validates a PASETO delegation token. Steps:
@@ -1015,6 +1026,7 @@ type Service struct {
 	failClosedReplay    bool                      // if true, replay store errors become invalid_request instead of fail-open
 	limits              ValidationLimits          // configurable validation limits
 	poaValidator        PoAValidator              // semantic validator applied post basic validation
+	enhancedValidator   *EnhancedPoAValidator     // enhanced validator with warning collection and daily limits (optional)
 	mandatorySignatures bool                      // if true, issuance aborts when signature cannot be produced
 	// semanticCounters prototype: fine-grained semantic rejection reasons (will be surfaced via endpoints later)
 	semanticCounters struct {
@@ -1332,6 +1344,16 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 		}
 	}
 
+	// Enhanced validation with warning collection
+	var warnings []ValidationWarning
+	if s.enhancedValidator != nil {
+		result := s.enhancedValidator.ValidateWithResult(ctx, poa)
+		if !result.Valid {
+			return nil, result.Error
+		}
+		warnings = result.Warnings
+	}
+
 	// Attempt canonical digest + signature
 	if s.signerProvider != nil {
 		if signer, err := s.signerProvider(); err == nil && signer != nil {
@@ -1413,6 +1435,7 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 		POA:       *poa,
 		AuthToken: authToken,
 		ExpiresAt: poa.ValidUntil,
+		Warnings:  warnings,
 	}
 	// Metrics
 	if s.metrics != nil {

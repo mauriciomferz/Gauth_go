@@ -1,6 +1,8 @@
 # GAuth RFC Gap Matrix (Generated)
 
-> Generated: 2025-10-22T06:28:32Z
+> Generated: 2025-10-23T18:02:09Z
+
+**Status Summary:** Implemented=8 | Partial=23 | Missing=12 | Conceptual=0 | Total=43
 
 ## Capability Snapshot
 
@@ -31,7 +33,7 @@ Schema Version: 1
 | sec2.item1 | PDP combining algorithms | Implemented | P0 | Need richer conflict diagnostics | docs/GAP_MATRIX.md:20 |
 | sec2.item2 | ABAC expression evaluation | Implemented | P0 | No extensible function registry | docs/GAP_MATRIX.md:21 |
 | sec2.item3 | Obligations & advice processing | Partial | P2 | Executor skeleton present; lacks advice emission semantics & persistent audit channel | docs/GAP_MATRIX.md:25 |
-| sec2.item4 | Policy versioning & rollback | Missing | P1 | No version metadata | docs/GAP_MATRIX.md:23 |
+| sec2.item4 | Policy versioning & rollback | Partial | P1 | In-memory version snapshots + rollback API; missing persistent store + audit trail | docs/GAP_MATRIX.md:23\|pkg/authz/policy_version_test.go |
 | sec2.item5 | Distributed PDP & caching | Missing | P2 | No clustering or cache invalidation | docs/GAP_MATRIX.md:24 |
 
 ## PoA Definition (RFC0115)
@@ -80,7 +82,7 @@ Schema Version: 1
 
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|
-| sec8.item1 | Secure secret storage | Missing | P0 | No vault/HSM provider | docs/GAP_MATRIX.md:70 |
+| sec8.item1 | Secure secret storage | Partial | P0 | Secret provider abstraction + memory + vault stub; missing real backend + encryption at rest | docs/GAP_MATRIX.md:70\|pkg/secret/provider.go |
 | sec8.item2 | Rotation audit trail | Partial | P1 | JSON rotation log + hash chain (prev_hash -> hash) implemented; still missing external append-only sink & multi-tenant segregation | internal/crypto/keys.go\|internal/crypto/keys_rotation_log_test.go\|internal/crypto/keys_rotation_hash_chain_test.go |
 
 ## Testing & Conformance
@@ -102,17 +104,8 @@ Schema Version: 1
 
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|
-| sec11.item1 | Capability matrix enforcement | Partial | P1 | Core registry + allow/deny decision counters; missing policy binding & multi-tenant segregation | docs/GAP_MATRIX.md:90\|web/server_clean.go\|internal/metrics/prometheus_adapter.go |
-| sec11.item2 | Model limit checks | Implemented | P1 | Enforcement + audit/anchor + snapshot + strict unknown + signed attestation + surge stats + attestation notarization + verification & key discovery endpoints. Remaining gaps: external chain entry notarization, streaming head events, advanced rate algorithms, multi-sig attestation, public receipt publication. | docs/MODEL_LIMITS.md\|web/server_clean.go\|web/model_limits_attestation_test.go\|web/model_limits_attestation_signature_test.go\|web/model_limits_attestation_notarization_test.go\|web/model_limits_attestation_verify_test.go |
-### Recent Governance Delivery Summary
-
-| Date (UTC) | Feature | Commit Ref | Notes |
-|------------|---------|------------|-------|
-| 2025-10-22 | Strict unknown-model mode + counter | 055fb825 | `model_unknown_total` Prometheus counter; denial path instrumentation |
-| 2025-10-22 | Attestation endpoint (snapshot+audit+anchor) | 35434934 | Consolidated evidence JSON for external verifiers |
-| 2025-10-22 | Model limits governance foundation (earlier commits) | (historical) | Limits enforcement, audit & anchor chains, dynamic reload, snapshot hash |
-
-Outstanding follow-ups: external notarization integration, exceed surge anomaly gauges, signed attestation (EdDSA), SSE/WebSocket emission of new audit head, advanced rate limiting algorithm (token bucket), extended fuzzing (concurrent reload + rate window), external publication pipeline.
+| sec11.item1 | Capability matrix enforcement | Partial | P1 | Runtime enforcement & anchoring present (flag-gated); missing dedicated fuzz tests | external timestamp integration |
+| sec11.item2 | Model limit checks | Partial | P2 | Multi-dimension enforcement (input/output tokens + per-minute rate) + per-user scoped quotas and exceed audit hash chain with verification endpoint; metrics counters (model_limit_exceeded_total | model_output_limit_exceeded_total |
 
 ## Advanced Delegation Lifecycle
 

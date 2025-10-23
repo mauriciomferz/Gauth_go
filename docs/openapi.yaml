@@ -511,6 +511,469 @@ paths:
                     error: not_found
                     message: delegation not found
                     code: not_found
+  /api/v1/delegation/create:
+    post:
+      summary: Create a new delegation
+      operationId: createDelegation
+      tags: [delegation]
+      description: |
+        Create a new delegation granting authority from one principal to another.
+        Subject receives delegated permissions to perform actions on resources.
+        Requires capability enforcement when GAUTH_CAPABILITY_ENFORCE=1.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DelegationCreateRequest' }
+            examples:
+              financial_delegation:
+                value:
+                  subject: bob@example.com
+                  resource: account:12345
+                  action: transfer
+                  scope: ["amount_limit:1000"]
+                  delegation:
+                    delegated_by: alice@example.com
+                    delegated_to: bob@example.com
+      responses:
+        '200':
+          description: Delegation created successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DelegationCreateResponse' }
+              examples:
+                success:
+                  value:
+                    success: true
+                    poa:
+                      id: poa_abc123def456
+                      subject: bob@example.com
+                      resource: account:12345
+                      action: transfer
+                      created_at: "2025-10-21T12:00:00Z"
+                      expires_at: "2025-10-21T13:00:00Z"
+        '400':
+          description: Invalid delegation request
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+              examples:
+                missing_subject:
+                  value:
+                    error: invalid_request
+                    message: subject field required
+                    code: validation_error
+        '403':
+          description: Capability enforcement denied
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+              examples:
+                capability_denied:
+                  value:
+                    error: forbidden
+                    message: capability enforcement denied delegation creation
+                    code: capability_enforcement_denied
+  /api/v1/delegation/revoke:
+    post:
+      summary: Revoke an existing delegation
+      operationId: revokeDelegation
+      tags: [delegation]
+      description: |
+        Revoke a power-of-attorney delegation identified by PoA ID.
+        Revoker identity must match the original delegator or have admin privileges.
+        Requires capability enforcement when GAUTH_CAPABILITY_ENFORCE=1.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DelegationRevokeRequest' }
+            examples:
+              revoke_example:
+                value:
+                  poa_id: poa_abc123def456
+                  revoker: alice@example.com
+                  reason: delegation_no_longer_needed
+      responses:
+        '200':
+          description: Delegation revoked successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DelegationRevokeResponse' }
+              examples:
+                success:
+                  value:
+                    success: true
+                    message: delegation revoked
+                    poa_id: poa_abc123def456
+        '400':
+          description: Invalid revocation request
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+              examples:
+                missing_poa_id:
+                  value:
+                    error: invalid_request
+                    message: poa_id field required
+                    code: validation_error
+        '403':
+          description: Unauthorized revoker
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+              examples:
+                unauthorized:
+                  value:
+                    error: forbidden
+                    message: revoker not authorized
+                    code: unauthorized_revoker
+        '404':
+          description: Delegation not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+              examples:
+                not_found:
+                  value:
+                    error: not_found
+                    message: delegation not found
+                    code: not_found
+  /api/v1/beta/poa/sign:
+    post:
+      summary: Submit signature for multi-signature PoA collection
+      operationId: submitMultiSignature
+      tags: [poa, multisig]
+      description: |
+        Submit a cryptographic signature for multi-signature PoA workflow.
+        Signature must be base64-encoded Ed25519 signature over canonical PoA digest.
+        Supports M-of-N threshold enforcement and optional weighted signatures.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MultiSignatureRequest' }
+            examples:
+              board_approval:
+                value:
+                  poa_id: poa_multisig_789
+                  signer_id: board_member_3
+                  key_id: ed25519:abc123
+                  signature: SGVsbG8gV29ybGQhIFRoaXMgaXMgYSBiYXNlNjQgZW5jb2RlZCBzaWduYXR1cmUu
+                  metadata:
+                    approval_timestamp: "2025-10-21T12:05:00Z"
+                    approval_reason: high_value_transaction_approved
+      responses:
+        '200':
+          description: Signature submitted successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MultiSignatureResponse' }
+              examples:
+                threshold_not_met:
+                  value:
+                    success: true
+                    message: signature accepted
+                    poa_id: poa_multisig_789
+                    signer_id: board_member_3
+                    threshold_met: false
+                    collected_count: 2
+                    required_count: 3
+                threshold_met:
+                  value:
+                    success: true
+                    message: signature accepted - threshold met
+                    poa_id: poa_multisig_789
+                    signer_id: board_member_5
+                    threshold_met: true
+                    collected_count: 3
+                    required_count: 3
+        '400':
+          description: Invalid signature submission
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+              examples:
+                invalid_signature:
+                  value:
+                    error: invalid_signature
+                    message: signature verification failed
+                    code: signature_verification_failed
+                duplicate_signature:
+                  value:
+                    error: duplicate_signature
+                    message: signer already submitted signature
+                    code: duplicate_signer
+        '404':
+          description: PoA collection not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+              examples:
+                not_found:
+                  value:
+                    error: not_found
+                    message: no signature collection found for poa_id
+                    code: collection_not_found
+        '409':
+          description: Collection already completed or expired
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+              examples:
+                already_completed:
+                  value:
+                    error: conflict
+                    message: collection already completed
+                    code: collection_completed
+  /api/v1/beta/poa/{id}/multisig/status:
+    get:
+      summary: Get multi-signature collection status
+      operationId: getMultiSignatureStatus
+      tags: [poa, multisig]
+      description: |
+        Retrieve current status of multi-signature PoA collection.
+        Returns threshold configuration, collected signatures, remaining signers,
+        and weighted signature totals if applicable.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: PoA identifier for multi-signature collection
+          schema: { type: string }
+      responses:
+        '200':
+          description: Collection status retrieved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MultiSignatureStatusResponse' }
+              examples:
+                pending:
+                  value:
+                    poa_id: poa_multisig_789
+                    status: pending
+                    created_at: "2025-10-21T12:00:00Z"
+                    expires_at: "2025-10-21T13:00:00Z"
+                    threshold: 3
+                    collected_count: 2
+                    remaining_signers: ["board_member_4", "board_member_5"]
+                    collected_signatures:
+                      - signer_id: board_member_1
+                        key_id: ed25519:abc111
+                        submitted_at: "2025-10-21T12:01:00Z"
+                      - signer_id: board_member_3
+                        key_id: ed25519:abc333
+                        submitted_at: "2025-10-21T12:05:00Z"
+                    use_weighted: false
+                completed_weighted:
+                  value:
+                    poa_id: poa_weighted_456
+                    status: completed
+                    created_at: "2025-10-21T11:00:00Z"
+                    expires_at: "2025-10-21T12:00:00Z"
+                    threshold: 51
+                    collected_count: 3
+                    remaining_signers: []
+                    collected_signatures:
+                      - signer_id: ceo
+                        key_id: ed25519:ceo123
+                        submitted_at: "2025-10-21T11:10:00Z"
+                        weight: 40
+                      - signer_id: cfo
+                        key_id: ed25519:cfo456
+                        submitted_at: "2025-10-21T11:15:00Z"
+                        weight: 30
+                      - signer_id: board_chair
+                        key_id: ed25519:chair789
+                        submitted_at: "2025-10-21T11:20:00Z"
+                        weight: 25
+                    use_weighted: true
+                    collected_weight: 95
+                    total_weight: 100
+        '404':
+          description: Collection not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+              examples:
+                not_found:
+                  value:
+                    error: not_found
+                    message: no signature collection found
+                    code: collection_not_found
+  /api/v1/beta/poa/{id}/activate:
+    post:
+      summary: Activate PoA after threshold completion
+      operationId: activateMultiSignaturePoA
+      tags: [poa, multisig]
+      description: |
+        Activate a PoA once multi-signature threshold is met.
+        Validates threshold completion and transitions collection to active state.
+        Once activated, the PoA can be used for authorization decisions.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: PoA identifier to activate
+          schema: { type: string }
+      responses:
+        '200':
+          description: PoA activated successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MultiSignatureActivateResponse' }
+              examples:
+                success:
+                  value:
+                    success: true
+                    message: PoA activated
+                    poa_id: poa_multisig_789
+        '400':
+          description: Activation requirements not met
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+              examples:
+                threshold_not_met:
+                  value:
+                    error: invalid_request
+                    message: cannot activate - threshold not met (2/3 signatures)
+                    code: threshold_not_met
+        '404':
+          description: Collection not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+              examples:
+                not_found:
+                  value:
+                    error: not_found
+                    message: no signature collection found
+                    code: collection_not_found
+        '409':
+          description: PoA already activated or expired
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+              examples:
+                already_active:
+                  value:
+                    error: conflict
+                    message: PoA already activated
+                    code: already_activated
+  /api/v1/beta/poa/multisig/pending:
+    get:
+      summary: List pending multi-signature collections
+      operationId: listPendingMultiSignatures
+      tags: [poa, multisig]
+      description: |
+        Retrieve all pending multi-signature PoA collections.
+        Returns collections awaiting signature threshold completion.
+        Excludes expired, completed, or activated collections.
+      responses:
+        '200':
+          description: Pending collections list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MultiSignaturePendingResponse' }
+              examples:
+                multiple_pending:
+                  value:
+                    collections:
+                      - poa_id: poa_multisig_789
+                        status: pending
+                        created_at: "2025-10-21T12:00:00Z"
+                        expires_at: "2025-10-21T13:00:00Z"
+                        threshold: 3
+                        collected_count: 2
+                      - poa_id: poa_multisig_456
+                        status: pending
+                        created_at: "2025-10-21T11:30:00Z"
+                        expires_at: "2025-10-21T12:30:00Z"
+                        threshold: 5
+                        collected_count: 3
+  /api/v1/beta/delegation/create:
+    post:
+      summary: Create delegation (beta alias)
+      operationId: createDelegationBeta
+      tags: [delegation]
+      description: Beta-prefixed alias for /api/v1/delegation/create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DelegationCreateRequest' }
+      responses:
+        '200':
+          description: Delegation created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DelegationCreateResponse' }
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+  /api/v1/beta/delegation/revoke:
+    post:
+      summary: Revoke delegation (beta alias)
+      operationId: revokeDelegationBeta
+      tags: [delegation]
+      description: Beta-prefixed alias for /api/v1/delegation/revoke
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DelegationRevokeRequest' }
+      responses:
+        '200':
+          description: Delegation revoked
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DelegationRevokeResponse' }
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+  /api/v1/beta/delegation/status/update:
+    post:
+      summary: Update delegation status (beta alias)
+      operationId: updateDelegationStatusBeta
+      tags: [delegation]
+      description: Beta-prefixed alias for /api/v1/delegation/status/update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StatusUpdateRequest' }
+      responses:
+        '200': { description: Status updated }
+        '400':
+          description: Invalid transition
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StandardError' }
   /api/v1/beta/lifecycle/timeline:
     get:
       summary: Fetch lifecycle timeline entries
@@ -868,6 +1331,153 @@ components:
         keys:
           type: array
           maxItems: 10
-          items: { type: object, additionalProperties: true, description: JWK objects (public keys) }
-          description: Published JSON Web Keys available for signature verification
+          items: { $ref: '#/components/schemas/JWK', description: JSON Web Key }
+          description: Public keys for signature verification
       required: [keys]
+    JWK:
+      type: object
+      properties:
+        kty: { type: string, description: Key type (e.g. RSA, EC, oct) }
+        kid: { type: string, description: Key identifier }
+        use: { type: string, description: Intended use (sig or enc) }
+        alg: { type: string, description: Algorithm (e.g. RS256, EdDSA) }
+        n: { type: string, description: RSA modulus (base64url) }
+        e: { type: string, description: RSA exponent (base64url) }
+      required: [kty, kid]
+    DelegationCreateRequest:
+      type: object
+      description: Request to create a new delegation
+      properties:
+        subject: { type: string, description: Principal receiving delegated authority }
+        resource: { type: string, description: Resource identifier being delegated }
+        action: { type: string, description: Action permitted by delegation }
+        scope:
+          type: array
+          maxItems: 50
+          items: { type: string }
+          description: Optional scope constraints for delegation
+        context: { type: object, additionalProperties: true, description: Additional context metadata }
+        delegation:
+          type: object
+          description: Delegation relationship details
+          properties:
+            delegated_by: { type: string, description: Original authority holder delegating power }
+            delegated_to: { type: string, description: Recipient of delegated authority (same as subject) }
+          required: [delegated_by, delegated_to]
+      required: [subject, resource, action]
+    DelegationCreateResponse:
+      type: object
+      description: Response after successful delegation creation
+      properties:
+        success: { type: boolean, description: Indicates successful creation }
+        poa:
+          type: object
+          description: Created power-of-attorney object
+          properties:
+            id: { type: string, description: Unique PoA identifier }
+            subject: { type: string, description: Delegated principal }
+            resource: { type: string, description: Delegated resource }
+            action: { type: string, description: Delegated action }
+            created_at: { type: string, format: date-time, description: Creation timestamp }
+            expires_at: { type: string, format: date-time, description: Expiration timestamp }
+          required: [id, subject, resource, action, created_at]
+      required: [success, poa]
+    DelegationRevokeRequest:
+      type: object
+      description: Request to revoke an existing delegation
+      properties:
+        poa_id: { type: string, description: PoA identifier to revoke }
+        revoker: { type: string, description: Principal performing revocation }
+        reason: { type: string, description: Optional human-readable reason for revocation }
+      required: [poa_id, revoker]
+    DelegationRevokeResponse:
+      type: object
+      description: Response after successful delegation revocation
+      properties:
+        success: { type: boolean, description: Indicates successful revocation }
+        message: { type: string, description: Human-readable confirmation message }
+        poa_id: { type: string, description: Revoked PoA identifier }
+      required: [success, message, poa_id]
+    MultiSignatureRequest:
+      type: object
+      description: Request to submit signature for multi-sig PoA collection
+      properties:
+        poa_id: { type: string, description: PoA identifier for signature collection }
+        signer_id: { type: string, description: Identity of signer submitting signature }
+        key_id: { type: string, description: Public key identifier used for signing }
+        signature: { type: string, description: Base64-encoded Ed25519 signature over canonical PoA digest }
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Optional metadata about signature submission (timestamps, approval reasons, etc.)
+      required: [poa_id, signer_id, key_id, signature]
+    MultiSignatureResponse:
+      type: object
+      description: Response after signature submission
+      properties:
+        success: { type: boolean, description: Indicates successful signature acceptance }
+        message: { type: string, description: Human-readable status message }
+        poa_id: { type: string, description: PoA identifier }
+        signer_id: { type: string, description: Signer who submitted signature }
+        threshold_met: { type: boolean, description: Whether signature threshold is now satisfied }
+        collected_count: { type: integer, description: Number of signatures collected so far }
+        required_count: { type: integer, description: Total signatures required to meet threshold }
+      required: [success, message, poa_id, signer_id, threshold_met, collected_count, required_count]
+    MultiSignatureStatusResponse:
+      type: object
+      description: Current status of multi-signature PoA collection
+      properties:
+        poa_id: { type: string, description: PoA identifier }
+        status: { type: string, enum: [pending, completed, active, expired], description: Collection lifecycle status }
+        created_at: { type: string, format: date-time, description: Collection creation timestamp }
+        expires_at: { type: string, format: date-time, description: Collection expiration timestamp }
+        threshold: { type: integer, description: Required number of signatures (M-of-N threshold) }
+        collected_count: { type: integer, description: Current number of collected signatures }
+        remaining_signers:
+          type: array
+          maxItems: 100
+          items: { type: string }
+          description: List of signer IDs who have not yet submitted signatures
+        collected_signatures:
+          type: array
+          maxItems: 100
+          items:
+            type: object
+            properties:
+              signer_id: { type: string, description: Signer identity }
+              key_id: { type: string, description: Public key identifier }
+              submitted_at: { type: string, format: date-time, description: Signature submission timestamp }
+              weight: { type: integer, description: Signature weight (if weighted mode enabled) }
+            required: [signer_id, key_id, submitted_at]
+          description: Array of collected signatures with metadata
+        use_weighted: { type: boolean, description: Whether weighted signature mode is enabled }
+        collected_weight: { type: integer, description: Total weight of collected signatures (weighted mode only) }
+        total_weight: { type: integer, description: Sum of all signer weights (weighted mode only) }
+      required: [poa_id, status, created_at, threshold, collected_count, remaining_signers, collected_signatures]
+    MultiSignatureActivateResponse:
+      type: object
+      description: Response after PoA activation
+      properties:
+        success: { type: boolean, description: Indicates successful activation }
+        message: { type: string, description: Human-readable confirmation message }
+        poa_id: { type: string, description: Activated PoA identifier }
+      required: [success, message, poa_id]
+    MultiSignaturePendingResponse:
+      type: object
+      description: List of pending multi-signature collections
+      properties:
+        collections:
+          type: array
+          maxItems: 200
+          items:
+            type: object
+            properties:
+              poa_id: { type: string, description: PoA identifier }
+              status: { type: string, enum: [pending], description: Collection status }
+              created_at: { type: string, format: date-time, description: Creation timestamp }
+              expires_at: { type: string, format: date-time, description: Expiration timestamp }
+              threshold: { type: integer, description: Required signature threshold }
+              collected_count: { type: integer, description: Current collected signature count }
+            required: [poa_id, status, created_at, threshold, collected_count]
+          description: Array of pending collections awaiting threshold completion
+      required: [collections]
