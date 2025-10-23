@@ -332,7 +332,10 @@ func (k *KMSKeyStore) deactivateAllKeys(ctx context.Context, tenant string) erro
 		
 		if tags["GauthActive"] == "true" {
 			tags["GauthActive"] = "false"
-			k.client.TagResource(ctx, key.ID, tags)
+			if err := k.client.TagResource(ctx, key.ID, tags); err != nil {
+				// Log error but continue deactivating other keys
+				continue
+			}
 		}
 	}
 	

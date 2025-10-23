@@ -312,9 +312,9 @@ func TestGetMetrics(t *testing.T) {
 	}
 	
 	// Perform some validations
-	validator.ValidateJurisdiction(ctx, JurisdictionUS, "trade_execution") // Should succeed
-	validator.ValidateJurisdiction(ctx, JurisdictionUS, "autonomous_decision") // Should fail
-	validator.ValidateJurisdiction(ctx, Jurisdiction("INVALID"), "action") // Should fail
+	_ = validator.ValidateJurisdiction(ctx, JurisdictionUS, "trade_execution") // Should succeed
+	_ = validator.ValidateJurisdiction(ctx, JurisdictionUS, "autonomous_decision") // Should fail
+	_ = validator.ValidateJurisdiction(ctx, Jurisdiction("INVALID"), "action") // Should fail
 	
 	// Check updated metrics
 	updatedMetrics := validator.GetMetrics()
@@ -420,10 +420,10 @@ func TestConcurrentAccess(t *testing.T) {
 			defer func() { done <- true }()
 			
 			// Perform various operations concurrently
-			validator.ValidateJurisdiction(ctx, JurisdictionUS, "concurrent_test")
+			_ = validator.ValidateJurisdiction(ctx, JurisdictionUS, "concurrent_test")
 			validator.GetSupportedJurisdictions()
-			validator.GetJurisdictionRules(JurisdictionEU)
-			validator.ValidateEntityType(JurisdictionUK, EntityTypeCorporation)
+			_, _ = validator.GetJurisdictionRules(JurisdictionEU)
+			_ = validator.ValidateEntityType(JurisdictionUK, EntityTypeCorporation)
 			validator.GetMetrics()
 		}(i)
 	}

@@ -285,7 +285,10 @@ func (f *FileKeyStore) deactivateAllKeysLocked(tenant string) error {
 			
 			if keyData.Active {
 				keyData.Active = false
-				f.writeKeyFile(keyPath, *keyData)
+				if err := f.writeKeyFile(keyPath, *keyData); err != nil {
+					// Log error but continue deactivating other keys
+					continue
+				}
 			}
 		}
 	}

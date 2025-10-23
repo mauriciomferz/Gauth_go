@@ -323,7 +323,10 @@ func (ts *TenantScheduler) run() {
 			store := ts.manager.GetTenantStore(ts.tenant)
 			if store != nil {
 				// Simple rotation trigger - could be enhanced
-				store.Generate(ctx, ts.tenant)
+				if _, err := store.Generate(ctx, ts.tenant); err != nil {
+					// Log error but continue scheduling
+					continue
+				}
 			}
 		case <-ts.stopCh:
 			return

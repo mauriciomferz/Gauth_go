@@ -273,7 +273,10 @@ func (v *VaultKeyStore) deactivateAllKeys(ctx context.Context, tenant string) er
 		
 		if active, ok := keyData["active"].(bool); ok && active {
 			keyData["active"] = false
-			v.client.Write(ctx, path, map[string]interface{}{"data": keyData})
+			if _, err := v.client.Write(ctx, path, map[string]interface{}{"data": keyData}); err != nil {
+				// Log error but continue deactivating other keys
+				continue
+			}
 		}
 	}
 	
