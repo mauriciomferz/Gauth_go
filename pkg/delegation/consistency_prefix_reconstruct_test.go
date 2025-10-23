@@ -54,7 +54,7 @@ func TestFastReconstructionMatchesFullTree(t *testing.T) {
 		c := NewRevocationChain()
 		for i := 0; i < n; i++ {
 			id := fmt.Sprintf("X%d", i)
-			if err := c.Append(RevocationEvent{ID: id, DelegationID: id}); err != nil {
+			if _, err := c.Append(RevocationEvent{ID: id, DelegationID: id}); err != nil {
 				t.Fatalf("Failed to append revocation event: %v", err)
 			}
 		}
@@ -94,7 +94,7 @@ func TestFastReconstructionRandomSizes(t *testing.T) {
 		c := NewRevocationChain()
 		for j := 0; j < n; j++ {
 			id := fmt.Sprintf("R%d_%d", i, j)
-			if err := c.Append(RevocationEvent{ID: id, DelegationID: id}); err != nil {
+			if _, err := c.Append(RevocationEvent{ID: id, DelegationID: id}); err != nil {
 				t.Fatalf("Failed to append revocation event: %v", err)
 			}
 		}
@@ -159,7 +159,7 @@ func TestFastReconstructionTamperBridge(t *testing.T) {
 	c := NewRevocationChain()
 	for i := 0; i < 7; i++ {
 		id := fmt.Sprintf("TB%d", i)
-		if err := c.Append(RevocationEvent{ID: id, DelegationID: id}); err != nil {
+		if _, err := c.Append(RevocationEvent{ID: id, DelegationID: id}); err != nil {
 			t.Fatalf("Failed to append revocation event: %v", err)
 		}
 	}

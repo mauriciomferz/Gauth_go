@@ -24,10 +24,10 @@ func BenchmarkConsistencyProofV2(b *testing.B) {
 	for _, base := range sizes {
 		chain := seedBenchChain(base)
 		// Grow by +1 to simulate minimal extension
-		if err := chain.Append(RevocationEvent{ID: fmt.Sprintf("grow-%d", base), DelegationID: fmt.Sprintf("grow-%d", base)}); err != nil {
+		if _, err := chain.Append(RevocationEvent{ID: fmt.Sprintf("grow-%d", base), DelegationID: fmt.Sprintf("grow-%d", base)}); err != nil {
 			b.Fatalf("Failed to append revocation event: %v", err)
 		}
-		if err := chain.SignTreeHead(); err != nil {
+		if _, err := chain.SignTreeHead(); err != nil {
 			b.Fatalf("Failed to sign tree head: %v", err)
 		}
 		proof, err := chain.GenerateConsistencyProofV2(0)
@@ -52,10 +52,10 @@ func BenchmarkConsistencyProofV2(b *testing.B) {
 // BenchmarkConsistencyProofV2PathSize checks path size growth over larger chains.
 func BenchmarkConsistencyProofV2PathSize(b *testing.B) {
 	chain := seedBenchChain(8192)
-	if err := chain.Append(RevocationEvent{ID: "grow-final", DelegationID: "grow-final"}); err != nil {
+	if _, err := chain.Append(RevocationEvent{ID: "grow-final", DelegationID: "grow-final"}); err != nil {
 		b.Fatalf("Failed to append revocation event: %v", err)
 	}
-	if err := chain.SignTreeHead(); err != nil {
+	if _, err := chain.SignTreeHead(); err != nil {
 		b.Fatalf("Failed to sign tree head: %v", err)
 	}
 	proof, err := chain.GenerateConsistencyProofV2(0)
@@ -83,10 +83,10 @@ func BenchmarkConsistencyProofV2FutureFast(b *testing.B) {
 	os.Setenv("GAUTH_CONSISTENCY_V2_FAST", "1")
 	defer os.Setenv("GAUTH_CONSISTENCY_V2_FAST", tval)
 	chain := seedBenchChain(1024)
-	if err := chain.Append(RevocationEvent{ID: "grow-fast", DelegationID: "grow-fast"}); err != nil {
+	if _, err := chain.Append(RevocationEvent{ID: "grow-fast", DelegationID: "grow-fast"}); err != nil {
 		b.Fatalf("Failed to append revocation event: %v", err)
 	}
-	if err := chain.SignTreeHead(); err != nil {
+	if _, err := chain.SignTreeHead(); err != nil {
 		b.Fatalf("Failed to sign tree head: %v", err)
 	}
 	proof, err := chain.GenerateConsistencyProofV2(0)
