@@ -49,7 +49,7 @@ func TestJWTDiscoveryAlgorithms(t *testing.T) {
 func TestJWTIssuance(t *testing.T) {
 	os.Setenv("GAUTH_USE_JWT_LIB", "1")
 	os.Setenv("GAUTH_JWT_ALG", "RS256")
-	os.Setenv("GAUTH_JWT_KID", "demo-rsa")
+	os.Setenv("GAUTH_JWT_KID", demoRSAKid)
 	srv := NewBetaServer(":0")
 	// Issue token
 	w := httptest.NewRecorder()
@@ -93,7 +93,7 @@ func doValidate(s *BetaServer, token string) *httptest.ResponseRecorder {
 func TestJWTValidatePositive(t *testing.T) {
 	os.Setenv("GAUTH_USE_JWT_LIB", "1")
 	os.Setenv("GAUTH_JWT_ALG", "RS256")
-	os.Setenv("GAUTH_JWT_KID", "demo-rsa")
+	os.Setenv("GAUTH_JWT_KID", demoRSAKid)
 	srv := NewBetaServer(":0")
 	// issue
 	iw := httptest.NewRecorder()
@@ -131,7 +131,7 @@ func TestJWTValidatePositive(t *testing.T) {
 func TestJWTValidateExpired(t *testing.T) {
 	os.Setenv("GAUTH_USE_JWT_LIB", "1")
 	os.Setenv("GAUTH_JWT_ALG", "RS256")
-	os.Setenv("GAUTH_JWT_KID", "demo-rsa")
+	os.Setenv("GAUTH_JWT_KID", demoRSAKid)
 	srv := NewBetaServer(":0")
 	// Manually build extremely short-lived token (1 second) using server's RSA key helper.
 	pk, err := loadOrGenerateRSAKey()
@@ -141,7 +141,7 @@ func TestJWTValidateExpired(t *testing.T) {
 	method := jwt.GetSigningMethod("RS256")
 	claims := jwt.MapClaims{"sub": "demo-client", "exp": time.Now().Add(1 * time.Second).Unix(), "iat": time.Now().Unix()}
 	j := jwt.NewWithClaims(method, claims)
-	j.Header["kid"] = "demo-rsa"
+	j.Header["kid"] = demoRSAKid
 	signed, err := j.SignedString(pk)
 	if err != nil {
 		t.Fatalf("sign: %v", err)
@@ -160,7 +160,7 @@ func TestJWTValidateExpired(t *testing.T) {
 func TestJWTValidateTampered(t *testing.T) {
 	os.Setenv("GAUTH_USE_JWT_LIB", "1")
 	os.Setenv("GAUTH_JWT_ALG", "RS256")
-	os.Setenv("GAUTH_JWT_KID", "demo-rsa")
+	os.Setenv("GAUTH_JWT_KID", demoRSAKid)
 	srv := NewBetaServer(":0")
 	// issue
 	iw := httptest.NewRecorder()
@@ -188,7 +188,7 @@ func TestJWTValidateTampered(t *testing.T) {
 func TestJWTValidateAlgMismatch(t *testing.T) {
 	os.Setenv("GAUTH_USE_JWT_LIB", "1")
 	os.Setenv("GAUTH_JWT_ALG", "RS256")
-	os.Setenv("GAUTH_JWT_KID", "demo-rsa")
+	os.Setenv("GAUTH_JWT_KID", demoRSAKid)
 	srv := NewBetaServer(":0")
 	// issue
 	iw := httptest.NewRecorder()
@@ -225,7 +225,7 @@ func TestJWTValidateAlgMismatch(t *testing.T) {
 func TestJWTMissingJTIStrict(t *testing.T) {
 	os.Setenv("GAUTH_USE_JWT_LIB", "1")
 	os.Setenv("GAUTH_JWT_ALG", "RS256")
-	os.Setenv("GAUTH_JWT_KID", "demo-rsa")
+	os.Setenv("GAUTH_JWT_KID", demoRSAKid)
 	os.Setenv("GAUTH_REPLAY_STRICT", "1")
 	srv := NewBetaServer(":0")
 	pk, err := loadOrGenerateRSAKey()
@@ -235,7 +235,7 @@ func TestJWTMissingJTIStrict(t *testing.T) {
 	method := jwt.GetSigningMethod("RS256")
 	claims := jwt.MapClaims{"sub": "demo", "exp": time.Now().Add(60 * time.Second).Unix(), "iat": time.Now().Unix()}
 	j := jwt.NewWithClaims(method, claims)
-	j.Header["kid"] = "demo-rsa"
+	j.Header["kid"] = demoRSAKid
 	signed, err := j.SignedString(pk)
 	if err != nil {
 		t.Fatalf("sign: %v", err)
@@ -252,7 +252,7 @@ func TestJWTMissingJTIStrict(t *testing.T) {
 func TestJWTDuplicateJTIReplay(t *testing.T) {
 	os.Setenv("GAUTH_USE_JWT_LIB", "1")
 	os.Setenv("GAUTH_JWT_ALG", "RS256")
-	os.Setenv("GAUTH_JWT_KID", "demo-rsa")
+	os.Setenv("GAUTH_JWT_KID", demoRSAKid)
 	srv := NewBetaServer(":0")
 	// Issue standard token via API (will include jti and record it once)
 	iw := httptest.NewRecorder()
@@ -286,7 +286,7 @@ func TestJWTDuplicateJTIReplay(t *testing.T) {
 func TestJWTClockSkewTolerance(t *testing.T) {
 	os.Setenv("GAUTH_USE_JWT_LIB", "1")
 	os.Setenv("GAUTH_JWT_ALG", "RS256")
-	os.Setenv("GAUTH_JWT_KID", "demo-rsa")
+	os.Setenv("GAUTH_JWT_KID", demoRSAKid)
 	os.Setenv("GAUTH_JWT_CLOCK_SKEW_SECONDS", "30")
 	srv := NewBetaServer(":0")
 	pk, err := loadOrGenerateRSAKey()
@@ -297,7 +297,7 @@ func TestJWTClockSkewTolerance(t *testing.T) {
 	// Set exp 5 seconds in past; within 30s skew tolerance
 	claims := jwt.MapClaims{"sub": "demo", "exp": time.Now().Add(-5 * time.Second).Unix(), "iat": time.Now().Add(-10 * time.Second).Unix(), "jti": "skewtest-" + strconv.FormatInt(time.Now().UnixNano(), 10)}
 	j := jwt.NewWithClaims(method, claims)
-	j.Header["kid"] = "demo-rsa"
+	j.Header["kid"] = demoRSAKid
 	signed, err := j.SignedString(pk)
 	if err != nil {
 		t.Fatalf("sign: %v", err)
@@ -312,7 +312,7 @@ func TestJWTClockSkewTolerance(t *testing.T) {
 func TestJWTNearExpiration(t *testing.T) {
 	os.Setenv("GAUTH_USE_JWT_LIB", "1")
 	os.Setenv("GAUTH_JWT_ALG", "RS256")
-	os.Setenv("GAUTH_JWT_KID", "demo-rsa")
+	os.Setenv("GAUTH_JWT_KID", demoRSAKid)
 	os.Setenv("GAUTH_JWT_CLOCK_SKEW_SECONDS", "2")
 	srv := NewBetaServer(":0")
 	pk, err := loadOrGenerateRSAKey()
@@ -323,7 +323,7 @@ func TestJWTNearExpiration(t *testing.T) {
 	// exp 1 second ahead => should pass
 	claims1 := jwt.MapClaims{"sub": "demo", "exp": time.Now().Add(1 * time.Second).Unix(), "iat": time.Now().Unix(), "jti": "near-exp-pass" + strconv.FormatInt(time.Now().UnixNano(), 10)}
 	j1 := jwt.NewWithClaims(method, claims1)
-	j1.Header["kid"] = "demo-rsa"
+	j1.Header["kid"] = demoRSAKid
 	signed1, err := j1.SignedString(pk)
 	if err != nil {
 		t.Fatalf("sign1: %v", err)
@@ -335,7 +335,7 @@ func TestJWTNearExpiration(t *testing.T) {
 	// exp 3 seconds in past with skew tolerance=2 => should fail
 	claims2 := jwt.MapClaims{"sub": "demo", "exp": time.Now().Add(-3 * time.Second).Unix(), "iat": time.Now().Add(-5 * time.Second).Unix(), "jti": "near-exp-fail" + strconv.FormatInt(time.Now().UnixNano(), 10)}
 	j2 := jwt.NewWithClaims(method, claims2)
-	j2.Header["kid"] = "demo-rsa"
+	j2.Header["kid"] = demoRSAKid
 	signed2, err := j2.SignedString(pk)
 	if err != nil {
 		t.Fatalf("sign2: %v", err)

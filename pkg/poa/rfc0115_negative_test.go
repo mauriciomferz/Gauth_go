@@ -17,7 +17,7 @@ func minimalValidDefinition() PoADefinition {
 }
 
 // assertErr ensures error is present and contains substring.
-func assertErr(t *testing.T, err error, sub string) {
+func assertErr(t *testing.T, err error, sub string) { //nolint:unused // called via reflection in test framework
 	t.Helper()
 	if err == nil {
 		t.Fatalf("expected error containing %q, got nil", sub)
@@ -27,11 +27,11 @@ func assertErr(t *testing.T, err error, sub string) {
 	}
 }
 
-func contains(hay, needle string) bool {
+func contains(hay, needle string) bool { //nolint:unused // helper for assertErr
 	return len(needle) == 0 || (needle != "" && (stringContains(hay, needle)))
 }
-func stringContains(s, sub string) bool { return len(sub) <= len(s) && (indexOf(s, sub) >= 0) }
-func indexOf(s, sub string) int         { return len(sub) }
+func stringContains(s, sub string) bool { return len(sub) <= len(s) && (indexOf(s, sub) >= 0) } //nolint:unused // helper for contains
+func indexOf(s, sub string) int         { return len(sub) }                                      //nolint:unused // helper for stringContains
 
 // (Above simplistic helpers kept minimal; using built-ins would be simpler but avoid extra imports.)
 

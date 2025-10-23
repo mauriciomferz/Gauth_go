@@ -9,3 +9,5 @@ func testRevocationAutoSignMetrics(s *BetaServer) (emitted, skippedEmpty, skippe
 	}
 	return s.revocationAutoSignEmitted, s.revocationAutoSignSkippedEmpty, s.revocationAutoSignSkippedDup
 }
+
+var _ = testRevocationAutoSignMetrics // Keep function for manual debugging

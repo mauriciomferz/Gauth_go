@@ -67,7 +67,7 @@ func TestExternalAnchorMetricsFailureStrict(t *testing.T) {
 	seen := false
 	for _, m := range failuresProv.Metric {
 		for _, lp := range m.Label {
-			if lp.GetName() == "provider" && lp.GetValue() == tsaStubProvider {
+			if lp.GetName() == labelProvider && lp.GetValue() == tsaStubProvider {
 				if m.Counter.GetValue() < 1 {
 					t.Fatalf("provider labeled failures <1")
 				}

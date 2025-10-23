@@ -14,7 +14,7 @@ import (
 // TestCapabilityAnchorNotarizationProviderMetrics ensures provider-labeled metrics are recorded.
 func TestCapabilityAnchorNotarizationProviderMetrics(t *testing.T) {
 	os.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")
-	os.Setenv("GAUTH_CAP_ANCHOR_NOTARY_PROVIDER", "external_stub")
+	os.Setenv("GAUTH_CAP_ANCHOR_NOTARY_PROVIDER", capSourceExternal)
 	os.Setenv("GAUTH_NOTARY_STUB_MIN_LATENCY_MS", "1")
 	os.Setenv("GAUTH_NOTARY_STUB_MAX_LATENCY_MS", "2")
 	os.Setenv("GAUTH_NOTARY_STUB_FAIL_PROB", "0")
@@ -50,7 +50,7 @@ func TestCapabilityAnchorNotarizationProviderMetrics(t *testing.T) {
 		t.Fatalf("expected provider-labeled failure counter interface to be implemented")
 	}
 	// Minimal validation: ensure provider name is external_stub.
-	if receipt.Provider != "external_stub" {
+	if receipt.Provider != capSourceExternal {
 		t.Fatalf("unexpected provider: %s", receipt.Provider)
 	}
 	// Trigger a failure to exercise provider-labeled failures vector.

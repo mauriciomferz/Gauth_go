@@ -28,14 +28,14 @@ func TestBoltStoreAppendAndVerify(t *testing.T) {
 	ctx := context.Background()
 	// Append a few entries
 	for i := 0; i < 3; i++ {
-			e := &Entry{
-				ID:       fmt.Sprintf("e%d", i),
-				TS:       time.Now(),
-				Type:     "test",
-				Subject:  "alice",
-				Object:   "obj",
-				Metadata: map[string]interface{}{"i": i},
-			}
+		e := &Entry{
+			ID:       fmt.Sprintf("e%d", i),
+			TS:       time.Now(),
+			Type:     "test",
+			Subject:  "alice",
+			Object:   "obj",
+			Metadata: map[string]interface{}{"i": i},
+		}
 		if err := bs.Append(ctx, e); err != nil {
 			t.Fatalf("append %d: %v", i, err)
 		}

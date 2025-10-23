@@ -12,7 +12,7 @@ import (
 
 // TestExternalAnchorMetricsStrict asserts specific numeric values for provider-labeled external anchor metrics.
 func TestExternalAnchorMetricsStrict(t *testing.T) {
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
+	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", memoryProvider)
 	reg := prom.NewRegistry()
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111", Registry: reg})
 	// Use metrics-aware constructor so startup external anchoring attempt records directly into Prometheus.
@@ -20,7 +20,7 @@ func TestExternalAnchorMetricsStrict(t *testing.T) {
 	// Allow initial anchor attempt
 	time.Sleep(50 * time.Millisecond)
 	// Issue an additional latency observation to ensure histogram bucket increments beyond startup attempt.
-	pm.ObserveExternalAnchorLatency("memory", 12*time.Millisecond)
+	pm.ObserveExternalAnchorLatency(memoryProvider, 12*time.Millisecond)
 	// Hit status to confirm receipt
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/api/v1/beta/capabilities/anchor/status", nil)
@@ -65,11 +65,11 @@ func TestExternalAnchorMetricsStrict(t *testing.T) {
 	if attemptsProv == nil || len(attemptsProv.Metric) == 0 {
 		t.Fatalf("provider attempts vec missing")
 	}
-	// Expect at least one metric with label provider="memory"
+	// Expect at least one metric with label provider=memoryProvider
 	provSeen := false
 	for _, m := range attemptsProv.Metric {
 		for _, lp := range m.Label {
-			if lp.GetName() == "provider" && lp.GetValue() == "memory" {
+			if lp.GetName() == "provider" && lp.GetValue() == memoryProvider {
 				provSeen = true
 				if m.Counter.GetValue() < 1 {
 					t.Fatalf("provider attempts <1")
@@ -98,7 +98,7 @@ func TestExternalAnchorMetricsStrict(t *testing.T) {
 	var provSampleCount uint64
 	for _, m := range latHistProv.Metric {
 		for _, lp := range m.Label {
-			if lp.GetName() == "provider" && lp.GetValue() == "memory" {
+			if lp.GetName() == "provider" && lp.GetValue() == memoryProvider {
 				provLatSeen = true
 				provSampleCount = m.Histogram.GetSampleCount()
 				break

@@ -48,13 +48,13 @@ func buildTestServer(rc *delegation.RevocationChain, enableConsistency bool) *ht
 		for i, e := range events {
 			evJSON = append(evJSON, map[string]any{"id": e.ID, "hash": e.Hash, "index": i})
 		}
-			writeJSON(w, map[string]any{
-				"success":        true,
-				"events":         evJSON,
-				"length":         len(events),
-				"verified":       true,
-				"aggregate_hash": rc.AggregateHash(),
-			})
+		writeJSON(w, map[string]any{
+			"success":        true,
+			"events":         evJSON,
+			"length":         len(events),
+			"verified":       true,
+			"aggregate_hash": rc.AggregateHash(),
+		})
 	})
 	mux.HandleFunc("/api/v1/token/revocation/proof", func(w http.ResponseWriter, r *http.Request) {
 		hash := r.URL.Query().Get("hash")

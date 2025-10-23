@@ -70,11 +70,11 @@ const (
 
 // Literal outcome/status strings reused across decision recording and combining strategies.
 const (
-	outcomeAllow         = "allow"
-	outcomeDeny          = "deny"
-	defaultDenyReason    = "No matching policy - default deny"
-	denyPolicyReason     = "Denied by deny policy"
-	allowPolicyReason    = "Allowed by allow policy"
+	outcomeAllow      = "allow"
+	outcomeDeny       = "deny"
+	defaultDenyReason = "No matching policy - default deny"
+	denyPolicyReason  = "Denied by deny policy"
+	allowPolicyReason = "Allowed by allow policy"
 )
 
 // CombiningStrategy defines policy result combination behavior.

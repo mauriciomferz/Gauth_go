@@ -30,7 +30,7 @@ func FuzzModelLimitAuditChain(f *testing.F) {
 			case 0:
 				kind = "input"
 			case 1:
-				kind = "output"
+				kind = metricKindOutput
 			default:
 				kind = "rate"
 			}

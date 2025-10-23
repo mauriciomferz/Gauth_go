@@ -81,7 +81,7 @@ func (l *TokenBucketLimiter) AllowN(key string, n int) bool {
 	elapsed := now.Sub(b.lastRefill)
 
 	// Calculate tokens to add
-	tokensToAdd := int(elapsed.Nanoseconds() * int64(l.config.Rate) / int64(l.config.Period.Nanoseconds()))
+	tokensToAdd := int(elapsed.Nanoseconds() * int64(l.config.Rate) / l.config.Period.Nanoseconds())
 	if tokensToAdd > 0 {
 		b.tokens += tokensToAdd
 		if b.tokens > l.config.Burst {

@@ -1,0 +1,676 @@
+level=warning msg="[runner/nolint_filter] Found unknown linters in //nolint directives: sa4006"
+cmd/specgen/main.go:15:1: cyclomatic complexity 17 of func `main` is high (> 15) (gocyclo)
+func main() {
+^
+pkg/auth/auth.go:232:1: The line is 139 characters long, which exceeds the maximum of 130 characters. (lll)
+func (a *SimpleAuthenticator) AuthorizePowerOfAttorney(ctx context.Context, req PowerOfAttorneyRequest) (*PowerOfAttorneyResponse, error) {
+^
+internal/secrets/provider.go:137:1: cyclomatic complexity 17 of func `(*FilesystemProvider).Rotate` is high (> 15) (gocyclo)
+func (p *FilesystemProvider) Rotate(newMasterKey []byte) error {
+^
+internal/secrets/provider.go:182:9: shadow: declaration of "err" shadows declaration at line 152 (govet)
+		if _, err := io.ReadFull(rand.Reader, nonceNew); err != nil {
+		      ^
+internal/secrets/provider_test.go:30:5: shadow: declaration of "err" shadows declaration at line 22 (govet)
+	if err := p.Store("api_key", []byte(testSecret)); err != nil {
+	   ^
+internal/secrets/provider_test.go:40:5: shadow: declaration of "err" shadows declaration at line 22 (govet)
+	if err := p.Rotate(newKey); err != nil {
+	   ^
+internal/secrets/provider.go:33:1: The line is 134 characters long, which exceeds the maximum of 130 characters. (lll)
+// NewFilesystemProvider initializes a provider at path with masterKey (32 bytes). If masterKey nil, attempts to load or generate one.
+^
+pkg/policy/engine.go:623:1: cyclomatic complexity 27 of func `evalClause` is high (> 15) (gocyclo)
+func evalClause(clause string, attrs map[string]string, now time.Time) (bool, error) {
+^
+pkg/policy/engine.go:253:1: cyclomatic complexity 19 of func `(*Registry).Diff` is high (> 15) (gocyclo)
+func (r *Registry) Diff(fromVersion, toVersion int) (PolicyDiff, error) {
+^
+pkg/policy/engine.go:427:2: ifElseChain: rewrite if-else to switch statement (gocritic)
+	if dec.Deny {
+	^
+pkg/policy/adapter.go:37:1: The line is 197 characters long, which exceeds the maximum of 130 characters. (lll)
+	return authz.Decision{Allow: dec.Allow, Allowed: dec.Allow, Policies: dec.Matched, Reason: dec.Reason, Metadata: map[string]string{"bundle_hash": dec.BundleHash, "chain_head": dec.ChainHead}}, nil
+^
+pkg/policy/engine.go:202:1: The line is 168 characters long, which exceeds the maximum of 130 characters. (lll)
+// Added: policies present in 'to' but not in 'from'. Removed: present in 'from' but not in 'to'. Changed: IDs present in both with differing canonical representations.
+^
+pkg/policy/engine.go:220:1: The line is 145 characters long, which exceeds the maximum of 130 characters. (lll)
+// canonicalPolicy serializes a policy deterministically for diff comparisons (without meta ordering guarantees beyond JSON marshal field order).
+^
+pkg/policy/engine.go:330:1: The line is 179 characters long, which exceeds the maximum of 130 characters. (lll)
+	diff := PolicyDiff{FromVersion: fromVersion, ToVersion: toVersion, Added: added, Removed: removed, Changed: changed, Unchanged: unchanged, FromHash: fromB.Hash, ToHash: toB.Hash}
+^
+pkg/policy/engine_expr_test.go:51:1: The line is 213 characters long, which exceeds the maximum of 130 characters. (lll)
+	dec, err := eng.Evaluate(context.Background(), EvalRequest{Subject: "alice@example.com", Action: "read", Resource: "report:finance", Attrs: map[string]string{"role": "finance", "amount": "150"}, Now: time.Now()})
+^
+pkg/policy/engine_expr_test.go:59:1: The line is 214 characters long, which exceeds the maximum of 130 characters. (lll)
+	dec2, err := eng.Evaluate(context.Background(), EvalRequest{Subject: "alice@example.com", Action: "read", Resource: "report:finance", Attrs: map[string]string{"role": "finance", "amount": "600"}, Now: time.Now()})
+^
+pkg/policy/eval_combining_test.go:15:1: The line is 139 characters long, which exceeds the maximum of 130 characters. (lll)
+		{ID: "allow-read", Subjects: []string{"alice"}, Rules: []Rule{{Actions: []string{"read"}, Resources: []string{"doc:1"}, Effect: Allow}}},
+^
+pkg/policy/eval_combining_test.go:16:1: The line is 139 characters long, which exceeds the maximum of 130 characters. (lll)
+		{ID: "deny-write", Subjects: []string{"alice"}, Rules: []Rule{{Actions: []string{"write"}, Resources: []string{"doc:1"}, Effect: Deny}}},
+^
+pkg/policy/store_file_test.go:21:1: The line is 193 characters long, which exceeds the maximum of 130 characters. (lll)
+	b1, err := fs.AppendBundle(Bundle{ID: "b1", Policies: []Policy{{ID: "p1", Subjects: []string{"alice"}, Rules: []Rule{{Actions: []string{"read"}, Resources: []string{"res"}, Effect: Allow}}}}})
+^
+pkg/policy/store_file_test.go:41:1: The line is 195 characters long, which exceeds the maximum of 130 characters. (lll)
+	b2, err := fs2.AppendBundle(Bundle{ID: "b2", Policies: []Policy{{ID: "p2", Subjects: []string{"alice"}, Rules: []Rule{{Actions: []string{"read"}, Resources: []string{"res2"}, Effect: Allow}}}}})
+^
+pkg/policy/store_file_test.go:68:1: The line is 239 characters long, which exceeds the maximum of 130 characters. (lll)
+			_, _ = fs.AppendBundle(Bundle{ID: "b" + time.Now().Format("150405.000") + string(rune('a'+i)), Policies: []Policy{{ID: "p", Subjects: []string{"u"}, Rules: []Rule{{Actions: []string{"read"}, Resources: []string{"r"}, Effect: Allow}}}}})
+^
+cmd/conformance/main.go:19:1: cyclomatic complexity 30 of func `main` is high (> 15) (gocyclo)
+func main() {
+^
+cmd/conformance/main.go:84:1: The line is 156 characters long, which exceeds the maximum of 130 characters. (lll)
+	opts := harnesslib.Options{MinSymbolCoverage: minCov, MaxGapMissing: maxGapMissing, MaxMissingSymbols: maxMissingSymbols, MaxMissingTests: maxMissingTests}
+^
+cmd/conformance/main.go:95:1: The line is 277 characters long, which exceeds the maximum of 130 characters. (lll)
+		fmt.Fprintf(os.Stderr, "[conformance-debug] writing markdown to %s bytes=%d generated_at=%s mapped=%d/%d symbols=%d/%d\n", markdownOut, len(md), rep.GeneratedAt, rep.Summary.MappedClausesFound, rep.Summary.MappedClauses, rep.Summary.SymbolsFound, rep.Summary.RequiredSymbols)
+^
+cmd/conformance/main.go:169:1: The line is 153 characters long, which exceeds the maximum of 130 characters. (lll)
+		if err := w.Write([]string{"timestamp", "coverage", "gap_missing", "gap_partial", "gap_implemented", "missing_symbols", "missing_tests"}); err != nil {
+^
+cmd/conformance/main.go:174:1: The line is 296 characters long, which exceeds the maximum of 130 characters. (lll)
+	if err := w.Write([]string{time.Now().UTC().Format(time.RFC3339), fmt.Sprintf("%.2f", s.CoveragePercent), fmt.Sprintf("%d", s.GapMissing), fmt.Sprintf("%d", s.GapPartial), fmt.Sprintf("%d", s.GapImplemented), fmt.Sprintf("%d", s.MissingSymbols), fmt.Sprintf("%d", s.MissingTests)}); err != nil {
+^
+cmd/verify/verify.go:159:16: G107: Potential HTTP request made with variable url (gosec)
+		resp, err := http.Get(url)
+		             ^
+internal/metrics/instrumentation_integration_test.go:17:1: The line is 264 characters long, which exceeds the maximum of 130 characters. (lll)
+	eng.AddPolicy(pdp.Policy{ID: "p1", Subjects: []string{"alice"}, Rules: []pdp.Rule{{ID: "r1", Actions: []string{"read"}, Resources: []string{"resourceA"}, Effect: "allow"}, {ID: "r2", Actions: []string{"write"}, Resources: []string{"resourceA"}, Effect: "deny"}}})
+^
+internal/metrics/instrumentation_integration_test.go:19:1: The line is 173 characters long, which exceeds the maximum of 130 characters. (lll)
+	decAllow, err := eng.Evaluate(context.Background(), pdp.Request{Subject: "alice", Action: "read", Resource: "resourceA", Attributes: map[string]string{}, Time: time.Now()})
+^
+internal/metrics/instrumentation_integration_test.go:24:1: The line is 173 characters long, which exceeds the maximum of 130 characters. (lll)
+	decDeny, err := eng.Evaluate(context.Background(), pdp.Request{Subject: "alice", Action: "write", Resource: "resourceA", Attributes: map[string]string{}, Time: time.Now()})
+^
+test/benchmarks/new_benchmarks_test.go:17:1: The line is 168 characters long, which exceeds the maximum of 130 characters. (lll)
+	svc := token.NewServiceForBenchmarks(token.Config{ValidityPeriod: time.Hour, SigningKey: []byte("k"), Store: store, SigningMethod: token.ToString(token.HS256)}, store)
+^
+test/benchmarks/new_benchmarks_test.go:31:1: The line is 168 characters long, which exceeds the maximum of 130 characters. (lll)
+	svc := token.NewServiceForBenchmarks(token.Config{ValidityPeriod: time.Hour, SigningKey: []byte("k"), Store: store, SigningMethod: token.ToString(token.HS256)}, store)
+^
+internal/limits/store_test.go:39:5: shadow: declaration of "err" shadows declaration at line 33 (govet)
+	if err := st.Persist(); err != nil {
+	   ^
+pkg/pdp/engine.go:73:1: File is not properly formatted (gofmt)
+	outcomeAllow         = "allow"
+^
+pkg/pdp/engine.go:140:1: The line is 295 characters long, which exceeds the maximum of 130 characters. (lll)
+	return &InMemoryEngine{strategy: strategy, policies: make([]Policy, 0), policyMatches: make(map[string]uint64), latencyBuckets: []int64{50_000, 100_000, 250_000, 500_000, 1_000_000, 2_500_000, 5_000_000, 10_000_000, 25_000_000, 50_000_000, 100_000_000}, latencyBucketCounts: make([]uint64, 11)}
+^
+pkg/pdp/engine.go:191:1: The line is 198 characters long, which exceeds the maximum of 130 characters. (lll)
+	dec := Decision{Allow: final == EffectAllow, Reason: reason, Policies: allowPolicies, DenyPolicies: denyPolicies, Trace: steps, Metadata: map[string]string{"combining_strategy": e.strategy.Name()}}
+^
+pkg/pdp/engine.go:217:1: The line is 215 characters long, which exceeds the maximum of 130 characters. (lll)
+	snap := MetricsSnapshot{Decisions: e.decisions, Allows: e.allows, Denies: e.denies, ExprErrors: e.exprErrors, LatencyCount: e.latencyCount, LatencyMeanNs: e.latencyMeanNs, LatencyM2: e.latencyM2, PolicyMatches: pm}
+^
+pkg/pdp/engine_metrics_export_test.go:13:1: The line is 167 characters long, which exceeds the maximum of 130 characters. (lll)
+	eng.AddPolicy(Policy{ID: "p_latency", Subjects: []string{"alice"}, Rules: []Rule{{ID: "r1", Actions: []string{"read"}, Resources: []string{"doc"}, Effect: "allow"}}})
+^
+pkg/pdp/engine_test.go:11:1: The line is 160 characters long, which exceeds the maximum of 130 characters. (lll)
+	eng.AddPolicy(Policy{ID: "p1", Subjects: []string{"alice"}, Rules: []Rule{{ID: "r1", Actions: []string{"read"}, Resources: []string{"doc"}, Effect: "allow"}}})
+^
+pkg/pdp/engine_test.go:12:1: The line is 159 characters long, which exceeds the maximum of 130 characters. (lll)
+	eng.AddPolicy(Policy{ID: "p2", Subjects: []string{"alice"}, Rules: []Rule{{ID: "r2", Actions: []string{"read"}, Resources: []string{"doc"}, Effect: "deny"}}})
+^
+pkg/pdp/engine_test.go:30:1: The line is 158 characters long, which exceeds the maximum of 130 characters. (lll)
+	eng.AddPolicy(Policy{ID: "p1", Subjects: []string{"bob"}, Rules: []Rule{{ID: "r1", Actions: []string{"write"}, Resources: []string{"doc"}, Effect: "deny"}}})
+^
+pkg/pdp/engine_test.go:31:1: The line is 159 characters long, which exceeds the maximum of 130 characters. (lll)
+	eng.AddPolicy(Policy{ID: "p2", Subjects: []string{"bob"}, Rules: []Rule{{ID: "r2", Actions: []string{"write"}, Resources: []string{"doc"}, Effect: "allow"}}})
+^
+pkg/pdp/engine_test.go:47:1: The line is 166 characters long, which exceeds the maximum of 130 characters. (lll)
+	eng.AddPolicy(Policy{ID: "pdeny", Subjects: []string{"carl"}, Rules: []Rule{{ID: "rdeny", Actions: []string{"delete"}, Resources: []string{"doc"}, Effect: "deny"}}})
+^
+pkg/pdp/engine_test.go:48:1: The line is 169 characters long, which exceeds the maximum of 130 characters. (lll)
+	eng.AddPolicy(Policy{ID: "pallow", Subjects: []string{"carl"}, Rules: []Rule{{ID: "rallow", Actions: []string{"delete"}, Resources: []string{"doc"}, Effect: "allow"}}})
+^
+pkg/pdp/engine_test.go:77:1: The line is 163 characters long, which exceeds the maximum of 130 characters. (lll)
+	eng.AddPolicy(Policy{ID: "ptrace", Subjects: []string{"dana"}, Rules: []Rule{{ID: "r1", Actions: []string{"read"}, Resources: []string{"doc"}, Effect: "allow"}}})
+^
+internal/sunset/controller.go:123:51: G115: integer overflow conversion uint64 -> int (gosec)
+	threshold := adoptionThresholdForPhase(c.cfg, int(phase))
+	                                                 ^
+internal/sunset/controller.go:140:25: G115: integer overflow conversion uint64 -> int (gosec)
+			next := nextPhase(int(phase))
+			                     ^
+internal/sunset/controller.go:141:17: G115: integer overflow conversion uint64 -> int (gosec)
+			if next > int(phase) {
+			             ^
+internal/sunset/controller_progress_test.go:28:1: The line is 187 characters long, which exceeds the maximum of 130 characters. (lll)
+	cfg := ControllerConfig{Enable: true, Interval: 50 * time.Millisecond, Window: 180 * time.Millisecond, PilotToBroadAdoption: 0.75, BroadToStabilizeAdoption: 0.85, MaxMismatchRatio: 0.01}
+^
+scripts/gapmatrix/gen_gap_matrix.go:185:1: cyclomatic complexity 22 of func `parseCuratedMarkdown` is high (> 15) (gocyclo)
+func parseCuratedMarkdown(p string) (map[string]parsedRequirement, map[string]parsedRequirement, error) {
+^
+scripts/gapmatrix/gen_gap_matrix.go:316:1: The line is 149 characters long, which exceeds the maximum of 130 characters. (lll)
+			diffs = append(diffs, fmt.Sprintf("%s: CSV(Status=%s,Priority=%s) != MD(Status=%s,Priority=%s)", key, r.Status, r.Priority, c.Status, c.Priority))
+^
+scripts/gapmatrix/gen_gap_matrix.go:354:1: The line is 196 characters long, which exceeds the maximum of 130 characters. (lll)
+	fmt.Fprintf(&b, "**Status Summary:** Implemented=%d | Partial=%d | Missing=%d | Conceptual=%d | Total=%d\n\n", counts.Implemented, counts.Partial, counts.Missing, counts.Conceptual, counts.Total)
+^
+scripts/gapmatrix/gen_gap_matrix.go:382:1: The line is 132 characters long, which exceeds the maximum of 130 characters. (lll)
+			fmt.Fprintf(&b, "| %s | %s | %s | %s | %s | %s |\n", r.ID, esc(r.Requirement), r.Status, r.Priority, esc(r.Gap), esc(r.Evidence))
+^
+internal/metrics/prometheus_adapter.go:164:1: cyclomatic complexity 79 of func `NewPrometheusMetrics` is high (> 15) (gocyclo)
+func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
+^
+internal/metrics/metrics_test.go:8:1: cyclomatic complexity 42 of func `TestMemoryMetrics` is high (> 15) (gocyclo)
+func TestMemoryMetrics(t *testing.T) {
+^
+internal/metrics/metrics.go:978:1: cyclomatic complexity 34 of func `(*Memory).SnapshotEx` is high (> 15) (gocyclo)
+func (m *Memory) SnapshotEx() SnapshotStruct {
+^
+internal/metrics/metrics.go:402:47: G115: integer overflow conversion int64 -> uint64 (gosec)
+	atomic.StoreUint64(&m.lastPersistUnix, uint64(time.Now().Unix()))
+	                                             ^
+internal/metrics/metrics.go:472:14: G115: integer overflow conversion int64 -> uint64 (gosec)
+	ns := uint64(d.Nanoseconds())
+	            ^
+internal/metrics/metrics.go:553:53: G115: integer overflow conversion int -> uint64 (gosec)
+	atomic.StoreUint64(&m.envelopeV1SunsetPhase, uint64(phase))
+	                                                   ^
+internal/metrics/metrics.go:619:14: G115: integer overflow conversion int64 -> uint64 (gosec)
+	ns := uint64(d.Nanoseconds())
+	            ^
+internal/metrics/metrics.go:844:27: G115: integer overflow conversion int -> uint64 (gosec)
+	pos := lr.writes & uint64(len(lr.samples)-1) // ring position
+	                         ^
+internal/metrics/metrics.go:859:22: G115: integer overflow conversion uint64 -> int64 (gosec)
+		avg = time.Duration(tot / vc)
+		                   ^
+internal/metrics/metrics.go:891:24: G115: integer overflow conversion uint64 -> int64 (gosec)
+			return time.Duration(buf[rank])
+			                    ^
+internal/metrics/metrics_test.go:21:42: ineffectual assignment to si (ineffassign)
+	d, vc, tot, mn, mx, avg, p50, p90, p99, si, sif, sv, svf, rif, spkm, aa, af, rse, rslc, rslt, rslm, rh, rm = m.Snapshot()
+	                                        ^
+internal/metrics/metrics.go:38:1: The line is 143 characters long, which exceeds the maximum of 130 characters. (lll)
+	// IncEnvelopeDigestMismatchReason increments labeled mismatch reason counter (canonicalization_error|tamper_suspected|domain_conflict|other).
+^
+internal/metrics/metrics.go:40:1: The line is 137 characters long, which exceeds the maximum of 130 characters. (lll)
+	// ObserveEnvelopeIssuanceCadence records seconds elapsed since previous envelope issuance (any version) for migration cadence analysis.
+^
+internal/metrics/metrics.go:42:1: The line is 141 characters long, which exceeds the maximum of 130 characters. (lll)
+	// SetEnvelopeV1SunsetPhase sets gauge enumerating sunset lifecycle phase (0 Pilot,1 Broad,2 Stabilization,3 SoftDep,4 Sunset,5 PostVerify).
+^
+internal/metrics/metrics.go:52:1: The line is 141 characters long, which exceeds the maximum of 130 characters. (lll)
+	IncMultiSignatureStructuralFailures()       // structural preconditions failed (e.g. duplicate signer, insufficient signers, bad weight map)
+^
+internal/metrics/metrics.go:60:1: The line is 140 characters long, which exceeds the maximum of 130 characters. (lll)
+	// ObserveMultiSignatureVerificationLatency records latency of multi-signature verification path (distinct from generic validation latency)
+^
+internal/metrics/metrics.go:64:1: The line is 135 characters long, which exceeds the maximum of 130 characters. (lll)
+	// IncExternalAnchorForcedFailures increments counter of failures explicitly forced via GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS
+^
+internal/metrics/metrics.go:599:1: The line is 132 characters long, which exceeds the maximum of 130 characters. (lll)
+// ObserveMultiSignatureVerificationLatency reuses generic validation reservoir for simplicity; could add dedicated reservoir later.
+^
+internal/metrics/metrics.go:851:1: The line is 570 characters long, which exceeds the maximum of 130 characters. (lll)
+func (m *Memory) Snapshot() (delegations uint64, validations uint64, totalLatencyNS uint64, minLatencyNS uint64, maxLatencyNS uint64, avgLatency time.Duration, p50 time.Duration, p90 time.Duration, p99 time.Duration, sigIssued uint64, sigIssueFail uint64, sigVerifications uint64, sigVerificationFail uint64, revIntegrityFail uint64, sigPubKeyMissing uint64, anchorAttempts uint64, anchorFailures uint64, replayStoreErrors uint64, replayStoreLatencyCount uint64, replayStoreLatencyTotalNS uint64, replayStoreLatencyMaxNS uint64, replayHits uint64, replayMisses uint64) {
+^
+internal/metrics/prometheus_adapter.go:102:1: The line is 142 characters long, which exceeds the maximum of 130 characters. (lll)
+	capabilityAnchorLastWriteUnix        uint64         // stored locally for status endpoint exposure via type assertion (not a Prom metric yet)
+^
+internal/metrics/prometheus_adapter.go:112:1: The line is 135 characters long, which exceeds the maximum of 130 characters. (lll)
+	// Provider-labeled variants (added for enhanced attribution). Backward compatibility: existing methods write to unlabeled collectors.
+^
+internal/metrics/prometheus_adapter.go:180:1: The line is 263 characters long, which exceeds the maximum of 130 characters. (lll)
+	msLatency := prom.NewHistogram(prom.HistogramOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "multi_signature_verification_latency_seconds", Help: "Latency of multi-signature verification operations", Buckets: opts.Buckets, ConstLabels: labels})
+^
+internal/metrics/prometheus_adapter.go:198:1: The line is 219 characters long, which exceeds the maximum of 130 characters. (lll)
+	hist := prom.NewHistogram(prom.HistogramOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "validation_latency_seconds", Help: "Delegation validation latency", Buckets: opts.Buckets, ConstLabels: labels})
+^
+internal/metrics/prometheus_adapter.go:200:1: The line is 242 characters long, which exceeds the maximum of 130 characters. (lll)
+	rsHist := prom.NewHistogram(prom.HistogramOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "replay_store_latency_seconds", Help: "Latency of replay store (Seen/Record) operations", Buckets: opts.Buckets, ConstLabels: labels})
+^
+pkg/ledger/bolt.go:94:1: cyclomatic complexity 21 of func `(*boltStore).Append` is high (> 15) (gocyclo)
+func (b *boltStore) Append(ctx context.Context, e *Entry) error {
+^
+pkg/ledger/bolt_test.go:31:1: File is not properly formatted (gofmt)
+			e := &Entry{
+^
+pkg/ledger/bolt_anchor_test.go:32:5: shadow: declaration of "err" shadows declaration at line 17 (govet)
+	if err := st.EnableAnchorFile(anchorFile, 10*time.Millisecond); err != nil {
+	   ^
+pkg/ledger/bolt_anchor_test.go:44:6: shadow: declaration of "err" shadows declaration at line 17 (govet)
+		if err := st.Append(context.TODO(), e); err != nil {
+		   ^
+pkg/ledger/bolt_test.go:39:6: shadow: declaration of "err" shadows declaration at line 13 (govet)
+		if err := bs.Append(ctx, e); err != nil {
+		   ^
+pkg/ledger/ledger_signature_test.go:21:5: shadow: declaration of "err" shadows declaration at line 13 (govet)
+	if err := ms.Append(ctx, e); err != nil {
+	   ^
+pkg/ledger/ledger_signature_test.go:57:5: shadow: declaration of "err" shadows declaration at line 37 (govet)
+	if err := bs.Append(ctx, e); err != nil {
+	   ^
+internal/rfc/ingest_test.go:25:8: shadow: declaration of "err" shadows declaration at line 21 (govet)
+	if _, err := tmp.WriteString(sampleRFC); err != nil {
+	      ^
+internal/rfc/ingest_test.go:28:5: shadow: declaration of "err" shadows declaration at line 21 (govet)
+	if err := tmp.Close(); err != nil {
+	   ^
+cmd/snapshot/main.go:24:1: cyclomatic complexity 19 of func `main` is high (> 15) (gocyclo)
+func main() {
+^
+cmd/snapshot/main.go:60:4: exitAfterDefer: os.Exit will exit, and `defer f.Close()` will not run (gocritic)
+			os.Exit(9)
+			^
+cmd/snapshot/main.go:63:6: shadow: declaration of "err" shadows declaration at line 51 (govet)
+		if err := json.Unmarshal(b, &snap); err != nil {
+		   ^
+internal/reasons/reasons.go:23:1: don't use `init` function (gochecknoinits)
+func init() {
+^
+pkg/delegation/treehead_test.go:60:19: string `deadbeef` has 2 occurrences, but such constant `deadbeefValue` already exists (goconst)
+	sth.MerkleRoot = "deadbeef"
+	                 ^
+pkg/delegation/revocation_chain.go:634:1: cyclomatic complexity 38 of func `(*RevocationChain).GenerateConsistencyProofV2` is high (> 15) (gocyclo)
+func (c *RevocationChain) GenerateConsistencyProofV2(startIndex int) (*ConsistencyProofV2, error) {
+^
+pkg/delegation/revocation_chain.go:876:1: cyclomatic complexity 31 of func `VerifyConsistencyProofV2` is high (> 15) (gocyclo)
+func VerifyConsistencyProofV2(proof *ConsistencyProofV2, allEventHashes []string) error {
+^
+pkg/delegation/revocation_chain.go:367:1: cyclomatic complexity 23 of func `(*RevocationChain).SignTreeHead` is high (> 15) (gocyclo)
+func (c *RevocationChain) SignTreeHead() (*SignedTreeHead, error) {
+^
+pkg/delegation/consistency_opt.go:15:1: cyclomatic complexity 21 of func `ReconstructStartRootFromPrefixBlocks` is high (> 15) (gocyclo)
+func ReconstructStartRootFromPrefixBlocks(prefixRoots []string, prefixSizes []int, expectedStartLength int, prefixBridges []string) string {
+^
+pkg/delegation/benchmark_test.go:27:12: G404: Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand) (gosec)
+	idxRng := mrand.New(mrand.NewSource(42))
+	          ^
+pkg/delegation/consistency_generation_bench_test.go:45:7: G404: Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand) (gosec)
+	r := mrand.New(mrand.NewSource(int64(n) * 1337))
+	     ^
+pkg/delegation/consistency_prefix_reconstruct_test.go:90:9: G404: Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand) (gosec)
+	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
+	       ^
+pkg/delegation/merkle.go:142:3: ifElseChain: rewrite if-else to switch statement (gocritic)
+		if step.Position == "R" { // sibling is right of cur: parent = HASH(cur + sibling)
+		^
+pkg/delegation/revocation_consistency_v2_test.go:108:8: shadow: declaration of "err" shadows declaration at line 102 (govet)
+	if _, err := chain.SignTreeHead(); err != nil {
+	      ^
+pkg/delegation/revocation_consistency_v2_test.go:112:8: shadow: declaration of "err" shadows declaration at line 102 (govet)
+	if _, err := chain.SignTreeHead(); err != nil {
+	      ^
+pkg/delegation/treehead_multisig_negative_test.go:21:8: shadow: declaration of "err" shadows declaration at line 16 (govet)
+	if _, err := km.Rotate(); err != nil {
+	      ^
+pkg/delegation/treehead_multisig_negative_test.go:24:8: shadow: declaration of "err" shadows declaration at line 16 (govet)
+	if _, err := km.Rotate(); err != nil {
+	      ^
+pkg/delegation/treehead_multisig_negative_test.go:31:8: shadow: declaration of "err" shadows declaration at line 16 (govet)
+	if _, err := chain.Append(RevocationEvent{ID: "rev-neg-1", DelegationID: "del-neg"}); err != nil {
+	      ^
+pkg/delegation/treehead_multisig_test.go:17:8: shadow: declaration of "err" shadows declaration at line 13 (govet)
+	if _, err := km.Rotate(); err != nil {
+	      ^
+pkg/delegation/treehead_multisig_test.go:56:8: shadow: declaration of "err" shadows declaration at line 51 (govet)
+	if _, err := km.Rotate(); err != nil {
+	      ^
+pkg/delegation/treehead_multisig_test.go:59:8: shadow: declaration of "err" shadows declaration at line 51 (govet)
+	if _, err := km.Rotate(); err != nil {
+	      ^
+pkg/delegation/treehead_persist_test.go:27:8: shadow: declaration of "err" shadows declaration at line 14 (govet)
+	if _, err := chain.Append(RevocationEvent{ID: "rev-a", DelegationID: "del-a"}); err != nil {
+	      ^
+pkg/delegation/treehead_persist_test.go:30:8: shadow: declaration of "err" shadows declaration at line 14 (govet)
+	if _, err := chain.SignTreeHead(); err != nil {
+	      ^
+cmd/gauth-server/main.go:24:1: cyclomatic complexity 21 of func `main` is high (> 15) (gocyclo)
+func main() {
+^
+cmd/gauth-server/main.go:40:4: exitAfterDefer: os.Exit will exit, and `defer resp.Body.Close()` will not run (gocritic)
+			os.Exit(0)
+			^
+pkg/ratelimit/ratelimit.go:84:73: unnecessary conversion (unconvert)
+	tokensToAdd := int(elapsed.Nanoseconds() * int64(l.config.Rate) / int64(l.config.Period.Nanoseconds()))
+	                                                                       ^
+internal/notary/rotation_verify.go:57:1: cyclomatic complexity 21 of func `VerifyAllRotations` is high (> 15) (gocyclo)
+func VerifyAllRotations(descriptors []*KeyRotationDescriptor, receiptHashes []string, oldPubs []ed25519.PublicKey, newPubs []ed25519.PublicKey) RotationVerificationSummary {
+^
+internal/notary/receipt_store_incremental_test.go:17:1: cyclomatic complexity 20 of func `TestVerifyIncremental` is high (> 15) (gocyclo)
+func TestVerifyIncremental(t *testing.T) {
+^
+internal/notary/snapshot.go:136:1: cyclomatic complexity 17 of func `VerifySnapshot` is high (> 15) (gocyclo)
+func VerifySnapshot(rs *ReceiptStore, snap Snapshot) (SnapshotVerificationResult, error) {
+^
+internal/notary/snapshot_cli_failures_test.go:13:1: cyclomatic complexity 16 of func `TestSnapshotCLIFailureExitCodes` is high (> 15) (gocyclo)
+func TestSnapshotCLIFailureExitCodes(t *testing.T) {
+^
+internal/notary/snapshot_cli_failures_test.go:29:2: declaration has 3 blank identifiers (dogsled)
+	_, file, _, _ := runtime.Caller(0)
+	^
+internal/notary/snapshot_cli_integration_test.go:31:2: declaration has 3 blank identifiers (dogsled)
+	_, file, _, _ := runtime.Caller(0)
+	^
+internal/notary/rotation_verify.go:104:3: ifElseChain: rewrite if-else to switch statement (gocritic)
+		if len(oldPubs[i]) == 0 {
+		^
+pkg/verification/verification.go:243:1: cyclomatic complexity 16 of func `VerifyAll` is high (> 15) (gocyclo)
+func VerifyAll(client HTTPClient, base, targetHash string) error {
+^
+pkg/verification/test_util.go:51:1: File is not properly formatted (gofmt)
+			writeJSON(w, map[string]any{
+^
+internal/specgen/specgen.go:53:1: cyclomatic complexity 65 of func `GenerateCoverage` is high (> 15) (gocyclo)
+func GenerateCoverage(specPath string) (*CoverageReport, error) {
+^
+internal/specgen/specgen.go:342:9: G306: Expect WriteFile permissions to be 0600 or less (gosec)
+	return os.WriteFile(outPath, b, 0o644)
+	       ^
+internal/specgen/specgen.go:178:4: SA9003: empty branch (staticcheck)
+			if hasExample {
+			^
+pkg/token/token.go:807:1: cyclomatic complexity 23 of func `(*Manager).RefreshToken` is high (> 15) (gocyclo)
+func (m *Manager) RefreshToken(ctx context.Context, refreshToken string) (*Token, error) {
+^
+pkg/token/token.go:375:1: cyclomatic complexity 23 of func `(*MemoryStore).matchesFilter` is high (> 15) (gocyclo)
+func (ms *MemoryStore) matchesFilter(token *Token, filter *Filter) bool {
+^
+pkg/token/token.go:851:9: elseif: can replace 'else {if cond {}}' with 'else if cond {}' (gocritic)
+	} else {
+	       ^
+cmd/coverage/main.go:92:5: shadow: declaration of "err" shadows declaration at line 87 (govet)
+	if err := json.Unmarshal(b, &tpl); err != nil {
+	   ^
+pkg/gauth/gauth.go:372:1: cyclomatic complexity 92 of func `(*Service).ValidateToken` is high (> 15) (gocyclo)
+func (g *Service) ValidateToken(token string) (*TokenValidationResult, error) {
+^
+pkg/gauth/gauth_prop_test.go:60:1: cyclomatic complexity 22 of func `TestJSONParseProperty` is high (> 15) (gocyclo)
+func TestJSONParseProperty(t *testing.T) {
+^
+pkg/gauth/gauth.go:205:1: cyclomatic complexity 18 of func `New` is high (> 15) (gocyclo)
+func New(config Config, opts ...Option) (*Service, error) {
+^
+pkg/gauth/gauth.go:268:1: cyclomatic complexity 17 of func `(*Service).RequestToken` is high (> 15) (gocyclo)
+func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
+^
+internal/circuit/circuit.go:100:2: singleCaseSwitch: should rewrite switch statement to if statement (gocritic)
+	switch cb.state {
+	^
+pkg/pdp/expr/expr.go:90:1: cyclomatic complexity 36 of func `evalClause` is high (> 15) (gocyclo)
+func evalClause(clause string, attrs map[string]string, now time.Time) (bool, error) {
+^
+cmd/web-server/main.go:34:4: exitAfterDefer: os.Exit will exit, and `defer func(){...}(...)` will not run (gocritic)
+			os.Exit(0)
+			^
+pkg/secret/provider_test.go:23:5: shadow: declaration of "err" shadows declaration at line 18 (govet)
+	if err := mp.Set(ctx, "a", "value2", IfNotExists()); err == nil {
+	   ^
+pkg/secret/provider_test.go:27:5: shadow: declaration of "err" shadows declaration at line 18 (govet)
+	if err := mp.Set(ctx, "a", "value2"); err != nil {
+	   ^
+pkg/resilience/resilience.go:246:1: cyclomatic complexity 17 of func `(*Composite).Execute` is high (> 15) (gocyclo)
+func (c *Composite) Execute(ctx context.Context, fn func() error) error {
+^
+internal/crypto/keys_rotation_hash_chain_test.go:14:1: cyclomatic complexity 18 of func `TestRotationLogHashChain` is high (> 15) (gocyclo)
+func TestRotationLogHashChain(t *testing.T) {
+^
+internal/crypto/keys.go:420:1: cyclomatic complexity 16 of func `(*Manager).loadFromDisk` is high (> 15) (gocyclo)
+func (m *Manager) loadFromDisk() error {
+^
+internal/crypto/keys.go:65:1: cyclomatic complexity 16 of func `NewManager` is high (> 15) (gocyclo)
+func NewManager(ttl time.Duration) (*Manager, error) {
+^
+internal/crypto/keys.go:381:14: appendAssign: append result not assigned to the same slice (gocritic)
+	m.history = append(kept, k)
+	            ^
+pkg/crypto/kms_metrics_test.go:14:1: cyclomatic complexity 21 of func `TestKMSMetricsEmission` is high (> 15) (gocyclo)
+func TestKMSMetricsEmission(t *testing.T) {
+^
+pkg/crypto/signature.go:210:1: don't use `init` function (gochecknoinits)
+func init() {
+^
+pkg/crypto/kms_metrics_test.go:26:8: shadow: declaration of "err" shadows declaration at line 20 (govet)
+	if _, err := kms.ActiveSigner(); err != nil {
+	      ^
+pkg/crypto/kms_metrics_test.go:29:11: shadow: declaration of "err" shadows declaration at line 20 (govet)
+	if _, _, err := kms.PublicKey(kms.active.keyID); err != nil {
+	         ^
+pkg/crypto/kms_metrics_test.go:32:8: shadow: declaration of "err" shadows declaration at line 20 (govet)
+	if _, err := kms.Rotate(); err != nil {
+	      ^
+pkg/poa/poa.go:231:1: cyclomatic complexity 21 of func `ValidateRFC0115Compliance` is high (> 15) (gocyclo)
+func ValidateRFC0115Compliance(config interface{}) error {
+^
+pkg/poa/rfc0115_negative_test.go:20:6: func `assertErr` is unused (unused)
+func assertErr(t *testing.T, err error, sub string) {
+     ^
+pkg/poa/rfc0115_negative_test.go:30:6: func `contains` is unused (unused)
+func contains(hay, needle string) bool {
+     ^
+pkg/poa/rfc0115_negative_test.go:33:6: func `stringContains` is unused (unused)
+func stringContains(s, sub string) bool { return len(sub) <= len(s) && (indexOf(s, sub) >= 0) }
+     ^
+pkg/poa/rfc0115_negative_test.go:34:6: func `indexOf` is unused (unused)
+func indexOf(s, sub string) int         { return len(sub) }
+     ^
+conformance/harnesslib/analyze.go:155:1: cyclomatic complexity 24 of func `Analyze` is high (> 15) (gocyclo)
+func Analyze(clauses []Clause) AnalysisResult {
+^
+conformance/harnesslib/report.go:12:1: cyclomatic complexity 23 of func `(Report).ToMarkdown` is high (> 15) (gocyclo)
+func (r Report) ToMarkdown() string {
+^
+conformance/harnesslib/analyze.go:92:1: cyclomatic complexity 18 of func `BuildSymbolIndex` is high (> 15) (gocyclo)
+func BuildSymbolIndex(root string) (map[string][]string, []string) {
+^
+conformance/harnesslib/analyze_test.go:16:12: G306: Expect WriteFile permissions to be 0600 or less (gosec)
+	if err := os.WriteFile("conformance/clause_map.json", []byte(cm), 0o644); err != nil {
+	          ^
+conformance/harnesslib/history_test.go:19:8: shadow: declaration of "err" shadows declaration at line 15 (govet)
+	if _, err := f.WriteString(sampleHistoryCSV); err != nil {
+	      ^
+conformance/harnesslib/scan_test.go:15:8: shadow: declaration of "err" shadows declaration at line 11 (govet)
+	if _, err := f.WriteString(content); err != nil {
+	      ^
+test/policy_bench_test.go:13:1: cyclomatic complexity 26 of func `BenchmarkPolicyEvaluation` is high (> 15) (gocyclo)
+func BenchmarkPolicyEvaluation(b *testing.B) {
+^
+test/capability_anchor_prometheus_integrity_mismatch_test.go:62:5: shadow: declaration of "err" shadows declaration at line 45 (govet)
+	if err := json.Unmarshal(raw, &jf); err != nil {
+	   ^
+web/metrics_persistence_test.go:50:16: string `terminated` has 3 occurrences, but such constant `statusTerminated` already exists (goconst)
+		tok.Status = "terminated"
+		             ^
+web/capability_anchor_external_metrics_strict_test.go:72:54: string `memory` has 2 occurrences, but such constant `memoryProvider` already exists (goconst)
+			if lp.GetName() == "provider" && lp.GetValue() == "memory" {
+			                                                  ^
+web/jwt_test.go:144:20: string `demo-rsa` has 5 occurrences, but such constant `demoRSAKid` already exists (goconst)
+	j.Header["kid"] = "demo-rsa"
+	                  ^
+web/server_clean.go:1056:13: string `input` has 2 occurrences, make it a constant (goconst)
+	if kind == "input" || kind == metricKindOutput || kind == "rate" {
+	           ^
+web/server_clean.go:7367:12: string `text/csv` has 3 occurrences, make it a constant (goconst)
+			if p == "text/csv" || p == contentTypeCSV {
+			        ^
+web/server_clean.go:4233:29: string `ok` has 8 occurrences, but such constant `integrityOK` already exists (goconst)
+	s.receiptIntegrityStatus = "ok"
+	                           ^
+web/server_clean.go:4218:31: string `mismatch` has 12 occurrences, but such constant `integrityMismatch` already exists (goconst)
+			s.receiptIntegrityStatus = "mismatch"
+			                           ^
+web/server_clean.go:6183:40: string `active` has 8 occurrences, but such constant `statusActive` already exists (goconst)
+	s.delegationStatus[in.DelegationID] = "active"
+	                                      ^
+web/server_clean.go:4144:30: string `unconfigured` has 7 occurrences, but such constant `integrityUnconfigured` already exists (goconst)
+		s.receiptIntegrityStatus = "unconfigured"
+		                           ^
+web/capability_persistence_missing_schema_version_test.go:33:43: string `file` has 2 occurrences, but such constant `capSourceFile` already exists (goconst)
+	if doc1["capability_registry_source"] != "file" {
+	                                         ^
+web/fuzz_model_limit_audit_chain_test.go:33:12: string `output` has 2 occurrences, but such constant `metricKindOutput` already exists (goconst)
+				kind = "output"
+				       ^
+web/capability_anchor_external_metrics_forced_failure_test.go:72:54: string `tsa-stub` has 6 occurrences, but such constant `tsaStubProvider` already exists (goconst)
+			if lp.GetName() == "provider" && lp.GetValue() == "tsa-stub" {
+			                                                  ^
+web/capability_anchor_notarization_provider_metrics_test.go:53:25: string `external_stub` has 2 occurrences, but such constant `capSourceExternal` already exists (goconst)
+	if receipt.Provider != "external_stub" {
+	                       ^
+web/capability_anchor_external_metrics_failure_strict_test.go:70:23: string `provider` has 9 occurrences, but such constant `labelProvider` already exists (goconst)
+			if lp.GetName() == "provider" && lp.GetValue() == tsaStubProvider {
+			                   ^
+web/server_clean.go:8694:41: string `revoked` has 3 occurrences, but such constant `TokenStatusRevoked` already exists (goconst)
+	c.JSON(200, gin.H{"success": status == "revoked" || status == TokenStatusAlreadyRevoked, "status": status})
+	                                       ^
+web/server_clean.go:2318:1: cyclomatic complexity 276 of func `NewBetaServerWithMetrics` is high (> 15) (gocyclo)
+func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
+^
+web/server_clean.go:4639:1: cyclomatic complexity 246 of func `(*BetaServer).routes` is high (> 15) (gocyclo)
+func (s *BetaServer) routes() {
+^
+web/server_clean.go:3448:1: cyclomatic complexity 75 of func `(*BetaServer).loadCapabilitiesFromFile` is high (> 15) (gocyclo)
+func (s *BetaServer) loadCapabilitiesFromFile(path string) error {
+^
+web/server_clean.go:4379:1: cyclomatic complexity 57 of func `(*BetaServer).apiCapabilityAnchorPrometheus` is high (> 15) (gocyclo)
+func (s *BetaServer) apiCapabilityAnchorPrometheus(c *gin.Context) {
+^
+web/server_clean.go:8513:1: cyclomatic complexity 48 of func `(*BetaServer).apiTokenValidate` is high (> 15) (gocyclo)
+func (s *BetaServer) apiTokenValidate(c *gin.Context) {
+^
+web/server_clean.go:7784:1: cyclomatic complexity 47 of func `(*BetaServer).apiAuthorizePOA` is high (> 15) (gocyclo)
+func (s *BetaServer) apiAuthorizePOA(c *gin.Context) {
+^
+web/server_clean.go:9102:1: cyclomatic complexity 46 of func `(*BetaServer).apiLifecycleTimeline` is high (> 15) (gocyclo)
+func (s *BetaServer) apiLifecycleTimeline(c *gin.Context) {
+^
+web/server_clean.go:8885:1: cyclomatic complexity 44 of func `(*BetaServer).apiDelegationStatusUpdate` is high (> 15) (gocyclo)
+func (s *BetaServer) apiDelegationStatusUpdate(c *gin.Context) {
+^
+web/server_clean.go:842:1: cyclomatic complexity 44 of func `(*BetaServer).apiModelValidate` is high (> 15) (gocyclo)
+func (s *BetaServer) apiModelValidate(c *gin.Context) {
+^
+web/capability_anchor_external_metrics_strict_test.go:14:1: cyclomatic complexity 39 of func `TestExternalAnchorMetricsStrict` is high (> 15) (gocyclo)
+func TestExternalAnchorMetricsStrict(t *testing.T) {
+^
+web/discovery_capabilities_test.go:133:1: cyclomatic complexity 31 of func `TestAuditCapabilitiesPagination` is high (> 15) (gocyclo)
+func TestAuditCapabilitiesPagination(t *testing.T) {
+^
+web/server_clean.go:169:2: G101: Potential hardcoded credentials (gosec)
+	devSecretDemo = "dev-secret-demo-00000000000000000000000000000000"
+	^
+web/server_clean.go:1986:12: G306: Expect WriteFile permissions to be 0600 or less (gosec)
+	if err := os.WriteFile(tmp, finalBuf, 0o644); err != nil {
+	          ^
+web/server_clean.go:2931:31: G115: integer overflow conversion uint64 -> int64 (gosec)
+							o.ObserveInt64(g, int64(snap[k]))
+							                       ^
+web/capability_anchor_sla_test.go:42:29: G115: integer overflow conversion int -> uint64 (gosec)
+	if resp.AgeSeconds < uint64(resp.StaleThresholdSeconds) {
+	                           ^
+web/server_clean.go:4695:66: unnecessary conversion (unconvert)
+	beta.GET("/authz/metrics/prometheus", gin.WrapH(http.HandlerFunc(authz.PrometheusHandler(s.authorizer))))
+	                                                                ^
+web/revocation_metrics_access_test.go:6:6: func `testRevocationAutoSignMetrics` is unused (unused)
+func testRevocationAutoSignMetrics(s *BetaServer) (emitted, skippedEmpty, skippedDuplicate int64) {
+     ^
+web/limits_init.go:30:1: don't use `init` function (gochecknoinits)
+func init() { initLimitsManager() }
+^
+web/testmain_trace.go:76:2: exitAfterDefer: os.Exit will exit, and `defer func(){...}(...)` will not run (gocritic)
+	os.Exit(code)
+	^
+web/server_clean.go:2423:11: shadow: declaration of "err" shadows declaration at line 2417 (govet)
+				if v, err := strconv.Atoi(raw); err == nil && v > 0 {
+				      ^
+web/server_clean.go:3458:5: shadow: declaration of "err" shadows declaration at line 3449 (govet)
+	if err := json.Unmarshal(b, &cfg); err != nil {
+	   ^
+web/capability_anchor_material_signed_test.go:29:5: shadow: declaration of "err" shadows declaration at line 19 (govet)
+	if err := os.WriteFile(capFile, []byte(testutil.CapTransferV1), 0o600); err != nil {
+	   ^
+web/capability_anchor_material_test.go:28:5: shadow: declaration of "err" shadows declaration at line 15 (govet)
+	if err := os.WriteFile(capFile, []byte(testutil.CapTransferV1), 0o600); err != nil {
+	   ^
+web/capability_anchor_prometheus_gauge_test.go:30:5: shadow: declaration of "err" shadows declaration at line 22 (govet)
+	if err := os.WriteFile(capFile, []byte(`{"schema_version":1,"capabilities":[{"id":"cap.transfer","version":"1.0","stable":true}],["action_mappings":{"transaction:execute":["cap.transfer"]}}`), 0o600); err != nil {
+	   ^
+web/capability_anchor_signature_tamper_test.go:26:5: shadow: declaration of "err" shadows declaration at line 18 (govet)
+	if err := os.WriteFile(capFile, []byte(testutil.CapTransferV1), 0o600); err != nil {
+	   ^
+web/capability_anchor_signature_verify_test.go:33:5: shadow: declaration of "err" shadows declaration at line 24 (govet)
+	if err := os.WriteFile(capFile, []byte(testutil.CapTransferV1), 0o600); err != nil {
+	   ^
+web/capability_anchor_signature_verify_test.go:63:5: shadow: declaration of "err" shadows declaration at line 24 (govet)
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+	   ^
+web/capability_anchor_signature_verify_test.go:77:5: shadow: declaration of "err" shadows declaration at line 24 (govet)
+	if err := json.Unmarshal(resp.Artifact, &wrapper); err != nil {
+	   ^
+web/model_limit_anchor_test.go:23:8: shadow: declaration of "err" shadows declaration at line 17 (govet)
+	if _, err := limitsFile.Write([]byte(limitsJSON)); err != nil {
+	      ^
+web/notarization_receipt_persistence_test.go:81:5: shadow: declaration of "err" shadows declaration at line 64 (govet)
+	if err := json.Unmarshal(b, &file); err != nil {
+	   ^
+web/notarization_receipt_persistence_test.go:137:5: shadow: declaration of "err" shadows declaration at line 64 (govet)
+	if err := os.WriteFile(capFile, []byte(testutil.CapTransferIssueDelegationCreateV1), 0o600); err != nil {
+	   ^
+web/notarization_receipt_persistence_test.go:140:5: shadow: declaration of "err" shadows declaration at line 64 (govet)
+	if err := srv.loadCapabilitiesFromFile(capFile); err != nil {
+	   ^
+web/server_clean.go:4482:3: ineffectual assignment to doVerify (ineffassign)
+		doVerify = true
+		^
+web/capability_anchor_notarization_provider_metrics_test.go:59:5: SA4006: this value of `hasLatest` is never used (staticcheck)
+	if _, hasLatest := srv.notarizer.(interface{ Latest() interface{} }); hasLatest { /* noop - type hint to avoid unused */
+	   ^
+web/server_clean.go:4523:4: SA9003: empty branch (staticcheck)
+			if prev == "" && i == 0 {
+			^
+pkg/audit/file_logger.go:42:5: shadow: declaration of "err" shadows declaration at line 37 (govet)
+	if err := fl.load(); err != nil {
+	   ^
+pkg/audit/file_logger_test.go:70:6: shadow: declaration of "err" shadows declaration at line 62 (govet)
+		if err := fl.Log(context.Background(), ev); err != nil {
+		   ^
+pkg/audit/file_logger_test.go:74:5: shadow: declaration of "err" shadows declaration at line 62 (govet)
+	if err := fl.Close(); err != nil {
+	   ^
+pkg/audit/file_logger_test.go:87:6: shadow: declaration of "err" shadows declaration at line 62 (govet)
+		if err := fl2.Log(context.Background(), ev); err != nil {
+		   ^
+pkg/audit/file_logger_test.go:132:5: shadow: declaration of "err" shadows declaration at line 127 (govet)
+	if err := fl.Log(context.Background(), ev); err != nil {
+	   ^
+web/smoketest/ui_smoke_test.go:18:15: G107: Potential HTTP request made with variable url (gosec)
+	resp, err := http.Get(url)
+	             ^
+pkg/rfc0111/metrics_detached.go:28:6: func `incDetachedIssued` is unused (unused)
+func incDetachedIssued() { registerDetachedMetrics(); detachedIssued.Inc() }
+     ^
+pkg/rfc0111/rfc0111_anchor_test.go:43:2: declaration has 21 blank identifiers (dogsled)
+	_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, attempts, failures, _, _, _, _, _, _ := mem.Snapshot()
+	^
+pkg/rfc0111/rfc0111_anchor_test.go:68:2: declaration has 21 blank identifiers (dogsled)
+	_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, attempts, failures, _, _, _, _, _, _ := mem.Snapshot()
+	^
+pkg/rfc0111/rfc0111.go:891:7: dupBranchBody: both branches in if statement have same body (gocritic)
+						if decErr != nil {
+						^
+pkg/rfc0111/rfc0111.go:1488:13: elseif: can replace 'else {if cond {}}' with 'else if cond {}' (gocritic)
+					} else {
+					       ^
+pkg/rfc0111/rfc0111.go:2206:11: elseif: can replace 'else {if cond {}}' with 'else if cond {}' (gocritic)
+			} else {
+			       ^
+pkg/rfc0111/rfc0111_ledger_integration_test.go:25:161: unlambda: replace `func() time.Time { return time.Now() }` with `time.Now` (gocritic)
+	svc := NewService(al, az, WithLedger(lstore), WithMandatorySignatures(), WithSignerProvider(func() (cr.Signer, error) { return kp.ActiveSigner() })).WithClock(func() time.Time { return time.Now() })
+	                                                                                                                                                               ^
+pkg/rfc0111/rfc0111.go:2192:10: shadow: declaration of "err" shadows declaration at line 2178 (govet)
+			if v, err := strconv.Atoi(limStr); err == nil && v > 0 && v < 10_000_000 {
+			      ^
+pkg/circuit/circuit.go:140:48: G115: integer overflow conversion int -> uint32 (gosec)
+	return cb.counts.ConsecutiveFailures >= uint32(cb.maxFailures)
+	                                              ^

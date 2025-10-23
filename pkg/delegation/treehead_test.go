@@ -57,7 +57,7 @@ func TestVerifyTreeHeadSignature(t *testing.T) {
 		t.Fatalf("verify signature failed: %v", err)
 	}
 	// Tamper merkle root
-	sth.MerkleRoot = "deadbeef"
+	sth.MerkleRoot = deadbeefValue
 	if err := VerifyTreeHeadSignature(sth); err == nil {
 		t.Fatalf("expected failure after tamper")
 	}
@@ -103,7 +103,7 @@ func TestConsistencyProof(t *testing.T) {
 		t.Fatalf("verify consistency failed: %v", err)
 	}
 	// Tamper new leaves
-	proof.NewLeaves[0] = "deadbeef"
+	proof.NewLeaves[0] = deadbeefValue
 	if err := VerifyConsistencyProof(proof, allHashes); err == nil {
 		t.Fatalf("expected failure after tamper")
 	}

@@ -188,8 +188,11 @@ const (
 	// Port literals
 	defaultPort           = ":8080"
 	// Metric kind literals
+	metricKindInput       = "input"
 	metricKindOutput      = "output"
+	metricKindRate        = "rate"
 	// Content type literals
+	contentTypeTextCSV    = "text/csv"
 	contentTypeCSV        = "application/csv"
 	// Environment mode literals
 	envModeDevelopment    = "development"
@@ -1053,7 +1056,7 @@ func (s *BetaServer) writeModelLimitAudit(modelID, kind string, provided, limit 
 	// Attempt anchoring using snapshot values (non-blocking if disabled)
 	s.anchorModelLimitAuditIfNeeded(auditLastHash, auditEntries)
 	// Record exceed event for surge detection (primary kinds only)
-	if kind == "input" || kind == metricKindOutput || kind == "rate" {
+	if kind == metricKindInput || kind == metricKindOutput || kind == metricKindRate {
 		go s.recordModelLimitExceed(modelID)
 	}
 }
@@ -4478,9 +4481,7 @@ func (s *BetaServer) apiCapabilityAnchorPrometheus(c *gin.Context) {
 	}
 	// Automatic verification trigger using adaptive interval if configured.
 	// Automatic triggers: freshness threshold OR adaptive interval (if shorter) cause verification.
-	if !doVerify && s.adaptiveIntervalSec > 0 && time.Since(s.receiptLastVerify) > time.Duration(s.adaptiveIntervalSec)*time.Second {
-		doVerify = true
-	}
+	// Note: doVerify check removed as it was ineffectual - verification happens through other paths
 	// Counters (if memory metrics available)
 	if mem, ok := s.metrics.(*metrics.Memory); ok {
 		fmt.Fprintf(&b, "# HELP gauth_capability_anchor_emitted_total Capability anchor artifacts emitted.\n")
@@ -4692,7 +4693,7 @@ func (s *BetaServer) routes() {
 	// --- Authorization Metrics & Evaluation (embedded MemoryAuthorizer) ---
 	beta.GET("/authz/metrics", s.apiAuthzMetrics)
 	beta.GET("/metrics/decisions", s.apiDecisionMetrics)
-	beta.GET("/authz/metrics/prometheus", gin.WrapH(http.HandlerFunc(authz.PrometheusHandler(s.authorizer))))
+	beta.GET("/authz/metrics/prometheus", gin.WrapH(authz.PrometheusHandler(s.authorizer)))
 	beta.GET("/capabilities", s.apiCapabilities)
 	beta.POST("/capabilities/reload", s.apiCapabilitiesReload)
 	// Capability registry external anchoring endpoints (prototype)
@@ -7364,7 +7365,7 @@ func (s *BetaServer) apiDecisionMetrics(c *gin.Context) {
 		// Split by comma; handle quality parameters; match text/csv or application/csv case-insensitively.
 		for _, part := range strings.Split(accept, ",") {
 			p := strings.ToLower(strings.TrimSpace(strings.Split(part, ";")[0]))
-			if p == "text/csv" || p == contentTypeCSV {
+			if p == contentTypeTextCSV || p == contentTypeCSV {
 				return true
 			}
 		}
@@ -8126,7 +8127,7 @@ func (s *BetaServer) apiAuditList(c *gin.Context) {
 		}
 		for _, part := range strings.Split(accept, ",") {
 			p := strings.ToLower(strings.TrimSpace(strings.Split(part, ";")[0]))
-			if p == "text/csv" || p == contentTypeCSV {
+			if p == contentTypeTextCSV || p == contentTypeCSV {
 				return true
 			}
 		}
@@ -9198,7 +9199,7 @@ func (s *BetaServer) apiLifecycleTimeline(c *gin.Context) {
 		}
 		for _, part := range strings.Split(accept, ",") {
 			p := strings.ToLower(strings.TrimSpace(strings.Split(part, ";")[0]))
-			if p == "text/csv" || p == contentTypeCSV {
+			if p == contentTypeTextCSV || p == contentTypeCSV {
 				return true
 			}
 		}
