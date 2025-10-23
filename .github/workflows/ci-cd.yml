@@ -101,11 +101,16 @@ jobs:
     - name: Run go vet
       run: go vet ./...
 
-    - name: Run golangci-lint
-      uses: golangci/golangci-lint-action@v6
-      with:
-        version: v1.64.8
-        args: --timeout=10m --out-format=colored-line-number
+    - name: Install and run golangci-lint from source
+      run: |
+        # Ensure clean installation - remove any cached version
+        rm -f $(go env GOPATH)/bin/golangci-lint
+        # Install golangci-lint from source to ensure it's built with Go 1.25
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
+        # Verify the version and Go compatibility
+        $(go env GOPATH)/bin/golangci-lint version
+        # Run linter
+        $(go env GOPATH)/bin/golangci-lint run --timeout=10m --out-format=colored-line-number
       continue-on-error: true
 
     - name: Install and run staticcheck  
