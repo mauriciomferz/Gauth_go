@@ -84,7 +84,7 @@ func TestTokenStatusTransitions(t *testing.T) {
 	}
 
 	// 5. Terminate token from active
-	rrTerminate := doPOST(t, srv, "/api/v1/token/status/update", `{"token_id":"`+tokenID+`","new_status":statusTerminated}`)
+	rrTerminate := doPOST(t, srv, "/api/v1/token/status/update", `{"token_id":"`+tokenID+`","new_status":"terminated"}`)
 	if rrTerminate.Code != 200 {
 		t.Fatalf("terminate expected 200 got %d", rrTerminate.Code)
 	}
