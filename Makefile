@@ -13,7 +13,7 @@ crypto-test: ## Run EdDSA-focused tests only
 	@echo "🧪 Running EdDSA test subset..."; \
 	GAUTH_TOKEN_SIG_MODE=eddsa $(GOTEST) -run TestEdDSA ./pkg/gauth -count=1; \
 	echo "✅ EdDSA tests passed";
-.PHONY: all build test clean lint coverage docs help security deps format ci verify-csp verify-build-env debug-ci-env
+.PHONY: all build test clean lint coverage docs help security deps format ci verify-csp verify-build-env debug-ci-env build-ci-adaptive build-fallback ci-build
 .PHONY: gap-matrix gap-matrix-check openapi-guard
 .PHONY: js-lint js-test js-build
 .PHONY: js-bundle
@@ -110,6 +110,25 @@ build-ci-adaptive: ## CI-adaptive build that handles nested directory structures
 	$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-server "$$SOURCE_PATH"
 
 build: verify-build-env build-server build-security-test ## Build all binaries
+
+build-fallback: ## Fallback build method for CI environments with path issues
+	@echo "🔧 Fallback Build Method"
+	@echo "========================"
+	@if $(MAKE) build-server 2>/dev/null; then \
+		echo "✅ Standard build succeeded"; \
+	else \
+		echo "⚠️ Standard build failed, trying adaptive method..."; \
+		$(MAKE) build-ci-adaptive; \
+	fi
+
+ci-build: ## Recommended build target for CI/CD environments  
+	@echo "🚀 CI/CD Build Process"
+	@echo "======================"
+	@echo "📊 Environment Check:"
+	@$(MAKE) debug-ci-env
+	@echo ""
+	@echo "🏗️ Building with adaptive method:"
+	@$(MAKE) build-ci-adaptive
 
 build-server: ## Build the CLI demo server (cmd/gauth-server)
 	@echo "🔧 Building GAuth demo server..."
