@@ -69,7 +69,7 @@ func TestExternalAnchorMetricsForcedFailure(t *testing.T) {
 	var providerForced float64
 	for _, m := range forcedProv.Metric {
 		for _, lp := range m.Label {
-			if lp.GetName() == "provider" && lp.GetValue() == tsaStubProvider {
+			if lp.GetName() == labelProvider && lp.GetValue() == tsaStubProvider {
 				providerForced = m.Counter.GetValue()
 				break
 			}
@@ -86,7 +86,7 @@ func TestExternalAnchorMetricsForcedFailure(t *testing.T) {
 	var sampleCount uint64
 	for _, m := range latProv.Metric {
 		for _, lp := range m.Label {
-			if lp.GetName() == "provider" && lp.GetValue() == tsaStubProvider {
+			if lp.GetName() == labelProvider && lp.GetValue() == tsaStubProvider {
 				sampleCount = m.Histogram.GetSampleCount()
 				break
 			}

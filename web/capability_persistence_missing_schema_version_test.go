@@ -30,7 +30,7 @@ func TestCapabilityPersistenceMissingSchemaVersion(t *testing.T) {
 	if err := json.Unmarshal(disc1.Body.Bytes(), &doc1); err != nil {
 		t.Fatal(err)
 	}
-	if doc1["capability_registry_source"] != "file" {
+	if doc1["capability_registry_source"] != capSourceFile {
 		t.Fatalf("expected source file got %v", doc1["capability_registry_source"])
 	}
 	if doc1["capability_registry_schema_version"].(float64) != 1 {

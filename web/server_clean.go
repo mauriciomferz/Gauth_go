@@ -4144,7 +4144,7 @@ func (s *BetaServer) apiNotarizationReceiptsChain(c *gin.Context) {
 // nolint:SA4006 // status variable used for integrity assignment; staticcheck false positive.
 func (s *BetaServer) verifyReceiptChain() string {
 	if s.receiptStore == nil {
-		s.receiptIntegrityStatus = "unconfigured"
+		s.receiptIntegrityStatus = integrityUnconfigured
 		return s.receiptIntegrityStatus
 	}
 	entries := s.receiptStore.Entries()
@@ -4152,7 +4152,7 @@ func (s *BetaServer) verifyReceiptChain() string {
 		s.receiptIntegrityStatus = emptyValue
 		// map empty to unconfigured for Prom gauge numeric (-1)
 		if pm, ok := s.metrics.(interface{ SetCapabilityAnchorNotarizationReceiptsIntegrity(string) }); ok {
-			pm.SetCapabilityAnchorNotarizationReceiptsIntegrity("unconfigured")
+			pm.SetCapabilityAnchorNotarizationReceiptsIntegrity(integrityUnconfigured)
 		}
 		return s.receiptIntegrityStatus
 	}
@@ -4185,7 +4185,7 @@ func (s *BetaServer) verifyReceiptChain() string {
 	if pm, ok := s.metrics.(interface{ SetCapabilityAnchorNotarizationReceiptsIntegrity(string) }); ok {
 		mapped := s.receiptIntegrityStatus
 		if mapped == emptyValue {
-			mapped = "unconfigured"
+			mapped = integrityUnconfigured
 		}
 		pm.SetCapabilityAnchorNotarizationReceiptsIntegrity(mapped)
 	}
@@ -4245,9 +4245,9 @@ func (s *BetaServer) apiNotarizationReceiptsVerify(c *gin.Context) {
 // nolint:SA4006 // status variable used for integrity assignment; staticcheck false positive.
 func (s *BetaServer) verifyExternalReceiptChain() string {
 	if s.externalReceiptStore == nil {
-		s.externalReceiptIntegrityStatus = "unconfigured"
+		s.externalReceiptIntegrityStatus = integrityUnconfigured
 		if pm, ok := s.metrics.(interface{ SetExternalAnchorReceiptsIntegrity(string) }); ok {
-			pm.SetExternalAnchorReceiptsIntegrity("unconfigured")
+			pm.SetExternalAnchorReceiptsIntegrity(integrityUnconfigured)
 		}
 		return s.externalReceiptIntegrityStatus
 	}
@@ -4255,7 +4255,7 @@ func (s *BetaServer) verifyExternalReceiptChain() string {
 	if len(entries) == 0 {
 		s.externalReceiptIntegrityStatus = emptyValue
 		if pm, ok := s.metrics.(interface{ SetExternalAnchorReceiptsIntegrity(string) }); ok {
-			pm.SetExternalAnchorReceiptsIntegrity("unconfigured")
+			pm.SetExternalAnchorReceiptsIntegrity(integrityUnconfigured)
 		}
 		return s.externalReceiptIntegrityStatus
 	}
@@ -4285,7 +4285,7 @@ func (s *BetaServer) verifyExternalReceiptChain() string {
 	if pm, ok := s.metrics.(interface{ SetExternalAnchorReceiptsIntegrity(string) }); ok {
 		mapped := s.externalReceiptIntegrityStatus
 		if mapped == emptyValue {
-			mapped = "unconfigured"
+			mapped = integrityUnconfigured
 		}
 		pm.SetExternalAnchorReceiptsIntegrity(mapped)
 	}
@@ -4394,7 +4394,7 @@ func (s *BetaServer) apiCapabilityAnchorPrometheus(c *gin.Context) {
 	doVerify := c.Query("verify") == "1" || s.receiptLastVerify.IsZero() || time.Since(s.receiptLastVerify) > time.Duration(freshSecs)*time.Second
 	if doVerify {
 		if s.receiptStore == nil {
-			s.receiptIntegrityStatus = "unconfigured"
+			s.receiptIntegrityStatus = integrityUnconfigured
 		} else {
 			entries := s.receiptStore.Entries()
 			prevHash := "" // rename prev to prevHash to avoid potential shadow causing staticcheck confusion
@@ -4442,7 +4442,7 @@ func (s *BetaServer) apiCapabilityAnchorPrometheus(c *gin.Context) {
 		}
 		// Recompute interval if sufficient time passed (>= current interval) or mismatch occurred
 		elapsed := time.Since(s.adaptiveLastAdjust).Seconds()
-		if elapsed >= float64(s.adaptiveIntervalSec) || s.receiptIntegrityStatus == "mismatch" {
+		if elapsed >= float64(s.adaptiveIntervalSec) || s.receiptIntegrityStatus == integrityMismatch {
 			newEntries := entriesLen - s.adaptiveAppendCount
 			// Simple heuristic: scale interval inversely with growth & mismatches.
 			// Base target = maxIv; reduce by factor for growth and mismatches.
@@ -4455,7 +4455,7 @@ func (s *BetaServer) apiCapabilityAnchorPrometheus(c *gin.Context) {
 				}
 				interval -= reduction
 			}
-			if s.receiptIntegrityStatus == "mismatch" {
+			if s.receiptIntegrityStatus == integrityMismatch {
 				// Track consecutive mismatches to force aggressive interval.
 				s.adaptiveMismatchCount++
 			}
@@ -4469,12 +4469,12 @@ func (s *BetaServer) apiCapabilityAnchorPrometheus(c *gin.Context) {
 			s.adaptiveIntervalSec = interval
 			s.adaptiveLastAdjust = time.Now().UTC()
 			s.adaptiveAppendCount = entriesLen
-			if s.receiptIntegrityStatus == "ok" {
+			if s.receiptIntegrityStatus == integrityOK {
 				s.adaptiveMismatchCount = 0
 			}
 		}
 		// Use status value to avoid staticcheck SA4006 complaining about last assignment not observed.
-		if s.receiptIntegrityStatus == "mismatch" && s.adaptiveIntervalSec < minIv {
+		if s.receiptIntegrityStatus == integrityMismatch && s.adaptiveIntervalSec < minIv {
 			s.adaptiveIntervalSec = minIv
 		}
 		fmt.Fprintf(os.Stderr, "[notary] adaptive_interval=%d status=%s new_entries=%d mismatch_count=%d\n", s.adaptiveIntervalSec, s.receiptIntegrityStatus, entriesLen-s.adaptiveAppendCount, s.adaptiveMismatchCount)
@@ -4543,7 +4543,7 @@ func (s *BetaServer) apiCapabilityAnchorPrometheus(c *gin.Context) {
 	}
 	integrityStatusLocal := s.receiptIntegrityStatus
 	if integrityStatusLocal == "" {
-		integrityStatusLocal = "unconfigured"
+		integrityStatusLocal = integrityUnconfigured
 	}
 	fmt.Fprintf(&b, "# HELP gauth_capability_anchor_notarization_receipts_integrity Integrity status of notarization receipt persistence chain (ok=1 mismatch=0 unconfigured=-1).\n")
 	fmt.Fprintf(&b, "# TYPE gauth_capability_anchor_notarization_receipts_integrity gauge\n")
@@ -4553,7 +4553,7 @@ func (s *BetaServer) apiCapabilityAnchorPrometheus(c *gin.Context) {
 		val = 1
 	case "mismatch":
 		val = 0
-	case "unconfigured", "legacy":
+	case integrityUnconfigured, "legacy":
 		val = -1
 	}
 	fmt.Fprintf(&b, "gauth_capability_anchor_notarization_receipts_integrity %d\n", val)
@@ -6181,7 +6181,7 @@ func (s *BetaServer) apiDelegationCreate(c *gin.Context) {
 		s.metrics.IncCapabilityEnforceAllowed()
 	}
 	s.delegationStatusMu.Lock()
-	s.delegationStatus[in.DelegationID] = "active"
+	s.delegationStatus[in.DelegationID] = statusActive
 	s.delegationStatusMu.Unlock()
 	// Append audit entry with capability provenance if present
 	meta := map[string]any{"delegation_id": in.DelegationID, "delegate": in.Delegate}
@@ -6223,7 +6223,7 @@ func (s *BetaServer) apiDelegationRevoke(c *gin.Context) {
 			var lifecycle []map[string]any
 			for _, need := range s.requiredActionCaps["delegation:revoke"] {
 				co := reg[need]
-				phase := "active"
+				phase := statusActive
 				if co.DeprecatedAfter != "" {
 					if t, err := time.Parse(time.RFC3339, co.DeprecatedAfter); err == nil && time.Now().After(t) {
 						phase = statusDeprecated
@@ -8692,7 +8692,7 @@ func (s *BetaServer) apiTokenRevoke(c *gin.Context) {
 	status := s.tokens.Revoke(req.TokenID)
 	s.audit.Append(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: "api", Action: "token_revoke", Resource: req.TokenID, Outcome: status})
 	s.events.Emit(&Event{ID: randomNonce(6), At: time.Now(), Type: "token_revoked", Data: gin.H{"id": req.TokenID, "outcome": status}})
-	c.JSON(200, gin.H{"success": status == "revoked" || status == TokenStatusAlreadyRevoked, "status": status})
+	c.JSON(200, gin.H{"success": status == TokenStatusRevoked || status == TokenStatusAlreadyRevoked, "status": status})
 }
 
 func (s *BetaServer) apiTokenMetrics(c *gin.Context) {
@@ -8989,7 +8989,7 @@ func (s *BetaServer) apiDelegationStatusUpdate(c *gin.Context) {
 	// Allowed transitions
 	valid := false
 	switch old {
-	case "active":
+	case statusActive:
 		if req.NewStatus == statusSuspended || req.NewStatus == statusTerminated || req.NewStatus == statusActive {
 			valid = true
 		}
@@ -9280,7 +9280,7 @@ func (s *BetaServer) apiTokenIntrospect(c *gin.Context) {
 	}
 	// Internal token lookup
 	status, tok := s.tokens.Validate(tokenStr)
-	revoked := status == "revoked" || status == "already_revoked"
+	revoked := status == TokenStatusRevoked || status == "already_revoked"
 	c.JSON(200, gin.H{"success": true, "type": "internal", "status": status, "token": tok, "revoked": revoked, "multi_signature": ms})
 }
 

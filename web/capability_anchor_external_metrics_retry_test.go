@@ -64,7 +64,7 @@ func TestExternalAnchorMetricsRetrySuccess(t *testing.T) {
 	var providerAttempts float64
 	for _, m := range attemptsProv.Metric {
 		for _, lp := range m.Label {
-			if lp.GetName() == "provider" && lp.GetValue() == "tsa-stub" {
+			if lp.GetName() == "provider" && lp.GetValue() == tsaStubProvider {
 				providerAttempts = m.Counter.GetValue()
 				break
 			}
@@ -81,7 +81,7 @@ func TestExternalAnchorMetricsRetrySuccess(t *testing.T) {
 	if failuresProv != nil {
 		for _, m := range failuresProv.Metric {
 			for _, lp := range m.Label {
-				if lp.GetName() == "provider" && lp.GetValue() == "tsa-stub" {
+				if lp.GetName() == "provider" && lp.GetValue() == tsaStubProvider {
 					providerFailures = m.Counter.GetValue()
 					break
 				}
@@ -96,7 +96,7 @@ func TestExternalAnchorMetricsRetrySuccess(t *testing.T) {
 	if latProv != nil {
 		for _, m := range latProv.Metric {
 			for _, lp := range m.Label {
-				if lp.GetName() == "provider" && lp.GetValue() == "tsa-stub" {
+				if lp.GetName() == "provider" && lp.GetValue() == tsaStubProvider {
 					sampleCount = m.Histogram.GetSampleCount()
 					break
 				}
@@ -153,7 +153,7 @@ func TestExternalAnchorMetricsRetryAllFail(t *testing.T) {
 	var providerFailures float64
 	for _, m := range failuresProv.Metric {
 		for _, lp := range m.Label {
-			if lp.GetName() == "provider" && lp.GetValue() == "tsa-stub" {
+			if lp.GetName() == "provider" && lp.GetValue() == tsaStubProvider {
 				providerFailures = m.Counter.GetValue()
 				break
 			}
