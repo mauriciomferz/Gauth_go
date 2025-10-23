@@ -177,16 +177,16 @@ const (
 	statusValidJWT        = "valid_jwt"
 	statusDeprecated      = "deprecated"
 	statusSunset          = "sunset"
-	memoryProvider        = "memory"
-	tsaStubProvider       = "tsa-stub"
-	emptyValue            = "empty"
+	memoryProvider    = "memory"
+	tsaStubProvider   = "tsa-stub"
+	emptyValue        = "empty"
 	// Source/provider literals
-	capSourceStatic       = "static"
-	capSourceFile         = "file"
-	capSourceExternal     = "external_stub"
-	providerTSAStub       = "tsa_stub"
+	capSourceStatic   = "static"
+	capSourceFile     = "file"
+	capSourceExternal = "external_stub"
+	providerTSAStub   = "tsa_stub"
 	// Port literals
-	defaultPort           = ":8080"
+	defaultPort = ":8080"
 	// Metric kind literals
 	metricKindInput       = "input"
 	metricKindOutput      = "output"
@@ -4218,13 +4218,13 @@ func (s *BetaServer) apiNotarizationReceiptsVerify(c *gin.Context) {
 		}{Hash: e.Hash, Timestamp: e.Timestamp, Provider: e.Provider, Version: e.Version, Success: e.Success, LatencySeconds: e.LatencySeconds, PrevHash: e.PrevHash}
 		enc, err := json.Marshal(tmp)
 		if err != nil {
-			s.receiptIntegrityStatus = "mismatch"
+			s.receiptIntegrityStatus = integrityMismatch
 			c.JSON(500, gin.H{"success": false, "error": "marshal_failed", "detail": err.Error()})
 			return
 		}
 		expected := fmt.Sprintf("%x", sha256.Sum256(append([]byte(e.PrevHash), enc...)))
 		if expected != e.ChainHash || e.PrevHash != prev {
-			s.receiptIntegrityStatus = "mismatch"
+			s.receiptIntegrityStatus = integrityMismatch
 			if pm, ok := s.metrics.(interface{ SetCapabilityAnchorNotarizationReceiptsIntegrity(string) }); ok {
 				pm.SetCapabilityAnchorNotarizationReceiptsIntegrity("mismatch")
 			}
@@ -4233,7 +4233,7 @@ func (s *BetaServer) apiNotarizationReceiptsVerify(c *gin.Context) {
 		}
 		prev = expected
 	}
-	s.receiptIntegrityStatus = "ok"
+	s.receiptIntegrityStatus = integrityOK
 	if pm, ok := s.metrics.(interface{ SetCapabilityAnchorNotarizationReceiptsIntegrity(string) }); ok {
 		pm.SetCapabilityAnchorNotarizationReceiptsIntegrity("ok")
 	}
@@ -4398,13 +4398,13 @@ func (s *BetaServer) apiCapabilityAnchorPrometheus(c *gin.Context) {
 		} else {
 			entries := s.receiptStore.Entries()
 			prevHash := "" // rename prev to prevHash to avoid potential shadow causing staticcheck confusion
-			s.receiptIntegrityStatus = "ok"
+			s.receiptIntegrityStatus = integrityOK
 			for _, e := range entries {
 				// expected chain hash = sha256(prevHash + e.Hash)
 				h := sha256.Sum256([]byte(prevHash + e.Hash))
 				expected := hex.EncodeToString(h[:])
 				if expected != e.ChainHash || e.PrevHash != prevHash {
-					s.receiptIntegrityStatus = "mismatch"
+					s.receiptIntegrityStatus = integrityMismatch
 					s.adaptiveMismatchCount++
 					break
 				}
@@ -4521,12 +4521,8 @@ func (s *BetaServer) apiCapabilityAnchorPrometheus(c *gin.Context) {
 			// Compute expected chain hash: sha256(prev + e.Hash)
 			h := sha256.Sum256([]byte(prev + e.Hash))
 			expected := hex.EncodeToString(h[:])
-			if prev == "" && i == 0 {
-				// First entry semantics already align with verifyReceiptChain.
-				// No additional processing needed for the initial entry.
-			}
 			if expected != e.ChainHash || e.PrevHash != prev {
-				s.receiptIntegrityStatus = "mismatch"
+				s.receiptIntegrityStatus = integrityMismatch
 				if pm, ok := s.metrics.(interface{ SetCapabilityAnchorNotarizationReceiptsIntegrity(string) }); ok {
 					pm.SetCapabilityAnchorNotarizationReceiptsIntegrity("mismatch")
 				}
@@ -4535,7 +4531,7 @@ func (s *BetaServer) apiCapabilityAnchorPrometheus(c *gin.Context) {
 			prev = expected
 		}
 		if s.receiptIntegrityStatus == "" {
-			s.receiptIntegrityStatus = "ok"
+			s.receiptIntegrityStatus = integrityOK
 			if pm, ok := s.metrics.(interface{ SetCapabilityAnchorNotarizationReceiptsIntegrity(string) }); ok {
 				pm.SetCapabilityAnchorNotarizationReceiptsIntegrity("ok")
 			}
