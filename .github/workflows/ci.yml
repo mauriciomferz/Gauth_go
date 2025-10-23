@@ -71,6 +71,9 @@ jobs:
         echo "Testing internal packages..."
         go test -v -timeout=10m ./internal/...
         
+        echo "Testing web packages..."
+        go test -v -timeout=10m ./web/...
+        
         echo "✅ All tests completed successfully"
 
     - name: Install golangci-lint from source
