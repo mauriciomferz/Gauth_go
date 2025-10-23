@@ -19,6 +19,9 @@ type Effect string
 const (
 	Allow Effect = "allow"
 	Deny  Effect = "deny"
+
+	ReasonAllowed      = "allowed"
+	ReasonDeniedPolicy = "denied by policy"
 )
 
 // Rule is a minimal condition/action match element.
@@ -423,10 +426,10 @@ func (e *ChainEngine) Evaluate(ctx context.Context, req EvalRequest) (EvalDecisi
 	}
 	if dec.Deny {
 		dec.Allow = false
-		dec.Reason = "denied by policy"
+		dec.Reason = ReasonDeniedPolicy
 	} else if len(dec.Matched) > 0 {
 		dec.Allow = true
-		dec.Reason = "allowed"
+		dec.Reason = ReasonAllowed
 	} else {
 		dec.Allow = false
 		dec.Reason = "no matching policy"

@@ -14,6 +14,8 @@ import (
 	"sync"
 )
 
+const vaultStubName = "vaultstub"
+
 // Provider defines minimal secret storage capabilities. Implementations should be safe for
 // concurrent use. Errors SHOULD wrap context (provider name, key) for observability.
 type Provider interface {
@@ -113,4 +115,4 @@ func (m *MemoryProvider) List(_ context.Context, prefix string) ([]string, error
 type VaultStub struct{ *MemoryProvider }
 
 func NewVaultStub() *VaultStub    { return &VaultStub{MemoryProvider: NewMemory()} }
-func (v *VaultStub) Name() string { return "vaultstub" }
+func (v *VaultStub) Name() string { return vaultStubName }

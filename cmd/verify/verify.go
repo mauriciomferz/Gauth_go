@@ -20,7 +20,14 @@ import (
 	"os"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/verification"
+        "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/verification"
+)
+
+const (
+	statusOK           = "ok"
+	statusMismatch     = "mismatch"
+	statusUnconfigured = "unconfigured"
+	statusError        = "error"
 )
 
 // handleReceiptVerification handles receipt chain verification logic
@@ -28,21 +35,21 @@ func handleReceiptVerification(base, receipts string, receiptsURL, jsonOut, quie
 	status, total, head, err := verifyReceipts(base, receipts, receiptsURL)
 	exit := 3 // default error
 	switch status {
-	case "ok":
+	case statusOK:
 		exit = 0
-	case "mismatch":
+	case statusMismatch:
 		exit = 1
-	case "unconfigured", "empty":
+	case statusUnconfigured, "empty":
 		exit = 2
 	}
 	if jsonOut {
 		enc := map[string]interface{}{"mode": "receipts", "status": status, "total": total, "head": head}
 		b, _ := json.Marshal(enc)
 		fmt.Println(string(b))
-	} else if !(status == "ok" && quiet) {
+	} else if !(status == statusOK && quiet) {
 		fmt.Printf("[receipts] status=%s total=%d head=%s\n", status, total, head)
 	}
-	if err != nil && status == "error" {
+	if err != nil && status == statusError {
 		fmt.Fprintf(os.Stderr, "[receipts] error: %v\n", err)
 	}
 	os.Exit(exit)
@@ -91,7 +98,7 @@ func main() {
 			}
 		} else {
 			if *jsonOut {
-				b, _ := json.Marshal(map[string]interface{}{"mode": "revocation", "status": "error", "error": err.Error()})
+				b, _ := json.Marshal(map[string]interface{}{"mode": "revocation", "status": statusError, "error": err.Error()})
 				fmt.Println(string(b))
 			} else {
 				fmt.Fprintf(os.Stderr, "[verify] FAILED: %v\n", err)
@@ -113,7 +120,7 @@ func verifyReceipts(base, path string, remote bool) (string, int, string, error)
 	if path != "" {
 		b, err := os.ReadFile(path)
 		if err != nil {
-			return "error", 0, "", err
+			return statusError, 0, "", err
 		}
 		var raw struct {
 			Entries []struct {
@@ -125,7 +132,7 @@ func verifyReceipts(base, path string, remote bool) (string, int, string, error)
 			} `json:"entries"`
 		}
 		if err := json.Unmarshal(b, &raw); err != nil {
-			return "error", 0, "", err
+			return statusError, 0, "", err
 		}
 		prev := ""
 		for _, e := range raw.Entries {
@@ -145,7 +152,7 @@ func verifyReceipts(base, path string, remote bool) (string, int, string, error)
 		url := fmt.Sprintf("%s/api/v1/beta/notarization/receipts/verify", base)
 		resp, err := http.Get(url)
 		if err != nil {
-			return "error", 0, "", err
+			return statusError, 0, "", err
 		}
 		defer resp.Body.Close()
 		body, _ := io.ReadAll(resp.Body)
@@ -157,15 +164,15 @@ func verifyReceipts(base, path string, remote bool) (string, int, string, error)
 			Details    map[string]interface{} `json:"details"`
 		}
 		if err := json.Unmarshal(body, &d); err != nil {
-			return "error", 0, "", err
+			return statusError, 0, "", err
 		}
 		if !d.Configured {
-			return "unconfigured", 0, "", nil
+			return statusUnconfigured, 0, "", nil
 		}
 		if d.Integrity == "empty" {
 			return "empty", 0, "", nil
 		}
 		return d.Integrity, d.Total, "", nil
 	}
-	return "error", 0, "", errors.New("no receipt verification mode selected")
+	return statusError, 0, "", errors.New("no receipt verification mode selected")
 }
