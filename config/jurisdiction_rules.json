@@ -1,0 +1,47 @@
+{
+  "jurisdictions": [
+    {
+      "jurisdiction": "UNITED_STATES",
+      "strict_mode": false,
+      "allowed_actions": ["transfer", "pay", "issue"],
+      "blocked_actions": ["autonomous_high_risk_decision"],
+      "cross_border_rules": {
+        "transfer": ["CANADA", "UNITED_KINGDOM"],
+        "pay": ["CANADA", "UNITED_KINGDOM", "EU"]
+      },
+      "data_residency_rules": {
+        "personal_data": true,
+        "health_data": true
+      }
+    },
+    {
+      "jurisdiction": "EU",
+      "strict_mode": true,
+      "allowed_actions": ["transfer", "pay"],
+      "blocked_actions": ["unrestricted_data_export"],
+      "cross_border_rules": {
+        "transfer": ["UNITED_STATES", "CANADA"],
+        "pay": ["UNITED_STATES", "CANADA", "UNITED_KINGDOM"]
+      },
+      "data_residency_rules": {
+        "personal_data": true,
+        "health_data": true,
+        "biometric_data": true
+      }
+    },
+    {
+      "jurisdiction": "UNITED_KINGDOM",
+      "strict_mode": true,
+      "allowed_actions": ["transfer", "pay"],
+      "blocked_actions": ["unrestricted_data_export"],
+      "cross_border_rules": {
+        "transfer": ["EU", "UNITED_STATES"],
+        "pay": ["EU", "UNITED_STATES", "CANADA"]
+      },
+      "data_residency_rules": {
+        "personal_data": true,
+        "financial_data": true
+      }
+    }
+  ]
+}

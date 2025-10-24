@@ -16,6 +16,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
+	"sort"
 	"sync"
 	"time"
 
@@ -64,6 +65,7 @@ var OnKeyRotated func(prev, curr *Key)
 // Only non-expired history keys are kept on load. Missing or corrupt file results in fresh key generation.
 func NewManager(ttl time.Duration) (*Manager, error) {
 	m := &Manager{ttl: ttl, stopCh: make(chan struct{})}
+	fmt.Fprintf(os.Stderr, "[crypto] NewManager: ttl=%v persistPath=%s autoRotate=%s\n", ttl, m.persistPath, os.Getenv("GAUTH_EDDSA_AUTO_ROTATE"))
 	if p := os.Getenv("GAUTH_EDDSA_PERSIST_PATH"); p != "" {
 		// Expand ~ and relative path
 		if p[0] == '~' {
@@ -100,12 +102,23 @@ func NewManager(ttl time.Duration) (*Manager, error) {
 		fmt.Fprintf(os.Stderr, "[crypto] initial save failed: %v\n", err)
 	}
 	// Optional auto-rotation scheduler: if GAUTH_EDDSA_AUTO_ROTATE=1 run background ticker
-	if os.Getenv("GAUTH_EDDSA_AUTO_ROTATE") == "1" {
-		interval := m.ttl / 2
-		if interval < time.Minute {
-			interval = time.Minute
-		}
-		go m.runScheduler(interval)
+       if os.Getenv("GAUTH_EDDSA_AUTO_ROTATE") == "1" {
+	       interval := m.ttl / 2
+	       if envInterval := os.Getenv("GAUTH_EDDSA_ROTATE_INTERVAL"); envInterval != "" {
+		       if parsed, err := time.ParseDuration(envInterval); err == nil {
+			       interval = parsed
+		       } else {
+			       fmt.Fprintf(os.Stderr, "[crypto] invalid GAUTH_EDDSA_ROTATE_INTERVAL: %v\n", err)
+		       }
+	       } else if interval < time.Minute {
+		       interval = time.Minute
+	       }
+	       fmt.Fprintf(os.Stderr, "[crypto] NewManager: about to launch auto-rotation scheduler goroutine with interval %v\n", interval)
+	       go func() {
+		       fmt.Fprintf(os.Stderr, "[crypto] NewManager: auto-rotation scheduler goroutine launched\n")
+		       m.runScheduler(interval)
+	       }()
+	       fmt.Fprintf(os.Stderr, "[crypto] NewManager: goroutine launch line completed\n")
 	}
 	// Fire initial callback (prev nil) outside lock
 	if OnKeyRotated != nil && m.active != nil {
@@ -156,12 +169,15 @@ func (m *Manager) rotateLocked() error {
 func (m *Manager) Rotate() (*Key, error) {
 	m.mu.Lock()
 	prev := m.active
+	fmt.Fprintf(os.Stderr, "[crypto] Rotate called. Previous key: %v\n", prev)
 	if err := m.rotateLocked(); err != nil {
 		m.mu.Unlock()
+		fmt.Fprintf(os.Stderr, "[crypto] Rotate failed: %v\n", err)
 		return nil, err
 	}
 	curr := m.active
 	m.mu.Unlock()
+	fmt.Fprintf(os.Stderr, "[crypto] Rotate succeeded. New key: %v\n", curr)
 	if OnKeyRotated != nil {
 		func() {
 			defer func() {
@@ -177,19 +193,25 @@ func (m *Manager) Rotate() (*Key, error) {
 
 // runScheduler periodically rotates keys at given interval until stopCh closed.
 func (m *Manager) runScheduler(interval time.Duration) {
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-ticker.C:
-			// Perform rotation; log errors (will retry next tick)
-			if _, err := m.Rotate(); err != nil {
-				fmt.Fprintf(os.Stderr, "[crypto] scheduled rotation failed: %v\n", err)
-			}
-		case <-m.stopCh:
-			return
-		}
-	}
+       ticker := time.NewTicker(interval)
+       defer ticker.Stop()
+       fmt.Fprintf(os.Stderr, "[crypto] runScheduler started with interval %v\n", interval)
+       tickCount := 0
+       for {
+	       select {
+	       case <-ticker.C:
+		       tickCount++
+		       fmt.Fprintf(os.Stderr, "[crypto] runScheduler tick #%d: attempting rotation\n", tickCount)
+		       if _, err := m.Rotate(); err != nil {
+			       fmt.Fprintf(os.Stderr, "[crypto] scheduled rotation failed: %v\n", err)
+		       } else {
+			       fmt.Fprintf(os.Stderr, "[crypto] scheduled rotation succeeded\n")
+		       }
+	       case <-m.stopCh:
+		       fmt.Fprintf(os.Stderr, "[crypto] runScheduler stopped after %d ticks\n", tickCount)
+		       return
+	       }
+       }
 }
 
 // Stop halts the background rotation scheduler if running.
@@ -243,30 +265,53 @@ func (m *Manager) emitRotationLog(prev, curr *Key) {
 	if prevHash != "" {
 		rec["prev_hash"] = prevHash
 	}
-	// Compute hash over canonical JSON of record without hash field; add after computation.
-	tmpData, err := json.Marshal(rec)
-	if err != nil {
-		return
-	}
-	h := sha256.Sum256(tmpData)
-	rec["hash"] = base64.RawURLEncoding.EncodeToString(h[:])
-	data, err := json.Marshal(rec)
-	if err != nil {
-		return
-	}
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600) //nolint:gofumpt // spacing acceptable; functional logic prioritized
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "[crypto] rotation log open error: %v\n", err)
-		return
-	}
-	defer func() {
-		if cerr := f.Close(); cerr != nil {
-			fmt.Fprintf(os.Stderr, "[crypto] rotation log close error: %v\n", cerr)
-		}
-	}()
-	if _, err := f.Write(append(data, '\n')); err != nil {
-		fmt.Fprintf(os.Stderr, "[crypto] rotation log write error: %v\n", err)
-	}
+       // Compute hash over canonical JSON of record without hash/signature; add after computation.
+       keys := make([]string, 0, len(rec))
+       for k := range rec {
+	       keys = append(keys, k)
+       }
+       sort.Strings(keys)
+       buf := bytes.NewBuffer(nil)
+       buf.WriteByte('{')
+       for i, k := range keys {
+	       v, _ := json.Marshal(rec[k])
+	       buf.WriteString("\"")
+	       buf.WriteString(k)
+	       buf.WriteString("\":")
+	       buf.Write(v)
+	       if i < len(keys)-1 {
+		       buf.WriteByte(',')
+	       }
+       }
+       buf.WriteByte('}')
+       h := sha256.Sum256(buf.Bytes())
+       rec["hash"] = base64.RawURLEncoding.EncodeToString(h[:])
+
+       // Sign the canonical JSON (without hash/signature) using the current key
+       var sig []byte
+       if curr.Private != nil {
+	       sig = ed25519.Sign(curr.Private, buf.Bytes())
+	       rec["signature"] = base64.RawURLEncoding.EncodeToString(sig)
+	       rec["public_key"] = base64.RawURLEncoding.EncodeToString(curr.Public)
+       }
+
+       data, err := json.Marshal(rec)
+       if err != nil {
+	       return
+       }
+       f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
+       if err != nil {
+	       fmt.Fprintf(os.Stderr, "[crypto] rotation log open error: %v\n", err)
+	       return
+       }
+       defer func() {
+	       if cerr := f.Close(); cerr != nil {
+		       fmt.Fprintf(os.Stderr, "[crypto] rotation log close error: %v\n", cerr)
+	       }
+       }()
+       if _, err := f.Write(append(data, '\n')); err != nil {
+	       fmt.Fprintf(os.Stderr, "[crypto] rotation log write error: %v\n", err)
+       }
 }
 
 // appendLedgerRotation writes a rotation event to the immutable ledger if configured.

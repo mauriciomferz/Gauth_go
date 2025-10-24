@@ -46,6 +46,13 @@ type EnvelopeV2 struct {
 	// RawPOA is a deterministic JSON serialization of the PowerOfAttorney used to derive CanonicalDigest.
 	// Provided for auditing and external verification replay. Omitted if size exceeds policy limits.
 	RawPOA string `json:"raw_poa,omitempty"`
+	// RawPOAChain embeds a minimal CBOR-like streaming representation (length-prefixed map sequence or
+	// indefinite-length CBOR array) of the delegation chain snapshot at issuance (prototype: single POA item).
+	// Base64 encoded; omitted if embedding disabled or size exceeds limits. Uses hash algorithm negotiated
+	// via GAUTH_RAW_POA_CHAIN_HASH_ALGO (default sha256) for PrevHash continuity when multiple items present.
+	RawPOAChain string `json:"raw_poa_chain,omitempty"`
+	// RawPOAChainAlgo records hashing algorithm used when computing chain continuity ("sha256", "blake2b256", "sha3_256").
+	RawPOAChainAlgo string `json:"raw_poa_chain_algo,omitempty"`
 	// Detached signature (optional, feature gated by GAUTH_DETACHED_SIGNATURE=1). This is an Ed25519 (or future) signature
 	// over the canonical POA JSON bytes (the exact same bytes whose SHA-256 hex is CanonicalDigest). The intent is to
 	// provide a publicly verifiable integrity proof decoupled from the embedded (or absent) POA signature object.

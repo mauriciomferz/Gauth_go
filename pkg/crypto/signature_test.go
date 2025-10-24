@@ -53,3 +53,13 @@ func TestKeyProvider_RotationVisibility(t *testing.T) {
 func TestMultiSig_ThresholdPlaceholder(t *testing.T) {
 	// Placeholder for future threshold / multi-signature implementation.
 }
+
+func TestBLSAggregatedSignature_Verification(t *testing.T) {
+	// Placeholder for BLS aggregated signature verification test
+	// TODO: Implement BLS aggregated signature test logic
+}
+
+func TestBatchSignature_Verification(t *testing.T) {
+	// Placeholder for batch signature verification test
+	// TODO: Implement batch signature test logic
+}

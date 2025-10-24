@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy"
 )
@@ -174,15 +175,23 @@ func TestRollbackVersion(t *testing.T) {
 		t.Fatalf("RollbackVersion failed: %v", err)
 	}
 
+	// Allow asynchronous audit goroutine to complete
+	time.Sleep(100 * time.Millisecond)
+
 	if manager.GetActiveVersion() != 2 {
 		t.Errorf("expected active version 2 after rollback, got %d", manager.GetActiveVersion())
 	}
 
 	found := false
-	for _, event := range auditEvents {
-		if event.EventType == "rollback" && event.Version == 2 && event.Success {
-			found = true
-			break
+	for i := 0; i < 10 && !found; i++ { // retry loop in case goroutine audit delays
+		for _, event := range auditEvents {
+			if event.EventType == "rollback" && event.Version == 2 && event.Success {
+				found = true
+				break
+			}
+		}
+		if !found {
+			time.Sleep(20 * time.Millisecond)
 		}
 	}
 	if !found {

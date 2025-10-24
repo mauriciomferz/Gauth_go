@@ -1283,3 +1283,149 @@ Removed Gaps (Addressed):
 
 Owner: Authorization/Delegation Subsystem Maintainers.
 Stability: alpha (subject to naming and payload changes pre-1.0).
+
+### Detached Signature Missing Metric (NEW)
+
+When strict detached signature enforcement is enabled (`GAUTH_REQUIRE_DETACHED_SIGNATURE=1`), requests missing the required detached signature artifact increment a dedicated counter:
+
+```
+# HELP gauth_rfc0111_crypto_signature_missing_total Missing detached signature artifact events when strict enforcement is enabled
+# TYPE gauth_rfc0111_crypto_signature_missing_total counter
+gauth_rfc0111_crypto_signature_missing_total 0
+```
+
+Purpose:
+- Distinguish genuine signature verification failures from client integration issues (missing artifact).
+- Provide rollout visibility when enabling detached signature enforcement gradually.
+- Enable alerting before elevated missing rates begin to impact availability.
+
+Suggested PromQL:
+```promql
+# 10m rate of missing detached signatures
+sum(increase(gauth_rfc0111_crypto_signature_missing_total[10m]))
+
+# Ratio of missing events vs total attestation verifications
+sum(increase(gauth_rfc0111_crypto_signature_missing_total[5m])) /
+clamp_min(sum(increase(gauth_rfc0111_attestation_proof_verifications_total[5m])), 1)
+```
+
+Alert Example:
+```yaml
+ALERT DetachedSignatureMissingSpike
+	IF increase(gauth_rfc0111_crypto_signature_missing_total[15m]) > 25
+	FOR 5m
+	LABELS {severity="medium"}
+	ANNOTATIONS {summary="Detached signature missing spike", description=">25 missing detached signature events in 15m window (strict mode)."}
+```
+
+Runbook:
+1. Confirm strict mode flag enabled on all pods.
+2. Inspect client request construction—ensure detached signature attached (header or claim as per integration contract).
+3. Sample several denied requests; verify absence of `detached_signature` claim.
+4. Cross-check recent deployment of client libraries for regression.
+5. If spike coincides with key rotation, validate clients didn't drop signature field during error handling fallback.
+
+SLO Draft:
+- Missing Detached Signature Ratio < 0.5% of attestation verifications per rolling 1h.
+
+Roadmap:
+- Add labeled variant `crypto_signature_missing_total{client="<id>"}` with small allowlisted client IDs (guard cardinality).
+- Histogram of detached signature verification latency (to correlate slow path vs missing path).
+- Audit event enrichment (include missing signature reason) for rapid forensic pivot.
+
+
+### Attestation Proof Trust Anchor Metrics (NEW)
+
+Granular counters now distinguish specific trust anchor enforcement failure modes during attestation proof verification. These augment the generic `attestation_proof_verification_failures_total` counter to enable precise alerting and configuration drift detection.
+
+Prometheus Counters:
+```
+# HELP gauth_rfc0111_attestation_proof_trust_anchor_missing_total Attestation proof verification failures due to missing trust anchor
+# TYPE gauth_rfc0111_attestation_proof_trust_anchor_missing_total counter
+gauth_rfc0111_attestation_proof_trust_anchor_missing_total 0
+
+# HELP gauth_rfc0111_attestation_proof_trust_anchor_algorithm_mismatch_total Attestation proof verification failures due to algorithm mismatch with trust anchor
+# TYPE gauth_rfc0111_attestation_proof_trust_anchor_algorithm_mismatch_total counter
+gauth_rfc0111_attestation_proof_trust_anchor_algorithm_mismatch_total 0
+
+# HELP gauth_rfc0111_attestation_proof_trust_anchor_key_mismatch_total Attestation proof verification failures due to key mismatch with trust anchor
+# TYPE gauth_rfc0111_attestation_proof_trust_anchor_key_mismatch_total counter
+gauth_rfc0111_attestation_proof_trust_anchor_key_mismatch_total 0
+```
+
+Failure Taxonomy:
+| Counter | Condition | Typical Cause | Action |
+|---------|-----------|---------------|--------|
+| missing | Issuer not present in trust anchor registry | Registry drift, stale config, mis-deployed anchor JSON | Reload anchors, verify distribution channel |
+| algorithm_mismatch | Attestation proof signature algorithm differs from registered anchor algorithm | Unexpected algorithm rotation, misconfiguration | Confirm intended rotation; update anchor metadata |
+| key_mismatch | Key ID found but public key bytes differ | Stale key material, partial rotation, possible tampering | Reconcile key rotation logs; rotate & re-issue proofs |
+
+Environment Toggle:
+`GAUTH_ATTEST_REQUIRE_TRUST_ANCHOR=1` enables strict enforcement. When unset, proofs still verify cryptographically but trust anchor counters remain zero (soft mode) unless failures occur in branches guarded by strict mode.
+
+Suggested PromQL:
+```promql
+# 5m rate of total trust anchor failures
+sum(increase(gauth_rfc0111_attestation_proof_trust_anchor_missing_total[5m])) +
+sum(increase(gauth_rfc0111_attestation_proof_trust_anchor_algorithm_mismatch_total[5m])) +
+sum(increase(gauth_rfc0111_attestation_proof_trust_anchor_key_mismatch_total[5m]))
+
+# Failure ratio vs all verifications (guard divide-by-zero)
+(sum(increase(gauth_rfc0111_attestation_proof_trust_anchor_missing_total[5m])) +
+ sum(increase(gauth_rfc0111_attestation_proof_trust_anchor_algorithm_mismatch_total[5m])) +
+ sum(increase(gauth_rfc0111_attestation_proof_trust_anchor_key_mismatch_total[5m]))) /
+ clamp_min(sum(increase(gauth_rfc0111_attestation_proof_verifications_total[5m])), 1)
+
+# Algorithm mismatch spike detection (configuration drift)
+increase(gauth_rfc0111_attestation_proof_trust_anchor_algorithm_mismatch_total[15m]) > 3
+```
+
+Alert Examples:
+```
+ALERT AttestationTrustAnchorFailureSpike
+	IF (sum(increase(gauth_rfc0111_attestation_proof_trust_anchor_missing_total[10m])) +
+			sum(increase(gauth_rfc0111_attestation_proof_trust_anchor_algorithm_mismatch_total[10m])) +
+			sum(increase(gauth_rfc0111_attestation_proof_trust_anchor_key_mismatch_total[10m]))) > 10
+	FOR 5m
+	LABELS {severity="high"}
+	ANNOTATIONS {summary="Attestation trust anchor failure spike", description=">10 trust anchor verification failures in 10m window."}
+
+ALERT AttestationAlgorithmDrift
+	IF increase(gauth_rfc0111_attestation_proof_trust_anchor_algorithm_mismatch_total[30m]) > 5
+	FOR 10m
+	LABELS {severity="medium"}
+	ANNOTATIONS {summary="Attestation algorithm mismatch surge", description=">5 algorithm mismatches in 30m; verify anchor algorithm metadata."}
+
+ALERT AttestationKeyMismatchPersistent
+	IF increase(gauth_rfc0111_attestation_proof_trust_anchor_key_mismatch_total[1h]) > 0
+		AND increase(gauth_rfc0111_attestation_proof_trust_anchor_key_mismatch_total[1h]) == increase(gauth_rfc0111_attestation_proof_trust_anchor_key_mismatch_total[2h])
+	FOR 15m
+	LABELS {severity="warning"}
+	ANNOTATIONS {summary="Persistent attestation key mismatch", description="Key mismatch failures sustained across consecutive hours."}
+```
+
+Operational Runbook:
+1. Missing Anchor: Confirm `capabilities.json` or anchor registry source; diff currently loaded anchors vs expected artifact.
+2. Algorithm Mismatch: Inspect recent anchor rotation change logs; ensure dependent services updated; verify no mixed algorithm issuance.
+3. Key Mismatch: Retrieve current anchor public key bytes; compare against issuance key ring; rotate and reissue if compromised.
+4. All: Correlate with deployment events; check audit trail for unauthorized anchor modifications.
+
+Hardening Roadmap:
+- Add labeled counter for `trust_anchor_expired` (future) when anchor timestamps supported.
+- Emit gauge `attestation_trust_anchor_last_refresh_age_seconds` to alert on stale registry refresh.
+- Integrate anomaly detection (EWMA) for mismatch ratio vs baseline.
+- Provide CLI `gauth attestation anchors verify` to offline validate registry consistency.
+
+Testing Guidance:
+- Unit tests inject memory metrics and simulate each failure path asserting only the relevant counter increments.
+- Integration tests set `GAUTH_ATTEST_REQUIRE_TRUST_ANCHOR=1` and rotate algorithms/keys to ensure mismatch counters fire.
+- Use ephemeral anchor with deliberate wrong algorithm to validate algorithm mismatch counter before production rotations.
+
+SLO Considerations (initial draft):
+- Trust Anchor Failure Ratio < 0.1% of total attestation proof verifications per rolling 1h.
+- Algorithm Mismatch Count = 0 outside planned rotation windows.
+- Key Mismatch Count = 0 (any occurrence treated as potential security event).
+
+Owner: Cryptography / Attestation Subsystem Maintainers.
+Stability: beta (metrics names considered stable; additional labels may be added post 1.0).
+

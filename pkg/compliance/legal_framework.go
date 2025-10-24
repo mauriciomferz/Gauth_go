@@ -87,6 +87,17 @@ type LegalMetrics struct {
 	ValidationFailures  int64
 	JurisdictionCounts  map[Jurisdiction]int64
 	ViolationCounts     map[string]int64
+	// Extended granular metrics
+	EntityValidationAttempts int64
+	EntityValidationFailures int64
+	ValueLimitChecks         int64
+	ValueLimitViolations     int64
+	ApprovalChecks           int64
+	ApprovalFailures         int64
+	BoardApprovalChecks      int64
+	BoardApprovalFailures    int64
+	TotalValidationLatencyNs int64 // cumulative latency in nanoseconds across validations
+	LastValidationLatencyNs  int64 // last validation latency sample
 }
 
 // NewLegalFrameworkValidator creates a new validator with default jurisdiction rules.
@@ -109,50 +120,58 @@ func NewLegalFrameworkValidator() *LegalFrameworkValidator {
 
 // ValidateJurisdiction validates if an action is compliant within a specific jurisdiction.
 func (v *LegalFrameworkValidator) ValidateJurisdiction(ctx context.Context, jurisdiction Jurisdiction, action string) error {
+	start := time.Now()
 	v.metrics.mu.Lock()
 	v.metrics.ValidationAttempts++
 	v.metrics.JurisdictionCounts[jurisdiction]++
 	v.metrics.mu.Unlock()
-	
+
 	v.mu.RLock()
 	requirements, exists := v.supportedJurisdictions[jurisdiction]
 	v.mu.RUnlock()
-	
+
 	if !exists {
 		v.recordFailure(fmt.Sprintf("unsupported_jurisdiction_%s", jurisdiction))
+		v.recordLatency(time.Since(start))
 		return fmt.Errorf("unsupported jurisdiction: %s", jurisdiction)
 	}
-	
-	// Validate required approvals
+
+	// Validate required approvals (board-level tracked separately)
 	if requiredLevel, found := requirements.RequiredApprovals[action]; found {
+		v.metrics.mu.Lock(); v.metrics.ApprovalChecks++; v.metrics.mu.Unlock()
 		if requiredLevel == BoardApproval {
-			// Special handling for board-level approvals
+			v.metrics.mu.Lock(); v.metrics.BoardApprovalChecks++; v.metrics.mu.Unlock()
 			if err := v.validateBoardApproval(ctx, action); err != nil {
 				v.recordFailure(fmt.Sprintf("board_approval_failed_%s", action))
+				v.metrics.mu.Lock(); v.metrics.BoardApprovalFailures++; v.metrics.ApprovalFailures++; v.metrics.mu.Unlock()
+				v.recordLatency(time.Since(start))
 				return fmt.Errorf("board approval required for %s: %w", action, err)
 			}
 		}
 	}
-	
+
 	// Validate time restrictions
 	if timeWindows, found := requirements.TimeRestrictions[action]; found {
 		if !v.isWithinAllowedTimeWindow(timeWindows) {
 			v.recordFailure(fmt.Sprintf("time_restriction_%s", action))
+			v.recordLatency(time.Since(start))
 			return fmt.Errorf("action %s not allowed at current time", action)
 		}
 	}
-	
+
 	// Run compliance rule validations
 	for _, rule := range requirements.ComplianceRules {
 		if rule.Mandatory && rule.Validation != nil {
 			if err := rule.Validation(action); err != nil {
 				v.recordFailure(fmt.Sprintf("compliance_rule_%s", rule.Framework))
+				v.recordLatency(time.Since(start))
 				return fmt.Errorf("compliance rule %s failed: %w", rule.Framework, err)
 			}
 		}
 	}
-	
+
 	v.recordSuccess()
+	v.recordLatency(time.Since(start))
 	return nil
 }
 
@@ -164,18 +183,20 @@ func (v *LegalFrameworkValidator) ValidateJurisdictionRequirements(ctx context.C
 	
 	// Check value limits
 	if limit, exists := requirements.ValueLimits[action]; exists {
-		// This would normally extract value from context
-		// For now, we'll accept any action that has a defined limit
+		v.metrics.mu.Lock(); v.metrics.ValueLimitChecks++; v.metrics.mu.Unlock()
 		if limit <= 0 {
 			v.recordFailure(fmt.Sprintf("invalid_value_limit_%s", action))
+			v.metrics.mu.Lock(); v.metrics.ValueLimitViolations++; v.metrics.mu.Unlock()
 			return fmt.Errorf("invalid value limit for action %s", action)
 		}
 	}
 	
 	// Check required approvals
 	if approvalLevel, exists := requirements.RequiredApprovals[action]; exists {
+		v.metrics.mu.Lock(); v.metrics.ApprovalChecks++; v.metrics.mu.Unlock()
 		if approvalLevel == "" {
 			v.recordFailure(fmt.Sprintf("missing_approval_level_%s", action))
+			v.metrics.mu.Lock(); v.metrics.ApprovalFailures++; v.metrics.mu.Unlock()
 			return fmt.Errorf("missing approval level for action %s", action)
 		}
 	}
@@ -188,17 +209,21 @@ func (v *LegalFrameworkValidator) ValidateEntityType(jurisdiction Jurisdiction, 
 	v.mu.RLock()
 	requirements, exists := v.supportedJurisdictions[jurisdiction]
 	v.mu.RUnlock()
+	v.metrics.mu.Lock(); v.metrics.EntityValidationAttempts++; v.metrics.mu.Unlock()
 	
 	if !exists {
+		v.metrics.mu.Lock(); v.metrics.EntityValidationFailures++; v.metrics.mu.Unlock()
 		return fmt.Errorf("unsupported jurisdiction: %s", jurisdiction)
 	}
 	
 	for _, supportedType := range requirements.SupportedEntities {
 		if supportedType == entityType {
+			// success (no explicit metric besides attempt)
 			return nil
 		}
 	}
 	
+	v.metrics.mu.Lock(); v.metrics.EntityValidationFailures++; v.metrics.mu.Unlock()
 	v.recordFailure(fmt.Sprintf("unsupported_entity_%s_%s", jurisdiction, entityType))
 	return fmt.Errorf("entity type %s not supported in jurisdiction %s", entityType, jurisdiction)
 }
@@ -238,25 +263,10 @@ func (v *LegalFrameworkValidator) AddJurisdiction(requirements JurisdictionRequi
 }
 
 // GetMetrics returns current validation metrics.
-func (v *LegalFrameworkValidator) GetMetrics() LegalMetrics {
+func (v *LegalFrameworkValidator) GetMetrics() *LegalMetrics {
 	v.metrics.mu.RLock()
 	defer v.metrics.mu.RUnlock()
-	
-	// Return a copy
-	metrics := *v.metrics
-	
-	// Copy maps
-	metrics.JurisdictionCounts = make(map[Jurisdiction]int64)
-	for k, v := range v.metrics.JurisdictionCounts {
-		metrics.JurisdictionCounts[k] = v
-	}
-	
-	metrics.ViolationCounts = make(map[string]int64)
-	for k, v := range v.metrics.ViolationCounts {
-		metrics.ViolationCounts[k] = v
-	}
-	
-	return metrics
+	return v.metrics
 }
 
 // initializeDefaultJurisdictions sets up default jurisdiction requirements.
@@ -499,4 +509,12 @@ func (v *LegalFrameworkValidator) recordFailure(violationType string) {
 	defer v.metrics.mu.Unlock()
 	v.metrics.ValidationFailures++
 	v.metrics.ViolationCounts[violationType]++
+}
+
+// recordLatency records latency metrics for a validation.
+func (v *LegalFrameworkValidator) recordLatency(d time.Duration) {
+    v.metrics.mu.Lock()
+    v.metrics.LastValidationLatencyNs = d.Nanoseconds()
+    v.metrics.TotalValidationLatencyNs += d.Nanoseconds()
+    v.metrics.mu.Unlock()
 }

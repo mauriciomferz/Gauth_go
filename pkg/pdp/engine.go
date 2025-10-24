@@ -2,11 +2,14 @@ package pdp
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
+	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/obligations"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/pdp/expr"
 )
 
@@ -23,6 +26,9 @@ type Request struct {
 type Obligation struct {
 	ID         string
 	Attributes map[string]string
+	// Mandatory indicates the obligation must succeed; failure may convert an allow decision to deny
+	// when engine configured with denyOnMandatoryFailure.
+	Mandatory  bool
 }
 
 // EvaluationStep captures per-rule evaluation results for tracing.
@@ -112,6 +118,11 @@ type Policy struct {
 	Subjects []string // simple subject matching; later expand with attributes/roles
 	Rules    []Rule
 	Metadata map[string]string
+	// Obligations enumerates mandatory post-decision actions when this policy contributes
+	// to the final decision (e.g. logging, notification). These are executed after the
+	// decision is finalized. Execution failures are counted via metrics but do not alter
+	// the authorization outcome (Phase 1 semantics).
+	Obligations []Obligation
 }
 
 // InMemoryEngine implements Engine with in-memory slice of policies.
@@ -130,6 +141,10 @@ type InMemoryEngine struct {
 	latencyBuckets      []int64           // nanosecond upper bounds (sorted)
 	latencyBucketCounts []uint64          // per-bucket counts
 	externalMetrics     metrics.Metrics   // optional external metrics surface for decision labeling
+	// obligations execution (optional)
+	obligationExecutor obligations.Executor
+	obligationAuditPath string // JSONL audit file path (append-only)
+	denyOnMandatoryFailure bool // configuration: mandatory obligation failure flips allow->deny
 }
 
 // NewInMemoryEngine creates a new PDP engine with provided combining strategy.
@@ -146,6 +161,20 @@ func (e *InMemoryEngine) WithMetrics(m metrics.Metrics) *InMemoryEngine {
 	return e
 }
 
+// WithObligations configures an obligation executor and optional audit JSONL file path.
+// If auditPath is non-empty, obligation execution results will be appended as JSON lines.
+func (e *InMemoryEngine) WithObligations(exec obligations.Executor, auditPath string) *InMemoryEngine {
+	e.obligationExecutor = exec
+	e.obligationAuditPath = auditPath
+	return e
+}
+
+// WithObligationFailureDenies configures whether mandatory obligation failures deny the decision.
+func (e *InMemoryEngine) WithObligationFailureDenies(deny bool) *InMemoryEngine {
+	e.denyOnMandatoryFailure = deny
+	return e
+}
+
 // AddPolicy appends a policy (no deduplication yet).
 func (e *InMemoryEngine) AddPolicy(p Policy) { e.policies = append(e.policies, p) }
 
@@ -153,6 +182,7 @@ func (e *InMemoryEngine) AddPolicy(p Policy) { e.policies = append(e.policies, p
 func (e *InMemoryEngine) Evaluate(ctx context.Context, req Request) (Decision, error) {
 	start := time.Now()
 	steps := make([]EvaluationStep, 0, 16)
+	matchedObligations := make([]Obligation, 0, 8)
 	// naive matching; optimize later with indexes
 	for _, p := range e.policies {
 		if !subjectMatches(req.Subject, p.Subjects) {
@@ -185,10 +215,72 @@ func (e *InMemoryEngine) Evaluate(ctx context.Context, req Request) (Decision, e
 		}
 		if policyMatched {
 			e.policyMatches[p.ID]++
+			// Collect policy obligations (Phase 1: unconditional when any rule matched)
+			if len(p.Obligations) > 0 {
+				matchedObligations = append(matchedObligations, p.Obligations...)
+			}
 		}
 	}
 	final, allowPolicies, denyPolicies, reason := e.strategy.Combine(steps)
-	dec := Decision{Allow: final == EffectAllow, Reason: reason, Policies: allowPolicies, DenyPolicies: denyPolicies, Trace: steps, Metadata: map[string]string{"combining_strategy": e.strategy.Name()}}
+	dec := Decision{Allow: final == EffectAllow, Reason: reason, Policies: allowPolicies, DenyPolicies: denyPolicies, Trace: steps, Metadata: map[string]string{"combining_strategy": e.strategy.Name()}, Obligations: matchedObligations}
+	// Execute obligations prior to recording allow/deny metrics so mandatory failure can influence outcome.
+	var mandatoryFailures []string
+	if e.obligationExecutor != nil && len(dec.Obligations) > 0 {
+		names := make([]string, 0, len(dec.Obligations))
+		mandatoryFlags := make([]bool, 0, len(dec.Obligations))
+		for _, o := range dec.Obligations {
+			names = append(names, o.ID)
+			mandatoryFlags = append(mandatoryFlags, o.Mandatory)
+		}
+		startExec := time.Now()
+		results := e.obligationExecutor.Execute(ctx, names)
+		perObligationStart := startExec
+		for i, r := range results {
+			end := time.Now()
+			dur := end.Sub(perObligationStart)
+			perObligationStart = end
+			if e.externalMetrics != nil { e.externalMetrics.ObserveObligationLatency(dur) }
+			if r.Success {
+				if e.externalMetrics != nil { e.externalMetrics.IncObligationsExecuted() }
+			} else {
+				if e.externalMetrics != nil { e.externalMetrics.IncObligationsFailed() }
+				if i < len(mandatoryFlags) && mandatoryFlags[i] {
+					mandatoryFailures = append(mandatoryFailures, names[i])
+					if e.externalMetrics != nil { e.externalMetrics.IncMandatoryObligationFailures() }
+				}
+			}
+			if e.obligationAuditPath != "" {
+				auditRec := struct {
+					Timestamp   string  `json:"ts"`
+					Subject     string  `json:"subject"`
+					Action      string  `json:"action"`
+					Resource    string  `json:"resource"`
+					Allow       bool    `json:"allow"`
+					Obligation   string  `json:"obligation"`
+					Index       int     `json:"index"`
+					Success     bool    `json:"success"`
+					DurationMS  float64 `json:"duration_ms"`
+					Mandatory   bool    `json:"mandatory"`
+					Error       string  `json:"error,omitempty"`
+				}{Timestamp: time.Now().UTC().Format(time.RFC3339Nano), Subject: req.Subject, Action: req.Action, Resource: req.Resource, Allow: dec.Allow, Obligation: r.Name, Index: i, Success: r.Success, DurationMS: float64(dur.Microseconds()) / 1000.0, Mandatory: i < len(mandatoryFlags) && mandatoryFlags[i]}
+				if r.Error != nil { auditRec.Error = r.Error.Error() }
+				func() {
+					f, err := os.OpenFile(e.obligationAuditPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+					if err != nil { return }
+					defer func() { _ = f.Close() }()
+					enc, err := json.Marshal(auditRec)
+					if err != nil { return }
+					_, _ = f.Write(append(enc, '\n'))
+				}()
+			}
+		}
+	}
+	if dec.Allow && e.denyOnMandatoryFailure && len(mandatoryFailures) > 0 {
+		dec.Allow = false
+		dec.Reason = "Denied due to mandatory obligation failure"
+		dec.Metadata["mandatory_obligation_failures"] = strings.Join(mandatoryFailures, ",")
+	}
+	// Now record latency & decision counters with final outcome.
 	e.recordLatency(time.Since(start))
 	e.decisions++
 	if dec.Allow {
@@ -198,13 +290,9 @@ func (e *InMemoryEngine) Evaluate(ctx context.Context, req Request) (Decision, e
 	}
 	if e.externalMetrics != nil {
 		out := outcomeDeny
-		if dec.Allow {
-			out = outcomeAllow
-		}
+		if dec.Allow { out = outcomeAllow }
 		e.externalMetrics.RecordDecision(req.Action, req.Resource, out)
-		if !dec.Allow {
-			e.externalMetrics.IncUnauthorized()
-		}
+		if !dec.Allow { e.externalMetrics.IncUnauthorized() }
 	}
 	return dec, nil
 }

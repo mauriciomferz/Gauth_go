@@ -3,9 +3,10 @@
 Status: Proposed
 Date: 2025-10-20
 Drivers:
-- RFC0115 requires joint / collective signature semantics.
-- Current implementation only records a single Ed25519 signature and a placeholder count field.
-- Integrity and governance rely on verifiable aggregation of multiple signers.
+
+Summary: Proposes N-of-M multi-signature/threshold enforcement for Power of Attorney, verification API, metrics, and audit log integration. Implementation in beta-refactor branch.
+
+References: See GAP_MATRIX Section 15, implementation in `internal/poa/multisig.go`, tests in `internal/poa/multisig_test.go`.
 
 ## Problem Statement
 Delegations / PoAs needing multiple principals (e.g., dual control) lack cryptographic enforcement. Without threshold signatures, policy evaluation cannot assert collective approval, weakening compliance and auditability.

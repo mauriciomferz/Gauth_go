@@ -1,148 +1,86 @@
-<!-- governance-report generated=2025-10-21T13:59:50Z replaces previous conformance snapshot -->
-# Policy Governance Feature Report
+<!-- conformance-meta generated=2025-10-24T22:08:02Z mapped_clauses=20 found_clauses=8 required_symbols=24 symbols_found=24 coverage=100.00 gap_impl=8 gap_partial=16 gap_missing=19 gap_total=43 -->
+# Conformance Report
 
-Date: 2025-10-21
-Branch: beta-refactor
+Generated: 2025-10-24T22:08:02Z
 
-## Overview
-This report summarizes the newly implemented beta governance enhancements for the policy chain system, including diff visualization, revision timeline, rollback RBAC controls, persistence durability, audit logging, and associated tests.
+## Summary
+Mapped Clauses: 8 / 20
 
-## Key Features
-1. Diff Endpoint & Engine
-	- Endpoint: `GET /api/v1/beta/policy/diff?from=<v>&to=<v>`
-	- Backend: `Registry.Diff(from,to)` performing canonical JSON hashing and classification (added, removed, changed, unchanged).
-	- Frontend integration (`web/static/js/modules/policy.js`) renders color-coded diff summary.
-2. Revision Timeline
-	- Endpoint: `GET /api/v1/beta/policy/timeline` returns ordered versions with: `version`, `hash`, `short_hash`, `created`, `active`, `rolled_back`.
-	- UI block (`index.html` element `#pg-timeline`) auto-refreshes to show active marker and rollback state.
-3. Rollback with RBAC
-	- Endpoint: `POST /api/v1/beta/policy/rollback?version=<v>` requires `X-Admin-Token` header.
-	- Maintains chain immutability using head override pointer rather than destructive mutation.
-	- Updates metrics (active_version) and emits audit event.
-4. Persistence (Durable Chain State)
-	- Controlled via env `POLICY_CHAIN_STATE_PATH`.
-	- Atomic write (tmp rename) plus checksum (`sha256` over bundle slice JSON) and continuity validation on load.
-	- Loader gracefully handles missing or empty files; verifies checksum & strict version monotonicity.
-5. Audit Logging
-	- Rollback and evaluate events appended to in-memory audit log (`AuditLog`).
-	- Endpoint: `GET /api/v1/beta/audit` provides recent entries (id, timestamp, actor, action, resource, outcome, meta).
-6. UI Enhancements
-	- Verification badge color-coded (chain verified vs. error).
-	- Policy version surfaced near evaluation outputs.
-	- Timeline and diff integrated in governance panel.
-7. Metrics
-	- `active_version` gauge tracking current operative version.
-	- Counters/histograms for evaluation latency and decision outcomes remain intact.
-	- NEW Governance Counters:
-		- `rollback_count` (JSON) / `gauth_policy_rollback_total` (Prometheus): Successful administrative rollback operations (RBAC-protected). Enable monitoring of rollback frequency signaling potential instability or policy hot-fixes.
-		- `diff_requests` (JSON) / `gauth_policy_diff_requests_total` (Prometheus): Successful diff endpoint requests. Measures governance inspection activity and can be correlated with audit/rollback events for forensic timelines.
-	- JSON Metrics Endpoint Fields Added: `revisions`, `active_version`, `rollback_count`, `diff_requests`.
-	- Prometheus Exposition Additions:
-		```text
-		# HELP gauth_policy_rollback_total Total successful policy rollback operations
-		# TYPE gauth_policy_rollback_total counter
-		gauth_policy_rollback_total <N>
-		# HELP gauth_policy_diff_requests_total Total successful diff requests
-		# TYPE gauth_policy_diff_requests_total counter
-		gauth_policy_diff_requests_total <M>
-		```
-	- Operational Guidance:
-		- Alert if `increase(gauth_policy_rollback_total[1h]) > 3` to detect excessive rollbacks (potential policy churn or instability).
-		- Track engagement: `rate(gauth_policy_diff_requests_total[5m])` compared against deployment cadence to ensure adequate pre-change review.
-		- Combine metrics: `rollbacks_per_revision = gauth_policy_rollback_total / gauth_policy_revisions_total` (high ratio indicates frequent corrective actions post-append).
-	- Future Work: OTEL gauges mirroring these counters for unified telemetry pipeline; persistence of counters for restart continuity.
+Symbols: 24 / 24 (100.00% coverage)
 
-## Persistence Format
-```
-{
-  "bundles": [ {"id":"...","version":n,"policies":[...]} , ... ],
-  "checksum": "<sha256 hex of bundles array JSON>"
-}
-```
-- Order of bundles reflects append sequence.
-- Checksum verified during load; continuity check ensures versions form 1..N without gaps.
-- Rollback does not alter stored bundles (head override only). Persist after rollback updates head metrics but re-saves same bundle list.
+Test Globs: 8 present of 8 required
 
-## Endpoints Summary
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/policy/diff` | GET | Version diff classification |
-| `/policy/timeline` | GET | Compact chronological bundle list |
-| `/policy/rollback` | POST | Switch active head (RBAC) |
-| `/policy/bundles` | POST | Append new bundle |
-| `/audit` | GET | Retrieve recent audit entries |
-| `/policy/evaluate` | POST | Policy evaluation (provenance + version returned) |
+Missing: clauses=12 symbols=0 tests=0
 
-## Tests Added
-- `policy_diff_test.go`: Validates diff classification logic with seeded bundles (from=2 to=3 scenario).
-- `policy_timeline_test.go`: Ensures rollback state reflected (active marker, rolled_back flag).
-- `policy_persistence_test.go`: Round-trip persistence with seed + appended bundles; validates timeline after reload.
-- `policy_rbac_test.go`: Confirms rollback requires admin token (403 without, 200 with) and active version change.
-- `policy_audit_test.go`: Validates presence of rollback audit entry with metadata: `target_version`, `previous_active_version`, `head_hash`.
+GAP Matrix: implemented=8 partial=16 missing=19 total=43
 
-All tests currently passing.
+## Clauses
 
-## Robustness Improvements
-- Added checksum and continuity verification to persistence loader/save.
-- Graceful handling of missing/empty persistence file to avoid restore errors.
-- Skips demo seeding when persistence restored (prevents overwriting loaded chain).
+| Clause ID | Title | RFC  |
+| ----------------------------------- | ------------------------------ | ---- |
+| 0111:rfc-0111-(placeholder-extract) | RFC 0111 (Placeholder Extract) | 0111 |
+| 0115:rfc-0115-(placeholder-extract) | RFC 0115 (Placeholder Extract) | 0115 |
+| 0111:1.-introduction | 1. Introduction | 0111 |
+| 0115:1.-power-of-attorney-structure | 1. Power of Attorney Structure | 0115 |
+| 0111:2.-policy-bundle-integrity | 2. Policy Bundle Integrity | 0111 |
+| 0115:2.-scope-semantics | 2. Scope Semantics | 0115 |
+| 0111:3.-delegation-&-revocation | 3. Delegation & Revocation | 0111 |
+| 0115:3.-validity-period | 3. Validity Period | 0115 |
+| 0111:4.-audit-logging | 4. Audit Logging | 0111 |
+| 0115:4.-formal-requirements | 4. Formal Requirements | 0115 |
+| 0111:5.-replay-protection | 5. Replay Protection | 0111 |
+| 0115:5.-power-limits | 5. Power Limits | 0115 |
+| 0111:6.-cryptographic-requirements | 6. Cryptographic Requirements | 0111 |
+| 0115:6.-rights-&-obligations | 6. Rights & Obligations | 0115 |
+| 0115:7.-special-conditions | 7. Special Conditions | 0115 |
+| 0115:8.-joint-signatures | 8. Joint Signatures | 0115 |
+| 0115:9.-canonical-serialization | 9. Canonical Serialization | 0115 |
+| 0115:10.-revocation-semantics | 10. Revocation Semantics | 0115 |
 
-## Security & RBAC
-- Rollback guarded by presence of `X-Admin-Token` header (placeholder token-based RBAC). Future work: validate token against a secure store or integrate with capability system.
-- Audit trail captures administrative actions for accountability.
+### Failures
 
-## Known Limitations / Next Steps
-1. Persistence Integrity: Consider signing checksum or anchoring root hash externally.
-2. Concurrency: Snapshot still synchronous; explore WAL and incremental compaction.
-3. Diff Granularity: Extend diff to per-rule & expression-level semantic changes.
-4. RBAC Model: Integrate role evaluation instead of static header token.
-5. Audit Query: Add filters (actor, action, time range) and pagination.
-6. Metrics Expansion: Add rollback counter + diff request counter + persistence load status metric.
-7. Head Override Visibility: Surface `effective_head_version` vs stored head for transparency.
-8. Recovery Mode: Implement truncated/corrupt file salvage (partial chain reconstruction).
-
-## Suggested Follow-Up Work
-- Implement signed persistence (HMAC or asymmetric signature) and verify on load.
-- Add `/policy/diff/full` endpoint with structured rule-level changes.
-- Add integration test for multiple rollbacks sequence.
-- Extend `POLICY_ENGINE.md` with governance usage patterns & admin runbooks.
-- Provide CLI inspection tool for persistence file.
-
-## Completion Summary
-Governance enhancements (diff, timeline, rollback RBAC, persistence with checksum, audit endpoint) are implemented and validated with targeted tests. The system now provides richer introspection, integrity guarantees, and administrative accountability while preserving append-only chain semantics.
-
----
-Generated automatically as part of beta governance feature implementation.
+- clause missing: 0111:10.-detached-signatures
+- clause missing: 0111:11.-multi-signature-threshold
+- clause missing: 0111:7.-authorization-engine
+- clause missing: 0111:8.-pp-architecture
+- clause missing: 0111:9.-external-anchoring
+- clause missing: 0115:10.-embedding-poa-in-token
+- clause missing: 0115:2.-semantic-validation
+- clause missing: 0115:4.-jurisdiction-enforcement
+- clause missing: 0115:5.-advanced-claims
+- clause missing: 0115:6.-key-rotation
+- clause missing: 0115:7.-policy-versioning
+- clause missing: 0115:8.-ai-capability-governance
 
 ## Evidence
 
 | Symbol | Locations |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| AddBundle | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/engine.go:82 |
-| AuditEvents | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:1195 |
-| CanonicalPOADigest | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/canonical.go:40 |
-| CreateDelegation | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:722 |
-| FileLogger | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit/file_logger.go:21 |
-| MemoryLogger | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit/audit.go:84 |
-| POAStatus | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa/poa.go:16<br>/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:41 |
-| PowerOfAttorney | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:50 |
-| ReplayStore | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth/gauth.go:197<br>/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:596 |
-| RevocationChain | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/delegation/revocation_chain.go:65 |
-| RevokeDelegation | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:1116 |
-| ValidateDelegation | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:842 |
-| ValidateMultiSignature | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:88 |
-| VerifyChain | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit/audit.go:151<br>/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit/file_logger.go:137<br>/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/delegation/delegation.go:76<br>/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger/anchor.go:40<br>/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger/bolt.go:199<br>/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger/ledger.go:147<br>/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/engine.go:128<br>/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/store.go:35<br>/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/store_file.go:162 |
-| VerifyIntegrity | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:1268 |
-| VerifyToken | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/examples/token_management/paseto/main.go:73<br>/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:398 |
-| WithReplayProtection | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:695 |
-| computeHash | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:1342 |
-| policy.Registry | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/capability/registry.go:20<br>/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics/prometheus_adapter.go:584<br>/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/compliance/compliance.go:25<br>/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/engine.go:74<br>/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/store.go:36<br>/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/store_file.go:167 |
-| validateDelegationRequest | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:1348 |
-| verifyPOASignature | /Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:653 |
+| AddBundle | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/engine.go:85 |
+| AuditEvents | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1878 |
+| CanonicalPOADigest | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/canonical.go:38 |
+| CreateDelegation | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1262 |
+| FileLogger | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/file_logger.go:21 |
+| MemoryLogger | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:84 |
+| POAStatus | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/poa/poa.go:16<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:69 |
+| PowerOfAttorney | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/auth/legal_framework_integration.go:303<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/poa/validator.go:9<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:78 |
+| ReplayStore | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/gauth.go:197<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1083 |
+| RevocationChain | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/revocation_chain.go:65 |
+| RevokeDelegation | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1793 |
+| ValidateDelegation | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1442 |
+| ValidateMultiSignature | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:138 |
+| VerifyChain | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:151<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/file_logger.go:181<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/delegation.go:88<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/anchor.go:57<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/bolt.go:262<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/ledger.go:172<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/engine.go:141<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store.go:35<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store_file.go:162 |
+| VerifyIntegrity | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1959 |
+| VerifyToken | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/paseto/main.go:73<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:670 |
+| WithReplayProtection | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1224 |
+| computeHash | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:2045 |
+| policy.Registry | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/capability/registry.go:20<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/prometheus_adapter.go:1120<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/compliance/compliance.go:37<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/engine.go:77<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store.go:36<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store_file.go:167 |
+| validateDelegationRequest | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:2051 |
+| verifyPOASignature | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1164 |
 
 ## GAP Details
 
-Source Generated: 2025-10-17
+Source Generated: 2025-10-21
 
 | Section | ID | Requirement | Status | Priority | Gap | Evidence |
 | -------------------------------------- | ----------- | ----------------------------------------- | ----------- | -------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -167,8 +105,8 @@ Source Generated: 2025-10-17
 | Authorization Engine | sec2.item3 | Obligations & advice processing | Missing | P2 | Concept only, not executed | docs/GAP_MATRIX.md:25 |
 | Authorization Engine | sec2.item4 | Policy versioning & rollback | Missing | P1 | No version metadata | docs/GAP_MATRIX.md:23 |
 | Authorization Engine | sec2.item5 | Distributed PDP & caching | Missing | P2 | No clustering or cache invalidation | docs/GAP_MATRIX.md:24 |
-| PoA Definition (RFC0115) | sec3.item1 | Full semantic validation | Partial | P0 | BasicPoAValidator only | docs/GAP_MATRIX.md:32<br>pkg/rfc0111/validator.go |
-| PoA Definition (RFC0115) | sec3.item2 | Embed full PoA in token | Missing | P1 | Envelope lacks full definition | docs/GAP_MATRIX.md:33 |
+| PoA Definition (RFC0115) | sec3.item1 | Full semantic validation | Partial | P0 | AdvancedPoAValidator adds extended rules; lacking warning channel & persistence of daily limits | docs/GAP_MATRIX.md:32<br>pkg/rfc0111/validator.go<br>pkg/rfc0111/rfc0111.go |
+| PoA Definition (RFC0115) | sec3.item2 | Embed full PoA in token | Partial | P1 | RawPOA + PoAVersion embedding implemented behind GAUTH_EMBED_FULL_POA with size cap GAUTH_MAX_RAW_POA_BYTES; remaining gaps: verifier exposure helper, CBOR option, streaming for large PoAs, warning channel & audit persistence | docs/GAP_MATRIX.md:33<br>pkg/rfc0111/rfc0111.go<br>internal/metrics/metrics.go |
 | PoA Definition (RFC0115) | sec3.item3 | Joint/collective signature enforcement | Missing | P1 | No multi-signer aggregation | docs/GAP_MATRIX.md:33 |
 | PoA Definition (RFC0115) | sec3.item4 | Conditional/special conditions evaluation | Missing | P2 | No runtime interpreter | docs/GAP_MATRIX.md:34 |
 | Legal / Jurisdiction / Compliance | sec4.item1 | Jurisdiction-specific enforcement | Missing | P1 | No runtime branching | docs/GAP_MATRIX.md:40 |
@@ -190,5 +128,5 @@ Source Generated: 2025-10-17
 | Testing & Conformance | sec9.item2 | Fuzzing / property tests | Partial | P1 | Canonical digest covered; parsing & semantic validators still lack property tests | docs/GAP_MATRIX.md:77<br>pkg/rfc0111/canonical_prop_test.go<br>pkg/rfc0111/canonical_fuzz_test.go |
 | Testing & Conformance | sec9.item3 | Load/stress benchmarks | Missing | P2 | No high-load harness | docs/GAP_MATRIX.md:78 |
 
-_GAP status distribution: implemented=8 partial=15 missing=20 total=43_
+_GAP status distribution: implemented=8 partial=16 missing=19 total=43_
 

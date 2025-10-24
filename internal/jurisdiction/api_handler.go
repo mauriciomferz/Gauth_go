@@ -1,10 +1,12 @@
 package jurisdiction
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/compliance"
+	"github.com/gin-gonic/gin"
 )
 
 // APIHandler provides REST API endpoints for jurisdiction management.
@@ -27,6 +29,11 @@ func (h *APIHandler) RegisterRoutes(r *gin.Engine) {
 		jurisdictionGroup.GET("/supported", h.getSupportedJurisdictions)
 		jurisdictionGroup.GET("/rules/:jurisdiction", h.getJurisdictionRules)
 		jurisdictionGroup.GET("/metrics", h.getMetrics)
+		// Prometheus exposition (text/plain) for jurisdiction enforcement metrics.
+		jurisdictionGroup.GET("/metrics/prometheus", h.getMetricsPrometheus)
+		// Validator (legal framework) metrics JSON + Prometheus
+		jurisdictionGroup.GET("/validator/metrics", h.getValidatorMetrics)
+		jurisdictionGroup.GET("/validator/metrics/prometheus", h.getValidatorMetricsPrometheus)
 		jurisdictionGroup.POST("/enforce", h.enforceAction)
 		jurisdictionGroup.POST("/validate", h.validateAction)
 		jurisdictionGroup.POST("/simulate", h.simulateEnforcement)
@@ -135,15 +142,169 @@ func (h *APIHandler) getMetrics(c *gin.Context) {
 		"total_enforcements":        metrics.TotalEnforcements,
 		"allowed_count":             metrics.AllowedCount,
 		"denied_count":              metrics.DeniedCount,
-		"allow_rate":                calculateAllowRate(metrics),
+	"allow_rate":                calculateAllowRate(metrics),
 		"jurisdiction_breakdown":    metrics.JurisdictionBreakdown,
 		"violations_by_type":        metrics.ViolationsByType,
 		"average_latency_ms":        metrics.AverageLatencyMs,
 		"cross_border_attempts":     metrics.CrossBorderAttempts,
 		"cross_border_denials":      metrics.CrossBorderDenials,
-		"cross_border_success_rate": calculateCrossBorderSuccessRate(metrics),
+	"cross_border_success_rate": calculateCrossBorderSuccessRate(metrics),
 		"data_residency_violations": metrics.DataResidencyViolations,
 	})
+}
+
+// getMetricsPrometheus returns enforcement metrics in Prometheus exposition format.
+// Metric set kept minimal and stable; numerical values are counters or gauges as appropriate:
+// gauth_jurisdiction_enforcements_total
+// gauth_jurisdiction_enforcements_allowed_total
+// gauth_jurisdiction_enforcements_denied_total
+// gauth_jurisdiction_average_latency_ms (gauge)
+// gauth_jurisdiction_cross_border_attempts_total
+// gauth_jurisdiction_cross_border_denials_total
+// gauth_jurisdiction_data_residency_violations_total
+// Per-jurisdiction breakdown: gauth_jurisdiction_enforcements_total{jurisdiction="EU"}
+// Violation types: gauth_jurisdiction_violation_total{type="ccpa_opt_out"}
+func (h *APIHandler) getMetricsPrometheus(c *gin.Context) {
+	m := h.integration.GetMetrics()
+	c.Header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
+	// Build deterministic ordering for maps
+	type kv struct{ k string; v int64 }
+	// Jurisdiction breakdown
+	jKeys := make([]string, 0, len(m.JurisdictionBreakdown))
+	for j := range m.JurisdictionBreakdown { jKeys = append(jKeys, string(j)) }
+	// Violations by type
+	vKeys := make([]string, 0, len(m.ViolationsByType))
+	for vt := range m.ViolationsByType { vKeys = append(vKeys, vt) }
+	// Simple insertion sort (maps are small)
+	for i := 1; i < len(jKeys); i++ { for j := i; j > 0 && jKeys[j] < jKeys[j-1]; j-- { jKeys[j], jKeys[j-1] = jKeys[j-1], jKeys[j] } }
+	for i := 1; i < len(vKeys); i++ { for j := i; j > 0 && vKeys[j] < vKeys[j-1]; j-- { vKeys[j], vKeys[j-1] = vKeys[j-1], vKeys[j] } }
+	b := &strings.Builder{}
+	b.WriteString("# HELP gauth_jurisdiction_enforcements_total Total jurisdiction enforcement attempts.\n")
+	b.WriteString("# TYPE gauth_jurisdiction_enforcements_total counter\n")
+	fmt.Fprintf(b, "gauth_jurisdiction_enforcements_total %d\n", m.TotalEnforcements)
+	b.WriteString("# HELP gauth_jurisdiction_enforcements_allowed_total Total allowed jurisdiction decisions.\n")
+	b.WriteString("# TYPE gauth_jurisdiction_enforcements_allowed_total counter\n")
+	fmt.Fprintf(b, "gauth_jurisdiction_enforcements_allowed_total %d\n", m.AllowedCount)
+	b.WriteString("# HELP gauth_jurisdiction_enforcements_denied_total Total denied jurisdiction decisions.\n")
+	b.WriteString("# TYPE gauth_jurisdiction_enforcements_denied_total counter\n")
+	fmt.Fprintf(b, "gauth_jurisdiction_enforcements_denied_total %d\n", m.DeniedCount)
+	b.WriteString("# HELP gauth_jurisdiction_average_latency_ms Average jurisdiction enforcement latency (EMA).\n")
+	b.WriteString("# TYPE gauth_jurisdiction_average_latency_ms gauge\n")
+	fmt.Fprintf(b, "gauth_jurisdiction_average_latency_ms %.6f\n", m.AverageLatencyMs)
+	b.WriteString("# HELP gauth_jurisdiction_cross_border_attempts_total Total cross-border enforcement attempts.\n")
+	b.WriteString("# TYPE gauth_jurisdiction_cross_border_attempts_total counter\n")
+	fmt.Fprintf(b, "gauth_jurisdiction_cross_border_attempts_total %d\n", m.CrossBorderAttempts)
+	b.WriteString("# HELP gauth_jurisdiction_cross_border_denials_total Total cross-border denials.\n")
+	b.WriteString("# TYPE gauth_jurisdiction_cross_border_denials_total counter\n")
+	fmt.Fprintf(b, "gauth_jurisdiction_cross_border_denials_total %d\n", m.CrossBorderDenials)
+	b.WriteString("# HELP gauth_jurisdiction_data_residency_violations_total Total data residency violations.\n")
+	b.WriteString("# TYPE gauth_jurisdiction_data_residency_violations_total counter\n")
+	fmt.Fprintf(b, "gauth_jurisdiction_data_residency_violations_total %d\n", m.DataResidencyViolations)
+	// Jurisdiction breakdown metrics
+	b.WriteString("# HELP gauth_jurisdiction_enforcements_by_jurisdiction_total Total enforcements per jurisdiction.\n")
+	b.WriteString("# TYPE gauth_jurisdiction_enforcements_by_jurisdiction_total counter\n")
+	for _, jk := range jKeys {
+		fmt.Fprintf(b, "gauth_jurisdiction_enforcements_by_jurisdiction_total{jurisdiction=\"%s\"} %d\n", jk, m.JurisdictionBreakdown[compliance.Jurisdiction(jk)])
+	}
+	// Violation types
+	b.WriteString("# HELP gauth_jurisdiction_violation_total Jurisdiction enforcement violation occurrences by type.\n")
+	b.WriteString("# TYPE gauth_jurisdiction_violation_total counter\n")
+	for _, vk := range vKeys {
+		fmt.Fprintf(b, "gauth_jurisdiction_violation_total{type=\"%s\"} %d\n", vk, m.ViolationsByType[vk])
+	}
+	c.String(200, b.String())
+}
+
+// getValidatorMetrics returns legal framework validator metrics in JSON.
+func (h *APIHandler) getValidatorMetrics(c *gin.Context) {
+	engine := h.integration.GetEnforcementEngine()
+	validator := engine.validator
+	m := validator.GetMetrics()
+	c.JSON(http.StatusOK, gin.H{
+		"validation_attempts":           m.ValidationAttempts,
+		"validation_successes":          m.ValidationSuccesses,
+		"validation_failures":           m.ValidationFailures,
+		"entity_validation_attempts":    m.EntityValidationAttempts,
+		"entity_validation_failures":    m.EntityValidationFailures,
+		"value_limit_checks":            m.ValueLimitChecks,
+		"value_limit_violations":        m.ValueLimitViolations,
+		"approval_checks":               m.ApprovalChecks,
+		"approval_failures":             m.ApprovalFailures,
+		"board_approval_checks":         m.BoardApprovalChecks,
+		"board_approval_failures":       m.BoardApprovalFailures,
+		"total_validation_latency_ms":   float64(m.TotalValidationLatencyNs) / 1e6,
+		"last_validation_latency_ms":    float64(m.LastValidationLatencyNs) / 1e6,
+		"jurisdiction_counts":           m.JurisdictionCounts,
+		"violation_counts":              m.ViolationCounts,
+	})
+}
+
+// getValidatorMetricsPrometheus exposes validator metrics in Prometheus 0.0.4 format.
+func (h *APIHandler) getValidatorMetricsPrometheus(c *gin.Context) {
+	engine := h.integration.GetEnforcementEngine()
+	validator := engine.validator
+	m := validator.GetMetrics()
+	c.Header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
+	// Deterministic ordering of maps
+	jKeys := make([]string, 0, len(m.JurisdictionCounts))
+	for j := range m.JurisdictionCounts { jKeys = append(jKeys, string(j)) }
+	vKeys := make([]string, 0, len(m.ViolationCounts))
+	for vt := range m.ViolationCounts { vKeys = append(vKeys, vt) }
+	for i := 1; i < len(jKeys); i++ { for j := i; j > 0 && jKeys[j] < jKeys[j-1]; j-- { jKeys[j], jKeys[j-1] = jKeys[j-1], jKeys[j] } }
+	for i := 1; i < len(vKeys); i++ { for j := i; j > 0 && vKeys[j] < vKeys[j-1]; j-- { vKeys[j], vKeys[j-1] = vKeys[j-1], vKeys[j] } }
+	b := &strings.Builder{}
+	b.WriteString("# HELP gauth_validator_validation_attempts_total Total validator jurisdiction validation attempts.\n")
+	b.WriteString("# TYPE gauth_validator_validation_attempts_total counter\n")
+	fmt.Fprintf(b, "gauth_validator_validation_attempts_total %d\n", m.ValidationAttempts)
+	b.WriteString("# HELP gauth_validator_validation_successes_total Successful validator jurisdiction validations.\n")
+	b.WriteString("# TYPE gauth_validator_validation_successes_total counter\n")
+	fmt.Fprintf(b, "gauth_validator_validation_successes_total %d\n", m.ValidationSuccesses)
+	b.WriteString("# HELP gauth_validator_validation_failures_total Failed validator jurisdiction validations.\n")
+	b.WriteString("# TYPE gauth_validator_validation_failures_total counter\n")
+	fmt.Fprintf(b, "gauth_validator_validation_failures_total %d\n", m.ValidationFailures)
+	b.WriteString("# HELP gauth_validator_entity_validation_attempts_total Entity type validation attempts.\n")
+	b.WriteString("# TYPE gauth_validator_entity_validation_attempts_total counter\n")
+	fmt.Fprintf(b, "gauth_validator_entity_validation_attempts_total %d\n", m.EntityValidationAttempts)
+	b.WriteString("# HELP gauth_validator_entity_validation_failures_total Entity type validation failures.\n")
+	b.WriteString("# TYPE gauth_validator_entity_validation_failures_total counter\n")
+	fmt.Fprintf(b, "gauth_validator_entity_validation_failures_total %d\n", m.EntityValidationFailures)
+	b.WriteString("# HELP gauth_validator_value_limit_checks_total Value limit checks performed.\n")
+	b.WriteString("# TYPE gauth_validator_value_limit_checks_total counter\n")
+	fmt.Fprintf(b, "gauth_validator_value_limit_checks_total %d\n", m.ValueLimitChecks)
+	b.WriteString("# HELP gauth_validator_value_limit_violations_total Value limit violations detected.\n")
+	b.WriteString("# TYPE gauth_validator_value_limit_violations_total counter\n")
+	fmt.Fprintf(b, "gauth_validator_value_limit_violations_total %d\n", m.ValueLimitViolations)
+	b.WriteString("# HELP gauth_validator_approval_checks_total Approval requirement checks performed.\n")
+	b.WriteString("# TYPE gauth_validator_approval_checks_total counter\n")
+	fmt.Fprintf(b, "gauth_validator_approval_checks_total %d\n", m.ApprovalChecks)
+	b.WriteString("# HELP gauth_validator_approval_failures_total Approval validation failures.\n")
+	b.WriteString("# TYPE gauth_validator_approval_failures_total counter\n")
+	fmt.Fprintf(b, "gauth_validator_approval_failures_total %d\n", m.ApprovalFailures)
+	b.WriteString("# HELP gauth_validator_board_approval_checks_total Board approval checks performed.\n")
+	b.WriteString("# TYPE gauth_validator_board_approval_checks_total counter\n")
+	fmt.Fprintf(b, "gauth_validator_board_approval_checks_total %d\n", m.BoardApprovalChecks)
+	b.WriteString("# HELP gauth_validator_board_approval_failures_total Board approval validation failures.\n")
+	b.WriteString("# TYPE gauth_validator_board_approval_failures_total counter\n")
+	fmt.Fprintf(b, "gauth_validator_board_approval_failures_total %d\n", m.BoardApprovalFailures)
+	b.WriteString("# HELP gauth_validator_total_validation_latency_ms Cumulative jurisdiction validation latency in milliseconds.\n")
+	b.WriteString("# TYPE gauth_validator_total_validation_latency_ms counter\n")
+	fmt.Fprintf(b, "gauth_validator_total_validation_latency_ms %.6f\n", float64(m.TotalValidationLatencyNs)/1e6)
+	b.WriteString("# HELP gauth_validator_last_validation_latency_ms Last jurisdiction validation latency in milliseconds.\n")
+	b.WriteString("# TYPE gauth_validator_last_validation_latency_ms gauge\n")
+	fmt.Fprintf(b, "gauth_validator_last_validation_latency_ms %.6f\n", float64(m.LastValidationLatencyNs)/1e6)
+	// Jurisdiction counts
+	b.WriteString("# HELP gauth_validator_validations_by_jurisdiction_total Jurisdiction validation attempts by jurisdiction.\n")
+	b.WriteString("# TYPE gauth_validator_validations_by_jurisdiction_total counter\n")
+	for _, jk := range jKeys {
+		fmt.Fprintf(b, "gauth_validator_validations_by_jurisdiction_total{jurisdiction=\"%s\"} %d\n", jk, m.JurisdictionCounts[compliance.Jurisdiction(jk)])
+	}
+	// Violation types
+	b.WriteString("# HELP gauth_validator_violation_total Validator violation occurrences by type.\n")
+	b.WriteString("# TYPE gauth_validator_violation_total counter\n")
+	for _, vk := range vKeys {
+		fmt.Fprintf(b, "gauth_validator_violation_total{type=\"%s\"} %d\n", vk, m.ViolationCounts[vk])
+	}
+	c.String(200, b.String())
 }
 
 // enforceAction enforces jurisdiction rules for a specific action.
@@ -373,14 +534,14 @@ func formatComplianceRules(rules []compliance.ComplianceRule) []map[string]inter
 	return formatted
 }
 
-func calculateAllowRate(metrics EnforcementMetrics) float64 {
+func calculateAllowRate(metrics *EnforcementMetrics) float64 {
 	if metrics.TotalEnforcements == 0 {
 		return 0.0
 	}
 	return float64(metrics.AllowedCount) / float64(metrics.TotalEnforcements) * 100.0
 }
 
-func calculateCrossBorderSuccessRate(metrics EnforcementMetrics) float64 {
+func calculateCrossBorderSuccessRate(metrics *EnforcementMetrics) float64 {
 	if metrics.CrossBorderAttempts == 0 {
 		return 0.0
 	}

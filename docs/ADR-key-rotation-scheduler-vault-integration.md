@@ -3,9 +3,10 @@
 Status: Proposed
 Date: 2025-10-20
 Drivers:
-- GAP_MATRIX marks key rotation & secure secret storage as Partial/Missing (P1/P0).
-- RFC cryptographic requirements: agility, lifecycle hygiene, compromise blast-radius reduction.
-- Current: static keyRing, manual env-driven persistence, no scheduler, no HSM/Vault.
+
+Summary: Proposes automated key rotation scheduler, secure secret storage integration (Vault/KMS), rotation log, metrics, and discovery endpoint extensions. Implementation in beta-refactor branch.
+
+References: See GAP_MATRIX Section 14, implementation in `internal/crypto/rotation_manager.go`, tests in `internal/crypto/rotation_manager_test.go`.
 
 ## Goals
 1. Introduce automated rotation scheduler (configurable interval + jitter window).

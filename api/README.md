@@ -159,6 +159,7 @@ While the current Go API is fully functional, future work may include:
 - OpenAPI/Swagger specifications
 - gRPC Protocol Buffer services
 - GraphQL schema definitions
+ - RFC 0111/0115 compliance maturation (see `docs/rfc0111_compliance_matrix.md`)
 
 ## Beta Use
 
@@ -174,3 +175,12 @@ This API is designed for:
 
 ---
 Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md
+
+### Compliance Summary (2025-10-25)
+Recent security & integrity improvements:
+1. Automatic multi-signature domain separation (threshold >1 triggers V2; binds sorted weights).
+2. Embedded deterministic `weights` + `version` fields in canonical JSON (future evolution ready).
+3. Strict authenticity default (missing signature key => integrity failure unless `GAUTH_STRICT_AUTHENTICITY=0`).
+4. Mandatory `jti` claim baseline (replay fail-closed by default).
+
+Status snapshot: Multi-signature threshold & canonical serialization Implemented; several authorization engine, lifecycle, and observability items remain Partial/Missing. Full matrix in `docs/rfc0111_compliance_matrix.md`.

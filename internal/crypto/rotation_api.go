@@ -422,13 +422,13 @@ func (api *KeyRotationAPI) getTenantInfo(tenantID string) (TenantRotationInfo, e
 	info.Status = api.multiTenantManager.GetRotationStatus(tenantID)
 	
 	// Get active key information
-	if activeKey, err := api.multiTenantManager.keyStore.GetActive(nil, tenantID); err == nil && activeKey != nil {
+	if activeKey, err := api.multiTenantManager.keyStore.GetActive(context.TODO(), tenantID); err == nil && activeKey != nil {
 		info.ActiveKeyID = activeKey.ID
 		info.ActiveKeyExpires = &activeKey.ExpiresAt
 	}
 	
 	// Get key count
-	if keys, err := api.multiTenantManager.keyStore.ListKeys(nil, tenantID); err == nil {
+	if keys, err := api.multiTenantManager.keyStore.ListKeys(context.TODO(), tenantID); err == nil {
 		info.KeyCount = len(keys)
 	}
 	

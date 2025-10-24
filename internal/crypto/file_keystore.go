@@ -2,6 +2,8 @@ package crypto
 
 import (
 	"context"
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/base64"
@@ -20,6 +22,7 @@ type FileKeyStore struct {
 	basePath string
 	mu       sync.RWMutex
 	ttl      time.Duration
+	masterKey []byte // AES key for encryption at rest
 }
 
 // FileKeyData represents the JSON structure stored in key files.
@@ -49,10 +52,19 @@ func NewFileKeyStore(basePath string, ttl time.Duration) (*FileKeyStore, error) 
 	if err := os.MkdirAll(basePath, 0700); err != nil {
 		return nil, fmt.Errorf("failed to create base directory: %w", err)
 	}
+	var masterKey []byte
+	keyStr := os.Getenv("GAUTH_FILEKEYSTORE_MASTER_KEY")
+	if keyStr != "" {
+		mk, err := base64.StdEncoding.DecodeString(keyStr)
+		if err == nil && (len(mk) == 32) {
+			masterKey = mk
+		}
+	}
 	
 	return &FileKeyStore{
 		basePath: basePath,
 		ttl:      ttl,
+		masterKey: masterKey,
 	}, nil
 }
 
@@ -328,25 +340,42 @@ func (f *FileKeyStore) writeKeyFile(path string, keyData FileKeyData) error {
 
 // parseFileKey converts file key data to Key struct.
 func (f *FileKeyStore) parseFileKey(keyID string, keyData FileKeyData) (*Key, error) {
-	privateKey, err := base64.StdEncoding.DecodeString(keyData.PrivateKey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode private key: %w", err)
-	}
-	
-	publicKey, err := base64.StdEncoding.DecodeString(keyData.PublicKey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode public key: %w", err)
-	}
-	
-	return &Key{
-		ID:        keyID,
-		CreatedAt: keyData.CreatedAt,
-		ExpiresAt: keyData.ExpiresAt,
-		Private:   ed25519.PrivateKey(privateKey),
-		Public:    ed25519.PublicKey(publicKey),
-		Alg:       keyData.Algorithm,
-		Use:       "sig",
-	}, nil
+		privBytes, err := base64.StdEncoding.DecodeString(keyData.PrivateKey)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode private key: %w", err)
+		}
+		if len(f.masterKey) == 32 {
+			block, err := aes.NewCipher(f.masterKey)
+			if err != nil {
+				return nil, fmt.Errorf("AES cipher error: %w", err)
+			}
+			gcm, err := cipher.NewGCM(block)
+			if err != nil {
+				return nil, fmt.Errorf("AES-GCM error: %w", err)
+			}
+			nonceSize := gcm.NonceSize()
+			if len(privBytes) < nonceSize {
+				return nil, fmt.Errorf("encrypted private key too short")
+			}
+			nonce, ciphertext := privBytes[:nonceSize], privBytes[nonceSize:]
+			privBytes, err = gcm.Open(nil, nonce, ciphertext, nil)
+			if err != nil {
+				return nil, fmt.Errorf("AES-GCM decryption failed: %w", err)
+			}
+		}
+		publicKey, err := base64.StdEncoding.DecodeString(keyData.PublicKey)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode public key: %w", err)
+		}
+		return &Key{
+			ID:        keyID,
+			CreatedAt: keyData.CreatedAt,
+			ExpiresAt: keyData.ExpiresAt,
+			Private:   ed25519.PrivateKey(privBytes),
+			Public:    ed25519.PublicKey(publicKey),
+			Alg:       keyData.Algorithm,
+			Use:       "sig",
+		}, nil
 }
 
 // Cleanup removes expired keys from disk.

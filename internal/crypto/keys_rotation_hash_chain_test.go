@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"os"
+	"sort"
 	"testing"
 	"time"
 )
@@ -59,20 +60,40 @@ func TestRotationLogHashChain(t *testing.T) {
 		}
 		// Remove hash field for recomputation
 		delete(rec, "hash")
+		// Remove signature and public_key fields for canonical hash recomputation
+		delete(rec, "signature")
+		delete(rec, "public_key")
 		// Keep prev_hash for integrity check (optional on first entry)
 		chainPrev := ""
 		if ph, ok := rec["prev_hash"].(string); ok {
 			chainPrev = ph
 		}
 		// Recompute
-		raw, mErr := json.Marshal(rec)
-		if mErr != nil {
-			t.Fatalf("marshal line %d: %v", idx, mErr)
+		// Marshal with sorted keys for canonical JSON
+		keys := make([]string, 0, len(rec))
+		for k := range rec {
+			keys = append(keys, k)
 		}
-		h := sha256.Sum256(raw)
+		sort.Strings(keys)
+		buf := bytes.NewBuffer(nil)
+		buf.WriteByte('{')
+		for i, k := range keys {
+			v, _ := json.Marshal(rec[k])
+			buf.WriteString("\"")
+			buf.WriteString(k)
+			buf.WriteString("\":")
+			buf.Write(v)
+			if i < len(keys)-1 {
+				buf.WriteByte(',')
+			}
+		}
+		buf.WriteByte('}')
+		h := sha256.Sum256(buf.Bytes())
 		recomputed := base64.RawURLEncoding.EncodeToString(h[:])
 		if storedHash != recomputed {
-			t.Fatalf("hash mismatch line %d stored=%s recomputed=%s", idx, storedHash, recomputed)
+			t.Errorf("hash mismatch line %d stored=%s recomputed=%s", idx, storedHash, recomputed)
+			t.Logf("Stored JSON: %s", string(line))
+			t.Logf("Recomputed JSON: %s", buf.String())
 		}
 		if idx > 0 { // after first line
 			if chainPrev != prevHash {

@@ -3,6 +3,7 @@ package rfc0111
 import (
 	"context"
 	"encoding/base64"
+	"os"
 	"testing"
 	"time"
 
@@ -17,6 +18,9 @@ import (
 // TestRotationRobustness ensures that after rotating token symmetric keys, existing tokens still validate
 // (handled in decryptWithAnyKey) and that removal of a signing public key increments the signature_public_key_missing metric.
 func TestRotationRobustness(t *testing.T) {
+	// Disable strict authenticity for soft skip expectation.
+	os.Setenv("GAUTH_STRICT_AUTHENTICITY", "0")
+	defer os.Unsetenv("GAUTH_STRICT_AUTHENTICITY")
 	memMetrics := metrics.NewMemory()
 	auditLogger := audit.NewMemoryLogger(nil)
 	authorizer := authz.NewMemoryAuthorizer()

@@ -1,6 +1,7 @@
 package monitoring
 
 import (
+	"context"
 	"sync"
 )
 
@@ -16,6 +17,41 @@ type MetricsCollector struct {
 	counters map[string]float64
 	gauges   map[string]float64
 	mutex    sync.RWMutex
+	otel     *OTELCollector // optional OpenTelemetry exporter
+}
+// MultiSignatureAdoptionGauge records the current multi-signature adoption rate
+func (mc *MetricsCollector) MultiSignatureAdoptionGauge(ctx context.Context, value float64) {
+	mc.Gauge("multi_signature_adoption", value, nil)
+	if mc.otel != nil {
+		mc.otel.RecordGauge(ctx, "multi_signature_adoption", value)
+	}
+}
+
+// VerificationSuccessCounter increments the verification success counter
+func (mc *MetricsCollector) VerificationSuccessCounter(ctx context.Context) {
+	mc.Counter("verification_success_total", 1, nil)
+	if mc.otel != nil {
+		mc.otel.RecordCounter(ctx, "verification_success_total", 1)
+	}
+}
+
+// VerificationFailureCounter increments the verification failure counter
+func (mc *MetricsCollector) VerificationFailureCounter(ctx context.Context) {
+	mc.Counter("verification_failure_total", 1, nil)
+	if mc.otel != nil {
+		mc.otel.RecordCounter(ctx, "verification_failure_total", 1)
+	}
+}
+
+// WithTrace runs a function within a trace span if OTEL is enabled
+func (mc *MetricsCollector) WithTrace(ctx context.Context, name string, fn func(ctx context.Context)) {
+	if mc.otel != nil {
+		ctx, span := mc.otel.StartSpan(ctx, name)
+		defer mc.otel.EndSpan(span)
+		fn(ctx)
+	} else {
+		fn(ctx)
+	}
 }
 
 // DefaultMetricsCollector is a compatibility alias expected by examples.
@@ -30,7 +66,25 @@ func NewMetricsCollector() *MetricsCollector {
 		metrics:  NewMetrics(),
 		counters: make(map[string]float64),
 		gauges:   make(map[string]float64),
+		otel:     NewOTELCollector(),
 	}
+// Example: instrument a metric update with trace
+	return &MetricsCollector{
+		metrics:  NewMetrics(),
+		counters: make(map[string]float64),
+		gauges:   make(map[string]float64),
+		otel:     NewOTELCollector(),
+	}
+}
+ 
+// Example: instrument a metric update with trace
+func (mc *MetricsCollector) RecordWithTrace(ctx context.Context, name string, value float64) {
+	mc.WithTrace(ctx, "metric_update:"+name, func(ctx context.Context) {
+		mc.Counter(name, value, nil)
+		if mc.otel != nil {
+			mc.otel.RecordCounter(ctx, name, value)
+		}
+	})
 }
 
 // Counter increments a counter metric

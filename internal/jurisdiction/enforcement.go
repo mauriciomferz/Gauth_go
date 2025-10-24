@@ -2,7 +2,9 @@ package jurisdiction
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -45,6 +47,7 @@ type EnforcementEngine struct {
 	metrics           *EnforcementMetrics
 	auditCallback     func(decision EnforcementDecision)
 	jurisdictionRules map[compliance.Jurisdiction]*JurisdictionEnforcement
+	requireDetachedSignature bool // if true, deny requests missing detached signature artifact
 }
 
 // JurisdictionEnforcement contains enforcement-specific configuration for a jurisdiction.
@@ -77,17 +80,106 @@ func NewEnforcementEngine() *EnforcementEngine {
 	engine := &EnforcementEngine{
 		validator:         compliance.NewLegalFrameworkValidator(),
 		enabled:           true,
-		metrics:           &EnforcementMetrics{
+		metrics: &EnforcementMetrics{
 			JurisdictionBreakdown: make(map[compliance.Jurisdiction]int64),
 			ViolationsByType:      make(map[string]int64),
 		},
 		jurisdictionRules: make(map[compliance.Jurisdiction]*JurisdictionEnforcement),
+		requireDetachedSignature: parseBoolEnv("GAUTH_REQUIRE_DETACHED_SIGNATURE"),
 	}
 
-	// Initialize default jurisdiction enforcement rules
-	engine.initializeDefaultEnforcement()
+	// Attempt external rules load first (allows overriding built-ins without code changes).
+	if path := os.Getenv("GAUTH_JURISDICTION_RULES_PATH"); path != "" {
+		if err := engine.loadRulesFromFile(path); err == nil {
+			// Successfully loaded external rules; skip defaults.
+			return engine
+		} else {
+			// Fall back to defaults on failure (log best-effort; avoid panics in constructor).
+			fmt.Fprintf(os.Stderr, "[jurisdiction] external rules load failed path=%s err=%v (falling back to defaults)\n", path, err)
+		}
+	}
 
+	// Initialize default jurisdiction enforcement rules when no external override.
+	engine.initializeDefaultEnforcement()
 	return engine
+}
+
+// parseBoolEnv returns true if environment variable is set to a truthy value: "1","true","yes" (case-insensitive).
+func parseBoolEnv(key string) bool {
+	v := strings.ToLower(strings.TrimSpace(os.Getenv(key)))
+	switch v {
+	case "1", "true", "yes", "on":
+		return true
+	default:
+		return false
+	}
+}
+
+// errExternalLoad formats nil-safe error strings.
+// (removed helper errExternalLoad - direct logging used)
+
+// jurisdictionRulesFile models the external JSON configuration schema.
+// Example schema:
+// {
+//   "jurisdictions": [
+//     {
+//       "jurisdiction": "UNITED_STATES",
+//       "strict_mode": true,
+//       "allowed_actions": ["transfer","pay"],
+//       "blocked_actions": ["high_value_transfer"],
+//       "cross_border_rules": {"transfer": ["CANADA","UNITED_KINGDOM"]},
+//       "data_residency_rules": {"personal_data": true}
+//     }
+//   ]
+// }
+type jurisdictionRulesFile struct {
+	Jurisdictions []struct {
+		Jurisdiction      string              `json:"jurisdiction"`
+		StrictMode        bool                `json:"strict_mode"`
+		AllowedActions    []string            `json:"allowed_actions"`
+		BlockedActions    []string            `json:"blocked_actions"`
+		CrossBorderRules  map[string][]string `json:"cross_border_rules"`
+		DataResidencyRules map[string]bool    `json:"data_residency_rules"`
+	} `json:"jurisdictions"`
+}
+
+// loadRulesFromFile loads jurisdiction enforcement overrides from a JSON file.
+// On success it replaces any existing in-memory rules. Unknown jurisdictions are accepted
+// (they will still pass validator checks only if validator supports them). Returns error on parse/read.
+func (e *EnforcementEngine) loadRulesFromFile(path string) error {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	var cfg jurisdictionRulesFile
+	if err := json.Unmarshal(b, &cfg); err != nil {
+		return err
+	}
+	if len(cfg.Jurisdictions) == 0 {
+		return fmt.Errorf("no jurisdictions defined in rules file")
+	}
+	newMap := make(map[compliance.Jurisdiction]*JurisdictionEnforcement, len(cfg.Jurisdictions))
+	for _, j := range cfg.Jurisdictions {
+		jid := compliance.Jurisdiction(strings.TrimSpace(strings.ToUpper(j.Jurisdiction)))
+		allowed := make(map[string]bool)
+		for _, a := range j.AllowedActions { allowed[a] = true }
+		blocked := make(map[string]bool)
+		for _, b2 := range j.BlockedActions { blocked[b2] = true }
+		newMap[jid] = &JurisdictionEnforcement{
+			Jurisdiction:       jid,
+			StrictMode:         j.StrictMode,
+			AllowedActions:     allowed,
+			BlockedActions:     blocked,
+			CrossBorderRules:   j.CrossBorderRules,
+			DataResidencyRules: j.DataResidencyRules,
+			CustomValidators:   make(map[string]func(ctx *EnforcementContext) error),
+		}
+	}
+	e.mu.Lock()
+	e.jurisdictionRules = newMap
+	e.mu.Unlock()
+	fmt.Fprintf(os.Stderr, "[jurisdiction] loaded external enforcement rules jurisdictions=%d path=%s\n", len(newMap), path)
+	return nil
 }
 
 // Enforce performs jurisdiction-specific enforcement of an action.
@@ -120,12 +212,28 @@ func (e *EnforcementEngine) Enforce(ctx context.Context, enfCtx *EnforcementCont
 		RequestID:         enfCtx.RequestID,
 	}
 
+	// Step 0 (optional): Detached signature enforcement
+	if e.requireDetachedSignature {
+		if _, ok := enfCtx.Claims["detached_signature"]; !ok {
+			decision.Allowed = false
+			decision.Violations = append(decision.Violations, "missing_detached_signature")
+			e.recordDenial(enfCtx.Jurisdiction, "missing_detached_signature")
+			decision.EnforcementLatency = time.Since(startTime)
+			// Record latency even on early return so metrics AverageLatencyMs is never zero when denials occur.
+			e.updateLatency(decision.EnforcementLatency)
+			e.notifyAudit(*decision)
+			return decision, nil
+		}
+		decision.AppliedRules = append(decision.AppliedRules, "detached_signature_present")
+	}
+
 	// Step 1: Validate jurisdiction is supported
 	if err := e.validator.ValidateJurisdiction(ctx, enfCtx.Jurisdiction, enfCtx.Action); err != nil {
 		decision.Allowed = false
 		decision.Violations = append(decision.Violations, fmt.Sprintf("jurisdiction validation failed: %v", err))
 		e.recordDenial(enfCtx.Jurisdiction, "jurisdiction_validation_failed")
 		decision.EnforcementLatency = time.Since(startTime)
+		e.updateLatency(decision.EnforcementLatency)
 		e.notifyAudit(*decision)
 		return decision, nil
 	}
@@ -138,6 +246,7 @@ func (e *EnforcementEngine) Enforce(ctx context.Context, enfCtx *EnforcementCont
 			decision.Violations = append(decision.Violations, fmt.Sprintf("entity type not supported: %v", err))
 			e.recordDenial(enfCtx.Jurisdiction, "entity_type_unsupported")
 			decision.EnforcementLatency = time.Since(startTime)
+			e.updateLatency(decision.EnforcementLatency)
 			e.notifyAudit(*decision)
 			return decision, nil
 		}
@@ -151,6 +260,7 @@ func (e *EnforcementEngine) Enforce(ctx context.Context, enfCtx *EnforcementCont
 		decision.Violations = append(decision.Violations, fmt.Sprintf("failed to get jurisdiction rules: %v", err))
 		e.recordDenial(enfCtx.Jurisdiction, "rules_retrieval_failed")
 		decision.EnforcementLatency = time.Since(startTime)
+		e.updateLatency(decision.EnforcementLatency)
 		e.notifyAudit(*decision)
 		return decision, nil
 	}
@@ -429,7 +539,8 @@ func ExtractJurisdictionFromClaims(claims map[string]interface{}) compliance.Jur
 		if strings.Contains(locationUpper, "US") || strings.Contains(locationUpper, "USA") {
 			return compliance.JurisdictionUS
 		}
-		if strings.Contains(locationUpper, "UK") || strings.Contains(locationUpper, "BRITAIN") {
+		// Support multiple UK identifiers ("UK", "Britain", "United Kingdom")
+		if strings.Contains(locationUpper, "UK") || strings.Contains(locationUpper, "BRITAIN") || strings.Contains(locationUpper, "UNITED KINGDOM") {
 			return compliance.JurisdictionUK
 		}
 		if strings.Contains(locationUpper, "CA") || strings.Contains(locationUpper, "CANADA") {
@@ -468,22 +579,10 @@ func (e *EnforcementEngine) SetAuditCallback(callback func(decision EnforcementD
 }
 
 // GetMetrics returns current enforcement metrics.
-func (e *EnforcementEngine) GetMetrics() EnforcementMetrics {
+func (e *EnforcementEngine) GetMetrics() *EnforcementMetrics {
 	e.metrics.mu.RLock()
 	defer e.metrics.mu.RUnlock()
-
-	// Copy metrics
-	metrics := *e.metrics
-	metrics.JurisdictionBreakdown = make(map[compliance.Jurisdiction]int64)
-	for k, v := range e.metrics.JurisdictionBreakdown {
-		metrics.JurisdictionBreakdown[k] = v
-	}
-	metrics.ViolationsByType = make(map[string]int64)
-	for k, v := range e.metrics.ViolationsByType {
-		metrics.ViolationsByType[k] = v
-	}
-
-	return metrics
+	return e.metrics
 }
 
 // GetJurisdictionEnforcement returns enforcement rules for a jurisdiction.
@@ -523,12 +622,16 @@ func (e *EnforcementEngine) updateLatency(latency time.Duration) {
 	e.metrics.mu.Lock()
 	defer e.metrics.mu.Unlock()
 
+	// Very fast operations may be < 1µs causing Microseconds() to truncate to 0.
+	// Normalize any sub-microsecond or non-positive durations to 1µs so average is never zero after first update.
+	if latency <= 0 || latency.Microseconds() == 0 {
+		latency = time.Microsecond
+	}
 	latencyMs := float64(latency.Microseconds()) / 1000.0
+	alpha := 0.1
 	if e.metrics.AverageLatencyMs == 0 {
 		e.metrics.AverageLatencyMs = latencyMs
 	} else {
-		// Exponential moving average
-		alpha := 0.1
 		e.metrics.AverageLatencyMs = alpha*latencyMs + (1-alpha)*e.metrics.AverageLatencyMs
 	}
 }

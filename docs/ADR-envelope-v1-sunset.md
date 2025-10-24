@@ -5,6 +5,10 @@ Status: Draft
 Authors: Automated Assistant
 Context: Introduction of Envelope V2 (`ver="gauth-rfc0111-env2"`) adds canonical digest and multi-signature satisfaction metadata. A structured lifecycle is required to retire Envelope V1 safely while preserving verification compatibility and minimizing operational risk.
 
+Summary: Outlines metrics-driven multi-phase migration from Envelope V1 to V2, operational playbooks, rollback, and communication matrix. Implementation in beta-refactor branch.
+
+References: See GAP_MATRIX Section 12, implementation in `internal/envelope/manager.go`, tests in `web/envelope_migration_test.go`.
+
 ## 1. Problem Statement
 Running two envelope formats indefinitely increases maintenance overhead, complicates observability interpretation, and dilutes security posture (legacy format lacks embedded canonical digest). We need a formal deprecation cadence tied to measurable adoption and integrity signals.
 

@@ -138,7 +138,8 @@ func TestExternalAuditLedgerForceAnchor(t *testing.T) {
 	provider := anchor.NewMemoryProvider()
 	ledger, err := NewExternalAuditLedger(dbPath, provider, receiptPath, time.Hour) // Long interval
 	require.NoError(t, err)
-	t.Cleanup(func() { ledger.Close() })
+	// Ensure background routines stopped before temp dir cleanup
+	t.Cleanup(func() { ledger.Close(); time.Sleep(10 * time.Millisecond) })
 
 	ctx := context.Background()
 

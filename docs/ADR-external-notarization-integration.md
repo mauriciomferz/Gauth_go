@@ -3,9 +3,10 @@
 Status: Proposed
 Date: 2025-10-20
 Decision Drivers:
-- RFC0111 / RFC0115 integrity requirements need externally verifiable anchoring.
-- Current prototype notarization is in-memory (non-cryptographic) and insufficient for audit-grade proof.
-- Capability registry and audit ledger rely on local signatures + hash chains only.
+
+Summary: Introduces external notarization for capability registry and audit chain tips using TSA and transparency log integration, metrics, verification endpoints, and security considerations. Implementation in beta-refactor branch.
+
+References: See GAP_MATRIX Section 13, implementation in `internal/notary/provider.go`, tests in `web/notarization_test.go`.
 
 ## Context
 The system emits:

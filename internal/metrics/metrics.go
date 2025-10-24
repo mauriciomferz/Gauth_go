@@ -26,8 +26,21 @@ type Metrics interface {
 	IncSignatureIssueFailures()
 	IncSignatureVerifications()
 	IncSignatureVerificationFailures()
+	// Attestation proof counters (prototype Task 9)
+	IncAttestationProofIssued()
+	IncAttestationProofIssueFailures()
+	IncAttestationProofVerifications()
+	IncAttestationProofVerificationFailures()
+	IncAttestationProofDigestMismatch()
+	ObserveAttestationProofVerificationLatency(d time.Duration)
+	// Trust anchor enforcement granular counters (attestation issuer binding failures)
+	IncAttestationProofTrustAnchorMissing()
+	IncAttestationProofTrustAnchorAlgorithmMismatch()
+	IncAttestationProofTrustAnchorKeyMismatch()
 	IncRevocationIntegrityFailures()
 	IncSignaturePublicKeyMissing() // soft skip: signature present but key id not found in key ring
+	// Detached signature enforcement counters
+	IncCryptoSignatureMissing() // missing detached signature artifact when enforcement enabled
 	// Envelope issuance version counters (migration observability)
 	IncEnvelopeV1Issued()
 	IncEnvelopeV2Issued()
@@ -59,6 +72,10 @@ type Metrics interface {
 	IncMultiSignatureWeightFailures()
 	// ObserveMultiSignatureVerificationLatency records latency of multi-signature verification path (distinct from generic validation latency)
 	ObserveMultiSignatureVerificationLatency(d time.Duration)
+	// ObserveMultiSignatureBatchSize records batch size of multi-signature operations (aggregation or verification sets).
+	ObserveMultiSignatureBatchSize(size int)
+	// ObserveMultiSignatureAggregateLatency records latency of aggregate signature computation (distinct from verification path).
+	ObserveMultiSignatureAggregateLatency(d time.Duration)
 	IncAnchorAttempts()
 	IncAnchorFailures()
 	// IncExternalAnchorForcedFailures increments counter of failures explicitly forced via GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS
@@ -67,6 +84,10 @@ type Metrics interface {
 	// Obligations / advice execution metrics
 	IncObligationsExecuted()
 	IncObligationsFailed()
+	// ObserveObligationLatency records per-obligation execution latency (nanoseconds -> reservoir/histogram).
+	ObserveObligationLatency(d time.Duration)
+	// IncMandatoryObligationFailures increments counter when a mandatory obligation failure flips an allow decision to deny.
+	IncMandatoryObligationFailures()
 	IncReplayHits()
 	IncReplayMisses()
 	IncReplayStoreErrors()
@@ -135,7 +156,16 @@ func (n noop) ObserveValidationLatency(d time.Duration)                         
 func (n noop) IncSignaturesIssued()                                                          {}
 func (n noop) IncSignatureIssueFailures()                                                    {}
 func (n noop) IncSignatureVerifications()                                                    {}
-func (n noop) IncSignatureVerificationFailures()                                             {}
+	func (n noop) IncSignatureVerificationFailures()                                             {}
+	func (n noop) IncAttestationProofIssued()                                                    {}
+	func (n noop) IncAttestationProofIssueFailures()                                             {}
+	func (n noop) IncAttestationProofVerifications()                                             {}
+	func (n noop) IncAttestationProofVerificationFailures()                                      {}
+	func (n noop) IncAttestationProofDigestMismatch()                                            {}
+	func (n noop) ObserveAttestationProofVerificationLatency(d time.Duration)                   {}
+	func (n noop) IncAttestationProofTrustAnchorMissing()                                        {}
+	func (n noop) IncAttestationProofTrustAnchorAlgorithmMismatch()                              {}
+	func (n noop) IncAttestationProofTrustAnchorKeyMismatch()                                    {}
 func (n noop) IncMultiSignatureVerifications()                                               {}
 func (n noop) IncMultiSignatureVerificationFailures()                                        {}
 func (n noop) IncEnvelopeV1Issued()                                                          {}
@@ -156,13 +186,18 @@ func (n noop) IncMultiSignatureThresholdFailures()                              
 func (n noop) IncViolation(cat interface{})                                                  {}
 func (n noop) IncMultiSignatureWeightFailures()                                              {}
 func (n noop) ObserveMultiSignatureVerificationLatency(d time.Duration)                      {}
+func (n noop) ObserveMultiSignatureBatchSize(size int)                                      {}
+func (n noop) ObserveMultiSignatureAggregateLatency(d time.Duration)                        {}
 func (n noop) IncRevocationIntegrityFailures()                                               {}
 func (n noop) IncSignaturePublicKeyMissing()                                                 {}
+func (n noop) IncCryptoSignatureMissing()                                                   {}
 func (n noop) IncAnchorAttempts()                                                            {}
 func (n noop) IncAnchorFailures()                                                            {}
 func (n noop) IncExternalAnchorForcedFailures()                                              {}
 func (n noop) IncObligationsExecuted()                                                       {}
 func (n noop) IncObligationsFailed()                                                         {}
+func (n noop) ObserveObligationLatency(d time.Duration)                                       {}
+func (n noop) IncMandatoryObligationFailures()                                                {}
 func (n noop) IncReplayHits()                                                                {}
 func (n noop) IncReplayMisses()                                                              {}
 func (n noop) IncReplayStoreErrors()                                                         {}
@@ -220,6 +255,19 @@ type Memory struct {
 	envelopeDigestMismatch        uint64
 	envelopeRawPOAEmbedded        uint64 // count of envelopes embedding RawPOA
 	envelopeRawPOATooLarge        uint64 // count of embedding attempts omitted due to size
+	// Attestation proof counters (Task 9)
+	attestationProofIssued                    uint64
+	attestationProofIssueFailures             uint64
+	attestationProofVerifications             uint64
+	attestationProofVerificationFailures      uint64
+	attestationProofDigestMismatch            uint64
+	attestationProofVerificationLatencyCount  uint64
+	attestationProofVerificationLatencyTotalNS uint64
+	attestationProofVerificationLatencyMaxNS  uint64
+	// Trust anchor enforcement granular counters
+	attestationProofTrustAnchorMissing         uint64
+	attestationProofTrustAnchorAlgorithmMismatch uint64
+	attestationProofTrustAnchorKeyMismatch     uint64
 	// labeled digest mismatch reasons map (small cardinality, protected by mutex)
 	envelopeDigestMismatchReasons          map[string]uint64
 	envelopeDigestMismatchReasonsMu        sync.Mutex
@@ -237,14 +285,25 @@ type Memory struct {
 	multiSignaturePublicKeyMissingFailures uint64
 	multiSignatureInvalidSignatureFailures uint64
 	multiSignatureThresholdFailures        uint64
+	multiSignatureBatchSizeCount           uint64
+	multiSignatureBatchSizeTotal           uint64 // sum of batch sizes for avg
+	multiSignatureBatchSizeMax             uint64
+	multiSignatureAggregateLatencyCount    uint64
+	multiSignatureAggregateLatencyTotalNS  uint64
+	multiSignatureAggregateLatencyMaxNS    uint64
 	// revocation integrity failures (revocation chain tamper detection)
 	revocationIntegrityFailures  uint64
 	signaturePublicKeyMissing    uint64
+	cryptoSignatureMissing       uint64
 	anchorAttempts               uint64
 	anchorFailures               uint64
 	externalAnchorForcedFailures uint64 // forced initial failures (deterministic override)
 	obligationsExecuted          uint64 // successful obligation/advice executions
 	obligationsFailed            uint64 // failed obligation/advice executions
+	obligationLatencyCount       uint64 // number of obligation latency observations
+	obligationLatencyTotalNS     uint64 // total latency nanoseconds
+	obligationLatencyMaxNS       uint64 // max latency observed
+	mandatoryObligationFailures  uint64 // count of mandatory failures that flipped decision
 	replayHits                   uint64
 	replayMisses                 uint64
 	replayStoreErrors            uint64
@@ -501,6 +560,28 @@ func (m *Memory) IncSignatureVerifications() { atomic.AddUint64(&m.signatureVeri
 func (m *Memory) IncSignatureVerificationFailures() {
 	atomic.AddUint64(&m.signatureVerificationFailures, 1)
 }
+// Attestation proof counters
+func (m *Memory) IncAttestationProofIssued()       { atomic.AddUint64(&m.attestationProofIssued, 1) }
+func (m *Memory) IncAttestationProofIssueFailures() { atomic.AddUint64(&m.attestationProofIssueFailures, 1) }
+func (m *Memory) IncAttestationProofVerifications() { atomic.AddUint64(&m.attestationProofVerifications, 1) }
+func (m *Memory) IncAttestationProofVerificationFailures() {
+	atomic.AddUint64(&m.attestationProofVerificationFailures, 1)
+}
+func (m *Memory) IncAttestationProofDigestMismatch() { atomic.AddUint64(&m.attestationProofDigestMismatch, 1) }
+func (m *Memory) ObserveAttestationProofVerificationLatency(d time.Duration) {
+	ns := uint64(d.Nanoseconds())
+	atomic.AddUint64(&m.attestationProofVerificationLatencyCount, 1)
+	atomic.AddUint64(&m.attestationProofVerificationLatencyTotalNS, ns)
+	for {
+		cur := atomic.LoadUint64(&m.attestationProofVerificationLatencyMaxNS)
+		if ns <= cur { break }
+		if atomic.CompareAndSwapUint64(&m.attestationProofVerificationLatencyMaxNS, cur, ns) { break }
+	}
+}
+// Trust anchor granular attestation failure counters
+func (m *Memory) IncAttestationProofTrustAnchorMissing() { atomic.AddUint64(&m.attestationProofTrustAnchorMissing, 1) }
+func (m *Memory) IncAttestationProofTrustAnchorAlgorithmMismatch() { atomic.AddUint64(&m.attestationProofTrustAnchorAlgorithmMismatch, 1) }
+func (m *Memory) IncAttestationProofTrustAnchorKeyMismatch() { atomic.AddUint64(&m.attestationProofTrustAnchorKeyMismatch, 1) }
 func (m *Memory) IncEnvelopeV1Issued()       { atomic.AddUint64(&m.envelopeV1Issued, 1) }
 func (m *Memory) IncEnvelopeV2Issued()       { atomic.AddUint64(&m.envelopeV2Issued, 1) }
 func (m *Memory) IncEnvelopeDigestMismatch() { atomic.AddUint64(&m.envelopeDigestMismatch, 1) }
@@ -596,6 +677,29 @@ func (m *Memory) IncMultiSignatureThresholdFailures() {
 	atomic.AddUint64(&m.multiSignatureThresholdFailures, 1)
 }
 
+func (m *Memory) ObserveMultiSignatureBatchSize(size int) {
+	if size <= 0 { return }
+	s := uint64(size)
+	atomic.AddUint64(&m.multiSignatureBatchSizeCount, 1)
+	atomic.AddUint64(&m.multiSignatureBatchSizeTotal, s)
+	for {
+		cur := atomic.LoadUint64(&m.multiSignatureBatchSizeMax)
+		if s <= cur { break }
+		if atomic.CompareAndSwapUint64(&m.multiSignatureBatchSizeMax, cur, s) { break }
+	}
+}
+
+func (m *Memory) ObserveMultiSignatureAggregateLatency(d time.Duration) {
+	ns := uint64(d.Nanoseconds())
+	atomic.AddUint64(&m.multiSignatureAggregateLatencyCount, 1)
+	atomic.AddUint64(&m.multiSignatureAggregateLatencyTotalNS, ns)
+	for {
+		cur := atomic.LoadUint64(&m.multiSignatureAggregateLatencyMaxNS)
+		if ns <= cur { break }
+		if atomic.CompareAndSwapUint64(&m.multiSignatureAggregateLatencyMaxNS, cur, ns) { break }
+	}
+}
+
 // ObserveMultiSignatureVerificationLatency reuses generic validation reservoir for simplicity; could add dedicated reservoir later.
 func (m *Memory) ObserveMultiSignatureVerificationLatency(d time.Duration) {
 	m.ObserveValidationLatency(d)
@@ -605,6 +709,8 @@ func (m *Memory) IncRevocationIntegrityFailures() {
 	atomic.AddUint64(&m.revocationIntegrityFailures, 1)
 }
 func (m *Memory) IncSignaturePublicKeyMissing() { atomic.AddUint64(&m.signaturePublicKeyMissing, 1) }
+// IncCryptoSignatureMissing increments missing detached signature counter.
+func (m *Memory) IncCryptoSignatureMissing() { atomic.AddUint64(&m.cryptoSignatureMissing, 1) }
 func (m *Memory) IncAnchorAttempts()            { atomic.AddUint64(&m.anchorAttempts, 1) }
 func (m *Memory) IncAnchorFailures()            { atomic.AddUint64(&m.anchorFailures, 1) }
 func (m *Memory) IncExternalAnchorForcedFailures() {
@@ -612,6 +718,17 @@ func (m *Memory) IncExternalAnchorForcedFailures() {
 }
 func (m *Memory) IncObligationsExecuted() { atomic.AddUint64(&m.obligationsExecuted, 1) }
 func (m *Memory) IncObligationsFailed()   { atomic.AddUint64(&m.obligationsFailed, 1) }
+func (m *Memory) ObserveObligationLatency(d time.Duration) {
+	ns := uint64(d.Nanoseconds())
+	atomic.AddUint64(&m.obligationLatencyCount, 1)
+	atomic.AddUint64(&m.obligationLatencyTotalNS, ns)
+	for {
+		cur := atomic.LoadUint64(&m.obligationLatencyMaxNS)
+		if ns <= cur { break }
+		if atomic.CompareAndSwapUint64(&m.obligationLatencyMaxNS, cur, ns) { break }
+	}
+}
+func (m *Memory) IncMandatoryObligationFailures() { atomic.AddUint64(&m.mandatoryObligationFailures, 1) }
 func (m *Memory) IncReplayHits()          { atomic.AddUint64(&m.replayHits, 1) }
 func (m *Memory) IncReplayMisses()        { atomic.AddUint64(&m.replayMisses, 1) }
 func (m *Memory) IncReplayStoreErrors()   { atomic.AddUint64(&m.replayStoreErrors, 1) }
@@ -660,6 +777,8 @@ func (m *Memory) CapabilityAnchorLastWriteUnix() uint64 {
 // Obligations accessors (for tests / future exposition)
 func (m *Memory) ObligationsExecuted() uint64 { return atomic.LoadUint64(&m.obligationsExecuted) }
 func (m *Memory) ObligationsFailed() uint64   { return atomic.LoadUint64(&m.obligationsFailed) }
+// MandatoryObligationFailures accessor for tests/exposition.
+func (m *Memory) MandatoryObligationFailures() uint64 { return atomic.LoadUint64(&m.mandatoryObligationFailures) }
 
 // External anchor forced failure accessor (for tests / exposition)
 func (m *Memory) ExternalAnchorForcedFailures() uint64 {
@@ -936,8 +1055,15 @@ type SnapshotStruct struct {
 	MultiSignaturePublicKeyMissingFailures uint64        `json:"multi_signature_public_key_missing_failures"`
 	MultiSignatureInvalidSignatureFailures uint64        `json:"multi_signature_invalid_signature_failures"`
 	MultiSignatureThresholdFailures        uint64        `json:"multi_signature_threshold_failures"`
+	MultiSignatureBatchSizeCount           uint64        `json:"multi_signature_batch_size_count"`
+	MultiSignatureBatchSizeTotal           uint64        `json:"multi_signature_batch_size_total"`
+	MultiSignatureBatchSizeMax             uint64        `json:"multi_signature_batch_size_max"`
+	MultiSignatureAggregateLatencyCount    uint64        `json:"multi_signature_aggregate_latency_count"`
+	MultiSignatureAggregateLatencyTotalNS  uint64        `json:"multi_signature_aggregate_latency_total_ns"`
+	MultiSignatureAggregateLatencyMaxNS    uint64        `json:"multi_signature_aggregate_latency_max_ns"`
 	RevocationIntegrityFailures            uint64        `json:"revocation_integrity_failures"`
 	SignaturePublicKeyMissing              uint64        `json:"signature_public_key_missing"`
+	CryptoSignatureMissing                 uint64        `json:"crypto_signature_missing"`
 	AnchorAttempts                         uint64        `json:"anchor_attempts"`
 	AnchorFailures                         uint64        `json:"anchor_failures"`
 	ReplayHits                             uint64        `json:"replay_hits"`
@@ -971,7 +1097,23 @@ type SnapshotStruct struct {
 	LastPersistUnix     uint64 `json:"last_persist_unix,omitempty"`
 	ObligationsExecuted uint64 `json:"obligations_executed_total"`
 	ObligationsFailed   uint64 `json:"obligations_failed_total"`
+	ObligationLatencyCount   uint64 `json:"obligation_latency_count"`
+	ObligationLatencyTotalNS uint64 `json:"obligation_latency_total_ns"`
+	ObligationLatencyMaxNS   uint64 `json:"obligation_latency_max_ns"`
+	MandatoryObligationFailures uint64 `json:"mandatory_obligation_failures_total"`
 	ModelLimitSurges    uint64 `json:"model_limit_surges_total"`
+	// Attestation proof counters (Task 9)
+	AttestationProofIssued                       uint64 `json:"attestation_proof_issued"`
+	AttestationProofIssueFailures                uint64 `json:"attestation_proof_issue_failures"`
+	AttestationProofVerifications                uint64 `json:"attestation_proof_verifications"`
+	AttestationProofVerificationFailures         uint64 `json:"attestation_proof_verification_failures"`
+	AttestationProofDigestMismatches             uint64 `json:"attestation_proof_digest_mismatches"`
+	AttestationProofVerificationLatencyCount     uint64 `json:"attestation_proof_verification_latency_count"`
+	AttestationProofVerificationLatencyTotalNS   uint64 `json:"attestation_proof_verification_latency_total_ns"`
+	AttestationProofVerificationLatencyMaxNS     uint64 `json:"attestation_proof_verification_latency_max_ns"`
+	AttestationProofTrustAnchorMissing           uint64 `json:"attestation_proof_trust_anchor_missing"`
+	AttestationProofTrustAnchorAlgorithmMismatch uint64 `json:"attestation_proof_trust_anchor_algorithm_mismatch"`
+	AttestationProofTrustAnchorKeyMismatch       uint64 `json:"attestation_proof_trust_anchor_key_mismatch"`
 }
 
 // SnapshotEx returns the extended snapshot struct.
@@ -1003,8 +1145,15 @@ func (m *Memory) SnapshotEx() SnapshotStruct {
 		MultiSignaturePublicKeyMissingFailures: atomic.LoadUint64(&m.multiSignaturePublicKeyMissingFailures),
 		MultiSignatureInvalidSignatureFailures: atomic.LoadUint64(&m.multiSignatureInvalidSignatureFailures),
 		MultiSignatureThresholdFailures:        atomic.LoadUint64(&m.multiSignatureThresholdFailures),
+		MultiSignatureBatchSizeCount:           atomic.LoadUint64(&m.multiSignatureBatchSizeCount),
+		MultiSignatureBatchSizeTotal:           atomic.LoadUint64(&m.multiSignatureBatchSizeTotal),
+		MultiSignatureBatchSizeMax:             atomic.LoadUint64(&m.multiSignatureBatchSizeMax),
+		MultiSignatureAggregateLatencyCount:    atomic.LoadUint64(&m.multiSignatureAggregateLatencyCount),
+		MultiSignatureAggregateLatencyTotalNS:  atomic.LoadUint64(&m.multiSignatureAggregateLatencyTotalNS),
+		MultiSignatureAggregateLatencyMaxNS:    atomic.LoadUint64(&m.multiSignatureAggregateLatencyMaxNS),
 		RevocationIntegrityFailures:            rif,
 		SignaturePublicKeyMissing:              spkm,
+		CryptoSignatureMissing:                 atomic.LoadUint64(&m.cryptoSignatureMissing),
 		AnchorAttempts:                         aa,
 		AnchorFailures:                         af,
 		ReplayHits:                             rh,
@@ -1023,6 +1172,17 @@ func (m *Memory) SnapshotEx() SnapshotStruct {
 		TokenStatusTransitions:                 atomic.LoadUint64(&m.tokenStatusTransitions),
 		TokenStatusTransitionFailures:          atomic.LoadUint64(&m.tokenStatusTransitionFailures),
 		ModelLimitSurges:                       atomic.LoadUint64(&m.modelLimitSurges),
+		AttestationProofIssued:                 atomic.LoadUint64(&m.attestationProofIssued),
+		AttestationProofIssueFailures:          atomic.LoadUint64(&m.attestationProofIssueFailures),
+		AttestationProofVerifications:          atomic.LoadUint64(&m.attestationProofVerifications),
+		AttestationProofVerificationFailures:   atomic.LoadUint64(&m.attestationProofVerificationFailures),
+		AttestationProofDigestMismatches:       atomic.LoadUint64(&m.attestationProofDigestMismatch),
+		AttestationProofVerificationLatencyCount:   atomic.LoadUint64(&m.attestationProofVerificationLatencyCount),
+		AttestationProofVerificationLatencyTotalNS: atomic.LoadUint64(&m.attestationProofVerificationLatencyTotalNS),
+		AttestationProofVerificationLatencyMaxNS:   atomic.LoadUint64(&m.attestationProofVerificationLatencyMaxNS),
+		AttestationProofTrustAnchorMissing:           atomic.LoadUint64(&m.attestationProofTrustAnchorMissing),
+		AttestationProofTrustAnchorAlgorithmMismatch: atomic.LoadUint64(&m.attestationProofTrustAnchorAlgorithmMismatch),
+		AttestationProofTrustAnchorKeyMismatch:       atomic.LoadUint64(&m.attestationProofTrustAnchorKeyMismatch),
 		LifecycleBreakdown: func() map[string]uint64 {
 			m.lifecycleMu.Lock()
 			defer m.lifecycleMu.Unlock()
@@ -1200,6 +1360,10 @@ func (m *Memory) SnapshotEx() SnapshotStruct {
 		LastPersistUnix:     atomic.LoadUint64(&m.lastPersistUnix),
 		ObligationsExecuted: atomic.LoadUint64(&m.obligationsExecuted),
 		ObligationsFailed:   atomic.LoadUint64(&m.obligationsFailed),
+		ObligationLatencyCount:   atomic.LoadUint64(&m.obligationLatencyCount),
+		ObligationLatencyTotalNS: atomic.LoadUint64(&m.obligationLatencyTotalNS),
+		ObligationLatencyMaxNS:   atomic.LoadUint64(&m.obligationLatencyMaxNS),
+		MandatoryObligationFailures: atomic.LoadUint64(&m.mandatoryObligationFailures),
 	}
 }
 

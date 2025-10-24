@@ -3,9 +3,6 @@ package rfc0111
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"os"
-	"sort"
-	"strings"
 	"testing"
 	"time"
 )
@@ -14,21 +11,21 @@ import (
 // identical digests regardless of input weight mapping order and that changing threshold or weights
 // changes the digest (domain separation effectiveness).
 func TestMultiSigDomainSeparationDeterminism(t *testing.T) {
-	// Ensure v2 domain active
-	os.Setenv("GAUTH_MULTI_SIG_DOMAIN_V2", "1")
-	defer os.Unsetenv("GAUTH_MULTI_SIG_DOMAIN_V2")
-
 	basePOA := &PowerOfAttorney{ID: "p1", Grantor: "g1", Grantee: "g2", Scope: []string{"read", "write"}, Restrictions: map[string]string{"env": "dev"}, ValidFrom: time.Unix(0, 0).UTC(), ValidUntil: time.Unix(3600, 0).UTC(), CreatedAt: time.Unix(5, 0).UTC(), Threshold: 2, Signers: []string{"A", "B", "C"}}
-
-	weights := []string{"A=3", "B=1", "C=2"}
-	permuted := [][]string{
-		{"A=3", "B=1", "C=2"},
-		{"C=2", "A=3", "B=1"},
-		{"B=1", "C=2", "A=3"},
+	// Permutations of the same weight mapping inserted in different orders must yield identical digest.
+	type weightKV struct{ k string; v int }
+	permuted := [][]weightKV{
+		{{"A", 3}, {"B", 1}, {"C", 2}},
+		{{"C", 2}, {"A", 3}, {"B", 1}},
+		{{"B", 1}, {"C", 2}, {"A", 3}},
 	}
 	var firstDigest string
-	for i, wset := range permuted {
-		os.Setenv("GAUTH_MULTI_SIG_WEIGHTS", strings.Join(wset, ","))
+	for i, set := range permuted {
+		w := map[string]int{}
+		for _, kv := range set {
+			w[kv.k] = kv.v
+		}
+		basePOA.Weights = w
 		d, _, err := CanonicalPOADigest(basePOA)
 		if err != nil {
 			t.Fatalf("digest err: %v", err)
@@ -36,74 +33,70 @@ func TestMultiSigDomainSeparationDeterminism(t *testing.T) {
 		if i == 0 {
 			firstDigest = d
 		} else if d != firstDigest {
-			t.Fatalf("digest changed with weight order: %s vs %s", firstDigest, d)
+			t.Fatalf("digest changed with weight insertion order: %s vs %s", firstDigest, d)
 		}
 	}
-	// Changing a weight value must change digest
-	os.Setenv("GAUTH_MULTI_SIG_WEIGHTS", "A=4,B=1,C=2")
+	// Changing a weight value must change digest.
+	basePOA.Weights["A"] = 4
 	dChanged, _, _ := CanonicalPOADigest(basePOA)
 	if dChanged == firstDigest {
 		t.Fatalf("digest did not change after weight value modification")
 	}
-	// Changing threshold should also change digest
+	// Changing threshold should also change digest.
+	basePOA.Weights["A"] = 3 // restore
 	basePOA.Threshold = 3
-	os.Setenv("GAUTH_MULTI_SIG_WEIGHTS", strings.Join(weights, ","))
 	dThr, _, _ := CanonicalPOADigest(basePOA)
 	if dThr == firstDigest {
 		t.Fatalf("digest did not change after threshold modification")
 	}
-	// Disable v2 domain; digest should differ from v2 digest even with same weights/threshold (unless threshold==1)
-	os.Unsetenv("GAUTH_MULTI_SIG_DOMAIN_V2")
-	// Reset threshold to 2 for fairness
-	basePOA.Threshold = 2
-	os.Setenv("GAUTH_MULTI_SIG_WEIGHTS", strings.Join(weights, ","))
+	// Reset threshold to 1 (single signer) -> revert to V1 domain -> digest differs.
+	basePOA.Threshold = 1
 	dLegacy, _, _ := CanonicalPOADigest(basePOA)
 	if dLegacy == firstDigest {
-		t.Fatalf("legacy digest equals v2 digest; domain separation failed")
+		t.Fatalf("legacy (threshold=1) digest equals multi-sig digest; domain separation failed")
 	}
 }
 
 // TestMultiSigWeightsSortingProperty performs randomized weight order permutations to ensure digest stability.
 func TestMultiSigWeightsSortingProperty(t *testing.T) {
-	os.Setenv("GAUTH_MULTI_SIG_DOMAIN_V2", "1")
-	defer os.Unsetenv("GAUTH_MULTI_SIG_DOMAIN_V2")
 	basePOA := &PowerOfAttorney{ID: "p2", Grantor: "gg", Grantee: "hh", Scope: []string{"exec"}, Restrictions: map[string]string{}, ValidFrom: time.Unix(0, 0).UTC(), ValidUntil: time.Unix(7200, 0).UTC(), CreatedAt: time.Unix(7, 0).UTC(), Threshold: 2, Signers: []string{"S1", "S2", "S3", "S4"}}
-	canonicalWeights := []string{"S1=5", "S2=1", "S3=3", "S4=2"}
-	os.Setenv("GAUTH_MULTI_SIG_WEIGHTS", strings.Join(canonicalWeights, ","))
+	canonicalWeights := map[string]int{"S1": 5, "S2": 1, "S3": 3, "S4": 2}
+	basePOA.Weights = canonicalWeights
 	baseDigest, _, err := CanonicalPOADigest(basePOA)
 	if err != nil {
 		t.Fatalf("base digest err: %v", err)
 	}
-	// Generate permutations by rotating and swapping pairs
-	permSets := [][]string{}
-	for i := 0; i < len(canonicalWeights); i++ {
-		rot := append([]string{}, canonicalWeights[i:]...)
-		rot = append(rot, canonicalWeights[:i]...)
-		permSets = append(permSets, rot)
-	}
-	// Add swapped pairs
-	swapped := append([]string{}, canonicalWeights...)
-	swapped[0], swapped[1] = swapped[1], swapped[0]
-	permSets = append(permSets, swapped)
-	for _, wset := range permSets {
-		os.Setenv("GAUTH_MULTI_SIG_WEIGHTS", strings.Join(wset, ","))
+	// Generate permutations by rotating key sequence but insertion order should not matter.
+	order := []string{"S1", "S2", "S3", "S4"}
+	for i := 0; i < len(order); i++ {
+		rot := append([]string{}, order[i:]...)
+		rot = append(rot, order[:i]...)
+		w := map[string]int{}
+		for _, k := range rot {
+			w[k] = canonicalWeights[k]
+		}
+		basePOA.Weights = w
 		d, _, err := CanonicalPOADigest(basePOA)
 		if err != nil {
 			t.Fatalf("digest err: %v", err)
 		}
 		if d != baseDigest {
-			t.Fatalf("digest changed across weight order permutation: %s != %s (%v)", d, baseDigest, wset)
+			t.Fatalf("digest changed across weight order permutation: %s != %s (%v)", d, baseDigest, rot)
 		}
 	}
-	// Confirm that altering a weight value changes digest.
-	altered := append([]string{}, canonicalWeights...)
-	altered[2] = "S3=9"
-	sort.Strings(altered) // order doesn't matter, just consistency
-	os.Setenv("GAUTH_MULTI_SIG_WEIGHTS", strings.Join(altered, ","))
+	// Swap pair insertion order
+	swapped := []string{"S2", "S1", "S3", "S4"}
+	w2 := map[string]int{}
+	for _, k := range swapped { w2[k] = canonicalWeights[k] }
+	basePOA.Weights = w2
+	d2, _, err := CanonicalPOADigest(basePOA)
+	if err != nil { t.Fatalf("digest err: %v", err) }
+	if d2 != baseDigest { t.Fatalf("digest changed after swapped insertion order") }
+	// Alter a weight value -> digest must change
+	altered := map[string]int{"S1":5, "S2":1, "S3":9, "S4":2}
+	basePOA.Weights = altered
 	dAlter, _, _ := CanonicalPOADigest(basePOA)
-	if dAlter == baseDigest {
-		t.Fatalf("digest unchanged after weight value alteration")
-	}
+	if dAlter == baseDigest { t.Fatalf("digest unchanged after weight value alteration") }
 }
 
 // randomString and helpers moved to separate test utilities file to avoid duplicate package declaration.

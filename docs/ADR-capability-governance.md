@@ -103,4 +103,19 @@ Selection criteria: latency, cost, independent verifiability, audit API maturity
 - GAP Matrix Section 11 (AI Capability & Governance) updated 2025-10-19.
 - Source: `web/server_clean.go` (loader, discovery, audit pagination), `internal/capability/registry.go` (Reset), tests in `web/capability_persistence_test.go`, `web/discovery_capabilities_test.go`.
 
+## 14. Obligations & Advice Execution (Prototype Integration)
+
+An initial obligations execution pipeline was added to the PDP engine (Phase 2 prototype scope):
+
+* Policies may declare an `Obligations` slice; if any rule in the policy matches, those obligations are attached to the final decision.
+* Each obligation can set `mandatory=true`. When the engine is configured via `WithObligationFailureDenies(true)`, any failure of a mandatory obligation converts an allow decision into a deny with reason `Denied due to mandatory obligation failure` and metadata key `mandatory_obligation_failures` listing failed IDs.
+* Execution occurs prior to recording allow/deny counters so final outcome reflects mandatory semantics.
+* Metrics: successful executions increment `obligations_executed_total`; failures increment `obligations_failed_total` via `metrics.Metrics` surface.
+* Optional JSONL audit file records one line per obligation: `{ts, subject, action, resource, allow, obligation, index, success, duration_ms, error?}`.
+	* `duration_ms` provides per-obligation execution latency (sequential approximation in current executor implementations) enabling SLO tracking and future alerting.
+* Context cancellation propagates into executor; cancelled obligations are counted as failures.
+* Future evolution will add richer advisory vs mandatory policies, retry/circuit isolation, and parameterized attributes.
+
+This prototype advances compliance observability without coupling authorization correctness to side-effect channels.
+
 ---

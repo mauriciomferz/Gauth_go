@@ -1,4 +1,5 @@
 package policy
+
 import (
 	"context"
 	"encoding/json"
@@ -600,8 +601,9 @@ func (m *PolicyVersionManager) validateRollbackSafety(currentVersion, targetVers
 
 // audit sends an audit event.
 func (m *PolicyVersionManager) audit(event VersionAuditEvent) {
+	// For deterministic tests, execute callback synchronously.
 	if m.auditCallback != nil {
-		go m.auditCallback(event)
+		m.auditCallback(event)
 	}
 }
 

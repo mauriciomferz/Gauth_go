@@ -4,6 +4,10 @@ Date: 2025-10-19
 Status: Proposed
 Context: Capability governance now supports `deprecated_after` and `sunset_after` metadata fields. A formal lifecycle policy is required for consistent enforcement, client negotiation behavior, and external communication.
 
+Summary: Defines a two-phase lifecycle for capability versions (deprecation and sunset), enforcement flags, audit chain integration, anchoring, and rollback plan. Implementation in beta-refactor branch.
+
+References: See GAP_MATRIX Section 11, implementation in `web/server_clean.go`, tests in `web/capability_persistence_test.go`.
+
 ## Problem Statement
 Without a standardized lifecycle, introducing new capability versions or retiring old ones risks:
 - Inconsistent client negotiation results.

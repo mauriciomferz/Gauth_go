@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	fmt.Println("=== Jurisdiction-Specific Enforcement Demo ===\n")
+	fmt.Println("=== Jurisdiction-Specific Enforcement Demo ===")
 
 	// Create enforcement engine
 	integration := jurisdiction.NewServerIntegration()
@@ -162,12 +162,17 @@ func main() {
 	fmt.Println("═════════════════════════════════════════════")
 	metrics := integration.GetMetrics()
 	fmt.Printf("Total Enforcements:      %d\n", metrics.TotalEnforcements)
-	fmt.Printf("Allowed:                 %d (%.1f%%)\n",
-		metrics.AllowedCount,
-		float64(metrics.AllowedCount)/float64(metrics.TotalEnforcements)*100)
-	fmt.Printf("Denied:                  %d (%.1f%%)\n",
-		metrics.DeniedCount,
-		float64(metrics.DeniedCount)/float64(metrics.TotalEnforcements)*100)
+	if metrics.TotalEnforcements > 0 {
+		fmt.Printf("Allowed:                 %d (%.1f%%)\n",
+			metrics.AllowedCount,
+			float64(metrics.AllowedCount)/float64(metrics.TotalEnforcements)*100)
+		fmt.Printf("Denied:                  %d (%.1f%%)\n",
+			metrics.DeniedCount,
+			float64(metrics.DeniedCount)/float64(metrics.TotalEnforcements)*100)
+	} else {
+		fmt.Printf("Allowed:                 %d (0.0%%)\n", metrics.AllowedCount)
+		fmt.Printf("Denied:                  %d (0.0%%)\n", metrics.DeniedCount)
+	}
 	fmt.Printf("Average Latency:         %.2f ms\n", metrics.AverageLatencyMs)
 	fmt.Printf("Cross-Border Attempts:   %d\n", metrics.CrossBorderAttempts)
 	fmt.Printf("Cross-Border Denials:    %d\n", metrics.CrossBorderDenials)

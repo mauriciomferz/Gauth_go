@@ -62,6 +62,8 @@ type PrometheusMetrics struct {
 	multiSignatureInvalidSignatureFailures prom.Counter
 	multiSignatureThresholdFailures        prom.Counter
 	multiSignatureVerificationLatency      prom.Histogram
+	multiSignatureBatchSize                prom.Histogram
+	multiSignatureAggregateLatency         prom.Histogram
 	revocationIntegrityFailures            prom.Counter
 	validationLatency                      prom.Histogram
 	signaturePublicKeyMissing              prom.Counter
@@ -76,6 +78,7 @@ type PrometheusMetrics struct {
 	unauthorizedDecisions                  prom.Counter
 	expiredDelegations                     prom.Counter
 	revokedDelegations                     prom.Counter
+	cryptoSignatureMissing                 prom.Counter
 	// Capability enforcement decision counters
 	capabilityEnforceAllowed           prom.Counter
 	capabilityEnforceDenied            prom.Counter
@@ -96,6 +99,8 @@ type PrometheusMetrics struct {
 	capabilityRegistryHashChanged      prom.Counter
 	obligationsExecuted                prom.Counter
 	obligationsFailed                  prom.Counter
+	obligationLatency                  prom.Histogram // per-obligation execution latency
+	mandatoryObligationFailures        prom.Counter   // mandatory obligation failures flipping allow->deny
 	// RawPOA embedding counters
 	envelopeRawPOAEmbedded               prom.Counter
 	envelopeRawPOATooLarge               prom.Counter
@@ -138,6 +143,16 @@ type PrometheusMetrics struct {
 	tokenLifecycleCounter      *prom.CounterVec   // labels: old_status,new_status,outcome
 	delegationLifecycleCounter *prom.CounterVec   // labels: old_status,new_status,outcome
 	lifecycleTransitionLatency *prom.HistogramVec // labels: entity (token|delegation), outcome
+	// Attestation proof metrics (Task 9 complete instrumentation)
+	attestationProofIssued               prom.Counter
+	attestationProofIssueFailures        prom.Counter
+	attestationProofVerifications        prom.Counter
+	attestationProofVerificationFailures prom.Counter
+	attestationProofDigestMismatch       prom.Counter
+	attestationProofVerificationLatency  prom.Histogram
+	attestationProofTrustAnchorMissing               prom.Counter
+	attestationProofTrustAnchorAlgorithmMismatch     prom.Counter
+	attestationProofTrustAnchorKeyMismatch           prom.Counter
 }
 
 // PrometheusAdapterOptions allows optional customization when constructing.
@@ -178,6 +193,21 @@ func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 
 	labels := prom.Labels{}
 	msLatency := prom.NewHistogram(prom.HistogramOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "multi_signature_verification_latency_seconds", Help: "Latency of multi-signature verification operations", Buckets: opts.Buckets, ConstLabels: labels})
+	// Multi-signature batch size histogram (integer bucket edges represented as floats)
+	batchBuckets := []float64{1,2,3,4,5,6,8,10,12,16,24,32,48,64}
+	msBatch := prom.NewHistogram(prom.HistogramOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "multi_signature_batch_size", Help: "Distribution of multi-signature batch sizes (number of signatures aggregated or verified together)", Buckets: batchBuckets, ConstLabels: labels})
+	if err := reg.Register(msBatch); err != nil {
+		if are, ok := err.(prom.AlreadyRegisteredError); ok {
+			if h, ok2 := are.ExistingCollector.(prom.Histogram); ok2 { msBatch = h }
+		}
+	}
+	// Aggregate latency histogram (separate from verification)
+	aggLatency := prom.NewHistogram(prom.HistogramOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "multi_signature_aggregate_latency_seconds", Help: "Latency of multi-signature aggregate signature computation", Buckets: opts.Buckets, ConstLabels: labels})
+	if err := reg.Register(aggLatency); err != nil {
+		if are, ok := err.(prom.AlreadyRegisteredError); ok {
+			if h, ok2 := are.ExistingCollector.(prom.Histogram); ok2 { aggLatency = h }
+		}
+	}
 	if err := reg.Register(msLatency); err != nil {
 		if are, ok := err.(prom.AlreadyRegisteredError); ok {
 			if h, ok2 := are.ExistingCollector.(prom.Histogram); ok2 {
@@ -234,6 +264,8 @@ func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 		multiSignatureInvalidSignatureFailures: fqCounter("multi_signature_invalid_signature_failures_total", "Multi-signature invalid signature cryptographic failures"),
 		multiSignatureThresholdFailures:        fqCounter("multi_signature_threshold_failures_total", "Multi-signature count-based threshold failures"),
 		multiSignatureVerificationLatency:      msLatency,
+		multiSignatureBatchSize:                msBatch,
+		multiSignatureAggregateLatency:         aggLatency,
 		revocationIntegrityFailures:            fqCounter("revocation_integrity_failures_total", "Revocation chain integrity verification failures"),
 		signaturePublicKeyMissing:              fqCounter("signature_public_key_missing_total", "Signature present but public key not found (soft skip)"),
 		validationLatency:                      hist,
@@ -248,6 +280,7 @@ func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 		unauthorizedDecisions:                  fqCounter("unauthorized_total", "Unauthorized decisions (authz denied due to policy)"),
 		expiredDelegations:                     fqCounter("expired_delegations_total", "Expired delegations encountered in validation"),
 		revokedDelegations:                     fqCounter("revoked_delegations_total", "Revoked delegations encountered in validation"),
+		cryptoSignatureMissing:                fqCounter("crypto_signature_missing_total", "Missing detached signature artifact events when enforcement enabled"),
 		capabilityEnforceAllowed:               fqCounter("capability_enforce_allowed_total", "Capability enforcement allow decisions"),
 		capabilityEnforceDenied:                fqCounter("capability_enforce_denied_total", "Capability enforcement denied decisions"),
 		modelLimitExceeded:                     fqCounter("model_limit_exceeded_total", "Model input token limit exceeded decisions"),
@@ -267,7 +300,32 @@ func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 		capabilityRegistryHashChanged:          fqCounter("capability_registry_hash_changed_total", "Capability registry hash change events (semantic changes)"),
 		obligationsExecuted:                    fqCounter("obligations_executed_total", "Successfully executed obligations/advice actions"),
 		obligationsFailed:                      fqCounter("obligations_failed_total", "Failed obligation/advice executions"),
+		attestationProofIssued:                 fqCounter("attestation_proof_issued_total", "Attestation proofs successfully issued"),
+		attestationProofIssueFailures:          fqCounter("attestation_proof_issue_failures_total", "Failed attempts to issue attestation proofs"),
+		attestationProofVerifications:          fqCounter("attestation_proof_verifications_total", "Successful attestation proof verifications"),
+		attestationProofVerificationFailures:   fqCounter("attestation_proof_verification_failures_total", "Failed attestation proof verifications"),
+		attestationProofDigestMismatch:         fqCounter("attestation_proof_digest_mismatch_total", "Attestation proof digest mismatch events"),
+		attestationProofTrustAnchorMissing:     fqCounter("attestation_proof_trust_anchor_missing_total", "Attestation proof verification failures due to missing trust anchor"),
+		attestationProofTrustAnchorAlgorithmMismatch: fqCounter("attestation_proof_trust_anchor_algorithm_mismatch_total", "Attestation proof verification failures due to algorithm mismatch with trust anchor"),
+		attestationProofTrustAnchorKeyMismatch: fqCounter("attestation_proof_trust_anchor_key_mismatch_total", "Attestation proof verification failures due to key mismatch with trust anchor"),
 	}
+	// Obligation latency histogram & mandatory failure counter
+	oblHist := prom.NewHistogram(prom.HistogramOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "obligation_latency_seconds", Help: "Latency of individual obligation/advice executions", Buckets: opts.Buckets, ConstLabels: labels})
+	if err := reg.Register(oblHist); err != nil {
+		if are, ok := err.(prom.AlreadyRegisteredError); ok {
+			if h, ok2 := are.ExistingCollector.(prom.Histogram); ok2 { oblHist = h }
+		}
+	}
+	pm.obligationLatency = oblHist
+	pm.mandatoryObligationFailures = fqCounter("mandatory_obligation_failures_total", "Mandatory obligation failures that flipped allow decision to deny")
+	// Attestation proof verification latency histogram (focus on sub-ms typical path)
+	attLatency := prom.NewHistogram(prom.HistogramOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "attestation_proof_verification_latency_seconds", Help: "Latency of attestation proof verification operations", Buckets: opts.Buckets, ConstLabels: labels})
+	if err := reg.Register(attLatency); err != nil {
+		if are, ok := err.(prom.AlreadyRegisteredError); ok {
+			if h, ok2 := are.ExistingCollector.(prom.Histogram); ok2 { attLatency = h }
+		}
+	}
+	pm.attestationProofVerificationLatency = attLatency
 	// Capability anchoring gauges (best-effort registration; ignore AlreadyRegistered errors)
 	createGauge := func(name, help string) prom.Gauge {
 		g := prom.NewGauge(prom.GaugeOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: name, Help: help, ConstLabels: labels})
@@ -590,6 +648,19 @@ func (p *PrometheusMetrics) IncMultiSignatureThresholdFailures() {
 func (p *PrometheusMetrics) ObserveMultiSignatureVerificationLatency(d time.Duration) {
 	p.multiSignatureVerificationLatency.Observe(d.Seconds())
 }
+// ObserveMultiSignatureBatchSize records batch size distribution.
+func (p *PrometheusMetrics) ObserveMultiSignatureBatchSize(size int) {
+	if size <= 0 { return }
+	if p.multiSignatureBatchSize != nil {
+		p.multiSignatureBatchSize.Observe(float64(size))
+	}
+}
+// ObserveMultiSignatureAggregateLatency records latency of aggregate signature computation.
+func (p *PrometheusMetrics) ObserveMultiSignatureAggregateLatency(d time.Duration) {
+	if p.multiSignatureAggregateLatency != nil {
+		p.multiSignatureAggregateLatency.Observe(d.Seconds())
+	}
+}
 func (p *PrometheusMetrics) IncRevocationIntegrityFailures() { p.revocationIntegrityFailures.Inc() }
 func (p *PrometheusMetrics) IncSignaturePublicKeyMissing()   { p.signaturePublicKeyMissing.Inc() }
 func (p *PrometheusMetrics) IncAnchorAttempts()              { p.anchorAttempts.Inc() }
@@ -608,6 +679,7 @@ func (p *PrometheusMetrics) IncRestrictionViolations()       { p.restrictionViol
 func (p *PrometheusMetrics) IncUnauthorized()                { p.unauthorizedDecisions.Inc() }
 func (p *PrometheusMetrics) IncExpired()                     { p.expiredDelegations.Inc() }
 func (p *PrometheusMetrics) IncRevoked()                     { p.revokedDelegations.Inc() }
+func (p *PrometheusMetrics) IncCryptoSignatureMissing()      { if p.cryptoSignatureMissing != nil { p.cryptoSignatureMissing.Inc() } }
 func (p *PrometheusMetrics) IncDelegationStatusTransitions() { p.delegationStatusTransitions.Inc() }
 func (p *PrometheusMetrics) IncDelegationStatusTransitionFailures() {
 	p.delegationStatusTransitionFailures.Inc()
@@ -677,6 +749,18 @@ func (p *PrometheusMetrics) IncObligationsFailed() {
 		p.obligationsFailed.Inc()
 	}
 }
+// ObserveObligationLatency records per-obligation execution latency.
+func (p *PrometheusMetrics) ObserveObligationLatency(d time.Duration) {
+	if p.obligationLatency != nil {
+		p.obligationLatency.Observe(d.Seconds())
+	}
+}
+// IncMandatoryObligationFailures increments mandatory failure counter.
+func (p *PrometheusMetrics) IncMandatoryObligationFailures() {
+	if p.mandatoryObligationFailures != nil {
+		p.mandatoryObligationFailures.Inc()
+	}
+}
 func (p *PrometheusMetrics) SetCapabilityAnchorLastWriteUnix(ts uint64) {
 	p.capabilityAnchorLastWriteUnix = ts
 	if p.capabilityAnchorLastWriteGauge != nil {
@@ -721,6 +805,27 @@ func (p *PrometheusMetrics) ObserveCapabilityAnchorNotarizationLatency(d time.Du
 	if p.capabilityAnchorNotarizationLatencyHist != nil {
 		p.capabilityAnchorNotarizationLatencyHist.Observe(d.Seconds())
 	}
+}
+
+// --- Attestation Proof prototype metrics (Task 9) ---
+// For initial integration we expose no-op implementations; future enhancement will register dedicated counters/histograms.
+func (p *PrometheusMetrics) IncAttestationProofIssued()               { if p.attestationProofIssued != nil { p.attestationProofIssued.Inc() } }
+func (p *PrometheusMetrics) IncAttestationProofIssueFailures()        { if p.attestationProofIssueFailures != nil { p.attestationProofIssueFailures.Inc() } }
+func (p *PrometheusMetrics) IncAttestationProofVerifications()        { if p.attestationProofVerifications != nil { p.attestationProofVerifications.Inc() } }
+func (p *PrometheusMetrics) IncAttestationProofVerificationFailures() { if p.attestationProofVerificationFailures != nil { p.attestationProofVerificationFailures.Inc() } }
+func (p *PrometheusMetrics) IncAttestationProofDigestMismatch()       { if p.attestationProofDigestMismatch != nil { p.attestationProofDigestMismatch.Inc() } }
+func (p *PrometheusMetrics) ObserveAttestationProofVerificationLatency(d time.Duration) {
+	if p.attestationProofVerificationLatency != nil { p.attestationProofVerificationLatency.Observe(d.Seconds()) }
+}
+// Trust anchor granular attestation failure counters
+func (p *PrometheusMetrics) IncAttestationProofTrustAnchorMissing() {
+	if p.attestationProofTrustAnchorMissing != nil { p.attestationProofTrustAnchorMissing.Inc() }
+}
+func (p *PrometheusMetrics) IncAttestationProofTrustAnchorAlgorithmMismatch() {
+	if p.attestationProofTrustAnchorAlgorithmMismatch != nil { p.attestationProofTrustAnchorAlgorithmMismatch.Inc() }
+}
+func (p *PrometheusMetrics) IncAttestationProofTrustAnchorKeyMismatch() {
+	if p.attestationProofTrustAnchorKeyMismatch != nil { p.attestationProofTrustAnchorKeyMismatch.Inc() }
 }
 
 // ObserveCapabilityAnchorNotarizationLatencyProvider records latency with provider label.

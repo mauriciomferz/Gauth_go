@@ -92,7 +92,7 @@ func (si *ServerIntegration) SetAuditCallback(callback func(decision Enforcement
 }
 
 // GetMetrics returns current enforcement metrics.
-func (si *ServerIntegration) GetMetrics() EnforcementMetrics {
+func (si *ServerIntegration) GetMetrics() *EnforcementMetrics {
 	return si.engine.GetMetrics()
 }
 

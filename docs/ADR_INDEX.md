@@ -1,3 +1,9 @@
+# Cryptographic Enhancements (2025-10-24)
+
+- Aggregated signature schemes (BLS, batch) and multi-algorithm support added to signature abstraction.
+- Registry and interfaces updated for extensibility; placeholders for BLS/batch logic present.
+- Compliance with RFC 0111/0115 strengthened; future cryptographic schemes can be integrated with minimal changes.
+
 # ADR Index
 
 This index lists Architecture Decision Records for the GAuth beta-refactor branch.
@@ -5,6 +11,11 @@ This index lists Architecture Decision Records for the GAuth beta-refactor branc
 | ADR | Status | Summary |
 |-----|--------|---------|
 | `ADR-capability-governance.md` | Proposed (Implemented) | Capability registry governance: schema versioning, canonical hash anchoring, transactional loader, audit pagination & discovery metadata expansion. |
+| `ADR-capability-deprecation-sunset.md` | Proposed | Capability lifecycle: deprecation and sunset phases, enforcement flags, audit chain integration, anchoring, and rollback plan. |
+| `ADR-envelope-v1-sunset.md` | Draft | Envelope V1 deprecation and sunset plan: metrics-driven multi-phase migration, operational playbooks, rollback, and communication matrix. |
+| `ADR-external-notarization-integration.md` | Proposed | External notarization for capability registry and audit chain: TSA and transparency log integration, metrics, verification endpoints, and security considerations. |
+| `ADR-key-rotation-scheduler-vault-integration.md` | Proposed | Automated key rotation scheduler, secure secret storage (Vault/KMS), rotation log, metrics, and discovery endpoint extensions. |
+| `ADR-multi-signature-threshold-enforcement.md` | Proposed | Multi-signature/threshold enforcement for Power of Attorney: N-of-M signing, verification API, metrics, and audit log integration. |
 
 ## Conventions
 - File naming: `ADR-<short-topic>.md`.

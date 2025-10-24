@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-10-18T23:14:40Z",
+  "generated_at": "2025-10-24T22:08:02Z",
   "clauses": [
     {
       "id": "0111:rfc-0111-(placeholder-extract)",
@@ -128,121 +128,150 @@
       "line_to": 33
     }
   ],
-  "failures": null,
+  "failures": [
+    "clause missing: 0111:10.-detached-signatures",
+    "clause missing: 0111:11.-multi-signature-threshold",
+    "clause missing: 0111:7.-authorization-engine",
+    "clause missing: 0111:8.-pp-architecture",
+    "clause missing: 0111:9.-external-anchoring",
+    "clause missing: 0115:10.-embedding-poa-in-token",
+    "clause missing: 0115:2.-semantic-validation",
+    "clause missing: 0115:4.-jurisdiction-enforcement",
+    "clause missing: 0115:5.-advanced-claims",
+    "clause missing: 0115:6.-key-rotation",
+    "clause missing: 0115:7.-policy-versioning",
+    "clause missing: 0115:8.-ai-capability-governance"
+  ],
   "summary": {
-    "mapped_clauses": 8,
+    "mapped_clauses": 20,
     "mapped_clauses_found": 8,
     "required_symbols": 24,
     "symbols_found": 24,
     "clauses_with_tests": 8,
     "clauses_tests_found": 8,
     "coverage_percent": 100,
-    "missing_clauses": 0,
+    "missing_clauses": 12,
     "missing_symbols": 0,
     "missing_tests": 0,
     "gap_total": 43,
-    "gap_implemented": 6,
-    "gap_partial": 17,
-    "gap_missing": 20
+    "gap_implemented": 8,
+    "gap_partial": 16,
+    "gap_missing": 19
   },
   "evidence": {
     "AddBundle": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/engine.go:79"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/engine.go:85"
     ],
     "AuditEvents": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:1053"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1878"
     ],
     "CanonicalPOADigest": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/canonical.go:32",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/canonical.go:32",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/canonical.go:32"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/canonical.go:38",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/canonical.go:38",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/canonical.go:38"
     ],
     "CreateDelegation": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:641"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1262"
     ],
     "FileLogger": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit/file_logger.go:21"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/file_logger.go:21"
     ],
     "MemoryLogger": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit/audit.go:84"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:84"
     ],
     "POAStatus": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa/poa.go:16",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:39"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/poa/poa.go:16",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:69"
     ],
     "PowerOfAttorney": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:48"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/auth/legal_framework_integration.go:303",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/poa/validator.go:9",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:78"
     ],
     "ReplayStore": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth/gauth.go:182",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:520"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/gauth.go:197",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1083"
     ],
     "RevocationChain": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/delegation/revocation_chain.go:63"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/revocation_chain.go:65"
     ],
     "RevokeDelegation": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:974"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1793"
     ],
     "ValidateDelegation": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:761"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1442"
     ],
     "ValidateMultiSignature": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:82"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:138"
     ],
     "VerifyChain": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit/audit.go:151",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit/audit.go:151",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit/file_logger.go:137",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit/file_logger.go:137",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/delegation/delegation.go:76",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/delegation/delegation.go:76",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger/anchor.go:40",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger/anchor.go:40",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger/bolt.go:166",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger/bolt.go:166",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger/ledger.go:147",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger/ledger.go:147",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/engine.go:114",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/engine.go:114",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/store.go:35",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/store.go:35",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/store_file.go:162",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/store_file.go:162"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:151",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:151",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/file_logger.go:181",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/file_logger.go:181",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/delegation.go:88",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/delegation.go:88",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/anchor.go:57",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/anchor.go:57",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/bolt.go:262",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/bolt.go:262",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/ledger.go:172",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/ledger.go:172",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/engine.go:141",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/engine.go:141",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store.go:35",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store.go:35",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store_file.go:162",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store_file.go:162"
     ],
     "VerifyIntegrity": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:1100"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1959"
     ],
     "VerifyToken": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/examples/token_management/paseto/main.go:73",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:361"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/paseto/main.go:73",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:670"
     ],
     "WithReplayProtection": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:614"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1224"
     ],
     "computeHash": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:1174"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:2045"
     ],
     "policy.Registry": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics/prometheus_adapter.go:252",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/compliance/compliance.go:25",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/engine.go:72",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/store.go:36",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy/store_file.go:167"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/capability/registry.go:20",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/prometheus_adapter.go:1120",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/compliance/compliance.go:37",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/engine.go:77",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store.go:36",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store_file.go:167"
     ],
     "validateDelegationRequest": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:1180"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:2051"
     ],
     "verifyPOASignature": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111/rfc0111.go:577"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1164"
     ]
   },
   "failure_categories": {
-    "clause_missing": [],
+    "clause_missing": [
+      "clause missing: 0111:10.-detached-signatures",
+      "clause missing: 0111:11.-multi-signature-threshold",
+      "clause missing: 0111:7.-authorization-engine",
+      "clause missing: 0111:8.-pp-architecture",
+      "clause missing: 0111:9.-external-anchoring",
+      "clause missing: 0115:10.-embedding-poa-in-token",
+      "clause missing: 0115:2.-semantic-validation",
+      "clause missing: 0115:4.-jurisdiction-enforcement",
+      "clause missing: 0115:5.-advanced-claims",
+      "clause missing: 0115:6.-key-rotation",
+      "clause missing: 0115:7.-policy-versioning",
+      "clause missing: 0115:8.-ai-capability-governance"
+    ],
     "symbol_missing": [],
     "tests_missing": []
   },
   "gap_matrix": {
-    "generated": "2025-10-17",
+    "generated": "2025-10-21",
     "version": "beta-refactor",
     "sections": [
       {
@@ -383,20 +412,23 @@
             "id": "sec3.item1",
             "requirement": "Full semantic validation",
             "status": "Partial",
-            "gap": "BasicPoAValidator only",
+            "gap": "AdvancedPoAValidator adds extended rules; lacking warning channel \u0026 persistence of daily limits",
             "evidence": [
               "docs/GAP_MATRIX.md:32",
-              "pkg/rfc0111/validator.go"
+              "pkg/rfc0111/validator.go",
+              "pkg/rfc0111/rfc0111.go"
             ],
             "priority": "P0"
           },
           {
             "id": "sec3.item2",
             "requirement": "Embed full PoA in token",
-            "status": "Missing",
-            "gap": "Envelope lacks full definition",
+            "status": "Partial",
+            "gap": "RawPOA + PoAVersion embedding implemented behind GAUTH_EMBED_FULL_POA with size cap GAUTH_MAX_RAW_POA_BYTES; remaining gaps: verifier exposure helper, CBOR option, streaming for large PoAs, warning channel \u0026 audit persistence",
             "evidence": [
-              "docs/GAP_MATRIX.md:33"
+              "docs/GAP_MATRIX.md:33",
+              "pkg/rfc0111/rfc0111.go",
+              "internal/metrics/metrics.go"
             ],
             "priority": "P1"
           },
@@ -537,11 +569,13 @@
         "items": [
           {
             "id": "sec7.item1",
-            "requirement": "Decision metrics (allow/deny by policy)",
-            "status": "Partial",
-            "gap": "No action/resource dimension",
+            "requirement": "Decision metrics (allow/deny + action/resource labels)",
+            "status": "Implemented",
+            "gap": "Reason taxonomy limited; no JSON labeled export yet",
             "evidence": [
-              "docs/GAP_MATRIX.md:62"
+              "docs/GAP_MATRIX.md:62",
+              "internal/metrics/prometheus_adapter.go",
+              "docs/OBSERVABILITY.md"
             ],
             "priority": "P2"
           },
@@ -557,14 +591,18 @@
           },
           {
             "id": "sec7.item3",
-            "requirement": "Violation counters",
-            "status": "Partial",
-            "gap": "Categorized counters implemented + JSON snapshot endpoint (/api/v1/beta/metrics/violations) with timestamp/total; still missing Prometheus collector registration, OTEL exporter, anomaly detection, semantic PoA reason granularity",
+            "requirement": "Violation \u0026 semantic counters (adaptive anomaly)",
+            "status": "Implemented",
+            "gap": "Counters + per-category 60s/300s rates + adaptive anomaly detector (EWMA + Welford variance) with z-score export via JSON/Prometheus/OTEL; anomaly EWMA state persisted \u0026 restored with hash chain verification. Remaining gaps: external anchoring \u0026 archival rotation of semantic snapshots, historical rate archive beyond EWMA, surge alert hooks.",
             "evidence": [
               "internal/observability/violations.go",
               "pkg/gauth/gauth.go",
+              "pkg/rfc0111/rfc0111.go",
               "web/server_clean.go",
-              "web/violation_metrics_endpoint_test.go"
+              "docs/OBSERVABILITY.md",
+              "web/persistence_verify_test.go",
+              "web/server_anomaly_test.go",
+              "web/server_semantic_persistence_test.go"
             ],
             "priority": "P2"
           },

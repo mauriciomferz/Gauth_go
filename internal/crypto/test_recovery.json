@@ -1,0 +1,23 @@
+{
+  "ttl_hours": 0,
+  "active": {
+    "kid": "mOfjvN2LDV0",
+    "created_at": "2025-10-24T21:54:56Z",
+    "expires_at": "2025-10-24T21:55:06Z",
+    "private_b64": "lMHdPlBrK2iXX9KjmiJhGfNArmPOfVs+MRo/MWyvaIuY5+O83YsNXfvranKz+1vGuPGXbUUybkbv7nA3GVtFQg",
+    "public_b64": "mOfjvN2LDV3762pys/tbxrjxl21FMm5G7+5wNxlbRUI",
+    "alg": "EdDSA",
+    "use": "sig"
+  },
+  "history": [
+    {
+      "kid": "N9N843ijqoY",
+      "created_at": "2025-10-24T21:54:56Z",
+      "expires_at": "2025-10-24T21:55:06Z",
+      "private_b64": "keSoLq4MxReGcPYbrFmb2xTwfnA6L4koS5Ggn1/mhPc303zjeKOqhvwkjk+zOuUDVVtGc+qrq0+tl6pHyybZMw",
+      "public_b64": "N9N843ijqob8JI5PszrlA1VbRnPqq6tPrZeqR8sm2TM",
+      "alg": "EdDSA",
+      "use": "sig"
+    }
+  ]
+}

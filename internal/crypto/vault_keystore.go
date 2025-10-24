@@ -83,26 +83,46 @@ func (v *VaultKeyStore) Generate(ctx context.Context, tenant string) (string, er
 	if err != nil {
 		return "", fmt.Errorf("key generation failed: %w", err)
 	}
-	
+
 	// Create key ID
 	keyID := base64.RawURLEncoding.EncodeToString(pub[:8])
-	
+
+	// Encrypt private key using Vault transit if configured
+	var encryptedPriv string
+	if v.transitPath != "" {
+		// Use Vault transit encrypt API
+		transitKey := "gauth-key"
+		transitEncryptPath := fmt.Sprintf("%s/encrypt/%s", v.transitPath, transitKey)
+		req := map[string]interface{}{"plaintext": base64.StdEncoding.EncodeToString(priv)}
+		resp, err := v.client.Write(ctx, transitEncryptPath, req)
+		if err != nil {
+			return "", fmt.Errorf("vault transit encrypt failed: %w", err)
+		}
+		ciphertext, ok := resp.Data["ciphertext"].(string)
+		if !ok {
+			return "", fmt.Errorf("vault transit encrypt: missing ciphertext")
+		}
+		encryptedPriv = ciphertext
+	} else {
+		encryptedPriv = base64.StdEncoding.EncodeToString(priv)
+	}
+
 	// Store key in Vault KV
 	keyData := map[string]interface{}{
 		"algorithm":   "Ed25519",
 		"created_at":  time.Now().UTC().Format(time.RFC3339),
 		"expires_at":  time.Now().Add(v.tokenTTL).UTC().Format(time.RFC3339),
-		"private_key": base64.StdEncoding.EncodeToString(priv),
+		"private_key": encryptedPriv,
 		"public_key":  base64.StdEncoding.EncodeToString(pub),
 		"tenant":      tenant,
 		"active":      false,
 	}
-	
+
 	path := fmt.Sprintf("%s/data/gauth/keys/%s/%s", v.kvPath, tenant, keyID)
 	if _, err := v.client.Write(ctx, path, map[string]interface{}{"data": keyData}); err != nil {
 		return "", fmt.Errorf("vault key storage failed: %w", err)
 	}
-	
+
 	return keyID, nil
 }
 
@@ -288,22 +308,43 @@ func (v *VaultKeyStore) parseVaultKey(keyID string, keyData map[string]interface
 	algorithm, _ := keyData["algorithm"].(string)
 	createdAtStr, _ := keyData["created_at"].(string)
 	expiresAtStr, _ := keyData["expires_at"].(string)
-	privateKeyB64, _ := keyData["private_key"].(string)
+	privateKeyEnc, _ := keyData["private_key"].(string)
 	publicKeyB64, _ := keyData["public_key"].(string)
-	
+
 	createdAt, _ := time.Parse(time.RFC3339, createdAtStr)
 	expiresAt, _ := time.Parse(time.RFC3339, expiresAtStr)
-	
-	privateKey, err := base64.StdEncoding.DecodeString(privateKeyB64)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode private key: %w", err)
+
+	var privateKey []byte
+	if v.transitPath != "" && len(privateKeyEnc) > 7 && privateKeyEnc[:7] == "vault:v" {
+		// Use Vault transit decrypt API
+		transitKey := "gauth-key"
+		transitDecryptPath := fmt.Sprintf("%s/decrypt/%s", v.transitPath, transitKey)
+		req := map[string]interface{}{"ciphertext": privateKeyEnc}
+		resp, err := v.client.Write(context.Background(), transitDecryptPath, req)
+		if err != nil {
+			return nil, fmt.Errorf("vault transit decrypt failed: %w", err)
+		}
+		plaintextB64, ok := resp.Data["plaintext"].(string)
+		if !ok {
+			return nil, fmt.Errorf("vault transit decrypt: missing plaintext")
+		}
+		privateKey, err = base64.StdEncoding.DecodeString(plaintextB64)
+		if err != nil {
+			return nil, fmt.Errorf("vault transit decode failed: %w", err)
+		}
+	} else {
+		var err error
+		privateKey, err = base64.StdEncoding.DecodeString(privateKeyEnc)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode private key: %w", err)
+		}
 	}
-	
+
 	publicKey, err := base64.StdEncoding.DecodeString(publicKeyB64)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode public key: %w", err)
 	}
-	
+
 	return &Key{
 		ID:        keyID,
 		CreatedAt: createdAt,
