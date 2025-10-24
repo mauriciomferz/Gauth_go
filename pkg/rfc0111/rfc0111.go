@@ -1,6 +1,7 @@
 package rfc0111
 
 import (
+	"bytes"
 	"context"
 	"crypto/ed25519"
 	"crypto/rand"
@@ -19,6 +20,7 @@ import (
 
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/observability"
+	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/attest"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/authz"
 	cr "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/crypto"
@@ -26,6 +28,7 @@ import (
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/delegation"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/pdp"
+	poaPkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/token"
 	"github.com/google/uuid"
@@ -74,6 +77,7 @@ const (
 // PowerOfAttorney represents a delegation grant between a grantor and grantee.
 type PowerOfAttorney struct {
 	ID           string            `json:"id"`
+	Version      int               `json:"version"` // structural version (included in canonical digest)
 	Grantor      string            `json:"grantor"`
 	Grantee      string            `json:"grantee"`
 	Scope        []string          `json:"scope"`
@@ -87,6 +91,7 @@ type PowerOfAttorney struct {
 	// Multi-signature prototype fields (RFC115-C8): if Signers provided and Threshold>1 we require aggregated validation.
 	Signers   []string `json:"signers,omitempty"`
 	Threshold int      `json:"threshold,omitempty"`
+	Weights   map[string]int `json:"weights,omitempty"` // signer -> weight (positive int); included in canonical digest when present
 	// MultiSignatures holds individual signatures (each over canonical POA digest) keyed by signer identity.
 	// For threshold verification we require at least Threshold valid entries.
 	MultiSignatures map[string]*POASignature `json:"multi_signatures,omitempty"`
@@ -159,6 +164,22 @@ func ValidateMultiSignature(p *PowerOfAttorney) error {
 			}
 		}
 	}
+	// Weights validation (optional weighted mode)
+	if len(p.Weights) > 0 {
+		var total int
+		for k, v := range p.Weights {
+			if _, ok := seen[k]; !ok {
+				return fmt.Errorf("weight key not a declared signer: %s", k)
+			}
+			if v <= 0 || v > 1_000_000 {
+				return fmt.Errorf("invalid weight for signer %s: %d", k, v)
+			}
+			total += v
+		}
+		if total < p.Threshold { // interpret threshold as required cumulative weight when weights provided
+			return fmt.Errorf("cumulative weights %d below threshold %d", total, p.Threshold)
+		}
+	}
 	return nil
 }
 
@@ -184,68 +205,34 @@ func (s *Service) verifyMultiSignatures(p *PowerOfAttorney) error {
 	if err := ValidateMultiSignature(p); err != nil {
 		return rfc.New(rfc.ErrIntegrityFailure, fmt.Sprintf("multi-signature structural invalid: %v", err))
 	}
-	// Optional weighted threshold: parse first so we can relax count-based structural check when weights enabled.
-	weightsRaw := os.Getenv("GAUTH_MULTI_SIG_WEIGHTS")
+	// Weighted threshold mode: prefer embedded POA weights; fallback to env (GAUTH_MULTI_SIG_WEIGHTS) for transitional compatibility.
+	weights := p.Weights
 	useWeights := false
-	weights := map[string]int{}
-	if weightsRaw != "" {
-		parts := strings.Split(weightsRaw, ",")
-		validParse := true
-		var totalWeight int
-		seenKeys := make(map[string]struct{})
-		for _, part := range parts {
-			part = strings.TrimSpace(part)
-			if part == "" {
-				continue
+	if len(weights) == 0 {
+		if raw := os.Getenv("GAUTH_MULTI_SIG_WEIGHTS"); raw != "" {
+			parts := strings.Split(raw, ",")
+			parsed := map[string]int{}
+			valid := true
+			var total int
+			for _, part := range parts {
+				part = strings.TrimSpace(part)
+				if part == "" { continue }
+				kv := strings.SplitN(part, "=", 2)
+				if len(kv) != 2 { valid = false; break }
+				w64, err := strconv.ParseInt(strings.TrimSpace(kv[1]), 10, 32)
+				if err != nil { valid = false; break }
+				w := int(w64)
+				if w <= 0 || w > 1_000_000 { valid = false; break }
+				parsed[strings.TrimSpace(kv[0])] = w
+				total += w
 			}
-			kv := strings.SplitN(part, "=", 2)
-			if len(kv) != 2 {
-				validParse = false
-				break
-			}
-			key := strings.TrimSpace(kv[0])
-			if key == "" {
-				validParse = false
-				break
-			}
-			if _, dup := seenKeys[key]; dup {
-				validParse = false
-				break
-			}
-			w64, err := strconv.ParseInt(kv[1], 10, 32)
-			if err != nil {
-				validParse = false
-				break
-			}
-			w := int(w64)
-			if w <= 0 || w > 1_000_000 {
-				validParse = false
-				break
-			} // guard overflow / absurd weights
-			weights[key] = w
-			seenKeys[key] = struct{}{}
-			totalWeight += w
-		}
-		// Ensure every weight key corresponds to a declared signer.
-		if validParse {
-			declared := make(map[string]struct{}, len(p.Signers))
-			for _, sID := range p.Signers {
-				declared[sID] = struct{}{}
-			}
-			for k := range weights {
-				if _, ok := declared[k]; !ok {
-					validParse = false
-					break
-				}
+			if valid && total >= p.Threshold {
+				weights = parsed
 			}
 		}
-		// Require cumulative possible weight >= threshold to make weighted mode meaningful.
-		if validParse && totalWeight < p.Threshold {
-			validParse = false
-		}
-		if validParse {
-			useWeights = true
-		}
+	}
+	if len(weights) > 0 {
+		useWeights = true
 	}
 	// Count-based structural guard only applies when weights not enabled. In weighted mode we allow fewer signatures
 	// as long as cumulative weight meets threshold later.
@@ -390,6 +377,9 @@ type DelegationRequest struct {
 	Scope        []string          `json:"scope"`
 	Restrictions map[string]string `json:"restrictions,omitempty"`
 	Duration     time.Duration     `json:"duration"`
+	Signers      []string          `json:"signers,omitempty"`
+	Threshold    int               `json:"threshold,omitempty"`
+	Weights      map[string]int    `json:"weights,omitempty"`
 }
 
 // generateLocalKey returns a 32-byte random key for PASETO local tokens.
@@ -433,6 +423,26 @@ func WithSignerProvider(fn func() (cr.Signer, error)) Option {
 	}
 }
 
+// WithInMemoryAlgorithm installs an in-memory key provider + signer for a specific algorithm.
+// Supported values: ed25519, ecdsa-p256. It sets both signerProvider and keyProvider so issuance
+// and verification succeed without additional configuration. Unknown algorithms are ignored.
+func WithInMemoryAlgorithm(algo string) Option {
+	return func(s *Service) {
+		switch algo {
+		case cr.AlgoEd25519:
+			if kp, err := cr.NewInMemoryEd25519Provider(); err == nil {
+				s.signerProvider = kp.ActiveSigner
+				s.keyProvider = kp
+			}
+		case cr.AlgoECDSAP256:
+			if kp, err := cr.NewInMemoryECDSAProvider(); err == nil {
+				s.signerProvider = kp.ActiveSigner
+				s.keyProvider = kp
+			}
+		}
+	}
+}
+
 // WithKMS installs a KMS abstraction; if provided it supersedes signerProvider in issuance paths.
 func WithKMS(kms cr.KMS) Option {
 	return func(s *Service) {
@@ -445,6 +455,18 @@ func WithKMS(kms cr.KMS) Option {
 				// Wrap using anonymous struct implementing VerifyWith.
 				s.keyProvider = &kmsKeyProviderAdapter{kms: kms}
 			}
+		}
+	}
+}
+
+// WithAttestationTrustAnchors installs a trust anchor registry used for optional
+// strict attestation issuer enforcement (GAUTH_ATTEST_REQUIRE_TRUST_ANCHOR=1).
+// If nil is passed it is ignored. The registry can be mutated after service
+// construction to add anchors dynamically in tests or initialization code.
+func WithAttestationTrustAnchors(reg *attest.TrustAnchorRegistry) Option {
+	return func(s *Service) {
+		if reg != nil {
+			s.attestAnchors = reg
 		}
 	}
 }
@@ -558,6 +580,10 @@ func NewService(auditLogger *audit.MemoryLogger, authorizer authz.Authorizer, op
 		s.mandatorySignatures = true
 		s.strictAuthenticity = true
 	}
+	// Default strict authenticity unless explicitly disabled (GAUTH_STRICT_AUTHENTICITY=0)
+	if os.Getenv("GAUTH_STRICT_AUTHENTICITY") != "0" && !s.strictAuthenticity {
+		s.strictAuthenticity = true
+	}
 	return s
 }
 
@@ -588,6 +614,9 @@ func NewServicePersistent(auditLogPath string, authorizer authz.Authorizer, opts
 		if opt != nil {
 			opt(s)
 		}
+	}
+	if os.Getenv("GAUTH_STRICT_AUTHENTICITY") != "0" && !s.strictAuthenticity {
+		s.strictAuthenticity = true
 	}
 	return s, nil
 }
@@ -721,63 +750,42 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 	if useV2 {
 		delegationID = env2.DelegationID
 	}
-	// Replay protection (requires valid UUID v4 JTI). Prefer distributed store if configured.
+	// Replay protection & mandatory JTI: require JTI unless explicitly allowed via GAUTH_ALLOW_MISSING_JTI.
 	jti := env.JTI
-	if useV2 {
-		jti = env2.JTI
-	}
-	if jti != "" { // JTI required for replay detection; if missing we surface invalid request later.
+	if useV2 { jti = env2.JTI }
+	if jti == "" {
+		if os.Getenv("GAUTH_ALLOW_MISSING_JTI") != "1" {
+			return nil, rfc.New(rfc.ErrInvalidRequest, "missing jti")
+		}
+	} else {
 		if !isUUIDv4(jti) {
 			return nil, rfc.New(rfc.ErrInvalidRequest, "malformed jti (must be uuid v4)")
 		}
 		if s.replayStore != nil {
 			startRS := s.nowFn()
 			seen, err := s.replayStore.Seen(jti)
-			if s.metrics != nil {
-				s.metrics.ObserveReplayStoreLatency(s.nowFn().Sub(startRS))
-			}
+			if s.metrics != nil { s.metrics.ObserveReplayStoreLatency(s.nowFn().Sub(startRS)) }
 			if err != nil {
-				if s.metrics != nil {
-					s.metrics.IncReplayStoreErrors()
-				}
-				if s.failClosedReplay {
-					return nil, rfc.New(rfc.ErrInvalidRequest, "replay store error")
-				}
+				if s.metrics != nil { s.metrics.IncReplayStoreErrors() }
+				if s.failClosedReplay { return nil, rfc.New(rfc.ErrInvalidRequest, "replay store error") }
 			} else if seen {
-				if s.metrics != nil {
-					s.metrics.IncReplayHits()
-				}
+				if s.metrics != nil { s.metrics.IncReplayHits() }
 				return nil, rfc.New(rfc.ErrReplay, "token replay detected")
 			}
-			// Attempt record (ignore error, fail-open semantics) with latency instrumentation
 			recStart := s.nowFn()
 			if recErr := s.replayStore.Record(jti, s.nowFn()); recErr != nil {
-				if s.metrics != nil {
-					s.metrics.IncReplayStoreErrors()
-				}
-				if s.failClosedReplay {
-					return nil, rfc.New(rfc.ErrInvalidRequest, "replay store record error")
-				}
-			} else if s.metrics != nil {
-				s.metrics.ObserveReplayStoreLatency(s.nowFn().Sub(recStart))
-			}
-			if s.metrics != nil {
-				s.metrics.IncReplayMisses()
-			}
+				if s.metrics != nil { s.metrics.IncReplayStoreErrors() }
+				if s.failClosedReplay { return nil, rfc.New(rfc.ErrInvalidRequest, "replay store record error") }
+			} else if s.metrics != nil { s.metrics.ObserveReplayStoreLatency(s.nowFn().Sub(recStart)) }
+			if s.metrics != nil { s.metrics.IncReplayMisses() }
 		} else if s.replay != nil {
 			if s.replay.Seen(jti) {
-				if s.metrics != nil {
-					s.metrics.IncReplayHits()
-				}
+				if s.metrics != nil { s.metrics.IncReplayHits() }
 				return nil, rfc.New(rfc.ErrReplay, "token replay detected")
 			}
 			s.replay.Record(jti, s.nowFn())
-			if s.metrics != nil {
-				s.metrics.IncReplayMisses()
-			}
+			if s.metrics != nil { s.metrics.IncReplayMisses() }
 		}
-	} else if s.replay != nil || s.replayStore != nil { // replay protection configured but missing JTI
-		return nil, rfc.New(rfc.ErrInvalidRequest, "missing jti")
 	}
 	poa, ok := s.repo.Get(delegationID)
 	if !ok || poa == nil {
@@ -1028,6 +1036,7 @@ type Service struct {
 	poaValidator        PoAValidator              // semantic validator applied post basic validation
 	enhancedValidator   *EnhancedPoAValidator     // enhanced validator with warning collection and daily limits (optional)
 	mandatorySignatures bool                      // if true, issuance aborts when signature cannot be produced
+	attestAnchors       *attest.TrustAnchorRegistry // optional trust anchor registry for attestation proofs
 	// semanticCounters prototype: fine-grained semantic rejection reasons (will be surfaced via endpoints later)
 	semanticCounters struct {
 		AmountLimitExceeded      uint64
@@ -1330,6 +1339,10 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 		Status:       POAStatusActive,
 		CreatedAt:    now,
 		UpdatedAt:    now,
+		Version:      1,
+		Signers:      req.Signers,
+		Threshold:    req.Threshold,
+		Weights:      req.Weights,
 	}
 
 	// Multi-signature enforcement (prototype RFC115-C8). If Threshold>1 require structural validity.
@@ -2218,6 +2231,7 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 		}
 		var rawPOA string
 		var poaVersion string
+		var rawPOAChain string
 		if embedEnabled && len(canonicalJSON) > 0 {
 			if len(canonicalJSON) <= maxRaw {
 				// Canonical JSON is already deterministic minimal encoding; reuse directly.
@@ -2231,6 +2245,37 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 				if s.metrics != nil {
 					s.metrics.IncEnvelopeRawPOATooLarge()
 				}
+			}
+		}
+		// RawPOAChain embedding (prototype). Feature-gated independently (GAUTH_EMBED_RAW_POA_CHAIN=1).
+		embedChain := os.Getenv("GAUTH_EMBED_RAW_POA_CHAIN") == "1"
+		var rawPOAChainAlgo string
+		if embedChain {
+			// Hash algorithm negotiation (default sha256). Supported: sha256, blake2b256, sha3_256.
+			algoName := strings.ToLower(os.Getenv("GAUTH_RAW_POA_CHAIN_HASH_ALGO"))
+			var algo poaPkg.RawPOAHashAlg = poaPkg.RawPOAHashSHA256
+			switch algoName {
+			case "blake2b256": algo = poaPkg.RawPOAHashBLAKE2b256
+			case "sha3_256": algo = poaPkg.RawPOAHashSHA3_256
+			}
+			// Build minimal chain snapshot (single item) representing this issuance.
+			// Clamp timestamp to <=255 to satisfy minimal CBOR encoder integer encoding (supports <256 path).
+			item := poaPkg.RawPOAItem{ID: poa.ID, Issuer: poa.Grantor, Subject: poa.Grantee, Timestamp: now.Unix() % 256, Algo: algEd25519}
+			if poa.Signature != nil && poa.Signature.SigBase64 != "" {
+				if sigBytes, decErr := base64.StdEncoding.DecodeString(poa.Signature.SigBase64); decErr == nil {
+					item.Signature = sigBytes
+				}
+			}
+			chainBytes, cErr := poaPkg.EncodeRawPOAChain([]poaPkg.RawPOAItem{item})
+			if cErr == nil {
+				if len(chainBytes) <= maxRaw {
+					// Compute chain hash + algo via streaming decode (single item continuity trivial).
+					if chainDec, decErr := poaPkg.DecodeRawPOAStreamWith(bytes.NewReader(chainBytes), poaPkg.DefaultStreamLimits, algo, false); decErr == nil {
+						rawPOAChainAlgo = chainDec.HashAlgo.String()
+					}
+					rawPOAChain = base64.StdEncoding.EncodeToString(chainBytes)
+					if s.metrics != nil { s.metrics.IncEnvelopeRawPOAEmbedded() }
+				} else if s.metrics != nil { s.metrics.IncEnvelopeRawPOATooLarge() }
 			}
 		}
 		env2 := token.EnvelopeV2{
@@ -2252,6 +2297,8 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 			SatisfiedSignatures: poa.SatisfiedSignatures,
 			PoAVersion:          poaVersion,
 			RawPOA:              rawPOA,
+			RawPOAChain:         rawPOAChain,
+			RawPOAChainAlgo:     rawPOAChainAlgo,
 		}
 		// Detached signature issuance (feature-gated). We sign the canonical JSON bytes (not the digest hex) so that
 		// external verifiers can recompute the canonical representation and verify directly without relying on hash preimage.
