@@ -13,6 +13,7 @@ This release focuses on strengthening multi-signature integrity, canonical seria
 | Replay Protection | JTI claim mandatory unless `GAUTH_ALLOW_MISSING_JTI=1` | Closes trivial replay channel for tokens without store |
 | Tests | Updated property & domain tests; added version/weights presence test | Ensures determinism & correctness under new model |
 | Docs | New `rfc0111_compliance_matrix.md`, API README compliance summary, CHANGELOG entry | Transparent compliance and roadmap communication |
+| Algorithm Agility | Added ECDSA P-256 + BLS12-381 single signature support via registry | Enables phased adoption of alternative crypto primitives |
 
 ## Security Impact
 - Stronger signature context binding (domain separation tied to threshold & weights).
@@ -52,12 +53,15 @@ See `docs/rfc0111_compliance_matrix.md` for full matrix. Highlights:
 - Crypto Abstraction: `pkg/crypto/signature.go`, `pkg/crypto/ecdsa_provider.go`
 
 ## Algorithm Agility Usage
-Configure service with a specific algorithm using:
+Configure service with a specific algorithm using functional options:
 
-Ed25519 (default): via existing in-memory provider or KMS integration.
-ECDSA P-256: `WithInMemoryAlgorithm("ecdsa-p256")` to set signer + key provider.
+- Ed25519 (default): existing in-memory provider or external KMS.
+- ECDSA P-256: `WithInMemoryAlgorithm("ecdsa-p256")`
+- BLS12-381: construct provider manually (future convenience option planned) or use registry for verification.
 
-Signatures store algorithm name without altering canonical digest; digest invariance ensures identical structural semantics across algorithms.
+Signatures record the algorithm name without altering canonical digest. Digest invariance maintains structural semantics across algorithms.
+
+Planned: aggregated BLS signatures (multi-signer compression) and algorithm introspection endpoint.
 
 ## Checksums (Informational)
 The canonical digest domain prefix variants:
