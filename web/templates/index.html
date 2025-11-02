@@ -389,6 +389,19 @@
                 modal.remove();
             }, 300);
         }
+        
+        // Also close learning content modal
+        var learningContent = document.getElementById('learning-content');
+        if (learningContent) {
+            learningContent.classList.add('hidden');
+            learningContent.style.position = '';
+            learningContent.style.top = '';
+            learningContent.style.left = '';
+            learningContent.style.right = '';
+            learningContent.style.bottom = '';
+            learningContent.style.backgroundColor = '';
+            learningContent.style.display = '';
+        }
     };
     
     // Close modal with Escape key
@@ -404,8 +417,8 @@
         console.log('📚 Starting learning module:', moduleId);
         button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Loading Module...';
         
-        // Learning module content database
-        var moduleContent = {
+        // Learning module content database - make it global
+        window.moduleContent = {
             'auth-fundamentals': {
                 title: '🎯 Authorization Fundamentals',
                 duration: '15 minutes',
@@ -5935,48 +5948,35 @@ verified = verify(token, signature, publicKey) // true</pre>
                         learningContent.style.padding = '2rem';
                         learningContent.style.overflow = 'auto';
                         
+                        // Get actual module content from moduleContent database
+                        const module = window.moduleContent && window.moduleContent[moduleId];
+                        const moduleTitle = module ? module.title : moduleId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        const moduleHTML = module ? module.content : `
+                            <div class="learning-module-content">
+                                <div class="module-header">
+                                    <h3>${moduleId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</h3>
+                                </div>
+                                <p>Module content is being loaded...</p>
+                            </div>
+                        `;
+                        
                         learningContent.innerHTML = `
-                            <div style="background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                                    <h2 style="font-size: 2rem; font-weight: bold; color: #1f2937;">${moduleId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</h2>
+                            <div style="background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 3px solid #e5e7eb; padding-bottom: 1rem;">
+                                    <h2 style="font-size: 2rem; font-weight: bold; color: #1f2937;">${moduleTitle}</h2>
                                     <button onclick="var el = document.getElementById('learning-content'); el.classList.add('hidden'); el.style.position = ''; el.style.top = ''; el.style.left = ''; el.style.right = ''; el.style.bottom = ''; el.style.backgroundColor = ''; el.style.display = '';" 
-                                            style="background: #6b7280; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; font-size: 1.25rem; line-height: 1;">
+                                            style="background: #6b7280; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; font-size: 1.25rem; line-height: 1; transition: background 0.2s;" 
+                                            onmouseover="this.style.background='#4b5563'" 
+                                            onmouseout="this.style.background='#6b7280'">
                                         ✕
                                     </button>
                                 </div>
                                 
-                                <div style="margin-bottom: 2rem;">
-                                    <div style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; padding: 1.5rem; border-radius: 0.75rem; margin-bottom: 1rem;">
-                                        <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">🎉 SUCCESS! Learning Module Active</h3>
-                                        <p>The "${moduleId}" learning module is now working correctly!</p>
-                                    </div>
-                                    
-                                    <div style="background: #f3f4f6; padding: 1.5rem; border-radius: 0.75rem; margin-bottom: 1rem;">
-                                        <h4 style="font-weight: bold; margin-bottom: 1rem;">Module Content:</h4>
-                                        <p style="margin-bottom: 1rem;">This interactive learning module covers key concepts in authorization and delegation.</p>
-                                        <ul style="list-style: disc; padding-left: 1.5rem; margin-bottom: 0;">
-                                            <li style="margin-bottom: 0.5rem;">Core authorization principles</li>
-                                            <li style="margin-bottom: 0.5rem;">Practical implementation examples</li>
-                                            <li style="margin-bottom: 0.5rem;">Interactive demonstrations</li>
-                                            <li>Real-world use cases</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div style="background: #10b981; color: white; padding: 1rem; border-radius: 0.5rem; text-align: center;">
-                                        <strong>✅ Learning buttons are now fully functional!</strong>
-                                    </div>
-                                </div>
-                                
-                                <div style="text-align: center;">
-                                    <button onclick="var el = document.getElementById('learning-content'); el.classList.add('hidden'); el.style.position = ''; el.style.top = ''; el.style.left = ''; el.style.right = ''; el.style.bottom = ''; el.style.backgroundColor = ''; el.style.display = '';" 
-                                            style="background: #3b82f6; color: white; border: none; padding: 0.75rem 2rem; border-radius: 0.5rem; cursor: pointer; font-weight: bold;">
-                                        Complete Module
-                                    </button>
-                                </div>
+                                ${moduleHTML}
                             </div>
                         `;
                         
-                        // No need to scroll, content is now a modal overlay
+                        console.log('✅ Loaded module content for:', moduleId);
                     }
                     
                     // Reset button
