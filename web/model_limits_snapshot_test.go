@@ -20,8 +20,8 @@ func TestModelLimitsSnapshotHashChange(t *testing.T) {
 		t.Fatalf("write: %v", err)
 	}
 	tmp.Close()
-	t.Setenv("GAUTH_MODEL_LIMITS_PATH", tmp.Name())
-	t.Setenv("GAUTH_MODEL_LIMITS_RELOAD_INTERVAL", "1")
+	os.Setenv("GAUTH_MODEL_LIMITS_PATH", tmp.Name())
+	os.Setenv("GAUTH_MODEL_LIMITS_RELOAD_INTERVAL", "1")
 	bs := NewBetaServer("")
 
 	getHash := func() string {

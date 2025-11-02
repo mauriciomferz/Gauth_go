@@ -11,8 +11,6 @@ import (
 )
 
 func TestDelegationGraphExport(t *testing.T) {
-    t.Skip("Test requires repository List support for graph export - not yet implemented")
-    
     // Create a proper Service using the public constructor
     auditLogger := audit.NewMemoryLogger(nil)
     authorizer := authz.NewMemoryAuthorizer()
@@ -27,11 +25,13 @@ func TestDelegationGraphExport(t *testing.T) {
     
     svc := rfc0111.NewService(auditLogger, authorizer)
     
+    now := time.Now()
+    
     // Create delegations through the service (this will populate the repo)
     rootResp, err := svc.CreateDelegationCtx(context.Background(), rfc0111.DelegationRequest{
         Grantor: "alice", 
         Grantee: "agentA", 
-        Scope: []string{"scope.x", "scope.x.*"}, // Allow wildcards for child delegations
+        Scope: []string{"scope.x"}, 
         Duration: time.Hour,
     })
     if err != nil {
@@ -41,7 +41,7 @@ func TestDelegationGraphExport(t *testing.T) {
     childResp, err := svc.CreateDelegationCtx(context.Background(), rfc0111.DelegationRequest{
         Grantor: "agentA", 
         Grantee: "agentB", 
-        Scope: []string{"scope.x.sub", "scope.x.sub.*"}, // Allow wildcards for grandchild delegations
+        Scope: []string{"scope.x.sub"}, 
         Duration: time.Hour,
         ParentPOAID: rootResp.POA.ID,
     })

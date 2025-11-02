@@ -9851,7 +9851,7 @@ Generated: ${new Date().toISOString()}
                 console.log('Module data:', moduleData);
                 console.log('Setting learning content HTML');
                 learningContent.innerHTML = `
-                    <div onclick="event.stopPropagation()" style="background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 900px; width: 90%; border: 2px solid #e5e7eb;">
+                    <div onclick="event.stopPropagation()" style="background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 900px; margin: 0 auto; position: relative; z-index: 100; border: 2px solid #e5e7eb;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                             <div style="display: flex; align-items: center; gap: 1rem;">
                                 <div style="font-size: 2.5rem;">${moduleData.icon}</div>
@@ -9901,7 +9901,7 @@ Generated: ${new Date().toISOString()}
                 
                 // Scroll to content
                 console.log('Scrolling to learning content');
-                learningContent.classList.remove('hidden');
+                learningContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
             } else {
                 console.error('Learning content element not found!');
             }

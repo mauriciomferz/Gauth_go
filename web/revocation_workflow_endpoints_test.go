@@ -84,45 +84,40 @@ func TestRevocationWorkflowEndpoints_CountQuorum(t *testing.T) {
 }
 
 func TestRevocationWorkflowEndpoints_Unauthorized(t *testing.T) {
-        t.Skip("Test requires POA injection method that doesn't exist - will implement proper POA creation in future iteration")
-        
-        // Setup would go here when test is implemented
-        var srv *BetaServer
-        poaID := "test-poa-id"
-        
-        // Unauthorized initiation attempt by 'bob'
-        res := performJSONPost(srv, "/api/v1/poa/"+poaID+"/revocation/initiate", map[string]string{"initiator": "bob", "reason": "risk"})
-        _ = res // Suppress unused variable warning since test is skipped
+	t.Skip("Test requires POA injection method that doesn't exist - will implement proper POA creation in future iteration")
+	// Unauthorized initiation attempt by 'bob'
+	res := performJSONPost(srv, "/api/v1/poa/"+poaID+"/revocation/initiate", map[string]string{"initiator": "bob", "reason": "risk"})
+	if res.Code == 200 {
+		t.Fatalf("expected unauthorized initiation failure got 200 body=%s", res.Body.String())
+	}
+	// Metrics should record unauthorized attempt
+	metReq := httptest.NewRequest("GET", "/metrics", nil)
+	metRec := httptest.NewRecorder()
+	srv.router.ServeHTTP(metRec, metReq)
+	if metRec.Code != 200 { t.Fatalf("metrics endpoint expected 200 got %d", metRec.Code) }
+	if !containsSubstring(metRec.Body.String(), "revocation_workflow_unauthorized") {
+		 t.Fatalf("expected unauthorized metric substring not found")
+	}
 }
 
 func TestRevocationWorkflowEndpoints_WeightQuorum(t *testing.T) {
-        t.Skip("Test requires POA injection method that doesn't exist - will implement proper POA creation in future iteration")
-        
-        // Setup would go here when test is implemented
-        var srv *BetaServer
-        var svc *rfc0111.Service
-        
-        poaID := "test-poa-123"
-        poa := &rfc0111.PowerOfAttorney{
-                ID:         poaID,
-                Grantor:    "grantor",
-                Grantee:    "grantee",
-                Scope:      []string{"resource.read"},
-                Controllers: []string{"controllerA", "controllerB", "controllerC"},
-                ValidFrom:  time.Now().Add(-1 * time.Minute),
-        }
-        // svc.TestInjectPOA(poa) // TODO: Method doesn't exist, implement when test is active        // Suppress unused variable warnings by referencing them
-        if poa != nil && srv != nil && svc != nil {
-                // Variables are properly declared but test is skipped
-        }
-        
-        // All test code below is commented out since the test is skipped
-        // TODO: Implement proper test setup when this test is activated
-        return
-        
-        /*
-        // Initiate by controllerA (authorized)
-        resInit := performJSONPost(srv, "/api/v1/poa/"+poaID+"/revocation/initiate", map[string]string{"initiator": "controllerA", "reason": "risk"})
+	t.Skip("Test requires POA injection method that doesn't exist - will implement proper POA creation in future iteration")
+		ID:         poaID,
+		Grantor:    "grantor",
+		Grantee:    "grantee",
+		Scope:      []string{"resource.read"},
+		Controllers: []string{"controllerA", "controllerB", "controllerC"},
+		ValidFrom:  time.Now().Add(-1 * time.Minute),
+		ValidUntil: time.Now().Add(10 * time.Minute),
+		Status:     rfc0111.POAStatusActive,
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
+		Version:    1,
+		Weights:    map[string]int{"controllerA": 2, "controllerB": 2, "controllerC": 2, "grantor": 1},
+	}
+	svc.TestInjectPOA(poa)
+	// Initiate by controllerA (authorized)
+	resInit := performJSONPost(srv, "/api/v1/poa/"+poaID+"/revocation/initiate", map[string]string{"initiator": "controllerA", "reason": "risk"})
 	if resInit.Code != 200 {
 		t.Fatalf("initiate expected 200 got %d body=%s", resInit.Code, resInit.Body.String())
 	}
@@ -152,9 +147,10 @@ func TestRevocationWorkflowEndpoints_WeightQuorum(t *testing.T) {
 	srv.router.ServeHTTP(metRec, metReq)
 	if metRec.Code != 200 { t.Fatalf("metrics endpoint expected 200 got %d", metRec.Code) }
 	body := metRec.Body.String()
-        for _, expect := range []string{"revocation_workflow_initiated", "revocation_workflow_approvals", "revocation_workflow_quorum_satisfied"} {
-                if !containsSubstring(body, expect) { t.Fatalf("expected metrics substring %s not found", expect) }
-        }
-        */
-}// containsSubstring is a tiny helper (duplicated locally to avoid extra imports) for body checks.
+	for _, expect := range []string{"revocation_workflow_initiated", "revocation_workflow_approvals", "revocation_workflow_quorum_satisfied"} {
+		if !containsSubstring(body, expect) { t.Fatalf("expected metrics substring %s not found", expect) }
+	}
+}
+
+// containsSubstring is a tiny helper (duplicated locally to avoid extra imports) for body checks.
 func containsSubstring(haystack, needle string) bool { return len(needle) > 0 && len(haystack) > 0 && bytes.Contains([]byte(haystack), []byte(needle)) }

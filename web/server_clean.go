@@ -6973,6 +6973,9 @@ func (s *BetaServer) routes() {
 				path := wd + "/web/templates/index.html"
 				fmt.Fprintf(os.Stderr, "[debug] attempting disk index read: %s\n", path)
 				if b, err := os.ReadFile(path); err == nil {
+                                        c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+                                        c.Header("Pragma", "no-cache")
+                                        c.Header("Expires", "0")
 					fmt.Fprintf(os.Stderr, "[debug] serving disk index.html (%d bytes)\n", len(b))
 					serveWithNonce(c, b)
 					return

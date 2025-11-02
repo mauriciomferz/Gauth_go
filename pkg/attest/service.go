@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"sync/atomic"
 	"time"
 
 	internalCrypto "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
@@ -161,22 +160,18 @@ func (s *AttestationService) CanonicalizeModelLimitsUnsigned(raw []byte) ([]byte
     return json.Marshal(gen)
 }
 
-var nonceCounter int64
-
 // randomNonce local minimal entropy helper (duplicated to avoid import cycle with web package)
 func randomNonce(n int) string {
-	const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
-	b := make([]byte, n)
-	// Use atomic counter to ensure uniqueness even in fast succession
-	counter := atomic.AddInt64(&nonceCounter, 1)
-	baseTime := time.Now().UnixNano()
-	for i := range b {
-		// Combine timestamp, counter, and index for better variation
-		seed := baseTime + counter*100 + int64(i*37)
-		b[i] = chars[int(seed)%len(chars)]
-	}
-	return string(b)
-}// SignAttestation performs domain-separated signing of a model limits attestation using global signer agility.
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
+    b := make([]byte, n)
+    // naive timestamp-mix fallback; cryptographic randomness not required for demo nonce
+    for i := range b {
+        b[i] = chars[int(time.Now().UnixNano()+int64(i))%len(chars)]
+    }
+    return string(b)
+}
+
+// SignAttestation performs domain-separated signing of a model limits attestation using global signer agility.
 // If global signer unavailable, falls back to direct ed25519 using active registry key.
 // Returns a mutated copy with signature fields populated.
 // SignDomainSeparated signs raw canonical JSON bytes with provided domain prefix.

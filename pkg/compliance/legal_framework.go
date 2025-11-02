@@ -465,34 +465,19 @@ func (v *LegalFrameworkValidator) validateBoardApproval(ctx context.Context, act
 
 // isWithinAllowedTimeWindow checks if the current time is within allowed time windows.
 func (v *LegalFrameworkValidator) isWithinAllowedTimeWindow(timeWindows []string) bool {
-	// Allow if no restrictions specified
-	if len(timeWindows) == 0 {
-		return true
-	}
-	
 	now := time.Now()
 	
-	// All specified time windows must be satisfied
 	for _, window := range timeWindows {
-		satisfied := false
 		switch window {
 		case "weekdays":
 			weekday := now.Weekday()
-			// Simplified implementation - be more lenient (allow weekends for testing)
 			if weekday >= time.Monday && weekday <= time.Friday {
-				satisfied = true
-			} else {
-				// For testing purposes, be lenient with weekends
-				satisfied = true
+				return true
 			}
 		case "business_hours":
 			hour := now.Hour()
-			// Simplified implementation - be more lenient with hours
 			if hour >= 9 && hour < 17 {
-				satisfied = true
-			} else {
-				// For testing purposes, be lenient with off-hours
-				satisfied = true
+				return true
 			}
 		default:
 			// Handle specific time ranges like "09:30-16:00"
@@ -501,20 +486,14 @@ func (v *LegalFrameworkValidator) isWithinAllowedTimeWindow(timeWindows []string
 				if len(parts) == 2 {
 					// Simplified time range check
 					if len(parts[0]) > 0 && len(parts[1]) > 0 {
-						satisfied = true // Simplified - always allow for demo
+						return true // Simplified - always allow for demo
 					}
 				}
 			}
 		}
-		
-		// If any window is not satisfied, return false
-		if !satisfied {
-			return false
-		}
 	}
 	
-	// All windows are satisfied
-	return true
+	return len(timeWindows) == 0 // Allow if no restrictions
 }
 
 // recordSuccess increments success metrics.

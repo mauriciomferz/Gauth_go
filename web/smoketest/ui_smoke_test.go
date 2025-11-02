@@ -41,9 +41,7 @@ func fetchIndexHTML(t *testing.T) string {
 
 // TestUISmoke checks for core interactive elements and ARIA attributes.
 func TestUISmoke(t *testing.T) {
-        t.Skip("UI structure has changed - mobile nav button no longer exists in current implementation")
-        
-        body := fetchIndexHTML(t)
+	body := fetchIndexHTML(t)
 	if body == "" { // skipped
 		return
 	}
