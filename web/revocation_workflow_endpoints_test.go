@@ -101,19 +101,16 @@ func TestRevocationWorkflowEndpoints_Unauthorized(t *testing.T) {
 }
 
 func TestRevocationWorkflowEndpoints_WeightQuorum(t *testing.T) {
-	t.Skip("Test requires POA injection method that doesn't exist - will implement proper POA creation in future iteration")
-		ID:         poaID,
-		Grantor:    "grantor",
-		Grantee:    "grantee",
-		Scope:      []string{"resource.read"},
-		Controllers: []string{"controllerA", "controllerB", "controllerC"},
-		ValidFrom:  time.Now().Add(-1 * time.Minute),
-		ValidUntil: time.Now().Add(10 * time.Minute),
-		Status:     rfc0111.POAStatusActive,
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
-		Version:    1,
-		Weights:    map[string]int{"controllerA": 2, "controllerB": 2, "controllerC": 2, "grantor": 1},
+        t.Skip("Test requires POA injection method that doesn't exist - will implement proper POA creation in future iteration")
+        
+        poaID := "test-poa-123"
+        poa := &rfc0111.POA{
+                ID:         poaID,
+                Grantor:    "grantor",
+                Grantee:    "grantee",
+                Scope:      []string{"resource.read"},
+                Controllers: []string{"controllerA", "controllerB", "controllerC"},
+                ValidFrom:  time.Now().Add(-1 * time.Minute),
 	}
 	svc.TestInjectPOA(poa)
 	// Initiate by controllerA (authorized)
