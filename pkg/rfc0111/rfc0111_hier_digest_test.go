@@ -56,7 +56,7 @@ func TestHierDigestTamperParent(t *testing.T) {
 	os.Setenv("GAUTH_PERSIST_PATH", path)
 	defer os.Unsetenv("GAUTH_PERSIST_PATH")
 	memLogger := audit.NewMemoryLogger(nil)
-	svc := NewService(memLogger, &allowAllAuthorizer{})
+	svc := NewService(memLogger, &allowAllAuthorizer{}, WithInMemoryAlgorithm("ed25519"))
 	rootResp, err := svc.CreateDelegation(DelegationRequest{Grantor: "alice", Grantee: "bob", Scope: []string{"finance.read"}, Duration: time.Hour})
 	if err != nil { t.Fatalf("root create failed: %v", err) }
 	childResp, err := svc.CreateDelegation(DelegationRequest{Grantor: "bob", Grantee: "carol", Scope: []string{"finance.read"}, Duration: time.Hour, ParentPOAID: rootResp.POA.ID})
