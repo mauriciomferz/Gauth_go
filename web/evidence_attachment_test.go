@@ -133,7 +133,3 @@ func TestEvidenceAttachment_NotFound(t *testing.T) {
 		t.Fatalf("expected not found status got %d body=%s", res.Code, res.Body.String()) 
 	}
 }
-
-func contains(s, substr string) bool {
-	return bytes.Contains([]byte(s), []byte(substr))
-}
