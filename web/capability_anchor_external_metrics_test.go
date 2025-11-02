@@ -61,15 +61,11 @@ func TestExternalAnchorFailureMetrics(t *testing.T) {
 
 // contains helper (avoid pulling strings package repeatedly for readability).
 func hasSubstr(haystack, needle string) bool {
-	return len(haystack) >= len(needle) && (stringIndex(haystack, needle) >= 0)
+	return len(haystack) >= len(needle) && (capExtIndex(haystack, needle) >= 0)
 }
 
-// stringIndex naive substring search (small bodies, keep dependency minimal).
-func stringIndex(s, sub string) int {
-	return indexImpl(s, sub)
-}
-
-func indexImpl(s, sub string) int {
+// capExtIndex naive substring search (small bodies, keep dependency minimal).
+func capExtIndex(s, sub string) int {
 	if sub == "" {
 		return 0
 	}

@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "generated_at": "2025-10-26T00:00:00Z",
+  "rotation_summary_multisig": {
+    "chain_length": 128,
+    "head_hash": "sha256:deadbeefcafebabefeedface00112233445566778899aabbccddeeff00112233",
+    "aggregate_hash": "sha256:a1b2c3d4e5f60718293a4b5c6d7e8f90123456789abcdef0011223344556677",
+    "threshold": 2,
+    "satisfied_weight": 2,
+    "signatures": [
+      {
+        "kid": "ed25519:keyA1234567890",
+        "mode": "EdDSA",
+        "signature": "MEUCIFakeSignatureValueForKeyAMEQCIFakeTailValueKeyAPlaceholder"
+      },
+      {
+        "kid": "ed25519:keyB0987654321",
+        "mode": "EdDSA",
+        "signature": "MEUCIFakeSignatureValueForKeyBMEQCIFakeTailValueKeyBPlaceholder"
+      }
+    ]
+  },
+  "notes": [
+    "Demonstration artifact showing prospective multi-signature rotation summary expansion.",
+    "Endpoint currently returns single-sign summary; this illustrates threshold >=2 support.",
+    "Signatures are placeholders (not cryptographically valid)."
+  ],
+  "rfc_refs": ["rfc111:rotation_invariants", "rfc111:rotation_summary", "rfc111:multisig_future"]
+}

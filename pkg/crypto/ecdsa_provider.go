@@ -5,15 +5,15 @@ package crypto
 // of signatures performed by higher layers (rfc0111 service). The Sign method returns raw DER bytes.
 
 import (
-    "crypto/ecdsa"
-    "crypto/elliptic"
-    "crypto/rand"
-    "crypto/sha256"
-    "encoding/hex"
-    "errors"
-    "fmt"
-    "math/big"
-    "encoding/base64"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/hex"
+	"errors"
+	"fmt"
+	"math/big"
 )
 
 const (

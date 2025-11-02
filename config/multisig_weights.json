@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "active_key_set_id": "default-set",
+  "threshold_weight": 100,
+  "signers": [
+    { "id": "hsm-a", "alg": "ED25519", "weight": 60 },
+    { "id": "soft-b", "alg": "ED25519", "weight": 20 },
+    { "id": "notary-c", "alg": "ED25519", "weight": 40 }
+  ],
+  "algorithm_suite": ["ed25519"]
+}

@@ -4,9 +4,10 @@ package crypto
 // Relies on internal/crypto BLS primitives (GenerateBLSKey, BLSSign, BLSVerify).
 
 import (
-    "encoding/base64"
-    "errors"
-    blsbin "github.com/herumi/bls-eth-go-binary/bls"
+	"encoding/base64"
+	"errors"
+
+	blsbin "github.com/herumi/bls-eth-go-binary/bls"
 )
 
 const AlgoBLS12381 = "bls12-381"

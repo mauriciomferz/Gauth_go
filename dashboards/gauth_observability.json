@@ -1,0 +1,64 @@
+{
+  "title": "GAuth Observability",
+  "schemaVersion": 38,
+  "version": 1,
+  "timezone": "UTC",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Per-Algorithm Anchor Ratio",
+      "datasource": "Prometheus",
+      "targets": [
+        {"expr": "gauth_rfc0111_capability_anchor_algorithm_ratio", "legendFormat": "{{algorithm}}", "refId": "A"}
+      ],
+      "id": 1
+    },
+    {
+      "type": "graph",
+      "title": "Multi-Signature Batch Size Max",
+      "datasource": "Prometheus",
+      "targets": [
+        {"expr": "max_over_time(gauth_rfc0111_multi_signature_batch_size_bucket[5m])", "legendFormat": "batch", "refId": "A"}
+      ],
+      "id": 2
+    },
+    {
+      "type": "stat",
+      "title": "Attestation Proof Issue p95 (approx)",
+      "datasource": "Prometheus",
+      "targets": [
+        {"expr": "histogram_quantile(0.95, sum(rate(gauth_rfc0111_attestation_proof_issue_latency_seconds_bucket[5m])) by (le))", "refId": "A"}
+      ],
+      "id": 3
+    },
+    {
+      "type": "stat",
+      "title": "Attestation Proof Verification Failures (5m)",
+      "datasource": "Prometheus",
+      "targets": [
+        {"expr": "increase(gauth_rfc0111_attestation_proof_verification_failures_total[5m])", "refId": "A"}
+      ],
+      "id": 4
+    },
+    {
+      "type": "graph",
+      "title": "Attestation Verification Failure Reasons",
+      "datasource": "Prometheus",
+      "targets": [
+        {"expr": "increase(gauth_rfc0111_attestation_proof_verification_failure_reason_total[15m])", "legendFormat": "{{reason}}", "refId": "A"}
+      ],
+      "id": 5
+    },
+    {
+      "type": "stat",
+      "title": "Lifecycle Delegation Transition p95",
+      "datasource": "Prometheus",
+      "targets": [
+        {"expr": "gauth_rfc0111_lifecycle_transition_latency_quantile{entity=\"delegation\",quantile=\"p95\"}", "refId": "A"}
+      ],
+      "id": 6
+    }
+  ],
+  "templating": {"list": []},
+  "annotations": {"list": []}
+}

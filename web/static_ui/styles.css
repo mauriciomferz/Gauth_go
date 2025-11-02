@@ -1,0 +1,40 @@
+body { font-family: system-ui,-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#121212; color:#eee; }
+header { background:#1e1e1e; padding:1rem 1.5rem; border-bottom:1px solid #2a2a2a; display:flex; flex-wrap:wrap; align-items:center; gap:1rem; }
+header h1 { margin:0; font-size:1.25rem; }
+nav a { color:#9ecbff; text-decoration:none; margin-right:0.75rem; font-size:0.9rem; }
+nav a:hover { text-decoration:underline; }
+main { padding:1.25rem; display:grid; gap:1.25rem; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); }
+.panel { background:#1b1b1b; padding:1rem; border:1px solid #2a2a2a; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.3); display:flex; flex-direction:column; gap:0.5rem; }
+.panel h2 { margin:0 0 0.5rem; font-size:1.05rem; letter-spacing:.5px; }
+.status { font-size:0.75rem; opacity:0.8; }
+.grid { display:grid; gap:.4rem; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); font-size:0.75rem; }
+#error-table { width:100%; border-collapse:collapse; font-size:0.7rem; }
+#error-table th, #error-table td { padding:4px 6px; border:1px solid #333; }
+#error-table th { background:#242424; position:sticky; top:0; }
+#error-table tbody tr:nth-child(even){ background:#181818; }
+footer { text-align:center; padding:0.75rem; font-size:0.65rem; opacity:0.6; }
+pre { background:#181818; padding:0.5rem; border-radius:4px; overflow:auto; font-size:0.65rem; }
+ul { list-style:none; margin:0; padding:0; }
+ul li { padding:2px 4px; background:#181818; margin-bottom:2px; font-size:0.7rem; border-radius:4px; }
+@media (max-width:680px){ main { grid-template-columns:1fr; } header { flex-direction:column; align-items:flex-start; } }
+
+/* Badges for Rotation V2 */
+.badge { display:inline-block; padding:2px 6px; border-radius:12px; font-size:0.55rem; letter-spacing:.5px; font-weight:500; background:#2a2a2a; color:#eee; border:1px solid #333; }
+.badge-ok { background:#133a24; color:#68d391; border-color:#1f5a36; }
+.badge-partial { background:#3a2f13; color:#f6ad55; border-color:#5a421f; }
+.badge-fail { background:#3a1313; color:#fc8181; border-color:#5a1f1f; }
+.badge-neutral { background:#2a2a2a; color:#aaa; }
+
+/* Rotation V2 tables */
+#rotv2-signers td, #rotv2-signers th, #rotv2-alg-weights td, #rotv2-alg-weights th { border:1px solid #2a2a2a; }
+#rotv2-signers tbody tr:nth-child(even), #rotv2-alg-weights tbody tr:nth-child(even){ background:#181818; }
+/* Verification indicators */
+.verify-ok { color:#68d391; font-weight:600; }
+.verify-fail { color:#fc8181; font-weight:600; }
+
+/* Mini buttons */
+.btn-mini {
+	background:#242424; color:#ddd; border:1px solid #333; border-radius:4px; padding:4px 8px; font-size:0.55rem; cursor:pointer;
+}
+.btn-mini:hover { background:#2e2e2e; }
+.btn-mini:active { background:#1f1f1f; }

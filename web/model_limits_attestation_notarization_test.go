@@ -72,6 +72,7 @@ func TestModelLimitsAttestationNotarization(t *testing.T) {
 		Success    bool   `json:"success"`
 		Configured bool   `json:"configured"`
 		Reason     string `json:"reason,omitempty"`
+		Nonce      string `json:"nonce"`
 		Snapshot   struct {
 			Hash        string `json:"hash"`
 			GeneratedAt string `json:"generated_at"`
@@ -131,6 +132,7 @@ func TestModelLimitsAttestationNotarization(t *testing.T) {
 		Success    bool   `json:"success"`
 		Configured bool   `json:"configured"`
 		Reason     string `json:"reason,omitempty"`
+		Nonce      string `json:"nonce"`
 		Snapshot   struct {
 			Hash        string `json:"hash"`
 			GeneratedAt string `json:"generated_at"`
@@ -165,6 +167,7 @@ func TestModelLimitsAttestationNotarization(t *testing.T) {
 		Success:       att.Success,
 		Configured:    att.Configured,
 		Reason:        att.Reason,
+		Nonce:         att.Nonce,
 		Snapshot:      att.Snapshot,
 		Audit:         att.Audit,
 		Anchor:        att.Anchor,
@@ -176,7 +179,9 @@ func TestModelLimitsAttestationNotarization(t *testing.T) {
 	if err != nil {
 		t.Fatalf("marshal unsigned: %v", err)
 	}
-	if !ed25519.Verify(active.Public, raw, sigBytes) {
-		t.Fatalf("signature verify failed")
+	prefixed := append([]byte("GAUTH_MODEL_LIMIT_ATTEST:"), raw...)
+	if !ed25519.Verify(active.Public, prefixed, sigBytes) {
+		f := "signature verify failed"
+		t.Fatalf("%s (len raw=%d len prefixed=%d)", f, len(raw), len(prefixed))
 	}
 }

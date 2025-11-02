@@ -254,31 +254,34 @@ func TestJWTDuplicateJTIReplay(t *testing.T) {
 	os.Setenv("GAUTH_JWT_ALG", "RS256")
 	os.Setenv("GAUTH_JWT_KID", demoRSAKid)
 	srv := NewBetaServer(":0")
-	// Issue standard token via API (will include jti and record it once)
+	// Issue standard token via API (will include jti)
 	iw := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/token/create", strings.NewReader(`{"ttl_seconds":60}`))
 	req.Header.Set("Content-Type", "application/json")
 	srv.router.ServeHTTP(iw, req)
 	if iw.Code != 201 {
-		t.Fatalf("issue status=%d body=%s", iw.Code, iw.Body.String())
+		 t.Fatalf("issue status=%d body=%s", iw.Code, iw.Body.String())
 	}
 	var body map[string]any
 	_ = json.Unmarshal(iw.Body.Bytes(), &body)
 	jwtRaw, _ := body["jwt"].(string)
 	if jwtRaw == "" {
-		t.Fatalf("missing jwt issuance body=%v", body)
+		 t.Fatalf("missing jwt issuance body=%v", body)
 	}
-	// First validate ok
+	// First validate ok (records JTI)
 	vw1 := doValidate(srv, jwtRaw)
 	if vw1.Code != 200 {
-		t.Fatalf("first validate status=%d body=%s", vw1.Code, vw1.Body.String())
+		 t.Fatalf("first validate status=%d body=%s", vw1.Code, vw1.Body.String())
 	}
-	// Second validate should detect replay (duplicate jti)
+	// Second validate should detect replay (duplicate jti) and emit replay taxonomy
 	vw2 := doValidate(srv, jwtRaw)
+	if vw2.Code != 401 {
+		 t.Fatalf("expected 401 replay detection second validation status=%d body=%s", vw2.Code, vw2.Body.String())
+	}
 	var rep map[string]any
 	_ = json.Unmarshal(vw2.Body.Bytes(), &rep)
-	if rep["error"] != ErrInvalidSignature || !strings.Contains(vw2.Body.String(), "replay") {
-		t.Fatalf("expected %s replay error second validation body=%s", ErrInvalidSignature, vw2.Body.String())
+	if rep["code"] != "token_replay_detected" || rep["error"] != "replay_detected" || rep["rfc_ref"] != "rfc111:replay_protection" {
+		 t.Fatalf("expected replay taxonomy code=token_replay_detected error=replay_detected rfc_ref=rfc111:replay_protection body=%s", vw2.Body.String())
 	}
 }
 

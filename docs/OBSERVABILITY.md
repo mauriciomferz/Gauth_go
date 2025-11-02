@@ -1,4 +1,132 @@
 ## Decision Metrics
+## Tracing (RB9) & Latency Percentiles (NEW)
+The RB9 observability phase introduces lightweight in-repo tracing plus a consolidated latency percentile endpoint.
+
+Enabling Tracing:
+- Set `GAUTH_TRACING_ENABLED=1` (preferred) OR legacy `GAUTH_OTEL_ENABLE=1`.
+- Optional sampling ratio: `GAUTH_TRACING_SAMPLE_RATIO` in `[0,1]`. A value of `0` or unset defaults to always sample; any value in `(0,1]` applies probabilistic sampling (uniform `rand.Float64()<ratio`).
+
+Emitted Span Operations:
+| Operation | Description | Key Tags |
+|-----------|-------------|----------|
+| `token.issue` | Token creation endpoint | `kid`, `subject`, `scopes_count` |
+| `token.validate` | Token validation endpoint | `kid`, `subject`, `digest_version`, `replay_hit` (bool) |
+| `attestation.verify` | Model limits attestation verification | `valid` (bool), `failure_code`, `kid` |
+| `rotation.perform` | Ed25519 key rotation (manual or scheduled) | `prev_kid`, `new_kid`, `ttl_hours`, `history_size`, `error` (on failure) |
+| `rotation.append` | Immutable rotation ledger append emission | `prev_kid`, `new_kid`, `new_key_set_size`, `error` (on failure) |
+
+Error Path Coverage:
+- Body read failure and JSON parse failure in attestation verify set `error` tag and end span early.
+- Rotation failures tag `error` before span end.
+
+Latency Percentiles Endpoint:
+`GET /api/v1/beta/metrics/latency` returns approximate p50/p95/p99 for selected Prometheus histograms using bucket scans (upper bound of first bucket exceeding the quantile threshold). Shape:
+```json
+{
+	"success": true,
+	"generated_at": "2025-10-27T02:55:00.000000Z",
+	"histograms": {
+		"attestation_verify": {"p50": 0.0005, "p95": 0.002, "p99": 0.005, "count": 42},
+		"rotation_summary": {"p50": -1, "p95": -1, "p99": -1, "count": 0},
+		"rfc0111_validation": {"p50": 0.001, "p95": 0.006, "p99": 0.010, "count": 310}
+	}
+}
+```
+- `-1` indicates no observations yet (histogram empty).
+- Percentiles are approximate (no interpolation within bucket). For precise Prometheus calculations use `histogram_quantile()` over `_bucket` series.
+
+Alerting Example (PromQL):
+```
+histogram_quantile(0.95, sum by (le)(rate(gauth_attestation_verify_latency_seconds_bucket[5m]))) > 0.050
+```
+Use the JSON endpoint for quick UI snapshots; prefer PromQL for dashboards / SLO tracking.
+
+Future Enhancements:
+- Add token validation latency histogram (`gauth_token_validation_latency_seconds`) once implemented and include it automatically.
+- Add richer attestation outcome counters (`gauth_attestation_verify_total`) sliced by soft_invalid classification for governance dashboards.
+- Emit trace-to-metric correlation IDs for deeper latency root cause drill-down.
+
+Backward Compatibility: The new endpoint is additive and does not alter existing metric names or semantics.
+
+## WAL Metrics (Replay Durability)
+
+The replay nonce store (token issuance & attestation replay protection) supports optional write-ahead log (WAL) durability.
+
+Environment Variables:
+* `GAUTH_REPLAY_WAL` – enable WAL for token issuance replay store.
+* `GAUTH_ATTEST_REPLAY_WAL_PATH` – enable WAL for attestation replay store.
+
+Durable Path Behavior:
+1. On startup, existing WAL file is replayed; malformed lines are skipped (counted via `replay_store_errors_total`).
+2. Active nonces are held in memory; TTL expiration pruning occurs lazily on access.
+3. Compaction (`SnapshotAndCompact()`): writes snapshot `<wal>.snapshot`, rotates (truncates) WAL, re-appends active entries.
+
+Metrics Surface (Memory adapter):
+* `replay_wal_pending` (gauge) – number of active entries considered pending during flush (Prometheus adapter: noop placeholder today).
+* `replay_wal_flush_latency` – recorded as part of replay store latency histogram until a dedicated histogram is added.
+
+Prometheus (current state):
+* Flush latency samples appear under `gauth_rfc0111_replay_store_latency_seconds` (multiplexed). Future version will add `gauth_rfc0111_replay_wal_flush_latency_seconds` and `gauth_rfc0111_replay_wal_pending` gauge.
+
+Alert Rule Examples:
+```
+ALERT ReplayStoreHighFlushLatency
+	IF histogram_quantile(0.95, sum(rate(gauth_rfc0111_replay_store_latency_seconds_bucket[5m])) by (le)) > 0.25
+	FOR 5m
+	LABELS { severity = "warning" }
+	ANNOTATIONS { summary = "High WAL flush latency", description = "95th percentile flush latency >250ms" }
+
+ALERT ReplayStoreErrorSurge
+	IF increase(gauth_rfc0111_replay_store_errors_total[5m]) > 25
+	FOR 2m
+	LABELS { severity = "critical" }
+	ANNOTATIONS { summary = "Replay store error surge", description = "Errors exceed 25 in 5m window" }
+```
+
+Operational Guidance:
+* Investigate high flush latency for disk IO contention or large active set; consider increasing snapshot cadence.
+* Error surges often indicate WAL corruption; rotate WAL (archive & recreate) then monitor error count stabilization.
+* Snapshot Age (future metric) should remain < configured RPO (e.g. 6h). Until exposed, derive externally from file mtime.
+
+Roadmap:
+* Dedicated Prometheus gauge + histogram.
+* Snapshot age & last flush timestamp metrics.
+* Optional automatic periodic compaction based on size or age thresholds.
+
+## Delegation Depth Enforcement (RB12)
+
+RB12 introduces an optional maximum delegation chain length enforced at append time.
+
+Environment Variable:
+* `GAUTH_MAX_DELEGATION_DEPTH` – positive integer; if set and >0, attempts to append a delegation that would increase chain length beyond this value are rejected with error code `delegation_depth_exceeded`.
+
+Metrics:
+* `delegation_depth_exceeded_total` (counter) – increments for each rejected append due to depth.
+* Optional future gauge `delegation_max_depth_observed` – highest depth seen since start (not yet implemented).
+
+Discovery Surface:
+`GET /api/v1/discovery` now includes `max_delegation_depth` when the environment variable is set (absent or null when disabled). Clients can proactively bound delegation creation attempts without trial failures.
+
+Alert Examples (PromQL):
+```
+ALERT DelegationDepthExceededSpike
+	IF increase(gauth_delegation_depth_exceeded_total[30m]) > 5
+	FOR 10m
+	LABELS {severity="warning"}
+	ANNOTATIONS {summary="Delegation depth limit exceed spike", description="More than 5 exceed events in 30m"}
+```
+
+Operational Notes:
+* Depth counting uses chain length (genesis = 1). Clarify off‑by‑one semantics in any consumer dashboards.
+* To stage rollout: leave env unset (disabled) while observing natural depths, then set limit slightly above p99 observed depth.
+* Set to a high temporary value (e.g. 100) to validate error taxonomy path before lowering.
+
+Roadmap:
+* Add max observed depth gauge.
+* Include depth statistics in a governance diagnostics endpoint.
+* Soft warning mode (`GAUTH_DELEGATION_DEPTH_ENFORCE_STRICT=0`) prior to hard enforcement.
+
+
 ### Decision Counters
 Existing decision counters track total decisions, allows, denies, and expression evaluation errors. To enable richer dimensional analysis (gap: action/resource labeling) the system now records labeled decision counters via the metrics interface (`RecordDecision(action, resource, outcome)`) and optional reason-enriched counters (`RecordDecisionWithReason(action, resource, outcome, reason)`).
 
@@ -964,6 +1092,7 @@ GAUTH_RFC0111_POA_V1\n
 to:
 ```
 GAUTH_RFC0111_POA_V2|thr=<threshold>|w=<sorted-weight-map>\n
+GAUTH_RFC0111_POA_V3|tax=1\n  (Introduced with taxonomy expansion RB2; used for single-signer / non multi-sig PoAs when Version >=3. Multi-sig PoAs continue to use V2 domain to minimize downstream changes. Canonical JSON gains optional taxonomy object: {"taxonomy":{"agent_type":...,"sector":...,"action_class":...}} only when non-empty values are provided.)
 ```
 `<sorted-weight-map>` is a comma-separated `signer=weight` list sorted lexicographically. If no valid weight map is configured, only `thr=<threshold>` is embedded (weights segment empty).
 

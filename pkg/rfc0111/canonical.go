@@ -12,8 +12,9 @@ package rfc0111
 //
 // Included fields (in order):
 //   id, version, grantor, grantee, scope (sorted), restrictions (sorted keys, always present),
-//   weights (sorted keys when present), valid_from (RFC3339 UTC), valid_until (RFC3339 UTC), created_at (RFC3339 UTC)
-// Excluded fields: Status (mutable), UpdatedAt (mutable), any future dynamic metadata.
+//   weights (sorted keys when present), taxonomy (agent_type, sector, action_class when Version>=3 and non-empty),
+//   valid_from (RFC3339 UTC), valid_until (RFC3339 UTC), created_at (RFC3339 UTC)
+// Excluded fields: Status (mutable), UpdatedAt (mutable), jurisdiction, witnesses, attestations, revocation fields (mutable legal/evidentiary metadata), any future dynamic metadata.
 // Domain separation: a constant prefix prevents cross‑protocol hash reuse.
 // Weighted / threshold multi-signature mode enables a V2 domain which incorporates
 // threshold and sorted weight mapping into the domain prefix to guarantee digest differentiation when
@@ -30,6 +31,8 @@ import (
 )
 
 const poaDigestDomainV1 = "GAUTH_RFC0111_POA_V1\n" // trailing newline as delimiter (legacy)
+// V3 domain adds taxonomy sentinel to prevent cross-version digest collision when new fields introduced.
+// Format extension: GAUTH_RFC0111_POA_V3|tax=1 (weights/threshold logic still uses V2 multi-sig domain when threshold>1).
 // V2 multi-sig domain (threshold + weights binding). Stable ordering of weights keys.
 // Format: GAUTH_RFC0111_POA_V2|thr=<threshold>|w=<signer1>=<w1>,<signer2>=<w2>,...\n
 
@@ -105,6 +108,45 @@ func CanonicalPOADigest(p *PowerOfAttorney) (string, []byte, error) {
 		}
 		buf.WriteByte('}')
 	}
+	// taxonomy fields (Version >=3) included only when non-empty to avoid inflating legacy POAs.
+	if p.Version >= 3 {
+		includedAny := false
+		// agent_type, sector, action_class in fixed order
+		if p.AgentType != "" || p.Sector != "" || p.ActionClass != "" {
+			buf.WriteByte(',')
+			buf.WriteString("\"taxonomy\":")
+			buf.WriteByte('{')
+			// We emit keys only if value non-empty for minimal encoding; order fixed.
+			firstField := true
+			if p.AgentType != "" {
+				writeJSONStringRaw(&buf, "agent_type"); buf.WriteByte(':'); writeJSONStringRaw(&buf, p.AgentType); firstField = false; includedAny = true
+			}
+			if p.Sector != "" {
+				if !firstField { buf.WriteByte(',') }
+				writeJSONStringRaw(&buf, "sector"); buf.WriteByte(':'); writeJSONStringRaw(&buf, p.Sector); firstField = false; includedAny = true
+			}
+			if p.ActionClass != "" {
+				if !firstField { buf.WriteByte(',') }
+				writeJSONStringRaw(&buf, "action_class"); buf.WriteByte(':'); writeJSONStringRaw(&buf, p.ActionClass); includedAny = true
+			}
+			buf.WriteByte('}')
+		}
+		_ = includedAny // future metrics hook if needed
+	}
+	// Hierarchical fields (Version >=4): parent_poa_id, parent_digest (if present), depth.
+	if p.Version >= 4 {
+		// Emit object only if any hierarchical linkage present OR always? Decide: always emit for structural binding even for root (depth=0).
+		buf.WriteByte(',')
+		buf.WriteString("\"hierarchy\":")
+		buf.WriteByte('{')
+		// parent_poa_id (empty for root): include value to guarantee root canonical differs from pre-v4 digests.
+		writeJSONStringRaw(&buf, "parent_poa_id"); buf.WriteByte(':'); writeJSONStringRaw(&buf, p.ParentPOAID)
+		buf.WriteByte(',')
+		writeJSONStringRaw(&buf, "parent_digest"); buf.WriteByte(':'); writeJSONStringRaw(&buf, p.ParentDigest)
+		buf.WriteByte(',')
+		writeJSONStringRaw(&buf, "depth"); buf.WriteByte(':'); writeJSONStringRaw(&buf, fmt.Sprintf("%d", p.Depth))
+		buf.WriteByte('}')
+	}
 	// times (writeJSONStringField will prepend comma automatically)
 	writeJSONStringField(&buf, "valid_from", vf.Format(time.RFC3339), false)
 	writeJSONStringField(&buf, "valid_until", vu.Format(time.RFC3339), false)
@@ -112,14 +154,23 @@ func CanonicalPOADigest(p *PowerOfAttorney) (string, []byte, error) {
 	buf.WriteByte('}')
 
 	canonical := buf.Bytes()
-	// Domain selection: V2 if threshold>1 (multi-signature context) else V1.
+	// Domain selection hierarchy:
+	//   V4 hierarchical sentinel when Version>=4 and not multi-sig (single-sig taxonomy/hierarchy path)
+	//   V2 multi-sig domain when threshold>1 (overrides hierarchical/taxonomy to retain stable multi-sig semantics)
+	//   V3 taxonomy sentinel when Version>=3 (non hierarchical/non multi-sig)
+	//   V1 legacy otherwise.
 	domain := poaDigestDomainV1
-	if p.Threshold > 1 && len(p.Signers) > 0 {
+	if p.Version >= 4 && !(p.Threshold > 1 && len(p.Signers) > 0) {
+		// Hierarchical+taxonomy (if taxonomy present). Sentinel indicates presence of hierarchy fields in canonical JSON.
+		domain = "GAUTH_RFC0111_POA_V4|hier=1\n"
+	} else if p.Version >= 3 && !(p.Threshold > 1 && len(p.Signers) > 0) {
+		// Taxonomy-only upgrade path (non multi-sig & non hierarchical)
+		domain = "GAUTH_RFC0111_POA_V3|tax=1\n"
+	}
+	if p.Threshold > 1 && len(p.Signers) > 0 { // multi-sig overrides other domains
 		weightParts := []string{}
 		if len(p.Weights) > 0 {
-			for k, v := range p.Weights {
-				weightParts = append(weightParts, fmt.Sprintf("%s=%d", k, v))
-			}
+			for k, v := range p.Weights { weightParts = append(weightParts, fmt.Sprintf("%s=%d", k, v)) }
 			sort.Strings(weightParts)
 		}
 		domain = fmt.Sprintf("GAUTH_RFC0111_POA_V2|thr=%d|w=%s\n", p.Threshold, strings.Join(weightParts, ","))

@@ -20,6 +20,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/tracing"
 	ledger "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger"
 )
 
@@ -50,6 +51,14 @@ type Manager struct {
 // Intended usage: downstream transparency modules auto-sign tree heads when keys change.
 // Panics inside the callback are recovered and logged.
 var OnKeyRotated func(prev, curr *Key)
+
+// RotationTracerProvider optionally enables RB9 tracing spans for key rotation operations.
+// It is set by the server initialization when tracing is enabled. If nil, rotation operations
+// proceed without span creation. Operation name: "rotation.perform".
+var RotationTracerProvider *tracing.TracerProvider
+
+// SetRotationTracerProvider assigns the tracer provider used for key rotation spans.
+func SetRotationTracerProvider(tp *tracing.TracerProvider) { RotationTracerProvider = tp }
 
 // NewManager constructs a manager with given key lifetime.
 // NewManager constructs a manager with given key lifetime.
@@ -170,7 +179,19 @@ func (m *Manager) Rotate() (*Key, error) {
 	m.mu.Lock()
 	prev := m.active
 	fmt.Fprintf(os.Stderr, "[crypto] Rotate called. Previous key: %v\n", prev)
+	// RB9 tracing instrumentation: start span (sample logic handled by provider upstream)
+	var span *tracing.Span
+	if RotationTracerProvider != nil {
+		ctx := context.Background()
+		_, span = RotationTracerProvider.StartSpan(ctx, "rotation.perform")
+		if span != nil {
+			if prev != nil { span.SetTag("prev_kid", prev.ID) }
+			span.SetTag("ttl_hours", int(m.ttl.Hours()))
+			span.SetTag("history_size", len(m.history))
+		}
+	}
 	if err := m.rotateLocked(); err != nil {
+		if span != nil { span.SetTag("error", err.Error()); span.End() }
 		m.mu.Unlock()
 		fmt.Fprintf(os.Stderr, "[crypto] Rotate failed: %v\n", err)
 		return nil, err
@@ -178,6 +199,10 @@ func (m *Manager) Rotate() (*Key, error) {
 	curr := m.active
 	m.mu.Unlock()
 	fmt.Fprintf(os.Stderr, "[crypto] Rotate succeeded. New key: %v\n", curr)
+	if span != nil {
+		span.SetTag("new_kid", curr.ID)
+		span.End()
+	}
 	if OnKeyRotated != nil {
 		func() {
 			defer func() {
@@ -321,6 +346,18 @@ func (m *Manager) appendLedgerRotation(prev, curr *Key) {
 	if m.ledgerStore == nil || curr == nil {
 		return
 	}
+	// RB9: tracing span for rotation.append (distinct from rotation.perform) to capture ledger emission timing & attributes.
+	var span *tracing.Span
+	if RotationTracerProvider != nil {
+		ctx := context.Background()
+		_, span = RotationTracerProvider.StartSpan(ctx, "rotation.append")
+		if span != nil {
+			// new_key_set_size approximated as history length + active (curr)
+			span.SetTag("new_key_set_size", len(m.history)+1)
+			span.SetTag("new_kid", curr.ID)
+			if prev != nil { span.SetTag("prev_kid", prev.ID) }
+		}
+	}
 	meta := map[string]any{
 		"ttl_hours":    int(m.ttl.Hours()),
 		"history_size": len(m.history),
@@ -339,7 +376,11 @@ func (m *Manager) appendLedgerRotation(prev, curr *Key) {
 		Metadata: meta,
 	}); err != nil {
 		fmt.Fprintf(os.Stderr, "[crypto] ledger append error: %v\n", err)
+		if span != nil { span.SetTag("error", err.Error()) }
+	} else if span != nil {
+		span.SetTag("append_success", true)
 	}
+	if span != nil { span.End() }
 }
 
 // Active returns current active key.

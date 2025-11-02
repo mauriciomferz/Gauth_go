@@ -6,7 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"strconv"
 	"time"
+
+	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
+	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc"
 )
 
 // Delegation status constants
@@ -15,6 +20,7 @@ const (
 	StatusSuspended  = "suspended"
 	StatusTerminated = "terminated"
 	StatusPending    = "pending"
+	StatusPartiallyRevoked = "partially_revoked" // scope reduced without full termination
 )
 
 // Delegation represents a POA/delegation grant from Subject to Delegate over Scope until ExpiresAt.
@@ -44,6 +50,16 @@ type Revocation struct {
 // Chain maintains ordered delegations.
 type Chain struct{ items []Delegation }
 
+// currentMaxDelegationDepth parses GAUTH_MAX_DELEGATION_DEPTH each call to allow dynamic test changes.
+// Invalid or empty values disable enforcement (return 0).
+func currentMaxDelegationDepth() int64 {
+	raw := os.Getenv("GAUTH_MAX_DELEGATION_DEPTH")
+	if raw == "" { return 0 }
+	v, err := strconv.ParseInt(raw, 10, 64)
+	if err != nil || v <= 0 { return 0 }
+	return v
+}
+
 func NewChain() *Chain { return &Chain{items: make([]Delegation, 0)} }
 
 // Append adds a new delegation computing its hash and linking previous.
@@ -64,6 +80,13 @@ func (c *Chain) Append(d Delegation) (Delegation, error) {
 		return Delegation{}, errors.New("invalid status")
 	}
 	d.IssuedAt = time.Now().UTC()
+	// Enforce max depth (chain length) if configured (>0)
+	if md := currentMaxDelegationDepth(); md > 0 {
+		newDepth := int64(len(c.items) + 1) // depth defined as number of chain entries after append
+		if newDepth > md {
+			return Delegation{}, rfc.New(rfc.ErrDelegationDepthExceeded, fmt.Sprintf("delegation depth %d exceeds max %d", newDepth, md))
+		}
+	}
 	if len(c.items) > 0 {
 		d.PrevHash = c.items[len(c.items)-1].Hash
 	}
@@ -73,6 +96,30 @@ func (c *Chain) Append(d Delegation) (Delegation, error) {
 	}
 	d.Hash = h
 	c.items = append(c.items, d)
+	return d, nil
+}
+
+// AppendWithMetrics is an optional helper allowing instrumentation of depth exceeded events.
+func (c *Chain) AppendWithMetrics(d Delegation, m metrics.Metrics) (Delegation, error) {
+	if d.ID == "" {
+		return Delegation{}, errors.New("delegation id required")
+	}
+	d.IssuedAt = time.Now().UTC()
+	if md := currentMaxDelegationDepth(); md > 0 {
+		newDepth := int64(len(c.items) + 1)
+		if newDepth > md {
+			if m != nil { m.IncDelegationDepthExceeded() }
+			return Delegation{}, rfc.New(rfc.ErrDelegationDepthExceeded, fmt.Sprintf("delegation depth %d exceeds max %d", newDepth, md))
+		}
+	}
+	if len(c.items) > 0 { d.PrevHash = c.items[len(c.items)-1].Hash }
+	h, err := hashDelegation(d)
+	if err != nil { return Delegation{}, err }
+	d.Hash = h
+	c.items = append(c.items, d)
+	if m != nil {
+		m.SetMaxObservedDelegationDepth(len(c.items))
+	}
 	return d, nil
 }
 
@@ -126,7 +173,7 @@ func ValidateScopeNarrowing(parent, child Delegation) error {
 // validDelegationStatus reports whether status value is supported.
 func validDelegationStatus(s string) bool {
 	switch s {
-	case StatusActive, StatusSuspended, StatusTerminated, StatusPending:
+	case StatusActive, StatusSuspended, StatusTerminated, StatusPending, StatusPartiallyRevoked:
 		return true
 	default:
 		return false
@@ -146,6 +193,15 @@ func ValidateDelegationStatusTransition(old, new string) error {
 	}
 	if old == StatusActive && new == StatusPending {
 		return errors.New("cannot revert to pending from active")
+	}
+	// partial revocation rules:
+	// Allow active|suspended -> partially_revoked (scope reduction event)
+	// Disallow transitions out of partially_revoked except termination (one-way narrowing)
+	if old == StatusPartiallyRevoked && new != StatusPartiallyRevoked && new != StatusTerminated {
+		return errors.New("partially_revoked delegations can only terminate")
+	}
+	if (old == StatusActive || old == StatusSuspended) && new == StatusPartiallyRevoked {
+		return nil
 	}
 	return nil
 }

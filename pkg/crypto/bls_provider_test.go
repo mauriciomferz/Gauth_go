@@ -1,8 +1,8 @@
 package crypto
 
 import (
-    "encoding/base64"
-    "testing"
+	"encoding/base64"
+	"testing"
 )
 
 func TestBLSProvider_SignAndVerify(t *testing.T) {

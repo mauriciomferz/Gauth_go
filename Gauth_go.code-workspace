@@ -1,0 +1,74 @@
+{
+	"folders": [
+		{
+			"path": "Gauth_go"
+		},
+		{
+			"path": "api"
+		},
+		{
+			"path": "artifacts"
+		},
+		{
+			"path": "bin"
+		},
+		{
+			"path": "build"
+		},
+		{
+			"path": "cmd"
+		},
+		{
+			"path": "config"
+		},
+		{
+			"path": "conformance"
+		},
+		{
+			"path": "deployments"
+		},
+		{
+			"path": "docs"
+		},
+		{
+			"path": "examples"
+		},
+		{
+			"path": "internal"
+		},
+		{
+			"path": "monitoring"
+		},
+		{
+			"path": "node_modules"
+		},
+		{
+			"path": "pkg"
+		},
+		{
+			"path": "playwright-report"
+		},
+		{
+			"path": "schema"
+		},
+		{
+			"path": "scripts"
+		},
+		{
+			"path": "test"
+		},
+		{
+			"path": "test-results"
+		},
+		{
+			"path": "tmp"
+		},
+		{
+			"path": "ui-tests"
+		},
+		{
+			"path": "web"
+		}
+	],
+	"settings": {}
+}

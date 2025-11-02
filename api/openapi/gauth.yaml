@@ -1,0 +1,1672 @@
+openapi: 3.1.0
+info:
+  title: GAuth Learning Lab API
+  version: 1.0.0
+  description: >-
+    RFC-0150 compliant authorization framework API for learning, experimentation, and compliance validation.
+    This comprehensive implementation provides endpoints for evaluation and demonstration of GAuth concepts,
+    authorization pattern testing, and RFC-0150 compliance verification.
+    
+    **Learning Features:**
+    - Interactive authorization pattern evaluation
+    - RFC-0150 compliance testing and validation
+    - Educational sandbox environments for experimentation
+    - Comprehensive audit trails and transparency logs
+    
+    **Implementation Status:**
+    - Core Authorization: ✅ Complete
+    - Delegation & PoA: ✅ Complete  
+    - Revocation & Lifecycle: ✅ Complete
+    - Audit & Transparency: ✅ Complete
+    - Cryptographic Standards: ✅ Complete
+    - API & Integration: ✅ Complete
+externalDocs:
+  description: GAuth Learning Lab Documentation & RFC-0150 Compliance Guide
+  url: https://github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/tree/main/docs
+tags:
+  - name: learning
+    description: Educational and learning path management
+  - name: compliance
+    description: RFC-0150 compliance testing and validation
+  - name: patterns
+    description: Authorization pattern library and experimentation
+  - name: playground
+    description: Safe sandbox for testing authorization scenarios  
+  - name: validation
+    description: Comprehensive validation suite and testing tools
+  - name: discovery
+    description: Capability & algorithm discovery
+  - name: crypto
+    description: Cryptographic aggregation & proof-of-possession
+  - name: rotation
+    description: Key rotation & multi-signature artifacts
+  - name: revocation
+    description: Token revocation transparency proofs
+  - name: capability
+    description: Capability registry anchoring
+  - name: attestation
+    description: Model limits attestation & verification
+  - name: policy
+    description: Policy manifest retrieval
+  - name: authorization
+    description: Composite human→human→AI delegation & authority artifacts
+  - name: poa
+    description: Power of Attorney (PoA) lifecycle, multi-signature preparation/finalization, extended token issuance
+  - name: audit
+    description: Tamper-evident hash-chain audit ledger (append-only) listing, export & integrity verification
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+paths:
+  /api/v1/learning/progress:
+    get:
+      summary: Get learning progress for current session
+      tags: [learning]
+      operationId: getLearningProgress
+      description: |
+        Returns the user's progress through the GAuth learning modules including completed concepts,
+        patterns explored, experiments conducted, and validations passed.
+      responses:
+        '200':
+          description: Learning progress data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  concepts_completed: { type: integer }
+                  patterns_explored: { type: integer }
+                  experiments_conducted: { type: integer }
+                  validations_passed: { type: integer }
+                  total_progress_percent: { type: integer }
+                  recommended_next_steps: { type: array, items: { type: string } }
+    
+  /api/v1/compliance/rfc0150/validate:
+    post:
+      summary: Run RFC-0150 compliance validation
+      tags: [compliance]
+      operationId: validateRFC0150Compliance
+      description: |
+        Executes comprehensive RFC-0150 compliance testing including core authorization model,
+        delegation protocols, revocation mechanisms, audit requirements, and API completeness.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                test_categories: 
+                  type: array
+                  items: 
+                    type: string
+                    enum: [core_authorization, delegation_poa, revocation_lifecycle, audit_transparency, crypto_standards, api_integration]
+                include_performance_tests: { type: boolean }
+                generate_report: { type: boolean }
+      responses:
+        '200':
+          description: Compliance validation results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  overall_score: { type: integer }
+                  compliance_status: { type: string }
+                  tests_passed: { type: integer }
+                  tests_failed: { type: integer }
+                  warnings: { type: integer }
+                  total_tests: { type: integer }
+                  category_results: { type: object }
+                  recommendations: { type: array, items: { type: string } }
+    
+  /api/v1/patterns/library:
+    get:
+      summary: Get available authorization patterns
+      tags: [patterns]
+      operationId: getAuthorizationPatterns
+      description: |
+        Returns the library of available authorization patterns for learning and experimentation,
+        categorized by complexity and use case.
+      responses:
+        '200':
+          description: Authorization patterns library
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  simple_delegation: { type: array, items: { type: object } }
+                  hierarchical: { type: array, items: { type: object } }
+                  revocation: { type: array, items: { type: object } }
+                  multi_signature: { type: array, items: { type: object } }
+                  total_patterns: { type: integer }
+  
+  /api/v1/patterns/execute:
+    post:
+      summary: Execute authorization pattern in sandbox
+      tags: [patterns]
+      operationId: executeAuthorizationPattern
+      description: |
+        Executes a selected authorization pattern in a safe sandbox environment,
+        allowing users to observe the delegation flow and authorization decisions.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pattern_id: { type: string }
+                participants: { type: array, items: { type: string } }
+                scenario_parameters: { type: object }
+                trace_execution: { type: boolean }
+      responses:
+        '200':
+          description: Pattern execution results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  execution_trace: { type: array, items: { type: object } }
+                  authorization_decisions: { type: array, items: { type: object } }
+                  audit_entries: { type: array, items: { type: object } }
+                  learning_insights: { type: array, items: { type: string } }
+  
+  /api/v1/playground/scenarios:
+    post:
+      summary: Create and run custom authorization scenario
+      tags: [playground]
+      operationId: runPlaygroundScenario
+      description: |
+        Allows users to create custom authorization scenarios for testing and learning,
+        providing a safe sandbox environment for experimentation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                scenario_type: { type: string, enum: [simple_auth, delegation_chain, multi_sig, revocation_cascade] }
+                participants: { type: array, items: { type: object } }
+                actions_resources: { type: object }
+                test_cases: { type: array, items: { type: object } }
+      responses:
+        '200':
+          description: Scenario execution results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  scenario_id: { type: string }
+                  execution_results: { type: array, items: { type: object } }
+                  authorization_flow: { type: object }
+                  compliance_analysis: { type: object }
+                  educational_notes: { type: array, items: { type: string } }
+                  
+  /api/v1/validation/comprehensive:
+    post:
+      summary: Run comprehensive validation suite
+      tags: [validation]
+      operationId: runComprehensiveValidation
+      description: |
+        Executes the full validation suite including functional, security, and performance tests
+        to ensure complete RFC-0150 compliance and implementation correctness.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                test_suites: 
+                  type: array
+                  items:
+                    type: string
+                    enum: [functional, security, performance, integration]
+                generate_certificate: { type: boolean }
+                detailed_reporting: { type: boolean }
+      responses:
+        '200':
+          description: Comprehensive validation results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  validation_id: { type: string }
+                  overall_status: { type: string }
+                  test_results: { type: object }
+                  compliance_certificate: { type: string }
+                  detailed_report_url: { type: string }
+                  recommendations: { type: array, items: { type: string } }
+                  
+  /api/v1/crypto/bls/aggregate:
+    post:
+      summary: Aggregate BLS signatures
+      tags: [crypto]
+      operationId: postBLSAggregate
+      description: |
+        Aggregates multiple BLS12-381 signatures over identical message bytes (domain-separated internally).
+        Optional require_pop flag enforces proof-of-possession (PoP) issuance for each participant prior to aggregation.
+      parameters:
+        - in: query
+          name: require_pop
+          schema: { type: boolean }
+          description: When true, server returns PoP challenges instead of final aggregate; client must POST to /api/v1/crypto/bls/pop/verify.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BLSAggregateRequest'
+      responses:
+        '200': { $ref: '#/components/responses/BLSAggregateOk' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/crypto/bls/pop/verify:
+    post:
+      summary: Verify BLS proof-of-possession and finalize aggregate
+      tags: [crypto]
+      operationId: postBLSPoPVerify
+      description: |
+        Verifies submitted PoP signatures for each participant and returns the finalized aggregate signature when all proofs validate.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BLSPoPVerifyRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/BLSPoPVerifyOk' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/anchor/revocation/emit:
+    post:
+      summary: Emit external revocation anchor receipt
+      tags: [revocation]
+      operationId: postRevocationAnchorEmit
+      description: |
+        Anchors the current revocation Merkle root (chain head) to an external timestamp / transparency service.
+        Idempotent within identical head hash; returns existing receipt when already anchored.
+      responses:
+        '200': { $ref: '#/components/responses/RevocationAnchorEmitOk' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/model/limits/attestation/verify:
+    post:
+      summary: Verify model limits attestation (domain-separated signature)
+      tags: [attestation]
+      operationId: postModelLimitsAttestationVerify
+      description: |
+        Reconstructs unsigned attestation JSON, prepends domain separation prefix `GAUTH_MODEL_LIMIT_ATTEST:` and verifies Ed25519 signature.
+        Returns validity and combined hash linking snapshot, audit, and anchor chain heads.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ModelLimitsAttestationVerifyRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/ModelLimitsAttestationVerifyOk' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/beta/capabilities/anchor/metrics/prometheus:
+    get:
+      summary: Capability anchor custom Prometheus exposition
+      tags: [capability]
+      operationId: getCapabilityAnchorMetricsPrometheus
+      description: |
+        Emits capability anchor counters, age/stale gauges, emission interval HELP/TYPE lines, jitter gauge, and (when enabled) notarization latency identifiers.
+        Use when scraping full /metrics registry is impractical; bucket lines for histograms appear only in /metrics.
+      responses:
+        '200':
+          description: Text exposition
+          content:
+            text/plain:
+              schema: { type: string }
+  /api/v1/beta/capabilities/anchor/external/verify:
+    get:
+      summary: Verify latest external capability anchor receipt
+      tags: [capability]
+      operationId: getExternalCapabilityAnchorVerify
+      description: |
+        Performs provider-specific verification on latest external capability anchor receipt. Returns verified=true if successful or empty=true if no receipt present.
+      responses:
+        '200': { $ref: '#/components/responses/ExternalCapabilityAnchorVerifyOk' }
+  /api/v1/beta/capabilities/anchor/external/receipts/verify:
+    get:
+      summary: Verify external capability anchor receipt chain integrity
+      tags: [capability]
+      operationId: getExternalCapabilityAnchorReceiptsVerify
+      description: |
+        Recomputes hash-chain (prev_hash + canonical receipt) linkage for persisted external receipts. Reports status ok|mismatch|empty and mismatch index diagnostics.
+      responses:
+        '200': { $ref: '#/components/responses/ExternalCapabilityAnchorReceiptsVerifyOk' }
+  /api/v1/beta/discovery:
+    get:
+      summary: Discovery metadata
+      tags: [discovery]
+      operationId: getDiscovery
+      description: |
+        Returns server capability discovery including supported algorithms and delegation limits.
+        Use this prior to constructing artifacts that depend on algorithm suites or maximum delegation depth.
+      responses:
+        '200':
+          description: Discovery document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discovery'
+  /api/v1/policy/manifest:
+    get:
+      summary: Signed policy manifest
+      tags: [policy]
+      operationId: getPolicyManifest
+      parameters:
+        - $ref: '#/components/parameters/IfNoneMatch'
+      description: |
+        Retrieves the currently active signed policy manifest governing capability usage and operational guardrails.
+        Supports conditional retrieval via ETag. For validation guidance see docs/ADR_POLICY_MANIFEST.md (if present).
+      responses:
+        '200': { $ref: '#/components/responses/PolicyManifestOk' }
+        '304': { $ref: '#/components/responses/NotModified' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/v1/token/revocation/head:
+    get:
+      summary: Current revocation chain head
+      tags: [revocation]
+      operationId: getRevocationHead
+      description: |
+        Provides the latest revocation log size and head hash enabling clients to detect new revocations
+        and request consistency or inclusion proofs. Poll and compare head_hash to track updates.
+      responses:
+        '200': { $ref: '#/components/responses/RevocationHeadOk' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/token/revocation/proof:
+    get:
+      summary: Merkle inclusion proof for a revocation event
+      tags: [revocation]
+      operationId: getRevocationProof
+      parameters:
+        - $ref: '#/components/parameters/RevocationId'
+        - $ref: '#/components/parameters/RevocationIndex'
+        - $ref: '#/components/parameters/RevocationHash'
+      description: |
+        Returns a Merkle inclusion proof for a specific revocation event. Provide one of id, index, or hash.
+        Proof structure allows local validation against a previously fetched head hash ensuring tamper-evidence.
+      responses:
+        '200': { $ref: '#/components/responses/RevocationProofOk' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/token/revocation/consistency:
+    get:
+      summary: Consistency proof from start index 0 to current
+      tags: [revocation]
+      operationId: getRevocationConsistency
+      parameters:
+        - $ref: '#/components/parameters/RevocationStart'
+      description: |
+        Supplies a consistency proof between an earlier log size and the current state. Use after downtime
+        or to validate append-only integrity when syncing missed revocation events.
+      responses:
+        '200': { $ref: '#/components/responses/ConsistencyProofOk' }
+  /api/v1/token/revocation/consistency_sizes:
+    get:
+      summary: Sizes-based consistency stub
+      tags: [revocation]
+      operationId: getRevocationConsistencySizes
+      parameters:
+        - $ref: '#/components/parameters/RevocationOlder'
+        - $ref: '#/components/parameters/RevocationNewer'
+      description: |
+        Lightweight consistency stub returning expected proof sizes for older/newer pairs prior to requesting
+        full proofs. Useful for planning bandwidth in constrained environments.
+      responses:
+        '200': { $ref: '#/components/responses/ConsistencySizesOk' }
+  /api/v1/capability/anchor:
+    post:
+      summary: Anchor current capability registry hash externally
+      tags: [capability]
+      operationId: postCapabilityAnchor
+      description: |
+        Attempts to anchor the current capability registry hash to an external trust system (e.g., blockchain or
+        timestamp authority). Enhances non-repudiation and historical audit. See docs/ADR_CAPABILITY_ANCHOR.md for design rationale.
+      responses:
+        '200': { $ref: '#/components/responses/CapabilityAnchorOk' }
+  /api/v1/capability/anchor/latest:
+    get:
+      summary: Latest capability registry anchor artifact
+      tags: [capability]
+      operationId: getCapabilityAnchorLatest
+      description: |
+        Returns the most recent successful external anchor artifact for the capability registry including provider
+        metadata and anchoring timestamp for audit chain reconstruction.
+      responses:
+        '200': { $ref: '#/components/responses/CapabilityAnchorOk' }
+  /api/v1/model/limits/attestation:
+    get:
+      summary: Stream model limits attestations (SSE)
+      tags: [attestation]
+      operationId: streamModelLimitsAttestation
+      description: |
+        Server-Sent Events stream emitting model limits attestation updates (e.g., token caps, concurrency, safety flags).
+        Clients should validate domain signatures (see verify endpoint) and apply changes atomically.
+      responses:
+        '200':
+          description: Server-sent events stream
+  /api/v1/model/limits/verify:
+    post:
+      summary: Verify model limits attestation
+      tags: [attestation]
+      operationId: postVerifyModelLimitsAttestation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModelLimitsVerifyRequest'
+      description: |
+        Verifies integrity and domain signature of a model limits attestation object. Returns success and diagnostic
+        fields indicating signature and domain separation validity. Use this before enforcing received limits.
+      responses:
+        '200': { $ref: '#/components/responses/ModelLimitsVerifyOk' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/rotation/summary:
+    get:
+      summary: Current rotation summary (multi-sig)
+      tags: [rotation]
+      operationId: getRotationSummary
+      description: |
+        Legacy multi-signature rotation summary (unweighted). Provides active key identifier, threshold, and previous hash pointer.
+        Prefer /api/v1/rotation/summary/v2 for weighted artifacts and enhanced continuity semantics.
+      responses:
+        '200': { $ref: '#/components/responses/RotationSummaryOk' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/rotation/summary/v2:
+    get:
+      summary: Weighted multi-sig rotation summary (version 2 artifact)
+      operationId: getRotationSummaryV2
+      description: |
+        Returns the current weighted multi-signature rotation artifact (V2) including per-algorithm verified
+        weights, threshold status, and continuity hashes. See docs/ROTATION_V2_DEMO.md for usage, metrics, and
+        security considerations. Prometheus metrics: gauth_rotation_v2_verified_weight, gauth_rotation_v2_verified_weight_alg,
+        gauth_rotation_v2_threshold_weight, gauth_rotation_v2_signature_failures_total, gauth_rotation_v2_continuity_updates_total.
+      tags: [rotation]
+      responses:
+        '200': { $ref: '#/components/responses/RotationSummaryV2Ok' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/authorization/composite:
+    get:
+      summary: Current composite authorization artifact
+      tags: [authorization]
+      operationId: getCompositeAuthorization
+      description: |
+        Returns the active composite authorization artifact capturing multi-level delegation (e.g., CEO → CFO → AI system),
+        scope, powers, decision/escalation matrices, transaction limits, dual-control requirements, and accountability chain.
+        See examples/composite_authorization_README.md for structural guidance.
+      responses:
+        '200': { $ref: '#/components/responses/CompositeAuthorizationOk' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    post:
+      summary: Submit & activate new composite authorization artifact
+      tags: [authorization]
+      operationId: postCompositeAuthorization
+      description: |
+        Accepts a proposed composite authorization artifact. Performs structural validation (required sections),
+        optional signature / provenance checks (if enabled), and activation rules (e.g., non-overlapping validity window).
+        Returns the persisted artifact envelope and activation status.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompositeAuthorizationArtifact'
+            examples:
+              sample:
+                summary: Minimal composite authorization example
+                value:
+                  ai_system_id: enterprise_financial_ai_v1
+                  authorizing_party:
+                    id: enterprise_corp_001
+                    name: Enterprise Financial Corporation
+                    type: corporation
+                  authorization_grant:
+                    type: general
+                    scope: [financial_operations]
+                    valid_from: '2025-01-01T00:00:00Z'
+                    valid_until: '2025-12-31T23:59:59Z'
+                  powers_granted:
+                    basic_powers: [financial_operations]
+                  decision_authority:
+                    autonomous_decisions: [routine_invoice_approval]
+                  transaction_rights:
+                    allowed_transaction_types: [vendor_payments]
+                  action_permissions:
+                    system_actions: [generate_reports]
+                  dual_control_principle:
+                    enabled: true
+                  authorization_cascade:
+                    accountability_chain: [ceo_001, cfo_001, enterprise_financial_ai_v1]
+                  expires_at: '2025-12-31T23:59:59Z'
+      responses:
+        '201': { $ref: '#/components/responses/CompositeAuthorizationCreated' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/poa/prepare:
+    post:
+      summary: Prepare draft PoA (multi-signature pre-image)
+      tags: [poa]
+      operationId: postPoAPrepare
+      description: |
+        Creates a draft PoA artifact (status=draft) capturing grantor, grantee, scope, validity window and optional witnesses/attestations.
+        Returns draft with canonical digest version and ready for signature collection via /api/v1/poa/{id}/sign.
+        Replay Protection: Duplicate signature (same canonical digest + signer key id) submissions will be rejected with 409 reason signature_replay_detected.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PoAPrepareRequest' }
+      responses:
+        '201': { $ref: '#/components/responses/PoAOk' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/poa/issue:
+    post:
+      summary: Issue active PoA directly (single-step)
+      tags: [poa]
+      operationId: postPoAIssue
+      description: |
+        Issues an active PoA (status=active) without multi-signature preparation phase (single signer flow).
+        Appends issuance event to audit ledger and returns active PoA artifact envelope.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PoAIssueRequest' }
+      responses:
+        '201': { $ref: '#/components/responses/PoAOk' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/poa/{id}/sign:
+    post:
+      summary: Append signer signature to draft PoA
+      tags: [poa]
+      operationId: postPoASign
+      description: |
+        Adds a signature from an authorized witness / participant to a draft PoA. Signatures contribute toward multi-signature thresholds.
+        Returns updated PoA including collected signatures and current weight/threshold status.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PoASignRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/PoAOk' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/poa/{id}/finalize:
+    post:
+      summary: Finalize draft PoA to active after threshold signatures
+      tags: [poa]
+      operationId: postPoAFinalize
+      description: |
+        Validates collected multi-signatures meet configured threshold/weight and transitions status from draft to active.
+        Replay Protection: A previously recorded signature (canonical digest + signer id) triggers a 409 conflict (reason signature_replay_detected) and does not increment signatures_collected.
+        Appends finalize event to audit ledger and returns active PoA artifact envelope.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/PoAOk' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/poa/{id}:
+    get:
+        '409': { $ref: '#/components/responses/Conflict' }
+      summary: Retrieve PoA artifact by id
+      tags: [poa]
+      operationId: getPoA
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/PoAOk' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/poa/{id}/revoke:
+    post:
+      summary: Revoke active PoA
+      tags: [poa]
+      operationId: postPoARevoke
+      description: |
+        Updates status to revoked with reason metadata and appends revocation event to audit ledger.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PoARevokeRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/PoAOk' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    /api/v1/poa/{id}/revocation/initiate:
+      post:
+        summary: Initiate dual-control PoA revocation workflow
+        tags: [poa]
+        operationId: postPoARevocationInitiate
+        description: |
+          Starts a dual-control revocation workflow (suspends PoA) requiring subsequent approvals to finalize.
+          Supports count-based quorum (GAUTH_REVOCATION_REQUIRED_COUNT) or weight-based quorum (GAUTH_REVOCATION_REQUIRED_WEIGHT).
+          Returns updated PoA with pending_revocation metadata. Unauthorized initiators receive 401.
+        parameters:
+          - in: path
+            name: id
+            required: true
+            schema: { type: string }
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PoARevocationInitiateRequest' }
+        responses:
+          '200': { $ref: '#/components/responses/PoAOk' }
+          '400': { $ref: '#/components/responses/BadRequest' }
+          '401': { $ref: '#/components/responses/Unauthorized' }
+          '404': { $ref: '#/components/responses/NotFound' }
+          '409': { $ref: '#/components/responses/Conflict' }
+          '500': { $ref: '#/components/responses/InternalError' }
+    /api/v1/poa/{id}/revocation/approve:
+      post:
+        summary: Approve pending dual-control PoA revocation
+        tags: [poa]
+        operationId: postPoARevocationApprove
+        description: |
+          Records an approval toward the revocation quorum. Duplicates are idempotent.
+          On quorum satisfaction (count or weight) the PoA transitions to revoked state.
+        parameters:
+          - in: path
+            name: id
+            required: true
+            schema: { type: string }
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PoARevocationApproveRequest' }
+        responses:
+          '200': { $ref: '#/components/responses/PoAOk' }
+          '400': { $ref: '#/components/responses/BadRequest' }
+          '401': { $ref: '#/components/responses/Unauthorized' }
+          '404': { $ref: '#/components/responses/NotFound' }
+          '409': { $ref: '#/components/responses/Conflict' }
+          '500': { $ref: '#/components/responses/InternalError' }
+    /api/v1/poa/{id}/revocation/cancel:
+      post:
+        summary: Cancel pending dual-control PoA revocation
+        tags: [poa]
+        operationId: postPoARevocationCancel
+        description: |
+          Cancels a pending revocation (before quorum) returning PoA to active status. Only grantor or controllers may cancel.
+        parameters:
+          - in: path
+            name: id
+            required: true
+            schema: { type: string }
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PoARevocationCancelRequest' }
+        responses:
+          '200': { $ref: '#/components/responses/PoAOk' }
+          '400': { $ref: '#/components/responses/BadRequest' }
+          '401': { $ref: '#/components/responses/Unauthorized' }
+          '404': { $ref: '#/components/responses/NotFound' }
+          '409': { $ref: '#/components/responses/Conflict' }
+          '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/poa/{id}/suspend:
+    post:
+      summary: Suspend active PoA (temporary hold)
+      tags: [poa]
+      operationId: postPoASuspend
+      description: |
+        Transitions status from active to suspended; can be reactivated later (future endpoint). Appends suspend event to audit ledger.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/PoAOk' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/poa/{id}/terminate:
+    post:
+      summary: Terminate PoA (non-revocation end state)
+      tags: [poa]
+      operationId: postPoATerminate
+      description: |
+        Transitions status from active or suspended to terminated (distinct from revoked). Appends terminate event to audit ledger.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/PoAOk' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/poa/{id}/token:
+    post:
+      summary: Issue extended integrity token bound to PoA
+      tags: [poa]
+      operationId: postPoAToken
+      description: |
+        Issues a short-lived JWT embedding claims: poa_id, poa_digest, poa_version, token_version. Validates PoA status & time window.
+        Appends token issuance event to audit ledger.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '201': { $ref: '#/components/responses/PoATokenOk' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/poa/graph:
+    get:
+      summary: Export hierarchical delegation graph
+      tags: [poa]
+      operationId: getPoAGraph
+      description: |
+        Returns a flattened set of nodes representing current PoA hierarchical relationships.
+        Each node includes id, parent (if any), depth (0=root), status, and scope preview.
+        Intended for observability and governance analytics (max observed depth also tracked via metrics).
+      responses:
+        '200': { $ref: '#/components/responses/PoAGraphOk' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/enforce:
+    post:
+      summary: Enforce action under PoA scope
+      tags: [poa]
+      operationId: postEnforce
+      description: |
+        Evaluates a requested action against PoA scope, status, temporal validity, and jurisdiction rules.
+        Persists decision with PoA linkage and appends enforcement event to audit ledger.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EnforcementRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/EnforcementOk' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/audit/ledger:
+    get:
+      summary: List audit ledger entries
+      tags: [audit]
+      operationId: getAuditLedger
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer, default: 100 }
+        - in: query
+          name: offset
+          schema: { type: integer, default: 0 }
+      responses:
+        '200': { $ref: '#/components/responses/AuditLedgerListOk' }
+  /api/v1/audit/ledger/{index}:
+    get:
+      summary: Retrieve audit ledger entry by index
+      tags: [audit]
+      operationId: getAuditLedgerEntry
+      parameters:
+        - in: path
+          name: index
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { $ref: '#/components/responses/AuditLedgerEntryOk' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/audit/ledger/export:
+    get:
+      summary: Export audit ledger entries (NDJSON)
+      tags: [audit]
+      operationId: getAuditLedgerExport
+      responses:
+        '200':
+          description: NDJSON stream of entries
+          content:
+            application/x-ndjson:
+              schema: { type: string }
+  /api/v1/audit/ledger/verify:
+    get:
+      summary: Verify audit ledger hash-chain integrity
+      tags: [audit]
+      operationId: getAuditLedgerVerify
+      description: |
+        Recomputes each entry_hash = SHA256(prev_hash || canonical_entry_json). Returns integrity status and mismatch diagnostics.
+      responses:
+        '200': { $ref: '#/components/responses/AuditLedgerVerifyOk' }
+        '500': { $ref: '#/components/responses/InternalError' }
+components:
+  schemas:
+    BLSAggregateParticipant:
+      type: object
+      properties:
+        public_b64: { type: string, description: Base64 raw public key bytes }
+        signature_b64: { type: string, description: Base64 raw signature bytes over message }
+        id: { type: string }
+      required: [public_b64, signature_b64]
+    BLSAggregateRequest:
+      type: object
+      properties:
+        message_b64: { type: string }
+        participants: { type: array, items: { $ref: '#/components/schemas/BLSAggregateParticipant' } }
+      required: [message_b64, participants]
+    BLSAggregateResult:
+      type: object
+      properties:
+        success: { type: boolean }
+        aggregate_signature_b64: { type: string }
+        participant_count: { type: integer }
+        require_pop: { type: boolean }
+        pop_challenges: { type: array, items: { type: object, properties: { id: { type: string }, challenge_b64: { type: string } } } }
+      required: [success]
+    BLSPoPVerifyRequest:
+      type: object
+      properties:
+        message_b64: { type: string }
+        proofs: { type: array, items: { type: object, properties: { id: { type: string }, proof_b64: { type: string } }, required: [id, proof_b64] } }
+      required: [message_b64, proofs]
+    BLSPoPVerifyResult:
+      type: object
+      properties:
+        success: { type: boolean }
+        aggregate_signature_b64: { type: string }
+        verified: { type: boolean }
+        failures: { type: array, items: { type: string } }
+      required: [success, verified]
+    RevocationAnchorEmitResult:
+      type: object
+      properties:
+        success: { type: boolean }
+        hash: { type: string, description: Revocation chain head hash anchored }
+        anchored_at: { type: string, format: date-time }
+        merkle_root: { type: string }
+        total: { type: integer, description: Total revocation events at time of emission }
+        idempotent: { type: boolean, description: True if existing receipt returned }
+      required: [success, hash]
+    ModelLimitsAttestationVerifyRequest:
+      type: object
+      properties:
+        success: { type: boolean }
+        configured: { type: boolean }
+        nonce: { type: string }
+        snapshot: { type: object, properties: { hash: { type: string }, generated_at: { type: string, format: date-time } }, required: [hash, generated_at] }
+        audit: { type: object, properties: { head_hash: { type: string }, entries: { type: integer } } }
+        anchor: { type: object, properties: { latest_hash: { type: string }, entries: { type: integer }, interval: { type: integer } } }
+        strict_unknown: { type: boolean }
+        surge: { type: object, properties: { model_id: { type: string } }, additionalProperties: true }
+        notarization: { type: object, properties: { provider: { type: string }, timestamp: { type: string, format: date-time }, latency_seconds: { type: number }, success: { type: boolean } } }
+        signature: { type: string }
+        sig_kid: { type: string }
+        sig_mode: { type: string }
+      required: [success, configured, snapshot, signature, sig_kid, sig_mode]
+    ModelLimitsAttestationVerifyResult:
+      type: object
+      properties:
+        success: { type: boolean }
+        valid: { type: boolean }
+        kid: { type: string }
+        sig_mode: { type: string }
+        error: { type: string }
+        combined_hash: { type: string }
+      required: [success, valid]
+    ExternalCapabilityAnchorVerifyResult:
+      type: object
+      properties:
+        success: { type: boolean }
+        configured: { type: boolean }
+        verified: { type: boolean }
+        empty: { type: boolean }
+        error: { type: string }
+      required: [success, configured]
+    ExternalCapabilityAnchorReceiptsVerifyResult:
+      type: object
+      properties:
+        success: { type: boolean }
+        configured: { type: boolean }
+        integrity: { type: string, enum: [ok, mismatch, empty, unconfigured] }
+        total: { type: integer }
+        chain_head: { type: string }
+        details: { type: object, additionalProperties: true }
+      required: [success, configured, integrity]
+    ErrorEnvelope:
+      type: object
+      description: Standard error response wrapper
+      properties:
+        code:
+          type: string
+          description: Stable error code identifier
+        message:
+          type: string
+          description: Human-readable short description
+        details:
+          type: object
+          description: Structured detail block (timestamp, request_id, http metadata, additional_info)
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+            request_id:
+              type: string
+            http_method:
+              type: string
+            http_path:
+              type: string
+            additional_info:
+              type: object
+              additionalProperties: true
+        source:
+          type: string
+          description: Optional subsystem source tag
+        retryable:
+          type: boolean
+          description: Hint indicating client may safely retry
+      required: [code, message]
+      examples:
+        signatureReplay:
+          value:
+            code: signature_replay_detected
+            message: Signature already recorded for canonical digest + signer key id
+            details:
+              timestamp: "2025-10-30T12:34:56Z"
+              http_method: POST
+              http_path: /api/v1/poa/{id}/sign
+            retryable: false
+    Discovery:
+      type: object
+      properties:
+        capability_registry_hash:
+          type: string
+        taxonomy_supported:
+          type: boolean
+        max_delegation_depth:
+          type: integer
+        domain_signature_enabled:
+          type: boolean
+        algorithms:
+          type: array
+          items: { type: string }
+    RevocationHead:
+      type: object
+      properties:
+        size: { type: integer }
+        head_hash: { type: string }
+        generated_at: { type: string, format: date-time }
+    RevocationProof:
+      type: object
+      properties:
+        success: { type: boolean }
+        proof: { type: array, items: { type: string } }
+        merkle_root: { type: string }
+        event_hash: { type: string }
+    ConsistencyProof:
+      type: object
+      properties:
+        success: { type: boolean }
+        prefix_roots: { type: array, items: { type: string } }
+        start_size: { type: integer }
+        current_size: { type: integer }
+    ConsistencySizes:
+      type: object
+      properties:
+        success: { type: boolean }
+        older_size: { type: integer }
+        newer_size: { type: integer }
+        current_length: { type: integer }
+    CapabilityAnchor:
+      type: object
+      properties:
+        registry_hash: { type: string }
+        anchored_at: { type: string, format: date-time }
+        provider: { type: string }
+        success: { type: boolean }
+    ModelLimitsVerifyRequest:
+      type: object
+      properties:
+        attestation: { type: object }
+      required: [attestation]
+    ModelLimitsVerifyResult:
+      type: object
+      properties:
+        success: { type: boolean }
+        reason: { type: string }
+        domain_signature_valid: { type: boolean }
+    RotationSummary:
+      type: object
+      properties:
+        threshold: { type: integer }
+        signatures: { type: array, items: { type: object, properties: { signer: { type: string }, signature: { type: string } } } }
+        active_key_id: { type: string }
+        previous_rotation_hash: { type: string }
+    RotationSummaryV2:
+      type: object
+      description: |
+        Weighted multi-sig rotation artifact (multi-algorithm). See ADR_WEIGHTED_MULTISIG for canonical digest rules.
+        For practical demonstration and metrics explanation refer to docs/ROTATION_V2_DEMO.md.
+      properties:
+        threshold_weight:
+          type: integer
+          description: Minimum cumulative signer weight required for validity.
+        signers:
+          type: array
+          description: Ordered signer set with weights and signatures.
+          items:
+            type: object
+            properties:
+              signer: { type: string, description: Signer key identifier }
+              alg: { type: string, description: Signing algorithm (e.g. ED25519, ECDSA-P256, BLS12-381) }
+              weight: { type: integer, description: Non-negative integer weight contributing to threshold }
+              signature: { type: string, description: Base64 (algorithm specific) signature over canonical artifact digest }
+              public: { type: string, description: Optional base64url encoded public key bytes enabling offline verification }
+        active_key_set_id:
+          type: string
+          description: Identifier for the active signer set (rotation domain).
+        previous_artifact_hash:
+          type: string
+          description: Hash pointer to previous rotation artifact for chain continuity.
+        algorithm_suite:
+          type: array
+          items: { type: string }
+          description: Algorithms included for agility (e.g. ["ed25519","p256","bls12-381"]).
+        canonical_digest:
+          type: string
+          description: Deterministic digest covering threshold, ordered signers (id+weight), previous hash, algorithm suite.
+        generated_at:
+          type: string
+          format: date-time
+          description: Timestamp of artifact finalization.
+      required: [threshold_weight, signers, active_key_set_id, canonical_digest]
+    RotationSummaryV2Response:
+      type: object
+      description: |
+        Full response envelope for rotation summary v2 endpoint. Includes verification outcome fields and
+        continuity pointers. See docs/ROTATION_V2_DEMO.md for extended guidance.
+      properties:
+        success:
+          type: boolean
+        artifact:
+          $ref: '#/components/schemas/RotationSummaryV2'
+        verified_weight:
+          type: integer
+          description: Cumulative weight of signatures that verified.
+        verified_weight_by_alg:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Mapping of algorithm (uppercase) to cumulative verified weight for that algorithm.
+        threshold_met:
+          type: boolean
+          description: True if verified_weight >= artifact.threshold_weight.
+        failures:
+          type: array
+          items:
+            type: string
+            enum: [signature_invalid, signature_decode_failed, public_key_not_found, resolver_nil, unknown_algorithm, artifact_nil]
+          description: List of failure reasons for signatures that did not verify.
+        continuity_prev_hash:
+          type: string
+          description: Previous artifact canonical digest (empty if chain start).
+        continuity_latest_hash:
+          type: string
+          description: Latest canonical digest recorded for continuity (only set when threshold satisfied at least once).
+      example:
+        success: true
+        artifact:
+          threshold_weight: 70
+          signers:
+            - id: ed1
+              alg: ED25519
+              weight: 30
+              signature: "mO4v..."
+            - id: ec1
+              alg: ECDSA-P256
+              weight: 40
+              signature: "MEQC..."
+          active_key_set_id: mixed-set
+          previous_artifact_hash: ""
+          algorithm_suite: ["ed25519","ecdsa-p256"]
+          canonical_digest: "5f3c2d9a..."
+          generated_at: "2025-10-28T12:34:56Z"
+        verified_weight: 70
+        verified_weight_by_alg:
+          ED25519: 30
+          ECDSA-P256: 40
+        threshold_met: true
+        failures: []
+        continuity_prev_hash: ""
+        continuity_latest_hash: "5f3c2d9a..."
+      required: [success, artifact, verified_weight, threshold_met]
+    CompositeAuthorizationArtifact:
+      type: object
+      description: |
+        Composite authorization artifact modeling hierarchical delegation (human → human → AI) including scope, powers,
+        decision authorities, transaction & interaction limits, dual control, and accountability cascade. See composite_authorization_README.md.
+      properties:
+        ai_system_id: { type: string }
+        authorizing_party:
+          type: object
+          properties:
+            id: { type: string }
+            name: { type: string }
+            type: { type: string }
+            authorized_representative:
+              type: object
+              properties:
+                id: { type: string }
+                name: { type: string }
+                position: { type: string }
+                authority_scope: { type: array, items: { type: string } }
+            legal_capacity:
+              type: object
+              properties:
+                verified: { type: boolean }
+                verification_date: { type: string, format: date-time }
+        authorization_grant:
+          type: object
+          properties:
+            type: { type: string }
+            scope: { type: array, items: { type: string } }
+            limitations: { type: array, items: { type: string } }
+            valid_from: { type: string, format: date-time }
+            valid_until: { type: string, format: date-time }
+            revocable: { type: boolean }
+        powers_granted:
+          type: object
+          properties:
+            basic_powers: { type: array, items: { type: string } }
+            derived_powers: { type: array, items: { type: string } }
+            power_derivation:
+              type: object
+              additionalProperties:
+                type: array
+                items: { type: string }
+        decision_authority:
+          type: object
+          properties:
+            autonomous_decisions: { type: array, items: { type: string } }
+            approval_required: { type: array, items: { type: string } }
+            decision_matrix:
+              type: object
+              additionalProperties: { type: string }
+            escalation_rules:
+              type: object
+              properties:
+                threshold_triggers: { type: object, additionalProperties: true }
+                escalation_path: { type: array, items: { type: string } }
+        transaction_rights:
+          type: object
+          properties:
+            allowed_transaction_types: { type: array, items: { type: string } }
+            prohibited_transactions: { type: array, items: { type: string } }
+        action_permissions:
+          type: object
+          properties:
+            system_actions: { type: array, items: { type: string } }
+            resource_actions: { type: object, additionalProperties: { type: array, items: { type: string } } }
+            human_interactions: { type: object, additionalProperties: true }
+            agent_interactions: { type: object, additionalProperties: true }
+        dual_control_principle:
+          type: object
+          properties:
+            enabled: { type: boolean }
+            requires_dual_control: { type: array, items: { type: string } }
+            approval_matrix: { type: object, additionalProperties: { type: array, items: { type: string } } }
+        authorization_cascade:
+          type: object
+          properties:
+            accountability_chain: { type: array, items: { type: string } }
+            cascade_chain: { type: array, items: { type: object, additionalProperties: true } }
+        expires_at: { type: string, format: date-time }
+      required: [ai_system_id, authorization_grant, powers_granted, decision_authority, transaction_rights, action_permissions, dual_control_principle, authorization_cascade, expires_at]
+    CompositeAuthorizationResponse:
+      type: object
+      description: Response envelope for composite authorization retrieval or activation.
+      properties:
+        success: { type: boolean }
+        artifact: { $ref: '#/components/schemas/CompositeAuthorizationArtifact' }
+        activated_at: { type: string, format: date-time }
+        version: { type: string }
+        previous_artifact_hash: { type: string }
+        canonical_hash: { type: string }
+      required: [success, artifact]
+    PoAStatus:
+      type: string
+      enum: [draft, active, revoked, suspended, terminated]
+    PoASigningWitness:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        signature: { type: string, description: Base64 signature over canonical digest }
+        weight: { type: integer, description: Optional weight contributing to threshold }
+      required: [id]
+    PoAArtifact:
+      type: object
+      description: Power of Attorney artifact with lifecycle & multi-signature context.
+      properties:
+        id: { type: string }
+        grantor_id: { type: string }
+        grantee_id: { type: string }
+        scope: { type: array, items: { type: string } }
+        jurisdiction: { type: string }
+        valid_from: { type: string, format: date-time }
+        valid_until: { type: string, format: date-time }
+        status: { $ref: '#/components/schemas/PoAStatus' }
+        witnesses: { type: array, items: { $ref: '#/components/schemas/PoASigningWitness' } }
+        signatures_collected: { type: integer }
+        threshold_required: { type: integer }
+        digest_version: { type: string }
+        canonical_digest: { type: string }
+        revoked_reason: { type: string }
+        revoked_at: { type: string, format: date-time }
+        suspended_at: { type: string, format: date-time }
+        terminated_at: { type: string, format: date-time }
+        parent_poa_id: { type: string, description: Optional parent PoA id for sub-delegation }
+        depth: { type: integer, description: Hierarchical depth (0=root) }
+      required: [id, grantor_id, grantee_id, scope, valid_from, valid_until, status, digest_version, canonical_digest]
+    PoAPrepareRequest:
+      type: object
+      properties:
+        grantor_id: { type: string }
+        grantee_id: { type: string }
+        scope: { type: array, items: { type: string } }
+        jurisdiction: { type: string }
+        valid_from: { type: string, format: date-time }
+        valid_until: { type: string, format: date-time }
+        threshold_required: { type: integer }
+        witnesses: { type: array, items: { $ref: '#/components/schemas/PoASigningWitness' } }
+        parent_poa_id: { type: string }
+      required: [grantor_id, grantee_id, scope, valid_from, valid_until]
+    PoAIssueRequest:
+      type: object
+      properties:
+        grantor_id: { type: string }
+        grantee_id: { type: string }
+        scope: { type: array, items: { type: string } }
+        jurisdiction: { type: string }
+        valid_from: { type: string, format: date-time }
+        valid_until: { type: string, format: date-time }
+      required: [grantor_id, grantee_id, scope, valid_from, valid_until]
+    PoASignRequest:
+      type: object
+      properties:
+        signer_id: { type: string }
+        signature: { type: string }
+      required: [signer_id, signature]
+    PoARevokeRequest:
+      type: object
+      properties:
+        reason: { type: string }
+      required: [reason]
+    PoARevocationInitiateRequest:
+      type: object
+      properties:
+        initiator: { type: string, description: Identity initiating workflow (grantor or controller) }
+        reason: { type: string, description: Human-readable revocation reason }
+        evidence_hashes: { type: array, items: { type: string }, description: Optional evidence artifact hashes }
+      required: [initiator]
+    PoARevocationApproveRequest:
+      type: object
+      properties:
+        approver: { type: string, description: Identity approving (grantor, controller, or signer) }
+      required: [approver]
+    PoARevocationCancelRequest:
+      type: object
+      properties:
+        actor: { type: string, description: Identity canceling (grantor or controller) }
+      required: [actor]
+    EnforcementRequest:
+      type: object
+      properties:
+        poa_id: { type: string }
+        action: { type: string }
+        resource: { type: string }
+        amount: { type: number }
+        jurisdiction: { type: string }
+      required: [action]
+    EnforcementResult:
+      type: object
+      properties:
+        success: { type: boolean }
+        allowed: { type: boolean }
+        reason: { type: string }
+        poa_id: { type: string }
+        poa_digest: { type: string }
+        recorded_at: { type: string, format: date-time }
+      required: [success, allowed]
+    ExtendedTokenResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        token: { type: string, description: JWT bearer token }
+        poa_id: { type: string }
+        poa_digest: { type: string }
+        poa_version: { type: string }
+        token_version: { type: string }
+        expires_at: { type: string, format: date-time }
+      required: [success, token, poa_id, poa_digest, poa_version, token_version, expires_at]
+    AuditLedgerEntry:
+      type: object
+      properties:
+        index: { type: integer }
+        id: { type: string }
+        type: { type: string, enum: [prepare, issue, sign, finalize, revoke, suspend, terminate, token, enforce] }
+        timestamp: { type: string, format: date-time }
+        poa_id: { type: string }
+        prev_hash: { type: string }
+        entry_hash: { type: string }
+        data: { type: object, additionalProperties: true }
+      required: [index, id, type, timestamp, prev_hash, entry_hash]
+    AuditLedgerVerifyResult:
+      type: object
+      properties:
+        success: { type: boolean }
+        integrity: { type: string, enum: [ok, mismatch, empty] }
+        mismatch_index: { type: integer }
+        total: { type: integer }
+        head_hash: { type: string }
+        error: { type: string }
+      required: [success, integrity]
+    AuditLedgerList:
+      type: object
+      properties:
+        success: { type: boolean }
+        total: { type: integer }
+        entries: { type: array, items: { $ref: '#/components/schemas/AuditLedgerEntry' } }
+      required: [success, total, entries]
+    DelegationGraphNode:
+      type: object
+      properties:
+        id: { type: string }
+        parent: { type: string }
+        depth: { type: integer }
+        scope: { type: array, items: { type: string } }
+        status: { $ref: '#/components/schemas/PoAStatus' }
+      required: [id, depth, status]
+    DelegationGraph:
+      type: object
+      properties:
+        success: { type: boolean }
+        nodes:
+          type: array
+          items: { $ref: '#/components/schemas/DelegationGraphNode' }
+        total: { type: integer }
+        generated_at: { type: string, format: date-time }
+      required: [success, nodes, total]
+  parameters:
+    IfNoneMatch:
+      in: header
+      name: If-None-Match
+      required: false
+      schema:
+        type: string
+      description: Optional ETag for conditional manifest retrieval.
+    RevocationId:
+      in: query
+      name: id
+      schema:
+        type: string
+      description: Optional event identifier (mutually exclusive with index/hash combinations).
+    RevocationIndex:
+      in: query
+      name: index
+      schema:
+        type: integer
+      description: Optional event index in revocation log.
+    RevocationHash:
+      in: query
+      name: hash
+      schema:
+        type: string
+      description: Optional event hash for direct proof lookup.
+    RevocationStart:
+      in: query
+      name: start
+      schema:
+        type: integer
+      description: Starting size (0-based) for consistency proof.
+    RevocationOlder:
+      in: query
+      name: older
+      schema:
+        type: integer
+      description: Older log size for consistency sizes endpoint.
+    RevocationNewer:
+      in: query
+      name: newer
+      schema:
+        type: integer
+      description: Newer log size for consistency sizes endpoint.
+  responses:
+    BLSAggregateOk:
+      description: BLS aggregate response (or PoP challenges when require_pop=1)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/BLSAggregateResult' }
+    BLSPoPVerifyOk:
+      description: BLS PoP verification response with finalized aggregate signature
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/BLSPoPVerifyResult' }
+    RevocationAnchorEmitOk:
+      description: Revocation anchor emission result
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/RevocationAnchorEmitResult' }
+    ModelLimitsAttestationVerifyOk:
+      description: Attestation verification result
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ModelLimitsAttestationVerifyResult' }
+    ExternalCapabilityAnchorVerifyOk:
+      description: External capability anchor verification result
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ExternalCapabilityAnchorVerifyResult' }
+    ExternalCapabilityAnchorReceiptsVerifyOk:
+      description: External capability anchor receipts chain integrity verification result
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ExternalCapabilityAnchorReceiptsVerifyResult' }
+    PolicyManifestOk:
+      description: Signed policy manifest payload
+      headers:
+        ETag:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            type: object
+            description: Policy manifest envelope
+            additionalProperties: true
+    NotModified:
+      description: Manifest not modified
+    BadRequest:
+      description: Bad request / invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    RateLimited:
+      description: Rate limited
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    RevocationHeadOk:
+      description: Revocation head summary
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RevocationHead'
+    RevocationProofOk:
+      description: Inclusion proof response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RevocationProof'
+    ConsistencyProofOk:
+      description: Consistency proof response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConsistencyProof'
+    ConsistencySizesOk:
+      description: Sizes stub consistency response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConsistencySizes'
+    CapabilityAnchorOk:
+      description: Capability registry anchor artifact
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CapabilityAnchor'
+    ModelLimitsVerifyOk:
+      description: Verification result
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ModelLimitsVerifyResult'
+    RotationSummaryOk:
+      description: Rotation summary payload
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RotationSummary'
+    RotationSummaryV2Ok:
+      description: Rotation summary V2 payload
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RotationSummaryV2Response'
+    CompositeAuthorizationOk:
+      description: Active composite authorization artifact
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CompositeAuthorizationResponse'
+    CompositeAuthorizationCreated:
+      description: Composite authorization artifact accepted & activated
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CompositeAuthorizationResponse'
+    Conflict:
+      description: Resource state conflict. Possible reasons include:
+        - overlapping_validity_window
+        - hash_mismatch
+        - signature_replay_detected (duplicate canonical digest + signer key id)
+        - revocation_workflow_active
+        - threshold_already_met
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    PoAOk:
+      description: PoA artifact envelope
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/PoAArtifact' }
+    PoATokenOk:
+      description: Extended token issuance response
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ExtendedTokenResponse' }
+    PoAGraphOk:
+      description: Delegation graph export response
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/DelegationGraph' }
+    EnforcementOk:
+      description: Enforcement decision result
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/EnforcementResult' }
+    AuditLedgerListOk:
+      description: Audit ledger entries list
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/AuditLedgerList' }
+    AuditLedgerEntryOk:
+      description: Single audit ledger entry
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/AuditLedgerEntry' }
+    AuditLedgerVerifyOk:
+      description: Audit ledger integrity verification result
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/AuditLedgerVerifyResult' }

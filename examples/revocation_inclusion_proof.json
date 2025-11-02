@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "generated_at": "2025-10-26T00:00:00Z",
+  "revocation_event": {
+    "id": "rev-42",
+    "delegation_id": "del-42",
+    "reason": "user_request",
+    "hash": "sha256:1e3f0c6b9f0b4d6f8d3c2e7a9a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b"
+  },
+  "merkle_proof": {
+    "leaf_hash": "sha256:1e3f0c6b9f0b4d6f8d3c2e7a9a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b",
+    "siblings": [
+      "sha256:ab12cd34ef56...",
+      "sha256:de78fa90bc12...",
+      "sha256:9012abcd3456..."
+    ],
+    "index": 42,
+    "tree_size": 64,
+    "computed_root": "sha256:f0e1d2c3b4a5968778695a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7c6b5a4"
+  },
+  "signed_tree_head": {
+    "chain_length": 64,
+    "merkle_root": "sha256:f0e1d2c3b4a5968778695a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7c6b5a4",
+    "aggregate_hash": "sha256:aa55bb66cc77dd88ee99ff00112233445566778899aabbccddeeff0011223344",
+    "generated_at": "2025-10-26T00:00:00Z",
+    "satisfied_weight": 1,
+    "threshold": 1,
+    "signatures": [
+      {
+        "kid": "ed25519:abcd1234ef567890",
+        "mode": "EdDSA",
+        "signature": "MEUCIQDdFakeSignatureValueExampleDontVerifyMEQCIFakeSignatureTailValuePlaceholder"
+      }
+    ]
+  },
+  "verification_steps": [
+    "1. Hash the revocation_event payload to obtain leaf_hash (already given).",
+    "2. Iteratively hash leaf_hash with each sibling (index bit determines order) to derive computed_root.",
+    "3. Confirm computed_root matches signed_tree_head.merkle_root.",
+    "4. Verify EdDSA signature over canonical tree head payload (domain-separated).",
+    "5. Accept revocation inclusion as valid if all checks succeed."
+  ],
+  "rfc_refs": ["rfc111:revocation_anchor", "rfc111:revocation_inclusion"]
+}

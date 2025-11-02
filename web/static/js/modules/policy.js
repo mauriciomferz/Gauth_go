@@ -178,9 +178,7 @@ function initGovernanceUI(){
   refreshPolicyGovernance();
   setInterval(refreshPolicyGovernance, 15000);
 }
-        // Inline current policy version badge near decision for easier UX
-        const ver = escapeHtml(String(data.policy_version||'-'));
-        out(`bundle_hash=${escapeHtml(data.bundle_hash||'')} chain_head=${escapeHtml(data.chain_head||'')} <span class='pg-version-badge' aria-label='policy version'>v${ver}</span>`,'info');
+
 export function policyInit(){
   document.querySelectorAll('[data-action="policy-provenance"]').forEach(b=> b.addEventListener('click', ()=>loadProvenance()));
   document.querySelectorAll('[data-action="policy-chain-page"]').forEach(b=> b.addEventListener('click', ()=>{

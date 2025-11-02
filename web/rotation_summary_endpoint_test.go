@@ -7,7 +7,9 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
+	cryptoInt "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
 	notary "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
 )
 
@@ -22,6 +24,10 @@ func TestRotationSummaryEndpointAnchoring(t *testing.T) {
 	// Enable signing to exercise signature path (optional)
 	os.Setenv("GAUTH_ROTATIONS_SIGN", "1")
 	os.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
+	// Ensure isolation from previous tests that may have mutated global registry or multisig env.
+	os.Unsetenv("GAUTH_ROTATIONS_MULTISIG")
+	os.Unsetenv("GAUTH_ROTATIONS_THRESHOLD")
+	if m, _ := cryptoInt.NewManager(24 * time.Hour); m != nil { cryptoInt.GlobalEdDSARegistry = m }
 	// Initialize server
 	srv := NewBetaServer("0")
 	// Append two descriptors through ledger directly (simulate rotation activity).
@@ -31,13 +37,23 @@ func TestRotationSummaryEndpointAnchoring(t *testing.T) {
 	}
 	_, o1Priv, _ := ed25519.GenerateKey(rand.Reader)
 	_, o2Priv, _ := ed25519.GenerateKey(rand.Reader)
-	// First rotation
+	// First rotation descriptor (dual signature)
 	r1 := &notary.KeyRotationDescriptor{EffectiveTime: "2025-10-20T12:00:00Z", Reason: "scheduled"}
 	if err := notary.SignRotationDescriptor(o1Priv, o2Priv, r1); err != nil {
 		t.Fatalf("sign r1: %v", err)
 	}
 	if _, err := led.AppendDescriptor(r1); err != nil {
 		t.Fatalf("append r1: %v", err)
+	}
+	// Second descriptor to avoid empty-chain edge cases and continuity gap false positives
+	r2 := &notary.KeyRotationDescriptor{EffectiveTime: "2025-10-21T12:00:00Z", Reason: "scheduled"}
+	// Set PrevRotationHash to previous head hash for continuity correctness
+	r2.PrevRotationHash = led.HeadHash()
+	if err := notary.SignRotationDescriptor(o1Priv, o2Priv, r2); err != nil {
+		t.Fatalf("sign r2: %v", err)
+	}
+	if _, err := led.AppendDescriptor(r2); err != nil {
+		t.Fatalf("append r2: %v", err)
 	}
 	// Fetch summary first time (should anchor)
 	req1 := httptest.NewRequest("GET", "/api/v1/beta/rotations/summary", nil)

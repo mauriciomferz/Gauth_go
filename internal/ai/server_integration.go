@@ -39,6 +39,11 @@ func (si *ServerIntegration) SetMetricsCallback(callback func(string)) {
 	si.metricsCallback = callback
 }
 
+// GetMetricsCallback returns the metrics callback if set (nil-safe for callers).
+func (si *ServerIntegration) GetMetricsCallback() func(string) {
+    return si.metricsCallback
+}
+
 // EnableEnforcement enables AI capability enforcement
 func (si *ServerIntegration) EnableEnforcement(enabled bool) {
 	si.matrix.SetEnforcementActive(enabled)

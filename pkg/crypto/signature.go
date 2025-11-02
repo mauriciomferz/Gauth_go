@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"sort"
 	"sync"
 )
 
@@ -202,6 +203,23 @@ func GetAlgorithm(name string) *Algorithm {
        return nil
 }
 
+// AlgorithmInfo provides external metadata for registered algorithms.
+// AggregatedSupported indicates whether batch/multi-signature verification handler is registered.
+type AlgorithmInfo struct {
+	Name               string `json:"name"`
+	AggregatedSupported bool   `json:"aggregated_supported"`
+}
+
+// ListAlgorithms returns a deterministic ordered slice of registered algorithms.
+func ListAlgorithms() []AlgorithmInfo {
+	infos := make([]AlgorithmInfo, 0, len(algoRegistry))
+	for _, a := range algoRegistry {
+		infos = append(infos, AlgorithmInfo{Name: a.Name, AggregatedSupported: a.AggregatedVerify != nil})
+	}
+	sort.Slice(infos, func(i, j int) bool { return infos[i].Name < infos[j].Name })
+	return infos
+}
+
 // VerifyAlgorithm dispatches verification via registry
 func VerifyAlgorithm(algo string, canonical []byte, sigBase64, keyID string, kp KeyProvider) error {
        a := GetAlgorithm(algo)
@@ -249,24 +267,5 @@ func init() {
 	})
 
        // Placeholder: Register BLS aggregated signature algorithm
-       RegisterAlgorithm(Algorithm{Name: "bls", Verify: func(canonical []byte, sigBase64 string, keyID string, kp KeyProvider) error {
-	       // TODO: Implement BLS single signature verification
-	       return errors.New("bls: not implemented")
-       },
-       AggregatedVerify: func(messages [][]byte, signatures []string, keyIDs []string, kp KeyProvider) error {
-	       // TODO: Implement BLS aggregated signature verification
-	       return errors.New("bls aggregated: not implemented")
-       },
-       })
-
-       // Placeholder: Register batch signature algorithm
-       RegisterAlgorithm(Algorithm{Name: "batch", Verify: func(canonical []byte, sigBase64 string, keyID string, kp KeyProvider) error {
-	       // TODO: Implement batch single signature verification
-	       return errors.New("batch: not implemented")
-       },
-       AggregatedVerify: func(messages [][]byte, signatures []string, keyIDs []string, kp KeyProvider) error {
-	       // TODO: Implement batch signature verification
-	       return errors.New("batch: not implemented")
-       },
-       })
+	// Removed legacy placeholders for generic 'bls' and 'batch' algorithms.
 }

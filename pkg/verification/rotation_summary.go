@@ -34,6 +34,13 @@ type RotationSummary struct {
 	Kid           string `json:"kid,omitempty"`
 	Signature     string `json:"signature,omitempty"`
 	Mode          string `json:"mode,omitempty"`
+	Threshold       int                `json:"threshold,omitempty"`
+	SatisfiedWeight int                `json:"satisfied_weight,omitempty"`
+	Signatures      []struct {
+		Kid       string `json:"kid"`
+		Mode      string `json:"mode"`
+		Signature string `json:"signature"`
+	} `json:"signatures,omitempty"`
 }
 
 // FetchRotationSummary retrieves the summary document.
@@ -59,7 +66,42 @@ func VerifyRotationSummarySignature(sum *RotationSummary) error {
 	if sum == nil {
 		return errors.New("summary_nil")
 	}
-	if sum.Signature == "" {
+	// Prefer multi-signature verification if slice populated; require at least one signature.
+	if len(sum.Signatures) > 0 {
+		// Validate all signatures whose kids resolve; treat any invalid as failure.
+		for _, sigEntry := range sum.Signatures {
+			if sigEntry.Signature == "" {
+				return errors.New("missing_signature")
+			}
+			// fallback to single legacy fields for message payload
+			enc, err := canonicalRotationSummaryPayload(sum)
+			if err != nil {
+				return fmt.Errorf("serialization_error:%w", err)
+			}
+			msg := append([]byte("GAUTH_ROTATION_SUMMARY:"), enc...)
+			sigBytes, err := base64.RawURLEncoding.DecodeString(sigEntry.Signature)
+			if err != nil {
+				return errors.New("signature_decode_error")
+			}
+			if cryptoReg := getGlobalRegistry(); cryptoReg != nil {
+				pub := cryptoReg.FindByID(sigEntry.Kid)
+				if pub == nil {
+					return errors.New("kid_not_found")
+				}
+				if !ed25519.Verify(pub.Public, msg, sigBytes) {
+					return errors.New("signature_invalid")
+				}
+			} else {
+				return errors.New("eddsa_registry_unavailable")
+			}
+		}
+		// Optionally enforce threshold satisfaction
+		if sum.Threshold > 0 && sum.SatisfiedWeight < sum.Threshold {
+			return errors.New("threshold_not_satisfied")
+		}
+		return nil
+	}
+	if sum.Signature == "" { // legacy single-signature path
 		return errors.New("missing_signature")
 	}
 	if sum.Mode != "" && sum.Mode != "EdDSA" {

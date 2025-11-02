@@ -54,6 +54,15 @@ var (
 		Name: "gauth_rotation_summary_last_anchor_age_seconds",
 		Help: "Age in seconds since the last successful rotation summary anchor (now - last_anchor_time)",
 	})
+	rotationSignatureVerifyLatency = promauto.NewHistogram(prom.HistogramOpts{
+		Name:    "gauth_rotation_signature_verify_latency_seconds",
+		Help:    "Latency of individual rotation summary signature verification operations",
+		Buckets: prom.DefBuckets,
+	})
+	rotationSignatureVerifyFailures = promauto.NewCounterVec(prom.CounterOpts{
+		Name: "gauth_rotation_signature_verify_failures_total",
+		Help: "Total failed rotation signature verifications labeled by reason",
+	}, []string{"reason"})
 	lastAnchorUnixNano atomic.Int64
 )
 

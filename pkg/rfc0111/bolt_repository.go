@@ -239,6 +239,75 @@ func (b *BoltRepository) Update(p *PowerOfAttorney) error {
 	})
 }
 
+// ListDescendants finds all POAs that have the given POA ID as their parent.
+// Performs depth-limited traversal with cycle detection.
+func (b *BoltRepository) ListDescendants(parentPoaID string, maxDepth int) ([]*PowerOfAttorney, error) {
+	if parentPoaID == "" {
+		return []*PowerOfAttorney{}, nil
+	}
+	if err := b.ensureOpen(); err != nil {
+		return nil, err
+	}
+
+	var result []*PowerOfAttorney
+	visited := make(map[string]bool) // Cycle prevention
+
+	// Helper to find direct children of a given parent ID
+	findDirectChildren := func(currentParentID string) ([]*PowerOfAttorney, error) {
+		var children []*PowerOfAttorney
+		err := b.db.View(func(tx *bolt.Tx) error {
+			poaB := tx.Bucket([]byte(boltBucketPOA))
+			if poaB == nil {
+				return errors.New("missing bucket")
+			}
+			// Scan all POAs to find those with matching parent_poa_id
+			// TODO: Add parent_poa_id index for better performance
+			return poaB.ForEach(func(k, v []byte) error {
+				var p PowerOfAttorney
+				if err := json.Unmarshal(v, &p); err != nil {
+					return nil // Skip malformed entries
+				}
+				if p.ParentPOAID == currentParentID {
+					children = append(children, &p)
+				}
+				return nil
+			})
+		})
+		return children, err
+	}
+
+	// Recursive depth-first search for descendants
+	var findDescendants func(currentParentID string, currentDepth int) error
+	findDescendants = func(currentParentID string, currentDepth int) error {
+		if maxDepth > 0 && currentDepth >= maxDepth {
+			return nil // Hit depth limit
+		}
+		if visited[currentParentID] {
+			return nil // Cycle prevention
+		}
+		visited[currentParentID] = true
+
+		children, err := findDirectChildren(currentParentID)
+		if err != nil {
+			return err
+		}
+
+		for _, child := range children {
+			result = append(result, child)
+			// Recursively find descendants of this child
+			if err := findDescendants(child.ID, currentDepth+1); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	if err := findDescendants(parentPoaID, 0); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 // WithPOARepository injects a custom repository (e.g., Bolt).
 func WithPOARepository(repo POARepository) Option {
 	return func(s *Service) {

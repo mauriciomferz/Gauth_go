@@ -130,5 +130,17 @@ When adding new examples:
 4. Add tests if applicable
 5. Update this index
 
+## Cryptographic Transparency Artifacts
+
+The following JSON artifacts demonstrate transparency and verifiability concepts.
+
+| Artifact | Purpose | Notes |
+|----------|---------|-------|
+| `revocation_inclusion_proof.json` | Example revocation Merkle inclusion proof and signed tree head | Sibling hashes truncated (placeholders) – structural only. |
+| `rotation_summary_multisig.json` | Prospective multi-signature rotation summary (threshold 2) | Signatures are placeholders; endpoint currently emits single-sign summary. |
+
+These artifacts complement the runtime endpoints: `/api/v1/token/revocation/proof` and `/api/v1/beta/rotations/summary`.
+They are intended for documentation, test scaffolding, and forward-looking design discussions around threshold signing.
+
 ---
 Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md

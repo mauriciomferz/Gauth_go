@@ -12,6 +12,10 @@ type POARepository interface {
 	Get(id string) (*PowerOfAttorney, bool)
 	ListByPrincipal(principal string) []*PowerOfAttorney
 	Update(p *PowerOfAttorney) error
+	// ListDescendants finds all POAs that have the given POA ID as their parent
+	// maxDepth limits how deep to search (0 = unlimited depth)
+	// Returns descendants organized by depth level for batch processing
+	ListDescendants(parentPoaID string, maxDepth int) ([]*PowerOfAttorney, error)
 }
 
 // memoryRepository is an in-memory implementation (prototype / tests).
@@ -42,4 +46,40 @@ func (m *memoryRepository) Update(p *PowerOfAttorney) error {
 	}
 	m.store[p.ID] = p
 	return nil
+}
+
+func (m *memoryRepository) ListDescendants(parentPoaID string, maxDepth int) ([]*PowerOfAttorney, error) {
+	if parentPoaID == "" {
+		return []*PowerOfAttorney{}, nil
+	}
+
+	var result []*PowerOfAttorney
+	visited := make(map[string]bool) // Prevent cycles - shared across all recursive calls
+
+	// Recursive depth-first search for descendants
+	var findDescendants func(currentParentID string, currentDepth int)
+	findDescendants = func(currentParentID string, currentDepth int) {
+		if maxDepth > 0 && currentDepth >= maxDepth {
+			return // Hit depth limit
+		}
+		if visited[currentParentID] {
+			return // Cycle prevention
+		}
+		visited[currentParentID] = true
+
+		for _, p := range m.store {
+			if p != nil && p.ParentPOAID == currentParentID {
+				// Check if we've already processed this POA to prevent cycles
+				if visited[p.ID] {
+					continue // Skip already visited descendants
+				}
+				result = append(result, p)
+				// Recursively find children of this descendant
+				findDescendants(p.ID, currentDepth+1)
+			}
+		}
+	}
+
+	findDescendants(parentPoaID, 0)
+	return result, nil
 }

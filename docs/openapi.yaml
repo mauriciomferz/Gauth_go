@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: GAuth Demo API
-  version: 0.3.1-beta
+  version: 0.3.2-beta
   description: |
     Core GAuth demo endpoints including token issuance, validation, revocation,
     delegation status, lifecycle timeline, policy evaluation & metrics, examples,
@@ -11,6 +11,44 @@ info:
 servers:
   - url: /
     description: Root (relative paths)
+
+tags:
+  - name: tokens
+    description: Token issuance, validation, status & revocation endpoints
+  - name: delegation
+    description: Delegation (power-of-attorney) lifecycle endpoints
+  - name: poa
+    description: Power-of-attorney authorization & metrics
+  - name: crypto
+    description: Cryptographic algorithm introspection & operations
+  - name: bls
+    description: BLS aggregated signature and proof-of-possession operations
+  - name: anchor
+    description: External capability & rotation anchoring endpoints
+  - name: authz
+    description: Authorization evaluation and metrics
+  - name: policy
+    description: Policy chain, bundles, evaluation & provenance
+  - name: lifecycle
+    description: Lifecycle timeline & metrics endpoints
+  - name: revocation
+    description: Token revocation chain management
+  - name: events
+    description: Generic event emission and streaming
+  - name: audit
+    description: Audit logging & streaming
+  - name: discovery
+    description: API discovery metadata & OpenAPI retrieval
+  - name: jwks
+    description: JSON Web Key Set publication
+  - name: health
+    description: Health & info endpoints
+  - name: examples
+    description: Example catalog and execution workflow
+  - name: multisig
+    description: Multi-signature collection and activation flows
+  - name: diagnostics
+    description: Semantic metrics & anomaly diagnostics endpoints
 
 security:
   - BearerAuth: []
@@ -79,6 +117,62 @@ paths:
             schema: { type: object, additionalProperties: true }
       responses:
         '200': { description: Authorization decision }
+  /api/v1/poa/issue:
+    post:
+      summary: Issue (generate) a Power-of-Attorney (PoA) document with canonical digest
+      operationId: issuePOA
+      tags: [poa, multisig]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subject: { type: string, description: Delegated principal }
+                resource: { type: string, description: Resource identifier }
+                action: { type: string, description: Action delegated }
+                ttl_seconds: { type: integer, minimum: 1, description: Lifetime (seconds) for PoA }
+                signer_kids:
+                  type: array
+                  maxItems: 20
+                  items: { type: string }
+                  description: Ordered list of key IDs requested to sign (multisig mode)
+                threshold: { type: integer, minimum: 1, description: Required signature count (multisig) }
+                sig_mode: { type: string, enum: [single, multisig], description: Signature mode selection }
+              required: [subject, resource, action]
+      responses:
+        '200':
+          description: PoA issued successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PoADocument' }
+        '400':
+          description: Invalid issuance request (missing fields, bad threshold)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+  /api/v1/poa/verify:
+    post:
+      summary: Verify PoA document canonical digest and signatures (single or multisig)
+      operationId: verifyPOA
+      tags: [poa, multisig]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PoAVerifyRequest' }
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PoAVerifyResponse' }
+        '400':
+          description: Invalid PoA payload (malformed fields or signatures array)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
   /api/v1/poa/metrics:
     get:
       summary: PoA metrics
@@ -86,6 +180,449 @@ paths:
       tags: [poa]
       responses:
         '200': { description: PoA metrics snapshot }
+  /api/v1/crypto/algorithms:
+    get:
+      summary: List cryptographic algorithms registered
+      operationId: listAlgorithms
+      tags: [crypto]
+      responses:
+        '200':
+          description: Algorithm list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  algorithms:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name: { type: string }
+                        aggregated_supported: { type: boolean }
+                  count: { type: integer }
+  /api/v1/crypto/bls/aggregate:
+    post:
+      summary: Issue aggregated BLS signatures or PoP challenges; verify aggregated signatures
+      operationId: blsAggregate
+      tags: [crypto, bls]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mode:
+                  type: string
+                  enum: [issue, verify]
+                message_b64: { type: string, description: Base64 message }
+                participants: { type: integer, minimum: 1, maximum: 64 }
+                private_keys_b64:
+                  type: array
+                  maxItems: 64
+                  items: { type: string }
+                aggregated_signature_b64: { type: string }
+                public_keys_b64:
+                  type: array
+                  maxItems: 64
+                  items: { type: string }
+                require_pop: { type: boolean, description: Issue PoP challenges instead of aggregated signature }
+      responses:
+        '200':
+          description: Success (variant by mode)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      success: { type: boolean }
+                      mode: { type: string, enum: [issue] }
+                      participant_count: { type: integer }
+                      aggregated_signature_b64: { type: string }
+                      public_keys_b64:
+                        type: array
+                        items: { type: string }
+                      key_ids:
+                        type: array
+                        items: { type: string }
+                      latency_ms: { type: number }
+                  - type: object
+                    properties:
+                      success: { type: boolean }
+                      mode: { type: string, enum: [issue_pop] }
+                      participant_count: { type: integer }
+                      public_keys_b64:
+                        type: array
+                        items: { type: string }
+                      key_ids:
+                        type: array
+                        items: { type: string }
+                      challenges_b64:
+                        type: array
+                        items: { type: string }
+                      latency_ms: { type: number }
+                  - type: object
+                    properties:
+                      success: { type: boolean }
+                      mode: { type: string, enum: [verify] }
+                      participant_count: { type: integer }
+                      valid: { type: boolean }
+                      latency_ms: { type: number }
+        '400':
+          description: Invalid request parameters (see code for categorical error)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+          headers:
+            X-Error-Code: { description: Machine-readable code (mirrors body.code), schema: { type: string } }
+        '500':
+          description: Internal failure (e.g. bls_init_failed, nonce_gen_failed)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+  /api/v1/crypto/bls/pop/verify:
+    post:
+      summary: Verify BLS Proof-of-Possession signatures over issued challenges
+      operationId: blsPoPVerify
+      tags: [crypto, bls]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pairs:
+                  type: array
+                  maxItems: 64
+                  items:
+                    type: object
+                    required: [public_key_b64, signature_b64, challenge_b64]
+                    properties:
+                      public_key_b64: { type: string }
+                      signature_b64: { type: string }
+                      challenge_b64: { type: string }
+      responses:
+        '200':
+          description: Verification result summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  valid: { type: boolean }
+                  total: { type: integer }
+                  failures: { type: integer }
+                  failure_indices:
+                    type: array
+                    items: { type: integer }
+                  latency_ms: { type: number }
+        '400':
+          description: Invalid request body (bad_request, no_pairs)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500':
+          description: BLS library initialization failure (bls_init_failed)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+  /api/v1/anchor/chain:
+    get:
+      summary: Retrieve external capability anchor receipt chain
+      operationId: anchorChain
+      tags: [anchor]
+      responses:
+        '200':
+          description: Chain receipts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  receipts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        hash: { type: string }
+                        timestamp: { type: string }
+                        provider: { type: string }
+                        version: { type: string }
+                        latency_seconds: { type: number }
+                        prev_hash: { type: string }
+                        chain_hash: { type: string }
+        '503':
+          description: Chain not configured
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+  /api/v1/anchor/emitCombined:
+    post:
+      summary: Emit combined capability + rotation anchor receipt
+      operationId: anchorEmitCombined
+      tags: [anchor]
+      security:
+        - CombinedAnchorToken: []
+      responses:
+        '200':
+          description: Combined anchor emitted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  combined_hash: { type: string }
+                  rotation_head: { type: string }
+                  capability_hash: { type: string }
+        '400':
+          description: Invalid request (missing capability or rotation material)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '401':
+          description: Authentication failed (token missing or mismatched)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '403':
+          description: Emission forbidden by configuration or policy
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '503':
+          description: Receipt store not configured
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500':
+          description: Internal append failure
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+  /api/v1/anchor/verifyChain:
+    get:
+      summary: Verify anchor receipt chain integrity
+      operationId: anchorVerifyChain
+      tags: [anchor]
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  status: { type: string, enum: [ok, mismatch, empty] }
+                  mismatch_index: { type: integer }
+        '500':
+          description: Verification processing error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+  /api/v1/anchor/revocation/emit:
+    post:
+      summary: Emit external anchor receipt for current revocation Merkle root
+      operationId: anchorRevocationEmit
+      tags: [anchor, revocation]
+      responses:
+        '200':
+          description: Revocation root anchored
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  hash: { type: string }
+                  anchored_at: { type: string, format: date-time }
+                  total: { type: integer }
+                  merkle_root: { type: string }
+                  chain_length: { type: integer }
+                  type: { type: string, enum: [revocation_root] }
+                  latest_tree_head: { type: object, additionalProperties: true }
+              examples:
+                success:
+                  value:
+                    success: true
+                    hash: "5f3e2b2c9a8d...demo"
+                    anchored_at: "2025-10-26T02:50:33Z"
+                    total: 7
+                    merkle_root: "a4c9f7d1e3b2...root"
+                    chain_length: 42
+                    type: "revocation_root"
+                    latest_tree_head:
+                      chain_length: 42
+                      merkle_root: "a4c9f7d1e3b2...root"
+                      aggregate_hash: "93ff0b8d7c...agg"
+                idempotent_repeat:
+                  summary: Same hash returned when called again with unchanged root
+                  value:
+                    success: true
+                    hash: "5f3e2b2c9a8d...demo"
+                    anchored_at: "2025-10-26T02:50:33Z"
+                    total: 7
+                    merkle_root: "a4c9f7d1e3b2...root"
+                    chain_length: 42
+                    type: "revocation_root"
+        '400':
+          description: Empty or invalid Merkle root (revocation_root_empty)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                root_empty:
+                  value:
+                    success: false
+                    code: revocation_root_empty
+                    error: revocation_root_empty
+                    message: revocation merkle root empty
+                    rfc_ref: "rfc111:revocation_anchor"
+        '404':
+          description: Revocation chain empty (revocation_chain_empty)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                chain_empty:
+                  value:
+                    success: false
+                    code: revocation_chain_empty
+                    error: revocation_chain_empty
+                    message: revocation chain empty
+                    rfc_ref: "rfc111:revocation_anchor"
+        '500':
+          description: Anchor failure or client unavailable (revocation_anchor_failure | revocation_anchor_client_unavailable)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                client_unavailable:
+                  value:
+                    success: false
+                    code: revocation_anchor_client_unavailable
+                    error: anchor_client_unavailable
+                    message: anchor client unavailable
+                    rfc_ref: "rfc111:revocation_anchor"
+                anchor_failure:
+                  value:
+                    success: false
+                    code: revocation_anchor_failure
+                    error: anchor_failure
+                    message: failed anchoring revocation root
+                    rfc_ref: "rfc111:revocation_anchor"
+  /api/v1/diagnostics/semantic:
+    get:
+      summary: Semantic counters, history & anomaly diagnostics
+      operationId: getSemanticDiagnostics
+      tags: [diagnostics]
+      responses:
+        '200':
+          description: Diagnostics payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  wired: { type: boolean }
+                  timestamp: { type: string }
+                  counters:
+                    type: object
+                    additionalProperties: { type: integer }
+                  history:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        at: { type: string }
+                        counters:
+                          type: object
+                          additionalProperties: { type: integer }
+                  anomaly:
+                    type: object
+                    properties:
+                      rate_per_minute_60s:
+                        type: object
+                        additionalProperties: { type: number }
+                      rate_per_minute_300s:
+                        type: object
+                        additionalProperties: { type: number }
+                      scores:
+                        type: object
+                        additionalProperties: { type: number }
+                  integrity_status: { type: string }
+                  history_window_cap: { type: integer }
+                  prev_hash: { type: string }
+                  current_hash: { type: string }
+              examples:
+                wired_false_minimal:
+                  value:
+                    success: true
+                    wired: false
+                    timestamp: "2025-10-26T02:52:16Z"
+                    counters: {}
+                    history: []
+                    anomaly:
+                      rate_per_minute_60s: {}
+                      rate_per_minute_300s: {}
+                      scores: {}
+                    integrity_status: unconfigured
+                    history_window_cap: 120
+                    prev_hash: ""
+                    current_hash: ""
+                wired_true_populated:
+                  summary: Example with populated counters, history and anomaly scores
+                  value:
+                    success: true
+                    wired: true
+                    timestamp: "2025-10-26T02:53:10Z"
+                    counters:
+                      scope_violation: 12
+                      restriction_mismatch: 3
+                    history:
+                      - at: "2025-10-26T02:52:50Z"
+                        counters:
+                          scope_violation: 10
+                          restriction_mismatch: 3
+                      - at: "2025-10-26T02:53:00Z"
+                        counters:
+                          scope_violation: 12
+                          restriction_mismatch: 3
+                    anomaly:
+                      rate_per_minute_60s:
+                        scope_violation: 4.2
+                        restriction_mismatch: 0
+                      rate_per_minute_300s:
+                        scope_violation: 1.1
+                        restriction_mismatch: 0
+                      scores:
+                        scope_violation: 1.37
+                        restriction_mismatch: 0
+                    integrity_status: ok
+                    history_window_cap: 120
+                    prev_hash: "d34db33fprevhashdemo"
+                    current_hash: "cafebabecurrenthashdemo"
+        '500':
+          description: Metrics unavailable (semantic_metrics_unavailable)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                metrics_unavailable:
+                  value:
+                    success: false
+                    code: semantic_metrics_unavailable
+                    error: semantic_metrics_unavailable
+                    message: semantic metrics unavailable
+                    rfc_ref: "rfc115:semantic_diagnostics"
   /api/v1/events/emit:
     post:
       summary: Emit an event
@@ -1174,13 +1711,357 @@ paths:
         '200': { description: JSON Web Key Set }
         '304': { description: Not Modified }
 
+  /api/v1/model/validate:
+    post:
+      summary: Validate model token usage limits (input/output/rate and per-user overrides)
+      operationId: modelValidate
+      tags: [lifecycle]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                model_id: { type: string }
+                user_id: { type: string }
+                input_tokens: { type: integer, minimum: 0 }
+                output_tokens: { type: integer, minimum: 0 }
+      responses:
+        '200':
+          description: Validation success (limit_enforced indicates configured limits applied)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  model_id: { type: string }
+                  input_tokens: { type: integer }
+                  output_tokens: { type: integer }
+                  input_limit: { type: integer }
+                  output_limit: { type: integer }
+                  rate_limit: { type: integer }
+                  limit_enforced: { type: boolean }
+        '400':
+          description: Invalid request (model_invalid_payload, model_unknown, model_limit_exceeded, model_output_limit_exceeded, model_user_* limit codes)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '429':
+          description: Rate limit exceeded (model_rate_limit_exceeded, model_user_rate_limit_exceeded)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/v1/capabilities/reload:
+    post:
+      summary: Reload capabilities file and refresh action mappings
+      operationId: capabilitiesReload
+      tags: [policy]
+      responses:
+        '200':
+          description: Reload summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  capabilities_before: { type: integer }
+                  capabilities_after: { type: integer }
+                  action_mappings: { type: integer }
+                  source: { type: string }
+                  last_loaded: { type: string }
+        '400':
+          description: Missing path (capabilities_path_missing)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500':
+          description: Reload failure (reload_failed)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/v1/capabilities/negotiate:
+    post:
+      summary: Negotiate capability versions between client and server registry
+      operationId: capabilitiesNegotiate
+      tags: [policy]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                client_versions:
+                  type: object
+                  additionalProperties:
+                    type: array
+                    items: { type: string }
+      responses:
+        '200':
+          description: Negotiation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  agreed: { type: object, additionalProperties: { type: string } }
+                  unsupported: { type: object, additionalProperties: { type: array, items: { type: string } } }
+                  lifecycle_strict: { type: boolean }
+        '400':
+          description: Invalid payload (capabilities_negotiate_invalid_payload)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/v1/capabilities/audit/verify:
+    post:
+      summary: Verify capability model limits attestation (Ed25519 signature integrity)
+      operationId: capabilitiesAuditVerify
+      tags: [policy, audit]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        '200':
+          description: Verification outcome (valid false when signature missing or invalid)
+        '400':
+          description: Body read / JSON failure (attestation_body_read_failed, attestation_invalid_json)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500':
+          description: Internal processing errors
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/v1/capabilities/audit/anchor:
+    post:
+      summary: Anchor capability audit chain tip externally
+      operationId: capabilitiesAuditAnchor
+      tags: [anchor, audit]
+      responses:
+        '200': { description: Anchor record emitted }
+        '400':
+          description: Empty chain tip (capabilities_audit_chain_tip_empty)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '403':
+          description: Anchoring disabled (capabilities_audit_anchor_disabled)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500':
+          description: Anchor failure (capabilities_audit_anchor_failure, capability_anchor_client_unavailable)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/v1/capabilities/anchor:
+    post:
+      summary: Anchor current capability registry hash externally
+      operationId: capabilityAnchor
+      tags: [anchor, policy]
+      responses:
+        '200': { description: Anchor record emitted }
+        '400':
+          description: Registry hash empty (capability_registry_hash_empty)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '403':
+          description: Anchoring disabled (capability_anchor_disabled)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500':
+          description: Anchor failure (capability_anchor_failure, capability_anchor_client_unavailable)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/v1/token/revocation/root:
+    get:
+      summary: Retrieve current revocation chain Merkle root and length
+      operationId: revocationRoot
+      tags: [revocation]
+      responses:
+        '200': { description: Merkle root snapshot }
+
+  /api/v1/token/revocation/proof:
+    get:
+      summary: Generate Merkle proof by id, index or hash
+      operationId: revocationProof
+      tags: [revocation]
+      parameters:
+        - in: query
+          name: id
+          schema: { type: string }
+        - in: query
+          name: index
+          schema: { type: integer, minimum: 0 }
+        - in: query
+          name: hash
+          schema: { type: string }
+      responses:
+        '200': { description: Proof generated }
+        '400':
+          description: Missing or invalid identifier / generation failure
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '404':
+          description: Chain empty or event not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/v1/token/revocation/consistency:
+    get:
+      summary: Generate RFC6962-style consistency proof
+      operationId: revocationConsistency
+      tags: [revocation]
+      parameters:
+        - in: query
+          name: start
+          required: true
+          schema: { type: integer, minimum: 0 }
+      responses:
+        '200': { description: Consistency proof }
+        '400':
+          description: Missing/invalid start or generation failure
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '404':
+          description: Chain empty
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/v1/token/revocation/consistency_v2:
+    get:
+      summary: Generate logarithmic consistency proof (prefix block optimized)
+      operationId: revocationConsistencyV2
+      tags: [revocation]
+      parameters:
+        - in: query
+          name: start
+          required: true
+          schema: { type: integer, minimum: 0 }
+      responses:
+        '200': { description: Consistency V2 proof }
+        '400':
+          description: Missing/invalid start or generation failure
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '404':
+          description: Chain empty
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/v1/token/revocation/audit_consistency:
+    get:
+      summary: Generate and internally verify consistency proof with performance metrics
+      operationId: revocationAuditConsistency
+      tags: [revocation, audit]
+      parameters:
+        - in: query
+          name: start
+          required: true
+          schema: { type: integer, minimum: 0 }
+      responses:
+        '200': { description: Audit consistency result }
+        '400':
+          description: Missing/invalid start or generation failure
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '404':
+          description: Chain empty
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/v1/beta/tsa/anchor:
+    post:
+      summary: Timestamp/anchor arbitrary hash (prototype TSA)
+      operationId: tsaAnchor
+      tags: [anchor]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                hash: { type: string }
+      responses:
+        '200': { description: TSA receipt issued }
+        '400':
+          description: Invalid payload (tsa_anchor_invalid_payload)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/v1/beta/tsa/verify:
+    post:
+      summary: Verify TSA receipt integrity and basic timestamp sanity
+      operationId: tsaVerify
+      tags: [anchor]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                hash: { type: string }
+                timestamp: { type: string }
+                provider: { type: string }
+                version: { type: integer }
+      responses:
+        '200': { description: Verification result }
+        '400':
+          description: Invalid receipt (tsa_verify_invalid_receipt)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
 components:
   securitySchemes:
     BearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    CombinedAnchorToken:
+      type: apiKey
+      in: header
+      name: X-Combined-Anchor-Token
+      description: Static or capability-derived token required for combined anchor emission.
   schemas:
+    ErrorResponse:
+      type: object
+      description: Standardized error payload (all error responses share this structure).
+      properties:
+        success: { type: boolean, description: Always false for errors }
+        code: { type: string, description: Stable machine-readable code (snake_case) }
+        error: { type: string, description: Legacy short error string }
+        message: { type: string, description: Optional human-readable expansion }
+        rfc_ref: { type: string, description: Optional RFC clause or section reference }
+        detail: { description: Arbitrary extra context (string, object, or array) }
+      required: [error, code]
     TokenIssueRequest:
       type: object
       properties:
@@ -1398,6 +2279,61 @@ components:
         message: { type: string, description: Human-readable confirmation message }
         poa_id: { type: string, description: Revoked PoA identifier }
       required: [success, message, poa_id]
+    PoADocument:
+      type: object
+      description: Issued Power-of-Attorney document with canonical digest and signatures
+      properties:
+        id: { type: string, description: Unique PoA identifier }
+        subject: { type: string, description: Delegated principal }
+        resource: { type: string, description: Resource identifier }
+        action: { type: string, description: Delegated action }
+        created_at: { type: string, format: date-time, description: Creation timestamp }
+        expires_at: { type: string, format: date-time, description: Expiration timestamp }
+        digest: { type: string, description: Canonical digest (sha256:<hex>) over stable fields }
+        sig_mode: { type: string, enum: [single, multisig], description: Signature mode used }
+        signer_kids:
+          type: array
+          maxItems: 20
+          items: { type: string }
+          description: Ordered list of key IDs required (multisig only)
+        threshold: { type: integer, description: Required signature count (multisig only) }
+        signatures:
+          type: array
+          maxItems: 20
+          items:
+            type: object
+            properties:
+              kid: { type: string, description: Key identifier }
+              sig_b64: { type: string, description: Base64 signature }
+              at: { type: string, format: date-time, description: Signature timestamp }
+            required: [kid, sig_b64]
+          description: Collected signatures (single entry in single mode)
+        threshold_met: { type: boolean, description: Whether required signatures collected }
+      required: [id, subject, resource, action, created_at, digest, sig_mode]
+    PoAVerifyRequest:
+      type: object
+      description: Request to verify a PoA document
+      properties:
+        poa: { $ref: '#/components/schemas/PoADocument' }
+      required: [poa]
+    PoAVerifyResponse:
+      type: object
+      description: Verification result for PoA document
+      properties:
+        valid: { type: boolean, description: Whether PoA is fully valid }
+        digest_valid: { type: boolean, description: Canonical digest matches recomputed value }
+        signatures_valid: { type: boolean, description: All required signatures verified }
+        threshold_met: { type: boolean, description: Multi-sig threshold satisfied (if applicable) }
+        failing_indices:
+          type: array
+          maxItems: 20
+          items: { type: integer }
+          description: Indices of invalid signatures (if any)
+        reason: { type: string, description: High-level failure reason (if invalid) }
+        signer_count: { type: integer, description: Total signatures provided }
+        required: { type: integer, description: Threshold required (multisig) }
+        latency_ms: { type: number, description: Verification latency }
+      required: [valid, digest_valid, signatures_valid]
     MultiSignatureRequest:
       type: object
       description: Request to submit signature for multi-sig PoA collection

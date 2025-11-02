@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sort"
 	"regexp"
 	"strconv"
 	"strings"
@@ -72,6 +73,13 @@ const (
 	POAStatusActive  POAStatus = "active"
 	POAStatusRevoked POAStatus = "revoked"
 	POAStatusExpired POAStatus = "expired"
+	// POAStatusDraft represents a PoA that is prepared but not yet finalized (e.g., awaiting multi-signature quorum)
+	POAStatusDraft  POAStatus = "draft"
+	// POAStatusSuspended is a temporary hold (can transition back to active or to terminated)
+	POAStatusSuspended POAStatus = "suspended"
+	// POAStatusTerminated is a permanent closure distinct from revocation (e.g., natural end-of-contract);
+	// terminated PoAs cannot return to active.
+	POAStatusTerminated POAStatus = "terminated"
 )
 
 // PowerOfAttorney represents a delegation grant between a grantor and grantee.
@@ -82,11 +90,22 @@ type PowerOfAttorney struct {
 	Grantee      string            `json:"grantee"`
 	Scope        []string          `json:"scope"`
 	Restrictions map[string]string `json:"restrictions,omitempty"`
+	// Taxonomy expansion (RB2): classify agents and actions for governance analytics & scoped delegation.
+	// Included in canonical digest starting with Version >=3. Empty values treated as absent (legacy compatibility).
+	AgentType    string            `json:"agent_type,omitempty"`
+	Sector       string            `json:"sector,omitempty"`
+	ActionClass  string            `json:"action_class,omitempty"`
 	ValidFrom    time.Time         `json:"valid_from"`
 	ValidUntil   time.Time         `json:"valid_until"`
 	Status       POAStatus         `json:"status"`
 	CreatedAt    time.Time         `json:"created_at"`
 	UpdatedAt    time.Time         `json:"updated_at"`
+	// Legal & evidentiary extension fields (Beta MVP – excluded from canonical digest):
+	Jurisdiction       string     `json:"jurisdiction,omitempty"`       // Primary governing jurisdiction
+	Witnesses          []string   `json:"witnesses,omitempty"`          // Optional witness identities
+	Attestations       []string   `json:"attestations,omitempty"`       // External attestations / certifications IDs
+	RevokedAt          *time.Time `json:"revoked_at,omitempty"`         // Timestamp of revocation (if revoked)
+	RevocationReason   string     `json:"revocation_reason,omitempty"` // Human-readable structured reason code
 	Signature    *POASignature     `json:"signature,omitempty"`
 	// Multi-signature prototype fields (RFC115-C8): if Signers provided and Threshold>1 we require aggregated validation.
 	Signers   []string `json:"signers,omitempty"`
@@ -99,6 +118,16 @@ type PowerOfAttorney struct {
 	SatisfiedWeight int `json:"satisfied_weight,omitempty"`
 	// SatisfiedSignatures records count of valid signatures contributing to threshold (set on success).
 	SatisfiedSignatures int `json:"satisfied_signatures,omitempty"`
+	// Hierarchical delegation (sub-delegation) fields (excluded from canonical digest for v1-v3; future version may incorporate):
+	ParentPOAID string `json:"parent_poa_id,omitempty"`
+	// ParentDigest binds this delegation to its parent's canonical digest (hierarchical integrity). Included in canonical digest for Version>=4.
+	ParentDigest string `json:"parent_digest,omitempty"`
+	Depth      int    `json:"depth,omitempty"` // 0=root; derived when ParentPOAID set
+	// Dual-control revocation governance fields (beta design placeholders)
+	Controllers []string                 `json:"controllers,omitempty"`          // Optional explicit controller identities authorized for quorum revocation
+	PendingRevocation *PendingRevocationState `json:"pending_revocation,omitempty"` // Non-nil when a revocation workflow is in progress
+	// Evidence hash attachments for forensic strengthening (excluded from canonical digest)
+	EvidenceHashes []string `json:"evidence_hashes,omitempty"`
 }
 
 // POASignature provides authenticity metadata; signature covers canonical digest.
@@ -108,6 +137,32 @@ type POASignature struct {
 	DigestHex string `json:"dig"`
 	SigBase64 string `json:"sig"`
 	Canonical []byte `json:"-"` // cached canonical form (not serialized)
+}
+
+// PendingRevocationState captures an in-progress quorum / dual-control revocation workflow.
+// Quorum rules (design): either RequiredCount (distinct approvers) OR RequiredWeight (sum of signer/controller weights) must be met.
+// Only controllers (when set), Grantor, or declared Signers may approve. Approvals map records timestamp of each distinct approver.
+// Finalization transitions POA.Status to revoked and sets RevokedAt/RevocationReason. Cancellation returns to prior status.
+// All fields are persisted inside the PoA record for durability.
+type PendingRevocationState struct {
+	InitiatedAt     time.Time          `json:"initiated_at"`
+	Initiator       string             `json:"initiator"`
+	Reason          string             `json:"reason,omitempty"`
+	EvidenceHashes  []string           `json:"evidence_hashes,omitempty"` // optional supporting evidence content-addressed hashes
+	Approvals       map[string]time.Time `json:"approvals,omitempty"`     // approver -> timestamp
+	RequiredCount   int                `json:"required_count,omitempty"`  // quorum size by distinct approvers (if >0)
+	RequiredWeight  int                `json:"required_weight,omitempty"` // cumulative weight target (alternative mode)
+	SatisfiedWeight int                `json:"satisfied_weight,omitempty"`// running total in weight mode
+	Finalized       bool               `json:"finalized"`
+	Canceled        bool               `json:"canceled"`
+}
+
+// RevocationRequest represents an initiation request for dual-control revocation.
+type RevocationRequest struct {
+	POAID          string   `json:"poa_id"`
+	Initiator      string   `json:"initiator"`
+	Reason         string   `json:"reason,omitempty"`
+	EvidenceHashes []string `json:"evidence_hashes,omitempty"`
 }
 
 // Reusable constants (reduce duplication and goconst warnings)
@@ -380,6 +435,12 @@ type DelegationRequest struct {
 	Signers      []string          `json:"signers,omitempty"`
 	Threshold    int               `json:"threshold,omitempty"`
 	Weights      map[string]int    `json:"weights,omitempty"`
+	ParentPOAID  string            `json:"parent_poa_id,omitempty"`
+	// Optional taxonomy fields (RB2). When any are provided the resulting POA Version is auto-bumped to >=3
+	// and canonical digest includes taxonomy object (unless multi-sig domain path).
+	AgentType   string `json:"agent_type,omitempty"`
+	Sector      string `json:"sector,omitempty"`
+	ActionClass string `json:"action_class,omitempty"`
 }
 
 // generateLocalKey returns a 32-byte random key for PASETO local tokens.
@@ -569,6 +630,14 @@ func NewService(auditLogger *audit.MemoryLogger, authorizer authz.Authorizer, op
 		poaValidator: selectPoAValidator(),
 		dailyAmounts: make(map[string]float64),
 	}
+	// Optional persistent repository activation via env path
+	if path := os.Getenv("GAUTH_PERSIST_PATH"); path != "" {
+		if br, err := NewBoltRepository(path); err == nil {
+			s.repo = br
+		} else {
+			fmt.Fprintf(os.Stderr, "warn: bolt repo init failed (%v) falling back to memory\n", err)
+		}
+	}
 	// semanticCounters: zero-values (prototype) will accumulate semantic rejection reasons in future validation path.
 	s.limits.applyDefaults()
 	for _, opt := range opts {
@@ -607,6 +676,13 @@ func NewServicePersistent(auditLogPath string, authorizer authz.Authorizer, opts
 		limits:       ValidationLimits{},
 		poaValidator: selectPoAValidator(),
 		dailyAmounts: make(map[string]float64),
+	}
+	if path := os.Getenv("GAUTH_PERSIST_PATH"); path != "" {
+		if br, err := NewBoltRepository(path); err == nil {
+			s.repo = br
+		} else {
+			fmt.Fprintf(os.Stderr, "warn: bolt repo init failed (%v) falling back to memory\n", err)
+		}
 	}
 	// semanticCounters: zero-values (prototype) will accumulate semantic rejection reasons in future validation path.
 	s.limits.applyDefaults()
@@ -1020,6 +1096,7 @@ type Service struct {
 	pdp                 pdp.Engine   // optional modern PDP engine
 	ledger              ledger.Store // optional immutable audit ledger backend
 	nowFn               func() time.Time
+	clockSkew           time.Duration // tolerated clock skew for ValidFrom/ValidUntil windows
 	revChain            *delegation.RevocationChain
 	issChain            *DelegationChain
 	tokenKey            []byte                    // legacy symmetric key (to be deprecated after envelope migration)
@@ -1031,6 +1108,7 @@ type Service struct {
 	keyProvider         cr.KeyProvider            // asymmetric key provider for signature verification
 	replay              *replayCache              // optional in-memory replay protection
 	replayStore         ReplayStore               // optional external distributed replay store (takes precedence if non-nil)
+	sigReplayStore      SignatureReplayStore      // optional signature replay protection store (issuance path)
 	failClosedReplay    bool                      // if true, replay store errors become invalid_request instead of fail-open
 	limits              ValidationLimits          // configurable validation limits
 	poaValidator        PoAValidator              // semantic validator applied post basic validation
@@ -1047,6 +1125,50 @@ type Service struct {
 	}
 	dailyAmounts   map[string]float64 // key: delegationID|YYYY-MM-DD cumulative requested amount
 	dailyAmountsMu sync.Mutex
+}
+
+// AttachEvidenceHashes appends new evidence hash(es) to a POA ensuring uniqueness and basic validation.
+// Rules:
+// - POA must exist and not be revoked/terminated (evidence on historical records disallowed for now)
+// - Each hash must be lowercase hex (0-9a-f) length 64 (sha256) or 128 (sha512) – future extension may allow prefix algo:
+// - Duplicates (already present) are ignored but if submission contains only duplicates we treat as failure for observability
+// - On success: UpdatedAt updated, repository persisted, audit event emitted, metrics incremented, per-POA gauge updated
+func (s *Service) AttachEvidenceHashes(ctx context.Context, poaID string, hashes []string) (*PowerOfAttorney, error) {
+	if poaID == "" { return nil, rfc.New(rfc.ErrInvalidRequest, "missing poa id") }
+	if len(hashes) == 0 { if s.metrics!=nil { s.metrics.IncEvidenceAttachmentFailures() }; return nil, rfc.New(rfc.ErrInvalidRequest, "no hashes provided") }
+	p, ok := s.repo.Get(poaID)
+	if !ok { if s.metrics!=nil { s.metrics.IncEvidenceAttachmentFailures() }; return nil, rfc.New(rfc.ErrNotFound, "poa not found") }
+	if p.Status == POAStatusRevoked || p.Status == POAStatusTerminated { if s.metrics!=nil { s.metrics.IncEvidenceAttachmentFailures() }; return nil, rfc.New(rfc.ErrInvalidRequest, "cannot attach evidence to finalized poa") }
+	// build set of existing
+	existing := make(map[string]struct{}, len(p.EvidenceHashes))
+	for _, eh := range p.EvidenceHashes { existing[eh] = struct{}{} }
+	added := 0
+	hexRx := regexp.MustCompile(`^[0-9a-f]{64}([0-9a-f]{64})?$`)
+	for _, h := range hashes {
+		h = strings.ToLower(strings.TrimSpace(h))
+		if h == "" { continue }
+		if !hexRx.MatchString(h) { if s.metrics!=nil { s.metrics.IncEvidenceAttachmentFailures() }; return nil, rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid hash format: %s", h)) }
+		if _, dup := existing[h]; dup { continue }
+		p.EvidenceHashes = append(p.EvidenceHashes, h)
+		existing[h] = struct{}{}
+		added++
+	}
+	if added == 0 { if s.metrics!=nil { s.metrics.IncEvidenceAttachmentFailures() }; return nil, rfc.New(rfc.ErrInvalidRequest, "no new hashes (all duplicates)") }
+	p.UpdatedAt = s.nowFn()
+	if err := s.repo.Update(p); err != nil { if s.metrics!=nil { s.metrics.IncEvidenceAttachmentFailures() }; return nil, rfc.New(rfc.ErrInternal, fmt.Sprintf("update failed: %v", err)) }
+	// audit event
+	if s.audit != nil {
+		ev := audit.NewEvent(audit.TypeAuth, "evidence_attach", audit.ResultSuccess)
+		ev.Subject = p.Grantor
+		ev.Object = poaID
+		ev.Metadata = map[string]interface{}{"added": added, "total": len(p.EvidenceHashes)}
+		_ = s.audit.Log(ctx, ev)
+	}
+	if s.metrics != nil {
+		for i := 0; i < added; i++ { s.metrics.IncEvidenceAttachment() }
+		s.metrics.SetEvidenceHashesPerPOA(poaID, len(p.EvidenceHashes))
+	}
+	return p, nil
 }
 
 // ValidationLimits defines configurable bounds for delegation request validation.
@@ -1103,6 +1225,17 @@ type replayCache struct {
 type ReplayStore interface {
 	Seen(jti string) (bool, error)
 	Record(jti string, at time.Time) error
+}
+
+// SignatureReplayStore tracks previously used signature digests (digest+keyid compound) to
+// prevent replay of an identical signature over a mutated POA payload. While canonical digest
+// domain separation mitigates cross‑context confusion, an attacker who obtains a valid signature
+// over a canonical form could attempt to reuse it for issuance if dynamic fields were excluded.
+// Tracking first‑use prevents silent acceptance of duplicate signatures (forensic strengthening).
+// Implementations MUST be concurrency‑safe. Seen returns true if compound key already present.
+type SignatureReplayStore interface {
+	SeenSignature(sigKey string) (bool, error)
+	RecordSignature(sigKey string, at time.Time) error
 }
 
 func newReplayCache(max int, ttl time.Duration) *replayCache {
@@ -1264,6 +1397,45 @@ func WithReplayStore(rs ReplayStore) Option {
 	}
 }
 
+// WithSignatureReplayStore installs a signature replay store used during delegation issuance.
+// If installed, CreateDelegation will reject issuance when an identical digest+keyid has been
+// previously observed (ErrReplay). Store errors are treated as miss unless failClosedReplay enabled.
+func WithSignatureReplayStore(ss SignatureReplayStore) Option {
+	return func(s *Service) {
+		if ss != nil { s.sigReplayStore = ss }
+	}
+}
+
+// DelegationGraphNode represents a hierarchical delegation node for export.
+// Scope is copied (non-mutated) to avoid exposing internal slice references.
+type DelegationGraphNode struct {
+	ID     string    `json:"id"`
+	Parent string    `json:"parent,omitempty"`
+	Depth  int       `json:"depth"`
+	Scope  []string  `json:"scope,omitempty"`
+	Status POAStatus `json:"status"`
+}
+
+// BuildDelegationGraph returns all current delegations as a flat slice of nodes including
+// parent linkage and depth. Repository must support List(); if not available an error is returned.
+func (s *Service) BuildDelegationGraph(ctx context.Context) ([]DelegationGraphNode, error) {
+	type lister interface{ List() []*PowerOfAttorney }
+	l, ok := s.repo.(lister)
+	if !ok {
+		return nil, fmt.Errorf("repository does not support List for graph export")
+	}
+	poas := l.List()
+	nodes := make([]DelegationGraphNode, 0, len(poas))
+	for _, p := range poas {
+		if p == nil { continue }
+		// defensive copy of scope slice
+		scopeCopy := append([]string{}, p.Scope...)
+		nodes = append(nodes, DelegationGraphNode{ID: p.ID, Parent: p.ParentPOAID, Depth: p.Depth, Scope: scopeCopy, Status: p.Status})
+	}
+	if s.metrics != nil { s.metrics.IncDelegationGraphExports(); s.metrics.SetDelegationGraphNodeCount(len(nodes)) }
+	return nodes, nil
+}
+
 // AnchorClient defines minimal interface for external anchoring of chain tips.
 type AnchorClient interface{ Anchor(hash string) error }
 
@@ -1277,6 +1449,7 @@ func (n NoopAnchorClient) Anchor(hash string) error { return nil }
 // WithClock allows tests to override the time source (experimental)
 func (s *Service) WithClock(f func() time.Time) *Service { s.nowFn = f; return s }
 
+
 // CreateDelegation creates a new power-of-attorney delegation
 // CreateDelegation is a backward-compatible wrapper that uses context.Background().
 func (s *Service) CreateDelegation(req DelegationRequest) (*DelegationResponse, error) {
@@ -1288,6 +1461,26 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 	// Validate request
 	if err := s.validateDelegationRequest(req); err != nil {
 		return nil, rfc.New(rfc.ErrInvalidRequest, err.Error())
+	}
+	// Sub-delegation depth derivation (before authorization side-effects)
+	depth := 0
+	if req.ParentPOAID != "" {
+		parent, ok := s.repo.Get(req.ParentPOAID)
+		if !ok || parent == nil {
+			return nil, rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("parent_poa_id not found: %s", req.ParentPOAID))
+		}
+		depth = parent.Depth + 1
+		maxDepth := 5
+		if v := os.Getenv("GAUTH_MAX_DELEGATION_DEPTH"); v != "" {
+			if iv, err := strconv.Atoi(strings.TrimSpace(v)); err == nil && iv > 0 { maxDepth = iv }
+		}
+		if depth > maxDepth {
+			return nil, rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("delegation depth %d exceeds max %d", depth, maxDepth))
+		}
+		// Scope inheritance enforcement: child scope must be subset of parent scope semantics.
+		if err := validateInheritedScope(parent.Scope, req.Scope); err != nil {
+			return nil, rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("scope inheritance invalid: %v", err))
+		}
 	}
 
 	// Check authorization via PDP if present; otherwise legacy authorizer.
@@ -1343,11 +1536,54 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 		Signers:      req.Signers,
 		Threshold:    req.Threshold,
 		Weights:      req.Weights,
+		AgentType:    req.AgentType,
+		Sector:       req.Sector,
+		ActionClass:  req.ActionClass,
+		ParentPOAID:  req.ParentPOAID,
+		Depth:        depth,
+	}
+	// Hierarchical digest activation gating (Version 4). Controlled by env flags:
+	// GAUTH_ENABLE_HIER_DIGEST=1 enables automatic Version bump to 4 for new issuances.
+	// GAUTH_FORCE_HIER_DIGEST=1 enforces Version=4 even if enabling logic conditions fail (defensive activation).
+	enableHier := os.Getenv("GAUTH_ENABLE_HIER_DIGEST") == "1"
+	forceHier := os.Getenv("GAUTH_FORCE_HIER_DIGEST") == "1"
+	if enableHier || forceHier {
+		poa.Version = 4
+		// When sub-delegation capture parent's canonical digest for binding (ParentDigest). Missing parent digest increments metric & may error if forced.
+		if poa.ParentPOAID != "" {
+			parent, ok := s.repo.Get(poa.ParentPOAID)
+			if ok && parent != nil {
+				if dig, _, derr := CanonicalPOADigest(parent); derr == nil {
+					poa.ParentDigest = dig
+				} else {
+					if s.metrics != nil { s.metrics.IncHierDigestParentDigestMissing() }
+					if forceHier { return nil, rfc.New(rfc.ErrIntegrityFailure, "parent canonical digest failed") }
+				}
+			} else {
+				if s.metrics != nil { s.metrics.IncHierDigestParentDigestMissing() }
+				if forceHier { return nil, rfc.New(rfc.ErrIntegrityFailure, "parent not found") }
+			}
+		} else {
+			// Root issuance still increments issued metric when hierarchical digest enabled.
+			if s.metrics != nil { s.metrics.IncHierDigestIssued() }
+		}
+	}
+	// Auto-bump version when taxonomy present (non-empty fields) to engage V3 canonical domain separation logic for single-sig.
+	if poa.AgentType != "" || poa.Sector != "" || poa.ActionClass != "" {
+		// Preserve hierarchical V4 if already bumped; else set to 3
+		if poa.Version < 4 { poa.Version = 3 }
 	}
 
 	// Multi-signature enforcement (prototype RFC115-C8). If Threshold>1 require structural validity.
 	if err := ValidateMultiSignature(poa); err != nil {
 		return nil, rfc.New(rfc.ErrIntegrityFailure, fmt.Sprintf("multi-signature invalid: %v", err))
+	}
+
+	// Taxonomy validation (Version>=3 only; legacy versions ignore taxonomy fields even if set)
+	if poa.Version >= 3 {
+		if err := ValidateTaxonomy(poa); err != nil {
+			return nil, rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("taxonomy invalid: %v", err))
+		}
 	}
 
 	// Semantic validation (cross-field invariants)
@@ -1375,6 +1611,22 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 					poa.Signature = &POASignature{Algorithm: signer.Algorithm(), KeyID: signer.KeyID(), DigestHex: dig, SigBase64: base64.StdEncoding.EncodeToString(sig), Canonical: canon}
 					if s.metrics != nil {
 						s.metrics.IncSignaturesIssued()
+					}
+					// Signature replay protection (digest+keyid compound). Only apply to successful signature issuance.
+					if s.sigReplayStore != nil && poa.Signature != nil {
+						compound := poa.Signature.DigestHex + "|" + poa.Signature.KeyID
+						seen, rErr := s.sigReplayStore.SeenSignature(compound)
+						if rErr != nil {
+							if s.metrics != nil { s.metrics.IncReplayStoreErrors() }
+							if s.failClosedReplay { return nil, rfc.New(rfc.ErrInvalidRequest, "signature replay store error") }
+						} else if seen {
+							if s.metrics != nil { s.metrics.IncReplayHits() }
+							return nil, rfc.New(rfc.ErrReplay, "signature replay detected")
+						}
+						if recErr := s.sigReplayStore.RecordSignature(compound, s.nowFn()); recErr != nil {
+							if s.metrics != nil { s.metrics.IncReplayStoreErrors() }
+							if s.failClosedReplay { return nil, rfc.New(rfc.ErrInvalidRequest, "signature replay record error") }
+						} else if s.metrics != nil { s.metrics.IncReplayMisses() }
 					}
 				} else {
 					if s.metrics != nil {
@@ -1474,6 +1726,23 @@ func (s *Service) ValidateDelegationCtx(ctx context.Context, poaID, grantee, act
 	poa, exists := s.repo.Get(poaID)
 	if !exists || poa == nil {
 		return rfc.New(rfc.ErrNotFound, poaID)
+	}
+	// Hierarchical parent digest verification (Version>=4). Ensures recorded ParentDigest matches current parent canonical digest.
+	if poa.Version >= 4 && poa.ParentPOAID != "" {
+		parent, ok := s.repo.Get(poa.ParentPOAID)
+		if !ok || parent == nil {
+			if s.metrics != nil { s.metrics.IncHierDigestParentDigestMissing() }
+			return rfc.New(rfc.ErrIntegrityFailure, "parent delegation missing for hierarchical digest")
+		}
+		if dig, _, derr := CanonicalPOADigest(parent); derr == nil {
+			if poa.ParentDigest == "" || poa.ParentDigest != dig {
+				if s.metrics != nil { s.metrics.IncHierDigestVersionMismatch() }
+				return rfc.New(rfc.ErrIntegrityFailure, "parent digest mismatch")
+			}
+		} else {
+			if s.metrics != nil { s.metrics.IncHierDigestParentDigestMissing() }
+			return rfc.New(rfc.ErrIntegrityFailure, "parent canonicalization failed")
+		}
 	}
 
 	// Signature verification (if signature present and provider available). Performed early
@@ -1583,10 +1852,25 @@ func (s *Service) ValidateDelegationCtx(ctx context.Context, poaID, grantee, act
 		return rfc.New(rfc.ErrRevoked, fmt.Sprintf("delegation not active: %s", poa.Status))
 	}
 
-	// Check expiry
-	if s.nowFn().After(poa.ValidUntil) {
+	// Clock skew tolerance (applies to ValidFrom future and ValidUntil past within skew window)
+	now := s.nowFn()
+	skew := s.clockSkew
+	if skew == 0 {
+		if raw := os.Getenv("GAUTH_CLOCK_SKEW_SECONDS"); raw != "" {
+			if v, err := strconv.Atoi(raw); err == nil && v >= 0 && v <= 3600 {
+				skew = time.Duration(v) * time.Second
+				s.clockSkew = skew
+			}
+		}
+	}
+	// Not-before: reject only if outside tolerance window
+	if now.Add(skew).Before(poa.ValidFrom) {
+		return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("delegation not yet valid until %s", poa.ValidFrom.UTC().Format(time.RFC3339Nano)))
+	}
+	// Expiry: treat within skew window as still valid (soft grace); mark expired only beyond skew
+	if now.After(poa.ValidUntil.Add(skew)) {
 		poa.Status = POAStatusExpired
-		poa.UpdatedAt = s.nowFn()
+		poa.UpdatedAt = now
 		_ = s.repo.Update(poa)
 		if s.metrics != nil {
 			s.metrics.IncExpired()
@@ -1652,6 +1936,102 @@ func (s *Service) ValidateDelegationCtx(ctx context.Context, poaID, grantee, act
 	return nil
 }
 
+// InitiateRevocation starts a dual-control revocation workflow if enabled.
+// It sets PendingRevocation with quorum parameters derived from env or defaults.
+// Env:
+//   GAUTH_REVOCATION_REQUIRED_COUNT (int) overrides RequiredCount
+//   GAUTH_REVOCATION_REQUIRED_WEIGHT (int) enables weight mode when >0
+// Authorization: only Grantor or Controllers may initiate.
+func (s *Service) InitiateRevocation(ctx context.Context, req RevocationRequest) error {
+	if req.POAID == "" { return rfc.New(rfc.ErrInvalidRequest, "poa_id required") }
+	poa, ok := s.repo.Get(req.POAID)
+	if !ok || poa == nil { if s.metrics!=nil { s.metrics.IncRevocationWorkflowInitiationFailures() }; return rfc.New(rfc.ErrNotFound, req.POAID) }
+	if poa.Status != POAStatusActive && poa.Status != POAStatusSuspended { if s.metrics!=nil { s.metrics.IncRevocationWorkflowInitiationFailures() }; return rfc.New(rfc.ErrInvalidRequest, "revocation can only initiate from active or suspended") }
+	// Auth check
+	if req.Initiator != poa.Grantor && !identityIn(req.Initiator, poa.Controllers) {
+		if s.metrics!=nil { s.metrics.IncRevocationWorkflowUnauthorized() }
+		return rfc.New(rfc.ErrUnauthorized, "initiator not authorized for dual-control revocation")
+	}
+	if poa.PendingRevocation != nil { if s.metrics!=nil { s.metrics.IncRevocationWorkflowInitiationFailures() }; return rfc.New(rfc.ErrInvalidRequest, "revocation already pending") }
+	pr := &PendingRevocationState{InitiatedAt: s.nowFn(), Initiator: req.Initiator, Reason: req.Reason, EvidenceHashes: req.EvidenceHashes, Approvals: map[string]time.Time{}}
+	if v := os.Getenv("GAUTH_REVOCATION_REQUIRED_COUNT"); v != "" {
+		if iv, err := strconv.Atoi(strings.TrimSpace(v)); err == nil && iv > 0 { pr.RequiredCount = iv }
+	}
+	if v := os.Getenv("GAUTH_REVOCATION_REQUIRED_WEIGHT"); v != "" {
+		if iv, err := strconv.Atoi(strings.TrimSpace(v)); err == nil && iv > 0 { pr.RequiredWeight = iv }
+	}
+	if pr.RequiredCount == 0 && pr.RequiredWeight == 0 { pr.RequiredCount = 2 } // default dual-control (2 approvals)
+	poa.PendingRevocation = pr
+	poa.Status = POAStatusSuspended // place into suspended during pending revocation (prevents usage)
+	poa.UpdatedAt = s.nowFn()
+	_ = s.repo.Update(poa)
+	if s.metrics!=nil { s.metrics.IncRevocationWorkflowInitiated() }
+	return nil
+}
+
+// ApproveRevocation records an approval and evaluates quorum satisfaction.
+// Approvers: Grantor, Controllers, Signers (if multi-sig) – duplicates ignored.
+func (s *Service) ApproveRevocation(ctx context.Context, poaID, approver string) error {
+	if poaID == "" { return rfc.New(rfc.ErrInvalidRequest, "poa_id required") }
+	poa, ok := s.repo.Get(poaID)
+	if !ok || poa == nil { if s.metrics!=nil { s.metrics.IncRevocationWorkflowApprovalFailures() }; return rfc.New(rfc.ErrNotFound, poaID) }
+	if poa.PendingRevocation == nil { if s.metrics!=nil { s.metrics.IncRevocationWorkflowApprovalFailures() }; return rfc.New(rfc.ErrInvalidRequest, "no pending revocation") }
+	if poa.PendingRevocation.Finalized { if s.metrics!=nil { s.metrics.IncRevocationWorkflowApprovalFailures() }; return rfc.New(rfc.ErrInvalidRequest, "revocation already finalized") }
+	if poa.PendingRevocation.Canceled { if s.metrics!=nil { s.metrics.IncRevocationWorkflowApprovalFailures() }; return rfc.New(rfc.ErrInvalidRequest, "revocation canceled") }
+	if approver != poa.Grantor && !identityIn(approver, poa.Controllers) && !identityIn(approver, poa.Signers) {
+		if s.metrics!=nil { s.metrics.IncRevocationWorkflowUnauthorized() }
+		return rfc.New(rfc.ErrUnauthorized, "approver not authorized") }
+	if poa.PendingRevocation.Approvals == nil { poa.PendingRevocation.Approvals = map[string]time.Time{} }
+	if _, exists := poa.PendingRevocation.Approvals[approver]; !exists {
+		poa.PendingRevocation.Approvals[approver] = s.nowFn()
+		if s.metrics!=nil { s.metrics.IncRevocationWorkflowApprovals() }
+		// Weight accumulation if in weight mode
+		if poa.PendingRevocation.RequiredWeight > 0 && len(poa.Weights) > 0 {
+			if w, okW := poa.Weights[approver]; okW { poa.PendingRevocation.SatisfiedWeight += w }
+		}
+	}
+	// Quorum evaluation
+	if poa.PendingRevocation.RequiredWeight > 0 {
+		if poa.PendingRevocation.SatisfiedWeight >= poa.PendingRevocation.RequiredWeight { if s.metrics!=nil { s.metrics.IncRevocationWorkflowQuorumSatisfied() }; return s.finalizeRevocation(poa) }
+	} else if poa.PendingRevocation.RequiredCount > 0 {
+		if len(poa.PendingRevocation.Approvals) >= poa.PendingRevocation.RequiredCount { if s.metrics!=nil { s.metrics.IncRevocationWorkflowQuorumSatisfied() }; return s.finalizeRevocation(poa) }
+	}
+	_ = s.repo.Update(poa)
+	return nil
+}
+
+// CancelRevocation aborts a pending revocation returning POA to its prior status (active) if not finalized.
+// Only Grantor or Controllers may cancel.
+func (s *Service) CancelRevocation(ctx context.Context, poaID, actor string) error {
+	poa, ok := s.repo.Get(poaID); if !ok || poa == nil { return rfc.New(rfc.ErrNotFound, poaID) }
+	if poa.PendingRevocation == nil { if s.metrics!=nil { s.metrics.IncRevocationWorkflowCancellationFailures() }; return rfc.New(rfc.ErrInvalidRequest, "no pending revocation") }
+	if poa.PendingRevocation.Finalized { if s.metrics!=nil { s.metrics.IncRevocationWorkflowCancellationFailures() }; return rfc.New(rfc.ErrInvalidRequest, "revocation finalized") }
+	if actor != poa.Grantor && !identityIn(actor, poa.Controllers) { if s.metrics!=nil { s.metrics.IncRevocationWorkflowUnauthorized() }; return rfc.New(rfc.ErrUnauthorized, "cancel not authorized") }
+	poa.PendingRevocation.Canceled = true
+	poa.Status = POAStatusActive
+	poa.UpdatedAt = s.nowFn()
+	_ = s.repo.Update(poa)
+	if s.metrics!=nil { s.metrics.IncRevocationWorkflowCanceled() }
+	return nil
+}
+
+// finalizeRevocation (internal) applies the revocation and records metadata.
+func (s *Service) finalizeRevocation(poa *PowerOfAttorney) error {
+	now := s.nowFn()
+	poa.PendingRevocation.Finalized = true
+	poa.Status = POAStatusRevoked
+	poa.RevokedAt = &now
+	if poa.PendingRevocation != nil && poa.PendingRevocation.Reason != "" {
+		poa.RevocationReason = poa.PendingRevocation.Reason
+	}
+	poa.UpdatedAt = now
+	_ = s.repo.Update(poa)
+	return nil
+}
+
+// identityIn helper checks presence of id in slice (case-sensitive exact match).
+func identityIn(id string, list []string) bool { for _, v := range list { if v == id { return true } }; return false }
+
 // ValidateDelegationRich validates a POA using a structured ValidationContext.
 // Falls back to context-based requested_amount extraction if RequestedAmount is nil.
 func (s *Service) ValidateDelegationRich(ctx context.Context, poaID, grantee string, vctx ValidationContext) error {
@@ -1691,9 +2071,22 @@ func (s *Service) ValidateDelegationRich(ctx context.Context, poaID, grantee str
 		}
 		return rfc.New(rfc.ErrRevoked, fmt.Sprintf("delegation not active: %s", poa.Status))
 	}
-	if s.nowFn().After(poa.ValidUntil) {
+	now2 := s.nowFn()
+	skew2 := s.clockSkew
+	if skew2 == 0 {
+		if raw := os.Getenv("GAUTH_CLOCK_SKEW_SECONDS"); raw != "" {
+			if v, err := strconv.Atoi(raw); err == nil && v >= 0 && v <= 3600 {
+				skew2 = time.Duration(v) * time.Second
+				s.clockSkew = skew2
+			}
+		}
+	}
+	if now2.Add(skew2).Before(poa.ValidFrom) {
+		return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("delegation not yet valid until %s", poa.ValidFrom.UTC().Format(time.RFC3339Nano)))
+	}
+	if now2.After(poa.ValidUntil.Add(skew2)) {
 		poa.Status = POAStatusExpired
-		poa.UpdatedAt = s.nowFn()
+		poa.UpdatedAt = now2
 		_ = s.repo.Update(poa)
 		if s.metrics != nil {
 			s.metrics.IncExpired()
@@ -1804,6 +2197,65 @@ func (s *Service) ValidateDelegationRich(ctx context.Context, poaID, grantee str
 	}
 	if err := s.audit.Log(ctx, event); err != nil {
 		return rfc.New(rfc.ErrInternal, fmt.Sprintf("audit log failed: %v", err))
+	}
+	return nil
+}
+
+// validateInheritedScope enforces conservative subset semantics for hierarchical delegation.
+// Rules:
+// 1. Each child scope entry must be covered by at least one parent entry.
+// 2. Coverage definitions:
+//    a. Exact match (parent == child)
+//    b. Parent wildcard suffix using '*' matches prefix (e.g. parent 'audit.*' covers 'audit.log.write')
+//    c. Global wildcard '*' (if present in parent list) covers all child scopes
+// 3. No broadening: child entry not covered => error.
+// 4. Duplicate child entries rejected for determinism.
+// 5. Empty child scope not allowed.
+// Advanced patterns (regex/range) will be layered later; current function is intentionally strict.
+func validateInheritedScope(parentScopes, childScopes []string) error {
+	if len(childScopes) == 0 { return fmt.Errorf("child scope empty") }
+	parentExact := make(map[string]struct{}, len(parentScopes))
+	parentWild := make([]string, 0)
+	parentRegex := make([]*regexp.Regexp, 0)
+	hasGlobal := false
+	enableAdvanced := os.Getenv("GAUTH_ENABLE_ADVANCED_SCOPE") == "1"
+	for _, p := range parentScopes {
+		p = strings.TrimSpace(p)
+		if p == "" { continue }
+		if p == "*" { hasGlobal = true; continue }
+		if strings.HasSuffix(p, "*") {
+			pref := strings.TrimSuffix(p, "*")
+			parentWild = append(parentWild, pref)
+			continue
+		}
+		// Advanced regex pattern: parent entries beginning with 're:' treat remainder as a Go regex.
+		if enableAdvanced && strings.HasPrefix(p, "re:") {
+			pattern := strings.TrimPrefix(p, "re:")
+			if pattern == "" { return fmt.Errorf("empty regex pattern in parent scope") }
+			rx, err := regexp.Compile(pattern)
+			if err != nil { return fmt.Errorf("invalid regex pattern '%s': %v", pattern, err) }
+			parentRegex = append(parentRegex, rx)
+			continue
+		}
+		parentExact[p] = struct{}{}
+	}
+	sort.Slice(parentWild, func(i, j int) bool { return len(parentWild[i]) > len(parentWild[j]) })
+	seenChild := make(map[string]struct{}, len(childScopes))
+	for _, c := range childScopes {
+		c = strings.TrimSpace(c)
+		if c == "" { return fmt.Errorf("child scope contains empty entry") }
+		if _, dup := seenChild[c]; dup { return fmt.Errorf("duplicate child scope entry: %s", c) }
+		seenChild[c] = struct{}{}
+		if hasGlobal { continue }
+		if _, ok := parentExact[c]; ok { continue }
+		covered := false
+		for _, pref := range parentWild { if strings.HasPrefix(c, pref) { covered = true; break } }
+		if !covered && enableAdvanced {
+			for _, rx := range parentRegex { if rx.MatchString(c) { covered = true; break } }
+		}
+		if !covered {
+			return fmt.Errorf("child scope '%s' not covered by parent", c)
+		}
 	}
 	return nil
 }
@@ -2165,15 +2617,128 @@ func (s *Service) validateDelegationRequest(req DelegationRequest) error {
 	return nil
 }
 
-// containsScope checks if an action is within the permitted scope
+// validateInheritedScopeV2 ensures childScope does not broaden parentScope. Rules:
+// Parent patterns supported (same semantics as containsScope):
+//  - Exact: resource.action
+//  - Global wildcard: * (allows any child scope)
+//  - Prefix wildcard: prefix.* (allows any action that starts with prefix.)
+// Child entries must each be authorized by at least one parent entry; rejection occurs on first broaden attempt.
+// Regex and numeric range patterns are conservatively unsupported for inheritance (must match exactly or via wildcard);
+// if present in parent they are treated as exact strings (no expansion) until advanced inheritance implemented.
+func validateInheritedScopeV2(parentScope, childScope []string) error {
+	if len(childScope) == 0 { return fmt.Errorf("child scope must be non-empty") }
+	if len(parentScope) == 0 { return fmt.Errorf("parent scope empty") }
+	// Fast path: global wildcard present in parent => allow all
+	for _, p := range parentScope { if p == "*" { return nil } }
+	// Normalize parent into classification buckets
+	exact := map[string]struct{}{}
+	prefixes := make([]string, 0)
+	for _, p := range parentScope {
+		p = strings.TrimSpace(p)
+		if p == "" { continue }
+		if p == "*" { return nil }
+		if strings.HasSuffix(p, ".*") {
+			prefixes = append(prefixes, strings.TrimSuffix(p, ".*"))
+			continue
+		}
+		// treat regex:/ and range patterns conservatively as exact strings (no expansion)
+		exact[p] = struct{}{}
+	}
+	// For each child entry ensure coverage by exact match or prefix wildcard.
+	for _, c := range childScope {
+		c = strings.TrimSpace(c)
+		if c == "" { return fmt.Errorf("child scope contains empty entry") }
+		if _, ok := exact[c]; ok { continue }
+		covered := false
+		for _, pre := range prefixes {
+			if strings.HasPrefix(c, pre+".") { covered = true; break }
+		}
+		if !covered {
+			return fmt.Errorf("child scope entry '%s' not covered by parent scope", c)
+		}
+	}
+	return nil
+}
+
+// containsScope checks if an action is within the permitted scope using enhanced pattern semantics.
+// Supported patterns:
+//   1. Exact: "resource.action" must equal the action string
+//   2. Global wildcard: "*" matches any action
+//   3. Prefix wildcard: "prefix.*" matches any action with leading segment(s) "prefix." (e.g. "audit.*" matches "audit.read.log")
+//   4. Regex: "regex:/<expr>/" (only active when GAUTH_SCOPE_ALLOW_REGEX=1). On regex compile error pattern is skipped.
+//   5. Numeric range: "base[min-max]" where action is "base<integer>" and integer lies inclusively within [min,max].
+//      Example: pattern "rate[5-10]" matches action "rate7".
+// Notes:
+//   - Evaluation short-circuits on first match.
+//   - Invalid patterns are ignored (never match) to avoid unintended broad authorization.
+//   - Regex gating prevents accidental performance impact or security risk unless explicitly enabled.
 func containsScope(scope []string, action string) bool {
-	for _, s := range scope {
-		if s == action || s == "*" {
+	allowRegex := os.Getenv("GAUTH_SCOPE_ALLOW_REGEX") == "1"
+	for _, raw := range scope {
+		if raw == "" { // skip empty entries
+			continue
+		}
+		// 1. Global wildcard
+		if raw == "*" {
+			return true
+		}
+		// 2. Regex pattern: regex:/.../
+		if strings.HasPrefix(raw, "regex:/") && strings.HasSuffix(raw, "/") {
+			if !allowRegex {
+				// Regex patterns ignored when not enabled
+				continue
+			}
+			pattern := raw[len("regex:/") : len(raw)-1]
+			re, err := regexp.Compile(pattern)
+			if err != nil {
+				continue // invalid regex silently ignored
+			}
+			if re.MatchString(action) {
+				return true
+			}
+			continue
+		}
+		// 3. Prefix wildcard suffix "*" (but not solitary "*")
+		if strings.HasSuffix(raw, "*") && raw != "*" {
+			prefix := strings.TrimSuffix(raw, "*")
+			if prefix == "" { // Edge case: "*" already handled; empty prefix after trim means malformed pattern
+				continue
+			}
+			if strings.HasPrefix(action, prefix) {
+				return true
+			}
+			// continue; maybe exact match below
+		}
+		// 4. Numeric range: base[min-max]
+		if lb := strings.Index(raw, "["); lb != -1 && strings.HasSuffix(raw, "]") {
+			base := raw[:lb]
+			rng := raw[lb+1 : len(raw)-1]
+			parts := strings.Split(rng, "-")
+			if len(parts) == 2 {
+				start, err1 := strconv.Atoi(strings.TrimSpace(parts[0]))
+				end, err2 := strconv.Atoi(strings.TrimSpace(parts[1]))
+				if err1 == nil && err2 == nil && start <= end && strings.HasPrefix(action, base) {
+					valStr := action[len(base):]
+					if num, err3 := strconv.Atoi(valStr); err3 == nil {
+						if num >= start && num <= end {
+							return true
+						}
+					}
+				}
+			}
+			// continue after range attempt
+		}
+		// 5. Exact match
+		if raw == action {
 			return true
 		}
 	}
 	return false
 }
+
+// ScopeContains is an exported wrapper around containsScope for external validation & testing.
+// It preserves internal pattern semantics while offering a stable public API.
+func ScopeContains(scope []string, action string) bool { return containsScope(scope, action) }
 
 // auditActionAmount extracts a simulated requested transaction amount from context (prototype).
 // Future enhancement: pass a structured request carrying amount; for now always returns none.
@@ -2193,9 +2758,10 @@ func auditActionAmount(ctx context.Context) (string, bool) {
 }
 
 // generatePOAID generates a unique ID for a power-of-attorney
-func generatePOAID() string {
-	return fmt.Sprintf("poa_%d", time.Now().UnixNano())
-}
+// poaIDGenerator is a variable to allow deterministic override in tests (signature replay scenarios).
+var poaIDGenerator = func() string { return fmt.Sprintf("poa_%d", time.Now().UnixNano()) }
+
+func generatePOAID() string { return poaIDGenerator() }
 
 // generateAuthToken generates an authorization token for a POA
 func generateAuthToken(s *Service, poa *PowerOfAttorney) string {

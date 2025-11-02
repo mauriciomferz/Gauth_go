@@ -8,6 +8,9 @@
 
 This index lists Architecture Decision Records for the GAuth beta-refactor branch.
 
+Related Design Docs (non-ADR):
+- `DISCOVERY_ENDPOINT.md` (RB3) – JSON schema, caching, ETag semantics for `/api/v1/discovery` transparency surface.
+
 | ADR | Status | Summary |
 |-----|--------|---------|
 | `ADR-capability-governance.md` | Proposed (Implemented) | Capability registry governance: schema versioning, canonical hash anchoring, transactional loader, audit pagination & discovery metadata expansion. |
@@ -16,6 +19,9 @@ This index lists Architecture Decision Records for the GAuth beta-refactor branc
 | `ADR-external-notarization-integration.md` | Proposed | External notarization for capability registry and audit chain: TSA and transparency log integration, metrics, verification endpoints, and security considerations. |
 | `ADR-key-rotation-scheduler-vault-integration.md` | Proposed | Automated key rotation scheduler, secure secret storage (Vault/KMS), rotation log, metrics, and discovery endpoint extensions. |
 | `ADR-multi-signature-threshold-enforcement.md` | Proposed | Multi-signature/threshold enforcement for Power of Attorney: N-of-M signing, verification API, metrics, and audit log integration. |
+| `ADR-tracing-sampling-semantics.md` | Proposed (Implemented) | RB9 tracing sampling semantics: ratio<=0 always-sample, future inversion plan, minimal span tags. |
+| `ADR-ledger-entry-signatures.md` | Proposed | Ledger entry signatures: integration of cryptographic signatures for ledger entries, ensuring integrity and authenticity. |
+| `ADR-revocation-consistency-proofs.md` | Proposed (Implemented) | Revocation Merkle subtree progression consistency proofs (logarithmic update verification, tamper detection, future notarization path). |
 
 ## Conventions
 - File naming: `ADR-<short-topic>.md`.

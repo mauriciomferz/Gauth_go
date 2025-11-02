@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GAuth Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/ui/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>GAuth Beta Dashboard</h1>
+    <nav>
+      <a href="#revocation">Revocation</a>
+      <a href="#rotation">Rotation</a>
+      <a href="#capability">Capability</a>
+      <a href="#errors">Errors</a>
+      <a href="#algorithms">Algorithms</a>
+      <a href="#openapi">OpenAPI</a>
+    </nav>
+  </header>
+  <main>
+    <section id="revocation" class="panel">
+      <h2>Revocation Head</h2>
+      <div id="revocation-status" class="status">Loading…</div>
+      <pre id="revocation-head"></pre>
+    </section>
+    <section id="rotation" class="panel">
+      <h2>Rotation Summary</h2>
+      <div id="rotation-status" class="status">Loading…</div>
+      <div class="grid">
+        <div><strong>Head Hash:</strong> <span id="rotation-head-hash">—</span></div>
+        <div><strong>Aggregate Hash:</strong> <span id="rotation-aggregate-hash">—</span></div>
+        <div><strong>Chain Length:</strong> <span id="rotation-chain-length">—</span></div>
+        <div><strong>Active Key:</strong> <span id="rotation-signature-kid">—</span></div>
+      </div>
+      <div class="legacy-note" style="font-size:0.6rem; opacity:.65;">Legacy rotation summary. See Rotation V2 panel for weighted multi‑sig.</div>
+    </section>
+    <section id="rotation-v2" class="panel">
+      <h2>Rotation V2</h2>
+      <div id="rotation-v2-status" class="status">Loading…</div>
+      <div class="actions" style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+        <button id="rotv2-copy-latest" class="btn-mini" title="Copy latest canonical digest">Copy Digest</button>
+        <button id="rotv2-copy-prev" class="btn-mini" title="Copy previous artifact hash">Copy Prev</button>
+        <button id="rotv2-download" class="btn-mini" title="Download full artifact JSON">Download Artifact</button>
+      </div>
+      <div class="grid">
+        <div><strong>Verified Weight:</strong> <span id="rotv2-verified-weight">—</span></div>
+        <div><strong>Threshold:</strong> <span id="rotv2-threshold">—</span></div>
+        <div><strong>Status:</strong> <span id="rotv2-threshold-status" class="badge">—</span></div>
+        <div><strong>Prev Hash:</strong> <span id="rotv2-prev-hash">—</span></div>
+        <div><strong>Latest Hash:</strong> <span id="rotv2-latest-hash">—</span></div>
+        <div><strong>Active Key Set:</strong> <span id="rotv2-keyset-id">—</span></div>
+        <div><strong>Generated At:</strong> <span id="rotv2-generated-at">—</span></div>
+        <div><strong>Algorithms:</strong> <span id="rotv2-alg-suite">—</span></div>
+      </div>
+      <div id="rotv2-alg-weights-wrapper">
+        <h3 style="margin:.5rem 0 .25rem; font-size:.8rem;">Per‑Algorithm Weights</h3>
+        <table id="rotv2-alg-weights" style="width:100%; border-collapse:collapse; font-size:0.65rem;">
+          <thead><tr><th style="text-align:left; border-bottom:1px solid #333; padding:2px 4px;">Algorithm</th><th style="text-align:right; border-bottom:1px solid #333; padding:2px 4px;">Weight</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div id="rotv2-signers-wrapper">
+        <h3 style="margin:.75rem 0 .25rem; font-size:.8rem;">Signers</h3>
+        <table id="rotv2-signers" style="width:100%; border-collapse:collapse; font-size:0.6rem;">
+          <thead><tr>
+            <th style="text-align:left; border-bottom:1px solid #333; padding:2px 4px;">Kid</th>
+            <th style="text-align:left; border-bottom:1px solid #333; padding:2px 4px;">Alg</th>
+            <th style="text-align:right; border-bottom:1px solid #333; padding:2px 4px;">Weight</th>
+            <th style="text-align:left; border-bottom:1px solid #333; padding:2px 4px;">Signature</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div id="rotv2-failures-wrapper" style="display:none;">
+        <h3 style="margin:.75rem 0 .25rem; font-size:.8rem; color:#f88;">Verification Failures</h3>
+        <ul id="rotv2-failures" style="font-size:0.65rem; list-style:disc; padding-left:1.1rem;"></ul>
+      </div>
+    </section>
+    <section id="capability" class="panel">
+      <h2>Capability Anchor</h2>
+      <div id="capability-status" class="status">Loading…</div>
+      <div class="grid">
+        <div><strong>Registry Hash:</strong> <span id="cap-registry-hash">—</span></div>
+        <div><strong>Prev Hash:</strong> <span id="cap-prev-hash">—</span></div>
+        <div><strong>Anchored At:</strong> <span id="cap-anchored-at">—</span></div>
+        <div><strong>Provider:</strong> <span id="cap-provider">—</span></div>
+      </div>
+    </section>
+    <section id="errors" class="panel">
+      <h2>Error Catalog</h2>
+      <table id="error-table">
+        <thead>
+          <tr><th>Code</th><th>HTTP</th><th>Category</th><th>Severity</th><th>Retry</th><th>Description</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+    <section id="algorithms" class="panel">
+      <h2>Algorithms</h2>
+      <ul id="alg-list"></ul>
+    </section>
+    <section id="openapi" class="panel">
+      <h2>OpenAPI Spec</h2>
+      <div id="openapi-container">Loading spec…</div>
+    </section>
+  </main>
+  <footer>
+    <small>© 2025 GAuth Beta</small>
+  </footer>
+  <script src="/ui/app.js" type="module"></script>
+</body>
+</html>

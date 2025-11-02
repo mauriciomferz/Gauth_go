@@ -21,6 +21,12 @@ const (
 // Metrics defines the minimal instrumentation surface for early Phase 2.
 type Metrics interface {
 	IncDelegationsCreated()
+	// IncDelegationsPartiallyRevoked increments counter for delegations transitioned to partially_revoked state.
+	IncDelegationsPartiallyRevoked()
+	// IncDelegationDepthExceeded increments counter when a delegation append exceeds configured max depth.
+	IncDelegationDepthExceeded()
+	// SetMaxObservedDelegationDepth sets a gauge tracking the maximum delegation chain depth observed (root=1).
+	SetMaxObservedDelegationDepth(depth int)
 	ObserveValidationLatency(d time.Duration)
 	IncSignaturesIssued()
 	IncSignatureIssueFailures()
@@ -33,6 +39,14 @@ type Metrics interface {
 	IncAttestationProofVerificationFailures()
 	IncAttestationProofDigestMismatch()
 	ObserveAttestationProofVerificationLatency(d time.Duration)
+	// ObserveAttestationProofIssueLatency records issuance latency (distinct from verification latency)
+	ObserveAttestationProofIssueLatency(d time.Duration)
+	// IncAttestationProofVerificationFailureReason increments labeled failure reason counter (digest_mismatch|algo_mismatch|key_mismatch|missing_anchor|other)
+	IncAttestationProofVerificationFailureReason(reason string)
+	// BLS Proof-of-Possession metrics
+	IncBLSPoPChallengesIssued()
+	IncBLSPoPVerifications()
+	IncBLSPoPVerificationFailures()
 	// Trust anchor enforcement granular counters (attestation issuer binding failures)
 	IncAttestationProofTrustAnchorMissing()
 	IncAttestationProofTrustAnchorAlgorithmMismatch()
@@ -44,6 +58,10 @@ type Metrics interface {
 	// Envelope issuance version counters (migration observability)
 	IncEnvelopeV1Issued()
 	IncEnvelopeV2Issued()
+	// Hierarchical digest V4 domain counters (Beta MVP)
+	IncHierDigestIssued()
+	IncHierDigestParentDigestMissing()
+	IncHierDigestVersionMismatch()
 	// SetEnvelopeV2AdoptionRatio sets a gauge expressing V2 issuance ratio (0.0-1.0) over sliding window or total counters.
 	SetEnvelopeV2AdoptionRatio(r float64)
 	// IncEnvelopeDigestMismatch increments counter when canonical digest recomputed at verification differs from stored digest.
@@ -77,6 +95,8 @@ type Metrics interface {
 	// ObserveMultiSignatureAggregateLatency records latency of aggregate signature computation (distinct from verification path).
 	ObserveMultiSignatureAggregateLatency(d time.Duration)
 	IncAnchorAttempts()
+	IncCombinedAnchorEmitted()
+	IncCombinedAnchorFailures()
 	IncAnchorFailures()
 	// IncExternalAnchorForcedFailures increments counter of failures explicitly forced via GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS
 	// distinguishing deterministic test harness failures from probabilistic model failures.
@@ -92,6 +112,18 @@ type Metrics interface {
 	IncReplayMisses()
 	IncReplayStoreErrors()
 	ObserveReplayStoreLatency(d time.Duration)
+	// WAL durability metrics (RB1 Phase): pending buffered entries and flush latency.
+	SetReplayWALPending(n int)
+	ObserveReplayWALFlushLatency(d time.Duration)
+	// ObserveReplayWALSnapshotDuration measures the duration of creating a snapshot
+	// of the replay WAL (copying state before compaction/rotation) exclusive of
+	// the subsequent flush/rotation latency which is tracked separately.
+	ObserveReplayWALSnapshotDuration(d time.Duration)
+	// Capability diff endpoint metrics (RB13)
+	// IncCapabilityDiffRequests increments the capability diff requests counter.
+	IncCapabilityDiffRequests()
+	// ObserveCapabilityDiffLatency records diff computation latency (hash + compare phase) excluding serialization.
+	ObserveCapabilityDiffLatency(d time.Duration)
 	// Capability registry anchoring metrics (Phase 2 governance integrity)
 	IncCapabilityAnchorEmitted()
 	IncCapabilityAnchorSkipped()
@@ -99,6 +131,15 @@ type Metrics interface {
 	// SetCapabilityAnchorLastWriteUnix records the unix epoch seconds of the last successful capability anchor artifact emission.
 	// Implementations MAY expose this as a gauge. Zero value indicates no emission yet.
 	SetCapabilityAnchorLastWriteUnix(ts uint64)
+	// IncCapabilityAnchorAlgorithm increments a labeled counter for each cryptographic algorithm
+	// present during a capability anchor emission. This provides per-algorithm visibility
+	// on anchor events (e.g. ed25519 vs ecdsa-p256 vs future bls aggregated paths).
+	// The caller SHOULD pass a stable lowercase algorithm identifier. Empty values are
+	// normalized to "_". Multiple algorithms may be incremented for a single anchor emission.
+	IncCapabilityAnchorAlgorithm(algo string)
+	// SetCapabilityAnchorAlgorithmRatio sets a gauge expressing per-algorithm anchor emission ratio (0..1) vs total across all algorithms.
+	// Implementations MAY approximate over a sliding window; callers should pre-compute ratio externally.
+	SetCapabilityAnchorAlgorithmRatio(algo string, ratio float64)
 	// Capability enforcement decision counters (added after initial generic violation-only path).
 	// These provide explicit allow/deny monotonic counters for capability matrix enforcement decisions
 	// to enable ratio calculations and alerting without scraping audit logs.
@@ -129,6 +170,33 @@ type Metrics interface {
 	IncDelegationStatusTransitionFailures()
 	IncTokenStatusTransitions()
 	IncTokenStatusTransitionFailures()
+	// Dual-control revocation workflow metrics (hierarchical governance observability)
+	// IncRevocationWorkflowInitiated increments counter when a pending dual-control revocation is successfully initiated.
+	IncRevocationWorkflowInitiated()
+	// IncRevocationWorkflowInitiationFailures increments counter when initiation is rejected (invalid state, already pending, etc.).
+	IncRevocationWorkflowInitiationFailures()
+	// IncRevocationWorkflowApprovals increments counter when a new unique approval is recorded (duplicate approvals ignored).
+	IncRevocationWorkflowApprovals()
+	// IncRevocationWorkflowApprovalFailures increments counter when an approval attempt fails (unauthorized, no pending revocation, finalized/canceled).
+	IncRevocationWorkflowApprovalFailures()
+	// IncRevocationWorkflowQuorumSatisfied increments counter when quorum (count or weight) is satisfied and revocation is finalized.
+	IncRevocationWorkflowQuorumSatisfied()
+	// IncRevocationWorkflowCanceled increments counter when a pending revocation is canceled.
+	IncRevocationWorkflowCanceled()
+	// IncRevocationWorkflowCancellationFailures increments counter when cancellation attempt fails (unauthorized, no pending, already finalized, etc.).
+	IncRevocationWorkflowCancellationFailures()
+	// IncRevocationWorkflowUnauthorized increments counter for any unauthorized dual-control revocation action attempt (initiate/approve/cancel).
+	IncRevocationWorkflowUnauthorized()
+	// Evidence attachment metrics (forensic evidentiary strengthening)
+	// IncEvidenceAttachment increments counter when a valid new evidence hash is attached to a POA (unique additions only).
+	IncEvidenceAttachment()
+	// IncEvidenceAttachmentFailures increments counter when an evidence attachment attempt fails (invalid format, not found, duplicate-only submission, etc.).
+	IncEvidenceAttachmentFailures()
+	// SetEvidenceHashesPerPOA sets a gauge (labeled by poa_id in Prometheus implementation) with current evidence hash count for a POA.
+	SetEvidenceHashesPerPOA(poaID string, n int)
+	// Delegation graph export metrics
+	IncDelegationGraphExports() // count graph export requests
+	SetDelegationGraphNodeCount(n int) // gauge of current nodes in exported graph
 	// RecordDecision captures an authorization decision with action/resource/outcome labels.
 	// outcome SHOULD be one of: allow, deny, error, success, failure, noop.
 	RecordDecision(action, resource, outcome string)
@@ -140,6 +208,24 @@ type Metrics interface {
 	// ObserveLifecycleTransitionLatency records the latency of a lifecycle transition (token/delegation status update)
 	// outcome aligns with lifecycle transition outcome labels: success|failure|noop|unknown
 	ObserveLifecycleTransitionLatency(entityType, outcome string, d time.Duration)
+	// SetLifecycleTransitionLatencyQuantile sets a gauge labeled with entity,outcome,quantile (e.g. p50,p95,p99) for latency distribution.
+	// Computation performed externally (e.g. using reservoir samples); implementations simply store/update gauge.
+	SetLifecycleTransitionLatencyQuantile(entityType, outcome, quantile string, value float64)
+	// Cascade revocation metrics (Phase 2b)
+	// IncCascadeRevocationTriggered increments counter when a cascade revocation is initiated (parent POA revoked)
+	IncCascadeRevocationTriggered()
+	// IncCascadeDescendantsProcessed increments counter for each descendant POA processed during cascade
+	IncCascadeDescendantsProcessed()
+	// ObserveCascadeProcessingLatency records total time to process cascade revocation for a parent POA
+	ObserveCascadeProcessingLatency(d time.Duration)
+	// IncCascadeDepthLimitReached increments counter when cascade processing hits configured max depth limit
+	IncCascadeDepthLimitReached()
+	// IncCascadeBatchProcessed increments counter for each batch processed during cascade operation
+	IncCascadeBatchProcessed()
+	// SetCascadeMaxDepthReached sets gauge tracking deepest cascade depth processed in current session
+	SetCascadeMaxDepthReached(depth int)
+	// IncCascadeProcessingErrors increments counter for cascade processing errors (failures to update descendants)
+	IncCascadeProcessingErrors()
 	// Optional adapter-specific setters (Prometheus) for capability anchor SLA freshness. Memory implementation intentionally omits.
 	// These are not required by all implementations; callers SHOULD use type assertions.
 	// SetCapabilityAnchorAgeSeconds(age uint64)
@@ -152,20 +238,28 @@ var Noop Metrics = noop{}
 type noop struct{}
 
 func (n noop) IncDelegationsCreated()                                                        {}
+func (n noop) IncDelegationsPartiallyRevoked()                                               {}
+func (n noop) IncDelegationDepthExceeded()                                                   {}
+func (n noop) SetMaxObservedDelegationDepth(depth int)                                       {}
 func (n noop) ObserveValidationLatency(d time.Duration)                                      {}
 func (n noop) IncSignaturesIssued()                                                          {}
 func (n noop) IncSignatureIssueFailures()                                                    {}
 func (n noop) IncSignatureVerifications()                                                    {}
-	func (n noop) IncSignatureVerificationFailures()                                             {}
-	func (n noop) IncAttestationProofIssued()                                                    {}
-	func (n noop) IncAttestationProofIssueFailures()                                             {}
-	func (n noop) IncAttestationProofVerifications()                                             {}
-	func (n noop) IncAttestationProofVerificationFailures()                                      {}
-	func (n noop) IncAttestationProofDigestMismatch()                                            {}
-	func (n noop) ObserveAttestationProofVerificationLatency(d time.Duration)                   {}
-	func (n noop) IncAttestationProofTrustAnchorMissing()                                        {}
-	func (n noop) IncAttestationProofTrustAnchorAlgorithmMismatch()                              {}
-	func (n noop) IncAttestationProofTrustAnchorKeyMismatch()                                    {}
+func (n noop) IncSignatureVerificationFailures()                                             {}
+func (n noop) IncAttestationProofIssued()                                                    {}
+func (n noop) IncAttestationProofIssueFailures()                                             {}
+func (n noop) IncAttestationProofVerifications()                                             {}
+func (n noop) IncAttestationProofVerificationFailures()                                      {}
+func (n noop) IncAttestationProofDigestMismatch()                                            {}
+func (n noop) ObserveAttestationProofVerificationLatency(d time.Duration)                   {}
+func (n noop) ObserveAttestationProofIssueLatency(d time.Duration)                          {}
+func (n noop) IncAttestationProofVerificationFailureReason(reason string)                   {}
+func (n noop) IncBLSPoPChallengesIssued()                                                   {}
+func (n noop) IncBLSPoPVerifications()                                                      {}
+func (n noop) IncBLSPoPVerificationFailures()                                               {}
+func (n noop) IncAttestationProofTrustAnchorMissing()                                        {}
+func (n noop) IncAttestationProofTrustAnchorAlgorithmMismatch()                              {}
+func (n noop) IncAttestationProofTrustAnchorKeyMismatch()                                    {}
 func (n noop) IncMultiSignatureVerifications()                                               {}
 func (n noop) IncMultiSignatureVerificationFailures()                                        {}
 func (n noop) IncEnvelopeV1Issued()                                                          {}
@@ -181,6 +275,10 @@ func (n noop) IncEnvelopeRawPOATooLarge()                                       
 func (n noop) IncMultiSignatureStructuralFailures()                                          {}
 func (n noop) IncMultiSignatureDigestFailures()                                              {}
 func (n noop) IncMultiSignaturePublicKeyMissing()                                            {}
+// Hierarchical digest metrics (V4)
+func (n noop) IncHierDigestIssued()                                                          {}
+func (n noop) IncHierDigestParentDigestMissing()                                             {}
+func (n noop) IncHierDigestVersionMismatch()                                                 {}
 func (n noop) IncMultiSignatureInvalidSignatureFailures()                                    {}
 func (n noop) IncMultiSignatureThresholdFailures()                                           {}
 func (n noop) IncViolation(cat interface{})                                                  {}
@@ -192,6 +290,8 @@ func (n noop) IncRevocationIntegrityFailures()                                  
 func (n noop) IncSignaturePublicKeyMissing()                                                 {}
 func (n noop) IncCryptoSignatureMissing()                                                   {}
 func (n noop) IncAnchorAttempts()                                                            {}
+func (n noop) IncCombinedAnchorEmitted()                                                     {}
+func (n noop) IncCombinedAnchorFailures()                                                    {}
 func (n noop) IncAnchorFailures()                                                            {}
 func (n noop) IncExternalAnchorForcedFailures()                                              {}
 func (n noop) IncObligationsExecuted()                                                       {}
@@ -202,9 +302,14 @@ func (n noop) IncReplayHits()                                                   
 func (n noop) IncReplayMisses()                                                              {}
 func (n noop) IncReplayStoreErrors()                                                         {}
 func (n noop) ObserveReplayStoreLatency(d time.Duration)                                     {}
+func (n noop) SetReplayWALPending(p int)                                                    {}
+func (n noop) ObserveReplayWALFlushLatency(d time.Duration)                                 {}
+func (n noop) ObserveReplayWALSnapshotDuration(d time.Duration)                            {}
 func (n noop) IncCapabilityAnchorEmitted()                                                   {}
 func (n noop) IncCapabilityAnchorSkipped()                                                   {}
 func (n noop) IncCapabilityRegistryHashChanged()                                             {}
+func (n noop) IncCapabilityAnchorAlgorithm(algo string)                                      {}
+func (n noop) SetCapabilityAnchorAlgorithmRatio(algo string, ratio float64)                 {}
 func (n noop) SetCapabilityAnchorLastWriteUnix(ts uint64)                                    {}
 func (n noop) IncCapabilityEnforceAllowed()                                                  {}
 func (n noop) IncCapabilityEnforceDenied()                                                   {}
@@ -229,6 +334,30 @@ func (n noop) RecordDecision(action, resource, outcome string)                  
 func (n noop) RecordDecisionWithReason(action, resource, outcome, reason string)             {}
 func (n noop) RecordLifecycleTransition(entityType, oldStatus, newStatus, outcome string)    {}
 func (n noop) ObserveLifecycleTransitionLatency(entityType, outcome string, d time.Duration) {}
+func (n noop) SetLifecycleTransitionLatencyQuantile(entityType, outcome, quantile string, value float64) {}
+func (n noop) IncCapabilityDiffRequests() {}
+func (n noop) ObserveCapabilityDiffLatency(d time.Duration) {}
+func (n noop) IncRevocationWorkflowInitiated() {}
+func (n noop) IncRevocationWorkflowInitiationFailures() {}
+func (n noop) IncRevocationWorkflowApprovals() {}
+func (n noop) IncRevocationWorkflowApprovalFailures() {}
+func (n noop) IncRevocationWorkflowQuorumSatisfied() {}
+func (n noop) IncRevocationWorkflowCanceled() {}
+func (n noop) IncRevocationWorkflowCancellationFailures() {}
+func (n noop) IncRevocationWorkflowUnauthorized() {}
+func (n noop) IncEvidenceAttachment() {}
+func (n noop) IncEvidenceAttachmentFailures() {}
+func (n noop) SetEvidenceHashesPerPOA(poaID string, count int) {}
+func (n noop) IncDelegationGraphExports() {}
+func (n noop) SetDelegationGraphNodeCount(count int) {}
+// Cascade revocation noop implementations
+func (n noop) IncCascadeRevocationTriggered() {}
+func (n noop) IncCascadeDescendantsProcessed() {}
+func (n noop) ObserveCascadeProcessingLatency(d time.Duration) {}
+func (n noop) IncCascadeDepthLimitReached() {}
+func (n noop) IncCascadeBatchProcessed() {}
+func (n noop) SetCascadeMaxDepthReached(depth int) {}
+func (n noop) IncCascadeProcessingErrors() {}
 
 // Memory is a simple in-process metrics collector used for tests and benchmarks.
 // It is intentionally minimal and lock-free for write paths using atomics.
@@ -264,6 +393,17 @@ type Memory struct {
 	attestationProofVerificationLatencyCount  uint64
 	attestationProofVerificationLatencyTotalNS uint64
 	attestationProofVerificationLatencyMaxNS  uint64
+	// Attestation proof issuance latency summary
+	attestationProofIssueLatencyCount    uint64
+	attestationProofIssueLatencyTotalNS  uint64
+	attestationProofIssueLatencyMaxNS    uint64
+	// Attestation proof verification failure reasons (labeled): reason -> count
+	attestationProofVerificationFailureReasons   map[string]uint64
+	attestationProofVerificationFailureReasonsMu sync.Mutex
+	// BLS PoP counters
+	blsPoPChallengesIssued      uint64
+	blsPoPVerifications         uint64
+	blsPoPVerificationFailures  uint64
 	// Trust anchor enforcement granular counters
 	attestationProofTrustAnchorMissing         uint64
 	attestationProofTrustAnchorAlgorithmMismatch uint64
@@ -296,6 +436,8 @@ type Memory struct {
 	signaturePublicKeyMissing    uint64
 	cryptoSignatureMissing       uint64
 	anchorAttempts               uint64
+	combinedAnchorEmitted        uint64
+	combinedAnchorFailures       uint64
 	anchorFailures               uint64
 	externalAnchorForcedFailures uint64 // forced initial failures (deterministic override)
 	obligationsExecuted          uint64 // successful obligation/advice executions
@@ -310,17 +452,34 @@ type Memory struct {
 	replayStoreLatencyCount      uint64
 	replayStoreLatencyTotalNS    uint64
 	replayStoreLatencyMaxNS      uint64
+	replayWALPending             uint64
+	replayWALFlushLatencyCount   uint64
+	replayWALFlushLatencyTotalNS uint64
+	replayWALFlushLatencyMaxNS   uint64
+	replayWALSnapshotDurationCount uint64
+	replayWALSnapshotDurationTotalNS uint64
+	replayWALSnapshotDurationMaxNS uint64
 	// Capability anchoring counters
 	capabilityAnchorEmitted       uint64
 	capabilityAnchorSkipped       uint64
 	capabilityRegistryHashChanged uint64
 	capabilityAnchorLastWriteUnix uint64 // unix seconds of last successful anchor artifact emission
+	// Per-algorithm capability anchor emission counters (labeled by algorithm name)
+	anchorAlgoCounts map[string]uint64
+	anchorAlgoMu     sync.Mutex
+	// Per-algorithm anchor emission ratios (gauge semantics) algorithm->float64 bits
+	anchorAlgoRatioBits   map[string]uint64
+	anchorAlgoRatioMu     sync.Mutex
 	// Extended counters
 	scopeViolations       uint64
 	restrictionViolations uint64
 	unauthorized          uint64
 	expiredDelegations    uint64
 	revokedDelegations    uint64
+	// partial revocation (delegation scope reduction without full termination)
+	partiallyRevokedDelegations uint64
+	delegationDepthExceeded     uint64
+	maxObservedDelegationDepth  uint64 // stores max observed delegation chain depth (root=1)
 	// Capability enforcement decision counters
 	capabilityEnforceAllowed     uint64
 	capabilityEnforceDenied      uint64
@@ -359,10 +518,128 @@ type Memory struct {
 	lifecycleLatencyMu     sync.Mutex
 	// Lifecycle latency reservoir samples per entity|outcome for percentile estimation
 	lifecycleLatencyRes map[string]*latencyReservoir
+	// Lifecycle latency quantile gauges (entity|outcome|quantile -> float64 bits)
+	lifecycleLatencyQuantiles   map[string]uint64
+	lifecycleLatencyQuantilesMu sync.Mutex
 	// persistence path (optional)
 	persistPath string
 	// lastPersistUnix stores the last successful persistence UNIX timestamp (seconds).
 	lastPersistUnix uint64
+	// RB4: policy manifest emitted counter
+	policyManifestEmitted uint64
+	// Capability diff metrics (RB13)
+	capabilityDiffRequests        uint64
+	capabilityDiffLatencyCount    uint64
+	capabilityDiffLatencyTotalNS  uint64
+	capabilityDiffLatencyMaxNS    uint64
+	// Dual-control revocation workflow counters
+	revWorkflowInitiated            uint64
+	revWorkflowInitiationFailures   uint64
+	revWorkflowApprovals            uint64
+	revWorkflowApprovalFailures     uint64
+	revWorkflowQuorumSatisfied      uint64
+	revWorkflowCanceled             uint64
+	revWorkflowCancellationFailures uint64
+	revWorkflowUnauthorized         uint64
+	// Evidence attachment metrics
+	evidenceAttachments       uint64
+	evidenceAttachmentFailures uint64
+	// per-POA evidence hash counts (only used for snapshot & tests; small cardinality assumption)
+	evidenceCountsMu sync.Mutex
+	evidenceCounts   map[string]int
+	delegationGraphExports uint64
+	delegationGraphNodeCount uint64
+	// Hierarchical digest V4 counters
+	hierDigestIssued uint64
+	hierDigestParentDigestMissing uint64
+	hierDigestVersionMismatch uint64
+	// Cascade revocation metrics
+	cascadeRevocationTriggered       uint64
+	cascadeDescendantsProcessed      uint64
+	cascadeProcessingLatencyCount    uint64
+	cascadeProcessingLatencyTotalNS  uint64
+	cascadeProcessingLatencyMaxNS    uint64
+	cascadeDepthLimitReached         uint64
+	cascadeBatchProcessed            uint64
+	cascadeMaxDepthReachedGauge      uint64
+	cascadeProcessingErrors          uint64
+}
+
+// IncEvidenceAttachment increments successful evidence hash attachment counter.
+func (m *Memory) IncEvidenceAttachment() { atomic.AddUint64(&m.evidenceAttachments, 1) }
+// IncEvidenceAttachmentFailures increments failed evidence hash attachment attempts counter.
+func (m *Memory) IncEvidenceAttachmentFailures() { atomic.AddUint64(&m.evidenceAttachmentFailures, 1) }
+// SetEvidenceHashesPerPOA records current evidence hash count for a POA in memory map.
+func (m *Memory) SetEvidenceHashesPerPOA(poaID string, n int) {
+	if poaID == "" { return }
+	m.evidenceCountsMu.Lock(); defer m.evidenceCountsMu.Unlock()
+	if m.evidenceCounts == nil { m.evidenceCounts = make(map[string]int) }
+	m.evidenceCounts[poaID] = n
+}
+
+// Delegation graph metrics
+func (m *Memory) IncDelegationGraphExports() { atomic.AddUint64(&m.delegationGraphExports, 1) }
+func (m *Memory) SetDelegationGraphNodeCount(n int) { atomic.StoreUint64(&m.delegationGraphNodeCount, uint64(n)) }
+
+// Hierarchical digest metrics
+func (m *Memory) IncHierDigestIssued() { atomic.AddUint64(&m.hierDigestIssued, 1) }
+func (m *Memory) IncHierDigestParentDigestMissing() { atomic.AddUint64(&m.hierDigestParentDigestMissing, 1) }
+func (m *Memory) IncHierDigestVersionMismatch() { atomic.AddUint64(&m.hierDigestVersionMismatch, 1) }
+
+// Cascade revocation metrics
+func (m *Memory) IncCascadeRevocationTriggered() { atomic.AddUint64(&m.cascadeRevocationTriggered, 1) }
+func (m *Memory) IncCascadeDescendantsProcessed() { atomic.AddUint64(&m.cascadeDescendantsProcessed, 1) }
+func (m *Memory) ObserveCascadeProcessingLatency(d time.Duration) {
+	if d < 0 { return }
+	ns := uint64(d.Nanoseconds())
+	atomic.AddUint64(&m.cascadeProcessingLatencyCount, 1)
+	atomic.AddUint64(&m.cascadeProcessingLatencyTotalNS, ns)
+	for {
+		old := atomic.LoadUint64(&m.cascadeProcessingLatencyMaxNS)
+		if ns <= old || atomic.CompareAndSwapUint64(&m.cascadeProcessingLatencyMaxNS, old, ns) {
+			break
+		}
+	}
+}
+func (m *Memory) IncCascadeDepthLimitReached() { atomic.AddUint64(&m.cascadeDepthLimitReached, 1) }
+func (m *Memory) IncCascadeBatchProcessed() { atomic.AddUint64(&m.cascadeBatchProcessed, 1) }
+func (m *Memory) SetCascadeMaxDepthReached(depth int) {
+	if depth <= 0 { return }
+	for {
+		cur := atomic.LoadUint64(&m.cascadeMaxDepthReachedGauge)
+		if uint64(depth) <= cur { return }
+		if atomic.CompareAndSwapUint64(&m.cascadeMaxDepthReachedGauge, cur, uint64(depth)) { return }
+	}
+}
+func (m *Memory) IncCascadeProcessingErrors() { atomic.AddUint64(&m.cascadeProcessingErrors, 1) }
+
+// ValidationLatencyPercentiles returns approximate p50, p95, p99 validation latency using the reservoir.
+// Falls back to zero durations when insufficient samples. Computation mirrors Snapshot() logic.
+func (m *Memory) ValidationLatencyPercentiles() (p50, p95, p99 time.Duration) {
+	vc := atomic.LoadUint64(&m.validationCount)
+	if vc == 0 { return }
+	// Determine sample size (cannot exceed reservoir size nor validation count)
+	sampleSize := vc
+	if sampleSize > uint64(len(m.reservoir)) { sampleSize = uint64(len(m.reservoir)) }
+	if sampleSize == 0 { return }
+	buf := make([]uint64, 0, sampleSize)
+	end := atomic.LoadUint64(&m.reservoirIndex)
+	for i := uint64(0); i < sampleSize; i++ {
+		pos := (end - 1 - i) & 255
+		buf = append(buf, m.reservoir[pos])
+	}
+	sort.Slice(buf, func(i, j int) bool { return buf[i] < buf[j] })
+	pick := func(p float64) time.Duration {
+		if len(buf) == 0 { return 0 }
+		rank := int(p*float64(len(buf)-1) + 0.5)
+		if rank < 0 { rank = 0 }
+		if rank >= len(buf) { rank = len(buf) - 1 }
+		return time.Duration(buf[rank])
+	}
+	p50 = pick(0.50)
+	p95 = pick(0.95)
+	p99 = pick(0.99)
+	return
 }
 
 // latencyReservoir maintains a fixed-size ring buffer of recent latency samples (nanoseconds)
@@ -374,6 +651,50 @@ type latencyReservoir struct {
 
 // NewMemory constructs a fresh Memory metrics collector.
 func NewMemory() *Memory { return &Memory{} }
+
+// SetReplayWALPending sets current pending WAL entries gauge.
+func (m *Memory) SetReplayWALPending(n int) { atomic.StoreUint64(&m.replayWALPending, uint64(n)) }
+
+// ObserveReplayWALFlushLatency records WAL flush latency.
+func (m *Memory) ObserveReplayWALFlushLatency(d time.Duration) {
+	if d < 0 { return }
+	ns := uint64(d.Nanoseconds())
+	atomic.AddUint64(&m.replayWALFlushLatencyCount, 1)
+	atomic.AddUint64(&m.replayWALFlushLatencyTotalNS, ns)
+	for {
+		old := atomic.LoadUint64(&m.replayWALFlushLatencyMaxNS)
+		if ns <= old || atomic.CompareAndSwapUint64(&m.replayWALFlushLatencyMaxNS, old, ns) {
+			break
+		}
+	}
+}
+
+// ObserveReplayWALSnapshotDuration records snapshot write duration prior to WAL rotation.
+func (m *Memory) ObserveReplayWALSnapshotDuration(d time.Duration) {
+	if d < 0 { return }
+	ns := uint64(d.Nanoseconds())
+	atomic.AddUint64(&m.replayWALSnapshotDurationCount, 1)
+	atomic.AddUint64(&m.replayWALSnapshotDurationTotalNS, ns)
+	for {
+		old := atomic.LoadUint64(&m.replayWALSnapshotDurationMaxNS)
+		if ns <= old || atomic.CompareAndSwapUint64(&m.replayWALSnapshotDurationMaxNS, old, ns) { break }
+	}
+}
+
+// IncCapabilityDiffRequests increments diff endpoint request counter.
+func (m *Memory) IncCapabilityDiffRequests() { atomic.AddUint64(&m.capabilityDiffRequests, 1) }
+
+// ObserveCapabilityDiffLatency records diff computation latency.
+func (m *Memory) ObserveCapabilityDiffLatency(d time.Duration) {
+    if d < 0 { return }
+    ns := uint64(d.Nanoseconds())
+    atomic.AddUint64(&m.capabilityDiffLatencyCount, 1)
+    atomic.AddUint64(&m.capabilityDiffLatencyTotalNS, ns)
+    for {
+        old := atomic.LoadUint64(&m.capabilityDiffLatencyMaxNS)
+        if ns <= old || atomic.CompareAndSwapUint64(&m.capabilityDiffLatencyMaxNS, old, ns) { break }
+    }
+}
 
 // EnablePersistence configures a file path for periodic / shutdown persistence.
 // If the file exists it will be loaded immediately.
@@ -504,6 +825,16 @@ func (m *Memory) IncUnsupportedStatusFailure() { atomic.AddUint64(&m.unsupported
 func (m *Memory) IncInvalidTransitionFailure() { atomic.AddUint64(&m.invalidTransitionFailures, 1) }
 func (m *Memory) IncNotFoundFailure()          { atomic.AddUint64(&m.notFoundFailures, 1) }
 
+// Dual-control revocation workflow metric increments
+func (m *Memory) IncRevocationWorkflowInitiated()            { atomic.AddUint64(&m.revWorkflowInitiated, 1) }
+func (m *Memory) IncRevocationWorkflowInitiationFailures()   { atomic.AddUint64(&m.revWorkflowInitiationFailures, 1) }
+func (m *Memory) IncRevocationWorkflowApprovals()            { atomic.AddUint64(&m.revWorkflowApprovals, 1) }
+func (m *Memory) IncRevocationWorkflowApprovalFailures()     { atomic.AddUint64(&m.revWorkflowApprovalFailures, 1) }
+func (m *Memory) IncRevocationWorkflowQuorumSatisfied()      { atomic.AddUint64(&m.revWorkflowQuorumSatisfied, 1) }
+func (m *Memory) IncRevocationWorkflowCanceled()             { atomic.AddUint64(&m.revWorkflowCanceled, 1) }
+func (m *Memory) IncRevocationWorkflowCancellationFailures() { atomic.AddUint64(&m.revWorkflowCancellationFailures, 1) }
+func (m *Memory) IncRevocationWorkflowUnauthorized()         { atomic.AddUint64(&m.revWorkflowUnauthorized, 1) }
+
 // Accessors for validation failure counters (read paths for Prometheus exposition without exporting raw fields)
 func (m *Memory) InvalidPayloadFailures() uint64 { return atomic.LoadUint64(&m.invalidPayloadFailures) }
 
@@ -525,6 +856,21 @@ func (m *Memory) RevokedDelegations() uint64    { return atomic.LoadUint64(&m.re
 
 func (m *Memory) IncDelegationsCreated() {
 	atomic.AddUint64(&m.delegationsCreated, 1)
+}
+
+// Replay metrics increments
+func (m *Memory) IncReplayHits() { atomic.AddUint64(&m.replayHits, 1) }
+func (m *Memory) IncReplayMisses() { atomic.AddUint64(&m.replayMisses, 1) }
+func (m *Memory) IncReplayStoreErrors() { atomic.AddUint64(&m.replayStoreErrors, 1) }
+func (m *Memory) ObserveReplayStoreLatency(d time.Duration) {
+	if d < 0 { return }
+	ns := uint64(d.Nanoseconds())
+	atomic.AddUint64(&m.replayStoreLatencyCount, 1)
+	atomic.AddUint64(&m.replayStoreLatencyTotalNS, ns)
+	for {
+		old := atomic.LoadUint64(&m.replayStoreLatencyMaxNS)
+		if ns <= old || atomic.CompareAndSwapUint64(&m.replayStoreLatencyMaxNS, old, ns) { break }
+	}
 }
 
 func (m *Memory) ObserveValidationLatency(d time.Duration) {
@@ -577,6 +923,25 @@ func (m *Memory) ObserveAttestationProofVerificationLatency(d time.Duration) {
 		if ns <= cur { break }
 		if atomic.CompareAndSwapUint64(&m.attestationProofVerificationLatencyMaxNS, cur, ns) { break }
 	}
+}
+// ObserveAttestationProofIssueLatency records issuance latency.
+func (m *Memory) ObserveAttestationProofIssueLatency(d time.Duration) {
+	ns := uint64(d.Nanoseconds())
+	atomic.AddUint64(&m.attestationProofIssueLatencyCount, 1)
+	atomic.AddUint64(&m.attestationProofIssueLatencyTotalNS, ns)
+	for {
+		cur := atomic.LoadUint64(&m.attestationProofIssueLatencyMaxNS)
+		if ns <= cur { break }
+		if atomic.CompareAndSwapUint64(&m.attestationProofIssueLatencyMaxNS, cur, ns) { break }
+	}
+}
+// IncAttestationProofVerificationFailureReason increments labeled verification failure reason counter.
+func (m *Memory) IncAttestationProofVerificationFailureReason(reason string) {
+	if reason == "" { reason = otherReason }
+	m.attestationProofVerificationFailureReasonsMu.Lock()
+	if m.attestationProofVerificationFailureReasons == nil { m.attestationProofVerificationFailureReasons = make(map[string]uint64, 8) }
+	m.attestationProofVerificationFailureReasons[reason]++
+	m.attestationProofVerificationFailureReasonsMu.Unlock()
 }
 // Trust anchor granular attestation failure counters
 func (m *Memory) IncAttestationProofTrustAnchorMissing() { atomic.AddUint64(&m.attestationProofTrustAnchorMissing, 1) }
@@ -712,6 +1077,8 @@ func (m *Memory) IncSignaturePublicKeyMissing() { atomic.AddUint64(&m.signatureP
 // IncCryptoSignatureMissing increments missing detached signature counter.
 func (m *Memory) IncCryptoSignatureMissing() { atomic.AddUint64(&m.cryptoSignatureMissing, 1) }
 func (m *Memory) IncAnchorAttempts()            { atomic.AddUint64(&m.anchorAttempts, 1) }
+func (m *Memory) IncCombinedAnchorEmitted()     { atomic.AddUint64(&m.combinedAnchorEmitted, 1) }
+func (m *Memory) IncCombinedAnchorFailures()    { atomic.AddUint64(&m.combinedAnchorFailures, 1) }
 func (m *Memory) IncAnchorFailures()            { atomic.AddUint64(&m.anchorFailures, 1) }
 func (m *Memory) IncExternalAnchorForcedFailures() {
 	atomic.AddUint64(&m.externalAnchorForcedFailures, 1)
@@ -729,27 +1096,29 @@ func (m *Memory) ObserveObligationLatency(d time.Duration) {
 	}
 }
 func (m *Memory) IncMandatoryObligationFailures() { atomic.AddUint64(&m.mandatoryObligationFailures, 1) }
-func (m *Memory) IncReplayHits()          { atomic.AddUint64(&m.replayHits, 1) }
-func (m *Memory) IncReplayMisses()        { atomic.AddUint64(&m.replayMisses, 1) }
-func (m *Memory) IncReplayStoreErrors()   { atomic.AddUint64(&m.replayStoreErrors, 1) }
-func (m *Memory) ObserveReplayStoreLatency(d time.Duration) {
-	ns := uint64(d.Nanoseconds())
-	atomic.AddUint64(&m.replayStoreLatencyCount, 1)
-	atomic.AddUint64(&m.replayStoreLatencyTotalNS, ns)
-	for {
-		cur := atomic.LoadUint64(&m.replayStoreLatencyMaxNS)
-		if ns <= cur {
-			break
-		}
-		if atomic.CompareAndSwapUint64(&m.replayStoreLatencyMaxNS, cur, ns) {
-			break
-		}
-	}
-}
 func (m *Memory) IncCapabilityAnchorEmitted() { atomic.AddUint64(&m.capabilityAnchorEmitted, 1) }
 func (m *Memory) IncCapabilityAnchorSkipped() { atomic.AddUint64(&m.capabilityAnchorSkipped, 1) }
 func (m *Memory) IncCapabilityRegistryHashChanged() {
 	atomic.AddUint64(&m.capabilityRegistryHashChanged, 1)
+}
+
+// IncCapabilityAnchorAlgorithm increments per-algorithm anchor emission counter.
+// Multiple algorithms may be recorded for a single emission event.
+func (m *Memory) IncCapabilityAnchorAlgorithm(algo string) {
+	if algo == "" { algo = "_" }
+	m.anchorAlgoMu.Lock()
+	if m.anchorAlgoCounts == nil { m.anchorAlgoCounts = make(map[string]uint64, 4) }
+	m.anchorAlgoCounts[algo]++
+	m.anchorAlgoMu.Unlock()
+}
+// SetCapabilityAnchorAlgorithmRatio stores per-algorithm ratio (0..1) as float64 bits.
+func (m *Memory) SetCapabilityAnchorAlgorithmRatio(algo string, ratio float64) {
+	if algo == "" { algo = "_" }
+	if ratio < 0 { ratio = 0 } else if ratio > 1 { ratio = 1 }
+	m.anchorAlgoRatioMu.Lock()
+	if m.anchorAlgoRatioBits == nil { m.anchorAlgoRatioBits = make(map[string]uint64, 4) }
+	m.anchorAlgoRatioBits[algo] = math.Float64bits(ratio)
+	m.anchorAlgoRatioMu.Unlock()
 }
 
 // SetCapabilityAnchorLastWriteUnix sets unix epoch seconds for last emission (idempotent for same value).
@@ -789,6 +1158,17 @@ func (m *Memory) IncRestrictionViolations()    { atomic.AddUint64(&m.restriction
 func (m *Memory) IncUnauthorized()             { atomic.AddUint64(&m.unauthorized, 1) }
 func (m *Memory) IncExpired()                  { atomic.AddUint64(&m.expiredDelegations, 1) }
 func (m *Memory) IncRevoked()                  { atomic.AddUint64(&m.revokedDelegations, 1) }
+// IncDelegationsPartiallyRevoked increments counter for delegations transitioned to partially_revoked state.
+func (m *Memory) IncDelegationsPartiallyRevoked() { atomic.AddUint64(&m.partiallyRevokedDelegations, 1) }
+func (m *Memory) IncDelegationDepthExceeded()     { atomic.AddUint64(&m.delegationDepthExceeded, 1) }
+func (m *Memory) SetMaxObservedDelegationDepth(depth int) {
+	if depth <= 0 { return }
+	for {
+		cur := atomic.LoadUint64(&m.maxObservedDelegationDepth)
+		if uint64(depth) <= cur { return }
+		if atomic.CompareAndSwapUint64(&m.maxObservedDelegationDepth, cur, uint64(depth)) { return }
+	}
+}
 func (m *Memory) IncCapabilityEnforceAllowed() { atomic.AddUint64(&m.capabilityEnforceAllowed, 1) }
 func (m *Memory) IncCapabilityEnforceDenied()  { atomic.AddUint64(&m.capabilityEnforceDenied, 1) }
 func (m *Memory) IncModelLimitExceeded()       { atomic.AddUint64(&m.modelLimitExceeded, 1) }
@@ -803,6 +1183,12 @@ func (m *Memory) IncModelUserOutputLimitExceeded() {
 func (m *Memory) IncModelUserRateLimitExceeded() { atomic.AddUint64(&m.modelUserRateLimitExceeded, 1) }
 func (m *Memory) IncModelUnknown()               { atomic.AddUint64(&m.modelUnknown, 1) }
 func (m *Memory) IncModelLimitSurge()            { atomic.AddUint64(&m.modelLimitSurges, 1) }
+
+// IncPolicyManifestEmitted increments the RB4 policy manifest emission counter.
+func (m *Memory) IncPolicyManifestEmitted() { atomic.AddUint64(&m.policyManifestEmitted, 1) }
+
+// PolicyManifestEmitted returns total successful policy manifest emissions (RB4).
+func (m *Memory) PolicyManifestEmitted() uint64 { return atomic.LoadUint64(&m.policyManifestEmitted) }
 
 // Accessors for per-user limit exceed counters (for tests / diagnostics)
 func (m *Memory) ModelUserInputLimitExceeded() uint64 {
@@ -965,6 +1351,17 @@ func (m *Memory) ObserveLifecycleTransitionLatency(entityType, outcome string, d
 	lr.writes++
 	m.lifecycleLatencyMu.Unlock()
 }
+// SetLifecycleTransitionLatencyQuantile stores latency quantile gauge value.
+func (m *Memory) SetLifecycleTransitionLatencyQuantile(entityType, outcome, quantile string, value float64) {
+	if entityType == "" { entityType = "_" }
+	if outcome == "" { outcome = unknownOutcome }
+	if quantile == "" { quantile = "_" }
+	m.lifecycleLatencyQuantilesMu.Lock()
+	if m.lifecycleLatencyQuantiles == nil { m.lifecycleLatencyQuantiles = make(map[string]uint64, 12) }
+	key := entityType + "|" + outcome + "|" + quantile
+	m.lifecycleLatencyQuantiles[key] = math.Float64bits(value)
+	m.lifecycleLatencyQuantilesMu.Unlock()
+}
 
 // Snapshot returns current counters for testing/diagnostics.
 func (m *Memory) Snapshot() (delegations uint64, validations uint64, totalLatencyNS uint64, minLatencyNS uint64, maxLatencyNS uint64, avgLatency time.Duration, p50 time.Duration, p90 time.Duration, p99 time.Duration, sigIssued uint64, sigIssueFail uint64, sigVerifications uint64, sigVerificationFail uint64, revIntegrityFail uint64, sigPubKeyMissing uint64, anchorAttempts uint64, anchorFailures uint64, replayStoreErrors uint64, replayStoreLatencyCount uint64, replayStoreLatencyTotalNS uint64, replayStoreLatencyMaxNS uint64, replayHits uint64, replayMisses uint64) {
@@ -1066,6 +1463,8 @@ type SnapshotStruct struct {
 	CryptoSignatureMissing                 uint64        `json:"crypto_signature_missing"`
 	AnchorAttempts                         uint64        `json:"anchor_attempts"`
 	AnchorFailures                         uint64        `json:"anchor_failures"`
+	CombinedAnchorEmitted                  uint64        `json:"combined_anchor_emitted"`
+	CombinedAnchorFailures                 uint64        `json:"combined_anchor_failures"`
 	ReplayHits                             uint64        `json:"replay_hits"`
 	ReplayMisses                           uint64        `json:"replay_misses"`
 	ReplayStoreErrors                      uint64        `json:"replay_store_errors"`
@@ -1077,6 +1476,7 @@ type SnapshotStruct struct {
 	UnauthorizedDecisions                  uint64        `json:"unauthorized_decisions"`
 	ExpiredDelegations                     uint64        `json:"expired_delegations"`
 	RevokedDelegations                     uint64        `json:"revoked_delegations"`
+	PartiallyRevokedDelegations            uint64        `json:"partially_revoked_delegations"`
 	DelegationStatusTransitions            uint64        `json:"delegation_status_transitions"`
 	DelegationStatusTransitionFailures     uint64        `json:"delegation_status_transition_failures"`
 	TokenStatusTransitions                 uint64        `json:"token_status_transitions"`
@@ -1114,6 +1514,31 @@ type SnapshotStruct struct {
 	AttestationProofTrustAnchorMissing           uint64 `json:"attestation_proof_trust_anchor_missing"`
 	AttestationProofTrustAnchorAlgorithmMismatch uint64 `json:"attestation_proof_trust_anchor_algorithm_mismatch"`
 	AttestationProofTrustAnchorKeyMismatch       uint64 `json:"attestation_proof_trust_anchor_key_mismatch"`
+	// Per-algorithm capability anchor emission counts (only populated for Memory implementation)
+	CapabilityAnchorAlgorithmCounts map[string]uint64 `json:"capability_anchor_algorithm_counts,omitempty"`
+	// BLS Proof-of-Possession counters
+	BLSPoPChallengesIssued     uint64 `json:"bls_pop_challenges_issued"`
+	BLSPoPVerifications        uint64 `json:"bls_pop_verifications"`
+	BLSPoPVerificationFailures uint64 `json:"bls_pop_verification_failures"`
+	// Dual-control revocation workflow counters
+	RevocationWorkflowInitiated            uint64 `json:"revocation_workflow_initiated"`
+	RevocationWorkflowInitiationFailures   uint64 `json:"revocation_workflow_initiation_failures"`
+	RevocationWorkflowApprovals            uint64 `json:"revocation_workflow_approvals"`
+	RevocationWorkflowApprovalFailures     uint64 `json:"revocation_workflow_approval_failures"`
+	RevocationWorkflowQuorumSatisfied      uint64 `json:"revocation_workflow_quorum_satisfied"`
+	RevocationWorkflowCanceled             uint64 `json:"revocation_workflow_canceled"`
+	RevocationWorkflowCancellationFailures uint64 `json:"revocation_workflow_cancellation_failures"`
+	RevocationWorkflowUnauthorized         uint64 `json:"revocation_workflow_unauthorized"`
+	// Cascade revocation metrics
+	CascadeRevocationTriggered      uint64 `json:"cascade_revocation_triggered"`
+	CascadeDescendantsProcessed     uint64 `json:"cascade_descendants_processed"`
+	CascadeProcessingLatencyCount   uint64 `json:"cascade_processing_latency_count"`
+	CascadeProcessingLatencyTotalNS uint64 `json:"cascade_processing_latency_total_ns"`
+	CascadeProcessingLatencyMaxNS   uint64 `json:"cascade_processing_latency_max_ns"`
+	CascadeDepthLimitReached        uint64 `json:"cascade_depth_limit_reached"`
+	CascadeBatchProcessed           uint64 `json:"cascade_batch_processed"`
+	CascadeMaxDepthReached          uint64 `json:"cascade_max_depth_reached"`
+	CascadeProcessingErrors         uint64 `json:"cascade_processing_errors"`
 }
 
 // SnapshotEx returns the extended snapshot struct.
@@ -1156,6 +1581,8 @@ func (m *Memory) SnapshotEx() SnapshotStruct {
 		CryptoSignatureMissing:                 atomic.LoadUint64(&m.cryptoSignatureMissing),
 		AnchorAttempts:                         aa,
 		AnchorFailures:                         af,
+		CombinedAnchorEmitted:                  atomic.LoadUint64(&m.combinedAnchorEmitted),
+		CombinedAnchorFailures:                 atomic.LoadUint64(&m.combinedAnchorFailures),
 		ReplayHits:                             rh,
 		ReplayMisses:                           rm,
 		ReplayStoreErrors:                      rse,
@@ -1167,6 +1594,7 @@ func (m *Memory) SnapshotEx() SnapshotStruct {
 		UnauthorizedDecisions:                  atomic.LoadUint64(&m.unauthorized),
 		ExpiredDelegations:                     atomic.LoadUint64(&m.expiredDelegations),
 		RevokedDelegations:                     atomic.LoadUint64(&m.revokedDelegations),
+		PartiallyRevokedDelegations:            atomic.LoadUint64(&m.partiallyRevokedDelegations),
 		DelegationStatusTransitions:            atomic.LoadUint64(&m.delegationStatusTransitions),
 		DelegationStatusTransitionFailures:     atomic.LoadUint64(&m.delegationStatusTransitionFailures),
 		TokenStatusTransitions:                 atomic.LoadUint64(&m.tokenStatusTransitions),
@@ -1183,6 +1611,35 @@ func (m *Memory) SnapshotEx() SnapshotStruct {
 		AttestationProofTrustAnchorMissing:           atomic.LoadUint64(&m.attestationProofTrustAnchorMissing),
 		AttestationProofTrustAnchorAlgorithmMismatch: atomic.LoadUint64(&m.attestationProofTrustAnchorAlgorithmMismatch),
 		AttestationProofTrustAnchorKeyMismatch:       atomic.LoadUint64(&m.attestationProofTrustAnchorKeyMismatch),
+		BLSPoPChallengesIssued:     atomic.LoadUint64(&m.blsPoPChallengesIssued),
+		BLSPoPVerifications:        atomic.LoadUint64(&m.blsPoPVerifications),
+		BLSPoPVerificationFailures: atomic.LoadUint64(&m.blsPoPVerificationFailures),
+		RevocationWorkflowInitiated:            atomic.LoadUint64(&m.revWorkflowInitiated),
+		RevocationWorkflowInitiationFailures:   atomic.LoadUint64(&m.revWorkflowInitiationFailures),
+		RevocationWorkflowApprovals:            atomic.LoadUint64(&m.revWorkflowApprovals),
+		RevocationWorkflowApprovalFailures:     atomic.LoadUint64(&m.revWorkflowApprovalFailures),
+		RevocationWorkflowQuorumSatisfied:      atomic.LoadUint64(&m.revWorkflowQuorumSatisfied),
+		RevocationWorkflowCanceled:             atomic.LoadUint64(&m.revWorkflowCanceled),
+		RevocationWorkflowCancellationFailures: atomic.LoadUint64(&m.revWorkflowCancellationFailures),
+		RevocationWorkflowUnauthorized:         atomic.LoadUint64(&m.revWorkflowUnauthorized),
+		// Cascade revocation metrics
+		CascadeRevocationTriggered:      atomic.LoadUint64(&m.cascadeRevocationTriggered),
+		CascadeDescendantsProcessed:     atomic.LoadUint64(&m.cascadeDescendantsProcessed),
+		CascadeProcessingLatencyCount:   atomic.LoadUint64(&m.cascadeProcessingLatencyCount),
+		CascadeProcessingLatencyTotalNS: atomic.LoadUint64(&m.cascadeProcessingLatencyTotalNS),
+		CascadeProcessingLatencyMaxNS:   atomic.LoadUint64(&m.cascadeProcessingLatencyMaxNS),
+		CascadeDepthLimitReached:        atomic.LoadUint64(&m.cascadeDepthLimitReached),
+		CascadeBatchProcessed:           atomic.LoadUint64(&m.cascadeBatchProcessed),
+		CascadeMaxDepthReached:          atomic.LoadUint64(&m.cascadeMaxDepthReachedGauge),
+		CascadeProcessingErrors:         atomic.LoadUint64(&m.cascadeProcessingErrors),
+		CapabilityAnchorAlgorithmCounts: func() map[string]uint64 {
+			m.anchorAlgoMu.Lock()
+			defer m.anchorAlgoMu.Unlock()
+			if m.anchorAlgoCounts == nil { return map[string]uint64{} }
+			cp := make(map[string]uint64, len(m.anchorAlgoCounts))
+			for k, v := range m.anchorAlgoCounts { cp[k] = v }
+			return cp
+		}(),
 		LifecycleBreakdown: func() map[string]uint64 {
 			m.lifecycleMu.Lock()
 			defer m.lifecycleMu.Unlock()
@@ -1412,6 +1869,11 @@ func (m *Memory) LastEnvelopeIssuanceUnix() uint64 {
 func (m *Memory) SetLastEnvelopeIssuanceUnix(ts uint64) {
 	atomic.StoreUint64(&m.lastEnvelopeIssuanceUnix, ts)
 }
+
+// BLS Proof-of-Possession counters
+func (m *Memory) IncBLSPoPChallengesIssued() { atomic.AddUint64(&m.blsPoPChallengesIssued, 1) }
+func (m *Memory) IncBLSPoPVerifications() { atomic.AddUint64(&m.blsPoPVerifications, 1) }
+func (m *Memory) IncBLSPoPVerificationFailures() { atomic.AddUint64(&m.blsPoPVerificationFailures, 1) }
 
 // Ensure Memory implements Metrics.
 var _ Metrics = (*Memory)(nil)

@@ -58,6 +58,7 @@ func TestModelLimitsAttestationSignature(t *testing.T) {
 		Success    bool   `json:"success"`
 		Configured bool   `json:"configured"`
 		Reason     string `json:"reason,omitempty"`
+		Nonce      string `json:"nonce"`
 		Snapshot   struct {
 			Hash        string `json:"hash"`
 			GeneratedAt string `json:"generated_at"`
@@ -103,14 +104,18 @@ func TestModelLimitsAttestationSignature(t *testing.T) {
 	if len(pub) != ed25519.PublicKeySize {
 		t.Fatalf("public key size bad")
 	}
-	if !ed25519.Verify(pub, raw, sigBytes) {
-		t.Fatalf("signature verify failed")
+	// Domain-separated message must match server signing (prefix + canonical JSON)
+	prefix := []byte("GAUTH_MODEL_LIMIT_ATTEST:")
+	msg := append(prefix, raw...)
+	if !ed25519.Verify(pub, msg, sigBytes) {
+		t.Fatalf("signature verify failed (domain-separated)")
 	}
 	// Tamper check
 	unsigned.Snapshot.Hash += testTamper
 	tamperedRaw, _ := json.Marshal(unsigned)
-	if ed25519.Verify(pub, tamperedRaw, sigBytes) {
-		t.Fatalf("tamper should fail verification")
+	tamperedMsg := append(prefix, tamperedRaw...)
+	if ed25519.Verify(pub, tamperedMsg, sigBytes) {
+		t.Fatalf("tamper should fail verification (domain-separated)")
 	}
 }
 

@@ -48,6 +48,40 @@ func (s *Ed25519Signer) Verify(msg, sig []byte) bool {
     return len(s.pub) == ed25519.PublicKeySize && ed25519.Verify(s.pub, msg, sig)
 }
 
+// -------------------- RotatingEd25519Signer (RB6 dynamic agility) --------------------
+// Provides a Signer backed by the key Manager enabling transparent rotation without
+// changing downstream signing call sites. Exposes KeyID via optional interface assertion.
+type RotatingEd25519Signer struct {
+    M *Manager
+}
+
+func (s *RotatingEd25519Signer) Algo() string { return "Ed25519" }
+func (s *RotatingEd25519Signer) Public() []byte {
+    if s == nil || s.M == nil || s.M.Active() == nil { return nil }
+    return append([]byte(nil), s.M.Active().Public...)
+}
+func (s *RotatingEd25519Signer) Sign(msg []byte) ([]byte, error) {
+    if s == nil || s.M == nil || s.M.Active() == nil || len(s.M.Active().Private) != ed25519.PrivateKeySize {
+        return nil, errors.New("ed25519_rotating_signer_no_private")
+    }
+    return ed25519.Sign(s.M.Active().Private, msg), nil
+}
+func (s *RotatingEd25519Signer) Verify(msg, sig []byte) bool {
+    if s == nil || s.M == nil || s.M.Active() == nil { return false }
+    k := s.M.Active()
+    return ed25519.Verify(k.Public, msg, sig)
+}
+// KeyID returns the active key identifier; not part of Signer interface to avoid widening existing contract.
+func (s *RotatingEd25519Signer) KeyID() string {
+    if s == nil || s.M == nil || s.M.Active() == nil { return "" }
+    return s.M.Active().ID
+}
+// GlobalRotatingSigner returns a Signer backed by GlobalEdDSARegistry if available.
+func GlobalRotatingSigner() Signer {
+    if GlobalEdDSARegistry == nil { return nil }
+    return &RotatingEd25519Signer{M: GlobalEdDSARegistry}
+}
+
 // -------------------- ECDSA (P-256 only Phase 1) --------------------
 type ECDSASigner struct {
     priv *ecdsa.PrivateKey // optional

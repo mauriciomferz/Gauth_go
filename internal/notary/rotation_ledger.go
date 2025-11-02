@@ -36,6 +36,10 @@ type RotationLedgerRecord struct {
 	PrevHash   string                 `json:"prev_hash"`
 	Descriptor *KeyRotationDescriptor `json:"descriptor"`
 	Timestamp  string                 `json:"timestamp"`
+	// RB5 signing fields (optional for backward compatibility)
+	Kid       string `json:"kid,omitempty"`
+	Signature string `json:"signature,omitempty"`
+	Mode      string `json:"mode,omitempty"`
 }
 
 // rotationLedgerFileModel persisted file schema (append-friendly rewrite-on-append approach).
@@ -52,6 +56,9 @@ type RotationLedger struct {
 	path    string
 	entries []RotationLedgerRecord
 	head    string
+	// optional signer (RB5)
+	signerPriv ed25519.PrivateKey
+	signerKid  string
 }
 
 // NewRotationLedger creates a ledger bound to given path (may not yet exist).
@@ -95,6 +102,19 @@ func (l *RotationLedger) AppendDescriptor(rd *KeyRotationDescriptor) (RotationLe
 	prev := l.head
 	h := sha256Sum(prev, msg)
 	rec := RotationLedgerRecord{Index: len(l.entries), Hash: fmt.Sprintf("%x", h), PrevHash: prev, Descriptor: rd, Timestamp: time.Now().UTC().Format(time.RFC3339Nano)}
+	// RB5: optional entry signature (domain separated) if signer configured
+	if len(l.signerPriv) == ed25519.PrivateKeySize {
+		payload := append([]byte("GAUTH_ROTATION_LEDGER_ENTRY:"), append([]byte(prev), msg...)...)
+		sig := ed25519.Sign(l.signerPriv, payload)
+		rec.Signature = base64.RawURLEncoding.EncodeToString(sig)
+		if l.signerKid == "" {
+			// derive kid similar to summary verify (prefix ed25519: first 8 bytes)
+			pub := l.signerPriv.Public().(ed25519.PublicKey)
+			l.signerKid = fmt.Sprintf("ed25519:%x", pub[:8])
+		}
+		rec.Kid = l.signerKid
+		rec.Mode = rotationModeEdDSA
+	}
 	l.entries = append(l.entries, rec)
 	l.head = rec.Hash
 	// Persist full file atomically.
@@ -123,6 +143,50 @@ func (l *RotationLedger) Entries() []RotationLedgerRecord {
 // HeadHash returns head hash.
 func (l *RotationLedger) HeadHash() string { return l.head }
 
+// ConfigureEd25519Signer enables RB5 per-entry signatures for future appends.
+// Existing entries remain unsigned and are still valid unless strict mode enforced elsewhere.
+func (l *RotationLedger) ConfigureEd25519Signer(priv ed25519.PrivateKey, kid string) {
+	if len(priv) != ed25519.PrivateKeySize { return }
+	l.signerPriv = priv
+	l.signerKid = kid
+}
+
+// VerifyRotationLedger performs chained hash recomputation and signature checks.
+// Returns (mismatches, invalidSigs). Unsigned entries do not count as invalid unless strict=true.
+func VerifyRotationLedger(entries []RotationLedgerRecord, strict bool, pubResolver func(kid string) ed25519.PublicKey) (int, int) {
+	mismatches := 0
+	invalidSigs := 0
+	prev := ""
+	for _, rec := range entries {
+		msg, err := canonicalRotationDescriptor(rec.Descriptor)
+		if err != nil {
+			mismatches++
+			prev = rec.Hash
+			continue
+		}
+		expected := fmt.Sprintf("%x", sha256Sum(prev, msg))
+		if expected != rec.Hash { mismatches++ }
+		// Signature verification
+		if rec.Signature != "" && rec.Kid != "" && rec.Mode == rotationModeEdDSA {
+			pub := pubResolver(rec.Kid)
+			if len(pub) != ed25519.PublicKeySize {
+				invalidSigs++
+			} else {
+				payload := append([]byte("GAUTH_ROTATION_LEDGER_ENTRY:"), append([]byte(rec.PrevHash), msg...)...)
+				sigBytes, err := base64.RawURLEncoding.DecodeString(rec.Signature)
+				if err != nil || len(sigBytes) != ed25519.SignatureSize || !ed25519.Verify(pub, payload, sigBytes) {
+					invalidSigs++
+				}
+			}
+		} else if strict {
+			// in strict mode unsigned entries treated as invalid signature
+			invalidSigs++
+		}
+		prev = rec.Hash
+	}
+	return mismatches, invalidSigs
+}
+
 // sha256Sum computes sha256(prev || data).
 func sha256Sum(prev string, data []byte) []byte {
 	sum := sha256.New()
@@ -141,6 +205,17 @@ type RotationSummary struct {
 	Kid       string `json:"kid,omitempty"`
 	Signature string `json:"signature,omitempty"`
 	Mode      string `json:"mode,omitempty"`
+	// Multi-signature extensions (beta)
+	Threshold       int                `json:"threshold,omitempty"`
+	SatisfiedWeight int                `json:"satisfied_weight,omitempty"`
+	Signatures      []RotationSignature `json:"signatures,omitempty"`
+}
+
+// RotationSignature models an individual signature for multi-sig summaries.
+type RotationSignature struct {
+	Kid       string `json:"kid"`
+	Mode      string `json:"mode"`
+	Signature string `json:"signature"`
 }
 
 // BuildRotationSummary constructs a summary from ledger entries computing aggregate hash.
@@ -171,6 +246,34 @@ func SignRotationSummary(sum *RotationSummary, priv ed25519.PrivateKey, kid stri
 	sum.Kid = kid
 	sum.Signature = base64.RawURLEncoding.EncodeToString(sig)
 	sum.Mode = rotationModeEdDSA
+	// Also append to multi-signature slice for backward compatibility bridging.
+	sum.Signatures = append(sum.Signatures, RotationSignature{Kid: kid, Mode: rotationModeEdDSA, Signature: sum.Signature})
+	if sum.SatisfiedWeight == 0 { // initialize if unset
+		sum.SatisfiedWeight = 1
+	}
+	return nil
+}
+
+// AppendSignatureToSummary adds an additional signature (multi-sig path). Does not mutate legacy Kid/Signature unless first.
+func AppendSignatureToSummary(sum *RotationSummary, priv ed25519.PrivateKey, kid string) error {
+	if sum == nil || len(priv) != ed25519.PrivateKeySize {
+		return errors.New("invalid_inputs")
+	}
+	enc, err := canonicalRotationSummaryPayload(sum)
+	if err != nil {
+		return err
+	}
+	msg := append([]byte("GAUTH_ROTATION_SUMMARY:"), enc...)
+	sig := ed25519.Sign(priv, msg)
+	sigStr := base64.RawURLEncoding.EncodeToString(sig)
+	// If legacy fields empty, populate for backward compatibility.
+	if sum.Signature == "" {
+		sum.Kid = kid
+		sum.Signature = sigStr
+		sum.Mode = rotationModeEdDSA
+	}
+	sum.Signatures = append(sum.Signatures, RotationSignature{Kid: kid, Mode: rotationModeEdDSA, Signature: sigStr})
+	sum.SatisfiedWeight = len(sum.Signatures)
 	return nil
 }
 
@@ -178,34 +281,52 @@ func SignRotationSummary(sum *RotationSummary, priv ed25519.PrivateKey, kid stri
 // Returns (valid, reason). Reasons: missing_signature, kid_mismatch, serialization_error, signature_invalid, mode_unsupported.
 // kid_mismatch is returned when provided public key does not derive the same kid as summary.Kid.
 func VerifyRotationSummary(sum *RotationSummary, pub ed25519.PublicKey) (bool, string) {
+	start := time.Now()
 	if sum == nil {
+		rotationSignatureVerifyFailures.WithLabelValues(reasonSummaryNil).Inc()
+		rotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
 		return false, reasonSummaryNil
 	}
 	if sum.Signature == "" {
+		rotationSignatureVerifyFailures.WithLabelValues(reasonMissingSignature).Inc()
+		rotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
 		return false, reasonMissingSignature
 	}
 	if sum.Mode != "" && sum.Mode != rotationModeEdDSA {
+		rotationSignatureVerifyFailures.WithLabelValues(reasonModeUnsupported).Inc()
+		rotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
 		return false, reasonModeUnsupported
 	}
 	if len(pub) != ed25519.PublicKeySize {
+		rotationSignatureVerifyFailures.WithLabelValues(reasonPublicKeyInvalid).Inc()
+		rotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
 		return false, reasonPublicKeyInvalid
 	}
 	derivedKid := fmt.Sprintf("ed25519:%x", pub[:8])
 	if sum.Kid != "" && sum.Kid != derivedKid {
+		rotationSignatureVerifyFailures.WithLabelValues(reasonKidMismatch).Inc()
+		rotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
 		return false, reasonKidMismatch
 	}
 	enc, err := canonicalRotationSummaryPayload(sum)
 	if err != nil {
+		rotationSignatureVerifyFailures.WithLabelValues(reasonSerializationFail).Inc()
+		rotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
 		return false, reasonSerializationFail
 	}
 	msg := append([]byte("GAUTH_ROTATION_SUMMARY:"), enc...)
 	sigBytes, err := base64.RawURLEncoding.DecodeString(sum.Signature)
 	if err != nil {
+		rotationSignatureVerifyFailures.WithLabelValues(reasonSignatureInvalid).Inc()
+		rotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
 		return false, reasonSignatureInvalid
 	}
 	if !ed25519.Verify(pub, msg, sigBytes) {
+		rotationSignatureVerifyFailures.WithLabelValues(reasonSignatureInvalid).Inc()
+		rotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
 		return false, reasonSignatureInvalid
 	}
+	rotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
 	return true, ""
 }
 

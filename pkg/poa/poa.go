@@ -4,11 +4,19 @@ package poa
 
 import (
 	"context"
+	"crypto/ed25519"
 	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"os"
+	"strconv"
+	"strings"
 	"time"
 
+	internalCrypto "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/errors"
 )
 
@@ -295,6 +303,14 @@ type ProofOfAuthorization struct {
 	Delegation  *Delegation            `json:"delegation,omitempty"`
 	Attestation *Attestation           `json:"attestation,omitempty"`
 	Metadata    map[string]interface{} `json:"metadata,omitempty"`
+	// Digest provides a canonical integrity hash over the core PoA fields (excluding metadata & attestation evidence maps which may vary).
+	// Format: sha256:<hex>. Populated on Issue(). Recomputed on demand by CanonicalDigest().
+	Digest     string `json:"digest,omitempty"`
+	// Multi-signature fields (optional). If threshold>0 then signatures must meet threshold for verification success.
+	SignerKids  []string `json:"signer_kids,omitempty"`
+	Signatures  []string `json:"signatures,omitempty"`
+	SigMode     string   `json:"sig_mode,omitempty"`
+	Threshold   int      `json:"threshold,omitempty"`
 }
 
 // Delegation represents delegation information
@@ -397,6 +413,44 @@ func (s *MemoryService) Issue(ctx context.Context, req *Request) (*ProofOfAuthor
 		ValidityScore: 0.98,
 	}
 
+	// Compute canonical digest (after all core fields populated)
+	poa.Digest = CanonicalDigest(poa)
+
+	// Optional multi-signature issuance using EdDSA registry (demo). Controlled via env:
+	// GAUTH_POA_MULTISIG_KIDS=<kid1,kid2,...> GAUTH_POA_MULTISIG_THRESHOLD=<n>
+	// If kids not set but registry available, uses active key only when GAUTH_POA_MULTISIG_SIGN=1.
+	if os.Getenv("GAUTH_POA_MULTISIG_SIGN") == "1" {
+		kidsRaw := os.Getenv("GAUTH_POA_MULTISIG_KIDS")
+		var kids []string
+		if kidsRaw != "" {
+			for _, part := range strings.Split(kidsRaw, ",") {
+				p := strings.TrimSpace(part)
+				if p != "" { kids = append(kids, p) }
+			}
+		}
+		// Fallback to active key if no explicit list
+		if len(kids) == 0 && internalCrypto.GlobalEdDSARegistry != nil {
+			if ak := internalCrypto.GlobalEdDSARegistry.Active(); ak != nil { kids = []string{ak.ID} }
+		}
+		th := 0
+		if rawTh := os.Getenv("GAUTH_POA_MULTISIG_THRESHOLD"); rawTh != "" {
+			if v, err := strconv.Atoi(rawTh); err == nil && v >= 0 { th = v }
+		}
+		if th == 0 { th = len(kids) }
+		poa.Threshold = th
+		poa.SignerKids = append([]string(nil), kids...)
+		poa.SigMode = "eddsa"
+		msg := buildPoASigningPayload(poa)
+		for _, kid := range kids {
+			if internalCrypto.GlobalEdDSARegistry == nil { continue }
+			k := internalCrypto.GlobalEdDSARegistry.FindByID(kid)
+			if k == nil || len(k.Private) != ed25519.PrivateKeySize { continue }
+			// Sign
+			sig := ed25519.Sign(k.Private, msg)
+			poa.Signatures = append(poa.Signatures, base64.RawStdEncoding.EncodeToString(sig))
+		}
+	}
+
 	s.proofs[poa.ID] = poa
 	return poa, nil
 }
@@ -480,4 +534,138 @@ func CreateAttestation(attestedBy string, evidence map[string]interface{}) *Atte
 		Confidence:    0.90,
 		ValidityScore: 0.95,
 	}
+}
+
+// buildPoASigningPayload constructs the domain-separated payload for PoA signatures.
+func buildPoASigningPayload(p *ProofOfAuthorization) []byte {
+	// Reuse canonical digest source (without signatures) to avoid circular changes.
+	// Canonical subset identical to CanonicalDigest's internal struct.
+	type canon struct {
+		ID        string    `json:"id"`
+		Subject   string    `json:"subject"`
+		Resource  string    `json:"resource"`
+		Action    string    `json:"action"`
+		Issuer    string    `json:"issuer"`
+		IssuedAt  time.Time `json:"issued_at"`
+		ExpiresAt time.Time `json:"expires_at"`
+		Scope     []string  `json:"scope"`
+		Delegation *struct {
+			DelegatedBy string    `json:"delegated_by"`
+			DelegatedTo string    `json:"delegated_to"`
+			DelegatedAt time.Time `json:"delegated_at"`
+			ExpiresAt   time.Time `json:"expires_at"`
+			Scope       []string  `json:"scope"`
+			Revocable   bool      `json:"revocable"`
+		} `json:"delegation,omitempty"`
+		Attestation *struct {
+			AttestedBy    string    `json:"attested_by"`
+			AttestedAt    time.Time `json:"attested_at"`
+			Confidence    float64   `json:"confidence"`
+			ValidityScore float64   `json:"validity_score"`
+		} `json:"attestation,omitempty"`
+	}
+	c := canon{ID: p.ID, Subject: p.Subject, Resource: p.Resource, Action: p.Action, Issuer: p.Issuer, IssuedAt: p.IssuedAt, ExpiresAt: p.ExpiresAt, Scope: append([]string(nil), p.Scope...)}
+	if p.Delegation != nil {
+		c.Delegation = &struct {
+			DelegatedBy string    `json:"delegated_by"`
+			DelegatedTo string    `json:"delegated_to"`
+			DelegatedAt time.Time `json:"delegated_at"`
+			ExpiresAt   time.Time `json:"expires_at"`
+			Scope       []string  `json:"scope"`
+			Revocable   bool      `json:"revocable"`
+		}{DelegatedBy: p.Delegation.DelegatedBy, DelegatedTo: p.Delegation.DelegatedTo, DelegatedAt: p.Delegation.DelegatedAt, ExpiresAt: p.Delegation.ExpiresAt, Scope: append([]string(nil), p.Delegation.Scope...), Revocable: p.Delegation.Revocable}
+	}
+	if p.Attestation != nil {
+		c.Attestation = &struct {
+			AttestedBy    string    `json:"attested_by"`
+			AttestedAt    time.Time `json:"attested_at"`
+			Confidence    float64   `json:"confidence"`
+			ValidityScore float64   `json:"validity_score"`
+		}{AttestedBy: p.Attestation.AttestedBy, AttestedAt: p.Attestation.AttestedAt, Confidence: p.Attestation.Confidence, ValidityScore: p.Attestation.ValidityScore}
+	}
+	raw, _ := json.Marshal(c)
+	return append([]byte("GAUTH_POA:"), raw...)
+}
+
+// VerifyMultiSig validates all signatures present and evaluates threshold satisfaction.
+// Returns (validSignatures, satisfied, requiredThreshold).
+func VerifyMultiSig(p *ProofOfAuthorization) (int, bool, int) {
+	if p == nil || len(p.Signatures) == 0 || len(p.SignerKids) == 0 || p.Threshold <= 0 { return 0, false, p.Threshold }
+	msg := buildPoASigningPayload(p)
+	valid := 0
+	for i, sigB64 := range p.Signatures {
+		if i >= len(p.SignerKids) { break }
+		kid := p.SignerKids[i]
+		k := internalCrypto.GlobalEdDSARegistry
+		if k == nil { continue }
+		mkey := k.FindByID(kid)
+		if mkey == nil { continue }
+		sigBytes, err := base64.RawStdEncoding.DecodeString(sigB64)
+		if err != nil || len(sigBytes) != ed25519.SignatureSize { continue }
+		if ed25519.Verify(mkey.Public, msg, sigBytes) { valid++ }
+	}
+	return valid, valid >= p.Threshold, p.Threshold
+}
+
+// CanonicalDigest computes a deterministic SHA256 hash over stable PoA fields.
+// Excludes Metadata (arbitrary map), Attestation.Evidence (may be large/dynamic), and Delegation.Constraints
+// to ensure digest stability across benign descriptive changes.
+// Canonical serialization order is fixed by explicit struct used below.
+func CanonicalDigest(p *ProofOfAuthorization) string {
+	if p == nil { return "" }
+	// Canonical view struct
+	type canon struct {
+		ID        string    `json:"id"`
+		Subject   string    `json:"subject"`
+		Resource  string    `json:"resource"`
+		Action    string    `json:"action"`
+		Issuer    string    `json:"issuer"`
+		IssuedAt  time.Time `json:"issued_at"`
+		ExpiresAt time.Time `json:"expires_at"`
+		Scope     []string  `json:"scope"`
+		// Delegation minimal canonical subset (identity & temporal scope only)
+		Delegation *struct {
+			DelegatedBy string    `json:"delegated_by"`
+			DelegatedTo string    `json:"delegated_to"`
+			DelegatedAt time.Time `json:"delegated_at"`
+			ExpiresAt   time.Time `json:"expires_at"`
+			Scope       []string  `json:"scope"`
+			Revocable   bool      `json:"revocable"`
+		} `json:"delegation,omitempty"`
+		// Attestation canonical subset (exclude evidence map)
+		Attestation *struct {
+			AttestedBy    string    `json:"attested_by"`
+			AttestedAt    time.Time `json:"attested_at"`
+			Confidence    float64   `json:"confidence"`
+			ValidityScore float64   `json:"validity_score"`
+		} `json:"attestation,omitempty"`
+	}
+	c := canon{ID: p.ID, Subject: p.Subject, Resource: p.Resource, Action: p.Action, Issuer: p.Issuer, IssuedAt: p.IssuedAt, ExpiresAt: p.ExpiresAt, Scope: append([]string(nil), p.Scope...)}
+	if p.Delegation != nil {
+		c.Delegation = &struct {
+			DelegatedBy string    `json:"delegated_by"`
+			DelegatedTo string    `json:"delegated_to"`
+			DelegatedAt time.Time `json:"delegated_at"`
+			ExpiresAt   time.Time `json:"expires_at"`
+			Scope       []string  `json:"scope"`
+			Revocable   bool      `json:"revocable"`
+		}{DelegatedBy: p.Delegation.DelegatedBy, DelegatedTo: p.Delegation.DelegatedTo, DelegatedAt: p.Delegation.DelegatedAt, ExpiresAt: p.Delegation.ExpiresAt, Scope: append([]string(nil), p.Delegation.Scope...), Revocable: p.Delegation.Revocable}
+	}
+	if p.Attestation != nil {
+		c.Attestation = &struct {
+			AttestedBy    string    `json:"attested_by"`
+			AttestedAt    time.Time `json:"attested_at"`
+			Confidence    float64   `json:"confidence"`
+			ValidityScore float64   `json:"validity_score"`
+		}{AttestedBy: p.Attestation.AttestedBy, AttestedAt: p.Attestation.AttestedAt, Confidence: p.Attestation.Confidence, ValidityScore: p.Attestation.ValidityScore}
+	}
+	raw, _ := json.Marshal(c)
+	sum := sha256.Sum256(raw)
+	return fmt.Sprintf("sha256:%x", sum[:])
+}
+
+// VerifyDigest recomputes the canonical digest and compares with embedded Digest field.
+func VerifyDigest(p *ProofOfAuthorization) bool {
+	if p == nil || p.Digest == "" { return false }
+	return p.Digest == CanonicalDigest(p)
 }

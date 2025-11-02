@@ -1,0 +1,5 @@
+/* Minimal placeholder; in production replace with official Swagger UI dist CSS. */
+html { box-sizing:border-box; }
+*,*:before,*:after { box-sizing:inherit; }
+body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color:#eee; }
+.swagger-ui .info h1 { color:#9ecbff; }

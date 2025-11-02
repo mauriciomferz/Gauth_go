@@ -68,6 +68,8 @@ type PrometheusMetrics struct {
 	validationLatency                      prom.Histogram
 	signaturePublicKeyMissing              prom.Counter
 	anchorAttempts                         prom.Counter
+	combinedAnchorEmitted                  prom.Counter
+	combinedAnchorFailures                 prom.Counter
 	anchorFailures                         prom.Counter
 	replayHits                             prom.Counter
 	replayMisses                           prom.Counter
@@ -78,6 +80,9 @@ type PrometheusMetrics struct {
 	unauthorizedDecisions                  prom.Counter
 	expiredDelegations                     prom.Counter
 	revokedDelegations                     prom.Counter
+	partiallyRevokedDelegations            prom.Counter
+	delegationDepthExceeded                prom.Counter
+	maxObservedDelegationDepth             prom.Gauge
 	cryptoSignatureMissing                 prom.Counter
 	// Capability enforcement decision counters
 	capabilityEnforceAllowed           prom.Counter
@@ -97,10 +102,15 @@ type PrometheusMetrics struct {
 	capabilityAnchorEmitted            prom.Counter
 	capabilityAnchorSkipped            prom.Counter
 	capabilityRegistryHashChanged      prom.Counter
+	// Labeled per-algorithm capability anchor emission counter (algorithm label)
+	capabilityAnchorAlgorithmEmitted   *prom.CounterVec // labels: algorithm
 	obligationsExecuted                prom.Counter
 	obligationsFailed                  prom.Counter
 	obligationLatency                  prom.Histogram // per-obligation execution latency
 	mandatoryObligationFailures        prom.Counter   // mandatory obligation failures flipping allow->deny
+	// Capability diff endpoint metrics (RB13)
+	capabilityDiffRequests             prom.Counter
+	capabilityDiffLatency              prom.Histogram
 	// RawPOA embedding counters
 	envelopeRawPOAEmbedded               prom.Counter
 	envelopeRawPOATooLarge               prom.Counter
@@ -143,6 +153,19 @@ type PrometheusMetrics struct {
 	tokenLifecycleCounter      *prom.CounterVec   // labels: old_status,new_status,outcome
 	delegationLifecycleCounter *prom.CounterVec   // labels: old_status,new_status,outcome
 	lifecycleTransitionLatency *prom.HistogramVec // labels: entity (token|delegation), outcome
+	// Dual-control revocation workflow counters
+	revocationWorkflowInitiated            prom.Counter
+	revocationWorkflowInitiationFailures   prom.Counter
+	revocationWorkflowApprovals            prom.Counter
+	revocationWorkflowApprovalFailures     prom.Counter
+	revocationWorkflowQuorumSatisfied      prom.Counter
+	revocationWorkflowCanceled             prom.Counter
+	revocationWorkflowCancellationFailures prom.Counter
+	revocationWorkflowUnauthorized         prom.Counter
+	// Evidence attachment metrics
+	evidenceAttachments        prom.Counter
+	evidenceAttachmentFailures prom.Counter
+	evidenceHashesPerPOA       *prom.GaugeVec // labels: poa_id
 	// Attestation proof metrics (Task 9 complete instrumentation)
 	attestationProofIssued               prom.Counter
 	attestationProofIssueFailures        prom.Counter
@@ -153,7 +176,46 @@ type PrometheusMetrics struct {
 	attestationProofTrustAnchorMissing               prom.Counter
 	attestationProofTrustAnchorAlgorithmMismatch     prom.Counter
 	attestationProofTrustAnchorKeyMismatch           prom.Counter
+	// New metrics (Phase expansion): attestation issue latency, verification failure reasons (labeled), per-algorithm anchor ratio gauge, lifecycle latency quantiles
+	attestationProofIssueLatencyHist      prom.Histogram
+	attestationProofVerificationFailureReason *prom.CounterVec // labels: reason
+	capabilityAnchorAlgorithmRatioGaugeVec   *prom.GaugeVec    // labels: algorithm
+	lifecycleTransitionLatencyQuantileGaugeVec *prom.GaugeVec  // labels: entity,outcome,quantile
+	// BLS Proof-of-Possession counters
+	blsPoPChallengesIssued      prom.Counter
+	blsPoPVerifications         prom.Counter
+	blsPoPVerificationFailures  prom.Counter
+	// (Phase 2B) Per-algorithm capability anchor emission counters are currently
+	// only implemented for the in-memory adapter. Prometheus adapter may later
+	// expose a labeled counter vec. This placeholder satisfies the Metrics
+	// interface after adding IncCapabilityAnchorAlgorithm.
+	// Hierarchical digest V4 counters (dedicated Prometheus counters)
+	hierDigestIssued               prom.Counter
+	hierDigestParentDigestMissing  prom.Counter
+	hierDigestVersionMismatch      prom.Counter
+	// Cascade revocation metrics (Phase 2b)
+	cascadeRevocationTriggered    prom.Counter
+	cascadeDescendantsProcessed   prom.Counter
+	cascadeProcessingLatency      prom.Histogram
+	cascadeDepthLimitReached      prom.Counter
+	cascadeBatchProcessed         prom.Counter
+	cascadeMaxDepthReachedGauge   prom.Gauge
+	cascadeProcessingErrors       prom.Counter
 }
+
+// Dual-control revocation workflow Prometheus counter increments (moved outside struct)
+func (pm *PrometheusMetrics) IncRevocationWorkflowInitiated()            { pm.revocationWorkflowInitiated.Inc() }
+func (pm *PrometheusMetrics) IncRevocationWorkflowInitiationFailures()   { pm.revocationWorkflowInitiationFailures.Inc() }
+func (pm *PrometheusMetrics) IncRevocationWorkflowApprovals()            { pm.revocationWorkflowApprovals.Inc() }
+func (pm *PrometheusMetrics) IncRevocationWorkflowApprovalFailures()     { pm.revocationWorkflowApprovalFailures.Inc() }
+func (pm *PrometheusMetrics) IncRevocationWorkflowQuorumSatisfied()      { pm.revocationWorkflowQuorumSatisfied.Inc() }
+func (pm *PrometheusMetrics) IncRevocationWorkflowCanceled()             { pm.revocationWorkflowCanceled.Inc() }
+func (pm *PrometheusMetrics) IncRevocationWorkflowCancellationFailures() { pm.revocationWorkflowCancellationFailures.Inc() }
+func (pm *PrometheusMetrics) IncRevocationWorkflowUnauthorized()         { pm.revocationWorkflowUnauthorized.Inc() }
+// Evidence metrics methods
+func (pm *PrometheusMetrics) IncEvidenceAttachment()              { pm.evidenceAttachments.Inc() }
+func (pm *PrometheusMetrics) IncEvidenceAttachmentFailures()      { pm.evidenceAttachmentFailures.Inc() }
+func (pm *PrometheusMetrics) SetEvidenceHashesPerPOA(poaID string, n int) { if poaID=="" {return}; pm.evidenceHashesPerPOA.WithLabelValues(poaID).Set(float64(n)) }
 
 // PrometheusAdapterOptions allows optional customization when constructing.
 type PrometheusAdapterOptions struct {
@@ -225,6 +287,15 @@ func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 		}
 		return c
 	}
+	fqGauge := func(name, help string) prom.Gauge {
+		g := prom.NewGauge(prom.GaugeOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: name, Help: help, ConstLabels: labels})
+		if err := reg.Register(g); err != nil {
+			if are, ok := err.(prom.AlreadyRegisteredError); ok {
+				return are.ExistingCollector.(prom.Gauge)
+			}
+		}
+		return g
+	}
 	hist := prom.NewHistogram(prom.HistogramOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "validation_latency_seconds", Help: "Delegation validation latency", Buckets: opts.Buckets, ConstLabels: labels})
 	// Replay store latency histogram uses same bucket set (fast path expected <1ms typical)
 	rsHist := prom.NewHistogram(prom.HistogramOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "replay_store_latency_seconds", Help: "Latency of replay store (Seen/Record) operations", Buckets: opts.Buckets, ConstLabels: labels})
@@ -270,6 +341,8 @@ func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 		signaturePublicKeyMissing:              fqCounter("signature_public_key_missing_total", "Signature present but public key not found (soft skip)"),
 		validationLatency:                      hist,
 		anchorAttempts:                         fqCounter("anchor_attempt_total", "Attempts to externally anchor chain tip"),
+		combinedAnchorEmitted:                  fqCounter("combined_anchor_emitted_total", "Combined capability+rotation anchor emissions"),
+		combinedAnchorFailures:                 fqCounter("combined_anchor_failures_total", "Failures during combined capability+rotation anchoring"),
 		anchorFailures:                         fqCounter("anchor_failure_total", "Failures anchoring chain tip"),
 		replayHits:                             fqCounter("replay_hits_total", "Replay token detections (rejected)"),
 		replayMisses:                           fqCounter("replay_misses_total", "Unique tokens accepted (first-seen)"),
@@ -280,6 +353,9 @@ func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 		unauthorizedDecisions:                  fqCounter("unauthorized_total", "Unauthorized decisions (authz denied due to policy)"),
 		expiredDelegations:                     fqCounter("expired_delegations_total", "Expired delegations encountered in validation"),
 		revokedDelegations:                     fqCounter("revoked_delegations_total", "Revoked delegations encountered in validation"),
+		partiallyRevokedDelegations:            fqCounter("partially_revoked_delegations_total", "Delegations transitioned to partially_revoked state"),
+		delegationDepthExceeded:                fqCounter("delegation_depth_exceeded_total", "Delegation append rejected due to exceeding max depth"),
+		maxObservedDelegationDepth:             fqGauge("delegation_max_observed_depth", "Maximum observed delegation chain depth (root=1)"),
 		cryptoSignatureMissing:                fqCounter("crypto_signature_missing_total", "Missing detached signature artifact events when enforcement enabled"),
 		capabilityEnforceAllowed:               fqCounter("capability_enforce_allowed_total", "Capability enforcement allow decisions"),
 		capabilityEnforceDenied:                fqCounter("capability_enforce_denied_total", "Capability enforcement denied decisions"),
@@ -298,6 +374,7 @@ func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 		capabilityAnchorEmitted:                fqCounter("capability_anchor_emitted_total", "Capability registry anchor artifacts emitted"),
 		capabilityAnchorSkipped:                fqCounter("capability_anchor_skipped_total", "Capability anchor emission attempts skipped due to interval throttle"),
 		capabilityRegistryHashChanged:          fqCounter("capability_registry_hash_changed_total", "Capability registry hash change events (semantic changes)"),
+		// capabilityAnchorAlgorithmEmitted initialized below as CounterVec
 		obligationsExecuted:                    fqCounter("obligations_executed_total", "Successfully executed obligations/advice actions"),
 		obligationsFailed:                      fqCounter("obligations_failed_total", "Failed obligation/advice executions"),
 		attestationProofIssued:                 fqCounter("attestation_proof_issued_total", "Attestation proofs successfully issued"),
@@ -308,7 +385,72 @@ func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 		attestationProofTrustAnchorMissing:     fqCounter("attestation_proof_trust_anchor_missing_total", "Attestation proof verification failures due to missing trust anchor"),
 		attestationProofTrustAnchorAlgorithmMismatch: fqCounter("attestation_proof_trust_anchor_algorithm_mismatch_total", "Attestation proof verification failures due to algorithm mismatch with trust anchor"),
 		attestationProofTrustAnchorKeyMismatch: fqCounter("attestation_proof_trust_anchor_key_mismatch_total", "Attestation proof verification failures due to key mismatch with trust anchor"),
+		// BLS PoP counters
+		blsPoPChallengesIssued:     fqCounter("bls_pop_challenges_issued_total", "BLS proof-of-possession challenges issued"),
+		blsPoPVerifications:        fqCounter("bls_pop_verifications_total", "Successful BLS proof-of-possession verifications"),
+		blsPoPVerificationFailures: fqCounter("bls_pop_verification_failures_total", "Failed BLS proof-of-possession verifications"),
+		revocationWorkflowInitiated:            fqCounter("revocation_workflow_initiated_total", "Dual-control revocation workflows successfully initiated"),
+		revocationWorkflowInitiationFailures:   fqCounter("revocation_workflow_initiation_failures_total", "Failed attempts to initiate dual-control revocation"),
+		revocationWorkflowApprovals:            fqCounter("revocation_workflow_approvals_total", "Dual-control revocation unique approval events"),
+		revocationWorkflowApprovalFailures:     fqCounter("revocation_workflow_approval_failures_total", "Failed dual-control revocation approval attempts"),
+		revocationWorkflowQuorumSatisfied:      fqCounter("revocation_workflow_quorum_satisfied_total", "Dual-control revocation quorum satisfaction events"),
+		revocationWorkflowCanceled:             fqCounter("revocation_workflow_canceled_total", "Dual-control revocation cancellations before quorum"),
+		revocationWorkflowCancellationFailures: fqCounter("revocation_workflow_cancellation_failures_total", "Failed dual-control revocation cancellation attempts"),
+		revocationWorkflowUnauthorized:         fqCounter("revocation_workflow_unauthorized_total", "Unauthorized dual-control revocation action attempts"),
+		evidenceAttachments:                    fqCounter("evidence_attachment_total", "Successful evidence hash attachment events"),
+		evidenceAttachmentFailures:             fqCounter("evidence_attachment_failures_total", "Failed evidence hash attachment attempts"),
+		// Hierarchical digest counters
+		hierDigestIssued:               fqCounter("hier_digest_issued_total", "Delegations issued with hierarchical digest V4 domain"),
+		hierDigestParentDigestMissing: fqCounter("hier_digest_parent_digest_missing_total", "Hierarchical digest parent digest missing during issuance or validation"),
+		hierDigestVersionMismatch:     fqCounter("hier_digest_version_mismatch_total", "Hierarchical digest expected V4 but observed different version"),
+		// Cascade revocation metrics
+		cascadeRevocationTriggered:     fqCounter("cascade_revocation_triggered_total", "Cascade revocation operations initiated for parent POA"),
+		cascadeDescendantsProcessed:    fqCounter("cascade_descendants_processed_total", "Descendant POAs processed during cascade revocation"),
+		cascadeDepthLimitReached:       fqCounter("cascade_depth_limit_reached_total", "Cascade operations hitting configured maximum depth limit"),
+		cascadeBatchProcessed:          fqCounter("cascade_batch_processed_total", "Batches processed during cascade revocation operations"),
+		cascadeMaxDepthReachedGauge:    fqGauge("cascade_max_depth_reached", "Maximum cascade depth reached in current session"),
+		cascadeProcessingErrors:        fqCounter("cascade_processing_errors_total", "Errors encountered during cascade descendant processing"),
 	}
+	// Attestation proof issuance latency histogram
+	attIssue := prom.NewHistogram(prom.HistogramOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "attestation_proof_issue_latency_seconds", Help: "Latency of attestation proof issuance operations", Buckets: opts.Buckets, ConstLabels: labels})
+	if err := reg.Register(attIssue); err != nil {
+		if are, ok := err.(prom.AlreadyRegisteredError); ok {
+			if h, ok2 := are.ExistingCollector.(prom.Histogram); ok2 { attIssue = h }
+		}
+	}
+	pm.attestationProofIssueLatencyHist = attIssue
+	// Cascade processing latency histogram
+	cascadeLatency := prom.NewHistogram(prom.HistogramOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "cascade_processing_latency_seconds", Help: "Latency of cascade revocation processing operations", Buckets: opts.Buckets, ConstLabels: labels})
+	if err := reg.Register(cascadeLatency); err != nil {
+		if are, ok := err.(prom.AlreadyRegisteredError); ok {
+			if h, ok2 := are.ExistingCollector.(prom.Histogram); ok2 { cascadeLatency = h }
+		}
+	}
+	pm.cascadeProcessingLatency = cascadeLatency
+	// Verification failure reason counter vec
+	apFailReason := prom.NewCounterVec(prom.CounterOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "attestation_proof_verification_failure_reason_total", Help: "Attestation proof verification failures labeled by reason", ConstLabels: labels}, []string{"reason"})
+	if err := reg.Register(apFailReason); err != nil {
+		if are, ok := err.(prom.AlreadyRegisteredError); ok {
+			if cv, ok2 := are.ExistingCollector.(*prom.CounterVec); ok2 { apFailReason = cv }
+		}
+	}
+	pm.attestationProofVerificationFailureReason = apFailReason
+	// Per-algorithm capability anchor emission ratio gauge vec
+	car := prom.NewGaugeVec(prom.GaugeOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "capability_anchor_algorithm_ratio", Help: "Per-algorithm capability anchor emission ratio (0..1) vs total", ConstLabels: labels}, []string{"algorithm"})
+	if err := reg.Register(car); err != nil {
+		if are, ok := err.(prom.AlreadyRegisteredError); ok {
+			if gv, ok2 := are.ExistingCollector.(*prom.GaugeVec); ok2 { car = gv }
+		}
+	}
+	pm.capabilityAnchorAlgorithmRatioGaugeVec = car
+	// Lifecycle latency quantile gauge vec
+	ltq := prom.NewGaugeVec(prom.GaugeOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "lifecycle_transition_latency_quantile", Help: "Lifecycle transition latency quantiles labeled by entity,outcome,quantile", ConstLabels: labels}, []string{"entity", "outcome", "quantile"})
+	if err := reg.Register(ltq); err != nil {
+		if are, ok := err.(prom.AlreadyRegisteredError); ok {
+			if gv, ok2 := are.ExistingCollector.(*prom.GaugeVec); ok2 { ltq = gv }
+		}
+	}
+	pm.lifecycleTransitionLatencyQuantileGaugeVec = ltq
 	// Obligation latency histogram & mandatory failure counter
 	oblHist := prom.NewHistogram(prom.HistogramOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "obligation_latency_seconds", Help: "Latency of individual obligation/advice executions", Buckets: opts.Buckets, ConstLabels: labels})
 	if err := reg.Register(oblHist); err != nil {
@@ -397,6 +539,14 @@ func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 		}
 	}
 	pm.capabilityAnchorNotarizationFailuresVec = nfVec
+	// Evidence hashes per POA gauge vec
+	ehg := prom.NewGaugeVec(prom.GaugeOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "evidence_hashes_per_poa", Help: "Current number of evidence hashes attached to a POA", ConstLabels: labels}, []string{"poa_id"})
+	if err := reg.Register(ehg); err != nil {
+		if are, ok := err.(prom.AlreadyRegisteredError); ok {
+			if gv, ok2 := are.ExistingCollector.(*prom.GaugeVec); ok2 { ehg = gv }
+		}
+	}
+	pm.evidenceHashesPerPOA = ehg
 	// Receipt chain integrity gauge
 	rInt := prom.NewGauge(prom.GaugeOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "capability_anchor_notarization_receipts_integrity", Help: "Integrity status of notarization receipt persistence chain (ok=1 mismatch=0 unconfigured=-1)", ConstLabels: labels})
 	if err := reg.Register(rInt); err != nil {
@@ -494,6 +644,15 @@ func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 	pm.externalAnchorReceiptsLastVerifyAgeGauge = exrAge
 	exrTot := fqCounter("capability_external_anchor_receipts_total", "Total successful external anchor receipts persisted")
 	pm.externalAnchorReceiptsTotalCounter = exrTot
+	// Capability diff metrics registration
+	pm.capabilityDiffRequests = fqCounter("capability_diff_requests_total", "Capability diff endpoint requests")
+	cdHist := prom.NewHistogram(prom.HistogramOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "capability_diff_latency_seconds", Help: "Latency of capability diff computation", Buckets: opts.Buckets, ConstLabels: labels})
+	if err := reg.Register(cdHist); err != nil {
+		if are, ok := err.(prom.AlreadyRegisteredError); ok {
+			if h, ok2 := are.ExistingCollector.(prom.Histogram); ok2 { cdHist = h }
+		}
+	}
+	pm.capabilityDiffLatency = cdHist
 	// digest mismatch reasons
 	dmrc := prom.NewCounterVec(prom.CounterOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "envelope_digest_mismatch_reason_total", Help: "Envelope digest mismatches labeled by reason", ConstLabels: labels}, []string{"reason"})
 	if err := reg.Register(dmrc); err != nil {
@@ -553,6 +712,14 @@ func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 		}
 	}
 	pm.lifecycleTransitionLatency = lth
+	// (Phase 2B) Per-algorithm capability anchor emission CounterVec
+	algoVec := prom.NewCounterVec(prom.CounterOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "capability_anchor_algorithm_emitted_total", Help: "Capability anchor emissions labeled by signature algorithm", ConstLabels: labels}, []string{"algorithm"})
+	if err := reg.Register(algoVec); err != nil {
+		if are, ok := err.(prom.AlreadyRegisteredError); ok {
+			if cv, ok2 := are.ExistingCollector.(*prom.CounterVec); ok2 { algoVec = cv }
+		}
+	}
+	pm.capabilityAnchorAlgorithmEmitted = algoVec
 	return pm
 }
 
@@ -561,6 +728,14 @@ var _ Metrics = (*PrometheusMetrics)(nil)
 
 // Counter increments
 func (p *PrometheusMetrics) IncDelegationsCreated()            { p.delegationsCreated.Inc() }
+// Delegation graph export metrics
+func (p *PrometheusMetrics) IncDelegationGraphExports() {
+	// Reuse existing delegationsCreated counter for now? Prefer dedicated counter; implement when needed.
+	// Placeholder no-op until dedicated counter added; interface satisfaction only.
+}
+func (p *PrometheusMetrics) SetDelegationGraphNodeCount(n int) {
+	// Placeholder no-op (would map to a gauge in future for current node count of exported graph)
+}
 func (p *PrometheusMetrics) IncSignaturesIssued()              { p.signaturesIssued.Inc() }
 func (p *PrometheusMetrics) IncSignatureIssueFailures()        { p.signatureIssueFailures.Inc() }
 func (p *PrometheusMetrics) IncSignatureVerifications()        { p.signatureVerifications.Inc() }
@@ -597,6 +772,40 @@ func (p *PrometheusMetrics) SetEnvelopeV1SunsetPhase(phase int) {
 		}
 		p.envelopeV1SunsetPhaseGauge.Set(float64(phase))
 	}
+}
+
+// Hierarchical digest metrics (counters only; low cardinality)
+func (p *PrometheusMetrics) IncHierDigestIssued() {
+	if p.hierDigestIssued != nil { p.hierDigestIssued.Inc() }
+}
+func (p *PrometheusMetrics) IncHierDigestParentDigestMissing() {
+	if p.hierDigestParentDigestMissing != nil { p.hierDigestParentDigestMissing.Inc() }
+}
+func (p *PrometheusMetrics) IncHierDigestVersionMismatch() {
+	if p.hierDigestVersionMismatch != nil { p.hierDigestVersionMismatch.Inc() }
+}
+
+// Cascade revocation metrics (Phase 2b)
+func (p *PrometheusMetrics) IncCascadeRevocationTriggered() {
+	if p.cascadeRevocationTriggered != nil { p.cascadeRevocationTriggered.Inc() }
+}
+func (p *PrometheusMetrics) IncCascadeDescendantsProcessed() {
+	if p.cascadeDescendantsProcessed != nil { p.cascadeDescendantsProcessed.Inc() }
+}
+func (p *PrometheusMetrics) ObserveCascadeProcessingLatency(d time.Duration) {
+	if p.cascadeProcessingLatency != nil && d >= 0 { p.cascadeProcessingLatency.Observe(d.Seconds()) }
+}
+func (p *PrometheusMetrics) IncCascadeDepthLimitReached() {
+	if p.cascadeDepthLimitReached != nil { p.cascadeDepthLimitReached.Inc() }
+}
+func (p *PrometheusMetrics) IncCascadeBatchProcessed() {
+	if p.cascadeBatchProcessed != nil { p.cascadeBatchProcessed.Inc() }
+}
+func (p *PrometheusMetrics) SetCascadeMaxDepthReached(depth int) {
+	if p.cascadeMaxDepthReachedGauge != nil && depth > 0 { p.cascadeMaxDepthReachedGauge.Set(float64(depth)) }
+}
+func (p *PrometheusMetrics) IncCascadeProcessingErrors() {
+	if p.cascadeProcessingErrors != nil { p.cascadeProcessingErrors.Inc() }
 }
 
 // SetSunsetPhaseSatisfactionProgress sets 0..1 gauge indicating fraction of window satisfied.
@@ -664,6 +873,8 @@ func (p *PrometheusMetrics) ObserveMultiSignatureAggregateLatency(d time.Duratio
 func (p *PrometheusMetrics) IncRevocationIntegrityFailures() { p.revocationIntegrityFailures.Inc() }
 func (p *PrometheusMetrics) IncSignaturePublicKeyMissing()   { p.signaturePublicKeyMissing.Inc() }
 func (p *PrometheusMetrics) IncAnchorAttempts()              { p.anchorAttempts.Inc() }
+func (p *PrometheusMetrics) IncCombinedAnchorEmitted()       { p.combinedAnchorEmitted.Inc() }
+func (p *PrometheusMetrics) IncCombinedAnchorFailures()      { p.combinedAnchorFailures.Inc() }
 func (p *PrometheusMetrics) IncAnchorFailures()              { p.anchorFailures.Inc() }
 func (p *PrometheusMetrics) IncReplayHits()                  { p.replayHits.Inc() }
 func (p *PrometheusMetrics) IncReplayMisses()                { p.replayMisses.Inc() }
@@ -674,11 +885,36 @@ func (p *PrometheusMetrics) IncReplayStoreErrors() { p.replayStoreErrors.Inc() }
 func (p *PrometheusMetrics) ObserveReplayStoreLatency(d time.Duration) {
 	p.replayStoreLatency.Observe(d.Seconds())
 }
+func (p *PrometheusMetrics) SetReplayWALPending(n int) {
+	// Expose as gauge if implemented in future; noop for now.
+}
+func (p *PrometheusMetrics) ObserveReplayWALFlushLatency(d time.Duration) {
+	// Reuse replayStoreLatency histogram until dedicated one added.
+	if d >= 0 {
+		p.replayStoreLatency.Observe(d.Seconds())
+	}
+}
+// ObserveReplayWALSnapshotDuration currently reuses the replayStoreLatency histogram
+// until a dedicated snapshot duration histogram is added.
+func (p *PrometheusMetrics) ObserveReplayWALSnapshotDuration(d time.Duration) {
+    if d >= 0 {
+        p.replayStoreLatency.Observe(d.Seconds())
+    }
+}
 func (p *PrometheusMetrics) IncScopeViolations()             { p.scopeViolations.Inc() }
 func (p *PrometheusMetrics) IncRestrictionViolations()       { p.restrictionViolations.Inc() }
 func (p *PrometheusMetrics) IncUnauthorized()                { p.unauthorizedDecisions.Inc() }
 func (p *PrometheusMetrics) IncExpired()                     { p.expiredDelegations.Inc() }
 func (p *PrometheusMetrics) IncRevoked()                     { p.revokedDelegations.Inc() }
+func (p *PrometheusMetrics) IncDelegationsPartiallyRevoked() { if p.partiallyRevokedDelegations != nil { p.partiallyRevokedDelegations.Inc() } }
+func (p *PrometheusMetrics) IncDelegationDepthExceeded() { if p.delegationDepthExceeded != nil { p.delegationDepthExceeded.Inc() } }
+func (p *PrometheusMetrics) SetMaxObservedDelegationDepth(depth int) {
+	if depth <= 0 || p.maxObservedDelegationDepth == nil { return }
+	// We assume caller provides monotonically non-decreasing depth values (only on successful append).
+	p.maxObservedDelegationDepth.Set(float64(depth))
+}
+func (p *PrometheusMetrics) IncCapabilityDiffRequests() { if p.capabilityDiffRequests != nil { p.capabilityDiffRequests.Inc() } }
+func (p *PrometheusMetrics) ObserveCapabilityDiffLatency(d time.Duration) { if p.capabilityDiffLatency != nil { p.capabilityDiffLatency.Observe(d.Seconds()) } }
 func (p *PrometheusMetrics) IncCryptoSignatureMissing()      { if p.cryptoSignatureMissing != nil { p.cryptoSignatureMissing.Inc() } }
 func (p *PrometheusMetrics) IncDelegationStatusTransitions() { p.delegationStatusTransitions.Inc() }
 func (p *PrometheusMetrics) IncDelegationStatusTransitionFailures() {
@@ -817,6 +1053,16 @@ func (p *PrometheusMetrics) IncAttestationProofDigestMismatch()       { if p.att
 func (p *PrometheusMetrics) ObserveAttestationProofVerificationLatency(d time.Duration) {
 	if p.attestationProofVerificationLatency != nil { p.attestationProofVerificationLatency.Observe(d.Seconds()) }
 }
+// --- BLS Proof-of-Possession counters ---
+func (p *PrometheusMetrics) IncBLSPoPChallengesIssued() {
+	if p.blsPoPChallengesIssued != nil { p.blsPoPChallengesIssued.Inc() }
+}
+func (p *PrometheusMetrics) IncBLSPoPVerifications() {
+	if p.blsPoPVerifications != nil { p.blsPoPVerifications.Inc() }
+}
+func (p *PrometheusMetrics) IncBLSPoPVerificationFailures() {
+	if p.blsPoPVerificationFailures != nil { p.blsPoPVerificationFailures.Inc() }
+}
 // Trust anchor granular attestation failure counters
 func (p *PrometheusMetrics) IncAttestationProofTrustAnchorMissing() {
 	if p.attestationProofTrustAnchorMissing != nil { p.attestationProofTrustAnchorMissing.Inc() }
@@ -826,6 +1072,16 @@ func (p *PrometheusMetrics) IncAttestationProofTrustAnchorAlgorithmMismatch() {
 }
 func (p *PrometheusMetrics) IncAttestationProofTrustAnchorKeyMismatch() {
 	if p.attestationProofTrustAnchorKeyMismatch != nil { p.attestationProofTrustAnchorKeyMismatch.Inc() }
+}
+
+// ObserveAttestationProofIssueLatency records issuance latency.
+func (p *PrometheusMetrics) ObserveAttestationProofIssueLatency(d time.Duration) {
+	if p.attestationProofIssueLatencyHist != nil { p.attestationProofIssueLatencyHist.Observe(d.Seconds()) }
+}
+// IncAttestationProofVerificationFailureReason increments labeled verification failure reason counter.
+func (p *PrometheusMetrics) IncAttestationProofVerificationFailureReason(reason string) {
+	if reason == "" { reason = otherReason }
+	if p.attestationProofVerificationFailureReason != nil { p.attestationProofVerificationFailureReason.WithLabelValues(reason).Inc() }
 }
 
 // ObserveCapabilityAnchorNotarizationLatencyProvider records latency with provider label.
@@ -1128,3 +1384,32 @@ func (p *PrometheusMetrics) Collect(ch chan<- prom.Metric) { /* intentionally em
 
 // ErrNotCollector signals that PrometheusMetrics should not be registered directly.
 var ErrNotCollector = errors.New("PrometheusMetrics adapter is not itself a collector; counters are already registered")
+
+// IncCapabilityAnchorAlgorithm increments labeled per-algorithm capability anchor emission counter.
+// Multiple algorithms may be recorded for a single emission event (call once per algorithm).
+// Empty algorithm names are normalized to "_" placeholder to avoid high cardinality from empty strings.
+func (p *PrometheusMetrics) IncCapabilityAnchorAlgorithm(algo string) {
+	if algo == "" { algo = "_" }
+	if p.capabilityAnchorAlgorithmEmitted != nil {
+		p.capabilityAnchorAlgorithmEmitted.WithLabelValues(algo).Inc()
+	}
+}
+
+// SetCapabilityAnchorAlgorithmRatio sets per-algorithm ratio gauge (0..1).
+func (p *PrometheusMetrics) SetCapabilityAnchorAlgorithmRatio(algo string, ratio float64) {
+	if algo == "" { algo = "_" }
+	if ratio < 0 { ratio = 0 } else if ratio > 1 { ratio = 1 }
+	if p.capabilityAnchorAlgorithmRatioGaugeVec != nil {
+		p.capabilityAnchorAlgorithmRatioGaugeVec.WithLabelValues(algo).Set(ratio)
+	}
+}
+
+// SetLifecycleTransitionLatencyQuantile sets lifecycle latency quantile gauge.
+func (p *PrometheusMetrics) SetLifecycleTransitionLatencyQuantile(entityType, outcome, quantile string, value float64) {
+	if entityType == "" { entityType = "_" }
+	if outcome == "" { outcome = unknownOutcome }
+	if quantile == "" { quantile = "_" }
+	if p.lifecycleTransitionLatencyQuantileGaugeVec != nil {
+		p.lifecycleTransitionLatencyQuantileGaugeVec.WithLabelValues(entityType, outcome, quantile).Set(value)
+	}
+}

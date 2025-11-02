@@ -16,6 +16,7 @@ const (
 	ErrIntegrityFailure    ErrorCode = "integrity_failure"
 	ErrInternal            ErrorCode = "internal_error"
 	ErrReplay              ErrorCode = "replay"
+	ErrDelegationDepthExceeded ErrorCode = "delegation_depth_exceeded"
 )
 
 // RFCError wraps an error with a code and message.

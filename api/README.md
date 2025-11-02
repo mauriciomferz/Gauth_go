@@ -124,6 +124,164 @@ if err := poa.ValidatePoADefinition(def); err != nil { /* handle */ }
 ### Error Handling Compatibility
 `pkg/errors` provides legacy code constants plus HTTP/status fields for bridging older examples. Use wrapped errors with additional context.
 
+### Rotation Summary Artifact (Ledger Transparency & Multisig)
+The endpoint `GET /api/v1/beta/rotations/summary` exposes an integrity artifact for Ed25519 key rotations.
+
+JSON Shape (multisig enabled):
+```jsonc
+{
+	"success": true,
+	"configured": true,
+	"generated_at": "2025-10-26T04:00:00.000000000Z",
+	"summary": {
+		"chain_length": 42,
+		"head_hash": "sha256:...",          // hash of latest rotation record
+		"aggregate_hash": "sha256:...",     // stable hash over entire rotation chain
+		"generated_at": "RFC3339Nano",
+		"kid": "ed25519:abcdef12",          // legacy single-signature KID (omitted when pure multisig mode)
+		"signature": "base64url...",        // legacy single signature (omitted in pure multisig mode)
+		"mode": "EdDSA",                    // signature mode (currently EdDSA only)
+		"threshold": 2,                      // required signature quorum (only if GAUTH_ROTATIONS_MULTISIG=1)
+		"satisfied_weight": 2,               // number of valid signatures collected
+		"signatures": [                      // multisig entries
+			{ "kid": "ed25519:abcdef12", "mode": "EdDSA", "signature": "base64url..." },
+			{ "kid": "ed25519:98765432", "mode": "EdDSA", "signature": "base64url..." }
+		]
+	}
+}
+```
+
+Legacy single-signature path (multisig disabled) includes only: `kid`, `signature`, `mode` and omits `threshold`, `satisfied_weight`, `signatures`.
+
+Environment Flags:
+| Flag | Purpose |
+|------|---------|
+| `GAUTH_ROTATIONS_SIGN=1` | Enable rotation summary signing. |
+| `GAUTH_ROTATIONS_MULTISIG=1` | Aggregate signatures from all current Ed25519 keys. |
+| `GAUTH_ROTATIONS_THRESHOLD` | Optional integer quorum; error if greater than available signatures. |
+
+Error Codes (rotation summary path):
+| Code | Condition |
+|------|-----------|
+| `rotation_chain_empty` | Ledger has no rotation entries. |
+| `rotation_continuity_gap` | Hash continuity broken between entries. |
+| `rotation_signature_registry_unavailable` | Signing required but EdDSA registry missing. |
+| `rotation_signature_missing` | Signature fields absent in required single-sign path. |
+| `rotation_signature_invalid` | Signature verification failure (legacy mode). |
+| `rotation_threshold_unsatisfied` | Requested threshold exceeds available signatures. |
+| `rotation_ledger_unavailable` | Rotation ledger not wired. |
+| `rotation_ledger_type_mismatch` | Internal type assertion failed (should never occur in normal config). |
+
+Client Verification:
+Use `pkg/verification.VerifyRotationSummarySignature(sum)` which:
+- Iterates all `signatures[]` if present; every must verify.
+- Enforces `satisfied_weight >= threshold` when `threshold > 0`.
+- Falls back to legacy single signature (`kid` + `signature`).
+
+Canonical Signing Payload:
+Only the minimal fields `{chain_length, head_hash, aggregate_hash, generated_at}` are serialized and prefixed with `GAUTH_ROTATION_SUMMARY:` before Ed25519 signing. This keeps signatures stable across future schema extensions.
+
+Example Go verification snippet:
+```go
+resp, _ := verification.FetchRotationSummary(httpClient, baseURL)
+if err := verification.VerifyRotationSummarySignature(resp.Summary); err != nil {
+		// handle integrity failure (invalid signature, threshold unsatisfied, etc.)
+}
+```
+
+Planned Extensions:
+- Weighted signatures (governance tiers) – future `weights[]` field.
+- Alternative algorithms (BLS) – potential `mode` variants.
+- External anchoring of head hash – integrating with capability anchors.
+
+### Model Limits Attestation Integrity & Signing
+
+Endpoint: `GET /api/v1/model/limits/attestation` produces a governance attestation describing current model limits, audit chain head, optional anchor chain head, surge detection status, and strict unknown-model enforcement.
+
+Signature (when `GAUTH_MODEL_LIMIT_ATTEST_SIGN=1`):
+ - Includes `nonce` (random base64url) for replay protection; unique per signed attestation
+
+Verification (`POST /api/v1/model/limits/attestation/verify`):
+1. Reconstruct unsigned object preserving field order.
+2. Prepend identical prefix `GAUTH_MODEL_LIMIT_ATTEST:`.
+3. Verify Ed25519 signature using provided `sig_kid` key.
+4. Return `combined_hash = sha256(attest|snapshot.hash|audit.head_hash|anchor.latest_hash)` for external anchoring / linkage.
+
+Environment Flags:
+| Flag | Purpose |
+|------|---------|
+| `GAUTH_MODEL_LIMIT_ATTEST_SIGN=1` | Enable attestation signing with domain-separated payload. |
+| `GAUTH_MODEL_LIMIT_ATTEST_NOTARIZE=1` | Attach external notarization receipt over combined hash seed. |
+| `GAUTH_ATTEST_STREAM_ENABLE=1` | Enable SSE stream of periodic attestation updates. |
+| `GAUTH_ATTEST_NONCE_TTL=30m` | Optional TTL (Go duration string) to evict cached replay nonces (default 1h). |
+
+Error Codes (attestation verify path):
+| Code | Condition |
+|------|-----------|
+| `attestation_body_read_failed` | Request body unreadable. |
+| `attestation_invalid_json` | JSON malformed. |
+| `attestation_signature_fields_missing` | Missing signature mode/KID fields. |
+| `attestation_key_registry_unavailable` | EdDSA key registry not wired. |
+| `attestation_unknown_kid` | `sig_kid` not found. |
+| `attestation_signature_base64_invalid` | Signature not valid base64url. |
+| `attestation_signature_invalid` | Signature cryptographic verification failed. |
+| `attestation_notarization_inconsistent` | Notarization block present but marked unsuccessful. |
+| `attestation_nonce_missing` | Nonce absent in signed attestation. |
+| `attestation_nonce_replay` | Nonce already observed (replay attempt). |
+
+Canonical Signing Payload Stability:
+The prefix ensures signatures cannot be replayed or confused with rotation summaries. Future schema extensions that add optional fields will not alter past signatures because optional fields are excluded when empty.
+
+Example Verification (client-side pseudocode):
+```go
+rawUnsigned := rebuildUnsigned(att) // drop signature fields
+msg := append([]byte("GAUTH_MODEL_LIMIT_ATTEST:"), rawUnsigned...)
+ok := ed25519.Verify(pubKey, msg, sigBytes)
+if nonceCache.Seen(att.Nonce) { /* reject replay */ }
+```
+
+Planned Attestation Extensions:
+
+#### Observability Metrics (Rotation & Attestation Verification)
+
+The beta surfaces Prometheus metrics for cryptographic integrity operations.
+
+| Metric | Type | Labels | Description |
+|--------|------|--------|-------------|
+| `gauth_rotation_signature_verify_latency_seconds` | histogram | (none) | Latency per rotation summary signature verification (each signature). |
+| `gauth_rotation_signature_verify_failures_total` | counter | `reason` | Count of rotation signature verification failures by reason (e.g. `missing_signature`, `kid_mismatch`). |
+| `gauth_attestation_verify_latency_seconds` | histogram | (none) | Latency of full attestation verification (reconstruction + signature + replay check). |
+| `gauth_attestation_verify_failures_total` | counter | `reason` | Count of attestation verification failures by reason (e.g. `invalid_json`, `signature_invalid`, `nonce_replay`). |
+| `gauth_attestation_verify_total` | counter | `outcome`, `soft_invalid` | Total attestation verification attempts classified by outcome (success|failure) and whether failure was soft-invalid. |
+| `gauth_attestation_nonce_cache_size` | gauge | (none) | Current size of replay nonce cache after periodic TTL prune. |
+| `attestation_domain_signature_failures_total` | counter | `reason` | Domain signature soft invalid verification failures (invalid, prefix_missing, base64_invalid). |
+| `attestation_domain_signature_success_total` | counter | (none) | Count of attestations where optional domain signature verified successfully. |
+
+Example PromQL dashboards:
+
+```promql
+# 95th percentile latency (5m window)
+histogram_quantile(0.95, sum(rate(gauth_rotation_signature_verify_latency_seconds_bucket[5m])) by (le))
+histogram_quantile(0.95, sum(rate(gauth_attestation_verify_latency_seconds_bucket[5m])) by (le))
+
+# Failure ratios
+sum(increase(gauth_rotation_signature_verify_failures_total[5m])) / sum(increase(gauth_rotation_signature_verify_latency_seconds_count[5m]))
+sum(increase(gauth_attestation_verify_failures_total[5m])) / sum(increase(gauth_attestation_verify_latency_seconds_count[5m]))
+
+# Top attestation failure reasons (5m)
+topk(5, sum(increase(gauth_attestation_verify_failures_total[5m])) by (reason))
+```
+
+Operational Notes:
+- A consistently elevated `nonce_replay` rate may indicate upstream caching / replay issues.
+- Rotation signature failures for `serialization_error` imply schema drift between signer & verifier.
+- Use latency histograms to size alert thresholds (e.g. P99 > 50ms for rotation verification under normal load is atypical in this beta).
+
+Planned metric enhancements:
+- Add success/failure outcome counter for attestation similar to rotation aggregate.
+- Expose eviction gauge for nonce replay map once TTL/LRU added.
+
+
 ### Migration Notes (Recent Refactors)
 | Area | Old Pattern | New Pattern |
 |------|-------------|-------------|
