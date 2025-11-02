@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
+	cr "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/crypto"
 )
 
 // TestHierarchicalDigestRootAndChild verifies Version bump to 4 and parent digest binding.
@@ -16,7 +17,9 @@ func TestHierarchicalDigestRootAndChild(t *testing.T) {
 	os.Setenv("GAUTH_PERSIST_PATH", path)
 	defer os.Unsetenv("GAUTH_PERSIST_PATH")
 	memLogger := audit.NewMemoryLogger(nil)
-	svc := NewService(memLogger, &allowAllAuthorizer{})
+	kms, err := cr.NewInMemoryEd25519Provider()
+	if err != nil { t.Fatalf("kms init: %v", err) }
+	svc := NewService(memLogger, &allowAllAuthorizer{}, WithKMS(kms))
 	rootResp, err := svc.CreateDelegation(DelegationRequest{Grantor: "alice", Grantee: "bob", Scope: []string{"finance.read"}, Duration: time.Hour})
 	if err != nil { t.Fatalf("root create failed: %v", err) }
 	if rootResp.POA.Version != 4 {
@@ -42,7 +45,9 @@ func TestHierDigestDisabled(t *testing.T) {
 	os.Setenv("GAUTH_PERSIST_PATH", path)
 	defer os.Unsetenv("GAUTH_PERSIST_PATH")
 	memLogger := audit.NewMemoryLogger(nil)
-	svc := NewService(memLogger, &allowAllAuthorizer{})
+	kms, err := cr.NewInMemoryEd25519Provider()
+	if err != nil { t.Fatalf("kms init: %v", err) }
+	svc := NewService(memLogger, &allowAllAuthorizer{}, WithKMS(kms))
 	resp, err := svc.CreateDelegation(DelegationRequest{Grantor: "alice", Grantee: "bob", Scope: []string{"finance.read"}, Duration: time.Hour})
 	if err != nil { t.Fatalf("create failed: %v", err) }
 	if resp.POA.Version >= 4 { t.Fatalf("expected Version<4 when hier digest disabled got %d", resp.POA.Version) }
@@ -56,7 +61,9 @@ func TestHierDigestTamperParent(t *testing.T) {
 	os.Setenv("GAUTH_PERSIST_PATH", path)
 	defer os.Unsetenv("GAUTH_PERSIST_PATH")
 	memLogger := audit.NewMemoryLogger(nil)
-	svc := NewService(memLogger, &allowAllAuthorizer{})
+	kms, err := cr.NewInMemoryEd25519Provider()
+	if err != nil { t.Fatalf("kms init: %v", err) }
+	svc := NewService(memLogger, &allowAllAuthorizer{}, WithKMS(kms))
 	rootResp, err := svc.CreateDelegation(DelegationRequest{Grantor: "alice", Grantee: "bob", Scope: []string{"finance.read"}, Duration: time.Hour})
 	if err != nil { t.Fatalf("root create failed: %v", err) }
 	childResp, err := svc.CreateDelegation(DelegationRequest{Grantor: "bob", Grantee: "carol", Scope: []string{"finance.read"}, Duration: time.Hour, ParentPOAID: rootResp.POA.ID})
