@@ -23,21 +23,21 @@ func TestModelLimitsAttestationNotarization(t *testing.T) {
 	// Force initialization of notarizer by reusing capability env (fallback path if needed):
 	t.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")
 
-	auditFile, _ := os.CreateTemp(t.TempDir(), "audit_*.jsonl")
-	anchorFile, _ := os.CreateTemp(t.TempDir(), "anchor_*.jsonl")
-	limitsFile, _ := os.CreateTemp(t.TempDir(), "limits_*.json")
-	_, _ = limitsFile.Write([]byte(`{"model_limits":{"demo":{"max_input_tokens":5}}}`))
-	limitsFile.Close()
-	os.Setenv("GAUTH_MODEL_LIMITS_PATH", limitsFile.Name())
-	os.Setenv("GAUTH_MODEL_LIMIT_AUDIT_PATH", auditFile.Name())
-	os.Setenv("GAUTH_MODEL_LIMIT_ANCHOR_PATH", anchorFile.Name())
-	os.Setenv("GAUTH_MODEL_LIMIT_ANCHOR_INTERVAL", "1")
-	os.Setenv("GAUTH_MODEL_LIMITS_STRICT_UNKNOWN", "1")
-	// Surge tuning for deterministic trigger
-	os.Setenv("GAUTH_MODEL_LIMIT_SURGE_FACTOR", "1.0") // make trigger easier
-	os.Setenv("GAUTH_MODEL_LIMIT_SURGE_MIN_EVENTS", "1")
+        auditFile, _ := os.CreateTemp(t.TempDir(), "audit_*.jsonl")
+        anchorFile, _ := os.CreateTemp(t.TempDir(), "anchor_*.jsonl")
+        limitsFile, _ := os.CreateTemp(t.TempDir(), "limits_*.json")
+        _, _ = limitsFile.Write([]byte(`{"model_limits":{"demo":{"max_input_tokens":5}}}`))
+        limitsFile.Close()
+        t.Setenv("GAUTH_MODEL_LIMITS_PATH", limitsFile.Name())
+        t.Setenv("GAUTH_MODEL_LIMIT_AUDIT_PATH", auditFile.Name())
+        t.Setenv("GAUTH_MODEL_LIMIT_ANCHOR_PATH", anchorFile.Name())
+        t.Setenv("GAUTH_MODEL_LIMIT_ANCHOR_INTERVAL", "1")
+        t.Setenv("GAUTH_MODEL_LIMITS_STRICT_UNKNOWN", "1")
+        // Surge tuning for deterministic trigger
+        t.Setenv("GAUTH_MODEL_LIMIT_SURGE_FACTOR", "1.0") // make trigger easier
+        t.Setenv("GAUTH_MODEL_LIMIT_SURGE_MIN_EVENTS", "1")
 
-	srv := NewBetaServer("")
+        srv := NewBetaServer("")
 	if internalCrypto.GlobalEdDSARegistry == nil || internalCrypto.GlobalEdDSARegistry.Active() == nil {
 		t.Fatalf("expected eddsa registry active")
 	}
