@@ -25,8 +25,6 @@ func TestDelegationGraphExport(t *testing.T) {
     
     svc := rfc0111.NewService(auditLogger, authorizer)
     
-    now := time.Now()
-    
     // Create delegations through the service (this will populate the repo)
     rootResp, err := svc.CreateDelegationCtx(context.Background(), rfc0111.DelegationRequest{
         Grantor: "alice", 

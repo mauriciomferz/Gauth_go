@@ -43,13 +43,13 @@ func TestRevocationAnchoring(t *testing.T) {
 		t.Fatalf("expected 200 got %d", w.Code)
 	}
 	body := w.Body.String()
-	if !(contains(body, "anchor_hash") && contains(body, "revocation_hash")) {
+	if !(containsString(body, "anchor_hash") && containsString(body, "revocation_hash")) {
 		t.Fatalf("expected anchor_hash & revocation_hash in audit log body: %s", body)
 	}
 }
 
-// contains is a small helper to avoid importing strings repeatedly.
-func contains(s, sub string) bool {
+// containsString is a small helper to avoid importing strings repeatedly.
+func containsString(s, sub string) bool {
 	return len(s) >= len(sub) && (func() bool { return indexOf(s, sub) >= 0 })()
 }
 

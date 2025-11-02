@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
@@ -85,6 +84,13 @@ func TestRevocationWorkflowEndpoints_CountQuorum(t *testing.T) {
 
 func TestRevocationWorkflowEndpoints_Unauthorized(t *testing.T) {
 	t.Skip("Test requires POA injection method that doesn't exist - will implement proper POA creation in future iteration")
+	
+	// TODO: Re-enable this test when TestInjectPOA method is implemented
+	/*
+	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111"})
+	srv := NewBetaServerWithMetrics("", pm)
+	poaID := "poa-test-unauthorized"
+	
 	// Unauthorized initiation attempt by 'bob'
 	res := performJSONPost(srv, "/api/v1/poa/"+poaID+"/revocation/initiate", map[string]string{"initiator": "bob", "reason": "risk"})
 	if res.Code == 200 {
@@ -98,10 +104,16 @@ func TestRevocationWorkflowEndpoints_Unauthorized(t *testing.T) {
 	if !containsSubstring(metRec.Body.String(), "revocation_workflow_unauthorized") {
 		 t.Fatalf("expected unauthorized metric substring not found")
 	}
+	*/
 }
 
 func TestRevocationWorkflowEndpoints_WeightQuorum(t *testing.T) {
 	t.Skip("Test requires POA injection method that doesn't exist - will implement proper POA creation in future iteration")
+	
+	// TODO: Re-enable this test when TestInjectPOA method is implemented
+	/*
+	poaID := "poa_weight_test"
+	poa := &rfc0111.PowerOfAttorney{
 		ID:         poaID,
 		Grantor:    "grantor",
 		Grantee:    "grantee",
@@ -150,6 +162,7 @@ func TestRevocationWorkflowEndpoints_WeightQuorum(t *testing.T) {
 	for _, expect := range []string{"revocation_workflow_initiated", "revocation_workflow_approvals", "revocation_workflow_quorum_satisfied"} {
 		if !containsSubstring(body, expect) { t.Fatalf("expected metrics substring %s not found", expect) }
 	}
+	*/
 }
 
 // containsSubstring is a tiny helper (duplicated locally to avoid extra imports) for body checks.

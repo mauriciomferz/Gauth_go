@@ -14639,5 +14639,178 @@ RFC-0150 Authorization Platform
     <div id="learning-content" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-start justify-center overflow-y-auto py-8" onclick="if(event.target === this) this.classList.add('hidden')">
     </div>
 
+    <!-- Power of Attorney Educational Content Section -->
+    <section class="bg-gradient-to-br from-indigo-50 to-purple-50 py-16 px-4 mt-12 border-t-4 border-indigo-500">
+        <div class="max-w-6xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">
+                    <i class="fas fa-scroll text-indigo-600 mr-3"></i>
+                    Power of Attorney (PoA)
+                </h2>
+                <p class="text-xl text-gray-700 mb-2">Power of Attorney & Delegation</p>
+                <div class="flex items-center justify-center gap-6 text-sm text-gray-600">
+                    <span><i class="fas fa-clock text-indigo-500 mr-2"></i>20 minutes</span>
+                    <span><i class="fas fa-chart-bar text-indigo-500 mr-2"></i>Intermediate</span>
+                </div>
+            </div>
+
+            <!-- Section 1: What is Power of Attorney? -->
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">
+                    <span class="bg-indigo-600 text-white rounded-full w-8 h-8 inline-flex items-center justify-center mr-3">1</span>
+                    What is Power of Attorney?
+                </h3>
+                <p class="text-gray-700 mb-6">
+                    Power of Attorney (PoA) allows one party to delegate authority to another:
+                </p>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-indigo-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-indigo-900 mb-2">
+                            <i class="fas fa-user-tie text-indigo-600 mr-2"></i>Delegator
+                        </h4>
+                        <p class="text-gray-700 text-sm">Original authority holder (e.g., Marketing Manager)</p>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-purple-900 mb-2">
+                            <i class="fas fa-user-check text-purple-600 mr-2"></i>Delegate
+                        </h4>
+                        <p class="text-gray-700 text-sm">Who receives the authority (e.g., AI Marketing Agent)</p>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-blue-900 mb-2">
+                            <i class="fas fa-tasks text-blue-600 mr-2"></i>Scope
+                        </h4>
+                        <p class="text-gray-700 text-sm">What actions are delegated</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-green-900 mb-2">
+                            <i class="fas fa-hourglass-half text-green-600 mr-2"></i>Duration
+                        </h4>
+                        <p class="text-gray-700 text-sm">How long the delegation lasts</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Marketing AI Agent Use Case -->
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">
+                    <span class="bg-indigo-600 text-white rounded-full w-8 h-8 inline-flex items-center justify-center mr-3">2</span>
+                    Marketing AI Agent Use Case
+                </h3>
+                <p class="text-gray-700 mb-4">
+                    A marketing manager delegates content approval to an AI agent:
+                </p>
+                <div class="bg-gray-900 text-green-400 p-6 rounded-lg font-mono text-sm overflow-x-auto">
+<pre>{
+  "delegator": "marketing-manager@company.com",
+  "delegate": "ai-content-agent-001",
+  "permissions": ["APPROVE_SOCIAL_MEDIA", "APPROVE_BLOG_POSTS"],
+  "constraints": {
+    "max_budget": "$500",
+    "content_types": ["twitter", "linkedin", "blog"],
+    "valid_until": "2025-12-31"
+  }
+}</pre>
+                </div>
+            </div>
+
+            <!-- Section 3: Delegation Chain -->
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">
+                    <span class="bg-indigo-600 text-white rounded-full w-8 h-8 inline-flex items-center justify-center mr-3">3</span>
+                    Delegation Chain
+                </h3>
+                <p class="text-gray-700 mb-6">
+                    Delegations can form chains with proper auditing:
+                </p>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-4 p-4 bg-gradient-to-r from-indigo-100 to-indigo-50 rounded-lg">
+                        <span class="bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-semibold">Level 1</span>
+                        <span class="text-gray-800 font-medium">CMO → Marketing Manager</span>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-gradient-to-r from-purple-100 to-purple-50 rounded-lg">
+                        <span class="bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">Level 2</span>
+                        <span class="text-gray-800 font-medium">Marketing Manager → AI Agent</span>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-100 to-blue-50 rounded-lg">
+                        <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">Level 3</span>
+                        <span class="text-gray-800 font-medium">AI Agent → Specific Campaign</span>
+                    </div>
+                </div>
+                <div class="mt-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+                    <p class="text-gray-800">
+                        <i class="fas fa-clipboard-list text-yellow-600 mr-2"></i>
+                        <strong>Audit Trail:</strong> Every action traces back to original authority
+                    </p>
+                </div>
+            </div>
+
+            <!-- Section 4: Safety & Constraints -->
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">
+                    <span class="bg-indigo-600 text-white rounded-full w-8 h-8 inline-flex items-center justify-center mr-3">4</span>
+                    Safety & Constraints
+                </h3>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="flex items-start gap-3 p-4 bg-green-50 rounded-lg">
+                        <i class="fas fa-check-circle text-green-600 text-xl mt-1"></i>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-1">Time-limited delegations</h4>
+                            <p class="text-gray-600 text-sm">Automatically expire</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-4 bg-green-50 rounded-lg">
+                        <i class="fas fa-check-circle text-green-600 text-xl mt-1"></i>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-1">Spending limits</h4>
+                            <p class="text-gray-600 text-sm">Prevent budget overruns</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-4 bg-green-50 rounded-lg">
+                        <i class="fas fa-check-circle text-green-600 text-xl mt-1"></i>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-1">Content restrictions</h4>
+                            <p class="text-gray-600 text-sm">Ensure brand compliance</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-4 bg-green-50 rounded-lg">
+                        <i class="fas fa-check-circle text-green-600 text-xl mt-1"></i>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-1">Revocation</h4>
+                            <p class="text-gray-600 text-sm">Instant authority withdrawal</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Takeaways -->
+            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-lg p-8 text-white">
+                <h3 class="text-2xl font-bold mb-6 flex items-center">
+                    <i class="fas fa-check-double mr-3"></i>
+                    Key Takeaways
+                </h3>
+                <ul class="space-y-3">
+                    <li class="flex items-start gap-3">
+                        <i class="fas fa-check-circle text-green-300 text-xl mt-1"></i>
+                        <span>PoA enables safe delegation of authority</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fas fa-check-circle text-green-300 text-xl mt-1"></i>
+                        <span>Essential for AI agent operations</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fas fa-check-circle text-green-300 text-xl mt-1"></i>
+                        <span>Constraints prevent unauthorized actions</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fas fa-check-circle text-green-300 text-xl mt-1"></i>
+                        <span>Full audit trail maintains accountability</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
 </body>
 </html>
