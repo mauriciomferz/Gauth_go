@@ -3,11 +3,19 @@
 [![Lint](https://github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/actions/workflows/lint.yml/badge.svg)](https://github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/actions/workflows/lint.yml)
 [![OpenAPI Spec Contract](https://github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/actions/workflows/openapi-coverage.yml/badge.svg)](https://github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/actions/workflows/openapi-coverage.yml)
 [![Gap Matrix](docs/badges/gap-matrix.svg)](docs/GAP_MATRIX.auto.md)
+[![CI Build](https://github.com/mauriciomferz/Gauth_go/actions/workflows/ci.yml/badge.svg)](https://github.com/mauriciomferz/Gauth_go/actions/workflows/ci.yml)
+
+> **📅 Recent Updates (November 2025)**
+> - ✅ **Test Suite Stabilization** - Fixed race conditions in model limits tests using test-scoped environment variables
+> - ✅ **CI/CD Improvements** - Resolved web package compilation errors and test failures  
+> - ✅ **Enhanced Test Coverage** - Fixed time restrictions, hierarchical digest validation, and nonce uniqueness tests
+> - ✅ **Code Quality** - All pkg, internal, web, and test packages passing with comprehensive test suite
 
 > **Latest Project Status & Compliance Mapping**
 > - Progress Report (2025-10-20): see `docs/PROGRESS_STATUS_2025-10-20.md` (executive summary of delivered vs planned + next 10-day focus)
 > - Clause-to-Test Coverage Scoping: `docs/CLAUSE_TEST_COVERAGE_SCOPING.md` (data model & generator plan)
 > - Coverage Template & Generator: `docs/coverage_template.json` + `cmd/coverage/main.go` (run `go run ./cmd/coverage` to produce `docs/CLAUSE_TEST_COVERAGE.json` after adding markers)
+
 
 
 > **⚠️ BETA DEMO NOTICE**
