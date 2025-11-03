@@ -6,6 +6,22 @@ export const demoState = {
   auditEntries: [],
 };
 
+// Token metrics tracking
+export const tokenMetrics = {
+  created: 0,
+  validated: 0,
+  revoked: 0,
+  get total() {
+    return this.created + this.validated + this.revoked;
+  }
+};
+
+export function incrementTokenMetric(metric) {
+  if (metric in tokenMetrics && metric !== 'total') {
+    tokenMetrics[metric]++;
+  }
+}
+
 export function setCurrentToken(tok) {
   currentToken = tok;
   demoState.tokenCreated = !!tok;

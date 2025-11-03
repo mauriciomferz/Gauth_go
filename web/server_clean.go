@@ -4041,8 +4041,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 		c.Set("csp-nonce", nonce)
 		c.Header("Content-Security-Policy", strings.Join([]string{
 			"default-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
-			"script-src 'self' 'nonce-" + nonce + "' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
-			"style-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
+			"script-src 'self' 'nonce-" + nonce + "' 'unsafe-inline' 'unsafe-hashes' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
+			"style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
 			"font-src 'self' https://cdnjs.cloudflare.com data:",
 			"img-src 'self' data:",
 			"connect-src 'self'",

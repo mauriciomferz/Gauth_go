@@ -6,7 +6,13 @@
 
 /* Animations and Transitions */
 .blinking-cursor {
+    -webkit-animation: blink 1s infinite;
     animation: blink 1s infinite;
+}
+
+@-webkit-keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
 }
 
 @keyframes blink {
@@ -145,14 +151,20 @@
     border-radius: 50%;
     width: 20px;
     height: 20px;
+    -webkit-animation: spin 1s linear infinite;
     animation: spin 1s linear infinite;
     display: inline-block;
     margin-right: 8px;
 }
 
+@-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); transform: rotate(360deg); }
+}
+
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% { -webkit-transform: rotate(0deg); transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); transform: rotate(360deg); }
 }
 
 /* Code Syntax Highlighting */
@@ -275,16 +287,32 @@
 
 /* Card Animations */
 .card-enter {
+    -webkit-animation: cardEnter 0.5s ease-out;
     animation: cardEnter 0.5s ease-out;
+}
+
+@-webkit-keyframes cardEnter {
+    from {
+        opacity: 0;
+        -webkit-transform: translateY(20px);
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        -webkit-transform: translateY(0);
+        transform: translateY(0);
+    }
 }
 
 @keyframes cardEnter {
     from {
         opacity: 0;
+        -webkit-transform: translateY(20px);
         transform: translateY(20px);
     }
     to {
         opacity: 1;
+        -webkit-transform: translateY(0);
         transform: translateY(0);
     }
 }
@@ -389,9 +417,15 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    * {
-        animation: none !important;
-        transition: none !important;
+    *,
+    *::before,
+    *::after {
+        -webkit-animation-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        -webkit-animation-iteration-count: 1 !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
     }
     html {
         scroll-behavior: auto;
@@ -457,35 +491,19 @@ html {
 /* Print Styles */
 @media print {
     .no-print {
-        display: none;
+        display: none !important;
     }
     
     body {
         font-size: 12pt;
         line-height: 1.4;
-        color: black;
-        background: white;
+        color: black !important;
+        background: white !important;
     }
-}
-
-/* Contrast Fixes for Beta Warning and Orange Backgrounds */
-.bg-orange-500,
-.bg-orange-600 {
-    color: white !important;
-}
-
-.bg-orange-500 *,
-.bg-orange-600 * {
-    color: white !important;
-}
-
-/* Specific fixes for problematic elements */
-div[style*="bg-orange-500"],
-div[style*="bg-orange-600"] {
-    color: white !important;
-}
-
-div[style*="bg-orange-500"] *,
-div[style*="bg-orange-600"] * {
-    color: white !important;
+    
+    .beta-warning,
+    .educational-warning {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
 }

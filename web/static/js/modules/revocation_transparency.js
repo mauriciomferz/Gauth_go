@@ -148,6 +148,9 @@ function setText(id, value) {
 }
 
 function attachProofHandler() {
+  // Proof handler placeholder - currently no proof UI elements
+  // Reserved for future inclusion proof interactive demo
+}
 
 function attachConsistencyHandler() {
   const btn = document.getElementById('rev-consistency-btn');
