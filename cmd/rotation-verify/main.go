@@ -7,12 +7,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	notary "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
 	"io/ioutil"
 	"os"
 	"sort"
 	"strings"
 	"time"
+
+	notary "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
 )
 
 // artifactFile structure expecting top-level object containing an "artifact" field mirroring RotationSummaryV2.

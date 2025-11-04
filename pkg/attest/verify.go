@@ -92,7 +92,7 @@ func VerifyModelLimitsAttestation(att *Attestation, keyRegistry KeyFinder, repla
 		return VerificationResult{Valid: false, FailureCode: "invalid_json", ErrorCode: "attestation_invalid_json", HTTPStatus: 400}, errors.New("nil_attestation")
 	}
 	// Signature field presence & mode
-	if att.Signature == "" || att.SigKid == "" || att.SigMode != "eddsa" {
+	if att.Signature == "" || att.SigKid == "" || att.SigMode != sigModeEdDSA {
 		return VerificationResult{Valid: false, FailureCode: "signature_fields_missing", ErrorCode: "attestation_signature_fields_missing", HTTPStatus: 400}, nil
 	}
 	if keyRegistry == nil {

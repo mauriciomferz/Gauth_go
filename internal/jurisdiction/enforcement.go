@@ -347,7 +347,7 @@ func (e *EnforcementEngine) applyJurisdictionEnforcement(
 	}
 
 	// Check allowed actions (if whitelist mode)
-	if enforcement.AllowedActions != nil && len(enforcement.AllowedActions) > 0 {
+	if len(enforcement.AllowedActions) > 0 {
 		if allowed, exists := enforcement.AllowedActions[enfCtx.Action]; !exists || !allowed {
 			return fmt.Errorf("action %s is not in allowed list for jurisdiction %s", enfCtx.Action, enfCtx.Jurisdiction)
 		}

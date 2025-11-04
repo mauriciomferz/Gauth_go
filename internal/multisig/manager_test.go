@@ -485,8 +485,8 @@ func TestSignatureManager_ListPending(t *testing.T) {
 		Signers:   []string{"carol", "dave"},
 	}
 
-	manager.InitiateCollection(ctx, poa1, 1*time.Hour)
-	manager.InitiateCollection(ctx, poa2, 1*time.Hour)
+	_ = manager.InitiateCollection(ctx, poa1, 1*time.Hour)
+	_ = manager.InitiateCollection(ctx, poa2, 1*time.Hour)
 
 	pending := manager.ListPending(ctx)
 	if len(pending) != 2 {
@@ -505,7 +505,7 @@ func TestSignatureManager_RejectCollection(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	manager.InitiateCollection(ctx, poa, 1*time.Hour)
+	_ = manager.InitiateCollection(ctx, poa, 1*time.Hour)
 
 	// Reject the collection
 	err := manager.RejectCollection(ctx, "poa-reject", "PoA withdrawn")

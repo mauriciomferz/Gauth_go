@@ -88,7 +88,7 @@ func (si *ServerIntegration) EnforceAICapabilities(action string, claims map[str
 
 	// Increment metrics
 	if si.metricsCallback != nil {
-		if decision.Decision == "allow" {
+		if decision.Decision == DecisionAllow {
 			si.metricsCallback("ai_capability_enforce_allowed")
 		} else {
 			si.metricsCallback("ai_capability_enforce_denied")

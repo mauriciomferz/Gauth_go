@@ -16,12 +16,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	cryptoreg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
 	"math/big"
 	"os"
 	"sort"
 	"strings"
 	"time"
+
+	cryptoreg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
 
 	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"

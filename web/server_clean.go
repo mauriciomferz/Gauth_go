@@ -590,7 +590,7 @@ func (s *BetaServer) CapAnchorStaleThresholdSeconds() int {
 func (s *BetaServer) CapAnchorStale() bool { return s.capAnchorStale.Load() }
 func (s *BetaServer) CapAnchorMetrics() (emitted, skipped, hashChanged, lastWriteUnix uint64, ok bool) {
 	if mem, ok2 := s.metrics.(*metrics.Memory); ok2 {
-		return mem.CapabilityAnchorEmitted(), mem.CapabilityAnchorSkipped(), mem.CapabilityRegistryHashChanged(), uint64(mem.CapabilityAnchorLastWriteUnix()), true
+		return mem.CapabilityAnchorEmitted(), mem.CapabilityAnchorSkipped(), mem.CapabilityRegistryHashChanged(), mem.CapabilityAnchorLastWriteUnix(), true
 	}
 	return 0, 0, 0, 0, false
 }
@@ -4997,12 +4997,12 @@ func (s *BetaServer) verifyExternalReceiptChain() string {
 		}{Hash: e.Hash, Timestamp: e.Timestamp, Provider: e.Provider, Version: e.Version, LatencySeconds: e.LatencySeconds, PrevHash: e.PrevHash}
 		enc, err := json.Marshal(base)
 		if err != nil {
-			s.externalReceiptIntegrityStatus = "mismatch"
+			s.externalReceiptIntegrityStatus = integrityMismatch
 			break
 		}
 		expected := fmt.Sprintf("%x", sha256.Sum256(append([]byte(e.PrevHash), enc...)))
 		if expected != e.ChainHash || e.PrevHash != prev {
-			s.externalReceiptIntegrityStatus = "mismatch"
+			s.externalReceiptIntegrityStatus = integrityMismatch
 			break
 		}
 		prev = expected
@@ -5073,13 +5073,13 @@ func (s *BetaServer) apiExternalAnchorReceiptsVerify(c *gin.Context) {
 		}{Hash: e.Hash, Timestamp: e.Timestamp, Provider: e.Provider, Version: e.Version, LatencySeconds: e.LatencySeconds, PrevHash: e.PrevHash}
 		enc, err := json.Marshal(base)
 		if err != nil {
-			s.externalReceiptIntegrityStatus = "mismatch"
+			s.externalReceiptIntegrityStatus = integrityMismatch
 			c.JSON(500, gin.H{"success": false, "error": "marshal_failed", "detail": err.Error()})
 			return
 		}
 		expected := fmt.Sprintf("%x", sha256.Sum256(append([]byte(e.PrevHash), enc...)))
 		if expected != e.ChainHash || e.PrevHash != prev {
-			s.externalReceiptIntegrityStatus = "mismatch"
+			s.externalReceiptIntegrityStatus = integrityMismatch
 			if pm, ok := s.metrics.(interface{ SetExternalAnchorReceiptsIntegrity(string) }); ok {
 				pm.SetExternalAnchorReceiptsIntegrity("mismatch")
 			}

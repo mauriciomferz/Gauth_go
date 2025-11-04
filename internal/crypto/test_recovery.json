@@ -1,21 +1,21 @@
 {
   "ttl_hours": 0,
   "active": {
-    "kid": "FUZjhB-nLAU",
-    "created_at": "2025-10-30T07:29:45Z",
-    "expires_at": "2025-10-30T07:29:55Z",
-    "private_b64": "aJ9LgQVvVREMFsqm9akRtXumQx9YbFVB5toiajziQ30VRmOEH6csBWwmmvxFnqmF0oxyBMWVwv30Y/oYKadEGQ",
-    "public_b64": "FUZjhB+nLAVsJpr8RZ6phdKMcgTFlcL99GP6GCmnRBk",
+    "kid": "K9oVaguiZ4s",
+    "created_at": "2025-11-04T01:37:16Z",
+    "expires_at": "2025-11-04T01:37:26Z",
+    "private_b64": "iomv9E6t5qTXQQ881bGFmaBFW23AldWqzR9JB0WXfCsr2hVqC6JnixhQR6J26DvMDTBWdAPT7cHHspExYYIweg",
+    "public_b64": "K9oVaguiZ4sYUEeidug7zA0wVnQD0+3Bx7KRMWGCMHo",
     "alg": "EdDSA",
     "use": "sig"
   },
   "history": [
     {
-      "kid": "gFiHL9aY_p0",
-      "created_at": "2025-10-30T07:29:45Z",
-      "expires_at": "2025-10-30T07:29:55Z",
-      "private_b64": "lsq9l8aokm9eM62DLxwFo/sl7wCM/0rksOF9jMA0qyWAWIcv1pj+nWYjnfk6b4rf/m1kCRhJzZaPnExlrlPs7g",
-      "public_b64": "gFiHL9aY/p1mI535Om+K3/5tZAkYSc2Wj5xMZa5T7O4",
+      "kid": "bhh8sBIAxT4",
+      "created_at": "2025-11-04T01:37:16Z",
+      "expires_at": "2025-11-04T01:37:26Z",
+      "private_b64": "pPwszslqwKFpdk42iGnjquxVmSe69eStBSTQ2yBVTV1uGHywEgDFPjfBBfk5P6vGKunrkJi80yQutw/uXwFvDQ",
+      "public_b64": "bhh8sBIAxT43wQX5OT+rxirp65CYvNMkLrcP7l8Bbw0",
       "alg": "EdDSA",
       "use": "sig"
     }

@@ -36,7 +36,7 @@ func TestVerifyModelLimitsAttestationValid(t *testing.T) {
 	pub, priv, _ := ed25519.GenerateKey(nil)
 	// Manager not required; we use stubKeyRegistry with public key only.
 	att := &Attestation{Success: true, Configured: true, Nonce: "n1"}
-	att.Snapshot.Hash = "sha256:demo"
+	att.Snapshot.Hash = testSnapshotHash
 	// Reconstruct unsigned struct exactly like verify.go logic
 	unsigned := struct {
 		Success    bool   `json:"success"`
@@ -103,7 +103,7 @@ func TestVerifyModelLimitsAttestationValid(t *testing.T) {
 func TestVerifyModelLimitsAttestationInvalidSignature(t *testing.T) {
 	pub, _, _ := ed25519.GenerateKey(nil)
 	att := &Attestation{Success: true, Configured: true, Nonce: "n2"}
-	att.Snapshot.Hash = "sha256:demo"
+	att.Snapshot.Hash = testSnapshotHash
 	// Provide bogus signature
 	att.Signature = base64.RawStdEncoding.EncodeToString([]byte("invalid_signature"))
 	att.SigKid = "k2"
@@ -183,7 +183,7 @@ func signAtt(t *testing.T, priv ed25519.PrivateKey, att *Attestation) {
 func TestVerifyModelLimitsAttestationReplay(t *testing.T) {
 	pub, priv, _ := ed25519.GenerateKey(nil)
 	att := &Attestation{Success: true, Configured: true, Nonce: "nonce-replay"}
-	att.Snapshot.Hash = "sha256:demo"
+	att.Snapshot.Hash = testSnapshotHash
 	signAtt(t, priv, att)
 	att.SigKid = "rkid"
 	att.SigMode = "eddsa"
@@ -199,7 +199,7 @@ func TestVerifyModelLimitsAttestationReplay(t *testing.T) {
 func TestVerifyModelLimitsAttestationNonceMissing(t *testing.T) {
 	pub, priv, _ := ed25519.GenerateKey(nil)
 	att := &Attestation{Success: true, Configured: true, Nonce: ""}
-	att.Snapshot.Hash = "sha256:demo"
+	att.Snapshot.Hash = testSnapshotHash
 	signAtt(t, priv, att)
 	att.SigKid = "nkid"
 	att.SigMode = "eddsa"
@@ -213,7 +213,7 @@ func TestVerifyModelLimitsAttestationNonceMissing(t *testing.T) {
 func TestVerifyModelLimitsAttestationNotarizationInconsistent(t *testing.T) {
 	pub, priv, _ := ed25519.GenerateKey(nil)
 	att := &Attestation{Success: true, Configured: true, Nonce: "n3"}
-	att.Snapshot.Hash = "sha256:demo"
+	att.Snapshot.Hash = testSnapshotHash
 	att.Notarization = &struct {
 		Provider       string  `json:"provider"`
 		Timestamp      string  `json:"timestamp"`
@@ -232,7 +232,7 @@ func TestVerifyModelLimitsAttestationNotarizationInconsistent(t *testing.T) {
 
 func TestVerifyModelLimitsAttestationSignatureFieldsMissing(t *testing.T) {
 	att := &Attestation{Success: true, Configured: true, Nonce: "n4"}
-	att.Snapshot.Hash = "sha256:demo"
+	att.Snapshot.Hash = testSnapshotHash
 	// No signature fields populated
 	res, _ := VerifyModelLimitsAttestation(att, nil, &memoryReplay{}, time.Now())
 	if res.FailureCode != "signature_fields_missing" || res.HTTPStatus != 400 {
@@ -243,7 +243,7 @@ func TestVerifyModelLimitsAttestationSignatureFieldsMissing(t *testing.T) {
 func TestVerifyModelLimitsAttestationUnknownKid(t *testing.T) {
 	pub, priv, _ := ed25519.GenerateKey(nil)
 	att := &Attestation{Success: true, Configured: true, Nonce: "n5"}
-	att.Snapshot.Hash = "sha256:demo"
+	att.Snapshot.Hash = testSnapshotHash
 	signAtt(t, priv, att)
 	att.SigKid = "kid-real" // registry will not contain this kid
 	att.SigMode = "eddsa"
@@ -257,7 +257,7 @@ func TestVerifyModelLimitsAttestationUnknownKid(t *testing.T) {
 func TestVerifyModelLimitsAttestationSignatureBase64Invalid(t *testing.T) {
 	pub, _, _ := ed25519.GenerateKey(nil)
 	att := &Attestation{Success: true, Configured: true, Nonce: "n6"}
-	att.Snapshot.Hash = "sha256:demo"
+	att.Snapshot.Hash = testSnapshotHash
 	att.Signature = "@@@" // invalid base64
 	att.SigKid = "kid1"
 	att.SigMode = "eddsa"
@@ -335,7 +335,7 @@ func TestVerifyModelLimitsAttestationTamperedSnapshot(t *testing.T) {
 func TestVerifyModelLimitsAttestationDurableReplay(t *testing.T) {
 	pub, priv, _ := ed25519.GenerateKey(nil)
 	att := &Attestation{Success: true, Configured: true, Nonce: "durable-nonce"}
-	att.Snapshot.Hash = "sha256:demo"
+	att.Snapshot.Hash = testSnapshotHash
 	signAtt(t, priv, att)
 	att.SigKid = "dkid"
 	att.SigMode = "eddsa"

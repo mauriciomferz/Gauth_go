@@ -631,9 +631,7 @@ func auditRotationV2ArtifactJSON(data []byte, expectedPrev string) (interface{},
 	h.Write([]byte("|"))
 	// Signers sorted by ID for digest recompute (copy into auxiliary slice for sorting)
 	aux := make([]signerEntry, len(art.Signers))
-	for i, si := range art.Signers {
-		aux[i] = si
-	}
+	copy(aux, art.Signers)
 	s := aux
 	sort.Slice(s, func(i, j int) bool { return s[i].Signer < s[j].Signer })
 	for _, si := range s {

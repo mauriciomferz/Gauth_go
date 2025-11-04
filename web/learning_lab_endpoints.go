@@ -46,11 +46,11 @@ func (s *BetaServer) AddLearningLabEndpoints() {
 
 // apiLearningStart handles learning journey initialization
 func (s *BetaServer) apiLearningStart(c *gin.Context) {
-	sessionId := generateID()
+	sessionID := generateID()
 
 	c.JSON(http.StatusOK, gin.H{
 		"success":           true,
-		"session_id":        sessionId,
+		"session_id":        sessionID,
 		"current_module":    "gauth-fundamentals",
 		"progress":          15,
 		"modules_completed": 2,
@@ -98,7 +98,7 @@ func (s *BetaServer) apiTokenCreateDemo(c *gin.Context) {
 		return
 	}
 
-	tokenId := generateID()
+	tokenID := generateID()
 	issuedAt := time.Now()
 	expiresAt := issuedAt.Add(24 * time.Hour)
 
@@ -110,7 +110,7 @@ func (s *BetaServer) apiTokenCreateDemo(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"success":      true,
-		"token_id":     tokenId,
+		"token_id":     tokenID,
 		"issued_at":    issuedAt.Format(time.RFC3339),
 		"expires_at":   expiresAt.Format(time.RFC3339),
 		"algorithm":    "HS256",
@@ -169,13 +169,13 @@ func (s *BetaServer) apiMarketingPoA(c *gin.Context) {
 		return
 	}
 
-	poaId := generateID()
-	campaignId := generateID()
+	poaID := generateID()
+	campaignID := generateID()
 
 	c.JSON(http.StatusOK, gin.H{
 		"success":       true,
-		"poa_id":        poaId,
-		"campaign_id":   campaignId,
+		"poa_id":        poaID,
+		"campaign_id":   campaignID,
 		"status":        "authorized",
 		"authorized_by": "marketing-manager@company.com",
 		"expires_at":    time.Now().Add(7 * 24 * time.Hour).Format(time.RFC3339),
@@ -198,11 +198,11 @@ func (s *BetaServer) apiExperimentalOperation(c *gin.Context) {
 		return
 	}
 
-	experimentId := generateID()
+	experimentID := generateID()
 
 	c.JSON(http.StatusOK, gin.H{
 		"success":       true,
-		"experiment_id": experimentId,
+		"experiment_id": experimentID,
 		"status":        "completed",
 		"output":        fmt.Sprintf("Experimental operation '%s' executed successfully.\nMode: %v\nResults: All tests passed.", action, req.Parameters["mode"]),
 		"metrics": []string{
@@ -229,11 +229,11 @@ func (s *BetaServer) apiValidationOperation(c *gin.Context) {
 		return
 	}
 
-	validationId := generateID()
+	validationID := generateID()
 
 	c.JSON(http.StatusOK, gin.H{
 		"success":        true,
-		"validation_id":  validationId,
+		"validation_id":  validationID,
 		"action":         action,
 		"overall_status": "passed",
 		"checks": []gin.H{
@@ -258,11 +258,11 @@ func (s *BetaServer) apiGenericAction(c *gin.Context) {
 		return
 	}
 
-	actionId := generateID()
+	actionID := generateID()
 
 	c.JSON(http.StatusOK, gin.H{
 		"success":   true,
-		"action_id": actionId,
+		"action_id": actionID,
 		"status":    "completed",
 		"message":   fmt.Sprintf("GAuth action '%s' executed successfully in %s context", req.Action, req.Context),
 		"details": gin.H{

@@ -5,9 +5,10 @@
 package errorscatalog
 
 import (
-	gerrs "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/errors"
 	"net/http"
 	"sort"
+
+	gerrs "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/errors"
 )
 
 // Category represents a coarse grouping for error codes to enable filtering
