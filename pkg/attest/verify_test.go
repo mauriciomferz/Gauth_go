@@ -15,9 +15,21 @@ import (
 const testSnapshotHash = "sha256:demo"
 
 // memoryReplay simple in-memory replay strategy for tests
-type memoryReplay struct { seen map[string]struct{} }
-func (m *memoryReplay) Seen(nonce string) bool { if m.seen == nil { return false }; _, ok := m.seen[nonce]; return ok }
-func (m *memoryReplay) Record(nonce string) { if m.seen == nil { m.seen = make(map[string]struct{}) }; m.seen[nonce] = struct{}{} }
+type memoryReplay struct{ seen map[string]struct{} }
+
+func (m *memoryReplay) Seen(nonce string) bool {
+	if m.seen == nil {
+		return false
+	}
+	_, ok := m.seen[nonce]
+	return ok
+}
+func (m *memoryReplay) Record(nonce string) {
+	if m.seen == nil {
+		m.seen = make(map[string]struct{})
+	}
+	m.seen[nonce] = struct{}{}
+}
 
 func TestVerifyModelLimitsAttestationValid(t *testing.T) {
 	// Generate ephemeral key and manager
@@ -27,11 +39,11 @@ func TestVerifyModelLimitsAttestationValid(t *testing.T) {
 	att.Snapshot.Hash = "sha256:demo"
 	// Reconstruct unsigned struct exactly like verify.go logic
 	unsigned := struct {
-		Success      bool   `json:"success"`
-		Configured   bool   `json:"configured"`
-		Reason       string `json:"reason,omitempty"`
-		Nonce        string `json:"nonce,omitempty"`
-		Snapshot     struct {
+		Success    bool   `json:"success"`
+		Configured bool   `json:"configured"`
+		Reason     string `json:"reason,omitempty"`
+		Nonce      string `json:"nonce,omitempty"`
+		Snapshot   struct {
 			Hash        string `json:"hash"`
 			GeneratedAt string `json:"generated_at"`
 		} `json:"snapshot"`
@@ -73,10 +85,18 @@ func TestVerifyModelLimitsAttestationValid(t *testing.T) {
 	if err != nil || !res.Valid || res.Kid != "k1" || res.CombinedHash == "" {
 		// Note combined hash requires audit/anchor heads; empty snapshot hash uses only snapshot hash component
 		// res.CombinedHash should still be non-empty based on seed derivation.
-		if err != nil { t.Fatalf("verify error: %v", err) }
-		if !res.Valid { t.Fatalf("expected valid signature") }
-		if res.Kid != "k1" { t.Fatalf("kid mismatch") }
-		if res.CombinedHash == "" { t.Fatalf("combined hash empty") }
+		if err != nil {
+			t.Fatalf("verify error: %v", err)
+		}
+		if !res.Valid {
+			t.Fatalf("expected valid signature")
+		}
+		if res.Kid != "k1" {
+			t.Fatalf("kid mismatch")
+		}
+		if res.CombinedHash == "" {
+			t.Fatalf("combined hash empty")
+		}
 	}
 }
 
@@ -92,29 +112,67 @@ func TestVerifyModelLimitsAttestationInvalidSignature(t *testing.T) {
 	res, _ := VerifyModelLimitsAttestation(att, fakeRegistry, &memoryReplay{}, time.Now())
 	if res.Valid || !res.SoftInvalid || res.FailureCode != "signature_invalid" {
 		// Soft invalid expected
-		if res.Valid { t.Fatalf("expected invalid signature") }
-		if !res.SoftInvalid { t.Fatalf("expected SoftInvalid flag true") }
-		if res.FailureCode != "signature_invalid" { t.Fatalf("expected failure_code signature_invalid got %s", res.FailureCode) }
+		if res.Valid {
+			t.Fatalf("expected invalid signature")
+		}
+		if !res.SoftInvalid {
+			t.Fatalf("expected SoftInvalid flag true")
+		}
+		if res.FailureCode != "signature_invalid" {
+			t.Fatalf("expected failure_code signature_invalid got %s", res.FailureCode)
+		}
 	}
 }
 
 // stubKeyRegistry minimal implementation of FindByID
-type stubKeyRegistry struct { kid string; pub ed25519.PublicKey }
-func (s *stubKeyRegistry) FindByID(id string) *internalcrypto.Key { if id == s.kid { return &internalcrypto.Key{ID: s.kid, Public: s.pub} }; return nil }
+type stubKeyRegistry struct {
+	kid string
+	pub ed25519.PublicKey
+}
+
+func (s *stubKeyRegistry) FindByID(id string) *internalcrypto.Key {
+	if id == s.kid {
+		return &internalcrypto.Key{ID: s.kid, Public: s.pub}
+	}
+	return nil
+}
 
 // helper to sign an attestation using a private key matching verifier reconstruction logic
 func signAtt(t *testing.T, priv ed25519.PrivateKey, att *Attestation) {
 	unsigned := struct {
-		Success      bool   `json:"success"`
-		Configured   bool   `json:"configured"`
-		Reason       string `json:"reason,omitempty"`
-		Nonce        string `json:"nonce,omitempty"`
-		Snapshot     struct { Hash string `json:"hash"`; GeneratedAt string `json:"generated_at"` } `json:"snapshot"`
-		Audit *struct { HeadHash string `json:"head_hash"`; Entries int `json:"entries"` } `json:"audit,omitempty"`
-		Anchor *struct { LatestHash string `json:"latest_hash"`; Entries int `json:"entries"`; Interval int `json:"interval"` } `json:"anchor,omitempty"`
+		Success    bool   `json:"success"`
+		Configured bool   `json:"configured"`
+		Reason     string `json:"reason,omitempty"`
+		Nonce      string `json:"nonce,omitempty"`
+		Snapshot   struct {
+			Hash        string `json:"hash"`
+			GeneratedAt string `json:"generated_at"`
+		} `json:"snapshot"`
+		Audit *struct {
+			HeadHash string `json:"head_hash"`
+			Entries  int    `json:"entries"`
+		} `json:"audit,omitempty"`
+		Anchor *struct {
+			LatestHash string `json:"latest_hash"`
+			Entries    int    `json:"entries"`
+			Interval   int    `json:"interval"`
+		} `json:"anchor,omitempty"`
 		StrictUnknown bool `json:"strict_unknown"`
-		Surge *struct { ModelID string `json:"model_id"`; Last10Sec int `json:"last_10s_exceed_events"`; AvgActive float64 `json:"avg_active_seconds"`; Factor float64 `json:"factor"`; MinEvents int `json:"min_events"`; Triggered bool `json:"triggered"`; At string `json:"triggered_at,omitempty"` } `json:"surge,omitempty"`
-		Notarization *struct { Provider string `json:"provider"`; Timestamp string `json:"timestamp"`; LatencySeconds float64 `json:"latency_seconds"`; Success bool `json:"success"` } `json:"notarization,omitempty"`
+		Surge         *struct {
+			ModelID   string  `json:"model_id"`
+			Last10Sec int     `json:"last_10s_exceed_events"`
+			AvgActive float64 `json:"avg_active_seconds"`
+			Factor    float64 `json:"factor"`
+			MinEvents int     `json:"min_events"`
+			Triggered bool    `json:"triggered"`
+			At        string  `json:"triggered_at,omitempty"`
+		} `json:"surge,omitempty"`
+		Notarization *struct {
+			Provider       string  `json:"provider"`
+			Timestamp      string  `json:"timestamp"`
+			LatencySeconds float64 `json:"latency_seconds"`
+			Success        bool    `json:"success"`
+		} `json:"notarization,omitempty"`
 	}{Success: att.Success, Configured: att.Configured, Reason: att.Reason, Nonce: att.Nonce, Snapshot: att.Snapshot, Audit: att.Audit, Anchor: att.Anchor, StrictUnknown: att.StrictUnknown, Surge: att.Surge, Notarization: att.Notarization}
 	raw, _ := json.Marshal(unsigned)
 	msg := append([]byte(AttestationDomainPrefix), raw...)
@@ -156,7 +214,12 @@ func TestVerifyModelLimitsAttestationNotarizationInconsistent(t *testing.T) {
 	pub, priv, _ := ed25519.GenerateKey(nil)
 	att := &Attestation{Success: true, Configured: true, Nonce: "n3"}
 	att.Snapshot.Hash = "sha256:demo"
-	att.Notarization = &struct { Provider string `json:"provider"`; Timestamp string `json:"timestamp"`; LatencySeconds float64 `json:"latency_seconds"`; Success bool `json:"success"` }{Provider: "stub", Timestamp: time.Now().UTC().Format(time.RFC3339Nano), LatencySeconds: 0.01, Success: false}
+	att.Notarization = &struct {
+		Provider       string  `json:"provider"`
+		Timestamp      string  `json:"timestamp"`
+		LatencySeconds float64 `json:"latency_seconds"`
+		Success        bool    `json:"success"`
+	}{Provider: "stub", Timestamp: time.Now().UTC().Format(time.RFC3339Nano), LatencySeconds: 0.01, Success: false}
 	signAtt(t, priv, att)
 	att.SigKid = "nkid2"
 	att.SigMode = "eddsa"
@@ -209,8 +272,15 @@ func TestVerifyModelLimitsAttestationCombinedHash(t *testing.T) {
 	pub, priv, _ := ed25519.GenerateKey(nil)
 	att := &Attestation{Success: true, Configured: true, Nonce: "n7"}
 	att.Snapshot.Hash = "sha256:snap"
-	att.Audit = &struct { HeadHash string `json:"head_hash"`; Entries int `json:"entries"` }{HeadHash: "sha256:audit", Entries: 10}
-	att.Anchor = &struct { LatestHash string `json:"latest_hash"`; Entries int `json:"entries"`; Interval int `json:"interval"` }{LatestHash: "sha256:anchor", Entries: 5, Interval: 1}
+	att.Audit = &struct {
+		HeadHash string `json:"head_hash"`
+		Entries  int    `json:"entries"`
+	}{HeadHash: "sha256:audit", Entries: 10}
+	att.Anchor = &struct {
+		LatestHash string `json:"latest_hash"`
+		Entries    int    `json:"entries"`
+		Interval   int    `json:"interval"`
+	}{LatestHash: "sha256:anchor", Entries: 5, Interval: 1}
 	signAtt(t, priv, att)
 	att.SigKid = "kidCH"
 	att.SigMode = "eddsa"
@@ -228,9 +298,21 @@ func TestVerifyModelLimitsAttestationCombinedHash(t *testing.T) {
 }
 
 // durableReplay simulates a persistent replay store by retaining nonces across calls
-type durableReplay struct { seen map[string]struct{} }
-func (d *durableReplay) Seen(nonce string) bool { if d.seen == nil { return false }; _, ok := d.seen[nonce]; return ok }
-func (d *durableReplay) Record(nonce string) { if d.seen == nil { d.seen = make(map[string]struct{}) }; d.seen[nonce] = struct{}{} }
+type durableReplay struct{ seen map[string]struct{} }
+
+func (d *durableReplay) Seen(nonce string) bool {
+	if d.seen == nil {
+		return false
+	}
+	_, ok := d.seen[nonce]
+	return ok
+}
+func (d *durableReplay) Record(nonce string) {
+	if d.seen == nil {
+		d.seen = make(map[string]struct{})
+	}
+	d.seen[nonce] = struct{}{}
+}
 
 // Test tampering with snapshot hash after signing causes soft invalid signature
 func TestVerifyModelLimitsAttestationTamperedSnapshot(t *testing.T) {

@@ -14,7 +14,7 @@ import (
 
 // TestCascadeProcessorComprehensive adds comprehensive test scenarios for cascade revocation
 func TestCascadeProcessorComprehensive(t *testing.T) {
-	
+
 	// Helper to create a test POA with realistic attributes
 	createRealisticPOA := func(id, parentID, grantor, grantee string, scope []string, depth int) *rfc0111.PowerOfAttorney {
 		now := time.Now().UTC()
@@ -50,20 +50,20 @@ func TestCascadeProcessorComprehensive(t *testing.T) {
 		ceo := createRealisticPOA("ceo", "", "board", "ceo", []string{"*"}, 0)
 		cto := createRealisticPOA("cto", "ceo", "ceo", "cto", []string{"engineering.*"}, 1)
 		cfo := createRealisticPOA("cfo", "ceo", "ceo", "cfo", []string{"finance.*"}, 1)
-		
+
 		engLead1 := createRealisticPOA("eng-lead1", "cto", "cto", "eng-lead1", []string{"engineering.backend.*"}, 2)
 		engLead2 := createRealisticPOA("eng-lead2", "cto", "cto", "eng-lead2", []string{"engineering.frontend.*"}, 2)
 		financeLead := createRealisticPOA("finance-lead", "cfo", "cfo", "finance-lead", []string{"finance.reporting.*"}, 2)
-		
+
 		dev1 := createRealisticPOA("dev1", "eng-lead1", "eng-lead1", "dev1", []string{"engineering.backend.api"}, 3)
 		dev2 := createRealisticPOA("dev2", "eng-lead1", "eng-lead1", "dev2", []string{"engineering.backend.db"}, 3)
 		dev3 := createRealisticPOA("dev3", "eng-lead2", "eng-lead2", "dev3", []string{"engineering.frontend.ui"}, 3)
-		
+
 		analyst1 := createRealisticPOA("analyst1", "finance-lead", "finance-lead", "analyst1", []string{"finance.reporting.monthly"}, 3)
 		analyst2 := createRealisticPOA("analyst2", "finance-lead", "finance-lead", "analyst2", []string{"finance.reporting.quarterly"}, 3)
 
 		allPOAs := []*rfc0111.PowerOfAttorney{
-			ceo, cto, cfo, engLead1, engLead2, financeLead, 
+			ceo, cto, cfo, engLead1, engLead2, financeLead,
 			dev1, dev2, dev3, analyst1, analyst2,
 		}
 
@@ -189,18 +189,18 @@ func TestCascadeProcessorComprehensive(t *testing.T) {
 	t.Run("performance test - deep hierarchy", func(t *testing.T) {
 		// Create a deep chain: root -> level1 -> level2 -> ... -> level20
 		repo := &memoryRepo{store: make(map[string]*rfc0111.PowerOfAttorney)}
-		
+
 		const maxLevels = 20
 		var previousID string = ""
 
 		for i := 0; i < maxLevels; i++ {
 			id := fmt.Sprintf("level-%d", i)
 			poa := createRealisticPOA(
-				id, 
-				previousID, 
-				fmt.Sprintf("user-%d", i), 
-				fmt.Sprintf("user-%d", i+1), 
-				[]string{fmt.Sprintf("scope.level.%d", i)}, 
+				id,
+				previousID,
+				fmt.Sprintf("user-%d", i),
+				fmt.Sprintf("user-%d", i+1),
+				[]string{fmt.Sprintf("scope.level.%d", i)},
 				i,
 			)
 			_ = repo.Create(poa)
@@ -236,7 +236,7 @@ func TestCascadeProcessorComprehensive(t *testing.T) {
 		}
 
 		t.Logf("Processed %d POAs in %v", result.ProcessedCount, processingTime)
-		
+
 		// Verify max depth tracking
 		if result.MaxDepthReached != maxLevels-1 {
 			t.Errorf("Expected max depth %d, got %d", maxLevels-1, result.MaxDepthReached)
@@ -246,9 +246,9 @@ func TestCascadeProcessorComprehensive(t *testing.T) {
 	t.Run("error injection - repository failures", func(t *testing.T) {
 		// Create a failing repository that simulates partial failures
 		failingRepo := &failingMemoryRepo{
-			memoryRepo:   &memoryRepo{store: make(map[string]*rfc0111.PowerOfAttorney)},
-			failureRate:  0.3, // 30% failure rate
-			failAfterID:  "failure-point",
+			memoryRepo:  &memoryRepo{store: make(map[string]*rfc0111.PowerOfAttorney)},
+			failureRate: 0.3, // 30% failure rate
+			failAfterID: "failure-point",
 		}
 
 		// Set up hierarchy
@@ -365,7 +365,7 @@ func TestCascadeProcessorComprehensive(t *testing.T) {
 
 		// Verify metrics were recorded
 		snapshot := memoryMetrics.SnapshotEx()
-		
+
 		// Check cascade trigger metric
 		if snapshot.CascadeRevocationTriggered != 1 {
 			t.Errorf("Expected cascade trigger metric to be 1, got %d", snapshot.CascadeRevocationTriggered)
@@ -386,23 +386,23 @@ func TestCascadeProcessorComprehensive(t *testing.T) {
 // failingMemoryRepo simulates repository failures for error injection testing
 type failingMemoryRepo struct {
 	*memoryRepo
-	failureRate  float64
-	failAfterID  string
-	updateCalls  int
+	failureRate float64
+	failAfterID string
+	updateCalls int
 }
 
 func (f *failingMemoryRepo) Update(p *rfc0111.PowerOfAttorney) error {
 	f.updateCalls++
-	
+
 	// Fail updates after encountering the specific ID
 	if p.ID == f.failAfterID {
 		return fmt.Errorf("simulated repository failure for ID: %s", p.ID)
 	}
-	
+
 	// Random failures based on failure rate
 	if f.updateCalls > 2 && float64(f.updateCalls%10) < f.failureRate*10 {
 		return fmt.Errorf("simulated random repository failure")
 	}
-	
+
 	return f.memoryRepo.Update(p)
 }

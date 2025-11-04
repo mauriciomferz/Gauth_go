@@ -95,13 +95,17 @@ func CanonicalPOADigest(p *PowerOfAttorney) (string, []byte, error) {
 	// weights object (optional; deterministic ordering)
 	if len(p.Weights) > 0 {
 		wKeys := make([]string, 0, len(p.Weights))
-		for k := range p.Weights { wKeys = append(wKeys, k) }
+		for k := range p.Weights {
+			wKeys = append(wKeys, k)
+		}
 		sort.Strings(wKeys)
 		buf.WriteByte(',')
 		buf.WriteString("\"weights\":")
 		buf.WriteByte('{')
 		for i, k := range wKeys {
-			if i > 0 { buf.WriteByte(',') }
+			if i > 0 {
+				buf.WriteByte(',')
+			}
 			writeJSONStringRaw(&buf, k)
 			buf.WriteByte(':')
 			writeJSONStringRaw(&buf, fmt.Sprintf("%d", p.Weights[k]))
@@ -119,15 +123,30 @@ func CanonicalPOADigest(p *PowerOfAttorney) (string, []byte, error) {
 			// We emit keys only if value non-empty for minimal encoding; order fixed.
 			firstField := true
 			if p.AgentType != "" {
-				writeJSONStringRaw(&buf, "agent_type"); buf.WriteByte(':'); writeJSONStringRaw(&buf, p.AgentType); firstField = false; includedAny = true
+				writeJSONStringRaw(&buf, "agent_type")
+				buf.WriteByte(':')
+				writeJSONStringRaw(&buf, p.AgentType)
+				firstField = false
+				includedAny = true
 			}
 			if p.Sector != "" {
-				if !firstField { buf.WriteByte(',') }
-				writeJSONStringRaw(&buf, "sector"); buf.WriteByte(':'); writeJSONStringRaw(&buf, p.Sector); firstField = false; includedAny = true
+				if !firstField {
+					buf.WriteByte(',')
+				}
+				writeJSONStringRaw(&buf, "sector")
+				buf.WriteByte(':')
+				writeJSONStringRaw(&buf, p.Sector)
+				firstField = false
+				includedAny = true
 			}
 			if p.ActionClass != "" {
-				if !firstField { buf.WriteByte(',') }
-				writeJSONStringRaw(&buf, "action_class"); buf.WriteByte(':'); writeJSONStringRaw(&buf, p.ActionClass); includedAny = true
+				if !firstField {
+					buf.WriteByte(',')
+				}
+				writeJSONStringRaw(&buf, "action_class")
+				buf.WriteByte(':')
+				writeJSONStringRaw(&buf, p.ActionClass)
+				includedAny = true
 			}
 			buf.WriteByte('}')
 		}
@@ -140,11 +159,17 @@ func CanonicalPOADigest(p *PowerOfAttorney) (string, []byte, error) {
 		buf.WriteString("\"hierarchy\":")
 		buf.WriteByte('{')
 		// parent_poa_id (empty for root): include value to guarantee root canonical differs from pre-v4 digests.
-		writeJSONStringRaw(&buf, "parent_poa_id"); buf.WriteByte(':'); writeJSONStringRaw(&buf, p.ParentPOAID)
+		writeJSONStringRaw(&buf, "parent_poa_id")
+		buf.WriteByte(':')
+		writeJSONStringRaw(&buf, p.ParentPOAID)
 		buf.WriteByte(',')
-		writeJSONStringRaw(&buf, "parent_digest"); buf.WriteByte(':'); writeJSONStringRaw(&buf, p.ParentDigest)
+		writeJSONStringRaw(&buf, "parent_digest")
+		buf.WriteByte(':')
+		writeJSONStringRaw(&buf, p.ParentDigest)
 		buf.WriteByte(',')
-		writeJSONStringRaw(&buf, "depth"); buf.WriteByte(':'); writeJSONStringRaw(&buf, fmt.Sprintf("%d", p.Depth))
+		writeJSONStringRaw(&buf, "depth")
+		buf.WriteByte(':')
+		writeJSONStringRaw(&buf, fmt.Sprintf("%d", p.Depth))
 		buf.WriteByte('}')
 	}
 	// times (writeJSONStringField will prepend comma automatically)
@@ -170,7 +195,9 @@ func CanonicalPOADigest(p *PowerOfAttorney) (string, []byte, error) {
 	if p.Threshold > 1 && len(p.Signers) > 0 { // multi-sig overrides other domains
 		weightParts := []string{}
 		if len(p.Weights) > 0 {
-			for k, v := range p.Weights { weightParts = append(weightParts, fmt.Sprintf("%s=%d", k, v)) }
+			for k, v := range p.Weights {
+				weightParts = append(weightParts, fmt.Sprintf("%s=%d", k, v))
+			}
 			sort.Strings(weightParts)
 		}
 		domain = fmt.Sprintf("GAUTH_RFC0111_POA_V2|thr=%d|w=%s\n", p.Threshold, strings.Join(weightParts, ","))

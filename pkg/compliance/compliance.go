@@ -40,7 +40,7 @@ type Registry struct {
 	legalValidator *LegalFrameworkValidator
 }
 
-func NewRegistry() *Registry { 
+func NewRegistry() *Registry {
 	return &Registry{
 		flows:          map[string]Flow{},
 		legalValidator: NewLegalFrameworkValidator(),
@@ -61,7 +61,7 @@ func (r *Registry) RegisterWithLegalValidation(ctx context.Context, f Flow, acti
 		}
 		f.LegallyApproved = true
 	}
-	
+
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.flows[f.ID] = f
@@ -88,11 +88,11 @@ func (r *Registry) ValidateFlowCompliance(ctx context.Context, flowID string, ju
 	r.mu.RLock()
 	flow, exists := r.flows[flowID]
 	r.mu.RUnlock()
-	
+
 	if !exists {
 		return ErrFlowNotFound
 	}
-	
+
 	// Determine action based on data types
 	action := "data_flow"
 	for _, dataType := range flow.DataTypes {
@@ -105,7 +105,7 @@ func (r *Registry) ValidateFlowCompliance(ctx context.Context, flowID string, ju
 			break
 		}
 	}
-	
+
 	return r.legalValidator.ValidateJurisdiction(ctx, jurisdiction, action)
 }
 

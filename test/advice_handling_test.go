@@ -13,10 +13,14 @@ import (
 type fakeExecutor struct{}
 
 func (f *fakeExecutor) Execute(ob authz.Obligation, ctx map[string]interface{}) error {
-	if ob.Type == "fail" { return fmt.Errorf("simulated failure") }
+	if ob.Type == "fail" {
+		return fmt.Errorf("simulated failure")
+	}
 	return nil
 }
-func (f *fakeExecutor) PersistAudit(ob authz.Obligation, ctx map[string]interface{}, result error) error { return nil }
+func (f *fakeExecutor) PersistAudit(ob authz.Obligation, ctx map[string]interface{}, result error) error {
+	return nil
+}
 
 // minimal metrics provider (Memory implements needed interface)
 
@@ -33,9 +37,15 @@ func TestAdviceFailureDoesNotChangeDecision(t *testing.T) {
 	ma.Snapshot()
 	req := authz.Request{Subject: "bob", Resource: "doc:7", Action: "read"}
 	dec, err := ma.Authorize(context.Background(), req)
-	if err != nil { t.Fatalf("authorize err: %v", err) }
-	if !dec.Allow { t.Fatalf("decision flipped unexpectedly on advice failure") }
-	if dec.Metadata["advice_failure"] != "adv1" { t.Fatalf("expected advice_failure metadata adv1 got %v", dec.Metadata["advice_failure"]) }
+	if err != nil {
+		t.Fatalf("authorize err: %v", err)
+	}
+	if !dec.Allow {
+		t.Fatalf("decision flipped unexpectedly on advice failure")
+	}
+	if dec.Metadata["advice_failure"] != "adv1" {
+		t.Fatalf("expected advice_failure metadata adv1 got %v", dec.Metadata["advice_failure"])
+	}
 }
 
 func TestMandatoryObligationFailureFlipsDecision(t *testing.T) {
@@ -50,8 +60,16 @@ func TestMandatoryObligationFailureFlipsDecision(t *testing.T) {
 	ma.Snapshot()
 	req := authz.Request{Subject: "alice", Resource: "doc:99", Action: "write"}
 	dec, err := ma.Authorize(context.Background(), req)
-	if err != nil { t.Fatalf("authorize err: %v", err) }
-	if dec.Allow { t.Fatalf("expected decision flipped to deny due to mandatory obligation failure") }
-	if dec.Metadata["obligation_failure"] != "obl1" { t.Fatalf("expected obligation_failure metadata obl1 got %v", dec.Metadata["obligation_failure"]) }
-	if mem.MandatoryObligationFailures() == 0 { t.Fatalf("expected mandatory obligation failure metric increment") }
+	if err != nil {
+		t.Fatalf("authorize err: %v", err)
+	}
+	if dec.Allow {
+		t.Fatalf("expected decision flipped to deny due to mandatory obligation failure")
+	}
+	if dec.Metadata["obligation_failure"] != "obl1" {
+		t.Fatalf("expected obligation_failure metadata obl1 got %v", dec.Metadata["obligation_failure"])
+	}
+	if mem.MandatoryObligationFailures() == 0 {
+		t.Fatalf("expected mandatory obligation failure metric increment")
+	}
 }

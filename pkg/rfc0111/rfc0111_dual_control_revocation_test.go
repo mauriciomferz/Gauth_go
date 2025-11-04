@@ -18,33 +18,43 @@ func TestDualControlRevocationWorkflow(t *testing.T) {
 	svc := NewService(memLogger, &allowAllAuthorizer{})
 	// Create POA with controllers
 	resp, err := svc.CreateDelegation(DelegationRequest{Grantor: "alice", Grantee: "bob", Scope: []string{"ops.read"}, Duration: time.Hour})
-	if err != nil { t.Fatalf("create failed: %v", err) }
+	if err != nil {
+		t.Fatalf("create failed: %v", err)
+	}
 	poaID := resp.POA.ID
 	// Manually attach controllers for test (simulating issuance with controllers field)
 	poa, _ := svc.repo.Get(poaID)
 	poa.Controllers = []string{"controller1", "controller2"}
-	if err := svc.repo.Update(poa); err != nil { t.Fatalf("update controllers failed: %v", err) }
+	if err := svc.repo.Update(poa); err != nil {
+		t.Fatalf("update controllers failed: %v", err)
+	}
 	// Unauthorized initiator
 	if err := svc.InitiateRevocation(nil, RevocationRequest{POAID: poaID, Initiator: "bob", Reason: "risk"}); err == nil {
-		 t.Fatalf("expected unauthorized initiator rejection")
+		t.Fatalf("expected unauthorized initiator rejection")
 	}
 	// Authorized initiator (grantor)
 	if err := svc.InitiateRevocation(nil, RevocationRequest{POAID: poaID, Initiator: "alice", Reason: "risk"}); err != nil {
-		 t.Fatalf("initiation failed: %v", err)
+		t.Fatalf("initiation failed: %v", err)
 	}
 	// First approval (controller1)
-	if err := svc.ApproveRevocation(nil, poaID, "controller1"); err != nil { t.Fatalf("first approval failed: %v", err) }
+	if err := svc.ApproveRevocation(nil, poaID, "controller1"); err != nil {
+		t.Fatalf("first approval failed: %v", err)
+	}
 	// Duplicate approval should be idempotent
-	if err := svc.ApproveRevocation(nil, poaID, "controller1"); err != nil { t.Fatalf("duplicate approval should be allowed/idempotent: %v", err) }
+	if err := svc.ApproveRevocation(nil, poaID, "controller1"); err != nil {
+		t.Fatalf("duplicate approval should be allowed/idempotent: %v", err)
+	}
 	// Second approval (controller2) should finalize
-	if err := svc.ApproveRevocation(nil, poaID, "controller2"); err != nil { t.Fatalf("second approval failed: %v", err) }
+	if err := svc.ApproveRevocation(nil, poaID, "controller2"); err != nil {
+		t.Fatalf("second approval failed: %v", err)
+	}
 	poaFinal, _ := svc.repo.Get(poaID)
 	if poaFinal.Status != POAStatusRevoked || poaFinal.PendingRevocation == nil || !poaFinal.PendingRevocation.Finalized {
-		 t.Fatalf("expected POA revoked after quorum; status=%s finalized=%v", poaFinal.Status, poaFinal.PendingRevocation != nil && poaFinal.PendingRevocation.Finalized)
+		t.Fatalf("expected POA revoked after quorum; status=%s finalized=%v", poaFinal.Status, poaFinal.PendingRevocation != nil && poaFinal.PendingRevocation.Finalized)
 	}
 	// Attempt cancellation after finalize should fail
 	if err := svc.CancelRevocation(nil, poaID, "alice"); err == nil {
-		 t.Fatalf("expected cancellation failure after finalize")
+		t.Fatalf("expected cancellation failure after finalize")
 	}
 }
 

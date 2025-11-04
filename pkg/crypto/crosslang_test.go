@@ -18,8 +18,8 @@ var crossLangVectors = []struct {
 
 func TestCrossLangVectors_Ed25519(t *testing.T) {
 	for i, v := range crossLangVectors {
- 		// key, err := base64.StdEncoding.DecodeString(v.keyB64)
- 		// sig, err := base64.StdEncoding.DecodeString(v.sigB64)
+		// key, err := base64.StdEncoding.DecodeString(v.keyB64)
+		// sig, err := base64.StdEncoding.DecodeString(v.sigB64)
 		// TODO: Use actual Ed25519 verification logic here
 		valid := true // stub, replace with actual verification
 		if valid != v.valid {

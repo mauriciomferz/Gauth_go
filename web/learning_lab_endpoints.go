@@ -19,27 +19,27 @@ func (s *BetaServer) AddLearningLabEndpoints() {
 
 	// Learning endpoints
 	s.router.POST("/api/v1/learning/start", s.apiLearningStart)
-	
-	// Compliance endpoints  
+
+	// Compliance endpoints
 	s.router.POST("/api/v1/compliance/check", s.apiComplianceCheck)
-	
+
 	// Token endpoints - use existing endpoint but add demo-specific one
 	s.router.POST("/api/v1/token/create-demo", s.apiTokenCreateDemo)
-	
+
 	// Pattern endpoints
 	s.router.POST("/api/v1/patterns/load/*action", s.apiPatternOperation)
-	s.router.POST("/api/v1/patterns/test/*action", s.apiPatternOperation)  
+	s.router.POST("/api/v1/patterns/test/*action", s.apiPatternOperation)
 	s.router.POST("/api/v1/patterns/simulate/*action", s.apiPatternOperation)
-	
+
 	// Marketing PoA endpoints
 	s.router.POST("/api/v1/marketing/poa", s.apiMarketingPoA)
-	
+
 	// Experimental endpoints
 	s.router.POST("/api/v1/experimental/*action", s.apiExperimentalOperation)
-	
+
 	// Validation endpoints
 	s.router.POST("/api/v1/validation/*action", s.apiValidationOperation)
-	
+
 	// Generic GAuth action endpoint
 	s.router.POST("/api/v1/gauth/action", s.apiGenericAction)
 }
@@ -47,7 +47,7 @@ func (s *BetaServer) AddLearningLabEndpoints() {
 // apiLearningStart handles learning journey initialization
 func (s *BetaServer) apiLearningStart(c *gin.Context) {
 	sessionId := generateID()
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success":           true,
 		"session_id":        sessionId,
@@ -57,7 +57,7 @@ func (s *BetaServer) apiLearningStart(c *gin.Context) {
 		"total_modules":     12,
 		"next_steps": []string{
 			"Learn about delegation patterns",
-			"Explore authorization hierarchies", 
+			"Explore authorization hierarchies",
 			"Practice token creation",
 			"Test compliance scenarios",
 		},
@@ -92,22 +92,22 @@ func (s *BetaServer) apiTokenCreateDemo(c *gin.Context) {
 		Subject      string   `json:"subject"`
 		Capabilities []string `json:"capabilities"`
 	}
-	
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid request"})
 		return
 	}
-	
+
 	tokenId := generateID()
 	issuedAt := time.Now()
 	expiresAt := issuedAt.Add(24 * time.Hour)
-	
+
 	// Generate a mock JWT token
 	header := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
 	payload := "eyJzdWIiOiJkZW1vLXVzZXIiLCJpc3MiOiJnYXV0aC1sZWFybmluZy1sYWIiLCJleHAiOjE3MzA0OTEwMDAsImNhcGFiaWxpdGllcyI6WyJkZW1vLXRva2VuLWlzc3VhbmNlIiwiYmFzaWMtcG9saWN5LWV2YWwiXX0"
 	signature := generateID()[:32]
 	token := fmt.Sprintf("%s.%s.%s", header, payload, signature)
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success":      true,
 		"token_id":     tokenId,
@@ -119,41 +119,39 @@ func (s *BetaServer) apiTokenCreateDemo(c *gin.Context) {
 	})
 }
 
-
-
 // apiPatternOperation handles pattern-related operations (load, test, simulate)
 func (s *BetaServer) apiPatternOperation(c *gin.Context) {
 	action := c.Param("action")
-	
+
 	var request struct {
-		PatternType string `json:"pattern_type"`
+		PatternType string                 `json:"pattern_type"`
 		Parameters  map[string]interface{} `json:"parameters"`
 	}
-	
+
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
 		return
 	}
-	
+
 	// Generate a demo pattern result based on the action
 	patternData := gin.H{
-		"pattern_id": generateID(),
+		"pattern_id":   generateID(),
 		"pattern_type": request.PatternType,
-		"action": action,
-		"parameters": request.Parameters,
-		"timestamp": time.Now().Unix(),
-		"status": "success",
+		"action":       action,
+		"parameters":   request.Parameters,
+		"timestamp":    time.Now().Unix(),
+		"status":       "success",
 		"results": gin.H{
 			"authorization_granted": true,
-			"policy_matched": "default_allow",
-			"confidence_score": 0.95,
-			"execution_time": "12ms",
+			"policy_matched":        "default_allow",
+			"confidence_score":      0.95,
+			"execution_time":        "12ms",
 		},
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"data": patternData,
+		"data":    patternData,
 		"message": fmt.Sprintf("Pattern %s operation completed successfully", action),
 	})
 }
@@ -165,15 +163,15 @@ func (s *BetaServer) apiMarketingPoA(c *gin.Context) {
 		CampaignType string `json:"campaign_type"`
 		ContentType  string `json:"content_type"`
 	}
-	
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid request"})
 		return
 	}
-	
+
 	poaId := generateID()
 	campaignId := generateID()
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success":       true,
 		"poa_id":        poaId,
@@ -188,20 +186,20 @@ func (s *BetaServer) apiMarketingPoA(c *gin.Context) {
 // apiExperimentalOperation handles experimental playground operations
 func (s *BetaServer) apiExperimentalOperation(c *gin.Context) {
 	action := c.Param("action")
-	
+
 	var req struct {
 		Action         string                 `json:"action"`
 		ExperimentType string                 `json:"experiment_type"`
 		Parameters     map[string]interface{} `json:"parameters"`
 	}
-	
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid request"})
 		return
 	}
-	
+
 	experimentId := generateID()
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success":       true,
 		"experiment_id": experimentId,
@@ -219,20 +217,20 @@ func (s *BetaServer) apiExperimentalOperation(c *gin.Context) {
 // apiValidationOperation handles validation operations
 func (s *BetaServer) apiValidationOperation(c *gin.Context) {
 	action := c.Param("action")
-	
+
 	var req struct {
 		Action         string `json:"action"`
 		ValidationType string `json:"validation_type"`
 		StrictMode     bool   `json:"strict_mode"`
 	}
-	
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid request"})
 		return
 	}
-	
+
 	validationId := generateID()
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success":        true,
 		"validation_id":  validationId,
@@ -254,14 +252,14 @@ func (s *BetaServer) apiGenericAction(c *gin.Context) {
 		Action  string `json:"action"`
 		Context string `json:"context"`
 	}
-	
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid request"})
 		return
 	}
-	
+
 	actionId := generateID()
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success":   true,
 		"action_id": actionId,

@@ -1,4 +1,5 @@
 package policy
+
 import (
 	"context"
 	"net/http"
@@ -31,14 +32,14 @@ func (h *APIHandler) RegisterRoutes(router *gin.Engine) {
 		policyAPI.POST("/versions/:version/activate", h.activateVersion)
 		policyAPI.POST("/versions/:version/deprecate", h.deprecateVersion)
 		policyAPI.POST("/versions/:version/approve", h.approveVersion)
-		
+
 		// Rollback endpoint
 		policyAPI.POST("/rollback", h.rollbackVersion)
-		
+
 		// Comparison and diff endpoints
 		policyAPI.GET("/compare", h.compareVersions)
 		policyAPI.GET("/diff", h.diffVersions)
-		
+
 		// Export and health endpoints
 		policyAPI.GET("/metadata/export", h.exportMetadata)
 		policyAPI.GET("/health", h.healthCheck)
@@ -48,7 +49,7 @@ func (h *APIHandler) RegisterRoutes(router *gin.Engine) {
 // listVersions returns all policy versions with metadata.
 func (h *APIHandler) listVersions(c *gin.Context) {
 	versions := h.versionManager.ListVersions()
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success":        true,
 		"total_versions": len(versions),
@@ -88,16 +89,16 @@ func (h *APIHandler) getVersionDetails(c *gin.Context) {
 func (h *APIHandler) getActiveVersion(c *gin.Context) {
 	activeVersion := h.versionManager.GetActiveVersion()
 	metadata, err := h.versionManager.GetVersionMetadata(activeVersion)
-	
+
 	response := gin.H{
 		"success":        true,
 		"active_version": activeVersion,
 	}
-	
+
 	if err == nil {
 		response["metadata"] = metadata
 	}
-	
+
 	c.JSON(http.StatusOK, response)
 }
 
@@ -331,7 +332,7 @@ func (h *APIHandler) exportMetadata(c *gin.Context) {
 func (h *APIHandler) healthCheck(c *gin.Context) {
 	activeVersion := h.versionManager.GetActiveVersion()
 	versions := h.versionManager.ListVersions()
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"status":         "healthy",
 		"active_version": activeVersion,

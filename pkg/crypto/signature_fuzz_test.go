@@ -1,8 +1,8 @@
 package crypto
 
 import (
-	"testing"
 	"math/rand"
+	"testing"
 )
 
 func FuzzSignerVerifier_Ed25519(f *testing.F) {

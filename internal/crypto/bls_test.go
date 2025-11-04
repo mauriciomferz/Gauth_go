@@ -35,13 +35,21 @@ func TestBLSAggregate(t *testing.T) {
 	var pubs []blslib.PublicKey
 	for i := 0; i < 3; i++ {
 		k, err := GenerateBLSKey()
-		if err != nil { t.Fatalf("keygen: %v", err) }
+		if err != nil {
+			t.Fatalf("keygen: %v", err)
+		}
 		s, err := BLSSign(k, msg)
-		if err != nil { t.Fatalf("sign: %v", err) }
+		if err != nil {
+			t.Fatalf("sign: %v", err)
+		}
 		sigs = append(sigs, s)
 		pubs = append(pubs, k.Public)
 	}
 	agg, err := BLSAggregate(sigs)
-	if err != nil { t.Fatalf("aggregate: %v", err) }
-	if !BLSAggregateVerify(pubs, msg, agg) { t.Fatalf("aggregate verify failed") }
+	if err != nil {
+		t.Fatalf("aggregate: %v", err)
+	}
+	if !BLSAggregateVerify(pubs, msg, agg) {
+		t.Fatalf("aggregate verify failed")
+	}
 }

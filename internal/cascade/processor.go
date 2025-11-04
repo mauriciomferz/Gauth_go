@@ -24,10 +24,10 @@ type ProcessorResult struct {
 
 // Processor handles cascade revocation operations
 type Processor struct {
-	repo     rfc0111.POARepository
-	auditor  *audit.MemoryLogger
-	config   config.CascadeConfig
-	metrics  metrics.Metrics
+	repo    rfc0111.POARepository
+	auditor *audit.MemoryLogger
+	config  config.CascadeConfig
+	metrics metrics.Metrics
 }
 
 // NewProcessor creates a new cascade processor
@@ -92,7 +92,7 @@ func (p *Processor) ProcessCascadeRevocation(ctx context.Context, parentPoaID, r
 
 	// Group descendants by depth for ordered processing
 	depthGroups := p.groupByDepth(descendants)
-	
+
 	// Calculate max depth reached
 	for depth := range depthGroups {
 		if depth > result.MaxDepthReached {
@@ -112,7 +112,7 @@ func (p *Processor) ProcessCascadeRevocation(ctx context.Context, parentPoaID, r
 			if depth >= p.config.MaxDepth {
 				p.metrics.IncCascadeDepthLimitReached()
 			}
-			
+
 			batchResult := p.processBatch(ctx, depthDescendants, depth, revokedBy)
 			result.ProcessedCount += batchResult.ProcessedCount
 			result.SuccessCount += batchResult.SuccessCount
@@ -171,10 +171,10 @@ func (p *Processor) processBatch(ctx context.Context, descendants []*rfc0111.Pow
 		if end > len(descendants) {
 			end = len(descendants)
 		}
-		
+
 		batch := descendants[i:end]
 		result.BatchCount++
-		
+
 		for _, poa := range batch {
 			select {
 			case <-ctx.Done():
@@ -186,7 +186,7 @@ func (p *Processor) processBatch(ctx context.Context, descendants []*rfc0111.Pow
 			err := p.processDescendant(poa, depth, revokedBy)
 			result.ProcessedCount++
 			p.metrics.IncCascadeDescendantsProcessed()
-			
+
 			if err != nil {
 				result.FailureCount++
 				result.Errors = append(result.Errors, fmt.Errorf("failed to process POA %s: %w", poa.ID, err))
@@ -195,7 +195,7 @@ func (p *Processor) processBatch(ctx context.Context, descendants []*rfc0111.Pow
 				result.SuccessCount++
 			}
 		}
-		
+
 		// Increment batch processed metric
 		p.metrics.IncCascadeBatchProcessed()
 	}
@@ -213,11 +213,11 @@ func (p *Processor) processDescendant(poa *rfc0111.PowerOfAttorney, depth int, r
 		poa.Status = rfc0111.POAStatusRevoked
 		poa.RevokedAt = &now
 		poa.RevocationReason = fmt.Sprintf("cascade_revocation:parent_revoked:depth_%d", depth)
-		
+
 	case config.CascadeModeSuspend:
 		poa.Status = rfc0111.POAStatusSuspended
 		poa.RevocationReason = fmt.Sprintf("cascade_suspension:parent_revoked:depth_%d", depth)
-		
+
 	case config.CascadeModeNotify:
 		// Only log, don't change status
 		if p.auditor != nil {
@@ -240,7 +240,7 @@ func (p *Processor) processDescendant(poa *rfc0111.PowerOfAttorney, depth int, r
 			}
 		}
 		return nil // Don't actually update the POA
-		
+
 	default:
 		return fmt.Errorf("invalid cascade mode: %s", p.config.Mode)
 	}
@@ -262,11 +262,11 @@ func (p *Processor) processDescendant(poa *rfc0111.PowerOfAttorney, depth int, r
 			Result:    "success",
 			Timestamp: time.Now(),
 			Metadata: map[string]interface{}{
-				"depth":            depth,
-				"original_status":  string(originalStatus),
-				"new_status":       string(poa.Status),
+				"depth":             depth,
+				"original_status":   string(originalStatus),
+				"new_status":        string(poa.Status),
 				"revocation_reason": poa.RevocationReason,
-				"cascade_mode":     string(p.config.Mode),
+				"cascade_mode":      string(p.config.Mode),
 			},
 		}
 		if err := p.auditor.Log(context.Background(), event); err != nil {
@@ -281,7 +281,7 @@ func (p *Processor) processDescendant(poa *rfc0111.PowerOfAttorney, depth int, r
 // groupByDepth organizes descendants by their depth level
 func (p *Processor) groupByDepth(descendants []*rfc0111.PowerOfAttorney) map[int][]*rfc0111.PowerOfAttorney {
 	groups := make(map[int][]*rfc0111.PowerOfAttorney)
-	
+
 	for _, poa := range descendants {
 		depth := poa.Depth
 		if depth <= 0 {
@@ -289,7 +289,7 @@ func (p *Processor) groupByDepth(descendants []*rfc0111.PowerOfAttorney) map[int
 		}
 		groups[depth] = append(groups[depth], poa)
 	}
-	
+
 	return groups
 }
 

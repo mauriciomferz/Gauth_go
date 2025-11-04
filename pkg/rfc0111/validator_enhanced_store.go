@@ -14,17 +14,17 @@ import (
 
 // BoltDailyLimitStore implements DailyLimitStore using BoltDB persistence
 type BoltDailyLimitStore struct {
-	dbPath     string
-	data       map[string]map[string]float64 // delegationID -> date -> amount
-	mu         sync.RWMutex
+	dbPath      string
+	data        map[string]map[string]float64 // delegationID -> date -> amount
+	mu          sync.RWMutex
 	persistence *dailyLimitPersistence
 }
 
 type dailyLimitPersistence struct {
-	Version   string                           `json:"version"`
-	Timestamp time.Time                        `json:"timestamp"`
-	Data      map[string]map[string]float64   `json:"data"`
-	Metadata  map[string]interface{}          `json:"metadata"`
+	Version   string                        `json:"version"`
+	Timestamp time.Time                     `json:"timestamp"`
+	Data      map[string]map[string]float64 `json:"data"`
+	Metadata  map[string]interface{}        `json:"metadata"`
 }
 
 // NewBoltDailyLimitStore creates a new BoltDB-backed daily limit store
@@ -38,12 +38,12 @@ func NewBoltDailyLimitStore(dbPath string) (*BoltDailyLimitStore, error) {
 			Metadata: make(map[string]interface{}),
 		},
 	}
-	
+
 	// Ensure directory exists
 	if err := os.MkdirAll(filepath.Dir(dbPath), 0755); err != nil {
 		return nil, fmt.Errorf("failed to create directory: %w", err)
 	}
-	
+
 	// Load existing data
 	if err := store.loadFromDisk(); err != nil {
 		// If file doesn't exist, that's okay - we'll create it on first save
@@ -51,7 +51,7 @@ func NewBoltDailyLimitStore(dbPath string) (*BoltDailyLimitStore, error) {
 			return nil, fmt.Errorf("failed to load daily limits: %w", err)
 		}
 	}
-	
+
 	return store, nil
 }
 
@@ -59,13 +59,13 @@ func NewBoltDailyLimitStore(dbPath string) (*BoltDailyLimitStore, error) {
 func (s *BoltDailyLimitStore) GetDailyUsage(delegationID, date string) (float64, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	
+
 	if delegationData, exists := s.data[delegationID]; exists {
 		if usage, exists := delegationData[date]; exists {
 			return usage, nil
 		}
 	}
-	
+
 	return 0.0, nil // No usage recorded yet
 }
 
@@ -73,13 +73,13 @@ func (s *BoltDailyLimitStore) GetDailyUsage(delegationID, date string) (float64,
 func (s *BoltDailyLimitStore) IncrementDailyUsage(delegationID, date string, amount float64) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	if s.data[delegationID] == nil {
 		s.data[delegationID] = make(map[string]float64)
 	}
-	
+
 	s.data[delegationID][date] += amount
-	
+
 	// Persist to disk
 	return s.saveToDisk()
 }
@@ -88,14 +88,14 @@ func (s *BoltDailyLimitStore) IncrementDailyUsage(delegationID, date string, amo
 func (s *BoltDailyLimitStore) ResetDailyUsage(delegationID, date string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	if delegationData, exists := s.data[delegationID]; exists {
 		delete(delegationData, date)
 		if len(delegationData) == 0 {
 			delete(s.data, delegationID)
 		}
 	}
-	
+
 	// Persist to disk
 	return s.saveToDisk()
 }
@@ -104,7 +104,7 @@ func (s *BoltDailyLimitStore) ResetDailyUsage(delegationID, date string) error {
 func (s *BoltDailyLimitStore) ExportDailyLimits(ctx context.Context) (map[string]map[string]float64, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	
+
 	// Deep copy the data
 	result := make(map[string]map[string]float64)
 	for delegationID, dateMap := range s.data {
@@ -113,7 +113,7 @@ func (s *BoltDailyLimitStore) ExportDailyLimits(ctx context.Context) (map[string
 			result[delegationID][date] = amount
 		}
 	}
-	
+
 	return result, nil
 }
 
@@ -121,9 +121,9 @@ func (s *BoltDailyLimitStore) ExportDailyLimits(ctx context.Context) (map[string
 func (s *BoltDailyLimitStore) CleanupOldData(retentionDays int) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	cutoffDate := time.Now().AddDate(0, 0, -retentionDays).Format("2006-01-02")
-	
+
 	for delegationID, dateMap := range s.data {
 		for date := range dateMap {
 			if date < cutoffDate {
@@ -134,7 +134,7 @@ func (s *BoltDailyLimitStore) CleanupOldData(retentionDays int) error {
 			delete(s.data, delegationID)
 		}
 	}
-	
+
 	return s.saveToDisk()
 }
 
@@ -144,18 +144,18 @@ func (s *BoltDailyLimitStore) loadFromDisk() error {
 	if err != nil {
 		return err
 	}
-	
+
 	var persistence dailyLimitPersistence
 	if err := json.Unmarshal(file, &persistence); err != nil {
 		return fmt.Errorf("failed to unmarshal daily limits: %w", err)
 	}
-	
+
 	s.persistence = &persistence
 	s.data = persistence.Data
 	if s.data == nil {
 		s.data = make(map[string]map[string]float64)
 	}
-	
+
 	return nil
 }
 
@@ -163,7 +163,7 @@ func (s *BoltDailyLimitStore) loadFromDisk() error {
 func (s *BoltDailyLimitStore) saveToDisk() error {
 	s.persistence.Data = s.data
 	s.persistence.Timestamp = time.Now()
-	
+
 	// Safely increment save_count
 	if count, exists := s.persistence.Metadata["save_count"]; exists {
 		if countInt, ok := count.(int); ok {
@@ -174,12 +174,12 @@ func (s *BoltDailyLimitStore) saveToDisk() error {
 	} else {
 		s.persistence.Metadata["save_count"] = 1
 	}
-	
+
 	data, err := json.MarshalIndent(s.persistence, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal daily limits: %w", err)
 	}
-	
+
 	return os.WriteFile(s.dbPath, data, 0644)
 }
 
@@ -195,7 +195,7 @@ func NewSimpleConditionalEngine() *SimpleConditionalEngine {
 func (e *SimpleConditionalEngine) EvaluateCondition(condition string, context map[string]interface{}) (bool, error) {
 	// Simple implementation for basic conditions
 	// Format: "field operator value" or "field operator value AND field2 operator2 value2"
-	
+
 	// Split by AND/OR operators
 	parts := strings.Split(condition, " AND ")
 	if len(parts) == 1 {
@@ -226,7 +226,7 @@ func (e *SimpleConditionalEngine) EvaluateCondition(condition string, context ma
 		}
 		return true, nil
 	}
-	
+
 	// Single condition
 	return e.evaluateSingleCondition(condition, context)
 }
@@ -238,14 +238,14 @@ func (e *SimpleConditionalEngine) evaluateSingleCondition(condition string, cont
 	if len(parts) != 3 {
 		return false, fmt.Errorf("invalid condition format: expected 'field operator value'")
 	}
-	
+
 	field, operator, expectedValue := parts[0], parts[1], parts[2]
-	
+
 	actualValue, exists := context[field]
 	if !exists {
 		return false, fmt.Errorf("field %s not found in context", field)
 	}
-	
+
 	switch operator {
 	case "==", "=":
 		return fmt.Sprintf("%v", actualValue) == expectedValue, nil
@@ -279,12 +279,12 @@ func (e *SimpleConditionalEngine) compareNumbers(actual interface{}, expected st
 	if err != nil {
 		return false, fmt.Errorf("actual value is not numeric: %v", actual)
 	}
-	
+
 	expectedFloat, err := strconv.ParseFloat(expected, 64)
 	if err != nil {
 		return false, fmt.Errorf("expected value is not numeric: %s", expected)
 	}
-	
+
 	switch operator {
 	case ">":
 		return actualFloat > expectedFloat, nil
@@ -324,27 +324,27 @@ func (e *SimpleConditionalEngine) ValidateConditionSyntax(condition string) erro
 	if strings.TrimSpace(condition) == "" {
 		return fmt.Errorf("empty condition")
 	}
-	
+
 	// Check for supported operators
 	supportedOperators := []string{"==", "=", "!=", "<>", ">", ">=", "<", "<=", "contains", "starts_with", "ends_with"}
 	hasOperator := false
-	
+
 	for _, op := range supportedOperators {
 		if strings.Contains(condition, " "+op+" ") {
 			hasOperator = true
 			break
 		}
 	}
-	
+
 	if !hasOperator {
 		return fmt.Errorf("no supported operator found in condition")
 	}
-	
+
 	// Basic structure validation for AND/OR
 	if strings.Contains(condition, " AND ") && strings.Contains(condition, " OR ") {
 		return fmt.Errorf("cannot mix AND and OR operators in same condition")
 	}
-	
+
 	// Split by logical operators and validate each part
 	var parts []string
 	if strings.Contains(condition, " AND ") {
@@ -354,7 +354,7 @@ func (e *SimpleConditionalEngine) ValidateConditionSyntax(condition string) erro
 	} else {
 		parts = []string{condition}
 	}
-	
+
 	for _, part := range parts {
 		part = strings.TrimSpace(part)
 		fields := strings.Fields(part)
@@ -362,17 +362,17 @@ func (e *SimpleConditionalEngine) ValidateConditionSyntax(condition string) erro
 			return fmt.Errorf("invalid condition part: '%s' (expected 'field operator value')", part)
 		}
 	}
-	
+
 	return nil
 }
 
 // InMemoryValidationMetrics implements ValidationMetricsRecorder for testing
 type InMemoryValidationMetrics struct {
-	successCounts  map[string]int
-	failureCounts  map[string]int
-	warningCounts  map[string]int
+	successCounts    map[string]int
+	failureCounts    map[string]int
+	warningCounts    map[string]int
 	dailyLimitChecks []DailyLimitCheckRecord
-	mu             sync.RWMutex
+	mu               sync.RWMutex
 }
 
 type DailyLimitCheckRecord struct {
@@ -397,7 +397,7 @@ func NewInMemoryValidationMetrics() *InMemoryValidationMetrics {
 func (m *InMemoryValidationMetrics) RecordValidationSuccess(validatorType, scope string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	key := fmt.Sprintf("%s:%s", validatorType, scope)
 	m.successCounts[key]++
 }
@@ -406,7 +406,7 @@ func (m *InMemoryValidationMetrics) RecordValidationSuccess(validatorType, scope
 func (m *InMemoryValidationMetrics) RecordValidationFailure(validatorType, scope, reason string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	key := fmt.Sprintf("%s:%s:%s", validatorType, scope, reason)
 	m.failureCounts[key]++
 }
@@ -415,7 +415,7 @@ func (m *InMemoryValidationMetrics) RecordValidationFailure(validatorType, scope
 func (m *InMemoryValidationMetrics) RecordWarning(category, severity string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	key := fmt.Sprintf("%s:%s", category, severity)
 	m.warningCounts[key]++
 }
@@ -424,7 +424,7 @@ func (m *InMemoryValidationMetrics) RecordWarning(category, severity string) {
 func (m *InMemoryValidationMetrics) RecordDailyLimitCheck(delegationID string, used, limit float64, exceeded bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	m.dailyLimitChecks = append(m.dailyLimitChecks, DailyLimitCheckRecord{
 		DelegationID: delegationID,
 		Used:         used,
@@ -438,7 +438,7 @@ func (m *InMemoryValidationMetrics) RecordDailyLimitCheck(delegationID string, u
 func (m *InMemoryValidationMetrics) GetMetricsSummary() map[string]interface{} {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	// Calculate total validations by summing all success and failure counts
 	totalValidations := 0
 	for _, count := range m.successCounts {
@@ -447,12 +447,12 @@ func (m *InMemoryValidationMetrics) GetMetricsSummary() map[string]interface{} {
 	for _, count := range m.failureCounts {
 		totalValidations += count
 	}
-	
+
 	return map[string]interface{}{
-		"success_counts":      m.successCounts,
-		"failure_counts":      m.failureCounts,
-		"warning_counts":      m.warningCounts,
-		"daily_limit_checks":  len(m.dailyLimitChecks),
-		"total_validations":   totalValidations,
+		"success_counts":     m.successCounts,
+		"failure_counts":     m.failureCounts,
+		"warning_counts":     m.warningCounts,
+		"daily_limit_checks": len(m.dailyLimitChecks),
+		"total_validations":  totalValidations,
 	}
 }

@@ -12,7 +12,6 @@ import (
 
 // ECDSAKey represents an ECDSA key pair
 // Curve: P-256, P-384, P-521
-//
 type ECDSAKey struct {
 	Private *ecdsa.PrivateKey
 	Public  *ecdsa.PublicKey

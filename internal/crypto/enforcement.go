@@ -6,19 +6,23 @@ package crypto
 // call sites integrate it when performing authenticity-sensitive actions.
 
 import (
-    "errors"
-    "os"
+	"errors"
+	"os"
 )
 
 var ErrSignatureRequired = errors.New("detached_signature_required")
 
 func RequireDetachedSignature() bool {
-    return os.Getenv("COMPLIANCE_REQUIRE_SIGNATURE") == "1"
+	return os.Getenv("COMPLIANCE_REQUIRE_SIGNATURE") == "1"
 }
 
 // EnforceDetachedSignature returns error if signature required and missing.
 func EnforceDetachedSignature(payload []byte, sig []byte) error {
-    if !RequireDetachedSignature() { return nil }
-    if len(sig) == 0 { return ErrSignatureRequired }
-    return nil
+	if !RequireDetachedSignature() {
+		return nil
+	}
+	if len(sig) == 0 {
+		return ErrSignatureRequired
+	}
+	return nil
 }

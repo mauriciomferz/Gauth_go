@@ -31,22 +31,22 @@ import (
 type SignatureStatus string
 
 const (
-	StatusPending   SignatureStatus = "pending"    // Awaiting signatures
-	StatusCompleted SignatureStatus = "completed"  // Threshold met
-	StatusActive    SignatureStatus = "active"     // PoA activated
-	StatusExpired   SignatureStatus = "expired"    // Collection window expired
-	StatusRejected  SignatureStatus = "rejected"   // Explicitly rejected
+	StatusPending   SignatureStatus = "pending"   // Awaiting signatures
+	StatusCompleted SignatureStatus = "completed" // Threshold met
+	StatusActive    SignatureStatus = "active"    // PoA activated
+	StatusExpired   SignatureStatus = "expired"   // Collection window expired
+	StatusRejected  SignatureStatus = "rejected"  // Explicitly rejected
 )
 
 // SignatureRecord tracks an individual signature submission.
 type SignatureRecord struct {
-	SignerID    string    `json:"signer_id"`
-	KeyID       string    `json:"key_id"`
-	Signature   string    `json:"signature"`     // base64-encoded
-	SignedAt    time.Time `json:"signed_at"`
-	Weight      int       `json:"weight"`        // For weighted voting
-	IPAddress   string    `json:"ip_address"`    // Optional audit info
-	UserAgent   string    `json:"user_agent"`    // Optional audit info
+	SignerID  string    `json:"signer_id"`
+	KeyID     string    `json:"key_id"`
+	Signature string    `json:"signature"` // base64-encoded
+	SignedAt  time.Time `json:"signed_at"`
+	Weight    int       `json:"weight"`     // For weighted voting
+	IPAddress string    `json:"ip_address"` // Optional audit info
+	UserAgent string    `json:"user_agent"` // Optional audit info
 }
 
 // PoASignatureState tracks the multi-signature collection state for a PoA.
@@ -69,8 +69,8 @@ type PoASignatureState struct {
 
 // SignatureManager orchestrates multi-signature PoA collection and verification.
 type SignatureManager struct {
-	mu      sync.RWMutex
-	states  map[string]*PoASignatureState // keyed by PoA ID
+	mu       sync.RWMutex
+	states   map[string]*PoASignatureState // keyed by PoA ID
 	verifier VerificationProvider
 }
 

@@ -28,7 +28,9 @@ func BuildSnapshot(receipts []Receipt) Snapshot {
 		}
 	}
 	h := sha256.New()
-	for _, hx := range hashes { _, _ = h.Write([]byte(hx)) }
+	for _, hx := range hashes {
+		_, _ = h.Write([]byte(hx))
+	}
 	root := hex.EncodeToString(h.Sum(nil))
 	return Snapshot{RootHash: root, Count: len(hashes), GeneratedAt: time.Now().UTC().Format(time.RFC3339Nano), Hashes: hashes, Version: 1}
 }

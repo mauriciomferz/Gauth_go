@@ -181,8 +181,8 @@ type AggregatedVerifierFunc func(messages [][]byte, signatures []string, keyIDs 
 
 // Algorithm describes a signature verification handler
 type Algorithm struct {
-	Name   string
-	Verify VerifierFunc
+	Name             string
+	Verify           VerifierFunc
 	AggregatedVerify AggregatedVerifierFunc // Optional: for batch/multi-sig schemes
 }
 
@@ -190,23 +190,23 @@ var algoRegistry = map[string]Algorithm{}
 
 // RegisterAlgorithm registers a signature algorithm
 func RegisterAlgorithm(a Algorithm) {
-       if a.Name != "" && a.Verify != nil {
-	       algoRegistry[a.Name] = a
-       }
+	if a.Name != "" && a.Verify != nil {
+		algoRegistry[a.Name] = a
+	}
 }
 
 // GetAlgorithm retrieves registered algorithm
 func GetAlgorithm(name string) *Algorithm {
-       if a, ok := algoRegistry[name]; ok {
-	       return &a
-       }
-       return nil
+	if a, ok := algoRegistry[name]; ok {
+		return &a
+	}
+	return nil
 }
 
 // AlgorithmInfo provides external metadata for registered algorithms.
 // AggregatedSupported indicates whether batch/multi-signature verification handler is registered.
 type AlgorithmInfo struct {
-	Name               string `json:"name"`
+	Name                string `json:"name"`
 	AggregatedSupported bool   `json:"aggregated_supported"`
 }
 
@@ -222,36 +222,36 @@ func ListAlgorithms() []AlgorithmInfo {
 
 // VerifyAlgorithm dispatches verification via registry
 func VerifyAlgorithm(algo string, canonical []byte, sigBase64, keyID string, kp KeyProvider) error {
-       a := GetAlgorithm(algo)
-       if a == nil {
-	       return fmt.Errorf("unknown signature algorithm: %s", algo)
-       }
-       return a.Verify(canonical, sigBase64, keyID, kp)
+	a := GetAlgorithm(algo)
+	if a == nil {
+		return fmt.Errorf("unknown signature algorithm: %s", algo)
+	}
+	return a.Verify(canonical, sigBase64, keyID, kp)
 }
 
 // VerifyAggregatedAlgorithm dispatches batch/multi-sig verification via registry
 func VerifyAggregatedAlgorithm(algo string, messages [][]byte, signatures []string, keyIDs []string, kp KeyProvider) error {
-       a := GetAlgorithm(algo)
-       if a == nil || a.AggregatedVerify == nil {
-	       return fmt.Errorf("unknown or unsupported aggregated signature algorithm: %s", algo)
-       }
-       return a.AggregatedVerify(messages, signatures, keyIDs, kp)
+	a := GetAlgorithm(algo)
+	if a == nil || a.AggregatedVerify == nil {
+		return fmt.Errorf("unknown or unsupported aggregated signature algorithm: %s", algo)
+	}
+	return a.AggregatedVerify(messages, signatures, keyIDs, kp)
 }
 
 func init() {
-       // Register ed25519
-       RegisterAlgorithm(Algorithm{Name: AlgoEd25519, Verify: func(canonical []byte, sigBase64 string, keyID string, kp KeyProvider) error {
-	       if kp == nil {
-		       return errors.New("ed25519: missing key provider")
-	       }
-	       sigBytes, err := base64.StdEncoding.DecodeString(sigBase64)
-	       if err != nil {
-		       return err
-	       }
-	       return kp.VerifyWith(canonical, sigBytes, keyID)
-       },
-       AggregatedVerify: nil, // Ed25519 does not support batch/aggregated natively
-       })
+	// Register ed25519
+	RegisterAlgorithm(Algorithm{Name: AlgoEd25519, Verify: func(canonical []byte, sigBase64 string, keyID string, kp KeyProvider) error {
+		if kp == nil {
+			return errors.New("ed25519: missing key provider")
+		}
+		sigBytes, err := base64.StdEncoding.DecodeString(sigBase64)
+		if err != nil {
+			return err
+		}
+		return kp.VerifyWith(canonical, sigBytes, keyID)
+	},
+		AggregatedVerify: nil, // Ed25519 does not support batch/aggregated natively
+	})
 
 	// Register ecdsa-p256 (fallback path if provider did not self-register; harmless overwrite)
 	RegisterAlgorithm(Algorithm{Name: AlgoECDSAP256, Verify: func(canonical []byte, sigBase64 string, keyID string, kp KeyProvider) error {
@@ -259,13 +259,15 @@ func init() {
 			return errors.New("ecdsa-p256: missing key provider")
 		}
 		sigBytes, err := base64.StdEncoding.DecodeString(sigBase64)
-		if err != nil { return err }
+		if err != nil {
+			return err
+		}
 		// Provider VerifyWith for ECDSA expects DER raw bytes and performs low-S + hashing
 		return kp.VerifyWith(canonical, sigBytes, keyID)
 	},
-	AggregatedVerify: nil,
+		AggregatedVerify: nil,
 	})
 
-       // Placeholder: Register BLS aggregated signature algorithm
+	// Placeholder: Register BLS aggregated signature algorithm
 	// Removed legacy placeholders for generic 'bls' and 'batch' algorithms.
 }

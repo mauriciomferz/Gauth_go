@@ -125,12 +125,12 @@ func (e *BasicEnforcer) matchesPattern(pattern, value string) bool {
 
 // Policy represents an authorization policy
 type Policy struct {
-	ID             string            `json:"id"`
-	Subject        string            `json:"subject"`
-	Resource       string            `json:"resource"`
-	Actions        []string          `json:"actions"`
-	Effect         Effect            `json:"effect"`
-	Conditions     []Condition       `json:"conditions,omitempty"`
+	ID         string      `json:"id"`
+	Subject    string      `json:"subject"`
+	Resource   string      `json:"resource"`
+	Actions    []string    `json:"actions"`
+	Effect     Effect      `json:"effect"`
+	Conditions []Condition `json:"conditions,omitempty"`
 	// Expression is an optional advanced boolean expression evaluated against request context.
 	// If present it MUST evaluate to true for the policy to match. Grammar supports identifiers,
 	// boolean logic (&&, ||, !), comparison (==, !=, >, >=, <, <=), membership (in [..]). Identifiers:
@@ -211,8 +211,13 @@ type MemoryAuthorizer struct {
 	jurisdiction  string // current jurisdiction scope (empty => global)
 	// Advice / obligation execution
 	obligationExecutor ObligationExecutor
-	metricsProvider    interface { IncObligationsExecuted(); IncObligationsFailed(); IncMandatoryObligationFailures(); ObserveObligationLatency(d time.Duration) } // minimal metrics subset
-	validatorRegistry  *ValidatorRegistry
+	metricsProvider    interface {
+		IncObligationsExecuted()
+		IncObligationsFailed()
+		IncMandatoryObligationFailures()
+		ObserveObligationLatency(d time.Duration)
+	} // minimal metrics subset
+	validatorRegistry *ValidatorRegistry
 }
 
 // NewMemoryAuthorizer creates a new in-memory authorizer
@@ -243,7 +248,9 @@ func (ma *MemoryAuthorizer) SetDecisionCache(c *AuthorizationCache) { ma.decisio
 
 // SetJurisdiction sets the active jurisdiction and invalidates cache (simplistic full flush for now).
 func (ma *MemoryAuthorizer) SetJurisdiction(j string) {
-	if j == ma.jurisdiction { return }
+	if j == ma.jurisdiction {
+		return
+	}
 	ma.jurisdiction = j
 	if ma.decisionCache != nil {
 		ma.decisionCache.InvalidateAll()
@@ -251,10 +258,19 @@ func (ma *MemoryAuthorizer) SetJurisdiction(j string) {
 }
 
 // SetObligationExecutor overrides default executor.
-func (ma *MemoryAuthorizer) SetObligationExecutor(exec ObligationExecutor) { if exec != nil { ma.obligationExecutor = exec } }
+func (ma *MemoryAuthorizer) SetObligationExecutor(exec ObligationExecutor) {
+	if exec != nil {
+		ma.obligationExecutor = exec
+	}
+}
 
 // SetMetricsProvider sets metrics subset implementation (Noop if nil).
-func (ma *MemoryAuthorizer) SetMetricsProvider(mp interface{ IncObligationsExecuted(); IncObligationsFailed(); IncMandatoryObligationFailures(); ObserveObligationLatency(d time.Duration) }) {
+func (ma *MemoryAuthorizer) SetMetricsProvider(mp interface {
+	IncObligationsExecuted()
+	IncObligationsFailed()
+	IncMandatoryObligationFailures()
+	ObserveObligationLatency(d time.Duration)
+}) {
 	ma.metricsProvider = mp
 }
 
@@ -272,51 +288,75 @@ func (ma *MemoryAuthorizer) InvalidateOnCryptoRotation() {
 
 // AuthorizationCacheMetrics returns snapshot metrics from attached decision cache (nil if none).
 func (ma *MemoryAuthorizer) AuthorizationCacheMetrics() *AuthorizationCacheMetrics {
-	if ma.decisionCache == nil { return nil }
+	if ma.decisionCache == nil {
+		return nil
+	}
 	snap := ma.decisionCache.Snapshot()
 	return &snap
 }
 
 // executePostDecision runs obligations (mandatory may flip allow->deny) and advice (never flips outcome).
 func (ma *MemoryAuthorizer) executePostDecision(dec *Decision, policy Policy, req Request) {
-	if ma.obligationExecutor == nil { return }
+	if ma.obligationExecutor == nil {
+		return
+	}
 	// Obligations
 	for _, ob := range policy.Obligations {
 		start := time.Now()
 		err := ma.obligationExecutor.Execute(ob, map[string]interface{}{"request_subject": req.Subject, "request_action": req.Action, "request_resource": req.Resource})
-		if ma.metricsProvider != nil { ma.metricsProvider.ObserveObligationLatency(time.Since(start)) }
+		if ma.metricsProvider != nil {
+			ma.metricsProvider.ObserveObligationLatency(time.Since(start))
+		}
 		if err != nil {
-			if ma.metricsProvider != nil { ma.metricsProvider.IncObligationsFailed() }
+			if ma.metricsProvider != nil {
+				ma.metricsProvider.IncObligationsFailed()
+			}
 			if ob.Mandatory && dec.Allow {
 				dec.Allow = false
 				dec.Reason = fmt.Sprintf("mandatory obligation %s failed: %v", ob.ID, err)
-				if ma.metricsProvider != nil { ma.metricsProvider.IncMandatoryObligationFailures() }
+				if ma.metricsProvider != nil {
+					ma.metricsProvider.IncMandatoryObligationFailures()
+				}
 			}
-			if dec.Metadata == nil { dec.Metadata = make(map[string]string) }
+			if dec.Metadata == nil {
+				dec.Metadata = make(map[string]string)
+			}
 			dec.Metadata["obligation_failure"] = ob.ID
 			continue
 		}
-		if ma.metricsProvider != nil { ma.metricsProvider.IncObligationsExecuted() }
+		if ma.metricsProvider != nil {
+			ma.metricsProvider.IncObligationsExecuted()
+		}
 	}
 	// Advice (non-mandatory): failures recorded but no decision change
 	for _, adv := range policy.Advice {
 		start := time.Now()
 		err := ma.obligationExecutor.Execute(Obligation{ID: adv.ID, Type: adv.Type, Params: adv.Params, Mandatory: false}, map[string]interface{}{"request_subject": req.Subject, "request_action": req.Action, "request_resource": req.Resource, "advice": true})
-		if ma.metricsProvider != nil { ma.metricsProvider.ObserveObligationLatency(time.Since(start)) }
+		if ma.metricsProvider != nil {
+			ma.metricsProvider.ObserveObligationLatency(time.Since(start))
+		}
 		if err != nil {
-			if ma.metricsProvider != nil { ma.metricsProvider.IncObligationsFailed() }
-			if dec.Metadata == nil { dec.Metadata = make(map[string]string) }
+			if ma.metricsProvider != nil {
+				ma.metricsProvider.IncObligationsFailed()
+			}
+			if dec.Metadata == nil {
+				dec.Metadata = make(map[string]string)
+			}
 			dec.Metadata["advice_failure"] = adv.ID
 			continue
 		}
-		if ma.metricsProvider != nil { ma.metricsProvider.IncObligationsExecuted() }
+		if ma.metricsProvider != nil {
+			ma.metricsProvider.IncObligationsExecuted()
+		}
 	}
 }
 
 // currentPolicyVersion returns stable snapshot version used for caching (last snapshot boundary).
 func (ma *MemoryAuthorizer) currentPolicyVersion() int64 {
 	v := ma.version
-	if v <= 1 { return 1 }
+	if v <= 1 {
+		return 1
+	}
 	return v - 1
 }
 
@@ -548,7 +588,9 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 		if ok {
 			if entry.PolicyVersion == ma.currentPolicyVersion() && entry.Jurisdiction == ma.jurisdiction {
 				dec := entry.Decision
-				if dec.Metadata == nil { dec.Metadata = make(map[string]string) }
+				if dec.Metadata == nil {
+					dec.Metadata = make(map[string]string)
+				}
 				dec.Metadata["cache_hit"] = metadataCacheHitTrue
 				atomic.AddUint64(&ma.metricDecisions, 1)
 				atomic.AddUint64(&ma.metricCacheHits, 1)
@@ -883,13 +925,19 @@ func (ma *MemoryAuthorizer) matchesPolicy(request Request, policy Policy) bool {
 	// Advanced expression evaluation (Task 6). Fail closed on error.
 	if policy.Expression != "" {
 		ok, err := EvaluateExpression(policy.Expression, request, nil)
-		if err != nil || !ok { return false }
+		if err != nil || !ok {
+			return false
+		}
 	}
 	// Validator enforcement: all listed validators must pass; missing registry or validator ID => fail closed.
 	if len(policy.Validators) > 0 {
-		if ma.validatorRegistry == nil { return false }
+		if ma.validatorRegistry == nil {
+			return false
+		}
 		for _, vid := range policy.Validators {
-			if err := ma.validatorRegistry.Invoke(vid, request, policy); err != nil { return false }
+			if err := ma.validatorRegistry.Invoke(vid, request, policy); err != nil {
+				return false
+			}
 		}
 	}
 	return true

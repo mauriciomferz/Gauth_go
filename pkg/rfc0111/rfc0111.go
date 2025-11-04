@@ -11,8 +11,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"sort"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -74,7 +74,7 @@ const (
 	POAStatusRevoked POAStatus = "revoked"
 	POAStatusExpired POAStatus = "expired"
 	// POAStatusDraft represents a PoA that is prepared but not yet finalized (e.g., awaiting multi-signature quorum)
-	POAStatusDraft  POAStatus = "draft"
+	POAStatusDraft POAStatus = "draft"
 	// POAStatusSuspended is a temporary hold (can transition back to active or to terminated)
 	POAStatusSuspended POAStatus = "suspended"
 	// POAStatusTerminated is a permanent closure distinct from revocation (e.g., natural end-of-contract);
@@ -92,24 +92,24 @@ type PowerOfAttorney struct {
 	Restrictions map[string]string `json:"restrictions,omitempty"`
 	// Taxonomy expansion (RB2): classify agents and actions for governance analytics & scoped delegation.
 	// Included in canonical digest starting with Version >=3. Empty values treated as absent (legacy compatibility).
-	AgentType    string            `json:"agent_type,omitempty"`
-	Sector       string            `json:"sector,omitempty"`
-	ActionClass  string            `json:"action_class,omitempty"`
-	ValidFrom    time.Time         `json:"valid_from"`
-	ValidUntil   time.Time         `json:"valid_until"`
-	Status       POAStatus         `json:"status"`
-	CreatedAt    time.Time         `json:"created_at"`
-	UpdatedAt    time.Time         `json:"updated_at"`
+	AgentType   string    `json:"agent_type,omitempty"`
+	Sector      string    `json:"sector,omitempty"`
+	ActionClass string    `json:"action_class,omitempty"`
+	ValidFrom   time.Time `json:"valid_from"`
+	ValidUntil  time.Time `json:"valid_until"`
+	Status      POAStatus `json:"status"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 	// Legal & evidentiary extension fields (Beta MVP – excluded from canonical digest):
-	Jurisdiction       string     `json:"jurisdiction,omitempty"`       // Primary governing jurisdiction
-	Witnesses          []string   `json:"witnesses,omitempty"`          // Optional witness identities
-	Attestations       []string   `json:"attestations,omitempty"`       // External attestations / certifications IDs
-	RevokedAt          *time.Time `json:"revoked_at,omitempty"`         // Timestamp of revocation (if revoked)
-	RevocationReason   string     `json:"revocation_reason,omitempty"` // Human-readable structured reason code
-	Signature    *POASignature     `json:"signature,omitempty"`
+	Jurisdiction     string        `json:"jurisdiction,omitempty"`      // Primary governing jurisdiction
+	Witnesses        []string      `json:"witnesses,omitempty"`         // Optional witness identities
+	Attestations     []string      `json:"attestations,omitempty"`      // External attestations / certifications IDs
+	RevokedAt        *time.Time    `json:"revoked_at,omitempty"`        // Timestamp of revocation (if revoked)
+	RevocationReason string        `json:"revocation_reason,omitempty"` // Human-readable structured reason code
+	Signature        *POASignature `json:"signature,omitempty"`
 	// Multi-signature prototype fields (RFC115-C8): if Signers provided and Threshold>1 we require aggregated validation.
-	Signers   []string `json:"signers,omitempty"`
-	Threshold int      `json:"threshold,omitempty"`
+	Signers   []string       `json:"signers,omitempty"`
+	Threshold int            `json:"threshold,omitempty"`
 	Weights   map[string]int `json:"weights,omitempty"` // signer -> weight (positive int); included in canonical digest when present
 	// MultiSignatures holds individual signatures (each over canonical POA digest) keyed by signer identity.
 	// For threshold verification we require at least Threshold valid entries.
@@ -122,9 +122,9 @@ type PowerOfAttorney struct {
 	ParentPOAID string `json:"parent_poa_id,omitempty"`
 	// ParentDigest binds this delegation to its parent's canonical digest (hierarchical integrity). Included in canonical digest for Version>=4.
 	ParentDigest string `json:"parent_digest,omitempty"`
-	Depth      int    `json:"depth,omitempty"` // 0=root; derived when ParentPOAID set
+	Depth        int    `json:"depth,omitempty"` // 0=root; derived when ParentPOAID set
 	// Dual-control revocation governance fields (beta design placeholders)
-	Controllers []string                 `json:"controllers,omitempty"`          // Optional explicit controller identities authorized for quorum revocation
+	Controllers       []string                `json:"controllers,omitempty"`        // Optional explicit controller identities authorized for quorum revocation
 	PendingRevocation *PendingRevocationState `json:"pending_revocation,omitempty"` // Non-nil when a revocation workflow is in progress
 	// Evidence hash attachments for forensic strengthening (excluded from canonical digest)
 	EvidenceHashes []string `json:"evidence_hashes,omitempty"`
@@ -145,16 +145,16 @@ type POASignature struct {
 // Finalization transitions POA.Status to revoked and sets RevokedAt/RevocationReason. Cancellation returns to prior status.
 // All fields are persisted inside the PoA record for durability.
 type PendingRevocationState struct {
-	InitiatedAt     time.Time          `json:"initiated_at"`
-	Initiator       string             `json:"initiator"`
-	Reason          string             `json:"reason,omitempty"`
-	EvidenceHashes  []string           `json:"evidence_hashes,omitempty"` // optional supporting evidence content-addressed hashes
-	Approvals       map[string]time.Time `json:"approvals,omitempty"`     // approver -> timestamp
-	RequiredCount   int                `json:"required_count,omitempty"`  // quorum size by distinct approvers (if >0)
-	RequiredWeight  int                `json:"required_weight,omitempty"` // cumulative weight target (alternative mode)
-	SatisfiedWeight int                `json:"satisfied_weight,omitempty"`// running total in weight mode
-	Finalized       bool               `json:"finalized"`
-	Canceled        bool               `json:"canceled"`
+	InitiatedAt     time.Time            `json:"initiated_at"`
+	Initiator       string               `json:"initiator"`
+	Reason          string               `json:"reason,omitempty"`
+	EvidenceHashes  []string             `json:"evidence_hashes,omitempty"`  // optional supporting evidence content-addressed hashes
+	Approvals       map[string]time.Time `json:"approvals,omitempty"`        // approver -> timestamp
+	RequiredCount   int                  `json:"required_count,omitempty"`   // quorum size by distinct approvers (if >0)
+	RequiredWeight  int                  `json:"required_weight,omitempty"`  // cumulative weight target (alternative mode)
+	SatisfiedWeight int                  `json:"satisfied_weight,omitempty"` // running total in weight mode
+	Finalized       bool                 `json:"finalized"`
+	Canceled        bool                 `json:"canceled"`
 }
 
 // RevocationRequest represents an initiation request for dual-control revocation.
@@ -271,13 +271,24 @@ func (s *Service) verifyMultiSignatures(p *PowerOfAttorney) error {
 			var total int
 			for _, part := range parts {
 				part = strings.TrimSpace(part)
-				if part == "" { continue }
+				if part == "" {
+					continue
+				}
 				kv := strings.SplitN(part, "=", 2)
-				if len(kv) != 2 { valid = false; break }
+				if len(kv) != 2 {
+					valid = false
+					break
+				}
 				w64, err := strconv.ParseInt(strings.TrimSpace(kv[1]), 10, 32)
-				if err != nil { valid = false; break }
+				if err != nil {
+					valid = false
+					break
+				}
 				w := int(w64)
-				if w <= 0 || w > 1_000_000 { valid = false; break }
+				if w <= 0 || w > 1_000_000 {
+					valid = false
+					break
+				}
 				parsed[strings.TrimSpace(kv[0])] = w
 				total += w
 			}
@@ -828,7 +839,9 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 	}
 	// Replay protection & mandatory JTI: require JTI unless explicitly allowed via GAUTH_ALLOW_MISSING_JTI.
 	jti := env.JTI
-	if useV2 { jti = env2.JTI }
+	if useV2 {
+		jti = env2.JTI
+	}
 	if jti == "" {
 		if os.Getenv("GAUTH_ALLOW_MISSING_JTI") != "1" {
 			return nil, rfc.New(rfc.ErrInvalidRequest, "missing jti")
@@ -840,27 +853,47 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 		if s.replayStore != nil {
 			startRS := s.nowFn()
 			seen, err := s.replayStore.Seen(jti)
-			if s.metrics != nil { s.metrics.ObserveReplayStoreLatency(s.nowFn().Sub(startRS)) }
+			if s.metrics != nil {
+				s.metrics.ObserveReplayStoreLatency(s.nowFn().Sub(startRS))
+			}
 			if err != nil {
-				if s.metrics != nil { s.metrics.IncReplayStoreErrors() }
-				if s.failClosedReplay { return nil, rfc.New(rfc.ErrInvalidRequest, "replay store error") }
+				if s.metrics != nil {
+					s.metrics.IncReplayStoreErrors()
+				}
+				if s.failClosedReplay {
+					return nil, rfc.New(rfc.ErrInvalidRequest, "replay store error")
+				}
 			} else if seen {
-				if s.metrics != nil { s.metrics.IncReplayHits() }
+				if s.metrics != nil {
+					s.metrics.IncReplayHits()
+				}
 				return nil, rfc.New(rfc.ErrReplay, "token replay detected")
 			}
 			recStart := s.nowFn()
 			if recErr := s.replayStore.Record(jti, s.nowFn()); recErr != nil {
-				if s.metrics != nil { s.metrics.IncReplayStoreErrors() }
-				if s.failClosedReplay { return nil, rfc.New(rfc.ErrInvalidRequest, "replay store record error") }
-			} else if s.metrics != nil { s.metrics.ObserveReplayStoreLatency(s.nowFn().Sub(recStart)) }
-			if s.metrics != nil { s.metrics.IncReplayMisses() }
+				if s.metrics != nil {
+					s.metrics.IncReplayStoreErrors()
+				}
+				if s.failClosedReplay {
+					return nil, rfc.New(rfc.ErrInvalidRequest, "replay store record error")
+				}
+			} else if s.metrics != nil {
+				s.metrics.ObserveReplayStoreLatency(s.nowFn().Sub(recStart))
+			}
+			if s.metrics != nil {
+				s.metrics.IncReplayMisses()
+			}
 		} else if s.replay != nil {
 			if s.replay.Seen(jti) {
-				if s.metrics != nil { s.metrics.IncReplayHits() }
+				if s.metrics != nil {
+					s.metrics.IncReplayHits()
+				}
 				return nil, rfc.New(rfc.ErrReplay, "token replay detected")
 			}
 			s.replay.Record(jti, s.nowFn())
-			if s.metrics != nil { s.metrics.IncReplayMisses() }
+			if s.metrics != nil {
+				s.metrics.IncReplayMisses()
+			}
 		}
 	}
 	poa, ok := s.repo.Get(delegationID)
@@ -1099,21 +1132,21 @@ type Service struct {
 	clockSkew           time.Duration // tolerated clock skew for ValidFrom/ValidUntil windows
 	revChain            *delegation.RevocationChain
 	issChain            *DelegationChain
-	tokenKey            []byte                    // legacy symmetric key (to be deprecated after envelope migration)
-	keyRing             *keyring.KeyRing          // Milestone 2A: key management (active + previous)
-	metrics             metrics.Metrics           // instrumentation (noop by default)
-	signerProvider      func() (cr.Signer, error) // optional signing capability
-	strictAuthenticity  bool                      // if true, missing public key becomes integrity failure instead of soft skip
-	anchorClient        AnchorClient              // optional external anchoring client
-	keyProvider         cr.KeyProvider            // asymmetric key provider for signature verification
-	replay              *replayCache              // optional in-memory replay protection
-	replayStore         ReplayStore               // optional external distributed replay store (takes precedence if non-nil)
-	sigReplayStore      SignatureReplayStore      // optional signature replay protection store (issuance path)
-	failClosedReplay    bool                      // if true, replay store errors become invalid_request instead of fail-open
-	limits              ValidationLimits          // configurable validation limits
-	poaValidator        PoAValidator              // semantic validator applied post basic validation
-	enhancedValidator   *EnhancedPoAValidator     // enhanced validator with warning collection and daily limits (optional)
-	mandatorySignatures bool                      // if true, issuance aborts when signature cannot be produced
+	tokenKey            []byte                      // legacy symmetric key (to be deprecated after envelope migration)
+	keyRing             *keyring.KeyRing            // Milestone 2A: key management (active + previous)
+	metrics             metrics.Metrics             // instrumentation (noop by default)
+	signerProvider      func() (cr.Signer, error)   // optional signing capability
+	strictAuthenticity  bool                        // if true, missing public key becomes integrity failure instead of soft skip
+	anchorClient        AnchorClient                // optional external anchoring client
+	keyProvider         cr.KeyProvider              // asymmetric key provider for signature verification
+	replay              *replayCache                // optional in-memory replay protection
+	replayStore         ReplayStore                 // optional external distributed replay store (takes precedence if non-nil)
+	sigReplayStore      SignatureReplayStore        // optional signature replay protection store (issuance path)
+	failClosedReplay    bool                        // if true, replay store errors become invalid_request instead of fail-open
+	limits              ValidationLimits            // configurable validation limits
+	poaValidator        PoAValidator                // semantic validator applied post basic validation
+	enhancedValidator   *EnhancedPoAValidator       // enhanced validator with warning collection and daily limits (optional)
+	mandatorySignatures bool                        // if true, issuance aborts when signature cannot be produced
 	attestAnchors       *attest.TrustAnchorRegistry // optional trust anchor registry for attestation proofs
 	// semanticCounters prototype: fine-grained semantic rejection reasons (will be surfaced via endpoints later)
 	semanticCounters struct {
@@ -1134,28 +1167,66 @@ type Service struct {
 // - Duplicates (already present) are ignored but if submission contains only duplicates we treat as failure for observability
 // - On success: UpdatedAt updated, repository persisted, audit event emitted, metrics incremented, per-POA gauge updated
 func (s *Service) AttachEvidenceHashes(ctx context.Context, poaID string, hashes []string) (*PowerOfAttorney, error) {
-	if poaID == "" { return nil, rfc.New(rfc.ErrInvalidRequest, "missing poa id") }
-	if len(hashes) == 0 { if s.metrics!=nil { s.metrics.IncEvidenceAttachmentFailures() }; return nil, rfc.New(rfc.ErrInvalidRequest, "no hashes provided") }
+	if poaID == "" {
+		return nil, rfc.New(rfc.ErrInvalidRequest, "missing poa id")
+	}
+	if len(hashes) == 0 {
+		if s.metrics != nil {
+			s.metrics.IncEvidenceAttachmentFailures()
+		}
+		return nil, rfc.New(rfc.ErrInvalidRequest, "no hashes provided")
+	}
 	p, ok := s.repo.Get(poaID)
-	if !ok { if s.metrics!=nil { s.metrics.IncEvidenceAttachmentFailures() }; return nil, rfc.New(rfc.ErrNotFound, "poa not found") }
-	if p.Status == POAStatusRevoked || p.Status == POAStatusTerminated { if s.metrics!=nil { s.metrics.IncEvidenceAttachmentFailures() }; return nil, rfc.New(rfc.ErrInvalidRequest, "cannot attach evidence to finalized poa") }
+	if !ok {
+		if s.metrics != nil {
+			s.metrics.IncEvidenceAttachmentFailures()
+		}
+		return nil, rfc.New(rfc.ErrNotFound, "poa not found")
+	}
+	if p.Status == POAStatusRevoked || p.Status == POAStatusTerminated {
+		if s.metrics != nil {
+			s.metrics.IncEvidenceAttachmentFailures()
+		}
+		return nil, rfc.New(rfc.ErrInvalidRequest, "cannot attach evidence to finalized poa")
+	}
 	// build set of existing
 	existing := make(map[string]struct{}, len(p.EvidenceHashes))
-	for _, eh := range p.EvidenceHashes { existing[eh] = struct{}{} }
+	for _, eh := range p.EvidenceHashes {
+		existing[eh] = struct{}{}
+	}
 	added := 0
 	hexRx := regexp.MustCompile(`^[0-9a-f]{64}([0-9a-f]{64})?$`)
 	for _, h := range hashes {
 		h = strings.ToLower(strings.TrimSpace(h))
-		if h == "" { continue }
-		if !hexRx.MatchString(h) { if s.metrics!=nil { s.metrics.IncEvidenceAttachmentFailures() }; return nil, rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid hash format: %s", h)) }
-		if _, dup := existing[h]; dup { continue }
+		if h == "" {
+			continue
+		}
+		if !hexRx.MatchString(h) {
+			if s.metrics != nil {
+				s.metrics.IncEvidenceAttachmentFailures()
+			}
+			return nil, rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid hash format: %s", h))
+		}
+		if _, dup := existing[h]; dup {
+			continue
+		}
 		p.EvidenceHashes = append(p.EvidenceHashes, h)
 		existing[h] = struct{}{}
 		added++
 	}
-	if added == 0 { if s.metrics!=nil { s.metrics.IncEvidenceAttachmentFailures() }; return nil, rfc.New(rfc.ErrInvalidRequest, "no new hashes (all duplicates)") }
+	if added == 0 {
+		if s.metrics != nil {
+			s.metrics.IncEvidenceAttachmentFailures()
+		}
+		return nil, rfc.New(rfc.ErrInvalidRequest, "no new hashes (all duplicates)")
+	}
 	p.UpdatedAt = s.nowFn()
-	if err := s.repo.Update(p); err != nil { if s.metrics!=nil { s.metrics.IncEvidenceAttachmentFailures() }; return nil, rfc.New(rfc.ErrInternal, fmt.Sprintf("update failed: %v", err)) }
+	if err := s.repo.Update(p); err != nil {
+		if s.metrics != nil {
+			s.metrics.IncEvidenceAttachmentFailures()
+		}
+		return nil, rfc.New(rfc.ErrInternal, fmt.Sprintf("update failed: %v", err))
+	}
 	// audit event
 	if s.audit != nil {
 		ev := audit.NewEvent(audit.TypeAuth, "evidence_attach", audit.ResultSuccess)
@@ -1165,7 +1236,9 @@ func (s *Service) AttachEvidenceHashes(ctx context.Context, poaID string, hashes
 		_ = s.audit.Log(ctx, ev)
 	}
 	if s.metrics != nil {
-		for i := 0; i < added; i++ { s.metrics.IncEvidenceAttachment() }
+		for i := 0; i < added; i++ {
+			s.metrics.IncEvidenceAttachment()
+		}
 		s.metrics.SetEvidenceHashesPerPOA(poaID, len(p.EvidenceHashes))
 	}
 	return p, nil
@@ -1402,7 +1475,9 @@ func WithReplayStore(rs ReplayStore) Option {
 // previously observed (ErrReplay). Store errors are treated as miss unless failClosedReplay enabled.
 func WithSignatureReplayStore(ss SignatureReplayStore) Option {
 	return func(s *Service) {
-		if ss != nil { s.sigReplayStore = ss }
+		if ss != nil {
+			s.sigReplayStore = ss
+		}
 	}
 }
 
@@ -1427,12 +1502,17 @@ func (s *Service) BuildDelegationGraph(ctx context.Context) ([]DelegationGraphNo
 	poas := l.List()
 	nodes := make([]DelegationGraphNode, 0, len(poas))
 	for _, p := range poas {
-		if p == nil { continue }
+		if p == nil {
+			continue
+		}
 		// defensive copy of scope slice
 		scopeCopy := append([]string{}, p.Scope...)
 		nodes = append(nodes, DelegationGraphNode{ID: p.ID, Parent: p.ParentPOAID, Depth: p.Depth, Scope: scopeCopy, Status: p.Status})
 	}
-	if s.metrics != nil { s.metrics.IncDelegationGraphExports(); s.metrics.SetDelegationGraphNodeCount(len(nodes)) }
+	if s.metrics != nil {
+		s.metrics.IncDelegationGraphExports()
+		s.metrics.SetDelegationGraphNodeCount(len(nodes))
+	}
 	return nodes, nil
 }
 
@@ -1448,7 +1528,6 @@ func (n NoopAnchorClient) Anchor(hash string) error { return nil }
 
 // WithClock allows tests to override the time source (experimental)
 func (s *Service) WithClock(f func() time.Time) *Service { s.nowFn = f; return s }
-
 
 // CreateDelegation creates a new power-of-attorney delegation
 // CreateDelegation is a backward-compatible wrapper that uses context.Background().
@@ -1472,7 +1551,9 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 		depth = parent.Depth + 1
 		maxDepth := 5
 		if v := os.Getenv("GAUTH_MAX_DELEGATION_DEPTH"); v != "" {
-			if iv, err := strconv.Atoi(strings.TrimSpace(v)); err == nil && iv > 0 { maxDepth = iv }
+			if iv, err := strconv.Atoi(strings.TrimSpace(v)); err == nil && iv > 0 {
+				maxDepth = iv
+			}
 		}
 		if depth > maxDepth {
 			return nil, rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("delegation depth %d exceeds max %d", depth, maxDepth))
@@ -1556,22 +1637,34 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 				if dig, _, derr := CanonicalPOADigest(parent); derr == nil {
 					poa.ParentDigest = dig
 				} else {
-					if s.metrics != nil { s.metrics.IncHierDigestParentDigestMissing() }
-					if forceHier { return nil, rfc.New(rfc.ErrIntegrityFailure, "parent canonical digest failed") }
+					if s.metrics != nil {
+						s.metrics.IncHierDigestParentDigestMissing()
+					}
+					if forceHier {
+						return nil, rfc.New(rfc.ErrIntegrityFailure, "parent canonical digest failed")
+					}
 				}
 			} else {
-				if s.metrics != nil { s.metrics.IncHierDigestParentDigestMissing() }
-				if forceHier { return nil, rfc.New(rfc.ErrIntegrityFailure, "parent not found") }
+				if s.metrics != nil {
+					s.metrics.IncHierDigestParentDigestMissing()
+				}
+				if forceHier {
+					return nil, rfc.New(rfc.ErrIntegrityFailure, "parent not found")
+				}
 			}
 		} else {
 			// Root issuance still increments issued metric when hierarchical digest enabled.
-			if s.metrics != nil { s.metrics.IncHierDigestIssued() }
+			if s.metrics != nil {
+				s.metrics.IncHierDigestIssued()
+			}
 		}
 	}
 	// Auto-bump version when taxonomy present (non-empty fields) to engage V3 canonical domain separation logic for single-sig.
 	if poa.AgentType != "" || poa.Sector != "" || poa.ActionClass != "" {
 		// Preserve hierarchical V4 if already bumped; else set to 3
-		if poa.Version < 4 { poa.Version = 3 }
+		if poa.Version < 4 {
+			poa.Version = 3
+		}
 	}
 
 	// Multi-signature enforcement (prototype RFC115-C8). If Threshold>1 require structural validity.
@@ -1617,16 +1710,28 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 						compound := poa.Signature.DigestHex + "|" + poa.Signature.KeyID
 						seen, rErr := s.sigReplayStore.SeenSignature(compound)
 						if rErr != nil {
-							if s.metrics != nil { s.metrics.IncReplayStoreErrors() }
-							if s.failClosedReplay { return nil, rfc.New(rfc.ErrInvalidRequest, "signature replay store error") }
+							if s.metrics != nil {
+								s.metrics.IncReplayStoreErrors()
+							}
+							if s.failClosedReplay {
+								return nil, rfc.New(rfc.ErrInvalidRequest, "signature replay store error")
+							}
 						} else if seen {
-							if s.metrics != nil { s.metrics.IncReplayHits() }
+							if s.metrics != nil {
+								s.metrics.IncReplayHits()
+							}
 							return nil, rfc.New(rfc.ErrReplay, "signature replay detected")
 						}
 						if recErr := s.sigReplayStore.RecordSignature(compound, s.nowFn()); recErr != nil {
-							if s.metrics != nil { s.metrics.IncReplayStoreErrors() }
-							if s.failClosedReplay { return nil, rfc.New(rfc.ErrInvalidRequest, "signature replay record error") }
-						} else if s.metrics != nil { s.metrics.IncReplayMisses() }
+							if s.metrics != nil {
+								s.metrics.IncReplayStoreErrors()
+							}
+							if s.failClosedReplay {
+								return nil, rfc.New(rfc.ErrInvalidRequest, "signature replay record error")
+							}
+						} else if s.metrics != nil {
+							s.metrics.IncReplayMisses()
+						}
 					}
 				} else {
 					if s.metrics != nil {
@@ -1731,16 +1836,22 @@ func (s *Service) ValidateDelegationCtx(ctx context.Context, poaID, grantee, act
 	if poa.Version >= 4 && poa.ParentPOAID != "" {
 		parent, ok := s.repo.Get(poa.ParentPOAID)
 		if !ok || parent == nil {
-			if s.metrics != nil { s.metrics.IncHierDigestParentDigestMissing() }
+			if s.metrics != nil {
+				s.metrics.IncHierDigestParentDigestMissing()
+			}
 			return rfc.New(rfc.ErrIntegrityFailure, "parent delegation missing for hierarchical digest")
 		}
 		if dig, _, derr := CanonicalPOADigest(parent); derr == nil {
 			if poa.ParentDigest == "" || poa.ParentDigest != dig {
-				if s.metrics != nil { s.metrics.IncHierDigestVersionMismatch() }
+				if s.metrics != nil {
+					s.metrics.IncHierDigestVersionMismatch()
+				}
 				return rfc.New(rfc.ErrIntegrityFailure, "parent digest mismatch")
 			}
 		} else {
-			if s.metrics != nil { s.metrics.IncHierDigestParentDigestMissing() }
+			if s.metrics != nil {
+				s.metrics.IncHierDigestParentDigestMissing()
+			}
 			return rfc.New(rfc.ErrIntegrityFailure, "parent canonicalization failed")
 		}
 	}
@@ -1939,62 +2050,132 @@ func (s *Service) ValidateDelegationCtx(ctx context.Context, poaID, grantee, act
 // InitiateRevocation starts a dual-control revocation workflow if enabled.
 // It sets PendingRevocation with quorum parameters derived from env or defaults.
 // Env:
-//   GAUTH_REVOCATION_REQUIRED_COUNT (int) overrides RequiredCount
-//   GAUTH_REVOCATION_REQUIRED_WEIGHT (int) enables weight mode when >0
+//
+//	GAUTH_REVOCATION_REQUIRED_COUNT (int) overrides RequiredCount
+//	GAUTH_REVOCATION_REQUIRED_WEIGHT (int) enables weight mode when >0
+//
 // Authorization: only Grantor or Controllers may initiate.
 func (s *Service) InitiateRevocation(ctx context.Context, req RevocationRequest) error {
-	if req.POAID == "" { return rfc.New(rfc.ErrInvalidRequest, "poa_id required") }
+	if req.POAID == "" {
+		return rfc.New(rfc.ErrInvalidRequest, "poa_id required")
+	}
 	poa, ok := s.repo.Get(req.POAID)
-	if !ok || poa == nil { if s.metrics!=nil { s.metrics.IncRevocationWorkflowInitiationFailures() }; return rfc.New(rfc.ErrNotFound, req.POAID) }
-	if poa.Status != POAStatusActive && poa.Status != POAStatusSuspended { if s.metrics!=nil { s.metrics.IncRevocationWorkflowInitiationFailures() }; return rfc.New(rfc.ErrInvalidRequest, "revocation can only initiate from active or suspended") }
+	if !ok || poa == nil {
+		if s.metrics != nil {
+			s.metrics.IncRevocationWorkflowInitiationFailures()
+		}
+		return rfc.New(rfc.ErrNotFound, req.POAID)
+	}
+	if poa.Status != POAStatusActive && poa.Status != POAStatusSuspended {
+		if s.metrics != nil {
+			s.metrics.IncRevocationWorkflowInitiationFailures()
+		}
+		return rfc.New(rfc.ErrInvalidRequest, "revocation can only initiate from active or suspended")
+	}
 	// Auth check
 	if req.Initiator != poa.Grantor && !identityIn(req.Initiator, poa.Controllers) {
-		if s.metrics!=nil { s.metrics.IncRevocationWorkflowUnauthorized() }
+		if s.metrics != nil {
+			s.metrics.IncRevocationWorkflowUnauthorized()
+		}
 		return rfc.New(rfc.ErrUnauthorized, "initiator not authorized for dual-control revocation")
 	}
-	if poa.PendingRevocation != nil { if s.metrics!=nil { s.metrics.IncRevocationWorkflowInitiationFailures() }; return rfc.New(rfc.ErrInvalidRequest, "revocation already pending") }
+	if poa.PendingRevocation != nil {
+		if s.metrics != nil {
+			s.metrics.IncRevocationWorkflowInitiationFailures()
+		}
+		return rfc.New(rfc.ErrInvalidRequest, "revocation already pending")
+	}
 	pr := &PendingRevocationState{InitiatedAt: s.nowFn(), Initiator: req.Initiator, Reason: req.Reason, EvidenceHashes: req.EvidenceHashes, Approvals: map[string]time.Time{}}
 	if v := os.Getenv("GAUTH_REVOCATION_REQUIRED_COUNT"); v != "" {
-		if iv, err := strconv.Atoi(strings.TrimSpace(v)); err == nil && iv > 0 { pr.RequiredCount = iv }
+		if iv, err := strconv.Atoi(strings.TrimSpace(v)); err == nil && iv > 0 {
+			pr.RequiredCount = iv
+		}
 	}
 	if v := os.Getenv("GAUTH_REVOCATION_REQUIRED_WEIGHT"); v != "" {
-		if iv, err := strconv.Atoi(strings.TrimSpace(v)); err == nil && iv > 0 { pr.RequiredWeight = iv }
+		if iv, err := strconv.Atoi(strings.TrimSpace(v)); err == nil && iv > 0 {
+			pr.RequiredWeight = iv
+		}
 	}
-	if pr.RequiredCount == 0 && pr.RequiredWeight == 0 { pr.RequiredCount = 2 } // default dual-control (2 approvals)
+	if pr.RequiredCount == 0 && pr.RequiredWeight == 0 {
+		pr.RequiredCount = 2
+	} // default dual-control (2 approvals)
 	poa.PendingRevocation = pr
 	poa.Status = POAStatusSuspended // place into suspended during pending revocation (prevents usage)
 	poa.UpdatedAt = s.nowFn()
 	_ = s.repo.Update(poa)
-	if s.metrics!=nil { s.metrics.IncRevocationWorkflowInitiated() }
+	if s.metrics != nil {
+		s.metrics.IncRevocationWorkflowInitiated()
+	}
 	return nil
 }
 
 // ApproveRevocation records an approval and evaluates quorum satisfaction.
 // Approvers: Grantor, Controllers, Signers (if multi-sig) – duplicates ignored.
 func (s *Service) ApproveRevocation(ctx context.Context, poaID, approver string) error {
-	if poaID == "" { return rfc.New(rfc.ErrInvalidRequest, "poa_id required") }
+	if poaID == "" {
+		return rfc.New(rfc.ErrInvalidRequest, "poa_id required")
+	}
 	poa, ok := s.repo.Get(poaID)
-	if !ok || poa == nil { if s.metrics!=nil { s.metrics.IncRevocationWorkflowApprovalFailures() }; return rfc.New(rfc.ErrNotFound, poaID) }
-	if poa.PendingRevocation == nil { if s.metrics!=nil { s.metrics.IncRevocationWorkflowApprovalFailures() }; return rfc.New(rfc.ErrInvalidRequest, "no pending revocation") }
-	if poa.PendingRevocation.Finalized { if s.metrics!=nil { s.metrics.IncRevocationWorkflowApprovalFailures() }; return rfc.New(rfc.ErrInvalidRequest, "revocation already finalized") }
-	if poa.PendingRevocation.Canceled { if s.metrics!=nil { s.metrics.IncRevocationWorkflowApprovalFailures() }; return rfc.New(rfc.ErrInvalidRequest, "revocation canceled") }
+	if !ok || poa == nil {
+		if s.metrics != nil {
+			s.metrics.IncRevocationWorkflowApprovalFailures()
+		}
+		return rfc.New(rfc.ErrNotFound, poaID)
+	}
+	if poa.PendingRevocation == nil {
+		if s.metrics != nil {
+			s.metrics.IncRevocationWorkflowApprovalFailures()
+		}
+		return rfc.New(rfc.ErrInvalidRequest, "no pending revocation")
+	}
+	if poa.PendingRevocation.Finalized {
+		if s.metrics != nil {
+			s.metrics.IncRevocationWorkflowApprovalFailures()
+		}
+		return rfc.New(rfc.ErrInvalidRequest, "revocation already finalized")
+	}
+	if poa.PendingRevocation.Canceled {
+		if s.metrics != nil {
+			s.metrics.IncRevocationWorkflowApprovalFailures()
+		}
+		return rfc.New(rfc.ErrInvalidRequest, "revocation canceled")
+	}
 	if approver != poa.Grantor && !identityIn(approver, poa.Controllers) && !identityIn(approver, poa.Signers) {
-		if s.metrics!=nil { s.metrics.IncRevocationWorkflowUnauthorized() }
-		return rfc.New(rfc.ErrUnauthorized, "approver not authorized") }
-	if poa.PendingRevocation.Approvals == nil { poa.PendingRevocation.Approvals = map[string]time.Time{} }
+		if s.metrics != nil {
+			s.metrics.IncRevocationWorkflowUnauthorized()
+		}
+		return rfc.New(rfc.ErrUnauthorized, "approver not authorized")
+	}
+	if poa.PendingRevocation.Approvals == nil {
+		poa.PendingRevocation.Approvals = map[string]time.Time{}
+	}
 	if _, exists := poa.PendingRevocation.Approvals[approver]; !exists {
 		poa.PendingRevocation.Approvals[approver] = s.nowFn()
-		if s.metrics!=nil { s.metrics.IncRevocationWorkflowApprovals() }
+		if s.metrics != nil {
+			s.metrics.IncRevocationWorkflowApprovals()
+		}
 		// Weight accumulation if in weight mode
 		if poa.PendingRevocation.RequiredWeight > 0 && len(poa.Weights) > 0 {
-			if w, okW := poa.Weights[approver]; okW { poa.PendingRevocation.SatisfiedWeight += w }
+			if w, okW := poa.Weights[approver]; okW {
+				poa.PendingRevocation.SatisfiedWeight += w
+			}
 		}
 	}
 	// Quorum evaluation
 	if poa.PendingRevocation.RequiredWeight > 0 {
-		if poa.PendingRevocation.SatisfiedWeight >= poa.PendingRevocation.RequiredWeight { if s.metrics!=nil { s.metrics.IncRevocationWorkflowQuorumSatisfied() }; return s.finalizeRevocation(poa) }
+		if poa.PendingRevocation.SatisfiedWeight >= poa.PendingRevocation.RequiredWeight {
+			if s.metrics != nil {
+				s.metrics.IncRevocationWorkflowQuorumSatisfied()
+			}
+			return s.finalizeRevocation(poa)
+		}
 	} else if poa.PendingRevocation.RequiredCount > 0 {
-		if len(poa.PendingRevocation.Approvals) >= poa.PendingRevocation.RequiredCount { if s.metrics!=nil { s.metrics.IncRevocationWorkflowQuorumSatisfied() }; return s.finalizeRevocation(poa) }
+		if len(poa.PendingRevocation.Approvals) >= poa.PendingRevocation.RequiredCount {
+			if s.metrics != nil {
+				s.metrics.IncRevocationWorkflowQuorumSatisfied()
+			}
+			return s.finalizeRevocation(poa)
+		}
 	}
 	_ = s.repo.Update(poa)
 	return nil
@@ -2003,15 +2184,35 @@ func (s *Service) ApproveRevocation(ctx context.Context, poaID, approver string)
 // CancelRevocation aborts a pending revocation returning POA to its prior status (active) if not finalized.
 // Only Grantor or Controllers may cancel.
 func (s *Service) CancelRevocation(ctx context.Context, poaID, actor string) error {
-	poa, ok := s.repo.Get(poaID); if !ok || poa == nil { return rfc.New(rfc.ErrNotFound, poaID) }
-	if poa.PendingRevocation == nil { if s.metrics!=nil { s.metrics.IncRevocationWorkflowCancellationFailures() }; return rfc.New(rfc.ErrInvalidRequest, "no pending revocation") }
-	if poa.PendingRevocation.Finalized { if s.metrics!=nil { s.metrics.IncRevocationWorkflowCancellationFailures() }; return rfc.New(rfc.ErrInvalidRequest, "revocation finalized") }
-	if actor != poa.Grantor && !identityIn(actor, poa.Controllers) { if s.metrics!=nil { s.metrics.IncRevocationWorkflowUnauthorized() }; return rfc.New(rfc.ErrUnauthorized, "cancel not authorized") }
+	poa, ok := s.repo.Get(poaID)
+	if !ok || poa == nil {
+		return rfc.New(rfc.ErrNotFound, poaID)
+	}
+	if poa.PendingRevocation == nil {
+		if s.metrics != nil {
+			s.metrics.IncRevocationWorkflowCancellationFailures()
+		}
+		return rfc.New(rfc.ErrInvalidRequest, "no pending revocation")
+	}
+	if poa.PendingRevocation.Finalized {
+		if s.metrics != nil {
+			s.metrics.IncRevocationWorkflowCancellationFailures()
+		}
+		return rfc.New(rfc.ErrInvalidRequest, "revocation finalized")
+	}
+	if actor != poa.Grantor && !identityIn(actor, poa.Controllers) {
+		if s.metrics != nil {
+			s.metrics.IncRevocationWorkflowUnauthorized()
+		}
+		return rfc.New(rfc.ErrUnauthorized, "cancel not authorized")
+	}
 	poa.PendingRevocation.Canceled = true
 	poa.Status = POAStatusActive
 	poa.UpdatedAt = s.nowFn()
 	_ = s.repo.Update(poa)
-	if s.metrics!=nil { s.metrics.IncRevocationWorkflowCanceled() }
+	if s.metrics != nil {
+		s.metrics.IncRevocationWorkflowCanceled()
+	}
 	return nil
 }
 
@@ -2030,7 +2231,14 @@ func (s *Service) finalizeRevocation(poa *PowerOfAttorney) error {
 }
 
 // identityIn helper checks presence of id in slice (case-sensitive exact match).
-func identityIn(id string, list []string) bool { for _, v := range list { if v == id { return true } }; return false }
+func identityIn(id string, list []string) bool {
+	for _, v := range list {
+		if v == id {
+			return true
+		}
+	}
+	return false
+}
 
 // ValidateDelegationRich validates a POA using a structured ValidationContext.
 // Falls back to context-based requested_amount extraction if RequestedAmount is nil.
@@ -2203,17 +2411,20 @@ func (s *Service) ValidateDelegationRich(ctx context.Context, poaID, grantee str
 
 // validateInheritedScope enforces conservative subset semantics for hierarchical delegation.
 // Rules:
-// 1. Each child scope entry must be covered by at least one parent entry.
-// 2. Coverage definitions:
-//    a. Exact match (parent == child)
-//    b. Parent wildcard suffix using '*' matches prefix (e.g. parent 'audit.*' covers 'audit.log.write')
-//    c. Global wildcard '*' (if present in parent list) covers all child scopes
-// 3. No broadening: child entry not covered => error.
-// 4. Duplicate child entries rejected for determinism.
-// 5. Empty child scope not allowed.
+//  1. Each child scope entry must be covered by at least one parent entry.
+//  2. Coverage definitions:
+//     a. Exact match (parent == child)
+//     b. Parent wildcard suffix using '*' matches prefix (e.g. parent 'audit.*' covers 'audit.log.write')
+//     c. Global wildcard '*' (if present in parent list) covers all child scopes
+//  3. No broadening: child entry not covered => error.
+//  4. Duplicate child entries rejected for determinism.
+//  5. Empty child scope not allowed.
+//
 // Advanced patterns (regex/range) will be layered later; current function is intentionally strict.
 func validateInheritedScope(parentScopes, childScopes []string) error {
-	if len(childScopes) == 0 { return fmt.Errorf("child scope empty") }
+	if len(childScopes) == 0 {
+		return fmt.Errorf("child scope empty")
+	}
 	parentExact := make(map[string]struct{}, len(parentScopes))
 	parentWild := make([]string, 0)
 	parentRegex := make([]*regexp.Regexp, 0)
@@ -2221,8 +2432,13 @@ func validateInheritedScope(parentScopes, childScopes []string) error {
 	enableAdvanced := os.Getenv("GAUTH_ENABLE_ADVANCED_SCOPE") == "1"
 	for _, p := range parentScopes {
 		p = strings.TrimSpace(p)
-		if p == "" { continue }
-		if p == "*" { hasGlobal = true; continue }
+		if p == "" {
+			continue
+		}
+		if p == "*" {
+			hasGlobal = true
+			continue
+		}
 		if strings.HasSuffix(p, "*") {
 			pref := strings.TrimSuffix(p, "*")
 			parentWild = append(parentWild, pref)
@@ -2231,9 +2447,13 @@ func validateInheritedScope(parentScopes, childScopes []string) error {
 		// Advanced regex pattern: parent entries beginning with 're:' treat remainder as a Go regex.
 		if enableAdvanced && strings.HasPrefix(p, "re:") {
 			pattern := strings.TrimPrefix(p, "re:")
-			if pattern == "" { return fmt.Errorf("empty regex pattern in parent scope") }
+			if pattern == "" {
+				return fmt.Errorf("empty regex pattern in parent scope")
+			}
 			rx, err := regexp.Compile(pattern)
-			if err != nil { return fmt.Errorf("invalid regex pattern '%s': %v", pattern, err) }
+			if err != nil {
+				return fmt.Errorf("invalid regex pattern '%s': %v", pattern, err)
+			}
 			parentRegex = append(parentRegex, rx)
 			continue
 		}
@@ -2243,15 +2463,33 @@ func validateInheritedScope(parentScopes, childScopes []string) error {
 	seenChild := make(map[string]struct{}, len(childScopes))
 	for _, c := range childScopes {
 		c = strings.TrimSpace(c)
-		if c == "" { return fmt.Errorf("child scope contains empty entry") }
-		if _, dup := seenChild[c]; dup { return fmt.Errorf("duplicate child scope entry: %s", c) }
+		if c == "" {
+			return fmt.Errorf("child scope contains empty entry")
+		}
+		if _, dup := seenChild[c]; dup {
+			return fmt.Errorf("duplicate child scope entry: %s", c)
+		}
 		seenChild[c] = struct{}{}
-		if hasGlobal { continue }
-		if _, ok := parentExact[c]; ok { continue }
+		if hasGlobal {
+			continue
+		}
+		if _, ok := parentExact[c]; ok {
+			continue
+		}
 		covered := false
-		for _, pref := range parentWild { if strings.HasPrefix(c, pref) { covered = true; break } }
+		for _, pref := range parentWild {
+			if strings.HasPrefix(c, pref) {
+				covered = true
+				break
+			}
+		}
 		if !covered && enableAdvanced {
-			for _, rx := range parentRegex { if rx.MatchString(c) { covered = true; break } }
+			for _, rx := range parentRegex {
+				if rx.MatchString(c) {
+					covered = true
+					break
+				}
+			}
 		}
 		if !covered {
 			return fmt.Errorf("child scope '%s' not covered by parent", c)
@@ -2619,24 +2857,37 @@ func (s *Service) validateDelegationRequest(req DelegationRequest) error {
 
 // validateInheritedScopeV2 ensures childScope does not broaden parentScope. Rules:
 // Parent patterns supported (same semantics as containsScope):
-//  - Exact: resource.action
-//  - Global wildcard: * (allows any child scope)
-//  - Prefix wildcard: prefix.* (allows any action that starts with prefix.)
+//   - Exact: resource.action
+//   - Global wildcard: * (allows any child scope)
+//   - Prefix wildcard: prefix.* (allows any action that starts with prefix.)
+//
 // Child entries must each be authorized by at least one parent entry; rejection occurs on first broaden attempt.
 // Regex and numeric range patterns are conservatively unsupported for inheritance (must match exactly or via wildcard);
 // if present in parent they are treated as exact strings (no expansion) until advanced inheritance implemented.
 func validateInheritedScopeV2(parentScope, childScope []string) error {
-	if len(childScope) == 0 { return fmt.Errorf("child scope must be non-empty") }
-	if len(parentScope) == 0 { return fmt.Errorf("parent scope empty") }
+	if len(childScope) == 0 {
+		return fmt.Errorf("child scope must be non-empty")
+	}
+	if len(parentScope) == 0 {
+		return fmt.Errorf("parent scope empty")
+	}
 	// Fast path: global wildcard present in parent => allow all
-	for _, p := range parentScope { if p == "*" { return nil } }
+	for _, p := range parentScope {
+		if p == "*" {
+			return nil
+		}
+	}
 	// Normalize parent into classification buckets
 	exact := map[string]struct{}{}
 	prefixes := make([]string, 0)
 	for _, p := range parentScope {
 		p = strings.TrimSpace(p)
-		if p == "" { continue }
-		if p == "*" { return nil }
+		if p == "" {
+			continue
+		}
+		if p == "*" {
+			return nil
+		}
 		if strings.HasSuffix(p, ".*") {
 			prefixes = append(prefixes, strings.TrimSuffix(p, ".*"))
 			continue
@@ -2647,11 +2898,18 @@ func validateInheritedScopeV2(parentScope, childScope []string) error {
 	// For each child entry ensure coverage by exact match or prefix wildcard.
 	for _, c := range childScope {
 		c = strings.TrimSpace(c)
-		if c == "" { return fmt.Errorf("child scope contains empty entry") }
-		if _, ok := exact[c]; ok { continue }
+		if c == "" {
+			return fmt.Errorf("child scope contains empty entry")
+		}
+		if _, ok := exact[c]; ok {
+			continue
+		}
 		covered := false
 		for _, pre := range prefixes {
-			if strings.HasPrefix(c, pre+".") { covered = true; break }
+			if strings.HasPrefix(c, pre+".") {
+				covered = true
+				break
+			}
 		}
 		if !covered {
 			return fmt.Errorf("child scope entry '%s' not covered by parent scope", c)
@@ -2662,12 +2920,13 @@ func validateInheritedScopeV2(parentScope, childScope []string) error {
 
 // containsScope checks if an action is within the permitted scope using enhanced pattern semantics.
 // Supported patterns:
-//   1. Exact: "resource.action" must equal the action string
-//   2. Global wildcard: "*" matches any action
-//   3. Prefix wildcard: "prefix.*" matches any action with leading segment(s) "prefix." (e.g. "audit.*" matches "audit.read.log")
-//   4. Regex: "regex:/<expr>/" (only active when GAUTH_SCOPE_ALLOW_REGEX=1). On regex compile error pattern is skipped.
-//   5. Numeric range: "base[min-max]" where action is "base<integer>" and integer lies inclusively within [min,max].
-//      Example: pattern "rate[5-10]" matches action "rate7".
+//  1. Exact: "resource.action" must equal the action string
+//  2. Global wildcard: "*" matches any action
+//  3. Prefix wildcard: "prefix.*" matches any action with leading segment(s) "prefix." (e.g. "audit.*" matches "audit.read.log")
+//  4. Regex: "regex:/<expr>/" (only active when GAUTH_SCOPE_ALLOW_REGEX=1). On regex compile error pattern is skipped.
+//  5. Numeric range: "base[min-max]" where action is "base<integer>" and integer lies inclusively within [min,max].
+//     Example: pattern "rate[5-10]" matches action "rate7".
+//
 // Notes:
 //   - Evaluation short-circuits on first match.
 //   - Invalid patterns are ignored (never match) to avoid unintended broad authorization.
@@ -2821,8 +3080,10 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 			algoName := strings.ToLower(os.Getenv("GAUTH_RAW_POA_CHAIN_HASH_ALGO"))
 			var algo poaPkg.RawPOAHashAlg = poaPkg.RawPOAHashSHA256
 			switch algoName {
-			case "blake2b256": algo = poaPkg.RawPOAHashBLAKE2b256
-			case "sha3_256": algo = poaPkg.RawPOAHashSHA3_256
+			case "blake2b256":
+				algo = poaPkg.RawPOAHashBLAKE2b256
+			case "sha3_256":
+				algo = poaPkg.RawPOAHashSHA3_256
 			}
 			// Build minimal chain snapshot (single item) representing this issuance.
 			// Clamp timestamp to <=255 to satisfy minimal CBOR encoder integer encoding (supports <256 path).
@@ -2840,8 +3101,12 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 						rawPOAChainAlgo = chainDec.HashAlgo.String()
 					}
 					rawPOAChain = base64.StdEncoding.EncodeToString(chainBytes)
-					if s.metrics != nil { s.metrics.IncEnvelopeRawPOAEmbedded() }
-				} else if s.metrics != nil { s.metrics.IncEnvelopeRawPOATooLarge() }
+					if s.metrics != nil {
+						s.metrics.IncEnvelopeRawPOAEmbedded()
+					}
+				} else if s.metrics != nil {
+					s.metrics.IncEnvelopeRawPOATooLarge()
+				}
 			}
 		}
 		env2 := token.EnvelopeV2{

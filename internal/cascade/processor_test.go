@@ -31,7 +31,7 @@ func TestCascadeProcessor(t *testing.T) {
 
 	setupHierarchy := func() (*memoryRepo, []*rfc0111.PowerOfAttorney) {
 		repo := &memoryRepo{store: make(map[string]*rfc0111.PowerOfAttorney)}
-		
+
 		// Create hierarchy: root -> child1 -> grandchild1
 		//                        -> child2
 		root := createTestPOA("root", "", 0)
@@ -50,53 +50,53 @@ func TestCascadeProcessor(t *testing.T) {
 	t.Run("revoke mode cascades correctly", func(t *testing.T) {
 		repo, _ := setupHierarchy()
 		auditor := audit.NewMemoryLogger(nil)
-		
+
 		cfg := config.CascadeConfig{
 			Enabled:   true,
 			Mode:      config.CascadeModeRevoke,
 			MaxDepth:  10,
 			BatchSize: 100,
 		}
-		
+
 		processor := NewProcessor(repo, auditor, cfg, nil)
 		result, err := processor.ProcessCascadeRevocation(context.Background(), "root", "admin")
-		
+
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		
+
 		if result.ProcessedCount != 3 { // child1, child2, grandchild1
 			t.Errorf("expected 3 processed, got %d", result.ProcessedCount)
 		}
-		
+
 		if result.SuccessCount != 3 {
 			t.Errorf("expected 3 successful, got %d", result.SuccessCount)
 		}
-		
+
 		if result.FailureCount != 0 {
 			t.Errorf("expected 0 failures, got %d", result.FailureCount)
 		}
-		
+
 		if result.MaxDepthReached != 2 {
 			t.Errorf("expected max depth 2, got %d", result.MaxDepthReached)
 		}
-		
+
 		// Check that descendants are actually revoked
 		child1, _ := repo.Get("child1")
 		if child1.Status != rfc0111.POAStatusRevoked {
 			t.Errorf("child1 should be revoked, got %s", child1.Status)
 		}
-		
+
 		child2, _ := repo.Get("child2")
 		if child2.Status != rfc0111.POAStatusRevoked {
 			t.Errorf("child2 should be revoked, got %s", child2.Status)
 		}
-		
+
 		grandchild1, _ := repo.Get("grandchild1")
 		if grandchild1.Status != rfc0111.POAStatusRevoked {
 			t.Errorf("grandchild1 should be revoked, got %s", grandchild1.Status)
 		}
-		
+
 		// Root should remain unchanged
 		root, _ := repo.Get("root")
 		if root.Status != rfc0111.POAStatusActive {
@@ -107,31 +107,31 @@ func TestCascadeProcessor(t *testing.T) {
 	t.Run("suspend mode suspends descendants", func(t *testing.T) {
 		repo, _ := setupHierarchy()
 		auditor := audit.NewMemoryLogger(nil)
-		
+
 		cfg := config.CascadeConfig{
 			Enabled:   true,
 			Mode:      config.CascadeModeSuspend,
 			MaxDepth:  10,
 			BatchSize: 100,
 		}
-		
+
 		processor := NewProcessor(repo, auditor, cfg, nil)
 		result, err := processor.ProcessCascadeRevocation(context.Background(), "root", "admin")
-		
+
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		
+
 		if result.SuccessCount != 3 {
 			t.Errorf("expected 3 successful, got %d", result.SuccessCount)
 		}
-		
+
 		// Check that descendants are suspended
 		child1, _ := repo.Get("child1")
 		if child1.Status != rfc0111.POAStatusSuspended {
 			t.Errorf("child1 should be suspended, got %s", child1.Status)
 		}
-		
+
 		if child1.RevocationReason != "cascade_suspension:parent_revoked:depth_1" {
 			t.Errorf("wrong revocation reason: %s", child1.RevocationReason)
 		}
@@ -140,25 +140,25 @@ func TestCascadeProcessor(t *testing.T) {
 	t.Run("notify mode does not change status", func(t *testing.T) {
 		repo, originalPOAs := setupHierarchy()
 		auditor := audit.NewMemoryLogger(nil)
-		
+
 		cfg := config.CascadeConfig{
 			Enabled:   true,
 			Mode:      config.CascadeModeNotify,
 			MaxDepth:  10,
 			BatchSize: 100,
 		}
-		
+
 		processor := NewProcessor(repo, auditor, cfg, nil)
 		result, err := processor.ProcessCascadeRevocation(context.Background(), "root", "admin")
-		
+
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		
+
 		if result.SuccessCount != 3 {
 			t.Errorf("expected 3 successful, got %d", result.SuccessCount)
 		}
-		
+
 		// Check that descendants are unchanged
 		for _, originalPOA := range originalPOAs {
 			if originalPOA.ID == "root" {
@@ -166,11 +166,11 @@ func TestCascadeProcessor(t *testing.T) {
 			}
 			currentPOA, _ := repo.Get(originalPOA.ID)
 			if currentPOA.Status != originalPOA.Status {
-				t.Errorf("POA %s status changed from %s to %s in notify mode", 
+				t.Errorf("POA %s status changed from %s to %s in notify mode",
 					originalPOA.ID, originalPOA.Status, currentPOA.Status)
 			}
 		}
-		
+
 		// Check audit logs for notifications
 		entries, err := auditor.Query(context.Background(), nil)
 		if err != nil {
@@ -190,35 +190,35 @@ func TestCascadeProcessor(t *testing.T) {
 	t.Run("depth limit works correctly", func(t *testing.T) {
 		repo, _ := setupHierarchy()
 		auditor := audit.NewMemoryLogger(nil)
-		
+
 		cfg := config.CascadeConfig{
 			Enabled:   true,
 			Mode:      config.CascadeModeRevoke,
 			MaxDepth:  1, // Only process direct children
 			BatchSize: 100,
 		}
-		
+
 		processor := NewProcessor(repo, auditor, cfg, nil)
 		result, err := processor.ProcessCascadeRevocation(context.Background(), "root", "admin")
-		
+
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		
+
 		if result.ProcessedCount != 2 { // Only child1 and child2, not grandchild1
 			t.Errorf("expected 2 processed with depth limit 1, got %d", result.ProcessedCount)
 		}
-		
+
 		if result.MaxDepthReached != 1 {
 			t.Errorf("expected max depth reached 1, got %d", result.MaxDepthReached)
 		}
-		
+
 		// Check that grandchild is not revoked
 		grandchild1, _ := repo.Get("grandchild1")
 		if grandchild1.Status != rfc0111.POAStatusActive {
 			t.Errorf("grandchild1 should remain active with depth limit, got %s", grandchild1.Status)
 		}
-		
+
 		// But children should be revoked
 		child1, _ := repo.Get("child1")
 		if child1.Status != rfc0111.POAStatusRevoked {
@@ -229,26 +229,26 @@ func TestCascadeProcessor(t *testing.T) {
 	t.Run("batch processing works correctly", func(t *testing.T) {
 		repo, _ := setupHierarchy()
 		auditor := audit.NewMemoryLogger(nil)
-		
+
 		cfg := config.CascadeConfig{
 			Enabled:   true,
 			Mode:      config.CascadeModeRevoke,
 			MaxDepth:  10,
 			BatchSize: 1, // Process one at a time
 		}
-		
+
 		processor := NewProcessor(repo, auditor, cfg, nil)
 		result, err := processor.ProcessCascadeRevocation(context.Background(), "root", "admin")
-		
+
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		
+
 		// Should have more batches due to small batch size
 		if result.BatchCount < 2 {
 			t.Errorf("expected multiple batches with batch size 1, got %d", result.BatchCount)
 		}
-		
+
 		if result.SuccessCount != 3 {
 			t.Errorf("expected 3 successful despite batching, got %d", result.SuccessCount)
 		}
@@ -257,21 +257,21 @@ func TestCascadeProcessor(t *testing.T) {
 	t.Run("disabled cascade returns error", func(t *testing.T) {
 		repo, _ := setupHierarchy()
 		auditor := audit.NewMemoryLogger(nil)
-		
+
 		cfg := config.CascadeConfig{
 			Enabled:   false, // Disabled
 			Mode:      config.CascadeModeRevoke,
 			MaxDepth:  10,
 			BatchSize: 100,
 		}
-		
+
 		processor := NewProcessor(repo, auditor, cfg, nil)
 		_, err := processor.ProcessCascadeRevocation(context.Background(), "root", "admin")
-		
+
 		if err == nil {
 			t.Fatal("expected error when cascade processing disabled")
 		}
-		
+
 		if err.Error() != "cascade processing disabled" {
 			t.Errorf("unexpected error message: %s", err.Error())
 		}
@@ -279,11 +279,11 @@ func TestCascadeProcessor(t *testing.T) {
 
 	t.Run("no descendants to process", func(t *testing.T) {
 		repo := &memoryRepo{store: make(map[string]*rfc0111.PowerOfAttorney)}
-		
+
 		// Only create root with no children
 		root := createTestPOA("root", "", 0)
 		_ = repo.Create(root)
-		
+
 		auditor := audit.NewMemoryLogger(nil)
 		cfg := config.CascadeConfig{
 			Enabled:   true,
@@ -291,18 +291,18 @@ func TestCascadeProcessor(t *testing.T) {
 			MaxDepth:  10,
 			BatchSize: 100,
 		}
-		
+
 		processor := NewProcessor(repo, auditor, cfg, nil)
 		result, err := processor.ProcessCascadeRevocation(context.Background(), "root", "admin")
-		
+
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		
+
 		if result.ProcessedCount != 0 {
 			t.Errorf("expected 0 processed with no descendants, got %d", result.ProcessedCount)
 		}
-		
+
 		if result.SuccessCount != 0 {
 			t.Errorf("expected 0 successful with no descendants, got %d", result.SuccessCount)
 		}
@@ -311,24 +311,24 @@ func TestCascadeProcessor(t *testing.T) {
 	t.Run("context cancellation stops processing", func(t *testing.T) {
 		repo, _ := setupHierarchy()
 		auditor := audit.NewMemoryLogger(nil)
-		
+
 		cfg := config.CascadeConfig{
 			Enabled:   true,
 			Mode:      config.CascadeModeRevoke,
 			MaxDepth:  10,
 			BatchSize: 1, // Small batches to increase chance of cancellation
 		}
-		
+
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel() // Cancel immediately
-		
+
 		processor := NewProcessor(repo, auditor, cfg, nil)
 		result, err := processor.ProcessCascadeRevocation(ctx, "root", "admin")
-		
+
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		
+
 		// Should have some errors due to context cancellation
 		if len(result.Errors) == 0 {
 			t.Error("expected errors due to context cancellation")

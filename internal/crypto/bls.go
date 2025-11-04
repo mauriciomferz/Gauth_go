@@ -27,9 +27,13 @@ func GenerateBLSKey() (*BLSKey, error) {
 // NewBLSPublicKey constructs a public-only BLSKey from serialized public key bytes.
 // This allows verify-only vector tests without private key material.
 func NewBLSPublicKey(pubBytes []byte) (*BLSKey, error) {
-	if err := bls.Init(bls.BLS12_381); err != nil { return nil, err }
+	if err := bls.Init(bls.BLS12_381); err != nil {
+		return nil, err
+	}
 	var pk bls.PublicKey
-	if err := pk.Deserialize(pubBytes); err != nil { return nil, err }
+	if err := pk.Deserialize(pubBytes); err != nil {
+		return nil, err
+	}
 	return &BLSKey{Public: pk}, nil
 }
 
@@ -51,11 +55,15 @@ func BLSVerify(key *BLSKey, message, signature []byte) bool {
 // BLSAggregate aggregates multiple BLS signatures over the SAME message.
 // All signatures must be valid individually; aggregation is performed by group addition.
 func BLSAggregate(signatures [][]byte) ([]byte, error) {
-	if len(signatures) == 0 { return nil, errors.New("no signatures to aggregate") }
+	if len(signatures) == 0 {
+		return nil, errors.New("no signatures to aggregate")
+	}
 	var agg bls.Sign
 	for i, s := range signatures {
 		var sig bls.Sign
-		if err := sig.Deserialize(s); err != nil { return nil, errors.New("invalid signature at index ") }
+		if err := sig.Deserialize(s); err != nil {
+			return nil, errors.New("invalid signature at index ")
+		}
 		if i == 0 {
 			agg = sig
 		} else {
@@ -68,12 +76,20 @@ func BLSAggregate(signatures [][]byte) ([]byte, error) {
 // BLSAggregateVerify verifies an aggregated signature against aggregated public keys for SAME message.
 // Assumes all participants signed identical message.
 func BLSAggregateVerify(pubKeys []bls.PublicKey, message, aggSig []byte) bool {
-	if len(pubKeys) == 0 { return false }
+	if len(pubKeys) == 0 {
+		return false
+	}
 	var aggPK bls.PublicKey
 	for i, pk := range pubKeys {
-		if i == 0 { aggPK = pk } else { aggPK.Add(&pk) }
+		if i == 0 {
+			aggPK = pk
+		} else {
+			aggPK.Add(&pk)
+		}
 	}
 	var sig bls.Sign
-	if err := sig.Deserialize(aggSig); err != nil { return false }
+	if err := sig.Deserialize(aggSig); err != nil {
+		return false
+	}
 	return sig.VerifyByte(&aggPK, message)
 }

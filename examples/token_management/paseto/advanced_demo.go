@@ -15,25 +15,25 @@ import (
 
 func runAdvancedDemo() {
 	fmt.Println("=== PASETO Advanced Claims and Structured Footer Demo ===")
-	
+
 	// Create advanced claims with comprehensive metadata
 	advancedClaims := createAdvancedClaimsExample()
 	fmt.Printf("Created Advanced Claims:\n%s\n\n", formatJSON(advancedClaims.ToMap()))
-	
+
 	// Create structured PASETO footer
 	footer := createStructuredFooter()
 	fmt.Printf("Created Structured Footer:\n%s\n\n", formatJSON(footer))
-	
+
 	// Simulate PASETO token creation (v4.public format)
 	token := createMockPASETOToken(advancedClaims, footer)
 	fmt.Printf("Mock PASETO Token:\n%s\n\n", token)
-	
+
 	// Demonstrate advanced claims validation
 	demonstrateValidation(advancedClaims)
-	
+
 	// Demonstrate time window validation
 	demonstrateTimeWindowValidation()
-	
+
 	// Demonstrate claims metadata confidence scoring
 	demonstrateConfidenceScoring()
 }
@@ -57,8 +57,8 @@ func createAdvancedClaimsExample() *gauth.AdvancedClaims {
 			Confidence:   0.98,
 			Restrictions: &gauth.ClaimsRestrictions{
 				TimeWindow: &gauth.TimeWindow{
-					StartHour: 6,  // 6 AM
-					EndHour:   20, // 8 PM
+					StartHour: 6,                    // 6 AM
+					EndHour:   20,                   // 8 PM
 					Weekdays:  []int{1, 2, 3, 4, 5}, // Monday-Friday
 				},
 				UsageLimit:     500,
@@ -67,11 +67,11 @@ func createAdvancedClaimsExample() *gauth.AdvancedClaims {
 			},
 		},
 		Custom: map[string]interface{}{
-			"tenant_id":           "gauth-enterprise-001",
-			"session_id":          "sess_" + fmt.Sprintf("%d", time.Now().UnixNano()),
-			"device_fingerprint":  "mobile-ios-16.1-iphone14",
-			"risk_score":          0.15,
-			"delegation_chain":    []string{"admin@example.com", "manager@example.com"},
+			"tenant_id":          "gauth-enterprise-001",
+			"session_id":         "sess_" + fmt.Sprintf("%d", time.Now().UnixNano()),
+			"device_fingerprint": "mobile-ios-16.1-iphone14",
+			"risk_score":         0.15,
+			"delegation_chain":   []string{"admin@example.com", "manager@example.com"},
 			"audit_context": map[string]interface{}{
 				"action":    "token_issued",
 				"timestamp": time.Now().Format(time.RFC3339),
@@ -109,22 +109,22 @@ func createStructuredFooter() *gauth.PASETOFooter {
 func createMockPASETOToken(claims *gauth.AdvancedClaims, footer *gauth.PASETOFooter) string {
 	// This creates a mock PASETO v4.public token format
 	// In a real implementation, this would use a proper PASETO library
-	
+
 	// Encode claims as payload
 	claimsJSON, _ := json.Marshal(claims.ToMap())
 	payload := base64.RawURLEncoding.EncodeToString(claimsJSON)
-	
+
 	// Encode footer
 	footerJSON, _ := footer.ToJSON()
 	footerEncoded := base64.RawURLEncoding.EncodeToString([]byte(footerJSON))
-	
+
 	// Mock PASETO format: v4.public.payload.footer
 	return fmt.Sprintf("v4.public.%s.%s", payload, footerEncoded)
 }
 
 func demonstrateValidation(claims *gauth.AdvancedClaims) {
 	fmt.Println("=== Advanced Claims Semantic Validation ===")
-	
+
 	// Test valid claims
 	err := claims.ValidateSemantics()
 	if err != nil {
@@ -132,7 +132,7 @@ func demonstrateValidation(claims *gauth.AdvancedClaims) {
 	} else {
 		fmt.Printf("✅ Claims validation passed\n")
 	}
-	
+
 	// Test claims metadata validation
 	if claims.ClaimsMetadata != nil {
 		err = claims.ClaimsMetadata.Validate()
@@ -142,7 +142,7 @@ func demonstrateValidation(claims *gauth.AdvancedClaims) {
 			fmt.Printf("✅ Metadata validation passed\n")
 		}
 	}
-	
+
 	// Test restrictions validation
 	if claims.ClaimsMetadata != nil && claims.ClaimsMetadata.Restrictions != nil {
 		restrictions := claims.ClaimsMetadata.Restrictions
@@ -152,29 +152,29 @@ func demonstrateValidation(claims *gauth.AdvancedClaims) {
 		} else {
 			fmt.Printf("✅ Restrictions validation passed\n")
 		}
-		
+
 		// Test time window check
 		inWindow := restrictions.IsInTimeWindow()
 		fmt.Printf("📅 Current time in allowed window: %v\n", inWindow)
 	}
-	
+
 	fmt.Println()
 }
 
 func demonstrateTimeWindowValidation() {
 	fmt.Println("=== Time Window Validation Examples ===")
-	
+
 	// Business hours restriction
 	businessHours := &gauth.ClaimsRestrictions{
 		TimeWindow: &gauth.TimeWindow{
-			StartHour: 9,  // 9 AM
-			EndHour:   17, // 5 PM
+			StartHour: 9,                    // 9 AM
+			EndHour:   17,                   // 5 PM
 			Weekdays:  []int{1, 2, 3, 4, 5}, // Monday-Friday
 		},
 	}
-	
+
 	fmt.Printf("Business hours allowed: %v\n", businessHours.IsInTimeWindow())
-	
+
 	// 24/7 access
 	alwaysAllowed := &gauth.ClaimsRestrictions{
 		TimeWindow: &gauth.TimeWindow{
@@ -183,9 +183,9 @@ func demonstrateTimeWindowValidation() {
 			Weekdays:  []int{0, 1, 2, 3, 4, 5, 6}, // All days
 		},
 	}
-	
+
 	fmt.Printf("24/7 access allowed: %v\n", alwaysAllowed.IsInTimeWindow())
-	
+
 	// Weekend only
 	weekendOnly := &gauth.ClaimsRestrictions{
 		TimeWindow: &gauth.TimeWindow{
@@ -194,14 +194,14 @@ func demonstrateTimeWindowValidation() {
 			Weekdays:  []int{0, 6}, // Saturday and Sunday
 		},
 	}
-	
+
 	fmt.Printf("Weekend only allowed: %v\n", weekendOnly.IsInTimeWindow())
 	fmt.Println()
 }
 
 func demonstrateConfidenceScoring() {
 	fmt.Println("=== Claims Confidence Scoring Examples ===")
-	
+
 	// High confidence claims with metadata
 	highConfidenceClaims := &gauth.AdvancedClaims{
 		Subject:   "admin@example.com",
@@ -217,15 +217,15 @@ func demonstrateConfidenceScoring() {
 			},
 		},
 	}
-	
+
 	// Basic claims with minimal metadata
 	basicClaims := &gauth.AdvancedClaims{
-		Subject:  "user@example.com",
-		Audience: []string{"api.example.com"},
+		Subject:   "user@example.com",
+		Audience:  []string{"api.example.com"},
 		ExpiresAt: time.Now().Add(time.Hour).Unix(), // Short-lived
 		IssuedAt:  time.Now().Unix(),
 	}
-	
+
 	fmt.Printf("High confidence claims score: %.2f\n", calculateMockConfidence(highConfidenceClaims))
 	fmt.Printf("Basic claims score: %.2f\n", calculateMockConfidence(basicClaims))
 	fmt.Println()
@@ -234,33 +234,33 @@ func demonstrateConfidenceScoring() {
 // Mock confidence calculation for demonstration
 func calculateMockConfidence(claims *gauth.AdvancedClaims) float64 {
 	score := 0.5 // Base score
-	
+
 	if claims.ClaimsMetadata != nil {
 		score += 0.2
 		if claims.ClaimsMetadata.Confidence > 0 {
 			score = (score + claims.ClaimsMetadata.Confidence) / 2
 		}
 	}
-	
+
 	if claims.TokenType != "" {
 		score += 0.1
 	}
-	
+
 	if claims.ClaimsMetadata != nil && claims.ClaimsMetadata.Restrictions != nil {
 		score += 0.1
 	}
-	
+
 	if claims.ExpiresAt > 0 && claims.IssuedAt > 0 {
 		duration := claims.ExpiresAt - claims.IssuedAt
 		if duration > 3600 { // More than 1 hour
 			score += 0.1
 		}
 	}
-	
+
 	if score > 1.0 {
 		score = 1.0
 	}
-	
+
 	return score
 }
 

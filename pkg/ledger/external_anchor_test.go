@@ -13,11 +13,11 @@ import (
 // TestExternalAnchorClient tests the basic external anchor client functionality.
 func TestExternalAnchorClient(t *testing.T) {
 	provider := anchor.NewMemoryProvider()
-	
+
 	tempDir := t.TempDir()
 	receiptPath := filepath.Join(tempDir, "receipts.json")
 	receiptStore := anchor.NewExternalReceiptStore(receiptPath)
-	
+
 	client := NewExternalAnchorClient(provider, receiptStore)
 	require.NotNil(t, client)
 
@@ -87,13 +87,13 @@ func TestExternalAuditLedger(t *testing.T) {
 	}
 
 	entry2 := &Entry{
-		ID:      "test-2", 
+		ID:      "test-2",
 		TS:      time.Now().UTC().Add(time.Second),
 		Type:    "audit",
 		Subject: "user2",
 		Object:  "resource2",
 		Metadata: map[string]interface{}{
-			"action": "update", 
+			"action": "update",
 			"result": "success",
 		},
 	}
@@ -262,7 +262,7 @@ func TestExternalAuditLedgerAnchorInterval(t *testing.T) {
 	// Wait for interval
 	time.Sleep(60 * time.Millisecond)
 
-	// Add second entry - should trigger another anchor  
+	// Add second entry - should trigger another anchor
 	entry2 := &Entry{
 		ID:      "interval-2",
 		TS:      time.Now().UTC(),
@@ -270,7 +270,7 @@ func TestExternalAuditLedgerAnchorInterval(t *testing.T) {
 		Subject: "user",
 		Object:  "resource",
 		Metadata: map[string]interface{}{
-			"action": "action2", 
+			"action": "action2",
 			"result": "success",
 		},
 	}
@@ -307,7 +307,7 @@ func TestExternalAuditLedgerWithBoltAnchorFile(t *testing.T) {
 		TS:      time.Now().UTC(),
 		Type:    "audit",
 		Subject: "user",
-		Object:  "resource", 
+		Object:  "resource",
 		Metadata: map[string]interface{}{
 			"action": "test",
 			"result": "success",

@@ -30,21 +30,21 @@ func (h *APIHandler) RegisterRoutes(router *gin.Engine) {
 		ai.GET("/capabilities/entity-types", h.getSupportedEntityTypes)
 		ai.GET("/capabilities/policies", h.getGovernancePolicies)
 		ai.GET("/capabilities/policies/:policy_id", h.getGovernancePolicy)
-		
+
 		// Enforcement control endpoints
 		ai.POST("/capabilities/enforcement/enable", h.enableEnforcement)
 		ai.POST("/capabilities/enforcement/disable", h.disableEnforcement)
 		ai.GET("/capabilities/enforcement/status", h.getEnforcementStatus)
-		
+
 		// AI profile validation and testing
 		ai.POST("/capabilities/validate/profile", h.validateAIProfile)
 		ai.POST("/capabilities/test/enforcement", h.testAIEnforcement)
 		ai.POST("/capabilities/simulate/decision", h.simulateEnforcementDecision)
-		
+
 		// Entity rule management
 		ai.GET("/capabilities/rules/:entity_type", h.getEntityRule)
 		ai.PUT("/capabilities/rules/:entity_type", h.updateEntityRule)
-		
+
 		// Health check specific to AI capabilities
 		ai.GET("/health", h.healthCheck)
 	}
@@ -71,7 +71,7 @@ func (h *APIHandler) getSupportedEntityTypes(c *gin.Context) {
 // getGovernancePolicies returns all loaded governance policies
 func (h *APIHandler) getGovernancePolicies(c *gin.Context) {
 	policies := h.integration.GetGovernancePolicies()
-	
+
 	// Filter sensitive information for API response
 	publicPolicies := make([]map[string]any, len(policies))
 	for i, policy := range policies {
@@ -88,7 +88,7 @@ func (h *APIHandler) getGovernancePolicies(c *gin.Context) {
 			"audit_requirements":   policy.AuditRequirements,
 		}
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success":  true,
 		"policies": publicPolicies,
@@ -106,7 +106,7 @@ func (h *APIHandler) getGovernancePolicy(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	policies := h.integration.GetGovernancePolicies()
 	for _, policy := range policies {
 		if policy.PolicyID == policyID {
@@ -130,7 +130,7 @@ func (h *APIHandler) getGovernancePolicy(c *gin.Context) {
 			return
 		}
 	}
-	
+
 	c.JSON(http.StatusNotFound, gin.H{
 		"success": false,
 		"error":   "policy not found",
@@ -163,7 +163,7 @@ func (h *APIHandler) getEnforcementStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success":            true,
 		"enforcement_active": active,
-		"last_check":        time.Now().Format(time.RFC3339),
+		"last_check":         time.Now().Format(time.RFC3339),
 	})
 }
 
@@ -178,31 +178,31 @@ func (h *APIHandler) validateAIProfile(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	errors := h.integration.ValidateAIProfile(profile)
 	valid := len(errors) == 0
-	
+
 	response := gin.H{
 		"success": true,
 		"valid":   valid,
 		"profile": profile,
 	}
-	
+
 	if !valid {
 		response["validation_errors"] = errors
 	}
-	
+
 	c.JSON(http.StatusOK, response)
 }
 
 // testAIEnforcement tests AI enforcement for a given profile and action
 func (h *APIHandler) testAIEnforcement(c *gin.Context) {
 	var request struct {
-		Profile AISystemProfile   `json:"profile"`
-		Action  string            `json:"action"`
-		Claims  map[string]any    `json:"claims"`
+		Profile AISystemProfile `json:"profile"`
+		Action  string          `json:"action"`
+		Claims  map[string]any  `json:"claims"`
 	}
-	
+
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -211,7 +211,7 @@ func (h *APIHandler) testAIEnforcement(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	if request.Action == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -219,8 +219,8 @@ func (h *APIHandler) testAIEnforcement(c *gin.Context) {
 		})
 		return
 	}
-	
-	// Add profile information to claims for testing  
+
+	// Add profile information to claims for testing
 	if request.Claims == nil {
 		request.Claims = make(map[string]any)
 	}
@@ -229,14 +229,14 @@ func (h *APIHandler) testAIEnforcement(c *gin.Context) {
 	request.Claims["jurisdiction"] = request.Profile.Jurisdiction
 	request.Claims["risk_level"] = request.Profile.RiskLevel
 	request.Claims["industry_context"] = request.Profile.IndustryContext
-	
+
 	// Perform enforcement test
 	allowed, missing, metadata := h.integration.EnforceAICapabilities(request.Action, request.Claims)
-	
+
 	c.JSON(http.StatusOK, gin.H{
-		"success":               true,
+		"success": true,
 		"test_result": map[string]any{
-			"allowed":               allowed,
+			"allowed":              allowed,
 			"missing_capabilities": missing,
 			"metadata":             metadata,
 			"profile":              request.Profile,
@@ -256,7 +256,7 @@ func (h *APIHandler) simulateEnforcementDecision(c *gin.Context) {
 		RiskLevel       string         `json:"risk_level,omitempty"`
 		Claims          map[string]any `json:"claims"`
 	}
-	
+
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -265,7 +265,7 @@ func (h *APIHandler) simulateEnforcementDecision(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// Create test profile
 	profile := h.integration.CreateTestProfile(request.EntityType, request.Jurisdiction)
 	if request.IndustryContext != "" {
@@ -274,27 +274,27 @@ func (h *APIHandler) simulateEnforcementDecision(c *gin.Context) {
 	if request.RiskLevel != "" {
 		profile.RiskLevel = request.RiskLevel
 	}
-	
+
 	// Get underlying matrix for direct access
 	matrix := h.integration.GetAICapabilityMatrix()
-	
+
 	// Simulate enforcement decision
 	decision := matrix.EnforceAICapabilities(profile, request.Action, request.Claims)
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"simulation": map[string]any{
-			"decision":               decision.Decision,
-			"reason":                 decision.Reason,
-			"system_profile":         decision.SystemProfile,
-			"requested_action":       decision.RequestedAction,
-			"applied_policies":       decision.AppliedPolicies,
-			"violated_rules":         decision.ViolatedRules,
-			"missing_capabilities":   decision.MissingCapabilities,
-			"required_human_auth":    decision.RequiredHumanAuth,
-			"audit_level":           decision.AuditLevel,
-			"decision_id":           decision.DecisionID,
-			"simulation_timestamp":  decision.Timestamp.Format(time.RFC3339),
+			"decision":             decision.Decision,
+			"reason":               decision.Reason,
+			"system_profile":       decision.SystemProfile,
+			"requested_action":     decision.RequestedAction,
+			"applied_policies":     decision.AppliedPolicies,
+			"violated_rules":       decision.ViolatedRules,
+			"missing_capabilities": decision.MissingCapabilities,
+			"required_human_auth":  decision.RequiredHumanAuth,
+			"audit_level":          decision.AuditLevel,
+			"decision_id":          decision.DecisionID,
+			"simulation_timestamp": decision.Timestamp.Format(time.RFC3339),
 		},
 	})
 }
@@ -309,11 +309,11 @@ func (h *APIHandler) getEntityRule(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	entityType := AIEntityType(entityTypeStr)
 	matrix := h.integration.GetAICapabilityMatrix()
 	rule, exists := matrix.GetEntityRule(entityType)
-	
+
 	if !exists {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -321,7 +321,7 @@ func (h *APIHandler) getEntityRule(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success":     true,
 		"entity_type": entityTypeStr,
@@ -339,7 +339,7 @@ func (h *APIHandler) updateEntityRule(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	var rule AICapabilityRule
 	if err := c.ShouldBindJSON(&rule); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -349,11 +349,11 @@ func (h *APIHandler) updateEntityRule(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	entityType := AIEntityType(entityTypeStr)
 	matrix := h.integration.GetAICapabilityMatrix()
 	matrix.UpdateEntityRule(entityType, rule)
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success":     true,
 		"message":     "Entity rule updated successfully",
@@ -365,40 +365,40 @@ func (h *APIHandler) updateEntityRule(c *gin.Context) {
 // healthCheck returns health status of AI capability system
 func (h *APIHandler) healthCheck(c *gin.Context) {
 	status := h.integration.GetAICapabilityStatus()
-	
+
 	// Check if enforcement is working
 	healthy := true
 	issues := []string{}
-	
+
 	// Test with a simple profile
 	testProfile := h.integration.CreateTestProfile("assistant", "US")
 	testClaims := map[string]any{
 		"ai_entity_type": "assistant",
-		"system_id":     testProfile.SystemID,  
+		"system_id":      testProfile.SystemID,
 	}
-	
+
 	// Test enforcement
 	allowed, _, metadata := h.integration.EnforceAICapabilities("info:read", testClaims)
 	if metadata == nil {
 		healthy = false
 		issues = append(issues, "AI enforcement metadata not generated")
 	}
-	
+
 	// Check policy loading
 	if loadedPolicies, ok := status["loaded_policies"].(int); ok && loadedPolicies == 0 {
 		healthy = false
 		issues = append(issues, "No governance policies loaded")
 	}
-	
+
 	statusCode := http.StatusOK
 	if !healthy {
 		statusCode = http.StatusServiceUnavailable
 	}
-	
+
 	c.JSON(statusCode, gin.H{
-		"success": healthy,
-		"healthy": healthy,
-		"status":  "AI capability enforcement system",
+		"success":            healthy,
+		"healthy":            healthy,
+		"status":             "AI capability enforcement system",
 		"enforcement_active": h.integration.IsEnforcementEnabled(),
 		"test_result": map[string]any{
 			"action":   "info:read",

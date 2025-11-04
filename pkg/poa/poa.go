@@ -305,12 +305,12 @@ type ProofOfAuthorization struct {
 	Metadata    map[string]interface{} `json:"metadata,omitempty"`
 	// Digest provides a canonical integrity hash over the core PoA fields (excluding metadata & attestation evidence maps which may vary).
 	// Format: sha256:<hex>. Populated on Issue(). Recomputed on demand by CanonicalDigest().
-	Digest     string `json:"digest,omitempty"`
+	Digest string `json:"digest,omitempty"`
 	// Multi-signature fields (optional). If threshold>0 then signatures must meet threshold for verification success.
-	SignerKids  []string `json:"signer_kids,omitempty"`
-	Signatures  []string `json:"signatures,omitempty"`
-	SigMode     string   `json:"sig_mode,omitempty"`
-	Threshold   int      `json:"threshold,omitempty"`
+	SignerKids []string `json:"signer_kids,omitempty"`
+	Signatures []string `json:"signatures,omitempty"`
+	SigMode    string   `json:"sig_mode,omitempty"`
+	Threshold  int      `json:"threshold,omitempty"`
 }
 
 // Delegation represents delegation information
@@ -425,26 +425,38 @@ func (s *MemoryService) Issue(ctx context.Context, req *Request) (*ProofOfAuthor
 		if kidsRaw != "" {
 			for _, part := range strings.Split(kidsRaw, ",") {
 				p := strings.TrimSpace(part)
-				if p != "" { kids = append(kids, p) }
+				if p != "" {
+					kids = append(kids, p)
+				}
 			}
 		}
 		// Fallback to active key if no explicit list
 		if len(kids) == 0 && internalCrypto.GlobalEdDSARegistry != nil {
-			if ak := internalCrypto.GlobalEdDSARegistry.Active(); ak != nil { kids = []string{ak.ID} }
+			if ak := internalCrypto.GlobalEdDSARegistry.Active(); ak != nil {
+				kids = []string{ak.ID}
+			}
 		}
 		th := 0
 		if rawTh := os.Getenv("GAUTH_POA_MULTISIG_THRESHOLD"); rawTh != "" {
-			if v, err := strconv.Atoi(rawTh); err == nil && v >= 0 { th = v }
+			if v, err := strconv.Atoi(rawTh); err == nil && v >= 0 {
+				th = v
+			}
 		}
-		if th == 0 { th = len(kids) }
+		if th == 0 {
+			th = len(kids)
+		}
 		poa.Threshold = th
 		poa.SignerKids = append([]string(nil), kids...)
 		poa.SigMode = "eddsa"
 		msg := buildPoASigningPayload(poa)
 		for _, kid := range kids {
-			if internalCrypto.GlobalEdDSARegistry == nil { continue }
+			if internalCrypto.GlobalEdDSARegistry == nil {
+				continue
+			}
 			k := internalCrypto.GlobalEdDSARegistry.FindByID(kid)
-			if k == nil || len(k.Private) != ed25519.PrivateKeySize { continue }
+			if k == nil || len(k.Private) != ed25519.PrivateKeySize {
+				continue
+			}
 			// Sign
 			sig := ed25519.Sign(k.Private, msg)
 			poa.Signatures = append(poa.Signatures, base64.RawStdEncoding.EncodeToString(sig))
@@ -541,14 +553,14 @@ func buildPoASigningPayload(p *ProofOfAuthorization) []byte {
 	// Reuse canonical digest source (without signatures) to avoid circular changes.
 	// Canonical subset identical to CanonicalDigest's internal struct.
 	type canon struct {
-		ID        string    `json:"id"`
-		Subject   string    `json:"subject"`
-		Resource  string    `json:"resource"`
-		Action    string    `json:"action"`
-		Issuer    string    `json:"issuer"`
-		IssuedAt  time.Time `json:"issued_at"`
-		ExpiresAt time.Time `json:"expires_at"`
-		Scope     []string  `json:"scope"`
+		ID         string    `json:"id"`
+		Subject    string    `json:"subject"`
+		Resource   string    `json:"resource"`
+		Action     string    `json:"action"`
+		Issuer     string    `json:"issuer"`
+		IssuedAt   time.Time `json:"issued_at"`
+		ExpiresAt  time.Time `json:"expires_at"`
+		Scope      []string  `json:"scope"`
 		Delegation *struct {
 			DelegatedBy string    `json:"delegated_by"`
 			DelegatedTo string    `json:"delegated_to"`
@@ -590,19 +602,31 @@ func buildPoASigningPayload(p *ProofOfAuthorization) []byte {
 // VerifyMultiSig validates all signatures present and evaluates threshold satisfaction.
 // Returns (validSignatures, satisfied, requiredThreshold).
 func VerifyMultiSig(p *ProofOfAuthorization) (int, bool, int) {
-	if p == nil || len(p.Signatures) == 0 || len(p.SignerKids) == 0 || p.Threshold <= 0 { return 0, false, p.Threshold }
+	if p == nil || len(p.Signatures) == 0 || len(p.SignerKids) == 0 || p.Threshold <= 0 {
+		return 0, false, p.Threshold
+	}
 	msg := buildPoASigningPayload(p)
 	valid := 0
 	for i, sigB64 := range p.Signatures {
-		if i >= len(p.SignerKids) { break }
+		if i >= len(p.SignerKids) {
+			break
+		}
 		kid := p.SignerKids[i]
 		k := internalCrypto.GlobalEdDSARegistry
-		if k == nil { continue }
+		if k == nil {
+			continue
+		}
 		mkey := k.FindByID(kid)
-		if mkey == nil { continue }
+		if mkey == nil {
+			continue
+		}
 		sigBytes, err := base64.RawStdEncoding.DecodeString(sigB64)
-		if err != nil || len(sigBytes) != ed25519.SignatureSize { continue }
-		if ed25519.Verify(mkey.Public, msg, sigBytes) { valid++ }
+		if err != nil || len(sigBytes) != ed25519.SignatureSize {
+			continue
+		}
+		if ed25519.Verify(mkey.Public, msg, sigBytes) {
+			valid++
+		}
 	}
 	return valid, valid >= p.Threshold, p.Threshold
 }
@@ -612,7 +636,9 @@ func VerifyMultiSig(p *ProofOfAuthorization) (int, bool, int) {
 // to ensure digest stability across benign descriptive changes.
 // Canonical serialization order is fixed by explicit struct used below.
 func CanonicalDigest(p *ProofOfAuthorization) string {
-	if p == nil { return "" }
+	if p == nil {
+		return ""
+	}
 	// Canonical view struct
 	type canon struct {
 		ID        string    `json:"id"`
@@ -666,6 +692,8 @@ func CanonicalDigest(p *ProofOfAuthorization) string {
 
 // VerifyDigest recomputes the canonical digest and compares with embedded Digest field.
 func VerifyDigest(p *ProofOfAuthorization) bool {
-	if p == nil || p.Digest == "" { return false }
+	if p == nil || p.Digest == "" {
+		return false
+	}
 	return p.Digest == CanonicalDigest(p)
 }

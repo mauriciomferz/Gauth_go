@@ -6,16 +6,16 @@ import "fmt"
 type ErrorCode string
 
 const (
-	ErrNotFound            ErrorCode = "not_found"
-	ErrUnauthorized        ErrorCode = "unauthorized"
-	ErrRevoked             ErrorCode = "revoked"
-	ErrExpired             ErrorCode = "expired"
-	ErrScopeViolation      ErrorCode = "scope_violation"
-	ErrRestrictionExceeded ErrorCode = "restriction_exceeded"
-	ErrInvalidRequest      ErrorCode = "invalid_request"
-	ErrIntegrityFailure    ErrorCode = "integrity_failure"
-	ErrInternal            ErrorCode = "internal_error"
-	ErrReplay              ErrorCode = "replay"
+	ErrNotFound                ErrorCode = "not_found"
+	ErrUnauthorized            ErrorCode = "unauthorized"
+	ErrRevoked                 ErrorCode = "revoked"
+	ErrExpired                 ErrorCode = "expired"
+	ErrScopeViolation          ErrorCode = "scope_violation"
+	ErrRestrictionExceeded     ErrorCode = "restriction_exceeded"
+	ErrInvalidRequest          ErrorCode = "invalid_request"
+	ErrIntegrityFailure        ErrorCode = "integrity_failure"
+	ErrInternal                ErrorCode = "internal_error"
+	ErrReplay                  ErrorCode = "replay"
 	ErrDelegationDepthExceeded ErrorCode = "delegation_depth_exceeded"
 )
 

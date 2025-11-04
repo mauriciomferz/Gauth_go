@@ -50,9 +50,9 @@ func TestEnforce_BasicValidation(t *testing.T) {
 	ctx := context.Background()
 
 	tests := []struct {
-		name           string
-		enfCtx         *EnforcementContext
-		expectAllowed  bool
+		name             string
+		enfCtx           *EnforcementContext
+		expectAllowed    bool
 		expectViolations bool
 	}{
 		{
@@ -68,7 +68,7 @@ func TestEnforce_BasicValidation(t *testing.T) {
 				Claims:       map[string]interface{}{},
 				Timestamp:    time.Now(),
 			},
-			expectAllowed:  true,
+			expectAllowed:    true,
 			expectViolations: false,
 		},
 		{
@@ -84,7 +84,7 @@ func TestEnforce_BasicValidation(t *testing.T) {
 				Claims:       map[string]interface{}{},
 				Timestamp:    time.Now(),
 			},
-			expectAllowed:  false,
+			expectAllowed:    false,
 			expectViolations: true,
 		},
 		{
@@ -100,7 +100,7 @@ func TestEnforce_BasicValidation(t *testing.T) {
 				Claims:       map[string]interface{}{},
 				Timestamp:    time.Now(),
 			},
-			expectAllowed:  true,
+			expectAllowed:    true,
 			expectViolations: false,
 		},
 		{
@@ -115,7 +115,7 @@ func TestEnforce_BasicValidation(t *testing.T) {
 				Claims:       map[string]interface{}{},
 				Timestamp:    time.Now(),
 			},
-			expectAllowed:  false,
+			expectAllowed:    false,
 			expectViolations: true,
 		},
 	}
@@ -167,8 +167,8 @@ func TestEnforce_GDPR_DataProcessing(t *testing.T) {
 			expectAllowed: false,
 		},
 		{
-			name: "GDPR data processing missing consent claim",
-			claims: map[string]interface{}{},
+			name:          "GDPR data processing missing consent claim",
+			claims:        map[string]interface{}{},
 			expectAllowed: false,
 		},
 	}
@@ -223,8 +223,8 @@ func TestEnforce_CCPA_DataProcessing(t *testing.T) {
 			expectAllowed: false,
 		},
 		{
-			name: "CCPA data processing missing opt-out claim",
-			claims: map[string]interface{}{},
+			name:          "CCPA data processing missing opt-out claim",
+			claims:        map[string]interface{}{},
 			expectAllowed: true, // Default is allowed if no opt-out
 		},
 	}
@@ -260,46 +260,46 @@ func TestEnforce_CrossBorderDataTransfer(t *testing.T) {
 	ctx := context.Background()
 
 	tests := []struct {
-		name                   string
-		sourceJurisdiction     compliance.Jurisdiction
+		name                    string
+		sourceJurisdiction      compliance.Jurisdiction
 		destinationJurisdiction string
-		action                 string
-		expectAllowed          bool
+		action                  string
+		expectAllowed           bool
 	}{
 		{
-			name:                   "EU to UK personal data transfer (allowed)",
-			sourceJurisdiction:     compliance.JurisdictionEU,
+			name:                    "EU to UK personal data transfer (allowed)",
+			sourceJurisdiction:      compliance.JurisdictionEU,
 			destinationJurisdiction: "UK",
-			action:                 "personal_data_transfer",
-			expectAllowed:          true,
+			action:                  "personal_data_transfer",
+			expectAllowed:           true,
 		},
 		{
-			name:                   "EU to US personal data transfer (not allowed)",
-			sourceJurisdiction:     compliance.JurisdictionEU,
+			name:                    "EU to US personal data transfer (not allowed)",
+			sourceJurisdiction:      compliance.JurisdictionEU,
 			destinationJurisdiction: "US",
-			action:                 "personal_data_transfer",
-			expectAllowed:          false,
+			action:                  "personal_data_transfer",
+			expectAllowed:           false,
 		},
 		{
-			name:                   "US to EU personal data transfer (allowed)",
-			sourceJurisdiction:     compliance.JurisdictionUS,
+			name:                    "US to EU personal data transfer (allowed)",
+			sourceJurisdiction:      compliance.JurisdictionUS,
 			destinationJurisdiction: "EU",
-			action:                 "personal_data_transfer",
-			expectAllowed:          true,
+			action:                  "personal_data_transfer",
+			expectAllowed:           true,
 		},
 		{
-			name:                   "Japan to EU personal data transfer (allowed)",
-			sourceJurisdiction:     compliance.JurisdictionJP,
+			name:                    "Japan to EU personal data transfer (allowed)",
+			sourceJurisdiction:      compliance.JurisdictionJP,
 			destinationJurisdiction: "EU",
-			action:                 "personal_data_transfer",
-			expectAllowed:          true,
+			action:                  "personal_data_transfer",
+			expectAllowed:           true,
 		},
 		{
-			name:                   "Japan to US personal data transfer (not allowed)",
-			sourceJurisdiction:     compliance.JurisdictionJP,
+			name:                    "Japan to US personal data transfer (not allowed)",
+			sourceJurisdiction:      compliance.JurisdictionJP,
 			destinationJurisdiction: "US",
-			action:                 "personal_data_transfer",
-			expectAllowed:          false,
+			action:                  "personal_data_transfer",
+			expectAllowed:           false,
 		},
 	}
 
@@ -342,39 +342,39 @@ func TestEnforce_DataResidency(t *testing.T) {
 	ctx := context.Background()
 
 	tests := []struct {
-		name                   string
-		sourceJurisdiction     compliance.Jurisdiction
+		name                    string
+		sourceJurisdiction      compliance.Jurisdiction
 		destinationJurisdiction string
-		dataType               string
-		expectAllowed          bool
+		dataType                string
+		expectAllowed           bool
 	}{
 		{
-			name:                   "EU personal data must stay in EU",
-			sourceJurisdiction:     compliance.JurisdictionEU,
+			name:                    "EU personal data must stay in EU",
+			sourceJurisdiction:      compliance.JurisdictionEU,
 			destinationJurisdiction: "EU",
-			dataType:               "personal_data",
-			expectAllowed:          true,
+			dataType:                "personal_data",
+			expectAllowed:           true,
 		},
 		{
-			name:                   "EU personal data leaving EU (violation)",
-			sourceJurisdiction:     compliance.JurisdictionEU,
+			name:                    "EU personal data leaving EU (violation)",
+			sourceJurisdiction:      compliance.JurisdictionEU,
 			destinationJurisdiction: "US",
-			dataType:               "personal_data",
-			expectAllowed:          false,
+			dataType:                "personal_data",
+			expectAllowed:           false,
 		},
 		{
-			name:                   "EU health data leaving EU (violation)",
-			sourceJurisdiction:     compliance.JurisdictionEU,
+			name:                    "EU health data leaving EU (violation)",
+			sourceJurisdiction:      compliance.JurisdictionEU,
 			destinationJurisdiction: "US",
-			dataType:               "health_data",
-			expectAllowed:          false,
+			dataType:                "health_data",
+			expectAllowed:           false,
 		},
 		{
-			name:                   "US personal data to EU (allowed - no residency requirement)",
-			sourceJurisdiction:     compliance.JurisdictionUS,
+			name:                    "US personal data to EU (allowed - no residency requirement)",
+			sourceJurisdiction:      compliance.JurisdictionUS,
 			destinationJurisdiction: "EU",
-			dataType:               "personal_data",
-			expectAllowed:          true,
+			dataType:                "personal_data",
+			expectAllowed:           true,
 		},
 	}
 
@@ -613,8 +613,8 @@ func TestEnforce_EnableDisable(t *testing.T) {
 
 func TestExtractJurisdictionFromClaims(t *testing.T) {
 	tests := []struct {
-		name           string
-		claims         map[string]interface{}
+		name                 string
+		claims               map[string]interface{}
 		expectedJurisdiction compliance.Jurisdiction
 	}{
 		{
@@ -646,8 +646,8 @@ func TestExtractJurisdictionFromClaims(t *testing.T) {
 			expectedJurisdiction: compliance.JurisdictionUK,
 		},
 		{
-			name: "No jurisdiction claim - defaults to US",
-			claims: map[string]interface{}{},
+			name:                 "No jurisdiction claim - defaults to US",
+			claims:               map[string]interface{}{},
 			expectedJurisdiction: compliance.JurisdictionUS,
 		},
 	}

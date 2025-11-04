@@ -36,11 +36,11 @@ func TestRevocationWorkflowEndpoints_CountQuorum(t *testing.T) {
 		// Service should be wired; fail test if not
 		t.Fatalf("RFC0111 service not wired")
 	}
-	
+
 	// Create POA through proper service methods instead of direct injection
 	// The service should be properly initialized with policies by the NewBetaServerWithMetrics call
 	poaID := "poa-test-123"
-	
+
 	// Since we can't inject directly, skip this test for now to focus on the core metrics implementation
 	t.Skip("Test requires POA injection method that doesn't exist - will implement proper POA creation in future iteration")
 	// Initiate revocation by authorized actor 'alice'
@@ -71,99 +71,101 @@ func TestRevocationWorkflowEndpoints_CountQuorum(t *testing.T) {
 	metRec := httptest.NewRecorder()
 	srv.router.ServeHTTP(metRec, metReq)
 	if metRec.Code != 200 {
-		 t.Fatalf("metrics endpoint expected 200 got %d", metRec.Code)
+		t.Fatalf("metrics endpoint expected 200 got %d", metRec.Code)
 	}
 	body := metRec.Body.String()
 	// Basic presence checks (exact counter names may be exposed differently; use substrings)
 	for _, expect := range []string{"revocation_workflow_initiated", "revocation_workflow_approvals", "revocation_workflow_quorum_satisfied"} {
 		if !containsSubstring(body, expect) {
-			 t.Fatalf("expected metrics substring %s not found in body", expect)
+			t.Fatalf("expected metrics substring %s not found in body", expect)
 		}
 	}
 }
 
 func TestRevocationWorkflowEndpoints_Unauthorized(t *testing.T) {
 	t.Skip("Test requires POA injection method that doesn't exist - will implement proper POA creation in future iteration")
-	
+
 	// TODO: Re-enable this test when TestInjectPOA method is implemented
 	/*
-	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111"})
-	srv := NewBetaServerWithMetrics("", pm)
-	poaID := "poa-test-unauthorized"
-	
-	// Unauthorized initiation attempt by 'bob'
-	res := performJSONPost(srv, "/api/v1/poa/"+poaID+"/revocation/initiate", map[string]string{"initiator": "bob", "reason": "risk"})
-	if res.Code == 200 {
-		t.Fatalf("expected unauthorized initiation failure got 200 body=%s", res.Body.String())
-	}
-	// Metrics should record unauthorized attempt
-	metReq := httptest.NewRequest("GET", "/metrics", nil)
-	metRec := httptest.NewRecorder()
-	srv.router.ServeHTTP(metRec, metReq)
-	if metRec.Code != 200 { t.Fatalf("metrics endpoint expected 200 got %d", metRec.Code) }
-	if !containsSubstring(metRec.Body.String(), "revocation_workflow_unauthorized") {
-		 t.Fatalf("expected unauthorized metric substring not found")
-	}
+		pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111"})
+		srv := NewBetaServerWithMetrics("", pm)
+		poaID := "poa-test-unauthorized"
+
+		// Unauthorized initiation attempt by 'bob'
+		res := performJSONPost(srv, "/api/v1/poa/"+poaID+"/revocation/initiate", map[string]string{"initiator": "bob", "reason": "risk"})
+		if res.Code == 200 {
+			t.Fatalf("expected unauthorized initiation failure got 200 body=%s", res.Body.String())
+		}
+		// Metrics should record unauthorized attempt
+		metReq := httptest.NewRequest("GET", "/metrics", nil)
+		metRec := httptest.NewRecorder()
+		srv.router.ServeHTTP(metRec, metReq)
+		if metRec.Code != 200 { t.Fatalf("metrics endpoint expected 200 got %d", metRec.Code) }
+		if !containsSubstring(metRec.Body.String(), "revocation_workflow_unauthorized") {
+			 t.Fatalf("expected unauthorized metric substring not found")
+		}
 	*/
 }
 
 func TestRevocationWorkflowEndpoints_WeightQuorum(t *testing.T) {
 	t.Skip("Test requires POA injection method that doesn't exist - will implement proper POA creation in future iteration")
-	
+
 	// TODO: Re-enable this test when TestInjectPOA method is implemented
 	/*
-	poaID := "poa_weight_test"
-	poa := &rfc0111.PowerOfAttorney{
-		ID:         poaID,
-		Grantor:    "grantor",
-		Grantee:    "grantee",
-		Scope:      []string{"resource.read"},
-		Controllers: []string{"controllerA", "controllerB", "controllerC"},
-		ValidFrom:  time.Now().Add(-1 * time.Minute),
-		ValidUntil: time.Now().Add(10 * time.Minute),
-		Status:     rfc0111.POAStatusActive,
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
-		Version:    1,
-		Weights:    map[string]int{"controllerA": 2, "controllerB": 2, "controllerC": 2, "grantor": 1},
-	}
-	svc.TestInjectPOA(poa)
-	// Initiate by controllerA (authorized)
-	resInit := performJSONPost(srv, "/api/v1/poa/"+poaID+"/revocation/initiate", map[string]string{"initiator": "controllerA", "reason": "risk"})
-	if resInit.Code != 200 {
-		t.Fatalf("initiate expected 200 got %d body=%s", resInit.Code, resInit.Body.String())
-	}
-	// Approve by controllerB (weight now 2 from approvals + initiator not auto-counted; approvals accumulate)
-	resAp1 := performJSONPost(srv, "/api/v1/poa/"+poaID+"/revocation/approve", map[string]string{"approver": "controllerB"})
-	if resAp1.Code != 200 {
-		t.Fatalf("approval1 expected 200 got %d body=%s", resAp1.Code, resAp1.Body.String())
-	}
-	// Approve by controllerC -> cumulative weight 4 (if only approvals counted) + maybe grantor if used later; still below 5
-	resAp2 := performJSONPost(srv, "/api/v1/poa/"+poaID+"/revocation/approve", map[string]string{"approver": "controllerC"})
-	if resAp2.Code != 200 {
-		t.Fatalf("approval2 expected 200 got %d body=%s", resAp2.Code, resAp2.Body.String())
-	}
-	// Final approval by grantor to reach weight 5
-	resAp3 := performJSONPost(srv, "/api/v1/poa/"+poaID+"/revocation/approve", map[string]string{"approver": "grantor"})
-	if resAp3.Code != 200 {
-		t.Fatalf("approval3 expected 200 got %d body=%s", resAp3.Code, resAp3.Body.String())
-	}
-	// One more approval attempt (duplicate) should be idempotent or conflict; accept 200 or 409
-	resDup := performJSONPost(srv, "/api/v1/poa/"+poaID+"/revocation/approve", map[string]string{"approver": "grantor"})
-	if resDup.Code != 200 && resDup.Code != 409 {
-		t.Fatalf("duplicate approval unexpected status %d body=%s", resDup.Code, resDup.Body.String())
-	}
-	// Metrics presence for weight quorum path (quorum satisfied)
-	metReq := httptest.NewRequest("GET", "/metrics", nil)
-	metRec := httptest.NewRecorder()
-	srv.router.ServeHTTP(metRec, metReq)
-	if metRec.Code != 200 { t.Fatalf("metrics endpoint expected 200 got %d", metRec.Code) }
-	body := metRec.Body.String()
-	for _, expect := range []string{"revocation_workflow_initiated", "revocation_workflow_approvals", "revocation_workflow_quorum_satisfied"} {
-		if !containsSubstring(body, expect) { t.Fatalf("expected metrics substring %s not found", expect) }
-	}
+		poaID := "poa_weight_test"
+		poa := &rfc0111.PowerOfAttorney{
+			ID:         poaID,
+			Grantor:    "grantor",
+			Grantee:    "grantee",
+			Scope:      []string{"resource.read"},
+			Controllers: []string{"controllerA", "controllerB", "controllerC"},
+			ValidFrom:  time.Now().Add(-1 * time.Minute),
+			ValidUntil: time.Now().Add(10 * time.Minute),
+			Status:     rfc0111.POAStatusActive,
+			CreatedAt:  time.Now(),
+			UpdatedAt:  time.Now(),
+			Version:    1,
+			Weights:    map[string]int{"controllerA": 2, "controllerB": 2, "controllerC": 2, "grantor": 1},
+		}
+		svc.TestInjectPOA(poa)
+		// Initiate by controllerA (authorized)
+		resInit := performJSONPost(srv, "/api/v1/poa/"+poaID+"/revocation/initiate", map[string]string{"initiator": "controllerA", "reason": "risk"})
+		if resInit.Code != 200 {
+			t.Fatalf("initiate expected 200 got %d body=%s", resInit.Code, resInit.Body.String())
+		}
+		// Approve by controllerB (weight now 2 from approvals + initiator not auto-counted; approvals accumulate)
+		resAp1 := performJSONPost(srv, "/api/v1/poa/"+poaID+"/revocation/approve", map[string]string{"approver": "controllerB"})
+		if resAp1.Code != 200 {
+			t.Fatalf("approval1 expected 200 got %d body=%s", resAp1.Code, resAp1.Body.String())
+		}
+		// Approve by controllerC -> cumulative weight 4 (if only approvals counted) + maybe grantor if used later; still below 5
+		resAp2 := performJSONPost(srv, "/api/v1/poa/"+poaID+"/revocation/approve", map[string]string{"approver": "controllerC"})
+		if resAp2.Code != 200 {
+			t.Fatalf("approval2 expected 200 got %d body=%s", resAp2.Code, resAp2.Body.String())
+		}
+		// Final approval by grantor to reach weight 5
+		resAp3 := performJSONPost(srv, "/api/v1/poa/"+poaID+"/revocation/approve", map[string]string{"approver": "grantor"})
+		if resAp3.Code != 200 {
+			t.Fatalf("approval3 expected 200 got %d body=%s", resAp3.Code, resAp3.Body.String())
+		}
+		// One more approval attempt (duplicate) should be idempotent or conflict; accept 200 or 409
+		resDup := performJSONPost(srv, "/api/v1/poa/"+poaID+"/revocation/approve", map[string]string{"approver": "grantor"})
+		if resDup.Code != 200 && resDup.Code != 409 {
+			t.Fatalf("duplicate approval unexpected status %d body=%s", resDup.Code, resDup.Body.String())
+		}
+		// Metrics presence for weight quorum path (quorum satisfied)
+		metReq := httptest.NewRequest("GET", "/metrics", nil)
+		metRec := httptest.NewRecorder()
+		srv.router.ServeHTTP(metRec, metReq)
+		if metRec.Code != 200 { t.Fatalf("metrics endpoint expected 200 got %d", metRec.Code) }
+		body := metRec.Body.String()
+		for _, expect := range []string{"revocation_workflow_initiated", "revocation_workflow_approvals", "revocation_workflow_quorum_satisfied"} {
+			if !containsSubstring(body, expect) { t.Fatalf("expected metrics substring %s not found", expect) }
+		}
 	*/
 }
 
 // containsSubstring is a tiny helper (duplicated locally to avoid extra imports) for body checks.
-func containsSubstring(haystack, needle string) bool { return len(needle) > 0 && len(haystack) > 0 && bytes.Contains([]byte(haystack), []byte(needle)) }
+func containsSubstring(haystack, needle string) bool {
+	return len(needle) > 0 && len(haystack) > 0 && bytes.Contains([]byte(haystack), []byte(needle))
+}

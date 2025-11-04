@@ -4,10 +4,10 @@ import "testing"
 
 func TestNegativeRFCClauses(t *testing.T) {
 	cases := []struct {
-		name string
-		msg  []byte
-		key  string
-		sig  string
+		name       string
+		msg        []byte
+		key        string
+		sig        string
 		shouldPass bool
 	}{
 		{"invalid signature format", []byte("msg"), "invalid-key", "invalid-sig", false},

@@ -57,9 +57,9 @@ func main() {
 		"customer-data",
 		"gdpr_data_processing",
 		map[string]interface{}{
-			"jurisdiction":  "EU",
-			"entity_type":   "corporation",
-			"gdpr_consent":  true,
+			"jurisdiction": "EU",
+			"entity_type":  "corporation",
+			"gdpr_consent": true,
 		})
 	printDecision(result3, "EU GDPR with consent")
 
@@ -70,9 +70,9 @@ func main() {
 		"customer-data",
 		"gdpr_data_processing",
 		map[string]interface{}{
-			"jurisdiction":  "EU",
-			"entity_type":   "corporation",
-			"gdpr_consent":  false,
+			"jurisdiction": "EU",
+			"entity_type":  "corporation",
+			"gdpr_consent": false,
 		})
 	printDecision(result4, "EU GDPR without consent")
 

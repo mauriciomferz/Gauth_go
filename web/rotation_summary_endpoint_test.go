@@ -27,7 +27,9 @@ func TestRotationSummaryEndpointAnchoring(t *testing.T) {
 	// Ensure isolation from previous tests that may have mutated global registry or multisig env.
 	os.Unsetenv("GAUTH_ROTATIONS_MULTISIG")
 	os.Unsetenv("GAUTH_ROTATIONS_THRESHOLD")
-	if m, _ := cryptoInt.NewManager(24 * time.Hour); m != nil { cryptoInt.GlobalEdDSARegistry = m }
+	if m, _ := cryptoInt.NewManager(24 * time.Hour); m != nil {
+		cryptoInt.GlobalEdDSARegistry = m
+	}
 	// Initialize server
 	srv := NewBetaServer("0")
 	// Append two descriptors through ledger directly (simulate rotation activity).

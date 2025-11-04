@@ -7,7 +7,6 @@ type DecisionCache interface {
 	Invalidate(key string)
 }
 
-
 // DistributedPDP supports distributed policy decision points.
 type DistributedPDP interface {
 	Decide(request map[string]interface{}) (Decision, error)

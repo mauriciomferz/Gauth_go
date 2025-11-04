@@ -260,28 +260,28 @@ func TestJWTDuplicateJTIReplay(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	srv.router.ServeHTTP(iw, req)
 	if iw.Code != 201 {
-		 t.Fatalf("issue status=%d body=%s", iw.Code, iw.Body.String())
+		t.Fatalf("issue status=%d body=%s", iw.Code, iw.Body.String())
 	}
 	var body map[string]any
 	_ = json.Unmarshal(iw.Body.Bytes(), &body)
 	jwtRaw, _ := body["jwt"].(string)
 	if jwtRaw == "" {
-		 t.Fatalf("missing jwt issuance body=%v", body)
+		t.Fatalf("missing jwt issuance body=%v", body)
 	}
 	// First validate ok (records JTI)
 	vw1 := doValidate(srv, jwtRaw)
 	if vw1.Code != 200 {
-		 t.Fatalf("first validate status=%d body=%s", vw1.Code, vw1.Body.String())
+		t.Fatalf("first validate status=%d body=%s", vw1.Code, vw1.Body.String())
 	}
 	// Second validate should detect replay (duplicate jti) and emit replay taxonomy
 	vw2 := doValidate(srv, jwtRaw)
 	if vw2.Code != 401 {
-		 t.Fatalf("expected 401 replay detection second validation status=%d body=%s", vw2.Code, vw2.Body.String())
+		t.Fatalf("expected 401 replay detection second validation status=%d body=%s", vw2.Code, vw2.Body.String())
 	}
 	var rep map[string]any
 	_ = json.Unmarshal(vw2.Body.Bytes(), &rep)
 	if rep["code"] != "token_replay_detected" || rep["error"] != "replay_detected" || rep["rfc_ref"] != "rfc111:replay_protection" {
-		 t.Fatalf("expected replay taxonomy code=token_replay_detected error=replay_detected rfc_ref=rfc111:replay_protection body=%s", vw2.Body.String())
+		t.Fatalf("expected replay taxonomy code=token_replay_detected error=replay_detected rfc_ref=rfc111:replay_protection body=%s", vw2.Body.String())
 	}
 }
 

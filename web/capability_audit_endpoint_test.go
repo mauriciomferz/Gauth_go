@@ -38,12 +38,12 @@ func TestCapabilityAuditEndpoint(t *testing.T) {
 	var foundDenied, foundCreate bool
 	for _, raw := range entries {
 		e := raw.(map[string]any)
-	if e["action"] == actionCapabilityEnforce && e["outcome"] == "denied" {
-		foundDenied = true
-	}
-	if e["action"] == "delegation_create" && e["outcome"] == statusActive {
-		foundCreate = true
-	}
+		if e["action"] == actionCapabilityEnforce && e["outcome"] == "denied" {
+			foundDenied = true
+		}
+		if e["action"] == "delegation_create" && e["outcome"] == statusActive {
+			foundCreate = true
+		}
 	}
 	if !foundDenied {
 		t.Fatalf("expected denied capability enforcement entry")

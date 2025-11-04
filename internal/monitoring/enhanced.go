@@ -19,6 +19,7 @@ type MetricsCollector struct {
 	mutex    sync.RWMutex
 	otel     *OTELCollector // optional OpenTelemetry exporter
 }
+
 // MultiSignatureAdoptionGauge records the current multi-signature adoption rate
 func (mc *MetricsCollector) MultiSignatureAdoptionGauge(ctx context.Context, value float64) {
 	mc.Gauge("multi_signature_adoption", value, nil)
@@ -69,7 +70,7 @@ func NewMetricsCollector() *MetricsCollector {
 		otel:     NewOTELCollector(),
 	}
 }
- 
+
 // Example: instrument a metric update with trace
 func (mc *MetricsCollector) RecordWithTrace(ctx context.Context, name string, value float64) {
 	mc.WithTrace(ctx, "metric_update:"+name, func(ctx context.Context) {

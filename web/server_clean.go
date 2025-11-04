@@ -9,10 +9,10 @@ package web
 //nolint:SA4006 // Local suppress for other linters that recognize nolint.
 
 import (
-	"context"
 	"bytes"
-	"crypto/ed25519"
+	"context"
 	"crypto/ecdsa"
+	"crypto/ed25519"
 	"crypto/hmac"
 	crand "crypto/rand"
 	"crypto/sha256"
@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	bls "github.com/herumi/bls-eth-go-binary/bls"
 	"io"
 	"log"
 	"math"
@@ -38,7 +39,6 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
-	bls "github.com/herumi/bls-eth-go-binary/bls"
 
 	anchorint "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/anchor"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/capability"
@@ -51,10 +51,13 @@ import (
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
 	authpkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/auth"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/authz"
+	cryptopkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/crypto"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/delegation"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+	anchorHandlers "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/anchor"
+	auditHandlers "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/audit"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	promhttp "github.com/prometheus/client_golang/prometheus/promhttp"
@@ -63,10 +66,6 @@ import (
 	"go.opentelemetry.io/otel/metric"
 	metricsdk "go.opentelemetry.io/otel/sdk/metric"
 	"gopkg.in/yaml.v3"
-	cryptopkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/crypto"
-	anchorHandlers "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/anchor"
-	auditHandlers "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/audit"
-
 )
 
 // atoiDefault converts string to int, returning def on error or negative values.
@@ -115,10 +114,10 @@ type SignedAnchorWrapper struct {
 // combinedAnchorEntry represents one combined capability+rotation anchor digest emission.
 // Stored in-memory for chain retrieval and verification endpoints exercised by tests.
 type combinedAnchorEntry struct {
-    Digest       string    `json:"digest"`
-    Capability   string    `json:"capability_hash"`
-    RotationHead string    `json:"rotation_head"`
-    EmittedAt    time.Time `json:"emitted_at"`
+	Digest       string    `json:"digest"`
+	Capability   string    `json:"capability_hash"`
+	RotationHead string    `json:"rotation_head"`
+	EmittedAt    time.Time `json:"emitted_at"`
 }
 
 // modelLimitsAttestation models the attestation response for model limits governance.
@@ -159,9 +158,9 @@ type modelLimitsAttestation struct {
 		LatencySeconds float64 `json:"latency_seconds"`
 		Success        bool    `json:"success"`
 	} `json:"notarization,omitempty"`
-	Signature string `json:"signature,omitempty"`
-	SigKid    string `json:"sig_kid,omitempty"`
-	SigMode   string `json:"sig_mode,omitempty"`
+	Signature       string `json:"signature,omitempty"`
+	SigKid          string `json:"sig_kid,omitempty"`
+	SigMode         string `json:"sig_mode,omitempty"`
 	DomainSignature string `json:"domain_signature,omitempty"`
 	DomainPrefix    string `json:"domain_prefix,omitempty"`
 }
@@ -187,19 +186,19 @@ const (
 	// Demo dev secret placeholder (long repeated literal)
 	devSecretDemo = "dev-secret-demo-00000000000000000000000000000000"
 	// Lifecycle / decision reason literals (standardized with JSON Schemas)
-	reasonMaintenance     = "maintenance"
-	reasonRateLimited     = "rate_limited"
-	reasonPolicyViolation = "policy_violation"
-	statusSuspended       = "suspended"
-	statusActive          = "active"
-	statusTerminated      = "terminated"
+	reasonMaintenance      = "maintenance"
+	reasonRateLimited      = "rate_limited"
+	reasonPolicyViolation  = "policy_violation"
+	statusSuspended        = "suspended"
+	statusActive           = "active"
+	statusTerminated       = "terminated"
 	statusPartiallyRevoked = "partially_revoked"
-	statusValidJWT        = "valid_jwt"
-	statusDeprecated      = "deprecated"
-	statusSunset          = "sunset"
-	memoryProvider    = "memory"
-	tsaStubProvider   = "tsa-stub"
-	emptyValue        = "empty"
+	statusValidJWT         = "valid_jwt"
+	statusDeprecated       = "deprecated"
+	statusSunset           = "sunset"
+	memoryProvider         = "memory"
+	tsaStubProvider        = "tsa-stub"
+	emptyValue             = "empty"
 	// Source/provider literals
 	capSourceStatic   = "static"
 	capSourceFile     = "file"
@@ -208,23 +207,23 @@ const (
 	// Port literals
 	defaultPort = ":8080"
 	// Metric kind literals
-	metricKindInput       = "input"
-	metricKindOutput      = "output"
-	metricKindRate        = "rate"
+	metricKindInput  = "input"
+	metricKindOutput = "output"
+	metricKindRate   = "rate"
 	// Content type literals
-	contentTypeTextCSV    = "text/csv"
-	contentTypeCSV        = "application/csv"
+	contentTypeTextCSV = "text/csv"
+	contentTypeCSV     = "application/csv"
 	// Environment mode literals
-	envModeDevelopment    = "development"
+	envModeDevelopment = "development"
 	// Change reason literals
-	changeReasonStatus    = "status_change"
-	changeReasonNoop      = "noop"
+	changeReasonStatus = "status_change"
+	changeReasonNoop   = "noop"
 	// Algorithm literals
-	algHMACSHA256         = "HMAC-SHA256"
+	algHMACSHA256 = "HMAC-SHA256"
 	// Label literals
-	labelProvider         = "provider"
+	labelProvider = "provider"
 	// Action literals
-	actionEvaluate        = "evaluate"
+	actionEvaluate = "evaluate"
 )
 
 // anomalyPersist defines persistence format for EWMA semantic anomaly stats.
@@ -540,7 +539,7 @@ type BetaServer struct {
 // We expose aggregated_supported=true only for the aggregated BLS variant.
 func (s *BetaServer) apiCryptoAlgorithms(c *gin.Context) {
 	type algo struct {
-		Name               string `json:"name"`
+		Name                string `json:"name"`
 		AggregatedSupported bool   `json:"aggregated_supported"`
 	}
 	resp := struct {
@@ -563,29 +562,41 @@ func (s *BetaServer) Engine() *gin.Engine { return s.router }
 
 // ===== Modular Anchor Handlers Deps Interface Implementations =====
 // CapabilityAnchorEnabled returns true when anchoring enable flag is set.
-func (s *BetaServer) CapabilityAnchorEnabled() bool { return os.Getenv("GAUTH_CAPABILITY_ANCHOR_ENABLE") == "1" }
-func (s *BetaServer) CapabilityRegistryHash() string { return s.capabilityRegistryHash }
-func (s *BetaServer) CapabilityPrevRegistryHash() string { return s.capabilityPrevRegistryHash }
+func (s *BetaServer) CapabilityAnchorEnabled() bool {
+	return os.Getenv("GAUTH_CAPABILITY_ANCHOR_ENABLE") == "1"
+}
+func (s *BetaServer) CapabilityRegistryHash() string        { return s.capabilityRegistryHash }
+func (s *BetaServer) CapabilityPrevRegistryHash() string    { return s.capabilityPrevRegistryHash }
 func (s *BetaServer) CapabilityRegistryChangeAt() time.Time { return s.capabilityRegistryChangeAt }
+
 // AnchorClient returns underlying anchor client (memory prototype).
 func (s *BetaServer) AnchorClient() interface {
 	Anchor(string) (anchor.AnchorRecord, error)
 	LatestAnchor() (anchor.AnchorRecord, error)
 	TotalAnchors() int
-} { if s.anchorClient == nil { return nil }; return s.anchorClient }
-func (s *BetaServer) CapAnchorFilePath() string { return s.capAnchorFilePath }
-func (s *BetaServer) CapAnchorLastWrite() time.Time { return s.capAnchorLastWrite }
+} {
+	if s.anchorClient == nil {
+		return nil
+	}
+	return s.anchorClient
+}
+func (s *BetaServer) CapAnchorFilePath() string             { return s.capAnchorFilePath }
+func (s *BetaServer) CapAnchorLastWrite() time.Time         { return s.capAnchorLastWrite }
 func (s *BetaServer) CapAnchorWriteInterval() time.Duration { return s.capAnchorWriteInterval }
-func (s *BetaServer) CapAnchorAgeSeconds() uint64 { return s.capAnchorLastAgeSeconds.Load() }
-func (s *BetaServer) CapAnchorStaleThresholdSeconds() int { return int(s.capAnchorStaleThreshold.Seconds()) }
+func (s *BetaServer) CapAnchorAgeSeconds() uint64           { return s.capAnchorLastAgeSeconds.Load() }
+func (s *BetaServer) CapAnchorStaleThresholdSeconds() int {
+	return int(s.capAnchorStaleThreshold.Seconds())
+}
 func (s *BetaServer) CapAnchorStale() bool { return s.capAnchorStale.Load() }
 func (s *BetaServer) CapAnchorMetrics() (emitted, skipped, hashChanged, lastWriteUnix uint64, ok bool) {
 	if mem, ok2 := s.metrics.(*metrics.Memory); ok2 {
 		return mem.CapabilityAnchorEmitted(), mem.CapabilityAnchorSkipped(), mem.CapabilityRegistryHashChanged(), uint64(mem.CapabilityAnchorLastWriteUnix()), true
 	}
-	return 0,0,0,0,false
+	return 0, 0, 0, 0, false
 }
-func (s *BetaServer) NotarizationEnabled() bool { return os.Getenv("GAUTH_CAP_ANCHOR_NOTARIZE") == "1" && s.notarizer != nil }
+func (s *BetaServer) NotarizationEnabled() bool {
+	return os.Getenv("GAUTH_CAP_ANCHOR_NOTARIZE") == "1" && s.notarizer != nil
+}
 func (s *BetaServer) LastNotarizationTime() time.Time { return s.capLastNotarization }
 func (s *BetaServer) LastNotarizationReceipt() (hash, timestamp, provider string, success bool) {
 	if s.capLastNotarizationReceipt.Provider != "" {
@@ -599,17 +610,23 @@ func (s *BetaServer) ExternalAnchorReceipt() (hash, timestamp, provider string, 
 	}
 	return "", "", "", 0
 }
+
 // ===== Modular Capability Audit Handlers Deps Interface Implementations =====
 // CapAuditPersistPath returns persistence path for capability audit chain.
 func (s *BetaServer) CapAuditPersistPath() string { return s.capAuditPersistPath }
+
 // CapAuditPrevHash returns previous hash (chain tip) for capability audit chain.
 func (s *BetaServer) CapAuditPrevHash() string { return s.capAuditPrevHash }
 
 // routeRegistered returns true if the given absolute path already has a handler registered.
 func (s *BetaServer) routeRegistered(path string) bool {
-	if s == nil || s.router == nil { return false }
+	if s == nil || s.router == nil {
+		return false
+	}
 	for _, rt := range s.router.Routes() {
-		if rt.Path == path { return true }
+		if rt.Path == path {
+			return true
+		}
 	}
 	return false
 }
@@ -619,10 +636,10 @@ var capabilityDiffStore = capability.NewSnapshotStore(50)
 
 // capabilityCurrent returns current list + hash using capability.RegistryHash.
 func capabilityCurrent() ([]capability.Capability, string) {
-    // The default registry exposes List via DefaultRegistry().List()
-    list := capability.DefaultRegistry().List()
-    // Sort for deterministic hashing already handled by RegistryHash
-    return list, capability.RegistryHash(list)
+	// The default registry exposes List via DefaultRegistry().List()
+	list := capability.DefaultRegistry().List()
+	// Sort for deterministic hashing already handled by RegistryHash
+	return list, capability.RegistryHash(list)
 }
 
 // apiCapabilityDiff computes added/removed/modified capabilities relative to optional baseline hash (?since=).
@@ -644,9 +661,13 @@ func (s *BetaServer) apiCapabilityDiff(c *gin.Context) {
 	}
 	// Build maps for comparison
 	baseMap := make(map[string]capability.Capability, len(baseSnap.Capabilities))
-	for _, ccap := range baseSnap.Capabilities { baseMap[ccap.ID] = ccap }
+	for _, ccap := range baseSnap.Capabilities {
+		baseMap[ccap.ID] = ccap
+	}
 	curMap := make(map[string]capability.Capability, len(currentList))
-	for _, ccap := range currentList { curMap[ccap.ID] = ccap }
+	for _, ccap := range currentList {
+		curMap[ccap.ID] = ccap
+	}
 	added := []map[string]any{}
 	removed := []map[string]any{}
 	modified := []map[string]any{}
@@ -664,9 +685,9 @@ func (s *BetaServer) apiCapabilityDiff(c *gin.Context) {
 			removed = append(removed, map[string]any{"id": id})
 		}
 	}
-	sort.Slice(added, func(i,j int) bool { return added[i]["id"].(string) < added[j]["id"].(string) })
-	sort.Slice(removed, func(i,j int) bool { return removed[i]["id"].(string) < removed[j]["id"].(string) })
-	sort.Slice(modified, func(i,j int) bool { return modified[i]["id"].(string) < modified[j]["id"].(string) })
+	sort.Slice(added, func(i, j int) bool { return added[i]["id"].(string) < added[j]["id"].(string) })
+	sort.Slice(removed, func(i, j int) bool { return removed[i]["id"].(string) < removed[j]["id"].(string) })
+	sort.Slice(modified, func(i, j int) bool { return modified[i]["id"].(string) < modified[j]["id"].(string) })
 	c.JSON(200, gin.H{"base_hash": since, "current_hash": currentHash, "added": added, "removed": removed, "modified": modified})
 }
 
@@ -674,9 +695,13 @@ func (s *BetaServer) apiCapabilityDiff(c *gin.Context) {
 // The original richer UI bundle was decoupled; tests only assert presence of nonce-based CSP and a few elements.
 // This stub keeps those contracts without reintroducing the full asset pipeline.
 func (s *BetaServer) RegisterUIRoutes() {
-	if s == nil || s.router == nil { return }
+	if s == nil || s.router == nil {
+		return
+	}
 	// idempotent
-	if s.routeRegistered("/index.html") { return }
+	if s.routeRegistered("/index.html") {
+		return
+	}
 
 	// Helper to create a random base64url nonce (16 bytes -> 22 chars).
 	genNonce := func() string {
@@ -893,12 +918,16 @@ func (s *BetaServer) SemanticAnomalyStats() (ewmaEntries int, scoreEntries int) 
 }
 
 // rotationV2LocalResolver implements notary.PublicKeyResolver for rotation V2 verification using a map of Ed25519 publics.
-type rotationV2LocalResolver struct { m map[string]ed25519.PublicKey }
+type rotationV2LocalResolver struct{ m map[string]ed25519.PublicKey }
 
 func (lr rotationV2LocalResolver) FindByID(id string) *notary.PublicKeyRecord {
-	if pk, ok := lr.m[id]; ok { return &notary.PublicKeyRecord{Ed25519: pk} }
+	if pk, ok := lr.m[id]; ok {
+		return &notary.PublicKeyRecord{Ed25519: pk}
+	}
 	if crypto.GlobalEdDSARegistry != nil { // fallback to global registry if available
-		if k := crypto.GlobalEdDSARegistry.FindByID(id); k != nil { return &notary.PublicKeyRecord{Ed25519: k.Public} }
+		if k := crypto.GlobalEdDSARegistry.FindByID(id); k != nil {
+			return &notary.PublicKeyRecord{Ed25519: k.Public}
+		}
 	}
 	return nil
 }
@@ -910,19 +939,26 @@ type compositeResolver struct {
 }
 
 func (cr *compositeResolver) FindByID(id string) *notary.PublicKeyRecord {
-	if cr == nil { return nil }
-	if pk, ok := cr.ed25519Keys[id]; ok { return &notary.PublicKeyRecord{Ed25519: pk} }
-	if pk := cr.ecdsaKeys[id]; pk != nil { return &notary.PublicKeyRecord{ECDSA: pk} }
+	if cr == nil {
+		return nil
+	}
+	if pk, ok := cr.ed25519Keys[id]; ok {
+		return &notary.PublicKeyRecord{Ed25519: pk}
+	}
+	if pk := cr.ecdsaKeys[id]; pk != nil {
+		return &notary.PublicKeyRecord{ECDSA: pk}
+	}
 	return nil
 }
 
 // buildAndOptionallySignRotationV2 constructs a weighted rotation V2 artifact, optionally attaches
 // signatures based on environment-provided private keys, verifies signatures, and returns verification stats.
 // Environment variables:
-//   GAUTH_ROTATIONS_V2_CONFIG   (required) path to weights config JSON
-//   GAUTH_ROTATIONS_V2_SIGN     =1 to enable signing attempts
-//   GAUTH_ROTATIONS_V2_ED25519_KEYS "id:hexOrB64Priv,id2:..." private keys for Ed25519 signers
-//   GAUTH_ROTATIONS_V2_FORCE_SIGN when set attempts signing even if some keys missing (best-effort)
+//
+//	GAUTH_ROTATIONS_V2_CONFIG   (required) path to weights config JSON
+//	GAUTH_ROTATIONS_V2_SIGN     =1 to enable signing attempts
+//	GAUTH_ROTATIONS_V2_ED25519_KEYS "id:hexOrB64Priv,id2:..." private keys for Ed25519 signers
+//	GAUTH_ROTATIONS_V2_FORCE_SIGN when set attempts signing even if some keys missing (best-effort)
 func (s *BetaServer) buildAndOptionallySignRotationV2() (notary.WeightedRotationArtifact, int, map[string]int, []string, error) {
 	cfgPath := os.Getenv("GAUTH_ROTATIONS_V2_CONFIG")
 	if cfgPath == "" {
@@ -947,7 +983,9 @@ func (s *BetaServer) buildAndOptionallySignRotationV2() (notary.WeightedRotation
 			entries := strings.Split(raw, ",")
 			for _, e := range entries {
 				parts := strings.SplitN(e, ":", 2)
-				if len(parts) != 2 { continue }
+				if len(parts) != 2 {
+					continue
+				}
 				id, enc := parts[0], parts[1]
 				var b []byte
 				// Try hex first
@@ -964,16 +1002,25 @@ func (s *BetaServer) buildAndOptionallySignRotationV2() (notary.WeightedRotation
 		// Auto-generate ephemeral private keys if enabled OR no explicit keys present.
 		if os.Getenv("GAUTH_ROTATIONS_V2_AUTO_GEN") == "1" || len(privMap) == 0 {
 			for _, sref := range cfg.Signers {
-				if strings.ToUpper(sref.Alg) != "ED25519" { continue }
-				if _, exists := privMap[sref.ID]; !exists { _, pk, _ := ed25519.GenerateKey(nil); privMap[sref.ID] = pk }
+				if strings.ToUpper(sref.Alg) != "ED25519" {
+					continue
+				}
+				if _, exists := privMap[sref.ID]; !exists {
+					_, pk, _ := ed25519.GenerateKey(nil)
+					privMap[sref.ID] = pk
+				}
 			}
 		}
 		force := os.Getenv("GAUTH_ROTATIONS_V2_FORCE_SIGN") == "1"
 		for _, sref := range cfg.Signers { // use config ordering (artifact already re-sorted)
-			if strings.ToUpper(sref.Alg) != "ED25519" { continue } // only Ed25519 currently
+			if strings.ToUpper(sref.Alg) != "ED25519" {
+				continue
+			} // only Ed25519 currently
 			pk, ok := privMap[sref.ID]
 			if !ok {
-				if !force { continue }
+				if !force {
+					continue
+				}
 				// force mode: skip silently (could record failure in future)
 				continue
 			}
@@ -982,7 +1029,11 @@ func (s *BetaServer) buildAndOptionallySignRotationV2() (notary.WeightedRotation
 	}
 	// Build public key map from collected private keys (env + auto-gen)
 	pubMap := map[string]ed25519.PublicKey{}
-	for id, pk := range privMap { if len(pk) == ed25519.PrivateKeySize { pubMap[id] = ed25519.PublicKey(pk[32:]) } }
+	for id, pk := range privMap {
+		if len(pk) == ed25519.PrivateKeySize {
+			pubMap[id] = ed25519.PublicKey(pk[32:])
+		}
+	}
 	verified, perAlg, failures := notary.VerifyArtifactSignatures(&art, rotationV2LocalResolver{m: pubMap})
 	// Update last hash for chaining only after successful build
 	s.rotationLastV2Hash = art.CanonicalDigest
@@ -1082,7 +1133,9 @@ func (s *BetaServer) apiCombinedAnchorEmit(c *gin.Context) {
 	s.combinedAnchorMu.Lock()
 	s.combinedAnchorChain = append(s.combinedAnchorChain, entry)
 	s.combinedAnchorMu.Unlock()
-	if inc, ok := s.metrics.(interface{ IncCombinedAnchorEmitted() }); ok { inc.IncCombinedAnchorEmitted() }
+	if inc, ok := s.metrics.(interface{ IncCombinedAnchorEmitted() }); ok {
+		inc.IncCombinedAnchorEmitted()
+	}
 	c.JSON(200, gin.H{"success": true, "combined_hash": hexDigest, "rotation_head": rotationHead})
 }
 
@@ -1105,7 +1158,9 @@ func (s *BetaServer) apiCombinedAnchorVerify(c *gin.Context) {
 		combo := e.Capability + ":" + e.RotationHead
 		dig := sha256.Sum256([]byte(combo))
 		if hex.EncodeToString(dig[:]) != e.Digest {
-			if inc, ok := s.metrics.(interface{ IncCombinedAnchorFailures() }); ok { inc.IncCombinedAnchorFailures() }
+			if inc, ok := s.metrics.(interface{ IncCombinedAnchorFailures() }); ok {
+				inc.IncCombinedAnchorFailures()
+			}
 			c.JSON(200, gin.H{"success": true, "status": "mismatch"})
 			return
 		}
@@ -1225,65 +1280,94 @@ func (s *BetaServer) apiSemanticCounters(c *gin.Context) {
 // All responses: {success:true} on success or {success:false,error:"code",detail:"..."}
 // Error codes align with service errors: invalid_payload | service_disabled | unauthorized | already_pending | not_pending | quorum_satisfied | already_finalized | internal_error
 func (s *BetaServer) mountRevocationWorkflow() {
-	if s.router == nil { return }
+	if s.router == nil {
+		return
+	}
 	// Safe to mount multiple times (tests) via routeRegistered guard.
 	// Initiate
 	initPath := "/api/v1/poa/:id/revocation/initiate"
 	if !s.routeRegistered(initPath) {
 		s.router.POST(initPath, func(c *gin.Context) {
-			if s.rfc0111Service == nil { c.JSON(503, gin.H{"success":false,"error":"service_disabled"}); return }
+			if s.rfc0111Service == nil {
+				c.JSON(503, gin.H{"success": false, "error": "service_disabled"})
+				return
+			}
 			id := c.Param("id")
-			var in struct { Initiator string `json:"initiator"`; Reason string `json:"reason"` }
-			if err := c.ShouldBindJSON(&in); err != nil || id == "" || in.Initiator == "" { c.JSON(400, gin.H{"success":false,"error":"invalid_payload"}); return }
-			req := rfc0111.RevocationRequest{ POAID: id, Initiator: in.Initiator, Reason: in.Reason }
+			var in struct {
+				Initiator string `json:"initiator"`
+				Reason    string `json:"reason"`
+			}
+			if err := c.ShouldBindJSON(&in); err != nil || id == "" || in.Initiator == "" {
+				c.JSON(400, gin.H{"success": false, "error": "invalid_payload"})
+				return
+			}
+			req := rfc0111.RevocationRequest{POAID: id, Initiator: in.Initiator, Reason: in.Reason}
 			if err := s.rfc0111Service.InitiateRevocation(c, req); err != nil {
 				code := mapRevocationErr(err)
 				status := httpStatusForRevocationErr(code)
-				c.JSON(status, gin.H{"success":false,"error":code,"detail":err.Error()})
+				c.JSON(status, gin.H{"success": false, "error": code, "detail": err.Error()})
 				return
 			}
-			c.JSON(200, gin.H{"success":true})
+			c.JSON(200, gin.H{"success": true})
 		})
 	}
 	// Approve
 	approvePath := "/api/v1/poa/:id/revocation/approve"
 	if !s.routeRegistered(approvePath) {
 		s.router.POST(approvePath, func(c *gin.Context) {
-			if s.rfc0111Service == nil { c.JSON(503, gin.H{"success":false,"error":"service_disabled"}); return }
+			if s.rfc0111Service == nil {
+				c.JSON(503, gin.H{"success": false, "error": "service_disabled"})
+				return
+			}
 			id := c.Param("id")
-			var in struct { Approver string `json:"approver"` }
-			if err := c.ShouldBindJSON(&in); err != nil || id == "" || in.Approver == "" { c.JSON(400, gin.H{"success":false,"error":"invalid_payload"}); return }
+			var in struct {
+				Approver string `json:"approver"`
+			}
+			if err := c.ShouldBindJSON(&in); err != nil || id == "" || in.Approver == "" {
+				c.JSON(400, gin.H{"success": false, "error": "invalid_payload"})
+				return
+			}
 			if err := s.rfc0111Service.ApproveRevocation(c, id, in.Approver); err != nil {
 				code := mapRevocationErr(err)
 				status := httpStatusForRevocationErr(code)
-				c.JSON(status, gin.H{"success":false,"error":code,"detail":err.Error()})
+				c.JSON(status, gin.H{"success": false, "error": code, "detail": err.Error()})
 				return
 			}
-			c.JSON(200, gin.H{"success":true})
+			c.JSON(200, gin.H{"success": true})
 		})
 	}
 	// Cancel
 	cancelPath := "/api/v1/poa/:id/revocation/cancel"
 	if !s.routeRegistered(cancelPath) {
 		s.router.POST(cancelPath, func(c *gin.Context) {
-			if s.rfc0111Service == nil { c.JSON(503, gin.H{"success":false,"error":"service_disabled"}); return }
+			if s.rfc0111Service == nil {
+				c.JSON(503, gin.H{"success": false, "error": "service_disabled"})
+				return
+			}
 			id := c.Param("id")
-			var in struct { Actor string `json:"actor"` }
-			if err := c.ShouldBindJSON(&in); err != nil || id == "" || in.Actor == "" { c.JSON(400, gin.H{"success":false,"error":"invalid_payload"}); return }
+			var in struct {
+				Actor string `json:"actor"`
+			}
+			if err := c.ShouldBindJSON(&in); err != nil || id == "" || in.Actor == "" {
+				c.JSON(400, gin.H{"success": false, "error": "invalid_payload"})
+				return
+			}
 			if err := s.rfc0111Service.CancelRevocation(c, id, in.Actor); err != nil {
 				code := mapRevocationErr(err)
 				status := httpStatusForRevocationErr(code)
-				c.JSON(status, gin.H{"success":false,"error":code,"detail":err.Error()})
+				c.JSON(status, gin.H{"success": false, "error": code, "detail": err.Error()})
 				return
 			}
-			c.JSON(200, gin.H{"success":true})
+			c.JSON(200, gin.H{"success": true})
 		})
 	}
 }
 
 // mapRevocationErr normalizes service error strings to stable API error codes.
 func mapRevocationErr(err error) string {
-	if err == nil { return "" }
+	if err == nil {
+		return ""
+	}
 	msg := err.Error()
 	// Ordered checks for specificity; service should return descriptive messages.
 	switch {
@@ -2093,9 +2177,9 @@ func (s *BetaServer) apiModelLimitsAttestationVerify(c *gin.Context) {
 			LatencySeconds float64 `json:"latency_seconds"`
 			Success        bool    `json:"success"`
 		} `json:"notarization,omitempty"`
-		Signature string `json:"signature"`
-		SigKid    string `json:"sig_kid"`
-		SigMode   string `json:"sig_mode"`
+		Signature       string `json:"signature"`
+		SigKid          string `json:"sig_kid"`
+		SigMode         string `json:"sig_mode"`
 		DomainSignature string `json:"domain_signature,omitempty"`
 		DomainPrefix    string `json:"domain_prefix,omitempty"`
 	}
@@ -2124,11 +2208,11 @@ func (s *BetaServer) apiModelLimitsAttestationVerify(c *gin.Context) {
 	}
 	// Reconstruct unsigned object with identical field order
 	type unsignedStruct struct {
-		Success       bool   `json:"success"`
-		Configured    bool   `json:"configured"`
-		Reason        string `json:"reason,omitempty"`
-		Nonce         string `json:"nonce,omitempty"`
-		Snapshot      struct {
+		Success    bool   `json:"success"`
+		Configured bool   `json:"configured"`
+		Reason     string `json:"reason,omitempty"`
+		Nonce      string `json:"nonce,omitempty"`
+		Snapshot   struct {
 			Hash        string `json:"hash"`
 			GeneratedAt string `json:"generated_at"`
 		} `json:"snapshot"`
@@ -2913,25 +2997,37 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 	r.POST("/api/v1/authorization/composite", func(c *gin.Context) {
 		// Read raw body (store copy) then reset Body so gin JSON binding can succeed even on repeated POST.
 		b, err := io.ReadAll(c.Request.Body)
-		if err != nil || len(b) == 0 { c.JSON(400, gin.H{"success": false, "error": "invalid_json"}); return }
+		if err != nil || len(b) == 0 {
+			c.JSON(400, gin.H{"success": false, "error": "invalid_json"})
+			return
+		}
 		c.Request.Body = io.NopCloser(bytes.NewReader(b))
 		var payload map[string]any
 		// Attempt JSON parse only if not yet activated; after activation we skip parse to allow conflict detection even if stream reused.
 		if !compositeActivated {
-			if err := json.Unmarshal(b, &payload); err != nil { c.JSON(400, gin.H{"success": false, "error": "invalid_json"}); return }
+			if err := json.Unmarshal(b, &payload); err != nil {
+				c.JSON(400, gin.H{"success": false, "error": "invalid_json"})
+				return
+			}
 		}
 		raw := b
 		h := sha256.Sum256(raw)
 		digest := hex.EncodeToString(h[:])
 		if compositeActivated {
-			if digest == compositeHash { c.JSON(409, gin.H{"success": false, "error": "authorization_conflict"}); return }
+			if digest == compositeHash {
+				c.JSON(409, gin.H{"success": false, "error": "authorization_conflict"})
+				return
+			}
 		}
 		compositeActivated = true
 		compositeHash = digest
 		c.JSON(201, gin.H{"success": true, "activated": true, "hash": compositeHash})
 	})
 	r.GET("/api/v1/authorization/composite", func(c *gin.Context) {
-		if !compositeActivated { c.JSON(404, gin.H{"success": false, "error": "authorization_not_found"}); return }
+		if !compositeActivated {
+			c.JSON(404, gin.H{"success": false, "error": "authorization_not_found"})
+			return
+		}
 		c.JSON(200, gin.H{"success": true, "hash": compositeHash})
 	})
 	// Register modular anchor handlers early to ensure consistent error taxonomy.
@@ -3137,10 +3233,10 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 	s.registerPolicyManifest()
 	// Crypto algorithms introspection endpoint required by tests
 	s.router.GET("/api/v1/crypto/algorithms", s.apiCryptoAlgorithms)
-	
+
 	// Learning Lab endpoints for full button functionality
 	s.AddLearningLabEndpoints()
-	
+
 	go func() {
 		ticker := time.NewTicker(30 * time.Second)
 		defer ticker.Stop()
@@ -4307,18 +4403,20 @@ func (s *BetaServer) loadCapabilitiesFromFile(path string) error {
 				}
 				prevAnchorWrite := s.capAnchorLastWrite
 				s.capAnchorLastWrite = time.Now()
-					if s.metrics != nil {
-						// Overall emission counter.
-						s.metrics.IncCapabilityAnchorEmitted()
-						// Per-algorithm emission attribution: increment for every registered algorithm.
-						// This decouples anchor artifact contents (may only be EdDSA signed) from algorithm registry agility.
-						if algRec, ok := s.metrics.(interface{ IncCapabilityAnchorAlgorithm(string) }); ok {
-							for _, info := range cryptopkg.ListAlgorithms() {
-								if info.Name == "" { continue }
-								algRec.IncCapabilityAnchorAlgorithm(info.Name)
+				if s.metrics != nil {
+					// Overall emission counter.
+					s.metrics.IncCapabilityAnchorEmitted()
+					// Per-algorithm emission attribution: increment for every registered algorithm.
+					// This decouples anchor artifact contents (may only be EdDSA signed) from algorithm registry agility.
+					if algRec, ok := s.metrics.(interface{ IncCapabilityAnchorAlgorithm(string) }); ok {
+						for _, info := range cryptopkg.ListAlgorithms() {
+							if info.Name == "" {
+								continue
 							}
+							algRec.IncCapabilityAnchorAlgorithm(info.Name)
 						}
 					}
+				}
 				// Emission interval & jitter metrics (Prometheus adapter only via type assertion)
 				if pm, ok := s.metrics.(*metrics.PrometheusMetrics); ok {
 					if !prevAnchorWrite.IsZero() {
@@ -5441,7 +5539,11 @@ func (s *BetaServer) routes() {
 		}
 		// Threshold + multisig enforcement (pre-V2 legacy behavior expected by tests)
 		threshold := 2
-		if raw := os.Getenv("GAUTH_ROTATIONS_THRESHOLD"); raw != "" { if v, err := strconv.Atoi(raw); err == nil && v >= 0 { threshold = v } }
+		if raw := os.Getenv("GAUTH_ROTATIONS_THRESHOLD"); raw != "" {
+			if v, err := strconv.Atoi(raw); err == nil && v >= 0 {
+				threshold = v
+			}
+		}
 		multisig := os.Getenv("GAUTH_ROTATIONS_MULTISIG") == "1"
 		// Build summary from ledger (reuse notary helper)
 		var concrete *notary.RotationLedger
@@ -5642,7 +5744,8 @@ func (s *BetaServer) routes() {
 		ctx := c.Request.Context()
 		graph, err := s.rfcService.BuildDelegationGraph(ctx)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()}); return
+			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
+			return
 		}
 		c.JSON(http.StatusOK, gin.H{"success": true, "nodes": graph, "total": len(graph), "generated_at": time.Now().UTC().Format(time.RFC3339)})
 	})
@@ -5689,9 +5792,12 @@ func (s *BetaServer) routes() {
 	// Evidence hash attachment (beta forensic feature)
 	s.router.POST("/api/v1/beta/poa/:id/evidence", func(c *gin.Context) {
 		poaID := c.Param("id")
-		var body struct { Hashes []string `json:"hashes"` }
+		var body struct {
+			Hashes []string `json:"hashes"`
+		}
 		if err := c.ShouldBindJSON(&body); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_request", "detail": err.Error()}); return
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_request", "detail": err.Error()})
+			return
 		}
 		updated, err := s.rfcService.AttachEvidenceHashes(c.Request.Context(), poaID, body.Hashes)
 		if err != nil {
@@ -5700,8 +5806,11 @@ func (s *BetaServer) routes() {
 				_ = rfcErr // placeholder; existing error mapping logic elsewhere
 			}
 			// Simplified mapping: NotFound -> 404
-			if strings.Contains(err.Error(), "not found") { code = http.StatusNotFound }
-			c.JSON(code, gin.H{"success": false, "error": err.Error()}); return
+			if strings.Contains(err.Error(), "not found") {
+				code = http.StatusNotFound
+			}
+			c.JSON(code, gin.H{"success": false, "error": err.Error()})
+			return
 		}
 		c.JSON(http.StatusOK, gin.H{"success": true, "poa_id": updated.ID, "total_evidence_hashes": len(updated.EvidenceHashes)})
 	})
@@ -5726,7 +5835,11 @@ func (s *BetaServer) routes() {
 	if !s.routeRegistered("/api/v1/beta/rotations/summary") { // helper ensures no duplicate
 		s.router.GET("/api/v1/beta/rotations/summary", func(c *gin.Context) {
 			threshold := 2
-			if raw := os.Getenv("GAUTH_ROTATIONS_THRESHOLD"); raw != "" { if v, err := strconv.Atoi(raw); err == nil && v >= 0 { threshold = v } }
+			if raw := os.Getenv("GAUTH_ROTATIONS_THRESHOLD"); raw != "" {
+				if v, err := strconv.Atoi(raw); err == nil && v >= 0 {
+					threshold = v
+				}
+			}
 			multisig := os.Getenv("GAUTH_ROTATIONS_MULTISIG") == "1"
 			var satisfied int
 			if s.rotationLedger != nil {
@@ -5734,12 +5847,18 @@ func (s *BetaServer) routes() {
 				satisfied = len(s.rotationLedger.Entries()) * 2
 			}
 			if os.Getenv("GAUTH_ROTATIONS_SIGN") == "1" && crypto.GlobalEdDSARegistry != nil {
-				keys := crypto.GlobalEdDSARegistry.ListCurrent(); if len(keys) > satisfied { satisfied = len(keys) }
+				keys := crypto.GlobalEdDSARegistry.ListCurrent()
+				if len(keys) > satisfied {
+					satisfied = len(keys)
+				}
 			}
 			// In tests, GAUTH_ROTATIONS_THRESHOLD may exceed combined descriptors and key count; ensure unsatisfied triggers 400.
 			unsatisfied := multisig && threshold > 0 && satisfied < threshold
-			if unsatisfied { c.JSON(400, gin.H{"code": "rotation_threshold_unsatisfied", "rfc_ref": "rfc120:multi_signature_rotation", "detail": gin.H{"satisfied_weight": satisfied, "threshold": threshold}}); return }
-			c.JSON(200, gin.H{"success": true, "configured": true, "anchored": false, "summary": gin.H{"chain_length": satisfied/2, "threshold": threshold, "head_hash": s.rotationLastV2Hash, "aggregate_hash": s.rotationLastV2Hash, "generated_at": time.Now().UTC().Format(time.RFC3339), "satisfied_weight": satisfied, "signatures": []gin.H{{"kid": fmt.Sprintf("ed25519:%s", randomNonce(8)), "signature": randomNonce(32), "mode": "EdDSA"}}}})
+			if unsatisfied {
+				c.JSON(400, gin.H{"code": "rotation_threshold_unsatisfied", "rfc_ref": "rfc120:multi_signature_rotation", "detail": gin.H{"satisfied_weight": satisfied, "threshold": threshold}})
+				return
+			}
+			c.JSON(200, gin.H{"success": true, "configured": true, "anchored": false, "summary": gin.H{"chain_length": satisfied / 2, "threshold": threshold, "head_hash": s.rotationLastV2Hash, "aggregate_hash": s.rotationLastV2Hash, "generated_at": time.Now().UTC().Format(time.RFC3339), "satisfied_weight": satisfied, "signatures": []gin.H{{"kid": fmt.Sprintf("ed25519:%s", randomNonce(8)), "signature": randomNonce(32), "mode": "EdDSA"}}}})
 		})
 	}
 
@@ -6383,33 +6502,33 @@ func (s *BetaServer) routes() {
 		c.JSON(200, gin.H{"success": true, "proof": proof, "latest_tree_head": latest})
 	})
 
-		// Size-based trivial consistency proof endpoint (prototype)
-		// /api/v1/token/revocation/consistency_sizes?older=<n>&newer=<m>
-		// When older==newer==current_length returns trivial proof object.
-		// Otherwise emits 501 consistency_proof_unavailable structured error.
-		s.router.GET("/api/v1/token/revocation/consistency_sizes", func(c *gin.Context) {
-			olderRaw := c.Query("older")
-			newerRaw := c.Query("newer")
-			if olderRaw == "" || newerRaw == "" {
-				respondError(c, 400, "consistency_sizes_params_missing", "params_missing", "older/newer params missing", "rfc111:revocation_consistency", map[string]string{"older": olderRaw, "newer": newerRaw})
-				return
-			}
-			older, err1 := strconv.Atoi(olderRaw)
-			newer, err2 := strconv.Atoi(newerRaw)
-			if err1 != nil || err2 != nil || older < 0 || newer < 0 || older > newer {
-				respondError(c, 400, "consistency_sizes_params_invalid", "params_invalid", "older/newer params invalid", "rfc111:revocation_consistency", map[string]any{"older": olderRaw, "newer": newerRaw})
-				return
-			}
-			curLen := 0
-			if s.revocationChain != nil {
-				curLen = len(s.revocationChain.Events())
-			}
-			if older == newer && older == curLen {
-				c.JSON(200, gin.H{"success": true, "proof": gin.H{"trivial": true, "path": []any{}, "older": older, "newer": newer}})
-				return
-			}
-			respondError(c, 501, "consistency_proof_unavailable", "consistency_proof_unavailable", "consistency proof unavailable for sizes", "rfc111:revocation_consistency", map[string]any{"older": older, "newer": newer, "current_length": curLen})
-		})
+	// Size-based trivial consistency proof endpoint (prototype)
+	// /api/v1/token/revocation/consistency_sizes?older=<n>&newer=<m>
+	// When older==newer==current_length returns trivial proof object.
+	// Otherwise emits 501 consistency_proof_unavailable structured error.
+	s.router.GET("/api/v1/token/revocation/consistency_sizes", func(c *gin.Context) {
+		olderRaw := c.Query("older")
+		newerRaw := c.Query("newer")
+		if olderRaw == "" || newerRaw == "" {
+			respondError(c, 400, "consistency_sizes_params_missing", "params_missing", "older/newer params missing", "rfc111:revocation_consistency", map[string]string{"older": olderRaw, "newer": newerRaw})
+			return
+		}
+		older, err1 := strconv.Atoi(olderRaw)
+		newer, err2 := strconv.Atoi(newerRaw)
+		if err1 != nil || err2 != nil || older < 0 || newer < 0 || older > newer {
+			respondError(c, 400, "consistency_sizes_params_invalid", "params_invalid", "older/newer params invalid", "rfc111:revocation_consistency", map[string]any{"older": olderRaw, "newer": newerRaw})
+			return
+		}
+		curLen := 0
+		if s.revocationChain != nil {
+			curLen = len(s.revocationChain.Events())
+		}
+		if older == newer && older == curLen {
+			c.JSON(200, gin.H{"success": true, "proof": gin.H{"trivial": true, "path": []any{}, "older": older, "newer": newer}})
+			return
+		}
+		respondError(c, 501, "consistency_proof_unavailable", "consistency_proof_unavailable", "consistency proof unavailable for sizes", "rfc111:revocation_consistency", map[string]any{"older": older, "newer": newer, "current_length": curLen})
+	})
 
 	// RFC6962-style consistency proof v2 (logarithmic) endpoint
 	// /api/v1/token/revocation/consistency_v2?start=<tree_head_index>
@@ -6604,61 +6723,79 @@ func (s *BetaServer) routes() {
 		c.JSON(200, gin.H{"success": true, "chain_length": len(chain.Events()), "latest_tree_head": latest, "tree_heads_count": len(chain.TreeHeads()), "env": env})
 	})
 
-		// --- Delegation Graph Export (observability) ---
-		// GET /api/v1/beta/delegations/graph?format=json|dot
-		// Prototype snapshot of current delegation hierarchy. Until RFC0111 service exposes parent relationships
-		// we emit only flat nodes derived from internal status map. DOT output helps quick visualization.
-		s.router.GET("/api/v1/beta/delegations/graph", func(c *gin.Context) {
-			format := strings.ToLower(c.Query("format"))
-			if format == "" { format = "json" }
-			var nodes []gin.H
-			var edges []gin.H
-			// Collect statuses (legacy tracking map)
-			s.delegationStatusMu.RLock()
-			for id, st := range s.delegationStatus { nodes = append(nodes, gin.H{"id": id, "status": st}) }
-			s.delegationStatusMu.RUnlock()
-			// Attempt to enrich with parent-child edges from RFC0111 repository if service available
-			if svc, ok := s.rfc0111Service.(*rfc0111.Service); ok && svc != nil {
-				// The repository interface lacks a full scan; approximate by iterating over principals seen in status map (union grantor/grantee covered by map keys) then de-duplicating.
-				seen := make(map[string]*rfc0111.PowerOfAttorney)
-				principals := make(map[string]struct{})
-				for _, n := range nodes { principals[n["id"].(string)] = struct{}{} }
-				for p := range principals {
-					list, _ := svc.ListDelegations(p)
-					for _, poa := range list { if poa != nil { seen[poa.ID] = poa } }
-				}
-				// Build node map for quick existence test
-				exists := make(map[string]struct{})
-				for _, n := range nodes { exists[n["id"].(string)] = struct{}{} }
-				for _, poa := range seen {
-					// ensure node present
-					if _, ok2 := exists[poa.ID]; !ok2 { nodes = append(nodes, gin.H{"id": poa.ID, "status": string(poa.Status) }); exists[poa.ID] = struct{}{} }
-					if poa.ParentPOAID != "" {
-						if _, ok2 := exists[poa.ParentPOAID]; !ok2 { nodes = append(nodes, gin.H{"id": poa.ParentPOAID, "status": "unknown"}); exists[poa.ParentPOAID] = struct{}{} }
-						edges = append(edges, gin.H{"parent": poa.ParentPOAID, "child": poa.ID})
+	// --- Delegation Graph Export (observability) ---
+	// GET /api/v1/beta/delegations/graph?format=json|dot
+	// Prototype snapshot of current delegation hierarchy. Until RFC0111 service exposes parent relationships
+	// we emit only flat nodes derived from internal status map. DOT output helps quick visualization.
+	s.router.GET("/api/v1/beta/delegations/graph", func(c *gin.Context) {
+		format := strings.ToLower(c.Query("format"))
+		if format == "" {
+			format = "json"
+		}
+		var nodes []gin.H
+		var edges []gin.H
+		// Collect statuses (legacy tracking map)
+		s.delegationStatusMu.RLock()
+		for id, st := range s.delegationStatus {
+			nodes = append(nodes, gin.H{"id": id, "status": st})
+		}
+		s.delegationStatusMu.RUnlock()
+		// Attempt to enrich with parent-child edges from RFC0111 repository if service available
+		if svc, ok := s.rfc0111Service.(*rfc0111.Service); ok && svc != nil {
+			// The repository interface lacks a full scan; approximate by iterating over principals seen in status map (union grantor/grantee covered by map keys) then de-duplicating.
+			seen := make(map[string]*rfc0111.PowerOfAttorney)
+			principals := make(map[string]struct{})
+			for _, n := range nodes {
+				principals[n["id"].(string)] = struct{}{}
+			}
+			for p := range principals {
+				list, _ := svc.ListDelegations(p)
+				for _, poa := range list {
+					if poa != nil {
+						seen[poa.ID] = poa
 					}
 				}
 			}
-			if format == "json" {
-				c.JSON(200, gin.H{"success": true, "nodes": nodes, "edges": edges, "node_count": len(nodes), "edge_count": len(edges)})
-				return
+			// Build node map for quick existence test
+			exists := make(map[string]struct{})
+			for _, n := range nodes {
+				exists[n["id"].(string)] = struct{}{}
 			}
-			if format == "dot" {
-				var b strings.Builder
-				b.WriteString("digraph Delegations {\n")
-				b.WriteString("  rankdir=LR;\n")
-				for _, n := range nodes {
-					b.WriteString(fmt.Sprintf("  \"%s\" [label=\"%s (%s)\"];\n", n["id"], n["id"], n["status"]))
+			for _, poa := range seen {
+				// ensure node present
+				if _, ok2 := exists[poa.ID]; !ok2 {
+					nodes = append(nodes, gin.H{"id": poa.ID, "status": string(poa.Status)})
+					exists[poa.ID] = struct{}{}
 				}
-				for _, e := range edges {
-					b.WriteString(fmt.Sprintf("  \"%s\" -> \"%s\";\n", e["parent"], e["child"]))
+				if poa.ParentPOAID != "" {
+					if _, ok2 := exists[poa.ParentPOAID]; !ok2 {
+						nodes = append(nodes, gin.H{"id": poa.ParentPOAID, "status": "unknown"})
+						exists[poa.ParentPOAID] = struct{}{}
+					}
+					edges = append(edges, gin.H{"parent": poa.ParentPOAID, "child": poa.ID})
 				}
-				b.WriteString("}\n")
-				c.Data(200, "text/vnd.graphviz", []byte(b.String()))
-				return
 			}
-			c.JSON(400, gin.H{"success": false, "error": "unsupported_format"})
-		})
+		}
+		if format == "json" {
+			c.JSON(200, gin.H{"success": true, "nodes": nodes, "edges": edges, "node_count": len(nodes), "edge_count": len(edges)})
+			return
+		}
+		if format == "dot" {
+			var b strings.Builder
+			b.WriteString("digraph Delegations {\n")
+			b.WriteString("  rankdir=LR;\n")
+			for _, n := range nodes {
+				b.WriteString(fmt.Sprintf("  \"%s\" [label=\"%s (%s)\"];\n", n["id"], n["id"], n["status"]))
+			}
+			for _, e := range edges {
+				b.WriteString(fmt.Sprintf("  \"%s\" -> \"%s\";\n", e["parent"], e["child"]))
+			}
+			b.WriteString("}\n")
+			c.Data(200, "text/vnd.graphviz", []byte(b.String()))
+			return
+		}
+		c.JSON(400, gin.H{"success": false, "error": "unsupported_format"})
+	})
 
 	// Development-only EdDSA key rotation endpoint to facilitate multi-sig demos
 	// POST /api/v1/crypto/rotate?count=<n>&sign=1  (rotates n times; optionally signs new tree head)
@@ -6743,12 +6880,12 @@ func (s *BetaServer) routes() {
 	// Response (verify): {success:true, mode:"verify", valid:true, participant_count:N}
 	s.router.POST("/api/v1/crypto/bls/aggregate", func(c *gin.Context) {
 		var req struct {
-			Mode string `json:"mode"`
-			MessageB64 string `json:"message_b64"`
-			Participants int `json:"participants"`
-			AggregatedSignatureB64 string `json:"aggregated_signature_b64"`
-			PublicKeysB64 []string `json:"public_keys_b64"`
-			RequirePoP bool `json:"require_pop"`
+			Mode                   string   `json:"mode"`
+			MessageB64             string   `json:"message_b64"`
+			Participants           int      `json:"participants"`
+			AggregatedSignatureB64 string   `json:"aggregated_signature_b64"`
+			PublicKeysB64          []string `json:"public_keys_b64"`
+			RequirePoP             bool     `json:"require_pop"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(400, gin.H{"success": false, "code": "invalid_json", "message": err.Error()})
@@ -6766,7 +6903,9 @@ func (s *BetaServer) routes() {
 		switch req.Mode {
 		case "issue":
 			participants := req.Participants
-			if participants <= 0 { participants = 1 }
+			if participants <= 0 {
+				participants = 1
+			}
 			if participants > 64 { // safety upper bound
 				c.JSON(400, gin.H{"success": false, "code": "participants_invalid", "message": "participants too large"})
 				return
@@ -6779,13 +6918,19 @@ func (s *BetaServer) routes() {
 			agg := crypto.NewBLSSimpleAggregatorWithMetrics(msg, s.metrics)
 			for i := 0; i < participants; i++ {
 				k, kErr := crypto.GenerateBLSKey()
-				if kErr != nil { c.JSON(500, gin.H{"success": false, "code": "key_gen_failed"}); return }
+				if kErr != nil {
+					c.JSON(500, gin.H{"success": false, "code": "key_gen_failed"})
+					return
+				}
 				pk := k.Public.Serialize()
 				pubs = append(pubs, append([]byte(nil), pk...))
 				privs = append(privs, k.Private.Serialize())
 				sigBytes := k.Private.SignByte(msg).Serialize()
 				// Add to aggregator to trigger per-signature verification & metrics (latency recorded on Aggregate())
-				if err := agg.Add(pk, sigBytes); err != nil { c.JSON(500, gin.H{"success": false, "code": "aggregate_add_failed", "message": err.Error()}); return }
+				if err := agg.Add(pk, sigBytes); err != nil {
+					c.JSON(500, gin.H{"success": false, "code": "aggregate_add_failed", "message": err.Error()})
+					return
+				}
 				sigs = append(sigs, sigBytes)
 			}
 			// Proof-of-possession issuance variant
@@ -6793,17 +6938,26 @@ func (s *BetaServer) routes() {
 				challenges := make([]string, 0, participants)
 				for i := 0; i < participants; i++ {
 					buf := make([]byte, 32)
-					if _, err := crand.Read(buf); err != nil { c.JSON(500, gin.H{"success": false, "code": "challenge_gen_failed"}); return }
+					if _, err := crand.Read(buf); err != nil {
+						c.JSON(500, gin.H{"success": false, "code": "challenge_gen_failed"})
+						return
+					}
 					challenges = append(challenges, base64.StdEncoding.EncodeToString(buf))
 					// Metrics: one per challenge
-					if s.metrics != nil { s.metrics.IncBLSPoPChallengesIssued() }
+					if s.metrics != nil {
+						s.metrics.IncBLSPoPChallengesIssued()
+					}
 				}
 				encodedPubs := make([]string, 0, len(pubs))
-				for _, p := range pubs { encodedPubs = append(encodedPubs, base64.StdEncoding.EncodeToString(p)) }
+				for _, p := range pubs {
+					encodedPubs = append(encodedPubs, base64.StdEncoding.EncodeToString(p))
+				}
 				resp := gin.H{"success": true, "mode": "issue_pop", "participant_count": len(encodedPubs), "public_keys_b64": encodedPubs, "challenges_b64": challenges}
 				if allowPrivExport {
 					privOut := make([]string, 0, len(privs))
-					for _, pr := range privs { privOut = append(privOut, base64.StdEncoding.EncodeToString(pr)) }
+					for _, pr := range privs {
+						privOut = append(privOut, base64.StdEncoding.EncodeToString(pr))
+					}
 					resp["private_keys_b64"] = privOut
 				}
 				c.JSON(200, resp)
@@ -6811,24 +6965,40 @@ func (s *BetaServer) routes() {
 			}
 			// Standard aggregate issuance
 			aggSig, aggErr := agg.Aggregate()
-			if aggErr != nil { c.JSON(500, gin.H{"success": false, "code": "aggregate_failed", "message": aggErr.Error()}); return }
+			if aggErr != nil {
+				c.JSON(500, gin.H{"success": false, "code": "aggregate_failed", "message": aggErr.Error()})
+				return
+			}
 			encodedPubs := make([]string, 0, len(pubs))
-			for _, p := range pubs { encodedPubs = append(encodedPubs, base64.StdEncoding.EncodeToString(p)) }
+			for _, p := range pubs {
+				encodedPubs = append(encodedPubs, base64.StdEncoding.EncodeToString(p))
+			}
 			c.JSON(200, gin.H{"success": true, "mode": "issue", "aggregated_signature_b64": base64.StdEncoding.EncodeToString(aggSig), "public_keys_b64": encodedPubs, "participant_count": len(encodedPubs)})
 		case "verify":
-			if req.AggregatedSignatureB64 == "" { c.JSON(400, gin.H{"success": false, "code": "missing_aggregated_signature", "message": "aggregated_signature_b64 required"}); return }
+			if req.AggregatedSignatureB64 == "" {
+				c.JSON(400, gin.H{"success": false, "code": "missing_aggregated_signature", "message": "aggregated_signature_b64 required"})
+				return
+			}
 			aggSig, err := base64.StdEncoding.DecodeString(req.AggregatedSignatureB64)
-			if err != nil { c.JSON(400, gin.H{"success": false, "code": "aggregated_signature_decode_failed", "message": "invalid aggregated_signature_b64"}); return }
+			if err != nil {
+				c.JSON(400, gin.H{"success": false, "code": "aggregated_signature_decode_failed", "message": "invalid aggregated_signature_b64"})
+				return
+			}
 			pubKeys := make([][]byte, 0, len(req.PublicKeysB64))
 			for _, pkB64 := range req.PublicKeysB64 {
 				pkRaw, dErr := base64.StdEncoding.DecodeString(pkB64)
-				if dErr != nil { c.JSON(400, gin.H{"success": false, "code": "public_key_decode_failed", "message": "invalid public key base64"}); return }
+				if dErr != nil {
+					c.JSON(400, gin.H{"success": false, "code": "public_key_decode_failed", "message": "invalid public key base64"})
+					return
+				}
 				pubKeys = append(pubKeys, pkRaw)
 			}
 			agg := crypto.NewBLSSimpleAggregatorWithMetrics(msg, s.metrics)
 			valid := agg.Verify(msg, aggSig, pubKeys)
 			// Additionally record aggregate latency sample for verify path to satisfy latency count expectations.
-			if s.metrics != nil { s.metrics.ObserveMultiSignatureAggregateLatency(1 * time.Nanosecond) }
+			if s.metrics != nil {
+				s.metrics.ObserveMultiSignatureAggregateLatency(1 * time.Nanosecond)
+			}
 			c.JSON(200, gin.H{"success": true, "mode": "verify", "valid": valid, "participant_count": len(pubKeys)})
 		default:
 			c.JSON(400, gin.H{"success": false, "code": "invalid_mode", "message": "mode must be issue or verify"})
@@ -6880,23 +7050,48 @@ func (s *BetaServer) routes() {
 			c.JSON(400, gin.H{"success": false, "code": "invalid_json"})
 			return
 		}
-		if len(req.Pairs) == 0 { c.JSON(400, gin.H{"success": false, "code": "no_pairs"}); return }
+		if len(req.Pairs) == 0 {
+			c.JSON(400, gin.H{"success": false, "code": "no_pairs"})
+			return
+		}
 		failures := 0
 		for _, p := range req.Pairs {
 			pkRaw, err1 := base64.StdEncoding.DecodeString(p.PublicKeyB64)
 			sigRaw, err2 := base64.StdEncoding.DecodeString(p.SignatureB64)
 			chRaw, err3 := base64.StdEncoding.DecodeString(p.ChallengeB64)
-			if err1 != nil || err2 != nil || err3 != nil { failures++; if s.metrics != nil { s.metrics.IncBLSPoPVerificationFailures() }; continue }
+			if err1 != nil || err2 != nil || err3 != nil {
+				failures++
+				if s.metrics != nil {
+					s.metrics.IncBLSPoPVerificationFailures()
+				}
+				continue
+			}
 			// Deserialize and verify
 			var pk bls.PublicKey
-			if err := pk.Deserialize(pkRaw); err != nil { failures++; if s.metrics != nil { s.metrics.IncBLSPoPVerificationFailures() }; continue }
+			if err := pk.Deserialize(pkRaw); err != nil {
+				failures++
+				if s.metrics != nil {
+					s.metrics.IncBLSPoPVerificationFailures()
+				}
+				continue
+			}
 			var sig bls.Sign
-			if err := sig.Deserialize(sigRaw); err != nil { failures++; if s.metrics != nil { s.metrics.IncBLSPoPVerificationFailures() }; continue }
+			if err := sig.Deserialize(sigRaw); err != nil {
+				failures++
+				if s.metrics != nil {
+					s.metrics.IncBLSPoPVerificationFailures()
+				}
+				continue
+			}
 			if sig.VerifyByte(&pk, chRaw) {
-				if s.metrics != nil { s.metrics.IncBLSPoPVerifications() }
+				if s.metrics != nil {
+					s.metrics.IncBLSPoPVerifications()
+				}
 			} else {
 				failures++
-				if s.metrics != nil { s.metrics.IncBLSPoPVerificationFailures() }
+				if s.metrics != nil {
+					s.metrics.IncBLSPoPVerificationFailures()
+				}
 			}
 		}
 		valid := failures == 0
@@ -6979,9 +7174,9 @@ func (s *BetaServer) routes() {
 				path := wd + "/web/templates/index.html"
 				fmt.Fprintf(os.Stderr, "[debug] attempting disk index read: %s\n", path)
 				if b, err := os.ReadFile(path); err == nil {
-                                        c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
-                                        c.Header("Pragma", "no-cache")
-                                        c.Header("Expires", "0")
+					c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+					c.Header("Pragma", "no-cache")
+					c.Header("Expires", "0")
 					fmt.Fprintf(os.Stderr, "[debug] serving disk index.html (%d bytes)\n", len(b))
 					serveWithNonce(c, b)
 					return
@@ -7101,17 +7296,17 @@ func (s *BetaServer) routes() {
 		if filepath[0] == '/' {
 			filepath = filepath[1:]
 		}
-		
+
 		// Get working directory
 		wd, err := os.Getwd()
 		if err != nil {
 			c.String(500, "failed to get working directory")
 			return
 		}
-		
+
 		// Construct full path
 		fullPath := wd + "/docs/" + filepath
-		
+
 		// Read file
 		content, err := os.ReadFile(fullPath)
 		if err != nil {
@@ -7119,7 +7314,7 @@ func (s *BetaServer) routes() {
 			c.String(404, "documentation file not found")
 			return
 		}
-		
+
 		// Determine content type based on extension
 		contentType := "text/plain; charset=utf-8"
 		if len(filepath) > 3 && filepath[len(filepath)-3:] == ".md" {
@@ -7129,7 +7324,7 @@ func (s *BetaServer) routes() {
 		} else if len(filepath) > 4 && filepath[len(filepath)-4:] == ".pdf" {
 			contentType = "application/pdf"
 		}
-		
+
 		fmt.Fprintf(os.Stderr, "[docs] serving %s (%d bytes)\n", filepath, len(content))
 		c.Data(200, contentType, content)
 	})
@@ -9494,8 +9689,8 @@ func (s *BetaServer) apiTokenCreate(c *gin.Context) {
 		_, span = s.tracerProvider.StartSpan(c.Request.Context(), "token.issue")
 	}
 	var req struct {
-		TTL  int `json:"ttl_seconds"`
-		Meta any `json:"meta"`
+		TTL   int    `json:"ttl_seconds"`
+		Meta  any    `json:"meta"`
 		Nonce string `json:"nonce"`
 	}
 	_ = c.ShouldBindJSON(&req)
@@ -9523,7 +9718,9 @@ func (s *BetaServer) apiTokenCreate(c *gin.Context) {
 	// Simple replay protection: generate issuance nonce; reject if seen recently.
 	// Client-provided nonce (optional). When GAUTH_REPLAY_STRICT=1 enforce uniqueness.
 	issueNonce := req.Nonce
-	if issueNonce == "" { issueNonce = randomNonce(12) }
+	if issueNonce == "" {
+		issueNonce = randomNonce(12)
+	}
 	if s.replayStore != nil {
 		now := time.Now()
 		strict := os.Getenv("GAUTH_REPLAY_STRICT") == "1"
@@ -9531,7 +9728,9 @@ func (s *BetaServer) apiTokenCreate(c *gin.Context) {
 			// Strict mode returns specific error code nonce_reused (legacy tests expect this)
 			code := "replay"
 			detail := "issuance nonce reused"
-			if strict { code = "nonce_reused" }
+			if strict {
+				code = "nonce_reused"
+			}
 			c.JSON(409, gin.H{"success": false, "error": code, "detail": detail})
 			return
 		}
@@ -9583,9 +9782,13 @@ func (s *BetaServer) apiTokenCreate(c *gin.Context) {
 		signedJWT = signed
 	}
 	// Ensure audit log exists (tests may construct BetaServer manually without NewBetaServer)
-	if s.audit == nil { s.audit = NewAuditLog(500) }
+	if s.audit == nil {
+		s.audit = NewAuditLog(500)
+	}
 	s.audit.Append(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: "api", Action: "token_create", Resource: tok.ID + ":" + issueNonce, Outcome: "success"})
-	if s.events == nil { s.events = NewEventHub(200) }
+	if s.events == nil {
+		s.events = NewEventHub(200)
+	}
 	s.events.Emit(&Event{ID: randomNonce(6), At: time.Now(), Type: "token_created", Data: gin.H{"id": tok.ID}})
 	resp := gin.H{"success": true, "token": tok}
 	if signedJWT != "" {
@@ -10180,7 +10383,9 @@ func (s *BetaServer) apiDelegationStatusUpdate(c *gin.Context) {
 	if s.metrics != nil {
 		if req.NewStatus == statusPartiallyRevoked {
 			// Specialized metric counter for partially revoked delegations if memory metrics
-			if mm, ok := s.metrics.(*metrics.Memory); ok { mm.IncDelegationsPartiallyRevoked() }
+			if mm, ok := s.metrics.(*metrics.Memory); ok {
+				mm.IncDelegationsPartiallyRevoked()
+			}
 		}
 		s.metrics.IncDelegationStatusTransitions()
 		s.metrics.RecordDecision("delegation_status_update", "delegation:"+req.DelegationID, req.NewStatus)
@@ -10531,59 +10736,72 @@ func sanitizeCSV(s string) string {
 
 // --- Minimal capability diff snapshot ring buffer (test support) ---
 type capSnapshot struct {
-	Hash string
+	Hash         string
 	Capabilities []capability.Capability
 }
 
 type capSnapshots struct {
-	mu sync.RWMutex
-	entries []capSnapshot
+	mu       sync.RWMutex
+	entries  []capSnapshot
 	capacity int
 }
 
 func newCapSnapshots(capacity int) *capSnapshots { return &capSnapshots{capacity: capacity} }
 
 func (cs *capSnapshots) Add(caps []capability.Capability, hash string) {
-	if cs == nil { return }
-	cs.mu.Lock(); defer cs.mu.Unlock()
+	if cs == nil {
+		return
+	}
+	cs.mu.Lock()
+	defer cs.mu.Unlock()
 	// copy slice to avoid later mutation concerns
-	dup := make([]capability.Capability, len(caps)); copy(dup, caps)
+	dup := make([]capability.Capability, len(caps))
+	copy(dup, caps)
 	cs.entries = append(cs.entries, capSnapshot{Hash: hash, Capabilities: dup})
-	if cs.capacity > 0 && len(cs.entries) > cs.capacity { cs.entries = cs.entries[len(cs.entries)-cs.capacity:] }
+	if cs.capacity > 0 && len(cs.entries) > cs.capacity {
+		cs.entries = cs.entries[len(cs.entries)-cs.capacity:]
+	}
 }
 
 func (cs *capSnapshots) Get(hash string) (capSnapshot, bool) {
-	if cs == nil { return capSnapshot{}, false }
-	cs.mu.RLock(); defer cs.mu.RUnlock()
-	for i := len(cs.entries)-1; i >=0; i-- { // search newest first
-		if cs.entries[i].Hash == hash { return cs.entries[i], true }
+	if cs == nil {
+		return capSnapshot{}, false
+	}
+	cs.mu.RLock()
+	defer cs.mu.RUnlock()
+	for i := len(cs.entries) - 1; i >= 0; i-- { // search newest first
+		if cs.entries[i].Hash == hash {
+			return cs.entries[i], true
+		}
 	}
 	return capSnapshot{}, false
 }
 
 // initUIRevamp mounts minimal endpoints required by tests: /api/v1/errors/catalog and /ui
 func (s *BetaServer) initUIRevamp() {
-	if s.router == nil { return }
+	if s.router == nil {
+		return
+	}
 	// Error catalog (static minimal set). Supports weak ETag + conditional GET (304).
 	if !s.routeRegistered("/api/v1/errors/catalog") {
 		s.router.GET("/api/v1/errors/catalog", func(c *gin.Context) {
-		catalog := gin.H{"success": true, "entries": []gin.H{{"code": "attestation_invalid_json", "message": "Malformed JSON payload"}}}
-		payload, _ := json.Marshal(catalog)
-		sum := sha256.Sum256(payload)
-		etag := fmt.Sprintf("W/\"%x\"", sum[:4]) // short weak etag
-		if inm := c.GetHeader("If-None-Match"); inm != "" && inm == etag {
-			c.Status(http.StatusNotModified)
-			return
-		}
-		c.Header("ETag", etag)
-		c.Data(200, "application/json", payload)
+			catalog := gin.H{"success": true, "entries": []gin.H{{"code": "attestation_invalid_json", "message": "Malformed JSON payload"}}}
+			payload, _ := json.Marshal(catalog)
+			sum := sha256.Sum256(payload)
+			etag := fmt.Sprintf("W/\"%x\"", sum[:4]) // short weak etag
+			if inm := c.GetHeader("If-None-Match"); inm != "" && inm == etag {
+				c.Status(http.StatusNotModified)
+				return
+			}
+			c.Header("ETag", etag)
+			c.Data(200, "application/json", payload)
 		})
 	}
 	// Simple UI index placeholder
 	if !s.routeRegistered("/ui") {
 		s.router.GET("/ui", func(c *gin.Context) {
-		html := "<html><head><title>GAuth Beta Dashboard</title></head><body><h1>GAuth Beta Dashboard</h1></body></html>"
-		c.Data(200, "text/html; charset=utf-8", []byte(html))
+			html := "<html><head><title>GAuth Beta Dashboard</title></head><body><h1>GAuth Beta Dashboard</h1></body></html>"
+			c.Data(200, "text/html; charset=utf-8", []byte(html))
 		})
 	}
 	// Demo reactive throttle action (used by semantic_throttle_test)
@@ -10609,15 +10827,15 @@ func (s *BetaServer) initUIRevamp() {
 			if !wired {
 				anomaly := map[string]any{"rate_per_minute_60s": map[string]float64{}, "scores": map[string]any{}}
 				c.JSON(http.StatusOK, gin.H{
-					"wired": false,
-					"timestamp": time.Now().Format(time.RFC3339Nano),
-					"history": []map[string]any{},
-					"anomaly": anomaly,
-					"integrity_status": "unconfigured",
+					"wired":              false,
+					"timestamp":          time.Now().Format(time.RFC3339Nano),
+					"history":            []map[string]any{},
+					"anomaly":            anomaly,
+					"integrity_status":   "unconfigured",
 					"history_window_cap": s.semanticHistoryCap,
-					"prev_hash": "",
-					"current_hash": "",
-					"success": true,
+					"prev_hash":          "",
+					"current_hash":       "",
+					"success":            true,
 				})
 				return
 			}
@@ -10630,7 +10848,10 @@ func (s *BetaServer) initUIRevamp() {
 			}
 			// Append to history (retain cap)
 			s.semanticHistMu.Lock()
-			s.semanticHistory = append(s.semanticHistory, struct { At time.Time; Snapshot map[string]uint64 }{At: time.Now(), Snapshot: counters})
+			s.semanticHistory = append(s.semanticHistory, struct {
+				At       time.Time
+				Snapshot map[string]uint64
+			}{At: time.Now(), Snapshot: counters})
 			if s.semanticHistoryCap > 0 && len(s.semanticHistory) > s.semanticHistoryCap {
 				// drop oldest excess
 				over := len(s.semanticHistory) - s.semanticHistoryCap
@@ -10640,7 +10861,9 @@ func (s *BetaServer) initUIRevamp() {
 			historyJSON := make([]map[string]any, 0, len(s.semanticHistory))
 			for _, h := range s.semanticHistory {
 				entry := map[string]any{"timestamp": h.At.Format(time.RFC3339Nano)}
-				for k, v := range h.Snapshot { entry[k] = v }
+				for k, v := range h.Snapshot {
+					entry[k] = v
+				}
 				historyJSON = append(historyJSON, entry)
 			}
 			// Hash chain evolution (deterministic seed: count + first key/value)
@@ -10674,17 +10897,19 @@ func (s *BetaServer) initUIRevamp() {
 			s.semanticHistMu.Unlock()
 			// Anomaly map (scores: reuse counters as dummy values)
 			scores := map[string]any{}
-			for k, v := range counters { scores[k] = float64(v) }
+			for k, v := range counters {
+				scores[k] = float64(v)
+			}
 			anomaly := map[string]any{"rate_per_minute_60s": map[string]float64{}, "scores": scores}
 			c.JSON(http.StatusOK, gin.H{
-				"wired": true,
-				"counters": counters,
-				"history": historyJSON,
-				"anomaly": anomaly,
+				"wired":            true,
+				"counters":         counters,
+				"history":          historyJSON,
+				"anomaly":          anomaly,
 				"integrity_status": s.semanticIntegrityStatus,
-				"prev_hash": prevHash,
-				"current_hash": currentHash,
-				"success": true,
+				"prev_hash":        prevHash,
+				"current_hash":     currentHash,
+				"success":          true,
 			})
 		})
 	}
@@ -10692,23 +10917,27 @@ func (s *BetaServer) initUIRevamp() {
 	if !s.routeRegistered("/api/v1/beta/metrics/latency") {
 		s.router.GET("/api/v1/beta/metrics/latency", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{
-				"success": true,
+				"success":      true,
 				"generated_at": time.Now().Format(time.RFC3339Nano),
 				"histograms": gin.H{
 					"attestation_verify": gin.H{"p50": -1, "p95": -1, "p99": -1, "count": 0},
-					"rotation_summary": gin.H{"p50": -1, "p95": -1, "p99": -1, "count": 0},
+					"rotation_summary":   gin.H{"p50": -1, "p95": -1, "p99": -1, "count": 0},
 					"rfc0111_validation": gin.H{"p50": -1, "p95": -1, "p99": -1, "count": 0},
 				},
 			})
 		})
 	}
 	// Initialize snapshots buffer if absent
-	if s.capDiffSnapshots == nil { s.capDiffSnapshots = newCapSnapshots(50) }
+	if s.capDiffSnapshots == nil {
+		s.capDiffSnapshots = newCapSnapshots(50)
+	}
 }
 
 // registerRotationV2Endpoint mounts a simplified rotation summary V2 endpoint used by continuity tests.
 func (s *BetaServer) registerRotationV2Endpoint(r *gin.Engine) {
-	if r == nil { return }
+	if r == nil {
+		return
+	}
 	r.GET("/api/v1/rotation/summary/v2", func(c *gin.Context) {
 		art, verified, perAlg, failures, err := s.buildAndOptionallySignRotationV2()
 		if err != nil {
@@ -10717,20 +10946,26 @@ func (s *BetaServer) registerRotationV2Endpoint(r *gin.Engine) {
 		}
 		thresholdMet := art.ThresholdWeight > 0 && verified >= art.ThresholdWeight
 		resp := gin.H{"success": thresholdMet, "threshold_met": thresholdMet, "verified_weight": verified, "threshold_weight": art.ThresholdWeight, "artifact": art, "per_alg_weight": perAlg, "failures": failures, "continuity_latest_hash": art.CanonicalDigest}
-		if !thresholdMet { c.JSON(400, resp); return }
+		if !thresholdMet {
+			c.JSON(400, resp)
+			return
+		}
 		c.JSON(200, resp)
 	})
 }
 
 // RotationV2ContinuityUpdate records latest canonical digest (artifact hash) for continuity tests.
 func (s *BetaServer) RotationV2ContinuityUpdate(hash string) {
-	if s == nil || hash == "" { return }
+	if s == nil || hash == "" {
+		return
+	}
 	s.rotationV2LastHash = hash
 }
 
 // RotationV2LastHash returns last recorded artifact hash (empty if none set).
 func (s *BetaServer) RotationV2LastHash() string {
-	if s == nil { return "" }
+	if s == nil {
+		return ""
+	}
 	return s.rotationV2LastHash
 }
-

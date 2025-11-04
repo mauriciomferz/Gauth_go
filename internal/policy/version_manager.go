@@ -68,29 +68,29 @@ func ParseSemanticVersion(s string) (SemanticVersion, error) {
 
 // PolicyVersionMetadata contains comprehensive metadata for a policy version.
 type PolicyVersionMetadata struct {
-	BundleVersion       int             `json:"bundle_version"`        // Integer version from bundle
-	SemanticVersion     SemanticVersion `json:"semantic_version"`      // Semantic version
-	Name                string          `json:"name"`                  // Human-readable version name
-	Description         string          `json:"description"`           // Change description
-	Author              string          `json:"author"`                // Author/creator
-	EffectiveDate       time.Time       `json:"effective_date"`        // When version becomes active
-	SunsetDate          *time.Time      `json:"sunset_date,omitempty"` // When version is deprecated
-	Deprecated          bool            `json:"deprecated"`            // Deprecation flag
-	DeprecationReason   string          `json:"deprecation_reason,omitempty"`
-	BackwardCompatible  bool            `json:"backward_compatible"`    // Compatibility with previous version
-	MigrationRequired   bool            `json:"migration_required"`     // Requires data migration
-	MigrationScript     string          `json:"migration_script,omitempty"`
-	Tags                []string        `json:"tags,omitempty"`         // Version tags (e.g., "stable", "beta", "security-fix")
-	ChangeLog           []ChangeEntry   `json:"changelog,omitempty"`
-	RollbackAllowed     bool            `json:"rollback_allowed"`       // Can roll back to this version
-	RequiredApprovals   []string        `json:"required_approvals,omitempty"` // Required approvals for activation
-	ApprovalStatus      map[string]bool `json:"approval_status,omitempty"`    // Approval tracking
-	CreatedAt           time.Time       `json:"created_at"`
-	ActivatedAt         *time.Time      `json:"activated_at,omitempty"`
-	Hash                string          `json:"hash"`                   // Bundle hash
-	PreviousHash        string          `json:"previous_hash"`          // Previous bundle hash
-	ValidationErrors    []string        `json:"validation_errors,omitempty"`
-	ImpactAnalysis      *ImpactAnalysis `json:"impact_analysis,omitempty"`
+	BundleVersion      int             `json:"bundle_version"`        // Integer version from bundle
+	SemanticVersion    SemanticVersion `json:"semantic_version"`      // Semantic version
+	Name               string          `json:"name"`                  // Human-readable version name
+	Description        string          `json:"description"`           // Change description
+	Author             string          `json:"author"`                // Author/creator
+	EffectiveDate      time.Time       `json:"effective_date"`        // When version becomes active
+	SunsetDate         *time.Time      `json:"sunset_date,omitempty"` // When version is deprecated
+	Deprecated         bool            `json:"deprecated"`            // Deprecation flag
+	DeprecationReason  string          `json:"deprecation_reason,omitempty"`
+	BackwardCompatible bool            `json:"backward_compatible"` // Compatibility with previous version
+	MigrationRequired  bool            `json:"migration_required"`  // Requires data migration
+	MigrationScript    string          `json:"migration_script,omitempty"`
+	Tags               []string        `json:"tags,omitempty"` // Version tags (e.g., "stable", "beta", "security-fix")
+	ChangeLog          []ChangeEntry   `json:"changelog,omitempty"`
+	RollbackAllowed    bool            `json:"rollback_allowed"`             // Can roll back to this version
+	RequiredApprovals  []string        `json:"required_approvals,omitempty"` // Required approvals for activation
+	ApprovalStatus     map[string]bool `json:"approval_status,omitempty"`    // Approval tracking
+	CreatedAt          time.Time       `json:"created_at"`
+	ActivatedAt        *time.Time      `json:"activated_at,omitempty"`
+	Hash               string          `json:"hash"`          // Bundle hash
+	PreviousHash       string          `json:"previous_hash"` // Previous bundle hash
+	ValidationErrors   []string        `json:"validation_errors,omitempty"`
+	ImpactAnalysis     *ImpactAnalysis `json:"impact_analysis,omitempty"`
 }
 
 // ChangeEntry represents a single change in the changelog.
@@ -213,9 +213,9 @@ func (m *PolicyVersionManager) CreateVersion(ctx context.Context, bundle policy.
 		Timestamp:   time.Now(),
 		Success:     true,
 		Metadata: map[string]interface{}{
-			"name":               metadata.Name,
+			"name":                metadata.Name,
 			"backward_compatible": metadata.BackwardCompatible,
-			"hash":               metadata.Hash,
+			"hash":                metadata.Hash,
 		},
 	})
 
@@ -282,7 +282,7 @@ func (m *PolicyVersionManager) ActivateVersion(ctx context.Context, version int,
 		Success:     true,
 		Metadata: map[string]interface{}{
 			"previous_version": previousVersion,
-			"name":            metadata.Name,
+			"name":             metadata.Name,
 		},
 	})
 
@@ -363,8 +363,8 @@ func (m *PolicyVersionManager) RollbackVersion(ctx context.Context, targetVersio
 		Success:     true,
 		Metadata: map[string]interface{}{
 			"previous_version": currentVersion,
-			"reason":          reason,
-			"name":            metadata.Name,
+			"reason":           reason,
+			"name":             metadata.Name,
 		},
 		ImpactSummary: fmt.Sprintf("Rolled back from v%d to v%d", currentVersion, targetVersion),
 	})
@@ -443,6 +443,7 @@ func (m *PolicyVersionManager) GetActiveVersion() int {
 	defer m.mu.RUnlock()
 	return m.activeVersion
 }
+
 // CompareVersions compares two policy versions and returns the difference.
 func (m *PolicyVersionManager) CompareVersions(fromVersion, toVersion int) (*policy.PolicyDiff, error) {
 	diff, err := m.registry.Diff(fromVersion, toVersion)
@@ -619,11 +620,11 @@ func (m *PolicyVersionManager) ExportMetadata() ([]byte, error) {
 	defer m.mu.RUnlock()
 
 	export := struct {
-		ActiveVersion   int                                `json:"active_version"`
-		TotalVersions   int                                `json:"total_versions"`
-		VersionMetadata map[int]*PolicyVersionMetadata     `json:"version_metadata"`
-		ChainHashes     []string                           `json:"chain_hashes"`
-		ExportedAt      time.Time                          `json:"exported_at"`
+		ActiveVersion   int                            `json:"active_version"`
+		TotalVersions   int                            `json:"total_versions"`
+		VersionMetadata map[int]*PolicyVersionMetadata `json:"version_metadata"`
+		ChainHashes     []string                       `json:"chain_hashes"`
+		ExportedAt      time.Time                      `json:"exported_at"`
 	}{
 		ActiveVersion:   m.activeVersion,
 		TotalVersions:   len(m.versionMetadata),

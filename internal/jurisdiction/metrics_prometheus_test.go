@@ -18,7 +18,9 @@ func TestPrometheusMetricsEndpoint(t *testing.T) {
 	// Perform a sample enforcement to populate latency + counters.
 	claims := map[string]interface{}{"jurisdiction": "UNITED_STATES"}
 	_, err := integration.EnforceJurisdiction(context.Background(), "alice", "resource:x", "transfer", claims)
-	if err != nil { t.Fatalf("enforce: %v", err) }
+	if err != nil {
+		t.Fatalf("enforce: %v", err)
+	}
 
 	h := NewAPIHandler(integration)
 	r := gin.New()
@@ -33,14 +35,16 @@ func TestPrometheusMetricsEndpoint(t *testing.T) {
 		"gauth_jurisdiction_average_latency_ms",
 	} {
 		if !strings.Contains(body, metric) {
-			 t.Fatalf("expected metric %s in body", metric)
+			t.Fatalf("expected metric %s in body", metric)
 		}
 	}
 	// Ensure no empty content
-	if len(body) == 0 { t.Fatalf("empty metrics body") }
+	if len(body) == 0 {
+		t.Fatalf("empty metrics body")
+	}
 	// Latency should be >=0; enforcement sets EMA first sample.
 	if !strings.Contains(body, "gauth_jurisdiction_average_latency_ms") {
-		 t.Fatalf("latency metric missing")
+		t.Fatalf("latency metric missing")
 	}
 	// Clear env for isolation (if tests set external file)
 	os.Unsetenv("GAUTH_JURISDICTION_RULES_PATH")

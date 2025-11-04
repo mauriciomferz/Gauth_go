@@ -17,11 +17,11 @@ const AttestationDomainPrefix = "GAUTH_MODEL_LIMIT_ATTEST:"
 
 // Attestation mirrors the JSON structure necessary for verification (subset of full endpoint).
 type Attestation struct {
-	Success      bool   `json:"success"`
-	Configured   bool   `json:"configured"`
-	Reason       string `json:"reason,omitempty"`
-	Nonce        string `json:"nonce,omitempty"`
-	Snapshot     struct {
+	Success    bool   `json:"success"`
+	Configured bool   `json:"configured"`
+	Reason     string `json:"reason,omitempty"`
+	Nonce      string `json:"nonce,omitempty"`
+	Snapshot   struct {
 		Hash        string `json:"hash"`
 		GeneratedAt string `json:"generated_at"`
 	} `json:"snapshot"`
@@ -52,9 +52,9 @@ type Attestation struct {
 	} `json:"notarization,omitempty"`
 	DomainSignature string `json:"domain_signature,omitempty"`
 	DomainPrefix    string `json:"domain_prefix,omitempty"`
-	Signature string `json:"signature"`
-	SigKid    string `json:"sig_kid"`
-	SigMode   string `json:"sig_mode"`
+	Signature       string `json:"signature"`
+	SigKid          string `json:"sig_kid"`
+	SigMode         string `json:"sig_mode"`
 }
 
 // ReplayStrategy abstracts nonce replay protection.
@@ -83,7 +83,7 @@ type VerificationResult struct {
 // VerifyModelLimitsAttestation performs signature + nonce replay + basic notarization consistency verification.
 // It mirrors legacy behavior while centralizing logic under pkg/attest for RB7.
 // KeyFinder abstracts key lookup (allows tests to provide stub without full Manager).
-type KeyFinder interface { FindByID(id string) *crypto.Key }
+type KeyFinder interface{ FindByID(id string) *crypto.Key }
 
 func VerifyModelLimitsAttestation(att *Attestation, keyRegistry KeyFinder, replay ReplayStrategy, now time.Time) (VerificationResult, error) {
 	start := time.Now()
@@ -104,11 +104,11 @@ func VerifyModelLimitsAttestation(att *Attestation, keyRegistry KeyFinder, repla
 	}
 	// Reconstruct unsigned attestation (exclude signature fields)
 	unsigned := struct {
-		Success      bool   `json:"success"`
-		Configured   bool   `json:"configured"`
-		Reason       string `json:"reason,omitempty"`
-		Nonce        string `json:"nonce,omitempty"`
-		Snapshot     struct {
+		Success    bool   `json:"success"`
+		Configured bool   `json:"configured"`
+		Reason     string `json:"reason,omitempty"`
+		Nonce      string `json:"nonce,omitempty"`
+		Snapshot   struct {
 			Hash        string `json:"hash"`
 			GeneratedAt string `json:"generated_at"`
 		} `json:"snapshot"`

@@ -17,7 +17,7 @@ import (
 func FuzzBLSAggregateEndpoint(f *testing.F) {
 	// Seed with a few minimal valid cases.
 	seedMsg := base64.StdEncoding.EncodeToString([]byte("fuzz"))
-	seed := map[string]any{"mode":"issue","message_b64":seedMsg,"participants":2}
+	seed := map[string]any{"mode": "issue", "message_b64": seedMsg, "participants": 2}
 	b, _ := json.Marshal(seed)
 	f.Add(string(b))
 	f.Add(`{"mode":"verify","message_b64":"` + seedMsg + `","aggregated_signature_b64":"AAAA","public_keys_b64":["AAAA"]}`)
@@ -25,13 +25,19 @@ func FuzzBLSAggregateEndpoint(f *testing.F) {
 		mem := imetrics.NewMemory()
 		srv := NewBetaServerWithMetrics(":0", mem)
 		// Randomly decide small mutations if input looks like JSON.
-		if len(raw) > 2048 { raw = raw[:2048] } // bound size
+		if len(raw) > 2048 {
+			raw = raw[:2048]
+		} // bound size
 		// Occasionally craft a synthetic request if raw isn't JSON-y.
 		if raw == "" || raw[0] != '{' {
 			mode := "issue"
-			if rand.Intn(2) == 0 { mode = "verify" }
+			if rand.Intn(2) == 0 {
+				mode = "verify"
+			}
 			msg := base64.StdEncoding.EncodeToString([]byte("m"))
-			if rand.Intn(5) == 0 { msg = "%%%" } // invalid base64
+			if rand.Intn(5) == 0 {
+				msg = "%%%"
+			} // invalid base64
 			obj := map[string]any{"mode": mode, "message_b64": msg}
 			if mode == "issue" {
 				obj["participants"] = 1 + rand.Intn(4)

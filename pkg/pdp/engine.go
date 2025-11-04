@@ -28,7 +28,7 @@ type Obligation struct {
 	Attributes map[string]string
 	// Mandatory indicates the obligation must succeed; failure may convert an allow decision to deny
 	// when engine configured with denyOnMandatoryFailure.
-	Mandatory  bool
+	Mandatory bool
 }
 
 // EvaluationStep captures per-rule evaluation results for tracing.
@@ -142,9 +142,9 @@ type InMemoryEngine struct {
 	latencyBucketCounts []uint64          // per-bucket counts
 	externalMetrics     metrics.Metrics   // optional external metrics surface for decision labeling
 	// obligations execution (optional)
-	obligationExecutor obligations.Executor
-	obligationAuditPath string // JSONL audit file path (append-only)
-	denyOnMandatoryFailure bool // configuration: mandatory obligation failure flips allow->deny
+	obligationExecutor     obligations.Executor
+	obligationAuditPath    string // JSONL audit file path (append-only)
+	denyOnMandatoryFailure bool   // configuration: mandatory obligation failure flips allow->deny
 }
 
 // NewInMemoryEngine creates a new PDP engine with provided combining strategy.
@@ -239,37 +239,51 @@ func (e *InMemoryEngine) Evaluate(ctx context.Context, req Request) (Decision, e
 			end := time.Now()
 			dur := end.Sub(perObligationStart)
 			perObligationStart = end
-			if e.externalMetrics != nil { e.externalMetrics.ObserveObligationLatency(dur) }
+			if e.externalMetrics != nil {
+				e.externalMetrics.ObserveObligationLatency(dur)
+			}
 			if r.Success {
-				if e.externalMetrics != nil { e.externalMetrics.IncObligationsExecuted() }
+				if e.externalMetrics != nil {
+					e.externalMetrics.IncObligationsExecuted()
+				}
 			} else {
-				if e.externalMetrics != nil { e.externalMetrics.IncObligationsFailed() }
+				if e.externalMetrics != nil {
+					e.externalMetrics.IncObligationsFailed()
+				}
 				if i < len(mandatoryFlags) && mandatoryFlags[i] {
 					mandatoryFailures = append(mandatoryFailures, names[i])
-					if e.externalMetrics != nil { e.externalMetrics.IncMandatoryObligationFailures() }
+					if e.externalMetrics != nil {
+						e.externalMetrics.IncMandatoryObligationFailures()
+					}
 				}
 			}
 			if e.obligationAuditPath != "" {
 				auditRec := struct {
-					Timestamp   string  `json:"ts"`
-					Subject     string  `json:"subject"`
-					Action      string  `json:"action"`
-					Resource    string  `json:"resource"`
-					Allow       bool    `json:"allow"`
-					Obligation   string  `json:"obligation"`
-					Index       int     `json:"index"`
-					Success     bool    `json:"success"`
-					DurationMS  float64 `json:"duration_ms"`
-					Mandatory   bool    `json:"mandatory"`
-					Error       string  `json:"error,omitempty"`
+					Timestamp  string  `json:"ts"`
+					Subject    string  `json:"subject"`
+					Action     string  `json:"action"`
+					Resource   string  `json:"resource"`
+					Allow      bool    `json:"allow"`
+					Obligation string  `json:"obligation"`
+					Index      int     `json:"index"`
+					Success    bool    `json:"success"`
+					DurationMS float64 `json:"duration_ms"`
+					Mandatory  bool    `json:"mandatory"`
+					Error      string  `json:"error,omitempty"`
 				}{Timestamp: time.Now().UTC().Format(time.RFC3339Nano), Subject: req.Subject, Action: req.Action, Resource: req.Resource, Allow: dec.Allow, Obligation: r.Name, Index: i, Success: r.Success, DurationMS: float64(dur.Microseconds()) / 1000.0, Mandatory: i < len(mandatoryFlags) && mandatoryFlags[i]}
-				if r.Error != nil { auditRec.Error = r.Error.Error() }
+				if r.Error != nil {
+					auditRec.Error = r.Error.Error()
+				}
 				func() {
 					f, err := os.OpenFile(e.obligationAuditPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
-					if err != nil { return }
+					if err != nil {
+						return
+					}
 					defer func() { _ = f.Close() }()
 					enc, err := json.Marshal(auditRec)
-					if err != nil { return }
+					if err != nil {
+						return
+					}
 					_, _ = f.Write(append(enc, '\n'))
 				}()
 			}
@@ -290,9 +304,13 @@ func (e *InMemoryEngine) Evaluate(ctx context.Context, req Request) (Decision, e
 	}
 	if e.externalMetrics != nil {
 		out := outcomeDeny
-		if dec.Allow { out = outcomeAllow }
+		if dec.Allow {
+			out = outcomeAllow
+		}
 		e.externalMetrics.RecordDecision(req.Action, req.Resource, out)
-		if !dec.Allow { e.externalMetrics.IncUnauthorized() }
+		if !dec.Allow {
+			e.externalMetrics.IncUnauthorized()
+		}
 	}
 	return dec, nil
 }

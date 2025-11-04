@@ -75,7 +75,7 @@ func main() {
 	// Step 1: Generate board member keypairs
 	fmt.Println("📋 Step 1: Generating Board Member Keypairs")
 	fmt.Println("   Creating 5 board members with Ed25519 keys...")
-	
+
 	boardMembers := []BoardMember{
 		generateBoardMember("Alice Chen (CEO)"),
 		generateBoardMember("Bob Smith (CFO)"),
@@ -111,12 +111,12 @@ func main() {
 	fmt.Println("📝 Step 4: Creating Power of Attorney")
 	fmt.Println("   Authorization: High-value financial transaction")
 	fmt.Println("   Threshold: 3 of 5 signatures required")
-	
+
 	poa := &rfc0111.PowerOfAttorney{
-		ID:       "poa-board-approval-2025-001",
-		Grantor:  "Acme Corporation Board of Directors",
-		Grantee:  "Chief Financial Officer",
-		Scope:    []string{"authorize_wire_transfer", "approve_acquisition"},
+		ID:        "poa-board-approval-2025-001",
+		Grantor:   "Acme Corporation Board of Directors",
+		Grantee:   "Chief Financial Officer",
+		Scope:     []string{"authorize_wire_transfer", "approve_acquisition"},
 		Threshold: 3,
 		Signers: []string{
 			boardMembers[0].Name,
@@ -129,7 +129,7 @@ func main() {
 
 	ctx := context.Background()
 	expiresIn := 24 * time.Hour
-	
+
 	if err := manager.InitiateCollection(ctx, poa, expiresIn); err != nil {
 		log.Fatalf("Failed to initiate collection: %v", err)
 	}
@@ -166,10 +166,10 @@ func main() {
 	fmt.Println()
 	fmt.Println("📊 Step 7: Checking Threshold Status")
 	state, _ = manager.GetStatus(ctx, poa.ID)
-	
+
 	fmt.Printf("   Status: %s\n", state.Status)
 	fmt.Printf("   Collected: %d/%d signatures\n", len(state.Signatures), state.Threshold)
-	
+
 	if state.Status == multisig.StatusCompleted {
 		fmt.Println("   🎉 THRESHOLD MET - PoA ready for activation!")
 		if state.CompletedAt != nil {
@@ -193,7 +193,7 @@ func main() {
 	if err := manager.ActivatePoA(ctx, poa.ID); err != nil {
 		log.Fatalf("Failed to activate PoA: %v", err)
 	}
-	
+
 	state, _ = manager.GetStatus(ctx, poa.ID)
 	fmt.Printf("   Status: %s\n", state.Status)
 	if state.ActivatedAt != nil {
@@ -207,7 +207,7 @@ func main() {
 	signatures, _ := manager.GetSignatures(ctx, poa.ID)
 	fmt.Printf("   Retrieved %d signatures in RFC0111 POASignature format\n", len(signatures))
 	for signerID, sig := range signatures {
-		fmt.Printf("   • %s: Algorithm=%s, KeyID=%s\n", 
+		fmt.Printf("   • %s: Algorithm=%s, KeyID=%s\n",
 			signerID, sig.Algorithm, sig.KeyID)
 	}
 	fmt.Println()
@@ -236,9 +236,9 @@ func generateBoardMember(name string) BoardMember {
 	if err != nil {
 		log.Fatalf("Failed to generate key for %s: %v", name, err)
 	}
-	
+
 	keyID := fmt.Sprintf("key-%s", hex.EncodeToString(pub[:8]))
-	
+
 	return BoardMember{
 		Name:       name,
 		PrivateKey: priv,

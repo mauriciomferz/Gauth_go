@@ -234,7 +234,6 @@ func evalNumericComparison(clause string, attrs map[string]string) (bool, error)
 	return false, fmt.Errorf("unsupported clause: %s", clause)
 }
 
-
 // Utilities
 func splitCSV(s string) []string {
 	raw := strings.Split(s, ",")

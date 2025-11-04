@@ -139,9 +139,9 @@ func TestEnhancedValidatorServiceIntegration_DailyLimitEnforcement(t *testing.T)
 		Scope:    []string{"transaction:withdraw"},
 		Duration: 24 * time.Hour,
 		Restrictions: map[string]string{
-			"currency":          "USD",
-			"max_daily_amount":  "10000",
-			"max_amount":        "5000",
+			"currency":         "USD",
+			"max_daily_amount": "10000",
+			"max_amount":       "5000",
 		},
 	}
 
@@ -160,16 +160,16 @@ func TestEnhancedValidatorServiceIntegration_DailyLimitEnforcement(t *testing.T)
 	// Create another delegation with same ID (should get approaching limit warning)
 	// Note: For this test we're using the validator directly since CreateDelegationCtx creates new IDs
 	poa := &PowerOfAttorney{
-		ID:       resp1.POA.ID,
-		Grantor:  "alice",
-		Grantee:  "bob",
-		Scope:    []string{"transaction:withdraw"},
-		ValidFrom: time.Now(),
+		ID:         resp1.POA.ID,
+		Grantor:    "alice",
+		Grantee:    "bob",
+		Scope:      []string{"transaction:withdraw"},
+		ValidFrom:  time.Now(),
 		ValidUntil: time.Now().Add(24 * time.Hour),
 		Restrictions: map[string]string{
-			"currency":          "USD",
-			"max_daily_amount":  "10000",
-			"max_amount":        "5000",
+			"currency":         "USD",
+			"max_daily_amount": "10000",
+			"max_amount":       "5000",
 		},
 	}
 

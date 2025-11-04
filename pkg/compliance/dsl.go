@@ -9,12 +9,12 @@ import (
 
 // PoACondition represents a modular condition for PoA validation.
 type PoACondition struct {
-	Type   string // e.g. "amount", "time", "custom"
-	Expr   string // DSL expression, e.g. ">=1000", "between(09:00,17:00)", "custom:approved"
+	Type string // e.g. "amount", "time", "custom"
+	Expr string // DSL expression, e.g. ">=1000", "between(09:00,17:00)", "custom:approved"
 }
 
 // PoAValidator validates conditions using a simple DSL.
-type PoAValidator struct {}
+type PoAValidator struct{}
 
 func NewPoAValidator() *PoAValidator {
 	return &PoAValidator{}

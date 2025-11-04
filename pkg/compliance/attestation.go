@@ -28,10 +28,10 @@ func (v *DefaultAttestationVerifier) Verify(att Attestation) (bool, error) {
 
 // ArbitrationMetadata holds metadata for dispute resolution.
 type ArbitrationMetadata struct {
-	CaseID      string
-	Status      string // e.g., "open", "closed", "escalated"
-	Escalation  string // e.g., "manual", "auto"
-	Notes       string
+	CaseID     string
+	Status     string // e.g., "open", "closed", "escalated"
+	Escalation string // e.g., "manual", "auto"
+	Notes      string
 }
 
 // ArbitrationAPI provides hooks for dispute resolution.

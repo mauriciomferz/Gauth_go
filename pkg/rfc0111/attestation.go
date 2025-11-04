@@ -29,13 +29,15 @@ func (s *Service) IssueAttestationProof(ctx context.Context, statement, subject 
 	}
 	now := s.nowFn().UTC()
 	proof := &attest.AttestationProof{
-		Version:  "att/v1",
+		Version:   "att/v1",
 		Statement: statement,
-		Subject:  subject,
-		Issuer:   subject, // default issuer=subject; caller may override with wrapper later
-		IssuedAt: now,
+		Subject:   subject,
+		Issuer:    subject, // default issuer=subject; caller may override with wrapper later
+		IssuedAt:  now,
 	}
-	if duration > 0 { proof.ExpiresAt = now.Add(duration) }
+	if duration > 0 {
+		proof.ExpiresAt = now.Add(duration)
+	}
 	// Nonce for replay uniqueness
 	proof.Nonce = uuid.New().String()
 	// Optional chain binding: if issuance chain exists record current tip hash + algo if available.
@@ -43,26 +45,36 @@ func (s *Service) IssueAttestationProof(ctx context.Context, statement, subject 
 		proof.RawPOAChainHash = chainTip(s.issChain)
 		// Chain hash algorithm negotiation already recorded on envelopes; reuse env var logic.
 		alg := lookupRawPOAHashAlgo()
-		if alg != "" { proof.RawPOAChainAlgo = alg }
+		if alg != "" {
+			proof.RawPOAChainAlgo = alg
+		}
 	}
 	// Signer required
 	if s.signerProvider == nil {
-		if s.metrics != nil { s.metrics.IncAttestationProofIssueFailures() }
+		if s.metrics != nil {
+			s.metrics.IncAttestationProofIssueFailures()
+		}
 		return nil, rfc.New(rfc.ErrIntegrityFailure, "signer unavailable")
 	}
 	signer, err := s.signerProvider()
 	if err != nil || signer == nil {
-		if s.metrics != nil { s.metrics.IncAttestationProofIssueFailures() }
+		if s.metrics != nil {
+			s.metrics.IncAttestationProofIssueFailures()
+		}
 		return nil, rfc.New(rfc.ErrIntegrityFailure, fmt.Sprintf("signer error: %v", err))
 	}
 	dig, canon, derr := attest.CanonicalAttestationDigest(proof)
 	if derr != nil {
-		if s.metrics != nil { s.metrics.IncAttestationProofIssueFailures() }
+		if s.metrics != nil {
+			s.metrics.IncAttestationProofIssueFailures()
+		}
 		return nil, rfc.New(rfc.ErrIntegrityFailure, fmt.Sprintf("canonicalization failed: %v", derr))
 	}
 	sigBytes, serr := signer.Sign(canon)
 	if serr != nil {
-		if s.metrics != nil { s.metrics.IncAttestationProofIssueFailures() }
+		if s.metrics != nil {
+			s.metrics.IncAttestationProofIssueFailures()
+		}
 		return nil, rfc.New(rfc.ErrIntegrityFailure, fmt.Sprintf("sign failed: %v", serr))
 	}
 	proof.DigestHex = dig
@@ -70,7 +82,9 @@ func (s *Service) IssueAttestationProof(ctx context.Context, statement, subject 
 	proof.Algorithm = signer.Algorithm()
 	proof.KeyID = signer.KeyID()
 	proof.Signature = base64.StdEncoding.EncodeToString(sigBytes)
-	if s.metrics != nil { s.metrics.IncAttestationProofIssued() }
+	if s.metrics != nil {
+		s.metrics.IncAttestationProofIssued()
+	}
 	return proof, nil
 }
 
@@ -113,35 +127,47 @@ func (s *Service) VerifyAttestationProof(ctx context.Context, proof *attest.Atte
 	}
 	dig, canon, derr := attest.CanonicalAttestationDigest(proof)
 	if derr != nil {
-		if s.metrics != nil { s.metrics.IncAttestationProofVerificationFailures() }
+		if s.metrics != nil {
+			s.metrics.IncAttestationProofVerificationFailures()
+		}
 		return rfc.New(rfc.ErrIntegrityFailure, "canonicalization failed")
 	}
 	if dig != proof.DigestHex {
 		if s.metrics != nil {
 			s.metrics.IncAttestationProofDigestMismatch()
-			 s.metrics.IncAttestationProofVerificationFailures()
+			s.metrics.IncAttestationProofVerificationFailures()
 		}
 		return rfc.New(rfc.ErrIntegrityFailure, "digest mismatch")
 	}
 	// Dispatch verification through registered algorithm
 	algo := proof.Algorithm
-	if algo == "" { algo = cr.AlgoEd25519 }
+	if algo == "" {
+		algo = cr.AlgoEd25519
+	}
 	if cr.GetAlgorithm(algo) == nil {
-		if s.metrics != nil { s.metrics.IncAttestationProofVerificationFailures() }
+		if s.metrics != nil {
+			s.metrics.IncAttestationProofVerificationFailures()
+		}
 		return rfc.New(rfc.ErrIntegrityFailure, "unsupported algorithm")
 	}
 	if s.keyProvider == nil {
-		if s.metrics != nil { s.metrics.IncAttestationProofVerificationFailures() }
+		if s.metrics != nil {
+			s.metrics.IncAttestationProofVerificationFailures()
+		}
 		return rfc.New(rfc.ErrIntegrityFailure, "key provider unavailable")
 	}
 	err := cr.VerifyAlgorithm(algo, canon, proof.Signature, proof.KeyID, s.keyProvider)
 	if err != nil {
 		if errors.Is(err, cr.ErrUnknownKey) {
 			// Unknown key treated as integrity_failure (strict posture for attestation)
-			if s.metrics != nil { s.metrics.IncAttestationProofVerificationFailures() }
+			if s.metrics != nil {
+				s.metrics.IncAttestationProofVerificationFailures()
+			}
 			return rfc.New(rfc.ErrIntegrityFailure, "public key missing")
 		}
-		if s.metrics != nil { s.metrics.IncAttestationProofVerificationFailures() }
+		if s.metrics != nil {
+			s.metrics.IncAttestationProofVerificationFailures()
+		}
 		return rfc.New(rfc.ErrIntegrityFailure, "signature verification failed")
 	}
 	if s.metrics != nil {

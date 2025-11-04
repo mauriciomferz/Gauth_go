@@ -7,16 +7,16 @@ import (
 
 // WALRecord represents a write-ahead log entry for replay store operations.
 type WALRecord struct {
-	Op      string // e.g., "Put", "Delete"
-	Key     []byte
-	Value   []byte
-	TS      int64  // Unix timestamp
+	Op    string // e.g., "Put", "Delete"
+	Key   []byte
+	Value []byte
+	TS    int64 // Unix timestamp
 }
 
 // WALStore provides write-ahead logging for replay store durability.
 type WALStore struct {
-	file   *os.File
-	mu     sync.Mutex
+	file *os.File
+	mu   sync.Mutex
 }
 
 // NewWALStore creates a new WALStore backed by the given file path.

@@ -18,13 +18,15 @@ func TestScopeInheritanceAdvanced(t *testing.T) {
 	memLogger := audit.NewMemoryLogger(nil)
 	svc := NewService(memLogger, &allowAllAuthorizer{})
 	root, err := svc.CreateDelegation(DelegationRequest{Grantor: "alice", Grantee: "bob", Scope: []string{"finance.read", "re:^audit\\.[a-z]+\\.write$"}, Duration: time.Hour})
-	if err != nil { t.Fatalf("root create failed: %v", err) }
+	if err != nil {
+		t.Fatalf("root create failed: %v", err)
+	}
 	// Regex covers audit.log.write
 	if _, err := svc.CreateDelegation(DelegationRequest{Grantor: "bob", Grantee: "carol", Scope: []string{"audit.log.write"}, Duration: time.Hour, ParentPOAID: root.POA.ID}); err != nil {
-		 t.Fatalf("expected regex covered scope allowed: %v", err)
+		t.Fatalf("expected regex covered scope allowed: %v", err)
 	}
 	// Regex should not cover audit.log.delete (pattern expects write)
 	if _, err := svc.CreateDelegation(DelegationRequest{Grantor: "bob", Grantee: "dave", Scope: []string{"audit.log.delete"}, Duration: time.Hour, ParentPOAID: root.POA.ID}); err == nil {
-		 t.Fatalf("expected audit.log.delete to be rejected (not covered by regex pattern)")
+		t.Fatalf("expected audit.log.delete to be rejected (not covered by regex pattern)")
 	}
 }

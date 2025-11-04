@@ -22,7 +22,9 @@ var ErrRFC3161NotImplemented = errors.New("rfc3161 provider not implemented")
 // 3. Parse TimeStampResp DER, extract genTime, serialNumber, tsa certificate.
 // 4. Validate PKI chain & signature; embed selected fields in Receipt.
 func (p *RFC3161Provider) Notarize(hash string) (Receipt, error) {
-	if hash == "" { return Receipt{}, errors.New("hash required") }
+	if hash == "" {
+		return Receipt{}, errors.New("hash required")
+	}
 	start := time.Now()
 	r := Receipt{
 		Hash:           hash,

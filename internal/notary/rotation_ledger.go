@@ -146,7 +146,9 @@ func (l *RotationLedger) HeadHash() string { return l.head }
 // ConfigureEd25519Signer enables RB5 per-entry signatures for future appends.
 // Existing entries remain unsigned and are still valid unless strict mode enforced elsewhere.
 func (l *RotationLedger) ConfigureEd25519Signer(priv ed25519.PrivateKey, kid string) {
-	if len(priv) != ed25519.PrivateKeySize { return }
+	if len(priv) != ed25519.PrivateKeySize {
+		return
+	}
 	l.signerPriv = priv
 	l.signerKid = kid
 }
@@ -165,7 +167,9 @@ func VerifyRotationLedger(entries []RotationLedgerRecord, strict bool, pubResolv
 			continue
 		}
 		expected := fmt.Sprintf("%x", sha256Sum(prev, msg))
-		if expected != rec.Hash { mismatches++ }
+		if expected != rec.Hash {
+			mismatches++
+		}
 		// Signature verification
 		if rec.Signature != "" && rec.Kid != "" && rec.Mode == rotationModeEdDSA {
 			pub := pubResolver(rec.Kid)
@@ -206,8 +210,8 @@ type RotationSummary struct {
 	Signature string `json:"signature,omitempty"`
 	Mode      string `json:"mode,omitempty"`
 	// Multi-signature extensions (beta)
-	Threshold       int                `json:"threshold,omitempty"`
-	SatisfiedWeight int                `json:"satisfied_weight,omitempty"`
+	Threshold       int                 `json:"threshold,omitempty"`
+	SatisfiedWeight int                 `json:"satisfied_weight,omitempty"`
 	Signatures      []RotationSignature `json:"signatures,omitempty"`
 }
 

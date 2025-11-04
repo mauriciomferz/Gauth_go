@@ -7,7 +7,7 @@ import (
 
 func TestDefaultCascadeConfig(t *testing.T) {
 	config := DefaultCascadeConfig()
-	
+
 	if config.Enabled {
 		t.Error("default config should be disabled")
 	}
@@ -149,10 +149,10 @@ func TestLoadCascadeConfigFromEnv(t *testing.T) {
 
 func TestCascadeConfigMethods(t *testing.T) {
 	tests := []struct {
-		name   string
-		config CascadeConfig
-		valid  bool
-		should bool
+		name      string
+		config    CascadeConfig
+		valid     bool
+		should    bool
 		unlimited bool
 	}{
 		{

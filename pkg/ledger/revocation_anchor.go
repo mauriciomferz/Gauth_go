@@ -30,7 +30,7 @@ func (s *DefaultRevocationAnchorService) AnchorChainTip(chainTipHash []byte, act
 	anchoredAt := time.Now().UTC().Format(time.RFC3339)
 	payloadObj := map[string]interface{}{
 		"chain_tip_hash": base64.RawURLEncoding.EncodeToString(chainTipHash),
-		"anchored_at": anchoredAt,
+		"anchored_at":    anchoredAt,
 	}
 
 	// Canonical JSON for signing
@@ -39,14 +39,13 @@ func (s *DefaultRevocationAnchorService) AnchorChainTip(chainTipHash []byte, act
 		return fmt.Errorf("payload marshal failed: %w", err)
 	}
 
-
 	sig := ed25519.Sign(activeKey, payloadBytes)
 
 	anchorReq := map[string]interface{}{
 		"chain_tip_hash": payloadObj["chain_tip_hash"],
-		"anchored_at": anchoredAt,
-		"signature": base64.StdEncoding.EncodeToString(sig),
-		"public_key": base64.StdEncoding.EncodeToString(publicKey),
+		"anchored_at":    anchoredAt,
+		"signature":      base64.StdEncoding.EncodeToString(sig),
+		"public_key":     base64.StdEncoding.EncodeToString(publicKey),
 	}
 
 	anchorBytes, err := json.Marshal(anchorReq)

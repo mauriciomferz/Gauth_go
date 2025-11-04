@@ -22,16 +22,16 @@ type PrivateKey []byte
 
 // SignatureAlgorithm defines pluggable signing primitives.
 type SignatureAlgorithm interface {
-    Name() string
-    KeyGen() (PublicKey, PrivateKey, error)
-    Sign(priv PrivateKey, msg []byte) ([]byte, error)
-    Verify(pub PublicKey, msg []byte, sig []byte) bool
+	Name() string
+	KeyGen() (PublicKey, PrivateKey, error)
+	Sign(priv PrivateKey, msg []byte) ([]byte, error)
+	Verify(pub PublicKey, msg []byte, sig []byte) bool
 }
 
 // registry maintains a map of supported algorithms.
 type registry struct {
-    mu    sync.RWMutex
-    algos map[string]SignatureAlgorithm
+	mu    sync.RWMutex
+	algos map[string]SignatureAlgorithm
 }
 
 // AlgorithmRegistry is the global default registry instance.
@@ -39,32 +39,32 @@ var AlgorithmRegistry = &registry{algos: make(map[string]SignatureAlgorithm)}
 
 // Register adds a new algorithm if not already present.
 func Register(algo SignatureAlgorithm) error {
-    AlgorithmRegistry.mu.Lock()
-    defer AlgorithmRegistry.mu.Unlock()
-    if _, exists := AlgorithmRegistry.algos[algo.Name()]; exists {
-        return errors.New("signalgo: algorithm already registered: " + algo.Name())
-    }
-    AlgorithmRegistry.algos[algo.Name()] = algo
-    return nil
+	AlgorithmRegistry.mu.Lock()
+	defer AlgorithmRegistry.mu.Unlock()
+	if _, exists := AlgorithmRegistry.algos[algo.Name()]; exists {
+		return errors.New("signalgo: algorithm already registered: " + algo.Name())
+	}
+	AlgorithmRegistry.algos[algo.Name()] = algo
+	return nil
 }
 
 // Get retrieves an algorithm by name.
 func Get(name string) (SignatureAlgorithm, bool) {
-    AlgorithmRegistry.mu.RLock()
-    defer AlgorithmRegistry.mu.RUnlock()
-    a, ok := AlgorithmRegistry.algos[name]
-    return a, ok
+	AlgorithmRegistry.mu.RLock()
+	defer AlgorithmRegistry.mu.RUnlock()
+	a, ok := AlgorithmRegistry.algos[name]
+	return a, ok
 }
 
 // List returns the names of registered algorithms.
 func List() []string {
-    AlgorithmRegistry.mu.RLock()
-    defer AlgorithmRegistry.mu.RUnlock()
-    out := make([]string, 0, len(AlgorithmRegistry.algos))
-    for k := range AlgorithmRegistry.algos {
-        out = append(out, k)
-    }
-    return out
+	AlgorithmRegistry.mu.RLock()
+	defer AlgorithmRegistry.mu.RUnlock()
+	out := make([]string, 0, len(AlgorithmRegistry.algos))
+	for k := range AlgorithmRegistry.algos {
+		out = append(out, k)
+	}
+	return out
 }
 
 // ed25519Algorithm implements SignatureAlgorithm for Ed25519.
@@ -73,28 +73,28 @@ type ed25519Algorithm struct{}
 func (e ed25519Algorithm) Name() string { return "Ed25519" }
 
 func (e ed25519Algorithm) KeyGen() (PublicKey, PrivateKey, error) {
-    pub, priv, err := ed25519.GenerateKey(rand.Reader)
-    if err != nil {
-        return nil, nil, err
-    }
-    return PublicKey(pub), PrivateKey(priv), nil
+	pub, priv, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		return nil, nil, err
+	}
+	return PublicKey(pub), PrivateKey(priv), nil
 }
 
 func (e ed25519Algorithm) Sign(priv PrivateKey, msg []byte) ([]byte, error) {
-    if len(priv) != ed25519.PrivateKeySize {
-        return nil, errors.New("signalgo: invalid ed25519 private key length")
-    }
-    return ed25519.Sign(ed25519.PrivateKey(priv), msg), nil
+	if len(priv) != ed25519.PrivateKeySize {
+		return nil, errors.New("signalgo: invalid ed25519 private key length")
+	}
+	return ed25519.Sign(ed25519.PrivateKey(priv), msg), nil
 }
 
 func (e ed25519Algorithm) Verify(pub PublicKey, msg []byte, sig []byte) bool {
-    if len(pub) != ed25519.PublicKeySize {
-        return false
-    }
-    return ed25519.Verify(ed25519.PublicKey(pub), msg, sig)
+	if len(pub) != ed25519.PublicKeySize {
+		return false
+	}
+	return ed25519.Verify(ed25519.PublicKey(pub), msg, sig)
 }
 
 // init registers default algorithms.
 func init() {
-    _ = Register(ed25519Algorithm{})
+	_ = Register(ed25519Algorithm{})
 }

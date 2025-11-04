@@ -13,7 +13,10 @@ import (
 func TestMultiSigDomainSeparationDeterminism(t *testing.T) {
 	basePOA := &PowerOfAttorney{ID: "p1", Grantor: "g1", Grantee: "g2", Scope: []string{"read", "write"}, Restrictions: map[string]string{"env": "dev"}, ValidFrom: time.Unix(0, 0).UTC(), ValidUntil: time.Unix(3600, 0).UTC(), CreatedAt: time.Unix(5, 0).UTC(), Threshold: 2, Signers: []string{"A", "B", "C"}}
 	// Permutations of the same weight mapping inserted in different orders must yield identical digest.
-	type weightKV struct{ k string; v int }
+	type weightKV struct {
+		k string
+		v int
+	}
 	permuted := [][]weightKV{
 		{{"A", 3}, {"B", 1}, {"C", 2}},
 		{{"C", 2}, {"A", 3}, {"B", 1}},
@@ -87,16 +90,24 @@ func TestMultiSigWeightsSortingProperty(t *testing.T) {
 	// Swap pair insertion order
 	swapped := []string{"S2", "S1", "S3", "S4"}
 	w2 := map[string]int{}
-	for _, k := range swapped { w2[k] = canonicalWeights[k] }
+	for _, k := range swapped {
+		w2[k] = canonicalWeights[k]
+	}
 	basePOA.Weights = w2
 	d2, _, err := CanonicalPOADigest(basePOA)
-	if err != nil { t.Fatalf("digest err: %v", err) }
-	if d2 != baseDigest { t.Fatalf("digest changed after swapped insertion order") }
+	if err != nil {
+		t.Fatalf("digest err: %v", err)
+	}
+	if d2 != baseDigest {
+		t.Fatalf("digest changed after swapped insertion order")
+	}
 	// Alter a weight value -> digest must change
-	altered := map[string]int{"S1":5, "S2":1, "S3":9, "S4":2}
+	altered := map[string]int{"S1": 5, "S2": 1, "S3": 9, "S4": 2}
 	basePOA.Weights = altered
 	dAlter, _, _ := CanonicalPOADigest(basePOA)
-	if dAlter == baseDigest { t.Fatalf("digest unchanged after weight value alteration") }
+	if dAlter == baseDigest {
+		t.Fatalf("digest unchanged after weight value alteration")
+	}
 }
 
 // randomString and helpers moved to separate test utilities file to avoid duplicate package declaration.

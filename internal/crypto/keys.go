@@ -111,23 +111,23 @@ func NewManager(ttl time.Duration) (*Manager, error) {
 		fmt.Fprintf(os.Stderr, "[crypto] initial save failed: %v\n", err)
 	}
 	// Optional auto-rotation scheduler: if GAUTH_EDDSA_AUTO_ROTATE=1 run background ticker
-       if os.Getenv("GAUTH_EDDSA_AUTO_ROTATE") == "1" {
-	       interval := m.ttl / 2
-	       if envInterval := os.Getenv("GAUTH_EDDSA_ROTATE_INTERVAL"); envInterval != "" {
-		       if parsed, err := time.ParseDuration(envInterval); err == nil {
-			       interval = parsed
-		       } else {
-			       fmt.Fprintf(os.Stderr, "[crypto] invalid GAUTH_EDDSA_ROTATE_INTERVAL: %v\n", err)
-		       }
-	       } else if interval < time.Minute {
-		       interval = time.Minute
-	       }
-	       fmt.Fprintf(os.Stderr, "[crypto] NewManager: about to launch auto-rotation scheduler goroutine with interval %v\n", interval)
-	       go func() {
-		       fmt.Fprintf(os.Stderr, "[crypto] NewManager: auto-rotation scheduler goroutine launched\n")
-		       m.runScheduler(interval)
-	       }()
-	       fmt.Fprintf(os.Stderr, "[crypto] NewManager: goroutine launch line completed\n")
+	if os.Getenv("GAUTH_EDDSA_AUTO_ROTATE") == "1" {
+		interval := m.ttl / 2
+		if envInterval := os.Getenv("GAUTH_EDDSA_ROTATE_INTERVAL"); envInterval != "" {
+			if parsed, err := time.ParseDuration(envInterval); err == nil {
+				interval = parsed
+			} else {
+				fmt.Fprintf(os.Stderr, "[crypto] invalid GAUTH_EDDSA_ROTATE_INTERVAL: %v\n", err)
+			}
+		} else if interval < time.Minute {
+			interval = time.Minute
+		}
+		fmt.Fprintf(os.Stderr, "[crypto] NewManager: about to launch auto-rotation scheduler goroutine with interval %v\n", interval)
+		go func() {
+			fmt.Fprintf(os.Stderr, "[crypto] NewManager: auto-rotation scheduler goroutine launched\n")
+			m.runScheduler(interval)
+		}()
+		fmt.Fprintf(os.Stderr, "[crypto] NewManager: goroutine launch line completed\n")
 	}
 	// Fire initial callback (prev nil) outside lock
 	if OnKeyRotated != nil && m.active != nil {
@@ -185,13 +185,18 @@ func (m *Manager) Rotate() (*Key, error) {
 		ctx := context.Background()
 		_, span = RotationTracerProvider.StartSpan(ctx, "rotation.perform")
 		if span != nil {
-			if prev != nil { span.SetTag("prev_kid", prev.ID) }
+			if prev != nil {
+				span.SetTag("prev_kid", prev.ID)
+			}
 			span.SetTag("ttl_hours", int(m.ttl.Hours()))
 			span.SetTag("history_size", len(m.history))
 		}
 	}
 	if err := m.rotateLocked(); err != nil {
-		if span != nil { span.SetTag("error", err.Error()); span.End() }
+		if span != nil {
+			span.SetTag("error", err.Error())
+			span.End()
+		}
 		m.mu.Unlock()
 		fmt.Fprintf(os.Stderr, "[crypto] Rotate failed: %v\n", err)
 		return nil, err
@@ -218,25 +223,25 @@ func (m *Manager) Rotate() (*Key, error) {
 
 // runScheduler periodically rotates keys at given interval until stopCh closed.
 func (m *Manager) runScheduler(interval time.Duration) {
-       ticker := time.NewTicker(interval)
-       defer ticker.Stop()
-       fmt.Fprintf(os.Stderr, "[crypto] runScheduler started with interval %v\n", interval)
-       tickCount := 0
-       for {
-	       select {
-	       case <-ticker.C:
-		       tickCount++
-		       fmt.Fprintf(os.Stderr, "[crypto] runScheduler tick #%d: attempting rotation\n", tickCount)
-		       if _, err := m.Rotate(); err != nil {
-			       fmt.Fprintf(os.Stderr, "[crypto] scheduled rotation failed: %v\n", err)
-		       } else {
-			       fmt.Fprintf(os.Stderr, "[crypto] scheduled rotation succeeded\n")
-		       }
-	       case <-m.stopCh:
-		       fmt.Fprintf(os.Stderr, "[crypto] runScheduler stopped after %d ticks\n", tickCount)
-		       return
-	       }
-       }
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+	fmt.Fprintf(os.Stderr, "[crypto] runScheduler started with interval %v\n", interval)
+	tickCount := 0
+	for {
+		select {
+		case <-ticker.C:
+			tickCount++
+			fmt.Fprintf(os.Stderr, "[crypto] runScheduler tick #%d: attempting rotation\n", tickCount)
+			if _, err := m.Rotate(); err != nil {
+				fmt.Fprintf(os.Stderr, "[crypto] scheduled rotation failed: %v\n", err)
+			} else {
+				fmt.Fprintf(os.Stderr, "[crypto] scheduled rotation succeeded\n")
+			}
+		case <-m.stopCh:
+			fmt.Fprintf(os.Stderr, "[crypto] runScheduler stopped after %d ticks\n", tickCount)
+			return
+		}
+	}
 }
 
 // Stop halts the background rotation scheduler if running.
@@ -290,53 +295,53 @@ func (m *Manager) emitRotationLog(prev, curr *Key) {
 	if prevHash != "" {
 		rec["prev_hash"] = prevHash
 	}
-       // Compute hash over canonical JSON of record without hash/signature; add after computation.
-       keys := make([]string, 0, len(rec))
-       for k := range rec {
-	       keys = append(keys, k)
-       }
-       sort.Strings(keys)
-       buf := bytes.NewBuffer(nil)
-       buf.WriteByte('{')
-       for i, k := range keys {
-	       v, _ := json.Marshal(rec[k])
-	       buf.WriteString("\"")
-	       buf.WriteString(k)
-	       buf.WriteString("\":")
-	       buf.Write(v)
-	       if i < len(keys)-1 {
-		       buf.WriteByte(',')
-	       }
-       }
-       buf.WriteByte('}')
-       h := sha256.Sum256(buf.Bytes())
-       rec["hash"] = base64.RawURLEncoding.EncodeToString(h[:])
+	// Compute hash over canonical JSON of record without hash/signature; add after computation.
+	keys := make([]string, 0, len(rec))
+	for k := range rec {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	buf := bytes.NewBuffer(nil)
+	buf.WriteByte('{')
+	for i, k := range keys {
+		v, _ := json.Marshal(rec[k])
+		buf.WriteString("\"")
+		buf.WriteString(k)
+		buf.WriteString("\":")
+		buf.Write(v)
+		if i < len(keys)-1 {
+			buf.WriteByte(',')
+		}
+	}
+	buf.WriteByte('}')
+	h := sha256.Sum256(buf.Bytes())
+	rec["hash"] = base64.RawURLEncoding.EncodeToString(h[:])
 
-       // Sign the canonical JSON (without hash/signature) using the current key
-       var sig []byte
-       if curr.Private != nil {
-	       sig = ed25519.Sign(curr.Private, buf.Bytes())
-	       rec["signature"] = base64.RawURLEncoding.EncodeToString(sig)
-	       rec["public_key"] = base64.RawURLEncoding.EncodeToString(curr.Public)
-       }
+	// Sign the canonical JSON (without hash/signature) using the current key
+	var sig []byte
+	if curr.Private != nil {
+		sig = ed25519.Sign(curr.Private, buf.Bytes())
+		rec["signature"] = base64.RawURLEncoding.EncodeToString(sig)
+		rec["public_key"] = base64.RawURLEncoding.EncodeToString(curr.Public)
+	}
 
-       data, err := json.Marshal(rec)
-       if err != nil {
-	       return
-       }
-       f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
-       if err != nil {
-	       fmt.Fprintf(os.Stderr, "[crypto] rotation log open error: %v\n", err)
-	       return
-       }
-       defer func() {
-	       if cerr := f.Close(); cerr != nil {
-		       fmt.Fprintf(os.Stderr, "[crypto] rotation log close error: %v\n", cerr)
-	       }
-       }()
-       if _, err := f.Write(append(data, '\n')); err != nil {
-	       fmt.Fprintf(os.Stderr, "[crypto] rotation log write error: %v\n", err)
-       }
+	data, err := json.Marshal(rec)
+	if err != nil {
+		return
+	}
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[crypto] rotation log open error: %v\n", err)
+		return
+	}
+	defer func() {
+		if cerr := f.Close(); cerr != nil {
+			fmt.Fprintf(os.Stderr, "[crypto] rotation log close error: %v\n", cerr)
+		}
+	}()
+	if _, err := f.Write(append(data, '\n')); err != nil {
+		fmt.Fprintf(os.Stderr, "[crypto] rotation log write error: %v\n", err)
+	}
 }
 
 // appendLedgerRotation writes a rotation event to the immutable ledger if configured.
@@ -355,7 +360,9 @@ func (m *Manager) appendLedgerRotation(prev, curr *Key) {
 			// new_key_set_size approximated as history length + active (curr)
 			span.SetTag("new_key_set_size", len(m.history)+1)
 			span.SetTag("new_kid", curr.ID)
-			if prev != nil { span.SetTag("prev_kid", prev.ID) }
+			if prev != nil {
+				span.SetTag("prev_kid", prev.ID)
+			}
 		}
 	}
 	meta := map[string]any{
@@ -376,11 +383,15 @@ func (m *Manager) appendLedgerRotation(prev, curr *Key) {
 		Metadata: meta,
 	}); err != nil {
 		fmt.Fprintf(os.Stderr, "[crypto] ledger append error: %v\n", err)
-		if span != nil { span.SetTag("error", err.Error()) }
+		if span != nil {
+			span.SetTag("error", err.Error())
+		}
 	} else if span != nil {
 		span.SetTag("append_success", true)
 	}
-	if span != nil { span.End() }
+	if span != nil {
+		span.End()
+	}
 }
 
 // Active returns current active key.

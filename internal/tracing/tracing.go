@@ -189,6 +189,8 @@ func AddEvent(span *Span, name string, attrs ...Attribute) {
 
 // Spans returns the slice of recorded spans (for tests / introspection).
 func (p *TracerProvider) Spans() []*Span {
-	if p == nil || p.tracer == nil { return nil }
+	if p == nil || p.tracer == nil {
+		return nil
+	}
 	return p.tracer.GetSpans()
 }

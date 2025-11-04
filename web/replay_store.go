@@ -79,30 +79,34 @@ func newReplayNonceStore(ttl time.Duration, m metrics.Metrics) *ReplayNonceStore
 // on environment variables. This enables isolated durable replay stores (e.g. attestation vs token issuance)
 // without mutating global process environment. If walPath is empty durability is disabled.
 func NewReplayNonceStoreWithConfig(ttl time.Duration, capacity int, walPath string, m metrics.Metrics) *ReplayNonceStore {
-    store := &ReplayNonceStore{ttl: ttl, seen: make(map[string]time.Time), cap: capacity, metrics: m}
-    if walPath != "" {
-        if w, err := replay.NewWALStore(walPath); err == nil {
-            store.wal = w
-            // Attempt recovery
-            start := time.Now()
-            skipped := 0
-            _, skipped, _ = store.wal.RecoverWithStats(func(rec replay.WALRecord) error {
-                if rec.Op == "Record" {
-                    ts := time.Unix(rec.TS, 0)
-                    if ts.After(time.Now()) { ts = time.Now() }
-                    store.seen[string(rec.Key)] = ts
-                }
-                return nil
-            })
-            if m != nil {
-                m.ObserveReplayStoreLatency(time.Since(start))
-                for i := 0; i < skipped; i++ { m.IncReplayStoreErrors() }
-            }
-        } else if m != nil {
-            m.IncReplayStoreErrors()
-        }
-    }
-    return store
+	store := &ReplayNonceStore{ttl: ttl, seen: make(map[string]time.Time), cap: capacity, metrics: m}
+	if walPath != "" {
+		if w, err := replay.NewWALStore(walPath); err == nil {
+			store.wal = w
+			// Attempt recovery
+			start := time.Now()
+			skipped := 0
+			_, skipped, _ = store.wal.RecoverWithStats(func(rec replay.WALRecord) error {
+				if rec.Op == "Record" {
+					ts := time.Unix(rec.TS, 0)
+					if ts.After(time.Now()) {
+						ts = time.Now()
+					}
+					store.seen[string(rec.Key)] = ts
+				}
+				return nil
+			})
+			if m != nil {
+				m.ObserveReplayStoreLatency(time.Since(start))
+				for i := 0; i < skipped; i++ {
+					m.IncReplayStoreErrors()
+				}
+			}
+		} else if m != nil {
+			m.IncReplayStoreErrors()
+		}
+	}
+	return store
 }
 
 // Seen returns true if nonce already recorded (and not expired). Performs lazy TTL cleanup.
@@ -133,10 +137,10 @@ func (r *ReplayNonceStore) Record(n string, now time.Time) {
 	if r.wal != nil {
 		start := time.Now()
 		err := r.wal.AppendRecord(replay.WALRecord{
-			Op:   "Record",
-			Key:  []byte(n),
+			Op:    "Record",
+			Key:   []byte(n),
 			Value: nil,
-			TS:   now.Unix(),
+			TS:    now.Unix(),
 		})
 		if r.metrics != nil {
 			if err != nil {
@@ -165,10 +169,10 @@ func (r *ReplayNonceStore) RecordWithEvict(n string, now time.Time) {
 	if r.wal != nil {
 		start := time.Now()
 		err := r.wal.AppendRecord(replay.WALRecord{
-			Op:   "Record",
-			Key:  []byte(n),
+			Op:    "Record",
+			Key:   []byte(n),
 			Value: nil,
-			TS:   now.Unix(),
+			TS:    now.Unix(),
 		})
 		if r.metrics != nil {
 			if err != nil {
@@ -202,7 +206,9 @@ func (r *ReplayNonceStore) Size() int {
 	defer r.mu.Unlock()
 	now := time.Now()
 	for k, t := range r.seen {
-		if now.Sub(t) > r.ttl { delete(r.seen, k) }
+		if now.Sub(t) > r.ttl {
+			delete(r.seen, k)
+		}
 	}
 	return len(r.seen)
 }
@@ -211,7 +217,9 @@ func (r *ReplayNonceStore) Size() int {
 // After rotation all active entries are re-appended to a fresh WAL for minimal recovery surface.
 // This reduces WAL growth and bounds recovery time.
 func (r *ReplayNonceStore) SnapshotAndCompact() error {
-	if r.wal == nil { return nil } // nothing to do
+	if r.wal == nil {
+		return nil
+	} // nothing to do
 	r.mu.Lock()
 	// Build active map (exclude expired)
 	now := time.Now()
@@ -224,15 +232,23 @@ func (r *ReplayNonceStore) SnapshotAndCompact() error {
 	r.mu.Unlock()
 	// Write snapshot outside lock and measure duration
 	var snapStart time.Time
-	if r.metrics != nil { snapStart = time.Now() }
+	if r.metrics != nil {
+		snapStart = time.Now()
+	}
 	if err := r.wal.Snapshot(active); err != nil {
-		if r.metrics != nil { r.metrics.IncReplayStoreErrors() }
+		if r.metrics != nil {
+			r.metrics.IncReplayStoreErrors()
+		}
 		return err
 	}
-	if r.metrics != nil { r.metrics.ObserveReplayWALSnapshotDuration(time.Since(snapStart)) }
+	if r.metrics != nil {
+		r.metrics.ObserveReplayWALSnapshotDuration(time.Since(snapStart))
+	}
 	// Rotate WAL (truncate)
 	if err := r.wal.Rotate(); err != nil {
-		if r.metrics != nil { r.metrics.IncReplayStoreErrors() }
+		if r.metrics != nil {
+			r.metrics.IncReplayStoreErrors()
+		}
 		return err
 	}
 	// Re-append active entries

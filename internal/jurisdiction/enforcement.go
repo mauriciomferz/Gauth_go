@@ -41,23 +41,23 @@ type EnforcementContext struct {
 
 // EnforcementEngine provides runtime jurisdiction-specific enforcement.
 type EnforcementEngine struct {
-	mu                sync.RWMutex
-	validator         *compliance.LegalFrameworkValidator
-	enabled           bool
-	metrics           *EnforcementMetrics
-	auditCallback     func(decision EnforcementDecision)
-	jurisdictionRules map[compliance.Jurisdiction]*JurisdictionEnforcement
+	mu                       sync.RWMutex
+	validator                *compliance.LegalFrameworkValidator
+	enabled                  bool
+	metrics                  *EnforcementMetrics
+	auditCallback            func(decision EnforcementDecision)
+	jurisdictionRules        map[compliance.Jurisdiction]*JurisdictionEnforcement
 	requireDetachedSignature bool // if true, deny requests missing detached signature artifact
 }
 
 // JurisdictionEnforcement contains enforcement-specific configuration for a jurisdiction.
 type JurisdictionEnforcement struct {
 	Jurisdiction       compliance.Jurisdiction
-	StrictMode         bool                      // If true, enforce all rules strictly
-	AllowedActions     map[string]bool           // Whitelist of allowed actions
-	BlockedActions     map[string]bool           // Blacklist of blocked actions
-	CrossBorderRules   map[string][]string       // action -> list of allowed destination jurisdictions
-	DataResidencyRules map[string]bool           // data_type -> must_stay_local
+	StrictMode         bool                // If true, enforce all rules strictly
+	AllowedActions     map[string]bool     // Whitelist of allowed actions
+	BlockedActions     map[string]bool     // Blacklist of blocked actions
+	CrossBorderRules   map[string][]string // action -> list of allowed destination jurisdictions
+	DataResidencyRules map[string]bool     // data_type -> must_stay_local
 	CustomValidators   map[string]func(ctx *EnforcementContext) error
 }
 
@@ -78,13 +78,13 @@ type EnforcementMetrics struct {
 // NewEnforcementEngine creates a new jurisdiction enforcement engine.
 func NewEnforcementEngine() *EnforcementEngine {
 	engine := &EnforcementEngine{
-		validator:         compliance.NewLegalFrameworkValidator(),
-		enabled:           true,
+		validator: compliance.NewLegalFrameworkValidator(),
+		enabled:   true,
 		metrics: &EnforcementMetrics{
 			JurisdictionBreakdown: make(map[compliance.Jurisdiction]int64),
 			ViolationsByType:      make(map[string]int64),
 		},
-		jurisdictionRules: make(map[compliance.Jurisdiction]*JurisdictionEnforcement),
+		jurisdictionRules:        make(map[compliance.Jurisdiction]*JurisdictionEnforcement),
 		requireDetachedSignature: parseBoolEnv("GAUTH_REQUIRE_DETACHED_SIGNATURE"),
 	}
 
@@ -120,26 +120,27 @@ func parseBoolEnv(key string) bool {
 
 // jurisdictionRulesFile models the external JSON configuration schema.
 // Example schema:
-// {
-//   "jurisdictions": [
-//     {
-//       "jurisdiction": "UNITED_STATES",
-//       "strict_mode": true,
-//       "allowed_actions": ["transfer","pay"],
-//       "blocked_actions": ["high_value_transfer"],
-//       "cross_border_rules": {"transfer": ["CANADA","UNITED_KINGDOM"]},
-//       "data_residency_rules": {"personal_data": true}
-//     }
-//   ]
-// }
+//
+//	{
+//	  "jurisdictions": [
+//	    {
+//	      "jurisdiction": "UNITED_STATES",
+//	      "strict_mode": true,
+//	      "allowed_actions": ["transfer","pay"],
+//	      "blocked_actions": ["high_value_transfer"],
+//	      "cross_border_rules": {"transfer": ["CANADA","UNITED_KINGDOM"]},
+//	      "data_residency_rules": {"personal_data": true}
+//	    }
+//	  ]
+//	}
 type jurisdictionRulesFile struct {
 	Jurisdictions []struct {
-		Jurisdiction      string              `json:"jurisdiction"`
-		StrictMode        bool                `json:"strict_mode"`
-		AllowedActions    []string            `json:"allowed_actions"`
-		BlockedActions    []string            `json:"blocked_actions"`
-		CrossBorderRules  map[string][]string `json:"cross_border_rules"`
-		DataResidencyRules map[string]bool    `json:"data_residency_rules"`
+		Jurisdiction       string              `json:"jurisdiction"`
+		StrictMode         bool                `json:"strict_mode"`
+		AllowedActions     []string            `json:"allowed_actions"`
+		BlockedActions     []string            `json:"blocked_actions"`
+		CrossBorderRules   map[string][]string `json:"cross_border_rules"`
+		DataResidencyRules map[string]bool     `json:"data_residency_rules"`
 	} `json:"jurisdictions"`
 }
 
@@ -162,9 +163,13 @@ func (e *EnforcementEngine) loadRulesFromFile(path string) error {
 	for _, j := range cfg.Jurisdictions {
 		jid := compliance.Jurisdiction(strings.TrimSpace(strings.ToUpper(j.Jurisdiction)))
 		allowed := make(map[string]bool)
-		for _, a := range j.AllowedActions { allowed[a] = true }
+		for _, a := range j.AllowedActions {
+			allowed[a] = true
+		}
 		blocked := make(map[string]bool)
-		for _, b2 := range j.BlockedActions { blocked[b2] = true }
+		for _, b2 := range j.BlockedActions {
+			blocked[b2] = true
+		}
 		newMap[jid] = &JurisdictionEnforcement{
 			Jurisdiction:       jid,
 			StrictMode:         j.StrictMode,
@@ -415,13 +420,13 @@ func (e *EnforcementEngine) initializeDefaultEnforcement() {
 			"bulk_data_transfer":       true,
 		},
 		CrossBorderRules: map[string][]string{
-			"personal_data_transfer": {"EU", "UK"}, // Only allow to adequacy countries
+			"personal_data_transfer": {"EU", "UK"},       // Only allow to adequacy countries
 			"financial_data_export":  {"EU", "UK", "US"}, // Financial data has more flexibility
 		},
 		DataResidencyRules: map[string]bool{
-			"personal_data":   true,  // Must stay in EU
-			"health_data":     true,  // Must stay in EU
-			"financial_data":  false, // Can cross borders with safeguards
+			"personal_data":  true,  // Must stay in EU
+			"health_data":    true,  // Must stay in EU
+			"financial_data": false, // Can cross borders with safeguards
 		},
 		CustomValidators: map[string]func(ctx *EnforcementContext) error{
 			"gdpr_data_processing": func(ctx *EnforcementContext) error {

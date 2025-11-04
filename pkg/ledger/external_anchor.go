@@ -37,7 +37,7 @@ func (eac *ExternalAnchorClient) Anchor(hash string) error {
 	}
 
 	start := time.Now()
-	
+
 	// Submit to external provider
 	receipt, err := eac.provider.Anchor(hash)
 	if err != nil {
@@ -45,7 +45,7 @@ func (eac *ExternalAnchorClient) Anchor(hash string) error {
 	}
 
 	latency := time.Since(start)
-	
+
 	// Update last receipt
 	eac.mu.Lock()
 	eac.lastReceipt = receipt
@@ -60,7 +60,7 @@ func (eac *ExternalAnchorClient) Anchor(hash string) error {
 			Version:        receipt.Version,
 			LatencySeconds: latency.Seconds(),
 		}
-		
+
 		if _, err := eac.receiptStore.Append(extReceipt); err != nil {
 			// Non-fatal - receipt persistence failure shouldn't break anchoring
 			return fmt.Errorf("external anchor succeeded but receipt persistence failed: %w", err)
@@ -190,12 +190,12 @@ func (eal *ExternalAuditLedger) ExternalAnchorStatus() map[string]interface{} {
 	eal.mu.RUnlock()
 
 	latest := eal.externalAnchor.Latest()
-	
+
 	status := map[string]interface{}{
-		"configured":      true,
-		"interval":        eal.anchorInterval.String(),
-		"last_anchor_at":  lastAnchor.Format(time.RFC3339Nano),
-		"age_seconds":     time.Since(lastAnchor).Seconds(),
+		"configured":     true,
+		"interval":       eal.anchorInterval.String(),
+		"last_anchor_at": lastAnchor.Format(time.RFC3339Nano),
+		"age_seconds":    time.Since(lastAnchor).Seconds(),
 	}
 
 	if latest.Hash != "" {

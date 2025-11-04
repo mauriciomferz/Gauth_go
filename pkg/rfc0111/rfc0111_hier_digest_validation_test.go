@@ -19,12 +19,16 @@ func TestHierDigestParentValidation(t *testing.T) {
 	memLogger := audit.NewMemoryLogger(nil)
 	svc := NewService(memLogger, &allowAllAuthorizer{})
 	rootResp, err := svc.CreateDelegationCtx(context.Background(), DelegationRequest{Grantor: "alice", Grantee: "bob", Scope: []string{"finance.read"}, Duration: time.Hour})
-	if err != nil { t.Fatalf("root create failed: %v", err) }
+	if err != nil {
+		t.Fatalf("root create failed: %v", err)
+	}
 	childResp, err := svc.CreateDelegationCtx(context.Background(), DelegationRequest{Grantor: "bob", Grantee: "carol", Scope: []string{"finance.read"}, Duration: time.Hour, ParentPOAID: rootResp.POA.ID})
-	if err != nil { t.Fatalf("child create failed: %v", err) }
+	if err != nil {
+		t.Fatalf("child create failed: %v", err)
+	}
 	// Sanity: validation succeeds before tamper
 	if vErr := svc.ValidateDelegationCtx(context.Background(), childResp.POA.ID, childResp.POA.Grantee, "finance.read"); vErr != nil {
-		 t.Fatalf("expected validation succeed pre-tamper: %v", vErr)
+		t.Fatalf("expected validation succeed pre-tamper: %v", vErr)
 	}
 	// Tamper parent body (e.g., change scope) -> recomputed digest differs
 	parent := rootResp.POA
@@ -33,6 +37,6 @@ func TestHierDigestParentValidation(t *testing.T) {
 	_ = svc.repo.Update(&parent)
 	// Validation should now fail due to parent digest mismatch
 	if vErr := svc.ValidateDelegationCtx(context.Background(), childResp.POA.ID, childResp.POA.Grantee, "finance.read"); vErr == nil {
-		 t.Fatalf("expected validation failure after parent tamper")
+		t.Fatalf("expected validation failure after parent tamper")
 	}
 }

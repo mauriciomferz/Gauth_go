@@ -47,7 +47,7 @@ func main() {
 	// 1. Modern Interface-based Provider (pkg/secret)
 	fmt.Println("1️⃣ Modern Interface-based Secret Provider (pkg/secret)")
 	fmt.Println("----------------------------------------------------")
-	
+
 	// Memory Provider
 	fmt.Printf("   📝 Testing Memory Provider...\n")
 	memProvider := secret.NewMemory()
@@ -55,10 +55,10 @@ func main() {
 
 	// Store secrets with options
 	secrets := map[string]string{
-		"oauth/client_secret":    "super-secret-client-key",
-		"jwt/signing_key":        "HS256-jwt-signing-secret",
-		"api/external_service":   "api-key-12345",
-		"db/connection_string":   "postgresql://user:pass@host:5432/db",
+		"oauth/client_secret":  "super-secret-client-key",
+		"jwt/signing_key":      "HS256-jwt-signing-secret",
+		"api/external_service": "api-key-12345",
+		"db/connection_string": "postgresql://user:pass@host:5432/db",
 	}
 
 	for key, value := range secrets {
@@ -115,10 +115,10 @@ func main() {
 
 	// Store encrypted secrets
 	encryptedSecrets := map[string][]byte{
-		"private_key":        []byte("-----BEGIN RSA PRIVATE KEY-----\nMIIE..."),
-		"certificate":        []byte("-----BEGIN CERTIFICATE-----\nMIIC..."),  
-		"database_password":  []byte("extremely-secure-db-password"),
-		"api_token":          []byte("bearer-token-with-high-entropy"),
+		"private_key":       []byte("-----BEGIN RSA PRIVATE KEY-----\nMIIE..."),
+		"certificate":       []byte("-----BEGIN CERTIFICATE-----\nMIIC..."),
+		"database_password": []byte("extremely-secure-db-password"),
+		"api_token":         []byte("bearer-token-with-high-entropy"),
 	}
 
 	fmt.Printf("\n   🔐 Storing encrypted secrets...\n")
@@ -141,7 +141,7 @@ func main() {
 
 	// Demonstrate master key rotation
 	fmt.Printf("\n   🔄 Demonstrating master key rotation...\n")
-	
+
 	// Generate new master key
 	newMasterKey := make([]byte, 32)
 	for i := range newMasterKey {
@@ -195,7 +195,7 @@ func main() {
 
 	// Demonstrate provider switching
 	fmt.Printf("   🔄 Provider switching pattern...\n")
-	
+
 	providers := []secret.Provider{
 		memProvider,
 		vaultStub,
@@ -206,7 +206,7 @@ func main() {
 
 	for _, provider := range providers {
 		fmt.Printf("   Testing with %s provider:\n", provider.Name())
-		
+
 		if err := provider.Set(ctx, testKey, testValue); err != nil {
 			log.Fatalf("Failed to set with %s: %v", provider.Name(), err)
 		}
@@ -229,8 +229,8 @@ func main() {
 	fmt.Println("----------------------------------")
 
 	features := []struct {
-		feature string
-		modern  string
+		feature    string
+		modern     string
 		filesystem string
 	}{
 		{"Interface Design", "✅ Clean, extensible", "✅ Purpose-built"},

@@ -14,14 +14,14 @@ import (
 // Integrates with MetricsCollector and supports trace propagation
 
 type OTELCollector struct {
-	meter metric.Meter
+	meter  metric.Meter
 	tracer trace.Tracer
 }
 
 func NewOTELCollector() *OTELCollector {
 	meterProvider := noop.NewMeterProvider()
 	return &OTELCollector{
-		meter: meterProvider.Meter("gauth-monitoring"),
+		meter:  meterProvider.Meter("gauth-monitoring"),
 		tracer: otel.Tracer("gauth-monitoring"),
 	}
 }

@@ -13,10 +13,10 @@ import (
 
 // WALRecord represents a write-ahead log entry for replay store operations.
 type WALRecord struct {
-	Op      string // e.g., "Put", "Delete"
-	Key     []byte
-	Value   []byte
-	TS      int64  // Unix timestamp
+	Op    string // e.g., "Put", "Delete"
+	Key   []byte
+	Value []byte
+	TS    int64 // Unix timestamp
 }
 
 // WALStore provides write-ahead logging for replay store durability.
@@ -97,17 +97,31 @@ func (w *WALStore) RecoverWithStats(apply func(WALRecord) error) (applied int, s
 func (w *WALStore) Snapshot(state map[string]time.Time) error {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	if w.file == nil { return errors.New("wal closed") }
+	if w.file == nil {
+		return errors.New("wal closed")
+	}
 	tmp := w.path + ".snapshot.tmp"
 	f, err := os.OpenFile(tmp, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	enc := json.NewEncoder(f)
 	// Serialize as array of objects for easy future extension.
-	type snapEntry struct { Key string `json:"key"`; TS int64 `json:"ts"` }
+	type snapEntry struct {
+		Key string `json:"key"`
+		TS  int64  `json:"ts"`
+	}
 	arr := make([]snapEntry, 0, len(state))
-	for k, v := range state { arr = append(arr, snapEntry{Key: k, TS: v.Unix()}) }
-	if err := enc.Encode(arr); err != nil { _ = f.Close(); return err }
-	if err := f.Close(); err != nil { return err }
+	for k, v := range state {
+		arr = append(arr, snapEntry{Key: k, TS: v.Unix()})
+	}
+	if err := enc.Encode(arr); err != nil {
+		_ = f.Close()
+		return err
+	}
+	if err := f.Close(); err != nil {
+		return err
+	}
 	return os.Rename(tmp, w.path+".snapshot")
 }
 
@@ -115,11 +129,17 @@ func (w *WALStore) Snapshot(state map[string]time.Time) error {
 func (w *WALStore) Rotate() error {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	if w.file == nil { return errors.New("wal closed") }
+	if w.file == nil {
+		return errors.New("wal closed")
+	}
 	// Close existing file handle
-	if err := w.file.Close(); err != nil { return err }
+	if err := w.file.Close(); err != nil {
+		return err
+	}
 	f, err := os.OpenFile(w.path, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0o600)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	w.file = f
 	return nil
 }

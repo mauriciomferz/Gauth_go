@@ -16,10 +16,10 @@ import (
 
 // Delegation status constants
 const (
-	StatusActive     = "active"
-	StatusSuspended  = "suspended"
-	StatusTerminated = "terminated"
-	StatusPending    = "pending"
+	StatusActive           = "active"
+	StatusSuspended        = "suspended"
+	StatusTerminated       = "terminated"
+	StatusPending          = "pending"
 	StatusPartiallyRevoked = "partially_revoked" // scope reduced without full termination
 )
 
@@ -54,9 +54,13 @@ type Chain struct{ items []Delegation }
 // Invalid or empty values disable enforcement (return 0).
 func currentMaxDelegationDepth() int64 {
 	raw := os.Getenv("GAUTH_MAX_DELEGATION_DEPTH")
-	if raw == "" { return 0 }
+	if raw == "" {
+		return 0
+	}
 	v, err := strconv.ParseInt(raw, 10, 64)
-	if err != nil || v <= 0 { return 0 }
+	if err != nil || v <= 0 {
+		return 0
+	}
 	return v
 }
 
@@ -108,13 +112,19 @@ func (c *Chain) AppendWithMetrics(d Delegation, m metrics.Metrics) (Delegation, 
 	if md := currentMaxDelegationDepth(); md > 0 {
 		newDepth := int64(len(c.items) + 1)
 		if newDepth > md {
-			if m != nil { m.IncDelegationDepthExceeded() }
+			if m != nil {
+				m.IncDelegationDepthExceeded()
+			}
 			return Delegation{}, rfc.New(rfc.ErrDelegationDepthExceeded, fmt.Sprintf("delegation depth %d exceeds max %d", newDepth, md))
 		}
 	}
-	if len(c.items) > 0 { d.PrevHash = c.items[len(c.items)-1].Hash }
+	if len(c.items) > 0 {
+		d.PrevHash = c.items[len(c.items)-1].Hash
+	}
 	h, err := hashDelegation(d)
-	if err != nil { return Delegation{}, err }
+	if err != nil {
+		return Delegation{}, err
+	}
 	d.Hash = h
 	c.items = append(c.items, d)
 	if m != nil {

@@ -27,15 +27,15 @@ type RotationSummaryAPI struct {
 
 // RotationSummary is the signed artifact subset.
 type RotationSummary struct {
-	ChainLength   int    `json:"chain_length"`
-	HeadHash      string `json:"head_hash"`
-	AggregateHash string `json:"aggregate_hash"`
-	GeneratedAt   string `json:"generated_at"`
-	Kid           string `json:"kid,omitempty"`
-	Signature     string `json:"signature,omitempty"`
-	Mode          string `json:"mode,omitempty"`
-	Threshold       int                `json:"threshold,omitempty"`
-	SatisfiedWeight int                `json:"satisfied_weight,omitempty"`
+	ChainLength     int    `json:"chain_length"`
+	HeadHash        string `json:"head_hash"`
+	AggregateHash   string `json:"aggregate_hash"`
+	GeneratedAt     string `json:"generated_at"`
+	Kid             string `json:"kid,omitempty"`
+	Signature       string `json:"signature,omitempty"`
+	Mode            string `json:"mode,omitempty"`
+	Threshold       int    `json:"threshold,omitempty"`
+	SatisfiedWeight int    `json:"satisfied_weight,omitempty"`
 	Signatures      []struct {
 		Kid       string `json:"kid"`
 		Mode      string `json:"mode"`

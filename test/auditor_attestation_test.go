@@ -26,7 +26,7 @@ type minimalAttestationUnsigned struct {
 func TestAuditorAttestationSignature(t *testing.T) {
 	reg := cryptoReg.GlobalEdDSARegistry
 	if reg == nil || reg.Active() == nil {
-		 t.Skip("eddsa registry not initialized")
+		t.Skip("eddsa registry not initialized")
 	}
 	ak := reg.Active()
 	unsigned := minimalAttestationUnsigned{Success: true, Configured: true, Nonce: "nonce123"}
@@ -36,13 +36,13 @@ func TestAuditorAttestationSignature(t *testing.T) {
 	msg := append([]byte("GAUTH_MODEL_LIMIT_ATTEST:"), raw...)
 	sig := ed25519.Sign(ak.Private, msg)
 	att := map[string]any{
-		"success": true,
+		"success":    true,
 		"configured": true,
-		"nonce": unsigned.Nonce,
-		"snapshot": map[string]string{"hash": unsigned.Snapshot.Hash, "generated_at": unsigned.Snapshot.GeneratedAt},
-		"signature": base64.RawStdEncoding.EncodeToString(sig),
-		"sig_kid": ak.ID,
-		"sig_mode": "eddsa",
+		"nonce":      unsigned.Nonce,
+		"snapshot":   map[string]string{"hash": unsigned.Snapshot.Hash, "generated_at": unsigned.Snapshot.GeneratedAt},
+		"signature":  base64.RawStdEncoding.EncodeToString(sig),
+		"sig_kid":    ak.ID,
+		"sig_mode":   "eddsa",
 	}
 	// Recompute combined hash
 	seed := "attest|" + unsigned.Snapshot.Hash + "||" // no audit/anchor heads
@@ -52,6 +52,6 @@ func TestAuditorAttestationSignature(t *testing.T) {
 	// Verify signature manually
 	bsig, _ := base64.RawStdEncoding.DecodeString(att["signature"].(string))
 	if !ed25519.Verify(ak.Public, msg, bsig) {
-		 t.Fatalf("expected valid attestation signature")
+		t.Fatalf("expected valid attestation signature")
 	}
 }

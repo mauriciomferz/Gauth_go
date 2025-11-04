@@ -19,13 +19,13 @@ const (
 type CascadeConfig struct {
 	// Enabled controls whether cascade revocation processing is active
 	Enabled bool
-	
+
 	// Mode determines how descendants are processed when parent is revoked
 	Mode CascadeMode
-	
+
 	// MaxDepth limits cascade depth to prevent runaway processing (0 = unlimited)
 	MaxDepth int
-	
+
 	// BatchSize controls how many descendants are processed in each batch
 	BatchSize int
 }
@@ -43,34 +43,34 @@ func DefaultCascadeConfig() CascadeConfig {
 // LoadCascadeConfigFromEnv loads cascade configuration from environment variables
 func LoadCascadeConfigFromEnv() CascadeConfig {
 	config := DefaultCascadeConfig()
-	
+
 	// GAUTH_CASCADE_PARENT_REVOCATION enables cascade processing
 	if enabled := parseBoolEnv("GAUTH_CASCADE_PARENT_REVOCATION"); enabled {
 		config.Enabled = enabled
 	}
-	
+
 	// GAUTH_CASCADE_MODE sets processing mode (revoke|suspend|notify)
 	if mode := strings.ToLower(strings.TrimSpace(os.Getenv("GAUTH_CASCADE_MODE"))); mode != "" {
 		switch mode {
 		case "revoke":
 			config.Mode = CascadeModeRevoke
 		case "suspend":
-			config.Mode = CascadeModeSuspend  
+			config.Mode = CascadeModeSuspend
 		case "notify":
 			config.Mode = CascadeModeNotify
 		}
 	}
-	
+
 	// GAUTH_CASCADE_MAX_DEPTH limits cascade depth
 	if depth := getIntEnv("GAUTH_CASCADE_MAX_DEPTH", int64(config.MaxDepth)); depth >= 0 {
 		config.MaxDepth = int(depth)
 	}
-	
+
 	// GAUTH_CASCADE_BATCH_SIZE controls batch processing size
 	if batchSize := getIntEnv("GAUTH_CASCADE_BATCH_SIZE", int64(config.BatchSize)); batchSize > 0 {
 		config.BatchSize = int(batchSize)
 	}
-	
+
 	return config
 }
 

@@ -148,13 +148,13 @@ func main() {
 	}
 
 	metadata3 := policy.PolicyVersionMetadata{
-		SemanticVersion:  policy.SemanticVersion{Major: 2, Minor: 0, Patch: 0},
-		Name:             "Consolidated Permissions",
-		Description:      "Major: Removed bob, consolidated all permissions for alice",
-		Author:           "security-team",
+		SemanticVersion:   policy.SemanticVersion{Major: 2, Minor: 0, Patch: 0},
+		Name:              "Consolidated Permissions",
+		Description:       "Major: Removed bob, consolidated all permissions for alice",
+		Author:            "security-team",
 		RequiredApprovals: []string{"security-lead", "compliance-officer"},
-		RollbackAllowed:  true,
-		Tags:             []string{"breaking-change", "beta"},
+		RollbackAllowed:   true,
+		Tags:              []string{"breaking-change", "beta"},
 	}
 
 	v3, err := versionManager.CreateVersion(ctx, bundle3, metadata3)
@@ -221,11 +221,11 @@ func main() {
 	} else {
 		fmt.Println("⚠️  Unexpected: Rollback succeeded across major version boundary")
 	}
-	
+
 	// Scenario 10: Create a patch version 2.0.1 and rollback to 2.0.0 (safe)
 	fmt.Println("\n--- Scenario 10: Create Patch Version 2.0.1 and Safe Rollback ---")
 	time.Sleep(100 * time.Millisecond)
-	
+
 	bundle4 := pkgpolicy.Bundle{
 		ID: "policy-bundle-v4",
 		Policies: []pkgpolicy.Policy{
@@ -258,14 +258,14 @@ func main() {
 	}
 	fmt.Printf("✅ Created: %s (v%d) - Hash: %s\n", v4.Name, v4.BundleVersion, v4.Hash[:8])
 	fmt.Printf("   Semantic Version: %s\n", v4.SemanticVersion.String())
-	
+
 	// Activate v4
 	err = versionManager.ActivateVersion(ctx, 4, "admin-user")
 	if err != nil {
 		panic(fmt.Sprintf("Failed to activate v4: %v", err))
 	}
 	fmt.Printf("✅ Activated Version 4 (2.0.1)\n")
-	
+
 	// Now rollback to v3 (2.0.0) - safe within same major version
 	fmt.Println("\n--- Scenario 11: Safe Rollback Within Major Version (2.0.1 -> 2.0.0) ---")
 	err = versionManager.RollbackVersion(ctx, 3, "admin-user", "Rollback patch changes")

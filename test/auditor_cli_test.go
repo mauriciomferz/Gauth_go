@@ -29,11 +29,10 @@ func buildSigningPayload(p *poa.ProofOfAuthorization) []byte {
 	return append([]byte("GAUTH_POA:"), raw...)
 }
 
-
 func TestAuditorVerifyPOA(t *testing.T) {
 	reg := cryptoReg.GlobalEdDSARegistry
 	if reg == nil || reg.Active() == nil {
-		 t.Skip("eddsa registry not initialized; skip auditor poa test")
+		t.Skip("eddsa registry not initialized; skip auditor poa test")
 	}
 	ak := reg.Active()
 	poaDoc := &poa.ProofOfAuthorization{
@@ -54,7 +53,13 @@ func TestAuditorVerifyPOA(t *testing.T) {
 	poaDoc.Signatures = []string{base64.RawStdEncoding.EncodeToString(sig)}
 
 	res := auditor.VerifyPOA(poaDoc)
-	if !res["digest_valid"].(bool) { t.Fatalf("expected digest_valid true") }
-	if !res["threshold_met"].(bool) { t.Fatalf("expected threshold_met true") }
-	if res["valid_signatures"].(int) != 1 { t.Fatalf("expected 1 valid signature") }
+	if !res["digest_valid"].(bool) {
+		t.Fatalf("expected digest_valid true")
+	}
+	if !res["threshold_met"].(bool) {
+		t.Fatalf("expected threshold_met true")
+	}
+	if res["valid_signatures"].(int) != 1 {
+		t.Fatalf("expected 1 valid signature")
+	}
 }

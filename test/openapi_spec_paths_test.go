@@ -11,9 +11,9 @@ func TestOpenAPISpecPaths(t *testing.T) {
 	wd, _ := os.Getwd()
 	// Candidate paths relative to current working dir (which may be module root or /test)
 	candidates := []string{
-		filepath.Join(wd, "docs", "openapi.yaml"),                            // if wd=root
-		filepath.Join(wd, "..", "docs", "openapi.yaml"),                     // if wd=/test
-		filepath.Join(wd, "..", "..", "docs", "openapi.yaml"),              // fallback
+		filepath.Join(wd, "docs", "openapi.yaml"),             // if wd=root
+		filepath.Join(wd, "..", "docs", "openapi.yaml"),       // if wd=/test
+		filepath.Join(wd, "..", "..", "docs", "openapi.yaml"), // fallback
 	}
 	var path string
 	for _, c := range candidates {
@@ -26,7 +26,9 @@ func TestOpenAPISpecPaths(t *testing.T) {
 		t.Fatalf("could not locate openapi.yaml in candidate paths: %v", candidates)
 	}
 	b, err := os.ReadFile(path)
-	if err != nil { t.Fatalf("read openapi spec: %v", err) }
+	if err != nil {
+		t.Fatalf("read openapi spec: %v", err)
+	}
 	content := string(b)
 	mustContain := []string{
 		"/api/v1/crypto/bls/pop/verify:",

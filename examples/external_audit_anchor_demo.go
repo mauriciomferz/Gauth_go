@@ -29,7 +29,7 @@ func main() {
 
 	// 1. Create external anchor provider
 	fmt.Println("\n1️⃣ Creating External Anchor Providers...")
-	
+
 	// Memory provider for demo (in production: use TSA, blockchain, etc.)
 	memoryProvider := anchor.NewMemoryProvider()
 	fmt.Printf("   ✅ Memory provider initialized\n")
@@ -40,7 +40,7 @@ func main() {
 
 	// 2. Create External Audit Ledger with memory provider
 	fmt.Println("\n2️⃣ Creating External Audit Ledger...")
-	
+
 	externalLedger, err := ledger.NewExternalAuditLedger(
 		dbPath,
 		memoryProvider,
@@ -65,7 +65,7 @@ func main() {
 
 	// 3. Add audit entries and demonstrate automatic anchoring
 	fmt.Println("\n3️⃣ Adding Audit Entries with Automatic Anchoring...")
-	
+
 	entries := []*ledger.Entry{
 		{
 			ID:      "auth-001",
@@ -74,9 +74,9 @@ func main() {
 			Subject: "user@example.com",
 			Object:  "login-service",
 			Metadata: map[string]interface{}{
-				"action":    "login",
-				"result":    "success",
-				"ip":        "192.168.1.100",
+				"action":     "login",
+				"result":     "success",
+				"ip":         "192.168.1.100",
 				"user_agent": "GAuth-Client/1.0",
 			},
 		},
@@ -94,14 +94,14 @@ func main() {
 			},
 		},
 		{
-			ID:      "revoke-001", 
+			ID:      "revoke-001",
 			TS:      time.Now().UTC().Add(time.Second),
 			Type:    "revocation",
 			Subject: "admin@example.com",
 			Object:  "capability:cap-789",
 			Metadata: map[string]interface{}{
 				"action":   "revoke",
-				"result":   "success", 
+				"result":   "success",
 				"reason":   "security-policy",
 				"operator": "admin@example.com",
 			},
@@ -128,7 +128,7 @@ func main() {
 	fmt.Printf("      • Interval: %v\n", status["interval"])
 	fmt.Printf("      • Last anchor: %v\n", status["last_anchor_at"])
 	fmt.Printf("      • Age: %.2fs\n", status["age_seconds"])
-	
+
 	if receipt, ok := status["latest_receipt"]; ok {
 		r := receipt.(map[string]interface{})
 		fmt.Printf("      • Latest Receipt:\n")
@@ -137,7 +137,7 @@ func main() {
 		fmt.Printf("        - Timestamp: %v\n", r["timestamp"])
 	}
 
-	// 5. Force immediate external anchoring  
+	// 5. Force immediate external anchoring
 	fmt.Println("\n5️⃣ Force External Anchoring...")
 	if err := externalLedger.ForceExternalAnchor(); err != nil {
 		log.Fatalf("Failed to force external anchor: %v", err)
@@ -165,11 +165,11 @@ func main() {
 
 	// 7. Demonstrate TSA provider integration
 	fmt.Println("\n7️⃣ Demonstrating TSA Provider Integration...")
-	
+
 	// Create another ledger with TSA provider
 	tsaDbPath := tmpDir + "/tsa-audit-ledger.db"
 	tsaReceiptPath := tmpDir + "/tsa-receipts.json"
-	
+
 	tsaLedger, err := ledger.NewExternalAuditLedger(
 		tsaDbPath,
 		tsaProvider,
@@ -205,7 +205,7 @@ func main() {
 	}
 	latency := time.Since(start)
 
-	tsaStatus := tsaLedger.ExternalAnchorStatus() 
+	tsaStatus := tsaLedger.ExternalAnchorStatus()
 	if receipt, ok := tsaStatus["latest_receipt"]; ok {
 		r := receipt.(map[string]interface{})
 		fmt.Printf("   ✅ TSA anchoring completed in %v\n", latency)
@@ -216,15 +216,15 @@ func main() {
 
 	// 8. Show file artifacts
 	fmt.Println("\n8️⃣ Generated Artifacts:")
-	
+
 	if _, err := os.Stat(anchorFilePath); err == nil {
 		fmt.Printf("   📄 Anchor file: %s\n", anchorFilePath)
 	}
-	
+
 	if _, err := os.Stat(receiptPath); err == nil {
 		fmt.Printf("   🧾 External receipts: %s\n", receiptPath)
 	}
-	
+
 	if _, err := os.Stat(tsaReceiptPath); err == nil {
 		fmt.Printf("   🧾 TSA receipts: %s\n", tsaReceiptPath)
 	}
@@ -238,7 +238,7 @@ func main() {
 	fmt.Println("   • ✅ External anchor provider integration (Memory, TSA stub)")
 	fmt.Println("   • ✅ Automatic periodic anchoring with configurable intervals")
 	fmt.Println("   • ✅ Manual force anchoring on-demand")
-	fmt.Println("   • ✅ External receipt persistence with hash-chain integrity")  
+	fmt.Println("   • ✅ External receipt persistence with hash-chain integrity")
 	fmt.Println("   • ✅ Dual anchoring (both file-based and external provider)")
 	fmt.Println("   • ✅ Chain verification and tamper detection")
 	fmt.Println("   • ✅ Comprehensive test coverage")

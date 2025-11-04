@@ -17,7 +17,7 @@ const (
 	BoardApproval  = compliance.BoardApproval
 )
 
-// Jurisdiction mirrors the compliance package type  
+// Jurisdiction mirrors the compliance package type
 type Jurisdiction = compliance.Jurisdiction
 
 const (
@@ -51,14 +51,14 @@ func (v *LegalFrameworkValidator) GetJurisdictionRules(jurisdiction string) (*Ju
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Convert to auth package format
 	rules := &JurisdictionRules{
 		Country:           jurisdiction,
 		RequiredApprovals: requirements.RequiredApprovals,
 		ValueLimits:       requirements.ValueLimits,
 	}
-	
+
 	return rules, nil
 }
 
@@ -170,7 +170,7 @@ func (f *StandardLegalFramework) TrackApprovalDetails(ctx context.Context, appro
 	}
 }
 
-// VerifyLegalCapacity verifies an entity's legal capacity  
+// VerifyLegalCapacity verifies an entity's legal capacity
 func (f *StandardLegalFramework) VerifyLegalCapacity(ctx context.Context, entity *Entity) error {
 	return f.validator.VerifyLegalCapacity(ctx, entity)
 }
@@ -417,12 +417,12 @@ type ComplianceAction struct {
 
 // TrackingRecord represents a compliance tracking record
 type TrackingRecord struct {
-	ID          string
-	ApprovalID  string
-	Timestamp   time.Time
-	Action      string
-	Status      string
-	Details     map[string]interface{}
+	ID         string
+	ApprovalID string
+	Timestamp  time.Time
+	Action     string
+	Status     string
+	Details    map[string]interface{}
 }
 
 // Store interface for storing compliance data
@@ -440,19 +440,19 @@ func (s *StoreStub) GetTrackingRecords(ctx context.Context, approvalID string) (
 	if s.records == nil {
 		s.records = make(map[string][]TrackingRecord)
 	}
-	
+
 	// Return mock tracking records
 	records := []TrackingRecord{
 		{
-			ID:          "record_001",
-			ApprovalID:  approvalID,
-			Timestamp:   time.Now(),
-			Action:      "approval_tracked",
-			Status:      "completed",
-			Details:     map[string]interface{}{"tracked": true},
+			ID:         "record_001",
+			ApprovalID: approvalID,
+			Timestamp:  time.Now(),
+			Action:     "approval_tracked",
+			Status:     "completed",
+			Details:    map[string]interface{}{"tracked": true},
 		},
 	}
-	
+
 	s.records[approvalID] = records
 	return records, nil
 }

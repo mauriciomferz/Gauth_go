@@ -12,11 +12,11 @@ func isWithinAllowedTimeWindow(timeWindows []string) bool {
 		fmt.Println("No time restrictions - allowing")
 		return true
 	}
-	
+
 	now := time.Now()
 	fmt.Printf("Current time: %v, Weekday: %v, Hour: %d\n", now, now.Weekday(), now.Hour())
 	fmt.Printf("Time windows to check: %v\n", timeWindows)
-	
+
 	// All specified time windows must be satisfied
 	for _, window := range timeWindows {
 		satisfied := false
@@ -57,7 +57,7 @@ func isWithinAllowedTimeWindow(timeWindows []string) bool {
 				}
 			}
 		}
-		
+
 		fmt.Printf("  Window %s satisfied: %v\n", window, satisfied)
 		// If any window is not satisfied, return false
 		if !satisfied {
@@ -65,7 +65,7 @@ func isWithinAllowedTimeWindow(timeWindows []string) bool {
 			return false
 		}
 	}
-	
+
 	// All windows are satisfied
 	fmt.Println("All windows satisfied, returning true")
 	return true

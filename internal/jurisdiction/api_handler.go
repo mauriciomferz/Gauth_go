@@ -70,10 +70,10 @@ func (h *APIHandler) getSupportedJurisdictions(c *gin.Context) {
 		}
 
 		jurisdictionInfo = append(jurisdictionInfo, map[string]interface{}{
-			"jurisdiction":        jurisdiction,
-			"supported_entities":  rules.SupportedEntities,
+			"jurisdiction":          jurisdiction,
+			"supported_entities":    rules.SupportedEntities,
 			"compliance_frameworks": extractFrameworks(rules.ComplianceRules),
-			"has_value_limits":    len(rules.ValueLimits) > 0,
+			"has_value_limits":      len(rules.ValueLimits) > 0,
 			"has_time_restrictions": len(rules.TimeRestrictions) > 0,
 		})
 	}
@@ -142,13 +142,13 @@ func (h *APIHandler) getMetrics(c *gin.Context) {
 		"total_enforcements":        metrics.TotalEnforcements,
 		"allowed_count":             metrics.AllowedCount,
 		"denied_count":              metrics.DeniedCount,
-	"allow_rate":                calculateAllowRate(metrics),
+		"allow_rate":                calculateAllowRate(metrics),
 		"jurisdiction_breakdown":    metrics.JurisdictionBreakdown,
 		"violations_by_type":        metrics.ViolationsByType,
 		"average_latency_ms":        metrics.AverageLatencyMs,
 		"cross_border_attempts":     metrics.CrossBorderAttempts,
 		"cross_border_denials":      metrics.CrossBorderDenials,
-	"cross_border_success_rate": calculateCrossBorderSuccessRate(metrics),
+		"cross_border_success_rate": calculateCrossBorderSuccessRate(metrics),
 		"data_residency_violations": metrics.DataResidencyViolations,
 	})
 }
@@ -168,16 +168,31 @@ func (h *APIHandler) getMetricsPrometheus(c *gin.Context) {
 	m := h.integration.GetMetrics()
 	c.Header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
 	// Build deterministic ordering for maps
-	type kv struct{ k string; v int64 }
+	type kv struct {
+		k string
+		v int64
+	}
 	// Jurisdiction breakdown
 	jKeys := make([]string, 0, len(m.JurisdictionBreakdown))
-	for j := range m.JurisdictionBreakdown { jKeys = append(jKeys, string(j)) }
+	for j := range m.JurisdictionBreakdown {
+		jKeys = append(jKeys, string(j))
+	}
 	// Violations by type
 	vKeys := make([]string, 0, len(m.ViolationsByType))
-	for vt := range m.ViolationsByType { vKeys = append(vKeys, vt) }
+	for vt := range m.ViolationsByType {
+		vKeys = append(vKeys, vt)
+	}
 	// Simple insertion sort (maps are small)
-	for i := 1; i < len(jKeys); i++ { for j := i; j > 0 && jKeys[j] < jKeys[j-1]; j-- { jKeys[j], jKeys[j-1] = jKeys[j-1], jKeys[j] } }
-	for i := 1; i < len(vKeys); i++ { for j := i; j > 0 && vKeys[j] < vKeys[j-1]; j-- { vKeys[j], vKeys[j-1] = vKeys[j-1], vKeys[j] } }
+	for i := 1; i < len(jKeys); i++ {
+		for j := i; j > 0 && jKeys[j] < jKeys[j-1]; j-- {
+			jKeys[j], jKeys[j-1] = jKeys[j-1], jKeys[j]
+		}
+	}
+	for i := 1; i < len(vKeys); i++ {
+		for j := i; j > 0 && vKeys[j] < vKeys[j-1]; j-- {
+			vKeys[j], vKeys[j-1] = vKeys[j-1], vKeys[j]
+		}
+	}
 	b := &strings.Builder{}
 	b.WriteString("# HELP gauth_jurisdiction_enforcements_total Total jurisdiction enforcement attempts.\n")
 	b.WriteString("# TYPE gauth_jurisdiction_enforcements_total counter\n")
@@ -221,21 +236,21 @@ func (h *APIHandler) getValidatorMetrics(c *gin.Context) {
 	validator := engine.validator
 	m := validator.GetMetrics()
 	c.JSON(http.StatusOK, gin.H{
-		"validation_attempts":           m.ValidationAttempts,
-		"validation_successes":          m.ValidationSuccesses,
-		"validation_failures":           m.ValidationFailures,
-		"entity_validation_attempts":    m.EntityValidationAttempts,
-		"entity_validation_failures":    m.EntityValidationFailures,
-		"value_limit_checks":            m.ValueLimitChecks,
-		"value_limit_violations":        m.ValueLimitViolations,
-		"approval_checks":               m.ApprovalChecks,
-		"approval_failures":             m.ApprovalFailures,
-		"board_approval_checks":         m.BoardApprovalChecks,
-		"board_approval_failures":       m.BoardApprovalFailures,
-		"total_validation_latency_ms":   float64(m.TotalValidationLatencyNs) / 1e6,
-		"last_validation_latency_ms":    float64(m.LastValidationLatencyNs) / 1e6,
-		"jurisdiction_counts":           m.JurisdictionCounts,
-		"violation_counts":              m.ViolationCounts,
+		"validation_attempts":         m.ValidationAttempts,
+		"validation_successes":        m.ValidationSuccesses,
+		"validation_failures":         m.ValidationFailures,
+		"entity_validation_attempts":  m.EntityValidationAttempts,
+		"entity_validation_failures":  m.EntityValidationFailures,
+		"value_limit_checks":          m.ValueLimitChecks,
+		"value_limit_violations":      m.ValueLimitViolations,
+		"approval_checks":             m.ApprovalChecks,
+		"approval_failures":           m.ApprovalFailures,
+		"board_approval_checks":       m.BoardApprovalChecks,
+		"board_approval_failures":     m.BoardApprovalFailures,
+		"total_validation_latency_ms": float64(m.TotalValidationLatencyNs) / 1e6,
+		"last_validation_latency_ms":  float64(m.LastValidationLatencyNs) / 1e6,
+		"jurisdiction_counts":         m.JurisdictionCounts,
+		"violation_counts":            m.ViolationCounts,
 	})
 }
 
@@ -247,11 +262,23 @@ func (h *APIHandler) getValidatorMetricsPrometheus(c *gin.Context) {
 	c.Header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
 	// Deterministic ordering of maps
 	jKeys := make([]string, 0, len(m.JurisdictionCounts))
-	for j := range m.JurisdictionCounts { jKeys = append(jKeys, string(j)) }
+	for j := range m.JurisdictionCounts {
+		jKeys = append(jKeys, string(j))
+	}
 	vKeys := make([]string, 0, len(m.ViolationCounts))
-	for vt := range m.ViolationCounts { vKeys = append(vKeys, vt) }
-	for i := 1; i < len(jKeys); i++ { for j := i; j > 0 && jKeys[j] < jKeys[j-1]; j-- { jKeys[j], jKeys[j-1] = jKeys[j-1], jKeys[j] } }
-	for i := 1; i < len(vKeys); i++ { for j := i; j > 0 && vKeys[j] < vKeys[j-1]; j-- { vKeys[j], vKeys[j-1] = vKeys[j-1], vKeys[j] } }
+	for vt := range m.ViolationCounts {
+		vKeys = append(vKeys, vt)
+	}
+	for i := 1; i < len(jKeys); i++ {
+		for j := i; j > 0 && jKeys[j] < jKeys[j-1]; j-- {
+			jKeys[j], jKeys[j-1] = jKeys[j-1], jKeys[j]
+		}
+	}
+	for i := 1; i < len(vKeys); i++ {
+		for j := i; j > 0 && vKeys[j] < vKeys[j-1]; j-- {
+			vKeys[j], vKeys[j-1] = vKeys[j-1], vKeys[j]
+		}
+	}
 	b := &strings.Builder{}
 	b.WriteString("# HELP gauth_validator_validation_attempts_total Total validator jurisdiction validation attempts.\n")
 	b.WriteString("# TYPE gauth_validator_validation_attempts_total counter\n")
@@ -343,7 +370,7 @@ func (h *APIHandler) enforceAction(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "enforcement failed",
+			"error":   "enforcement failed",
 			"details": err.Error(),
 		})
 		return
@@ -355,14 +382,14 @@ func (h *APIHandler) enforceAction(c *gin.Context) {
 	}
 
 	c.JSON(statusCode, gin.H{
-		"decision":    decision.Allowed,
-		"jurisdiction": decision.Jurisdiction,
-		"applied_rules": decision.AppliedRules,
-		"required_approvals": decision.RequiredApprovals,
-		"value_limits": decision.ValueLimits,
-		"violations": decision.Violations,
-		"warnings": decision.Warnings,
-		"request_id": decision.RequestID,
+		"decision":               decision.Allowed,
+		"jurisdiction":           decision.Jurisdiction,
+		"applied_rules":          decision.AppliedRules,
+		"required_approvals":     decision.RequiredApprovals,
+		"value_limits":           decision.ValueLimits,
+		"violations":             decision.Violations,
+		"warnings":               decision.Warnings,
+		"request_id":             decision.RequestID,
 		"enforcement_latency_ms": decision.EnforcementLatency.Milliseconds(),
 	})
 }
@@ -457,21 +484,21 @@ func (h *APIHandler) simulateEnforcement(c *gin.Context) {
 	decision, err := engine.Enforce(c.Request.Context(), enfCtx)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "simulation failed",
+			"error":   "simulation failed",
 			"details": err.Error(),
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"simulation":  true,
-		"decision":    decision.Allowed,
-		"jurisdiction": decision.Jurisdiction,
-		"applied_rules": decision.AppliedRules,
-		"required_approvals": decision.RequiredApprovals,
-		"value_limits": decision.ValueLimits,
-		"violations": decision.Violations,
-		"warnings": decision.Warnings,
+		"simulation":             true,
+		"decision":               decision.Allowed,
+		"jurisdiction":           decision.Jurisdiction,
+		"applied_rules":          decision.AppliedRules,
+		"required_approvals":     decision.RequiredApprovals,
+		"value_limits":           decision.ValueLimits,
+		"violations":             decision.Violations,
+		"warnings":               decision.Warnings,
 		"enforcement_latency_ms": decision.EnforcementLatency.Milliseconds(),
 	})
 }

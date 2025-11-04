@@ -25,20 +25,20 @@ import (
 // CanonicalDigest duplicates DigestHex for explicit naming alignment with other components.
 // Future: add Advice / Evidence fields.
 type AttestationProof struct {
-	Version              string    `json:"ver"`
-	Statement            string    `json:"stmt"`
-	Subject              string    `json:"sub"`
-	Issuer               string    `json:"iss"`
-	IssuedAt             time.Time `json:"iat"`
-	ExpiresAt            time.Time `json:"exp,omitempty"`
-	Nonce                string    `json:"nonce,omitempty"`
-	DigestHex            string    `json:"dig"`
-	Algorithm            string    `json:"alg"`
-	KeyID                string    `json:"kid"`
-	Signature            string    `json:"sig"`
-	RawPOAChainHash      string    `json:"chain_hash,omitempty"`
-	RawPOAChainAlgo      string    `json:"chain_hash_alg,omitempty"`
-	CanonicalDigest      string    `json:"canonical_digest,omitempty"`
+	Version         string    `json:"ver"`
+	Statement       string    `json:"stmt"`
+	Subject         string    `json:"sub"`
+	Issuer          string    `json:"iss"`
+	IssuedAt        time.Time `json:"iat"`
+	ExpiresAt       time.Time `json:"exp,omitempty"`
+	Nonce           string    `json:"nonce,omitempty"`
+	DigestHex       string    `json:"dig"`
+	Algorithm       string    `json:"alg"`
+	KeyID           string    `json:"kid"`
+	Signature       string    `json:"sig"`
+	RawPOAChainHash string    `json:"chain_hash,omitempty"`
+	RawPOAChainAlgo string    `json:"chain_hash_alg,omitempty"`
+	CanonicalDigest string    `json:"canonical_digest,omitempty"`
 }
 
 // CanonicalAttestationDigest returns hex digest and canonical JSON bytes for signing.
@@ -55,19 +55,29 @@ func CanonicalAttestationDigest(p *AttestationProof) (string, []byte, error) {
 	}
 	// Build a map omitting signature-bearing fields to avoid circularity.
 	m := map[string]interface{}{
-		"ver":   p.Version,
-		"stmt":  p.Statement,
-		"sub":   p.Subject,
-		"iss":   p.Issuer,
-		"iat":   p.IssuedAt.UTC().Format(time.RFC3339Nano),
+		"ver":  p.Version,
+		"stmt": p.Statement,
+		"sub":  p.Subject,
+		"iss":  p.Issuer,
+		"iat":  p.IssuedAt.UTC().Format(time.RFC3339Nano),
 	}
-	if !p.ExpiresAt.IsZero() { m["exp"] = p.ExpiresAt.UTC().Format(time.RFC3339Nano) }
-	if p.Nonce != "" { m["nonce"] = p.Nonce }
-	if p.RawPOAChainHash != "" { m["chain_hash"] = p.RawPOAChainHash }
-	if p.RawPOAChainAlgo != "" { m["chain_hash_alg"] = p.RawPOAChainAlgo }
+	if !p.ExpiresAt.IsZero() {
+		m["exp"] = p.ExpiresAt.UTC().Format(time.RFC3339Nano)
+	}
+	if p.Nonce != "" {
+		m["nonce"] = p.Nonce
+	}
+	if p.RawPOAChainHash != "" {
+		m["chain_hash"] = p.RawPOAChainHash
+	}
+	if p.RawPOAChainAlgo != "" {
+		m["chain_hash_alg"] = p.RawPOAChainAlgo
+	}
 	// Deterministic ordering by sorting keys then encoding manually.
 	keys := make([]string, 0, len(m))
-	for k := range m { keys = append(keys, k) }
+	for k := range m {
+		keys = append(keys, k)
+	}
 	sort.Strings(keys)
 	// Manual minimal JSON encoding to guarantee ordering.
 	buf := make([]byte, 0, 256)
@@ -75,13 +85,17 @@ func CanonicalAttestationDigest(p *AttestationProof) (string, []byte, error) {
 	for i, k := range keys {
 		// Marshal value using json for safety (strings/time strings already sanitized).
 		vb, err := json.Marshal(m[k])
-		if err != nil { return "", nil, fmt.Errorf("marshal value %s: %w", k, err) }
+		if err != nil {
+			return "", nil, fmt.Errorf("marshal value %s: %w", k, err)
+		}
 		// Append key:
 		buf = append(buf, '"')
 		buf = append(buf, k...)
 		buf = append(buf, '"', ':')
 		buf = append(buf, vb...)
-		if i < len(keys)-1 { buf = append(buf, ',') }
+		if i < len(keys)-1 {
+			buf = append(buf, ',')
+		}
 	}
 	buf = append(buf, '}')
 	dig := sha256.Sum256(buf)

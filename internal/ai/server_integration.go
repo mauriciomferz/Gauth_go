@@ -12,9 +12,9 @@ import (
 
 // ServerIntegration provides integration between AICapabilityMatrix and BetaServer
 type ServerIntegration struct {
-	matrix        *AICapabilityMatrix
-	auditCallback func(string, map[string]any) // action, metadata
-	metricsCallback func(string)               // metric name to increment
+	matrix          *AICapabilityMatrix
+	auditCallback   func(string, map[string]any) // action, metadata
+	metricsCallback func(string)                 // metric name to increment
 }
 
 // NewServerIntegration creates a new integration layer
@@ -22,10 +22,10 @@ func NewServerIntegration() *ServerIntegration {
 	integration := &ServerIntegration{
 		matrix: NewAICapabilityMatrix(),
 	}
-	
+
 	// Set up audit callback for AI decisions
 	integration.matrix.SetAuditCallback(integration.handleAIDecisionAudit)
-	
+
 	return integration
 }
 
@@ -41,7 +41,7 @@ func (si *ServerIntegration) SetMetricsCallback(callback func(string)) {
 
 // GetMetricsCallback returns the metrics callback if set (nil-safe for callers).
 func (si *ServerIntegration) GetMetricsCallback() func(string) {
-    return si.metricsCallback
+	return si.metricsCallback
 }
 
 // EnableEnforcement enables AI capability enforcement
@@ -58,34 +58,34 @@ func (si *ServerIntegration) IsEnforcementEnabled() bool {
 func (si *ServerIntegration) EnforceAICapabilities(action string, claims map[string]any) (bool, []string, map[string]any) {
 	// Extract AI system profile from claims
 	profile := si.extractAIProfile(claims)
-	
+
 	// If no AI profile detected, treat as human user (no AI restrictions)
 	if profile.EntityType == AIEntityHuman {
 		return true, nil, map[string]any{
 			"ai_enforcement": "skipped",
-			"entity_type": "human",
+			"entity_type":    "human",
 		}
 	}
-	
+
 	// Perform AI capability enforcement
 	decision := si.matrix.EnforceAICapabilities(profile, action, claims)
-	
+
 	// Prepare metadata for audit/metrics
 	metadata := map[string]any{
-		"ai_enforcement":        "enforced",
-		"entity_type":          string(profile.EntityType),
-		"system_id":            profile.SystemID,
-		"decision":             decision.Decision,
-		"reason":               decision.Reason,
-		"required_human_auth":  decision.RequiredHumanAuth,
-		"audit_level":          decision.AuditLevel,
-		"applied_policies":     decision.AppliedPolicies,
-		"decision_id":          decision.DecisionID,
-		"jurisdiction":         profile.Jurisdiction,
-		"industry_context":     profile.IndustryContext,
-		"risk_level":           profile.RiskLevel,
+		"ai_enforcement":      "enforced",
+		"entity_type":         string(profile.EntityType),
+		"system_id":           profile.SystemID,
+		"decision":            decision.Decision,
+		"reason":              decision.Reason,
+		"required_human_auth": decision.RequiredHumanAuth,
+		"audit_level":         decision.AuditLevel,
+		"applied_policies":    decision.AppliedPolicies,
+		"decision_id":         decision.DecisionID,
+		"jurisdiction":        profile.Jurisdiction,
+		"industry_context":    profile.IndustryContext,
+		"risk_level":          profile.RiskLevel,
 	}
-	
+
 	// Increment metrics
 	if si.metricsCallback != nil {
 		if decision.Decision == "allow" {
@@ -93,14 +93,14 @@ func (si *ServerIntegration) EnforceAICapabilities(action string, claims map[str
 		} else {
 			si.metricsCallback("ai_capability_enforce_denied")
 		}
-		
+
 		// Entity-type specific metrics
 		si.metricsCallback(fmt.Sprintf("ai_%s_requests", strings.ToLower(string(profile.EntityType))))
 		if decision.Decision == DecisionDeny {
 			si.metricsCallback(fmt.Sprintf("ai_%s_denied", strings.ToLower(string(profile.EntityType))))
 		}
 	}
-	
+
 	// Handle decision
 	if decision.Decision == DecisionAllow {
 		return true, nil, metadata
@@ -116,17 +116,17 @@ func (si *ServerIntegration) extractAIProfile(claims map[string]any) AISystemPro
 	profile := AISystemProfile{
 		EntityType:   AIEntityHuman, // Default to human
 		SystemID:     "unknown",
-		Jurisdiction: "US",          // Default jurisdiction
-		RiskLevel:    "medium",      // Default risk level
+		Jurisdiction: "US",     // Default jurisdiction
+		RiskLevel:    "medium", // Default risk level
 	}
-	
+
 	// Check for AI entity type indicator
 	if entityType, exists := claims["ai_entity_type"]; exists {
 		if entityStr, ok := entityType.(string); ok {
 			profile.EntityType = AIEntityType(entityStr)
 		}
 	}
-	
+
 	// If no explicit AI entity type, try to infer from other claims
 	if profile.EntityType == AIEntityHuman {
 		// Check for AI-related claims that indicate non-human entity
@@ -135,7 +135,7 @@ func (si *ServerIntegration) extractAIProfile(claims map[string]any) AISystemPro
 			"ai_system_registered", "ai_robot_certified", "ai_analytics_approved",
 			"ai_automation_certified",
 		}
-		
+
 		for _, indicator := range aiIndicators {
 			if si.hasClaimValue(claims, indicator) {
 				// Infer entity type from specific claims
@@ -159,44 +159,44 @@ func (si *ServerIntegration) extractAIProfile(claims map[string]any) AISystemPro
 			}
 		}
 	}
-	
+
 	// Extract other profile fields
 	if systemID, exists := claims["system_id"]; exists {
 		if systemStr, ok := systemID.(string); ok {
 			profile.SystemID = systemStr
 		}
 	}
-	
+
 	if jurisdiction, exists := claims["jurisdiction"]; exists {
 		if jurisdictionStr, ok := jurisdiction.(string); ok {
 			profile.Jurisdiction = jurisdictionStr
 		}
 	}
-	
+
 	if riskLevel, exists := claims["risk_level"]; exists {
 		if riskStr, ok := riskLevel.(string); ok {
 			profile.RiskLevel = riskStr
 		}
 	}
-	
+
 	if industry, exists := claims["industry_context"]; exists {
 		if industryStr, ok := industry.(string); ok {
 			profile.IndustryContext = industryStr
 		}
 	}
-	
+
 	if modelName, exists := claims["model_name"]; exists {
 		if modelStr, ok := modelName.(string); ok {
 			profile.ModelName = modelStr
 		}
 	}
-	
+
 	if modelVersion, exists := claims["model_version"]; exists {
 		if versionStr, ok := modelVersion.(string); ok {
 			profile.ModelVersion = versionStr
 		}
 	}
-	
+
 	// Extract compliance flags
 	if complianceRaw, exists := claims["compliance_flags"]; exists {
 		switch v := complianceRaw.(type) {
@@ -212,7 +212,7 @@ func (si *ServerIntegration) extractAIProfile(claims map[string]any) AISystemPro
 			profile.ComplianceFlags = []string{v}
 		}
 	}
-	
+
 	// Extract certification authorities
 	if certRaw, exists := claims["certified_by"]; exists {
 		switch v := certRaw.(type) {
@@ -228,7 +228,7 @@ func (si *ServerIntegration) extractAIProfile(claims map[string]any) AISystemPro
 			profile.CertifiedBy = []string{v}
 		}
 	}
-	
+
 	return profile
 }
 
@@ -238,7 +238,7 @@ func (si *ServerIntegration) hasClaimValue(claims map[string]any, claimName stri
 	if !exists {
 		return false
 	}
-	
+
 	switch v := value.(type) {
 	case bool:
 		return v
@@ -258,7 +258,7 @@ func (si *ServerIntegration) handleAIDecisionAudit(decision AIEnforcementDecisio
 	if si.auditCallback == nil {
 		return
 	}
-	
+
 	// Create audit metadata
 	auditMetadata := map[string]any{
 		"event_type":           "ai_capability_enforcement",
@@ -282,7 +282,7 @@ func (si *ServerIntegration) handleAIDecisionAudit(decision AIEnforcementDecisio
 		"certified_by":         decision.SystemProfile.CertifiedBy,
 		"timestamp":            decision.Timestamp.Format(time.RFC3339),
 	}
-	
+
 	// Send to audit system
 	si.auditCallback("ai_capability_enforcement", auditMetadata)
 }
@@ -310,23 +310,23 @@ func (si *ServerIntegration) GetGovernancePolicies() []AIGovernancePolicy {
 // ValidateAIProfile validates that an AI profile has required fields
 func (si *ServerIntegration) ValidateAIProfile(profile AISystemProfile) []string {
 	var errors []string
-	
+
 	if profile.SystemID == "" || profile.SystemID == "unknown" {
 		errors = append(errors, "system_id is required for AI entities")
 	}
-	
+
 	if profile.EntityType == AIEntityHuman {
 		return errors // No additional validation for human users
 	}
-	
+
 	if profile.Jurisdiction == "" {
 		errors = append(errors, "jurisdiction is required for AI entities")
 	}
-	
+
 	if profile.RiskLevel == "" {
 		errors = append(errors, "risk_level is required for AI entities")
 	}
-	
+
 	// Entity-specific validations
 	switch profile.EntityType {
 	case AIEntityModel:
@@ -342,7 +342,7 @@ func (si *ServerIntegration) ValidateAIProfile(profile AISystemProfile) []string
 			errors = append(errors, "compliance_flags required for critical risk AI agents")
 		}
 	}
-	
+
 	return errors
 }
 
@@ -367,15 +367,15 @@ func (si *ServerIntegration) CreateTestProfile(entityType string, jurisdiction s
 func (si *ServerIntegration) ExtendStandardCapabilityEnforcement(action string, required []string, provided map[string]bool, claims map[string]any) ([]string, map[string]any) {
 	// First run standard capability validation
 	missing := capability.ValidateCapabilities(required, provided)
-	
+
 	// Then run AI-specific enforcement
 	allowed, aiMissing, aiMetadata := si.EnforceAICapabilities(action, claims)
-	
+
 	// Combine results
 	if !allowed {
 		missing = append(missing, aiMissing...)
 	}
-	
+
 	// Merge metadata
 	if aiMetadata != nil {
 		if len(missing) == 0 {
@@ -385,7 +385,7 @@ func (si *ServerIntegration) ExtendStandardCapabilityEnforcement(action string, 
 			}
 		}
 	}
-	
+
 	return missing, aiMetadata
 }
 
@@ -393,7 +393,7 @@ func (si *ServerIntegration) ExtendStandardCapabilityEnforcement(action string, 
 func (si *ServerIntegration) GetAICapabilityStatus() map[string]any {
 	policies := si.matrix.GetGovernancePolicies()
 	entityTypes := si.matrix.GetEntityTypes()
-	
+
 	policyInfo := make([]map[string]any, len(policies))
 	for i, policy := range policies {
 		policyInfo[i] = map[string]any{
@@ -405,17 +405,17 @@ func (si *ServerIntegration) GetAICapabilityStatus() map[string]any {
 			"last_updated":         policy.LastUpdated,
 		}
 	}
-	
+
 	entityTypeStrings := make([]string, len(entityTypes))
 	for i, t := range entityTypes {
 		entityTypeStrings[i] = string(t)
 	}
-	
+
 	return map[string]any{
-		"enforcement_active":    si.matrix.IsEnforcementActive(),
+		"enforcement_active":     si.matrix.IsEnforcementActive(),
 		"supported_entity_types": entityTypeStrings,
-		"loaded_policies":       len(policies),
-		"policies":              policyInfo,
-		"last_check":            time.Now().Format(time.RFC3339),
+		"loaded_policies":        len(policies),
+		"policies":               policyInfo,
+		"last_check":             time.Now().Format(time.RFC3339),
 	}
 }

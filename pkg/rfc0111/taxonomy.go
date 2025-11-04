@@ -14,27 +14,43 @@ var agentTypeSet, sectorSet, actionClassSet map[string]struct{}
 
 func init() {
 	agentTypeSet = make(map[string]struct{}, len(AllowedAgentTypes))
-	for _, v := range AllowedAgentTypes { agentTypeSet[v] = struct{}{} }
+	for _, v := range AllowedAgentTypes {
+		agentTypeSet[v] = struct{}{}
+	}
 	sectorSet = make(map[string]struct{}, len(AllowedSectors))
-	for _, v := range AllowedSectors { sectorSet[v] = struct{}{} }
+	for _, v := range AllowedSectors {
+		sectorSet[v] = struct{}{}
+	}
 	actionClassSet = make(map[string]struct{}, len(AllowedActionClasses))
-	for _, v := range AllowedActionClasses { actionClassSet[v] = struct{}{} }
+	for _, v := range AllowedActionClasses {
+		actionClassSet[v] = struct{}{}
+	}
 }
 
 // ValidateTaxonomy returns error when any non-empty taxonomy field is not part of its allowed enumeration.
 // For Version <3 callers SHOULD NOT invoke this (fields are ignored in canonical digest).
 func ValidateTaxonomy(p *PowerOfAttorney) error {
-	if p == nil { return fmt.Errorf("nil poa") }
+	if p == nil {
+		return fmt.Errorf("nil poa")
+	}
 	// Guard: only enforce when Version>=3 per canonical logic.
-	if p.Version < 3 { return nil }
+	if p.Version < 3 {
+		return nil
+	}
 	if p.AgentType != "" {
-		if _, ok := agentTypeSet[p.AgentType]; !ok { return fmt.Errorf("agent_type unsupported: %s", p.AgentType) }
+		if _, ok := agentTypeSet[p.AgentType]; !ok {
+			return fmt.Errorf("agent_type unsupported: %s", p.AgentType)
+		}
 	}
 	if p.Sector != "" {
-		if _, ok := sectorSet[p.Sector]; !ok { return fmt.Errorf("sector unsupported: %s", p.Sector) }
+		if _, ok := sectorSet[p.Sector]; !ok {
+			return fmt.Errorf("sector unsupported: %s", p.Sector)
+		}
 	}
 	if p.ActionClass != "" {
-		if _, ok := actionClassSet[p.ActionClass]; !ok { return fmt.Errorf("action_class unsupported: %s", p.ActionClass) }
+		if _, ok := actionClassSet[p.ActionClass]; !ok {
+			return fmt.Errorf("action_class unsupported: %s", p.ActionClass)
+		}
 	}
 	return nil
 }

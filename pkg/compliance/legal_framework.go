@@ -13,7 +13,7 @@ type Jurisdiction string
 
 const (
 	JurisdictionUS Jurisdiction = "US"
-	JurisdictionEU Jurisdiction = "EU" 
+	JurisdictionEU Jurisdiction = "EU"
 	JurisdictionUK Jurisdiction = "UK"
 	JurisdictionCA Jurisdiction = "CA"
 	JurisdictionAU Jurisdiction = "AU"
@@ -24,13 +24,13 @@ const (
 type EntityType string
 
 const (
-	EntityTypeCorporation EntityType = "corporation"
-	EntityTypeLLC         EntityType = "llc"
-	EntityTypePartnership EntityType = "partnership"
-	EntityTypeIndividual  EntityType = "individual"
-	EntityTypeTrust       EntityType = "trust"
+	EntityTypeCorporation  EntityType = "corporation"
+	EntityTypeLLC          EntityType = "llc"
+	EntityTypePartnership  EntityType = "partnership"
+	EntityTypeIndividual   EntityType = "individual"
+	EntityTypeTrust        EntityType = "trust"
 	EntityTypeOrganization EntityType = "organization"
-	EntityTypeAIAgent     EntityType = "ai_agent"
+	EntityTypeAIAgent      EntityType = "ai_agent"
 )
 
 // ApprovalLevel defines the level of approval required for actions.
@@ -44,9 +44,9 @@ const (
 
 // ComplianceRule represents a jurisdiction-specific compliance requirement.
 type ComplianceRule struct {
-	Framework   string            // e.g., "SOX", "GDPR", "MiFID"
-	Requirement string            // specific requirement description
-	Mandatory   bool              // whether this rule is mandatory
+	Framework   string                  // e.g., "SOX", "GDPR", "MiFID"
+	Requirement string                  // specific requirement description
+	Mandatory   bool                    // whether this rule is mandatory
 	Validation  func(interface{}) error // validation function
 }
 
@@ -55,9 +55,9 @@ type JurisdictionRequirements struct {
 	Jurisdiction      Jurisdiction
 	SupportedEntities []EntityType
 	ComplianceRules   []ComplianceRule
-	ValueLimits       map[string]float64    // action -> maximum value
+	ValueLimits       map[string]float64       // action -> maximum value
 	RequiredApprovals map[string]ApprovalLevel // action -> approval level
-	TimeRestrictions  map[string][]string   // action -> allowed time windows
+	TimeRestrictions  map[string][]string      // action -> allowed time windows
 }
 
 // ValidationResult represents the result of a legal framework validation.
@@ -76,7 +76,7 @@ type LegalFrameworkValidator struct {
 	mu                     sync.RWMutex
 	supportedJurisdictions map[Jurisdiction]JurisdictionRequirements
 	entityValidators       map[EntityType]func(entity interface{}) error
-	metrics               *LegalMetrics
+	metrics                *LegalMetrics
 }
 
 // LegalMetrics tracks legal framework validation metrics.
@@ -105,16 +105,16 @@ func NewLegalFrameworkValidator() *LegalFrameworkValidator {
 	validator := &LegalFrameworkValidator{
 		supportedJurisdictions: make(map[Jurisdiction]JurisdictionRequirements),
 		entityValidators:       make(map[EntityType]func(entity interface{}) error),
-		metrics:               &LegalMetrics{
+		metrics: &LegalMetrics{
 			JurisdictionCounts: make(map[Jurisdiction]int64),
 			ViolationCounts:    make(map[string]int64),
 		},
 	}
-	
+
 	// Initialize with default jurisdiction requirements
 	validator.initializeDefaultJurisdictions()
 	validator.initializeEntityValidators()
-	
+
 	return validator
 }
 
@@ -138,12 +138,19 @@ func (v *LegalFrameworkValidator) ValidateJurisdiction(ctx context.Context, juri
 
 	// Validate required approvals (board-level tracked separately)
 	if requiredLevel, found := requirements.RequiredApprovals[action]; found {
-		v.metrics.mu.Lock(); v.metrics.ApprovalChecks++; v.metrics.mu.Unlock()
+		v.metrics.mu.Lock()
+		v.metrics.ApprovalChecks++
+		v.metrics.mu.Unlock()
 		if requiredLevel == BoardApproval {
-			v.metrics.mu.Lock(); v.metrics.BoardApprovalChecks++; v.metrics.mu.Unlock()
+			v.metrics.mu.Lock()
+			v.metrics.BoardApprovalChecks++
+			v.metrics.mu.Unlock()
 			if err := v.validateBoardApproval(ctx, action); err != nil {
 				v.recordFailure(fmt.Sprintf("board_approval_failed_%s", action))
-				v.metrics.mu.Lock(); v.metrics.BoardApprovalFailures++; v.metrics.ApprovalFailures++; v.metrics.mu.Unlock()
+				v.metrics.mu.Lock()
+				v.metrics.BoardApprovalFailures++
+				v.metrics.ApprovalFailures++
+				v.metrics.mu.Unlock()
 				v.recordLatency(time.Since(start))
 				return fmt.Errorf("board approval required for %s: %w", action, err)
 			}
@@ -178,27 +185,35 @@ func (v *LegalFrameworkValidator) ValidateJurisdictionRequirements(ctx context.C
 	if requirements == nil {
 		return fmt.Errorf("jurisdiction requirements cannot be nil")
 	}
-	
+
 	// Check value limits
 	if limit, exists := requirements.ValueLimits[action]; exists {
-		v.metrics.mu.Lock(); v.metrics.ValueLimitChecks++; v.metrics.mu.Unlock()
+		v.metrics.mu.Lock()
+		v.metrics.ValueLimitChecks++
+		v.metrics.mu.Unlock()
 		if limit <= 0 {
 			v.recordFailure(fmt.Sprintf("invalid_value_limit_%s", action))
-			v.metrics.mu.Lock(); v.metrics.ValueLimitViolations++; v.metrics.mu.Unlock()
+			v.metrics.mu.Lock()
+			v.metrics.ValueLimitViolations++
+			v.metrics.mu.Unlock()
 			return fmt.Errorf("invalid value limit for action %s", action)
 		}
 	}
-	
+
 	// Check required approvals
 	if approvalLevel, exists := requirements.RequiredApprovals[action]; exists {
-		v.metrics.mu.Lock(); v.metrics.ApprovalChecks++; v.metrics.mu.Unlock()
+		v.metrics.mu.Lock()
+		v.metrics.ApprovalChecks++
+		v.metrics.mu.Unlock()
 		if approvalLevel == "" {
 			v.recordFailure(fmt.Sprintf("missing_approval_level_%s", action))
-			v.metrics.mu.Lock(); v.metrics.ApprovalFailures++; v.metrics.mu.Unlock()
+			v.metrics.mu.Lock()
+			v.metrics.ApprovalFailures++
+			v.metrics.mu.Unlock()
 			return fmt.Errorf("missing approval level for action %s", action)
 		}
 	}
-	
+
 	return nil
 }
 
@@ -207,21 +222,27 @@ func (v *LegalFrameworkValidator) ValidateEntityType(jurisdiction Jurisdiction, 
 	v.mu.RLock()
 	requirements, exists := v.supportedJurisdictions[jurisdiction]
 	v.mu.RUnlock()
-	v.metrics.mu.Lock(); v.metrics.EntityValidationAttempts++; v.metrics.mu.Unlock()
-	
+	v.metrics.mu.Lock()
+	v.metrics.EntityValidationAttempts++
+	v.metrics.mu.Unlock()
+
 	if !exists {
-		v.metrics.mu.Lock(); v.metrics.EntityValidationFailures++; v.metrics.mu.Unlock()
+		v.metrics.mu.Lock()
+		v.metrics.EntityValidationFailures++
+		v.metrics.mu.Unlock()
 		return fmt.Errorf("unsupported jurisdiction: %s", jurisdiction)
 	}
-	
+
 	for _, supportedType := range requirements.SupportedEntities {
 		if supportedType == entityType {
 			// success (no explicit metric besides attempt)
 			return nil
 		}
 	}
-	
-	v.metrics.mu.Lock(); v.metrics.EntityValidationFailures++; v.metrics.mu.Unlock()
+
+	v.metrics.mu.Lock()
+	v.metrics.EntityValidationFailures++
+	v.metrics.mu.Unlock()
 	v.recordFailure(fmt.Sprintf("unsupported_entity_%s_%s", jurisdiction, entityType))
 	return fmt.Errorf("entity type %s not supported in jurisdiction %s", entityType, jurisdiction)
 }
@@ -230,12 +251,12 @@ func (v *LegalFrameworkValidator) ValidateEntityType(jurisdiction Jurisdiction, 
 func (v *LegalFrameworkValidator) GetJurisdictionRules(jurisdiction Jurisdiction) (*JurisdictionRequirements, error) {
 	v.mu.RLock()
 	defer v.mu.RUnlock()
-	
+
 	requirements, exists := v.supportedJurisdictions[jurisdiction]
 	if !exists {
 		return nil, fmt.Errorf("jurisdiction %s not supported", jurisdiction)
 	}
-	
+
 	// Return a copy to prevent external modification
 	requirementsCopy := requirements
 	return &requirementsCopy, nil
@@ -245,7 +266,7 @@ func (v *LegalFrameworkValidator) GetJurisdictionRules(jurisdiction Jurisdiction
 func (v *LegalFrameworkValidator) GetSupportedJurisdictions() []Jurisdiction {
 	v.mu.RLock()
 	defer v.mu.RUnlock()
-	
+
 	jurisdictions := make([]Jurisdiction, 0, len(v.supportedJurisdictions))
 	for jurisdiction := range v.supportedJurisdictions {
 		jurisdictions = append(jurisdictions, jurisdiction)
@@ -299,7 +320,7 @@ func (v *LegalFrameworkValidator) initializeDefaultJurisdictions() {
 			"trade_execution": {"09:30-16:00", "weekdays"},
 		},
 	}
-	
+
 	// European Union
 	v.supportedJurisdictions[JurisdictionEU] = JurisdictionRequirements{
 		Jurisdiction:      JurisdictionEU,
@@ -326,7 +347,7 @@ func (v *LegalFrameworkValidator) initializeDefaultJurisdictions() {
 			"high_value_transaction": BoardApproval,
 		},
 	}
-	
+
 	// United Kingdom
 	v.supportedJurisdictions[JurisdictionUK] = JurisdictionRequirements{
 		Jurisdiction:      JurisdictionUK,
@@ -346,7 +367,7 @@ func (v *LegalFrameworkValidator) initializeDefaultJurisdictions() {
 			"high_value_transaction": DualApproval,
 		},
 	}
-	
+
 	// Canada
 	v.supportedJurisdictions[JurisdictionCA] = JurisdictionRequirements{
 		Jurisdiction:      JurisdictionCA,
@@ -366,7 +387,7 @@ func (v *LegalFrameworkValidator) initializeDefaultJurisdictions() {
 			"high_value_transaction": DualApproval,
 		},
 	}
-	
+
 	// Australia
 	v.supportedJurisdictions[JurisdictionAU] = JurisdictionRequirements{
 		Jurisdiction:      JurisdictionAU,
@@ -386,7 +407,7 @@ func (v *LegalFrameworkValidator) initializeDefaultJurisdictions() {
 			"high_value_transaction": BoardApproval,
 		},
 	}
-	
+
 	// Japan
 	v.supportedJurisdictions[JurisdictionJP] = JurisdictionRequirements{
 		Jurisdiction:      JurisdictionJP,
@@ -414,32 +435,32 @@ func (v *LegalFrameworkValidator) initializeEntityValidators() {
 		// Validate corporation-specific requirements
 		return nil
 	}
-	
+
 	v.entityValidators[EntityTypeLLC] = func(entity interface{}) error {
 		// Validate LLC-specific requirements
 		return nil
 	}
-	
+
 	v.entityValidators[EntityTypePartnership] = func(entity interface{}) error {
 		// Validate partnership-specific requirements
 		return nil
 	}
-	
+
 	v.entityValidators[EntityTypeIndividual] = func(entity interface{}) error {
 		// Validate individual-specific requirements
 		return nil
 	}
-	
+
 	v.entityValidators[EntityTypeTrust] = func(entity interface{}) error {
 		// Validate trust-specific requirements
 		return nil
 	}
-	
+
 	v.entityValidators[EntityTypeOrganization] = func(entity interface{}) error {
 		// Validate organization-specific requirements
 		return nil
 	}
-	
+
 	v.entityValidators[EntityTypeAIAgent] = func(entity interface{}) error {
 		// Validate AI agent-specific requirements
 		return nil
@@ -453,18 +474,18 @@ func (v *LegalFrameworkValidator) validateBoardApproval(ctx context.Context, act
 	// - Quorum requirements
 	// - Voting records
 	// For now, we'll do a basic validation
-	
+
 	if strings.Contains(action, "unauthorized") {
 		return fmt.Errorf("board approval cannot be granted for unauthorized actions")
 	}
-	
+
 	return nil
 }
 
 // isWithinAllowedTimeWindow checks if the current time is within allowed time windows.
 func (v *LegalFrameworkValidator) isWithinAllowedTimeWindow(timeWindows []string) bool {
 	now := time.Now()
-	
+
 	for _, window := range timeWindows {
 		switch window {
 		case "weekdays":
@@ -490,7 +511,7 @@ func (v *LegalFrameworkValidator) isWithinAllowedTimeWindow(timeWindows []string
 			}
 		}
 	}
-	
+
 	return len(timeWindows) == 0 // Allow if no restrictions
 }
 
@@ -511,8 +532,8 @@ func (v *LegalFrameworkValidator) recordFailure(violationType string) {
 
 // recordLatency records latency metrics for a validation.
 func (v *LegalFrameworkValidator) recordLatency(d time.Duration) {
-    v.metrics.mu.Lock()
-    v.metrics.LastValidationLatencyNs = d.Nanoseconds()
-    v.metrics.TotalValidationLatencyNs += d.Nanoseconds()
-    v.metrics.mu.Unlock()
+	v.metrics.mu.Lock()
+	v.metrics.LastValidationLatencyNs = d.Nanoseconds()
+	v.metrics.TotalValidationLatencyNs += d.Nanoseconds()
+	v.metrics.mu.Unlock()
 }

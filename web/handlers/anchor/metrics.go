@@ -10,10 +10,10 @@ import "github.com/gin-gonic/gin"
 // BetaServer implements this via CapabilityAnchorMetricsPrometheus wrapper.
 // Narrow interface keeps package decoupled from full server.
 type MetricsDeps interface {
-    CapabilityAnchorMetricsPrometheus(*gin.Context)
+	CapabilityAnchorMetricsPrometheus(*gin.Context)
 }
 
 // RegisterMetrics mounts Prometheus capability anchor metrics endpoint on router group.
 func RegisterMetrics(r *gin.RouterGroup, deps MetricsDeps) {
-    r.GET("/capabilities/anchor/metrics/prometheus", func(c *gin.Context) { deps.CapabilityAnchorMetricsPrometheus(c) })
+	r.GET("/capabilities/anchor/metrics/prometheus", func(c *gin.Context) { deps.CapabilityAnchorMetricsPrometheus(c) })
 }

@@ -17,19 +17,31 @@ func TestAuthorizationCacheCryptoRotationInvalidation(t *testing.T) {
 
 	req := authz.Request{Subject: "sam", Resource: "obj:1", Action: "read"}
 	dec1, _ := ma.Authorize(context.Background(), req)
-	if dec1.Metadata["cache_hit"] != "false" { t.Fatalf("expected initial miss got %v", dec1.Metadata["cache_hit"]) }
+	if dec1.Metadata["cache_hit"] != "false" {
+		t.Fatalf("expected initial miss got %v", dec1.Metadata["cache_hit"])
+	}
 	dec2, _ := ma.Authorize(context.Background(), req)
-	if dec2.Metadata["cache_hit"] != "true" { t.Fatalf("expected second hit got %v", dec2.Metadata["cache_hit"]) }
+	if dec2.Metadata["cache_hit"] != "true" {
+		t.Fatalf("expected second hit got %v", dec2.Metadata["cache_hit"])
+	}
 
 	// Simulate crypto key rotation
 	ma.InvalidateOnCryptoRotation()
 
 	dec3, _ := ma.Authorize(context.Background(), req)
-	if dec3.Metadata["cache_hit"] != "false" { t.Fatalf("expected post-rotation miss got %v", dec3.Metadata["cache_hit"]) }
+	if dec3.Metadata["cache_hit"] != "false" {
+		t.Fatalf("expected post-rotation miss got %v", dec3.Metadata["cache_hit"])
+	}
 	dec4, _ := ma.Authorize(context.Background(), req)
-	if dec4.Metadata["cache_hit"] != "true" { t.Fatalf("expected re-populated hit got %v", dec4.Metadata["cache_hit"]) }
+	if dec4.Metadata["cache_hit"] != "true" {
+		t.Fatalf("expected re-populated hit got %v", dec4.Metadata["cache_hit"])
+	}
 
 	metrics := ma.AuthorizationCacheMetrics()
-	if metrics == nil { t.Fatalf("expected metrics snapshot") }
-	if metrics.Invalidations == 0 { t.Fatalf("expected invalidation counter >0 after rotation flush") }
+	if metrics == nil {
+		t.Fatalf("expected metrics snapshot")
+	}
+	if metrics.Invalidations == 0 {
+		t.Fatalf("expected invalidation counter >0 after rotation flush")
+	}
 }

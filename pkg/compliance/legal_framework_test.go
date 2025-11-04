@@ -9,26 +9,26 @@ import (
 
 func TestNewLegalFrameworkValidator(t *testing.T) {
 	validator := NewLegalFrameworkValidator()
-	
+
 	// Test initialization
 	if validator == nil {
 		t.Fatal("NewLegalFrameworkValidator should return a non-nil validator")
 	}
-	
+
 	// Test supported jurisdictions are initialized
 	jurisdictions := validator.GetSupportedJurisdictions()
 	expectedJurisdictions := []Jurisdiction{JurisdictionUS, JurisdictionEU, JurisdictionUK, JurisdictionCA, JurisdictionAU, JurisdictionJP}
-	
+
 	if len(jurisdictions) != len(expectedJurisdictions) {
 		t.Fatalf("Expected %d jurisdictions, got %d", len(expectedJurisdictions), len(jurisdictions))
 	}
-	
+
 	// Check all expected jurisdictions are present
 	jurisdictionMap := make(map[Jurisdiction]bool)
 	for _, j := range jurisdictions {
 		jurisdictionMap[j] = true
 	}
-	
+
 	for _, expected := range expectedJurisdictions {
 		if !jurisdictionMap[expected] {
 			t.Errorf("Expected jurisdiction %s not found", expected)
@@ -39,12 +39,12 @@ func TestNewLegalFrameworkValidator(t *testing.T) {
 func TestValidateJurisdiction(t *testing.T) {
 	validator := NewLegalFrameworkValidator()
 	ctx := context.Background()
-	
+
 	tests := []struct {
-		name         string
-		jurisdiction Jurisdiction
-		action       string
-		expectError  bool
+		name          string
+		jurisdiction  Jurisdiction
+		action        string
+		expectError   bool
 		errorContains string
 	}{
 		{
@@ -54,23 +54,23 @@ func TestValidateJurisdiction(t *testing.T) {
 			expectError:  false,
 		},
 		{
-			name:         "Valid EU fund transfer", 
+			name:         "Valid EU fund transfer",
 			jurisdiction: JurisdictionEU,
 			action:       "fund_transfer",
 			expectError:  false,
 		},
 		{
-			name:         "Unsupported jurisdiction",
-			jurisdiction: Jurisdiction("INVALID"),
-			action:       "trade_execution",
-			expectError:  true,
+			name:          "Unsupported jurisdiction",
+			jurisdiction:  Jurisdiction("INVALID"),
+			action:        "trade_execution",
+			expectError:   true,
 			errorContains: "unsupported jurisdiction",
 		},
 		{
-			name:         "US autonomous decision (should fail)",
-			jurisdiction: JurisdictionUS,
-			action:       "autonomous_decision",
-			expectError:  true,
+			name:          "US autonomous decision (should fail)",
+			jurisdiction:  JurisdictionUS,
+			action:        "autonomous_decision",
+			expectError:   true,
 			errorContains: "autonomous AI decisions not permitted",
 		},
 		{
@@ -86,18 +86,18 @@ func TestValidateJurisdiction(t *testing.T) {
 			expectError:  false,
 		},
 		{
-			name:         "Board approval unauthorized action",
-			jurisdiction: JurisdictionEU,
-			action:       "unauthorized_high_value_transaction",
-			expectError:  true,
+			name:          "Board approval unauthorized action",
+			jurisdiction:  JurisdictionEU,
+			action:        "unauthorized_high_value_transaction",
+			expectError:   true,
 			errorContains: "unauthorized actions not permitted",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := validator.ValidateJurisdiction(ctx, tt.jurisdiction, tt.action)
-			
+
 			if tt.expectError {
 				if err == nil {
 					t.Errorf("Expected error but got none")
@@ -115,7 +115,7 @@ func TestValidateJurisdiction(t *testing.T) {
 
 func TestValidateEntityType(t *testing.T) {
 	validator := NewLegalFrameworkValidator()
-	
+
 	tests := []struct {
 		name         string
 		jurisdiction Jurisdiction
@@ -153,11 +153,11 @@ func TestValidateEntityType(t *testing.T) {
 			expectError:  true,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := validator.ValidateEntityType(tt.jurisdiction, tt.entityType)
-			
+
 			if tt.expectError && err == nil {
 				t.Errorf("Expected error but got none")
 			} else if !tt.expectError && err != nil {
@@ -169,7 +169,7 @@ func TestValidateEntityType(t *testing.T) {
 
 func TestGetJurisdictionRules(t *testing.T) {
 	validator := NewLegalFrameworkValidator()
-	
+
 	tests := []struct {
 		name         string
 		jurisdiction Jurisdiction
@@ -191,11 +191,11 @@ func TestGetJurisdictionRules(t *testing.T) {
 			expectError:  true,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rules, err := validator.GetJurisdictionRules(tt.jurisdiction)
-			
+
 			if tt.expectError {
 				if err == nil {
 					t.Errorf("Expected error but got none")
@@ -229,7 +229,7 @@ func TestGetJurisdictionRules(t *testing.T) {
 func TestValidateJurisdictionRequirements(t *testing.T) {
 	validator := NewLegalFrameworkValidator()
 	ctx := context.Background()
-	
+
 	validRequirements := &JurisdictionRequirements{
 		Jurisdiction: JurisdictionUS,
 		ValueLimits: map[string]float64{
@@ -239,7 +239,7 @@ func TestValidateJurisdictionRequirements(t *testing.T) {
 			"test_action": DualApproval,
 		},
 	}
-	
+
 	tests := []struct {
 		name         string
 		requirements *JurisdictionRequirements
@@ -277,15 +277,15 @@ func TestValidateJurisdictionRequirements(t *testing.T) {
 					"test_action": ApprovalLevel(""), // Empty approval level
 				},
 			},
-			action:      "test_action", 
+			action:      "test_action",
 			expectError: true,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := validator.ValidateJurisdictionRequirements(ctx, tt.requirements, tt.action)
-			
+
 			if tt.expectError && err == nil {
 				t.Errorf("Expected error but got none")
 			} else if !tt.expectError && err != nil {
@@ -298,7 +298,7 @@ func TestValidateJurisdictionRequirements(t *testing.T) {
 func TestGetMetrics(t *testing.T) {
 	validator := NewLegalFrameworkValidator()
 	ctx := context.Background()
-	
+
 	// Initial metrics should be zero
 	metrics := validator.GetMetrics()
 	if metrics.ValidationAttempts != 0 {
@@ -310,12 +310,12 @@ func TestGetMetrics(t *testing.T) {
 	if metrics.ValidationFailures != 0 {
 		t.Errorf("Expected 0 validation failures, got %d", metrics.ValidationFailures)
 	}
-	
+
 	// Perform some validations
-	_ = validator.ValidateJurisdiction(ctx, JurisdictionUS, "trade_execution") // Should succeed
+	_ = validator.ValidateJurisdiction(ctx, JurisdictionUS, "trade_execution")     // Should succeed
 	_ = validator.ValidateJurisdiction(ctx, JurisdictionUS, "autonomous_decision") // Should fail
-	_ = validator.ValidateJurisdiction(ctx, Jurisdiction("INVALID"), "action") // Should fail
-	
+	_ = validator.ValidateJurisdiction(ctx, Jurisdiction("INVALID"), "action")     // Should fail
+
 	// Check updated metrics
 	updatedMetrics := validator.GetMetrics()
 	if updatedMetrics.ValidationAttempts != 3 {
@@ -327,12 +327,12 @@ func TestGetMetrics(t *testing.T) {
 	if updatedMetrics.ValidationFailures != 2 {
 		t.Errorf("Expected 2 validation failures, got %d", updatedMetrics.ValidationFailures)
 	}
-	
+
 	// Check jurisdiction counts
 	if updatedMetrics.JurisdictionCounts[JurisdictionUS] != 2 {
 		t.Errorf("Expected 2 US jurisdiction attempts, got %d", updatedMetrics.JurisdictionCounts[JurisdictionUS])
 	}
-	
+
 	// Check violation counts
 	if len(updatedMetrics.ViolationCounts) == 0 {
 		t.Errorf("Expected some violation counts, got none")
@@ -341,7 +341,7 @@ func TestGetMetrics(t *testing.T) {
 
 func TestAddJurisdiction(t *testing.T) {
 	validator := NewLegalFrameworkValidator()
-	
+
 	// Add a custom jurisdiction
 	customJurisdiction := JurisdictionRequirements{
 		Jurisdiction:      Jurisdiction("TEST"),
@@ -350,9 +350,9 @@ func TestAddJurisdiction(t *testing.T) {
 		ValueLimits:       map[string]float64{"test_action": 500000.0},
 		RequiredApprovals: map[string]ApprovalLevel{"test_action": SingleApproval},
 	}
-	
+
 	validator.AddJurisdiction(customJurisdiction)
-	
+
 	// Verify it was added
 	jurisdictions := validator.GetSupportedJurisdictions()
 	found := false
@@ -362,11 +362,11 @@ func TestAddJurisdiction(t *testing.T) {
 			break
 		}
 	}
-	
+
 	if !found {
 		t.Errorf("Custom jurisdiction TEST was not added")
 	}
-	
+
 	// Verify we can get its rules
 	rules, err := validator.GetJurisdictionRules(Jurisdiction("TEST"))
 	if err != nil {
@@ -379,7 +379,7 @@ func TestAddJurisdiction(t *testing.T) {
 
 func TestTimeRestrictions(t *testing.T) {
 	validator := NewLegalFrameworkValidator()
-	
+
 	// Add jurisdiction with time restrictions for testing
 	testJurisdiction := JurisdictionRequirements{
 		Jurisdiction:      Jurisdiction("TIME_TEST"),
@@ -390,17 +390,17 @@ func TestTimeRestrictions(t *testing.T) {
 			"always_allowed_action":  {},
 		},
 	}
-	
+
 	validator.AddJurisdiction(testJurisdiction)
-	
+
 	ctx := context.Background()
-	
+
 	// Test time-restricted action (should pass due to simplified implementation)
 	err := validator.ValidateJurisdiction(ctx, Jurisdiction("TIME_TEST"), "time_restricted_action")
 	if err != nil {
 		t.Errorf("Expected time-restricted action to pass, got error: %s", err.Error())
 	}
-	
+
 	// Test always allowed action
 	err = validator.ValidateJurisdiction(ctx, Jurisdiction("TIME_TEST"), "always_allowed_action")
 	if err != nil {
@@ -411,14 +411,14 @@ func TestTimeRestrictions(t *testing.T) {
 func TestConcurrentAccess(t *testing.T) {
 	validator := NewLegalFrameworkValidator()
 	ctx := context.Background()
-	
+
 	// Test concurrent access to validator methods
 	done := make(chan bool, 10)
-	
+
 	for i := 0; i < 10; i++ {
 		go func(id int) {
 			defer func() { done <- true }()
-			
+
 			// Perform various operations concurrently
 			_ = validator.ValidateJurisdiction(ctx, JurisdictionUS, "concurrent_test")
 			validator.GetSupportedJurisdictions()
@@ -427,7 +427,7 @@ func TestConcurrentAccess(t *testing.T) {
 			validator.GetMetrics()
 		}(i)
 	}
-	
+
 	// Wait for all goroutines to complete
 	for i := 0; i < 10; i++ {
 		select {
@@ -437,7 +437,7 @@ func TestConcurrentAccess(t *testing.T) {
 			t.Fatal("Concurrent access test timed out")
 		}
 	}
-	
+
 	// Verify metrics reflect concurrent operations
 	metrics := validator.GetMetrics()
 	if metrics.ValidationAttempts != 10 {
@@ -448,13 +448,13 @@ func TestConcurrentAccess(t *testing.T) {
 func TestBoardApprovalValidation(t *testing.T) {
 	validator := NewLegalFrameworkValidator()
 	ctx := context.Background()
-	
+
 	// Test board approval for high value transaction in EU (should require board approval)
 	err := validator.ValidateJurisdiction(ctx, JurisdictionEU, "high_value_transaction")
 	if err != nil {
 		t.Errorf("Expected board approval validation to pass for authorized action, got error: %s", err.Error())
 	}
-	
+
 	// Test board approval for unauthorized action (should fail)
 	err = validator.ValidateJurisdiction(ctx, JurisdictionEU, "unauthorized_high_value_transaction")
 	if err == nil {
@@ -466,13 +466,13 @@ func TestBoardApprovalValidation(t *testing.T) {
 
 func TestComplianceRuleValidation(t *testing.T) {
 	validator := NewLegalFrameworkValidator()
-	
+
 	// Test that compliance rules are properly initialized
 	rules, err := validator.GetJurisdictionRules(JurisdictionUS)
 	if err != nil {
 		t.Fatalf("Failed to get US rules: %s", err.Error())
 	}
-	
+
 	// Check for AI oversight rule
 	foundAIRule := false
 	for _, rule := range rules.ComplianceRules {
@@ -487,11 +487,11 @@ func TestComplianceRuleValidation(t *testing.T) {
 			break
 		}
 	}
-	
+
 	if !foundAIRule {
 		t.Errorf("Expected AI oversight rule in US jurisdiction")
 	}
-	
+
 	// Test other jurisdictions have appropriate rules
 	for _, jurisdiction := range []Jurisdiction{JurisdictionEU, JurisdictionUK, JurisdictionCA, JurisdictionAU, JurisdictionJP} {
 		rules, err := validator.GetJurisdictionRules(jurisdiction)
@@ -499,7 +499,7 @@ func TestComplianceRuleValidation(t *testing.T) {
 			t.Errorf("Failed to get rules for %s: %s", jurisdiction, err.Error())
 			continue
 		}
-		
+
 		if len(rules.ComplianceRules) == 0 {
 			t.Errorf("Expected compliance rules for jurisdiction %s", jurisdiction)
 		}
@@ -508,17 +508,17 @@ func TestComplianceRuleValidation(t *testing.T) {
 
 func TestValueLimitsValidation(t *testing.T) {
 	validator := NewLegalFrameworkValidator()
-	
+
 	// Test that all jurisdictions have appropriate value limits
 	jurisdictions := []Jurisdiction{JurisdictionUS, JurisdictionEU, JurisdictionUK, JurisdictionCA, JurisdictionAU, JurisdictionJP}
-	
+
 	for _, jurisdiction := range jurisdictions {
 		rules, err := validator.GetJurisdictionRules(jurisdiction)
 		if err != nil {
 			t.Errorf("Failed to get rules for %s: %s", jurisdiction, err.Error())
 			continue
 		}
-		
+
 		// Check common value limits exist
 		expectedActions := []string{"trade_execution", "fund_transfer", "high_value_transaction"}
 		for _, action := range expectedActions {
@@ -528,7 +528,7 @@ func TestValueLimitsValidation(t *testing.T) {
 				}
 			}
 		}
-		
+
 		// Check required approvals exist for actions with limits
 		for action := range rules.ValueLimits {
 			if _, exists := rules.RequiredApprovals[action]; !exists {

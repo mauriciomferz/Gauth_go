@@ -16,7 +16,7 @@ func TestService_ValidateAdvancedToken_Integration(t *testing.T) {
 		AccessTokenExpiry: time.Hour,
 		Audience:          []string{"api.example.com"},
 	}
-	
+
 	service, err := New(config)
 	if err != nil {
 		t.Fatalf("Failed to create service: %v", err)
@@ -71,7 +71,7 @@ func TestService_ValidateAdvancedToken_Integration(t *testing.T) {
 	if !result.Valid {
 		t.Error("ValidateAdvancedToken() result.Valid = false, want true")
 	}
-	
+
 	// Note: The basic validation returns the JWT 'sub' claim as ClientID, which is the subject
 	// This is expected behavior for JWT validation
 
@@ -79,7 +79,7 @@ func TestService_ValidateAdvancedToken_Integration(t *testing.T) {
 	if result.AdvancedClaims == nil {
 		t.Fatal("ValidateAdvancedToken() AdvancedClaims is nil")
 	}
-	
+
 	claims := result.AdvancedClaims
 	if claims.Subject != "test-user@example.com" {
 		t.Errorf("AdvancedClaims Subject = %v, want %v", claims.Subject, "test-user@example.com")
@@ -124,7 +124,7 @@ func TestService_ValidateAdvancedToken_ExpiredToken(t *testing.T) {
 		AccessTokenExpiry: time.Hour,
 		Audience:          []string{"api.example.com"},
 	}
-	
+
 	service, err := New(config)
 	if err != nil {
 		t.Fatalf("Failed to create service: %v", err)
@@ -161,7 +161,7 @@ func TestService_ValidateAdvancedToken_TimeWindowRestriction(t *testing.T) {
 		AccessTokenExpiry: time.Hour,
 		Audience:          []string{"api.example.com"},
 	}
-	
+
 	service, err := New(config)
 	if err != nil {
 		t.Fatalf("Failed to create service: %v", err)
@@ -187,7 +187,7 @@ func TestService_ValidateAdvancedToken_TimeWindowRestriction(t *testing.T) {
 				TimeWindow: &TimeWindow{
 					StartHour: restrictiveHour,
 					EndHour:   restrictiveHour, // Same hour = very narrow window
-					Weekdays:  []int{}, // No days allowed
+					Weekdays:  []int{},         // No days allowed
 				},
 			},
 		},
@@ -215,7 +215,7 @@ func TestPASETOValidation_StructuredFooter(t *testing.T) {
 		ClientID:      "test-client",
 		SigningKey:    "test-signing-key-32-bytes-long-12",
 	}
-	
+
 	service, err := New(config)
 	if err != nil {
 		t.Fatalf("Failed to create service: %v", err)
@@ -224,12 +224,12 @@ func TestPASETOValidation_StructuredFooter(t *testing.T) {
 
 	// Test valid PASETO token format
 	validToken := "v4.public.eyJzdWIiOiJ1c2VyMTIzIiwiaXNzIjoiaHR0cHM6Ly9hdXRoLmV4YW1wbGUuY29tIn0.eyJraWQiOiJrZXktMTIzIiwiYWxnIjoiRWQyNTUxOSIsImlzcyI6Imh0dHBzOi8vYXV0aC5leGFtcGxlLmNvbSJ9"
-	
+
 	result, err := service.ValidatePASETOWithFooter(validToken)
 	if err != nil {
 		t.Fatalf("ValidatePASETOWithFooter() error = %v", err)
 	}
-	
+
 	if !result.Valid {
 		t.Error("ValidatePASETOWithFooter() Valid = false, want true")
 	}
@@ -250,10 +250,10 @@ func TestPASETOValidation_StructuredFooter(t *testing.T) {
 
 func TestAdvancedClaimsComplexScenarios(t *testing.T) {
 	tests := []struct {
-		name          string
-		setupClaims   func() *AdvancedClaims
-		expectValid   bool
-		expectError   string
+		name        string
+		setupClaims func() *AdvancedClaims
+		expectValid bool
+		expectError string
 	}{
 		{
 			name: "multi_tenant_with_delegation",
@@ -315,9 +315,9 @@ func TestAdvancedClaimsComplexScenarios(t *testing.T) {
 						},
 					},
 					Custom: map[string]interface{}{
-						"risk_score":     0.75,
-						"risk_factors":   []string{"new_device", "unusual_location", "off_hours"},
-						"requires_mfa":   true,
+						"risk_score":           0.75,
+						"risk_factors":         []string{"new_device", "unusual_location", "off_hours"},
+						"requires_mfa":         true,
 						"max_session_duration": 1800, // 30 minutes
 					},
 				}
@@ -345,7 +345,7 @@ func TestAdvancedClaimsComplexScenarios(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			claims := tt.setupClaims()
 			err := claims.ValidateSemantics()
-			
+
 			if tt.expectValid && err != nil {
 				t.Errorf("ValidateSemantics() unexpected error: %v", err)
 			}
@@ -370,8 +370,8 @@ func TestAdvancedTokenJSONSerialization(t *testing.T) {
 		IssuedAt:  time.Now().Unix(),
 		TokenType: "JWT",
 		ClaimsMetadata: &ClaimsMetadata{
-			Version:    "2.0",
-			Confidence: 0.90,
+			Version:      "2.0",
+			Confidence:   0.90,
 			Capabilities: []string{"test", "serialization"},
 		},
 		Custom: map[string]interface{}{
@@ -388,7 +388,7 @@ func TestAdvancedTokenJSONSerialization(t *testing.T) {
 
 	// Test ToMap
 	claimsMap := original.ToMap()
-	
+
 	// Serialize to JSON
 	jsonBytes, err := json.Marshal(claimsMap)
 	if err != nil {
@@ -414,12 +414,12 @@ func TestAdvancedTokenJSONSerialization(t *testing.T) {
 	if reconstructed.TokenType != original.TokenType {
 		t.Errorf("TokenType mismatch: got %v, want %v", reconstructed.TokenType, original.TokenType)
 	}
-	
+
 	// Verify custom claims preservation
 	if reconstructed.Custom["simple_value"] == nil {
 		t.Error("Custom simple_value not preserved")
 	}
-	
+
 	// Note: Complex nested objects might need additional type handling in a production implementation
 	// For this test, we verify the basic structure is maintained
 }

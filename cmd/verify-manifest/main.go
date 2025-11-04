@@ -35,14 +35,14 @@ import (
 
 // Canonical struct definitions (mirrors web/policy_manifest.go)
 type manifestCanonical struct {
-	SchemaVersion         int             `json:"schema_version"`
-	Capabilities          []manifestCap   `json:"capabilities"`
+	SchemaVersion         int              `json:"schema_version"`
+	Capabilities          []manifestCap    `json:"capabilities"`
 	ActionMatrix          []manifestAction `json:"action_matrix"`
-	RegistryHash          string          `json:"registry_hash"`
-	RegistryPrevHash      string          `json:"registry_prev_hash,omitempty"`
-	RegistryLastChangedAt string          `json:"registry_last_changed_at,omitempty"`
-	CapabilityCount       int             `json:"capability_count"`
-	ActionCount           int             `json:"action_count"`
+	RegistryHash          string           `json:"registry_hash"`
+	RegistryPrevHash      string           `json:"registry_prev_hash,omitempty"`
+	RegistryLastChangedAt string           `json:"registry_last_changed_at,omitempty"`
+	CapabilityCount       int              `json:"capability_count"`
+	ActionCount           int              `json:"action_count"`
 }
 
 type manifestCap struct {
@@ -98,38 +98,54 @@ func reconstructCanonical(payload map[string]any) (manifestCanonical, []byte, st
 	for _, c := range capsAny {
 		cm := c.(map[string]any)
 		mc := manifestCap{ID: cm["id"].(string), Version: cm["version"].(string), Stable: cm["stable"].(bool)}
-		if v, ok := cm["deprecated_after"].(string); ok && v != "" { mc.DeprecatedAfter = v }
-		if v, ok := cm["sunset_after"].(string); ok && v != "" { mc.SunsetAfter = v }
+		if v, ok := cm["deprecated_after"].(string); ok && v != "" {
+			mc.DeprecatedAfter = v
+		}
+		if v, ok := cm["sunset_after"].(string); ok && v != "" {
+			mc.SunsetAfter = v
+		}
 		if vv, ok := cm["versions"].([]any); ok && len(vv) > 0 {
 			list := make([]string, 0, len(vv))
-			for _, x := range vv { list = append(list, x.(string)) }
+			for _, x := range vv {
+				list = append(list, x.(string))
+			}
 			mc.Versions = list
 		}
 		caps = append(caps, mc)
 	}
 	actsAny, ok := payload["action_matrix"].([]any)
-	if !ok { return manifestCanonical{}, nil, "", errors.New("action_matrix missing or wrong type") }
+	if !ok {
+		return manifestCanonical{}, nil, "", errors.New("action_matrix missing or wrong type")
+	}
 	acts := make([]manifestAction, 0, len(actsAny))
 	for _, a := range actsAny {
 		am := a.(map[string]any)
 		reqList := []string{}
 		if rr, ok := am["required"].([]any); ok {
-			for _, r := range rr { reqList = append(reqList, r.(string)) }
+			for _, r := range rr {
+				reqList = append(reqList, r.(string))
+			}
 		}
 		acts = append(acts, manifestAction{Action: am["action"].(string), Required: reqList})
 	}
 	canon := manifestCanonical{
-		SchemaVersion: int(payload["schema_version"].(float64)),
-		Capabilities: caps,
-		ActionMatrix: acts,
-		RegistryHash: payload["registry_hash"].(string),
+		SchemaVersion:   int(payload["schema_version"].(float64)),
+		Capabilities:    caps,
+		ActionMatrix:    acts,
+		RegistryHash:    payload["registry_hash"].(string),
 		CapabilityCount: int(payload["capability_count"].(float64)),
-		ActionCount: int(payload["action_count"].(float64)),
+		ActionCount:     int(payload["action_count"].(float64)),
 	}
-	if v, ok := payload["registry_prev_hash"].(string); ok && v != "" { canon.RegistryPrevHash = v }
-	if v, ok := payload["registry_last_changed_at"].(string); ok && v != "" { canon.RegistryLastChangedAt = v }
+	if v, ok := payload["registry_prev_hash"].(string); ok && v != "" {
+		canon.RegistryPrevHash = v
+	}
+	if v, ok := payload["registry_last_changed_at"].(string); ok && v != "" {
+		canon.RegistryLastChangedAt = v
+	}
 	raw, err := json.Marshal(canon)
-	if err != nil { return manifestCanonical{}, nil, "", err }
+	if err != nil {
+		return manifestCanonical{}, nil, "", err
+	}
 	sum := sha256.Sum256(raw)
 	h := fmt.Sprintf("sha256:%x", sum[:])
 	return canon, raw, h, nil
@@ -152,15 +168,24 @@ func main() {
 	var pubKey ed25519.PublicKey
 	if *pubKeyFile != "" {
 		b, err := os.ReadFile(*pubKeyFile)
-		if err != nil { fmt.Fprintf(os.Stderr, "read public key file: %v\n", err); os.Exit(2) }
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "read public key file: %v\n", err)
+			os.Exit(2)
+		}
 		pubKeyStrVal := string(b)
 		pubKeyStrVal = trimWhitespace(pubKeyStrVal)
 		pk, err := decodePublicKey(pubKeyStrVal)
-		if err != nil { fmt.Fprintf(os.Stderr, "decode public key file: %v\n", err); os.Exit(2) }
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "decode public key file: %v\n", err)
+			os.Exit(2)
+		}
 		pubKey = pk
 	} else {
 		pk, err := decodePublicKey(*pubKeyStr)
-		if err != nil { fmt.Fprintf(os.Stderr, "decode public key: %v\n", err); os.Exit(2) }
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "decode public key: %v\n", err)
+			os.Exit(2)
+		}
 		pubKey = pk
 	}
 
@@ -168,10 +193,16 @@ func main() {
 	var err error
 	if *file != "" {
 		data, err = os.ReadFile(*file)
-		if err != nil { fmt.Fprintf(os.Stderr, "read file: %v\n", err); os.Exit(2) }
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "read file: %v\n", err)
+			os.Exit(2)
+		}
 	} else {
 		data, err = fetchManifest(*url)
-		if err != nil { fmt.Fprintf(os.Stderr, "fetch manifest: %v\n", err); os.Exit(2) }
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "fetch manifest: %v\n", err)
+			os.Exit(2)
+		}
 	}
 	var payload map[string]any
 	if err := json.Unmarshal(data, &payload); err != nil {
@@ -180,22 +211,39 @@ func main() {
 	}
 
 	manifestHashField, ok := payload["manifest_hash"].(string)
-	if !ok || manifestHashField == "" { fmt.Fprintln(os.Stderr, "manifest_hash missing"); os.Exit(1) }
+	if !ok || manifestHashField == "" {
+		fmt.Fprintln(os.Stderr, "manifest_hash missing")
+		os.Exit(1)
+	}
 	sigB64, ok := payload["signature"].(string)
-	if !ok || sigB64 == "" { fmt.Fprintln(os.Stderr, "signature missing"); os.Exit(1) }
+	if !ok || sigB64 == "" {
+		fmt.Fprintln(os.Stderr, "signature missing")
+		os.Exit(1)
+	}
 	kid, _ := payload["sig_kid"].(string)
-	if *expectKid != "" && kid != *expectKid { fmt.Fprintf(os.Stderr, "kid mismatch expected=%s got=%s\n", *expectKid, kid); os.Exit(1) }
+	if *expectKid != "" && kid != *expectKid {
+		fmt.Fprintf(os.Stderr, "kid mismatch expected=%s got=%s\n", *expectKid, kid)
+		os.Exit(1)
+	}
 
 	canon, rawCanon, recomputedHash, err := reconstructCanonical(payload)
-	if err != nil { fmt.Fprintf(os.Stderr, "canonical reconstruction error: %v\n", err); os.Exit(1) }
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "canonical reconstruction error: %v\n", err)
+		os.Exit(1)
+	}
 	if recomputedHash != manifestHashField {
 		emitResult(*jsonOut, false, "hash_mismatch", map[string]any{"expected": manifestHashField, "got": recomputedHash})
 		os.Exit(1)
 	}
 	// Verify signature
 	sigBytes, err := base64.RawURLEncoding.DecodeString(sigB64)
-	if err != nil { sigBytes, err = base64.StdEncoding.DecodeString(sigB64) }
-	if err != nil { emitResult(*jsonOut, false, "signature_decode_error", map[string]any{"error": err.Error()}); os.Exit(1) }
+	if err != nil {
+		sigBytes, err = base64.StdEncoding.DecodeString(sigB64)
+	}
+	if err != nil {
+		emitResult(*jsonOut, false, "signature_decode_error", map[string]any{"error": err.Error()})
+		os.Exit(1)
+	}
 	msg := append([]byte("GAUTH_POLICY_MANIFEST:"), rawCanon...)
 	if !ed25519.Verify(pubKey, msg, sigBytes) {
 		emitResult(*jsonOut, false, "signature_invalid", map[string]any{"kid": kid})
@@ -212,7 +260,9 @@ func main() {
 func trimWhitespace(s string) string {
 	out := make([]rune, 0, len(s))
 	for _, r := range s {
-		if r == '\n' || r == '\r' || r == '\t' || r == ' ' { continue }
+		if r == '\n' || r == '\r' || r == '\t' || r == ' ' {
+			continue
+		}
 		out = append(out, r)
 	}
 	return string(out)
@@ -221,7 +271,9 @@ func trimWhitespace(s string) string {
 func emitResult(jsonMode bool, success bool, status string, extra map[string]any) {
 	if jsonMode {
 		obj := map[string]any{"success": success, "status": status}
-		for k, v := range extra { obj[k] = v }
+		for k, v := range extra {
+			obj[k] = v
+		}
 		b, _ := json.Marshal(obj)
 		fmt.Println(string(b))
 		return

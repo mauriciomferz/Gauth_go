@@ -23,9 +23,9 @@ type ValidationWarning struct {
 
 // ValidationResult contains both validation outcome and collected warnings
 type ValidationResult struct {
-	Valid    bool                 `json:"valid"`
-	Error    error               `json:"error,omitempty"`
-	Warnings []ValidationWarning  `json:"warnings,omitempty"`
+	Valid    bool                   `json:"valid"`
+	Error    error                  `json:"error,omitempty"`
+	Warnings []ValidationWarning    `json:"warnings,omitempty"`
 	Metadata map[string]interface{} `json:"metadata,omitempty"`
 }
 
@@ -51,7 +51,7 @@ func NewWarningCollector() *DefaultWarningCollector {
 func (c *DefaultWarningCollector) AddWarning(code, message, field string, value interface{}, severity string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	
+
 	c.warnings = append(c.warnings, ValidationWarning{
 		Code:      code,
 		Message:   message,
@@ -65,7 +65,7 @@ func (c *DefaultWarningCollector) AddWarning(code, message, field string, value 
 func (c *DefaultWarningCollector) GetWarnings() []ValidationWarning {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	
+
 	result := make([]ValidationWarning, len(c.warnings))
 	copy(result, c.warnings)
 	return result
@@ -80,11 +80,11 @@ func (c *DefaultWarningCollector) ClearWarnings() {
 // EnhancedPoAValidator provides comprehensive PoA semantic validation with warnings
 type EnhancedPoAValidator struct {
 	BasicPoAValidator
-	warningCollector WarningCollector
-	dailyLimitStore  DailyLimitStore
+	warningCollector  WarningCollector
+	dailyLimitStore   DailyLimitStore
 	conditionalEngine ConditionalEngine
-	validatorChain   []PoAValidator
-	metricsRecorder  ValidationMetricsRecorder
+	validatorChain    []PoAValidator
+	metricsRecorder   ValidationMetricsRecorder
 }
 
 // DailyLimitStore interface for persistent daily transaction limit tracking
@@ -116,11 +116,11 @@ func NewEnhancedPoAValidator(opts ...EnhancedValidatorOption) *EnhancedPoAValida
 		warningCollector:  NewWarningCollector(),
 		validatorChain:    make([]PoAValidator, 0),
 	}
-	
+
 	for _, opt := range opts {
 		opt(validator)
 	}
-	
+
 	return validator
 }
 
@@ -172,7 +172,7 @@ func (v *EnhancedPoAValidator) ValidateWithContext(ctx context.Context, p *Power
 	if v.warningCollector != nil {
 		v.warningCollector.ClearWarnings()
 	}
-	
+
 	// Start with basic validation
 	if err := v.BasicPoAValidator.Validate(p); err != nil {
 		if v.metricsRecorder != nil {
@@ -180,7 +180,7 @@ func (v *EnhancedPoAValidator) ValidateWithContext(ctx context.Context, p *Power
 		}
 		return err
 	}
-	
+
 	// Enhanced validations with warning collection
 	if err := v.validateEnhancedSemantics(ctx, p); err != nil {
 		if v.metricsRecorder != nil {
@@ -188,7 +188,7 @@ func (v *EnhancedPoAValidator) ValidateWithContext(ctx context.Context, p *Power
 		}
 		return err
 	}
-	
+
 	// Run validator chain
 	for i, validator := range v.validatorChain {
 		if err := validator.Validate(p); err != nil {
@@ -198,7 +198,7 @@ func (v *EnhancedPoAValidator) ValidateWithContext(ctx context.Context, p *Power
 			return err
 		}
 	}
-	
+
 	// Daily limit validation
 	if err := v.validateDailyLimits(ctx, p); err != nil {
 		if v.metricsRecorder != nil {
@@ -206,7 +206,7 @@ func (v *EnhancedPoAValidator) ValidateWithContext(ctx context.Context, p *Power
 		}
 		return err
 	}
-	
+
 	// Conditional expressions validation
 	if err := v.validateConditionalExpressions(ctx, p); err != nil {
 		if v.metricsRecorder != nil {
@@ -214,11 +214,11 @@ func (v *EnhancedPoAValidator) ValidateWithContext(ctx context.Context, p *Power
 		}
 		return err
 	}
-	
+
 	if v.metricsRecorder != nil {
 		v.metricsRecorder.RecordValidationSuccess("enhanced", getPoAScope(p))
 	}
-	
+
 	return nil
 }
 
@@ -227,14 +227,14 @@ func (v *EnhancedPoAValidator) ValidateWithResult(ctx context.Context, p *PowerO
 	if v.warningCollector != nil {
 		v.warningCollector.ClearWarnings()
 	}
-	
+
 	err := v.ValidateWithContext(ctx, p)
-	
+
 	var warnings []ValidationWarning
 	if v.warningCollector != nil {
 		warnings = v.warningCollector.GetWarnings()
 	}
-	
+
 	return ValidationResult{
 		Valid:    err == nil,
 		Error:    err,
@@ -252,13 +252,13 @@ func (v *EnhancedPoAValidator) validateEnhancedSemantics(ctx context.Context, p 
 	if len(p.Scope) > 10 {
 		v.addWarning("excessive_scope", "Large number of scopes may indicate overprivileged delegation", "scope", len(p.Scope), "warning")
 	}
-	
+
 	// Duration analysis
 	duration := p.ValidUntil.Sub(p.ValidFrom)
 	if duration > 365*24*time.Hour {
 		v.addWarning("long_duration", "Delegation duration exceeds 1 year", "duration", duration.String(), "warning")
 	}
-	
+
 	// Financial scope analysis
 	for _, scope := range p.Scope {
 		if strings.HasPrefix(scope, "transaction:") {
@@ -267,19 +267,19 @@ func (v *EnhancedPoAValidator) validateEnhancedSemantics(ctx context.Context, p 
 			}
 		}
 	}
-	
+
 	// Administrative scope warnings
 	for _, scope := range p.Scope {
 		if strings.Contains(scope, "admin") || strings.Contains(scope, "root") {
 			v.addWarning("administrative_scope", "Administrative scope detected - requires elevated approval", "scope", scope, "error")
 		}
 	}
-	
+
 	// Cross-field consistency checks
 	if err := v.validateCrossFieldConsistency(ctx, p); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -292,14 +292,14 @@ func (v *EnhancedPoAValidator) validateFinancialScope(ctx context.Context, p *Po
 			return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("financial scope %s requires %s restriction", scope, req))
 		}
 	}
-	
+
 	// Enhanced currency validation
 	if currency, exists := p.Restrictions["currency"]; exists {
 		if !v.isValidCurrencyCode(currency) {
 			return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid currency code: %s", currency))
 		}
 	}
-	
+
 	// Amount validation with warnings
 	if maxAmountStr, exists := p.Restrictions["max_amount"]; exists {
 		if maxAmount, err := strconv.ParseFloat(maxAmountStr, 64); err == nil {
@@ -308,14 +308,14 @@ func (v *EnhancedPoAValidator) validateFinancialScope(ctx context.Context, p *Po
 			}
 		}
 	}
-	
+
 	// Geographic restrictions for international transactions
 	if strings.Contains(scope, "international") {
 		if _, exists := p.Restrictions["jurisdiction"]; !exists {
 			return rfc.New(rfc.ErrInvalidRequest, "international transactions require jurisdiction restriction")
 		}
 	}
-	
+
 	return nil
 }
 
@@ -324,38 +324,38 @@ func (v *EnhancedPoAValidator) validateDailyLimits(ctx context.Context, p *Power
 	if v.dailyLimitStore == nil {
 		return nil // No daily limit tracking configured
 	}
-	
+
 	dailyLimitStr, hasDailyLimit := p.Restrictions["max_daily_amount"]
 	if !hasDailyLimit {
 		return nil // No daily limit set
 	}
-	
+
 	dailyLimit, err := strconv.ParseFloat(dailyLimitStr, 64)
 	if err != nil {
 		return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid max_daily_amount: %v", err))
 	}
-	
+
 	today := time.Now().Format("2006-01-02")
 	currentUsage, err := v.dailyLimitStore.GetDailyUsage(p.ID, today)
 	if err != nil {
 		v.addWarning("daily_limit_check_failed", "Could not verify daily usage", "daily_limit", err.Error(), "error")
 		return nil // Don't fail validation, but log warning
 	}
-	
+
 	if v.metricsRecorder != nil {
 		exceeded := currentUsage >= dailyLimit
 		v.metricsRecorder.RecordDailyLimitCheck(p.ID, currentUsage, dailyLimit, exceeded)
 	}
-	
+
 	if currentUsage >= dailyLimit {
 		return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("daily limit exceeded: %f/%f", currentUsage, dailyLimit))
 	}
-	
+
 	// Warning for approaching limit
 	if currentUsage > dailyLimit*0.8 {
 		v.addWarning("approaching_daily_limit", "Daily usage approaching limit", "usage_percentage", (currentUsage/dailyLimit)*100, "warning")
 	}
-	
+
 	return nil
 }
 
@@ -364,7 +364,7 @@ func (v *EnhancedPoAValidator) validateConditionalExpressions(ctx context.Contex
 	if v.conditionalEngine == nil {
 		return nil // No conditional engine configured
 	}
-	
+
 	for key, value := range p.Restrictions {
 		if strings.HasPrefix(key, "condition_") {
 			if err := v.conditionalEngine.ValidateConditionSyntax(value); err != nil {
@@ -372,14 +372,14 @@ func (v *EnhancedPoAValidator) validateConditionalExpressions(ctx context.Contex
 			}
 		}
 	}
-	
+
 	// Validate time-based expressions
 	if timeCondition, exists := p.Restrictions["time_condition"]; exists {
 		if err := v.validateTimeCondition(timeCondition); err != nil {
 			return err
 		}
 	}
-	
+
 	return nil
 }
 
@@ -395,7 +395,7 @@ func (v *EnhancedPoAValidator) validateCrossFieldConsistency(ctx context.Context
 			}
 		}
 	}
-	
+
 	// Validate scope-restriction alignment
 	hasTransactionScope := false
 	for _, scope := range p.Scope {
@@ -404,7 +404,7 @@ func (v *EnhancedPoAValidator) validateCrossFieldConsistency(ctx context.Context
 			break
 		}
 	}
-	
+
 	if !hasTransactionScope {
 		// Warn about financial restrictions without transaction scope
 		financialRestrictions := []string{"currency", "max_amount", "max_daily_amount"}
@@ -414,7 +414,7 @@ func (v *EnhancedPoAValidator) validateCrossFieldConsistency(ctx context.Context
 			}
 		}
 	}
-	
+
 	return nil
 }
 
@@ -422,7 +422,7 @@ func (v *EnhancedPoAValidator) validateCrossFieldConsistency(ctx context.Context
 func (v *EnhancedPoAValidator) validateTimeCondition(condition string) error {
 	// Simple DSL for time conditions: "weekdays(1,2,3,4,5) AND hours(9-17)"
 	// This is a basic implementation - a full DSL would be more sophisticated
-	
+
 	if strings.Contains(condition, "weekdays(") {
 		start := strings.Index(condition, "weekdays(")
 		end := strings.Index(condition[start:], ")")
@@ -438,7 +438,7 @@ func (v *EnhancedPoAValidator) validateTimeCondition(condition string) error {
 			}
 		}
 	}
-	
+
 	if strings.Contains(condition, "hours(") {
 		start := strings.Index(condition, "hours(")
 		end := strings.Index(condition[start:], ")")
@@ -459,7 +459,7 @@ func (v *EnhancedPoAValidator) validateTimeCondition(condition string) error {
 			}
 		}
 	}
-	
+
 	return nil
 }
 

@@ -22,9 +22,9 @@ type TestVector struct {
 
 // EnforcementFlags holds compliance/authenticity enforcement settings.
 type EnforcementFlags struct {
-	RequireSignature        bool
+	RequireSignature         bool
 	RequireBatchVerification bool
-	RequireKeyRotation      bool
+	RequireKeyRotation       bool
 }
 
 // GeneratePhase1Vectors creates a slice of positive and negative test vectors
@@ -36,7 +36,9 @@ func GeneratePhase1Vectors() ([]TestVector, error) {
 
 	// --- Ed25519 ---
 	edPub, edPriv, err := ed25519.GenerateKey(rand.Reader)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	edMsg := []byte("tv-ed25519-1")
 	edSig := ed25519.Sign(edPriv, edMsg)
 	vectors = append(vectors, TestVector{Alg: "Ed25519", Message: edMsg, Private: edPriv, Public: edPub, Signature: edSig, Valid: true})
@@ -47,11 +49,15 @@ func GeneratePhase1Vectors() ([]TestVector, error) {
 
 	// --- ECDSA P-256 ---
 	ecdsaPriv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	eMsg := []byte("tv-ecdsa-1")
 	h := sha256.Sum256(eMsg)
 	r, s, err := ecdsa.Sign(rand.Reader, ecdsaPriv, h[:])
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	// Canonical low-S form
 	lowS := normalizeLowS(s, ecdsaPriv.Params().N)
 	derLow := encodeDERSignature(r, lowS)
@@ -70,15 +76,21 @@ func GeneratePhase1Vectors() ([]TestVector, error) {
 
 	// --- BLS12-381 ---
 	blsKey, err := GenerateBLSKey()
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	bMsg := []byte("tv-bls-1")
 	bSig, err := BLSSign(blsKey, bMsg)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	pubBLS := blsKey.Public.Serialize()
 	vectors = append(vectors, TestVector{Alg: "BLS12-381", Message: bMsg, Public: pubBLS, Signature: bSig, Valid: true})
 	// Negative: mutate
 	badBLS := append([]byte(nil), bSig...)
-	if len(badBLS) > 0 { badBLS[0] ^= 0xAA }
+	if len(badBLS) > 0 {
+		badBLS[0] ^= 0xAA
+	}
 	vectors = append(vectors, TestVector{Alg: "BLS12-381", Message: bMsg, Public: pubBLS, Signature: badBLS, Valid: false})
 
 	return vectors, nil
