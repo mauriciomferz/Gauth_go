@@ -78,7 +78,7 @@ func TestVerifyModelLimitsAttestationValid(t *testing.T) {
 	sig := ed25519.Sign(priv, msg)
 	att.Signature = base64.RawStdEncoding.EncodeToString(sig)
 	att.SigKid = "k1"
-	att.SigMode = "eddsa"
+	att.SigMode = sigModeEdDSA
 	// Provide fake key registry struct implementing FindByID
 	fakeRegistry := &stubKeyRegistry{kid: "k1", pub: pub}
 	res, err := VerifyModelLimitsAttestation(att, fakeRegistry, &memoryReplay{}, time.Now())
@@ -107,7 +107,7 @@ func TestVerifyModelLimitsAttestationInvalidSignature(t *testing.T) {
 	// Provide bogus signature
 	att.Signature = base64.RawStdEncoding.EncodeToString([]byte("invalid_signature"))
 	att.SigKid = "k2"
-	att.SigMode = "eddsa"
+	att.SigMode = sigModeEdDSA
 	fakeRegistry := &stubKeyRegistry{kid: "k2", pub: pub}
 	res, _ := VerifyModelLimitsAttestation(att, fakeRegistry, &memoryReplay{}, time.Now())
 	if res.Valid || !res.SoftInvalid || res.FailureCode != "signature_invalid" {
@@ -186,7 +186,7 @@ func TestVerifyModelLimitsAttestationReplay(t *testing.T) {
 	att.Snapshot.Hash = testSnapshotHash
 	signAtt(t, priv, att)
 	att.SigKid = "rkid"
-	att.SigMode = "eddsa"
+	att.SigMode = sigModeEdDSA
 	reg := &stubKeyRegistry{kid: "rkid", pub: pub}
 	// Pre-seed replay strategy so nonce is seen
 	mr := &memoryReplay{seen: map[string]struct{}{att.Nonce: {}}}
@@ -202,7 +202,7 @@ func TestVerifyModelLimitsAttestationNonceMissing(t *testing.T) {
 	att.Snapshot.Hash = testSnapshotHash
 	signAtt(t, priv, att)
 	att.SigKid = "nkid"
-	att.SigMode = "eddsa"
+	att.SigMode = sigModeEdDSA
 	reg := &stubKeyRegistry{kid: "nkid", pub: pub}
 	res, _ := VerifyModelLimitsAttestation(att, reg, &memoryReplay{}, time.Now())
 	if res.FailureCode != "nonce_missing" || res.HTTPStatus != 400 {
@@ -222,7 +222,7 @@ func TestVerifyModelLimitsAttestationNotarizationInconsistent(t *testing.T) {
 	}{Provider: "stub", Timestamp: time.Now().UTC().Format(time.RFC3339Nano), LatencySeconds: 0.01, Success: false}
 	signAtt(t, priv, att)
 	att.SigKid = "nkid2"
-	att.SigMode = "eddsa"
+	att.SigMode = sigModeEdDSA
 	reg := &stubKeyRegistry{kid: "nkid2", pub: pub}
 	res, _ := VerifyModelLimitsAttestation(att, reg, &memoryReplay{}, time.Now())
 	if res.FailureCode != "notarization_inconsistent" || res.HTTPStatus != 422 {
@@ -246,7 +246,7 @@ func TestVerifyModelLimitsAttestationUnknownKid(t *testing.T) {
 	att.Snapshot.Hash = testSnapshotHash
 	signAtt(t, priv, att)
 	att.SigKid = "kid-real" // registry will not contain this kid
-	att.SigMode = "eddsa"
+	att.SigMode = sigModeEdDSA
 	reg := &stubKeyRegistry{kid: "different", pub: pub}
 	res, _ := VerifyModelLimitsAttestation(att, reg, &memoryReplay{}, time.Now())
 	if res.FailureCode != "unknown_kid" || res.HTTPStatus != 404 {
@@ -260,7 +260,7 @@ func TestVerifyModelLimitsAttestationSignatureBase64Invalid(t *testing.T) {
 	att.Snapshot.Hash = testSnapshotHash
 	att.Signature = "@@@" // invalid base64
 	att.SigKid = "kid1"
-	att.SigMode = "eddsa"
+	att.SigMode = sigModeEdDSA
 	reg := &stubKeyRegistry{kid: "kid1", pub: pub}
 	res, _ := VerifyModelLimitsAttestation(att, reg, &memoryReplay{}, time.Now())
 	if res.FailureCode != "signature_base64_invalid" || res.HTTPStatus != 400 {
@@ -283,7 +283,7 @@ func TestVerifyModelLimitsAttestationCombinedHash(t *testing.T) {
 	}{LatestHash: "sha256:anchor", Entries: 5, Interval: 1}
 	signAtt(t, priv, att)
 	att.SigKid = "kidCH"
-	att.SigMode = "eddsa"
+	att.SigMode = sigModeEdDSA
 	reg := &stubKeyRegistry{kid: "kidCH", pub: pub}
 	res, _ := VerifyModelLimitsAttestation(att, reg, &memoryReplay{}, time.Now())
 	if !res.Valid || res.CombinedHash == "" {
@@ -321,7 +321,7 @@ func TestVerifyModelLimitsAttestationTamperedSnapshot(t *testing.T) {
 	att.Snapshot.Hash = "sha256:orig"
 	signAtt(t, priv, att)
 	att.SigKid = "tkid"
-	att.SigMode = "eddsa"
+	att.SigMode = sigModeEdDSA
 	// Tamper after signing
 	att.Snapshot.Hash = "sha256:modified"
 	reg := &stubKeyRegistry{kid: "tkid", pub: pub}
@@ -338,7 +338,7 @@ func TestVerifyModelLimitsAttestationDurableReplay(t *testing.T) {
 	att.Snapshot.Hash = testSnapshotHash
 	signAtt(t, priv, att)
 	att.SigKid = "dkid"
-	att.SigMode = "eddsa"
+	att.SigMode = sigModeEdDSA
 	reg := &stubKeyRegistry{kid: "dkid", pub: pub}
 	dr := &durableReplay{}
 	res1, _ := VerifyModelLimitsAttestation(att, reg, dr, time.Now())

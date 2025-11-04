@@ -615,15 +615,15 @@ func (m *AICapabilityMatrix) validateRequiredClaims(entityRule AICapabilityRule,
 	for _, policy := range policies {
 		for _, claim := range policy.MandatoryClaims {
 			requiredClaims[claim] = true
-	}
-
-	// Add entity-specific required claims from policy
-	if restriction, exists := policy.EntityRestrictions[entityRule.EntityType]; exists {
-		for _, claim := range restriction.RequiredClaims {
-			requiredClaims[claim] = true
 		}
-	}
-}	// Check which claims are missing
+
+		// Add entity-specific required claims from policy
+		if restriction, exists := policy.EntityRestrictions[entityRule.EntityType]; exists {
+			for _, claim := range restriction.RequiredClaims {
+				requiredClaims[claim] = true
+			}
+		}
+	} // Check which claims are missing
 	var missing []string
 	for claim := range requiredClaims {
 		if !m.hasClaimValue(claims, claim) {

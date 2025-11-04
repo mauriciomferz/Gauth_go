@@ -3,11 +3,12 @@ package rfc0111
 import (
 	"context"
 	"encoding/base64"
+	"testing"
+	"time"
+
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/authz"
 	cr "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/crypto"
-	"testing"
-	"time"
 )
 
 // fixedClock returns a constant timestamp for deterministic canonical fields.

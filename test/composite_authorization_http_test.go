@@ -3,11 +3,12 @@ package test
 import (
 	"bytes"
 	"encoding/json"
-	web "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	web "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web"
 )
 
 func TestCompositeAuthorizationHTTP(t *testing.T) {
