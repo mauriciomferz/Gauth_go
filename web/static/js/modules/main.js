@@ -9,6 +9,18 @@ import { initSemanticMetricsPanel } from './semantic_metrics.js';
 import { initCapabilityAnchor } from './capability_anchor.js';
 import { initRevocationTransparency } from './revocation_transparency.js';
 import { initMultiSigPanel } from './multisig_panel.js';
+import { currentToken, demoState, setCurrentToken, addAuditEntry } from "./state.js";
+import { addConsoleOutput, clearConsoleOutput, escapeHtml } from "./console.js";
+import { initTokens } from "./tokens.js";
+import { metricsInit } from "./metrics.js";
+import { auditInit } from "./audit.js";
+import { samplesInit } from "./samples.js";
+import { authzInit } from "./authz.js";
+import { jobLogsInit } from "./joblogs.js";
+import { policyInit } from "./policy.js";
+
+// Re-export for other modules / potential future bundler
+export { currentToken, demoState, setCurrentToken, addAuditEntry, addConsoleOutput, clearConsoleOutput, escapeHtml };
 
 function initThemeToggle(){
   const btn = document.getElementById('themeToggle');
@@ -16,8 +28,6 @@ function initThemeToggle(){
   btn.addEventListener('click', ()=>{
     const body = document.body;
     const dark = body.classList.toggle('theme-dark');
-  try { initCapabilityAnchor(); } catch (e) { console.error('capability anchor init failed', e); }
-  try { initRevocationTransparency(); } catch (e) { console.error('revocation transparency init failed', e); }
     btn.innerHTML = dark ? '<i class="fas fa-moon mr-2" aria-hidden="true"></i>Dark' : '<i class="fas fa-sun mr-2" aria-hidden="true"></i>Light';
   });
 }
@@ -34,86 +44,83 @@ function initMobileNav(){
 }
 
 function initTabSystem(){
+  console.log('[GAuth] Initializing tab system...');
   const buttons = document.querySelectorAll('.tab-button');
+  console.log('[GAuth] Found', buttons.length, 'tab buttons');
   buttons.forEach(btn => {
     btn.addEventListener('click', ()=>{
       const target = btn.getAttribute('data-tab');
+      console.log('[GAuth] Tab clicked:', target);
       if(!target) return;
       buttons.forEach(b=>{ b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
       btn.classList.add('active');
       btn.setAttribute('aria-selected','true');
       document.querySelectorAll('.tab-content').forEach(c=>{
-        if(c.id === target){ c.classList.remove('hidden'); } else { c.classList.add('hidden'); }
+        if(c.id === target){ 
+          c.classList.remove('hidden'); 
+          console.log('[GAuth] Showing tab:', target);
+        } else { 
+          c.classList.add('hidden'); 
+        }
       });
     });
   });
 }
 
 function initPanels(){
-  initDecisionMetricsPanel();
-  initGovernancePanels();
-  initRotationSummaryPanel();
-  initViolationMetricsPanel();
-  initSemanticMetricsPanel();
-  initCapabilityAnchor();
-  initRevocationTransparency();
-  initMultiSigPanel();
+  try { initDecisionMetricsPanel(); } catch (e) { console.warn('Decision metrics init failed', e); }
+  try { initGovernancePanels(); } catch (e) { console.warn('Governance init failed', e); }
+  try { initRotationSummaryPanel(); } catch (e) { console.warn('Rotation summary init failed', e); }
+  try { initViolationMetricsPanel(); } catch (e) { console.warn('Violation metrics init failed', e); }
+  try { initSemanticMetricsPanel(); } catch (e) { console.warn('Semantic metrics init failed', e); }
+  try { initCapabilityAnchor(); } catch (e) { console.warn('Capability anchor init failed', e); }
+  try { initRevocationTransparency(); } catch (e) { console.warn('Revocation transparency init failed', e); }
+  try { initMultiSigPanel(); } catch (e) { console.warn('MultiSig panel init failed', e); }
+}
+
+export function initModules() {
+  console.log("[GAuth] Initializing feature modules...");
+  try { initTokens(); console.log("[GAuth] ✓ tokens"); } catch (e) { console.error("❌ Token module init failed:", e); }
+  try { metricsInit(); console.log("[GAuth] ✓ metrics"); } catch (e) { console.error("❌ Metrics module init failed:", e); }
+  try { auditInit(); console.log("[GAuth] ✓ audit"); } catch (e) { console.error("❌ Audit module init failed:", e); }
+  try { samplesInit(); console.log("[GAuth] ✓ samples"); } catch (e) { console.error("❌ Samples module init failed:", e); }
+  try { authzInit(); console.log("[GAuth] ✓ authz"); } catch (e) { console.error("❌ Authz module init failed:", e); }
+  try { jobLogsInit(); console.log("[GAuth] ✓ joblogs"); } catch (e) { console.error("❌ JobLogs module init failed:", e); }
+  try { policyInit(); console.log("[GAuth] ✓ policy"); } catch (e) { console.error("❌ Policy module init failed:", e); }
+  console.log("[GAuth] ✅ Module initialization complete");
+  return true;
 }
 
 // Public API (attach to window for backward compatibility testing)
 export function initAll(){
+  console.log('[GAuth] ========================================');
+  console.log('[GAuth] Starting initialization...');
+  console.log('[GAuth] ========================================');
   initThemeToggle();
   initMobileNav();
   initTabSystem();
   initPanels();
+  initModules();
+  console.log('[GAuth] ========================================');
+  console.log('[GAuth] ✅ Initialization complete!');
+  console.log('[GAuth] ========================================');
 }
 
-// Auto-run when DOM ready
-document.addEventListener('DOMContentLoaded', ()=>{ initAll(); });
-// Entry module bridging legacy app.js to new modular structure.
-// Progressive migration: feature code will move from app.js into dedicated modules imported here.
-import { currentToken, demoState, setCurrentToken, addAuditEntry } from "./state.js";
-import { addConsoleOutput, clearConsoleOutput, escapeHtml } from "./console.js";
-import { initTokens } from "./tokens.js";
-import { metricsInit } from "./metrics.js";
-import { auditInit } from "./audit.js";
-import { samplesInit } from "./samples.js";
-import { authzInit } from "./authz.js";
-import { jobLogsInit } from "./joblogs.js";
-import { policyInit } from "./policy.js";
-
-// Re-export for other modules / potential future bundler
-export { currentToken, demoState, setCurrentToken, addAuditEntry, addConsoleOutput, clearConsoleOutput, escapeHtml };
-
-// Hook for future initialization (e.g., attaching event listeners once DOM ready)
-export function initModules() {
-  console.log("[GAuth] Initializing modules...");
-  try { initTokens(); console.log("[GAuth] tokens ok"); } catch (e) { console.warn("Token module init failed", e); }
-  try { metricsInit(); console.log("[GAuth] metrics ok"); } catch (e) { console.warn("Metrics module init failed", e); }
-  try { auditInit(); console.log("[GAuth] audit ok"); } catch (e) { console.warn("Audit module init failed", e); }
-  try { samplesInit(); console.log("[GAuth] samples ok"); } catch (e) { console.warn("Samples module init failed", e); }
-  try { authzInit(); console.log("[GAuth] authz ok"); } catch (e) { console.warn("Authz module init failed", e); }
-  try { jobLogsInit(); console.log("[GAuth] joblogs ok"); } catch (e) { console.warn("JobLogs module init failed", e); }
-  try { policyInit(); console.log("[GAuth] policy ok"); } catch (e) { console.warn("Policy module init failed", e); }
-  return true;
-}
-
-// For immediate backward compatibility, attach a minimal namespace (can be removed later)
+// For immediate backward compatibility, attach a minimal namespace
 window.GAuth = window.GAuth || { state: demoState, setCurrentToken, addAuditEntry, addConsoleOutput };
-// Provide legacy compatibility alias
-window.GAuth.it = initModules;
+window.GAuth.initModules = initModules;
 
 // Auto-init when DOM ready (safe idempotent)
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     if (!window.__gauthInitialized) {
       window.__gauthInitialized = true;
-      initModules();
+      initAll();
     }
   });
 } else {
   if (!window.__gauthInitialized) {
     window.__gauthInitialized = true;
-    initModules();
+    initAll();
   }
 }

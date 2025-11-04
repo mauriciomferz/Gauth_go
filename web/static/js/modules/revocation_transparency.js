@@ -25,6 +25,7 @@ let lastProof = null; // cached JSON response from last inclusion proof fetch
 let lastLeafDigest = null; // derived leaf digest (if event_hash present)
 let verifying = false;
 let lastConsistency = null; // cached consistency proof response
+let wellKnownAvailable = true; // Track if endpoint exists
 
 export function initRevocationTransparency() {
   const contentEl = document.getElementById('revocation-transparency-content');
@@ -40,7 +41,9 @@ export function initRevocationTransparency() {
   // Schedule recurring polls
   setInterval(pollHead, POLL_INTERVAL);
   setInterval(pollRoot, POLL_INTERVAL);
-  setInterval(pollWellKnown, WELL_KNOWN_INTERVAL);
+  setInterval(() => {
+    if (wellKnownAvailable) pollWellKnown();
+  }, WELL_KNOWN_INTERVAL);
 }
 
 async function pollHead() {
@@ -73,7 +76,13 @@ async function pollRoot() {
 async function pollWellKnown() {
   try {
     const data = await backoffFetchJSON(WELL_KNOWN);
-    if (!data || !data.revocation_support) return;
+    if (!data) {
+      // Endpoint doesn't exist (404) - stop polling
+      wellKnownAvailable = false;
+      console.log('📭 .well-known/gauth endpoint not available - polling disabled');
+      return;
+    }
+    if (!data.revocation_support) return;
     const rs = data.revocation_support;
     // Basic chain meta (prefer richer snapshot if available)
     if (rs.revocation_chain_head) setText('rev-chain-head', rs.revocation_chain_head);
@@ -148,8 +157,8 @@ function setText(id, value) {
 }
 
 function attachProofHandler() {
-  // Proof handler placeholder - currently no proof UI elements
-  // Reserved for future inclusion proof interactive demo
+  // Initialize proof fetcher UI
+  initProofFetcher();
 }
 
 function attachConsistencyHandler() {
@@ -386,6 +395,8 @@ function sha256PureJS(messageBytes) {
 function toHex(buf) {
   return Array.from(buf).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
+
+function initProofFetcher() {
   const btn = document.getElementById('rev-proof-btn');
   const input = document.getElementById('rev-proof-input');
   const result = document.getElementById('rev-proof-result');

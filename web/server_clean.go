@@ -4041,7 +4041,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 		c.Set("csp-nonce", nonce)
 		c.Header("Content-Security-Policy", strings.Join([]string{
 			"default-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
-			"script-src 'self' 'nonce-" + nonce + "' 'unsafe-inline' 'unsafe-hashes' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
+			"script-src 'self' 'nonce-" + nonce + "' 'unsafe-inline' 'unsafe-hashes' 'sha256-biFQTroSCI3Z5BmsMGyEE2jFZdwjjG1Oe7JLytgH6jM=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
 			"style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
 			"font-src 'self' https://cdnjs.cloudflare.com data:",
 			"img-src 'self' data:",
@@ -6051,6 +6051,12 @@ func (s *BetaServer) routes() {
 			return
 		}
 		c.JSON(200, cfg)
+	})
+
+	// Alias endpoint for frontend compatibility (/api/v1/.well-known/gauth -> /.well-known/gauth-configuration)
+	s.router.GET("/api/v1/.well-known/gauth", func(c *gin.Context) {
+		c.Request.URL.Path = "/.well-known/gauth-configuration"
+		s.router.HandleContext(c)
 	})
 
 	// Serve OpenAPI YAML (static). Loaded lazily to avoid startup dependency if file missing.
