@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -18,8 +19,7 @@ type simpleFailExecutor struct{ *iobligations.SimpleExecutor }
 
 func TestObligationsExecutionSuccessAndAudit(t *testing.T) {
 	m := imetrics.NewMemory()
-	auditPath := "./test_obligations_audit_success.jsonl"
-	_ = os.Remove(auditPath)
+	auditPath := filepath.Join(t.TempDir(), "test_obligations_audit_success.jsonl")
 	exec := iobligations.NewSimpleExecutor(1, 2, nil) // no failures
 	engine := NewInMemoryEngine(DenyOverridesStrategy{}).WithMetrics(m).WithObligations(exec, auditPath)
 	engine.AddPolicy(Policy{ID: "p1", Subjects: []string{"alice"}, Rules: []Rule{{ID: "r1", Actions: []string{"read"}, Resources: []string{"doc"}, Effect: outcomeAllow}}, Obligations: []Obligation{{ID: "log_access"}, {ID: "notify"}}})
@@ -71,13 +71,11 @@ func TestObligationsExecutionSuccessAndAudit(t *testing.T) {
 	if count != 2 {
 		t.Fatalf("expected 2 audit lines, got %d", count)
 	}
-	_ = os.Remove(auditPath)
 }
 
 func TestObligationsExecutionFailure(t *testing.T) {
 	m := imetrics.NewMemory()
-	auditPath := "./test_obligations_audit_fail.jsonl"
-	_ = os.Remove(auditPath)
+	auditPath := filepath.Join(t.TempDir(), "test_obligations_audit_fail.jsonl")
 	// Force failure for obligation id "fail_me"
 	exec := iobligations.NewSimpleExecutor(0, 0, []string{"fail_me"})
 	engine := NewInMemoryEngine(DenyOverridesStrategy{}).WithMetrics(m).WithObligations(exec, auditPath)
@@ -120,13 +118,11 @@ func TestObligationsExecutionFailure(t *testing.T) {
 	if !failureSeen {
 		t.Fatalf("expected failure audit entry for fail_me")
 	}
-	_ = os.Remove(auditPath)
 }
 
 func TestMandatoryFailureDeniesWhenConfigured(t *testing.T) {
 	m := imetrics.NewMemory()
-	auditPath := "./test_obligations_audit_mandatory_deny.jsonl"
-	_ = os.Remove(auditPath)
+	auditPath := filepath.Join(t.TempDir(), "test_obligations_audit_mandatory_deny.jsonl")
 	// fail mandatory obligation
 	exec := iobligations.NewSimpleExecutor(0, 0, []string{"critical_log"})
 	engine := NewInMemoryEngine(DenyOverridesStrategy{}).WithMetrics(m).WithObligations(exec, auditPath).WithObligationFailureDenies(true)
@@ -144,13 +140,11 @@ func TestMandatoryFailureDeniesWhenConfigured(t *testing.T) {
 	if dec.Metadata["mandatory_obligation_failures"] != "critical_log" {
 		t.Fatalf("metadata missing failures list: %+v", dec.Metadata)
 	}
-	_ = os.Remove(auditPath)
 }
 
 func TestMandatoryFailureDoesNotDenyWhenDisabled(t *testing.T) {
 	m := imetrics.NewMemory()
-	auditPath := "./test_obligations_audit_mandatory_no_deny.jsonl"
-	_ = os.Remove(auditPath)
+	auditPath := filepath.Join(t.TempDir(), "test_obligations_audit_mandatory_no_deny.jsonl")
 	exec := iobligations.NewSimpleExecutor(0, 0, []string{"critical_log"})
 	engine := NewInMemoryEngine(DenyOverridesStrategy{}).WithMetrics(m).WithObligations(exec, auditPath).WithObligationFailureDenies(false)
 	engine.AddPolicy(Policy{ID: "p_nomand", Subjects: []string{"erin"}, Rules: []Rule{{ID: "r_nomand", Actions: []string{"read"}, Resources: []string{"doc"}, Effect: outcomeAllow}}, Obligations: []Obligation{{ID: "critical_log", Mandatory: true}}})
@@ -164,13 +158,11 @@ func TestMandatoryFailureDoesNotDenyWhenDisabled(t *testing.T) {
 	if _, ok := dec.Metadata["mandatory_obligation_failures"]; ok {
 		t.Fatalf("metadata should not include mandatory failures when outcome not flipped")
 	}
-	_ = os.Remove(auditPath)
 }
 
 func TestObligationLatencyAndMandatoryMetrics(t *testing.T) {
 	m := imetrics.NewMemory()
-	auditPath := "./test_obligations_latency_metrics.jsonl"
-	_ = os.Remove(auditPath)
+	auditPath := filepath.Join(t.TempDir(), "test_obligations_latency_metrics.jsonl")
 	// One mandatory failing, one succeeding to exercise both latency and mandatory failure counter
 	exec := iobligations.NewSimpleExecutor(1, 3, []string{"must_fail"})
 	engine := NewInMemoryEngine(DenyOverridesStrategy{}).WithMetrics(m).WithObligations(exec, auditPath).WithObligationFailureDenies(true)
@@ -195,13 +187,11 @@ func TestObligationLatencyAndMandatoryMetrics(t *testing.T) {
 	if snap.ObligationLatencyTotalNS == 0 {
 		t.Fatalf("expected non-zero total latency")
 	}
-	_ = os.Remove(auditPath)
 }
 
 func TestObligationsContextCancellation(t *testing.T) {
 	m := imetrics.NewMemory()
-	auditPath := "./test_obligations_audit_cancel.jsonl"
-	_ = os.Remove(auditPath)
+	auditPath := filepath.Join(t.TempDir(), "test_obligations_audit_cancel.jsonl")
 	// executor with artificial small latency to allow cancellation mid-way
 	exec := iobligations.NewSimpleExecutor(5, 5, nil)
 	engine := NewInMemoryEngine(DenyOverridesStrategy{}).WithMetrics(m).WithObligations(exec, auditPath)
@@ -240,5 +230,4 @@ func TestObligationsContextCancellation(t *testing.T) {
 	if !found {
 		t.Fatalf("expected at least one line with duration_ms")
 	}
-	_ = os.Remove(auditPath)
 }
