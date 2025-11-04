@@ -1406,7 +1406,6 @@ func httpStatusForRevocationErr(code string) int {
 // POST /api/v1/model/validate {"model_id":"m1","input_tokens":1234}
 // Response success: {"success":true,"model_id":"m1","input_tokens":1234}
 //nolint:gocyclo // Model validation API handler
-//nolint:gocyclo // Model validation API handler
 // Response failure: 400 {"success":false,"error":"model_limit_exceeded","model_id":"m1","limit":1024,"input_tokens":1500}
 func (s *BetaServer) apiModelValidate(c *gin.Context) {
 	var in struct {

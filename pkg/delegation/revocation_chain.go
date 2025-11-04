@@ -632,7 +632,6 @@ func (c *RevocationChain) GenerateConsistencyProof(startIndex int) (*Consistency
 // GenerateConsistencyProofV2 builds a logarithmic sized consistency proof between tree head at startIndex and latest.
 // startIndex selects the historical SignedTreeHead in c.treeHeads slice. Implementation derived from RFC6962 algorithm.
 //nolint:gocyclo // Merkle proof generation with path construction
-//nolint:gocyclo // Merkle proof generation with path construction
 func (c *RevocationChain) GenerateConsistencyProofV2(startIndex int) (*ConsistencyProofV2, error) {
 	if c == nil {
 		return nil, errors.New("nil_chain")

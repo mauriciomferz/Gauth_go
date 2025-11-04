@@ -250,7 +250,6 @@ func ValidateMultiSignature(p *PowerOfAttorney) error {
 //   - invalid_signature_<signer>
 //   - missing_signature_<signer> (optional; only enforced if mandatorySignatures enabled in service)
 //nolint:gocyclo // Multi-signature verification with threshold logic
-//nolint:gocyclo // Multi-signature verification with threshold logic
 func (s *Service) verifyMultiSignatures(p *PowerOfAttorney) error {
 	if p == nil {
 		return nil

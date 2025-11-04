@@ -51,7 +51,6 @@ type CoverageReport struct {
 
 // GenerateCoverage loads the existing OpenAPI spec and computes coverage against the live server's routes.
 //nolint:gocyclo // Spec coverage report generation
-//nolint:gocyclo // Spec coverage report generation
 func GenerateCoverage(specPath string) (*CoverageReport, error) {
 	// Ensure JWT route inclusion before server creation
 	os.Setenv("GAUTH_USE_JWT_LIB", "1")

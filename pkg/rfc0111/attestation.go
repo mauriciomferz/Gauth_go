@@ -91,7 +91,6 @@ func (s *Service) IssueAttestationProof(ctx context.Context, statement, subject 
 // VerifyAttestationProof validates signature & digest of an AttestationProof.
 // Returns nil on success or RFC integrity/expired errors. Metrics are recorded for success & failure.
 //nolint:gocyclo // Attestation proof verification with signature checks
-//nolint:gocyclo // Attestation proof verification with signature checks
 func (s *Service) VerifyAttestationProof(ctx context.Context, proof *attest.AttestationProof) error {
 	if proof == nil {
 		return rfc.New(rfc.ErrInvalidRequest, "nil proof")

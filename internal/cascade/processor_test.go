@@ -11,7 +11,6 @@ import (
 )
 
 //nolint:gocyclo // Comprehensive cascade processor test
-//nolint:gocyclo // Comprehensive cascade processor test
 func TestCascadeProcessor(t *testing.T) {
 	createTestPOA := func(id, parentID string, depth int) *rfc0111.PowerOfAttorney {
 		now := time.Now().UTC()

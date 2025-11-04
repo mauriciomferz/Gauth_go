@@ -39,7 +39,6 @@ func performJSON(t *testing.T, srv *BetaServer, method, path, body string, hdr m
 }
 
 //nolint:gocyclo // Policy lifecycle integration test
-//nolint:gocyclo // Policy lifecycle integration test
 func TestPolicyLifecycleIntegration(t *testing.T) {
 	// Ensure admin token for authorization path
 	os.Setenv("GAUTH_POLICY_ADMIN_TOKEN", "test-admin")

@@ -207,7 +207,6 @@ func DecodeRawPOAStream(r io.Reader, limits StreamLimits) (*RawPOAChain, error) 
 // DecodeRawPOAStreamWith adds hash algorithm selection, optional PrevHash continuity verification,
 // and supports both legacy length-prefixed format and indefinite-length CBOR arrays (0x9f ... 0xff).
 //nolint:gocyclo // Stream decoder with chaining and verification
-//nolint:gocyclo // Stream decoder with chaining and verification
 func DecodeRawPOAStreamWith(r io.Reader, limits StreamLimits, algo RawPOAHashAlg, verifyPrev bool) (*RawPOAChain, error) {
 	if limits.MaxItems == 0 {
 		limits.MaxItems = DefaultStreamLimits.MaxItems

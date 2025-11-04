@@ -6,7 +6,6 @@ import (
 )
 
 //nolint:gocyclo // Comprehensive test covering all metrics functionality
-//nolint:gocyclo // Comprehensive test covering all metrics functionality
 func TestMemoryMetrics(t *testing.T) {
 	m := NewMemory()
 	// Initially zero snapshot (extended fields included)

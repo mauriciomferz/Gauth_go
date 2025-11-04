@@ -42,7 +42,6 @@ func (NoopPoAValidator) Validate(*PowerOfAttorney) error { return nil }
 type BasicPoAValidator struct{}
 
 //nolint:gocyclo // Basic PoA validation with field checks
-//nolint:gocyclo // Basic PoA validation with field checks
 func (BasicPoAValidator) Validate(p *PowerOfAttorney) error {
 	if p == nil {
 		return rfc.New(rfc.ErrInvalidRequest, "nil poa")

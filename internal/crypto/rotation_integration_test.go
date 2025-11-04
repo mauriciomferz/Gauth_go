@@ -9,7 +9,6 @@ import (
 )
 
 //nolint:gocyclo // Integration test covering multiple rotation scenarios
-//nolint:gocyclo // Integration test covering multiple rotation scenarios
 func TestKeyRotationSystemIntegration(t *testing.T) {
 	// Create temporary directory for test keys
 	tempDir := filepath.Join(os.TempDir(), "gauth-test-keys")

@@ -370,7 +370,6 @@ func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
 
 // ValidateToken validates a token and returns client information
 //nolint:gocyclo // Token validation with comprehensive security checks
-//nolint:gocyclo // Token validation with comprehensive security checks
 func (g *Service) ValidateToken(token string) (*TokenValidationResult, error) {
 	if g == nil || (len(g.signingKey) == 0 && g.keyMode != sigModeEdDSA) {
 		failMetric(g, observability.SigInvalid)

@@ -113,7 +113,6 @@ func (si *ServerIntegration) EnforceAICapabilities(action string, claims map[str
 
 // extractAIProfile extracts AI system profile from claims
 //nolint:gocyclo // AI profile extraction with extensive claim validation
-//nolint:gocyclo // AI profile extraction with extensive claim validation
 func (si *ServerIntegration) extractAIProfile(claims map[string]any) AISystemProfile {
 	profile := AISystemProfile{
 		EntityType:   AIEntityHuman, // Default to human
