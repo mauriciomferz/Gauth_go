@@ -81,16 +81,18 @@ func lex(src string, limits ExprLimits) ([]token, error) {
 			break
 		}
 		r := l.src[l.pos]
+		oldPos := l.pos // Track position before trying operators
 		// Try multi-char operators first
 		if err := l.tryMultiCharOps(r); err != nil {
 			return nil, err
-		} else if l.didConsume() {
+		} else if l.pos > oldPos {
+			// Position advanced, token was consumed
 			continue
 		}
 		// Try single-char tokens
 		if err := l.trySingleCharTokens(r); err != nil {
 			return nil, err
-		} else if l.didConsume() {
+		} else if l.pos > oldPos {
 			// Token was consumed in switch
 		} else if isIdentStart(r) {
 			// Identifier or keyword
@@ -122,19 +124,6 @@ func (l *lexer) tryMultiCharOps(r byte) error {
 		l.add(tokOr, "||")
 	}
 	return nil
-}
-
-// didConsume checks if position advanced
-func (l *lexer) didConsume() bool {
-	// Track whether the last operation consumed characters
-	// We use this heuristically: if a token was added, we consumed
-	if len(l.tokens) > 0 {
-		lastIdx := len(l.tokens) - 1
-		// If the last token is the one we just added, we consumed
-		// This is a simple check based on token array growth
-		return lastIdx >= 0
-	}
-	return false
 }
 
 // trySingleCharTokens handles single-char and some two-char tokens
