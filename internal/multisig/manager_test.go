@@ -186,7 +186,9 @@ func TestSignatureManager_DuplicateSignature(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	manager.InitiateCollection(ctx, poa, 1*time.Hour)
+	if err := manager.InitiateCollection(ctx, poa, 1*time.Hour); err != nil {
+		t.Fatalf("InitiateCollection failed: %v", err)
+	}
 
 	state, _ := manager.GetStatus(ctx, "poa-3")
 	digest := state.CanonicalDigest
@@ -228,7 +230,9 @@ func TestSignatureManager_InvalidSignature(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	manager.InitiateCollection(ctx, poa, 1*time.Hour)
+	if err := manager.InitiateCollection(ctx, poa, 1*time.Hour); err != nil {
+		t.Fatalf("InitiateCollection failed: %v", err)
+	}
 
 	state, _ := manager.GetStatus(ctx, "poa-4")
 	digest := state.CanonicalDigest
@@ -264,7 +268,9 @@ func TestSignatureManager_UnauthorizedSigner(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	manager.InitiateCollection(ctx, poa, 1*time.Hour)
+	if err := manager.InitiateCollection(ctx, poa, 1*time.Hour); err != nil {
+		t.Fatalf("InitiateCollection failed: %v", err)
+	}
 
 	state, _ := manager.GetStatus(ctx, "poa-5")
 	digest := state.CanonicalDigest
@@ -301,7 +307,9 @@ func TestSignatureManager_ActivatePoA(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	manager.InitiateCollection(ctx, poa, 1*time.Hour)
+	if err := manager.InitiateCollection(ctx, poa, 1*time.Hour); err != nil {
+		t.Fatalf("Failed to initiate collection: %v", err)
+	}
 
 	// Try to activate before threshold met - should fail
 	err := manager.ActivatePoA(ctx, "poa-6")
@@ -314,10 +322,14 @@ func TestSignatureManager_ActivatePoA(t *testing.T) {
 	digest := state.CanonicalDigest
 
 	sig1 := signDigest(t, digest, privA)
-	manager.SubmitSignature(ctx, "poa-6", "alice", keyIDA, sig1, nil)
+	if err := manager.SubmitSignature(ctx, "poa-6", "alice", keyIDA, sig1, nil); err != nil {
+		t.Fatalf("SubmitSignature failed: %v", err)
+	}
 
 	sig2 := signDigest(t, digest, privB)
-	manager.SubmitSignature(ctx, "poa-6", "bob", keyIDB, sig2, nil)
+	if err := manager.SubmitSignature(ctx, "poa-6", "bob", keyIDB, sig2, nil); err != nil {
+		t.Fatalf("SubmitSignature failed: %v", err)
+	}
 
 	// Now activation should succeed
 	err = manager.ActivatePoA(ctx, "poa-6")
@@ -355,7 +367,9 @@ func TestSignatureManager_Expiration(t *testing.T) {
 
 	ctx := context.Background()
 	// Set very short expiration
-	manager.InitiateCollection(ctx, poa, 1*time.Millisecond)
+	if err := manager.InitiateCollection(ctx, poa, 1*time.Millisecond); err != nil {
+		t.Fatalf("Failed to initiate collection: %v", err)
+	}
 
 	// Wait for expiration
 	time.Sleep(10 * time.Millisecond)
@@ -401,16 +415,22 @@ func TestSignatureManager_GetSignatures(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	manager.InitiateCollection(ctx, poa, 1*time.Hour)
+	if err := manager.InitiateCollection(ctx, poa, 1*time.Hour); err != nil {
+		t.Fatalf("Failed to initiate collection: %v", err)
+	}
 
 	state, _ := manager.GetStatus(ctx, "poa-8")
 	digest := state.CanonicalDigest
 
 	sig1 := signDigest(t, digest, privA)
-	manager.SubmitSignature(ctx, "poa-8", "alice", keyIDA, sig1, nil)
+	if err := manager.SubmitSignature(ctx, "poa-8", "alice", keyIDA, sig1, nil); err != nil {
+		t.Fatalf("SubmitSignature failed: %v", err)
+	}
 
 	sig2 := signDigest(t, digest, privB)
-	manager.SubmitSignature(ctx, "poa-8", "bob", keyIDB, sig2, nil)
+	if err := manager.SubmitSignature(ctx, "poa-8", "bob", keyIDB, sig2, nil); err != nil {
+		t.Fatalf("SubmitSignature failed: %v", err)
+	}
 
 	// Get signatures in RFC0111 format
 	signatures, err := manager.GetSignatures(ctx, "poa-8")

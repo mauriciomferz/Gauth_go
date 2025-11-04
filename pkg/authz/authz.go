@@ -944,155 +944,199 @@ func (ma *MemoryAuthorizer) evaluateCondition(request Request, condition Conditi
 
 	switch condition.Operator {
 	case "equals":
-		for _, value := range condition.Values {
-			if contextValue == value {
-				return true
-			}
-		}
-		return false
+		return ma.evalEquals(contextValue, condition.Values)
 	case "not_equals":
-		for _, value := range condition.Values {
-			if contextValue == value {
-				return false
-			}
-		}
-		return true
-	case "in": // any value list matches (set membership)
-		for _, value := range condition.Values {
-			if contextValue == value {
-				return true
-			}
-		}
-		return false
-	case "contains": // substring containment
-		for _, value := range condition.Values {
-			if strings.Contains(contextValue, value) {
-				return true
-			}
-		}
-		return false
+		return ma.evalNotEquals(contextValue, condition.Values)
+	case "in":
+		return ma.evalIn(contextValue, condition.Values)
+	case "contains":
+		return ma.evalContains(contextValue, condition.Values)
 	case "prefix":
-		for _, value := range condition.Values {
-			if strings.HasPrefix(contextValue, value) {
-				return true
-			}
-		}
-		return false
+		return ma.evalPrefix(contextValue, condition.Values)
 	case "suffix":
-		for _, value := range condition.Values {
-			if strings.HasSuffix(contextValue, value) {
-				return true
-			}
-		}
-		return false
+		return ma.evalSuffix(contextValue, condition.Values)
 	case operatorRegex:
-		for _, pattern := range condition.Values {
-			// Fast path: check if compiled regex exists
-			ma.regexMu.RLock()
-			rx, ok := ma.regexCache[pattern]
-			ma.regexMu.RUnlock()
-			if !ok {
-				// Compile new pattern
-				compiled, err := regexp.Compile(pattern)
-				if err != nil {
-					atomic.AddUint64(&ma.metricRegexCompileErrors, 1)
-					continue // try next pattern value
-				}
-				// Insert into cache (double-check another goroutine didn't add meanwhile)
-				ma.regexMu.Lock()
-				if existing, exists := ma.regexCache[pattern]; exists {
-					// Use existing compiled version
-					rx = existing
-				} else {
-					ma.regexCache[pattern] = compiled
-					ma.regexAddedAt[pattern] = time.Now()
-					ma.regexLastAccess[pattern] = time.Now()
-					rx = compiled
-					atomic.AddUint64(&ma.metricRegexCompiles, 1)
-				}
-				ma.regexMu.Unlock()
-				// Perform pruning post-insert (outside lock inside prune)
-				ma.pruneRegexCache()
-			} else {
-				// Update last access (write requires full Lock)
-				ma.regexMu.Lock()
-				ma.regexLastAccess[pattern] = time.Now()
-				ma.regexMu.Unlock()
-			}
-			// Safeguard: rx can still be nil theoretically (should not), guard anyway
-			if rx != nil && rx.MatchString(contextValue) {
-				// increment per-pattern and total counters
-				ma.regexMu.Lock()
-				ma.regexMatchCounts[pattern]++
-				ma.regexMu.Unlock()
-				atomic.AddUint64(&ma.metricRegexMatches, 1)
-				return true
-			}
-		}
-		return false
+		return ma.evalRegex(contextValue, condition.Values)
 	case "numeric_gt":
-		cv, err := strconv.ParseFloat(contextValue, 64)
-		if err != nil {
-			return false
-		}
-		for _, thr := range condition.Values {
-			v, err := strconv.ParseFloat(thr, 64)
-			if err != nil {
-				continue
-			}
-			if cv > v {
-				return true
-			}
-		}
-		return false
+		return ma.evalNumericGt(contextValue, condition.Values)
 	case "numeric_lt":
-		cv, err := strconv.ParseFloat(contextValue, 64)
-		if err != nil {
-			return false
-		}
-		for _, thr := range condition.Values {
-			v, err := strconv.ParseFloat(thr, 64)
-			if err != nil {
-				continue
-			}
-			if cv < v {
-				return true
-			}
-		}
-		return false
+		return ma.evalNumericLt(contextValue, condition.Values)
 	case "time_before":
-		ct, err := time.Parse(time.RFC3339, contextValue)
-		if err != nil {
-			return false
-		}
-		for _, tv := range condition.Values {
-			pt, err := time.Parse(time.RFC3339, tv)
-			if err != nil {
-				continue
-			}
-			if ct.Before(pt) {
-				return true
-			}
-		}
-		return false
+		return ma.evalTimeBefore(contextValue, condition.Values)
 	case "time_after":
-		ct, err := time.Parse(time.RFC3339, contextValue)
-		if err != nil {
-			return false
-		}
-		for _, tv := range condition.Values {
-			pt, err := time.Parse(time.RFC3339, tv)
-			if err != nil {
-				continue
-			}
-			if ct.After(pt) {
-				return true
-			}
-		}
-		return false
+		return ma.evalTimeAfter(contextValue, condition.Values)
 	default:
 		return false
 	}
+}
+
+func (ma *MemoryAuthorizer) evalEquals(contextValue string, values []string) bool {
+	for _, value := range values {
+		if contextValue == value {
+			return true
+		}
+	}
+	return false
+}
+
+func (ma *MemoryAuthorizer) evalNotEquals(contextValue string, values []string) bool {
+	for _, value := range values {
+		if contextValue == value {
+			return false
+		}
+	}
+	return true
+}
+
+func (ma *MemoryAuthorizer) evalIn(contextValue string, values []string) bool {
+	for _, value := range values {
+		if contextValue == value {
+			return true
+		}
+	}
+	return false
+}
+
+func (ma *MemoryAuthorizer) evalContains(contextValue string, values []string) bool {
+	for _, value := range values {
+		if strings.Contains(contextValue, value) {
+			return true
+		}
+	}
+	return false
+}
+
+func (ma *MemoryAuthorizer) evalPrefix(contextValue string, values []string) bool {
+	for _, value := range values {
+		if strings.HasPrefix(contextValue, value) {
+			return true
+		}
+	}
+	return false
+}
+
+func (ma *MemoryAuthorizer) evalSuffix(contextValue string, values []string) bool {
+	for _, value := range values {
+		if strings.HasSuffix(contextValue, value) {
+			return true
+		}
+	}
+	return false
+}
+
+func (ma *MemoryAuthorizer) evalRegex(contextValue string, patterns []string) bool {
+	for _, pattern := range patterns {
+		// Fast path: check if compiled regex exists
+		ma.regexMu.RLock()
+		rx, ok := ma.regexCache[pattern]
+		ma.regexMu.RUnlock()
+		if !ok {
+			// Compile new pattern
+			compiled, err := regexp.Compile(pattern)
+			if err != nil {
+				atomic.AddUint64(&ma.metricRegexCompileErrors, 1)
+				continue // try next pattern value
+			}
+			// Insert into cache (double-check another goroutine didn't add meanwhile)
+			ma.regexMu.Lock()
+			if existing, exists := ma.regexCache[pattern]; exists {
+				// Use existing compiled version
+				rx = existing
+			} else {
+				ma.regexCache[pattern] = compiled
+				ma.regexAddedAt[pattern] = time.Now()
+				ma.regexLastAccess[pattern] = time.Now()
+				rx = compiled
+				atomic.AddUint64(&ma.metricRegexCompiles, 1)
+			}
+			ma.regexMu.Unlock()
+			// Perform pruning post-insert (outside lock inside prune)
+			ma.pruneRegexCache()
+		} else {
+			// Update last access (write requires full Lock)
+			ma.regexMu.Lock()
+			ma.regexLastAccess[pattern] = time.Now()
+			ma.regexMu.Unlock()
+		}
+		// Safeguard: rx can still be nil theoretically (should not), guard anyway
+		if rx != nil && rx.MatchString(contextValue) {
+			// increment per-pattern and total counters
+			ma.regexMu.Lock()
+			ma.regexMatchCounts[pattern]++
+			ma.regexMu.Unlock()
+			atomic.AddUint64(&ma.metricRegexMatches, 1)
+			return true
+		}
+	}
+	return false
+}
+
+func (ma *MemoryAuthorizer) evalNumericGt(contextValue string, thresholds []string) bool {
+	cv, err := strconv.ParseFloat(contextValue, 64)
+	if err != nil {
+		return false
+	}
+	for _, thr := range thresholds {
+		v, err := strconv.ParseFloat(thr, 64)
+		if err != nil {
+			continue
+		}
+		if cv > v {
+			return true
+		}
+	}
+	return false
+}
+
+func (ma *MemoryAuthorizer) evalNumericLt(contextValue string, thresholds []string) bool {
+	cv, err := strconv.ParseFloat(contextValue, 64)
+	if err != nil {
+		return false
+	}
+	for _, thr := range thresholds {
+		v, err := strconv.ParseFloat(thr, 64)
+		if err != nil {
+			continue
+		}
+		if cv < v {
+			return true
+		}
+	}
+	return false
+}
+
+func (ma *MemoryAuthorizer) evalTimeBefore(contextValue string, values []string) bool {
+	ct, err := time.Parse(time.RFC3339, contextValue)
+	if err != nil {
+		return false
+	}
+	for _, tv := range values {
+		pt, err := time.Parse(time.RFC3339, tv)
+		if err != nil {
+			continue
+		}
+		if ct.Before(pt) {
+			return true
+		}
+	}
+	return false
+}
+
+func (ma *MemoryAuthorizer) evalTimeAfter(contextValue string, values []string) bool {
+	ct, err := time.Parse(time.RFC3339, contextValue)
+	if err != nil {
+		return false
+	}
+	for _, tv := range values {
+		pt, err := time.Parse(time.RFC3339, tv)
+		if err != nil {
+			continue
+		}
+		if ct.After(pt) {
+			return true
+		}
+	}
+	return false
 }
 
 // BasicEnforcer minimal structure for backward compatibility

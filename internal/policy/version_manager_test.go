@@ -168,7 +168,9 @@ func TestRollbackVersion(t *testing.T) {
 		}
 	}
 
-	manager.ActivateVersion(ctx, 3, "test-actor")
+	if err := manager.ActivateVersion(ctx, 3, "test-actor"); err != nil {
+		t.Fatalf("ActivateVersion failed: %v", err)
+	}
 
 	err := manager.RollbackVersion(ctx, 2, "admin", "Testing rollback")
 	if err != nil {

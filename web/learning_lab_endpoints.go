@@ -278,6 +278,9 @@ func (s *BetaServer) apiGenericAction(c *gin.Context) {
 // generateID generates a random hexadecimal ID
 func generateID() string {
 	bytes := make([]byte, 16)
-	rand.Read(bytes)
+	if _, err := rand.Read(bytes); err != nil {
+		// Fallback to predictable ID on error
+		return "fallback-id-" + hex.EncodeToString([]byte{1, 2, 3, 4})
+	}
 	return hex.EncodeToString(bytes)
 }

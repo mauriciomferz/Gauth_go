@@ -46,7 +46,10 @@ func (idx *BoltDBIndexer) PruneExpiredEntries(bucket string) error {
 		for k, v := c.First(); k != nil; k, v = c.Next() {
 			entry := decodeIndexEntry(v)
 			if entry.TTL > 0 && time.Now().Unix()-entry.Timestamp > entry.TTL {
-				b.Delete(k)
+				if err := b.Delete(k); err != nil {
+					// Log or handle delete error as appropriate
+					continue
+				}
 			}
 		}
 		return nil

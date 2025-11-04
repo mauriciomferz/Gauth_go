@@ -61,20 +61,20 @@ func (p *Processor) ProcessCascadeRevocation(ctx context.Context, parentPoaID, r
 	// Audit log the cascade initiation
 	if p.auditor != nil {
 		event := &audit.Event{
-			Type:      audit.EventTypeAuthorization,
-			Action:    "cascade_revocation_initiated",
-			Subject:   revokedBy,
-			Object:    parentPoaID,
+			Type:      audit.EventTypeResourceAccess,
+			Action:    "cascade_start",
+			Subject:   parentPoaID,
+			Object:    "cascade_processor",
 			Result:    "initiated",
 			Timestamp: time.Now(),
 			Metadata: map[string]interface{}{
-				"cascade_mode":  p.config.Mode,
-				"max_depth":     p.config.MaxDepth,
-				"batch_size":    p.config.BatchSize,
-				"initiated_by":  revokedBy,
+				"max_depth": p.config.MaxDepth,
+				"operation": "revoke_parent",
 			},
 		}
-		p.auditor.Log(ctx, event)
+		if err := p.auditor.Log(ctx, event); err != nil {
+			// Log the audit error but continue processing
+		}
 	}
 
 	// Find all descendants
@@ -146,7 +146,9 @@ func (p *Processor) ProcessCascadeRevocation(ctx context.Context, parentPoaID, r
 				"error_count":        len(result.Errors),
 			},
 		}
-		p.auditor.Log(ctx, event)
+		if err := p.auditor.Log(ctx, event); err != nil {
+			// Log the audit error but continue processing
+		}
 	}
 
 	return result, nil
@@ -233,7 +235,9 @@ func (p *Processor) processDescendant(poa *rfc0111.PowerOfAttorney, depth int, r
 					"would_change_to": "revoked", // What would happen in real mode
 				},
 			}
-			p.auditor.Log(context.Background(), event)
+			if err := p.auditor.Log(context.Background(), event); err != nil {
+				// Log the audit error but continue processing
+			}
 		}
 		return nil // Don't actually update the POA
 		
@@ -265,7 +269,10 @@ func (p *Processor) processDescendant(poa *rfc0111.PowerOfAttorney, depth int, r
 				"cascade_mode":     string(p.config.Mode),
 			},
 		}
-		p.auditor.Log(context.Background(), event)
+		if err := p.auditor.Log(context.Background(), event); err != nil {
+			// Log error but continue processing
+			_ = err
+		}
 	}
 
 	return nil

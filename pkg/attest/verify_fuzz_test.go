@@ -57,6 +57,6 @@ func FuzzVerifyModelLimitsAttestation(f *testing.F) {
         }
         // Limit size of variable fields to avoid extreme memory consumption
         if len(att.DomainPrefix) > 256 { att.DomainPrefix = att.DomainPrefix[:256] }
-        VerifyModelLimitsAttestation(&att, reg, replay, time.Now())
+        _, _ = VerifyModelLimitsAttestation(&att, reg, replay, time.Now())
     })
 }

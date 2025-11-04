@@ -510,7 +510,6 @@ func initSchema(db *sql.DB) error {
 		}
 	}
 	return nil
-	return err
 }
 
 func persistDecision(db *sql.DB, action string, allowed bool, meta map[string]any, missing []string) {

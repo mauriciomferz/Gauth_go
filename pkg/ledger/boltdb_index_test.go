@@ -30,7 +30,7 @@ db, err := bbolt.Open(file, 0600, nil)
 		t.Fatalf("prune: %v", err)
 	}
 	// Check that entry is deleted
-	db.View(func(tx *bbolt.Tx) error {
+	if err := db.View(func(tx *bbolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
 		if b == nil {
 			t.Fatalf("bucket missing")
@@ -40,5 +40,7 @@ db, err := bbolt.Open(file, 0600, nil)
 			t.Fatalf("expected entry to be pruned, got %v", v)
 		}
 		return nil
-	})
+	}); err != nil {
+		t.Fatalf("view error: %v", err)
+	}
 }

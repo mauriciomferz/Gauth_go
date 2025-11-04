@@ -54,9 +54,15 @@ func ParseSemanticVersion(s string) (SemanticVersion, error) {
 	if len(matches) != 4 {
 		return v, fmt.Errorf("invalid semantic version: %s", s)
 	}
-	fmt.Sscanf(matches[1], "%d", &v.Major)
-	fmt.Sscanf(matches[2], "%d", &v.Minor)
-	fmt.Sscanf(matches[3], "%d", &v.Patch)
+	if _, err := fmt.Sscanf(matches[1], "%d", &v.Major); err != nil {
+		return v, fmt.Errorf("invalid major version: %s", matches[1])
+	}
+	if _, err := fmt.Sscanf(matches[2], "%d", &v.Minor); err != nil {
+		return v, fmt.Errorf("invalid minor version: %s", matches[2])
+	}
+	if _, err := fmt.Sscanf(matches[3], "%d", &v.Patch); err != nil {
+		return v, fmt.Errorf("invalid patch version: %s", matches[3])
+	}
 	return v, nil
 }
 

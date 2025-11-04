@@ -1,15 +1,16 @@
 package web
 
 import (
-    "crypto/ed25519"
-    "crypto/rand"
-    "encoding/hex"
-    "encoding/json"
-    "os"
-    "testing"
-    "net/http/httptest"
-    "github.com/gin-gonic/gin"
-    notary "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
+	"crypto/ed25519"
+	"crypto/rand"
+	"encoding/hex"
+	"encoding/json"
+	"net/http/httptest"
+	"os"
+	"testing"
+
+	notary "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
+	"github.com/gin-gonic/gin"
 )
 
 // helper to install keys into global registry (simplified for tests)
@@ -38,8 +39,12 @@ func TestRotationV2VerifiedWeightSuccess(t *testing.T) {
     srv := NewBetaServerWithMetrics("", nil)
     // Provide a rotation ledger with dummy entries to satisfy endpoint preconditions
     srv.rotationLedger = notary.NewRotationLedger("")
-    srv.rotationLedger.AppendDescriptor(&notary.KeyRotationDescriptor{OldKeyID: "a", NewKeyID: "b"})
-    srv.rotationLedger.AppendDescriptor(&notary.KeyRotationDescriptor{OldKeyID: "b", NewKeyID: "c"})
+    if _, err := srv.rotationLedger.AppendDescriptor(&notary.KeyRotationDescriptor{OldKeyID: "a", NewKeyID: "b"}); err != nil {
+        t.Fatalf("AppendDescriptor failed: %v", err)
+    }
+    if _, err := srv.rotationLedger.AppendDescriptor(&notary.KeyRotationDescriptor{OldKeyID: "b", NewKeyID: "c"}); err != nil {
+        t.Fatalf("AppendDescriptor failed: %v", err)
+    }
     w := httptest.NewRecorder()
     req := httptest.NewRequest("GET", "/api/v1/beta/rotations/summary/v2", nil)
     srv.router.ServeHTTP(w, req)
@@ -62,7 +67,9 @@ func TestRotationV2ThresholdUnsatisfied(t *testing.T) {
     installTestKey(t, "k1") // single key -> verified weight 2 < threshold 3
     srv := NewBetaServerWithMetrics("", nil)
     srv.rotationLedger = notary.NewRotationLedger("")
-    srv.rotationLedger.AppendDescriptor(&notary.KeyRotationDescriptor{OldKeyID: "a", NewKeyID: "b"})
+    if _, err := srv.rotationLedger.AppendDescriptor(&notary.KeyRotationDescriptor{OldKeyID: "a", NewKeyID: "b"}); err != nil {
+        t.Fatalf("AppendDescriptor failed: %v", err)
+    }
     w := httptest.NewRecorder()
     req := httptest.NewRequest("GET", "/api/v1/beta/rotations/summary/v2", nil)
     srv.router.ServeHTTP(w, req)

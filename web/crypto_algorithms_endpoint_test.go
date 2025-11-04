@@ -22,9 +22,7 @@ func TestCryptoAlgorithmsEndpoint(t *testing.T) {
     // Minimal presence checks
     want := map[string]bool{"ed25519":false, "ecdsa-p256":false, "bls12-381":false, "bls12-381-agg":true}
     for _, a := range resp.Algorithms {
-        if _, ok := want[a.Name]; ok {
-            delete(want, a.Name)
-        }
+        delete(want, a.Name)
     }
     if len(want) != 0 { t.Fatalf("missing algorithms: %v", want) }
 }

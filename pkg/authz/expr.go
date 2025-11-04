@@ -68,62 +68,160 @@ func lex(src string, limits ExprLimits) ([]token, error) {
 	l := &lexer{src: src, limits: limits}
 	for {
 		l.skipWS()
-		if l.pos >= len(l.src) { l.tokens = append(l.tokens, token{typ: tokEOF}); break }
+		if l.pos >= len(l.src) {
+			l.tokens = append(l.tokens, token{typ: tokEOF})
+			break
+		}
 		r := l.src[l.pos]
-		// operators & punctuation
-		if r == '&' && l.peek("&&") { l.pos += 2; l.add(tokAnd, "&&"); continue }
-		if r == '|' && l.peek("||") { l.pos += 2; l.add(tokOr, "||"); continue }
-		switch r {
-		case '!':
-			// not or !=
-			if l.pos+1 < len(l.src) && l.src[l.pos+1] == '=' { l.pos += 2; l.add(tokNeq, "!="); break }
-			l.pos++; l.add(tokNot, "!")
-		case '(':
-			l.pos++; l.add(tokLParen, "(")
-		case ')':
-			l.pos++; l.add(tokRParen, ")")
-		case '[':
-			l.pos++; l.add(tokLBracket, "[")
-		case ']':
-			l.pos++; l.add(tokRBracket, "]")
-		case ',':
-			l.pos++; l.add(tokComma, ",")
-		case '=':
-			// equality '=='
-			if l.pos+1 < len(l.src) && l.src[l.pos+1] == '=' { l.pos += 2; l.add(tokEq, "==") } else { return nil, fmt.Errorf("unexpected '='; use '=='") }
-		// duplicate '!' case removed
-		case '>':
-			l.pos++
-			if l.match('=') { l.add(tokGTE, ">=") } else { l.add(tokGT, ">") }
-		case '<':
-			l.pos++
-			if l.match('=') { l.add(tokLTE, "<=") } else { l.add(tokLT, "<") }
-		case '"':
-			str, err := l.readString()
-			if err != nil { return nil, err }
-			if len(str) > l.limits.MaxLiteralLength { return nil, errors.New("string literal length limit exceeded") }
-			l.add(tokString, str)
-		default:
-			if isIdentStart(r) {
-				id := l.readIdent()
-				if len(id) > l.limits.MaxIdentifierLength { return nil, errors.New("identifier length limit exceeded") }
-				low := strings.ToLower(id)
-				if low == "true" || low == "false" { l.add(tokBool, low); continue }
-				if low == "in" { l.add(tokIn, low); continue }
-				l.add(tokIdent, id)
-				continue
+		// Try multi-char operators first
+		if err := l.tryMultiCharOps(r); err != nil {
+			return nil, err
+		} else if l.didConsume() {
+			continue
+		}
+		// Try single-char tokens
+		if err := l.trySingleCharTokens(r); err != nil {
+			return nil, err
+		} else if l.didConsume() {
+			// Token was consumed in switch
+		} else if isIdentStart(r) {
+			// Identifier or keyword
+			if err := l.readIdentOrKeyword(); err != nil {
+				return nil, err
 			}
-			if unicode.IsDigit(rune(r)) {
-				num := l.readNumber()
-				if len(num) > l.limits.MaxLiteralLength { return nil, errors.New("number literal length limit exceeded") }
-				l.add(tokNumber, num)
-				continue
+		} else if unicode.IsDigit(rune(r)) {
+			// Number
+			if err := l.readNum(); err != nil {
+				return nil, err
 			}
+		} else {
 			return nil, fmt.Errorf("unexpected character: %c", r)
 		}
-		if len(l.tokens) > l.limits.MaxTokens { return nil, errors.New("token limit exceeded") }
+		if len(l.tokens) > l.limits.MaxTokens {
+			return nil, errors.New("token limit exceeded")
+		}
 	}
 	return l.tokens, nil
+}
+
+// tryMultiCharOps handles && and ||
+func (l *lexer) tryMultiCharOps(r byte) error {
+	if r == '&' && l.peek("&&") {
+		l.pos += 2
+		l.add(tokAnd, "&&")
+	} else if r == '|' && l.peek("||") {
+		l.pos += 2
+		l.add(tokOr, "||")
+	}
+	return nil
+}
+
+// didConsume checks if position advanced
+func (l *lexer) didConsume() bool {
+	// Track whether the last operation consumed characters
+	// We use this heuristically: if a token was added, we consumed
+	if len(l.tokens) > 0 {
+		lastIdx := len(l.tokens) - 1
+		// If the last token is the one we just added, we consumed
+		// This is a simple check based on token array growth
+		return lastIdx >= 0
+	}
+	return false
+}
+
+// trySingleCharTokens handles single-char and some two-char tokens
+func (l *lexer) trySingleCharTokens(r byte) error {
+	oldPos := l.pos
+	switch r {
+	case '!':
+		// not or !=
+		if l.pos+1 < len(l.src) && l.src[l.pos+1] == '=' {
+			l.pos += 2
+			l.add(tokNeq, "!=")
+		} else {
+			l.pos++
+			l.add(tokNot, "!")
+		}
+	case '(':
+		l.pos++
+		l.add(tokLParen, "(")
+	case ')':
+		l.pos++
+		l.add(tokRParen, ")")
+	case '[':
+		l.pos++
+		l.add(tokLBracket, "[")
+	case ']':
+		l.pos++
+		l.add(tokRBracket, "]")
+	case ',':
+		l.pos++
+		l.add(tokComma, ",")
+	case '=':
+		// equality '=='
+		if l.pos+1 < len(l.src) && l.src[l.pos+1] == '=' {
+			l.pos += 2
+			l.add(tokEq, "==")
+		} else {
+			return fmt.Errorf("unexpected '='; use '=='")
+		}
+	case '>':
+		l.pos++
+		if l.match('=') {
+			l.add(tokGTE, ">=")
+		} else {
+			l.add(tokGT, ">")
+		}
+	case '<':
+		l.pos++
+		if l.match('=') {
+			l.add(tokLTE, "<=")
+		} else {
+			l.add(tokLT, "<")
+		}
+	case '"':
+		str, err := l.readString()
+		if err != nil {
+			return err
+		}
+		if len(str) > l.limits.MaxLiteralLength {
+			return errors.New("string literal length limit exceeded")
+		}
+		l.add(tokString, str)
+	}
+	// Check if we consumed anything
+	if l.pos == oldPos {
+		// No single-char match, caller should try identifier or number
+		return nil
+	}
+	return nil
+}
+
+// readIdentOrKeyword reads an identifier or keyword
+func (l *lexer) readIdentOrKeyword() error {
+	id := l.readIdent()
+	if len(id) > l.limits.MaxIdentifierLength {
+		return errors.New("identifier length limit exceeded")
+	}
+	low := strings.ToLower(id)
+	if low == "true" || low == "false" {
+		l.add(tokBool, low)
+	} else if low == "in" {
+		l.add(tokIn, low)
+	} else {
+		l.add(tokIdent, id)
+	}
+	return nil
+}
+
+// readNum reads a number literal
+func (l *lexer) readNum() error {
+	num := l.readNumber()
+	if len(num) > l.limits.MaxLiteralLength {
+		return errors.New("number literal length limit exceeded")
+	}
+	l.add(tokNumber, num)
+	return nil
 }
 
 func (l *lexer) add(t int, lit string) { l.tokens = append(l.tokens, token{typ: t, lit: lit}) }

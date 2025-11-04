@@ -68,13 +68,6 @@ func NewMetricsCollector() *MetricsCollector {
 		gauges:   make(map[string]float64),
 		otel:     NewOTELCollector(),
 	}
-// Example: instrument a metric update with trace
-	return &MetricsCollector{
-		metrics:  NewMetrics(),
-		counters: make(map[string]float64),
-		gauges:   make(map[string]float64),
-		otel:     NewOTELCollector(),
-	}
 }
  
 // Example: instrument a metric update with trace

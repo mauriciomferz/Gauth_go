@@ -88,93 +88,123 @@ var regexCache = struct {
 }{compiled: map[string]*regexp.Regexp{}}
 
 func evalClause(clause string, attrs map[string]string, now time.Time) (bool, error) {
+	// Dispatch to specific evaluators based on clause type
 	if strings.HasPrefix(clause, "time_between") {
-		i := strings.Index(clause, "(")
-		j := strings.LastIndex(clause, ")")
-		if i < 0 || j < 0 {
-			return false, fmt.Errorf("invalid time_between syntax")
-		}
-		inside := clause[i+1 : j]
-		segs := splitCSV(inside)
-		if len(segs) != 2 {
-			return false, fmt.Errorf("time_between requires 2 params")
-		}
-		layout := "15:04"
-		start, err := time.Parse(layout, trimQuotes(segs[0]))
-		if err != nil {
-			return false, err
-		}
-		end, err := time.Parse(layout, trimQuotes(segs[1]))
-		if err != nil {
-			return false, err
-		}
-		cur := now.UTC()
-		curClock := time.Date(0, 1, 1, cur.Hour(), cur.Minute(), 0, 0, time.UTC)
-		sClock := time.Date(0, 1, 1, start.Hour(), start.Minute(), 0, 0, time.UTC)
-		eClock := time.Date(0, 1, 1, end.Hour(), end.Minute(), 0, 0, time.UTC)
-		if sClock.Before(eClock) {
-			return (curClock.Equal(sClock) || curClock.After(sClock)) && (curClock.Before(eClock) || curClock.Equal(eClock)), nil
-		}
-		return !(curClock.After(eClock) && curClock.Before(sClock)), nil // overnight window
+		return evalTimeBetween(clause, now)
 	}
 	if strings.Contains(clause, " in ") {
-		segs := strings.SplitN(clause, " in ", 2)
-		key := strings.TrimSpace(segs[0])
-		list := strings.TrimSpace(segs[1])
-		if !strings.HasPrefix(list, "[") || !strings.HasSuffix(list, "]") {
-			return false, fmt.Errorf("invalid in list syntax")
-		}
-		list = strings.Trim(list, "[]")
-		opts := splitCSV(list)
-		val := attrs[key]
-		for _, o := range opts {
-			if val == trimQuotes(o) {
-				return true, nil
-			}
-		}
-		return false, nil
+		return evalInOperator(clause, attrs)
 	}
 	if strings.Contains(clause, "==") {
-		segs := strings.SplitN(clause, "==", 2)
-		key := strings.TrimSpace(segs[0])
-		want := trimQuotes(strings.TrimSpace(segs[1]))
-		return attrs[key] == want, nil
+		return evalEquality(clause, attrs)
 	}
-	// contains(key,'substr')
 	if strings.HasPrefix(clause, "contains(") && strings.HasSuffix(clause, ")") {
-		inner := clause[len("contains(") : len(clause)-1]
-		parts := splitCSV(inner)
-		if len(parts) != 2 {
-			return false, fmt.Errorf("contains requires 2 args")
-		}
-		key := trimQuotes(parts[0])
-		sub := trimQuotes(parts[1])
-		val := attrs[key]
-		return strings.Contains(val, sub), nil
+		return evalContains(clause, attrs)
 	}
-	// regex_match(key,'^pat$') with safety caps
 	if strings.HasPrefix(clause, "regex_match(") && strings.HasSuffix(clause, ")") {
-		inner := clause[len("regex_match(") : len(clause)-1]
-		parts := splitCSV(inner)
-		if len(parts) != 2 {
-			return false, fmt.Errorf("regex_match requires 2 args")
-		}
-		key := trimQuotes(parts[0])
-		pat := trimQuotes(parts[1])
-		if len(pat) > 256 {
-			return false, fmt.Errorf("regex pattern too long")
-		}
-		rgx, ok := regexCache.compiled[pat]
-		if !ok {
-			compiled, err := regexp.Compile(pat)
-			if err != nil {
-				return false, fmt.Errorf("regex compile error: %v", err)
-			}
-			regexCache.compiled[pat] = compiled
-			rgx = compiled
-		}
-		return rgx.MatchString(attrs[key]), nil
+		return evalRegexMatch(clause, attrs)
 	}
+	// Check numeric comparisons
+	return evalNumericComparison(clause, attrs)
+}
+
+// evalTimeBetween handles time_between("15:04","22:00") clauses
+func evalTimeBetween(clause string, now time.Time) (bool, error) {
+	i := strings.Index(clause, "(")
+	j := strings.LastIndex(clause, ")")
+	if i < 0 || j < 0 {
+		return false, fmt.Errorf("invalid time_between syntax")
+	}
+	inside := clause[i+1 : j]
+	segs := splitCSV(inside)
+	if len(segs) != 2 {
+		return false, fmt.Errorf("time_between requires 2 params")
+	}
+	layout := "15:04"
+	start, err := time.Parse(layout, trimQuotes(segs[0]))
+	if err != nil {
+		return false, err
+	}
+	end, err := time.Parse(layout, trimQuotes(segs[1]))
+	if err != nil {
+		return false, err
+	}
+	cur := now.UTC()
+	curClock := time.Date(0, 1, 1, cur.Hour(), cur.Minute(), 0, 0, time.UTC)
+	sClock := time.Date(0, 1, 1, start.Hour(), start.Minute(), 0, 0, time.UTC)
+	eClock := time.Date(0, 1, 1, end.Hour(), end.Minute(), 0, 0, time.UTC)
+	if sClock.Before(eClock) {
+		return (curClock.Equal(sClock) || curClock.After(sClock)) && (curClock.Before(eClock) || curClock.Equal(eClock)), nil
+	}
+	return !(curClock.After(eClock) && curClock.Before(sClock)), nil // overnight window
+}
+
+// evalInOperator handles "key in [val1,val2]" clauses
+func evalInOperator(clause string, attrs map[string]string) (bool, error) {
+	segs := strings.SplitN(clause, " in ", 2)
+	key := strings.TrimSpace(segs[0])
+	list := strings.TrimSpace(segs[1])
+	if !strings.HasPrefix(list, "[") || !strings.HasSuffix(list, "]") {
+		return false, fmt.Errorf("invalid in list syntax")
+	}
+	list = strings.Trim(list, "[]")
+	opts := splitCSV(list)
+	val := attrs[key]
+	for _, o := range opts {
+		if val == trimQuotes(o) {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+// evalEquality handles "key == value" clauses
+func evalEquality(clause string, attrs map[string]string) (bool, error) {
+	segs := strings.SplitN(clause, "==", 2)
+	key := strings.TrimSpace(segs[0])
+	want := trimQuotes(strings.TrimSpace(segs[1]))
+	return attrs[key] == want, nil
+}
+
+// evalContains handles contains(key,'substr') clauses
+func evalContains(clause string, attrs map[string]string) (bool, error) {
+	inner := clause[len("contains(") : len(clause)-1]
+	parts := splitCSV(inner)
+	if len(parts) != 2 {
+		return false, fmt.Errorf("contains requires 2 args")
+	}
+	key := trimQuotes(parts[0])
+	sub := trimQuotes(parts[1])
+	val := attrs[key]
+	return strings.Contains(val, sub), nil
+}
+
+// evalRegexMatch handles regex_match(key,'^pat$') with safety caps
+func evalRegexMatch(clause string, attrs map[string]string) (bool, error) {
+	inner := clause[len("regex_match(") : len(clause)-1]
+	parts := splitCSV(inner)
+	if len(parts) != 2 {
+		return false, fmt.Errorf("regex_match requires 2 args")
+	}
+	key := trimQuotes(parts[0])
+	pat := trimQuotes(parts[1])
+	if len(pat) > 256 {
+		return false, fmt.Errorf("regex pattern too long")
+	}
+	rgx, ok := regexCache.compiled[pat]
+	if !ok {
+		compiled, err := regexp.Compile(pat)
+		if err != nil {
+			return false, fmt.Errorf("regex compile error: %v", err)
+		}
+		regexCache.compiled[pat] = compiled
+		rgx = compiled
+	}
+	return rgx.MatchString(attrs[key]), nil
+}
+
+// evalNumericComparison handles >, <, >=, <= operators
+func evalNumericComparison(clause string, attrs map[string]string) (bool, error) {
 	for _, op := range []string{">=", "<=", ">", "<"} {
 		if strings.Contains(clause, op) {
 			segs := strings.SplitN(clause, op, 2)
@@ -203,6 +233,7 @@ func evalClause(clause string, attrs map[string]string, now time.Time) (bool, er
 	}
 	return false, fmt.Errorf("unsupported clause: %s", clause)
 }
+
 
 // Utilities
 func splitCSV(s string) []string {

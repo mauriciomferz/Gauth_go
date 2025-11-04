@@ -1,13 +1,14 @@
 package web
 
 import (
-    "encoding/json"
-    "os"
-    "testing"
-    "time"
-    "net/http/httptest"
-    "github.com/gin-gonic/gin"
-    internalCrypto "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
+	"encoding/json"
+	"net/http/httptest"
+	"os"
+	"testing"
+	"time"
+
+	internalCrypto "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
+	"github.com/gin-gonic/gin"
 )
 
 // installKey helper (simplified: generate ephemeral key, register with manager)
@@ -39,7 +40,9 @@ func TestRotationV2ContinuitySatisfied(t *testing.T) {
     srv.router.ServeHTTP(rec1, req1)
     if rec1.Code != 200 { t.Fatalf("first status %d body=%s", rec1.Code, rec1.Body.String()) }
     var b1 map[string]any
-    json.Unmarshal(rec1.Body.Bytes(), &b1)
+    if err := json.Unmarshal(rec1.Body.Bytes(), &b1); err != nil {
+        t.Fatalf("json unmarshal failed: %v", err)
+    }
     if b1["artifact"] == nil { t.Fatalf("artifact missing first call") }
     // Second call
     time.Sleep(10 * time.Millisecond) // allow GeneratedAt to differ
@@ -48,7 +51,9 @@ func TestRotationV2ContinuitySatisfied(t *testing.T) {
     srv.router.ServeHTTP(rec2, req2)
     if rec2.Code != 200 { t.Fatalf("second status %d body=%s", rec2.Code, rec2.Body.String()) }
     var b2 map[string]any
-    json.Unmarshal(rec2.Body.Bytes(), &b2)
+    if err := json.Unmarshal(rec2.Body.Bytes(), &b2); err != nil {
+        t.Fatalf("json unmarshal failed: %v", err)
+    }
     // Assert continuity_latest_hash stable and threshold_met true when possible
     if b2["threshold_met"] != nil && b2["threshold_met"].(bool) {
         // continuity_latest_hash should equal artifact.canonical_digest

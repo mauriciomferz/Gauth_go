@@ -24,6 +24,7 @@ package main
 //   - SVG curve artifact (signers vs latency)
 //   - Compare Ed25519 vs future BLS aggregated path
 //
+
 // Note: This harness avoids third-party benchmark frameworks to keep output machine-readable.
 
 import (
@@ -38,6 +39,12 @@ import (
 	"time"
 
 	imetrics "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
+)
+
+const (
+	modeSign   = "sign"
+	modeVerify = "verify"
+	modeBoth   = "both"
 )
 
 type record struct {
@@ -110,7 +117,7 @@ func main() {
     signerCounts, err := parseSignerList(signerStr)
     if err != nil { fmt.Fprintf(os.Stderr, "parse signers error: %v\n", err); os.Exit(1) }
     mode = strings.ToLower(mode)
-    if mode != "sign" && mode != "verify" && mode != "both" { fmt.Fprintf(os.Stderr, "invalid mode: %s\n", mode); os.Exit(1) }
+    if mode != modeSign && mode != modeVerify && mode != modeBoth { fmt.Fprintf(os.Stderr, "invalid mode: %s\n", mode); os.Exit(1) }
     if threshold < 0 { fmt.Fprintf(os.Stderr, "threshold must be >=0\n"); os.Exit(1) }
 
     // Deterministic RNG for message content generation (not cryptographic; signing uses ed25519 library RNG implicitly for key generation if needed).
@@ -145,7 +152,7 @@ func main() {
         for iter := 0; iter < iterations; iter++ {
             // Optionally regenerate message slight variation per iteration to simulate different workloads.
             if _, err := rng.Read(msg[:32]); err == nil { /* ignore error for determinism */ }
-            if mode == "sign" || mode == "both" {
+            if mode == modeSign || mode == modeBoth {
                 t0 := time.Now()
                 for i := 0; i < signers; i++ {
                     signatures[i] = ed25519.Sign(keys[i], msg)
@@ -155,9 +162,9 @@ func main() {
                 signSamples = append(signSamples, dur)
                 if useMem { m.ObserveMultiSignatureAggregateLatency(time.Duration(dur) * time.Nanosecond) }
             }
-            if mode == "verify" || mode == "both" {
+            if mode == modeVerify || mode == modeBoth {
                 // Ensure signatures exist if verify-only mode (create once).
-                if mode == "verify" {
+                if mode == modeVerify {
                     // Re-sign each iteration to bind signatures to current message mutation.
                     for i := 0; i < signers; i++ { signatures[i] = ed25519.Sign(keys[i], msg) }
                 }
@@ -177,8 +184,8 @@ func main() {
 
         avgSign := int64(0)
         avgVerify := int64(0)
-        if mode == "sign" || mode == "both" { avgSign = totalSignNS / int64(iterations) }
-        if mode == "verify" || mode == "both" { avgVerify = totalVerifyNS / int64(iterations) }
+        if mode == modeSign || mode == modeBoth { avgSign = totalSignNS / int64(iterations) }
+        if mode == modeVerify || mode == modeBoth { avgVerify = totalVerifyNS / int64(iterations) }
         p50s, p95s, p99s := computePercentiles(signSamples)
         p50v, p95v, p99v := computePercentiles(verifySamples)
         rec := record{

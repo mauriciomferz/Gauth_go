@@ -1,14 +1,15 @@
 package test
 
 import (
-    "crypto/ed25519"
-    "crypto/ecdsa"
-    "crypto/elliptic"
-    "crypto/rand"
-    "encoding/base64"
-    "testing"
-    "time"
-    notary "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
+	"crypto/ecdsa"
+	"crypto/ed25519"
+	"crypto/elliptic"
+	"crypto/rand"
+	"encoding/base64"
+	"testing"
+	"time"
+
+	notary "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
 )
 
 // resolverBoth implements PublicKeyResolver for both Ed25519 and ECDSA.
@@ -60,7 +61,10 @@ func TestRotationV2MixedAlgFailure(t *testing.T) {
     pubEd, privEd, _ := ed25519.GenerateKey(rand.Reader)
     if err := notary.AttachEd25519Signature(&art, privEd, "ed1", "ED25519", 30); err != nil { t.Fatalf("attach ed25519: %v", err) }
     // Fake ECDSA signature (random bytes) to trigger failure
-    fake := make([]byte, 64); rand.Read(fake)
+    fake := make([]byte, 64)
+    if _, err := rand.Read(fake); err != nil {
+        t.Fatalf("rand.Read failed: %v", err)
+    }
     // Assign directly (since ECDSA signer entry exists already)
     for i := range art.Signers { if art.Signers[i].ID == "ec1" { art.Signers[i].Signature = base64.RawURLEncoding.EncodeToString(fake) } }
     rs := &resolverEd{ed: pubEd}

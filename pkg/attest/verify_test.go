@@ -12,6 +12,8 @@ import (
 	internalcrypto "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
 )
 
+const testSnapshotHash = "sha256:demo"
+
 // memoryReplay simple in-memory replay strategy for tests
 type memoryReplay struct { seen map[string]struct{} }
 func (m *memoryReplay) Seen(nonce string) bool { if m.seen == nil { return false }; _, ok := m.seen[nonce]; return ok }

@@ -14,6 +14,10 @@ import (
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
 )
 
+const (
+	sigModeEdDSA = "eddsa"
+)
+
 // AttestationService provides construction + signing helpers for model limits attestation.
 // Extraction target for logic currently embedded in web/server_clean.go (RB7).
 // It intentionally avoids importing web types to prevent cycles; callers supply/consume
@@ -100,7 +104,7 @@ func (s *AttestationService) NotarizeAndSignModelLimits(unsignedJSON []byte, sna
         if err == nil && len(sigBytes) > 0 {
             res.Signature = base64.RawStdEncoding.EncodeToString(sigBytes)
             if kidp, ok := signer.(keyIDProvider); ok { res.SigKid = kidp.KeyID() }
-            res.SigMode = "eddsa" // agility retains eddsa label for now
+            res.SigMode = sigModeEdDSA // agility retains eddsa label for now
         }
         // Optional dual domain signature.
         if dp := os.Getenv("GAUTH_ATTEST_DOMAIN_PREFIX"); dp != "" && len(sigBytes) > 0 {
@@ -123,7 +127,7 @@ func (s *AttestationService) NotarizeAndSignModelLimits(unsignedJSON []byte, sna
     primarySig := ed25519.Sign(active.Private, primaryMsg)
     res.Signature = base64.RawStdEncoding.EncodeToString(primarySig)
     res.SigKid = active.ID
-    res.SigMode = "eddsa"
+    res.SigMode = sigModeEdDSA
     if dp := os.Getenv("GAUTH_ATTEST_DOMAIN_PREFIX"); dp != "" {
         dualMsg := append([]byte(dp), unsignedJSON...)
         dsig := ed25519.Sign(active.Private, dualMsg)

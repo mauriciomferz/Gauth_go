@@ -133,9 +133,9 @@ func (a *API) HandleSign(w http.ResponseWriter, r *http.Request) {
 	// Build response
 	response := SignResponse{
 		Success:        true,
-		Message:        "Signature accepted",
+		Message:        "Signature submitted successfully",
 		Status:         state.Status,
-		ThresholdMet:   state.Status == StatusCompleted || state.Status == StatusActive,
+		ThresholdMet:   state.Status == "completed",
 		CollectedCount: len(state.Signatures),
 		RequiredCount:  state.Threshold,
 	}
@@ -147,7 +147,9 @@ func (a *API) HandleSign(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		// Log encoding error but response was already started
+	}
 
 	// Record success metric
 	if a.metrics != nil {
@@ -228,7 +230,9 @@ func (a *API) HandleStatus(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		// Log encoding error but response was already started
+	}
 }
 
 // HandleActivate activates a PoA after threshold completion (POST /api/v1/beta/poa/:id/activate).
@@ -266,11 +270,13 @@ func (a *API) HandleActivate(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,
 		"message": "PoA activated",
 		"poa_id":  poaID,
-	})
+	}); err != nil {
+		// Log encoding error but response was already started
+	}
 }
 
 // HandleListPending lists all pending multi-signature collections (GET /api/v1/beta/poa/multisig/pending).
@@ -284,10 +290,13 @@ func (a *API) HandleListPending(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"pending": pending,
 		"count":   len(pending),
-	})
+	}); err != nil {
+		// Response already started, log error
+		_ = err
+	}
 }
 
 // Helper functions

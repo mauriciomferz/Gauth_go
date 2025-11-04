@@ -96,13 +96,13 @@ func (si *ServerIntegration) EnforceAICapabilities(action string, claims map[str
 		
 		// Entity-type specific metrics
 		si.metricsCallback(fmt.Sprintf("ai_%s_requests", strings.ToLower(string(profile.EntityType))))
-		if decision.Decision == "deny" {
+		if decision.Decision == DecisionDeny {
 			si.metricsCallback(fmt.Sprintf("ai_%s_denied", strings.ToLower(string(profile.EntityType))))
 		}
 	}
 	
 	// Handle decision
-	if decision.Decision == "allow" {
+	if decision.Decision == DecisionAllow {
 		return true, nil, metadata
 	} else {
 		// Return missing capabilities for standard capability system integration

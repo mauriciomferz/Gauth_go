@@ -25,6 +25,12 @@ const (
 	AIEntityAutomation AIEntityType = "automation"  // Process automation AI
 )
 
+// Decision constants for capability evaluation
+const (
+	DecisionAllow = "allow"
+	DecisionDeny  = "deny"
+)
+
 // AISystemProfile contains metadata about an AI system for governance decisions
 type AISystemProfile struct {
 	EntityType      AIEntityType `json:"entity_type"`
@@ -398,7 +404,7 @@ func (m *AICapabilityMatrix) EnforceAICapabilities(profile AISystemProfile, acti
 		SystemProfile:   profile,
 		RequestedAction: action,
 		ProvidedClaims:  claims,
-		Decision:        "deny", // Default to deny
+		Decision:        DecisionDeny, // Default to deny
 		Timestamp:       time.Now(),
 		DecisionID:      fmt.Sprintf("ai-decision-%d", time.Now().UnixNano()),
 	}
@@ -412,7 +418,7 @@ func (m *AICapabilityMatrix) EnforceAICapabilities(profile AISystemProfile, acti
 	
 	// If enforcement is disabled, allow with audit
 	if !m.enforcementActive {
-		decision.Decision = "allow"
+		decision.Decision = DecisionAllow
 		decision.Reason = "AI capability enforcement disabled"
 		decision.AuditLevel = "basic"
 		return decision
@@ -484,7 +490,7 @@ func (m *AICapabilityMatrix) EnforceAICapabilities(profile AISystemProfile, acti
 	}
 	
 	// All checks passed - allow the action
-	decision.Decision = "allow"
+	decision.Decision = DecisionAllow
 	decision.Reason = "AI capability enforcement checks passed"
 	
 	return decision
