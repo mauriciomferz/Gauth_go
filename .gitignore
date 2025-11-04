@@ -92,6 +92,10 @@ benchmarks/
 # Test artifacts
 testdata/
 gauth-demo-app/web/backend/test-build
+test/tmp/
+test_results.txt
+internal/crypto/test_recovery.json
+web/test_ext_anchor_receipts.json
 
 # macOS system files
 .DS_Store
@@ -131,7 +135,11 @@ gauth-enhanced-*
 gauth-rfc111-*
 # Ignore built server binaries but not source directories
 bin/*-server
+bin/web-server-new
 build/*-server
 *-backend
 *-demo
 .trunk/
+
+# Documentation artifacts
+CSP_FIXES.md
