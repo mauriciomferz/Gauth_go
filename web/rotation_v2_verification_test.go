@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"testing"
 
 	notary "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
@@ -42,7 +43,8 @@ func TestRotationV2VerifiedWeightSuccess(t *testing.T) {
 	// Use full server initialization so route wiring matches production: /api/v1/beta/rotations/summary/v2
 	srv := NewBetaServerWithMetrics("", nil)
 	// Provide a rotation ledger with dummy entries to satisfy endpoint preconditions
-	srv.rotationLedger = notary.NewRotationLedger("")
+	ledgerPath := filepath.Join(t.TempDir(), "rotation_ledger.json")
+	srv.rotationLedger = notary.NewRotationLedger(ledgerPath)
 	if _, err := srv.rotationLedger.AppendDescriptor(&notary.KeyRotationDescriptor{OldKeyID: "a", NewKeyID: "b"}); err != nil {
 		t.Fatalf("AppendDescriptor failed: %v", err)
 	}
@@ -74,7 +76,8 @@ func TestRotationV2ThresholdUnsatisfied(t *testing.T) {
 	os.Unsetenv("GAUTH_ROTATIONS_V2_ED25519_KEYS")
 	installTestKey(t, "k1") // single key -> verified weight 2 < threshold 3
 	srv := NewBetaServerWithMetrics("", nil)
-	srv.rotationLedger = notary.NewRotationLedger("")
+	ledgerPath := filepath.Join(t.TempDir(), "rotation_ledger.json")
+	srv.rotationLedger = notary.NewRotationLedger(ledgerPath)
 	if _, err := srv.rotationLedger.AppendDescriptor(&notary.KeyRotationDescriptor{OldKeyID: "a", NewKeyID: "b"}); err != nil {
 		t.Fatalf("AppendDescriptor failed: %v", err)
 	}
