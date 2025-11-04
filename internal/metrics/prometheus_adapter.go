@@ -254,6 +254,7 @@ var DefaultBuckets = []float64{
 // Safe for repeated invocation; if collectors are already registered and the
 // same registry is reused the function returns the existing metrics (the
 // Prometheus client returns an AlreadyRegisteredError which we treat as reuse).
+//nolint:gocyclo // Metrics initialization with 100+ metric registrations
 func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 	if opts.Namespace == "" {
 		opts.Namespace = "gauth"

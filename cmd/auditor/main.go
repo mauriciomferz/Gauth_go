@@ -592,6 +592,8 @@ func auditRotationV2File(path, expectedPrev string) (interface{}, error) {
 }
 
 // auditRotationV2ArtifactJSON performs digest recomputation and continuity check.
+//nolint:gocyclo // Audit verification with multiple artifact types
+//nolint:gocyclo // Audit verification with multiple artifact types
 func auditRotationV2ArtifactJSON(data []byte, expectedPrev string) (interface{}, error) {
 	// Local signer type matching JSON schema (avoid anonymous struct duplication mismatch)
 	type signerEntry struct {

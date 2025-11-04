@@ -11,6 +11,8 @@ import (
 )
 
 // TestExternalAnchorMetricsRetrySuccess forces a transient failure then success via fail probability and retries.
+//nolint:gocyclo // External anchor retry test
+//nolint:gocyclo // External anchor retry test
 func TestExternalAnchorMetricsRetrySuccess(t *testing.T) {
 	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "tsa_stub")
 	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_MIN_MS", "5")

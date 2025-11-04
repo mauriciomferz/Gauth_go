@@ -10,6 +10,8 @@ import (
 )
 
 // TestCapabilityPersistenceAndReload verifies loading from file and reload behavior, including provenance fields.
+//nolint:gocyclo // Capability persistence test
+//nolint:gocyclo // Capability persistence test
 func TestCapabilityPersistenceAndReload(t *testing.T) {
 	// Write a temporary capabilities file
 	tmp, err := os.CreateTemp(t.TempDir(), "caps-*.json")

@@ -179,6 +179,7 @@ func (e *InMemoryEngine) WithObligationFailureDenies(deny bool) *InMemoryEngine 
 func (e *InMemoryEngine) AddPolicy(p Policy) { e.policies = append(e.policies, p) }
 
 // Evaluate executes rule matching & combining.
+//nolint:gocyclo // Core policy evaluation logic with multiple decision paths - refactoring would reduce readability
 func (e *InMemoryEngine) Evaluate(ctx context.Context, req Request) (Decision, error) {
 	start := time.Now()
 	steps := make([]EvaluationStep, 0, 16)

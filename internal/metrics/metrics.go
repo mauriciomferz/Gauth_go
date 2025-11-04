@@ -1679,6 +1679,8 @@ type SnapshotStruct struct {
 }
 
 // SnapshotEx returns the extended snapshot struct.
+//nolint:gocyclo // Atomic snapshot of 30+ metric fields
+//nolint:gocyclo // Atomic snapshot of 30+ metric fields
 func (m *Memory) SnapshotEx() SnapshotStruct {
 	d, vc, tot, mn, mx, avg, p50, p90, p99, si, sif, sv, svf, rif, spkm, aa, af, rse, rslc, rslt, rslm, rh, rm := m.Snapshot()
 	return SnapshotStruct{

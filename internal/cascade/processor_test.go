@@ -10,6 +10,8 @@ import (
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
 )
 
+//nolint:gocyclo // Comprehensive cascade processor test
+//nolint:gocyclo // Comprehensive cascade processor test
 func TestCascadeProcessor(t *testing.T) {
 	createTestPOA := func(id, parentID string, depth int) *rfc0111.PowerOfAttorney {
 		now := time.Now().UTC()

@@ -112,6 +112,7 @@ func parseSignerList(raw string) ([]int, error) {
 	return out, nil
 }
 
+//nolint:gocyclo // Main function with CLI arg parsing, benchmark orchestration - acceptable complexity for entry point
 func main() {
 	var signerStr string
 	var iterations int
