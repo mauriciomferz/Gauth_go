@@ -762,6 +762,7 @@ type TokenVerificationResult struct {
 	RevocationChain string            `json:"revocation_chain_tip,omitempty"`
 	Expired         bool              `json:"expired"`
 	Revoked         bool              `json:"revoked"`
+	Suspended       bool              `json:"suspended"`
 	SignatureValid  bool              `json:"signature_valid"`
 	PublicKeyFound  bool              `json:"public_key_found"`
 	// RawPOA exposes the embedded canonical PoA JSON when present (EnvelopeV2 with GAUTH_EMBED_FULL_POA enabled and within size cap).
@@ -1026,6 +1027,13 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 	}
 	if poa.Status == POAStatusRevoked {
 		res.Revoked = true
+	}
+	if poa.Status == POAStatusSuspended {
+		res.Suspended = true
+		if s.metrics != nil {
+			s.metrics.IncDelegationStatusTransitionFailures() // Reuse existing metric for suspended rejections
+		}
+		return nil, rfc.New(rfc.ErrUnauthorized, "delegation is suspended")
 	}
 	// Authenticity verification (shared helper)
 	if poa.Signature != nil {
@@ -2783,6 +2791,306 @@ func (s *Service) RevokeDelegationCtx(ctx context.Context, poaID, revoker string
 	}
 
 	return nil
+}
+
+// SuspendDelegation temporarily suspends an active delegation (can be resumed later).
+// Only transitions active -> suspended are allowed. Returns error for invalid transitions.
+func (s *Service) SuspendDelegation(ctx context.Context, poaID, actor, reason string) error {
+	poa, exists := s.repo.Get(poaID)
+	if !exists || poa == nil {
+		return rfc.New(rfc.ErrNotFound, poaID)
+	}
+
+	// Only grantor can suspend
+	if poa.Grantor != actor {
+		return rfc.New(rfc.ErrUnauthorized, fmt.Sprintf("only grantor can suspend: grantor=%s actor=%s", poa.Grantor, actor))
+	}
+
+	// Check current status - only active can be suspended
+	if poa.Status != POAStatusActive {
+		return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("cannot suspend delegation in status %s (must be active)", poa.Status))
+	}
+
+	// Check authorization
+	authReq := authz.Request{
+		Subject:  actor,
+		Action:   "suspend_delegation",
+		Resource: poaID,
+		Context:  map[string]string{"grantee": poa.Grantee},
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	decision, err := s.authz.Authorize(ctx, authReq)
+	if err != nil {
+		return rfc.New(rfc.ErrInternal, fmt.Sprintf("authorization failed: %v", err))
+	}
+	if !decision.Allow {
+		return rfc.New(rfc.ErrUnauthorized, decision.Reason)
+	}
+
+	// Suspend POA
+	poa.Status = POAStatusSuspended
+	poa.UpdatedAt = s.nowFn()
+	if err := s.repo.Update(poa); err != nil {
+		return rfc.New(rfc.ErrInternal, fmt.Sprintf("update failed: %v", err))
+	}
+
+	// Audit log
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	event := audit.NewEvent(audit.TypeAuth, "suspend_delegation", audit.ResultSuccess)
+	event.Subject = actor
+	event.Object = poaID
+	if event.Metadata == nil {
+		event.Metadata = map[string]interface{}{}
+	}
+	event.Metadata["grantee"] = poa.Grantee
+	event.Metadata["reason"] = reason
+	event.Metadata["prev_status"] = string(POAStatusActive)
+	if err := s.audit.Log(ctx, event); err != nil {
+		return rfc.New(rfc.ErrInternal, fmt.Sprintf("audit log failed: %v", err))
+	}
+	s.sendToAuditSink(ctx, event)
+
+	// Ledger append
+	if s.ledger != nil {
+		_ = s.ledger.Append(ctx, &ledger.Entry{
+			ID:       fmt.Sprintf("led_suspend_%s", poa.ID),
+			TS:       s.nowFn(),
+			Type:     "delegation_suspension",
+			Subject:  actor,
+			Object:   poa.ID,
+			Metadata: map[string]interface{}{"grantee": poa.Grantee, "reason": reason},
+		})
+	}
+
+	return nil
+}
+
+// ResumeDelegation reactivates a suspended delegation.
+// Only transitions suspended -> active are allowed. Returns error for invalid transitions.
+func (s *Service) ResumeDelegation(ctx context.Context, poaID, actor string) error {
+	poa, exists := s.repo.Get(poaID)
+	if !exists || poa == nil {
+		return rfc.New(rfc.ErrNotFound, poaID)
+	}
+
+	// Only grantor can resume
+	if poa.Grantor != actor {
+		return rfc.New(rfc.ErrUnauthorized, fmt.Sprintf("only grantor can resume: grantor=%s actor=%s", poa.Grantor, actor))
+	}
+
+	// Check current status - only suspended can be resumed
+	if poa.Status != POAStatusSuspended {
+		return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("cannot resume delegation in status %s (must be suspended)", poa.Status))
+	}
+
+	// Check authorization
+	authReq := authz.Request{
+		Subject:  actor,
+		Action:   "resume_delegation",
+		Resource: poaID,
+		Context:  map[string]string{"grantee": poa.Grantee},
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	decision, err := s.authz.Authorize(ctx, authReq)
+	if err != nil {
+		return rfc.New(rfc.ErrInternal, fmt.Sprintf("authorization failed: %v", err))
+	}
+	if !decision.Allow {
+		return rfc.New(rfc.ErrUnauthorized, decision.Reason)
+	}
+
+	// Resume POA
+	poa.Status = POAStatusActive
+	poa.UpdatedAt = s.nowFn()
+	if err := s.repo.Update(poa); err != nil {
+		return rfc.New(rfc.ErrInternal, fmt.Sprintf("update failed: %v", err))
+	}
+
+	// Audit log
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	event := audit.NewEvent(audit.TypeAuth, "resume_delegation", audit.ResultSuccess)
+	event.Subject = actor
+	event.Object = poaID
+	if event.Metadata == nil {
+		event.Metadata = map[string]interface{}{}
+	}
+	event.Metadata["grantee"] = poa.Grantee
+	event.Metadata["prev_status"] = string(POAStatusSuspended)
+	if err := s.audit.Log(ctx, event); err != nil {
+		return rfc.New(rfc.ErrInternal, fmt.Sprintf("audit log failed: %v", err))
+	}
+	s.sendToAuditSink(ctx, event)
+
+	// Ledger append
+	if s.ledger != nil {
+		_ = s.ledger.Append(ctx, &ledger.Entry{
+			ID:       fmt.Sprintf("led_resume_%s", poa.ID),
+			TS:       s.nowFn(),
+			Type:     "delegation_resumption",
+			Subject:  actor,
+			Object:   poa.ID,
+			Metadata: map[string]interface{}{"grantee": poa.Grantee},
+		})
+	}
+
+	return nil
+}
+
+// ScopeUpdate records a scope reduction event for audit trail.
+type ScopeUpdate struct {
+	Timestamp time.Time `json:"timestamp"`
+	Actor     string    `json:"actor"`
+	PrevScope []string  `json:"prev_scope"`
+	NewScope  []string  `json:"new_scope"`
+	Reason    string    `json:"reason,omitempty"`
+}
+
+// UpdateDelegationScope performs partial revocation by reducing the scope of an active/suspended delegation.
+// New scope must be a non-empty subset of current scope. Tracks history in ScopeHistory field.
+func (s *Service) UpdateDelegationScope(ctx context.Context, poaID, actor string, newScope []string, reason string) error {
+	poa, exists := s.repo.Get(poaID)
+	if !exists || poa == nil {
+		return rfc.New(rfc.ErrNotFound, poaID)
+	}
+
+	// Only grantor can update scope
+	if poa.Grantor != actor {
+		return rfc.New(rfc.ErrUnauthorized, fmt.Sprintf("only grantor can update scope: grantor=%s actor=%s", poa.Grantor, actor))
+	}
+
+	// Can only update scope for active or suspended delegations
+	if poa.Status != POAStatusActive && poa.Status != POAStatusSuspended {
+		return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("cannot update scope in status %s (must be active or suspended)", poa.Status))
+	}
+
+	// Validate new scope is non-empty
+	if len(newScope) == 0 {
+		return rfc.New(rfc.ErrInvalidRequest, "new scope cannot be empty (use revocation to remove all permissions)")
+	}
+
+	// Validate new scope is subset of current scope
+	currentScopeSet := make(map[string]bool)
+	for _, s := range poa.Scope {
+		currentScopeSet[s] = true
+	}
+	for _, s := range newScope {
+		if !currentScopeSet[s] {
+			return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("new scope contains permission not in current scope: %s", s))
+		}
+	}
+
+	// Check if scope actually changed
+	if scopesEqual(poa.Scope, newScope) {
+		return rfc.New(rfc.ErrInvalidRequest, "new scope is identical to current scope")
+	}
+
+	// Check authorization
+	authReq := authz.Request{
+		Subject:  actor,
+		Action:   "update_delegation_scope",
+		Resource: poaID,
+		Context:  map[string]string{"grantee": poa.Grantee},
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	decision, err := s.authz.Authorize(ctx, authReq)
+	if err != nil {
+		return rfc.New(rfc.ErrInternal, fmt.Sprintf("authorization failed: %v", err))
+	}
+	if !decision.Allow {
+		return rfc.New(rfc.ErrUnauthorized, decision.Reason)
+	}
+
+	// Record scope history (store in Restrictions map for backward compatibility)
+	update := ScopeUpdate{
+		Timestamp: s.nowFn(),
+		Actor:     actor,
+		PrevScope: poa.Scope,
+		NewScope:  newScope,
+		Reason:    reason,
+	}
+	if poa.Restrictions == nil {
+		poa.Restrictions = make(map[string]string)
+	}
+	historyJSON, _ := json.Marshal([]ScopeUpdate{update})
+	if existing, ok := poa.Restrictions["__scope_history"]; ok {
+		var history []ScopeUpdate
+		_ = json.Unmarshal([]byte(existing), &history)
+		history = append(history, update)
+		historyJSON, _ = json.Marshal(history)
+	}
+	poa.Restrictions["__scope_history"] = string(historyJSON)
+
+	// Update scope
+	poa.Scope = newScope
+	poa.UpdatedAt = s.nowFn()
+	if err := s.repo.Update(poa); err != nil {
+		return rfc.New(rfc.ErrInternal, fmt.Sprintf("update failed: %v", err))
+	}
+
+	// Audit log
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	event := audit.NewEvent(audit.TypeAuth, "update_delegation_scope", audit.ResultSuccess)
+	event.Subject = actor
+	event.Object = poaID
+	if event.Metadata == nil {
+		event.Metadata = map[string]interface{}{}
+	}
+	event.Metadata["grantee"] = poa.Grantee
+	event.Metadata["prev_scope"] = update.PrevScope
+	event.Metadata["new_scope"] = newScope
+	event.Metadata["reason"] = reason
+	if err := s.audit.Log(ctx, event); err != nil {
+		return rfc.New(rfc.ErrInternal, fmt.Sprintf("audit log failed: %v", err))
+	}
+	s.sendToAuditSink(ctx, event)
+
+	// Ledger append
+	if s.ledger != nil {
+		_ = s.ledger.Append(ctx, &ledger.Entry{
+			ID:      fmt.Sprintf("led_scope_%s", poa.ID),
+			TS:      s.nowFn(),
+			Type:    "delegation_scope_reduction",
+			Subject: actor,
+			Object:  poa.ID,
+			Metadata: map[string]interface{}{
+				"grantee":    poa.Grantee,
+				"prev_scope": update.PrevScope,
+				"new_scope":  newScope,
+				"reason":     reason,
+			},
+		})
+	}
+
+	return nil
+}
+
+// scopesEqual checks if two scope slices contain the same elements (order-independent).
+func scopesEqual(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	setA := make(map[string]bool)
+	for _, s := range a {
+		setA[s] = true
+	}
+	for _, s := range b {
+		if !setA[s] {
+			return false
+		}
+	}
+	return true
 }
 
 // ErrCanceled is exposed for callers to compare error values (mirrors context.Canceled without dependency leakage in tests if wrapped).

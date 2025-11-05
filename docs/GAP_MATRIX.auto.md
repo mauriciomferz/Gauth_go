@@ -1,8 +1,8 @@
 # GAuth RFC Gap Matrix (Generated)
 
-> Generated: 2025-11-05T19:00:00Z
+> Generated: 2025-11-05T23:45:00Z
 
-**Status Summary:** Implemented=25 | Partial=12 | Missing=7 | Conceptual=0 | Total=44
+**Status Summary:** Implemented=26 | Partial=12 | Missing=6 | Conceptual=0 | Total=44
 
 ## Capability Snapshot
 
@@ -111,7 +111,7 @@ Schema Version: 1
 
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|
-| sec12.item1 | Suspension / partial revocation | Missing | P2 | Only revoked/expired statuses | docs/GAP_MATRIX.md:96 |
+| sec12.item1 | Suspension / partial revocation | Implemented | P2 | **COMPLETED**: Comprehensive suspension lifecycle management with SuspendDelegation (pause active delegations with reason), ResumeDelegation (reactivate suspended delegations), UpdateDelegationScope (partial revocation via scope reduction with subset validation, no widening); status lifecycle Active ↔ Suspended (reversible) → Partially Revoked → Terminated (one-way); VerifyToken integration (suspended delegations rejected automatically); scope history tracking (immutable audit trail of all scope changes with timestamp, actor, prev_scope, new_scope, reason); audit trail integration (all operations logged with reason/metadata); comprehensive test coverage (11/11 tests passing: success cases, invalid status transitions, unauthorized access, scope validation, scope history, suspended delegation handling) | pkg/rfc0111/rfc0111.go (SuspendDelegation lines 2793-2860, ResumeDelegation lines 2862-2923, UpdateDelegationScope lines 2925-3050, TokenVerificationResult.Suspended field line 766, VerifyToken suspended check lines 1028-1031)\|pkg/rfc0111/suspension_test.go (11 tests, 440+ lines)\|docs/SUSPENSION_PARTIAL_REVOCATION.md |
 | sec12.item2 | Delegation chaining depth limits | Implemented | P2 | Dynamic env-based depth enforcement (GAUTH_MAX_DELEGATION_DEPTH) with metrics tracking; missing multi-tenant depth policies & depth audit trail | test/delegation_depth_limit_test.go\|pkg/delegation/delegation.go\|web/discovery_endpoint.go |
 
 ## Data Hygiene & Validation
@@ -204,6 +204,19 @@ Schema Version: 1
    - 14/14 tests passing including stress test (100 PoAs) and concurrent access
    - Complete SEMANTIC_POA_VALIDATION.md with migration guide
 
+10. **Delegation Suspension & Partial Revocation (sec12.item1)**: Upgraded from Missing to **Implemented**
+    - Comprehensive suspension lifecycle management with 3 core methods:
+      1. SuspendDelegation (pause active delegations with reason, reversible)
+      2. ResumeDelegation (reactivate suspended delegations to active)
+      3. UpdateDelegationScope (partial revocation via scope reduction, subset validation, no widening)
+    - Status lifecycle: Active ↔ Suspended (reversible) → Partially Revoked → Terminated (one-way)
+    - VerifyToken integration: Suspended delegations rejected automatically (TokenVerificationResult.Suspended field)
+    - Scope history tracking: Immutable audit trail of all scope changes (timestamp, actor, prev_scope, new_scope, reason)
+    - Authorization: Grantor-only operations with authz framework integration
+    - Audit trail: All operations logged with reason/metadata (suspend_delegation, resume_delegation, update_delegation_scope events)
+    - Comprehensive test coverage: 11/11 tests passing (success cases, invalid status transitions, unauthorized access, scope validation, scope history)
+    - Complete documentation: SUSPENSION_PARTIAL_REVOCATION.md with API reference, usage examples, migration guide
+
 ### Priority Focus Areas
 
 **P0 Critical Gaps (ALL COMPLETE ✅)**:
@@ -222,7 +235,7 @@ Schema Version: 1
 - sec2.item5: Distributed PDP with cache invalidation
 - sec5.item2: Delegation storage indexing and pruning policies
 - sec6.item3: Replay persistence with WAL snapshot recovery
-- sec12.item1: Suspension and partial revocation status support
+- ✅ sec12.item1: Suspension and partial revocation status support - **COMPLETED**
 
 **P3 Low Priority (Future Enhancements):**
 - sec7.item2: Metrics collector registration framework
