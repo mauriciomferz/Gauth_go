@@ -90,7 +90,7 @@ Schema Version: 1
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|
 | sec9.item1 | Clause-to-test mapping | Partial | P0 | Harness maps 8 mapped clause entries (100% of declared set); broader RFC sections still unmapped | docs/GAP_MATRIX.md:76\|conformance/clause_map.json\|report.md |
-| sec9.item2 | Fuzzing / property tests | Partial | P1 | Canonical digest covered; parsing & semantic validators still lack property tests | docs/GAP_MATRIX.md:77\|pkg/rfc0111/canonical_prop_test.go\|pkg/rfc0111/canonical_fuzz_test.go |
+| sec9.item2 | Fuzzing / property tests | Partial | P1 | Parsing property tests implemented (5/6 tests passing, 2700+ iterations: round-trip encoding, idempotence, error preservation, claim extraction, null handling); existing tests (canonical digest determinism, lightweight property test 300 iterations, fuzz tests); semantic validator property tests remain future work | pkg/gauth/gauth_parsing_prop_test.go (6 tests)\|pkg/gauth/gauth_prop_test.go\|pkg/rfc0111/canonical_prop_test.go\|pkg/rfc0111/canonical_fuzz_test.go\|pkg/gauth/gauth_fuzz_test.go\|docs/PROPERTY_TESTING.md |
 | sec9.item3 | Load/stress benchmarks | Missing | P2 | No high-load harness | docs/GAP_MATRIX.md:78 |
 
 ## Interoperability / External Interfaces
