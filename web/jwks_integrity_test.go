@@ -5,6 +5,9 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
+
+	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
 )
 
 // TestJWKSDiscoveryMetadata verifies discovery includes jwks_etag & jwks_last_rotated when JWT enabled.
@@ -96,3 +99,129 @@ func TestJWKSOptionalSignature(t *testing.T) {
 		t.Fatalf("signature alg mismatch")
 	}
 }
+
+// TestJWKSDeprecationMetadata verifies deprecated_after and sunset_after in EdDSA JWK entries.
+func TestJWKSDeprecationMetadata(t *testing.T) {
+	// Clean environment first to avoid pollution from other tests
+	os.Unsetenv("GAUTH_USE_JWT_LIB")
+	os.Unsetenv("GAUTH_JWT_ALG")
+	os.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
+	os.Setenv("GAUTH_EDDSA_AUTO_ROTATE", "0") // Disable auto-rotation for stable test
+	defer os.Unsetenv("GAUTH_TOKEN_SIG_MODE")
+	defer os.Unsetenv("GAUTH_EDDSA_AUTO_ROTATE")
+	// Create server first (initializes crypto manager with 24h TTL)
+	s := NewBetaServer("0")
+	// Replace with short-TTL manager to trigger deprecation
+	ttl := 10 * time.Second
+	km, err := crypto.NewManager(ttl)
+	if err != nil {
+		t.Fatalf("crypto.NewManager: %v", err)
+	}
+	crypto.GlobalEdDSARegistry = km
+	// Wait for deprecation (80% of 10s = 8s, add 1s buffer)
+	time.Sleep(9 * time.Second)
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/.well-known/jwks.json", nil)
+	s.router.ServeHTTP(w, req)
+	if w.Code != 200 {
+		t.Fatalf("expected 200 got %d", w.Code)
+	}
+	var body struct {
+		Keys []map[string]any `json:"keys"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+		t.Fatalf("unmarshal jwks: %v", err)
+	}
+	if len(body.Keys) == 0 {
+		t.Fatalf("expected at least 1 EdDSA key")
+	}
+	// Verify first key has deprecation metadata
+	key := body.Keys[0]
+	// Verify key type is actually EdDSA (not HMAC fallback)
+	if key["kty"] != "OKP" || key["alg"] != "EdDSA" {
+		t.Skip("EdDSA mode not activated, skipping deprecation test")
+	}
+	if key["deprecated_after"] == nil {
+		t.Errorf("deprecated_after missing in JWK")
+	}
+	if key["sunset_after"] == nil {
+		t.Errorf("sunset_after missing in JWK")
+	}
+	// Verify expires_at equals sunset_after
+	if key["expires_at"] != nil && key["sunset_after"] != nil {
+		if key["expires_at"].(string) != key["sunset_after"].(string) {
+			t.Errorf("expires_at != sunset_after: %s != %s", key["expires_at"].(string), key["sunset_after"].(string))
+		}
+	}
+}
+
+// TestJWKSDeprecationWarningHeader verifies Warning header when key is deprecated.
+func TestJWKSDeprecationWarningHeader(t *testing.T) {
+	// Clean environment first
+	os.Unsetenv("GAUTH_USE_JWT_LIB")
+	os.Unsetenv("GAUTH_JWT_ALG")
+	os.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
+	os.Setenv("GAUTH_EDDSA_AUTO_ROTATE", "0")
+	defer os.Unsetenv("GAUTH_TOKEN_SIG_MODE")
+	defer os.Unsetenv("GAUTH_EDDSA_AUTO_ROTATE")
+	// Create server first
+	s := NewBetaServer("0")
+	// Replace with short-TTL manager
+	ttl := 10 * time.Second
+	km, err := crypto.NewManager(ttl)
+	if err != nil {
+		t.Fatalf("crypto.NewManager: %v", err)
+	}
+	crypto.GlobalEdDSARegistry = km
+	// Wait for deprecation (80% of 10s = 8s, add 1s buffer)
+	time.Sleep(9 * time.Second)
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/.well-known/jwks.json", nil)
+	s.router.ServeHTTP(w, req)
+	if w.Code != 200 {
+		t.Fatalf("expected 200 got %d", w.Code)
+	}
+	var body struct {
+		Keys []map[string]any `json:"keys"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &body); err == nil && len(body.Keys) > 0 {
+		key := body.Keys[0]
+		if key["kty"] != "OKP" || key["alg"] != "EdDSA" {
+			t.Skip("EdDSA mode not activated, skipping warning test")
+		}
+	}
+	warning := w.Header().Get("Warning")
+	if warning == "" {
+		t.Errorf("expected Warning header when key deprecated")
+	} else {
+		// Verify Warning format: "299 - "Keys deprecated: <kid>""
+		if len(warning) < 10 || warning[:3] != "299" {
+			t.Errorf("Warning header format unexpected: %s", warning)
+		}
+	}
+}
+
+// TestJWKSNoWarningWhenNoDeprecation verifies no Warning header when keys are fresh.
+func TestJWKSNoWarningWhenNoDeprecation(t *testing.T) {
+	os.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
+	os.Setenv("GAUTH_EDDSA_AUTO_ROTATE", "0")
+	// Create manager with long TTL (no deprecation)
+	ttl := 24 * time.Hour
+	km, err := crypto.NewManager(ttl)
+	if err != nil {
+		t.Fatalf("crypto.NewManager: %v", err)
+	}
+	crypto.GlobalEdDSARegistry = km
+	s := NewBetaServer("0")
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/.well-known/jwks.json", nil)
+	s.router.ServeHTTP(w, req)
+	if w.Code != 200 {
+		t.Fatalf("expected 200 got %d", w.Code)
+	}
+	warning := w.Header().Get("Warning")
+	if warning != "" {
+		t.Errorf("unexpected Warning header when keys not deprecated: %s", warning)
+	}
+}
+

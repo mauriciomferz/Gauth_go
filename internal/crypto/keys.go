@@ -26,13 +26,15 @@ import (
 
 // Key represents a signing key (Ed25519) with metadata.
 type Key struct {
-	ID        string             `json:"kid"`
-	CreatedAt time.Time          `json:"created_at"`
-	ExpiresAt time.Time          `json:"expires_at"`
-	Private   ed25519.PrivateKey `json:"-"`
-	Public    ed25519.PublicKey  `json:"public"`
-	Alg       string             `json:"alg"` // EdDSA
-	Use       string             `json:"use"` // sig
+	ID             string             `json:"kid"`
+	CreatedAt      time.Time          `json:"created_at"`
+	ExpiresAt      time.Time          `json:"expires_at"`
+	DeprecatedAfter time.Time         `json:"deprecated_after,omitempty"` // RFC0115 deprecation warning timestamp (recommended: 80% of TTL)
+	SunsetAfter    time.Time          `json:"sunset_after,omitempty"`     // RFC0115 hard cutoff timestamp (same as ExpiresAt)
+	Private        ed25519.PrivateKey `json:"-"`
+	Public         ed25519.PublicKey  `json:"public"`
+	Alg            string             `json:"alg"` // EdDSA
+	Use            string             `json:"use"` // sig
 }
 
 // Manager manages active + previous keys (simple in-memory rotation).
@@ -151,7 +153,19 @@ func (m *Manager) rotateLocked() error {
 	}
 	now := time.Now().UTC()
 	id := base64.RawURLEncoding.EncodeToString(pub[:8]) // short kid derivation (placeholder)
-	k := &Key{ID: id, CreatedAt: now, ExpiresAt: now.Add(m.ttl), Private: priv, Public: pub, Alg: "EdDSA", Use: "sig"}
+	expiresAt := now.Add(m.ttl)
+	deprecatedAfter := now.Add(time.Duration(float64(m.ttl) * 0.8)) // Deprecation warning at 80% of TTL
+	k := &Key{
+		ID:              id,
+		CreatedAt:       now,
+		ExpiresAt:       expiresAt,
+		DeprecatedAfter: deprecatedAfter,
+		SunsetAfter:     expiresAt, // Sunset = hard expiration
+		Private:         priv,
+		Public:          pub,
+		Alg:             "EdDSA",
+		Use:             "sig",
+	}
 	prev := m.active
 	if prev != nil {
 		m.history = append(m.history, prev)
@@ -448,7 +462,22 @@ func (m *Manager) ImportPublic(kid string, pub []byte, expires time.Time) {
 	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	k := &Key{ID: kid, CreatedAt: time.Now().UTC(), ExpiresAt: expires, Public: ed25519.PublicKey(pub), Alg: "EdDSA", Use: "sig"}
+	now := time.Now().UTC()
+	ttl := expires.Sub(now)
+	deprecatedAfter := now.Add(time.Duration(float64(ttl) * 0.8))
+	if deprecatedAfter.After(expires) {
+		deprecatedAfter = expires // Safety: ensure deprecation <= expiration
+	}
+	k := &Key{
+		ID:              kid,
+		CreatedAt:       now,
+		ExpiresAt:       expires,
+		DeprecatedAfter: deprecatedAfter,
+		SunsetAfter:     expires,
+		Public:          ed25519.PublicKey(pub),
+		Alg:             "EdDSA",
+		Use:             "sig",
+	}
 	// If no active set, assign active. Otherwise append to history for lookup.
 	if m.active == nil {
 		m.active = k
@@ -485,13 +514,15 @@ type persistenceRecord struct {
 	History  []*diskKey `json:"history"`
 }
 type diskKey struct {
-	ID         string `json:"kid"`
-	CreatedAt  string `json:"created_at"`
-	ExpiresAt  string `json:"expires_at"`
-	PrivateB64 string `json:"private_b64"`
-	PublicB64  string `json:"public_b64"`
-	Alg        string `json:"alg"`
-	Use        string `json:"use"`
+	ID              string `json:"kid"`
+	CreatedAt       string `json:"created_at"`
+	ExpiresAt       string `json:"expires_at"`
+	DeprecatedAfter string `json:"deprecated_after,omitempty"`
+	SunsetAfter     string `json:"sunset_after,omitempty"`
+	PrivateB64      string `json:"private_b64"`
+	PublicB64       string `json:"public_b64"`
+	Alg             string `json:"alg"`
+	Use             string `json:"use"`
 }
 
 // saveLocked writes current state to disk if persistPath set. Caller holds write lock.
@@ -501,10 +532,40 @@ func (m *Manager) saveLocked() error {
 	}
 	rec := persistenceRecord{TTLHours: int(m.ttl.Hours())}
 	if m.active != nil {
-		rec.Active = &diskKey{ID: m.active.ID, CreatedAt: m.active.CreatedAt.Format(time.RFC3339), ExpiresAt: m.active.ExpiresAt.Format(time.RFC3339), PrivateB64: base64.RawStdEncoding.EncodeToString(m.active.Private), PublicB64: base64.RawStdEncoding.EncodeToString(m.active.Public), Alg: m.active.Alg, Use: m.active.Use}
+		dk := &diskKey{
+			ID:         m.active.ID,
+			CreatedAt:  m.active.CreatedAt.Format(time.RFC3339),
+			ExpiresAt:  m.active.ExpiresAt.Format(time.RFC3339),
+			PrivateB64: base64.RawStdEncoding.EncodeToString(m.active.Private),
+			PublicB64:  base64.RawStdEncoding.EncodeToString(m.active.Public),
+			Alg:        m.active.Alg,
+			Use:        m.active.Use,
+		}
+		if !m.active.DeprecatedAfter.IsZero() {
+			dk.DeprecatedAfter = m.active.DeprecatedAfter.Format(time.RFC3339)
+		}
+		if !m.active.SunsetAfter.IsZero() {
+			dk.SunsetAfter = m.active.SunsetAfter.Format(time.RFC3339)
+		}
+		rec.Active = dk
 	}
 	for _, hk := range m.history {
-		rec.History = append(rec.History, &diskKey{ID: hk.ID, CreatedAt: hk.CreatedAt.Format(time.RFC3339), ExpiresAt: hk.ExpiresAt.Format(time.RFC3339), PrivateB64: base64.RawStdEncoding.EncodeToString(hk.Private), PublicB64: base64.RawStdEncoding.EncodeToString(hk.Public), Alg: hk.Alg, Use: hk.Use})
+		dk := &diskKey{
+			ID:         hk.ID,
+			CreatedAt:  hk.CreatedAt.Format(time.RFC3339),
+			ExpiresAt:  hk.ExpiresAt.Format(time.RFC3339),
+			PrivateB64: base64.RawStdEncoding.EncodeToString(hk.Private),
+			PublicB64:  base64.RawStdEncoding.EncodeToString(hk.Public),
+			Alg:        hk.Alg,
+			Use:        hk.Use,
+		}
+		if !hk.DeprecatedAfter.IsZero() {
+			dk.DeprecatedAfter = hk.DeprecatedAfter.Format(time.RFC3339)
+		}
+		if !hk.SunsetAfter.IsZero() {
+			dk.SunsetAfter = hk.SunsetAfter.Format(time.RFC3339)
+		}
+		rec.History = append(rec.History, dk)
 	}
 	data, err := json.MarshalIndent(rec, "", "  ")
 	if err != nil {
@@ -544,7 +605,27 @@ func (m *Manager) loadFromDisk() error {
 		if err != nil {
 			return nil, err
 		}
-		return &Key{ID: dk.ID, CreatedAt: created, ExpiresAt: expires, Private: ed25519.PrivateKey(privBytes), Public: ed25519.PublicKey(pubBytes), Alg: dk.Alg, Use: dk.Use}, nil
+		k := &Key{
+			ID:        dk.ID,
+			CreatedAt: created,
+			ExpiresAt: expires,
+			Private:   ed25519.PrivateKey(privBytes),
+			Public:    ed25519.PublicKey(pubBytes),
+			Alg:       dk.Alg,
+			Use:       dk.Use,
+		}
+		// Parse optional deprecation timestamps (backward compatible)
+		if dk.DeprecatedAfter != "" {
+			if deprecated, err := time.Parse(time.RFC3339, dk.DeprecatedAfter); err == nil {
+				k.DeprecatedAfter = deprecated
+			}
+		}
+		if dk.SunsetAfter != "" {
+			if sunset, err := time.Parse(time.RFC3339, dk.SunsetAfter); err == nil {
+				k.SunsetAfter = sunset
+			}
+		}
+		return k, nil
 	}
 	if rec.Active != nil {
 		ak, err := parseKey(rec.Active)

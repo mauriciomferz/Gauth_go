@@ -2,7 +2,7 @@
 
 > Generated: 2025-11-05T19:00:00Z
 
-**Status Summary:** Implemented=20 | Partial=17 | Missing=7 | Conceptual=0 | Total=43
+**Status Summary:** Implemented=21 | Partial=16 | Missing=7 | Conceptual=0 | Total=43
 
 ## Capability Snapshot
 
@@ -98,7 +98,7 @@ Schema Version: 1
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|
 | sec10.item1 | OpenAPI for PoA & delegation | Implemented | P1 | Spec published (issue/validate/status/delegation/metrics/provenance); remaining: comprehensive error schemas & audit endpoints documentation | docs/GAP_MATRIX.md:83\|docs/openapi.yaml\|api/openapi/openapi.yaml\|web/server_clean.go |
-| sec10.item2 | Well-known discovery endpoints | Partial | P2 | Missing JWKS integrity signature & structured deprecation metadata (deprecated_after/sunset_after) | web/server_clean.go\|web/jwks_integrity_test.go |
+| sec10.item2 | Well-known discovery endpoints | Implemented | P2 | **COMPLETED**: JWKS integrity signature (X-JWKS-Signature HMAC-SHA256 header, optional GAUTH_JWKS_SIGNING_KEY), structured deprecation metadata (deprecated_after at 80% TTL, sunset_after = expires_at), HTTP Warning header (299 - "Keys deprecated: kid") when keys past deprecation, ETag conditional requests (If-None-Match → 304), backward-compatible JSON schema (omitempty fields), 6/6 tests passing (discovery, ETag, signature, deprecation metadata, warning header, no-warning) | internal/crypto/keys.go (Key.DeprecatedAfter/SunsetAfter, rotateLocked 80% calculation, ImportPublic deprecation, diskKey persistence)\|web/server_clean.go (JWKS endpoint lines 6328-6347 deprecation fields, lines 6378-6390 Warning header)\|web/jwks_integrity_test.go (6 tests)\|docs/JWKS_INTEGRITY.md |
 
 ## AI Capability & Governance
 

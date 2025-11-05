@@ -6330,7 +6330,23 @@ func (s *BetaServer) routes() {
 		if mode == sigModeEdDSA {
 			if km := crypto.GlobalEdDSARegistry; km != nil {
 				for _, k := range km.ListCurrent() {
-					keys = append(keys, gin.H{"kty": "OKP", "crv": "Ed25519", "alg": "EdDSA", "kid": k.ID, "use": "sig", "x": base64.RawURLEncoding.EncodeToString(k.Public), "expires_at": k.ExpiresAt.Format(time.RFC3339)})
+					jwk := gin.H{
+						"kty":        "OKP",
+						"crv":        "Ed25519",
+						"alg":        "EdDSA",
+						"kid":        k.ID,
+						"use":        "sig",
+						"x":          base64.RawURLEncoding.EncodeToString(k.Public),
+						"expires_at": k.ExpiresAt.Format(time.RFC3339),
+					}
+					// RFC0115 deprecation metadata (structured key lifecycle signals)
+					if !k.DeprecatedAfter.IsZero() {
+						jwk["deprecated_after"] = k.DeprecatedAfter.Format(time.RFC3339)
+					}
+					if !k.SunsetAfter.IsZero() {
+						jwk["sunset_after"] = k.SunsetAfter.Format(time.RFC3339)
+					}
+					keys = append(keys, jwk)
 				}
 			}
 		}
@@ -6357,6 +6373,23 @@ func (s *BetaServer) routes() {
 		if inm := c.GetHeader("If-None-Match"); inm != "" && inm == etag {
 			c.Status(304)
 			return
+		}
+		// RFC0115 deprecation warning: Signal clients when keys are deprecated (past deprecated_after but before sunset_after)
+		if mode == sigModeEdDSA {
+			if km := crypto.GlobalEdDSARegistry; km != nil {
+				now := time.Now().UTC()
+				var deprecatedKids []string
+				for _, k := range km.ListCurrent() {
+					// Key is deprecated if past DeprecatedAfter but before ExpiresAt
+					if !k.DeprecatedAfter.IsZero() && now.After(k.DeprecatedAfter) && now.Before(k.ExpiresAt) {
+						deprecatedKids = append(deprecatedKids, k.ID)
+					}
+				}
+				if len(deprecatedKids) > 0 {
+					// Use HTTP Warning header (RFC 7234): "299 - "Miscellaneous persistent warning""
+					c.Header("Warning", fmt.Sprintf("299 - \"Keys deprecated: %s\"", strings.Join(deprecatedKids, ", ")))
+				}
+			}
 		}
 		if key := os.Getenv("GAUTH_JWKS_SIGNING_KEY"); key != "" && os.Getenv("GAUTH_JWKS_SIGNING_KEY_ENABLED") == "1" {
 			mac := hmac.New(sha256.New, []byte(key))
