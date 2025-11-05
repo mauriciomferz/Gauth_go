@@ -1,8 +1,8 @@
 # GAuth RFC Gap Matrix (Generated)
 
-> Generated: 2025-11-05T18:00:00Z
+> Generated: 2025-11-05T19:00:00Z
 
-**Status Summary:** Implemented=17 | Partial=19 | Missing=8 | Conceptual=0 | Total=43
+**Status Summary:** Implemented=18 | Partial=18 | Missing=8 | Conceptual=0 | Total=43
 
 ## Capability Snapshot
 
@@ -32,7 +32,7 @@ Schema Version: 1
 |----|-------------|--------|----------|-----|----------|
 | sec2.item1 | PDP combining algorithms | Implemented | P0 | **COMPLETED**: Comprehensive conflict diagnostics implemented with 4 detection types (permit-deny, scope overlap, rule contradiction, priority ambiguity), severity levels (critical/high/medium/low), runtime detection via CombineWithDiagnostics(), and static policy analysis via AnalyzePolicies() | pkg/pdp/conflict_diagnostics.go\|pkg/pdp/conflict_diagnostics_test.go\|pkg/pdp/engine.go\|docs/CONFLICT_DIAGNOSTICS.md |
 | sec2.item2 | ABAC expression evaluation | Implemented | P0 | **COMPLETED**: Extensible function registry with 18 built-in functions (string/numeric/time/collection/logical), thread-safe registration, type validation, metrics tracking, and comprehensive documentation | pkg/pdp/expr/registry.go\|pkg/pdp/expr/builtins.go\|pkg/pdp/expr/registry_test.go\|docs/ABAC_FUNCTION_REGISTRY.md |
-| sec2.item3 | Obligations & advice processing | Partial | P2 | Executor skeleton present; lacks advice emission semantics & persistent audit channel | docs/GAP_MATRIX.md:25 |
+| sec2.item3 | Obligations & advice processing | Implemented | P2 | **COMPLETED**: ExtendedObligationExecutor with extensible handler registry (log/notify/rate_limit built-in), BufferedAdviceChannel for async client notifications (configurable buffer), ObligationAuditSink for persistent execution records, mandatory obligation semantics (failure can flip allow→deny), 3 built-in handlers with custom handler registration, 12/12 tests passing (advice emission, audit sink, multiple obligations, custom handlers) | pkg/pdp/obligations_extended.go\|pkg/pdp/obligations_extended_test.go\|pkg/pdp/engine.go (WithAdviceChannel)\|docs/OBLIGATIONS_ADVICE.md |
 | sec2.item4 | Policy versioning & rollback | Partial | P1 | In-memory version snapshots + rollback API; missing persistent store + audit trail | docs/GAP_MATRIX.md:23\|pkg/authz/policy_version_test.go |
 | sec2.item5 | Distributed PDP & caching | Missing | P2 | No clustering or cache invalidation | docs/GAP_MATRIX.md:24 |
 

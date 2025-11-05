@@ -151,6 +151,8 @@ type InMemoryEngine struct {
 	obligationExecutor     obligations.Executor
 	obligationAuditPath    string // JSONL audit file path (append-only)
 	denyOnMandatoryFailure bool   // configuration: mandatory obligation failure flips allow->deny
+	// P2.1: Advice channel for non-mandatory recommendations
+	adviceChannel          AdviceChannel
 }
 
 // NewInMemoryEngine creates a new PDP engine with provided combining strategy.
@@ -178,6 +180,13 @@ func (e *InMemoryEngine) WithObligations(exec obligations.Executor, auditPath st
 // WithObligationFailureDenies configures whether mandatory obligation failures deny the decision.
 func (e *InMemoryEngine) WithObligationFailureDenies(deny bool) *InMemoryEngine {
 	e.denyOnMandatoryFailure = deny
+	return e
+}
+
+// WithAdviceChannel configures an advice emission channel for non-mandatory recommendations.
+// Clients should subscribe to ch.AdviceEvents() to receive advice events asynchronously.
+func (e *InMemoryEngine) WithAdviceChannel(ch AdviceChannel) *InMemoryEngine {
+	e.adviceChannel = ch
 	return e
 }
 
