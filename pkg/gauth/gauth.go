@@ -409,9 +409,20 @@ func (g *Service) ValidateToken(token string) (*TokenValidationResult, error) {
 			return nil, ErrInvalidToken
 		}
 		var head map[string]any
-		if uErr := json.Unmarshal(headBytes, &head); uErr != nil {
-			failMetric(g, observability.SigInvalid)
-			return nil, ErrInvalidToken
+		// Secure JSON parsing (P2.11 sec1.item3): Feature-gated with GAUTH_STRICT_JSON_PARSING=1
+		// Provides depth limits, size validation, UTF-8 validation to prevent DOS attacks
+		if os.Getenv("GAUTH_STRICT_JSON_PARSING") == "1" {
+			parser := DefaultSecureParser()
+			if uErr := parser.ParseSecure(headBytes, &head); uErr != nil {
+				failMetric(g, observability.SigInvalid)
+				return nil, ErrInvalidToken
+			}
+		} else {
+			// Default: standard json.Unmarshal for backward compatibility
+			if uErr := json.Unmarshal(headBytes, &head); uErr != nil {
+				failMetric(g, observability.SigInvalid)
+				return nil, ErrInvalidToken
+			}
 		}
 		algVal, okAlg := head["alg"].(string)
 		kidVal, okKid := head["kid"].(string)
@@ -439,9 +450,19 @@ func (g *Service) ValidateToken(token string) (*TokenValidationResult, error) {
 			return nil, ErrInvalidToken
 		}
 		var claims map[string]any
-		if err := json.Unmarshal(payloadBytes, &claims); err != nil {
-			failMetric(g, observability.SigInvalid)
-			return nil, ErrInvalidToken
+		// Secure JSON parsing (P2.11 sec1.item3): Feature-gated with GAUTH_STRICT_JSON_PARSING=1
+		if os.Getenv("GAUTH_STRICT_JSON_PARSING") == "1" {
+			parser := DefaultSecureParser()
+			if err := parser.ParseSecure(payloadBytes, &claims); err != nil {
+				failMetric(g, observability.SigInvalid)
+				return nil, ErrInvalidToken
+			}
+		} else {
+			// Default: standard json.Unmarshal for backward compatibility
+			if err := json.Unmarshal(payloadBytes, &claims); err != nil {
+				failMetric(g, observability.SigInvalid)
+				return nil, ErrInvalidToken
+			}
 		}
 		if exp, ok := claims["exp"].(float64); ok && time.Now().Unix() > int64(exp) {
 			failMetric(g, observability.Expired)

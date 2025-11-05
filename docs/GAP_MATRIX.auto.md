@@ -1,8 +1,8 @@
 # GAuth RFC Gap Matrix (Generated)
 
-> Generated: 2025-11-05T23:45:00Z
+> Generated: 2025-11-06T08:30:00Z (P2.11 Complete)
 
-**Status Summary:** Implemented=26 | Partial=12 | Missing=6 | Conceptual=0 | Total=44
+**Status Summary:** Implemented=27 | Partial=11 | Missing=6 | Conceptual=0 | Total=44
 
 ## Capability Snapshot
 
@@ -21,7 +21,7 @@ Schema Version: 1
 |----|-------------|--------|----------|-----|----------|
 | sec1.item1 | Mandatory POA signature at issuance | Implemented | P0 | Need configurable algorithms (Ed25519 only) | docs/GAP_MATRIX.md:12\|pkg/rfc0111/signature_negative_test.go |
 | sec1.item2 | Full JWT/PASETO claims | Implemented | P0 | All JWT/PASETO claims implemented: sub, scope, exp, iat, iss, aud, jti, nbf (basic) + typ semantic enforcement (gauth.delegation/gauth.token/gauth.capability), ClaimsMetadata (version, capabilities, source, confidence, restrictions), delegation chain depth tracking, feature-gated with GAUTH_ADVANCED_CLAIMS=1, backward compatible (omitempty on AdvancedClaims field). Remaining: PASETO footer population (future enhancement). | pkg/gauth/gauth.go\|pkg/gauth/advanced_claims.go\|pkg/token/envelope.go (AdvancedClaims field)\|pkg/rfc0111/rfc0111.go (generateAuthToken lines 3646-3721, VerifyToken lines 1039-1076)\|pkg/rfc0111/advanced_claims_test.go\|docs/ADVANCED_CLAIMS_INTEGRATION.md |
-| sec1.item3 | Robust JSON parsing | Partial | P0 | Manual string scanning; property + fuzz tests cover legacy parser for safety | pkg/gauth/gauth.go\|pkg/gauth/gauth_prop_test.go\|pkg/gauth/gauth_fuzz_test.go |
+| sec1.item3 | Robust JSON parsing | Implemented | P2.11 | Security-hardened JSON parsing with explicit controls: depth limit (max 32 levels), size limit (max 1MB), UTF-8 validation, strict unknown field rejection (optional). Feature-gated with GAUTH_STRICT_JSON_PARSING=1 for backward compatibility (default: standard json.Unmarshal). Prevents DOS attacks (stack overflow via deep nesting, memory exhaustion via large payloads) and encoding-based attacks (invalid UTF-8 sequences). Code already uses encoding/json (not manual scanning as originally stated). SecureJSONParser wrapper provides explicit security hardening. | pkg/gauth/secure_json.go (SecureJSONParser, 145 lines)\|pkg/gauth/secure_json_test.go (9 test suites, 41 test cases)\|pkg/gauth/gauth.go (ValidateToken integration lines ~407-422, ~438-453)\|docs/SECURE_JSON_PARSING.md |
 | sec1.item4 | Key rotation & lifecycle | Partial | P1 | Scheduler + disk persistence implemented (env driven); missing multi-tenant segregation & external HSM integration | internal/crypto/keys.go\|internal/crypto/keys_persist_test.go |
 | sec1.item5 | Public verifiable token integrity | Implemented | P0 | Multi-algorithm support (Ed25519/ECDSA-P256/BLS12-381) + property/fuzz tests + mandatory enforcement (GAUTH_REQUIRE_DETACHED_SIGNATURE); remaining: external HSM integration | docs/TOKEN_INTEGRITY_MULTI_ALGO.md\|pkg/crypto/signature_prop_test.go\|pkg/crypto/signature_multi_algo_fuzz_test.go\|pkg/rfc0111/mandatory_detached_signature_test.go |
 | sec1.item6 | Canonical digest stability fuzzing | Implemented | P2 | Property + fuzz tests validate determinism & mutable field exclusion | docs/GAP_MATRIX.md:15\|pkg/rfc0111/canonical.go\|pkg/rfc0111/canonical_prop_test.go\|pkg/rfc0111/canonical_fuzz_test.go |
