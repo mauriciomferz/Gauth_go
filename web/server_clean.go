@@ -55,6 +55,7 @@ import (
 	cryptopkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/crypto"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/delegation"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
+	ratelimit "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/limits"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
 	anchorHandlers "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/anchor"
@@ -489,6 +490,17 @@ type BetaServer struct {
 		WindowStart time.Time
 		Count       int
 	} // sliding 60s window per model
+	// Multi-period rate limits (sec13.item2 governance)
+	modelRateLimitsExtendedMu sync.Mutex
+	modelRateLimitsExtended   map[string][]struct {
+		Limit  int
+		Period time.Duration
+	} // model_id -> multiple period limits ("5000/hour", "100K/day")
+	modelRateStateExtendedMu sync.Mutex
+	modelRateStateExtended   map[string]map[time.Duration]struct {
+		WindowStart time.Time
+		Count       int
+	} // model_id -> period -> window state
 	// Per-user scoped model limits (compound model_id + user_id governance)
 	modelUserLimitsMu    sync.Mutex
 	modelUserLimits      map[string]map[string]struct{ InputLimit, OutputLimit, RateLimit int } // model_id -> user_id -> limits
@@ -756,6 +768,10 @@ func (s *BetaServer) loadModelLimitsFromDisk() bool {
 	newInput := make(map[string]int)
 	newOutput := make(map[string]int)
 	newRate := make(map[string]int)
+	newRateExtended := make(map[string][]struct {
+		Limit  int
+		Period time.Duration
+	})
 	newUser := make(map[string]map[string]struct{ InputLimit, OutputLimit, RateLimit int })
 	for id, lim := range raw.ModelLimits {
 		if lim.MaxInputTokens > 0 {
@@ -766,6 +782,20 @@ func (s *BetaServer) loadModelLimitsFromDisk() bool {
 		}
 		if lim.MaxRequestsPerMinute > 0 {
 			newRate[id] = lim.MaxRequestsPerMinute
+		}
+		// Parse extended multi-period limits
+		if len(lim.RateLimitsExtended) > 0 {
+			for _, rateStr := range lim.RateLimitsExtended {
+				rl, parseErr := ratelimit.ParseRateLimit(rateStr)
+				if parseErr != nil {
+					fmt.Fprintf(os.Stderr, "[model-limits] invalid rate limit %q for model %s: %v\n", rateStr, id, parseErr)
+					continue
+				}
+				newRateExtended[id] = append(newRateExtended[id], struct {
+					Limit  int
+					Period time.Duration
+				}{Limit: rl.Limit, Period: rl.Period})
+			}
 		}
 	}
 	for mid, users := range raw.UserLimits {
@@ -779,12 +809,15 @@ func (s *BetaServer) loadModelLimitsFromDisk() bool {
 	// Swap under locks
 	s.modelOutputLimitsMu.Lock()
 	s.modelRateMu.Lock()
+	s.modelRateLimitsExtendedMu.Lock()
 	s.modelUserLimitsMu.Lock()
 	s.modelLimits = newInput
 	s.modelOutputLimits = newOutput
 	s.modelRateLimits = newRate
+	s.modelRateLimitsExtended = newRateExtended
 	s.modelUserLimits = newUser
 	s.modelUserLimitsMu.Unlock()
+	s.modelRateLimitsExtendedMu.Unlock()
 	s.modelRateMu.Unlock()
 	s.modelOutputLimitsMu.Unlock()
 	fmt.Fprintf(os.Stderr, "[model-limits] reloaded entries=%d path=%s\n", len(raw.ModelLimits), s.modelLimitsPath)
@@ -1565,6 +1598,62 @@ func (s *BetaServer) apiModelValidate(c *gin.Context) {
 				s.metrics.IncModelRateLimitExceeded()
 			}
 			c.JSON(429, gin.H{"success": false, "error": "model_rate_limit_exceeded", "model_id": in.ModelID, "limit": rateLimit, "window_seconds": 60})
+			return
+		}
+	}
+	// Multi-period rate limiting (sec13.item2 governance)
+	s.modelRateLimitsExtendedMu.Lock()
+	extendedLimits := s.modelRateLimitsExtended[in.ModelID]
+	s.modelRateLimitsExtendedMu.Unlock()
+	if len(extendedLimits) > 0 {
+		now := time.Now()
+		s.modelRateStateExtendedMu.Lock()
+		if s.modelRateStateExtended == nil {
+			s.modelRateStateExtended = make(map[string]map[time.Duration]struct {
+				WindowStart time.Time
+				Count       int
+			})
+		}
+		if s.modelRateStateExtended[in.ModelID] == nil {
+			s.modelRateStateExtended[in.ModelID] = make(map[time.Duration]struct {
+				WindowStart time.Time
+				Count       int
+			})
+		}
+		periodStates := s.modelRateStateExtended[in.ModelID]
+		var exceededPeriod *struct {
+			Limit  int
+			Period time.Duration
+			Count  int
+		}
+		for _, rl := range extendedLimits {
+			st := periodStates[rl.Period]
+			if st.WindowStart.IsZero() || now.Sub(st.WindowStart) >= rl.Period {
+				st.WindowStart = now
+				st.Count = 0
+			}
+			st.Count++
+			periodStates[rl.Period] = st
+			if st.Count > rl.Limit {
+				exceededPeriod = &struct {
+					Limit  int
+					Period time.Duration
+					Count  int
+				}{Limit: rl.Limit, Period: rl.Period, Count: st.Count}
+				break
+			}
+		}
+		s.modelRateStateExtended[in.ModelID] = periodStates
+		s.modelRateStateExtendedMu.Unlock()
+		if exceededPeriod != nil {
+			if s.modelLimitAuditPath != "" {
+				s.writeModelLimitAudit(in.ModelID, "rate_extended", exceededPeriod.Count, exceededPeriod.Limit, now.Unix(), int(exceededPeriod.Period.Seconds()), "")
+			}
+			if s.metrics != nil {
+				s.metrics.RecordDecision("model_validate", in.ModelID, "deny")
+				s.metrics.IncModelRateLimitExceeded()
+			}
+			c.JSON(429, gin.H{"success": false, "error": "model_rate_limit_exceeded", "model_id": in.ModelID, "limit": exceededPeriod.Limit, "window_seconds": int(exceededPeriod.Period.Seconds()), "period": ratelimit.FormatPeriod(exceededPeriod.Period)})
 			return
 		}
 	}

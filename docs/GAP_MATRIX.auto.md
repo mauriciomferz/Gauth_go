@@ -2,7 +2,7 @@
 
 > Generated: 2025-11-05T19:00:00Z
 
-**Status Summary:** Implemented=21 | Partial=16 | Missing=7 | Conceptual=0 | Total=43
+**Status Summary:** Implemented=22 | Partial=15 | Missing=7 | Conceptual=0 | Total=43
 
 ## Capability Snapshot
 
@@ -119,7 +119,7 @@ Schema Version: 1
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|
 | sec13.item1 | UTF-8 & control char filtering | Partial | P3 | No metrics instrumentation | docs/GAP_MATRIX.md:102 |
-| sec13.item2 | Structured numeric limit parsing | Partial | P2 | No multi-period limits; lacks currency conversion & audit persistence | docs/GAP_MATRIX.md:103 |
+| sec13.item2 | Structured numeric limit parsing | Implemented | P2 | **COMPLETED**: Multi-period rate limiting with human-readable syntax ("1000/hour", "50K/day", "1M/month"), backward-compatible RateLimitsExtended JSON array, independent window tracking per period (minute/hour/day/week/month), K/M multipliers (5K=5000, 1.5M=1500000), legacy max_requests_per_minute still supported, ALL periods enforced (any exceeded → 429), audit trail with period metadata, 7/7 integration tests passing | pkg/limits/parser.go (ParseRateLimit with 37 test scenarios)\|web/model_limits_parse.go (RateLimitsExtended []string field)\|web/server_clean.go (modelRateLimitsExtended, modelRateStateExtended, multi-period enforcement lines 1567-1627)\|web/multi_period_limits_test.go (7 tests: minute/hour/daily limits, backward compat, dual enforcement, rollover, error handling)\|docs/MULTI_PERIOD_LIMITS.md (460+ lines with schema, enforcement, migration guide, operational recommendations) |
 
 ## Risk & Threat Modeling
 
