@@ -985,7 +985,19 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 		}
 	}
 	// Detached signature verification (envelope-level) – only for V2 envelopes carrying detached fields.
-	if useV2 && env2.DetachedSignature != "" && env2.DetachedSignatureKid != "" && env2.CanonicalDigest != "" {
+	requireDetachedSig := os.Getenv("GAUTH_REQUIRE_DETACHED_SIGNATURE") == "1"
+	hasDetachedSig := useV2 && env2.DetachedSignature != "" && env2.DetachedSignatureKid != "" && env2.CanonicalDigest != ""
+
+	// Fail-closed mode: if detached signatures are mandatory, reject tokens without them
+	if requireDetachedSig && !hasDetachedSig {
+		if s.metrics != nil {
+			s.metrics.IncSignatureVerificationFailures()
+		}
+		incDetachedVerify("missing_required_signature")
+		return nil, rfc.New(rfc.ErrUnauthorized, "detached signature required but missing")
+	}
+
+	if hasDetachedSig {
 		// Recompute canonical digest + bytes from stored POA (repository copy) for authenticity binding.
 		if dig, canon, derr := CanonicalPOADigest(poa); derr == nil {
 			if dig == env2.CanonicalDigest { // only attempt if digest aligns
