@@ -22,7 +22,7 @@ function renderJobTable(jobs) {
 			<td class="px-3 py-2 ${stateColor}">${escapeHtml(job.state||'')}</td>
 			<td class="px-3 py-2">${job.started_at ? escapeHtml(job.started_at) : '-'}</td>
 			<td class="px-3 py-2">${job.finished_at && job.started_at ? ((new Date(job.finished_at)-new Date(job.started_at))/1000).toFixed(1)+'s' : '-'}</td>
-			<td class="px-3 py-2"><button class="bg-blue-100 hover:bg-blue-200 text-blue-800 text-xs px-2 py-1 rounded" onclick="window.GAuth.runSample && window.GAuth.runSample('${escapeHtml(job.example_id)}')">Re-run</button></td>
+			<td class="px-3 py-2"><button class="bg-blue-100 hover:bg-blue-200 text-blue-800 text-xs px-2 py-1 rounded" data-rerun-sample="${escapeHtml(job.example_id)}">Re-run</button></td>
 		</tr>`;
 	}).join('');
 }
@@ -307,6 +307,18 @@ function wireFilters(){
 export function samplesInit(){
   fetchCatalog();
   observeTabSwitchCancellation();
+  
+  // Event delegation for re-run buttons in job table
+  document.addEventListener('click', function(e) {
+    const rerunBtn = e.target.closest('[data-rerun-sample]');
+    if (rerunBtn) {
+      const exampleId = rerunBtn.getAttribute('data-rerun-sample');
+      if (exampleId && window.GAuth.runSample) {
+        window.GAuth.runSample(exampleId);
+      }
+    }
+  });
+  
   // Start polling immediately if samples tab is default active
   const active = document.querySelector('.tab-button.active');
   if (active && active.getAttribute('data-tab') === 'samples-demo') startJobPolling();

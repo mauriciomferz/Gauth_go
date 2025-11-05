@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1375,9 +1375,70 @@ verified = verify(token, signature, publicKey) // true</pre>
         for (var i = 0; i < allButtons.length; i++) {
             var button = allButtons[i];
             
-            // CRITICAL: Skip simulate-pattern-button completely - it has its own handler
+            // CRITICAL: Skip buttons that have their own dedicated handlers
             if (button.id === 'simulate-pattern-button') {
                 console.log('ULTIMATE FIX: Skipping simulate-pattern-button (has dedicated handler)');
+                // Clear any previously set handler
+                if (button._gauthFixed && button._gauthHandler) {
+                    button.removeEventListener('click', button._gauthHandler, false);
+                    button._gauthFixed = false;
+                    button._gauthHandler = null;
+                }
+                continue;
+            }
+            
+            // Skip job log stream buttons - handled by joblogs.js module
+            if (button.id === 'startLogStream' || button.id === 'stopLogStream') {
+                console.log('ULTIMATE FIX: Skipping job log stream button (module-handled)');
+                // Clear any previously set handler
+                if (button._gauthFixed && button._gauthHandler) {
+                    button.removeEventListener('click', button._gauthHandler, false);
+                    button._gauthFixed = false;
+                    button._gauthHandler = null;
+                }
+                continue;
+            }
+            
+            // Skip tab navigation buttons by ID prefix or class - handled by UI modules
+            if (button.id && button.id.startsWith('tab-')) {
+                console.log('ULTIMATE FIX: Skipping tab button by ID (module-handled):', button.id);
+                // Clear any previously set handler
+                if (button._gauthFixed && button._gauthHandler) {
+                    button.removeEventListener('click', button._gauthHandler, false);
+                    button._gauthFixed = false;
+                    button._gauthHandler = null;
+                }
+                continue;
+            }
+            
+            if (button.classList.contains('tab-button') || button.hasAttribute('data-tab')) {
+                console.log('ULTIMATE FIX: Skipping tab navigation button (module-handled)');
+                // Clear any previously set handler
+                if (button._gauthFixed && button._gauthHandler) {
+                    button.removeEventListener('click', button._gauthHandler, false);
+                    button._gauthFixed = false;
+                    button._gauthHandler = null;
+                }
+                continue;
+            }
+            
+            // Skip test action buttons - have their own dedicated handler
+            if (button.hasAttribute('data-test-action')) {
+                console.log('ULTIMATE FIX: Skipping test action button (has dedicated handler)');
+                continue;
+            }
+            
+            // Skip buttons with data-action that are handled by unified handler
+            // (these should be processed by the unified handler, not this legacy fix)
+            if (button.hasAttribute('data-action') || 
+                button.hasAttribute('data-validate-marketing-request') ||
+                button.hasAttribute('data-create-marketing-poa') ||
+                button.hasAttribute('data-test-authorization-pattern') ||
+                button.hasAttribute('data-test-content-approval') ||
+                button.hasAttribute('data-test-social-campaign') ||
+                button.hasAttribute('data-sandbox-action') ||
+                button.hasAttribute('data-example-id')) {
+                console.log('ULTIMATE FIX: Skipping button with data attributes (unified handler)');
                 continue;
             }
             
@@ -1407,32 +1468,29 @@ verified = verify(token, signature, publicKey) // true</pre>
             }
             button._gauthFixed = true;
             
-            // Create a closure to capture the action variable
-            (function(btn, act) {
-                btn.onclick = function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('BULLETPROOF: Button clicked:', act);
-                    
-                    var originalHTML = this.innerHTML;
-                    this.innerHTML = 'Processing...';
-                    this.disabled = true;
-                    
-                    var self = this;
-                    setTimeout(function() {
-                        self.innerHTML = originalHTML;
-                        self.disabled = false;
-                    }, 2000);
-                    
-                    // Handle learning module buttons
-                    if (this.hasAttribute && this.hasAttribute('data-start-module')) {
-                        handleLearningModule(act, self, originalHTML);
-                        return;
-                    }
-                    
-                    // Real API calls instead of alerts
-                    if (act === 'start-learning-path') {
-                        self.innerHTML = 'Starting Learning Journey...';
+            // Store the handler function for potential removal later
+            button._gauthHandler = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('BULLETPROOF: Button clicked:', action);
+                
+                var originalHTML = button.innerHTML;
+                button.innerHTML = 'Processing...';
+                button.disabled = true;
+                
+                setTimeout(function() {
+                    button.innerHTML = originalHTML;
+                    button.disabled = false;
+                }, 2000);
+                
+                // Handle learning module buttons
+                if (button.hasAttribute && button.hasAttribute('data-start-module')) {
+                    handleLearningModule(action, button, originalHTML);
+                    return;
+                }
+                
+                // Real API calls instead of alerts
+                if (action === 'start-learning-path') {
                         fetch('/api/v1/learning/start', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -1469,7 +1527,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                             displayResult('Error', 'Network error: ' + err.message);
                         });
                         return;
-                    } else if (act === 'quick-compliance-check') {
+                    } else if (action === 'quick-compliance-check') {
                         self.innerHTML = 'Checking Compliance...';
                         fetch('/api/v1/compliance/check', {
                             method: 'POST',
@@ -1513,7 +1571,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                             displayResult('Error', 'Network error: ' + err.message);
                         });
                         return;
-                    } else if (act === 'create-token') {
+                    } else if (action === 'create-token') {
                         self.innerHTML = 'Creating Token...';
                         fetch('/api/v1/token/create-demo', {
                             method: 'POST',
@@ -1563,31 +1621,31 @@ verified = verify(token, signature, publicKey) // true</pre>
                             displayResult('Error', 'Network error: ' + err.message);
                         });
                         return;
-                    } else if (act === 'load-pattern' || act === 'test-pattern' || act === 'simulate-pattern' || act.indexOf('pattern') !== -1) {
-                        handlePatternOperation(act, self, originalHTML);
+                    } else if (action === 'load-pattern' || action === 'test-pattern' || action === 'simulate-pattern' || action.indexOf('pattern') !== -1) {
+                        handlePatternOperation(action, self, originalHTML);
                         return;
-                    } else if (act.indexOf('poa') !== -1 || act.indexOf('marketing') !== -1 || act.indexOf('content-approval') !== -1 || act.indexOf('create-marketing') !== -1 || act.indexOf('campaign') !== -1) {
-                        handleMarketingPoAOperation(act, self, originalHTML);
+                    } else if (action.indexOf('poa') !== -1 || action.indexOf('marketing') !== -1 || action.indexOf('content-approval') !== -1 || action.indexOf('create-marketing') !== -1 || action.indexOf('campaign') !== -1) {
+                        handleMarketingPoAOperation(action, self, originalHTML);
                         return;
-                    } else if (act.indexOf('playground') !== -1 || act.indexOf('experiment') !== -1) {
-                        handleExperimentalOperation(act, self, originalHTML);
+                    } else if (action.indexOf('playground') !== -1 || action.indexOf('experiment') !== -1) {
+                        handleExperimentalOperation(action, self, originalHTML);
                         return;
-                    } else if (act.indexOf('validation') !== -1 || act.indexOf('validate') !== -1 || act.indexOf('test') !== -1) {
-                        handleValidationOperation(act, self, originalHTML);
-                        return;
-                    } else {
-                        // Generic handler for other actions - params: button, action, originalText, originalClass
-                        handleGenericAction(self, act, originalHTML, self.className);
-                        return;
-                    }
-                };
-            })(button, action);
+                    } else if (action.indexOf('validation') !== -1 || action.indexOf('validate') !== -1 || action.indexOf('test') !== -1) {
+                    handleValidationOperation(action, button, originalHTML);
+                    return;
+                } else {
+                    // Generic handler for other actions - params: button, action, originalText, originalClass
+                    handleGenericAction(button, action, originalHTML, button.className);
+                    return;
+                }
+            };
+            
+            // Use addEventListener instead of onclick for CSP compliance
+            button.addEventListener('click', button._gauthHandler, false);
         }
         
         console.log('ULTIMATE BUTTON FIX COMPLETE!');
-    };
-    
-    // Helper functions for different operation types
+    };    // Helper functions for different operation types
     window.handlePatternOperation = function(action, button, originalHTML) {
         console.log('🔧 Pattern operation called:', action);
         
@@ -8312,6 +8370,35 @@ Test completed successfully with ${testResults.approvalScore}% approval score.
                 return;
             }
             
+            // Skip tab navigation buttons - they use data-tab attribute
+            if (button.classList.contains('tab-button') || button.hasAttribute('data-tab')) {
+                console.log('⚠️ UNIFIED HANDLER: Tab navigation button, skipping (uses data-tab)');
+                return;
+            }
+            
+            // Skip test action buttons - they have their own dedicated handler
+            if (button.hasAttribute('data-test-action')) {
+                console.log('⚠️ UNIFIED HANDLER: Test action button, skipping (has dedicated handler)');
+                return;
+            }
+            
+            // Skip buttons that don't have any recognized handler attributes
+            // These should be handled by module-specific handlers
+            const hasHandlerAttribute = button.hasAttribute('data-action') ||
+                button.hasAttribute('data-start-module') ||
+                button.hasAttribute('data-validate-marketing-request') ||
+                button.hasAttribute('data-create-marketing-poa') ||
+                button.hasAttribute('data-test-authorization-pattern') ||
+                button.hasAttribute('data-test-content-approval') ||
+                button.hasAttribute('data-test-social-campaign') ||
+                button.hasAttribute('data-sandbox-action') ||
+                button.hasAttribute('data-example-id');
+            
+            if (!hasHandlerAttribute) {
+                console.log('⚠️ UNIFIED HANDLER: Button has no recognized handler attributes, letting module handlers process it');
+                return;
+            }
+            
             console.log('🔘 UNIFIED HANDLER: Processing button click');
             console.log('📋 Button attributes:', {
                 'data-action': button.getAttribute('data-action'),
@@ -10697,6 +10784,12 @@ Generated: ${new Date().toISOString()}
                         e.stopPropagation();
                     });
                 }
+                
+                // Re-initialize button handlers for dynamically loaded content
+                if (window.GAuthButtonSystem && window.GAuthButtonSystem.reinitialize) {
+                    console.log('🔄 Reinitializing button handlers for dynamic content...');
+                    window.GAuthButtonSystem.reinitialize();
+                }
             } else {
                 console.error('Learning content element not found!');
             }
@@ -11324,12 +11417,16 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
             case 'generate-poa':
                 handleGeneratePoa(button, originalText, originalClass);
                 break;
-            case 'create-token':
-                handleCreateToken(button, originalText, originalClass);
-                break;
             case 'view-audit-log':
                 handleViewAuditLog(button, originalText, originalClass);
                 break;
+            
+            // TOKEN MANAGEMENT - Handled by tokens.js module (skip in unified handler)
+            case 'create-token':
+            case 'validate-token':
+            case 'revoke-token':
+                console.log(`Token action '${action}' handled by tokens.js module`);
+                return; // Let the module handle it
             
             // VALIDATION TEST ACTIONS
             case 'run-functional-tests':
@@ -11374,14 +11471,6 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
                 break;
             case 'simulate-pattern':
                 handleSimulatePattern(button, originalText, originalClass);
-                break;
-                
-            // TOKEN MANAGEMENT ACTIONS (Phase 7)
-            case 'validate-token':
-                handleValidateToken(button, originalText, originalClass);
-                break;
-            case 'revoke-token':
-                handleRevokeToken(button, originalText, originalClass);
                 break;
                 
             // EVENT MANAGEMENT ACTIONS (Phase 7)
@@ -11552,16 +11641,94 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
 
     // Additional handlers for demo functionality
     function handleCheckAuthorization(button, originalText, originalClass) {
-        console.log('🔒 Checking authorization via Interactive Authorization Simulator...');
+        console.log('🔒 Checking authorization - calling real API...');
         
-        // Check if the authorization simulator function exists
-        if (typeof window.simulateAuthDecision === 'function') {
-            // The simulateAuthDecision function handles everything internally
-            window.simulateAuthDecision();
-        } else {
-            console.error('❌ simulateAuthDecision function not available');
-            showActionMessage('Authorization simulator not loaded. Please refresh the page.', 'error');
+        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Checking Authorization...';
+        button.disabled = true;
+        
+        // Get form values
+        const subject = document.getElementById('auth-subject')?.value;
+        const resource = document.getElementById('auth-resource')?.value;
+        const action = document.getElementById('auth-action')?.value;
+        const resultDiv = document.getElementById('auth-result');
+        
+        if (!subject || !resource || !action) {
+            console.error('❌ Missing form values');
+            if (resultDiv) {
+                resultDiv.style.cssText = 'display: block !important; padding: 1rem; border-radius: 0.5rem; border: 2px solid #fca5a5; background-color: #fef2f2; color: #991b1b; margin-top: 1rem;';
+                resultDiv.innerHTML = '<strong>❌ Error:</strong> Please fill in all fields';
+            }
+            button.innerHTML = originalText;
+            button.disabled = false;
+            return;
         }
+        
+        if (!resultDiv) {
+            console.error('❌ Result div not found');
+            button.innerHTML = originalText;
+            button.disabled = false;
+            return;
+        }
+        
+        // Call real API
+        fetch('/api/v1/beta/policy/evaluate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                subject: subject,
+                action: action,
+                resource: resource,
+                attrs: {}
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('API response:', data);
+            
+            const decision = data.decision || 'DENY';
+            const isAllowed = decision === 'ALLOW';
+            const backgroundColor = isAllowed ? '#dcfce7' : '#fef2f2';
+            const borderColor = isAllowed ? '#86efac' : '#fca5a5';
+            const textColor = isAllowed ? '#166534' : '#991b1b';
+            const icon = isAllowed ? '✅' : '❌';
+            
+            resultDiv.style.cssText = `
+                margin-top: 1rem !important;
+                padding: 1rem !important;
+                border-radius: 0.5rem !important;
+                border: 2px solid ${borderColor} !important;
+                background-color: ${backgroundColor} !important;
+                color: ${textColor} !important;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            `;
+            
+            resultDiv.innerHTML = `
+                <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                    <span style="font-size: 1.5rem; margin-right: 0.5rem;">${icon}</span>
+                    <strong style="font-size: 1.25rem;">Authorization Decision: ${decision}</strong>
+                </div>
+                <div style="margin: 0.5rem 0;">
+                    <div style="margin: 0.25rem 0;"><strong>Subject:</strong> ${subject}</div>
+                    <div style="margin: 0.25rem 0;"><strong>Resource:</strong> ${resource}</div>
+                    <div style="margin: 0.25rem 0;"><strong>Action:</strong> ${action}</div>
+                    ${data.reason ? `<div style="margin: 0.25rem 0;"><strong>Reason:</strong> ${data.reason}</div>` : ''}
+                    ${data.policy_id ? `<div style="margin: 0.25rem 0;"><strong>Policy:</strong> ${data.policy_id}</div>` : ''}
+                </div>
+            `;
+            
+            button.innerHTML = originalText;
+            button.disabled = false;
+        })
+        .catch(error => {
+            console.error('API error:', error);
+            resultDiv.style.cssText = 'display: block !important; padding: 1rem; border-radius: 0.5rem; border: 2px solid #fca5a5; background-color: #fef2f2; color: #991b1b; margin-top: 1rem;';
+            resultDiv.innerHTML = `<strong>❌ Error:</strong> ${error.message}`;
+            
+            button.innerHTML = originalText;
+            button.disabled = false;
+        });
     }
 
     function handleGeneratePoa(button, originalText, originalClass) {
@@ -11581,13 +11748,41 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
 
     function handleCreateToken(button, originalText, originalClass) {
         console.log('🎫 Creating demo token...');
-        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating Token...';
         
-        setTimeout(() => {
-            showActionMessage('🎫 Demo token created successfully!', 'success');
+        // Delegate to the module's createToken function if available
+        if (window.GAuth && typeof window.GAuth.createToken === 'function') {
+            window.GAuth.createToken();
+            return;
+        }
+        
+        // Fallback: manual implementation
+        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating Token...';
+        button.disabled = true;
+        
+        fetch('/api/v1/token/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ttl_seconds: 3600 })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Store token globally for validate/revoke operations
+                window.currentToken = data.token;
+                showActionMessage('🎫 Token created successfully!', 'success');
+            } else {
+                showActionMessage(`❌ Token creation failed: ${data.message}`, 'error');
+            }
             button.innerHTML = originalText;
             button.className = originalClass;
-        }, 1200);
+            button.disabled = false;
+        })
+        .catch(error => {
+            showActionMessage(`❌ Creation error: ${error.message}`, 'error');
+            button.innerHTML = originalText;
+            button.className = originalClass;
+            button.disabled = false;
+        });
     }
 
     function handleViewAuditLog(button, originalText, originalClass) {
@@ -11617,41 +11812,32 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
     
     function handleRunAllSamples(button, originalText, originalClass) {
         console.log('📚 Running all samples...');
-        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Running All Samples...';
-        button.disabled = true;
-        
-        setTimeout(() => {
-            showActionMessage('🎯 All samples executed successfully! 37 examples completed.', 'success');
-            button.innerHTML = originalText;
-            button.className = originalClass;
-            button.disabled = false;
-        }, 3000);
+        // Delegate to the samples module which calls the real API
+        if (window.GAuth && window.GAuth.runAllSamples) {
+            window.GAuth.runAllSamples();
+        } else {
+            showActionMessage('⚠️ Samples module not loaded', 'warning');
+        }
     }
     
     function handleRunAllBasics(button, originalText, originalClass) {
         console.log('🎯 Running basic examples...');
-        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Running Basic Examples...';
-        button.disabled = true;
-        
-        setTimeout(() => {
-            showActionMessage('✅ Basic examples completed! 15 core patterns tested.', 'success');
-            button.innerHTML = originalText;
-            button.className = originalClass;
-            button.disabled = false;
-        }, 2000);
+        // Delegate to the samples module which calls the real API
+        if (window.GAuth && window.GAuth.runAllBasics) {
+            window.GAuth.runAllBasics();
+        } else {
+            showActionMessage('⚠️ Samples module not loaded', 'warning');
+        }
     }
     
     function handleRunAdvancedSuite(button, originalText, originalClass) {
         console.log('🚀 Running advanced suite...');
-        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Running Advanced Suite...';
-        button.disabled = true;
-        
-        setTimeout(() => {
-            showActionMessage('🏆 Advanced suite completed! Complex scenarios validated.', 'success');
-            button.innerHTML = originalText;
-            button.className = originalClass;
-            button.disabled = false;
-        }, 3500);
+        // Delegate to the samples module which calls the real API
+        if (window.GAuth && window.GAuth.runAdvancedSuite) {
+            window.GAuth.runAdvancedSuite();
+        } else {
+            showActionMessage('⚠️ Samples module not loaded', 'warning');
+        }
     }
     
     // Expose globally so the click detector can find it
@@ -12194,19 +12380,6 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
                 console.log('✅ Authorization evaluation form handler initialized');
             }
             
-            // Set up event delegation for dynamically loaded buttons
-            document.addEventListener('click', function(e) {
-                if (e.target && e.target.getAttribute('onclick') === 'simulateAuthDecision()') {
-                    console.log('🔍 Authorization simulator button clicked via delegation');
-                    e.preventDefault();
-                    window.simulateAuthDecision();
-                } else if (e.target && e.target.getAttribute('onclick') === 'buildPoA()') {
-                    console.log('🏗️ PoA builder button clicked via delegation');
-                    e.preventDefault();
-                    window.buildPoA();
-                }
-            });
-            
         // Sandbox action handlers
         function handleRunExperiment(button, originalText, originalClass) {
             console.log('Running sandbox experiment...');
@@ -12405,148 +12578,118 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
     
     // Interactive PoA Builder
     window.buildPoA = function buildPoA() {
-        console.log('🏗️ buildPoA function called');
-        console.log('🏗️ Current page elements check:');
-        console.log('- poa-grantor exists:', !!document.getElementById('poa-grantor'));
-        console.log('- poa-result exists:', !!document.getElementById('poa-result'));
+        console.log('🏗️ buildPoA function called - calling real API');
         
-        // Show immediate feedback
-        const button = document.querySelector('button[data-action="generate-poa"]');
-        if (button) {
-            const originalText = button.innerHTML;
-            button.innerHTML = '⏳ Generating...';
-            button.disabled = true;
-            setTimeout(() => {
-                button.innerHTML = originalText;
-                button.disabled = false;
-            }, 2000);
-        }
-        
-        const grantor = document.getElementById('poa-grantor').value;
-        const grantee = document.getElementById('poa-grantee').value;
-        const capability = document.getElementById('poa-capability').value;
-        const duration = document.getElementById('poa-duration').value;
+        // Read form values
+        const grantor = document.getElementById('poa-grantor')?.value;
+        const grantee = document.getElementById('poa-grantee')?.value;
+        const capability = document.getElementById('poa-capability')?.value;
+        const duration = document.getElementById('poa-duration')?.value;
         const resultDiv = document.getElementById('poa-result');
         
-        console.log('Values:', { grantor, grantee, capability, duration, resultDiv });
-        console.log('Element visibility before (PoA):', resultDiv ? {
-            display: resultDiv.style.display,
-            visibility: resultDiv.style.visibility,
-            opacity: resultDiv.style.opacity,
-            classList: Array.from(resultDiv.classList)
-        } : 'null');
-        
-        if (!resultDiv) {
-            console.error('❌ poa-result element not found');
-            alert('PoA Builder not properly loaded. Please try refreshing the page.');
+        if (!grantor || !grantee || !capability || !duration) {
+            console.error('❌ Missing required fields');
+            if (resultDiv) {
+                resultDiv.style.cssText = 'display: block !important; padding: 1rem; border-radius: 0.5rem; border: 2px solid #fca5a5; background-color: #fef2f2; color: #991b1b; margin-top: 1rem;';
+                resultDiv.innerHTML = '<strong>❌ Error:</strong> Please fill in all fields';
+            }
             return;
         }
         
-        // Generate PoA ID
-        const poaId = `poa-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        
-        // Define constraints based on capability
-        let constraints = [];
-        let riskLevel = 'LOW';
-        
-        switch(capability) {
-            case 'content-creation':
-                constraints = ['Brand guidelines must be followed', 'No competitor mentions without approval', 'Maximum 10 posts per day'];
-                riskLevel = 'LOW';
-                break;
-            case 'budget-approval':
-                constraints = ['Maximum $50,000 per transaction', 'Finance team notification required', 'Quarterly review mandatory'];
-                riskLevel = 'HIGH';
-                break;
-            case 'hiring-decisions':
-                constraints = ['HR approval required for final offers', 'Salary bands must be respected', 'Diversity guidelines enforced'];
-                riskLevel = 'MEDIUM';
-                break;
-            case 'vendor-negotiations':
-                constraints = ['Legal review for contracts >$25,000', 'Procurement team notification', 'Approved vendor list only'];
-                riskLevel = 'MEDIUM';
-                break;
+        if (!resultDiv) {
+            console.error('❌ poa-result element not found');
+            alert('PoA result display not found. Please try refreshing the page.');
+            return;
         }
         
-        // Format grantor and grantee names
-        const grantorName = grantor.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        const granteeName = grantee.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        const capabilityName = capability.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        // Show loading state
+        const button = document.querySelector('button[data-action="generate-poa"]');
+        if (button) {
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
+            button.disabled = true;
+        }
         
-        // Determine risk color
-        const riskColors = {
-            'LOW': { bg: '#dcfce7', border: '#86efac', text: '#166534' },
-            'MEDIUM': { bg: '#fef3c7', border: '#fcd34d', text: '#92400e' },
-            'HIGH': { bg: '#fef2f2', border: '#fca5a5', text: '#991b1b' }
+        // Map capability to power_type
+        const powerTypeMap = {
+            'content-creation': 'content_creation',
+            'budget-approval': 'budget_approval',
+            'hiring-decisions': 'hiring_decisions',
+            'vendor-negotiations': 'vendor_negotiations'
         };
         
-        const colors = riskColors[riskLevel];
-        resultDiv.style.cssText = `
-            margin-top: 1rem !important;
-            padding: 1rem !important;
-            border-radius: 0.5rem !important;
-            border: 2px solid ${colors.border} !important;
-            background-color: ${colors.bg} !important;
-            color: ${colors.text} !important;
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-        `;
-        
-        resultDiv.innerHTML = `
-            <div style="display: flex; align-items: center; margin-bottom: 0.75rem; justify-content: space-between;">
-                <div style="display: flex; align-items: center;">
-                    <span style="font-size: 1.5rem; margin-right: 0.5rem;">📋</span>
-                    <strong style="font-size: 1.25rem;">Power of Attorney Generated</strong>
-                </div>
-                <span style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: 0.25rem; background-color: ${colors.bg}; border: 1px solid ${colors.border}; font-weight: bold;">
-                    ${riskLevel} RISK
-                </span>
-            </div>
-            <div style="margin: 0.5rem 0; font-size: 0.875rem;">
-                <div style="margin: 0.25rem 0;"><strong>PoA ID:</strong> <code style="background-color: #e5e7eb; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">${poaId}</code></div>
-                <div style="margin: 0.25rem 0;"><strong>Grantor:</strong> ${grantorName}</div>
-                <div style="margin: 0.25rem 0;"><strong>Grantee:</strong> ${granteeName}</div>
-                <div style="margin: 0.25rem 0;"><strong>Capability:</strong> ${capabilityName}</div>
-                <div style="margin: 0.25rem 0;"><strong>Duration:</strong> ${duration.replace(/-/g, ' ')}</div>
-                <div style="margin: 0.5rem 0;"><strong>Constraints:</strong></div>
-                <ul style="margin-left: 1.5rem; margin-top: 0.25rem;">
-                    ${constraints.map(constraint => `<li style="margin: 0.125rem 0;">${constraint}</li>`).join('')}
-                </ul>
-            </div>
-            <div style="margin-top: 1rem; padding: 0.75rem; background-color: #f9fafb; border-radius: 0.5rem;">
-                <strong style="font-size: 0.875rem;">Cryptographic Signature:</strong>
-                <div style="font-size: 0.75rem; font-family: monospace; margin-top: 0.25rem; word-break: break-all; background-color: white; padding: 0.5rem; border-radius: 0.25rem; border: 1px solid #d1d5db;">
-                    ${btoa(poaId + grantor + grantee + capability + duration).substr(0, 64)}...
-                </div>
-            </div>
-            <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
-                <button data-deploy-poa data-poa-id="${poaId}" class="poa-deploy-btn" style="padding: 0.25rem 0.75rem; background-color: #3b82f6; color: white; font-size: 0.75rem; border-radius: 0.25rem; border: none; cursor: pointer;">
-                    <i class="fas fa-rocket" style="margin-right: 0.25rem;"></i>Deploy PoA
-                </button>
-                <button data-download-certificate data-poa-id="${poaId}" class="poa-download-btn" style="padding: 0.25rem 0.75rem; background-color: #6b7280; color: white; font-size: 0.75rem; border-radius: 0.25rem; border: none; cursor: pointer;">
-                    <i class="fas fa-download" style="margin-right: 0.25rem;"></i>Download Certificate
-                </button>
-                <button data-revoke-poa data-poa-id="${poaId}" class="poa-revoke-btn" style="padding: 0.25rem 0.75rem; background-color: #ef4444; color: white; font-size: 0.75rem; border-radius: 0.25rem; border: none; cursor: pointer;">
-                    <i class="fas fa-ban" style="margin-right: 0.25rem;"></i>Revoke PoA
-                </button>
-            </div>
-        `;
-        
-        // Force visibility by removing Tailwind hidden class and applying block
-        resultDiv.classList.remove('hidden');
-        resultDiv.classList.add('block');
-        // Override Tailwind's !important with our own
-        resultDiv.style.setProperty('display', 'block', 'important');
-        resultDiv.style.setProperty('visibility', 'visible', 'important');
-        resultDiv.style.setProperty('opacity', '1', 'important');
-        
-        console.log('Element visibility after styling (PoA):', {
-            display: resultDiv.style.display,
-            visibility: resultDiv.style.visibility,
-            opacity: resultDiv.style.opacity,
-            classList: Array.from(resultDiv.classList),
-            computedStyle: window.getComputedStyle(resultDiv).display
+        // Call real API
+        fetch('/api/v1/poa/authorize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                client_id: grantor,
+                principal_id: grantee,
+                ai_agent_id: `agent-${grantee}`,
+                power_type: powerTypeMap[capability] || capability,
+                jurisdiction: 'US-CA',
+                duration: duration
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('API response:', data);
+            
+            if (data.success || data.authorized) {
+                // Success - show green result
+                resultDiv.style.cssText = `
+                    margin-top: 1rem !important;
+                    padding: 1rem !important;
+                    border-radius: 0.5rem !important;
+                    border: 2px solid #86efac !important;
+                    background-color: #dcfce7 !important;
+                    color: #166534 !important;
+                    display: block !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                `;
+                
+                const poaId = data.poa_id || data.delegation_id || `poa-${Date.now()}`;
+                const grantorName = grantor.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                const granteeName = grantee.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                const capabilityName = capability.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                
+                resultDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; margin-bottom: 0.75rem;">
+                        <span style="font-size: 1.5rem; margin-right: 0.5rem;">✅</span>
+                        <strong style="font-size: 1.25rem;">Power of Attorney Generated</strong>
+                    </div>
+                    <div style="margin: 0.5rem 0; font-size: 0.875rem;">
+                        <div style="margin: 0.25rem 0;"><strong>PoA ID:</strong> <code style="background-color: #e5e7eb; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">${poaId}</code></div>
+                        <div style="margin: 0.25rem 0;"><strong>Grantor:</strong> ${grantorName}</div>
+                        <div style="margin: 0.25rem 0;"><strong>Grantee:</strong> ${granteeName}</div>
+                        <div style="margin: 0.25rem 0;"><strong>Capability:</strong> ${capabilityName}</div>
+                        <div style="margin: 0.25rem 0;"><strong>Duration:</strong> ${duration.replace(/-/g, ' ')}</div>
+                        ${data.constraints ? `<div style="margin: 0.5rem 0;"><strong>Constraints:</strong><ul style="margin-left: 1.5rem; margin-top: 0.25rem;">${data.constraints.map(c => `<li>${c}</li>`).join('')}</ul></div>` : ''}
+                        ${data.token ? `<div style="margin: 0.5rem 0;"><strong>Token:</strong> <code style="background-color: #e5e7eb; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; word-break: break-all;">${data.token}</code></div>` : ''}
+                    </div>
+                `;
+            } else {
+                // Error - show red result
+                resultDiv.style.cssText = 'display: block !important; padding: 1rem; border-radius: 0.5rem; border: 2px solid #fca5a5; background-color: #fef2f2; color: #991b1b; margin-top: 1rem;';
+                resultDiv.innerHTML = `<strong>❌ Error:</strong> ${data.message || 'Power of Attorney generation failed'}`;
+            }
+            
+            // Restore button
+            if (button) {
+                button.innerHTML = '<i class="fas fa-file-signature mr-2"></i>Generate Power of Attorney';
+                button.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('API error:', error);
+            resultDiv.style.cssText = 'display: block !important; padding: 1rem; border-radius: 0.5rem; border: 2px solid #fca5a5; background-color: #fef2f2; color: #991b1b; margin-top: 1rem;';
+            resultDiv.innerHTML = `<strong>❌ Error:</strong> ${error.message}`;
+            
+            // Restore button
+            if (button) {
+                button.innerHTML = '<i class="fas fa-file-signature mr-2"></i>Generate Power of Attorney';
+                button.disabled = false;
+            }
         });
     };
     
@@ -13627,33 +13770,82 @@ Generated: ${new Date().toISOString()}
     // Token Management Handlers
     function handleValidateToken(button, originalText, originalClass) {
         console.log('🔍 Validating token...');
+        
+        // Delegate to the module's validateToken function if available
+        if (window.GAuth && typeof window.GAuth.validateToken === 'function') {
+            window.GAuth.validateToken();
+            return;
+        }
+        
+        // Fallback: manual implementation
         button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Validating Token...';
         button.disabled = true;
         
-        setTimeout(() => {
-            const tokenValid = Math.random() > 0.1; // 90% valid rate
-            if (tokenValid) {
+        // Get current token from the page or use a demo token
+        const tokenToValidate = window.currentToken?.id || 'demo-token-123';
+        
+        fetch('/api/v1/token/validate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token_id: tokenToValidate })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
                 showActionMessage('✅ Token validated successfully! Signature verified, not expired.', 'success');
             } else {
-                showActionMessage('⚠️ Token validation failed! Token may be expired or invalid.', 'warning');
+                const reason = data.status || data.message || 'Token validation failed';
+                showActionMessage(`⚠️ Token validation failed: ${reason}`, 'warning');
             }
             button.innerHTML = originalText;
             button.className = originalClass;
             button.disabled = false;
-        }, 1500);
+        })
+        .catch(error => {
+            showActionMessage(`❌ Validation error: ${error.message}`, 'error');
+            button.innerHTML = originalText;
+            button.className = originalClass;
+            button.disabled = false;
+        });
     }
     
     function handleRevokeToken(button, originalText, originalClass) {
         console.log('❌ Revoking token...');
+        
+        // Delegate to the module's revokeToken function if available
+        if (window.GAuth && typeof window.GAuth.revokeToken === 'function') {
+            window.GAuth.revokeToken();
+            return;
+        }
+        
+        // Fallback: manual implementation
         button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Revoking Token...';
         button.disabled = true;
         
-        setTimeout(() => {
-            showActionMessage('🚫 Token revoked successfully! All associated authorizations terminated.', 'success');
+        const tokenToRevoke = window.currentToken?.id || 'demo-token-123';
+        
+        fetch('/api/v1/token/revoke', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token_id: tokenToRevoke })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showActionMessage('🚫 Token revoked successfully! All associated authorizations terminated.', 'success');
+            } else {
+                showActionMessage(`⚠️ Revocation failed: ${data.message || 'Unknown error'}`, 'error');
+            }
             button.innerHTML = originalText;
             button.className = originalClass;
             button.disabled = false;
-        }, 1200);
+        })
+        .catch(error => {
+            showActionMessage(`❌ Revocation error: ${error.message}`, 'error');
+            button.innerHTML = originalText;
+            button.className = originalClass;
+            button.disabled = false;
+        });
     }
     
     // Event Management Handlers
@@ -13662,13 +13854,36 @@ Generated: ${new Date().toISOString()}
         button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Publishing Event...';
         button.disabled = true;
         
-        setTimeout(() => {
-            const eventId = `evt-${Date.now()}`;
-            showActionMessage(`📢 Event published successfully! Event ID: ${eventId}`, 'success');
+        // Call real API endpoint
+        fetch('/api/v1/events/emit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                event_type: 'authorization_event',
+                payload: {
+                    action: 'demo_authorization',
+                    timestamp: new Date().toISOString()
+                }
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success || data.event_id) {
+                const eventId = data.event_id || `evt-${Date.now()}`;
+                showActionMessage(`📢 Event published successfully! Event ID: ${eventId}`, 'success');
+            } else {
+                showActionMessage(`⚠️ Event publish failed: ${data.message || 'Unknown error'}`, 'warning');
+            }
             button.innerHTML = originalText;
             button.className = originalClass;
             button.disabled = false;
-        }, 1000);
+        })
+        .catch(error => {
+            showActionMessage(`❌ Event publish error: ${error.message}`, 'error');
+            button.innerHTML = originalText;
+            button.className = originalClass;
+            button.disabled = false;
+        });
     }
     
     function handleSubscribeEvents(button, originalText, originalClass) {
@@ -13676,12 +13891,29 @@ Generated: ${new Date().toISOString()}
         button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Subscribing...';
         button.disabled = true;
         
-        setTimeout(() => {
-            showActionMessage('🔔 Successfully subscribed to authorization events! You\'ll receive real-time updates.', 'success');
+        // Subscribe to event stream
+        fetch('/api/v1/events/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event_types: ['authorization', 'token', 'delegation'] })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success || data.subscription_id) {
+                showActionMessage('🔔 Successfully subscribed to authorization events! You\'ll receive real-time updates.', 'success');
+            } else {
+                showActionMessage(`⚠️ Subscription failed: ${data.message || 'Unknown error'}`, 'warning');
+            }
             button.innerHTML = originalText;
             button.className = originalClass;
             button.disabled = false;
-        }, 1300);
+        })
+        .catch(error => {
+            showActionMessage(`❌ Subscription error: ${error.message}`, 'error');
+            button.innerHTML = originalText;
+            button.className = originalClass;
+            button.disabled = false;
+        });
     }
     
     // Report Generation Handlers
@@ -13690,34 +13922,40 @@ Generated: ${new Date().toISOString()}
         button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating Report...';
         button.disabled = true;
         
-        setTimeout(() => {
-            const reportData = {
-                reportType: 'Authorization Audit Report',
-                generated: new Date().toISOString(),
-                summary: {
-                    totalAuthorizations: 1247,
-                    activeTokens: 89,
-                    revokedTokens: 34,
-                    complianceScore: '94.7%'
-                },
-                details: 'Full audit trail with 1,247 authorization events analyzed.'
-            };
-            
-            const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `authorization-report-${Date.now()}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            showActionMessage('📄 Authorization report generated and downloaded!', 'success');
+        // Call audit report API
+        fetch('/api/v1/audit/report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ report_type: 'authorization_audit', format: 'json' })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success || data.report) {
+                const reportData = data.report || data;
+                const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `authorization-report-${Date.now()}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showActionMessage('📄 Authorization report generated and downloaded!', 'success');
+            } else {
+                showActionMessage(`⚠️ Report generation failed: ${data.message || 'Unknown error'}`, 'warning');
+            }
             button.innerHTML = originalText;
             button.className = originalClass;
             button.disabled = false;
-        }, 2000);
+        })
+        .catch(error => {
+            showActionMessage(`❌ Report generation error: ${error.message}`, 'error');
+            button.innerHTML = originalText;
+            button.className = originalClass;
+            button.disabled = false;
+        });
     }
     
     function handleExportTestReport(button, originalText, originalClass) {
@@ -13808,12 +14046,32 @@ Generated: ${new Date().toISOString()}
         button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Rolling Back...';
         button.disabled = true;
         
-        setTimeout(() => {
-            showActionMessage('⏪ Policy rolled back to previous version successfully!', 'success');
-            button.innerHTML = originalText;
-            button.className = originalClass;
-            button.disabled = false;
-        }, 1500);
+        // For demo purposes, rollback to version 1 (if it exists)
+        // In production, you'd have an input field for the target version
+        const targetVersion = 1;
+        
+        fetch('/api/v1/beta/policy/rollback?version=' + targetVersion, {
+            method: 'POST',
+            headers: { 'X-Admin-Token': 'demo-admin-token' }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showActionMessage(`⏪ Policy rolled back to version ${data.active_version}!`, 'success');
+                } else {
+                    showActionMessage('⏪ Policy rollback failed: ' + (data.message || 'error'), 'error');
+                }
+                button.innerHTML = originalText;
+                button.className = originalClass;
+                button.disabled = false;
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                showActionMessage('⏪ Policy rollback error: ' + err.message, 'error');
+                button.innerHTML = originalText;
+                button.className = originalClass;
+                button.disabled = false;
+            });
     }
     
     function handlePolicyProvenance(button, originalText, originalClass) {
@@ -13821,22 +14079,29 @@ Generated: ${new Date().toISOString()}
         button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Checking Provenance...';
         button.disabled = true;
         
-        setTimeout(() => {
-            fetch('/api/v1/beta/policy/provenance')
-                .then(res => res.json())
-                .then(data => {
-                    console.log('📜 Policy Provenance:', data);
-                    showActionMessage(`📜 Policy provenance verified! Hash: ${data.hash?.substring(0, 16)}...`, 'success');
-                })
-                .catch(err => {
-                    console.error('Error:', err);
-                    showActionMessage('📜 Policy provenance check completed!', 'success');
-                });
-            
-            button.innerHTML = originalText;
-            button.className = originalClass;
-            button.disabled = false;
-        }, 1200);
+        fetch('/api/v1/beta/policy/provenance')
+            .then(res => res.json())
+            .then(data => {
+                console.log('📜 Policy Provenance:', data);
+                if (data.success) {
+                    const verified = data.verified ? '✅ Verified' : '❌ Verification Failed';
+                    const hash = data.head_hash ? data.head_hash.substring(0, 16) + '...' : 'none';
+                    const chainLength = data.length || 0;
+                    showActionMessage(`📜 Policy provenance: ${verified}! Head: ${hash}, Chain length: ${chainLength}`, data.verified ? 'success' : 'warning');
+                } else {
+                    showActionMessage('📜 Policy provenance check failed.', 'error');
+                }
+                button.innerHTML = originalText;
+                button.className = originalClass;
+                button.disabled = false;
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                showActionMessage('📜 Policy provenance check error: ' + err.message, 'error');
+                button.innerHTML = originalText;
+                button.className = originalClass;
+                button.disabled = false;
+            });
     }
     
     function handlePolicyConsistency(button, originalText, originalClass) {
@@ -13844,13 +14109,27 @@ Generated: ${new Date().toISOString()}
         button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Checking Consistency...';
         button.disabled = true;
         
-        setTimeout(() => {
-            const consistencyScore = (95 + Math.random() * 5).toFixed(1);
-            showActionMessage(`✅ Policy consistency verified! Consistency score: ${consistencyScore}%.`, 'success');
-            button.innerHTML = originalText;
-            button.className = originalClass;
-            button.disabled = false;
-        }, 1400);
+        fetch('/api/v1/beta/policy/audit-consistency')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const status = data.consistent && data.chain_verified ? '✅ Consistent' : '⚠️ Inconsistent';
+                    const evaluations = data.evaluations || 0;
+                    showActionMessage(`${status} | Evaluations: ${evaluations} | Chain verified: ${data.chain_verified}`, data.consistent ? 'success' : 'warning');
+                } else {
+                    showActionMessage('✅ Policy consistency check failed.', 'error');
+                }
+                button.innerHTML = originalText;
+                button.className = originalClass;
+                button.disabled = false;
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                showActionMessage('✅ Policy consistency check error: ' + err.message, 'error');
+                button.innerHTML = originalText;
+                button.className = originalClass;
+                button.disabled = false;
+            });
     }
     
     function handlePolicyChainPage(button, originalText, originalClass) {
@@ -13871,14 +14150,39 @@ Generated: ${new Date().toISOString()}
         button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Evaluating...';
         button.disabled = true;
         
-        setTimeout(() => {
-            const evalResult = Math.random() > 0.2 ? 'GRANTED' : 'DENIED';
-            const icon = evalResult === 'GRANTED' ? '✅' : '❌';
-            showActionMessage(`${icon} Policy evaluation complete! Result: ${evalResult}`, evalResult === 'GRANTED' ? 'success' : 'warning');
-            button.innerHTML = originalText;
-            button.className = originalClass;
-            button.disabled = false;
-        }, 1600);
+        // Demo request - you can add input fields for these values
+        const request = {
+            subject: 'demo-user@example.com',
+            action: 'read',
+            resource: 'document:sensitive',
+            attrs: { department: 'engineering', clearance: 'high' }
+        };
+        
+        fetch('/api/v1/beta/policy/evaluate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(request)
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const result = data.allow ? '✅ GRANTED' : '❌ DENIED';
+                    const reason = data.reason || 'no reason';
+                    showActionMessage(`⚡ Policy evaluation: ${result} | Reason: ${reason}`, data.allow ? 'success' : 'warning');
+                } else {
+                    showActionMessage('⚡ Policy evaluation failed: ' + (data.message || 'error'), 'error');
+                }
+                button.innerHTML = originalText;
+                button.className = originalClass;
+                button.disabled = false;
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                showActionMessage('⚡ Policy evaluation error: ' + err.message, 'error');
+                button.innerHTML = originalText;
+                button.className = originalClass;
+                button.disabled = false;
+            });
     }
     
     function handlePolicySubmitBundle(button, originalText, originalClass) {
@@ -13886,13 +14190,45 @@ Generated: ${new Date().toISOString()}
         button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting Bundle...';
         button.disabled = true;
         
-        setTimeout(() => {
-            const bundleId = `bundle-${Date.now()}`;
-            showActionMessage(`📦 Policy bundle submitted successfully! Bundle ID: ${bundleId}`, 'success');
-            button.innerHTML = originalText;
-            button.className = originalClass;
-            button.disabled = false;
-        }, 1900);
+        // Demo bundle - a simple allow policy
+        const demoBundle = {
+            id: 'demo-bundle-' + Date.now(),
+            policies: [
+                {
+                    id: 'allow-demo-read',
+                    effect: 'allow',
+                    subject: 'demo-user@example.com',
+                    action: 'read',
+                    resource: 'document:*',
+                    attrs: {}
+                }
+            ]
+        };
+        
+        fetch('/api/v1/beta/policy/bundles', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(demoBundle)
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const hash = data.bundle_hash ? data.bundle_hash.substring(0, 16) + '...' : 'none';
+                    showActionMessage(`📦 Policy bundle submitted! Hash: ${hash}, Version: ${data.policy_version}`, 'success');
+                } else {
+                    showActionMessage('📦 Policy bundle submission failed: ' + (data.message || 'error'), 'error');
+                }
+                button.innerHTML = originalText;
+                button.className = originalClass;
+                button.disabled = false;
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                showActionMessage('📦 Policy bundle submission error: ' + err.message, 'error');
+                button.innerHTML = originalText;
+                button.className = originalClass;
+                button.disabled = false;
+            });
     }
     
     // Example Viewing Handler
@@ -14005,53 +14341,8 @@ Generated: ${new Date().toISOString()}
         }, experiment.duration);
     }
 
-    // SIMPLE BUTTON FIX - Override any existing issues
-    setTimeout(function() {
-        console.log('SIMPLE BUTTON FIX - Applying universal button handlers...');
-        
-        // Get all buttons with data-action attributes
-        const actionButtons = document.querySelectorAll('[data-action]');
-        console.log('Found buttons with data-action:', actionButtons.length);
-        
-        actionButtons.forEach(function(button) {
-            const action = button.getAttribute('data-action');
-            console.log('Setting up button:', action);
-            
-            // Remove any existing listeners by cloning the element
-            const newButton = button.cloneNode(true);
-            button.parentNode.replaceChild(newButton, button);
-            
-            // Add fresh click handler
-            newButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Button clicked:', action);
-                
-                // Show immediate feedback
-                const originalText = this.innerHTML;
-                this.innerHTML = 'Processing...';
-                this.disabled = true;
-                
-                setTimeout(() => {
-                    this.innerHTML = originalText;
-                    this.disabled = false;
-                }, 1000);
-                
-                // Handle different actions
-                if (action === 'start-learning-path') {
-                    alert('Starting Learning Journey!\n\nThis will guide you through GAuth capabilities.');
-                } else if (action === 'quick-compliance-check') {
-                    alert('Quick Compliance Check!\n\nAnalyzing your current compliance status.');
-                } else if (action === 'create-token') {
-                    alert('Creating Demo Token!\n\nGenerating a sample authentication token.');
-                } else {
-                    alert('Action: ' + action + '\n\nButton is working! Feature coming soon.');
-                }
-            });
-        });
-        
-        console.log('SIMPLE BUTTON FIX COMPLETE - All buttons should work now!');
-    }, 2000);
+    // REMOVED: SIMPLE BUTTON FIX that was interfering with proper action handlers
+    // All buttons now use the Unified Button Handler System and Modern Action Dispatcher below
 
     </script>
     
@@ -14120,6 +14411,9 @@ Generated: ${new Date().toISOString()}
             }
         }
         
+        // Make showNotification globally accessible
+        window.showNotification = showNotification;
+        
         // Add animations
         const style = document.createElement('style');
         style.textContent = `
@@ -14150,8 +14444,8 @@ Generated: ${new Date().toISOString()}
         `;
         document.head.appendChild(style);
         
-        // Unified button handler mapping
-        const buttonHandlers = {
+        // Unified button handler mapping - MUST BE GLOBAL
+        window.buttonHandlers = {
             // Hero Section Actions
             'start-learning-path': async function(btn) {
                 showNotification('🎓 Starting Learning Path...', 'info');
@@ -14254,15 +14548,18 @@ Generated: ${new Date().toISOString()}
             'test-multisig': async function(btn) {
                 showNotification('👥 Testing multi-signature authorization...', 'info');
                 try {
-                    // Simulate multi-signature approval workflow
+                    // Simulate multi-signature approval workflow with proper POA request
                     const authResp = await fetch('/api/v1/poa/authorize', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            subject: 'multisig-group',
-                            action: 'approve',
-                            resource: 'transaction:high-value',
-                            context: { signaturesRequired: 3 }
+                            client_id: 'multisig-client-' + Date.now(),
+                            principal_id: 'multisig-principal',
+                            ai_agent_id: 'agent-multisig',
+                            power_type: 'financial_transactions',
+                            jurisdiction: 'US',
+                            scope: 'approve_transaction',
+                            legal_basis: 'multisig_policy_2024'
                         })
                     });
                     
@@ -14271,7 +14568,8 @@ Generated: ${new Date().toISOString()}
                         showNotification('✅ Multi-signature test passed: Authorization workflow validated', 'success');
                         console.log('Multi-sig test result:', data);
                     } else {
-                        showNotification('⚠️ Multi-signature test: See console for details', 'warning');
+                        showNotification(`⚠️ Multi-signature test failed: ${data.message || 'See console'}`, 'warning');
+                        console.error('Multi-sig test error:', data);
                     }
                 } catch (error) {
                     showNotification(`❌ Multi-signature test error: ${error.message}`, 'error');
@@ -14303,20 +14601,25 @@ Generated: ${new Date().toISOString()}
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            subject: 'user-temporal',
-                            action: 'access',
-                            resource: 'system:time-restricted',
-                            context: { validUntil: Date.now() + 3600000 }
+                            client_id: 'temporal-client-' + Date.now(),
+                            principal_id: 'user-temporal',
+                            ai_agent_id: 'agent-temporal',
+                            power_type: 'time_restricted_access',
+                            jurisdiction: 'US',
+                            scope: 'time_based_access',
+                            legal_basis: 'temporal_policy_2024'
                         })
                     });
                     
+                    const data = await authResp.json();
                     if (authResp.ok) {
                         showNotification('✅ Temporal test passed: Time constraints validated', 'success');
                     } else {
-                        showNotification('⚠️ Temporal test: Time validation needs review', 'warning');
+                        showNotification(`⚠️ Temporal test failed: ${data.message || 'See console'}`, 'warning');
+                        console.error('Temporal test error:', data);
                     }
                 } catch (error) {
-                    showNotification('✅ Temporal test passed: Simulated time-based validation', 'success');
+                    showNotification(`❌ Temporal test error: ${error.message}`, 'error');
                 }
             },
             
@@ -14327,20 +14630,25 @@ Generated: ${new Date().toISOString()}
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            subject: 'user-geo',
-                            action: 'access',
-                            resource: 'system:geo-restricted',
-                            context: { location: 'US', ipAddress: '192.168.1.1' }
+                            client_id: 'geo-client-' + Date.now(),
+                            principal_id: 'user-geo',
+                            ai_agent_id: 'agent-geo',
+                            power_type: 'geo_restricted_access',
+                            jurisdiction: 'US',
+                            scope: 'location_based_access',
+                            legal_basis: 'geo_policy_2024'
                         })
                     });
                     
+                    const data = await authResp.json();
                     if (authResp.ok) {
                         showNotification('✅ Geo-restriction test passed: Location constraints validated', 'success');
                     } else {
-                        showNotification('⚠️ Geo-restriction test: See console for details', 'warning');
+                        showNotification(`⚠️ Geo-restriction test failed: ${data.message || 'See console'}`, 'warning');
+                        console.error('Geo test error:', data);
                     }
                 } catch (error) {
-                    showNotification('✅ Geo-restriction test passed: Simulated location validation', 'success');
+                    showNotification(`❌ Geo-restriction test error: ${error.message}`, 'error');
                 }
             },
             
@@ -14353,7 +14661,7 @@ Generated: ${new Date().toISOString()}
             'test-zero-trust': async function(btn) {
                 showNotification('🔐 Testing zero-trust architecture...', 'info');
                 try {
-                    // Test multiple validation layers
+                    // Test multiple validation layers with proper POA request
                     const results = await Promise.all([
                         fetch('/api/v1/token/validate', {
                             method: 'POST',
@@ -14363,13 +14671,21 @@ Generated: ${new Date().toISOString()}
                         fetch('/api/v1/poa/authorize', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ subject: 'zero-trust-test', action: 'verify', resource: 'system' })
+                            body: JSON.stringify({
+                                client_id: 'zero-trust-client-' + Date.now(),
+                                principal_id: 'zero-trust-principal',
+                                ai_agent_id: 'agent-zero-trust',
+                                power_type: 'system_verification',
+                                jurisdiction: 'US',
+                                scope: 'zero_trust_verification',
+                                legal_basis: 'zero_trust_policy_2024'
+                            })
                         })
                     ]);
                     
                     showNotification('✅ Zero-trust test passed: Multi-layer validation completed', 'success');
                 } catch (error) {
-                    showNotification('✅ Zero-trust test passed: Validation layers simulated', 'success');
+                    showNotification(`❌ Zero-trust test error: ${error.message}`, 'error');
                 }
             },
             
@@ -14759,25 +15075,180 @@ RFC-0150 Authorization Platform
             
             // Authorization
             'check-authorization': async function(btn) {
+                // Get form values
+                const subject = document.getElementById('auth-subject')?.value;
+                const resource = document.getElementById('auth-resource')?.value;
+                const action = document.getElementById('auth-action')?.value;
+                const resultDiv = document.getElementById('auth-result');
+                
+                if (!subject || !resource || !action) {
+                    showNotification('❌ Please fill in all authorization fields', 'error');
+                    return;
+                }
+                
                 showNotification('🔐 Checking authorization...', 'info');
+                
                 try {
-                    const response = await fetch('/api/v1/poa/authorize', {
+                    // Call the real policy evaluation endpoint
+                    const response = await fetch('/api/v1/beta/policy/evaluate', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
-                            subject: 'demo-user',
-                            action: 'read',
-                            resource: 'system:demo'
+                            subject: subject,
+                            action: action,
+                            resource: resource,
+                            attrs: {}
                         })
                     });
+                    
                     const data = await response.json();
-                    if (response.ok && data.authorized) {
-                        showNotification('✅ Authorization granted: Full access', 'success');
+                    
+                    if (response.ok && data.success) {
+                        const isAllowed = data.allow === true && data.deny !== true;
+                        const decision = isAllowed ? 'ALLOW' : 'DENY';
+                        const reason = data.reason || (isAllowed ? 'Policy matched' : 'No matching policy');
+                        const icon = isAllowed ? '✅' : '❌';
+                        const backgroundColor = isAllowed ? '#dcfce7' : '#fef2f2';
+                        const borderColor = isAllowed ? '#86efac' : '#fca5a5';
+                        const textColor = isAllowed ? '#166534' : '#991b1b';
+                        
+                        // Display results in the auth-result div
+                        if (resultDiv) {
+                            resultDiv.style.cssText = `
+                                margin-top: 1rem !important;
+                                padding: 1rem !important;
+                                border-radius: 0.5rem !important;
+                                border: 2px solid ${borderColor} !important;
+                                background-color: ${backgroundColor} !important;
+                                color: ${textColor} !important;
+                                display: block !important;
+                            `;
+                            
+                            resultDiv.innerHTML = `
+                                <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                                    <span style="font-size: 1.5rem; margin-right: 0.5rem;">${icon}</span>
+                                    <strong style="font-size: 1.25rem;">Decision: ${decision}</strong>
+                                </div>
+                                <div style="margin: 0.5rem 0;">
+                                    <div><strong>Subject:</strong> ${subject}</div>
+                                    <div><strong>Resource:</strong> ${resource}</div>
+                                    <div><strong>Action:</strong> ${action}</div>
+                                    <div><strong>Reason:</strong> ${reason}</div>
+                                    ${data.matched ? `<div><strong>Matched Policies:</strong> ${data.matched.join(', ')}</div>` : ''}
+                                </div>
+                            `;
+                        }
+                        
+                        showNotification(`${icon} Authorization ${decision}: ${reason}`, isAllowed ? 'success' : 'warning');
                     } else {
-                        showNotification(`❌ Authorization denied: ${data.reason || 'Insufficient permissions'}`, 'error');
+                        showNotification(`❌ Authorization check failed: ${data.message || 'Unknown error'}`, 'error');
+                        if (resultDiv) {
+                            resultDiv.style.display = 'none';
+                        }
                     }
                 } catch (error) {
-                    showNotification(`❌ Authorization check failed: ${error.message}`, 'error');
+                    showNotification(`❌ Authorization error: ${error.message}`, 'error');
+                    console.error('Authorization check error:', error);
+                    if (resultDiv) {
+                        resultDiv.style.display = 'none';
+                    }
+                }
+            },
+            
+            'generate-poa': async function(btn) {
+                // Get form values
+                const grantor = document.getElementById('poa-grantor')?.value;
+                const grantee = document.getElementById('poa-grantee')?.value;
+                const capability = document.getElementById('poa-capability')?.value;
+                const duration = document.getElementById('poa-duration')?.value;
+                const resultDiv = document.getElementById('poa-result');
+                
+                if (!grantor || !grantee || !capability || !duration) {
+                    showNotification('❌ Please fill in all PoA fields', 'error');
+                    return;
+                }
+                
+                showNotification('📝 Generating Power of Attorney...', 'info');
+                
+                try {
+                    // Map capability to power_type
+                    const powerTypeMap = {
+                        'content-creation': 'content_creation',
+                        'budget-approval': 'budget_approval',
+                        'hiring-decisions': 'hiring_decisions',
+                        'vendor-negotiations': 'vendor_negotiations'
+                    };
+                    
+                    const payload = {
+                        client_id: grantor,
+                        principal_id: grantee,
+                        ai_agent_id: `agent-${grantee}`,
+                        power_type: powerTypeMap[capability] || capability,
+                        jurisdiction: 'US-CA'
+                    };
+                    
+                    console.log('🔍 Sending PoA request:', payload);
+                    
+                    // Call the real PoA authorization endpoint
+                    const response = await fetch('/api/v1/poa/authorize', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    const data = await response.json();
+                    console.log('📦 PoA response:', response.status, data);
+                    
+                    if (response.ok && (data.success || data.authorized)) {
+                        const poaId = data.poa_id || data.delegation_id || `poa-${Date.now()}`;
+                        const grantorName = grantor.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        const granteeName = grantee.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        const capabilityName = capability.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        
+                        // Display results in the poa-result div
+                        if (resultDiv) {
+                            resultDiv.style.cssText = `
+                                margin-top: 1rem !important;
+                                padding: 1rem !important;
+                                border-radius: 0.5rem !important;
+                                border: 2px solid #86efac !important;
+                                background-color: #dcfce7 !important;
+                                color: #166534 !important;
+                                display: block !important;
+                            `;
+                            
+                            resultDiv.innerHTML = `
+                                <div style="display: flex; align-items: center; margin-bottom: 0.75rem;">
+                                    <span style="font-size: 1.5rem; margin-right: 0.5rem;">✅</span>
+                                    <strong style="font-size: 1.25rem;">Power of Attorney Generated</strong>
+                                </div>
+                                <div style="margin: 0.5rem 0; font-size: 0.875rem;">
+                                    <div style="margin: 0.25rem 0;"><strong>PoA ID:</strong> <code style="background-color: #e5e7eb; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">${poaId}</code></div>
+                                    <div style="margin: 0.25rem 0;"><strong>Grantor:</strong> ${grantorName}</div>
+                                    <div style="margin: 0.25rem 0;"><strong>Grantee:</strong> ${granteeName}</div>
+                                    <div style="margin: 0.25rem 0;"><strong>Capability:</strong> ${capabilityName}</div>
+                                    <div style="margin: 0.25rem 0;"><strong>Duration:</strong> ${duration.replace(/-/g, ' ')}</div>
+                                    ${data.constraints ? `<div style="margin: 0.5rem 0;"><strong>Constraints:</strong><ul style="margin-left: 1.5rem; margin-top: 0.25rem;">${data.constraints.map(c => `<li>${c}</li>`).join('')}</ul></div>` : ''}
+                                    ${data.token ? `<div style="margin: 0.5rem 0;"><strong>Token:</strong> <code style="background-color: #e5e7eb; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; word-break: break-all;">${data.token}</code></div>` : ''}
+                                </div>
+                            `;
+                        }
+                        
+                        showNotification(`✅ Power of Attorney generated successfully: ${poaId}`, 'success');
+                    } else {
+                        showNotification(`❌ PoA generation failed: ${data.message || 'Unknown error'}`, 'error');
+                        if (resultDiv) {
+                            resultDiv.style.cssText = 'display: block !important; padding: 1rem; border-radius: 0.5rem; border: 2px solid #fca5a5; background-color: #fef2f2; color: #991b1b; margin-top: 1rem;';
+                            resultDiv.innerHTML = `<strong>❌ Error:</strong> ${data.message || 'Power of Attorney generation failed'}`;
+                        }
+                    }
+                } catch (error) {
+                    showNotification(`❌ PoA error: ${error.message}`, 'error');
+                    console.error('PoA generation error:', error);
+                    if (resultDiv) {
+                        resultDiv.style.cssText = 'display: block !important; padding: 1rem; border-radius: 0.5rem; border: 2px solid #fca5a5; background-color: #fef2f2; color: #991b1b; margin-top: 1rem;';
+                        resultDiv.innerHTML = `<strong>❌ Error:</strong> ${error.message}`;
+                    }
                 }
             },
             
@@ -15218,9 +15689,15 @@ RFC-0150 Authorization Platform
         function delay(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
+        window.delay = delay; // Make delay globally accessible
         
         // Initialize button handlers
         function initializeButtonHandlers() {
+            console.log('🚀 Initializing button handlers...');
+            console.log('🔍 window.buttonHandlers exists?', !!window.buttonHandlers);
+            console.log('🔍 window.buttonHandlers keys:', window.buttonHandlers ? Object.keys(window.buttonHandlers) : 'NONE');
+            console.log('Available handlers:', window.buttonHandlers ? Object.keys(window.buttonHandlers) : 'UNDEFINED!');
+            
             const buttons = document.querySelectorAll('[data-action]');
             console.log(`🔧 Found ${buttons.length} buttons with data-action attributes`);
             
@@ -15235,6 +15712,9 @@ RFC-0150 Authorization Platform
                     return;
                 }
                 
+                console.log(`Setting up handler for: ${action}`);
+                console.log(`🔍 Handler exists for ${action}?`, !!window.buttonHandlers[action]);
+                
                 // Remove existing event listeners by cloning
                 const newBtn = btn.cloneNode(true);
                 btn.parentNode.replaceChild(newBtn, btn);
@@ -15246,7 +15726,7 @@ RFC-0150 Authorization Platform
                         return;
                     }
                     
-                    const handler = buttonHandlers[action];
+                    const handler = window.buttonHandlers[action];
                     
                     if (handler) {
                         console.log(`🎯 Executing handler for: ${action}`);
@@ -15264,18 +15744,22 @@ RFC-0150 Authorization Platform
                             this.style.backgroundColor = originalBg;
                         } catch (error) {
                             console.error(`Error executing ${action}:`, error);
-                            showNotification(`❌ Error: ${error.message}`, 'error');
+                            if (window.showNotification) {
+                                window.showNotification(`❌ Error: ${error.message}`, 'error');
+                            }
                             this.classList.remove('loading');
                             this.style.opacity = '';
                         }
                     } else {
                         console.warn(`⚠️ No handler for action: ${action}`);
                         unhandledActions.add(action);
-                        showNotification(`🚧 "${action}" feature coming soon!`, 'info');
+                        if (window.showNotification) {
+                            window.showNotification(`🚧 "${action}" feature coming soon!`, 'info');
+                        }
                     }
                 });
                 
-                if (buttonHandlers[action]) {
+                if (window.buttonHandlers && window.buttonHandlers[action]) {
                     handledCount++;
                 }
             });
@@ -15298,13 +15782,13 @@ RFC-0150 Authorization Platform
         
         // Make functions globally accessible for debugging
         window.GAuthButtonSystem = {
-            handlers: buttonHandlers,
+            handlers: window.buttonHandlers,
             reinitialize: initializeButtonHandlers,
-            showNotification: showNotification
+            showNotification: window.showNotification
         };
         
         console.log('✅ Unified Button Handler System Ready');
-        console.log('💡 Available actions:', Object.keys(buttonHandlers).length);
+        console.log('💡 Available actions:', window.buttonHandlers ? Object.keys(window.buttonHandlers).length : 0);
         
     })();
     </script>
