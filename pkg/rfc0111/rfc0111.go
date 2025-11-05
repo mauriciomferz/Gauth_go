@@ -1309,6 +1309,7 @@ type Service struct {
 	mandatorySignatures bool                        // if true, issuance aborts when signature cannot be produced
 	attestAnchors       *attest.TrustAnchorRegistry // optional trust anchor registry for attestation proofs
 	jurisdictionEnforcement *JurisdictionEnforcement // optional jurisdiction-specific enforcement (P1.3)
+	auditSink           AuditSink                    // optional external audit sink for token lifecycle events (P1.4)
 	// semanticCounters prototype: fine-grained semantic rejection reasons (will be surfaced via endpoints later)
 	semanticCounters struct {
 		AmountLimitExceeded      uint64
@@ -1395,6 +1396,8 @@ func (s *Service) AttachEvidenceHashes(ctx context.Context, poaID string, hashes
 		ev.Object = poaID
 		ev.Metadata = map[string]interface{}{"added": added, "total": len(p.EvidenceHashes)}
 		_ = s.audit.Log(ctx, ev)
+		// Send to external audit sink (P1.4)
+		s.sendToAuditSink(ctx, ev)
 	}
 	if s.metrics != nil {
 		for i := 0; i < added; i++ {
@@ -1759,6 +1762,8 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 			if err := s.audit.Log(ctx, event); err != nil {
 				return nil, fmt.Errorf("audit log failed: %w", err)
 			}
+			// Send to external audit sink (P1.4)
+			s.sendToAuditSink(ctx, event)
 			return nil, rfc.New(rfc.ErrUnauthorized, decision.Reason)
 		}
 	}
@@ -1967,6 +1972,8 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 	if err := s.audit.Log(ctx, event); err != nil {
 		return nil, rfc.New(rfc.ErrInternal, fmt.Sprintf("audit log failed: %v", err))
 	}
+	// Send to external audit sink (P1.4)
+	s.sendToAuditSink(ctx, event)
 	// Ledger append (best-effort)
 	if s.ledger != nil {
 		_ = s.ledger.Append(ctx, &ledger.Entry{ID: fmt.Sprintf("led_iss_%s", poa.ID), TS: now, Type: "delegation_issuance", Subject: req.Grantor, Object: poa.ID, Metadata: map[string]interface{}{"grantee": req.Grantee, "scope": req.Scope, "valid_until": poa.ValidUntil}})
@@ -2216,6 +2223,8 @@ func (s *Service) ValidateDelegationCtx(ctx context.Context, poaID, grantee, act
 	if err := s.audit.Log(ctx, event); err != nil {
 		return rfc.New(rfc.ErrInternal, fmt.Sprintf("audit log failed: %v", err))
 	}
+	// Send to external audit sink (P1.4)
+	s.sendToAuditSink(ctx, event)
 
 	return nil
 }
@@ -2583,6 +2592,8 @@ func (s *Service) ValidateDelegationRich(ctx context.Context, poaID, grantee str
 	if err := s.audit.Log(ctx, event); err != nil {
 		return rfc.New(rfc.ErrInternal, fmt.Sprintf("audit log failed: %v", err))
 	}
+	// Send to external audit sink (P1.4)
+	s.sendToAuditSink(ctx, event)
 	return nil
 }
 
@@ -2749,6 +2760,8 @@ func (s *Service) RevokeDelegationCtx(ctx context.Context, poaID, revoker string
 	if err := s.audit.Log(ctx, event); err != nil {
 		return rfc.New(rfc.ErrInternal, fmt.Sprintf("audit log failed: %v", err))
 	}
+	// Send to external audit sink (P1.4)
+	s.sendToAuditSink(ctx, event)
 
 	// Ledger append (best-effort) for revocation
 	if s.ledger != nil {
