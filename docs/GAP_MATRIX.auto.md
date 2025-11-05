@@ -23,7 +23,7 @@ Schema Version: 1
 | sec1.item2 | Full JWT/PASETO claims | Partial | P0 | sub,scope,exp,iat,iss,aud,jti,nbf implemented; missing advanced (claims set metadata, structured nested PASETO footer, typ semantic enforcement) | pkg/gauth/gauth.go\|pkg/gauth/gauth_claims_test.go |
 | sec1.item3 | Robust JSON parsing | Partial | P0 | Manual string scanning; property + fuzz tests cover legacy parser for safety | pkg/gauth/gauth.go\|pkg/gauth/gauth_prop_test.go\|pkg/gauth/gauth_fuzz_test.go |
 | sec1.item4 | Key rotation & lifecycle | Partial | P1 | Scheduler + disk persistence implemented (env driven); missing multi-tenant segregation & external HSM integration | internal/crypto/keys.go\|internal/crypto/keys_persist_test.go |
-| sec1.item5 | Public verifiable token integrity | Implemented | P0 | Detached signature (EnvelopeV2: detached_sig+alg+kid) implemented; remaining: alt algs (ecdsa/bls/batch) & property/fuzz tests & mandatory enforcement flag | docs/GAP_MATRIX.md:14\|pkg/rfc0111/rfc0111_detached_signature_test.go |
+| sec1.item5 | Public verifiable token integrity | Implemented | P0 | Multi-algorithm support (Ed25519/ECDSA-P256/BLS12-381) + property/fuzz tests + mandatory enforcement (GAUTH_REQUIRE_DETACHED_SIGNATURE); remaining: external HSM integration | docs/TOKEN_INTEGRITY_MULTI_ALGO.md\|pkg/crypto/signature_prop_test.go\|pkg/crypto/signature_multi_algo_fuzz_test.go\|pkg/rfc0111/mandatory_detached_signature_test.go |
 | sec1.item6 | Canonical digest stability fuzzing | Implemented | P2 | Property + fuzz tests validate determinism & mutable field exclusion | docs/GAP_MATRIX.md:15\|pkg/rfc0111/canonical.go\|pkg/rfc0111/canonical_prop_test.go\|pkg/rfc0111/canonical_fuzz_test.go |
 
 ## Authorization Engine
@@ -133,31 +133,38 @@ Schema Version: 1
 
 ### Recent Achievements (October-November 2025)
 
-1. **AI Capability Governance (sec11.item2)**: Upgraded from Missing to **Implemented**
+1. **Token Integrity Multi-Algorithm Support (sec1.item5)**: Upgraded from Partial to **Fully Implemented**
+   - Multi-algorithm signature support (Ed25519, ECDSA P-256, BLS12-381)
+   - Property-based tests for signature stability & cryptographic invariants (8 test suites)
+   - Comprehensive fuzz tests for malformed inputs & edge cases (11 fuzz functions)
+   - Mandatory signature enforcement (GAUTH_REQUIRE_DETACHED_SIGNATURE fail-closed mode)
+   - Complete migration guide with 3-phase adoption strategy
+
+2. **AI Capability Governance (sec11.item2)**: Upgraded from Missing to **Implemented**
    - Multi-dimensional model limit enforcement (input/output tokens, per-minute rates)
    - Per-user scoped quotas with exceed audit hash chain
    - Verification endpoint with cryptographic attestation
    - Metrics instrumentation for limit violations
 
-2. **Delegation Depth Control (sec12.item2)**: Upgraded from Missing to **Implemented**
+3. **Delegation Depth Control (sec12.item2)**: Upgraded from Missing to **Implemented**
    - Environment-based depth configuration (GAUTH_MAX_DELEGATION_DEPTH)
    - Runtime enforcement with depth exceeded error codes
    - Metrics tracking for max observed depth
    - Discovery endpoint exposure of depth limits
 
-3. **Threat Modeling (sec14.item1, sec14.item2)**: Upgraded from Partial/Missing to **Implemented**
+4. **Threat Modeling (sec14.item1, sec14.item2)**: Upgraded from Partial/Missing to **Implemented**
    - Comprehensive threat model with 12 primary threats (T1-T12)
    - Anchor layer threat analysis (CA1-CA7)
    - Mitigation mapping for each threat scenario
    - Residual risk documentation with roadmap
 
-4. **Audit Ledger (sec5.item1)**: Upgraded from Partial to **Implemented**
+5. **Audit Ledger (sec5.item1)**: Upgraded from Partial to **Implemented**
    - Hash chain verification with receipt chain
    - Merkle root computation for efficient verification
    - Integrity gauges and mismatch detection
    - Structured notarization receipt append-only chain
 
-5. **OpenAPI Specification (sec10.item1)**: Upgraded from Partial to **Implemented**
+6. **OpenAPI Specification (sec10.item1)**: Upgraded from Partial to **Implemented**
    - Complete API documentation including provenance endpoints
    - Comprehensive request/response schemas
    - Error code documentation
@@ -166,7 +173,6 @@ Schema Version: 1
 ### Priority Focus Areas
 
 **P0 Critical Gaps (Must Address):**
-- sec1.item5: Public verifiable token integrity - needs detached signature support beyond local symmetric
 - sec2.item1: PDP combining algorithms - requires richer conflict diagnostics
 - sec2.item2: ABAC expression evaluation - needs extensible function registry
 - sec3.item1: Full semantic PoA validation - beyond BasicPoAValidator
@@ -208,10 +214,11 @@ Schema Version: 1
 ### Next Milestones
 
 **Q4 2025 Targets:**
-- Complete detached signature implementation (sec1.item5)
+- ✅ Complete multi-algorithm token integrity (sec1.item5) - **COMPLETED**
+- Implement PDP conflict diagnostics (sec2.item1)
+- Deploy extensible ABAC function registry (sec2.item2)
 - Implement joint signature validation (sec3.item3)
 - Deploy jurisdiction-aware enforcement (sec4.item1)
-- External HSM integration for key management (sec1.item4)
 
 **Q1 2026 Targets:**
 - Distributed PDP with cache invalidation (sec2.item5)
