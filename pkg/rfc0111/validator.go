@@ -216,9 +216,12 @@ func (AdvancedPoAValidator) Validate(p *PowerOfAttorney) error {
 	return nil
 }
 
-// selectPoAValidator returns a PoAValidator based on environment (advanced|basic|none).
+// selectPoAValidator returns a PoAValidator based on environment (semantic|advanced|basic|none).
 func selectPoAValidator() PoAValidator {
 	switch strings.ToLower(os.Getenv("GAUTH_POA_VALIDATOR")) {
+	case "semantic":
+		// Full RFC0115 semantic validation with enhanced checks
+		return NewEnhancedPoAValidator()
 	case "advanced":
 		return AdvancedPoAValidator{}
 	case "basic":
@@ -226,6 +229,7 @@ func selectPoAValidator() PoAValidator {
 	case "none":
 		return NoopPoAValidator{}
 	default:
+		// Default to basic for backward compatibility
 		return BasicPoAValidator{}
 	}
 }

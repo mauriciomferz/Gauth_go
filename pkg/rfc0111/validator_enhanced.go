@@ -3,6 +3,7 @@ package rfc0111
 import (
 	"context"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -248,6 +249,11 @@ func (v *EnhancedPoAValidator) ValidateWithResult(ctx context.Context, p *PowerO
 
 // validateEnhancedSemantics performs advanced semantic validation with warnings
 func (v *EnhancedPoAValidator) validateEnhancedSemantics(ctx context.Context, p *PowerOfAttorney) error {
+	// RFC0115-specific semantic validation
+	if err := v.validateRFC0115Semantics(ctx, p); err != nil {
+		return err
+	}
+
 	// Check for potentially suspicious patterns
 	if len(p.Scope) > 10 {
 		v.addWarning("excessive_scope", "Large number of scopes may indicate overprivileged delegation", "scope", len(p.Scope), "warning")
@@ -281,6 +287,301 @@ func (v *EnhancedPoAValidator) validateEnhancedSemantics(ctx context.Context, p 
 	}
 
 	return nil
+}
+
+// validateRFC0115Semantics validates PoA according to RFC0115 semantic rules
+func (v *EnhancedPoAValidator) validateRFC0115Semantics(ctx context.Context, p *PowerOfAttorney) error {
+	// 1. Scope syntax validation - ensure proper format
+	for i, scope := range p.Scope {
+		if err := v.validateScopeSyntax(scope); err != nil {
+			return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("scope[%d] syntax invalid: %v", i, err))
+		}
+	}
+
+	// 2. Scope semantic validation - ensure logical consistency
+	if err := v.validateScopeSemantics(p.Scope); err != nil {
+		return err
+	}
+
+	// 3. Action taxonomy validation - verify action classes are valid
+	if err := v.validateActionTaxonomy(p); err != nil {
+		return err
+	}
+
+	// 4. Temporal constraint semantics
+	if err := v.validateTemporalConstraints(p); err != nil {
+		return err
+	}
+
+	// 5. Authority relationship validation
+	if err := v.validateAuthorityRelationship(p); err != nil {
+		return err
+	}
+
+	// 6. Delegation depth semantics (if parent chain available)
+	if err := v.validateDelegationDepthSemantics(ctx, p); err != nil {
+		return err
+	}
+
+	// 7. Restriction semantics validation
+	if err := v.validateRestrictionSemantics(p); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateScopeSyntax validates individual scope string format
+func (v *EnhancedPoAValidator) validateScopeSyntax(scope string) error {
+	if scope == "" {
+		return fmt.Errorf("empty scope not allowed")
+	}
+
+	// Wildcard validation
+	if scope == "*" {
+		return nil // Wildcard is syntactically valid
+	}
+
+	// Scope must be printable ASCII or valid UTF-8
+	for _, r := range scope {
+		if r < 32 || r == 127 {
+			return fmt.Errorf("control characters not allowed in scope")
+		}
+	}
+
+	// If scope contains colon, validate namespace:action format
+	if strings.Contains(scope, ":") {
+		parts := strings.SplitN(scope, ":", 2)
+		if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+			return fmt.Errorf("invalid namespace:action format")
+		}
+
+		// Namespace must be alphanumeric with underscores/hyphens
+		namespace := parts[0]
+		for _, r := range namespace {
+			if !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') ||
+				(r >= '0' && r <= '9') || r == '_' || r == '-') {
+				return fmt.Errorf("invalid namespace characters: %s", namespace)
+			}
+		}
+	}
+
+	return nil
+}
+
+// validateScopeSemantics validates logical consistency of scope array
+func (v *EnhancedPoAValidator) validateScopeSemantics(scopes []string) error {
+	if len(scopes) == 0 {
+		return rfc.New(rfc.ErrInvalidRequest, "scope array cannot be empty")
+	}
+
+	// Check for duplicates
+	seen := make(map[string]bool, len(scopes))
+	for i, scope := range scopes {
+		if seen[scope] {
+			v.addWarning("duplicate_scope", "Duplicate scope detected", "scope", scope, "warning")
+		}
+		seen[scope] = true
+
+		// Check for wildcard with other scopes
+		if scope == "*" && len(scopes) > 1 {
+			return rfc.New(rfc.ErrInvalidRequest, "wildcard scope must be used alone")
+		}
+
+		// Check for scope subsumption (e.g., "read:*" and "read:documents")
+		if strings.HasSuffix(scope, ":*") {
+			prefix := scope[:len(scope)-1] // Remove "*", keep ":"
+			for j, other := range scopes {
+				if i != j && strings.HasPrefix(other, prefix) && other != scope {
+					v.addWarning("scope_subsumption", fmt.Sprintf("Scope %s subsumes %s", scope, other), "scope", other, "info")
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+// validateActionTaxonomy validates action classes against RFC0115 taxonomy
+func (v *EnhancedPoAValidator) validateActionTaxonomy(p *PowerOfAttorney) error {
+	// Define valid action classes per RFC0115
+	validActionClasses := map[string]bool{
+		"read":        true,
+		"write":       true,
+		"execute":     true,
+		"delete":      true,
+		"admin":       true,
+		"transaction": true,
+		"transfer":    true,
+		"delegate":    true,
+		"revoke":      true,
+		"audit":       true,
+		"regulatory":  true,
+		"joint":       true,
+	}
+
+	// Validate ActionClass field if present
+	if p.ActionClass != "" {
+		if !validActionClasses[strings.ToLower(p.ActionClass)] {
+			v.addWarning("unknown_action_class", "Action class not in RFC0115 taxonomy", "action_class", p.ActionClass, "warning")
+		}
+	}
+
+	// Validate scope prefixes
+	for _, scope := range p.Scope {
+		if strings.Contains(scope, ":") {
+			parts := strings.SplitN(scope, ":", 2)
+			action := strings.ToLower(parts[0])
+			if action != "*" && !validActionClasses[action] {
+				v.addWarning("unknown_action_prefix", "Scope action prefix not in RFC0115 taxonomy", "scope", scope, "info")
+			}
+		}
+	}
+
+	return nil
+}
+
+// validateTemporalConstraints validates temporal semantics
+func (v *EnhancedPoAValidator) validateTemporalConstraints(p *PowerOfAttorney) error {
+	now := time.Now()
+
+	// Warn about past valid_from (likely error)
+	if p.ValidFrom.Before(now.Add(-24 * time.Hour)) {
+		v.addWarning("past_valid_from", "Valid_from is more than 24h in the past", "valid_from", p.ValidFrom, "warning")
+	}
+
+	// Warn about very short duration (< 1 hour)
+	duration := p.ValidUntil.Sub(p.ValidFrom)
+	if duration < time.Hour {
+		v.addWarning("very_short_duration", "Delegation duration less than 1 hour may be unintentional", "duration", duration.String(), "info")
+	}
+
+	// Validate business hour restrictions if present
+	if validHours, exists := p.Restrictions["valid_hours"]; exists {
+		parts := strings.Split(validHours, "-")
+		if len(parts) == 2 {
+			start, _ := strconv.Atoi(parts[0])
+			end, _ := strconv.Atoi(parts[1])
+			if start >= end {
+				v.addWarning("overnight_hours", "valid_hours spans midnight - ensure this is intentional", "valid_hours", validHours, "info")
+			}
+		}
+	}
+
+	return nil
+}
+
+// validateAuthorityRelationship validates grantor-grantee relationship semantics
+func (v *EnhancedPoAValidator) validateAuthorityRelationship(p *PowerOfAttorney) error {
+	// Grantor and grantee must be different (unless wildcard delegation)
+	if p.Grantor == p.Grantee {
+		isWildcard := len(p.Scope) == 1 && p.Scope[0] == "*"
+		if !isWildcard {
+			return rfc.New(rfc.ErrInvalidRequest, "self-delegation only allowed for wildcard scope")
+		}
+	}
+
+	// Check for service account patterns (prefix-based heuristic)
+	servicePatterns := []string{"service-", "bot-", "system-", "app-"}
+	isServiceGrantor := false
+	isServiceGrantee := false
+
+	for _, pattern := range servicePatterns {
+		if strings.HasPrefix(strings.ToLower(p.Grantor), pattern) {
+			isServiceGrantor = true
+		}
+		if strings.HasPrefix(strings.ToLower(p.Grantee), pattern) {
+			isServiceGrantee = true
+		}
+	}
+
+	// Warn about service-to-service delegation (may require elevated approval)
+	if isServiceGrantor && isServiceGrantee {
+		v.addWarning("service_to_service", "Service-to-service delegation detected", "grantor_grantee", fmt.Sprintf("%s -> %s", p.Grantor, p.Grantee), "warning")
+	}
+
+	return nil
+}
+
+// validateDelegationDepthSemantics validates delegation chain depth
+func (v *EnhancedPoAValidator) validateDelegationDepthSemantics(ctx context.Context, p *PowerOfAttorney) error {
+	// If delegation has a parent, validate depth constraints
+	if p.ParentPOAID != "" {
+		// Maximum depth check (environment-based)
+		maxDepthStr := os.Getenv("GAUTH_MAX_DELEGATION_DEPTH")
+		if maxDepthStr != "" {
+			if maxDepth, err := strconv.Atoi(maxDepthStr); err == nil && maxDepth > 0 {
+				// Depth validation would require access to parent chain
+				// This is a semantic check that the structure supports depth tracking
+				v.addWarning("delegation_chain", "Delegation has parent - verify depth limits", "parent_id", p.ParentPOAID, "info")
+			}
+		}
+	}
+
+	return nil
+}
+
+// validateRestrictionSemantics validates restriction key-value semantics
+func (v *EnhancedPoAValidator) validateRestrictionSemantics(p *PowerOfAttorney) error {
+	// Define valid restriction keys per RFC0115
+	knownRestrictions := map[string]bool{
+		"currency":          true,
+		"max_amount":        true,
+		"max_daily_amount":  true,
+		"min_amount":        true,
+		"jurisdiction":      true,
+		"signatures":        true,
+		"valid_hours":       true,
+		"valid_weekdays":    true,
+		"time_condition":    true,
+		"ip_whitelist":      true,
+		"geo_restriction":   true,
+		"purpose":           true,
+		"approval_required": true,
+	}
+
+	// Warn about unknown restrictions
+	for key := range p.Restrictions {
+		// Skip condition_ prefixed keys (dynamic conditions)
+		if strings.HasPrefix(key, "condition_") {
+			continue
+		}
+
+		if !knownRestrictions[key] {
+			v.addWarning("unknown_restriction", "Restriction key not in RFC0115 standard", "restriction", key, "info")
+		}
+	}
+
+	// Validate restriction value semantics
+	if purpose, exists := p.Restrictions["purpose"]; exists {
+		if len(purpose) > 500 {
+			return rfc.New(rfc.ErrInvalidRequest, "purpose restriction exceeds 500 character limit")
+		}
+	}
+
+	if ipWhitelist, exists := p.Restrictions["ip_whitelist"]; exists {
+		// Basic IP format validation
+		ips := strings.Split(ipWhitelist, ",")
+		for _, ip := range ips {
+			ip = strings.TrimSpace(ip)
+			if ip != "" && !v.isValidIPOrCIDR(ip) {
+				v.addWarning("invalid_ip_format", "IP whitelist contains potentially invalid entry", "ip", ip, "warning")
+			}
+		}
+	}
+
+	return nil
+}
+
+// isValidIPOrCIDR performs basic IP/CIDR format validation
+func (v *EnhancedPoAValidator) isValidIPOrCIDR(s string) bool {
+	// Simple heuristic: contains only digits, dots, slashes, colons
+	for _, r := range s {
+		if !((r >= '0' && r <= '9') || r == '.' || r == ':' || r == '/') {
+			return false
+		}
+	}
+	return true
 }
 
 // validateFinancialScope validates transaction-related scopes with enhanced checks

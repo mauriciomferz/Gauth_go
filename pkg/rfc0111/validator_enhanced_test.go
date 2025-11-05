@@ -71,7 +71,7 @@ func TestEnhancedPoAValidator_BasicValidation(t *testing.T) {
 				Restrictions: map[string]string{},
 			},
 			wantErr:      false,
-			wantWarnings: 2, // One for each admin scope
+			wantWarnings: 3, // One unknown_action_prefix + two administrative_scope warnings
 		},
 	}
 
