@@ -1,8 +1,8 @@
 # GAuth RFC Gap Matrix (Generated)
 
-> Generated: 2025-11-06T08:30:00Z (P2.11 Complete)
+> Generated: 2025-11-06T14:00:00Z (P2.12 Complete)
 
-**Status Summary:** Implemented=27 | Partial=11 | Missing=6 | Conceptual=0 | Total=44
+**Status Summary:** Implemented=28 | Partial=10 | Missing=6 | Conceptual=0 | Total=44
 
 ## Capability Snapshot
 
@@ -59,7 +59,7 @@ Schema Version: 1
 |----|-------------|--------|----------|-----|----------|
 | sec5.item1 | Immutable audit ledger | Implemented | P0 | **COMPLETED**: BoltDB with hash chain verification, receipt chain with Merkle roots, integrity gauges, external audit sink integration with async buffering, multiplex to SIEM/compliance/queue, event filtering, fail-open error handling; remaining: external anchoring to production transparency logs (planned P1.4.1) | pkg/rfc0111/audit_sink_integration.go (WithAuditSink, AsyncAuditSink, MultiplexAuditSink, FilteredAuditSink)\|pkg/rfc0111/audit_sink_integration_test.go (11 tests)\|pkg/rfc0111/rfc0111.go (Service.auditSink field, sendToAuditSink integration in CreateDelegation/VerifyToken/RevokeToken/AttachEvidence)\|docs/AUDIT_SINK_INTEGRATION.md\|pkg/audit/file_logger.go\|docs/THREAT_MODEL.md |
 | sec5.item2 | Delegation storage durability | Implemented | P2 | Enhanced BoltRepository with multi-index queries (FindByStatus, FindExpired), pruning methods (PruneExpired/PruneRevoked with retention cutoffs), statistics (Stats), automatic index maintenance on Create/Update, thread-safe concurrent access | pkg/rfc0111/bolt_repository.go\|pkg/rfc0111/bolt_repository_indexing_test.go\|docs/DELEGATION_STORAGE.md |
-| sec5.item3 | Revocation anchoring | Partial | P2 | No external notarization | docs/GAP_MATRIX.md:50 |
+| sec5.item3 | Revocation anchoring | Implemented | P2.12 | **COMPLETED**: RFC 3161 Time-Stamp Authority integration with cryptographic timestamping. RevocationAnchoringAdapter implements AnchorClient interface, wraps Notarizer (RFC3161Provider), provides BoltDB receipt persistence (anchor_receipts bucket). RFC3161Provider HTTP client posts TimeStampReq to TSA endpoint, parses TimeStampResp, stores Receipt with timestamp. Best-effort anchoring in RevokeDelegation (line 2800). ComputeRevocationHash() for canonical event hashing. GetStats() for monitoring. Future: Full ASN.1 DER parsing, TSA signature verification, batch merkle anchoring. | pkg/notary/revocation_anchor.go (RevocationAnchoringAdapter, ReceiptStore, 350+ lines)\|internal/notary/rfc3161.go (RFC3161Provider, Notarize, 220+ lines)\|pkg/rfc0111/rfc0111.go (anchorClient integration line 2800)\|docs/REVOCATION_ANCHORING.md |
 
 ## Replay & Token Security
 
