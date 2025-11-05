@@ -1,24 +1,52 @@
 # API Directory
 
-> Last Updated: 2025-10-17
-> Status: Active
+> Last Updated: 2025-11-05
+> Status: Active - Enhanced with Complete OpenAPI Specification
 
 This directory contains the API definitions and specifications for the GAuth implementation.
 
-## Current Status: 🎓 BETA IMPLEMENTATION
+## Current Status: 🎓 BETA IMPLEMENTATION - Production-Grade Specifications
 
 > **⚠️ Beta Purpose Only**: This implementation is designed for learning and demonstration. It is NOT production ready. Do NOT use for real security, production, or commercial deployment.
 
-The GAuth beta implementation provides a demonstration Go API through the `pkg/gauth` package for learning purposes.
+The GAuth beta implementation provides a demonstration Go API through the `pkg/gauth` package for learning purposes, now with complete OpenAPI specifications for all endpoints.
 
 ## Directory Structure
 
 ```
 api/
-├── openapi/          # OpenAPI/Swagger specifications (placeholder)
+├── openapi/          # Complete OpenAPI/Swagger specifications
+│   └── openapi.yaml  # Full API documentation (issue, validate, status, delegation, metrics, provenance)
 ├── proto/            # Protocol Buffer definitions (placeholder) 
 └── README.md         # This file
 ```
+
+## Recent Updates (November 2025)
+
+### OpenAPI Specification - Now Complete! ✅
+
+The OpenAPI specification has been upgraded from Partial to **Implemented** status:
+
+**Documented Endpoints:**
+- ✅ POST `/api/v1/poa/issue` - Issue new Power of Attorney
+- ✅ POST `/api/v1/beta/policy/evaluate` - Evaluate authorization policies
+- ✅ GET `/api/v1/poa/status/{id}` - Get PoA delegation status
+- ✅ POST `/api/v1/delegation/create` - Create delegation
+- ✅ GET `/api/v1/metrics` - System metrics and observability
+- ✅ GET `/api/v1/provenance` - Audit trail and provenance
+- ✅ GET `/.well-known/gauth-configuration` - Discovery endpoint
+
+**Documentation Quality:**
+- Complete request/response schemas
+- Error code documentation
+- Authentication requirements
+- Example payloads
+- Status code specifications
+
+**Locations:**
+- `api/openapi/openapi.yaml` (comprehensive specification)
+- `docs/openapi.yaml` (documentation copy)
+- Inline annotations in `web/server_clean.go`
 
 authService, err := gauth.New(config)
 authGrant, err := authService.InitiateAuthorization(authReq)

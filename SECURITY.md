@@ -1,6 +1,6 @@
 # Security Policy
 
-> Last Updated: 2025-10-17
+> Last Updated: 2025-11-05
 > Status: Active
 
 **Gimel Foundation gGmbH i.G. - GAuth RFC Implementation**

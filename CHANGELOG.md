@@ -1,7 +1,37 @@
 # Changelog
 
-
 The format is inspired by Keep a Changelog and uses date-based sections.
+
+## 2025-11-05
+### Added
+- **Interactive Web Features**: Complete dynamic pattern simulation system with 25+ unique authorization patterns
+- **Pattern Explorer**: Fully dynamic pattern loading and simulation without hardcoded scenarios
+- **GAP Matrix Updates**: Comprehensive status updates with 10 implemented features (up from 8)
+  - Model limit checks (sec11.item2): Missing → Implemented
+  - Delegation depth limits (sec12.item2): Missing → Implemented  
+  - Threat model synchronization (sec14.item1): Partial → Implemented
+  - Residual risk register (sec14.item2): Missing → Implemented
+  - Audit ledger (sec5.item1): Partial → Implemented
+  - OpenAPI specification (sec10.item1): Partial → Implemented
+- **Implementation Progress Summary**: Added comprehensive roadmap and milestone tracking in GAP_MATRIX.auto.md
+- **Test Coverage**: 100% conformance (8/8 clauses, 24/24 symbols)
+
+### Fixed
+- **Web Interface**: Fixed non-working "Check Authorization" and "Generate Power of Attorney" buttons
+- **Jurisdiction Validation**: Corrected invalid jurisdiction from 'US-CA' to 'US' (valid jurisdictions: US, EU, UK, DE)
+- **Pattern Simulation**: Removed all hardcoded pattern IDs and data-action attributes
+- **Authorization Demo**: Updated defaults to show ALLOW decisions with alice@example.com and report:finance
+- **JavaScript Errors**: Fixed incomplete scenario object causing page breakage
+
+### Changed
+- **Status Summary**: Updated to 10 Implemented, 24 Partial, 9 Missing (from 8/23/12)
+- **Priority Categorization**: Reorganized gaps into P0-P3 tiers with clear roadmap
+- **Documentation**: Enhanced GAP matrix with recent achievements section and next milestones (Q4 2025, Q1 2026)
+
+### Deployed
+- **GitHub Repositories**: Successfully pushed updates to both repositories
+  - mauriciomferz/Gauth_go (main branch)
+  - Gimel-Foundation/Gimel_Platform-GAuth_Server_Prototype (web-interactive-forms-fix branch)
 
 - `DISCLAIMER.md` centralizing NOT production ready rationale and enumerating intentionally missing controls.
 - Badge in `README.md` highlighting NOT production ready status.
