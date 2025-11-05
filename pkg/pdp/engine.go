@@ -57,6 +57,9 @@ type Decision struct {
 	Obligations  []Obligation
 	Trace        []EvaluationStep
 	Metadata     map[string]string
+	// P0.2: Conflict diagnostics for policy analysis
+	Conflicts    []PolicyConflict `json:"conflicts,omitempty"`
+	HasConflicts bool             `json:"has_conflicts"`
 }
 
 // Engine defines the PDP interface.
@@ -84,8 +87,11 @@ const (
 )
 
 // CombiningStrategy defines policy result combination behavior.
+// P0.2: Enhanced to return conflict diagnostics alongside decisions.
 type CombiningStrategy interface {
 	Combine(steps []EvaluationStep) (final Effect, allowPolicies []string, denyPolicies []string, reason string)
+	// CombineWithDiagnostics performs combination and detects conflicts
+	CombineWithDiagnostics(steps []EvaluationStep, policies []Policy) (final Effect, allowPolicies []string, denyPolicies []string, reason string, conflicts []PolicyConflict)
 	Name() string
 }
 
@@ -421,6 +427,30 @@ func (DenyOverridesStrategy) Combine(steps []EvaluationStep) (Effect, []string, 
 	return EffectDeny, nil, nil, defaultDenyReason
 }
 
+// CombineWithDiagnostics performs combination and detects permit-deny conflicts
+func (d DenyOverridesStrategy) CombineWithDiagnostics(steps []EvaluationStep, policies []Policy) (Effect, []string, []string, string, []PolicyConflict) {
+	effect, allowIDs, denyIDs, reason := d.Combine(steps)
+	
+	var conflicts []PolicyConflict
+	
+	// Detect permit-deny conflict
+	if len(allowIDs) > 0 && len(denyIDs) > 0 {
+		allIDs := append(append([]string{}, allowIDs...), denyIDs...)
+		conflicts = append(conflicts, PolicyConflict{
+			ID:          "runtime-conflict-1",
+			Type:        ConflictPermitDeny,
+			Severity:    SeverityHigh,
+			PolicyIDs:   allIDs,
+			Description: fmt.Sprintf("Deny-overrides resolved conflict: %d policies allowed, %d policies denied", len(allowIDs), len(denyIDs)),
+			Recommendation: "Deny policies took precedence. Consider making deny policies more specific or removing redundant allow policies.",
+			DetectedAt:     time.Now(),
+			ResolutionHint: "DENY effect applied (deny-overrides strategy)",
+		})
+	}
+	
+	return effect, allowIDs, denyIDs, reason, conflicts
+}
+
 // PermitOverridesStrategy final allow if any allow rule matched; else deny if any deny; else deny (no match).
 type PermitOverridesStrategy struct{}
 
@@ -444,6 +474,30 @@ func (PermitOverridesStrategy) Combine(steps []EvaluationStep) (Effect, []string
 	return EffectDeny, nil, nil, defaultDenyReason
 }
 
+// CombineWithDiagnostics performs combination and detects permit-deny conflicts
+func (p PermitOverridesStrategy) CombineWithDiagnostics(steps []EvaluationStep, policies []Policy) (Effect, []string, []string, string, []PolicyConflict) {
+	effect, allowIDs, denyIDs, reason := p.Combine(steps)
+	
+	var conflicts []PolicyConflict
+	
+	// Detect permit-deny conflict
+	if len(allowIDs) > 0 && len(denyIDs) > 0 {
+		allIDs := append(append([]string{}, allowIDs...), denyIDs...)
+		conflicts = append(conflicts, PolicyConflict{
+			ID:          "runtime-conflict-1",
+			Type:        ConflictPermitDeny,
+			Severity:    SeverityCritical, // Higher severity for permit-overrides
+			PolicyIDs:   allIDs,
+			Description: fmt.Sprintf("Permit-overrides resolved conflict: %d policies allowed, %d policies denied", len(allowIDs), len(denyIDs)),
+			Recommendation: "Allow policies took precedence. Consider adding mandatory obligations for audit logging or making allow policies more restrictive.",
+			DetectedAt:     time.Now(),
+			ResolutionHint: "ALLOW effect applied (permit-overrides strategy) - ensure this is intended behavior",
+		})
+	}
+	
+	return effect, allowIDs, denyIDs, reason, conflicts
+}
+
 // FirstApplicableStrategy picks first step with allow/deny and uses its effect.
 type FirstApplicableStrategy struct{}
 
@@ -458,6 +512,36 @@ func (FirstApplicableStrategy) Combine(steps []EvaluationStep) (Effect, []string
 		}
 	}
 	return EffectDeny, nil, nil, defaultDenyReason
+}
+
+// CombineWithDiagnostics performs combination with conflict detection for first-applicable
+func (f FirstApplicableStrategy) CombineWithDiagnostics(steps []EvaluationStep, policies []Policy) (Effect, []string, []string, string, []PolicyConflict) {
+	effect, allowIDs, denyIDs, reason := f.Combine(steps)
+	
+	var conflicts []PolicyConflict
+	
+	// Check if there are multiple matching policies (potential ordering issue)
+	var matchedPolicies []string
+	for _, s := range steps {
+		if s.Effect == outcomeAllow || s.Effect == outcomeDeny {
+			matchedPolicies = append(matchedPolicies, s.PolicyID)
+		}
+	}
+	
+	if len(matchedPolicies) > 1 {
+		conflicts = append(conflicts, PolicyConflict{
+			ID:          "runtime-conflict-1",
+			Type:        ConflictPriorityAmbiguity,
+			Severity:    SeverityMedium,
+			PolicyIDs:   matchedPolicies,
+			Description: fmt.Sprintf("First-applicable strategy: %d policies matched, using first (%s)", len(matchedPolicies), matchedPolicies[0]),
+			Recommendation: "Consider making policies mutually exclusive or using explicit priority ordering to avoid ambiguity.",
+			DetectedAt:     time.Now(),
+			ResolutionHint: fmt.Sprintf("Policy %s applied; remaining %d policies ignored", matchedPolicies[0], len(matchedPolicies)-1),
+		})
+	}
+	
+	return effect, allowIDs, denyIDs, reason, conflicts
 }
 
 // --- Match Helpers (simplistic; to be enhanced) ---
