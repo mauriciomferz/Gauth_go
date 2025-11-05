@@ -1626,6 +1626,20 @@ func WithReplayProtection(maxEntries int, ttl time.Duration) Option {
 // WithReplayStore installs a distributed replay store implementation. If provided, VerifyToken will
 // consult the store first (atomic first-seen semantics) and fall back to in-memory cache only if the
 // store is nil. Store errors are treated as miss (fail-open) but should be instrumented by metrics.
+//
+// For production deployments requiring replay protection across process restarts, use DurableReplayStore
+// with automatic snapshot scheduling and crash recovery:
+//
+//	config := replay.DurableReplayStoreConfig{
+//	    WALPath:          "/var/lib/gauth/replay.wal",
+//	    TTL:              24 * time.Hour,
+//	    SnapshotInterval: 5 * time.Minute,
+//	}
+//	durableStore, _ := replay.NewDurableReplayStore(config)
+//	adapter := replay.NewDurableReplayStoreAdapter(durableStore)
+//	svc, _ := NewService(WithReplayStore(adapter), ...)
+//
+// See docs/REPLAY_PERSISTENCE.md for architecture, recovery procedures, and operational guide.
 func WithReplayStore(rs ReplayStore) Option {
 	return func(s *Service) {
 		if rs != nil {

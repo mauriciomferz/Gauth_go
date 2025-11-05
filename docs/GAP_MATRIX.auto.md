@@ -2,7 +2,7 @@
 
 > Generated: 2025-11-05T19:00:00Z
 
-**Status Summary:** Implemented=18 | Partial=18 | Missing=8 | Conceptual=0 | Total=43
+**Status Summary:** Implemented=19 | Partial=18 | Missing=7 | Conceptual=0 | Total=43
 
 ## Capability Snapshot
 
@@ -67,7 +67,7 @@ Schema Version: 1
 |----|-------------|--------|----------|-----|----------|
 | sec6.item1 | Fail-closed replay mode | Partial | P1 | In-memory JTI map + optional ReplayStore reject duplicates/errors; missing durable persistence & eviction controls | pkg/gauth/gauth.go\|pkg/gauth/gauth_claims_test.go |
 | sec6.item2 | JTI format validation | Implemented | P2 | Need skew checks | docs/GAP_MATRIX.md:56 |
-| sec6.item3 | Replay persistence recovery | Missing | P2 | No WAL snapshot | docs/GAP_MATRIX.md:57 |
+| sec6.item3 | Replay persistence recovery | Implemented | P2 | DurableReplayStore with automatic snapshot scheduling (5m intervals), WAL compaction, crash recovery (load snapshot → replay WAL → merge state), graceful shutdown | pkg/replay/durable_replay_store.go\|pkg/replay/durable_replay_store_test.go\|docs/REPLAY_PERSISTENCE.md |
 
 ## Observability & Metrics
 
