@@ -2,7 +2,7 @@
 
 > Generated: 2025-11-05T19:00:00Z
 
-**Status Summary:** Implemented=19 | Partial=18 | Missing=7 | Conceptual=0 | Total=43
+**Status Summary:** Implemented=20 | Partial=17 | Missing=7 | Conceptual=0 | Total=43
 
 ## Capability Snapshot
 
@@ -58,7 +58,7 @@ Schema Version: 1
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|
 | sec5.item1 | Immutable audit ledger | Implemented | P0 | **COMPLETED**: BoltDB with hash chain verification, receipt chain with Merkle roots, integrity gauges, external audit sink integration with async buffering, multiplex to SIEM/compliance/queue, event filtering, fail-open error handling; remaining: external anchoring to production transparency logs (planned P1.4.1) | pkg/rfc0111/audit_sink_integration.go (WithAuditSink, AsyncAuditSink, MultiplexAuditSink, FilteredAuditSink)\|pkg/rfc0111/audit_sink_integration_test.go (11 tests)\|pkg/rfc0111/rfc0111.go (Service.auditSink field, sendToAuditSink integration in CreateDelegation/VerifyToken/RevokeToken/AttachEvidence)\|docs/AUDIT_SINK_INTEGRATION.md\|pkg/audit/file_logger.go\|docs/THREAT_MODEL.md |
-| sec5.item2 | Delegation storage durability | Partial | P2 | No indexing or pruning | docs/GAP_MATRIX.md:49 |
+| sec5.item2 | Delegation storage durability | Implemented | P2 | Enhanced BoltRepository with multi-index queries (FindByStatus, FindExpired), pruning methods (PruneExpired/PruneRevoked with retention cutoffs), statistics (Stats), automatic index maintenance on Create/Update, thread-safe concurrent access | pkg/rfc0111/bolt_repository.go\|pkg/rfc0111/bolt_repository_indexing_test.go\|docs/DELEGATION_STORAGE.md |
 | sec5.item3 | Revocation anchoring | Partial | P2 | No external notarization | docs/GAP_MATRIX.md:50 |
 
 ## Replay & Token Security
