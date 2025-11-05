@@ -285,8 +285,10 @@ func (pf *PASETOFooter) ToJSON() (string, error) {
 }
 
 // isValidTokenType checks if the token type is valid according to RFC standards
+// and GAuth-specific types (P2.10 sec1.item2).
 func isValidTokenType(tokenType string) bool {
 	validTypes := map[string]bool{
+		// Standard JWT/PASETO types (RFC 7519)
 		"JWT":           true,
 		"PASETO":        true,
 		"access_token":  true,
@@ -294,6 +296,10 @@ func isValidTokenType(tokenType string) bool {
 		"id_token":      true,
 		"at+jwt":        true,
 		"rt+jwt":        true,
+		// GAuth-specific types (P2.10 sec1.item2)
+		"gauth.delegation": true,
+		"gauth.token":      true,
+		"gauth.capability": true,
 	}
 	return validTypes[tokenType]
 }

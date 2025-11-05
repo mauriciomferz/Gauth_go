@@ -1,6 +1,10 @@
 package token
 
-import "time"
+import (
+	"time"
+
+	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
+)
 
 // Envelope is a draft structured token payload (Milestone 2A scaffold).
 // Not yet wired into issuance; future versions will sign + serialize this.
@@ -59,4 +63,9 @@ type EnvelopeV2 struct {
 	DetachedSignature    string `json:"detached_sig,omitempty"`
 	DetachedSignatureAlg string `json:"detached_sig_alg,omitempty"`
 	DetachedSignatureKid string `json:"detached_sig_kid,omitempty"`
+	// AdvancedClaims provides comprehensive token metadata including typ semantic enforcement, claims set metadata,
+	// and extensible restrictions. When present, VerifyToken enforces typ-specific validation rules (e.g. delegation
+	// tokens must have valid PoA reference, capability tokens must specify supported operations). Omitted for
+	// backward compatibility with tokens issued before P2.10 (sec1.item2 integration).
+	AdvancedClaims *gauth.AdvancedClaims `json:"advanced_claims,omitempty"`
 }

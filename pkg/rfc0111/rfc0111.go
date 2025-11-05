@@ -27,6 +27,7 @@ import (
 	cr "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/crypto"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/crypto/keyring"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/delegation"
+	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/pdp"
 	poaPkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
@@ -1034,6 +1035,45 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 			s.metrics.IncDelegationStatusTransitionFailures() // Reuse existing metric for suspended rejections
 		}
 		return nil, rfc.New(rfc.ErrUnauthorized, "delegation is suspended")
+	}
+	// Advanced claims validation (P2.10 sec1.item2): Enforce typ semantic rules when AdvancedClaims present.
+	// Feature-gated by GAUTH_ADVANCED_CLAIMS=1 for backward compatibility with tokens issued before P2.10.
+	if useV2 && env2.AdvancedClaims != nil && os.Getenv("GAUTH_ADVANCED_CLAIMS") == "1" {
+		// Validate AdvancedClaims semantic rules (expiration, typ, metadata)
+		if err := env2.AdvancedClaims.ValidateSemantics(); err != nil {
+			if s.metrics != nil {
+				s.metrics.IncSignatureVerificationFailures() // Reuse existing metric for claims validation failures
+			}
+			return nil, rfc.New(rfc.ErrUnauthorized, fmt.Sprintf("advanced claims validation failed: %v", err))
+		}
+		// Enforce typ-specific validation rules
+		switch env2.AdvancedClaims.TokenType {
+		case "gauth.delegation":
+			// Delegation tokens must have non-empty delegation ID and scope
+			if env2.DelegationID == "" {
+				return nil, rfc.New(rfc.ErrUnauthorized, "typ=gauth.delegation requires valid delegation_id")
+			}
+			if len(env2.AdvancedClaims.Scope) == 0 {
+				return nil, rfc.New(rfc.ErrUnauthorized, "typ=gauth.delegation requires non-empty scope")
+			}
+		case "gauth.capability":
+			// Capability tokens must have scope prefixed with "cap:"
+			hasCapScope := false
+			for _, scope := range env2.AdvancedClaims.Scope {
+				if len(scope) > 4 && scope[:4] == "cap:" {
+					hasCapScope = true
+					break
+				}
+			}
+			if !hasCapScope {
+				return nil, rfc.New(rfc.ErrUnauthorized, "typ=gauth.capability requires at least one 'cap:' prefixed scope")
+			}
+		case "gauth.token":
+			// Generic tokens have no special requirements (minimal validation)
+		default:
+			// Unknown typ values rejected for security (fail-closed)
+			return nil, rfc.New(rfc.ErrUnauthorized, fmt.Sprintf("unknown token type: %s", env2.AdvancedClaims.TokenType))
+		}
 	}
 	// Authenticity verification (shared helper)
 	if poa.Signature != nil {
@@ -3663,6 +3703,67 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 				}
 			} else if sErr := os.Getenv("GAUTH_DETACHED_SIGNATURE"); sErr == "1" && s.metrics != nil { // signer unavailable
 				s.metrics.IncSignatureIssueFailures()
+			}
+		}
+		// Advanced claims integration (P2.10 sec1.item2): Populate AdvancedClaims with typ semantic enforcement
+		// and claims set metadata. Feature-gated by GAUTH_ADVANCED_CLAIMS=1 for backward compatibility.
+		if os.Getenv("GAUTH_ADVANCED_CLAIMS") == "1" {
+			// Compute delegation chain length (best-effort; fallback to 1 if parent chain unavailable)
+			chainLength := 1
+			if poa.ParentPOAID != "" {
+				// Count chain depth by traversing parent references
+				depth := 1
+				parentID := poa.ParentPOAID
+				for depth < 100 { // Safety limit to prevent infinite loops
+					if parentPOA, found := s.repo.Get(parentID); found && parentPOA != nil {
+						depth++
+						if parentPOA.ParentPOAID == "" {
+							break
+						}
+						parentID = parentPOA.ParentPOAID
+					} else {
+						break
+					}
+				}
+				chainLength = depth
+			}
+			// Determine token type based on delegation properties
+			tokenType := "gauth.delegation" // Default typ for delegation tokens
+			if len(poa.Scope) == 0 {
+				tokenType = "gauth.token" // Generic token without specific delegated scopes
+			}
+			// Check if token represents capability-based access (heuristic: "cap:" scope prefix)
+			for _, scope := range poa.Scope {
+				if len(scope) > 4 && scope[:4] == "cap:" {
+					tokenType = "gauth.capability"
+					break
+				}
+			}
+			// Build claims metadata with issuer trust level, delegation chain length, and policy version
+			claimsMeta := &gauth.ClaimsMetadata{
+				Version:      "1.0",                                            // Claims schema version
+				Capabilities: poa.Scope,                                        // Supported capabilities = delegated scopes
+				Source:       "rfc0111-service",                                // Claims source identifier
+				Confidence:   1.0,                                              // Full confidence for directly issued tokens
+			}
+			// Populate AdvancedClaims with standard JWT claims + GAuth-specific metadata
+			env2.AdvancedClaims = &gauth.AdvancedClaims{
+				Subject:   poa.Grantee,
+				Issuer:    poa.Grantor,
+				Audience:  []string{poa.Grantee}, // Audience = grantee (token intended for grantee's use)
+				ExpiresAt: poa.ValidUntil.Unix(),
+				IssuedAt:  now.Unix(),
+				NotBefore: now.Unix(),
+				JWTID:     env2.JTI,
+				Scope:     poa.Scope,
+				TokenType: tokenType, // typ semantic enforcement (gauth.delegation, gauth.token, gauth.capability)
+				ClientID:  poa.ID,    // ClientID = delegation ID for traceability
+				ClaimsMetadata: claimsMeta,
+				Custom: map[string]interface{}{
+					"delegation_chain_length": chainLength,
+					"poa_version":             poaVersion,
+					"canonical_digest":        digest,
+				},
 			}
 		}
 		plain, err = json.Marshal(env2)
