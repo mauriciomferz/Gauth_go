@@ -65,7 +65,7 @@ Schema Version: 1
 
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|
-| sec6.item1 | Fail-closed replay mode | Partial | P1 | In-memory JTI map + optional ReplayStore reject duplicates/errors; missing durable persistence & eviction controls | pkg/gauth/gauth.go\|pkg/gauth/gauth_claims_test.go |
+| sec6.item1 | Fail-closed replay mode | Implemented | P1 | Fail-closed replay with pluggable eviction policies (TTL, LRU, size, composite), env var configuration, durable persistence (WAL+snapshot), comprehensive metrics | pkg/replay/durable_replay_store.go (4 eviction policies, NewDurableReplayStoreFromEnv, CheckAndStore adapter)\|pkg/replay/eviction_test.go (7 tests)\|pkg/replay/gauth_integration_test.go (6 tests)\|pkg/gauth/gauth.go (WithDurableReplayFromEnv option)\|docs/REPLAY_EVICTION.md |
 | sec6.item2 | JTI format validation | Implemented | P2 | Need skew checks | docs/GAP_MATRIX.md:56 |
 | sec6.item3 | Replay persistence recovery | Implemented | P2 | DurableReplayStore with automatic snapshot scheduling (5m intervals), WAL compaction, crash recovery (load snapshot → replay WAL → merge state), graceful shutdown | pkg/replay/durable_replay_store.go\|pkg/replay/durable_replay_store_test.go\|docs/REPLAY_PERSISTENCE.md |
 

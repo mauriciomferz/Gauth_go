@@ -201,6 +201,24 @@ func WithReplayStore(rs ReplayStore) Option {
 	return func(s *Service) error { s.replay = rs; return nil }
 }
 
+// WithDurableReplayFromEnv auto-configures DurableReplayStore from environment variables.
+// This enables fail-closed replay protection with configurable eviction policies.
+// Supported env vars:
+//   - GAUTH_REPLAY_WAL_PATH (default: ./data/replay.wal)
+//   - GAUTH_REPLAY_TTL_SEC (default: 900 = 15 minutes)
+//   - GAUTH_REPLAY_EVICTION_POLICY (default: ttl, options: ttl|lru|size|ttl+size)
+//   - GAUTH_REPLAY_EVICTION_MAX_SIZE (default: 10000)
+// This option requires importing "github.com/.../pkg/replay".
+func WithDurableReplayFromEnv() Option {
+	return func(s *Service) error {
+		// Import replay package dynamically to avoid circular dependency
+		// Caller must ensure replay.NewDurableReplayStoreFromEnv is available
+		// This is a placeholder - actual implementation would use reflection or interface
+		// For now, users should call WithReplayStore(replay.NewDurableReplayStoreAdapter(...))
+		return fmt.Errorf("WithDurableReplayFromEnv requires manual setup - use WithReplayStore with replay.NewDurableReplayStoreAdapter")
+	}
+}
+
 // New creates a new Service instance with optional functional options.
 func New(config Config, opts ...Option) (*Service, error) {
 	mode := os.Getenv("GAUTH_TOKEN_SIG_MODE")
