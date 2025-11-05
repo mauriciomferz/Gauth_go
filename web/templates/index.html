@@ -3962,7 +3962,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                                     <option value="Healthcare Patient Consent (4-of-6)">Healthcare Patient Consent (4-of-6)</option>
                                 </optgroup>
                             </select>
-                            <button data-action="load-pattern" data-pattern-id="delegation-chain" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors mb-2">
+                            <button data-action="load-pattern" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors mb-2">
                                 <i class="fas fa-download mr-2"></i>
                                 Load Pattern
                             </button>
@@ -3990,7 +3990,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                             </div>
                         </div>
                         <div id="simulate-button-container" class="mt-4 pattern-button-protected" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
-                            <button id="simulate-pattern-button" data-pattern-id="hierarchical" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors" style="display: block !important;">
+                            <button id="simulate-pattern-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors" style="display: block !important;">
                                 <i class="fas fa-play mr-2"></i>
                                 Simulate Pattern
                             </button>
@@ -7944,8 +7944,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                 console.log('🔧 Button container exists but button is missing - recreating button...');
                 const newButton = document.createElement('button');
                 newButton.id = 'simulate-pattern-button';
-                newButton.setAttribute('data-action', 'simulate-pattern');
-                newButton.setAttribute('data-pattern-id', 'hierarchical');
+                // DON'T add data-action - let it use the dedicated simulate-pattern-button handler
                 newButton.className = 'w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors';
                 newButton.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important;';
                 newButton.innerHTML = '<i class="fas fa-play mr-2"></i>Simulate Pattern';
@@ -7966,8 +7965,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                 // Create the simulate button
                 const newButton = document.createElement('button');
                 newButton.id = 'simulate-pattern-button';
-                newButton.setAttribute('data-action', 'simulate-pattern');
-                newButton.setAttribute('data-pattern-id', 'hierarchical');
+                // DON'T add data-action - let it use the dedicated simulate-pattern-button handler
                 newButton.className = 'w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors';
                 newButton.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important;';
                 newButton.innerHTML = '<i class="fas fa-play mr-2"></i>Simulate Pattern';
@@ -8969,17 +8967,17 @@ Generated: ${new Date().toISOString()}
                                                 <div>
                                                     <label class="block text-sm font-semibold text-gray-700 mb-1">Subject</label>
                                                     <select class="w-full p-2 border rounded" id="auth-subject">
-                                                        <option value="alice@company.com">alice@company.com</option>
-                                                        <option value="bob@vendor.com">bob@vendor.com</option>
+                                                        <option value="alice@example.com">alice@example.com (has finance access)</option>
+                                                        <option value="bob@example.com">bob@example.com (no access)</option>
                                                         <option value="ai-agent-001">ai-agent-001</option>
                                                     </select>
                                                 </div>
                                                 <div>
                                                     <label class="block text-sm font-semibold text-gray-700 mb-1">Resource</label>
                                                     <select class="w-full p-2 border rounded" id="auth-resource">
+                                                        <option value="report:finance">report:finance (demo policy exists)</option>
                                                         <option value="/files/confidential.pdf">/files/confidential.pdf</option>
                                                         <option value="/api/payment">/api/payment</option>
-                                                        <option value="/admin/users">/admin/users</option>
                                                     </select>
                                                 </div>
                                                 <div>
@@ -11847,6 +11845,17 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
         console.log('Original text:', originalText);
         console.log('Original class:', originalClass);
         
+        // Get the selected pattern
+        const patternSelector = document.getElementById('pattern-selector');
+        const selectedPattern = patternSelector ? patternSelector.value : '';
+        
+        if (!selectedPattern) {
+            showActionMessage('⚠️ Please select a pattern first!', 'warning');
+            return;
+        }
+        
+        console.log('📋 Loading pattern:', selectedPattern);
+        
         button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Loading Pattern...';
         button.disabled = true;
         
@@ -11864,51 +11873,27 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
                                 <i class="fas fa-check-circle text-green-600 mr-2"></i>
                                 Pattern Loaded Successfully
                             </h5>
-                            <p class="text-sm text-gray-600">Hierarchical Delegation Chain - Enterprise Configuration</p>
+                            <p class="text-sm text-gray-600">${selectedPattern}</p>
                         </div>
                         
-                        <div class="space-y-3">
-                            <div class="flex items-start">
-                                <div class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                                    <span class="text-blue-600 font-bold text-sm">1</span>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="font-semibold text-gray-900">CEO (Root Authority)</p>
-                                    <p class="text-sm text-gray-600">Full authorization scope • 90-day duration</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-start ml-4">
-                                <div class="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
-                                    <span class="text-purple-600 font-bold text-sm">2</span>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="font-semibold text-gray-900">CFO (Delegated)</p>
-                                    <p class="text-sm text-gray-600">Financial operations • $100K limit</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-start ml-8">
-                                <div class="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                                    <span class="text-green-600 font-bold text-sm">3</span>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="font-semibold text-gray-900">AI Agent (Sub-delegated)</p>
-                                    <p class="text-sm text-gray-600">Automated approvals • $10K limit</p>
-                                </div>
-                            </div>
+                        <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                            <p class="text-sm text-gray-700">
+                                <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+                                <strong>Pattern loaded and ready for simulation.</strong>
+                            </p>
+                            <p class="text-sm text-gray-600 mt-2">
+                                Click the "Simulate Pattern" button below to see this pattern in action with specific scenarios and timing.
+                            </p>
                         </div>
                         
-                        <div class="mt-4 pt-3 border-t border-gray-300">
-                            <div class="grid grid-cols-2 gap-3 text-sm">
-                                <div class="bg-blue-50 rounded p-2">
-                                    <p class="text-gray-600">Cascade Depth</p>
-                                    <p class="font-semibold text-gray-900">3 Levels</p>
-                                </div>
-                                <div class="bg-green-50 rounded p-2">
-                                    <p class="text-gray-600">Status</p>
-                                    <p class="font-semibold text-green-600">Ready to Simulate</p>
-                                </div>
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div class="bg-green-50 rounded p-3 border border-green-200">
+                                <p class="text-gray-600 text-xs mb-1">Status</p>
+                                <p class="font-semibold text-green-700"><i class="fas fa-check-circle mr-1"></i>Ready</p>
+                            </div>
+                            <div class="bg-purple-50 rounded p-3 border border-purple-200">
+                                <p class="text-gray-600 text-xs mb-1">Selected Pattern</p>
+                                <p class="font-semibold text-purple-700 text-xs">${selectedPattern.substring(0, 30)}...</p>
                             </div>
                         </div>
                     </div>
@@ -11932,8 +11917,252 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
         console.log('Original text:', originalText);
         console.log('Original class:', originalClass);
         
+        // Get the selected pattern
+        const patternSelector = document.getElementById('pattern-selector');
+        const selectedPattern = patternSelector ? patternSelector.value : 'hierarchical';
+        console.log('📋 Selected pattern for simulation:', selectedPattern);
+        
         button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Simulating Pattern...';
         button.disabled = true;
+        
+        // Define different scenarios based on pattern type
+        const patternScenarios = {
+            // Simple Delegation Patterns
+            'Manager → Assistant (Simple Delegation)': {
+                title: 'Manager → Assistant (Simple Delegation)',
+                steps: [
+                    { name: 'Manager Authorization', time: '0.08s', icon: 'fa-user-tie', color: 'green' },
+                    { name: 'Delegation Token Created', time: '0.05s', icon: 'fa-key', color: 'green', indent: 1 },
+                    { name: 'Assistant Authorized', time: '0.04s', icon: 'fa-user', color: 'green', indent: 2 },
+                    { name: 'Proof Generated', time: '0.02s', icon: 'fa-shield-alt', color: 'blue' },
+                    { name: 'Audit Logged', time: '0.01s', icon: 'fa-clipboard', color: 'purple' }
+                ],
+                totalTime: '0.20s'
+            },
+            'Project Lead → Developer (Task Assignment)': {
+                title: 'Project Lead → Developer (Task Assignment)',
+                steps: [
+                    { name: 'Project Lead Verified', time: '0.07s', icon: 'fa-user-cog', color: 'green' },
+                    { name: 'Task Scope Validated', time: '0.06s', icon: 'fa-tasks', color: 'green', indent: 1 },
+                    { name: 'Developer Assigned', time: '0.05s', icon: 'fa-code', color: 'green', indent: 2 },
+                    { name: 'Permission Granted', time: '0.03s', icon: 'fa-check', color: 'blue' }
+                ],
+                totalTime: '0.21s'
+            },
+            'Admin → User (Permission Grant)': {
+                title: 'Admin → User (Permission Grant)',
+                steps: [
+                    { name: 'Admin Credentials Verified', time: '0.09s', icon: 'fa-user-shield', color: 'green' },
+                    { name: 'Permission Scope Checked', time: '0.05s', icon: 'fa-list-check', color: 'green', indent: 1 },
+                    { name: 'User Access Granted', time: '0.04s', icon: 'fa-user-plus', color: 'green', indent: 2 },
+                    { name: 'Role Updated', time: '0.03s', icon: 'fa-id-card', color: 'blue' }
+                ],
+                totalTime: '0.21s'
+            },
+            'Supervisor → Employee (Authority Transfer)': {
+                title: 'Supervisor → Employee (Authority Transfer)',
+                steps: [
+                    { name: 'Supervisor Authorization', time: '0.08s', icon: 'fa-user-tie', color: 'green' },
+                    { name: 'Authority Scope Defined', time: '0.06s', icon: 'fa-sitemap', color: 'green', indent: 1 },
+                    { name: 'Employee Empowered', time: '0.05s', icon: 'fa-user-check', color: 'green', indent: 2 },
+                    { name: 'Transfer Recorded', time: '0.02s', icon: 'fa-exchange-alt', color: 'blue' }
+                ],
+                totalTime: '0.21s'
+            },
+            
+            // Hierarchical Patterns
+            'CEO → CFO → Finance AI (Hierarchical)': {
+                title: 'CEO → CFO → Finance AI (Hierarchical)',
+                steps: [
+                    { name: 'CEO Authorization', time: '0.12s', icon: 'fa-crown', color: 'green' },
+                    { name: 'CFO Delegation Verified', time: '0.10s', icon: 'fa-user-tie', color: 'green', indent: 1 },
+                    { name: 'Finance AI Activated', time: '0.08s', icon: 'fa-robot', color: 'green', indent: 2 },
+                    { name: 'Financial Controls Applied', time: '0.05s', icon: 'fa-dollar-sign', color: 'blue', indent: 2 },
+                    { name: 'Compliance Check Passed', time: '0.04s', icon: 'fa-shield-check', color: 'blue' },
+                    { name: 'Audit Trail Created', time: '0.02s', icon: 'fa-database', color: 'purple' }
+                ],
+                totalTime: '0.41s'
+            },
+            'Board → CEO → VP → Manager (Corporate Chain)': {
+                title: 'Board → CEO → VP → Manager (Corporate Chain)',
+                steps: [
+                    { name: 'Board Resolution Approved', time: '0.15s', icon: 'fa-gavel', color: 'green' },
+                    { name: 'CEO Authorization', time: '0.12s', icon: 'fa-crown', color: 'green', indent: 1 },
+                    { name: 'VP Delegation', time: '0.10s', icon: 'fa-user-tie', color: 'green', indent: 2 },
+                    { name: 'Manager Empowerment', time: '0.08s', icon: 'fa-user', color: 'green', indent: 3 },
+                    { name: 'Chain Verified', time: '0.06s', icon: 'fa-link', color: 'blue' },
+                    { name: 'Governance Logged', time: '0.03s', icon: 'fa-book', color: 'purple' }
+                ],
+                totalTime: '0.54s'
+            },
+            'CTO → Director → Team Lead → Developer': {
+                title: 'CTO → Director → Team Lead → Developer',
+                steps: [
+                    { name: 'CTO Technical Authorization', time: '0.11s', icon: 'fa-microchip', color: 'green' },
+                    { name: 'Director Approval', time: '0.09s', icon: 'fa-user-cog', color: 'green', indent: 1 },
+                    { name: 'Team Lead Assignment', time: '0.07s', icon: 'fa-users', color: 'green', indent: 2 },
+                    { name: 'Developer Access Granted', time: '0.05s', icon: 'fa-code', color: 'green', indent: 3 },
+                    { name: 'Technical Controls Set', time: '0.04s', icon: 'fa-cog', color: 'blue' }
+                ],
+                totalTime: '0.36s'
+            },
+            'Military Chain of Command': {
+                title: 'Military Chain of Command',
+                steps: [
+                    { name: 'General Orders Issued', time: '0.14s', icon: 'fa-star', color: 'green' },
+                    { name: 'Colonel Verification', time: '0.11s', icon: 'fa-shield', color: 'green', indent: 1 },
+                    { name: 'Major Authorization', time: '0.09s', icon: 'fa-medal', color: 'green', indent: 2 },
+                    { name: 'Captain Execution', time: '0.07s', icon: 'fa-user-shield', color: 'green', indent: 3 },
+                    { name: 'Command Chain Verified', time: '0.05s', icon: 'fa-sitemap', color: 'blue' },
+                    { name: 'Military Audit Logged', time: '0.02s', icon: 'fa-file-contract', color: 'purple' }
+                ],
+                totalTime: '0.48s'
+            },
+            'Government Authority Cascade': {
+                title: 'Government Authority Cascade',
+                steps: [
+                    { name: 'Cabinet Authorization', time: '0.16s', icon: 'fa-landmark', color: 'green' },
+                    { name: 'Ministry Approval', time: '0.13s', icon: 'fa-building', color: 'green', indent: 1 },
+                    { name: 'Department Head Delegation', time: '0.10s', icon: 'fa-user-tie', color: 'green', indent: 2 },
+                    { name: 'Agency Execution', time: '0.08s', icon: 'fa-university', color: 'green', indent: 3 },
+                    { name: 'Legal Compliance Verified', time: '0.06s', icon: 'fa-balance-scale', color: 'blue' },
+                    { name: 'Public Record Created', time: '0.03s', icon: 'fa-file-alt', color: 'purple' }
+                ],
+                totalTime: '0.56s'
+            },
+            
+            // Revocation Patterns
+            'Emergency Revocation Cascade': {
+                title: 'Emergency Revocation Cascade',
+                steps: [
+                    { name: 'Emergency Detected', time: '0.05s', icon: 'fa-exclamation-triangle', color: 'yellow' },
+                    { name: 'All Tokens Invalidated', time: '0.08s', icon: 'fa-ban', color: 'yellow', indent: 1 },
+                    { name: 'Cascading Revocation', time: '0.12s', icon: 'fa-undo-alt', color: 'yellow', indent: 1 },
+                    { name: 'Access Blocked', time: '0.06s', icon: 'fa-lock', color: 'blue' },
+                    { name: 'Security Alert Sent', time: '0.03s', icon: 'fa-bell', color: 'purple' },
+                    { name: 'Incident Logged', time: '0.02s', icon: 'fa-clipboard-list', color: 'purple' }
+                ],
+                totalTime: '0.36s'
+            },
+            'Selective Authority Revocation': {
+                title: 'Selective Authority Revocation',
+                steps: [
+                    { name: 'Revocation Request Received', time: '0.07s', icon: 'fa-hand-paper', color: 'yellow' },
+                    { name: 'Target Tokens Identified', time: '0.09s', icon: 'fa-search', color: 'yellow', indent: 1 },
+                    { name: 'Selective Invalidation', time: '0.10s', icon: 'fa-times-circle', color: 'yellow', indent: 2 },
+                    { name: 'Remaining Tokens Preserved', time: '0.05s', icon: 'fa-check-circle', color: 'blue' },
+                    { name: 'Revocation Audit Logged', time: '0.02s', icon: 'fa-file-alt', color: 'purple' }
+                ],
+                totalTime: '0.33s'
+            },
+            'Time-Based Auto Revocation': {
+                title: 'Time-Based Auto Revocation',
+                steps: [
+                    { name: 'Expiration Time Reached', time: '0.04s', icon: 'fa-clock', color: 'yellow' },
+                    { name: 'Token Validity Check', time: '0.06s', icon: 'fa-hourglass-end', color: 'yellow', indent: 1 },
+                    { name: 'Automatic Revocation', time: '0.08s', icon: 'fa-power-off', color: 'yellow', indent: 2 },
+                    { name: 'Access Terminated', time: '0.05s', icon: 'fa-sign-out-alt', color: 'blue' },
+                    { name: 'Expiration Event Logged', time: '0.02s', icon: 'fa-calendar-times', color: 'purple' }
+                ],
+                totalTime: '0.25s'
+            },
+            'Security Breach Response': {
+                title: 'Security Breach Response',
+                steps: [
+                    { name: 'Breach Detected', time: '0.03s', icon: 'fa-shield-virus', color: 'yellow' },
+                    { name: 'Immediate Lockdown', time: '0.05s', icon: 'fa-door-closed', color: 'yellow', indent: 1 },
+                    { name: 'All Sessions Terminated', time: '0.10s', icon: 'fa-sign-out-alt', color: 'yellow', indent: 1 },
+                    { name: 'Credentials Invalidated', time: '0.12s', icon: 'fa-key-slash', color: 'yellow', indent: 2 },
+                    { name: 'Security Team Alerted', time: '0.04s', icon: 'fa-user-secret', color: 'blue' },
+                    { name: 'Forensic Log Created', time: '0.03s', icon: 'fa-file-medical-alt', color: 'purple' }
+                ],
+                totalTime: '0.37s'
+            },
+            
+            // Multi-Signature Patterns
+            'Dual Control for High-Value Transactions': {
+                title: 'Dual Control for High-Value Transactions',
+                steps: [
+                    { name: 'Signature 1/2 Collected (Controller)', time: '0.10s', icon: 'fa-signature', color: 'green' },
+                    { name: 'Signature 2/2 Collected (Approver)', time: '0.09s', icon: 'fa-signature', color: 'green' },
+                    { name: 'Threshold Met (2-of-2)', time: '0.06s', icon: 'fa-check-double', color: 'blue' },
+                    { name: 'Transaction Authorized', time: '0.04s', icon: 'fa-dollar-sign', color: 'blue' },
+                    { name: 'Dual Control Audit', time: '0.02s', icon: 'fa-file-invoice-dollar', color: 'purple' }
+                ],
+                totalTime: '0.31s'
+            },
+            '3-of-5 Board Approval': {
+                title: '3-of-5 Board Approval',
+                steps: [
+                    { name: 'Signature 1/5 (Board Member A)', time: '0.09s', icon: 'fa-signature', color: 'green' },
+                    { name: 'Signature 2/5 (Board Member B)', time: '0.08s', icon: 'fa-signature', color: 'green' },
+                    { name: 'Signature 3/5 (Board Member C)', time: '0.09s', icon: 'fa-signature', color: 'green' },
+                    { name: 'Threshold Reached (3-of-5)', time: '0.05s', icon: 'fa-check-circle', color: 'blue' },
+                    { name: 'Board Resolution Approved', time: '0.04s', icon: 'fa-gavel', color: 'blue' },
+                    { name: 'Corporate Governance Logged', time: '0.03s', icon: 'fa-book', color: 'purple' }
+                ],
+                totalTime: '0.38s'
+            },
+            'Treasury Multi-Signature (2-of-3)': {
+                title: 'Treasury Multi-Signature (2-of-3)',
+                steps: [
+                    { name: 'Treasurer Signature (1/3)', time: '0.10s', icon: 'fa-signature', color: 'green' },
+                    { name: 'CFO Signature (2/3)', time: '0.09s', icon: 'fa-signature', color: 'green' },
+                    { name: 'Threshold Met (2-of-3)', time: '0.06s', icon: 'fa-check-double', color: 'blue' },
+                    { name: 'Treasury Release Authorized', time: '0.05s', icon: 'fa-money-check-alt', color: 'blue' },
+                    { name: 'Financial Audit Trail', time: '0.02s', icon: 'fa-receipt', color: 'purple' }
+                ],
+                totalTime: '0.32s'
+            },
+            'Nuclear Launch Consensus (5-of-7)': {
+                title: 'Nuclear Launch Consensus (5-of-7)',
+                steps: [
+                    { name: 'Commander Signature (1/7)', time: '0.11s', icon: 'fa-signature', color: 'green' },
+                    { name: 'Deputy Signature (2/7)', time: '0.10s', icon: 'fa-signature', color: 'green' },
+                    { name: 'Officer A Signature (3/7)', time: '0.10s', icon: 'fa-signature', color: 'green' },
+                    { name: 'Officer B Signature (4/7)', time: '0.09s', icon: 'fa-signature', color: 'green' },
+                    { name: 'Officer C Signature (5/7)', time: '0.09s', icon: 'fa-signature', color: 'green' },
+                    { name: 'Critical Threshold Met', time: '0.07s', icon: 'fa-radiation', color: 'blue' },
+                    { name: 'Maximum Security Audit', time: '0.04s', icon: 'fa-shield-alt', color: 'purple' }
+                ],
+                totalTime: '0.60s'
+            },
+            'Smart Contract Multi-Sig': {
+                title: 'Smart Contract Multi-Sig',
+                steps: [
+                    { name: 'Wallet 1 Signature', time: '0.08s', icon: 'fa-wallet', color: 'green' },
+                    { name: 'Wallet 2 Signature', time: '0.08s', icon: 'fa-wallet', color: 'green' },
+                    { name: 'Wallet 3 Signature', time: '0.07s', icon: 'fa-wallet', color: 'green' },
+                    { name: 'Smart Contract Validation', time: '0.10s', icon: 'fa-file-contract', color: 'blue' },
+                    { name: 'Blockchain Transaction Executed', time: '0.12s', icon: 'fa-cubes', color: 'blue' },
+                    { name: 'On-Chain Audit', time: '0.03s', icon: 'fa-link', color: 'purple' }
+                ],
+                totalTime: '0.48s'
+            },
+            'Healthcare Patient Consent (4-of-6)': {
+                title: 'Healthcare Patient Consent (4-of-6)',
+                steps: [
+                    { name: 'Patient Signature (1/6)', time: '0.09s', icon: 'fa-signature', color: 'green' },
+                    { name: 'Primary Physician (2/6)', time: '0.08s', icon: 'fa-user-md', color: 'green' },
+                    { name: 'Specialist Approval (3/6)', time: '0.08s', icon: 'fa-stethoscope', color: 'green' },
+                    { name: 'Family Member (4/6)', time: '0.07s', icon: 'fa-users', color: 'green' },
+                    { name: 'Medical Consensus Reached', time: '0.06s', icon: 'fa-heartbeat', color: 'blue' },
+                    { name: 'HIPAA Compliance Verified', time: '0.05s', icon: 'fa-shield-check', color: 'blue' },
+                    { name: 'Medical Records Updated', time: '0.03s', icon: 'fa-file-medical', color: 'purple' }
+                ],
+                totalTime: '0.46s'
+            }
+        };
+        
+        const scenario = patternScenarios[selectedPattern] || {
+            title: 'Generic Authorization Pattern',
+            steps: [
+                { name: 'Authorization Verified', time: '0.10s', icon: 'fa-check', color: 'green' },
+                { name: 'Proof Generated', time: '0.05s', icon: 'fa-shield-alt', color: 'blue' },
+                { name: 'Audit Logged', time: '0.02s', icon: 'fa-clipboard', color: 'purple' }
+            ],
+            totalTime: '0.17s'
+        };
         
         setTimeout(() => {
             // Update visualization area with simulation results
@@ -11941,68 +12170,58 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
             console.log('🎯 Found visualization area:', vizArea);
             
             if (vizArea) {
-                console.log('✅ Updating visualization area with simulation results...');
+                console.log('✅ Updating visualization area with simulation results for:', selectedPattern);
+                console.log('✅ Updating visualization area with simulation results for:', selectedPattern);
+                
+                // Generate steps HTML dynamically
+                const stepsHTML = scenario.steps.map(step => {
+                    const marginLeft = (step.indent || 0) * 16; // 16px per indent level
+                    const colorClasses = {
+                        'green': 'bg-green-50 text-green-600',
+                        'blue': 'bg-blue-50 text-blue-600',
+                        'purple': 'bg-purple-50 text-purple-600',
+                        'yellow': 'bg-yellow-50 text-yellow-600'
+                    };
+                    const bgColor = colorClasses[step.color] || 'bg-green-50 text-green-600';
+                    
+                    return `
+                        <div class="flex items-center justify-between ${bgColor.split(' ')[0]} rounded p-2">
+                            <div class="flex items-center" style="margin-left: ${marginLeft}px;">
+                                <i class="fas ${step.icon} ${bgColor.split(' ')[1]} mr-2"></i>
+                                <span class="text-sm font-medium">${step.name}</span>
+                            </div>
+                            <span class="text-xs text-gray-600">${step.time}</span>
+                        </div>
+                    `;
+                }).join('');
+                
+                // Generate random but realistic proof hash
+                const proofHash = '0x' + Math.random().toString(16).substring(2, 6) + '...' + 
+                                  Math.random().toString(16).substring(2, 6);
+                
                 vizArea.innerHTML = `
                     <div class="w-full text-left">
                         <div class="mb-4 pb-3 border-b border-gray-300">
                             <h5 class="text-lg font-semibold text-gray-900 mb-2">
                                 <i class="fas fa-play-circle text-blue-600 mr-2"></i>
-                                Pattern Simulation Complete
+                                ${scenario.title} - Simulation Complete
                             </h5>
                             <p class="text-sm text-gray-600">All authorization steps executed successfully</p>
                         </div>
                         
                         <div class="space-y-2">
-                            <div class="flex items-center justify-between bg-green-50 rounded p-2">
-                                <div class="flex items-center">
-                                    <i class="fas fa-check-circle text-green-600 mr-2"></i>
-                                    <span class="text-sm font-medium">CEO Authorization</span>
-                                </div>
-                                <span class="text-xs text-gray-600">0.12s</span>
-                            </div>
-                            
-                            <div class="flex items-center justify-between bg-green-50 rounded p-2">
-                                <div class="flex items-center ml-4">
-                                    <i class="fas fa-check-circle text-green-600 mr-2"></i>
-                                    <span class="text-sm font-medium">CFO Delegation Verified</span>
-                                </div>
-                                <span class="text-xs text-gray-600">0.08s</span>
-                            </div>
-                            
-                            <div class="flex items-center justify-between bg-green-50 rounded p-2">
-                                <div class="flex items-center ml-8">
-                                    <i class="fas fa-check-circle text-green-600 mr-2"></i>
-                                    <span class="text-sm font-medium">AI Agent Execution</span>
-                                </div>
-                                <span class="text-xs text-gray-600">0.05s</span>
-                            </div>
-                            
-                            <div class="flex items-center justify-between bg-blue-50 rounded p-2">
-                                <div class="flex items-center">
-                                    <i class="fas fa-shield-alt text-blue-600 mr-2"></i>
-                                    <span class="text-sm font-medium">Proof of Authority Generated</span>
-                                </div>
-                                <span class="text-xs text-gray-600">0.03s</span>
-                            </div>
-                            
-                            <div class="flex items-center justify-between bg-purple-50 rounded p-2">
-                                <div class="flex items-center">
-                                    <i class="fas fa-database text-purple-600 mr-2"></i>
-                                    <span class="text-sm font-medium">Audit Trail Recorded</span>
-                                </div>
-                                <span class="text-xs text-gray-600">0.02s</span>
-                            </div>
+                            ${stepsHTML}
                         </div>
                         
                         <div class="mt-4 pt-3 border-t border-gray-300">
                             <div class="grid grid-cols-3 gap-3 text-sm">
                                 <div class="bg-green-50 rounded p-2 text-center">
                                     <p class="text-gray-600 text-xs">Total Time</p>
-                                    <p class="font-semibold text-gray-900">0.30s</p>
+                                    <p class="font-semibold text-gray-900">${scenario.totalTime}</p>
                                 </div>
                                 <div class="bg-blue-50 rounded p-2 text-center">
                                     <p class="text-gray-600 text-xs">Steps</p>
-                                    <p class="font-semibold text-gray-900">5/5</p>
+                                    <p class="font-semibold text-gray-900">${scenario.steps.length}/${scenario.steps.length}</p>
                                 </div>
                                 <div class="bg-purple-50 rounded p-2 text-center">
                                     <p class="text-gray-600 text-xs">Status</p>
@@ -12015,7 +12234,12 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
                             <p class="text-gray-600">
                                 <i class="fas fa-info-circle mr-1"></i>
                                 <strong>Proof Hash:</strong> 
-                                <code class="text-gray-800">0x7a9f...3d2e</code>
+                                <code class="text-gray-800">${proofHash}</code>
+                            </p>
+                            <p class="text-gray-600 mt-1">
+                                <i class="fas fa-tag mr-1"></i>
+                                <strong>Pattern:</strong> 
+                                <code class="text-gray-800">${selectedPattern}</code>
                             </p>
                         </div>
                     </div>
@@ -12025,7 +12249,7 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
                 console.error('❌ Visualization area NOT FOUND!');
             }
             
-            showActionMessage('✅ Pattern simulation completed! All steps executed successfully.', 'success');
+            showActionMessage(`✅ ${scenario.title} completed! All steps executed successfully.`, 'success');
             button.innerHTML = originalText;
             button.className = originalClass;
             button.disabled = false;
@@ -12626,7 +12850,7 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
                 principal_id: grantee,
                 ai_agent_id: `agent-${grantee}`,
                 power_type: powerTypeMap[capability] || capability,
-                jurisdiction: 'US-CA',
+                jurisdiction: 'US',
                 duration: duration
             })
         })
@@ -15184,7 +15408,7 @@ RFC-0150 Authorization Platform
                         principal_id: grantee,
                         ai_agent_id: `agent-${grantee}`,
                         power_type: powerTypeMap[capability] || capability,
-                        jurisdiction: 'US-CA'
+                        jurisdiction: 'US'
                     };
                     
                     console.log('🔍 Sending PoA request:', payload);
