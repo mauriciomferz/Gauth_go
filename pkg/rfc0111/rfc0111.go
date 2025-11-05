@@ -903,6 +903,34 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 	if !ok || poa == nil {
 		return nil, rfc.New(rfc.ErrNotFound, delegationID)
 	}
+	
+	// Offline verification mode (GAUTH_OFFLINE_VERIFICATION=1): prefer embedded PoA over repository lookup
+	// when RawPOA is present in EnvelopeV2. This enables token verification without external dependencies.
+	// Feature-gated because it changes verification semantics (embedded PoA may differ from repository state).
+	offlineMode := os.Getenv("GAUTH_OFFLINE_VERIFICATION") == "1"
+	if offlineMode && useV2 && env2.RawPOA != "" {
+		// Attempt to extract embedded PoA
+		var embeddedPoA PowerOfAttorney
+		if err := json.Unmarshal([]byte(env2.RawPOA), &embeddedPoA); err == nil {
+			// Validate embedded PoA ID matches envelope
+			if embeddedPoA.ID == delegationID {
+				// Use embedded PoA instead of repository lookup
+				poa = &embeddedPoA
+				ok = true
+				if s.metrics != nil {
+					// Record offline verification usage (reuse existing metric)
+					s.metrics.IncEnvelopeRawPOAEmbedded()
+				}
+			} else if s.metrics != nil {
+				// Embedded PoA ID mismatch - fall back to repository PoA but record anomaly
+				s.metrics.IncEnvelopeDigestMismatch()
+			}
+		} else if s.metrics != nil {
+			// Embedded PoA parse failure - fall back to repository PoA but record anomaly
+			s.metrics.IncEnvelopeDigestMismatch()
+		}
+	}
+	
 	res := &TokenVerificationResult{
 		DelegationID: delegationID,
 		Grantor: func() string {
@@ -1128,6 +1156,98 @@ func VerifyDelegationToken(ctx context.Context, svc *Service, tok string) (*Toke
 		return nil, rfc.New(rfc.ErrInvalidRequest, "nil service")
 	}
 	return svc.VerifyToken(ctx, tok)
+}
+
+// ExtractEmbeddedPoA extracts and validates the embedded PoA definition from a TokenVerificationResult.
+// This enables offline token verification without requiring access to the PoA repository.
+//
+// Requirements (RFC0115 sec3.item2):
+//  - RawPOA field must be non-empty (GAUTH_EMBED_FULL_POA=1 must have been enabled during token issuance)
+//  - RawPOA must contain valid canonical JSON representing a PowerOfAttorney
+//  - Extracted PoA.ID must match the DelegationID from the token envelope
+//  - Extracted PoA must pass basic structural validation (non-empty fields, valid timestamps)
+//
+// Returns:
+//  - *PowerOfAttorney: the extracted and validated PoA definition
+//  - error: validation failure (ErrInvalidRequest if RawPOA missing/invalid, ErrIntegrityFailure if ID mismatch)
+//
+// Usage:
+//
+//	result, _ := svc.VerifyToken(ctx, tokenString)
+//	poa, err := ExtractEmbeddedPoA(result)
+//	if err != nil {
+//	    // Fall back to repository lookup or reject token
+//	}
+//	// Use poa for authorization without repository access
+func ExtractEmbeddedPoA(result *TokenVerificationResult) (*PowerOfAttorney, error) {
+	if result == nil {
+		return nil, rfc.New(rfc.ErrInvalidRequest, "nil verification result")
+	}
+	
+	// Check if RawPOA is present (requires GAUTH_EMBED_FULL_POA=1 during issuance)
+	if result.RawPOA == "" {
+		return nil, rfc.New(rfc.ErrInvalidRequest, "no embedded poa definition (GAUTH_EMBED_FULL_POA=1 not enabled)")
+	}
+	
+	// Parse canonical JSON - the canonical format encodes version as a string (for digest stability),
+	// but PowerOfAttorney expects an int. We need a custom unmarshal step.
+	// Create an intermediate struct that accepts version as either string or int.
+	type canonicalPoA struct {
+		PowerOfAttorney
+		VersionRaw interface{} `json:"version"` // Accept string or int
+	}
+	
+	var intermediate canonicalPoA
+	if err := json.Unmarshal([]byte(result.RawPOA), &intermediate); err != nil {
+		return nil, rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid embedded poa json: %v", err))
+	}
+	
+	// Convert version from string to int if needed
+	switch v := intermediate.VersionRaw.(type) {
+	case string:
+		if parsed, err := strconv.Atoi(v); err == nil {
+			intermediate.PowerOfAttorney.Version = parsed
+		} else {
+			return nil, rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid version format: %s", v))
+		}
+	case float64: // JSON numbers decode as float64
+		intermediate.PowerOfAttorney.Version = int(v)
+	case int:
+		intermediate.PowerOfAttorney.Version = v
+	default:
+		return nil, rfc.New(rfc.ErrInvalidRequest, "version field must be string or number")
+	}
+	
+	poa := &intermediate.PowerOfAttorney
+	
+	// Validate extracted PoA matches token envelope DelegationID
+	if poa.ID == "" {
+		return nil, rfc.New(rfc.ErrIntegrityFailure, "embedded poa missing id field")
+	}
+	if result.DelegationID != "" && poa.ID != result.DelegationID {
+		return nil, rfc.New(rfc.ErrIntegrityFailure, fmt.Sprintf("embedded poa id mismatch: envelope=%s embedded=%s", result.DelegationID, poa.ID))
+	}
+	
+	// Basic structural validation (ensures PoA is not malformed)
+	if poa.Grantor == "" {
+		return nil, rfc.New(rfc.ErrInvalidRequest, "embedded poa missing grantor")
+	}
+	if poa.Grantee == "" {
+		return nil, rfc.New(rfc.ErrInvalidRequest, "embedded poa missing grantee")
+	}
+	if len(poa.Scope) == 0 {
+		return nil, rfc.New(rfc.ErrInvalidRequest, "embedded poa missing scope")
+	}
+	
+	// Temporal validation (ensure timestamps are reasonable)
+	if poa.ValidUntil.IsZero() {
+		return nil, rfc.New(rfc.ErrInvalidRequest, "embedded poa missing valid_until")
+	}
+	if !poa.ValidFrom.IsZero() && poa.ValidUntil.Before(poa.ValidFrom) {
+		return nil, rfc.New(rfc.ErrInvalidRequest, "embedded poa valid_until before valid_from")
+	}
+	
+	return poa, nil
 }
 
 // Service provides RFC 0111 power-of-attorney services

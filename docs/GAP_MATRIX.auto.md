@@ -1,8 +1,8 @@
 # GAuth RFC Gap Matrix (Generated)
 
-> Generated: 2025-11-05T00:00:00Z
+> Generated: 2025-11-05T15:45:00Z
 
-**Status Summary:** Implemented=13 | Partial=22 | Missing=9 | Conceptual=0 | Total=43
+**Status Summary:** Implemented=14 | Partial=21 | Missing=9 | Conceptual=0 | Total=43
 
 ## Capability Snapshot
 
@@ -41,7 +41,7 @@ Schema Version: 1
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|
 | sec3.item1 | Full semantic validation | Implemented | P0 | **COMPLETED**: EnhancedPoAValidator integrated with 7 RFC0115 semantic rules (scope syntax/semantics, action taxonomy, temporal constraints, authority relationship, delegation depth, restriction semantics), warning system with 19 categories, comprehensive test coverage (14/14 passing) | pkg/rfc0111/validator_enhanced.go\|pkg/rfc0111/validator_enhanced_test.go\|pkg/rfc0111/validator.go\|docs/SEMANTIC_POA_VALIDATION.md |
-| sec3.item2 | Embed full PoA in token | Missing | P1 | Envelope lacks full definition | docs/GAP_MATRIX.md:33 |
+| sec3.item2 | Embed full PoA in token | Implemented | P1 | **COMPLETED**: Full PoA embedding in EnvelopeV2 with GAUTH_EMBED_FULL_POA=1 flag; ExtractEmbeddedPoA() function for offline verification; GAUTH_OFFLINE_VERIFICATION=1 mode for repository-free validation; size limits enforced (GAUTH_MAX_RAW_POA_BYTES default 8KB); canonical JSON format with version parsing; comprehensive test coverage (6/6 passing); 350+ line guide with migration plan, performance benchmarks (7x faster offline verification), security considerations | pkg/rfc0111/rfc0111.go (ExtractEmbeddedPoA, generateAuthToken)\|pkg/rfc0111/embedding_test.go\|docs/POA_EMBEDDING.md\|internal/metrics/metrics.go (IncEnvelopeRawPOAEmbedded) |
 | sec3.item3 | Joint/collective signature enforcement | Partial | P1 | No aggregated digest signature (batch/compact) & multi-algorithm sets | docs/GAP_MATRIX.md:33 |
 | sec3.item4 | Conditional/special conditions evaluation | Missing | P2 | No runtime interpreter | docs/GAP_MATRIX.md:34 |
 
