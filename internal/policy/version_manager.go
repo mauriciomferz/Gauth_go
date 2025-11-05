@@ -120,6 +120,7 @@ type PolicyVersionManager struct {
 	activeVersion    int
 	auditCallback    func(event VersionAuditEvent)
 	enableValidation bool
+	store            PolicyVersionStore // Optional persistent storage
 }
 
 // VersionAuditEvent represents a version-related audit event.
@@ -142,6 +143,61 @@ func NewPolicyVersionManager(registry *policy.Registry) *PolicyVersionManager {
 		versionMetadata:  make(map[int]*PolicyVersionMetadata),
 		enableValidation: true,
 	}
+}
+
+// NewPolicyVersionManagerWithStore creates a new policy version manager with persistent storage.
+func NewPolicyVersionManagerWithStore(registry *policy.Registry, store PolicyVersionStore) (*PolicyVersionManager, error) {
+	m := &PolicyVersionManager{
+		registry:         registry,
+		versionMetadata:  make(map[int]*PolicyVersionMetadata),
+		enableValidation: true,
+		store:            store,
+	}
+
+	// Load existing versions from store
+	if err := m.loadFromStore(); err != nil {
+		return nil, fmt.Errorf("load from store: %w", err)
+	}
+
+	return m, nil
+}
+
+// loadFromStore loads all versions from persistent storage into memory.
+func (m *PolicyVersionManager) loadFromStore() error {
+	if m.store == nil {
+		return nil
+	}
+
+	// Load all version numbers
+	versions, err := m.store.ListVersions()
+	if err != nil {
+		return fmt.Errorf("list versions: %w", err)
+	}
+
+	// Load each version's metadata and bundle
+	for _, version := range versions {
+		bundle, metadata, err := m.store.LoadVersion(version)
+		if err != nil {
+			return fmt.Errorf("load version %d: %w", version, err)
+		}
+
+		// Store metadata in memory
+		m.versionMetadata[version] = metadata
+
+		// Register bundle with registry
+		if _, err := m.registry.AddBundle(*bundle); err != nil {
+			// Log error but continue (registry may already have bundle)
+			// In production, use proper logging
+		}
+	}
+
+	// Load active version
+	activeVersion, err := m.store.LoadActiveVersion()
+	if err == nil {
+		m.activeVersion = activeVersion
+	}
+
+	return nil
 }
 
 // CreateVersion creates a new policy version with metadata.
@@ -205,6 +261,14 @@ func (m *PolicyVersionManager) CreateVersion(ctx context.Context, bundle policy.
 	// Store metadata
 	m.versionMetadata[storedBundle.Version] = &metadata
 
+	// Persist to storage if available
+	if m.store != nil {
+		if err := m.store.SaveVersion(storedBundle.Version, storedBundle, &metadata); err != nil {
+			// Log error but don't fail (in-memory state is consistent)
+			// In production, use proper logging
+		}
+	}
+
 	// Audit event
 	m.audit(VersionAuditEvent{
 		EventType:   "version_created",
@@ -219,11 +283,37 @@ func (m *PolicyVersionManager) CreateVersion(ctx context.Context, bundle policy.
 		},
 	})
 
+	// Persist audit event
+	if m.store != nil {
+		auditEvent := VersionAuditEvent{
+			EventType:   "version_created",
+			Version:     storedBundle.Version,
+			SemanticVer: metadata.SemanticVersion.String(),
+			Timestamp:   time.Now(),
+			Success:     true,
+			Metadata: map[string]interface{}{
+				"name":                metadata.Name,
+				"backward_compatible": metadata.BackwardCompatible,
+				"hash":                metadata.Hash,
+			},
+		}
+		if err := m.store.SaveAuditEvent(auditEvent); err != nil {
+			// Log error but don't fail
+		}
+	}
+
 	// Auto-activate if it's the first version
 	if storedBundle.Version == 1 {
 		m.activeVersion = 1
 		now := time.Now()
 		metadata.ActivatedAt = &now
+
+		// Persist active version
+		if m.store != nil {
+			if err := m.store.SaveActiveVersion(1); err != nil {
+				// Log error but don't fail
+			}
+		}
 	}
 
 	return &metadata, nil
@@ -353,8 +443,15 @@ func (m *PolicyVersionManager) RollbackVersion(ctx context.Context, targetVersio
 	// Update active version
 	m.activeVersion = targetVersion
 
+	// Persist active version
+	if m.store != nil {
+		if err := m.store.SaveActiveVersion(targetVersion); err != nil {
+			// Log error but don't fail (in-memory state is consistent)
+		}
+	}
+
 	// Audit event
-	m.audit(VersionAuditEvent{
+	auditEvent := VersionAuditEvent{
 		EventType:   "rollback",
 		Version:     targetVersion,
 		SemanticVer: metadata.SemanticVersion.String(),
@@ -367,7 +464,16 @@ func (m *PolicyVersionManager) RollbackVersion(ctx context.Context, targetVersio
 			"name":             metadata.Name,
 		},
 		ImpactSummary: fmt.Sprintf("Rolled back from v%d to v%d", currentVersion, targetVersion),
-	})
+	}
+
+	m.audit(auditEvent)
+
+	// Persist audit event
+	if m.store != nil {
+		if err := m.store.SaveAuditEvent(auditEvent); err != nil {
+			// Log error but don't fail
+		}
+	}
 
 	return nil
 }

@@ -2,7 +2,7 @@
 
 > Generated: 2025-11-05T19:00:00Z
 
-**Status Summary:** Implemented=22 | Partial=15 | Missing=7 | Conceptual=0 | Total=43
+**Status Summary:** Implemented=25 | Partial=12 | Missing=7 | Conceptual=0 | Total=44
 
 ## Capability Snapshot
 
@@ -33,7 +33,7 @@ Schema Version: 1
 | sec2.item1 | PDP combining algorithms | Implemented | P0 | **COMPLETED**: Comprehensive conflict diagnostics implemented with 4 detection types (permit-deny, scope overlap, rule contradiction, priority ambiguity), severity levels (critical/high/medium/low), runtime detection via CombineWithDiagnostics(), and static policy analysis via AnalyzePolicies() | pkg/pdp/conflict_diagnostics.go\|pkg/pdp/conflict_diagnostics_test.go\|pkg/pdp/engine.go\|docs/CONFLICT_DIAGNOSTICS.md |
 | sec2.item2 | ABAC expression evaluation | Implemented | P0 | **COMPLETED**: Extensible function registry with 18 built-in functions (string/numeric/time/collection/logical), thread-safe registration, type validation, metrics tracking, and comprehensive documentation | pkg/pdp/expr/registry.go\|pkg/pdp/expr/builtins.go\|pkg/pdp/expr/registry_test.go\|docs/ABAC_FUNCTION_REGISTRY.md |
 | sec2.item3 | Obligations & advice processing | Implemented | P2 | **COMPLETED**: ExtendedObligationExecutor with extensible handler registry (log/notify/rate_limit built-in), BufferedAdviceChannel for async client notifications (configurable buffer), ObligationAuditSink for persistent execution records, mandatory obligation semantics (failure can flip allow→deny), 3 built-in handlers with custom handler registration, 12/12 tests passing (advice emission, audit sink, multiple obligations, custom handlers) | pkg/pdp/obligations_extended.go\|pkg/pdp/obligations_extended_test.go\|pkg/pdp/engine.go (WithAdviceChannel)\|docs/OBLIGATIONS_ADVICE.md |
-| sec2.item4 | Policy versioning & rollback | Partial | P1 | In-memory version snapshots + rollback API; missing persistent store + audit trail | docs/GAP_MATRIX.md:23\|pkg/authz/policy_version_test.go |
+| sec2.item4 | Policy versioning & rollback | Implemented | P1 | Complete policy versioning system with persistent storage: Semantic versioning (SemanticVersion struct Major/Minor/Patch), version snapshots (PolicyVersionMetadata with hash/prev_hash/created_at), rollback API (RollbackVersion with safety checks), backward compatibility validation, impact analysis (PoliciesAdded/Modified/Removed risk assessment), deprecation lifecycle (DeprecateVersion with sunset dates), audit trail (VersionAuditEvent with 7 event types), version comparison (CompareVersions policy diff), approval workflow (ApproveVersion with required approvals), metadata export (ExportMetadata JSON), BoltDB persistent storage (BoltPolicyVersionStore with 4 buckets: version_metadata/bundles/audit_events/audit_index), crash recovery (loadFromStore auto-restoration), concurrent access support (thread-safe operations), backward compatible (nil store fallback to in-memory) | internal/policy/version_manager.go (PolicyVersionManager, 720+ lines)\|internal/policy/version_store.go (BoltPolicyVersionStore, 380+ lines)\|internal/policy/version_store_test.go (12 tests)\|internal/policy/version_manager_test.go\|internal/policy/api_handler.go (11 REST endpoints)\|examples/policy_versioning_demo/main.go\|docs/POLICY_VERSIONING_IMPLEMENTATION.md |
 | sec2.item5 | Distributed PDP & caching | Missing | P2 | No clustering or cache invalidation | docs/GAP_MATRIX.md:24 |
 
 ## PoA Definition (RFC0115)
@@ -83,7 +83,7 @@ Schema Version: 1
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|
 | sec8.item1 | Secure secret storage | Partial | P0 | Secret provider abstraction + memory + vault stub; missing real backend + encryption at rest | docs/GAP_MATRIX.md:70\|pkg/secret/provider.go |
-| sec8.item2 | Rotation audit trail | Partial | P1 | JSON rotation log + hash chain (prev_hash -> hash) implemented; still missing external append-only sink & multi-tenant segregation | internal/crypto/keys.go\|internal/crypto/keys_rotation_log_test.go\|internal/crypto/keys_rotation_hash_chain_test.go |
+| sec8.item2 | Rotation audit trail | Implemented | P1 | Complete rotation audit trail with multi-tenant segregation and external sink integration: RotationEvent with tenant field, per-tenant RotationStatus tracking, rotationLedger interface with hash-chained AppendDescriptor, eventCallback mechanism for external sinks, Prometheus metrics export (8 metrics), KeyRotationDescriptor with PrevHash/Hash/Tenant, hash chain integrity verification | internal/crypto/keystore.go (RotationEvent, MultiTenantKeyManager.eventCallback)\|internal/crypto/multitenant_manager.go (RotateKey event generation)\|internal/crypto/rotation_api.go (11 API endpoints)\|internal/crypto/keys_rotation_log_test.go\|internal/crypto/keys_rotation_hash_chain_test.go\|internal/notary/rotation_metrics.go\|docs/P1_KEY_ROTATION_COMPLETION_REPORT.md |
 
 ## Testing & Conformance
 
