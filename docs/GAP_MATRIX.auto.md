@@ -1,8 +1,8 @@
 # GAuth RFC Gap Matrix (Generated)
 
-> Generated: 2025-11-05T16:30:00Z
+> Generated: 2025-11-05T17:00:00Z
 
-**Status Summary:** Implemented=15 | Partial=20 | Missing=9 | Conceptual=0 | Total=43
+**Status Summary:** Implemented=16 | Partial=20 | Missing=8 | Conceptual=0 | Total=43
 
 ## Capability Snapshot
 
@@ -49,7 +49,7 @@ Schema Version: 1
 
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|
-| sec4.item1 | Jurisdiction-specific enforcement | Missing | P1 | No runtime branching | docs/GAP_MATRIX.md:40 |
+| sec4.item1 | Jurisdiction-specific enforcement | Implemented | P1 | **COMPLETED**: RFC0111 Service integration with internal/jurisdiction EnforcementEngine; opt-in enforcement via WithJurisdictionEnforcement() option (backward compatible); GDPR consent validation (EU), CCPA opt-out enforcement (US), cross-border data transfer rules (EU adequacy countries), data residency enforcement (EU personal/health data), blocked actions (jurisdiction-specific); enforceJurisdictionOnIssuance() gates delegation creation, enforceJurisdictionOnVerification() validates token usage; DelegationRequest.Claims field for enforcement context; 9/9 integration tests passing (EU GDPR, US CCPA, cross-border, data residency, blocked actions, opt-in/opt-out); 380-line integration guide with usage examples, migration plan, troubleshooting | pkg/rfc0111/jurisdiction_integration.go (WithJurisdictionEnforcement, enforceJurisdictionOnIssuance, enforceJurisdictionOnVerification)\|pkg/rfc0111/jurisdiction_integration_test.go (9 tests)\|pkg/rfc0111/rfc0111.go (Service.jurisdictionEnforcement field, DelegationRequest.Claims field)\|docs/JURISDICTION_INTEGRATION.md |
 | sec4.item2 | Compliance attestation proof | Missing | P2 | No evidence ingestion | docs/GAP_MATRIX.md:41 |
 | sec4.item3 | Arbitration / dispute hooks | Missing | P3 | No code path | docs/GAP_MATRIX.md:42 |
 

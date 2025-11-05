@@ -453,6 +453,9 @@ type DelegationRequest struct {
 	AgentType   string `json:"agent_type,omitempty"`
 	Sector      string `json:"sector,omitempty"`
 	ActionClass string `json:"action_class,omitempty"`
+	// Optional claims for jurisdiction enforcement context (P1.3). Used to provide additional
+	// enforcement context beyond structured fields (e.g., gdpr_consent, ccpa_opt_out, data_type).
+	Claims map[string]interface{} `json:"claims,omitempty"`
 }
 
 // generateLocalKey returns a 32-byte random key for PASETO local tokens.
@@ -904,6 +907,28 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 		return nil, rfc.New(rfc.ErrNotFound, delegationID)
 	}
 	
+	// Jurisdiction enforcement (P1.3): Validate jurisdiction-specific rules DURING token verification.
+	// This enforces runtime compliance with GDPR consent, CCPA opt-out, cross-border rules, data residency, and blocked actions.
+	// Extract claims from the envelope for enforcement context.
+	enforcementClaims := make(map[string]interface{})
+	if useV2 {
+		// EnvelopeV2 may carry additional fields for jurisdiction context
+		if env2.DelegationID != "" {
+			enforcementClaims["delegation_id"] = env2.DelegationID
+		}
+	}
+	// Add action claim if we can infer it from envelope scope
+	if useV2 && len(env2.Scope) > 0 {
+		enforcementClaims["action"] = env2.Scope[0] // Use first scope item as action
+	} else if len(env.Scope) > 0 {
+		enforcementClaims["action"] = env.Scope[0]
+	}
+	
+	// Enforce jurisdiction rules (when enabled, this is a no-op otherwise)
+	if err := s.enforceJurisdictionOnVerification(ctx, poa, enforcementClaims); err != nil {
+		return nil, rfc.New(rfc.ErrUnauthorized, fmt.Sprintf("jurisdiction enforcement denied: %v", err))
+	}
+	
 	// Offline verification mode (GAUTH_OFFLINE_VERIFICATION=1): prefer embedded PoA over repository lookup
 	// when RawPOA is present in EnvelopeV2. This enables token verification without external dependencies.
 	// Feature-gated because it changes verification semantics (embedded PoA may differ from repository state).
@@ -1283,6 +1308,7 @@ type Service struct {
 	enhancedValidator   *EnhancedPoAValidator       // enhanced validator with warning collection and daily limits (optional)
 	mandatorySignatures bool                        // if true, issuance aborts when signature cannot be produced
 	attestAnchors       *attest.TrustAnchorRegistry // optional trust anchor registry for attestation proofs
+	jurisdictionEnforcement *JurisdictionEnforcement // optional jurisdiction-specific enforcement (P1.3)
 	// semanticCounters prototype: fine-grained semantic rejection reasons (will be surfaced via endpoints later)
 	semanticCounters struct {
 		AmountLimitExceeded      uint64
@@ -1760,6 +1786,14 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 		ParentPOAID:  req.ParentPOAID,
 		Depth:        depth,
 	}
+	
+	// Jurisdiction enforcement (P1.3): Validate jurisdiction-specific rules BEFORE creating delegation.
+	// This gates creation based on GDPR consent, CCPA opt-out, cross-border rules, data residency, and blocked actions.
+	// When enforcement is disabled (nil), this is a no-op allowing all operations (backward compatible).
+	if err := s.enforceJurisdictionOnIssuance(ctx, req, poa); err != nil {
+		return nil, rfc.New(rfc.ErrUnauthorized, fmt.Sprintf("jurisdiction enforcement denied: %v", err))
+	}
+	
 	// Hierarchical digest activation gating (Version 4). Controlled by env flags:
 	// GAUTH_ENABLE_HIER_DIGEST=1 enables automatic Version bump to 4 for new issuances.
 	// GAUTH_FORCE_HIER_DIGEST=1 enforces Version=4 even if enabling logic conditions fail (defensive activation).
