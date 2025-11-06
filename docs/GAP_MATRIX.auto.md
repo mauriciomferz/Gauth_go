@@ -1,8 +1,8 @@
 # GAuth RFC Gap Matrix (Generated)
 
-> Generated: 2025-11-06T14:00:00Z (P3.2 Complete)
+> Generated: 2025-11-06T14:55:00Z (P3.5 sec13.item1 Complete)
 
-**Status Summary:** Implemented=30 | Partial=9 | Missing=5 | Conceptual=0 | Total=44
+**Status Summary:** Implemented=31 | Partial=8 | Missing=5 | Conceptual=0 | Total=44
 
 ## Capability Snapshot
 
@@ -118,7 +118,7 @@ Schema Version: 1
 
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|
-| sec13.item1 | UTF-8 & control char filtering | Partial | P3 | No metrics instrumentation | docs/GAP_MATRIX.md:102 |
+| sec13.item1 | UTF-8 & control char filtering | Implemented | P3 | **COMPLETED**: UTF-8 validation with `utf8.ValidString()` for all scope items and restriction key/value pairs, control character filtering (0x00-0x1F, 0x7F) with rejection, comprehensive metrics instrumentation via 4 violation categories (ScopeUTF8Invalid, ScopeControlChar, RestrictionUTF8Invalid, RestrictionControlChar), atomic counters exported via ViolationSnapshot(), 5/5 validation tests passing | pkg/rfc0111/rfc0111.go (lines 3348-3395: UTF-8 + control char validation with metrics)\|internal/observability/violations.go (4 hygiene violation categories with atomic counters)\|pkg/rfc0111/rfc0111_hygiene_metrics_test.go (TestUTF8ScopeViolationCounter, TestControlCharRestrictionViolation)\|pkg/rfc0111/rfc0111_string_hygiene_test.go (TestScopeItemControlCharRejected, TestRestrictionControlCharsRejected, TestRFCErrorCodeForControlChar) |
 | sec13.item2 | Structured numeric limit parsing | Implemented | P2 | **COMPLETED**: Multi-period rate limiting with human-readable syntax ("1000/hour", "50K/day", "1M/month"), backward-compatible RateLimitsExtended JSON array, independent window tracking per period (minute/hour/day/week/month), K/M multipliers (5K=5000, 1.5M=1500000), legacy max_requests_per_minute still supported, ALL periods enforced (any exceeded → 429), audit trail with period metadata, 7/7 integration tests passing | pkg/limits/parser.go (ParseRateLimit with 37 test scenarios)\|web/model_limits_parse.go (RateLimitsExtended []string field)\|web/server_clean.go (modelRateLimitsExtended, modelRateStateExtended, multi-period enforcement lines 1567-1627)\|web/multi_period_limits_test.go (7 tests: minute/hour/daily limits, backward compat, dual enforcement, rollover, error handling)\|docs/MULTI_PERIOD_LIMITS.md (460+ lines with schema, enforcement, migration guide, operational recommendations) |
 
 ## Risk & Threat Modeling
@@ -241,7 +241,7 @@ Schema Version: 1
 - ✅ sec7.item2: Metrics collector registration framework - **COMPLETED** (P3.2 - CollectorRegistry with multi-collector dispatch, 119 methods, Prometheus/JSON collectors, 8 comprehensive tests)
 - sec7.item4: Distributed tracing with span linking
 - ✅ sec9.item3: Load/stress benchmark harness - **COMPLETED** (P3.1 - 66,595 ops/sec baseline, 5 comprehensive tests)
-- sec13.item1: UTF-8 validation metrics instrumentation
+- ✅ sec13.item1: UTF-8 validation metrics instrumentation - **COMPLETED** (P3.5 - Already fully implemented with 4 violation categories, 5 passing tests)
 
 ### Test Coverage Highlights
 
