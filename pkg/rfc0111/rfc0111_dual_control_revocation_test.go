@@ -1,6 +1,7 @@
 package rfc0111
 
 import (
+	"context"
 	"os"
 	"testing"
 	"time"
@@ -28,24 +29,25 @@ func TestDualControlRevocationWorkflow(t *testing.T) {
 	if err := svc.repo.Update(poa); err != nil {
 		t.Fatalf("update controllers failed: %v", err)
 	}
+	ctx := context.Background()
 	// Unauthorized initiator
-	if err := svc.InitiateRevocation(nil, RevocationRequest{POAID: poaID, Initiator: "bob", Reason: "risk"}); err == nil {
+	if err := svc.InitiateRevocation(ctx, RevocationRequest{POAID: poaID, Initiator: "bob", Reason: "risk"}); err == nil {
 		t.Fatalf("expected unauthorized initiator rejection")
 	}
 	// Authorized initiator (grantor)
-	if err := svc.InitiateRevocation(nil, RevocationRequest{POAID: poaID, Initiator: "alice", Reason: "risk"}); err != nil {
+	if err := svc.InitiateRevocation(ctx, RevocationRequest{POAID: poaID, Initiator: "alice", Reason: "risk"}); err != nil {
 		t.Fatalf("initiation failed: %v", err)
 	}
 	// First approval (controller1)
-	if err := svc.ApproveRevocation(nil, poaID, "controller1"); err != nil {
+	if err := svc.ApproveRevocation(ctx, poaID, "controller1"); err != nil {
 		t.Fatalf("first approval failed: %v", err)
 	}
 	// Duplicate approval should be idempotent
-	if err := svc.ApproveRevocation(nil, poaID, "controller1"); err != nil {
+	if err := svc.ApproveRevocation(ctx, poaID, "controller1"); err != nil {
 		t.Fatalf("duplicate approval should be allowed/idempotent: %v", err)
 	}
 	// Second approval (controller2) should finalize
-	if err := svc.ApproveRevocation(nil, poaID, "controller2"); err != nil {
+	if err := svc.ApproveRevocation(ctx, poaID, "controller2"); err != nil {
 		t.Fatalf("second approval failed: %v", err)
 	}
 	poaFinal, _ := svc.repo.Get(poaID)
@@ -53,7 +55,7 @@ func TestDualControlRevocationWorkflow(t *testing.T) {
 		t.Fatalf("expected POA revoked after quorum; status=%s finalized=%v", poaFinal.Status, poaFinal.PendingRevocation != nil && poaFinal.PendingRevocation.Finalized)
 	}
 	// Attempt cancellation after finalize should fail
-	if err := svc.CancelRevocation(nil, poaID, "alice"); err == nil {
+	if err := svc.CancelRevocation(ctx, poaID, "alice"); err == nil {
 		t.Fatalf("expected cancellation failure after finalize")
 	}
 }

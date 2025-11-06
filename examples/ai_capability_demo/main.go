@@ -335,7 +335,7 @@ func main() {
 		poaRepoMu.Lock()
 		defer poaRepoMu.Unlock()
 		if boltPOARepo == nil {
-			if poaRepo == nil || len(poaRepo) == 0 {
+			if len(poaRepo) == 0 {
 				poaRepo = make(map[string]*rfc0111.PowerOfAttorney)
 			}
 		}

@@ -2,7 +2,6 @@
 """Generate CollectorRegistry dispatch methods from noop implementation."""
 
 import re
-import sys
 
 def parse_noop_method(line):
     """Parse noop method signature: func (n noop) MethodName(params) {}
@@ -59,7 +58,7 @@ def generate_registry_method(method_name, params, param_names):
     # Rename any parameter named 'r' to avoid conflict with receiver
     renamed_params = []
     renamed_param_names = []
-    for i, (param, param_name) in enumerate(zip(params, param_names)):
+    for param, param_name in zip(params, param_names, strict=True):
         if param_name == 'r':
             # Rename to avoid conflict with receiver
             renamed_param = param.replace('r ', 'r2 ')
