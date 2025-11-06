@@ -31,18 +31,34 @@ const (
 	DecisionDeny  = "deny"
 )
 
+// ModelMetadata defines operational limits for AI models (sec11.item2 P2).
+// These limits are enforced during capability evaluation to prevent resource abuse.
+type ModelMetadata struct {
+	ModelName         string  `json:"model_name"`
+	ModelVersion      string  `json:"model_version"`
+	TokenLimitPerCall int     `json:"token_limit_per_call,omitempty"` // Max tokens per request
+	TokenLimitDaily   int     `json:"token_limit_daily,omitempty"`    // Daily token budget
+	CostLimitPerCall  float64 `json:"cost_limit_per_call,omitempty"`  // Max cost in USD per request
+	CostLimitDaily    float64 `json:"cost_limit_daily,omitempty"`     // Daily cost budget in USD
+	RateLimitRPM      int     `json:"rate_limit_rpm,omitempty"`       // Requests per minute
+	RateLimitRPH      int     `json:"rate_limit_rph,omitempty"`       // Requests per hour
+	ContextWindow     int     `json:"context_window,omitempty"`       // Total context window size
+	MaxBatchSize      int     `json:"max_batch_size,omitempty"`       // Max batch size for embeddings/etc.
+}
+
 // AISystemProfile contains metadata about an AI system for governance decisions
 type AISystemProfile struct {
-	EntityType      AIEntityType `json:"entity_type"`
-	SystemID        string       `json:"system_id"`
-	ModelName       string       `json:"model_name,omitempty"`
-	ModelVersion    string       `json:"model_version,omitempty"`
-	TrainingDate    string       `json:"training_date,omitempty"`    // RFC3339 format
-	RiskLevel       string       `json:"risk_level"`                 // low, medium, high, critical
-	IndustryContext string       `json:"industry_context,omitempty"` // healthcare, finance, etc.
-	Jurisdiction    string       `json:"jurisdiction"`               // US, EU, UK, etc.
-	CertifiedBy     []string     `json:"certified_by,omitempty"`     // certification authorities
-	ComplianceFlags []string     `json:"compliance_flags,omitempty"` // GDPR, HIPAA, SOX, etc.
+	EntityType      AIEntityType   `json:"entity_type"`
+	SystemID        string         `json:"system_id"`
+	ModelName       string         `json:"model_name,omitempty"`
+	ModelVersion    string         `json:"model_version,omitempty"`
+	ModelMetadata   *ModelMetadata `json:"model_metadata,omitempty"`   // Optional model limits (sec11.item2)
+	TrainingDate    string         `json:"training_date,omitempty"`    // RFC3339 format
+	RiskLevel       string         `json:"risk_level"`                 // low, medium, high, critical
+	IndustryContext string         `json:"industry_context,omitempty"` // healthcare, finance, etc.
+	Jurisdiction    string         `json:"jurisdiction"`               // US, EU, UK, etc.
+	CertifiedBy     []string       `json:"certified_by,omitempty"`     // certification authorities
+	ComplianceFlags []string       `json:"compliance_flags,omitempty"` // GDPR, HIPAA, SOX, etc.
 }
 
 // AICapabilityRule defines what actions an AI entity type can perform
@@ -489,6 +505,15 @@ func (m *AICapabilityMatrix) EnforceAICapabilities(profile AISystemProfile, acti
 		}
 	}
 
+	// Check model metadata limits (sec11.item2 P2)
+	if profile.ModelMetadata != nil {
+		if limitViolation := m.checkModelLimits(profile.ModelMetadata, claims); limitViolation != "" {
+			decision.Reason = limitViolation
+			decision.ViolatedRules = []string{"model_limit_exceeded"}
+			return decision
+		}
+	}
+
 	// All checks passed - allow the action
 	decision.Decision = DecisionAllow
 	decision.Reason = "AI capability enforcement checks passed"
@@ -696,6 +721,57 @@ func (m *AICapabilityMatrix) getAuditLevelPriority(level string) int {
 	default:
 		return 1 // default to basic
 	}
+}
+
+// checkModelLimits validates model operational limits against request claims (sec11.item2 P2).
+// Returns empty string if all limits are satisfied, or violation message if any limit is exceeded.
+func (m *AICapabilityMatrix) checkModelLimits(metadata *ModelMetadata, claims map[string]any) string {
+	if metadata == nil {
+		return "" // No limits configured
+	}
+
+	// Check token limit per call
+	if metadata.TokenLimitPerCall > 0 {
+		if tokens, ok := claims["requested_tokens"].(int); ok && tokens > metadata.TokenLimitPerCall {
+			return fmt.Sprintf("requested tokens %d exceeds model limit %d per call", tokens, metadata.TokenLimitPerCall)
+		}
+		if tokensFloat, ok := claims["requested_tokens"].(float64); ok && int(tokensFloat) > metadata.TokenLimitPerCall {
+			return fmt.Sprintf("requested tokens %d exceeds model limit %d per call", int(tokensFloat), metadata.TokenLimitPerCall)
+		}
+	}
+
+	// Check cost limit per call
+	if metadata.CostLimitPerCall > 0 {
+		if cost, ok := claims["estimated_cost"].(float64); ok && cost > metadata.CostLimitPerCall {
+			return fmt.Sprintf("estimated cost %.4f USD exceeds model limit %.4f USD per call", cost, metadata.CostLimitPerCall)
+		}
+	}
+
+	// Check context window size
+	if metadata.ContextWindow > 0 {
+		if contextSize, ok := claims["context_size"].(int); ok && contextSize > metadata.ContextWindow {
+			return fmt.Sprintf("context size %d exceeds model context window %d", contextSize, metadata.ContextWindow)
+		}
+		if contextFloat, ok := claims["context_size"].(float64); ok && int(contextFloat) > metadata.ContextWindow {
+			return fmt.Sprintf("context size %d exceeds model context window %d", int(contextFloat), metadata.ContextWindow)
+		}
+	}
+
+	// Check batch size limit
+	if metadata.MaxBatchSize > 0 {
+		if batchSize, ok := claims["batch_size"].(int); ok && batchSize > metadata.MaxBatchSize {
+			return fmt.Sprintf("batch size %d exceeds model limit %d", batchSize, metadata.MaxBatchSize)
+		}
+		if batchFloat, ok := claims["batch_size"].(float64); ok && int(batchFloat) > metadata.MaxBatchSize {
+			return fmt.Sprintf("batch size %d exceeds model limit %d", int(batchFloat), metadata.MaxBatchSize)
+		}
+	}
+
+	// Note: Daily limits (TokenLimitDaily, CostLimitDaily) and rate limits (RateLimitRPM, RateLimitRPH)
+	// require stateful tracking across requests. Consider implementing with external rate limiter
+	// or time-series database for production use.
+
+	return "" // All checks passed
 }
 
 // SetEnforcementActive enables or disables AI capability enforcement
