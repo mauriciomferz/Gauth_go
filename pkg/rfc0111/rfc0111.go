@@ -166,6 +166,162 @@ type RevocationRequest struct {
 	EvidenceHashes []string `json:"evidence_hashes,omitempty"`
 }
 
+// ========================================
+// RFC 0111 & 0115 Conformance Types
+// ========================================
+
+// TokenResult represents the result of token verification or issuance operations (RFC 0111:1).
+type TokenResult struct {
+	Token     string                   `json:"token"`
+	ExpiresAt time.Time                `json:"expires_at"`
+	Status    string                   `json:"status"`
+	Result    *TokenVerificationResult `json:"verification_result,omitempty"`
+	Error     string                   `json:"error,omitempty"`
+}
+
+// ScopeItem represents a single scope entry with semantic validation (RFC 0115:2).
+type ScopeItem struct {
+	Action      string            `json:"action"`
+	Resource    string            `json:"resource,omitempty"`
+	Constraints map[string]string `json:"constraints,omitempty"`
+}
+
+// ScopeValidator provides scope semantic validation (RFC 0115:2).
+type ScopeValidator struct {
+	AllowedActions   []string          `json:"allowed_actions,omitempty"`
+	RequiredFields   []string          `json:"required_fields,omitempty"`
+	ConstraintRules  map[string]string `json:"constraint_rules,omitempty"`
+	StrictValidation bool              `json:"strict_validation"`
+}
+
+// ValidateScope performs semantic validation of scope items (RFC 0115:2).
+func ValidateScope(items []ScopeItem, validator *ScopeValidator) error {
+	if validator == nil || !validator.StrictValidation {
+		return nil // permissive mode
+	}
+	for _, item := range items {
+		if item.Action == "" {
+			return fmt.Errorf("scope item missing action")
+		}
+		// Check against allowed actions if configured
+		if len(validator.AllowedActions) > 0 {
+			found := false
+			for _, allowed := range validator.AllowedActions {
+				if item.Action == allowed {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return fmt.Errorf("action %s not in allowed list", item.Action)
+			}
+		}
+	}
+	return nil
+}
+
+// FormalValidation represents formal requirement validation state (RFC 0115:4).
+type FormalValidation struct {
+	RequirementsMet bool     `json:"requirements_met"`
+	ChecksPassed    []string `json:"checks_passed,omitempty"`
+	ChecksFailed    []string `json:"checks_failed,omitempty"`
+	Timestamp       time.Time `json:"timestamp"`
+}
+
+// RequirementCheck represents a single formal requirement check (RFC 0115:4).
+type RequirementCheck struct {
+	Name        string    `json:"name"`
+	Description string    `json:"description,omitempty"`
+	Passed      bool      `json:"passed"`
+	Message     string    `json:"message,omitempty"`
+	CheckedAt   time.Time `json:"checked_at"`
+}
+
+// DailyLimit represents daily transaction limits (RFC 0115:5).
+type DailyLimit struct {
+	MaxAmount       float64   `json:"max_amount"`
+	Currency        string    `json:"currency,omitempty"`
+	TransactionCap  int       `json:"transaction_cap,omitempty"`
+	CurrentAmount   float64   `json:"current_amount"`
+	CurrentCount    int       `json:"current_count"`
+	ResetAt         time.Time `json:"reset_at"`
+	LastTransaction time.Time `json:"last_transaction,omitempty"`
+}
+
+// PowerLimit represents general power-of-attorney limits (RFC 0115:5).
+type PowerLimit struct {
+	Type        string            `json:"type"` // e.g., "daily", "transaction", "cumulative"
+	MaxValue    float64           `json:"max_value"`
+	CurrentValue float64          `json:"current_value"`
+	Unit        string            `json:"unit,omitempty"`
+	Metadata    map[string]string `json:"metadata,omitempty"`
+}
+
+// TransactionLimit represents per-transaction limits (RFC 0115:5).
+type TransactionLimit struct {
+	MaxAmount      float64 `json:"max_amount"`
+	MinAmount      float64 `json:"min_amount,omitempty"`
+	Currency       string  `json:"currency,omitempty"`
+	RequireApproval bool   `json:"require_approval,omitempty"`
+}
+
+// Rights represents rights granted under power of attorney (RFC 0115:6).
+type Rights struct {
+	Actions       []string          `json:"actions"`
+	Resources     []string          `json:"resources,omitempty"`
+	Constraints   map[string]string `json:"constraints,omitempty"`
+	ValidFrom     time.Time         `json:"valid_from,omitempty"`
+	ValidUntil    time.Time         `json:"valid_until,omitempty"`
+	TransferableSubRights bool      `json:"transferable_sub_rights,omitempty"`
+}
+
+// Obligations represents obligations under power of attorney (RFC 0115:6).
+type Obligations struct {
+	DutiesOfCare      []string          `json:"duties_of_care,omitempty"`
+	ReportingRequired bool              `json:"reporting_required,omitempty"`
+	NotificationRules map[string]string `json:"notification_rules,omitempty"`
+	ComplianceChecks  []string          `json:"compliance_checks,omitempty"`
+}
+
+// DutyOfCare represents a specific duty of care obligation (RFC 0115:6).
+type DutyOfCare struct {
+	Description string            `json:"description"`
+	Standard    string            `json:"standard,omitempty"` // e.g., "reasonable_person", "professional"
+	Scope       []string          `json:"scope,omitempty"`
+	Evidence    map[string]string `json:"evidence,omitempty"`
+}
+
+// ConditionalExpression represents a conditional special condition (RFC 0115:7).
+type ConditionalExpression struct {
+	Condition  string            `json:"condition"`
+	Expression string            `json:"expression"`
+	Variables  map[string]string `json:"variables,omitempty"`
+	Evaluated  bool              `json:"evaluated,omitempty"`
+	Result     interface{}       `json:"result,omitempty"`
+}
+
+// RuntimeEvaluation represents runtime evaluation of special conditions (RFC 0115:7).
+type RuntimeEvaluation struct {
+	ExpressionID string                  `json:"expression_id"`
+	Context      map[string]interface{}  `json:"context,omitempty"`
+	Result       bool                    `json:"result"`
+	Error        string                  `json:"error,omitempty"`
+	EvaluatedAt  time.Time               `json:"evaluated_at"`
+	Conditions   []ConditionalExpression `json:"conditions,omitempty"`
+}
+
+// ThresholdValidation represents joint signature threshold validation (RFC 0115:8).
+type ThresholdValidation struct {
+	RequiredSignatures int                `json:"required_signatures"`
+	ProvidedSignatures int                `json:"provided_signatures"`
+	ValidSignatures    int                `json:"valid_signatures"`
+	Threshold          int                `json:"threshold"`
+	ThresholdMet       bool               `json:"threshold_met"`
+	SignerIdentities   []string           `json:"signer_identities,omitempty"`
+	ValidationResults  map[string]bool    `json:"validation_results,omitempty"`
+	ValidatedAt        time.Time          `json:"validated_at"`
+}
+
 // Reusable constants (reduce duplication and goconst warnings)
 const (
 	poaVersionV1 = "poa/v1"

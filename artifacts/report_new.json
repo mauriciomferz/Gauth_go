@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-11-06T21:20:44+01:00",
+  "generated_at": "2025-11-06T20:58:20+01:00",
   "clauses": [
     {
       "id": "0111:rfc-0111-(placeholder-extract)",
@@ -129,6 +129,21 @@
     }
   ],
   "failures": [
+    "symbol missing: 0111:1.-introduction -\u003e TokenResult",
+    "symbol missing: 0115:2.-scope-semantics -\u003e ScopeItem",
+    "symbol missing: 0115:2.-scope-semantics -\u003e ScopeValidator",
+    "symbol missing: 0115:2.-scope-semantics -\u003e ValidateScope",
+    "symbol missing: 0115:4.-formal-requirements -\u003e FormalValidation",
+    "symbol missing: 0115:4.-formal-requirements -\u003e RequirementCheck",
+    "symbol missing: 0115:5.-power-limits -\u003e DailyLimit",
+    "symbol missing: 0115:5.-power-limits -\u003e PowerLimit",
+    "symbol missing: 0115:5.-power-limits -\u003e TransactionLimit",
+    "symbol missing: 0115:6.-rights-\u0026-obligations -\u003e DutyOfCare",
+    "symbol missing: 0115:6.-rights-\u0026-obligations -\u003e Obligations",
+    "symbol missing: 0115:6.-rights-\u0026-obligations -\u003e Rights",
+    "symbol missing: 0115:7.-special-conditions -\u003e ConditionalExpression",
+    "symbol missing: 0115:7.-special-conditions -\u003e RuntimeEvaluation",
+    "symbol missing: 0115:8.-joint-signatures -\u003e ThresholdValidation",
     "tests missing: 0111:1.-introduction glob=pkg/rfc0111/rfc0111_test.go",
     "tests missing: 0115:2.-scope-semantics glob=pkg/rfc0111/rfc0111_scope_test.go",
     "tests missing: 0115:7.-special-conditions glob=pkg/authz/authz_test.go"
@@ -137,12 +152,12 @@
     "mapped_clauses": 16,
     "mapped_clauses_found": 16,
     "required_symbols": 48,
-    "symbols_found": 48,
+    "symbols_found": 33,
     "clauses_with_tests": 16,
     "clauses_tests_found": 13,
-    "coverage_percent": 100,
+    "coverage_percent": 68.75,
     "missing_clauses": 0,
-    "missing_symbols": 0,
+    "missing_symbols": 15,
     "missing_tests": 3,
     "gap_total": 43,
     "gap_implemented": 8,
@@ -154,30 +169,18 @@
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/engine.go:85"
     ],
     "AuditEvents": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3391"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3235"
     ],
     "CanonicalPOADigest": [
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/canonical.go:42",
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/canonical.go:42",
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/canonical.go:42"
     ],
-    "ConditionalExpression": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:295"
-    ],
     "CreateDelegation": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:2011"
-    ],
-    "DailyLimit": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:241"
-    ],
-    "DutyOfCare": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:287"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1855"
     ],
     "FileLogger": [
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/file_logger.go:21"
-    ],
-    "FormalValidation": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:224"
     ],
     "LegalFramework": [
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/auth/legal_framework_integration.go:241"
@@ -188,18 +191,12 @@
     "NewService": [
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/multi_region/cmd/main.go:48",
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/multi_region/main.go:45",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:808",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:652",
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/token/token.go:449"
-    ],
-    "Obligations": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:279"
     ],
     "POAStatus": [
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/poa/poa.go:24",
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:71"
-    ],
-    "PowerLimit": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:252"
     ],
     "PowerOfAttorney": [
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/auth/legal_framework_integration.go:303",
@@ -208,10 +205,7 @@
     ],
     "ReplayStore": [
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/gauth.go:197",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1761"
-    ],
-    "RequirementCheck": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:232"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1605"
     ],
     "RevocationChain": [
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/revocation_chain.go:65",
@@ -221,20 +215,8 @@
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/token/token.go:111"
     ],
     "RevokeDelegation": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3004",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3004"
-    ],
-    "Rights": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:269"
-    ],
-    "RuntimeEvaluation": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:304"
-    ],
-    "ScopeItem": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:183"
-    ],
-    "ScopeValidator": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:190"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:2848",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:2848"
     ],
     "Service": [
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/cascade/pkg/mesh/mesh.go:24",
@@ -242,7 +224,7 @@
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/multi_region/main.go:14",
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/gauth.go:161",
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/poa/poa.go:355",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1584",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1428",
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/token/token.go:230"
     ],
     "SignatureManager": [
@@ -251,24 +233,12 @@
     "SpecialConditions": [
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/poa/poa.go:123"
     ],
-    "ThresholdValidation": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:314"
-    ],
-    "TokenResult": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:174"
-    ],
-    "TransactionLimit": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:261"
-    ],
     "ValidateDelegation": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:2311"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:2155"
     ],
     "ValidateMultiSignature": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:350",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:350"
-    ],
-    "ValidateScope": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:198"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:194",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:194"
     ],
     "VerifyChain": [
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/ledger/audit_ledger.go:173",
@@ -293,18 +263,18 @@
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store_file.go:162"
     ],
     "VerifyIntegrity": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3472"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3316"
     ],
     "VerifyToken": [
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/paseto/main.go:73",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:959"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:803"
     ],
     "WithReplayProtection": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1913"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1757"
     ],
     "computeHash": [
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/ledger/audit_ledger.go:47",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3559"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3403"
     ],
     "policy.Registry": [
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/capability/registry.go:20",
@@ -315,15 +285,31 @@
       "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store_file.go:167"
     ],
     "validateDelegationRequest": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3566"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3410"
     ],
     "verifyPOASignature": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1853"
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1697"
     ]
   },
   "failure_categories": {
     "clause_missing": [],
-    "symbol_missing": [],
+    "symbol_missing": [
+      "symbol missing: 0111:1.-introduction -\u003e TokenResult",
+      "symbol missing: 0115:2.-scope-semantics -\u003e ScopeItem",
+      "symbol missing: 0115:2.-scope-semantics -\u003e ScopeValidator",
+      "symbol missing: 0115:2.-scope-semantics -\u003e ValidateScope",
+      "symbol missing: 0115:4.-formal-requirements -\u003e FormalValidation",
+      "symbol missing: 0115:4.-formal-requirements -\u003e RequirementCheck",
+      "symbol missing: 0115:5.-power-limits -\u003e DailyLimit",
+      "symbol missing: 0115:5.-power-limits -\u003e PowerLimit",
+      "symbol missing: 0115:5.-power-limits -\u003e TransactionLimit",
+      "symbol missing: 0115:6.-rights-\u0026-obligations -\u003e DutyOfCare",
+      "symbol missing: 0115:6.-rights-\u0026-obligations -\u003e Obligations",
+      "symbol missing: 0115:6.-rights-\u0026-obligations -\u003e Rights",
+      "symbol missing: 0115:7.-special-conditions -\u003e ConditionalExpression",
+      "symbol missing: 0115:7.-special-conditions -\u003e RuntimeEvaluation",
+      "symbol missing: 0115:8.-joint-signatures -\u003e ThresholdValidation"
+    ],
     "tests_missing": [
       "tests missing: 0111:1.-introduction glob=pkg/rfc0111/rfc0111_test.go",
       "tests missing: 0115:2.-scope-semantics glob=pkg/rfc0111/rfc0111_scope_test.go",
