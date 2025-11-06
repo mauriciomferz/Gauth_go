@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -233,6 +234,11 @@ func TestParsingPropertyClaimExtraction(t *testing.T) {
 // TestParsingPropertyTimingBoundaries validates parsing behavior near time boundaries.
 // Property: Expired tokens should be rejected consistently
 func TestParsingPropertyTimingBoundaries(t *testing.T) {
+	// Force HMAC mode for this test since buildTestToken creates HMAC tokens
+	oldMode := os.Getenv("GAUTH_TOKEN_SIG_MODE")
+	os.Setenv("GAUTH_TOKEN_SIG_MODE", "hmac")
+	defer os.Setenv("GAUTH_TOKEN_SIG_MODE", oldMode)
+	
 	svc, err := New(Config{
 		ClientID:           "timing-client",
 		ClientSecret:       strings.Repeat("b", 40),
@@ -255,6 +261,7 @@ func TestParsingPropertyTimingBoundaries(t *testing.T) {
 			"scope": "read",
 			"exp":   now.Add(-time.Minute).Unix(), // Expired 1 minute ago
 			"iat":   now.Add(-2 * time.Minute).Unix(),
+			"jti":   fmt.Sprintf("expired-jti-%d", i),
 		}
 		expiredToken := buildTestToken(svc.signingKey, expiredClaims)
 		_, expiredErr := svc.ValidateToken(expiredToken)
@@ -268,6 +275,7 @@ func TestParsingPropertyTimingBoundaries(t *testing.T) {
 			"scope": "read",
 			"exp":   now.Add(time.Hour).Unix(),
 			"iat":   now.Unix(),
+			"jti":   fmt.Sprintf("valid-jti-%d", i),
 		}
 		validToken := buildTestToken(svc.signingKey, validClaims)
 		validRes, validErr := svc.ValidateToken(validToken)
@@ -281,6 +289,7 @@ func TestParsingPropertyTimingBoundaries(t *testing.T) {
 			"scope": "write",
 			"exp":   now.Add(time.Duration(rnd.Intn(3600)+60) * time.Second).Unix(),
 			"iat":   now.Unix(),
+			"jti":   fmt.Sprintf("future-jti-%d", i),
 		}
 		futureToken := buildTestToken(svc.signingKey, futureClaims)
 		futureRes, futureErr := svc.ValidateToken(futureToken)
