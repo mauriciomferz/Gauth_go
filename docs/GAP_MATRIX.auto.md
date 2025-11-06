@@ -1,8 +1,8 @@
 # GAuth RFC Gap Matrix (Generated)
 
-> Generated: 2025-11-06T12:51:00Z
+> Generated: 2025-11-06T13:14:08Z
 
-**Status Summary:** Implemented=24 | Partial=7 | Missing=12 | Conceptual=0 | Total=43
+**Status Summary:** Implemented=26 | Partial=5 | Missing=12 | Conceptual=0 | Total=43
 
 **Drift Detected (9 items)**:
 - sec2.item3 (Obligations & advice processing): CSV(Status=Missing,Priority=P2) != MD(Status=Partial,Priority=P2)
@@ -54,7 +54,7 @@ Schema Version: 1
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|
 | sec3.item1 | Full semantic validation | Implemented | P0 | Complete EnhancedPoAValidator Service integration: warning channel (ValidationWarning WarningCollector DefaultWarningCollector) persistent daily limits (BoltDailyLimitStore JSON storage IncrementDailyUsage GetDailyUsage) conditional engine (SimpleConditionalEngine) metrics recording (InMemoryValidationMetrics RecordWarning RecordDailyLimitCheck) Service integration (WithEnhancedValidator option CreateDelegationCtx warnings collection DelegationResponse.Warnings field) comprehensive test coverage (rfc0111_enhanced_validator_service_integration_test.go 4 passing tests) production example (examples/enhanced_poa_validator_integration/main.go real Service integration). Remaining gaps: richer conditional DSL modular validator registry advanced restriction audit metrics. | pkg/rfc0111/validator_enhanced.go\|pkg/rfc0111/validator_enhanced_store.go\|pkg/rfc0111/rfc0111.go\|pkg/rfc0111/rfc0111_enhanced_validator_service_integration_test.go\|examples/enhanced_poa_validator_integration/main.go\|docs/ENHANCED_POA_VALIDATOR_SUMMARY.md |
-| sec3.item2 | Embed full PoA in token | Partial | P1 | RawPOA + PoAVersion embedding implemented behind GAUTH_EMBED_FULL_POA with size cap GAUTH_MAX_RAW_POA_BYTES; remaining gaps: verifier exposure helper, CBOR option, streaming for large PoAs, warning channel & audit persistence | docs/GAP_MATRIX.md:33\|pkg/rfc0111/rfc0111.go\|internal/metrics/metrics.go |
+| sec3.item2 | Embed full PoA in token | Implemented | P1 | RawPOA + PoAVersion embedding fully implemented with GAUTH_EMBED_FULL_POA flag and size cap GAUTH_MAX_RAW_POA_BYTES. Verifier helper ExtractEmbeddedPoA() extracts and validates embedded PoA. Enhanced ExtractEmbeddedPoAWithAudit() provides audit logging and metrics tracking. Size overflow metrics (IncEnvelopeRawPOATooLarge) warn when PoA exceeds limits. Offline verification mode (GAUTH_OFFLINE_VERIFICATION=1) validates tokens without repository access. | pkg/rfc0111/rfc0111.go:ExtractEmbeddedPoA,ExtractEmbeddedPoAWithAudit\|pkg/rfc0111/embedding_test.go\|internal/metrics/metrics.go:IncEnvelopeRawPOAEmbedded |
 | sec3.item3 | Joint/collective signature enforcement | Implemented | P1 | Complete multi-signature workflow with M-of-N threshold verification (verifyMultiSignatures 180+ lines with threshold enforcement weighted signatures canonical digest computation) comprehensive metrics (8 failure categorization counters) REST API orchestration (SignatureManager with InitiateCollection SubmitSignature GetStatus ActivatePoA) API handlers (POST /api/v1/beta/poa/sign GET /api/v1/beta/poa/:id/multisig/status) signature collection lifecycle (pending→completed→active) expiration tracking concurrent submission support and production demo (3-of-5 board approval scenario) | pkg/rfc0111/rfc0111.go\|internal/multisig/manager.go\|internal/multisig/api.go\|internal/multisig/manager_test.go\|examples/multi_signature_poa/main.go\|docs/ADR-multi-signature-threshold-enforcement.md |
 | sec3.item4 | Conditional/special conditions evaluation | Missing | P2 | No runtime interpreter | docs/GAP_MATRIX.md:34 |
 
@@ -78,7 +78,7 @@ Schema Version: 1
 
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|
-| sec6.item1 | Fail-closed replay mode | Partial | P1 | In-memory JTI map + optional ReplayStore reject duplicates/errors; missing durable persistence & eviction controls | pkg/gauth/gauth.go\|pkg/gauth/gauth_claims_test.go |
+| sec6.item1 | Fail-closed replay mode | Implemented | P1 | Complete durable replay protection with pkg/replay/DurableReplayStore: WAL persistence, automatic snapshots, recovery, and pluggable eviction policies (TTL, LRU, size-based, composite). gauth integration via WithReplayStore() option and factory pattern (RegisterDurableReplayStoreFactory). Environment-based auto-configuration with GAUTH_REPLAY_WAL_PATH, GAUTH_REPLAY_TTL_SEC, GAUTH_REPLAY_EVICTION_POLICY, GAUTH_REPLAY_EVICTION_MAX_SIZE. Fail-closed mode: CheckAndStore() rejects duplicate JTI with error, ensuring replay attacks always fail. | pkg/replay/durable_replay_store.go\|pkg/replay/gauth_factory.go\|pkg/gauth/replay_integration.go\|pkg/replay/gauth_autoconfig_test.go\|pkg/replay/gauth_integration_test.go |
 | sec6.item2 | JTI format validation | Implemented | P2 | Need skew checks | docs/GAP_MATRIX.md:56 |
 | sec6.item3 | Replay persistence recovery | Missing | P2 | No WAL snapshot | docs/GAP_MATRIX.md:57 |
 

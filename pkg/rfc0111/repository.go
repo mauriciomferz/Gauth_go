@@ -1,5 +1,7 @@
 package rfc0111
 
+import "sync"
+
 // Milestone 2A: Persistence abstraction scaffold.
 // NOTE: Existing code still uses the in-struct map directly; the POARepository
 // interface and memoryRepository implementation are introduced now so that
@@ -19,18 +21,32 @@ type POARepository interface {
 }
 
 // memoryRepository is an in-memory implementation (prototype / tests).
-type memoryRepository struct{ store map[string]*PowerOfAttorney }
+type memoryRepository struct {
+	mu    sync.RWMutex
+	store map[string]*PowerOfAttorney
+}
 
 func newMemoryRepository() *memoryRepository {
 	return &memoryRepository{store: make(map[string]*PowerOfAttorney)}
 }
 
-func (m *memoryRepository) Create(p *PowerOfAttorney) error { m.store[p.ID] = p; return nil }
+func (m *memoryRepository) Create(p *PowerOfAttorney) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.store[p.ID] = p
+	return nil
+}
+
 func (m *memoryRepository) Get(id string) (*PowerOfAttorney, bool) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 	p, ok := m.store[id]
 	return p, ok
 }
+
 func (m *memoryRepository) ListByPrincipal(principal string) []*PowerOfAttorney {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 	out := make([]*PowerOfAttorney, 0)
 	for _, p := range m.store {
 		if p.Grantor == principal || p.Grantee == principal {
@@ -41,6 +57,8 @@ func (m *memoryRepository) ListByPrincipal(principal string) []*PowerOfAttorney 
 }
 
 func (m *memoryRepository) Update(p *PowerOfAttorney) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	if _, ok := m.store[p.ID]; !ok {
 		return nil
 	}
@@ -52,6 +70,9 @@ func (m *memoryRepository) ListDescendants(parentPoaID string, maxDepth int) ([]
 	if parentPoaID == "" {
 		return []*PowerOfAttorney{}, nil
 	}
+
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 
 	var result []*PowerOfAttorney
 	visited := make(map[string]bool) // Prevent cycles - shared across all recursive calls

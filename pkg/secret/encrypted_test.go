@@ -65,10 +65,10 @@ func TestEncryptedProviderList(t *testing.T) {
 
 	ctx := context.Background()
 	secrets := map[string]string{
-		"api/key1":     "secret1",
-		"api/key2":     "secret2",
-		"db/password":  "dbpass",
-		"db/username":  "dbuser",
+		"api/key1":    "secret1",
+		"api/key2":    "secret2",
+		"db/password": "dbpass",
+		"db/username": "dbuser",
 	}
 
 	for k, v := range secrets {
@@ -236,15 +236,15 @@ func TestEncryptedProviderTamperDetection(t *testing.T) {
 func TestEncryptedProviderDifferentKeys(t *testing.T) {
 	backend1 := NewMemory()
 	backend2 := NewMemory()
-	
+
 	pass1 := "first-passphrase-sufficient"
 	pass2 := "second-passphrase-different"
-	
+
 	enc1, err := NewEncrypted(backend1, pass1)
 	if err != nil {
 		t.Fatalf("NewEncrypted 1: %v", err)
 	}
-	
+
 	enc2, err := NewEncrypted(backend2, pass2)
 	if err != nil {
 		t.Fatalf("NewEncrypted 2: %v", err)

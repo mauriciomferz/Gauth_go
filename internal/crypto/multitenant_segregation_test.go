@@ -121,12 +121,12 @@ func TestMultiTenantDifferentBackends(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create dev store: %v", err)
 	}
-	
+
 	stagingStore, err := NewFileKeyStore(filepath.Join(tempDir, "staging"), 48*time.Hour)
 	if err != nil {
 		t.Fatalf("Failed to create staging store: %v", err)
 	}
-	
+
 	prodStore, err := NewFileKeyStore(filepath.Join(tempDir, "production"), 168*time.Hour)
 	if err != nil {
 		t.Fatalf("Failed to create production store: %v", err)

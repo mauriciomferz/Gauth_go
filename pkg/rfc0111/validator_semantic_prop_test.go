@@ -59,16 +59,16 @@ func TestPropertyScopeSyntaxInvalidInputs(t *testing.T) {
 	validator := NewEnhancedPoAValidator()
 
 	invalidScopes := []string{
-		"",                      // Empty scope
-		"read\x00:file",         // Control character (NULL)
-		"read\x1f:file",         // Control character (Unit separator)
-		":action",               // Missing namespace
-		"namespace:",            // Missing action
-		"bad-ns@:action",        // Invalid namespace character (@)
-		"ns!:action",            // Invalid namespace character (!)
-		"ns space:action",       // Space in namespace
-		"read\x7f:file",         // DEL character
-		"ns#:action",            // Invalid character (#)
+		"",                // Empty scope
+		"read\x00:file",   // Control character (NULL)
+		"read\x1f:file",   // Control character (Unit separator)
+		":action",         // Missing namespace
+		"namespace:",      // Missing action
+		"bad-ns@:action",  // Invalid namespace character (@)
+		"ns!:action",      // Invalid namespace character (!)
+		"ns space:action", // Space in namespace
+		"read\x7f:file",   // DEL character
+		"ns#:action",      // Invalid character (#)
 	}
 
 	for _, scope := range invalidScopes {
@@ -155,9 +155,9 @@ func TestPropertyActionTaxonomyConsistency(t *testing.T) {
 			// Validate twice to check consistency
 			err1 := validator.validateActionTaxonomy(poa)
 			warnings1Count := len(validator.warningCollector.GetWarnings())
-			
+
 			validator.warningCollector.ClearWarnings()
-			
+
 			err2 := validator.validateActionTaxonomy(poa)
 			warnings2Count := len(validator.warningCollector.GetWarnings())
 
@@ -205,7 +205,7 @@ func TestPropertyTemporalConstraintsMonotonicity(t *testing.T) {
 			}
 
 			validator.warningCollector.ClearWarnings()
-			
+
 			// Use validateEnhancedSemantics for long_duration check
 			err := validator.validateEnhancedSemantics(ctx, poa)
 			if err != nil {
@@ -213,7 +213,7 @@ func TestPropertyTemporalConstraintsMonotonicity(t *testing.T) {
 			}
 
 			warnings := validator.warningCollector.GetWarnings()
-			
+
 			if tc.expectedWarningCode == "" {
 				// No specific warnings expected (may have other warnings)
 				// Just check no errors occurred
@@ -247,8 +247,8 @@ func TestPropertyRestrictionSemanticsConsistency(t *testing.T) {
 		{"MaxAmountRestriction", map[string]string{"max_amount": "1000.0"}},
 		{"IPWhitelistRestriction", map[string]string{"ip_whitelist": "192.168.1.1"}},
 		{"MultipleRestrictions", map[string]string{
-			"max_amount":  "500.0",
-			"daily_limit": "5000.0",
+			"max_amount":   "500.0",
+			"daily_limit":  "5000.0",
 			"ip_whitelist": "10.0.0.1,10.0.0.2",
 		}},
 		{"InvalidAmountType", map[string]string{"max_amount": "not_a_number"}},
@@ -372,9 +372,9 @@ func TestPropertyWarningCollectionNonBlockingProperty(t *testing.T) {
 
 	// Check for expected warning codes
 	expectedWarnings := map[string]bool{
-		"duplicate_scope":  false,
-		"past_valid_from":  false,
-		"long_duration":    false,
+		"duplicate_scope": false,
+		"past_valid_from": false,
+		"long_duration":   false,
 	}
 
 	for _, warning := range result.Warnings {
@@ -396,8 +396,8 @@ func TestPropertyScopeSubsumptionDetection(t *testing.T) {
 	validator := NewEnhancedPoAValidator()
 
 	testCases := []struct {
-		name               string
-		scopes             []string
+		name                string
+		scopes              []string
 		expectedSubsumption bool
 	}{
 		{"NoSubsumption", []string{"read:documents", "write:files"}, false},
@@ -438,8 +438,8 @@ func TestPropertyAdministrativeScopeDetection(t *testing.T) {
 	ctx := context.Background()
 
 	testCases := []struct {
-		name              string
-		scopes            []string
+		name               string
+		scopes             []string
 		expectAdminWarning bool
 	}{
 		{"NoAdminScope", []string{"read:documents"}, false},

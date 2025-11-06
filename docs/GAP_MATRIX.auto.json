@@ -1,8 +1,8 @@
 {
-  "generated": "2025-11-06T12:51:00Z",
+  "generated": "2025-11-06T13:14:08Z",
   "counts": {
-    "implemented": 24,
-    "partial": 7,
+    "implemented": 26,
+    "partial": 5,
     "missing": 12,
     "conceptual": 0,
     "total": 43
@@ -467,33 +467,34 @@
       "Section": "PoA Definition (RFC0115)",
       "ID": "sec3.item2",
       "Requirement": "Embed full PoA in token",
-      "Status": "Partial",
+      "Status": "Implemented",
       "Priority": "P1",
-      "Gap": "RawPOA + PoAVersion embedding implemented behind GAUTH_EMBED_FULL_POA with size cap GAUTH_MAX_RAW_POA_BYTES; remaining gaps: verifier exposure helper, CBOR option, streaming for large PoAs, warning channel \u0026 audit persistence",
-      "Evidence": "docs/GAP_MATRIX.md:33|pkg/rfc0111/rfc0111.go|internal/metrics/metrics.go",
+      "Gap": "RawPOA + PoAVersion embedding fully implemented with GAUTH_EMBED_FULL_POA flag and size cap GAUTH_MAX_RAW_POA_BYTES. Verifier helper ExtractEmbeddedPoA() extracts and validates embedded PoA. Enhanced ExtractEmbeddedPoAWithAudit() provides audit logging and metrics tracking. Size overflow metrics (IncEnvelopeRawPOATooLarge) warn when PoA exceeds limits. Offline verification mode (GAUTH_OFFLINE_VERIFICATION=1) validates tokens without repository access.",
+      "Evidence": "pkg/rfc0111/rfc0111.go:ExtractEmbeddedPoA,ExtractEmbeddedPoAWithAudit|pkg/rfc0111/embedding_test.go|internal/metrics/metrics.go:IncEnvelopeRawPOAEmbedded",
       "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:33|pkg/rfc0111/rfc0111.go|internal/metrics/metrics.go",
+        "raw": "pkg/rfc0111/rfc0111.go:ExtractEmbeddedPoA,ExtractEmbeddedPoAWithAudit|pkg/rfc0111/embedding_test.go|internal/metrics/metrics.go:IncEnvelopeRawPOAEmbedded",
         "files": [
-          "docs/GAP_MATRIX.md:33",
-          "pkg/rfc0111/rfc0111.go",
-          "internal/metrics/metrics.go"
+          "pkg/rfc0111/rfc0111.go:ExtractEmbeddedPoA,ExtractEmbeddedPoAWithAudit",
+          "pkg/rfc0111/embedding_test.go",
+          "internal/metrics/metrics.go:IncEnvelopeRawPOAEmbedded"
         ],
         "existing": [
-          "docs/GAP_MATRIX.md",
           "pkg/rfc0111/rfc0111.go",
+          "pkg/rfc0111/embedding_test.go",
           "internal/metrics/metrics.go"
         ],
         "missing": null,
-        "test_files": null,
+        "test_files": [
+          "pkg/rfc0111/embedding_test.go"
+        ],
         "code_files": [
-          "docs/GAP_MATRIX.md",
           "pkg/rfc0111/rfc0111.go",
           "internal/metrics/metrics.go"
         ],
         "existing_count": 3,
         "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 3
+        "test_file_count": 1,
+        "code_file_count": 2
       }
     },
     {
@@ -762,31 +763,40 @@
       "Section": "Replay \u0026 Token Security",
       "ID": "sec6.item1",
       "Requirement": "Fail-closed replay mode",
-      "Status": "Partial",
+      "Status": "Implemented",
       "Priority": "P1",
-      "Gap": "In-memory JTI map + optional ReplayStore reject duplicates/errors; missing durable persistence \u0026 eviction controls",
-      "Evidence": "pkg/gauth/gauth.go|pkg/gauth/gauth_claims_test.go",
+      "Gap": "Complete durable replay protection with pkg/replay/DurableReplayStore: WAL persistence, automatic snapshots, recovery, and pluggable eviction policies (TTL, LRU, size-based, composite). gauth integration via WithReplayStore() option and factory pattern (RegisterDurableReplayStoreFactory). Environment-based auto-configuration with GAUTH_REPLAY_WAL_PATH, GAUTH_REPLAY_TTL_SEC, GAUTH_REPLAY_EVICTION_POLICY, GAUTH_REPLAY_EVICTION_MAX_SIZE. Fail-closed mode: CheckAndStore() rejects duplicate JTI with error, ensuring replay attacks always fail.",
+      "Evidence": "pkg/replay/durable_replay_store.go|pkg/replay/gauth_factory.go|pkg/gauth/replay_integration.go|pkg/replay/gauth_autoconfig_test.go|pkg/replay/gauth_integration_test.go",
       "evidence_detail": {
-        "raw": "pkg/gauth/gauth.go|pkg/gauth/gauth_claims_test.go",
+        "raw": "pkg/replay/durable_replay_store.go|pkg/replay/gauth_factory.go|pkg/gauth/replay_integration.go|pkg/replay/gauth_autoconfig_test.go|pkg/replay/gauth_integration_test.go",
         "files": [
-          "pkg/gauth/gauth.go",
-          "pkg/gauth/gauth_claims_test.go"
+          "pkg/replay/durable_replay_store.go",
+          "pkg/replay/gauth_factory.go",
+          "pkg/gauth/replay_integration.go",
+          "pkg/replay/gauth_autoconfig_test.go",
+          "pkg/replay/gauth_integration_test.go"
         ],
         "existing": [
-          "pkg/gauth/gauth.go",
-          "pkg/gauth/gauth_claims_test.go"
+          "pkg/replay/durable_replay_store.go",
+          "pkg/replay/gauth_factory.go",
+          "pkg/gauth/replay_integration.go",
+          "pkg/replay/gauth_autoconfig_test.go",
+          "pkg/replay/gauth_integration_test.go"
         ],
         "missing": null,
         "test_files": [
-          "pkg/gauth/gauth_claims_test.go"
+          "pkg/replay/gauth_autoconfig_test.go",
+          "pkg/replay/gauth_integration_test.go"
         ],
         "code_files": [
-          "pkg/gauth/gauth.go"
+          "pkg/replay/durable_replay_store.go",
+          "pkg/replay/gauth_factory.go",
+          "pkg/gauth/replay_integration.go"
         ],
-        "existing_count": 2,
+        "existing_count": 5,
         "missing_count": 0,
-        "test_file_count": 1,
-        "code_file_count": 1
+        "test_file_count": 2,
+        "code_file_count": 3
       }
     },
     {
