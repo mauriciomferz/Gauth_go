@@ -1,8 +1,8 @@
 # GAuth RFC Gap Matrix (Generated)
 
-> Generated: 2025-11-06T15:45:00Z (P0 sec9.item1 Complete - Comprehensive Clause Mapping)
+> Generated: 2025-11-06T16:00:00Z (P1 sec11.item1 Complete - Capability Matrix Fuzz Tests)
 
-**Status Summary:** Implemented=33 | Partial=6 | Missing=5 | Conceptual=0 | Total=44
+**Status Summary:** Implemented=34 | Partial=5 | Missing=5 | Conceptual=0 | Total=44
 
 ## Capability Snapshot
 
@@ -104,7 +104,7 @@ Schema Version: 1
 
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|
-| sec11.item1 | Capability matrix enforcement | Partial | P1 | Runtime enforcement & anchoring present (flag-gated); missing dedicated fuzz tests | external timestamp integration |
+| sec11.item1 | Capability matrix enforcement | Implemented | P1 | **COMPLETED**: Runtime enforcement & anchoring present (flag-gated) with comprehensive fuzz testing: 9 dedicated fuzz tests (FuzzCapabilityEnforcement, FuzzWildcardMatching, FuzzSystemProfileValidation, FuzzClaimsValidation, FuzzJurisdictionEnforcement, FuzzAuditLevelDetermination, FuzzEnforcementToggle, FuzzCapabilityFormat, FuzzRiskLevelEvaluation) covering arbitrary inputs (entity types, jurisdictions, risk levels, claims, wildcards), decision consistency validation, no-panic guarantees (279K+ exec/sec), edge case handling (empty strings, Unicode, long strings, invalid formats), and idempotence verification | internal/ai/capability_matrix.go\|internal/ai/capability_matrix_test.go (6 comprehensive tests)\|internal/ai/capability_matrix_fuzz_test.go (9 fuzz tests, 377 lines)\|external timestamp integration |
 | sec11.item2 | Model limit checks | Implemented | P2 | Multi-dimension enforcement (input/output tokens + per-minute rate) + per-user scoped quotas and exceed audit hash chain with verification endpoint; metrics counters (model_limit_exceeded_total, model_output_limit_exceeded_total). Remaining gaps: currency conversion & multi-period limits | web/model_limits_attestation_signature_test.go\|web/model_limits_attestation_notarize_dual_domain_test.go\|pkg/attest/verify.go\|cmd/auditor/main.go |
 
 ## Advanced Delegation Lifecycle
@@ -280,8 +280,9 @@ Schema Version: 1
 
 - **RFC 0111 Compliance**: Core delegation and revocation implemented with audit trail
 - **RFC 0115 Compliance**: PoA structure and scope semantics validated
-- **Security Posture**: 33/44 requirements fully implemented (75%), 6/44 partial (14%), 5/44 missing (11%)
+- **Security Posture**: 34/44 requirements fully implemented (77%), 5/44 partial (11%), 5/44 missing (11%)
 - **P0 Critical Priorities**: 5/5 COMPLETED ✅ (100%) 🎉
+- **P1 High Priority**: 1/4 additional complete (sec11.item1 ✅), 3 remaining
 - **Test Maturity**: 100% symbol coverage, property + fuzz testing for critical paths
 
 ---
