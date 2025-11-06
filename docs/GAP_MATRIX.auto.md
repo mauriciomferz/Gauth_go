@@ -1,8 +1,8 @@
 # GAuth RFC Gap Matrix (Generated)
 
-> Generated: 2025-11-06T14:00:00Z (P2.12 Complete)
+> Generated: 2025-11-06T14:00:00Z (P3.2 Complete)
 
-**Status Summary:** Implemented=29 | Partial=10 | Missing=5 | Conceptual=0 | Total=44
+**Status Summary:** Implemented=30 | Partial=9 | Missing=5 | Conceptual=0 | Total=44
 
 ## Capability Snapshot
 
@@ -74,7 +74,7 @@ Schema Version: 1
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|
 | sec7.item1 | Decision metrics (allow/deny + action/resource labels) | Implemented | P2 | Reason taxonomy limited; no JSON labeled export yet | docs/GAP_MATRIX.md:62\|internal/metrics/prometheus_adapter.go\|docs/OBSERVABILITY.md |
-| sec7.item2 | Metrics export adapter | Partial | P3 | No collector registration | docs/GAP_MATRIX.md:63 |
+| sec7.item2 | Metrics export adapter | Implemented | P3 | Complete collector registry framework with multi-collector support: MetricsCollector interface, CollectorRegistry with Register/Deregister API, lifecycle management (Flush/Close/Health), thread-safe dispatch to multiple collectors (sequential or concurrent modes), example collectors (PrometheusCollector wrapper, JSONCollector for debugging). Comprehensive test suite (8 tests: registration, multi-collector dispatch, concurrent access, lifecycle, error handling). Integration with rfc0111.Service via WithCollectorRegistry option. Remaining gaps: Advanced features (conditional registration, collector health monitoring UI, metrics aggregation/downsampling). | internal/metrics/registry.go\|internal/metrics/registry_test.go\|internal/metrics/collectors/prometheus.go\|internal/metrics/collectors/json.go\|pkg/rfc0111/rfc0111.go\|docs/METRICS_COLLECTOR_REGISTRY.md |
 | sec7.item3 | Violation & semantic counters (adaptive anomaly) | Implemented | P2 | Counters + per-category 60s/300s rates + adaptive anomaly detector (EWMA + Welford variance) with z-score export via JSON/Prometheus/OTEL; anomaly EWMA state persisted & restored with hash chain verification. Remaining gaps: external anchoring & archival rotation of semantic snapshots, historical rate archive beyond EWMA, surge alert hooks. | internal/observability/violations.go\|pkg/gauth/gauth.go\|pkg/rfc0111/rfc0111.go\|web/server_clean.go\|docs/OBSERVABILITY.md\|web/persistence_verify_test.go\|web/server_anomaly_test.go\|web/server_semantic_persistence_test.go |
 | sec7.item4 | Distributed tracing | Missing | P3 | No span linking | docs/GAP_MATRIX.md:65 |
 
@@ -238,7 +238,7 @@ Schema Version: 1
 - ✅ sec12.item1: Suspension and partial revocation status support - **COMPLETED**
 
 **P3 Low Priority (Future Enhancements):**
-- sec7.item2: Metrics collector registration framework
+- ✅ sec7.item2: Metrics collector registration framework - **COMPLETED** (P3.2 - CollectorRegistry with multi-collector dispatch, 119 methods, Prometheus/JSON collectors, 8 comprehensive tests)
 - sec7.item4: Distributed tracing with span linking
 - ✅ sec9.item3: Load/stress benchmark harness - **COMPLETED** (P3.1 - 66,595 ops/sec baseline, 5 comprehensive tests)
 - sec13.item1: UTF-8 validation metrics instrumentation

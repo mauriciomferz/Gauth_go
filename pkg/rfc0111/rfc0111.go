@@ -491,6 +491,24 @@ func WithMetrics(m metrics.Metrics) Option {
 	}
 }
 
+// WithCollectorRegistry injects a CollectorRegistry as the metrics implementation.
+// This allows using multiple simultaneous metrics collectors (Prometheus + StatsD + JSON, etc.).
+// The registry dispatches metric events to all registered collectors in parallel.
+//
+// Example:
+//
+//	registry := metrics.NewCollectorRegistry(true) // concurrent dispatch
+//	registry.Register(collectors.NewPrometheusCollector("prom", promMetrics, "Prometheus exporter"))
+//	registry.Register(collectors.NewJSONCollector("json", "/tmp/metrics.json", false))
+//	svc := rfc0111.New(store, rfc0111.WithCollectorRegistry(registry))
+func WithCollectorRegistry(registry *metrics.CollectorRegistry) Option {
+	return func(s *Service) {
+		if registry != nil {
+			s.metrics = registry
+		}
+	}
+}
+
 // WithSignerProvider injects a signer provider function returning an active crypto.Signer.
 func WithSignerProvider(fn func() (cr.Signer, error)) Option {
 	return func(s *Service) {
