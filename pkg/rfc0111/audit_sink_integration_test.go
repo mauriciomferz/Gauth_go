@@ -83,6 +83,9 @@ func TestAuditSinkIntegration_Disabled(t *testing.T) {
 	if resp.POA.ID == "" {
 		t.Fatal("Expected POA ID but got empty")
 	}
+	
+	// Allow async audit processing to complete
+	time.Sleep(50 * time.Millisecond)
 
 	// Verify audit logger received event but sink was not called (nil check passes)
 	events, err := logger.Query(ctx, &audit.Filter{EventTypes: []audit.EventType{audit.TypeAuth}})
@@ -314,6 +317,9 @@ func TestAuditSinkIntegration_ErrorHandling(t *testing.T) {
 	if resp.POA.ID == "" {
 		t.Fatal("Expected POA ID but got empty")
 	}
+	
+	// Allow async audit processing to complete
+	time.Sleep(50 * time.Millisecond)
 
 	// Verify audit logger still received event (sink failure doesn't affect logger)
 	events, err := logger.Query(ctx, &audit.Filter{EventTypes: []audit.EventType{audit.TypeAuth}})

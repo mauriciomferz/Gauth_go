@@ -53,6 +53,10 @@ func (l *Ledger) Append(actor, action, resource, details string) (LedgerEntry, e
 	if err := l.logger.Log(context.Background(), ev); err != nil {
 		return LedgerEntry{}, err
 	}
+	
+	// Allow async audit processing to complete
+	time.Sleep(50 * time.Millisecond)
+	
 	// Project last event to LedgerEntry
 	events, _ := l.logger.Query(context.Background(), nil)
 	e := events[len(events)-1]

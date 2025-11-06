@@ -27,6 +27,9 @@ func TestSuspendDelegation_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("suspend failed: %v", err)
 	}
+	
+	// Allow async audit processing to complete
+	time.Sleep(50 * time.Millisecond)
 
 	// Verify status changed
 	updated, ok := svc.repo.Get(poa.ID)
@@ -140,6 +143,9 @@ func TestResumeDelegation_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("resume failed: %v", err)
 	}
+	
+	// Allow async audit processing to complete
+	time.Sleep(50 * time.Millisecond)
 
 	// Verify status changed back to active
 	resumed, ok := svc.repo.Get(poa.ID)
@@ -218,6 +224,9 @@ func TestUpdateDelegationScope_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("update scope failed: %v", err)
 	}
+	
+	// Allow async audit processing to complete
+	time.Sleep(50 * time.Millisecond)
 
 	// Verify scope changed
 	updated, ok := svc.repo.Get(poa.ID)

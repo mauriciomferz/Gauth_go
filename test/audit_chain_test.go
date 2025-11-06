@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"testing"
+	"time"
 
 	a "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/common"
@@ -20,6 +21,9 @@ func TestAuditChainIntegrity(t *testing.T) {
 		ev.Object = "resource"
 		require.NoError(t, logger.Log(ctx, ev))
 	}
+
+	// Allow async audit processing to complete
+	time.Sleep(50 * time.Millisecond)
 
 	// Verify chain passes initially
 	require.NoError(t, logger.VerifyChain())

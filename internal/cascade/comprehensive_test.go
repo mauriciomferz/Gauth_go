@@ -140,6 +140,9 @@ func TestCascadeProcessorComprehensive(t *testing.T) {
 			t.Errorf("Expected max depth 3, got %d", result.MaxDepthReached)
 		}
 
+		// Allow async audit processing to complete
+		time.Sleep(50 * time.Millisecond)
+
 		// Check audit logs have been created
 		events, err := auditor.Query(context.Background(), nil)
 		if err != nil {
@@ -334,6 +337,9 @@ func TestCascadeProcessorComprehensive(t *testing.T) {
 				t.Errorf("Concurrent operation %d processed no POAs", i+1)
 			}
 		}
+
+		// Allow async audit processing to complete
+		time.Sleep(50 * time.Millisecond)
 
 		// Verify audit logs contain entries from both operations
 		events, err := auditor.Query(context.Background(), nil)
