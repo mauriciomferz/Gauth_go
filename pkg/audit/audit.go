@@ -82,10 +82,13 @@ const (
 
 // MemoryLogger implements audit logging in memory
 type MemoryLogger struct {
-	mu     sync.RWMutex
-	events []Event
-	logger common.Logger
-	anchor AnchorFunc
+	mu         sync.RWMutex
+	events     []Event
+	logger     common.Logger
+	anchor     AnchorFunc
+	eventQueue chan *Event
+	done       chan struct{}
+	wg         sync.WaitGroup
 }
 
 // AnchorFunc receives (index, hash) when a new event is appended. Intended for
@@ -96,15 +99,81 @@ type AnchorFunc func(index int, hash string)
 // SetAnchor registers (or replaces) the anchor callback. Passing nil removes it.
 func (ml *MemoryLogger) SetAnchor(fn AnchorFunc) { ml.mu.Lock(); ml.anchor = fn; ml.mu.Unlock() }
 
-// NewMemoryLogger creates a new memory-based audit logger
+// NewMemoryLogger creates a new memory-based audit logger with async event processing
 func NewMemoryLogger(logger common.Logger) *MemoryLogger {
+	return NewMemoryLoggerWithQueueSize(logger, 1000)
+}
+
+// NewMemoryLoggerWithQueueSize creates a new memory-based audit logger with a custom queue size.
+// Use larger queue sizes (e.g., 10000+) for high-throughput scenarios like load tests.
+func NewMemoryLoggerWithQueueSize(logger common.Logger, queueSize int) *MemoryLogger {
 	if logger == nil {
 		logger = common.NewSimpleLogger() // fallback no-op style
 	}
-	return &MemoryLogger{events: make([]Event, 0), logger: logger}
+	if queueSize < 100 {
+		queueSize = 100 // Minimum reasonable queue size
+	}
+	ml := &MemoryLogger{
+		events:     make([]Event, 0, 10000), // Pre-allocate for performance
+		logger:     logger,
+		eventQueue: make(chan *Event, queueSize), // Buffered channel for async processing
+		done:       make(chan struct{}),
+	}
+
+	// Start background event processor
+	ml.wg.Add(1)
+	go ml.processEvents()
+
+	return ml
 }
 
-// Log logs an audit event
+// processEvents runs in a background goroutine to serialize event processing
+func (ml *MemoryLogger) processEvents() {
+	defer ml.wg.Done()
+	for {
+		select {
+		case event := <-ml.eventQueue:
+			ml.processEvent(event)
+		case <-ml.done:
+			// Drain remaining events
+			for {
+				select {
+				case event := <-ml.eventQueue:
+					ml.processEvent(event)
+				default:
+					return
+				}
+			}
+		}
+	}
+}
+
+// processEvent handles a single event (called from background goroutine only)
+func (ml *MemoryLogger) processEvent(event *Event) {
+	ml.mu.Lock()
+	idx := len(ml.events)
+	prevHash := ""
+	if idx > 0 {
+		prevHash = ml.events[idx-1].Hash
+	}
+	event.ChainIndex = idx
+	event.PrevHash = prevHash
+	event.Hash = computeEventHash(*event)
+	ml.events = append(ml.events, *event)
+
+	// Copy values before unlock
+	chainIndex := event.ChainIndex
+	hash := event.Hash
+	hasAnchor := ml.anchor != nil
+	ml.mu.Unlock()
+
+	// Optional anchor callback (non-blocking, outside lock)
+	if hasAnchor {
+		go ml.anchor(chainIndex, hash)
+	}
+}
+
+// Log logs an audit event asynchronously
 func (ml *MemoryLogger) Log(ctx context.Context, entry interface{}) error {
 	var event *Event
 	switch e := entry.(type) {
@@ -121,30 +190,15 @@ func (ml *MemoryLogger) Log(ctx context.Context, entry interface{}) error {
 		event.Timestamp = time.Now().UTC()
 	}
 
-	ml.mu.Lock()
-	// chain position & previous hash
-	idx := len(ml.events)
-	prevHash := ""
-	if idx > 0 {
-		prevHash = ml.events[idx-1].Hash
+	// Send to background processor (non-blocking if channel has space)
+	select {
+	case ml.eventQueue <- event:
+		return nil
+	default:
+		// Channel full - log warning and drop event (or process synchronously)
+		ml.logger.Warnf("Audit event queue full, dropping event %s", event.ID)
+		return fmt.Errorf("audit queue full")
 	}
-	event.ChainIndex = idx
-	event.PrevHash = prevHash
-	event.Hash = computeEventHash(*event)
-	ml.events = append(ml.events, *event)
-	ml.mu.Unlock()
-
-	// Optional anchor callback (non-blocking best effort)
-	if ml.anchor != nil {
-		// pass only immutable values
-		go ml.anchor(event.ChainIndex, event.Hash)
-	}
-
-	// Also log to the underlying logger (non-critical)
-	if b, err := json.Marshal(event); err == nil {
-		ml.logger.Infof("Audit Event: %s", string(b))
-	}
-	return nil
 }
 
 // VerifyChain validates the integrity of the in-memory hash chain.
@@ -221,8 +275,10 @@ func (ml *MemoryLogger) Query(ctx context.Context, filter *Filter) ([]*Event, er
 	return result, nil
 }
 
-// Close closes the audit logger
+// Close stops the background event processor and releases resources
 func (ml *MemoryLogger) Close() error {
+	close(ml.done)
+	ml.wg.Wait()
 	ml.mu.Lock()
 	defer ml.mu.Unlock()
 	ml.events = nil
