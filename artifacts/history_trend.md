@@ -1,11 +1,11 @@
 # Conformance Trend Dashboard
 
 ## Summary
-Total Runs: 27
+Total Runs: 28
 
 Coverage Latest: 100.00%
 Coverage Moving Avg: 91.67%
-Coverage Δ (latest-prev): 31.25%
+Coverage Δ (latest-prev): 0.00%
 
 Gap Missing Latest: 19 (Δ 0)
 Gap Implemented Latest: 8 (Δ 0)
@@ -13,7 +13,6 @@ Gap Implemented Latest: 8 (Δ 0)
 ## Recent Runs
 | Timestamp | Coverage | GapMissing | GapPartial | GapImplemented | MissingSymbols | MissingTests |
 |-----------|----------|-----------|-----------|---------------|---------------|-------------|
-| 2025-10-19T10:49:06Z | 100.00 | 20 | 15 | 8 | 0 | 0 |
 | 2025-10-19T13:04:20Z | 100.00 | 20 | 15 | 8 | 0 | 0 |
 | 2025-10-19T13:04:21Z | 100.00 | 20 | 15 | 8 | 0 | 0 |
 | 2025-10-19T13:09:03Z | 100.00 | 20 | 15 | 8 | 0 | 0 |
@@ -33,3 +32,4 @@ Gap Implemented Latest: 8 (Δ 0)
 | 2025-11-06T21:10:55+01:00 | 68.75 | 19 | 16 | 8 | 15 | 3 |
 | 2025-11-06T21:11:15+01:00 | 68.75 | 19 | 16 | 8 | 15 | 3 |
 | 2025-11-06T21:20:44+01:00 | 100.00 | 19 | 16 | 8 | 0 | 3 |
+| 2025-11-06T21:35:43+01:00 | 100.00 | 19 | 16 | 8 | 0 | 3 |
