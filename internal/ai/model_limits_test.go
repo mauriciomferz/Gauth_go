@@ -54,7 +54,9 @@ func TestModelMetadata_TokenLimitPerCall(t *testing.T) {
 			name:   "exceed token limit int",
 			action: "generate_text",
 			claims: map[string]any{
-				"requested_tokens": 5000,
+				"requested_tokens":            5000,
+				"nist_ai_compliance":          "verified",
+				"algorithmic_accountability":  "enabled",
 			},
 			expectAllow:    false,
 			expectReason:   "requested tokens 5000 exceeds model limit 4096 per call",
@@ -64,7 +66,9 @@ func TestModelMetadata_TokenLimitPerCall(t *testing.T) {
 			name:   "exceed token limit float",
 			action: "generate_text",
 			claims: map[string]any{
-				"requested_tokens": 5000.0,
+				"requested_tokens":            5000.0,
+				"nist_ai_compliance":          "verified",
+				"algorithmic_accountability":  "enabled",
 			},
 			expectAllow:    false,
 			expectReason:   "requested tokens 5000 exceeds model limit 4096 per call",
@@ -74,7 +78,9 @@ func TestModelMetadata_TokenLimitPerCall(t *testing.T) {
 			name:   "exceed cost limit",
 			action: "generate_text",
 			claims: map[string]any{
-				"estimated_cost": 0.10,
+				"estimated_cost":              0.10,
+				"nist_ai_compliance":          "verified",
+				"algorithmic_accountability":  "enabled",
 			},
 			expectAllow:    false,
 			expectReason:   "estimated cost 0.1000 USD exceeds model limit 0.0500 USD per call",
@@ -84,7 +90,9 @@ func TestModelMetadata_TokenLimitPerCall(t *testing.T) {
 			name:   "within cost limit",
 			action: "generate_text",
 			claims: map[string]any{
-				"estimated_cost": 0.02,
+				"estimated_cost":              0.02,
+				"nist_ai_compliance":          "verified",
+				"algorithmic_accountability":  "enabled",
 			},
 			expectAllow: true,
 		},
@@ -92,7 +100,9 @@ func TestModelMetadata_TokenLimitPerCall(t *testing.T) {
 			name:   "exceed context window",
 			action: "analyze",
 			claims: map[string]any{
-				"context_size": 10000,
+				"context_size":                10000,
+				"nist_ai_compliance":          "verified",
+				"algorithmic_accountability":  "enabled",
 			},
 			expectAllow:    false,
 			expectReason:   "context size 10000 exceeds model context window 8192",
@@ -102,7 +112,9 @@ func TestModelMetadata_TokenLimitPerCall(t *testing.T) {
 			name:   "within context window",
 			action: "analyze",
 			claims: map[string]any{
-				"context_size": 7000,
+				"context_size":                7000,
+				"nist_ai_compliance":          "verified",
+				"algorithmic_accountability":  "enabled",
 			},
 			expectAllow: true,
 		},
@@ -110,7 +122,9 @@ func TestModelMetadata_TokenLimitPerCall(t *testing.T) {
 			name:   "no limits claimed passes",
 			action: "generate_text",
 			claims: map[string]any{
-				"other_metadata": "value",
+				"other_metadata":              "value",
+				"nist_ai_compliance":          "verified",
+				"algorithmic_accountability":  "enabled",
 			},
 			expectAllow: true,
 		},
@@ -169,7 +183,11 @@ func TestModelMetadata_BatchSizeLimit(t *testing.T) {
 
 	// Within limit
 	decision := matrix.EnforceAICapabilities(profile, "embed", map[string]any{
-		"batch_size": 50,
+		"batch_size":            50,
+		"eu_ai_conformity":      "compliant",
+		"human_oversight":       "enabled",
+		"ce_marking":            "verified",
+		"transparency_report":   "published",
 	})
 	if decision.Decision != DecisionAllow {
 		t.Errorf("Expected allow for batch_size=50, got %s: %s", decision.Decision, decision.Reason)
@@ -177,7 +195,11 @@ func TestModelMetadata_BatchSizeLimit(t *testing.T) {
 
 	// Exceed limit (int)
 	decision = matrix.EnforceAICapabilities(profile, "embed", map[string]any{
-		"batch_size": 150,
+		"batch_size":            150,
+		"eu_ai_conformity":      "compliant",
+		"human_oversight":       "enabled",
+		"ce_marking":            "verified",
+		"transparency_report":   "published",
 	})
 	if decision.Decision != DecisionDeny {
 		t.Errorf("Expected deny for batch_size=150, got %s", decision.Decision)
@@ -189,7 +211,11 @@ func TestModelMetadata_BatchSizeLimit(t *testing.T) {
 
 	// Exceed limit (float)
 	decision = matrix.EnforceAICapabilities(profile, "embed", map[string]any{
-		"batch_size": 150.0,
+		"batch_size":            150.0,
+		"eu_ai_conformity":      "compliant",
+		"human_oversight":       "enabled",
+		"ce_marking":            "verified",
+		"transparency_report":   "published",
 	})
 	if decision.Decision != DecisionDeny {
 		t.Errorf("Expected deny for batch_size=150.0, got %s", decision.Decision)
@@ -218,7 +244,9 @@ func TestModelMetadata_NilMetadata(t *testing.T) {
 
 	// Should allow when no metadata present
 	decision := matrix.EnforceAICapabilities(profile, "query", map[string]any{
-		"requested_tokens": 999999, // Huge value but no limit set
+		"requested_tokens":            999999, // Huge value but no limit set
+		"nist_ai_compliance":          "verified",
+		"algorithmic_accountability":  "enabled",
 	})
 	if decision.Decision != DecisionAllow {
 		t.Errorf("Expected allow when ModelMetadata is nil, got %s: %s", decision.Decision, decision.Reason)
