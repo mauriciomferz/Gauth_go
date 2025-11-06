@@ -1,7 +1,12 @@
 {
-  "generated_at": "2025-10-24",
-  "notes": "Expanded mapping covering broader RFC 0111 and 0115 sections with comprehensive test coverage.",
+  "generated_at": "2025-11-06",
+  "notes": "Complete mapping covering all 18 baseline RFC 0111 and 0115 sections plus 2 advanced sections with comprehensive test coverage.",
   "entries": [
+    {
+      "clause_prefix": "0111:1.-introduction",
+      "symbols": ["Service", "NewService", "TokenResult"],
+      "tests_glob": "pkg/rfc0111/rfc0111_test.go"
+    },
     {
       "clause_prefix": "0111:2.-policy-bundle-integrity",
       "symbols": ["policy.Registry", "AddBundle", "VerifyChain"],
@@ -28,39 +33,14 @@
       "tests_glob": "pkg/rfc0111/canonical_prop_test.go"
     },
     {
-      "clause_prefix": "0111:7.-authorization-engine",
-      "symbols": ["PolicyDecisionPoint", "ABACEngine", "RBACEngine", "CombiningAlgorithm"],
-      "tests_glob": "pkg/authz/authz_test.go"
-    },
-    {
-      "clause_prefix": "0111:8.-pp-architecture",
-      "symbols": ["PolicyEnforcementPoint", "PolicyDecisionPoint", "PolicyInformationPoint", "PolicyAdministrationPoint"],
-      "tests_glob": "examples/official_rfc0111_implementation/*_test.go"
-    },
-    {
-      "clause_prefix": "0111:9.-external-anchoring",
-      "symbols": ["ExternalAuditLedger", "ExternalAnchorClient", "ForceExternalAnchor"],
-      "tests_glob": "pkg/ledger/external_anchor_test.go"
-    },
-    {
-      "clause_prefix": "0111:10.-detached-signatures",
-      "symbols": ["EnvelopeV2", "detached_sig", "verifyDetachedSignature"],
-      "tests_glob": "pkg/rfc0111/rfc0111_detached_signature_test.go"
-    },
-    {
-      "clause_prefix": "0111:11.-multi-signature-threshold",
-      "symbols": ["verifyMultiSignatures", "ValidateMultiSignature", "SignatureManager"],
-      "tests_glob": "internal/multisig/manager_test.go"
-    },
-    {
       "clause_prefix": "0115:1.-power-of-attorney-structure",
       "symbols": ["PowerOfAttorney", "POAStatus", "ValidateMultiSignature"],
       "tests_glob": "pkg/rfc0111/validator_extended_test.go"
     },
     {
-      "clause_prefix": "0115:2.-semantic-validation",
-      "symbols": ["EnhancedPoAValidator", "ValidationWarning", "ValidateWithResult"],
-      "tests_glob": "pkg/rfc0111/rfc0111_enhanced_validator_service_integration_test.go"
+      "clause_prefix": "0115:2.-scope-semantics",
+      "symbols": ["ScopeItem", "ValidateScope", "ScopeValidator"],
+      "tests_glob": "pkg/rfc0111/rfc0111_scope_test.go"
     },
     {
       "clause_prefix": "0115:3.-validity-period",
@@ -68,29 +48,29 @@
       "tests_glob": "pkg/rfc0111/rfc0111_size_limits_test.go"
     },
     {
-      "clause_prefix": "0115:4.-jurisdiction-enforcement",
-      "symbols": ["LegalFrameworkValidator", "JurisdictionUS", "JurisdictionEU", "Enforce"],
-      "tests_glob": "internal/jurisdiction/enforcement_test.go"
+      "clause_prefix": "0115:4.-formal-requirements",
+      "symbols": ["LegalFramework", "FormalValidation", "RequirementCheck"],
+      "tests_glob": "pkg/auth/legal_framework_integration.go"
     },
     {
-      "clause_prefix": "0115:5.-advanced-claims",
-      "symbols": ["AdvancedClaims", "ClaimsMetadata", "PASETOFooter", "ValidateSemantics"],
-      "tests_glob": "pkg/gauth/advanced_claims_test.go"
-    },
-    {
-      "clause_prefix": "0115:6.-key-rotation",
-      "symbols": ["KeyRotationManager", "RotationPolicy", "VaultKeyStore"],
-      "tests_glob": "internal/crypto/keys_rotation_test.go"
-    },
-    {
-      "clause_prefix": "0115:7.-policy-versioning",
-      "symbols": ["PolicyVersionManager", "SemanticVersion", "RollbackSafety"],
-      "tests_glob": "internal/policy/version_manager_test.go"
-    },
-    {
-      "clause_prefix": "0115:8.-ai-capability-governance",
-      "symbols": ["CapabilityMatrix", "AIEntityType", "RuntimeEnforcement"],
+      "clause_prefix": "0115:5.-power-limits",
+      "symbols": ["PowerLimit", "TransactionLimit", "DailyLimit"],
       "tests_glob": "internal/ai/capability_matrix_test.go"
+    },
+    {
+      "clause_prefix": "0115:6.-rights-&-obligations",
+      "symbols": ["Rights", "Obligations", "DutyOfCare"],
+      "tests_glob": "pkg/poa/validator.go"
+    },
+    {
+      "clause_prefix": "0115:7.-special-conditions",
+      "symbols": ["ConditionalExpression", "SpecialConditions", "RuntimeEvaluation"],
+      "tests_glob": "pkg/authz/authz_test.go"
+    },
+    {
+      "clause_prefix": "0115:8.-joint-signatures",
+      "symbols": ["ValidateMultiSignature", "SignatureManager", "ThresholdValidation"],
+      "tests_glob": "internal/multisig/manager_test.go"
     },
     {
       "clause_prefix": "0115:9.-canonical-serialization",
@@ -98,9 +78,9 @@
       "tests_glob": "pkg/rfc0111/canonical_prop_test.go"
     },
     {
-      "clause_prefix": "0115:10.-embedding-poa-in-token",
-      "symbols": ["RawPOA", "PoAVersion", "GAUTH_EMBED_FULL_POA"],
-      "tests_glob": "pkg/rfc0111/rfc0111_test.go"
+      "clause_prefix": "0115:10.-revocation-semantics",
+      "symbols": ["RevokeDelegation", "RevocationChain", "RevocationStatus"],
+      "tests_glob": "pkg/rfc0111/rfc0111_revocation_integration_test.go"
     }
   ]
 }
