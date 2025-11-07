@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -30,6 +31,7 @@ type Provider interface {
 
 // MemoryProvider is a non-secure, in-memory provider useful for demo / testing.
 type MemoryProvider struct {
+	mu     sync.RWMutex
 	latest Receipt
 }
 
@@ -40,11 +42,17 @@ func (m *MemoryProvider) Anchor(hash string) (Receipt, error) {
 		return Receipt{}, errors.New("empty hash")
 	}
 	r := Receipt{Hash: hash, Timestamp: time.Now().UTC(), Provider: "memory", Version: 1}
+	m.mu.Lock()
 	m.latest = r
+	m.mu.Unlock()
 	return r, nil
 }
 
-func (m *MemoryProvider) Latest() Receipt { return m.latest }
+func (m *MemoryProvider) Latest() Receipt {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return m.latest
+}
 func (m *MemoryProvider) Verify(r Receipt) error {
 	if r.Hash == "" {
 		return errors.New("invalid receipt hash")

@@ -133,9 +133,8 @@ func (eal *ExternalAuditLedger) Append(ctx context.Context, e *Entry) error {
 	}
 
 	// Check if we should submit to external anchor
-	now := time.Now()
 	eal.mu.RLock()
-	shouldAnchor := now.Sub(eal.lastAnchor) >= eal.anchorInterval
+	shouldAnchor := time.Since(eal.lastAnchor) >= eal.anchorInterval
 	eal.mu.RUnlock()
 
 	if shouldAnchor {
@@ -146,7 +145,7 @@ func (eal *ExternalAuditLedger) Append(ctx context.Context, e *Entry) error {
 			go func() {
 				if anchorErr := eal.externalAnchor.Anchor(tip); anchorErr == nil {
 					eal.mu.Lock()
-					eal.lastAnchor = now
+					eal.lastAnchor = time.Now()
 					eal.mu.Unlock()
 				}
 				// Errors logged but don't fail the append operation
