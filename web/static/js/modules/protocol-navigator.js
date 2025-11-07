@@ -324,10 +324,10 @@ class ProtocolNavigatorUI {
                 </div>
 
                 <div class="navigator-actions">
-                    <button class="btn-reset" onclick="window.protocolNav.navigator.reset()">
+                    <button class="btn-reset" data-action="reset">
                         🔄 Reset Flow
                     </button>
-                    <button class="btn-export" onclick="window.protocolNav.exportHistory()">
+                    <button class="btn-export" data-action="export">
                         📥 Export History
                     </button>
                 </div>
@@ -348,8 +348,7 @@ class ProtocolNavigatorUI {
             
             return `
                 <div class="protocol-step ${statusClass}" 
-                     data-step="${step.id}" 
-                     onclick="window.protocolNav.toggleStep('${step.id}')">
+                     data-step="${step.id}">
                     <div class="step-header">
                         <span class="step-icon">${step.icon}</span>
                         <div class="step-info">
@@ -383,7 +382,7 @@ class ProtocolNavigatorUI {
             return `
                 <div class="substep ${statusClass}" 
                      data-substep="${substep.id}"
-                     onclick="window.protocolNav.selectSubstep('${step.id}', '${substep.id}')">
+                     data-step-id="${step.id}">
                     <span class="substep-marker">${isCompleted ? '✓' : '○'}</span>
                     <span class="substep-name">${substep.name}</span>
                     ${isCurrent ? '<span class="substep-current">← Current</span>' : ''}
@@ -527,8 +526,42 @@ class ProtocolNavigatorUI {
      * Attach event listeners
      */
     attachEventListeners() {
-        // Step clicks are handled via onclick attributes
-        // Additional event listeners can be added here
+        // Reset and Export buttons
+        const resetBtn = this.container.querySelector('.btn-reset');
+        const exportBtn = this.container.querySelector('.btn-export');
+        
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                this.navigator.reset();
+            });
+        }
+        
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => {
+                this.exportHistory();
+            });
+        }
+
+        // Protocol step clicks (toggle)
+        this.container.querySelectorAll('.protocol-step').forEach(stepEl => {
+            stepEl.addEventListener('click', (e) => {
+                // Don't toggle if clicking on a substep
+                if (e.target.closest('.substep')) return;
+                
+                const stepId = stepEl.getAttribute('data-step');
+                this.toggleStep(stepId);
+            });
+        });
+
+        // Substep clicks
+        this.container.querySelectorAll('.substep').forEach(substepEl => {
+            substepEl.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent triggering step toggle
+                const stepId = substepEl.getAttribute('data-step-id');
+                const substepId = substepEl.getAttribute('data-substep');
+                this.selectSubstep(stepId, substepId);
+            });
+        });
     }
 
     /**
