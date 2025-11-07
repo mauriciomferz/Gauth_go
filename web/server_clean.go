@@ -5851,6 +5851,23 @@ func (s *BetaServer) routes() {
 		c.JSON(http.StatusOK, gin.H{"success": true, "nodes": graph, "total": len(graph), "generated_at": time.Now().UTC().Format(time.RFC3339)})
 	})
 
+	// --- PoA Visualization Endpoints (Item 3) ---
+	SetupVisualizationRoutes(s.router)
+	// Visualization demo page
+	s.router.GET("/poa-visualization", func(c *gin.Context) {
+		c.Header("Content-Type", "text/html; charset=utf-8")
+		if os.Getenv("GAUTH_DEV_INDEX") == "1" {
+			wd, _ := os.Getwd()
+			b, err := os.ReadFile(wd + "/web/templates/poa-visualization.html")
+			if err == nil {
+				c.Data(200, "text/html; charset=utf-8", b)
+				return
+			}
+		}
+		// TODO: Embed poa-visualization.html via go:embed for production
+		c.String(404, "poa-visualization.html not available")
+	})
+
 	// --- Audit Trail Endpoints ---
 	s.router.GET("/api/v1/audit/logs", s.apiAuditList)
 	s.router.GET("/api/v1/audit/capabilities", s.apiAuditCapabilities)
