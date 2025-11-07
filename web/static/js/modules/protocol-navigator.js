@@ -420,7 +420,7 @@ class ProtocolNavigatorUI {
      */
     selectSubstep(stepId, substepId) {
         this.navigator.navigateToStep(stepId, substepId);
-        event.stopPropagation();
+        this.render(); // Update UI after navigation
     }
 
     /**
