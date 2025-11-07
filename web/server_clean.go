@@ -3331,6 +3331,13 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 	// Crypto algorithms introspection endpoint required by tests
 	s.router.GET("/api/v1/crypto/algorithms", s.apiCryptoAlgorithms)
 
+	// Protocol Flow API endpoints (Item 2: Protocol Flow Navigation)
+	s.router.POST("/api/v1/protocol/flow/sessions", s.apiProtocolFlowCreateSession)
+	s.router.GET("/api/v1/protocol/flow/sessions/:id", s.apiProtocolFlowGetSession)
+	s.router.POST("/api/v1/protocol/flow/sessions/:id/navigate", s.apiProtocolFlowNavigate)
+	s.router.POST("/api/v1/protocol/flow/sessions/:id/steps/:stepId/status", s.apiProtocolFlowUpdateStep)
+	s.router.POST("/api/v1/protocol/flow/sessions/:id/steps/:stepId/substeps/:substepId/complete", s.apiProtocolFlowCompleteSubstep)
+
 	// Learning Lab endpoints for full button functionality
 	s.AddLearningLabEndpoints()
 
@@ -7348,7 +7355,7 @@ func (s *BetaServer) routes() {
 	})
 
 	// Serve protocol-flow.html (dev mode supports disk reload)
-	s.router.GET("/protocol-flow.html", func(c *gin.Context) {
+	protocolFlowHandler := func(c *gin.Context) {
 		if os.Getenv("GAUTH_DEV_INDEX") == "1" {
 			if wd, err := os.Getwd(); err == nil {
 				path := wd + "/web/templates/protocol-flow.html"
@@ -7366,7 +7373,9 @@ func (s *BetaServer) routes() {
 		}
 		// Fallback: serve embedded or minimal HTML
 		c.String(200, `<!DOCTYPE html><html><head><title>Protocol Flow Navigator</title></head><body><h1>GAuth Protocol Flow Navigator</h1><p>Loading...</p></body></html>`)
-	})
+	}
+	s.router.GET("/protocol-flow.html", protocolFlowHandler)
+	s.router.GET("/protocol-flow", protocolFlowHandler)
 
 	// Serve poa-visualization.html (Item 3 PoA Map Visualization)
 	s.router.GET("/poa-visualization.html", func(c *gin.Context) {

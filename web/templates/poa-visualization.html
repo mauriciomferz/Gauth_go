@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PoA Visualization - GAuth</title>
     <link rel="stylesheet" href="/static/css/poa-viz.css">
+    
+    <!-- Import map to resolve bare module specifiers -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/": "https://cdn.jsdelivr.net/npm/three@0.160.0/"
+        }
+    }
+    </script>
 </head>
 <body>
     <div class="poa-visualization-container">
@@ -30,11 +40,25 @@
             </div>
             
             <div id="graphControls" class="viz-control-group">
-                <label for="graphType">Graph Type</label>
+                <label for="graphType">Graph Type / Pattern</label>
                 <select id="graphType">
                     <option value="demo">Demo Complex Graph</option>
                     <option value="simple">Simple 3-Node</option>
                     <option value="multi">Multi-Party</option>
+                    <option value="cascade">Cascade Revocation</option>
+                    <option value="delegation-chain">Delegation Chain</option>
+                    <option value="multisig">Multi-Signature PoA</option>
+                    <option value="jurisdiction">Jurisdiction Boundaries</option>
+                    <option value="revocation">Revocation States</option>
+                    <option value="full-pattern">All Patterns Combined</option>
+                    <optgroup label="GAuth Protocol Flow">
+                        <option value="protocol-subscription">Subscription Flow</option>
+                        <option value="protocol-matching">Matching Flow</option>
+                        <option value="protocol-request">Subset/Request Flow</option>
+                        <option value="protocol-enforcement">Enforcement Flow</option>
+                        <option value="protocol-verification">Verification Flow</option>
+                        <option value="protocol-full">Complete Protocol Flow</option>
+                    </optgroup>
                 </select>
             </div>
             
@@ -126,7 +150,7 @@
     </div>
     
     <script type="module">
-        import { PoAGraphVisualizer, ProtocolStepVisualizer } from '/static/js/modules/poa-viz.js';
+        import { PoAGraphVisualizer, ProtocolStepVisualizer, generateDemoGraph } from '/static/js/modules/poa-viz.js';
         
         let currentVisualizer = null;
         let currentMode = 'graph';
@@ -211,36 +235,12 @@
                 const data = await response.json();
                 graphData = data.graph;
             } else {
-                // Create simple graphs for other types
-                graphData = createSimpleGraph(type);
+                // Use the new pattern generators
+                graphData = generateDemoGraph(type);
             }
             
             await currentVisualizer.loadGraph(graphData);
             updateStats(graphData.stats);
-        }
-        
-        // Create simple graph data
-        function createSimpleGraph(type) {
-            if (type === 'simple') {
-                return {
-                    nodes: [
-                        { id: 'n1', type: 'principal', label: 'Alice', status: 'active', position: { x: -2, y: 0, z: 0 } },
-                        { id: 'n2', type: 'client', label: 'AI Agent', status: 'active', position: { x: 0, y: 0, z: 2 } },
-                        { id: 'n3', type: 'resource', label: 'Database', status: 'active', position: { x: 2, y: 0, z: 4 } }
-                    ],
-                    edges: [
-                        { source: 'n1', target: 'n2', type: 'authorizes', label: 'Auth', strength: 1.0 },
-                        { source: 'n2', target: 'n3', type: 'requests', label: 'Request', strength: 1.0 }
-                    ],
-                    stats: { total_nodes: 3, total_edges: 2, active_nodes: 3, pending_nodes: 0, revoked_nodes: 0 }
-                };
-            }
-            
-            return {
-                nodes: [],
-                edges: [],
-                stats: { total_nodes: 0, total_edges: 0, active_nodes: 0, pending_nodes: 0, revoked_nodes: 0 }
-            };
         }
         
         // Load protocol step
