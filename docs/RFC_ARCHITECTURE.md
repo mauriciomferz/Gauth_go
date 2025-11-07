@@ -62,20 +62,47 @@ type RFCCompliantService struct {
 #### **🏛️ Power Enforcement Point (PEP)**
 - **Supply-Side PEP**: AI client enforces compliance with its authorization
 - **Demand-Side PEP**: Resource owner/server validates AI authorization
-- **Implementation**: Built into RFC validation logic and token verification
+- **Implementation**: `pkg/enforcement/pep.go` with comprehensive RFC compliance
 
 ```go
-// Supply-side enforcement in AI client
-func (ai *AIClient) enforceAuthorization(action Action) error {
-    if !ai.hasCapability(action) {
-        return ErrUnauthorizedAction
-    }
-    return ai.performAction(action)
+// Supply-Side PEP: Client enforces its own authorization compliance
+type SupplySidePEP struct {
+    clientID   string
+    pdpClient  PDPClient
+    ruleEngine *Enforcer
 }
 
-// Demand-side enforcement in resource server  
-func (rs *ResourceServer) validateAIAuthorization(token ExtendedToken) error {
-    return rs.verifyPowerOfAttorney(token.PoADefinition)
+func (s *SupplySidePEP) EnforceClientAction(ctx context.Context, req *EnforcementRequest) error {
+    // Step 1: Ask PDP for decision
+    pdpDecision, err := s.pdpClient.Decide(ctx, req)
+    if err != nil || pdpDecision.Decision == "deny" {
+        return ErrUnauthorizedAction
+    }
+    
+    // Step 2: Check local rules
+    decision, err := s.ruleEngine.Evaluate(ctx, req)
+    if err != nil || decision.Decision == "deny" {
+        return ErrLocalRuleViolation
+    }
+    
+    return nil
+}
+
+// Demand-Side PEP: Resource server validates client authorization
+type DemandSidePEP struct {
+    serverID   string
+    pdpClient  PDPClient
+    validator  *Enforcer
+}
+
+func (d *DemandSidePEP) ValidateClientCompliance(ctx context.Context, req *EnforcementRequest) error {
+    // Validate client's authorization and actions
+    decision, err := d.validator.Evaluate(ctx, req)
+    if err != nil || decision.Decision == "deny" {
+        return ErrClientNotAuthorized
+    }
+    
+    return nil
 }
 ```
 

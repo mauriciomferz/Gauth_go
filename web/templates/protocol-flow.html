@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAuth Protocol Flow Navigator</title>
+    <link rel="stylesheet" href="/static/css/protocol-navigator.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #1f2937;
+        }
+
+        .page-header h1 {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            font-size: 16px;
+            color: #6b7280;
+        }
+
+        .demo-controls {
+            max-width: 900px;
+            margin: 0 auto 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .demo-controls h3 {
+            margin-bottom: 12px;
+            color: #1f2937;
+        }
+
+        .demo-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .demo-button {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .demo-button:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+        }
+
+        .demo-button.success {
+            background: #10b981;
+        }
+
+        .demo-button.success:hover {
+            background: #059669;
+        }
+
+        .demo-button.error {
+            background: #ef4444;
+        }
+
+        .demo-button.error:hover {
+            background: #dc2626;
+        }
+
+        .demo-info {
+            margin-top: 16px;
+            padding: 12px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #4b5563;
+        }
+
+        footer {
+            max-width: 900px;
+            margin: 30px auto 0;
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <h1>🚀 GAuth Protocol Flow Navigator</h1>
+        <p>RFC-0111 & RFC-0115 Authorization Flow Visualization</p>
+    </div>
+
+    <div class="demo-controls">
+        <h3>Demo Controls</h3>
+        <div class="demo-buttons">
+            <button class="demo-button" onclick="demoSubscription()">▶ Start Subscription</button>
+            <button class="demo-button" onclick="demoMatching()">🔍 Run Matching</button>
+            <button class="demo-button" onclick="demoSubsetRequest()">🎯 Request Authorization</button>
+            <button class="demo-button" onclick="demoEnforcement()">🛡️ Enforce Policy</button>
+            <button class="demo-button" onclick="demoVerification()">✓ Verify Token</button>
+            <button class="demo-button" onclick="demoAudit()">📊 Audit & Report</button>
+            <button class="demo-button success" onclick="demoCompleteFlow()">🎉 Complete Full Flow</button>
+            <button class="demo-button error" onclick="demoError()">⚠️ Simulate Error</button>
+        </div>
+        <div class="demo-info">
+            <strong>Instructions:</strong> Click the buttons above to simulate different stages of the GAuth protocol flow. 
+            The navigator will track your progress and show the current position in the workflow.
+        </div>
+    </div>
+
+    <!-- Protocol Navigator Container -->
+    <div id="protocol-navigator"></div>
+
+    <footer>
+        <p><strong>Gimel Foundation gGmbH i.G.</strong> • Development Prototype • RFC-0111 & RFC-0115 Compliant</p>
+        <p>© 2025 • Licensed under Apache 2.0</p>
+    </footer>
+
+    <script type="module">
+        import { initProtocolNavigator } from '/static/js/modules/protocol-navigator.js';
+        
+        // Initialize navigator
+        const { navigator, ui } = initProtocolNavigator('protocol-navigator');
+        
+        // Make navigator available globally for demo functions
+        window.gauthNavigator = navigator;
+
+        // Demo functions
+        window.demoSubscription = async () => {
+            navigator.navigateToStep('subscription', 'register');
+            await delay(500);
+            navigator.completeSubstep('subscription', 'register');
+            
+            navigator.navigateToStep('subscription', 'configure');
+            await delay(500);
+            navigator.completeSubstep('subscription', 'configure');
+            
+            navigator.navigateToStep('subscription', 'credentials');
+            await delay(500);
+            navigator.completeSubstep('subscription', 'credentials');
+            navigator.completeStep('subscription');
+        };
+
+        window.demoMatching = async () => {
+            navigator.navigateToStep('matching', 'validate_poa');
+            await delay(500);
+            navigator.completeSubstep('matching', 'validate_poa');
+            
+            navigator.navigateToStep('matching', 'check_capabilities');
+            await delay(500);
+            navigator.completeSubstep('matching', 'check_capabilities');
+            
+            navigator.navigateToStep('matching', 'verify_jurisdiction');
+            await delay(500);
+            navigator.completeSubstep('matching', 'verify_jurisdiction');
+            
+            navigator.navigateToStep('matching', 'match_policies');
+            await delay(500);
+            navigator.completeSubstep('matching', 'match_policies');
+            navigator.completeStep('matching');
+        };
+
+        window.demoSubsetRequest = async () => {
+            navigator.navigateToStep('subset_request', 'create_request');
+            await delay(500);
+            navigator.completeSubstep('subset_request', 'create_request');
+            
+            navigator.navigateToStep('subset_request', 'select_scope');
+            await delay(500);
+            navigator.completeSubstep('subset_request', 'select_scope');
+            
+            navigator.navigateToStep('subset_request', 'pdp_decision');
+            await delay(800);
+            navigator.completeSubstep('subset_request', 'pdp_decision');
+            
+            navigator.navigateToStep('subset_request', 'generate_token');
+            await delay(500);
+            navigator.completeSubstep('subset_request', 'generate_token');
+            navigator.completeStep('subset_request');
+        };
+
+        window.demoEnforcement = async () => {
+            navigator.navigateToStep('enforcement', 'supply_pep');
+            await delay(500);
+            navigator.completeSubstep('enforcement', 'supply_pep');
+            
+            navigator.navigateToStep('enforcement', 'demand_pep');
+            await delay(500);
+            navigator.completeSubstep('enforcement', 'demand_pep');
+            
+            navigator.navigateToStep('enforcement', 'disclosure');
+            await delay(500);
+            navigator.completeSubstep('enforcement', 'disclosure');
+            
+            navigator.navigateToStep('enforcement', 'audit');
+            await delay(500);
+            navigator.completeSubstep('enforcement', 'audit');
+            navigator.completeStep('enforcement');
+        };
+
+        window.demoVerification = async () => {
+            navigator.navigateToStep('verification', 'validate_token');
+            await delay(500);
+            navigator.completeSubstep('verification', 'validate_token');
+            
+            navigator.navigateToStep('verification', 'verify_signature');
+            await delay(500);
+            navigator.completeSubstep('verification', 'verify_signature');
+            
+            navigator.navigateToStep('verification', 'check_revocation');
+            await delay(500);
+            navigator.completeSubstep('verification', 'check_revocation');
+            
+            navigator.navigateToStep('verification', 'pvp_check');
+            await delay(500);
+            navigator.completeSubstep('verification', 'pvp_check');
+            navigator.completeStep('verification');
+        };
+
+        window.demoAudit = async () => {
+            navigator.navigateToStep('audit', 'log_event');
+            await delay(500);
+            navigator.completeSubstep('audit', 'log_event');
+            
+            navigator.navigateToStep('audit', 'compliance_check');
+            await delay(500);
+            navigator.completeSubstep('audit', 'compliance_check');
+            
+            navigator.navigateToStep('audit', 'report_generation');
+            await delay(500);
+            navigator.completeSubstep('audit', 'report_generation');
+            navigator.completeStep('audit');
+        };
+
+        window.demoCompleteFlow = async () => {
+            navigator.reset();
+            await delay(500);
+            await demoSubscription();
+            await delay(1000);
+            await demoMatching();
+            await delay(1000);
+            await demoSubsetRequest();
+            await delay(1000);
+            await demoEnforcement();
+            await delay(1000);
+            await demoVerification();
+            await delay(1000);
+            await demoAudit();
+        };
+
+        window.demoError = () => {
+            navigator.navigateToStep('matching', 'verify_jurisdiction');
+            navigator.errorStep('matching', 'Jurisdiction validation failed: Unsupported region');
+        };
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+</html>
