@@ -122,6 +122,8 @@
             <button class="demo-button" onclick="demoAudit()">📊 Audit & Report</button>
             <button class="demo-button success" onclick="demoCompleteFlow()">🎉 Complete Full Flow</button>
             <button class="demo-button error" onclick="demoError()">⚠️ Simulate Error</button>
+            <button class="demo-button" onclick="demoReset()">🔄 Reset Flow</button>
+            <button class="demo-button" onclick="demoExport()">💾 Export History</button>
         </div>
         <div class="demo-info">
             <strong>Instructions:</strong> Click the buttons above to simulate different stages of the GAuth protocol flow. 
@@ -143,140 +145,158 @@
         // Initialize navigator
         const { navigator, ui } = initProtocolNavigator('protocol-navigator');
         
-        // Make navigator available globally for demo functions
+        // Make navigator and ui available globally
         window.gauthNavigator = navigator;
+        window.gauthUI = ui;
 
-        // Demo functions
-        window.demoSubscription = async () => {
-            navigator.navigateToStep('subscription', 'register');
-            await delay(500);
-            navigator.completeSubstep('subscription', 'register');
-            
-            navigator.navigateToStep('subscription', 'configure');
-            await delay(500);
-            navigator.completeSubstep('subscription', 'configure');
-            
-            navigator.navigateToStep('subscription', 'credentials');
-            await delay(500);
-            navigator.completeSubstep('subscription', 'credentials');
-            navigator.completeStep('subscription');
-        };
-
-        window.demoMatching = async () => {
-            navigator.navigateToStep('matching', 'validate_poa');
-            await delay(500);
-            navigator.completeSubstep('matching', 'validate_poa');
-            
-            navigator.navigateToStep('matching', 'check_capabilities');
-            await delay(500);
-            navigator.completeSubstep('matching', 'check_capabilities');
-            
-            navigator.navigateToStep('matching', 'verify_jurisdiction');
-            await delay(500);
-            navigator.completeSubstep('matching', 'verify_jurisdiction');
-            
-            navigator.navigateToStep('matching', 'match_policies');
-            await delay(500);
-            navigator.completeSubstep('matching', 'match_policies');
-            navigator.completeStep('matching');
-        };
-
-        window.demoSubsetRequest = async () => {
-            navigator.navigateToStep('subset_request', 'create_request');
-            await delay(500);
-            navigator.completeSubstep('subset_request', 'create_request');
-            
-            navigator.navigateToStep('subset_request', 'select_scope');
-            await delay(500);
-            navigator.completeSubstep('subset_request', 'select_scope');
-            
-            navigator.navigateToStep('subset_request', 'pdp_decision');
-            await delay(800);
-            navigator.completeSubstep('subset_request', 'pdp_decision');
-            
-            navigator.navigateToStep('subset_request', 'generate_token');
-            await delay(500);
-            navigator.completeSubstep('subset_request', 'generate_token');
-            navigator.completeStep('subset_request');
-        };
-
-        window.demoEnforcement = async () => {
-            navigator.navigateToStep('enforcement', 'supply_pep');
-            await delay(500);
-            navigator.completeSubstep('enforcement', 'supply_pep');
-            
-            navigator.navigateToStep('enforcement', 'demand_pep');
-            await delay(500);
-            navigator.completeSubstep('enforcement', 'demand_pep');
-            
-            navigator.navigateToStep('enforcement', 'disclosure');
-            await delay(500);
-            navigator.completeSubstep('enforcement', 'disclosure');
-            
-            navigator.navigateToStep('enforcement', 'audit');
-            await delay(500);
-            navigator.completeSubstep('enforcement', 'audit');
-            navigator.completeStep('enforcement');
-        };
-
-        window.demoVerification = async () => {
-            navigator.navigateToStep('verification', 'validate_token');
-            await delay(500);
-            navigator.completeSubstep('verification', 'validate_token');
-            
-            navigator.navigateToStep('verification', 'verify_signature');
-            await delay(500);
-            navigator.completeSubstep('verification', 'verify_signature');
-            
-            navigator.navigateToStep('verification', 'check_revocation');
-            await delay(500);
-            navigator.completeSubstep('verification', 'check_revocation');
-            
-            navigator.navigateToStep('verification', 'pvp_check');
-            await delay(500);
-            navigator.completeSubstep('verification', 'pvp_check');
-            navigator.completeStep('verification');
-        };
-
-        window.demoAudit = async () => {
-            navigator.navigateToStep('audit', 'log_event');
-            await delay(500);
-            navigator.completeSubstep('audit', 'log_event');
-            
-            navigator.navigateToStep('audit', 'compliance_check');
-            await delay(500);
-            navigator.completeSubstep('audit', 'compliance_check');
-            
-            navigator.navigateToStep('audit', 'report_generation');
-            await delay(500);
-            navigator.completeSubstep('audit', 'report_generation');
-            navigator.completeStep('audit');
-        };
-
-        window.demoCompleteFlow = async () => {
-            navigator.reset();
-            await delay(500);
-            await demoSubscription();
-            await delay(1000);
-            await demoMatching();
-            await delay(1000);
-            await demoSubsetRequest();
-            await delay(1000);
-            await demoEnforcement();
-            await delay(1000);
-            await demoVerification();
-            await delay(1000);
-            await demoAudit();
-        };
-
-        window.demoError = () => {
-            navigator.navigateToStep('matching', 'verify_jurisdiction');
-            navigator.errorStep('matching', 'Jurisdiction validation failed: Unsupported region');
-        };
-
+        // Helper function
         function delay(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
+
+        // Demo functions - using window.gauthNavigator to ensure accessibility
+        window.demoSubscription = async () => {
+            const nav = window.gauthNavigator;
+            nav.navigateToStep('subscription', 'register');
+            await delay(500);
+            nav.completeSubstep('subscription', 'register');
+            
+            nav.navigateToStep('subscription', 'configure');
+            await delay(500);
+            nav.completeSubstep('subscription', 'configure');
+            
+            nav.navigateToStep('subscription', 'credentials');
+            await delay(500);
+            nav.completeSubstep('subscription', 'credentials');
+            nav.completeStep('subscription');
+        };
+
+        window.demoMatching = async () => {
+            const nav = window.gauthNavigator;
+            nav.navigateToStep('matching', 'validate_poa');
+            await delay(500);
+            nav.completeSubstep('matching', 'validate_poa');
+            
+            nav.navigateToStep('matching', 'check_capabilities');
+            await delay(500);
+            nav.completeSubstep('matching', 'check_capabilities');
+            
+            nav.navigateToStep('matching', 'verify_jurisdiction');
+            await delay(500);
+            nav.completeSubstep('matching', 'verify_jurisdiction');
+            
+            nav.navigateToStep('matching', 'match_policies');
+            await delay(500);
+            nav.completeSubstep('matching', 'match_policies');
+            nav.completeStep('matching');
+        };
+
+        window.demoSubsetRequest = async () => {
+            const nav = window.gauthNavigator;
+            nav.navigateToStep('subset_request', 'create_request');
+            await delay(500);
+            nav.completeSubstep('subset_request', 'create_request');
+            
+            nav.navigateToStep('subset_request', 'select_scope');
+            await delay(500);
+            nav.completeSubstep('subset_request', 'select_scope');
+            
+            nav.navigateToStep('subset_request', 'pdp_decision');
+            await delay(800);
+            nav.completeSubstep('subset_request', 'pdp_decision');
+            
+            nav.navigateToStep('subset_request', 'generate_token');
+            await delay(500);
+            nav.completeSubstep('subset_request', 'generate_token');
+            nav.completeStep('subset_request');
+        };
+
+        window.demoEnforcement = async () => {
+            const nav = window.gauthNavigator;
+            nav.navigateToStep('enforcement', 'supply_pep');
+            await delay(500);
+            nav.completeSubstep('enforcement', 'supply_pep');
+            
+            nav.navigateToStep('enforcement', 'demand_pep');
+            await delay(500);
+            nav.completeSubstep('enforcement', 'demand_pep');
+            
+            nav.navigateToStep('enforcement', 'disclosure');
+            await delay(500);
+            nav.completeSubstep('enforcement', 'disclosure');
+            
+            nav.navigateToStep('enforcement', 'audit');
+            await delay(500);
+            nav.completeSubstep('enforcement', 'audit');
+            nav.completeStep('enforcement');
+        };
+
+        window.demoVerification = async () => {
+            const nav = window.gauthNavigator;
+            nav.navigateToStep('verification', 'validate_token');
+            await delay(500);
+            nav.completeSubstep('verification', 'validate_token');
+            
+            nav.navigateToStep('verification', 'verify_signature');
+            await delay(500);
+            nav.completeSubstep('verification', 'verify_signature');
+            
+            nav.navigateToStep('verification', 'check_revocation');
+            await delay(500);
+            nav.completeSubstep('verification', 'check_revocation');
+            
+            nav.navigateToStep('verification', 'pvp_check');
+            await delay(500);
+            nav.completeSubstep('verification', 'pvp_check');
+            nav.completeStep('verification');
+        };
+
+        window.demoAudit = async () => {
+            const nav = window.gauthNavigator;
+            nav.navigateToStep('audit', 'log_event');
+            await delay(500);
+            nav.completeSubstep('audit', 'log_event');
+            
+            nav.navigateToStep('audit', 'compliance_check');
+            await delay(500);
+            nav.completeSubstep('audit', 'compliance_check');
+            
+            nav.navigateToStep('audit', 'report_generation');
+            await delay(500);
+            nav.completeSubstep('audit', 'report_generation');
+            nav.completeStep('audit');
+        };
+
+        window.demoCompleteFlow = async () => {
+            const nav = window.gauthNavigator;
+            nav.reset();
+            await delay(500);
+            await window.demoSubscription();
+            await delay(1000);
+            await window.demoMatching();
+            await delay(1000);
+            await window.demoSubsetRequest();
+            await delay(1000);
+            await window.demoEnforcement();
+            await delay(1000);
+            await window.demoVerification();
+            await delay(1000);
+            await window.demoAudit();
+        };
+
+        window.demoError = () => {
+            const nav = window.gauthNavigator;
+            nav.navigateToStep('matching', 'verify_jurisdiction');
+            nav.errorStep('matching', 'Jurisdiction validation failed: Unsupported region');
+        };
+
+        window.demoReset = () => {
+            window.gauthNavigator.reset();
+        };
+
+        window.demoExport = () => {
+            window.gauthUI.exportHistory();
+        };
     </script>
 </body>
 </html>
