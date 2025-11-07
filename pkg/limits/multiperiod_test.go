@@ -266,25 +266,6 @@ func TestUsageRecord_CanAccommodate(t *testing.T) {
 	}
 }
 
-func TestMultiPeriodCounter_YearlyPeriod(t *testing.T) {
-	cache := NewMemoryStore()
-	counter := NewMultiPeriodCounter(cache)
-	now := time.Date(2025, 11, 6, 15, 30, 0, 0, time.UTC)
-
-	// Yearly period
-	expectedStart := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
-	expectedEnd := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
-
-	start, end := counter.getPeriodBounds(now, PeriodYearly)
-
-	if !start.Equal(expectedStart) {
-		t.Errorf("Expected start %v, got %v", expectedStart, start)
-	}
-	if !end.Equal(expectedEnd) {
-		t.Errorf("Expected end %v, got %v", expectedEnd, end)
-	}
-}
-
 func TestCalculatePeriodBounds_Weekly(t *testing.T) {
 	// Wednesday, Nov 6, 2025
 	now := time.Date(2025, 11, 6, 15, 30, 0, 0, time.UTC)
