@@ -7368,6 +7368,48 @@ func (s *BetaServer) routes() {
 		c.String(200, `<!DOCTYPE html><html><head><title>Protocol Flow Navigator</title></head><body><h1>GAuth Protocol Flow Navigator</h1><p>Loading...</p></body></html>`)
 	})
 
+	// Serve poa-visualization.html (Item 3 PoA Map Visualization)
+	s.router.GET("/poa-visualization.html", func(c *gin.Context) {
+		if os.Getenv("GAUTH_DEV_INDEX") == "1" {
+			if wd, err := os.Getwd(); err == nil {
+				path := wd + "/web/templates/poa-visualization.html"
+				if b, err := os.ReadFile(path); err == nil {
+					c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+					c.Header("Pragma", "no-cache")
+					c.Header("Expires", "0")
+					fmt.Fprintf(os.Stderr, "[debug] serving disk poa-visualization.html (%d bytes)\n", len(b))
+					serveWithNonce(c, b)
+					return
+				} else {
+					fmt.Fprintf(os.Stderr, "[debug] disk poa-visualization read failed: %v\n", err)
+				}
+			}
+		}
+		// Fallback: serve embedded or minimal HTML
+		c.String(200, `<!DOCTYPE html><html><head><title>PoA Visualization</title></head><body><h1>GAuth PoA Map Visualization</h1><p>Loading...</p></body></html>`)
+	})
+
+	// Serve demo.html (comprehensive feature demonstration)
+	s.router.GET("/demo.html", func(c *gin.Context) {
+		if os.Getenv("GAUTH_DEV_INDEX") == "1" {
+			if wd, err := os.Getwd(); err == nil {
+				path := wd + "/web/templates/demo.html"
+				if b, err := os.ReadFile(path); err == nil {
+					c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+					c.Header("Pragma", "no-cache")
+					c.Header("Expires", "0")
+					fmt.Fprintf(os.Stderr, "[debug] serving disk demo.html (%d bytes)\n", len(b))
+					serveWithNonce(c, b)
+					return
+				} else {
+					fmt.Fprintf(os.Stderr, "[debug] disk demo read failed: %v\n", err)
+				}
+			}
+		}
+		// Fallback: serve embedded or minimal HTML
+		c.String(200, `<!DOCTYPE html><html><head><title>GAuth Demo</title></head><body><h1>GAuth Comprehensive Demo</h1><p>Loading...</p></body></html>`)
+	})
+
 	// Serve embedded static assets
 	s.router.GET("/static/css/style.css", func(c *gin.Context) { c.Data(200, "text/css; charset=utf-8", embeddedStyleCSS) })
 	s.router.GET("/static/js/app.js", func(c *gin.Context) { c.Data(200, "application/javascript; charset=utf-8", embeddedAppJS) })
@@ -7393,6 +7435,25 @@ func (s *BetaServer) routes() {
 					return
 				}
 				c.Data(200, "application/javascript; charset=utf-8", b)
+			})
+
+			// Also serve all CSS files from disk
+			cssPath := wd + "/web/static/css"
+			fmt.Fprintf(os.Stderr, "[debug] dev mode: serving static CSS from disk: %s\n", cssPath)
+			s.router.GET("/static/css/:file", func(c *gin.Context) {
+				name := c.Param("file")
+				if name == "" || strings.Contains(name, "..") || strings.Contains(name, "/") {
+					c.String(400, "invalid file")
+					return
+				}
+				fullPath := cssPath + "/" + name
+				b, err := os.ReadFile(fullPath)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "[debug] CSS file read error file=%s err=%v\n", fullPath, err)
+					c.String(404, "not found")
+					return
+				}
+				c.Data(200, "text/css; charset=utf-8", b)
 			})
 		}
 	}
