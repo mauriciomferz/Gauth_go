@@ -7347,6 +7347,27 @@ func (s *BetaServer) routes() {
 		serveWithNonce(c, embeddedIndexHTML)
 	})
 
+	// Serve protocol-flow.html (dev mode supports disk reload)
+	s.router.GET("/protocol-flow.html", func(c *gin.Context) {
+		if os.Getenv("GAUTH_DEV_INDEX") == "1" {
+			if wd, err := os.Getwd(); err == nil {
+				path := wd + "/web/templates/protocol-flow.html"
+				if b, err := os.ReadFile(path); err == nil {
+					c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+					c.Header("Pragma", "no-cache")
+					c.Header("Expires", "0")
+					fmt.Fprintf(os.Stderr, "[debug] serving disk protocol-flow.html (%d bytes)\n", len(b))
+					serveWithNonce(c, b)
+					return
+				} else {
+					fmt.Fprintf(os.Stderr, "[debug] disk protocol-flow read failed: %v\n", err)
+				}
+			}
+		}
+		// Fallback: serve embedded or minimal HTML
+		c.String(200, `<!DOCTYPE html><html><head><title>Protocol Flow Navigator</title></head><body><h1>GAuth Protocol Flow Navigator</h1><p>Loading...</p></body></html>`)
+	})
+
 	// Serve embedded static assets
 	s.router.GET("/static/css/style.css", func(c *gin.Context) { c.Data(200, "text/css; charset=utf-8", embeddedStyleCSS) })
 	s.router.GET("/static/js/app.js", func(c *gin.Context) { c.Data(200, "application/javascript; charset=utf-8", embeddedAppJS) })
