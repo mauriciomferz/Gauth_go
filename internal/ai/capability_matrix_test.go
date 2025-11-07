@@ -103,7 +103,7 @@ func TestAICapabilityMatrix(t *testing.T) {
 
 		// Should require EU compliance
 		foundEUPolicy := false
-		for _, policyID := range appliedPolicies {
+		for _, policyID := range decision.AppliedPolicies {
 			if policyID == "eu_ai_act_2025" {
 				foundEUPolicy = true
 				break
