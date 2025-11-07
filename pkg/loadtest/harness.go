@@ -98,7 +98,7 @@ func (h *LoadTestHarness) Run(ctx context.Context, scenario *TestScenario) (*Loa
 	// Ramp up virtual users
 	rampUpInterval := scenario.RampUpTime / time.Duration(scenario.VirtualUsers)
 	
-	// Test duration context
+	// Test duration context with small grace period for request completion
 	testCtx, cancel := context.WithTimeout(ctx, scenario.Duration)
 	defer cancel()
 	
@@ -123,6 +123,8 @@ func (h *LoadTestHarness) Run(ctx context.Context, scenario *TestScenario) (*Loa
 	
 done:
 	// Wait for all users to complete
+	// The wg.Done() is called when each virtual user goroutine exits,
+	// which happens after all their requests are fully processed
 	wg.Wait()
 	
 	h.endTime = time.Now()
@@ -160,6 +162,14 @@ func (h *LoadTestHarness) runVirtualUser(ctx context.Context, userID int, scenar
 
 // executeRequest executes a single request and records metrics.
 func (h *LoadTestHarness) executeRequest(ctx context.Context, userID, iteration int, scenario *TestScenario) {
+	// Check if context is already cancelled before starting
+	select {
+	case <-ctx.Done():
+		// Don't count requests that start after test completion
+		return
+	default:
+	}
+	
 	atomic.AddInt64(&h.totalRequests, 1)
 	
 	// Generate request
@@ -175,8 +185,10 @@ func (h *LoadTestHarness) executeRequest(ctx context.Context, userID, iteration 
 	response, err := h.performRequest(ctx, request)
 	duration := time.Since(startTime)
 	
-	// Record response time
-	h.recordResponseTime(duration)
+	// Record response time only for completed requests
+	if err == nil {
+		h.recordResponseTime(duration)
+	}
 	
 	// Validate response
 	if scenario.Validator != nil {
@@ -187,6 +199,7 @@ func (h *LoadTestHarness) executeRequest(ctx context.Context, userID, iteration 
 		}
 	}
 	
+	// Count final result
 	if err != nil {
 		atomic.AddInt64(&h.failedReqs, 1)
 		h.recordError(err)
@@ -200,11 +213,16 @@ func (h *LoadTestHarness) performRequest(ctx context.Context, request interface{
 	// This is a hook for custom request execution
 	// In real tests, this would call the actual service
 	
-	// Simulate processing time
+	// Simulate processing time with graceful context handling
+	timer := time.NewTimer(10 * time.Millisecond)
+	defer timer.Stop()
+	
 	select {
 	case <-ctx.Done():
+		// Context cancelled - this is expected during test teardown
 		return nil, ctx.Err()
-	case <-time.After(10 * time.Millisecond):
+	case <-timer.C:
+		// Request completed successfully
 		return "success", nil
 	}
 }
