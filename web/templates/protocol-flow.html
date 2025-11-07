@@ -114,16 +114,16 @@
     <div class="demo-controls">
         <h3>Demo Controls</h3>
         <div class="demo-buttons">
-            <button class="demo-button" onclick="demoSubscription()">▶ Start Subscription</button>
-            <button class="demo-button" onclick="demoMatching()">🔍 Run Matching</button>
-            <button class="demo-button" onclick="demoSubsetRequest()">🎯 Request Authorization</button>
-            <button class="demo-button" onclick="demoEnforcement()">🛡️ Enforce Policy</button>
-            <button class="demo-button" onclick="demoVerification()">✓ Verify Token</button>
-            <button class="demo-button" onclick="demoAudit()">📊 Audit & Report</button>
-            <button class="demo-button success" onclick="demoCompleteFlow()">🎉 Complete Full Flow</button>
-            <button class="demo-button error" onclick="demoError()">⚠️ Simulate Error</button>
-            <button class="demo-button" onclick="demoReset()">🔄 Reset Flow</button>
-            <button class="demo-button" onclick="demoExport()">💾 Export History</button>
+            <button class="demo-button" data-action="demoSubscription">▶ Start Subscription</button>
+            <button class="demo-button" data-action="demoMatching">🔍 Run Matching</button>
+            <button class="demo-button" data-action="demoSubsetRequest">🎯 Request Authorization</button>
+            <button class="demo-button" data-action="demoEnforcement">🛡️ Enforce Policy</button>
+            <button class="demo-button" data-action="demoVerification">✓ Verify Token</button>
+            <button class="demo-button" data-action="demoAudit">📊 Audit & Report</button>
+            <button class="demo-button success" data-action="demoCompleteFlow">🎉 Complete Full Flow</button>
+            <button class="demo-button error" data-action="demoError">⚠️ Simulate Error</button>
+            <button class="demo-button" data-action="demoReset">🔄 Reset Flow</button>
+            <button class="demo-button" data-action="demoExport">💾 Export History</button>
         </div>
         <div class="demo-info">
             <strong>Instructions:</strong> Click the buttons above to simulate different stages of the GAuth protocol flow. 
@@ -163,6 +163,14 @@
             window.gauthUI = ui;
 
             console.log('[protocol-flow] Navigator initialized:', window.gauthNavigator);
+
+            // Attach event listeners to buttons (CSP-compliant)
+            document.querySelectorAll('.demo-button[data-action]').forEach(button => {
+                const action = button.getAttribute('data-action');
+                if (window[action]) {
+                    button.addEventListener('click', window[action]);
+                }
+            });
         }
 
         // Demo functions - using window.gauthNavigator to ensure accessibility
