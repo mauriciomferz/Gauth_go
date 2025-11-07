@@ -47,7 +47,7 @@ func main() {
 		PrincipalID:  "corp_ceo_123",
 		AIAgentID:    "ai_trading_assistant_v2",
 		Jurisdiction: "US",
-		LegalBasis:   "power_of_attorney_act_2024",
+		LegalBasis:   "power_of_attorney_act_2025",
 	}
 
 	poaResponse, err := rfcService.AuthorizePowerOfAttorney(ctx, validPOARequest)

@@ -354,7 +354,7 @@ func (si *ServerIntegration) CreateTestProfile(entityType string, jurisdiction s
 		SystemID:        fmt.Sprintf("test-%s-%d", entityType, time.Now().Unix()),
 		ModelName:       "test-model",
 		ModelVersion:    "1.0",
-		TrainingDate:    "2024-01-01T00:00:00Z",
+		TrainingDate:    "2025-01-01T00:00:00Z",
 		RiskLevel:       "medium",
 		IndustryContext: "general",
 		Jurisdiction:    jurisdiction,

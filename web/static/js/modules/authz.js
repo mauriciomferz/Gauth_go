@@ -97,7 +97,7 @@ export async function checkAuthorization() {
         const scope = document.getElementById('scope-input')?.value || 'ai_power_of_attorney,financial_transactions';
         const principalId = document.getElementById('principal-id-input')?.value || 'principal-xyz';
         const aiAgentId = document.getElementById('ai-agent-id-input')?.value || 'agent-123';
-        const legalBasis = document.getElementById('legal-basis-input')?.value || 'law2024';
+        const legalBasis = document.getElementById('legal-basis-input')?.value || 'law2025';
         const redirectURI = document.getElementById('redirect-uri-input')?.value || 'https://cb.example.com';
         const responseType = 'code';
         const state = 'demo';

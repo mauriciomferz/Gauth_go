@@ -261,7 +261,7 @@ func (m *AICapabilityMatrix) loadDefaultEntityRules() {
 func (m *AICapabilityMatrix) loadDefaultGovernancePolicies() {
 	// EU AI Act compliance
 	euPolicy := AIGovernancePolicy{
-		PolicyID:            "eu_ai_act_2024",
+		PolicyID:            "eu_ai_act_2025",
 		Jurisdiction:        "EU",
 		ComplianceFramework: "EU_AI_ACT",
 		EntityRestrictions: map[AIEntityType]AICapabilityRule{
@@ -285,13 +285,13 @@ func (m *AICapabilityMatrix) loadDefaultGovernancePolicies() {
 		ProhibitedActions: []string{"transaction:pay", "delegation:create"}, // High-risk systems
 		MandatoryClaims:   []string{"eu_ai_conformity", "human_oversight"},
 		AuditRequirements: []string{"realtime_monitoring", "bias_testing", "transparency_log"},
-		EffectiveDate:     "2024-08-01T00:00:00Z",
+		EffectiveDate:     "2025-08-01T00:00:00Z",
 		LastUpdated:       time.Now().Format(time.RFC3339),
 	}
 
 	// US AI governance (sectoral approach)
 	usPolicy := AIGovernancePolicy{
-		PolicyID:            "us_ai_governance_2024",
+		PolicyID:            "us_ai_governance_2025",
 		Jurisdiction:        "US",
 		ComplianceFramework: "NIST_AI_RMF",
 		EntityRestrictions: map[AIEntityType]AICapabilityRule{
@@ -306,13 +306,13 @@ func (m *AICapabilityMatrix) loadDefaultGovernancePolicies() {
 		},
 		MandatoryClaims:   []string{"algorithmic_accountability"},
 		AuditRequirements: []string{"impact_assessment", "bias_monitoring"},
-		EffectiveDate:     "2024-01-01T00:00:00Z",
+		EffectiveDate:     "2025-01-01T00:00:00Z",
 		LastUpdated:       time.Now().Format(time.RFC3339),
 	}
 
-	// UK AI governance (principles-based)
+	// UK AI governance principles
 	ukPolicy := AIGovernancePolicy{
-		PolicyID:            "uk_ai_principles_2024",
+		PolicyID:            "uk_ai_principles_2025",
 		Jurisdiction:        "UK",
 		ComplianceFramework: "UK_AI_PRINCIPLES",
 		EntityRestrictions: map[AIEntityType]AICapabilityRule{
@@ -327,13 +327,13 @@ func (m *AICapabilityMatrix) loadDefaultGovernancePolicies() {
 		},
 		MandatoryClaims:   []string{"explainability", "fairness_assessment"},
 		AuditRequirements: []string{"explainability_log", "fairness_monitoring"},
-		EffectiveDate:     "2024-03-01T00:00:00Z",
+		EffectiveDate:     "2025-03-01T00:00:00Z",
 		LastUpdated:       time.Now().Format(time.RFC3339),
 	}
 
 	// Healthcare industry-specific rules (HIPAA compliance for AI)
 	healthcarePolicy := AIGovernancePolicy{
-		PolicyID:            "healthcare_ai_hipaa_2024",
+		PolicyID:            "healthcare_ai_hipaa_2025",
 		IndustryContext:     "healthcare",
 		ComplianceFramework: "HIPAA_AI",
 		EntityRestrictions: map[AIEntityType]AICapabilityRule{
@@ -356,13 +356,13 @@ func (m *AICapabilityMatrix) loadDefaultGovernancePolicies() {
 		ProhibitedActions: []string{"transaction:pay", "delegation:create"},
 		MandatoryClaims:   []string{"hipaa_compliance", "phi_protection"},
 		AuditRequirements: []string{"phi_access_log", "de_identification_audit", "breach_monitoring"},
-		EffectiveDate:     "2024-01-01T00:00:00Z",
+		EffectiveDate:     "2025-01-01T00:00:00Z",
 		LastUpdated:       time.Now().Format(time.RFC3339),
 	}
 
 	// Financial services AI governance (SOX, banking regulations)
 	financePolicy := AIGovernancePolicy{
-		PolicyID:            "finance_ai_compliance_2024",
+		PolicyID:            "finance_ai_compliance_2025",
 		IndustryContext:     "finance",
 		ComplianceFramework: "SOX_AI_BANKING",
 		EntityRestrictions: map[AIEntityType]AICapabilityRule{
@@ -387,7 +387,7 @@ func (m *AICapabilityMatrix) loadDefaultGovernancePolicies() {
 		ProhibitedActions: []string{"transaction:pay", "delegation:create"},
 		MandatoryClaims:   []string{"sox_compliance", "financial_cert"},
 		AuditRequirements: []string{"transaction_log", "model_validation_audit", "operational_risk_monitoring"},
-		EffectiveDate:     "2024-01-01T00:00:00Z",
+		EffectiveDate:     "2025-01-01T00:00:00Z",
 		LastUpdated:       time.Now().Format(time.RFC3339),
 	}
 

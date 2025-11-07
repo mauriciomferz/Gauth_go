@@ -59,7 +59,7 @@ ClaimsMetadata{
 ### **Structured PASETO Footer**
 ```go
 PASETOFooter{
-    KeyID:     "gauth-ed25519-key-v2-2024",
+    KeyID:     "gauth-ed25519-key-v2-2025",
     Algorithm: "Ed25519", 
     Issuer:    "https://auth.gauth.example.com",
     Metadata: map[string]interface{}{

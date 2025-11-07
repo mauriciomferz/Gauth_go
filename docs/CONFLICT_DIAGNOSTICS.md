@@ -431,4 +431,6 @@ go test ./pkg/pdp -v
 
 ## License
 
-Copyright © 2024 Gimel Foundation. Licensed under Apache 2.0.
+---
+
+Copyright © 2025 Gimel Foundation. Licensed under Apache 2.0.

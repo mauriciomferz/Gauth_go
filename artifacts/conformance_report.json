@@ -1,0 +1,1034 @@
+{
+  "generated_at": "2025-11-07T00:54:46+01:00",
+  "clauses": [
+    {
+      "id": "0111:rfc-0111-(placeholder-extract)",
+      "title": "RFC 0111 (Placeholder Extract)",
+      "rfc": "0111",
+      "line_from": 1,
+      "line_to": 1
+    },
+    {
+      "id": "0115:rfc-0115-(placeholder-extract)",
+      "title": "RFC 0115 (Placeholder Extract)",
+      "rfc": "0115",
+      "line_from": 1,
+      "line_to": 1
+    },
+    {
+      "id": "0111:1.-introduction",
+      "title": "1. Introduction",
+      "rfc": "0111",
+      "line_from": 3,
+      "line_to": 3
+    },
+    {
+      "id": "0115:1.-power-of-attorney-structure",
+      "title": "1. Power Of Attorney Structure",
+      "rfc": "0115",
+      "line_from": 21,
+      "line_to": 21
+    },
+    {
+      "id": "0111:2.-policy-bundle-integrity",
+      "title": "2. Policy Bundle Integrity",
+      "rfc": "0111",
+      "line_from": 6,
+      "line_to": 6
+    },
+    {
+      "id": "0115:2.-scope-semantics",
+      "title": "2. Scope Semantics",
+      "rfc": "0115",
+      "line_from": 24,
+      "line_to": 24
+    },
+    {
+      "id": "0111:3.-delegation-\u0026-revocation",
+      "title": "3. Delegation \u0026 Revocation",
+      "rfc": "0111",
+      "line_from": 9,
+      "line_to": 9
+    },
+    {
+      "id": "0115:3.-validity-period",
+      "title": "3. Validity Period",
+      "rfc": "0115",
+      "line_from": 27,
+      "line_to": 27
+    },
+    {
+      "id": "0111:4.-audit-logging",
+      "title": "4. Audit Logging",
+      "rfc": "0111",
+      "line_from": 12,
+      "line_to": 12
+    },
+    {
+      "id": "0115:4.-formal-requirements",
+      "title": "4. Formal Requirements",
+      "rfc": "0115",
+      "line_from": 30,
+      "line_to": 30
+    },
+    {
+      "id": "0111:5.-replay-protection",
+      "title": "5. Replay Protection",
+      "rfc": "0111",
+      "line_from": 15,
+      "line_to": 15
+    },
+    {
+      "id": "0115:5.-power-limits",
+      "title": "5. Power Limits",
+      "rfc": "0115",
+      "line_from": 33,
+      "line_to": 33
+    },
+    {
+      "id": "0111:6.-cryptographic-requirements",
+      "title": "6. Cryptographic Requirements",
+      "rfc": "0111",
+      "line_from": 18,
+      "line_to": 18
+    },
+    {
+      "id": "0115:6.-rights-\u0026-obligations",
+      "title": "6. Rights \u0026 Obligations",
+      "rfc": "0115",
+      "line_from": 36,
+      "line_to": 36
+    },
+    {
+      "id": "0111:7.-authorization-engine",
+      "title": "7. Authorization Engine",
+      "rfc": "0111",
+      "line_from": 51,
+      "line_to": 51
+    },
+    {
+      "id": "0115:7.-special-conditions",
+      "title": "7. Special Conditions",
+      "rfc": "0115",
+      "line_from": 39,
+      "line_to": 39
+    },
+    {
+      "id": "0111:8.-pp-architecture",
+      "title": "8. Pp Architecture",
+      "rfc": "0111",
+      "line_from": 54,
+      "line_to": 54
+    },
+    {
+      "id": "0115:8.-joint-signatures",
+      "title": "8. Joint Signatures",
+      "rfc": "0115",
+      "line_from": 42,
+      "line_to": 42
+    },
+    {
+      "id": "0111:9.-external-anchoring",
+      "title": "9. External Anchoring",
+      "rfc": "0111",
+      "line_from": 57,
+      "line_to": 57
+    },
+    {
+      "id": "0115:9.-canonical-serialization",
+      "title": "9. Canonical Serialization",
+      "rfc": "0115",
+      "line_from": 45,
+      "line_to": 45
+    },
+    {
+      "id": "0111:10.-detached-signatures",
+      "title": "10. Detached Signatures",
+      "rfc": "0111",
+      "line_from": 60,
+      "line_to": 60
+    },
+    {
+      "id": "0115:10.-revocation-semantics",
+      "title": "10. Revocation Semantics",
+      "rfc": "0115",
+      "line_from": 48,
+      "line_to": 48
+    },
+    {
+      "id": "0111:11.-multi-signature-threshold",
+      "title": "11. Multi Signature Threshold",
+      "rfc": "0111",
+      "line_from": 63,
+      "line_to": 63
+    },
+    {
+      "id": "0115:11.-advanced-claims",
+      "title": "11. Advanced Claims",
+      "rfc": "0115",
+      "line_from": 66,
+      "line_to": 66
+    },
+    {
+      "id": "0115:12.-key-rotation",
+      "title": "12. Key Rotation",
+      "rfc": "0115",
+      "line_from": 69,
+      "line_to": 69
+    },
+    {
+      "id": "0115:13.-policy-versioning",
+      "title": "13. Policy Versioning",
+      "rfc": "0115",
+      "line_from": 72,
+      "line_to": 72
+    },
+    {
+      "id": "0115:14.-ai-capability-governance",
+      "title": "14. Ai Capability Governance",
+      "rfc": "0115",
+      "line_from": 75,
+      "line_to": 75
+    },
+    {
+      "id": "0115:15.-embedding-poa-in-token",
+      "title": "15. Embedding Poa In Token",
+      "rfc": "0115",
+      "line_from": 78,
+      "line_to": 78
+    }
+  ],
+  "failures": [
+    "symbol missing: 0115:14.-ai-capability-governance -\u003e ContextLimits"
+  ],
+  "summary": {
+    "mapped_clauses": 26,
+    "mapped_clauses_found": 26,
+    "required_symbols": 78,
+    "symbols_found": 77,
+    "clauses_with_tests": 26,
+    "clauses_tests_found": 26,
+    "coverage_percent": 98.71794871794873,
+    "missing_clauses": 0,
+    "missing_symbols": 1,
+    "missing_tests": 0,
+    "gap_total": 43,
+    "gap_implemented": 8,
+    "gap_partial": 16,
+    "gap_missing": 19
+  },
+  "evidence": {
+    "AddBundle": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/engine.go:85",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/engine.go:85"
+    ],
+    "AdvancedClaims": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/advanced_claims.go:12"
+    ],
+    "AnchorClient": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/tsa/tsa.go:32",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/anchor/anchor.go:55",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/anchor.go:10",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1997",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go:586"
+    ],
+    "AnchorRecord": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/anchor/anchor.go:49"
+    ],
+    "AuditEvents": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3391"
+    ],
+    "CanonicalPOADigest": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/canonical.go:42",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/canonical.go:42",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/canonical.go:42"
+    ],
+    "CapabilityEnforcer": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/ai/capability_enforcer.go:15"
+    ],
+    "ClaimsMetadata": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/advanced_claims.go:37"
+    ],
+    "ClaimsRestrictions": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/advanced_claims.go:46"
+    ],
+    "ConditionalExpression": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:295"
+    ],
+    "CreateDelegation": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:2011"
+    ],
+    "DailyLimit": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:241"
+    ],
+    "DutyOfCare": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:287"
+    ],
+    "EnvelopeV2": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/token/envelope.go:31"
+    ],
+    "EvaluateExpression": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/conditions/conditions.go:57",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/authz/expr.go:655"
+    ],
+    "ExprLimits": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/authz/expr.go:27"
+    ],
+    "FileLogger": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/file_logger.go:21"
+    ],
+    "FormalValidation": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:224"
+    ],
+    "LegalFramework": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/auth/legal_framework_integration.go:241"
+    ],
+    "Manager": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/authorization/manager.go:10",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/crypto/keys.go:41",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/limits/manager.go:33",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/token/token.go:216"
+    ],
+    "MemoryAnchor": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/anchor/anchor.go:65"
+    ],
+    "MemoryLogger": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:84"
+    ],
+    "MemoryStore": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/tokenstore/tokenstore.go:13",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/store/store.go:13",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/token/token.go:209"
+    ],
+    "ModelLimits": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/ai/capability_enforcer.go:34"
+    ],
+    "NewService": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/multi_region/cmd/main.go:48",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/multi_region/main.go:45",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:808",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/token/token.go:449"
+    ],
+    "Obligations": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:279"
+    ],
+    "POAStatus": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/poa/poa.go:24",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:71"
+    ],
+    "PolicyBundle": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/testutil/parse.go:53"
+    ],
+    "PowerLimit": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:252"
+    ],
+    "PowerOfAttorney": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/auth/legal_framework_integration.go:303",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/poa/validator.go:9",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:87"
+    ],
+    "ReplayStore": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/gauth.go:197",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/gauth.go:197",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1761",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1761"
+    ],
+    "Request": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/authz/authz.go:22",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/pdp/engine.go:17",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/poa/poa.go:337"
+    ],
+    "RequirementCheck": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:232"
+    ],
+    "RevocationChain": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/revocation_chain.go:65",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/revocation_chain.go:65"
+    ],
+    "RevocationStatus": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/token/token.go:111"
+    ],
+    "RevokeDelegation": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3004",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3004"
+    ],
+    "Rights": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:269"
+    ],
+    "RotationPolicy": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/crypto/keystore.go:43"
+    ],
+    "RotationStatus": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/crypto/keystore.go:79"
+    ],
+    "RuntimeEvaluation": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:304"
+    ],
+    "ScopeItem": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:183"
+    ],
+    "ScopeValidator": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:190"
+    ],
+    "Service": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/cascade/pkg/mesh/mesh.go:24",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/multi_region/cmd/main.go:14",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/multi_region/main.go:14",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/gauth.go:161",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/poa/poa.go:355",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1584",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/token/token.go:230"
+    ],
+    "SignatureManager": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/multisig/manager.go:71",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/multisig/manager.go:71"
+    ],
+    "SpecialConditions": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/poa/poa.go:123"
+    ],
+    "ThresholdValidation": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:314",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:314"
+    ],
+    "TokenResult": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:174",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:174"
+    ],
+    "TokenVerificationResult": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:928"
+    ],
+    "TransactionLimit": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:261"
+    ],
+    "ValidateBundle": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/engine.go:349"
+    ],
+    "ValidateDelegation": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:2311"
+    ],
+    "ValidateMultiSignature": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:350",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:350",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:350"
+    ],
+    "ValidateScope": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:198"
+    ],
+    "VerifyChain": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/ledger/audit_ledger.go:173",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/ledger/audit_ledger.go:173",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:205",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:205",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/file_logger.go:181",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/file_logger.go:181",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/delegation.go:145",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/delegation.go:145",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/anchor.go:57",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/anchor.go:57",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/bolt.go:262",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/bolt.go:262",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/ledger.go:172",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/ledger.go:172",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/engine.go:141",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/engine.go:141",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store.go:35",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store.go:35",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store_file.go:162",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store_file.go:162"
+    ],
+    "VerifyIntegrity": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3472"
+    ],
+    "VerifyToken": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/paseto/main.go:73",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:959"
+    ],
+    "WithReplayProtection": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1913",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1913"
+    ],
+    "computeHash": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/ledger/audit_ledger.go:47",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3559"
+    ],
+    "detachedIssued": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/metrics_detached.go:11"
+    ],
+    "incDetachedVerify": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/metrics_detached.go:29"
+    ],
+    "policy.Registry": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/capability/registry.go:20",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/prometheus_adapter.go:1510",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/compliance/compliance.go:37",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/engine.go:77",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store.go:36",
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store_file.go:167"
+    ],
+    "registerDetachedMetrics": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/metrics_detached.go:21"
+    ],
+    "validateDelegationRequest": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3566"
+    ],
+    "verifyPOASignature": [
+      "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1853"
+    ]
+  },
+  "failure_categories": {
+    "clause_missing": [],
+    "symbol_missing": [
+      "symbol missing: 0115:14.-ai-capability-governance -\u003e ContextLimits"
+    ],
+    "tests_missing": []
+  },
+  "gap_matrix": {
+    "generated": "2025-10-21",
+    "version": "beta-refactor",
+    "sections": [
+      {
+        "id": "sec1",
+        "name": "Cryptographic \u0026 Authenticity",
+        "items": [
+          {
+            "id": "sec1.item1",
+            "requirement": "Mandatory POA signature at issuance",
+            "status": "Implemented",
+            "gap": "Need configurable algorithms (Ed25519 only)",
+            "evidence": [
+              "docs/GAP_MATRIX.md:12",
+              "pkg/rfc0111/signature_negative_test.go"
+            ],
+            "priority": "P0"
+          },
+          {
+            "id": "sec1.item2",
+            "requirement": "Full JWT/PASETO claims",
+            "status": "Partial",
+            "gap": "sub,scope,exp,iat,iss,aud,jti,nbf implemented; missing advanced (claims set metadata, structured nested PASETO footer, typ semantic enforcement)",
+            "evidence": [
+              "pkg/gauth/gauth.go",
+              "pkg/gauth/gauth_claims_test.go"
+            ],
+            "priority": "P0"
+          },
+          {
+            "id": "sec1.item3",
+            "requirement": "Robust JSON parsing",
+            "status": "Partial",
+            "gap": "Manual string scanning; property + fuzz tests cover legacy parser for safety",
+            "evidence": [
+              "pkg/gauth/gauth.go",
+              "pkg/gauth/gauth_prop_test.go",
+              "pkg/gauth/gauth_fuzz_test.go"
+            ],
+            "priority": "P0"
+          },
+          {
+            "id": "sec1.item4",
+            "requirement": "Key rotation \u0026 lifecycle",
+            "status": "Partial",
+            "gap": "Scheduler + disk persistence implemented (env driven); missing multi-tenant segregation \u0026 external HSM integration",
+            "evidence": [
+              "internal/crypto/keys.go",
+              "internal/crypto/keys_persist_test.go"
+            ],
+            "priority": "P1"
+          },
+          {
+            "id": "sec1.item5",
+            "requirement": "Public verifiable token integrity",
+            "status": "Partial",
+            "gap": "Local symmetric only; no detached signature",
+            "evidence": [
+              "docs/GAP_MATRIX.md:14"
+            ],
+            "priority": "P0"
+          },
+          {
+            "id": "sec1.item6",
+            "requirement": "Canonical digest stability fuzzing",
+            "status": "Implemented",
+            "gap": "Property + fuzz tests validate determinism \u0026 mutable field exclusion",
+            "evidence": [
+              "docs/GAP_MATRIX.md:15",
+              "pkg/rfc0111/canonical.go",
+              "pkg/rfc0111/canonical_prop_test.go",
+              "pkg/rfc0111/canonical_fuzz_test.go"
+            ],
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "id": "sec2",
+        "name": "Authorization Engine",
+        "items": [
+          {
+            "id": "sec2.item1",
+            "requirement": "PDP combining algorithms",
+            "status": "Implemented",
+            "gap": "Need richer conflict diagnostics",
+            "evidence": [
+              "docs/GAP_MATRIX.md:20"
+            ],
+            "priority": "P0"
+          },
+          {
+            "id": "sec2.item2",
+            "requirement": "ABAC expression evaluation",
+            "status": "Implemented",
+            "gap": "No extensible function registry",
+            "evidence": [
+              "docs/GAP_MATRIX.md:21"
+            ],
+            "priority": "P0"
+          },
+          {
+            "id": "sec2.item3",
+            "requirement": "Obligations \u0026 advice processing",
+            "status": "Missing",
+            "gap": "Concept only, not executed",
+            "evidence": [
+              "docs/GAP_MATRIX.md:25"
+            ],
+            "priority": "P2"
+          },
+          {
+            "id": "sec2.item4",
+            "requirement": "Policy versioning \u0026 rollback",
+            "status": "Missing",
+            "gap": "No version metadata",
+            "evidence": [
+              "docs/GAP_MATRIX.md:23"
+            ],
+            "priority": "P1"
+          },
+          {
+            "id": "sec2.item5",
+            "requirement": "Distributed PDP \u0026 caching",
+            "status": "Missing",
+            "gap": "No clustering or cache invalidation",
+            "evidence": [
+              "docs/GAP_MATRIX.md:24"
+            ],
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "id": "sec3",
+        "name": "PoA Definition (RFC0115)",
+        "items": [
+          {
+            "id": "sec3.item1",
+            "requirement": "Full semantic validation",
+            "status": "Partial",
+            "gap": "AdvancedPoAValidator adds extended rules; lacking warning channel \u0026 persistence of daily limits",
+            "evidence": [
+              "docs/GAP_MATRIX.md:32",
+              "pkg/rfc0111/validator.go",
+              "pkg/rfc0111/rfc0111.go"
+            ],
+            "priority": "P0"
+          },
+          {
+            "id": "sec3.item2",
+            "requirement": "Embed full PoA in token",
+            "status": "Partial",
+            "gap": "RawPOA + PoAVersion embedding implemented behind GAUTH_EMBED_FULL_POA with size cap GAUTH_MAX_RAW_POA_BYTES; remaining gaps: verifier exposure helper, CBOR option, streaming for large PoAs, warning channel \u0026 audit persistence",
+            "evidence": [
+              "docs/GAP_MATRIX.md:33",
+              "pkg/rfc0111/rfc0111.go",
+              "internal/metrics/metrics.go"
+            ],
+            "priority": "P1"
+          },
+          {
+            "id": "sec3.item3",
+            "requirement": "Joint/collective signature enforcement",
+            "status": "Missing",
+            "gap": "No multi-signer aggregation",
+            "evidence": [
+              "docs/GAP_MATRIX.md:33"
+            ],
+            "priority": "P1"
+          },
+          {
+            "id": "sec3.item4",
+            "requirement": "Conditional/special conditions evaluation",
+            "status": "Missing",
+            "gap": "No runtime interpreter",
+            "evidence": [
+              "docs/GAP_MATRIX.md:34"
+            ],
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "id": "sec4",
+        "name": "Legal / Jurisdiction / Compliance",
+        "items": [
+          {
+            "id": "sec4.item1",
+            "requirement": "Jurisdiction-specific enforcement",
+            "status": "Missing",
+            "gap": "No runtime branching",
+            "evidence": [
+              "docs/GAP_MATRIX.md:40"
+            ],
+            "priority": "P1"
+          },
+          {
+            "id": "sec4.item2",
+            "requirement": "Compliance attestation proof",
+            "status": "Missing",
+            "gap": "No evidence ingestion",
+            "evidence": [
+              "docs/GAP_MATRIX.md:41"
+            ],
+            "priority": "P2"
+          },
+          {
+            "id": "sec4.item3",
+            "requirement": "Arbitration / dispute hooks",
+            "status": "Missing",
+            "gap": "No code path",
+            "evidence": [
+              "docs/GAP_MATRIX.md:42"
+            ],
+            "priority": "P3"
+          }
+        ]
+      },
+      {
+        "id": "sec5",
+        "name": "Persistence \u0026 Durability",
+        "items": [
+          {
+            "id": "sec5.item1",
+            "requirement": "Immutable audit ledger",
+            "status": "Partial",
+            "gap": "BoltDB lacks signatures \u0026 external anchor",
+            "evidence": [
+              "docs/GAP_MATRIX.md:48"
+            ],
+            "priority": "P0"
+          },
+          {
+            "id": "sec5.item2",
+            "requirement": "Delegation storage durability",
+            "status": "Partial",
+            "gap": "No indexing or pruning",
+            "evidence": [
+              "docs/GAP_MATRIX.md:49"
+            ],
+            "priority": "P2"
+          },
+          {
+            "id": "sec5.item3",
+            "requirement": "Revocation anchoring",
+            "status": "Partial",
+            "gap": "No external notarization",
+            "evidence": [
+              "docs/GAP_MATRIX.md:50"
+            ],
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "id": "sec6",
+        "name": "Replay \u0026 Token Security",
+        "items": [
+          {
+            "id": "sec6.item1",
+            "requirement": "Fail-closed replay mode",
+            "status": "Partial",
+            "gap": "In-memory JTI map + optional ReplayStore reject duplicates/errors; missing durable persistence \u0026 eviction controls",
+            "evidence": [
+              "pkg/gauth/gauth.go",
+              "pkg/gauth/gauth_claims_test.go"
+            ],
+            "priority": "P1"
+          },
+          {
+            "id": "sec6.item2",
+            "requirement": "JTI format validation",
+            "status": "Implemented",
+            "gap": "Need skew checks",
+            "evidence": [
+              "docs/GAP_MATRIX.md:56"
+            ],
+            "priority": "P2"
+          },
+          {
+            "id": "sec6.item3",
+            "requirement": "Replay persistence recovery",
+            "status": "Missing",
+            "gap": "No WAL snapshot",
+            "evidence": [
+              "docs/GAP_MATRIX.md:57"
+            ],
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "id": "sec7",
+        "name": "Observability \u0026 Metrics",
+        "items": [
+          {
+            "id": "sec7.item1",
+            "requirement": "Decision metrics (allow/deny + action/resource labels)",
+            "status": "Implemented",
+            "gap": "Reason taxonomy limited; no JSON labeled export yet",
+            "evidence": [
+              "docs/GAP_MATRIX.md:62",
+              "internal/metrics/prometheus_adapter.go",
+              "docs/OBSERVABILITY.md"
+            ],
+            "priority": "P2"
+          },
+          {
+            "id": "sec7.item2",
+            "requirement": "Metrics export adapter",
+            "status": "Partial",
+            "gap": "No collector registration",
+            "evidence": [
+              "docs/GAP_MATRIX.md:63"
+            ],
+            "priority": "P3"
+          },
+          {
+            "id": "sec7.item3",
+            "requirement": "Violation \u0026 semantic counters (adaptive anomaly)",
+            "status": "Implemented",
+            "gap": "Counters + per-category 60s/300s rates + adaptive anomaly detector (EWMA + Welford variance) with z-score export via JSON/Prometheus/OTEL; anomaly EWMA state persisted \u0026 restored with hash chain verification. Remaining gaps: external anchoring \u0026 archival rotation of semantic snapshots, historical rate archive beyond EWMA, surge alert hooks.",
+            "evidence": [
+              "internal/observability/violations.go",
+              "pkg/gauth/gauth.go",
+              "pkg/rfc0111/rfc0111.go",
+              "web/server_clean.go",
+              "docs/OBSERVABILITY.md",
+              "web/persistence_verify_test.go",
+              "web/server_anomaly_test.go",
+              "web/server_semantic_persistence_test.go"
+            ],
+            "priority": "P2"
+          },
+          {
+            "id": "sec7.item4",
+            "requirement": "Distributed tracing",
+            "status": "Missing",
+            "gap": "No span linking",
+            "evidence": [
+              "docs/GAP_MATRIX.md:65"
+            ],
+            "priority": "P3"
+          }
+        ]
+      },
+      {
+        "id": "sec8",
+        "name": "Key \u0026 Secret Management",
+        "items": [
+          {
+            "id": "sec8.item1",
+            "requirement": "Secure secret storage",
+            "status": "Missing",
+            "gap": "No vault/HSM provider",
+            "evidence": [
+              "docs/GAP_MATRIX.md:70"
+            ],
+            "priority": "P0"
+          },
+          {
+            "id": "sec8.item2",
+            "requirement": "Rotation audit trail",
+            "status": "Partial",
+            "gap": "JSON rotation log + hash chain (prev_hash -\u003e hash) implemented; still missing external append-only sink \u0026 multi-tenant segregation",
+            "evidence": [
+              "internal/crypto/keys.go",
+              "internal/crypto/keys_rotation_log_test.go",
+              "internal/crypto/keys_rotation_hash_chain_test.go"
+            ],
+            "priority": "P1"
+          }
+        ]
+      },
+      {
+        "id": "sec9",
+        "name": "Testing \u0026 Conformance",
+        "items": [
+          {
+            "id": "sec9.item1",
+            "requirement": "Clause-to-test mapping",
+            "status": "Partial",
+            "gap": "Harness maps 8 mapped clause entries (100% of declared set); broader RFC sections still unmapped",
+            "evidence": [
+              "docs/GAP_MATRIX.md:76",
+              "conformance/clause_map.json",
+              "report.md"
+            ],
+            "priority": "P0"
+          },
+          {
+            "id": "sec9.item2",
+            "requirement": "Fuzzing / property tests",
+            "status": "Partial",
+            "gap": "Canonical digest covered; parsing \u0026 semantic validators still lack property tests",
+            "evidence": [
+              "docs/GAP_MATRIX.md:77",
+              "pkg/rfc0111/canonical_prop_test.go",
+              "pkg/rfc0111/canonical_fuzz_test.go"
+            ],
+            "priority": "P1"
+          },
+          {
+            "id": "sec9.item3",
+            "requirement": "Load/stress benchmarks",
+            "status": "Missing",
+            "gap": "No high-load harness",
+            "evidence": [
+              "docs/GAP_MATRIX.md:78"
+            ],
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "id": "sec10",
+        "name": "Interoperability / External Interfaces",
+        "items": [
+          {
+            "id": "sec10.item1",
+            "requirement": "OpenAPI for PoA \u0026 delegation",
+            "status": "Missing",
+            "gap": "No documented contract",
+            "evidence": [
+              "docs/GAP_MATRIX.md:83"
+            ],
+            "priority": "P1"
+          },
+          {
+            "id": "sec10.item2",
+            "requirement": "Well-known discovery endpoints",
+            "status": "Implemented",
+            "gap": "jwks_uri + revocation endpoints exposed; missing oauth2 revocation + introspection standardization",
+            "evidence": [
+              "web/server_clean.go",
+              "web/jwks_integrity_test.go"
+            ],
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "id": "sec11",
+        "name": "AI Capability \u0026 Governance",
+        "items": [
+          {
+            "id": "sec11.item1",
+            "requirement": "Capability matrix enforcement",
+            "status": "Missing",
+            "gap": "No runtime enforcement",
+            "evidence": [
+              "docs/GAP_MATRIX.md:90"
+            ],
+            "priority": "P1"
+          },
+          {
+            "id": "sec11.item2",
+            "requirement": "Model limit checks",
+            "status": "Missing",
+            "gap": "No metadata evaluation",
+            "evidence": [
+              "docs/GAP_MATRIX.md:91"
+            ],
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "id": "sec12",
+        "name": "Advanced Delegation Lifecycle",
+        "items": [
+          {
+            "id": "sec12.item1",
+            "requirement": "Suspension / partial revocation",
+            "status": "Missing",
+            "gap": "Only revoked/expired statuses",
+            "evidence": [
+              "docs/GAP_MATRIX.md:96"
+            ],
+            "priority": "P2"
+          },
+          {
+            "id": "sec12.item2",
+            "requirement": "Delegation chaining depth limits",
+            "status": "Missing",
+            "gap": "No depth enforcement",
+            "evidence": [
+              "docs/GAP_MATRIX.md:97"
+            ],
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "id": "sec13",
+        "name": "Data Hygiene \u0026 Validation",
+        "items": [
+          {
+            "id": "sec13.item1",
+            "requirement": "UTF-8 \u0026 control char filtering",
+            "status": "Partial",
+            "gap": "No metrics instrumentation",
+            "evidence": [
+              "docs/GAP_MATRIX.md:102"
+            ],
+            "priority": "P3"
+          },
+          {
+            "id": "sec13.item2",
+            "requirement": "Structured numeric limit parsing",
+            "status": "Missing",
+            "gap": "Amounts not parsed/enforced",
+            "evidence": [
+              "docs/GAP_MATRIX.md:103"
+            ],
+            "priority": "P2"
+          }
+        ]
+      },
+      {
+        "id": "sec14",
+        "name": "Risk \u0026 Threat Modeling",
+        "items": [
+          {
+            "id": "sec14.item1",
+            "requirement": "Threat model synchronization",
+            "status": "Partial",
+            "gap": "No mitigations matrix",
+            "evidence": [
+              "docs/GAP_MATRIX.md:108"
+            ],
+            "priority": "P2"
+          },
+          {
+            "id": "sec14.item2",
+            "requirement": "Residual risk register",
+            "status": "Missing",
+            "gap": "No tracking of remaining exposures",
+            "evidence": [
+              "docs/GAP_MATRIX.md:109"
+            ],
+            "priority": "P3"
+          }
+        ]
+      }
+    ]
+  }
+}

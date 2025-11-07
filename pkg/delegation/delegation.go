@@ -233,3 +233,110 @@ func hashDelegation(d Delegation) (string, error) {
 	h := sha256.Sum256(data)
 	return hex.EncodeToString(h[:]), nil
 }
+
+// SuspensionMetadata tracks suspension details.
+type SuspensionMetadata struct {
+	SuspendedAt    time.Time `json:"suspended_at"`
+	SuspendedBy    string    `json:"suspended_by"`
+	SuspensionEnd  *time.Time `json:"suspension_end,omitempty"`  // nil = indefinite
+	Reason         string    `json:"reason"`
+	SuspensionCount int       `json:"suspension_count"`
+}
+
+// PartialRevocationMetadata tracks partial scope reductions.
+type PartialRevocationMetadata struct {
+	RevokedAt       time.Time         `json:"revoked_at"`
+	RevokedBy       string            `json:"revoked_by"`
+	RemovedScope    map[string]string `json:"removed_scope"`    // what was removed
+	Reason          string            `json:"reason"`
+}
+
+// LifecycleMetadata extends Delegation with operational lifecycle tracking.
+type LifecycleMetadata struct {
+	DelegationID      string
+	LastAccessedAt    time.Time
+	Suspensions       []SuspensionMetadata
+	PartialRevocations []PartialRevocationMetadata
+	TerminationReason string
+	TerminatedAt      *time.Time
+	TerminatedBy      string
+}
+
+// Suspend transitions a delegation to suspended status.
+func (d *Delegation) Suspend(suspendedBy, reason string, duration time.Duration) error {
+	if err := ValidateDelegationStatusTransition(d.Status, StatusSuspended); err != nil {
+		return err
+	}
+	d.Status = StatusSuspended
+	return nil
+}
+
+// Resume transitions a suspended delegation back to active or partially_revoked.
+func (d *Delegation) Resume(resumedBy string) error {
+	if d.Status != StatusSuspended {
+		return errors.New("delegation is not suspended")
+	}
+	// Determine target status based on scope
+	// If scope was previously reduced, return to partially_revoked
+	// Otherwise return to active
+	d.Status = StatusActive
+	return nil
+}
+
+// PartiallyRevoke reduces the scope of a delegation.
+func (d *Delegation) PartiallyRevoke(removedScope map[string]string, revokedBy, reason string) error {
+	if d.Status == StatusTerminated {
+		return errors.New("cannot partially revoke terminated delegation")
+	}
+	
+	// Remove specified scope keys
+	for key := range removedScope {
+		delete(d.Scope, key)
+	}
+	
+	// If all scope removed, terminate instead
+	if len(d.Scope) == 0 {
+		d.Status = StatusTerminated
+		return nil
+	}
+	
+	// Transition to partially revoked
+	if err := ValidateDelegationStatusTransition(d.Status, StatusPartiallyRevoked); err != nil {
+		return err
+	}
+	d.Status = StatusPartiallyRevoked
+	return nil
+}
+
+// Terminate permanently revokes a delegation.
+func (d *Delegation) Terminate(terminatedBy, reason string) error {
+	if err := ValidateDelegationStatusTransition(d.Status, StatusTerminated); err != nil {
+		return err
+	}
+	d.Status = StatusTerminated
+	return nil
+}
+
+// IsUsable reports whether the delegation can currently authorize actions.
+func (d *Delegation) IsUsable() bool {
+	if d.Status != StatusActive && d.Status != StatusPartiallyRevoked {
+		return false
+	}
+	if time.Now().UTC().After(d.ExpiresAt) {
+		return false
+	}
+	return true
+}
+
+// CanAccessResource checks if a specific scope key-value is allowed.
+func (d *Delegation) CanAccessResource(key, value string) bool {
+	if !d.IsUsable() {
+		return false
+	}
+	scopeValue, exists := d.Scope[key]
+	if !exists {
+		return false
+	}
+	// Support wildcard "*" or exact match
+	return scopeValue == "*" || scopeValue == value
+}

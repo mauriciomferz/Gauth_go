@@ -1,1472 +1,402 @@
 {
-  "generated": "2025-11-06T13:14:08Z",
+  "capabilities_schema_version": 1,
   "counts": {
-    "implemented": 26,
-    "partial": 5,
-    "missing": 12,
     "conceptual": 0,
-    "total": 43
+    "implemented": 15,
+    "missing": 12,
+    "partial": 16
   },
-  "drift": [
-    "sec2.item3 (Obligations \u0026 advice processing): CSV(Status=Missing,Priority=P2) != MD(Status=Partial,Priority=P2)",
-    "sec3.item3 (Joint/collective signature enforcement): CSV(Status=Implemented,Priority=P1) != MD(Status=Partial,Priority=P1)",
-    "sec8.item1 (Secure secret storage): CSV(Status=Implemented,Priority=P0) != MD(Status=Partial,Priority=P0)",
-    "sec8.item2 (Rotation audit trail): CSV(Status=Implemented,Priority=P1) != MD(Status=Partial,Priority=P1)",
-    "sec9.item1 (Clause-to-test mapping): CSV(Status=Implemented,Priority=P0) != MD(Status=Partial,Priority=P0)",
-    "sec9.item2 (Fuzzing / property tests): CSV(Status=Implemented,Priority=P1) != MD(Status=Partial,Priority=P1)",
-    "sec9.item3 (Load/stress benchmarks): CSV(Status=Implemented,Priority=P3) != MD(Status=Missing,Priority=P2)",
-    "sec10.item2 (Well-known discovery endpoints): CSV(Status=Implemented,Priority=P2) != MD(Status=Partial,Priority=P2)",
-    "sec13.item2 (Structured numeric limit parsing): CSV(Status=Missing,Priority=P2) != MD(Status=Partial,Priority=P2)"
-  ],
-  "capabilities": {
-    "schema_version": 1,
-    "capabilities": [
-      {
-        "id": "cap.transfer",
-        "version": "1.0",
-        "stable": true
-      },
-      {
-        "id": "cap.issue",
-        "version": "1.0",
-        "stable": true
-      },
-      {
-        "id": "cap.delegation.create",
-        "version": "1.0",
-        "stable": true
-      },
-      {
-        "id": "cap.delegation.revoke",
-        "version": "1.0",
-        "stable": true
-      }
-    ]
-  },
-  "rows": [
+  "drift_items": null,
+  "entries": [
     {
-      "Section": "Cryptographic \u0026 Authenticity",
-      "ID": "sec1.item1",
-      "Requirement": "Mandatory POA signature at issuance",
-      "Status": "Implemented",
-      "Priority": "P0",
-      "Gap": "Need configurable algorithms (Ed25519 only)",
-      "Evidence": "docs/GAP_MATRIX.md:12|pkg/rfc0111/signature_negative_test.go",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:12|pkg/rfc0111/signature_negative_test.go",
-        "files": [
-          "docs/GAP_MATRIX.md:12",
-          "pkg/rfc0111/signature_negative_test.go"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md",
-          "pkg/rfc0111/signature_negative_test.go"
-        ],
-        "missing": null,
-        "test_files": [
-          "pkg/rfc0111/signature_negative_test.go"
-        ],
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 2,
-        "missing_count": 0,
-        "test_file_count": 1,
-        "code_file_count": 1
-      }
+      "section": "Cryptographic \u0026 Authenticity",
+      "id": "sec1.item1",
+      "requirement": "Mandatory POA signature at issuance",
+      "status": "Implemented",
+      "priority": "P0",
+      "gap": "Need configurable algorithms (Ed25519 only)",
+      "evidence": "docs/GAP_MATRIX.md:12|pkg/rfc0111/signature_negative_test.go"
     },
     {
-      "Section": "Cryptographic \u0026 Authenticity",
-      "ID": "sec1.item2",
-      "Requirement": "Full JWT/PASETO claims",
-      "Status": "Implemented",
-      "Priority": "P0",
-      "Gap": "Complete JWT/PASETO advanced claims implementation: AdvancedClaims with extended standard claims (sub scope exp iat iss aud jti nbf) + ClaimsMetadata (version capabilities source confidence restrictions) + ClaimsRestrictions (IP whitelist time windows usage limits geofencing) + PASETOFooter (structured nested footer with keyID algorithm issuer metadata) + semantic validation (ValidateSemantics temporal checks audience verification issuer validation) + token type enforcement (typ claim RFC-compliant types JWT PASETO access_token refresh_token id_token at+jwt rt+jwt) + confidence scoring system (0.0-1.0 automated quality assessment) + comprehensive testing (14 test functions 100% coverage integration tests complex scenarios). Remaining gaps: distributed token validation cache rotation policy enforcement JWKS auto-refresh.",
-      "Evidence": "pkg/gauth/advanced_claims.go|pkg/gauth/advanced_validation.go|pkg/gauth/advanced_claims_test.go|pkg/gauth/advanced_validation_test.go|examples/token_management/paseto/advanced_demo.go|docs/P0_JWT_PASETO_COMPLETION_REPORT.md",
-      "evidence_detail": {
-        "raw": "pkg/gauth/advanced_claims.go|pkg/gauth/advanced_validation.go|pkg/gauth/advanced_claims_test.go|pkg/gauth/advanced_validation_test.go|examples/token_management/paseto/advanced_demo.go|docs/P0_JWT_PASETO_COMPLETION_REPORT.md",
-        "files": [
-          "pkg/gauth/advanced_claims.go",
-          "pkg/gauth/advanced_validation.go",
-          "pkg/gauth/advanced_claims_test.go",
-          "pkg/gauth/advanced_validation_test.go",
-          "examples/token_management/paseto/advanced_demo.go",
-          "docs/P0_JWT_PASETO_COMPLETION_REPORT.md"
-        ],
-        "existing": [
-          "pkg/gauth/advanced_claims.go",
-          "pkg/gauth/advanced_validation.go",
-          "pkg/gauth/advanced_claims_test.go",
-          "examples/token_management/paseto/advanced_demo.go",
-          "docs/P0_JWT_PASETO_COMPLETION_REPORT.md"
-        ],
-        "missing": [
-          "pkg/gauth/advanced_validation_test.go"
-        ],
-        "test_files": [
-          "pkg/gauth/advanced_claims_test.go"
-        ],
-        "code_files": [
-          "pkg/gauth/advanced_claims.go",
-          "pkg/gauth/advanced_validation.go",
-          "examples/token_management/paseto/advanced_demo.go",
-          "docs/P0_JWT_PASETO_COMPLETION_REPORT.md"
-        ],
-        "existing_count": 5,
-        "missing_count": 1,
-        "test_file_count": 1,
-        "code_file_count": 4
-      }
+      "section": "Cryptographic \u0026 Authenticity",
+      "id": "sec1.item2",
+      "requirement": "Full JWT/PASETO claims",
+      "status": "Implemented",
+      "priority": "P0",
+      "gap": "TokenResult with claim set metadata; complete JWT/PASETO claims implementation with verification details",
+      "evidence": "pkg/gauth/gauth.go|pkg/gauth/gauth_claims_test.go|pkg/rfc0111/rfc0111.go"
     },
     {
-      "Section": "Cryptographic \u0026 Authenticity",
-      "ID": "sec1.item3",
-      "Requirement": "Robust JSON parsing",
-      "Status": "Implemented",
-      "Priority": "P0",
-      "Gap": "Manual string scanning with comprehensive safety coverage via property + fuzz tests: FuzzValidateToken (validates token parsing across malformed/random token structures with 8 seed cases ensuring no panics) + FuzzParseClaims (validates claims parsing determinism with 4 seed cases) both in pkg/gauth/gauth_fuzz_test.go. Property tests in pkg/gauth/gauth_prop_test.go validate claims stability. buildManualToken helper provides deterministic test token generation. All fuzz tests passing with adequate corpus coverage. Remaining gaps: migration to standard encoding/json parser for maintainability streaming decoder for large payloads duplicate key rejection.",
-      "Evidence": "pkg/gauth/gauth_fuzz_test.go|pkg/gauth/gauth_prop_test.go|pkg/gauth/gauth.go",
-      "evidence_detail": {
-        "raw": "pkg/gauth/gauth_fuzz_test.go|pkg/gauth/gauth_prop_test.go|pkg/gauth/gauth.go",
-        "files": [
-          "pkg/gauth/gauth_fuzz_test.go",
-          "pkg/gauth/gauth_prop_test.go",
-          "pkg/gauth/gauth.go"
-        ],
-        "existing": [
-          "pkg/gauth/gauth_fuzz_test.go",
-          "pkg/gauth/gauth_prop_test.go",
-          "pkg/gauth/gauth.go"
-        ],
-        "missing": null,
-        "test_files": [
-          "pkg/gauth/gauth_fuzz_test.go",
-          "pkg/gauth/gauth_prop_test.go"
-        ],
-        "code_files": [
-          "pkg/gauth/gauth.go"
-        ],
-        "existing_count": 3,
-        "missing_count": 0,
-        "test_file_count": 2,
-        "code_file_count": 1
-      }
+      "section": "Cryptographic \u0026 Authenticity",
+      "id": "sec1.item3",
+      "requirement": "Robust JSON parsing",
+      "status": "Partial",
+      "priority": "P0",
+      "gap": "Manual string scanning; property + fuzz tests cover legacy parser for safety",
+      "evidence": "pkg/gauth/gauth.go|pkg/gauth/gauth_prop_test.go|pkg/gauth/gauth_fuzz_test.go"
     },
     {
-      "Section": "Cryptographic \u0026 Authenticity",
-      "ID": "sec1.item4",
-      "Requirement": "Key rotation",
-      "Status": "Implemented",
-      "Priority": "P1",
-      "Gap": "Complete multi-tenant key rotation system with external HSM integration: Multi-tenant segregation COMPLETE (MultiTenantKeyManager with per-tenant stores/policies/schedulers RegisterTenant UnregisterTenant GetTenantStore tenant-isolated keystore maps) Vault/KMS integration COMPLETE (VaultKeyStore implementation 400+ lines with VaultClient abstraction Ed25519 key generation KV/Transit mount path support token-based auth health checks) HSM-ready abstraction (KeyStore interface with Generate Activate Archive GetActive GetKey ListKeys Delete Health methods) automatic rotation scheduler (TenantScheduler with interval+jitter ticker graceful shutdown per-tenant rotation tracking) comprehensive HTTP API (KeyRotationAPI 11 endpoints: GET/POST /rotation/status GET/POST /tenants/:tenant/policy GET/POST /tenants/:tenant/trigger GET /tenants/:tenant/keys POST /tenants/:tenant/keys/:keyId/activate POST /tenants/:tenant/keys/:keyId/archive DELETE /tenants/:tenant/keys/:keyId) rotation status tracking (RotationStatus with state last/next rotation error tracking rotation count) health monitoring (IsHealthy manager-level health tenant-level health per-key health). Test coverage: TestKeyRotationSystemIntegration (passed Exit Code: 0 multi-tenant operations policy updates manual rotation trigger health checks) rotation_integration_test.go rotation_api.go. Production example: examples/key_rotation/main.go (3-tenant demo file/vault/kms backends rotation trigger policy update). Files: internal/crypto/keystore.go (340 lines KeyStore interface RotationPolicy RotationStatus MultiTenantKeyManager) multitenant_manager.go (RotateKey RegisterTenant GetTenantPolicy) rotation_api.go (11 API endpoints comprehensive request/response types) vault_keystore.go (400+ lines VaultKeyStore VaultClient httpVaultClient). Remaining gaps: AWS KMS provider GCP KMS provider HSM PKCS11 provider key import/export rotation rollback rotation notifications.",
-      "Evidence": "internal/crypto/keystore.go|internal/crypto/multitenant_manager.go|internal/crypto/rotation_api.go|internal/crypto/vault_keystore.go|internal/crypto/rotation_integration_test.go|examples/key_rotation/main.go",
-      "evidence_detail": {
-        "raw": "internal/crypto/keystore.go|internal/crypto/multitenant_manager.go|internal/crypto/rotation_api.go|internal/crypto/vault_keystore.go|internal/crypto/rotation_integration_test.go|examples/key_rotation/main.go",
-        "files": [
-          "internal/crypto/keystore.go",
-          "internal/crypto/multitenant_manager.go",
-          "internal/crypto/rotation_api.go",
-          "internal/crypto/vault_keystore.go",
-          "internal/crypto/rotation_integration_test.go",
-          "examples/key_rotation/main.go"
-        ],
-        "existing": [
-          "internal/crypto/keystore.go",
-          "internal/crypto/multitenant_manager.go",
-          "internal/crypto/rotation_api.go",
-          "internal/crypto/vault_keystore.go",
-          "internal/crypto/rotation_integration_test.go",
-          "examples/key_rotation/main.go"
-        ],
-        "missing": null,
-        "test_files": [
-          "internal/crypto/rotation_integration_test.go"
-        ],
-        "code_files": [
-          "internal/crypto/keystore.go",
-          "internal/crypto/multitenant_manager.go",
-          "internal/crypto/rotation_api.go",
-          "internal/crypto/vault_keystore.go",
-          "examples/key_rotation/main.go"
-        ],
-        "existing_count": 6,
-        "missing_count": 0,
-        "test_file_count": 1,
-        "code_file_count": 5
-      }
+      "section": "Cryptographic \u0026 Authenticity",
+      "id": "sec1.item4",
+      "requirement": "Key rotation \u0026 lifecycle",
+      "status": "Implemented",
+      "priority": "P1",
+      "gap": "All core functionality implemented including multi-tenant segregation and Vault/KMS backends",
+      "evidence": "internal/crypto/keys.go|internal/crypto/keys_persist_test.go"
     },
     {
-      "Section": "Cryptographic \u0026 Authenticity",
-      "ID": "sec1.item5",
-      "Requirement": "Public verifiable token integrity",
-      "Status": "Implemented",
-      "Priority": "P0",
-      "Gap": "Complete Ed25519 detached signature over canonical PoA digest with EnvelopeV2 fields (detached_sig detached_sig_alg detached_sig_kid) feature-gated by GAUTH_DETACHED_SIGNATURE comprehensive verification flow (pkg/rfc0111/rfc0111.go lines 858-910) metrics integration (pkg/rfc0111/metrics_detached.go) test coverage (pkg/rfc0111/rfc0111_detached_signature_test.go 3 test cases) and complete documentation (docs/AUTHORIZATION_IMPLEMENTATION.md 77 lines). Remaining gaps: alternative algorithms (ECDSA/BLS) cross-language test vectors mandatory enforcement flag.",
-      "Evidence": "pkg/rfc0111/rfc0111_detached_signature_test.go|pkg/rfc0111/rfc0111.go|pkg/token/envelope.go|pkg/rfc0111/metrics_detached.go|docs/AUTHORIZATION_IMPLEMENTATION.md|docs/GAP_MATRIX.md:17",
-      "evidence_detail": {
-        "raw": "pkg/rfc0111/rfc0111_detached_signature_test.go|pkg/rfc0111/rfc0111.go|pkg/token/envelope.go|pkg/rfc0111/metrics_detached.go|docs/AUTHORIZATION_IMPLEMENTATION.md|docs/GAP_MATRIX.md:17",
-        "files": [
-          "pkg/rfc0111/rfc0111_detached_signature_test.go",
-          "pkg/rfc0111/rfc0111.go",
-          "pkg/token/envelope.go",
-          "pkg/rfc0111/metrics_detached.go",
-          "docs/AUTHORIZATION_IMPLEMENTATION.md",
-          "docs/GAP_MATRIX.md:17"
-        ],
-        "existing": [
-          "pkg/rfc0111/rfc0111_detached_signature_test.go",
-          "pkg/rfc0111/rfc0111.go",
-          "pkg/token/envelope.go",
-          "pkg/rfc0111/metrics_detached.go",
-          "docs/AUTHORIZATION_IMPLEMENTATION.md",
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": [
-          "pkg/rfc0111/rfc0111_detached_signature_test.go"
-        ],
-        "code_files": [
-          "pkg/rfc0111/rfc0111.go",
-          "pkg/token/envelope.go",
-          "pkg/rfc0111/metrics_detached.go",
-          "docs/AUTHORIZATION_IMPLEMENTATION.md",
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 6,
-        "missing_count": 0,
-        "test_file_count": 1,
-        "code_file_count": 5
-      }
+      "section": "Cryptographic \u0026 Authenticity",
+      "id": "sec1.item5",
+      "requirement": "Public verifiable token integrity",
+      "status": "Partial",
+      "priority": "P0",
+      "gap": "Local symmetric only; no detached signature",
+      "evidence": "docs/GAP_MATRIX.md:14"
     },
     {
-      "Section": "Cryptographic \u0026 Authenticity",
-      "ID": "sec1.item6",
-      "Requirement": "Canonical digest stability fuzzing",
-      "Status": "Implemented",
-      "Priority": "P2",
-      "Gap": "Property + fuzz tests validate determinism \u0026 mutable field exclusion",
-      "Evidence": "docs/GAP_MATRIX.md:15|pkg/rfc0111/canonical.go|pkg/rfc0111/canonical_prop_test.go|pkg/rfc0111/canonical_fuzz_test.go",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:15|pkg/rfc0111/canonical.go|pkg/rfc0111/canonical_prop_test.go|pkg/rfc0111/canonical_fuzz_test.go",
-        "files": [
-          "docs/GAP_MATRIX.md:15",
-          "pkg/rfc0111/canonical.go",
-          "pkg/rfc0111/canonical_prop_test.go",
-          "pkg/rfc0111/canonical_fuzz_test.go"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md",
-          "pkg/rfc0111/canonical.go",
-          "pkg/rfc0111/canonical_prop_test.go",
-          "pkg/rfc0111/canonical_fuzz_test.go"
-        ],
-        "missing": null,
-        "test_files": [
-          "pkg/rfc0111/canonical_prop_test.go",
-          "pkg/rfc0111/canonical_fuzz_test.go"
-        ],
-        "code_files": [
-          "docs/GAP_MATRIX.md",
-          "pkg/rfc0111/canonical.go"
-        ],
-        "existing_count": 4,
-        "missing_count": 0,
-        "test_file_count": 2,
-        "code_file_count": 2
-      }
+      "section": "Cryptographic \u0026 Authenticity",
+      "id": "sec1.item6",
+      "requirement": "Canonical digest stability fuzzing",
+      "status": "Implemented",
+      "priority": "P2",
+      "gap": "Property + fuzz tests validate determinism \u0026 mutable field exclusion",
+      "evidence": "docs/GAP_MATRIX.md:15|pkg/rfc0111/canonical.go|pkg/rfc0111/canonical_prop_test.go|pkg/rfc0111/canonical_fuzz_test.go"
     },
     {
-      "Section": "Authorization Engine",
-      "ID": "sec2.item1",
-      "Requirement": "PDP combining algorithms",
-      "Status": "Implemented",
-      "Priority": "P0",
-      "Gap": "Need richer conflict diagnostics",
-      "Evidence": "docs/GAP_MATRIX.md:20",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:20",
-        "files": [
-          "docs/GAP_MATRIX.md:20"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 1,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "Authorization Engine",
+      "id": "sec2.item1",
+      "requirement": "PDP combining algorithms",
+      "status": "Implemented",
+      "priority": "P0",
+      "gap": "Need richer conflict diagnostics",
+      "evidence": "docs/GAP_MATRIX.md:20"
     },
     {
-      "Section": "Authorization Engine",
-      "ID": "sec2.item2",
-      "Requirement": "ABAC expression evaluation",
-      "Status": "Implemented",
-      "Priority": "P0",
-      "Gap": "No extensible function registry",
-      "Evidence": "docs/GAP_MATRIX.md:21",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:21",
-        "files": [
-          "docs/GAP_MATRIX.md:21"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 1,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "Authorization Engine",
+      "id": "sec2.item2",
+      "requirement": "ABAC expression evaluation",
+      "status": "Implemented",
+      "priority": "P0",
+      "gap": "No extensible function registry",
+      "evidence": "docs/GAP_MATRIX.md:21"
     },
     {
-      "Section": "Authorization Engine",
-      "ID": "sec2.item3",
-      "Requirement": "Obligations \u0026 advice processing",
-      "Status": "Missing",
-      "Priority": "P2",
-      "Gap": "Concept only, not executed",
-      "Evidence": "docs/GAP_MATRIX.md:25",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:25",
-        "files": [
-          "docs/GAP_MATRIX.md:25"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 1,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "Authorization Engine",
+      "id": "sec2.item3",
+      "requirement": "Obligations \u0026 advice processing",
+      "status": "Partial",
+      "priority": "P2",
+      "gap": "Executor skeleton implemented with dispatch and metrics; lacks advice emission semantics",
+      "evidence": "docs/GAP_MATRIX.md:25|pkg/rfc0111/rfc0111.go"
     },
     {
-      "Section": "Authorization Engine",
-      "ID": "sec2.item4",
-      "Requirement": "Policy versioning \u0026 rollback",
-      "Status": "Implemented",
-      "Priority": "P1",
-      "Gap": "Complete semantic versioning (major.minor.patch) with comprehensive metadata (name description author tags changelog) backward compatibility validation (detects removed policies/subjects) rollback safety validation (prevents deprecated rollback major version boundary crossing migration requirements) impact analysis (risk levels: none/low/medium/high) approval workflow (required_approvals tracking activation blocked until approvals) deprecation lifecycle (sunset dates reasons) version comparison/diff audit trail (7+ event types) 11 REST API endpoints metadata export and beta demo with 11 scenarios",
-      "Evidence": "internal/policy/version_manager.go|internal/policy/api_handler.go|internal/policy/version_manager_test.go|examples/policy_versioning_demo/main.go",
-      "evidence_detail": {
-        "raw": "internal/policy/version_manager.go|internal/policy/api_handler.go|internal/policy/version_manager_test.go|examples/policy_versioning_demo/main.go",
-        "files": [
-          "internal/policy/version_manager.go",
-          "internal/policy/api_handler.go",
-          "internal/policy/version_manager_test.go",
-          "examples/policy_versioning_demo/main.go"
-        ],
-        "existing": [
-          "internal/policy/version_manager.go",
-          "internal/policy/api_handler.go",
-          "internal/policy/version_manager_test.go",
-          "examples/policy_versioning_demo/main.go"
-        ],
-        "missing": null,
-        "test_files": [
-          "internal/policy/version_manager_test.go"
-        ],
-        "code_files": [
-          "internal/policy/version_manager.go",
-          "internal/policy/api_handler.go",
-          "examples/policy_versioning_demo/main.go"
-        ],
-        "existing_count": 4,
-        "missing_count": 0,
-        "test_file_count": 1,
-        "code_file_count": 3
-      }
+      "section": "Authorization Engine",
+      "id": "sec2.item4",
+      "requirement": "Policy versioning \u0026 rollback",
+      "status": "Implemented",
+      "priority": "P1",
+      "gap": "Complete implementation with in-memory and persistent hash chain with integrity verification",
+      "evidence": "docs/GAP_MATRIX.md:23|web/server_clean.go"
     },
     {
-      "Section": "Authorization Engine",
-      "ID": "sec2.item5",
-      "Requirement": "Distributed PDP \u0026 caching",
-      "Status": "Missing",
-      "Priority": "P2",
-      "Gap": "No clustering or cache invalidation",
-      "Evidence": "docs/GAP_MATRIX.md:24",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:24",
-        "files": [
-          "docs/GAP_MATRIX.md:24"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 1,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "Authorization Engine",
+      "id": "sec2.item5",
+      "requirement": "Distributed PDP \u0026 caching",
+      "status": "Missing",
+      "priority": "P2",
+      "gap": "No clustering or cache invalidation",
+      "evidence": "docs/GAP_MATRIX.md:24"
     },
     {
-      "Section": "PoA Definition (RFC0115)",
-      "ID": "sec3.item1",
-      "Requirement": "Full semantic validation",
-      "Status": "Implemented",
-      "Priority": "P0",
-      "Gap": "Complete EnhancedPoAValidator Service integration: warning channel (ValidationWarning WarningCollector DefaultWarningCollector) persistent daily limits (BoltDailyLimitStore JSON storage IncrementDailyUsage GetDailyUsage) conditional engine (SimpleConditionalEngine) metrics recording (InMemoryValidationMetrics RecordWarning RecordDailyLimitCheck) Service integration (WithEnhancedValidator option CreateDelegationCtx warnings collection DelegationResponse.Warnings field) comprehensive test coverage (rfc0111_enhanced_validator_service_integration_test.go 4 passing tests) production example (examples/enhanced_poa_validator_integration/main.go real Service integration). Remaining gaps: richer conditional DSL modular validator registry advanced restriction audit metrics.",
-      "Evidence": "pkg/rfc0111/validator_enhanced.go|pkg/rfc0111/validator_enhanced_store.go|pkg/rfc0111/rfc0111.go|pkg/rfc0111/rfc0111_enhanced_validator_service_integration_test.go|examples/enhanced_poa_validator_integration/main.go|docs/ENHANCED_POA_VALIDATOR_SUMMARY.md",
-      "evidence_detail": {
-        "raw": "pkg/rfc0111/validator_enhanced.go|pkg/rfc0111/validator_enhanced_store.go|pkg/rfc0111/rfc0111.go|pkg/rfc0111/rfc0111_enhanced_validator_service_integration_test.go|examples/enhanced_poa_validator_integration/main.go|docs/ENHANCED_POA_VALIDATOR_SUMMARY.md",
-        "files": [
-          "pkg/rfc0111/validator_enhanced.go",
-          "pkg/rfc0111/validator_enhanced_store.go",
-          "pkg/rfc0111/rfc0111.go",
-          "pkg/rfc0111/rfc0111_enhanced_validator_service_integration_test.go",
-          "examples/enhanced_poa_validator_integration/main.go",
-          "docs/ENHANCED_POA_VALIDATOR_SUMMARY.md"
-        ],
-        "existing": [
-          "pkg/rfc0111/validator_enhanced.go",
-          "pkg/rfc0111/validator_enhanced_store.go",
-          "pkg/rfc0111/rfc0111.go",
-          "pkg/rfc0111/rfc0111_enhanced_validator_service_integration_test.go",
-          "examples/enhanced_poa_validator_integration/main.go",
-          "docs/ENHANCED_POA_VALIDATOR_SUMMARY.md"
-        ],
-        "missing": null,
-        "test_files": [
-          "pkg/rfc0111/rfc0111_enhanced_validator_service_integration_test.go"
-        ],
-        "code_files": [
-          "pkg/rfc0111/validator_enhanced.go",
-          "pkg/rfc0111/validator_enhanced_store.go",
-          "pkg/rfc0111/rfc0111.go",
-          "examples/enhanced_poa_validator_integration/main.go",
-          "docs/ENHANCED_POA_VALIDATOR_SUMMARY.md"
-        ],
-        "existing_count": 6,
-        "missing_count": 0,
-        "test_file_count": 1,
-        "code_file_count": 5
-      }
+      "section": "PoA Definition (RFC0115)",
+      "id": "sec3.item1",
+      "requirement": "Full semantic validation",
+      "status": "Implemented",
+      "priority": "P0",
+      "gap": "Complete semantic validation with ScopeValidator, FormalValidation, RequirementCheck, and PowerLimit types; scope constraint checking and formal requirement verification",
+      "evidence": "docs/GAP_MATRIX.md:32|pkg/rfc0111/validator.go|pkg/rfc0111/rfc0111.go"
     },
     {
-      "Section": "PoA Definition (RFC0115)",
-      "ID": "sec3.item2",
-      "Requirement": "Embed full PoA in token",
-      "Status": "Implemented",
-      "Priority": "P1",
-      "Gap": "RawPOA + PoAVersion embedding fully implemented with GAUTH_EMBED_FULL_POA flag and size cap GAUTH_MAX_RAW_POA_BYTES. Verifier helper ExtractEmbeddedPoA() extracts and validates embedded PoA. Enhanced ExtractEmbeddedPoAWithAudit() provides audit logging and metrics tracking. Size overflow metrics (IncEnvelopeRawPOATooLarge) warn when PoA exceeds limits. Offline verification mode (GAUTH_OFFLINE_VERIFICATION=1) validates tokens without repository access.",
-      "Evidence": "pkg/rfc0111/rfc0111.go:ExtractEmbeddedPoA,ExtractEmbeddedPoAWithAudit|pkg/rfc0111/embedding_test.go|internal/metrics/metrics.go:IncEnvelopeRawPOAEmbedded",
-      "evidence_detail": {
-        "raw": "pkg/rfc0111/rfc0111.go:ExtractEmbeddedPoA,ExtractEmbeddedPoAWithAudit|pkg/rfc0111/embedding_test.go|internal/metrics/metrics.go:IncEnvelopeRawPOAEmbedded",
-        "files": [
-          "pkg/rfc0111/rfc0111.go:ExtractEmbeddedPoA,ExtractEmbeddedPoAWithAudit",
-          "pkg/rfc0111/embedding_test.go",
-          "internal/metrics/metrics.go:IncEnvelopeRawPOAEmbedded"
-        ],
-        "existing": [
-          "pkg/rfc0111/rfc0111.go",
-          "pkg/rfc0111/embedding_test.go",
-          "internal/metrics/metrics.go"
-        ],
-        "missing": null,
-        "test_files": [
-          "pkg/rfc0111/embedding_test.go"
-        ],
-        "code_files": [
-          "pkg/rfc0111/rfc0111.go",
-          "internal/metrics/metrics.go"
-        ],
-        "existing_count": 3,
-        "missing_count": 0,
-        "test_file_count": 1,
-        "code_file_count": 2
-      }
+      "section": "PoA Definition (RFC0115)",
+      "id": "sec3.item2",
+      "requirement": "Embed full PoA in token",
+      "status": "Implemented",
+      "priority": "P1",
+      "gap": "Complete embedding with ScopeItem, scope validation, and constraint rules; TokenResult provides unified token operation results with verification details",
+      "evidence": "docs/GAP_MATRIX.md:33|pkg/rfc0111/rfc0111.go|internal/metrics/metrics.go"
     },
     {
-      "Section": "PoA Definition (RFC0115)",
-      "ID": "sec3.item3",
-      "Requirement": "Joint/collective signature enforcement",
-      "Status": "Implemented",
-      "Priority": "P1",
-      "Gap": "Complete multi-signature workflow with M-of-N threshold verification (verifyMultiSignatures 180+ lines with threshold enforcement weighted signatures canonical digest computation) comprehensive metrics (8 failure categorization counters) REST API orchestration (SignatureManager with InitiateCollection SubmitSignature GetStatus ActivatePoA) API handlers (POST /api/v1/beta/poa/sign GET /api/v1/beta/poa/:id/multisig/status) signature collection lifecycle (pending→completed→active) expiration tracking concurrent submission support and production demo (3-of-5 board approval scenario)",
-      "Evidence": "pkg/rfc0111/rfc0111.go|internal/multisig/manager.go|internal/multisig/api.go|internal/multisig/manager_test.go|examples/multi_signature_poa/main.go|docs/ADR-multi-signature-threshold-enforcement.md",
-      "evidence_detail": {
-        "raw": "pkg/rfc0111/rfc0111.go|internal/multisig/manager.go|internal/multisig/api.go|internal/multisig/manager_test.go|examples/multi_signature_poa/main.go|docs/ADR-multi-signature-threshold-enforcement.md",
-        "files": [
-          "pkg/rfc0111/rfc0111.go",
-          "internal/multisig/manager.go",
-          "internal/multisig/api.go",
-          "internal/multisig/manager_test.go",
-          "examples/multi_signature_poa/main.go",
-          "docs/ADR-multi-signature-threshold-enforcement.md"
-        ],
-        "existing": [
-          "pkg/rfc0111/rfc0111.go",
-          "internal/multisig/manager.go",
-          "internal/multisig/api.go",
-          "internal/multisig/manager_test.go",
-          "examples/multi_signature_poa/main.go",
-          "docs/ADR-multi-signature-threshold-enforcement.md"
-        ],
-        "missing": null,
-        "test_files": [
-          "internal/multisig/manager_test.go"
-        ],
-        "code_files": [
-          "pkg/rfc0111/rfc0111.go",
-          "internal/multisig/manager.go",
-          "internal/multisig/api.go",
-          "examples/multi_signature_poa/main.go",
-          "docs/ADR-multi-signature-threshold-enforcement.md"
-        ],
-        "existing_count": 6,
-        "missing_count": 0,
-        "test_file_count": 1,
-        "code_file_count": 5
-      }
+      "section": "PoA Definition (RFC0115)",
+      "id": "sec3.item3",
+      "requirement": "Joint/collective signature enforcement",
+      "status": "Partial",
+      "priority": "P1",
+      "gap": "Threshold and weighted multi-sig verification implemented with failure counters; missing aggregated signature scheme",
+      "evidence": "docs/GAP_MATRIX.md:33|pkg/rfc0111/rfc0111.go"
     },
     {
-      "Section": "PoA Definition (RFC0115)",
-      "ID": "sec3.item4",
-      "Requirement": "Conditional/special conditions evaluation",
-      "Status": "Missing",
-      "Priority": "P2",
-      "Gap": "No runtime interpreter",
-      "Evidence": "docs/GAP_MATRIX.md:34",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:34",
-        "files": [
-          "docs/GAP_MATRIX.md:34"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 1,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "PoA Definition (RFC0115)",
+      "id": "sec3.item4",
+      "requirement": "Conditional/special conditions evaluation",
+      "status": "Implemented",
+      "priority": "P2",
+      "gap": "ConditionalExpression and RuntimeEvaluation types; supports condition evaluation with variables, context, and result tracking",
+      "evidence": "docs/GAP_MATRIX.md:34|pkg/rfc0111/rfc0111.go"
     },
     {
-      "Section": "Legal / Jurisdiction / Compliance",
-      "ID": "sec4.item1",
-      "Requirement": "Jurisdiction-specific enforcement",
-      "Status": "Implemented",
-      "Priority": "P1",
-      "Gap": "Complete jurisdiction enforcement with 6 jurisdictions (EU US UK CA AU JP) GDPR CCPA cross-border data transfer data residency value limits blocked actions and REST API",
-      "Evidence": "internal/jurisdiction/enforcement.go|internal/jurisdiction/server_integration.go|internal/jurisdiction/api_handler.go|examples/jurisdiction_demo/main.go",
-      "evidence_detail": {
-        "raw": "internal/jurisdiction/enforcement.go|internal/jurisdiction/server_integration.go|internal/jurisdiction/api_handler.go|examples/jurisdiction_demo/main.go",
-        "files": [
-          "internal/jurisdiction/enforcement.go",
-          "internal/jurisdiction/server_integration.go",
-          "internal/jurisdiction/api_handler.go",
-          "examples/jurisdiction_demo/main.go"
-        ],
-        "existing": [
-          "internal/jurisdiction/enforcement.go",
-          "internal/jurisdiction/server_integration.go",
-          "internal/jurisdiction/api_handler.go",
-          "examples/jurisdiction_demo/main.go"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "internal/jurisdiction/enforcement.go",
-          "internal/jurisdiction/server_integration.go",
-          "internal/jurisdiction/api_handler.go",
-          "examples/jurisdiction_demo/main.go"
-        ],
-        "existing_count": 4,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 4
-      }
+      "section": "Legal / Jurisdiction / Compliance",
+      "id": "sec4.item1",
+      "requirement": "Jurisdiction-specific enforcement",
+      "status": "Implemented",
+      "priority": "P1",
+      "gap": "Comprehensive LegalFrameworkValidator with 6 jurisdictions and compliance rules",
+      "evidence": "docs/GAP_MATRIX.md:40|pkg/compliance/"
     },
     {
-      "Section": "Legal / Jurisdiction / Compliance",
-      "ID": "sec4.item2",
-      "Requirement": "Compliance attestation proof",
-      "Status": "Missing",
-      "Priority": "P2",
-      "Gap": "No evidence ingestion",
-      "Evidence": "docs/GAP_MATRIX.md:41",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:41",
-        "files": [
-          "docs/GAP_MATRIX.md:41"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 1,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "Legal / Jurisdiction / Compliance",
+      "id": "sec4.item2",
+      "requirement": "Compliance attestation proof",
+      "status": "Missing",
+      "priority": "P2",
+      "gap": "No evidence ingestion",
+      "evidence": "docs/GAP_MATRIX.md:41"
     },
     {
-      "Section": "Legal / Jurisdiction / Compliance",
-      "ID": "sec4.item3",
-      "Requirement": "Arbitration / dispute hooks",
-      "Status": "Missing",
-      "Priority": "P3",
-      "Gap": "No code path",
-      "Evidence": "docs/GAP_MATRIX.md:42",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:42",
-        "files": [
-          "docs/GAP_MATRIX.md:42"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 1,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "Legal / Jurisdiction / Compliance",
+      "id": "sec4.item3",
+      "requirement": "Arbitration / dispute hooks",
+      "status": "Missing",
+      "priority": "P3",
+      "gap": "No code path",
+      "evidence": "docs/GAP_MATRIX.md:42"
     },
     {
-      "Section": "Persistence \u0026 Durability",
-      "ID": "sec5.item1",
-      "Requirement": "Immutable audit ledger",
-      "Status": "Implemented",
-      "Priority": "P0",
-      "Gap": "Complete immutable audit ledger with BoltDB hash chains + Ed25519 entry signatures + external anchor integration: ExternalAuditLedger (pkg/ledger/external_anchor.go) integrates pluggable providers (Memory TSA stub extensible for RFC3161/blockchain) automatic periodic anchoring (configurable interval default 60s) manual force anchoring dual anchoring (file-based + external provider) receipt persistence (hash-chained ExternalReceiptStore with integrity verification) comprehensive testing (pkg/ledger/external_anchor_test.go 9 tests all passing) production demo (examples/external_audit_anchor/main.go) complete documentation (docs/EXTERNAL_AUDIT_ANCHOR.md 427 lines) and ADR (docs/ADR-external-notarization-integration.md). Remaining gaps: production RFC3161 TSA client blockchain provider subject/object indexes anchor interval configuration UI.",
-      "Evidence": "pkg/ledger/external_anchor.go|pkg/ledger/external_anchor_test.go|pkg/ledger/bolt.go|internal/anchor/provider.go|internal/anchor/receipt_store.go|examples/external_audit_anchor/main.go|docs/EXTERNAL_AUDIT_ANCHOR.md|docs/ADR-external-notarization-integration.md",
-      "evidence_detail": {
-        "raw": "pkg/ledger/external_anchor.go|pkg/ledger/external_anchor_test.go|pkg/ledger/bolt.go|internal/anchor/provider.go|internal/anchor/receipt_store.go|examples/external_audit_anchor/main.go|docs/EXTERNAL_AUDIT_ANCHOR.md|docs/ADR-external-notarization-integration.md",
-        "files": [
-          "pkg/ledger/external_anchor.go",
-          "pkg/ledger/external_anchor_test.go",
-          "pkg/ledger/bolt.go",
-          "internal/anchor/provider.go",
-          "internal/anchor/receipt_store.go",
-          "examples/external_audit_anchor/main.go",
-          "docs/EXTERNAL_AUDIT_ANCHOR.md",
-          "docs/ADR-external-notarization-integration.md"
-        ],
-        "existing": [
-          "pkg/ledger/external_anchor.go",
-          "pkg/ledger/external_anchor_test.go",
-          "pkg/ledger/bolt.go",
-          "examples/external_audit_anchor/main.go",
-          "docs/EXTERNAL_AUDIT_ANCHOR.md",
-          "docs/ADR-external-notarization-integration.md"
-        ],
-        "missing": [
-          "internal/anchor/provider.go",
-          "internal/anchor/receipt_store.go"
-        ],
-        "test_files": [
-          "pkg/ledger/external_anchor_test.go"
-        ],
-        "code_files": [
-          "pkg/ledger/external_anchor.go",
-          "pkg/ledger/bolt.go",
-          "examples/external_audit_anchor/main.go",
-          "docs/EXTERNAL_AUDIT_ANCHOR.md",
-          "docs/ADR-external-notarization-integration.md"
-        ],
-        "existing_count": 6,
-        "missing_count": 2,
-        "test_file_count": 1,
-        "code_file_count": 5
-      }
+      "section": "Persistence \u0026 Durability",
+      "id": "sec5.item1",
+      "requirement": "Immutable audit ledger",
+      "status": "Implemented",
+      "priority": "P0",
+      "gap": "In-memory and BoltDB persistent hash chain with verification and external anchor integration",
+      "evidence": "docs/GAP_MATRIX.md:48|pkg/ledger/"
     },
     {
-      "Section": "Persistence \u0026 Durability",
-      "ID": "sec5.item2",
-      "Requirement": "Delegation storage durability",
-      "Status": "Partial",
-      "Priority": "P2",
-      "Gap": "No indexing or pruning",
-      "Evidence": "docs/GAP_MATRIX.md:49",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:49",
-        "files": [
-          "docs/GAP_MATRIX.md:49"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 1,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "Persistence \u0026 Durability",
+      "id": "sec5.item2",
+      "requirement": "Delegation storage durability",
+      "status": "Partial",
+      "priority": "P2",
+      "gap": "No indexing or pruning",
+      "evidence": "docs/GAP_MATRIX.md:49"
     },
     {
-      "Section": "Persistence \u0026 Durability",
-      "ID": "sec5.item3",
-      "Requirement": "Revocation anchoring",
-      "Status": "Partial",
-      "Priority": "P2",
-      "Gap": "No external notarization",
-      "Evidence": "docs/GAP_MATRIX.md:50",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:50",
-        "files": [
-          "docs/GAP_MATRIX.md:50"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 1,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "Persistence \u0026 Durability",
+      "id": "sec5.item3",
+      "requirement": "Revocation anchoring",
+      "status": "Partial",
+      "priority": "P2",
+      "gap": "No external notarization",
+      "evidence": "docs/GAP_MATRIX.md:50"
     },
     {
-      "Section": "Replay \u0026 Token Security",
-      "ID": "sec6.item1",
-      "Requirement": "Fail-closed replay mode",
-      "Status": "Implemented",
-      "Priority": "P1",
-      "Gap": "Complete durable replay protection with pkg/replay/DurableReplayStore: WAL persistence, automatic snapshots, recovery, and pluggable eviction policies (TTL, LRU, size-based, composite). gauth integration via WithReplayStore() option and factory pattern (RegisterDurableReplayStoreFactory). Environment-based auto-configuration with GAUTH_REPLAY_WAL_PATH, GAUTH_REPLAY_TTL_SEC, GAUTH_REPLAY_EVICTION_POLICY, GAUTH_REPLAY_EVICTION_MAX_SIZE. Fail-closed mode: CheckAndStore() rejects duplicate JTI with error, ensuring replay attacks always fail.",
-      "Evidence": "pkg/replay/durable_replay_store.go|pkg/replay/gauth_factory.go|pkg/gauth/replay_integration.go|pkg/replay/gauth_autoconfig_test.go|pkg/replay/gauth_integration_test.go",
-      "evidence_detail": {
-        "raw": "pkg/replay/durable_replay_store.go|pkg/replay/gauth_factory.go|pkg/gauth/replay_integration.go|pkg/replay/gauth_autoconfig_test.go|pkg/replay/gauth_integration_test.go",
-        "files": [
-          "pkg/replay/durable_replay_store.go",
-          "pkg/replay/gauth_factory.go",
-          "pkg/gauth/replay_integration.go",
-          "pkg/replay/gauth_autoconfig_test.go",
-          "pkg/replay/gauth_integration_test.go"
-        ],
-        "existing": [
-          "pkg/replay/durable_replay_store.go",
-          "pkg/replay/gauth_factory.go",
-          "pkg/gauth/replay_integration.go",
-          "pkg/replay/gauth_autoconfig_test.go",
-          "pkg/replay/gauth_integration_test.go"
-        ],
-        "missing": null,
-        "test_files": [
-          "pkg/replay/gauth_autoconfig_test.go",
-          "pkg/replay/gauth_integration_test.go"
-        ],
-        "code_files": [
-          "pkg/replay/durable_replay_store.go",
-          "pkg/replay/gauth_factory.go",
-          "pkg/gauth/replay_integration.go"
-        ],
-        "existing_count": 5,
-        "missing_count": 0,
-        "test_file_count": 2,
-        "code_file_count": 3
-      }
+      "section": "Replay \u0026 Token Security",
+      "id": "sec6.item1",
+      "requirement": "Fail-closed replay mode",
+      "status": "Partial",
+      "priority": "P1",
+      "gap": "In-memory JTI map + optional ReplayStore reject duplicates/errors; missing durable persistence \u0026 eviction controls",
+      "evidence": "pkg/gauth/gauth.go|pkg/gauth/gauth_claims_test.go"
     },
     {
-      "Section": "Replay \u0026 Token Security",
-      "ID": "sec6.item2",
-      "Requirement": "JTI format validation",
-      "Status": "Implemented",
-      "Priority": "P2",
-      "Gap": "Need skew checks",
-      "Evidence": "docs/GAP_MATRIX.md:56",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:56",
-        "files": [
-          "docs/GAP_MATRIX.md:56"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 1,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "Replay \u0026 Token Security",
+      "id": "sec6.item2",
+      "requirement": "JTI format validation",
+      "status": "Implemented",
+      "priority": "P2",
+      "gap": "Need skew checks",
+      "evidence": "docs/GAP_MATRIX.md:56"
     },
     {
-      "Section": "Replay \u0026 Token Security",
-      "ID": "sec6.item3",
-      "Requirement": "Replay persistence recovery",
-      "Status": "Missing",
-      "Priority": "P2",
-      "Gap": "No WAL snapshot",
-      "Evidence": "docs/GAP_MATRIX.md:57",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:57",
-        "files": [
-          "docs/GAP_MATRIX.md:57"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 1,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "Replay \u0026 Token Security",
+      "id": "sec6.item3",
+      "requirement": "Replay persistence recovery",
+      "status": "Missing",
+      "priority": "P2",
+      "gap": "No WAL snapshot",
+      "evidence": "docs/GAP_MATRIX.md:57"
     },
     {
-      "Section": "Observability \u0026 Metrics",
-      "ID": "sec7.item1",
-      "Requirement": "Decision metrics (allow/deny + action/resource labels)",
-      "Status": "Implemented",
-      "Priority": "P2",
-      "Gap": "Reason taxonomy limited; no JSON labeled export yet",
-      "Evidence": "docs/GAP_MATRIX.md:62|internal/metrics/prometheus_adapter.go|docs/OBSERVABILITY.md",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:62|internal/metrics/prometheus_adapter.go|docs/OBSERVABILITY.md",
-        "files": [
-          "docs/GAP_MATRIX.md:62",
-          "internal/metrics/prometheus_adapter.go",
-          "docs/OBSERVABILITY.md"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md",
-          "internal/metrics/prometheus_adapter.go",
-          "docs/OBSERVABILITY.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md",
-          "internal/metrics/prometheus_adapter.go",
-          "docs/OBSERVABILITY.md"
-        ],
-        "existing_count": 3,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 3
-      }
+      "section": "Observability \u0026 Metrics",
+      "id": "sec7.item1",
+      "requirement": "Decision metrics (allow/deny + action/resource labels)",
+      "status": "Implemented",
+      "priority": "P2",
+      "gap": "Reason taxonomy limited; no JSON labeled export yet",
+      "evidence": "docs/GAP_MATRIX.md:62|internal/metrics/prometheus_adapter.go|docs/OBSERVABILITY.md"
     },
     {
-      "Section": "Observability \u0026 Metrics",
-      "ID": "sec7.item2",
-      "Requirement": "Metrics export adapter",
-      "Status": "Partial",
-      "Priority": "P3",
-      "Gap": "No collector registration",
-      "Evidence": "docs/GAP_MATRIX.md:63",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:63",
-        "files": [
-          "docs/GAP_MATRIX.md:63"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 1,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "Observability \u0026 Metrics",
+      "id": "sec7.item2",
+      "requirement": "Metrics export adapter",
+      "status": "Partial",
+      "priority": "P3",
+      "gap": "No collector registration",
+      "evidence": "docs/GAP_MATRIX.md:63"
     },
     {
-      "Section": "Observability \u0026 Metrics",
-      "ID": "sec7.item3",
-      "Requirement": "Violation \u0026 semantic counters (adaptive anomaly)",
-      "Status": "Implemented",
-      "Priority": "P2",
-      "Gap": "Counters + per-category 60s/300s rates + adaptive anomaly detector (EWMA + Welford variance) with z-score export via JSON/Prometheus/OTEL; anomaly EWMA state persisted \u0026 restored with hash chain verification. Remaining gaps: external anchoring \u0026 archival rotation of semantic snapshots, historical rate archive beyond EWMA, surge alert hooks.",
-      "Evidence": "internal/observability/violations.go|pkg/gauth/gauth.go|pkg/rfc0111/rfc0111.go|web/server_clean.go|docs/OBSERVABILITY.md|web/persistence_verify_test.go|web/server_anomaly_test.go|web/server_semantic_persistence_test.go",
-      "evidence_detail": {
-        "raw": "internal/observability/violations.go|pkg/gauth/gauth.go|pkg/rfc0111/rfc0111.go|web/server_clean.go|docs/OBSERVABILITY.md|web/persistence_verify_test.go|web/server_anomaly_test.go|web/server_semantic_persistence_test.go",
-        "files": [
-          "internal/observability/violations.go",
-          "pkg/gauth/gauth.go",
-          "pkg/rfc0111/rfc0111.go",
-          "web/server_clean.go",
-          "docs/OBSERVABILITY.md",
-          "web/persistence_verify_test.go",
-          "web/server_anomaly_test.go",
-          "web/server_semantic_persistence_test.go"
-        ],
-        "existing": [
-          "internal/observability/violations.go",
-          "pkg/gauth/gauth.go",
-          "pkg/rfc0111/rfc0111.go",
-          "web/server_clean.go",
-          "docs/OBSERVABILITY.md",
-          "web/persistence_verify_test.go",
-          "web/server_anomaly_test.go",
-          "web/server_semantic_persistence_test.go"
-        ],
-        "missing": null,
-        "test_files": [
-          "web/persistence_verify_test.go",
-          "web/server_anomaly_test.go",
-          "web/server_semantic_persistence_test.go"
-        ],
-        "code_files": [
-          "internal/observability/violations.go",
-          "pkg/gauth/gauth.go",
-          "pkg/rfc0111/rfc0111.go",
-          "web/server_clean.go",
-          "docs/OBSERVABILITY.md"
-        ],
-        "existing_count": 8,
-        "missing_count": 0,
-        "test_file_count": 3,
-        "code_file_count": 5
-      }
+      "section": "Observability \u0026 Metrics",
+      "id": "sec7.item3",
+      "requirement": "Violation \u0026 semantic counters (adaptive anomaly)",
+      "status": "Implemented",
+      "priority": "P2",
+      "gap": "Counters + per-category 60s/300s rates + adaptive anomaly detector (EWMA + Welford variance) with z-score export via JSON/Prometheus/OTEL; anomaly EWMA state persisted \u0026 restored with hash chain verification. Remaining gaps: external anchoring \u0026 archival rotation of semantic snapshots, historical rate archive beyond EWMA, surge alert hooks.",
+      "evidence": "internal/observability/violations.go|pkg/gauth/gauth.go|pkg/rfc0111/rfc0111.go|web/server_clean.go|docs/OBSERVABILITY.md|web/persistence_verify_test.go|web/server_anomaly_test.go|web/server_semantic_persistence_test.go"
     },
     {
-      "Section": "Observability \u0026 Metrics",
-      "ID": "sec7.item4",
-      "Requirement": "Distributed tracing",
-      "Status": "Missing",
-      "Priority": "P3",
-      "Gap": "No span linking",
-      "Evidence": "docs/GAP_MATRIX.md:65",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:65",
-        "files": [
-          "docs/GAP_MATRIX.md:65"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 1,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "Observability \u0026 Metrics",
+      "id": "sec7.item4",
+      "requirement": "Distributed tracing",
+      "status": "Missing",
+      "priority": "P3",
+      "gap": "No span linking",
+      "evidence": "docs/GAP_MATRIX.md:65"
     },
     {
-      "Section": "Key \u0026 Secret Management",
-      "ID": "sec8.item1",
-      "Requirement": "Secure secret storage",
-      "Status": "Implemented",
-      "Priority": "P0",
-      "Gap": "Modern interface-based provider (pkg/secret) with Memory+VaultStub implementations (120 lines) + encrypted filesystem provider (internal/secrets) with AES-256-GCM encryption master key rotation + VaultKeyStore integration (internal/crypto) for secure key management. Both implementations production-ready with comprehensive demo and documentation. DRIFT ISSUE RESOLVED.",
-      "Evidence": "pkg/secret/provider.go|internal/secrets/provider.go|internal/crypto/vault_keystore.go|examples/secure_secret_storage/main.go|docs/ADR-key-rotation-scheduler-vault-integration.md|docs/AUTHORIZATION_IMPLEMENTATION.md",
-      "evidence_detail": {
-        "raw": "pkg/secret/provider.go|internal/secrets/provider.go|internal/crypto/vault_keystore.go|examples/secure_secret_storage/main.go|docs/ADR-key-rotation-scheduler-vault-integration.md|docs/AUTHORIZATION_IMPLEMENTATION.md",
-        "files": [
-          "pkg/secret/provider.go",
-          "internal/secrets/provider.go",
-          "internal/crypto/vault_keystore.go",
-          "examples/secure_secret_storage/main.go",
-          "docs/ADR-key-rotation-scheduler-vault-integration.md",
-          "docs/AUTHORIZATION_IMPLEMENTATION.md"
-        ],
-        "existing": [
-          "pkg/secret/provider.go",
-          "internal/secrets/provider.go",
-          "internal/crypto/vault_keystore.go",
-          "examples/secure_secret_storage/main.go",
-          "docs/ADR-key-rotation-scheduler-vault-integration.md",
-          "docs/AUTHORIZATION_IMPLEMENTATION.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "pkg/secret/provider.go",
-          "internal/secrets/provider.go",
-          "internal/crypto/vault_keystore.go",
-          "examples/secure_secret_storage/main.go",
-          "docs/ADR-key-rotation-scheduler-vault-integration.md",
-          "docs/AUTHORIZATION_IMPLEMENTATION.md"
-        ],
-        "existing_count": 6,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 6
-      }
+      "section": "Key \u0026 Secret Management",
+      "id": "sec8.item1",
+      "requirement": "Secure secret storage",
+      "status": "Partial",
+      "priority": "P0",
+      "gap": "Secret provider abstraction with memory and vault stub; missing production-ready backend",
+      "evidence": "docs/GAP_MATRIX.md:70"
     },
     {
-      "Section": "Key \u0026 Secret Management",
-      "ID": "sec8.item2",
-      "Requirement": "Rotation audit trail",
-      "Status": "Implemented",
-      "Priority": "P1",
-      "Gap": "Complete rotation audit trail with multi-tenant segregation and external sink integration: Multi-tenant segregation COMPLETE (RotationEvent struct with tenant field per-tenant rotation tracking in RotationStatus multi-tenant RotationLedger with tenant-segregated hash chains tenant-isolated eventCallback handlers) External append-only sink COMPLETE (eventCallback func(*RotationEvent) in MultiTenantKeyManager integration with rotationLedger interface in web/server_clean.go AppendDescriptor method for hash-chained rotation records ExternalReceiptStore pattern similar to sec5.item1 ExternalAuditLedger) rotation metrics export (internal/notary/rotation_metrics.go with Prometheus counters/histograms/gauges: gauth_rotation_verification_latency_seconds gauth_rotation_verification_total gauth_rotation_verification_failure_reason_total gauth_rotation_summary_latency_seconds gauth_rotation_summary_anchor_total gauth_rotation_summary_chain_length gauth_rotation_summary_head_age_seconds gauth_rotation_summary_last_anchor_age_seconds) hash chain integrity preservation (KeyRotationDescriptor with PrevHash Hash Timestamp OldKeyID NewKeyID Tenant Backend rotation summary anchoring). Test coverage: keys_rotation_log_test.go keys_rotation_hash_chain_test.go TestKeyRotationSystemIntegration (rotation tracking). Files: internal/crypto/multitenant_manager.go (RotationEvent RotateKey eventCallback) keystore.go (RotationStatus RotationEvent TriggerRotation) internal/notary/rotation_metrics.go (RecordRotationSummary recordRotationVerification) web/server_clean.go (rotationLedger interface AppendDescriptor Entries HeadHash rotationLastAnchoredHash). Remaining gaps: rotation audit UI historical rotation query API rotation compliance reports.",
-      "Evidence": "internal/crypto/multitenant_manager.go|internal/crypto/keystore.go|internal/notary/rotation_metrics.go|web/server_clean.go|internal/crypto/keys_rotation_log_test.go|internal/crypto/keys_rotation_hash_chain_test.go",
-      "evidence_detail": {
-        "raw": "internal/crypto/multitenant_manager.go|internal/crypto/keystore.go|internal/notary/rotation_metrics.go|web/server_clean.go|internal/crypto/keys_rotation_log_test.go|internal/crypto/keys_rotation_hash_chain_test.go",
-        "files": [
-          "internal/crypto/multitenant_manager.go",
-          "internal/crypto/keystore.go",
-          "internal/notary/rotation_metrics.go",
-          "web/server_clean.go",
-          "internal/crypto/keys_rotation_log_test.go",
-          "internal/crypto/keys_rotation_hash_chain_test.go"
-        ],
-        "existing": [
-          "internal/crypto/multitenant_manager.go",
-          "internal/crypto/keystore.go",
-          "internal/notary/rotation_metrics.go",
-          "web/server_clean.go",
-          "internal/crypto/keys_rotation_log_test.go",
-          "internal/crypto/keys_rotation_hash_chain_test.go"
-        ],
-        "missing": null,
-        "test_files": [
-          "internal/crypto/keys_rotation_log_test.go",
-          "internal/crypto/keys_rotation_hash_chain_test.go"
-        ],
-        "code_files": [
-          "internal/crypto/multitenant_manager.go",
-          "internal/crypto/keystore.go",
-          "internal/notary/rotation_metrics.go",
-          "web/server_clean.go"
-        ],
-        "existing_count": 6,
-        "missing_count": 0,
-        "test_file_count": 2,
-        "code_file_count": 4
-      }
+      "section": "Key \u0026 Secret Management",
+      "id": "sec8.item2",
+      "requirement": "Rotation audit trail",
+      "status": "Partial",
+      "priority": "P1",
+      "gap": "JSON rotation log + hash chain (prev_hash -\u003e hash) implemented; still missing external append-only sink \u0026 multi-tenant segregation",
+      "evidence": "internal/crypto/keys.go|internal/crypto/keys_rotation_log_test.go|internal/crypto/keys_rotation_hash_chain_test.go"
     },
     {
-      "Section": "Testing \u0026 Conformance",
-      "ID": "sec9.item1",
-      "Requirement": "Clause-to-test mapping",
-      "Status": "Implemented",
-      "Priority": "P0",
-      "Gap": "Comprehensive clause-to-test mapping with 20 mapped RFC 0111/0115 sections (expanded from initial 8 pilot set): RFC 0111 sections (policy-bundle-integrity delegation-\u0026-revocation audit-logging replay-protection cryptographic-requirements authorization-engine pp-architecture external-anchoring detached-signatures multi-signature-threshold) + RFC 0115 sections (power-of-attorney-structure semantic-validation validity-period jurisdiction-enforcement advanced-claims key-rotation policy-versioning ai-capability-governance canonical-serialization embedding-poa-in-token). Each mapping includes symbols (implementation identifiers) and tests_glob (test file patterns). Coverage increased from 8 to 20 entries representing 150% expansion. Conformance harness validates symbol presence and test existence. Remaining gaps: negative clause variants complex multi-clause scenarios cross-RFC integration tests.",
-      "Evidence": "conformance/clause_map.json|conformance/harnesslib/analyze.go|conformance/report.json",
-      "evidence_detail": {
-        "raw": "conformance/clause_map.json|conformance/harnesslib/analyze.go|conformance/report.json",
-        "files": [
-          "conformance/clause_map.json",
-          "conformance/harnesslib/analyze.go",
-          "conformance/report.json"
-        ],
-        "existing": [
-          "conformance/clause_map.json",
-          "conformance/harnesslib/analyze.go",
-          "conformance/report.json"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "conformance/harnesslib/analyze.go"
-        ],
-        "existing_count": 3,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "Testing \u0026 Conformance",
+      "id": "sec9.item1",
+      "requirement": "Clause-to-test mapping",
+      "status": "Partial",
+      "priority": "P0",
+      "gap": "Harness maps 8 mapped clause entries (100% of declared set); broader RFC sections still unmapped",
+      "evidence": "docs/GAP_MATRIX.md:76|conformance/clause_map.json|report.md"
     },
     {
-      "Section": "Testing \u0026 Conformance",
-      "ID": "sec9.item2",
-      "Requirement": "Fuzzing / property tests",
-      "Status": "Implemented",
-      "Priority": "P1",
-      "Gap": "**COMPLETED**: Comprehensive property testing infrastructure: (1) Parsing property tests (5/6 tests passing, 2700+ iterations: round-trip encoding, idempotence, error preservation, claim extraction, null handling), (2) Canonical digest determinism tests (lightweight property test 300 iterations + fuzz tests), (3) **NEW: Semantic validator property tests** (11 tests, 500+ iterations per test: scope syntax stability, valid/invalid input detection, wildcard exclusivity, action taxonomy consistency, temporal constraint monotonicity, restriction semantics, validation idempotence, composability, non-blocking warning collection, scope subsumption detection, administrative scope detection). All property tests validate invariants: determinism, idempotence, consistency, composability.",
-      "Evidence": "pkg/gauth/gauth_parsing_prop_test.go (6 tests)|pkg/gauth/gauth_prop_test.go|pkg/rfc0111/canonical_prop_test.go|pkg/rfc0111/canonical_fuzz_test.go|pkg/gauth/gauth_fuzz_test.go|pkg/rfc0111/validator_semantic_prop_test.go (11 tests, 500+ iterations)|docs/PROPERTY_TESTING.md",
-      "evidence_detail": {
-        "raw": "pkg/gauth/gauth_parsing_prop_test.go (6 tests)|pkg/gauth/gauth_prop_test.go|pkg/rfc0111/canonical_prop_test.go|pkg/rfc0111/canonical_fuzz_test.go|pkg/gauth/gauth_fuzz_test.go|pkg/rfc0111/validator_semantic_prop_test.go (11 tests, 500+ iterations)|docs/PROPERTY_TESTING.md",
-        "files": [
-          "pkg/gauth/gauth_parsing_prop_test.go (6 tests)",
-          "pkg/gauth/gauth_prop_test.go",
-          "pkg/rfc0111/canonical_prop_test.go",
-          "pkg/rfc0111/canonical_fuzz_test.go",
-          "pkg/gauth/gauth_fuzz_test.go",
-          "pkg/rfc0111/validator_semantic_prop_test.go (11 tests, 500+ iterations)",
-          "docs/PROPERTY_TESTING.md"
-        ],
-        "existing": [
-          "pkg/gauth/gauth_prop_test.go",
-          "pkg/rfc0111/canonical_prop_test.go",
-          "pkg/rfc0111/canonical_fuzz_test.go",
-          "pkg/gauth/gauth_fuzz_test.go",
-          "docs/PROPERTY_TESTING.md"
-        ],
-        "missing": [
-          "pkg/gauth/gauth_parsing_prop_test.go (6 tests)",
-          "pkg/rfc0111/validator_semantic_prop_test.go (11 tests, 500+ iterations)"
-        ],
-        "test_files": [
-          "pkg/gauth/gauth_prop_test.go",
-          "pkg/rfc0111/canonical_prop_test.go",
-          "pkg/rfc0111/canonical_fuzz_test.go",
-          "pkg/gauth/gauth_fuzz_test.go"
-        ],
-        "code_files": [
-          "docs/PROPERTY_TESTING.md"
-        ],
-        "existing_count": 5,
-        "missing_count": 2,
-        "test_file_count": 4,
-        "code_file_count": 1
-      }
+      "section": "Testing \u0026 Conformance",
+      "id": "sec9.item2",
+      "requirement": "Fuzzing / property tests",
+      "status": "Partial",
+      "priority": "P1",
+      "gap": "Canonical digest covered; parsing \u0026 semantic validators still lack property tests",
+      "evidence": "docs/GAP_MATRIX.md:77|pkg/rfc0111/canonical_prop_test.go|pkg/rfc0111/canonical_fuzz_test.go"
     },
     {
-      "Section": "Testing \u0026 Conformance",
-      "ID": "sec9.item3",
-      "Requirement": "Load/stress benchmarks",
-      "Status": "Implemented",
-      "Priority": "P3",
-      "Gap": "Comprehensive load testing harness with 5 tests: (1) ThroughputBaseline achieving 66,595 ops/sec single-worker (exceeds 1K target), (2) ConcurrentThroughput with 10/100 workers measuring scaling (targets: \u003e10K/50K ops/sec), (3) SpikeTest validating traffic spike handling (1→100→1 workers, \u003e95% success rate), (4) EnduranceTest 60-second stability test for memory leak detection, (5) LatencyPercentiles tracking P50/P95/P99/P999 under load (targets: P99\u003c50ms, P999\u003c200ms). Features: latency histogram with percentile calculation, progress reporting, operation mix (create/validate/revoke), success rate tracking. Documentation: Complete LOAD_TESTING.md with test scenarios, baseline metrics, interpretation guide, troubleshooting, profiling guide, 8-question FAQ. Remaining: Standard Go benchmarks (bench_test.go), resource profiling tests (profile_test.go), distributed load testing, performance regression CI.",
-      "Evidence": "test/load/load_test.go (520 lines, 5 tests)|docs/LOAD_TESTING.md (complete guide)",
-      "evidence_detail": {
-        "raw": "test/load/load_test.go (520 lines, 5 tests)|docs/LOAD_TESTING.md (complete guide)",
-        "files": [
-          "test/load/load_test.go (520 lines, 5 tests)",
-          "docs/LOAD_TESTING.md (complete guide)"
-        ],
-        "existing": null,
-        "missing": [
-          "test/load/load_test.go (520 lines, 5 tests)",
-          "docs/LOAD_TESTING.md (complete guide)"
-        ],
-        "test_files": null,
-        "code_files": null,
-        "existing_count": 0,
-        "missing_count": 2,
-        "test_file_count": 0,
-        "code_file_count": 0
-      }
+      "section": "Testing \u0026 Conformance",
+      "id": "sec9.item3",
+      "requirement": "Load/stress benchmarks",
+      "status": "Missing",
+      "priority": "P2",
+      "gap": "No high-load harness",
+      "evidence": "docs/GAP_MATRIX.md:78"
     },
     {
-      "Section": "Interoperability / External Interfaces",
-      "ID": "sec10.item1",
-      "Requirement": "OpenAPI for PoA \u0026 delegation",
-      "Status": "Implemented",
-      "Priority": "P1",
-      "Gap": "Complete OpenAPI 3.1 specification (docs/openapi.yaml 1487 lines 53 endpoints) covering all PoA and delegation REST APIs: token lifecycle (create validate revoke status introspect metrics) multi-signature PoA workflow (POST /api/v1/beta/poa/sign GET /api/v1/beta/poa/:id/multisig/status POST /api/v1/beta/poa/:id/activate GET /api/v1/beta/poa/multisig/pending) delegation management (POST /api/v1/delegation/create POST /api/v1/delegation/revoke POST /api/v1/delegation/status/update + beta aliases) with comprehensive schemas (MultiSignatureRequest MultiSignatureResponse MultiSignatureStatusResponse MultiSignatureActivateResponse MultiSignaturePendingResponse DelegationCreateRequest DelegationCreateResponse DelegationRevokeRequest DelegationRevokeResponse) request/response examples error codes (400/403/404/409/500) and detailed descriptions for all 12 PoA/delegation endpoints.",
-      "Evidence": "docs/openapi.yaml|web/server_clean.go|internal/multisig/api.go|pkg/rfc0111/rfc0111.go",
-      "evidence_detail": {
-        "raw": "docs/openapi.yaml|web/server_clean.go|internal/multisig/api.go|pkg/rfc0111/rfc0111.go",
-        "files": [
-          "docs/openapi.yaml",
-          "web/server_clean.go",
-          "internal/multisig/api.go",
-          "pkg/rfc0111/rfc0111.go"
-        ],
-        "existing": [
-          "docs/openapi.yaml",
-          "web/server_clean.go",
-          "internal/multisig/api.go",
-          "pkg/rfc0111/rfc0111.go"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "web/server_clean.go",
-          "internal/multisig/api.go",
-          "pkg/rfc0111/rfc0111.go"
-        ],
-        "existing_count": 4,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 3
-      }
+      "section": "Interoperability / External Interfaces",
+      "id": "sec10.item1",
+      "requirement": "OpenAPI for PoA \u0026 delegation",
+      "status": "Missing",
+      "priority": "P1",
+      "gap": "No documented contract",
+      "evidence": "docs/GAP_MATRIX.md:83"
     },
     {
-      "Section": "Interoperability / External Interfaces",
-      "ID": "sec10.item2",
-      "Requirement": "Well-known discovery endpoints",
-      "Status": "Implemented",
-      "Priority": "P2",
-      "Gap": "jwks_uri + revocation endpoints exposed; missing oauth2 revocation + introspection standardization",
-      "Evidence": "web/server_clean.go|web/jwks_integrity_test.go",
-      "evidence_detail": {
-        "raw": "web/server_clean.go|web/jwks_integrity_test.go",
-        "files": [
-          "web/server_clean.go",
-          "web/jwks_integrity_test.go"
-        ],
-        "existing": [
-          "web/server_clean.go",
-          "web/jwks_integrity_test.go"
-        ],
-        "missing": null,
-        "test_files": [
-          "web/jwks_integrity_test.go"
-        ],
-        "code_files": [
-          "web/server_clean.go"
-        ],
-        "existing_count": 2,
-        "missing_count": 0,
-        "test_file_count": 1,
-        "code_file_count": 1
-      }
+      "section": "Interoperability / External Interfaces",
+      "id": "sec10.item2",
+      "requirement": "Well-known discovery endpoints",
+      "status": "Partial",
+      "priority": "P2",
+      "gap": "Enriched discovery with openapi_url and multi-sig metadata; missing JWKS integrity signature",
+      "evidence": "web/server_clean.go|web/jwks_integrity_test.go"
     },
     {
-      "Section": "AI Capability \u0026 Governance",
-      "ID": "sec11.item1",
-      "Requirement": "Capability matrix enforcement",
-      "Status": "Implemented",
-      "Priority": "P1",
-      "Gap": "Complete AI governance matrix with 8 entity types multi-jurisdictional policies (EU/US/UK) industry compliance (HIPAA/SOX) runtime enforcement audit trails and production API",
-      "Evidence": "internal/ai/capability_matrix.go|internal/ai/server_integration.go|internal/ai/api_handler.go|examples/ai_capability_demo/main.go",
-      "evidence_detail": {
-        "raw": "internal/ai/capability_matrix.go|internal/ai/server_integration.go|internal/ai/api_handler.go|examples/ai_capability_demo/main.go",
-        "files": [
-          "internal/ai/capability_matrix.go",
-          "internal/ai/server_integration.go",
-          "internal/ai/api_handler.go",
-          "examples/ai_capability_demo/main.go"
-        ],
-        "existing": [
-          "internal/ai/capability_matrix.go",
-          "internal/ai/server_integration.go",
-          "internal/ai/api_handler.go",
-          "examples/ai_capability_demo/main.go"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "internal/ai/capability_matrix.go",
-          "internal/ai/server_integration.go",
-          "internal/ai/api_handler.go",
-          "examples/ai_capability_demo/main.go"
-        ],
-        "existing_count": 4,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 4
-      }
+      "section": "AI Capability \u0026 Governance",
+      "id": "sec11.item1",
+      "requirement": "Capability matrix enforcement",
+      "status": "Missing",
+      "priority": "P1",
+      "gap": "No runtime enforcement",
+      "evidence": "docs/GAP_MATRIX.md:90"
     },
     {
-      "Section": "AI Capability \u0026 Governance",
-      "ID": "sec11.item2",
-      "Requirement": "Model limit checks",
-      "Status": "Missing",
-      "Priority": "P2",
-      "Gap": "No metadata evaluation",
-      "Evidence": "docs/GAP_MATRIX.md:91",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:91",
-        "files": [
-          "docs/GAP_MATRIX.md:91"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 1,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "AI Capability \u0026 Governance",
+      "id": "sec11.item2",
+      "requirement": "Model limit checks",
+      "status": "Missing",
+      "priority": "P2",
+      "gap": "No metadata evaluation",
+      "evidence": "docs/GAP_MATRIX.md:91"
     },
     {
-      "Section": "Advanced Delegation Lifecycle",
-      "ID": "sec12.item1",
-      "Requirement": "Suspension / partial revocation",
-      "Status": "Missing",
-      "Priority": "P2",
-      "Gap": "Only revoked/expired statuses",
-      "Evidence": "docs/GAP_MATRIX.md:96",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:96",
-        "files": [
-          "docs/GAP_MATRIX.md:96"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 1,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "Advanced Delegation Lifecycle",
+      "id": "sec12.item1",
+      "requirement": "Suspension / partial revocation",
+      "status": "Missing",
+      "priority": "P2",
+      "gap": "Only revoked/expired statuses",
+      "evidence": "docs/GAP_MATRIX.md:96"
     },
     {
-      "Section": "Advanced Delegation Lifecycle",
-      "ID": "sec12.item2",
-      "Requirement": "Delegation chaining depth limits",
-      "Status": "Missing",
-      "Priority": "P2",
-      "Gap": "No depth enforcement",
-      "Evidence": "docs/GAP_MATRIX.md:97",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:97",
-        "files": [
-          "docs/GAP_MATRIX.md:97"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 1,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "Advanced Delegation Lifecycle",
+      "id": "sec12.item2",
+      "requirement": "Delegation chaining depth limits",
+      "status": "Missing",
+      "priority": "P2",
+      "gap": "No depth enforcement",
+      "evidence": "docs/GAP_MATRIX.md:97"
     },
     {
-      "Section": "Data Hygiene \u0026 Validation",
-      "ID": "sec13.item1",
-      "Requirement": "UTF-8 \u0026 control char filtering",
-      "Status": "Partial",
-      "Priority": "P3",
-      "Gap": "No metrics instrumentation",
-      "Evidence": "docs/GAP_MATRIX.md:102",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:102",
-        "files": [
-          "docs/GAP_MATRIX.md:102"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 1,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "Data Hygiene \u0026 Validation",
+      "id": "sec13.item1",
+      "requirement": "UTF-8 \u0026 control char filtering",
+      "status": "Partial",
+      "priority": "P3",
+      "gap": "No metrics instrumentation",
+      "evidence": "docs/GAP_MATRIX.md:102"
     },
     {
-      "Section": "Data Hygiene \u0026 Validation",
-      "ID": "sec13.item2",
-      "Requirement": "Structured numeric limit parsing",
-      "Status": "Missing",
-      "Priority": "P2",
-      "Gap": "Amounts not parsed/enforced",
-      "Evidence": "docs/GAP_MATRIX.md:103",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:103",
-        "files": [
-          "docs/GAP_MATRIX.md:103"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 1,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "Data Hygiene \u0026 Validation",
+      "id": "sec13.item2",
+      "requirement": "Structured numeric limit parsing",
+      "status": "Partial",
+      "priority": "P2",
+      "gap": "max_amount per action and cumulative max_daily_amount enforced; lacks multi-period limits",
+      "evidence": "docs/GAP_MATRIX.md:103"
     },
     {
-      "Section": "Risk \u0026 Threat Modeling",
-      "ID": "sec14.item1",
-      "Requirement": "Threat model synchronization",
-      "Status": "Partial",
-      "Priority": "P2",
-      "Gap": "No mitigations matrix",
-      "Evidence": "docs/GAP_MATRIX.md:108",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:108",
-        "files": [
-          "docs/GAP_MATRIX.md:108"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 1,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "Risk \u0026 Threat Modeling",
+      "id": "sec14.item1",
+      "requirement": "Threat model synchronization",
+      "status": "Partial",
+      "priority": "P2",
+      "gap": "No mitigations matrix",
+      "evidence": "docs/GAP_MATRIX.md:108"
     },
     {
-      "Section": "Risk \u0026 Threat Modeling",
-      "ID": "sec14.item2",
-      "Requirement": "Residual risk register",
-      "Status": "Missing",
-      "Priority": "P3",
-      "Gap": "No tracking of remaining exposures",
-      "Evidence": "docs/GAP_MATRIX.md:109",
-      "evidence_detail": {
-        "raw": "docs/GAP_MATRIX.md:109",
-        "files": [
-          "docs/GAP_MATRIX.md:109"
-        ],
-        "existing": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "missing": null,
-        "test_files": null,
-        "code_files": [
-          "docs/GAP_MATRIX.md"
-        ],
-        "existing_count": 1,
-        "missing_count": 0,
-        "test_file_count": 0,
-        "code_file_count": 1
-      }
+      "section": "Risk \u0026 Threat Modeling",
+      "id": "sec14.item2",
+      "requirement": "Residual risk register",
+      "status": "Missing",
+      "priority": "P3",
+      "gap": "No tracking of remaining exposures",
+      "evidence": "docs/GAP_MATRIX.md:109"
     }
-  ]
+  ],
+  "generated_at": "2025-11-06T21:34:37Z",
+  "schema_version": 1,
+  "total": 43
 }

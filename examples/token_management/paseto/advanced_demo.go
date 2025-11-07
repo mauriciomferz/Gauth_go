@@ -83,7 +83,7 @@ func createAdvancedClaimsExample() *gauth.AdvancedClaims {
 
 func createStructuredFooter() *gauth.PASETOFooter {
 	footer, err := gauth.CreatePASETOFooter(
-		"gauth-ed25519-key-v2-2024",
+		"gauth-ed25519-key-v2-2025",
 		"Ed25519",
 		"https://auth.gauth.example.com",
 		map[string]interface{}{
@@ -94,7 +94,7 @@ func createStructuredFooter() *gauth.PASETOFooter {
 			"jurisdiction":   "US-CA",
 			"audit_trail_id": "audit_" + fmt.Sprintf("%d", time.Now().UnixNano()),
 			"chain_of_trust": map[string]interface{}{
-				"root_ca":      "GAuth-Root-CA-2024",
+				"root_ca":      "GAuth-Root-CA-2025",
 				"intermediate": "GAuth-Intermediate-CA-West",
 				"leaf":         "auth.gauth.example.com",
 			},

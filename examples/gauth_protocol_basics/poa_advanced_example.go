@@ -28,7 +28,7 @@ func runAdvancedPOAExample() {
 		PrincipalID:  "user-123",
 		AIAgentID:    "ai-agent-1",
 		Jurisdiction: "ZZ", // Invalid
-		LegalBasis:   "power_of_attorney_act_2024",
+		LegalBasis:   "power_of_attorney_act_2025",
 	}
 	_, err := svc.AuthorizePowerOfAttorney(ctx, invalidJurisdictionReq)
 	if err != nil {
@@ -54,7 +54,7 @@ func runAdvancedPOAExample() {
 		PrincipalID:  "",
 		AIAgentID:    "ai-agent-1",
 		Jurisdiction: "US",
-		LegalBasis:   "power_of_attorney_act_2024",
+		LegalBasis:   "power_of_attorney_act_2025",
 	}
 	_, err = svc.AuthorizePowerOfAttorney(ctx, missingFieldsReq)
 	if err != nil {

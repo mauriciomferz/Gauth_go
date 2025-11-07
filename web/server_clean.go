@@ -9246,7 +9246,7 @@ func (s *BetaServer) apiAuthorizePOA(c *gin.Context) {
 			poaReq.Jurisdiction = "US"
 		}
 		if poaReq.LegalBasis == "" {
-			poaReq.LegalBasis = "law2024"
+			poaReq.LegalBasis = "law2025"
 		}
 		if poaReq.State == "" {
 			poaReq.State = "demo"

@@ -323,6 +323,34 @@ func (e *InMemoryEngine) Evaluate(ctx context.Context, req Request) (Decision, e
 					}
 				}
 			}
+			
+			// P2.1 (sec2.item3): Emit advice for non-mandatory obligations
+			// Advice provides non-binding recommendations to clients for operational best practices.
+			if i < len(mandatoryFlags) && !mandatoryFlags[i] && e.adviceChannel != nil {
+				obligationType, obligationID := "", ""
+				if i < len(dec.Obligations) {
+					obligationType = dec.Obligations[i].Attributes["type"]
+					obligationID = dec.Obligations[i].ID
+				}
+				adviceEvent := AdviceEvent{
+					Timestamp:  time.Now(),
+					Subject:    req.Subject,
+					Action:     req.Action,
+					Resource:   req.Resource,
+					AdviceID:   obligationID,
+					AdviceType: obligationType,
+					Message:    fmt.Sprintf("Non-mandatory obligation '%s' executed", r.Name),
+					Metadata:   map[string]string{
+						"success": fmt.Sprintf("%t", r.Success),
+						"duration_ms": fmt.Sprintf("%.3f", float64(dur.Microseconds())/1000.0),
+					},
+				}
+				if r.Error != nil {
+					adviceEvent.Metadata["error"] = r.Error.Error()
+				}
+				// Fire and forget - advice emission should not block decision flow
+				_ = e.adviceChannel.Emit(ctx, adviceEvent)
+			}
 			if e.obligationAuditPath != "" {
 				auditRec := struct {
 					Timestamp  string  `json:"ts"`

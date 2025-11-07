@@ -300,7 +300,7 @@ Response excerpt:
       "entity_type": "assistant",
       "jurisdictions": "US",
       "missing": [""],
-      "applied_policies": "[us_ai_governance_2024]",
+      "applied_policies": "[us_ai_governance_2025]",
       "created_at": "2025-10-29T10:01:22.123456Z"
     }
   ],

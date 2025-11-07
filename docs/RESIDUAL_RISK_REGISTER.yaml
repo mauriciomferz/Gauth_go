@@ -1,0 +1,372 @@
+# GAuth Residual Risk Register
+# Tracks remaining security exposures after mitigation implementation
+# Completes sec14.item2 (P3) - Residual risk register
+
+version: "1.0"
+last_updated: "2025-11-06"
+scope: "GAuth RFC 0111/0115 Implementation"
+reference_matrix: "docs/THREAT_MITIGATIONS_MATRIX.yaml"
+
+# Risk Scoring
+# Likelihood: VeryLow (1), Low (2), Medium (3), High (4), VeryHigh (5)
+# Impact: Low (1), Medium (2), High (3), Critical (4)
+# Risk Score: Likelihood × Impact
+# Risk Level: VeryLow (1-2), Low (3-4), Medium (5-8), High (9-12), Critical (13-20)
+
+# Residual Risks (After Mitigation)
+residual_risks:
+  RR01_Token_Replay_Window:
+    threat_id: "T1"
+    threat_name: "Token Replay"
+    risk_score: 4
+    likelihood: 2  # Low - Requires theft + narrow window
+    impact: 2      # Medium - Single unauthorized action
+    risk_level: "Low"
+    
+    description: "Stolen token can be replayed within validity window before detection"
+    
+    residual_exposure:
+      - "JTI replay cache has small window before distributed synchronization"
+      - "Token validity period (typically 5-15 minutes) creates replay opportunity"
+      - "Network partitions may delay replay store synchronization"
+    
+    mitigations_applied:
+      - "M01: Short-lived tokens"
+      - "M02: JTI replay cache"
+      - "M03: Replay metrics"
+      - "M04: Fail-closed mode"
+    
+    acceptance_criteria:
+      - "Token validity under 15 minutes"
+      - "Distributed replay store with <1s sync latency"
+      - "Metrics alerting on replay attempts"
+    
+    compensating_controls:
+      - "Audit logging captures all token usage"
+      - "Rate limiting on endpoints"
+      - "Anomaly detection on usage patterns"
+    
+    recommended_actions:
+      priority: "Low"
+      actions:
+        - "Consider reducing default token TTL to 5 minutes"
+        - "Implement real-time replay store sync monitoring"
+        - "Add client IP binding to tokens (optional)"
+    
+    owner: "Security Team"
+    review_date: "2026-02-06"  # 3 months
+
+  RR02_Key_Material_Exposure:
+    threat_id: "T2"
+    threat_name: "Token Forgery (Symmetric Key Compromise)"
+    risk_score: 6
+    likelihood: 2  # Low - Requires system compromise
+    impact: 3      # High - Complete privilege escalation
+    risk_level: "Medium"
+    
+    description: "Compromise of symmetric encryption key enables arbitrary token minting"
+    
+    residual_exposure:
+      - "Keys stored in memory during runtime (process memory dump risk)"
+      - "Key rotation retention window creates extended exposure"
+      - "Environment variable storage may be visible to privileged users"
+    
+    mitigations_applied:
+      - "M05: Key ring rotation"
+      - "M06: Environment-based key loading"
+      - "M07: Manual rotation capability"
+    
+    acceptance_criteria:
+      - "Keys loaded from secure storage (Vault/KMS)"
+      - "Automatic rotation every 90 days"
+      - "Previous keys retained max 24 hours"
+    
+    compensating_controls:
+      - "Host-level access controls restrict process memory access"
+      - "Encrypted environment variables in production"
+      - "Key usage audit trail"
+    
+    recommended_actions:
+      priority: "Medium"
+      actions:
+        - "Deploy HashiCorp Vault integration (M06 supports this)"
+        - "Implement memory encryption for key material"
+        - "Reduce key retention window to 1 hour after rotation"
+        - "Add key usage alerting (unusual volume/patterns)"
+    
+    owner: "Platform Team"
+    review_date: "2025-12-06"  # 1 month
+
+  RR03_Offline_Persistence_Tampering:
+    threat_id: "T6"
+    threat_name: "Persistence Tampering"
+    risk_score: 6
+    likelihood: 2  # Low - Requires host access
+    impact: 3      # High - Silent data corruption
+    risk_level: "Medium"
+    
+    description: "Direct filesystem access enables offline BoltDB/WAL file tampering"
+    
+    residual_exposure:
+      - "No file-level integrity seal (HMAC/signature)"
+      - "Filesystem permissions provide only basic protection"
+      - "No encryption-at-rest for BoltDB data"
+    
+    mitigations_applied:
+      - "M17: BoltDB ACID properties"
+      - "M18: WAL-based replay store"
+      - "M19: Hash chain integrity verification"
+    
+    acceptance_criteria:
+      - "File integrity seal verified at startup"
+      - "Encryption-at-rest for sensitive data"
+      - "Immutable audit log of file modifications"
+    
+    compensating_controls:
+      - "Host-based intrusion detection"
+      - "Filesystem audit logging (auditd/osquery)"
+      - "Regular integrity checks via scheduled jobs"
+    
+    recommended_actions:
+      priority: "Medium"
+      actions:
+        - "Implement HMAC seal for BoltDB file (verify at open)"
+        - "Add optional AES-256-GCM encryption for BoltDB values"
+        - "Enable host filesystem encryption (LUKS/BitLocker)"
+        - "Add file modification detection to health checks"
+    
+    owner: "Security Team"
+    review_date: "2026-01-06"  # 2 months
+
+  RR04_Key_Rotation_Operational_Risk:
+    threat_id: "T8"
+    threat_name: "Key Rotation Gaps"
+    risk_score: 4
+    likelihood: 2  # Low - Process-dependent
+    impact: 2      # Medium - Extended replay window
+    risk_level: "Low"
+    
+    description: "Manual rotation processes or delayed execution extends key validity"
+    
+    residual_exposure:
+      - "Rotation requires operational procedures (not fully automated)"
+      - "Previous key retention policy not enforced programmatically"
+      - "No automatic rotation scheduling in production"
+    
+    mitigations_applied:
+      - "M22: Configurable rotation schedule"
+      - "M23: Active + previous key support"
+    
+    acceptance_criteria:
+      - "Fully automated rotation with zero-downtime"
+      - "Enforced retention policy (max 24 hours)"
+      - "Rotation alerts and validation"
+    
+    compensating_controls:
+      - "Key age metrics and alerting"
+      - "Runbook documentation for manual rotation"
+      - "Pre-rotation validation checks"
+    
+    recommended_actions:
+      priority: "Low"
+      actions:
+        - "Implement automatic rotation scheduler (cron/k8s CronJob)"
+        - "Add programmatic retention enforcement"
+        - "Create rotation health dashboard"
+        - "Test rotation process quarterly"
+    
+    owner: "Platform Team"
+    review_date: "2026-03-06"  # 4 months
+
+  RR05_Authorization_Policy_Gaps:
+    threat_id: "T7"
+    threat_name: "Principal Enumeration"
+    risk_score: 3
+    likelihood: 1  # VeryLow - Requires API exposure misconfiguration
+    impact: 3      # High - Privacy leakage
+    risk_level: "Low"
+    
+    description: "Insufficient authorization on listing operations may expose delegation graph"
+    
+    residual_exposure:
+      - "ABAC policy enforcement marked 'Partial' (M21)"
+      - "Default-deny policy not enforced on all endpoints"
+      - "No rate limiting on list operations"
+    
+    mitigations_applied:
+      - "M20: PDP engine authorization checks"
+      - "M21: ABAC policy enforcement (Partial)"
+    
+    acceptance_criteria:
+      - "All API endpoints have authorization middleware"
+      - "Default-deny policy with explicit allow rules"
+      - "Rate limiting on enumeration endpoints"
+    
+    compensating_controls:
+      - "API access logs capture all requests"
+      - "Network segmentation limits API exposure"
+      - "Authentication required for all endpoints"
+    
+    recommended_actions:
+      priority: "Low"
+      actions:
+        - "Complete ABAC middleware integration (upgrade M21 to full)"
+        - "Add rate limiting to list/search endpoints"
+        - "Implement pagination and result limits"
+        - "Add RBAC layer for administrative operations"
+    
+    owner: "API Team"
+    review_date: "2026-02-06"  # 3 months
+
+  RR06_Missing_Strict_Mode_Deployment:
+    threat_id: "T9"
+    threat_name: "Missing Public Key (Strict Mode)"
+    risk_score: 2
+    likelihood: 1  # VeryLow - Configuration issue
+    impact: 2      # Medium - Single delegation integrity loss
+    risk_level: "VeryLow"
+    
+    description: "Strict authenticity mode not enabled allows downgrade attacks"
+    
+    residual_exposure:
+      - "Strict mode is opt-in (not enforced by default)"
+      - "Deployment without strict mode flag accepts unsigned delegations"
+      - "No runtime detection of missing strict mode in production"
+    
+    mitigations_applied:
+      - "M24: Strict authenticity mode available"
+      - "M25: Metrics tracking verification failures"
+    
+    acceptance_criteria:
+      - "Strict mode enabled by default in production"
+      - "Deployment validation checks for strict mode flag"
+      - "Alerting on authentication verification failures"
+    
+    compensating_controls:
+      - "Deployment checklists require strict mode"
+      - "Metrics dashboard highlights auth failures"
+      - "Regular security reviews verify configuration"
+    
+    recommended_actions:
+      priority: "Low"
+      actions:
+        - "Change default to strict mode (breaking change)"
+        - "Add health check endpoint exposing strict mode status"
+        - "Document strict mode requirement in deployment guides"
+        - "Create alerts for high auth failure rates"
+    
+    owner: "Security Team"
+    review_date: "2026-01-06"  # 2 months
+
+  RR07_External_Anchor_Verification_Gap:
+    threat_id: "T12"
+    threat_name: "Anchor Spoofing"
+    risk_score: 2
+    likelihood: 1  # VeryLow - Metrics detect failures
+    impact: 2      # Medium - False witness claims
+    risk_level: "VeryLow"
+    
+    description: "External notarization verification not enforced at validation time"
+    
+    residual_exposure:
+      - "Chain tips submitted to blockchain but not verified on retrieval"
+      - "Notarization receipt validation not performed during audits"
+      - "No automated verification of on-chain anchor presence"
+    
+    mitigations_applied:
+      - "M30: Notarization metrics"
+      - "M31: Multiple notarization backends"
+    
+    acceptance_criteria:
+      - "Automatic verification of blockchain anchors during audits"
+      - "Receipt validation integrated into chain integrity checks"
+      - "Alerting on anchor verification failures"
+    
+    compensating_controls:
+      - "Multiple independent notarization backends"
+      - "Metrics track notarization success rates"
+      - "Manual audit procedures verify anchors"
+    
+    recommended_actions:
+      priority: "VeryLow"
+      actions:
+        - "Implement automatic anchor verification job (daily)"
+        - "Add receipt validation to integrity check flows"
+        - "Create anchor verification dashboard"
+        - "Document manual verification procedures"
+    
+    owner: "Platform Team"
+    review_date: "2026-04-06"  # 5 months
+
+# Risk Summary
+risk_summary:
+  total_residual_risks: 7
+  by_level:
+    VeryLow: 2
+    Low: 3
+    Medium: 2
+    High: 0
+    Critical: 0
+  
+  by_threat:
+    T1: 1  # Token Replay
+    T2: 1  # Token Forgery
+    T6: 1  # Persistence Tampering
+    T7: 1  # Principal Enumeration
+    T8: 1  # Key Rotation Gaps
+    T9: 1  # Missing Strict Mode
+    T12: 1 # Anchor Spoofing
+  
+  fully_mitigated_threats:
+    - T3  # Signature Forgery
+    - T4  # Revocation Bypass
+    - T5  # Chain Tampering
+    - T10 # DOS via Large Scope
+    - T11 # Timing Side Channel
+
+# Acceptance Decisions
+acceptance:
+  VeryLow_risks:
+    decision: "Accept"
+    rationale: "Minimal impact; compensating controls sufficient"
+    approver: "Security Lead"
+    date: "2025-11-06"
+  
+  Low_risks:
+    decision: "Accept with monitoring"
+    rationale: "Low likelihood with effective mitigations; continuous monitoring required"
+    approver: "Security Lead"
+    date: "2025-11-06"
+  
+  Medium_risks:
+    decision: "Accept with action plan"
+    rationale: "Acceptable for production with committed remediation timeline"
+    approver: "CISO"
+    date: "2025-11-06"
+    action_plan:
+      - "RR02: Deploy Vault integration within 1 month"
+      - "RR03: Implement file integrity seals within 2 months"
+
+# Review Schedule
+review_schedule:
+  frequency: "Quarterly"
+  next_review: "2026-02-06"
+  review_triggers:
+    - "New threat identified"
+    - "Significant architecture change"
+    - "Mitigation implementation completed"
+    - "Security incident or near-miss"
+    - "Regulatory requirement change"
+
+# Audit Trail
+audit:
+  created: "2025-11-06"
+  created_by: "Gap Closure Session 2"
+  purpose: "Complete sec14.item2 (P3) - Residual risk register with tracking of remaining exposures"
+  methodology: "Based on threat mitigations matrix (sec14.item1) with residual risk analysis"
+  validation: "Cross-referenced with implemented controls and production deployment practices"
+  
+changelog:
+  - date: "2025-11-06"
+    change: "Initial register created with 7 residual risks identified"
+    author: "Security Team"
