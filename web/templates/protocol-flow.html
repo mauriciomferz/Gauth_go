@@ -164,6 +164,18 @@
 
             console.log('[protocol-flow] Navigator initialized:', window.gauthNavigator);
 
+            // Make demo functions available globally
+            window.demoSubscription = demoSubscription;
+            window.demoMatching = demoMatching;
+            window.demoSubsetRequest = demoSubsetRequest;
+            window.demoEnforcement = demoEnforcement;
+            window.demoVerification = demoVerification;
+            window.demoAudit = demoAudit;
+            window.demoCompleteFlow = demoCompleteFlow;
+            window.demoError = demoError;
+            window.demoReset = demoReset;
+            window.demoExport = demoExport;
+
             // Attach event listeners to buttons (CSP-compliant)
             document.querySelectorAll('.demo-button[data-action]').forEach(button => {
                 const action = button.getAttribute('data-action');
@@ -174,7 +186,7 @@
         }
 
         // Demo functions - using window.gauthNavigator to ensure accessibility
-        window.demoSubscription = async () => {
+        async function demoSubscription() {
             if (!window.gauthNavigator) {
                 console.error('Navigator not initialized yet');
                 return;
@@ -192,9 +204,9 @@
             await delay(500);
             nav.completeSubstep('subscription', 'credentials');
             nav.completeStep('subscription');
-        };
+        }
 
-        window.demoMatching = async () => {
+        async function demoMatching() {
             if (!window.gauthNavigator) {
                 console.error('Navigator not initialized yet');
                 return;
@@ -216,9 +228,9 @@
             await delay(500);
             nav.completeSubstep('matching', 'match_policies');
             nav.completeStep('matching');
-        };
+        }
 
-        window.demoSubsetRequest = async () => {
+        async function demoSubsetRequest() {
             if (!window.gauthNavigator) {
                 console.error('Navigator not initialized yet');
                 return;
@@ -240,9 +252,9 @@
             await delay(500);
             nav.completeSubstep('subset_request', 'generate_token');
             nav.completeStep('subset_request');
-        };
+        }
 
-        window.demoEnforcement = async () => {
+        async function demoEnforcement() {
             if (!window.gauthNavigator) {
                 console.error('Navigator not initialized yet');
                 return;
@@ -264,9 +276,9 @@
             await delay(500);
             nav.completeSubstep('enforcement', 'audit');
             nav.completeStep('enforcement');
-        };
+        }
 
-        window.demoVerification = async () => {
+        async function demoVerification() {
             if (!window.gauthNavigator) {
                 console.error('Navigator not initialized yet');
                 return;
@@ -288,9 +300,9 @@
             await delay(500);
             nav.completeSubstep('verification', 'pvp_check');
             nav.completeStep('verification');
-        };
+        }
 
-        window.demoAudit = async () => {
+        async function demoAudit() {
             if (!window.gauthNavigator) {
                 console.error('Navigator not initialized yet');
                 return;
@@ -308,9 +320,9 @@
             await delay(500);
             nav.completeSubstep('audit', 'report_generation');
             nav.completeStep('audit');
-        };
+        }
 
-        window.demoCompleteFlow = async () => {
+        async function demoCompleteFlow() {
             if (!window.gauthNavigator) {
                 console.error('Navigator not initialized yet');
                 return;
@@ -329,9 +341,9 @@
             await window.demoVerification();
             await delay(1000);
             await window.demoAudit();
-        };
+        }
 
-        window.demoError = () => {
+        function demoError() {
             if (!window.gauthNavigator) {
                 console.error('Navigator not initialized yet');
                 return;
@@ -339,23 +351,23 @@
             const nav = window.gauthNavigator;
             nav.navigateToStep('matching', 'verify_jurisdiction');
             nav.errorStep('matching', 'Jurisdiction validation failed: Unsupported region');
-        };
+        }
 
-        window.demoReset = () => {
+        function demoReset() {
             if (!window.gauthNavigator) {
                 console.error('Navigator not initialized yet');
                 return;
             }
             window.gauthNavigator.reset();
-        };
+        }
 
-        window.demoExport = () => {
+        function demoExport() {
             if (!window.gauthUI) {
                 console.error('Navigator UI not initialized yet');
                 return;
             }
             window.gauthUI.exportHistory();
-        };
+        }
     </script>
 </body>
 </html>
