@@ -416,6 +416,8 @@ type BetaServer struct {
 	// Capability audit hash chain persistence (tracking capability-related audit entries: create, revoke, enforce)
 	capAuditPrevHash    string
 	capAuditPersistPath string
+	// Protocol flow manager for interactive GAuth flow guidance
+	protocolFlowManager *ProtocolFlowManager
 	// Capability registry external anchor artifact (periodic file emission)
 	capAnchorFilePath      string
 	capAnchorLastWrite     time.Time
@@ -3081,7 +3083,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 			}
 		}
 	}
-	s := &BetaServer{router: r, start: time.Now(), jobs: NewJobManager(200), audit: NewAuditLog(500), events: NewEventHub(500), tokens: NewTokenStore(500), port: port, policyRL: newSimpleRateLimiter(20, time.Minute), replayStore: NewReplayNonceStore(5 * time.Minute), delegationStatus: make(map[string]string), metrics: memoryMetrics, lifecycleEvents: make(map[string][]*LifecycleEvent), lifecycleCap: 250, violationHistoryCap: 400, semanticHistoryCap: 300, requiredActionCaps: map[string][]string{"transaction:execute": {"cap.transfer"}, "transaction:pay": {"cap.transfer"}, "transaction:issue": {"cap.issue"}, "delegation:create": {"cap.delegation.create"}, "delegation:revoke": {"cap.delegation.revoke"}}, stopCh: make(chan struct{}), modelLimits: make(map[string]int), attestStreamSubs: make(map[chan modelLimitsAttestation]struct{}), attestStreamCounts: make(map[string]uint64)}
+	s := &BetaServer{router: r, start: time.Now(), jobs: NewJobManager(200), audit: NewAuditLog(500), events: NewEventHub(500), tokens: NewTokenStore(500), port: port, policyRL: newSimpleRateLimiter(20, time.Minute), replayStore: NewReplayNonceStore(5 * time.Minute), delegationStatus: make(map[string]string), metrics: memoryMetrics, lifecycleEvents: make(map[string][]*LifecycleEvent), lifecycleCap: 250, violationHistoryCap: 400, semanticHistoryCap: 300, requiredActionCaps: map[string][]string{"transaction:execute": {"cap.transfer"}, "transaction:pay": {"cap.transfer"}, "transaction:issue": {"cap.issue"}, "delegation:create": {"cap.delegation.create"}, "delegation:revoke": {"cap.delegation.revoke"}}, stopCh: make(chan struct{}), modelLimits: make(map[string]int), attestStreamSubs: make(map[chan modelLimitsAttestation]struct{}), attestStreamCounts: make(map[string]uint64), protocolFlowManager: NewProtocolFlowManager()}
 	// Defer semantic diagnostics integrity endpoint registration to initUIRevamp (invoked immediately below)
 	s.initUIRevamp()
 	// Register composite authorization endpoints (demo) for tests expecting activation flow.
