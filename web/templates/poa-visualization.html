@@ -68,6 +68,9 @@
                     <option value="subscription">Subscription</option>
                     <option value="matching">Matching</option>
                     <option value="request">Subset/Request</option>
+                    <option value="enforcement">Enforcement</option>
+                    <option value="verification">Verification</option>
+                    <option value="complete">Complete Flow</option>
                 </select>
             </div>
             
@@ -195,12 +198,9 @@
                 currentVisualizer.dispose();
             }
             
-            // Create new visualizer
-            if (mode === 'graph') {
-                currentVisualizer = new PoAGraphVisualizer(vizCanvas);
-            } else {
-                currentVisualizer = new ProtocolStepVisualizer(vizCanvas);
-            }
+            // Create new visualizer - use graph visualizer for both modes
+            // since protocol steps are now rendered as graphs
+            currentVisualizer = new PoAGraphVisualizer(vizCanvas);
         }
         
         // Load button
@@ -246,20 +246,30 @@
         // Load protocol step
         async function loadProtocolStep() {
             const step = protocolStep.value;
-            const response = await fetch(`/api/v1/visualization/protocol/${step}`);
-            const stepData = await response.json();
             
-            await currentVisualizer.loadProtocolStep(stepData);
+            // Map protocol step names to graph pattern names
+            const stepToPattern = {
+                'subscription': 'protocol-subscription',
+                'matching': 'protocol-matching',
+                'request': 'protocol-request',
+                'enforcement': 'protocol-enforcement',
+                'verification': 'protocol-verification',
+                'complete': 'protocol-full'
+            };
             
-            // Update stats for protocol visualization
-            const totalComponents = stepData.layers.reduce((sum, layer) => sum + layer.components.length, 0);
-            updateStats({
-                total_nodes: totalComponents,
-                total_edges: stepData.connections.length,
-                active_nodes: totalComponents,
-                pending_nodes: 0,
-                revoked_nodes: 0
-            });
+            const patternName = stepToPattern[step] || 'protocol-subscription';
+            
+            // Use the graph generators for protocol visualization
+            const graphData = generateDemoGraph(patternName);
+            
+            if (!graphData) {
+                throw new Error(`Protocol step '${step}' not found`);
+            }
+            
+            // Load as a graph instead of protocol step
+            await currentVisualizer.loadGraph(graphData);
+            
+            updateStats(graphData.stats);
         }
         
         // Clear button
