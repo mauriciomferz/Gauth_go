@@ -186,6 +186,7 @@ const (
 	// Demo KID for RSA path
 	demoRSAKid = "demo-rsa"
 	// Demo dev secret placeholder (long repeated literal)
+	//nolint:gosec // G101: demo constant, not real credentials
 	devSecretDemo = "dev-secret-demo-00000000000000000000000000000000"
 	// Lifecycle / decision reason literals (standardized with JSON Schemas)
 	reasonMaintenance      = "maintenance"

@@ -37,6 +37,7 @@ func NewAuthorizationRequestGenerator(subjects, resources, actions []string) *Au
 		Subjects:  subjects,
 		Resources: resources,
 		Actions:   actions,
+		//nolint:gosec // G404: weak random acceptable for load testing
 		rng:       rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
@@ -111,6 +112,7 @@ func NewDelegationRequestGenerator(subjects, delegates, resources, actions []str
 		Resources:  resources,
 		Actions:    actions,
 		Operations: []string{"create", "revoke", "verify"},
+		//nolint:gosec // G404: weak random acceptable for load testing
 		rng:        rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
@@ -160,6 +162,7 @@ func NewCachePressureGenerator(subjects, resources, actions []string, hotSetSize
 		Subjects:    subjects,
 		Resources:   resources,
 		Actions:     actions,
+		//nolint:gosec // G404: weak random acceptable for load testing
 		rng:         rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }

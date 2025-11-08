@@ -341,5 +341,5 @@ func WriteReport(rep *CoverageReport, outPath string) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(outPath, b, 0o644)
+	return os.WriteFile(outPath, b, 0o600)
 }

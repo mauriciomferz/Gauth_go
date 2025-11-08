@@ -156,6 +156,7 @@ func verifyReceipts(base, path string, remote bool) (string, int, string, error)
 	}
 	if remote {
 		url := fmt.Sprintf("%s/api/v1/beta/notarization/receipts/verify", base)
+		//nolint:gosec // G107: URL from user-provided base flag, validated by caller
 		resp, err := http.Get(url)
 		if err != nil {
 			return statusError, 0, "", err

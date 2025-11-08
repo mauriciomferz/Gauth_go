@@ -13,7 +13,7 @@ func TestAnalyzeMappingFailures(t *testing.T) {
 	if err := os.MkdirAll("conformance", 0o750); err != nil {
 		t.Fatalf("mkdir: %v", err)
 	}
-	if err := os.WriteFile("conformance/clause_map.json", []byte(cm), 0o644); err != nil {
+	if err := os.WriteFile("conformance/clause_map.json", []byte(cm), 0o600); err != nil {
 		t.Fatalf("write clause_map: %v", err)
 	}
 	// Simulate clause list containing the target clause id.

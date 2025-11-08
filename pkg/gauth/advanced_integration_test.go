@@ -223,6 +223,7 @@ func TestPASETOValidation_StructuredFooter(t *testing.T) {
 	defer service.Close()
 
 	// Test valid PASETO token format
+	//nolint:gosec // G101: test token, not real credentials
 	validToken := "v4.public.eyJzdWIiOiJ1c2VyMTIzIiwiaXNzIjoiaHR0cHM6Ly9hdXRoLmV4YW1wbGUuY29tIn0.eyJraWQiOiJrZXktMTIzIiwiYWxnIjoiRWQyNTUxOSIsImlzcyI6Imh0dHBzOi8vYXV0aC5leGFtcGxlLmNvbSJ9"
 
 	result, err := service.ValidatePASETOWithFooter(validToken)

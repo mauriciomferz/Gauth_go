@@ -15,6 +15,7 @@ func fetchIndexHTML(t *testing.T) string {
 	if url == "" {
 		url = "http://localhost:8080/index.html"
 	}
+	//nolint:gosec // G107: test server URL from environment or localhost
 	resp, err := http.Get(url)
 	if err != nil {
 		if strings.Contains(err.Error(), "connection refused") {

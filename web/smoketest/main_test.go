@@ -16,6 +16,7 @@ func TestMain(m *testing.M) {
 		// Start server; ignore error on shutdown.
 		bs := webpkg.NewBetaServer(":8080")
 		bs.RegisterUIRoutes()
+		//nolint:gosec // G114: test server, timeout not critical
 		_ = http.ListenAndServe(":8080", bs.Engine())
 	}()
 	// Allow minimal time for server to bind.

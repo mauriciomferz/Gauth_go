@@ -18,7 +18,7 @@ func TestApplyBundleSubstitutionSRI(t *testing.T) {
 	}
 	manifestPath := filepath.Join(manifestDir, "asset-manifest.json")
 	manifest := `{"app":"app-deadbeef.js","sha256":"deadbeefdeadbeef","sri":"sha256-ABCDEFG=="}`
-	if err := os.WriteFile(manifestPath, []byte(manifest), 0o644); err != nil {
+	if err := os.WriteFile(manifestPath, []byte(manifest), 0o600); err != nil {
 		t.Fatalf("write manifest: %v", err)
 	}
 	defer func() { _ = os.Remove(manifestPath) }()
