@@ -364,11 +364,23 @@ func (a *Agent) updateMetrics(rec *enforcement.AIRecommendation, latencyMs int64
 	a.metrics.AverageLatencyMs = ((a.metrics.AverageLatencyMs * (totalEval - 1)) + float64(latencyMs)) / totalEval
 }
 
-// GetMetrics returns agent metrics
+// GetMetrics returns a copy of agent metrics (safe for concurrent access)
 func (a *Agent) GetMetrics() AgentMetrics {
 	a.metrics.mu.RLock()
 	defer a.metrics.mu.RUnlock()
-	return *a.metrics
+	// Return a copy without the mutex to avoid copylocks
+	return AgentMetrics{
+		TotalEvaluations:   a.metrics.TotalEvaluations,
+		AllowSuggestions:   a.metrics.AllowSuggestions,
+		DenySuggestions:    a.metrics.DenySuggestions,
+		ReviewSuggestions:  a.metrics.ReviewSuggestions,
+		AverageConfidence:  a.metrics.AverageConfidence,
+		AverageLatencyMs:   a.metrics.AverageLatencyMs,
+		PolicyViolations:   a.metrics.PolicyViolations,
+		HighRiskDecisions:  a.metrics.HighRiskDecisions,
+		LastEvaluationTime: a.metrics.LastEvaluationTime,
+		// mu is intentionally not copied
+	}
 }
 
 // Enable enables the agent

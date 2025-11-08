@@ -1,0 +1,808 @@
+level=warning msg="[runner/nolint_filter] Found unknown linters in //nolint directives: sa4006"
+pkg/ledger/bolt_anchor_test.go:32:5: shadow: declaration of "err" shadows declaration at line 17 (govet)
+	if err := st.EnableAnchorFile(anchorFile, 10*time.Millisecond); err != nil {
+	   ^
+pkg/ledger/bolt_anchor_test.go:44:6: shadow: declaration of "err" shadows declaration at line 17 (govet)
+		if err := st.Append(context.TODO(), e); err != nil {
+		   ^
+pkg/ledger/bolt_test.go:39:6: shadow: declaration of "err" shadows declaration at line 13 (govet)
+		if err := bs.Append(ctx, e); err != nil {
+		   ^
+pkg/ledger/ledger_signature_test.go:21:5: shadow: declaration of "err" shadows declaration at line 13 (govet)
+	if err := ms.Append(ctx, e); err != nil {
+	   ^
+pkg/ledger/ledger_signature_test.go:57:5: shadow: declaration of "err" shadows declaration at line 37 (govet)
+	if err := bs.Append(ctx, e); err != nil {
+	   ^
+pkg/ledger/external_anchor.go:96:1: The line is 155 characters long, which exceeds the maximum of 130 characters. (lll)
+func NewExternalAuditLedger(dbPath string, provider anchor.Provider, receiptStorePath string, anchorInterval time.Duration) (*ExternalAuditLedger, error) {
+^
+pkg/ledger/revocation_anchor.go:23:1: The line is 143 characters long, which exceeds the maximum of 130 characters. (lll)
+func (s *DefaultRevocationAnchorService) AnchorChainTip(chainTipHash []byte, activeKey ed25519.PrivateKey, publicKey ed25519.PublicKey) error {
+^
+web/multi_period_limits_test.go:51:18: Error return value of `json.Unmarshal` is not checked (errcheck)
+			json.Unmarshal(w.Body.Bytes(), &resp)
+			              ^
+web/multi_period_limits_test.go:101:18: Error return value of `json.Unmarshal` is not checked (errcheck)
+			json.Unmarshal(w.Body.Bytes(), &resp)
+			              ^
+web/multi_period_limits_test.go:187:18: Error return value of `json.Unmarshal` is not checked (errcheck)
+			json.Unmarshal(w.Body.Bytes(), &resp)
+			              ^
+web/protocol_flow.go:192:21: Error return value of `m.UpdateStepStatus` is not checked (errcheck)
+		m.UpdateStepStatus(sessionID, stepID, "completed")
+		                  ^
+web/visualization.go:228:23: Error return value of `graph.SetNodePosition` is not checked (errcheck)
+	graph.SetNodePosition(principal.ID, 0, 0, 0)
+	                     ^
+web/visualization.go:234:23: Error return value of `graph.SetNodePosition` is not checked (errcheck)
+	graph.SetNodePosition(agent1.ID, -3, 0, 2)
+	                     ^
+web/visualization.go:239:23: Error return value of `graph.SetNodePosition` is not checked (errcheck)
+	graph.SetNodePosition(agent2.ID, 3, 0, 2)
+	                     ^
+web/visualization.go:295:24: Error return value of `graph.UpdateNodeStatus` is not checked (errcheck)
+	graph.UpdateNodeStatus(aiClient2.ID, "pending")
+	                      ^
+web/server_clean.go:5477:1: cyclomatic complexity 392 of func `(*BetaServer).routes` is high (> 25) (gocyclo)
+func (s *BetaServer) routes() {
+^
+web/server_clean.go:10060:1: cyclomatic complexity 54 of func `(*BetaServer).apiTokenValidate` is high (> 25) (gocyclo)
+func (s *BetaServer) apiTokenValidate(c *gin.Context) {
+^
+web/server_clean.go:10459:1: cyclomatic complexity 52 of func `(*BetaServer).apiDelegationStatusUpdate` is high (> 25) (gocyclo)
+func (s *BetaServer) apiDelegationStatusUpdate(c *gin.Context) {
+^
+web/server_clean.go:9299:1: cyclomatic complexity 47 of func `(*BetaServer).apiAuthorizePOA` is high (> 25) (gocyclo)
+func (s *BetaServer) apiAuthorizePOA(c *gin.Context) {
+^
+web/server_clean.go:10691:1: cyclomatic complexity 46 of func `(*BetaServer).apiLifecycleTimeline` is high (> 25) (gocyclo)
+func (s *BetaServer) apiLifecycleTimeline(c *gin.Context) {
+^
+web/server_clean.go:11045:1: cyclomatic complexity 29 of func `(*BetaServer).initUIRevamp` is high (> 25) (gocyclo)
+func (s *BetaServer) initUIRevamp() {
+^
+web/server_clean.go:2023:1: cyclomatic complexity 28 of func `(*BetaServer).maybeAugmentAndSignAttestation` is high (> 25) (gocyclo)
+func (s *BetaServer) maybeAugmentAndSignAttestation(att modelLimitsAttestation) modelLimitsAttestation {
+^
+web/capability_diff_endpoint.go:102:62: G404: Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand) (gosec)
+		if s.tracerProvider != nil && (s.tracerSampleRatio <= 0 || rand.Float64() < s.tracerSampleRatio) {
+		                                                           ^
+web/server_clean.go:189:2: G101: Potential hardcoded credentials (gosec)
+	devSecretDemo = "dev-secret-demo-00000000000000000000000000000000"
+	^
+web/server_clean.go:724:16: G404: Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand) (gosec)
+		if _, err := rand.Read(b); err != nil {
+		             ^
+web/server_clean.go:2097:12: G404: Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand) (gosec)
+				_, _ = rand.Read(nb[:])
+				       ^
+web/server_clean.go:2723:12: G306: Expect WriteFile permissions to be 0600 or less (gosec)
+	if err := os.WriteFile(tmp, finalBuf, 0o644); err != nil {
+	          ^
+web/server_clean.go:2872:12: G306: Expect WriteFile permissions to be 0600 or less (gosec)
+	if err := os.WriteFile(tmp, finalBuf, 0o644); err != nil {
+	          ^
+web/server_clean.go:8793:12: G306: Expect WriteFile permissions to be 0600 or less (gosec)
+	if err := os.WriteFile(tmp, enc, 0o644); err != nil {
+	          ^
+web/server_clean.go:3754:31: G115: integer overflow conversion uint64 -> int64 (gosec)
+							o.ObserveInt64(g, int64(snap[k]))
+							                       ^
+web/server_clean.go:3767:32: G115: integer overflow conversion uint64 -> int64 (gosec)
+								o.ObserveInt64(g, int64(v))
+								                       ^
+web/server_clean.go:4579:55: G115: integer overflow conversion int64 -> uint64 (gosec)
+					s.metrics.SetCapabilityAnchorLastWriteUnix(uint64(s.capAnchorLastWrite.Unix()))
+					                                                 ^
+web/server_clean.go:8112:22: G115: integer overflow conversion int64 -> uint64 (gosec)
+		approxSum += uint64(segmentMid) * cnt
+		                   ^
+web/capability_anchor_prometheus_gauge_test.go:46:44: G115: integer overflow conversion int64 -> uint64 (gosec)
+	pm.SetCapabilityAnchorLastWriteUnix(uint64(setUnix))
+	                                          ^
+web/capability_anchor_sla_test.go:42:29: G115: integer overflow conversion int -> uint64 (gosec)
+	if resp.AgeSeconds < uint64(resp.StaleThresholdSeconds) {
+	                           ^
+web/capability_anchor_sla_test.go:68:30: G115: integer overflow conversion int -> uint64 (gosec)
+	if resp.AgeSeconds >= uint64(resp.StaleThresholdSeconds) {
+	                            ^
+web/capability_anchor_status_unix_test.go:60:24: G115: integer overflow conversion uint64 -> int64 (gosec)
+	if diff := now - int64(resp.LastWriteUnix); diff < -5 || diff > 5 {
+	                      ^
+web/semantic_throttle_test.go:22:54: G115: integer overflow conversion int -> uint64 (gosec)
+		snap := map[string]uint64{"scope_violation": uint64(i*i + i)}
+		                                                   ^
+web/capability_diff_endpoint.go:30:6: type `capabilityDiffResponse` is unused (unused)
+type capabilityDiffResponse struct {
+     ^
+web/capability_diff_endpoint.go:40:6: type `simpleCapabilityMeta` is unused (unused)
+type simpleCapabilityMeta struct {
+     ^
+web/capability_diff_endpoint.go:47:6: type `capabilityModified` is unused (unused)
+type capabilityModified struct {
+     ^
+web/capability_diff_endpoint.go:54:6: func `diffCapabilities` is unused (unused)
+func diffCapabilities(base, current []capability.Capability) (added, removed []simpleCapabilityMeta, modified []capabilityModified) {
+     ^
+web/capability_diff_endpoint.go:97:22: func `(*BetaServer).registerCapabilityDiff` is unused (unused)
+func (s *BetaServer) registerCapabilityDiff() {
+                     ^
+web/protocol_flow.go:297:22: func `(*BetaServer).handleProtocolFlowPage` is unused (unused)
+func (s *BetaServer) handleProtocolFlowPage(c *gin.Context) {
+                     ^
+web/server_clean.go:255:2: field `code` is unused (unused)
+	code    int
+	^
+web/server_clean.go:4682:22: func `(*BetaServer).apiCapabilitiesAuditVerify` is unused (unused)
+func (s *BetaServer) apiCapabilitiesAuditVerify(c *gin.Context) {
+                     ^
+web/server_clean.go:4711:22: func `(*BetaServer).apiCapabilitiesAuditAnchor` is unused (unused)
+func (s *BetaServer) apiCapabilitiesAuditAnchor(c *gin.Context) {
+                     ^
+web/server_clean.go:4786:22: func `(*BetaServer).apiCapabilityAnchor` is unused (unused)
+func (s *BetaServer) apiCapabilityAnchor(c *gin.Context) {
+                     ^
+web/server_clean.go:4817:22: func `(*BetaServer).apiCapabilityAnchorLatest` is unused (unused)
+func (s *BetaServer) apiCapabilityAnchorLatest(c *gin.Context) {
+                     ^
+web/server_clean.go:4832:22: func `(*BetaServer).apiCapabilityAnchorMaterial` is unused (unused)
+func (s *BetaServer) apiCapabilityAnchorMaterial(c *gin.Context) {
+                     ^
+web/server_clean.go:4865:22: func `(*BetaServer).apiCapabilityAnchorStatus` is unused (unused)
+func (s *BetaServer) apiCapabilityAnchorStatus(c *gin.Context) {
+                     ^
+web/limits_init.go:30:1: don't use `init` function (gochecknoinits)
+func init() { initLimitsManager() }
+^
+web/bls_aggregate_fuzz_test.go:63:1: don't use `init` function (gochecknoinits)
+func init() { rand.Seed(time.Now().UnixNano()) }
+^
+web/server_clean.go:6692:6: badCond: `older == newer && older == curLen` condition is suspicious (gocritic)
+		if older == newer && older == curLen {
+		   ^
+web/server_clean.go:6568:4: ifElseChain: rewrite if-else to switch statement (gocritic)
+			if e.Signature == "" {
+			^
+web/server_clean.go:7570:3: ifElseChain: rewrite if-else to switch statement (gocritic)
+		if len(filepath) > 3 && filepath[len(filepath)-3:] == ".md" {
+		^
+web/testmain_trace.go:76:2: exitAfterDefer: os.Exit will exit, and `defer func(){...}(...)` will not run (gocritic)
+	os.Exit(code)
+	^
+web/bls_aggregate_endpoint_test.go:147:2: ifElseChain: rewrite if-else to switch statement (gocritic)
+	if wv.Code == 200 {
+	^
+web/jwks_integrity_test.go:196:9: elseif: can replace 'else {if cond {}}' with 'else if cond {}' (gocritic)
+	} else {
+	       ^
+web/model_limits_attestation_signature_test.go:109:9: appendAssign: append result not assigned to the same slice (gocritic)
+	msg := append(prefix, raw...)
+	       ^
+web/model_limits_attestation_signature_test.go:116:17: appendAssign: append result not assigned to the same slice (gocritic)
+	tamperedMsg := append(prefix, tamperedRaw...)
+	               ^
+web/error_response.go:3:1: File is not properly formatted (goimports)
+import (
+^
+web/attestation_external_backend_test.go:4:1: File is not properly formatted (goimports)
+	replaypkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/replay"
+^
+web/attestation_replay_benchmark_test.go:4:1: File is not properly formatted (goimports)
+	replaypkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/replay"
+^
+web/server_clean.go:3216:11: shadow: declaration of "err" shadows declaration at line 3210 (govet)
+				if v, err := strconv.Atoi(raw); err == nil && v > 0 {
+				      ^
+web/server_clean.go:4284:5: shadow: declaration of "err" shadows declaration at line 4275 (govet)
+	if err := json.Unmarshal(b, &cfg); err != nil {
+	   ^
+web/bls_aggregate_endpoint_test.go:45:5: shadow: declaration of "err" shadows declaration at line 28 (govet)
+	if err := json.Unmarshal(w.Body.Bytes(), &issueResp); err != nil {
+	   ^
+web/bls_pop_endpoint_test.go:61:6: shadow: declaration of "err" shadows declaration at line 52 (govet)
+		if err := sk.Deserialize(privRaw); err != nil {
+		   ^
+web/capability_anchor_material_signed_test.go:29:5: shadow: declaration of "err" shadows declaration at line 19 (govet)
+	if err := os.WriteFile(capFile, []byte(testutil.CapTransferV1), 0o600); err != nil {
+	   ^
+web/capability_anchor_material_test.go:28:5: shadow: declaration of "err" shadows declaration at line 15 (govet)
+	if err := os.WriteFile(capFile, []byte(testutil.CapTransferV1), 0o600); err != nil {
+	   ^
+web/capability_anchor_prometheus_gauge_test.go:30:5: shadow: declaration of "err" shadows declaration at line 22 (govet)
+	if err := os.WriteFile(capFile, []byte(`{"schema_version":1,"capabilities":[{"id":"cap.transfer","version":"1.0","stable":true}],["action_mappings":{"transaction:execute":["cap.transfer"]}}`), 0o600); err != nil {
+	   ^
+web/capability_anchor_signature_tamper_test.go:26:5: shadow: declaration of "err" shadows declaration at line 18 (govet)
+	if err := os.WriteFile(capFile, []byte(testutil.CapTransferV1), 0o600); err != nil {
+	   ^
+web/capability_anchor_signature_tamper_test.go:44:5: shadow: declaration of "err" shadows declaration at line 18 (govet)
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+	   ^
+web/capability_anchor_signature_tamper_test.go:56:5: shadow: declaration of "err" shadows declaration at line 18 (govet)
+	if err := json.Unmarshal(resp.Artifact, &wrapper); err != nil {
+	   ^
+web/capability_anchor_signature_verify_test.go:33:5: shadow: declaration of "err" shadows declaration at line 24 (govet)
+	if err := os.WriteFile(capFile, []byte(testutil.CapTransferV1), 0o600); err != nil {
+	   ^
+web/capability_anchor_signature_verify_test.go:63:5: shadow: declaration of "err" shadows declaration at line 24 (govet)
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+	   ^
+web/capability_anchor_signature_verify_test.go:77:5: shadow: declaration of "err" shadows declaration at line 24 (govet)
+	if err := json.Unmarshal(resp.Artifact, &wrapper); err != nil {
+	   ^
+web/model_limit_anchor_test.go:23:8: shadow: declaration of "err" shadows declaration at line 17 (govet)
+	if _, err := limitsFile.Write([]byte(limitsJSON)); err != nil {
+	      ^
+web/notarization_receipt_persistence_test.go:81:5: shadow: declaration of "err" shadows declaration at line 64 (govet)
+	if err := json.Unmarshal(b, &file); err != nil {
+	   ^
+web/notarization_receipt_persistence_test.go:137:5: shadow: declaration of "err" shadows declaration at line 64 (govet)
+	if err := os.WriteFile(capFile, []byte(testutil.CapTransferIssueDelegationCreateV1), 0o600); err != nil {
+	   ^
+web/notarization_receipt_persistence_test.go:140:5: shadow: declaration of "err" shadows declaration at line 64 (govet)
+	if err := srv.loadCapabilitiesFromFile(capFile); err != nil {
+	   ^
+web/replay_snapshot_test.go:29:5: shadow: declaration of "err" shadows declaration at line 25 (govet)
+	if err := store.SnapshotAndCompact(); err != nil {
+	   ^
+web/rotation_v2_explicit_import_test.go:21:5: shadow: declaration of "err" shadows declaration at line 15 (govet)
+	if err := os.WriteFile(cfgPath, b, 0o600); err != nil {
+	   ^
+web/rotation_v2_integration_test.go:29:5: shadow: declaration of "err" shadows declaration at line 23 (govet)
+	if err := os.WriteFile(cfgPath, b, 0o600); err != nil {
+	   ^
+web/rotation_v2_no_sign_test.go:18:5: shadow: declaration of "err" shadows declaration at line 12 (govet)
+	if err := os.WriteFile(cfgPath, b, 0o600); err != nil {
+	   ^
+web/rotation_v2_signature_invalid_test.go:21:5: shadow: declaration of "err" shadows declaration at line 15 (govet)
+	if err := os.WriteFile(cfgPath, b, 0o600); err != nil {
+	   ^
+web/capability_diff_endpoint.go:71:1: The line is 182 characters long, which exceeds the maximum of 130 characters. (lll)
+		if curr.Version != b.Version || curr.Stable != b.Stable || curr.DeprecatedAfter != b.DeprecatedAfter || curr.SunsetAfter != b.SunsetAfter || len(curr.Versions) != len(b.Versions) {
+^
+web/capability_diff_endpoint.go:72:1: The line is 224 characters long, which exceeds the maximum of 130 characters. (lll)
+			modified = append(modified, capabilityModified{ID: id, Before: &simpleCapabilityMeta{ID: b.ID, Version: b.Version, Stable: b.Stable}, After: &simpleCapabilityMeta{ID: curr.ID, Version: curr.Version, Stable: curr.Stable}})
+^
+web/capability_diff_endpoint.go:78:1: The line is 225 characters long, which exceeds the maximum of 130 characters. (lll)
+				modified = append(modified, capabilityModified{ID: id, Before: &simpleCapabilityMeta{ID: b.ID, Version: b.Version, Stable: b.Stable}, After: &simpleCapabilityMeta{ID: curr.ID, Version: curr.Version, Stable: curr.Stable}})
+^
+web/capability_diff_endpoint.go:125:1: The line is 155 characters long, which exceeds the maximum of 130 characters. (lll)
+				respondError(c, http.StatusNotFound, "capability_version_not_found", "version_not_found", "snapshot retention disabled", "rfc111:capability_diff", nil)
+^
+web/capability_diff_endpoint.go:135:1: The line is 156 characters long, which exceeds the maximum of 130 characters. (lll)
+				respondError(c, http.StatusNotFound, "capability_version_not_found", "version_not_found", "base capability hash unknown", "rfc111:capability_diff", nil)
+^
+web/error_response.go:59:1: The line is 136 characters long, which exceeds the maximum of 130 characters. (lll)
+	envelope := ErrorEnvelope{Code: code, Message: msg, Details: det, Retryable: retryable, Source: "gauth", Error: errStr, Success: false}
+^
+web/learning_lab_endpoints.go:107:1: The line is 177 characters long, which exceeds the maximum of 130 characters. (lll)
+	payload := "eyJzdWIiOiJkZW1vLXVzZXIiLCJpc3MiOiJnYXV0aC1sZWFybmluZy1sYWIiLCJleHAiOjE3MzA0OTEwMDAsImNhcGFiaWxpdGllcyI6WyJkZW1vLXRva2VuLWlzc3VhbmNlIiwiYmFzaWMtcG9saWN5LWV2YWwiXX0"
+^
+web/learning_lab_endpoints.go:207:1: The line is 155 characters long, which exceeds the maximum of 130 characters. (lll)
+		"output":        fmt.Sprintf("Experimental operation '%s' executed successfully.\nMode: %v\nResults: All tests passed.", action, req.Parameters["mode"]),
+^
+web/policy_manifest.go:110:1: The line is 135 characters long, which exceeds the maximum of 130 characters. (lll)
+			respondError(c, 500, "manifest_build_failed", "build_failed", "policy manifest build failed", "rfc111:policy_manifest", err.Error())
+^
+web/policy_manifest.go:114:1: The line is 226 characters long, which exceeds the maximum of 130 characters. (lll)
+		if os.Getenv("GAUTH_TOKEN_SIG_MODE") != sigModeEdDSA || cryptoint.GlobalEdDSARegistry == nil || cryptoint.GlobalEdDSARegistry.Active() == nil || len(cryptoint.GlobalEdDSARegistry.Active().Private) != ed25519.PrivateKeySize {
+^
+web/policy_manifest.go:115:1: The line is 132 characters long, which exceeds the maximum of 130 characters. (lll)
+			respondError(c, 500, "signing_unavailable", "signing_unavailable", "active eddsa key unavailable", "rfc111:policy_manifest", nil)
+^
+web/policy_manifest.go:121:1: The line is 140 characters long, which exceeds the maximum of 130 characters. (lll)
+			respondError(c, 500, "signing_unavailable", "signing_unavailable", "active eddsa key unavailable", "rfc111:policy_manifest", "no signer")
+^
+web/policy_manifest.go:127:1: The line is 141 characters long, which exceeds the maximum of 130 characters. (lll)
+			respondError(c, 500, "signing_unavailable", "signing_unavailable", "active eddsa key unavailable", "rfc111:policy_manifest", sErr.Error())
+^
+web/server_clean.go:608:1: The line is 149 characters long, which exceeds the maximum of 130 characters. (lll)
+		return mem.CapabilityAnchorEmitted(), mem.CapabilityAnchorSkipped(), mem.CapabilityRegistryHashChanged(), mem.CapabilityAnchorLastWriteUnix(), true
+^
+web/server_clean.go:618:1: The line is 159 characters long, which exceeds the maximum of 130 characters. (lll)
+		return s.capLastNotarizationReceipt.Hash, s.capLastNotarizationReceipt.Timestamp, s.capLastNotarizationReceipt.Provider, s.capLastNotarizationReceipt.Success
+^
+web/server_clean.go:624:1: The line is 186 characters long, which exceeds the maximum of 130 characters. (lll)
+		return s.externalAnchorLastReceipt.Hash, s.externalAnchorLastReceipt.Timestamp.UTC().Format(time.RFC3339Nano), s.externalAnchorLastReceipt.Provider, s.externalAnchorLastReceipt.Version
+^
+web/server_clean.go:669:1: The line is 134 characters long, which exceeds the maximum of 130 characters. (lll)
+		c.JSON(200, gin.H{"base_hash": currentHash, "current_hash": currentHash, "added": []any{}, "removed": []any{}, "modified": []any{}})
+^
+web/server_clean.go:693:1: The line is 156 characters long, which exceeds the maximum of 130 characters. (lll)
+		} else if base.Version != cur.Version || base.Stable != cur.Stable || base.DeprecatedAfter != cur.DeprecatedAfter || base.SunsetAfter != cur.SunsetAfter {
+^
+web/server_clean.go:734:1: The line is 133 characters long, which exceeds the maximum of 130 characters. (lll)
+		c.Header("Content-Security-Policy", fmt.Sprintf("default-src 'self'; script-src 'self' 'nonce-%s'; frame-ancestors 'none'", nonce))
+^
+web/server_clean.go:808:1: The line is 177 characters long, which exceeds the maximum of 130 characters. (lll)
+			newUser[mid][uid] = struct{ InputLimit, OutputLimit, RateLimit int }{InputLimit: ulim.MaxInputTokens, OutputLimit: ulim.MaxOutputTokens, RateLimit: ulim.MaxRequestsPerMinute}
+^
+web/server_clean.go:856:1: The line is 141 characters long, which exceeds the maximum of 130 characters. (lll)
+// computeModelLimitsSnapshot constructs a canonical ordered representation of current model and user limits and returns JSON bytes and hash.
+^
+web/server_clean.go:946:1: The line is 172 characters long, which exceeds the maximum of 130 characters. (lll)
+	c.JSON(200, gin.H{"success": true, "hash": hash, "generated_at": s.modelLimitsSnapshotAt.Format(time.RFC3339Nano), "model_limits": snap.Models, "user_limits": snap.Users})
+^
+web/server_clean.go:1168:1: The line is 143 characters long, which exceeds the maximum of 130 characters. (lll)
+	entry := combinedAnchorEntry{Digest: hexDigest, Capability: s.capabilityRegistryHash, RotationHead: rotationHead, EmittedAt: time.Now().UTC()}
+^
+web/server_clean.go:1309:1: The line is 244 characters long, which exceeds the maximum of 130 characters. (lll)
+	c.JSON(200, gin.H{"success": true, "counters": ss, "wired": true, "timestamp": time.Now().UTC().Format(time.RFC3339Nano), "anomaly": gin.H{"rate_per_minute_60s": rates60, "rate_per_minute_300s": rates300, "scores": s.currentSemanticScores()}})
+^
+web/server_clean.go:1317:1: The line is 179 characters long, which exceeds the maximum of 130 characters. (lll)
+// Error codes align with service errors: invalid_payload | service_disabled | unauthorized | already_pending | not_pending | quorum_satisfied | already_finalized | internal_error
+^
+web/server_clean.go:1489:1: The line is 187 characters long, which exceeds the maximum of 130 characters. (lll)
+			c.JSON(400, gin.H{"success": false, "error": "model_user_input_limit_exceeded", "model_id": in.ModelID, "user_id": in.UserID, "limit": uLim.InputLimit, "input_tokens": in.InputTokens})
+^
+web/server_clean.go:1501:1: The line is 191 characters long, which exceeds the maximum of 130 characters. (lll)
+			c.JSON(400, gin.H{"success": false, "error": "model_user_output_limit_exceeded", "model_id": in.ModelID, "user_id": in.UserID, "limit": uLim.OutputLimit, "output_tokens": in.OutputTokens})
+^
+web/server_clean.go:1536:1: The line is 176 characters long, which exceeds the maximum of 130 characters. (lll)
+				c.JSON(429, gin.H{"success": false, "error": "model_user_rate_limit_exceeded", "model_id": in.ModelID, "user_id": in.UserID, "limit": uLim.RateLimit, "window_seconds": 60})
+^
+web/server_clean.go:1549:1: The line is 143 characters long, which exceeds the maximum of 130 characters. (lll)
+		c.JSON(400, gin.H{"success": false, "error": "model_limit_exceeded", "model_id": in.ModelID, "limit": limit, "input_tokens": in.InputTokens})
+^
+web/server_clean.go:1653:1: The line is 153 characters long, which exceeds the maximum of 130 characters. (lll)
+				s.writeModelLimitAudit(in.ModelID, "rate_extended", exceededPeriod.Count, exceededPeriod.Limit, now.Unix(), int(exceededPeriod.Period.Seconds()), "")
+^
+web/server_clean.go:1659:1: The line is 245 characters long, which exceeds the maximum of 130 characters. (lll)
+			c.JSON(429, gin.H{"success": false, "error": "model_rate_limit_exceeded", "model_id": in.ModelID, "limit": exceededPeriod.Limit, "window_seconds": int(exceededPeriod.Period.Seconds()), "period": ratelimit.FormatPeriod(exceededPeriod.Period)})
+^
+web/server_clean.go:1666:1: The line is 223 characters long, which exceeds the maximum of 130 characters. (lll)
+	c.JSON(200, gin.H{"success": true, "model_id": in.ModelID, "input_tokens": in.InputTokens, "output_tokens": in.OutputTokens, "input_limit": limit, "output_limit": outLimit, "rate_limit": rateLimit, "limit_enforced": true})
+^
+web/server_clean.go:1672:1: The line is 139 characters long, which exceeds the maximum of 130 characters. (lll)
+func (s *BetaServer) writeModelLimitAudit(modelID, kind string, provided, limit int, windowStart int64, windowSeconds int, userID string) {
+^
+web/server_clean.go:1689:1: The line is 198 characters long, which exceeds the maximum of 130 characters. (lll)
+	}{TS: time.Now().Unix(), ModelID: modelID, UserID: userID, Kind: kind, Provided: provided, Limit: limit, WindowStart: windowStart, WindowSeconds: windowSeconds, PrevHash: s.modelLimitAuditPrevHash}
+^
+web/server_clean.go:1936:1: The line is 211 characters long, which exceeds the maximum of 130 characters. (lll)
+// {"success":true,"configured":true,"snapshot":{"hash":"sha256:..","generated_at":"RFC3339"},"audit":{"head_hash":"sha256:..","entries":N},"anchor":{"latest_hash":"sha256:..","entries":M},"strict_unknown":true}
+^
+web/server_clean.go:2068:1: The line is 200 characters long, which exceeds the maximum of 130 characters. (lll)
+			}{ModelID: topModel, Last10Sec: topLast10, AvgActive: topAvg, Factor: s.modelLimitSurgeFactor, MinEvents: s.modelLimitSurgeMinEvents, Triggered: true, At: time.Now().UTC().Format(time.RFC3339Nano)}
+^
+web/server_clean.go:2290:1: The line is 176 characters long, which exceeds the maximum of 130 characters. (lll)
+		c.JSON(400, gin.H{"code": "attestation_invalid_json", "message": "attestation verify invalid JSON", "details": gin.H{"http_path": c.FullPath(), "content_length": len(body)}})
+^
+web/server_clean.go:2342:1: The line is 254 characters long, which exceeds the maximum of 130 characters. (lll)
+	u := unsignedStruct{Success: att.Success, Configured: att.Configured, Reason: att.Reason, Nonce: att.Nonce, Snapshot: att.Snapshot, Audit: att.Audit, Anchor: att.Anchor, StrictUnknown: att.StrictUnknown, Surge: att.Surge, Notarization: att.Notarization}
+^
+web/server_clean.go:2397:1: The line is 170 characters long, which exceeds the maximum of 130 characters. (lll)
+			c.JSON(409, gin.H{"code": "attestation_nonce_replay", "message": "attestation nonce replay detected", "details": gin.H{"http_path": c.FullPath(), "nonce": att.Nonce}})
+^
+web/server_clean.go:2403:1: The line is 146 characters long, which exceeds the maximum of 130 characters. (lll)
+	c.JSON(200, gin.H{"success": true, "valid": valid, "kid": att.SigKid, "sig_mode": att.SigMode, "combined_hash": fmt.Sprintf("sha256:%x", ch[:])})
+^
+web/server_clean.go:2660:1: The line is 136 characters long, which exceeds the maximum of 130 characters. (lll)
+	fmt.Fprintf(os.Stderr, "[violations] restored counters from persistence file %s (format=%s)\n", s.violationPersistPath, func() string {
+^
+web/server_clean.go:2915:1: The line is 169 characters long, which exceeds the maximum of 130 characters. (lll)
+	c.JSON(200, gin.H{"success": true, "configured": true, "integrity": integrity, "details": gin.H{"expected": w.Hash, "recomputed": recomputed, "prev_hash": w.PrevHash}})
+^
+web/server_clean.go:2947:1: The line is 169 characters long, which exceeds the maximum of 130 characters. (lll)
+	c.JSON(200, gin.H{"success": true, "configured": true, "integrity": integrity, "details": gin.H{"expected": w.Hash, "recomputed": recomputed, "prev_hash": w.PrevHash}})
+^
+web/server_clean.go:2951:1: The line is 194 characters long, which exceeds the maximum of 130 characters. (lll)
+// Reason values align with decision reason taxonomy (status_change, invalid_transition, init, noop, maintenance, rate_limited, policy_violation, not_found, unsupported_status, invalid_payload).
+^
+web/server_clean.go:3013:1: The line is 176 characters long, which exceeds the maximum of 130 characters. (lll)
+var transparent1x1Gif = []byte("GIF89a\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\xFF\xFF\xFF!\xF9\x04\x01\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;")
+^
+web/server_clean.go:3089:1: The line is 927 characters long, which exceeds the maximum of 130 characters. (lll)
+	s := &BetaServer{router: r, start: time.Now(), jobs: NewJobManager(200), audit: NewAuditLog(500), events: NewEventHub(500), tokens: NewTokenStore(500), port: port, policyRL: newSimpleRateLimiter(20, time.Minute), replayStore: NewReplayNonceStore(5 * time.Minute), delegationStatus: make(map[string]string), metrics: memoryMetrics, lifecycleEvents: make(map[string][]*LifecycleEvent), lifecycleCap: 250, violationHistoryCap: 400, semanticHistoryCap: 300, requiredActionCaps: map[string][]string{"transaction:execute": {"cap.transfer"}, "transaction:pay": {"cap.transfer"}, "transaction:issue": {"cap.issue"}, "delegation:create": {"cap.delegation.create"}, "delegation:revoke": {"cap.delegation.revoke"}}, stopCh: make(chan struct{}), modelLimits: make(map[string]int), attestStreamSubs: make(map[chan modelLimitsAttestation]struct{}), attestStreamCounts: make(map[string]uint64), protocolFlowManager: NewProtocolFlowManager()}
+^
+web/server_clean.go:3106:1: The line is 132 characters long, which exceeds the maximum of 130 characters. (lll)
+		// Attempt JSON parse only if not yet activated; after activation we skip parse to allow conflict detection even if stream reused.
+^
+web/server_clean.go:3263:1: The line is 137 characters long, which exceeds the maximum of 130 characters. (lll)
+			fmt.Fprintf(os.Stderr, "[capabilities] loaded from file path=%s capabilities=%d\n", capPath, len(capability.DefaultRegistry().List()))
+^
+web/capability_diff_endpoint.go:93:2: naked return in func `diffCapabilities` with 40 lines of code (nakedret)
+	return
+	^
+web/server_clean.go:1050:3: SA4006: this value of `force` is never used (staticcheck)
+		force := os.Getenv("GAUTH_ROTATIONS_V2_FORCE_SIGN") == "1"
+		^
+web/capability_anchor_notarization_provider_metrics_test.go:62:5: SA4006: this value of `hasLatest` is never used (staticcheck)
+	if _, hasLatest := srv.notarizer.(interface{ Latest() interface{} }); hasLatest { /* noop - type hint to avoid unused */
+	   ^
+web/server_clean.go:7100:12: SA4010: this result of append is never used, except maybe in other appends (staticcheck)
+				sigs = append(sigs, sigBytes)
+				       ^
+pkg/rfc0111/audit_sink_integration_test.go:132:19: string `create_delegation` has 6 occurrences, make it a constant (goconst)
+		if ev.Action == "create_delegation" && ev.Result == audit.ResultSuccess {
+		                ^
+pkg/rfc0111/rfc0111.go:2322:1: cyclomatic complexity 73 of func `(*Service).ValidateDelegationCtx` is high (> 25) (gocyclo)
+func (s *Service) ValidateDelegationCtx(ctx context.Context, poaID, grantee, action string) error {
+^
+pkg/rfc0111/rfc0111.go:2749:1: cyclomatic complexity 58 of func `(*Service).ValidateDelegationRich` is high (> 25) (gocyclo)
+func (s *Service) ValidateDelegationRich(ctx context.Context, poaID, grantee string, vctx ValidationContext) error {
+^
+pkg/rfc0111/rfc0111.go:3839:1: cyclomatic complexity 57 of func `generateAuthToken` is high (> 25) (gocyclo)
+func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
+^
+pkg/rfc0111/rfc0111.go:3571:1: cyclomatic complexity 39 of func `(*Service).validateDelegationRequest` is high (> 25) (gocyclo)
+func (s *Service) validateDelegationRequest(req DelegationRequest) error {
+^
+pkg/rfc0111/rfc0111.go:2616:1: cyclomatic complexity 27 of func `(*Service).ApproveRevocation` is high (> 25) (gocyclo)
+func (s *Service) ApproveRevocation(ctx context.Context, poaID, approver string) error {
+^
+pkg/rfc0111/rfc0111.go:3677:6: func `validateInheritedScopeV2` is unused (unused)
+func validateInheritedScopeV2(parentScope, childScope []string) error {
+     ^
+pkg/rfc0111/canonical_version_weights_test.go:77:6: func `intToStr` is unused (unused)
+func intToStr(i int) string { return fmt.Sprintf("%d", i) }
+     ^
+pkg/rfc0111/rfc0111_signature_replay_test.go:9:6: type `memorySigReplayStore` is unused (unused)
+type memorySigReplayStore struct{ seen map[string]time.Time }
+     ^
+pkg/rfc0111/rfc0111_signature_replay_test.go:11:6: func `newMemorySigReplayStore` is unused (unused)
+func newMemorySigReplayStore() *memorySigReplayStore {
+     ^
+pkg/rfc0111/rfc0111_signature_replay_test.go:14:32: func `(*memorySigReplayStore).SeenSignature` is unused (unused)
+func (m *memorySigReplayStore) SeenSignature(k string) (bool, error) {
+                               ^
+pkg/rfc0111/rfc0111_signature_replay_test.go:20:32: func `(*memorySigReplayStore).RecordSignature` is unused (unused)
+func (m *memorySigReplayStore) RecordSignature(k string, at time.Time) error {
+                               ^
+pkg/rfc0111/rfc0111_signature_replay_test.go:32:6: type `failClosedSigReplayStore` is unused (unused)
+type failClosedSigReplayStore struct{}
+     ^
+pkg/rfc0111/rfc0111_signature_replay_test.go:34:35: func `failClosedSigReplayStore.SeenSignature` is unused (unused)
+func (f failClosedSigReplayStore) SeenSignature(k string) (bool, error)         { return false, nil }
+                                  ^
+pkg/rfc0111/rfc0111_signature_replay_test.go:35:35: func `failClosedSigReplayStore.RecordSignature` is unused (unused)
+func (f failClosedSigReplayStore) RecordSignature(k string, at time.Time) error { return nil }
+                                  ^
+pkg/rfc0111/rfc0111_anchor_test.go:43:2: declaration has 21 blank identifiers (dogsled)
+	_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, attempts, failures, _, _, _, _, _, _ := mem.Snapshot()
+	^
+pkg/rfc0111/rfc0111_anchor_test.go:68:2: declaration has 21 blank identifiers (dogsled)
+	_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, attempts, failures, _, _, _, _, _, _ := mem.Snapshot()
+	^
+pkg/rfc0111/taxonomy.go:15:1: don't use `init` function (gochecknoinits)
+func init() {
+^
+pkg/rfc0111/rfc0111.go:1311:7: dupBranchBody: both branches in if statement have same body (gocritic)
+						if decErr != nil {
+						^
+pkg/rfc0111/rfc0111.go:2147:10: elseif: can replace 'else {if cond {}}' with 'else if cond {}' (gocritic)
+		} else {
+		       ^
+pkg/rfc0111/rfc0111.go:2402:13: elseif: can replace 'else {if cond {}}' with 'else if cond {}' (gocritic)
+					} else {
+					       ^
+pkg/rfc0111/rfc0111_ledger_integration_test.go:25:161: unlambda: replace `func() time.Time { return time.Now() }` with `time.Now` (gocritic)
+	svc := NewService(al, az, WithLedger(lstore), WithMandatorySignatures(), WithSignerProvider(func() (cr.Signer, error) { return kp.ActiveSigner() })).WithClock(func() time.Time { return time.Now() })
+	                                                                                                                                                               ^
+pkg/rfc0111/rfc0111.go:3866:10: shadow: declaration of "err" shadows declaration at line 3852 (govet)
+			if v, err := strconv.Atoi(limStr); err == nil && v > 0 && v < 10_000_000 {
+			      ^
+pkg/rfc0111/bolt_repository_indexing_test.go:63:6: shadow: declaration of "err" shadows declaration at line 14 (govet)
+		if err := repo.Create(p); err != nil {
+		   ^
+pkg/rfc0111/bolt_repository_indexing_test.go:144:6: shadow: declaration of "err" shadows declaration at line 104 (govet)
+		if err := repo.Create(p); err != nil {
+		   ^
+pkg/rfc0111/bolt_repository_indexing_test.go:216:6: shadow: declaration of "err" shadows declaration at line 176 (govet)
+		if err := repo.Create(p); err != nil {
+		   ^
+pkg/rfc0111/bolt_repository_indexing_test.go:283:6: shadow: declaration of "err" shadows declaration at line 250 (govet)
+		if err := repo.Create(p); err != nil {
+		   ^
+pkg/rfc0111/bolt_repository_indexing_test.go:418:6: shadow: declaration of "err" shadows declaration at line 368 (govet)
+		if err := repo.Create(p); err != nil {
+		   ^
+pkg/rfc0111/bolt_repository_indexing_test.go:473:6: shadow: declaration of "err" shadows declaration at line 454 (govet)
+		if err := repo.Create(poa); err != nil {
+		   ^
+pkg/rfc0111/bolt_repository_indexing_test.go:535:5: shadow: declaration of "err" shadows declaration at line 520 (govet)
+	if err := repo1.Create(poa); err != nil {
+	   ^
+pkg/rfc0111/bolt_repository_indexing_test.go:584:6: shadow: declaration of "err" shadows declaration at line 565 (govet)
+		if err := repo.Create(poa); err != nil {
+		   ^
+pkg/rfc0111/bolt_repository_test.go:80:5: shadow: declaration of "err" shadows declaration at line 75 (govet)
+	if err := repo.Create(p); err != nil {
+	   ^
+pkg/rfc0111/canonical_prop_test.go:82:9: shadow: declaration of "err" shadows declaration at line 68 (govet)
+		d, _, err := CanonicalPOADigest(basePOA)
+		      ^
+pkg/rfc0111/error_mapping_test.go:70:5: shadow: declaration of "err" shadows declaration at line 43 (govet)
+	if err := svc.RevokeDelegation(dr2.POA.ID, "alice"); err != nil {
+	   ^
+pkg/rfc0111/redis_replay_store_test.go:25:5: shadow: declaration of "err" shadows declaration at line 13 (govet)
+	if err := rs.Record(jti, time.Now()); err != nil {
+	   ^
+pkg/rfc0111/rfc0111_ledger_integration_test.go:35:5: shadow: declaration of "err" shadows declaration at line 21 (govet)
+	if err := svc.RevokeDelegation(del.POA.ID, "alice"); err != nil {
+	   ^
+pkg/rfc0111/rfc0111_persistence_durability_test.go:28:6: shadow: declaration of "err" shadows declaration at line 20 (govet)
+		if err := br.Close(); err != nil {
+		   ^
+pkg/rfc0111/rfc0111_strict_auth_test.go:40:5: shadow: declaration of "err" shadows declaration at line 26 (govet)
+	if err := svcSoft.ValidateDelegationCtx(context.Background(), resp.POA.ID, "bob", "read"); err != nil {
+	   ^
+pkg/rfc0111/rfc0111_token_test.go:102:5: shadow: declaration of "err" shadows declaration at line 92 (govet)
+	if err := svc.decryptWithAnyKey(dr.AuthToken, &claims); err != nil {
+	   ^
+pkg/rfc0111/signature_agility_test.go:26:8: shadow: declaration of "err" shadows declaration at line 20 (govet)
+	if _, err := rand.Read(msg); err != nil {
+	      ^
+pkg/rfc0111/validator_enhanced_integration_test.go:220:6: shadow: declaration of "err" shadows declaration at line 190 (govet)
+		if err := store.IncrementDailyUsage(poa.ID, today, usage); err != nil {
+		   ^
+pkg/rfc0111/validator_enhanced_integration_test.go:294:8: shadow: declaration of "err" shadows declaration at line 256 (govet)
+				if err := store.IncrementDailyUsage(delegationID, today, 10.0); err != nil {
+				   ^
+pkg/rfc0111/validator_enhanced_test.go:215:5: shadow: declaration of "err" shadows declaration at line 197 (govet)
+	if err := store.IncrementDailyUsage(delegationID, today, 100.50); err != nil {
+	   ^
+pkg/rfc0111/validator_enhanced_test.go:228:5: shadow: declaration of "err" shadows declaration at line 197 (govet)
+	if err := store.IncrementDailyUsage(delegationID, today, 25.25); err != nil {
+	   ^
+pkg/rfc0111/validator_enhanced_test.go:251:5: shadow: declaration of "err" shadows declaration at line 197 (govet)
+	if err := store.ResetDailyUsage(delegationID, today); err != nil {
+	   ^
+pkg/rfc0111/rfc0111.go:1122:5: ineffectual assignment to ok (ineffassign)
+				ok = true
+				^
+pkg/rfc0111/audit_sink_integration.go:186:3: SA9003: empty branch (staticcheck)
+		if s.metrics != nil {
+		^
+pkg/rfc0111/rfc0111.go:3894:13: ST1023: should omit type poaPkg.RawPOAHashAlg from declaration; it will be inferred from the right-hand side (stylecheck)
+			var algo poaPkg.RawPOAHashAlg = poaPkg.RawPOAHashSHA256
+			         ^
+cmd/snapshot/main.go:60:4: exitAfterDefer: os.Exit will exit, and `defer f.Close()` will not run (gocritic)
+			os.Exit(9)
+			^
+pkg/pdp/obligations_test.go:18:6: type `simpleFailExecutor` is unused (unused)
+type simpleFailExecutor struct{ *iobligations.SimpleExecutor }
+     ^
+pkg/pdp/conflict_diagnostics_test.go:489:2: declaration has 3 blank identifiers (dogsled)
+	effect, _, _, _, conflicts := strategy.CombineWithDiagnostics(steps, nil)
+	^
+pkg/pdp/conflict_diagnostics.go:134:20: appendAssign: append result not assigned to the same slice (gocritic)
+			allPolicyIDs := append(allowIDs, denyIDs...)
+			                ^
+pkg/pdp/conflict_diagnostics.go:218:46: unnecessary leading newline (whitespace)
+					hasOverlap(r1.Resources, r2.Resources) {
+					                                        ^
+cmd/web-server/main.go:34:4: exitAfterDefer: os.Exit will exit, and `defer func(){...}(...)` will not run (gocritic)
+			os.Exit(0)
+			^
+test/load/load_test.go:71:6: type `workerTask` is unused (unused)
+type workerTask struct {
+     ^
+internal/arbitration/webhook_test.go:241:13: Error return value of `client.Send` is not checked (errcheck)
+	client.Send(context.Background(), WebhookPayload{
+	           ^
+internal/arbitration/webhook_test.go:247:13: Error return value of `client.Send` is not checked (errcheck)
+	client.Send(context.Background(), WebhookPayload{
+	           ^
+internal/arbitration/webhook_test.go:344:13: Error return value of `client.Send` is not checked (errcheck)
+	client.Send(context.Background(), payload)
+	           ^
+internal/arbitration/webhook.go:212:60: G115: integer overflow conversion int -> uint (gosec)
+			backoff := w.config.RetryBackoff * time.Duration(1<<uint(attempt))
+			                                                        ^
+internal/arbitration/webhook.go:133:3: SA9003: empty branch (staticcheck)
+		if _, err := fmt.Sscanf(r, "%d", &maxRetries); err == nil && maxRetries > 0 {
+		^
+pkg/gauth/advanced_integration_test.go:226:2: G101: Potential hardcoded credentials (gosec)
+	validToken := "v4.public.eyJzdWIiOiJ1c2VyMTIzIiwiaXNzIjoiaHR0cHM6Ly9hdXRoLmV4YW1wbGUuY29tIn0.eyJraWQiOiJrZXktMTIzIiwiYWxnIjoiRWQyNTUxOSIsImlzcyI6Imh0dHBzOi8vYXV0aC5leGFtcGxlLmNvbSJ9"
+	^
+pkg/gauth/gauth.go:220:8: type `durableReplayFactory` is unused (unused)
+		type durableReplayFactory interface {
+		     ^
+pkg/gauth/gauth_parsing_prop_test.go:531:6: func `abs` is unused (unused)
+func abs(x int64) int64 {
+     ^
+cmd/gauth-server/main.go:40:4: exitAfterDefer: os.Exit will exit, and `defer resp.Body.Close()` will not run (gocritic)
+			os.Exit(0)
+			^
+internal/circuit/circuit.go:100:2: singleCaseSwitch: should rewrite switch statement to if statement (gocritic)
+	switch cb.state {
+	^
+cmd/multisig-bench/main.go:330:2: naked return in func `computePercentiles` with 37 lines of code (nakedret)
+	return
+	^
+cmd/multisig-bench/main.go:190:4: SA9003: empty branch (staticcheck)
+			if _, err := rng.Read(msg[:32]); err == nil { /* ignore error for determinism */
+			^
+cmd/multisig-bench/main.go:158:8: ST1023: should omit type imetrics.Metrics from declaration; it will be inferred from the right-hand side (stylecheck)
+	var m imetrics.Metrics = imetrics.Noop
+	      ^
+cmd/verify/verify.go:159:16: G107: Potential HTTP request made with variable url (gosec)
+		resp, err := http.Get(url)
+		             ^
+internal/cascade/comprehensive_test.go:199:18: ST1023: should omit type string from declaration; it will be inferred from the right-hand side (stylecheck)
+		var previousID string = ""
+		               ^
+internal/cascade/comprehensive_test.go:18:55: unnecessary leading newline (whitespace)
+func TestCascadeProcessorComprehensive(t *testing.T) {
+                                                      ^
+cmd/rotation-verify/main.go:10:2: SA1019: "io/ioutil" has been deprecated since Go 1.19: As of Go 1.16, the same functionality is now provided by package [io] or package [os], and those implementations should be preferred in new code. See the specific function documentation for details. (staticcheck)
+	"io/ioutil"
+	^
+web/smoketest/main_test.go:19:7: G114: Use of net/http serve function that has no support for setting timeouts (gosec)
+		_ = http.ListenAndServe(":8080", bs.Engine())
+		    ^
+web/smoketest/ui_smoke_test.go:18:15: G107: Potential HTTP request made with variable url (gosec)
+	resp, err := http.Get(url)
+	             ^
+pkg/circuit/circuit.go:140:48: G115: integer overflow conversion int -> uint32 (gosec)
+	return cb.counts.ConsecutiveFailures >= uint32(cb.maxFailures)
+	                                              ^
+pkg/enforcement/enforcement.go:151:23: string `deny` has 10 occurrences, but such constant `DecisionDeny` already exists (goconst)
+		decision.Decision = "deny"
+		                    ^
+test/auth_cache_crypto_rotation_test.go:20:35: string `false` has 5 occurrences, make it a constant (goconst)
+	if dec1.Metadata["cache_hit"] != "false" {
+	                                 ^
+test/attestation_proof_test.go:208:6: func `contains` is unused (unused)
+func contains(haystack, needle string) bool {
+     ^
+test/attestation_proof_test.go:213:6: func `indexOf` is unused (unused)
+func indexOf(h, n string) int {
+     ^
+test/rotation_v2_continuity_test.go:24:6: func `continuityTestServer` is unused (unused)
+func continuityTestServer(t *testing.T) *web.BetaServer {
+     ^
+pkg/compliance/legal_framework.go:486:35: func `(*LegalFrameworkValidator).isWithinAllowedTimeWindow` is unused (unused)
+func (v *LegalFrameworkValidator) isWithinAllowedTimeWindow(timeWindows []string) bool {
+                                  ^
+pkg/replay/durable_replay_store_test.go:75:15: Error return value of `store1.Record` is not checked (errcheck)
+	store1.Record(jti1, time.Now())
+	             ^
+pkg/replay/durable_replay_store_test.go:76:15: Error return value of `store1.Record` is not checked (errcheck)
+	store1.Record(jti2, time.Now())
+	             ^
+pkg/replay/durable_replay_store_test.go:120:14: Error return value of `store.Record` is not checked (errcheck)
+	store.Record(jti, time.Now())
+	            ^
+pkg/replay/durable_replay_store_test.go:157:16: Error return value of `store1.Record` is not checked (errcheck)
+		store1.Record(jti, time.Now())
+		             ^
+pkg/replay/durable_replay_store_test.go:213:16: Error return value of `store.Record` is not checked (errcheck)
+			store.Record(jti, time.Now())
+			            ^
+pkg/replay/durable_replay_store_test.go:251:14: Error return value of `store.Record` is not checked (errcheck)
+	store.Record("jti-1", time.Now())
+	            ^
+pkg/replay/eviction_test.go:102:12: Error return value of `store.Seen` is not checked (errcheck)
+	store.Seen("token5")
+	          ^
+pkg/replay/eviction_test.go:158:12: Error return value of `store.Seen` is not checked (errcheck)
+	store.Seen("token5")
+	          ^
+pkg/replay/eviction_test.go:279:12: Error return value of `store.Seen` is not checked (errcheck)
+	store.Seen("token1")
+	          ^
+pkg/replay/gauth_integration_test.go:118:14: Error return value of `adapter.Seen` is not checked (errcheck)
+	adapter.Seen("jti-005")
+	            ^
+pkg/replay/gauth_integration_test.go:156:23: Error return value of `adapter.CheckAndStore` is not checked (errcheck)
+	adapter.CheckAndStore("jti-ttl-test")
+	                     ^
+pkg/replay/gauth_integration_test.go:216:24: Error return value of `adapter.CheckAndStore` is not checked (errcheck)
+		adapter.CheckAndStore("jti-persist-1")
+		                     ^
+pkg/replay/gauth_integration_test.go:217:24: Error return value of `adapter.CheckAndStore` is not checked (errcheck)
+		adapter.CheckAndStore("jti-persist-2")
+		                     ^
+pkg/replay/durable_replay_store.go:31:9: string `ttl` has 5 occurrences, make it a constant (goconst)
+	return "ttl"
+	       ^
+pkg/replay/durable_replay_store.go:337:1: cyclomatic complexity 27 of func `(*DurableReplayStore).applyEviction` is high (> 25) (gocyclo)
+func (d *DurableReplayStore) applyEviction(now time.Time) {
+^
+internal/jurisdiction/api_handler.go:171:7: type `kv` is unused (unused)
+	type kv struct {
+	     ^
+internal/sunset/controller.go:123:51: G115: integer overflow conversion uint64 -> int (gosec)
+	threshold := adoptionThresholdForPhase(c.cfg, int(phase))
+	                                                 ^
+internal/sunset/controller.go:140:25: G115: integer overflow conversion uint64 -> int (gosec)
+			next := nextPhase(int(phase))
+			                     ^
+internal/sunset/controller.go:141:17: G115: integer overflow conversion uint64 -> int (gosec)
+			if next > int(phase) {
+			             ^
+cmd/gen-crypto-vectors/main.go:145:14: SA1019: elliptic.Marshal has been deprecated since Go 1.21: for ECDH, use the crypto/ecdh package. This function returns an encoding equivalent to that of PublicKey.Bytes in crypto/ecdh. (staticcheck)
+	pubBytes := elliptic.Marshal(elliptic.P256(), ePriv.PublicKey.X, ePriv.PublicKey.Y)
+	            ^
+internal/metrics/registry_test.go:339:19: Error return value of `registry.Register` is not checked (errcheck)
+	registry.Register(c1)
+	                 ^
+internal/metrics/registry_test.go:340:19: Error return value of `registry.Register` is not checked (errcheck)
+	registry.Register(c2)
+	                 ^
+internal/metrics/registry_test.go:341:19: Error return value of `registry.Register` is not checked (errcheck)
+	registry.Register(c3)
+	                 ^
+internal/metrics/metrics_test.go:22:45: ineffectual assignment to sif (ineffassign)
+	d, vc, tot, mn, mx, avg, p50, p90, p99, _, sif, sv, svf, rif, spkm, aa, af, rse, rslc, rslt, rslm, rh, rm = m.Snapshot()
+	                                           ^
+internal/metrics/metrics.go:645:3: naked return in func `ValidationLatencyPercentiles` with 37 lines of code (nakedret)
+		return
+		^
+internal/metrics/metrics.go:653:3: naked return in func `ValidationLatencyPercentiles` with 37 lines of code (nakedret)
+		return
+		^
+internal/metrics/metrics.go:678:2: naked return in func `ValidationLatencyPercentiles` with 37 lines of code (nakedret)
+	return
+	^
+internal/metrics/prometheus_adapter.go:1518:29: ST1016: methods on the same type should have the same receiver name (seen 11x "pm", 132x "p") (stylecheck)
+func (p *PrometheusMetrics) Collect(ch chan<- prom.Metric) { /* intentionally empty */ }
+                            ^
+internal/metrics/registry.go:185:29: ST1016: methods on the same type should have the same receiver name (seen 119x "reg", 8x "r") (stylecheck)
+func (r *CollectorRegistry) CloseAll() map[string]error {
+                            ^
+internal/ai/capability_matrix_fuzz_test.go:54:59: string `deny` has 14 occurrences, but such constant `DecisionDeny` already exists (goconst)
+		if decision.Decision != "allow" && decision.Decision != "deny" {
+		                                                        ^
+pkg/crypto/signature_prop_test.go:108:14: Error return value of `rand.Read` is not checked (errcheck)
+				rand.Read(msg)
+				         ^
+pkg/crypto/signature_prop_test.go:147:13: Error return value of `rand.Read` is not checked (errcheck)
+			rand.Read(badSig)
+			         ^
+pkg/crypto/ecdsa_provider.go:70:18: SA1019: elliptic.Marshal has been deprecated since Go 1.21: for ECDH, use the crypto/ecdh package. This function returns an encoding equivalent to that of PublicKey.Bytes in crypto/ecdh. (staticcheck)
+	uncompressed := elliptic.Marshal(elliptic.P256(), pub.X, pub.Y)
+	                ^
+pkg/crypto/ecdsa_provider.go:88:9: SA1019: elliptic.Marshal has been deprecated since Go 1.21: for ECDH, use the crypto/ecdh package. This function returns an encoding equivalent to that of PublicKey.Bytes in crypto/ecdh. (staticcheck)
+	return elliptic.Marshal(elliptic.P256(), pk.X, pk.Y), AlgoECDSAP256, nil
+	       ^
+pkg/gagent/gagent.go:227:32: string `deny` has 10 occurrences, make it a constant (goconst)
+	if policyDecision.Decision == "deny" {
+	                              ^
+pkg/gagent/gagent.go:267:31: string `allow` has 5 occurrences, make it a constant (goconst)
+	} else if policy.Decision == "allow" && len(policy.Violations) == 0 {
+	                             ^
+pkg/gagent/gagent.go:304:10: string `review` has 5 occurrences, make it a constant (goconst)
+		return "review"
+		       ^
+pkg/loadtest/benchmark_test.go:134:6: func `runComprehensiveBenchmarks` is unused (unused)
+func runComprehensiveBenchmarks() {
+     ^
+pkg/loadtest/authorization_loadtest.go:120:2: ineffectual assignment to operation (ineffassign)
+	operation := g.Operations[g.rng.Intn(len(g.Operations))]
+	^
+pkg/poa/raw_poa_stream.go:105:47: G115: integer overflow conversion int -> uint32 (gosec)
+		binary.BigEndian.PutUint32(lenBuf[:], uint32(len(b)))
+		                                            ^
+pkg/poa/poa_digest_test.go:37:24: SA1012: do not pass a nil Context, even if a function permits it; pass context.TODO if you are unsure about which Context to use (staticcheck)
+	poa, err := svc.Issue(nil, &Request{Subject: "bob", Resource: "ledger", Action: "append", Scope: []string{"ledger.append"}})
+	                      ^
+pkg/poa/poa_digest_test.go:59:24: SA1012: do not pass a nil Context, even if a function permits it; pass context.TODO if you are unsure about which Context to use (staticcheck)
+	poa, err := svc.Issue(nil, req)
+	                      ^
+pkg/poa/poa_multisig_test.go:51:27: SA1012: do not pass a nil Context, even if a function permits it; pass context.TODO if you are unsure about which Context to use (staticcheck)
+	poaObj, err := svc.Issue(nil, &Request{Subject: "alice", Resource: "vault", Action: "read"})
+	                         ^
+internal/crypto/keystore.go:136:2: field `nextRotation` is unused (unused)
+	nextRotation time.Time
+	^
+internal/crypto/keystore.go:137:2: field `mu` is unused (unused)
+	mu           sync.RWMutex
+	^
+internal/crypto/multitenant_manager.go:127:6: func `calculateJitteredInterval` is unused (unused)
+func calculateJitteredInterval(base, maxJitter time.Duration) time.Duration {
+     ^
+internal/crypto/rotation_integration_test.go:112:13: SA5011: possible nil pointer dereference (staticcheck)
+		if policy.Backend != "file" {
+		          ^
+internal/crypto/rotation_integration_test.go:108:6: SA5011(related information): this check suggests that the pointer can be nil (staticcheck)
+		if policy == nil {
+		   ^
+internal/notary/snapshot_cli_failures_test.go:29:2: declaration has 3 blank identifiers (dogsled)
+	_, file, _, _ := runtime.Caller(0)
+	^
+internal/notary/snapshot_cli_integration_test.go:31:2: declaration has 3 blank identifiers (dogsled)
+	_, file, _, _ := runtime.Caller(0)
+	^

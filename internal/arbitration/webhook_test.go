@@ -266,7 +266,7 @@ func TestWebhookEnabledArbiter_Integration(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var payload WebhookPayload
 		body, _ := io.ReadAll(r.Body)
-		json.Unmarshal(body, &payload)
+		_ = json.Unmarshal(body, &payload) //nolint:errcheck
 
 		mu.Lock()
 		receivedEvents[payload.Event]++
@@ -427,11 +427,11 @@ func TestWebhookClient_Metrics(t *testing.T) {
 	})
 
 	// Send 2 successful webhooks
-	client.Send(context.Background(), WebhookPayload{Event: EventDisputeCreated, Timestamp: time.Now()})
-	client.Send(context.Background(), WebhookPayload{Event: EventDisputeResolved, Timestamp: time.Now()})
+	_ = client.Send(context.Background(), WebhookPayload{Event: EventDisputeCreated, Timestamp: time.Now()})
+	_ = client.Send(context.Background(), WebhookPayload{Event: EventDisputeResolved, Timestamp: time.Now()})
 
 	// Send 1 failing webhook
-	client.Send(context.Background(), WebhookPayload{Event: EventDisputeEscalated, Timestamp: time.Now()})
+	_ = client.Send(context.Background(), WebhookPayload{Event: EventDisputeEscalated, Timestamp: time.Now()})
 
 	metrics := client.GetMetrics()
 	if metrics.TotalSent != 3 {

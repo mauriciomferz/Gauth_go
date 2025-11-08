@@ -276,7 +276,7 @@ func TestEvictionMetrics(t *testing.T) {
 	}
 
 	// Verify cache hit for existing token
-	store.Seen("token1")
+	_, _ = store.Seen("token1") //nolint:errcheck
 	if metrics.cacheHits != 1 {
 		t.Errorf("cacheHits should be 1 after Seen(), got %d", metrics.cacheHits)
 	}
@@ -374,7 +374,7 @@ func TestEvictionConcurrency(t *testing.T) {
 			for j := 0; j < 20; j++ {
 				jti := fmt.Sprintf("token-%d-%d", id, j)
 				store.Record(jti, time.Now())
-				store.Seen(jti)
+				_, _ = store.Seen(jti) //nolint:errcheck
 			}
 			done <- true
 		}(i)

@@ -3,11 +3,12 @@ package test
 import (
 	"crypto/ed25519"
 	"crypto/rand"
+	"testing"
+	"time"
+
 	notary "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web"
 	"github.com/gin-gonic/gin"
-	"testing"
-	"time"
 )
 
 // singleEdResolver implements PublicKeyResolver for a single Ed25519 key.

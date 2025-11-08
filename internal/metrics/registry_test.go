@@ -376,9 +376,9 @@ func TestCollectorRegistry_CloseAll(t *testing.T) {
 	c3 := newMockCollector("collector-3")
 	c3.shouldFailClose = true // Make c3 fail
 
-	registry.Register(c1)
-	registry.Register(c2)
-	registry.Register(c3)
+	_ = registry.Register(c1)
+	_ = registry.Register(c2)
+	_ = registry.Register(c3)
 
 	errors := registry.CloseAll()
 

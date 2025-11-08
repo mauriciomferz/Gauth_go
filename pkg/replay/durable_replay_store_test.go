@@ -341,8 +341,8 @@ func TestDurableReplayStore_AutomaticSnapshot(t *testing.T) {
 	}
 
 	// Record JTIs
-	store.Record("auto-snapshot-jti-1", time.Now())
-	store.Record("auto-snapshot-jti-2", time.Now())
+	_ = store.Record("auto-snapshot-jti-1", time.Now()) //nolint:errcheck
+	_ = store.Record("auto-snapshot-jti-2", time.Now()) //nolint:errcheck
 
 	// Wait for automatic snapshot
 	time.Sleep(300 * time.Millisecond)
@@ -373,7 +373,7 @@ func TestDurableReplayStore_GracefulShutdown(t *testing.T) {
 	}
 
 	// Record JTI
-	store.Record("shutdown-jti", time.Now())
+	_ = store.Record("shutdown-jti", time.Now()) //nolint:errcheck
 
 	// Close (should trigger final snapshot)
 	store.Close()

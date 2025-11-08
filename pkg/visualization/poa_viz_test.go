@@ -457,9 +457,9 @@ func TestComplexGraph(t *testing.T) {
 
 	// Set 3D positions
 	_ = graph.SetNodePosition(principal.ID, 0, 0, 0) //nolint:errcheck
-	_ = graph.SetNodePosition(agent.ID, 2, 0, 1) //nolint:errcheck
-	_ = graph.SetNodePosition(aiClient.ID, 0, 2, 2) //nolint:errcheck
-	graph.SetNodePosition(resource.ID, 2, 2, 3)
+	_ = graph.SetNodePosition(agent.ID, 2, 0, 1)     //nolint:errcheck
+	_ = graph.SetNodePosition(aiClient.ID, 0, 2, 2)  //nolint:errcheck
+	_ = graph.SetNodePosition(resource.ID, 2, 2, 3)  //nolint:errcheck
 
 	// Create authorization chain
 	graph.AddEdge(principal.ID, agent.ID, "delegates", "Delegates authority", 0.9, map[string]interface{}{

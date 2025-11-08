@@ -174,7 +174,7 @@ func TestInvalidateCache(t *testing.T) {
 	ctx := context.Background()
 
 	// Start background workers
-	_ = pdp.Start(ctx) //nolint:errcheck
+	_ = pdp.Start(ctx)                //nolint:errcheck
 	defer func() { _ = pdp.Stop() }() //nolint:errcheck
 
 	// Create a cached decision
@@ -308,7 +308,7 @@ func TestCacheCleanup(t *testing.T) {
 	defer cancel()
 
 	// Start with cleanup worker
-	_ = pdp.Start(ctx) //nolint:errcheck
+	_ = pdp.Start(ctx)                //nolint:errcheck
 	defer func() { _ = pdp.Stop() }() //nolint:errcheck
 
 	// Add decision with short TTL
