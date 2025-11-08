@@ -43,6 +43,7 @@ func TestCapabilityAnchorPrometheusGauge(t *testing.T) {
 	srv.metrics = pm
 	// Instead of relying on background emission, set the metric explicitly for deterministic test.
 	setUnix := time.Now().Unix()
+	//nolint:gosec // G115: test code, Unix timestamp always positive
 	pm.SetCapabilityAnchorLastWriteUnix(uint64(setUnix))
 	// Collect metrics text exposition manually.
 	// Use prometheus handler to gather current samples.

@@ -120,6 +120,7 @@ func (c *Controller) evaluate() {
 	if v2 > 0 {
 		mismatchRatio = float64(mismatches) / float64(v2)
 	}
+	//nolint:gosec // G115: phase enum value, small range
 	threshold := adoptionThresholdForPhase(c.cfg, int(phase))
 	if adoption >= threshold && mismatchRatio <= c.cfg.MaxMismatchRatio {
 		// Start or continue satisfy window
@@ -137,7 +138,9 @@ func (c *Controller) evaluate() {
 		}
 		c.mv.SetSunsetPhaseSatisfactionProgress(prog)
 		if time.Since(c.lastSatisfyStart) >= c.cfg.Window {
+			//nolint:gosec // G115: phase enum value, small range
 			next := nextPhase(int(phase))
+			//nolint:gosec // G115: phase enum value, small range
 			if next > int(phase) {
 				c.mv.SetEnvelopeV1SunsetPhase(next)
 				log.Printf("sunset controller: promoted phase %d -> %d (adoption=%.3f mismatch=%.5f)", phase, next, adoption, mismatchRatio)

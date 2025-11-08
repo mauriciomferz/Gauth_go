@@ -3752,6 +3752,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 					if s.primaryAuthService != nil {
 						snap := s.primaryAuthService.ViolationSnapshot()
 						for k, g := range s.otelViolationCounters {
+						//nolint:gosec // G115: violation counter, safe conversion
 							o.ObserveInt64(g, int64(snap[k]))
 						}
 						rates := s.violationRatesForWindows()
@@ -3764,6 +3765,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 					if s.rfc0111Service != nil {
 						ss := s.rfc0111Service.SemanticSnapshot()
 						for k, g := range semanticGauges {
+						//nolint:gosec // G115: semantic counter, safe conversion
 							if v, ok := ss[k]; ok {
 								o.ObserveInt64(g, int64(v))
 							}
@@ -4575,6 +4577,7 @@ func (s *BetaServer) loadCapabilitiesFromFile(path string) error {
 						pm.SetCapabilityAnchorEmissionJitter(stddev)
 					}
 				}
+				//nolint:gosec // G115: Unix timestamp always positive, safe conversion
 				// Record unix epoch seconds of last write for status freshness monitoring (memory + prometheus adapter supported).
 				if s.metrics != nil {
 					s.metrics.SetCapabilityAnchorLastWriteUnix(uint64(s.capAnchorLastWrite.Unix()))
@@ -8107,6 +8110,7 @@ func (s *BetaServer) apiPolicyMetricsPrometheus(c *gin.Context) {
 		// midpoint approximation between previous bound (exclusive) and current bound (inclusive)
 		low := prevBound
 		if i == 0 {
+		//nolint:gosec // G115: histogram calculation, segmentMid bounded
 			low = 0
 		}
 		segmentMid := (low + ub) / 2

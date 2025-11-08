@@ -4037,6 +4037,7 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 			}
 			// Cadence observation
 			prev := mem.LastEnvelopeIssuanceUnix()
+		//nolint:gosec // G115: Unix timestamp always positive, safe conversion
 			cur := uint64(now.Unix())
 			if prev != 0 && cur > prev {
 				s.metrics.ObserveEnvelopeIssuanceCadence(float64(cur - prev))
@@ -4070,6 +4071,7 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 				s.metrics.SetEnvelopeV2AdoptionRatio(float64(v2) / float64(total))
 			}
 			prev := mem.LastEnvelopeIssuanceUnix()
+		//nolint:gosec // G115: Unix timestamp always positive, safe conversion
 			cur := uint64(now.Unix())
 			if prev != 0 && cur > prev {
 				s.metrics.ObserveEnvelopeIssuanceCadence(float64(cur - prev))

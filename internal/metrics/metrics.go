@@ -590,6 +590,7 @@ func (m *Memory) SetEvidenceHashesPerPOA(poaID string, n int) {
 // Delegation graph metrics
 func (m *Memory) IncDelegationGraphExports() { atomic.AddUint64(&m.delegationGraphExports, 1) }
 func (m *Memory) SetDelegationGraphNodeCount(n int) {
+	//nolint:gosec // G115: node count, always non-negative
 	atomic.StoreUint64(&m.delegationGraphNodeCount, uint64(n))
 }
 
@@ -689,6 +690,7 @@ type latencyReservoir struct {
 func NewMemory() *Memory { return &Memory{} }
 
 // SetReplayWALPending sets current pending WAL entries gauge.
+//nolint:gosec // G115: WAL pending count, always non-negative
 func (m *Memory) SetReplayWALPending(n int) { atomic.StoreUint64(&m.replayWALPending, uint64(n)) }
 
 // ObserveReplayWALFlushLatency records WAL flush latency.
@@ -1082,6 +1084,7 @@ func (m *Memory) SetEnvelopeV1SunsetPhase(phase int) {
 	if phase < 0 {
 		phase = 0
 	}
+	//nolint:gosec // G115: phase validated non-negative, small enum value
 	atomic.StoreUint64(&m.envelopeV1SunsetPhase, uint64(phase))
 }
 

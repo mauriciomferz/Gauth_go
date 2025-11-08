@@ -207,10 +207,11 @@ func (w *WebhookClient) Send(ctx context.Context, payload WebhookPayload) error 
 
 		lastErr = err
 
-		// Exponential backoff before retry
-		if attempt < w.config.MaxRetries {
-			backoff := w.config.RetryBackoff * time.Duration(1<<uint(attempt))
-			select {
+	// Exponential backoff before retry
+	if attempt < w.config.MaxRetries {
+		//nolint:gosec // G115: small retry attempt value, safe conversion
+		backoff := w.config.RetryBackoff * time.Duration(1<<uint(attempt))
+		select {
 			case <-ctx.Done():
 				return ctx.Err()
 			case <-time.After(backoff):

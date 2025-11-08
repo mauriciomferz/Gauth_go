@@ -17,10 +17,11 @@ func TestSemanticReactiveThrottle(t *testing.T) {
 	// We directly manipulate semanticHistory before requesting diagnostics to accumulate EWMA samples.
 	base := time.Now().Add(-40 * time.Second)
 	for i := 0; i < 6; i++ {
-		s.semanticHistMu.Lock()
-		// Build snapshot with one counter increasing non-linearly.
-		snap := map[string]uint64{"scope_violation": uint64(i*i + i)}
-		s.semanticHistory = append(s.semanticHistory, struct {
+	s.semanticHistMu.Lock()
+	// Build snapshot with one counter increasing non-linearly.
+	//nolint:gosec // G115: test code, small loop counter values
+	snap := map[string]uint64{"scope_violation": uint64(i*i + i)}
+	s.semanticHistory = append(s.semanticHistory, struct {
 			At       time.Time
 			Snapshot map[string]uint64
 		}{At: base.Add(time.Duration(i) * 5 * time.Second), Snapshot: snap})

@@ -39,6 +39,7 @@ func TestCapabilityAnchorSLAStale(t *testing.T) {
 	if !resp.Stale {
 		t.Fatalf("expected stale=true got false age=%d threshold=%d", resp.AgeSeconds, resp.StaleThresholdSeconds)
 	}
+	//nolint:gosec // G115: test code, threshold is small int value
 	if resp.AgeSeconds < uint64(resp.StaleThresholdSeconds) {
 		t.Fatalf("age below threshold unexpectedly age=%d threshold=%d", resp.AgeSeconds, resp.StaleThresholdSeconds)
 	}
@@ -65,6 +66,7 @@ func TestCapabilityAnchorSLAFresh(t *testing.T) {
 	if resp.Stale {
 		t.Fatalf("expected stale=false got true age=%d threshold=%d", resp.AgeSeconds, resp.StaleThresholdSeconds)
 	}
+	//nolint:gosec // G115: test code, threshold is small int value
 	if resp.AgeSeconds >= uint64(resp.StaleThresholdSeconds) {
 		t.Fatalf("age exceeds threshold unexpectedly age=%d threshold=%d", resp.AgeSeconds, resp.StaleThresholdSeconds)
 	}

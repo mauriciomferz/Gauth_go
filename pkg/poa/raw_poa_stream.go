@@ -102,6 +102,7 @@ func EncodeRawPOAChain(items []RawPOAItem) ([]byte, error) {
 			return nil, errors.New("item too large to encode")
 		}
 		var lenBuf [4]byte
+		//nolint:gosec // G115: length already validated against uint32 max
 		binary.BigEndian.PutUint32(lenBuf[:], uint32(len(b)))
 		out.Write(lenBuf[:])
 		out.Write(b)

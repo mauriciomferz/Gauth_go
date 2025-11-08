@@ -57,6 +57,7 @@ func TestCapabilityAnchorStatusLastWriteUnix(t *testing.T) {
 	}
 	// Freshness check: unix should be within +/-5s of current time
 	now := time.Now().Unix()
+	//nolint:gosec // G115: test code, timestamp comparison
 	if diff := now - int64(resp.LastWriteUnix); diff < -5 || diff > 5 {
 		t.Fatalf("last_write_unix freshness diff=%d now=%d recorded=%d", diff, now, resp.LastWriteUnix)
 	}
