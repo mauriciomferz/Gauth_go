@@ -48,7 +48,7 @@ func TestMultiPeriodRateLimits(t *testing.T) {
 				t.Fatalf("request %d got status %d, expected 429 (rate limit)", i+1, w.Code)
 			}
 			var resp map[string]interface{}
-			json.Unmarshal(w.Body.Bytes(), &resp)  //nolint:errcheck
+			json.Unmarshal(w.Body.Bytes(), &resp) //nolint:errcheck
 			if resp["error"] != "model_rate_limit_exceeded" {
 				t.Errorf("expected error 'model_rate_limit_exceeded', got %v", resp["error"])
 			}
@@ -98,7 +98,7 @@ func TestMultiPeriodHourlyLimit(t *testing.T) {
 				t.Fatalf("request %d got status %d, expected 429 (rate limit)", i+1, w.Code)
 			}
 			var resp map[string]interface{}
-			json.Unmarshal(w.Body.Bytes(), &resp)  //nolint:errcheck
+			json.Unmarshal(w.Body.Bytes(), &resp) //nolint:errcheck
 			if resp["period"] != "hour" {
 				t.Errorf("expected period 'hour', got %v", resp["period"])
 			}
@@ -184,7 +184,7 @@ func TestBackwardCompatibilityPerMinute(t *testing.T) {
 				t.Fatalf("request %d got status %d, expected 429", i+1, w.Code)
 			}
 			var resp map[string]interface{}
-			json.Unmarshal(w.Body.Bytes(), &resp)  //nolint:errcheck
+			json.Unmarshal(w.Body.Bytes(), &resp) //nolint:errcheck
 			if resp["window_seconds"] != float64(60) {
 				t.Errorf("expected window_seconds 60, got %v", resp["window_seconds"])
 			}
@@ -228,7 +228,7 @@ func TestBothLegacyAndExtended(t *testing.T) {
 				t.Fatalf("request %d got status %d, expected 429", i+1, w.Code)
 			}
 			var resp map[string]interface{}
-			json.Unmarshal(w.Body.Bytes(), &resp)
+			json.Unmarshal(w.Body.Bytes(), &resp)  //nolint:errcheck
 			// Should be legacy limit (no "period" field)
 			if resp["period"] != nil {
 				t.Errorf("expected legacy rate limit (no period), got period=%v", resp["period"])

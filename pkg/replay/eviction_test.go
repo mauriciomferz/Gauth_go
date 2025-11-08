@@ -88,11 +88,11 @@ func TestSizeBasedEviction(t *testing.T) {
 
 	// Record 5 tokens (should evict oldest 2)
 	now := time.Now()
-	store.Record("token1", now.Add(-5*time.Second))
+	store.Record("token1", now.Add(-5*time.Second))  //nolint:errcheck
 	time.Sleep(10 * time.Millisecond)
-	store.Record("token2", now.Add(-4*time.Second))
+	store.Record("token2", now.Add(-4*time.Second))  //nolint:errcheck
 	time.Sleep(10 * time.Millisecond)
-	store.Record("token3", now.Add(-3*time.Second))
+	store.Record("token3", now.Add(-3*time.Second))  //nolint:errcheck
 	time.Sleep(10 * time.Millisecond)
 	store.Record("token4", now.Add(-2*time.Second))
 	time.Sleep(10 * time.Millisecond)

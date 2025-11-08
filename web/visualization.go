@@ -225,35 +225,35 @@ func createDemoComplexGraph(c *gin.Context) {
 		"type":         "organization",
 		"jurisdiction": "US",
 	})
-	graph.SetNodePosition(principal.ID, 0, 0, 0)  //nolint:errcheck
+	graph.SetNodePosition(principal.ID, 0, 0, 0) //nolint:errcheck
 
 	// Create authorizers
 	agent1 := graph.AddNode("authorizer", "Legal Department", "Authorized legal agent", "👔", map[string]interface{}{
 		"department": "legal",
 	})
-	graph.SetNodePosition(agent1.ID, -3, 0, 2)  //nolint:errcheck
+	graph.SetNodePosition(agent1.ID, -3, 0, 2) //nolint:errcheck
 
 	agent2 := graph.AddNode("authorizer", "Finance Department", "Authorized finance agent", "💼", map[string]interface{}{
 		"department": "finance",
 	})
-	graph.SetNodePosition(agent2.ID, 3, 0, 2)  //nolint:errcheck
+	graph.SetNodePosition(agent2.ID, 3, 0, 2) //nolint:errcheck
 
 	// Create AI clients
 	aiClient1 := graph.AddNode("client", "Legal AI Assistant", "AI for legal document processing", "🤖", map[string]interface{}{
 		"capability": "document_analysis",
 	})
-	graph.SetNodePosition(aiClient1.ID, -3, 0, 4)
+	graph.SetNodePosition(aiClient1.ID, -3, 0, 4)  //nolint:errcheck
 
 	aiClient2 := graph.AddNode("client", "Finance AI Assistant", "AI for financial analysis", "🤖", map[string]interface{}{
 		"capability": "financial_analysis",
 	})
-	graph.SetNodePosition(aiClient2.ID, 3, 0, 4)
+	graph.SetNodePosition(aiClient2.ID, 3, 0, 4)  //nolint:errcheck
 
 	// Create resources
 	resource1 := graph.AddNode("resource", "Legal Documents", "Contracts and legal files", "📄", map[string]interface{}{
 		"sensitivity": "high",
 	})
-	graph.SetNodePosition(resource1.ID, -3, 0, 6)
+	graph.SetNodePosition(resource1.ID, -3, 0, 6)  //nolint:errcheck
 
 	resource2 := graph.AddNode("resource", "Financial Database", "Financial records and transactions", "💾", map[string]interface{}{
 		"sensitivity": "critical",
@@ -292,7 +292,7 @@ func createDemoComplexGraph(c *gin.Context) {
 	})
 
 	// Set one node to pending for demo
-	graph.UpdateNodeStatus(aiClient2.ID, "pending")  //nolint:errcheck
+	graph.UpdateNodeStatus(aiClient2.ID, "pending") //nolint:errcheck
 
 	c.JSON(http.StatusCreated, gin.H{
 		"graph":   graph,
