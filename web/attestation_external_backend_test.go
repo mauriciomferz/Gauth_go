@@ -1,10 +1,11 @@
 package web
 
 import (
-	replaypkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/replay"
 	"os"
 	"testing"
 	"time"
+
+	replaypkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/replay"
 )
 
 // TestAttestationExternalRedisBackend ensures Redis backend detects replay after Record.

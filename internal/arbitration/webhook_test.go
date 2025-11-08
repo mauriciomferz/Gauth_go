@@ -238,13 +238,13 @@ func TestWebhookClient_EventFiltering(t *testing.T) {
 	})
 
 	// Send subscribed event
-	client.Send(context.Background(), WebhookPayload{
+	_ = client.Send(context.Background(), WebhookPayload{ //nolint:errcheck
 		Event:     EventDisputeCreated,
 		Timestamp: time.Now(),
 	})
 
 	// Send unsubscribed event
-	client.Send(context.Background(), WebhookPayload{
+	_ = client.Send(context.Background(), WebhookPayload{ //nolint:errcheck
 		Event:     EventDisputeResolved,
 		Timestamp: time.Now(),
 	})
@@ -341,7 +341,7 @@ func TestWebhookClient_HeadersPresent(t *testing.T) {
 		Timestamp: time.Now(),
 	}
 
-	client.Send(context.Background(), payload)
+	_ = client.Send(context.Background(), payload) //nolint:errcheck
 
 	mu.Lock()
 	defer mu.Unlock()

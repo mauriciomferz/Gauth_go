@@ -1,10 +1,11 @@
 package web
 
 import (
+	"time"
+
 	errorscatalog "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/errors"
 	gerrs "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/errors"
 	"github.com/gin-gonic/gin"
-	"time"
 )
 
 // ErrorResponse standardizes API error payloads and maps them to RFC references.

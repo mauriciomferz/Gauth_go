@@ -336,9 +336,15 @@ func TestCollectorRegistry_FlushAll(t *testing.T) {
 	c3 := newMockCollector("collector-3")
 	c3.shouldFailFlush = true // Make c3 fail
 
-	registry.Register(c1)
-	registry.Register(c2)
-	registry.Register(c3)
+	if err := registry.Register(c1); err != nil {
+		t.Fatalf("failed to register c1: %v", err)
+	}
+	if err := registry.Register(c2); err != nil {
+		t.Fatalf("failed to register c2: %v", err)
+	}
+	if err := registry.Register(c3); err != nil {
+		t.Fatalf("failed to register c3: %v", err)
+	}
 
 	errors := registry.FlushAll()
 

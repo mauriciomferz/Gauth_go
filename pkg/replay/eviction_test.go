@@ -99,7 +99,7 @@ func TestSizeBasedEviction(t *testing.T) {
 	store.Record("token5", now.Add(-1*time.Second))
 
 	// Trigger eviction by checking one
-	store.Seen("token5")
+	_, _ = store.Seen("token5") //nolint:errcheck
 
 	// Oldest 2 should be evicted (token1, token2)
 	if seen, _ := store.Seen("token1"); seen {
@@ -155,7 +155,7 @@ func TestLRUEviction(t *testing.T) {
 	}
 
 	// Trigger eviction
-	store.Seen("token5")
+	_, _ = store.Seen("token5") //nolint:errcheck
 
 	// Store size should be limited to MaxSize
 	if store.Size() > 3 {
@@ -285,7 +285,7 @@ func TestEvictionMetrics(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	// Trigger eviction
-	store.Seen("token1")
+	_, _ = store.Seen("token1") //nolint:errcheck
 
 	// Verify eviction metric
 	if metrics.evictions["ttl"] == 0 {

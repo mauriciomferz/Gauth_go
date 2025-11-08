@@ -72,8 +72,12 @@ func TestDurableReplayStore_Persistence(t *testing.T) {
 	jti2 := "persistent-jti-2"
 
 	// Record JTIs
-	store1.Record(jti1, time.Now())
-	store1.Record(jti2, time.Now())
+	if err := store1.Record(jti1, time.Now()); err != nil {
+		t.Fatalf("failed to record jti1: %v", err)
+	}
+	if err := store1.Record(jti2, time.Now()); err != nil {
+		t.Fatalf("failed to record jti2: %v", err)
+	}
 
 	// Close first instance
 	store1.Close()
@@ -117,7 +121,9 @@ func TestDurableReplayStore_TTLExpiration(t *testing.T) {
 	jti := "expiring-jti"
 
 	// Record JTI
-	store.Record(jti, time.Now())
+	if err := store.Record(jti, time.Now()); err != nil {
+		t.Fatalf("failed to record jti: %v", err)
+	}
 
 	// Should be seen immediately
 	seen, _ := store.Seen(jti)
@@ -154,7 +160,9 @@ func TestDurableReplayStore_Snapshot(t *testing.T) {
 	// Record multiple JTIs
 	for i := 0; i < 10; i++ {
 		jti := "snapshot-jti-" + string(rune('0'+i))
-		store1.Record(jti, time.Now())
+		if err := store1.Record(jti, time.Now()); err != nil {
+			t.Fatalf("failed to record jti: %v", err)
+		}
 	}
 
 	// Create manual snapshot
@@ -210,7 +218,7 @@ func TestDurableReplayStore_ConcurrentAccess(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		go func(id int) {
 			jti := "concurrent-jti-" + string(rune('0'+id))
-			store.Record(jti, time.Now())
+			_ = store.Record(jti, time.Now()) //nolint:errcheck
 			done <- true
 		}(i)
 	}
@@ -248,9 +256,15 @@ func TestDurableReplayStore_Stats(t *testing.T) {
 	defer store.Close()
 
 	// Record JTIs
-	store.Record("jti-1", time.Now())
-	store.Record("jti-2", time.Now())
-	store.Record("jti-3", time.Now())
+	if err := store.Record("jti-1", time.Now()); err != nil {
+		t.Fatalf("failed to record jti-1: %v", err)
+	}
+	if err := store.Record("jti-2", time.Now()); err != nil {
+		t.Fatalf("failed to record jti-2: %v", err)
+	}
+	if err := store.Record("jti-3", time.Now()); err != nil {
+		t.Fatalf("failed to record jti-3: %v", err)
+	}
 
 	stats := store.Stats()
 	if stats.TotalEntries != 3 {

@@ -115,7 +115,7 @@ func TestDurableReplayStoreWithSizeEviction(t *testing.T) {
 	}
 
 	// Trigger eviction by accessing
-	adapter.Seen("jti-005")
+	_, _ = adapter.Seen("jti-005") //nolint:errcheck
 
 	// Store size should be limited
 	if store.Size() > 3 {
@@ -153,7 +153,7 @@ func TestDurableReplayStoreCompositePolicy(t *testing.T) {
 	adapter := NewDurableReplayStoreAdapter(store)
 
 	// Add entry
-	adapter.CheckAndStore("jti-ttl-test")
+	_ = adapter.CheckAndStore("jti-ttl-test") //nolint:errcheck
 
 	// Wait for TTL expiration
 	time.Sleep(1500 * time.Millisecond)
@@ -213,9 +213,9 @@ func TestDurableReplayStorePersistence(t *testing.T) {
 		}
 
 		adapter := NewDurableReplayStoreAdapter(store)
-		adapter.CheckAndStore("jti-persist-1")
-		adapter.CheckAndStore("jti-persist-2")
-		adapter.CheckAndStore("jti-persist-3")
+		_ = adapter.CheckAndStore("jti-persist-1") //nolint:errcheck
+		_ = adapter.CheckAndStore("jti-persist-2") //nolint:errcheck
+		_ = adapter.CheckAndStore("jti-persist-3") //nolint:errcheck
 
 		store.Close()
 	}

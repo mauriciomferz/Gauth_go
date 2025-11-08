@@ -1,11 +1,12 @@
 package web
 
 import (
-	replaypkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/replay"
 	"os"
 	"strconv"
 	"testing"
 	"time"
+
+	replaypkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/replay"
 )
 
 // BenchmarkAttestationReplay compares memory vs redis latency (best-effort, skips if redis unavailable).

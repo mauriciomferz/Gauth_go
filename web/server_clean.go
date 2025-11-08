@@ -2720,7 +2720,7 @@ func (s *BetaServer) saveViolationPersistence() {
 		return
 	}
 	tmp := s.violationPersistPath + ".tmp"
-	if err := os.WriteFile(tmp, finalBuf, 0o644); err != nil {
+	if err := os.WriteFile(tmp, finalBuf, 0o600); err != nil {
 		return
 	}
 	if err := os.Rename(tmp, s.violationPersistPath); err != nil {
@@ -2869,7 +2869,7 @@ func (s *BetaServer) saveSemanticPersistence() {
 		return
 	}
 	tmp := s.semanticPersistPath + ".tmp"
-	if err := os.WriteFile(tmp, finalBuf, 0o644); err != nil {
+	if err := os.WriteFile(tmp, finalBuf, 0o600); err != nil {
 		return
 	}
 	if err := os.Rename(tmp, s.semanticPersistPath); err != nil {
@@ -8790,7 +8790,7 @@ func savePolicyChainToFile(path string, reg *policy.Registry) error {
 		return err
 	}
 	tmp := path + ".tmp"
-	if err := os.WriteFile(tmp, enc, 0o644); err != nil {
+	if err := os.WriteFile(tmp, enc, 0o600); err != nil {
 		return err
 	}
 	// Optional fsync for durability
