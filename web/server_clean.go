@@ -3213,7 +3213,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 			// Parse interval (entries) env if supplied
 			interval := 0
 			if raw := os.Getenv("GAUTH_MODEL_LIMIT_ANCHOR_INTERVAL"); raw != "" {
-				if v, err := strconv.Atoi(raw); err == nil && v > 0 {
+				if v, err2 := strconv.Atoi(raw); err2 == nil && v > 0 {
 					interval = v
 				}
 			}

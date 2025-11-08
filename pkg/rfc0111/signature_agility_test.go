@@ -23,8 +23,8 @@ func TestSignatureAgilityEd25519Basic(t *testing.T) {
 	}
 	// Random message; canonical digest independence verified separately in existing tests.
 	msg := make([]byte, 64)
-	if _, err := rand.Read(msg); err != nil {
-		t.Fatalf("rand: %v", err)
+	if _, err2 := rand.Read(msg); err2 != nil {
+		t.Fatalf("rand: %v", err2)
 	}
 	sig, err := algo.Sign(priv, msg)
 	if err != nil {

@@ -178,14 +178,14 @@ func (m *PolicyVersionManager) loadFromStore() error {
 	for _, version := range versions {
 		bundle, metadata, err2 := m.store.LoadVersion(version)
 		if err2 != nil {
-			return fmt.Errorf("load version %d: %w", version, err)
+			return fmt.Errorf("load version %d: %w", version, err2)
 		}
 
 		// Store metadata in memory
 		m.versionMetadata[version] = metadata
 
 		// Register bundle with registry
-		if _, err := m.registry.AddBundle(*bundle); err != nil {
+		if _, err2 := m.registry.AddBundle(*bundle); err2 != nil {
 			// Log error but continue (registry may already have bundle)
 			// In production, use proper logging
 		}

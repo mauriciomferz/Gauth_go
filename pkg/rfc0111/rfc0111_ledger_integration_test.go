@@ -32,8 +32,8 @@ func TestLedgerIssuanceAndRevocation(t *testing.T) {
 	}
 
 	// Revoke delegation
-	if err := svc.RevokeDelegation(del.POA.ID, "alice"); err != nil {
-		t.Fatalf("revocation failed: %v", err)
+	if err2 := svc.RevokeDelegation(del.POA.ID, "alice"); err2 != nil {
+		t.Fatalf("revocation failed: %v", err2)
 	}
 
 	// Query ledger by subject (grantor)

@@ -63,16 +63,16 @@ func NewBoltPolicyVersionStore(dbPath string) (*BoltPolicyVersionStore, error) {
 	// Create buckets
 	err = db.Update(func(tx *bolt.Tx) error {
 		if _, err2 := tx.CreateBucketIfNotExists([]byte(versionMetadataBucket)); err2 != nil {
-			return fmt.Errorf("create version_metadata bucket: %w", err)
+			return fmt.Errorf("create version_metadata bucket: %w", err2)
 		}
 		if _, err2 := tx.CreateBucketIfNotExists([]byte(bundlesBucket)); err2 != nil {
-			return fmt.Errorf("create bundles bucket: %w", err)
+			return fmt.Errorf("create bundles bucket: %w", err2)
 		}
 		if _, err2 := tx.CreateBucketIfNotExists([]byte(auditEventsBucket)); err2 != nil {
-			return fmt.Errorf("create audit_events bucket: %w", err)
+			return fmt.Errorf("create audit_events bucket: %w", err2)
 		}
-		if _, err := tx.CreateBucketIfNotExists([]byte(auditIndexBucket)); err != nil {
-			return fmt.Errorf("create audit_index bucket: %w", err)
+		if _, err2 := tx.CreateBucketIfNotExists([]byte(auditIndexBucket)); err2 != nil {
+			return fmt.Errorf("create audit_index bucket: %w", err2)
 		}
 		return nil
 	})

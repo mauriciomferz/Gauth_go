@@ -25,8 +25,8 @@ func TestPersistenceDurability(t *testing.T) {
 
 	// Close underlying bolt repo if type matches
 	if br, ok := svc1.repo.(*BoltRepository); ok {
-		if err := br.Close(); err != nil {
-			t.Fatalf("close repo failed: %v", err)
+		if err2 := br.Close(); err2 != nil {
+			t.Fatalf("close repo failed: %v", err2)
 		}
 	}
 

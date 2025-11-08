@@ -19,8 +19,8 @@ func TestRotationV2SignatureInvalid(t *testing.T) {
 	}
 	tmpDir := t.TempDir()
 	cfgPath := filepath.Join(tmpDir, "weights.json")
-	if err := os.WriteFile(cfgPath, b, 0o600); err != nil {
-		t.Fatalf("write temp config: %v", err)
+	if err2 := os.WriteFile(cfgPath, b, 0o600); err2 != nil {
+		t.Fatalf("write temp config: %v", err2)
 	}
 	t.Setenv("GAUTH_ROTATIONS_V2_CONFIG", cfgPath)
 	t.Setenv("GAUTH_ROTATIONS_V2_SIGN", "1")

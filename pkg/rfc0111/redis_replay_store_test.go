@@ -22,8 +22,8 @@ func TestRedisReplayStoreBasic(t *testing.T) {
 	if seen {
 		t.Fatalf("expected not seen first time")
 	}
-	if err := rs.Record(jti, time.Now()); err != nil {
-		t.Fatalf("record error: %v", err)
+	if err2 := rs.Record(jti, time.Now()); err2 != nil {
+		t.Fatalf("record error: %v", err2)
 	}
 	seen2, err := rs.Seen(jti)
 	if err != nil {

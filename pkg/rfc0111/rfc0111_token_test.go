@@ -99,8 +99,8 @@ func TestTokenRoundTripEnvKey(t *testing.T) {
 
 	// Attempt decrypt into typed struct
 	var claims typedClaims
-	if err := svc.decryptWithAnyKey(dr.AuthToken, &claims); err != nil {
-		t.Fatalf("decrypt failed: %v", err)
+	if err2 := svc.decryptWithAnyKey(dr.AuthToken, &claims); err2 != nil {
+		t.Fatalf("decrypt failed: %v", err2)
 	}
 	// Strict assertions
 	if claims.DelegationID != dr.POA.ID {

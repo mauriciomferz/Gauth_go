@@ -66,8 +66,8 @@ func TestEnhancedPoAValidator_Integration(t *testing.T) {
 	today := time.Now().Format("2006-01-02")
 
 	// Add some usage (to 85% of limit to trigger warning)
-	if err := store.IncrementDailyUsage(poa.ID, today, 8500.0); err != nil {
-		t.Fatalf("IncrementDailyUsage() error = %v", err)
+	if err2 := store.IncrementDailyUsage(poa.ID, today, 8500.0); err2 != nil {
+		t.Fatalf("IncrementDailyUsage() error = %v", err2)
 	}
 
 	// Validate again - should pass but generate warning

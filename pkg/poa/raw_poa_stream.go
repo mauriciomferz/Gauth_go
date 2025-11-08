@@ -252,16 +252,16 @@ func DecodeRawPOAStreamWith(r io.Reader, limits StreamLimits, algo RawPOAHashAlg
 				return nil, errors.New("exceeds total byte limit")
 			}
 			buf := make([]byte, sz)
-			if _, err := io.ReadFull(bufReader, buf); err != nil {
-				return nil, fmt.Errorf("item read: %w", err)
+			if _, err2 := io.ReadFull(bufReader, buf); err2 != nil {
+				return nil, fmt.Errorf("item read: %w", err2)
 			}
 			total += sz
 			// continuity check uses digest before adding current bytes
 			if verifyPrev {
 				// For first item, PrevHash must be empty
-				tmpItem, err := unmarshalMinimal(buf)
-				if err != nil {
-					return nil, fmt.Errorf("decode item %d: %w", len(items), err)
+				tmpItem, err2 := unmarshalMinimal(buf)
+				if err2 != nil {
+					return nil, fmt.Errorf("decode item %d: %w", len(items), err2)
 				}
 				if len(items) == 0 && len(tmpItem.PrevHash) > 0 {
 					return nil, errors.New("first item must not contain prev_hash")

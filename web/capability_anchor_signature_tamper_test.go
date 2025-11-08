@@ -23,8 +23,8 @@ func TestCapabilityAnchorEndpointSignatureTamper(t *testing.T) {
 	t.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", anchorFile.Name())
 	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m")
 	capFile := filepath.Join(t.TempDir(), "caps.json")
-	if err := os.WriteFile(capFile, []byte(testutil.CapTransferV1), 0o600); err != nil {
-		t.Fatalf("write caps file: %v", err)
+	if err2 := os.WriteFile(capFile, []byte(testutil.CapTransferV1), 0o600); err2 != nil {
+		t.Fatalf("write caps file: %v", err2)
 	}
 	t.Setenv("GAUTH_CAPABILITIES_PATH", capFile)
 	t.Setenv("GAUTH_DISABLE_BG_POLLS", "1")
@@ -41,8 +41,8 @@ func TestCapabilityAnchorEndpointSignatureTamper(t *testing.T) {
 		Emitted    bool            `json:"emitted"`
 		Artifact   json.RawMessage `json:"artifact"`
 	}
-	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
-		t.Fatalf("unmarshal resp: %v", err)
+	if err2 := json.Unmarshal(w.Body.Bytes(), &resp); err2 != nil {
+		t.Fatalf("unmarshal resp: %v", err2)
 	}
 	if !resp.Success || !resp.Configured || !resp.Emitted {
 		t.Fatalf("unexpected flags")
@@ -53,8 +53,8 @@ func TestCapabilityAnchorEndpointSignatureTamper(t *testing.T) {
 		Signature string          `json:"signature"`
 		Mode      string          `json:"mode"`
 	}
-	if err := json.Unmarshal(resp.Artifact, &wrapper); err != nil {
-		t.Fatalf("unmarshal wrapper: %v", err)
+	if err2 := json.Unmarshal(resp.Artifact, &wrapper); err2 != nil {
+		t.Fatalf("unmarshal wrapper: %v", err2)
 	}
 	if wrapper.Mode != sigModeEdDSA {
 		t.Fatalf("expected mode eddsa")

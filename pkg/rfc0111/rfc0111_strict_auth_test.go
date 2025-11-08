@@ -37,8 +37,8 @@ func TestStrictAuthenticityMissingKey(t *testing.T) {
 		t.Fatalf("digest: %v", derr)
 	}
 	st.Signature = &POASignature{Algorithm: algEd25519, KeyID: "unknown_kid", DigestHex: dig, SigBase64: base64.StdEncoding.EncodeToString(make([]byte, 64))}
-	if err := svcSoft.ValidateDelegationCtx(context.Background(), resp.POA.ID, "bob", "read"); err != nil {
-		t.Fatalf("soft mode should not fail on missing key: %v", err)
+	if err2 := svcSoft.ValidateDelegationCtx(context.Background(), resp.POA.ID, "bob", "read"); err2 != nil {
+		t.Fatalf("soft mode should not fail on missing key: %v", err2)
 	}
 	// Strict mode service
 	auditLogger2 := audit.NewMemoryLogger(nil)

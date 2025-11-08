@@ -80,8 +80,8 @@ func TestWALRecoverSkipsMalformed(t *testing.T) {
 	if err2 := wal.AppendRecord(WALRecord{Op: "Record", Key: []byte("good2"), TS: time.Now().Unix()}); err2 != nil {
 		t.Fatalf("append good2: %v", err2)
 	}
-	if err := wal.Close(); err != nil {
-		t.Fatalf("close wal: %v", err)
+	if err2 := wal.Close(); err2 != nil {
+		t.Fatalf("close wal: %v", err2)
 	}
 	wal2, err := NewWALStore(path)
 	if err != nil {

@@ -67,8 +67,8 @@ func TestErrorMapping(t *testing.T) {
 	// Add explicit policy for this specific delegation resource revoke (resource=delegation ID)
 	ma := svc.authz.(*authz.MemoryAuthorizer)
 	ma.AddPolicy(authz.Policy{ID: "allow-revoke-specific", Subject: "alice", Resource: dr2.POA.ID, Actions: []string{"revoke_delegation"}, Effect: authz.Allow})
-	if err := svc.RevokeDelegation(dr2.POA.ID, "alice"); err != nil {
-		t.Fatalf("revoke: %v", err)
+	if err2 := svc.RevokeDelegation(dr2.POA.ID, "alice"); err2 != nil {
+		t.Fatalf("revoke: %v", err2)
 	}
 	err = svc.ValidateDelegationCtx(context.Background(), dr2.POA.ID, "bob", "read")
 	expectCode(t, err, rfc.ErrRevoked)
