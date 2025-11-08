@@ -20,7 +20,7 @@ func TestWebhookClient_Send(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
 		mu.Lock()
-		json.Unmarshal(body, &receivedPayload)
+		_ = json.Unmarshal(body, &receivedPayload) //nolint:errcheck
 		mu.Unlock()
 		w.WriteHeader(http.StatusOK)
 	}))

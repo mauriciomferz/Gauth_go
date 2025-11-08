@@ -242,8 +242,8 @@ func TestGraphStats(t *testing.T) {
 	node2 := graph.AddNode("client", "AI Agent 1", "AI", "🤖", nil)
 	node3 := graph.AddNode("client", "AI Agent 2", "AI", "🤖", nil)
 
-	graph.UpdateNodeStatus(node2.ID, "pending")
-	graph.UpdateNodeStatus(node3.ID, "revoked")
+	_ = graph.UpdateNodeStatus(node2.ID, "pending") //nolint:errcheck
+	_ = graph.UpdateNodeStatus(node3.ID, "revoked") //nolint:errcheck
 
 	// Add edges
 	graph.AddEdge(node1.ID, node2.ID, "authorizes", "Auth", 1.0, nil)
@@ -456,9 +456,9 @@ func TestComplexGraph(t *testing.T) {
 	resource := graph.AddNode("resource", "Financial DB", "Financial database", "💾", nil)
 
 	// Set 3D positions
-	graph.SetNodePosition(principal.ID, 0, 0, 0)
-	graph.SetNodePosition(agent.ID, 2, 0, 1)
-	graph.SetNodePosition(aiClient.ID, 0, 2, 2)
+	_ = graph.SetNodePosition(principal.ID, 0, 0, 0) //nolint:errcheck
+	_ = graph.SetNodePosition(agent.ID, 2, 0, 1) //nolint:errcheck
+	_ = graph.SetNodePosition(aiClient.ID, 0, 2, 2) //nolint:errcheck
 	graph.SetNodePosition(resource.ID, 2, 2, 3)
 
 	// Create authorization chain

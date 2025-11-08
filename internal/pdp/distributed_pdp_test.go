@@ -174,8 +174,8 @@ func TestInvalidateCache(t *testing.T) {
 	ctx := context.Background()
 
 	// Start background workers
-	pdp.Start(ctx)
-	defer pdp.Stop()
+	_ = pdp.Start(ctx) //nolint:errcheck
+	defer func() { _ = pdp.Stop() }() //nolint:errcheck
 
 	// Create a cached decision
 	req := &DecisionRequest{
@@ -187,7 +187,7 @@ func TestInvalidateCache(t *testing.T) {
 		CacheTTL:  60 * time.Second,
 	}
 
-	pdp.MakeDecision(ctx, req)
+	_, _ = pdp.MakeDecision(ctx, req) //nolint:errcheck
 
 	// Verify cache has entry
 	statsBefore := pdp.GetCacheStats()
@@ -283,7 +283,7 @@ func TestCacheEviction(t *testing.T) {
 			Timestamp: time.Now(),
 			CacheTTL:  30 * time.Second,
 		}
-		pdp.MakeDecision(ctx, req)
+		_, _ = pdp.MakeDecision(ctx, req) //nolint:errcheck
 		time.Sleep(10 * time.Millisecond) // Ensure different timestamps
 	}
 
@@ -308,8 +308,8 @@ func TestCacheCleanup(t *testing.T) {
 	defer cancel()
 
 	// Start with cleanup worker
-	pdp.Start(ctx)
-	defer pdp.Stop()
+	_ = pdp.Start(ctx) //nolint:errcheck
+	defer func() { _ = pdp.Stop() }() //nolint:errcheck
 
 	// Add decision with short TTL
 	req := &DecisionRequest{
@@ -321,7 +321,7 @@ func TestCacheCleanup(t *testing.T) {
 		CacheTTL:  100 * time.Millisecond, // Very short TTL
 	}
 
-	pdp.MakeDecision(ctx, req)
+	_, _ = pdp.MakeDecision(ctx, req) //nolint:errcheck
 
 	// Verify cache has entry
 	statsBefore := pdp.GetCacheStats()
@@ -364,7 +364,7 @@ func TestGetClusterStatus(t *testing.T) {
 			LastSeen: time.Now(),
 			Load:     float64(i) * 0.1,
 		}
-		pdp.AddNode(node)
+		_ = pdp.AddNode(node) //nolint:errcheck
 	}
 
 	status := pdp.GetClusterStatus()
@@ -402,7 +402,7 @@ func BenchmarkMakeDecision(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		pdp.MakeDecision(ctx, req)
+		_, _ = pdp.MakeDecision(ctx, req) //nolint:errcheck
 	}
 }
 
@@ -427,6 +427,6 @@ func BenchmarkMakeDecision_NoCache(b *testing.B) {
 			Timestamp: time.Now(),
 			CacheTTL:  0, // No caching
 		}
-		pdp.MakeDecision(ctx, req)
+		_, _ = pdp.MakeDecision(ctx, req) //nolint:errcheck
 	}
 }

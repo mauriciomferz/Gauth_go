@@ -290,7 +290,7 @@ func TestBlockchainNotary_GetStats(t *testing.T) {
 			RevokedAt:    time.Now(),
 			RevokedBy:    "admin",
 		}
-		notary.Notarize(event)
+		_, _ = notary.Notarize(event) //nolint:errcheck
 	}
 
 	stats := notary.GetStats()
@@ -364,7 +364,7 @@ func BenchmarkBlockchainNotary_Notarize(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		notary.Notarize(event)
+		_, _ = notary.Notarize(event) //nolint:errcheck
 	}
 }
 
@@ -382,6 +382,6 @@ func BenchmarkRFC3161_Notarize(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		notary.Notarize(event)
+		_, _ = notary.Notarize(event) //nolint:errcheck
 	}
 }

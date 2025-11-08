@@ -142,8 +142,12 @@ func TestEnforcer_MultipleRules(t *testing.T) {
 		Enabled:  false, // Disabled
 	}
 
-	enforcer.AddRule(allowRule)
-	enforcer.AddRule(denyRule)
+	if err := enforcer.AddRule(allowRule); err != nil {
+		t.Fatalf("Failed to add allow rule: %v", err)
+	}
+	if err := enforcer.AddRule(denyRule); err != nil {
+		t.Fatalf("Failed to add deny rule: %v", err)
+	}
 
 	req := &EnforcementRequest{
 		Subject:  "user:charlie",
@@ -196,15 +200,19 @@ func TestEnforcer_AuditCallback(t *testing.T) {
 func TestEnforcer_GetMetrics(t *testing.T) {
 	enforcer := NewEnforcer()
 
-	enforcer.AddRule(&Rule{
+	if err := enforcer.AddRule(&Rule{
 		ID:      "rule1",
 		Enabled: true,
-	})
+	}); err != nil {
+		t.Fatalf("Failed to add rule1: %v", err)
+	}
 
-	enforcer.AddRule(&Rule{
+	if err := enforcer.AddRule(&Rule{
 		ID:      "rule2",
 		Enabled: false,
-	})
+	}); err != nil {
+		t.Fatalf("Failed to add rule2: %v", err)
+	}
 
 	metrics := enforcer.GetMetrics()
 

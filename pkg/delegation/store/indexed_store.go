@@ -105,7 +105,7 @@ func NewIndexedDelegationStore(dbPath string) (*IndexedDelegationStore, error) {
 	}
 
 	// Load stats
-	store.loadStats()
+	_ = store.loadStats() // Best effort stat loading
 
 	return store, nil
 }
@@ -174,7 +174,9 @@ func (s *IndexedDelegationStore) Get(id string) (*DelegationRecord, error) {
 	}
 
 	// Update last accessed time asynchronously
-	go s.updateAccessTime(id)
+	go func() {
+		_ = s.updateAccessTime(id) // Best effort update
+	}()
 
 	return record, nil
 }

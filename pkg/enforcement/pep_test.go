@@ -55,7 +55,7 @@ func TestSupplySidePEP_EnforceClientAction_WithRule(t *testing.T) {
 	pep := NewSupplySidePEP("ai:agent-123", pdp)
 
 	// Add a deny rule for sensitive resources
-	pep.AddRule(&Rule{
+	if err := pep.AddRule(&Rule{
 		ID:   "deny-sensitive",
 		Name: "Deny Sensitive Resources",
 		Condition: func(ctx context.Context, req *EnforcementRequest) bool {
@@ -63,7 +63,9 @@ func TestSupplySidePEP_EnforceClientAction_WithRule(t *testing.T) {
 		},
 		Action:  "deny",
 		Enabled: true,
-	})
+	}); err != nil {
+		t.Fatalf("Failed to add rule: %v", err)
+	}
 
 	// Should be denied by rule even though PDP permits
 	err := pep.EnforceClientAction(context.Background(), "sensitive:data", "read", nil)
@@ -120,7 +122,7 @@ func TestDemandSidePEP_ValidateClientCompliance_WithRule(t *testing.T) {
 	pep := NewDemandSidePEP("server:rs-1", "owner:alice", pdp)
 
 	// Add a rule to deny write operations from specific client
-	pep.AddRule(&Rule{
+	if err := pep.AddRule(&Rule{
 		ID:   "deny-client-write",
 		Name: "Deny Specific Client Writes",
 		Condition: func(ctx context.Context, req *EnforcementRequest) bool {
@@ -128,7 +130,9 @@ func TestDemandSidePEP_ValidateClientCompliance_WithRule(t *testing.T) {
 		},
 		Action:  "deny",
 		Enabled: true,
-	})
+	}); err != nil {
+		t.Fatalf("Failed to add rule: %v", err)
+	}
 
 	// Should be denied by rule
 	err := pep.ValidateClientCompliance(
@@ -222,7 +226,7 @@ func TestDemandSidePEP_TokenValidation(t *testing.T) {
 	pep := NewDemandSidePEP("server:rs-1", "owner:alice", pdp)
 
 	// Add rule to validate token presence
-	pep.AddRule(&Rule{
+	if err := pep.AddRule(&Rule{
 		ID:   "require-token",
 		Name: "Require Valid Token",
 		Condition: func(ctx context.Context, req *EnforcementRequest) bool {
@@ -231,7 +235,9 @@ func TestDemandSidePEP_TokenValidation(t *testing.T) {
 		},
 		Action:  "deny",
 		Enabled: true,
-	})
+	}); err != nil {
+		t.Fatalf("Failed to add rule: %v", err)
+	}
 
 	// Should be denied without token
 	err := pep.ValidateClientCompliance(

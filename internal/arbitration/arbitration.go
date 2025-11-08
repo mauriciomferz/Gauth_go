@@ -3,6 +3,7 @@ package arbitration
 
 import (
 	"context"
+	"fmt"
 	"time"
 )
 
@@ -79,9 +80,15 @@ func NewDefaultArbiter() *DefaultArbiter {
 	}
 
 	// Register default rules
-	arbiter.RegisterRule("deny_overrides", 100, denyOverridesRule)
-	arbiter.RegisterRule("permit_overrides", 90, permitOverridesRule)
-	arbiter.RegisterRule("first_applicable", 80, firstApplicableRule)
+	if err := arbiter.RegisterRule("deny_overrides", 100, denyOverridesRule); err != nil {
+		panic(fmt.Sprintf("failed to register deny_overrides rule: %v", err))
+	}
+	if err := arbiter.RegisterRule("permit_overrides", 90, permitOverridesRule); err != nil {
+		panic(fmt.Sprintf("failed to register permit_overrides rule: %v", err))
+	}
+	if err := arbiter.RegisterRule("first_applicable", 80, firstApplicableRule); err != nil {
+		panic(fmt.Sprintf("failed to register first_applicable rule: %v", err))
+	}
 
 	return arbiter
 }

@@ -122,7 +122,7 @@ func TestFunctionRegistry_Call(t *testing.T) {
 	registry := NewFunctionRegistry()
 
 	// Register a simple function
-	registry.Register(FunctionMetadata{
+	if err := registry.Register(FunctionMetadata{
 		Name:       "add",
 		MinArgs:    2,
 		MaxArgs:    2,
@@ -131,7 +131,9 @@ func TestFunctionRegistry_Call(t *testing.T) {
 		Category:   "numeric",
 	}, func(attrs map[string]string, now time.Time, args []FunctionArg) (FunctionResult, error) {
 		return NumericResult(args[0].NumericValue + args[1].NumericValue), nil
-	})
+	}); err != nil {
+		t.Fatalf("Failed to register function: %v", err)
+	}
 
 	result, err := registry.Call("add", nil, time.Now(), []FunctionArg{
 		NumericArg(5),
@@ -151,14 +153,16 @@ func TestFunctionRegistry_Call(t *testing.T) {
 func TestFunctionRegistry_ArgumentValidation(t *testing.T) {
 	registry := NewFunctionRegistry()
 
-	registry.Register(FunctionMetadata{
+	if err := registry.Register(FunctionMetadata{
 		Name:       "strict_func",
 		MinArgs:    2,
 		MaxArgs:    3,
 		ReturnType: ResultTypeBool,
 	}, func(attrs map[string]string, now time.Time, args []FunctionArg) (FunctionResult, error) {
 		return BoolResult(true), nil
-	})
+	}); err != nil {
+		t.Fatalf("Failed to register function: %v", err)
+	}
 
 	tests := []struct {
 		name      string
@@ -485,8 +489,8 @@ func TestFunctionRegistry_Metrics(t *testing.T) {
 	registry := NewFunctionRegistry()
 
 	// Make some calls
-	registry.Call("contains", nil, time.Now(), []FunctionArg{StringArg("hello"), StringArg("world")})
-	registry.Call("contains", nil, time.Now(), []FunctionArg{StringArg("test"), StringArg("x")})
+	_, _ = registry.Call("contains", nil, time.Now(), []FunctionArg{StringArg("hello"), StringArg("world")})
+	_, _ = registry.Call("contains", nil, time.Now(), []FunctionArg{StringArg("test"), StringArg("x")})
 
 	metrics := registry.GetMetrics()
 
@@ -527,9 +531,11 @@ func TestFunctionRegistry_Unregister(t *testing.T) {
 		ReturnType: ResultTypeBool,
 	}
 
-	registry.Register(metadata, func(attrs map[string]string, now time.Time, args []FunctionArg) (FunctionResult, error) {
+	if err := registry.Register(metadata, func(attrs map[string]string, now time.Time, args []FunctionArg) (FunctionResult, error) {
 		return BoolResult(true), nil
-	})
+	}); err != nil {
+		t.Fatalf("Failed to register function: %v", err)
+	}
 
 	// Verify it exists
 	_, _, err := registry.Lookup("temp_func")
