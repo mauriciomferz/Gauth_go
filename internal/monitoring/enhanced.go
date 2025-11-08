@@ -47,9 +47,9 @@ func (mc *MetricsCollector) VerificationFailureCounter(ctx context.Context) {
 // WithTrace runs a function within a trace span if OTEL is enabled
 func (mc *MetricsCollector) WithTrace(ctx context.Context, name string, fn func(ctx context.Context)) {
 	if mc.otel != nil {
-		ctx, span := mc.otel.StartSpan(ctx, name)
+		ctx2, span := mc.otel.StartSpan(ctx, name)
 		defer mc.otel.EndSpan(span)
-		fn(ctx)
+		fn(ctx2)
 	} else {
 		fn(ctx)
 	}

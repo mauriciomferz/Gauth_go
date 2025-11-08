@@ -176,8 +176,8 @@ func (m *PolicyVersionManager) loadFromStore() error {
 
 	// Load each version's metadata and bundle
 	for _, version := range versions {
-		bundle, metadata, err := m.store.LoadVersion(version)
-		if err != nil {
+		bundle, metadata, err2 := m.store.LoadVersion(version)
+		if err2 != nil {
 			return fmt.Errorf("load version %d: %w", version, err)
 		}
 

@@ -81,7 +81,7 @@ func (a *API) HandleSign(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	var req SignRequest
-	if err := json.Unmarshal(body, &req); err != nil {
+	if err2 := json.Unmarshal(body, &req); err2 != nil {
 		http.Error(w, fmt.Sprintf("Invalid JSON: %v", err), http.StatusBadRequest)
 		return
 	}

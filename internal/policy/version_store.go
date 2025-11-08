@@ -62,13 +62,13 @@ func NewBoltPolicyVersionStore(dbPath string) (*BoltPolicyVersionStore, error) {
 
 	// Create buckets
 	err = db.Update(func(tx *bolt.Tx) error {
-		if _, err := tx.CreateBucketIfNotExists([]byte(versionMetadataBucket)); err != nil {
+		if _, err2 := tx.CreateBucketIfNotExists([]byte(versionMetadataBucket)); err2 != nil {
 			return fmt.Errorf("create version_metadata bucket: %w", err)
 		}
-		if _, err := tx.CreateBucketIfNotExists([]byte(bundlesBucket)); err != nil {
+		if _, err2 := tx.CreateBucketIfNotExists([]byte(bundlesBucket)); err2 != nil {
 			return fmt.Errorf("create bundles bucket: %w", err)
 		}
-		if _, err := tx.CreateBucketIfNotExists([]byte(auditEventsBucket)); err != nil {
+		if _, err2 := tx.CreateBucketIfNotExists([]byte(auditEventsBucket)); err2 != nil {
 			return fmt.Errorf("create audit_events bucket: %w", err)
 		}
 		if _, err := tx.CreateBucketIfNotExists([]byte(auditIndexBucket)); err != nil {
@@ -238,7 +238,7 @@ func (s *BoltPolicyVersionStore) SaveAuditEvent(event VersionAuditEvent) error {
 
 		// Save to audit_events bucket
 		auditBucket := tx.Bucket([]byte(auditEventsBucket))
-		if err := auditBucket.Put([]byte(eventID), eventJSON); err != nil {
+		if err2 := auditBucket.Put([]byte(eventID), eventJSON); err2 != nil {
 			return fmt.Errorf("put audit event: %w", err)
 		}
 
@@ -250,7 +250,7 @@ func (s *BoltPolicyVersionStore) SaveAuditEvent(event VersionAuditEvent) error {
 		var eventIDs []string
 		existingJSON := indexBucket.Get(versionKey)
 		if existingJSON != nil {
-			if err := json.Unmarshal(existingJSON, &eventIDs); err != nil {
+			if err2 := json.Unmarshal(existingJSON, &eventIDs); err2 != nil {
 				// Ignore unmarshal errors, start fresh
 				eventIDs = []string{}
 			}

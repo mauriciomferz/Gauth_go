@@ -322,12 +322,12 @@ func TestSignatureManager_ActivatePoA(t *testing.T) {
 	digest := state.CanonicalDigest
 
 	sig1 := signDigest(t, digest, privA)
-	if err := manager.SubmitSignature(ctx, "poa-6", "alice", keyIDA, sig1, nil); err != nil {
+	if err2 := manager.SubmitSignature(ctx, "poa-6", "alice", keyIDA, sig1, nil); err2 != nil {
 		t.Fatalf("SubmitSignature failed: %v", err)
 	}
 
 	sig2 := signDigest(t, digest, privB)
-	if err := manager.SubmitSignature(ctx, "poa-6", "bob", keyIDB, sig2, nil); err != nil {
+	if err2 := manager.SubmitSignature(ctx, "poa-6", "bob", keyIDB, sig2, nil); err2 != nil {
 		t.Fatalf("SubmitSignature failed: %v", err)
 	}
 

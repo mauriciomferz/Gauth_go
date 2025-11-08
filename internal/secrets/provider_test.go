@@ -27,8 +27,8 @@ func TestFilesystemProviderLifecycle(t *testing.T) {
 		t.Fatalf("backend mismatch")
 	}
 	// store
-	if err := p.Store("api_key", []byte(testSecret)); err != nil {
-		t.Fatalf("store: %v", err)
+	if err2 := p.Store("api_key", []byte(testSecret)); err2 != nil {
+		t.Fatalf("store: %v", err2)
 	}
 	// get
 	val, err := p.Get("api_key")
@@ -37,8 +37,8 @@ func TestFilesystemProviderLifecycle(t *testing.T) {
 	}
 	// rotate
 	newKey := randKey(t)
-	if err := p.Rotate(newKey); err != nil {
-		t.Fatalf("rotate: %v", err)
+	if err2 := p.Rotate(newKey); err2 != nil {
+		t.Fatalf("rotate: %v", err2)
 	}
 	val2, err := p.Get("api_key")
 	if err != nil || string(val2) != testSecret {

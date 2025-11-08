@@ -36,7 +36,7 @@ func TestPersistenceRoundTrip(t *testing.T) {
 	}
 	st.Inc("issued", 5)
 	st.Inc("revoked", 2)
-	if err := st.Persist(); err != nil {
+	if err2 := st.Persist(); err2 != nil {
 		t.Fatalf("persist: %v", err)
 	}
 	// Create new store loading same path

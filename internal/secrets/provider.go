@@ -179,8 +179,8 @@ func (p *FilesystemProvider) Rotate(newMasterKey []byte) error {
 		}
 		// encrypt with new key
 		nonceNew := make([]byte, 12)
-		if _, err := io.ReadFull(rand.Reader, nonceNew); err != nil {
-			return err
+		if _, err2 := io.ReadFull(rand.Reader, nonceNew); err2 != nil {
+			return err2
 		}
 		blockNew, err := aes.NewCipher(newMasterKey)
 		if err != nil {

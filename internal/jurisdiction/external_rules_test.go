@@ -25,10 +25,10 @@ func TestExternalRulesLoad(t *testing.T) {
 	    }
 	  ]
 	}`
-	if _, err := f.WriteString(json); err != nil {
+	if _, err2 := f.WriteString(json); err2 != nil {
 		t.Fatalf("write: %v", err)
 	}
-	if err := f.Close(); err != nil {
+	if err2 := f.Close(); err2 != nil {
 		t.Fatalf("close: %v", err)
 	}
 

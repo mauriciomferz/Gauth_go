@@ -22,10 +22,10 @@ func TestParseRFCFile_ExtractsClausesAndNormativeStatements(t *testing.T) {
 	if err != nil {
 		t.Fatalf("temp file: %v", err)
 	}
-	if _, err := tmp.WriteString(sampleRFC); err != nil {
+	if _, err2 := tmp.WriteString(sampleRFC); err2 != nil {
 		t.Fatalf("write sample: %v", err)
 	}
-	if err := tmp.Close(); err != nil {
+	if err2 := tmp.Close(); err2 != nil {
 		t.Fatalf("close sample: %v", err)
 	}
 

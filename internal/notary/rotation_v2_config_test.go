@@ -12,7 +12,7 @@ func TestLoadWeightsConfigValid(t *testing.T) {
 		t.Fatalf("tmp: %v", err)
 	}
 	content := `{"schema_version":1,"active_key_set_id":"set","threshold_weight":3,"signers":[{"id":"b","alg":"ED25519","weight":1},{"id":"a","alg":"ED25519","weight":2}],"algorithm_suite":["ed25519"]}`
-	if _, err := tmp.WriteString(content); err != nil {
+	if _, err2 := tmp.WriteString(content); err2 != nil {
 		t.Fatalf("write: %v", err)
 	}
 	tmp.Close()

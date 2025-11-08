@@ -39,7 +39,7 @@ func OpenFileLogger(path string) (*FileLogger, error) {
 		return nil, err
 	}
 	fl := &FileLogger{path: path, file: f, events: make([]Event, 0, 128)}
-	if err := fl.load(); err != nil {
+	if err2 := fl.load(); err2 != nil {
 		f.Close()
 		return nil, fmt.Errorf("load: %w", err)
 	}

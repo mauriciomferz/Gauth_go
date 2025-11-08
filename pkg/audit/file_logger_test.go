@@ -25,14 +25,14 @@ func TestFileLoggerAppendAndReload(t *testing.T) {
 		ev := NewEvent(EventTypeAuthorization, "action", ResultSuccess)
 		ev.Subject = "alice"
 		ev.Object = "resource"
-		if err := fl.Log(context.Background(), ev); err != nil {
+		if err2 := fl.Log(context.Background(), ev); err2 != nil {
 			t.Fatalf("log %d: %v", i, err)
 		}
 	}
 	if len(fl.Events()) != 3 {
 		t.Fatalf("expected 3 events, got %d", len(fl.Events()))
 	}
-	if err := fl.VerifyChain(); err != nil {
+	if err2 := fl.VerifyChain(); err2 != nil {
 		t.Fatalf("verify: %v", err)
 	}
 	// Re-open
@@ -67,11 +67,11 @@ func TestFileLoggerReloadIntegrity(t *testing.T) {
 		ev := NewEvent(EventTypeAuthorization, "phase1", ResultSuccess)
 		ev.Subject = testSubject
 		ev.Object = testObject
-		if err := fl.Log(context.Background(), ev); err != nil {
+		if err2 := fl.Log(context.Background(), ev); err2 != nil {
 			t.Fatalf("log phase1 %d: %v", i, err)
 		}
 	}
-	if err := fl.Close(); err != nil {
+	if err2 := fl.Close(); err2 != nil {
 		t.Fatalf("close phase1: %v", err)
 	}
 
@@ -84,7 +84,7 @@ func TestFileLoggerReloadIntegrity(t *testing.T) {
 		ev := NewEvent(EventTypeAuthorization, "phase2", ResultSuccess)
 		ev.Subject = testSubject
 		ev.Object = testObject
-		if err := fl2.Log(context.Background(), ev); err != nil {
+		if err2 := fl2.Log(context.Background(), ev); err2 != nil {
 			t.Fatalf("log phase2 %d: %v", i, err)
 		}
 	}

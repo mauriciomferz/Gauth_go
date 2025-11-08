@@ -51,7 +51,7 @@ func TestBoltPolicyVersionStore_SaveLoadVersion(t *testing.T) {
 	}
 
 	// Save version
-	if err := store.SaveVersion(1, bundle, metadata); err != nil {
+	if err2 := store.SaveVersion(1, bundle, metadata); err2 != nil {
 		t.Fatalf("Failed to save version: %v", err)
 	}
 
@@ -99,7 +99,7 @@ func TestBoltPolicyVersionStore_ListVersions(t *testing.T) {
 			Name:            fmt.Sprintf("Version %d", i),
 			BundleVersion:   i,
 		}
-		if err := store.SaveVersion(i, bundle, metadata); err != nil {
+		if err2 := store.SaveVersion(i, bundle, metadata); err2 != nil {
 			t.Fatalf("Failed to save version %d: %v", i, err)
 		}
 	}
@@ -139,7 +139,7 @@ func TestBoltPolicyVersionStore_ActiveVersion(t *testing.T) {
 	defer store.Close()
 
 	// Save active version
-	if err := store.SaveActiveVersion(2); err != nil {
+	if err2 := store.SaveActiveVersion(2); err2 != nil {
 		t.Fatalf("Failed to save active version: %v", err)
 	}
 
@@ -154,7 +154,7 @@ func TestBoltPolicyVersionStore_ActiveVersion(t *testing.T) {
 	}
 
 	// Update active version
-	if err := store.SaveActiveVersion(3); err != nil {
+	if err2 := store.SaveActiveVersion(3); err2 != nil {
 		t.Fatalf("Failed to update active version: %v", err)
 	}
 
@@ -201,7 +201,7 @@ func TestBoltPolicyVersionStore_AuditEvents(t *testing.T) {
 	}
 
 	for _, event := range events {
-		if err := store.SaveAuditEvent(event); err != nil {
+		if err2 := store.SaveAuditEvent(event); err2 != nil {
 			t.Fatalf("Failed to save audit event: %v", err)
 		}
 		// Small delay to ensure unique event IDs (timestamp-based)
@@ -259,13 +259,13 @@ func TestBoltPolicyVersionStore_Stats(t *testing.T) {
 			Name:          fmt.Sprintf("Version %d", i),
 			BundleVersion: i,
 		}
-		if err := store.SaveVersion(i, bundle, metadata); err != nil {
+		if err2 := store.SaveVersion(i, bundle, metadata); err2 != nil {
 			t.Fatalf("Failed to save version %d: %v", i, err)
 		}
 	}
 
 	// Save active version
-	if err := store.SaveActiveVersion(2); err != nil {
+	if err2 := store.SaveActiveVersion(2); err2 != nil {
 		t.Fatalf("Failed to save active version: %v", err)
 	}
 
@@ -276,7 +276,7 @@ func TestBoltPolicyVersionStore_Stats(t *testing.T) {
 		Timestamp: time.Now(),
 		Success:   true,
 	}
-	if err := store.SaveAuditEvent(event); err != nil {
+	if err2 := store.SaveAuditEvent(event); err2 != nil {
 		t.Fatalf("Failed to save audit event: %v", err)
 	}
 
@@ -426,18 +426,18 @@ func TestPolicyVersionManagerWithStore_RollbackPersistence(t *testing.T) {
 			RollbackAllowed: true,
 		}
 
-		if _, err := manager.CreateVersion(ctx, bundle, metadata); err != nil {
+		if _, err2 := manager.CreateVersion(ctx, bundle, metadata); err2 != nil {
 			t.Fatalf("Failed to create version %d: %v", i, err)
 		}
 
 		// Activate each version
-		if err := manager.ActivateVersion(ctx, i, "system"); err != nil {
+		if err2 := manager.ActivateVersion(ctx, i, "system"); err2 != nil {
 			t.Fatalf("Failed to activate version %d: %v", i, err)
 		}
 	}
 
 	// Rollback to version 2
-	if err := manager.RollbackVersion(ctx, 2, "admin", "Testing rollback"); err != nil {
+	if err2 := manager.RollbackVersion(ctx, 2, "admin", "Testing rollback"); err2 != nil {
 		t.Fatalf("Failed to rollback: %v", err)
 	}
 
