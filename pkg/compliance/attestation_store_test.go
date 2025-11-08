@@ -408,8 +408,8 @@ func TestInMemoryAttestationStore_Count(t *testing.T) {
 			IssuedAt:  time.Now(),
 			Nonce:     fmt.Sprintf("nonce-012-%d", i),
 		}
-		if err := store.Store(ctx, proof, true); err != nil {
-			t.Fatalf("failed to store attestation: %v", err)
+		if err2 := store.Store(ctx, proof, true); err2 != nil {
+			t.Fatalf("failed to store attestation: %v", err2)
 		}
 	}
 
@@ -445,13 +445,13 @@ func TestJSONLAttestationStore_Persistence(t *testing.T) {
 		Nonce:     "nonce-persist-001",
 	}
 
-	if err := store1.Store(ctx, proof, true); err != nil {
-		t.Fatalf("failed to store attestation: %v", err)
+	if err2 := store1.Store(ctx, proof, true); err2 != nil {
+		t.Fatalf("failed to store attestation: %v", err2)
 	}
 	store1.Close()
 
 	// Verify file exists
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+	if _, err2 := os.Stat(filePath); os.IsNotExist(err2) {
 		t.Fatal("JSONL file was not created")
 	}
 

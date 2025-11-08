@@ -36,8 +36,8 @@ func TestBoltStoreAppendAndVerify(t *testing.T) {
 			Object:   "obj",
 			Metadata: map[string]interface{}{"i": i},
 		}
-		if err := bs.Append(ctx, e); err != nil {
-			t.Fatalf("append %d: %v", i, err)
+		if err2 := bs.Append(ctx, e); err2 != nil {
+			t.Fatalf("append %d: %v", i, err2)
 		}
 	}
 	vr, err := bs.VerifyChain(ctx)

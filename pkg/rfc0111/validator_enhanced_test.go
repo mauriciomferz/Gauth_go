@@ -212,8 +212,8 @@ func TestBoltDailyLimitStore(t *testing.T) {
 	}
 
 	// Test increment usage
-	if err := store.IncrementDailyUsage(delegationID, today, 100.50); err != nil {
-		t.Fatalf("IncrementDailyUsage() error = %v", err)
+	if err2 := store.IncrementDailyUsage(delegationID, today, 100.50); err2 != nil {
+		t.Fatalf("IncrementDailyUsage() error = %v", err2)
 	}
 
 	usage, err = store.GetDailyUsage(delegationID, today)
@@ -225,8 +225,8 @@ func TestBoltDailyLimitStore(t *testing.T) {
 	}
 
 	// Test second increment
-	if err := store.IncrementDailyUsage(delegationID, today, 25.25); err != nil {
-		t.Fatalf("IncrementDailyUsage() second error = %v", err)
+	if err2 := store.IncrementDailyUsage(delegationID, today, 25.25); err2 != nil {
+		t.Fatalf("IncrementDailyUsage() second error = %v", err2)
 	}
 
 	usage, err = store.GetDailyUsage(delegationID, today)
@@ -248,8 +248,8 @@ func TestBoltDailyLimitStore(t *testing.T) {
 	}
 
 	// Test reset
-	if err := store.ResetDailyUsage(delegationID, today); err != nil {
-		t.Fatalf("ResetDailyUsage() error = %v", err)
+	if err2 := store.ResetDailyUsage(delegationID, today); err2 != nil {
+		t.Fatalf("ResetDailyUsage() error = %v", err2)
 	}
 
 	usage, err = store.GetDailyUsage(delegationID, today)

@@ -237,12 +237,12 @@ func DecodeRawPOAStreamWith(r io.Reader, limits StreamLimits, algo RawPOAHashAlg
 		prevDigest := h.Sum(nil)
 		for len(items) < limits.MaxItems {
 			var lenBuf [4]byte
-			_, err := io.ReadFull(bufReader, lenBuf[:])
-			if err == io.EOF {
+			_, err2 := io.ReadFull(bufReader, lenBuf[:])
+			if err2 == io.EOF {
 				break
 			}
-			if err != nil {
-				return nil, fmt.Errorf("length read: %w", err)
+			if err2 != nil {
+				return nil, fmt.Errorf("length read: %w", err2)
 			}
 			sz := int(binary.BigEndian.Uint32(lenBuf[:]))
 			if sz <= 0 || sz > limits.MaxItemBytes {

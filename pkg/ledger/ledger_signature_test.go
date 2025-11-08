@@ -18,8 +18,8 @@ func TestMemoryStoreEntrySignature(t *testing.T) {
 	ms.ConfigureEd25519Signer(priv, pub, "testkey")
 	ctx := context.Background()
 	e := &Entry{ID: "sig1", TS: time.Now(), Type: "test", Subject: "alice", Object: "obj"}
-	if err := ms.Append(ctx, e); err != nil {
-		t.Fatalf("append: %v", err)
+	if err2 := ms.Append(ctx, e); err2 != nil {
+		t.Fatalf("append: %v", err2)
 	}
 	if e.Signature == nil {
 		t.Fatalf("expected signature present")
@@ -54,8 +54,8 @@ func TestBoltStoreEntrySignature(t *testing.T) {
 	defer func() { _ = bs.Close() }()
 	ctx := context.Background()
 	e := &Entry{ID: "sig2", TS: time.Now(), Type: "test", Subject: "alice", Object: "obj"}
-	if err := bs.Append(ctx, e); err != nil {
-		t.Fatalf("append: %v", err)
+	if err2 := bs.Append(ctx, e); err2 != nil {
+		t.Fatalf("append: %v", err2)
 	}
 	if e.Signature == nil {
 		t.Fatalf("expected signature present")

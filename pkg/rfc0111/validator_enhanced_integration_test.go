@@ -89,8 +89,8 @@ func TestEnhancedPoAValidator_Integration(t *testing.T) {
 	}
 
 	// Test 4: Exceed daily limit (add 2000 more to total 10500)
-	if err := store.IncrementDailyUsage(poa.ID, today, 2000.0); err != nil {
-		t.Fatalf("IncrementDailyUsage() exceed error = %v", err)
+	if err2 := store.IncrementDailyUsage(poa.ID, today, 2000.0); err2 != nil {
+		t.Fatalf("IncrementDailyUsage() exceed error = %v", err2)
 	}
 
 	result3 := validator.ValidateWithResult(context.Background(), poa)
@@ -217,8 +217,8 @@ func TestEnhancedPoAValidator_StressTest(t *testing.T) {
 
 		// Add some usage
 		usage := float64(i * 10)
-		if err := store.IncrementDailyUsage(poa.ID, today, usage); err != nil {
-			t.Fatalf("IncrementDailyUsage() error at iteration %d: %v", i, err)
+		if err2 := store.IncrementDailyUsage(poa.ID, today, usage); err2 != nil {
+			t.Fatalf("IncrementDailyUsage() error at iteration %d: %v", i, err2)
 		}
 
 		// Validate
@@ -291,8 +291,8 @@ func TestEnhancedPoAValidator_ConcurrentAccess(t *testing.T) {
 
 			for j := 0; j < incrementsPerGoroutine; j++ {
 				// Increment usage
-				if err := store.IncrementDailyUsage(delegationID, today, 10.0); err != nil {
-					t.Errorf("Goroutine %d increment %d failed: %v", goroutineID, j, err)
+				if err2 := store.IncrementDailyUsage(delegationID, today, 10.0); err2 != nil {
+					t.Errorf("Goroutine %d increment %d failed: %v", goroutineID, j, err2)
 					return
 				}
 

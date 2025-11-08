@@ -29,8 +29,8 @@ func TestBoltAnchorFileEmission(t *testing.T) {
 	}
 	st.ConfigureEd25519Signer(priv, pub, "test-key")
 	anchorFile := filepath.Join(dir, "anchor.json")
-	if err := st.EnableAnchorFile(anchorFile, 10*time.Millisecond); err != nil {
-		t.Fatalf("enable anchor file: %v", err)
+	if err2 := st.EnableAnchorFile(anchorFile, 10*time.Millisecond); err2 != nil {
+		t.Fatalf("enable anchor file: %v", err2)
 	}
 	// Append several entries spaced out to trigger writes.
 	for i := 0; i < 3; i++ {
@@ -41,8 +41,8 @@ func TestBoltAnchorFileEmission(t *testing.T) {
 			Subject: "sub",
 			Object:  "obj",
 		}
-		if err := st.Append(context.TODO(), e); err != nil {
-			t.Fatalf("append %d: %v", i, err)
+		if err2 := st.Append(context.TODO(), e); err2 != nil {
+			t.Fatalf("append %d: %v", i, err2)
 		}
 		time.Sleep(15 * time.Millisecond)
 	}

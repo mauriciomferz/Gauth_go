@@ -44,7 +44,7 @@ func TestAuditLedgerTamper(t *testing.T) {
 		}
 		// Decode JSON, alter prev_hash
 		var entry map[string]any
-		if err := json.Unmarshal(v, &entry); err != nil {
+		if err2 := json.Unmarshal(v, &entry); err2 != nil {
 			return err
 		}
 		entry["prev_hash"] = "deadbeef" // invalid linkage

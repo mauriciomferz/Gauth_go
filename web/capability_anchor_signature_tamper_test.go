@@ -74,8 +74,8 @@ func TestCapabilityAnchorEndpointSignatureTamper(t *testing.T) {
 		Kid        string `json:"kid"`
 		PublicKey  string `json:"public_key"`
 	}
-	if err := json.Unmarshal(pkResp.Body.Bytes(), &pk); err != nil {
-		t.Fatalf("unmarshal pk: %v", err)
+	if err2 := json.Unmarshal(pkResp.Body.Bytes(), &pk); err2 != nil {
+		t.Fatalf("unmarshal pk: %v", err2)
 	}
 	if !pk.Success || !pk.Configured || pk.PublicKey == "" {
 		t.Fatalf("public key response invalid")

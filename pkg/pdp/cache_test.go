@@ -130,8 +130,8 @@ func TestPDPCache_LRUEviction(t *testing.T) {
 
 	// Verify others still cached
 	for i := 1; i < len(decisions); i++ {
-		_, found := cache.Get(decisions[i].req)
-		if !found {
+		_, found2 := cache.Get(decisions[i].req)
+		if !found2 {
 			t.Errorf("Expected to find %s in cache after eviction", decisions[i].req.Subject)
 		}
 	}

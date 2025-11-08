@@ -23,14 +23,14 @@ func TestRotationVerifyCLI(t *testing.T) {
 		t.Skip("skipping: non-200 status from rotation v2 endpoint (likely unsigned artifact)")
 	}
 	var raw map[string]any
-	if err := json.NewDecoder(resp.Body).Decode(&raw); err != nil {
-		t.Fatalf("decode: %v", err)
+	if err2 := json.NewDecoder(resp.Body).Decode(&raw); err2 != nil {
+		t.Fatalf("decode: %v", err2)
 	}
 	// write artifact to temp file
 	b, _ := json.Marshal(raw)
 	tmp := t.TempDir() + "/artifact.json"
-	if err := os.WriteFile(tmp, b, 0o600); err != nil {
-		t.Fatalf("write temp: %v", err)
+	if err2 := os.WriteFile(tmp, b, 0o600); err2 != nil {
+		t.Fatalf("write temp: %v", err2)
 	}
 	// Use path relative to module root (test package lives in ./test so we need to go up one level).
 	cmd := exec.Command("go", "run", "../cmd/rotation-verify", "--file", tmp, "--json")
