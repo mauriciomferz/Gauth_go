@@ -3749,8 +3749,13 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 					if s.primaryAuthService != nil {
 						snap := s.primaryAuthService.ViolationSnapshot()
 						for k, g := range s.otelViolationCounters {
-							//nolint:gosec // G115: violation counter, safe conversion
-							o.ObserveInt64(g, int64(snap[k])) //nolint:gosec // G115: violation counter
+							// G115 fix: Validate boundary before uint64→int64 conversion
+							val := snap[k]
+							if val > math.MaxInt64 {
+								o.ObserveInt64(g, math.MaxInt64)
+							} else {
+								o.ObserveInt64(g, int64(val))
+							}
 						}
 						rates := s.violationRatesForWindows()
 						for rk, g := range s.otelViolationRates {
@@ -3762,9 +3767,13 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 					if s.rfc0111Service != nil {
 						ss := s.rfc0111Service.SemanticSnapshot()
 						for k, g := range semanticGauges {
-							//nolint:gosec // G115: semantic counter, safe conversion
+							// G115 fix: Validate boundary before uint64→int64 conversion
 							if v, ok := ss[k]; ok {
-								o.ObserveInt64(g, int64(v)) //nolint:gosec // G115: semantic counter
+								if v > math.MaxInt64 {
+									o.ObserveInt64(g, math.MaxInt64)
+								} else {
+									o.ObserveInt64(g, int64(v))
+								}
 							}
 						}
 						r60, r300 := s.semanticRatesForWindows()
