@@ -105,12 +105,12 @@ func TestConsistencyProofV2WithKeyManager(t *testing.T) {
 	}
 	cryptoInt.GlobalEdDSARegistry = km
 	chain := seedChain(4)
-	if _, err := chain.SignTreeHead(); err != nil {
-		t.Fatalf("sign 1: %v", err)
+	if _, err2 := chain.SignTreeHead(); err2 != nil {
+		t.Fatalf("sign 1: %v", err2)
 	}
 	_, _ = chain.Append(RevocationEvent{ID: "x2", DelegationID: "x2"})
-	if _, err := chain.SignTreeHead(); err != nil {
-		t.Fatalf("sign 2: %v", err)
+	if _, err2 := chain.SignTreeHead(); err2 != nil {
+		t.Fatalf("sign 2: %v", err2)
 	}
 	proof, err := chain.GenerateConsistencyProofV2(0)
 	if err != nil {

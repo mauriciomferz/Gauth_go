@@ -14,10 +14,10 @@ func TestMultiSignatureTreeHeadThreshold(t *testing.T) {
 	if err != nil {
 		t.Fatalf("manager init: %v", err)
 	}
-	if _, err := km.Rotate(); err != nil {
+	if _, err2 := km.Rotate(); err2 != nil {
 		t.Fatalf("rotate1: %v", err)
 	}
-	if _, err := km.Rotate(); err != nil {
+	if _, err2 := km.Rotate(); err2 != nil {
 		t.Fatalf("rotate2: %v", err)
 	}
 	cryptoInt.GlobalEdDSARegistry = km
@@ -27,8 +27,8 @@ func TestMultiSignatureTreeHeadThreshold(t *testing.T) {
 	chain := NewRevocationChain()
 	// Append some events
 	for i := 0; i < 3; i++ {
-		if _, err := chain.Append(RevocationEvent{ID: "rev-" + time.Now().Format("150405") + string(rune('a'+i)), DelegationID: "del-"}); err != nil {
-			t.Fatalf("append: %v", err)
+		if _, err2 := chain.Append(RevocationEvent{ID: "rev-" + time.Now().Format("150405") + string(rune('a'+i)), DelegationID: "del-"}); err != nil {
+			t.Fatalf("append: %v", err2)
 		}
 		time.Sleep(5 * time.Millisecond) // ensure unique timestamp for hash determinism
 	}
@@ -53,10 +53,10 @@ func TestMultiSignatureTreeHeadWeights(t *testing.T) {
 		t.Fatalf("manager init: %v", err)
 	}
 	// Rotate twice to have 3 keys total (active + 2 history)
-	if _, err := km.Rotate(); err != nil {
+	if _, err2 := km.Rotate(); err2 != nil {
 		t.Fatalf("rotate1: %v", err)
 	}
-	if _, err := km.Rotate(); err != nil {
+	if _, err2 := km.Rotate(); err2 != nil {
 		t.Fatalf("rotate2: %v", err)
 	}
 	cryptoInt.GlobalEdDSARegistry = km
@@ -69,8 +69,8 @@ func TestMultiSignatureTreeHeadWeights(t *testing.T) {
 	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "3")
 	os.Setenv("GAUTH_MULTI_SIG_WEIGHTS", wEnv)
 	chain := NewRevocationChain()
-	if _, err := chain.Append(RevocationEvent{ID: "rev-x", DelegationID: "del-x"}); err != nil {
-		t.Fatalf("append: %v", err)
+	if _, err2 := chain.Append(RevocationEvent{ID: "rev-x", DelegationID: "del-x"}); err != nil {
+		t.Fatalf("append: %v", err2)
 	}
 	sth, err := chain.SignTreeHead()
 	if err != nil {

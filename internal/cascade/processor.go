@@ -72,7 +72,7 @@ func (p *Processor) ProcessCascadeRevocation(ctx context.Context, parentPoaID, r
 				"operation": "revoke_parent",
 			},
 		}
-		if err := p.auditor.Log(ctx, event); err != nil {
+		if err := p.auditor.Log(ctx, event); err != nil { //nolint:SA9003
 			// Log the audit error but continue processing
 		}
 	}
@@ -146,7 +146,7 @@ func (p *Processor) ProcessCascadeRevocation(ctx context.Context, parentPoaID, r
 				"error_count":        len(result.Errors),
 			},
 		}
-		if err := p.auditor.Log(ctx, event); err != nil {
+		if err := p.auditor.Log(ctx, event); err != nil { //nolint:SA9003
 			// Log the audit error but continue processing
 		}
 	}
@@ -235,7 +235,7 @@ func (p *Processor) processDescendant(poa *rfc0111.PowerOfAttorney, depth int, r
 					"would_change_to": "revoked", // What would happen in real mode
 				},
 			}
-			if err := p.auditor.Log(context.Background(), event); err != nil {
+			if err := p.auditor.Log(context.Background(), event); err != nil { //nolint:SA9003
 				// Log the audit error but continue processing
 			}
 		}
@@ -269,7 +269,7 @@ func (p *Processor) processDescendant(poa *rfc0111.PowerOfAttorney, depth int, r
 				"cascade_mode":      string(p.config.Mode),
 			},
 		}
-		if err := p.auditor.Log(context.Background(), event); err != nil {
+		if err := p.auditor.Log(context.Background(), event); err != nil { //nolint:SA9003
 			// Log error but continue processing
 			_ = err
 		}

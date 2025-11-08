@@ -16,7 +16,6 @@ import (
 //
 //nolint:gocyclo // End-to-end cascade testing
 func TestCascadeProcessorComprehensive(t *testing.T) {
-
 	// Helper to create a test POA with realistic attributes
 	createRealisticPOA := func(id, parentID, grantor, grantee string, scope []string, depth int) *rfc0111.PowerOfAttorney {
 		now := time.Now().UTC()
@@ -192,13 +191,13 @@ func TestCascadeProcessorComprehensive(t *testing.T) {
 	})
 
 	t.Run("performance test - deep hierarchy", func(t *testing.T) {
-		// Create a deep chain: root -> level1 -> level2 -> ... -> level20
-		repo := &memoryRepo{store: make(map[string]*rfc0111.PowerOfAttorney)}
+	// Create a deep chain: root -> level1 -> level2 -> ... -> level20
+	repo := &memoryRepo{store: make(map[string]*rfc0111.PowerOfAttorney)}
 
-		const maxLevels = 20
-		var previousID string = ""
+	const maxLevels = 20
+	var previousID = ""
 
-		for i := 0; i < maxLevels; i++ {
+	for i := 0; i < maxLevels; i++ {
 			id := fmt.Sprintf("level-%d", i)
 			poa := createRealisticPOA(
 				id,

@@ -24,11 +24,11 @@ func TestSignedTreeHeadPersistence(t *testing.T) {
 	cryptoInt.GlobalEdDSARegistry = km
 	chain := NewRevocationChain()
 	// Append an event and sign tree head (auto-save expected)
-	if _, err := chain.Append(RevocationEvent{ID: "rev-a", DelegationID: "del-a"}); err != nil {
-		t.Fatalf("append: %v", err)
+	if _, err2 := chain.Append(RevocationEvent{ID: "rev-a", DelegationID: "del-a"}); err2 != nil {
+		t.Fatalf("append: %v", err2)
 	}
-	if _, err := chain.SignTreeHead(); err != nil {
-		t.Fatalf("sign: %v", err)
+	if _, err2 := chain.SignTreeHead(); err2 != nil {
+		t.Fatalf("sign: %v", err2)
 	}
 	// Confirm file non-empty
 	info, err := os.Stat(tmpFile.Name())
