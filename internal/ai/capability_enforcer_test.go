@@ -233,7 +233,7 @@ func TestCapabilityEnforcer_ModelMetadataLimits(t *testing.T) {
 	limits.ModelMetadata["gpt-4"] = gpt4Limits
 	err = enforcer.UpdateCapability(limits)
 	require.NoError(t, err)
-	
+
 	result, err = enforcer.Enforce(&UsageContext{
 		CapabilityID: "text-gen-with-limits",
 		ModelName:    "gpt-4",
@@ -253,4 +253,3 @@ func TestCapabilityEnforcer_ModelMetadataLimits(t *testing.T) {
 	assert.False(t, result.Allowed)
 	assert.Contains(t, result.Violations[0], "deprecated")
 }
-

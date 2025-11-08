@@ -11,6 +11,7 @@ import (
 )
 
 // TestExternalAnchorMetricsStrict asserts specific numeric values for provider-labeled external anchor metrics.
+//
 //nolint:gocyclo // External anchor metrics test
 func TestExternalAnchorMetricsStrict(t *testing.T) {
 	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", memoryProvider)

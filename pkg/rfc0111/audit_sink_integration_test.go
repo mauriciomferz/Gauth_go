@@ -83,7 +83,7 @@ func TestAuditSinkIntegration_Disabled(t *testing.T) {
 	if resp.POA.ID == "" {
 		t.Fatal("Expected POA ID but got empty")
 	}
-	
+
 	// Allow async audit processing to complete
 	time.Sleep(50 * time.Millisecond)
 
@@ -317,7 +317,7 @@ func TestAuditSinkIntegration_ErrorHandling(t *testing.T) {
 	if resp.POA.ID == "" {
 		t.Fatal("Expected POA ID but got empty")
 	}
-	
+
 	// Allow async audit processing to complete
 	time.Sleep(50 * time.Millisecond)
 

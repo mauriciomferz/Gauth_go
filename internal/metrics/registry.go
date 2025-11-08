@@ -645,7 +645,9 @@ func (reg *CollectorRegistry) ObserveLifecycleTransitionLatency(entityType strin
 }
 
 func (reg *CollectorRegistry) SetLifecycleTransitionLatencyQuantile(entityType string, outcome string, quantile string, value float64) {
-	reg.dispatch(func(c MetricsCollector) { c.SetLifecycleTransitionLatencyQuantile(entityType, outcome, quantile, value) })
+	reg.dispatch(func(c MetricsCollector) {
+		c.SetLifecycleTransitionLatencyQuantile(entityType, outcome, quantile, value)
+	})
 }
 
 func (reg *CollectorRegistry) IncCapabilityDiffRequests() {
@@ -735,4 +737,3 @@ func (reg *CollectorRegistry) SetCascadeMaxDepthReached(depth int) {
 func (reg *CollectorRegistry) IncCascadeProcessingErrors() {
 	reg.dispatch(func(c MetricsCollector) { c.IncCascadeProcessingErrors() })
 }
-

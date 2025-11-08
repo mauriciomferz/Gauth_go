@@ -17,6 +17,7 @@ import (
 )
 
 // TestRotationV2EmbeddedECDSAPublicKeyVerification ensures embedded uncompressed P-256 point enables auditor-style verification.
+//
 //nolint:gocyclo // ECDSA verification test with multiple cases
 func TestRotationV2EmbeddedECDSAPublicKeyVerification(t *testing.T) {
 	os.Setenv("GAUTH_ROTATIONS_V2_EMBED_PUBS", "1")

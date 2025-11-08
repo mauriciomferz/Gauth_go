@@ -17,10 +17,10 @@ import (
 // Property: For all valid claim sets C, decode(encode(C)) ≈ C (modulo type coercion)
 func TestParsingPropertyRoundTrip(t *testing.T) {
 	svc, err := New(Config{
-		ClientID:           "roundtrip-client",
-		ClientSecret:       strings.Repeat("x", 40),
-		AuthServerURL:      "https://auth.local",
-		AccessTokenExpiry:  time.Hour,
+		ClientID:          "roundtrip-client",
+		ClientSecret:      strings.Repeat("x", 40),
+		AuthServerURL:     "https://auth.local",
+		AccessTokenExpiry: time.Hour,
 	})
 	if err != nil {
 		t.Fatalf("service init: %v", err)
@@ -97,10 +97,10 @@ func TestParsingPropertyRoundTrip(t *testing.T) {
 // Note: Subsequent parses may fail due to JTI replay detection, which is expected behavior
 func TestParsingPropertyIdempotence(t *testing.T) {
 	svc, err := New(Config{
-		ClientID:           "idempotent-client",
-		ClientSecret:       strings.Repeat("y", 40),
-		AuthServerURL:      "https://auth.local",
-		AccessTokenExpiry:  time.Hour,
+		ClientID:          "idempotent-client",
+		ClientSecret:      strings.Repeat("y", 40),
+		AuthServerURL:     "https://auth.local",
+		AccessTokenExpiry: time.Hour,
 	})
 	if err != nil {
 		t.Fatalf("service init: %v", err)
@@ -113,7 +113,7 @@ func TestParsingPropertyIdempotence(t *testing.T) {
 		claims := generateRandomClaims(rnd)
 		// Don't include JTI to avoid replay detection interference
 		delete(claims, "jti")
-		
+
 		token := buildTestToken(svc.signingKey, claims)
 
 		// Parse token multiple times (without JTI, should be deterministic)
@@ -146,10 +146,10 @@ func TestParsingPropertyIdempotence(t *testing.T) {
 // Property: For all malformed tokens M, validate(M) returns error consistently
 func TestParsingPropertyErrorPreservation(t *testing.T) {
 	svc, err := New(Config{
-		ClientID:           "error-client",
-		ClientSecret:       strings.Repeat("z", 40),
-		AuthServerURL:      "https://auth.local",
-		AccessTokenExpiry:  time.Hour,
+		ClientID:          "error-client",
+		ClientSecret:      strings.Repeat("z", 40),
+		AuthServerURL:     "https://auth.local",
+		AccessTokenExpiry: time.Hour,
 	})
 	if err != nil {
 		t.Fatalf("service init: %v", err)
@@ -181,10 +181,10 @@ func TestParsingPropertyErrorPreservation(t *testing.T) {
 // Property: For all claim sets C with permuted JSON field order, parsed claims are equivalent
 func TestParsingPropertyClaimExtraction(t *testing.T) {
 	svc, err := New(Config{
-		ClientID:           "extraction-client",
-		ClientSecret:       strings.Repeat("a", 40),
-		AuthServerURL:      "https://auth.local",
-		AccessTokenExpiry:  time.Hour,
+		ClientID:          "extraction-client",
+		ClientSecret:      strings.Repeat("a", 40),
+		AuthServerURL:     "https://auth.local",
+		AccessTokenExpiry: time.Hour,
 	})
 	if err != nil {
 		t.Fatalf("service init: %v", err)
@@ -238,12 +238,12 @@ func TestParsingPropertyTimingBoundaries(t *testing.T) {
 	oldMode := os.Getenv("GAUTH_TOKEN_SIG_MODE")
 	os.Setenv("GAUTH_TOKEN_SIG_MODE", "hmac")
 	defer os.Setenv("GAUTH_TOKEN_SIG_MODE", oldMode)
-	
+
 	svc, err := New(Config{
-		ClientID:           "timing-client",
-		ClientSecret:       strings.Repeat("b", 40),
-		AuthServerURL:      "https://auth.local",
-		AccessTokenExpiry:  time.Hour,
+		ClientID:          "timing-client",
+		ClientSecret:      strings.Repeat("b", 40),
+		AuthServerURL:     "https://auth.local",
+		AccessTokenExpiry: time.Hour,
 	})
 	if err != nil {
 		t.Fatalf("service init: %v", err)
@@ -303,10 +303,10 @@ func TestParsingPropertyTimingBoundaries(t *testing.T) {
 // Property: Missing/null/empty claims should be handled consistently without panics
 func TestParsingPropertyNullAndEmpty(t *testing.T) {
 	svc, err := New(Config{
-		ClientID:           "null-client",
-		ClientSecret:       strings.Repeat("c", 40),
-		AuthServerURL:      "https://auth.local",
-		AccessTokenExpiry:  time.Hour,
+		ClientID:          "null-client",
+		ClientSecret:      strings.Repeat("c", 40),
+		AuthServerURL:     "https://auth.local",
+		AccessTokenExpiry: time.Hour,
 	})
 	if err != nil {
 		t.Fatalf("service init: %v", err)

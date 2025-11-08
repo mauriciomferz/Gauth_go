@@ -61,7 +61,7 @@ func TestStartSpanFromW3C(t *testing.T) {
 
 func TestExtractW3C_InvalidFormat(t *testing.T) {
 	tests := []struct {
-		name       string
+		name        string
 		traceparent string
 	}{
 		{"empty", ""},
@@ -85,7 +85,7 @@ func TestExtractW3C_InvalidFormat(t *testing.T) {
 }
 
 func contains(s, substr string) bool {
-	return len(s) >= len(substr) && s[:len(substr)] == substr || 
-	       len(s) >= len(substr) && s[len(s)-len(substr):] == substr ||
-	       len(s) > len(substr) && strings.Contains(s, substr)
+	return len(s) >= len(substr) && s[:len(substr)] == substr ||
+		len(s) >= len(substr) && s[len(s)-len(substr):] == substr ||
+		len(s) > len(substr) && strings.Contains(s, substr)
 }

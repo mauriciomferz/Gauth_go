@@ -631,6 +631,7 @@ func (c *RevocationChain) GenerateConsistencyProof(startIndex int) (*Consistency
 
 // GenerateConsistencyProofV2 builds a logarithmic sized consistency proof between tree head at startIndex and latest.
 // startIndex selects the historical SignedTreeHead in c.treeHeads slice. Implementation derived from RFC6962 algorithm.
+//
 //nolint:gocyclo // Merkle proof generation with path construction
 func (c *RevocationChain) GenerateConsistencyProofV2(startIndex int) (*ConsistencyProofV2, error) {
 	if c == nil {
@@ -872,10 +873,11 @@ func (c *RevocationChain) GenerateConsistencyProofV2(startIndex int) (*Consisten
 }
 
 // VerifyConsistencyProofV2 verifies logarithmic consistency proof ensuring append-only growth.
-//nolint:gocyclo // Merkle proof verification logic
 // Recomputes old and new roots using provided path. For prototype we simply trust provided StartRoot/EndRoot fields
-//nolint:gocyclo // Merkle proof verification logic
 // after reconstructing from full leaf set for integrity, then ensure that path enables derivation following our recorded sequence.
+//
+//nolint:gocyclo // Merkle proof verification logic
+//nolint:gocyclo // Merkle proof verification logic
 func VerifyConsistencyProofV2(proof *ConsistencyProofV2, allEventHashes []string) error {
 	if proof == nil {
 		return errors.New("nil_proof")

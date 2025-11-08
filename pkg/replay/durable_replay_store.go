@@ -88,29 +88,29 @@ func (p *CompositeEvictionPolicy) Name() string {
 // Supported: "ttl", "lru", "size", "ttl+size", "none" (default: ttl).
 func ParseEvictionPolicy(policy string, ttl time.Duration, maxSize int) EvictionPolicy {
 	policy = strings.ToLower(strings.TrimSpace(policy))
-	
+
 	if policy == "none" || policy == "" {
 		return &TTLEvictionPolicy{TTL: ttl} // Default to TTL
 	}
-	
+
 	if policy == "ttl" {
 		return &TTLEvictionPolicy{TTL: ttl}
 	}
-	
+
 	if policy == "lru" {
 		if maxSize <= 0 {
 			maxSize = 10000 // Default max size for LRU
 		}
 		return &LRUEvictionPolicy{MaxSize: maxSize}
 	}
-	
+
 	if policy == "size" {
 		if maxSize <= 0 {
 			maxSize = 10000
 		}
 		return &SizeBasedEvictionPolicy{MaxSize: maxSize}
 	}
-	
+
 	// Composite: "ttl+size", "ttl+lru"
 	if strings.Contains(policy, "+") {
 		parts := strings.Split(policy, "+")
@@ -120,7 +120,7 @@ func ParseEvictionPolicy(policy string, ttl time.Duration, maxSize int) Eviction
 		}
 		return &CompositeEvictionPolicy{Policies: policies}
 	}
-	
+
 	// Unknown policy, default to TTL
 	return &TTLEvictionPolicy{TTL: ttl}
 }
@@ -145,17 +145,17 @@ type EvictionStats struct {
 // - Access time tracking for LRU
 // - Eviction statistics and metrics
 type DurableReplayStore struct {
-	mu              sync.RWMutex
-	entries         map[string]time.Time // JTI -> creation timestamp
-	accessTimes     map[string]time.Time // JTI -> last access timestamp (for LRU)
-	ttl             time.Duration
-	wal             *WALStore
+	mu               sync.RWMutex
+	entries          map[string]time.Time // JTI -> creation timestamp
+	accessTimes      map[string]time.Time // JTI -> last access timestamp (for LRU)
+	ttl              time.Duration
+	wal              *WALStore
 	snapshotInterval time.Duration
-	stopCh          chan struct{}
-	stoppedCh       chan struct{}
-	metrics         DurableReplayMetrics
-	evictionPolicy  EvictionPolicy
-	evictionStats   EvictionStats
+	stopCh           chan struct{}
+	stoppedCh        chan struct{}
+	metrics          DurableReplayMetrics
+	evictionPolicy   EvictionPolicy
+	evictionStats    EvictionStats
 }
 
 // DurableReplayMetrics defines metrics collection interface for replay persistence.
@@ -175,24 +175,24 @@ type DurableReplayMetrics interface {
 // NoopReplayMetrics provides a no-op metrics implementation.
 type NoopReplayMetrics struct{}
 
-func (n NoopReplayMetrics) IncReplayStoreErrors()                      {}
-func (n NoopReplayMetrics) ObserveReplayStoreLatency(d time.Duration)  {}
+func (n NoopReplayMetrics) IncReplayStoreErrors()                            {}
+func (n NoopReplayMetrics) ObserveReplayStoreLatency(d time.Duration)        {}
 func (n NoopReplayMetrics) ObserveReplayWALSnapshotDuration(d time.Duration) {}
 func (n NoopReplayMetrics) ObserveReplayWALFlushLatency(d time.Duration)     {}
-func (n NoopReplayMetrics) SetReplayWALPending(count int)              {}
-func (n NoopReplayMetrics) IncReplayEvictions(reason string)           {}
-func (n NoopReplayMetrics) SetReplayStoreSize(size int)                {}
-func (n NoopReplayMetrics) IncReplayCacheHit()                         {}
-func (n NoopReplayMetrics) IncReplayCacheMiss()                        {}
+func (n NoopReplayMetrics) SetReplayWALPending(count int)                    {}
+func (n NoopReplayMetrics) IncReplayEvictions(reason string)                 {}
+func (n NoopReplayMetrics) SetReplayStoreSize(size int)                      {}
+func (n NoopReplayMetrics) IncReplayCacheHit()                               {}
+func (n NoopReplayMetrics) IncReplayCacheMiss()                              {}
 
 // DurableReplayStoreConfig configures DurableReplayStore creation.
 type DurableReplayStoreConfig struct {
-	WALPath          string                 // Path to WAL file
-	TTL              time.Duration          // TTL for replay entries
-	SnapshotInterval time.Duration          // How often to create snapshots (default: 5m)
-	Metrics          DurableReplayMetrics   // Optional metrics (uses NoopReplayMetrics if nil)
-	EvictionPolicy   EvictionPolicy         // Optional eviction policy (default: TTL-based)
-	MaxSize          int                    // Max entries for size-based policies (default: 10000)
+	WALPath          string               // Path to WAL file
+	TTL              time.Duration        // TTL for replay entries
+	SnapshotInterval time.Duration        // How often to create snapshots (default: 5m)
+	Metrics          DurableReplayMetrics // Optional metrics (uses NoopReplayMetrics if nil)
+	EvictionPolicy   EvictionPolicy       // Optional eviction policy (default: TTL-based)
+	MaxSize          int                  // Max entries for size-based policies (default: 10000)
 }
 
 // NewDurableReplayStore creates a durable replay store with automatic snapshots.
@@ -305,7 +305,7 @@ func (d *DurableReplayStore) Seen(jti string) (bool, error) {
 	defer d.mu.Unlock()
 
 	now := time.Now()
-	
+
 	// Apply eviction policy (lazy cleanup during read)
 	d.applyEviction(now)
 
@@ -336,7 +336,7 @@ func (d *DurableReplayStore) Seen(jti string) (bool, error) {
 // applyEviction applies the configured eviction policy (must be called with lock held).
 func (d *DurableReplayStore) applyEviction(now time.Time) {
 	evicted := 0
-	
+
 	// For TTL-based eviction
 	if _, ok := d.evictionPolicy.(*TTLEvictionPolicy); ok {
 		for jti, ts := range d.entries {
@@ -354,13 +354,13 @@ func (d *DurableReplayStore) applyEviction(now time.Time) {
 		}
 		return
 	}
-	
+
 	// For size-based eviction (oldest first)
 	if sizePolicy, ok := d.evictionPolicy.(*SizeBasedEvictionPolicy); ok {
 		if len(d.entries) <= sizePolicy.MaxSize {
 			return
 		}
-		
+
 		// Sort by timestamp, evict oldest
 		type entry struct {
 			jti string
@@ -370,7 +370,7 @@ func (d *DurableReplayStore) applyEviction(now time.Time) {
 		for jti, ts := range d.entries {
 			entries = append(entries, entry{jti, ts})
 		}
-		
+
 		// Simple bubble sort (OK for small eviction batches)
 		for i := 0; i < len(entries)-1; i++ {
 			for j := i + 1; j < len(entries); j++ {
@@ -379,7 +379,7 @@ func (d *DurableReplayStore) applyEviction(now time.Time) {
 				}
 			}
 		}
-		
+
 		// Evict oldest until under max size
 		toEvict := len(d.entries) - sizePolicy.MaxSize
 		for i := 0; i < toEvict && i < len(entries); i++ {
@@ -387,7 +387,7 @@ func (d *DurableReplayStore) applyEviction(now time.Time) {
 			delete(d.accessTimes, entries[i].jti)
 			evicted++
 		}
-		
+
 		if evicted > 0 {
 			d.evictionStats.TotalEvictions += uint64(evicted)
 			d.evictionStats.SizeEvictions += uint64(evicted)
@@ -396,14 +396,14 @@ func (d *DurableReplayStore) applyEviction(now time.Time) {
 		}
 		return
 	}
-	
+
 	// For LRU eviction
 	if lruPolicy, ok := d.evictionPolicy.(*LRUEvictionPolicy); ok {
 		lruPolicy.currentSize = len(d.entries)
 		if len(d.entries) <= lruPolicy.MaxSize {
 			return
 		}
-		
+
 		// Sort by access time, evict least recently used
 		type entry struct {
 			jti        string
@@ -413,7 +413,7 @@ func (d *DurableReplayStore) applyEviction(now time.Time) {
 		for jti, accessTime := range d.accessTimes {
 			entries = append(entries, entry{jti, accessTime})
 		}
-		
+
 		// Sort by access time (oldest first)
 		for i := 0; i < len(entries)-1; i++ {
 			for j := i + 1; j < len(entries); j++ {
@@ -422,7 +422,7 @@ func (d *DurableReplayStore) applyEviction(now time.Time) {
 				}
 			}
 		}
-		
+
 		// Evict LRU entries until under max size
 		toEvict := len(d.entries) - lruPolicy.MaxSize
 		for i := 0; i < toEvict && i < len(entries); i++ {
@@ -430,7 +430,7 @@ func (d *DurableReplayStore) applyEviction(now time.Time) {
 			delete(d.accessTimes, entries[i].jti)
 			evicted++
 		}
-		
+
 		if evicted > 0 {
 			d.evictionStats.TotalEvictions += uint64(evicted)
 			d.evictionStats.LRUEvictions += uint64(evicted)
@@ -439,7 +439,7 @@ func (d *DurableReplayStore) applyEviction(now time.Time) {
 		}
 		return
 	}
-	
+
 	// For composite policy, check all sub-policies
 	if composite, ok := d.evictionPolicy.(*CompositeEvictionPolicy); ok {
 		for jti, ts := range d.entries {
@@ -582,11 +582,11 @@ func (d *DurableReplayStore) Size() int {
 
 // Stats returns store statistics for monitoring.
 type DurableReplayStoreStats struct {
-	TotalEntries  int           `json:"total_entries"`
-	ActiveEntries int           `json:"active_entries"`
-	WALPath       string        `json:"wal_path"`
+	TotalEntries     int           `json:"total_entries"`
+	ActiveEntries    int           `json:"active_entries"`
+	WALPath          string        `json:"wal_path"`
 	SnapshotInterval time.Duration `json:"snapshot_interval"`
-	TTL           time.Duration `json:"ttl"`
+	TTL              time.Duration `json:"ttl"`
 }
 
 // Stats returns current store statistics.
@@ -603,11 +603,11 @@ func (d *DurableReplayStore) Stats() DurableReplayStoreStats {
 	}
 
 	return DurableReplayStoreStats{
-		TotalEntries:  len(d.entries),
-		ActiveEntries: active,
-		WALPath:       d.wal.Path(),
+		TotalEntries:     len(d.entries),
+		ActiveEntries:    active,
+		WALPath:          d.wal.Path(),
 		SnapshotInterval: d.snapshotInterval,
-		TTL:           d.ttl,
+		TTL:              d.ttl,
 	}
 }
 
@@ -680,34 +680,34 @@ func NewDurableReplayStoreFromEnv(metrics DurableReplayMetrics) (*DurableReplayS
 	if walPath == "" {
 		walPath = "./data/replay.wal"
 	}
-	
+
 	ttl := 15 * time.Minute
 	if v := os.Getenv("GAUTH_REPLAY_TTL_SEC"); v != "" {
 		if secs, err := strconv.Atoi(v); err == nil && secs > 0 {
 			ttl = time.Duration(secs) * time.Second
 		}
 	}
-	
+
 	snapshotInterval := 5 * time.Minute
 	if v := os.Getenv("GAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC"); v != "" {
 		if secs, err := strconv.Atoi(v); err == nil && secs > 0 {
 			snapshotInterval = time.Duration(secs) * time.Second
 		}
 	}
-	
+
 	maxSize := 10000
 	if v := os.Getenv("GAUTH_REPLAY_EVICTION_MAX_SIZE"); v != "" {
 		if size, err := strconv.Atoi(v); err == nil && size > 0 {
 			maxSize = size
 		}
 	}
-	
+
 	policyStr := os.Getenv("GAUTH_REPLAY_EVICTION_POLICY")
 	if policyStr == "" {
 		policyStr = "ttl" // Default
 	}
 	policy := ParseEvictionPolicy(policyStr, ttl, maxSize)
-	
+
 	config := DurableReplayStoreConfig{
 		WALPath:          walPath,
 		TTL:              ttl,
@@ -716,6 +716,6 @@ func NewDurableReplayStoreFromEnv(metrics DurableReplayMetrics) (*DurableReplayS
 		EvictionPolicy:   policy,
 		MaxSize:          maxSize,
 	}
-	
+
 	return NewDurableReplayStore(config)
 }

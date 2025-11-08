@@ -11,6 +11,9 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/conformance/harnesslib"
 )
 
@@ -50,7 +53,7 @@ func main() {
 
 	if *markdownOut != "" {
 		md := report.ToMarkdown()
-		if err := os.WriteFile(*markdownOut, []byte(md), 0644); err != nil {
+		if err := os.WriteFile(*markdownOut, []byte(md), 0600); err != nil {
 			fmt.Fprintf(os.Stderr, "❌ Failed to write markdown: %v\n", err)
 			os.Exit(1)
 		}
@@ -63,7 +66,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "❌ Failed to marshal JSON: %v\n", err)
 			os.Exit(1)
 		}
-		if err := os.WriteFile(*jsonOut, jsonData, 0644); err != nil {
+		if err := os.WriteFile(*jsonOut, jsonData, 0600); err != nil {
 			fmt.Fprintf(os.Stderr, "❌ Failed to write JSON: %v\n", err)
 			os.Exit(1)
 		}
@@ -75,7 +78,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "❌ Failed to create CSV directory: %v\n", err)
 			os.Exit(1)
 		}
-		
+
 		gapMatrixPath := filepath.Join(*csvOut, "gap_matrix.csv")
 		if err := harnesslib.WriteGapCSV(gapMatrixPath, report); err != nil {
 			fmt.Fprintf(os.Stderr, "❌ Failed to write gap matrix CSV: %v\n", err)
@@ -149,14 +152,14 @@ func runAnalysis() (harnesslib.Report, error) {
 	// Create synthetic RFC clauses from clause_map.json
 	// Since RFC markdown files don't exist, we generate placeholder clauses
 	// that match the clause IDs in the clause_map.json
-	
+
 	// Load clause map to extract clause IDs
 	clauseMapPath := "conformance/clause_map.json"
 	clauseMapData, err := os.ReadFile(clauseMapPath)
 	if err != nil {
 		return harnesslib.Report{}, fmt.Errorf("failed to read clause_map.json: %w", err)
 	}
-	
+
 	// Parse clause map to extract clause prefixes
 	var clauseMap struct {
 		Entries []struct {
@@ -166,10 +169,10 @@ func runAnalysis() (harnesslib.Report, error) {
 	if err := json.Unmarshal(clauseMapData, &clauseMap); err != nil {
 		return harnesslib.Report{}, fmt.Errorf("failed to parse clause_map.json: %w", err)
 	}
-	
+
 	// Create placeholder clauses matching the clause_map
 	var allClauses []harnesslib.Clause
-	
+
 	// Add RFC placeholders
 	allClauses = append(allClauses, harnesslib.Clause{
 		ID:       "0111:rfc-0111-(placeholder-extract)",
@@ -185,7 +188,7 @@ func runAnalysis() (harnesslib.Report, error) {
 		LineFrom: 1,
 		LineTo:   1,
 	})
-	
+
 	// Convert clause prefixes to Clause objects
 	lineNum := 3
 	for _, entry := range clauseMap.Entries {
@@ -197,11 +200,12 @@ func runAnalysis() (harnesslib.Report, error) {
 		}
 		rfc := parts[0]
 		titleSlug := parts[1]
-		
+
 		// Convert slug to title (e.g., "1.-introduction" -> "1. Introduction")
 		title := strings.ReplaceAll(titleSlug, "-", " ")
-		title = strings.Title(title)
-		
+		caser := cases.Title(language.English)
+		title = caser.String(title)
+
 		allClauses = append(allClauses, harnesslib.Clause{
 			ID:       entry.ClausePrefix,
 			Title:    title,
@@ -211,43 +215,42 @@ func runAnalysis() (harnesslib.Report, error) {
 		})
 		lineNum += 3
 	}
-	
+
 	// Build symbol index
 	_, _ = harnesslib.BuildSymbolIndex(".")
-	
+
 	// Run analysis
 	result := harnesslib.Analyze(allClauses)
-	
+
 	// Build report
 	report := harnesslib.BuildReport(result)
 	report.GeneratedAt = time.Now().Format(time.RFC3339)
-	
+
 	return report, nil
 }
-
 
 func appendToHistory(path string, report harnesslib.Report) error {
 	// Check if file exists
 	_, err := os.Stat(path)
 	fileExists := err == nil
-	
+
 	// Open file for appending (create if doesn't exist)
-	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	
+
 	w := csv.NewWriter(f)
 	defer w.Flush()
-	
+
 	// Write header if new file
 	if !fileExists {
 		if err := w.Write([]string{"timestamp", "coverage", "gap_missing", "gap_partial", "gap_implemented", "missing_symbols", "missing_tests"}); err != nil {
 			return err
 		}
 	}
-	
+
 	// Write data
 	timestamp := time.Now().Format(time.RFC3339)
 	coverage := fmt.Sprintf("%.2f", report.Summary.CoveragePercent)
@@ -256,7 +259,7 @@ func appendToHistory(path string, report harnesslib.Report) error {
 	gapImplemented := fmt.Sprintf("%d", report.Summary.GapImplemented)
 	missingSymbols := fmt.Sprintf("%d", report.Summary.MissingSymbols)
 	missingTests := fmt.Sprintf("%d", report.Summary.MissingTests)
-	
+
 	return w.Write([]string{timestamp, coverage, gapMissing, gapPartial, gapImplemented, missingSymbols, missingTests})
 }
 
@@ -265,10 +268,9 @@ func generateTrendMarkdown(historyPath, outPath string, window int) error {
 	if err != nil {
 		return err
 	}
-	
+
 	tm := harnesslib.ComputeTrend(entries, window)
 	md := harnesslib.RenderTrendMarkdown(entries, tm)
-	
-	return os.WriteFile(outPath, []byte(md), 0644)
-}
 
+	return os.WriteFile(outPath, []byte(md), 0600)
+}

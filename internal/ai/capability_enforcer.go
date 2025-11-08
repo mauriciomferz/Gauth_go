@@ -76,7 +76,7 @@ func (e *CapabilityEnforcer) RegisterCapability(limits *CapabilityLimits) error 
 
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	
+
 	e.matrix[limits.CapabilityID] = limits
 	return nil
 }
@@ -181,7 +181,7 @@ func (e *CapabilityEnforcer) Enforce(ctx *UsageContext) (*EnforcementResult, err
 func (e *CapabilityEnforcer) GetCapability(capabilityID string) (*CapabilityLimits, bool) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	limits, exists := e.matrix[capabilityID]
 	return limits, exists
 }
@@ -190,7 +190,7 @@ func (e *CapabilityEnforcer) GetCapability(capabilityID string) (*CapabilityLimi
 func (e *CapabilityEnforcer) ListCapabilities() []string {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	ids := make([]string, 0, len(e.matrix))
 	for id := range e.matrix {
 		ids = append(ids, id)
@@ -206,11 +206,11 @@ func (e *CapabilityEnforcer) UpdateCapability(limits *CapabilityLimits) error {
 
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	
+
 	if _, exists := e.matrix[limits.CapabilityID]; !exists {
 		return fmt.Errorf("capability_enforcer: capability %s not found", limits.CapabilityID)
 	}
-	
+
 	e.matrix[limits.CapabilityID] = limits
 	return nil
 }
@@ -219,11 +219,11 @@ func (e *CapabilityEnforcer) UpdateCapability(limits *CapabilityLimits) error {
 func (e *CapabilityEnforcer) RemoveCapability(capabilityID string) error {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	
+
 	if _, exists := e.matrix[capabilityID]; !exists {
 		return fmt.Errorf("capability_enforcer: capability %s not found", capabilityID)
 	}
-	
+
 	delete(e.matrix, capabilityID)
 	return nil
 }
@@ -232,7 +232,7 @@ func (e *CapabilityEnforcer) RemoveCapability(capabilityID string) error {
 func (e *CapabilityEnforcer) ExportMatrix() ([]byte, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	return json.MarshalIndent(e.matrix, "", "  ")
 }
 
@@ -245,7 +245,7 @@ func (e *CapabilityEnforcer) ImportMatrix(data []byte) error {
 
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	
+
 	e.matrix = matrix
 	return nil
 }

@@ -27,4 +27,3 @@ func parseModelLimitsJSON(b []byte) (modelLimitsRaw, error) {
 	}
 	return raw, nil
 }
-

@@ -154,12 +154,14 @@ func (a *AsyncAuditSink) Close() error {
 // Existing deployments continue working without changes.
 //
 // Usage:
-//   sink := NewAsyncAuditSink(mySiemSink, 1000)
-//   svc := rfc0111.NewService(logger, authorizer, WithAuditSink(sink))
+//
+//	sink := NewAsyncAuditSink(mySiemSink, 1000)
+//	svc := rfc0111.NewService(logger, authorizer, WithAuditSink(sink))
 //
 // For multiple sinks (e.g., SIEM + compliance DB), use MultiplexAuditSink:
-//   multiplex := NewMultiplexAuditSink(siemSink, complianceSink)
-//   svc := rfc0111.NewService(logger, authorizer, WithAuditSink(multiplex))
+//
+//	multiplex := NewMultiplexAuditSink(siemSink, complianceSink)
+//	svc := rfc0111.NewService(logger, authorizer, WithAuditSink(multiplex))
 func WithAuditSink(sink AuditSink) Option {
 	return func(s *Service) {
 		s.auditSink = sink

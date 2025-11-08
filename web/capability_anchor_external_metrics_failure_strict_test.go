@@ -11,6 +11,7 @@ import (
 )
 
 // TestExternalAnchorMetricsFailureStrict asserts failure counters increment when provider always fails.
+//
 //nolint:gocyclo // External anchor failure test
 func TestExternalAnchorMetricsFailureStrict(t *testing.T) {
 	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "tsa_stub")

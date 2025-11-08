@@ -45,15 +45,15 @@ func NewGAuthReplayStoreFromEnv(metrics interface{}) (GAuthReplayStore, error) {
 	} else {
 		durableMetrics = NoopReplayMetrics{}
 	}
-	
+
 	// Create DurableReplayStore from environment
 	store, err := NewDurableReplayStoreFromEnv(durableMetrics)
 	if err != nil {
 		return nil, fmt.Errorf("create durable replay store from env: %w", err)
 	}
-	
+
 	// Wrap in adapter that implements gauth.ReplayStore interface
 	adapter := NewDurableReplayStoreAdapter(store)
-	
+
 	return adapter, nil
 }

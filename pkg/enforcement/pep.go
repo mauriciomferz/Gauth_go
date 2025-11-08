@@ -94,9 +94,9 @@ func (s *SupplySidePEP) EnforceClientAction(ctx context.Context, resource, actio
 // The resource owner/server MUST validate client authorization compliance
 type DemandSidePEP struct {
 	*Enforcer
-	pdpClient  PDPClient
-	serverID   string
-	ownerID    string
+	pdpClient PDPClient
+	serverID  string
+	ownerID   string
 }
 
 // NewDemandSidePEP creates a PEP configured for demand-side (resource server) enforcement

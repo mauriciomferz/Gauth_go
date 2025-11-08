@@ -245,7 +245,7 @@ func (s *BoltPolicyVersionStore) SaveAuditEvent(event VersionAuditEvent) error {
 		// Update index (version -> event IDs)
 		indexBucket := tx.Bucket([]byte(auditIndexBucket))
 		versionKey := []byte(strconv.Itoa(event.Version))
-		
+
 		// Load existing event IDs for this version
 		var eventIDs []string
 		existingJSON := indexBucket.Get(versionKey)

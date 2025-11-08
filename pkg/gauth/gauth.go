@@ -208,6 +208,7 @@ func WithReplayStore(rs ReplayStore) Option {
 //   - GAUTH_REPLAY_TTL_SEC (default: 900 = 15 minutes)
 //   - GAUTH_REPLAY_EVICTION_POLICY (default: ttl, options: ttl|lru|size|ttl+size)
 //   - GAUTH_REPLAY_EVICTION_MAX_SIZE (default: 10000)
+//
 // This option requires importing "github.com/.../pkg/replay".
 //
 // NOTE: Due to circular dependency concerns, this function requires the caller to have
@@ -219,14 +220,14 @@ func WithDurableReplayFromEnv() Option {
 		type durableReplayFactory interface {
 			NewFromEnv(metrics interface{}) (ReplayStore, error)
 		}
-		
+
 		// Attempt to create DurableReplayStore using pkg/replay
 		// To make this work, we need a factory function that's injected globally
 		// For simplicity, directly use the known pattern from pkg/replay
-		
+
 		// Note: This requires pkg/replay to be imported by the caller
 		// If not imported, this will gracefully fail with an actionable error message
-		
+
 		// For now, return a clear error guiding users to the correct usage
 		// Once we refactor to use a factory pattern, this will auto-configure
 		return fmt.Errorf("WithDurableReplayFromEnv requires pkg/replay import - use: WithReplayStore(replay.NewDurableReplayStoreAdapter(replay.NewDurableReplayStoreFromEnv(nil)))")
@@ -401,6 +402,7 @@ func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
 }
 
 // ValidateToken validates a token and returns client information
+//
 //nolint:gocyclo // Token validation with comprehensive security checks
 func (g *Service) ValidateToken(token string) (*TokenValidationResult, error) {
 	if g == nil || (len(g.signingKey) == 0 && g.keyMode != sigModeEdDSA) {

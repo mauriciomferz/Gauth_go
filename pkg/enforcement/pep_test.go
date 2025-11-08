@@ -148,7 +148,7 @@ func TestDemandSidePEP_ValidateClientCompliance_WithRule(t *testing.T) {
 func TestPEPSides_Distinction(t *testing.T) {
 	// Verify that supply-side and demand-side PEPs are distinct
 	pdp := &MockPDP{decision: "permit", reason: "allowed"}
-	
+
 	supplySide := NewSupplySidePEP("ai:agent-123", pdp)
 	demandSide := NewDemandSidePEP("server:rs-1", "owner:alice", pdp)
 

@@ -10,6 +10,7 @@ import (
 )
 
 // Benchmark comparing simple map-based RBAC (MemoryAuthorizer) vs ChainEngine evaluation.
+//
 //nolint:gocyclo // Policy evaluation benchmark with scenarios
 func BenchmarkPolicyEvaluation(b *testing.B) {
 	// Setup legacy memory authorizer

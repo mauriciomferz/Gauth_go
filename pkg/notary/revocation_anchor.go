@@ -20,18 +20,19 @@ import (
 // Stores timestamped receipts in BoltDB for non-repudiation and audit trail.
 //
 // Architecture:
-//   rfc0111.Service.RevokeDelegation()
-//     → AnchorClient.Anchor(hash)
-//       → RevocationAnchoringAdapter.Anchor(hash)
-//         → Notarizer.Notarize(hash)  [RFC3161Provider, MemoryNotarizer, etc.]
-//         → Store Receipt in BoltDB anchor_receipts bucket
+//
+//	rfc0111.Service.RevokeDelegation()
+//	  → AnchorClient.Anchor(hash)
+//	    → RevocationAnchoringAdapter.Anchor(hash)
+//	      → Notarizer.Notarize(hash)  [RFC3161Provider, MemoryNotarizer, etc.]
+//	      → Store Receipt in BoltDB anchor_receipts bucket
 //
 // Receipts provide cryptographic proof that revocation occurred at specific time.
 // Future enhancement: Batch anchoring with merkle tree compression.
 type RevocationAnchoringAdapter struct {
-	notarizer    notary.Notarizer // Internal notarizer (RFC3161Provider, MemoryNotarizer, etc.)
-	receiptStore *ReceiptStore    // BoltDB-backed receipt storage
-	mu           sync.RWMutex     // Protects in-memory cache
+	notarizer    notary.Notarizer          // Internal notarizer (RFC3161Provider, MemoryNotarizer, etc.)
+	receiptStore *ReceiptStore             // BoltDB-backed receipt storage
+	mu           sync.RWMutex              // Protects in-memory cache
 	cache        map[string]notary.Receipt // Hash -> Receipt cache (optional optimization)
 }
 
@@ -52,7 +53,7 @@ func NewReceiptStore(db *bolt.DB) (*ReceiptStore, error) {
 		db:         db,
 		bucketName: []byte("anchor_receipts"),
 	}
-	
+
 	// Create bucket if not exists
 	err := db.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists(store.bucketName)
@@ -61,7 +62,7 @@ func NewReceiptStore(db *bolt.DB) (*ReceiptStore, error) {
 	if err != nil {
 		return nil, fmt.Errorf("create anchor_receipts bucket: %w", err)
 	}
-	
+
 	return store, nil
 }
 
@@ -69,13 +70,13 @@ func NewReceiptStore(db *bolt.DB) (*ReceiptStore, error) {
 func (rs *ReceiptStore) Store(hash string, receipt notary.Receipt) error {
 	rs.mu.Lock()
 	defer rs.mu.Unlock()
-	
+
 	// Serialize receipt to JSON
 	data, err := json.Marshal(receipt)
 	if err != nil {
 		return fmt.Errorf("marshal receipt: %w", err)
 	}
-	
+
 	// Store in BoltDB
 	err = rs.db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(rs.bucketName)
@@ -87,7 +88,7 @@ func (rs *ReceiptStore) Store(hash string, receipt notary.Receipt) error {
 	if err != nil {
 		return fmt.Errorf("store receipt in bolt: %w", err)
 	}
-	
+
 	return nil
 }
 
@@ -95,29 +96,29 @@ func (rs *ReceiptStore) Store(hash string, receipt notary.Receipt) error {
 func (rs *ReceiptStore) Get(hash string) (notary.Receipt, bool, error) {
 	rs.mu.RLock()
 	defer rs.mu.RUnlock()
-	
+
 	var receipt notary.Receipt
 	var found bool
-	
+
 	err := rs.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(rs.bucketName)
 		if bucket == nil {
 			return errors.New("anchor_receipts bucket not found")
 		}
-		
+
 		data := bucket.Get([]byte(hash))
 		if data == nil {
 			found = false
 			return nil
 		}
-		
+
 		found = true
 		return json.Unmarshal(data, &receipt)
 	})
 	if err != nil {
 		return notary.Receipt{}, false, fmt.Errorf("get receipt from bolt: %w", err)
 	}
-	
+
 	return receipt, found, nil
 }
 
@@ -126,15 +127,15 @@ func (rs *ReceiptStore) Get(hash string) (notary.Receipt, bool, error) {
 func (rs *ReceiptStore) List() ([]notary.Receipt, error) {
 	rs.mu.RLock()
 	defer rs.mu.RUnlock()
-	
+
 	var receipts []notary.Receipt
-	
+
 	err := rs.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(rs.bucketName)
 		if bucket == nil {
 			return errors.New("anchor_receipts bucket not found")
 		}
-		
+
 		return bucket.ForEach(func(k, v []byte) error {
 			var receipt notary.Receipt
 			if err := json.Unmarshal(v, &receipt); err != nil {
@@ -147,17 +148,18 @@ func (rs *ReceiptStore) List() ([]notary.Receipt, error) {
 	if err != nil {
 		return nil, fmt.Errorf("list receipts: %w", err)
 	}
-	
+
 	return receipts, nil
 }
 
 // NewRevocationAnchoringAdapter creates a new adapter with notarizer and receipt store.
 //
 // Example:
-//   notarizer := notary.NewRFC3161Provider("https://freetsa.org/tsr", "FreeTSA")
-//   receiptStore, _ := NewReceiptStore(boltDB)
-//   adapter := NewRevocationAnchoringAdapter(notarizer, receiptStore)
-//   svc := rfc0111.NewService(..., rfc0111.WithAnchorClient(adapter))
+//
+//	notarizer := notary.NewRFC3161Provider("https://freetsa.org/tsr", "FreeTSA")
+//	receiptStore, _ := NewReceiptStore(boltDB)
+//	adapter := NewRevocationAnchoringAdapter(notarizer, receiptStore)
+//	svc := rfc0111.NewService(..., rfc0111.WithAnchorClient(adapter))
 func NewRevocationAnchoringAdapter(notarizer notary.Notarizer, receiptStore *ReceiptStore) *RevocationAnchoringAdapter {
 	return &RevocationAnchoringAdapter{
 		notarizer:    notarizer,
@@ -182,25 +184,25 @@ func (a *RevocationAnchoringAdapter) Anchor(hash string) error {
 	if hash == "" {
 		return errors.New("hash required for anchoring")
 	}
-	
+
 	// Call notarizer to get timestamped receipt
 	receipt, err := a.notarizer.Notarize(hash)
 	if err != nil {
 		return fmt.Errorf("notarization failed: %w", err)
 	}
-	
+
 	// Store receipt in BoltDB
 	if a.receiptStore != nil {
 		if err := a.receiptStore.Store(hash, receipt); err != nil {
 			return fmt.Errorf("store receipt failed: %w", err)
 		}
 	}
-	
+
 	// Cache receipt in memory
 	a.mu.Lock()
 	a.cache[hash] = receipt
 	a.mu.Unlock()
-	
+
 	return nil
 }
 
@@ -222,24 +224,24 @@ func (a *RevocationAnchoringAdapter) GetReceipt(hash string) (notary.Receipt, bo
 		return receipt, true, nil
 	}
 	a.mu.RUnlock()
-	
+
 	// Check persistent storage
 	if a.receiptStore == nil {
 		return notary.Receipt{}, false, nil
 	}
-	
+
 	receipt, found, err := a.receiptStore.Get(hash)
 	if err != nil {
 		return notary.Receipt{}, false, err
 	}
-	
+
 	// Populate cache if found
 	if found {
 		a.mu.Lock()
 		a.cache[hash] = receipt
 		a.mu.Unlock()
 	}
-	
+
 	return receipt, found, nil
 }
 
@@ -254,13 +256,13 @@ func (a *RevocationAnchoringAdapter) VerifyReceipt(receipt notary.Receipt) error
 	if !receipt.Success {
 		return errors.New("receipt indicates failed notarization")
 	}
-	
+
 	// Verify timestamp format
 	_, err := time.Parse(time.RFC3339Nano, receipt.Timestamp)
 	if err != nil {
 		return fmt.Errorf("invalid timestamp format: %w", err)
 	}
-	
+
 	// Provider-specific verification
 	// If notarizer implements VerifyReceipt interface, delegate to it
 	if verifier, ok := a.notarizer.(interface{ VerifyReceipt(notary.Receipt) error }); ok {
@@ -268,7 +270,7 @@ func (a *RevocationAnchoringAdapter) VerifyReceipt(receipt notary.Receipt) error
 			return fmt.Errorf("provider verification failed: %w", err)
 		}
 	}
-	
+
 	return nil
 }
 
@@ -281,7 +283,7 @@ func (a *RevocationAnchoringAdapter) VerifyReceipt(receipt notary.Receipt) error
 func ComputeRevocationHash(poaID, revoker string, timestamp time.Time, reason string) string {
 	// Canonical format: "<poaID>|<revoker>|<timestamp_unix>|<reason>"
 	canonical := fmt.Sprintf("%s|%s|%d|%s", poaID, revoker, timestamp.Unix(), reason)
-	
+
 	hash := sha256.Sum256([]byte(canonical))
 	return "sha256:" + hex.EncodeToString(hash[:])
 }
@@ -301,50 +303,50 @@ func (a *RevocationAnchoringAdapter) GetStats() (AnchorStats, error) {
 	if a.receiptStore == nil {
 		return AnchorStats{}, errors.New("receipt store not initialized")
 	}
-	
+
 	receipts, err := a.receiptStore.List()
 	if err != nil {
 		return AnchorStats{}, fmt.Errorf("list receipts: %w", err)
 	}
-	
+
 	stats := AnchorStats{
 		TotalReceipts: len(receipts),
 	}
-	
+
 	if len(receipts) == 0 {
 		return stats, nil
 	}
-	
+
 	var totalLatency float64
 	var oldestTime, newestTime time.Time
-	
+
 	for _, receipt := range receipts {
 		if receipt.Success {
 			stats.SuccessfulCount++
 		} else {
 			stats.FailedCount++
 		}
-		
+
 		totalLatency += receipt.LatencySeconds
-		
+
 		// Parse timestamp
 		ts, err := time.Parse(time.RFC3339Nano, receipt.Timestamp)
 		if err != nil {
 			continue
 		}
-		
+
 		if oldestTime.IsZero() || ts.Before(oldestTime) {
 			oldestTime = ts
 			stats.OldestReceipt = receipt.Timestamp
 		}
-		
+
 		if newestTime.IsZero() || ts.After(newestTime) {
 			newestTime = ts
 			stats.NewestReceipt = receipt.Timestamp
 		}
 	}
-	
+
 	stats.AverageLatencyMs = (totalLatency / float64(len(receipts))) * 1000
-	
+
 	return stats, nil
 }

@@ -414,94 +414,94 @@ func (o *OpenTelemetryCollector) IncRevoked() {
 // Stub implementations for remaining methods
 // Production implementation would include all 119 methods
 
-func (o *OpenTelemetryCollector) IncDelegationStatusTransitions()                             {}
-func (o *OpenTelemetryCollector) IncJurisdictionPolicyEvaluations()                           {}
-func (o *OpenTelemetryCollector) IncJurisdictionPolicyViolations()                            {}
-func (o *OpenTelemetryCollector) ObserveJurisdictionPolicyEvaluationLatency(d time.Duration)  {}
-func (o *OpenTelemetryCollector) IncAICapabilityChecks()                                      {}
-func (o *OpenTelemetryCollector) IncAICapabilityDenied()                                      {}
-func (o *OpenTelemetryCollector) IncAIHighRiskActionDenied()                                  {}
-func (o *OpenTelemetryCollector) ObserveAICapabilityEvaluationLatency(d time.Duration)        {}
-func (o *OpenTelemetryCollector) IncModelLimitChecks()                                        {}
-func (o *OpenTelemetryCollector) IncModelContextLimitExceeded()                               {}
-func (o *OpenTelemetryCollector) IncModelRateLimitExceeded()                                  {}
-func (o *OpenTelemetryCollector) IncModelUnknown()                                            {}
-func (o *OpenTelemetryCollector) IncModelLimitSurge()                                         {}
-func (o *OpenTelemetryCollector) IncModelUserInputLimitExceeded()                             {}
-func (o *OpenTelemetryCollector) IncModelUserOutputLimitExceeded()                            {}
-func (o *OpenTelemetryCollector) IncModelUserRateLimitExceeded()                              {}
-func (o *OpenTelemetryCollector) IncKeyRotationsInitiated()                                   {}
-func (o *OpenTelemetryCollector) IncKeyRotationFailures()                                     {}
-func (o *OpenTelemetryCollector) ObserveKeyRotationLatency(d time.Duration)                   {}
-func (o *OpenTelemetryCollector) SetActiveKeySetSize(size int)                                {}
-func (o *OpenTelemetryCollector) IncCapabilityComputations()                                  {}
-func (o *OpenTelemetryCollector) IncCapabilityComputationFailures()                           {}
-func (o *OpenTelemetryCollector) ObserveCapabilityComputationLatency(d time.Duration)         {}
-func (o *OpenTelemetryCollector) ObserveCapabilityDiffLatency(d time.Duration)                {}
-func (o *OpenTelemetryCollector) IncRevocationWorkflowInitiated()                             {}
-func (o *OpenTelemetryCollector) IncRevocationWorkflowInitiationFailures()                    {}
-func (o *OpenTelemetryCollector) IncRevocationWorkflowApprovals()                             {}
-func (o *OpenTelemetryCollector) IncRevocationWorkflowApprovalFailures()                      {}
-func (o *OpenTelemetryCollector) IncRevocationWorkflowQuorumSatisfied()                       {}
-func (o *OpenTelemetryCollector) IncRevocationWorkflowCanceled()                              {}
-func (o *OpenTelemetryCollector) IncRevocationWorkflowCancellationFailures()                  {}
-func (o *OpenTelemetryCollector) IncRevocationWorkflowUnauthorized()                          {}
-func (o *OpenTelemetryCollector) IncEvidenceAttachment()                                      {}
-func (o *OpenTelemetryCollector) IncEvidenceAttachmentFailures()                              {}
-func (o *OpenTelemetryCollector) SetWorkflowPendingApprovals(poaID string, count int)         {}
-func (o *OpenTelemetryCollector) SetWorkflowQuorumProgress(poaID string, ratio float64)       {}
-func (o *OpenTelemetryCollector) SetEvidenceHashesPerPOA(poaID string, count int)             {}
-func (o *OpenTelemetryCollector) IncDelegationGraphExports()                                  {}
-func (o *OpenTelemetryCollector) SetDelegationGraphNodeCount(count int)                       {}
-func (o *OpenTelemetryCollector) IncCascadeRevocationTriggered()                              {}
-func (o *OpenTelemetryCollector) IncCascadeDescendantsProcessed()                             {}
-func (o *OpenTelemetryCollector) ObserveCascadeProcessingLatency(d time.Duration)             {}
-func (o *OpenTelemetryCollector) IncCascadeDepthLimitReached()                                {}
-func (o *OpenTelemetryCollector) IncCascadeBatchProcessed()                                   {}
-func (o *OpenTelemetryCollector) SetCascadeMaxDepthReached(depth int)                         {}
-func (o *OpenTelemetryCollector) IncCascadeProcessingErrors()                                 {}
-func (o *OpenTelemetryCollector) IncNotarizationAttempts()                                    {}
-func (o *OpenTelemetryCollector) IncNotarizationSuccesses()                                   {}
-func (o *OpenTelemetryCollector) IncNotarizationFailures()                                    {}
-func (o *OpenTelemetryCollector) ObserveNotarizationLatency(d time.Duration)                  {}
-func (o *OpenTelemetryCollector) IncNotarizationBackendFailures(backend string)               {}
-func (o *OpenTelemetryCollector) SetNotarizationPendingCount(count int)                       {}
-func (o *OpenTelemetryCollector) IncSemanticPoAValidations()                                  {}
-func (o *OpenTelemetryCollector) IncSemanticPoAViolations()                                   {}
-func (o *OpenTelemetryCollector) ObserveSemanticValidationLatency(d time.Duration)            {}
-func (o *OpenTelemetryCollector) IncConflictDetections()                                      {}
-func (o *OpenTelemetryCollector) IncConflictResolutions()                                     {}
-func (o *OpenTelemetryCollector) ObserveConflictResolutionLatency(d time.Duration)            {}
-func (o *OpenTelemetryCollector) IncABACPolicyEvaluations()                                   {}
-func (o *OpenTelemetryCollector) IncABACPolicyDenials()                                       {}
-func (o *OpenTelemetryCollector) ObserveABACEvaluationLatency(d time.Duration)                {}
-func (o *OpenTelemetryCollector) IncPatternMatchAttempts()                                    {}
-func (o *OpenTelemetryCollector) IncPatternMatchSuccesses()                                   {}
-func (o *OpenTelemetryCollector) ObservePatternMatchLatency(d time.Duration)                  {}
-func (o *OpenTelemetryCollector) IncUTF8ValidationFailures()                                  {}
-func (o *OpenTelemetryCollector) IncControlCharFiltered()                                     {}
-func (o *OpenTelemetryCollector) ObserveInputSanitizationLatency(d time.Duration)             {}
-func (o *OpenTelemetryCollector) IncAdviceEmissions()                                         {}
-func (o *OpenTelemetryCollector) IncAdviceEmissionFailures()                                  {}
-func (o *OpenTelemetryCollector) ObserveAdviceEmissionLatency(d time.Duration)                {}
-func (o *OpenTelemetryCollector) IncComplianceAttestationStored()                             {}
-func (o *OpenTelemetryCollector) IncComplianceAttestationStoreFailures()                      {}
-func (o *OpenTelemetryCollector) IncComplianceAttestationQueries()                            {}
-func (o *OpenTelemetryCollector) ObserveComplianceAttestationQueryLatency(d time.Duration)    {}
-func (o *OpenTelemetryCollector) IncSnapshotCreated()                                         {}
-func (o *OpenTelemetryCollector) IncSnapshotRestored()                                        {}
-func (o *OpenTelemetryCollector) IncSnapshotFailures()                                        {}
-func (o *OpenTelemetryCollector) ObserveSnapshotLatency(d time.Duration)                      {}
-func (o *OpenTelemetryCollector) IncThreatDetected(threatID string)                           {}
-func (o *OpenTelemetryCollector) IncMitigationApplied(mitigationID string)                    {}
-func (o *OpenTelemetryCollector) SetResidualRiskScore(riskID string, score float64)           {}
-func (o *OpenTelemetryCollector) ObserveThreatDetectionLatency(d time.Duration)               {}
-func (o *OpenTelemetryCollector) IncArbitrationInitiated()                                    {}
-func (o *OpenTelemetryCollector) IncArbitrationResolved()                                     {}
-func (o *OpenTelemetryCollector) IncArbitrationFailed()                                       {}
-func (o *OpenTelemetryCollector) ObserveArbitrationLatency(d time.Duration)                   {}
-func (o *OpenTelemetryCollector) IncDistributedTraceStarted()                                 {}
-func (o *OpenTelemetryCollector) IncDistributedTraceCompleted()                               {}
-func (o *OpenTelemetryCollector) IncDistributedTraceFailed()                                  {}
-func (o *OpenTelemetryCollector) ObserveDistributedTraceLatency(d time.Duration)              {}
-func (o *OpenTelemetryCollector) SetDistributedTraceActiveSpans(count int)                    {}
+func (o *OpenTelemetryCollector) IncDelegationStatusTransitions()                            {}
+func (o *OpenTelemetryCollector) IncJurisdictionPolicyEvaluations()                          {}
+func (o *OpenTelemetryCollector) IncJurisdictionPolicyViolations()                           {}
+func (o *OpenTelemetryCollector) ObserveJurisdictionPolicyEvaluationLatency(d time.Duration) {}
+func (o *OpenTelemetryCollector) IncAICapabilityChecks()                                     {}
+func (o *OpenTelemetryCollector) IncAICapabilityDenied()                                     {}
+func (o *OpenTelemetryCollector) IncAIHighRiskActionDenied()                                 {}
+func (o *OpenTelemetryCollector) ObserveAICapabilityEvaluationLatency(d time.Duration)       {}
+func (o *OpenTelemetryCollector) IncModelLimitChecks()                                       {}
+func (o *OpenTelemetryCollector) IncModelContextLimitExceeded()                              {}
+func (o *OpenTelemetryCollector) IncModelRateLimitExceeded()                                 {}
+func (o *OpenTelemetryCollector) IncModelUnknown()                                           {}
+func (o *OpenTelemetryCollector) IncModelLimitSurge()                                        {}
+func (o *OpenTelemetryCollector) IncModelUserInputLimitExceeded()                            {}
+func (o *OpenTelemetryCollector) IncModelUserOutputLimitExceeded()                           {}
+func (o *OpenTelemetryCollector) IncModelUserRateLimitExceeded()                             {}
+func (o *OpenTelemetryCollector) IncKeyRotationsInitiated()                                  {}
+func (o *OpenTelemetryCollector) IncKeyRotationFailures()                                    {}
+func (o *OpenTelemetryCollector) ObserveKeyRotationLatency(d time.Duration)                  {}
+func (o *OpenTelemetryCollector) SetActiveKeySetSize(size int)                               {}
+func (o *OpenTelemetryCollector) IncCapabilityComputations()                                 {}
+func (o *OpenTelemetryCollector) IncCapabilityComputationFailures()                          {}
+func (o *OpenTelemetryCollector) ObserveCapabilityComputationLatency(d time.Duration)        {}
+func (o *OpenTelemetryCollector) ObserveCapabilityDiffLatency(d time.Duration)               {}
+func (o *OpenTelemetryCollector) IncRevocationWorkflowInitiated()                            {}
+func (o *OpenTelemetryCollector) IncRevocationWorkflowInitiationFailures()                   {}
+func (o *OpenTelemetryCollector) IncRevocationWorkflowApprovals()                            {}
+func (o *OpenTelemetryCollector) IncRevocationWorkflowApprovalFailures()                     {}
+func (o *OpenTelemetryCollector) IncRevocationWorkflowQuorumSatisfied()                      {}
+func (o *OpenTelemetryCollector) IncRevocationWorkflowCanceled()                             {}
+func (o *OpenTelemetryCollector) IncRevocationWorkflowCancellationFailures()                 {}
+func (o *OpenTelemetryCollector) IncRevocationWorkflowUnauthorized()                         {}
+func (o *OpenTelemetryCollector) IncEvidenceAttachment()                                     {}
+func (o *OpenTelemetryCollector) IncEvidenceAttachmentFailures()                             {}
+func (o *OpenTelemetryCollector) SetWorkflowPendingApprovals(poaID string, count int)        {}
+func (o *OpenTelemetryCollector) SetWorkflowQuorumProgress(poaID string, ratio float64)      {}
+func (o *OpenTelemetryCollector) SetEvidenceHashesPerPOA(poaID string, count int)            {}
+func (o *OpenTelemetryCollector) IncDelegationGraphExports()                                 {}
+func (o *OpenTelemetryCollector) SetDelegationGraphNodeCount(count int)                      {}
+func (o *OpenTelemetryCollector) IncCascadeRevocationTriggered()                             {}
+func (o *OpenTelemetryCollector) IncCascadeDescendantsProcessed()                            {}
+func (o *OpenTelemetryCollector) ObserveCascadeProcessingLatency(d time.Duration)            {}
+func (o *OpenTelemetryCollector) IncCascadeDepthLimitReached()                               {}
+func (o *OpenTelemetryCollector) IncCascadeBatchProcessed()                                  {}
+func (o *OpenTelemetryCollector) SetCascadeMaxDepthReached(depth int)                        {}
+func (o *OpenTelemetryCollector) IncCascadeProcessingErrors()                                {}
+func (o *OpenTelemetryCollector) IncNotarizationAttempts()                                   {}
+func (o *OpenTelemetryCollector) IncNotarizationSuccesses()                                  {}
+func (o *OpenTelemetryCollector) IncNotarizationFailures()                                   {}
+func (o *OpenTelemetryCollector) ObserveNotarizationLatency(d time.Duration)                 {}
+func (o *OpenTelemetryCollector) IncNotarizationBackendFailures(backend string)              {}
+func (o *OpenTelemetryCollector) SetNotarizationPendingCount(count int)                      {}
+func (o *OpenTelemetryCollector) IncSemanticPoAValidations()                                 {}
+func (o *OpenTelemetryCollector) IncSemanticPoAViolations()                                  {}
+func (o *OpenTelemetryCollector) ObserveSemanticValidationLatency(d time.Duration)           {}
+func (o *OpenTelemetryCollector) IncConflictDetections()                                     {}
+func (o *OpenTelemetryCollector) IncConflictResolutions()                                    {}
+func (o *OpenTelemetryCollector) ObserveConflictResolutionLatency(d time.Duration)           {}
+func (o *OpenTelemetryCollector) IncABACPolicyEvaluations()                                  {}
+func (o *OpenTelemetryCollector) IncABACPolicyDenials()                                      {}
+func (o *OpenTelemetryCollector) ObserveABACEvaluationLatency(d time.Duration)               {}
+func (o *OpenTelemetryCollector) IncPatternMatchAttempts()                                   {}
+func (o *OpenTelemetryCollector) IncPatternMatchSuccesses()                                  {}
+func (o *OpenTelemetryCollector) ObservePatternMatchLatency(d time.Duration)                 {}
+func (o *OpenTelemetryCollector) IncUTF8ValidationFailures()                                 {}
+func (o *OpenTelemetryCollector) IncControlCharFiltered()                                    {}
+func (o *OpenTelemetryCollector) ObserveInputSanitizationLatency(d time.Duration)            {}
+func (o *OpenTelemetryCollector) IncAdviceEmissions()                                        {}
+func (o *OpenTelemetryCollector) IncAdviceEmissionFailures()                                 {}
+func (o *OpenTelemetryCollector) ObserveAdviceEmissionLatency(d time.Duration)               {}
+func (o *OpenTelemetryCollector) IncComplianceAttestationStored()                            {}
+func (o *OpenTelemetryCollector) IncComplianceAttestationStoreFailures()                     {}
+func (o *OpenTelemetryCollector) IncComplianceAttestationQueries()                           {}
+func (o *OpenTelemetryCollector) ObserveComplianceAttestationQueryLatency(d time.Duration)   {}
+func (o *OpenTelemetryCollector) IncSnapshotCreated()                                        {}
+func (o *OpenTelemetryCollector) IncSnapshotRestored()                                       {}
+func (o *OpenTelemetryCollector) IncSnapshotFailures()                                       {}
+func (o *OpenTelemetryCollector) ObserveSnapshotLatency(d time.Duration)                     {}
+func (o *OpenTelemetryCollector) IncThreatDetected(threatID string)                          {}
+func (o *OpenTelemetryCollector) IncMitigationApplied(mitigationID string)                   {}
+func (o *OpenTelemetryCollector) SetResidualRiskScore(riskID string, score float64)          {}
+func (o *OpenTelemetryCollector) ObserveThreatDetectionLatency(d time.Duration)              {}
+func (o *OpenTelemetryCollector) IncArbitrationInitiated()                                   {}
+func (o *OpenTelemetryCollector) IncArbitrationResolved()                                    {}
+func (o *OpenTelemetryCollector) IncArbitrationFailed()                                      {}
+func (o *OpenTelemetryCollector) ObserveArbitrationLatency(d time.Duration)                  {}
+func (o *OpenTelemetryCollector) IncDistributedTraceStarted()                                {}
+func (o *OpenTelemetryCollector) IncDistributedTraceCompleted()                              {}
+func (o *OpenTelemetryCollector) IncDistributedTraceFailed()                                 {}
+func (o *OpenTelemetryCollector) ObserveDistributedTraceLatency(d time.Duration)             {}
+func (o *OpenTelemetryCollector) SetDistributedTraceActiveSpans(count int)                   {}

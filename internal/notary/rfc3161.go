@@ -33,13 +33,13 @@ type RFC3161Provider struct {
 var (
 	// ErrRFC3161NotImplemented indicates TSA integration is not yet complete (legacy error)
 	ErrRFC3161NotImplemented = errors.New("rfc3161 provider not implemented")
-	
+
 	// ErrInvalidHash indicates hash format is invalid
 	ErrInvalidHash = errors.New("invalid hash format: expected 'sha256:<hex>' or raw hex")
-	
+
 	// ErrTSARequestFailed indicates TSA HTTP request failed
 	ErrTSARequestFailed = errors.New("tsa request failed")
-	
+
 	// ErrTSAResponseInvalid indicates TSA response is invalid
 	ErrTSAResponseInvalid = errors.New("tsa response invalid")
 )
@@ -72,31 +72,31 @@ func (p *RFC3161Provider) Notarize(hash string) (Receipt, error) {
 	if hash == "" {
 		return Receipt{}, errors.New("hash required")
 	}
-	
+
 	start := time.Now()
-	
+
 	// Parse hash (accept "sha256:<hex>" or raw hex)
 	hashBytes, err := p.parseHash(hash)
 	if err != nil {
 		return Receipt{}, fmt.Errorf("%w: %v", ErrInvalidHash, err)
 	}
-	
+
 	// Construct minimal TimeStampReq (simplified - production should use encoding/asn1)
 	// For now, we just need the hash bytes to submit to TSA
 	reqBody := p.buildSimplifiedTSARequest(hashBytes)
-	
+
 	// Submit to TSA endpoint
 	req, err := http.NewRequest("POST", p.EndpointURL, bytes.NewReader(reqBody))
 	if err != nil {
 		return Receipt{}, fmt.Errorf("create tsa request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/timestamp-query")
-	
+
 	client := p.HTTPClient
 	if client == nil {
 		client = &http.Client{Timeout: p.Timeout}
 	}
-	
+
 	resp, err := client.Do(req)
 	if err != nil {
 		r := Receipt{
@@ -110,7 +110,7 @@ func (p *RFC3161Provider) Notarize(hash string) (Receipt, error) {
 		return r, fmt.Errorf("%w: %v", ErrTSARequestFailed, err)
 	}
 	defer resp.Body.Close()
-	
+
 	// Read response body (store for potential future parsing)
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -124,7 +124,7 @@ func (p *RFC3161Provider) Notarize(hash string) (Receipt, error) {
 		}
 		return r, fmt.Errorf("read tsa response: %w", err)
 	}
-	
+
 	// Validate TSA response (simplified: accept 200 OK with non-empty body)
 	// Production: Parse TimeStampResp DER, validate signature, extract genTime
 	if resp.StatusCode != http.StatusOK {
@@ -138,7 +138,7 @@ func (p *RFC3161Provider) Notarize(hash string) (Receipt, error) {
 		}
 		return r, fmt.Errorf("%w: status %d, body: %s", ErrTSAResponseInvalid, resp.StatusCode, string(respBody))
 	}
-	
+
 	if len(respBody) == 0 {
 		r := Receipt{
 			Hash:           hash,
@@ -150,7 +150,7 @@ func (p *RFC3161Provider) Notarize(hash string) (Receipt, error) {
 		}
 		return r, fmt.Errorf("%w: empty response body", ErrTSAResponseInvalid)
 	}
-	
+
 	// Success: Return receipt with timestamp
 	// Note: Using current time as proxy for TSA genTime (should parse from TimeStampResp)
 	r := Receipt{
@@ -161,7 +161,7 @@ func (p *RFC3161Provider) Notarize(hash string) (Receipt, error) {
 		Success:        true,
 		LatencySeconds: time.Since(start).Seconds(),
 	}
-	
+
 	return r, nil
 }
 
@@ -170,18 +170,18 @@ func (p *RFC3161Provider) parseHash(hash string) ([]byte, error) {
 	// Strip "sha256:" prefix if present
 	hashHex := strings.TrimPrefix(hash, "sha256:")
 	hashHex = strings.TrimSpace(hashHex)
-	
+
 	// Validate hex length (SHA256 = 64 hex chars = 32 bytes)
 	if len(hashHex) != 64 {
 		return nil, fmt.Errorf("expected 64 hex characters, got %d", len(hashHex))
 	}
-	
+
 	// Decode hex to bytes
 	hashBytes, err := hex.DecodeString(hashHex)
 	if err != nil {
 		return nil, fmt.Errorf("invalid hex encoding: %w", err)
 	}
-	
+
 	return hashBytes, nil
 }
 
@@ -208,16 +208,16 @@ func (p *RFC3161Provider) parseHash(hash string) ([]byte, error) {
 func (p *RFC3161Provider) buildSimplifiedTSARequest(hashBytes []byte) []byte {
 	// Simplified: Just send hash bytes with minimal wrapper
 	// Production: Proper ASN.1 DER encoding with encoding/asn1
-	
+
 	// Minimal ASN.1 SEQUENCE wrapper (not spec-compliant, but demonstrates concept)
 	// Real implementation needs: version=1, MessageImprint with SHA256 OID (2.16.840.1.101.3.4.2.1), hash
-	
+
 	// For demonstration purposes, we'll create a pseudo-DER structure
 	// This would fail with strict TSA implementations - use encoding/asn1 in production
-	
+
 	// Compute hash of hash (for request integrity)
 	reqHash := sha256.Sum256(hashBytes)
-	
+
 	// Return hash bytes (TSA client libraries would handle proper DER encoding)
 	return reqHash[:]
 }
@@ -236,19 +236,19 @@ func (p *RFC3161Provider) VerifyReceipt(receipt Receipt) error {
 	if !receipt.Success {
 		return errors.New("receipt indicates failed notarization")
 	}
-	
+
 	// Minimal validation: Check provider matches
 	if receipt.Provider != p.ProviderName {
 		return fmt.Errorf("provider mismatch: expected %s, got %s", p.ProviderName, receipt.Provider)
 	}
-	
+
 	// Parse timestamp to ensure well-formed
 	_, err := time.Parse(time.RFC3339Nano, receipt.Timestamp)
 	if err != nil {
 		return fmt.Errorf("invalid timestamp format: %w", err)
 	}
-	
+
 	// Future: Cryptographic verification of TimeStampToken signature
-	
+
 	return nil
 }

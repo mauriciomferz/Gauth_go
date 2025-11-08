@@ -34,13 +34,13 @@ func WithDurableReplayFromEnvUsingFactory() Option {
 		if durableReplayFactory == nil {
 			return fmt.Errorf("durable replay factory not registered - import pkg/replay and call gauth.RegisterDurableReplayStoreFactory first")
 		}
-		
+
 		// Create replay store using factory
 		replayStore, err := durableReplayFactory(s.metrics)
 		if err != nil {
 			return fmt.Errorf("create durable replay store: %w", err)
 		}
-		
+
 		// Inject into service
 		s.replay = replayStore
 		return nil

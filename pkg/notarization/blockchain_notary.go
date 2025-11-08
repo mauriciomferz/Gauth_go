@@ -41,10 +41,10 @@ type NotarizationProof struct {
 type NotaryProvider interface {
 	// Notarize submits an event for notarization and returns proof
 	Notarize(event *RevocationEvent) (*NotarizationProof, error)
-	
+
 	// Verify checks if a proof is valid for an event
 	Verify(event *RevocationEvent, proof *NotarizationProof) (bool, error)
-	
+
 	// GetProviderName returns the name of the notary provider
 	GetProviderName() string
 }
@@ -52,17 +52,17 @@ type NotaryProvider interface {
 // BlockchainNotary implements blockchain-based notarization.
 type BlockchainNotary struct {
 	mu sync.RWMutex
-	
+
 	// Configuration
 	chainType    string // "ethereum", "polygon", "avalanche", etc.
 	contractAddr string // Smart contract address
 	endpoint     string // RPC endpoint
-	
+
 	// Pending notarizations (batch mode)
 	pending      []*RevocationEvent
 	batchSize    int
 	batchTimeout time.Duration
-	
+
 	// Statistics
 	totalNotarized int64
 	lastBatch      time.Time
@@ -91,7 +91,7 @@ func NewBlockchainNotary(config *BlockchainConfig) (*BlockchainNotary, error) {
 	if config.BatchTimeout == 0 {
 		config.BatchTimeout = 5 * time.Minute
 	}
-	
+
 	return &BlockchainNotary{
 		chainType:    config.ChainType,
 		contractAddr: config.ContractAddr,
@@ -107,13 +107,13 @@ func (b *BlockchainNotary) Notarize(event *RevocationEvent) (*NotarizationProof,
 	if event == nil {
 		return nil, errors.New("event is required")
 	}
-	
+
 	// Compute event hash
 	eventHash, err := b.hashEvent(event)
 	if err != nil {
 		return nil, fmt.Errorf("failed to hash event: %w", err)
 	}
-	
+
 	// In production, submit to blockchain smart contract
 	// For demo, we simulate blockchain submission
 	proof := &NotarizationProof{
@@ -124,11 +124,11 @@ func (b *BlockchainNotary) Notarize(event *RevocationEvent) (*NotarizationProof,
 		BlockNumber:     b.getCurrentBlockNumber(),
 		VerificationURL: b.generateVerificationURL(eventHash),
 	}
-	
+
 	b.mu.Lock()
 	b.totalNotarized++
 	b.mu.Unlock()
-	
+
 	return proof, nil
 }
 
@@ -137,28 +137,28 @@ func (b *BlockchainNotary) Verify(event *RevocationEvent, proof *NotarizationPro
 	if event == nil || proof == nil {
 		return false, errors.New("event and proof are required")
 	}
-	
+
 	// Compute event hash
 	eventHash, err := b.hashEvent(event)
 	if err != nil {
 		return false, err
 	}
-	
+
 	// Verify hash matches
 	if eventHash != proof.EventHash {
 		return false, nil
 	}
-	
+
 	// In production, query blockchain to verify transaction exists
 	// For demo, we do basic validation
 	if proof.TransactionID == "" {
 		return false, nil
 	}
-	
+
 	if proof.NotarizedAt.IsZero() {
 		return false, nil
 	}
-	
+
 	return true, nil
 }
 
@@ -178,12 +178,12 @@ func (b *BlockchainNotary) hashEvent(event *RevocationEvent) (string, error) {
 		"revoked_at":    event.RevokedAt.Unix(),
 		"revoked_by":    event.RevokedBy,
 	}
-	
+
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return "", err
 	}
-	
+
 	hash := sha256.Sum256(jsonData)
 	return hex.EncodeToString(hash[:]), nil
 }
@@ -212,7 +212,7 @@ func (b *BlockchainNotary) generateVerificationURL(eventHash string) string {
 func (b *BlockchainNotary) GetStats() map[string]interface{} {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
-	
+
 	return map[string]interface{}{
 		"total_notarized": b.totalNotarized,
 		"pending_batch":   len(b.pending),
@@ -224,7 +224,7 @@ func (b *BlockchainNotary) GetStats() map[string]interface{} {
 // RFC3161TimestampNotary implements RFC 3161 timestamp protocol notarization.
 type RFC3161TimestampNotary struct {
 	mu sync.RWMutex
-	
+
 	tsaURL         string // Timestamp Authority URL
 	totalNotarized int64
 }
@@ -234,7 +234,7 @@ func NewRFC3161TimestampNotary(tsaURL string) (*RFC3161TimestampNotary, error) {
 	if tsaURL == "" {
 		return nil, errors.New("TSA URL is required")
 	}
-	
+
 	return &RFC3161TimestampNotary{
 		tsaURL: tsaURL,
 	}, nil
@@ -245,21 +245,21 @@ func (r *RFC3161TimestampNotary) Notarize(event *RevocationEvent) (*Notarization
 	if event == nil {
 		return nil, errors.New("event is required")
 	}
-	
+
 	// Compute event hash
 	eventJSON, err := json.Marshal(event)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	hash := sha256.Sum256(eventJSON)
 	eventHash := hex.EncodeToString(hash[:])
-	
+
 	// In production, send timestamp request to TSA
 	// and receive signed timestamp token
 	// For demo, generate mock timestamp token
 	timestampToken := r.generateTimestampToken(eventHash)
-	
+
 	proof := &NotarizationProof{
 		EventHash:       eventHash,
 		NotarizedAt:     time.Now(),
@@ -267,11 +267,11 @@ func (r *RFC3161TimestampNotary) Notarize(event *RevocationEvent) (*Notarization
 		TimestampToken:  timestampToken,
 		VerificationURL: r.tsaURL + "/verify",
 	}
-	
+
 	r.mu.Lock()
 	r.totalNotarized++
 	r.mu.Unlock()
-	
+
 	return proof, nil
 }
 
@@ -280,17 +280,17 @@ func (r *RFC3161TimestampNotary) Verify(event *RevocationEvent, proof *Notarizat
 	if event == nil || proof == nil {
 		return false, errors.New("event and proof are required")
 	}
-	
+
 	// In production, verify the timestamp token signature
 	// against the TSA's certificate
 	if proof.TimestampToken == "" {
 		return false, nil
 	}
-	
+
 	if proof.NotarizedAt.IsZero() {
 		return false, nil
 	}
-	
+
 	return true, nil
 }
 
@@ -317,7 +317,7 @@ func NewMultiNotary(providers ...NotaryProvider) (*MultiNotary, error) {
 	if len(providers) == 0 {
 		return nil, errors.New("at least one provider is required")
 	}
-	
+
 	return &MultiNotary{
 		providers: providers,
 	}, nil
@@ -328,13 +328,13 @@ func (m *MultiNotary) Notarize(event *RevocationEvent) (*NotarizationProof, erro
 	if len(m.providers) == 0 {
 		return nil, errors.New("no providers configured")
 	}
-	
+
 	// Use first provider as primary
 	primaryProof, err := m.providers[0].Notarize(event)
 	if err != nil {
 		return nil, fmt.Errorf("primary notarization failed: %w", err)
 	}
-	
+
 	// Collect additional proofs from other providers
 	additionalProofs := make([]string, 0, len(m.providers)-1)
 	for i := 1; i < len(m.providers); i++ {
@@ -343,12 +343,12 @@ func (m *MultiNotary) Notarize(event *RevocationEvent) (*NotarizationProof, erro
 			// Log error but continue with other providers
 			continue
 		}
-		
+
 		// Serialize proof as additional evidence
 		proofJSON, _ := json.Marshal(proof)
 		additionalProofs = append(additionalProofs, string(proofJSON))
 	}
-	
+
 	primaryProof.AdditionalProofs = additionalProofs
 	return primaryProof, nil
 }
@@ -359,12 +359,12 @@ func (m *MultiNotary) Verify(event *RevocationEvent, proof *NotarizationProof) (
 	if len(m.providers) == 0 {
 		return false, errors.New("no providers configured")
 	}
-	
+
 	valid, err := m.providers[0].Verify(event, proof)
 	if err != nil || !valid {
 		return false, err
 	}
-	
+
 	return true, nil
 }
 
@@ -380,10 +380,10 @@ func (m *MultiNotary) GetProviderName() string {
 // NotarizationRegistry tracks all notarized revocations.
 type NotarizationRegistry struct {
 	mu sync.RWMutex
-	
+
 	// Map of delegation ID -> list of notarization proofs
 	proofs map[string][]*NotarizationProof
-	
+
 	// Notary provider
 	notary NotaryProvider
 }
@@ -402,7 +402,7 @@ func (r *NotarizationRegistry) NotarizeRevocation(event *RevocationEvent) (*Nota
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Store proof
 	r.mu.Lock()
 	if r.proofs[event.DelegationID] == nil {
@@ -410,7 +410,7 @@ func (r *NotarizationRegistry) NotarizeRevocation(event *RevocationEvent) (*Nota
 	}
 	r.proofs[event.DelegationID] = append(r.proofs[event.DelegationID], proof)
 	r.mu.Unlock()
-	
+
 	return proof, nil
 }
 
@@ -418,12 +418,12 @@ func (r *NotarizationRegistry) NotarizeRevocation(event *RevocationEvent) (*Nota
 func (r *NotarizationRegistry) GetProofs(delegationID string) []*NotarizationProof {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	
+
 	proofs := r.proofs[delegationID]
 	if proofs == nil {
 		return nil
 	}
-	
+
 	// Return copy
 	result := make([]*NotarizationProof, len(proofs))
 	copy(result, proofs)
@@ -439,12 +439,12 @@ func (r *NotarizationRegistry) VerifyRevocation(event *RevocationEvent, proof *N
 func (r *NotarizationRegistry) GetStats() map[string]interface{} {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	
+
 	totalProofs := 0
 	for _, proofs := range r.proofs {
 		totalProofs += len(proofs)
 	}
-	
+
 	return map[string]interface{}{
 		"total_delegations": len(r.proofs),
 		"total_proofs":      totalProofs,

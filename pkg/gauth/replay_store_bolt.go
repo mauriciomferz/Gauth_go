@@ -38,7 +38,7 @@ func NewBoltReplayStore(path string, ttl time.Duration) (*BoltReplayStore, error
 	}
 
 	bucketName := []byte("jti_replay")
-	
+
 	// Create bucket if it doesn't exist
 	err = db.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists(bucketName)
@@ -75,7 +75,7 @@ func (s *BoltReplayStore) CheckAndRecord(jti string) error {
 
 		key := []byte(jti)
 		existing := bucket.Get(key)
-		
+
 		// Check if JTI exists and is not expired
 		if existing != nil {
 			expiry := int64(binary.BigEndian.Uint64(existing))
@@ -101,7 +101,7 @@ func (s *BoltReplayStore) cleanupExpired() {
 
 	for range ticker.C {
 		now := time.Now().Unix()
-		
+
 		_ = s.db.Update(func(tx *bolt.Tx) error {
 			bucket := tx.Bucket(s.bucketName)
 			if bucket == nil {
@@ -111,7 +111,7 @@ func (s *BoltReplayStore) cleanupExpired() {
 			// Collect expired keys
 			var expiredKeys [][]byte
 			cursor := bucket.Cursor()
-			
+
 			for k, v := cursor.First(); k != nil; k, v = cursor.Next() {
 				if len(v) >= 8 {
 					expiry := int64(binary.BigEndian.Uint64(v))

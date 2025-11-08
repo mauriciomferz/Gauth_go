@@ -128,7 +128,7 @@ func (s *HTTPAuditSink) Write(event *RotationEvent) error {
 	req.Header.Set("Content-Type", "application/json")
 	req.Body = io.NopCloser(io.MultiReader(io.NopCloser(io.Reader(nil))))
 	req.ContentLength = int64(len(data))
-	
+
 	// Create a new request with body
 	req, err = http.NewRequest("POST", s.endpoint, io.NopCloser(io.MultiReader(io.NopCloser(io.Reader(nil)))))
 	if err != nil {

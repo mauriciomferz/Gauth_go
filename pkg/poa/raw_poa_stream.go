@@ -206,6 +206,7 @@ func DecodeRawPOAStream(r io.Reader, limits StreamLimits) (*RawPOAChain, error) 
 
 // DecodeRawPOAStreamWith adds hash algorithm selection, optional PrevHash continuity verification,
 // and supports both legacy length-prefixed format and indefinite-length CBOR arrays (0x9f ... 0xff).
+//
 //nolint:gocyclo // Stream decoder with chaining and verification
 func DecodeRawPOAStreamWith(r io.Reader, limits StreamLimits, algo RawPOAHashAlg, verifyPrev bool) (*RawPOAChain, error) {
 	if limits.MaxItems == 0 {
@@ -337,8 +338,9 @@ func DecodeRawPOAStreamWith(r io.Reader, limits StreamLimits, algo RawPOAHashAlg
 	return &RawPOAChain{Items: items, ChainHash: h.Sum(nil), HashAlgo: algo}, nil
 }
 
-//nolint:gocyclo // Binary deserialization with format validation
 // unmarshalMinimal decodes subset encoded by marshalCBORItem.
+//
+//nolint:gocyclo // Binary deserialization with format validation
 //nolint:gocyclo // Binary deserialization with format validation
 func unmarshalMinimal(b []byte) (*RawPOAItem, error) {
 	// Very small state machine; not a full CBOR parser.
@@ -495,9 +497,11 @@ func unmarshalMinimal(b []byte) (*RawPOAItem, error) {
 	}
 	return it, nil
 }
+
 //nolint:gocyclo // Binary deserialization with field-by-field parsing
 
 // unmarshalMinimalAt parses a map with known pair count starting at b[0]; returns item, bytes consumed.
+//
 //nolint:gocyclo // Binary deserialization with field-by-field parsing
 func unmarshalMinimalAt(b []byte, count int) (*RawPOAItem, int, error) {
 	if len(b) == 0 {

@@ -40,7 +40,7 @@ const (
 type IndexedDelegationStore struct {
 	mu sync.RWMutex
 	db *bbolt.DB
-	
+
 	// Statistics
 	stats *StoreStats
 }
@@ -57,13 +57,13 @@ type StoreStats struct {
 
 // Bucket names for BoltDB
 const (
-	bucketDelegations      = "delegations"
-	bucketSubjectIndex     = "index_subject"
-	bucketDelegateIndex    = "index_delegate"
-	bucketExpiryIndex      = "index_expiry"
-	bucketStatusIndex      = "index_status"
-	bucketAccessTimeIndex  = "index_access_time"
-	bucketStats            = "stats"
+	bucketDelegations     = "delegations"
+	bucketSubjectIndex    = "index_subject"
+	bucketDelegateIndex   = "index_delegate"
+	bucketExpiryIndex     = "index_expiry"
+	bucketStatusIndex     = "index_status"
+	bucketAccessTimeIndex = "index_access_time"
+	bucketStats           = "stats"
 )
 
 // NewIndexedDelegationStore creates a new indexed delegation store.
@@ -74,7 +74,7 @@ func NewIndexedDelegationStore(dbPath string) (*IndexedDelegationStore, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
-	
+
 	// Create all buckets
 	err = db.Update(func(tx *bbolt.Tx) error {
 		buckets := []string{
@@ -86,7 +86,7 @@ func NewIndexedDelegationStore(dbPath string) (*IndexedDelegationStore, error) {
 			bucketAccessTimeIndex,
 			bucketStats,
 		}
-		
+
 		for _, bucket := range buckets {
 			if _, err := tx.CreateBucketIfNotExists([]byte(bucket)); err != nil {
 				return fmt.Errorf("failed to create bucket %s: %w", bucket, err)
@@ -98,15 +98,15 @@ func NewIndexedDelegationStore(dbPath string) (*IndexedDelegationStore, error) {
 		db.Close()
 		return nil, err
 	}
-	
+
 	store := &IndexedDelegationStore{
 		db:    db,
 		stats: &StoreStats{},
 	}
-	
+
 	// Load stats
 	store.loadStats()
-	
+
 	return store, nil
 }
 
@@ -120,34 +120,34 @@ func (s *IndexedDelegationStore) Store(record *DelegationRecord) error {
 	if record == nil || record.ID == "" {
 		return errors.New("invalid delegation record")
 	}
-	
+
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	return s.db.Update(func(tx *bbolt.Tx) error {
 		// Serialize record
 		data, err := json.Marshal(record)
 		if err != nil {
 			return err
 		}
-		
+
 		// Store main record
 		bucket := tx.Bucket([]byte(bucketDelegations))
 		if err := bucket.Put([]byte(record.ID), data); err != nil {
 			return err
 		}
-		
+
 		// Update indexes
 		if err := s.updateIndexes(tx, record); err != nil {
 			return err
 		}
-		
+
 		// Update stats
 		s.stats.TotalRecords++
 		if record.Status == string(StatusActive) {
 			s.stats.ActiveRecords++
 		}
-		
+
 		return s.saveStats(tx)
 	})
 }
@@ -156,7 +156,7 @@ func (s *IndexedDelegationStore) Store(record *DelegationRecord) error {
 func (s *IndexedDelegationStore) Get(id string) (*DelegationRecord, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	
+
 	var record *DelegationRecord
 	err := s.db.View(func(tx *bbolt.Tx) error {
 		bucket := tx.Bucket([]byte(bucketDelegations))
@@ -164,18 +164,18 @@ func (s *IndexedDelegationStore) Get(id string) (*DelegationRecord, error) {
 		if data == nil {
 			return errors.New("delegation not found")
 		}
-		
+
 		record = &DelegationRecord{}
 		return json.Unmarshal(data, record)
 	})
-	
+
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Update last accessed time asynchronously
 	go s.updateAccessTime(id)
-	
+
 	return record, nil
 }
 
@@ -183,40 +183,40 @@ func (s *IndexedDelegationStore) Get(id string) (*DelegationRecord, error) {
 func (s *IndexedDelegationStore) GetBySubject(subject string) ([]*DelegationRecord, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	
+
 	var records []*DelegationRecord
 	err := s.db.View(func(tx *bbolt.Tx) error {
 		indexBucket := tx.Bucket([]byte(bucketSubjectIndex))
 		delegationBucket := tx.Bucket([]byte(bucketDelegations))
-		
+
 		// Get delegation IDs from index
 		idsData := indexBucket.Get([]byte(subject))
 		if idsData == nil {
 			return nil // No delegations for this subject
 		}
-		
+
 		var ids []string
 		if err := json.Unmarshal(idsData, &ids); err != nil {
 			return err
 		}
-		
+
 		// Fetch each delegation
 		for _, id := range ids {
 			data := delegationBucket.Get([]byte(id))
 			if data == nil {
 				continue
 			}
-			
+
 			record := &DelegationRecord{}
 			if err := json.Unmarshal(data, record); err != nil {
 				continue
 			}
 			records = append(records, record)
 		}
-		
+
 		return nil
 	})
-	
+
 	return records, err
 }
 
@@ -224,38 +224,38 @@ func (s *IndexedDelegationStore) GetBySubject(subject string) ([]*DelegationReco
 func (s *IndexedDelegationStore) GetByDelegate(delegate string) ([]*DelegationRecord, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	
+
 	var records []*DelegationRecord
 	err := s.db.View(func(tx *bbolt.Tx) error {
 		indexBucket := tx.Bucket([]byte(bucketDelegateIndex))
 		delegationBucket := tx.Bucket([]byte(bucketDelegations))
-		
+
 		idsData := indexBucket.Get([]byte(delegate))
 		if idsData == nil {
 			return nil
 		}
-		
+
 		var ids []string
 		if err := json.Unmarshal(idsData, &ids); err != nil {
 			return err
 		}
-		
+
 		for _, id := range ids {
 			data := delegationBucket.Get([]byte(id))
 			if data == nil {
 				continue
 			}
-			
+
 			record := &DelegationRecord{}
 			if err := json.Unmarshal(data, record); err != nil {
 				continue
 			}
 			records = append(records, record)
 		}
-		
+
 		return nil
 	})
-	
+
 	return records, err
 }
 
@@ -263,38 +263,38 @@ func (s *IndexedDelegationStore) GetByDelegate(delegate string) ([]*DelegationRe
 func (s *IndexedDelegationStore) GetByStatus(status DelegationStatus) ([]*DelegationRecord, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	
+
 	var records []*DelegationRecord
 	err := s.db.View(func(tx *bbolt.Tx) error {
 		indexBucket := tx.Bucket([]byte(bucketStatusIndex))
 		delegationBucket := tx.Bucket([]byte(bucketDelegations))
-		
+
 		idsData := indexBucket.Get([]byte(status))
 		if idsData == nil {
 			return nil
 		}
-		
+
 		var ids []string
 		if err := json.Unmarshal(idsData, &ids); err != nil {
 			return err
 		}
-		
+
 		for _, id := range ids {
 			data := delegationBucket.Get([]byte(id))
 			if data == nil {
 				continue
 			}
-			
+
 			record := &DelegationRecord{}
 			if err := json.Unmarshal(data, record); err != nil {
 				continue
 			}
 			records = append(records, record)
 		}
-		
+
 		return nil
 	})
-	
+
 	return records, err
 }
 
@@ -302,62 +302,62 @@ func (s *IndexedDelegationStore) GetByStatus(status DelegationStatus) ([]*Delega
 func (s *IndexedDelegationStore) PruneExpired(retentionPeriod time.Duration) (int, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	cutoffTime := time.Now().Add(-retentionPeriod)
 	pruned := 0
-	
+
 	err := s.db.Update(func(tx *bbolt.Tx) error {
 		delegationBucket := tx.Bucket([]byte(bucketDelegations))
 		cursor := delegationBucket.Cursor()
-		
+
 		var toDelete []string
-		
+
 		// Find expired delegations
 		for k, v := cursor.First(); k != nil; k, v = cursor.Next() {
 			record := &DelegationRecord{}
 			if err := json.Unmarshal(v, record); err != nil {
 				continue
 			}
-			
+
 			// Delete if expired and past retention period
 			if record.ExpiresAt.Before(cutoffTime) {
 				toDelete = append(toDelete, record.ID)
 			}
 		}
-		
+
 		// Delete records and update indexes
 		for _, id := range toDelete {
 			data := delegationBucket.Get([]byte(id))
 			if data == nil {
 				continue
 			}
-			
+
 			record := &DelegationRecord{}
 			if err := json.Unmarshal(data, record); err != nil {
 				continue
 			}
-			
+
 			// Remove from main bucket
 			if err := delegationBucket.Delete([]byte(id)); err != nil {
 				return err
 			}
-			
+
 			// Remove from indexes
 			if err := s.removeFromIndexes(tx, record); err != nil {
 				return err
 			}
-			
+
 			pruned++
 		}
-		
+
 		// Update stats
 		s.stats.PrunedRecords += int64(pruned)
 		s.stats.TotalRecords -= int64(pruned)
 		s.stats.LastPruneTime = time.Now()
-		
+
 		return s.saveStats(tx)
 	})
-	
+
 	return pruned, err
 }
 
@@ -365,56 +365,56 @@ func (s *IndexedDelegationStore) PruneExpired(retentionPeriod time.Duration) (in
 func (s *IndexedDelegationStore) PruneInactive(inactivityPeriod time.Duration) (int, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	cutoffTime := time.Now().Add(-inactivityPeriod)
 	pruned := 0
-	
+
 	err := s.db.Update(func(tx *bbolt.Tx) error {
 		delegationBucket := tx.Bucket([]byte(bucketDelegations))
 		cursor := delegationBucket.Cursor()
-		
+
 		var toDelete []string
-		
+
 		for k, v := cursor.First(); k != nil; k, v = cursor.Next() {
 			record := &DelegationRecord{}
 			if err := json.Unmarshal(v, record); err != nil {
 				continue
 			}
-			
+
 			// Delete if not accessed recently and expired
 			if record.LastAccessed.Before(cutoffTime) && record.ExpiresAt.Before(time.Now()) {
 				toDelete = append(toDelete, record.ID)
 			}
 		}
-		
+
 		for _, id := range toDelete {
 			data := delegationBucket.Get([]byte(id))
 			if data == nil {
 				continue
 			}
-			
+
 			record := &DelegationRecord{}
 			if err := json.Unmarshal(data, record); err != nil {
 				continue
 			}
-			
+
 			if err := delegationBucket.Delete([]byte(id)); err != nil {
 				return err
 			}
-			
+
 			if err := s.removeFromIndexes(tx, record); err != nil {
 				return err
 			}
-			
+
 			pruned++
 		}
-		
+
 		s.stats.PrunedRecords += int64(pruned)
 		s.stats.TotalRecords -= int64(pruned)
-		
+
 		return s.saveStats(tx)
 	})
-	
+
 	return pruned, err
 }
 
@@ -422,32 +422,32 @@ func (s *IndexedDelegationStore) PruneInactive(inactivityPeriod time.Duration) (
 func (s *IndexedDelegationStore) UpdateStatus(id string, newStatus DelegationStatus) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	return s.db.Update(func(tx *bbolt.Tx) error {
 		bucket := tx.Bucket([]byte(bucketDelegations))
 		data := bucket.Get([]byte(id))
 		if data == nil {
 			return errors.New("delegation not found")
 		}
-		
+
 		record := &DelegationRecord{}
 		if err := json.Unmarshal(data, record); err != nil {
 			return err
 		}
-		
+
 		oldStatus := record.Status
 		record.Status = string(newStatus)
-		
+
 		// Re-serialize
 		updatedData, err := json.Marshal(record)
 		if err != nil {
 			return err
 		}
-		
+
 		if err := bucket.Put([]byte(id), updatedData); err != nil {
 			return err
 		}
-		
+
 		// Update status index
 		return s.updateStatusIndex(tx, record, oldStatus)
 	})
@@ -457,7 +457,7 @@ func (s *IndexedDelegationStore) UpdateStatus(id string, newStatus DelegationSta
 func (s *IndexedDelegationStore) GetStats() *StoreStats {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	
+
 	statsCopy := *s.stats
 	return &statsCopy
 }
@@ -468,24 +468,24 @@ func (s *IndexedDelegationStore) updateIndexes(tx *bbolt.Tx, record *DelegationR
 	if err := s.addToIndex(tx, bucketSubjectIndex, record.Subject, record.ID); err != nil {
 		return err
 	}
-	
+
 	// Delegate index
 	if err := s.addToIndex(tx, bucketDelegateIndex, record.Delegate, record.ID); err != nil {
 		return err
 	}
-	
+
 	// Status index
 	if err := s.addToIndex(tx, bucketStatusIndex, record.Status, record.ID); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
 // addToIndex adds a record ID to an index.
 func (s *IndexedDelegationStore) addToIndex(tx *bbolt.Tx, bucketName, key, id string) error {
 	bucket := tx.Bucket([]byte(bucketName))
-	
+
 	var ids []string
 	data := bucket.Get([]byte(key))
 	if data != nil {
@@ -493,7 +493,7 @@ func (s *IndexedDelegationStore) addToIndex(tx *bbolt.Tx, bucketName, key, id st
 			return err
 		}
 	}
-	
+
 	// Add ID if not already present
 	found := false
 	for _, existingID := range ids {
@@ -502,7 +502,7 @@ func (s *IndexedDelegationStore) addToIndex(tx *bbolt.Tx, bucketName, key, id st
 			break
 		}
 	}
-	
+
 	if !found {
 		ids = append(ids, id)
 		data, err := json.Marshal(ids)
@@ -511,7 +511,7 @@ func (s *IndexedDelegationStore) addToIndex(tx *bbolt.Tx, bucketName, key, id st
 		}
 		return bucket.Put([]byte(key), data)
 	}
-	
+
 	return nil
 }
 
@@ -536,12 +536,12 @@ func (s *IndexedDelegationStore) removeFromIndex(tx *bbolt.Tx, bucketName, key, 
 	if data == nil {
 		return nil
 	}
-	
+
 	var ids []string
 	if err := json.Unmarshal(data, &ids); err != nil {
 		return err
 	}
-	
+
 	// Remove ID
 	newIDs := make([]string, 0, len(ids))
 	for _, existingID := range ids {
@@ -549,11 +549,11 @@ func (s *IndexedDelegationStore) removeFromIndex(tx *bbolt.Tx, bucketName, key, 
 			newIDs = append(newIDs, existingID)
 		}
 	}
-	
+
 	if len(newIDs) == 0 {
 		return bucket.Delete([]byte(key))
 	}
-	
+
 	data, err := json.Marshal(newIDs)
 	if err != nil {
 		return err
@@ -567,7 +567,7 @@ func (s *IndexedDelegationStore) updateStatusIndex(tx *bbolt.Tx, record *Delegat
 	if err := s.removeFromIndex(tx, bucketStatusIndex, oldStatus, record.ID); err != nil {
 		return err
 	}
-	
+
 	// Add to new status index
 	return s.addToIndex(tx, bucketStatusIndex, record.Status, record.ID)
 }
@@ -576,26 +576,26 @@ func (s *IndexedDelegationStore) updateStatusIndex(tx *bbolt.Tx, record *Delegat
 func (s *IndexedDelegationStore) updateAccessTime(id string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	return s.db.Update(func(tx *bbolt.Tx) error {
 		bucket := tx.Bucket([]byte(bucketDelegations))
 		data := bucket.Get([]byte(id))
 		if data == nil {
 			return nil
 		}
-		
+
 		record := &DelegationRecord{}
 		if err := json.Unmarshal(data, record); err != nil {
 			return err
 		}
-		
+
 		record.LastAccessed = time.Now()
-		
+
 		updatedData, err := json.Marshal(record)
 		if err != nil {
 			return err
 		}
-		
+
 		return bucket.Put([]byte(id), updatedData)
 	})
 }

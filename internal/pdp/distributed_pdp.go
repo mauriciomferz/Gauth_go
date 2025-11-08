@@ -14,8 +14,8 @@ import (
 
 // ClusterNode represents a node in the distributed PDP cluster.
 type ClusterNode struct {
-	ID       string    // Unique node identifier
-	Address  string    // Network address (host:port)
+	ID       string // Unique node identifier
+	Address  string // Network address (host:port)
 	Status   NodeStatus
 	LastSeen time.Time
 	Load     float64 // Current load factor (0.0 - 1.0)
@@ -33,13 +33,13 @@ const (
 
 // DecisionRequest represents a policy decision request.
 type DecisionRequest struct {
-	RequestID   string                 // Unique request ID
-	Subject     string                 // Who is making the request
-	Action      string                 // What action is requested
-	Resource    string                 // What resource is being accessed
-	Context     map[string]interface{} // Additional context
-	Timestamp   time.Time
-	CacheTTL    time.Duration // How long to cache this decision
+	RequestID string                 // Unique request ID
+	Subject   string                 // Who is making the request
+	Action    string                 // What action is requested
+	Resource  string                 // What resource is being accessed
+	Context   map[string]interface{} // Additional context
+	Timestamp time.Time
+	CacheTTL  time.Duration // How long to cache this decision
 }
 
 // DecisionResponse represents a policy decision response.
@@ -57,8 +57,8 @@ type DecisionResponse struct {
 type Decision string
 
 const (
-	DecisionPermit      Decision = "permit"
-	DecisionDeny        Decision = "deny"
+	DecisionPermit        Decision = "permit"
+	DecisionDeny          Decision = "deny"
 	DecisionNotApplicable Decision = "not_applicable"
 	DecisionIndeterminate Decision = "indeterminate"
 )
@@ -72,35 +72,35 @@ type CacheEntry struct {
 
 // CacheInvalidation represents a cache invalidation message.
 type CacheInvalidation struct {
-	Pattern   string    // Pattern to match for invalidation (e.g., "subject:user123:*")
-	Reason    string    // Why invalidation occurred
+	Pattern   string // Pattern to match for invalidation (e.g., "subject:user123:*")
+	Reason    string // Why invalidation occurred
 	Timestamp time.Time
-	NodeID    string    // Which node initiated invalidation
+	NodeID    string // Which node initiated invalidation
 }
 
 // DistributedPDP implements a distributed Policy Decision Point with clustering.
 type DistributedPDP struct {
 	mu sync.RWMutex
-	
+
 	// Node identity
 	nodeID  string
 	address string
-	
+
 	// Cluster membership
 	nodes map[string]*ClusterNode
-	
+
 	// Decision cache
-	cache         map[string]*CacheEntry
-	cacheVersion  int64
-	
+	cache        map[string]*CacheEntry
+	cacheVersion int64
+
 	// Configuration
 	config *PDPConfig
-	
+
 	// Channels
 	invalidationCh chan *CacheInvalidation
 	healthCheckCh  chan struct{}
 	shutdownCh     chan struct{}
-	
+
 	// Health
 	isHealthy bool
 }
@@ -128,7 +128,7 @@ func NewDistributedPDP(config *PDPConfig) (*DistributedPDP, error) {
 	if config.Address == "" {
 		return nil, errors.New("address is required")
 	}
-	
+
 	// Set defaults
 	if config.HealthCheckInterval == 0 {
 		config.HealthCheckInterval = 10 * time.Second
@@ -136,7 +136,7 @@ func NewDistributedPDP(config *PDPConfig) (*DistributedPDP, error) {
 	if config.CacheMaxSize == 0 {
 		config.CacheMaxSize = 10000
 	}
-	
+
 	pdp := &DistributedPDP{
 		nodeID:         config.NodeID,
 		address:        config.Address,
@@ -149,7 +149,7 @@ func NewDistributedPDP(config *PDPConfig) (*DistributedPDP, error) {
 		shutdownCh:     make(chan struct{}),
 		isHealthy:      true,
 	}
-	
+
 	// Register self as a node
 	pdp.nodes[config.NodeID] = &ClusterNode{
 		ID:       config.NodeID,
@@ -158,7 +158,7 @@ func NewDistributedPDP(config *PDPConfig) (*DistributedPDP, error) {
 		LastSeen: time.Now(),
 		Load:     0.0,
 	}
-	
+
 	return pdp, nil
 }
 
@@ -168,22 +168,22 @@ func (pdp *DistributedPDP) Start(ctx context.Context) error {
 	go pdp.healthCheckWorker(ctx)
 	go pdp.invalidationWorker(ctx)
 	go pdp.cacheCleanupWorker(ctx)
-	
+
 	return nil
 }
 
 // Stop gracefully shuts down the distributed PDP.
 func (pdp *DistributedPDP) Stop() error {
 	close(pdp.shutdownCh)
-	
+
 	pdp.mu.Lock()
 	defer pdp.mu.Unlock()
-	
+
 	// Mark node as draining
 	if node, exists := pdp.nodes[pdp.nodeID]; exists {
 		node.Status = NodeStatusDraining
 	}
-	
+
 	return nil
 }
 
@@ -193,10 +193,10 @@ func (pdp *DistributedPDP) MakeDecision(ctx context.Context, req *DecisionReques
 	if req == nil {
 		return nil, errors.New("request is required")
 	}
-	
+
 	// Generate cache key
 	cacheKey := pdp.generateCacheKey(req)
-	
+
 	// Check cache first
 	pdp.mu.RLock()
 	if entry, found := pdp.cache[cacheKey]; found {
@@ -209,18 +209,18 @@ func (pdp *DistributedPDP) MakeDecision(ctx context.Context, req *DecisionReques
 		}
 	}
 	pdp.mu.RUnlock()
-	
+
 	// Cache miss or expired - evaluate policy
 	response, err := pdp.evaluatePolicy(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Cache the decision
 	if req.CacheTTL > 0 {
 		pdp.cacheDecision(cacheKey, response, req.CacheTTL)
 	}
-	
+
 	return response, nil
 }
 
@@ -229,7 +229,7 @@ func (pdp *DistributedPDP) MakeDecision(ctx context.Context, req *DecisionReques
 func (pdp *DistributedPDP) evaluatePolicy(ctx context.Context, req *DecisionRequest) (*DecisionResponse, error) {
 	// Simplified policy evaluation for demonstration
 	// In production, integrate with your policy engine
-	
+
 	response := &DecisionResponse{
 		RequestID:   req.RequestID,
 		Decision:    DecisionPermit, // Default for demo
@@ -239,13 +239,13 @@ func (pdp *DistributedPDP) evaluatePolicy(ctx context.Context, req *DecisionRequ
 		NodeID:      pdp.nodeID,
 		Obligations: []string{},
 	}
-	
+
 	// Example: Deny if action is "delete" and resource starts with "critical:"
 	if req.Action == "delete" && len(req.Resource) > 9 && req.Resource[:9] == "critical:" {
 		response.Decision = DecisionDeny
 		response.Reason = "Deletion of critical resources is prohibited"
 	}
-	
+
 	return response, nil
 }
 
@@ -253,13 +253,13 @@ func (pdp *DistributedPDP) evaluatePolicy(ctx context.Context, req *DecisionRequ
 func (pdp *DistributedPDP) generateCacheKey(req *DecisionRequest) string {
 	// Create deterministic key from request fields
 	data := fmt.Sprintf("%s|%s|%s", req.Subject, req.Action, req.Resource)
-	
+
 	// Include context in key if present
 	if len(req.Context) > 0 {
 		contextJSON, _ := json.Marshal(req.Context)
 		data += "|" + string(contextJSON)
 	}
-	
+
 	hash := sha256.Sum256([]byte(data))
 	return fmt.Sprintf("%x", hash)
 }
@@ -268,13 +268,13 @@ func (pdp *DistributedPDP) generateCacheKey(req *DecisionRequest) string {
 func (pdp *DistributedPDP) cacheDecision(key string, response *DecisionResponse, ttl time.Duration) {
 	pdp.mu.Lock()
 	defer pdp.mu.Unlock()
-	
+
 	// Check cache size limit
 	if len(pdp.cache) >= pdp.config.CacheMaxSize {
 		// Evict oldest entry (simple LRU)
 		pdp.evictOldest()
 	}
-	
+
 	pdp.cacheVersion++
 	pdp.cache[key] = &CacheEntry{
 		Response:  response,
@@ -288,7 +288,7 @@ func (pdp *DistributedPDP) evictOldest() {
 	var oldestKey string
 	var oldestTime time.Time
 	first := true
-	
+
 	for key, entry := range pdp.cache {
 		if first || entry.ExpiresAt.Before(oldestTime) {
 			oldestKey = key
@@ -296,7 +296,7 @@ func (pdp *DistributedPDP) evictOldest() {
 			first = false
 		}
 	}
-	
+
 	if oldestKey != "" {
 		delete(pdp.cache, oldestKey)
 	}
@@ -310,7 +310,7 @@ func (pdp *DistributedPDP) InvalidateCache(pattern string, reason string) error 
 		Timestamp: time.Now(),
 		NodeID:    pdp.nodeID,
 	}
-	
+
 	// Send to local invalidation channel
 	select {
 	case pdp.invalidationCh <- invalidation:
@@ -331,13 +331,13 @@ func (pdp *DistributedPDP) broadcastInvalidation(inv *CacheInvalidation) error {
 		}
 	}
 	pdp.mu.RUnlock()
-	
+
 	// In production, send HTTP/gRPC messages to other nodes
 	// For now, just log the broadcast
 	for _, node := range nodes {
 		_ = node // Would send invalidation to node.Address
 	}
-	
+
 	return nil
 }
 
@@ -359,7 +359,7 @@ func (pdp *DistributedPDP) invalidationWorker(ctx context.Context) {
 func (pdp *DistributedPDP) processInvalidation(inv *CacheInvalidation) {
 	pdp.mu.Lock()
 	defer pdp.mu.Unlock()
-	
+
 	// Simple pattern matching - in production use more sophisticated matching
 	keysToRemove := []string{}
 	for key := range pdp.cache {
@@ -368,7 +368,7 @@ func (pdp *DistributedPDP) processInvalidation(inv *CacheInvalidation) {
 			keysToRemove = append(keysToRemove, key)
 		}
 	}
-	
+
 	for _, key := range keysToRemove {
 		delete(pdp.cache, key)
 	}
@@ -381,17 +381,17 @@ func (pdp *DistributedPDP) matchesPattern(key, pattern string) bool {
 	if len(pattern) == 0 {
 		return false
 	}
-	
+
 	if pattern == "*" {
 		return true // Match all
 	}
-	
+
 	// Check for wildcard suffix
 	if len(pattern) > 2 && pattern[len(pattern)-2:] == ":*" {
 		prefix := pattern[:len(pattern)-2]
 		return len(key) >= len(prefix) && key[:len(prefix)] == prefix
 	}
-	
+
 	return key == pattern
 }
 
@@ -399,7 +399,7 @@ func (pdp *DistributedPDP) matchesPattern(key, pattern string) bool {
 func (pdp *DistributedPDP) healthCheckWorker(ctx context.Context) {
 	ticker := time.NewTicker(pdp.config.HealthCheckInterval)
 	defer ticker.Stop()
-	
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -416,14 +416,14 @@ func (pdp *DistributedPDP) healthCheckWorker(ctx context.Context) {
 func (pdp *DistributedPDP) performHealthCheck() {
 	pdp.mu.Lock()
 	defer pdp.mu.Unlock()
-	
+
 	now := time.Now()
 	for _, node := range pdp.nodes {
 		if node.ID == pdp.nodeID {
 			node.LastSeen = now
 			continue
 		}
-		
+
 		// Check if node is stale
 		if now.Sub(node.LastSeen) > pdp.config.HealthCheckInterval*3 {
 			node.Status = NodeStatusUnhealthy
@@ -435,7 +435,7 @@ func (pdp *DistributedPDP) performHealthCheck() {
 func (pdp *DistributedPDP) cacheCleanupWorker(ctx context.Context) {
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
-	
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -452,7 +452,7 @@ func (pdp *DistributedPDP) cacheCleanupWorker(ctx context.Context) {
 func (pdp *DistributedPDP) cleanupExpiredCache() {
 	pdp.mu.Lock()
 	defer pdp.mu.Unlock()
-	
+
 	now := time.Now()
 	for key, entry := range pdp.cache {
 		if now.After(entry.ExpiresAt) {
@@ -466,10 +466,10 @@ func (pdp *DistributedPDP) AddNode(node *ClusterNode) error {
 	if node == nil || node.ID == "" {
 		return errors.New("invalid node")
 	}
-	
+
 	pdp.mu.Lock()
 	defer pdp.mu.Unlock()
-	
+
 	pdp.nodes[node.ID] = node
 	return nil
 }
@@ -478,11 +478,11 @@ func (pdp *DistributedPDP) AddNode(node *ClusterNode) error {
 func (pdp *DistributedPDP) RemoveNode(nodeID string) error {
 	pdp.mu.Lock()
 	defer pdp.mu.Unlock()
-	
+
 	if nodeID == pdp.nodeID {
 		return errors.New("cannot remove self")
 	}
-	
+
 	delete(pdp.nodes, nodeID)
 	return nil
 }
@@ -491,14 +491,14 @@ func (pdp *DistributedPDP) RemoveNode(nodeID string) error {
 func (pdp *DistributedPDP) GetClusterStatus() []*ClusterNode {
 	pdp.mu.RLock()
 	defer pdp.mu.RUnlock()
-	
+
 	nodes := make([]*ClusterNode, 0, len(pdp.nodes))
 	for _, node := range pdp.nodes {
 		// Create copy to avoid race conditions
 		nodeCopy := *node
 		nodes = append(nodes, &nodeCopy)
 	}
-	
+
 	return nodes
 }
 
@@ -506,10 +506,10 @@ func (pdp *DistributedPDP) GetClusterStatus() []*ClusterNode {
 func (pdp *DistributedPDP) GetCacheStats() map[string]interface{} {
 	pdp.mu.RLock()
 	defer pdp.mu.RUnlock()
-	
+
 	return map[string]interface{}{
-		"size":    len(pdp.cache),
+		"size":     len(pdp.cache),
 		"max_size": pdp.config.CacheMaxSize,
-		"version": pdp.cacheVersion,
+		"version":  pdp.cacheVersion,
 	}
 }

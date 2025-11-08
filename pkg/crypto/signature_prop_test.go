@@ -141,7 +141,7 @@ func TestProperty_InvalidSignatureFailsVerification(t *testing.T) {
 			}
 			signer, _ := prov.ActiveSigner()
 			msg := []byte("valid message")
-			
+
 			// Create random garbage signature
 			badSig := make([]byte, 64)
 			rand.Read(badSig)

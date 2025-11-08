@@ -180,7 +180,7 @@ func (s *BoltDailyLimitStore) saveToDisk() error {
 		return fmt.Errorf("failed to marshal daily limits: %w", err)
 	}
 
-	return os.WriteFile(s.dbPath, data, 0644)
+	return os.WriteFile(s.dbPath, data, 0600)
 }
 
 // SimpleConditionalEngine implements basic conditional expression evaluation

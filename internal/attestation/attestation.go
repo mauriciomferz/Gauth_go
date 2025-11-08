@@ -11,17 +11,17 @@ import (
 
 // Attestation represents a compliance attestation with cryptographic proof.
 type Attestation struct {
-	ID            string                 `json:"id"`
-	Subject       string                 `json:"subject"` // Who is attesting
-	Claim         string                 `json:"claim"`   // What is being attested
-	Evidence      []Evidence             `json:"evidence"`
-	Timestamp     time.Time              `json:"timestamp"`
-	ExpiresAt     *time.Time             `json:"expires_at,omitempty"`
-	Signature     string                 `json:"signature,omitempty"`
-	ProofHash     string                 `json:"proof_hash"` // SHA-256 of evidence
-	Metadata      map[string]interface{} `json:"metadata,omitempty"`
-	Verified      bool                   `json:"verified"`
-	VerifiedAt    *time.Time             `json:"verified_at,omitempty"`
+	ID         string                 `json:"id"`
+	Subject    string                 `json:"subject"` // Who is attesting
+	Claim      string                 `json:"claim"`   // What is being attested
+	Evidence   []Evidence             `json:"evidence"`
+	Timestamp  time.Time              `json:"timestamp"`
+	ExpiresAt  *time.Time             `json:"expires_at,omitempty"`
+	Signature  string                 `json:"signature,omitempty"`
+	ProofHash  string                 `json:"proof_hash"` // SHA-256 of evidence
+	Metadata   map[string]interface{} `json:"metadata,omitempty"`
+	Verified   bool                   `json:"verified"`
+	VerifiedAt *time.Time             `json:"verified_at,omitempty"`
 }
 
 // Evidence represents a piece of supporting evidence for an attestation.
@@ -63,12 +63,12 @@ type Store interface {
 
 // AttestationFilter specifies filtering criteria.
 type AttestationFilter struct {
-	Subject    string
-	Claim      string
-	ValidOnly  bool // Only return non-expired attestations
+	Subject      string
+	Claim        string
+	ValidOnly    bool // Only return non-expired attestations
 	VerifiedOnly bool
-	Since      *time.Time
-	Until      *time.Time
+	Since        *time.Time
+	Until        *time.Time
 }
 
 // InMemoryStore provides a simple in-memory attestation store.

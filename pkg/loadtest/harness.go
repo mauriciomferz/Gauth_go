@@ -33,39 +33,39 @@ type ResponseValidator interface {
 
 // LoadTestResult contains aggregated load test results.
 type LoadTestResult struct {
-	Scenario         string
-	Duration         time.Duration
-	TotalRequests    int64
-	SuccessfulReqs   int64
-	FailedReqs       int64
-	TotalErrors      int64
-	AvgResponseTime  time.Duration
-	MinResponseTime  time.Duration
-	MaxResponseTime  time.Duration
-	P50ResponseTime  time.Duration
-	P95ResponseTime  time.Duration
-	P99ResponseTime  time.Duration
-	RequestsPerSec   float64
-	ErrorRate        float64
-	Throughput       float64
+	Scenario        string
+	Duration        time.Duration
+	TotalRequests   int64
+	SuccessfulReqs  int64
+	FailedReqs      int64
+	TotalErrors     int64
+	AvgResponseTime time.Duration
+	MinResponseTime time.Duration
+	MaxResponseTime time.Duration
+	P50ResponseTime time.Duration
+	P95ResponseTime time.Duration
+	P99ResponseTime time.Duration
+	RequestsPerSec  float64
+	ErrorRate       float64
+	Throughput      float64
 }
 
 // LoadTestHarness orchestrates load tests.
 type LoadTestHarness struct {
 	mu sync.RWMutex
-	
+
 	// Current test state
-	running        bool
-	startTime      time.Time
-	endTime        time.Time
-	
+	running   bool
+	startTime time.Time
+	endTime   time.Time
+
 	// Metrics
 	totalRequests  int64
 	successfulReqs int64
 	failedReqs     int64
 	responseTimes  []time.Duration
 	errors         []error
-	
+
 	// Configuration
 	maxConcurrency int
 	reportInterval time.Duration
@@ -86,25 +86,25 @@ func (h *LoadTestHarness) Run(ctx context.Context, scenario *TestScenario) (*Loa
 	if scenario == nil {
 		return nil, fmt.Errorf("scenario is required")
 	}
-	
+
 	h.reset()
 	h.running = true
 	h.startTime = time.Now()
-	
+
 	// Create worker pool
 	var wg sync.WaitGroup
 	userSemaphore := make(chan struct{}, scenario.VirtualUsers)
-	
+
 	// Ramp up virtual users
 	rampUpInterval := scenario.RampUpTime / time.Duration(scenario.VirtualUsers)
-	
+
 	// Test duration context with small grace period for request completion
 	testCtx, cancel := context.WithTimeout(ctx, scenario.Duration)
 	defer cancel()
-	
+
 	// Start progress reporter
 	go h.reportProgress(testCtx, scenario.Name)
-	
+
 	// Launch virtual users
 	for userID := 0; userID < scenario.VirtualUsers; userID++ {
 		// Ramp up delay
@@ -113,30 +113,30 @@ func (h *LoadTestHarness) Run(ctx context.Context, scenario *TestScenario) (*Loa
 			goto done
 		case <-time.After(rampUpInterval):
 		}
-		
+
 		wg.Add(1)
 		go func(uid int) {
 			defer wg.Done()
 			h.runVirtualUser(testCtx, uid, scenario, userSemaphore)
 		}(userID)
 	}
-	
+
 done:
 	// Wait for all users to complete
 	// The wg.Done() is called when each virtual user goroutine exits,
 	// which happens after all their requests are fully processed
 	wg.Wait()
-	
+
 	h.endTime = time.Now()
 	h.running = false
-	
+
 	return h.generateResult(scenario), nil
 }
 
 // runVirtualUser simulates a single virtual user's behavior.
 func (h *LoadTestHarness) runVirtualUser(ctx context.Context, userID int, scenario *TestScenario, sem chan struct{}) {
 	iteration := 0
-	
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -145,9 +145,9 @@ func (h *LoadTestHarness) runVirtualUser(ctx context.Context, userID int, scenar
 			// Execute request
 			h.executeRequest(ctx, userID, iteration, scenario)
 			<-sem
-			
+
 			iteration++
-			
+
 			// Think time between requests
 			if scenario.ThinkTime > 0 {
 				select {
@@ -169,9 +169,9 @@ func (h *LoadTestHarness) executeRequest(ctx context.Context, userID, iteration 
 		return
 	default:
 	}
-	
+
 	atomic.AddInt64(&h.totalRequests, 1)
-	
+
 	// Generate request
 	request, err := scenario.RequestGenerator.Generate(userID, iteration)
 	if err != nil {
@@ -179,17 +179,17 @@ func (h *LoadTestHarness) executeRequest(ctx context.Context, userID, iteration 
 		h.recordError(err)
 		return
 	}
-	
+
 	// Execute request and measure time
 	startTime := time.Now()
 	response, err := h.performRequest(ctx, request)
 	duration := time.Since(startTime)
-	
+
 	// Record response time only for completed requests
 	if err == nil {
 		h.recordResponseTime(duration)
 	}
-	
+
 	// Validate response
 	if scenario.Validator != nil {
 		if validationErr := scenario.Validator.Validate(request, response, err); validationErr != nil {
@@ -198,7 +198,7 @@ func (h *LoadTestHarness) executeRequest(ctx context.Context, userID, iteration 
 			return
 		}
 	}
-	
+
 	// Count final result
 	if err != nil {
 		atomic.AddInt64(&h.failedReqs, 1)
@@ -212,11 +212,11 @@ func (h *LoadTestHarness) executeRequest(ctx context.Context, userID, iteration 
 func (h *LoadTestHarness) performRequest(ctx context.Context, request interface{}) (interface{}, error) {
 	// This is a hook for custom request execution
 	// In real tests, this would call the actual service
-	
+
 	// Simulate processing time with graceful context handling
 	timer := time.NewTimer(10 * time.Millisecond)
 	defer timer.Stop()
-	
+
 	select {
 	case <-ctx.Done():
 		// Context cancelled - this is expected during test teardown
@@ -245,7 +245,7 @@ func (h *LoadTestHarness) recordError(err error) {
 func (h *LoadTestHarness) reportProgress(ctx context.Context, scenarioName string) {
 	ticker := time.NewTicker(h.reportInterval)
 	defer ticker.Stop()
-	
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -256,7 +256,7 @@ func (h *LoadTestHarness) reportProgress(ctx context.Context, scenarioName strin
 			failed := atomic.LoadInt64(&h.failedReqs)
 			elapsed := time.Since(h.startTime)
 			rps := float64(total) / elapsed.Seconds()
-			
+
 			fmt.Printf("[%s] Elapsed: %v | Requests: %d | Success: %d | Failed: %d | RPS: %.2f\n",
 				scenarioName, elapsed.Round(time.Second), total, successful, failed, rps)
 		}
@@ -267,9 +267,9 @@ func (h *LoadTestHarness) reportProgress(ctx context.Context, scenarioName strin
 func (h *LoadTestHarness) generateResult(scenario *TestScenario) *LoadTestResult {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
-	
+
 	duration := h.endTime.Sub(h.startTime)
-	
+
 	result := &LoadTestResult{
 		Scenario:       scenario.Name,
 		Duration:       duration,
@@ -278,13 +278,13 @@ func (h *LoadTestHarness) generateResult(scenario *TestScenario) *LoadTestResult
 		FailedReqs:     atomic.LoadInt64(&h.failedReqs),
 		TotalErrors:    int64(len(h.errors)),
 	}
-	
+
 	if result.TotalRequests > 0 {
 		result.RequestsPerSec = float64(result.TotalRequests) / duration.Seconds()
 		result.ErrorRate = float64(result.FailedReqs) / float64(result.TotalRequests)
 		result.Throughput = result.RequestsPerSec
 	}
-	
+
 	// Calculate response time statistics
 	if len(h.responseTimes) > 0 {
 		result.AvgResponseTime = h.calculateAverage(h.responseTimes)
@@ -294,7 +294,7 @@ func (h *LoadTestHarness) generateResult(scenario *TestScenario) *LoadTestResult
 		result.P95ResponseTime = h.calculatePercentile(h.responseTimes, 95)
 		result.P99ResponseTime = h.calculatePercentile(h.responseTimes, 99)
 	}
-	
+
 	return result
 }
 
@@ -303,7 +303,7 @@ func (h *LoadTestHarness) calculateAverage(durations []time.Duration) time.Durat
 	if len(durations) == 0 {
 		return 0
 	}
-	
+
 	var total time.Duration
 	for _, d := range durations {
 		total += d
@@ -316,7 +316,7 @@ func (h *LoadTestHarness) calculateMin(durations []time.Duration) time.Duration 
 	if len(durations) == 0 {
 		return 0
 	}
-	
+
 	min := durations[0]
 	for _, d := range durations[1:] {
 		if d < min {
@@ -331,7 +331,7 @@ func (h *LoadTestHarness) calculateMax(durations []time.Duration) time.Duration 
 	if len(durations) == 0 {
 		return 0
 	}
-	
+
 	max := durations[0]
 	for _, d := range durations[1:] {
 		if d > max {
@@ -346,14 +346,14 @@ func (h *LoadTestHarness) calculatePercentile(durations []time.Duration, percent
 	if len(durations) == 0 {
 		return 0
 	}
-	
+
 	// Simple percentile calculation (not perfectly accurate without sorting)
 	// For production, use a proper percentile algorithm
 	index := (len(durations) * percentile) / 100
 	if index >= len(durations) {
 		index = len(durations) - 1
 	}
-	
+
 	return durations[index]
 }
 
@@ -361,7 +361,7 @@ func (h *LoadTestHarness) calculatePercentile(durations []time.Duration, percent
 func (h *LoadTestHarness) reset() {
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	
+
 	atomic.StoreInt64(&h.totalRequests, 0)
 	atomic.StoreInt64(&h.successfulReqs, 0)
 	atomic.StoreInt64(&h.failedReqs, 0)
@@ -377,7 +377,7 @@ func (h *LoadTestHarness) PrintResult(result *LoadTestResult) {
 	fmt.Println(separator)
 	fmt.Printf("Duration:          %v\n", result.Duration)
 	fmt.Printf("Total Requests:    %d\n", result.TotalRequests)
-	fmt.Printf("Successful:        %d (%.2f%%)\n", result.SuccessfulReqs, 
+	fmt.Printf("Successful:        %d (%.2f%%)\n", result.SuccessfulReqs,
 		float64(result.SuccessfulReqs)/float64(result.TotalRequests)*100)
 	fmt.Printf("Failed:            %d (%.2f%%)\n", result.FailedReqs, result.ErrorRate*100)
 	fmt.Printf("Requests/sec:      %.2f\n", result.RequestsPerSec)
@@ -404,7 +404,7 @@ type StressTestConfig struct {
 // RunStressTest performs a stress test with gradually increasing load.
 func (h *LoadTestHarness) RunStressTest(ctx context.Context, config *StressTestConfig, reqGen RequestGenerator) ([]*LoadTestResult, error) {
 	results := make([]*LoadTestResult, 0)
-	
+
 	for users := config.StartUsers; users <= config.MaxUsers; users += config.UserIncrement {
 		scenario := &TestScenario{
 			Name:             fmt.Sprintf("Stress-%d-users", users),
@@ -414,24 +414,24 @@ func (h *LoadTestHarness) RunStressTest(ctx context.Context, config *StressTestC
 			ThinkTime:        0,
 			RequestGenerator: reqGen,
 		}
-		
+
 		result, err := h.Run(ctx, scenario)
 		if err != nil {
 			return results, err
 		}
-		
+
 		results = append(results, result)
-		
+
 		// Print intermediate result
 		h.PrintResult(result)
-		
+
 		// Check if system is degrading
 		if result.ErrorRate > 0.5 {
 			fmt.Printf("⚠️  High error rate detected (%.2f%%), stopping stress test\n", result.ErrorRate*100)
 			break
 		}
 	}
-	
+
 	return results, nil
 }
 

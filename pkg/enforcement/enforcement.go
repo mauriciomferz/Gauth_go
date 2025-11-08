@@ -13,30 +13,35 @@ import (
 type EnforcementType string
 
 const (
-	EnforcementRuleBased   EnforcementType = "rule-based"
-	EnforcementDisclosure  EnforcementType = "disclosure"
-	EnforcementAIAssisted  EnforcementType = "ai-assisted"
-	EnforcementHybrid      EnforcementType = "hybrid"
+	EnforcementRuleBased  EnforcementType = "rule-based"
+	EnforcementDisclosure EnforcementType = "disclosure"
+	EnforcementAIAssisted EnforcementType = "ai-assisted"
+	EnforcementHybrid     EnforcementType = "hybrid"
+
+	// Decision constants
+	DecisionAllow  = "allow"
+	DecisionDeny   = "deny"
+	DecisionReview = "review"
 )
 
 // EnforcementDecision represents the result of an enforcement evaluation
 type EnforcementDecision struct {
-	Decision         string                 `json:"decision"`          // "allow", "deny", "conditional"
-	Reason           string                 `json:"reason"`
-	AppliedRules     []string               `json:"applied_rules"`
+	Decision         string                  `json:"decision"` // "allow", "deny", "conditional"
+	Reason           string                  `json:"reason"`
+	AppliedRules     []string                `json:"applied_rules"`
 	Disclosures      []DisclosureRequirement `json:"disclosures"`
-	AIRecommendation *AIRecommendation      `json:"ai_recommendation,omitempty"`
-	Timestamp        time.Time              `json:"timestamp"`
-	EnforcementType  EnforcementType        `json:"enforcement_type"`
-	Subject          string                 `json:"subject"`
-	Resource         string                 `json:"resource"`
-	Action           string                 `json:"action"`
-	Metadata         map[string]interface{} `json:"metadata"`
+	AIRecommendation *AIRecommendation       `json:"ai_recommendation,omitempty"`
+	Timestamp        time.Time               `json:"timestamp"`
+	EnforcementType  EnforcementType         `json:"enforcement_type"`
+	Subject          string                  `json:"subject"`
+	Resource         string                  `json:"resource"`
+	Action           string                  `json:"action"`
+	Metadata         map[string]interface{}  `json:"metadata"`
 }
 
 // DisclosureRequirement represents a transparency disclosure requirement
 type DisclosureRequirement struct {
-	Type         string `json:"type"`          // "data-usage", "ai-involvement", "third-party-sharing"
+	Type         string `json:"type"` // "data-usage", "ai-involvement", "third-party-sharing"
 	Description  string `json:"description"`
 	Required     bool   `json:"required"`
 	Acknowledged bool   `json:"acknowledged"`
@@ -65,10 +70,10 @@ type Rule struct {
 
 // EnforcementRequest represents a request for enforcement evaluation
 type EnforcementRequest struct {
-	Subject     string                 `json:"subject"`
-	Resource    string                 `json:"resource"`
-	Action      string                 `json:"action"`
-	Context     map[string]interface{} `json:"context"`
+	Subject     string                  `json:"subject"`
+	Resource    string                  `json:"resource"`
+	Action      string                  `json:"action"`
+	Context     map[string]interface{}  `json:"context"`
 	Disclosures []DisclosureRequirement `json:"disclosures"`
 }
 

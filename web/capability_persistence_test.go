@@ -10,6 +10,7 @@ import (
 )
 
 // TestCapabilityPersistenceAndReload verifies loading from file and reload behavior, including provenance fields.
+//
 //nolint:gocyclo // Capability persistence test
 func TestCapabilityPersistenceAndReload(t *testing.T) {
 	// Write a temporary capabilities file

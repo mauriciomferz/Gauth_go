@@ -60,16 +60,6 @@ func RegisterAll(r *gin.RouterGroup, deps Deps) {
 	r.GET("/capabilities/anchor/status", func(c *gin.Context) { statusHandler(c, deps) })
 }
 
-// respondError mirrors global error taxonomy response shape (success=false payload) used elsewhere.
-// Align with tests: Code should carry the short machine code (e.g. anchoring_disabled) and Error the broader taxonomy (e.g. capability_anchor_disabled)
-func respondError(c *gin.Context, status int, errorCode, code, message, ref string, detail any) {
-	payload := gin.H{"success": false, "error": errorCode, "code": code, "message": message, "ref": ref}
-	if detail != nil {
-		payload["detail"] = detail
-	}
-	c.JSON(status, payload)
-}
-
 // POST /capabilities/anchor
 func postAnchorHandler(c *gin.Context, d Deps) {
 	if !d.CapabilityAnchorEnabled() {

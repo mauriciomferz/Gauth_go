@@ -268,7 +268,7 @@ func main() {
 			return tot
 		}(), Mode: mode, Iterations: iterations, Timestamp: time.Now().UTC().Format(time.RFC3339Nano)}
 		sb, _ := json.MarshalIndent(&s, "", "  ")
-		if err := os.WriteFile(summaryPath, sb, 0644); err != nil {
+		if err := os.WriteFile(summaryPath, sb, 0600); err != nil {
 			fmt.Fprintf(os.Stderr, "write summary error: %v\n", err)
 		}
 	}

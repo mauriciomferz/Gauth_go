@@ -45,7 +45,7 @@ func NewAuthorizationRequestGenerator(subjects, resources, actions []string) *Au
 func (g *AuthorizationRequestGenerator) Generate(userID, iteration int) (interface{}, error) {
 	// Mix of patterns: some predictable, some random
 	var subject, resource, action string
-	
+
 	if iteration%3 == 0 {
 		// Predictable pattern for cache hit testing
 		subject = g.Subjects[userID%len(g.Subjects)]
@@ -57,7 +57,7 @@ func (g *AuthorizationRequestGenerator) Generate(userID, iteration int) (interfa
 		resource = g.Resources[g.rng.Intn(len(g.Resources))]
 		action = g.Actions[g.rng.Intn(len(g.Actions))]
 	}
-	
+
 	return &AuthorizationRequest{
 		Subject:  subject,
 		Resource: resource,
@@ -80,16 +80,16 @@ func (v *AuthorizationValidator) Validate(request, response interface{}, err err
 	if err != nil {
 		return fmt.Errorf("authorization error: %w", err)
 	}
-	
+
 	authResp, ok := response.(*AuthorizationResponse)
 	if !ok {
 		return fmt.Errorf("invalid response type")
 	}
-	
+
 	if authResp.Decision != "permit" && authResp.Decision != "deny" {
 		return fmt.Errorf("invalid decision: %s", authResp.Decision)
 	}
-	
+
 	return nil
 }
 
@@ -118,7 +118,7 @@ func NewDelegationRequestGenerator(subjects, delegates, resources, actions []str
 // Generate creates a delegation request.
 func (g *DelegationRequestGenerator) Generate(userID, iteration int) (interface{}, error) {
 	operation := g.Operations[g.rng.Intn(len(g.Operations))]
-	
+
 	// Weight operations: 60% verify, 30% create, 10% revoke
 	roll := g.rng.Float64()
 	if roll < 0.6 {
@@ -128,7 +128,7 @@ func (g *DelegationRequestGenerator) Generate(userID, iteration int) (interface{
 	} else {
 		operation = "revoke"
 	}
-	
+
 	return map[string]interface{}{
 		"operation": operation,
 		"subject":   g.Subjects[g.rng.Intn(len(g.Subjects))],
@@ -142,13 +142,13 @@ func (g *DelegationRequestGenerator) Generate(userID, iteration int) (interface{
 
 // CachePressureGenerator generates requests to test cache efficiency.
 type CachePressureGenerator struct {
-	HotSetSize   int    // Number of frequently accessed items
-	ColdSetSize  int    // Number of rarely accessed items
-	HotSetRatio  float64 // Probability of hitting hot set (e.g., 0.8)
-	Subjects     []string
-	Resources    []string
-	Actions      []string
-	rng          *rand.Rand
+	HotSetSize  int     // Number of frequently accessed items
+	ColdSetSize int     // Number of rarely accessed items
+	HotSetRatio float64 // Probability of hitting hot set (e.g., 0.8)
+	Subjects    []string
+	Resources   []string
+	Actions     []string
+	rng         *rand.Rand
 }
 
 // NewCachePressureGenerator creates a cache pressure generator.
@@ -167,7 +167,7 @@ func NewCachePressureGenerator(subjects, resources, actions []string, hotSetSize
 // Generate creates a request targeting hot or cold cache entries.
 func (g *CachePressureGenerator) Generate(userID, iteration int) (interface{}, error) {
 	var resource string
-	
+
 	if g.rng.Float64() < g.HotSetRatio {
 		// Hot set - frequently accessed
 		resource = g.Resources[g.rng.Intn(min(g.HotSetSize, len(g.Resources)))]
@@ -180,7 +180,7 @@ func (g *CachePressureGenerator) Generate(userID, iteration int) (interface{}, e
 			resource = g.Resources[g.rng.Intn(len(g.Resources))]
 		}
 	}
-	
+
 	return &AuthorizationRequest{
 		Subject:  g.Subjects[g.rng.Intn(len(g.Subjects))],
 		Resource: resource,
@@ -228,7 +228,7 @@ func (g *BurstLoadGenerator) Generate(userID, iteration int) (interface{}, error
 			"requests": requests,
 		}, nil
 	}
-	
+
 	// Normal single request
 	return g.BaseGenerator.Generate(userID, iteration)
 }
@@ -250,10 +250,10 @@ func (s *LoadTestSuite) RunAuthorizationLoadTest(ctx context.Context) (*LoadTest
 	subjects := generateTestSubjects(100)
 	resources := generateTestResources(50)
 	actions := []string{"read", "write", "delete", "execute"}
-	
+
 	reqGen := NewAuthorizationRequestGenerator(subjects, resources, actions)
 	validator := &AuthorizationValidator{ExpectedSuccessRate: 0.95}
-	
+
 	scenario := &TestScenario{
 		Name:             "Authorization-Standard",
 		Duration:         1 * time.Minute,
@@ -263,7 +263,7 @@ func (s *LoadTestSuite) RunAuthorizationLoadTest(ctx context.Context) (*LoadTest
 		RequestGenerator: reqGen,
 		Validator:        validator,
 	}
-	
+
 	return s.harness.Run(ctx, scenario)
 }
 
@@ -272,10 +272,10 @@ func (s *LoadTestSuite) RunHighVolumeAuthorizationTest(ctx context.Context) (*Lo
 	subjects := generateTestSubjects(1000)
 	resources := generateTestResources(500)
 	actions := []string{"read", "write", "delete", "execute", "admin"}
-	
+
 	reqGen := NewAuthorizationRequestGenerator(subjects, resources, actions)
 	validator := &AuthorizationValidator{ExpectedSuccessRate: 0.95}
-	
+
 	scenario := &TestScenario{
 		Name:             "Authorization-HighVolume",
 		Duration:         2 * time.Minute,
@@ -285,7 +285,7 @@ func (s *LoadTestSuite) RunHighVolumeAuthorizationTest(ctx context.Context) (*Lo
 		RequestGenerator: reqGen,
 		Validator:        validator,
 	}
-	
+
 	return s.harness.Run(ctx, scenario)
 }
 
@@ -294,10 +294,10 @@ func (s *LoadTestSuite) RunCacheEfficiencyTest(ctx context.Context) (*LoadTestRe
 	subjects := generateTestSubjects(100)
 	resources := generateTestResources(1000)
 	actions := []string{"read", "write"}
-	
+
 	// 80% hot set (first 100 resources), 20% cold set (remaining 900)
 	reqGen := NewCachePressureGenerator(subjects, resources, actions, 100, 900, 0.8)
-	
+
 	scenario := &TestScenario{
 		Name:             "Cache-Efficiency",
 		Duration:         1 * time.Minute,
@@ -306,7 +306,7 @@ func (s *LoadTestSuite) RunCacheEfficiencyTest(ctx context.Context) (*LoadTestRe
 		ThinkTime:        10 * time.Millisecond,
 		RequestGenerator: reqGen,
 	}
-	
+
 	return s.harness.Run(ctx, scenario)
 }
 
@@ -316,9 +316,9 @@ func (s *LoadTestSuite) RunDelegationLoadTest(ctx context.Context) (*LoadTestRes
 	delegates := generateTestSubjects(200)
 	resources := generateTestResources(100)
 	actions := []string{"read", "write"}
-	
+
 	reqGen := NewDelegationRequestGenerator(subjects, delegates, resources, actions)
-	
+
 	scenario := &TestScenario{
 		Name:             "Delegation-Operations",
 		Duration:         1 * time.Minute,
@@ -327,7 +327,7 @@ func (s *LoadTestSuite) RunDelegationLoadTest(ctx context.Context) (*LoadTestRes
 		ThinkTime:        200 * time.Millisecond,
 		RequestGenerator: reqGen,
 	}
-	
+
 	return s.harness.Run(ctx, scenario)
 }
 
@@ -336,10 +336,10 @@ func (s *LoadTestSuite) RunBurstTrafficTest(ctx context.Context) (*LoadTestResul
 	subjects := generateTestSubjects(100)
 	resources := generateTestResources(50)
 	actions := []string{"read", "write"}
-	
+
 	baseGen := NewAuthorizationRequestGenerator(subjects, resources, actions)
 	burstGen := NewBurstLoadGenerator(baseGen, 0.1, 5)
-	
+
 	scenario := &TestScenario{
 		Name:             "Burst-Traffic",
 		Duration:         1 * time.Minute,
@@ -348,14 +348,14 @@ func (s *LoadTestSuite) RunBurstTrafficTest(ctx context.Context) (*LoadTestResul
 		ThinkTime:        100 * time.Millisecond,
 		RequestGenerator: burstGen,
 	}
-	
+
 	return s.harness.Run(ctx, scenario)
 }
 
 // RunFullSuite runs all load tests in the suite.
 func (s *LoadTestSuite) RunFullSuite(ctx context.Context) (map[string]*LoadTestResult, error) {
 	results := make(map[string]*LoadTestResult)
-	
+
 	tests := []struct {
 		name string
 		fn   func(context.Context) (*LoadTestResult, error)
@@ -366,7 +366,7 @@ func (s *LoadTestSuite) RunFullSuite(ctx context.Context) (map[string]*LoadTestR
 		{"Delegation-Operations", s.RunDelegationLoadTest},
 		{"Burst-Traffic", s.RunBurstTrafficTest},
 	}
-	
+
 	for _, test := range tests {
 		fmt.Printf("\n🚀 Starting test: %s\n", test.name)
 		result, err := test.fn(ctx)
@@ -375,11 +375,11 @@ func (s *LoadTestSuite) RunFullSuite(ctx context.Context) (map[string]*LoadTestR
 		}
 		results[test.name] = result
 		s.harness.PrintResult(result)
-		
+
 		// Cool-down period between tests
 		time.Sleep(5 * time.Second)
 	}
-	
+
 	return results, nil
 }
 

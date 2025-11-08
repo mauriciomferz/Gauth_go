@@ -355,94 +355,94 @@ func (s *StatsDCollector) IncRevoked() {
 // Stub implementations for remaining methods (to satisfy interface)
 // In production, implement all 119 methods following the same pattern
 
-func (s *StatsDCollector) IncDelegationStatusTransitions()                             {}
-func (s *StatsDCollector) IncJurisdictionPolicyEvaluations()                           {}
-func (s *StatsDCollector) IncJurisdictionPolicyViolations()                            {}
-func (s *StatsDCollector) ObserveJurisdictionPolicyEvaluationLatency(d time.Duration)  {}
-func (s *StatsDCollector) IncAICapabilityChecks()                                      {}
-func (s *StatsDCollector) IncAICapabilityDenied()                                      {}
-func (s *StatsDCollector) IncAIHighRiskActionDenied()                                  {}
-func (s *StatsDCollector) ObserveAICapabilityEvaluationLatency(d time.Duration)        {}
-func (s *StatsDCollector) IncModelLimitChecks()                                        {}
-func (s *StatsDCollector) IncModelContextLimitExceeded()                               {}
-func (s *StatsDCollector) IncModelRateLimitExceeded()                                  {}
-func (s *StatsDCollector) IncModelUnknown()                                            {}
-func (s *StatsDCollector) IncModelLimitSurge()                                         {}
-func (s *StatsDCollector) IncModelUserInputLimitExceeded()                             {}
-func (s *StatsDCollector) IncModelUserOutputLimitExceeded()                            {}
-func (s *StatsDCollector) IncModelUserRateLimitExceeded()                              {}
-func (s *StatsDCollector) IncKeyRotationsInitiated()                                   {}
-func (s *StatsDCollector) IncKeyRotationFailures()                                     {}
-func (s *StatsDCollector) ObserveKeyRotationLatency(d time.Duration)                   {}
-func (s *StatsDCollector) SetActiveKeySetSize(size int)                                {}
-func (s *StatsDCollector) IncCapabilityComputations()                                  {}
-func (s *StatsDCollector) IncCapabilityComputationFailures()                           {}
-func (s *StatsDCollector) ObserveCapabilityComputationLatency(d time.Duration)         {}
-func (s *StatsDCollector) ObserveCapabilityDiffLatency(d time.Duration)                {}
-func (s *StatsDCollector) IncRevocationWorkflowInitiated()                             {}
-func (s *StatsDCollector) IncRevocationWorkflowInitiationFailures()                    {}
-func (s *StatsDCollector) IncRevocationWorkflowApprovals()                             {}
-func (s *StatsDCollector) IncRevocationWorkflowApprovalFailures()                      {}
-func (s *StatsDCollector) IncRevocationWorkflowQuorumSatisfied()                       {}
-func (s *StatsDCollector) IncRevocationWorkflowCanceled()                              {}
-func (s *StatsDCollector) IncRevocationWorkflowCancellationFailures()                  {}
-func (s *StatsDCollector) IncRevocationWorkflowUnauthorized()                          {}
-func (s *StatsDCollector) IncEvidenceAttachment()                                      {}
-func (s *StatsDCollector) IncEvidenceAttachmentFailures()                              {}
-func (s *StatsDCollector) SetWorkflowPendingApprovals(poaID string, count int)         {}
-func (s *StatsDCollector) SetWorkflowQuorumProgress(poaID string, ratio float64)       {}
-func (s *StatsDCollector) SetEvidenceHashesPerPOA(poaID string, count int)             {}
-func (s *StatsDCollector) IncDelegationGraphExports()                                  {}
-func (s *StatsDCollector) SetDelegationGraphNodeCount(count int)                       {}
-func (s *StatsDCollector) IncCascadeRevocationTriggered()                              {}
-func (s *StatsDCollector) IncCascadeDescendantsProcessed()                             {}
-func (s *StatsDCollector) ObserveCascadeProcessingLatency(d time.Duration)             {}
-func (s *StatsDCollector) IncCascadeDepthLimitReached()                                {}
-func (s *StatsDCollector) IncCascadeBatchProcessed()                                   {}
-func (s *StatsDCollector) SetCascadeMaxDepthReached(depth int)                         {}
-func (s *StatsDCollector) IncCascadeProcessingErrors()                                 {}
-func (s *StatsDCollector) IncNotarizationAttempts()                                    {}
-func (s *StatsDCollector) IncNotarizationSuccesses()                                   {}
-func (s *StatsDCollector) IncNotarizationFailures()                                    {}
-func (s *StatsDCollector) ObserveNotarizationLatency(d time.Duration)                  {}
-func (s *StatsDCollector) IncNotarizationBackendFailures(backend string)               {}
-func (s *StatsDCollector) SetNotarizationPendingCount(count int)                       {}
-func (s *StatsDCollector) IncSemanticPoAValidations()                                  {}
-func (s *StatsDCollector) IncSemanticPoAViolations()                                   {}
-func (s *StatsDCollector) ObserveSemanticValidationLatency(d time.Duration)            {}
-func (s *StatsDCollector) IncConflictDetections()                                      {}
-func (s *StatsDCollector) IncConflictResolutions()                                     {}
-func (s *StatsDCollector) ObserveConflictResolutionLatency(d time.Duration)            {}
-func (s *StatsDCollector) IncABACPolicyEvaluations()                                   {}
-func (s *StatsDCollector) IncABACPolicyDenials()                                       {}
-func (s *StatsDCollector) ObserveABACEvaluationLatency(d time.Duration)                {}
-func (s *StatsDCollector) IncPatternMatchAttempts()                                    {}
-func (s *StatsDCollector) IncPatternMatchSuccesses()                                   {}
-func (s *StatsDCollector) ObservePatternMatchLatency(d time.Duration)                  {}
-func (s *StatsDCollector) IncUTF8ValidationFailures()                                  {}
-func (s *StatsDCollector) IncControlCharFiltered()                                     {}
-func (s *StatsDCollector) ObserveInputSanitizationLatency(d time.Duration)             {}
-func (s *StatsDCollector) IncAdviceEmissions()                                         {}
-func (s *StatsDCollector) IncAdviceEmissionFailures()                                  {}
-func (s *StatsDCollector) ObserveAdviceEmissionLatency(d time.Duration)                {}
-func (s *StatsDCollector) IncComplianceAttestationStored()                             {}
-func (s *StatsDCollector) IncComplianceAttestationStoreFailures()                      {}
-func (s *StatsDCollector) IncComplianceAttestationQueries()                            {}
-func (s *StatsDCollector) ObserveComplianceAttestationQueryLatency(d time.Duration)    {}
-func (s *StatsDCollector) IncSnapshotCreated()                                         {}
-func (s *StatsDCollector) IncSnapshotRestored()                                        {}
-func (s *StatsDCollector) IncSnapshotFailures()                                        {}
-func (s *StatsDCollector) ObserveSnapshotLatency(d time.Duration)                      {}
-func (s *StatsDCollector) IncThreatDetected(threatID string)                           {}
-func (s *StatsDCollector) IncMitigationApplied(mitigationID string)                    {}
-func (s *StatsDCollector) SetResidualRiskScore(riskID string, score float64)           {}
-func (s *StatsDCollector) ObserveThreatDetectionLatency(d time.Duration)               {}
-func (s *StatsDCollector) IncArbitrationInitiated()                                    {}
-func (s *StatsDCollector) IncArbitrationResolved()                                     {}
-func (s *StatsDCollector) IncArbitrationFailed()                                       {}
-func (s *StatsDCollector) ObserveArbitrationLatency(d time.Duration)                   {}
-func (s *StatsDCollector) IncDistributedTraceStarted()                                 {}
-func (s *StatsDCollector) IncDistributedTraceCompleted()                               {}
-func (s *StatsDCollector) IncDistributedTraceFailed()                                  {}
-func (s *StatsDCollector) ObserveDistributedTraceLatency(d time.Duration)              {}
-func (s *StatsDCollector) SetDistributedTraceActiveSpans(count int)                    {}
+func (s *StatsDCollector) IncDelegationStatusTransitions()                            {}
+func (s *StatsDCollector) IncJurisdictionPolicyEvaluations()                          {}
+func (s *StatsDCollector) IncJurisdictionPolicyViolations()                           {}
+func (s *StatsDCollector) ObserveJurisdictionPolicyEvaluationLatency(d time.Duration) {}
+func (s *StatsDCollector) IncAICapabilityChecks()                                     {}
+func (s *StatsDCollector) IncAICapabilityDenied()                                     {}
+func (s *StatsDCollector) IncAIHighRiskActionDenied()                                 {}
+func (s *StatsDCollector) ObserveAICapabilityEvaluationLatency(d time.Duration)       {}
+func (s *StatsDCollector) IncModelLimitChecks()                                       {}
+func (s *StatsDCollector) IncModelContextLimitExceeded()                              {}
+func (s *StatsDCollector) IncModelRateLimitExceeded()                                 {}
+func (s *StatsDCollector) IncModelUnknown()                                           {}
+func (s *StatsDCollector) IncModelLimitSurge()                                        {}
+func (s *StatsDCollector) IncModelUserInputLimitExceeded()                            {}
+func (s *StatsDCollector) IncModelUserOutputLimitExceeded()                           {}
+func (s *StatsDCollector) IncModelUserRateLimitExceeded()                             {}
+func (s *StatsDCollector) IncKeyRotationsInitiated()                                  {}
+func (s *StatsDCollector) IncKeyRotationFailures()                                    {}
+func (s *StatsDCollector) ObserveKeyRotationLatency(d time.Duration)                  {}
+func (s *StatsDCollector) SetActiveKeySetSize(size int)                               {}
+func (s *StatsDCollector) IncCapabilityComputations()                                 {}
+func (s *StatsDCollector) IncCapabilityComputationFailures()                          {}
+func (s *StatsDCollector) ObserveCapabilityComputationLatency(d time.Duration)        {}
+func (s *StatsDCollector) ObserveCapabilityDiffLatency(d time.Duration)               {}
+func (s *StatsDCollector) IncRevocationWorkflowInitiated()                            {}
+func (s *StatsDCollector) IncRevocationWorkflowInitiationFailures()                   {}
+func (s *StatsDCollector) IncRevocationWorkflowApprovals()                            {}
+func (s *StatsDCollector) IncRevocationWorkflowApprovalFailures()                     {}
+func (s *StatsDCollector) IncRevocationWorkflowQuorumSatisfied()                      {}
+func (s *StatsDCollector) IncRevocationWorkflowCanceled()                             {}
+func (s *StatsDCollector) IncRevocationWorkflowCancellationFailures()                 {}
+func (s *StatsDCollector) IncRevocationWorkflowUnauthorized()                         {}
+func (s *StatsDCollector) IncEvidenceAttachment()                                     {}
+func (s *StatsDCollector) IncEvidenceAttachmentFailures()                             {}
+func (s *StatsDCollector) SetWorkflowPendingApprovals(poaID string, count int)        {}
+func (s *StatsDCollector) SetWorkflowQuorumProgress(poaID string, ratio float64)      {}
+func (s *StatsDCollector) SetEvidenceHashesPerPOA(poaID string, count int)            {}
+func (s *StatsDCollector) IncDelegationGraphExports()                                 {}
+func (s *StatsDCollector) SetDelegationGraphNodeCount(count int)                      {}
+func (s *StatsDCollector) IncCascadeRevocationTriggered()                             {}
+func (s *StatsDCollector) IncCascadeDescendantsProcessed()                            {}
+func (s *StatsDCollector) ObserveCascadeProcessingLatency(d time.Duration)            {}
+func (s *StatsDCollector) IncCascadeDepthLimitReached()                               {}
+func (s *StatsDCollector) IncCascadeBatchProcessed()                                  {}
+func (s *StatsDCollector) SetCascadeMaxDepthReached(depth int)                        {}
+func (s *StatsDCollector) IncCascadeProcessingErrors()                                {}
+func (s *StatsDCollector) IncNotarizationAttempts()                                   {}
+func (s *StatsDCollector) IncNotarizationSuccesses()                                  {}
+func (s *StatsDCollector) IncNotarizationFailures()                                   {}
+func (s *StatsDCollector) ObserveNotarizationLatency(d time.Duration)                 {}
+func (s *StatsDCollector) IncNotarizationBackendFailures(backend string)              {}
+func (s *StatsDCollector) SetNotarizationPendingCount(count int)                      {}
+func (s *StatsDCollector) IncSemanticPoAValidations()                                 {}
+func (s *StatsDCollector) IncSemanticPoAViolations()                                  {}
+func (s *StatsDCollector) ObserveSemanticValidationLatency(d time.Duration)           {}
+func (s *StatsDCollector) IncConflictDetections()                                     {}
+func (s *StatsDCollector) IncConflictResolutions()                                    {}
+func (s *StatsDCollector) ObserveConflictResolutionLatency(d time.Duration)           {}
+func (s *StatsDCollector) IncABACPolicyEvaluations()                                  {}
+func (s *StatsDCollector) IncABACPolicyDenials()                                      {}
+func (s *StatsDCollector) ObserveABACEvaluationLatency(d time.Duration)               {}
+func (s *StatsDCollector) IncPatternMatchAttempts()                                   {}
+func (s *StatsDCollector) IncPatternMatchSuccesses()                                  {}
+func (s *StatsDCollector) ObservePatternMatchLatency(d time.Duration)                 {}
+func (s *StatsDCollector) IncUTF8ValidationFailures()                                 {}
+func (s *StatsDCollector) IncControlCharFiltered()                                    {}
+func (s *StatsDCollector) ObserveInputSanitizationLatency(d time.Duration)            {}
+func (s *StatsDCollector) IncAdviceEmissions()                                        {}
+func (s *StatsDCollector) IncAdviceEmissionFailures()                                 {}
+func (s *StatsDCollector) ObserveAdviceEmissionLatency(d time.Duration)               {}
+func (s *StatsDCollector) IncComplianceAttestationStored()                            {}
+func (s *StatsDCollector) IncComplianceAttestationStoreFailures()                     {}
+func (s *StatsDCollector) IncComplianceAttestationQueries()                           {}
+func (s *StatsDCollector) ObserveComplianceAttestationQueryLatency(d time.Duration)   {}
+func (s *StatsDCollector) IncSnapshotCreated()                                        {}
+func (s *StatsDCollector) IncSnapshotRestored()                                       {}
+func (s *StatsDCollector) IncSnapshotFailures()                                       {}
+func (s *StatsDCollector) ObserveSnapshotLatency(d time.Duration)                     {}
+func (s *StatsDCollector) IncThreatDetected(threatID string)                          {}
+func (s *StatsDCollector) IncMitigationApplied(mitigationID string)                   {}
+func (s *StatsDCollector) SetResidualRiskScore(riskID string, score float64)          {}
+func (s *StatsDCollector) ObserveThreatDetectionLatency(d time.Duration)              {}
+func (s *StatsDCollector) IncArbitrationInitiated()                                   {}
+func (s *StatsDCollector) IncArbitrationResolved()                                    {}
+func (s *StatsDCollector) IncArbitrationFailed()                                      {}
+func (s *StatsDCollector) ObserveArbitrationLatency(d time.Duration)                  {}
+func (s *StatsDCollector) IncDistributedTraceStarted()                                {}
+func (s *StatsDCollector) IncDistributedTraceCompleted()                              {}
+func (s *StatsDCollector) IncDistributedTraceFailed()                                 {}
+func (s *StatsDCollector) ObserveDistributedTraceLatency(d time.Duration)             {}
+func (s *StatsDCollector) SetDistributedTraceActiveSpans(count int)                   {}

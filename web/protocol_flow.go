@@ -34,15 +34,15 @@ type ProtocolFlowSubstep struct {
 
 // ProtocolFlowState tracks the complete state of a protocol flow session
 type ProtocolFlowState struct {
-	SessionID     string                         `json:"session_id"`
-	CurrentStep   string                         `json:"current_step,omitempty"`
-	CurrentSubstep string                        `json:"current_substep,omitempty"`
-	Steps         map[string]*ProtocolFlowStep   `json:"steps"`
-	History       []ProtocolFlowHistoryEntry     `json:"history"`
-	Progress      int                            `json:"progress"` // 0-100
-	CreatedAt     time.Time                      `json:"created_at"`
-	UpdatedAt     time.Time                      `json:"updated_at"`
-	Metadata      map[string]interface{}         `json:"metadata,omitempty"`
+	SessionID      string                       `json:"session_id"`
+	CurrentStep    string                       `json:"current_step,omitempty"`
+	CurrentSubstep string                       `json:"current_substep,omitempty"`
+	Steps          map[string]*ProtocolFlowStep `json:"steps"`
+	History        []ProtocolFlowHistoryEntry   `json:"history"`
+	Progress       int                          `json:"progress"` // 0-100
+	CreatedAt      time.Time                    `json:"created_at"`
+	UpdatedAt      time.Time                    `json:"updated_at"`
+	Metadata       map[string]interface{}       `json:"metadata,omitempty"`
 }
 
 // ProtocolFlowHistoryEntry records navigation history
@@ -110,11 +110,11 @@ func (m *ProtocolFlowManager) UpdateStepStatus(sessionID, stepID, status string)
 
 	now := time.Now()
 	step.Status = status
-	
+
 	if status == "in-progress" && step.StartTime == nil {
 		step.StartTime = &now
 	}
-	
+
 	if status == "completed" && step.EndTime == nil {
 		step.EndTime = &now
 	}
@@ -326,7 +326,7 @@ func (s *BetaServer) apiProtocolFlowCreateSession(c *gin.Context) {
 
 func (s *BetaServer) apiProtocolFlowGetSession(c *gin.Context) {
 	sessionID := c.Param("session_id")
-	
+
 	state := s.protocolFlowManager.GetSession(sessionID)
 	if state == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "session not found"})
@@ -341,7 +341,7 @@ func (s *BetaServer) apiProtocolFlowGetSession(c *gin.Context) {
 
 func (s *BetaServer) apiProtocolFlowNavigate(c *gin.Context) {
 	sessionID := c.Param("session_id")
-	
+
 	var req struct {
 		Step    string `json:"step"`
 		Substep string `json:"substep"`
@@ -366,7 +366,7 @@ func (s *BetaServer) apiProtocolFlowNavigate(c *gin.Context) {
 func (s *BetaServer) apiProtocolFlowUpdateStep(c *gin.Context) {
 	sessionID := c.Param("session_id")
 	stepID := c.Param("step_id")
-	
+
 	var req struct {
 		Status string `json:"status"`
 	}
@@ -389,7 +389,7 @@ func (s *BetaServer) apiProtocolFlowUpdateStep(c *gin.Context) {
 
 func (s *BetaServer) apiProtocolFlowCompleteSubstep(c *gin.Context) {
 	sessionID := c.Param("session_id")
-	
+
 	var req struct {
 		Step    string `json:"step"`
 		Substep string `json:"substep"`

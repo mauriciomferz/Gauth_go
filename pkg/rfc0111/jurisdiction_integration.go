@@ -102,10 +102,10 @@ func (s *Service) enforceJurisdictionOnIssuance(ctx context.Context, req Delegat
 	// Enforce jurisdiction rules
 	decision, err := s.jurisdictionEnforcement.integration.EnforceJurisdiction(
 		ctx,
-		poa.Grantor,      // subject
-		poa.Grantee,      // resource
-		action,           // action
-		claims,           // claims
+		poa.Grantor, // subject
+		poa.Grantee, // resource
+		action,      // action
+		claims,      // claims
 	)
 	if err != nil {
 		// Enforcement check failed (engine error)
@@ -221,12 +221,12 @@ func ExtractJurisdictionFromPOA(poa *PowerOfAttorney) compliance.Jurisdiction {
 
 	// Build claims map from PowerOfAttorney fields
 	claims := make(map[string]interface{})
-	
+
 	// Primary: use Jurisdiction field
 	if poa.Jurisdiction != "" {
 		claims["jurisdiction"] = poa.Jurisdiction
 	}
-	
+
 	// Fallback: check Restrictions map
 	if poa.Restrictions != nil {
 		if j, ok := poa.Restrictions["jurisdiction"]; ok {
@@ -249,7 +249,7 @@ func (s *Service) ValidateJurisdictionCompliance(ctx context.Context, poa *Power
 	}
 
 	jurisdiction := ExtractJurisdictionFromPOA(poa)
-	
+
 	// Determine action from scope
 	action := "delegation"
 	if len(poa.Scope) > 0 {

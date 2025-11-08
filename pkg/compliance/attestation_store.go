@@ -37,11 +37,11 @@ type AttestationStore interface {
 // StoredAttestation wraps an attestation proof with storage metadata.
 type StoredAttestation struct {
 	Proof        *attest.AttestationProof `json:"proof"`
-	Verified     bool                      `json:"verified"`
-	StoredAt     time.Time                 `json:"stored_at"`
-	VerifiedAt   *time.Time                `json:"verified_at,omitempty"`
-	Jurisdiction string                    `json:"jurisdiction,omitempty"`
-	Notes        string                    `json:"notes,omitempty"`
+	Verified     bool                     `json:"verified"`
+	StoredAt     time.Time                `json:"stored_at"`
+	VerifiedAt   *time.Time               `json:"verified_at,omitempty"`
+	Jurisdiction string                   `json:"jurisdiction,omitempty"`
+	Notes        string                   `json:"notes,omitempty"`
 }
 
 // AttestationFilter defines query criteria for attestations.
@@ -272,7 +272,7 @@ func (s *JSONLAttestationStore) Store(ctx context.Context, proof *attest.Attesta
 
 // appendToFile appends a stored attestation to the JSONL file.
 func (s *JSONLAttestationStore) appendToFile(stored *StoredAttestation) error {
-	file, err := os.OpenFile(s.filePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(s.filePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
 	if err != nil {
 		return err
 	}

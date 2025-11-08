@@ -106,7 +106,7 @@ type MetricsSnapshot struct {
 	LatencyM2     float64
 	PolicyMatches map[string]uint64
 	// P2.13: Cache metrics
-	CacheMetrics  *PDPCacheMetrics
+	CacheMetrics *PDPCacheMetrics
 }
 
 // --- Policy & Rule model (phase 1) ---
@@ -154,9 +154,9 @@ type InMemoryEngine struct {
 	obligationAuditPath    string // JSONL audit file path (append-only)
 	denyOnMandatoryFailure bool   // configuration: mandatory obligation failure flips allow->deny
 	// P2.1: Advice channel for non-mandatory recommendations
-	adviceChannel          AdviceChannel
+	adviceChannel AdviceChannel
 	// P2.13: Decision caching (sec2.item5)
-	cache                  *PDPCache
+	cache *PDPCache
 }
 
 // NewInMemoryEngine creates a new PDP engine with provided combining strategy.
@@ -205,8 +205,9 @@ func (e *InMemoryEngine) WithAdviceChannel(ch AdviceChannel) *InMemoryEngine {
 //   - GAUTH_PDP_CACHE_TTL: Entry lifetime (default 5m)
 //
 // Example:
-//   cache := pdp.NewPDPCacheFromEnv()
-//   engine := pdp.NewInMemoryEngine(strategy).WithCache(cache)
+//
+//	cache := pdp.NewPDPCacheFromEnv()
+//	engine := pdp.NewInMemoryEngine(strategy).WithCache(cache)
 func (e *InMemoryEngine) WithCache(cache *PDPCache) *InMemoryEngine {
 	e.cache = cache
 	return e
@@ -228,10 +229,11 @@ func (e *InMemoryEngine) InvalidateCache() {
 }
 
 // Evaluate executes rule matching & combining.
+//
 //nolint:gocyclo // Core policy evaluation logic with multiple decision paths - refactoring would reduce readability
 func (e *InMemoryEngine) Evaluate(ctx context.Context, req Request) (Decision, error) {
 	start := time.Now()
-	
+
 	// P2.13: Check cache before policy evaluation
 	if e.cache != nil {
 		if cachedDec, found := e.cache.Get(req); found {
@@ -246,7 +248,7 @@ func (e *InMemoryEngine) Evaluate(ctx context.Context, req Request) (Decision, e
 			return cachedDec, nil
 		}
 	}
-	
+
 	steps := make([]EvaluationStep, 0, 16)
 	matchedObligations := make([]Obligation, 0, 8)
 	// naive matching; optimize later with indexes
@@ -323,7 +325,7 @@ func (e *InMemoryEngine) Evaluate(ctx context.Context, req Request) (Decision, e
 					}
 				}
 			}
-			
+
 			// P2.1 (sec2.item3): Emit advice for non-mandatory obligations
 			// Advice provides non-binding recommendations to clients for operational best practices.
 			if i < len(mandatoryFlags) && !mandatoryFlags[i] && e.adviceChannel != nil {
@@ -340,8 +342,8 @@ func (e *InMemoryEngine) Evaluate(ctx context.Context, req Request) (Decision, e
 					AdviceID:   obligationID,
 					AdviceType: obligationType,
 					Message:    fmt.Sprintf("Non-mandatory obligation '%s' executed", r.Name),
-					Metadata:   map[string]string{
-						"success": fmt.Sprintf("%t", r.Success),
+					Metadata: map[string]string{
+						"success":     fmt.Sprintf("%t", r.Success),
 						"duration_ms": fmt.Sprintf("%.3f", float64(dur.Microseconds())/1000.0),
 					},
 				}
@@ -369,7 +371,7 @@ func (e *InMemoryEngine) Evaluate(ctx context.Context, req Request) (Decision, e
 					auditRec.Error = r.Error.Error()
 				}
 				func() {
-					f, err := os.OpenFile(e.obligationAuditPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+					f, err := os.OpenFile(e.obligationAuditPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
 					if err != nil {
 						return
 					}
@@ -406,7 +408,7 @@ func (e *InMemoryEngine) Evaluate(ctx context.Context, req Request) (Decision, e
 			e.externalMetrics.IncUnauthorized()
 		}
 	}
-	
+
 	// P2.13: Store decision in cache
 	if e.cache != nil {
 		// Mark as cache miss for this evaluation
@@ -416,7 +418,7 @@ func (e *InMemoryEngine) Evaluate(ctx context.Context, req Request) (Decision, e
 		dec.Metadata["cache_hit"] = "false"
 		e.cache.Set(req, dec)
 	}
-	
+
 	return dec, nil
 }
 
@@ -426,13 +428,13 @@ func (e *InMemoryEngine) Metrics() MetricsSnapshot {
 		pm[k] = v
 	}
 	snap := MetricsSnapshot{Decisions: e.decisions, Allows: e.allows, Denies: e.denies, ExprErrors: e.exprErrors, LatencyCount: e.latencyCount, LatencyMeanNs: e.latencyMeanNs, LatencyM2: e.latencyM2, PolicyMatches: pm}
-	
+
 	// P2.13: Include cache metrics if enabled
 	if e.cache != nil {
 		cm := e.cache.GetMetrics()
 		snap.CacheMetrics = &cm
 	}
-	
+
 	return snap
 }
 
@@ -480,43 +482,43 @@ func (e *InMemoryEngine) ExportPrometheus() string {
 			fmt.Fprintf(&b, "pdp_policy_matches_total{policy=\"%s\"} %d\n", sid, c)
 		}
 	}
-	
+
 	// P2.13: Cache metrics
 	if snap.CacheMetrics != nil {
 		cm := snap.CacheMetrics
 		fmt.Fprintf(&b, "# HELP pdp_cache_lookups_total Total cache lookups\n")
 		fmt.Fprintf(&b, "# TYPE pdp_cache_lookups_total counter\n")
 		fmt.Fprintf(&b, "pdp_cache_lookups_total %d\n", cm.Lookups)
-		
+
 		fmt.Fprintf(&b, "# HELP pdp_cache_hits_total Total cache hits\n")
 		fmt.Fprintf(&b, "# TYPE pdp_cache_hits_total counter\n")
 		fmt.Fprintf(&b, "pdp_cache_hits_total %d\n", cm.Hits)
-		
+
 		fmt.Fprintf(&b, "# HELP pdp_cache_misses_total Total cache misses\n")
 		fmt.Fprintf(&b, "# TYPE pdp_cache_misses_total counter\n")
 		fmt.Fprintf(&b, "pdp_cache_misses_total %d\n", cm.Misses)
-		
+
 		fmt.Fprintf(&b, "# HELP pdp_cache_hit_rate Cache hit rate (0.0-1.0)\n")
 		fmt.Fprintf(&b, "# TYPE pdp_cache_hit_rate gauge\n")
 		fmt.Fprintf(&b, "pdp_cache_hit_rate %.4f\n", cm.HitRate)
-		
+
 		fmt.Fprintf(&b, "# HELP pdp_cache_size Current cache size\n")
 		fmt.Fprintf(&b, "# TYPE pdp_cache_size gauge\n")
 		fmt.Fprintf(&b, "pdp_cache_size %d\n", cm.Size)
-		
+
 		fmt.Fprintf(&b, "# HELP pdp_cache_evictions_total Total LRU evictions\n")
 		fmt.Fprintf(&b, "# TYPE pdp_cache_evictions_total counter\n")
 		fmt.Fprintf(&b, "pdp_cache_evictions_total %d\n", cm.Evictions)
-		
+
 		fmt.Fprintf(&b, "# HELP pdp_cache_expirations_total Total TTL expirations\n")
 		fmt.Fprintf(&b, "# TYPE pdp_cache_expirations_total counter\n")
 		fmt.Fprintf(&b, "pdp_cache_expirations_total %d\n", cm.Expirations)
-		
+
 		fmt.Fprintf(&b, "# HELP pdp_cache_invalidations_total Total cache invalidations\n")
 		fmt.Fprintf(&b, "# TYPE pdp_cache_invalidations_total counter\n")
 		fmt.Fprintf(&b, "pdp_cache_invalidations_total %d\n", cm.Invalidations)
 	}
-	
+
 	return b.String()
 }
 
@@ -572,24 +574,24 @@ func (DenyOverridesStrategy) Combine(steps []EvaluationStep) (Effect, []string, 
 // CombineWithDiagnostics performs combination and detects permit-deny conflicts
 func (d DenyOverridesStrategy) CombineWithDiagnostics(steps []EvaluationStep, policies []Policy) (Effect, []string, []string, string, []PolicyConflict) {
 	effect, allowIDs, denyIDs, reason := d.Combine(steps)
-	
+
 	var conflicts []PolicyConflict
-	
+
 	// Detect permit-deny conflict
 	if len(allowIDs) > 0 && len(denyIDs) > 0 {
 		allIDs := append(append([]string{}, allowIDs...), denyIDs...)
 		conflicts = append(conflicts, PolicyConflict{
-			ID:          "runtime-conflict-1",
-			Type:        ConflictPermitDeny,
-			Severity:    SeverityHigh,
-			PolicyIDs:   allIDs,
-			Description: fmt.Sprintf("Deny-overrides resolved conflict: %d policies allowed, %d policies denied", len(allowIDs), len(denyIDs)),
+			ID:             "runtime-conflict-1",
+			Type:           ConflictPermitDeny,
+			Severity:       SeverityHigh,
+			PolicyIDs:      allIDs,
+			Description:    fmt.Sprintf("Deny-overrides resolved conflict: %d policies allowed, %d policies denied", len(allowIDs), len(denyIDs)),
 			Recommendation: "Deny policies took precedence. Consider making deny policies more specific or removing redundant allow policies.",
 			DetectedAt:     time.Now(),
 			ResolutionHint: "DENY effect applied (deny-overrides strategy)",
 		})
 	}
-	
+
 	return effect, allowIDs, denyIDs, reason, conflicts
 }
 
@@ -619,24 +621,24 @@ func (PermitOverridesStrategy) Combine(steps []EvaluationStep) (Effect, []string
 // CombineWithDiagnostics performs combination and detects permit-deny conflicts
 func (p PermitOverridesStrategy) CombineWithDiagnostics(steps []EvaluationStep, policies []Policy) (Effect, []string, []string, string, []PolicyConflict) {
 	effect, allowIDs, denyIDs, reason := p.Combine(steps)
-	
+
 	var conflicts []PolicyConflict
-	
+
 	// Detect permit-deny conflict
 	if len(allowIDs) > 0 && len(denyIDs) > 0 {
 		allIDs := append(append([]string{}, allowIDs...), denyIDs...)
 		conflicts = append(conflicts, PolicyConflict{
-			ID:          "runtime-conflict-1",
-			Type:        ConflictPermitDeny,
-			Severity:    SeverityCritical, // Higher severity for permit-overrides
-			PolicyIDs:   allIDs,
-			Description: fmt.Sprintf("Permit-overrides resolved conflict: %d policies allowed, %d policies denied", len(allowIDs), len(denyIDs)),
+			ID:             "runtime-conflict-1",
+			Type:           ConflictPermitDeny,
+			Severity:       SeverityCritical, // Higher severity for permit-overrides
+			PolicyIDs:      allIDs,
+			Description:    fmt.Sprintf("Permit-overrides resolved conflict: %d policies allowed, %d policies denied", len(allowIDs), len(denyIDs)),
 			Recommendation: "Allow policies took precedence. Consider adding mandatory obligations for audit logging or making allow policies more restrictive.",
 			DetectedAt:     time.Now(),
 			ResolutionHint: "ALLOW effect applied (permit-overrides strategy) - ensure this is intended behavior",
 		})
 	}
-	
+
 	return effect, allowIDs, denyIDs, reason, conflicts
 }
 
@@ -659,9 +661,9 @@ func (FirstApplicableStrategy) Combine(steps []EvaluationStep) (Effect, []string
 // CombineWithDiagnostics performs combination with conflict detection for first-applicable
 func (f FirstApplicableStrategy) CombineWithDiagnostics(steps []EvaluationStep, policies []Policy) (Effect, []string, []string, string, []PolicyConflict) {
 	effect, allowIDs, denyIDs, reason := f.Combine(steps)
-	
+
 	var conflicts []PolicyConflict
-	
+
 	// Check if there are multiple matching policies (potential ordering issue)
 	var matchedPolicies []string
 	for _, s := range steps {
@@ -669,20 +671,20 @@ func (f FirstApplicableStrategy) CombineWithDiagnostics(steps []EvaluationStep, 
 			matchedPolicies = append(matchedPolicies, s.PolicyID)
 		}
 	}
-	
+
 	if len(matchedPolicies) > 1 {
 		conflicts = append(conflicts, PolicyConflict{
-			ID:          "runtime-conflict-1",
-			Type:        ConflictPriorityAmbiguity,
-			Severity:    SeverityMedium,
-			PolicyIDs:   matchedPolicies,
-			Description: fmt.Sprintf("First-applicable strategy: %d policies matched, using first (%s)", len(matchedPolicies), matchedPolicies[0]),
+			ID:             "runtime-conflict-1",
+			Type:           ConflictPriorityAmbiguity,
+			Severity:       SeverityMedium,
+			PolicyIDs:      matchedPolicies,
+			Description:    fmt.Sprintf("First-applicable strategy: %d policies matched, using first (%s)", len(matchedPolicies), matchedPolicies[0]),
 			Recommendation: "Consider making policies mutually exclusive or using explicit priority ordering to avoid ambiguity.",
 			DetectedAt:     time.Now(),
 			ResolutionHint: fmt.Sprintf("Policy %s applied; remaining %d policies ignored", matchedPolicies[0], len(matchedPolicies)-1),
 		})
 	}
-	
+
 	return effect, allowIDs, denyIDs, reason, conflicts
 }
 

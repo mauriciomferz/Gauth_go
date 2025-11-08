@@ -140,39 +140,39 @@ func (m *mockCollector) SetCapabilityAnchorLastWriteUnix(ts uint64)             
 func (m *mockCollector) IncCapabilityAnchorAlgorithm(algo string)                   {}
 func (m *mockCollector) SetCapabilityAnchorAlgorithmRatio(algo string, ratio float64) {
 }
-func (m *mockCollector) IncCapabilityEnforceAllowed()                            {}
-func (m *mockCollector) IncCapabilityEnforceDenied()                             {}
-func (m *mockCollector) IncModelLimitExceeded()                                  {}
-func (m *mockCollector) IncModelOutputLimitExceeded()                            {}
-func (m *mockCollector) IncModelRateLimitExceeded()                              {}
-func (m *mockCollector) IncModelUnknown()                                        {}
-func (m *mockCollector) IncModelLimitSurge()                                     {}
-func (m *mockCollector) IncModelUserInputLimitExceeded()                         {}
-func (m *mockCollector) IncModelUserOutputLimitExceeded()                        {}
-func (m *mockCollector) IncModelUserRateLimitExceeded()                          {}
-func (m *mockCollector) IncScopeViolations()                                     {}
-func (m *mockCollector) IncRestrictionViolations()                               {}
-func (m *mockCollector) IncUnauthorized()                                        {}
-func (m *mockCollector) IncExpired()                                             {}
-func (m *mockCollector) IncRevoked()                                             {}
-func (m *mockCollector) IncDelegationStatusTransitions()                         {}
-func (m *mockCollector) IncDelegationStatusTransitionFailures()                  {}
-func (m *mockCollector) IncTokenStatusTransitions()                              {}
-func (m *mockCollector) IncTokenStatusTransitionFailures()                       {}
-func (m *mockCollector) IncRevocationWorkflowInitiated()                         {}
-func (m *mockCollector) IncRevocationWorkflowInitiationFailures()                {}
-func (m *mockCollector) IncRevocationWorkflowApprovals()                         {}
-func (m *mockCollector) IncRevocationWorkflowApprovalFailures()                  {}
-func (m *mockCollector) IncRevocationWorkflowQuorumSatisfied()                   {}
-func (m *mockCollector) IncRevocationWorkflowCanceled()                          {}
-func (m *mockCollector) IncRevocationWorkflowCancellationFailures()              {}
-func (m *mockCollector) IncRevocationWorkflowUnauthorized()                      {}
-func (m *mockCollector) IncEvidenceAttachment()                                  {}
-func (m *mockCollector) IncEvidenceAttachmentFailures()                          {}
-func (m *mockCollector) SetEvidenceHashesPerPOA(poaID string, n int)             {}
-func (m *mockCollector) IncDelegationGraphExports()                              {}
-func (m *mockCollector) SetDelegationGraphNodeCount(n int)                       {}
-func (m *mockCollector) RecordDecision(action, resource, outcome string)         {}
+func (m *mockCollector) IncCapabilityEnforceAllowed()                    {}
+func (m *mockCollector) IncCapabilityEnforceDenied()                     {}
+func (m *mockCollector) IncModelLimitExceeded()                          {}
+func (m *mockCollector) IncModelOutputLimitExceeded()                    {}
+func (m *mockCollector) IncModelRateLimitExceeded()                      {}
+func (m *mockCollector) IncModelUnknown()                                {}
+func (m *mockCollector) IncModelLimitSurge()                             {}
+func (m *mockCollector) IncModelUserInputLimitExceeded()                 {}
+func (m *mockCollector) IncModelUserOutputLimitExceeded()                {}
+func (m *mockCollector) IncModelUserRateLimitExceeded()                  {}
+func (m *mockCollector) IncScopeViolations()                             {}
+func (m *mockCollector) IncRestrictionViolations()                       {}
+func (m *mockCollector) IncUnauthorized()                                {}
+func (m *mockCollector) IncExpired()                                     {}
+func (m *mockCollector) IncRevoked()                                     {}
+func (m *mockCollector) IncDelegationStatusTransitions()                 {}
+func (m *mockCollector) IncDelegationStatusTransitionFailures()          {}
+func (m *mockCollector) IncTokenStatusTransitions()                      {}
+func (m *mockCollector) IncTokenStatusTransitionFailures()               {}
+func (m *mockCollector) IncRevocationWorkflowInitiated()                 {}
+func (m *mockCollector) IncRevocationWorkflowInitiationFailures()        {}
+func (m *mockCollector) IncRevocationWorkflowApprovals()                 {}
+func (m *mockCollector) IncRevocationWorkflowApprovalFailures()          {}
+func (m *mockCollector) IncRevocationWorkflowQuorumSatisfied()           {}
+func (m *mockCollector) IncRevocationWorkflowCanceled()                  {}
+func (m *mockCollector) IncRevocationWorkflowCancellationFailures()      {}
+func (m *mockCollector) IncRevocationWorkflowUnauthorized()              {}
+func (m *mockCollector) IncEvidenceAttachment()                          {}
+func (m *mockCollector) IncEvidenceAttachmentFailures()                  {}
+func (m *mockCollector) SetEvidenceHashesPerPOA(poaID string, n int)     {}
+func (m *mockCollector) IncDelegationGraphExports()                      {}
+func (m *mockCollector) SetDelegationGraphNodeCount(n int)               {}
+func (m *mockCollector) RecordDecision(action, resource, outcome string) {}
 func (m *mockCollector) RecordDecisionWithReason(action, resource, outcome, reason string) {
 }
 func (m *mockCollector) RecordLifecycleTransition(entityType, oldStatus, newStatus, outcome string) {
@@ -181,13 +181,13 @@ func (m *mockCollector) ObserveLifecycleTransitionLatency(entityType, outcome st
 }
 func (m *mockCollector) SetLifecycleTransitionLatencyQuantile(entityType, outcome, quantile string, value float64) {
 }
-func (m *mockCollector) IncCascadeRevocationTriggered()             {}
-func (m *mockCollector) IncCascadeDescendantsProcessed()            {}
+func (m *mockCollector) IncCascadeRevocationTriggered()                  {}
+func (m *mockCollector) IncCascadeDescendantsProcessed()                 {}
 func (m *mockCollector) ObserveCascadeProcessingLatency(d time.Duration) {}
-func (m *mockCollector) IncCascadeDepthLimitReached()               {}
-func (m *mockCollector) IncCascadeBatchProcessed()                  {}
-func (m *mockCollector) SetCascadeMaxDepthReached(depth int)        {}
-func (m *mockCollector) IncCascadeProcessingErrors()                {}
+func (m *mockCollector) IncCascadeDepthLimitReached()                    {}
+func (m *mockCollector) IncCascadeBatchProcessed()                       {}
+func (m *mockCollector) SetCascadeMaxDepthReached(depth int)             {}
+func (m *mockCollector) IncCascadeProcessingErrors()                     {}
 
 // TestCollectorRegistry_Registration tests basic registration and deregistration.
 func TestCollectorRegistry_Registration(t *testing.T) {

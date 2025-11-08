@@ -27,7 +27,7 @@ func TestSuspendDelegation_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("suspend failed: %v", err)
 	}
-	
+
 	// Allow async audit processing to complete
 	time.Sleep(50 * time.Millisecond)
 
@@ -143,7 +143,7 @@ func TestResumeDelegation_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("resume failed: %v", err)
 	}
-	
+
 	// Allow async audit processing to complete
 	time.Sleep(50 * time.Millisecond)
 
@@ -224,7 +224,7 @@ func TestUpdateDelegationScope_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("update scope failed: %v", err)
 	}
-	
+
 	// Allow async audit processing to complete
 	time.Sleep(50 * time.Millisecond)
 
@@ -370,7 +370,7 @@ func TestVerifyToken_SuspendedDelegation(t *testing.T) {
 
 	// Create active delegation and generate token
 	poa := createTestDelegation(svc, "alice", "bob", []string{"read", "write"})
-	
+
 	// Generate real token using CreateDelegation
 	req := DelegationRequest{
 		Grantor:      poa.Grantor,
@@ -474,11 +474,11 @@ func TestSuspensionResumptionCycle(t *testing.T) {
 
 func setupTestService(t *testing.T) (*Service, func()) {
 	t.Helper()
-	
+
 	// Create permissive authorizer for testing
 	authzMem := authz.NewMemoryAuthorizer()
 	authzMem.AddPolicy(authz.Policy{ID: "allow-all", Subject: "*", Resource: "*", Actions: []string{"*"}, Effect: authz.Allow})
-	
+
 	// Create service with memory-backed components
 	svc := NewService(audit.NewMemoryLogger(nil), authzMem)
 

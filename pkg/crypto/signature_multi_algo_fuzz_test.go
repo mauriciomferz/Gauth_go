@@ -65,8 +65,8 @@ func FuzzSignatureRoundTrip_Ed25519(f *testing.F) {
 	// Seed with various message types
 	f.Add([]byte("normal text"))
 	f.Add([]byte{0x00, 0xFF, 0xAA, 0x55}) // binary
-	f.Add([]byte(""))                      // empty
-	f.Add(make([]byte, 1024))              // large
+	f.Add([]byte(""))                     // empty
+	f.Add(make([]byte, 1024))             // large
 
 	f.Fuzz(func(t *testing.T, msg []byte) {
 		prov, err := NewInMemoryEd25519Provider()

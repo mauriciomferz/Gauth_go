@@ -130,6 +130,7 @@ func TestDiscoveryCapabilityEnforcementFlag(t *testing.T) {
 }
 
 // TestAuditCapabilitiesPagination generates capability-related audit entries then pages through them.
+//
 //nolint:gocyclo // Capability audit pagination test
 func TestAuditCapabilitiesPagination(t *testing.T) {
 	t.Setenv("GAUTH_CAPABILITY_ENFORCE", "1")

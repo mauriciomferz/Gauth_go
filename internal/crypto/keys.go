@@ -26,15 +26,15 @@ import (
 
 // Key represents a signing key (Ed25519) with metadata.
 type Key struct {
-	ID             string             `json:"kid"`
-	CreatedAt      time.Time          `json:"created_at"`
-	ExpiresAt      time.Time          `json:"expires_at"`
-	DeprecatedAfter time.Time         `json:"deprecated_after,omitempty"` // RFC0115 deprecation warning timestamp (recommended: 80% of TTL)
-	SunsetAfter    time.Time          `json:"sunset_after,omitempty"`     // RFC0115 hard cutoff timestamp (same as ExpiresAt)
-	Private        ed25519.PrivateKey `json:"-"`
-	Public         ed25519.PublicKey  `json:"public"`
-	Alg            string             `json:"alg"` // EdDSA
-	Use            string             `json:"use"` // sig
+	ID              string             `json:"kid"`
+	CreatedAt       time.Time          `json:"created_at"`
+	ExpiresAt       time.Time          `json:"expires_at"`
+	DeprecatedAfter time.Time          `json:"deprecated_after,omitempty"` // RFC0115 deprecation warning timestamp (recommended: 80% of TTL)
+	SunsetAfter     time.Time          `json:"sunset_after,omitempty"`     // RFC0115 hard cutoff timestamp (same as ExpiresAt)
+	Private         ed25519.PrivateKey `json:"-"`
+	Public          ed25519.PublicKey  `json:"public"`
+	Alg             string             `json:"alg"` // EdDSA
+	Use             string             `json:"use"` // sig
 }
 
 // Manager manages active + previous keys (simple in-memory rotation).

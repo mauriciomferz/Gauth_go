@@ -241,7 +241,7 @@ func (m *MockAIIntegration) GetAgentID() string {
 
 func TestEnforcer_AIIntegration(t *testing.T) {
 	enforcer := NewEnforcer()
-	
+
 	mockAI := &MockAIIntegration{agentID: "g-agent-001"}
 	enforcer.SetAIIntegration(mockAI)
 

@@ -13,6 +13,7 @@ import (
 )
 
 // TestCascadeProcessorComprehensive adds comprehensive test scenarios for cascade revocation
+//
 //nolint:gocyclo // End-to-end cascade testing
 func TestCascadeProcessorComprehensive(t *testing.T) {
 

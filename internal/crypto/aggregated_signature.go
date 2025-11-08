@@ -17,17 +17,17 @@ import (
 type AggregatedSignatureScheme interface {
 	// GenerateKeyPair generates a new key pair for this signature scheme
 	GenerateKeyPair() (*AggregatedPrivateKey, *AggregatedPublicKey, error)
-	
+
 	// Sign creates a signature over the message using the private key
 	Sign(privKey *AggregatedPrivateKey, message []byte) (*AggregatedSignature, error)
-	
+
 	// Aggregate combines multiple signatures into a single aggregated signature
 	Aggregate(signatures []*AggregatedSignature) (*AggregatedSignature, error)
-	
+
 	// Verify checks if an aggregated signature is valid for the given message
 	// and set of public keys. Returns true if all signers properly signed the message.
 	Verify(pubKeys []*AggregatedPublicKey, message []byte, aggSig *AggregatedSignature) (bool, error)
-	
+
 	// VerifyIndividual checks if a single signature is valid
 	VerifyIndividual(pubKey *AggregatedPublicKey, message []byte, sig *AggregatedSignature) (bool, error)
 }
@@ -74,7 +74,7 @@ func NewSimpleBLSScheme() (*SimpleBLSScheme, error) {
 	// In production, use BLS12-381 or BLS12-377
 	p, _ := new(big.Int).SetString("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16)
 	n, _ := new(big.Int).SetString("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16)
-	
+
 	return &SimpleBLSScheme{
 		curve: &SimpleCurve{
 			P: p,
@@ -90,27 +90,27 @@ func (s *SimpleBLSScheme) GenerateKeyPair() (*AggregatedPrivateKey, *AggregatedP
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to generate private key: %w", err)
 	}
-	
+
 	// Ensure non-zero
 	if privScalar.Sign() == 0 {
 		privScalar.SetInt64(1)
 	}
-	
+
 	privKey := &AggregatedPrivateKey{
 		Scalar: privScalar,
 		Scheme: "SimpleBLS",
 	}
-	
+
 	// Compute public key as g^privKey (point multiplication)
 	// For simplicity, we're using the scalar directly as the "point"
 	// In real BLS, this would be actual elliptic curve point multiplication
 	pubPoint := new(big.Int).Exp(big.NewInt(2), privScalar, s.curve.P)
-	
+
 	pubKey := &AggregatedPublicKey{
 		Point:  pubPoint.Bytes(),
 		Scheme: "SimpleBLS",
 	}
-	
+
 	return privKey, pubKey, nil
 }
 
@@ -119,16 +119,16 @@ func (s *SimpleBLSScheme) Sign(privKey *AggregatedPrivateKey, message []byte) (*
 	if privKey == nil || privKey.Scalar == nil {
 		return nil, errors.New("invalid private key")
 	}
-	
+
 	// Hash message to curve point
 	h := sha256.Sum256(message)
 	msgHash := new(big.Int).SetBytes(h[:])
 	msgHash.Mod(msgHash, s.curve.N)
-	
+
 	// Signature = H(m)^privKey
 	// In real BLS, this is a point multiplication on the curve
 	sig := new(big.Int).Exp(msgHash, privKey.Scalar, s.curve.P)
-	
+
 	return &AggregatedSignature{
 		Signature: sig.Bytes(),
 		Scheme:    "SimpleBLS",
@@ -142,7 +142,7 @@ func (s *SimpleBLSScheme) Aggregate(signatures []*AggregatedSignature) (*Aggrega
 	if len(signatures) == 0 {
 		return nil, errors.New("no signatures to aggregate")
 	}
-	
+
 	// Verify all signatures use the same scheme
 	scheme := signatures[0].Scheme
 	for _, sig := range signatures {
@@ -150,20 +150,20 @@ func (s *SimpleBLSScheme) Aggregate(signatures []*AggregatedSignature) (*Aggrega
 			return nil, errors.New("cannot aggregate signatures from different schemes")
 		}
 	}
-	
+
 	// Aggregate by multiplying signature points
 	// In BLS: aggSig = sig1 + sig2 + ... + sigN (point addition)
 	// We simulate this with multiplication
 	aggSig := big.NewInt(1)
 	allSignerIDs := []string{}
-	
+
 	for _, sig := range signatures {
 		sigInt := new(big.Int).SetBytes(sig.Signature)
 		aggSig.Mul(aggSig, sigInt)
 		aggSig.Mod(aggSig, s.curve.P)
 		allSignerIDs = append(allSignerIDs, sig.SignerIDs...)
 	}
-	
+
 	return &AggregatedSignature{
 		Signature: aggSig.Bytes(),
 		Scheme:    scheme,
@@ -181,19 +181,19 @@ func (s *SimpleBLSScheme) Verify(pubKeys []*AggregatedPublicKey, message []byte,
 	if aggSig == nil {
 		return false, errors.New("no signature provided")
 	}
-	
+
 	// Verify scheme compatibility
 	for _, pk := range pubKeys {
 		if pk.Scheme != aggSig.Scheme {
 			return false, errors.New("public key and signature schemes do not match")
 		}
 	}
-	
+
 	// Hash message
 	h := sha256.Sum256(message)
 	msgHash := new(big.Int).SetBytes(h[:])
 	msgHash.Mod(msgHash, s.curve.N)
-	
+
 	// Aggregate public keys by multiplication
 	// In real BLS: aggPubKey = pk1 + pk2 + ... + pkN (point addition)
 	aggPubKey := big.NewInt(1)
@@ -202,23 +202,23 @@ func (s *SimpleBLSScheme) Verify(pubKeys []*AggregatedPublicKey, message []byte,
 		aggPubKey.Mul(aggPubKey, pkInt)
 		aggPubKey.Mod(aggPubKey, s.curve.P)
 	}
-	
+
 	sigInt := new(big.Int).SetBytes(aggSig.Signature)
-	
+
 	// Verify the signature is in valid range
 	if sigInt.Cmp(big.NewInt(0)) <= 0 || sigInt.Cmp(s.curve.P) >= 0 {
 		return false, nil
 	}
-	
+
 	// Simplified verification: Check that signature = H(m)^(product of private keys)
 	// Since we can't recover private keys, we'll verify structural properties only
 	// In production BLS, use proper pairing-based verification e(sig, g) == e(H(m), aggPK)
-	
+
 	// For this simplified scheme, we accept signatures that are:
 	// 1. In valid range (already checked)
 	// 2. Not obviously invalid (not zero, not the modulus)
 	// 3. Have reasonable relationship to message hash
-	
+
 	// Create a combined hash incorporating message and public keys
 	combined := sha256.New()
 	combined.Write(message)
@@ -227,13 +227,13 @@ func (s *SimpleBLSScheme) Verify(pubKeys []*AggregatedPublicKey, message []byte,
 	}
 	expectedHash := new(big.Int).SetBytes(combined.Sum(nil))
 	expectedHash.Mod(expectedHash, s.curve.P)
-	
+
 	// For our toy scheme, verify that signature differs from simple message hash
 	// This at least ensures some processing occurred
 	if sigInt.Cmp(msgHash) == 0 {
 		return false, nil // Signature is just the message hash - invalid
 	}
-	
+
 	// Basic structural validation passes
 	// NOTE: This is NOT cryptographically secure
 	// Use proper BLS12-381 or BLS12-377 libraries in production
@@ -256,7 +256,7 @@ func NewAggregatedSignatureManager() (*AggregatedSignatureManager, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &AggregatedSignatureManager{
 		scheme: scheme,
 	}, nil
@@ -271,7 +271,7 @@ func (m *AggregatedSignatureManager) CreateJointSignature(
 	if len(privKeys) == 0 {
 		return nil, errors.New("no private keys provided")
 	}
-	
+
 	// Each signer creates their individual signature
 	signatures := make([]*AggregatedSignature, 0, len(privKeys))
 	for i, privKey := range privKeys {
@@ -282,7 +282,7 @@ func (m *AggregatedSignatureManager) CreateJointSignature(
 		sig.SignerIDs = []string{fmt.Sprintf("signer-%d", i)}
 		signatures = append(signatures, sig)
 	}
-	
+
 	// Aggregate all signatures into one
 	return m.scheme.Aggregate(signatures)
 }

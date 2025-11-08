@@ -10,12 +10,12 @@ import (
 
 // CacheEntry represents a cached authorization decision.
 type CacheEntry struct {
-	Key        string                 `json:"key"`
-	Decision   string                 `json:"decision"` // "permit", "deny"
-	Context    map[string]interface{} `json:"context"`
-	CachedAt   time.Time              `json:"cached_at"`
-	ExpiresAt  time.Time              `json:"expires_at"`
-	Metadata   map[string]interface{} `json:"metadata,omitempty"`
+	Key       string                 `json:"key"`
+	Decision  string                 `json:"decision"` // "permit", "deny"
+	Context   map[string]interface{} `json:"context"`
+	CachedAt  time.Time              `json:"cached_at"`
+	ExpiresAt time.Time              `json:"expires_at"`
+	Metadata  map[string]interface{} `json:"metadata,omitempty"`
 }
 
 // Cache provides distributed PDP decision caching.
@@ -41,12 +41,12 @@ type Cache interface {
 
 // CacheStats provides cache performance metrics.
 type CacheStats struct {
-	Hits           int64     `json:"hits"`
-	Misses         int64     `json:"misses"`
-	Evictions      int64     `json:"evictions"`
-	Size           int       `json:"size"`
-	HitRate        float64   `json:"hit_rate"`
-	LastClearAt    time.Time `json:"last_clear_at,omitempty"`
+	Hits        int64     `json:"hits"`
+	Misses      int64     `json:"misses"`
+	Evictions   int64     `json:"evictions"`
+	Size        int       `json:"size"`
+	HitRate     float64   `json:"hit_rate"`
+	LastClearAt time.Time `json:"last_clear_at,omitempty"`
 }
 
 // InMemoryCache provides a simple in-memory cache implementation.

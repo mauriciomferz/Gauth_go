@@ -169,7 +169,7 @@ func (h *APIHandler) getAgentMetrics(c *gin.Context) {
 	metrics := agent.GetMetrics()
 
 	c.JSON(http.StatusOK, gin.H{
-		"success": true,
+		"success":  true,
 		"agent_id": agentID,
 		"metrics":  metrics,
 	})
@@ -178,11 +178,11 @@ func (h *APIHandler) getAgentMetrics(c *gin.Context) {
 // evaluateEnforcement evaluates an enforcement request
 func (h *APIHandler) evaluateEnforcement(c *gin.Context) {
 	var request struct {
-		AgentID     string                            `json:"agent_id"`
-		Subject     string                            `json:"subject" binding:"required"`
-		Resource    string                            `json:"resource" binding:"required"`
-		Action      string                            `json:"action" binding:"required"`
-		Context     map[string]interface{}            `json:"context"`
+		AgentID     string                              `json:"agent_id"`
+		Subject     string                              `json:"subject" binding:"required"`
+		Resource    string                              `json:"resource" binding:"required"`
+		Action      string                              `json:"action" binding:"required"`
+		Context     map[string]interface{}              `json:"context"`
 		Disclosures []enforcement.DisclosureRequirement `json:"disclosures"`
 	}
 
@@ -266,10 +266,10 @@ func (h *APIHandler) evaluateBatch(c *gin.Context) {
 	var request struct {
 		AgentID  string `json:"agent_id"`
 		Requests []struct {
-			Subject     string                            `json:"subject" binding:"required"`
-			Resource    string                            `json:"resource" binding:"required"`
-			Action      string                            `json:"action" binding:"required"`
-			Context     map[string]interface{}            `json:"context"`
+			Subject     string                              `json:"subject" binding:"required"`
+			Resource    string                              `json:"resource" binding:"required"`
+			Action      string                              `json:"action" binding:"required"`
+			Context     map[string]interface{}              `json:"context"`
 			Disclosures []enforcement.DisclosureRequirement `json:"disclosures"`
 		} `json:"requests" binding:"required,min=1,max=100"`
 	}

@@ -11,8 +11,14 @@ import (
 
 // registerBuiltIns registers all built-in ABAC functions
 func (r *FunctionRegistry) registerBuiltIns() {
+	mustRegister := func(metadata FunctionMetadata, fn Function) {
+		if err := r.Register(metadata, fn); err != nil {
+			panic(fmt.Sprintf("failed to register built-in function %s: %v", metadata.Name, err))
+		}
+	}
+
 	// String functions
-	r.Register(FunctionMetadata{
+	mustRegister(FunctionMetadata{
 		Name:        "contains",
 		Description: "Check if string contains substring",
 		MinArgs:     2,
@@ -21,8 +27,8 @@ func (r *FunctionRegistry) registerBuiltIns() {
 		ReturnType:  ResultTypeBool,
 		Category:    "string",
 	}, fnContains)
-	
-	r.Register(FunctionMetadata{
+
+	mustRegister(FunctionMetadata{
 		Name:        "starts_with",
 		Description: "Check if string starts with prefix",
 		MinArgs:     2,
@@ -31,8 +37,8 @@ func (r *FunctionRegistry) registerBuiltIns() {
 		ReturnType:  ResultTypeBool,
 		Category:    "string",
 	}, fnStartsWith)
-	
-	r.Register(FunctionMetadata{
+
+	mustRegister(FunctionMetadata{
 		Name:        "ends_with",
 		Description: "Check if string ends with suffix",
 		MinArgs:     2,
@@ -41,8 +47,8 @@ func (r *FunctionRegistry) registerBuiltIns() {
 		ReturnType:  ResultTypeBool,
 		Category:    "string",
 	}, fnEndsWith)
-	
-	r.Register(FunctionMetadata{
+
+	mustRegister(FunctionMetadata{
 		Name:        "regex_match",
 		Description: "Match string against regular expression",
 		MinArgs:     2,
@@ -51,8 +57,8 @@ func (r *FunctionRegistry) registerBuiltIns() {
 		ReturnType:  ResultTypeBool,
 		Category:    "string",
 	}, fnRegexMatch)
-	
-	r.Register(FunctionMetadata{
+
+	mustRegister(FunctionMetadata{
 		Name:        "to_upper",
 		Description: "Convert string to uppercase",
 		MinArgs:     1,
@@ -61,8 +67,8 @@ func (r *FunctionRegistry) registerBuiltIns() {
 		ReturnType:  ResultTypeString,
 		Category:    "string",
 	}, fnToUpper)
-	
-	r.Register(FunctionMetadata{
+
+	mustRegister(FunctionMetadata{
 		Name:        "to_lower",
 		Description: "Convert string to lowercase",
 		MinArgs:     1,
@@ -71,8 +77,8 @@ func (r *FunctionRegistry) registerBuiltIns() {
 		ReturnType:  ResultTypeString,
 		Category:    "string",
 	}, fnToLower)
-	
-	r.Register(FunctionMetadata{
+
+	mustRegister(FunctionMetadata{
 		Name:        "trim",
 		Description: "Remove leading/trailing whitespace",
 		MinArgs:     1,
@@ -81,8 +87,8 @@ func (r *FunctionRegistry) registerBuiltIns() {
 		ReturnType:  ResultTypeString,
 		Category:    "string",
 	}, fnTrim)
-	
-	r.Register(FunctionMetadata{
+
+	mustRegister(FunctionMetadata{
 		Name:        "str_length",
 		Description: "Get string length",
 		MinArgs:     1,
@@ -91,9 +97,9 @@ func (r *FunctionRegistry) registerBuiltIns() {
 		ReturnType:  ResultTypeNumeric,
 		Category:    "string",
 	}, fnStrLength)
-	
+
 	// Numeric functions
-	r.Register(FunctionMetadata{
+	mustRegister(FunctionMetadata{
 		Name:        "abs",
 		Description: "Absolute value",
 		MinArgs:     1,
@@ -102,8 +108,8 @@ func (r *FunctionRegistry) registerBuiltIns() {
 		ReturnType:  ResultTypeNumeric,
 		Category:    "numeric",
 	}, fnAbs)
-	
-	r.Register(FunctionMetadata{
+
+	mustRegister(FunctionMetadata{
 		Name:        "min",
 		Description: "Minimum of two numbers",
 		MinArgs:     2,
@@ -112,8 +118,8 @@ func (r *FunctionRegistry) registerBuiltIns() {
 		ReturnType:  ResultTypeNumeric,
 		Category:    "numeric",
 	}, fnMin)
-	
-	r.Register(FunctionMetadata{
+
+	mustRegister(FunctionMetadata{
 		Name:        "max",
 		Description: "Maximum of two numbers",
 		MinArgs:     2,
@@ -122,9 +128,9 @@ func (r *FunctionRegistry) registerBuiltIns() {
 		ReturnType:  ResultTypeNumeric,
 		Category:    "numeric",
 	}, fnMax)
-	
+
 	// Time functions
-	r.Register(FunctionMetadata{
+	mustRegister(FunctionMetadata{
 		Name:        "time_between",
 		Description: "Check if current time is between start and end (HH:MM format)",
 		MinArgs:     2,
@@ -133,8 +139,8 @@ func (r *FunctionRegistry) registerBuiltIns() {
 		ReturnType:  ResultTypeBool,
 		Category:    "time",
 	}, fnTimeBetween)
-	
-	r.Register(FunctionMetadata{
+
+	mustRegister(FunctionMetadata{
 		Name:        "weekday",
 		Description: "Get current weekday (0=Sunday, 6=Saturday)",
 		MinArgs:     0,
@@ -142,8 +148,8 @@ func (r *FunctionRegistry) registerBuiltIns() {
 		ReturnType:  ResultTypeNumeric,
 		Category:    "time",
 	}, fnWeekday)
-	
-	r.Register(FunctionMetadata{
+
+	mustRegister(FunctionMetadata{
 		Name:        "is_weekend",
 		Description: "Check if current time is weekend",
 		MinArgs:     0,
@@ -151,8 +157,8 @@ func (r *FunctionRegistry) registerBuiltIns() {
 		ReturnType:  ResultTypeBool,
 		Category:    "time",
 	}, fnIsWeekend)
-	
-	r.Register(FunctionMetadata{
+
+	mustRegister(FunctionMetadata{
 		Name:        "hour",
 		Description: "Get current hour (0-23)",
 		MinArgs:     0,
@@ -160,19 +166,19 @@ func (r *FunctionRegistry) registerBuiltIns() {
 		ReturnType:  ResultTypeNumeric,
 		Category:    "time",
 	}, fnHour)
-	
+
 	// Collection functions
-	r.Register(FunctionMetadata{
+	mustRegister(FunctionMetadata{
 		Name:        "in",
 		Description: "Check if value is in list",
 		MinArgs:     2,
-		MaxArgs:     -1, // unlimited
+		MaxArgs:     -1,                       // unlimited
 		ArgTypes:    []ArgType{ArgTypeString}, // first arg checked, rest are list items
 		ReturnType:  ResultTypeBool,
 		Category:    "collection",
 	}, fnIn)
-	
-	r.Register(FunctionMetadata{
+
+	mustRegister(FunctionMetadata{
 		Name:        "not_in",
 		Description: "Check if value is not in list",
 		MinArgs:     2,
@@ -181,9 +187,9 @@ func (r *FunctionRegistry) registerBuiltIns() {
 		ReturnType:  ResultTypeBool,
 		Category:    "collection",
 	}, fnNotIn)
-	
+
 	// Logical functions
-	r.Register(FunctionMetadata{
+	mustRegister(FunctionMetadata{
 		Name:        "not",
 		Description: "Logical NOT",
 		MinArgs:     1,
@@ -224,22 +230,22 @@ var registryRegexCache = &cachedRegexMap{m: make(map[string]*regexp.Regexp)}
 func fnRegexMatch(attrs map[string]string, now time.Time, args []FunctionArg) (FunctionResult, error) {
 	str := args[0].StringValue
 	pattern := args[1].StringValue
-	
+
 	// Security: limit pattern length
 	if len(pattern) > 256 {
 		return BoolResult(false), fmt.Errorf("regex pattern too long (max 256 chars)")
 	}
-	
+
 	registryRegexCache.RLock()
 	re, cached := registryRegexCache.m[pattern]
 	registryRegexCache.RUnlock()
-	
+
 	if !cached {
 		compiled, err := regexp.Compile(pattern)
 		if err != nil {
 			return BoolResult(false), fmt.Errorf("invalid regex pattern: %v", err)
 		}
-		
+
 		registryRegexCache.Lock()
 		// Check cache size to prevent unbounded growth
 		if len(registryRegexCache.m) > 100 {
@@ -248,10 +254,10 @@ func fnRegexMatch(attrs map[string]string, now time.Time, args []FunctionArg) (F
 		}
 		registryRegexCache.m[pattern] = compiled
 		registryRegexCache.Unlock()
-		
+
 		re = compiled
 	}
-	
+
 	return BoolResult(re.MatchString(str)), nil
 }
 
@@ -304,23 +310,23 @@ func fnMax(attrs map[string]string, now time.Time, args []FunctionArg) (Function
 func fnTimeBetween(attrs map[string]string, now time.Time, args []FunctionArg) (FunctionResult, error) {
 	startStr := args[0].StringValue
 	endStr := args[1].StringValue
-	
+
 	layout := "15:04"
 	start, err := time.Parse(layout, startStr)
 	if err != nil {
 		return BoolResult(false), fmt.Errorf("invalid start time format (use HH:MM): %v", err)
 	}
-	
+
 	end, err := time.Parse(layout, endStr)
 	if err != nil {
 		return BoolResult(false), fmt.Errorf("invalid end time format (use HH:MM): %v", err)
 	}
-	
+
 	cur := now.UTC()
 	curClock := time.Date(0, 1, 1, cur.Hour(), cur.Minute(), 0, 0, time.UTC)
 	sClock := time.Date(0, 1, 1, start.Hour(), start.Minute(), 0, 0, time.UTC)
 	eClock := time.Date(0, 1, 1, end.Hour(), end.Minute(), 0, 0, time.UTC)
-	
+
 	var result bool
 	if sClock.Before(eClock) {
 		// Normal range (e.g., 09:00-17:00)
@@ -329,7 +335,7 @@ func fnTimeBetween(attrs map[string]string, now time.Time, args []FunctionArg) (
 		// Overnight range (e.g., 22:00-06:00)
 		result = !(curClock.After(eClock) && curClock.Before(sClock))
 	}
-	
+
 	return BoolResult(result), nil
 }
 
@@ -380,17 +386,17 @@ func GetAttrValue(attrs map[string]string, key string) (FunctionArg, error) {
 	if !exists {
 		return FunctionArg{}, fmt.Errorf("attribute '%s' not found", key)
 	}
-	
+
 	// Try parsing as numeric
 	if numVal, err := strconv.ParseFloat(val, 64); err == nil {
 		return NumericArg(numVal), nil
 	}
-	
+
 	// Try parsing as bool
 	if boolVal, err := strconv.ParseBool(val); err == nil {
 		return BoolArg(boolVal), nil
 	}
-	
+
 	// Default to string
 	return StringArg(val), nil
 }

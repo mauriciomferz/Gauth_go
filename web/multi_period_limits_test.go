@@ -312,20 +312,20 @@ func TestInvalidRateLimitFormat(t *testing.T) {
 	defer os.Unsetenv("GAUTH_MODEL_LIMITS_PATH")
 
 	s := NewBetaServer("0")
-	
+
 	// Capture stderr to verify error logging
 	oldStderr := os.Stderr
 	r, w, _ := os.Pipe()
 	os.Stderr = w
-	
+
 	s.loadModelLimitsFromDisk()
-	
+
 	w.Close()
 	os.Stderr = oldStderr
-	
+
 	stderrOutput, _ := io.ReadAll(r)
 	stderrStr := string(stderrOutput)
-	
+
 	// Verify error messages logged for invalid formats
 	if !strings.Contains(stderrStr, "invalid rate limit") {
 		t.Errorf("expected error log for invalid rate limit, got: %s", stderrStr)

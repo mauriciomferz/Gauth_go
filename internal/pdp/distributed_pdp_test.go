@@ -18,16 +18,16 @@ func TestNewDistributedPDP(t *testing.T) {
 		MaxRetries:          3,
 		RequestTimeout:      5 * time.Second,
 	}
-	
+
 	pdp, err := NewDistributedPDP(config)
 	if err != nil {
 		t.Fatalf("Failed to create PDP: %v", err)
 	}
-	
+
 	if pdp.nodeID != "node1" {
 		t.Errorf("Expected node ID node1, got %s", pdp.nodeID)
 	}
-	
+
 	if !pdp.isHealthy {
 		t.Error("PDP should be healthy initially")
 	}
@@ -42,7 +42,7 @@ func TestNewDistributedPDP_ValidationErrors(t *testing.T) {
 		{"empty node ID", &PDPConfig{Address: "localhost:8080"}},
 		{"empty address", &PDPConfig{NodeID: "node1"}},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			_, err := NewDistributedPDP(tt.config)
@@ -60,10 +60,10 @@ func TestMakeDecision_PolicyEvaluation(t *testing.T) {
 		CacheTTL:     5 * time.Minute,
 		CacheMaxSize: 100,
 	}
-	
+
 	pdp, _ := NewDistributedPDP(config)
 	ctx := context.Background()
-	
+
 	req := &DecisionRequest{
 		RequestID: "req-001",
 		Subject:   "user:alice",
@@ -73,20 +73,20 @@ func TestMakeDecision_PolicyEvaluation(t *testing.T) {
 		Timestamp: time.Now(),
 		CacheTTL:  30 * time.Second,
 	}
-	
+
 	resp, err := pdp.MakeDecision(ctx, req)
 	if err != nil {
 		t.Fatalf("Failed to make decision: %v", err)
 	}
-	
+
 	if resp == nil {
 		t.Fatal("Response is nil")
 	}
-	
+
 	if resp.RequestID != "req-001" {
 		t.Errorf("Expected request ID req-001, got %s", resp.RequestID)
 	}
-	
+
 	if resp.Decision != DecisionPermit {
 		t.Errorf("Expected permit decision, got %s", resp.Decision)
 	}
@@ -99,10 +99,10 @@ func TestMakeDecision_CriticalResourceDenial(t *testing.T) {
 		CacheTTL:     5 * time.Minute,
 		CacheMaxSize: 100,
 	}
-	
+
 	pdp, _ := NewDistributedPDP(config)
 	ctx := context.Background()
-	
+
 	req := &DecisionRequest{
 		RequestID: "req-002",
 		Subject:   "user:bob",
@@ -111,12 +111,12 @@ func TestMakeDecision_CriticalResourceDenial(t *testing.T) {
 		Timestamp: time.Now(),
 		CacheTTL:  30 * time.Second,
 	}
-	
+
 	resp, err := pdp.MakeDecision(ctx, req)
 	if err != nil {
 		t.Fatalf("Failed to make decision: %v", err)
 	}
-	
+
 	if resp.Decision != DecisionDeny {
 		t.Errorf("Expected deny decision for critical resource deletion, got %s", resp.Decision)
 	}
@@ -129,10 +129,10 @@ func TestMakeDecision_CacheHit(t *testing.T) {
 		CacheTTL:     5 * time.Minute,
 		CacheMaxSize: 100,
 	}
-	
+
 	pdp, _ := NewDistributedPDP(config)
 	ctx := context.Background()
-	
+
 	req := &DecisionRequest{
 		RequestID: "req-003",
 		Subject:   "user:charlie",
@@ -141,19 +141,19 @@ func TestMakeDecision_CacheHit(t *testing.T) {
 		Timestamp: time.Now(),
 		CacheTTL:  10 * time.Second,
 	}
-	
+
 	// First request - cache miss
 	resp1, _ := pdp.MakeDecision(ctx, req)
-	
+
 	// Second request - should be cache hit
 	req.RequestID = "req-004" // Different request ID but same decision parameters
 	resp2, _ := pdp.MakeDecision(ctx, req)
-	
+
 	// Verify both responses are for the same policy decision
 	if resp1.Decision != resp2.Decision {
 		t.Errorf("Cache hit should return same decision: %s vs %s", resp1.Decision, resp2.Decision)
 	}
-	
+
 	// Cache stats should show one entry
 	stats := pdp.GetCacheStats()
 	size := stats["size"].(int)
@@ -169,14 +169,14 @@ func TestInvalidateCache(t *testing.T) {
 		CacheTTL:     5 * time.Minute,
 		CacheMaxSize: 100,
 	}
-	
+
 	pdp, _ := NewDistributedPDP(config)
 	ctx := context.Background()
-	
+
 	// Start background workers
 	pdp.Start(ctx)
 	defer pdp.Stop()
-	
+
 	// Create a cached decision
 	req := &DecisionRequest{
 		RequestID: "req-005",
@@ -186,25 +186,25 @@ func TestInvalidateCache(t *testing.T) {
 		Timestamp: time.Now(),
 		CacheTTL:  60 * time.Second,
 	}
-	
+
 	pdp.MakeDecision(ctx, req)
-	
+
 	// Verify cache has entry
 	statsBefore := pdp.GetCacheStats()
 	sizeBefore := statsBefore["size"].(int)
 	if sizeBefore != 1 {
 		t.Fatalf("Expected cache size 1, got %d", sizeBefore)
 	}
-	
+
 	// Invalidate cache with wildcard pattern
 	err := pdp.InvalidateCache("*", "test invalidation")
 	if err != nil {
 		t.Fatalf("Failed to invalidate cache: %v", err)
 	}
-	
+
 	// Give invalidation worker time to process
 	time.Sleep(100 * time.Millisecond)
-	
+
 	// Verify cache is empty
 	statsAfter := pdp.GetCacheStats()
 	sizeAfter := statsAfter["size"].(int)
@@ -220,9 +220,9 @@ func TestAddRemoveNode(t *testing.T) {
 		CacheTTL:     5 * time.Minute,
 		CacheMaxSize: 100,
 	}
-	
+
 	pdp, _ := NewDistributedPDP(config)
-	
+
 	// Add a new node
 	node2 := &ClusterNode{
 		ID:       "node2",
@@ -231,30 +231,30 @@ func TestAddRemoveNode(t *testing.T) {
 		LastSeen: time.Now(),
 		Load:     0.3,
 	}
-	
+
 	err := pdp.AddNode(node2)
 	if err != nil {
 		t.Fatalf("Failed to add node: %v", err)
 	}
-	
+
 	// Verify cluster has 2 nodes (self + node2)
 	status := pdp.GetClusterStatus()
 	if len(status) != 2 {
 		t.Errorf("Expected 2 nodes in cluster, got %d", len(status))
 	}
-	
+
 	// Remove node2
 	err = pdp.RemoveNode("node2")
 	if err != nil {
 		t.Fatalf("Failed to remove node: %v", err)
 	}
-	
+
 	// Verify cluster has 1 node
 	status = pdp.GetClusterStatus()
 	if len(status) != 1 {
 		t.Errorf("Expected 1 node in cluster after removal, got %d", len(status))
 	}
-	
+
 	// Try to remove self (should fail)
 	err = pdp.RemoveNode("node1")
 	if err == nil {
@@ -269,10 +269,10 @@ func TestCacheEviction(t *testing.T) {
 		CacheTTL:     5 * time.Minute,
 		CacheMaxSize: 3, // Small cache for testing eviction
 	}
-	
+
 	pdp, _ := NewDistributedPDP(config)
 	ctx := context.Background()
-	
+
 	// Add 4 decisions (exceeds cache size of 3)
 	for i := 1; i <= 4; i++ {
 		req := &DecisionRequest{
@@ -286,7 +286,7 @@ func TestCacheEviction(t *testing.T) {
 		pdp.MakeDecision(ctx, req)
 		time.Sleep(10 * time.Millisecond) // Ensure different timestamps
 	}
-	
+
 	// Cache should be at max size (3), oldest evicted
 	stats := pdp.GetCacheStats()
 	size := stats["size"].(int)
@@ -302,15 +302,15 @@ func TestCacheCleanup(t *testing.T) {
 		CacheTTL:     5 * time.Minute,
 		CacheMaxSize: 100,
 	}
-	
+
 	pdp, _ := NewDistributedPDP(config)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	
+
 	// Start with cleanup worker
 	pdp.Start(ctx)
 	defer pdp.Stop()
-	
+
 	// Add decision with short TTL
 	req := &DecisionRequest{
 		RequestID: "req-short-ttl",
@@ -320,22 +320,22 @@ func TestCacheCleanup(t *testing.T) {
 		Timestamp: time.Now(),
 		CacheTTL:  100 * time.Millisecond, // Very short TTL
 	}
-	
+
 	pdp.MakeDecision(ctx, req)
-	
+
 	// Verify cache has entry
 	statsBefore := pdp.GetCacheStats()
 	sizeBefore := statsBefore["size"].(int)
 	if sizeBefore != 1 {
 		t.Fatalf("Expected cache size 1, got %d", sizeBefore)
 	}
-	
+
 	// Wait for entry to expire
 	time.Sleep(200 * time.Millisecond)
-	
+
 	// Manually trigger cleanup
 	pdp.cleanupExpiredCache()
-	
+
 	// Verify cache is empty
 	statsAfter := pdp.GetCacheStats()
 	sizeAfter := statsAfter["size"].(int)
@@ -346,15 +346,15 @@ func TestCacheCleanup(t *testing.T) {
 
 func TestGetClusterStatus(t *testing.T) {
 	config := &PDPConfig{
-		NodeID:       "node1",
-		Address:      "localhost:8080",
-		CacheTTL:     5 * time.Minute,
-		CacheMaxSize: 100,
+		NodeID:              "node1",
+		Address:             "localhost:8080",
+		CacheTTL:            5 * time.Minute,
+		CacheMaxSize:        100,
 		HealthCheckInterval: 1 * time.Second,
 	}
-	
+
 	pdp, _ := NewDistributedPDP(config)
-	
+
 	// Add multiple nodes
 	for i := 2; i <= 4; i++ {
 		node := &ClusterNode{
@@ -366,12 +366,12 @@ func TestGetClusterStatus(t *testing.T) {
 		}
 		pdp.AddNode(node)
 	}
-	
+
 	status := pdp.GetClusterStatus()
 	if len(status) != 4 {
 		t.Errorf("Expected 4 nodes in cluster, got %d", len(status))
 	}
-	
+
 	// Verify each node has expected status
 	for _, node := range status {
 		if node.Status != NodeStatusHealthy {
@@ -387,10 +387,10 @@ func BenchmarkMakeDecision(b *testing.B) {
 		CacheTTL:     5 * time.Minute,
 		CacheMaxSize: 10000,
 	}
-	
+
 	pdp, _ := NewDistributedPDP(config)
 	ctx := context.Background()
-	
+
 	req := &DecisionRequest{
 		RequestID: "bench-req",
 		Subject:   "user:benchuser",
@@ -399,7 +399,7 @@ func BenchmarkMakeDecision(b *testing.B) {
 		Timestamp: time.Now(),
 		CacheTTL:  60 * time.Second,
 	}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		pdp.MakeDecision(ctx, req)
@@ -413,10 +413,10 @@ func BenchmarkMakeDecision_NoCache(b *testing.B) {
 		CacheTTL:     5 * time.Minute,
 		CacheMaxSize: 10000,
 	}
-	
+
 	pdp, _ := NewDistributedPDP(config)
 	ctx := context.Background()
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		req := &DecisionRequest{

@@ -12,19 +12,19 @@ import (
 
 // BatchVerificationResult holds results for batch token verification
 type BatchVerificationResult struct {
-	TokenIndex int                        // Index in input batch
-	Token      string                     // Original token string
-	Result     *TokenVerificationResult   // Verification result (nil if failed)
-	Error      error                      // Error if verification failed
-	Latency    time.Duration              // Individual verification latency
+	TokenIndex int                      // Index in input batch
+	Token      string                   // Original token string
+	Result     *TokenVerificationResult // Verification result (nil if failed)
+	Error      error                    // Error if verification failed
+	Latency    time.Duration            // Individual verification latency
 }
 
 // BatchVerifyTokensRequest configures batch token verification
 type BatchVerifyTokensRequest struct {
-	Tokens     []string      // Tokens to verify
-	Parallel   bool          // Use parallel verification (default true)
-	MaxWorkers int           // Max parallel workers (default NumCPU)
-	UseBLS     bool          // Attempt BLS batch optimization (experimental)
+	Tokens     []string        // Tokens to verify
+	Parallel   bool            // Use parallel verification (default true)
+	MaxWorkers int             // Max parallel workers (default NumCPU)
+	UseBLS     bool            // Attempt BLS batch optimization (experimental)
 	Context    context.Context // Optional context for cancellation
 }
 
@@ -53,7 +53,7 @@ func (s *Service) BatchVerifyTokens(req BatchVerifyTokensRequest) ([]BatchVerifi
 		parallel = false
 	}
 	useBLS := req.UseBLS || os.Getenv("GAUTH_BATCH_VERIFY_BLS") == "1"
-	
+
 	maxWorkers := req.MaxWorkers
 	if maxWorkers <= 0 {
 		maxWorkers = 4 // Conservative default
@@ -91,12 +91,12 @@ func (s *Service) BatchVerifyTokens(req BatchVerifyTokensRequest) ([]BatchVerifi
 	if parallel && len(req.Tokens) > 1 {
 		var wg sync.WaitGroup
 		sem := make(chan struct{}, maxWorkers) // Worker pool semaphore
-		
+
 		for i, token := range req.Tokens {
 			wg.Add(1)
 			go func(idx int, tok string) {
 				defer wg.Done()
-				sem <- struct{}{} // Acquire worker slot
+				sem <- struct{}{}        // Acquire worker slot
 				defer func() { <-sem }() // Release worker slot
 
 				// Check context cancellation
@@ -147,7 +147,7 @@ func (s *Service) BatchVerifyTokens(req BatchVerifyTokensRequest) ([]BatchVerifi
 	if s.metrics != nil {
 		s.metrics.ObserveMultiSignatureBatchSize(len(req.Tokens))
 		s.metrics.ObserveMultiSignatureVerificationLatency(batchLatency)
-		
+
 		// Count successes/failures
 		successes := 0
 		for _, r := range results {
@@ -254,6 +254,6 @@ func AggregateBLSSignatures(message []byte, signatures [][]byte) ([]byte, error)
 	if len(signatures) == 1 {
 		return signatures[0], nil
 	}
-	
+
 	return icrypto.BLSAggregate(signatures)
 }

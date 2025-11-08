@@ -61,7 +61,7 @@ func (j *JSONCollector) Flush() error {
 		return fmt.Errorf("JSON marshal: %w", err)
 	}
 
-	if err := os.WriteFile(j.outputPath, data, 0644); err != nil {
+	if err := os.WriteFile(j.outputPath, data, 0600); err != nil {
 		return fmt.Errorf("write file: %w", err)
 	}
 
@@ -82,7 +82,7 @@ func (j *JSONCollector) Close() error {
 // Health checks if output path is writable.
 func (j *JSONCollector) Health() error {
 	// Try writing an empty file to test permissions
-	f, err := os.OpenFile(j.outputPath, os.O_WRONLY|os.O_CREATE, 0644)
+	f, err := os.OpenFile(j.outputPath, os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		return fmt.Errorf("cannot write to %s: %w", j.outputPath, err)
 	}

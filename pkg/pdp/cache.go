@@ -14,9 +14,9 @@ import (
 
 // PDPCacheEntry stores a cached decision with TTL metadata.
 type PDPCacheEntry struct {
-	Decision  Decision
-	InsertedAt time.Time
-	ExpiresAt  time.Time
+	Decision    Decision
+	InsertedAt  time.Time
+	ExpiresAt   time.Time
 	AccessCount uint64
 }
 
@@ -46,7 +46,7 @@ type PDPCache struct {
 	mu       sync.RWMutex
 	items    map[string]*list.Element
 	order    *list.List // front = most recent, back = least recent
-	
+
 	// Metrics
 	lookups       uint64
 	hits          uint64
@@ -98,14 +98,14 @@ func NewPDPCacheFromEnv() *PDPCache {
 			capacity = v
 		}
 	}
-	
+
 	ttl := 5 * time.Minute // default
 	if s := os.Getenv("GAUTH_PDP_CACHE_TTL"); s != "" {
 		if d, err := time.ParseDuration(s); err == nil {
 			ttl = d
 		}
 	}
-	
+
 	return NewPDPCache(capacity, ttl)
 }
 
@@ -122,7 +122,7 @@ func makeKey(req Request) string {
 		Attributes map[string]string `json:"attributes"`
 		TimeUnix   int64             `json:"time_unix"` // Round to second for cache coherence
 	}
-	
+
 	ks := keyStruct{
 		Subject:    req.Subject,
 		Action:     req.Action,
@@ -130,7 +130,7 @@ func makeKey(req Request) string {
 		Attributes: req.Attributes,
 		TimeUnix:   req.Time.Unix(),
 	}
-	
+
 	data, _ := json.Marshal(ks)
 	hash := sha256.Sum256(data)
 	return hex.EncodeToString(hash[:])
@@ -145,22 +145,22 @@ func (c *PDPCache) Get(req Request) (Decision, bool) {
 	if c.capacity == 0 {
 		return Decision{}, false
 	}
-	
+
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	
+
 	c.lookups++
-	
+
 	key := makeKey(req)
 	elem, ok := c.items[key]
 	if !ok {
 		c.misses++
 		return Decision{}, false
 	}
-	
+
 	payload := elem.Value.(*cacheListPayload)
 	entry := payload.value
-	
+
 	// Check TTL expiration
 	if c.ttl > 0 && time.Now().After(entry.ExpiresAt) {
 		// Expired - remove and return miss
@@ -170,13 +170,13 @@ func (c *PDPCache) Get(req Request) (Decision, bool) {
 		c.misses++
 		return Decision{}, false
 	}
-	
+
 	// Cache hit - update access count and move to front (most recent)
 	entry.AccessCount++
 	payload.value = entry
 	c.order.MoveToFront(elem)
 	c.hits++
-	
+
 	// Clone decision to avoid mutation
 	dec := entry.Decision
 	if dec.Metadata == nil {
@@ -184,7 +184,7 @@ func (c *PDPCache) Get(req Request) (Decision, bool) {
 	}
 	dec.Metadata["cache_hit"] = "true"
 	dec.Metadata["cache_age_seconds"] = fmt.Sprintf("%.1f", time.Since(entry.InsertedAt).Seconds())
-	
+
 	return dec, true
 }
 
@@ -195,20 +195,20 @@ func (c *PDPCache) Set(req Request, decision Decision) {
 	if c.capacity == 0 {
 		return
 	}
-	
+
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	
+
 	key := makeKey(req)
 	now := time.Now()
-	
+
 	entry := PDPCacheEntry{
-		Decision:   decision,
-		InsertedAt: now,
-		ExpiresAt:  now.Add(c.ttl),
+		Decision:    decision,
+		InsertedAt:  now,
+		ExpiresAt:   now.Add(c.ttl),
 		AccessCount: 1,
 	}
-	
+
 	// Check if key already exists (update)
 	if elem, ok := c.items[key]; ok {
 		payload := elem.Value.(*cacheListPayload)
@@ -219,7 +219,7 @@ func (c *PDPCache) Set(req Request, decision Decision) {
 		c.order.MoveToFront(elem)
 		return
 	}
-	
+
 	// New entry - check capacity and evict if needed
 	if c.order.Len() >= c.capacity {
 		// Evict least recently used (back of list)
@@ -231,7 +231,7 @@ func (c *PDPCache) Set(req Request, decision Decision) {
 			c.evictions++
 		}
 	}
-	
+
 	// Insert new entry at front
 	payload := &cacheListPayload{
 		key:      key,
@@ -251,10 +251,10 @@ func (c *PDPCache) InvalidateAll() {
 	if c.capacity == 0 {
 		return
 	}
-	
+
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	
+
 	count := len(c.items)
 	c.items = make(map[string]*list.Element, c.capacity)
 	c.order = list.New()
@@ -268,10 +268,10 @@ func (c *PDPCache) InvalidateSubject(subject string) {
 	if c.capacity == 0 {
 		return
 	}
-	
+
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	
+
 	// Linear scan to find matching entries
 	var toRemove []*list.Element
 	for _, elem := range c.items {
@@ -280,7 +280,7 @@ func (c *PDPCache) InvalidateSubject(subject string) {
 			toRemove = append(toRemove, elem)
 		}
 	}
-	
+
 	// Remove matched entries
 	for _, elem := range toRemove {
 		payload := elem.Value.(*cacheListPayload)
@@ -297,10 +297,10 @@ func (c *PDPCache) InvalidateResource(resource string) {
 	if c.capacity == 0 {
 		return
 	}
-	
+
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	
+
 	// Linear scan to find matching entries
 	var toRemove []*list.Element
 	for _, elem := range c.items {
@@ -309,7 +309,7 @@ func (c *PDPCache) InvalidateResource(resource string) {
 			toRemove = append(toRemove, elem)
 		}
 	}
-	
+
 	// Remove matched entries
 	for _, elem := range toRemove {
 		payload := elem.Value.(*cacheListPayload)
@@ -326,10 +326,10 @@ func (c *PDPCache) InvalidateAction(action string) {
 	if c.capacity == 0 {
 		return
 	}
-	
+
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	
+
 	// Linear scan to find matching entries
 	var toRemove []*list.Element
 	for _, elem := range c.items {
@@ -338,7 +338,7 @@ func (c *PDPCache) InvalidateAction(action string) {
 			toRemove = append(toRemove, elem)
 		}
 	}
-	
+
 	// Remove matched entries
 	for _, elem := range toRemove {
 		payload := elem.Value.(*cacheListPayload)
@@ -366,12 +366,12 @@ type PDPCacheMetrics struct {
 func (c *PDPCache) GetMetrics() PDPCacheMetrics {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
-	
+
 	hitRate := 0.0
 	if c.lookups > 0 {
 		hitRate = float64(c.hits) / float64(c.lookups)
 	}
-	
+
 	return PDPCacheMetrics{
 		Capacity:      c.capacity,
 		Size:          c.order.Len(),
@@ -401,27 +401,27 @@ func (c *PDPCache) CleanupExpired() int {
 	if c.capacity == 0 || c.ttl == 0 {
 		return 0
 	}
-	
+
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	
+
 	now := time.Now()
 	var toRemove []*list.Element
-	
+
 	for _, elem := range c.items {
 		payload := elem.Value.(*cacheListPayload)
 		if now.After(payload.value.ExpiresAt) {
 			toRemove = append(toRemove, elem)
 		}
 	}
-	
+
 	for _, elem := range toRemove {
 		payload := elem.Value.(*cacheListPayload)
 		c.order.Remove(elem)
 		delete(c.items, payload.key)
 		c.expirations++
 	}
-	
+
 	return len(toRemove)
 }
 
@@ -429,7 +429,7 @@ func (c *PDPCache) CleanupExpired() int {
 func (c *PDPCache) ResetMetrics() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	
+
 	c.lookups = 0
 	c.hits = 0
 	c.misses = 0

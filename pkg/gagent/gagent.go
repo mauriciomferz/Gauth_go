@@ -58,7 +58,7 @@ type RiskScorer interface {
 
 // PolicyDecision represents a policy evaluation result
 type PolicyDecision struct {
-	Decision      string   // "allow", "deny", "conditional"
+	Decision      string // "allow", "deny", "conditional"
 	AppliedRules  []string
 	Violations    []string
 	Justification string
@@ -66,10 +66,10 @@ type PolicyDecision struct {
 
 // ContextInsights represents analyzed context information
 type ContextInsights struct {
-	AccessPattern      string   // "normal", "anomalous", "suspicious"
-	HistoricalBehavior string   // "consistent", "inconsistent", "new"
+	AccessPattern      string // "normal", "anomalous", "suspicious"
+	HistoricalBehavior string // "consistent", "inconsistent", "new"
 	RelatedEntities    []string
-	TimeOfDay          string   // "business-hours", "after-hours"
+	TimeOfDay          string // "business-hours", "after-hours"
 	GeographicContext  string
 	DataSensitivity    string // "public", "internal", "confidential", "restricted"
 }
@@ -398,29 +398,29 @@ func (a *Agent) GetInfo() AgentInfo {
 	defer a.mu.RUnlock()
 
 	return AgentInfo{
-		ID:                   a.id,
-		Name:                 a.name,
-		Model:                a.model,
-		Provider:             a.provider,
-		ConfidenceThreshold:  a.confidence,
-		Enabled:              a.enabled,
-		HasPolicyEngine:      a.policyEngine != nil,
-		HasContextAnalyzer:   a.contextAnalyzer != nil,
-		HasRiskScorer:        a.riskScorer != nil,
+		ID:                  a.id,
+		Name:                a.name,
+		Model:               a.model,
+		Provider:            a.provider,
+		ConfidenceThreshold: a.confidence,
+		Enabled:             a.enabled,
+		HasPolicyEngine:     a.policyEngine != nil,
+		HasContextAnalyzer:  a.contextAnalyzer != nil,
+		HasRiskScorer:       a.riskScorer != nil,
 	}
 }
 
 // AgentInfo represents agent information
 type AgentInfo struct {
-	ID                   string  `json:"id"`
-	Name                 string  `json:"name"`
-	Model                string  `json:"model"`
-	Provider             string  `json:"provider"`
-	ConfidenceThreshold  float64 `json:"confidence_threshold"`
-	Enabled              bool    `json:"enabled"`
-	HasPolicyEngine      bool    `json:"has_policy_engine"`
-	HasContextAnalyzer   bool    `json:"has_context_analyzer"`
-	HasRiskScorer        bool    `json:"has_risk_scorer"`
+	ID                  string  `json:"id"`
+	Name                string  `json:"name"`
+	Model               string  `json:"model"`
+	Provider            string  `json:"provider"`
+	ConfidenceThreshold float64 `json:"confidence_threshold"`
+	Enabled             bool    `json:"enabled"`
+	HasPolicyEngine     bool    `json:"has_policy_engine"`
+	HasContextAnalyzer  bool    `json:"has_context_analyzer"`
+	HasRiskScorer       bool    `json:"has_risk_scorer"`
 }
 
 // MarshalJSON implements json.Marshaler for AgentMetrics

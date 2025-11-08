@@ -104,18 +104,18 @@ type ObligationAuditSink interface {
 
 // ObligationAuditRecord represents a complete obligation execution audit entry.
 type ObligationAuditRecord struct {
-	Timestamp     time.Time         `json:"timestamp"`
-	Subject       string            `json:"subject"`
-	Action        string            `json:"action"`
-	Resource      string            `json:"resource"`
-	Decision      string            `json:"decision"` // "allow" or "deny"
-	ObligationID  string            `json:"obligation_id"`
-	ObligationType string           `json:"obligation_type"`
-	Mandatory     bool              `json:"mandatory"`
-	Success       bool              `json:"success"`
-	DurationMS    float64           `json:"duration_ms"`
-	Error         string            `json:"error,omitempty"`
-	Metadata      map[string]string `json:"metadata,omitempty"`
+	Timestamp      time.Time         `json:"timestamp"`
+	Subject        string            `json:"subject"`
+	Action         string            `json:"action"`
+	Resource       string            `json:"resource"`
+	Decision       string            `json:"decision"` // "allow" or "deny"
+	ObligationID   string            `json:"obligation_id"`
+	ObligationType string            `json:"obligation_type"`
+	Mandatory      bool              `json:"mandatory"`
+	Success        bool              `json:"success"`
+	DurationMS     float64           `json:"duration_ms"`
+	Error          string            `json:"error,omitempty"`
+	Metadata       map[string]string `json:"metadata,omitempty"`
 }
 
 // JSONFileObligationAuditSink implements ObligationAuditSink with JSONL file append.
@@ -155,10 +155,10 @@ func (j *JSONFileObligationAuditSink) Close() error {
 
 // ExtendedObligationExecutor implements obligations.Executor with advice channel and audit sink support.
 type ExtendedObligationExecutor struct {
-	handlers     map[string]ObligationHandler
+	handlers      map[string]ObligationHandler
 	adviceChannel AdviceChannel
-	auditSink    ObligationAuditSink
-	mu           sync.RWMutex
+	auditSink     ObligationAuditSink
+	mu            sync.RWMutex
 }
 
 // ObligationHandler defines the contract for executing specific obligation types.

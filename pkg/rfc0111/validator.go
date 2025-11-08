@@ -124,6 +124,7 @@ func (BasicPoAValidator) Validate(p *PowerOfAttorney) error {
 // - Optional maximum aggregate scope length (GAUTH_MAX_SCOPE_AGG_LEN env).
 // - Wildcard scope disabled unless GAUTH_ALLOW_WILDCARD=1.
 type AdvancedPoAValidator struct{ BasicPoAValidator }
+
 //nolint:gocyclo // Advanced PoA validation with comprehensive checks
 
 //nolint:gocyclo // Advanced PoA validation with comprehensive checks

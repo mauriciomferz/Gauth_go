@@ -23,15 +23,15 @@ type PoANode struct {
 
 // PoAEdge represents a relationship/connection between PoA nodes
 type PoAEdge struct {
-	ID          string                 `json:"id"`
-	Source      string                 `json:"source"`       // Source node ID
-	Target      string                 `json:"target"`       // Target node ID
-	Type        string                 `json:"type"`         // authorizes, delegates, requests, validates
-	Label       string                 `json:"label"`
-	Strength    float64                `json:"strength"`     // 0.0-1.0 connection strength
-	Bidirectional bool                 `json:"bidirectional"`
-	Metadata    map[string]interface{} `json:"metadata"`
-	CreatedAt   time.Time              `json:"created_at"`
+	ID            string                 `json:"id"`
+	Source        string                 `json:"source"` // Source node ID
+	Target        string                 `json:"target"` // Target node ID
+	Type          string                 `json:"type"`   // authorizes, delegates, requests, validates
+	Label         string                 `json:"label"`
+	Strength      float64                `json:"strength"` // 0.0-1.0 connection strength
+	Bidirectional bool                   `json:"bidirectional"`
+	Metadata      map[string]interface{} `json:"metadata"`
+	CreatedAt     time.Time              `json:"created_at"`
 }
 
 // Position represents 3D coordinates for visualization
@@ -56,13 +56,13 @@ type PoAGraph struct {
 
 // PoAGraphStats contains statistics about the graph
 type PoAGraphStats struct {
-	TotalNodes       int     `json:"total_nodes"`
-	TotalEdges       int     `json:"total_edges"`
-	ActiveNodes      int     `json:"active_nodes"`
-	PendingNodes     int     `json:"pending_nodes"`
-	RevokedNodes     int     `json:"revoked_nodes"`
+	TotalNodes         int     `json:"total_nodes"`
+	TotalEdges         int     `json:"total_edges"`
+	ActiveNodes        int     `json:"active_nodes"`
+	PendingNodes       int     `json:"pending_nodes"`
+	RevokedNodes       int     `json:"revoked_nodes"`
 	AverageConnections float64 `json:"average_connections"`
-	MaxDepth         int     `json:"max_depth"`
+	MaxDepth           int     `json:"max_depth"`
 }
 
 // ProtocolStepVisualization represents a 3D visualization of a protocol step
@@ -91,15 +91,15 @@ type VisualizationLayer struct {
 
 // LayerComponent represents a component within a visualization layer
 type LayerComponent struct {
-	ID          string                 `json:"id"`
-	Type        string                 `json:"type"` // actor, process, data, validation
-	Label       string                 `json:"label"`
-	Icon        string                 `json:"icon"`
-	Position    Position               `json:"position"`
-	Size        float64                `json:"size"`
-	Color       string                 `json:"color"`
-	Status      string                 `json:"status"` // active, processing, completed, error
-	Metadata    map[string]interface{} `json:"metadata"`
+	ID       string                 `json:"id"`
+	Type     string                 `json:"type"` // actor, process, data, validation
+	Label    string                 `json:"label"`
+	Icon     string                 `json:"icon"`
+	Position Position               `json:"position"`
+	Size     float64                `json:"size"`
+	Color    string                 `json:"color"`
+	Status   string                 `json:"status"` // active, processing, completed, error
+	Metadata map[string]interface{} `json:"metadata"`
 }
 
 // LayerConnection represents a connection between layer components
@@ -130,7 +130,7 @@ func NewPoAVisualizer() *PoAVisualizer {
 func (v *PoAVisualizer) CreateGraph(name, description string) *PoAGraph {
 	now := time.Now()
 	id := generateGraphID(name, now)
-	
+
 	graph := &PoAGraph{
 		ID:          id,
 		Name:        name,
@@ -142,7 +142,7 @@ func (v *PoAVisualizer) CreateGraph(name, description string) *PoAGraph {
 		UpdatedAt:   now,
 		Stats:       PoAGraphStats{},
 	}
-	
+
 	v.graphs[id] = graph
 	return graph
 }
@@ -151,7 +151,7 @@ func (v *PoAVisualizer) CreateGraph(name, description string) *PoAGraph {
 func (g *PoAGraph) AddNode(nodeType, label, description, icon string, metadata map[string]interface{}) *PoANode {
 	now := time.Now()
 	id := generateNodeID(nodeType, label, now)
-	
+
 	node := PoANode{
 		ID:          id,
 		Type:        nodeType,
@@ -163,11 +163,11 @@ func (g *PoAGraph) AddNode(nodeType, label, description, icon string, metadata m
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
-	
+
 	g.Nodes = append(g.Nodes, node)
 	g.UpdatedAt = now
 	g.updateStats()
-	
+
 	return &node
 }
 
@@ -175,23 +175,23 @@ func (g *PoAGraph) AddNode(nodeType, label, description, icon string, metadata m
 func (g *PoAGraph) AddEdge(sourceID, targetID, edgeType, label string, strength float64, metadata map[string]interface{}) *PoAEdge {
 	now := time.Now()
 	id := generateEdgeID(sourceID, targetID, edgeType)
-	
+
 	edge := PoAEdge{
-		ID:          id,
-		Source:      sourceID,
-		Target:      targetID,
-		Type:        edgeType,
-		Label:       label,
-		Strength:    strength,
+		ID:            id,
+		Source:        sourceID,
+		Target:        targetID,
+		Type:          edgeType,
+		Label:         label,
+		Strength:      strength,
 		Bidirectional: false,
-		Metadata:    metadata,
-		CreatedAt:   now,
+		Metadata:      metadata,
+		CreatedAt:     now,
 	}
-	
+
 	g.Edges = append(g.Edges, edge)
 	g.UpdatedAt = now
 	g.updateStats()
-	
+
 	return &edge
 }
 
@@ -235,7 +235,7 @@ func (g *PoAGraph) GetNode(nodeID string) *PoANode {
 // GetConnectedNodes returns all nodes connected to the given node
 func (g *PoAGraph) GetConnectedNodes(nodeID string) []PoANode {
 	connected := []PoANode{}
-	
+
 	for _, edge := range g.Edges {
 		var targetID string
 		if edge.Source == nodeID {
@@ -243,14 +243,14 @@ func (g *PoAGraph) GetConnectedNodes(nodeID string) []PoANode {
 		} else if edge.Target == nodeID && edge.Bidirectional {
 			targetID = edge.Source
 		}
-		
+
 		if targetID != "" {
 			if node := g.GetNode(targetID); node != nil {
 				connected = append(connected, *node)
 			}
 		}
 	}
-	
+
 	return connected
 }
 
@@ -258,11 +258,11 @@ func (g *PoAGraph) GetConnectedNodes(nodeID string) []PoANode {
 func (g *PoAGraph) updateStats() {
 	g.Stats.TotalNodes = len(g.Nodes)
 	g.Stats.TotalEdges = len(g.Edges)
-	
+
 	activeCount := 0
 	pendingCount := 0
 	revokedCount := 0
-	
+
 	for _, node := range g.Nodes {
 		switch node.Status {
 		case "active":
@@ -273,15 +273,15 @@ func (g *PoAGraph) updateStats() {
 			revokedCount++
 		}
 	}
-	
+
 	g.Stats.ActiveNodes = activeCount
 	g.Stats.PendingNodes = pendingCount
 	g.Stats.RevokedNodes = revokedCount
-	
+
 	if len(g.Nodes) > 0 {
 		g.Stats.AverageConnections = float64(len(g.Edges)*2) / float64(len(g.Nodes))
 	}
-	
+
 	// Calculate max depth (simplified - would need proper graph traversal)
 	g.Stats.MaxDepth = calculateMaxDepth(g)
 }
@@ -296,7 +296,7 @@ func CreateSubscriptionVisualization() *ProtocolStepVisualization {
 		Timestamp:   time.Now(),
 		Metadata:    make(map[string]interface{}),
 	}
-	
+
 	// Layer 0: Client Registration
 	layer0 := VisualizationLayer{
 		ID:          "layer-client",
@@ -319,7 +319,7 @@ func CreateSubscriptionVisualization() *ProtocolStepVisualization {
 			},
 		},
 	}
-	
+
 	// Layer 1: Authorization Server
 	layer1 := VisualizationLayer{
 		ID:          "layer-authz",
@@ -342,7 +342,7 @@ func CreateSubscriptionVisualization() *ProtocolStepVisualization {
 			},
 		},
 	}
-	
+
 	// Layer 2: Credential Storage
 	layer2 := VisualizationLayer{
 		ID:          "layer-storage",
@@ -365,9 +365,9 @@ func CreateSubscriptionVisualization() *ProtocolStepVisualization {
 			},
 		},
 	}
-	
+
 	viz.Layers = []VisualizationLayer{layer0, layer1, layer2}
-	
+
 	// Connections
 	viz.Connections = []LayerConnection{
 		{
@@ -391,7 +391,7 @@ func CreateSubscriptionVisualization() *ProtocolStepVisualization {
 			Metadata:    map[string]interface{}{"action": "persist"},
 		},
 	}
-	
+
 	return viz
 }
 
@@ -405,7 +405,7 @@ func CreateMatchingVisualization() *ProtocolStepVisualization {
 		Timestamp:   time.Now(),
 		Metadata:    make(map[string]interface{}),
 	}
-	
+
 	// Layer 0: PoA Definition
 	layer0 := VisualizationLayer{
 		ID:          "layer-poa",
@@ -428,7 +428,7 @@ func CreateMatchingVisualization() *ProtocolStepVisualization {
 			},
 		},
 	}
-	
+
 	// Layer 1: Validation Engines
 	layer1 := VisualizationLayer{
 		ID:          "layer-validation",
@@ -473,7 +473,7 @@ func CreateMatchingVisualization() *ProtocolStepVisualization {
 			},
 		},
 	}
-	
+
 	// Layer 2: Decision
 	layer2 := VisualizationLayer{
 		ID:          "layer-decision",
@@ -496,9 +496,9 @@ func CreateMatchingVisualization() *ProtocolStepVisualization {
 			},
 		},
 	}
-	
+
 	viz.Layers = []VisualizationLayer{layer0, layer1, layer2}
-	
+
 	// Connections
 	viz.Connections = []LayerConnection{
 		{
@@ -538,7 +538,7 @@ func CreateMatchingVisualization() *ProtocolStepVisualization {
 			Animated:    true,
 		},
 	}
-	
+
 	return viz
 }
 
@@ -552,7 +552,7 @@ func CreateRequestVisualization() *ProtocolStepVisualization {
 		Timestamp:   time.Now(),
 		Metadata:    make(map[string]interface{}),
 	}
-	
+
 	// Layer 0: Authorization Request
 	layer0 := VisualizationLayer{
 		ID:          "layer-request",
@@ -575,7 +575,7 @@ func CreateRequestVisualization() *ProtocolStepVisualization {
 			},
 		},
 	}
-	
+
 	// Layer 1: PDP Processing
 	layer1 := VisualizationLayer{
 		ID:          "layer-pdp",
@@ -598,7 +598,7 @@ func CreateRequestVisualization() *ProtocolStepVisualization {
 			},
 		},
 	}
-	
+
 	// Layer 2: Token Generation
 	layer2 := VisualizationLayer{
 		ID:          "layer-token",
@@ -621,9 +621,9 @@ func CreateRequestVisualization() *ProtocolStepVisualization {
 			},
 		},
 	}
-	
+
 	viz.Layers = []VisualizationLayer{layer0, layer1, layer2}
-	
+
 	// Connections
 	viz.Connections = []LayerConnection{
 		{
@@ -645,7 +645,7 @@ func CreateRequestVisualization() *ProtocolStepVisualization {
 			Animated:    true,
 		},
 	}
-	
+
 	return viz
 }
 
@@ -674,13 +674,13 @@ func calculateMaxDepth(g *PoAGraph) int {
 	if len(g.Nodes) == 0 {
 		return 0
 	}
-	
+
 	maxZ := 0.0
 	for _, node := range g.Nodes {
 		if node.Position != nil && node.Position.Z > maxZ {
 			maxZ = node.Position.Z
 		}
 	}
-	
+
 	return int(maxZ) + 1
 }

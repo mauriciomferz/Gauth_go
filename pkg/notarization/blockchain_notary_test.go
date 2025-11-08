@@ -11,12 +11,12 @@ func TestBlockchainNotary_Notarize(t *testing.T) {
 		ContractAddr: "0x1234567890abcdef",
 		Endpoint:     "https://eth.example.com",
 	}
-	
+
 	notary, err := NewBlockchainNotary(config)
 	if err != nil {
 		t.Fatalf("Failed to create notary: %v", err)
 	}
-	
+
 	event := &RevocationEvent{
 		DelegationID: "del-001",
 		Subject:      "user:alice",
@@ -25,28 +25,28 @@ func TestBlockchainNotary_Notarize(t *testing.T) {
 		RevokedAt:    time.Now(),
 		RevokedBy:    "admin",
 	}
-	
+
 	proof, err := notary.Notarize(event)
 	if err != nil {
 		t.Fatalf("Failed to notarize: %v", err)
 	}
-	
+
 	if proof == nil {
 		t.Fatal("Proof is nil")
 	}
-	
+
 	if proof.EventHash == "" {
 		t.Error("Event hash is empty")
 	}
-	
+
 	if proof.TransactionID == "" {
 		t.Error("Transaction ID is empty")
 	}
-	
+
 	if proof.BlockNumber == 0 {
 		t.Error("Block number is zero")
 	}
-	
+
 	if proof.NotaryProvider != "blockchain:ethereum" {
 		t.Errorf("Expected provider blockchain:ethereum, got %s", proof.NotaryProvider)
 	}
@@ -56,9 +56,9 @@ func TestBlockchainNotary_Verify(t *testing.T) {
 	config := &BlockchainConfig{
 		ChainType: "polygon",
 	}
-	
+
 	notary, _ := NewBlockchainNotary(config)
-	
+
 	event := &RevocationEvent{
 		DelegationID: "del-002",
 		Subject:      "user:charlie",
@@ -67,14 +67,14 @@ func TestBlockchainNotary_Verify(t *testing.T) {
 		RevokedAt:    time.Now(),
 		RevokedBy:    "system",
 	}
-	
+
 	proof, _ := notary.Notarize(event)
-	
+
 	valid, err := notary.Verify(event, proof)
 	if err != nil {
 		t.Fatalf("Verification failed: %v", err)
 	}
-	
+
 	if !valid {
 		t.Error("Proof should be valid")
 	}
@@ -84,9 +84,9 @@ func TestBlockchainNotary_VerifyInvalidProof(t *testing.T) {
 	config := &BlockchainConfig{
 		ChainType: "avalanche",
 	}
-	
+
 	notary, _ := NewBlockchainNotary(config)
-	
+
 	event := &RevocationEvent{
 		DelegationID: "del-003",
 		Subject:      "user:eve",
@@ -95,7 +95,7 @@ func TestBlockchainNotary_VerifyInvalidProof(t *testing.T) {
 		RevokedAt:    time.Now(),
 		RevokedBy:    "admin",
 	}
-	
+
 	// Create proof for different event
 	differentEvent := &RevocationEvent{
 		DelegationID: "del-999",
@@ -105,9 +105,9 @@ func TestBlockchainNotary_VerifyInvalidProof(t *testing.T) {
 		RevokedAt:    time.Now(),
 		RevokedBy:    "admin",
 	}
-	
+
 	proof, _ := notary.Notarize(differentEvent)
-	
+
 	// Verify should fail
 	valid, _ := notary.Verify(event, proof)
 	if valid {
@@ -120,7 +120,7 @@ func TestRFC3161TimestampNotary(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create notary: %v", err)
 	}
-	
+
 	event := &RevocationEvent{
 		DelegationID: "del-004",
 		Subject:      "user:george",
@@ -129,26 +129,26 @@ func TestRFC3161TimestampNotary(t *testing.T) {
 		RevokedAt:    time.Now(),
 		RevokedBy:    "compliance",
 	}
-	
+
 	proof, err := notary.Notarize(event)
 	if err != nil {
 		t.Fatalf("Failed to notarize: %v", err)
 	}
-	
+
 	if proof.TimestampToken == "" {
 		t.Error("Timestamp token is empty")
 	}
-	
+
 	if proof.NotaryProvider != "rfc3161" {
 		t.Errorf("Expected provider rfc3161, got %s", proof.NotaryProvider)
 	}
-	
+
 	// Verify
 	valid, err := notary.Verify(event, proof)
 	if err != nil {
 		t.Fatalf("Verification failed: %v", err)
 	}
-	
+
 	if !valid {
 		t.Error("RFC 3161 proof should be valid")
 	}
@@ -157,12 +157,12 @@ func TestRFC3161TimestampNotary(t *testing.T) {
 func TestMultiNotary(t *testing.T) {
 	blockchain, _ := NewBlockchainNotary(&BlockchainConfig{ChainType: "ethereum"})
 	rfc3161, _ := NewRFC3161TimestampNotary("https://tsa.example.com")
-	
+
 	multiNotary, err := NewMultiNotary(blockchain, rfc3161)
 	if err != nil {
 		t.Fatalf("Failed to create multi-notary: %v", err)
 	}
-	
+
 	event := &RevocationEvent{
 		DelegationID: "del-005",
 		Subject:      "user:ivan",
@@ -171,27 +171,27 @@ func TestMultiNotary(t *testing.T) {
 		RevokedAt:    time.Now(),
 		RevokedBy:    "security-team",
 	}
-	
+
 	proof, err := multiNotary.Notarize(event)
 	if err != nil {
 		t.Fatalf("Failed to notarize with multi-notary: %v", err)
 	}
-	
+
 	// Should have primary proof + additional proofs
 	if proof == nil {
 		t.Fatal("Proof is nil")
 	}
-	
+
 	if len(proof.AdditionalProofs) == 0 {
 		t.Error("Multi-notary should have additional proofs")
 	}
-	
+
 	// Verify
 	valid, err := multiNotary.Verify(event, proof)
 	if err != nil {
 		t.Fatalf("Verification failed: %v", err)
 	}
-	
+
 	if !valid {
 		t.Error("Multi-notary proof should be valid")
 	}
@@ -200,7 +200,7 @@ func TestMultiNotary(t *testing.T) {
 func TestNotarizationRegistry(t *testing.T) {
 	notary, _ := NewBlockchainNotary(&BlockchainConfig{ChainType: "ethereum"})
 	registry := NewNotarizationRegistry(notary)
-	
+
 	event := &RevocationEvent{
 		DelegationID: "del-006",
 		Subject:      "user:kevin",
@@ -209,33 +209,33 @@ func TestNotarizationRegistry(t *testing.T) {
 		RevokedAt:    time.Now(),
 		RevokedBy:    "auditor",
 	}
-	
+
 	// Notarize and store
 	proof, err := registry.NotarizeRevocation(event)
 	if err != nil {
 		t.Fatalf("Failed to notarize revocation: %v", err)
 	}
-	
+
 	if proof == nil {
 		t.Fatal("Proof is nil")
 	}
-	
+
 	// Retrieve proofs
 	proofs := registry.GetProofs("del-006")
 	if len(proofs) != 1 {
 		t.Errorf("Expected 1 proof, got %d", len(proofs))
 	}
-	
+
 	// Verify
 	valid, err := registry.VerifyRevocation(event, proof)
 	if err != nil {
 		t.Fatalf("Verification failed: %v", err)
 	}
-	
+
 	if !valid {
 		t.Error("Registry proof should be valid")
 	}
-	
+
 	// Check stats
 	stats := registry.GetStats()
 	if stats["total_delegations"].(int) != 1 {
@@ -246,10 +246,10 @@ func TestNotarizationRegistry(t *testing.T) {
 func TestNotarizationRegistry_MultipleRevocations(t *testing.T) {
 	notary, _ := NewBlockchainNotary(&BlockchainConfig{ChainType: "polygon"})
 	registry := NewNotarizationRegistry(notary)
-	
+
 	// Notarize same delegation multiple times
 	delegationID := "del-007"
-	
+
 	for i := 0; i < 3; i++ {
 		event := &RevocationEvent{
 			DelegationID: delegationID,
@@ -259,13 +259,13 @@ func TestNotarizationRegistry_MultipleRevocations(t *testing.T) {
 			RevokedAt:    time.Now().Add(time.Duration(i) * time.Hour),
 			RevokedBy:    "tester",
 		}
-		
+
 		_, err := registry.NotarizeRevocation(event)
 		if err != nil {
 			t.Fatalf("Failed to notarize: %v", err)
 		}
 	}
-	
+
 	// Should have 3 proofs for the same delegation
 	proofs := registry.GetProofs(delegationID)
 	if len(proofs) != 3 {
@@ -277,9 +277,9 @@ func TestBlockchainNotary_GetStats(t *testing.T) {
 	config := &BlockchainConfig{
 		ChainType: "ethereum",
 	}
-	
+
 	notary, _ := NewBlockchainNotary(config)
-	
+
 	// Notarize a few events
 	for i := 0; i < 5; i++ {
 		event := &RevocationEvent{
@@ -292,13 +292,13 @@ func TestBlockchainNotary_GetStats(t *testing.T) {
 		}
 		notary.Notarize(event)
 	}
-	
+
 	stats := notary.GetStats()
-	
+
 	if stats["total_notarized"].(int64) != 5 {
 		t.Errorf("Expected 5 notarizations, got %d", stats["total_notarized"])
 	}
-	
+
 	if stats["chain_type"].(string) != "ethereum" {
 		t.Errorf("Expected chain_type ethereum, got %s", stats["chain_type"])
 	}
@@ -306,20 +306,20 @@ func TestBlockchainNotary_GetStats(t *testing.T) {
 
 func TestNewBlockchainNotary_Defaults(t *testing.T) {
 	config := &BlockchainConfig{} // Empty config
-	
+
 	notary, err := NewBlockchainNotary(config)
 	if err != nil {
 		t.Fatalf("Failed to create notary with defaults: %v", err)
 	}
-	
+
 	if notary.chainType != "ethereum" {
 		t.Errorf("Expected default chain type ethereum, got %s", notary.chainType)
 	}
-	
+
 	if notary.batchSize != 100 {
 		t.Errorf("Expected default batch size 100, got %d", notary.batchSize)
 	}
-	
+
 	if notary.batchTimeout != 5*time.Minute {
 		t.Errorf("Expected default batch timeout 5m, got %v", notary.batchTimeout)
 	}
@@ -342,7 +342,7 @@ func TestNewMultiNotary_NoProviders(t *testing.T) {
 func TestBlockchainNotary_NilEvent(t *testing.T) {
 	config := &BlockchainConfig{ChainType: "ethereum"}
 	notary, _ := NewBlockchainNotary(config)
-	
+
 	_, err := notary.Notarize(nil)
 	if err == nil {
 		t.Error("Should fail with nil event")
@@ -352,7 +352,7 @@ func TestBlockchainNotary_NilEvent(t *testing.T) {
 func BenchmarkBlockchainNotary_Notarize(b *testing.B) {
 	config := &BlockchainConfig{ChainType: "ethereum"}
 	notary, _ := NewBlockchainNotary(config)
-	
+
 	event := &RevocationEvent{
 		DelegationID: "del-bench",
 		Subject:      "user:bench",
@@ -361,7 +361,7 @@ func BenchmarkBlockchainNotary_Notarize(b *testing.B) {
 		RevokedAt:    time.Now(),
 		RevokedBy:    "system",
 	}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		notary.Notarize(event)
@@ -370,7 +370,7 @@ func BenchmarkBlockchainNotary_Notarize(b *testing.B) {
 
 func BenchmarkRFC3161_Notarize(b *testing.B) {
 	notary, _ := NewRFC3161TimestampNotary("https://tsa.example.com")
-	
+
 	event := &RevocationEvent{
 		DelegationID: "del-bench",
 		Subject:      "user:bench",
@@ -379,7 +379,7 @@ func BenchmarkRFC3161_Notarize(b *testing.B) {
 		RevokedAt:    time.Now(),
 		RevokedBy:    "system",
 	}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		notary.Notarize(event)

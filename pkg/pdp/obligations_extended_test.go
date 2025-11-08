@@ -273,10 +273,10 @@ func TestObligationNameParsing(t *testing.T) {
 	exec := NewExtendedObligationExecutor()
 
 	tests := []struct {
-		name           string
-		input          string
-		expectedType   string
-		expectedID     string
+		name         string
+		input        string
+		expectedType string
+		expectedID   string
 	}{
 		{
 			name:         "colon-separated",

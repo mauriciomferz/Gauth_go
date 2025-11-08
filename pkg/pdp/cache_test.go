@@ -27,8 +27,8 @@ func TestPDPCache_GetSet(t *testing.T) {
 	}
 
 	decision := pdp.Decision{
-		Allow:   true,
-		Reason:  "policy:admin-read",
+		Allow:    true,
+		Reason:   "policy:admin-read",
 		Metadata: map[string]string{},
 	}
 

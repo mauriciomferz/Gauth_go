@@ -44,9 +44,9 @@ type SectionMetrics struct {
 
 // PriorityMetrics tracks implementation status per priority
 type PriorityMetrics struct {
-	Total       int
-	Implemented int
-	Percentage  float64
+	Total        int
+	Implemented  int
+	Percentage   float64
 	Requirements []string
 }
 
@@ -300,7 +300,7 @@ func writeJSONReport(result *ValidationResult) error {
 		return err
 	}
 
-	if err := os.WriteFile(outputPath, data, 0644); err != nil {
+	if err := os.WriteFile(outputPath, data, 0600); err != nil {
 		return err
 	}
 
@@ -435,7 +435,7 @@ func writeMarkdownReport(result *ValidationResult) error {
 		sb.WriteString("Focus on addressing critical (P0) gaps first.\n\n")
 	}
 
-	if err := os.WriteFile(outputPath, []byte(sb.String()), 0644); err != nil {
+	if err := os.WriteFile(outputPath, []byte(sb.String()), 0600); err != nil {
 		return err
 	}
 

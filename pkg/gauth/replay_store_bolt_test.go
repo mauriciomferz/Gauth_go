@@ -86,7 +86,7 @@ func TestBoltReplayStore_Persistence(t *testing.T) {
 	// Create store and record JTI
 	store1, err := NewBoltReplayStore(dbPath, 1*time.Hour)
 	require.NoError(t, err)
-	
+
 	err = store1.CheckAndRecord("jti-persist")
 	assert.NoError(t, err)
 	store1.Close()

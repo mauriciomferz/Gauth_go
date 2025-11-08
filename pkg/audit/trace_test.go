@@ -19,10 +19,10 @@ func TestDecisionTraceabilityStub(t *testing.T) {
 	if err := ml.Log(context.TODO(), evDeny); err != nil {
 		t.Fatalf("log deny: %v", err)
 	}
-	
+
 	// Allow async audit processing to complete
 	time.Sleep(50 * time.Millisecond)
-	
+
 	// Verify chain integrity
 	if err := ml.VerifyChain(); err != nil {
 		t.Fatalf("verify chain: %v", err)

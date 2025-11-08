@@ -22,7 +22,7 @@ func jurisdictionTestService() *Service {
 	logger := audit.NewMemoryLogger(nil)
 	authorizer := &allowAllJurisdictionAuthorizer{}
 	integration := jurisdiction.NewServerIntegration()
-	
+
 	return NewService(logger, authorizer, WithJurisdictionEnforcement(integration))
 }
 
@@ -30,10 +30,10 @@ func jurisdictionTestService() *Service {
 func TestJurisdictionIntegration_Disabled(t *testing.T) {
 	logger := audit.NewMemoryLogger(nil)
 	authorizer := &allowAllJurisdictionAuthorizer{}
-	
+
 	// Service WITHOUT jurisdiction enforcement (default behavior)
 	svc := NewService(logger, authorizer)
-	
+
 	// Create delegation without any jurisdiction claims - should succeed
 	req := DelegationRequest{
 		Grantor:  "alice@example.com",
@@ -41,7 +41,7 @@ func TestJurisdictionIntegration_Disabled(t *testing.T) {
 		Scope:    []string{"read", "write"},
 		Duration: 1 * time.Hour,
 	}
-	
+
 	ctx := context.Background()
 	resp, err := svc.CreateDelegationCtx(ctx, req)
 	if err != nil {
@@ -64,12 +64,12 @@ func TestJurisdictionIntegration_EUGDPRConsent(t *testing.T) {
 		Scope:    []string{"gdpr_data_processing"},
 		Duration: 1 * time.Hour,
 		Claims: map[string]interface{}{
-			"jurisdiction":  "EU",
-			"entity_type":   "corporation",
-			"gdpr_consent":  true, // Required for GDPR data processing
+			"jurisdiction": "EU",
+			"entity_type":  "corporation",
+			"gdpr_consent": true, // Required for GDPR data processing
 		},
 	}
-	
+
 	respAllow, err := svc.CreateDelegationCtx(ctx, reqWithConsent)
 	if err != nil {
 		t.Fatalf("EU GDPR with consent should be ALLOWED: %v", err)
@@ -85,12 +85,12 @@ func TestJurisdictionIntegration_EUGDPRConsent(t *testing.T) {
 		Scope:    []string{"gdpr_data_processing"},
 		Duration: 1 * time.Hour,
 		Claims: map[string]interface{}{
-			"jurisdiction":  "EU",
-			"entity_type":   "corporation",
-			"gdpr_consent":  false, // Missing consent
+			"jurisdiction": "EU",
+			"entity_type":  "corporation",
+			"gdpr_consent": false, // Missing consent
 		},
 	}
-	
+
 	_, err = svc.CreateDelegationCtx(ctx, reqWithoutConsent)
 	if err == nil {
 		t.Fatal("EU GDPR without consent should be DENIED")
@@ -113,12 +113,12 @@ func TestJurisdictionIntegration_USCCPAOptOut(t *testing.T) {
 		Scope:    []string{"ccpa_data_processing"},
 		Duration: 1 * time.Hour,
 		Claims: map[string]interface{}{
-			"jurisdiction":  "US",
-			"entity_type":   "corporation",
-			"ccpa_opt_out":  false, // No opt-out, processing allowed
+			"jurisdiction": "US",
+			"entity_type":  "corporation",
+			"ccpa_opt_out": false, // No opt-out, processing allowed
 		},
 	}
-	
+
 	respAllow, err := svc.CreateDelegationCtx(ctx, reqNoOptOut)
 	if err != nil {
 		t.Fatalf("US CCPA without opt-out should be ALLOWED: %v", err)
@@ -134,12 +134,12 @@ func TestJurisdictionIntegration_USCCPAOptOut(t *testing.T) {
 		Scope:    []string{"ccpa_data_processing"},
 		Duration: 1 * time.Hour,
 		Claims: map[string]interface{}{
-			"jurisdiction":  "US",
-			"entity_type":   "corporation",
-			"ccpa_opt_out":  true, // User opted out, processing denied
+			"jurisdiction": "US",
+			"entity_type":  "corporation",
+			"ccpa_opt_out": true, // User opted out, processing denied
 		},
 	}
-	
+
 	_, err = svc.CreateDelegationCtx(ctx, reqWithOptOut)
 	if err == nil {
 		t.Fatal("US CCPA with opt-out should be DENIED")
@@ -163,7 +163,7 @@ func TestJurisdictionIntegration_CrossBorderDataTransfer(t *testing.T) {
 			"destination_jurisdiction": "UK", // UK is adequacy country for EU
 		},
 	}
-	
+
 	respAllow, err := svc.CreateDelegationCtx(ctx, reqEUtoUK)
 	if err != nil {
 		t.Fatalf("EU to UK cross-border transfer should be ALLOWED: %v", err)
@@ -184,7 +184,7 @@ func TestJurisdictionIntegration_CrossBorderDataTransfer(t *testing.T) {
 			"destination_jurisdiction": "US", // US not in EU adequacy list for personal data
 		},
 	}
-	
+
 	_, err = svc.CreateDelegationCtx(ctx, reqEUtoUS)
 	if err == nil {
 		t.Fatal("EU to US cross-border transfer should be DENIED")
@@ -205,11 +205,11 @@ func TestJurisdictionIntegration_DataResidency(t *testing.T) {
 		Claims: map[string]interface{}{
 			"jurisdiction":             "EU",
 			"entity_type":              "corporation",
-			"destination_jurisdiction": "EU",   // Staying in EU
+			"destination_jurisdiction": "EU",            // Staying in EU
 			"data_type":                "personal_data", // EU requires personal data to stay local
 		},
 	}
-	
+
 	respAllow, err := svc.CreateDelegationCtx(ctx, reqResidencyOK)
 	if err != nil {
 		t.Fatalf("EU personal data staying in EU should be ALLOWED: %v", err)
@@ -227,11 +227,11 @@ func TestJurisdictionIntegration_DataResidency(t *testing.T) {
 		Claims: map[string]interface{}{
 			"jurisdiction":             "EU",
 			"entity_type":              "corporation",
-			"destination_jurisdiction": "US",   // Leaving EU
+			"destination_jurisdiction": "US",            // Leaving EU
 			"data_type":                "personal_data", // Violates residency rule
 		},
 	}
-	
+
 	_, err = svc.CreateDelegationCtx(ctx, reqResidencyViolation)
 	if err == nil {
 		t.Fatal("EU personal data leaving EU should be DENIED (data residency violation)")
@@ -254,7 +254,7 @@ func TestJurisdictionIntegration_BlockedActions(t *testing.T) {
 			"entity_type":  "corporation",
 		},
 	}
-	
+
 	_, err := svc.CreateDelegationCtx(ctx, reqBlockedAction)
 	if err == nil {
 		t.Fatal("EU blocked action 'unrestricted_data_export' should be DENIED")
@@ -271,7 +271,7 @@ func TestJurisdictionIntegration_BlockedActions(t *testing.T) {
 			"entity_type":  "corporation",
 		},
 	}
-	
+
 	respAllow, err := svc.CreateDelegationCtx(ctx, reqAllowedAction)
 	if err != nil {
 		t.Fatalf("EU allowed action should succeed: %v", err)
@@ -297,7 +297,7 @@ func TestJurisdictionIntegration_VerifyTokenEnforcement(t *testing.T) {
 			"entity_type":  "corporation",
 		},
 	}
-	
+
 	resp, err := svc.CreateDelegationCtx(ctx, req)
 	if err != nil {
 		t.Fatalf("Failed to create delegation: %v", err)

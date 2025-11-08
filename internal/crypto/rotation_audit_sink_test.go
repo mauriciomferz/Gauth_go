@@ -64,7 +64,7 @@ func TestFileAuditSink_MultipleWrites(t *testing.T) {
 	// Verify all events written
 	data, err := os.ReadFile(sinkPath)
 	require.NoError(t, err)
-	
+
 	for i := 0; i < 5; i++ {
 		assert.Contains(t, string(data), fmt.Sprintf("rot-%d", i))
 	}
@@ -76,7 +76,7 @@ func TestFileAuditSink_ClosedWrite(t *testing.T) {
 
 	sink, err := NewFileAuditSink(sinkPath)
 	require.NoError(t, err)
-	
+
 	err = sink.Close()
 	require.NoError(t, err)
 
@@ -105,7 +105,7 @@ func TestFileAuditSink_CreateDirectory(t *testing.T) {
 
 func TestMultiAuditSink(t *testing.T) {
 	tmpDir := t.TempDir()
-	
+
 	sink1, err := NewFileAuditSink(filepath.Join(tmpDir, "audit1.log"))
 	require.NoError(t, err)
 	defer sink1.Close()
@@ -129,7 +129,7 @@ func TestMultiAuditSink(t *testing.T) {
 	// Verify both files have the event
 	data1, _ := os.ReadFile(filepath.Join(tmpDir, "audit1.log"))
 	data2, _ := os.ReadFile(filepath.Join(tmpDir, "audit2.log"))
-	
+
 	assert.Contains(t, string(data1), "rot-multi")
 	assert.Contains(t, string(data2), "rot-multi")
 }
@@ -163,7 +163,7 @@ func TestHTTPAuditSink_Instantiation(t *testing.T) {
 	// Just test creation, not actual HTTP call
 	sink := NewHTTPAuditSink("https://example.com/audit")
 	assert.NotNil(t, sink)
-	
+
 	err := sink.Close()
 	assert.NoError(t, err)
 }

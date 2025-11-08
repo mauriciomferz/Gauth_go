@@ -70,7 +70,7 @@ func NewMultiPeriodLimitTracker() *MultiPeriodLimitTracker {
 func (t *MultiPeriodLimitTracker) SetLimit(entityID string, period Period, limit float64) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	
+
 	if t.limits[entityID] == nil {
 		t.limits[entityID] = make(map[Period]float64)
 	}
@@ -81,7 +81,7 @@ func (t *MultiPeriodLimitTracker) SetLimit(entityID string, period Period, limit
 func (t *MultiPeriodLimitTracker) SetLimits(entityID string, limits map[Period]float64) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	
+
 	if t.limits[entityID] == nil {
 		t.limits[entityID] = make(map[Period]float64)
 	}
@@ -94,27 +94,27 @@ func (t *MultiPeriodLimitTracker) SetLimits(entityID string, limits map[Period]f
 func (t *MultiPeriodLimitTracker) CheckLimit(entityID string, amount float64) error {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
-	
+
 	entityLimits, exists := t.limits[entityID]
 	if !exists {
 		return nil // No limits configured
 	}
-	
+
 	for period, limit := range entityLimits {
 		record := t.getOrCreateRecord(entityID, period)
-		
+
 		// Reset if period expired
 		if record.IsExpired() {
 			t.resetRecord(entityID, period)
 			record = t.getOrCreateRecord(entityID, period)
 		}
-		
+
 		if !record.CanAccommodate(amount) {
 			return fmt.Errorf("%s limit exceeded: current %.2f + amount %.2f > limit %.2f (remaining: %.2f)",
 				period, record.Current, amount, limit, record.RemainingCapacity())
 		}
 	}
-	
+
 	return nil
 }
 
@@ -122,34 +122,34 @@ func (t *MultiPeriodLimitTracker) CheckLimit(entityID string, amount float64) er
 func (t *MultiPeriodLimitTracker) RecordUsage(entityID string, amount float64) error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	
+
 	// First check all limits
 	entityLimits, exists := t.limits[entityID]
 	if !exists {
 		return nil // No limits configured
 	}
-	
+
 	// Check all period limits
 	for period := range entityLimits {
 		record := t.getOrCreateRecordUnsafe(entityID, period)
-		
+
 		if record.IsExpired() {
 			t.resetRecordUnsafe(entityID, period)
 			record = t.getOrCreateRecordUnsafe(entityID, period)
 		}
-		
+
 		if !record.CanAccommodate(amount) {
 			return fmt.Errorf("%s limit would be exceeded: %.2f + %.2f > %.2f",
 				period, record.Current, amount, record.Limit)
 		}
 	}
-	
+
 	// All limits OK, record usage
 	for period := range entityLimits {
 		record := t.getOrCreateRecordUnsafe(entityID, period)
 		record.Current += amount
 	}
-	
+
 	return nil
 }
 
@@ -157,20 +157,20 @@ func (t *MultiPeriodLimitTracker) RecordUsage(entityID string, amount float64) e
 func (t *MultiPeriodLimitTracker) GetUsage(entityID string) map[Period]*UsageRecord {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
-	
+
 	result := make(map[Period]*UsageRecord)
-	
+
 	entityRecords, exists := t.records[entityID]
 	if !exists {
 		return result
 	}
-	
+
 	for period, record := range entityRecords {
 		// Return copy to prevent external modification
 		recordCopy := *record
 		result[period] = &recordCopy
 	}
-	
+
 	return result
 }
 
@@ -193,13 +193,13 @@ func (t *MultiPeriodLimitTracker) getOrCreateRecord(entityID string, period Peri
 	if t.records[entityID] == nil {
 		t.records[entityID] = make(map[Period]*UsageRecord)
 	}
-	
+
 	record, exists := t.records[entityID][period]
 	if !exists || record.IsExpired() {
 		record = t.createRecord(entityID, period)
 		t.records[entityID][period] = record
 	}
-	
+
 	return record
 }
 
@@ -208,13 +208,13 @@ func (t *MultiPeriodLimitTracker) getOrCreateRecordUnsafe(entityID string, perio
 	if t.records[entityID] == nil {
 		t.records[entityID] = make(map[Period]*UsageRecord)
 	}
-	
+
 	record, exists := t.records[entityID][period]
 	if !exists || record.IsExpired() {
 		record = t.createRecord(entityID, period)
 		t.records[entityID][period] = record
 	}
-	
+
 	return record
 }
 
@@ -222,12 +222,12 @@ func (t *MultiPeriodLimitTracker) getOrCreateRecordUnsafe(entityID string, perio
 func (t *MultiPeriodLimitTracker) createRecord(entityID string, period Period) *UsageRecord {
 	now := time.Now()
 	startTime, endTime := calculatePeriodBounds(now, period)
-	
+
 	limit := float64(0)
 	if t.limits[entityID] != nil {
 		limit = t.limits[entityID][period]
 	}
-	
+
 	return &UsageRecord{
 		Period:    period,
 		StartTime: startTime,
@@ -260,7 +260,7 @@ func calculatePeriodBounds(now time.Time, period Period) (time.Time, time.Time) 
 		start := time.Date(year, month, day, 0, 0, 0, 0, now.Location())
 		end := start.Add(24 * time.Hour)
 		return start, end
-		
+
 	case PeriodWeekly:
 		// Start: beginning of current week (Monday), End: end of week (Sunday)
 		weekday := now.Weekday()
@@ -270,20 +270,20 @@ func calculatePeriodBounds(now time.Time, period Period) (time.Time, time.Time) 
 		}
 		end := start.AddDate(0, 0, 7)
 		return start, end
-		
+
 	case PeriodMonthly:
 		// Start: first day of current month, End: first day of next month
 		year, month, _ := now.Date()
 		start := time.Date(year, month, 1, 0, 0, 0, 0, now.Location())
 		end := start.AddDate(0, 1, 0)
 		return start, end
-		
+
 	case PeriodYearly:
 		// Start: first day of current year, End: first day of next year
 		start := time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
 		end := start.AddDate(1, 0, 0)
 		return start, end
-		
+
 	default:
 		// Default to daily
 		year, month, day := now.Date()
@@ -297,25 +297,25 @@ func calculatePeriodBounds(now time.Time, period Period) (time.Time, time.Time) 
 func (t *MultiPeriodLimitTracker) GetStatistics(entityID string) map[string]interface{} {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
-	
+
 	stats := map[string]interface{}{
 		"entity_id": entityID,
 		"periods":   make(map[Period]map[string]interface{}),
 	}
-	
+
 	entityLimits, hasLimits := t.limits[entityID]
 	entityRecords, hasRecords := t.records[entityID]
-	
+
 	if !hasLimits && !hasRecords {
 		return stats
 	}
-	
+
 	periods := stats["periods"].(map[Period]map[string]interface{})
-	
+
 	for period := range entityLimits {
 		periodStats := make(map[string]interface{})
 		periodStats["limit"] = entityLimits[period]
-		
+
 		if record, exists := entityRecords[period]; exists {
 			periodStats["current"] = record.Current
 			periodStats["remaining"] = record.RemainingCapacity()
@@ -327,9 +327,9 @@ func (t *MultiPeriodLimitTracker) GetStatistics(entityID string) map[string]inte
 			periodStats["remaining"] = entityLimits[period]
 			periodStats["utilization"] = 0.0
 		}
-		
+
 		periods[period] = periodStats
 	}
-	
+
 	return stats
 }

@@ -236,30 +236,30 @@ func hashDelegation(d Delegation) (string, error) {
 
 // SuspensionMetadata tracks suspension details.
 type SuspensionMetadata struct {
-	SuspendedAt    time.Time `json:"suspended_at"`
-	SuspendedBy    string    `json:"suspended_by"`
-	SuspensionEnd  *time.Time `json:"suspension_end,omitempty"`  // nil = indefinite
-	Reason         string    `json:"reason"`
-	SuspensionCount int       `json:"suspension_count"`
+	SuspendedAt     time.Time  `json:"suspended_at"`
+	SuspendedBy     string     `json:"suspended_by"`
+	SuspensionEnd   *time.Time `json:"suspension_end,omitempty"` // nil = indefinite
+	Reason          string     `json:"reason"`
+	SuspensionCount int        `json:"suspension_count"`
 }
 
 // PartialRevocationMetadata tracks partial scope reductions.
 type PartialRevocationMetadata struct {
-	RevokedAt       time.Time         `json:"revoked_at"`
-	RevokedBy       string            `json:"revoked_by"`
-	RemovedScope    map[string]string `json:"removed_scope"`    // what was removed
-	Reason          string            `json:"reason"`
+	RevokedAt    time.Time         `json:"revoked_at"`
+	RevokedBy    string            `json:"revoked_by"`
+	RemovedScope map[string]string `json:"removed_scope"` // what was removed
+	Reason       string            `json:"reason"`
 }
 
 // LifecycleMetadata extends Delegation with operational lifecycle tracking.
 type LifecycleMetadata struct {
-	DelegationID      string
-	LastAccessedAt    time.Time
-	Suspensions       []SuspensionMetadata
+	DelegationID       string
+	LastAccessedAt     time.Time
+	Suspensions        []SuspensionMetadata
 	PartialRevocations []PartialRevocationMetadata
-	TerminationReason string
-	TerminatedAt      *time.Time
-	TerminatedBy      string
+	TerminationReason  string
+	TerminatedAt       *time.Time
+	TerminatedBy       string
 }
 
 // Suspend transitions a delegation to suspended status.
@@ -288,18 +288,18 @@ func (d *Delegation) PartiallyRevoke(removedScope map[string]string, revokedBy, 
 	if d.Status == StatusTerminated {
 		return errors.New("cannot partially revoke terminated delegation")
 	}
-	
+
 	// Remove specified scope keys
 	for key := range removedScope {
 		delete(d.Scope, key)
 	}
-	
+
 	// If all scope removed, terminate instead
 	if len(d.Scope) == 0 {
 		d.Status = StatusTerminated
 		return nil
 	}
-	
+
 	// Transition to partially revoked
 	if err := ValidateDelegationStatusTransition(d.Status, StatusPartiallyRevoked); err != nil {
 		return err

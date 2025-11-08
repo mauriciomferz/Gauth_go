@@ -76,7 +76,7 @@ func NewVaultBackend(config VaultBackendConfig) (*VaultBackend, error) {
 // StoreKey stores a key pair in Vault at the specified path.
 func (v *VaultBackend) StoreKey(keyID string, privateKey ed25519.PrivateKey, publicKey ed25519.PublicKey) error {
 	path := fmt.Sprintf("v1/%s/data/gauth/keys/%s", v.mountPath, keyID)
-	
+
 	data := map[string]interface{}{
 		"data": map[string]interface{}{
 			"private_key": base64.StdEncoding.EncodeToString(privateKey),
@@ -96,14 +96,14 @@ func (v *VaultBackend) RetrieveKey(keyID string) (ed25519.PrivateKey, ed25519.Pu
 	v.mu.RLock()
 	cached, ok := v.cache[keyID]
 	v.mu.RUnlock()
-	
+
 	if ok && time.Since(cached.cachedAt) < cached.ttl {
 		return cached.privateKey, cached.publicKey, nil
 	}
 
 	// Fetch from Vault
 	path := fmt.Sprintf("v1/%s/data/gauth/keys/%s", v.mountPath, keyID)
-	
+
 	var response struct {
 		Data struct {
 			Data map[string]interface{} `json:"data"`
@@ -157,7 +157,7 @@ func (v *VaultBackend) GenerateAndStoreKey() (keyID string, err error) {
 	}
 
 	keyID = deriveKeyIDFromPub(pub)
-	
+
 	if err := v.StoreKey(keyID, priv, pub); err != nil {
 		return "", err
 	}
@@ -179,7 +179,7 @@ func (v *VaultBackend) GenerateAndStoreKey() (keyID string, err error) {
 // ListKeys lists all keys stored in Vault under gauth/keys/.
 func (v *VaultBackend) ListKeys() ([]string, error) {
 	path := fmt.Sprintf("v1/%s/metadata/gauth/keys", v.mountPath)
-	
+
 	var response struct {
 		Data struct {
 			Keys []string `json:"keys"`
@@ -196,7 +196,7 @@ func (v *VaultBackend) ListKeys() ([]string, error) {
 // DeleteKey removes a key from Vault and cache.
 func (v *VaultBackend) DeleteKey(keyID string) error {
 	path := fmt.Sprintf("v1/%s/data/gauth/keys/%s", v.mountPath, keyID)
-	
+
 	if err := v.vaultRequest("DELETE", path, nil, nil); err != nil {
 		return err
 	}
@@ -212,7 +212,7 @@ func (v *VaultBackend) DeleteKey(keyID string) error {
 // vaultRequest performs HTTP request to Vault API.
 func (v *VaultBackend) vaultRequest(method, path string, requestBody interface{}, responseBody interface{}) error {
 	url := fmt.Sprintf("%s/%s", v.address, path)
-	
+
 	var bodyReader io.Reader
 	if requestBody != nil {
 		jsonData, err := json.Marshal(requestBody)
@@ -229,7 +229,7 @@ func (v *VaultBackend) vaultRequest(method, path string, requestBody interface{}
 
 	req.Header.Set("X-Vault-Token", v.token)
 	req.Header.Set("Content-Type", "application/json")
-	
+
 	if v.namespace != "" {
 		req.Header.Set("X-Vault-Namespace", v.namespace)
 	}

@@ -222,9 +222,9 @@ func ValidateScope(items []ScopeItem, validator *ScopeValidator) error {
 
 // FormalValidation represents formal requirement validation state (RFC 0115:4).
 type FormalValidation struct {
-	RequirementsMet bool     `json:"requirements_met"`
-	ChecksPassed    []string `json:"checks_passed,omitempty"`
-	ChecksFailed    []string `json:"checks_failed,omitempty"`
+	RequirementsMet bool      `json:"requirements_met"`
+	ChecksPassed    []string  `json:"checks_passed,omitempty"`
+	ChecksFailed    []string  `json:"checks_failed,omitempty"`
 	Timestamp       time.Time `json:"timestamp"`
 }
 
@@ -250,29 +250,29 @@ type DailyLimit struct {
 
 // PowerLimit represents general power-of-attorney limits (RFC 0115:5).
 type PowerLimit struct {
-	Type        string            `json:"type"` // e.g., "daily", "transaction", "cumulative"
-	MaxValue    float64           `json:"max_value"`
-	CurrentValue float64          `json:"current_value"`
-	Unit        string            `json:"unit,omitempty"`
-	Metadata    map[string]string `json:"metadata,omitempty"`
+	Type         string            `json:"type"` // e.g., "daily", "transaction", "cumulative"
+	MaxValue     float64           `json:"max_value"`
+	CurrentValue float64           `json:"current_value"`
+	Unit         string            `json:"unit,omitempty"`
+	Metadata     map[string]string `json:"metadata,omitempty"`
 }
 
 // TransactionLimit represents per-transaction limits (RFC 0115:5).
 type TransactionLimit struct {
-	MaxAmount      float64 `json:"max_amount"`
-	MinAmount      float64 `json:"min_amount,omitempty"`
-	Currency       string  `json:"currency,omitempty"`
-	RequireApproval bool   `json:"require_approval,omitempty"`
+	MaxAmount       float64 `json:"max_amount"`
+	MinAmount       float64 `json:"min_amount,omitempty"`
+	Currency        string  `json:"currency,omitempty"`
+	RequireApproval bool    `json:"require_approval,omitempty"`
 }
 
 // Rights represents rights granted under power of attorney (RFC 0115:6).
 type Rights struct {
-	Actions       []string          `json:"actions"`
-	Resources     []string          `json:"resources,omitempty"`
-	Constraints   map[string]string `json:"constraints,omitempty"`
-	ValidFrom     time.Time         `json:"valid_from,omitempty"`
-	ValidUntil    time.Time         `json:"valid_until,omitempty"`
-	TransferableSubRights bool      `json:"transferable_sub_rights,omitempty"`
+	Actions               []string          `json:"actions"`
+	Resources             []string          `json:"resources,omitempty"`
+	Constraints           map[string]string `json:"constraints,omitempty"`
+	ValidFrom             time.Time         `json:"valid_from,omitempty"`
+	ValidUntil            time.Time         `json:"valid_until,omitempty"`
+	TransferableSubRights bool              `json:"transferable_sub_rights,omitempty"`
 }
 
 // Obligations represents obligations under power of attorney (RFC 0115:6).
@@ -312,14 +312,14 @@ type RuntimeEvaluation struct {
 
 // ThresholdValidation represents joint signature threshold validation (RFC 0115:8).
 type ThresholdValidation struct {
-	RequiredSignatures int                `json:"required_signatures"`
-	ProvidedSignatures int                `json:"provided_signatures"`
-	ValidSignatures    int                `json:"valid_signatures"`
-	Threshold          int                `json:"threshold"`
-	ThresholdMet       bool               `json:"threshold_met"`
-	SignerIdentities   []string           `json:"signer_identities,omitempty"`
-	ValidationResults  map[string]bool    `json:"validation_results,omitempty"`
-	ValidatedAt        time.Time          `json:"validated_at"`
+	RequiredSignatures int             `json:"required_signatures"`
+	ProvidedSignatures int             `json:"provided_signatures"`
+	ValidSignatures    int             `json:"valid_signatures"`
+	Threshold          int             `json:"threshold"`
+	ThresholdMet       bool            `json:"threshold_met"`
+	SignerIdentities   []string        `json:"signer_identities,omitempty"`
+	ValidationResults  map[string]bool `json:"validation_results,omitempty"`
+	ValidatedAt        time.Time       `json:"validated_at"`
 }
 
 // Reusable constants (reduce duplication and goconst warnings)
@@ -406,6 +406,7 @@ func ValidateMultiSignature(p *PowerOfAttorney) error {
 //   - canonical_digest_failed
 //   - invalid_signature_<signer>
 //   - missing_signature_<signer> (optional; only enforced if mandatorySignatures enabled in service)
+//
 //nolint:gocyclo // Multi-signature verification with threshold logic
 func (s *Service) verifyMultiSignatures(p *PowerOfAttorney) error {
 	if p == nil {
@@ -953,8 +954,9 @@ type TokenVerificationResult struct {
 // 2. Sanity check envelope fields.
 // 3. Lookup current POA and derive revoked / expired status.
 // 4. If POA has a signature: verify digest, locate public key, verify signature.
-//nolint:gocyclo // RFC-0111 token verification with delegation chain validation
 // Returns a rich result struct and possible RFC error (expired, revoked, integrity_failure, unauthorized, etc.).
+//
+//nolint:gocyclo // RFC-0111 token verification with delegation chain validation
 //nolint:gocyclo // RFC-0111 token verification with delegation chain validation
 func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVerificationResult, error) {
 	if tokenString == "" {
@@ -1082,7 +1084,7 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 	if !ok || poa == nil {
 		return nil, rfc.New(rfc.ErrNotFound, delegationID)
 	}
-	
+
 	// Jurisdiction enforcement (P1.3): Validate jurisdiction-specific rules DURING token verification.
 	// This enforces runtime compliance with GDPR consent, CCPA opt-out, cross-border rules, data residency, and blocked actions.
 	// Extract claims from the envelope for enforcement context.
@@ -1099,12 +1101,12 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 	} else if len(env.Scope) > 0 {
 		enforcementClaims["action"] = env.Scope[0]
 	}
-	
+
 	// Enforce jurisdiction rules (when enabled, this is a no-op otherwise)
 	if err := s.enforceJurisdictionOnVerification(ctx, poa, enforcementClaims); err != nil {
 		return nil, rfc.New(rfc.ErrUnauthorized, fmt.Sprintf("jurisdiction enforcement denied: %v", err))
 	}
-	
+
 	// Offline verification mode (GAUTH_OFFLINE_VERIFICATION=1): prefer embedded PoA over repository lookup
 	// when RawPOA is present in EnvelopeV2. This enables token verification without external dependencies.
 	// Feature-gated because it changes verification semantics (embedded PoA may differ from repository state).
@@ -1131,7 +1133,7 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 			s.metrics.IncEnvelopeDigestMismatch()
 		}
 	}
-	
+
 	res := &TokenVerificationResult{
 		DelegationID: delegationID,
 		Grantor: func() string {
@@ -1409,14 +1411,14 @@ func VerifyDelegationToken(ctx context.Context, svc *Service, tok string) (*Toke
 // This enables offline token verification without requiring access to the PoA repository.
 //
 // Requirements (RFC0115 sec3.item2):
-//  - RawPOA field must be non-empty (GAUTH_EMBED_FULL_POA=1 must have been enabled during token issuance)
-//  - RawPOA must contain valid canonical JSON representing a PowerOfAttorney
-//  - Extracted PoA.ID must match the DelegationID from the token envelope
-//  - Extracted PoA must pass basic structural validation (non-empty fields, valid timestamps)
+//   - RawPOA field must be non-empty (GAUTH_EMBED_FULL_POA=1 must have been enabled during token issuance)
+//   - RawPOA must contain valid canonical JSON representing a PowerOfAttorney
+//   - Extracted PoA.ID must match the DelegationID from the token envelope
+//   - Extracted PoA must pass basic structural validation (non-empty fields, valid timestamps)
 //
 // Returns:
-//  - *PowerOfAttorney: the extracted and validated PoA definition
-//  - error: validation failure (ErrInvalidRequest if RawPOA missing/invalid, ErrIntegrityFailure if ID mismatch)
+//   - *PowerOfAttorney: the extracted and validated PoA definition
+//   - error: validation failure (ErrInvalidRequest if RawPOA missing/invalid, ErrIntegrityFailure if ID mismatch)
 //
 // Usage:
 //
@@ -1430,12 +1432,12 @@ func ExtractEmbeddedPoA(result *TokenVerificationResult) (*PowerOfAttorney, erro
 	if result == nil {
 		return nil, rfc.New(rfc.ErrInvalidRequest, "nil verification result")
 	}
-	
+
 	// Check if RawPOA is present (requires GAUTH_EMBED_FULL_POA=1 during issuance)
 	if result.RawPOA == "" {
 		return nil, rfc.New(rfc.ErrInvalidRequest, "no embedded poa definition (GAUTH_EMBED_FULL_POA=1 not enabled)")
 	}
-	
+
 	// Parse canonical JSON - the canonical format encodes version as a string (for digest stability),
 	// but PowerOfAttorney expects an int. We need a custom unmarshal step.
 	// Create an intermediate struct that accepts version as either string or int.
@@ -1443,12 +1445,12 @@ func ExtractEmbeddedPoA(result *TokenVerificationResult) (*PowerOfAttorney, erro
 		PowerOfAttorney
 		VersionRaw interface{} `json:"version"` // Accept string or int
 	}
-	
+
 	var intermediate canonicalPoA
 	if err := json.Unmarshal([]byte(result.RawPOA), &intermediate); err != nil {
 		return nil, rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid embedded poa json: %v", err))
 	}
-	
+
 	// Convert version from string to int if needed
 	switch v := intermediate.VersionRaw.(type) {
 	case string:
@@ -1464,9 +1466,9 @@ func ExtractEmbeddedPoA(result *TokenVerificationResult) (*PowerOfAttorney, erro
 	default:
 		return nil, rfc.New(rfc.ErrInvalidRequest, "version field must be string or number")
 	}
-	
+
 	poa := &intermediate.PowerOfAttorney
-	
+
 	// Validate extracted PoA matches token envelope DelegationID
 	if poa.ID == "" {
 		return nil, rfc.New(rfc.ErrIntegrityFailure, "embedded poa missing id field")
@@ -1474,7 +1476,7 @@ func ExtractEmbeddedPoA(result *TokenVerificationResult) (*PowerOfAttorney, erro
 	if result.DelegationID != "" && poa.ID != result.DelegationID {
 		return nil, rfc.New(rfc.ErrIntegrityFailure, fmt.Sprintf("embedded poa id mismatch: envelope=%s embedded=%s", result.DelegationID, poa.ID))
 	}
-	
+
 	// Basic structural validation (ensures PoA is not malformed)
 	if poa.Grantor == "" {
 		return nil, rfc.New(rfc.ErrInvalidRequest, "embedded poa missing grantor")
@@ -1485,7 +1487,7 @@ func ExtractEmbeddedPoA(result *TokenVerificationResult) (*PowerOfAttorney, erro
 	if len(poa.Scope) == 0 {
 		return nil, rfc.New(rfc.ErrInvalidRequest, "embedded poa missing scope")
 	}
-	
+
 	// Temporal validation (ensure timestamps are reasonable)
 	if poa.ValidUntil.IsZero() {
 		return nil, rfc.New(rfc.ErrInvalidRequest, "embedded poa missing valid_until")
@@ -1493,7 +1495,7 @@ func ExtractEmbeddedPoA(result *TokenVerificationResult) (*PowerOfAttorney, erro
 	if !poa.ValidFrom.IsZero() && poa.ValidUntil.Before(poa.ValidFrom) {
 		return nil, rfc.New(rfc.ErrInvalidRequest, "embedded poa valid_until before valid_from")
 	}
-	
+
 	return poa, nil
 }
 
@@ -1522,10 +1524,10 @@ func ExtractEmbeddedPoA(result *TokenVerificationResult) (*PowerOfAttorney, erro
 //   - Embedded PoA size distribution (histogram)
 func (s *Service) ExtractEmbeddedPoAWithAudit(ctx context.Context, result *TokenVerificationResult) (*PowerOfAttorney, error) {
 	start := time.Now()
-	
+
 	// Attempt extraction using base function
 	poa, err := ExtractEmbeddedPoA(result)
-	
+
 	// Track metrics
 	extractionLatency := time.Since(start)
 	if s.metrics != nil {
@@ -1540,15 +1542,15 @@ func (s *Service) ExtractEmbeddedPoAWithAudit(ctx context.Context, result *Token
 			s.metrics.IncEnvelopeRawPOATooLarge() // Reuse as generic extraction failure counter
 		}
 	}
-	
+
 	// Log audit event
 	if s.audit != nil {
 		auditEvent := map[string]interface{}{
-			"event_type":        "embedded_poa_extraction",
-			"timestamp":         s.nowFn().UTC().Format(time.RFC3339Nano),
+			"event_type":            "embedded_poa_extraction",
+			"timestamp":             s.nowFn().UTC().Format(time.RFC3339Nano),
 			"extraction_latency_ms": extractionLatency.Milliseconds(),
 		}
-		
+
 		if err == nil && poa != nil {
 			auditEvent["status"] = "success"
 			auditEvent["poa_id"] = poa.ID
@@ -1566,11 +1568,11 @@ func (s *Service) ExtractEmbeddedPoAWithAudit(ctx context.Context, result *Token
 				auditEvent["delegation_id"] = result.DelegationID
 			}
 		}
-		
+
 		// Log asynchronously (non-blocking)
 		_ = s.audit.Log(ctx, auditEvent)
 	}
-	
+
 	return poa, err
 }
 
@@ -1582,33 +1584,33 @@ type AuditLogger interface {
 }
 
 type Service struct {
-	repo                POARepository // persistence abstraction (Milestone 2A)
-	audit               AuditLogger
-	authz               authz.Authorizer
-	pdp                 pdp.Engine   // optional modern PDP engine
-	ledger              ledger.Store // optional immutable audit ledger backend
-	nowFn               func() time.Time
-	clockSkew           time.Duration // tolerated clock skew for ValidFrom/ValidUntil windows
-	revChain            *delegation.RevocationChain
-	issChain            *DelegationChain
-	tokenKey            []byte                      // legacy symmetric key (to be deprecated after envelope migration)
-	keyRing             *keyring.KeyRing            // Milestone 2A: key management (active + previous)
-	metrics             metrics.Metrics             // instrumentation (noop by default)
-	signerProvider      func() (cr.Signer, error)   // optional signing capability
-	strictAuthenticity  bool                        // if true, missing public key becomes integrity failure instead of soft skip
-	anchorClient        AnchorClient                // optional external anchoring client
-	keyProvider         cr.KeyProvider              // asymmetric key provider for signature verification
-	replay              *replayCache                // optional in-memory replay protection
-	replayStore         ReplayStore                 // optional external distributed replay store (takes precedence if non-nil)
-	sigReplayStore      SignatureReplayStore        // optional signature replay protection store (issuance path)
-	failClosedReplay    bool                        // if true, replay store errors become invalid_request instead of fail-open
-	limits              ValidationLimits            // configurable validation limits
-	poaValidator        PoAValidator                // semantic validator applied post basic validation
-	enhancedValidator   *EnhancedPoAValidator       // enhanced validator with warning collection and daily limits (optional)
-	mandatorySignatures bool                        // if true, issuance aborts when signature cannot be produced
-	attestAnchors       *attest.TrustAnchorRegistry // optional trust anchor registry for attestation proofs
-	jurisdictionEnforcement *JurisdictionEnforcement // optional jurisdiction-specific enforcement (P1.3)
-	auditSink           AuditSink                    // optional external audit sink for token lifecycle events (P1.4)
+	repo                    POARepository // persistence abstraction (Milestone 2A)
+	audit                   AuditLogger
+	authz                   authz.Authorizer
+	pdp                     pdp.Engine   // optional modern PDP engine
+	ledger                  ledger.Store // optional immutable audit ledger backend
+	nowFn                   func() time.Time
+	clockSkew               time.Duration // tolerated clock skew for ValidFrom/ValidUntil windows
+	revChain                *delegation.RevocationChain
+	issChain                *DelegationChain
+	tokenKey                []byte                      // legacy symmetric key (to be deprecated after envelope migration)
+	keyRing                 *keyring.KeyRing            // Milestone 2A: key management (active + previous)
+	metrics                 metrics.Metrics             // instrumentation (noop by default)
+	signerProvider          func() (cr.Signer, error)   // optional signing capability
+	strictAuthenticity      bool                        // if true, missing public key becomes integrity failure instead of soft skip
+	anchorClient            AnchorClient                // optional external anchoring client
+	keyProvider             cr.KeyProvider              // asymmetric key provider for signature verification
+	replay                  *replayCache                // optional in-memory replay protection
+	replayStore             ReplayStore                 // optional external distributed replay store (takes precedence if non-nil)
+	sigReplayStore          SignatureReplayStore        // optional signature replay protection store (issuance path)
+	failClosedReplay        bool                        // if true, replay store errors become invalid_request instead of fail-open
+	limits                  ValidationLimits            // configurable validation limits
+	poaValidator            PoAValidator                // semantic validator applied post basic validation
+	enhancedValidator       *EnhancedPoAValidator       // enhanced validator with warning collection and daily limits (optional)
+	mandatorySignatures     bool                        // if true, issuance aborts when signature cannot be produced
+	attestAnchors           *attest.TrustAnchorRegistry // optional trust anchor registry for attestation proofs
+	jurisdictionEnforcement *JurisdictionEnforcement    // optional jurisdiction-specific enforcement (P1.3)
+	auditSink               AuditSink                   // optional external audit sink for token lifecycle events (P1.4)
 	// semanticCounters prototype: fine-grained semantic rejection reasons (will be surfaced via endpoints later)
 	semanticCounters struct {
 		AmountLimitExceeded      uint64
@@ -2010,11 +2012,12 @@ func (s *Service) WithClock(f func() time.Time) *Service { s.nowFn = f; return s
 // CreateDelegation is a backward-compatible wrapper that uses context.Background().
 func (s *Service) CreateDelegation(req DelegationRequest) (*DelegationResponse, error) {
 	return s.CreateDelegationCtx(context.Background(), req)
-//nolint:gocyclo // Delegation creation with constraint validation
+	//nolint:gocyclo // Delegation creation with constraint validation
 }
 
-//nolint:gocyclo // Delegation creation with constraint validation
 // CreateDelegationCtx creates a new power-of-attorney with a caller-supplied context (supports cancellation / deadlines).
+//
+//nolint:gocyclo // Delegation creation with constraint validation
 func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest) (*DelegationResponse, error) {
 	// Validate request
 	if err := s.validateDelegationRequest(req); err != nil {
@@ -2104,14 +2107,14 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 		ParentPOAID:  req.ParentPOAID,
 		Depth:        depth,
 	}
-	
+
 	// Jurisdiction enforcement (P1.3): Validate jurisdiction-specific rules BEFORE creating delegation.
 	// This gates creation based on GDPR consent, CCPA opt-out, cross-border rules, data residency, and blocked actions.
 	// When enforcement is disabled (nil), this is a no-op allowing all operations (backward compatible).
 	if err := s.enforceJurisdictionOnIssuance(ctx, req, poa); err != nil {
 		return nil, rfc.New(rfc.ErrUnauthorized, fmt.Sprintf("jurisdiction enforcement denied: %v", err))
 	}
-	
+
 	// Hierarchical digest activation gating (Version 4). Controlled by env flags:
 	// GAUTH_ENABLE_HIER_DIGEST=1 enables automatic Version bump to 4 for new issuances.
 	// GAUTH_FORCE_HIER_DIGEST=1 enforces Version=4 even if enabling logic conditions fail (defensive activation).
@@ -2307,10 +2310,12 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 
 // ValidateDelegation validates a power-of-attorney for a specific action
 // ValidateDelegation is a backward-compatible wrapper using context.Background().
+//
 //nolint:gocyclo // Delegation validation with chain verification
 func (s *Service) ValidateDelegation(poaID, grantee, action string) error {
 	return s.ValidateDelegationCtx(context.Background(), poaID, grantee, action)
 }
+
 //nolint:gocyclo // Delegation validation with chain verification
 
 // ValidateDelegationCtx validates a power-of-attorney for a specific action with context support.
@@ -2598,12 +2603,12 @@ func (s *Service) InitiateRevocation(ctx context.Context, req RevocationRequest)
 	poa.Status = POAStatusSuspended // place into suspended during pending revocation (prevents usage)
 	poa.UpdatedAt = s.nowFn()
 	_ = s.repo.Update(poa)
-//nolint:gocyclo // Revocation approval with state transitions
+	//nolint:gocyclo // Revocation approval with state transitions
 	if s.metrics != nil {
 		s.metrics.IncRevocationWorkflowInitiated()
 	}
 	return nil
-//nolint:gocyclo // Revocation approval with state transitions
+	//nolint:gocyclo // Revocation approval with state transitions
 }
 
 // ApproveRevocation records an approval and evaluates quorum satisfaction.
@@ -2730,13 +2735,13 @@ func (s *Service) finalizeRevocation(poa *PowerOfAttorney) error {
 // identityIn helper checks presence of id in slice (case-sensitive exact match).
 func identityIn(id string, list []string) bool {
 	for _, v := range list {
-//nolint:gocyclo // Rich delegation validation with context checks
+		//nolint:gocyclo // Rich delegation validation with context checks
 		if v == id {
 			return true
 		}
 	}
 	return false
-//nolint:gocyclo // Rich delegation validation with context checks
+	//nolint:gocyclo // Rich delegation validation with context checks
 }
 
 // ValidateDelegationRich validates a POA using a structured ValidationContext.
@@ -3550,14 +3555,14 @@ func (dc *DelegationChain) Verify() error {
 		if ev.Hash != expect || ev.PrevHash != prev || ev.Index != i {
 			return fmt.Errorf("delegation chain integrity failure at index %d", i)
 		}
-//nolint:gocyclo // Request validation with business rules
+		//nolint:gocyclo // Request validation with business rules
 	}
 	return nil
 }
 
 // computeHash is a small helper (reuse revocation chain style) – SHA256 hex.
 func computeHash(data []byte) string {
-//nolint:gocyclo // Request validation with business rules
+	//nolint:gocyclo // Request validation with business rules
 	h := sha256.Sum256(data)
 	return fmt.Sprintf("%x", h[:])
 }
@@ -3816,7 +3821,7 @@ func auditActionAmount(ctx context.Context) (string, bool) {
 		return "", false
 	}
 	if s, ok := v.(string); ok {
-//nolint:gocyclo // Auth token generation with capability encoding
+		//nolint:gocyclo // Auth token generation with capability encoding
 		return s, true
 	}
 	return fmt.Sprintf("%v", v), true
@@ -3824,6 +3829,7 @@ func auditActionAmount(ctx context.Context) (string, bool) {
 
 // generatePOAID generates a unique ID for a power-of-attorney
 // poaIDGenerator is a variable to allow deterministic override in tests (signature replay scenarios).
+//
 //nolint:gocyclo // Auth token generation with capability encoding
 var poaIDGenerator = func() string { return fmt.Sprintf("poa_%d", time.Now().UnixNano()) }
 
@@ -3992,23 +3998,23 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 			}
 			// Build claims metadata with issuer trust level, delegation chain length, and policy version
 			claimsMeta := &gauth.ClaimsMetadata{
-				Version:      "1.0",                                            // Claims schema version
-				Capabilities: poa.Scope,                                        // Supported capabilities = delegated scopes
-				Source:       "rfc0111-service",                                // Claims source identifier
-				Confidence:   1.0,                                              // Full confidence for directly issued tokens
+				Version:      "1.0",             // Claims schema version
+				Capabilities: poa.Scope,         // Supported capabilities = delegated scopes
+				Source:       "rfc0111-service", // Claims source identifier
+				Confidence:   1.0,               // Full confidence for directly issued tokens
 			}
 			// Populate AdvancedClaims with standard JWT claims + GAuth-specific metadata
 			env2.AdvancedClaims = &gauth.AdvancedClaims{
-				Subject:   poa.Grantee,
-				Issuer:    poa.Grantor,
-				Audience:  []string{poa.Grantee}, // Audience = grantee (token intended for grantee's use)
-				ExpiresAt: poa.ValidUntil.Unix(),
-				IssuedAt:  now.Unix(),
-				NotBefore: now.Unix(),
-				JWTID:     env2.JTI,
-				Scope:     poa.Scope,
-				TokenType: tokenType, // typ semantic enforcement (gauth.delegation, gauth.token, gauth.capability)
-				ClientID:  poa.ID,    // ClientID = delegation ID for traceability
+				Subject:        poa.Grantee,
+				Issuer:         poa.Grantor,
+				Audience:       []string{poa.Grantee}, // Audience = grantee (token intended for grantee's use)
+				ExpiresAt:      poa.ValidUntil.Unix(),
+				IssuedAt:       now.Unix(),
+				NotBefore:      now.Unix(),
+				JWTID:          env2.JTI,
+				Scope:          poa.Scope,
+				TokenType:      tokenType, // typ semantic enforcement (gauth.delegation, gauth.token, gauth.capability)
+				ClientID:       poa.ID,    // ClientID = delegation ID for traceability
 				ClaimsMetadata: claimsMeta,
 				Custom: map[string]interface{}{
 					"delegation_chain_length": chainLength,

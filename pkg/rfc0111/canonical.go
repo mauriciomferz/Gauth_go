@@ -38,6 +38,7 @@ const poaDigestDomainV1 = "GAUTH_RFC0111_POA_V1\n" // trailing newline as delimi
 
 // CanonicalPOADigest returns (digestHex, canonicalJSON, error) for the supplied POA.
 // digestHex = SHA256( domain || canonicalJSON ) in lowercase hex.
+//
 //nolint:gocyclo // Canonical digest generation with field normalization
 func CanonicalPOADigest(p *PowerOfAttorney) (string, []byte, error) {
 	if p == nil {

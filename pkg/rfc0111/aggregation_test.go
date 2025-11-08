@@ -29,7 +29,7 @@ func TestBLSAggregationRoundTrip(t *testing.T) {
 	// Create 3 BLS key pairs
 	keys := make([]*icrypto.BLSKey, 3)
 	sigs := make([][]byte, 3)
-	
+
 	for i := 0; i < 3; i++ {
 		key, err := icrypto.GenerateBLSKey()
 		if err != nil {
@@ -85,7 +85,7 @@ func TestBatchTokenVerification(t *testing.T) {
 	// Create 10 valid tokens
 	const numTokens = 10
 	tokens := make([]string, numTokens)
-	
+
 	for i := 0; i < numTokens; i++ {
 		req := DelegationRequest{
 			Grantor:  "alice",
@@ -158,17 +158,17 @@ func TestThresholdWeighted(t *testing.T) {
 	// alice=5, bob=3, carol=2 (total 10, threshold 6)
 	// With 3 signers and threshold 6, this is WEIGHTED mode (weight-based not count-based)
 	poa := &PowerOfAttorney{
-		ID:        "weighted-1",
-		Grantor:   "org",
-		Grantee:   "service",
-		Scope:     []string{"execute"},
-		ValidFrom: time.Now().UTC(),
+		ID:         "weighted-1",
+		Grantor:    "org",
+		Grantee:    "service",
+		Scope:      []string{"execute"},
+		ValidFrom:  time.Now().UTC(),
 		ValidUntil: time.Now().UTC().Add(time.Hour),
-		CreatedAt: time.Now().UTC(),
-		Signers:   []string{"alice", "bob", "carol"},
-		Threshold: 2, // Count-based threshold (2 of 3)
-		Weights:   map[string]int{"alice": 5, "bob": 3, "carol": 2},
-		Version:   1,
+		CreatedAt:  time.Now().UTC(),
+		Signers:    []string{"alice", "bob", "carol"},
+		Threshold:  2, // Count-based threshold (2 of 3)
+		Weights:    map[string]int{"alice": 5, "bob": 3, "carol": 2},
+		Version:    1,
 	}
 
 	// Structural validation should pass (threshold 2 <= signers 3)
@@ -215,7 +215,7 @@ func TestMultiAlgorithmCoexistence(t *testing.T) {
 	// This test validates that Ed25519 and BLS signatures can coexist
 	// In the current implementation, multi-signatures use Ed25519
 	// BLS aggregation is separate and used for batch verification
-	
+
 	svc := aggregationTestService()
 	ctx := context.Background()
 
@@ -241,7 +241,7 @@ func TestMultiAlgorithmCoexistence(t *testing.T) {
 	}
 
 	t.Logf("✓ Multi-algorithm coexistence test passed (Ed25519 verified)")
-	
+
 	// BLS aggregation is independent and used for batch optimization
 	// Future enhancement: Support BLS signatures in PoA MultiSignatures field
 }
@@ -258,7 +258,7 @@ func TestAggregationPerformance(t *testing.T) {
 	// Create 50 tokens
 	const numTokens = 50
 	tokens := make([]string, numTokens)
-	
+
 	for i := 0; i < numTokens; i++ {
 		req := DelegationRequest{
 			Grantor:  "alice",
@@ -280,11 +280,11 @@ func TestAggregationPerformance(t *testing.T) {
 		MaxWorkers: 8,
 		Context:    ctx,
 	}
-	
+
 	batchStart := time.Now()
 	batchResults, err := svc.BatchVerifyTokens(batchReq)
 	batchLatency := time.Since(batchStart)
-	
+
 	if err != nil {
 		t.Fatalf("Batch verification failed: %v", err)
 	}
@@ -320,7 +320,7 @@ func TestAggregationPerformance(t *testing.T) {
 // TestBatchVerificationCancellation tests context cancellation
 func TestBatchVerificationCancellation(t *testing.T) {
 	svc := aggregationTestService()
-	
+
 	// Create context with immediate cancellation
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
@@ -397,10 +397,10 @@ func TestBLSEnvironmentFlags(t *testing.T) {
 	defer os.Unsetenv("GAUTH_BATCH_VERIFY_BLS")
 
 	batchReq := BatchVerifyTokensRequest{
-		Tokens:   tokens,
-		Context:  ctx,
+		Tokens:  tokens,
+		Context: ctx,
 	}
-	
+
 	results, err := svc.BatchVerifyTokens(batchReq)
 	if err != nil {
 		t.Fatalf("Batch verification failed: %v", err)

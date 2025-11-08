@@ -77,14 +77,26 @@ func NewDefaultHandler() *DefaultHandler {
 	}
 
 	// Register default obligation handlers
-	handler.RegisterObligationHandler("log", logObligation)
-	handler.RegisterObligationHandler("notify", notifyObligation)
-	handler.RegisterObligationHandler("validate", validateObligation)
+	if err := handler.RegisterObligationHandler("log", logObligation); err != nil {
+		panic(fmt.Sprintf("failed to register log obligation handler: %v", err))
+	}
+	if err := handler.RegisterObligationHandler("notify", notifyObligation); err != nil {
+		panic(fmt.Sprintf("failed to register notify obligation handler: %v", err))
+	}
+	if err := handler.RegisterObligationHandler("validate", validateObligation); err != nil {
+		panic(fmt.Sprintf("failed to register validate obligation handler: %v", err))
+	}
 
 	// Register default advice handlers
-	handler.RegisterAdviceHandler("recommendation", logAdvice)
-	handler.RegisterAdviceHandler("warning", logAdvice)
-	handler.RegisterAdviceHandler("info", logAdvice)
+	if err := handler.RegisterAdviceHandler("recommendation", logAdvice); err != nil {
+		panic(fmt.Sprintf("failed to register recommendation advice handler: %v", err))
+	}
+	if err := handler.RegisterAdviceHandler("warning", logAdvice); err != nil {
+		panic(fmt.Sprintf("failed to register warning advice handler: %v", err))
+	}
+	if err := handler.RegisterAdviceHandler("info", logAdvice); err != nil {
+		panic(fmt.Sprintf("failed to register info advice handler: %v", err))
+	}
 
 	return handler
 }

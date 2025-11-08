@@ -159,7 +159,7 @@ func TestCascadeProcessor(t *testing.T) {
 		if result.SuccessCount != 3 {
 			t.Errorf("expected 3 successful, got %d", result.SuccessCount)
 		}
-		
+
 		// Allow async audit processing to complete
 		time.Sleep(50 * time.Millisecond)
 

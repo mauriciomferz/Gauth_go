@@ -8,30 +8,30 @@ import (
 
 // Dispute represents a policy conflict or authorization dispute requiring arbitration.
 type Dispute struct {
-	ID          string                 `json:"id"`
-	Type        string                 `json:"type"` // "policy_conflict", "delegation_dispute", "jurisdiction_conflict"
-	Subject     string                 `json:"subject"`
-	Resource    string                 `json:"resource"`
-	Action      string                 `json:"action"`
-	Policies    []string               `json:"policies"`     // Conflicting policy IDs
-	Decisions   []string               `json:"decisions"`    // Conflicting decisions
-	Context     map[string]interface{} `json:"context"`      // Additional context
-	CreatedAt   time.Time              `json:"created_at"`
-	Status      string                 `json:"status"` // "pending", "resolved", "escalated"
-	Resolution  string                 `json:"resolution,omitempty"`
-	ResolvedBy  string                 `json:"resolved_by,omitempty"`
-	ResolvedAt  *time.Time             `json:"resolved_at,omitempty"`
+	ID         string                 `json:"id"`
+	Type       string                 `json:"type"` // "policy_conflict", "delegation_dispute", "jurisdiction_conflict"
+	Subject    string                 `json:"subject"`
+	Resource   string                 `json:"resource"`
+	Action     string                 `json:"action"`
+	Policies   []string               `json:"policies"`  // Conflicting policy IDs
+	Decisions  []string               `json:"decisions"` // Conflicting decisions
+	Context    map[string]interface{} `json:"context"`   // Additional context
+	CreatedAt  time.Time              `json:"created_at"`
+	Status     string                 `json:"status"` // "pending", "resolved", "escalated"
+	Resolution string                 `json:"resolution,omitempty"`
+	ResolvedBy string                 `json:"resolved_by,omitempty"`
+	ResolvedAt *time.Time             `json:"resolved_at,omitempty"`
 }
 
 // ArbitrationResult represents the outcome of arbitration.
 type ArbitrationResult struct {
-	DisputeID    string                 `json:"dispute_id"`
-	Decision     string                 `json:"decision"` // "permit", "deny", "escalate"
-	Reasoning    string                 `json:"reasoning"`
-	AppliedRule  string                 `json:"applied_rule,omitempty"`
-	Metadata     map[string]interface{} `json:"metadata,omitempty"`
-	ResolvedAt   time.Time              `json:"resolved_at"`
-	RequiresEscalation bool              `json:"requires_escalation"`
+	DisputeID          string                 `json:"dispute_id"`
+	Decision           string                 `json:"decision"` // "permit", "deny", "escalate"
+	Reasoning          string                 `json:"reasoning"`
+	AppliedRule        string                 `json:"applied_rule,omitempty"`
+	Metadata           map[string]interface{} `json:"metadata,omitempty"`
+	ResolvedAt         time.Time              `json:"resolved_at"`
+	RequiresEscalation bool                   `json:"requires_escalation"`
 }
 
 // Arbiter defines the interface for dispute arbitration.

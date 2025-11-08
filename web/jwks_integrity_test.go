@@ -224,4 +224,3 @@ func TestJWKSNoWarningWhenNoDeprecation(t *testing.T) {
 		t.Errorf("unexpected Warning header when keys not deprecated: %s", warning)
 	}
 }
-

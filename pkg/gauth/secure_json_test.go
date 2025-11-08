@@ -171,13 +171,13 @@ func TestSecureJSONParser_MalformedJSON(t *testing.T) {
 	parser := DefaultSecureParser()
 
 	malformedTests := []string{
-		`{`,                          // Incomplete object
-		`{"key":}`,                   // Missing value
-		`{"key":"value"`,             // Missing closing brace
-		`{"key":value}`,              // Unquoted string value
-		`{'key':'value'}`,            // Single quotes instead of double
-		`{"key":"value",}`,           // Trailing comma
-		`{key:"value"}`,              // Unquoted key
+		`{`,                // Incomplete object
+		`{"key":}`,         // Missing value
+		`{"key":"value"`,   // Missing closing brace
+		`{"key":value}`,    // Unquoted string value
+		`{'key':'value'}`,  // Single quotes instead of double
+		`{"key":"value",}`, // Trailing comma
+		`{key:"value"}`,    // Unquoted key
 	}
 
 	for i, malformed := range malformedTests {
@@ -329,11 +329,11 @@ func TestComputeMaxDepth(t *testing.T) {
 // TestValidateJSONSecurity tests the fast pre-validation function
 func TestValidateJSONSecurity(t *testing.T) {
 	tests := []struct {
-		name    string
-		json    string
-		maxSize int
+		name     string
+		json     string
+		maxSize  int
 		maxDepth int
-		wantErr bool
+		wantErr  bool
 	}{
 		{
 			name:     "valid_json",

@@ -28,10 +28,10 @@ type SecureJSONParser struct {
 // DefaultSecureParser returns a SecureJSONParser with recommended security defaults
 func DefaultSecureParser() *SecureJSONParser {
 	return &SecureJSONParser{
-		MaxDepth:            32,  // Recommended max nesting depth
+		MaxDepth:            32,          // Recommended max nesting depth
 		MaxSize:             1024 * 1024, // 1MB max payload
-		StrictUnknownFields: false, // Backward compatible default
-		ValidateUTF8:        true,  // Always validate UTF-8
+		StrictUnknownFields: false,       // Backward compatible default
+		ValidateUTF8:        true,        // Always validate UTF-8
 	}
 }
 
