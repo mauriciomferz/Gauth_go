@@ -67,12 +67,6 @@ type LoadTestResult struct {
 	AvgLatency  float64
 }
 
-// workerTask represents a single operation for a worker.
-type workerTask struct {
-	opType string // "create", "validate", "revoke"
-	poaID  string
-}
-
 // TestLoad_ThroughputBaseline measures sustained throughput under low concurrency.
 //
 // Goal: Establish baseline throughput for single-worker scenario.

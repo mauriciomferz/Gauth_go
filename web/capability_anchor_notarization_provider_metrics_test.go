@@ -59,8 +59,7 @@ func TestCapabilityAnchorNotarizationProviderMetrics(t *testing.T) {
 	// Trigger a failure to exercise provider-labeled failures vector.
 	os.Setenv("GAUTH_NOTARY_STUB_FAIL_PROB", "1") // force failure next attempt
 	// Recreate stub to pick up new env configuration.
-	if _, hasLatest := srv.notarizer.(interface{ Latest() interface{} }); hasLatest { /* noop - type hint to avoid unused */
-	}
+	_, _ = srv.notarizer.(interface{ Latest() interface{} }) // type hint to ensure interface compatibility
 	srv.notarizer = notary.NewExternalStub()
 	_, err2 := srv.notarizer.Notarize(srv.capabilityRegistryHash)
 	if err2 == nil {

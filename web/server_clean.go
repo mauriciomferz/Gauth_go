@@ -722,8 +722,7 @@ func (s *BetaServer) RegisterUIRoutes() {
 	// Helper to create a random base64url nonce (16 bytes -> 22 chars).
 	genNonce := func() string {
 		b := make([]byte, 16)
-		//nolint:gosec // G404: weak random acceptable for CSP nonce generation in test/demo
-		if _, err := rand.Read(b); err != nil {
+		if _, err := crand.Read(b); err != nil {
 			// Fallback deterministic (test environments) – still includes 'nonce-' prefix satisfying regex.
 			return "deadbeefdeadbeefdead"
 		}
@@ -1049,17 +1048,13 @@ func (s *BetaServer) buildAndOptionallySignRotationV2() (notary.WeightedRotation
 				}
 			}
 		}
-		force := os.Getenv("GAUTH_ROTATIONS_V2_FORCE_SIGN") == "1"
 		for _, sref := range cfg.Signers { // use config ordering (artifact already re-sorted)
 			if strings.ToUpper(sref.Alg) != "ED25519" {
 				continue
 			} // only Ed25519 currently
 			pk, ok := privMap[sref.ID]
 			if !ok {
-				if !force {
-					continue
-				}
-				// force mode: skip silently (could record failure in future)
+				// Skip signers without keys (could record failure in future)
 				continue
 			}
 			_ = notary.AttachEd25519Signature(&art, pk, sref.ID, "ED25519", sref.Weight) // ignore error; signer entry exists
@@ -2096,8 +2091,7 @@ func (s *BetaServer) maybeAugmentAndSignAttestation(att modelLimitsAttestation) 
 			// Inject per-attestation nonce if absent (raw base64, 16 bytes) to prevent replay of identical payloads.
 			if att.Nonce == "" {
 				var nb [16]byte
-				//nolint:gosec // G404: weak random acceptable for attestation nonce in demo server
-				_, _ = rand.Read(nb[:])
+				_, _ = crand.Read(nb[:])
 				att.Nonce = base64.RawStdEncoding.EncodeToString(nb[:])
 			}
 			unsigned := att
@@ -3755,7 +3749,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 					if s.primaryAuthService != nil {
 						snap := s.primaryAuthService.ViolationSnapshot()
 						for k, g := range s.otelViolationCounters {
-						//nolint:gosec // G115: violation counter, safe conversion
+							//nolint:gosec // G115: violation counter, safe conversion
 							o.ObserveInt64(g, int64(snap[k])) //nolint:gosec // G115: violation counter
 						}
 						rates := s.violationRatesForWindows()
@@ -3768,7 +3762,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 					if s.rfc0111Service != nil {
 						ss := s.rfc0111Service.SemanticSnapshot()
 						for k, g := range semanticGauges {
-						//nolint:gosec // G115: semantic counter, safe conversion
+							//nolint:gosec // G115: semantic counter, safe conversion
 							if v, ok := ss[k]; ok {
 								o.ObserveInt64(g, int64(v)) //nolint:gosec // G115: semantic counter
 							}
@@ -6573,13 +6567,14 @@ func (s *BetaServer) routes() {
 			// Compute signature validity: unsigned => false; if signed but global verification failed => false.
 			var sigError string
 			var sigValid bool
-			if e.Signature == "" {
+			switch {
+			case e.Signature == "":
 				sigValid = false
 				sigError = "unsigned"
-			} else if !globalVerified {
+			case !globalVerified:
 				sigValid = false
 				sigError = "chain_verification_failed"
-			} else {
+			default:
 				sigValid = true
 			}
 			out = append(out, gin.H{"id": e.ID, "hash": e.Hash, "prev_hash": e.PrevHash, "delegation_id": e.DelegationID, "reason": e.Reason, "revoked_at": e.RevokedAt.Format(time.RFC3339), "signature_present": e.Signature != "", "sig_kid": e.SigKid, "signature_valid": sigValid, "signature_error": sigError, "index": i})
@@ -7088,7 +7083,6 @@ func (s *BetaServer) routes() {
 			allowPrivExport := os.Getenv("GAUTH_ALLOW_POP_PRIV_EXPORT") == "1"
 			pubs := make([][]byte, 0, participants)
 			privs := make([][]byte, 0, participants)
-			sigs := make([][]byte, 0, participants)
 			agg := crypto.NewBLSSimpleAggregatorWithMetrics(msg, s.metrics)
 			for i := 0; i < participants; i++ {
 				k, kErr := crypto.GenerateBLSKey()
@@ -7105,7 +7099,6 @@ func (s *BetaServer) routes() {
 					c.JSON(500, gin.H{"success": false, "code": "aggregate_add_failed", "message": err.Error()})
 					return
 				}
-				sigs = append(sigs, sigBytes)
 			}
 			// Proof-of-possession issuance variant
 			if req.RequirePoP {
@@ -7575,11 +7568,12 @@ func (s *BetaServer) routes() {
 
 		// Determine content type based on extension
 		contentType := "text/plain; charset=utf-8"
-		if len(filepath) > 3 && filepath[len(filepath)-3:] == ".md" {
+		switch {
+		case len(filepath) > 3 && filepath[len(filepath)-3:] == ".md":
 			contentType = "text/markdown; charset=utf-8"
-		} else if len(filepath) > 5 && filepath[len(filepath)-5:] == ".html" {
+		case len(filepath) > 5 && filepath[len(filepath)-5:] == ".html":
 			contentType = "text/html; charset=utf-8"
-		} else if len(filepath) > 4 && filepath[len(filepath)-4:] == ".pdf" {
+		case len(filepath) > 4 && filepath[len(filepath)-4:] == ".pdf":
 			contentType = "application/pdf"
 		}
 
@@ -8114,7 +8108,7 @@ func (s *BetaServer) apiPolicyMetricsPrometheus(c *gin.Context) {
 		// midpoint approximation between previous bound (exclusive) and current bound (inclusive)
 		low := prevBound
 		if i == 0 {
-		//nolint:gosec // G115: histogram calculation, segmentMid bounded
+			//nolint:gosec // G115: histogram calculation, segmentMid bounded
 			low = 0
 		}
 		segmentMid := (low + ub) / 2

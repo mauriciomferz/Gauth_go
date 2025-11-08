@@ -26,7 +26,10 @@ func TestSnapshotCLIFailureExitCodes(t *testing.T) {
 		}
 	}
 	// Locate repo root
-	_, file, _, _ := runtime.Caller(0)
+	_, file, _, ok := runtime.Caller(0)
+	if !ok {
+		t.Fatal("failed to get caller info")
+	}
 	walk := filepath.Dir(file)
 	repoRoot := ""
 	for i := 0; i < 10; i++ {

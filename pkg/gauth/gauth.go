@@ -217,9 +217,6 @@ func WithDurableReplayFromEnv() Option {
 	return func(s *Service) error {
 		// Import check: Use type assertion to verify replay package availability
 		// This approach avoids hard dependency while enabling auto-configuration
-		type durableReplayFactory interface {
-			NewFromEnv(metrics interface{}) (ReplayStore, error)
-		}
 
 		// Attempt to create DurableReplayStore using pkg/replay
 		// To make this work, we need a factory function that's injected globally

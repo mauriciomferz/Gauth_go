@@ -131,14 +131,14 @@ func (cd *ConflictDetector) detectPermitDenyConflicts() []PolicyConflict {
 				severity = SeverityCritical
 			}
 
-			allPolicyIDs := append(allowIDs, denyIDs...)
-			sort.Strings(allPolicyIDs)
+			allowIDs = append(allowIDs, denyIDs...)
+			sort.Strings(allowIDs)
 
 			conflicts = append(conflicts, PolicyConflict{
 				ID:        fmt.Sprintf("conflict-%d", conflictID),
 				Type:      ConflictPermitDeny,
 				Severity:  severity,
-				PolicyIDs: allPolicyIDs,
+				PolicyIDs: allowIDs,
 				Subject:   t.subj,
 				Action:    t.act,
 				Resource:  t.res,
@@ -216,7 +216,6 @@ func (cd *ConflictDetector) detectRuleContradictions() []PolicyConflict {
 				if r1.Effect != r2.Effect &&
 					hasOverlap(r1.Actions, r2.Actions) &&
 					hasOverlap(r1.Resources, r2.Resources) {
-
 					conflictID++
 					conflicts = append(conflicts, PolicyConflict{
 						ID:        fmt.Sprintf("contradiction-%d", conflictID),

@@ -19,7 +19,9 @@ func TestMemoryMetrics(t *testing.T) {
 	// Observe two latencies: 10ms and 30ms
 	m.ObserveValidationLatency(10 * time.Millisecond)
 	m.ObserveValidationLatency(30 * time.Millisecond)
-	d, vc, tot, mn, mx, avg, p50, p90, p99, _, sif, sv, svf, rif, spkm, aa, af, rse, rslc, rslt, rslm, rh, rm = m.Snapshot()
+	var sigIssued, sigIssueFail, sigVerifications, sigVerificationFail uint64
+	d, vc, tot, mn, mx, avg, p50, p90, p99, sigIssued, sigIssueFail, sigVerifications, sigVerificationFail, _, _, _, _, rse, rslc, rslt, rslm, rh, rm = m.Snapshot()
+	_, _, _, _ = sigIssued, sigIssueFail, sigVerifications, sigVerificationFail // Unused in this test
 	if d != 2 {
 		t.Errorf("expected delegations=2 got %d", d)
 	}

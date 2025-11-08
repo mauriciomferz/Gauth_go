@@ -168,10 +168,6 @@ func (h *APIHandler) getMetricsPrometheus(c *gin.Context) {
 	m := h.integration.GetMetrics()
 	c.Header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
 	// Build deterministic ordering for maps
-	type kv struct {
-		k string
-		v int64
-	}
 	// Jurisdiction breakdown
 	jKeys := make([]string, 0, len(m.JurisdictionBreakdown))
 	for j := range m.JurisdictionBreakdown {

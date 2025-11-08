@@ -8,11 +8,15 @@ package crypto
 import (
 	"crypto/ecdsa"
 	"crypto/ed25519"
-	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/sha256"
 	"errors"
 	"math/big"
+)
+
+// Algorithm name constants
+const (
+	AlgoEd25519 = "Ed25519"
 )
 
 // Signer exposes a unified interface across supported algorithms.
@@ -37,7 +41,7 @@ func NewEd25519Signer(priv ed25519.PrivateKey, pub ed25519.PublicKey) *Ed25519Si
 	return &Ed25519Signer{priv: priv, pub: pub}
 }
 
-func (s *Ed25519Signer) Algo() string   { return "Ed25519" }
+func (s *Ed25519Signer) Algo() string   { return AlgoEd25519 }
 func (s *Ed25519Signer) Public() []byte { return append([]byte(nil), s.pub...) }
 func (s *Ed25519Signer) Sign(msg []byte) ([]byte, error) {
 	if len(s.priv) != ed25519.PrivateKeySize {
@@ -57,7 +61,7 @@ type RotatingEd25519Signer struct {
 	M *Manager
 }
 
-func (s *RotatingEd25519Signer) Algo() string { return "Ed25519" }
+func (s *RotatingEd25519Signer) Algo() string { return AlgoEd25519 }
 func (s *RotatingEd25519Signer) Public() []byte {
 	if s == nil || s.M == nil || s.M.Active() == nil {
 		return nil
@@ -112,8 +116,13 @@ func (s *ECDSASigner) Public() []byte {
 	if s.pub == nil {
 		return nil
 	}
-	// Uncompressed form: 0x04 || X || Y
-	return elliptic.Marshal(elliptic.P256(), s.pub.X, s.pub.Y)
+	// Uncompressed form: 0x04 || X || Y (32 bytes each for P-256)
+	byteLen := (s.pub.Curve.Params().BitSize + 7) / 8
+	ret := make([]byte, 1+2*byteLen)
+	ret[0] = 0x04 // uncompressed point
+	s.pub.X.FillBytes(ret[1 : 1+byteLen])
+	s.pub.Y.FillBytes(ret[1+byteLen:])
+	return ret
 }
 func (s *ECDSASigner) Sign(msg []byte) ([]byte, error) {
 	if s.priv == nil {

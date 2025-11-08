@@ -67,7 +67,12 @@ func deriveECDSAKeyID(pub *ecdsa.PublicKey) string {
 	if pub == nil {
 		return ""
 	}
-	uncompressed := elliptic.Marshal(elliptic.P256(), pub.X, pub.Y)
+	// Uncompressed form: 0x04 || X || Y (32 bytes each for P-256)
+	byteLen := (pub.Curve.Params().BitSize + 7) / 8
+	uncompressed := make([]byte, 1+2*byteLen)
+	uncompressed[0] = 0x04
+	pub.X.FillBytes(uncompressed[1 : 1+byteLen])
+	pub.Y.FillBytes(uncompressed[1+byteLen:])
 	h := sha256.Sum256(uncompressed)
 	return hex.EncodeToString(h[:6])
 }
@@ -85,7 +90,13 @@ func (p *InMemoryECDSAProvider) PublicKey(keyID string) ([]byte, string, error) 
 	if !ok {
 		return nil, "", ErrUnknownKey
 	}
-	return elliptic.Marshal(elliptic.P256(), pk.X, pk.Y), AlgoECDSAP256, nil
+	// Uncompressed form: 0x04 || X || Y (32 bytes each for P-256)
+	byteLen := (pk.Curve.Params().BitSize + 7) / 8
+	ret := make([]byte, 1+2*byteLen)
+	ret[0] = 0x04
+	pk.X.FillBytes(ret[1 : 1+byteLen])
+	pk.Y.FillBytes(ret[1+byteLen:])
+	return ret, AlgoECDSAP256, nil
 }
 
 // VerifyWith verifies base64 DER signature against canonical bytes (after SHA-256 hashing).

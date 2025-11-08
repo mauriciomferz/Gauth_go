@@ -1,7 +1,7 @@
 /**
  * PoA Visualization Module
- * Think Machine-inspired 3D visualization for Power of Attorney relationships
- * and protocol step flows
+ * Star-inspired 3D visualization for Power of Attorney relationships
+ * with particle systems, mouse zoom/navigation, and brightness/color mapping
  */
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
@@ -9,7 +9,7 @@ import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/exampl
 
 /**
  * PoA Graph Visualizer
- * Renders PoA relationship graphs in 3D space
+ * Renders PoA relationship graphs as stars in 3D space with particle systems
  */
 export class PoAGraphVisualizer {
     constructor(container) {
@@ -20,82 +20,209 @@ export class PoAGraphVisualizer {
         this.controls = null;
         this.nodes = new Map();
         this.edges = [];
+        this.particleSystems = new Map();
         this.animationId = null;
+        this.starField = null;
         
         this.init();
     }
     
     init() {
-        // Scene
+        // Scene with Star Wars deep space background
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x0a0a0a);
-        this.scene.fog = new THREE.Fog(0x0a0a0a, 10, 50);
+        this.scene.background = new THREE.Color(0x000000); // Pure black space
+        this.scene.fog = new THREE.FogExp2(0x000814, 0.008); // Very subtle blue fog
         
         // Camera
         const aspect = this.container.clientWidth / this.container.clientHeight;
-        this.camera = new THREE.PerspectiveCamera(60, aspect, 0.1, 1000);
-        this.camera.position.set(10, 10, 10);
+        this.camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
+        this.camera.position.set(15, 15, 15);
         
         // Renderer
         this.renderer = new THREE.WebGLRenderer({ 
             antialias: true, 
-            alpha: true 
+            alpha: true,
+            powerPreference: 'high-performance'
         });
         this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
-        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         this.container.appendChild(this.renderer.domElement);
         
-        // Controls
+        // Enhanced Controls with zoom and navigation
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
-        this.controls.dampingFactor = 0.05;
+        this.controls.dampingFactor = 0.08;
         this.controls.screenSpacePanning = false;
-        this.controls.minDistance = 3;
-        this.controls.maxDistance = 50;
+        this.controls.minDistance = 2;
+        this.controls.maxDistance = 100;
+        this.controls.maxPolarAngle = Math.PI;
         
-        // Lighting
-        this.setupLighting();
+        // Smooth zoom controls
+        this.controls.zoomSpeed = 1.2;
+        this.controls.rotateSpeed = 0.5;
+        this.controls.panSpeed = 0.8;
         
-        // Grid
-        const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
-        this.scene.add(gridHelper);
+        // Enable all navigation
+        this.controls.enableZoom = true;
+        this.controls.enableRotate = true;
+        this.controls.enablePan = true;
+        
+        // Lighting for star-like environment
+        this.setupStarLighting();
+        
+        // Create background star field
+        this.createStarField();
         
         // Handle resize
         window.addEventListener('resize', () => this.onResize());
+        
+        // Add mouse interaction
+        this.setupMouseInteraction();
         
         // Start animation loop
         this.animate();
     }
     
-    setupLighting() {
-        // Ambient light
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+    setupStarLighting() {
+        // Ambient light with cool Star Wars space glow
+        const ambientLight = new THREE.AmbientLight(0x1a1a2e, 0.4);
         this.scene.add(ambientLight);
         
-        // Point lights for dramatic effect (Think Machine style)
-        const light1 = new THREE.PointLight(0x667eea, 1, 50);
-        light1.position.set(10, 10, 10);
-        this.scene.add(light1);
+        // Directional light (distant sun/star)
+        const sunLight = new THREE.DirectionalLight(0xccddff, 0.6);
+        sunLight.position.set(50, 50, 50);
+        this.scene.add(sunLight);
         
-        const light2 = new THREE.PointLight(0xf59e0b, 0.8, 50);
-        light2.position.set(-10, 10, -10);
-        this.scene.add(light2);
+        // Point lights for Star Wars atmosphere (blue/white)
+        const starLight1 = new THREE.PointLight(0x6699ff, 1.8, 100);
+        starLight1.position.set(20, 20, 20);
+        this.scene.add(starLight1);
         
-        const light3 = new THREE.PointLight(0x10b981, 0.6, 50);
-        light3.position.set(0, -10, 0);
-        this.scene.add(light3);
+        const starLight2 = new THREE.PointLight(0xffffff, 1.2, 100);
+        starLight2.position.set(-20, 20, -20);
+        this.scene.add(starLight2);
+        
+        const starLight3 = new THREE.PointLight(0x8899ff, 1.0, 100);
+        starLight3.position.set(0, -20, 20);
+        this.scene.add(starLight3);
     }
     
     /**
-     * Load and render a PoA graph
+     * Create Star Wars deep space starfield background
+     */
+    createStarField() {
+        const starGeometry = new THREE.BufferGeometry();
+        const particleCount = 5000; // Dense starfield like original Star Wars
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+        const sizes = new Float32Array(particleCount);
+        const velocities = [];
+        
+        for (let i = 0; i < particleCount; i++) {
+            const i3 = i * 3;
+            
+            // Random spherical distribution (distant stars)
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos((Math.random() * 2) - 1);
+            const radius = 50 + Math.random() * 40;
+            
+            positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
+            positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+            positions[i3 + 2] = radius * Math.cos(phi);
+            
+            // Star Wars color palette: mostly white/blue stars with some yellow
+            const colorType = Math.random();
+            if (colorType < 0.7) {
+                // White stars (most common)
+                const whiteness = 0.8 + Math.random() * 0.2;
+                colors[i3] = whiteness;
+                colors[i3 + 1] = whiteness;
+                colors[i3 + 2] = whiteness;
+            } else if (colorType < 0.9) {
+                // Blue-white stars
+                colors[i3] = 0.7 + Math.random() * 0.2;
+                colors[i3 + 1] = 0.8 + Math.random() * 0.2;
+                colors[i3 + 2] = 0.9 + Math.random() * 0.1;
+            } else {
+                // Yellow stars (distant suns)
+                colors[i3] = 0.9 + Math.random() * 0.1;
+                colors[i3 + 1] = 0.8 + Math.random() * 0.2;
+                colors[i3 + 2] = 0.5 + Math.random() * 0.3;
+            }
+            
+            // Varied star sizes (some bright, some dim)
+            const brightness = Math.random();
+            if (brightness > 0.95) {
+                sizes[i] = 0.3 + Math.random() * 0.2; // Bright stars
+            } else if (brightness > 0.8) {
+                sizes[i] = 0.15 + Math.random() * 0.1; // Medium stars
+            } else {
+                sizes[i] = 0.05 + Math.random() * 0.05; // Distant stars
+            }
+            
+            // Very slow rotation (space is vast and still)
+            velocities.push({
+                x: (Math.random() - 0.5) * 0.002,
+                y: (Math.random() - 0.5) * 0.002,
+                z: (Math.random() - 0.5) * 0.002
+            });
+        }
+        
+        starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        starGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        starGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        
+        const starMaterial = new THREE.PointsMaterial({
+            size: 0.2,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.9,
+            sizeAttenuation: true,
+            blending: THREE.AdditiveBlending
+        });
+        
+        this.starField = new THREE.Points(starGeometry, starMaterial);
+        this.starField.userData.velocities = velocities;
+        this.scene.add(this.starField);
+    }
+    
+    /**
+     * Setup mouse interaction for node selection
+     */
+    setupMouseInteraction() {
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+        
+        this.renderer.domElement.addEventListener('mousemove', (event) => {
+            const rect = this.renderer.domElement.getBoundingClientRect();
+            this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        });
+        
+        this.renderer.domElement.addEventListener('click', (event) => {
+            this.raycaster.setFromCamera(this.mouse, this.camera);
+            const intersects = this.raycaster.intersectObjects(Array.from(this.nodes.values()));
+            
+            if (intersects.length > 0) {
+                const node = intersects[0].object;
+                this.highlightNode(node);
+            }
+        });
+    }
+    
+    /**
+     * Load and render a PoA graph with star coordinates
      */
     async loadGraph(graphData) {
         // Clear existing visualization
         this.clearGraph();
         
-        // Create nodes
-        for (const node of graphData.nodes) {
-            this.createNode(node);
+        // Parse nodes and convert to 3D star coordinates
+        const nodes = this.parseNodesToStarCoordinates(graphData.nodes);
+        
+        // Create star nodes
+        for (const node of nodes) {
+            this.createStarNode(node);
         }
         
         // Create edges
@@ -105,62 +232,443 @@ export class PoAGraphVisualizer {
     }
     
     /**
-     * Create a 3D node representation
+     * Parse node data into 3D star coordinates
+     * Distributes nodes in a spherical/galactic pattern
      */
-    createNode(nodeData) {
-        const position = nodeData.position || { x: 0, y: 0, z: 0 };
+    parseNodesToStarCoordinates(nodes) {
+        const parsedNodes = [];
+        const radius = 10;
+        const nodeCount = nodes.length;
         
-        // Node geometry based on type
-        let geometry;
-        switch (nodeData.type) {
-            case 'principal':
-                geometry = new THREE.OctahedronGeometry(0.5, 0);
+        nodes.forEach((node, index) => {
+            // Use provided position or calculate spherical coordinates
+            let position;
+            
+            if (node.position && node.position.x !== undefined) {
+                position = node.position;
+            } else {
+                // Golden spiral distribution for even spacing
+                const phi = Math.acos(1 - 2 * (index + 0.5) / nodeCount);
+                const theta = Math.PI * (1 + Math.sqrt(5)) * index;
+                
+                // Add some randomness for natural star field look
+                const r = radius * (0.8 + Math.random() * 0.4);
+                
+                position = {
+                    x: r * Math.sin(phi) * Math.cos(theta),
+                    y: r * Math.sin(phi) * Math.sin(theta),
+                    z: r * Math.cos(phi)
+                };
+            }
+            
+            parsedNodes.push({
+                ...node,
+                position: position,
+                brightness: this.calculateBrightness(node),
+                starColor: this.getStarColor(node)
+            });
+        });
+        
+        return parsedNodes;
+    }
+    
+    /**
+     * Calculate star brightness based on node properties
+     */
+    calculateBrightness(node) {
+        let brightness = 1.0;
+        
+        // Status affects brightness
+        switch (node.status) {
+            case 'active':
+                brightness = 1.5;
                 break;
-            case 'client':
-                geometry = new THREE.TetrahedronGeometry(0.5, 0);
+            case 'pending':
+                brightness = 1.0;
                 break;
-            case 'resource':
-                geometry = new THREE.BoxGeometry(0.6, 0.6, 0.6);
+            case 'revoked':
+                brightness = 0.5;
                 break;
-            default:
-                geometry = new THREE.SphereGeometry(0.4, 16, 16);
+            case 'expired':
+                brightness = 0.3;
+                break;
         }
         
-        // Material with status-based color
-        const color = this.getStatusColor(nodeData.status);
-        const material = new THREE.MeshPhongMaterial({
-            color: color,
+        // Type affects brightness
+        if (node.type === 'principal') brightness *= 1.3;
+        if (node.type === 'resource') brightness *= 0.8;
+        
+        return brightness;
+    }
+    
+    /**
+     * Get star color with temperature mapping
+     */
+    getStarColor(node) {
+        // Color temperature mapping (like real stars)
+        const colors = {
+            active: { r: 0.4, g: 0.7, b: 1.0 },      // Blue (hot)
+            pending: { r: 1.0, g: 0.85, b: 0.4 },    // Yellow
+            revoked: { r: 1.0, g: 0.2, b: 0.2 },     // Red (cool)
+            expired: { r: 0.6, g: 0.6, b: 0.6 }      // White-gray
+        };
+        
+        return colors[node.status] || { r: 0.9, g: 0.9, b: 1.0 };
+    }
+    
+    /**
+     * Get NASA-style celestial texture based on node type and status
+     */
+    getCelestialTexture(nodeData) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+        
+        // Create procedural NASA-style textures
+        switch (nodeData.type) {
+            case 'principal':
+                return this.createStarTexture(ctx, nodeData.status);
+            case 'client':
+                return this.createPlanetTexture(ctx, nodeData.status);
+            case 'resource':
+                return this.createCometTexture(ctx, nodeData.status);
+            default:
+                return this.createNebulaTexture(ctx, nodeData.status);
+        }
+    }
+    
+    /**
+     * Create NASA-style star texture (Sun-like)
+     */
+    createStarTexture(ctx, status) {
+        const canvas = ctx.canvas;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = canvas.width / 2;
+        
+        // Star color based on status
+        const colors = {
+            active: ['#FFD700', '#FFA500', '#FF6B00'],      // Yellow/Orange (Sun-like)
+            pending: ['#FFFF00', '#FFD700', '#FFA500'],     // Yellow
+            revoked: ['#FF4500', '#DC143C', '#8B0000'],     // Red giant
+            expired: ['#E0E0E0', '#B0B0B0', '#808080']      // White dwarf
+        };
+        
+        const starColors = colors[status] || colors.active;
+        
+        // Create radial gradient for star surface
+        const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+        gradient.addColorStop(0, starColors[0]);
+        gradient.addColorStop(0.4, starColors[1]);
+        gradient.addColorStop(0.8, starColors[2]);
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Add surface details (solar flares/spots)
+        for (let i = 0; i < 30; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const dist = Math.random() * radius * 0.7;
+            const x = centerX + Math.cos(angle) * dist;
+            const y = centerY + Math.sin(angle) * dist;
+            const size = Math.random() * 20 + 10;
+            
+            const spotGradient = ctx.createRadialGradient(x, y, 0, x, y, size);
+            spotGradient.addColorStop(0, 'rgba(255, 200, 0, 0.3)');
+            spotGradient.addColorStop(1, 'rgba(255, 200, 0, 0)');
+            ctx.fillStyle = spotGradient;
+            ctx.fillRect(x - size, y - size, size * 2, size * 2);
+        }
+        
+        return new THREE.CanvasTexture(canvas);
+    }
+    
+    /**
+     * Create NASA-style planet texture (Earth/Mars-like)
+     */
+    createPlanetTexture(ctx, status) {
+        const canvas = ctx.canvas;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = canvas.width / 2;
+        
+        // Planet colors based on status
+        const planetTypes = {
+            active: { base: '#4169E1', secondary: '#228B22', tertiary: '#87CEEB' },  // Earth-like
+            pending: { base: '#DAA520', secondary: '#CD853F', tertiary: '#F4A460' }, // Mars-like
+            revoked: { base: '#696969', secondary: '#404040', tertiary: '#A9A9A9' }, // Dead planet
+            expired: { base: '#2F4F4F', secondary: '#1C1C1C', tertiary: '#4B4B4B' }  // Dark planet
+        };
+        
+        const colors = planetTypes[status] || planetTypes.active;
+        
+        // Base planet surface
+        const gradient = ctx.createRadialGradient(centerX - 50, centerY - 50, 0, centerX, centerY, radius);
+        gradient.addColorStop(0, colors.tertiary);
+        gradient.addColorStop(0.5, colors.base);
+        gradient.addColorStop(1, colors.secondary);
+        
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Add continents/terrain features
+        for (let i = 0; i < 15; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const dist = Math.random() * radius * 0.8;
+            const x = centerX + Math.cos(angle) * dist;
+            const y = centerY + Math.sin(angle) * dist;
+            const size = Math.random() * 60 + 30;
+            
+            ctx.fillStyle = colors.secondary;
+            ctx.globalAlpha = 0.6;
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        ctx.globalAlpha = 1.0;
+        
+        // Add atmosphere glow
+        const atmoGradient = ctx.createRadialGradient(centerX, centerY, radius * 0.9, centerX, centerY, radius * 1.1);
+        atmoGradient.addColorStop(0, 'rgba(135, 206, 250, 0)');
+        atmoGradient.addColorStop(1, 'rgba(135, 206, 250, 0.3)');
+        ctx.fillStyle = atmoGradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        return new THREE.CanvasTexture(canvas);
+    }
+    
+    /**
+     * Create NASA-style comet texture
+     */
+    createCometTexture(ctx, status) {
+        const canvas = ctx.canvas;
+        const centerX = canvas.width / 3;
+        const centerY = canvas.height / 2;
+        
+        // Comet core colors
+        const coreColors = {
+            active: ['#FFFFFF', '#E0E0E0', '#B0B0B0'],
+            pending: ['#FFE4B5', '#FFDAB9', '#D2B48C'],
+            revoked: ['#696969', '#505050', '#303030'],
+            expired: ['#808080', '#606060', '#404040']
+        };
+        
+        const colors = coreColors[status] || coreColors.active;
+        
+        // Draw comet nucleus
+        const coreGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 40);
+        coreGradient.addColorStop(0, colors[0]);
+        coreGradient.addColorStop(0.6, colors[1]);
+        coreGradient.addColorStop(1, colors[2]);
+        
+        ctx.fillStyle = coreGradient;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 40, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Draw comet tail
+        for (let i = 0; i < 20; i++) {
+            const tailX = centerX + (i * 20);
+            const tailY = centerY + (Math.random() - 0.5) * 50;
+            const tailSize = 30 + i * 5;
+            
+            const tailGradient = ctx.createRadialGradient(tailX, tailY, 0, tailX, tailY, tailSize);
+            tailGradient.addColorStop(0, `rgba(255, 255, 255, ${0.3 - i * 0.015})`);
+            tailGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            
+            ctx.fillStyle = tailGradient;
+            ctx.fillRect(tailX - tailSize, tailY - tailSize, tailSize * 2, tailSize * 2);
+        }
+        
+        return new THREE.CanvasTexture(canvas);
+    }
+    
+    /**
+     * Create NASA-style nebula texture
+     */
+    createNebulaTexture(ctx, status) {
+        const canvas = ctx.canvas;
+        
+        // Nebula colors based on status
+        const nebulaColors = {
+            active: ['#FF1493', '#9370DB', '#4169E1'],      // Pink/Purple nebula
+            pending: ['#FFD700', '#FF8C00', '#FF4500'],     // Orange nebula
+            revoked: ['#DC143C', '#8B0000', '#4B0000'],     // Red nebula
+            expired: ['#708090', '#2F4F4F', '#191970']      // Dark nebula
+        };
+        
+        const colors = nebulaColors[status] || nebulaColors.active;
+        
+        // Create nebula clouds
+        for (let i = 0; i < 50; i++) {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            const size = Math.random() * 100 + 50;
+            const colorIndex = Math.floor(Math.random() * colors.length);
+            
+            const cloudGradient = ctx.createRadialGradient(x, y, 0, x, y, size);
+            cloudGradient.addColorStop(0, colors[colorIndex] + '80');
+            cloudGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            
+            ctx.fillStyle = cloudGradient;
+            ctx.fillRect(x - size, y - size, size * 2, size * 2);
+        }
+        
+        // Add bright spots (stars within nebula)
+        for (let i = 0; i < 30; i++) {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            const size = Math.random() * 3 + 1;
+            
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        return new THREE.CanvasTexture(canvas);
+    }
+    
+    /**
+     * Create a celestial body node with NASA-style texture
+     */
+    createStarNode(nodeData) {
+        const position = nodeData.position;
+        const brightness = nodeData.brightness || 1.0;
+        const starColor = nodeData.starColor;
+        
+        // Determine size based on type
+        let size = 0.4 * brightness;
+        if (nodeData.type === 'principal') size *= 1.3;
+        if (nodeData.type === 'resource') size *= 0.8;
+        
+        // Create geometry
+        const coreGeometry = new THREE.SphereGeometry(size, 32, 32);
+        
+        // Get NASA-style texture
+        const texture = this.getCelestialTexture(nodeData);
+        const color = new THREE.Color(starColor.r, starColor.g, starColor.b);
+        
+        // Create material with texture
+        const coreMaterial = new THREE.MeshPhongMaterial({
+            map: texture,
             emissive: color,
-            emissiveIntensity: 0.3,
-            shininess: 100,
+            emissiveIntensity: brightness * 0.5,
+            shininess: 50,
             transparent: true,
-            opacity: 0.9
+            opacity: 0.95
         });
         
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(position.x, position.y, position.z);
-        mesh.userData = nodeData;
+        const core = new THREE.Mesh(coreGeometry, coreMaterial);
+        core.position.set(position.x, position.y, position.z);
+        core.userData = nodeData;
         
-        // Add glow effect
-        const glowGeometry = geometry.clone();
-        const glowMaterial = new THREE.MeshBasicMaterial({
-            color: color,
-            transparent: true,
-            opacity: 0.2,
-            side: THREE.BackSide
-        });
-        const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-        glow.scale.multiplyScalar(1.3);
-        mesh.add(glow);
+        // Add point light for celestial glow
+        const pointLight = new THREE.PointLight(color, brightness * 2, 10);
+        pointLight.position.set(0, 0, 0);
+        core.add(pointLight);
+        
+        // Add atmospheric glow layers
+        for (let i = 0; i < 2; i++) {
+            const glowSize = size + (i * 0.15);
+            const glowGeometry = new THREE.SphereGeometry(glowSize, 16, 16);
+            const glowMaterial = new THREE.MeshBasicMaterial({
+                color: color,
+                transparent: true,
+                opacity: 0.1 / (i + 1),
+                side: THREE.BackSide,
+                blending: THREE.AdditiveBlending
+            });
+            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+            core.add(glow);
+        }
         
         // Add to scene
-        this.scene.add(mesh);
-        this.nodes.set(nodeData.id, mesh);
+        this.scene.add(core);
+        this.nodes.set(nodeData.id, core);
+        
+        // Create particle system for the celestial body
+        this.createParticleSystem(nodeData, position, color, brightness);
         
         // Add label
         this.createLabel(nodeData.label, position);
         
-        return mesh;
+        return core;
+    }
+    
+    /**
+     * Create Star Wars energy field particle system around node
+     */
+    createParticleSystem(nodeData, position, color, brightness) {
+        const particleCount = Math.floor(50 * brightness);
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+        const velocities = [];
+        
+        for (let i = 0; i < particleCount; i++) {
+            const i3 = i * 3;
+            
+            // Random spherical distribution around node
+            const radius = 0.5 + Math.random() * 1.5;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos((Math.random() * 2) - 1);
+            
+            positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
+            positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+            positions[i3 + 2] = radius * Math.cos(phi);
+            
+            // Star Wars energy colors: blue, white, cyan (like lightsabers and ship lights)
+            const colorType = Math.random();
+            if (colorType < 0.5) {
+                // Electric blue (classic Star Wars blue)
+                colors[i3] = 0.3 + Math.random() * 0.2;
+                colors[i3 + 1] = 0.6 + Math.random() * 0.3;
+                colors[i3 + 2] = 0.9 + Math.random() * 0.1;
+            } else if (colorType < 0.8) {
+                // Bright white (energy cores)
+                const intensity = 0.8 + Math.random() * 0.2;
+                colors[i3] = intensity;
+                colors[i3 + 1] = intensity;
+                colors[i3 + 2] = intensity;
+            } else {
+                // Cyan/turquoise (control panels)
+                colors[i3] = 0.2 + Math.random() * 0.3;
+                colors[i3 + 1] = 0.7 + Math.random() * 0.2;
+                colors[i3 + 2] = 0.8 + Math.random() * 0.2;
+            }
+            
+            // Store velocity for orbital motion
+            velocities.push({
+                x: (Math.random() - 0.5) * 0.012,
+                y: (Math.random() - 0.5) * 0.012,
+                z: (Math.random() - 0.5) * 0.012
+            });
+        }
+        
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        
+        const material = new THREE.PointsMaterial({
+            vertexColors: true,
+            size: 0.03, // Small energy particles
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending,
+            sizeAttenuation: true
+        });
+        
+        const particles = new THREE.Points(geometry, material);
+        particles.position.set(position.x, position.y, position.z);
+        particles.userData = { velocities: velocities, nodeId: nodeData.id };
+        
+        this.scene.add(particles);
+        this.particleSystems.set(nodeData.id, particles);
     }
     
     /**
@@ -283,7 +791,27 @@ export class PoAGraphVisualizer {
     }
     
     /**
-     * Clear the graph
+     * Highlight a selected node
+     */
+    highlightNode(node) {
+        // Reset all nodes
+        this.nodes.forEach(n => {
+            if (n.material) {
+                n.material.emissiveIntensity = 0.3;
+            }
+        });
+        
+        // Highlight selected node
+        if (node.material) {
+            node.material.emissiveIntensity = 1.5;
+        }
+        
+        // Show node info
+        console.log('Selected node:', node.userData);
+    }
+    
+    /**
+     * Clear the graph and particle systems
      */
     clearGraph() {
         // Remove nodes
@@ -292,13 +820,23 @@ export class PoAGraphVisualizer {
         });
         this.nodes.clear();
         
+        // Remove particle systems
+        this.particleSystems.forEach(particles => {
+            this.scene.remove(particles);
+            if (particles.geometry) particles.geometry.dispose();
+            if (particles.material) particles.material.dispose();
+        });
+        this.particleSystems.clear();
+        
         // Remove edges
         this.edges.forEach(edge => {
             this.scene.remove(edge);
+            if (edge.geometry) edge.geometry.dispose();
+            if (edge.material) edge.material.dispose();
         });
         this.edges = [];
         
-        // Clear other objects except grid and lights
+        // Clear other objects except star field and lights
         const objectsToRemove = [];
         this.scene.traverse(obj => {
             if (obj.type === 'Sprite' || obj.type === 'ArrowHelper') {
@@ -309,21 +847,106 @@ export class PoAGraphVisualizer {
     }
     
     /**
-     * Animation loop
+     * Animation loop with particle system updates
      */
     animate() {
         this.animationId = requestAnimationFrame(() => this.animate());
         
-        // Rotate nodes slightly for visual effect
+        const time = Date.now() * 0.001;
+        
+        // Animate star nodes
         this.nodes.forEach(node => {
-            node.rotation.y += 0.002;
+            // Gentle rotation
+            node.rotation.y += 0.001;
             
             // Pulse effect for pending nodes
             if (node.userData.status === 'pending') {
-                const scale = 1 + Math.sin(Date.now() * 0.003) * 0.1;
+                const scale = 1 + Math.sin(time * 2) * 0.1;
                 node.scale.set(scale, scale, scale);
             }
+            
+            // Twinkle effect for active nodes
+            if (node.userData.status === 'active' && node.children.length > 0) {
+                const light = node.children.find(child => child.type === 'PointLight');
+                if (light) {
+                    light.intensity = node.userData.brightness * 2 * (0.8 + Math.sin(time * 3 + node.position.x) * 0.2);
+                }
+            }
         });
+        
+        // Animate particle systems
+        this.particleSystems.forEach(particles => {
+            const positions = particles.geometry.attributes.position.array;
+            const velocities = particles.userData.velocities;
+            
+            for (let i = 0; i < velocities.length; i++) {
+                const i3 = i * 3;
+                
+                // Update position based on velocity
+                positions[i3] += velocities[i].x;
+                positions[i3 + 1] += velocities[i].y;
+                positions[i3 + 2] += velocities[i].z;
+                
+                // Keep particles within bounds (orbital motion)
+                const distance = Math.sqrt(
+                    positions[i3] * positions[i3] +
+                    positions[i3 + 1] * positions[i3 + 1] +
+                    positions[i3 + 2] * positions[i3 + 2]
+                );
+                
+                if (distance > 2.0) {
+                    positions[i3] *= 0.95;
+                    positions[i3 + 1] *= 0.95;
+                    positions[i3 + 2] *= 0.95;
+                } else if (distance < 0.5) {
+                    positions[i3] *= 1.05;
+                    positions[i3 + 1] *= 1.05;
+                    positions[i3 + 2] *= 1.05;
+                }
+            }
+            
+            particles.geometry.attributes.position.needsUpdate = true;
+            
+            // Rotate particle system
+            particles.rotation.y += 0.001;
+        });
+        
+        // Animate Star Wars starfield (slow parallax rotation)
+        if (this.starField && this.starField.userData.velocities) {
+            const positions = this.starField.geometry.attributes.position.array;
+            const velocities = this.starField.userData.velocities;
+            
+            for (let i = 0; i < velocities.length; i++) {
+                const i3 = i * 3;
+                
+                // Very slow drift (stars are distant and static)
+                positions[i3] += velocities[i].x;
+                positions[i3 + 1] += velocities[i].y;
+                positions[i3 + 2] += velocities[i].z;
+                
+                // Keep stars in spherical bounds (50-90 units from center)
+                const distSquared = positions[i3]**2 + positions[i3+1]**2 + positions[i3+2]**2;
+                if (distSquared > 8100) { // 90^2
+                    // Pull back toward inner sphere
+                    const scale = 0.99;
+                    positions[i3] *= scale;
+                    positions[i3 + 1] *= scale;
+                    positions[i3 + 2] *= scale;
+                } else if (distSquared < 2500) { // 50^2
+                    // Push out toward outer sphere
+                    const scale = 1.01;
+                    positions[i3] *= scale;
+                    positions[i3 + 1] *= scale;
+                    positions[i3 + 2] *= scale;
+                }
+            }
+            
+            this.starField.geometry.attributes.position.needsUpdate = true;
+            
+            // Very slow rotation (camera/ship moving through space)
+            this.starField.rotation.y += 0.00008;
+            this.starField.rotation.x += 0.00003;
+        }
         
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
@@ -342,13 +965,24 @@ export class PoAGraphVisualizer {
     }
     
     /**
-     * Dispose resources
+     * Dispose resources including particles
      */
     dispose() {
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
         }
         
+        // Clear all graph elements
+        this.clearGraph();
+        
+        // Dispose star field
+        if (this.starField) {
+            this.scene.remove(this.starField);
+            if (this.starField.geometry) this.starField.geometry.dispose();
+            if (this.starField.material) this.starField.material.dispose();
+        }
+        
+        // Dispose renderer and controls
         this.renderer.dispose();
         this.controls.dispose();
         
@@ -380,7 +1014,8 @@ export class ProtocolStepVisualizer {
     init() {
         // Scene
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x0a0a0a);
+        this.scene.background = new THREE.Color(0x000000); // Pure black space
+        this.scene.fog = new THREE.FogExp2(0x000814, 0.008); // Very subtle blue fog
         
         // Camera
         const aspect = this.container.clientWidth / this.container.clientHeight;
@@ -414,21 +1049,27 @@ export class ProtocolStepVisualizer {
     }
     
     setupLighting() {
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+        // Cool blue-gray ambient (Star Wars space atmosphere)
+        const ambientLight = new THREE.AmbientLight(0x1a1a2e, 0.4);
         this.scene.add(ambientLight);
         
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        // Blue-white distant sun
+        const directionalLight = new THREE.DirectionalLight(0xccddff, 0.6);
         directionalLight.position.set(5, 10, 5);
         this.scene.add(directionalLight);
         
-        // Accent lights
-        const accentLight1 = new THREE.PointLight(0x667eea, 0.5, 20);
-        accentLight1.position.set(5, 5, 5);
+        // Blue and white Star Wars accent lights
+        const accentLight1 = new THREE.PointLight(0x6699ff, 1.8, 100);
+        accentLight1.position.set(10, 10, 10);
         this.scene.add(accentLight1);
         
-        const accentLight2 = new THREE.PointLight(0xf59e0b, 0.5, 20);
-        accentLight2.position.set(-5, 5, -5);
+        const accentLight2 = new THREE.PointLight(0xffffff, 1.2, 100);
+        accentLight2.position.set(-10, 10, -10);
         this.scene.add(accentLight2);
+        
+        const accentLight3 = new THREE.PointLight(0x8899ff, 1.0, 100);
+        accentLight3.position.set(0, -10, 0);
+        this.scene.add(accentLight3);
     }
     
     /**

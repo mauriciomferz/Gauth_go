@@ -190,13 +190,14 @@ func VerifySnapshot(rs *ReceiptStore, snap Snapshot) (SnapshotVerificationResult
 	res.Valid = res.HashMatch && res.MerkleMatch && res.ChainHeadMatch && res.ReceiptCountOk
 	if !res.Valid {
 		// Priority: merkle mismatch > hash mismatch > chain head > count
-		if !res.MerkleMatch {
+		switch {
+		case !res.MerkleMatch:
 			res.Reason = snapshotReasonMerkleMismatch
-		} else if !res.HashMatch {
+		case !res.HashMatch:
 			res.Reason = snapshotReasonHashMismatch
-		} else if !res.ChainHeadMatch {
+		case !res.ChainHeadMatch:
 			res.Reason = snapshotReasonChainHeadMismatch
-		} else if !res.ReceiptCountOk {
+		case !res.ReceiptCountOk:
 			res.Reason = snapshotReasonReceiptCountMismatch
 		}
 	}

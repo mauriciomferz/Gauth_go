@@ -7,7 +7,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"sort"
 	"strings"
@@ -95,7 +94,7 @@ func buildResolver(art *notary.WeightedRotationArtifact, userPubs []string) *res
 }
 
 func loadArtifact(path string) (*notary.WeightedRotationArtifact, error) {
-	b, err := ioutil.ReadFile(path)
+	b, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

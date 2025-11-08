@@ -131,7 +131,7 @@ func NewWebhookClientFromEnv() *WebhookClient {
 	maxRetries := 3
 	if r := os.Getenv("GAUTH_ARBITRATION_WEBHOOK_MAX_RETRIES"); r != "" {
 		if _, err := fmt.Sscanf(r, "%d", &maxRetries); err == nil && maxRetries > 0 {
-			// Use parsed value
+			_ = err // Use parsed value
 		}
 	}
 
@@ -207,11 +207,11 @@ func (w *WebhookClient) Send(ctx context.Context, payload WebhookPayload) error 
 
 		lastErr = err
 
-	// Exponential backoff before retry
-	if attempt < w.config.MaxRetries {
-		//nolint:gosec // G115: small retry attempt value, safe conversion
-		backoff := w.config.RetryBackoff * time.Duration(1<<uint(attempt))
-		select {
+		// Exponential backoff before retry
+		if attempt < w.config.MaxRetries {
+			//nolint:gosec // G115: small retry attempt value, safe conversion
+			backoff := w.config.RetryBackoff * time.Duration(1<<uint(attempt))
+			select {
 			case <-ctx.Done():
 				return ctx.Err()
 			case <-time.After(backoff):

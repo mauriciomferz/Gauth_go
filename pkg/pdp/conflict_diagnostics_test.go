@@ -486,7 +486,10 @@ func TestCombineWithDiagnostics_NoConflict(t *testing.T) {
 	}
 
 	strategy := DenyOverridesStrategy{}
-	effect, _, _, _, conflicts := strategy.CombineWithDiagnostics(steps, nil)
+	effect, reason, obligations, advice, conflicts := strategy.CombineWithDiagnostics(steps, nil)
+	_ = reason      // unused in this test
+	_ = obligations // unused in this test
+	_ = advice      // unused in this test
 
 	if effect != EffectAllow {
 		t.Errorf("Expected EffectAllow, got %v", effect)

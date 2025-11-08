@@ -101,19 +101,20 @@ func VerifyAllRotations(descriptors []*KeyRotationDescriptor, receiptHashes []st
 			summary.AllContinuityOK = false
 		}
 		// Signatures
-		if len(oldPubs[i]) == 0 {
+		switch {
+		case len(oldPubs[i]) == 0:
 			res.SignaturesOK = false
 			if res.Reason == "" {
 				res.Reason = reasonKidNotFoundOld
 			}
 			summary.AllSignaturesOK = false
-		} else if len(newPubs[i]) == 0 {
+		case len(newPubs[i]) == 0:
 			res.SignaturesOK = false
 			if res.Reason == "" {
 				res.Reason = reasonKidNotFoundNew
 			}
 			summary.AllSignaturesOK = false
-		} else {
+		default:
 			validSigs, sigReason := VerifyRotationDescriptor(rd, oldPubs[i], newPubs[i])
 			if validSigs {
 				res.SignaturesOK = true

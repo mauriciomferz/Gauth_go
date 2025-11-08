@@ -236,19 +236,20 @@ func matchesPattern(key, pattern string) bool {
 		return false
 	}
 
-	if pattern[0] == '*' && pattern[len(pattern)-1] == '*' {
+	switch {
+	case pattern[0] == '*' && pattern[len(pattern)-1] == '*':
 		// Contains
 		return contains(key, pattern[1:len(pattern)-1])
-	} else if pattern[0] == '*' {
+	case pattern[0] == '*':
 		// Suffix
 		return hasSuffix(key, pattern[1:])
-	} else if pattern[len(pattern)-1] == '*' {
+	case pattern[len(pattern)-1] == '*':
 		// Prefix
 		return hasPrefix(key, pattern[:len(pattern)-1])
+	default:
+		// Exact match
+		return key == pattern
 	}
-
-	// Exact match
-	return key == pattern
 }
 
 func contains(s, substr string) bool {

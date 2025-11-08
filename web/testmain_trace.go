@@ -19,6 +19,10 @@ import (
 )
 
 func TestMain(m *testing.M) {
+	os.Exit(runTests(m))
+}
+
+func runTests(m *testing.M) int {
 	// Deferred panic recovery to surface any hidden post-test panics that could force a non-zero exit.
 	// If a panic occurs after m.Run() (e.g. in a background goroutine finishing late) we log it.
 	defer func() {
@@ -72,6 +76,6 @@ func TestMain(m *testing.M) {
 	if os.Getenv("GAUTH_TEST_TRACE_SIGPIPE") == "1" {
 		fmt.Fprintf(os.Stderr, "[trace] test harness finished code=%d at=%s\n", code, time.Now().Format(time.RFC3339Nano))
 	}
-	// Final explicit exit using captured code.
-	os.Exit(code)
+	// Return code to allow defers to complete before exit.
+	return code
 }

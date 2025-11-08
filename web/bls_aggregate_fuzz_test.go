@@ -7,7 +7,6 @@ import (
 	"math/rand"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	imetrics "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
 )
@@ -62,5 +61,3 @@ func FuzzBLSAggregateEndpoint(f *testing.F) {
 		}
 	})
 }
-
-func init() { rand.Seed(time.Now().UnixNano()) }

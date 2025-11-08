@@ -90,7 +90,7 @@ func diffCapabilities(base, current []capability.Capability) (added, removed []s
 	sort.Slice(added, func(i, j int) bool { return added[i].ID < added[j].ID })
 	sort.Slice(removed, func(i, j int) bool { return removed[i].ID < removed[j].ID })
 	sort.Slice(modified, func(i, j int) bool { return modified[i].ID < modified[j].ID })
-	return
+	return added, removed, modified
 }
 
 // registerCapabilityDiff mounts the capability diff endpoint.

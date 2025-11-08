@@ -204,33 +204,33 @@ type PrometheusMetrics struct {
 }
 
 // Dual-control revocation workflow Prometheus counter increments (moved outside struct)
-func (pm *PrometheusMetrics) IncRevocationWorkflowInitiated() { pm.revocationWorkflowInitiated.Inc() }
-func (pm *PrometheusMetrics) IncRevocationWorkflowInitiationFailures() {
-	pm.revocationWorkflowInitiationFailures.Inc()
+func (p *PrometheusMetrics) IncRevocationWorkflowInitiated() { p.revocationWorkflowInitiated.Inc() }
+func (p *PrometheusMetrics) IncRevocationWorkflowInitiationFailures() {
+	p.revocationWorkflowInitiationFailures.Inc()
 }
-func (pm *PrometheusMetrics) IncRevocationWorkflowApprovals() { pm.revocationWorkflowApprovals.Inc() }
-func (pm *PrometheusMetrics) IncRevocationWorkflowApprovalFailures() {
-	pm.revocationWorkflowApprovalFailures.Inc()
+func (p *PrometheusMetrics) IncRevocationWorkflowApprovals() { p.revocationWorkflowApprovals.Inc() }
+func (p *PrometheusMetrics) IncRevocationWorkflowApprovalFailures() {
+	p.revocationWorkflowApprovalFailures.Inc()
 }
-func (pm *PrometheusMetrics) IncRevocationWorkflowQuorumSatisfied() {
-	pm.revocationWorkflowQuorumSatisfied.Inc()
+func (p *PrometheusMetrics) IncRevocationWorkflowQuorumSatisfied() {
+	p.revocationWorkflowQuorumSatisfied.Inc()
 }
-func (pm *PrometheusMetrics) IncRevocationWorkflowCanceled() { pm.revocationWorkflowCanceled.Inc() }
-func (pm *PrometheusMetrics) IncRevocationWorkflowCancellationFailures() {
-	pm.revocationWorkflowCancellationFailures.Inc()
+func (p *PrometheusMetrics) IncRevocationWorkflowCanceled() { p.revocationWorkflowCanceled.Inc() }
+func (p *PrometheusMetrics) IncRevocationWorkflowCancellationFailures() {
+	p.revocationWorkflowCancellationFailures.Inc()
 }
-func (pm *PrometheusMetrics) IncRevocationWorkflowUnauthorized() {
-	pm.revocationWorkflowUnauthorized.Inc()
+func (p *PrometheusMetrics) IncRevocationWorkflowUnauthorized() {
+	p.revocationWorkflowUnauthorized.Inc()
 }
 
 // Evidence metrics methods
-func (pm *PrometheusMetrics) IncEvidenceAttachment()         { pm.evidenceAttachments.Inc() }
-func (pm *PrometheusMetrics) IncEvidenceAttachmentFailures() { pm.evidenceAttachmentFailures.Inc() }
-func (pm *PrometheusMetrics) SetEvidenceHashesPerPOA(poaID string, n int) {
+func (p *PrometheusMetrics) IncEvidenceAttachment()         { p.evidenceAttachments.Inc() }
+func (p *PrometheusMetrics) IncEvidenceAttachmentFailures() { p.evidenceAttachmentFailures.Inc() }
+func (p *PrometheusMetrics) SetEvidenceHashesPerPOA(poaID string, n int) {
 	if poaID == "" {
 		return
 	}
-	pm.evidenceHashesPerPOA.WithLabelValues(poaID).Set(float64(n))
+	p.evidenceHashesPerPOA.WithLabelValues(poaID).Set(float64(n))
 }
 
 // PrometheusAdapterOptions allows optional customization when constructing.

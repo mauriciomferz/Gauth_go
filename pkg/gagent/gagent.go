@@ -12,6 +12,19 @@ import (
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/enforcement"
 )
 
+// Risk level constants
+const (
+	RiskLevelHigh     = "high"
+	RiskLevelCritical = "critical"
+)
+
+// Decision suggestion constants
+const (
+	SuggestionAllow  = "allow"
+	SuggestionDeny   = "deny"
+	SuggestionReview = "review"
+)
+
 // Agent represents a G-Agent instance for AI-assisted enforcement
 type Agent struct {
 	id              string
@@ -224,15 +237,15 @@ func (a *Agent) calculateRisk(ctx context.Context, req *enforcement.EnforcementR
 	}
 
 	// Increase risk for deny decisions
-	if policyDecision.Decision == "deny" {
+	if policyDecision.Decision == enforcement.DecisionDeny {
 		score += 0.4
-		level = "high"
+		level = RiskLevelHigh
 	}
 
 	// Cap at 1.0
 	if score > 1.0 {
 		score = 1.0
-		level = "critical"
+		level = RiskLevelCritical
 	}
 
 	return RiskScore{
@@ -262,9 +275,9 @@ func (a *Agent) calculateConfidence(policy PolicyDecision, context ContextInsigh
 	baseConfidence := 0.5
 
 	// Increase confidence for clear policy decisions
-	if policy.Decision == "deny" && len(policy.Violations) > 0 {
+	if policy.Decision == enforcement.DecisionDeny && len(policy.Violations) > 0 {
 		baseConfidence += 0.3
-	} else if policy.Decision == "allow" && len(policy.Violations) == 0 {
+	} else if policy.Decision == enforcement.DecisionAllow && len(policy.Violations) == 0 {
 		baseConfidence += 0.2
 	}
 
@@ -291,31 +304,31 @@ func (a *Agent) calculateConfidence(policy PolicyDecision, context ContextInsigh
 // determineSuggestion determines the recommendation suggestion
 func (a *Agent) determineSuggestion(policy PolicyDecision, context ContextInsights, risk RiskScore) string {
 	// High risk or policy violations = deny
-	if risk.Level == "critical" || risk.Level == "high" {
-		return "deny"
+	if risk.Level == RiskLevelCritical || risk.Level == RiskLevelHigh {
+		return SuggestionDeny
 	}
 
 	if len(policy.Violations) > 0 {
-		return "deny"
+		return SuggestionDeny
 	}
 
 	// Suspicious patterns = review
 	if context.AccessPattern == "suspicious" || context.AccessPattern == "anomalous" {
-		return "review"
+		return SuggestionReview
 	}
 
 	// Medium risk = review
 	if risk.Level == "medium" {
-		return "review"
+		return enforcement.DecisionReview
 	}
 
 	// Policy deny = deny
-	if policy.Decision == "deny" {
-		return "deny"
+	if policy.Decision == enforcement.DecisionDeny {
+		return enforcement.DecisionDeny
 	}
 
 	// Default to allow
-	return "allow"
+	return enforcement.DecisionAllow
 }
 
 // buildReasoning builds human-readable reasoning
@@ -343,16 +356,16 @@ func (a *Agent) updateMetrics(rec *enforcement.AIRecommendation, latencyMs int64
 
 	// Update suggestion counts
 	switch rec.Suggestion {
-	case "allow":
+	case SuggestionAllow:
 		a.metrics.AllowSuggestions++
-	case "deny":
+	case SuggestionDeny:
 		a.metrics.DenySuggestions++
-	case "review":
+	case SuggestionReview:
 		a.metrics.ReviewSuggestions++
 	}
 
 	// Update high risk decisions
-	if risk.Level == "high" || risk.Level == "critical" {
+	if risk.Level == RiskLevelHigh || risk.Level == RiskLevelCritical {
 		a.metrics.HighRiskDecisions++
 	}
 

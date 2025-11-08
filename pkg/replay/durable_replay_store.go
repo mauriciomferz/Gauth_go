@@ -23,12 +23,16 @@ type TTLEvictionPolicy struct {
 	TTL time.Duration
 }
 
+const (
+	evictionPolicyNameTTL = "ttl"
+)
+
 func (p *TTLEvictionPolicy) ShouldEvict(jti string, ts time.Time, now time.Time, accessCount int) bool {
 	return now.Sub(ts) > p.TTL
 }
 
 func (p *TTLEvictionPolicy) Name() string {
-	return "ttl"
+	return evictionPolicyNameTTL
 }
 
 // LRUEvictionPolicy evicts least recently used entries when size exceeds max.
@@ -93,7 +97,7 @@ func ParseEvictionPolicy(policy string, ttl time.Duration, maxSize int) Eviction
 		return &TTLEvictionPolicy{TTL: ttl} // Default to TTL
 	}
 
-	if policy == "ttl" {
+	if policy == evictionPolicyNameTTL {
 		return &TTLEvictionPolicy{TTL: ttl}
 	}
 

@@ -460,10 +460,8 @@ func TestSignatureManager_GetSignatures(t *testing.T) {
 	// Verify bob signature
 	if sig, ok := signatures["bob"]; !ok {
 		t.Error("Expected bob signature")
-	} else {
-		if sig.KeyID != keyIDB {
-			t.Errorf("Expected keyID %s, got %s", keyIDB, sig.KeyID)
-		}
+	} else if sig.KeyID != keyIDB {
+		t.Errorf("Expected keyID %s, got %s", keyIDB, sig.KeyID)
 	}
 }
 

@@ -11,6 +11,10 @@ import (
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/authz"
 )
 
+const (
+	testActionCreateDelegation = "create_delegation"
+)
+
 // allowAllAuditSinkAuthorizer is a test-only authorizer that allows all requests
 type allowAllAuditSinkAuthorizer struct{}
 
@@ -129,7 +133,7 @@ func TestAuditSinkIntegration_CreateDelegation(t *testing.T) {
 
 	found := false
 	for _, ev := range events {
-		if ev.Action == "create_delegation" && ev.Result == audit.ResultSuccess {
+		if ev.Action == testActionCreateDelegation && ev.Result == audit.ResultSuccess {
 			if ev.Subject != "alice@example.com" {
 				t.Errorf("Expected subject 'alice@example.com' but got '%s'", ev.Subject)
 			}
@@ -182,7 +186,7 @@ func TestAuditSinkIntegration_VerifyToken(t *testing.T) {
 	foundCreate := false
 	foundValidate := false
 	for _, ev := range events {
-		if ev.Action == "create_delegation" && ev.Result == audit.ResultSuccess {
+		if ev.Action == testActionCreateDelegation && ev.Result == audit.ResultSuccess {
 			foundCreate = true
 		}
 		if ev.Action == "validate_delegation" && ev.Result == audit.ResultSuccess {
@@ -237,7 +241,7 @@ func TestAuditSinkIntegration_RevokeToken(t *testing.T) {
 	foundCreate := false
 	foundRevoke := false
 	for _, ev := range events {
-		if ev.Action == "create_delegation" && ev.Result == audit.ResultSuccess {
+		if ev.Action == testActionCreateDelegation && ev.Result == audit.ResultSuccess {
 			foundCreate = true
 		}
 		if ev.Action == "revoke_delegation" && ev.Result == audit.ResultSuccess {
@@ -287,7 +291,7 @@ func TestAuditSinkIntegration_AsyncSink(t *testing.T) {
 		t.Fatal("Expected async sink to flush event to base sink but got none")
 	}
 
-	if events[0].Action != "create_delegation" {
+	if events[0].Action != testActionCreateDelegation {
 		t.Errorf("Expected create_delegation but got '%s'", events[0].Action)
 	}
 }
@@ -371,10 +375,10 @@ func TestAuditSinkIntegration_MultiplexSink(t *testing.T) {
 		t.Fatal("Expected sink2 to receive event but got none")
 	}
 
-	if events1[0].Action != "create_delegation" {
+	if events1[0].Action != testActionCreateDelegation {
 		t.Errorf("Expected sink1 create_delegation but got '%s'", events1[0].Action)
 	}
-	if events2[0].Action != "create_delegation" {
+	if events2[0].Action != testActionCreateDelegation {
 		t.Errorf("Expected sink2 create_delegation but got '%s'", events2[0].Action)
 	}
 }

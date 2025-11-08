@@ -74,8 +74,6 @@ func containsExactPermutedWeights(b []byte, w map[string]int) bool {
 	return containsExact(b, pat1) || containsExact(b, pat2)
 }
 
-func intToStr(i int) string { return fmt.Sprintf("%d", i) }
-
 // indexOf naive byte slice search (avoids pulling strings repeatedly)
 func indexOf(haystack, needle []byte) int {
 	if len(needle) == 0 {

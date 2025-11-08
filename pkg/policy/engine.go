@@ -424,13 +424,14 @@ func (e *ChainEngine) Evaluate(ctx context.Context, req EvalRequest) (EvalDecisi
 			}
 		}
 	}
-	if dec.Deny {
+	switch {
+	case dec.Deny:
 		dec.Allow = false
 		dec.Reason = ReasonDeniedPolicy
-	} else if len(dec.Matched) > 0 {
+	case len(dec.Matched) > 0:
 		dec.Allow = true
 		dec.Reason = ReasonAllowed
-	} else {
+	default:
 		dec.Allow = false
 		dec.Reason = "no matching policy"
 	}

@@ -73,11 +73,12 @@ func TestJSONParseProperty(t *testing.T) {
 			claims["sub"] = "prop-client"
 		}
 		// scope sometimes empty or large
-		if rnd.Intn(4) == 0 {
+		switch {
+		case rnd.Intn(4) == 0:
 			claims["scope"] = ""
-		} else if rnd.Intn(7) == 0 {
+		case rnd.Intn(7) == 0:
 			claims["scope"] = strings.Repeat("a", rnd.Intn(50)+1)
-		} else {
+		default:
 			claims["scope"] = "read write"
 		}
 		now := time.Now()

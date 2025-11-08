@@ -7,6 +7,11 @@ import (
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/authz"
 )
 
+const (
+	cacheMetadataFalse = "false"
+	cacheMetadataTrue  = "true"
+)
+
 // TestAuthorizationCacheCryptoRotationInvalidation ensures rotation hook flushes cache.
 func TestAuthorizationCacheCryptoRotationInvalidation(t *testing.T) {
 	ma := authz.NewMemoryAuthorizer()
@@ -17,11 +22,11 @@ func TestAuthorizationCacheCryptoRotationInvalidation(t *testing.T) {
 
 	req := authz.Request{Subject: "sam", Resource: "obj:1", Action: "read"}
 	dec1, _ := ma.Authorize(context.Background(), req)
-	if dec1.Metadata["cache_hit"] != "false" {
+	if dec1.Metadata["cache_hit"] != cacheMetadataFalse {
 		t.Fatalf("expected initial miss got %v", dec1.Metadata["cache_hit"])
 	}
 	dec2, _ := ma.Authorize(context.Background(), req)
-	if dec2.Metadata["cache_hit"] != "true" {
+	if dec2.Metadata["cache_hit"] != cacheMetadataTrue {
 		t.Fatalf("expected second hit got %v", dec2.Metadata["cache_hit"])
 	}
 
@@ -29,11 +34,11 @@ func TestAuthorizationCacheCryptoRotationInvalidation(t *testing.T) {
 	ma.InvalidateOnCryptoRotation()
 
 	dec3, _ := ma.Authorize(context.Background(), req)
-	if dec3.Metadata["cache_hit"] != "false" {
+	if dec3.Metadata["cache_hit"] != cacheMetadataFalse {
 		t.Fatalf("expected post-rotation miss got %v", dec3.Metadata["cache_hit"])
 	}
 	dec4, _ := ma.Authorize(context.Background(), req)
-	if dec4.Metadata["cache_hit"] != "true" {
+	if dec4.Metadata["cache_hit"] != cacheMetadataTrue {
 		t.Fatalf("expected re-populated hit got %v", dec4.Metadata["cache_hit"])
 	}
 

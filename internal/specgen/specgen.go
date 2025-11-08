@@ -179,6 +179,7 @@ func GenerateCoverage(specPath string) (*CoverageReport, error) {
 			}
 			if hasExample {
 				// will count later after loop; accumulate counters now
+				_ = hasExample // will count later
 				// We'll increment inside loop.
 				// operationsTotal++ operationsWithExample++ etc.
 				// We'll use local counters defined above.

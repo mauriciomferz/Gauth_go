@@ -92,19 +92,21 @@ func lex(src string, limits ExprLimits) ([]token, error) {
 		// Try single-char tokens
 		if err := l.trySingleCharTokens(r); err != nil {
 			return nil, err
-		} else if l.pos > oldPos {
+		}
+		switch {
+		case l.pos > oldPos:
 			// Token was consumed in switch
-		} else if isIdentStart(r) {
+		case isIdentStart(r):
 			// Identifier or keyword
 			if err := l.readIdentOrKeyword(); err != nil {
 				return nil, err
 			}
-		} else if unicode.IsDigit(rune(r)) {
+		case unicode.IsDigit(rune(r)):
 			// Number
 			if err := l.readNum(); err != nil {
 				return nil, err
 			}
-		} else {
+		default:
 			return nil, fmt.Errorf("unexpected character: %c", r)
 		}
 		if len(l.tokens) > l.limits.MaxTokens {
@@ -201,11 +203,12 @@ func (l *lexer) readIdentOrKeyword() error {
 		return errors.New("identifier length limit exceeded")
 	}
 	low := strings.ToLower(id)
-	if low == "true" || low == "false" {
+	switch low {
+	case "true", "false":
 		l.add(tokBool, low)
-	} else if low == "in" {
+	case "in":
 		l.add(tokIn, low)
-	} else {
+	default:
 		l.add(tokIdent, id)
 	}
 	return nil

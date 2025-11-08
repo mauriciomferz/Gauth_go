@@ -38,7 +38,7 @@ func NewAuthorizationRequestGenerator(subjects, resources, actions []string) *Au
 		Resources: resources,
 		Actions:   actions,
 		//nolint:gosec // G404: weak random acceptable for load testing
-		rng:       rand.New(rand.NewSource(time.Now().UnixNano())),
+		rng: rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
 
@@ -113,21 +113,22 @@ func NewDelegationRequestGenerator(subjects, delegates, resources, actions []str
 		Actions:    actions,
 		Operations: []string{"create", "revoke", "verify"},
 		//nolint:gosec // G404: weak random acceptable for load testing
-		rng:        rand.New(rand.NewSource(time.Now().UnixNano())),
+		rng: rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
 
 // Generate creates a delegation request.
 func (g *DelegationRequestGenerator) Generate(userID, iteration int) (interface{}, error) {
-	operation := g.Operations[g.rng.Intn(len(g.Operations))]
+	var operation string
 
 	// Weight operations: 60% verify, 30% create, 10% revoke
 	roll := g.rng.Float64()
-	if roll < 0.6 {
+	switch {
+	case roll < 0.6:
 		operation = "verify"
-	} else if roll < 0.9 {
+	case roll < 0.9:
 		operation = "create"
-	} else {
+	default:
 		operation = "revoke"
 	}
 
@@ -163,7 +164,7 @@ func NewCachePressureGenerator(subjects, resources, actions []string, hotSetSize
 		Resources:   resources,
 		Actions:     actions,
 		//nolint:gosec // G404: weak random acceptable for load testing
-		rng:         rand.New(rand.NewSource(time.Now().UnixNano())),
+		rng: rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
 
@@ -210,7 +211,7 @@ func NewBurstLoadGenerator(baseGen RequestGenerator, burstProb float64, burstMul
 		BurstMultiplier:  burstMult,
 		BaseGenerator:    baseGen,
 		//nolint:gosec // G404: weak random acceptable for load testing
-		rng:              rand.New(rand.NewSource(time.Now().UnixNano())),
+		rng: rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
 

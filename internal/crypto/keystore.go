@@ -128,13 +128,11 @@ type MultiTenantKeyManager struct {
 
 // TenantScheduler manages the rotation schedule for a specific tenant.
 type TenantScheduler struct {
-	tenant       string
-	manager      *MultiTenantKeyManager
-	policy       *RotationPolicy
-	ticker       *time.Ticker
-	stopCh       chan struct{}
-	nextRotation time.Time
-	mu           sync.RWMutex
+	tenant  string
+	manager *MultiTenantKeyManager
+	policy  *RotationPolicy
+	ticker  *time.Ticker
+	stopCh  chan struct{}
 }
 
 // Additional methods for MultiTenantKeyManager

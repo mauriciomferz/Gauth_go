@@ -61,7 +61,12 @@ func GeneratePhase1Vectors() ([]TestVector, error) {
 	// Canonical low-S form
 	lowS := normalizeLowS(s, ecdsaPriv.Params().N)
 	derLow := encodeDERSignature(r, lowS)
-	pubBytes := elliptic.Marshal(elliptic.P256(), ecdsaPriv.PublicKey.X, ecdsaPriv.PublicKey.Y)
+	// Uncompressed form: 0x04 || X || Y (32 bytes each for P-256)
+	byteLen := (ecdsaPriv.PublicKey.Curve.Params().BitSize + 7) / 8
+	pubBytes := make([]byte, 1+2*byteLen)
+	pubBytes[0] = 0x04
+	ecdsaPriv.PublicKey.X.FillBytes(pubBytes[1 : 1+byteLen])
+	ecdsaPriv.PublicKey.Y.FillBytes(pubBytes[1+byteLen:])
 	vectors = append(vectors, TestVector{Alg: "ECDSA-P256", Curve: "P-256", Message: eMsg, Public: pubBytes, Signature: derLow, Valid: true})
 	// High-S variant (malleable) - should be invalid
 	highS := new(big.Int).Sub(ecdsaPriv.Params().N, lowS)

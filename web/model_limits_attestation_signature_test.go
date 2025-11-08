@@ -106,15 +106,15 @@ func TestModelLimitsAttestationSignature(t *testing.T) {
 	}
 	// Domain-separated message must match server signing (prefix + canonical JSON)
 	prefix := []byte("GAUTH_MODEL_LIMIT_ATTEST:")
-	msg := append(prefix, raw...)
-	if !ed25519.Verify(pub, msg, sigBytes) {
+	prefix = append(prefix, raw...)
+	if !ed25519.Verify(pub, prefix, sigBytes) {
 		t.Fatalf("signature verify failed (domain-separated)")
 	}
 	// Tamper check
 	unsigned.Snapshot.Hash += testTamper
 	tamperedRaw, _ := json.Marshal(unsigned)
-	tamperedMsg := append(prefix, tamperedRaw...)
-	if ed25519.Verify(pub, tamperedMsg, sigBytes) {
+	prefix = append(prefix, tamperedRaw...)
+	if ed25519.Verify(pub, prefix, sigBytes) {
 		t.Fatalf("tamper should fail verification (domain-separated)")
 	}
 }

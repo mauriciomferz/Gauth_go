@@ -3,7 +3,6 @@ package loadtest
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 )
@@ -128,13 +127,4 @@ func BenchmarkResponseTimeCalculation(b *testing.B) {
 		_ = harness.calculatePercentile(harness.responseTimes, 95)
 		harness.mu.RUnlock()
 	}
-}
-
-// Run comprehensive benchmark suite
-func runComprehensiveBenchmarks() {
-	fmt.Println("Running comprehensive load test benchmarks...")
-	fmt.Println("================================================================================")
-
-	// This function would be called manually for performance analysis
-	// Not part of standard test suite
 }

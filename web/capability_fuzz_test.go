@@ -89,10 +89,10 @@ func FuzzCapabilityReload(f *testing.F) {
 	f.Fuzz(func(t *testing.T, input []byte) {
 		// Write seed base file first
 		tmpDir := t.TempDir()
-	capFile := fmt.Sprintf("%s/caps.json", tmpDir)
-	if err := os.WriteFile(capFile, seed, 0o600); err != nil {
-		t.Fatal(err)
-	}
+		capFile := fmt.Sprintf("%s/caps.json", tmpDir)
+		if err := os.WriteFile(capFile, seed, 0o600); err != nil {
+			t.Fatal(err)
+		}
 		t.Setenv("GAUTH_CAPABILITIES_PATH", capFile)
 		srv := NewBetaServer(":0")
 		disc := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")

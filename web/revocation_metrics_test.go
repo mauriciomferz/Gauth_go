@@ -36,13 +36,14 @@ func TestRevocationAutoSignMetrics(t *testing.T) {
 			if line == "" {
 				continue
 			}
-			if strings.HasPrefix(line, "gauth_revocation_auto_sign_emitted ") {
+			switch {
+			case strings.HasPrefix(line, "gauth_revocation_auto_sign_emitted "):
 				fmtS := strings.TrimPrefix(line, "gauth_revocation_auto_sign_emitted ")
 				emitted = parseInt64(t, fmtS)
-			} else if strings.HasPrefix(line, "gauth_revocation_auto_sign_skipped_empty ") {
+			case strings.HasPrefix(line, "gauth_revocation_auto_sign_skipped_empty "):
 				fmtS := strings.TrimPrefix(line, "gauth_revocation_auto_sign_skipped_empty ")
 				skippedEmpty = parseInt64(t, fmtS)
-			} else if strings.HasPrefix(line, "gauth_revocation_auto_sign_skipped_duplicate ") {
+			case strings.HasPrefix(line, "gauth_revocation_auto_sign_skipped_duplicate "):
 				fmtS := strings.TrimPrefix(line, "gauth_revocation_auto_sign_skipped_duplicate ")
 				skippedDup = parseInt64(t, fmtS)
 			}

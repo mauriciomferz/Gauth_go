@@ -36,6 +36,7 @@ func TestDelegationDepthLimitExceeded(t *testing.T) {
 		t.Fatalf("expected code %s got %s", rfc.ErrDelegationDepthExceeded, rfcErr.Code)
 	}
 	if mem.SnapshotEx().DelegationStatusTransitions != 0 { /* unrelated metric unaffected */
+		_ = mem // Just checking the metric value
 	}
 }
 

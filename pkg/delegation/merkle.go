@@ -139,13 +139,14 @@ func VerifyProof(leafDigest string, proof []MerkleProofStep, expectedRoot string
 	}
 	cur := leafDigest
 	for _, step := range proof {
-		if step.Position == "R" { // sibling is right of cur: parent = HASH(cur + sibling)
+		switch step.Position {
+		case "R": // sibling is right of cur: parent = HASH(cur + sibling)
 			parent := sha256.Sum256(append(append([]byte("GAUTH_MERKLE_NODE:"), []byte(cur)...), []byte(step.Sibling)...))
 			cur = hex.EncodeToString(parent[:])
-		} else if step.Position == "L" { // sibling is left: parent = HASH(sibling + cur)
+		case "L": // sibling is left: parent = HASH(sibling + cur)
 			parent := sha256.Sum256(append(append([]byte("GAUTH_MERKLE_NODE:"), []byte(step.Sibling)...), []byte(cur)...))
 			cur = hex.EncodeToString(parent[:])
-		} else {
+		default:
 			return false
 		}
 	}

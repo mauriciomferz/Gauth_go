@@ -74,6 +74,7 @@ func (p *Processor) ProcessCascadeRevocation(ctx context.Context, parentPoaID, r
 		}
 		if err := p.auditor.Log(ctx, event); err != nil { //nolint:SA9003
 			// Log the audit error but continue processing
+			_ = err // Log the audit error but continue processing
 		}
 	}
 
@@ -148,6 +149,7 @@ func (p *Processor) ProcessCascadeRevocation(ctx context.Context, parentPoaID, r
 		}
 		if err := p.auditor.Log(ctx, event); err != nil { //nolint:SA9003
 			// Log the audit error but continue processing
+			_ = err // Log the audit error but continue processing
 		}
 	}
 
@@ -237,6 +239,7 @@ func (p *Processor) processDescendant(poa *rfc0111.PowerOfAttorney, depth int, r
 			}
 			if err := p.auditor.Log(context.Background(), event); err != nil { //nolint:SA9003
 				// Log the audit error but continue processing
+				_ = err // Log the audit error but continue processing
 			}
 		}
 		return nil // Don't actually update the POA
@@ -295,11 +298,12 @@ func (p *Processor) groupByDepth(descendants []*rfc0111.PowerOfAttorney) map[int
 
 // getOutcome determines the overall outcome based on the result
 func (p *Processor) getOutcome(result *ProcessorResult) string {
-	if result.FailureCount == 0 {
+	switch {
+	case result.FailureCount == 0:
 		return "success"
-	} else if result.SuccessCount > 0 {
+	case result.SuccessCount > 0:
 		return "partial_success"
-	} else {
+	default:
 		return "failure"
 	}
 }

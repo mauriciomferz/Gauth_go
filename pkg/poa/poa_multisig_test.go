@@ -1,6 +1,7 @@
 package poa
 
 import (
+	"context"
 	"os"
 	"testing"
 	"time"
@@ -48,7 +49,7 @@ func TestPoAMultiSigThresholdSatisfied(t *testing.T) {
 	os.Setenv("GAUTH_POA_MULTISIG_KIDS", uniq[0]+","+uniq[1])
 	os.Setenv("GAUTH_POA_MULTISIG_THRESHOLD", "2")
 	svc := NewMemoryService()
-	poaObj, err := svc.Issue(nil, &Request{Subject: "alice", Resource: "vault", Action: "read"})
+	poaObj, err := svc.Issue(context.TODO(), &Request{Subject: "alice", Resource: "vault", Action: "read"})
 	if err != nil {
 		t.Fatalf("issue: %v", err)
 	}
@@ -81,7 +82,7 @@ func TestPoAMultiSigThresholdUnsatisfied(t *testing.T) {
 	os.Setenv("GAUTH_POA_MULTISIG_KIDS", uniq[0]+","+uniq[1])
 	os.Setenv("GAUTH_POA_MULTISIG_THRESHOLD", "3") // impossible threshold
 	svc := NewMemoryService()
-	poaObj, err := svc.Issue(nil, &Request{Subject: "bob", Resource: "ledger", Action: "append"})
+	poaObj, err := svc.Issue(context.TODO(), &Request{Subject: "bob", Resource: "ledger", Action: "append"})
 	if err != nil {
 		t.Fatalf("issue: %v", err)
 	}
@@ -101,7 +102,7 @@ func TestPoAMultiSigTamperSignature(t *testing.T) {
 	os.Setenv("GAUTH_POA_MULTISIG_KIDS", keys[0].ID)
 	os.Setenv("GAUTH_POA_MULTISIG_THRESHOLD", "1")
 	svc := NewMemoryService()
-	poaObj, err := svc.Issue(nil, &Request{Subject: "carol", Resource: "db", Action: "query"})
+	poaObj, err := svc.Issue(context.TODO(), &Request{Subject: "carol", Resource: "db", Action: "query"})
 	if err != nil {
 		t.Fatalf("issue: %v", err)
 	}

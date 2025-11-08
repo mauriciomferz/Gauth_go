@@ -203,18 +203,3 @@ func TestAttestationProofTrustAnchorSuccess(t *testing.T) {
 		t.Fatalf("expected zero trust anchor failure counters on success, got missing=%d algo=%d key=%d", ss.AttestationProofTrustAnchorMissing, ss.AttestationProofTrustAnchorAlgorithmMismatch, ss.AttestationProofTrustAnchorKeyMismatch)
 	}
 }
-
-// contains is a tiny helper to avoid importing strings for trivial substring checks.
-func contains(haystack, needle string) bool {
-	return len(needle) == 0 || (len(haystack) >= len(needle) && indexOf(haystack, needle) >= 0)
-}
-
-// indexOf returns the index of needle in haystack or -1.
-func indexOf(h, n string) int {
-	for i := 0; i+len(n) <= len(h); i++ {
-		if h[i:i+len(n)] == n {
-			return i
-		}
-	}
-	return -1
-}

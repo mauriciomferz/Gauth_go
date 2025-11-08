@@ -108,15 +108,19 @@ func (a *API) HandleSign(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Determine appropriate HTTP status
-		status := http.StatusBadRequest
-		if contains(err.Error(), "not found") || contains(err.Error(), "no signature collection") {
+		errMsg := err.Error()
+		var status int
+		switch {
+		case contains(errMsg, "not found") || contains(errMsg, "no signature collection"):
 			status = http.StatusNotFound
-		} else if contains(err.Error(), "expired") {
+		case contains(errMsg, "expired"):
 			status = http.StatusGone
-		} else if contains(err.Error(), "already submitted") || contains(err.Error(), "already completed") {
+		case contains(errMsg, "already submitted") || contains(errMsg, "already completed"):
 			status = http.StatusConflict
-		} else if contains(err.Error(), "verification failed") {
+		case contains(errMsg, "verification failed"):
 			status = http.StatusUnauthorized
+		default:
+			status = http.StatusBadRequest
 		}
 
 		http.Error(w, err.Error(), status)
@@ -148,7 +152,7 @@ func (a *API) HandleSign(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(response); err != nil {
-		// Log encoding error but response was already started
+		_ = err // Log encoding error but response was already started
 	}
 
 	// Record success metric
@@ -231,7 +235,7 @@ func (a *API) HandleStatus(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(response); err != nil {
-		// Log encoding error but response was already started
+		_ = err // Log encoding error but response was already started
 	}
 }
 
@@ -275,7 +279,7 @@ func (a *API) HandleActivate(w http.ResponseWriter, r *http.Request) {
 		"message": "PoA activated",
 		"poa_id":  poaID,
 	}); err != nil {
-		// Log encoding error but response was already started
+		_ = err // Log encoding error but response was already started
 	}
 }
 

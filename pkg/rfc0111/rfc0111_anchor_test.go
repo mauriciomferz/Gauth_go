@@ -40,7 +40,9 @@ func TestNoopAnchorSuccess(t *testing.T) {
 	if err := svc.RevokeDelegation(list[0].ID, "alice"); err != nil {
 		t.Fatalf("revoke: %v", err)
 	}
-	_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, attempts, failures, _, _, _, _, _, _ := mem.Snapshot()
+	// Extract only anchor metrics (positions 15 and 16 from Snapshot)
+	var attempts, failures uint64
+	_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, attempts, failures, _, _, _, _, _, _ = mem.Snapshot()
 	if attempts == 0 {
 		t.Fatalf("expected >0 anchor attempts got %d", attempts)
 	}
@@ -65,7 +67,9 @@ func TestAnchorFailures(t *testing.T) {
 	if err := svc.RevokeDelegation(list[0].ID, "carol"); err != nil {
 		t.Fatalf("revoke: %v", err)
 	}
-	_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, attempts, failures, _, _, _, _, _, _ := mem.Snapshot()
+	// Extract only anchor metrics (positions 15 and 16 from Snapshot)
+	var attempts, failures uint64
+	_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, attempts, failures, _, _, _, _, _, _ = mem.Snapshot()
 	if attempts == 0 {
 		t.Fatalf("expected attempts >0 got %d", attempts)
 	}

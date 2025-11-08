@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+
+	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/enforcement"
 )
 
 // FuzzCapabilityEnforcement fuzzes the capability matrix enforcement with arbitrary inputs
@@ -29,11 +31,12 @@ func FuzzCapabilityEnforcement(f *testing.F) {
 				kv := strings.Split(pair, ":")
 				if len(kv) == 2 {
 					// Try to parse as boolean
-					if kv[1] == "true" {
+					switch kv[1] {
+					case "true":
 						claims[kv[0]] = true
-					} else if kv[1] == "false" {
+					case "false":
 						claims[kv[0]] = false
-					} else {
+					default:
 						claims[kv[0]] = kv[1]
 					}
 				}
@@ -51,12 +54,12 @@ func FuzzCapabilityEnforcement(f *testing.F) {
 		decision := matrix.EnforceAICapabilities(profile, capability, claims)
 
 		// Validate decision structure
-		if decision.Decision != "allow" && decision.Decision != "deny" {
+		if decision.Decision != enforcement.DecisionAllow && decision.Decision != enforcement.DecisionDeny {
 			t.Errorf("Invalid decision value: %q (expected 'allow' or 'deny')", decision.Decision)
 		}
 
 		// If denied, should have a reason
-		if decision.Decision == "deny" && decision.Reason == "" {
+		if decision.Decision == enforcement.DecisionDeny && decision.Reason == "" {
 			t.Error("Deny decision missing reason")
 		}
 
@@ -100,7 +103,7 @@ func FuzzWildcardMatching(f *testing.F) {
 		decision := matrix.EnforceAICapabilities(profile, capability, claims)
 
 		// Validate return value
-		if decision.Decision != "allow" && decision.Decision != "deny" {
+		if decision.Decision != enforcement.DecisionAllow && decision.Decision != enforcement.DecisionDeny {
 			t.Errorf("Invalid decision: %q", decision.Decision)
 		}
 
@@ -137,7 +140,7 @@ func FuzzSystemProfileValidation(f *testing.F) {
 		decision := matrix.EnforceAICapabilities(profile, "test:capability", claims)
 
 		// Decision should be valid
-		if decision.Decision != "allow" && decision.Decision != "deny" {
+		if decision.Decision != enforcement.DecisionAllow && decision.Decision != enforcement.DecisionDeny {
 			t.Errorf("Invalid decision: %q", decision.Decision)
 		}
 
@@ -180,7 +183,7 @@ func FuzzClaimsValidation(f *testing.F) {
 		decision := matrix.EnforceAICapabilities(profile, "test:capability", claims)
 
 		// Validate decision structure
-		if decision.Decision != "allow" && decision.Decision != "deny" {
+		if decision.Decision != enforcement.DecisionAllow && decision.Decision != enforcement.DecisionDeny {
 			t.Errorf("Invalid decision: %q", decision.Decision)
 		}
 
@@ -227,7 +230,7 @@ func FuzzJurisdictionEnforcement(f *testing.F) {
 		decision := matrix.EnforceAICapabilities(profile, "transaction:execute", claims)
 
 		// Validate decision
-		if decision.Decision != "allow" && decision.Decision != "deny" {
+		if decision.Decision != enforcement.DecisionAllow && decision.Decision != enforcement.DecisionDeny {
 			t.Errorf("Invalid decision for jurisdiction %q: %q", jurisdiction, decision.Decision)
 		}
 
@@ -299,12 +302,10 @@ func FuzzEnforcementToggle(f *testing.F) {
 		decision := matrix.EnforceAICapabilities(profile, "test:capability", claims)
 
 		// When enforcement is inactive, should allow by default
-		if !active && decision.Decision == "deny" {
+		if !active && decision.Decision == enforcement.DecisionDeny {
 			t.Error("Enforcement inactive should not deny")
-		}
-
-		// Decision should be valid
-		if decision.Decision != "allow" && decision.Decision != "deny" {
+		} // Decision should be valid
+		if decision.Decision != enforcement.DecisionAllow && decision.Decision != enforcement.DecisionDeny {
 			t.Errorf("Invalid decision: %q", decision.Decision)
 		}
 	})
@@ -345,7 +346,7 @@ func FuzzCapabilityFormat(f *testing.F) {
 		decision := matrix.EnforceAICapabilities(profile, capability, claims)
 
 		// Decision should be valid
-		if decision.Decision != "allow" && decision.Decision != "deny" {
+		if decision.Decision != enforcement.DecisionAllow && decision.Decision != enforcement.DecisionDeny {
 			t.Errorf("Invalid decision for capability %q: %q", capability, decision.Decision)
 		}
 
@@ -388,7 +389,7 @@ func FuzzRiskLevelEvaluation(f *testing.F) {
 		decision := matrix.EnforceAICapabilities(profile, "test:capability", claims)
 
 		// Decision should be valid
-		if decision.Decision != "allow" && decision.Decision != "deny" {
+		if decision.Decision != enforcement.DecisionAllow && decision.Decision != enforcement.DecisionDeny {
 			t.Errorf("Invalid decision: %q", decision.Decision)
 		}
 

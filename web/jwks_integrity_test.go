@@ -193,11 +193,9 @@ func TestJWKSDeprecationWarningHeader(t *testing.T) {
 	warning := w.Header().Get("Warning")
 	if warning == "" {
 		t.Errorf("expected Warning header when key deprecated")
-	} else {
+	} else if len(warning) < 10 || warning[:3] != "299" {
 		// Verify Warning format: "299 - "Keys deprecated: <kid>""
-		if len(warning) < 10 || warning[:3] != "299" {
-			t.Errorf("Warning header format unexpected: %s", warning)
-		}
+		t.Errorf("Warning header format unexpected: %s", warning)
 	}
 }
 

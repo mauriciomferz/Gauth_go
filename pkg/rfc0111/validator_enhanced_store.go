@@ -347,11 +347,12 @@ func (e *SimpleConditionalEngine) ValidateConditionSyntax(condition string) erro
 
 	// Split by logical operators and validate each part
 	var parts []string
-	if strings.Contains(condition, " AND ") {
+	switch {
+	case strings.Contains(condition, " AND "):
 		parts = strings.Split(condition, " AND ")
-	} else if strings.Contains(condition, " OR ") {
+	case strings.Contains(condition, " OR "):
 		parts = strings.Split(condition, " OR ")
-	} else {
+	default:
 		parts = []string{condition}
 	}
 

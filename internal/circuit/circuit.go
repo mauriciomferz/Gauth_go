@@ -97,8 +97,7 @@ func (cb *CircuitBreaker) Execute(ctx context.Context, fn func() error) error {
 	// Fast path: check/open state decisions
 	cb.mu.Lock()
 	now := time.Now()
-	switch cb.state {
-	case StateOpen:
+	if cb.state == StateOpen {
 		if now.Sub(cb.lastFailure) >= cb.timeout {
 			// move to half-open and allow one probe
 			cb.state = StateHalfOpen
@@ -107,10 +106,8 @@ func (cb *CircuitBreaker) Execute(ctx context.Context, fn func() error) error {
 			cb.mu.Unlock()
 			return errors.New("circuit breaker open")
 		}
-	}
-
-	// If half-open, allow only one active probe at a time
-	if cb.state == StateHalfOpen {
+	} else if cb.state == StateHalfOpen {
+		// If half-open, allow only one active probe at a time
 		if cb.halfOpenActive { // another probe in-flight
 			cb.mu.Unlock()
 			return errors.New("circuit breaker half-open busy")

@@ -148,7 +148,7 @@ func (e *Enforcer) Evaluate(ctx context.Context, req *EnforcementRequest) (Enfor
 	// Evaluate disclosure requirements
 	disclosures, disclosureOk := e.disclosureManager.EvaluateDisclosures(req)
 	if !disclosureOk {
-		decision.Decision = "deny"
+		decision.Decision = DecisionDeny
 		decision.Reason = "Required disclosures not acknowledged"
 		decision.Disclosures = disclosures
 		decision.EnforcementType = EnforcementDisclosure
@@ -188,8 +188,8 @@ func (e *Enforcer) evaluateRules(ctx context.Context, req *EnforcementRequest) (
 
 		if rule.Condition(ctx, req) {
 			appliedRules = append(appliedRules, rule.ID)
-			if rule.Action == "deny" {
-				decision = "deny"
+			if rule.Action == DecisionDeny {
+				decision = DecisionDeny
 				break // Deny takes precedence
 			}
 		}

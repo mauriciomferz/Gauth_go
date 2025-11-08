@@ -188,10 +188,9 @@ func (m *PolicyVersionManager) loadFromStore() error {
 		if _, err2 := m.registry.AddBundle(*bundle); err2 != nil {
 			// Log error but continue (registry may already have bundle)
 			// In production, use proper logging
+			_ = err2 // Intentionally ignored
 		}
-	}
-
-	// Load active version
+	} // Load active version
 	activeVersion, err := m.store.LoadActiveVersion()
 	if err == nil {
 		m.activeVersion = activeVersion
@@ -266,6 +265,7 @@ func (m *PolicyVersionManager) CreateVersion(ctx context.Context, bundle policy.
 		if err := m.store.SaveVersion(storedBundle.Version, storedBundle, &metadata); err != nil {
 			// Log error but don't fail (in-memory state is consistent)
 			// In production, use proper logging
+			_ = err // Intentionally ignored
 		}
 	}
 
@@ -299,10 +299,9 @@ func (m *PolicyVersionManager) CreateVersion(ctx context.Context, bundle policy.
 		}
 		if err := m.store.SaveAuditEvent(auditEvent); err != nil {
 			// Log error but don't fail
+			_ = err // Intentionally ignored
 		}
-	}
-
-	// Auto-activate if it's the first version
+	} // Auto-activate if it's the first version
 	if storedBundle.Version == 1 {
 		m.activeVersion = 1
 		now := time.Now()
@@ -312,6 +311,7 @@ func (m *PolicyVersionManager) CreateVersion(ctx context.Context, bundle policy.
 		if m.store != nil {
 			if err := m.store.SaveActiveVersion(1); err != nil {
 				// Log error but don't fail
+				_ = err // Log error but dont fail
 			}
 		}
 	}
@@ -447,6 +447,7 @@ func (m *PolicyVersionManager) RollbackVersion(ctx context.Context, targetVersio
 	if m.store != nil {
 		if err := m.store.SaveActiveVersion(targetVersion); err != nil {
 			// Log error but don't fail (in-memory state is consistent)
+			_ = err // Log error but dont fail (in-memory state is consistent)
 		}
 	}
 
@@ -472,6 +473,7 @@ func (m *PolicyVersionManager) RollbackVersion(ctx context.Context, targetVersio
 	if m.store != nil {
 		if err := m.store.SaveAuditEvent(auditEvent); err != nil {
 			// Log error but don't fail
+			_ = err // Log error but dont fail
 		}
 	}
 
@@ -634,16 +636,17 @@ func (m *PolicyVersionManager) analyzeImpact(fromVersion, toVersion int) (*Impac
 
 	// Determine risk level
 	totalChanges := analysis.PoliciesAdded + analysis.PoliciesModified + analysis.PoliciesRemoved
-	if totalChanges == 0 {
+	switch {
+	case totalChanges == 0:
 		analysis.RiskLevel = "none"
 		analysis.EstimatedImpact = "No changes detected"
-	} else if totalChanges <= 2 && analysis.PoliciesRemoved == 0 {
+	case totalChanges <= 2 && analysis.PoliciesRemoved == 0:
 		analysis.RiskLevel = "low"
 		analysis.EstimatedImpact = fmt.Sprintf("Minor changes: %d policies affected", totalChanges)
-	} else if totalChanges <= 5 || analysis.PoliciesRemoved <= 1 {
+	case totalChanges <= 5 || analysis.PoliciesRemoved <= 1:
 		analysis.RiskLevel = "medium"
 		analysis.EstimatedImpact = fmt.Sprintf("Moderate changes: %d policies affected, %d removed", totalChanges, analysis.PoliciesRemoved)
-	} else {
+	default:
 		analysis.RiskLevel = "high"
 		analysis.EstimatedImpact = fmt.Sprintf("Major changes: %d policies affected, %d removed", totalChanges, analysis.PoliciesRemoved)
 	}

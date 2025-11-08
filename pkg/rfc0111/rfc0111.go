@@ -1119,7 +1119,6 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 			if embeddedPoA.ID == delegationID {
 				// Use embedded PoA instead of repository lookup
 				poa = &embeddedPoA
-				ok = true
 				if s.metrics != nil {
 					// Record offline verification usage (reuse existing metric)
 					s.metrics.IncEnvelopeRawPOAEmbedded()
@@ -1308,11 +1307,7 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 						incDetachedVerify("success")
 					} else if s.metrics != nil { // verification failure
 						s.metrics.IncSignatureVerificationFailures()
-						if decErr != nil {
-							incDetachedVerify("invalid_signature")
-						} else {
-							incDetachedVerify("invalid_signature")
-						}
+						incDetachedVerify("invalid_signature")
 					}
 				} else if s.metrics != nil { // missing public key
 					s.metrics.IncSignaturePublicKeyMissing()
@@ -2144,11 +2139,9 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 					return nil, rfc.New(rfc.ErrIntegrityFailure, "parent not found")
 				}
 			}
-		} else {
+		} else if s.metrics != nil {
 			// Root issuance still increments issued metric when hierarchical digest enabled.
-			if s.metrics != nil {
-				s.metrics.IncHierDigestIssued()
-			}
+			s.metrics.IncHierDigestIssued()
 		}
 	}
 	// Auto-bump version when taxonomy present (non-empty fields) to engage V3 canonical domain separation logic for single-sig.
@@ -2399,10 +2392,8 @@ func (s *Service) ValidateDelegationCtx(ctx context.Context, poaID, grantee, act
 							s.metrics.IncSignatureVerificationFailures()
 						}
 						return rfc.New(rfc.ErrIntegrityFailure, "signature verification failed")
-					} else {
-						if s.metrics != nil {
-							s.metrics.IncSignatureVerifications()
-						}
+					} else if s.metrics != nil {
+						s.metrics.IncSignatureVerifications()
 					}
 				} else { // key not found
 					if s.metrics != nil {
@@ -3671,63 +3662,6 @@ func (s *Service) validateDelegationRequest(req DelegationRequest) error {
 //   - Global wildcard: * (allows any child scope)
 //   - Prefix wildcard: prefix.* (allows any action that starts with prefix.)
 //
-// Child entries must each be authorized by at least one parent entry; rejection occurs on first broaden attempt.
-// Regex and numeric range patterns are conservatively unsupported for inheritance (must match exactly or via wildcard);
-// if present in parent they are treated as exact strings (no expansion) until advanced inheritance implemented.
-func validateInheritedScopeV2(parentScope, childScope []string) error {
-	if len(childScope) == 0 {
-		return fmt.Errorf("child scope must be non-empty")
-	}
-	if len(parentScope) == 0 {
-		return fmt.Errorf("parent scope empty")
-	}
-	// Fast path: global wildcard present in parent => allow all
-	for _, p := range parentScope {
-		if p == "*" {
-			return nil
-		}
-	}
-	// Normalize parent into classification buckets
-	exact := map[string]struct{}{}
-	prefixes := make([]string, 0)
-	for _, p := range parentScope {
-		p = strings.TrimSpace(p)
-		if p == "" {
-			continue
-		}
-		if p == "*" {
-			return nil
-		}
-		if strings.HasSuffix(p, ".*") {
-			prefixes = append(prefixes, strings.TrimSuffix(p, ".*"))
-			continue
-		}
-		// treat regex:/ and range patterns conservatively as exact strings (no expansion)
-		exact[p] = struct{}{}
-	}
-	// For each child entry ensure coverage by exact match or prefix wildcard.
-	for _, c := range childScope {
-		c = strings.TrimSpace(c)
-		if c == "" {
-			return fmt.Errorf("child scope contains empty entry")
-		}
-		if _, ok := exact[c]; ok {
-			continue
-		}
-		covered := false
-		for _, pre := range prefixes {
-			if strings.HasPrefix(c, pre+".") {
-				covered = true
-				break
-			}
-		}
-		if !covered {
-			return fmt.Errorf("child scope entry '%s' not covered by parent scope", c)
-		}
-	}
-	return nil
-}
-
 // containsScope checks if an action is within the permitted scope using enhanced pattern semantics.
 // Supported patterns:
 //  1. Exact: "resource.action" must equal the action string
@@ -3878,11 +3812,9 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 				if s.metrics != nil {
 					s.metrics.IncEnvelopeRawPOAEmbedded()
 				}
-			} else {
+			} else if s.metrics != nil {
 				// Size exceeded; omit RawPOA.
-				if s.metrics != nil {
-					s.metrics.IncEnvelopeRawPOATooLarge()
-				}
+				s.metrics.IncEnvelopeRawPOATooLarge()
 			}
 		}
 		// RawPOAChain embedding (prototype). Feature-gated independently (GAUTH_EMBED_RAW_POA_CHAIN=1).
@@ -3891,7 +3823,7 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 		if embedChain {
 			// Hash algorithm negotiation (default sha256). Supported: sha256, blake2b256, sha3_256.
 			algoName := strings.ToLower(os.Getenv("GAUTH_RAW_POA_CHAIN_HASH_ALGO"))
-			var algo poaPkg.RawPOAHashAlg = poaPkg.RawPOAHashSHA256
+			var algo = poaPkg.RawPOAHashSHA256
 			switch algoName {
 			case "blake2b256":
 				algo = poaPkg.RawPOAHashBLAKE2b256
@@ -4037,7 +3969,7 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 			}
 			// Cadence observation
 			prev := mem.LastEnvelopeIssuanceUnix()
-		//nolint:gosec // G115: Unix timestamp always positive, safe conversion
+			//nolint:gosec // G115: Unix timestamp always positive, safe conversion
 			cur := uint64(now.Unix()) //nolint:gosec // G115: Unix timestamp
 			if prev != 0 && cur > prev {
 				s.metrics.ObserveEnvelopeIssuanceCadence(float64(cur - prev))
@@ -4071,7 +4003,7 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 				s.metrics.SetEnvelopeV2AdoptionRatio(float64(v2) / float64(total))
 			}
 			prev := mem.LastEnvelopeIssuanceUnix()
-		//nolint:gosec // G115: Unix timestamp always positive, safe conversion
+			//nolint:gosec // G115: Unix timestamp always positive, safe conversion
 			cur := uint64(now.Unix()) //nolint:gosec // G115: Unix timestamp
 			if prev != 0 && cur > prev {
 				s.metrics.ObserveEnvelopeIssuanceCadence(float64(cur - prev))

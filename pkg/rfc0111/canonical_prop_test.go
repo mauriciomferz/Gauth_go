@@ -91,7 +91,7 @@ func TestMultiSigWeightsSortingProperty(t *testing.T) {
 	swapped := []string{"S2", "S1", "S3", "S4"}
 	w2 := map[string]int{}
 	for _, k := range swapped {
-	w2[k] = canonicalWeights[k]
+		w2[k] = canonicalWeights[k]
 	}
 	basePOA.Weights = w2
 	d, _, err3 := CanonicalPOADigest(basePOA)

@@ -504,7 +504,8 @@ func (m *Manager) ImportPublic(kid string, pub []byte, expires time.Time) {
 		return
 	}
 	// Append new key
-	m.history = append(kept, k)
+	kept = append(kept, k)
+	m.history = kept
 }
 
 // persistenceRecord models on-disk JSON.

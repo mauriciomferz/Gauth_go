@@ -216,13 +216,11 @@ func TestProperty_DifferentKeysProduceDifferentSignatures(t *testing.T) {
 
 			// Cross-verification should fail (if keys are in same provider)
 			if err := VerifyAlgorithm(algo.name, msg, b64_1, signer2.KeyID(), prov2); err == nil {
-				// Expected to fail because signer1's key is not in prov2
+				_ = err // Expected to fail because signer1's key is not in prov2
 			}
 		})
 	}
-}
-
-// Property: Algorithm interoperability - signatures from different algorithms should not cross-verify
+} // Property: Algorithm interoperability - signatures from different algorithms should not cross-verify
 func TestProperty_AlgorithmIsolation(t *testing.T) {
 	provEd, _ := NewInMemoryEd25519Provider()
 	provEC, _ := NewInMemoryECDSAProvider()

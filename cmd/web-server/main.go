@@ -28,11 +28,12 @@ func main() {
 			fmt.Println("healthcheck request failed:", err)
 			os.Exit(1)
 		}
-		defer func() { _ = resp.Body.Close() }()
 		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 			fmt.Println("OK")
+			_ = resp.Body.Close()
 			os.Exit(0)
 		}
+		_ = resp.Body.Close()
 		fmt.Printf("unhealthy status: %d\n", resp.StatusCode)
 		os.Exit(1)
 	}

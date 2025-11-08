@@ -644,7 +644,7 @@ func (m *Memory) IncCascadeProcessingErrors() { atomic.AddUint64(&m.cascadeProce
 func (m *Memory) ValidationLatencyPercentiles() (p50, p95, p99 time.Duration) {
 	vc := atomic.LoadUint64(&m.validationCount)
 	if vc == 0 {
-		return
+		return 0, 0, 0
 	}
 	// Determine sample size (cannot exceed reservoir size nor validation count)
 	sampleSize := vc
@@ -652,7 +652,7 @@ func (m *Memory) ValidationLatencyPercentiles() (p50, p95, p99 time.Duration) {
 		sampleSize = uint64(len(m.reservoir))
 	}
 	if sampleSize == 0 {
-		return
+		return 0, 0, 0
 	}
 	buf := make([]uint64, 0, sampleSize)
 	end := atomic.LoadUint64(&m.reservoirIndex)
@@ -678,7 +678,7 @@ func (m *Memory) ValidationLatencyPercentiles() (p50, p95, p99 time.Duration) {
 	p50 = pick(0.50)
 	p95 = pick(0.95)
 	p99 = pick(0.99)
-	return
+	return p50, p95, p99
 }
 
 // latencyReservoir maintains a fixed-size ring buffer of recent latency samples (nanoseconds)
@@ -692,6 +692,7 @@ type latencyReservoir struct {
 func NewMemory() *Memory { return &Memory{} }
 
 // SetReplayWALPending sets current pending WAL entries gauge.
+//
 //nolint:gosec // G115: WAL pending count, always non-negative
 func (m *Memory) SetReplayWALPending(n int) { atomic.StoreUint64(&m.replayWALPending, uint64(n)) }
 

@@ -338,13 +338,14 @@ func writeMarkdownReport(result *ValidationResult) error {
 	sb.WriteString("- P2 (Medium): 15% weight\n")
 	sb.WriteString("- P3 (Low): 5% weight\n\n")
 
-	if result.ReadinessScore >= 90.0 {
+	switch {
+	case result.ReadinessScore >= 90.0:
 		sb.WriteString("✅ **EXCELLENT** - Production ready with minor gaps\n\n")
-	} else if result.ReadinessScore >= 75.0 {
+	case result.ReadinessScore >= 75.0:
 		sb.WriteString("✅ **GOOD** - Near production ready, address critical gaps\n\n")
-	} else if result.ReadinessScore >= 50.0 {
+	case result.ReadinessScore >= 50.0:
 		sb.WriteString("⚠️ **FAIR** - Significant work required before production\n\n")
-	} else {
+	default:
 		sb.WriteString("🚨 **POOR** - Major gaps in critical requirements\n\n")
 	}
 

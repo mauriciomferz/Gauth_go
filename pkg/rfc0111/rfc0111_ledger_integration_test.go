@@ -22,7 +22,7 @@ func TestLedgerIssuanceAndRevocation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("key provider: %v", err)
 	}
-	svc := NewService(al, az, WithLedger(lstore), WithMandatorySignatures(), WithSignerProvider(func() (cr.Signer, error) { return kp.ActiveSigner() })).WithClock(func() time.Time { return time.Now() })
+	svc := NewService(al, az, WithLedger(lstore), WithMandatorySignatures(), WithSignerProvider(func() (cr.Signer, error) { return kp.ActiveSigner() })).WithClock(time.Now)
 
 	// Issue delegation
 	req := DelegationRequest{Grantor: "alice", Grantee: "bob", Scope: []string{"read"}, Duration: time.Hour}

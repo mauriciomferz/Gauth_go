@@ -156,7 +156,7 @@ func main() {
 	}
 
 	// Metrics collector (optional)
-	var m imetrics.Metrics = imetrics.Noop
+	var m = imetrics.Noop
 	mem, useMem := (&imetrics.Memory{}), false
 	if emitMetrics {
 		mem = imetrics.NewMemory()
@@ -188,7 +188,8 @@ func main() {
 
 		for iter := 0; iter < iterations; iter++ {
 			// Optionally regenerate message slight variation per iteration to simulate different workloads.
-			if _, err := rng.Read(msg[:32]); err == nil { /* ignore error for determinism */
+			if _, err := rng.Read(msg[:32]); err == nil {
+				_ = err // ignore error for determinism
 			}
 			if mode == modeSign || mode == modeBoth {
 				t0 := time.Now()
@@ -328,5 +329,5 @@ func computePercentiles(samples []int64) (p50, p95, p99 int64) {
 	p50 = cp[idx(0.50)]
 	p95 = cp[idx(0.95)]
 	p99 = cp[idx(0.99)]
-	return
+	return p50, p95, p99
 }

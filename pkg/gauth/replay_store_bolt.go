@@ -76,20 +76,20 @@ func (s *BoltReplayStore) CheckAndRecord(jti string) error {
 		key := []byte(jti)
 		existing := bucket.Get(key)
 
-	// Check if JTI exists and is not expired
-	if existing != nil {
-		//nolint:gosec // G115: converting stored timestamp, safe for Unix time values
-		expiry := int64(binary.BigEndian.Uint64(existing))
-		if now < expiry {
+		// Check if JTI exists and is not expired
+		if existing != nil {
+			//nolint:gosec // G115: converting stored timestamp, safe for Unix time values
+			expiry := int64(binary.BigEndian.Uint64(existing))
+			if now < expiry {
 				return fmt.Errorf("replay detected: jti=%s already used", jti)
 			}
 		}
 
-	// Record new JTI with expiration timestamp
-	value := make([]byte, 8)
-	//nolint:gosec // G115: timestamp conversion, safe for Unix time values
-	binary.BigEndian.PutUint64(value, uint64(expiresAt))
-	return bucket.Put(key, value)
+		// Record new JTI with expiration timestamp
+		value := make([]byte, 8)
+		//nolint:gosec // G115: timestamp conversion, safe for Unix time values
+		binary.BigEndian.PutUint64(value, uint64(expiresAt))
+		return bucket.Put(key, value)
 	})
 
 	return err
@@ -114,11 +114,11 @@ func (s *BoltReplayStore) cleanupExpired() {
 			var expiredKeys [][]byte
 			cursor := bucket.Cursor()
 
-		for k, v := cursor.First(); k != nil; k, v = cursor.Next() {
-			if len(v) >= 8 {
-				//nolint:gosec // G115: converting stored timestamp, safe for Unix time values
-				expiry := int64(binary.BigEndian.Uint64(v))
-				if now >= expiry {
+			for k, v := cursor.First(); k != nil; k, v = cursor.Next() {
+				if len(v) >= 8 {
+					//nolint:gosec // G115: converting stored timestamp, safe for Unix time values
+					expiry := int64(binary.BigEndian.Uint64(v))
+					if now >= expiry {
 						expiredKeys = append(expiredKeys, append([]byte(nil), k...))
 					}
 				}

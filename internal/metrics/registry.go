@@ -97,16 +97,16 @@ func NewCollectorRegistry(concurrent bool) *CollectorRegistry {
 //
 // Returns error if a collector with the same ID is already registered.
 // The collector will immediately start receiving metric events.
-func (r *CollectorRegistry) Register(collector MetricsCollector) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+func (reg *CollectorRegistry) Register(collector MetricsCollector) error {
+	reg.mu.Lock()
+	defer reg.mu.Unlock()
 
 	meta := collector.Metadata()
-	if _, exists := r.collectors[meta.ID]; exists {
+	if _, exists := reg.collectors[meta.ID]; exists {
 		return fmt.Errorf("collector %q already registered", meta.ID)
 	}
 
-	r.collectors[meta.ID] = collector
+	reg.collectors[meta.ID] = collector
 	return nil
 }
 
@@ -114,11 +114,11 @@ func (r *CollectorRegistry) Register(collector MetricsCollector) error {
 //
 // The collector is flushed and closed before removal. Returns error if
 // collector not found or if flush/close fails.
-func (r *CollectorRegistry) Deregister(id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+func (reg *CollectorRegistry) Deregister(id string) error {
+	reg.mu.Lock()
+	defer reg.mu.Unlock()
 
-	collector, exists := r.collectors[id]
+	collector, exists := reg.collectors[id]
 	if !exists {
 		return fmt.Errorf("collector %q not found", id)
 	}
@@ -133,26 +133,26 @@ func (r *CollectorRegistry) Deregister(id string) error {
 		return fmt.Errorf("close failed for %q: %w", id, err)
 	}
 
-	delete(r.collectors, id)
+	delete(reg.collectors, id)
 	return nil
 }
 
 // Get retrieves a collector by ID.
 //
 // Returns nil if collector not found.
-func (r *CollectorRegistry) Get(id string) MetricsCollector {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	return r.collectors[id]
+func (reg *CollectorRegistry) Get(id string) MetricsCollector {
+	reg.mu.RLock()
+	defer reg.mu.RUnlock()
+	return reg.collectors[id]
 }
 
 // List returns metadata for all registered collectors.
-func (r *CollectorRegistry) List() []CollectorMetadata {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+func (reg *CollectorRegistry) List() []CollectorMetadata {
+	reg.mu.RLock()
+	defer reg.mu.RUnlock()
 
-	result := make([]CollectorMetadata, 0, len(r.collectors))
-	for _, collector := range r.collectors {
+	result := make([]CollectorMetadata, 0, len(reg.collectors))
+	for _, collector := range reg.collectors {
 		result = append(result, collector.Metadata())
 	}
 	return result
@@ -162,13 +162,13 @@ func (r *CollectorRegistry) List() []CollectorMetadata {
 //
 // Returns a map of collector ID -> error for any collectors that failed to flush.
 // If all collectors flush successfully, returns empty map.
-func (r *CollectorRegistry) FlushAll() map[string]error {
-	r.mu.RLock()
-	collectors := make([]MetricsCollector, 0, len(r.collectors))
-	for _, c := range r.collectors {
+func (reg *CollectorRegistry) FlushAll() map[string]error {
+	reg.mu.RLock()
+	collectors := make([]MetricsCollector, 0, len(reg.collectors))
+	for _, c := range reg.collectors {
 		collectors = append(collectors, c)
 	}
-	r.mu.RUnlock()
+	reg.mu.RUnlock()
 
 	errors := make(map[string]error)
 	for _, collector := range collectors {
@@ -182,12 +182,12 @@ func (r *CollectorRegistry) FlushAll() map[string]error {
 // CloseAll closes all registered collectors and clears the registry.
 //
 // Returns a map of collector ID -> error for any collectors that failed to close.
-func (r *CollectorRegistry) CloseAll() map[string]error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+func (reg *CollectorRegistry) CloseAll() map[string]error {
+	reg.mu.Lock()
+	defer reg.mu.Unlock()
 
 	errors := make(map[string]error)
-	for id, collector := range r.collectors {
+	for id, collector := range reg.collectors {
 		if err := collector.Flush(); err != nil {
 			errors[id] = fmt.Errorf("flush: %w", err)
 		}
@@ -201,7 +201,7 @@ func (r *CollectorRegistry) CloseAll() map[string]error {
 	}
 
 	// Clear registry
-	r.collectors = make(map[string]MetricsCollector)
+	reg.collectors = make(map[string]MetricsCollector)
 	return errors
 }
 
@@ -209,12 +209,12 @@ func (r *CollectorRegistry) CloseAll() map[string]error {
 //
 // Returns a map of collector ID -> error for any unhealthy collectors.
 // If all collectors are healthy, returns empty map.
-func (r *CollectorRegistry) HealthCheck() map[string]error {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+func (reg *CollectorRegistry) HealthCheck() map[string]error {
+	reg.mu.RLock()
+	defer reg.mu.RUnlock()
 
 	errors := make(map[string]error)
-	for id, collector := range r.collectors {
+	for id, collector := range reg.collectors {
 		if err := collector.Health(); err != nil {
 			errors[id] = err
 		}
@@ -226,14 +226,14 @@ func (r *CollectorRegistry) HealthCheck() map[string]error {
 //
 // If concurrent dispatch is enabled, collectors are called in parallel.
 // Otherwise, collectors are called sequentially.
-func (r *CollectorRegistry) dispatch(fn func(MetricsCollector)) {
-	r.mu.RLock()
-	collectors := make([]MetricsCollector, 0, len(r.collectors))
-	for _, c := range r.collectors {
+func (reg *CollectorRegistry) dispatch(fn func(MetricsCollector)) {
+	reg.mu.RLock()
+	collectors := make([]MetricsCollector, 0, len(reg.collectors))
+	for _, c := range reg.collectors {
 		collectors = append(collectors, c)
 	}
-	concurrent := r.dispatchConcurrent
-	r.mu.RUnlock()
+	concurrent := reg.dispatchConcurrent
+	reg.mu.RUnlock()
 
 	if concurrent && len(collectors) > 1 {
 		// Parallel dispatch to avoid slow collectors blocking fast ones

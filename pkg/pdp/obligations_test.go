@@ -14,9 +14,6 @@ import (
 	iobligations "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/obligations"
 )
 
-// simpleFailExecutor wraps SimpleExecutor to force a known failure name for testing.
-type simpleFailExecutor struct{ *iobligations.SimpleExecutor }
-
 func TestObligationsExecutionSuccessAndAudit(t *testing.T) {
 	m := imetrics.NewMemory()
 	auditPath := filepath.Join(t.TempDir(), "test_obligations_audit_success.jsonl")

@@ -106,14 +106,12 @@ func TestKeyRotationSystemIntegration(t *testing.T) {
 		// Get tenant policy
 		policy := manager.GetRotationPolicy(tenant)
 		if policy == nil {
-			t.Error("Expected policy for tenant, got nil")
+			t.Fatal("Expected policy for tenant, got nil")
 		}
 
 		if policy.Backend != "file" {
 			t.Errorf("Expected backend 'file', got %s", policy.Backend)
-		}
-
-		// Update policy
+		} // Update policy
 		newPolicy := &RotationPolicy{
 			Enabled:  true,
 			Interval: 2 * time.Hour,

@@ -106,8 +106,8 @@ func (si *ServerIntegration) EnforceAICapabilities(action string, claims map[str
 		return true, nil, metadata
 	} else {
 		// Return missing capabilities for standard capability system integration
-		missing := append(decision.MissingCapabilities, decision.ViolatedRules...)
-		return false, missing, metadata
+		decision.MissingCapabilities = append(decision.MissingCapabilities, decision.ViolatedRules...)
+		return false, decision.MissingCapabilities, metadata
 	}
 }
 

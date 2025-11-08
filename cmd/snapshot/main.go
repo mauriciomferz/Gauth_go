@@ -53,22 +53,25 @@ func main() {
 			fmt.Fprintf(os.Stderr, "error: open snapshot: %v\n", err)
 			os.Exit(8)
 		}
-		defer f.Close()
 		b, err := io.ReadAll(f)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error: read snapshot: %v\n", err)
+			f.Close()
 			os.Exit(9)
 		}
 		var snap notary.Snapshot
 		if err2 := json.Unmarshal(b, &snap); err2 != nil {
 			fmt.Fprintf(os.Stderr, "error: parse snapshot JSON: %v\n", err)
+			f.Close()
 			os.Exit(10)
 		}
 		res, err := notary.VerifySnapshot(rs, snap)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error: verify snapshot: %v\n", err)
+			f.Close()
 			os.Exit(11)
 		}
+		f.Close()
 		out := struct {
 			Snapshot notary.Snapshot                   `json:"snapshot"`
 			Result   notary.SnapshotVerificationResult `json:"result"`

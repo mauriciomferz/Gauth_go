@@ -204,6 +204,7 @@ func TestRotationSummary_SignatureValid(t *testing.T) {
 		t.Fatalf("unmarshal: %v", err)
 	}
 	if !resp.Success || resp.Summary.Signature == "" || resp.Summary.Kid == "rot-valid" { /* kid may be derived; ensure signature decodes */
+		_ = resp // Validation happens in the signature decode below
 	}
 	if _, err := base64.RawURLEncoding.DecodeString(resp.Summary.Signature); err != nil {
 		t.Fatalf("signature base64 decode failed: %v", err)

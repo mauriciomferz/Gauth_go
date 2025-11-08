@@ -71,7 +71,7 @@ func (s *SupplySidePEP) EnforceClientAction(ctx context.Context, resource, actio
 			return fmt.Errorf("supply-side PEP: PDP decision failed: %w", err)
 		}
 
-		if pdpDecision.Decision == "deny" {
+		if pdpDecision.Decision == DecisionDeny {
 			return fmt.Errorf("supply-side PEP: action denied by PDP: %s", pdpDecision.Reason)
 		}
 	}
@@ -82,11 +82,9 @@ func (s *SupplySidePEP) EnforceClientAction(ctx context.Context, resource, actio
 		return fmt.Errorf("supply-side PEP: enforcement evaluation failed: %w", err)
 	}
 
-	if decision.Decision == "deny" {
+	if decision.Decision == DecisionDeny {
 		return fmt.Errorf("supply-side PEP: action denied: %s", decision.Reason)
-	}
-
-	// Client is authorized to proceed
+	} // Client is authorized to proceed
 	return nil
 }
 
@@ -133,7 +131,7 @@ func (d *DemandSidePEP) ValidateClientCompliance(ctx context.Context, clientID, 
 			return fmt.Errorf("demand-side PEP: PDP decision failed: %w", err)
 		}
 
-		if pdpDecision.Decision == "deny" {
+		if pdpDecision.Decision == DecisionDeny {
 			return fmt.Errorf("demand-side PEP: client action denied by PDP: %s", pdpDecision.Reason)
 		}
 	}
@@ -144,7 +142,7 @@ func (d *DemandSidePEP) ValidateClientCompliance(ctx context.Context, clientID, 
 		return fmt.Errorf("demand-side PEP: enforcement evaluation failed: %w", err)
 	}
 
-	if decision.Decision == "deny" {
+	if decision.Decision == DecisionDeny {
 		return fmt.Errorf("demand-side PEP: client action denied: %s", decision.Reason)
 	}
 

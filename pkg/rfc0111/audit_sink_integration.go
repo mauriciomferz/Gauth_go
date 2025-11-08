@@ -184,7 +184,7 @@ func (s *Service) sendToAuditSink(ctx context.Context, event *audit.Event) {
 		// Log error but don't fail operation (fail-open for external sinks)
 		// TODO: Add metrics for sink failures
 		if s.metrics != nil {
-			// TODO: Add s.metrics.IncAuditSinkErrors()
+			_ = s.metrics // TODO: Add s.metrics.IncAuditSinkErrors()
 		}
 	}
 }

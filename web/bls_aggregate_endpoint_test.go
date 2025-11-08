@@ -144,7 +144,8 @@ func TestBLSAggregateVerifyTamper(t *testing.T) {
 	wv := httptest.NewRecorder()
 	reqv := httptest.NewRequest("POST", "/api/v1/crypto/bls/aggregate", bytes.NewReader(vb))
 	srv.router.ServeHTTP(wv, reqv)
-	if wv.Code == 200 {
+	switch wv.Code {
+	case 200:
 		var vr struct {
 			Valid bool `json:"valid"`
 		}
@@ -158,14 +159,14 @@ func TestBLSAggregateVerifyTamper(t *testing.T) {
 		if snap.MultiSignatureVerificationFailures == 0 {
 			t.Fatalf("expected verification failure counter increment")
 		}
-	} else if wv.Code == 400 {
+	case 400:
 		// Accept structural failure (deserialize) - metrics not incremented in this path.
 		// No assertion on counters; ensure error marker present.
 		body := wv.Body.String()
 		if !(strings.Contains(body, "aggregated_signature_deserialize_failed") || strings.Contains(body, "aggregated_signature_decode_failed")) {
 			t.Fatalf("expected deserialize or decode failure marker in body=%s", body)
 		}
-	} else {
+	default:
 		t.Fatalf("unexpected status code %d body=%s", wv.Code, wv.Body.String())
 	}
 }

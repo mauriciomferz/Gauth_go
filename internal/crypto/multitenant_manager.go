@@ -3,7 +3,6 @@ package crypto
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"time"
 )
 
@@ -121,26 +120,6 @@ func (m *MultiTenantKeyManager) SetEventCallback(callback func(*RotationEvent)) 
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.eventCallback = callback
-}
-
-// calculateJitteredInterval adds random jitter to prevent thundering herd.
-func calculateJitteredInterval(base, maxJitter time.Duration) time.Duration {
-	if maxJitter <= 0 {
-		return base
-	}
-
-	// Generate random jitter: -maxJitter/2 to +maxJitter/2
-	//nolint:gosec // G404: weak random acceptable for rotation jitter timing
-	jitter := time.Duration(rand.Int63n(int64(maxJitter))) - maxJitter/2
-	result := base + jitter
-
-	// Ensure minimum interval
-	minInterval := base / 2
-	if result < minInterval {
-		result = minInterval
-	}
-
-	return result
 }
 
 // Additional helper methods can be added here as needed

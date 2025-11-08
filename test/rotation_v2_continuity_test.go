@@ -21,16 +21,6 @@ func (r *singleEdResolver) FindByID(id string) *notary.PublicKeyRecord {
 	return nil
 }
 
-// continuityTestServer constructs a minimal BetaServer with rotationLedger populated.
-func continuityTestServer(t *testing.T) *web.BetaServer {
-	gin.SetMode(gin.TestMode)
-	srv := &web.BetaServer{}
-	// Minimal rotation ledger simulation using notary. Provide at least one legacy entry.
-	// We reuse WeightedRotationArtifact digest as a ledger hash surrogate.
-	// Build a simple legacy entry list if needed (skipped detailed implementation for brevity).
-	return srv
-}
-
 func TestRotationV2ContinuityUpdatesPreviousHash(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	srv := &web.BetaServer{}

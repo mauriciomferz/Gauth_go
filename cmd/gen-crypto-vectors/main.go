@@ -142,7 +142,12 @@ func main() {
 	}
 	sLow := normalizeLowS(s, ePriv.Params().N)
 	der := encodeDERSignature(r, sLow)
-	pubBytes := elliptic.Marshal(elliptic.P256(), ePriv.PublicKey.X, ePriv.PublicKey.Y)
+	// Uncompressed form: 0x04 || X || Y (32 bytes each for P-256)
+	byteLen := (ePriv.PublicKey.Curve.Params().BitSize + 7) / 8
+	pubBytes := make([]byte, 1+2*byteLen)
+	pubBytes[0] = 0x04
+	ePriv.PublicKey.X.FillBytes(pubBytes[1 : 1+byteLen])
+	ePriv.PublicKey.Y.FillBytes(pubBytes[1+byteLen:])
 	vectors = append(vectors, vector{Alg: "ECDSA-P256", MessageHex: hexOf(eMsg), PublicHex: hexOf(pubBytes), SignatureHex: hexOf(der), Valid: true})
 	// High-S variant
 	highS := new(big.Int).Sub(ePriv.Params().N, sLow)

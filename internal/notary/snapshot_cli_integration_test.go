@@ -28,7 +28,10 @@ func TestSnapshotCLIIntegration(t *testing.T) {
 	snapshotPath := filepath.Join(tempDir, "snapshot.json")
 	// Generate snapshot
 	// Determine module root (two directories up from this file's directory if needed)
-	_, file, _, _ := runtime.Caller(0)
+	_, file, _, ok := runtime.Caller(0)
+	if !ok {
+		t.Fatal("failed to get caller info")
+	}
 	walkDir := filepath.Dir(file) // initial directory for upward traversal
 	repoRoot := ""
 	for i := 0; i < 10; i++ { // limit traversal depth

@@ -848,11 +848,9 @@ func (m *Manager) RefreshToken(ctx context.Context, refreshToken string) (*Token
 			}
 		}
 		// No expiration fallback needed for compatibility
-	} else {
-		if m.tokenScopes != nil {
-			if sc, ok := m.tokenScopes[refreshToken]; ok {
-				scopes = sc
-			}
+	} else if m.tokenScopes != nil {
+		if sc, ok := m.tokenScopes[refreshToken]; ok {
+			scopes = sc
 		}
 	}
 	claims := map[string]interface{}{"sub": subject}

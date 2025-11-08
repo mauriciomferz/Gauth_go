@@ -157,12 +157,13 @@ func marshalCBORItem(it RawPOAItem) ([]byte, error) {
 		buf.Write(b)
 	}
 	writeInt := func(i int64) {
-		if i >= 0 && i < 24 {
+		switch {
+		case i >= 0 && i < 24:
 			buf.WriteByte(0x00 | byte(i))
-		} else if i >= 0 && i < 256 {
+		case i >= 0 && i < 256:
 			buf.WriteByte(0x18)
 			buf.WriteByte(byte(i))
-		} else {
+		default:
 			return /* simplified for small timestamps */
 		}
 	}

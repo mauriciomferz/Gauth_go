@@ -532,10 +532,3 @@ func scopeSlicesEqual(a, b []string) bool {
 	}
 	return true
 }
-
-func abs(x int64) int64 {
-	if x < 0 {
-		return -x
-	}
-	return x
-}
