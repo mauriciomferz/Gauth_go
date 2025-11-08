@@ -19,8 +19,8 @@ func TestProperty_SignVerifyRoundTrip_Ed25519(t *testing.T) {
 		}
 		// Generate random message
 		msg := make([]byte, 32+i%128)
-		if _, err := rand.Read(msg); err != nil { //nolint:errcheck
-			t.Fatalf("iteration %d: random bytes: %v", i, err)
+		if _, err2 := rand.Read(msg); err2 != nil { //nolint:errcheck
+			t.Fatalf("iteration %d: random bytes: %v", i, err2)
 		}
 		sig, err := signer.Sign(msg)
 		if err != nil {
@@ -45,8 +45,8 @@ func TestProperty_SignVerifyRoundTrip_ECDSAP256(t *testing.T) {
 			t.Fatalf("iteration %d: active signer: %v", i, err)
 		}
 		msg := make([]byte, 64+i%256)
-		if _, err := rand.Read(msg); err != nil { //nolint:errcheck
-			t.Fatalf("iteration %d: random bytes: %v", i, err)
+		if _, err2 := rand.Read(msg); err2 != nil { //nolint:errcheck
+			t.Fatalf("iteration %d: random bytes: %v", i, err2)
 		}
 		sig, err := signer.Sign(msg)
 		if err != nil {
@@ -71,8 +71,8 @@ func TestProperty_SignVerifyRoundTrip_BLS12381(t *testing.T) {
 			t.Fatalf("iteration %d: active signer: %v", i, err)
 		}
 		msg := make([]byte, 32+i%128)
-		if _, err := rand.Read(msg); err != nil { //nolint:errcheck
-			t.Fatalf("iteration %d: random bytes: %v", i, err)
+		if _, err2 := rand.Read(msg); err2 != nil { //nolint:errcheck
+			t.Fatalf("iteration %d: random bytes: %v", i, err2)
 		}
 		sig, err := signer.Sign(msg)
 		if err != nil {

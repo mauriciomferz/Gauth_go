@@ -3863,7 +3863,7 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 		embedEnabled := os.Getenv("GAUTH_EMBED_FULL_POA") == "1"
 		maxRaw := 8192
 		if limStr := os.Getenv("GAUTH_MAX_RAW_POA_BYTES"); limStr != "" {
-			if v, err := strconv.Atoi(limStr); err == nil && v > 0 && v < 10_000_000 {
+			if v, err2 := strconv.Atoi(limStr); err2 == nil && v > 0 && v < 10_000_000 {
 				maxRaw = v
 			}
 		}

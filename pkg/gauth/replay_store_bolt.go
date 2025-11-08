@@ -41,8 +41,8 @@ func NewBoltReplayStore(path string, ttl time.Duration) (*BoltReplayStore, error
 
 	// Create bucket if it doesn't exist
 	err = db.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists(bucketName)
-		return err
+		_, err2 := tx.CreateBucketIfNotExists(bucketName)
+		return err2
 	})
 	if err != nil {
 		db.Close()

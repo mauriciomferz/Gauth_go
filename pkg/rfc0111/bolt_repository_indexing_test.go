@@ -60,8 +60,8 @@ func TestBoltRepository_FindByStatus(t *testing.T) {
 	}
 
 	for _, p := range poas {
-		if err := repo.Create(p); err != nil {
-			t.Fatalf("failed to create POA %s: %v", p.ID, err)
+		if err2 := repo.Create(p); err2 != nil {
+			t.Fatalf("failed to create POA %s: %v", p.ID, err2)
 		}
 	}
 
@@ -141,8 +141,8 @@ func TestBoltRepository_FindExpired(t *testing.T) {
 	}
 
 	for _, p := range poas {
-		if err := repo.Create(p); err != nil {
-			t.Fatalf("failed to create POA %s: %v", p.ID, err)
+		if err2 := repo.Create(p); err2 != nil {
+			t.Fatalf("failed to create POA %s: %v", p.ID, err2)
 		}
 	}
 
@@ -213,8 +213,8 @@ func TestBoltRepository_PruneExpired(t *testing.T) {
 	}
 
 	for _, p := range poas {
-		if err := repo.Create(p); err != nil {
-			t.Fatalf("failed to create POA %s: %v", p.ID, err)
+		if err2 := repo.Create(p); err2 != nil {
+			t.Fatalf("failed to create POA %s: %v", p.ID, err2)
 		}
 	}
 
@@ -280,8 +280,8 @@ func TestBoltRepository_PruneRevoked(t *testing.T) {
 	}
 
 	for _, p := range poas {
-		if err := repo.Create(p); err != nil {
-			t.Fatalf("failed to create POA %s: %v", p.ID, err)
+		if err2 := repo.Create(p); err2 != nil {
+			t.Fatalf("failed to create POA %s: %v", p.ID, err2)
 		}
 	}
 
@@ -415,8 +415,8 @@ func TestBoltRepository_Stats(t *testing.T) {
 	}
 
 	for _, p := range poas {
-		if err := repo.Create(p); err != nil {
-			t.Fatalf("failed to create POA %s: %v", p.ID, err)
+		if err2 := repo.Create(p); err2 != nil {
+			t.Fatalf("failed to create POA %s: %v", p.ID, err2)
 		}
 	}
 
@@ -470,7 +470,7 @@ func TestBoltRepository_ConcurrentPruning(t *testing.T) {
 			ValidUntil: now.Add(-48 * time.Hour),
 			CreatedAt:  now.Add(-72 * time.Hour),
 		}
-		if err := repo.Create(poa); err != nil {
+		if err2 := repo.Create(poa); err2 != nil {
 			t.Fatalf("failed to create POA: %v", err)
 		}
 	}
@@ -532,8 +532,8 @@ func TestBoltRepository_PersistenceAcrossRestarts(t *testing.T) {
 		ValidUntil: now.Add(24 * time.Hour),
 		CreatedAt:  now,
 	}
-	if err := repo1.Create(poa); err != nil {
-		t.Fatalf("failed to create POA: %v", err)
+	if err2 := repo1.Create(poa); err2 != nil {
+		t.Fatalf("failed to create POA: %v", err2)
 	}
 	repo1.Close()
 
@@ -581,8 +581,8 @@ func TestBoltRepository_StorageSizeReduction(t *testing.T) {
 			ValidUntil: now.Add(-48 * time.Hour),
 			CreatedAt:  now.Add(-72 * time.Hour),
 		}
-		if err := repo.Create(poa); err != nil {
-			t.Fatalf("failed to create POA: %v", err)
+		if err2 := repo.Create(poa); err2 != nil {
+			t.Fatalf("failed to create POA: %v", err2)
 		}
 	}
 

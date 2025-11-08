@@ -23,14 +23,14 @@ func TestKMSMetricsEmission(t *testing.T) {
 	}
 
 	// Exercise operations
-	if _, err := kms.ActiveSigner(); err != nil {
-		t.Fatalf("active signer: %v", err)
+	if _, err2 := kms.ActiveSigner(); err2 != nil {
+		t.Fatalf("active signer: %v", err2)
 	}
-	if _, _, err := kms.PublicKey(kms.active.keyID); err != nil {
-		t.Fatalf("public key: %v", err)
+	if _, _, err2 := kms.PublicKey(kms.active.keyID); err2 != nil {
+		t.Fatalf("public key: %v", err2)
 	}
-	if _, err := kms.Rotate(); err != nil {
-		t.Fatalf("rotate: %v", err)
+	if _, err2 := kms.Rotate(); err2 != nil {
+		t.Fatalf("rotate: %v", err2)
 	}
 	if _, err := kms.ListKeys(); err != nil {
 		t.Fatalf("list keys: %v", err)

@@ -205,8 +205,8 @@ func main() {
 		}
 	}
 	var payload map[string]any
-	if err := json.Unmarshal(data, &payload); err != nil {
-		fmt.Fprintf(os.Stderr, "decode manifest: %v\n", err)
+	if err2 := json.Unmarshal(data, &payload); err2 != nil {
+		fmt.Fprintf(os.Stderr, "decode manifest: %v\n", err2)
 		os.Exit(2)
 	}
 

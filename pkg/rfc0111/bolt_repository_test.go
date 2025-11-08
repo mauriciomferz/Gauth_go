@@ -77,8 +77,8 @@ func TestBoltRepositoryPersistenceAcrossReopen(t *testing.T) {
 		t.Fatalf("open: %v", err)
 	}
 	p := fabricatePOA("carol", "dave", time.Hour)
-	if err := repo.Create(p); err != nil {
-		t.Fatalf("create: %v", err)
+	if err2 := repo.Create(p); err2 != nil {
+		t.Fatalf("create: %v", err2)
 	}
 	repo.Close()
 	// Reopen
