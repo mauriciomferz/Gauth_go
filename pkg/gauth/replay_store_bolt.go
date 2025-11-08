@@ -114,10 +114,11 @@ func (s *BoltReplayStore) cleanupExpired() {
 			var expiredKeys [][]byte
 			cursor := bucket.Cursor()
 
-			for k, v := cursor.First(); k != nil; k, v = cursor.Next() {
-				if len(v) >= 8 {
-					expiry := int64(binary.BigEndian.Uint64(v))
-					if now >= expiry {
+		for k, v := cursor.First(); k != nil; k, v = cursor.Next() {
+			if len(v) >= 8 {
+				//nolint:gosec // G115: converting stored timestamp, safe for Unix time values
+				expiry := int64(binary.BigEndian.Uint64(v))
+				if now >= expiry {
 						expiredKeys = append(expiredKeys, append([]byte(nil), k...))
 					}
 				}

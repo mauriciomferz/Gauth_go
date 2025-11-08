@@ -157,6 +157,7 @@ func NewExternalStub() *ExternalStubNotarizer {
 	if name == "" {
 		name = "external_stub"
 	}
+	//nolint:gosec // G404: weak random acceptable for test stub notarizer
 	return &ExternalStubNotarizer{minLatency: time.Duration(minMs) * time.Millisecond, maxLatency: time.Duration(maxMs) * time.Millisecond, failProb: fp, providerName: name, rnd: rand.New(rand.NewSource(time.Now().UnixNano()))}
 }
 

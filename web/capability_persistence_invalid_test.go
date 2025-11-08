@@ -22,6 +22,7 @@ func TestCapabilityPersistenceInvalidMapping(t *testing.T) {
 	srv := NewBetaServer(":0")
 
 	// modify file referencing unknown capability id
+	//nolint:gosec // G306: test file permissions
 	if err := os.WriteFile(tmp.Name(), []byte(testutil.CapAlphaUnknownMapping), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -70,6 +71,7 @@ func TestCapabilityPersistenceDuplicateID(t *testing.T) {
 	srv := NewBetaServer(":0")
 
 	// write duplicate IDs
+	//nolint:gosec // G306: test file permissions
 	if err := os.WriteFile(tmp.Name(), []byte(testutil.CapAlphaDuplicateIDs), 0o644); err != nil {
 		t.Fatal(err)
 	}

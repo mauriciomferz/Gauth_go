@@ -3753,7 +3753,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 						snap := s.primaryAuthService.ViolationSnapshot()
 						for k, g := range s.otelViolationCounters {
 						//nolint:gosec // G115: violation counter, safe conversion
-							o.ObserveInt64(g, int64(snap[k]))
+							o.ObserveInt64(g, int64(snap[k])) //nolint:gosec // G115: violation counter
 						}
 						rates := s.violationRatesForWindows()
 						for rk, g := range s.otelViolationRates {
@@ -3767,7 +3767,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 						for k, g := range semanticGauges {
 						//nolint:gosec // G115: semantic counter, safe conversion
 							if v, ok := ss[k]; ok {
-								o.ObserveInt64(g, int64(v))
+								o.ObserveInt64(g, int64(v)) //nolint:gosec // G115: semantic counter
 							}
 						}
 						r60, r300 := s.semanticRatesForWindows()
@@ -8114,7 +8114,7 @@ func (s *BetaServer) apiPolicyMetricsPrometheus(c *gin.Context) {
 			low = 0
 		}
 		segmentMid := (low + ub) / 2
-		approxSum += uint64(segmentMid) * cnt
+		approxSum += uint64(segmentMid) * cnt //nolint:gosec // G115: histogram
 		b.WriteString(fmt.Sprintf("gauth_policy_eval_latency_ns_bucket{le=\"%d\"} %d\n", ub, cumulative))
 		prevBound = ub
 	}

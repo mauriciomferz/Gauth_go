@@ -610,6 +610,7 @@ func (m *Memory) ObserveCascadeProcessingLatency(d time.Duration) {
 	if d < 0 {
 		return
 	}
+	//nolint:gosec // G115: duration nanoseconds always non-negative
 	ns := uint64(d.Nanoseconds())
 	atomic.AddUint64(&m.cascadeProcessingLatencyCount, 1)
 	atomic.AddUint64(&m.cascadeProcessingLatencyTotalNS, ns)
@@ -671,6 +672,7 @@ func (m *Memory) ValidationLatencyPercentiles() (p50, p95, p99 time.Duration) {
 		if rank >= len(buf) {
 			rank = len(buf) - 1
 		}
+		//nolint:gosec // G115: converting stored nanosecond sample, safe range
 		return time.Duration(buf[rank])
 	}
 	p50 = pick(0.50)
@@ -698,6 +700,7 @@ func (m *Memory) ObserveReplayWALFlushLatency(d time.Duration) {
 	if d < 0 {
 		return
 	}
+	//nolint:gosec // G115: duration nanoseconds always non-negative
 	ns := uint64(d.Nanoseconds())
 	atomic.AddUint64(&m.replayWALFlushLatencyCount, 1)
 	atomic.AddUint64(&m.replayWALFlushLatencyTotalNS, ns)
@@ -714,6 +717,7 @@ func (m *Memory) ObserveReplayWALSnapshotDuration(d time.Duration) {
 	if d < 0 {
 		return
 	}
+	//nolint:gosec // G115: duration nanoseconds always non-negative
 	ns := uint64(d.Nanoseconds())
 	atomic.AddUint64(&m.replayWALSnapshotDurationCount, 1)
 	atomic.AddUint64(&m.replayWALSnapshotDurationTotalNS, ns)
@@ -1477,6 +1481,7 @@ func (m *Memory) ObserveLifecycleTransitionLatency(entityType, outcome string, d
 		lr = &latencyReservoir{samples: make([]uint64, 64)}
 		m.lifecycleLatencyRes[key] = lr
 	}
+	//nolint:gosec // G115: reservoir size is fixed at 64, safe conversion
 	pos := lr.writes & uint64(len(lr.samples)-1) // ring position
 	lr.samples[pos] = ns
 	lr.writes++

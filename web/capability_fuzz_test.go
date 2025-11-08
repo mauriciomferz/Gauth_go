@@ -89,10 +89,10 @@ func FuzzCapabilityReload(f *testing.F) {
 	f.Fuzz(func(t *testing.T, input []byte) {
 		// Write seed base file first
 		tmpDir := t.TempDir()
-		capFile := fmt.Sprintf("%s/caps.json", tmpDir)
-		if err := os.WriteFile(capFile, seed, 0o644); err != nil {
-			t.Fatal(err)
-		}
+	capFile := fmt.Sprintf("%s/caps.json", tmpDir)
+	if err := os.WriteFile(capFile, seed, 0o600); err != nil {
+		t.Fatal(err)
+	}
 		t.Setenv("GAUTH_CAPABILITIES_PATH", capFile)
 		srv := NewBetaServer(":0")
 		disc := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
@@ -109,6 +109,7 @@ func FuzzCapabilityReload(f *testing.F) {
 		// This stabilizes fuzz behavior across reruns while still exploring varied mutations based on corpus evolution.
 		h := sha256.Sum256(input)
 		seedInt := int64(binary.LittleEndian.Uint64(h[:8]))
+		//nolint:gosec // G115: test code, Unix timestamp comparison
 		r := rand.New(rand.NewSource(seedInt))
 		// Use provided input as potential override of base, fallback to seed if invalid JSON
 		var base map[string]any
@@ -153,6 +154,7 @@ func FuzzCapabilityReload(f *testing.F) {
 		}
 		base["action_mappings"] = normalized
 		mutBytes := mutateJSON(map[string]any{"schema_version": base["schema_version"], "capabilities": base["capabilities"], "action_mappings": normalized}, r)
+		//nolint:gosec // G306: test file permissions
 		if err := os.WriteFile(capFile, mutBytes, 0o644); err != nil {
 			t.Fatal(err)
 		}

@@ -4038,7 +4038,7 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 			// Cadence observation
 			prev := mem.LastEnvelopeIssuanceUnix()
 		//nolint:gosec // G115: Unix timestamp always positive, safe conversion
-			cur := uint64(now.Unix())
+			cur := uint64(now.Unix()) //nolint:gosec // G115: Unix timestamp
 			if prev != 0 && cur > prev {
 				s.metrics.ObserveEnvelopeIssuanceCadence(float64(cur - prev))
 			}
@@ -4072,7 +4072,7 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 			}
 			prev := mem.LastEnvelopeIssuanceUnix()
 		//nolint:gosec // G115: Unix timestamp always positive, safe conversion
-			cur := uint64(now.Unix())
+			cur := uint64(now.Unix()) //nolint:gosec // G115: Unix timestamp
 			if prev != 0 && cur > prev {
 				s.metrics.ObserveEnvelopeIssuanceCadence(float64(cur - prev))
 			}

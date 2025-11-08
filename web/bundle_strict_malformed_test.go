@@ -22,7 +22,7 @@ func TestStrictMalformedManifest(t *testing.T) {
 	}
 	manifestPath := filepath.Join(manifestDir, "asset-manifest.json")
 	// Invalid JSON content
-	if err := os.WriteFile(manifestPath, []byte(`{"app":"file.js",`), 0o644); err != nil {
+	if err := os.WriteFile(manifestPath, []byte(`{"app":"file.js",`), 0o600); err != nil {
 		t.Fatalf("write manifest: %v", err)
 	}
 	defer func() { _ = os.Remove(manifestPath) }()
@@ -52,7 +52,7 @@ func TestStrictMissingFieldsManifest(t *testing.T) {
 	}
 	manifestPath := filepath.Join(manifestDir, "asset-manifest.json")
 	// Missing SRI field
-	if err := os.WriteFile(manifestPath, []byte(`{"app":"file.js"}`), 0o644); err != nil {
+	if err := os.WriteFile(manifestPath, []byte(`{"app":"file.js"}`), 0o600); err != nil {
 		t.Fatalf("write manifest: %v", err)
 	}
 	defer func() { _ = os.Remove(manifestPath) }()

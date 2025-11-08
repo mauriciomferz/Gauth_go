@@ -209,6 +209,7 @@ func NewBurstLoadGenerator(baseGen RequestGenerator, burstProb float64, burstMul
 		BurstProbability: burstProb,
 		BurstMultiplier:  burstMult,
 		BaseGenerator:    baseGen,
+		//nolint:gosec // G404: weak random acceptable for load testing
 		rng:              rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
