@@ -277,9 +277,9 @@ func DecodeRawPOAStreamWith(r io.Reader, limits StreamLimits, algo RawPOAHashAlg
 			}
 			h.Write(buf)
 			prevDigest = h.Sum(nil)
-			it, err := unmarshalMinimal(buf)
-			if err != nil {
-				return nil, fmt.Errorf("decode item %d: %w", len(items), err)
+			it, err3 := unmarshalMinimal(buf)
+			if err3 != nil {
+				return nil, fmt.Errorf("decode item %d: %w", len(items), err3)
 			}
 			items = append(items, *it)
 		}

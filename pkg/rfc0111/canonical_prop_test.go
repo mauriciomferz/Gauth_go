@@ -79,9 +79,9 @@ func TestMultiSigWeightsSortingProperty(t *testing.T) {
 			w[k] = canonicalWeights[k]
 		}
 		basePOA.Weights = w
-		d, _, err := CanonicalPOADigest(basePOA)
-		if err != nil {
-			t.Fatalf("digest err: %v", err)
+		d, _, err2 := CanonicalPOADigest(basePOA)
+		if err2 != nil {
+			t.Fatalf("digest err: %v", err2)
 		}
 		if d != baseDigest {
 			t.Fatalf("digest changed across weight order permutation: %s != %s (%v)", d, baseDigest, rot)
@@ -91,14 +91,14 @@ func TestMultiSigWeightsSortingProperty(t *testing.T) {
 	swapped := []string{"S2", "S1", "S3", "S4"}
 	w2 := map[string]int{}
 	for _, k := range swapped {
-		w2[k] = canonicalWeights[k]
+	w2[k] = canonicalWeights[k]
 	}
 	basePOA.Weights = w2
-	d2, _, err := CanonicalPOADigest(basePOA)
-	if err != nil {
-		t.Fatalf("digest err: %v", err)
+	d, _, err3 := CanonicalPOADigest(basePOA)
+	if err3 != nil {
+		t.Fatalf("digest err: %v", err3)
 	}
-	if d2 != baseDigest {
+	if d != baseDigest {
 		t.Fatalf("digest changed after swapped insertion order")
 	}
 	// Alter a weight value -> digest must change

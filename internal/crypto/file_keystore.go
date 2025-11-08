@@ -347,11 +347,11 @@ func (f *FileKeyStore) parseFileKey(keyID string, keyData FileKeyData) (*Key, er
 	if len(f.masterKey) == 32 {
 		block, err2 := aes.NewCipher(f.masterKey)
 		if err2 != nil {
-			return nil, fmt.Errorf("AES cipher error: %w", err)
+			return nil, fmt.Errorf("AES cipher error: %w", err2)
 		}
-		gcm, err := cipher.NewGCM(block)
-		if err != nil {
-			return nil, fmt.Errorf("AES-GCM error: %w", err)
+		gcm, err3 := cipher.NewGCM(block)
+		if err3 != nil {
+			return nil, fmt.Errorf("AES-GCM error: %w", err3)
 		}
 		nonceSize := gcm.NonceSize()
 		if len(privBytes) < nonceSize {
