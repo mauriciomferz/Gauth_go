@@ -242,23 +242,23 @@ func createDemoComplexGraph(c *gin.Context) {
 	aiClient1 := graph.AddNode("client", "Legal AI Assistant", "AI for legal document processing", "🤖", map[string]interface{}{
 		"capability": "document_analysis",
 	})
-	graph.SetNodePosition(aiClient1.ID, -3, 0, 4)  //nolint:errcheck
+	graph.SetNodePosition(aiClient1.ID, -3, 0, 4) //nolint:errcheck
 
 	aiClient2 := graph.AddNode("client", "Finance AI Assistant", "AI for financial analysis", "🤖", map[string]interface{}{
 		"capability": "financial_analysis",
 	})
-	graph.SetNodePosition(aiClient2.ID, 3, 0, 4)  //nolint:errcheck
+	graph.SetNodePosition(aiClient2.ID, 3, 0, 4) //nolint:errcheck
 
 	// Create resources
 	resource1 := graph.AddNode("resource", "Legal Documents", "Contracts and legal files", "📄", map[string]interface{}{
 		"sensitivity": "high",
 	})
-	graph.SetNodePosition(resource1.ID, -3, 0, 6)  //nolint:errcheck
+	graph.SetNodePosition(resource1.ID, -3, 0, 6) //nolint:errcheck
 
 	resource2 := graph.AddNode("resource", "Financial Database", "Financial records and transactions", "💾", map[string]interface{}{
 		"sensitivity": "critical",
 	})
-	graph.SetNodePosition(resource2.ID, 3, 0, 6)
+	graph.SetNodePosition(resource2.ID, 3, 0, 6) //nolint:errcheck
 
 	// Create delegation edges
 	graph.AddEdge(principal.ID, agent1.ID, "delegates", "Delegates legal authority", 0.95, map[string]interface{}{

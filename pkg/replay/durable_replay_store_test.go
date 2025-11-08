@@ -420,9 +420,9 @@ func TestDurableReplayStore_Size(t *testing.T) {
 	}
 
 	// Record JTIs
-	store.Record("size-jti-1", time.Now())  //nolint:errcheck
-	store.Record("size-jti-2", time.Now())  //nolint:errcheck
-	store.Record("size-jti-3", time.Now())  //nolint:errcheck
+	store.Record("size-jti-1", time.Now()) //nolint:errcheck
+	store.Record("size-jti-2", time.Now()) //nolint:errcheck
+	store.Record("size-jti-3", time.Now()) //nolint:errcheck
 
 	// Size should be 3
 	if size := store.Size(); size != 3 {

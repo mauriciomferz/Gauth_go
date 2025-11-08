@@ -3,9 +3,10 @@ package test
 import (
 	"crypto/ed25519"
 	"crypto/rand"
-	notary "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
 	"testing"
 	"time"
+
+	notary "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
 )
 
 // rType implements notary.PublicKeyResolver for tests.

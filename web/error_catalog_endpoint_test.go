@@ -4,12 +4,13 @@ import (
 	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/json"
-	notary "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
-	"github.com/gin-gonic/gin"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
+
+	notary "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
+	"github.com/gin-gonic/gin"
 )
 
 // TestErrorCatalogEndpoint verifies /api/v1/errors/catalog returns success and non-empty entries.

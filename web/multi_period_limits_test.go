@@ -228,7 +228,7 @@ func TestBothLegacyAndExtended(t *testing.T) {
 				t.Fatalf("request %d got status %d, expected 429", i+1, w.Code)
 			}
 			var resp map[string]interface{}
-			json.Unmarshal(w.Body.Bytes(), &resp)  //nolint:errcheck
+			json.Unmarshal(w.Body.Bytes(), &resp) //nolint:errcheck
 			// Should be legacy limit (no "period" field)
 			if resp["period"] != nil {
 				t.Errorf("expected legacy rate limit (no period), got period=%v", resp["period"])

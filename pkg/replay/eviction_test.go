@@ -88,15 +88,15 @@ func TestSizeBasedEviction(t *testing.T) {
 
 	// Record 5 tokens (should evict oldest 2)
 	now := time.Now()
-	store.Record("token1", now.Add(-5*time.Second))  //nolint:errcheck
+	store.Record("token1", now.Add(-5*time.Second)) //nolint:errcheck
 	time.Sleep(10 * time.Millisecond)
-	store.Record("token2", now.Add(-4*time.Second))  //nolint:errcheck
+	store.Record("token2", now.Add(-4*time.Second)) //nolint:errcheck
 	time.Sleep(10 * time.Millisecond)
-	store.Record("token3", now.Add(-3*time.Second))  //nolint:errcheck
+	store.Record("token3", now.Add(-3*time.Second)) //nolint:errcheck
 	time.Sleep(10 * time.Millisecond)
-	store.Record("token4", now.Add(-2*time.Second))
+	store.Record("token4", now.Add(-2*time.Second)) //nolint:errcheck
 	time.Sleep(10 * time.Millisecond)
-	store.Record("token5", now.Add(-1*time.Second))
+	store.Record("token5", now.Add(-1*time.Second)) //nolint:errcheck
 
 	// Trigger eviction by checking one
 	_, _ = store.Seen("token5") //nolint:errcheck
@@ -150,7 +150,7 @@ func TestLRUEviction(t *testing.T) {
 	// Record 5 tokens (should trigger eviction)
 	for i := 1; i <= 5; i++ {
 		jti := fmt.Sprintf("token%d", i)
-		store.Record(jti, now)
+		store.Record(jti, now) //nolint:errcheck
 		time.Sleep(10 * time.Millisecond)
 	}
 
@@ -192,8 +192,8 @@ func TestCompositeEviction(t *testing.T) {
 	defer store.Close()
 
 	// Record 2 tokens
-	store.Record("token1", time.Now())
-	store.Record("token2", time.Now())
+	store.Record("token1", time.Now()) //nolint:errcheck
+	store.Record("token2", time.Now()) //nolint:errcheck
 
 	// Verify both exist
 	if seen, _ := store.Seen("token1"); !seen {
@@ -267,8 +267,8 @@ func TestEvictionMetrics(t *testing.T) {
 	defer store.Close()
 
 	// Record tokens
-	store.Record("token1", time.Now())
-	store.Record("token2", time.Now())
+	store.Record("token1", time.Now()) //nolint:errcheck
+	store.Record("token2", time.Now()) //nolint:errcheck
 
 	// Verify cache miss for new token
 	if metrics.cacheHits != 0 {
@@ -373,8 +373,8 @@ func TestEvictionConcurrency(t *testing.T) {
 		go func(id int) {
 			for j := 0; j < 20; j++ {
 				jti := fmt.Sprintf("token-%d-%d", id, j)
-				store.Record(jti, time.Now())
-				_, _ = store.Seen(jti) //nolint:errcheck
+				store.Record(jti, time.Now()) //nolint:errcheck
+				_, _ = store.Seen(jti)        //nolint:errcheck
 			}
 			done <- true
 		}(i)

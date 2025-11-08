@@ -8,12 +8,13 @@ import (
 	"crypto/sha256"
 	"encoding/asn1"
 	"encoding/base64"
-	notary "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
 	"math/big"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	notary "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
 )
 
 // TestRotationV2EmbeddedECDSAPublicKeyVerification ensures embedded uncompressed P-256 point enables auditor-style verification.

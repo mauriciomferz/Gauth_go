@@ -405,9 +405,9 @@ func TestCollectorRegistry_HealthCheck(t *testing.T) {
 	c3 := newMockCollector("collector-3")
 	c3.shouldFailHealth = true // Make c3 unhealthy
 
-	registry.Register(c1)  //nolint:errcheck
-	registry.Register(c2)  //nolint:errcheck
-	registry.Register(c3)  //nolint:errcheck
+	registry.Register(c1) //nolint:errcheck
+	registry.Register(c2) //nolint:errcheck
+	registry.Register(c3) //nolint:errcheck
 
 	errors := registry.HealthCheck()
 
