@@ -19,6 +19,7 @@ func FuzzSignerVerifier_Ed25519(f *testing.F) {
 		}
 		// Tamper with signature
 		if len(sig) > 0 {
+			//nolint:gosec // G404: weak random acceptable for fuzz test mutation
 			sig[0] ^= byte(rand.Intn(255))
 			if err := prov.VerifyWith(msg, sig, signer.KeyID()); err == nil {
 				t.Fatalf("expected verification failure with tampered signature")

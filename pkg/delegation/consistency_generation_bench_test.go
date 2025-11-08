@@ -42,6 +42,7 @@ func randStr(n int) string {
 	// Use a local deterministic RNG to avoid mutating global source; randomness quality not critical for benchmark.
 	c := []rune("abcdefghijklmnopqrstuvwxyz0123456789")
 	// Seed chosen for reproducibility; different length requests create new instance for isolation.
+	//nolint:gosec // G404: weak random acceptable for benchmark test generation
 	r := mrand.New(mrand.NewSource(int64(n) * 1337))
 	out := make([]rune, n)
 	for i := range out {

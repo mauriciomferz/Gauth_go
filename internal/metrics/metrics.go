@@ -737,6 +737,7 @@ func (m *Memory) ObserveCapabilityDiffLatency(d time.Duration) {
 	if d < 0 {
 		return
 	}
+	//nolint:gosec // G115: duration.Nanoseconds() validated non-negative above
 	ns := uint64(d.Nanoseconds())
 	atomic.AddUint64(&m.capabilityDiffLatencyCount, 1)
 	atomic.AddUint64(&m.capabilityDiffLatencyTotalNS, ns)
@@ -831,6 +832,7 @@ func (m *Memory) Save() error {
 		return err
 	}
 	// Mark last successful persistence time.
+	//nolint:gosec // G115: Unix timestamp always positive
 	atomic.StoreUint64(&m.lastPersistUnix, uint64(time.Now().Unix()))
 	return nil
 }
@@ -926,6 +928,7 @@ func (m *Memory) ObserveReplayStoreLatency(d time.Duration) {
 	if d < 0 {
 		return
 	}
+	//nolint:gosec // G115: duration.Nanoseconds() validated non-negative above
 	ns := uint64(d.Nanoseconds())
 	atomic.AddUint64(&m.replayStoreLatencyCount, 1)
 	atomic.AddUint64(&m.replayStoreLatencyTotalNS, ns)
@@ -938,6 +941,7 @@ func (m *Memory) ObserveReplayStoreLatency(d time.Duration) {
 }
 
 func (m *Memory) ObserveValidationLatency(d time.Duration) {
+	//nolint:gosec // G115: duration.Nanoseconds() returns int64, safe for positive durations
 	ns := uint64(d.Nanoseconds())
 	atomic.AddUint64(&m.validationCount, 1)
 	atomic.AddUint64(&m.validationTotalNS, ns)
@@ -986,6 +990,7 @@ func (m *Memory) IncAttestationProofDigestMismatch() {
 	atomic.AddUint64(&m.attestationProofDigestMismatch, 1)
 }
 func (m *Memory) ObserveAttestationProofVerificationLatency(d time.Duration) {
+	//nolint:gosec // G115: duration.Nanoseconds() returns int64, safe for positive durations
 	ns := uint64(d.Nanoseconds())
 	atomic.AddUint64(&m.attestationProofVerificationLatencyCount, 1)
 	atomic.AddUint64(&m.attestationProofVerificationLatencyTotalNS, ns)
@@ -1002,6 +1007,7 @@ func (m *Memory) ObserveAttestationProofVerificationLatency(d time.Duration) {
 
 // ObserveAttestationProofIssueLatency records issuance latency.
 func (m *Memory) ObserveAttestationProofIssueLatency(d time.Duration) {
+	//nolint:gosec // G115: duration.Nanoseconds() returns int64, safe for positive durations
 	ns := uint64(d.Nanoseconds())
 	atomic.AddUint64(&m.attestationProofIssueLatencyCount, 1)
 	atomic.AddUint64(&m.attestationProofIssueLatencyTotalNS, ns)
@@ -1154,6 +1160,7 @@ func (m *Memory) ObserveMultiSignatureBatchSize(size int) {
 }
 
 func (m *Memory) ObserveMultiSignatureAggregateLatency(d time.Duration) {
+	//nolint:gosec // G115: duration.Nanoseconds() returns int64, safe for positive durations
 	ns := uint64(d.Nanoseconds())
 	atomic.AddUint64(&m.multiSignatureAggregateLatencyCount, 1)
 	atomic.AddUint64(&m.multiSignatureAggregateLatencyTotalNS, ns)
@@ -1190,6 +1197,7 @@ func (m *Memory) IncExternalAnchorForcedFailures() {
 func (m *Memory) IncObligationsExecuted() { atomic.AddUint64(&m.obligationsExecuted, 1) }
 func (m *Memory) IncObligationsFailed()   { atomic.AddUint64(&m.obligationsFailed, 1) }
 func (m *Memory) ObserveObligationLatency(d time.Duration) {
+	//nolint:gosec // G115: duration.Nanoseconds() returns int64, safe for positive durations
 	ns := uint64(d.Nanoseconds())
 	atomic.AddUint64(&m.obligationLatencyCount, 1)
 	atomic.AddUint64(&m.obligationLatencyTotalNS, ns)
@@ -1455,6 +1463,7 @@ func (m *Memory) ObserveLifecycleTransitionLatency(entityType, outcome string, d
 	if outcome == "" {
 		outcome = unknownOutcome
 	}
+	//nolint:gosec // G115: duration.Nanoseconds() returns int64, safe for positive durations
 	ns := uint64(d.Nanoseconds())
 	m.lifecycleLatencyMu.Lock()
 	if m.lifecycleLatencyTotals == nil {
@@ -1517,12 +1526,14 @@ func (m *Memory) Snapshot() (delegations uint64, validations uint64, totalLatenc
 	mn := atomic.LoadUint64(&m.validationMinNS)
 	var avg time.Duration
 	if vc > 0 {
+		//nolint:gosec // G115: tot/vc cannot overflow, both are nanosecond counts
 		avg = time.Duration(tot / vc)
 	}
 
 	// Copy reservoir snapshot (lock-free; approximate)
 	// Determine effective sample size (cannot exceed vc nor reservoir size)
 	sampleSize := vc
+	//nolint:gosec // G115: reservoir size is small constant (128), safe conversion
 	if sampleSize > uint64(len(m.reservoir)) {
 		sampleSize = uint64(len(m.reservoir))
 	}
@@ -1549,6 +1560,7 @@ func (m *Memory) Snapshot() (delegations uint64, validations uint64, totalLatenc
 			if rank >= len(buf) {
 				rank = len(buf) - 1
 			}
+			//nolint:gosec // G115: buf[rank] is nanosecond duration, safe conversion
 			return time.Duration(buf[rank])
 		}
 		p50 = pick(0.50)

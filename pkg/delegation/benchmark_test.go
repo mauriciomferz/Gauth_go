@@ -24,6 +24,7 @@ func BenchmarkMerkleAppend(b *testing.B) {
 func BenchmarkMerkleGenerateProof(b *testing.B) {
 	size := 2000
 	mt := NewMerkleTree()
+	//nolint:gosec // G404: weak random acceptable for benchmark test
 	idxRng := mrand.New(mrand.NewSource(42))
 	for i := 0; i < size; i++ {
 		mt.AppendLeaf(randomHex(32))

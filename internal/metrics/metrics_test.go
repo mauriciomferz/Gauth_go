@@ -27,12 +27,15 @@ func TestMemoryMetrics(t *testing.T) {
 		t.Errorf("expected validations=2 got %d", vc)
 	}
 	// total should be ~40ms in ns
+	//nolint:gosec // G115: time.Millisecond.Nanoseconds() is constant, safe conversion
 	if tot < uint64(40*time.Millisecond.Nanoseconds())*95/100 || tot > uint64(40*time.Millisecond.Nanoseconds())*105/100 { // allow 5% wiggle though deterministic
 		t.Errorf("unexpected total latency ns got %d", tot)
 	}
+	//nolint:gosec // G115: time.Millisecond.Nanoseconds() is constant, safe conversion
 	if mx < uint64(30*time.Millisecond.Nanoseconds()) {
 		t.Errorf("expected max >=30ms got %d", mx)
 	}
+	//nolint:gosec // G115: time.Millisecond.Nanoseconds() is constant, safe conversion
 	if mn > uint64(10*time.Millisecond.Nanoseconds()) {
 		t.Errorf("expected min <=10ms got %d", mn)
 	}

@@ -18,6 +18,7 @@ func FuzzRegistry_Dispatch(f *testing.F) {
 		}
 		// Tamper with signature
 		if len(sig) > 0 {
+			//nolint:gosec // G404: weak random acceptable for fuzz test mutation
 			sig[0] ^= byte(rand.Intn(255))
 			b64 = base64.StdEncoding.EncodeToString(sig)
 			if err := VerifyAlgorithm(AlgoEd25519, msg, b64, signer.KeyID(), prov); err == nil {

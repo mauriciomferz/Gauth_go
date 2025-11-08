@@ -42,6 +42,7 @@ func canonicalSerialize(caps []capability.Capability, actionMappings map[string]
 func randomPerm[T any](src []T) []T {
 	out := make([]T, len(src))
 	copy(out, src)
+	//nolint:gosec // G404: weak random acceptable for test permutation generation
 	r := mrand.New(mrand.NewSource(time.Now().UnixNano()))
 	r.Shuffle(len(out), func(i, j int) { out[i], out[j] = out[j], out[i] })
 	return out
@@ -84,6 +85,7 @@ func TestCapabilityCanonicalHashStability(t *testing.T) {
 			actionKeys = append(actionKeys, k)
 		}
 		// Local shuffle to avoid global RNG.
+		//nolint:gosec // G404: weak random acceptable for test permutation generation
 		local := mrand.New(mrand.NewSource(time.Now().UnixNano()))
 		local.Shuffle(len(actionKeys), func(i, j int) { actionKeys[i], actionKeys[j] = actionKeys[j], actionKeys[i] })
 		permActions := make(map[string][]string, len(baseActions))

@@ -722,6 +722,7 @@ func (s *BetaServer) RegisterUIRoutes() {
 	// Helper to create a random base64url nonce (16 bytes -> 22 chars).
 	genNonce := func() string {
 		b := make([]byte, 16)
+		//nolint:gosec // G404: weak random acceptable for CSP nonce generation in test/demo
 		if _, err := rand.Read(b); err != nil {
 			// Fallback deterministic (test environments) – still includes 'nonce-' prefix satisfying regex.
 			return "deadbeefdeadbeefdead"
@@ -2095,6 +2096,7 @@ func (s *BetaServer) maybeAugmentAndSignAttestation(att modelLimitsAttestation) 
 			// Inject per-attestation nonce if absent (raw base64, 16 bytes) to prevent replay of identical payloads.
 			if att.Nonce == "" {
 				var nb [16]byte
+				//nolint:gosec // G404: weak random acceptable for attestation nonce in demo server
 				_, _ = rand.Read(nb[:])
 				att.Nonce = base64.RawStdEncoding.EncodeToString(nb[:])
 			}
@@ -3628,7 +3630,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 					case <-s.stopCh:
 						fmt.Fprintln(os.Stderr, "[metrics] autosave loop stopping")
 						return
-					case <-time.After(time.Duration(float64(intervalSec)*(0.9+rand.Float64()*0.2)) * time.Second):
+						//nolint:gosec // G404: weak random acceptable for metrics autosave jitter
+					case <-time.After(time.Duration(float64(intervalSec)*(0.9+rand.Float64()*0.2)) * time.Second): //nolint:gosec // G404: weak random acceptable for metrics autosave jitter
 						if saveErr := mm.Save(); saveErr != nil {
 							fmt.Fprintf(os.Stderr, "[metrics] autosave error: %v\n", saveErr)
 						} else {
@@ -4091,6 +4094,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 				if attempt < maxRetries {
 					// exponential backoff with jitter (±20%)
 					d := time.Duration(baseMs) * time.Millisecond * (1 << attempt)
+					//nolint:gosec // G404: weak random acceptable for retry backoff jitter
 					jitter := time.Duration(float64(d) * (0.2 * (rand.Float64()*2 - 1)))
 					time.Sleep(d + jitter)
 				}
@@ -4509,7 +4513,7 @@ func (s *BetaServer) loadCapabilitiesFromFile(path string) error {
 						}
 						if attempt < maxRetries {
 							d := time.Duration(baseMs) * time.Millisecond * (1 << attempt)
-							jitter := time.Duration(float64(d) * (0.2 * (rand.Float64()*2 - 1)))
+							jitter := time.Duration(float64(d) * (0.2 * (rand.Float64()*2 - 1))) //nolint:gosec // G404: weak random acceptable for retry backoff jitter
 							time.Sleep(d + jitter)
 						}
 					}
@@ -9942,6 +9946,7 @@ func (ts *TokenStore) Metrics() gin.H {
 func (s *BetaServer) apiTokenCreate(c *gin.Context) {
 	// Tracing span (token.issue)
 	var span *tracing.Span
+	//nolint:gosec // G404: weak random acceptable for trace sampling decision
 	if s.tracerProvider != nil && (s.tracerSampleRatio <= 0 || rand.Float64() < s.tracerSampleRatio) {
 		_, span = s.tracerProvider.StartSpan(c.Request.Context(), "token.issue")
 	}
@@ -10065,6 +10070,7 @@ func (s *BetaServer) apiTokenCreate(c *gin.Context) {
 func (s *BetaServer) apiTokenValidate(c *gin.Context) {
 	// Tracing span (token.validate)
 	var span *tracing.Span
+	//nolint:gosec // G404: weak random acceptable for trace sampling decision
 	if s.tracerProvider != nil && (s.tracerSampleRatio <= 0 || rand.Float64() < s.tracerSampleRatio) {
 		_, span = s.tracerProvider.StartSpan(c.Request.Context(), "token.validate")
 	}

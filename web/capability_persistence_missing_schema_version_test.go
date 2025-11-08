@@ -38,7 +38,7 @@ func TestCapabilityPersistenceMissingSchemaVersion(t *testing.T) {
 	}
 
 	// Overwrite file removing schema_version field
-	if err := os.WriteFile(tmp.Name(), []byte(testutil.CapAlphaMissingSchemaVersion), 0o644); err != nil {
+	if err := os.WriteFile(tmp.Name(), []byte(testutil.CapAlphaMissingSchemaVersion), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	w := performRequest(srv.router, "POST", "/api/v1/beta/capabilities/reload")

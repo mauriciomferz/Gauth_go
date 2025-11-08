@@ -85,7 +85,7 @@ func TestViolationPersistenceVerify(t *testing.T) {
 	if err != nil {
 		t.Fatalf("marshal mutated wrapper: %v", err)
 	}
-	if writeErr := os.WriteFile(path, mutatedWrapperBytes, 0o644); writeErr != nil {
+	if writeErr := os.WriteFile(path, mutatedWrapperBytes, 0o600); writeErr != nil {
 		t.Fatalf("write tampered: %v", writeErr)
 	}
 	wv2 := httptest.NewRecorder()
@@ -173,7 +173,7 @@ func TestSemanticPersistenceVerify(t *testing.T) {
 	if marshalErr3 != nil {
 		t.Fatalf("marshal mutated semantic wrapper: %v", marshalErr3)
 	}
-	if writeErr2 := os.WriteFile(path, mutatedWrapperBytes2, 0o644); writeErr2 != nil {
+	if writeErr2 := os.WriteFile(path, mutatedWrapperBytes2, 0o600); writeErr2 != nil {
 		t.Fatalf("write tampered semantic: %v", writeErr2)
 	}
 	ws2 := httptest.NewRecorder()

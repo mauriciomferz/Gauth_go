@@ -107,7 +107,7 @@ func TestParsingPropertyIdempotence(t *testing.T) {
 		t.Fatalf("service init: %v", err)
 	}
 
-		//nolint:gosec // G404: weak random acceptable for property-based testing
+	//nolint:gosec // G404: weak random acceptable for property-based testing
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	iterations := 200
 
@@ -157,7 +157,7 @@ func TestParsingPropertyErrorPreservation(t *testing.T) {
 		t.Fatalf("service init: %v", err)
 	}
 
-		//nolint:gosec // G404: weak random acceptable for property-based testing
+	//nolint:gosec // G404: weak random acceptable for property-based testing
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	iterations := 500
 
@@ -252,7 +252,7 @@ func TestParsingPropertyTimingBoundaries(t *testing.T) {
 		t.Fatalf("service init: %v", err)
 	}
 
-		//nolint:gosec // G404: weak random acceptable for property-based testing
+	//nolint:gosec // G404: weak random acceptable for property-based testing
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	iterations := 100
 
@@ -316,6 +316,7 @@ func TestParsingPropertyNullAndEmpty(t *testing.T) {
 		t.Fatalf("service init: %v", err)
 	}
 
+	//nolint:gosec // G404: weak random acceptable for property-based testing
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	iterations := 500
 

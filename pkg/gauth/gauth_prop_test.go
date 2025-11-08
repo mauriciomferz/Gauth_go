@@ -62,6 +62,7 @@ func TestJSONParseProperty(t *testing.T) {
 	if err != nil {
 		t.Fatalf("service init: %v", err)
 	}
+	//nolint:gosec // G404: weak random acceptable for property-based testing
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	iterations := 300
 	for i := 0; i < iterations; i++ {

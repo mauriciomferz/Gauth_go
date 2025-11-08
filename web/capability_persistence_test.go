@@ -58,7 +58,7 @@ func TestCapabilityPersistenceAndReload(t *testing.T) {
 	}
 
 	// Modify file to add new capability and mapping
-	if err := os.WriteFile(tmp.Name(), []byte(testutil.CapAlphaBetaGammaDelegationIssueV1), 0o644); err != nil {
+	if err := os.WriteFile(tmp.Name(), []byte(testutil.CapAlphaBetaGammaDelegationIssueV1), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -136,7 +136,7 @@ func TestCapabilityRegistryHashPreservedOnFailedReload(t *testing.T) {
 		t.Fatalf("expected initial hash present")
 	}
 	// Write invalid file (unknown capability in mapping)
-	if err := os.WriteFile(tmp.Name(), []byte(testutil.CapAlphaUnknownMapping), 0o644); err != nil {
+	if err := os.WriteFile(tmp.Name(), []byte(testutil.CapAlphaUnknownMapping), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	r := performRequest(srv.router, "POST", "/api/v1/beta/capabilities/reload")
@@ -188,7 +188,7 @@ func TestCapabilityRegistryHashDeterminism(t *testing.T) {
 		t.Fatalf("hash missing")
 	}
 	// Overwrite file with permutation
-	if err := os.WriteFile(tmp1.Name(), []byte(testutil.CapABDelegationIssuePerm2V1), 0o644); err != nil {
+	if err := os.WriteFile(tmp1.Name(), []byte(testutil.CapABDelegationIssuePerm2V1), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	r := performRequest(srv.router, "POST", "/api/v1/beta/capabilities/reload")
@@ -209,7 +209,7 @@ func TestCapabilityRegistryHashDeterminism(t *testing.T) {
 	}
 
 	// Now introduce semantic change: add new capability referenced by mapping
-	if err := os.WriteFile(tmp1.Name(), []byte(testutil.CapABCDelegationIssueV1), 0o644); err != nil {
+	if err := os.WriteFile(tmp1.Name(), []byte(testutil.CapABCDelegationIssueV1), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	r2 := performRequest(srv.router, "POST", "/api/v1/beta/capabilities/reload")

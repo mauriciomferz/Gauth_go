@@ -87,6 +87,7 @@ func TestFastReconstructionRejectsBadSizes(t *testing.T) {
 func TestFastReconstructionRandomSizes(t *testing.T) {
 	os.Setenv("GAUTH_CONSISTENCY_V2_FAST", "1")
 	defer os.Unsetenv("GAUTH_CONSISTENCY_V2_FAST")
+	//nolint:gosec // G404: weak random acceptable for property-based testing
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for i := 0; i < 200; i++ {
 		n := 1 + rng.Intn(200)

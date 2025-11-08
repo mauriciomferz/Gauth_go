@@ -130,6 +130,7 @@ func calculateJitteredInterval(base, maxJitter time.Duration) time.Duration {
 	}
 
 	// Generate random jitter: -maxJitter/2 to +maxJitter/2
+	//nolint:gosec // G404: weak random acceptable for rotation jitter timing
 	jitter := time.Duration(rand.Int63n(int64(maxJitter))) - maxJitter/2
 	result := base + jitter
 

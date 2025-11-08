@@ -31,15 +31,18 @@ func FuzzBLSAggregateEndpoint(f *testing.F) {
 		// Occasionally craft a synthetic request if raw isn't JSON-y.
 		if raw == "" || raw[0] != '{' {
 			mode := "issue"
+			//nolint:gosec // G404: weak random acceptable for fuzz test mutation
 			if rand.Intn(2) == 0 {
 				mode = "verify"
 			}
 			msg := base64.StdEncoding.EncodeToString([]byte("m"))
+			//nolint:gosec // G404: weak random acceptable for fuzz test mutation
 			if rand.Intn(5) == 0 {
 				msg = "%%%"
 			} // invalid base64
 			obj := map[string]any{"mode": mode, "message_b64": msg}
 			if mode == "issue" {
+				//nolint:gosec // G404: weak random acceptable for fuzz test mutation
 				obj["participants"] = 1 + rand.Intn(4)
 			} else {
 				obj["aggregated_signature_b64"] = "!!!!" // invalid base64

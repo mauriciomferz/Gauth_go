@@ -94,6 +94,7 @@ func NewTSAStubProviderSeeded(minMs, maxMs int, failProb float64, seed int64) *T
 		seed = time.Now().UnixNano()
 	}
 	src := rand.NewSource(seed)
+	//nolint:gosec // G404: weak random acceptable for TSA stub provider (testing only)
 	return &TSAStubProvider{minLatency: time.Duration(minMs) * time.Millisecond, maxLatency: time.Duration(maxMs) * time.Millisecond, failProb: failProb, providerTag: "tsa-stub", rnd: rand.New(src)}
 }
 

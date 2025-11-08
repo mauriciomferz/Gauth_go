@@ -44,7 +44,7 @@ func TestCapabilityRegistryPrevHashPermutationSemantics(t *testing.T) {
 	}
 
 	// Overwrite with permutation-only variant (same semantics, different ordering)
-	if err := os.WriteFile(tmp.Name(), []byte(testutil.CapABDelegationIssuePerm2V1), 0o644); err != nil {
+	if err := os.WriteFile(tmp.Name(), []byte(testutil.CapABDelegationIssuePerm2V1), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	rPerm := performRequest(srv.router, "POST", "/api/v1/beta/capabilities/reload")
@@ -68,7 +68,7 @@ func TestCapabilityRegistryPrevHashPermutationSemantics(t *testing.T) {
 	}
 
 	// Now introduce semantic change (add cap.c referenced in mapping)
-	if err := os.WriteFile(tmp.Name(), []byte(testutil.CapABCDelegationIssueV1), 0o644); err != nil {
+	if err := os.WriteFile(tmp.Name(), []byte(testutil.CapABCDelegationIssueV1), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	rSem := performRequest(srv.router, "POST", "/api/v1/beta/capabilities/reload")
