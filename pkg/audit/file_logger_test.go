@@ -36,8 +36,8 @@ func TestFileLoggerAppendAndReload(t *testing.T) {
 		t.Fatalf("verify: %v", err)
 	}
 	// Re-open
-	if err := fl.Close(); err != nil {
-		t.Fatalf("close: %v", err)
+	if err2 := fl.Close(); err2 != nil {
+		t.Fatalf("close: %v", err2)
 	}
 	fl2, err := OpenFileLogger(path)
 	if err != nil {
@@ -91,11 +91,11 @@ func TestFileLoggerReloadIntegrity(t *testing.T) {
 	if len(fl2.Events()) != 8 {
 		t.Fatalf("expected 8 events after phase2, got %d", len(fl2.Events()))
 	}
-	if err := fl2.VerifyChain(); err != nil {
-		t.Fatalf("verify phase2: %v", err)
+	if err2 := fl2.VerifyChain(); err2 != nil {
+		t.Fatalf("verify phase2: %v", err2)
 	}
-	if err := fl2.Close(); err != nil {
-		t.Fatalf("close phase2: %v", err)
+	if err2 := fl2.Close(); err2 != nil {
+		t.Fatalf("close phase2: %v", err2)
 	}
 
 	// Phase 3: final reopen for verification only
@@ -129,8 +129,8 @@ func TestFileLoggerTamperDetection(t *testing.T) {
 		t.Fatalf("open: %v", err)
 	}
 	ev := NewEvent(EventTypeAuthorization, "act", ResultSuccess)
-	if err := fl.Log(context.Background(), ev); err != nil {
-		t.Fatalf("log: %v", err)
+	if err2 := fl.Log(context.Background(), ev); err2 != nil {
+		t.Fatalf("log: %v", err2)
 	}
 	fl.Close()
 	// Tamper: modify first line hash

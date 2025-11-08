@@ -26,8 +26,8 @@ func TestCapabilityAnchorMaterialSigned(t *testing.T) {
 	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m")
 	// Provide capabilities file (single capability) to trigger file-backed path.
 	capFile := filepath.Join(t.TempDir(), "caps.json")
-	if err := os.WriteFile(capFile, []byte(testutil.CapTransferV1), 0o600); err != nil {
-		t.Fatalf("write caps file: %v", err)
+	if err2 := os.WriteFile(capFile, []byte(testutil.CapTransferV1), 0o600); err2 != nil {
+		t.Fatalf("write caps file: %v", err2)
 	}
 	t.Setenv("GAUTH_CAPABILITIES_PATH", capFile)
 

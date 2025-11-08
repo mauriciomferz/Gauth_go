@@ -78,8 +78,8 @@ func TestNotarizationReceiptPersistence(t *testing.T) {
 		} `json:"entries"`
 		ChainHead string `json:"chain_head"`
 	}
-	if err := json.Unmarshal(b, &file); err != nil {
-		t.Fatalf("unmarshal receipt file: %v raw=%s", err, string(b))
+	if err2 := json.Unmarshal(b, &file); err2 != nil {
+		t.Fatalf("unmarshal receipt file: %v raw=%s", err2, string(b))
 	}
 	if len(file.Entries) == 0 {
 		t.Fatalf("expected at least one receipt entry persisted")
@@ -134,11 +134,11 @@ func TestNotarizationReceiptPersistence(t *testing.T) {
 
 	// Trigger a third emission to test append-only growth.
 	time.Sleep(1100 * time.Millisecond)
-	if err := os.WriteFile(capFile, []byte(testutil.CapTransferIssueDelegationCreateV1), 0o600); err != nil {
-		t.Fatalf("update capabilities file third emission: %v", err)
+	if err2 := os.WriteFile(capFile, []byte(testutil.CapTransferIssueDelegationCreateV1), 0o600); err2 != nil {
+		t.Fatalf("update capabilities file third emission: %v", err2)
 	}
-	if err := srv.loadCapabilitiesFromFile(capFile); err != nil {
-		t.Fatalf("reload capabilities third emission: %v", err)
+	if err2 := srv.loadCapabilitiesFromFile(capFile); err2 != nil {
+		t.Fatalf("reload capabilities third emission: %v", err2)
 	}
 	b3, err := os.ReadFile(receiptPath)
 	if err != nil {

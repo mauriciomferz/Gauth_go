@@ -42,8 +42,8 @@ func TestBLSAggregateIssueAndVerify(t *testing.T) {
 		PublicKeysB64          []string `json:"public_keys_b64"`
 		ParticipantCount       int      `json:"participant_count"`
 	}
-	if err := json.Unmarshal(w.Body.Bytes(), &issueResp); err != nil {
-		t.Fatalf("parse issue resp: %v", err)
+	if err2 := json.Unmarshal(w.Body.Bytes(), &issueResp); err2 != nil {
+		t.Fatalf("parse issue resp: %v", err2)
 	}
 	if !issueResp.Success || issueResp.Mode != "issue" {
 		t.Fatalf("unexpected issue response: %+v", issueResp)

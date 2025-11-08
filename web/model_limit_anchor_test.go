@@ -20,8 +20,8 @@ func TestModelLimitAuditAnchoring(t *testing.T) {
 	}
 	// Very small input limit to trigger exceed easily
 	limitsJSON := `{"model_limits":{"anchor-model":{"max_input_tokens":10}},"user_limits":{}}`
-	if _, err := limitsFile.Write([]byte(limitsJSON)); err != nil {
-		t.Fatalf("write limits: %v", err)
+	if _, err2 := limitsFile.Write([]byte(limitsJSON)); err2 != nil {
+		t.Fatalf("write limits: %v", err2)
 	}
 	limitsFile.Close()
 	auditFile, err := os.CreateTemp(t.TempDir(), "model_limit_audit_*.jsonl")

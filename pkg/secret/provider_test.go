@@ -20,12 +20,12 @@ func TestMemoryProviderCRUD(t *testing.T) {
 		t.Fatalf("get mismatch v=%s err=%v", v, err)
 	}
 	// IfNotExists should fail
-	if err := mp.Set(ctx, "a", "value2", IfNotExists()); err == nil {
+	if err2 := mp.Set(ctx, "a", "value2", IfNotExists()); err2 == nil {
 		t.Fatalf("expected already exist error")
 	}
 	// Overwrite without flag
-	if err := mp.Set(ctx, "a", "value2"); err != nil {
-		t.Fatalf("overwrite: %v", err)
+	if err2 := mp.Set(ctx, "a", "value2"); err2 != nil {
+		t.Fatalf("overwrite: %v", err2)
 	}
 	if v, _ = mp.Get(ctx, "a"); v != "value2" {
 		t.Fatalf("expected overwrite value2 got %s", v)

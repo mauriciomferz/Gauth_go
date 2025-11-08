@@ -4281,7 +4281,7 @@ func (s *BetaServer) loadCapabilitiesFromFile(path string) error {
 		ActionMappings map[string][]string     `json:"action_mappings"`
 		SchemaVersion  int                     `json:"schema_version"`
 	}
-	if err := json.Unmarshal(b, &cfg); err != nil {
+	if err2 := json.Unmarshal(b, &cfg); err2 != nil {
 		return err
 	}
 	// Validate schema version first.

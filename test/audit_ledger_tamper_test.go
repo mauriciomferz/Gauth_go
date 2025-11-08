@@ -18,14 +18,14 @@ func TestAuditLedgerTamper(t *testing.T) {
 		t.Fatalf("init ledger: %v", err)
 	}
 	// Append two entries
-	if _, err := al.Append("poa_issue", "actorA", "poa-1", map[string]any{"scope": []string{"x"}}); err != nil {
-		t.Fatalf("append1: %v", err)
+	if _, err2 := al.Append("poa_issue", "actorA", "poa-1", map[string]any{"scope": []string{"x"}}); err2 != nil {
+		t.Fatalf("append1: %v", err2)
 	}
-	if _, err := al.Append("poa_sign", "actorB", "poa-1", map[string]any{"signatures": 1}); err != nil {
-		t.Fatalf("append2: %v", err)
+	if _, err2 := al.Append("poa_sign", "actorB", "poa-1", map[string]any{"signatures": 1}); err2 != nil {
+		t.Fatalf("append2: %v", err2)
 	}
-	if mismatch, err := al.VerifyChain(); err != nil || mismatch != -1 {
-		t.Fatalf("expected clean chain got mismatch=%d err=%v", mismatch, err)
+	if mismatch, err2 := al.VerifyChain(); err2 != nil || mismatch != -1 {
+		t.Fatalf("expected clean chain got mismatch=%d err=%v", mismatch, err2)
 	}
 	al.Close()
 	// Tamper second entry bytes directly via Bolt

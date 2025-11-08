@@ -173,8 +173,8 @@ func TestRevocationAnchoringAdapter_Persistence(t *testing.T) {
 
 	adapter1 := NewRevocationAnchoringAdapter(&mockNotarizer{}, store1)
 	hash := "sha256:persistent"
-	if err := adapter1.Anchor(hash); err != nil {
-		t.Fatalf("Anchor failed: %v", err)
+	if err2 := adapter1.Anchor(hash); err2 != nil {
+		t.Fatalf("Anchor failed: %v", err2)
 	}
 	db1.Close()
 
@@ -254,8 +254,8 @@ func TestReceiptStore_Operations(t *testing.T) {
 		LatencySeconds: 0.1,
 	}
 
-	if err := store.Store(receipt.Hash, receipt); err != nil {
-		t.Fatalf("Store failed: %v", err)
+	if err2 := store.Store(receipt.Hash, receipt); err2 != nil {
+		t.Fatalf("Store failed: %v", err2)
 	}
 
 	// Retrieve receipt

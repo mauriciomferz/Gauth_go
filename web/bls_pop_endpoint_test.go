@@ -58,8 +58,8 @@ func TestBLSPoPIssueAndVerify(t *testing.T) {
 		if err != nil {
 			t.Fatalf("decode priv: %v", err)
 		}
-		if err := sk.Deserialize(privRaw); err != nil {
-			t.Fatalf("deserialize priv: %v", err)
+		if err2 := sk.Deserialize(privRaw); err2 != nil {
+			t.Fatalf("deserialize priv: %v", err2)
 		}
 		chRaw, err := base64.StdEncoding.DecodeString(ir.ChallengesB64[i])
 		if err != nil {

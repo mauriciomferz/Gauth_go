@@ -42,11 +42,11 @@ func TestRotationV2EmbeddedECDSAPublicKeyVerification(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ecdsa key: %v", err)
 	}
-	if err := notary.AttachEd25519Signature(&art, privEd, "edA", "ED25519", 4); err != nil {
-		t.Fatalf("attach ed: %v", err)
+	if err2 := notary.AttachEd25519Signature(&art, privEd, "edA", "ED25519", 4); err2 != nil {
+		t.Fatalf("attach ed: %v", err2)
 	}
-	if err := notary.AttachECDSASignature(&art, privEc, "ecA", "ECDSA-P256", 5); err != nil {
-		t.Fatalf("attach ec: %v", err)
+	if err2 := notary.AttachECDSASignature(&art, privEc, "ecA", "ECDSA-P256", 5); err2 != nil {
+		t.Fatalf("attach ec: %v", err2)
 	}
 	// Embed public keys manually: Ed25519 via direct assignment since registry may not serve; ECDSA via env variable mapping
 	// Use helper encoding

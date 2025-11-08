@@ -30,8 +30,8 @@ func TestCapabilityAnchorEndpointSignatureVerification(t *testing.T) {
 	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m") // first load emits regardless
 	// Capabilities file to ensure file-backed loader path.
 	capFile := filepath.Join(t.TempDir(), "caps.json")
-	if err := os.WriteFile(capFile, []byte(testutil.CapTransferV1), 0o600); err != nil {
-		t.Fatalf("write caps file: %v", err)
+	if err2 := os.WriteFile(capFile, []byte(testutil.CapTransferV1), 0o600); err2 != nil {
+		t.Fatalf("write caps file: %v", err2)
 	}
 	t.Setenv("GAUTH_CAPABILITIES_PATH", capFile)
 	// Disable background polls for deterministic test timing.
@@ -60,8 +60,8 @@ func TestCapabilityAnchorEndpointSignatureVerification(t *testing.T) {
 		Emitted    bool            `json:"emitted"`
 		Artifact   json.RawMessage `json:"artifact"`
 	}
-	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
-		t.Fatalf("unmarshal resp: %v body=%s", err, w.Body.String())
+	if err2 := json.Unmarshal(w.Body.Bytes(), &resp); err2 != nil {
+		t.Fatalf("unmarshal resp: %v body=%s", err2, w.Body.String())
 	}
 	if !resp.Success || !resp.Configured || !resp.Emitted {
 		t.Fatalf("flags unexpected success=%v configured=%v emitted=%v", resp.Success, resp.Configured, resp.Emitted)
@@ -74,8 +74,8 @@ func TestCapabilityAnchorEndpointSignatureVerification(t *testing.T) {
 		Signature string          `json:"signature"`
 		Mode      string          `json:"mode"`
 	}
-	if err := json.Unmarshal(resp.Artifact, &wrapper); err != nil {
-		t.Fatalf("unmarshal wrapper: %v artifact=%s", err, string(resp.Artifact))
+	if err2 := json.Unmarshal(resp.Artifact, &wrapper); err2 != nil {
+		t.Fatalf("unmarshal wrapper: %v artifact=%s", err2, string(resp.Artifact))
 	}
 	if wrapper.Mode != sigModeEdDSA {
 		t.Fatalf("expected mode=eddsa got %s", wrapper.Mode)

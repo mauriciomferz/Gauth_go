@@ -59,8 +59,8 @@ func TestCapabilityAnchorPrometheusIntegrityMismatch(t *testing.T) {
 		} `json:"entries"`
 		ChainHead string `json:"chain_head"`
 	}
-	if err := json.Unmarshal(raw, &jf); err != nil {
-		t.Fatalf("unmarshal: %v", err)
+	if err2 := json.Unmarshal(raw, &jf); err2 != nil {
+		t.Fatalf("unmarshal: %v", err2)
 	}
 	if len(jf.Entries) < 2 {
 		t.Fatalf("expected at least 2 entries, got %d", len(jf.Entries))

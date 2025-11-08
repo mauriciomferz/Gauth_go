@@ -42,8 +42,8 @@ func TestRotationV2ContinuityUpdatesPreviousHash(t *testing.T) {
 	if err != nil {
 		t.Fatalf("artifact1: %v", err)
 	}
-	if err := notary.AttachEd25519Signature(&art1, priv, "s1", "ED25519", 10); err != nil {
-		t.Fatalf("attach1: %v", err)
+	if err2 := notary.AttachEd25519Signature(&art1, priv, "s1", "ED25519", 10); err2 != nil {
+		t.Fatalf("attach1: %v", err2)
 	}
 	verified1, _, _ := notary.VerifyArtifactSignatures(&art1, &singleEdResolver{key: pub})
 	if verified1 != 10 {

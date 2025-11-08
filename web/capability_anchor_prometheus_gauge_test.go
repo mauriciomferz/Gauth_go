@@ -27,7 +27,7 @@ func TestCapabilityAnchorPrometheusGauge(t *testing.T) {
 	t.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", anchorFile.Name())
 	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m")
 	capFile := filepath.Join(t.TempDir(), "caps.json")
-	if err := os.WriteFile(capFile, []byte(`{"schema_version":1,"capabilities":[{"id":"cap.transfer","version":"1.0","stable":true}],["action_mappings":{"transaction:execute":["cap.transfer"]}}`), 0o600); err != nil {
+	if err2 := os.WriteFile(capFile, []byte(`{"schema_version":1,"capabilities":[{"id":"cap.transfer","version":"1.0","stable":true}],["action_mappings":{"transaction:execute":["cap.transfer"]}}`), 0o600); err2 != nil {
 		// fix malformed JSON quickly
 		_ = os.WriteFile(capFile, []byte(`{"schema_version":1,"capabilities":[{"id":"cap.transfer","version":"1.0","stable":true}],"action_mappings":{"transaction:execute":["cap.transfer"]}}`), 0o600)
 	}

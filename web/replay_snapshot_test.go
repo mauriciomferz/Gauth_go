@@ -26,8 +26,8 @@ func TestReplaySnapshotAndCompact(t *testing.T) {
 	if err != nil {
 		t.Fatalf("stat before: %v", err)
 	}
-	if err := store.SnapshotAndCompact(); err != nil {
-		t.Fatalf("snapshot+compact: %v", err)
+	if err2 := store.SnapshotAndCompact(); err2 != nil {
+		t.Fatalf("snapshot+compact: %v", err2)
 	}
 	// Ensure snapshot file exists
 	snapInfo, err := os.Stat(walPath + ".snapshot")

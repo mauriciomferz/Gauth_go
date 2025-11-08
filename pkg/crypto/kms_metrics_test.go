@@ -32,8 +32,8 @@ func TestKMSMetricsEmission(t *testing.T) {
 	if _, err2 := kms.Rotate(); err2 != nil {
 		t.Fatalf("rotate: %v", err2)
 	}
-	if _, err := kms.ListKeys(); err != nil {
-		t.Fatalf("list keys: %v", err)
+	if _, err2 := kms.ListKeys(); err2 != nil {
+		t.Fatalf("list keys: %v", err2)
 	}
 
 	mfs, err := prom.DefaultGatherer.Gather()

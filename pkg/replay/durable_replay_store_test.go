@@ -72,11 +72,11 @@ func TestDurableReplayStore_Persistence(t *testing.T) {
 	jti2 := "persistent-jti-2"
 
 	// Record JTIs
-	if err := store1.Record(jti1, time.Now()); err != nil {
-		t.Fatalf("failed to record jti1: %v", err)
+	if err2 := store1.Record(jti1, time.Now()); err2 != nil {
+		t.Fatalf("failed to record jti1: %v", err2)
 	}
-	if err := store1.Record(jti2, time.Now()); err != nil {
-		t.Fatalf("failed to record jti2: %v", err)
+	if err2 := store1.Record(jti2, time.Now()); err2 != nil {
+		t.Fatalf("failed to record jti2: %v", err2)
 	}
 
 	// Close first instance
@@ -160,8 +160,8 @@ func TestDurableReplayStore_Snapshot(t *testing.T) {
 	// Record multiple JTIs
 	for i := 0; i < 10; i++ {
 		jti := "snapshot-jti-" + string(rune('0'+i))
-		if err := store1.Record(jti, time.Now()); err != nil {
-			t.Fatalf("failed to record jti: %v", err)
+		if err2 := store1.Record(jti, time.Now()); err2 != nil {
+			t.Fatalf("failed to record jti: %v", err2)
 		}
 	}
 
@@ -173,7 +173,7 @@ func TestDurableReplayStore_Snapshot(t *testing.T) {
 
 	// Verify snapshot file exists
 	snapshotPath := walPath + ".snapshot"
-	if _, err := os.Stat(snapshotPath); os.IsNotExist(err) {
+	if _, err2 := os.Stat(snapshotPath); os.IsNotExist(err2) {
 		t.Error("expected snapshot file to exist")
 	}
 
@@ -380,7 +380,7 @@ func TestDurableReplayStore_GracefulShutdown(t *testing.T) {
 
 	// Verify snapshot created on shutdown
 	snapshotPath := walPath + ".snapshot"
-	if _, err := os.Stat(snapshotPath); os.IsNotExist(err) {
+	if _, err2 := os.Stat(snapshotPath); os.IsNotExist(err2) {
 		t.Error("expected final snapshot file after Close()")
 	}
 

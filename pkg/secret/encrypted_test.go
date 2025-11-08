@@ -19,8 +19,8 @@ func TestEncryptedProviderCRUD(t *testing.T) {
 	secretValue := "super-secret-password-123"
 
 	// Set encrypted secret
-	if err := enc.Set(ctx, secretKey, secretValue); err != nil {
-		t.Fatalf("Set: %v", err)
+	if err2 := enc.Set(ctx, secretKey, secretValue); err2 != nil {
+		t.Fatalf("Set: %v", err2)
 	}
 
 	// Get decrypted secret
@@ -72,8 +72,8 @@ func TestEncryptedProviderList(t *testing.T) {
 	}
 
 	for k, v := range secrets {
-		if err := enc.Set(ctx, k, v); err != nil {
-			t.Fatalf("Set %s: %v", k, err)
+		if err2 := enc.Set(ctx, k, v); err2 != nil {
+			t.Fatalf("Set %s: %v", k, err2)
 		}
 	}
 
@@ -107,12 +107,12 @@ func TestEncryptedProviderIfNotExists(t *testing.T) {
 	key := "unique-key"
 
 	// First set should succeed
-	if err := enc.Set(ctx, key, "value1", IfNotExists()); err != nil {
-		t.Fatalf("first Set with IfNotExists: %v", err)
+	if err2 := enc.Set(ctx, key, "value1", IfNotExists()); err2 != nil {
+		t.Fatalf("first Set with IfNotExists: %v", err2)
 	}
 
 	// Second set with IfNotExists should fail
-	if err := enc.Set(ctx, key, "value2", IfNotExists()); err == nil {
+	if err2 := enc.Set(ctx, key, "value2", IfNotExists()); err2 == nil {
 		t.Error("expected error on second Set with IfNotExists")
 	}
 
@@ -210,8 +210,8 @@ func TestEncryptedProviderTamperDetection(t *testing.T) {
 	key := "tamper-test"
 	value := "original-secret"
 
-	if err := enc.Set(ctx, key, value); err != nil {
-		t.Fatalf("Set: %v", err)
+	if err2 := enc.Set(ctx, key, value); err2 != nil {
+		t.Fatalf("Set: %v", err2)
 	}
 
 	// Get encrypted value from backend
@@ -222,8 +222,8 @@ func TestEncryptedProviderTamperDetection(t *testing.T) {
 
 	// Tamper with encrypted value
 	tampered := encryptedValue[:len(encryptedValue)-4] + "XXXX"
-	if err := backend.Set(ctx, key, tampered); err != nil {
-		t.Fatalf("backend Set tampered: %v", err)
+	if err2 := backend.Set(ctx, key, tampered); err2 != nil {
+		t.Fatalf("backend Set tampered: %v", err2)
 	}
 
 	// Attempt to retrieve should fail

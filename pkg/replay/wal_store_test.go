@@ -21,12 +21,12 @@ func TestWALAppendAndRecover(t *testing.T) {
 		{Op: "Record", Key: []byte("alpha"), TS: time.Now().Add(2 * time.Second).Unix()}, // duplicate key acceptable
 	}
 	for i, r := range recs {
-		if err := wal.AppendRecord(r); err != nil {
-			t.Fatalf("append %d: %v", i, err)
+		if err2 := wal.AppendRecord(r); err2 != nil {
+			t.Fatalf("append %d: %v", i, err2)
 		}
 	}
-	if err := wal.Close(); err != nil {
-		t.Fatalf("close wal: %v", err)
+	if err2 := wal.Close(); err2 != nil {
+		t.Fatalf("close wal: %v", err2)
 	}
 	// Reopen and recover
 	wal2, err := NewWALStore(path)
@@ -69,16 +69,16 @@ func TestWALRecoverSkipsMalformed(t *testing.T) {
 		t.Fatalf("open wal: %v", err)
 	}
 	// Append one good record
-	if err := wal.AppendRecord(WALRecord{Op: "Record", Key: []byte("good"), TS: time.Now().Unix()}); err != nil {
-		t.Fatalf("append good: %v", err)
+	if err2 := wal.AppendRecord(WALRecord{Op: "Record", Key: []byte("good"), TS: time.Now().Unix()}); err2 != nil {
+		t.Fatalf("append good: %v", err2)
 	}
 	// Manually inject a malformed line
-	if _, err := wal.file.Write([]byte("{this is not json}\n")); err != nil {
-		t.Fatalf("inject malformed: %v", err)
+	if _, err2 := wal.file.Write([]byte("{this is not json}\n")); err2 != nil {
+		t.Fatalf("inject malformed: %v", err2)
 	}
 	// Append another good record
-	if err := wal.AppendRecord(WALRecord{Op: "Record", Key: []byte("good2"), TS: time.Now().Unix()}); err != nil {
-		t.Fatalf("append good2: %v", err)
+	if err2 := wal.AppendRecord(WALRecord{Op: "Record", Key: []byte("good2"), TS: time.Now().Unix()}); err2 != nil {
+		t.Fatalf("append good2: %v", err2)
 	}
 	if err := wal.Close(); err != nil {
 		t.Fatalf("close wal: %v", err)
