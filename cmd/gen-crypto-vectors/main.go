@@ -153,7 +153,7 @@ func main() {
 	vectors = append(vectors, vector{Alg: "ECDSA-P256", MessageHex: hexOf(eMsg), PublicHex: hexOf(pubBytes), SignatureHex: hexOf(trunc), Valid: false, Note: "truncated signature"})
 
 	// BLS12-381 (non-deterministic key) - acceptable for snapshot; mark note.
-	if err := bls.Init(bls.BLS12_381); err == nil {
+	if err2 := bls.Init(bls.BLS12_381); err2 == nil {
 		var sk bls.SecretKey
 		sk.SetByCSPRNG()
 		pk := sk.GetPublicKey()

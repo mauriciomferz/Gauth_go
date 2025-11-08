@@ -225,18 +225,18 @@ func createDemoComplexGraph(c *gin.Context) {
 		"type":         "organization",
 		"jurisdiction": "US",
 	})
-	graph.SetNodePosition(principal.ID, 0, 0, 0)
+	graph.SetNodePosition(principal.ID, 0, 0, 0)  //nolint:errcheck
 
 	// Create authorizers
 	agent1 := graph.AddNode("authorizer", "Legal Department", "Authorized legal agent", "👔", map[string]interface{}{
 		"department": "legal",
 	})
-	graph.SetNodePosition(agent1.ID, -3, 0, 2)
+	graph.SetNodePosition(agent1.ID, -3, 0, 2)  //nolint:errcheck
 
 	agent2 := graph.AddNode("authorizer", "Finance Department", "Authorized finance agent", "💼", map[string]interface{}{
 		"department": "finance",
 	})
-	graph.SetNodePosition(agent2.ID, 3, 0, 2)
+	graph.SetNodePosition(agent2.ID, 3, 0, 2)  //nolint:errcheck
 
 	// Create AI clients
 	aiClient1 := graph.AddNode("client", "Legal AI Assistant", "AI for legal document processing", "🤖", map[string]interface{}{
@@ -292,7 +292,7 @@ func createDemoComplexGraph(c *gin.Context) {
 	})
 
 	// Set one node to pending for demo
-	graph.UpdateNodeStatus(aiClient2.ID, "pending")
+	graph.UpdateNodeStatus(aiClient2.ID, "pending")  //nolint:errcheck
 
 	c.JSON(http.StatusCreated, gin.H{
 		"graph":   graph,

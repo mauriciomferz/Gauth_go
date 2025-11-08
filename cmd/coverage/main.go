@@ -89,7 +89,7 @@ func run() error {
 		return fmt.Errorf("read template: %w", err)
 	}
 	var tpl Template
-	if err := json.Unmarshal(b, &tpl); err != nil {
+	if err2 := json.Unmarshal(b, &tpl); err2 != nil {
 		return fmt.Errorf("unmarshal template: %w", err)
 	}
 

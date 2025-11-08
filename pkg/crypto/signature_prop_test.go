@@ -103,10 +103,10 @@ func TestProperty_TamperedMessageFailsVerification(t *testing.T) {
 				if err != nil {
 					t.Fatalf("iteration %d: provider init: %v", i, err)
 				}
-			signer, _ := prov.ActiveSigner()
-			msg := make([]byte, 64)
-			_, _ = rand.Read(msg) //nolint:errcheck
-			sig, _ := signer.Sign(msg)
+				signer, _ := prov.ActiveSigner()
+				msg := make([]byte, 64)
+				_, _ = rand.Read(msg) //nolint:errcheck
+				sig, _ := signer.Sign(msg)
 				b64 := base64.StdEncoding.EncodeToString(sig)
 
 				// Tamper message (flip one byte)
@@ -142,14 +142,14 @@ func TestProperty_InvalidSignatureFailsVerification(t *testing.T) {
 			signer, _ := prov.ActiveSigner()
 			msg := []byte("valid message")
 
-		// Create random garbage signature
-		badSig := make([]byte, 64)
-		_, _ = rand.Read(badSig) //nolint:errcheck
-		b64 := base64.StdEncoding.EncodeToString(badSig)
+			// Create random garbage signature
+			badSig := make([]byte, 64)
+			_, _ = rand.Read(badSig) //nolint:errcheck
+			b64 := base64.StdEncoding.EncodeToString(badSig)
 
-		if err := VerifyAlgorithm(algo.name, msg, b64, signer.KeyID(), prov); err == nil {
-			t.Fatalf("expected verification failure for invalid signature")
-		}
+			if err := VerifyAlgorithm(algo.name, msg, b64, signer.KeyID(), prov); err == nil {
+				t.Fatalf("expected verification failure for invalid signature")
+			}
 		})
 	}
 }

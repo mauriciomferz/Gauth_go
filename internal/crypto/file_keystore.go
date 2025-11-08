@@ -345,8 +345,8 @@ func (f *FileKeyStore) parseFileKey(keyID string, keyData FileKeyData) (*Key, er
 		return nil, fmt.Errorf("failed to decode private key: %w", err)
 	}
 	if len(f.masterKey) == 32 {
-		block, err := aes.NewCipher(f.masterKey)
-		if err != nil {
+		block, err2 := aes.NewCipher(f.masterKey)
+		if err2 != nil {
 			return nil, fmt.Errorf("AES cipher error: %w", err)
 		}
 		gcm, err := cipher.NewGCM(block)

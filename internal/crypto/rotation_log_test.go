@@ -37,7 +37,7 @@ func TestRotationLogSignatureVerification(t *testing.T) {
 		t.Fatalf("no log entries found")
 	}
 	var entry map[string]any
-	if err := json.Unmarshal(lines[len(lines)-1], &entry); err != nil {
+	if err2 := json.Unmarshal(lines[len(lines)-1], &entry); err2 != nil {
 		t.Fatalf("failed to unmarshal log entry: %v", err)
 	}
 

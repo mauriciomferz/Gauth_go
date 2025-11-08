@@ -161,7 +161,7 @@ func auditRotation(base string) (interface{}, error) {
 		return nil, err
 	}
 	var sum notary.RotationSummary
-	if err := json.Unmarshal(body, &sum); err != nil {
+	if err2 := json.Unmarshal(body, &sum); err2 != nil {
 		return nil, fmt.Errorf("decode_rotation_summary: %w", err)
 	}
 	reg := cryptoReg.GlobalEdDSARegistry

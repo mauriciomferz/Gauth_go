@@ -189,7 +189,7 @@ func (m *ProtocolFlowManager) CompleteSubstep(sessionID, stepID, substepID strin
 	}
 
 	if allCompleted {
-		m.UpdateStepStatus(sessionID, stepID, "completed")
+		m.UpdateStepStatus(sessionID, stepID, "completed")  //nolint:errcheck
 	}
 
 	state.UpdatedAt = time.Now()

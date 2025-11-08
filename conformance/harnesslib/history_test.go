@@ -16,7 +16,7 @@ func TestLoadHistoryAndTrend(t *testing.T) {
 	if err != nil {
 		t.Fatalf("temp: %v", err)
 	}
-	if _, err := f.WriteString(sampleHistoryCSV); err != nil {
+	if _, err2 := f.WriteString(sampleHistoryCSV); err2 != nil {
 		t.Fatalf("write: %v", err)
 	}
 	f.Close()

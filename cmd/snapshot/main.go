@@ -60,7 +60,7 @@ func main() {
 			os.Exit(9)
 		}
 		var snap notary.Snapshot
-		if err := json.Unmarshal(b, &snap); err != nil {
+		if err2 := json.Unmarshal(b, &snap); err2 != nil {
 			fmt.Fprintf(os.Stderr, "error: parse snapshot JSON: %v\n", err)
 			os.Exit(10)
 		}

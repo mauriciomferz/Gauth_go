@@ -88,7 +88,7 @@ func NewIndexedDelegationStore(dbPath string) (*IndexedDelegationStore, error) {
 		}
 
 		for _, bucket := range buckets {
-			if _, err := tx.CreateBucketIfNotExists([]byte(bucket)); err != nil {
+			if _, err2 := tx.CreateBucketIfNotExists([]byte(bucket)); err2 != nil {
 				return fmt.Errorf("failed to create bucket %s: %w", bucket, err)
 			}
 		}

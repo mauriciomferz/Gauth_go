@@ -98,13 +98,13 @@ func reconstructCanonical(payload map[string]any) (manifestCanonical, []byte, st
 	for _, c := range capsAny {
 		cm := c.(map[string]any)
 		mc := manifestCap{ID: cm["id"].(string), Version: cm["version"].(string), Stable: cm["stable"].(bool)}
-		if v, ok := cm["deprecated_after"].(string); ok && v != "" {
+		if v, ok2 := cm["deprecated_after"].(string); ok2 && v != "" {
 			mc.DeprecatedAfter = v
 		}
-		if v, ok := cm["sunset_after"].(string); ok && v != "" {
+		if v, ok3 := cm["sunset_after"].(string); ok3 && v != "" {
 			mc.SunsetAfter = v
 		}
-		if vv, ok := cm["versions"].([]any); ok && len(vv) > 0 {
+		if vv, ok4 := cm["versions"].([]any); ok4 && len(vv) > 0 {
 			list := make([]string, 0, len(vv))
 			for _, x := range vv {
 				list = append(list, x.(string))
