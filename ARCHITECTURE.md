@@ -59,9 +59,8 @@ GAuth 1.0 is a comprehensive authorization framework implementing RFC 0111 (Core
              │   Authorization Requests        │
              ▼                                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                                                                  │
 │                     GAuth Core Services                          │
-│                           │                                    │
+│                                                                  │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
 │  │   Auth       │  │   Authz      │  │  Delegation  │         │
 │  │ (pkg/auth)   │  │ (pkg/authz)  │  │(pkg/delegation)│       │
@@ -72,9 +71,10 @@ GAuth 1.0 is a comprehensive authorization framework implementing RFC 0111 (Core
 │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘         │
 │         │                 │                 │                  │
 │         └─────────────────┴─────────────────┘                  │
-│  ┌────────────────────────┴───────────────────────┐       ─   │
+│                           │                                     │
+│  ┌────────────────────────┴────────────────────────┐          │
 │  │              Core GAuth Engine                   │          │
-│  │                                                  │          │
+│  │              (pkg/gauth)                         │          │
 │  │  - POA Token Management (pkg/poa)                │          │
 │  │  - Multi-Signature Validation                    │          │
 │  │  - Revocation Management                         │          │
@@ -110,7 +110,6 @@ GAuth 1.0 is a comprehensive authorization framework implementing RFC 0111 (Core
 - **API Layer**: REST/gRPC endpoints for programmatic access
 - **PEP Integration**: Policy enforcement points in applications
 
-│  │              (pkg/gauth)                        │          │
 #### 2. Authorization Layer
 - **Authentication** (`pkg/auth`): Token validation, signature verification
 - **Authorization** (`pkg/authz`): Policy evaluation, access control
