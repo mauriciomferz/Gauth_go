@@ -1,1 +1,0 @@
-BenchmarkTokenIssue-11    	14925681	        71.43 ns/op	     272 B/op	       2 allocs/op

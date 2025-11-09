@@ -53,6 +53,16 @@ Thumbs.db
 # Logs
 *.log
 server.log
+gauth-web.log
+*.pid
+
+# Lint and build reports
+lint_*.txt
+report.json
+report.md
+build/*.txt
+build/*.json
+build/*.md
 
 # Built executables
 gauth-server
@@ -69,6 +79,31 @@ main
 basic
 basic_example
 cascade_main
+# Test executables
+advanced
+advanced_revocation_flow
+advanced_rfc111_flow
+advanced_server
+basic_server
+combined_rfc_demo
+combined_rfc_test
+comprehensive
+distributed
+gateway
+key_rotation
+ledger-verify
+microservices
+multisig-bench
+professional_interfaces_demo
+rfc111_protocol_flow
+rfc_0115_poa_definition
+rfc_functional_test
+rfc_implementation_demo
+rotate-key
+struct_demo
+type_safe_usage
+verify
+verify-manifest
 
 # Temporary files
 *.tmp
@@ -85,9 +120,13 @@ vendor/
 # Coverage files
 coverage.out
 coverage.html
+coverage*.out
+coverage*.txt
+test/coverage/
 
 # Benchmark results
 benchmarks/
+bench_summary.txt
 
 # Test artifacts
 testdata/
@@ -96,6 +135,7 @@ test/tmp/
 test_results.txt
 internal/crypto/test_recovery.json
 web/test_ext_anchor_receipts.json
+temp_cover.out
 
 # macOS system files
 .DS_Store
