@@ -65,7 +65,7 @@ See [Gap Matrix](docs/GAP_MATRIX.auto.md) for detailed implementation status.
 
 ### Prerequisites
 
-- Go 1.21 or later
+- **Go 1.25.3 or later** (required for security patches - see [Security Advisory](#security-advisory))
 - Make (optional)
 
 ### Installation
@@ -274,6 +274,26 @@ This implementation achieves **100% conformance** with RFC 0111/0115 specificati
 - ✅ Multi-jurisdiction compliance
 - ✅ AI governance capabilities
 - ✅ Production-grade security patterns
+
+## Security Advisory
+
+**CRITICAL**: Go 1.25.3+ Required
+
+This project requires **Go 1.25.3 or later** to address 8 known vulnerabilities in the Go standard library (Go 1.25.1):
+- 2 HIGH severity DoS vulnerabilities (crypto/x509 panic, net/http memory exhaustion)
+- 5 MEDIUM severity issues (ASN.1/PEM parsing, IPv6 validation, x509 constraints)
+- 1 LOW severity information disclosure
+
+All vulnerabilities are patched in Go 1.25.3. See [Pre-Production Audit Report](artifacts/preproduction_audit_week1_day2.md) for details.
+
+**Before deploying**:
+```bash
+# Verify Go version
+go version  # Must show go1.25.3 or higher
+
+# Run vulnerability check
+govulncheck ./...  # Must show 0 vulnerabilities
+```
 
 ## License
 

@@ -1,6 +1,6 @@
 # Multi-stage Docker build for GAuth
-# Build stage  
-FROM golang:1.25-alpine AS builder
+# Build stage - REQUIRES Go 1.25.3+ for security patches (CVE fixes)
+FROM golang:1.25.3-alpine AS builder
 
 # Install build dependencies
 RUN apk update && apk add --no-cache git ca-certificates tzdata

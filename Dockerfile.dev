@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1
 
-ARG GO_VERSION=1.25
+# REQUIRES Go 1.25.3+ for security patches (8 CVEs fixed)
+ARG GO_VERSION=1.25.3
 FROM golang:${GO_VERSION}-alpine AS dev
 
 WORKDIR /app

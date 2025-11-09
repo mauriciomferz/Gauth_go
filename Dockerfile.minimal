@@ -4,7 +4,8 @@
 # and aggressive binary size stripping to reduce moving parts when diagnosing
 # build issues (e.g., cache key problems, platform quirks, buildx parsing errors).
 
-FROM golang:1.25-alpine AS build
+# REQUIRES Go 1.25.3+ for security patches
+FROM golang:1.25.3-alpine AS build
 WORKDIR /app
 
 # Only copy what is strictly required for a minimal web server binary
