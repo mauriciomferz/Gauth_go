@@ -1,0 +1,184 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gauth-config
+  namespace: gauth-staging
+  labels:
+    app: gauth
+    environment: staging
+data:
+  # Server configuration
+  GAUTH_WEB_PORT: "8080"
+  GAUTH_HEALTH_URL: "http://localhost:8080/api/v1/beta/health"
+  
+  # Feature flags (production-ready features from Week 3)
+  GAUTH_DEV_INDEX: "0"  # Disable dev index in staging
+  GAUTH_CAPABILITY_ANCHOR_ENABLE: "1"
+  GAUTH_CAP_ANCHOR_NOTARIZE: "1"
+  GAUTH_ROTATIONS_V2_SIGN: "1"
+  GAUTH_MODEL_LIMIT_ATTEST_SIGN: "1"
+  GAUTH_MODEL_LIMIT_ATTEST_NOTARIZE: "1"
+  GAUTH_SEMANTIC_HISTORY_DISABLE: "0"
+  GAUTH_ATTEST_STREAM_ENABLE: "1"
+  GAUTH_OTEL_METRICS_ENABLE: "1"
+  
+  # Database configuration (using postgres service)
+  POSTGRES_HOST: "postgres-service.gauth-staging.svc.cluster.local"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "gauth"
+  POSTGRES_USER: "gauth_app"
+  POSTGRES_SSL_MODE: "require"
+  POSTGRES_MAX_CONNECTIONS: "50"
+  POSTGRES_CONNECTION_TIMEOUT: "30s"
+  
+  # Redis configuration
+  REDIS_HOST: "redis-service.gauth-staging.svc.cluster.local"
+  REDIS_PORT: "6379"
+  REDIS_POOL_SIZE: "10"
+  
+  # Monitoring configuration
+  PROMETHEUS_ENABLED: "true"
+  METRICS_PORT: "9090"
+  METRICS_PATH: "/metrics"
+  
+  # Logging configuration
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  
+  # Rate limiting (production thresholds)
+  RATE_LIMIT_REQUESTS: "1000"
+  RATE_LIMIT_WINDOW: "1m"
+  
+  # Security configuration
+  JWT_ALGORITHM: "RS256"  # Production uses RSA, not HMAC
+  JWT_EXPIRY: "1h"
+  REFRESH_TOKEN_EXPIRY: "7d"
+  
+  # RFC 0111 envelope configuration
+  GAUTH_RFC0111_ENFORCE_V2: "1"
+  GAUTH_RFC0111_ADOPTION_THRESHOLD: "0.95"
+  
+  # Audit configuration
+  AUDIT_LOG_ENABLED: "true"
+  AUDIT_LOG_TAMPER_DETECTION: "true"
+  
+  # Observability
+  JAEGER_ENABLED: "false"  # Optional: Enable if Jaeger deployed
+  JAEGER_AGENT_HOST: "jaeger-agent.gauth-staging.svc.cluster.local"
+  JAEGER_AGENT_PORT: "6831"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: gauth-staging
+  labels:
+    app: prometheus
+    environment: staging
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+      external_labels:
+        cluster: 'gauth-staging'
+        environment: 'staging'
+    
+    rule_files:
+      - '/etc/prometheus/rules/*.yml'
+    
+    alerting:
+      alertmanagers:
+        - static_configs:
+            - targets:
+              - alertmanager-service:9093
+    
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+      
+      - job_name: 'gauth-server'
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names:
+                - gauth-staging
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            regex: gauth-service
+            action: keep
+          - source_labels: [__meta_kubernetes_endpoint_port_name]
+            regex: metrics
+            action: keep
+        metrics_path: /metrics
+        scrape_interval: 5s
+      
+      - job_name: 'kubernetes-pods'
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names:
+                - gauth-staging
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: gauth-staging
+  labels:
+    app: alertmanager
+    environment: staging
+data:
+  alertmanager.yml: |
+    global:
+      resolve_timeout: 5m
+      slack_api_url: 'REPLACE_WITH_SLACK_WEBHOOK_URL'  # Configure for your team
+    
+    route:
+      group_by: ['alertname', 'cluster', 'service']
+      group_wait: 10s
+      group_interval: 10s
+      repeat_interval: 12h
+      receiver: 'team-alerts'
+      routes:
+        - match:
+            severity: critical
+          receiver: 'critical-alerts'
+          continue: true
+        - match:
+            severity: high
+          receiver: 'high-alerts'
+          continue: true
+    
+    receivers:
+      - name: 'team-alerts'
+        slack_configs:
+          - channel: '#gauth-staging-alerts'
+            title: 'GAuth Staging Alert'
+            text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ .Annotations.description }}\n{{ end }}'
+      
+      - name: 'critical-alerts'
+        slack_configs:
+          - channel: '#gauth-critical'
+            title: '🚨 CRITICAL: GAuth Staging'
+            text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ .Annotations.description }}\n{{ end }}'
+      
+      - name: 'high-alerts'
+        slack_configs:
+          - channel: '#gauth-staging-alerts'
+            title: '⚠️ HIGH: GAuth Staging'
+            text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ .Annotations.description }}\n{{ end }}'
