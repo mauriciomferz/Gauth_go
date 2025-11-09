@@ -520,14 +520,12 @@ func (b *BoltRepository) FindExpired(before time.Time) ([]*PowerOfAttorney, erro
 			return errors.New("missing expiration bucket")
 		}
 
-		// Scan all expiration dates <= before
+		// Scan all expiration dates <= before (compare by formatting to date strings)
+		beforeDateStr := before.Format("2006-01-02")
 		return expB.ForEach(func(k, v []byte) error {
 			dateStr := string(k)
-			expirationDate, err := time.Parse("2006-01-02", dateStr)
-			if err != nil {
-				return nil // Skip malformed dates
-			}
-			if expirationDate.Before(before) || expirationDate.Equal(before) {
+			// Compare date strings lexicographically (YYYY-MM-DD sorts correctly)
+			if dateStr <= beforeDateStr {
 				var ids []string
 				if err := json.Unmarshal(v, &ids); err == nil {
 					allIDs = append(allIDs, ids...)
