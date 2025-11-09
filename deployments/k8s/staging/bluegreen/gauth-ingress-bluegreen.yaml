@@ -1,0 +1,74 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gauth-ingress-bluegreen
+  namespace: gauth-staging
+  labels:
+    app: gauth
+    environment: staging
+  annotations:
+    # NGINX Ingress Controller
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    
+    # Rate limiting
+    nginx.ingress.kubernetes.io/limit-rps: "1000"
+    
+    # Security headers
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Frame-Options: DENY";
+      more_set_headers "X-Content-Type-Options: nosniff";
+      more_set_headers "X-XSS-Protection: 1; mode=block";
+      more_set_headers "Referrer-Policy: strict-origin-when-cross-origin";
+      more_set_headers "Content-Security-Policy: default-src 'self'";
+      more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains";
+    
+    # TLS configuration
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    
+    # Blue-Green Traffic Control
+    # Change this annotation to switch between blue and green
+    # Options: "gauth-service-blue" or "gauth-service-green"
+    nginx.ingress.kubernetes.io/service-upstream: "gauth-service-blue"
+spec:
+  tls:
+  - hosts:
+    - gauth-staging.yourdomain.com
+    secretName: gauth-tls
+  
+  rules:
+  - host: gauth-staging.yourdomain.com
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: gauth-service-blue  # Default to blue
+            port:
+              number: 80
+      
+      - path: /healthz
+        pathType: Exact
+        backend:
+          service:
+            name: gauth-service-blue  # Default to blue
+            port:
+              number: 80
+      
+      - path: /metrics
+        pathType: Exact
+        backend:
+          service:
+            name: gauth-service-blue  # Default to blue
+            port:
+              number: 80
+      
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: gauth-service-blue  # Default to blue
+            port:
+              number: 80

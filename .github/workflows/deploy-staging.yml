@@ -1,0 +1,413 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'examples/**'
+      - '.github/**'
+      - '!.github/workflows/**'
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'examples/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      skip_tests:
+        description: 'Skip test execution'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  GO_VERSION: '1.25.4'
+  DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+  IMAGE_NAME: gauth
+  KUBERNETES_NAMESPACE: gauth-staging
+
+jobs:
+  # Job 1: Run comprehensive tests before deployment
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    if: ${{ !inputs.skip_tests }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for accurate test coverage
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Download dependencies
+        run: |
+          go mod download
+          go mod verify
+
+      - name: Run unit tests with coverage
+        run: |
+          go test ./pkg/... ./internal/... -v -race -coverprofile=coverage.out -covermode=atomic
+          go tool cover -func=coverage.out | tail -1
+
+      - name: Run RFC compliance tests
+        run: |
+          go test ./pkg/rfc0111/... ./pkg/gauth/... -v -run "(RFC|Envelope|Rotation)"
+          echo "✅ RFC 0111/0115 compliance validated"
+
+      - name: Run security regression tests
+        run: |
+          go test ./pkg/rfc0111/... ./pkg/gauth/... ./pkg/audit/... -v -run "(Replay|Tamper|Scope)"
+          echo "✅ Security regression tests passed"
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.out
+          flags: unittests
+          name: gauth-coverage
+          fail_ci_if_error: false
+
+  # Job 2: Security scanning (SAST, dependency vulnerabilities)
+  security:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Run gosec (SAST)
+        run: |
+          go install github.com/securego/gosec/v2/cmd/gosec@latest
+          gosec -exclude=G115,G404 -fmt=json -out=gosec-report.json ./...
+          echo "✅ gosec scan complete (G404 warnings expected - false positives)"
+
+      - name: Run govulncheck (dependency vulnerabilities)
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...
+          echo "✅ No known vulnerabilities detected"
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            gosec-report.json
+          retention-days: 30
+
+  # Job 3: Build and push Docker image
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+      image_digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=staging,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+          platforms: linux/amd64
+          build-args: |
+            GO_VERSION=${{ env.GO_VERSION }}
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            GIT_COMMIT=${{ github.sha }}
+            GIT_BRANCH=${{ github.ref_name }}
+
+      - name: Scan Docker image for vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:staging
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'  # Fail on critical/high vulnerabilities
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # Job 4: Deploy to Kubernetes staging environment
+  deploy:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build]
+    environment:
+      name: staging
+      url: https://gauth-staging.yourdomain.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Set up kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG_STAGING }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Update deployment image
+        run: |
+          # Update image in deployment manifest
+          IMAGE_TAG="${{ needs.build.outputs.image_tag }}"
+          sed -i "s|image: gauth:staging|image: ${IMAGE_TAG}|g" deployments/k8s/staging/deployment.yaml
+          
+          echo "Updated deployment image to: ${IMAGE_TAG}"
+
+      - name: Apply Kubernetes manifests
+        run: |
+          # Apply in correct order to avoid dependency issues
+          kubectl apply -f deployments/k8s/staging/namespace.yaml
+          kubectl apply -f deployments/k8s/staging/configmap.yaml
+          kubectl apply -f deployments/k8s/staging/secrets.yaml --dry-run=client  # Secrets managed externally
+          kubectl apply -f deployments/k8s/staging/service.yaml
+          kubectl apply -f deployments/k8s/staging/hpa-pdb-rbac-netpol.yaml
+          kubectl apply -f deployments/k8s/staging/deployment.yaml
+          kubectl apply -f deployments/k8s/staging/ingress.yaml
+
+      - name: Wait for deployment rollout
+        run: |
+          kubectl rollout status deployment/gauth-deployment -n ${{ env.KUBERNETES_NAMESPACE }} --timeout=5m
+          echo "✅ Deployment rolled out successfully"
+
+      - name: Verify deployment health
+        run: |
+          # Wait for pods to be ready
+          kubectl wait --for=condition=ready pod -l app=gauth -n ${{ env.KUBERNETES_NAMESPACE }} --timeout=2m
+          
+          # Check pod status
+          kubectl get pods -n ${{ env.KUBERNETES_NAMESPACE }} -l app=gauth
+          
+          # Check deployment status
+          kubectl describe deployment gauth-deployment -n ${{ env.KUBERNETES_NAMESPACE }}
+
+      - name: Run smoke tests
+        run: |
+          # Get ingress URL
+          INGRESS_IP=$(kubectl get ingress gauth-ingress -n ${{ env.KUBERNETES_NAMESPACE }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          
+          # Test health endpoint
+          curl -f -k https://${INGRESS_IP}/healthz || exit 1
+          echo "✅ Health check passed"
+          
+          # Test beta health endpoint
+          curl -f -k https://${INGRESS_IP}/api/v1/beta/health || exit 1
+          echo "✅ Beta health check passed"
+          
+          # Test metrics endpoint
+          curl -f -k https://${INGRESS_IP}/metrics | grep -q "gauth_" || exit 1
+          echo "✅ Metrics endpoint validated"
+
+      - name: Notify deployment success
+        if: success()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "text": "✅ GAuth Staging Deployment Successful",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "✅ Deployment Success"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Environment:*\nStaging"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Image:*\n${{ needs.build.outputs.image_tag }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Commit:*\n<${{ github.event.head_commit.url }}|${{ github.sha }}>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Author:*\n${{ github.actor }}"
+                    }
+                  ]
+                }
+              ]
+            }
+
+      - name: Notify deployment failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "text": "❌ GAuth Staging Deployment Failed",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "❌ Deployment Failed"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Environment:*\nStaging"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Commit:*\n<${{ github.event.head_commit.url }}|${{ github.sha }}>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Author:*\n${{ github.actor }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Workflow:*\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Logs>"
+                    }
+                  ]
+                }
+              ]
+            }
+
+  # Job 5: Rollback on failure (automatic)
+  rollback:
+    name: Automatic Rollback
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: failure()
+    environment:
+      name: staging
+    steps:
+      - name: Configure kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Set up kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG_STAGING }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Rollback deployment
+        run: |
+          echo "🔄 Rolling back deployment to previous revision..."
+          kubectl rollout undo deployment/gauth-deployment -n ${{ env.KUBERNETES_NAMESPACE }}
+          kubectl rollout status deployment/gauth-deployment -n ${{ env.KUBERNETES_NAMESPACE }} --timeout=3m
+          echo "✅ Rollback completed"
+
+      - name: Notify rollback
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "text": "🔄 GAuth Staging Deployment Rolled Back",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🔄 Automatic Rollback"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Deployment failed health checks. Automatically rolled back to previous revision."
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Environment:*\nStaging"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Failed Commit:*\n<${{ github.event.head_commit.url }}|${{ github.sha }}>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Workflow:*\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Logs>"
+                    }
+                  ]
+                }
+              ]
+            }

@@ -1,0 +1,321 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: gauth-staging
+  labels:
+    app: postgres
+    environment: staging
+spec:
+  selector:
+    app: postgres
+    environment: staging
+  type: ClusterIP
+  clusterIP: None  # Headless service for StatefulSet
+  ports:
+  - name: postgres
+    port: 5432
+    targetPort: 5432
+    protocol: TCP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: gauth-staging
+  labels:
+    app: postgres
+    environment: staging
+spec:
+  serviceName: postgres-service
+  replicas: 1  # Single instance for staging (HA for production)
+  selector:
+    matchLabels:
+      app: postgres
+      environment: staging
+  template:
+    metadata:
+      labels:
+        app: postgres
+        environment: staging
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999  # PostgreSQL user
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: postgres
+          containerPort: 5432
+          protocol: TCP
+        
+        env:
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: gauth-config
+              key: POSTGRES_DB
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: gauth-config
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secrets
+              key: postgres-password
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        
+        # Resource limits
+        resources:
+          requests:
+            memory: 512Mi
+            cpu: 250m
+          limits:
+            memory: 2Gi
+            cpu: 1000m
+        
+        # Volume mounts
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+        - name: postgres-config
+          mountPath: /etc/postgresql/postgresql.conf
+          subPath: postgresql.conf
+        - name: postgres-init
+          mountPath: /docker-entrypoint-initdb.d
+        
+        # Health checks
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - exec pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB" -h 127.0.0.1
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 6
+        
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - exec pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB" -h 127.0.0.1
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        # Security context
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false  # PostgreSQL needs write access
+          capabilities:
+            drop:
+            - ALL
+      
+      volumes:
+      - name: postgres-config
+        configMap:
+          name: postgres-config
+      - name: postgres-init
+        configMap:
+          name: postgres-init-scripts
+  
+  # Persistent volume claim template
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+      labels:
+        app: postgres
+        environment: staging
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: standard  # Use your cluster's storage class (gp3 for AWS, pd-ssd for GCP)
+      resources:
+        requests:
+          storage: 20Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: gauth-staging
+  labels:
+    app: postgres
+    environment: staging
+data:
+  postgresql.conf: |
+    # PostgreSQL Configuration for GAuth Staging
+    
+    # Connection Settings
+    listen_addresses = '*'
+    port = 5432
+    max_connections = 100
+    superuser_reserved_connections = 3
+    
+    # Memory Settings
+    shared_buffers = 256MB
+    effective_cache_size = 1GB
+    work_mem = 16MB
+    maintenance_work_mem = 128MB
+    
+    # Write-Ahead Log (WAL)
+    wal_level = replica
+    fsync = on
+    synchronous_commit = on
+    wal_buffers = 16MB
+    max_wal_size = 1GB
+    min_wal_size = 80MB
+    
+    # Checkpoints
+    checkpoint_completion_target = 0.9
+    checkpoint_timeout = 10min
+    
+    # Query Tuning
+    random_page_cost = 1.1
+    effective_io_concurrency = 200
+    
+    # Logging
+    logging_collector = on
+    log_directory = 'log'
+    log_filename = 'postgresql-%Y-%m-%d.log'
+    log_rotation_age = 1d
+    log_rotation_size = 100MB
+    log_line_prefix = '%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
+    log_min_duration_statement = 1000  # Log queries > 1s
+    log_connections = on
+    log_disconnections = on
+    log_duration = off
+    log_statement = 'ddl'  # Log DDL statements
+    
+    # Security
+    ssl = on
+    ssl_cert_file = '/etc/ssl/certs/ssl-cert-snakeoil.pem'
+    ssl_key_file = '/etc/ssl/private/ssl-cert-snakeoil.key'
+    password_encryption = scram-sha-256
+    
+    # Autovacuum
+    autovacuum = on
+    autovacuum_max_workers = 3
+    autovacuum_naptime = 1min
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-scripts
+  namespace: gauth-staging
+  labels:
+    app: postgres
+    environment: staging
+data:
+  01-init-database.sql: |
+    -- Initialize GAuth database schema
+    
+    -- Create application user (if not exists)
+    DO
+    $$
+    BEGIN
+      IF NOT EXISTS (SELECT FROM pg_catalog.pg_user WHERE usename = 'gauth_app') THEN
+        CREATE USER gauth_app WITH PASSWORD 'REPLACE_WITH_APP_PASSWORD';
+      END IF;
+    END
+    $$;
+    
+    -- Grant privileges
+    GRANT ALL PRIVILEGES ON DATABASE gauth TO gauth_app;
+    GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO gauth_app;
+    GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO gauth_app;
+    
+    -- Enable required extensions
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+    
+    -- Create audit log table (tamper-resistant with hash chain)
+    CREATE TABLE IF NOT EXISTS audit_logs (
+      id SERIAL PRIMARY KEY,
+      timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
+      event_type VARCHAR(100) NOT NULL,
+      actor VARCHAR(255) NOT NULL,
+      resource VARCHAR(255),
+      action VARCHAR(100) NOT NULL,
+      result VARCHAR(50) NOT NULL,
+      details JSONB,
+      previous_hash VARCHAR(64),
+      current_hash VARCHAR(64) NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    );
+    
+    CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs(timestamp);
+    CREATE INDEX IF NOT EXISTS idx_audit_logs_event_type ON audit_logs(event_type);
+    CREATE INDEX IF NOT EXISTS idx_audit_logs_actor ON audit_logs(actor);
+    
+    -- Create tokens table
+    CREATE TABLE IF NOT EXISTS tokens (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      jti VARCHAR(255) UNIQUE NOT NULL,
+      subject VARCHAR(255) NOT NULL,
+      issuer VARCHAR(255) NOT NULL,
+      issued_at TIMESTAMP NOT NULL,
+      expires_at TIMESTAMP NOT NULL,
+      revoked BOOLEAN NOT NULL DEFAULT FALSE,
+      revoked_at TIMESTAMP,
+      revocation_reason VARCHAR(255),
+      capabilities JSONB,
+      metadata JSONB,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    );
+    
+    CREATE INDEX IF NOT EXISTS idx_tokens_jti ON tokens(jti);
+    CREATE INDEX IF NOT EXISTS idx_tokens_subject ON tokens(subject);
+    CREATE INDEX IF NOT EXISTS idx_tokens_expires_at ON tokens(expires_at);
+    CREATE INDEX IF NOT EXISTS idx_tokens_revoked ON tokens(revoked);
+    
+    -- Create delegations table
+    CREATE TABLE IF NOT EXISTS delegations (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      delegator VARCHAR(255) NOT NULL,
+      delegatee VARCHAR(255) NOT NULL,
+      capabilities JSONB NOT NULL,
+      constraints JSONB,
+      depth INTEGER NOT NULL DEFAULT 0,
+      max_depth INTEGER NOT NULL DEFAULT 3,
+      status VARCHAR(50) NOT NULL DEFAULT 'active',
+      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      expires_at TIMESTAMP NOT NULL,
+      revoked_at TIMESTAMP,
+      metadata JSONB
+    );
+    
+    CREATE INDEX IF NOT EXISTS idx_delegations_delegator ON delegations(delegator);
+    CREATE INDEX IF NOT EXISTS idx_delegations_delegatee ON delegations(delegatee);
+    CREATE INDEX IF NOT EXISTS idx_delegations_status ON delegations(status);
+    
+    -- Create rotation descriptors table (for key rotation)
+    CREATE TABLE IF NOT EXISTS rotation_descriptors (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      kid VARCHAR(255) UNIQUE NOT NULL,
+      algorithm VARCHAR(50) NOT NULL,
+      public_key TEXT NOT NULL,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      rotated_at TIMESTAMP,
+      expires_at TIMESTAMP,
+      signature TEXT,
+      metadata JSONB
+    );
+    
+    CREATE INDEX IF NOT EXISTS idx_rotation_descriptors_kid ON rotation_descriptors(kid);
+    CREATE INDEX IF NOT EXISTS idx_rotation_descriptors_active ON rotation_descriptors(active);
