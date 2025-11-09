@@ -102,7 +102,7 @@ func TestNewHash_CorrectHashTypes(t *testing.T) {
 	}
 	h1.Write([]byte("test"))
 	sum1 := h1.Sum(nil)
-	
+
 	expected1 := sha256.Sum256([]byte("test"))
 	if !bytes.Equal(sum1, expected1[:]) {
 		t.Errorf("SHA256 hash mismatch")
@@ -115,7 +115,7 @@ func TestNewHash_CorrectHashTypes(t *testing.T) {
 	}
 	h2.Write([]byte("test"))
 	sum2 := h2.Sum(nil)
-	
+
 	expected2, _ := blake2b.New256(nil)
 	expected2.Write([]byte("test"))
 	if !bytes.Equal(sum2, expected2.Sum(nil)) {
@@ -129,7 +129,7 @@ func TestNewHash_CorrectHashTypes(t *testing.T) {
 	}
 	h3.Write([]byte("test"))
 	sum3 := h3.Sum(nil)
-	
+
 	expected3 := sha3.New256()
 	expected3.Write([]byte("test"))
 	if !bytes.Equal(sum3, expected3.Sum(nil)) {
@@ -357,7 +357,7 @@ func TestDecodeRawPOAStream_CorruptedData(t *testing.T) {
 		// Create data with invalid length (claims more bytes than available)
 		data := []byte{0x00, 0x00, 0x10, 0x00} // Claims 4096 bytes
 		data = append(data, []byte{1, 2, 3}...) // But only 3 bytes follow
-		
+
 		r := bytes.NewReader(data)
 		_, err := DecodeRawPOAStream(r, DefaultStreamLimits)
 		if err == nil {
@@ -377,7 +377,7 @@ func TestDecodeRawPOAStream_CorruptedData(t *testing.T) {
 			},
 		}
 		encoded, _ := EncodeRawPOAChain(items)
-		
+
 		// Truncate the encoded data
 		truncated := encoded[:len(encoded)/2]
 		r := bytes.NewReader(truncated)
@@ -407,7 +407,7 @@ func TestMarshalRawPOAItem(t *testing.T) {
 	if len(data) == 0 {
 		t.Error("MarshalRawPOAItem() returned empty data")
 	}
-	
+
 	// Verify CBOR structure (basic check - map type)
 	if len(data) > 0 && (data[0]&0xE0) != 0xA0 {
 		t.Errorf("Expected CBOR map (0xAx), got 0x%02x", data[0])
@@ -461,7 +461,7 @@ func TestDecodeRawPOAStreamWith_IndefiniteLengthArray(t *testing.T) {
 		data := []byte{0x9f}
 		data = append(data, make([]byte, 1000)...)
 		data = append(data, 0xff)
-		
+
 		limits := StreamLimits{
 			MaxItems:      100,
 			MaxItemBytes:  1024,
@@ -500,14 +500,14 @@ func (e *errorReader) Read(p []byte) (n int, err error) {
 // TestDecodeRawPOAStreamWith_LimitDefaults tests that zero limits are replaced with defaults
 func TestDecodeRawPOAStreamWith_LimitDefaults(t *testing.T) {
 	r := bytes.NewReader([]byte{})
-	
+
 	// Pass zero limits
 	limits := StreamLimits{
 		MaxItems:      0,
 		MaxItemBytes:  0,
 		MaxTotalBytes: 0,
 	}
-	
+
 	chain, err := DecodeRawPOAStreamWith(r, limits, RawPOAHashSHA256, false)
 	if err != nil {
 		t.Errorf("DecodeRawPOAStreamWith() error = %v", err)
@@ -557,7 +557,7 @@ func TestDecodeRawPOAStreamWith_LegacyFormat(t *testing.T) {
 		// Size says 100 bytes but we only provide 10
 		data := []byte{0x00, 0x00, 0x00, 0x64} // size = 100
 		data = append(data, make([]byte, 10)...)
-		
+
 		r := bytes.NewReader(data)
 		_, err := DecodeRawPOAStreamWith(r, DefaultStreamLimits, RawPOAHashSHA256, false)
 		if err == nil {
@@ -620,7 +620,7 @@ func TestEncodeRawPOAChain_EdgeCases(t *testing.T) {
 			Timestamp: 1000,
 			Signature: make([]byte, 1000),
 		}
-		
+
 		data, err := EncodeRawPOAChain([]RawPOAItem{item})
 		if err != nil {
 			t.Errorf("EncodeRawPOAChain() error = %v", err)
@@ -635,7 +635,7 @@ func TestEncodeRawPOAChain_EdgeCases(t *testing.T) {
 		for i := 0; i < 20; i++ {
 			claims[string(rune('a'+i))] = string(rune('A'+i))
 		}
-		
+
 		item := RawPOAItem{
 			ID:        "test",
 			Issuer:    "issuer",
@@ -645,7 +645,7 @@ func TestEncodeRawPOAChain_EdgeCases(t *testing.T) {
 			Signature: []byte{1, 2, 3},
 			Claims:    claims,
 		}
-		
+
 		data, err := EncodeRawPOAChain([]RawPOAItem{item})
 		if err != nil {
 			t.Errorf("EncodeRawPOAChain() error = %v", err)
@@ -685,7 +685,7 @@ func TestEncodeRawPOAChain_EdgeCases(t *testing.T) {
 				// No prev_hash
 			},
 		}
-		
+
 		data, err := EncodeRawPOAChain(items)
 		if err != nil {
 			t.Errorf("EncodeRawPOAChain() error = %v", err)
@@ -708,7 +708,7 @@ func TestMarshalCBORItem_ClaimsEncoding(t *testing.T) {
 			Signature: []byte{1, 2, 3},
 			Claims:    map[string]string{}, // Empty map
 		}
-		
+
 		data, err := marshalCBORItem(item)
 		if err != nil {
 			t.Errorf("marshalCBORItem() error = %v", err)
@@ -733,7 +733,7 @@ func TestMarshalCBORItem_ClaimsEncoding(t *testing.T) {
 				"key/with/slash": "value",
 			},
 		}
-		
+
 		data, err := marshalCBORItem(item)
 		if err != nil {
 			t.Errorf("marshalCBORItem() error = %v", err)
@@ -764,7 +764,7 @@ func TestStreamLimits_Defaults(t *testing.T) {
 	if DefaultStreamLimits.MaxTotalBytes == 0 {
 		t.Error("DefaultStreamLimits.MaxTotalBytes should not be zero")
 	}
-	
+
 	// Verify reasonable values
 	if DefaultStreamLimits.MaxItems < 100 {
 		t.Errorf("MaxItems too low: %d", DefaultStreamLimits.MaxItems)
@@ -775,4 +775,140 @@ func TestStreamLimits_Defaults(t *testing.T) {
 	if DefaultStreamLimits.MaxTotalBytes < 100000 {
 		t.Errorf("MaxTotalBytes too low: %d", DefaultStreamLimits.MaxTotalBytes)
 	}
+}
+
+// TestUnmarshalMinimal tests the unmarshalMinimal function for CBOR decoding
+// Focus on error paths as encoder/decoder have known compatibility issues
+func TestUnmarshalMinimal(t *testing.T) {
+	t.Run("Empty bytes", func(t *testing.T) {
+		_, err := unmarshalMinimal([]byte{})
+		if err == nil {
+			t.Error("Expected error for empty bytes")
+		}
+		if !strings.Contains(err.Error(), "empty") {
+			t.Errorf("Expected 'empty' error, got %v", err)
+		}
+	})
+
+	t.Run("Invalid CBOR type", func(t *testing.T) {
+		// Not a map type (major type 5) - array type instead
+		invalidData := []byte{0x40}
+		_, err := unmarshalMinimal(invalidData)
+		if err == nil {
+			t.Error("Expected error for invalid CBOR type")
+		}
+		if !strings.Contains(err.Error(), "not CBOR map") {
+			t.Errorf("Expected map type error, got %v", err)
+		}
+	})
+
+	t.Run("Truncated text field", func(t *testing.T) {
+		// Map header but truncated text field
+		truncatedData := []byte{0xA1, 0x62} // Map with 1 item, text key marker (len 2) but no data
+		_, err := unmarshalMinimal(truncatedData)
+		if err == nil {
+			t.Error("Expected error for truncated data")
+		}
+		if !strings.Contains(err.Error(), "trunc") {
+			t.Errorf("Expected truncation error, got %v", err)
+		}
+	})
+
+	t.Run("Invalid text field type", func(t *testing.T) {
+		// Map with valid header but wrong field type (bytes instead of text)
+		invalidData := []byte{0xA1, 0x42, 0x61, 0x62} // Map, bytes type (major 2)
+		_, err := unmarshalMinimal(invalidData)
+		if err == nil {
+			t.Error("Expected error for wrong field type")
+		}
+		if !strings.Contains(err.Error(), "expected text") {
+			t.Errorf("Expected text type error, got %v", err)
+		}
+	})
+
+	t.Run("Truncated bytes field", func(t *testing.T) {
+		// Construct: map(1) { "sig": <bytes but truncated> }
+		// 0xA1 = map(1), 0x63 = text(3), "sig", 0x42 = bytes(2), but only 1 byte follows
+		data := []byte{
+			0xA1,             // map(1)
+			0x63, 's', 'i', 'g', // text(3) "sig"
+			0x42,            // bytes(2) - claims 2 bytes
+			0xAA,            // only 1 byte available - truncated!
+		}
+		_, err := unmarshalMinimal(data)
+		if err == nil {
+			t.Error("Expected error for truncated bytes field")
+		}
+		if !strings.Contains(err.Error(), "trunc") {
+			t.Errorf("Expected truncation error, got %v", err)
+		}
+	})
+}
+
+// TestUnmarshalMinimalAt tests the unmarshalMinimalAt function for positioned CBOR decoding
+// Focus on error paths as encoder/decoder have known compatibility issues
+func TestUnmarshalMinimalAt(t *testing.T) {
+	t.Run("Empty buffer", func(t *testing.T) {
+		_, _, err := unmarshalMinimalAt([]byte{}, 6)
+		if err == nil {
+			t.Error("Expected error for empty buffer")
+		}
+		if !strings.Contains(err.Error(), "empty") {
+			t.Errorf("Expected empty error, got %v", err)
+		}
+	})
+
+	t.Run("Invalid map type", func(t *testing.T) {
+		// Not a map major type - array type instead
+		invalidData := []byte{0x82, 0x01, 0x02}
+		_, _, err := unmarshalMinimalAt(invalidData, 2)
+		if err == nil {
+			t.Error("Expected error for invalid map type")
+		}
+		if !strings.Contains(err.Error(), "not map") {
+			t.Errorf("Expected map type error, got %v", err)
+		}
+	})
+
+	t.Run("Truncated text key", func(t *testing.T) {
+		// Map header with field count but truncated text key
+		truncatedData := []byte{0xA1, 0x63} // Map(1), text(3) but no text data
+		_, _, err := unmarshalMinimalAt(truncatedData, 1)
+		if err == nil {
+			t.Error("Expected error for truncated text key")
+		}
+		if !strings.Contains(err.Error(), "trunc") {
+			t.Errorf("Expected truncation error, got %v", err)
+		}
+	})
+
+	t.Run("Expected text but got bytes", func(t *testing.T) {
+		// Map with bytes type where text expected
+		invalidData := []byte{0xA1, 0x42, 0xAA, 0xBB} // Map(1), bytes(2)
+		_, _, err := unmarshalMinimalAt(invalidData, 1)
+		if err == nil {
+			t.Error("Expected error for wrong field type")
+		}
+		if !strings.Contains(err.Error(), "expected text") {
+			t.Errorf("Expected text type error, got %v", err)
+		}
+	})
+
+	t.Run("Truncated bytes value", func(t *testing.T) {
+		// Map with text key "sig" (recognized field) and truncated bytes value
+		data := []byte{
+			0xA1,                // map(1)
+			0x63, 's', 'i', 'g', // text(3) "sig" - recognized field
+			0x43,                // bytes(3) - claims 3 bytes
+			0x01, 0x02,          // only 2 bytes - truncated!
+		}
+		_, _, err := unmarshalMinimalAt(data, 1)
+		if err == nil {
+			t.Error("Expected error for truncated bytes value")
+		}
+		// Error could be "trunc" or "expected bytes" depending on parsing order
+		if !strings.Contains(err.Error(), "trunc") && !strings.Contains(err.Error(), "expected") {
+			t.Errorf("Expected truncation or parsing error, got %v", err)
+		}
+	})
 }
