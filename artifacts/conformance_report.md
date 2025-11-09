@@ -1,16 +1,16 @@
-<!-- conformance-meta generated=2025-11-07T00:54:46+01:00 mapped_clauses=26 found_clauses=26 required_symbols=78 symbols_found=77 coverage=98.72 gap_impl=8 gap_partial=16 gap_missing=19 gap_total=43 -->
+<!-- conformance-meta generated=2025-11-09T21:56:16+01:00 mapped_clauses=26 found_clauses=26 required_symbols=78 symbols_found=78 coverage=100.00 gap_impl=8 gap_partial=16 gap_missing=19 gap_total=43 -->
 # Conformance Report
 
-Generated: 2025-11-07T00:54:46+01:00
+Generated: 2025-11-09T21:56:16+01:00
 
 ## Summary
 Mapped Clauses: 26 / 26
 
-Symbols: 77 / 78 (98.72% coverage)
+Symbols: 78 / 78 (100.00% coverage)
 
 Test Globs: 26 present of 26 required
 
-Missing: clauses=0 symbols=1 tests=0
+Missing: clauses=0 symbols=0 tests=0
 
 GAP Matrix: implemented=8 partial=16 missing=19 total=43
 
@@ -47,9 +47,7 @@ GAP Matrix: implemented=8 partial=16 missing=19 total=43
 | 0115:14.-ai-capability-governance | 14. Ai Capability Governance | 0115 |
 | 0115:15.-embedding-poa-in-token | 15. Embedding Poa In Token | 0115 |
 
-### Failures
-
-- symbol missing: 0115:14.-ai-capability-governance -> ContextLimits
+_No failures detected._
 
 ## Evidence
 
@@ -57,19 +55,19 @@ GAP Matrix: implemented=8 partial=16 missing=19 total=43
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | AddBundle | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/engine.go:85 |
 | AdvancedClaims | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/advanced_claims.go:12 |
-| AnchorClient | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/tsa/tsa.go:32<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/anchor/anchor.go:55<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/anchor.go:10<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1997<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go:586 |
+| AnchorClient | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/tsa/tsa.go:32<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/anchor/anchor.go:55<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/anchor.go:10<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1994<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go:589 |
 | AnchorRecord | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/anchor/anchor.go:49 |
-| AuditEvents | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3391 |
-| CanonicalPOADigest | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/canonical.go:42 |
+| AuditEvents | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3387 |
+| CanonicalPOADigest | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/canonical.go:43 |
 | CapabilityEnforcer | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/ai/capability_enforcer.go:15 |
 | ClaimsMetadata | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/advanced_claims.go:37 |
 | ClaimsRestrictions | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/advanced_claims.go:46 |
 | ConditionalExpression | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:295 |
-| CreateDelegation | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:2011 |
+| CreateDelegation | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:2008 |
 | DailyLimit | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:241 |
 | DutyOfCare | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:287 |
 | EnvelopeV2 | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/token/envelope.go:31 |
-| EvaluateExpression | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/conditions/conditions.go:57<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/authz/expr.go:655 |
+| EvaluateExpression | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/conditions/conditions.go:57<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/authz/expr.go:658 |
 | ExprLimits | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/authz/expr.go:27 |
 | FileLogger | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/file_logger.go:21 |
 | FormalValidation | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:224 |
@@ -79,46 +77,47 @@ GAP Matrix: implemented=8 partial=16 missing=19 total=43
 | MemoryLogger | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:84 |
 | MemoryStore | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/tokenstore/tokenstore.go:13<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/store/store.go:13<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/token/token.go:209 |
 | ModelLimits | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/ai/capability_enforcer.go:34 |
-| NewService | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/multi_region/cmd/main.go:48<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/multi_region/main.go:45<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:808<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/token/token.go:449 |
+| NewService | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/multi_region/cmd/main.go:48<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/multi_region/main.go:45<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:809<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/token/token.go:449 |
 | Obligations | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:279 |
 | POAStatus | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/poa/poa.go:24<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:71 |
 | PolicyBundle | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/testutil/parse.go:53 |
 | PowerLimit | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:252 |
 | PowerOfAttorney | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/auth/legal_framework_integration.go:303<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/poa/validator.go:9<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:87 |
-| ReplayStore | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/gauth.go:197<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1761 |
+| ReplayStore | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/gauth.go:197<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1758 |
 | Request | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/authz/authz.go:22<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/pdp/engine.go:17<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/poa/poa.go:337 |
 | RequirementCheck | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:232 |
 | RevocationChain | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/revocation_chain.go:65 |
 | RevocationStatus | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/token/token.go:111 |
-| RevokeDelegation | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3004 |
+| RevokeDelegation | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3000 |
 | Rights | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:269 |
 | RotationPolicy | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/crypto/keystore.go:43 |
 | RotationStatus | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/crypto/keystore.go:79 |
 | RuntimeEvaluation | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:304 |
 | ScopeItem | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:183 |
 | ScopeValidator | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:190 |
-| Service | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/cascade/pkg/mesh/mesh.go:24<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/multi_region/cmd/main.go:14<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/multi_region/main.go:14<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/gauth.go:161<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/poa/poa.go:355<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1584<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/token/token.go:230 |
+| Service | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/cascade/pkg/mesh/mesh.go:24<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/multi_region/cmd/main.go:14<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/multi_region/main.go:14<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/gauth.go:161<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/poa/poa.go:355<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1581<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/token/token.go:230 |
 | SignatureManager | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/multisig/manager.go:71 |
 | SpecialConditions | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/poa/poa.go:123 |
 | ThresholdValidation | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:314 |
 | TokenResult | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:174 |
-| TokenVerificationResult | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:928 |
+| TokenVerificationResult | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:929 |
 | TransactionLimit | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:261 |
+| UsageContext | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/ai/capability_enforcer.go:44 |
 | ValidateBundle | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/engine.go:349 |
-| ValidateDelegation | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:2311 |
+| ValidateDelegation | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:2308 |
 | ValidateMultiSignature | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:350 |
 | ValidateScope | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:198 |
-| VerifyChain | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/ledger/audit_ledger.go:173<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:205<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/file_logger.go:181<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/delegation.go:145<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/anchor.go:57<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/bolt.go:262<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/ledger.go:172<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/engine.go:141<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store.go:35<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store_file.go:162 |
-| VerifyIntegrity | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3472 |
-| VerifyToken | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/paseto/main.go:73<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:959 |
-| WithReplayProtection | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1913 |
-| computeHash | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/ledger/audit_ledger.go:47<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3559 |
+| VerifyChain | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/ledger/audit_ledger.go:173<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:219<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/file_logger.go:181<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/delegation.go:145<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/anchor.go:57<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/bolt.go:262<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/ledger.go:172<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/engine.go:141<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store.go:35<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store_file.go:162 |
+| VerifyIntegrity | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3468 |
+| VerifyToken | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/paseto/main.go:73<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:961 |
+| WithReplayProtection | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1910 |
+| computeHash | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/ledger/audit_ledger.go:47<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3555 |
 | detachedIssued | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/metrics_detached.go:11 |
 | incDetachedVerify | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/metrics_detached.go:29 |
-| policy.Registry | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/capability/registry.go:20<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/prometheus_adapter.go:1510<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/compliance/compliance.go:37<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/engine.go:77<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store.go:36<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store_file.go:167 |
+| policy.Registry | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/capability/registry.go:20<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/prometheus_adapter.go:1511<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/compliance/compliance.go:37<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/engine.go:77<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store.go:36<br>/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store_file.go:167 |
 | registerDetachedMetrics | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/metrics_detached.go:21 |
-| validateDelegationRequest | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3566 |
-| verifyPOASignature | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1853 |
+| validateDelegationRequest | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:3562 |
+| verifyPOASignature | /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/rfc0111/rfc0111.go:1850 |
 
 ## GAP Details
 

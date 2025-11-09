@@ -78,20 +78,21 @@ if *csvOut != "" {
 	if err := os.MkdirAll(*csvOut, 0750); err != nil {
 		fmt.Fprintf(os.Stderr, "❌ Failed to create CSV directory: %v\n", err)
 		os.Exit(1)
-	}		gapMatrixPath := filepath.Join(*csvOut, "gap_matrix.csv")
-		if err := harnesslib.WriteGapCSV(gapMatrixPath, report); err != nil {
-			fmt.Fprintf(os.Stderr, "❌ Failed to write gap matrix CSV: %v\n", err)
-			os.Exit(1)
-		}
-		written = append(written, gapMatrixPath)
-
-		symbolEvidencePath := filepath.Join(*csvOut, "symbol_evidence.csv")
-		if err := harnesslib.WriteSymbolEvidenceCSV(symbolEvidencePath, report); err != nil {
-			fmt.Fprintf(os.Stderr, "❌ Failed to write symbol evidence CSV: %v\n", err)
-			os.Exit(1)
-		}
-		written = append(written, symbolEvidencePath)
 	}
+	gapMatrixPath := filepath.Join(*csvOut, "gap_matrix.csv")
+	if err := harnesslib.WriteGapCSV(gapMatrixPath, report); err != nil {
+		fmt.Fprintf(os.Stderr, "❌ Failed to write gap matrix CSV: %v\n", err)
+		os.Exit(1)
+	}
+	written = append(written, gapMatrixPath)
+
+	symbolEvidencePath := filepath.Join(*csvOut, "symbol_evidence.csv")
+	if err := harnesslib.WriteSymbolEvidenceCSV(symbolEvidencePath, report); err != nil {
+		fmt.Fprintf(os.Stderr, "❌ Failed to write symbol evidence CSV: %v\n", err)
+		os.Exit(1)
+	}
+	written = append(written, symbolEvidencePath)
+}
 
 	if *historyFile != "" {
 		if err := appendToHistory(*historyFile, report); err != nil {
