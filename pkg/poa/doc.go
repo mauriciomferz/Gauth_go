@@ -52,7 +52,8 @@
 //	})
 //
 // The resulting token contains the full chain:
-//   Alice -> Bob -> Charlie
+//
+//	Alice -> Bob -> Charlie
 //
 // # Multi-Signature POA
 //

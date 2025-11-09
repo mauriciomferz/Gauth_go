@@ -59,7 +59,7 @@ GAuth 1.0 is a comprehensive authorization framework implementing RFC 0111 (Core
              │   Authorization Requests        │
              ▼                                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                                                                  ││
+│                                                                  │
 │                     GAuth Core Services                          │
 │                           │                                    │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │

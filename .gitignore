@@ -143,3 +143,4 @@ build/*-server
 
 # Documentation artifacts
 CSP_FIXES.md
+web-server
