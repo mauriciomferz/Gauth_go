@@ -22,6 +22,22 @@ import (
 // Example line: "total:\t(statements)\t87.5%" (tabs/spaces vary).
 var reTotal = regexp.MustCompile(`^total:.*?([0-9]+\.?[0-9]*)%$`)
 
+// Matches valid Go package paths (relative paths starting with ./ or .)
+var reValidPkg = regexp.MustCompile(`^\.(/[a-zA-Z0-9_\-./]+)?$`)
+
+// isValidPackagePath validates that a package path is a safe relative path
+func isValidPackagePath(pkg string) bool {
+	// Must be relative path starting with ./ or just .
+	if !reValidPkg.MatchString(pkg) {
+		return false
+	}
+	// Additional safety: no path traversal attempts
+	if strings.Contains(pkg, "..") {
+		return false
+	}
+	return true
+}
+
 func main() {
 	flag.Parse()
 	outDir := flag.Arg(0)
@@ -108,8 +124,15 @@ func modulePath() (string, error) {
 }
 
 func coverageFor(pkg string) (float64, error) {
+	// Validate package path to prevent command injection
+	// Package paths from go list are trusted, but validate format for defense in depth
+	if !isValidPackagePath(pkg) {
+		return 0, fmt.Errorf("invalid package path: %s", pkg)
+	}
+	
 	prof := filepath.Join(os.TempDir(), fmt.Sprintf("cov_%d.out", time.Now().UnixNano()))
 	// Flags must precede package import path.
+	// #nosec G204 - Package paths are validated and come from trusted 'go list' output
 	cmd := exec.Command("go", "test", "-coverprofile", prof, "-covermode=atomic", pkg)
 	cmd.Env = os.Environ()
 	out, err := cmd.CombinedOutput()
@@ -119,6 +142,7 @@ func coverageFor(pkg string) (float64, error) {
 		}
 		return 0, fmt.Errorf("test run failed: %v output=%s", err, string(out))
 	}
+	// #nosec G204 - prof is a controlled temp file path, no user input
 	tool := exec.Command("go", "tool", "cover", "-func", prof)
 	funcOut, err := tool.Output()
 	if err != nil {
