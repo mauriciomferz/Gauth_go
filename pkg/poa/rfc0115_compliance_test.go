@@ -743,3 +743,351 @@ func errorContains(err error, substr string) bool {
 	}
 	return substringCheck(fmt.Sprintf("%v", err), substr)
 }
+
+// ============================================================================
+// Session 34: Additional ValidateRFC0115Compliance edge cases
+// ============================================================================
+
+func TestValidateRFC0115Compliance_UnsupportedInputType(t *testing.T) {
+	// Test with completely unsupported type (not RFC0115Config, not PoADefinition, not map)
+	tests := []interface{}{
+		123,
+		"string",
+		[]string{"array"},
+		true,
+		struct{ X int }{X: 42},
+	}
+
+	for _, input := range tests {
+		t.Run(fmt.Sprintf("Type_%T", input), func(t *testing.T) {
+			err := ValidateRFC0115Compliance(input)
+			if err == nil {
+				t.Errorf("Expected error for unsupported type %T", input)
+			}
+			if !errorContains(err, "unsupported RFC0115 compliance object type") {
+				t.Errorf("Error = %v, want 'unsupported RFC0115 compliance object type'", err)
+			}
+		})
+	}
+}
+
+func TestValidateRFC0115Compliance_PoADefinition_NoRegions(t *testing.T) {
+	// Test PoADefinition validation when ApplicableRegions is empty
+	baseTime := time.Now()
+
+	def := PoADefinition{
+		Parties: Parties{
+			Principal: Principal{
+				Identity: "test-principal",
+			},
+			AuthorizedClient: AuthorizedClient{
+				Identity: "test-client",
+			},
+		},
+		Authorization: AuthorizationScope{
+			ApplicableSectors: []IndustrySector{SectorFinancialInsurance},
+			ApplicableRegions: []GeographicScope{}, // Empty!
+			AuthorizedActions: AuthorizedActions{
+				Transactions: []Transaction{TransactionLoan},
+			},
+		},
+		Requirements: Requirements{
+			ValidityPeriod: ValidityPeriod{
+				StartTime: baseTime,
+				EndTime:   baseTime.Add(24 * time.Hour),
+			},
+		},
+	}
+
+	err := ValidateRFC0115Compliance(def)
+	if err == nil {
+		t.Fatal("Expected error for empty ApplicableRegions")
+	}
+	if !errorContains(err, "at least one region") {
+		t.Errorf("Error = %v, want 'at least one region'", err)
+	}
+}
+
+func TestValidateRFC0115Compliance_PoADefinition_NoActions(t *testing.T) {
+	// Test PoADefinition validation when all action arrays are empty
+	baseTime := time.Now()
+
+	def := PoADefinition{
+		Parties: Parties{
+			Principal: Principal{
+				Identity: "test-principal",
+			},
+			AuthorizedClient: AuthorizedClient{
+				Identity: "test-client",
+			},
+		},
+		Authorization: AuthorizationScope{
+			ApplicableSectors: []IndustrySector{SectorFinancialInsurance},
+			ApplicableRegions: []GeographicScope{
+				{Type: GeoTypeNational, Identifier: "US"},
+			},
+			AuthorizedActions: AuthorizedActions{
+				Transactions:       []Transaction{},
+				Decisions:          []Decision{},
+				NonPhysicalActions: []NonPhysicalAction{},
+			},
+		},
+		Requirements: Requirements{
+			ValidityPeriod: ValidityPeriod{
+				StartTime: baseTime,
+				EndTime:   baseTime.Add(24 * time.Hour),
+			},
+		},
+	}
+
+	err := ValidateRFC0115Compliance(def)
+	if err == nil {
+		t.Fatal("Expected error for no actions")
+	}
+	if !errorContains(err, "at least one action") {
+		t.Errorf("Error = %v, want 'at least one action'", err)
+	}
+}
+
+func TestValidateRFC0115Compliance_PoADefinition_NegativeDuration(t *testing.T) {
+	// Test PoADefinition validation when validity period is negative
+	baseTime := time.Now()
+
+	def := PoADefinition{
+		Parties: Parties{
+			Principal: Principal{
+				Identity: "test-principal",
+			},
+			AuthorizedClient: AuthorizedClient{
+				Identity: "test-client",
+			},
+		},
+		Authorization: AuthorizationScope{
+			ApplicableSectors: []IndustrySector{SectorFinancialInsurance},
+			ApplicableRegions: []GeographicScope{
+				{Type: GeoTypeNational, Identifier: "US"},
+			},
+			AuthorizedActions: AuthorizedActions{
+				Transactions: []Transaction{TransactionLoan},
+			},
+		},
+		Requirements: Requirements{
+			ValidityPeriod: ValidityPeriod{
+				StartTime: baseTime.Add(48 * time.Hour), // After EndTime!
+				EndTime:   baseTime,
+			},
+		},
+	}
+
+	err := ValidateRFC0115Compliance(def)
+	if err == nil {
+		t.Fatal("Expected error for negative duration")
+	}
+	// Note: ValidatePoADefinition is checked first and reports "end before start"
+	// Both errors are acceptable for this test
+	if !errorContains(err, "positive duration") && !errorContains(err, "end before start") {
+		t.Errorf("Error = %v, want 'positive duration' or 'end before start'", err)
+	}
+}
+
+func TestValidateRFC0115Compliance_PoADefinition_ExceedsTwoYears(t *testing.T) {
+	// Test PoADefinition validation when validity period > 2 years
+	baseTime := time.Now()
+
+	def := PoADefinition{
+		Parties: Parties{
+			Principal: Principal{
+				Identity: "test-principal",
+			},
+			AuthorizedClient: AuthorizedClient{
+				Identity: "test-client",
+			},
+		},
+		Authorization: AuthorizationScope{
+			ApplicableSectors: []IndustrySector{SectorFinancialInsurance},
+			ApplicableRegions: []GeographicScope{
+				{Type: GeoTypeNational, Identifier: "US"},
+			},
+			AuthorizedActions: AuthorizedActions{
+				Transactions: []Transaction{TransactionLoan},
+			},
+		},
+		Requirements: Requirements{
+			ValidityPeriod: ValidityPeriod{
+				StartTime: baseTime,
+				EndTime:   baseTime.Add(time.Hour * 24 * 731), // >2 years
+			},
+		},
+	}
+
+	err := ValidateRFC0115Compliance(def)
+	if err == nil {
+		t.Fatal("Expected error for duration exceeding 2 years")
+	}
+	if !errorContains(err, "exceeds 2 years") {
+		t.Errorf("Error = %v, want 'exceeds 2 years'", err)
+	}
+}
+
+func TestValidateRFC0115Compliance_PoADefinition_OnlyDecisions(t *testing.T) {
+	// Test PoADefinition validation with only Decisions (no Transactions)
+	baseTime := time.Now()
+
+	def := PoADefinition{
+		Parties: Parties{
+			Principal: Principal{
+				Identity: "test-principal",
+			},
+			AuthorizedClient: AuthorizedClient{
+				Identity: "test-client",
+			},
+		},
+		Authorization: AuthorizationScope{
+			ApplicableSectors: []IndustrySector{SectorFinancialInsurance},
+			ApplicableRegions: []GeographicScope{
+				{Type: GeoTypeNational, Identifier: "US"},
+			},
+			AuthorizedActions: AuthorizedActions{
+				Decisions: []Decision{DecisionFinancial},
+			},
+		},
+		Requirements: Requirements{
+			ValidityPeriod: ValidityPeriod{
+				StartTime: baseTime,
+				EndTime:   baseTime.Add(24 * time.Hour),
+			},
+		},
+	}
+
+	err := ValidateRFC0115Compliance(def)
+	if err != nil {
+		t.Errorf("Unexpected error for valid PoADefinition with only Decisions: %v", err)
+	}
+}
+
+func TestValidateRFC0115Compliance_PoADefinition_OnlyNonPhysicalActions(t *testing.T) {
+	// Test PoADefinition validation with only NonPhysicalActions
+	baseTime := time.Now()
+
+	def := PoADefinition{
+		Parties: Parties{
+			Principal: Principal{
+				Identity: "test-principal",
+			},
+			AuthorizedClient: AuthorizedClient{
+				Identity: "test-client",
+			},
+		},
+		Authorization: AuthorizationScope{
+			ApplicableSectors: []IndustrySector{SectorProfessional},
+			ApplicableRegions: []GeographicScope{
+				{Type: GeoTypeNational, Identifier: "EU"},
+			},
+			AuthorizedActions: AuthorizedActions{
+				NonPhysicalActions: []NonPhysicalAction{ActionResearching},
+			},
+		},
+		Requirements: Requirements{
+			ValidityPeriod: ValidityPeriod{
+				StartTime: baseTime,
+				EndTime:   baseTime.Add(24 * time.Hour),
+			},
+		},
+	}
+
+	err := ValidateRFC0115Compliance(def)
+	if err != nil {
+		t.Errorf("Unexpected error for valid PoADefinition with only NonPhysicalActions: %v", err)
+	}
+}
+
+func TestValidateRFC0115Compliance_CompositeMap_InvalidDefinition(t *testing.T) {
+	// Test composite map with invalid definition (missing sectors)
+	baseTime := time.Now()
+
+	invalidDef := PoADefinition{
+		Parties: Parties{
+			Principal: Principal{
+				Identity: "test-principal",
+			},
+			AuthorizedClient: AuthorizedClient{
+				Identity: "test-client",
+			},
+		},
+		Authorization: AuthorizationScope{
+			ApplicableSectors: []IndustrySector{}, // Empty!
+			ApplicableRegions: []GeographicScope{
+				{Type: GeoTypeNational, Identifier: "US"},
+			},
+			AuthorizedActions: AuthorizedActions{
+				Transactions: []Transaction{TransactionLoan},
+			},
+		},
+		Requirements: Requirements{
+			ValidityPeriod: ValidityPeriod{
+				StartTime: baseTime,
+				EndTime:   baseTime.Add(24 * time.Hour),
+			},
+		},
+	}
+
+	composite := map[string]interface{}{
+		"definition": invalidDef,
+	}
+
+	err := ValidateRFC0115Compliance(composite)
+	if err == nil {
+		t.Fatal("Expected error for invalid definition in composite")
+	}
+	if !errorContains(err, "definition invalid") {
+		t.Errorf("Error = %v, want 'definition invalid'", err)
+	}
+}
+
+func TestValidateRFC0115Compliance_CompositeMap_BothConfigAndDefinition(t *testing.T) {
+	// Test composite map with both config and definition
+	baseTime := time.Now()
+
+	validConfig := RFC0115Config{
+		ExcludeWeb3:          true,
+		ExcludeAIOperators:   true,
+		ExcludeDNAIdentities: true,
+		MaxValidityDays:      365,
+	}
+
+	validDef := PoADefinition{
+		Parties: Parties{
+			Principal: Principal{
+				Identity: "test-principal",
+			},
+			AuthorizedClient: AuthorizedClient{
+				Identity: "test-client",
+			},
+		},
+		Authorization: AuthorizationScope{
+			ApplicableSectors: []IndustrySector{SectorFinancialInsurance},
+			ApplicableRegions: []GeographicScope{
+				{Type: GeoTypeNational, Identifier: "US"},
+			},
+			AuthorizedActions: AuthorizedActions{
+				Transactions: []Transaction{TransactionLoan},
+			},
+		},
+		Requirements: Requirements{
+			ValidityPeriod: ValidityPeriod{
+				StartTime: baseTime,
+				EndTime:   baseTime.Add(24 * time.Hour),
+			},
+		},
+	}
+
+	composite := map[string]interface{}{
+		"config":     validConfig,
+		"definition": validDef,
+	}
+
+	err := ValidateRFC0115Compliance(composite)
+	if err != nil {
+		t.Errorf("Unexpected error for valid composite with both config and definition: %v", err)
+	}
+}
