@@ -1,6 +1,7 @@
 package ai
 
 import (
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -278,18 +279,18 @@ func TestServerIntegration(t *testing.T) {
 	integration := NewServerIntegration()
 	integration.EnableEnforcement(true)
 
-	auditCalled := false
-	metricsCalled := false
+	var auditCalled atomic.Bool
+	var metricsCalled atomic.Bool
 
 	integration.SetAuditCallback(func(action string, metadata map[string]any) {
-		auditCalled = true
+		auditCalled.Store(true)
 		if action != "ai_capability_enforcement" {
 			t.Errorf("Expected audit action 'ai_capability_enforcement', got: %s", action)
 		}
 	})
 
 	integration.SetMetricsCallback(func(metric string) {
-		metricsCalled = true
+		metricsCalled.Store(true)
 	})
 
 	t.Run("AI Profile Extraction", func(t *testing.T) {
@@ -326,11 +327,11 @@ func TestServerIntegration(t *testing.T) {
 		// Give the goroutine a moment to execute the audit callback
 		time.Sleep(10 * time.Millisecond)
 
-		if !auditCalled {
+		if !auditCalled.Load() {
 			t.Error("Expected audit callback to be called")
 		}
 
-		if !metricsCalled {
+		if !metricsCalled.Load() {
 			t.Error("Expected metrics callback to be called")
 		}
 	})

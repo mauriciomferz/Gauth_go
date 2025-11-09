@@ -2,6 +2,7 @@ package enforcement
 
 import (
 	"context"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -169,9 +170,9 @@ func TestEnforcer_MultipleRules(t *testing.T) {
 func TestEnforcer_AuditCallback(t *testing.T) {
 	enforcer := NewEnforcer()
 
-	auditCalled := false
+	var auditCalled atomic.Bool
 	enforcer.SetAuditCallback(func(decision EnforcementDecision) {
-		auditCalled = true
+		auditCalled.Store(true)
 		if decision.Subject != "user:test" {
 			t.Errorf("Expected subject user:test, got %v", decision.Metadata)
 		}
@@ -192,7 +193,7 @@ func TestEnforcer_AuditCallback(t *testing.T) {
 	// Give goroutine time to execute
 	time.Sleep(10 * time.Millisecond)
 
-	if !auditCalled {
+	if !auditCalled.Load() {
 		t.Error("Audit callback was not called")
 	}
 }
