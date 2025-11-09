@@ -82,13 +82,15 @@ const (
 
 // MemoryLogger implements audit logging in memory
 type MemoryLogger struct {
-	mu         sync.RWMutex
-	events     []Event
-	logger     common.Logger
-	anchor     AnchorFunc
-	eventQueue chan *Event
-	done       chan struct{}
-	wg         sync.WaitGroup
+	mu              sync.RWMutex
+	events          []Event
+	logger          common.Logger
+	anchor          AnchorFunc
+	eventQueue      chan *Event
+	done            chan struct{}
+	wg              sync.WaitGroup
+	droppedEvents   int64 // Counter for dropped events (atomic access)
+	processedEvents int64 // Counter for successfully processed events (atomic access)
 }
 
 // AnchorFunc receives (index, hash) when a new event is appended. Intended for
@@ -160,6 +162,7 @@ func (ml *MemoryLogger) processEvent(event *Event) {
 	event.PrevHash = prevHash
 	event.Hash = computeEventHash(*event)
 	ml.events = append(ml.events, *event)
+	ml.processedEvents++
 
 	// Copy values before unlock
 	chainIndex := event.ChainIndex
@@ -173,7 +176,9 @@ func (ml *MemoryLogger) processEvent(event *Event) {
 	}
 }
 
-// Log logs an audit event asynchronously
+// Log logs an audit event asynchronously. If the event queue is full, the event
+// is dropped silently to prevent blocking callers. Use GetMetrics() to monitor
+// dropped events in production.
 func (ml *MemoryLogger) Log(ctx context.Context, entry interface{}) error {
 	var event *Event
 	switch e := entry.(type) {
@@ -190,14 +195,23 @@ func (ml *MemoryLogger) Log(ctx context.Context, entry interface{}) error {
 		event.Timestamp = time.Now().UTC()
 	}
 
-	// Send to background processor (non-blocking if channel has space)
+	// Send to background processor (non-blocking)
 	select {
 	case ml.eventQueue <- event:
 		return nil
 	default:
-		// Channel full - log warning and drop event (or process synchronously)
-		ml.logger.Warnf("Audit event queue full, dropping event %s", event.ID)
-		return fmt.Errorf("audit queue full")
+		// Channel full - drop event and increment counter (never block caller)
+		// Use sync/atomic for thread-safe increment
+		ml.mu.Lock()
+		ml.droppedEvents++
+		dropped := ml.droppedEvents
+		ml.mu.Unlock()
+		
+		// Only log every 100th drop to avoid log spam
+		if dropped%100 == 1 {
+			ml.logger.Warnf("Audit event queue full, dropped %d events (latest: %s)", dropped, event.ID)
+		}
+		return nil // Return nil to prevent caller from failing
 	}
 }
 
@@ -273,6 +287,27 @@ func (ml *MemoryLogger) Query(ctx context.Context, filter *Filter) ([]*Event, er
 	}
 
 	return result, nil
+}
+
+// GetMetrics returns current audit logging metrics
+func (ml *MemoryLogger) GetMetrics() (processed, dropped int64) {
+	ml.mu.RLock()
+	defer ml.mu.RUnlock()
+	return ml.processedEvents, ml.droppedEvents
+}
+
+// GetDroppedCount returns the number of events dropped due to queue saturation
+func (ml *MemoryLogger) GetDroppedCount() int64 {
+	ml.mu.RLock()
+	defer ml.mu.RUnlock()
+	return ml.droppedEvents
+}
+
+// GetProcessedCount returns the number of events successfully processed
+func (ml *MemoryLogger) GetProcessedCount() int64 {
+	ml.mu.RLock()
+	defer ml.mu.RUnlock()
+	return ml.processedEvents
 }
 
 // Close stops the background event processor and releases resources
