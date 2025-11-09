@@ -1,9 +1,9 @@
 # Code Quality Improvement Roadmap
 
-**Status**: Phase 2 Complete (Test Coverage)
+**Status**: Phase 3A Complete (pkg/policy Test Coverage)
 **Generated**: November 9, 2025
-**Updated**: November 9, 2025 (Phase 2 completion)
-**Next Phase**: Phase 3 (Remaining Test Coverage) or Phase 1 (Security Hardening)
+**Updated**: November 9, 2025 (Phase 3A completion)
+**Next Phase**: Phase 3B (pkg/authz Test Coverage)
 
 ---
 
@@ -110,10 +110,10 @@ _ = resp.Body.Close() // Explicitly ignore cleanup error
 
 | Package | Baseline | Final | Status |
 |---------|----------|-------|--------|
-| pkg/auth | ~40% | 97.8% | ✅ EXCEEDED |
-| pkg/poa | 19.3% | 49.1% | ✅ PRACTICAL LIMIT |
-| pkg/policy | 44.7% | TBD | 🔄 Phase 3 |
-| pkg/authz | 39.5% | TBD | 🔄 Phase 3 |
+| pkg/auth | ~40% | 97.8% | ✅ EXCEEDED (Phase 2A) |
+| pkg/poa | 19.3% | 49.1% | ✅ PRACTICAL LIMIT (Phase 2B) |
+| pkg/policy | 44.7% | 76.9% | ✅ EXCEEDED (Phase 3A) |
+| pkg/authz | 39.5% | TBD | 🔄 Phase 3B |
 
 **High Coverage** (maintained):
 - pkg/enforcement: 90.5% ✅
@@ -189,21 +189,37 @@ _ = resp.Body.Close() // Explicitly ignore cleanup error
 3. **Private functions limit coverage**: Need public testable interfaces
 4. **Know when to stop**: 100% coverage not always practical or valuable
 
-### Recommendations for Remaining Packages
+### Phase 3: Remaining Test Coverage 🔄
 
-Based on Phase 2 experience:
+**Status**: Phase 3A COMPLETE ✅, Phase 3B IN PROGRESS 🔄
 
-**pkg/policy** (current: 44.7%, target: 70%+):
-- Estimated effort: 1 week (5-7 sessions)
-- Expected coverage: 70-80%
-- Priority: MEDIUM
+#### Phase 3A: pkg/policy (Sessions 37-38) ✅ COMPLETE
+
+**Achievement**: 76.9% coverage (exceeded 70% goal by 6.9pp)
+**Sessions**: 2 sessions (ahead of 5-7 estimate)
+**Deliverables**:
+- 3 test files created
+- ~1,018 test lines written
+- 33 test cases
+- 4 commits to main
+
+**Coverage**: All 0% functions eliminated
+- NewAuthorizerAdapter: 0% → 100% ✅
+- Authorize (adapter): 0% → 87.5% ✅
+- Rollback: 0% → 100% ✅
+- Registry functions: 0% → 89-100% ✅
+- Helper functions: 0% → 100% ✅
+
+**Detailed Documentation**: See `PHASE_3A_COMPLETE_SUMMARY.md`
+
+#### Phase 3B: pkg/authz 🔄 NEXT
 
 **pkg/authz** (current: 39.5%, target: 70%+):
-- Estimated effort: 1 week (5-7 sessions)
+- Estimated effort: 2-3 sessions (applying Phase 3A lessons)
 - Expected coverage: 70-80%
 - Priority: MEDIUM
 
-**Strategy**: Apply Phase 2 patterns, but set realistic targets based on code structure. Accept practical limits when diminishing returns appear.
+**Strategy**: Apply Phase 3A success patterns - focus on 0% functions first, large comprehensive sessions, thorough edge case testing.
 
 ---
 
