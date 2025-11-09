@@ -2,8 +2,21 @@
 
 **Status**: Phases 1-5 Complete (Security, Testing, Dependencies, Documentation)
 **Generated**: November 9, 2025
-**Updated**: November 9, 2025 (Phase 5 documentation completion)
+**Updated**: November 9, 2025 (Timeline and resources added)
 **Next Phase**: Optional - Code Complexity Refactoring
+
+---
+
+## Timeline Overview
+
+| Phase | Week | Engineer Time | Status |
+|-------|------|---------------|--------|
+| Phase 1: Security Hardening | Week 1 | 3-5 days | ✅ COMPLETE |
+| Phase 2: Test Coverage | Weeks 2-3 | 8-10 days | ✅ COMPLETE |
+| Phase 3: Additional Coverage | (Continuation) | (Included above) | ✅ COMPLETE |
+| Phase 4: Dependencies | Week 4 | 2-3 days | ✅ COMPLETE |
+| Phase 5: Documentation | Week 5 | 2-3 days | ✅ COMPLETE |
+| **Total** | **~5 weeks** | **15-21 days** | **✅ COMPLETE** |
 
 ---
 
@@ -18,6 +31,12 @@ After completing the linter cleanup campaign (194 → 84 warnings, 57% reduction
 ---
 
 ## Phase 1: Security Hardening (Priority: HIGH)
+
+### Timeline & Resources
+- **Week 1: Security Hardening**
+- **Engineer Time**: 3-5 days
+- **Skills Required**: Go security, integer overflow, error handling
+- **Tools**: gosec, go test, static analysis
 
 ### Current State
 - **Total Findings**: 185 gosec issues across 420 files
@@ -99,12 +118,18 @@ _ = resp.Body.Close() // Explicitly ignore cleanup error
 
 ## Phase 2: Test Coverage Improvement ✅ COMPLETE
 
+### Timeline & Resources
+- **Weeks 2-3: Test Coverage**
+- **Engineer Time**: 8-10 days
+- **Skills Required**: Go testing, security testing, edge case analysis
+- **Tools**: go test, go cover, testify, mockery
+
 ### Status: COMPLETE (November 9, 2025)
 
 **Phase 2A Results**: pkg/auth coverage: 97.8% (EXCEEDED 80% goal by 17.8pp) ✅
 **Phase 2B Results**: pkg/poa coverage: 49.1% (154% improvement from 19.3% baseline) ✅
 
-**Detailed Documentation**: See `PHASE_2_COMPLETE_SUMMARY.md`
+**Detailed Documentation**: See `docs/summaries/PHASE_2_COMPLETE_SUMMARY.md`
 
 ### Final State
 
@@ -241,6 +266,12 @@ _ = resp.Body.Close() // Explicitly ignore cleanup error
 
 ## Phase 4: Dependency Updates ✅ COMPLETE
 
+### Timeline & Resources
+- **Week 4: Dependencies**
+- **Engineer Time**: 2-3 days
+- **Skills Required**: Go modules, dependency management, breaking changes
+- **Tools**: go get, go mod, dependency checkers
+
 ### Status: COMPLETE (November 9, 2025)
 
 **Updated Dependencies**: 6 packages updated to latest versions
@@ -291,6 +322,12 @@ _ = resp.Body.Close() // Explicitly ignore cleanup error
 ---
 
 ## Phase 5: Documentation Improvements ✅ COMPLETE
+
+### Timeline & Resources
+- **Week 5: Documentation**
+- **Engineer Time**: 2-3 days
+- **Skills Required**: Technical writing, Go documentation standards, architecture design
+- **Tools**: godoc, markdown, diagram tools
 
 ### Status: COMPLETE (November 9, 2025)
 
