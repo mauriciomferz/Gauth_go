@@ -70,16 +70,15 @@ func main() {
 			fmt.Fprintf(os.Stderr, "❌ Failed to write JSON: %v\n", err)
 			os.Exit(1)
 		}
-		written = append(written, *jsonOut)
-	}
+	written = append(written, *jsonOut)
+}
 
-	if *csvOut != "" {
-		if err := os.MkdirAll(*csvOut, 0755); err != nil {
-			fmt.Fprintf(os.Stderr, "❌ Failed to create CSV directory: %v\n", err)
-			os.Exit(1)
-		}
-
-		gapMatrixPath := filepath.Join(*csvOut, "gap_matrix.csv")
+if *csvOut != "" {
+	// Use restricted directory permissions (0750 instead of 0755)
+	if err := os.MkdirAll(*csvOut, 0750); err != nil {
+		fmt.Fprintf(os.Stderr, "❌ Failed to create CSV directory: %v\n", err)
+		os.Exit(1)
+	}		gapMatrixPath := filepath.Join(*csvOut, "gap_matrix.csv")
 		if err := harnesslib.WriteGapCSV(gapMatrixPath, report); err != nil {
 			fmt.Fprintf(os.Stderr, "❌ Failed to write gap matrix CSV: %v\n", err)
 			os.Exit(1)

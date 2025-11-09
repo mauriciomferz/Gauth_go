@@ -36,7 +36,8 @@ type FileAuditSink struct {
 // The file is opened in append mode with appropriate permissions.
 func NewFileAuditSink(path string) (*FileAuditSink, error) {
 	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	// Use restricted directory permissions (0750 instead of 0755)
+	if err := os.MkdirAll(dir, 0750); err != nil {
 		return nil, fmt.Errorf("rotation_audit: mkdir failed: %w", err)
 	}
 

@@ -35,9 +35,9 @@ func main() {
 	fmt.Println("2. Encrypted Filesystem Provider (internal/secrets)")
 	fmt.Println()
 
-	// Setup temp directory for filesystem provider
+	// Setup temp directory for filesystem provider with restricted permissions
 	tmpDir := "/tmp/gauth-secrets-demo"
-	if err := os.MkdirAll(tmpDir, 0755); err != nil {
+	if err := os.MkdirAll(tmpDir, 0750); err != nil {
 		log.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer os.RemoveAll(tmpDir)

@@ -26,9 +26,9 @@ type BoltReplayStore struct {
 // The path parameter specifies where the database file should be created.
 // TTL determines how long JTI entries are retained before expiration.
 func NewBoltReplayStore(path string, ttl time.Duration) (*BoltReplayStore, error) {
-	// Ensure directory exists
+	// Ensure directory exists with restricted permissions (0750 instead of 0755)
 	if dir := filepath.Dir(path); dir != "." {
-		if err := os.MkdirAll(dir, 0755); err != nil {
+		if err := os.MkdirAll(dir, 0750); err != nil {
 			return nil, fmt.Errorf("replay_store: mkdir failed: %w", err)
 		}
 	}

@@ -296,7 +296,8 @@ func writeJSONReport(result *ValidationResult) error {
 		return err
 	}
 
-	if err := os.MkdirAll(filepath.Dir(outputPath), 0755); err != nil {
+	// Use restricted directory permissions (0750 instead of 0755)
+	if err := os.MkdirAll(filepath.Dir(outputPath), 0750); err != nil {
 		return err
 	}
 

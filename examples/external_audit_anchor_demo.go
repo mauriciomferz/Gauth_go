@@ -16,9 +16,9 @@ func main() {
 	fmt.Println("🔗 External Audit Anchor Integration Demo (sec5.item1)")
 	fmt.Println("=======================================================")
 
-	// Setup temp files
+	// Setup temp files with restricted permissions
 	tmpDir := "/tmp/gauth-external-anchor-demo"
-	if err := os.MkdirAll(tmpDir, 0755); err != nil {
+	if err := os.MkdirAll(tmpDir, 0750); err != nil {
 		log.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer os.RemoveAll(tmpDir)
