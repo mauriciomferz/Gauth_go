@@ -482,7 +482,8 @@ type BetaServer struct {
 	externalReceiptIntegrityStatus string    // ok|mismatch|unconfigured|empty
 	externalReceiptLastVerify      time.Time // last integrity verification timestamp
 	// Model limits governance (prototype for sec11.item2) loaded from optional file; map model_id -> max_input_tokens
-	modelLimits map[string]int
+	modelLimitsMu sync.Mutex
+	modelLimits   map[string]int
 	// Extended model governance dimensions
 	modelOutputLimitsMu sync.Mutex
 	modelOutputLimits   map[string]int // model_id -> max_output_tokens
@@ -810,6 +811,7 @@ func (s *BetaServer) loadModelLimitsFromDisk() bool {
 		}
 	}
 	// Swap under locks
+	s.modelLimitsMu.Lock()
 	s.modelOutputLimitsMu.Lock()
 	s.modelRateMu.Lock()
 	s.modelRateLimitsExtendedMu.Lock()
@@ -823,6 +825,7 @@ func (s *BetaServer) loadModelLimitsFromDisk() bool {
 	s.modelRateLimitsExtendedMu.Unlock()
 	s.modelRateMu.Unlock()
 	s.modelOutputLimitsMu.Unlock()
+	s.modelLimitsMu.Unlock()
 	fmt.Fprintf(os.Stderr, "[model-limits] reloaded entries=%d path=%s\n", len(raw.ModelLimits), s.modelLimitsPath)
 	return true
 }
@@ -893,9 +896,16 @@ func (s *BetaServer) computeModelLimitsSnapshot() (snap struct {
 		userCopy[mid] = m2
 	}
 	s.modelUserLimitsMu.Unlock()
+	// Copy modelLimits under lock
+	s.modelLimitsMu.Lock()
+	inputCopy := make(map[string]int)
+	for k, v := range s.modelLimits {
+		inputCopy[k] = v
+	}
+	s.modelLimitsMu.Unlock()
 	// Models ordering
-	modelKeys := make([]string, 0, len(s.modelLimits))
-	for k := range s.modelLimits {
+	modelKeys := make([]string, 0, len(inputCopy))
+	for k := range inputCopy {
 		modelKeys = append(modelKeys, k)
 	}
 	sort.Strings(modelKeys)
@@ -905,7 +915,7 @@ func (s *BetaServer) computeModelLimitsSnapshot() (snap struct {
 			Input   int    `json:"max_input_tokens,omitempty"`
 			Output  int    `json:"max_output_tokens,omitempty"`
 			Rate    int    `json:"max_requests_per_minute,omitempty"`
-		}{ModelID: mid, Input: s.modelLimits[mid], Output: outCopy[mid], Rate: rateCopy[mid]}
+		}{ModelID: mid, Input: inputCopy[mid], Output: outCopy[mid], Rate: rateCopy[mid]}
 		snap.Models = append(snap.Models, entry)
 	}
 	// User limits ordering (model then user)
@@ -1451,7 +1461,9 @@ func (s *BetaServer) apiModelValidate(c *gin.Context) {
 		c.JSON(400, gin.H{"success": false, "error": "invalid_payload"})
 		return
 	}
+	s.modelLimitsMu.Lock()
 	limit, ok := s.modelLimits[in.ModelID]
+	s.modelLimitsMu.Unlock()
 	if !ok || limit <= 0 {
 		if s.modelLimitsStrictUnknown {
 			if s.metrics != nil {
