@@ -197,8 +197,8 @@ func (p *PersistentAuthorizer) watchLoop(path string) {
 			if !ok {
 				return // channel closed
 			}
-			if event.Op&(fsnotify.Write|fsnotify.Create) != 0 {
-				// reload on write/create (handles some editor rename patterns)
+			if event.Op&(fsnotify.Write|fsnotify.Create|fsnotify.Remove) != 0 {
+				// reload on write/create/remove (handles file removal and editor rename patterns)
 				if err := p.reload(); err != nil {
 					fmt.Fprintf(os.Stderr, "watch reload error: %v\n", err) // nolint:errcheck
 					p.mu.Lock()

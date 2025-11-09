@@ -19,6 +19,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -266,10 +267,10 @@ func TestJWKSBackgroundRefresh(t *testing.T) {
 	// Short cache TTL and small refresh factor to force early refresh
 	ttl := 4 // seconds
 	factor := 0.25
-	fetches := 0
+	var fetches atomic.Int32
 	priv, _ := rsa.GenerateKey(rand.Reader, 1024)
 	jwksSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fetches++
+		fetches.Add(1)
 		type jwk struct {
 			Kid string `json:"kid"`
 			Kty string `json:"kty"`
@@ -304,14 +305,14 @@ func TestJWKSBackgroundRefresh(t *testing.T) {
 	startJWKSBackgroundRefresh()
 	// Wait a moment for initial fetch
 	time.Sleep(200 * time.Millisecond)
-	if fetches < 1 {
-		t.Fatalf("expected initial JWKS fetch, got %d", fetches)
+	if fetches.Load() < 1 {
+		t.Fatalf("expected initial JWKS fetch, got %d", fetches.Load())
 	}
 	// Sleep long enough for refresh to trigger: factor * ttl + small buffer (< ttl)
 	sleepFor := time.Duration(float64(ttl)*factor)*time.Second + 500*time.Millisecond
 	time.Sleep(sleepFor)
-	if fetches < 2 {
-		t.Fatalf("expected background refresh second fetch, still %d", fetches)
+	if fetches.Load() < 2 {
+		t.Fatalf("expected background refresh second fetch, still %d", fetches.Load())
 	}
 }
 
