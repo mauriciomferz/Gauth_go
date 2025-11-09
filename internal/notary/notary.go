@@ -1,6 +1,8 @@
 package notary
 
 import (
+	cryptorand "crypto/rand"
+	"encoding/binary"
 	"errors"
 	"math/rand"
 	"os"
@@ -130,6 +132,7 @@ func (m *MemoryNotarizer) Latest() Receipt {
 
 // ExternalStubNotarizer simulates an external network-backed notarization provider.
 // It introduces random latency and optional failure probability configurable via env.
+// Security: Uses math/rand for latency simulation but seeded from crypto/rand for unpredictability.
 // Env:
 //
 //	GAUTH_NOTARY_STUB_MIN_LATENCY_MS  (default 40)
@@ -157,8 +160,16 @@ func NewExternalStub() *ExternalStubNotarizer {
 	if name == "" {
 		name = "external_stub"
 	}
-	//nolint:gosec // G404: weak random acceptable for test stub notarizer
-	return &ExternalStubNotarizer{minLatency: time.Duration(minMs) * time.Millisecond, maxLatency: time.Duration(maxMs) * time.Millisecond, failProb: fp, providerName: name, rnd: rand.New(rand.NewSource(time.Now().UnixNano()))}
+	// Use crypto/rand for secure seed generation
+	var buf [8]byte
+	var seed int64
+	if _, err := cryptorand.Read(buf[:]); err != nil {
+		// Fallback to time-based seed only if crypto/rand fails
+		seed = time.Now().UnixNano()
+	} else {
+		seed = int64(binary.LittleEndian.Uint64(buf[:]))
+	}
+	return &ExternalStubNotarizer{minLatency: time.Duration(minMs) * time.Millisecond, maxLatency: time.Duration(maxMs) * time.Millisecond, failProb: fp, providerName: name, rnd: rand.New(rand.NewSource(seed))}
 }
 
 // Notarize simulates a network call with random latency and probabilistic failure.

@@ -3,7 +3,9 @@
 package anchor
 
 import (
+	cryptorand "crypto/rand"
 	"crypto/sha256"
+	"encoding/binary"
 	"encoding/hex"
 	"errors"
 	"math/rand"
@@ -61,6 +63,8 @@ func (m *MemoryProvider) Verify(r Receipt) error {
 }
 
 // TSAStubProvider simulates a timestamp authority with latency & failure probability.
+// NOT FOR PRODUCTION — demo/test only.
+// Security: Uses math/rand for latency simulation but seeded from crypto/rand for unpredictability.
 type TSAStubProvider struct {
 	latest      Receipt
 	minLatency  time.Duration
@@ -79,7 +83,7 @@ func NewTSAStubProvider(minMs, maxMs int, failProb float64) *TSAStubProvider {
 }
 
 // NewTSAStubProviderSeeded allows providing an explicit RNG seed for deterministic test scenarios.
-// If seed < 0 a time based seed is used.
+// If seed < 0 a cryptographically secure random seed is used.
 func NewTSAStubProviderSeeded(minMs, maxMs int, failProb float64, seed int64) *TSAStubProvider {
 	if minMs <= 0 {
 		minMs = 10
@@ -91,10 +95,16 @@ func NewTSAStubProviderSeeded(minMs, maxMs int, failProb float64, seed int64) *T
 		failProb = 0
 	}
 	if seed < 0 {
-		seed = time.Now().UnixNano()
+		// Use crypto/rand for secure seed generation
+		var buf [8]byte
+		if _, err := cryptorand.Read(buf[:]); err != nil {
+			// Fallback to time-based seed only if crypto/rand fails
+			seed = time.Now().UnixNano()
+		} else {
+			seed = int64(binary.LittleEndian.Uint64(buf[:]))
+		}
 	}
 	src := rand.NewSource(seed)
-	//nolint:gosec // G404: weak random acceptable for TSA stub provider (testing only)
 	return &TSAStubProvider{minLatency: time.Duration(minMs) * time.Millisecond, maxLatency: time.Duration(maxMs) * time.Millisecond, failProb: failProb, providerTag: "tsa-stub", rnd: rand.New(src)}
 }
 
