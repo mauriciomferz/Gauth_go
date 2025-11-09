@@ -103,6 +103,7 @@ type PersistentAuthorizer struct {
 	lastSeenMod  time.Time
 	stopCh       chan struct{}
 	watcher      *fsnotify.Watcher
+	mu           sync.RWMutex // protects watchErr, lastAdded, lastRemoved
 	watchErr     error
 	lastAdded    []string
 	lastRemoved  []string
@@ -162,13 +163,17 @@ func (p *PersistentAuthorizer) StartWatch() error {
 	}
 	w, err := fsnotify.NewWatcher()
 	if err != nil {
+		p.mu.Lock()
 		p.watchErr = err
+		p.mu.Unlock()
 		return err
 	}
 	p.watcher = w
 	path := fps.path
 	if err := w.Add(path); err != nil {
+		p.mu.Lock()
 		p.watchErr = err
+		p.mu.Unlock()
 		if cerr := w.Close(); cerr != nil {
 			fmt.Fprintf(os.Stderr, "watch: close error: %v\n", cerr) // nolint:errcheck
 		}
@@ -188,23 +193,19 @@ func (p *PersistentAuthorizer) watchLoop(path string) {
 				}
 			}
 			return
-		case evt, ok := <-p.watcher.Events:
+		case event, ok := <-p.watcher.Events:
 			if !ok {
-				return
+				return // channel closed
 			}
-			if evt.Op&(fsnotify.Write|fsnotify.Create|fsnotify.Rename|fsnotify.Remove) != 0 {
-				// For any mutating op, refresh mod time if file store.
-				if fps, ok := p.store.(*FilePolicyStore); ok {
-					if err := fps.refreshModTime(); err != nil {
-						fmt.Fprintf(os.Stderr, "watch: refreshModTime error: %v\n", err) // nolint:errcheck
-					}
-				}
-				if err := p.reload(); err == nil {
-					p.lastSeenMod = p.store.LastModified()
-					p.MemoryAuthorizer.InvalidateAll()
-					atomic.AddUint64(&p.MemoryAuthorizer.metricReloads, 1)
+			if event.Op&(fsnotify.Write|fsnotify.Create) != 0 {
+				// reload on write/create (handles some editor rename patterns)
+				if err := p.reload(); err != nil {
+					fmt.Fprintf(os.Stderr, "watch reload error: %v\n", err) // nolint:errcheck
+					p.mu.Lock()
+					p.watchErr = err
+					p.mu.Unlock()
 				} else {
-					fmt.Fprintf(os.Stderr, "watch: reload error: %v\n", err) // nolint:errcheck
+					atomic.AddUint64(&p.MemoryAuthorizer.metricReloads, 1)
 				}
 			}
 		case err, ok := <-p.watcher.Errors:
@@ -225,7 +226,10 @@ func (p *PersistentAuthorizer) reload() error {
 	}
 	// compute diff
 	oldMap := make(map[string]struct{})
-	for _, op := range p.policies {
+	p.policiesMu.RLock()
+	oldPolicies := append([]Policy(nil), p.policies...) // copy slice for diff computation
+	p.policiesMu.RUnlock()
+	for _, op := range oldPolicies {
 		oldMap[op.ID] = struct{}{}
 	}
 	newMap := make(map[string]Policy)
@@ -266,15 +270,35 @@ func (p *PersistentAuthorizer) reload() error {
 			removed = append(removed, id)
 		}
 	}
-	// Replace slice atomically
+	// Replace slice with write lock to prevent concurrent reads during reload
+	p.policiesMu.Lock()
 	p.policies = make([]Policy, 0, len(policies))
 	p.policies = append(p.policies, policies...)
+	p.policiesMu.Unlock()
+	p.mu.Lock()
 	p.lastAdded = added
 	p.lastRemoved = removed
+	p.mu.Unlock()
 	return nil
 }
 
 // LastDiff returns the most recent added and removed policy IDs from a reload.
 func (p *PersistentAuthorizer) LastDiff() (added, removed []string) {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
 	return append([]string{}, p.lastAdded...), append([]string{}, p.lastRemoved...)
+}
+
+// WatchErr returns the last error from the watch loop (for testing).
+func (p *PersistentAuthorizer) WatchErr() error {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.watchErr
+}
+
+// PolicyCount returns the number of policies (for testing).
+func (p *PersistentAuthorizer) PolicyCount() int {
+	p.policiesMu.RLock()
+	defer p.policiesMu.RUnlock()
+	return len(p.policies)
 }

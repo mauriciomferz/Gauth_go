@@ -165,9 +165,10 @@ type Condition struct {
 
 // MemoryAuthorizer implements Authorizer using in-memory policies
 type MemoryAuthorizer struct {
-	policies []Policy
-	version  int64      // monotonically increasing policy set version
-	versions []struct { // snapshot history for rollback (shallow copy of slice)
+	policiesMu sync.RWMutex // protects policies slice during reload
+	policies   []Policy
+	version    int64      // monotonically increasing policy set version
+	versions   []struct { // snapshot history for rollback (shallow copy of slice)
 		version  int64
 		policies []Policy
 	}
@@ -184,6 +185,7 @@ type MemoryAuthorizer struct {
 	metricCacheMisses uint64 // cache miss count
 	metricReloads     uint64 // policy reloads (updated externally by persistence wrapper)
 	// latency tracking (Welford): store count, mean (ns), M2
+	latencyMu    sync.Mutex // protects latencyMean and latencyM2 (floats can't be atomic)
 	latencyCount uint64
 	latencyMean  float64
 	latencyM2    float64
@@ -635,7 +637,10 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 	}
 	matched := make([]Policy, 0)
 	var denyList, allowList []Policy
-	for _, policy := range ma.policies {
+	ma.policiesMu.RLock()
+	policies := ma.policies // make a local copy of the slice reference for iteration
+	ma.policiesMu.RUnlock()
+	for _, policy := range policies {
 		if ma.matchesPolicy(request, policy) {
 			matched = append(matched, policy)
 			if policy.Effect == Deny {
@@ -771,6 +776,8 @@ func (ma *MemoryAuthorizer) recordLatency(d time.Duration) {
 		}
 	}
 	count := atomic.AddUint64(&ma.latencyCount, 1)
+	ma.latencyMu.Lock()
+	defer ma.latencyMu.Unlock()
 	if count == 1 {
 		ma.latencyMean = val
 		ma.latencyM2 = 0
@@ -813,10 +820,13 @@ func (ma *MemoryAuthorizer) GetMetricsSnapshot() MetricsSnapshot {
 	ma.regexMu.RUnlock()
 	evict := atomic.LoadUint64(&ma.metricRegexEvictions)
 	count := atomic.LoadUint64(&ma.latencyCount)
+	ma.latencyMu.Lock()
 	mean := ma.latencyMean
+	m2 := ma.latencyM2
+	ma.latencyMu.Unlock()
 	var p99 float64
 	if count > 1 {
-		variance := ma.latencyM2 / float64(count-1)
+		variance := m2 / float64(count-1)
 		// approximate p99 ~ mean + 2.326 * stddev (normal assumption)
 		if variance > 0 {
 			p99 = mean + 2.326*sqrt(variance)
