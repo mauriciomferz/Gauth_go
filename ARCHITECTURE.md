@@ -59,8 +59,8 @@ GAuth 1.0 is a comprehensive authorization framework implementing RFC 0111 (Core
              │   Authorization Requests        │
              ▼                                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                     GAuth Core Services                          │
-│                                                                  │
+│                     GAuth Core Services                         │
+│                                                                 │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
 │  │   Auth       │  │   Authz      │  │  Delegation  │         │
 │  │ (pkg/auth)   │  │ (pkg/authz)  │  │(pkg/delegation)│       │
@@ -71,7 +71,7 @@ GAuth 1.0 is a comprehensive authorization framework implementing RFC 0111 (Core
 │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘         │
 │         │                 │                 │                  │
 │         └─────────────────┴─────────────────┘                  │
-│                           │                                     │
+│                           │                                    │
 │  ┌────────────────────────┴────────────────────────┐          │
 │  │              Core GAuth Engine                   │          │
 │  │              (pkg/gauth)                         │          │
@@ -80,12 +80,12 @@ GAuth 1.0 is a comprehensive authorization framework implementing RFC 0111 (Core
 │  │  - Revocation Management                         │          │
 │  │  - Replay Protection                             │          │
 │  └────────────────────────────────────────────────┬┘          │
-│                                                     │            │
-└─────────────────────────────────────────────────────┼──────────┘
-                                                      │
-                    ┌─────────────────────────────────┼─────────┐
-                    │         Storage Layer           │         │
-                    │                                 ▼         │
+│                                                    │           │
+└────────────────────────────────────────────────────┼──────────┘
+                                                     │
+                    ┌────────────────────────────────┼─────────┐
+                    │         Storage Layer          │         │
+                    │                                ▼         │
                     │  ┌──────────────┐   ┌──────────────────┐ │
                     │  │ Policy Store │   │  Key Provider    │ │
                     │  │(pkg/policy)  │   │ (pkg/crypto)     │ │
