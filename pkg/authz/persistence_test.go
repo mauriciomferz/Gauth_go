@@ -2,6 +2,7 @@ package authz
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -302,4 +303,381 @@ func TestPolicyDiffOnReload(t *testing.T) {
 	if !(len(removed) == 1 && removed[0] == "b") {
 		t.Fatalf("expected removed [b], got %v", removed)
 	}
+}
+
+// TestStartWatchErrorCases tests error handling in StartWatch
+func TestStartWatchErrorCases(t *testing.T) {
+	t.Run("non_file_store", func(t *testing.T) {
+		// Use a mock store that isn't FilePolicyStore
+		mockStore := &mockPolicyStore{}
+		pa := &PersistentAuthorizer{
+			MemoryAuthorizer: NewMemoryAuthorizer(),
+			store:            mockStore,
+			stopCh:           make(chan struct{}),
+		}
+		err := pa.StartWatch()
+		if err == nil {
+			t.Fatal("expected error for non-FilePolicyStore")
+		}
+		if err.Error() != "watch only supported for FilePolicyStore" {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if pa.watchErr != nil {
+			t.Errorf("watchErr should remain nil, got: %v", pa.watchErr)
+		}
+	})
+
+	t.Run("invalid_file_path", func(t *testing.T) {
+		// Create a FilePolicyStore with an invalid path
+		invalidPath := "/nonexistent/directory/that/does/not/exist/policies.json"
+		store := &FilePolicyStore{path: invalidPath}
+		pa := &PersistentAuthorizer{
+			MemoryAuthorizer: NewMemoryAuthorizer(),
+			store:            store,
+			stopCh:           make(chan struct{}),
+		}
+
+		err := pa.StartWatch()
+		if err == nil {
+			t.Fatal("expected error for invalid path")
+		}
+		if pa.watchErr == nil {
+			t.Error("watchErr should be set on failure")
+		}
+	})
+
+	t.Run("watcher_close_on_error", func(t *testing.T) {
+		// Test that watcher closes properly on Add error
+		dir := t.TempDir()
+		// Create valid file first
+		path := writeTempPolicies(t, dir, `[]`)
+		store, err := NewFilePolicyStore(path)
+		if err != nil {
+			t.Fatalf("new store: %v", err)
+		}
+		pa, err := NewPersistentAuthorizer(store, 1*time.Second)
+		if err != nil {
+			t.Fatalf("new persistent: %v", err)
+		}
+
+		// Remove file to cause watcher.Add to potentially fail
+		os.Remove(path)
+
+		// StartWatch may or may not fail depending on OS behavior
+		// but it should handle the error gracefully
+		err = pa.StartWatch()
+		// Error is acceptable here
+		if err != nil && pa.watchErr == nil {
+			t.Error("if StartWatch returns error, watchErr should be set")
+		}
+	})
+}
+
+// TestWatchLoopEdgeCases tests watchLoop behavior
+func TestWatchLoopEdgeCases(t *testing.T) {
+	t.Run("watch_loop_stops_on_stopCh", func(t *testing.T) {
+		dir := t.TempDir()
+		path := writeTempPolicies(t, dir, `[]`)
+		store, err := NewFilePolicyStore(path)
+		if err != nil {
+			t.Fatalf("new store: %v", err)
+		}
+		pa, err := NewPersistentAuthorizer(store, 10*time.Second)
+		if err != nil {
+			t.Fatalf("new persistent: %v", err)
+		}
+
+		if err := pa.StartWatch(); err != nil {
+			t.Skipf("fsnotify not available: %v", err)
+		}
+
+		// Immediately stop
+		pa.Stop()
+		time.Sleep(100 * time.Millisecond)
+
+		// Watcher should be closed
+		// No way to directly verify goroutine exit, but Stop() should not hang
+	})
+
+	t.Run("watch_loop_handles_rename_events", func(t *testing.T) {
+		dir := t.TempDir()
+		path := writeTempPolicies(t, dir, `[{"id":"p1","subject":"alice","resource":"r1","actions":["read"],"effect":"allow"}]`)
+		store, err := NewFilePolicyStore(path)
+		if err != nil {
+			t.Fatalf("new store: %v", err)
+		}
+		pa, err := NewPersistentAuthorizer(store, 10*time.Second)
+		if err != nil {
+			t.Fatalf("new persistent: %v", err)
+		}
+		defer pa.Stop()
+
+		if err := pa.StartWatch(); err != nil {
+			t.Skipf("fsnotify not available: %v", err)
+		}
+
+		// Rename file (some editors do this on save)
+		tmpPath := path + ".tmp"
+		newContent := `[{"id":"p2","subject":"bob","resource":"r2","actions":["write"],"effect":"deny"}]`
+		if err := os.WriteFile(tmpPath, []byte(newContent), 0o600); err != nil {
+			t.Fatalf("write temp: %v", err)
+		}
+		if err := os.Rename(tmpPath, path); err != nil {
+			t.Fatalf("rename: %v", err)
+		}
+
+		time.Sleep(300 * time.Millisecond)
+
+		// Policy should have reloaded
+		if len(pa.policies) != 1 {
+			t.Errorf("expected 1 policy after rename, got %d", len(pa.policies))
+		}
+		if len(pa.policies) > 0 && pa.policies[0].ID != "p2" {
+			t.Errorf("expected policy p2, got %s", pa.policies[0].ID)
+		}
+	})
+
+	t.Run("watch_loop_handles_remove_events", func(t *testing.T) {
+		dir := t.TempDir()
+		path := writeTempPolicies(t, dir, `[{"id":"p1","subject":"alice","resource":"r1","actions":["read"],"effect":"allow"}]`)
+		store, err := NewFilePolicyStore(path)
+		if err != nil {
+			t.Fatalf("new store: %v", err)
+		}
+		pa, err := NewPersistentAuthorizer(store, 10*time.Second)
+		if err != nil {
+			t.Fatalf("new persistent: %v", err)
+		}
+		defer pa.Stop()
+
+		if err := pa.StartWatch(); err != nil {
+			t.Skipf("fsnotify not available: %v", err)
+		}
+
+		// Remove file
+		if err := os.Remove(path); err != nil {
+			t.Fatalf("remove: %v", err)
+		}
+
+		time.Sleep(300 * time.Millisecond)
+
+		// Should reload with empty policy set
+		if len(pa.policies) != 0 {
+			t.Errorf("expected 0 policies after removal, got %d", len(pa.policies))
+		}
+	})
+
+	t.Run("watch_loop_handles_multiple_rapid_changes", func(t *testing.T) {
+		dir := t.TempDir()
+		path := filepath.Join(dir, "policies.json")
+		// Start with file
+		if err := os.WriteFile(path, []byte(`[{"id":"p1","subject":"alice","resource":"r1","actions":["read"],"effect":"allow"}]`), 0o600); err != nil {
+			t.Fatalf("write: %v", err)
+		}
+
+		store, err := NewFilePolicyStore(path)
+		if err != nil {
+			t.Fatalf("new store: %v", err)
+		}
+		pa, err := NewPersistentAuthorizer(store, 10*time.Second)
+		if err != nil {
+			t.Fatalf("new persistent: %v", err)
+		}
+		defer pa.Stop()
+
+		if err := pa.StartWatch(); err != nil {
+			t.Skipf("fsnotify not available: %v", err)
+		}
+
+		// Make multiple rapid changes
+		for i := 2; i <= 4; i++ {
+			time.Sleep(50 * time.Millisecond)
+			content := fmt.Sprintf(`[{"id":"p%d","subject":"alice","resource":"r%d","actions":["read"],"effect":"allow"}]`, i, i)
+			if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+				t.Fatalf("write %d: %v", i, err)
+			}
+		}
+
+		// Wait for last change to be processed
+		time.Sleep(300 * time.Millisecond)
+
+		// Should have reloaded to latest policy (exact ID depends on timing)
+		if len(pa.policies) != 1 {
+			t.Errorf("expected 1 policy after changes, got %d", len(pa.policies))
+		}
+		// Just verify we have a policy, don't check exact ID due to timing
+	})
+}
+
+// TestLoadEdgeCases tests additional Load edge cases
+func TestLoadEdgeCases(t *testing.T) {
+	t.Run("read_permission_error", func(t *testing.T) {
+		if os.Getuid() == 0 {
+			t.Skip("running as root, cannot test permission errors")
+		}
+
+		dir := t.TempDir()
+		path := writeTempPolicies(t, dir, `[]`)
+
+		// Make file unreadable
+		if err := os.Chmod(path, 0o000); err != nil {
+			t.Fatalf("chmod: %v", err)
+		}
+		defer os.Chmod(path, 0o600) // cleanup
+
+		store, err := NewFilePolicyStore(path)
+		if err != nil {
+			// refreshModTime might fail with permission error
+			t.Skipf("NewFilePolicyStore failed (expected on permission error): %v", err)
+		}
+
+		_, err = store.Load()
+		if err == nil {
+			t.Fatal("expected error loading unreadable file")
+		}
+	})
+
+	t.Run("whitespace_only_file", func(t *testing.T) {
+		dir := t.TempDir()
+		path := filepath.Join(dir, "whitespace.json")
+		if err := os.WriteFile(path, []byte("   \n\t  \n"), 0o600); err != nil {
+			t.Fatalf("write: %v", err)
+		}
+
+		store, err := NewFilePolicyStore(path)
+		if err != nil {
+			t.Fatalf("new store: %v", err)
+		}
+
+		_, err = store.Load()
+		if err == nil {
+			t.Fatal("expected error for whitespace-only file")
+		}
+	})
+
+	t.Run("empty_object_instead_of_array", func(t *testing.T) {
+		dir := t.TempDir()
+		path := writeTempPolicies(t, dir, `{}`)
+		store, err := NewFilePolicyStore(path)
+		if err != nil {
+			t.Fatalf("new store: %v", err)
+		}
+
+		_, err = store.Load()
+		if err == nil {
+			t.Fatal("expected error for object instead of array")
+		}
+	})
+}
+
+// TestNewFilePolicyStoreEdgeCases tests constructor edge cases
+func TestNewFilePolicyStoreEdgeCases(t *testing.T) {
+	t.Run("directory_instead_of_file", func(t *testing.T) {
+		dir := t.TempDir()
+		store, err := NewFilePolicyStore(dir)
+		if err != nil {
+			// Some systems may error on Stat(directory)
+			return
+		}
+
+		// lastModified should be set to directory mod time
+		if store.lastModified.IsZero() {
+			t.Error("lastModified should not be zero for existing directory")
+		}
+	})
+
+	t.Run("symlink_to_file", func(t *testing.T) {
+		dir := t.TempDir()
+		target := writeTempPolicies(t, dir, `[]`)
+		symlink := filepath.Join(dir, "symlink.json")
+
+		if err := os.Symlink(target, symlink); err != nil {
+			t.Skipf("symlink not supported: %v", err)
+		}
+
+		store, err := NewFilePolicyStore(symlink)
+		if err != nil {
+			t.Fatalf("new store with symlink: %v", err)
+		}
+
+		policies, err := store.Load()
+		if err != nil {
+			t.Fatalf("load through symlink: %v", err)
+		}
+		if len(policies) != 0 {
+			t.Errorf("expected 0 policies, got %d", len(policies))
+		}
+	})
+}
+
+// TestStartEdgeCases tests Start polling edge cases
+func TestStartEdgeCases(t *testing.T) {
+	t.Run("refresh_modtime_error_continues", func(t *testing.T) {
+		dir := t.TempDir()
+		path := writeTempPolicies(t, dir, `[]`)
+		store, err := NewFilePolicyStore(path)
+		if err != nil {
+			t.Fatalf("new store: %v", err)
+		}
+
+		pa, err := NewPersistentAuthorizer(store, 50*time.Millisecond)
+		if err != nil {
+			t.Fatalf("new persistent: %v", err)
+		}
+		defer pa.Stop()
+
+		pa.Start()
+		time.Sleep(30 * time.Millisecond)
+
+		// Delete file to cause refreshModTime error
+		os.Remove(path)
+
+		// Wait for polling to attempt refresh
+		time.Sleep(100 * time.Millisecond)
+
+		// Polling should continue despite error (logged to stderr)
+		// Just verify no panic occurred
+	})
+
+	t.Run("concurrent_starts", func(t *testing.T) {
+		dir := t.TempDir()
+		path := writeTempPolicies(t, dir, `[]`)
+		store, err := NewFilePolicyStore(path)
+		if err != nil {
+			t.Fatalf("new store: %v", err)
+		}
+
+		pa, err := NewPersistentAuthorizer(store, 100*time.Millisecond)
+		if err != nil {
+			t.Fatalf("new persistent: %v", err)
+		}
+		defer pa.Stop()
+
+		// Start multiple times (should spawn multiple goroutines)
+		pa.Start()
+		pa.Start()
+		pa.Start()
+
+		time.Sleep(50 * time.Millisecond)
+
+		// No panic is the success criteria
+	})
+}
+
+// mockPolicyStore for testing non-FilePolicyStore scenarios
+type mockPolicyStore struct {
+	policies     []Policy
+	lastModified time.Time
+	loadErr      error
+}
+
+func (m *mockPolicyStore) Load() ([]Policy, error) {
+	if m.loadErr != nil {
+		return nil, m.loadErr
+	}
+	return append([]Policy{}, m.policies...), nil
+}
+
+func (m *mockPolicyStore) LastModified() time.Time {
+	return m.lastModified
 }
