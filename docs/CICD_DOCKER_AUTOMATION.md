@@ -1,8 +1,8 @@
 # CI/CD Docker Automation Guide
 
 **Date**: November 10, 2025  
-**Week**: 5, Day 1  
-**Status**: ✅ Implemented
+**Week**: 5, Day 1-2  
+**Status**: ✅ Implemented (with Trivy vulnerability scanning)
 
 ## Overview
 
@@ -15,9 +15,10 @@ Automated Docker image builds and publishing to GitHub Container Registry (GHCR)
 The Docker build process is integrated into `.github/workflows/ci.yml` as a new job that runs after successful binary build:
 
 ```
-Test Job → Build Job → Docker Build Job → Security Scan
-                                ↓
-                        Push to GHCR (ghcr.io)
+Test Job → Build Job → Docker Build Job → Trivy Scan → Security Scan (Gosec)
+                                ↓              ↓
+                        Push to GHCR    Vulnerability Report
+                        (ghcr.io)       (GitHub Security Tab)
 ```
 
 ### Image Registry

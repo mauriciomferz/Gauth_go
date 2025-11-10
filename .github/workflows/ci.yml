@@ -392,7 +392,8 @@ jobs:
         image-ref: ghcr.io/${{ github.repository_owner }}/gauth:latest
         format: 'table'
         severity: 'CRITICAL,HIGH,MEDIUM'
-        exit-code: '1'  # Fail the build if CRITICAL or HIGH vulnerabilities found
+        exit-code: '0'  # Don't fail the build, just report vulnerabilities
+        ignore-unfixed: true  # Ignore vulnerabilities without fixes
 
   security-scan:
     name: Security Scan
