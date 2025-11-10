@@ -25,6 +25,8 @@ spec:
         ports:
         - containerPort: 8080
           name: http
+        - containerPort: 6060
+          name: pprof
         env:
         - name: GAUTH_WEB_PORT
           value: "8080"
@@ -34,6 +36,10 @@ spec:
           value: "info"
         - name: VERSION
           value: "blue"
+        - name: GAUTH_ENABLE_PPROF
+          value: "1"
+        - name: GAUTH_PPROF_PORT
+          value: "6060"
         resources:
           requests:
             memory: "256Mi"

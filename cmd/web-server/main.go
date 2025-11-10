@@ -5,7 +5,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
+	_ "net/http/pprof" // Enable pprof HTTP handlers
 	"os"
 	"strings"
 	"time"
@@ -48,6 +50,27 @@ func main() {
 	if !strings.HasPrefix(port, ":") {
 		port = ":" + port
 	}
+
+	// Enable pprof profiling endpoints if GAUTH_ENABLE_PPROF=1
+	if os.Getenv("GAUTH_ENABLE_PPROF") == "1" {
+		pprofPort := os.Getenv("GAUTH_PPROF_PORT")
+		if pprofPort == "" {
+			pprofPort = "6060"
+		}
+		go func() {
+			pprofAddr := ":" + pprofPort
+			log.Printf("[pprof] Starting profiling server on http://localhost%s/debug/pprof/\n", pprofAddr)
+			log.Printf("[pprof] Available endpoints:\n")
+			log.Printf("[pprof]   - CPU profile: http://localhost%s/debug/pprof/profile?seconds=30\n", pprofAddr)
+			log.Printf("[pprof]   - Heap profile: http://localhost%s/debug/pprof/heap\n", pprofAddr)
+			log.Printf("[pprof]   - Goroutines: http://localhost%s/debug/pprof/goroutine\n", pprofAddr)
+			log.Printf("[pprof]   - All profiles: http://localhost%s/debug/pprof/\n", pprofAddr)
+			if err := http.ListenAndServe(pprofAddr, nil); err != nil {
+				log.Printf("[pprof] Server failed: %v\n", err)
+			}
+		}()
+	}
+
 	// Prefer new beta constructor (legacy NewEducationalServer retained as alias)
 	srv := web.NewBetaServer(port)
 	_ = srv.Run()
