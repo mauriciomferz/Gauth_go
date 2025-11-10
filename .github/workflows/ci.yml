@@ -369,6 +369,31 @@ jobs:
     - name: Image digest
       run: echo "Image pushed with tags ${{ steps.meta.outputs.tags }}"
 
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ghcr.io/${{ github.repository_owner }}/gauth:latest
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        severity: 'CRITICAL,HIGH'
+        exit-code: '0'  # Don't fail on vulnerabilities for SARIF upload
+
+    - name: Upload Trivy results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+        category: 'container-security'
+
+    - name: Run Trivy vulnerability scanner (table output)
+      uses: aquasecurity/trivy-action@master
+      if: always()
+      with:
+        image-ref: ghcr.io/${{ github.repository_owner }}/gauth:latest
+        format: 'table'
+        severity: 'CRITICAL,HIGH,MEDIUM'
+        exit-code: '1'  # Fail the build if CRITICAL or HIGH vulnerabilities found
+
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
