@@ -13,6 +13,7 @@ permissions:
   pull-requests: read
   checks: write
   statuses: write
+  packages: write  # Required for GHCR push
 
 jobs:
   test:
@@ -318,6 +319,55 @@ jobs:
         
         echo ""
         echo "🎉 Enhanced CI Build completed successfully!"
+
+  docker-build:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata (tags, labels)
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ghcr.io/${{ github.repository_owner }}/gauth
+        tags: |
+          type=ref,event=branch
+          type=sha,prefix={{branch}}-,format=short
+          type=raw,value=latest,enable={{is_default_branch}}
+          type=raw,value=blue,enable={{is_default_branch}}
+          type=raw,value=green,enable={{is_default_branch}}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.production
+        platforms: linux/amd64
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+          BUILD_DATE=${{ github.event.head_commit.timestamp }}
+          GIT_COMMIT=${{ github.sha }}
+          GIT_BRANCH=${{ github.ref_name }}
+
+    - name: Image digest
+      run: echo "Image pushed with tags ${{ steps.meta.outputs.tags }}"
 
   security-scan:
     name: Security Scan

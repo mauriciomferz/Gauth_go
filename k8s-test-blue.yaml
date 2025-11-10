@@ -20,8 +20,8 @@ spec:
     spec:
       containers:
       - name: gauth
-        image: gauth:blue-v2
-        imagePullPolicy: Never
+        image: ghcr.io/mauriciomferz/gauth:blue
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
           name: http
