@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gauth-deployment-blue
+  namespace: gauth-staging
+  labels:
+    app: gauth
+    environment: staging
+    version: blue
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0  # Zero downtime
+  selector:
+    matchLabels:
+      app: gauth
+      environment: staging
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: gauth
+        environment: staging
+        version: blue
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: gauth
+        image: gauth:blue
+        imagePullPolicy: Never  # Use local image from Docker
+        
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        
+        # Simplified environment for local testing
+        env:
+        - name: GAUTH_ENV
+          value: "staging"
+        - name: GAUTH_LOG_LEVEL
+          value: "debug"
+        - name: GAUTH_PORT
+          value: "8080"
+        - name: GAUTH_DEV_MODE
+          value: "true"
+        
+        # Resource limits (reduced for local testing)
+        resources:
+          requests:
+            memory: 128Mi
+            cpu: 100m
+          limits:
+            memory: 512Mi
+            cpu: 500m
+        
+        # Health probes
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        startupProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 0
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 12  # 60 seconds max startup time
