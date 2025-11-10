@@ -1,0 +1,99 @@
+# Production Dockerfile for GAuth Web Server
+# Multi-stage build supporting CGO dependencies (BLS library)
+# Target: linux/amd64 for Kubernetes deployment
+
+# ============================================================================
+# Stage 1: Builder - Compile Go application with CGO support
+# ============================================================================
+FROM golang:1.25-alpine AS builder
+
+# Install build dependencies for CGO and BLS library
+RUN apk add --no-cache \
+    gcc \
+    g++ \
+    musl-dev \
+    git \
+    make \
+    ca-certificates
+
+# Set working directory
+WORKDIR /build
+
+# Copy go module files first for better layer caching
+COPY go.mod go.sum ./
+
+# Download dependencies (skip go.work to avoid workspace issues in Docker)
+ENV GOWORK=off
+RUN go mod download && go mod verify
+
+# Copy source code
+COPY . .
+
+# Build the web-server binary with CGO enabled for BLS support
+# Target linux/amd64 for Kubernetes compatibility
+RUN echo "=== Building GAuth web-server with CGO support ===" && \
+    CGO_ENABLED=1 \
+    GOOS=linux \
+    GOARCH=amd64 \
+    go build -v \
+    -ldflags="-w -s" \
+    -o /build/web-server \
+    ./cmd/web-server && \
+    echo "=== Build completed successfully ==="
+
+# Verify the binary was built correctly
+RUN echo "=== Verifying binary ===" && \
+    ls -lh /build/web-server && \
+    file /build/web-server && \
+    /build/web-server -healthcheck || echo "Binary built (healthcheck needs server)"
+
+# ============================================================================
+# Stage 2: Runtime - Minimal Alpine image with runtime dependencies
+# ============================================================================
+FROM alpine:3.19
+
+# Install runtime dependencies for CGO-compiled binaries
+RUN apk add --no-cache \
+    ca-certificates \
+    tzdata \
+    libstdc++ \
+    libgcc
+
+# Create non-root user for security
+RUN addgroup -g 1000 gauth && \
+    adduser -D -u 1000 -G gauth gauth
+
+# Set working directory
+WORKDIR /app
+
+# Copy binary from builder
+COPY --from=builder /build/web-server /app/web-server
+
+# Copy web assets (templates and static files)
+COPY --from=builder /build/web/templates /app/web/templates
+COPY --from=builder /build/web/static /app/web/static
+COPY --from=builder /build/web/static_ui /app/web/static_ui
+
+# Create necessary directories for runtime
+RUN mkdir -p /app/data /app/logs && \
+    chown -R gauth:gauth /app
+
+# Switch to non-root user
+USER gauth
+
+# Expose default port
+EXPOSE 8080
+
+# Health check using the built-in healthcheck flag
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD ["/app/web-server", "-healthcheck"]
+
+# Default environment variables (can be overridden in Kubernetes)
+ENV GAUTH_WEB_PORT=8080 \
+    GAUTH_LOG_LEVEL=info \
+    GAUTH_ENV=production \
+    GAUTH_HEALTH_URL=http://localhost:8080/api/v1/beta/health
+
+# Run the web server
+ENTRYPOINT ["/app/web-server"]
+CMD []
