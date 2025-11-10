@@ -107,10 +107,12 @@ func createExamplePoADefinition() *poa.PoADefinition {
 				},
 			},
 			AuthorizedClient: poa.AuthorizedClient{
-				Type:              poa.ClientTypeLLM,
+				Type:              string(poa.ClientTypeLLM),
+				TypeEnum:          poa.ClientTypeLLM,
 				Identity:          "gauth-ai-client-v1",
 				Version:           "1.0.0",
 				OperationalStatus: "active",
+				StatusEnum:        poa.OperationalStatusActive,
 			},
 		},
 
@@ -123,27 +125,27 @@ func createExamplePoADefinition() *poa.PoADefinition {
 				SignatureType:      poa.SignatureSingle,
 			},
 			ApplicableSectors: []poa.IndustrySector{
-				poa.SectorInformationComm,
-				poa.SectorProfessional,
-				poa.SectorFinancialInsurance,
+				poa.DemoSectorInfoComm,
+				poa.DemoSectorProfessional,
+				poa.DemoSectorFinancial,
 			},
 			ApplicableRegions: []poa.GeographicScope{
 				{Type: poa.GeoTypeNational, Identifier: "DE"}, // Germany
 				{Type: poa.GeoTypeRegional, Identifier: "EU"}, // European Union
 			},
 			AuthorizedActions: poa.AuthorizedActions{
-				Transactions: []poa.Transaction{
+				Transactions: []poa.TransactionType{
 					poa.TransactionLoan,
 					poa.TransactionPurchase,
 				},
-				Decisions: []poa.Decision{
+				Decisions: []poa.DecisionType{
 					poa.DecisionFinancial,
 					poa.DecisionStrategic,
 					poa.DecisionInfoSharing,
 				},
-				NonPhysicalActions: []poa.NonPhysicalAction{
-					poa.ActionResearching,
-					poa.ActionBrainstorming,
+				NonPhysicalActions: []poa.ActionTypeNonPhysical{
+					poa.ActionNonPhysicalResearching,
+					poa.ActionNonPhysicalBrainstorming,
 				},
 			},
 		},

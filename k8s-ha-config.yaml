@@ -1,0 +1,72 @@
+# High Availability Resources for GAuth Application
+# Week 6 Day 3: HA Configuration
+
+---
+# Horizontal Pod Autoscaler
+# Automatically scales GAuth pods based on CPU and memory utilization
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: gauth-hpa
+  namespace: gauth-staging
+  labels:
+    app: gauth
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gauth-blue
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+      - type: Pods
+        value: 1
+        periodSeconds: 60
+      selectPolicy: Min
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 30
+      - type: Pods
+        value: 2
+        periodSeconds: 30
+      selectPolicy: Max
+
+---
+# Pod Disruption Budget
+# Ensures minimum availability during voluntary disruptions (updates, drains, etc.)
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: gauth-pdb
+  namespace: gauth-staging
+  labels:
+    app: gauth
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: gauth
+      version: blue
+  unhealthyPodEvictionPolicy: IfHealthyBudget

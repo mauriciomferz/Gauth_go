@@ -7,7 +7,7 @@ metadata:
     app: gauth
     version: blue
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: gauth
@@ -18,18 +18,9 @@ spec:
         app: gauth
         version: blue
     spec:
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchLabels:
-                  app: gauth
-              topologyKey: kubernetes.io/hostname
       containers:
       - name: gauth
-        image: gauth-local-arm64:latest
+        image: gauth-mock:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
@@ -49,17 +40,6 @@ spec:
           value: "1"
         - name: GAUTH_PPROF_PORT
           value: "6060"
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: postgres-secret
-              key: DATABASE_URL
-        - name: REDIS_URL
-          value: redis://:gauth_redis_password_changeme@redis-service.gauth-data.svc.cluster.local:6379/0
-        - name: DB_MAX_CONNECTIONS
-          value: "10"
-        - name: DB_MAX_IDLE_CONNECTIONS
-          value: "5"
         resources:
           requests:
             memory: "256Mi"

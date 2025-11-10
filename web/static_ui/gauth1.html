@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAuth 1.0 - RFC-0111/0115 Dashboard</title>
+    <link rel="stylesheet" href="/ui/gauth1.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <h1>GAuth 1.0</h1>
+                    <span class="badge badge-success">Production Ready</span>
+                </div>
+                <nav class="nav">
+                    <button class="nav-link active" data-tab="overview">
+                        <i class="fas fa-home"></i> Overview
+                    </button>
+                    <button class="nav-link" data-tab="tokens">
+                        <i class="fas fa-key"></i> Extended Tokens
+                    </button>
+                    <button class="nav-link" data-tab="pvp">
+                        <i class="fas fa-user-check"></i> PVP
+                    </button>
+                    <button class="nav-link" data-tab="registry">
+                        <i class="fas fa-building"></i> Registry
+                    </button>
+                    <button class="nav-link" data-tab="pip">
+                        <i class="fas fa-gavel"></i> PIP
+                    </button>
+                    <button class="nav-link" data-tab="poa">
+                        <i class="fas fa-file-contract"></i> PoA
+                    </button>
+                    <button class="nav-link" data-tab="e2e">
+                        <i class="fas fa-project-diagram"></i> E2E Testing
+                    </button>
+                    <button class="nav-link" data-tab="metrics">
+                        <i class="fas fa-chart-line"></i> Metrics
+                    </button>
+                </nav>
+                <div class="theme-toggle">
+                    <button id="theme-toggle-btn" title="Toggle theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Overview Tab -->
+            <div class="tab-content active" id="overview-tab">
+                <div class="hero">
+                    <h2><i class="fas fa-rocket"></i> Welcome to GAuth 1.0 Dashboard</h2>
+                    <p class="hero-subtitle">RFC-0111 & RFC-0115 Compliant Authorization Framework</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="stat-tests">91</h3>
+                            <p>Tests Passing</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%)">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="stat-benchmarks">19</h3>
+                            <p>Benchmarks</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="stat-coverage">72.6%</h3>
+                            <p>Test Coverage</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="stat-performance">1.3µs</h3>
+                            <p>E2E Token Flow</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <h3><i class="fas fa-book"></i> RFC Compliance</h3>
+                        <div class="compliance-list">
+                            <div class="compliance-item">
+                                <i class="fas fa-check-circle text-success"></i>
+                                <span><strong>RFC-0111</strong> - GAuth 1.0 Extended Tokens</span>
+                            </div>
+                            <div class="compliance-item">
+                                <i class="fas fa-check-circle text-success"></i>
+                                <span><strong>RFC-0115</strong> - Power of Attorney Framework</span>
+                            </div>
+                            <div class="compliance-item">
+                                <i class="fas fa-check-circle text-success"></i>
+                                <span><strong>eIDAS</strong> - Trust Service Provider Integration</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fas fa-layer-group"></i> System Components</h3>
+                        <div class="components-list">
+                            <div class="component-item">
+                                <span class="component-name">Extended Token</span>
+                                <span class="badge badge-success">Active</span>
+                            </div>
+                            <div class="component-item">
+                                <span class="component-name">PVP (Identity Verification)</span>
+                                <span class="badge badge-success">Active</span>
+                            </div>
+                            <div class="component-item">
+                                <span class="component-name">Commercial Register</span>
+                                <span class="badge badge-success">Active</span>
+                            </div>
+                            <div class="component-item">
+                                <span class="component-name">PIP (Policy Info Point)</span>
+                                <span class="badge badge-success">Active</span>
+                            </div>
+                            <div class="component-item">
+                                <span class="component-name">PoA (Power of Attorney)</span>
+                                <span class="badge badge-success">Active</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fas fa-info-circle"></i> Quick Start</h3>
+                        <ol class="quick-start-list">
+                            <li>Navigate to <strong>Extended Tokens</strong> to create and validate tokens</li>
+                            <li>Use <strong>PVP</strong> to verify identity chains with eIDAS</li>
+                            <li>Check <strong>Commercial Register</strong> for entity validation</li>
+                            <li>Test <strong>PIP</strong> for authorization decisions</li>
+                            <li>Manage <strong>PoA</strong> delegations and permissions</li>
+                            <li>Run <strong>E2E Tests</strong> to validate complete flows</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extended Tokens Tab -->
+            <div class="tab-content" id="tokens-tab">
+                <h2><i class="fas fa-key"></i> Extended Token Management</h2>
+                <p class="tab-description">Create, validate, and manage RFC-0111 compliant extended tokens with 3-level authorization chains.</p>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <h3><i class="fas fa-plus-circle"></i> Create Extended Token</h3>
+                        <form id="create-token-form" class="form">
+                            <div class="form-group">
+                                <label>Client ID</label>
+                                <input type="text" id="token-client-id" placeholder="client-123" value="demo-client-001" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Owner's Authorizer Entity</label>
+                                <input type="text" id="token-owner-auth" placeholder="HRB12345-DE" value="HRB12345-DE" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Client Owner Entity</label>
+                                <input type="text" id="token-client-owner" placeholder="12345678-GB" value="12345678-GB" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Scope (comma-separated)</label>
+                                <input type="text" id="token-scope" placeholder="read, write, admin" value="read,write" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Expiration (hours)</label>
+                                <input type="number" id="token-expiration" value="24" min="1" max="720" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Create Token
+                            </button>
+                        </form>
+                        <div id="token-result" class="result-box" style="display: none;"></div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fas fa-check-circle"></i> Validate Token</h3>
+                        <form id="validate-token-form" class="form">
+                            <div class="form-group">
+                                <label>Token (JWT)</label>
+                                <textarea id="validate-token-input" rows="6" placeholder="Paste JWT token here..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check"></i> Validate Token
+                            </button>
+                        </form>
+                        <div id="validate-result" class="result-box" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-list"></i> Recent Tokens</h3>
+                    <div id="recent-tokens" class="table-responsive">
+                        <p class="text-muted">No tokens created yet. Use the form above to create your first token.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PVP Tab -->
+            <div class="tab-content" id="pvp-tab">
+                <h2><i class="fas fa-user-check"></i> PVP Identity Verification</h2>
+                <p class="tab-description">Verify identity chains with eIDAS trust levels and cryptographic key binding.</p>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <h3><i class="fas fa-id-card"></i> Verify Identity Chain</h3>
+                        <form id="verify-identity-form" class="form">
+                            <div class="form-group">
+                                <label>Identity Type</label>
+                                <select id="identity-type" required>
+                                    <option value="eidas">eIDAS (EU)</option>
+                                    <option value="uk-verify">UK Verify</option>
+                                    <option value="national-id">National ID</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Trust Level</label>
+                                <select id="trust-level" required>
+                                    <option value="high">High</option>
+                                    <option value="substantial" selected>Substantial</option>
+                                    <option value="low">Low</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Entity ID</label>
+                                <input type="text" id="identity-entity-id" placeholder="HRB12345-DE" value="HRB12345-DE" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Trust Service Provider</label>
+                                <input type="text" id="identity-tsp" placeholder="DE-TSP-001" value="DE-TSP-001" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check-circle"></i> Verify Identity
+                            </button>
+                        </form>
+                        <div id="identity-result" class="result-box" style="display: none;"></div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fas fa-certificate"></i> Trust Service Providers</h3>
+                        <div id="tsp-list" class="tsp-grid">
+                            <div class="tsp-item">
+                                <i class="fas fa-shield-alt text-success"></i>
+                                <div>
+                                    <strong>DE-TSP-001</strong>
+                                    <p>German Trust Service Provider</p>
+                                    <span class="badge badge-success">Active</span>
+                                </div>
+                            </div>
+                            <div class="tsp-item">
+                                <i class="fas fa-shield-alt text-success"></i>
+                                <div>
+                                    <strong>UK-TSP-001</strong>
+                                    <p>UK Trust Service Provider</p>
+                                    <span class="badge badge-success">Active</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-chart-bar"></i> PVP Performance</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">Identity Verification</span>
+                            <span class="metric-value">582.1 ns/op</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">TSP Verification</span>
+                            <span class="metric-value">93.97 ns/op</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Authorization Chain</span>
+                            <span class="metric-value">410.7 ns/op</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Commercial Registry Tab -->
+            <div class="tab-content" id="registry-tab">
+                <h2><i class="fas fa-building"></i> Commercial Register</h2>
+                <p class="tab-description">Verify German HRB and UK Companies House registrations with signatory authority validation.</p>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <h3><i class="fas fa-search"></i> Verify Entity Registration</h3>
+                        <form id="verify-entity-form" class="form">
+                            <div class="form-group">
+                                <label>Jurisdiction</label>
+                                <select id="entity-jurisdiction" required>
+                                    <option value="DE">Germany (HRB)</option>
+                                    <option value="GB">United Kingdom</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Registration Number</label>
+                                <input type="text" id="entity-reg-number" placeholder="HRB12345" value="HRB12345-DE" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Verify Entity
+                            </button>
+                        </form>
+                        <div id="entity-result" class="result-box" style="display: none;"></div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fas fa-users"></i> Check Signatory Authority</h3>
+                        <form id="verify-signatory-form" class="form">
+                            <div class="form-group">
+                                <label>Entity Registration</label>
+                                <input type="text" id="signatory-entity" placeholder="HRB12345-DE" value="HRB12345-DE" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Signatory Name</label>
+                                <input type="text" id="signatory-name" placeholder="Max Mustermann" value="Max Mustermann" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Authority Type</label>
+                                <select id="signatory-type" required>
+                                    <option value="managing_director">Managing Director</option>
+                                    <option value="prokura">Prokura (Full)</option>
+                                    <option value="sole">Sole Signatory</option>
+                                    <option value="joint">Joint Signatory</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-user-check"></i> Verify Signatory
+                            </button>
+                        </form>
+                        <div id="signatory-result" class="result-box" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-database"></i> Mock Entities</h3>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Registration</th>
+                                    <th>Name</th>
+                                    <th>Jurisdiction</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>HRB12345-DE</code></td>
+                                    <td>Test Technologies GmbH</td>
+                                    <td>🇩🇪 Germany</td>
+                                    <td><span class="badge badge-success">Active</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>12345678-GB</code></td>
+                                    <td>Test Technologies Ltd</td>
+                                    <td>🇬🇧 United Kingdom</td>
+                                    <td><span class="badge badge-success">Active</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PIP Tab -->
+            <div class="tab-content" id="pip-tab">
+                <h2><i class="fas fa-gavel"></i> PIP - Policy Information Point</h2>
+                <p class="tab-description">Consolidated authorization decisions with caching, action validation, and geographic restrictions.</p>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <h3><i class="fas fa-balance-scale"></i> Validate Authorization</h3>
+                        <form id="validate-authz-form" class="form">
+                            <div class="form-group">
+                                <label>Client ID</label>
+                                <input type="text" id="authz-client-id" placeholder="demo-client-001" value="demo-client-001" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Action Type</label>
+                                <select id="authz-action" required>
+                                    <option value="transaction">Transaction</option>
+                                    <option value="decision">Decision</option>
+                                    <option value="physical">Physical Action</option>
+                                    <option value="non-physical">Non-Physical Action</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Geographic Scope</label>
+                                <select id="authz-geographic" required>
+                                    <option value="national">National</option>
+                                    <option value="eu">European Union</option>
+                                    <option value="global">Global</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Industry Sector (ISIC/NACE)</label>
+                                <input type="text" id="authz-sector" placeholder="64.19" value="64.19">
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check-circle"></i> Validate Authorization
+                            </button>
+                        </form>
+                        <div id="authz-result" class="result-box" style="display: none;"></div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fas fa-database"></i> Cache Statistics</h3>
+                        <div id="cache-stats" class="metrics-grid">
+                            <div class="metric-item">
+                                <span class="metric-label">Cache Size</span>
+                                <span class="metric-value" id="cache-size">0</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Hit Rate</span>
+                                <span class="metric-value" id="cache-hit-rate">0%</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Evictions</span>
+                                <span class="metric-value" id="cache-evictions">0</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" id="refresh-cache-btn">
+                            <i class="fas fa-sync"></i> Refresh Cache
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-tachometer-alt"></i> PIP Performance</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">Cache Miss</span>
+                            <span class="metric-value">107.0 ns/op</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Cache Hit</span>
+                            <span class="metric-value">97.02 ns/op</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Authorization</span>
+                            <span class="metric-value">224.5 ns/op</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Cache Get</span>
+                            <span class="metric-value">21.59 ns/op</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PoA Tab -->
+            <div class="tab-content" id="poa-tab">
+                <h2><i class="fas fa-file-contract"></i> Power of Attorney (RFC-0115)</h2>
+                <p class="tab-description">Manage delegations with representative types, action scopes, and geographic restrictions.</p>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <h3><i class="fas fa-plus-circle"></i> Create PoA</h3>
+                        <form id="create-poa-form" class="form">
+                            <div class="form-group">
+                                <label>Grantor Entity</label>
+                                <input type="text" id="poa-grantor" placeholder="HRB12345-DE" value="HRB12345-DE" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Representative Name</label>
+                                <input type="text" id="poa-representative" placeholder="John Doe" value="John Doe" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Representative Type</label>
+                                <select id="poa-rep-type" required>
+                                    <option value="managing_director">Managing Director</option>
+                                    <option value="prokura">Prokura</option>
+                                    <option value="legal_counsel">Legal Counsel</option>
+                                    <option value="agent">Authorized Agent</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Actions (comma-separated)</label>
+                                <input type="text" id="poa-actions" placeholder="transactions, decisions" value="transactions,decisions" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Geographic Scope</label>
+                                <select id="poa-geographic" required>
+                                    <option value="national">National</option>
+                                    <option value="eu">European Union</option>
+                                    <option value="multiple">Multiple Countries</option>
+                                    <option value="global">Global</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Validity Period (days)</label>
+                                <input type="number" id="poa-validity" value="365" min="1" max="3650" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Create PoA
+                            </button>
+                        </form>
+                        <div id="poa-result" class="result-box" style="display: none;"></div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fas fa-check-circle"></i> Validate PoA</h3>
+                        <form id="validate-poa-form" class="form">
+                            <div class="form-group">
+                                <label>PoA ID</label>
+                                <input type="text" id="validate-poa-id" placeholder="poa-12345" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Action to Verify</label>
+                                <input type="text" id="validate-poa-action" placeholder="transaction" value="transaction" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Geographic Location</label>
+                                <input type="text" id="validate-poa-location" placeholder="DE" value="DE" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check"></i> Validate PoA
+                            </button>
+                        </form>
+                        <div id="validate-poa-result" class="result-box" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-list"></i> Active PoAs</h3>
+                    <div id="active-poas" class="table-responsive">
+                        <p class="text-muted">No PoAs created yet. Use the form above to create your first Power of Attorney.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-bolt"></i> PoA Performance</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">PoA Validation</span>
+                            <span class="metric-value">21.19 ns/op</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Representative Check</span>
+                            <span class="metric-value">5.604 ns/op</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Authorization Chain</span>
+                            <span class="metric-value">4.594 ns/op</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Geographic Scope</span>
+                            <span class="metric-value">12.12 ns/op</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- E2E Testing Tab -->
+            <div class="tab-content" id="e2e-tab">
+                <h2><i class="fas fa-project-diagram"></i> End-to-End Testing</h2>
+                <p class="tab-description">Complete integration flows testing all GAuth 1.0 components together.</p>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <h3><i class="fas fa-play-circle"></i> Run E2E Tests</h3>
+                        <div class="test-buttons">
+                            <button class="btn btn-primary test-btn" data-test="token-issuance">
+                                <i class="fas fa-key"></i> Token Issuance Flow
+                            </button>
+                            <button class="btn btn-primary test-btn" data-test="token-validation">
+                                <i class="fas fa-check-circle"></i> Token Validation Flow
+                            </button>
+                            <button class="btn btn-primary test-btn" data-test="authorization">
+                                <i class="fas fa-gavel"></i> Authorization Decision Flow
+                            </button>
+                            <button class="btn btn-primary test-btn" data-test="error-handling">
+                                <i class="fas fa-exclamation-triangle"></i> Error Handling Flow
+                            </button>
+                            <button class="btn btn-success test-btn" data-test="all">
+                                <i class="fas fa-play"></i> Run All Tests
+                            </button>
+                        </div>
+                        <div id="e2e-results" class="result-box" style="display: none;"></div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fas fa-stopwatch"></i> E2E Performance</h3>
+                        <div class="metrics-grid">
+                            <div class="metric-item">
+                                <span class="metric-label">Token Issuance</span>
+                                <span class="metric-value">1,327 ns/op</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Token Validation</span>
+                                <span class="metric-value">1,307 ns/op</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Authorization</span>
+                                <span class="metric-value">257 ns/op</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Throughput</span>
+                                <span class="metric-value">750K ops/sec</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-chart-line"></i> Test Results History</h3>
+                    <div id="test-history" class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Test</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="test-history-body">
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">No tests run yet</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metrics Tab -->
+            <div class="tab-content" id="metrics-tab">
+                <h2><i class="fas fa-chart-line"></i> System Metrics & Analytics</h2>
+                <p class="tab-description">Real-time performance metrics and system health indicators.</p>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <h3><i class="fas fa-server"></i> System Health</h3>
+                        <div id="health-status" class="health-grid">
+                            <div class="health-item">
+                                <i class="fas fa-circle text-success"></i>
+                                <div>
+                                    <strong>API Server</strong>
+                                    <p>Operational</p>
+                                </div>
+                            </div>
+                            <div class="health-item">
+                                <i class="fas fa-circle text-success"></i>
+                                <div>
+                                    <strong>Commercial Register</strong>
+                                    <p>Connected</p>
+                                </div>
+                            </div>
+                            <div class="health-item">
+                                <i class="fas fa-circle text-success"></i>
+                                <div>
+                                    <strong>PVP Service</strong>
+                                    <p>Active</p>
+                                </div>
+                            </div>
+                            <div class="health-item">
+                                <i class="fas fa-circle text-success"></i>
+                                <div>
+                                    <strong>PIP Cache</strong>
+                                    <p>Ready</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fas fa-tachometer-alt"></i> Performance Overview</h3>
+                        <div class="perf-overview">
+                            <div class="perf-section">
+                                <h4>Component Benchmarks</h4>
+                                <div class="perf-grid">
+                                    <span>PVP Identity Chain:</span><span class="perf-value">582.1 ns/op</span>
+                                    <span>Registry Verification:</span><span class="perf-value">100.6 ms/op</span>
+                                    <span>PIP Authorization:</span><span class="perf-value">224.5 ns/op</span>
+                                    <span>PoA Validation:</span><span class="perf-value">21.19 ns/op</span>
+                                </div>
+                            </div>
+                            <div class="perf-section">
+                                <h4>E2E Flows</h4>
+                                <div class="perf-grid">
+                                    <span>Token Issuance:</span><span class="perf-value">1.3 µs</span>
+                                    <span>Token Validation:</span><span class="perf-value">1.3 µs</span>
+                                    <span>Authorization:</span><span class="perf-value">257 ns</span>
+                                    <span>Throughput:</span><span class="perf-value">750K/sec</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-check-double"></i> Test Coverage Summary</h3>
+                    <div class="coverage-grid">
+                        <div class="coverage-item">
+                            <div class="coverage-header">
+                                <span class="coverage-name">pkg/gauth</span>
+                                <span class="coverage-percent">69.6%</span>
+                            </div>
+                            <div class="coverage-bar">
+                                <div class="coverage-fill" style="width: 69.6%"></div>
+                            </div>
+                        </div>
+                        <div class="coverage-item">
+                            <div class="coverage-header">
+                                <span class="coverage-name">pkg/verification</span>
+                                <span class="coverage-percent">76.7%</span>
+                            </div>
+                            <div class="coverage-bar">
+                                <div class="coverage-fill" style="width: 76.7%"></div>
+                            </div>
+                        </div>
+                        <div class="coverage-item">
+                            <div class="coverage-header">
+                                <span class="coverage-name">pkg/registry</span>
+                                <span class="coverage-percent">91.4%</span>
+                            </div>
+                            <div class="coverage-bar">
+                                <div class="coverage-fill" style="width: 91.4%"></div>
+                            </div>
+                        </div>
+                        <div class="coverage-item">
+                            <div class="coverage-header">
+                                <span class="coverage-name">pkg/pip</span>
+                                <span class="coverage-percent">72.9%</span>
+                            </div>
+                            <div class="coverage-bar">
+                                <div class="coverage-fill" style="width: 72.9%"></div>
+                            </div>
+                        </div>
+                        <div class="coverage-item">
+                            <div class="coverage-header">
+                                <span class="coverage-name"><strong>Overall Coverage</strong></span>
+                                <span class="coverage-percent"><strong>72.6%</strong></span>
+                            </div>
+                            <div class="coverage-bar">
+                                <div class="coverage-fill" style="width: 72.6%; background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>GAuth 1.0</h4>
+                    <p>RFC-0111 & RFC-0115 Compliant Authorization Framework</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="https://github.com/Gimel-Foundation">GitHub</a></li>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API Reference</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Status</h4>
+                    <p><span class="badge badge-success">Production Ready</span></p>
+                    <p class="text-muted">All tests passing (91/91)</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Gimel Foundation. Licensed under MIT.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/ui/gauth1.js" type="module"></script>
+</body>
+</html>

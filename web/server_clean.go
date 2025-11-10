@@ -7426,6 +7426,62 @@ func (s *BetaServer) routes() {
 		c.String(200, `<!DOCTYPE html><html><head><title>PoA Visualization</title></head><body><h1>GAuth PoA Map Visualization</h1><p>Loading...</p></body></html>`)
 	})
 
+	// Serve gauth1.html (GAuth 1.0 Dashboard)
+	s.router.GET("/gauth1.html", func(c *gin.Context) {
+		if wd, err := os.Getwd(); err == nil {
+			path := wd + "/web/static_ui/gauth1.html"
+			if b, err := os.ReadFile(path); err == nil {
+				c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+				c.Header("Pragma", "no-cache")
+				c.Header("Expires", "0")
+				fmt.Fprintf(os.Stderr, "[debug] serving disk gauth1.html (%d bytes)\n", len(b))
+				serveWithNonce(c, b)
+				return
+			} else {
+				fmt.Fprintf(os.Stderr, "[debug] disk gauth1 read failed: %v\n", err)
+				c.String(404, "gauth1.html not found")
+				return
+			}
+		}
+		c.String(500, "error determining working directory")
+	})
+
+	// Serve gauth1.css
+	s.router.GET("/ui/gauth1.css", func(c *gin.Context) {
+		if wd, err := os.Getwd(); err == nil {
+			path := wd + "/web/static_ui/gauth1.css"
+			if b, err := os.ReadFile(path); err == nil {
+				c.Header("Content-Type", "text/css")
+				c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+				c.Data(200, "text/css", b)
+				return
+			} else {
+				fmt.Fprintf(os.Stderr, "[debug] disk gauth1.css read failed: %v\n", err)
+				c.String(404, "gauth1.css not found")
+				return
+			}
+		}
+		c.String(500, "error determining working directory")
+	})
+
+	// Serve gauth1.js
+	s.router.GET("/ui/gauth1.js", func(c *gin.Context) {
+		if wd, err := os.Getwd(); err == nil {
+			path := wd + "/web/static_ui/gauth1.js"
+			if b, err := os.ReadFile(path); err == nil {
+				c.Header("Content-Type", "application/javascript")
+				c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+				c.Data(200, "application/javascript", b)
+				return
+			} else {
+				fmt.Fprintf(os.Stderr, "[debug] disk gauth1.js read failed: %v\n", err)
+				c.String(404, "gauth1.js not found")
+				return
+			}
+		}
+		c.String(500, "error determining working directory")
+	})
+
 	// Serve demo.html (comprehensive feature demonstration)
 	s.router.GET("/demo.html", func(c *gin.Context) {
 		if os.Getenv("GAUTH_DEV_INDEX") == "1" {

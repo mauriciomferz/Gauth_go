@@ -23,13 +23,13 @@ func main() {
 	def := poa.PoADefinition{
 		Parties: poa.Parties{
 			Principal:        poa.Principal{Type: poa.PrincipalTypeOrganization, Identity: "org:acme", Organization: &poa.Organization{Type: poa.OrgTypeNonProfit, Name: "Acme Org", RegisterEntry: "REG-123", ManagingDirector: "Jane Doe", RegisteredAuthority: true}},
-			AuthorizedClient: poa.AuthorizedClient{Type: poa.ClientTypeLLM, Identity: "client:llm-alpha", Version: "0.1.0", OperationalStatus: "experimental"},
+			AuthorizedClient: poa.AuthorizedClient{Type: string(poa.ClientTypeLLM), TypeEnum: poa.ClientTypeLLM, Identity: "client:llm-alpha", Version: "0.1.0", OperationalStatus: "experimental", StatusEnum: poa.OperationalStatusActive},
 		},
 		Authorization: poa.AuthorizationScope{
 			AuthorizationType: poa.AuthorizationType{RepresentationType: poa.RepresentationSole, SubProxyAuthority: false, SignatureType: poa.SignatureSingle},
-			ApplicableSectors: []poa.IndustrySector{poa.SectorInformationComm},
+			ApplicableSectors: []poa.IndustrySector{poa.DemoSectorInfoComm},
 			ApplicableRegions: []poa.GeographicScope{{Type: poa.GeoTypeNational, Identifier: "DE"}},
-			AuthorizedActions: poa.AuthorizedActions{Transactions: []poa.Transaction{poa.TransactionLoan}, Decisions: []poa.Decision{poa.DecisionFinancial}, NonPhysicalActions: []poa.NonPhysicalAction{poa.ActionResearching}},
+			AuthorizedActions: poa.AuthorizedActions{Transactions: []poa.TransactionType{poa.TransactionLoan}, Decisions: []poa.DecisionType{poa.DecisionFinancial}, NonPhysicalActions: []poa.ActionTypeNonPhysical{poa.ActionNonPhysicalResearching}},
 		},
 		Requirements: poa.Requirements{ValidityPeriod: poa.ValidityPeriod{StartTime: time.Now().UTC(), EndTime: time.Now().UTC().Add(24 * time.Hour)}},
 	}
