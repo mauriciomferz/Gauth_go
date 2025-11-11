@@ -797,6 +797,204 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Powers of Attorney Act (State-specific)"},
 	}
+	
+	// Italy (IT) - Strict notarization requirements
+	s.jurisdictionReqs["IT"] = &JurisdictionRequirement{
+		Jurisdiction:         "IT",
+		RequiresNotarization: true,
+		RequiredDocuments:    []string{"passport", "national_id", "carta_identita"},
+		MinimumIDLevel:       "qualified",
+		MaxValueWithoutBoard: 75000.0,
+		RequiredSignatures:   2,
+		AcceptedIDTypes:      []string{"passport", "national_id", "carta_identita", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Consiglio_Nazionale_del_Notariato"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Codice Civile Art. 1392", "Legge 16 febbraio 1913, n. 89"},
+	}
+	
+	// Netherlands (NL) - Moderate requirements
+	s.jurisdictionReqs["NL"] = &JurisdictionRequirement{
+		Jurisdiction:         "NL",
+		RequiresNotarization: true,
+		RequiredDocuments:    []string{"passport", "national_id"},
+		MinimumIDLevel:       "advanced",
+		MaxValueWithoutBoard: 120000.0,
+		RequiredSignatures:   2,
+		AcceptedIDTypes:      []string{"passport", "national_id", "drivers_license", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Koninklijke_Notariele_Beroepsorganisatie"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Burgerlijk Wetboek Boek 3", "Wet op het Notarisambt"},
+	}
+	
+	// Spain (ES) - Notarization required for significant transactions
+	s.jurisdictionReqs["ES"] = &JurisdictionRequirement{
+		Jurisdiction:         "ES",
+		RequiresNotarization: true,
+		RequiredDocuments:    []string{"passport", "national_id", "dni"},
+		MinimumIDLevel:       "qualified",
+		MaxValueWithoutBoard: 80000.0,
+		RequiredSignatures:   2,
+		AcceptedIDTypes:      []string{"passport", "national_id", "dni", "nie", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Consejo_General_del_Notariado"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Código Civil Art. 1709-1739", "Ley del Notariado"},
+	}
+	
+	// Portugal (PT) - Similar to Spain
+	s.jurisdictionReqs["PT"] = &JurisdictionRequirement{
+		Jurisdiction:         "PT",
+		RequiresNotarization: true,
+		RequiredDocuments:    []string{"passport", "national_id", "cartao_cidadao"},
+		MinimumIDLevel:       "advanced",
+		MaxValueWithoutBoard: 85000.0,
+		RequiredSignatures:   2,
+		AcceptedIDTypes:      []string{"passport", "national_id", "cartao_cidadao", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Ordem_dos_Notarios"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Código Civil Português Art. 262-264", "Estatuto do Notariado"},
+	}
+	
+	// France (FR) - Strict civil law requirements
+	s.jurisdictionReqs["FR"] = &JurisdictionRequirement{
+		Jurisdiction:         "FR",
+		RequiresNotarization: true,
+		RequiredDocuments:    []string{"passport", "national_id", "carte_identite"},
+		MinimumIDLevel:       "qualified",
+		MaxValueWithoutBoard: 90000.0,
+		RequiredSignatures:   2,
+		AcceptedIDTypes:      []string{"passport", "national_id", "carte_identite", "residence_permit", "titre_sejour"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Conseil_Superieur_du_Notariat"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Code Civil Art. 1984-2010", "Ordonnance du 2 novembre 1945"},
+	}
+	
+	// Norway (NO) - Nordic model
+	s.jurisdictionReqs["NO"] = &JurisdictionRequirement{
+		Jurisdiction:         "NO",
+		RequiresNotarization: false,
+		RequiredDocuments:    []string{"passport", "national_id", "bank_id"},
+		MinimumIDLevel:       "advanced",
+		MaxValueWithoutBoard: 200000.0,
+		RequiredSignatures:   1,
+		AcceptedIDTypes:      []string{"passport", "national_id", "bank_id", "drivers_license"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            false,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Norwegian_Notary_Public"},
+			MaxCertificateAge:   730 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Fullmaktsloven", "Straffeloven"},
+	}
+	
+	// Denmark (DK) - Nordic model with digital emphasis
+	s.jurisdictionReqs["DK"] = &JurisdictionRequirement{
+		Jurisdiction:         "DK",
+		RequiresNotarization: false,
+		RequiredDocuments:    []string{"passport", "national_id", "nemid"},
+		MinimumIDLevel:       "advanced",
+		MaxValueWithoutBoard: 180000.0,
+		RequiredSignatures:   1,
+		AcceptedIDTypes:      []string{"passport", "national_id", "nemid", "mitid", "drivers_license"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            false,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Danish_Notary_Public"},
+			MaxCertificateAge:   730 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Fuldmagtsforhold", "Aftaleloven"},
+	}
+	
+	// Sweden (SE) - Nordic model with high digital trust
+	s.jurisdictionReqs["SE"] = &JurisdictionRequirement{
+		Jurisdiction:         "SE",
+		RequiresNotarization: false,
+		RequiredDocuments:    []string{"passport", "national_id", "bank_id"},
+		MinimumIDLevel:       "advanced",
+		MaxValueWithoutBoard: 220000.0,
+		RequiredSignatures:   1,
+		AcceptedIDTypes:      []string{"passport", "national_id", "bank_id", "drivers_license", "e_legitimation"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            false,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Swedish_Notary_Public"},
+			MaxCertificateAge:   730 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Fullmaktslagen", "Avtalslagen"},
+	}
+	
+	// Estonia (EE) - Digital-first e-Residency nation
+	s.jurisdictionReqs["EE"] = &JurisdictionRequirement{
+		Jurisdiction:         "EE",
+		RequiresNotarization: false,
+		RequiredDocuments:    []string{"passport", "national_id", "e_residency_card"},
+		MinimumIDLevel:       "qualified",
+		MaxValueWithoutBoard: 150000.0,
+		RequiredSignatures:   1,
+		AcceptedIDTypes:      []string{"passport", "national_id", "e_residency_card", "digi_id", "mobile_id"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            false,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Estonian_Notary_Chamber"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Võlaõigusseadus", "Digital Signature Act", "e-Residency Act"},
+	}
+	
+	// Lithuania (LT) - Baltic digital adoption
+	s.jurisdictionReqs["LT"] = &JurisdictionRequirement{
+		Jurisdiction:         "LT",
+		RequiresNotarization: false,
+		RequiredDocuments:    []string{"passport", "national_id"},
+		MinimumIDLevel:       "advanced",
+		MaxValueWithoutBoard: 140000.0,
+		RequiredSignatures:   1,
+		AcceptedIDTypes:      []string{"passport", "national_id", "residence_permit", "drivers_license"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            false,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Lithuanian_Chamber_of_Notaries"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Civilinis kodeksas", "Notariato įstatymas"},
+	}
+	
+	// Austria (AT) - Similar to Germany, strict civil law
+	s.jurisdictionReqs["AT"] = &JurisdictionRequirement{
+		Jurisdiction:         "AT",
+		RequiresNotarization: true,
+		RequiredDocuments:    []string{"passport", "national_id", "personalausweis"},
+		MinimumIDLevel:       "qualified",
+		MaxValueWithoutBoard: 95000.0,
+		RequiredSignatures:   2,
+		AcceptedIDTypes:      []string{"passport", "national_id", "personalausweis", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Osterreichische_Notariatskammer"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"ABGB §1002-1020", "Notariatsordnung"},
+	}
 }
 
 // AddJurisdictionRequirement adds or updates a jurisdiction requirement
