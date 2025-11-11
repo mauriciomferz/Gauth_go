@@ -995,6 +995,294 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"ABGB §1002-1020", "Notariatsordnung"},
 	}
+	
+	// Belgium (BE) - Bilingual system, notarization required
+	s.jurisdictionReqs["BE"] = &JurisdictionRequirement{
+		Jurisdiction:         "BE",
+		RequiresNotarization: true,
+		RequiredDocuments:    []string{"passport", "national_id", "carte_identite"},
+		MinimumIDLevel:       "advanced",
+		MaxValueWithoutBoard: 110000.0,
+		RequiredSignatures:   2,
+		AcceptedIDTypes:      []string{"passport", "national_id", "carte_identite", "eID_card", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Federale_Raad_der_Notarissen", "Conseil_Federal_des_Notaires"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Code Civil Belge Art. 1984-2010", "Wetboek der Notarisambt"},
+	}
+	
+	// Bulgaria (BG) - EU member, moderate requirements
+	s.jurisdictionReqs["BG"] = &JurisdictionRequirement{
+		Jurisdiction:         "BG",
+		RequiresNotarization: true,
+		RequiredDocuments:    []string{"passport", "national_id"},
+		MinimumIDLevel:       "advanced",
+		MaxValueWithoutBoard: 60000.0,
+		RequiredSignatures:   2,
+		AcceptedIDTypes:      []string{"passport", "national_id", "lична_карта", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Bulgarian_Chamber_of_Notaries"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Закон за задълженията и договорите", "Закон за нотариусите"},
+	}
+	
+	// Croatia (HR) - EU member since 2013
+	s.jurisdictionReqs["HR"] = &JurisdictionRequirement{
+		Jurisdiction:         "HR",
+		RequiresNotarization: true,
+		RequiredDocuments:    []string{"passport", "national_id", "osobna_iskaznica"},
+		MinimumIDLevel:       "advanced",
+		MaxValueWithoutBoard: 70000.0,
+		RequiredSignatures:   2,
+		AcceptedIDTypes:      []string{"passport", "national_id", "osobna_iskaznica", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Croatian_Chamber_of_Notaries"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Zakon o obveznim odnosima", "Zakon o javnom bilježništvu"},
+	}
+	
+	// Cyprus (CY) - Common law influence, EU member
+	s.jurisdictionReqs["CY"] = &JurisdictionRequirement{
+		Jurisdiction:         "CY",
+		RequiresNotarization: false,
+		RequiredDocuments:    []string{"passport", "national_id"},
+		MinimumIDLevel:       "basic",
+		MaxValueWithoutBoard: 130000.0,
+		RequiredSignatures:   1,
+		AcceptedIDTypes:      []string{"passport", "national_id", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            false,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Cyprus_Bar_Association"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Contract Law Cap. 149", "Powers of Attorney Law"},
+	}
+	
+	// Czech Republic (CZ) - Post-communist modernization
+	s.jurisdictionReqs["CZ"] = &JurisdictionRequirement{
+		Jurisdiction:         "CZ",
+		RequiresNotarization: true,
+		RequiredDocuments:    []string{"passport", "national_id", "obcansky_prukaz"},
+		MinimumIDLevel:       "advanced",
+		MaxValueWithoutBoard: 85000.0,
+		RequiredSignatures:   2,
+		AcceptedIDTypes:      []string{"passport", "national_id", "obcansky_prukaz", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Notarska_komora_CR"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Občanský zákoník §2159-2188", "Notářský řád"},
+	}
+	
+	// Finland (FI) - Nordic model with digital emphasis
+	s.jurisdictionReqs["FI"] = &JurisdictionRequirement{
+		Jurisdiction:         "FI",
+		RequiresNotarization: false,
+		RequiredDocuments:    []string{"passport", "national_id", "henkilokortti"},
+		MinimumIDLevel:       "advanced",
+		MaxValueWithoutBoard: 190000.0,
+		RequiredSignatures:   1,
+		AcceptedIDTypes:      []string{"passport", "national_id", "henkilokortti", "drivers_license", "bank_id"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            false,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Finnish_Notary_Public"},
+			MaxCertificateAge:   730 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Valtakirjalaki", "Oikeustoimilaki"},
+	}
+	
+	// Greece (GR) - Civil law with notarization emphasis
+	s.jurisdictionReqs["GR"] = &JurisdictionRequirement{
+		Jurisdiction:         "GR",
+		RequiresNotarization: true,
+		RequiredDocuments:    []string{"passport", "national_id", "taytotita"},
+		MinimumIDLevel:       "advanced",
+		MaxValueWithoutBoard: 65000.0,
+		RequiredSignatures:   2,
+		AcceptedIDTypes:      []string{"passport", "national_id", "taytotita", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Notarial_Association_of_Greece"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Αστικός Κώδικας Άρθρο 211-225", "Κώδικας Συμβολαιογράφων"},
+	}
+	
+	// Hungary (HU) - EU member, moderate requirements
+	s.jurisdictionReqs["HU"] = &JurisdictionRequirement{
+		Jurisdiction:         "HU",
+		RequiresNotarization: true,
+		RequiredDocuments:    []string{"passport", "national_id", "szemelyazonosito"},
+		MinimumIDLevel:       "advanced",
+		MaxValueWithoutBoard: 75000.0,
+		RequiredSignatures:   2,
+		AcceptedIDTypes:      []string{"passport", "national_id", "szemelyazonosito", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Hungarian_Chamber_of_Notaries"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Polgári Törvénykönyv 6:239-6:258", "Közjegyzőkről szóló törvény"},
+	}
+	
+	// Ireland (IE) - Common law system
+	s.jurisdictionReqs["IE"] = &JurisdictionRequirement{
+		Jurisdiction:         "IE",
+		RequiresNotarization: false,
+		RequiredDocuments:    []string{"passport", "drivers_licence", "public_services_card"},
+		MinimumIDLevel:       "basic",
+		MaxValueWithoutBoard: 280000.0,
+		RequiredSignatures:   1,
+		AcceptedIDTypes:      []string{"passport", "drivers_licence", "public_services_card", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            false,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Faculty_of_Notaries_Public_in_Ireland"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Powers of Attorney Act 1996", "Enduring Powers of Attorney Regulations"},
+	}
+	
+	// Latvia (LV) - Baltic state, digital adoption
+	s.jurisdictionReqs["LV"] = &JurisdictionRequirement{
+		Jurisdiction:         "LV",
+		RequiresNotarization: true,
+		RequiredDocuments:    []string{"passport", "national_id"},
+		MinimumIDLevel:       "advanced",
+		MaxValueWithoutBoard: 130000.0,
+		RequiredSignatures:   1,
+		AcceptedIDTypes:      []string{"passport", "national_id", "eID_card", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Latvian_Council_of_Sworn_Notaries"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Civillikums", "Notariāta likums"},
+	}
+	
+	// Luxembourg (LU) - Financial center, strict requirements
+	s.jurisdictionReqs["LU"] = &JurisdictionRequirement{
+		Jurisdiction:         "LU",
+		RequiresNotarization: true,
+		RequiredDocuments:    []string{"passport", "national_id", "carte_identite"},
+		MinimumIDLevel:       "qualified",
+		MaxValueWithoutBoard: 125000.0,
+		RequiredSignatures:   2,
+		AcceptedIDTypes:      []string{"passport", "national_id", "carte_identite", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Chambre_des_Notaires_Luxembourg"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Code Civil Art. 1984-2010", "Loi sur le Notariat"},
+	}
+	
+	// Malta (MT) - Common law system, English influence
+	s.jurisdictionReqs["MT"] = &JurisdictionRequirement{
+		Jurisdiction:         "MT",
+		RequiresNotarization: false,
+		RequiredDocuments:    []string{"passport", "national_id", "identity_card"},
+		MinimumIDLevel:       "basic",
+		MaxValueWithoutBoard: 160000.0,
+		RequiredSignatures:   1,
+		AcceptedIDTypes:      []string{"passport", "national_id", "identity_card", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            false,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Notarial_Council_of_Malta"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Civil Code Cap. 16", "Powers of Attorney Regulations"},
+	}
+	
+	// Poland (PL) - Large EU economy, moderate requirements
+	s.jurisdictionReqs["PL"] = &JurisdictionRequirement{
+		Jurisdiction:         "PL",
+		RequiresNotarization: true,
+		RequiredDocuments:    []string{"passport", "national_id", "dowod_osobisty"},
+		MinimumIDLevel:       "advanced",
+		MaxValueWithoutBoard: 105000.0,
+		RequiredSignatures:   2,
+		AcceptedIDTypes:      []string{"passport", "national_id", "dowod_osobisty", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Krajowa_Rada_Notarialna"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Kodeks cywilny Art. 95-109", "Prawo o notariacie"},
+	}
+	
+	// Romania (RO) - EU member, modernizing system
+	s.jurisdictionReqs["RO"] = &JurisdictionRequirement{
+		Jurisdiction:         "RO",
+		RequiresNotarization: true,
+		RequiredDocuments:    []string{"passport", "national_id", "carte_identitate"},
+		MinimumIDLevel:       "advanced",
+		MaxValueWithoutBoard: 55000.0,
+		RequiredSignatures:   2,
+		AcceptedIDTypes:      []string{"passport", "national_id", "carte_identitate", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Uniunea_Nationala_a_Notarilor_Publici"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Codul Civil Art. 2009-2044", "Legea notarilor publici"},
+	}
+	
+	// Slovakia (SK) - Post-1993 civil law system
+	s.jurisdictionReqs["SK"] = &JurisdictionRequirement{
+		Jurisdiction:         "SK",
+		RequiresNotarization: true,
+		RequiredDocuments:    []string{"passport", "national_id", "obciansky_preukaz"},
+		MinimumIDLevel:       "advanced",
+		MaxValueWithoutBoard: 80000.0,
+		RequiredSignatures:   2,
+		AcceptedIDTypes:      []string{"passport", "national_id", "obciansky_preukaz", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Notarska_komora_SR"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Občiansky zákonník §32-34", "Notársky poriadok"},
+	}
+	
+	// Slovenia (SI) - Small EU member, efficient system
+	s.jurisdictionReqs["SI"] = &JurisdictionRequirement{
+		Jurisdiction:         "SI",
+		RequiresNotarization: true,
+		RequiredDocuments:    []string{"passport", "national_id", "osebna_izkaznica"},
+		MinimumIDLevel:       "advanced",
+		MaxValueWithoutBoard: 90000.0,
+		RequiredSignatures:   2,
+		AcceptedIDTypes:      []string{"passport", "national_id", "osebna_izkaznica", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Notarska_zbornica_Slovenije"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Obligacijski zakonik Člen 88-90", "Zakon o notariatu"},
+	}
 }
 
 // AddJurisdictionRequirement adds or updates a jurisdiction requirement
