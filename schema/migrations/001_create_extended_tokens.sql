@@ -41,19 +41,16 @@ CREATE TABLE IF NOT EXISTS extended_tokens (
     last_used_at TIMESTAMP WITH TIME ZONE,
     use_count INTEGER NOT NULL DEFAULT 0,
     
-    -- Computed expiration time for easier queries
-    expires_at TIMESTAMP WITH TIME ZONE GENERATED ALWAYS AS (issued_at + (expires_in || ' seconds')::INTERVAL) STORED,
-    
     -- Indexes for common queries
     CONSTRAINT refresh_token_unique UNIQUE (refresh_token)
 );
 
 -- Create indexes for performance
-CREATE INDEX idx_extended_tokens_expires_at ON extended_tokens(expires_at) WHERE revoked_at IS NULL;
+CREATE INDEX idx_extended_tokens_issued_at ON extended_tokens(issued_at, expires_in) WHERE revoked_at IS NULL;
 CREATE INDEX idx_extended_tokens_revoked ON extended_tokens(revoked_at) WHERE revoked_at IS NOT NULL;
-CREATE INDEX idx_extended_tokens_client_id ON extended_tokens((authorization_chain->>'client'->>'entity_id'));
+CREATE INDEX idx_extended_tokens_client_id ON extended_tokens(((authorization_chain->'client'->>'entity_id')));
 CREATE INDEX idx_extended_tokens_grant_id ON extended_tokens(grant_id);
-CREATE INDEX idx_extended_tokens_issued_at ON extended_tokens(issued_at DESC);
+CREATE INDEX idx_extended_tokens_created_at ON extended_tokens(created_at DESC);
 
 -- Add comments
 COMMENT ON TABLE extended_tokens IS 'RFC-0111 Extended Authorization Tokens with comprehensive compliance metadata';
@@ -62,4 +59,3 @@ COMMENT ON COLUMN extended_tokens.authorization_chain IS 'RFC-0111 authorization
 COMMENT ON COLUMN extended_tokens.legal_framework IS 'Legal framework including applicable laws and jurisdiction';
 COMMENT ON COLUMN extended_tokens.verification_proof IS 'Identity verification chain for all parties';
 COMMENT ON COLUMN extended_tokens.compliance_level IS 'RFC-0111 compliance level (e.g., rfc-0111-compliant)';
-COMMENT ON COLUMN extended_tokens.expires_at IS 'Computed expiration timestamp for efficient cleanup';
