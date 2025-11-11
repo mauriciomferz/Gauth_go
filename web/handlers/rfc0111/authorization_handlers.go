@@ -13,12 +13,14 @@ import (
 // AuthorizationHandlers encapsulates RFC-0111 authorization API handlers.
 type AuthorizationHandlers struct {
 	gauthService *gauth.Service
+	tokenStore   gauth.ExtendedTokenStore
 }
 
 // NewAuthorizationHandlers creates a new authorization handlers instance.
-func NewAuthorizationHandlers(service *gauth.Service) *AuthorizationHandlers {
+func NewAuthorizationHandlers(service *gauth.Service, tokenStore gauth.ExtendedTokenStore) *AuthorizationHandlers {
 	return &AuthorizationHandlers{
 		gauthService: service,
+		tokenStore:   tokenStore,
 	}
 }
 
@@ -64,6 +66,15 @@ func (h *AuthorizationHandlers) RequestToken(c *gin.Context) {
 			"error_description": err.Error(),
 		})
 		return
+	}
+
+	// Store the extended token if token store is configured
+	if h.tokenStore != nil && response.ExtendedToken != nil {
+		if err := h.tokenStore.SaveToken(c.Request.Context(), response.ExtendedToken); err != nil {
+			// Log error but don't fail the request
+			// Token is still returned to client even if storage fails
+			c.Header("X-Token-Storage-Warning", "Token storage failed: "+err.Error())
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{

@@ -15,10 +15,11 @@ func (s *BetaServer) RegisterRFC0111Endpoints(
 	subscriptionManager *gauth.SubscriptionFlowManager,
 	subscriptionStore gauth.SubscriptionStore,
 	gauthService *gauth.Service,
+	tokenStore gauth.ExtendedTokenStore,
 ) {
 	// Create handlers
 	subscriptionHandlers := rfc0111handlers.NewSubscriptionHandlers(subscriptionManager, subscriptionStore)
-	authorizationHandlers := rfc0111handlers.NewAuthorizationHandlers(gauthService)
+	authorizationHandlers := rfc0111handlers.NewAuthorizationHandlers(gauthService, tokenStore)
 
 	// Subscription Flow endpoints (Steps I-VIII)
 	s.router.POST("/api/v1/rfc0111/subscriptions", subscriptionHandlers.CreateSubscription)

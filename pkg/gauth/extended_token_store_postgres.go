@@ -52,26 +52,8 @@ func (s *PostgresExtendedTokenStore) SaveToken(ctx context.Context, token *Exten
 		return fmt.Errorf("access token is required")
 	}
 
-	// Extract client ID from authorization chain
-	clientID := ""
-	if token.AuthorizationChain != nil && token.AuthorizationChain.Client != nil {
-		clientID = token.AuthorizationChain.Client.EntityID
-	}
-
 	// Extract grant ID from token
 	grantID := token.GrantID
-
-	// Extract resource owner from token if present
-	resourceOwner := ""
-	if token.ResourceOwner != nil {
-		resourceOwner = token.ResourceOwner.OwnerID
-	}
-
-	// Extract purpose from legal framework
-	purpose := ""
-	if token.LegalFramework != nil && len(token.LegalFramework.ApplicableLaws) > 0 {
-		purpose = token.LegalFramework.ApplicableLaws[0]
-	}
 
 	// Marshal complex structures to JSONB
 	poaJSON, err := json.Marshal(token.PowerOfAttorney)
@@ -99,18 +81,22 @@ func (s *PostgresExtendedTokenStore) SaveToken(ctx context.Context, token *Exten
 		return fmt.Errorf("failed to marshal audit trail: %w", err)
 	}
 
+	// Map ExtendedToken fields to table columns
+	// Note: compliance_level is required but not in ExtendedToken struct
+	complianceLevel := "rfc-0111-compliant" // default value
+	
 	// Insert or update token
 	query := `
 		INSERT INTO extended_tokens (
 			access_token, token_type, expires_in, refresh_token, scope, issued_at,
 			power_of_attorney, authorization_chain, legal_framework, verification_proof,
-			audit_trail,
-			client_id, grant_id, resource_owner, purpose, created_at, use_count
+			audit_trail, grant_id, compliance_level,
+			created_at, use_count
 		) VALUES (
 			$1, $2, $3, $4, $5, $6,
 			$7, $8, $9, $10,
-			$11,
-			$12, $13, $14, $15, NOW(), 0
+			$11, $12, $13,
+			NOW(), 0
 		)
 		ON CONFLICT (access_token) DO UPDATE SET
 			token_type = EXCLUDED.token_type,
@@ -136,10 +122,8 @@ func (s *PostgresExtendedTokenStore) SaveToken(ctx context.Context, token *Exten
 		legalFrameworkJSON,
 		verificationProofJSON,
 		auditTrailJSON,
-		clientID,
 		grantID,
-		resourceOwner,
-		purpose,
+		complianceLevel,
 	)
 
 	if err != nil {
@@ -150,7 +134,7 @@ func (s *PostgresExtendedTokenStore) SaveToken(ctx context.Context, token *Exten
 }
 
 // GetToken retrieves a token by access token
-func (s *PostgresExtendedTokenStore) GetToken(ctx context.Context, accessToken string) (*ExtendedToken, *TokenMetadata, error) {
+func (s *PostgresExtendedTokenStore) GetToken(ctx context.Context, accessToken string) (*ExtendedToken, error) {
 	query := `
 		SELECT 
 			access_token, token_type, expires_in, refresh_token, scope, issued_at,
@@ -187,51 +171,44 @@ func (s *PostgresExtendedTokenStore) GetToken(ctx context.Context, accessToken s
 	)
 
 	if err == sql.ErrNoRows {
-		return nil, nil, ErrTokenNotFound
+		return nil, ErrTokenNotFound
 	}
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get token: %w", err)
+		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	// Check if token is expired
 	expiresAt := token.IssuedAt.Unix() + token.ExpiresIn
 	if time.Now().Unix() > expiresAt {
-		return nil, nil, ErrTokenExpired
+		return nil, ErrTokenExpired
 	}
 
 	// Unmarshal JSONB fields
 	if len(poaJSON) > 0 {
 		if err := json.Unmarshal(poaJSON, &token.PowerOfAttorney); err != nil {
-			return nil, nil, fmt.Errorf("failed to unmarshal power of attorney: %w", err)
+			return nil, fmt.Errorf("failed to unmarshal power of attorney: %w", err)
 		}
 	}
 
 	if err := json.Unmarshal(authChainJSON, &token.AuthorizationChain); err != nil {
-		return nil, nil, fmt.Errorf("failed to unmarshal authorization chain: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal authorization chain: %w", err)
 	}
 
 	if err := json.Unmarshal(legalFrameworkJSON, &token.LegalFramework); err != nil {
-		return nil, nil, fmt.Errorf("failed to unmarshal legal framework: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal legal framework: %w", err)
 	}
 
 	if err := json.Unmarshal(verificationProofJSON, &token.VerificationProof); err != nil {
-		return nil, nil, fmt.Errorf("failed to unmarshal verification proof: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal verification proof: %w", err)
 	}
 
 	if len(auditTrailJSON) > 0 {
 		if err := json.Unmarshal(auditTrailJSON, &token.AuditTrail); err != nil {
-			return nil, nil, fmt.Errorf("failed to unmarshal audit trail: %w", err)
+			return nil, fmt.Errorf("failed to unmarshal audit trail: %w", err)
 		}
 	}
 
 	token.Scope = scope
-
-	if revokedAt.Valid {
-		metadata.RevokedAt = &revokedAt.Time
-	}
-	if lastUsedAt.Valid {
-		metadata.LastUsedAt = &lastUsedAt.Time
-	}
 
 	// Update last used timestamp and use count
 	updateQuery := `
@@ -241,11 +218,11 @@ func (s *PostgresExtendedTokenStore) GetToken(ctx context.Context, accessToken s
 	`
 	_, _ = s.db.ExecContext(ctx, updateQuery, accessToken)
 
-	return &token, &metadata, nil
+	return &token, nil
 }
 
 // GetTokenByRefreshToken retrieves a token by refresh token
-func (s *PostgresExtendedTokenStore) GetTokenByRefreshToken(ctx context.Context, refreshToken string) (*ExtendedToken, *TokenMetadata, error) {
+func (s *PostgresExtendedTokenStore) GetTokenByRefreshToken(ctx context.Context, refreshToken string) (*ExtendedToken, error) {
 	query := `
 		SELECT 
 			access_token, token_type, expires_in, refresh_token, scope, issued_at,
@@ -282,53 +259,46 @@ func (s *PostgresExtendedTokenStore) GetTokenByRefreshToken(ctx context.Context,
 	)
 
 	if err == sql.ErrNoRows {
-		return nil, nil, ErrTokenNotFound
+		return nil, ErrTokenNotFound
 	}
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get token by refresh token: %w", err)
+		return nil, fmt.Errorf("failed to get token by refresh token: %w", err)
 	}
 
 	// Check if token is expired
 	expiresAt := token.IssuedAt.Unix() + token.ExpiresIn
 	if time.Now().Unix() > expiresAt {
-		return nil, nil, ErrTokenExpired
+		return nil, ErrTokenExpired
 	}
 
 	// Unmarshal JSONB fields
 	if len(poaJSON) > 0 {
 		if err := json.Unmarshal(poaJSON, &token.PowerOfAttorney); err != nil {
-			return nil, nil, fmt.Errorf("failed to unmarshal power of attorney: %w", err)
+			return nil, fmt.Errorf("failed to unmarshal power of attorney: %w", err)
 		}
 	}
 
 	if err := json.Unmarshal(authChainJSON, &token.AuthorizationChain); err != nil {
-		return nil, nil, fmt.Errorf("failed to unmarshal authorization chain: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal authorization chain: %w", err)
 	}
 
 	if err := json.Unmarshal(legalFrameworkJSON, &token.LegalFramework); err != nil {
-		return nil, nil, fmt.Errorf("failed to unmarshal legal framework: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal legal framework: %w", err)
 	}
 
 	if err := json.Unmarshal(verificationProofJSON, &token.VerificationProof); err != nil {
-		return nil, nil, fmt.Errorf("failed to unmarshal verification proof: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal verification proof: %w", err)
 	}
 
 	if len(auditTrailJSON) > 0 {
 		if err := json.Unmarshal(auditTrailJSON, &token.AuditTrail); err != nil {
-			return nil, nil, fmt.Errorf("failed to unmarshal audit trail: %w", err)
+			return nil, fmt.Errorf("failed to unmarshal audit trail: %w", err)
 		}
 	}
 
 	token.Scope = scope
 
-	if revokedAt.Valid {
-		metadata.RevokedAt = &revokedAt.Time
-	}
-	if lastUsedAt.Valid {
-		metadata.LastUsedAt = &lastUsedAt.Time
-	}
-
-	return &token, &metadata, nil
+	return &token, nil
 }
 
 // RevokeToken marks a token as revoked (RFC 7009 compliant - idempotent)

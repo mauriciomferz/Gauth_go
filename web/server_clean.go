@@ -5947,7 +5947,7 @@ func (s *BetaServer) routes() {
 	s.router.POST("/api/v1/delegation/revoke", s.apiDelegationRevoke)
 	
 	// RFC-0111 Subscription and Authorization Flow endpoints (optional, controlled by GAUTH_RFC0111_ENABLED=1)
-	if rfc0111Components, err := InitRFC0111FromEnv(); err == nil && rfc0111Components != nil {
+	if rfc0111Components, tokenStore, err := InitRFC0111FromEnv(); err == nil && rfc0111Components != nil {
 		fmt.Fprintf(os.Stderr, "[RFC-0111] Enabled with mock external services\n")
 		
 		// Create GAuth service with RFC-0111 compliance enabled
@@ -5986,6 +5986,7 @@ func (s *BetaServer) routes() {
 				rfc0111Components.SubscriptionManager,
 				rfc0111Components.SubscriptionStore,
 				gauthService,
+				tokenStore,
 			)
 			
 			fmt.Fprintf(os.Stderr, "[RFC-0111] Endpoints registered:\n")
