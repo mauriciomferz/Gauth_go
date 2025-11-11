@@ -3,49 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAuth 1.0 - RFC-0111/0115 Dashboard</title>
+    <meta name="description" content="GAuth 1.0 - RFC-0111 & RFC-0115 Compliant Authorization Framework with Extended Tokens, PVP Identity Verification, and Power of Attorney Management">
+    <meta name="keywords" content="GAuth, OAuth, RFC-0111, RFC-0115, Authorization, Extended Tokens, Power of Attorney, eIDAS">
+    <meta name="author" content="Gimel Foundation">
+    <title>GAuth 1.0 - RFC-0111/0115 Dashboard | Production-Ready Authorization Framework</title>
     <link rel="stylesheet" href="/ui/gauth1.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqk1w27i+gXGFjz+UYYi6ZV7gzGrD5PnN1Spo3L9gV9A6FEXHgNs+ckr4X2UmJ8a3kMV5Akmw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <style>
+        /* Loading indicator */
+        .page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+        .page-loader.loaded {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .loader-icon {
+            font-size: 4rem;
+            color: white;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        .loader-text {
+            color: white;
+            font-size: 1.5rem;
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        /* Smooth transitions */
+        * {
+            transition-property: background-color, border-color, color, box-shadow;
+            transition-duration: 0.2s;
+            transition-timing-function: ease-in-out;
+        }
+        /* Stat trend styling */
+        .stat-trend {
+            display: inline-block;
+            font-size: 0.875rem;
+            color: #10b981;
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body>
+    <!-- Page Loader -->
+    <div class="page-loader" id="pageLoader">
+        <i class="fas fa-shield-alt loader-icon"></i>
+        <div class="loader-text">Loading GAuth 1.0...</div>
+    </div>
     <!-- Header -->
-    <header class="header">
+    <header class="header" role="banner">
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <i class="fas fa-shield-alt"></i>
+                    <i class="fas fa-shield-alt" aria-hidden="true"></i>
                     <h1>GAuth 1.0</h1>
-                    <span class="badge badge-success">Production Ready</span>
+                    <span class="badge badge-success" role="status" aria-label="System status: Production Ready">
+                        <i class="fas fa-check-circle" aria-hidden="true"></i> Production Ready
+                    </span>
                 </div>
-                <nav class="nav">
-                    <button class="nav-link active" data-tab="overview">
-                        <i class="fas fa-home"></i> Overview
+                <nav class="nav" role="navigation" aria-label="Main navigation">
+                    <button class="nav-link active" data-tab="overview" aria-label="Overview" aria-current="page">
+                        <i class="fas fa-home" aria-hidden="true"></i>
+                        <span>Overview</span>
                     </button>
-                    <button class="nav-link" data-tab="tokens">
-                        <i class="fas fa-key"></i> Extended Tokens
+                    <button class="nav-link" data-tab="tokens" aria-label="Extended Tokens Management">
+                        <i class="fas fa-key" aria-hidden="true"></i>
+                        <span>Extended Tokens</span>
                     </button>
-                    <button class="nav-link" data-tab="pvp">
-                        <i class="fas fa-user-check"></i> PVP
+                    <button class="nav-link" data-tab="pvp" aria-label="PVP Identity Verification">
+                        <i class="fas fa-user-check" aria-hidden="true"></i>
+                        <span>PVP</span>
                     </button>
-                    <button class="nav-link" data-tab="registry">
-                        <i class="fas fa-building"></i> Registry
+                    <button class="nav-link" data-tab="registry" aria-label="Commercial Registry">
+                        <i class="fas fa-building" aria-hidden="true"></i>
+                        <span>Registry</span>
                     </button>
-                    <button class="nav-link" data-tab="pip">
-                        <i class="fas fa-gavel"></i> PIP
+                    <button class="nav-link" data-tab="pip" aria-label="Policy Information Point">
+                        <i class="fas fa-gavel" aria-hidden="true"></i>
+                        <span>PIP</span>
                     </button>
-                    <button class="nav-link" data-tab="poa">
-                        <i class="fas fa-file-contract"></i> PoA
+                    <button class="nav-link" data-tab="poa" aria-label="Power of Attorney">
+                        <i class="fas fa-file-contract" aria-hidden="true"></i>
+                        <span>PoA</span>
                     </button>
-                    <button class="nav-link" data-tab="e2e">
-                        <i class="fas fa-project-diagram"></i> E2E Testing
+                    <button class="nav-link" data-tab="e2e" aria-label="End-to-End Testing">
+                        <i class="fas fa-project-diagram" aria-hidden="true"></i>
+                        <span>E2E Testing</span>
                     </button>
-                    <button class="nav-link" data-tab="metrics">
-                        <i class="fas fa-chart-line"></i> Metrics
+                    <button class="nav-link" data-tab="metrics" aria-label="System Metrics">
+                        <i class="fas fa-chart-line" aria-hidden="true"></i>
+                        <span>Metrics</span>
                     </button>
                 </nav>
                 <div class="theme-toggle">
-                    <button id="theme-toggle-btn" title="Toggle theme">
-                        <i class="fas fa-moon"></i>
+                    <button id="theme-toggle-btn" title="Toggle dark/light theme" aria-label="Toggle theme">
+                        <i class="fas fa-moon" aria-hidden="true"></i>
                     </button>
                 </div>
             </div>
@@ -53,52 +122,71 @@
     </header>
 
     <!-- Main Content -->
-    <main class="main">
+    <main class="main" role="main">
         <div class="container">
             <!-- Overview Tab -->
-            <div class="tab-content active" id="overview-tab">
+            <div class="tab-content active" id="overview-tab" role="tabpanel" aria-labelledby="overview" tabindex="0">
                 <div class="hero">
-                    <h2><i class="fas fa-rocket"></i> Welcome to GAuth 1.0 Dashboard</h2>
-                    <p class="hero-subtitle">RFC-0111 & RFC-0115 Compliant Authorization Framework</p>
+                    <h2>
+                        <i class="fas fa-rocket" aria-hidden="true"></i>
+                        <span>Welcome to GAuth 1.0 Dashboard</span>
+                    </h2>
+                    <p class="hero-subtitle">
+                        <strong>RFC-0111 & RFC-0115</strong> Compliant Authorization Framework
+                        <br>
+                        <small>Production-ready with 91 passing tests and 72.6% coverage</small>
+                    </p>
                 </div>
 
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
+                <div class="stats-grid" role="region" aria-label="System statistics">
+                    <article class="stat-card" aria-labelledby="stat-tests-label">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)" aria-hidden="true">
                             <i class="fas fa-check-circle"></i>
                         </div>
                         <div class="stat-content">
-                            <h3 id="stat-tests">91</h3>
-                            <p>Tests Passing</p>
+                            <h3 id="stat-tests" aria-label="91 tests passing">91</h3>
+                            <p id="stat-tests-label">Tests Passing</p>
+                            <span class="stat-trend" aria-label="100% success rate">
+                                <i class="fas fa-arrow-up" aria-hidden="true"></i> 100%
+                            </span>
                         </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%)">
+                    </article>
+                    <article class="stat-card" aria-labelledby="stat-benchmarks-label">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%)" aria-hidden="true">
                             <i class="fas fa-tachometer-alt"></i>
                         </div>
                         <div class="stat-content">
-                            <h3 id="stat-benchmarks">19</h3>
-                            <p>Benchmarks</p>
+                            <h3 id="stat-benchmarks" aria-label="19 performance benchmarks">19</h3>
+                            <p id="stat-benchmarks-label">Benchmarks</p>
+                            <span class="stat-trend" aria-label="All passing">
+                                <i class="fas fa-check" aria-hidden="true"></i> All Passing
+                            </span>
                         </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)">
+                    </article>
+                    <article class="stat-card" aria-labelledby="stat-coverage-label">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)" aria-hidden="true">
                             <i class="fas fa-shield-alt"></i>
                         </div>
                         <div class="stat-content">
-                            <h3 id="stat-coverage">72.6%</h3>
-                            <p>Test Coverage</p>
+                            <h3 id="stat-coverage" aria-label="72.6% test coverage">72.6%</h3>
+                            <p id="stat-coverage-label">Test Coverage</p>
+                            <span class="stat-trend" aria-label="Excellent coverage">
+                                <i class="fas fa-star" aria-hidden="true"></i> Excellent
+                            </span>
                         </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)">
+                    </article>
+                    <article class="stat-card" aria-labelledby="stat-performance-label">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)" aria-hidden="true">
                             <i class="fas fa-bolt"></i>
                         </div>
                         <div class="stat-content">
-                            <h3 id="stat-performance">1.3µs</h3>
-                            <p>E2E Token Flow</p>
+                            <h3 id="stat-performance" aria-label="1.3 microseconds end-to-end token flow">1.3µs</h3>
+                            <p id="stat-performance-label">E2E Token Flow</p>
+                            <span class="stat-trend" aria-label="Ultra-fast performance">
+                                <i class="fas fa-rocket" aria-hidden="true"></i> Ultra-Fast
+                            </span>
                         </div>
-                    </div>
+                    </article>
                 </div>
 
                 <div class="cards-grid">
@@ -769,33 +857,119 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="footer" role="contentinfo">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h4>GAuth 1.0</h4>
+                    <h4>
+                        <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                        GAuth 1.0
+                    </h4>
                     <p>RFC-0111 & RFC-0115 Compliant Authorization Framework</p>
+                    <p class="text-muted">
+                        <small>Built with ❤️ for secure, compliant authorization</small>
+                    </p>
                 </div>
                 <div class="footer-section">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="https://github.com/Gimel-Foundation">GitHub</a></li>
-                        <li><a href="#">Documentation</a></li>
-                        <li><a href="#">API Reference</a></li>
+                    <h4>
+                        <i class="fas fa-link" aria-hidden="true"></i>
+                        Quick Links
+                    </h4>
+                    <ul role="list">
+                        <li><a href="https://github.com/Gimel-Foundation" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-github" aria-hidden="true"></i> GitHub
+                        </a></li>
+                        <li><a href="/api/v1/docs" target="_blank" rel="noopener noreferrer">
+                            <i class="fas fa-book" aria-hidden="true"></i> Documentation
+                        </a></li>
+                        <li><a href="/swagger-ui/" target="_blank" rel="noopener noreferrer">
+                            <i class="fas fa-code" aria-hidden="true"></i> API Reference
+                        </a></li>
+                        <li><a href="/poa-visualization.html" target="_blank" rel="noopener noreferrer">
+                            <i class="fas fa-project-diagram" aria-hidden="true"></i> PoA Visualization
+                        </a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
-                    <h4>Status</h4>
-                    <p><span class="badge badge-success">Production Ready</span></p>
+                    <h4>
+                        <i class="fas fa-heartbeat" aria-hidden="true"></i>
+                        System Status
+                    </h4>
+                    <p>
+                        <span class="badge badge-success" role="status">
+                            <i class="fas fa-circle" aria-hidden="true"></i> Production Ready
+                        </span>
+                    </p>
                     <p class="text-muted">All tests passing (91/91)</p>
+                    <p class="text-muted">
+                        <small>
+                            <i class="fas fa-database" aria-hidden="true"></i> PostgreSQL Ready
+                            <br>
+                            <i class="fas fa-box" aria-hidden="true"></i> Docker Compatible
+                        </small>
+                    </p>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 Gimel Foundation. Licensed under MIT.</p>
+                <p>
+                    &copy; 2025 <a href="https://github.com/Gimel-Foundation" target="_blank" rel="noopener noreferrer">Gimel Foundation</a>.
+                    Licensed under <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">MIT</a>.
+                </p>
+                <p class="text-muted">
+                    <small>
+                        Version 1.0.0 | Last Updated: November 2025 |
+                        <a href="https://github.com/mauriciomferz/Gauth_go" target="_blank" rel="noopener noreferrer">
+                            View Source
+                        </a>
+                    </small>
+                </p>
             </div>
         </div>
     </footer>
 
     <script src="/ui/gauth1.js" type="module"></script>
+    
+    <!-- Page Load Handler -->
+    <script>
+        // Hide loader when page is fully loaded
+        window.addEventListener('load', function() {
+            const loader = document.getElementById('pageLoader');
+            if (loader) {
+                setTimeout(function() {
+                    loader.classList.add('loaded');
+                    setTimeout(function() {
+                        loader.style.display = 'none';
+                    }, 500);
+                }, 300);
+            }
+        });
+
+        // Add smooth scroll behavior
+        document.documentElement.style.scrollBehavior = 'smooth';
+
+        // Add keyboard navigation support
+        document.addEventListener('keydown', function(e) {
+            // Tab navigation enhancement
+            if (e.key === 'Tab') {
+                document.body.classList.add('keyboard-nav');
+            }
+        });
+
+        document.addEventListener('mousedown', function() {
+            document.body.classList.remove('keyboard-nav');
+        });
+
+        // Add focus-visible polyfill styles
+        if (!document.documentElement.classList.contains('focus-visible')) {
+            const style = document.createElement('style');
+            style.textContent = `
+                .keyboard-nav *:focus {
+                    outline: 2px solid #667eea !important;
+                    outline-offset: 2px;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    </script>
 </body>
 </html>
