@@ -12,6 +12,7 @@
 //
 // Status: TEMPORARILY DISABLED - Will be fixed in next iteration
 //
+//go:build ignore
 // +build ignore
 
 package gauth
