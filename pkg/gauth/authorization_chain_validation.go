@@ -653,12 +653,21 @@ func (v *AuthorizationChainValidator) verifyCommercialRegisterEntry(
 		return false, err
 	}
 	
-	// Verify the entity ID matches company info
-	if companyInfo.CompanyID != entityID && companyInfo.RegistrationNumber != entityID {
+	if !companyInfo.Active {
 		return false, nil
 	}
 	
-	return companyInfo.Active, nil
+	// Check if entity is a managing director of the company
+	director, err := v.commercialRegisterClient.VerifyManagingDirector(ctx, registerRef, entityID)
+	if err != nil {
+		// If director verification fails, check if entity is the company itself
+		if companyInfo.CompanyID == entityID || companyInfo.RegistrationNumber == entityID {
+			return companyInfo.Active, nil
+		}
+		return false, err
+	}
+	
+	return director.Active, nil
 }
 
 // verifyIdentityProof verifies identity verification proof

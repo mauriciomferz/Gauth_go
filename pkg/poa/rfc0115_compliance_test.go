@@ -785,7 +785,7 @@ func TestValidateRFC0115Compliance_PoADefinition_NoRegions(t *testing.T) {
 			},
 		},
 		Authorization: AuthorizationScope{
-			ApplicableSectors: []IndustrySector{SectorFinancialInsurance},
+			ApplicableSectors: []IndustrySector{{Code: SectorFinanceInsurance, Description: "Finance and Insurance", Authorized: true}},
 			ApplicableRegions: []GeographicScope{}, // Empty!
 			AuthorizedActions: AuthorizedActions{
 				Transactions: []Transaction{TransactionLoan},
@@ -822,7 +822,7 @@ func TestValidateRFC0115Compliance_PoADefinition_NoActions(t *testing.T) {
 			},
 		},
 		Authorization: AuthorizationScope{
-			ApplicableSectors: []IndustrySector{SectorFinancialInsurance},
+			ApplicableSectors: []IndustrySector{{Code: SectorFinanceInsurance, Description: "Finance and Insurance", Authorized: true}},
 			ApplicableRegions: []GeographicScope{
 				{Type: GeoTypeNational, Identifier: "US"},
 			},
@@ -863,7 +863,7 @@ func TestValidateRFC0115Compliance_PoADefinition_NegativeDuration(t *testing.T) 
 			},
 		},
 		Authorization: AuthorizationScope{
-			ApplicableSectors: []IndustrySector{SectorFinancialInsurance},
+			ApplicableSectors: []IndustrySector{{Code: SectorFinanceInsurance, Description: "Finance and Insurance", Authorized: true}},
 			ApplicableRegions: []GeographicScope{
 				{Type: GeoTypeNational, Identifier: "US"},
 			},
@@ -904,7 +904,7 @@ func TestValidateRFC0115Compliance_PoADefinition_ExceedsTwoYears(t *testing.T) {
 			},
 		},
 		Authorization: AuthorizationScope{
-			ApplicableSectors: []IndustrySector{SectorFinancialInsurance},
+			ApplicableSectors: []IndustrySector{{Code: SectorFinanceInsurance, Description: "Finance and Insurance", Authorized: true}},
 			ApplicableRegions: []GeographicScope{
 				{Type: GeoTypeNational, Identifier: "US"},
 			},
@@ -943,7 +943,7 @@ func TestValidateRFC0115Compliance_PoADefinition_OnlyDecisions(t *testing.T) {
 			},
 		},
 		Authorization: AuthorizationScope{
-			ApplicableSectors: []IndustrySector{SectorFinancialInsurance},
+			ApplicableSectors: []IndustrySector{{Code: SectorFinanceInsurance, Description: "Finance and Insurance", Authorized: true}},
 			ApplicableRegions: []GeographicScope{
 				{Type: GeoTypeNational, Identifier: "US"},
 			},
@@ -979,12 +979,12 @@ func TestValidateRFC0115Compliance_PoADefinition_OnlyNonPhysicalActions(t *testi
 			},
 		},
 		Authorization: AuthorizationScope{
-			ApplicableSectors: []IndustrySector{SectorProfessional},
+			ApplicableSectors: []IndustrySector{{Code: SectorProfessionalScience, Description: "Professional Services", Authorized: true}},
 			ApplicableRegions: []GeographicScope{
 				{Type: GeoTypeNational, Identifier: "EU"},
 			},
 			AuthorizedActions: AuthorizedActions{
-				NonPhysicalActions: []NonPhysicalAction{ActionResearching},
+				NonPhysicalActions: []NonPhysicalAction{ActionNonPhysicalResearching},
 			},
 		},
 		Requirements: Requirements{
@@ -1065,7 +1065,7 @@ func TestValidateRFC0115Compliance_CompositeMap_BothConfigAndDefinition(t *testi
 			},
 		},
 		Authorization: AuthorizationScope{
-			ApplicableSectors: []IndustrySector{SectorFinancialInsurance},
+			ApplicableSectors: []IndustrySector{{Code: SectorFinanceInsurance, Description: "Finance and Insurance", Authorized: true}},
 			ApplicableRegions: []GeographicScope{
 				{Type: GeoTypeNational, Identifier: "US"},
 			},

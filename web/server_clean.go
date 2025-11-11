@@ -5945,6 +5945,72 @@ func (s *BetaServer) routes() {
 	// Delegation create + revoke (capability enforced when GAUTH_CAPABILITY_ENFORCE=1)
 	s.router.POST("/api/v1/delegation/create", s.apiDelegationCreate)
 	s.router.POST("/api/v1/delegation/revoke", s.apiDelegationRevoke)
+	
+	// RFC-0111 Subscription and Authorization Flow endpoints (optional, controlled by GAUTH_RFC0111_ENABLED=1)
+	if rfc0111Components, err := InitRFC0111FromEnv(); err == nil && rfc0111Components != nil {
+		fmt.Fprintf(os.Stderr, "[RFC-0111] Enabled with mock external services\n")
+		
+		// Create GAuth service with RFC-0111 compliance enabled
+		// Create ExtendedTokenService for protocol orchestrator
+		extendedTokenService := gauth.NewExtendedTokenService(
+			rfc0111Components.AuthChainValidator,
+			rfc0111Components.ComplianceValidator,
+			rfc0111Components.PIPClient,
+			"rfc0111-demo",              // issuer
+			"demo-audience",              // audience
+			time.Hour,                    // default token TTL
+		)
+		
+		gauthService, err := gauth.New(
+			gauth.Config{
+				ClientID:     "rfc0111-demo",
+				ClientSecret: "demo-secret",
+			},
+			gauth.WithRFCCompliance(
+				rfc0111Components.SubscriptionStore,
+				extendedTokenService,
+				rfc0111Components.ComplianceValidator,
+				rfc0111Components.AuthChainValidator,
+				rfc0111Components.FormalReqValidator,
+				rfc0111Components.PVPClient,
+				rfc0111Components.PIPClient,
+				rfc0111Components.CommercialRegClient,
+				rfc0111Components.ComplianceTracker,
+			),
+		)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "[RFC-0111] Failed to create GAuth service: %v\n", err)
+		} else {
+			// Register all RFC-0111 endpoints
+			s.RegisterRFC0111Endpoints(
+				rfc0111Components.SubscriptionManager,
+				rfc0111Components.SubscriptionStore,
+				gauthService,
+			)
+			
+			fmt.Fprintf(os.Stderr, "[RFC-0111] Endpoints registered:\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]   Subscription Flow (Steps I-VIII):\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/rfc0111/subscriptions (Step I: Initiate)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/rfc0111/subscriptions/:id/step-ii (Authorizer Auth Proof)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/rfc0111/subscriptions/:id/step-iii (Client Owner Identity)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/rfc0111/subscriptions/:id/step-iv (Client Owner Auth)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/rfc0111/subscriptions/:id/step-v (Client Authorization)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/rfc0111/subscriptions/:id/step-vi (Resource Owner Identity)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/rfc0111/subscriptions/:id/step-vii (Resource Owner Auth)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/rfc0111/subscriptions/:id/step-viii (Resource Server Auth)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     GET  /api/v1/rfc0111/subscriptions/:id (Get subscription)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     GET  /api/v1/rfc0111/subscriptions (List subscriptions)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]   Authorization Flow (Steps a-i):\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/rfc0111/authorize (Request token)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/rfc0111/token/validate (Validate token)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/rfc0111/token/introspect (Introspect token)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/rfc0111/token/revoke (Revoke token)\n")
+		}
+	} else if err != nil {
+		fmt.Fprintf(os.Stderr, "[RFC-0111] Initialization failed: %v\n", err)
+	}
+	// End RFC-0111 initialization
+	
 	// Evidence hash attachment (beta forensic feature)
 	s.router.POST("/api/v1/beta/poa/:id/evidence", func(c *gin.Context) {
 		poaID := c.Param("id")

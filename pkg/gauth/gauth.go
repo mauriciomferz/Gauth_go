@@ -1,6 +1,7 @@
 package gauth
 
 import (
+	"context"
 	"crypto/ed25519"
 	"crypto/hmac"
 	"crypto/rand"
@@ -170,6 +171,10 @@ type Service struct {
 	jtiTTL     time.Duration
 	jtiMu      sync.Mutex
 	violations *observability.ViolationCounters
+	
+	// RFC-0111 compliance components
+	protocolOrchestrator *ProtocolOrchestrator
+	subscriptionManager  *SubscriptionFlowManager
 }
 
 // Option configures the Service during construction.
@@ -199,6 +204,45 @@ type ReplayStore interface{ CheckAndStore(jti string) error }
 // WithReplayStore injects a replay persistence layer.
 func WithReplayStore(rs ReplayStore) Option {
 	return func(s *Service) error { s.replay = rs; return nil }
+}
+
+// WithRFCCompliance configures RFC-0111 compliance components
+// This enables the full RFC-0111 subscription and authorization flows
+func WithRFCCompliance(
+	subscriptionStore SubscriptionStore,
+	extendedTokenService *ExtendedTokenService,
+	complianceValidator *ComplianceValidator,
+	authChainValidator *AuthorizationChainValidator,
+	formalReqValidator *FormalRequirementsValidator,
+	pvpClient PowerVerificationPoint,
+	pipClient PIPClient,
+	commercialRegClient CommercialRegisterClient,
+	complianceTracker ComplianceTracker,
+) Option {
+	return func(s *Service) error {
+		// Create subscription flow manager
+		s.subscriptionManager = NewSubscriptionFlowManager(
+			pvpClient,
+			pipClient,
+			commercialRegClient,
+			authChainValidator,
+			formalReqValidator,
+			subscriptionStore,
+		)
+		
+		// Create protocol orchestrator
+		s.protocolOrchestrator = NewProtocolOrchestrator(
+			extendedTokenService,
+			complianceValidator,
+			authChainValidator,
+			formalReqValidator,
+			pipClient,
+			subscriptionStore,
+			complianceTracker,
+		)
+		
+		return nil
+	}
 }
 
 // WithDurableReplayFromEnv auto-configures DurableReplayStore from environment variables.
@@ -396,6 +440,23 @@ func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
 		g.metrics.IncTokensIssued()
 	}
 	return &TokenResponse{Token: token, Scope: req.Scope, ValidUntil: expiry}, nil
+}
+
+// RequestTokenRFC executes RFC-0111 compliant authorization flow
+// This is the main entry point for RFC-0111 compliant token requests
+// It orchestrates Steps (a)-(i) and returns an ExtendedToken
+func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthorizationRequest) (*RFCCompliantTokenResponse, error) {
+	if g.protocolOrchestrator == nil {
+		return nil, fmt.Errorf("RFC-0111 protocol orchestrator not initialized - use WithRFCCompliance option")
+	}
+	
+	return g.protocolOrchestrator.ExecuteRFCCompliantFlow(ctx, req)
+}
+
+// GetSubscriptionManager returns the subscription flow manager
+// This allows external code to execute Steps I-VIII
+func (g *Service) GetSubscriptionManager() *SubscriptionFlowManager {
+	return g.subscriptionManager
 }
 
 // ValidateToken validates a token and returns client information

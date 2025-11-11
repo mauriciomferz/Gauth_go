@@ -10,8 +10,8 @@ func minimalValidDefinition() PoADefinition {
 	start := time.Now()
 	end := start.Add(24 * time.Hour)
 	return PoADefinition{
-		Parties:       Parties{Principal: Principal{Type: PrincipalTypeOrganization, Identity: "org-123"}, AuthorizedClient: AuthorizedClient{Type: ClientTypeLLM, Identity: "client-xyz", Version: "v1", OperationalStatus: "active"}},
-		Authorization: AuthorizationScope{ApplicableSectors: []IndustrySector{SectorInformationComm}, ApplicableRegions: []GeographicScope{{Type: GeoTypeNational, Identifier: "US"}}, AuthorizedActions: AuthorizedActions{Transactions: []Transaction{TransactionLoan}}},
+		Parties:       Parties{Principal: Principal{Type: PrincipalTypeOrganization, Identity: "org-123"}, AuthorizedClient: AuthorizedClient{Type: string(ClientTypeLLM), Identity: "client-xyz", Version: "v1", OperationalStatus: string(OperationalStatusActive)}},
+		Authorization: AuthorizationScope{ApplicableSectors: []IndustrySector{{Code: SectorInfoCommunication, Description: "Information and Communication", Authorized: true}}, ApplicableRegions: []GeographicScope{{Type: GeoTypeNational, Identifier: "US"}}, AuthorizedActions: AuthorizedActions{Transactions: []TransactionType{TransactionLoan}}},
 		Requirements:  Requirements{ValidityPeriod: ValidityPeriod{StartTime: start, EndTime: end}},
 	}
 }
