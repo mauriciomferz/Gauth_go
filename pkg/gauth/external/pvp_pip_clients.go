@@ -117,6 +117,7 @@ func (c *PVPClient) VerifyIdentity(
 	request *gauth.IdentityVerificationRequest,
 ) (*gauth.IdentityVerificationResult, error) {
 	var lastErr error
+	var finalResult *gauth.IdentityVerificationResult
 	
 	// Execute with circuit breaker
 	err := c.config.CircuitBreaker.Execute(func() error {
@@ -133,7 +134,8 @@ func (c *PVPClient) VerifyIdentity(
 
 			result, err := c.attemptVerifyIdentity(ctx, request)
 			if err == nil {
-				return nil // Success, store result somehow
+				finalResult = result
+				return nil
 			}
 			
 			lastErr = err
@@ -155,16 +157,7 @@ func (c *PVPClient) VerifyIdentity(
 		return nil, fmt.Errorf("PVP verification failed after %d attempts: %w", c.config.MaxRetries, err)
 	}
 
-	// TODO: Return actual result (needs to be stored during execution)
-	return &gauth.IdentityVerificationResult{
-		Verified:        true,
-		VerificationID:  fmt.Sprintf("pvp-%d", time.Now().Unix()),
-		SubjectID:       request.SubjectID,
-		IdentityLevel:   request.RequiredLevel,
-		VerifiedAt:      time.Now(),
-		ExpiresAt:       time.Now().Add(24 * time.Hour),
-		VerificationMethod: request.ProofMethod,
-	}, nil
+	return finalResult, nil
 }
 
 // attemptVerifyIdentity makes a single attempt to verify identity
