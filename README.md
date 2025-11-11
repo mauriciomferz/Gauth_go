@@ -113,6 +113,16 @@ Visit http://localhost:8080 to explore the interactive web interface.
 - **Comprehensive Testing** - Property tests, fuzz tests, integration tests
 - **Observability** - Prometheus metrics, distributed tracing support
 
+### Persistence & Scalability
+- **PostgreSQL Integration** - Production-ready token persistence with JSONB storage
+- **Token Store Abstraction** - Pluggable storage backends (memory, PostgreSQL)
+- **Subscription Management** - Complete RFC-0111 subscription flow persistence
+- **Docker Compose** - Ready-to-use development environment
+- **Connection Pooling** - Optimized database connection management
+- **Efficient Indexing** - Fast queries on authorization chains and metadata
+
+**See**: [PostgreSQL Setup Guide](docs/POSTGRESQL_SETUP.md) for database configuration.
+
 ## Architecture
 
 ```

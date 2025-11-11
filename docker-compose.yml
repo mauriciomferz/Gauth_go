@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database for RFC-0111 implementation
+  postgres:
+    image: postgres:16-alpine
+    container_name: gauth-postgres
+    environment:
+      POSTGRES_DB: gauth
+      POSTGRES_USER: gauth
+      POSTGRES_PASSWORD: gauth_dev_password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./schema/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gauth"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gauth-network
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: gauth-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - gauth-network
+
+  # GAuth web server (optional - for local development)
+  web-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.local-arm64
+    container_name: gauth-web-server
+    environment:
+      # RFC-0111 Configuration
+      GAUTH_RFC0111_ENABLED: "1"
+      GAUTH_RFC0111_USE_MOCKS: "1"
+      
+      # Database Configuration
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: gauth
+      DB_USER: gauth
+      DB_PASSWORD: gauth_dev_password
+      DB_SSLMODE: disable
+      
+      # Redis Configuration (optional)
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      
+      # Server Configuration
+      PORT: "8080"
+      GIN_MODE: debug
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - gauth-network
+    volumes:
+      - .:/app
+    command: ["./bin/web-server"]
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  gauth-network:
+    driver: bridge
