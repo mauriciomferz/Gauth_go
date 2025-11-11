@@ -4,7 +4,6 @@ package web
 import (
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/disclosure"
-	"github.com/gin-gonic/gin"
 )
 
 // RegisterDisclosureRoutes registers RFC-0111 disclosure/transparency endpoints

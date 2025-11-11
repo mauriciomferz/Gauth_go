@@ -443,6 +443,128 @@ func (s *PostgresExtendedTokenStore) ListTokensByClient(ctx context.Context, cli
 	return tokens, nil
 }
 
+// ListTokensByResourceOwner returns all active tokens for a specific resource owner
+func (s *PostgresExtendedTokenStore) ListTokensByResourceOwner(ctx context.Context, ownerID string) ([]*ExtendedToken, error) {
+	// Query for active (non-revoked, non-expired) tokens for the resource owner
+	// We need to extract owner_id from the authorization_chain JSONB field
+	query := `
+		SELECT 
+			access_token, token_type, expires_in, refresh_token, scope, issued_at,
+			power_of_attorney, authorization_chain, legal_framework, verification_proof,
+			audit_trail, grant_id, compliance_level
+		FROM extended_tokens
+		WHERE 
+			revoked_at IS NULL
+			AND (issued_at + (expires_in * interval '1 second')) > NOW()
+			AND authorization_chain->>'resource_owner_id' = $1
+		ORDER BY issued_at DESC
+	`
+
+	rows, err := s.db.QueryContext(ctx, query, ownerID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query tokens by resource owner: %w", err)
+	}
+	defer rows.Close()
+
+	var tokens []*ExtendedToken
+	for rows.Next() {
+		var token ExtendedToken
+		var scope pq.StringArray
+		var poaJSON, authChainJSON, legalFrameworkJSON, verificationProofJSON, auditTrailJSON []byte
+
+		err := rows.Scan(
+			&token.AccessToken,
+			&token.TokenType,
+			&token.ExpiresIn,
+			&token.RefreshToken,
+			&scope,
+			&token.IssuedAt,
+			&poaJSON,
+			&authChainJSON,
+			&legalFrameworkJSON,
+			&verificationProofJSON,
+			&auditTrailJSON,
+			&token.GrantID,
+			&token.ComplianceLevel,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan token row: %w", err)
+		}
+
+		// Unmarshal JSONB fields
+		if len(poaJSON) > 0 {
+			if err := json.Unmarshal(poaJSON, &token.PowerOfAttorney); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal power of attorney: %w", err)
+			}
+		}
+
+		if err := json.Unmarshal(authChainJSON, &token.AuthorizationChain); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal authorization chain: %w", err)
+		}
+
+		if err := json.Unmarshal(legalFrameworkJSON, &token.LegalFramework); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal legal framework: %w", err)
+		}
+
+		if err := json.Unmarshal(verificationProofJSON, &token.VerificationProof); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal verification proof: %w", err)
+		}
+
+		if len(auditTrailJSON) > 0 {
+			if err := json.Unmarshal(auditTrailJSON, &token.AuditTrail); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal audit trail: %w", err)
+			}
+		}
+
+		token.Scope = scope
+		tokens = append(tokens, &token)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating token rows: %w", err)
+	}
+
+	return tokens, nil
+}
+
+// RevokeTokenWithReason marks a token as revoked with a specific reason
+func (s *PostgresExtendedTokenStore) RevokeTokenWithReason(ctx context.Context, accessToken string, reason string) error {
+	// First, revoke the token
+	if err := s.RevokeToken(ctx, accessToken); err != nil {
+		return err
+	}
+
+	// Then, add an audit entry to the token's audit trail
+	query := `
+		UPDATE extended_tokens
+		SET audit_trail = COALESCE(audit_trail, '[]'::jsonb) || $2::jsonb
+		WHERE access_token = $1
+	`
+
+	auditEntry := AuditEntry{
+		Timestamp: time.Now(),
+		Action:    "token_revoked",
+		Actor:     "resource_owner", // Could be enhanced to get from context
+		Result:    "success",
+		Details: map[string]interface{}{
+			"reason":       reason,
+			"access_token": accessToken,
+		},
+	}
+
+	auditJSON, err := json.Marshal(auditEntry)
+	if err != nil {
+		return fmt.Errorf("failed to marshal audit entry: %w", err)
+	}
+
+	_, err = s.db.ExecContext(ctx, query, accessToken, auditJSON)
+	if err != nil {
+		return fmt.Errorf("failed to add audit entry: %w", err)
+	}
+
+	return nil
+}
+
 // Close closes the database connection
 func (s *PostgresExtendedTokenStore) Close() error {
 	return s.db.Close()

@@ -222,6 +222,69 @@ func (s *MemoryExtendedTokenStore) ListTokensByClient(ctx context.Context, clien
 	return tokens, nil
 }
 
+// ListTokensByResourceOwner returns all active tokens for a specific resource owner
+func (s *MemoryExtendedTokenStore) ListTokensByResourceOwner(ctx context.Context, ownerID string) ([]*ExtendedToken, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	var result []*ExtendedToken
+	
+	// Iterate through all tokens and filter by resource owner
+	for accessToken, stored := range s.tokens {
+		// Skip revoked tokens
+		if _, revoked := s.revokedTokens[accessToken]; revoked {
+			continue
+		}
+		
+		// Skip expired tokens
+		if isTokenExpired(stored.Token) {
+			continue
+		}
+		
+		// Check if this token belongs to the resource owner
+		if stored.Token.ResourceOwner != nil && stored.Token.ResourceOwner.OwnerID == ownerID {
+			result = append(result, stored.Token)
+		}
+	}
+	
+	return result, nil
+}
+
+// RevokeTokenWithReason marks a token as revoked with a specific reason
+func (s *MemoryExtendedTokenStore) RevokeTokenWithReason(ctx context.Context, accessToken string, reason string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// Check if token exists
+	stored, exists := s.tokens[accessToken]
+	if !exists {
+		return ErrTokenNotFound
+	}
+
+	// Mark as revoked
+	now := time.Now()
+	s.revokedTokens[accessToken] = now
+	stored.Metadata.RevokedAt = &now
+
+	// Add audit entry to token with revocation reason
+	if stored.Token.AuditTrail == nil {
+		stored.Token.AuditTrail = []AuditEntry{}
+	}
+	
+	stored.Token.AuditTrail = append(stored.Token.AuditTrail, AuditEntry{
+		Timestamp: now,
+		Action:    "token_revoked",
+		Actor:     "resource_owner", // or extract from context
+		Result:    "success",
+		Details: map[string]interface{}{
+			"reason":       reason,
+			"access_token": accessToken,
+		},
+	})
+
+	return nil
+}
+
 // GetStats returns statistics about stored tokens (useful for monitoring)
 func (s *MemoryExtendedTokenStore) GetStats() map[string]int {
 	s.mu.RLock()

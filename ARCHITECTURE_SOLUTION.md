@@ -484,7 +484,7 @@ lines of validation code into an RFC-0111 compliant flow.**
 │   ExtendedTokenStore     │      │   SubscriptionStore      │
 │      (Interface)         │      │      (Interface)         │
 └────────────┬─────────────┘      └────────────┬─────────────┘
-             │                                  │
+             │                                 │
        ┌─────┴─────┐                      ┌────┴────┐
        │           │                      │         │
        ↓           ↓                      ↓         ↓

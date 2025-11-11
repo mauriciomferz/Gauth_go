@@ -30,6 +30,13 @@ type ExtendedTokenStore interface {
 	
 	// ListTokensByClient returns all tokens for a specific client
 	ListTokensByClient(ctx context.Context, clientID string) ([]*ExtendedToken, error)
+	
+	// ListTokensByResourceOwner returns all active (non-revoked, non-expired) tokens for a specific resource owner
+	ListTokensByResourceOwner(ctx context.Context, ownerID string) ([]*ExtendedToken, error)
+	
+	// RevokeTokenWithReason marks a token as revoked with a specific reason
+	// The reason is stored in the audit trail or metadata for transparency
+	RevokeTokenWithReason(ctx context.Context, accessToken string, reason string) error
 }
 
 // Common errors for token store operations

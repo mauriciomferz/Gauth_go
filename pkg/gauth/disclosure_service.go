@@ -110,18 +110,35 @@ func (s *DisclosureService) ListActiveAuthorizations(
 		request.Limit = 50
 	}
 
-	// Query token store
-	tokens, total, err := s.tokenStore.ListTokensByResourceOwner(
-		ctx,
-		request.ResourceOwnerID,
-		request.ClientID,
-		request.Status,
-		request.Limit,
-		request.Offset,
-	)
+	// Query token store for all active tokens by resource owner
+	tokens, err := s.tokenStore.ListTokensByResourceOwner(ctx, request.ResourceOwnerID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list tokens: %w", err)
 	}
+
+	// Apply client filter if specified
+	if request.ClientID != "" {
+		filtered := make([]*ExtendedToken, 0)
+		for _, token := range tokens {
+			if token.AuthorizationChain != nil && token.AuthorizationChain.Client != nil &&
+				token.AuthorizationChain.Client.EntityID == request.ClientID {
+				filtered = append(filtered, token)
+			}
+		}
+		tokens = filtered
+	}
+
+	// Apply pagination
+	total := len(tokens)
+	start := request.Offset
+	end := request.Offset + request.Limit
+	if start > total {
+		start = total
+	}
+	if end > total {
+		end = total
+	}
+	tokens = tokens[start:end]
 
 	// Convert to summaries
 	summaries := make([]AuthorizationSummary, 0, len(tokens))
@@ -164,7 +181,7 @@ func (s *DisclosureService) GetAuthorizationDetail(
 	}
 
 	// Retrieve token
-	token, err := s.tokenStore.GetExtendedToken(ctx, authorizationID)
+	token, err := s.tokenStore.GetToken(ctx, authorizationID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve authorization: %w", err)
 	}
@@ -233,7 +250,7 @@ func (s *DisclosureService) RevokeAuthorization(
 	}
 
 	// Retrieve token
-	token, err := s.tokenStore.GetExtendedToken(ctx, request.AuthorizationID)
+	token, err := s.tokenStore.GetToken(ctx, request.AuthorizationID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve authorization: %w", err)
 	}
@@ -254,9 +271,9 @@ func (s *DisclosureService) RevokeAuthorization(
 		}, nil
 	}
 
-	// Revoke the token
+	// Revoke the token with reason
 	revokedAt := time.Now()
-	err = s.tokenStore.RevokeToken(ctx, request.AuthorizationID, request.Reason)
+	err = s.tokenStore.RevokeTokenWithReason(ctx, request.AuthorizationID, request.Reason)
 	if err != nil {
 		return nil, fmt.Errorf("failed to revoke authorization: %w", err)
 	}
@@ -349,22 +366,25 @@ func (s *DisclosureService) tokenToSummary(token *ExtendedToken) AuthorizationSu
 		IssuedAt:         token.IssuedAt,
 		ExpiresAt:        token.IssuedAt.Add(time.Duration(token.ExpiresIn) * time.Second),
 		ComplianceStatus: token.ComplianceLevel,
-		GrantedScopes:    []string{token.Scope},
-		GrantedActions:   []string{}, // TODO: Extract from PoA
+		GrantedScopes:    token.Scope, // Already []string
+		GrantedActions:   []string{},  // TODO: Extract from PoA
 	}
 
 	if token.ResourceOwner != nil {
 		summary.ResourceOwnerID = token.ResourceOwner.OwnerID
 	}
 	if token.ClientOwner != nil {
-		summary.ClientOwner = token.ClientOwner.Name
-		summary.ClientID = token.ClientOwner.EntityID
+		summary.ClientOwner = token.ClientOwner.OwnerName
+		summary.ClientID = token.ClientOwner.OwnerID
 	}
 	if token.OwnersAuthorizer != nil {
-		summary.OwnersAuthorizer = token.OwnersAuthorizer.Name
+		summary.OwnersAuthorizer = token.OwnersAuthorizer.AuthorizerName
 	}
 	if token.PowerOfAttorney != nil {
-		summary.ClientType = string(token.PowerOfAttorney.ClientTypeEnum)
+		// ClientType from authorization chain Client role
+		if token.AuthorizationChain != nil && token.AuthorizationChain.Client != nil {
+			summary.ClientType = token.AuthorizationChain.Client.EntityType
+		}
 	}
 
 	// Extract restriction summaries
