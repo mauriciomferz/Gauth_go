@@ -1,0 +1,390 @@
+// Package gauth - RFC-0111 Public Disclosure Service
+// This implements the transparency and accountability requirements from RFC-0111
+// Provides APIs for resource owners to view, manage, and revoke authorizations
+
+package gauth
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
+)
+
+// DisclosureService provides transparency APIs for authorization management
+type DisclosureService struct {
+	tokenStore         ExtendedTokenStore
+	subscriptionStore  SubscriptionStore
+	complianceTracker  ComplianceTracker
+	auditLogger        AuditLogger
+}
+
+// NewDisclosureService creates a new disclosure service
+func NewDisclosureService(
+	tokenStore ExtendedTokenStore,
+	subscriptionStore SubscriptionStore,
+	complianceTracker ComplianceTracker,
+	auditLogger AuditLogger,
+) *DisclosureService {
+	return &DisclosureService{
+		tokenStore:        tokenStore,
+		subscriptionStore: subscriptionStore,
+		complianceTracker: complianceTracker,
+		auditLogger:       auditLogger,
+	}
+}
+
+// AuthorizationSummary provides high-level view of an authorization
+type AuthorizationSummary struct {
+	AuthorizationID    string                 `json:"authorization_id"`
+	ResourceOwnerID    string                 `json:"resource_owner_id"`
+	ClientID           string                 `json:"client_id"`
+	ClientType         poa.ClientType         `json:"client_type"`
+	ClientOwner        string                 `json:"client_owner"`
+	OwnersAuthorizer   string                 `json:"owners_authorizer"`
+	GrantedScopes      []string               `json:"granted_scopes"`
+	GrantedActions     []poa.ActionType       `json:"granted_actions"`
+	Status             string                 `json:"status"`
+	IssuedAt           time.Time              `json:"issued_at"`
+	ExpiresAt          time.Time              `json:"expires_at"`
+	LastUsed           *time.Time             `json:"last_used,omitempty"`
+	UsageCount         int                    `json:"usage_count"`
+	ComplianceStatus   string                 `json:"compliance_status"`
+	ActiveRestrictions []string               `json:"active_restrictions"`
+}
+
+// AuthorizationDetail provides complete view of an authorization
+type AuthorizationDetail struct {
+	AuthorizationSummary
+	PowerOfAttorney       *poa.PoADefinition        `json:"power_of_attorney"`
+	AuthorizationChain    *AuthorizationChain       `json:"authorization_chain"`
+	LegalFramework        *LegalFrameworkInfo       `json:"legal_framework"`
+	VerificationProof     *IdentityVerificationChain `json:"verification_proof"`
+	Restrictions          []PowerRestriction        `json:"restrictions"`
+	AuditTrail            []AuditEntry              `json:"audit_trail"`
+	ComplianceViolations  []ComplianceViolation     `json:"compliance_violations,omitempty"`
+	SubscriptionID        string                    `json:"subscription_id"`
+}
+
+// ComplianceViolation represents a detected compliance issue
+type ComplianceViolation struct {
+	ViolationID   string    `json:"violation_id"`
+	DetectedAt    time.Time `json:"detected_at"`
+	ViolationType string    `json:"violation_type"`
+	Severity      string    `json:"severity"`
+	Description   string    `json:"description"`
+	Resolved      bool      `json:"resolved"`
+	ResolvedAt    *time.Time `json:"resolved_at,omitempty"`
+}
+
+// ListActiveAuthorizationsRequest is the request for listing authorizations
+type ListActiveAuthorizationsRequest struct {
+	ResourceOwnerID string    `json:"resource_owner_id"`
+	ClientID        string    `json:"client_id,omitempty"`
+	Status          string    `json:"status,omitempty"`
+	FromDate        time.Time `json:"from_date,omitempty"`
+	Limit           int       `json:"limit,omitempty"`
+	Offset          int       `json:"offset,omitempty"`
+}
+
+// ListActiveAuthorizationsResponse contains the list of authorizations
+type ListActiveAuthorizationsResponse struct {
+	Authorizations []AuthorizationSummary `json:"authorizations"`
+	Total          int                    `json:"total"`
+	Limit          int                    `json:"limit"`
+	Offset         int                    `json:"offset"`
+}
+
+// ListActiveAuthorizations retrieves all active authorizations for a resource owner
+func (s *DisclosureService) ListActiveAuthorizations(
+	ctx context.Context,
+	request *ListActiveAuthorizationsRequest,
+) (*ListActiveAuthorizationsResponse, error) {
+	if request.ResourceOwnerID == "" {
+		return nil, fmt.Errorf("resource_owner_id is required")
+	}
+
+	// Set defaults
+	if request.Limit <= 0 || request.Limit > 100 {
+		request.Limit = 50
+	}
+
+	// Query token store
+	tokens, total, err := s.tokenStore.ListTokensByResourceOwner(
+		ctx,
+		request.ResourceOwnerID,
+		request.ClientID,
+		request.Status,
+		request.Limit,
+		request.Offset,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list tokens: %w", err)
+	}
+
+	// Convert to summaries
+	summaries := make([]AuthorizationSummary, 0, len(tokens))
+	for _, token := range tokens {
+		summary := s.tokenToSummary(token)
+		summaries = append(summaries, summary)
+	}
+
+	// Log disclosure access
+	s.auditLogger.LogDisclosureAccess(ctx, &AuditEntry{
+		Timestamp:   time.Now(),
+		Action:      "list_authorizations",
+		SubjectID:   request.ResourceOwnerID,
+		SubjectType: "resource_owner",
+		Details: map[string]interface{}{
+			"count":  len(summaries),
+			"status": request.Status,
+		},
+	})
+
+	return &ListActiveAuthorizationsResponse{
+		Authorizations: summaries,
+		Total:          total,
+		Limit:          request.Limit,
+		Offset:         request.Offset,
+	}, nil
+}
+
+// GetAuthorizationDetail retrieves complete details of a specific authorization
+func (s *DisclosureService) GetAuthorizationDetail(
+	ctx context.Context,
+	authorizationID string,
+	resourceOwnerID string,
+) (*AuthorizationDetail, error) {
+	if authorizationID == "" {
+		return nil, fmt.Errorf("authorization_id is required")
+	}
+	if resourceOwnerID == "" {
+		return nil, fmt.Errorf("resource_owner_id is required")
+	}
+
+	// Retrieve token
+	token, err := s.tokenStore.GetExtendedToken(ctx, authorizationID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve authorization: %w", err)
+	}
+
+	// Verify ownership
+	if token.ResourceOwner == nil || token.ResourceOwner.ID != resourceOwnerID {
+		return nil, fmt.Errorf("unauthorized: not the resource owner")
+	}
+
+	// Get compliance violations
+	violations, err := s.complianceTracker.GetViolations(ctx, authorizationID)
+	if err != nil {
+		// Don't fail, just log
+		violations = []ComplianceViolation{}
+	}
+
+	// Build detail
+	detail := &AuthorizationDetail{
+		AuthorizationSummary: s.tokenToSummary(token),
+		PowerOfAttorney:      token.PowerOfAttorney,
+		AuthorizationChain:   token.AuthorizationChain,
+		LegalFramework:       token.LegalFramework,
+		VerificationProof:    token.VerificationProof,
+		Restrictions:         token.Restrictions,
+		AuditTrail:           token.AuditTrail,
+		ComplianceViolations: violations,
+		SubscriptionID:       token.IssuedBy.SubscriptionID,
+	}
+
+	// Log disclosure access
+	s.auditLogger.LogDisclosureAccess(ctx, &AuditEntry{
+		Timestamp:   time.Now(),
+		Action:      "get_authorization_detail",
+		SubjectID:   resourceOwnerID,
+		SubjectType: "resource_owner",
+		ObjectID:    authorizationID,
+		ObjectType:  "authorization",
+	})
+
+	return detail, nil
+}
+
+// RevokeAuthorizationRequest is the request to revoke an authorization
+type RevokeAuthorizationRequest struct {
+	AuthorizationID string `json:"authorization_id"`
+	ResourceOwnerID string `json:"resource_owner_id"`
+	Reason          string `json:"reason"`
+	RevokedBy       string `json:"revoked_by"`
+}
+
+// RevokeAuthorizationResponse contains the revocation result
+type RevokeAuthorizationResponse struct {
+	AuthorizationID string    `json:"authorization_id"`
+	RevokedAt       time.Time `json:"revoked_at"`
+	Status          string    `json:"status"`
+	Message         string    `json:"message"`
+}
+
+// RevokeAuthorization allows a resource owner to revoke an authorization
+func (s *DisclosureService) RevokeAuthorization(
+	ctx context.Context,
+	request *RevokeAuthorizationRequest,
+) (*RevokeAuthorizationResponse, error) {
+	if request.AuthorizationID == "" {
+		return nil, fmt.Errorf("authorization_id is required")
+	}
+	if request.ResourceOwnerID == "" {
+		return nil, fmt.Errorf("resource_owner_id is required")
+	}
+
+	// Retrieve token
+	token, err := s.tokenStore.GetExtendedToken(ctx, request.AuthorizationID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve authorization: %w", err)
+	}
+
+	// Verify ownership
+	if token.ResourceOwner == nil || token.ResourceOwner.ID != request.ResourceOwnerID {
+		return nil, fmt.Errorf("unauthorized: not the resource owner")
+	}
+
+	// Check if already revoked
+	if token.Status == "revoked" {
+		return &RevokeAuthorizationResponse{
+			AuthorizationID: request.AuthorizationID,
+			RevokedAt:       time.Now(),
+			Status:          "already_revoked",
+			Message:         "Authorization was already revoked",
+		}, nil
+	}
+
+	// Revoke the token
+	revokedAt := time.Now()
+	err = s.tokenStore.RevokeToken(ctx, request.AuthorizationID, request.Reason)
+	if err != nil {
+		return nil, fmt.Errorf("failed to revoke authorization: %w", err)
+	}
+
+	// Stop compliance tracking
+	_ = s.complianceTracker.StopTracking(ctx, request.AuthorizationID)
+
+	// Log revocation
+	s.auditLogger.LogRevocation(ctx, &AuditEntry{
+		Timestamp:   revokedAt,
+		Action:      "revoke_authorization",
+		SubjectID:   request.ResourceOwnerID,
+		SubjectType: "resource_owner",
+		ObjectID:    request.AuthorizationID,
+		ObjectType:  "authorization",
+		Details: map[string]interface{}{
+			"reason":     request.Reason,
+			"revoked_by": request.RevokedBy,
+		},
+	})
+
+	return &RevokeAuthorizationResponse{
+		AuthorizationID: request.AuthorizationID,
+		RevokedAt:       revokedAt,
+		Status:          "revoked",
+		Message:         "Authorization successfully revoked",
+	}, nil
+}
+
+// GetAuditTrail retrieves the audit trail for a specific authorization
+func (s *DisclosureService) GetAuditTrail(
+	ctx context.Context,
+	authorizationID string,
+	resourceOwnerID string,
+	fromDate time.Time,
+	limit int,
+) ([]AuditEntry, error) {
+	if authorizationID == "" {
+		return nil, fmt.Errorf("authorization_id is required")
+	}
+	if resourceOwnerID == "" {
+		return nil, fmt.Errorf("resource_owner_id is required")
+	}
+
+	// Retrieve token to verify ownership
+	token, err := s.tokenStore.GetExtendedToken(ctx, authorizationID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve authorization: %w", err)
+	}
+
+	// Verify ownership
+	if token.ResourceOwner == nil || token.ResourceOwner.ID != resourceOwnerID {
+		return nil, fmt.Errorf("unauthorized: not the resource owner")
+	}
+
+	// Get audit trail
+	entries, err := s.auditLogger.GetAuditTrail(ctx, authorizationID, fromDate, limit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve audit trail: %w", err)
+	}
+
+	// Log disclosure access
+	s.auditLogger.LogDisclosureAccess(ctx, &AuditEntry{
+		Timestamp:   time.Now(),
+		Action:      "get_audit_trail",
+		SubjectID:   resourceOwnerID,
+		SubjectType: "resource_owner",
+		ObjectID:    authorizationID,
+		ObjectType:  "authorization",
+		Details: map[string]interface{}{
+			"entry_count": len(entries),
+			"from_date":   fromDate,
+		},
+	})
+
+	return entries, nil
+}
+
+// tokenToSummary converts an ExtendedToken to an AuthorizationSummary
+func (s *DisclosureService) tokenToSummary(token *ExtendedToken) AuthorizationSummary {
+	summary := AuthorizationSummary{
+		AuthorizationID:  token.AccessToken, // Using access token as ID
+		Status:           token.Status,
+		IssuedAt:         token.IssuedAt,
+		ExpiresAt:        token.IssuedAt.Add(time.Duration(token.ExpiresIn) * time.Second),
+		ComplianceStatus: token.ComplianceLevel,
+	}
+
+	if token.ResourceOwner != nil {
+		summary.ResourceOwnerID = token.ResourceOwner.ID
+	}
+	if token.ClientOwner != nil {
+		summary.ClientOwner = token.ClientOwner.ID
+		summary.ClientID = token.ClientOwner.ClientID
+	}
+	if token.OwnersAuthorizer != nil {
+		summary.OwnersAuthorizer = token.OwnersAuthorizer.ID
+	}
+	if token.PowerOfAttorney != nil {
+		summary.ClientType = token.PowerOfAttorney.ClientType
+		summary.GrantedScopes = token.PowerOfAttorney.Scope
+		if token.PowerOfAttorney.ActionDefinition != nil {
+			summary.GrantedActions = token.PowerOfAttorney.ActionDefinition.AllowedActions
+		}
+	}
+
+	// Extract restriction summaries
+	restrictions := make([]string, 0, len(token.Restrictions))
+	for _, r := range token.Restrictions {
+		restrictions = append(restrictions, fmt.Sprintf("%s: %s", r.Type, r.Description))
+	}
+	summary.ActiveRestrictions = restrictions
+
+	return summary
+}
+
+// AuditLogger interface for audit trail management
+type AuditLogger interface {
+	LogDisclosureAccess(ctx context.Context, entry *AuditEntry) error
+	LogRevocation(ctx context.Context, entry *AuditEntry) error
+	GetAuditTrail(ctx context.Context, authorizationID string, fromDate time.Time, limit int) ([]AuditEntry, error)
+}
+
+// ExtendedTokenStore interface additions for disclosure
+type ExtendedTokenStore interface {
+	GetExtendedToken(ctx context.Context, tokenID string) (*ExtendedToken, error)
+	ListTokensByResourceOwner(ctx context.Context, resourceOwnerID, clientID, status string, limit, offset int) ([]*ExtendedToken, int, error)
+	RevokeToken(ctx context.Context, tokenID string, reason string) error
+}
