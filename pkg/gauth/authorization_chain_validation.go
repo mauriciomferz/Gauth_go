@@ -10,6 +10,19 @@ import (
 	"time"
 )
 
+// Authorization chain validation constants
+const (
+	// MaxChainDepth is the maximum allowed depth for authorization chains
+	// to prevent infinitely long delegation chains
+	MaxChainDepth = 10
+
+	// MaxDelegationHops is the maximum number of delegation steps allowed
+	MaxDelegationHops = 5
+
+	// ChainExpirationBuffer is the time buffer before expiration to warn
+	ChainExpirationBuffer = 24 * time.Hour
+)
+
 // ValidationContext provides context for authorization chain validation
 type ValidationContext struct {
 	Context                context.Context
@@ -25,6 +38,8 @@ type AuthorizationChainValidator struct {
 	trustServiceProvider     TrustServiceProvider
 	revocationChecker        RevocationChecker
 	strictMode               bool
+	maxChainDepth            int
+	maxDelegationHops        int
 }
 
 // NewAuthorizationChainValidator creates a new validator instance
@@ -38,6 +53,22 @@ func NewAuthorizationChainValidator(
 		trustServiceProvider:     trustServiceProvider,
 		revocationChecker:        revocationChecker,
 		strictMode:               true,
+		maxChainDepth:            MaxChainDepth,
+		maxDelegationHops:        MaxDelegationHops,
+	}
+}
+
+// SetMaxChainDepth allows configuration of maximum chain depth
+func (v *AuthorizationChainValidator) SetMaxChainDepth(depth int) {
+	if depth > 0 && depth <= 100 {
+		v.maxChainDepth = depth
+	}
+}
+
+// SetMaxDelegationHops allows configuration of maximum delegation hops
+func (v *AuthorizationChainValidator) SetMaxDelegationHops(hops int) {
+	if hops > 0 && hops <= 20 {
+		v.maxDelegationHops = hops
 	}
 }
 
@@ -155,6 +186,31 @@ func (v *AuthorizationChainValidator) validateChainStructure(
 		}
 	}
 
+	// Enhanced Validation 1: Check chain depth limit
+	chainDepth := v.calculateChainDepth(chain)
+	result.ValidatedChainDepth = chainDepth
+	if chainDepth > v.maxChainDepth {
+		return &GAuthError{
+			Code:    "chain_too_deep",
+			Message: fmt.Sprintf("Authorization chain depth %d exceeds maximum %d", chainDepth, v.maxChainDepth),
+		}
+	}
+
+	// Enhanced Validation 2: Check for circular references
+	if err := v.detectCircularReferences(chain); err != nil {
+		return err
+	}
+
+	// Enhanced Validation 3: Validate delegation path
+	if err := v.validateDelegationPath(chain, result); err != nil {
+		return err
+	}
+
+	// Enhanced Validation 4: Check expiration across chain
+	if err := v.validateChainExpiration(chain, result); err != nil {
+		return err
+	}
+
 	// Validate chain linkage
 	if chain.ClientOwner.AuthorizedBy != chain.OwnersAuthorizer.EntityID {
 		return &GAuthError{
@@ -170,6 +226,180 @@ func (v *AuthorizationChainValidator) validateChainStructure(
 		}
 	}
 
+	return nil
+}
+
+// calculateChainDepth calculates the depth of the authorization chain
+func (v *AuthorizationChainValidator) calculateChainDepth(chain *AuthorizationChain) int {
+	depth := 0
+	
+	if chain.OwnersAuthorizer != nil {
+		depth++
+	}
+	if chain.ClientOwner != nil {
+		depth++
+	}
+	if chain.Client != nil {
+		depth++
+	}
+	
+	// Use the ChainDepth field if available
+	if chain.ChainDepth > depth {
+		depth = chain.ChainDepth
+	}
+	
+	return depth
+}
+
+// detectCircularReferences checks for circular references in the authorization chain
+func (v *AuthorizationChainValidator) detectCircularReferences(chain *AuthorizationChain) error {
+	seen := make(map[string]bool)
+	
+	// Check owner's authorizer
+	if chain.OwnersAuthorizer != nil {
+		entityID := chain.OwnersAuthorizer.EntityID
+		if seen[entityID] {
+			return &GAuthError{
+				Code:    "circular_reference",
+				Message: fmt.Sprintf("Circular reference detected: entity %s appears multiple times", entityID),
+			}
+		}
+		seen[entityID] = true
+	}
+	
+	// Check client owner
+	if chain.ClientOwner != nil {
+		entityID := chain.ClientOwner.EntityID
+		if seen[entityID] {
+			return &GAuthError{
+				Code:    "circular_reference",
+				Message: fmt.Sprintf("Circular reference detected: entity %s appears multiple times", entityID),
+			}
+		}
+		seen[entityID] = true
+		
+		// Check if owner is authorizing itself
+		if chain.OwnersAuthorizer != nil && entityID == chain.OwnersAuthorizer.EntityID {
+			return &GAuthError{
+				Code:    "self_authorization",
+				Message: "Entity cannot authorize itself",
+			}
+		}
+	}
+	
+	// Check client
+	if chain.Client != nil {
+		entityID := chain.Client.EntityID
+		if seen[entityID] {
+			return &GAuthError{
+				Code:    "circular_reference",
+				Message: fmt.Sprintf("Circular reference detected: entity %s appears multiple times", entityID),
+			}
+		}
+		seen[entityID] = true
+	}
+	
+	return nil
+}
+
+// validateDelegationPath validates the complete delegation path
+func (v *AuthorizationChainValidator) validateDelegationPath(chain *AuthorizationChain, result *ChainValidationResult) error {
+	// Validate the 3-level chain structure
+	// Level 1: Owner's Authorizer → Level 2: Client Owner → Level 3: Client
+	
+	// Verify authorization types are appropriate for delegation
+	if chain.ClientOwner != nil {
+		// Client Owner must be authorized by Owner's Authorizer
+		if chain.ClientOwner.AuthorizationType == "delegated" {
+			// This is a delegated authorization - count as delegation hop
+			if chain.ClientOwner.AuthorizedBy == "" {
+				return &GAuthError{
+					Code:    "missing_delegator",
+					Message: "Delegated authorization must specify authorizer",
+				}
+			}
+		}
+	}
+	
+	if chain.Client != nil {
+		// Client must be authorized by Client Owner
+		if chain.Client.AuthorizationType == "delegated" {
+			if chain.Client.AuthorizedBy == "" {
+				return &GAuthError{
+					Code:    "missing_delegator",
+					Message: "Delegated client must specify authorizer",
+				}
+			}
+		}
+		
+		// Verify client status is active
+		if chain.Client.Status != "active" {
+			return &GAuthError{
+				Code:    "inactive_client",
+				Message: fmt.Sprintf("Client has invalid status: %s", chain.Client.Status),
+			}
+		}
+	}
+	
+	return nil
+}
+
+// validateChainExpiration checks expiration across the entire chain
+func (v *AuthorizationChainValidator) validateChainExpiration(chain *AuthorizationChain, result *ChainValidationResult) error {
+	now := time.Now()
+	warningThreshold := now.Add(ChainExpirationBuffer)
+	
+	// Check owner's authorizer expiration
+	if chain.OwnersAuthorizer != nil && !chain.OwnersAuthorizer.ValidUntil.IsZero() {
+		validUntil := chain.OwnersAuthorizer.ValidUntil
+		
+		if now.After(validUntil) {
+			return &GAuthError{
+				Code:    "authorizer_expired",
+				Message: fmt.Sprintf("Owner's authorizer expired at %v", validUntil),
+			}
+		}
+		
+		if validUntil.Before(warningThreshold) {
+			result.Warnings = append(result.Warnings,
+				fmt.Sprintf("Owner's authorizer expires soon: %v (within %v)", validUntil, ChainExpirationBuffer))
+		}
+	}
+	
+	// Check client owner expiration
+	if chain.ClientOwner != nil && !chain.ClientOwner.ValidUntil.IsZero() {
+		validUntil := chain.ClientOwner.ValidUntil
+		
+		if now.After(validUntil) {
+			return &GAuthError{
+				Code:    "owner_expired",
+				Message: fmt.Sprintf("Client owner authorization expired at %v", validUntil),
+			}
+		}
+		
+		if validUntil.Before(warningThreshold) {
+			result.Warnings = append(result.Warnings,
+				fmt.Sprintf("Client owner authorization expires soon: %v (within %v)", validUntil, ChainExpirationBuffer))
+		}
+	}
+	
+	// Check client expiration
+	if chain.Client != nil && !chain.Client.ValidUntil.IsZero() {
+		validUntil := chain.Client.ValidUntil
+		
+		if now.After(validUntil) {
+			return &GAuthError{
+				Code:    "client_expired",
+				Message: fmt.Sprintf("Client authorization expired at %v", validUntil),
+			}
+		}
+		
+		if validUntil.Before(warningThreshold) {
+			result.Warnings = append(result.Warnings,
+				fmt.Sprintf("Client authorization expires soon: %v (within %v)", validUntil, ChainExpirationBuffer))
+		}
+	}
+	
 	return nil
 }
 
