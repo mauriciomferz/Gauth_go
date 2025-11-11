@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	_ "github.com/lib/pq" // PostgreSQL driver
+	"github.com/lib/pq"
 )
 
 // PostgresExtendedTokenStore implements ExtendedTokenStore using PostgreSQL
@@ -115,7 +115,7 @@ func (s *PostgresExtendedTokenStore) SaveToken(ctx context.Context, token *Exten
 		token.TokenType,
 		token.ExpiresIn,
 		token.RefreshToken,
-		token.Scope,
+		pq.Array(token.Scope), // Convert Go slice to PostgreSQL array
 		token.IssuedAt,
 		poaJSON,
 		authChainJSON,
@@ -157,7 +157,7 @@ func (s *PostgresExtendedTokenStore) GetToken(ctx context.Context, accessToken s
 		&token.TokenType,
 		&token.ExpiresIn,
 		&token.RefreshToken,
-		&scope,
+		pq.Array(&scope), // Scan PostgreSQL array to Go slice
 		&token.IssuedAt,
 		&poaJSON,
 		&authChainJSON,
@@ -245,7 +245,7 @@ func (s *PostgresExtendedTokenStore) GetTokenByRefreshToken(ctx context.Context,
 		&token.TokenType,
 		&token.ExpiresIn,
 		&token.RefreshToken,
-		&scope,
+		pq.Array(&scope), // Scan PostgreSQL array to Go slice
 		&token.IssuedAt,
 		&poaJSON,
 		&authChainJSON,
@@ -395,7 +395,7 @@ func (s *PostgresExtendedTokenStore) ListTokensByClient(ctx context.Context, cli
 			&token.TokenType,
 			&token.ExpiresIn,
 			&token.RefreshToken,
-			&scope,
+			pq.Array(&scope), // Scan PostgreSQL array to Go slice
 			&token.IssuedAt,
 			&poaJSON,
 			&authChainJSON,
