@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/rsa"
+	"strings"
 	"testing"
 	"time"
 
@@ -618,15 +619,16 @@ func TestTokenExchangeService_RevokeExchangedToken(t *testing.T) {
 	service, _, _ := setupTokenExchangeTest(t)
 	ctx := context.Background()
 
-	// Revocation is not implemented yet
-	err := service.RevokeExchangedToken(ctx, "test-token")
+	// Revocation now attempts to parse the token and validate it
+	// An invalid token should produce an error
+	err := service.RevokeExchangedToken(ctx, "invalid-test-token", "testing", "test-user")
 	if err == nil {
-		t.Error("Expected error for unimplemented revocation but got none")
+		t.Error("Expected error for invalid token but got none")
 	}
 
-	expectedMsg := "token revocation not implemented"
-	if err.Error() != expectedMsg {
-		t.Errorf("Expected error message %q but got %q", expectedMsg, err.Error())
+	// Should get a token parsing error since "invalid-test-token" is not a valid JWT
+	if !strings.Contains(err.Error(), "invalid token") && !strings.Contains(err.Error(), "token is malformed") {
+		t.Errorf("Expected token parsing error but got %q", err.Error())
 	}
 }
 
@@ -634,19 +636,20 @@ func TestTokenExchangeService_RefreshExchangedToken(t *testing.T) {
 	service, _, _ := setupTokenExchangeTest(t)
 	ctx := context.Background()
 
-	// Refresh is not implemented yet
-	response, err := service.RefreshExchangedToken(ctx, "test-refresh-token", "google")
+	// Refresh now validates the refresh token in storage
+	// A nonexistent refresh token should produce an error
+	response, err := service.RefreshExchangedToken(ctx, "nonexistent-refresh-token", "google")
 	if err == nil {
-		t.Error("Expected error for unimplemented refresh but got none")
+		t.Error("Expected error for nonexistent refresh token but got none")
 	}
 
 	if response != nil {
 		t.Errorf("Expected nil response but got %+v", response)
 	}
 
-	expectedMsg := "token refresh not implemented"
-	if err.Error() != expectedMsg {
-		t.Errorf("Expected error message %q but got %q", expectedMsg, err.Error())
+	// Should get a refresh token not found error
+	if !strings.Contains(err.Error(), "refresh token not found") {
+		t.Errorf("Expected 'refresh token not found' error but got %q", err.Error())
 	}
 }
 
