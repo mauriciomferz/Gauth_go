@@ -6,9 +6,11 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
 )
 
@@ -20,6 +22,7 @@ type ExtendedTokenService struct {
 	issuerID           string
 	issuerURL          string
 	tokenExpiry        time.Duration
+	signingKey         []byte // HMAC signing key for JWT
 }
 
 // NewExtendedTokenService creates a new extended token service
@@ -35,6 +38,11 @@ func NewExtendedTokenService(
 		tokenExpiry = 1 * time.Hour // Default
 	}
 	
+	// Generate a signing key if not provided
+	// In production, this should be loaded from secure configuration
+	signingKey := make([]byte, 32)
+	rand.Read(signingKey)
+	
 	return &ExtendedTokenService{
 		chainValidator:      chainValidator,
 		complianceValidator: complianceValidator,
@@ -42,6 +50,7 @@ func NewExtendedTokenService(
 		issuerID:            issuerID,
 		issuerURL:           issuerURL,
 		tokenExpiry:         tokenExpiry,
+		signingKey:          signingKey,
 	}
 }
 
@@ -194,6 +203,68 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 	return token, nil
 }
 
+// EncodeExtendedToken encodes an ExtendedToken to a JWT string
+// This FIXES the critical gap identified in the audit
+func (s *ExtendedTokenService) EncodeExtendedToken(
+	ctx context.Context,
+	token *ExtendedToken,
+) (string, error) {
+	if token == nil {
+		return "", &GAuthError{
+			Code:    "nil_token",
+			Message: "Cannot encode nil token",
+		}
+	}
+
+	// Create JWT claims
+	claims := jwt.MapClaims{
+		"iss":        s.issuerID,
+		"sub":        token.AuthorizationChain.Client.EntityID,
+		"aud":        token.ResourceOwner.OwnerID,
+		"exp":        token.IssuedAt.Add(time.Duration(token.ExpiresIn) * time.Second).Unix(),
+		"iat":        token.IssuedAt.Unix(),
+		"jti":        token.AccessToken,
+		"token_type": token.TokenType,
+		"scope":      token.Scope,
+		
+		// RFC-0111 extended claims
+		"client_owner":      token.ClientOwner,
+		"owners_authorizer": token.OwnersAuthorizer,
+		"resource_owner":    token.ResourceOwner,
+		"legal_framework":   token.LegalFramework,
+		"restrictions":      token.Restrictions,
+		"compliance_level":  token.ComplianceLevel,
+		"grant_id":          token.GrantID,
+		"request_id":        token.RequestID,
+	}
+
+	// Serialize PoA and AuthChain as JSON strings to avoid nested complexity
+	if token.PowerOfAttorney != nil {
+		poaJSON, err := json.Marshal(token.PowerOfAttorney)
+		if err == nil {
+			claims["power_of_attorney"] = string(poaJSON)
+		}
+	}
+
+	if token.AuthorizationChain != nil {
+		chainJSON, err := json.Marshal(token.AuthorizationChain)
+		if err == nil {
+			claims["authorization_chain"] = string(chainJSON)
+		}
+	}
+
+	// Create JWT token
+	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// Sign and get the complete encoded token string
+	tokenString, err := jwtToken.SignedString(s.signingKey)
+	if err != nil {
+		return "", fmt.Errorf("failed to sign JWT: %w", err)
+	}
+
+	return tokenString, nil
+}
+
 // ValidateExtendedToken validates an RFC-0111 extended token
 // This implements the MISSING functionality identified in the assessment
 func (s *ExtendedTokenService) ValidateExtendedToken(
@@ -341,17 +412,140 @@ func (s *ExtendedTokenService) buildVerificationChain(
 	return chain
 }
 
-// parseExtendedToken parses an extended token (simplified implementation)
+// parseExtendedToken parses an extended token from JWT string
+// This FIXES the critical gap identified in the audit
 func (s *ExtendedTokenService) parseExtendedToken(
 	ctx context.Context,
 	tokenString string,
 ) (*ExtendedToken, error) {
-	// In production, this would parse a JWT/JWE and extract the ExtendedToken
-	// For now, return error indicating token not found
-	return nil, &GAuthError{
-		Code:    "token_parse_not_implemented",
-		Message: "Extended token parsing from string not fully implemented (requires JWT/JWE parser)",
+	// Parse JWT token
+	jwtToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// Verify signing method
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return s.signingKey, nil
+	})
+
+	if err != nil {
+		return nil, &GAuthError{
+			Code:    "jwt_parse_failed",
+			Message: fmt.Sprintf("Failed to parse JWT: %v", err),
+		}
 	}
+
+	if !jwtToken.Valid {
+		return nil, &GAuthError{
+			Code:    "invalid_jwt",
+			Message: "JWT token is invalid",
+		}
+	}
+
+	// Extract claims
+	claims, ok := jwtToken.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, &GAuthError{
+			Code:    "invalid_claims",
+			Message: "Failed to extract JWT claims",
+		}
+	}
+
+	// Build ExtendedToken from claims
+	token := &ExtendedToken{
+		AccessToken:  getString(claims, "jti"),
+		TokenType:    getString(claims, "token_type"),
+		RefreshToken: getString(claims, "refresh_token"),
+		IssuedAt:     time.Unix(getInt64(claims, "iat"), 0),
+	}
+
+	// Calculate ExpiresIn from exp
+	exp := getInt64(claims, "exp")
+	iat := getInt64(claims, "iat")
+	token.ExpiresIn = exp - iat
+
+	// Extract scope
+	if scope, ok := claims["scope"].([]interface{}); ok {
+		token.Scope = make([]string, len(scope))
+		for i, s := range scope {
+			if str, ok := s.(string); ok {
+				token.Scope[i] = str
+			}
+		}
+	}
+
+	// Extract complex objects
+	if poaStr, ok := claims["power_of_attorney"].(string); ok && poaStr != "" {
+		var poa poa.PoADefinition
+		if err := json.Unmarshal([]byte(poaStr), &poa); err == nil {
+			token.PowerOfAttorney = &poa
+		}
+	}
+
+	if chainStr, ok := claims["authorization_chain"].(string); ok && chainStr != "" {
+		var chain AuthorizationChain
+		if err := json.Unmarshal([]byte(chainStr), &chain); err == nil {
+			token.AuthorizationChain = &chain
+		}
+	}
+
+	// Extract entity information
+	if clientOwnerData, ok := claims["client_owner"].(map[string]interface{}); ok {
+		token.ClientOwner = &ClientOwnerInfo{
+			OwnerID:   getString(clientOwnerData, "owner_id"),
+			OwnerName: getString(clientOwnerData, "owner_name"),
+		}
+	}
+
+	if authorizerData, ok := claims["owners_authorizer"].(map[string]interface{}); ok {
+		token.OwnersAuthorizer = &OwnersAuthorizerInfo{
+			AuthorizerID:   getString(authorizerData, "authorizer_id"),
+			AuthorizerName: getString(authorizerData, "authorizer_name"),
+		}
+	}
+
+	if resourceOwnerData, ok := claims["resource_owner"].(map[string]interface{}); ok {
+		token.ResourceOwner = &ResourceOwnerInfo{
+			OwnerID: getString(resourceOwnerData, "owner_id"),
+		}
+	}
+
+	// Extract legal framework
+	if legalData, ok := claims["legal_framework"].(map[string]interface{}); ok {
+		token.LegalFramework = &LegalFrameworkInfo{
+			Jurisdiction:        getString(legalData, "jurisdiction"),
+			ComplianceFramework: getString(legalData, "compliance_framework"),
+		}
+		if laws, ok := legalData["applicable_laws"].([]interface{}); ok {
+			token.LegalFramework.ApplicableLaws = make([]string, len(laws))
+			for i, law := range laws {
+				if str, ok := law.(string); ok {
+					token.LegalFramework.ApplicableLaws[i] = str
+				}
+			}
+		}
+	}
+
+	// Extract metadata
+	token.ComplianceLevel = getString(claims, "compliance_level")
+	token.GrantID = getString(claims, "grant_id")
+	token.RequestID = getString(claims, "request_id")
+
+	return token, nil
+}
+
+// Helper functions for claim extraction
+func getString(m map[string]interface{}, key string) string {
+	if val, ok := m[key].(string); ok {
+		return val
+	}
+	return ""
+}
+
+func getInt64(m map[string]interface{}, key string) int64 {
+	if val, ok := m[key].(float64); ok {
+		return int64(val)
+	}
+	return 0
 }
 
 // validateLegalFrameworkCompliance validates legal framework compliance

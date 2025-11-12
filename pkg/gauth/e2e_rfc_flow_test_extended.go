@@ -522,6 +522,7 @@ func (m *mockSignatureVerifier) CheckCertificateRevocation(ctx context.Context, 
 
 type mockPDPClient struct{}
 
-func (m *mockPDPClient) EvaluatePolicy(ctx context.Context, subject, action, resource string, attributes map[string]interface{}) (bool, string, error) {
-	return true, "permit", nil
+func (m *mockPDPClient) EvaluatePolicy(ctx context.Context, request interface{}) (bool, error) {
+	// Mock always permits - in real implementation would check policies
+	return true, nil
 }
