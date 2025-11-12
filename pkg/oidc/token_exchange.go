@@ -10,14 +10,20 @@ import (
 
 // TokenExchangeService handles token exchange between external providers and GAuth.
 type TokenExchangeService struct {
-	providerRegistry ProviderRegistry
-	idTokenService   *IDTokenService
+	providerRegistry  ProviderRegistry
+	idTokenService    *IDTokenService
+	tokenValidator    *ExternalTokenValidator
+	jwksFetcher       JWKSFetcher
+	discoveryCache    DiscoveryCache
 }
 
 // TokenExchangeConfig configures the token exchange service.
 type TokenExchangeConfig struct {
-	ProviderRegistry ProviderRegistry
-	IDTokenService   *IDTokenService
+	ProviderRegistry  ProviderRegistry
+	IDTokenService    *IDTokenService
+	TokenValidator    *ExternalTokenValidator
+	JWKSFetcher       JWKSFetcher
+	DiscoveryCache    DiscoveryCache
 }
 
 // NewTokenExchangeService creates a new token exchange service.
@@ -30,9 +36,28 @@ func NewTokenExchangeService(config TokenExchangeConfig) (*TokenExchangeService,
 		return nil, fmt.Errorf("ID token service is required")
 	}
 
+	// If TokenValidator is not provided, create one with JWKS fetcher and discovery cache
+	tokenValidator := config.TokenValidator
+	jwksFetcher := config.JWKSFetcher
+	discoveryCache := config.DiscoveryCache
+
+	if tokenValidator == nil {
+		// Create default components if not provided
+		if jwksFetcher == nil {
+			jwksFetcher = NewInMemoryJWKSFetcher(24 * time.Hour)
+		}
+		if discoveryCache == nil {
+			discoveryCache = NewInMemoryDiscoveryCache(WithDefaultTTL(24 * time.Hour))
+		}
+		tokenValidator = NewExternalTokenValidator(jwksFetcher, discoveryCache)
+	}
+
 	return &TokenExchangeService{
-		providerRegistry: config.ProviderRegistry,
-		idTokenService:   config.IDTokenService,
+		providerRegistry:  config.ProviderRegistry,
+		idTokenService:    config.IDTokenService,
+		tokenValidator:    tokenValidator,
+		jwksFetcher:       jwksFetcher,
+		discoveryCache:    discoveryCache,
 	}, nil
 }
 
@@ -141,19 +166,34 @@ func (s *TokenExchangeService) ExchangeToken(ctx context.Context, req ExchangeRe
 	}, nil
 }
 
-// validateExternalToken validates an external provider token.
-// In a real implementation, this would call the provider-specific validation logic.
+// validateExternalToken validates an external provider token using JWKS validation.
 func (s *TokenExchangeService) validateExternalToken(ctx context.Context, provider *ProviderConfig, token string, audience string) (*IDTokenClaims, error) {
-	// This is a placeholder for provider-specific validation
-	// In production, this would:
-	// 1. Call provider's token validation endpoint or validate JWT signature
-	// 2. Verify issuer matches expected provider issuer
-	// 3. Verify audience matches expected client ID
-	// 4. Check token expiration
-	// 5. Extract and return claims
+	// Use the ExternalTokenValidator to validate the token
+	claims, err := s.tokenValidator.ValidateTokenForProvider(ctx, token, *provider)
+	if err != nil {
+		// If validation fails due to key not found, try refreshing JWKS and retry
+		if s.jwksFetcher != nil && s.discoveryCache != nil {
+			// Get discovery document to get JWKS URI
+			doc, docErr := s.discoveryCache.Get(ctx, provider.IssuerURL)
+			if docErr == nil && doc.JWKSUri != "" {
+				// Refresh JWKS keys
+				refreshErr := s.jwksFetcher.RefreshKeys(ctx, doc.JWKSUri)
+				if refreshErr == nil {
+					// Retry validation with refreshed keys
+					claims, err = s.tokenValidator.ValidateTokenForProvider(ctx, token, *provider)
+					if err == nil {
+						return claims, nil
+					}
+				}
+			}
+		}
+		return nil, fmt.Errorf("token validation failed: %w", err)
+	}
 
-	// For now, return an error indicating this needs provider-specific implementation
-	return nil, fmt.Errorf("external token validation not implemented for provider %s", provider.ID)
+	// Additional provider-specific validations can be performed here
+	// For example, checking hosted domain for Google, organization for Okta, tenant for Azure AD
+
+	return claims, nil
 }
 
 // normalizeClaims converts provider-specific claims to GAuth format.

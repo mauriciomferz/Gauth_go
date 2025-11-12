@@ -29,6 +29,11 @@ func setupTokenExchangeTest(t *testing.T) (*TokenExchangeService, *InMemoryProvi
 		t.Fatalf("Failed to create ID token service: %v", err)
 	}
 
+	// Create JWKS fetcher and discovery cache for token validation
+	jwksFetcher := NewInMemoryJWKSFetcher(time.Hour)
+	discoveryCache := NewInMemoryDiscoveryCache(WithDefaultTTL(time.Hour))
+	tokenValidator := NewExternalTokenValidator(jwksFetcher, discoveryCache)
+
 	// Create provider registry
 	registry := NewInMemoryProviderRegistry()
 
@@ -82,6 +87,9 @@ func setupTokenExchangeTest(t *testing.T) (*TokenExchangeService, *InMemoryProvi
 	service, err := NewTokenExchangeService(TokenExchangeConfig{
 		ProviderRegistry: registry,
 		IDTokenService:   idTokenService,
+		TokenValidator:   tokenValidator,
+		JWKSFetcher:      jwksFetcher,
+		DiscoveryCache:   discoveryCache,
 	})
 	if err != nil {
 		t.Fatalf("Failed to create token exchange service: %v", err)
