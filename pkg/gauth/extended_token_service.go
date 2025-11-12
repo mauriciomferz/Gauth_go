@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // ExtendedTokenService provides RFC-0111 compliant extended token operations
