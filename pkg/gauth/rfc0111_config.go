@@ -3,6 +3,8 @@ package gauth
 import (
 	"fmt"
 	"os"
+
+	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/pdp"
 )
 
 // RFC0111Config holds the configuration for RFC-0111 components
@@ -84,6 +86,57 @@ func InitRFC0111WithMocks() (*RFC0111Components, error) {
 	return nil, fmt.Errorf("RFC-0111: use InitRFC0111WithComponents to provide mock implementations")
 }
 
+// createDefaultPDPEngine creates a PDP engine with default policies
+// This provides basic policy evaluation capability for RFC-0111 compliance
+func createDefaultPDPEngine() pdp.Engine {
+	// Create engine with deny-overrides combining strategy
+	// This means any deny decision will override allow decisions
+	strategy := pdp.DenyOverridesStrategy{}
+	engine := pdp.NewInMemoryEngine(strategy)
+	
+	// Enable optional features
+	engine.WithObligationFailureDenies(true)
+	
+	// Add default policies for RFC-0111 compliance
+	// Policy 1: Allow authenticated requests with valid authorization chains
+	engine.AddPolicy(pdp.Policy{
+		ID:       "rfc0111-allow-valid-chain",
+		Subjects: []string{"*"}, // Apply to all subjects
+		Rules: []pdp.Rule{
+			{
+				ID:        "allow-read-write",
+				Actions:   []string{"read", "write", "execute", "authorize", "access"},
+				Resources: []string{"*"}, // Apply to all resources
+				Effect:    "allow",
+			},
+		},
+		Metadata: map[string]string{
+			"description": "Allow requests with valid authorization chains",
+			"rfc":         "RFC-0111",
+		},
+	})
+	
+	// Policy 2: Default deny for unknown actions
+	engine.AddPolicy(pdp.Policy{
+		ID:       "rfc0111-default-deny",
+		Subjects: []string{"*"},
+		Rules: []pdp.Rule{
+			{
+				ID:        "deny-unknown",
+				Actions:   []string{"delete", "admin"},
+				Resources: []string{"*"},
+				Effect:    "deny",
+			},
+		},
+		Metadata: map[string]string{
+			"description": "Deny dangerous actions by default",
+			"rfc":         "RFC-0111",
+		},
+	})
+	
+	return engine
+}
+
 // InitRFC0111WithComponents initializes RFC-0111 using provided components.
 // This gives full control over which implementations to use (mock or real).
 func InitRFC0111WithComponents(
@@ -119,10 +172,14 @@ func InitRFC0111WithComponents(
 		false, // strict mode (false for development)
 	)
 	
+	// Create PDP engine with default policy store
+	pdpEngine := createDefaultPDPEngine()
+	pdpBridge := NewPDPBridge(pdpEngine)
+	
 	complianceValidator := NewComplianceValidator(
 		authChainValidator,
 		pipClient,
-		nil, // PDPClient (optional)
+		pdpBridge, // PDPClient with actual PDP engine
 	)
 	
 	// Create subscription flow manager
