@@ -37,7 +37,7 @@ func TestOpenAPISpecPaths(t *testing.T) {
 		"/api/v1/anchor/chain:",
 		"/api/v1/anchor/emitCombined:",
 		"/api/v1/anchor/verifyChain:",
-		"version: 0.3.2-beta",
+		"version: 0.4.0-beta",
 		"CombinedAnchorToken:",
 		"ErrorResponse:",
 	}
