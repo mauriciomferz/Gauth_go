@@ -131,7 +131,6 @@ jobs:
   build:
     name: Build Docker Image
     runs-on: ubuntu-latest
-    continue-on-error: true
     needs: [test, security]
     outputs:
       image_tag: ${{ steps.meta.outputs.tags }}
@@ -145,8 +144,6 @@ jobs:
 
       - name: Log in to Docker Registry
         uses: docker/login-action@v3
-        continue-on-error: true
-        if: ${{ env.DOCKER_REGISTRY != '' }}
         with:
           registry: ${{ env.DOCKER_REGISTRY }}
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -154,7 +151,6 @@ jobs:
 
       - name: Extract metadata (tags, labels)
         id: meta
-        if: ${{ env.DOCKER_REGISTRY != '' }}
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}
@@ -168,7 +164,6 @@ jobs:
 
       - name: Build and push Docker image
         id: build
-        if: ${{ env.DOCKER_REGISTRY != '' }}
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -186,7 +181,6 @@ jobs:
             GIT_BRANCH=${{ github.ref_name }}
 
       - name: Scan Docker image for vulnerabilities
-        if: ${{ env.DOCKER_REGISTRY != '' }}
         uses: aquasecurity/trivy-action@master
         continue-on-error: true
         with:
@@ -197,8 +191,8 @@ jobs:
           exit-code: '0'  # Don't fail on vulnerabilities, just report
 
       - name: Upload Trivy scan results
-        if: ${{ env.DOCKER_REGISTRY != '' && always() && hashFiles('trivy-results.sarif') != '' }}
         uses: github/codeql-action/upload-sarif@v3
+        if: always() && hashFiles('trivy-results.sarif') != ''
         continue-on-error: true
         with:
           sarif_file: 'trivy-results.sarif'
@@ -208,14 +202,10 @@ jobs:
   deploy:
     name: Deploy to Staging
     runs-on: ubuntu-latest
-    continue-on-error: true
     needs: [build]
-    if: ${{ success() || failure() }}
     environment:
       name: staging
       url: https://gauth-staging.yourdomain.com
-    env:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -232,6 +222,7 @@ jobs:
           chmod 600 $HOME/.kube/config
 
       - name: Update deployment image
+        if: env.HAS_KUBE_CONFIG == 'true'
         run: |
           # Update image in deployment manifest
           IMAGE_TAG="${{ needs.build.outputs.image_tag }}"
@@ -240,6 +231,7 @@ jobs:
           echo "Updated deployment image to: ${IMAGE_TAG}"
 
       - name: Apply Kubernetes manifests
+        if: env.HAS_KUBE_CONFIG == 'true'
         run: |
           # Apply in correct order to avoid dependency issues
           kubectl apply -f deployments/k8s/staging/namespace.yaml
@@ -251,11 +243,13 @@ jobs:
           kubectl apply -f deployments/k8s/staging/ingress.yaml
 
       - name: Wait for deployment rollout
+        if: env.HAS_KUBE_CONFIG == 'true'
         run: |
           kubectl rollout status deployment/gauth-deployment -n ${{ env.KUBERNETES_NAMESPACE }} --timeout=5m
           echo "✅ Deployment rolled out successfully"
 
       - name: Verify deployment health
+        if: env.HAS_KUBE_CONFIG == 'true'
         run: |
           # Wait for pods to be ready
           kubectl wait --for=condition=ready pod -l app=gauth -n ${{ env.KUBERNETES_NAMESPACE }} --timeout=2m
@@ -267,6 +261,7 @@ jobs:
           kubectl describe deployment gauth-deployment -n ${{ env.KUBERNETES_NAMESPACE }}
 
       - name: Run smoke tests
+        if: env.HAS_KUBE_CONFIG == 'true'
         run: |
           # Get ingress URL
           INGRESS_IP=$(kubectl get ingress gauth-ingress -n ${{ env.KUBERNETES_NAMESPACE }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
@@ -284,9 +279,8 @@ jobs:
           echo "✅ Metrics endpoint validated"
 
       - name: Notify deployment success
-        if: success() && env.SLACK_WEBHOOK_URL != ''
+        if: success()
         uses: slackapi/slack-github-action@v1.24.0
-        continue-on-error: true
         with:
           payload: |
             {
@@ -324,9 +318,8 @@ jobs:
             }
 
       - name: Notify deployment failure
-        if: failure() && env.SLACK_WEBHOOK_URL != ''
+        if: failure()
         uses: slackapi/slack-github-action@v1.24.0
-        continue-on-error: true
         with:
           payload: |
             {
@@ -371,19 +364,24 @@ jobs:
     if: failure()
     environment:
       name: staging
+    env:
+      HAS_KUBE_CONFIG: ${{ secrets.KUBE_CONFIG_STAGING != '' }}
     steps:
       - name: Configure kubectl
+        if: env.HAS_KUBE_CONFIG == 'true'
         uses: azure/setup-kubectl@v3
         with:
           version: 'v1.28.0'
 
       - name: Set up kubeconfig
+        if: env.HAS_KUBE_CONFIG == 'true'
         run: |
           mkdir -p $HOME/.kube
           echo "${{ secrets.KUBE_CONFIG_STAGING }}" | base64 -d > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
 
       - name: Rollback deployment
+        if: env.HAS_KUBE_CONFIG == 'true'
         run: |
           echo "🔄 Rolling back deployment to previous revision..."
           kubectl rollout undo deployment/gauth-deployment -n ${{ env.KUBERNETES_NAMESPACE }}
@@ -391,9 +389,7 @@ jobs:
           echo "✅ Rollback completed"
 
       - name: Notify rollback
-        if: env.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v1.24.0
-        continue-on-error: true
         with:
           payload: |
             {
