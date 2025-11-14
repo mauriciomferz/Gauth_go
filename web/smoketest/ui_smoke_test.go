@@ -40,30 +40,37 @@ func fetchIndexHTML(t *testing.T) string {
 	return string(b)
 }
 
-// TestUISmoke checks for core interactive elements and ARIA attributes.
+// TestUISmoke checks for core landing page elements.
 func TestUISmoke(t *testing.T) {
 	body := fetchIndexHTML(t)
 	if body == "" { // skipped
 		return
 	}
 	checks := map[string]string{
-		"theme toggle button": "id=\"themeToggle\"",
-		"mobile nav button":   "id=\"mobileNavButton\"",
-		"tablist role":        "role=\"tablist\"",
-		"first tab id":        "id=\"tab-token-demo\"",
+		"hero title":       "The Open-Source Platform",
+		"compliance badge": "95% RFC-0111 & RFC-0115 Compliant",
+		"stat number":      "Protocol Substeps",
+		"RFC reference":    "RFC-0111",
+		"features section": "Enterprise-Grade",
+		"footer links":     "API Discovery",
 	}
 	for label, token := range checks {
 		if !strings.Contains(body, token) {
-			t.Errorf("missing %s (%s)", label, token)
+			t.Errorf("missing %s (expected text: %s)", label, token)
 		}
 	}
 
-	// Aria-selected check (global presence). Combines with id check to ensure first tab is marked selected.
-	if !strings.Contains(body, "aria-selected=\"true\"") {
-		t.Errorf("missing aria-selected=\"true\" token in document (expected first tab marked active)")
+	// Check for critical structural elements
+	requiredElements := []string{
+		"<nav",
+		"<footer",
+		"<style>",
+		"<section",
 	}
-	if strings.Count(body, "data-tab=\"") < 5 {
-		t.Errorf("expected >=5 tabs, found %d", strings.Count(body, "data-tab=\""))
+	for _, elem := range requiredElements {
+		if !strings.Contains(body, elem) {
+			t.Errorf("missing structural element: %s", elem)
+		}
 	}
 }
 
