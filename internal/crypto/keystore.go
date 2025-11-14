@@ -133,6 +133,7 @@ type TenantScheduler struct {
 	policy  *RotationPolicy
 	ticker  *time.Ticker
 	stopCh  chan struct{}
+	mu      sync.Mutex
 }
 
 // Additional methods for MultiTenantKeyManager
@@ -285,6 +286,9 @@ func (m *MultiTenantKeyManager) IsHealthy() bool {
 
 // GetTenantStore returns the key store for a tenant, falling back to default.
 func (m *MultiTenantKeyManager) GetTenantStore(tenant string) KeyStore {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	
 	if store, exists := m.stores[tenant]; exists {
 		return store
 	}
@@ -310,12 +314,22 @@ func (ts *TenantScheduler) run() {
 		return
 	}
 
+	ts.mu.Lock()
 	ts.ticker = time.NewTicker(ts.policy.Interval)
-	defer ts.ticker.Stop()
+	ticker := ts.ticker
+	ts.mu.Unlock()
+	
+	defer func() {
+		ts.mu.Lock()
+		if ts.ticker != nil {
+			ts.ticker.Stop()
+		}
+		ts.mu.Unlock()
+	}()
 
 	for {
 		select {
-		case <-ts.ticker.C:
+		case <-ticker.C:
 			// Trigger rotation
 			ctx := context.Background()
 			store := ts.manager.GetTenantStore(ts.tenant)
@@ -335,6 +349,8 @@ func (ts *TenantScheduler) run() {
 // stop stops the scheduler.
 func (ts *TenantScheduler) stop() {
 	close(ts.stopCh)
+	ts.mu.Lock()
+	defer ts.mu.Unlock()
 	if ts.ticker != nil {
 		ts.ticker.Stop()
 	}

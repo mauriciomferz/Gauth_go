@@ -313,7 +313,6 @@ func TestMultiTenantRotationSegregation(t *testing.T) {
 
 // TestMultiTenantPolicyIndependence validates that each tenant has independent rotation policies
 func TestMultiTenantPolicyIndependence(t *testing.T) {
-	t.Skip("Skipping due to known race condition - TenantScheduler needs proper synchronization")
 	// Create temporary directory
 	tempDir := filepath.Join(os.TempDir(), "gauth-test-policy")
 	defer os.RemoveAll(tempDir)

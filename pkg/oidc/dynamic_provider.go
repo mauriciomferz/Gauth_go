@@ -175,12 +175,14 @@ func (s *DynamicProviderService) GetProviderForTenant(tenantID string, providerI
 	// Check if provider is associated with this tenant
 	s.mu.RLock()
 	providers, tenantExists := s.tenantProviders[tenantID]
+	var isAuthorized bool
+	if tenantExists {
+		isAuthorized = providers[providerID]
+	}
 	s.mu.RUnlock()
 
-	if tenantExists {
-		if !providers[providerID] {
-			return nil, fmt.Errorf("provider %s not available for tenant %s", providerID, tenantID)
-		}
+	if tenantExists && !isAuthorized {
+		return nil, fmt.Errorf("provider %s not available for tenant %s", providerID, tenantID)
 	}
 
 	// Get provider from registry
@@ -191,6 +193,14 @@ func (s *DynamicProviderService) GetProviderForTenant(tenantID string, providerI
 func (s *DynamicProviderService) ListProvidersForTenant(tenantID string) []ProviderConfig {
 	s.mu.RLock()
 	providerIDs, tenantExists := s.tenantProviders[tenantID]
+	// Copy provider IDs while holding the lock to avoid race conditions
+	var providerIDList []string
+	if tenantExists {
+		providerIDList = make([]string, 0, len(providerIDs))
+		for providerID := range providerIDs {
+			providerIDList = append(providerIDList, providerID)
+		}
+	}
 	s.mu.RUnlock()
 
 	if !tenantExists {
@@ -200,7 +210,7 @@ func (s *DynamicProviderService) ListProvidersForTenant(tenantID string) []Provi
 
 	// Return tenant-specific providers
 	var configs []ProviderConfig
-	for providerID := range providerIDs {
+	for _, providerID := range providerIDList {
 		if cfg, err := s.registry.Get(providerID); err == nil {
 			if cfg.Enabled {
 				configs = append(configs, *cfg)

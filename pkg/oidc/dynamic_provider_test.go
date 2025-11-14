@@ -499,7 +499,6 @@ func TestDynamicProviderService_Statistics(t *testing.T) {
 
 // TestDynamicProviderService_ConcurrentOperations tests thread safety.
 func TestDynamicProviderService_ConcurrentOperations(t *testing.T) {
-	t.Skip("Skipping due to known race condition - needs synchronization fixes in DynamicProviderService")
 	registry := NewInMemoryProviderRegistry()
 	service := NewDynamicProviderService(registry)
 	ctx := context.Background()
