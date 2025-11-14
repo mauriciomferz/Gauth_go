@@ -413,7 +413,8 @@ jobs:
     - name: Run Gosec Security Scanner
       run: |
         go install github.com/securego/gosec/v2/cmd/gosec@latest
-        $(go env GOPATH)/bin/gosec -no-fail -fmt sarif -out results.sarif ./... || echo "Gosec completed with warnings"
+        $(go env GOPATH)/bin/gosec -no-fail -fmt sarif -out results.sarif ./... || true
+        echo "Gosec scan completed"
 
     - name: Display security scan results
       if: always()
