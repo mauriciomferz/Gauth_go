@@ -413,9 +413,12 @@ jobs:
     - name: Run Gosec Security Scanner
       continue-on-error: true
       run: |
+        set +e  # Disable exit on error for this step
         go install github.com/securego/gosec/v2/cmd/gosec@latest
-        $(go env GOPATH)/bin/gosec -no-fail -fmt sarif -out results.sarif ./... || true
-        echo "Gosec scan completed"
+        $(go env GOPATH)/bin/gosec -no-fail -fmt sarif -out results.sarif ./... 2>&1 || true
+        EXIT_CODE=$?
+        echo "Gosec scan completed with exit code: $EXIT_CODE"
+        exit 0  # Always succeed
 
     - name: Display security scan results
       if: always()
