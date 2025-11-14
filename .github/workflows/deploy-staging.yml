@@ -214,6 +214,8 @@ jobs:
     environment:
       name: staging
       url: https://gauth-staging.yourdomain.com
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -282,10 +284,10 @@ jobs:
           echo "✅ Metrics endpoint validated"
 
       - name: Notify deployment success
-        if: success()
+        if: success() && env.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v1.24.0
+        continue-on-error: true
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
           payload: |
             {
               "text": "✅ GAuth Staging Deployment Successful",
@@ -322,10 +324,10 @@ jobs:
             }
 
       - name: Notify deployment failure
-        if: failure()
+        if: failure() && env.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v1.24.0
+        continue-on-error: true
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
           payload: |
             {
               "text": "❌ GAuth Staging Deployment Failed",
@@ -389,9 +391,10 @@ jobs:
           echo "✅ Rollback completed"
 
       - name: Notify rollback
+        if: env.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v1.24.0
+        continue-on-error: true
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
           payload: |
             {
               "text": "🔄 GAuth Staging Deployment Rolled Back",
