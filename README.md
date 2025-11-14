@@ -42,7 +42,7 @@ A complete Go implementation of the GAuth authorization framework (RFC 0111/0115
 - ✅ **Dependencies:** All current, zero known CVEs
 - ✅ **Documentation:** 1,633+ lines (7 packages + architecture)
 
-See [Quality Status Report](PRODUCTION_READY_STATUS_REPORT.md) for complete details. See also `Dockerfile.unified` (consolidated build pipeline) and `CODEOWNERS` for ownership mapping.
+See [Dockerfiles Summary](DOCKERFILES_SUMMARY.md) for container build details. See also `CODEOWNERS` for ownership mapping.
 
 ## 🎉 95% RFC Conformance Achieved
 
@@ -73,7 +73,7 @@ See [Gap Matrix](docs/GAP_MATRIX.auto.md) for detailed implementation status.
 - Cryptographic operations use crypto/rand
 - Integer overflow protection on critical paths
 - CI/CD pipelines hardened with continue-on-error patterns
-- Full security audit: [SECURITY_AUDIT_SUMMARY.md](SECURITY_AUDIT_SUMMARY.md)
+- Full security policy: [SECURITY.md](SECURITY.md)
 
 ### Testing ✅
 - **pkg/auth**: 97.8% coverage (325 test cases)
@@ -85,7 +85,7 @@ See [Gap Matrix](docs/GAP_MATRIX.auto.md) for detailed implementation status.
 
 ### Documentation ✅
 - 7 core packages with comprehensive godoc documentation (1,133 lines)
-- Architecture documentation with system design: [ARCHITECTURE.md](ARCHITECTURE.md)
+- Architecture documentation with system design: [ORGANIZATION.md](ORGANIZATION.md)
 - 20+ runnable code examples
 - Integration patterns and deployment models
 - Performance characteristics documented
@@ -96,7 +96,7 @@ See [Gap Matrix](docs/GAP_MATRIX.auto.md) for detailed implementation status.
 - Regular security updates
 - 6 packages updated in latest cycle
 
-**See**: [Quality Status Report](PRODUCTION_READY_STATUS_REPORT.md) for complete details.
+**See**: [Docs Index](docs/INDEX.md) for complete documentation navigation.
 
 ## Quick Start
 
