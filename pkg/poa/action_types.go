@@ -124,6 +124,26 @@ const (
 	// ActionPhysicalDelivery - Delivery and distribution
 	ActionPhysicalDelivery ActionTypePhysical = "Delivery"
 
+	// ActionPhysicalStorage - Storage and warehousing
+	// RFC-0115 B.4.3: Required for physical asset management
+	ActionPhysicalStorage ActionTypePhysical = "Storage"
+
+	// ActionPhysicalPackaging - Packaging and wrapping
+	// RFC-0115 B.4.3: Required for product preparation and logistics
+	ActionPhysicalPackaging ActionTypePhysical = "Packaging"
+
+	// ActionPhysicalCleaning - Cleaning and sanitation
+	// RFC-0115 B.4.3: Required for maintenance and facility management
+	ActionPhysicalCleaning ActionTypePhysical = "Cleaning"
+
+	// ActionPhysicalRecycling - Recycling and waste management
+	// RFC-0115 B.4.3: Required for environmental compliance and sustainability
+	ActionPhysicalRecycling ActionTypePhysical = "Recycling"
+
+	// ActionPhysicalCustomization - Customization and modification
+	// RFC-0115 B.4.3: Required for bespoke manufacturing and adaptation
+	ActionPhysicalCustomization ActionTypePhysical = "Customization"
+
 	// ActionPhysicalOther - Other physical actions
 	ActionPhysicalOther ActionTypePhysical = "Other"
 )
@@ -251,7 +271,10 @@ func ValidateActionTypePhysical(at ActionTypePhysical) error {
 		ActionPhysicalTransport, ActionPhysicalMaintenance,
 		ActionPhysicalInspection, ActionPhysicalHandling,
 		ActionPhysicalInstallation, ActionPhysicalOperation,
-		ActionPhysicalSurgery, ActionPhysicalDelivery, ActionPhysicalOther,
+		ActionPhysicalSurgery, ActionPhysicalDelivery,
+		ActionPhysicalStorage, ActionPhysicalPackaging,
+		ActionPhysicalCleaning, ActionPhysicalRecycling,
+		ActionPhysicalCustomization, ActionPhysicalOther,
 	}
 	for _, valid := range validTypes {
 		if at == valid {

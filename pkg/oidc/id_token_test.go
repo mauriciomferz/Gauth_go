@@ -22,7 +22,7 @@ func generateTestRSAKey(t *testing.T) *rsa.PrivateKey {
 
 func TestNewIDTokenService(t *testing.T) {
 	privateKey := generateTestRSAKey(t)
-	
+
 	tests := []struct {
 		name    string
 		config  *IDTokenServiceConfig
@@ -79,7 +79,7 @@ func TestNewIDTokenService(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			service, err := NewIDTokenService(tt.config)
@@ -106,7 +106,7 @@ func TestIDTokenService_IssueIDToken(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create ID token service: %v", err)
 	}
-	
+
 	tests := []struct {
 		name    string
 		claims  *IDTokenClaims
@@ -129,12 +129,12 @@ func TestIDTokenService_IssueIDToken(t *testing.T) {
 					Subject:  "user123",
 					Audience: jwt.ClaimStrings{"client123"},
 				},
-				Name:            "John Doe",
-				Email:           "john@example.com",
-				EmailVerified:   true,
-				ACR:             "substantial",
-				EntityType:      "natural_person",
-				Nonce:           "test-nonce-123",
+				Name:          "John Doe",
+				Email:         "john@example.com",
+				EmailVerified: true,
+				ACR:           "substantial",
+				EntityType:    "natural_person",
+				Nonce:         "test-nonce-123",
 			},
 			wantErr: false,
 		},
@@ -172,7 +172,7 @@ func TestIDTokenService_IssueIDToken(t *testing.T) {
 			wantErr: true,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			token, err := service.IssueIDToken(context.Background(), tt.claims)
@@ -211,7 +211,7 @@ func TestIDTokenService_ValidateIDToken(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create ID token service: %v", err)
 	}
-	
+
 	// Issue a valid token
 	validClaims := &IDTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -226,7 +226,7 @@ func TestIDTokenService_ValidateIDToken(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to issue valid token: %v", err)
 	}
-	
+
 	// Issue a token with different audience
 	wrongAudienceClaims := &IDTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -238,7 +238,7 @@ func TestIDTokenService_ValidateIDToken(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to issue token with wrong audience: %v", err)
 	}
-	
+
 	tests := []struct {
 		name             string
 		token            string
@@ -270,7 +270,7 @@ func TestIDTokenService_ValidateIDToken(t *testing.T) {
 			wantErr:          true,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			claims, err := service.ValidateIDToken(context.Background(), tt.token, tt.expectedAudience)
@@ -306,7 +306,7 @@ func TestIDTokenService_CreateIDTokenFromIdentity(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create ID token service: %v", err)
 	}
-	
+
 	tests := []struct {
 		name             string
 		subjectID        string
@@ -342,7 +342,7 @@ func TestIDTokenService_CreateIDTokenFromIdentity(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			token, err := service.CreateIDTokenFromIdentity(
@@ -361,14 +361,14 @@ func TestIDTokenService_CreateIDTokenFromIdentity(t *testing.T) {
 				if token == "" {
 					t.Error("CreateIDTokenFromIdentity() returned empty token")
 				}
-				
+
 				// Validate the token
 				claims, err := service.ValidateIDToken(context.Background(), token, tt.audience[0])
 				if err != nil {
 					t.Errorf("Failed to validate created token: %v", err)
 					return
 				}
-				
+
 				if claims.Subject != tt.subjectID {
 					t.Errorf("Expected subject %s, got %s", tt.subjectID, claims.Subject)
 				}
@@ -386,7 +386,7 @@ func TestIDTokenService_MapTrustLevelToACR(t *testing.T) {
 		IssuerURL:  "https://gauth.example.com",
 		SigningKey: privateKey,
 	})
-	
+
 	tests := []struct {
 		name       string
 		trustLevel string
@@ -413,7 +413,7 @@ func TestIDTokenService_MapTrustLevelToACR(t *testing.T) {
 			want:       "0",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := service.mapTrustLevelToACR(tt.trustLevel); got != tt.want {
@@ -432,15 +432,15 @@ func TestIDTokenService_GetMethods(t *testing.T) {
 		SigningMethod: "RS256",
 		TokenExpiry:   2 * time.Hour,
 	})
-	
+
 	if got := service.GetSigningKeyID(); got != "test-key-1" {
 		t.Errorf("GetSigningKeyID() = %s, want test-key-1", got)
 	}
-	
+
 	if got := service.GetSigningAlgorithm(); got != "RS256" {
 		t.Errorf("GetSigningAlgorithm() = %s, want RS256", got)
 	}
-	
+
 	if got := service.GetDefaultExpiry(); got != 2*time.Hour {
 		t.Errorf("GetDefaultExpiry() = %v, want 2h", got)
 	}

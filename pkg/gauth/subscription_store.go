@@ -10,19 +10,19 @@ import (
 type SubscriptionStore interface {
 	// CreateSubscription creates a new subscription and returns the subscription ID
 	CreateSubscription(ctx context.Context, sub *Subscription) error
-	
+
 	// GetSubscription retrieves a subscription by ID
 	GetSubscription(ctx context.Context, subscriptionID string) (*Subscription, error)
-	
+
 	// SaveSubscription updates an existing subscription
 	SaveSubscription(ctx context.Context, sub *Subscription) error
-	
+
 	// DeleteSubscription removes a subscription
 	DeleteSubscription(ctx context.Context, subscriptionID string) error
-	
+
 	// ListSubscriptions returns all subscriptions for a client
 	ListSubscriptions(ctx context.Context, clientID string) ([]*Subscription, error)
-	
+
 	// GetSubscriptionByClient finds an active subscription for a specific client and resource owner
 	GetSubscriptionByClient(ctx context.Context, clientID, resourceOwnerID string) (*Subscription, error)
 }

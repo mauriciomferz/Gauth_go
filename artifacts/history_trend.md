@@ -1,3 +1,13 @@
+---
+title: Conformance Trend Dashboard
+category: compliance-report
+status: generated
+lastUpdated: 2025-11-12
+owners: compliance-team
+generated: true
+source: scripts/conformance_runner.sh
+refreshCadence: ad-hoc
+---
 # Conformance Trend Dashboard
 
 ## Summary

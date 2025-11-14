@@ -48,13 +48,13 @@ func TestAuthorizationChainValidation(t *testing.T) {
 			Status:             "active",
 		},
 		ClientOwner: &AuthorizationLink{
-			EntityID:           "owner-001",
-			EntityType:         "organization",
-			EntityName:         "Test Owner Corp",
-			Role:               "owner",
-			AuthorizedBy:       "HRB-12345-DE",
-			AuthorizationDate:  now.Add(-60 * 24 * time.Hour),
-			AuthorizationType:  "delegated",
+			EntityID:          "owner-001",
+			EntityType:        "organization",
+			EntityName:        "Test Owner Corp",
+			Role:              "owner",
+			AuthorizedBy:      "HRB-12345-DE",
+			AuthorizationDate: now.Add(-60 * 24 * time.Hour),
+			AuthorizationType: "delegated",
 			LegalBasis: &LegalBasis{
 				BasisType:    "power_of_attorney",
 				Jurisdiction: "DE",
@@ -68,13 +68,13 @@ func TestAuthorizationChainValidation(t *testing.T) {
 			Status:             "active",
 		},
 		Client: &AuthorizationLink{
-			EntityID:           "client-001",
-			EntityType:         "ai_system",
-			EntityName:         "Test AI Client",
-			Role:               "client",
-			AuthorizedBy:       "owner-001",
-			AuthorizationDate:  now.Add(-30 * 24 * time.Hour),
-			AuthorizationType:  "delegated",
+			EntityID:          "client-001",
+			EntityType:        "ai_system",
+			EntityName:        "Test AI Client",
+			Role:              "client",
+			AuthorizedBy:      "owner-001",
+			AuthorizationDate: now.Add(-30 * 24 * time.Hour),
+			AuthorizationType: "delegated",
 			LegalBasis: &LegalBasis{
 				BasisType:    "power_of_attorney",
 				Jurisdiction: "DE",
@@ -321,10 +321,10 @@ func TestExtendedTokenService(t *testing.T) {
 
 	chainValidator := NewAuthorizationChainValidator(mockCR, mockTSP, mockRevoke)
 	pip := NewUnifiedPIP(mockCR, mockTSP, true, 5*time.Minute)
-	
+
 	// Create a simple mock PDP
 	mockPDP := &simpleMockPDP{}
-	
+
 	complianceValidator := NewComplianceValidator(chainValidator, pip, mockPDP)
 
 	tokenService := NewExtendedTokenService(
@@ -360,7 +360,7 @@ func TestMockImplementations(t *testing.T) {
 
 	t.Run("MockCommercialRegister", func(t *testing.T) {
 		mock := NewMockCommercialRegisterClient(false)
-		
+
 		company, err := mock.VerifyCompany(ctx, "DE", "HRB-12345")
 		if err != nil {
 			t.Fatalf("Failed to verify company: %v", err)
@@ -373,7 +373,7 @@ func TestMockImplementations(t *testing.T) {
 
 	t.Run("MockTrustServiceProvider", func(t *testing.T) {
 		mock := NewMockTrustServiceProvider(false)
-		
+
 		doc := &IdentityDocument{
 			DocumentType: "passport",
 			DocumentID:   "test-123",
@@ -390,7 +390,7 @@ func TestMockImplementations(t *testing.T) {
 
 	t.Run("MockRevocationChecker", func(t *testing.T) {
 		mock := NewMockRevocationChecker(false)
-		
+
 		revoked, err := mock.IsRevoked(ctx, "test-id")
 		if err != nil {
 			t.Fatalf("Failed to check revocation: %v", err)
@@ -440,13 +440,13 @@ func TestIntegration_CompleteFlow(t *testing.T) {
 				Status:             "active",
 			},
 			ClientOwner: &AuthorizationLink{
-				EntityID:           "owner-001",
-				EntityType:         "organization",
-				EntityName:         "Owner Corp",
-				Role:               "owner",
-				AuthorizedBy:       "HRB-12345-DE",
-				AuthorizationDate:  now.Add(-60 * 24 * time.Hour),
-				AuthorizationType:  "delegated",
+				EntityID:          "owner-001",
+				EntityType:        "organization",
+				EntityName:        "Owner Corp",
+				Role:              "owner",
+				AuthorizedBy:      "HRB-12345-DE",
+				AuthorizationDate: now.Add(-60 * 24 * time.Hour),
+				AuthorizationType: "delegated",
 				LegalBasis: &LegalBasis{
 					BasisType:    "power_of_attorney",
 					Jurisdiction: "DE",
@@ -460,13 +460,13 @@ func TestIntegration_CompleteFlow(t *testing.T) {
 				Status:             "active",
 			},
 			Client: &AuthorizationLink{
-				EntityID:           "client-001",
-				EntityType:         "ai_system",
-				EntityName:         "AI Client",
-				Role:               "client",
-				AuthorizedBy:       "owner-001",
-				AuthorizationDate:  now.Add(-30 * 24 * time.Hour),
-				AuthorizationType:  "delegated",
+				EntityID:          "client-001",
+				EntityType:        "ai_system",
+				EntityName:        "AI Client",
+				Role:              "client",
+				AuthorizedBy:      "owner-001",
+				AuthorizationDate: now.Add(-30 * 24 * time.Hour),
+				AuthorizationType: "delegated",
 				LegalBasis: &LegalBasis{
 					BasisType:    "power_of_attorney",
 					Jurisdiction: "DE",

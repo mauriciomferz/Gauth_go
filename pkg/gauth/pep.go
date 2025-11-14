@@ -19,19 +19,19 @@ import (
 // and its owner as demand-side."
 type PowerEnforcementPoint struct {
 	// Token validator for verifying extended tokens
-	tokenValidator     TokenValidator
-	
+	tokenValidator TokenValidator
+
 	// PDP for authorization decisions
-	pdp                PowerDecisionPoint
-	
+	pdp PowerDecisionPoint
+
 	// Audit logger for tracking enforcement actions
-	auditLogger        PEPAuditLogger
-	
+	auditLogger PEPAuditLogger
+
 	// Compliance tracker for monitoring behavior
-	complianceTracker  ComplianceTracker
-	
+	complianceTracker ComplianceTracker
+
 	// Enforcement mode: "strict" or "advisory"
-	enforcementMode    string
+	enforcementMode string
 }
 
 // PowerDecisionPoint makes authorization decisions
@@ -56,7 +56,7 @@ func NewPowerEnforcementPoint(
 	if enforcementMode == "" {
 		enforcementMode = "strict" // Default to strict enforcement
 	}
-	
+
 	return &PowerEnforcementPoint{
 		tokenValidator:    tokenValidator,
 		pdp:               pdp,
@@ -69,67 +69,67 @@ func NewPowerEnforcementPoint(
 // EnforcementRequest represents a request for authorization enforcement
 type EnforcementRequest struct {
 	// Extended token for authentication
-	ExtendedToken      string
-	
+	ExtendedToken string
+
 	// Action details
-	ActionType         string // "transaction", "decision", "action"
-	ActionDescription  string
-	
+	ActionType        string // "transaction", "decision", "action"
+	ActionDescription string
+
 	// Resource information
-	ResourceID         string
-	ResourceType       string
-	ResourceOwnerID    string
-	
+	ResourceID      string
+	ResourceType    string
+	ResourceOwnerID string
+
 	// Transaction details (if applicable)
-	TransactionType    poa.TransactionType
-	TransactionAmount  float64
+	TransactionType     poa.TransactionType
+	TransactionAmount   float64
 	TransactionCurrency string
-	
+
 	// Decision details (if applicable)
-	DecisionType       poa.DecisionType
-	DecisionSubject    string
-	DecisionImpact     string
-	
+	DecisionType    poa.DecisionType
+	DecisionSubject string
+	DecisionImpact  string
+
 	// Action details (if applicable)
-	PhysicalAction     bool
-	ActionLocation     string
-	
+	PhysicalAction bool
+	ActionLocation string
+
 	// Context
-	Context            map[string]interface{}
-	Timestamp          time.Time
+	Context   map[string]interface{}
+	Timestamp time.Time
 }
 
 // EnforcementResult represents the result of enforcement
 type EnforcementResult struct {
 	// Enforcement decision
-	Allowed            bool
-	Decision           *AuthorizationDecision
-	
+	Allowed  bool
+	Decision *AuthorizationDecision
+
 	// Validation results
-	TokenValid         bool
-	TokenExpired       bool
-	ScopeValid         bool
-	RestrictionsValid  bool
-	ComplianceValid    bool
-	
+	TokenValid        bool
+	TokenExpired      bool
+	ScopeValid        bool
+	RestrictionsValid bool
+	ComplianceValid   bool
+
 	// Violations (if any)
-	Violations         []EnforcementViolation
-	
+	Violations []EnforcementViolation
+
 	// Audit information
-	EnforcementID      string
-	EnforcedAt         time.Time
-	
+	EnforcementID string
+	EnforcedAt    time.Time
+
 	// Reason for decision
-	AllowReason        string
-	DenyReason         string
+	AllowReason string
+	DenyReason  string
 }
 
 // EnforcementViolation represents a detected violation
 type EnforcementViolation struct {
-	ViolationType      string // "scope", "restriction", "compliance", "temporal", "geographic"
-	Severity           string // "critical", "high", "medium", "low"
-	Description        string
-	DetectedAt         time.Time
+	ViolationType string // "scope", "restriction", "compliance", "temporal", "geographic"
+	Severity      string // "critical", "high", "medium", "low"
+	Description   string
+	DetectedAt    time.Time
 }
 
 // AuthorizationDecisionRequest for PDP
@@ -145,12 +145,12 @@ type AuthorizationDecisionRequest struct {
 
 // AuthorizationDecision from PDP
 type AuthorizationDecision struct {
-	DecisionID         string
-	Authorized         bool
-	Reason             string
-	Conditions         []string
-	ValidUntil         time.Time
-	RequiresReview     bool
+	DecisionID     string
+	Authorized     bool
+	Reason         string
+	Conditions     []string
+	ValidUntil     time.Time
+	RequiresReview bool
 }
 
 // EnforceAuthorization is the main enforcement method (Supply-side PEP)
@@ -159,17 +159,17 @@ func (pep *PowerEnforcementPoint) EnforceAuthorization(
 	ctx context.Context,
 	request *EnforcementRequest,
 ) (*EnforcementResult, error) {
-	
+
 	enforcementID := generateEnforcementID()
 	startTime := time.Now()
-	
+
 	result := &EnforcementResult{
 		Allowed:       false,
 		Violations:    []EnforcementViolation{},
 		EnforcementID: enforcementID,
 		EnforcedAt:    startTime,
 	}
-	
+
 	// Step 1: Validate extended token
 	extendedToken, err := pep.tokenValidator.ValidateExtendedToken(ctx, request.ExtendedToken)
 	if err != nil {
@@ -179,7 +179,7 @@ func (pep *PowerEnforcementPoint) EnforceAuthorization(
 		return result, nil
 	}
 	result.TokenValid = true
-	
+
 	// Step 2: Check token expiration
 	expiryTime := extendedToken.IssuedAt.Add(time.Duration(extendedToken.ExpiresIn) * time.Second)
 	if time.Now().After(expiryTime) {
@@ -194,7 +194,7 @@ func (pep *PowerEnforcementPoint) EnforceAuthorization(
 		pep.logViolation(ctx, request, result, "token_expired")
 		return result, nil
 	}
-	
+
 	// Step 3: Validate scope
 	scopeValid, scopeViolations := pep.validateScope(request, extendedToken)
 	result.ScopeValid = scopeValid
@@ -202,12 +202,12 @@ func (pep *PowerEnforcementPoint) EnforceAuthorization(
 		result.Violations = append(result.Violations, scopeViolations...)
 		result.DenyReason = "Action outside authorized scope"
 		pep.logViolation(ctx, request, result, "scope_violation")
-		
+
 		if pep.enforcementMode == "strict" {
 			return result, nil
 		}
 	}
-	
+
 	// Step 4: Check power restrictions
 	restrictionsValid, restrictionViolations := pep.validateRestrictions(request, extendedToken)
 	result.RestrictionsValid = restrictionsValid
@@ -215,12 +215,12 @@ func (pep *PowerEnforcementPoint) EnforceAuthorization(
 		result.Violations = append(result.Violations, restrictionViolations...)
 		result.DenyReason = "Action violates power restrictions"
 		pep.logViolation(ctx, request, result, "restriction_violation")
-		
+
 		if pep.enforcementMode == "strict" {
 			return result, nil
 		}
 	}
-	
+
 	// Step 5: Check compliance status
 	if pep.complianceTracker != nil {
 		complianceStatus, err := pep.complianceTracker.CheckCompliance(ctx, extendedToken.AccessToken)
@@ -237,14 +237,14 @@ func (pep *PowerEnforcementPoint) EnforceAuthorization(
 				}
 				result.DenyReason = "Compliance violations detected"
 				pep.logViolation(ctx, request, result, "compliance_violation")
-				
+
 				if pep.enforcementMode == "strict" {
 					return result, nil
 				}
 			}
 		}
 	}
-	
+
 	// Step 6: Get PDP decision
 	if pep.pdp != nil {
 		pdpRequest := &AuthorizationDecisionRequest{
@@ -256,14 +256,14 @@ func (pep *PowerEnforcementPoint) EnforceAuthorization(
 			AuthorizationChain: extendedToken.AuthorizationChain,
 			Context:            request.Context,
 		}
-		
+
 		decision, err := pep.pdp.MakeDecision(ctx, pdpRequest)
 		if err != nil {
 			result.DenyReason = fmt.Sprintf("PDP decision failed: %v", err)
 			pep.logEnforcement(ctx, request, result, "pdp_error")
 			return result, nil
 		}
-		
+
 		result.Decision = decision
 		if !decision.Authorized {
 			result.DenyReason = decision.Reason
@@ -277,12 +277,12 @@ func (pep *PowerEnforcementPoint) EnforceAuthorization(
 			return result, nil
 		}
 	}
-	
+
 	// All checks passed - ALLOW
 	result.Allowed = true
 	result.AllowReason = "All authorization checks passed"
 	pep.logEnforcement(ctx, request, result, "allowed")
-	
+
 	return result, nil
 }
 
@@ -292,17 +292,17 @@ func (pep *PowerEnforcementPoint) ValidateDemandSide(
 	ctx context.Context,
 	request *EnforcementRequest,
 ) (*EnforcementResult, error) {
-	
+
 	// Demand-side validation focuses on resource owner authorization
 	// This is similar to EnforceAuthorization but from the resource server perspective
 	result, err := pep.EnforceAuthorization(ctx, request)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Additional demand-side checks would go here
 	// e.g., checking resource owner specific policies
-	
+
 	return result, nil
 }
 
@@ -311,9 +311,9 @@ func (pep *PowerEnforcementPoint) validateScope(
 	request *EnforcementRequest,
 	token *ExtendedToken,
 ) (bool, []EnforcementViolation) {
-	
+
 	violations := []EnforcementViolation{}
-	
+
 	if token.PowerOfAttorney == nil {
 		violations = append(violations, EnforcementViolation{
 			ViolationType: "scope",
@@ -323,9 +323,9 @@ func (pep *PowerEnforcementPoint) validateScope(
 		})
 		return false, violations
 	}
-	
+
 	authorizedActions := token.PowerOfAttorney.Authorization.AuthorizedActions
-	
+
 	// Check based on action type
 	switch request.ActionType {
 	case "transaction":
@@ -346,7 +346,7 @@ func (pep *PowerEnforcementPoint) validateScope(
 			})
 			return false, violations
 		}
-		
+
 	case "decision":
 		// Check if decision type is authorized
 		found := false
@@ -365,7 +365,7 @@ func (pep *PowerEnforcementPoint) validateScope(
 			})
 			return false, violations
 		}
-		
+
 	case "action":
 		// Check if action is authorized
 		// Physical actions require special authorization
@@ -381,7 +381,7 @@ func (pep *PowerEnforcementPoint) validateScope(
 			}
 		}
 	}
-	
+
 	return true, violations
 }
 
@@ -390,9 +390,9 @@ func (pep *PowerEnforcementPoint) validateRestrictions(
 	request *EnforcementRequest,
 	token *ExtendedToken,
 ) (bool, []EnforcementViolation) {
-	
+
 	violations := []EnforcementViolation{}
-	
+
 	// Check token-level restrictions
 	for _, restriction := range token.Restrictions {
 		switch restriction.RestrictionType {
@@ -409,25 +409,25 @@ func (pep *PowerEnforcementPoint) validateRestrictions(
 					}
 				}
 			}
-			
+
 		case "time_limit":
 			// Temporal restrictions checked in main enforcement
-			
+
 		case "geographic_limit":
 			if request.PhysicalAction && request.ActionLocation != "" {
 				// Would validate location against allowed regions
 				// Implementation depends on how geographic restrictions are structured
 			}
-			
+
 		case "scope_limit":
 			// Scope limitations are checked separately
 		}
 	}
-	
+
 	if len(violations) > 0 {
 		return false, violations
 	}
-	
+
 	return true, violations
 }
 
@@ -441,18 +441,18 @@ func (pep *PowerEnforcementPoint) logEnforcement(
 	if pep.auditLogger == nil {
 		return
 	}
-	
+
 	entry := &EnforcementAuditEntry{
-		EnforcementID:     result.EnforcementID,
-		Timestamp:         time.Now(),
-		ActionType:        request.ActionType,
-		ResourceID:        request.ResourceID,
-		Outcome:           outcome,
-		Allowed:           result.Allowed,
-		Reason:            result.AllowReason,
-		ViolationCount:    len(result.Violations),
+		EnforcementID:  result.EnforcementID,
+		Timestamp:      time.Now(),
+		ActionType:     request.ActionType,
+		ResourceID:     request.ResourceID,
+		Outcome:        outcome,
+		Allowed:        result.Allowed,
+		Reason:         result.AllowReason,
+		ViolationCount: len(result.Violations),
 	}
-	
+
 	_ = pep.auditLogger.LogEnforcement(ctx, entry)
 }
 
@@ -466,18 +466,18 @@ func (pep *PowerEnforcementPoint) logViolation(
 	if pep.auditLogger == nil {
 		return
 	}
-	
+
 	for _, violation := range result.Violations {
 		entry := &ViolationAuditEntry{
-			EnforcementID:   result.EnforcementID,
-			Timestamp:       time.Now(),
-			ViolationType:   violation.ViolationType,
-			Severity:        violation.Severity,
-			Description:     violation.Description,
-			ActionType:      request.ActionType,
-			ResourceID:      request.ResourceID,
+			EnforcementID: result.EnforcementID,
+			Timestamp:     time.Now(),
+			ViolationType: violation.ViolationType,
+			Severity:      violation.Severity,
+			Description:   violation.Description,
+			ActionType:    request.ActionType,
+			ResourceID:    request.ResourceID,
 		}
-		
+
 		_ = pep.auditLogger.LogViolation(ctx, entry)
 	}
 }
@@ -489,25 +489,25 @@ func generateEnforcementID() string {
 
 // EnforcementAuditEntry for audit logging
 type EnforcementAuditEntry struct {
-	EnforcementID     string
-	Timestamp         time.Time
-	ActionType        string
-	ResourceID        string
-	Outcome           string
-	Allowed           bool
-	Reason            string
-	ViolationCount    int
+	EnforcementID  string
+	Timestamp      time.Time
+	ActionType     string
+	ResourceID     string
+	Outcome        string
+	Allowed        bool
+	Reason         string
+	ViolationCount int
 }
 
 // ViolationAuditEntry for violation logging
 type ViolationAuditEntry struct {
-	EnforcementID     string
-	Timestamp         time.Time
-	ViolationType     string
-	Severity          string
-	Description       string
-	ActionType        string
-	ResourceID        string
+	EnforcementID string
+	Timestamp     time.Time
+	ViolationType string
+	Severity      string
+	Description   string
+	ActionType    string
+	ResourceID    string
 }
 
 // MemoryPEPAuditLogger is a simple in-memory implementation

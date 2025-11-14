@@ -129,7 +129,7 @@ func coverageFor(pkg string) (float64, error) {
 	if !isValidPackagePath(pkg) {
 		return 0, fmt.Errorf("invalid package path: %s", pkg)
 	}
-	
+
 	prof := filepath.Join(os.TempDir(), fmt.Sprintf("cov_%d.out", time.Now().UnixNano()))
 	// Flags must precede package import path.
 	// #nosec G204 - Package paths are validated and come from trusted 'go list' output

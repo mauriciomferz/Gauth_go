@@ -1,3 +1,11 @@
+---
+title: "GAuth Service Unavailable Alert Runbook"
+category: runbook
+status: active
+lastUpdated: 2025-11-12
+owners: devops-team
+refreshCadence: monthly
+---
 # Alert Runbook: GAuthServiceUnavailable
 
 **Alert Name:** `GAuthServiceUnavailable`  

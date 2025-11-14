@@ -1,3 +1,10 @@
+---
+title: Project Changelog
+category: release-notes
+status: active
+lastUpdated: 2025-11-12
+owners: release-engineering
+---
 # Changelog
 
 The format is inspired by Keep a Changelog and uses date-based sections.

@@ -1,3 +1,12 @@
+---
+title: Gap G10 Phase 7 Performance Consolidation Report
+ category: performance-report
+ status: complete
+ lastUpdated: 2025-11-12
+ owners: performance-team
+ refreshCadence: quarterly
+ source: performance-benchmark
+ ---
 # Gap G10 Phase 7: Performance Consolidation Report
 
 **Date**: November 10, 2025  

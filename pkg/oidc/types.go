@@ -12,15 +12,15 @@ import (
 // Spec: OpenID Connect Discovery 1.0
 type OIDCConfiguration struct {
 	// Core Discovery Fields (REQUIRED per spec)
-	Issuer                            string   `json:"issuer"`
-	AuthorizationEndpoint             string   `json:"authorization_endpoint"`
-	TokenEndpoint                     string   `json:"token_endpoint"`
-	JWKSUri                           string   `json:"jwks_uri"`
-	
+	Issuer                string `json:"issuer"`
+	AuthorizationEndpoint string `json:"authorization_endpoint"`
+	TokenEndpoint         string `json:"token_endpoint"`
+	JWKSUri               string `json:"jwks_uri"`
+
 	// Optional but Recommended
-	UserInfoEndpoint                  string   `json:"userinfo_endpoint,omitempty"`
-	RegistrationEndpoint              string   `json:"registration_endpoint,omitempty"`
-	
+	UserInfoEndpoint     string `json:"userinfo_endpoint,omitempty"`
+	RegistrationEndpoint string `json:"registration_endpoint,omitempty"`
+
 	// Supported Values
 	ResponseTypesSupported            []string `json:"response_types_supported"`
 	SubjectTypesSupported             []string `json:"subject_types_supported"`
@@ -28,62 +28,62 @@ type OIDCConfiguration struct {
 	ScopesSupported                   []string `json:"scopes_supported"`
 	TokenEndpointAuthMethodsSupported []string `json:"token_endpoint_auth_methods_supported"`
 	ClaimsSupported                   []string `json:"claims_supported"`
-	
+
 	// GAuth Extensions - ACR/LOA Support
-	ACRValuesSupported                []string `json:"acr_values_supported"`
-	
+	ACRValuesSupported []string `json:"acr_values_supported"`
+
 	// Metadata
-	ServiceDocumentation              string   `json:"service_documentation,omitempty"`
+	ServiceDocumentation string `json:"service_documentation,omitempty"`
 }
 
 // IDTokenClaims represents OIDC ID Token claims
 // Spec: OpenID Connect Core 1.0 Section 2
 type IDTokenClaims struct {
 	jwt.RegisteredClaims
-	
+
 	// Standard OIDC Claims (Section 5.1)
-	Name              string `json:"name,omitempty"`
-	GivenName         string `json:"given_name,omitempty"`
-	FamilyName        string `json:"family_name,omitempty"`
-	MiddleName        string `json:"middle_name,omitempty"`
-	Nickname          string `json:"nickname,omitempty"`
-	PreferredUsername string `json:"preferred_username,omitempty"`
-	Profile           string `json:"profile,omitempty"`
-	Picture           string `json:"picture,omitempty"`
-	Website           string `json:"website,omitempty"`
-	Email             string `json:"email,omitempty"`
-	EmailVerified     bool   `json:"email_verified,omitempty"`
-	Gender            string `json:"gender,omitempty"`
-	Birthdate         string `json:"birthdate,omitempty"`
-	Zoneinfo          string `json:"zoneinfo,omitempty"`
-	Locale            string `json:"locale,omitempty"`
-	PhoneNumber       string `json:"phone_number,omitempty"`
-	PhoneNumberVerified bool `json:"phone_number_verified,omitempty"`
-	UpdatedAt         int64  `json:"updated_at,omitempty"`
-	
+	Name                string `json:"name,omitempty"`
+	GivenName           string `json:"given_name,omitempty"`
+	FamilyName          string `json:"family_name,omitempty"`
+	MiddleName          string `json:"middle_name,omitempty"`
+	Nickname            string `json:"nickname,omitempty"`
+	PreferredUsername   string `json:"preferred_username,omitempty"`
+	Profile             string `json:"profile,omitempty"`
+	Picture             string `json:"picture,omitempty"`
+	Website             string `json:"website,omitempty"`
+	Email               string `json:"email,omitempty"`
+	EmailVerified       bool   `json:"email_verified,omitempty"`
+	Gender              string `json:"gender,omitempty"`
+	Birthdate           string `json:"birthdate,omitempty"`
+	Zoneinfo            string `json:"zoneinfo,omitempty"`
+	Locale              string `json:"locale,omitempty"`
+	PhoneNumber         string `json:"phone_number,omitempty"`
+	PhoneNumberVerified bool   `json:"phone_number_verified,omitempty"`
+	UpdatedAt           int64  `json:"updated_at,omitempty"`
+
 	// Authentication Context Class Reference (ACR)
 	// Maps to GAuth TrustLevel: "substantial", "high", "loa-4", etc.
-	ACR               string `json:"acr,omitempty"`
-	
+	ACR string `json:"acr,omitempty"`
+
 	// Authentication Methods References (AMR)
 	// Examples: "pwd", "mfa", "otp", "hwk", "bio"
-	AMR               []string `json:"amr,omitempty"`
-	
+	AMR []string `json:"amr,omitempty"`
+
 	// Authorized Party (azp) - Client ID that requested the ID Token
-	AuthorizedParty   string `json:"azp,omitempty"`
-	
+	AuthorizedParty string `json:"azp,omitempty"`
+
 	// Nonce - For replay attack prevention
-	Nonce             string `json:"nonce,omitempty"`
-	
+	Nonce string `json:"nonce,omitempty"`
+
 	// GAuth Extensions - Legal Entity Support
-	EntityType        string `json:"entity_type,omitempty"`        // "natural_person", "legal_entity"
-	EntityID          string `json:"entity_id,omitempty"`          // Tax ID, registration number
-	LegalEntityName   string `json:"legal_entity_name,omitempty"`  // Company name
-	Jurisdiction      string `json:"jurisdiction,omitempty"`       // "DE", "US", "EU", etc.
-	
+	EntityType      string `json:"entity_type,omitempty"`       // "natural_person", "legal_entity"
+	EntityID        string `json:"entity_id,omitempty"`         // Tax ID, registration number
+	LegalEntityName string `json:"legal_entity_name,omitempty"` // Company name
+	Jurisdiction    string `json:"jurisdiction,omitempty"`      // "DE", "US", "EU", etc.
+
 	// GAuth Extensions - Trust Service Provider
-	TSPName           string `json:"tsp_name,omitempty"`          // Trust Service Provider name
-	TSPID             string `json:"tsp_id,omitempty"`            // TSP identifier
+	TSPName string `json:"tsp_name,omitempty"` // Trust Service Provider name
+	TSPID   string `json:"tsp_id,omitempty"`   // TSP identifier
 }
 
 // AuthorizationCodeFlowRequest represents OAuth 2.0/OIDC authorization request
@@ -93,7 +93,7 @@ type AuthorizationCodeFlowRequest struct {
 	ResponseType string   `json:"response_type"` // "code"
 	Scope        []string `json:"scope"`         // ["openid", "profile", "email"]
 	State        string   `json:"state"`
-	Nonce        string   `json:"nonce"`         // For ID token replay prevention
+	Nonce        string   `json:"nonce"`                // For ID token replay prevention
 	ACRValues    []string `json:"acr_values,omitempty"` // Requested authentication context
 }
 
@@ -109,22 +109,22 @@ type TokenResponse struct {
 
 // ExternalProviderConfig configures external OIDC provider (Google, Okta, Azure AD)
 type ExternalProviderConfig struct {
-	ProviderID       string   `json:"provider_id"`        // "google", "okta", "azure_ad"
-	ProviderName     string   `json:"provider_name"`      // Display name
-	IssuerURL        string   `json:"issuer_url"`         // https://accounts.google.com
-	ClientID         string   `json:"client_id"`
-	ClientSecret     string   `json:"client_secret"`
-	RedirectURI      string   `json:"redirect_uri"`
-	Scopes           []string `json:"scopes"`             // ["openid", "profile", "email"]
-	ACRMapping       map[string]string `json:"acr_mapping"` // Provider ACR → GAuth TrustLevel
+	ProviderID   string            `json:"provider_id"`   // "google", "okta", "azure_ad"
+	ProviderName string            `json:"provider_name"` // Display name
+	IssuerURL    string            `json:"issuer_url"`    // https://accounts.google.com
+	ClientID     string            `json:"client_id"`
+	ClientSecret string            `json:"client_secret"`
+	RedirectURI  string            `json:"redirect_uri"`
+	Scopes       []string          `json:"scopes"`      // ["openid", "profile", "email"]
+	ACRMapping   map[string]string `json:"acr_mapping"` // Provider ACR → GAuth TrustLevel
 }
 
 // TrustLevelMapping maps OIDC ACR values to GAuth trust levels
 type TrustLevelMapping struct {
-	ACR               string `json:"acr"`                // OIDC ACR value
-	GAuthTrustLevel   string `json:"gauth_trust_level"`  // "low", "substantial", "high"
-	MinMFARequired    bool   `json:"min_mfa_required"`
-	Description       string `json:"description"`
+	ACR             string `json:"acr"`               // OIDC ACR value
+	GAuthTrustLevel string `json:"gauth_trust_level"` // "low", "substantial", "high"
+	MinMFARequired  bool   `json:"min_mfa_required"`
+	Description     string `json:"description"`
 }
 
 // Default ACR → TrustLevel mappings
@@ -181,18 +181,18 @@ var DefaultACRMappings = []TrustLevelMapping{
 
 // JWKSKey represents a JSON Web Key from JWKS endpoint
 type JWKSKey struct {
-	KID       string   `json:"kid"`       // Key ID
-	Kty       string   `json:"kty"`       // Key Type (RSA, EC)
-	Alg       string   `json:"alg"`       // Algorithm (RS256, ES256)
-	Use       string   `json:"use"`       // Usage (sig, enc)
-	N         string   `json:"n"`         // RSA modulus
-	E         string   `json:"e"`         // RSA exponent
-	X         string   `json:"x"`         // EC x coordinate
-	Y         string   `json:"y"`         // EC y coordinate
-	Crv       string   `json:"crv"`       // EC curve
-	X5c       []string `json:"x5c"`       // X.509 certificate chain
-	X5t       string   `json:"x5t"`       // X.509 thumbprint (SHA-1)
-	X5tS256   string   `json:"x5t#S256"`  // X.509 thumbprint (SHA-256)
+	KID     string   `json:"kid"`      // Key ID
+	Kty     string   `json:"kty"`      // Key Type (RSA, EC)
+	Alg     string   `json:"alg"`      // Algorithm (RS256, ES256)
+	Use     string   `json:"use"`      // Usage (sig, enc)
+	N       string   `json:"n"`        // RSA modulus
+	E       string   `json:"e"`        // RSA exponent
+	X       string   `json:"x"`        // EC x coordinate
+	Y       string   `json:"y"`        // EC y coordinate
+	Crv     string   `json:"crv"`      // EC curve
+	X5c     []string `json:"x5c"`      // X.509 certificate chain
+	X5t     string   `json:"x5t"`      // X.509 thumbprint (SHA-1)
+	X5tS256 string   `json:"x5t#S256"` // X.509 thumbprint (SHA-256)
 }
 
 // JWKS represents JSON Web Key Set
@@ -232,6 +232,6 @@ const (
 
 // ProofMethod constants for OIDC
 const (
-	ProofMethodOIDCIDToken   = "oidc_id_token"   // GAuth-issued ID token
-	ProofMethodOIDCExternal  = "oidc_external"   // External provider (Google, Okta, etc.)
+	ProofMethodOIDCIDToken  = "oidc_id_token" // GAuth-issued ID token
+	ProofMethodOIDCExternal = "oidc_external" // External provider (Google, Okta, etc.)
 )

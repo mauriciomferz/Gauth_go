@@ -13,7 +13,7 @@ const apiBase = "http://localhost:8080/api/v1/rfc0111"
 
 // Example demonstrating how to use the RFC-0111 REST API programmatically
 func main() {
-	fmt.Println("=== RFC-0111 API Go Client Example ===\n")
+	fmt.Println("=== RFC-0111 API Go Client Example ===")
 
 	// Step I: Create Subscription
 	fmt.Println("Step I: Creating subscription...")

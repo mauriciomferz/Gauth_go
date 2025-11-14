@@ -1,3 +1,13 @@
+---
+title: Conformance Report (Partial Symbols)
+category: compliance-report
+status: generated
+lastUpdated: 2025-11-06
+owners: compliance-team
+generated: true
+source: scripts/conformance_runner.sh
+refreshCadence: ad-hoc
+---
 <!-- conformance-meta generated=2025-11-06T20:58:20+01:00 mapped_clauses=16 found_clauses=16 required_symbols=48 symbols_found=33 coverage=68.75 gap_impl=8 gap_partial=16 gap_missing=19 gap_total=43 -->
 # Conformance Report
 

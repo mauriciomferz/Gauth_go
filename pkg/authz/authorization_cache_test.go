@@ -125,7 +125,7 @@ func TestFmtInt(t *testing.T) {
 func TestAuthorizationCache_GetSet(t *testing.T) {
 	cache := NewAuthorizationCache(10)
 	key := makeKey("user1", "read", "doc1", 1, "us")
-	
+
 	// Test miss on empty cache
 	entry, found := cache.Get(key)
 	if found {
@@ -282,7 +282,7 @@ func TestAuthorizationCache_LRU(t *testing.T) {
 // TestAuthorizationCache_Invalidate verifies single key invalidation
 func TestAuthorizationCache_Invalidate(t *testing.T) {
 	cache := NewAuthorizationCache(10)
-	
+
 	key1 := makeKey("user1", "read", "doc1", 1, "us")
 	key2 := makeKey("user2", "read", "doc2", 1, "us")
 
@@ -410,7 +410,7 @@ func TestAuthorizationCache_Size(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		key := makeKey("user", "read", "doc", int64(i), "us")
 		cache.Set(key, AuthorizationCacheEntry{Decision: Decision{Allow: true}, PolicyVersion: int64(i)})
-		
+
 		expectedSize := i + 1
 		if size := cache.Size(); size != expectedSize {
 			t.Errorf("Size after %d inserts = %d, want %d", i+1, size, expectedSize)
@@ -467,7 +467,7 @@ func TestAuthorizationCache_Snapshot(t *testing.T) {
 	if metrics.Misses != 1 {
 		t.Errorf("Misses = %d, want 1", metrics.Misses)
 	}
-	
+
 	expectedRatio := 0.5 // 1 hit / 2 lookups
 	if metrics.HitRatio != expectedRatio {
 		t.Errorf("HitRatio = %f, want %f", metrics.HitRatio, expectedRatio)
@@ -518,7 +518,7 @@ func TestAuthorizationCache_ZeroCapacity(t *testing.T) {
 	cache := NewAuthorizationCache(0)
 
 	key := makeKey("user", "read", "doc", 1, "us")
-	
+
 	// Set should be no-op
 	cache.Set(key, AuthorizationCacheEntry{Decision: Decision{Allow: true}, PolicyVersion: 1})
 

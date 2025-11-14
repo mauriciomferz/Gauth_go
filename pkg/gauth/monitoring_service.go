@@ -15,40 +15,40 @@ import (
 
 // MonitoringService provides comprehensive monitoring and alerting
 type MonitoringService struct {
-	mu                     sync.RWMutex
-	config                 MonitoringConfig
-	metricsRegistry        *prometheus.Registry
-	healthChecks           map[string]HealthCheckFunc
-	complianceAlerts       []ComplianceAlert
-	performanceThresholds  map[string]float64
-	lastHealthCheckTime    time.Time
-	lastComplianceCheck    time.Time
-	systemStatus           SystemStatus
-	
+	mu                    sync.RWMutex
+	config                MonitoringConfig
+	metricsRegistry       *prometheus.Registry
+	healthChecks          map[string]HealthCheckFunc
+	complianceAlerts      []ComplianceAlert
+	performanceThresholds map[string]float64
+	lastHealthCheckTime   time.Time
+	lastComplianceCheck   time.Time
+	systemStatus          SystemStatus
+
 	// Prometheus metrics
-	validationTotal        *prometheus.CounterVec
-	validationDuration     *prometheus.HistogramVec
-	validationErrors       *prometheus.CounterVec
-	complianceViolations   *prometheus.CounterVec
-	jurisdictionChecks     *prometheus.CounterVec
-	notaryVerifications    *prometheus.CounterVec
-	healthCheckStatus      *prometheus.GaugeVec
-	systemResourceUsage    *prometheus.GaugeVec
-	activeValidations      prometheus.Gauge
-	queueDepth             prometheus.Gauge
-	cacheHitRate           prometheus.Gauge
-	alertsTriggered        *prometheus.CounterVec
+	validationTotal      *prometheus.CounterVec
+	validationDuration   *prometheus.HistogramVec
+	validationErrors     *prometheus.CounterVec
+	complianceViolations *prometheus.CounterVec
+	jurisdictionChecks   *prometheus.CounterVec
+	notaryVerifications  *prometheus.CounterVec
+	healthCheckStatus    *prometheus.GaugeVec
+	systemResourceUsage  *prometheus.GaugeVec
+	activeValidations    prometheus.Gauge
+	queueDepth           prometheus.Gauge
+	cacheHitRate         prometheus.Gauge
+	alertsTriggered      *prometheus.CounterVec
 }
 
 // MonitoringConfig configures the monitoring service
 type MonitoringConfig struct {
-	EnableHealthChecks      bool
-	EnableComplianceAlerts  bool
+	EnableHealthChecks       bool
+	EnableComplianceAlerts   bool
 	EnablePerformanceMetrics bool
-	HealthCheckInterval     time.Duration
-	ComplianceCheckInterval time.Duration
-	AlertThresholds         AlertThresholds
-	DashboardRefreshRate    time.Duration
+	HealthCheckInterval      time.Duration
+	ComplianceCheckInterval  time.Duration
+	AlertThresholds          AlertThresholds
+	DashboardRefreshRate     time.Duration
 }
 
 // AlertThresholds defines thresholds for alerting
@@ -137,41 +137,41 @@ type SystemStatus struct {
 // DashboardMetrics contains metrics for dashboard display
 type DashboardMetrics struct {
 	// Performance metrics
-	ValidationLatencyP50  float64
-	ValidationLatencyP95  float64
-	ValidationLatencyP99  float64
-	ValidationsPerSecond  float64
-	ErrorRate             float64
-	
+	ValidationLatencyP50 float64
+	ValidationLatencyP95 float64
+	ValidationLatencyP99 float64
+	ValidationsPerSecond float64
+	ErrorRate            float64
+
 	// Business metrics
 	TotalValidations      int64
 	SuccessfulValidations int64
 	FailedValidations     int64
 	JurisdictionBreakdown map[string]int64
-	
+
 	// Compliance metrics
-	ComplianceScore       float64
-	ViolationsLast24h     int64
-	CriticalViolations    int64
-	NotarizationRate      float64
-	
+	ComplianceScore    float64
+	ViolationsLast24h  int64
+	CriticalViolations int64
+	NotarizationRate   float64
+
 	// Resource metrics
-	CPUUsagePercent       float64
-	MemoryUsageMB         float64
-	ActiveConnections     int64
-	QueueDepth            int64
-	CacheHitRate          float64
+	CPUUsagePercent   float64
+	MemoryUsageMB     float64
+	ActiveConnections int64
+	QueueDepth        int64
+	CacheHitRate      float64
 }
 
 // NewMonitoringService creates a new monitoring service
 func NewMonitoringService(config MonitoringConfig) *MonitoringService {
 	registry := prometheus.NewRegistry()
-	
+
 	service := &MonitoringService{
-		config:               config,
-		metricsRegistry:      registry,
-		healthChecks:         make(map[string]HealthCheckFunc),
-		complianceAlerts:     []ComplianceAlert{},
+		config:                config,
+		metricsRegistry:       registry,
+		healthChecks:          make(map[string]HealthCheckFunc),
+		complianceAlerts:      []ComplianceAlert{},
 		performanceThresholds: make(map[string]float64),
 		systemStatus: SystemStatus{
 			Overall:    HealthStatusHealthy,
@@ -179,7 +179,7 @@ func NewMonitoringService(config MonitoringConfig) *MonitoringService {
 			LastUpdate: time.Now(),
 		},
 	}
-	
+
 	service.initializeMetrics()
 	return service
 }
@@ -194,7 +194,7 @@ func (s *MonitoringService) initializeMetrics() {
 		},
 		[]string{"jurisdiction", "status"},
 	)
-	
+
 	s.validationDuration = promauto.With(s.metricsRegistry).NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "gauth_formal_validation_duration_seconds",
@@ -203,7 +203,7 @@ func (s *MonitoringService) initializeMetrics() {
 		},
 		[]string{"jurisdiction", "validation_type"},
 	)
-	
+
 	s.validationErrors = promauto.With(s.metricsRegistry).NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "gauth_formal_validation_errors_total",
@@ -211,7 +211,7 @@ func (s *MonitoringService) initializeMetrics() {
 		},
 		[]string{"error_type", "jurisdiction"},
 	)
-	
+
 	// Compliance metrics
 	s.complianceViolations = promauto.With(s.metricsRegistry).NewCounterVec(
 		prometheus.CounterOpts{
@@ -220,7 +220,7 @@ func (s *MonitoringService) initializeMetrics() {
 		},
 		[]string{"violation_type", "severity", "jurisdiction"},
 	)
-	
+
 	s.jurisdictionChecks = promauto.With(s.metricsRegistry).NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "gauth_jurisdiction_checks_total",
@@ -228,7 +228,7 @@ func (s *MonitoringService) initializeMetrics() {
 		},
 		[]string{"jurisdiction", "result"},
 	)
-	
+
 	s.notaryVerifications = promauto.With(s.metricsRegistry).NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "gauth_notary_verifications_total",
@@ -236,7 +236,7 @@ func (s *MonitoringService) initializeMetrics() {
 		},
 		[]string{"jurisdiction", "result"},
 	)
-	
+
 	// Health check metrics
 	s.healthCheckStatus = promauto.With(s.metricsRegistry).NewGaugeVec(
 		prometheus.GaugeOpts{
@@ -245,7 +245,7 @@ func (s *MonitoringService) initializeMetrics() {
 		},
 		[]string{"component"},
 	)
-	
+
 	// System resource metrics
 	s.systemResourceUsage = promauto.With(s.metricsRegistry).NewGaugeVec(
 		prometheus.GaugeOpts{
@@ -254,7 +254,7 @@ func (s *MonitoringService) initializeMetrics() {
 		},
 		[]string{"resource_type"},
 	)
-	
+
 	// Real-time metrics
 	s.activeValidations = promauto.With(s.metricsRegistry).NewGauge(
 		prometheus.GaugeOpts{
@@ -262,21 +262,21 @@ func (s *MonitoringService) initializeMetrics() {
 			Help: "Number of currently active validations",
 		},
 	)
-	
+
 	s.queueDepth = promauto.With(s.metricsRegistry).NewGauge(
 		prometheus.GaugeOpts{
 			Name: "gauth_queue_depth",
 			Help: "Current validation queue depth",
 		},
 	)
-	
+
 	s.cacheHitRate = promauto.With(s.metricsRegistry).NewGauge(
 		prometheus.GaugeOpts{
 			Name: "gauth_cache_hit_rate",
 			Help: "Cache hit rate (0-1)",
 		},
 	)
-	
+
 	// Alert metrics
 	s.alertsTriggered = promauto.With(s.metricsRegistry).NewCounterVec(
 		prometheus.CounterOpts{
@@ -299,23 +299,23 @@ func (s *MonitoringService) RunHealthChecks(ctx context.Context) SystemStatus {
 	s.mu.Lock()
 	s.lastHealthCheckTime = time.Now()
 	s.mu.Unlock()
-	
+
 	results := make(map[string]HealthCheckResult)
 	overallHealthy := true
 	overallDegraded := false
-	
+
 	for name, checkFunc := range s.healthChecks {
 		startTime := time.Now()
 		result := checkFunc(ctx)
 		result.Duration = time.Since(startTime)
 		result.Timestamp = time.Now()
-		
+
 		results[name] = result
-		
+
 		// Update Prometheus metric
 		statusValue := s.healthStatusToFloat(result.Status)
 		s.healthCheckStatus.WithLabelValues(name).Set(statusValue)
-		
+
 		// Determine overall status
 		if result.Status == HealthStatusUnhealthy {
 			overallHealthy = false
@@ -323,7 +323,7 @@ func (s *MonitoringService) RunHealthChecks(ctx context.Context) SystemStatus {
 			overallDegraded = true
 		}
 	}
-	
+
 	// Determine overall system status
 	var overallStatus HealthStatus
 	if !overallHealthy {
@@ -333,13 +333,13 @@ func (s *MonitoringService) RunHealthChecks(ctx context.Context) SystemStatus {
 	} else {
 		overallStatus = HealthStatusHealthy
 	}
-	
+
 	s.mu.Lock()
 	s.systemStatus.Overall = overallStatus
 	s.systemStatus.Components = results
 	s.systemStatus.LastUpdate = time.Now()
 	s.mu.Unlock()
-	
+
 	return s.systemStatus
 }
 
@@ -368,10 +368,10 @@ func (s *MonitoringService) RecordValidation(
 	if !success {
 		status = "failure"
 	}
-	
+
 	s.validationTotal.WithLabelValues(jurisdiction, status).Inc()
 	s.validationDuration.WithLabelValues(jurisdiction, validationType).Observe(duration.Seconds())
-	
+
 	s.mu.Lock()
 	s.systemStatus.TotalValidations++
 	if !success {
@@ -389,7 +389,7 @@ func (s *MonitoringService) RecordComplianceViolation(
 	details map[string]interface{},
 ) {
 	s.complianceViolations.WithLabelValues(string(violationType), string(severity), jurisdiction).Inc()
-	
+
 	alert := ComplianceAlert{
 		AlertID:      fmt.Sprintf("%s-%d", violationType, time.Now().Unix()),
 		Severity:     severity,
@@ -400,11 +400,11 @@ func (s *MonitoringService) RecordComplianceViolation(
 		Timestamp:    time.Now(),
 		Resolved:     false,
 	}
-	
+
 	s.mu.Lock()
 	s.complianceAlerts = append(s.complianceAlerts, alert)
 	s.mu.Unlock()
-	
+
 	// Trigger alert if severity is high or critical
 	if severity == AlertSeverityCritical || severity == AlertSeverityHigh {
 		s.alertsTriggered.WithLabelValues(string(violationType), string(severity)).Inc()
@@ -464,7 +464,7 @@ func (s *MonitoringService) UpdateSystemResources(
 	s.systemResourceUsage.WithLabelValues("active_connections").Set(float64(activeConnections))
 	s.queueDepth.Set(float64(queueDepth))
 	s.cacheHitRate.Set(cacheHitRate)
-	
+
 	// Check thresholds and trigger alerts
 	if cpuPercent > s.config.AlertThresholds.CPUUsageMax {
 		s.alertsTriggered.WithLabelValues("cpu_high", "high").Inc()
@@ -484,7 +484,7 @@ func (s *MonitoringService) UpdateSystemResources(
 func (s *MonitoringService) GetDashboardMetrics() DashboardMetrics {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	
+
 	return DashboardMetrics{
 		TotalValidations:      s.systemStatus.TotalValidations,
 		SuccessfulValidations: s.systemStatus.TotalValidations - s.systemStatus.TotalErrors,
@@ -498,7 +498,7 @@ func (s *MonitoringService) GetDashboardMetrics() DashboardMetrics {
 func (s *MonitoringService) GetActiveAlerts() []ComplianceAlert {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	
+
 	activeAlerts := []ComplianceAlert{}
 	for _, alert := range s.complianceAlerts {
 		if !alert.Resolved {
@@ -512,7 +512,7 @@ func (s *MonitoringService) GetActiveAlerts() []ComplianceAlert {
 func (s *MonitoringService) ResolveAlert(alertID string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	for i := range s.complianceAlerts {
 		if s.complianceAlerts[i].AlertID == alertID {
 			s.complianceAlerts[i].Resolved = true
@@ -540,7 +540,7 @@ func (s *MonitoringService) Start(ctx context.Context) {
 	if s.config.EnableHealthChecks {
 		go s.healthCheckLoop(ctx)
 	}
-	
+
 	if s.config.EnableComplianceAlerts {
 		go s.complianceCheckLoop(ctx)
 	}
@@ -550,7 +550,7 @@ func (s *MonitoringService) Start(ctx context.Context) {
 func (s *MonitoringService) healthCheckLoop(ctx context.Context) {
 	ticker := time.NewTicker(s.config.HealthCheckInterval)
 	defer ticker.Stop()
-	
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -565,7 +565,7 @@ func (s *MonitoringService) healthCheckLoop(ctx context.Context) {
 func (s *MonitoringService) complianceCheckLoop(ctx context.Context) {
 	ticker := time.NewTicker(s.config.ComplianceCheckInterval)
 	defer ticker.Stop()
-	
+
 	for {
 		select {
 		case <-ctx.Done():

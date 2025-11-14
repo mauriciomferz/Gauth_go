@@ -1,3 +1,12 @@
+---
+title: CI/CD Pipeline Execution Guide (Week 4 Day 4)
+category: deployment-guide
+status: active
+lastUpdated: 2025-11-12
+owners: platform-team
+source: internal-preproduction-runbook
+refreshCadence: weekly
+---
 # Week 4 Day 4: CI/CD Pipeline Execution Guide
 
 **Date**: November 9, 2025  

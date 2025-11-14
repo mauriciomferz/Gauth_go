@@ -1,3 +1,13 @@
+---
+title: Operations Readiness Gap Analysis
+category: readiness-gap-analysis
+status: active
+lastUpdated: 2025-11-12
+owners: platform-eng
+source: internal
+refreshCadence: quarterly
+---
+
 # Operations Readiness Gap Analysis
 
 **Document Version:** 1.0  

@@ -14,11 +14,11 @@ import (
 // IDTokenService handles OIDC ID Token issuance and validation
 // Spec: OpenID Connect Core 1.0 Section 2 (ID Token), Section 3.1.3.3 (Validation)
 type IDTokenService struct {
-	issuerURL      string
-	signingKey     *rsa.PrivateKey
-	signingKeyID   string
-	signingMethod  jwt.SigningMethod
-	defaultExpiry  time.Duration
+	issuerURL     string
+	signingKey    *rsa.PrivateKey
+	signingKeyID  string
+	signingMethod jwt.SigningMethod
+	defaultExpiry time.Duration
 }
 
 // IDTokenServiceConfig configures ID Token Service
@@ -35,7 +35,7 @@ func NewIDTokenService(config *IDTokenServiceConfig) (*IDTokenService, error) {
 	if config.SigningKey == nil {
 		return nil, fmt.Errorf("signing key is required")
 	}
-	
+
 	// Default signing method: RS256 (REQUIRED by OIDC spec)
 	signingMethod := jwt.SigningMethodRS256
 	if config.SigningMethod != "" {
@@ -50,13 +50,13 @@ func NewIDTokenService(config *IDTokenServiceConfig) (*IDTokenService, error) {
 			return nil, fmt.Errorf("unsupported signing method: %s", config.SigningMethod)
 		}
 	}
-	
+
 	// Default expiry: 1 hour (3600 seconds)
 	expiry := time.Hour
 	if config.TokenExpiry > 0 {
 		expiry = config.TokenExpiry
 	}
-	
+
 	return &IDTokenService{
 		issuerURL:     config.IssuerURL,
 		signingKey:    config.SigningKey,
@@ -73,38 +73,38 @@ func (s *IDTokenService) IssueIDToken(ctx context.Context, claims *IDTokenClaims
 	if err := s.validateClaims(claims); err != nil {
 		return "", fmt.Errorf("invalid claims: %w", err)
 	}
-	
+
 	// Set issuer
 	claims.Issuer = s.issuerURL
-	
+
 	// Set issued at time
 	now := time.Now()
 	claims.IssuedAt = jwt.NewNumericDate(now)
-	
+
 	// Set expiration (default 1 hour)
 	if claims.ExpiresAt == nil {
 		claims.ExpiresAt = jwt.NewNumericDate(now.Add(s.defaultExpiry))
 	}
-	
+
 	// Set Not Before (optional, but recommended)
 	if claims.NotBefore == nil {
 		claims.NotBefore = jwt.NewNumericDate(now)
 	}
-	
+
 	// Create JWT token
 	token := jwt.NewWithClaims(s.signingMethod, claims)
-	
+
 	// Set Key ID header (kid)
 	if s.signingKeyID != "" {
 		token.Header["kid"] = s.signingKeyID
 	}
-	
+
 	// Sign token
 	signedToken, err := token.SignedString(s.signingKey)
 	if err != nil {
 		return "", fmt.Errorf("failed to sign ID token: %w", err)
 	}
-	
+
 	return signedToken, nil
 }
 
@@ -121,26 +121,26 @@ func (s *IDTokenService) ValidateIDToken(
 		if token.Method.Alg() != s.signingMethod.Alg() {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Method.Alg())
 		}
-		
+
 		// Return public key for verification
 		return &s.signingKey.PublicKey, nil
 	})
-	
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse ID token: %w", err)
 	}
-	
+
 	// Extract claims
 	claims, ok := token.Claims.(*IDTokenClaims)
 	if !ok || !token.Valid {
 		return nil, fmt.Errorf("invalid ID token")
 	}
-	
+
 	// Validate claims according to OIDC spec Section 3.1.3.7
 	if err := s.validateIDTokenClaims(claims, expectedAudience); err != nil {
 		return nil, fmt.Errorf("ID token validation failed: %w", err)
 	}
-	
+
 	return claims, nil
 }
 
@@ -150,12 +150,12 @@ func (s *IDTokenService) validateClaims(claims *IDTokenClaims) error {
 	if claims.Subject == "" {
 		return fmt.Errorf("sub claim is required")
 	}
-	
+
 	// Audience (aud) is REQUIRED
 	if len(claims.Audience) == 0 {
 		return fmt.Errorf("aud claim is required")
 	}
-	
+
 	return nil
 }
 
@@ -166,7 +166,7 @@ func (s *IDTokenService) validateIDTokenClaims(claims *IDTokenClaims, expectedAu
 	if claims.Issuer != s.issuerURL {
 		return fmt.Errorf("invalid issuer: expected %s, got %s", s.issuerURL, claims.Issuer)
 	}
-	
+
 	// 2. Validate audience (aud)
 	// Must contain client_id that this ID token is intended for
 	if expectedAudience != "" {
@@ -181,18 +181,18 @@ func (s *IDTokenService) validateIDTokenClaims(claims *IDTokenClaims, expectedAu
 			return fmt.Errorf("invalid audience: expected %s", expectedAudience)
 		}
 	}
-	
+
 	// 3. Validate authorized party (azp) if multiple audiences
 	if len(claims.Audience) > 1 && claims.AuthorizedParty == "" {
 		return fmt.Errorf("azp claim required when multiple audiences present")
 	}
 	if claims.AuthorizedParty != "" && expectedAudience != "" {
 		if claims.AuthorizedParty != expectedAudience {
-			return fmt.Errorf("invalid authorized party: expected %s, got %s", 
+			return fmt.Errorf("invalid authorized party: expected %s, got %s",
 				expectedAudience, claims.AuthorizedParty)
 		}
 	}
-	
+
 	// 4. Validate expiration (exp)
 	now := time.Now()
 	if claims.ExpiresAt != nil {
@@ -200,7 +200,7 @@ func (s *IDTokenService) validateIDTokenClaims(claims *IDTokenClaims, expectedAu
 			return fmt.Errorf("ID token expired at %v", claims.ExpiresAt.Time)
 		}
 	}
-	
+
 	// 5. Validate issued at (iat)
 	if claims.IssuedAt != nil {
 		// Token must not be issued in the future
@@ -209,7 +209,7 @@ func (s *IDTokenService) validateIDTokenClaims(claims *IDTokenClaims, expectedAu
 			return fmt.Errorf("ID token issued in the future: %v", claims.IssuedAt.Time)
 		}
 	}
-	
+
 	// 6. Validate not before (nbf) if present
 	if claims.NotBefore != nil {
 		// Allow 5 minutes clock skew
@@ -217,11 +217,11 @@ func (s *IDTokenService) validateIDTokenClaims(claims *IDTokenClaims, expectedAu
 			return fmt.Errorf("ID token not yet valid: not before %v", claims.NotBefore.Time)
 		}
 	}
-	
+
 	// 7. Validate nonce if present (for replay attack prevention)
 	// Note: Nonce validation requires storing expected nonce in session
 	// This is typically handled by the relying party (client application)
-	
+
 	return nil
 }
 
@@ -241,13 +241,13 @@ func (s *IDTokenService) CreateIDTokenFromIdentity(
 			Audience: audience,
 		},
 	}
-	
+
 	// Map GAuth trust level to OIDC ACR
 	claims.ACR = s.mapTrustLevelToACR(trustLevel)
-	
+
 	// Set GAuth entity type
 	claims.EntityType = identityType
-	
+
 	// Add additional claims from proof data
 	if name, ok := additionalClaims["name"].(string); ok {
 		claims.Name = name
@@ -270,7 +270,7 @@ func (s *IDTokenService) CreateIDTokenFromIdentity(
 	if tspID, ok := additionalClaims["tsp_id"].(string); ok {
 		claims.TSPID = tspID
 	}
-	
+
 	return s.IssueIDToken(ctx, claims)
 }
 

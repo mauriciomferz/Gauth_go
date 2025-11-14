@@ -1,3 +1,12 @@
+---
+title: Documentation Changelog (Supplemental)
+category: release-notes
+status: active
+lastUpdated: 2025-11-12
+owners: release-manager
+source: manual-curation
+refreshCadence: monthly
+---
 # CHANGELOG
 
 ## 2025-10-29 (PoA Beta MVP Integration)

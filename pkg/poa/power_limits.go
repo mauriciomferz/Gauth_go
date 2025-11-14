@@ -84,9 +84,9 @@ type ApprovalRequirement struct {
 
 // RateLimit defines rate limiting for actions
 type RateLimit struct {
-	MaxRequests  int           `json:"max_requests"`   // Maximum requests
-	WindowSec    int           `json:"window_sec"`     // Time window in seconds
-	BurstAllowed int           `json:"burst_allowed"`  // Burst allowance
+	MaxRequests  int           `json:"max_requests"`               // Maximum requests
+	WindowSec    int           `json:"window_sec"`                 // Time window in seconds
+	BurstAllowed int           `json:"burst_allowed"`              // Burst allowance
 	PenaltyDur   time.Duration `json:"penalty_duration,omitempty"` // Penalty duration for violations
 }
 

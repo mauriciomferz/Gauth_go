@@ -1,3 +1,13 @@
+---
+title: PostgreSQL Implementation Summary
+category: database-implementation-summary
+status: final
+lastUpdated: 2025-11-12
+owners: platform-eng
+source: internal
+refreshCadence: annually
+---
+
 # PostgreSQL Integration - Implementation Summary
 
 **Date**: November 11, 2025  

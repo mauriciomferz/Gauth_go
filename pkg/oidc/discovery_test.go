@@ -9,20 +9,20 @@ import (
 func TestNewDiscoveryService(t *testing.T) {
 	issuerURL := "https://gauth.example.com"
 	service := NewDiscoveryService(issuerURL)
-	
+
 	if service == nil {
 		t.Fatal("NewDiscoveryService returned nil")
 	}
-	
+
 	if service.issuerURL != issuerURL {
 		t.Errorf("Expected issuer URL %s, got %s", issuerURL, service.issuerURL)
 	}
-	
+
 	config := service.GetConfiguration()
 	if config == nil {
 		t.Fatal("Configuration is nil")
 	}
-	
+
 	if config.Issuer != issuerURL {
 		t.Errorf("Expected issuer %s, got %s", issuerURL, config.Issuer)
 	}
@@ -31,7 +31,7 @@ func TestNewDiscoveryService(t *testing.T) {
 func TestDiscoveryService_GetConfiguration(t *testing.T) {
 	service := NewDiscoveryService("https://gauth.example.com")
 	config := service.GetConfiguration()
-	
+
 	// Verify required fields
 	if config.Issuer == "" {
 		t.Error("Issuer is empty")
@@ -45,7 +45,7 @@ func TestDiscoveryService_GetConfiguration(t *testing.T) {
 	if config.JWKSUri == "" {
 		t.Error("JWKSUri is empty")
 	}
-	
+
 	// Verify supported values
 	if len(config.ResponseTypesSupported) == 0 {
 		t.Error("ResponseTypesSupported is empty")
@@ -56,7 +56,7 @@ func TestDiscoveryService_GetConfiguration(t *testing.T) {
 	if len(config.IDTokenSigningAlgValuesSupported) == 0 {
 		t.Error("IDTokenSigningAlgValuesSupported is empty")
 	}
-	
+
 	// Verify RS256 is supported (REQUIRED by spec)
 	hasRS256 := false
 	for _, alg := range config.IDTokenSigningAlgValuesSupported {
@@ -68,7 +68,7 @@ func TestDiscoveryService_GetConfiguration(t *testing.T) {
 	if !hasRS256 {
 		t.Error("RS256 must be supported")
 	}
-	
+
 	// Verify openid scope is supported
 	hasOpenID := false
 	for _, scope := range config.ScopesSupported {
@@ -129,14 +129,14 @@ func TestDiscoveryService_ValidateConfiguration(t *testing.T) {
 			wantErr: true,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			service := NewDiscoveryService("https://gauth.example.com")
 			config := service.GetConfiguration()
 			tt.setup(config)
 			service.UpdateConfiguration(config)
-			
+
 			err := service.ValidateConfiguration()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ValidateConfiguration() error = %v, wantErr %v", err, tt.wantErr)
@@ -147,7 +147,7 @@ func TestDiscoveryService_ValidateConfiguration(t *testing.T) {
 
 func TestDiscoveryService_ServeHTTP(t *testing.T) {
 	service := NewDiscoveryService("https://gauth.example.com")
-	
+
 	tests := []struct {
 		name       string
 		method     string
@@ -164,18 +164,18 @@ func TestDiscoveryService_ServeHTTP(t *testing.T) {
 			wantStatus: http.StatusMethodNotAllowed,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			req := httptest.NewRequest(tt.method, "/.well-known/openid-configuration", nil)
 			w := httptest.NewRecorder()
-			
+
 			service.ServeHTTP(w, req)
-			
+
 			if w.Code != tt.wantStatus {
 				t.Errorf("Expected status %d, got %d", tt.wantStatus, w.Code)
 			}
-			
+
 			if tt.method == http.MethodGet {
 				contentType := w.Header().Get("Content-Type")
 				if contentType != "application/json" {
@@ -188,7 +188,7 @@ func TestDiscoveryService_ServeHTTP(t *testing.T) {
 
 func TestDiscoveryService_SupportsACR(t *testing.T) {
 	service := NewDiscoveryService("https://gauth.example.com")
-	
+
 	tests := []struct {
 		name string
 		acr  string
@@ -215,7 +215,7 @@ func TestDiscoveryService_SupportsACR(t *testing.T) {
 			want: false,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := service.SupportsACR(tt.acr); got != tt.want {
@@ -227,7 +227,7 @@ func TestDiscoveryService_SupportsACR(t *testing.T) {
 
 func TestDiscoveryService_SupportsScope(t *testing.T) {
 	service := NewDiscoveryService("https://gauth.example.com")
-	
+
 	tests := []struct {
 		name  string
 		scope string
@@ -254,7 +254,7 @@ func TestDiscoveryService_SupportsScope(t *testing.T) {
 			want:  false,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := service.SupportsScope(tt.scope); got != tt.want {
@@ -267,7 +267,7 @@ func TestDiscoveryService_SupportsScope(t *testing.T) {
 func TestDiscoveryService_GAuthExtensions(t *testing.T) {
 	service := NewDiscoveryService("https://gauth.example.com")
 	config := service.GetConfiguration()
-	
+
 	// Verify GAuth-specific scopes
 	gauthScopes := []string{"gauth:owner", "gauth:client", "gauth:resource", "gauth:legal_entity"}
 	for _, scope := range gauthScopes {
@@ -282,7 +282,7 @@ func TestDiscoveryService_GAuthExtensions(t *testing.T) {
 			t.Errorf("GAuth scope %s not found in supported scopes", scope)
 		}
 	}
-	
+
 	// Verify GAuth-specific claims
 	gauthClaims := []string{"entity_type", "entity_id", "legal_entity_name", "jurisdiction"}
 	for _, claim := range gauthClaims {
@@ -316,7 +316,7 @@ func TestIssuerURL(t *testing.T) {
 			want:  "https://gauth.example.com",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := issuerURL(tt.input); got != tt.want {

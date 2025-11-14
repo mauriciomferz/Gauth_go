@@ -10,11 +10,11 @@ import (
 
 // RightsObligationSet represents comprehensive rights and obligations per RFC-0115 C.3
 type RightsObligationSet struct {
-	ReportingDuties   []ReportingDuty   `json:"reporting_duties,omitempty"`
-	LiabilityRules    []LiabilityRule   `json:"liability_rules,omitempty"`
+	ReportingDuties   []ReportingDuty    `json:"reporting_duties,omitempty"`
+	LiabilityRules    []LiabilityRule    `json:"liability_rules,omitempty"`
 	CompensationRules []CompensationRule `json:"compensation_rules,omitempty"`
 	AuditRequirements *AuditRequirements `json:"audit_requirements,omitempty"`
-	ComplianceRules   []ComplianceRule  `json:"compliance_rules,omitempty"`
+	ComplianceRules   []ComplianceRule   `json:"compliance_rules,omitempty"`
 }
 
 // ReportingDuty defines mandatory reporting obligations per RFC-0115 C.3.1
@@ -48,16 +48,16 @@ type ReportingDuty struct {
 type ReportType string
 
 const (
-	ReportTypeActivity     ReportType = "activity"      // Activity logs
-	ReportTypePerformance  ReportType = "performance"   // Performance metrics
-	ReportTypeCompliance   ReportType = "compliance"    // Compliance status
-	ReportTypeIncident     ReportType = "incident"      // Incident reports
-	ReportTypeAudit        ReportType = "audit"         // Audit logs
-	ReportTypeFinancial    ReportType = "financial"     // Financial reports
-	ReportTypeDecision     ReportType = "decision"      // Decision rationale
-	ReportTypeException    ReportType = "exception"     // Exception reports
-	ReportTypeSecurity     ReportType = "security"      // Security events
-	ReportTypeDataAccess   ReportType = "data_access"   // Data access logs
+	ReportTypeActivity    ReportType = "activity"    // Activity logs
+	ReportTypePerformance ReportType = "performance" // Performance metrics
+	ReportTypeCompliance  ReportType = "compliance"  // Compliance status
+	ReportTypeIncident    ReportType = "incident"    // Incident reports
+	ReportTypeAudit       ReportType = "audit"       // Audit logs
+	ReportTypeFinancial   ReportType = "financial"   // Financial reports
+	ReportTypeDecision    ReportType = "decision"    // Decision rationale
+	ReportTypeException   ReportType = "exception"   // Exception reports
+	ReportTypeSecurity    ReportType = "security"    // Security events
+	ReportTypeDataAccess  ReportType = "data_access" // Data access logs
 )
 
 // ReportFrequency defines reporting intervals
@@ -112,22 +112,22 @@ type LiabilityRule struct {
 
 // LiabilityScope defines when liability rule applies
 type LiabilityScope struct {
-	Actions       []string `json:"actions,omitempty"`        // Action types covered
-	Sectors       []string `json:"sectors,omitempty"`        // Industry sectors
-	Jurisdictions []string `json:"jurisdictions,omitempty"`  // Legal jurisdictions
-	DamageTypes   []string `json:"damage_types,omitempty"`   // Types of damage
+	Actions       []string `json:"actions,omitempty"`       // Action types covered
+	Sectors       []string `json:"sectors,omitempty"`       // Industry sectors
+	Jurisdictions []string `json:"jurisdictions,omitempty"` // Legal jurisdictions
+	DamageTypes   []string `json:"damage_types,omitempty"`  // Types of damage
 }
 
 // LiabilityParty identifies a liable party
 type LiabilityParty string
 
 const (
-	LiabilityPrincipal      LiabilityParty = "principal"       // Principal organization
-	LiabilityRepresentative LiabilityParty = "representative"  // Representative/owner
-	LiabilityClient         LiabilityParty = "client"          // AI client/system
-	LiabilityManufacturer   LiabilityParty = "manufacturer"    // AI manufacturer
-	LiabilityOperator       LiabilityParty = "operator"        // System operator
-	LiabilityShared         LiabilityParty = "shared"          // Shared liability
+	LiabilityPrincipal      LiabilityParty = "principal"         // Principal organization
+	LiabilityRepresentative LiabilityParty = "representative"    // Representative/owner
+	LiabilityClient         LiabilityParty = "client"            // AI client/system
+	LiabilityManufacturer   LiabilityParty = "manufacturer"      // AI manufacturer
+	LiabilityOperator       LiabilityParty = "operator"          // System operator
+	LiabilityShared         LiabilityParty = "shared"            // Shared liability
 	LiabilityJointSeveral   LiabilityParty = "joint_and_several" // Joint and several
 )
 
@@ -135,12 +135,12 @@ const (
 type LiabilityType string
 
 const (
-	LiabilityStrict      LiabilityType = "strict"       // Strict liability
-	LiabilityNegligence  LiabilityType = "negligence"   // Negligence-based
-	LiabilityVicarious   LiabilityType = "vicarious"    // Vicarious liability
-	LiabilityProduct     LiabilityType = "product"      // Product liability
+	LiabilityStrict       LiabilityType = "strict"       // Strict liability
+	LiabilityNegligence   LiabilityType = "negligence"   // Negligence-based
+	LiabilityVicarious    LiabilityType = "vicarious"    // Vicarious liability
+	LiabilityProduct      LiabilityType = "product"      // Product liability
 	LiabilityProfessional LiabilityType = "professional" // Professional liability
-	LiabilityContractual LiabilityType = "contractual"  // Contractual liability
+	LiabilityContractual  LiabilityType = "contractual"  // Contractual liability
 )
 
 // MonetaryAmount represents a monetary value
@@ -183,21 +183,21 @@ type CompensationRule struct {
 type CompensationType string
 
 const (
-	CompensationFixed       CompensationType = "fixed"        // Fixed amount
-	CompensationVariable    CompensationType = "variable"     // Variable/calculated
-	CompensationPercentage  CompensationType = "percentage"   // Percentage-based
-	CompensationActualLoss  CompensationType = "actual_loss"  // Actual loss reimbursement
-	CompensationPunitive    CompensationType = "punitive"     // Punitive damages
+	CompensationFixed         CompensationType = "fixed"         // Fixed amount
+	CompensationVariable      CompensationType = "variable"      // Variable/calculated
+	CompensationPercentage    CompensationType = "percentage"    // Percentage-based
+	CompensationActualLoss    CompensationType = "actual_loss"   // Actual loss reimbursement
+	CompensationPunitive      CompensationType = "punitive"      // Punitive damages
 	CompensationConsequential CompensationType = "consequential" // Consequential damages
 )
 
 // PaymentSchedule defines payment timing
 type PaymentSchedule struct {
-	Type        string        `json:"type"` // "immediate", "installment", "milestone"
-	Frequency   string        `json:"frequency,omitempty"`
-	Installments int          `json:"installments,omitempty"`
-	DueDays     int           `json:"due_days,omitempty"`
-	GracePeriod time.Duration `json:"grace_period,omitempty"`
+	Type         string        `json:"type"` // "immediate", "installment", "milestone"
+	Frequency    string        `json:"frequency,omitempty"`
+	Installments int           `json:"installments,omitempty"`
+	DueDays      int           `json:"due_days,omitempty"`
+	GracePeriod  time.Duration `json:"grace_period,omitempty"`
 }
 
 // AuditRequirements defines audit obligations per RFC-0115 C.3.4

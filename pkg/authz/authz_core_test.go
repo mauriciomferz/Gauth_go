@@ -205,7 +205,7 @@ func TestAuthorizationCacheMetrics(t *testing.T) {
 	// Add some entries and operations
 	key := makeKey("user", "read", "doc", 1, "us")
 	cache.Set(key, AuthorizationCacheEntry{Decision: Decision{Allow: true}, PolicyVersion: 1})
-	cache.Get(key)                // hit
+	cache.Get(key)               // hit
 	cache.Get("nonexistent-key") // miss
 
 	metrics = ma.AuthorizationCacheMetrics()
@@ -261,7 +261,7 @@ func TestCurrentPolicyVersion(t *testing.T) {
 // TestDisableCaching verifies cache disabling
 func TestDisableCaching(t *testing.T) {
 	ma := NewMemoryAuthorizer()
-	
+
 	// Initially enabled
 	ma.cacheEnabled = true
 
@@ -443,10 +443,10 @@ func (m *MockObligationExecutor) PersistAudit(ob Obligation, ctx map[string]inte
 }
 
 type MockMetricsProvider struct {
-	ObligationsExecuted          uint64
-	ObligationsFailed            uint64
-	MandatoryObligationFailures  uint64
-	ObligationLatencies          []time.Duration
+	ObligationsExecuted         uint64
+	ObligationsFailed           uint64
+	MandatoryObligationFailures uint64
+	ObligationLatencies         []time.Duration
 }
 
 func (m *MockMetricsProvider) IncObligationsExecuted() {

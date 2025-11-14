@@ -1,3 +1,12 @@
+---
+title: ADR Ledger Entry Signatures (Rotation & Revocation Chains)
+category: adr
+status: proposed
+lastUpdated: 2025-11-12
+owners: architecture-team
+source: internal
+refreshCadence: on-change
+---
 # ADR: Ledger Entry Signatures (Rotation & Revocation Chains)
 
 Date: 2025-10-27

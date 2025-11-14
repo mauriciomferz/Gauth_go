@@ -15,12 +15,12 @@ import (
 type ActionCategory string
 
 const (
-	CategoryFinancial   ActionCategory = "Financial"
-	CategoryOperational ActionCategory = "Operational"
-	CategoryStrategic   ActionCategory = "Strategic"
-	CategoryPhysical    ActionCategory = "Physical"
-	CategoryDigital     ActionCategory = "Digital"
-	CategoryAnalytical  ActionCategory = "Analytical"
+	CategoryFinancial     ActionCategory = "Financial"
+	CategoryOperational   ActionCategory = "Operational"
+	CategoryStrategic     ActionCategory = "Strategic"
+	CategoryPhysical      ActionCategory = "Physical"
+	CategoryDigital       ActionCategory = "Digital"
+	CategoryAnalytical    ActionCategory = "Analytical"
 	CategoryCommunication ActionCategory = "Communication"
 )
 
@@ -28,20 +28,20 @@ const (
 type RiskLevel string
 
 const (
-	RiskCritical RiskLevel = "critical"  // Immediate financial/safety impact
-	RiskHigh     RiskLevel = "high"      // Significant consequences
-	RiskMedium   RiskLevel = "medium"    // Moderate impact
-	RiskLow      RiskLevel = "low"       // Minimal impact
-	RiskMinimal  RiskLevel = "minimal"   // Negligible impact
+	RiskCritical RiskLevel = "critical" // Immediate financial/safety impact
+	RiskHigh     RiskLevel = "high"     // Significant consequences
+	RiskMedium   RiskLevel = "medium"   // Moderate impact
+	RiskLow      RiskLevel = "low"      // Minimal impact
+	RiskMinimal  RiskLevel = "minimal"  // Negligible impact
 )
 
 // ActionScope defines the scope of impact for an action
 type ActionScope string
 
 const (
-	ScopeInternal   ActionScope = "internal"   // Within organization only
-	ScopeExternal   ActionScope = "external"   // Affects external parties
-	ScopePublic     ActionScope = "public"     // Public-facing actions
+	ScopeInternal     ActionScope = "internal"     // Within organization only
+	ScopeExternal     ActionScope = "external"     // Affects external parties
+	ScopePublic       ActionScope = "public"       // Public-facing actions
 	ScopeConfidential ActionScope = "confidential" // Confidential/sensitive
 )
 
@@ -80,15 +80,15 @@ type DecisionMetadata struct {
 
 // PhysicalActionMetadata provides detailed physical action classification
 type PhysicalActionMetadata struct {
-	Type               ActionTypePhysical
-	Category           ActionCategory
-	Risk               RiskLevel
-	Scope              ActionScope
-	RequiresSafety     bool
+	Type                ActionTypePhysical
+	Category            ActionCategory
+	Risk                RiskLevel
+	Scope               ActionScope
+	RequiresSafety      bool
 	RequiresSupervision bool
-	ImpactAnalysis     ActionImpact
-	ComplianceReqs     []string
-	Description        string
+	ImpactAnalysis      ActionImpact
+	ComplianceReqs      []string
+	Description         string
 }
 
 // NonPhysicalActionMetadata provides detailed non-physical action classification
@@ -1028,20 +1028,20 @@ func GetNonPhysicalActionMetadata(npa ActionTypeNonPhysical) (*NonPhysicalAction
 
 // ComprehensiveTaxonomyReport generates complete taxonomy report for action set
 type ComprehensiveTaxonomyReport struct {
-	OverallRisk        RiskLevel                       `json:"overall_risk"`
-	TotalActions       int                             `json:"total_actions"`
-	ActionsByCategory  map[ActionCategory]int          `json:"actions_by_category"`
-	ActionsByRisk      map[RiskLevel]int               `json:"actions_by_risk"`
-	RequiresApproval   int                             `json:"requires_approval"`
-	RequiresSafety     int                             `json:"requires_safety"`
-	RequiresSupervision int                            `json:"requires_supervision"`
-	ComplianceReqsSet  []string                        `json:"compliance_requirements"`
-	TransactionDetails []TransactionMetadata           `json:"transaction_details"`
-	DecisionDetails    []DecisionMetadata              `json:"decision_details"`
-	PhysicalDetails    []PhysicalActionMetadata        `json:"physical_details"`
-	NonPhysicalDetails []NonPhysicalActionMetadata     `json:"non_physical_details"`
-	Summary            string                          `json:"summary"`
-	Recommendations    []string                        `json:"recommendations"`
+	OverallRisk         RiskLevel                   `json:"overall_risk"`
+	TotalActions        int                         `json:"total_actions"`
+	ActionsByCategory   map[ActionCategory]int      `json:"actions_by_category"`
+	ActionsByRisk       map[RiskLevel]int           `json:"actions_by_risk"`
+	RequiresApproval    int                         `json:"requires_approval"`
+	RequiresSafety      int                         `json:"requires_safety"`
+	RequiresSupervision int                         `json:"requires_supervision"`
+	ComplianceReqsSet   []string                    `json:"compliance_requirements"`
+	TransactionDetails  []TransactionMetadata       `json:"transaction_details"`
+	DecisionDetails     []DecisionMetadata          `json:"decision_details"`
+	PhysicalDetails     []PhysicalActionMetadata    `json:"physical_details"`
+	NonPhysicalDetails  []NonPhysicalActionMetadata `json:"non_physical_details"`
+	Summary             string                      `json:"summary"`
+	Recommendations     []string                    `json:"recommendations"`
 }
 
 // GenerateComprehensiveTaxonomyReport creates detailed taxonomy report for action set

@@ -1,3 +1,12 @@
+---
+title: Project Contributors
+category: organizational
+status: active
+lastUpdated: 2025-11-12
+owners: core-maintainers
+source: manual-curation
+refreshCadence: quarterly
+---
 # Contributors
 
 > Last Updated: 2025-11-05

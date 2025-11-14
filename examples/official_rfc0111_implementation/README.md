@@ -1,3 +1,11 @@
+---
+title: "Official RFC0111 Implementation Examples"
+category: example
+status: active
+lastUpdated: 2025-11-12
+owners: architecture-team
+refreshCadence: on-change
+---
 # Official GiFo-RFC-0111 Implementation (Refactored Beta Demo)
 
 > Last Updated: 2025-10-17

@@ -17,11 +17,11 @@ func TestMemoryService_Issue(t *testing.T) {
 	ctx := context.Background()
 
 	tests := []struct {
-		name       string
-		req        *Request
-		wantErr    bool
-		errSubstr  string
-		validate   func(*testing.T, *ProofOfAuthorization)
+		name      string
+		req       *Request
+		wantErr   bool
+		errSubstr string
+		validate  func(*testing.T, *ProofOfAuthorization)
 	}{
 		{
 			name: "Valid request - basic fields",
@@ -174,12 +174,12 @@ func TestMemoryService_Issue(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s := NewMemoryService()
 			poa, err := s.Issue(ctx, tt.req)
-			
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Issue() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			
+
 			if tt.wantErr {
 				if err != nil && tt.errSubstr != "" {
 					if !substringCheck(err.Error(), tt.errSubstr) {
@@ -188,15 +188,15 @@ func TestMemoryService_Issue(t *testing.T) {
 				}
 				return
 			}
-			
+
 			if poa == nil {
 				t.Fatal("Issue() returned nil POA for valid request")
 			}
-			
+
 			if tt.validate != nil {
 				tt.validate(t, poa)
 			}
-			
+
 			// Verify POA is stored in service
 			if _, exists := s.proofs[poa.ID]; !exists {
 				t.Error("Issue() did not store POA in service")
@@ -209,26 +209,26 @@ func TestMemoryService_Issue(t *testing.T) {
 func TestMemoryService_Issue_Timestamps(t *testing.T) {
 	s := NewMemoryService()
 	ctx := context.Background()
-	
+
 	req := &Request{
 		Subject:  "user_ts",
 		Resource: "resource_ts",
 		Action:   "read",
 	}
-	
+
 	before := time.Now()
 	poa, err := s.Issue(ctx, req)
 	after := time.Now()
-	
+
 	if err != nil {
 		t.Fatalf("Issue() error = %v", err)
 	}
-	
+
 	// IssuedAt should be between before and after
 	if poa.IssuedAt.Before(before) || poa.IssuedAt.After(after) {
 		t.Errorf("IssuedAt = %v, expected between %v and %v", poa.IssuedAt, before, after)
 	}
-	
+
 	// ExpiresAt should be ~1 hour after IssuedAt (default duration)
 	expectedExpiry := poa.IssuedAt.Add(time.Hour)
 	// Allow 1 second tolerance
@@ -241,7 +241,7 @@ func TestMemoryService_Issue_Timestamps(t *testing.T) {
 func TestMemoryService_Issue_DelegationTimestamps(t *testing.T) {
 	s := NewMemoryService()
 	ctx := context.Background()
-	
+
 	duration := 6 * time.Hour
 	req := &Request{
 		Subject:  "user_del_ts",
@@ -252,24 +252,24 @@ func TestMemoryService_Issue_DelegationTimestamps(t *testing.T) {
 			Duration:    duration,
 		},
 	}
-	
+
 	before := time.Now()
 	poa, err := s.Issue(ctx, req)
 	after := time.Now()
-	
+
 	if err != nil {
 		t.Fatalf("Issue() error = %v", err)
 	}
-	
+
 	if poa.Delegation == nil {
 		t.Fatal("Delegation should not be nil")
 	}
-	
+
 	// DelegatedAt should be between before and after
 	if poa.Delegation.DelegatedAt.Before(before) || poa.Delegation.DelegatedAt.After(after) {
 		t.Errorf("DelegatedAt = %v, expected between %v and %v", poa.Delegation.DelegatedAt, before, after)
 	}
-	
+
 	// ExpiresAt should be duration after DelegatedAt
 	expectedExpiry := poa.Delegation.DelegatedAt.Add(duration)
 	if poa.Delegation.ExpiresAt.Sub(expectedExpiry) > time.Second || expectedExpiry.Sub(poa.Delegation.ExpiresAt) > time.Second {
@@ -281,34 +281,34 @@ func TestMemoryService_Issue_DelegationTimestamps(t *testing.T) {
 func TestMemoryService_Issue_AttestationDefaults(t *testing.T) {
 	s := NewMemoryService()
 	ctx := context.Background()
-	
+
 	req := &Request{
 		Subject:  "user_att",
 		Resource: "resource_att",
 		Action:   "read",
 	}
-	
+
 	poa, err := s.Issue(ctx, req)
 	if err != nil {
 		t.Fatalf("Issue() error = %v", err)
 	}
-	
+
 	if poa.Attestation == nil {
 		t.Fatal("Attestation should not be nil")
 	}
-	
+
 	if poa.Attestation.AttestedBy != "gauth-attestation-service" {
 		t.Errorf("AttestedBy = %v, want gauth-attestation-service", poa.Attestation.AttestedBy)
 	}
-	
+
 	if poa.Attestation.Confidence != 0.95 {
 		t.Errorf("Confidence = %v, want 0.95", poa.Attestation.Confidence)
 	}
-	
+
 	if poa.Attestation.ValidityScore != 0.98 {
 		t.Errorf("ValidityScore = %v, want 0.98", poa.Attestation.ValidityScore)
 	}
-	
+
 	if poa.Attestation.Evidence == nil {
 		t.Error("Evidence should not be nil (even if empty)")
 	}
@@ -321,12 +321,12 @@ func TestGenerateID(t *testing.T) {
 	if id == "" {
 		t.Error("generateID() returned empty string")
 	}
-	
+
 	// Test that ID has poa_ prefix
 	if !strings.HasPrefix(id, "poa_") {
 		t.Errorf("generateID() = %v, want prefix 'poa_'", id)
 	}
-	
+
 	// Test that IDs are unique
 	ids := make(map[string]bool)
 	for i := 0; i < 100; i++ {
@@ -342,17 +342,17 @@ func TestGenerateID(t *testing.T) {
 // TestGenerateID_Format tests ID format
 func TestGenerateID_Format(t *testing.T) {
 	id := generateID()
-	
+
 	// Should be poa_ followed by hex string
 	if !strings.HasPrefix(id, "poa_") {
 		t.Errorf("ID = %v, want prefix 'poa_'", id)
 	}
-	
+
 	hexPart := strings.TrimPrefix(id, "poa_")
 	if len(hexPart) != 32 { // 16 bytes = 32 hex characters
 		t.Errorf("Hex part length = %d, want 32", len(hexPart))
 	}
-	
+
 	// Verify it's valid hex
 	for _, c := range hexPart {
 		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')) {
@@ -365,11 +365,11 @@ func TestGenerateID_Format(t *testing.T) {
 // TestBuildPoASigningPayload tests the buildPoASigningPayload function
 func TestBuildPoASigningPayload(t *testing.T) {
 	baseTime := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
-	
+
 	tests := []struct {
-		name         string
-		poa          *ProofOfAuthorization
-		checkPrefix  string
+		name          string
+		poa           *ProofOfAuthorization
+		checkPrefix   string
 		checkContains []string
 	}{
 		{
@@ -384,7 +384,7 @@ func TestBuildPoASigningPayload(t *testing.T) {
 				ExpiresAt: baseTime.Add(24 * time.Hour),
 				Scope:     []string{"read"},
 			},
-			checkPrefix: "GAUTH_POA:",
+			checkPrefix:   "GAUTH_POA:",
 			checkContains: []string{"poa_basic", "user_basic", "resource_basic", "read", "issuer_basic"},
 		},
 		{
@@ -407,7 +407,7 @@ func TestBuildPoASigningPayload(t *testing.T) {
 					Revocable:   true,
 				},
 			},
-			checkPrefix: "GAUTH_POA:",
+			checkPrefix:   "GAUTH_POA:",
 			checkContains: []string{"poa_del", "admin", "user_del"},
 		},
 		{
@@ -428,27 +428,27 @@ func TestBuildPoASigningPayload(t *testing.T) {
 					ValidityScore: 0.90,
 				},
 			},
-			checkPrefix: "GAUTH_POA:",
+			checkPrefix:   "GAUTH_POA:",
 			checkContains: []string{"poa_att", "verifier", "0.95"},
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			payload := buildPoASigningPayload(tt.poa)
-			
+
 			if len(payload) == 0 {
 				t.Fatal("buildPoASigningPayload() returned empty payload")
 			}
-			
+
 			payloadStr := string(payload)
-			
+
 			if tt.checkPrefix != "" {
 				if !strings.HasPrefix(payloadStr, tt.checkPrefix) {
 					t.Errorf("Payload does not have prefix %v", tt.checkPrefix)
 				}
 			}
-			
+
 			for _, substr := range tt.checkContains {
 				if !strings.Contains(payloadStr, substr) {
 					t.Errorf("Payload does not contain %v", substr)
@@ -461,7 +461,7 @@ func TestBuildPoASigningPayload(t *testing.T) {
 // TestBuildPoASigningPayload_Deterministic tests payload is deterministic
 func TestBuildPoASigningPayload_Deterministic(t *testing.T) {
 	baseTime := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
-	
+
 	poa1 := &ProofOfAuthorization{
 		ID:        "poa_det",
 		Subject:   "user_det",
@@ -472,7 +472,7 @@ func TestBuildPoASigningPayload_Deterministic(t *testing.T) {
 		ExpiresAt: baseTime.Add(24 * time.Hour),
 		Scope:     []string{"read", "write"},
 	}
-	
+
 	poa2 := &ProofOfAuthorization{
 		ID:        "poa_det",
 		Subject:   "user_det",
@@ -483,10 +483,10 @@ func TestBuildPoASigningPayload_Deterministic(t *testing.T) {
 		ExpiresAt: baseTime.Add(24 * time.Hour),
 		Scope:     []string{"read", "write"},
 	}
-	
+
 	payload1 := buildPoASigningPayload(poa1)
 	payload2 := buildPoASigningPayload(poa2)
-	
+
 	if string(payload1) != string(payload2) {
 		t.Errorf("Payloads not deterministic:\n%s\n!=\n%s", payload1, payload2)
 	}
@@ -495,12 +495,12 @@ func TestBuildPoASigningPayload_Deterministic(t *testing.T) {
 // TestVerifyMultiSig tests the VerifyMultiSig function
 func TestVerifyMultiSig(t *testing.T) {
 	tests := []struct {
-		name           string
-		poa            *ProofOfAuthorization
-		wantValid      int
-		wantSatisfied  bool
-		wantThreshold  int
-		skipTest       bool // Skip tests that trigger known bugs
+		name          string
+		poa           *ProofOfAuthorization
+		wantValid     int
+		wantSatisfied bool
+		wantThreshold int
+		skipTest      bool // Skip tests that trigger known bugs
 	}{
 		{
 			name:          "Nil POA",
@@ -554,7 +554,7 @@ func TestVerifyMultiSig(t *testing.T) {
 			wantThreshold: 1,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.skipTest {
@@ -562,7 +562,7 @@ func TestVerifyMultiSig(t *testing.T) {
 				return
 			}
 			valid, satisfied, threshold := VerifyMultiSig(tt.poa)
-			
+
 			if valid != tt.wantValid {
 				t.Errorf("VerifyMultiSig() valid = %v, want %v", valid, tt.wantValid)
 			}
@@ -587,37 +587,37 @@ func TestVerifyMultiSig_WithValidSignature(t *testing.T) {
 	defer func() {
 		internalCrypto.GlobalEdDSARegistry = nil
 	}()
-	
+
 	// Get active key
 	activeKey := km.Active()
 	if activeKey == nil {
 		t.Fatal("No active key available")
 	}
-	
+
 	// Create POA
 	baseTime := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
 	poa := &ProofOfAuthorization{
-		ID:        "poa_valid_sig",
-		Subject:   "user_valid",
-		Resource:  "resource_valid",
-		Action:    "execute",
-		Issuer:    "issuer_valid",
-		IssuedAt:  baseTime,
-		ExpiresAt: baseTime.Add(24 * time.Hour),
-		Scope:     []string{"execute"},
-		Threshold: 1,
+		ID:         "poa_valid_sig",
+		Subject:    "user_valid",
+		Resource:   "resource_valid",
+		Action:     "execute",
+		Issuer:     "issuer_valid",
+		IssuedAt:   baseTime,
+		ExpiresAt:  baseTime.Add(24 * time.Hour),
+		Scope:      []string{"execute"},
+		Threshold:  1,
 		SignerKids: []string{activeKey.ID},
-		SigMode:   "eddsa",
+		SigMode:    "eddsa",
 	}
-	
+
 	// Sign the POA
 	msg := buildPoASigningPayload(poa)
 	sig := ed25519.Sign(activeKey.Private, msg)
 	poa.Signatures = []string{base64.RawStdEncoding.EncodeToString(sig)}
-	
+
 	// Verify
 	valid, satisfied, threshold := VerifyMultiSig(poa)
-	
+
 	if valid != 1 {
 		t.Errorf("VerifyMultiSig() valid = %v, want 1", valid)
 	}
@@ -646,42 +646,42 @@ func TestVerifyMultiSig_MultipleSignatures(t *testing.T) {
 	defer func() {
 		internalCrypto.GlobalEdDSARegistry = nil
 	}()
-	
+
 	// Get available keys
 	keys := km.ListCurrent()
 	if len(keys) < 3 {
 		t.Fatalf("Need at least 3 keys, got %d", len(keys))
 	}
-	
+
 	// Use first 3 keys
 	kids := []string{keys[0].ID, keys[1].ID, keys[2].ID}
-	
+
 	// Create POA with threshold 2 out of 3
 	baseTime := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
 	poa := &ProofOfAuthorization{
-		ID:        "poa_multi_sig",
-		Subject:   "user_multi",
-		Resource:  "resource_multi",
-		Action:    "approve",
-		Issuer:    "issuer_multi",
-		IssuedAt:  baseTime,
-		ExpiresAt: baseTime.Add(24 * time.Hour),
-		Scope:     []string{"approve"},
-		Threshold: 2,
+		ID:         "poa_multi_sig",
+		Subject:    "user_multi",
+		Resource:   "resource_multi",
+		Action:     "approve",
+		Issuer:     "issuer_multi",
+		IssuedAt:   baseTime,
+		ExpiresAt:  baseTime.Add(24 * time.Hour),
+		Scope:      []string{"approve"},
+		Threshold:  2,
 		SignerKids: kids,
-		SigMode:   "eddsa",
+		SigMode:    "eddsa",
 	}
-	
+
 	// Sign with all 3 keys
 	msg := buildPoASigningPayload(poa)
 	for i := 0; i < 3; i++ {
 		sig := ed25519.Sign(keys[i].Private, msg)
 		poa.Signatures = append(poa.Signatures, base64.RawStdEncoding.EncodeToString(sig))
 	}
-	
+
 	// Verify
 	valid, satisfied, threshold := VerifyMultiSig(poa)
-	
+
 	if valid != 3 {
 		t.Errorf("VerifyMultiSig() valid = %v, want 3", valid)
 	}
@@ -708,42 +708,42 @@ func TestVerifyMultiSig_InsufficientSignatures(t *testing.T) {
 	defer func() {
 		internalCrypto.GlobalEdDSARegistry = nil
 	}()
-	
+
 	// Get available keys
 	keys := km.ListCurrent()
 	if len(keys) < 2 {
 		t.Fatalf("Need at least 2 keys, got %d", len(keys))
 	}
-	
+
 	// Use first 2 keys
 	kids := []string{keys[0].ID, keys[1].ID}
-	
+
 	// Create POA with threshold 3 (more than available signatures)
 	baseTime := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
 	poa := &ProofOfAuthorization{
-		ID:        "poa_insufficient",
-		Subject:   "user_insuf",
-		Resource:  "resource_insuf",
-		Action:    "critical",
-		Issuer:    "issuer_insuf",
-		IssuedAt:  baseTime,
-		ExpiresAt: baseTime.Add(24 * time.Hour),
-		Scope:     []string{"critical"},
-		Threshold: 3,
+		ID:         "poa_insufficient",
+		Subject:    "user_insuf",
+		Resource:   "resource_insuf",
+		Action:     "critical",
+		Issuer:     "issuer_insuf",
+		IssuedAt:   baseTime,
+		ExpiresAt:  baseTime.Add(24 * time.Hour),
+		Scope:      []string{"critical"},
+		Threshold:  3,
 		SignerKids: kids,
-		SigMode:   "eddsa",
+		SigMode:    "eddsa",
 	}
-	
+
 	// Sign with only 2 keys
 	msg := buildPoASigningPayload(poa)
 	for i := 0; i < 2; i++ {
 		sig := ed25519.Sign(keys[i].Private, msg)
 		poa.Signatures = append(poa.Signatures, base64.RawStdEncoding.EncodeToString(sig))
 	}
-	
+
 	// Verify
 	valid, satisfied, threshold := VerifyMultiSig(poa)
-	
+
 	if valid != 2 {
 		t.Errorf("VerifyMultiSig() valid = %v, want 2", valid)
 	}
@@ -759,37 +759,37 @@ func TestVerifyMultiSig_InsufficientSignatures(t *testing.T) {
 func TestMemoryService_Issue_WithMultisigEnv(t *testing.T) {
 	// This test verifies the multisig code path is executed when env vars are set
 	// However, without a properly initialized registry, it won't produce signatures
-	
+
 	// Save original env vars
 	origSign := os.Getenv("GAUTH_POA_MULTISIG_SIGN")
 	origKids := os.Getenv("GAUTH_POA_MULTISIG_KIDS")
 	origThreshold := os.Getenv("GAUTH_POA_MULTISIG_THRESHOLD")
-	
+
 	defer func() {
 		os.Setenv("GAUTH_POA_MULTISIG_SIGN", origSign)
 		os.Setenv("GAUTH_POA_MULTISIG_KIDS", origKids)
 		os.Setenv("GAUTH_POA_MULTISIG_THRESHOLD", origThreshold)
 	}()
-	
+
 	// Set env vars to trigger multisig path
 	os.Setenv("GAUTH_POA_MULTISIG_SIGN", "1")
 	os.Setenv("GAUTH_POA_MULTISIG_KIDS", "key1,key2")
 	os.Setenv("GAUTH_POA_MULTISIG_THRESHOLD", "2")
-	
+
 	s := NewMemoryService()
 	ctx := context.Background()
-	
+
 	req := &Request{
 		Subject:  "user_multisig",
 		Resource: "resource_multisig",
 		Action:   "approve",
 	}
-	
+
 	poa, err := s.Issue(ctx, req)
 	if err != nil {
 		t.Fatalf("Issue() error = %v", err)
 	}
-	
+
 	// Verify multisig fields are set (even if signatures are empty due to no registry)
 	if poa.Threshold != 2 {
 		t.Errorf("Threshold = %v, want 2", poa.Threshold)

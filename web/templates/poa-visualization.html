@@ -1,233 +1,87 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PoA Visualization - GAuth</title>
-    <link rel="stylesheet" href="/static/css/poa-viz.css">
-    
-    <!-- Import map to resolve bare module specifiers -->
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-            "three/": "https://cdn.jsdelivr.net/npm/three@0.160.0/"
-        }
-    }
-    </script>
-</head>
-<body>
-    <div class="poa-visualization-container">
-        <!-- Grid Background -->
-        <div class="viz-grid-bg"></div>
+<!DOCTYPE html><html lang="en"><head>    <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>PoA Visualization - GAuth</title>    <meta name="description" content="Interactive 3D visualization of Power of Attorney relationships and delegation chains in GAuth">    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🔐</text></svg>">    <link rel="stylesheet" href="/static/css/poa-viz.css">    <!-- Import map to resolve bare module specifiers -->    <script type="importmap">    {        "imports": {            "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",            "three/": "https://cdn.jsdelivr.net/npm/three@0.169.0/"        }    }    </script>    <style>        /* Modern enhancements matching React webapp */        .viz-header {            position: absolute;            top: 0;            left: 0;            right: 0;            background: rgba(10, 10, 10, 0.95);            backdrop-filter: blur(20px);            border-bottom: 1px solid rgba(102, 126, 234, 0.3);            padding: 16px 24px;            z-index: 100;            display: flex;            align-items: center;            justify-content: space-between;        }        .viz-header h1 {            margin: 0;            font-size: 24px;            font-weight: 700;            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);            -webkit-background-clip: text;            -webkit-text-fill-color: transparent;            background-clip: text;        }        .viz-header-actions {            display: flex;            gap: 12px;            align-items: center;        }        .viz-header-btn {            padding: 8px 16px;            background: rgba(102, 126, 234, 0.2);            border: 1px solid rgba(102, 126, 234, 0.4);            border-radius: 8px;            color: #fff;            font-size: 14px;            cursor: pointer;            transition: all 0.2s;            text-decoration: none;            display: inline-flex;            align-items: center;            gap: 6px;        }        .viz-header-btn:hover {            background: rgba(102, 126, 234, 0.3);            border-color: rgba(102, 126, 234, 0.6);            transform: translateY(-1px);        }        .viz-toast {            position: fixed;            top: 80px;            right: 20px;            background: rgba(16, 185, 129, 0.95);            color: white;            padding: 12px 20px;            border-radius: 8px;            box-shadow: 0 4px 12px rgba(0,0,0,0.3);            z-index: 1000;            opacity: 0;            transform: translateX(400px);            transition: all 0.3s ease;        }        .viz-toast.show {            opacity: 1;            transform: translateX(0);        }        .viz-toast.error {            background: rgba(239, 68, 68, 0.95);        }        .poa-visualization-container {            padding-top: 64px;        }    </style></head><body>    <!-- Modern Header -->    <div class="viz-header">        <h1>🔐 PoA Visualization</h1>        <div class="viz-header-actions">            <a href="/protocol-flow" class="viz-header-btn">                <span>🚀</span>                <span>Protocol Flow</span>            </a>            <a href="/" class="viz-header-btn">                <span>🏠</span>                <span>Home</span>            </a>            <button id="fullscreenBtn" class="viz-header-btn">                <span>⛶</span>                <span>Fullscreen</span>            </button>        </div>    </div>    <!-- Toast notifications -->    <div id="toast" class="viz-toast"></div>    <div class="poa-visualization-container">        <!-- Grid Background -->        <div class="viz-grid-bg"></div>        <!-- Scan Line Effect -->        <div class="viz-scanline"></div>        <!-- 3D Canvas -->        <div id="vizCanvas" class="poa-viz-canvas"></div>        <!-- Control Panel -->        <div class="viz-control-panel">            <h2>⚙️ Control Panel</h2>            <div class="viz-control-group">                <label for="vizMode">🎯 Visualization Mode</label>                <select id="vizMode">                    <option value="graph">PoA Graph</option>                    <option value="protocol">Protocol Steps</option>                </select>            </div>            <div id="graphControls" class="viz-control-group">                <label for="graphType">Graph Type / Pattern</label>                <select id="graphType">                    <option value="cascade">Cascade Revocation</option>                    <option value="delegation-chain">Delegation Chain</option>                    <option value="multisig">Multi-Signature PoA</option>                    <option value="jurisdiction">Jurisdiction Boundaries</option>                    <option value="revocation">Revocation States</option>                    <option value="full-pattern">All Patterns Combined</option>                    <optgroup label="GAuth Protocol Flow">                        <option value="protocol-subscription">Subscription Flow</option>                        <option value="protocol-matching">Matching Flow</option>                        <option value="protocol-request">Subset/Request Flow</option>                        <option value="protocol-enforcement">Enforcement Flow</option>                        <option value="protocol-verification">Verification Flow</option>                        <option value="protocol-full">Complete Protocol Flow</option>                    </optgroup>                </select>            </div>            <div id="protocolControls" class="viz-control-group" style="display:none;">                <label for="protocolStep">Protocol Step</label>                <select id="protocolStep">                    <option value="subscription">Subscription</option>                    <option value="matching">Matching</option>                    <option value="request">Subset/Request</option>                    <option value="enforcement">Enforcement</option>                    <option value="verification">Verification</option>                    <option value="complete">Complete Flow</option>                </select>            </div>            <div class="viz-btn-group">                <button class="viz-btn" id="loadBtn">▶️ Load</button>                <button class="viz-btn viz-btn-secondary" id="clearBtn">🗑️ Clear</button>            </div>            <div class="viz-btn-group" style="margin-top: 10px;">                <button class="viz-btn viz-btn-secondary" id="rotateBtn">🔄 Rotate</button>                <button class="viz-btn viz-btn-secondary" id="resetBtn">↻ Reset</button>            </div>            <div class="viz-btn-group" style="margin-top: 10px;">                <button class="viz-btn viz-btn-secondary" id="screenshotBtn">📸 Screenshot</button>                <button class="viz-btn viz-btn-secondary" id="exportBtn">💾 Export</button>            </div>        </div>        <!-- Stats Panel -->        <div class="viz-stats-panel">            <h3>📊 Statistics</h3>            <div class="viz-stat-item">                <span class="viz-stat-label">🔵 Total Nodes</span>                <span class="viz-stat-value" id="statTotalNodes">0</span>            </div>            <div class="viz-stat-item">                <span class="viz-stat-label">🔗 Total Edges</span>                <span class="viz-stat-value" id="statTotalEdges">0</span>            </div>            <div class="viz-stat-item">                <span class="viz-stat-label">✅ Active</span>                <span class="viz-stat-value active" id="statActiveNodes">0</span>            </div>            <div class="viz-stat-item">                <span class="viz-stat-label">⏳ Pending</span>                <span class="viz-stat-value pending" id="statPendingNodes">0</span>            </div>            <div class="viz-stat-item">                <span class="viz-stat-label">❌ Revoked</span>                <span class="viz-stat-value error" id="statRevokedNodes">0</span>            </div>            <div class="viz-stat-item" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">                <span class="viz-stat-label">🎨 Render Time</span>                <span class="viz-stat-value" id="statRenderTime">0ms</span>            </div>        </div>        <!-- Legend -->        <div class="viz-legend">            <h4>Legend</h4>            <div class="viz-legend-item">                <div class="viz-legend-color" style="background: #10b981;"></div>                <span class="viz-legend-text">Active / Authorized</span>            </div>            <div class="viz-legend-item">                <div class="viz-legend-color" style="background: #f59e0b;"></div>                <span class="viz-legend-text">Pending / Processing</span>            </div>            <div class="viz-legend-item">                <div class="viz-legend-color" style="background: #ef4444;"></div>                <span class="viz-legend-text">Revoked / Error</span>            </div>            <div class="viz-legend-item">                <div class="viz-legend-color" style="background: #667eea;"></div>                <span class="viz-legend-text">Authorization Edge</span>            </div>            <div class="viz-legend-item">                <div class="viz-legend-color" style="background: #10b981;"></div>                <span class="viz-legend-text">Request Edge</span>            </div>        </div>        <!-- Info Panel -->        <div class="viz-info-panel" id="infoPanel">            <button class="viz-info-close" id="closeInfo">×</button>            <h4 id="infoTitle">Welcome</h4>            <p id="infoDescription">                This visualization demonstrates Power of Attorney relationships in 3D space.                Select a mode and click Load to begin.            </p>        </div>        <!-- Loading State -->        <div class="viz-loading" id="loadingIndicator" style="display: none;">            <div class="viz-loading-spinner"></div>            <div class="viz-loading-text">Loading visualization...</div>        </div>    </div>    <script type="module">        import { PoAGraphVisualizer, ProtocolStepVisualizer, generateDemoGraph } from '/static/js/modules/poa-viz.js';
         
-        <!-- Scan Line Effect -->
-        <div class="viz-scanline"></div>
-        
-        <!-- 3D Canvas -->
-        <div id="vizCanvas" class="poa-viz-canvas"></div>
-        
-        <!-- Control Panel -->
-        <div class="viz-control-panel">
-            <h2>Visualization Control</h2>
-            
-            <div class="viz-control-group">
-                <label for="vizMode">Visualization Mode</label>
-                <select id="vizMode">
-                    <option value="graph">PoA Graph</option>
-                    <option value="protocol">Protocol Steps</option>
-                </select>
-            </div>
-            
-            <div id="graphControls" class="viz-control-group">
-                <label for="graphType">Graph Type / Pattern</label>
-                <select id="graphType">
-                    <option value="demo">Demo Complex Graph</option>
-                    <option value="simple">Simple 3-Node</option>
-                    <option value="multi">Multi-Party</option>
-                    <option value="cascade">Cascade Revocation</option>
-                    <option value="delegation-chain">Delegation Chain</option>
-                    <option value="multisig">Multi-Signature PoA</option>
-                    <option value="jurisdiction">Jurisdiction Boundaries</option>
-                    <option value="revocation">Revocation States</option>
-                    <option value="full-pattern">All Patterns Combined</option>
-                    <optgroup label="GAuth Protocol Flow">
-                        <option value="protocol-subscription">Subscription Flow</option>
-                        <option value="protocol-matching">Matching Flow</option>
-                        <option value="protocol-request">Subset/Request Flow</option>
-                        <option value="protocol-enforcement">Enforcement Flow</option>
-                        <option value="protocol-verification">Verification Flow</option>
-                        <option value="protocol-full">Complete Protocol Flow</option>
-                    </optgroup>
-                </select>
-            </div>
-            
-            <div id="protocolControls" class="viz-control-group" style="display:none;">
-                <label for="protocolStep">Protocol Step</label>
-                <select id="protocolStep">
-                    <option value="subscription">Subscription</option>
-                    <option value="matching">Matching</option>
-                    <option value="request">Subset/Request</option>
-                    <option value="enforcement">Enforcement</option>
-                    <option value="verification">Verification</option>
-                    <option value="complete">Complete Flow</option>
-                </select>
-            </div>
-            
-            <div class="viz-btn-group">
-                <button class="viz-btn" id="loadBtn">Load</button>
-                <button class="viz-btn viz-btn-secondary" id="clearBtn">Clear</button>
-            </div>
-            
-            <div class="viz-btn-group" style="margin-top: 10px;">
-                <button class="viz-btn viz-btn-secondary" id="rotateBtn">Rotate</button>
-                <button class="viz-btn viz-btn-secondary" id="resetBtn">Reset View</button>
-            </div>
-        </div>
-        
-        <!-- Stats Panel -->
-        <div class="viz-stats-panel">
-            <h3>Graph Statistics</h3>
-            <div class="viz-stat-item">
-                <span class="viz-stat-label">Total Nodes</span>
-                <span class="viz-stat-value" id="statTotalNodes">0</span>
-            </div>
-            <div class="viz-stat-item">
-                <span class="viz-stat-label">Total Edges</span>
-                <span class="viz-stat-value" id="statTotalEdges">0</span>
-            </div>
-            <div class="viz-stat-item">
-                <span class="viz-stat-label">Active</span>
-                <span class="viz-stat-value active" id="statActiveNodes">0</span>
-            </div>
-            <div class="viz-stat-item">
-                <span class="viz-stat-label">Pending</span>
-                <span class="viz-stat-value pending" id="statPendingNodes">0</span>
-            </div>
-            <div class="viz-stat-item">
-                <span class="viz-stat-label">Revoked</span>
-                <span class="viz-stat-value error" id="statRevokedNodes">0</span>
-            </div>
-        </div>
-        
-        <!-- Legend -->
-        <div class="viz-legend">
-            <h4>Legend</h4>
-            <div class="viz-legend-item">
-                <div class="viz-legend-color" style="background: #10b981;"></div>
-                <span class="viz-legend-text">Active / Authorized</span>
-            </div>
-            <div class="viz-legend-item">
-                <div class="viz-legend-color" style="background: #f59e0b;"></div>
-                <span class="viz-legend-text">Pending / Processing</span>
-            </div>
-            <div class="viz-legend-item">
-                <div class="viz-legend-color" style="background: #ef4444;"></div>
-                <span class="viz-legend-text">Revoked / Error</span>
-            </div>
-            <div class="viz-legend-item">
-                <div class="viz-legend-color" style="background: #667eea;"></div>
-                <span class="viz-legend-text">Authorization Edge</span>
-            </div>
-            <div class="viz-legend-item">
-                <div class="viz-legend-color" style="background: #10b981;"></div>
-                <span class="viz-legend-text">Request Edge</span>
-            </div>
-        </div>
-        
-        <!-- Info Panel -->
-        <div class="viz-info-panel" id="infoPanel">
-            <button class="viz-info-close" id="closeInfo">×</button>
-            <h4 id="infoTitle">Welcome</h4>
-            <p id="infoDescription">
-                This visualization demonstrates Power of Attorney relationships in 3D space.
-                Select a mode and click Load to begin.
-            </p>
-        </div>
-        
-        <!-- Loading State -->
-        <div class="viz-loading" id="loadingIndicator" style="display: none;">
-            <div class="viz-loading-spinner"></div>
-            <div class="viz-loading-text">Loading visualization...</div>
-        </div>
-    </div>
-    
-    <script type="module">
-        import { PoAGraphVisualizer, ProtocolStepVisualizer, generateDemoGraph } from '/static/js/modules/poa-viz.js';
+        console.log('[PoA] Module script loaded, waiting for DOM...');
         
         let currentVisualizer = null;
         let currentMode = 'graph';
         
-        // DOM elements
-        const vizCanvas = document.getElementById('vizCanvas');
-        const vizMode = document.getElementById('vizMode');
-        const graphControls = document.getElementById('graphControls');
-        const protocolControls = document.getElementById('protocolControls');
-        const graphType = document.getElementById('graphType');
-        const protocolStep = document.getElementById('protocolStep');
-        const loadBtn = document.getElementById('loadBtn');
-        const clearBtn = document.getElementById('clearBtn');
-        const rotateBtn = document.getElementById('rotateBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const infoPanel = document.getElementById('infoPanel');
-        const closeInfo = document.getElementById('closeInfo');
+        // Wait for DOM to be fully loaded
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('[PoA] DOM ready, initializing...');        // DOM elements        const vizCanvas = document.getElementById('vizCanvas');        const vizMode = document.getElementById('vizMode');        const graphControls = document.getElementById('graphControls');        const protocolControls = document.getElementById('protocolControls');        const graphType = document.getElementById('graphType');        const protocolStep = document.getElementById('protocolStep');        const loadBtn = document.getElementById('loadBtn');        const clearBtn = document.getElementById('clearBtn');        const rotateBtn = document.getElementById('rotateBtn');        const resetBtn = document.getElementById('resetBtn');        const loadingIndicator = document.getElementById('loadingIndicator');        const infoPanel = document.getElementById('infoPanel');        const closeInfo = document.getElementById('closeInfo');
         
-        // Initialize with graph visualizer
-        initVisualizer('graph');
-        
-        // Mode switcher
-        vizMode.addEventListener('change', (e) => {
-            currentMode = e.target.value;
-            
-            if (currentMode === 'graph') {
-                graphControls.style.display = 'block';
-                protocolControls.style.display = 'none';
-            } else {
-                graphControls.style.display = 'none';
-                protocolControls.style.display = 'block';
-            }
-            
-            initVisualizer(currentMode);
+        // Verify all elements were found
+        console.log('[PoA] DOM Elements Check:', {
+            vizCanvas: !!vizCanvas,
+            vizMode: !!vizMode,
+            loadBtn: !!loadBtn,
+            clearBtn: !!clearBtn,
+            graphType: !!graphType
         });
         
-        // Initialize visualizer
+        if (!loadBtn) {
+            console.error('[PoA] ERROR: loadBtn is null! Cannot attach event listener.');
+            return;
+        }
+        
+        // Initialize visualizer function (defined before use)
         function initVisualizer(mode) {
+            console.log('[PoA] initVisualizer called with mode:', mode);
+            console.log('[PoA] vizCanvas element:', vizCanvas);
             // Dispose existing visualizer
             if (currentVisualizer) {
+                console.log('[PoA] Disposing existing visualizer');
                 currentVisualizer.dispose();
             }
-            
             // Create new visualizer - use graph visualizer for both modes
             // since protocol steps are now rendered as graphs
             currentVisualizer = new PoAGraphVisualizer(vizCanvas);
+            console.log('[PoA] Created visualizer:', currentVisualizer);
+            console.log('[PoA] currentVisualizer.loadGraph exists?', typeof currentVisualizer.loadGraph);
         }
         
-        // Load button
-        loadBtn.addEventListener('click', async () => {
-            showLoading(true);
-            
-            try {
-                if (currentMode === 'graph') {
-                    await loadGraph();
-                } else {
-                    await loadProtocolStep();
-                }
-                
-                showInfo('Loaded', 'Visualization loaded successfully', true);
-            } catch (error) {
-                console.error('Load error:', error);
-                showInfo('Error', 'Failed to load visualization: ' + error.message, true);
-            } finally {
-                showLoading(false);
-            }
-        });
+        // Initialize with graph visualizer
+        console.log('[PoA] About to call initVisualizer...');
+        initVisualizer('graph');
+        console.log('[PoA] After initVisualizer, currentVisualizer is:', currentVisualizer);
         
-        // Load graph
+        // Helper functions (defined early so event handlers can use them)
+        function showLoading(show) {
+            loadingIndicator.style.display = show ? 'block' : 'none';
+        }
+        
+        function showInfo(title, description, autoHide = false) {
+            document.getElementById('infoTitle').textContent = title;
+            document.getElementById('infoDescription').textContent = description;
+            infoPanel.classList.add('visible');
+            if (autoHide) {
+                setTimeout(() => {
+                    infoPanel.classList.remove('visible');
+                }, 3000);
+            }
+        }
+        
+        function updateStats(stats) {
+            document.getElementById('statTotalNodes').textContent = stats.total_nodes || 0;
+            document.getElementById('statTotalEdges').textContent = stats.total_edges || 0;
+            document.getElementById('statActiveNodes').textContent = stats.active_nodes || 0;
+            document.getElementById('statPendingNodes').textContent = stats.pending_nodes || 0;
+            document.getElementById('statRevokedNodes').textContent = stats.revoked_nodes || 0;
+        }
+        
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `viz-toast ${type}`;
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
         async function loadGraph() {
+            console.log('[PoA] loadGraph called');
             const type = graphType.value;
             let graphData;
-            
             if (type === 'demo') {
                 const response = await fetch('/api/v1/visualization/demo/complex-graph', {
                     method: 'POST'
@@ -238,16 +92,12 @@
                 // Use the new pattern generators
                 graphData = generateDemoGraph(type);
             }
-            
             await currentVisualizer.loadGraph(graphData);
             updateStats(graphData.stats);
         }
         
-        // Load protocol step
         async function loadProtocolStep() {
             const step = protocolStep.value;
-            
-            // Map protocol step names to graph pattern names
             const stepToPattern = {
                 'subscription': 'protocol-subscription',
                 'matching': 'protocol-matching',
@@ -256,102 +106,19 @@
                 'verification': 'protocol-verification',
                 'complete': 'protocol-full'
             };
-            
             const patternName = stepToPattern[step] || 'protocol-subscription';
-            
-            // Use the graph generators for protocol visualization
             const graphData = generateDemoGraph(patternName);
-            
             if (!graphData) {
                 throw new Error(`Protocol step '${step}' not found`);
             }
-            
-            // Load as a graph instead of protocol step
             await currentVisualizer.loadGraph(graphData);
-            
             updateStats(graphData.stats);
-        }
-        
-        // Clear button
-        clearBtn.addEventListener('click', () => {
-            if (currentMode === 'graph' && currentVisualizer.clearGraph) {
-                currentVisualizer.clearGraph();
-            } else if (currentMode === 'protocol' && currentVisualizer.clearVisualization) {
-                currentVisualizer.clearVisualization();
-            }
+        }        // Mode switcher        vizMode.addEventListener('change', (e) => {            currentMode = e.target.value;            if (currentMode === 'graph') {                graphControls.style.display = 'block';                protocolControls.style.display = 'none';            } else {                graphControls.style.display = 'none';                protocolControls.style.display = 'block';            }            initVisualizer(currentMode);        });        // Load button
+        console.log('[PoA] Attaching Load button listener to:', loadBtn);
+        loadBtn.addEventListener('click', async () => {
+            console.log('[PoA] *** Load button clicked - event fired! ***');            showLoading(true);            try {                if (currentMode === 'graph') {                    await loadGraph();                } else {                    await loadProtocolStep();                }                showInfo('Loaded', 'Visualization loaded successfully', true);            } catch (error) {                console.error('Load error:', error);                showInfo('Error', 'Failed to load visualization: ' + error.message, true);            } finally {                showLoading(false);            }        });        // Clear button        clearBtn.addEventListener('click', () => {            if (currentMode === 'graph' && currentVisualizer.clearGraph) {                currentVisualizer.clearGraph();            } else if (currentMode === 'protocol' && currentVisualizer.clearVisualization) {                currentVisualizer.clearVisualization();            }            updateStats({                total_nodes: 0,                total_edges: 0,                active_nodes: 0,                pending_nodes: 0,                revoked_nodes: 0            });            showInfo('Cleared', 'Visualization cleared', true);        });        // Rotate button        let autoRotate = false;        rotateBtn.addEventListener('click', () => {            autoRotate = !autoRotate;            rotateBtn.textContent = autoRotate ? 'Stop Rotate' : 'Rotate';            if (currentVisualizer.controls) {                currentVisualizer.controls.autoRotate = autoRotate;                currentVisualizer.controls.autoRotateSpeed = 2.0;            }        });        // Reset view button        resetBtn.addEventListener('click', () => {            if (currentVisualizer.camera) {                if (currentMode === 'graph') {                    currentVisualizer.camera.position.set(10, 10, 10);                } else {                    currentVisualizer.camera.position.set(8, 8, 8);                }                currentVisualizer.controls.target.set(0, 0, 0);                currentVisualizer.controls.update();            }        });        // Close info panel        closeInfo.addEventListener('click', () => {            infoPanel.classList.remove('visible');        });        // Show welcome info        setTimeout(() => {            infoPanel.classList.add('visible');        }, 500);        // Fullscreen button        document.getElementById('fullscreenBtn').addEventListener('click', () => {            if (!document.fullscreenElement) {                document.documentElement.requestFullscreen();                showToast('Entered fullscreen mode');            } else {                document.exitFullscreen();                showToast('Exited fullscreen mode');            }        });        // Screenshot button        document.getElementById('screenshotBtn').addEventListener('click', () => {            if (currentVisualizer && currentVisualizer.renderer) {                try {                    const canvas = currentVisualizer.renderer.domElement;                    canvas.toBlob((blob) => {                        const url = URL.createObjectURL(blob);                        const a = document.createElement('a');                        a.href = url;                        a.download = `poa-visualization-${Date.now()}.png`;                        a.click();                        URL.revokeObjectURL(url);                        showToast('Screenshot saved');                    });                } catch (error) {                    console.error('Screenshot error:', error);                    showToast('Failed to capture screenshot', 'error');                }            }        });        // Export button        document.getElementById('exportBtn').addEventListener('click', () => {            if (currentVisualizer && currentVisualizer.graphData) {                try {                    const dataStr = JSON.stringify(currentVisualizer.graphData, null, 2);                    const dataBlob = new Blob([dataStr], { type: 'application/json' });                    const url = URL.createObjectURL(dataBlob);                    const a = document.createElement('a');                    a.href = url;                    a.download = `poa-graph-${Date.now()}.json`;                    a.click();                    URL.revokeObjectURL(url);                    showToast('Graph data exported');                } catch (error) {                    console.error('Export error:', error);                    showToast('Failed to export graph data', 'error');                }            }        });        // Track render time        const originalLoadGraph = currentVisualizer.loadGraph;        currentVisualizer.loadGraph = async function(...args) {            const startTime = performance.now();            const result = await originalLoadGraph.apply(this, args);            const renderTime = Math.round(performance.now() - startTime);            document.getElementById('statRenderTime').textContent = `${renderTime}ms`;            return result;        };        // Keyboard shortcuts        document.addEventListener('keydown', (e) => {            if (e.key === 'f' && (e.metaKey || e.ctrlKey)) {                e.preventDefault();                document.getElementById('fullscreenBtn').click();            } else if (e.key === 'r' && (e.metaKey || e.ctrlKey)) {                e.preventDefault();                resetBtn.click();            } else if (e.key === 'c' && (e.metaKey || e.ctrlKey) && e.shiftKey) {                e.preventDefault();                clearBtn.click();            }        });        // Show updated welcome info
+        showInfo('Welcome! 🎉 Updated Protocol Flows', '✨ Protocol visualizations now reflect 95% RFC compliance with 30 substeps (was 19). Enhanced: Authorization Chain, Extended Tokens, PIP queries, Commercial Register validation. Use Cmd/Ctrl+F for fullscreen, Cmd/Ctrl+R to reset view.', false);
             
-            updateStats({
-                total_nodes: 0,
-                total_edges: 0,
-                active_nodes: 0,
-                pending_nodes: 0,
-                revoked_nodes: 0
-            });
-            
-            showInfo('Cleared', 'Visualization cleared', true);
-        });
-        
-        // Rotate button
-        let autoRotate = false;
-        rotateBtn.addEventListener('click', () => {
-            autoRotate = !autoRotate;
-            rotateBtn.textContent = autoRotate ? 'Stop Rotate' : 'Rotate';
-            
-            if (currentVisualizer.controls) {
-                currentVisualizer.controls.autoRotate = autoRotate;
-                currentVisualizer.controls.autoRotateSpeed = 2.0;
-            }
-        });
-        
-        // Reset view button
-        resetBtn.addEventListener('click', () => {
-            if (currentVisualizer.camera) {
-                if (currentMode === 'graph') {
-                    currentVisualizer.camera.position.set(10, 10, 10);
-                } else {
-                    currentVisualizer.camera.position.set(8, 8, 8);
-                }
-                currentVisualizer.controls.target.set(0, 0, 0);
-                currentVisualizer.controls.update();
-            }
-        });
-        
-        // Update statistics display
-        function updateStats(stats) {
-            document.getElementById('statTotalNodes').textContent = stats.total_nodes || 0;
-            document.getElementById('statTotalEdges').textContent = stats.total_edges || 0;
-            document.getElementById('statActiveNodes').textContent = stats.active_nodes || 0;
-            document.getElementById('statPendingNodes').textContent = stats.pending_nodes || 0;
-            document.getElementById('statRevokedNodes').textContent = stats.revoked_nodes || 0;
-        }
-        
-        // Show/hide loading indicator
-        function showLoading(show) {
-            loadingIndicator.style.display = show ? 'block' : 'none';
-        }
-        
-        // Show info panel
-        function showInfo(title, description, autoHide = false) {
-            document.getElementById('infoTitle').textContent = title;
-            document.getElementById('infoDescription').textContent = description;
-            infoPanel.classList.add('visible');
-            
-            if (autoHide) {
-                setTimeout(() => {
-                    infoPanel.classList.remove('visible');
-                }, 3000);
-            }
-        }
-        
-        // Close info panel
-        closeInfo.addEventListener('click', () => {
-            infoPanel.classList.remove('visible');
-        });
-        
-        // Show welcome info
-        setTimeout(() => {
-            infoPanel.classList.add('visible');
-        }, 500);
-    </script>
-</body>
-</html>
+            console.log('[PoA] Initialization complete!');
+        }); // End DOMContentLoaded
+    </script></body></html>

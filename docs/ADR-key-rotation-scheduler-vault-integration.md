@@ -1,3 +1,12 @@
+---
+title: ADR Key Rotation Scheduler & Secure Secret Storage Integration
+category: adr
+status: proposed
+lastUpdated: 2025-11-12
+owners: architecture-team
+source: internal
+refreshCadence: on-change
+---
 # ADR: Key Rotation Scheduler & Secure Secret Storage (Vault/KMS)
 
 Status: Proposed

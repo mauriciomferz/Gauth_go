@@ -1,3 +1,12 @@
+---
+title: GAuth 1.0 Production Deployment Guide
+category: operations
+status: active
+lastUpdated: 2025-11-12
+owners: devops-team
+source: manual-curation
+refreshCadence: quarterly
+---
 # GAuth 1.0 Production Deployment Guide
 
 **Status**: ✅ Ready for Production Deployment  

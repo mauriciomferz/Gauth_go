@@ -115,20 +115,20 @@ func (s *BoltReplayStore) cleanupExpired() {
 			var expiredKeys [][]byte
 			cursor := bucket.Cursor()
 
-		for k, v := cursor.First(); k != nil; k, v = cursor.Next() {
-			if len(v) >= 8 {
-				// G115 fix: Validate timestamp boundary before uint64→int64 conversion
-				expiryUint := binary.BigEndian.Uint64(v)
-				if expiryUint > math.MaxInt64 {
-					// Timestamp beyond int64 max (year 2262+), treat as far future
-					continue
+			for k, v := cursor.First(); k != nil; k, v = cursor.Next() {
+				if len(v) >= 8 {
+					// G115 fix: Validate timestamp boundary before uint64→int64 conversion
+					expiryUint := binary.BigEndian.Uint64(v)
+					if expiryUint > math.MaxInt64 {
+						// Timestamp beyond int64 max (year 2262+), treat as far future
+						continue
+					}
+					expiry := int64(expiryUint)
+					if now >= expiry {
+						expiredKeys = append(expiredKeys, append([]byte(nil), k...))
+					}
 				}
-				expiry := int64(expiryUint)
-				if now >= expiry {
-					expiredKeys = append(expiredKeys, append([]byte(nil), k...))
-				}
-			}
-		}			// Delete expired entries
+			} // Delete expired entries
 			for _, key := range expiredKeys {
 				_ = bucket.Delete(key)
 			}
@@ -160,22 +160,22 @@ func (s *BoltReplayStore) Count() (int, error) {
 
 		cursor := bucket.Cursor()
 		for k, v := cursor.First(); k != nil; k, v = cursor.Next() {
-		if len(v) >= 8 {
-			// G115 fix: Validate timestamp boundary before uint64→int64 conversion
-			expiryUint := binary.BigEndian.Uint64(v)
-			if expiryUint > math.MaxInt64 {
-				// Timestamp beyond int64 max (year 2262+), treat as not expired
-				count++
-				continue
-			}
-			expiry := int64(expiryUint)
-			if now < expiry {
-				count++
+			if len(v) >= 8 {
+				// G115 fix: Validate timestamp boundary before uint64→int64 conversion
+				expiryUint := binary.BigEndian.Uint64(v)
+				if expiryUint > math.MaxInt64 {
+					// Timestamp beyond int64 max (year 2262+), treat as not expired
+					count++
+					continue
+				}
+				expiry := int64(expiryUint)
+				if now < expiry {
+					count++
+				}
 			}
 		}
-	}
 
-	return nil
+		return nil
 	})
 
 	return count, err

@@ -7,12 +7,12 @@ import (
 // TestRegistryRollback verifies Rollback correctly sets headOverride to specified version.
 func TestRegistryRollback(t *testing.T) {
 	reg := NewRegistry()
-	
+
 	// Add three bundles
 	b1 := Bundle{ID: "bundle-1", Version: 1, Policies: []Policy{{ID: "p1", Subjects: []string{"*"}, Rules: []Rule{}}}}
 	b2 := Bundle{ID: "bundle-2", Version: 2, Policies: []Policy{{ID: "p2", Subjects: []string{"*"}, Rules: []Rule{}}}}
 	b3 := Bundle{ID: "bundle-3", Version: 3, Policies: []Policy{{ID: "p3", Subjects: []string{"*"}, Rules: []Rule{}}}}
-	
+
 	_, err := reg.AddBundle(b1)
 	if err != nil {
 		t.Fatalf("failed to add bundle 1: %v", err)
@@ -25,13 +25,13 @@ func TestRegistryRollback(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to add bundle 3: %v", err)
 	}
-	
+
 	// Rollback to version 2
 	err = reg.Rollback(2)
 	if err != nil {
 		t.Fatalf("Rollback failed: %v", err)
 	}
-	
+
 	// Verify head is version 2
 	head := reg.Head()
 	if head == nil {
@@ -45,13 +45,13 @@ func TestRegistryRollback(t *testing.T) {
 // TestRegistryRollback_NotFound verifies Rollback returns error for non-existent version.
 func TestRegistryRollback_NotFound(t *testing.T) {
 	reg := NewRegistry()
-	
+
 	b1 := Bundle{ID: "bundle-1", Version: 1, Policies: []Policy{{ID: "p1", Subjects: []string{"*"}, Rules: []Rule{}}}}
 	_, err := reg.AddBundle(b1)
 	if err != nil {
 		t.Fatalf("failed to add bundle: %v", err)
 	}
-	
+
 	// Try to rollback to non-existent version
 	err = reg.Rollback(99)
 	if err == nil {
@@ -62,16 +62,16 @@ func TestRegistryRollback_NotFound(t *testing.T) {
 // TestRegistryActiveVersion verifies ActiveVersion returns correct version after rollback.
 func TestRegistryActiveVersion(t *testing.T) {
 	reg := NewRegistry()
-	
+
 	// Empty registry should return 0
 	if av := reg.ActiveVersion(); av != 0 {
 		t.Errorf("expected ActiveVersion=0 for empty registry, got %d", av)
 	}
-	
+
 	// Add bundles
 	b1 := Bundle{ID: "bundle-1", Version: 1, Policies: []Policy{{ID: "p1", Subjects: []string{"*"}, Rules: []Rule{}}}}
 	b2 := Bundle{ID: "bundle-2", Version: 2, Policies: []Policy{{ID: "p2", Subjects: []string{"*"}, Rules: []Rule{}}}}
-	
+
 	_, err := reg.AddBundle(b1)
 	if err != nil {
 		t.Fatalf("failed to add bundle 1: %v", err)
@@ -80,18 +80,18 @@ func TestRegistryActiveVersion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to add bundle 2: %v", err)
 	}
-	
+
 	// Should return latest version (2)
 	if av := reg.ActiveVersion(); av != 2 {
 		t.Errorf("expected ActiveVersion=2, got %d", av)
 	}
-	
+
 	// Rollback to version 1
 	err = reg.Rollback(1)
 	if err != nil {
 		t.Fatalf("Rollback failed: %v", err)
 	}
-	
+
 	// Should now return 1
 	if av := reg.ActiveVersion(); av != 1 {
 		t.Errorf("expected ActiveVersion=1 after rollback, got %d", av)
@@ -101,17 +101,17 @@ func TestRegistryActiveVersion(t *testing.T) {
 // TestRegistryChainWithVersions verifies ChainWithVersions returns correct version/hash pairs.
 func TestRegistryChainWithVersions(t *testing.T) {
 	reg := NewRegistry()
-	
+
 	// Empty registry should return empty slice
 	chain := reg.ChainWithVersions()
 	if len(chain) != 0 {
 		t.Errorf("expected empty chain for empty registry, got %d items", len(chain))
 	}
-	
+
 	// Add bundles
 	b1 := Bundle{ID: "bundle-1", Version: 1, Policies: []Policy{{ID: "p1", Subjects: []string{"*"}, Rules: []Rule{}}}}
 	b2 := Bundle{ID: "bundle-2", Version: 2, Policies: []Policy{{ID: "p2", Subjects: []string{"*"}, Rules: []Rule{}}}}
-	
+
 	b1Added, err := reg.AddBundle(b1)
 	if err != nil {
 		t.Fatalf("failed to add bundle 1: %v", err)
@@ -120,15 +120,15 @@ func TestRegistryChainWithVersions(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to add bundle 2: %v", err)
 	}
-	
+
 	// Verify chain
 	chain = reg.ChainWithVersions()
 	if len(chain) != 2 {
 		t.Fatalf("expected 2 items in chain, got %d", len(chain))
 	}
-	
+
 	if chain[0].Version != 1 || chain[0].Hash != b1Added.Hash {
-		t.Errorf("chain[0] mismatch: expected version=1 hash=%s, got version=%d hash=%s", 
+		t.Errorf("chain[0] mismatch: expected version=1 hash=%s, got version=%d hash=%s",
 			b1Added.Hash, chain[0].Version, chain[0].Hash)
 	}
 	if chain[1].Version != 2 || chain[1].Hash != b2Added.Hash {
@@ -140,7 +140,7 @@ func TestRegistryChainWithVersions(t *testing.T) {
 // TestRegistryDiff_BasicChanges verifies Diff correctly identifies added, removed, changed policies.
 func TestRegistryDiff_BasicChanges(t *testing.T) {
 	reg := NewRegistry()
-	
+
 	// Version 1: policy-a and policy-b
 	b1 := Bundle{
 		ID:      "bundle-1",
@@ -150,7 +150,7 @@ func TestRegistryDiff_BasicChanges(t *testing.T) {
 			{ID: "policy-b", Subjects: []string{"user:bob"}, Rules: []Rule{{Actions: []string{"write"}, Resources: []string{"doc:*"}, Effect: Allow}}},
 		},
 	}
-	
+
 	// Version 2: policy-a (modified), policy-c (new), policy-b removed
 	b2 := Bundle{
 		ID:      "bundle-2",
@@ -160,7 +160,7 @@ func TestRegistryDiff_BasicChanges(t *testing.T) {
 			{ID: "policy-c", Subjects: []string{"user:charlie"}, Rules: []Rule{{Actions: []string{"delete"}, Resources: []string{"doc:*"}, Effect: Allow}}},
 		},
 	}
-	
+
 	_, err := reg.AddBundle(b1)
 	if err != nil {
 		t.Fatalf("failed to add bundle 1: %v", err)
@@ -169,23 +169,23 @@ func TestRegistryDiff_BasicChanges(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to add bundle 2: %v", err)
 	}
-	
+
 	// Compute diff from version 1 to 2
 	diff, err := reg.Diff(1, 2)
 	if err != nil {
 		t.Fatalf("Diff failed: %v", err)
 	}
-	
+
 	// Verify added: policy-c
 	if len(diff.Added) != 1 || diff.Added[0].ID != "policy-c" {
 		t.Errorf("expected 1 added policy (policy-c), got %d: %v", len(diff.Added), diff.Added)
 	}
-	
+
 	// Verify removed: policy-b
 	if len(diff.Removed) != 1 || diff.Removed[0].ID != "policy-b" {
 		t.Errorf("expected 1 removed policy (policy-b), got %d: %v", len(diff.Removed), diff.Removed)
 	}
-	
+
 	// Verify changed: policy-a (subjects changed)
 	if len(diff.Changed) != 1 || diff.Changed[0].ID != "policy-a" {
 		t.Errorf("expected 1 changed policy (policy-a), got %d: %v", len(diff.Changed), diff.Changed)
@@ -195,7 +195,7 @@ func TestRegistryDiff_BasicChanges(t *testing.T) {
 // TestRegistryDiff_EmptyChain verifies Diff returns error for empty registry.
 func TestRegistryDiff_EmptyChain(t *testing.T) {
 	reg := NewRegistry()
-	
+
 	_, err := reg.Diff(1, 2)
 	if err == nil {
 		t.Error("expected error for Diff on empty registry, got nil")
@@ -205,13 +205,13 @@ func TestRegistryDiff_EmptyChain(t *testing.T) {
 // TestRegistryDiff_SameVersion verifies Diff returns error when versions are identical.
 func TestRegistryDiff_SameVersion(t *testing.T) {
 	reg := NewRegistry()
-	
+
 	b1 := Bundle{ID: "bundle-1", Version: 1, Policies: []Policy{{ID: "p1", Subjects: []string{"*"}, Rules: []Rule{}}}}
 	_, err := reg.AddBundle(b1)
 	if err != nil {
 		t.Fatalf("failed to add bundle: %v", err)
 	}
-	
+
 	_, err = reg.Diff(1, 1)
 	if err == nil {
 		t.Error("expected error for Diff with identical versions, got nil")
@@ -221,11 +221,11 @@ func TestRegistryDiff_SameVersion(t *testing.T) {
 // TestRegistryDiff_DefaultVersions verifies Diff uses ActiveVersion and head when versions are 0.
 func TestRegistryDiff_DefaultVersions(t *testing.T) {
 	reg := NewRegistry()
-	
+
 	b1 := Bundle{ID: "bundle-1", Version: 1, Policies: []Policy{{ID: "p1", Subjects: []string{"*"}, Rules: []Rule{}}}}
 	b2 := Bundle{ID: "bundle-2", Version: 2, Policies: []Policy{{ID: "p2", Subjects: []string{"*"}, Rules: []Rule{}}}}
 	b3 := Bundle{ID: "bundle-3", Version: 3, Policies: []Policy{{ID: "p3", Subjects: []string{"*"}, Rules: []Rule{}}}}
-	
+
 	_, err := reg.AddBundle(b1)
 	if err != nil {
 		t.Fatalf("failed to add bundle 1: %v", err)
@@ -238,33 +238,33 @@ func TestRegistryDiff_DefaultVersions(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to add bundle 3: %v", err)
 	}
-	
+
 	// Diff with fromVersion=0 (should use ActiveVersion=3), toVersion=0 (should use head=3)
 	// This should fail because they're the same
 	_, err = reg.Diff(0, 0)
 	if err == nil {
 		t.Error("expected error for Diff(0,0) when both resolve to same version, got nil")
 	}
-	
+
 	// Rollback to version 1
 	err = reg.Rollback(1)
 	if err != nil {
 		t.Fatalf("Rollback failed: %v", err)
 	}
-	
+
 	// Now Diff(0,0) should compare ActiveVersion=1 (from rollback) to Head=1 (same due to rollback)
 	// This should fail because they're the same after rollback
 	_, err = reg.Diff(0, 0)
 	if err == nil {
 		t.Error("expected error for Diff(0,0) after rollback to same version, got nil")
 	}
-	
+
 	// Test explicit version diff: compare rolled-back version (1) to latest in chain (3)
 	diff, err := reg.Diff(0, 3)
 	if err != nil {
 		t.Fatalf("Diff(0,3) after rollback failed: %v", err)
 	}
-	
+
 	if diff.FromVersion != 1 || diff.ToVersion != 3 {
 		t.Errorf("expected diff from version 1 to 3, got from %d to %d", diff.FromVersion, diff.ToVersion)
 	}
@@ -273,13 +273,13 @@ func TestRegistryDiff_DefaultVersions(t *testing.T) {
 // TestRegistryFindByHash verifies FindByHash returns correct bundle or nil.
 func TestRegistryFindByHash(t *testing.T) {
 	reg := NewRegistry()
-	
+
 	b1 := Bundle{ID: "bundle-1", Version: 1, Policies: []Policy{{ID: "p1", Subjects: []string{"*"}, Rules: []Rule{}}}}
 	b1Added, err := reg.AddBundle(b1)
 	if err != nil {
 		t.Fatalf("failed to add bundle: %v", err)
 	}
-	
+
 	// Find by hash should return the bundle
 	found := reg.FindByHash(b1Added.Hash)
 	if found == nil {
@@ -288,7 +288,7 @@ func TestRegistryFindByHash(t *testing.T) {
 	if found.Version != 1 {
 		t.Errorf("expected version 1, got %d", found.Version)
 	}
-	
+
 	// Non-existent hash should return nil
 	notFound := reg.FindByHash("nonexistent-hash-12345")
 	if notFound != nil {
@@ -315,7 +315,7 @@ func TestValidateBundle_ValidBundle(t *testing.T) {
 			},
 		},
 	}
-	
+
 	err := ValidateBundle(bundle)
 	if err != nil {
 		t.Errorf("ValidateBundle failed for valid bundle: %v", err)
@@ -329,7 +329,7 @@ func TestValidateBundle_EmptyBundleID(t *testing.T) {
 		Version:  1,
 		Policies: []Policy{{ID: "p1", Subjects: []string{"*"}, Rules: []Rule{}}},
 	}
-	
+
 	err := ValidateBundle(bundle)
 	if err == nil {
 		t.Error("expected error for bundle with empty ID, got nil")
@@ -343,7 +343,7 @@ func TestValidateBundle_NoPolicies(t *testing.T) {
 		Version:  1,
 		Policies: []Policy{},
 	}
-	
+
 	err := ValidateBundle(bundle)
 	if err == nil {
 		t.Error("expected error for bundle with no policies, got nil")
@@ -363,7 +363,7 @@ func TestValidateBundle_EmptyPolicyID(t *testing.T) {
 			},
 		},
 	}
-	
+
 	err := ValidateBundle(bundle)
 	if err == nil {
 		t.Error("expected error for policy with empty ID, got nil")
@@ -383,7 +383,7 @@ func TestValidateBundle_NoSubjects(t *testing.T) {
 			},
 		},
 	}
-	
+
 	err := ValidateBundle(bundle)
 	if err == nil {
 		t.Error("expected error for policy with no subjects, got nil")

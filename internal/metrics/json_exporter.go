@@ -39,31 +39,31 @@ type ReasonCategory struct {
 
 // HistogramData represents histogram metric data
 type HistogramData struct {
-	Count   int64              `json:"count"`
-	Sum     float64            `json:"sum"`
-	Buckets map[string]int64   `json:"buckets,omitempty"`
-	P50     float64            `json:"p50,omitempty"`
-	P95     float64            `json:"p95,omitempty"`
-	P99     float64            `json:"p99,omitempty"`
-	Min     float64            `json:"min,omitempty"`
-	Max     float64            `json:"max,omitempty"`
+	Count   int64            `json:"count"`
+	Sum     float64          `json:"sum"`
+	Buckets map[string]int64 `json:"buckets,omitempty"`
+	P50     float64          `json:"p50,omitempty"`
+	P95     float64          `json:"p95,omitempty"`
+	P99     float64          `json:"p99,omitempty"`
+	Min     float64          `json:"min,omitempty"`
+	Max     float64          `json:"max,omitempty"`
 }
 
 // MetricEntry represents a single metric in JSON format
 type MetricEntry struct {
-	Name        string             `json:"name"`
-	Type        string             `json:"type"` // counter, gauge, histogram
-	Value       interface{}        `json:"value"`
-	Labels      map[string]string  `json:"labels,omitempty"`
-	Description string             `json:"description,omitempty"`
-	Unit        string             `json:"unit,omitempty"`
-	Timestamp   time.Time          `json:"timestamp"`
+	Name        string            `json:"name"`
+	Type        string            `json:"type"` // counter, gauge, histogram
+	Value       interface{}       `json:"value"`
+	Labels      map[string]string `json:"labels,omitempty"`
+	Description string            `json:"description,omitempty"`
+	Unit        string            `json:"unit,omitempty"`
+	Timestamp   time.Time         `json:"timestamp"`
 }
 
 // JSONMetricsResponse is the complete JSON response structure
 type JSONMetricsResponse struct {
-	Metadata MetricsMetadata         `json:"metadata"`
-	Metrics  []MetricEntry           `json:"metrics"`
+	Metadata MetricsMetadata           `json:"metadata"`
+	Metrics  []MetricEntry             `json:"metrics"`
 	Reasons  map[string]ReasonCategory `json:"reason_taxonomy,omitempty"`
 }
 
@@ -89,7 +89,7 @@ func NewJSONMetricsExporter(serviceName, serviceVersion, hostname string) *JSONM
 func (e *JSONMetricsExporter) RecordCounter(name string, value int64, labels map[string]string) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	
+
 	key := e.metricKey(name, labels)
 	e.counters[key] += value
 	if labels != nil && len(labels) > 0 {
@@ -101,7 +101,7 @@ func (e *JSONMetricsExporter) RecordCounter(name string, value int64, labels map
 func (e *JSONMetricsExporter) RecordGauge(name string, value float64, labels map[string]string) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	
+
 	key := e.metricKey(name, labels)
 	e.gauges[key] = value
 	if labels != nil && len(labels) > 0 {
@@ -113,7 +113,7 @@ func (e *JSONMetricsExporter) RecordGauge(name string, value float64, labels map
 func (e *JSONMetricsExporter) RecordHistogram(name string, value float64, labels map[string]string) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	
+
 	key := e.metricKey(name, labels)
 	hist, exists := e.histograms[key]
 	if !exists {
@@ -124,10 +124,10 @@ func (e *JSONMetricsExporter) RecordHistogram(name string, value float64, labels
 		}
 		e.histograms[key] = hist
 	}
-	
+
 	hist.Count++
 	hist.Sum += value
-	
+
 	// Update min/max
 	if value < hist.Min {
 		hist.Min = value
@@ -135,10 +135,10 @@ func (e *JSONMetricsExporter) RecordHistogram(name string, value float64, labels
 	if value > hist.Max {
 		hist.Max = value
 	}
-	
+
 	// Update buckets
 	e.updateHistogramBuckets(hist, value)
-	
+
 	if labels != nil && len(labels) > 0 {
 		e.labels[key] = labels
 	}
@@ -148,13 +148,13 @@ func (e *JSONMetricsExporter) RecordHistogram(name string, value float64, labels
 func (e *JSONMetricsExporter) ExportJSON() ([]byte, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	now := time.Now()
 	e.metadata.Timestamp = now
 	e.metadata.CollectionTime = now
-	
+
 	metrics := []MetricEntry{}
-	
+
 	// Export counters
 	for key, value := range e.counters {
 		name, labels := e.parseMetricKey(key)
@@ -166,7 +166,7 @@ func (e *JSONMetricsExporter) ExportJSON() ([]byte, error) {
 			Timestamp: now,
 		})
 	}
-	
+
 	// Export gauges
 	for key, value := range e.gauges {
 		name, labels := e.parseMetricKey(key)
@@ -178,7 +178,7 @@ func (e *JSONMetricsExporter) ExportJSON() ([]byte, error) {
 			Timestamp: now,
 		})
 	}
-	
+
 	// Export histograms
 	for key, hist := range e.histograms {
 		name, labels := e.parseMetricKey(key)
@@ -190,16 +190,16 @@ func (e *JSONMetricsExporter) ExportJSON() ([]byte, error) {
 			Timestamp: now,
 		})
 	}
-	
+
 	response := JSONMetricsResponse{
 		Metadata: e.metadata,
 		Metrics:  metrics,
 	}
-	
+
 	if e.includeReasons {
 		response.Reasons = e.reasonTaxonomy
 	}
-	
+
 	return json.MarshalIndent(response, "", "  ")
 }
 
@@ -207,13 +207,13 @@ func (e *JSONMetricsExporter) ExportJSON() ([]byte, error) {
 func (e *JSONMetricsExporter) ExportJSONCompact() ([]byte, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	now := time.Now()
 	e.metadata.Timestamp = now
 	e.metadata.CollectionTime = now
-	
+
 	metrics := []MetricEntry{}
-	
+
 	// Export counters
 	for key, value := range e.counters {
 		name, labels := e.parseMetricKey(key)
@@ -225,7 +225,7 @@ func (e *JSONMetricsExporter) ExportJSONCompact() ([]byte, error) {
 			Timestamp: now,
 		})
 	}
-	
+
 	// Export gauges
 	for key, value := range e.gauges {
 		name, labels := e.parseMetricKey(key)
@@ -237,7 +237,7 @@ func (e *JSONMetricsExporter) ExportJSONCompact() ([]byte, error) {
 			Timestamp: now,
 		})
 	}
-	
+
 	// Export histograms
 	for key, hist := range e.histograms {
 		name, labels := e.parseMetricKey(key)
@@ -249,16 +249,16 @@ func (e *JSONMetricsExporter) ExportJSONCompact() ([]byte, error) {
 			Timestamp: now,
 		})
 	}
-	
+
 	response := JSONMetricsResponse{
 		Metadata: e.metadata,
 		Metrics:  metrics,
 	}
-	
+
 	if e.includeReasons {
 		response.Reasons = e.reasonTaxonomy
 	}
-	
+
 	return json.Marshal(response)
 }
 
@@ -280,7 +280,7 @@ func (e *JSONMetricsExporter) SetIncludeMetadata(include bool) {
 func (e *JSONMetricsExporter) Reset() {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	
+
 	e.counters = make(map[string]int64)
 	e.gauges = make(map[string]float64)
 	e.histograms = make(map[string]*HistogramData)
@@ -299,14 +299,14 @@ func (e *JSONMetricsExporter) metricKey(name string, labels map[string]string) s
 	if labels == nil || len(labels) == 0 {
 		return name
 	}
-	
+
 	// Create deterministic key from labels by sorting keys
 	// This ensures consistent ordering for map iteration
 	var labelPairs []string
 	for k, v := range labels {
 		labelPairs = append(labelPairs, fmt.Sprintf("%s=%s", k, v))
 	}
-	
+
 	// Sort for consistency
 	for i := 0; i < len(labelPairs)-1; i++ {
 		for j := i + 1; j < len(labelPairs); j++ {
@@ -315,7 +315,7 @@ func (e *JSONMetricsExporter) metricKey(name string, labels map[string]string) s
 			}
 		}
 	}
-	
+
 	key := name
 	for _, pair := range labelPairs {
 		key += ":" + pair
@@ -344,7 +344,7 @@ func (e *JSONMetricsExporter) parseMetricKey(key string) (string, map[string]str
 func (e *JSONMetricsExporter) updateHistogramBuckets(hist *HistogramData, value float64) {
 	// Standard buckets: 0.001, 0.01, 0.1, 1, 10, 100, 1000, +Inf
 	buckets := []float64{0.001, 0.01, 0.1, 1, 10, 100, 1000}
-	
+
 	for _, bucket := range buckets {
 		if value <= bucket {
 			key := fmt.Sprintf("%.3f", bucket)

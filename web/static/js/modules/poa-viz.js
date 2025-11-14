@@ -4,8 +4,8 @@
  * with particle systems, mouse zoom/navigation, and brightness/color mapping
  */
 
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 /**
  * PoA Graph Visualizer
@@ -656,7 +656,7 @@ export class PoAGraphVisualizer {
         
         const material = new THREE.PointsMaterial({
             vertexColors: true,
-            size: 0.03, // Small energy particles
+            size: 0.008, // Minimal energy particles (smallest possible)
             transparent: true,
             opacity: 0.8,
             blending: THREE.AdditiveBlending,
@@ -1658,9 +1658,16 @@ function generateComplexGraph() {
 
 /**
  * ============================================================================
- * GAuth Protocol Flow Patterns
+ * GAuth Protocol Flow Patterns - 95% RFC Compliance
  * ============================================================================
  * These patterns visualize the RFC-0111 and RFC-0115 authorization flow stages
+ * Enhanced with 30 substeps (from 19) across 6 phases:
+ * - Subscription: 3 substeps
+ * - Matching: 7 substeps (was 4) - Added: authorization_chain, commercial_register, formal_requirements
+ * - Subset/Request: 7 substeps (was 4) - Added: request_compliance, pip_query, generate_extended_token, grant_compliance
+ * - Enforcement: 4 substeps
+ * - Verification: 6 substeps (was 4) - Added: validate_extended_token, pvp_identity, authorization_chain_verify, formal_requirements_verify
+ * - Audit: 3 substeps
  */
 
 /**
@@ -1688,54 +1695,71 @@ function generateProtocolSubscription() {
 
 /**
  * Protocol Matching Flow - PoA validation and capability matching
+ * Updated to reflect 95% RFC compliance with 7 substeps (was 4)
  */
 function generateProtocolMatching() {
     const nodes = [
-        { id: 'poa-def', label: 'PoA Definition (RFC-0115)', type: 'root', status: 'active', position: { x: 0, y: 3, z: 0 }, metadata: { format: 'json', version: '1.0' } },
-        { id: 'validate', label: '1. Validate PoA', type: 'delegation', status: 'active', position: { x: -4, y: 1, z: -2 }, metadata: { step: 'validation', schema_check: true } },
-        { id: 'capabilities', label: '2. Check AI Capabilities', type: 'delegation', status: 'active', position: { x: -2, y: 1, z: -2 }, metadata: { step: 'capabilities', ai_level: 'advanced' } },
-        { id: 'jurisdiction', label: '3. Verify Jurisdiction', type: 'delegation', status: 'active', position: { x: 0, y: 1, z: -2 }, metadata: { step: 'jurisdiction', region: 'EU', gdpr: true } },
-        { id: 'policies', label: '4. Match Policies', type: 'delegation', status: 'active', position: { x: 2, y: 1, z: -2 }, metadata: { step: 'policies', rbac: true } },
-        { id: 'pdp', label: 'PDP (Policy Decision Point)', type: 'root', status: 'active', position: { x: 0, y: -1, z: -4 }, metadata: { decision: 'permit' } },
-        { id: 'match-result', label: 'Match Result: PERMIT', type: 'consumer', status: 'active', position: { x: 0, y: -3, z: -6 }, metadata: { confidence: 0.98 } }
+        { id: 'poa-def', label: 'PoA Definition (RFC-0115)', type: 'root', status: 'active', position: { x: 0, y: 4, z: 0 }, metadata: { format: 'json', version: '1.0' } },
+        { id: 'validate', label: '1. Validate PoA', type: 'delegation', status: 'active', position: { x: -5, y: 2, z: -2 }, metadata: { step: 'validation', schema_check: true } },
+        { id: 'capabilities', label: '2. Check AI Capabilities', type: 'delegation', status: 'active', position: { x: -3, y: 2, z: -2 }, metadata: { step: 'capabilities', ai_level: 'advanced' } },
+        { id: 'jurisdiction', label: '3. Verify Jurisdiction', type: 'delegation', status: 'active', position: { x: -1, y: 2, z: -2 }, metadata: { step: 'jurisdiction', region: 'EU', gdpr: true } },
+        { id: 'policies', label: '4. Match Policies', type: 'delegation', status: 'active', position: { x: 1, y: 2, z: -2 }, metadata: { step: 'policies', rbac: true } },
+        { id: 'authz-chain', label: '5. Authorization Chain ✨', type: 'delegation', status: 'active', position: { x: 3, y: 2, z: -2 }, metadata: { step: 'authorization_chain', chain_valid: true } },
+        { id: 'commercial-reg', label: '6. Commercial Register ✨', type: 'delegation', status: 'active', position: { x: 5, y: 2, z: -2 }, metadata: { step: 'commercial_register', verified: true } },
+        { id: 'formal-req', label: '7. Formal Requirements ✨', type: 'delegation', status: 'active', position: { x: 7, y: 2, z: -2 }, metadata: { step: 'formal_requirements', compliant: true } },
+        { id: 'pdp', label: 'PDP (Policy Decision Point)', type: 'root', status: 'active', position: { x: 3, y: 0, z: -4 }, metadata: { decision: 'permit', compliance: '100%' } },
+        { id: 'match-result', label: 'Match Result: PERMIT ✅', type: 'consumer', status: 'active', position: { x: 3, y: -2, z: -6 }, metadata: { confidence: 0.98, rfc_compliant: true } }
     ];
     const edges = [
         { source: 'poa-def', target: 'validate', type: 'flow', label: 'submit' },
         { source: 'validate', target: 'capabilities', type: 'flow', label: 'next' },
         { source: 'capabilities', target: 'jurisdiction', type: 'flow', label: 'next' },
         { source: 'jurisdiction', target: 'policies', type: 'flow', label: 'next' },
+        { source: 'policies', target: 'authz-chain', type: 'flow', label: 'next' },
+        { source: 'authz-chain', target: 'commercial-reg', type: 'flow', label: 'next' },
+        { source: 'commercial-reg', target: 'formal-req', type: 'flow', label: 'next' },
         { source: 'validate', target: 'pdp', type: 'input', label: 'schema OK' },
         { source: 'capabilities', target: 'pdp', type: 'input', label: 'caps OK' },
         { source: 'jurisdiction', target: 'pdp', type: 'input', label: 'region OK' },
         { source: 'policies', target: 'pdp', type: 'input', label: 'policy OK' },
+        { source: 'authz-chain', target: 'pdp', type: 'input', label: 'chain OK' },
+        { source: 'commercial-reg', target: 'pdp', type: 'input', label: 'reg OK' },
+        { source: 'formal-req', target: 'pdp', type: 'input', label: 'formal OK' },
         { source: 'pdp', target: 'match-result', type: 'decision', label: 'decide' }
     ];
-    return { nodes, edges, stats: { total_nodes: 7, total_edges: 9, active_nodes: 7, pending_nodes: 0, revoked_nodes: 0 } };
+    return { nodes, edges, stats: { total_nodes: 10, total_edges: 15, active_nodes: 10, pending_nodes: 0, revoked_nodes: 0 } };
 }
 
 /**
  * Protocol Subset/Request Flow - Authorization request with scope selection
+ * Updated to reflect 95% RFC compliance with 7 substeps (was 4)
  */
 function generateProtocolRequest() {
     const nodes = [
-        { id: 'client', label: 'AI Agent', type: 'consumer', status: 'active', position: { x: -6, y: 2, z: 0 }, metadata: { role: 'requester' } },
-        { id: 'auth-request', label: '1. Create Auth Request', type: 'delegation', status: 'active', position: { x: -3, y: 1, z: -2 }, metadata: { step: 'request', response_type: 'code' } },
-        { id: 'scope-selection', label: '2. Select Scope Subset', type: 'delegation', status: 'active', position: { x: 0, y: 1, z: -2 }, metadata: { step: 'scope', scopes: ['poa:read', 'poa:delegate'] } },
-        { id: 'pdp-decision', label: '3. PDP Decision', type: 'root', status: 'active', position: { x: 3, y: 1, z: -2 }, metadata: { step: 'decision', result: 'permit' } },
-        { id: 'token-gen', label: '4. Generate Token', type: 'delegation', status: 'active', position: { x: 3, y: -1, z: -4 }, metadata: { step: 'token', type: 'jwt' } },
-        { id: 'access-token', label: 'Access Token (JWT)', type: 'consumer', status: 'active', position: { x: 0, y: -2, z: -6 }, metadata: { expires_in: 3600, token_type: 'Bearer' } },
-        { id: 'principal', label: 'Principal (Human)', type: 'root', status: 'active', position: { x: -6, y: 0, z: -4 }, metadata: { role: 'authorizer', consent: true } }
+        { id: 'client', label: 'AI Agent', type: 'consumer', status: 'active', position: { x: -7, y: 3, z: 0 }, metadata: { role: 'requester' } },
+        { id: 'auth-request', label: '1. Create Auth Request', type: 'delegation', status: 'active', position: { x: -5, y: 2, z: -2 }, metadata: { step: 'request', response_type: 'code' } },
+        { id: 'scope-selection', label: '2. Select Scope Subset', type: 'delegation', status: 'active', position: { x: -3, y: 2, z: -2 }, metadata: { step: 'scope', scopes: ['poa:read', 'poa:delegate'] } },
+        { id: 'request-compliance', label: '3. Request Compliance ✨', type: 'delegation', status: 'active', position: { x: -1, y: 2, z: -2 }, metadata: { step: 'request_compliance', validated: true } },
+        { id: 'pip-query', label: '4. PIP Policy Query ✨', type: 'delegation', status: 'active', position: { x: 1, y: 2, z: -2 }, metadata: { step: 'pip_query', policy_retrieved: true } },
+        { id: 'pdp-decision', label: '5. PDP Decision', type: 'root', status: 'active', position: { x: 3, y: 2, z: -2 }, metadata: { step: 'decision', result: 'permit' } },
+        { id: 'token-gen', label: '6. Generate Extended Token ✨', type: 'delegation', status: 'active', position: { x: 5, y: 2, z: -2 }, metadata: { step: 'generate_extended_token', type: 'jwt+claims' } },
+        { id: 'grant-compliance', label: '7. Grant Compliance ✨', type: 'delegation', status: 'active', position: { x: 7, y: 2, z: -2 }, metadata: { step: 'grant_compliance', verified: true } },
+        { id: 'access-token', label: 'Extended Access Token (JWT)', type: 'consumer', status: 'active', position: { x: 3, y: 0, z: -4 }, metadata: { expires_in: 3600, token_type: 'Bearer', extended_claims: true } },
+        { id: 'principal', label: 'Principal (Human)', type: 'root', status: 'active', position: { x: -7, y: 1, z: -4 }, metadata: { role: 'authorizer', consent: true } }
     ];
     const edges = [
         { source: 'client', target: 'auth-request', type: 'request', label: 'POST /authorize' },
         { source: 'auth-request', target: 'scope-selection', type: 'flow', label: 'select' },
         { source: 'principal', target: 'scope-selection', type: 'consent', label: 'authorize' },
-        { source: 'scope-selection', target: 'pdp-decision', type: 'evaluation', label: 'evaluate' },
+        { source: 'scope-selection', target: 'request-compliance', type: 'flow', label: 'validate' },
+        { source: 'request-compliance', target: 'pip-query', type: 'flow', label: 'query' },
+        { source: 'pip-query', target: 'pdp-decision', type: 'evaluation', label: 'evaluate' },
         { source: 'pdp-decision', target: 'token-gen', type: 'permit', label: 'permit' },
-        { source: 'token-gen', target: 'access-token', type: 'issuance', label: 'issue' },
+        { source: 'token-gen', target: 'grant-compliance', type: 'flow', label: 'verify' },
+        { source: 'grant-compliance', target: 'access-token', type: 'issuance', label: 'issue' },
         { source: 'access-token', target: 'client', type: 'delivery', label: 'deliver' }
     ];
-    return { nodes, edges, stats: { total_nodes: 7, total_edges: 7, active_nodes: 7, pending_nodes: 0, revoked_nodes: 0 } };
+    return { nodes, edges, stats: { total_nodes: 10, total_edges: 10, active_nodes: 10, pending_nodes: 0, revoked_nodes: 0 } };
 }
 
 /**
@@ -1768,18 +1792,21 @@ function generateProtocolEnforcement() {
 
 /**
  * Protocol Verification Flow - Token verification and PVP identity validation
+ * Updated to reflect 95% RFC compliance with 6 substeps (was 4)
  */
 function generateProtocolVerification() {
     const nodes = [
-        { id: 'incoming-token', label: 'Incoming Token', type: 'consumer', status: 'active', position: { x: -6, y: 2, z: 0 }, metadata: { type: 'jwt' } },
-        { id: 'validate-token', label: '1. Validate Token', type: 'delegation', status: 'active', position: { x: -3, y: 0, z: -2 }, metadata: { step: 'validation', format_ok: true } },
-        { id: 'verify-sig', label: '2. Verify Signature', type: 'delegation', status: 'active', position: { x: -1, y: 0, z: -2 }, metadata: { step: 'signature', algorithm: 'RS256' } },
-        { id: 'check-revocation', label: '3. Check Revocation', type: 'delegation', status: 'active', position: { x: 1, y: 0, z: -2 }, metadata: { step: 'revocation', status: 'not_revoked' } },
-        { id: 'pvp-check', label: '4. PVP Identity Check', type: 'delegation', status: 'active', position: { x: 3, y: 0, z: -2 }, metadata: { step: 'pvp', identity_verified: true } },
-        { id: 'jwks', label: 'JWKS Endpoint', type: 'root', status: 'active', position: { x: -1, y: 2, z: -4 }, metadata: { keys: 'public_keys' } },
-        { id: 'revocation-list', label: 'Revocation List', type: 'root', status: 'active', position: { x: 1, y: 2, z: -4 }, metadata: { type: 'merkle_tree' } },
-        { id: 'pvp-registry', label: 'PVP Registry', type: 'root', status: 'active', position: { x: 3, y: 2, z: -4 }, metadata: { verification: 'did_method' } },
-        { id: 'verification-result', label: 'Verification: VALID', type: 'consumer', status: 'active', position: { x: 0, y: -2, z: -6 }, metadata: { result: 'valid', confidence: 1.0 } }
+        { id: 'incoming-token', label: 'Incoming Extended Token', type: 'consumer', status: 'active', position: { x: -7, y: 3, z: 0 }, metadata: { type: 'jwt+claims' } },
+        { id: 'validate-token', label: '1. Validate Extended Token ✨', type: 'delegation', status: 'active', position: { x: -5, y: 2, z: -2 }, metadata: { step: 'validate_extended_token', format_ok: true } },
+        { id: 'verify-sig', label: '2. Verify Signature', type: 'delegation', status: 'active', position: { x: -3, y: 2, z: -2 }, metadata: { step: 'signature', algorithm: 'RS256' } },
+        { id: 'check-revocation', label: '3. Check Revocation', type: 'delegation', status: 'active', position: { x: -1, y: 2, z: -2 }, metadata: { step: 'revocation', status: 'not_revoked' } },
+        { id: 'pvp-identity', label: '4. PVP Identity Verify ✨', type: 'delegation', status: 'active', position: { x: 1, y: 2, z: -2 }, metadata: { step: 'pvp_identity', identity_verified: true } },
+        { id: 'authz-chain-verify', label: '5. Authorization Chain Verify ✨', type: 'delegation', status: 'active', position: { x: 3, y: 2, z: -2 }, metadata: { step: 'authorization_chain_verify', chain_valid: true } },
+        { id: 'formal-req-verify', label: '6. Formal Requirements Verify ✨', type: 'delegation', status: 'active', position: { x: 5, y: 2, z: -2 }, metadata: { step: 'formal_requirements_verify', compliant: true } },
+        { id: 'jwks', label: 'JWKS Endpoint', type: 'root', status: 'active', position: { x: -3, y: 4, z: -4 }, metadata: { keys: 'public_keys' } },
+        { id: 'revocation-list', label: 'Revocation List', type: 'root', status: 'active', position: { x: -1, y: 4, z: -4 }, metadata: { type: 'merkle_tree' } },
+        { id: 'pvp-registry', label: 'PVP Registry', type: 'root', status: 'active', position: { x: 1, y: 4, z: -4 }, metadata: { verification: 'did_method' } },
+        { id: 'verification-result', label: 'Verification: VALID ✅', type: 'consumer', status: 'active', position: { x: 1, y: 0, z: -6 }, metadata: { result: 'valid', confidence: 1.0, rfc_compliant: true } }
     ];
     const edges = [
         { source: 'incoming-token', target: 'validate-token', type: 'flow', label: 'submit' },
@@ -1787,46 +1814,54 @@ function generateProtocolVerification() {
         { source: 'verify-sig', target: 'jwks', type: 'lookup', label: 'fetch_key' },
         { source: 'verify-sig', target: 'check-revocation', type: 'flow', label: 'next' },
         { source: 'check-revocation', target: 'revocation-list', type: 'lookup', label: 'check' },
-        { source: 'check-revocation', target: 'pvp-check', type: 'flow', label: 'next' },
-        { source: 'pvp-check', target: 'pvp-registry', type: 'lookup', label: 'verify' },
-        { source: 'pvp-check', target: 'verification-result', type: 'decision', label: 'valid' }
+        { source: 'check-revocation', target: 'pvp-identity', type: 'flow', label: 'next' },
+        { source: 'pvp-identity', target: 'pvp-registry', type: 'lookup', label: 'verify' },
+        { source: 'pvp-identity', target: 'authz-chain-verify', type: 'flow', label: 'next' },
+        { source: 'authz-chain-verify', target: 'formal-req-verify', type: 'flow', label: 'next' },
+        { source: 'formal-req-verify', target: 'verification-result', type: 'decision', label: 'valid' }
     ];
-    return { nodes, edges, stats: { total_nodes: 9, total_edges: 8, active_nodes: 9, pending_nodes: 0, revoked_nodes: 0 } };
+    return { nodes, edges, stats: { total_nodes: 11, total_edges: 10, active_nodes: 11, pending_nodes: 0, revoked_nodes: 0 } };
 }
 
 /**
  * Complete Protocol Flow - Full RFC-0111 + RFC-0115 end-to-end flow
+ * 95% RFC Compliant - 30 substeps total across 6 phases
  */
 function generateProtocolFull() {
     const nodes = [
-        // Subscription Phase
-        { id: 'client', label: 'AI Agent', type: 'consumer', status: 'active', position: { x: -8, y: 4, z: 0 }, metadata: { phase: 'subscription' } },
-        { id: 'subscription', label: 'Subscription', type: 'delegation', status: 'active', position: { x: -6, y: 4, z: -2 }, metadata: { phase: 'subscription', icon: '📝' } },
+        // Subscription Phase (3 substeps)
+        { id: 'client', label: 'AI Agent', type: 'consumer', status: 'active', position: { x: -8, y: 4, z: 0 }, metadata: { phase: 'subscription', substeps: 3 } },
+        { id: 'subscription', label: 'Subscription (3 steps)', type: 'delegation', status: 'active', position: { x: -6, y: 4, z: -2 }, metadata: { phase: 'subscription', icon: '📝' } },
         
-        // Matching Phase
+        // Matching Phase (7 substeps - was 4) ✨
         { id: 'poa-def', label: 'PoA Definition', type: 'root', status: 'active', position: { x: -4, y: 4, z: -4 }, metadata: { phase: 'matching', format: 'rfc-0115' } },
-        { id: 'matching', label: 'Matching', type: 'delegation', status: 'active', position: { x: -2, y: 4, z: -6 }, metadata: { phase: 'matching', icon: '🔍' } },
+        { id: 'matching', label: 'Matching (7 steps) ✨', type: 'delegation', status: 'active', position: { x: -2, y: 4, z: -6 }, metadata: { phase: 'matching', icon: '🔍', substeps: 7, enhanced: true } },
         
-        // Request Phase
+        // Request Phase (7 substeps - was 4) ✨
         { id: 'principal', label: 'Principal (Human)', type: 'root', status: 'active', position: { x: 0, y: 6, z: -8 }, metadata: { phase: 'request', role: 'authorizer' } },
-        { id: 'request', label: 'Subset/Request', type: 'delegation', status: 'active', position: { x: 0, y: 4, z: -8 }, metadata: { phase: 'request', icon: '🎯' } },
-        { id: 'access-token', label: 'Access Token', type: 'consumer', status: 'active', position: { x: 2, y: 4, z: -10 }, metadata: { phase: 'request', type: 'jwt' } },
+        { id: 'request', label: 'Subset/Request (7 steps) ✨', type: 'delegation', status: 'active', position: { x: 0, y: 4, z: -8 }, metadata: { phase: 'request', icon: '🎯', substeps: 7, enhanced: true } },
+        { id: 'access-token', label: 'Extended Access Token ✨', type: 'consumer', status: 'active', position: { x: 2, y: 4, z: -10 }, metadata: { phase: 'request', type: 'jwt+claims' } },
         
-        // Enforcement Phase
-        { id: 'supply-pep', label: 'Supply PEP', type: 'delegation', status: 'active', position: { x: 4, y: 2, z: -12 }, metadata: { phase: 'enforcement', side: 'supply' } },
+        // Enforcement Phase (4 substeps)
+        { id: 'supply-pep', label: 'Supply PEP', type: 'delegation', status: 'active', position: { x: 4, y: 2, z: -12 }, metadata: { phase: 'enforcement', side: 'supply', substeps: 4 } },
         { id: 'demand-pep', label: 'Demand PEP', type: 'delegation', status: 'active', position: { x: 6, y: 2, z: -12 }, metadata: { phase: 'enforcement', side: 'demand' } },
         
-        // Verification Phase
-        { id: 'verification', label: 'Verification', type: 'delegation', status: 'active', position: { x: 4, y: 0, z: -14 }, metadata: { phase: 'verification', icon: '✓' } },
+        // Verification Phase (6 substeps - was 4) ✨
+        { id: 'verification', label: 'Verification (6 steps) ✨', type: 'delegation', status: 'active', position: { x: 4, y: 0, z: -14 }, metadata: { phase: 'verification', icon: '✓', substeps: 6, enhanced: true } },
         
-        // Audit Phase
-        { id: 'audit', label: 'Audit & Compliance', type: 'delegation', status: 'active', position: { x: 2, y: -2, z: -16 }, metadata: { phase: 'audit', icon: '📊' } },
-        { id: 'resource', label: 'Protected Resource', type: 'consumer', status: 'active', position: { x: 0, y: -2, z: -18 }, metadata: { access: 'granted' } },
+        // Audit Phase (3 substeps)
+        { id: 'audit', label: 'Audit & Compliance (3 steps)', type: 'delegation', status: 'active', position: { x: 2, y: -2, z: -16 }, metadata: { phase: 'audit', icon: '📊', substeps: 3 } },
+        { id: 'resource', label: 'Protected Resource ✅', type: 'consumer', status: 'active', position: { x: 0, y: -2, z: -18 }, metadata: { access: 'granted', rfc_compliant: true } },
         
         // Supporting Services
         { id: 'authz-server', label: 'Authorization Server', type: 'root', status: 'active', position: { x: -8, y: 0, z: -8 }, metadata: { role: 'issuer' } },
-        { id: 'pdp', label: 'PDP', type: 'root', status: 'active', position: { x: -6, y: 0, z: -10 }, metadata: { decision: 'permit' } },
-        { id: 'transparency-log', label: 'Transparency Log', type: 'root', status: 'active', position: { x: 0, y: -4, z: -16 }, metadata: { immutable: true } }
+        { id: 'pdp', label: 'PDP (Enhanced)', type: 'root', status: 'active', position: { x: -6, y: 0, z: -10 }, metadata: { decision: 'permit', compliance: '95%' } },
+        { id: 'transparency-log', label: 'Transparency Log', type: 'root', status: 'active', position: { x: 0, y: -4, z: -16 }, metadata: { immutable: true } },
+        
+        // New Enhanced Components ✨
+        { id: 'authz-chain-validator', label: 'Authorization Chain ✨', type: 'root', status: 'active', position: { x: -4, y: 2, z: -8 }, metadata: { feature: 'authz_chain' } },
+        { id: 'commercial-reg', label: 'Commercial Register ✨', type: 'root', status: 'active', position: { x: -2, y: 2, z: -8 }, metadata: { feature: 'commercial_register' } },
+        { id: 'pip-service', label: 'PIP (Policy Info) ✨', type: 'root', status: 'active', position: { x: 2, y: 2, z: -10 }, metadata: { feature: 'pip_query' } }
     ];
     
     const edges = [
@@ -1834,14 +1869,17 @@ function generateProtocolFull() {
         { source: 'client', target: 'subscription', type: 'flow', label: 'register' },
         { source: 'subscription', target: 'authz-server', type: 'registration', label: 'register' },
         
-        // Matching flow
+        // Matching flow (enhanced with 7 substeps)
         { source: 'poa-def', target: 'matching', type: 'flow', label: 'validate' },
         { source: 'matching', target: 'pdp', type: 'validation', label: 'match' },
+        { source: 'matching', target: 'authz-chain-validator', type: 'validation', label: 'validate chain' },
+        { source: 'matching', target: 'commercial-reg', type: 'validation', label: 'check register' },
         
-        // Request flow
+        // Request flow (enhanced with 7 substeps)
         { source: 'principal', target: 'request', type: 'consent', label: 'authorize' },
+        { source: 'request', target: 'pip-service', type: 'query', label: 'query policy' },
         { source: 'request', target: 'pdp', type: 'evaluation', label: 'evaluate' },
-        { source: 'request', target: 'access-token', type: 'issuance', label: 'issue' },
+        { source: 'request', target: 'access-token', type: 'issuance', label: 'issue extended' },
         
         // Enforcement flow
         { source: 'access-token', target: 'supply-pep', type: 'validation', label: 'validate' },
@@ -1849,7 +1887,8 @@ function generateProtocolFull() {
         { source: 'supply-pep', target: 'verification', type: 'flow', label: 'verify' },
         { source: 'demand-pep', target: 'verification', type: 'flow', label: 'verify' },
         
-        // Verification flow
+        // Verification flow (enhanced with 6 substeps)
+        { source: 'verification', target: 'authz-chain-validator', type: 'validation', label: 're-verify chain' },
         { source: 'verification', target: 'audit', type: 'flow', label: 'log' },
         
         // Audit flow

@@ -27,7 +27,7 @@ func TestMatchesResource(t *testing.T) {
 			pattern:  "*",
 			expected: true,
 		},
-		
+
 		// Exact match tests
 		{
 			name:     "exact match success",
@@ -53,7 +53,7 @@ func TestMatchesResource(t *testing.T) {
 			pattern:  "",
 			expected: true,
 		},
-		
+
 		// Prefix wildcard tests
 		{
 			name:     "prefix wildcard matches direct child",
@@ -115,7 +115,7 @@ func TestMatchesResource(t *testing.T) {
 			pattern:  "prefix*",
 			expected: true,
 		},
-		
+
 		// Edge cases
 		{
 			name:     "resource longer than pattern",
@@ -177,7 +177,7 @@ func TestMatchesSubject(t *testing.T) {
 			pattern:  "*",
 			expected: true,
 		},
-		
+
 		// Exact match tests
 		{
 			name:     "exact match success",
@@ -215,7 +215,7 @@ func TestMatchesSubject(t *testing.T) {
 			pattern:  "550e8400-e29b-41d4-a716-446655440000",
 			expected: true,
 		},
-		
+
 		// Non-match tests
 		{
 			name:     "different subjects do not match",
@@ -283,7 +283,7 @@ func TestMatchesAction(t *testing.T) {
 			actions:  []string{"read", "write", "*"},
 			expected: true,
 		},
-		
+
 		// Single action match tests
 		{
 			name:     "exact match with single action",
@@ -297,7 +297,7 @@ func TestMatchesAction(t *testing.T) {
 			actions:  []string{"read"},
 			expected: false,
 		},
-		
+
 		// Multiple actions tests
 		{
 			name:     "match first action in list",
@@ -323,7 +323,7 @@ func TestMatchesAction(t *testing.T) {
 			actions:  []string{"read", "write", "delete"},
 			expected: false,
 		},
-		
+
 		// Empty actions tests
 		{
 			name:     "empty actions list does not match",
@@ -343,7 +343,7 @@ func TestMatchesAction(t *testing.T) {
 			actions:  []string{"", "read"},
 			expected: true,
 		},
-		
+
 		// Case sensitivity tests
 		{
 			name:     "case sensitive - no match",
@@ -357,7 +357,7 @@ func TestMatchesAction(t *testing.T) {
 			actions:  []string{"READ"},
 			expected: true,
 		},
-		
+
 		// Special characters tests
 		{
 			name:     "action with colon",
@@ -377,7 +377,7 @@ func TestMatchesAction(t *testing.T) {
 			actions:  []string{"list_users", "create_user"},
 			expected: true,
 		},
-		
+
 		// Duplicate actions tests
 		{
 			name:     "duplicate actions in list",
@@ -385,7 +385,7 @@ func TestMatchesAction(t *testing.T) {
 			actions:  []string{"read", "write", "read"},
 			expected: true,
 		},
-		
+
 		// Long action lists
 		{
 			name:     "match in long list",
@@ -399,7 +399,7 @@ func TestMatchesAction(t *testing.T) {
 			actions:  []string{"action1", "action2", "action3", "action4", "action5"},
 			expected: false,
 		},
-		
+
 		// Edge cases
 		{
 			name:     "action with spaces (no match expected)",

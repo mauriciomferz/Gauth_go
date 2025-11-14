@@ -35,28 +35,28 @@ func NewComplianceValidator(
 
 // ExtendedAuthorizationRequest represents an RFC-0111 compliant authorization request
 type ExtendedAuthorizationRequest struct {
-	*AuthorizationRequest  // Embed existing type for compatibility
-	PowerOfAttorney        *poa.PoADefinition       `json:"power_of_attorney,omitempty"`
-	AuthorizationChain     *AuthorizationChain      `json:"authorization_chain,omitempty"`
-	LegalFramework         *LegalFrameworkInfo      `json:"legal_framework,omitempty"`
-	Restrictions           []PowerRestriction       `json:"restrictions,omitempty"`
-	RequestedActions       []string                 `json:"requested_actions,omitempty"`
-	TransactionContext     map[string]interface{}   `json:"transaction_context,omitempty"`
-	RequestTime            time.Time                `json:"request_time"`
+	*AuthorizationRequest                        // Embed existing type for compatibility
+	PowerOfAttorney       *poa.PoADefinition     `json:"power_of_attorney,omitempty"`
+	AuthorizationChain    *AuthorizationChain    `json:"authorization_chain,omitempty"`
+	LegalFramework        *LegalFrameworkInfo    `json:"legal_framework,omitempty"`
+	Restrictions          []PowerRestriction     `json:"restrictions,omitempty"`
+	RequestedActions      []string               `json:"requested_actions,omitempty"`
+	TransactionContext    map[string]interface{} `json:"transaction_context,omitempty"`
+	RequestTime           time.Time              `json:"request_time"`
 }
 
 // ExtendedAuthorizationGrant represents an RFC-0111 compliant authorization grant
 type ExtendedAuthorizationGrant struct {
-	*AuthorizationGrant    // Embed existing type for compatibility
-	ResourceOwnerID        string                   `json:"resource_owner_id"`
-	IssuerID               string                   `json:"issuer_id"`
-	AuthorizationChain     *AuthorizationChain      `json:"authorization_chain,omitempty"`
-	LegalFramework         *LegalFrameworkInfo      `json:"legal_framework,omitempty"`
-	Restrictions           []PowerRestriction       `json:"restrictions,omitempty"`
-	IssuedAt               time.Time                `json:"issued_at"`
-	ExpiresAt              time.Time                `json:"expires_at"`
-	ConsentTimestamp       time.Time                `json:"consent_timestamp"`
-	GrantCode              string                   `json:"grant_code,omitempty"`
+	*AuthorizationGrant                     // Embed existing type for compatibility
+	ResourceOwnerID     string              `json:"resource_owner_id"`
+	IssuerID            string              `json:"issuer_id"`
+	AuthorizationChain  *AuthorizationChain `json:"authorization_chain,omitempty"`
+	LegalFramework      *LegalFrameworkInfo `json:"legal_framework,omitempty"`
+	Restrictions        []PowerRestriction  `json:"restrictions,omitempty"`
+	IssuedAt            time.Time           `json:"issued_at"`
+	ExpiresAt           time.Time           `json:"expires_at"`
+	ConsentTimestamp    time.Time           `json:"consent_timestamp"`
+	GrantCode           string              `json:"grant_code,omitempty"`
 }
 
 // ValidateRequestCompliance implements RFC-0111 Section 6 step (b)
@@ -345,13 +345,13 @@ func (v *ComplianceValidator) validateRequestedScope(
 	// Validate scope against PoA authorized actions
 	if request.PowerOfAttorney != nil {
 		poaAuthorizedActions := request.PowerOfAttorney.Authorization.AuthorizedActions
-		
+
 		// Check if any actions are authorized
 		hasTransactions := len(poaAuthorizedActions.Transactions) > 0
 		hasDecisions := len(poaAuthorizedActions.Decisions) > 0
 		hasPhysicalActions := len(poaAuthorizedActions.PhysicalActions) > 0
 		hasNonPhysicalActions := len(poaAuthorizedActions.NonPhysicalActions) > 0
-		
+
 		if !hasTransactions && !hasDecisions && !hasPhysicalActions && !hasNonPhysicalActions {
 			if v.strictMode {
 				result.Checks["scope_allowed"] = false
@@ -362,7 +362,7 @@ func (v *ComplianceValidator) validateRequestedScope(
 			}
 			result.Warnings = append(result.Warnings, "PoA has no authorized actions defined")
 		}
-		
+
 		result.Checks["scope_allowed"] = true
 	} else {
 		result.Warnings = append(result.Warnings, "Cannot validate scope against PoA (not provided)")
@@ -645,22 +645,22 @@ func (v *ComplianceValidator) validateGrantRestrictions(
 
 // RequestComplianceResult represents request compliance validation result
 type RequestComplianceResult struct {
-	Valid            bool                       `json:"valid"`
-	ValidationTime   time.Time                  `json:"validation_time"`
-	Checks           map[string]bool            `json:"checks"`
-	ChainValidation  *ChainValidationResult     `json:"chain_validation,omitempty"`
-	FailureReason    string                     `json:"failure_reason,omitempty"`
-	Warnings         []string                   `json:"warnings,omitempty"`
+	Valid           bool                   `json:"valid"`
+	ValidationTime  time.Time              `json:"validation_time"`
+	Checks          map[string]bool        `json:"checks"`
+	ChainValidation *ChainValidationResult `json:"chain_validation,omitempty"`
+	FailureReason   string                 `json:"failure_reason,omitempty"`
+	Warnings        []string               `json:"warnings,omitempty"`
 }
 
 // GrantComplianceResult represents grant compliance validation result
 type GrantComplianceResult struct {
-	Valid            bool                       `json:"valid"`
-	ValidationTime   time.Time                  `json:"validation_time"`
-	Checks           map[string]bool            `json:"checks"`
-	ChainValidation  *ChainValidationResult     `json:"chain_validation,omitempty"`
-	FailureReason    string                     `json:"failure_reason,omitempty"`
-	Warnings         []string                   `json:"warnings,omitempty"`
+	Valid           bool                   `json:"valid"`
+	ValidationTime  time.Time              `json:"validation_time"`
+	Checks          map[string]bool        `json:"checks"`
+	ChainValidation *ChainValidationResult `json:"chain_validation,omitempty"`
+	FailureReason   string                 `json:"failure_reason,omitempty"`
+	Warnings        []string               `json:"warnings,omitempty"`
 }
 
 // PIPClient interface for Power Information Point
@@ -676,8 +676,8 @@ type PDPClient interface {
 
 // ClientInfo represents client information from PIP
 type ClientInfo struct {
-	ClientID   string    `json:"client_id"`
-	ClientName string    `json:"client_name"`
-	Active     bool      `json:"active"`
+	ClientID     string    `json:"client_id"`
+	ClientName   string    `json:"client_name"`
+	Active       bool      `json:"active"`
 	RegisteredAt time.Time `json:"registered_at"`
 }

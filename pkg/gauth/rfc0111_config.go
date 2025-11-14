@@ -11,38 +11,38 @@ import (
 type RFC0111Config struct {
 	// Enabled controls whether RFC-0111 functionality is active
 	Enabled bool
-	
+
 	// UseMocks controls whether to use mock external services
 	// If false, real implementations must be provided
 	UseMocks bool
-	
+
 	// Component interfaces (can be real or mock implementations)
-	PVPClient              PowerVerificationPoint
-	PIPClient              PIPClient
-	CommercialRegClient    CommercialRegisterClient
-	
+	PVPClient           PowerVerificationPoint
+	PIPClient           PIPClient
+	CommercialRegClient CommercialRegisterClient
+
 	// Storage and validators
-	SubscriptionStore      SubscriptionStore
-	AuthChainValidator     *AuthorizationChainValidator
-	FormalReqValidator     *FormalRequirementsValidator
-	ComplianceValidator    *ComplianceValidator
-	
+	SubscriptionStore   SubscriptionStore
+	AuthChainValidator  *AuthorizationChainValidator
+	FormalReqValidator  *FormalRequirementsValidator
+	ComplianceValidator *ComplianceValidator
+
 	// Flow managers
-	SubscriptionManager    *SubscriptionFlowManager
-	ComplianceTracker      ComplianceTracker
+	SubscriptionManager *SubscriptionFlowManager
+	ComplianceTracker   ComplianceTracker
 }
 
 // RFC0111Components holds initialized RFC-0111 components
 type RFC0111Components struct {
-	SubscriptionStore      SubscriptionStore
-	SubscriptionManager    *SubscriptionFlowManager
-	ComplianceTracker      ComplianceTracker
-	ComplianceValidator    *ComplianceValidator
-	AuthChainValidator     *AuthorizationChainValidator
-	FormalReqValidator     *FormalRequirementsValidator
-	PVPClient              PowerVerificationPoint
-	PIPClient              PIPClient
-	CommercialRegClient    CommercialRegisterClient
+	SubscriptionStore   SubscriptionStore
+	SubscriptionManager *SubscriptionFlowManager
+	ComplianceTracker   ComplianceTracker
+	ComplianceValidator *ComplianceValidator
+	AuthChainValidator  *AuthorizationChainValidator
+	FormalReqValidator  *FormalRequirementsValidator
+	PVPClient           PowerVerificationPoint
+	PIPClient           PIPClient
+	CommercialRegClient CommercialRegisterClient
 }
 
 // InitRFC0111FromEnv initializes RFC-0111 components based on environment variables.
@@ -63,17 +63,17 @@ func InitRFC0111FromEnv() (*RFC0111Components, error) {
 	if os.Getenv("GAUTH_RFC0111_ENABLED") != "1" {
 		return nil, nil
 	}
-	
+
 	// Determine whether to use mocks (default: yes)
 	useMocks := true
 	if os.Getenv("GAUTH_RFC0111_USE_MOCKS") == "0" {
 		useMocks = false
 	}
-	
+
 	if !useMocks {
 		return nil, fmt.Errorf("RFC-0111: real external service implementations not yet available, set GAUTH_RFC0111_USE_MOCKS=1")
 	}
-	
+
 	return InitRFC0111WithMocks()
 }
 
@@ -93,10 +93,10 @@ func createDefaultPDPEngine() pdp.Engine {
 	// This means any deny decision will override allow decisions
 	strategy := pdp.DenyOverridesStrategy{}
 	engine := pdp.NewInMemoryEngine(strategy)
-	
+
 	// Enable optional features
 	engine.WithObligationFailureDenies(true)
-	
+
 	// Add default policies for RFC-0111 compliance
 	// Policy 1: Allow authenticated requests with valid authorization chains
 	engine.AddPolicy(pdp.Policy{
@@ -115,7 +115,7 @@ func createDefaultPDPEngine() pdp.Engine {
 			"rfc":         "RFC-0111",
 		},
 	})
-	
+
 	// Policy 2: Default deny for unknown actions
 	engine.AddPolicy(pdp.Policy{
 		ID:       "rfc0111-default-deny",
@@ -133,7 +133,7 @@ func createDefaultPDPEngine() pdp.Engine {
 			"rfc":         "RFC-0111",
 		},
 	})
-	
+
 	return engine
 }
 
@@ -144,7 +144,7 @@ func InitRFC0111WithComponents(
 	pipClient PIPClient,
 	commercialRegClient CommercialRegisterClient,
 ) (*RFC0111Components, error) {
-	
+
 	if pvpClient == nil {
 		return nil, fmt.Errorf("RFC-0111: pvpClient is required")
 	}
@@ -154,34 +154,34 @@ func InitRFC0111WithComponents(
 	if commercialRegClient == nil {
 		return nil, fmt.Errorf("RFC-0111: commercialRegClient is required")
 	}
-	
+
 	// Create storage
 	subscriptionStore := NewMemorySubscriptionStore()
-	
+
 	// Create validators
 	authChainValidator := NewAuthorizationChainValidator(
 		commercialRegClient,
 		nil, // TrustServiceProvider (optional)
 		nil, // RevocationChecker (optional)
 	)
-	
+
 	formalReqValidator := NewFormalRequirementsValidator(
 		nil,   // NotarialCertificateVerifier (optional)
 		nil,   // IdentityDocumentVerifier (optional)
 		nil,   // DigitalSignatureVerifier (optional)
 		false, // strict mode (false for development)
 	)
-	
+
 	// Create PDP engine with default policy store
 	pdpEngine := createDefaultPDPEngine()
 	pdpBridge := NewPDPBridge(pdpEngine)
-	
+
 	complianceValidator := NewComplianceValidator(
 		authChainValidator,
 		pipClient,
 		pdpBridge, // PDPClient with actual PDP engine
 	)
-	
+
 	// Create subscription flow manager
 	subscriptionManager := NewSubscriptionFlowManager(
 		pvpClient,
@@ -191,19 +191,19 @@ func InitRFC0111WithComponents(
 		formalReqValidator,
 		subscriptionStore,
 	)
-	
+
 	// Create compliance tracker
 	complianceTracker := NewMemoryComplianceTracker(complianceValidator)
-	
+
 	return &RFC0111Components{
-		SubscriptionStore:      subscriptionStore,
-		SubscriptionManager:    subscriptionManager,
-		ComplianceTracker:      complianceTracker,
-		ComplianceValidator:    complianceValidator,
-		AuthChainValidator:     authChainValidator,
-		FormalReqValidator:     formalReqValidator,
-		PVPClient:              pvpClient,
-		PIPClient:              pipClient,
-		CommercialRegClient:    commercialRegClient,
+		SubscriptionStore:   subscriptionStore,
+		SubscriptionManager: subscriptionManager,
+		ComplianceTracker:   complianceTracker,
+		ComplianceValidator: complianceValidator,
+		AuthChainValidator:  authChainValidator,
+		FormalReqValidator:  formalReqValidator,
+		PVPClient:           pvpClient,
+		PIPClient:           pipClient,
+		CommercialRegClient: commercialRegClient,
 	}, nil
 }

@@ -38,9 +38,9 @@ func main() {
 		nil, // RevocationChecker (not needed for basic demo)
 	)
 	formalReqValidator := gauth.NewFormalRequirementsValidator(
-		nil, // NotarialCertificateVerifier
-		nil, // IdentityDocumentVerifier
-		nil, // DigitalSignatureVerifier
+		nil,   // NotarialCertificateVerifier
+		nil,   // IdentityDocumentVerifier
+		nil,   // DigitalSignatureVerifier
 		false, // strict mode off for demo
 	)
 	complianceValidator := gauth.NewComplianceValidator(

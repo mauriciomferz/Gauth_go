@@ -1,3 +1,10 @@
+---
+title: GAuth 1.0 README
+category: overview
+status: beta
+lastUpdated: 2025-11-14
+owners: core-maintainers
+---
 # GAuth 1.0 - Go Implementation
 
 [![CI Build](https://github.com/mauriciomferz/Gauth_go/actions/workflows/ci.yml/badge.svg)](https://github.com/mauriciomferz/Gauth_go/actions/workflows/ci.yml)
@@ -5,8 +12,28 @@
 [![Gap Matrix](docs/badges/gap-matrix.svg)](docs/GAP_MATRIX.auto.md)
 
 > **⚠️ BETA** - Comprehensive security audit, extensive testing (689+ test cases), complete documentation. Suitable for testing and evaluation.
+> **Last Updated:** 2025-11-14 (✨ 95% RFC compliance, enhanced protocol flow with 30 substeps, UI updates)
 
 A complete Go implementation of the GAuth authorization framework (RFC 0111/0115) with delegated authorization, proof-of-authorization tokens, and comprehensive security features.
+
+**✨ Latest Updates (Nov 14, 2025):**
+- Enhanced protocol flow: 30 substeps (was 19) reflecting 95% RFC compliance
+- Authorization Chain Validation
+- Extended JWT tokens with enhanced claims
+- Policy Information Point (PIP) integration
+- Commercial Register verification
+- Formal Requirements validation
+- Updated PoA visualization and Protocol Flow UI
+
+> Quick Dev Start
+> ```bash
+> # Backend
+> go build -o bin/web-server ./cmd/web-server && ./bin/web-server
+> # Frontend
+> cd web/ui-react && npm install && npm run dev
+> ```
+> API: http://localhost:8080  UI: http://localhost:3000
+> Vite proxy forwards /api -> backend; CORS middleware reflects Origin for local dev.
 
 **Status**: Beta (November 9, 2025)
 - ✅ Security: All HIGH severity issues resolved, 179 findings reviewed
@@ -14,16 +41,24 @@ A complete Go implementation of the GAuth authorization framework (RFC 0111/0115
 - ✅ Dependencies: All current, zero known CVEs
 - ✅ Documentation: 1,633+ lines (7 packages + architecture)
 
-See [Quality Status Report](PRODUCTION_READY_STATUS_REPORT.md) for complete details.
+See [Quality Status Report](PRODUCTION_READY_STATUS_REPORT.md) for complete details. See also `Dockerfile.unified` (consolidated build pipeline) and `CODEOWNERS` for ownership mapping.
 
-## 🎉 100% RFC Conformance Achieved
+## 🎉 95% RFC Conformance Achieved
 
-**Status**: 45/45 requirements implemented (November 7, 2025)
+**Status**: 45/45 requirements implemented with enhanced protocol flow (November 14, 2025)
 
 - ✅ P0 (Critical): 11/11 complete
-- ✅ P1 (High): 10/10 complete  
+- ✅ P1 (High): 10/10 complete
 - ✅ P2 (Medium): 19/19 complete
 - ✅ P3 (Low): 5/5 complete
+
+**Enhanced Protocol Implementation (30 substeps):**
+- **Subscription**: 3 substeps (registration, configuration, credentials)
+- **Matching**: 7 substeps - ✨ Added: Authorization Chain, Commercial Register, Formal Requirements
+- **Subset/Request**: 7 substeps - ✨ Added: Request Compliance, PIP Query, Extended Tokens, Grant Compliance
+- **Enforcement**: 4 substeps (supply PEP, demand PEP, disclosure, audit)
+- **Verification**: 6 substeps - ✨ Added: Extended Token validation, PVP Identity, Authorization Chain verify
+- **Audit**: 3 substeps (logging, compliance check, reporting)
 
 See [Gap Matrix](docs/GAP_MATRIX.auto.md) for detailed implementation status.
 
@@ -68,7 +103,7 @@ See [Gap Matrix](docs/GAP_MATRIX.auto.md) for detailed implementation status.
 - **Go 1.25.3 or later** (required for security patches - see [Security Advisory](#security-advisory))
 - Make (optional)
 
-### Installation
+### Installation / Local Run
 
 ```bash
 # Clone the repository
@@ -79,13 +114,73 @@ cd Gauth_go
 go test ./...
 
 # Build the web demo
-go build -o bin/web-server ./cmd/web-server
-
-# Start the demo server
-./bin/web-server
+go build -o bin/web-server ./cmd/web-server && ./bin/web-server
 ```
 
-Visit http://localhost:8080 to explore the interactive web interface.
+Visit http://localhost:8080 (API) and http://localhost:3000 (UI) to explore the interactive system.
+
+### Modern React Web Interface
+
+The webapp provides a comprehensive UI for testing and demonstrating GAuth capabilities:
+
+**Features:**
+- 🎯 **Token Management** - Create, validate, and manage authorization tokens with JWT/JWE support
+- 👤 **Identity Verification (PVP)** - Test identity verification with legal entity and individual validation
+- 🏢 **Registry Integration** - Entity lookup and verification with jurisdictional compliance
+- 🔐 **Authorization (PIP)** - Policy-based authorization with ABAC/RBAC support
+- 📜 **Power of Attorney (PoA)** - Create and validate delegation chains with geographic restrictions
+- 📊 **Real-time Metrics** - Live system performance, latency, cache statistics, and component health
+- 🧪 **E2E Testing** - Integrated test suite with 13 automated tests and detailed reporting
+- 📈 **Dynamic Analytics** - Interactive charts showing request volume and latency trends
+
+**Quick Start:**
+```bash
+# Backend (Go server on port 8080)
+go run ./cmd/web-server
+
+# Frontend (React + Vite on port 3000)
+cd web/ui-react
+npm install
+npm run dev
+```
+
+**Expose to Internet (VS Code):**
+1. Press `Cmd+J` (Mac) or `Ctrl+J` (Windows/Linux) to open bottom panel
+2. Click **"PORTS"** tab
+3. Click **"Forward a Port"** → Enter `3000`
+4. Right-click port 3000 → **Port Visibility** → **Public**
+5. Copy the generated URL (e.g., `https://xxx-3000.app.github.dev`)
+
+### Unified Dev Environment (Backend + Frontend)
+
+Use the helper script to start both services:
+
+```bash
+./scripts/dev-up.sh
+```
+
+Outputs backend & UI PIDs and log paths. Stop via:
+
+```bash
+kill $(pgrep -f web-server) $(pgrep -f vite)
+```
+
+Backend environment defaults are documented in `.env.backend.example` (copy and adjust for local needs).
+
+## 🌐 Interactive Web Demo
+
+A modern **React + TypeScript** web interface showcasing all GAuth capabilities with real-time testing:
+
+- **Token Operations** - Create, validate, and manage tokens with scope-based authorization
+- **Identity Verification (PVP)** - Mock identity verification with entity type detection
+- **Registry Services** - Entity lookup with jurisdictional compliance checks
+- **Authorization (PIP)** - Policy evaluation with geographic and sector-based rules
+- **Power of Attorney** - Create and validate delegation chains with action restrictions
+- **Live Metrics** - Real-time system performance with auto-refresh (request/sec, latency, cache hit rate)
+- **E2E Testing** - Automated test suite with 13 tests covering all major flows
+- **Dynamic Analytics** - Interactive charts and component health monitoring
+
+**Access:** http://localhost:3000 after running `npm run dev` in `web/ui-react/`
 
 ## Core Features
 
@@ -147,7 +242,7 @@ internal/
 └── jurisdiction/       # Multi-jurisdiction support
 ```
 
-## API Examples
+## API Examples (Selected)
 
 ### Create a Delegation Token
 
@@ -205,13 +300,13 @@ if result.Decision == pdp.Allow {
 The included web demo (`cmd/web-server`) provides:
 
 - **Token Management** - Create, validate, and revoke tokens
-- **Delegation Chains** - Visualize delegation hierarchies  
+- **Delegation Chains** - Visualize delegation hierarchies
 - **Policy Testing** - Test policies against requests
 - **Metrics Dashboard** - Real-time authorization metrics
 - **Audit Log Viewer** - Browse cryptographic audit trails
 - **Key Rotation** - Manual and automatic key rotation controls
 
-## Configuration
+## Configuration (Selected Environment Variables)
 
 Configuration via environment variables:
 
@@ -219,6 +314,8 @@ Configuration via environment variables:
 # Server
 GAUTH_PORT=8080
 GAUTH_HOST=localhost
+
+GAUTH_CORS_ALLOW=*           # Development only; restrict domains in production
 
 # Security
 GAUTH_JWT_SIGNING_KEY=your-secret-key
@@ -237,7 +334,9 @@ GAUTH_METRICS_ENABLED=true
 GAUTH_TRACING_ENABLED=true
 ```
 
-## Testing
+See `.env.backend.example` for a fuller set including persistence and feature flags.
+
+## Testing (Backend & Frontend)
 
 ```bash
 # Run all tests
@@ -253,8 +352,11 @@ go test ./pkg/delegation
 go test ./conformance/...
 
 # Generate coverage report
-go test -coverprofile=coverage.out ./...
-go tool cover -html=coverage.out
+go test -coverprofile=coverage.out ./... && go tool cover -html=coverage.out
+
+# Frontend (from web/ui-react)
+npm run test         # unit/component (if configured)
+npm run test:e2e     # Playwright end-to-end tests
 ```
 
 ## Performance
@@ -264,12 +366,13 @@ go tool cover -html=coverage.out
 - **Revocation Check**: < 2ms (p95)
 - **Throughput**: > 10,000 requests/sec (single instance)
 
-## Documentation
+## Documentation & Index
 
 - [Gap Matrix](docs/GAP_MATRIX.auto.md) - RFC compliance tracking
 - [API Documentation](api/openapi/gauth-api.yaml) - OpenAPI specification
 - [Threat Model](docs/THREAT_MITIGATIONS_MATRIX.yaml) - Security analysis
 - [Architecture](ORGANIZATION.md) - System architecture
+- [Docs Index](docs/INDEX.md) - Curated navigation of gap, compliance & performance reports
 - [Contributing](CONTRIBUTORS.md) - Contribution guidelines
 - [Security](SECURITY.md) - Security policy
 - [Disclaimer](DISCLAIMER.md) - Usage limitations
@@ -305,6 +408,19 @@ go version  # Must show go1.25.3 or higher
 govulncheck ./...  # Must show 0 vulnerabilities
 ```
 
+## Dockerfile Variants
+
+Multiple Dockerfiles exist for targeted scenarios:
+- `Dockerfile` (default multi-stage)
+- `Dockerfile.production` (optimized production image)
+- `Dockerfile.minimal` (static, smallest surface)
+- `Dockerfile.simple` / `Dockerfile.simple-prod` (reference builds)
+- `Dockerfile.local-arm64` (ARM64 dev convenience)
+- `Dockerfile.single-stage` (debug simplicity)
+- `Dockerfile.mock` (mock services instrumentation)
+
+See `DOCKERFILES_SUMMARY.md` for consolidation guidance.
+
 ## License
 
 See [LICENSE](LICENSE) for details.
@@ -315,16 +431,33 @@ See [LICENSE](LICENSE) for details.
 
 Do NOT use for:
 - ❌ Production systems
-- ❌ Real security requirements  
+- ❌ Real security requirements
 - ❌ Regulated data
 - ❌ Commercial applications
 
 See [DISCLAIMER.md](DISCLAIMER.md) for complete details on intentionally missing production safeguards.
 
-## Contributing
+## Contributing & Formatting
 
 Contributions welcome! See [CONTRIBUTORS.md](CONTRIBUTORS.md) for guidelines.
 
-## Acknowledgments
+### Development Tooling
 
-Built following the GAuth authorization framework specifications (RFC 0111/0115) by the Gimel Foundation.
+- `make hygiene` – format, tidy modules, generate TODO report
+- `make ci` – local CI pipeline (format check, vet, lint, race tests)
+- `scripts/dev-up.sh` – start backend + frontend together
+- `make gap-matrix` – regenerate RFC implementation status
+- `make spec-contract` – enforce OpenAPI coverage/metadata completeness
+
+For ownership clarity see [docs/STRUCTURE.md](docs/STRUCTURE.md) (proposed CODEOWNERS mapping).
+
+## Acknowledgments & Future Hardening
+
+Upcoming hardening focus:
+- Distributed PDP cache invalidation & eviction metrics
+- Attestation chain verification depth optimizations
+- Metrics persistence compaction & Prometheus registry hygiene
+- Structured error catalog & automated example coverage
+- Fuzzing (CBOR codec, policy evaluator) & negative security tests
+
+Built following the GAuth authorization framework specifications (RFC 0111/0115) by the Gimel Foundation. For structure overview and ownership, see [docs/STRUCTURE.md](docs/STRUCTURE.md) and `CODEOWNERS`.

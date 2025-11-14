@@ -12,7 +12,7 @@ func TestNewAuthorizerAdapter(t *testing.T) {
 	reg := NewRegistry()
 	engine := NewChainEngine(reg)
 	adapter := NewAuthorizerAdapter(engine)
-	
+
 	if adapter == nil {
 		t.Fatal("NewAuthorizerAdapter returned nil")
 	}
@@ -35,7 +35,7 @@ func TestAuthorizerAdapterAuthorize_Allow(t *testing.T) {
 					{
 						Actions:   []string{"read"},
 						Resources: []string{"document:123"}, // Exact match
-						Expr:      "", // Always true
+						Expr:      "",                       // Always true
 						Effect:    Allow,
 					},
 				},
@@ -47,16 +47,16 @@ func TestAuthorizerAdapterAuthorize_Allow(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to add bundle: %v", err)
 	}
-	
+
 	engine := NewChainEngine(reg)
 	adapter := NewAuthorizerAdapter(engine)
-	
+
 	req := authz.Request{
 		Subject:  "user:alice",
 		Action:   "read",
 		Resource: "document:123",
 	}
-	
+
 	decision, err := adapter.Authorize(context.Background(), req)
 	if err != nil {
 		t.Fatalf("Authorize returned error: %v", err)
@@ -95,16 +95,16 @@ func TestAuthorizerAdapterAuthorize_Deny(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to add bundle: %v", err)
 	}
-	
+
 	engine := NewChainEngine(reg)
 	adapter := NewAuthorizerAdapter(engine)
-	
+
 	req := authz.Request{
 		Subject:  "user:bob",
 		Action:   "delete",
 		Resource: "document:sensitive",
 	}
-	
+
 	decision, err := adapter.Authorize(context.Background(), req)
 	if err != nil {
 		t.Fatalf("Authorize returned error: %v", err)
@@ -143,17 +143,17 @@ func TestAuthorizerAdapterAuthorize_NotApplicable(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to add bundle: %v", err)
 	}
-	
+
 	engine := NewChainEngine(reg)
 	adapter := NewAuthorizerAdapter(engine)
-	
+
 	// Request from different user/action
 	req := authz.Request{
 		Subject:  "user:david",
 		Action:   "read",
 		Resource: "document:public",
 	}
-	
+
 	decision, err := adapter.Authorize(context.Background(), req)
 	if err != nil {
 		t.Fatalf("Authorize returned error: %v", err)
@@ -168,13 +168,13 @@ func TestAuthorizerAdapterAuthorize_EmptyRegistry(t *testing.T) {
 	reg := NewRegistry()
 	engine := NewChainEngine(reg)
 	adapter := NewAuthorizerAdapter(engine)
-	
+
 	req := authz.Request{
 		Subject:  "user:anyone",
 		Action:   "read",
 		Resource: "document:any",
 	}
-	
+
 	decision, err := adapter.Authorize(context.Background(), req)
 	if err != nil {
 		t.Fatalf("Authorize returned error: %v", err)
@@ -210,10 +210,10 @@ func TestAuthorizerAdapterAuthorize_ContextAttributes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to add bundle: %v", err)
 	}
-	
+
 	engine := NewChainEngine(reg)
 	adapter := NewAuthorizerAdapter(engine)
-	
+
 	// Request with matching context
 	req := authz.Request{
 		Subject:  "user:eve",
@@ -223,7 +223,7 @@ func TestAuthorizerAdapterAuthorize_ContextAttributes(t *testing.T) {
 			"ip_address": "192.168.1.1",
 		},
 	}
-	
+
 	decision, err := adapter.Authorize(context.Background(), req)
 	if err != nil {
 		t.Fatalf("Authorize returned error: %v", err)
@@ -231,7 +231,7 @@ func TestAuthorizerAdapterAuthorize_ContextAttributes(t *testing.T) {
 	if !decision.Allow {
 		t.Errorf("expected Allow=true with matching context, got Allow=%v", decision.Allow)
 	}
-	
+
 	// Request with non-matching context
 	req.Context = map[string]string{
 		"ip_address": "10.0.0.1",
@@ -283,16 +283,16 @@ func TestAuthorizerAdapterAuthorize_DenyOverrides(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to add bundle: %v", err)
 	}
-	
+
 	engine := NewChainEngine(reg)
 	adapter := NewAuthorizerAdapter(engine)
-	
+
 	req := authz.Request{
 		Subject:  "user:frank",
 		Action:   "read",
 		Resource: "document:sensitive",
 	}
-	
+
 	decision, err := adapter.Authorize(context.Background(), req)
 	if err != nil {
 		t.Fatalf("Authorize returned error: %v", err)

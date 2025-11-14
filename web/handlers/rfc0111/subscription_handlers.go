@@ -36,8 +36,8 @@ func NewSubscriptionHandlers(manager *gauth.SubscriptionFlowManager, store gauth
 // RFC-0111 Step I: Owner's Authorizer Identity Proof
 func (h *SubscriptionHandlers) CreateSubscription(c *gin.Context) {
 	var req struct {
-		OwnersAuthorizerID    string `json:"owners_authorizer_id" binding:"required"`
-		IdentityProofRequest  struct {
+		OwnersAuthorizerID   string `json:"owners_authorizer_id" binding:"required"`
+		IdentityProofRequest struct {
 			SubjectID     string                 `json:"subject_id" binding:"required"`
 			IdentityType  string                 `json:"identity_type" binding:"required"`
 			ProofMethod   string                 `json:"proof_method" binding:"required"`
@@ -317,10 +317,10 @@ func (h *SubscriptionHandlers) ExecuteStepV(c *gin.Context) {
 	subscriptionID := c.Param("id")
 
 	var req struct {
-		ClientID              string `json:"client_id" binding:"required"`
+		ClientID              string      `json:"client_id" binding:"required"`
 		PoACredential         interface{} `json:"poa_credential" binding:"required"`
-		EnableIdentitySharing bool   `json:"enable_identity_sharing"`
-		EnablePrompting       bool   `json:"enable_prompting"`
+		EnableIdentitySharing bool        `json:"enable_identity_sharing"`
+		EnablePrompting       bool        `json:"enable_prompting"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -365,7 +365,7 @@ func (h *SubscriptionHandlers) ExecuteStepV(c *gin.Context) {
 			},
 		},
 	}
-	
+
 	err := h.subscriptionManager.ExecuteStepV(
 		c.Request.Context(),
 		subscriptionID,

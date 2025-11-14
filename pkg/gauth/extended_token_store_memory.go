@@ -9,11 +9,11 @@ import (
 // MemoryExtendedTokenStore is an in-memory implementation of ExtendedTokenStore.
 // This is suitable for testing and development. For production, use PostgresExtendedTokenStore.
 type MemoryExtendedTokenStore struct {
-	mu              sync.RWMutex
-	tokens          map[string]*storedToken // accessToken -> token
-	refreshTokens   map[string]*storedToken // refreshToken -> token
-	revokedTokens   map[string]time.Time    // accessToken -> revoked time
-	clientIndex     map[string][]string     // clientID -> []accessToken
+	mu            sync.RWMutex
+	tokens        map[string]*storedToken // accessToken -> token
+	refreshTokens map[string]*storedToken // refreshToken -> token
+	revokedTokens map[string]time.Time    // accessToken -> revoked time
+	clientIndex   map[string][]string     // clientID -> []accessToken
 }
 
 // storedToken wraps ExtendedToken with metadata
@@ -166,18 +166,18 @@ func (s *MemoryExtendedTokenStore) DeleteExpiredTokens(ctx context.Context) (int
 	// Delete expired tokens
 	for _, accessToken := range expiredTokens {
 		stored := s.tokens[accessToken]
-		
+
 		// Remove from main storage
 		delete(s.tokens, accessToken)
-		
+
 		// Remove from refresh token index
 		if stored.Token.RefreshToken != "" {
 			delete(s.refreshTokens, stored.Token.RefreshToken)
 		}
-		
+
 		// Remove from revoked index
 		delete(s.revokedTokens, accessToken)
-		
+
 		// Remove from client index
 		clientID := extractClientID(stored.Token)
 		if clientID != "" {
@@ -195,7 +195,7 @@ func (s *MemoryExtendedTokenStore) DeleteExpiredTokens(ctx context.Context) (int
 				}
 			}
 		}
-		
+
 		count++
 	}
 
@@ -228,25 +228,25 @@ func (s *MemoryExtendedTokenStore) ListTokensByResourceOwner(ctx context.Context
 	defer s.mu.RUnlock()
 
 	var result []*ExtendedToken
-	
+
 	// Iterate through all tokens and filter by resource owner
 	for accessToken, stored := range s.tokens {
 		// Skip revoked tokens
 		if _, revoked := s.revokedTokens[accessToken]; revoked {
 			continue
 		}
-		
+
 		// Skip expired tokens
 		if isTokenExpired(stored.Token) {
 			continue
 		}
-		
+
 		// Check if this token belongs to the resource owner
 		if stored.Token.ResourceOwner != nil && stored.Token.ResourceOwner.OwnerID == ownerID {
 			result = append(result, stored.Token)
 		}
 	}
-	
+
 	return result, nil
 }
 
@@ -270,7 +270,7 @@ func (s *MemoryExtendedTokenStore) RevokeTokenWithReason(ctx context.Context, ac
 	if stored.Token.AuditTrail == nil {
 		stored.Token.AuditTrail = []AuditEntry{}
 	}
-	
+
 	stored.Token.AuditTrail = append(stored.Token.AuditTrail, AuditEntry{
 		Timestamp: now,
 		Action:    "token_revoked",

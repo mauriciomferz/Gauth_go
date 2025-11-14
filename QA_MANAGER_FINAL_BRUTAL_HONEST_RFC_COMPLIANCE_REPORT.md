@@ -1,3 +1,12 @@
+---
+title: QA Manager Final Brutal Honest RFC Compliance Assessment
+ category: compliance-report
+ status: final
+ lastUpdated: 2025-11-12
+ owners: compliance-team
+ refreshCadence: quarterly
+ source: qa-assessment
+ ---
 # QA MANAGER: FINAL BRUTAL HONEST RFC COMPLIANCE ASSESSMENT
 
 **UPDATED:** November 11, 2025 - Comprehensive Deep-Dive Analysis

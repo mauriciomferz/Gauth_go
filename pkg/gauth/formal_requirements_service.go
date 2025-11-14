@@ -46,11 +46,11 @@ type DocumentRequirementCheck struct {
 
 // LegalComplianceCheck contains legal framework compliance validation results
 type LegalComplianceCheck struct {
-	Framework      string
-	Compliant      bool
-	Requirements   []string
-	Violations     []string
-	Warnings       []string
+	Framework       string
+	Compliant       bool
+	Requirements    []string
+	Violations      []string
+	Warnings        []string
 	LegalReferences []string
 }
 
@@ -61,23 +61,23 @@ type FormalRequirementsServiceConfig struct {
 	EnableDocumentChecks     bool
 	EnableNotaryVerification bool
 	EnableLegalCompliance    bool
-	CacheDuration           time.Duration
+	CacheDuration            time.Duration
 }
 
 // FormalRequirementsService provides comprehensive formal requirements validation
 type FormalRequirementsService struct {
-	mu                      sync.RWMutex
-	config                  FormalRequirementsServiceConfig
-	validator               *FormalRequirementsValidator
-	legalValidator          *compliance.LegalFrameworkValidator
-	jurisdictionReqs        map[string]*JurisdictionRequirement
-	documentReqsCache       map[string]*DocumentRequirementCheck
-	complianceCheckCache    map[string]*LegalComplianceCheck
-	validationAttempts      int64
-	validationSuccesses     int64
-	validationFailures      int64
-	jurisdictionChecks      map[string]int64
-	lastCacheClear          time.Time
+	mu                   sync.RWMutex
+	config               FormalRequirementsServiceConfig
+	validator            *FormalRequirementsValidator
+	legalValidator       *compliance.LegalFrameworkValidator
+	jurisdictionReqs     map[string]*JurisdictionRequirement
+	documentReqsCache    map[string]*DocumentRequirementCheck
+	complianceCheckCache map[string]*LegalComplianceCheck
+	validationAttempts   int64
+	validationSuccesses  int64
+	validationFailures   int64
+	jurisdictionChecks   map[string]int64
+	lastCacheClear       time.Time
 }
 
 // ValidationRequest contains all data needed for formal requirements validation
@@ -93,45 +93,45 @@ type ValidationRequest struct {
 
 // ComprehensiveValidationResult contains complete validation results
 type ComprehensiveValidationResult struct {
-	Valid                    bool
-	ValidationTimestamp      time.Time
-	
+	Valid               bool
+	ValidationTimestamp time.Time
+
 	// Component results
-	FormalRequirements       *FormalRequirementsResult
-	JurisdictionCompliance   *JurisdictionComplianceResult
-	DocumentRequirements     []DocumentRequirementCheck
-	LegalCompliance          *LegalComplianceCheck
-	NotaryVerification       *NotarialVerificationResult
-	
+	FormalRequirements     *FormalRequirementsResult
+	JurisdictionCompliance *JurisdictionComplianceResult
+	DocumentRequirements   []DocumentRequirementCheck
+	LegalCompliance        *LegalComplianceCheck
+	NotaryVerification     *NotarialVerificationResult
+
 	// Summary
-	OverallScore             float64 // 0-100
-	CriticalIssues           []string
-	MinorIssues              []string
-	Warnings                 []string
-	Recommendations          []string
-	
+	OverallScore    float64 // 0-100
+	CriticalIssues  []string
+	MinorIssues     []string
+	Warnings        []string
+	Recommendations []string
+
 	// Metadata
-	ValidationDuration       time.Duration
-	ValidatorVersion         string
+	ValidationDuration time.Duration
+	ValidatorVersion   string
 }
 
 // JurisdictionComplianceResult contains jurisdiction-specific validation results
 type JurisdictionComplianceResult struct {
-	Jurisdiction            string
-	Compliant               bool
-	RequirementsMet         []string
-	RequirementsNotMet      []string
-	DocumentsSatisfied      []string
-	DocumentsMissing        []string
-	NotarizationRequired    bool
-	NotarizationSatisfied   bool
-	ValueLimitCompliant     bool
-	MaxAllowedValue         float64
-	ActualValue             float64
-	SignatureCountRequired  int
-	SignatureCountProvided  int
-	LegalReferences         []string
-	Issues                  []string
+	Jurisdiction           string
+	Compliant              bool
+	RequirementsMet        []string
+	RequirementsNotMet     []string
+	DocumentsSatisfied     []string
+	DocumentsMissing       []string
+	NotarizationRequired   bool
+	NotarizationSatisfied  bool
+	ValueLimitCompliant    bool
+	MaxAllowedValue        float64
+	ActualValue            float64
+	SignatureCountRequired int
+	SignatureCountProvided int
+	LegalReferences        []string
+	Issues                 []string
 }
 
 // NewFormalRequirementsService creates a new formal requirements service
@@ -149,7 +149,7 @@ func NewFormalRequirementsService(
 		jurisdictionChecks:   make(map[string]int64),
 		lastCacheClear:       time.Now(),
 	}
-	
+
 	service.initializeDefaultJurisdictions()
 	return service
 }
@@ -160,22 +160,22 @@ func (s *FormalRequirementsService) ValidateComprehensive(
 	req *ValidationRequest,
 ) (*ComprehensiveValidationResult, error) {
 	startTime := time.Now()
-	
+
 	s.mu.Lock()
 	s.validationAttempts++
 	s.mu.Unlock()
-	
+
 	result := &ComprehensiveValidationResult{
-		Valid:               true,
-		ValidationTimestamp: startTime,
-		ValidatorVersion:    "1.0.0",
-		CriticalIssues:      []string{},
-		MinorIssues:         []string{},
-		Warnings:            []string{},
-		Recommendations:     []string{},
+		Valid:                true,
+		ValidationTimestamp:  startTime,
+		ValidatorVersion:     "1.0.0",
+		CriticalIssues:       []string{},
+		MinorIssues:          []string{},
+		Warnings:             []string{},
+		Recommendations:      []string{},
 		DocumentRequirements: []DocumentRequirementCheck{},
 	}
-	
+
 	// Step 1: Basic formal requirements validation
 	if s.config.EnableDocumentChecks {
 		formalResult, err := s.validator.ValidateFormalRequirements(
@@ -189,79 +189,79 @@ func (s *FormalRequirementsService) ValidateComprehensive(
 			return nil, fmt.Errorf("formal requirements validation failed: %w", err)
 		}
 		result.FormalRequirements = formalResult
-		
+
 		if !formalResult.Valid {
 			result.Valid = false
 			result.CriticalIssues = append(result.CriticalIssues, formalResult.Issues...)
 		}
 		result.Warnings = append(result.Warnings, formalResult.Warnings...)
 	}
-	
+
 	// Step 2: Jurisdiction-specific compliance
 	if s.config.EnableJurisdictionChecks && req.Jurisdiction != "" {
 		jurisdictionResult, err := s.validateJurisdictionCompliance(ctx, req)
 		if err != nil {
-			result.MinorIssues = append(result.MinorIssues, 
+			result.MinorIssues = append(result.MinorIssues,
 				fmt.Sprintf("Jurisdiction validation error: %v", err))
 		} else {
 			result.JurisdictionCompliance = jurisdictionResult
-			
+
 			if !jurisdictionResult.Compliant {
 				result.Valid = false
 				result.CriticalIssues = append(result.CriticalIssues, jurisdictionResult.Issues...)
 			}
 		}
 	}
-	
+
 	// Step 3: Document requirements checking
 	if s.config.EnableDocumentChecks {
 		docChecks := s.checkDocumentRequirements(ctx, req)
 		result.DocumentRequirements = docChecks
-		
+
 		for _, check := range docChecks {
 			if !check.Satisfied {
 				result.Valid = false
-				result.CriticalIssues = append(result.CriticalIssues, 
-					fmt.Sprintf("Document requirement not satisfied: %s - %s", 
+				result.CriticalIssues = append(result.CriticalIssues,
+					fmt.Sprintf("Document requirement not satisfied: %s - %s",
 						check.RequirementType, check.Details))
 			}
 		}
 	}
-	
+
 	// Step 4: Notary verification
 	if s.config.EnableNotaryVerification && req.NotaryCert != nil {
 		notaryResult, err := s.validator.ValidateNotarialCertification(ctx, req.NotaryCert)
 		if err != nil {
-			result.MinorIssues = append(result.MinorIssues, 
+			result.MinorIssues = append(result.MinorIssues,
 				fmt.Sprintf("Notary verification error: %v", err))
 		} else {
 			result.NotaryVerification = notaryResult
-			
+
 			if !notaryResult.Valid {
 				result.Valid = false
 				result.CriticalIssues = append(result.CriticalIssues, notaryResult.Issues...)
 			}
 		}
 	}
-	
+
 	// Step 5: Legal framework compliance
 	if s.config.EnableLegalCompliance {
 		legalCheck := s.checkLegalCompliance(ctx, req)
 		result.LegalCompliance = legalCheck
-		
+
 		if !legalCheck.Compliant {
 			result.Valid = false
 			result.CriticalIssues = append(result.CriticalIssues, legalCheck.Violations...)
 		}
 		result.Warnings = append(result.Warnings, legalCheck.Warnings...)
 	}
-	
+
 	// Calculate overall score
 	result.OverallScore = s.calculateComplianceScore(result)
-	
+
 	// Add recommendations
 	result.Recommendations = s.generateRecommendations(result)
-	
+
 	// Record metrics
 	result.ValidationDuration = time.Since(startTime)
 	s.mu.Lock()
@@ -274,7 +274,7 @@ func (s *FormalRequirementsService) ValidateComprehensive(
 		s.jurisdictionChecks[req.Jurisdiction]++
 	}
 	s.mu.Unlock()
-	
+
 	return result, nil
 }
 
@@ -286,11 +286,11 @@ func (s *FormalRequirementsService) validateJurisdictionCompliance(
 	s.mu.RLock()
 	jurisdictionReq, exists := s.jurisdictionReqs[req.Jurisdiction]
 	s.mu.RUnlock()
-	
+
 	if !exists {
 		return nil, fmt.Errorf("unsupported jurisdiction: %s", req.Jurisdiction)
 	}
-	
+
 	result := &JurisdictionComplianceResult{
 		Jurisdiction:           req.Jurisdiction,
 		Compliant:              true,
@@ -305,45 +305,45 @@ func (s *FormalRequirementsService) validateJurisdictionCompliance(
 		SignatureCountRequired: jurisdictionReq.RequiredSignatures,
 		SignatureCountProvided: len(req.DigitalSigs),
 	}
-	
+
 	// Check notarization requirement
 	result.NotarizationRequired = jurisdictionReq.RequiresNotarization
-	result.NotarizationSatisfied = req.NotaryCert != nil && 
-		!req.NotaryCert.ExpirationDate.IsZero() && 
+	result.NotarizationSatisfied = req.NotaryCert != nil &&
+		!req.NotaryCert.ExpirationDate.IsZero() &&
 		req.NotaryCert.ExpirationDate.After(time.Now())
-	
+
 	if result.NotarizationRequired && !result.NotarizationSatisfied {
 		result.Compliant = false
 		result.RequirementsNotMet = append(result.RequirementsNotMet, "Notarization required but not provided")
-		result.Issues = append(result.Issues, 
+		result.Issues = append(result.Issues,
 			fmt.Sprintf("Jurisdiction %s requires notarization", req.Jurisdiction))
 	} else if result.NotarizationRequired && result.NotarizationSatisfied {
 		result.RequirementsMet = append(result.RequirementsMet, "Notarization requirement satisfied")
 	}
-	
+
 	// Check value limits
 	result.ValueLimitCompliant = req.TransactionValue <= jurisdictionReq.MaxValueWithoutBoard
 	if !result.ValueLimitCompliant {
 		result.Compliant = false
 		result.RequirementsNotMet = append(result.RequirementsNotMet, "Transaction value exceeds limits")
-		result.Issues = append(result.Issues, 
-			fmt.Sprintf("Value %.2f exceeds maximum %.2f without board approval", 
+		result.Issues = append(result.Issues,
+			fmt.Sprintf("Value %.2f exceeds maximum %.2f without board approval",
 				req.TransactionValue, jurisdictionReq.MaxValueWithoutBoard))
 	} else {
 		result.RequirementsMet = append(result.RequirementsMet, "Value limit compliance satisfied")
 	}
-	
+
 	// Check signature count
 	if len(req.DigitalSigs) < jurisdictionReq.RequiredSignatures {
 		result.Compliant = false
 		result.RequirementsNotMet = append(result.RequirementsNotMet, "Insufficient signatures")
-		result.Issues = append(result.Issues, 
-			fmt.Sprintf("Jurisdiction requires %d signatures, provided %d", 
+		result.Issues = append(result.Issues,
+			fmt.Sprintf("Jurisdiction requires %d signatures, provided %d",
 				jurisdictionReq.RequiredSignatures, len(req.DigitalSigs)))
 	} else {
 		result.RequirementsMet = append(result.RequirementsMet, "Signature count requirement satisfied")
 	}
-	
+
 	// Check required documents
 	for _, requiredDoc := range jurisdictionReq.RequiredDocuments {
 		found := false
@@ -357,11 +357,11 @@ func (s *FormalRequirementsService) validateJurisdictionCompliance(
 		if !found {
 			result.Compliant = false
 			result.DocumentsMissing = append(result.DocumentsMissing, requiredDoc)
-			result.RequirementsNotMet = append(result.RequirementsNotMet, 
+			result.RequirementsNotMet = append(result.RequirementsNotMet,
 				fmt.Sprintf("Required document missing: %s", requiredDoc))
 		}
 	}
-	
+
 	// Check ID types
 	for _, doc := range req.IdentityDocs {
 		accepted := false
@@ -372,12 +372,12 @@ func (s *FormalRequirementsService) validateJurisdictionCompliance(
 			}
 		}
 		if !accepted {
-			result.Issues = append(result.Issues, 
-				fmt.Sprintf("ID type '%s' not accepted in jurisdiction %s", 
+			result.Issues = append(result.Issues,
+				fmt.Sprintf("ID type '%s' not accepted in jurisdiction %s",
 					doc.DocumentType, req.Jurisdiction))
 		}
 	}
-	
+
 	return result, nil
 }
 
@@ -387,7 +387,7 @@ func (s *FormalRequirementsService) checkDocumentRequirements(
 	req *ValidationRequest,
 ) []DocumentRequirementCheck {
 	checks := []DocumentRequirementCheck{}
-	
+
 	// Check 1: Written form requirement
 	writtenFormCheck := DocumentRequirementCheck{
 		RequirementType: "written_form",
@@ -396,14 +396,14 @@ func (s *FormalRequirementsService) checkDocumentRequirements(
 		Evidence:        []string{},
 		Issues:          []string{},
 	}
-	
+
 	if req.PoADefinition == nil {
 		writtenFormCheck.Satisfied = false
 		writtenFormCheck.Issues = append(writtenFormCheck.Issues, "No PoA definition provided")
 	} else {
-		writtenFormCheck.Evidence = append(writtenFormCheck.Evidence, 
+		writtenFormCheck.Evidence = append(writtenFormCheck.Evidence,
 			"PoA definition document present")
-		
+
 		// Check if principal and authorized client are specified
 		if req.PoADefinition.Parties.Principal.Identity == "" {
 			writtenFormCheck.Satisfied = false
@@ -415,7 +415,7 @@ func (s *FormalRequirementsService) checkDocumentRequirements(
 		}
 	}
 	checks = append(checks, writtenFormCheck)
-	
+
 	// Check 2: Identity verification requirement
 	identityCheck := DocumentRequirementCheck{
 		RequirementType: "identity_verification",
@@ -424,24 +424,24 @@ func (s *FormalRequirementsService) checkDocumentRequirements(
 		Evidence:        []string{},
 		Issues:          []string{},
 	}
-	
+
 	if len(req.IdentityDocs) == 0 {
 		identityCheck.Issues = append(identityCheck.Issues, "No identity documents provided")
 	} else {
 		for _, doc := range req.IdentityDocs {
 			// Consider document verified if it has an expiration date in the future
 			if !doc.ExpirationDate.IsZero() && doc.ExpirationDate.After(time.Now()) {
-				identityCheck.Evidence = append(identityCheck.Evidence, 
+				identityCheck.Evidence = append(identityCheck.Evidence,
 					fmt.Sprintf("%s verified: %s", doc.DocumentType, doc.DocumentNumber))
 			} else {
 				identityCheck.Satisfied = false
-				identityCheck.Issues = append(identityCheck.Issues, 
+				identityCheck.Issues = append(identityCheck.Issues,
 					fmt.Sprintf("%s not verified or expired: %s", doc.DocumentType, doc.DocumentNumber))
 			}
 		}
 	}
 	checks = append(checks, identityCheck)
-	
+
 	// Check 3: Signature requirement
 	signatureCheck := DocumentRequirementCheck{
 		RequirementType: "digital_signature",
@@ -450,7 +450,7 @@ func (s *FormalRequirementsService) checkDocumentRequirements(
 		Evidence:        []string{},
 		Issues:          []string{},
 	}
-	
+
 	if len(req.DigitalSigs) == 0 {
 		signatureCheck.Issues = append(signatureCheck.Issues, "No digital signatures provided")
 	} else {
@@ -461,7 +461,7 @@ func (s *FormalRequirementsService) checkDocumentRequirements(
 				if signerInfo == "" {
 					signerInfo = "Unknown"
 				}
-				signatureCheck.Evidence = append(signatureCheck.Evidence, 
+				signatureCheck.Evidence = append(signatureCheck.Evidence,
 					fmt.Sprintf("Valid signature from %s", signerInfo))
 			} else {
 				signatureCheck.Satisfied = false
@@ -469,13 +469,13 @@ func (s *FormalRequirementsService) checkDocumentRequirements(
 				if signerInfo == "" {
 					signerInfo = "Unknown"
 				}
-				signatureCheck.Issues = append(signatureCheck.Issues, 
+				signatureCheck.Issues = append(signatureCheck.Issues,
 					fmt.Sprintf("Invalid signature from %s", signerInfo))
 			}
 		}
 	}
 	checks = append(checks, signatureCheck)
-	
+
 	// Check 4: Scope specification requirement
 	scopeCheck := DocumentRequirementCheck{
 		RequirementType: "scope_specification",
@@ -484,23 +484,23 @@ func (s *FormalRequirementsService) checkDocumentRequirements(
 		Evidence:        []string{},
 		Issues:          []string{},
 	}
-	
+
 	if req.PoADefinition != nil {
 		actionCount := len(req.PoADefinition.Authorization.AuthorizedActions.Transactions) +
 			len(req.PoADefinition.Authorization.AuthorizedActions.Decisions) +
 			len(req.PoADefinition.Authorization.AuthorizedActions.PhysicalActions) +
 			len(req.PoADefinition.Authorization.AuthorizedActions.NonPhysicalActions)
-		
+
 		if actionCount == 0 {
 			scopeCheck.Satisfied = false
 			scopeCheck.Issues = append(scopeCheck.Issues, "No authorized actions specified")
 		} else {
-			scopeCheck.Evidence = append(scopeCheck.Evidence, 
+			scopeCheck.Evidence = append(scopeCheck.Evidence,
 				fmt.Sprintf("%d authorized actions specified", actionCount))
 		}
 	}
 	checks = append(checks, scopeCheck)
-	
+
 	// Check 5: Validity period requirement
 	validityCheck := DocumentRequirementCheck{
 		RequirementType: "validity_period",
@@ -509,20 +509,20 @@ func (s *FormalRequirementsService) checkDocumentRequirements(
 		Evidence:        []string{},
 		Issues:          []string{},
 	}
-	
+
 	if req.PoADefinition != nil {
 		if req.PoADefinition.Requirements.ValidityPeriod.StartTime.IsZero() {
 			validityCheck.Satisfied = false
 			validityCheck.Issues = append(validityCheck.Issues, "Start time not specified")
 		} else {
-			validityCheck.Evidence = append(validityCheck.Evidence, 
-				fmt.Sprintf("Validity period: %s to %s", 
+			validityCheck.Evidence = append(validityCheck.Evidence,
+				fmt.Sprintf("Validity period: %s to %s",
 					req.PoADefinition.Requirements.ValidityPeriod.StartTime.Format(time.RFC3339),
 					req.PoADefinition.Requirements.ValidityPeriod.EndTime.Format(time.RFC3339)))
 		}
 	}
 	checks = append(checks, validityCheck)
-	
+
 	return checks
 }
 
@@ -539,31 +539,31 @@ func (s *FormalRequirementsService) checkLegalCompliance(
 		Warnings:        []string{},
 		LegalReferences: []string{},
 	}
-	
+
 	if req.Jurisdiction == "" {
 		check.Warnings = append(check.Warnings, "No jurisdiction specified")
 		return check
 	}
-	
+
 	// Convert jurisdiction string to compliance.Jurisdiction enum
 	jurisdiction := compliance.Jurisdiction(req.Jurisdiction)
-	
+
 	// Determine action from PoA scope
 	action := "delegation"
 	if req.PoADefinition != nil && len(req.PoADefinition.Authorization.AuthorizedActions.Transactions) > 0 {
 		action = "financial_transaction"
 	}
-	
+
 	// Validate against legal framework
 	err := s.legalValidator.ValidateJurisdiction(ctx, jurisdiction, action)
 	if err != nil {
 		check.Compliant = false
 		check.Violations = append(check.Violations, err.Error())
 	} else {
-		check.Requirements = append(check.Requirements, 
+		check.Requirements = append(check.Requirements,
 			fmt.Sprintf("Jurisdiction %s compliance validated for action: %s", req.Jurisdiction, action))
 	}
-	
+
 	// Get jurisdiction-specific rules
 	rules, err := s.legalValidator.GetJurisdictionRules(jurisdiction)
 	if err == nil {
@@ -571,19 +571,19 @@ func (s *FormalRequirementsService) checkLegalCompliance(
 		if valueLimit, exists := rules.ValueLimits[action]; exists {
 			if req.TransactionValue > valueLimit {
 				check.Compliant = false
-				check.Violations = append(check.Violations, 
-					fmt.Sprintf("Transaction value %.2f exceeds jurisdiction limit %.2f for action %s", 
+				check.Violations = append(check.Violations,
+					fmt.Sprintf("Transaction value %.2f exceeds jurisdiction limit %.2f for action %s",
 						req.TransactionValue, valueLimit, action))
 			}
 		}
-		
+
 		// Check approval requirements
 		if approvalLevel, exists := rules.RequiredApprovals[action]; exists {
-			check.Requirements = append(check.Requirements, 
+			check.Requirements = append(check.Requirements,
 				fmt.Sprintf("Approval level required: %s", approvalLevel))
 		}
 	}
-	
+
 	return check
 }
 
@@ -592,28 +592,28 @@ func (s *FormalRequirementsService) calculateComplianceScore(
 	result *ComprehensiveValidationResult,
 ) float64 {
 	score := 100.0
-	
+
 	// Deduct for critical issues (10 points each, max 50)
 	criticalDeduction := float64(len(result.CriticalIssues)) * 10.0
 	if criticalDeduction > 50.0 {
 		criticalDeduction = 50.0
 	}
 	score -= criticalDeduction
-	
+
 	// Deduct for minor issues (3 points each, max 20)
 	minorDeduction := float64(len(result.MinorIssues)) * 3.0
 	if minorDeduction > 20.0 {
 		minorDeduction = 20.0
 	}
 	score -= minorDeduction
-	
+
 	// Deduct for warnings (1 point each, max 10)
 	warningDeduction := float64(len(result.Warnings))
 	if warningDeduction > 10.0 {
 		warningDeduction = 10.0
 	}
 	score -= warningDeduction
-	
+
 	// Deduct for unsatisfied document requirements (5 points each, max 20)
 	unsatisfiedCount := 0
 	for _, check := range result.DocumentRequirements {
@@ -626,11 +626,11 @@ func (s *FormalRequirementsService) calculateComplianceScore(
 		docDeduction = 20.0
 	}
 	score -= docDeduction
-	
+
 	if score < 0 {
 		score = 0
 	}
-	
+
 	return score
 }
 
@@ -639,49 +639,49 @@ func (s *FormalRequirementsService) generateRecommendations(
 	result *ComprehensiveValidationResult,
 ) []string {
 	recommendations := []string{}
-	
+
 	// Check notarization
-	if result.JurisdictionCompliance != nil && 
-	   result.JurisdictionCompliance.NotarizationRequired && 
-	   !result.JurisdictionCompliance.NotarizationSatisfied {
-		recommendations = append(recommendations, 
+	if result.JurisdictionCompliance != nil &&
+		result.JurisdictionCompliance.NotarizationRequired &&
+		!result.JurisdictionCompliance.NotarizationSatisfied {
+		recommendations = append(recommendations,
 			"Obtain notarial certification to satisfy jurisdiction requirements")
 	}
-	
+
 	// Check document requirements
 	for _, check := range result.DocumentRequirements {
 		if !check.Satisfied {
-			recommendations = append(recommendations, 
+			recommendations = append(recommendations,
 				fmt.Sprintf("Satisfy %s requirement: %s", check.RequirementType, check.Details))
 		}
 	}
-	
+
 	// Check value limits
 	if result.JurisdictionCompliance != nil && !result.JurisdictionCompliance.ValueLimitCompliant {
-		recommendations = append(recommendations, 
+		recommendations = append(recommendations,
 			"Obtain board approval for transaction exceeding value limits")
 	}
-	
+
 	// Check signatures
-	if result.JurisdictionCompliance != nil && 
-	   result.JurisdictionCompliance.SignatureCountProvided < result.JurisdictionCompliance.SignatureCountRequired {
-		recommendations = append(recommendations, 
-			fmt.Sprintf("Obtain %d additional signature(s) to meet jurisdiction requirements", 
-				result.JurisdictionCompliance.SignatureCountRequired - result.JurisdictionCompliance.SignatureCountProvided))
+	if result.JurisdictionCompliance != nil &&
+		result.JurisdictionCompliance.SignatureCountProvided < result.JurisdictionCompliance.SignatureCountRequired {
+		recommendations = append(recommendations,
+			fmt.Sprintf("Obtain %d additional signature(s) to meet jurisdiction requirements",
+				result.JurisdictionCompliance.SignatureCountRequired-result.JurisdictionCompliance.SignatureCountProvided))
 	}
-	
+
 	// Check legal compliance
 	if result.LegalCompliance != nil && !result.LegalCompliance.Compliant {
-		recommendations = append(recommendations, 
+		recommendations = append(recommendations,
 			"Review and address legal framework violations before proceeding")
 	}
-	
+
 	// Score-based recommendations
 	if result.OverallScore < 70.0 {
-		recommendations = append(recommendations, 
+		recommendations = append(recommendations,
 			"Compliance score is below acceptable threshold - comprehensive review recommended")
 	}
-	
+
 	return recommendations
 }
 
@@ -689,7 +689,7 @@ func (s *FormalRequirementsService) generateRecommendations(
 func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	// Germany (DE) - Strict requirements
 	s.jurisdictionReqs["DE"] = &JurisdictionRequirement{
 		Jurisdiction:         "DE",
@@ -707,7 +707,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"BGB §167", "BGB §126"},
 	}
-	
+
 	// United States (US) - Varies by state
 	s.jurisdictionReqs["US"] = &JurisdictionRequirement{
 		Jurisdiction:         "US",
@@ -725,7 +725,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Uniform Power of Attorney Act"},
 	}
-	
+
 	// United Kingdom (UK)
 	s.jurisdictionReqs["UK"] = &JurisdictionRequirement{
 		Jurisdiction:         "UK",
@@ -743,7 +743,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Powers of Attorney Act 1971", "Mental Capacity Act 2005"},
 	}
-	
+
 	// European Union (EU) - General
 	s.jurisdictionReqs["EU"] = &JurisdictionRequirement{
 		Jurisdiction:         "EU",
@@ -761,7 +761,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"eIDAS Regulation (EU) 910/2014"},
 	}
-	
+
 	// Canada (CA)
 	s.jurisdictionReqs["CA"] = &JurisdictionRequirement{
 		Jurisdiction:         "CA",
@@ -779,7 +779,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Powers of Attorney Act (Provincial)"},
 	}
-	
+
 	// Australia (AU)
 	s.jurisdictionReqs["AU"] = &JurisdictionRequirement{
 		Jurisdiction:         "AU",
@@ -797,7 +797,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Powers of Attorney Act (State-specific)"},
 	}
-	
+
 	// Italy (IT) - Strict notarization requirements
 	s.jurisdictionReqs["IT"] = &JurisdictionRequirement{
 		Jurisdiction:         "IT",
@@ -815,7 +815,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Codice Civile Art. 1392", "Legge 16 febbraio 1913, n. 89"},
 	}
-	
+
 	// Netherlands (NL) - Moderate requirements
 	s.jurisdictionReqs["NL"] = &JurisdictionRequirement{
 		Jurisdiction:         "NL",
@@ -833,7 +833,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Burgerlijk Wetboek Boek 3", "Wet op het Notarisambt"},
 	}
-	
+
 	// Spain (ES) - Notarization required for significant transactions
 	s.jurisdictionReqs["ES"] = &JurisdictionRequirement{
 		Jurisdiction:         "ES",
@@ -851,7 +851,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Código Civil Art. 1709-1739", "Ley del Notariado"},
 	}
-	
+
 	// Portugal (PT) - Similar to Spain
 	s.jurisdictionReqs["PT"] = &JurisdictionRequirement{
 		Jurisdiction:         "PT",
@@ -869,7 +869,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Código Civil Português Art. 262-264", "Estatuto do Notariado"},
 	}
-	
+
 	// France (FR) - Strict civil law requirements
 	s.jurisdictionReqs["FR"] = &JurisdictionRequirement{
 		Jurisdiction:         "FR",
@@ -887,7 +887,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Code Civil Art. 1984-2010", "Ordonnance du 2 novembre 1945"},
 	}
-	
+
 	// Norway (NO) - Nordic model
 	s.jurisdictionReqs["NO"] = &JurisdictionRequirement{
 		Jurisdiction:         "NO",
@@ -905,7 +905,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Fullmaktsloven", "Straffeloven"},
 	}
-	
+
 	// Denmark (DK) - Nordic model with digital emphasis
 	s.jurisdictionReqs["DK"] = &JurisdictionRequirement{
 		Jurisdiction:         "DK",
@@ -923,7 +923,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Fuldmagtsforhold", "Aftaleloven"},
 	}
-	
+
 	// Sweden (SE) - Nordic model with high digital trust
 	s.jurisdictionReqs["SE"] = &JurisdictionRequirement{
 		Jurisdiction:         "SE",
@@ -941,7 +941,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Fullmaktslagen", "Avtalslagen"},
 	}
-	
+
 	// Estonia (EE) - Digital-first e-Residency nation
 	s.jurisdictionReqs["EE"] = &JurisdictionRequirement{
 		Jurisdiction:         "EE",
@@ -959,7 +959,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Võlaõigusseadus", "Digital Signature Act", "e-Residency Act"},
 	}
-	
+
 	// Lithuania (LT) - Baltic digital adoption
 	s.jurisdictionReqs["LT"] = &JurisdictionRequirement{
 		Jurisdiction:         "LT",
@@ -977,7 +977,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Civilinis kodeksas", "Notariato įstatymas"},
 	}
-	
+
 	// Austria (AT) - Similar to Germany, strict civil law
 	s.jurisdictionReqs["AT"] = &JurisdictionRequirement{
 		Jurisdiction:         "AT",
@@ -995,7 +995,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"ABGB §1002-1020", "Notariatsordnung"},
 	}
-	
+
 	// Belgium (BE) - Bilingual system, notarization required
 	s.jurisdictionReqs["BE"] = &JurisdictionRequirement{
 		Jurisdiction:         "BE",
@@ -1013,7 +1013,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Code Civil Belge Art. 1984-2010", "Wetboek der Notarisambt"},
 	}
-	
+
 	// Bulgaria (BG) - EU member, moderate requirements
 	s.jurisdictionReqs["BG"] = &JurisdictionRequirement{
 		Jurisdiction:         "BG",
@@ -1031,7 +1031,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Закон за задълженията и договорите", "Закон за нотариусите"},
 	}
-	
+
 	// Croatia (HR) - EU member since 2013
 	s.jurisdictionReqs["HR"] = &JurisdictionRequirement{
 		Jurisdiction:         "HR",
@@ -1049,7 +1049,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Zakon o obveznim odnosima", "Zakon o javnom bilježništvu"},
 	}
-	
+
 	// Cyprus (CY) - Common law influence, EU member
 	s.jurisdictionReqs["CY"] = &JurisdictionRequirement{
 		Jurisdiction:         "CY",
@@ -1067,7 +1067,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Contract Law Cap. 149", "Powers of Attorney Law"},
 	}
-	
+
 	// Czech Republic (CZ) - Post-communist modernization
 	s.jurisdictionReqs["CZ"] = &JurisdictionRequirement{
 		Jurisdiction:         "CZ",
@@ -1085,7 +1085,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Občanský zákoník §2159-2188", "Notářský řád"},
 	}
-	
+
 	// Finland (FI) - Nordic model with digital emphasis
 	s.jurisdictionReqs["FI"] = &JurisdictionRequirement{
 		Jurisdiction:         "FI",
@@ -1103,7 +1103,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Valtakirjalaki", "Oikeustoimilaki"},
 	}
-	
+
 	// Greece (GR) - Civil law with notarization emphasis
 	s.jurisdictionReqs["GR"] = &JurisdictionRequirement{
 		Jurisdiction:         "GR",
@@ -1121,7 +1121,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Αστικός Κώδικας Άρθρο 211-225", "Κώδικας Συμβολαιογράφων"},
 	}
-	
+
 	// Hungary (HU) - EU member, moderate requirements
 	s.jurisdictionReqs["HU"] = &JurisdictionRequirement{
 		Jurisdiction:         "HU",
@@ -1139,7 +1139,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Polgári Törvénykönyv 6:239-6:258", "Közjegyzőkről szóló törvény"},
 	}
-	
+
 	// Ireland (IE) - Common law system
 	s.jurisdictionReqs["IE"] = &JurisdictionRequirement{
 		Jurisdiction:         "IE",
@@ -1157,7 +1157,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Powers of Attorney Act 1996", "Enduring Powers of Attorney Regulations"},
 	}
-	
+
 	// Latvia (LV) - Baltic state, digital adoption
 	s.jurisdictionReqs["LV"] = &JurisdictionRequirement{
 		Jurisdiction:         "LV",
@@ -1175,7 +1175,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Civillikums", "Notariāta likums"},
 	}
-	
+
 	// Luxembourg (LU) - Financial center, strict requirements
 	s.jurisdictionReqs["LU"] = &JurisdictionRequirement{
 		Jurisdiction:         "LU",
@@ -1193,7 +1193,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Code Civil Art. 1984-2010", "Loi sur le Notariat"},
 	}
-	
+
 	// Malta (MT) - Common law system, English influence
 	s.jurisdictionReqs["MT"] = &JurisdictionRequirement{
 		Jurisdiction:         "MT",
@@ -1211,7 +1211,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Civil Code Cap. 16", "Powers of Attorney Regulations"},
 	}
-	
+
 	// Poland (PL) - Large EU economy, moderate requirements
 	s.jurisdictionReqs["PL"] = &JurisdictionRequirement{
 		Jurisdiction:         "PL",
@@ -1229,7 +1229,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Kodeks cywilny Art. 95-109", "Prawo o notariacie"},
 	}
-	
+
 	// Romania (RO) - EU member, modernizing system
 	s.jurisdictionReqs["RO"] = &JurisdictionRequirement{
 		Jurisdiction:         "RO",
@@ -1247,7 +1247,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Codul Civil Art. 2009-2044", "Legea notarilor publici"},
 	}
-	
+
 	// Slovakia (SK) - Post-1993 civil law system
 	s.jurisdictionReqs["SK"] = &JurisdictionRequirement{
 		Jurisdiction:         "SK",
@@ -1265,7 +1265,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		},
 		LegalReferences: []string{"Občiansky zákonník §32-34", "Notársky poriadok"},
 	}
-	
+
 	// Slovenia (SI) - Small EU member, efficient system
 	s.jurisdictionReqs["SI"] = &JurisdictionRequirement{
 		Jurisdiction:         "SI",
@@ -1296,7 +1296,7 @@ func (s *FormalRequirementsService) AddJurisdictionRequirement(req *Jurisdiction
 func (s *FormalRequirementsService) GetJurisdictionRequirement(jurisdiction string) (*JurisdictionRequirement, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	
+
 	req, exists := s.jurisdictionReqs[jurisdiction]
 	if !exists {
 		return nil, fmt.Errorf("jurisdiction not found: %s", jurisdiction)
@@ -1308,13 +1308,13 @@ func (s *FormalRequirementsService) GetJurisdictionRequirement(jurisdiction stri
 func (s *FormalRequirementsService) GetMetrics() map[string]interface{} {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	
+
 	return map[string]interface{}{
-		"validation_attempts":   s.validationAttempts,
-		"validation_successes":  s.validationSuccesses,
-		"validation_failures":   s.validationFailures,
-		"success_rate":          float64(s.validationSuccesses) / float64(s.validationAttempts),
-		"jurisdiction_checks":   s.jurisdictionChecks,
+		"validation_attempts":     s.validationAttempts,
+		"validation_successes":    s.validationSuccesses,
+		"validation_failures":     s.validationFailures,
+		"success_rate":            float64(s.validationSuccesses) / float64(s.validationAttempts),
+		"jurisdiction_checks":     s.jurisdictionChecks,
 		"supported_jurisdictions": len(s.jurisdictionReqs),
 	}
 }
@@ -1323,7 +1323,7 @@ func (s *FormalRequirementsService) GetMetrics() map[string]interface{} {
 func (s *FormalRequirementsService) ClearCache() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	s.documentReqsCache = make(map[string]*DocumentRequirementCheck)
 	s.complianceCheckCache = make(map[string]*LegalComplianceCheck)
 	s.lastCacheClear = time.Now()

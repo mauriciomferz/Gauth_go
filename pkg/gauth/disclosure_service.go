@@ -14,10 +14,10 @@ import (
 
 // DisclosureService provides transparency APIs for authorization management
 type DisclosureService struct {
-	tokenStore         ExtendedTokenStore
-	subscriptionStore  SubscriptionStore
-	complianceTracker  ComplianceTracker
-	auditLogger        AuditLogger
+	tokenStore        ExtendedTokenStore
+	subscriptionStore SubscriptionStore
+	complianceTracker ComplianceTracker
+	auditLogger       AuditLogger
 }
 
 // NewDisclosureService creates a new disclosure service
@@ -37,44 +37,44 @@ func NewDisclosureService(
 
 // AuthorizationSummary provides high-level view of an authorization
 type AuthorizationSummary struct {
-	AuthorizationID    string                 `json:"authorization_id"`
-	ResourceOwnerID    string                 `json:"resource_owner_id"`
-	ClientID           string                 `json:"client_id"`
-	ClientType         string                 `json:"client_type"`
-	ClientOwner        string                 `json:"client_owner"`
-	OwnersAuthorizer   string                 `json:"owners_authorizer"`
-	GrantedScopes      []string               `json:"granted_scopes"`
-	GrantedActions     []string               `json:"granted_actions"`
-	Status             string                 `json:"status"`
-	IssuedAt           time.Time              `json:"issued_at"`
-	ExpiresAt          time.Time              `json:"expires_at"`
-	LastUsed           *time.Time             `json:"last_used,omitempty"`
-	UsageCount         int                    `json:"usage_count"`
-	ComplianceStatus   string                 `json:"compliance_status"`
-	ActiveRestrictions []string               `json:"active_restrictions"`
+	AuthorizationID    string     `json:"authorization_id"`
+	ResourceOwnerID    string     `json:"resource_owner_id"`
+	ClientID           string     `json:"client_id"`
+	ClientType         string     `json:"client_type"`
+	ClientOwner        string     `json:"client_owner"`
+	OwnersAuthorizer   string     `json:"owners_authorizer"`
+	GrantedScopes      []string   `json:"granted_scopes"`
+	GrantedActions     []string   `json:"granted_actions"`
+	Status             string     `json:"status"`
+	IssuedAt           time.Time  `json:"issued_at"`
+	ExpiresAt          time.Time  `json:"expires_at"`
+	LastUsed           *time.Time `json:"last_used,omitempty"`
+	UsageCount         int        `json:"usage_count"`
+	ComplianceStatus   string     `json:"compliance_status"`
+	ActiveRestrictions []string   `json:"active_restrictions"`
 }
 
 // AuthorizationDetail provides complete view of an authorization
 type AuthorizationDetail struct {
 	AuthorizationSummary
-	PowerOfAttorney       *poa.PoADefinition        `json:"power_of_attorney"`
-	AuthorizationChain    *AuthorizationChain       `json:"authorization_chain"`
-	LegalFramework        *LegalFrameworkInfo       `json:"legal_framework"`
-	VerificationProof     *IdentityVerificationChain `json:"verification_proof"`
-	Restrictions          []PowerRestriction        `json:"restrictions"`
-	AuditTrail            []AuditEntry              `json:"audit_trail"`
-	ComplianceViolations  []ComplianceViolation     `json:"compliance_violations,omitempty"`
-	SubscriptionID        string                    `json:"subscription_id"`
+	PowerOfAttorney      *poa.PoADefinition         `json:"power_of_attorney"`
+	AuthorizationChain   *AuthorizationChain        `json:"authorization_chain"`
+	LegalFramework       *LegalFrameworkInfo        `json:"legal_framework"`
+	VerificationProof    *IdentityVerificationChain `json:"verification_proof"`
+	Restrictions         []PowerRestriction         `json:"restrictions"`
+	AuditTrail           []AuditEntry               `json:"audit_trail"`
+	ComplianceViolations []ComplianceViolation      `json:"compliance_violations,omitempty"`
+	SubscriptionID       string                     `json:"subscription_id"`
 }
 
 // ComplianceViolation represents a detected compliance issue
 type ComplianceViolation struct {
-	ViolationID   string    `json:"violation_id"`
-	DetectedAt    time.Time `json:"detected_at"`
-	ViolationType string    `json:"violation_type"`
-	Severity      string    `json:"severity"`
-	Description   string    `json:"description"`
-	Resolved      bool      `json:"resolved"`
+	ViolationID   string     `json:"violation_id"`
+	DetectedAt    time.Time  `json:"detected_at"`
+	ViolationType string     `json:"violation_type"`
+	Severity      string     `json:"severity"`
+	Description   string     `json:"description"`
+	Resolved      bool       `json:"resolved"`
 	ResolvedAt    *time.Time `json:"resolved_at,omitempty"`
 }
 
@@ -149,10 +149,10 @@ func (s *DisclosureService) ListActiveAuthorizations(
 
 	// Log disclosure access
 	s.auditLogger.LogDisclosureAccess(ctx, &AuditEntry{
-		Timestamp:   time.Now(),
-		Action:      "list_authorizations",
-		Actor:       request.ResourceOwnerID,
-		Result:      "success",
+		Timestamp: time.Now(),
+		Action:    "list_authorizations",
+		Actor:     request.ResourceOwnerID,
+		Result:    "success",
 		Details: map[string]interface{}{
 			"count":  len(summaries),
 			"status": request.Status,
@@ -209,10 +209,10 @@ func (s *DisclosureService) GetAuthorizationDetail(
 
 	// Log disclosure access
 	s.auditLogger.LogDisclosureAccess(ctx, &AuditEntry{
-		Timestamp:   time.Now(),
-		Action:      "get_authorization_detail",
-		Actor:       resourceOwnerID,
-		Result:      "success",
+		Timestamp: time.Now(),
+		Action:    "get_authorization_detail",
+		Actor:     resourceOwnerID,
+		Result:    "success",
 		Details: map[string]interface{}{
 			"authorization_id": authorizationID,
 		},
@@ -282,10 +282,10 @@ func (s *DisclosureService) RevokeAuthorization(
 
 	// Log revocation
 	s.auditLogger.LogRevocation(ctx, &AuditEntry{
-		Timestamp:   revokedAt,
-		Action:      "revoke_authorization",
-		Actor:       request.ResourceOwnerID,
-		Result:      "success",
+		Timestamp: revokedAt,
+		Action:    "revoke_authorization",
+		Actor:     request.ResourceOwnerID,
+		Result:    "success",
 		Details: map[string]interface{}{
 			"authorization_id": request.AuthorizationID,
 			"reason":           request.Reason,
@@ -335,10 +335,10 @@ func (s *DisclosureService) GetAuditTrail(
 
 	// Log disclosure access
 	s.auditLogger.LogDisclosureAccess(ctx, &AuditEntry{
-		Timestamp:   time.Now(),
-		Action:      "get_audit_trail",
-		Actor:       resourceOwnerID,
-		Result:      "success",
+		Timestamp: time.Now(),
+		Action:    "get_audit_trail",
+		Actor:     resourceOwnerID,
+		Result:    "success",
 		Details: map[string]interface{}{
 			"authorization_id": authorizationID,
 			"entry_count":      len(entries),

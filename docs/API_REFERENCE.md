@@ -1,4 +1,12 @@
 ---
+title: GAuth RFC API Reference
+ category: api-reference
+ status: active
+ lastUpdated: 2025-11-12
+ owners: architecture-team
+ refreshCadence: on-change
+ source: source-code
+ ---
 ## 🌲 Revocation Transparency Endpoint Examples (Beta)
 > For internal model details (Merkle accumulator, Signed Tree Heads v1/v2, multi-sig threshold & weights, persistence, consistency proofs) consult `REVOCATION_TRANSPARENCY.md`.
 ### Inclusion Proof
@@ -714,7 +722,7 @@ Security Considerations:
 - TTL tuning balances memory footprint vs. replay window risk; choose a value aligned with average token lifetime.
 ---
 Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md
-# GAuth RFC API Reference
+# (Metadata moved to top) GAuth RFC API Reference
 
 > Last Updated: 2025-10-21
 > Status: Active

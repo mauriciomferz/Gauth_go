@@ -1,3 +1,12 @@
+---
+title: JWKS Integrity & Key Deprecation Guide
+category: security-jwks
+status: implemented
+lastUpdated: 2025-11-12
+owners: security-team
+source: internal
+refreshCadence: quarterly
+---
 # JWKS Integrity & Key Deprecation
 
 **Status**: Implemented (P2.4)  

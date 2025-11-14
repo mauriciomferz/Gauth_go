@@ -23,9 +23,9 @@ import (
 
 // Algorithm identifier constants following IANA JOSE registry conventions
 const (
-	AlgorithmEd25519   = "EdDSA"    // RFC 8032 - Ed25519 signature algorithm
-	AlgorithmRSAPSS    = "PS256"    // RFC 8017 - RSA-PSS with SHA-256
-	AlgorithmECDSAP256 = "ES256"    // RFC 7518 - ECDSA with P-256 and SHA-256
+	AlgorithmEd25519   = "EdDSA" // RFC 8032 - Ed25519 signature algorithm
+	AlgorithmRSAPSS    = "PS256" // RFC 8017 - RSA-PSS with SHA-256
+	AlgorithmECDSAP256 = "ES256" // RFC 7518 - ECDSA with P-256 and SHA-256
 )
 
 // SignatureAlgorithm defines the interface for cryptographic signature operations.

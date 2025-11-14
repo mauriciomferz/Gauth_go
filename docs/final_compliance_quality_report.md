@@ -1,3 +1,13 @@
+---
+title: Final Compliance & Quality Report (RFC111 / RFC115) – Beta Release
+category: compliance-report
+status: archived
+lastUpdated: 2025-10-26
+owners: compliance-team
+generated: true
+source: repository-state-analysis
+refreshCadence: none
+---
 # Final Compliance & Quality Report (RFC111 / RFC115) – Beta Release
 
 Date: 2025-10-26

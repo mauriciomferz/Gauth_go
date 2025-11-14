@@ -1,3 +1,13 @@
+---
+title: Week 5 Day 4-5 Monitoring Report
+category: monitoring-report
+status: final
+lastUpdated: 2025-11-12
+owners: observability-team
+source: internal
+refreshCadence: none
+---
+
 # Week 5 Day 4-5: Monitoring & Observability Setup
 
 **Date:** November 10, 2025  

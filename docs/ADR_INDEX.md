@@ -1,3 +1,12 @@
+---
+title: ADR Index & Cryptographic Enhancements Overview
+category: adr-index
+status: active
+lastUpdated: 2025-11-12
+owners: architecture-team
+source: internal
+refreshCadence: on-change
+---
 # Cryptographic Enhancements (2025-10-24)
 
 - Aggregated signature schemes (BLS, batch) and multi-algorithm support added to signature abstraction.

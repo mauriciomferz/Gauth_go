@@ -354,9 +354,9 @@ func testTrustLevelPreservation(t *testing.T, ctx context.Context, privateKey *r
 	// Test that trust levels are correctly mapped from different providers
 
 	testCases := []struct {
-		name         string
-		providerID   string
-		claims       *oidc.IDTokenClaims
+		name          string
+		providerID    string
+		claims        *oidc.IDTokenClaims
 		expectedTrust string
 	}{
 		{

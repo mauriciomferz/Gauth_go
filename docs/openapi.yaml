@@ -1,12 +1,30 @@
 openapi: 3.1.0
 info:
   title: GAuth Demo API
-  version: 0.3.2-beta
+  version: 0.4.0-beta
   description: |
+    ✨ 95% RFC-0111 & RFC-0115 Compliant Authorization API
+    
     Core GAuth demo endpoints including token issuance, validation, revocation,
     delegation status, lifecycle timeline, policy evaluation & metrics, examples,
     JWKS publication, discovery metadata and audit/event streaming. Arrays are
     bounded to prevent unbounded growth. This spec is normalized for lint rules.
+    
+    **Enhanced Protocol Flow (30 substeps):**
+    - Subscription Phase: 3 substeps
+    - Matching Phase: 7 substeps (enhanced with Authorization Chain, Commercial Register, Formal Requirements)
+    - Subset/Request Phase: 7 substeps (enhanced with Request Compliance, PIP Query, Extended Tokens, Grant Compliance)
+    - Enforcement Phase: 4 substeps
+    - Verification Phase: 6 substeps (enhanced with Extended Token validation, PVP Identity, Authorization Chain verify)
+    - Audit Phase: 3 substeps
+    
+    **New Compliance Features:**
+    - Authorization Chain Validation
+    - Extended JWT Tokens with enhanced claims
+    - Policy Information Point (PIP) integration
+    - Commercial Register verification
+    - Formal Requirements validation
+    - P*P Architecture (PEP, PDP, PIP, PVP)
 
 servers:
   - url: /

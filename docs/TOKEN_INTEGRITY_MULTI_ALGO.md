@@ -1,3 +1,12 @@
+---
+title: Token Integrity & Multi-Algorithm Signature Support
+category: security-token-integrity
+status: implemented
+lastUpdated: 2025-11-12
+owners: security-team
+source: internal
+refreshCadence: quarterly
+---
 # Token Integrity & Multi-Algorithm Signature Support
 
 ## Overview

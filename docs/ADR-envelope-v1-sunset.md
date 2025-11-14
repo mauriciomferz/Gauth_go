@@ -1,3 +1,12 @@
+---
+title: ADR Envelope V1 Deprecation & Sunset Plan
+category: adr
+status: draft
+lastUpdated: 2025-11-12
+owners: architecture-team
+source: internal
+refreshCadence: on-change
+---
 # ADR: Envelope V1 Deprecation & Sunset Plan
 
 Date: 2025-10-20

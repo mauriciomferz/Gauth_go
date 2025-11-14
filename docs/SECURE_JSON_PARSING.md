@@ -1,3 +1,12 @@
+---
+title: Secure JSON Parsing
+category: security-parsing
+status: implemented
+lastUpdated: 2025-11-12
+owners: security-team
+source: internal
+refreshCadence: quarterly
+---
 # Secure JSON Parsing (P2.11 - sec1.item3)
 
 ## Overview

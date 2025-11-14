@@ -1,3 +1,13 @@
+---
+title: Week 5 Day 1 Application Containerization Progress Report
+category: containerization-report
+status: final
+lastUpdated: 2025-11-12
+owners: platform-eng
+source: internal
+refreshCadence: none
+---
+
 # Week 5 Day 1 - Application Containerization Progress Report
 
 **Date**: November 10, 2025  

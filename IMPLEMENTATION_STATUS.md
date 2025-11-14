@@ -1,3 +1,12 @@
+---
+title: RFC-0111/RFC-0115 Implementation Status
+category: implementation-status
+status: enhancement-complete
+lastUpdated: 2025-11-12
+owners: implementation-lead
+source: internal-status-report
+refreshCadence: weekly
+---
 # RFC-0111/RFC-0115 Implementation Status
 
 **Date**: November 11, 2025

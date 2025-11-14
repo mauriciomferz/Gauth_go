@@ -1,3 +1,11 @@
+---
+title: "PASETO Token Support Example"
+category: example
+status: active
+lastUpdated: 2025-11-12
+owners: architecture-team
+refreshCadence: on-change
+---
 # PASETO Token Management Example
 
 > Last Updated: 2025-10-17

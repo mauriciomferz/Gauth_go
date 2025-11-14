@@ -1,3 +1,13 @@
+---
+title: Security Setup Guide
+category: security-setup-guide
+status: active
+lastUpdated: 2025-11-12
+owners: security-team
+source: internal
+refreshCadence: quarterly
+---
+
 # Security Setup Guide
 
 > **Status:** Beta Demonstration  

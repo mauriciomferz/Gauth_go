@@ -1,3 +1,12 @@
+---
+title: Gap G10 Integration Testing Guide
+category: testing-guide
+status: complete
+lastUpdated: 2025-11-12
+owners: integration-test-team
+source: internal-guide
+refreshCadence: monthly
+---
 # Gap G10 Integration Testing Guide
 
 **Date**: November 10, 2025  

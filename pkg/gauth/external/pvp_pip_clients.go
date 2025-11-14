@@ -56,7 +56,7 @@ func (cb *CircuitBreaker) Execute(fn func() error) error {
 	if err != nil {
 		cb.failures++
 		cb.lastFailureTime = time.Now()
-		
+
 		if cb.failures >= cb.maxFailures {
 			cb.state = CircuitOpen
 		}
@@ -73,13 +73,13 @@ func (cb *CircuitBreaker) Execute(fn func() error) error {
 
 // PVPClientConfig holds configuration for PVP client
 type PVPClientConfig struct {
-	BaseURL          string
-	APIKey           string
-	Timeout          time.Duration
-	MaxRetries       int
-	RetryDelay       time.Duration
-	CircuitBreaker   *CircuitBreaker
-	FallbackEnabled  bool
+	BaseURL         string
+	APIKey          string
+	Timeout         time.Duration
+	MaxRetries      int
+	RetryDelay      time.Duration
+	CircuitBreaker  *CircuitBreaker
+	FallbackEnabled bool
 }
 
 // PVPClient is a production-ready client for PowerVerificationPoint
@@ -118,7 +118,7 @@ func (c *PVPClient) VerifyIdentity(
 ) (*gauth.IdentityVerificationResult, error) {
 	var lastErr error
 	var finalResult *gauth.IdentityVerificationResult
-	
+
 	// Execute with circuit breaker
 	err := c.config.CircuitBreaker.Execute(func() error {
 		// Implement retry logic
@@ -137,9 +137,9 @@ func (c *PVPClient) VerifyIdentity(
 				finalResult = result
 				return nil
 			}
-			
+
 			lastErr = err
-			
+
 			// Don't retry on client errors
 			if isClientError(err) {
 				return err
@@ -208,29 +208,29 @@ func (c *PVPClient) fallbackVerifyIdentity(
 	// 1. Check cache for recent verifications
 	// 2. Use alternative identity provider
 	// 3. Return partial verification with lower confidence
-	
+
 	return &gauth.IdentityVerificationResult{
-		Verified:        true,
-		VerificationID:  fmt.Sprintf("fallback-%d", time.Now().Unix()),
-		SubjectID:       request.SubjectID,
-		IdentityLevel:   "basic", // Lower level for fallback
-		VerifiedAt:      time.Now(),
-		ExpiresAt:       time.Now().Add(1 * time.Hour), // Shorter expiry
+		Verified:           true,
+		VerificationID:     fmt.Sprintf("fallback-%d", time.Now().Unix()),
+		SubjectID:          request.SubjectID,
+		IdentityLevel:      "basic", // Lower level for fallback
+		VerifiedAt:         time.Now(),
+		ExpiresAt:          time.Now().Add(1 * time.Hour), // Shorter expiry
 		VerificationMethod: "fallback_" + request.ProofMethod,
-		IsFallback:      true,
+		IsFallback:         true,
 	}, nil
 }
 
 // PIPClientConfig holds configuration for PIP client
 type PIPClientConfig struct {
-	BaseURL          string
-	APIKey           string
-	Timeout          time.Duration
-	MaxRetries       int
-	RetryDelay       time.Duration
-	CircuitBreaker   *CircuitBreaker
-	CacheEnabled     bool
-	CacheTTL         time.Duration
+	BaseURL        string
+	APIKey         string
+	Timeout        time.Duration
+	MaxRetries     int
+	RetryDelay     time.Duration
+	CircuitBreaker *CircuitBreaker
+	CacheEnabled   bool
+	CacheTTL       time.Duration
 }
 
 // PIPClient is a production-ready client for Power Information Point
@@ -286,7 +286,7 @@ func (c *PIPClient) GetPolicy(
 
 	var lastErr error
 	var policy *gauth.PowerOfAttorneyPolicy
-	
+
 	// Execute with circuit breaker and retry logic
 	err := c.config.CircuitBreaker.Execute(func() error {
 		for attempt := 0; attempt <= c.config.MaxRetries; attempt++ {
@@ -307,9 +307,9 @@ func (c *PIPClient) GetPolicy(
 				}
 				return nil
 			}
-			
+
 			lastErr = err
-			
+
 			if isClientError(err) {
 				return err
 			}

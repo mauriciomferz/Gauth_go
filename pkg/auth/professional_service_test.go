@@ -217,9 +217,9 @@ func TestProfessionalAuthService_ValidateToken_ScopeValidation(t *testing.T) {
 
 	// Check for expected scopes
 	expectedScopes := map[string]bool{
-		"service:read":       true,
-		"service:write":      true,
-		"mesh:communicate":   true,
+		"service:read":     true,
+		"service:write":    true,
+		"mesh:communicate": true,
 	}
 
 	for _, scope := range claims.Scopes {

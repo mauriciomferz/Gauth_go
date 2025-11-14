@@ -16,13 +16,14 @@ import (
 
 // ExtendedTokenService provides RFC-0111 compliant extended token operations
 type ExtendedTokenService struct {
-	chainValidator     *AuthorizationChainValidator
+	chainValidator      *AuthorizationChainValidator
 	complianceValidator *ComplianceValidator
-	pipClient          PIPClient
-	issuerID           string
-	issuerURL          string
-	tokenExpiry        time.Duration
-	signingKey         []byte // HMAC signing key for JWT
+	pipClient           PIPClient
+	issuerID            string
+	issuerURL           string
+	tokenExpiry         time.Duration
+	signingKey          []byte     // HMAC signing key for JWT
+	jweService          JWEService // Optional JWE encryption service
 }
 
 // NewExtendedTokenService creates a new extended token service
@@ -37,12 +38,12 @@ func NewExtendedTokenService(
 	if tokenExpiry == 0 {
 		tokenExpiry = 1 * time.Hour // Default
 	}
-	
+
 	// Generate a signing key if not provided
 	// In production, this should be loaded from secure configuration
 	signingKey := make([]byte, 32)
 	rand.Read(signingKey)
-	
+
 	return &ExtendedTokenService{
 		chainValidator:      chainValidator,
 		complianceValidator: complianceValidator,
@@ -51,7 +52,15 @@ func NewExtendedTokenService(
 		issuerURL:           issuerURL,
 		tokenExpiry:         tokenExpiry,
 		signingKey:          signingKey,
+		jweService:          nil, // JWE encryption disabled by default
 	}
+}
+
+// WithJWEEncryption adds JWE encryption to the token service
+// Call this method to enable JWE encryption for tokens
+func (s *ExtendedTokenService) WithJWEEncryption(jweService JWEService) *ExtendedTokenService {
+	s.jweService = jweService
+	return s
 }
 
 // CreateExtendedToken creates an RFC-0111 compliant extended token
@@ -226,7 +235,7 @@ func (s *ExtendedTokenService) EncodeExtendedToken(
 		"jti":        token.AccessToken,
 		"token_type": token.TokenType,
 		"scope":      token.Scope,
-		
+
 		// RFC-0111 extended claims
 		"client_owner":      token.ClientOwner,
 		"owners_authorizer": token.OwnersAuthorizer,
@@ -262,6 +271,16 @@ func (s *ExtendedTokenService) EncodeExtendedToken(
 		return "", fmt.Errorf("failed to sign JWT: %w", err)
 	}
 
+	// If JWE encryption is enabled, encrypt the JWT
+	if s.jweService != nil && s.jweService.IsEnabled() {
+		jweString, err := s.jweService.EncryptToken(ctx, tokenString)
+		if err != nil {
+			return "", fmt.Errorf("failed to encrypt token: %w", err)
+		}
+		return jweString, nil
+	}
+
+	// Return unencrypted JWT if JWE is disabled
 	return tokenString, nil
 }
 
@@ -278,10 +297,10 @@ func (s *ExtendedTokenService) ValidateExtendedToken(
 	}
 
 	result := &ExtendedTokenValidationResult{
-		ExtendedToken:      token,
-		Valid:              true,
+		ExtendedToken:       token,
+		Valid:               true,
 		ValidationTimestamp: time.Now(),
-		ValidationWarnings: make([]string, 0),
+		ValidationWarnings:  make([]string, 0),
 	}
 
 	// Step 2: Validate token structure
@@ -412,14 +431,33 @@ func (s *ExtendedTokenService) buildVerificationChain(
 	return chain
 }
 
-// parseExtendedToken parses an extended token from JWT string
+// parseExtendedToken parses an extended token from JWT/JWE string
 // This FIXES the critical gap identified in the audit
+// Supports both plain JWT and JWE-encrypted JWT tokens
 func (s *ExtendedTokenService) parseExtendedToken(
 	ctx context.Context,
 	tokenString string,
 ) (*ExtendedToken, error) {
+	var jwtString string
+
+	// Check if token is JWE-encrypted (5 parts) or plain JWT (3 parts)
+	if s.jweService != nil && s.jweService.IsEnabled() && IsJWE(tokenString) {
+		// Decrypt JWE to get JWT
+		decrypted, err := s.jweService.DecryptToken(ctx, tokenString)
+		if err != nil {
+			return nil, &GAuthError{
+				Code:    "jwe_decrypt_failed",
+				Message: fmt.Sprintf("Failed to decrypt JWE token: %v", err),
+			}
+		}
+		jwtString = decrypted
+	} else {
+		// Token is plain JWT (or JWE is disabled)
+		jwtString = tokenString
+	}
+
 	// Parse JWT token
-	jwtToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	jwtToken, err := jwt.Parse(jwtString, func(token *jwt.Token) (interface{}, error) {
 		// Verify signing method
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])

@@ -3051,6 +3051,47 @@ type ExampleMeta struct {
 	EstimatedSeconds int    `json:"estimated_seconds"`
 }
 
+// corsMiddleware provides a minimal CORS implementation allowing browser-based frontends
+// served from a different origin (e.g. Vite dev server on :5173/:3000) to access the API.
+// For production you may restrict allowed origins via GAUTH_CORS_ALLOW or similar in future.
+func corsMiddleware() gin.HandlerFunc {
+	allowedRaw := strings.TrimSpace(os.Getenv("GAUTH_CORS_ALLOW"))
+	var allowAll bool
+	var allowList map[string]struct{}
+	if allowedRaw == "" || allowedRaw == "*" {
+		allowAll = true
+	} else {
+		allowList = make(map[string]struct{})
+		for _, part := range strings.Split(allowedRaw, ",") {
+			p := strings.TrimSpace(part)
+			if p != "" {
+				allowList[p] = struct{}{}
+			}
+		}
+	}
+	return func(c *gin.Context) {
+		origin := c.Request.Header.Get("Origin")
+		if origin != "" {
+			if allowAll {
+				c.Header("Access-Control-Allow-Origin", origin)
+			} else {
+				if _, ok := allowList[origin]; ok {
+					c.Header("Access-Control-Allow-Origin", origin)
+				}
+			}
+			c.Header("Vary", "Origin")
+			c.Header("Access-Control-Allow-Credentials", "true")
+			c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
+			c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+		}
+		if c.Request.Method == http.MethodOptions {
+			c.AbortWithStatus(204)
+			return
+		}
+		c.Next()
+	}
+}
+
 // NewBetaServer creates a new BetaServer instance.
 // NewBetaServer constructs a server using the default in-memory metrics adapter.
 // For tests or advanced instrumentation provide a custom metrics implementation via NewBetaServerWithMetrics.
@@ -3067,6 +3108,8 @@ func NewBetaServer(port string) *BetaServer {
 func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
+	// Enable CORS with allow-list support (GAUTH_CORS_ALLOW env).
+	r.Use(corsMiddleware())
 	// Normalize port: allow ":8080" or "8080"
 	if port == "" {
 		port = defaultPort
@@ -5898,7 +5941,10 @@ func (s *BetaServer) routes() {
 			wd, _ := os.Getwd()
 			b, err := os.ReadFile(wd + "/web/templates/poa-visualization.html")
 			if err == nil {
-				c.Data(200, "text/html; charset=utf-8", b)
+				c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+				c.Header("Pragma", "no-cache")
+				c.Header("Expires", "0")
+				serveWithNonce(c, b)
 				return
 			}
 		}
@@ -5945,22 +5991,22 @@ func (s *BetaServer) routes() {
 	// Delegation create + revoke (capability enforced when GAUTH_CAPABILITY_ENFORCE=1)
 	s.router.POST("/api/v1/delegation/create", s.apiDelegationCreate)
 	s.router.POST("/api/v1/delegation/revoke", s.apiDelegationRevoke)
-	
+
 	// RFC-0111 Subscription and Authorization Flow endpoints (optional, controlled by GAUTH_RFC0111_ENABLED=1)
 	if rfc0111Components, tokenStore, err := InitRFC0111FromEnv(); err == nil && rfc0111Components != nil {
 		fmt.Fprintf(os.Stderr, "[RFC-0111] Enabled with mock external services\n")
-		
+
 		// Create GAuth service with RFC-0111 compliance enabled
 		// Create ExtendedTokenService for protocol orchestrator
 		extendedTokenService := gauth.NewExtendedTokenService(
 			rfc0111Components.AuthChainValidator,
 			rfc0111Components.ComplianceValidator,
 			rfc0111Components.PIPClient,
-			"rfc0111-demo",              // issuer
-			"demo-audience",              // audience
-			time.Hour,                    // default token TTL
+			"rfc0111-demo",  // issuer
+			"demo-audience", // audience
+			time.Hour,       // default token TTL
 		)
-		
+
 		gauthService, err := gauth.New(
 			gauth.Config{
 				ClientID:     "rfc0111-demo",
@@ -5988,7 +6034,7 @@ func (s *BetaServer) routes() {
 				gauthService,
 				tokenStore,
 			)
-			
+
 			fmt.Fprintf(os.Stderr, "[RFC-0111] Endpoints registered:\n")
 			fmt.Fprintf(os.Stderr, "[RFC-0111]   Subscription Flow (Steps I-VIII):\n")
 			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/rfc0111/subscriptions (Step I: Initiate)\n")
@@ -6011,7 +6057,7 @@ func (s *BetaServer) routes() {
 		fmt.Fprintf(os.Stderr, "[RFC-0111] Initialization failed: %v\n", err)
 	}
 	// End RFC-0111 initialization
-	
+
 	// Evidence hash attachment (beta forensic feature)
 	s.router.POST("/api/v1/beta/poa/:id/evidence", func(c *gin.Context) {
 		poaID := c.Param("id")
@@ -7618,8 +7664,8 @@ func (s *BetaServer) routes() {
 		}
 	}
 
-	// Development convenience: serve modules directly from disk if GAUTH_DEV_MODULES=1 (manual handler to avoid Dir()/OnlyFilesFS quirks)
-	if os.Getenv("GAUTH_DEV_MODULES") == "1" {
+	// Development convenience: serve modules directly from disk if GAUTH_DEV_INDEX=1 (manual handler to avoid Dir()/OnlyFilesFS quirks)
+	if os.Getenv("GAUTH_DEV_INDEX") == "1" {
 		if wd, err := os.Getwd(); err == nil {
 			modulesPath := wd + "/web/static/js/modules"
 			fmt.Fprintf(os.Stderr, "[debug] dev modules disk path: %s\\n", modulesPath)
@@ -7636,6 +7682,10 @@ func (s *BetaServer) routes() {
 					c.String(404, "not found")
 					return
 				}
+				// In dev mode, disable caching for modules
+				c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+				c.Header("Pragma", "no-cache")
+				c.Header("Expires", "0")
 				if c.Request.Method == http.MethodHead {
 					c.Header("Content-Type", "application/javascript; charset=utf-8")
 					c.Status(200)
@@ -8054,22 +8104,27 @@ func serveWithNonce(c *gin.Context, page []byte) {
 			var out strings.Builder
 			// Split by <script for scanning; re-add prefix.
 			parts := strings.Split(modified, "<script")
+			log.Printf("DEBUG: serveWithNonce found %d script tags, nonce=%s", len(parts)-1, nonceStr)
 			if len(parts) > 1 {
 				out.WriteString(parts[0])
-				for _, seg := range parts[1:] {
+				for idx, seg := range parts[1:] {
 					// Find closing tag start '>'
 					if i := strings.Index(seg, ">"); i >= 0 {
 						open := seg[:i]
 						rest := seg[i:]
 						low := strings.ToLower(open)
 						if !strings.Contains(low, "nonce=") {
-							out.WriteString("<script nonce=\"")
+							// Always add space after <script before nonce
+							out.WriteString("<script ")
+							out.WriteString("nonce=\"")
 							out.WriteString(nonceStr)
 							out.WriteString("\"")
 							out.WriteString(open)
 							out.WriteString(rest)
+							log.Printf("DEBUG: Added nonce to script tag %d: <script nonce=\"%s\"%s...>", idx+1, nonceStr, open[:min(30, len(open))])
 							continue
 						}
+						log.Printf("DEBUG: Script tag %d already has nonce", idx+1)
 						out.WriteString("<script")
 						out.WriteString(open)
 						out.WriteString(rest)
@@ -8083,6 +8138,13 @@ func serveWithNonce(c *gin.Context, page []byte) {
 		}
 	}
 	c.Data(200, "text/html; charset=utf-8", []byte(modified))
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 // apiPolicyProvenance returns current policy bundle chain head and verification status.

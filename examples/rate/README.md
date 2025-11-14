@@ -1,3 +1,11 @@
+---
+title: "Rate Limiting Examples"
+category: example
+status: active
+lastUpdated: 2025-11-12
+owners: architecture-team
+refreshCadence: on-change
+---
 # Rate Limiting Examples
 
 > Last Updated: 2025-10-17

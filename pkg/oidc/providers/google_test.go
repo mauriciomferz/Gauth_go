@@ -167,12 +167,12 @@ func TestGoogleProvider_GetDiscoveryDocument(t *testing.T) {
 
 	// Create mock Google discovery endpoint
 	mockDiscovery := oidc.OIDCConfiguration{
-		Issuer:                GoogleIssuerURL,
-		AuthorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-		TokenEndpoint:         "https://oauth2.googleapis.com/token",
-		JWKSUri:               "https://www.googleapis.com/oauth2/v3/certs",
-		ResponseTypesSupported: []string{"code", "token", "id_token"},
-		SubjectTypesSupported:  []string{"public"},
+		Issuer:                           GoogleIssuerURL,
+		AuthorizationEndpoint:            "https://accounts.google.com/o/oauth2/v2/auth",
+		TokenEndpoint:                    "https://oauth2.googleapis.com/token",
+		JWKSUri:                          "https://www.googleapis.com/oauth2/v3/certs",
+		ResponseTypesSupported:           []string{"code", "token", "id_token"},
+		SubjectTypesSupported:            []string{"public"},
 		IDTokenSigningAlgValuesSupported: []string{"RS256"},
 	}
 

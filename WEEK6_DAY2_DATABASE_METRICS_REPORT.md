@@ -1,3 +1,13 @@
+---
+title: Week 6 Day 2 Database Metrics Report
+category: observability-report
+status: final
+lastUpdated: 2025-11-12
+owners: observability-team
+source: internal
+refreshCadence: none
+---
+
 # Week 6 Day 2 Report: Database Metrics Integration
 
 **Date**: November 10, 2025  

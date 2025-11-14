@@ -399,9 +399,9 @@ func TestTokenExchangeService_MapTrustLevel(t *testing.T) {
 			expectedTrust: "substantial",
 		},
 		{
-			name:       "No ACR/AMR - use provider default",
-			providerID: "okta",
-			claims:     &IDTokenClaims{},
+			name:          "No ACR/AMR - use provider default",
+			providerID:    "okta",
+			claims:        &IDTokenClaims{},
 			expectedTrust: "substantial",
 		},
 	}
@@ -619,16 +619,19 @@ func TestTokenExchangeService_RevokeExchangedToken(t *testing.T) {
 	service, _, _ := setupTokenExchangeTest(t)
 	ctx := context.Background()
 
-	// Revocation now attempts to parse the token and validate it
-	// An invalid token should produce an error
+	// Per RFC 7009 Section 2.2: The authorization server responds with HTTP status code 200
+	// if the token has been revoked successfully or if the client submitted an invalid token.
+	// This is a security feature to prevent token scanning.
+	// Therefore, revocation should succeed even for invalid tokens.
 	err := service.RevokeExchangedToken(ctx, "invalid-test-token", "testing", "test-user")
-	if err == nil {
-		t.Error("Expected error for invalid token but got none")
+	if err != nil {
+		t.Errorf("RFC 7009 compliant revocation should not error on invalid tokens, but got: %v", err)
 	}
 
-	// Should get a token parsing error since "invalid-test-token" is not a valid JWT
-	if !strings.Contains(err.Error(), "invalid token") && !strings.Contains(err.Error(), "token is malformed") {
-		t.Errorf("Expected token parsing error but got %q", err.Error())
+	// Revoking an empty token should produce an error (required parameter)
+	err = service.RevokeExchangedToken(ctx, "", "testing", "test-user")
+	if err == nil {
+		t.Error("Expected error for empty token but got none")
 	}
 }
 

@@ -8,7 +8,7 @@ import (
 // TestNewBasicEnforcer verifies BasicEnforcer constructor
 func TestNewBasicEnforcer(t *testing.T) {
 	enforcer := NewBasicEnforcer()
-	
+
 	if enforcer == nil {
 		t.Fatal("NewBasicEnforcer returned nil")
 	}

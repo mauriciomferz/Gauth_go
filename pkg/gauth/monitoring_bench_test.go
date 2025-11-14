@@ -13,14 +13,14 @@ import (
 // BenchmarkMetricsRecording measures metric recording performance
 func BenchmarkMetricsRecording(b *testing.B) {
 	config := MonitoringConfig{
-		HealthCheckInterval:  10 * time.Second,
+		HealthCheckInterval:     10 * time.Second,
 		ComplianceCheckInterval: 30 * time.Second,
 	}
 	service := NewMonitoringService(config)
-	
+
 	b.ResetTimer()
 	b.ReportAllocs()
-	
+
 	for i := 0; i < b.N; i++ {
 		service.RecordValidation("DE", true, 10*time.Millisecond, "comprehensive")
 	}
@@ -29,14 +29,14 @@ func BenchmarkMetricsRecording(b *testing.B) {
 // BenchmarkConcurrentMetricsRecording measures concurrent metric recording
 func BenchmarkConcurrentMetricsRecording(b *testing.B) {
 	config := MonitoringConfig{
-		HealthCheckInterval:  10 * time.Second,
+		HealthCheckInterval:     10 * time.Second,
 		ComplianceCheckInterval: 30 * time.Second,
 	}
 	service := NewMonitoringService(config)
-	
+
 	b.ResetTimer()
 	b.ReportAllocs()
-	
+
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			service.RecordValidation("DE", true, 10*time.Millisecond, "comprehensive")
@@ -47,19 +47,19 @@ func BenchmarkConcurrentMetricsRecording(b *testing.B) {
 // BenchmarkComplianceViolationRecording measures compliance violation recording
 func BenchmarkComplianceViolationRecording(b *testing.B) {
 	config := MonitoringConfig{
-		HealthCheckInterval:  10 * time.Second,
+		HealthCheckInterval:     10 * time.Second,
 		ComplianceCheckInterval: 30 * time.Second,
 	}
 	service := NewMonitoringService(config)
-	
+
 	details := map[string]interface{}{
 		"rule_id": "RULE-001",
 		"value":   50000.0,
 	}
-	
+
 	b.ResetTimer()
 	b.ReportAllocs()
-	
+
 	for i := 0; i < b.N; i++ {
 		service.RecordComplianceViolation(
 			AlertTypeJurisdictionViolation,
@@ -73,12 +73,12 @@ func BenchmarkComplianceViolationRecording(b *testing.B) {
 // BenchmarkHealthCheckExecution measures health check execution
 func BenchmarkHealthCheckExecution(b *testing.B) {
 	config := MonitoringConfig{
-		HealthCheckInterval:  10 * time.Second,
+		HealthCheckInterval:     10 * time.Second,
 		ComplianceCheckInterval: 30 * time.Second,
 	}
 	service := NewMonitoringService(config)
 	ctx := context.Background()
-	
+
 	// Register mock health check
 	service.RegisterHealthCheck("test-component", func(ctx context.Context) HealthCheckResult {
 		return HealthCheckResult{
@@ -86,10 +86,10 @@ func BenchmarkHealthCheckExecution(b *testing.B) {
 			Message: "OK",
 		}
 	})
-	
+
 	b.ResetTimer()
 	b.ReportAllocs()
-	
+
 	for i := 0; i < b.N; i++ {
 		_ = service.RunHealthChecks(ctx)
 	}
@@ -98,19 +98,19 @@ func BenchmarkHealthCheckExecution(b *testing.B) {
 // BenchmarkDashboardMetricsCollection measures dashboard metrics collection
 func BenchmarkDashboardMetricsCollection(b *testing.B) {
 	config := MonitoringConfig{
-		HealthCheckInterval:  10 * time.Second,
+		HealthCheckInterval:     10 * time.Second,
 		ComplianceCheckInterval: 30 * time.Second,
 	}
 	service := NewMonitoringService(config)
-	
+
 	// Simulate some activity
 	for i := 0; i < 100; i++ {
 		service.RecordValidation("DE", true, 10*time.Millisecond, "comprehensive")
 	}
-	
+
 	b.ResetTimer()
 	b.ReportAllocs()
-	
+
 	for i := 0; i < b.N; i++ {
 		_ = service.GetDashboardMetrics()
 	}
@@ -119,14 +119,14 @@ func BenchmarkDashboardMetricsCollection(b *testing.B) {
 // BenchmarkSystemResourceUpdate measures resource monitoring
 func BenchmarkSystemResourceUpdate(b *testing.B) {
 	config := MonitoringConfig{
-		HealthCheckInterval:  10 * time.Second,
+		HealthCheckInterval:     10 * time.Second,
 		ComplianceCheckInterval: 30 * time.Second,
 	}
 	service := NewMonitoringService(config)
-	
+
 	b.ResetTimer()
 	b.ReportAllocs()
-	
+
 	for i := 0; i < b.N; i++ {
 		service.UpdateSystemResources(45.2, 1024.5, 150, 25, 0.85)
 	}
@@ -135,16 +135,16 @@ func BenchmarkSystemResourceUpdate(b *testing.B) {
 // BenchmarkMultiJurisdictionMetrics measures metrics across multiple jurisdictions
 func BenchmarkMultiJurisdictionMetrics(b *testing.B) {
 	config := MonitoringConfig{
-		HealthCheckInterval:  10 * time.Second,
+		HealthCheckInterval:     10 * time.Second,
 		ComplianceCheckInterval: 30 * time.Second,
 	}
 	service := NewMonitoringService(config)
-	
+
 	jurisdictions := []string{"DE", "FR", "IT", "ES", "PT", "NL", "BE", "LU", "AT"}
-	
+
 	b.ResetTimer()
 	b.ReportAllocs()
-	
+
 	for i := 0; i < b.N; i++ {
 		jurisdiction := jurisdictions[i%len(jurisdictions)]
 		service.RecordValidation(jurisdiction, true, 10*time.Millisecond, "comprehensive")
@@ -154,19 +154,19 @@ func BenchmarkMultiJurisdictionMetrics(b *testing.B) {
 // BenchmarkDashboardMetricsAccess measures dashboard metrics access
 func BenchmarkDashboardMetricsAccess(b *testing.B) {
 	config := MonitoringConfig{
-		HealthCheckInterval:  10 * time.Second,
+		HealthCheckInterval:     10 * time.Second,
 		ComplianceCheckInterval: 30 * time.Second,
 	}
 	service := NewMonitoringService(config)
-	
+
 	// Record various metrics
 	for i := 0; i < 50; i++ {
 		service.RecordValidation("DE", i%10 != 0, 100*time.Millisecond, "comprehensive")
 	}
-	
+
 	b.ResetTimer()
 	b.ReportAllocs()
-	
+
 	for i := 0; i < b.N; i++ {
 		metrics := service.GetDashboardMetrics()
 		_ = metrics.TotalValidations
@@ -187,10 +187,10 @@ func BenchmarkHistogramObservation(b *testing.B) {
 		[]string{"jurisdiction", "type"},
 	)
 	registry.MustRegister(histogram)
-	
+
 	b.ResetTimer()
 	b.ReportAllocs()
-	
+
 	for i := 0; i < b.N; i++ {
 		histogram.WithLabelValues("DE", "comprehensive").Observe(0.010)
 	}
@@ -207,10 +207,10 @@ func BenchmarkCounterIncrement(b *testing.B) {
 		[]string{"jurisdiction", "status"},
 	)
 	registry.MustRegister(counter)
-	
+
 	b.ResetTimer()
 	b.ReportAllocs()
-	
+
 	for i := 0; i < b.N; i++ {
 		counter.WithLabelValues("DE", "success").Inc()
 	}
@@ -227,10 +227,10 @@ func BenchmarkGaugeSet(b *testing.B) {
 		[]string{"component"},
 	)
 	registry.MustRegister(gauge)
-	
+
 	b.ResetTimer()
 	b.ReportAllocs()
-	
+
 	for i := 0; i < b.N; i++ {
 		gauge.WithLabelValues("test").Set(42.5)
 	}

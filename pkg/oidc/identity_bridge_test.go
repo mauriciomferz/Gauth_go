@@ -16,7 +16,7 @@ func TestNewIdentityBridge(t *testing.T) {
 		IssuerURL:  "https://gauth.example.com",
 		SigningKey: privateKey,
 	})
-	
+
 	bridge := NewIdentityBridge(idTokenService)
 	if bridge == nil {
 		t.Fatal("NewIdentityBridge returned nil")
@@ -36,20 +36,20 @@ func TestIdentityBridge_ConvertIDTokenToIdentityProof(t *testing.T) {
 		SigningKey: privateKey,
 	})
 	bridge := NewIdentityBridge(idTokenService)
-	
+
 	// Create a valid ID token
 	validClaims := &IDTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:  "user123",
 			Audience: jwt.ClaimStrings{"client123"},
 		},
-		Name:            "John Doe",
-		Email:           "john@example.com",
-		ACR:             "substantial",
-		EntityType:      "natural_person",
+		Name:       "John Doe",
+		Email:      "john@example.com",
+		ACR:        "substantial",
+		EntityType: "natural_person",
 	}
 	validToken, _ := idTokenService.IssueIDToken(context.Background(), validClaims)
-	
+
 	tests := []struct {
 		name             string
 		token            string
@@ -79,7 +79,7 @@ func TestIdentityBridge_ConvertIDTokenToIdentityProof(t *testing.T) {
 			wantSubject:      "",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result, err := bridge.ConvertIDTokenToIdentityProof(
@@ -87,16 +87,16 @@ func TestIdentityBridge_ConvertIDTokenToIdentityProof(t *testing.T) {
 				tt.token,
 				tt.expectedAudience,
 			)
-			
+
 			if err != nil {
 				t.Errorf("Unexpected error: %v", err)
 				return
 			}
-			
+
 			if result.Valid != tt.wantValid {
 				t.Errorf("Expected Valid=%v, got %v", tt.wantValid, result.Valid)
 			}
-			
+
 			if tt.wantValid {
 				if result.SubjectID != tt.wantSubject {
 					t.Errorf("Expected SubjectID=%s, got %s", tt.wantSubject, result.SubjectID)
@@ -123,7 +123,7 @@ func TestIdentityBridge_ConvertIdentityProofToIDToken(t *testing.T) {
 		SigningKey: privateKey,
 	})
 	bridge := NewIdentityBridge(idTokenService)
-	
+
 	tests := []struct {
 		name         string
 		proof        *gauth.IdentityProofResult
@@ -154,7 +154,7 @@ func TestIdentityBridge_ConvertIdentityProofToIDToken(t *testing.T) {
 			wantErr:      true,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			token, err := bridge.ConvertIdentityProofToIDToken(
@@ -163,12 +163,12 @@ func TestIdentityBridge_ConvertIdentityProofToIDToken(t *testing.T) {
 				tt.audience,
 				tt.identityType,
 			)
-			
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ConvertIdentityProofToIDToken() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			
+
 			if !tt.wantErr && token == "" {
 				t.Error("Expected non-empty token")
 			}
@@ -178,7 +178,7 @@ func TestIdentityBridge_ConvertIdentityProofToIDToken(t *testing.T) {
 
 func TestTrustLevelMapper_MapACRToTrustLevel(t *testing.T) {
 	mapper := NewTrustLevelMapper()
-	
+
 	tests := []struct {
 		name string
 		acr  string
@@ -220,7 +220,7 @@ func TestTrustLevelMapper_MapACRToTrustLevel(t *testing.T) {
 			want: "low",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := mapper.MapACRToTrustLevel(tt.acr); got != tt.want {
@@ -232,7 +232,7 @@ func TestTrustLevelMapper_MapACRToTrustLevel(t *testing.T) {
 
 func TestTrustLevelMapper_MapTrustLevelToACR(t *testing.T) {
 	mapper := NewTrustLevelMapper()
-	
+
 	tests := []struct {
 		name       string
 		trustLevel string
@@ -259,7 +259,7 @@ func TestTrustLevelMapper_MapTrustLevelToACR(t *testing.T) {
 			want:       "0",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := mapper.MapTrustLevelToACR(tt.trustLevel); got != tt.want {
@@ -271,7 +271,7 @@ func TestTrustLevelMapper_MapTrustLevelToACR(t *testing.T) {
 
 func TestTrustLevelMapper_ValidateMinimumTrustLevel(t *testing.T) {
 	mapper := NewTrustLevelMapper()
-	
+
 	tests := []struct {
 		name     string
 		acr      string
@@ -309,7 +309,7 @@ func TestTrustLevelMapper_ValidateMinimumTrustLevel(t *testing.T) {
 			want:     false,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := mapper.ValidateMinimumTrustLevel(tt.acr, tt.required); got != tt.want {
@@ -321,10 +321,10 @@ func TestTrustLevelMapper_ValidateMinimumTrustLevel(t *testing.T) {
 
 func TestTrustLevelMapper_AddCustomMapping(t *testing.T) {
 	mapper := NewTrustLevelMapper()
-	
+
 	// Add custom mapping
 	mapper.AddCustomMapping("custom_acr", "high")
-	
+
 	// Verify custom mapping works
 	if got := mapper.MapACRToTrustLevel("custom_acr"); got != "high" {
 		t.Errorf("Custom ACR mapping failed: got %s, want high", got)
@@ -357,7 +357,7 @@ func TestExtractEntityTypeFromClaims(t *testing.T) {
 			want:   "natural_person",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := ExtractEntityTypeFromClaims(tt.claims); got != tt.want {
@@ -380,12 +380,12 @@ func TestExtractProofDataFromClaims(t *testing.T) {
 		ACR:             "substantial",
 		AMR:             []string{"mfa", "otp"},
 	}
-	
+
 	proofData := ExtractProofDataFromClaims(claims)
-	
+
 	tests := []struct {
-		key   string
-		want  interface{}
+		key  string
+		want interface{}
 	}{
 		{"name", "John Doe"},
 		{"email", "john@example.com"},
@@ -397,7 +397,7 @@ func TestExtractProofDataFromClaims(t *testing.T) {
 		{"tsp_id", "tsp-123"},
 		{"acr", "substantial"},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.key, func(t *testing.T) {
 			if got, exists := proofData[tt.key]; !exists {
@@ -407,7 +407,7 @@ func TestExtractProofDataFromClaims(t *testing.T) {
 			}
 		})
 	}
-	
+
 	// Verify AMR is extracted
 	if amr, exists := proofData["amr"]; !exists {
 		t.Error("AMR not found in proof data")
@@ -427,7 +427,7 @@ func TestBuildIdentityProofRequestFromIDToken(t *testing.T) {
 		IssuerURL:  "https://gauth.example.com",
 		SigningKey: privateKey,
 	})
-	
+
 	// Create a valid ID token
 	claims := &IDTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -440,13 +440,13 @@ func TestBuildIdentityProofRequestFromIDToken(t *testing.T) {
 		EntityType: "natural_person",
 	}
 	token, _ := idTokenService.IssueIDToken(context.Background(), claims)
-	
+
 	// Build identity proof request
 	request, err := BuildIdentityProofRequestFromIDToken(token, idTokenService, "client123")
 	if err != nil {
 		t.Fatalf("BuildIdentityProofRequestFromIDToken() error = %v", err)
 	}
-	
+
 	if request.SubjectID != "user123" {
 		t.Errorf("Expected SubjectID user123, got %s", request.SubjectID)
 	}
@@ -467,7 +467,7 @@ func TestValidateIDTokenForIdentityProof(t *testing.T) {
 		IssuerURL:  "https://gauth.example.com",
 		SigningKey: privateKey,
 	})
-	
+
 	// Create tokens with different ACRs
 	highACRToken, _ := idTokenService.IssueIDToken(context.Background(), &IDTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -476,7 +476,7 @@ func TestValidateIDTokenForIdentityProof(t *testing.T) {
 		},
 		ACR: "high",
 	})
-	
+
 	lowACRToken, _ := idTokenService.IssueIDToken(context.Background(), &IDTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:  "user123",
@@ -484,7 +484,7 @@ func TestValidateIDTokenForIdentityProof(t *testing.T) {
 		},
 		ACR: "1",
 	})
-	
+
 	tests := []struct {
 		name             string
 		token            string
@@ -514,7 +514,7 @@ func TestValidateIDTokenForIdentityProof(t *testing.T) {
 			wantErr:          true,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := ValidateIDTokenForIdentityProof(

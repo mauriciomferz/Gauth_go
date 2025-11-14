@@ -1,3 +1,13 @@
+---
+title: Operations Readiness Gap Validation Report
+category: compliance-report
+status: generated
+lastUpdated: 2025-11-07
+owners: compliance-team
+generated: true
+source: scripts/gap_validation.sh
+refreshCadence: manual
+---
 # GAuth Operations Readiness Gap Validation Report
 
 **Generated:** 2025-11-07T12:58:18+01:00

@@ -11,24 +11,24 @@ import (
 
 // Okta OIDC provider constants
 const (
-	OktaProviderID     = "okta"
-	OktaProviderName   = "Okta"
-	OktaDefaultTrust   = "substantial"
+	OktaProviderID   = "okta"
+	OktaProviderName = "Okta"
+	OktaDefaultTrust = "substantial"
 )
 
 // OktaClaimMappings defines how Okta OIDC claims map to GAuth claims.
 // Okta provides enterprise-grade claims with group information.
 var OktaClaimMappings = map[string]string{
-	"sub":                "user_id",           // Unique user identifier
-	"email":              "email",             // User's email address
-	"email_verified":     "email_verified",    // Email verification status
-	"name":               "full_name",         // Full name
-	"given_name":         "given_name",        // Given/first name
-	"family_name":        "family_name",       // Family/last name
-	"preferred_username": "username",          // Username
-	"locale":             "locale",            // User's locale
-	"zoneinfo":           "timezone",          // User's timezone
-	"groups":             "roles",             // User's groups/roles
+	"sub":                "user_id",        // Unique user identifier
+	"email":              "email",          // User's email address
+	"email_verified":     "email_verified", // Email verification status
+	"name":               "full_name",      // Full name
+	"given_name":         "given_name",     // Given/first name
+	"family_name":        "family_name",    // Family/last name
+	"preferred_username": "username",       // Username
+	"locale":             "locale",         // User's locale
+	"zoneinfo":           "timezone",       // User's timezone
+	"groups":             "roles",          // User's groups/roles
 }
 
 // OktaProvider implements Okta-specific OIDC integration.

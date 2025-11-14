@@ -87,7 +87,7 @@ func TestValidateToken_ExpiredClaims(t *testing.T) {
 	// The simplified implementation doesn't check expiration
 	// This test documents expected behavior for production implementation
 	claims, err := auth.ValidateToken(ctx, "expired-token")
-	
+
 	if err != nil {
 		t.Logf("Expired token validation failed: %v", err)
 	} else if claims != nil {
@@ -107,7 +107,7 @@ func TestValidateToken_InvalidSignature(t *testing.T) {
 	// Simplified implementation doesn't verify signatures
 	// This test documents expected behavior for production implementation
 	claims, err := auth.ValidateToken(ctx, "token-with-invalid-signature")
-	
+
 	if err != nil {
 		t.Logf("Invalid signature validation failed as expected: %v", err)
 	} else if claims != nil {
@@ -122,7 +122,7 @@ func TestValidateToken_WrongIssuer(t *testing.T) {
 	ctx := context.Background()
 
 	claims, err := auth.ValidateToken(ctx, "token-with-wrong-issuer")
-	
+
 	if err != nil {
 		t.Logf("Wrong issuer validation failed as expected: %v", err)
 	} else if claims != nil {
@@ -138,7 +138,7 @@ func TestValidateToken_WrongAudience(t *testing.T) {
 	ctx := context.Background()
 
 	claims, err := auth.ValidateToken(ctx, "token-with-wrong-audience")
-	
+
 	if err != nil {
 		t.Logf("Wrong audience validation failed as expected: %v", err)
 	} else if claims != nil {
@@ -154,7 +154,7 @@ func TestValidateToken_NotBeforeTime(t *testing.T) {
 	ctx := context.Background()
 
 	claims, err := auth.ValidateToken(ctx, "token-not-yet-valid")
-	
+
 	if err != nil {
 		t.Logf("Not-yet-valid token validation failed as expected: %v", err)
 	} else if claims != nil {
@@ -174,7 +174,7 @@ func TestValidateToken_ClockSkew(t *testing.T) {
 	// Test that slight clock differences are tolerated
 	// In production, typically allow 5 minutes of clock skew
 	claims, err := auth.ValidateToken(ctx, "token-with-slight-time-diff")
-	
+
 	if err != nil {
 		t.Logf("Token with clock skew validation failed: %v", err)
 	} else if claims != nil {
@@ -189,9 +189,9 @@ func TestValidateToken_MissingClaims(t *testing.T) {
 	ctx := context.Background()
 
 	testCases := []struct {
-		name          string
-		token         string
-		missingClaim  string
+		name         string
+		token        string
+		missingClaim string
 	}{
 		{"MissingSubject", "token-no-sub", "sub"},
 		{"MissingIssuer", "token-no-iss", "iss"},
@@ -202,7 +202,7 @@ func TestValidateToken_MissingClaims(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			claims, err := auth.ValidateToken(ctx, tc.token)
-			
+
 			if err != nil {
 				t.Logf("Token with missing %s failed: %v", tc.missingClaim, err)
 			} else if claims != nil {
@@ -219,19 +219,19 @@ func TestValidateToken_WithScope(t *testing.T) {
 	ctx := context.Background()
 
 	claims, err := auth.ValidateToken(ctx, "token-with-scope")
-	
+
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
 	if claims == nil {
 		t.Fatal("Expected claims, got nil")
 	}
-	
+
 	// Check scope claim
 	if claims.Scope != "" {
 		// Verify scope is populated
 		t.Logf("Token scope: %s", claims.Scope)
-		
+
 		// In production, would verify specific scopes like "read" and "write"
 		if claims.Scope == "read write" {
 			t.Log("Scope matches expected format")
@@ -252,7 +252,7 @@ func TestValidateToken_ConcurrentValidation(t *testing.T) {
 	for i := 0; i < concurrency; i++ {
 		go func(id int) {
 			defer func() { done <- true }()
-			
+
 			claims, err := auth.ValidateToken(ctx, "concurrent-token")
 			if err != nil {
 				t.Logf("Goroutine %d: validation failed: %v", id, err)
@@ -275,14 +275,14 @@ func TestValidateToken_WithKeyID(t *testing.T) {
 	ctx := context.Background()
 
 	claims, err := auth.ValidateToken(ctx, "token-with-kid")
-	
+
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
 	if claims == nil {
 		t.Fatal("Expected claims, got nil")
 	}
-	
+
 	// In production, KeyID would be used to select verification key
 	if claims.KeyID != "" {
 		t.Logf("Token has KeyID: %s", claims.KeyID)
@@ -293,13 +293,13 @@ func TestValidateToken_WithKeyID(t *testing.T) {
 func TestValidateToken_ContextCancellation(t *testing.T) {
 	// Simplified implementation uses NewAuthenticator(nil)
 	auth := NewAuthenticator(nil)
-	
+
 	// Create cancelled context
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
 
 	claims, err := auth.ValidateToken(ctx, "valid-token")
-	
+
 	// Current implementation doesn't check context
 	// In production, should return context.Canceled error
 	if err != nil {
@@ -313,15 +313,15 @@ func TestValidateToken_ContextCancellation(t *testing.T) {
 func TestValidateToken_ContextTimeout(t *testing.T) {
 	// Simplified implementation uses NewAuthenticator(nil)
 	auth := NewAuthenticator(nil)
-	
+
 	// Create context with very short timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Nanosecond)
 	defer cancel()
-	
+
 	time.Sleep(10 * time.Millisecond) // Ensure timeout
 
 	claims, err := auth.ValidateToken(ctx, "valid-token")
-	
+
 	if err != nil {
 		t.Logf("Validation with timeout context failed: %v", err)
 	} else if claims != nil {

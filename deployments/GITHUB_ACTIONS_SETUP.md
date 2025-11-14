@@ -1,3 +1,13 @@
+---
+title: GitHub Actions CI/CD Setup Guide
+category: cicd-guide
+status: active
+lastUpdated: 2025-11-12
+owners: platform-eng
+source: internal
+refreshCadence: quarterly
+---
+
 # GitHub Actions CI/CD Setup Guide
 
 This guide walks through setting up the GitHub Actions CI/CD pipeline for GAuth staging deployment.

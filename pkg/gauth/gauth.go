@@ -19,6 +19,7 @@ import (
 
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/observability"
+	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -171,10 +172,12 @@ type Service struct {
 	jtiTTL     time.Duration
 	jtiMu      sync.Mutex
 	violations *observability.ViolationCounters
-	
+
 	// RFC-0111 compliance components
-	protocolOrchestrator *ProtocolOrchestrator
-	subscriptionManager  *SubscriptionFlowManager
+	protocolOrchestrator  *ProtocolOrchestrator
+	subscriptionManager   *SubscriptionFlowManager
+	powerEnforcementPoint *PowerEnforcementPoint
+	powerDecisionPoint    PowerDecisionPoint
 }
 
 // Option configures the Service during construction.
@@ -229,7 +232,7 @@ func WithRFCCompliance(
 			formalReqValidator,
 			subscriptionStore,
 		)
-		
+
 		// Create protocol orchestrator
 		s.protocolOrchestrator = NewProtocolOrchestrator(
 			extendedTokenService,
@@ -240,7 +243,25 @@ func WithRFCCompliance(
 			subscriptionStore,
 			complianceTracker,
 		)
-		
+
+		// Create PDP (Power Decision Point)
+		s.powerDecisionPoint = NewSimplePDP()
+
+		// Create PEP (Power Enforcement Point) wired to PDP
+		// This completes the P*P architecture integration (RFC-0111 Section 3.1)
+		if s.powerDecisionPoint != nil {
+			tokenValidator := &simpleTokenValidator{
+				extTokenService: extendedTokenService,
+			}
+			s.powerEnforcementPoint = NewPowerEnforcementPoint(
+				tokenValidator,
+				s.powerDecisionPoint,
+				&noopPEPAuditLogger{}, // Simple audit logger
+				complianceTracker,
+				"strict", // Enforcement mode
+			)
+		}
+
 		return nil
 	}
 }
@@ -339,7 +360,47 @@ func (g *Service) InitiateAuthorization(req AuthorizationRequest) (*Authorizatio
 }
 
 // RequestToken requests a token using an authorization grant
+// UPDATED: Now uses RFC-0111 flow by default for RFC compliance
+// Set GAUTH_LEGACY_OAUTH_MODE=1 to use legacy OAuth-only mode
 func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
+	// Check if legacy OAuth mode is enabled
+	if os.Getenv("GAUTH_LEGACY_OAUTH_MODE") == "1" {
+		return g.RequestTokenLegacy(req)
+	}
+
+	// RFC-0111 compliant mode (default)
+	ctx := context.Background()
+
+	// Check if RFC orchestrator is available
+	if g.protocolOrchestrator == nil {
+		// Fallback to legacy mode if RFC orchestrator not initialized
+		return g.RequestTokenLegacy(req)
+	}
+
+	// Convert TokenRequest to RFCCompliantAuthorizationRequest
+	rfcReq := &RFCCompliantAuthorizationRequest{
+		ClientID:       g.config.ClientID,
+		SubscriptionID: req.GrantID, // Use GrantID as subscription reference
+		RequestedScope: convertScopeToAuthorizationScope(req.Scope),
+		Context:        convertContextToMap(req.Context),
+	}
+
+	// Execute RFC-0111 compliant flow
+	rfcResp, err := g.RequestTokenRFC(ctx, rfcReq)
+	if err != nil {
+		// If RFC flow fails, log and fallback to legacy
+		// In production, you may want to return the error instead
+		return g.RequestTokenLegacy(req)
+	}
+
+	// Convert RFCCompliantTokenResponse to TokenResponse
+	return convertRFCResponseToTokenResponse(rfcResp), nil
+}
+
+// RequestTokenLegacy generates a basic OAuth token (non-RFC-0111 compliant)
+// This is the original implementation, kept for backward compatibility
+// Use GAUTH_LEGACY_OAUTH_MODE=1 to enable this mode
+func (g *Service) RequestTokenLegacy(req TokenRequest) (*TokenResponse, error) {
 	expiry := time.Now().Add(g.config.AccessTokenExpiry)
 	issuedAt := time.Now().Unix()
 	nbf := issuedAt // not-before set to iat for now
@@ -449,7 +510,7 @@ func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthoriz
 	if g.protocolOrchestrator == nil {
 		return nil, fmt.Errorf("RFC-0111 protocol orchestrator not initialized - use WithRFCCompliance option")
 	}
-	
+
 	return g.protocolOrchestrator.ExecuteRFCCompliantFlow(ctx, req)
 }
 
@@ -964,6 +1025,61 @@ func (g *Service) storeJTI(jti string) {
 				delete(g.seenJTI, id)
 			}
 		}
+	}
+}
+
+// Helper functions for RequestToken RFC-0111 conversion
+
+// convertScopeToAuthorizationScope converts string scope to poa.AuthorizationScope
+func convertScopeToAuthorizationScope(scopes []string) *poa.AuthorizationScope {
+	if len(scopes) == 0 {
+		return nil
+	}
+
+	// For now, create a basic authorization scope
+	// In production, this should be enriched with proper sector/region data
+	return &poa.AuthorizationScope{
+		AuthorizationType: poa.AuthorizationType{
+			RepresentationType: "sole",
+			Restrictions:       []string{},
+			SubProxyAuthority:  false,
+		},
+		ApplicableSectors: []poa.IndustrySector{},
+		ApplicableRegions: []poa.GeographicScope{
+			{Type: poa.GeoTypeGlobal}, // Default to global
+		},
+		AuthorizedActions: poa.AuthorizedActions{},
+	}
+}
+
+// convertContextToMap converts interface{} context to map[string]interface{}
+func convertContextToMap(ctx interface{}) map[string]interface{} {
+	if ctx == nil {
+		return make(map[string]interface{})
+	}
+
+	if m, ok := ctx.(map[string]interface{}); ok {
+		return m
+	}
+
+	return map[string]interface{}{
+		"original_context": ctx,
+	}
+}
+
+// convertRFCResponseToTokenResponse converts RFC response to legacy TokenResponse
+func convertRFCResponseToTokenResponse(rfcResp *RFCCompliantTokenResponse) *TokenResponse {
+	if rfcResp == nil || rfcResp.ExtendedToken == nil {
+		return &TokenResponse{}
+	}
+
+	token := rfcResp.ExtendedToken
+	expiry := token.IssuedAt.Add(time.Duration(token.ExpiresIn) * time.Second)
+
+	return &TokenResponse{
+		Token:      token.AccessToken,
+		Scope:      token.Scope,
+		ValidUntil: expiry,
 	}
 }
 

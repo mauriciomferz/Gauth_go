@@ -75,13 +75,11 @@ func (m *DefaultAuditMetrics) RecordValidation(poA *PowerOfAttorney, warnings []
 type DefaultCBORCodec struct{}
 
 func (c *DefaultCBORCodec) Encode(poA *PowerOfAttorney) ([]byte, error) {
-	// TODO: Implement CBOR encoding
-	return poA.RawJSON, nil
+	return EncodeCBOR(poA)
 }
 
 func (c *DefaultCBORCodec) Decode(data []byte) (*PowerOfAttorney, error) {
-	// TODO: Implement CBOR decoding
-	return &PowerOfAttorney{RawJSON: data}, nil
+	return DecodeCBOR(data)
 }
 
 type DefaultRawPOAExposer struct{}

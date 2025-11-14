@@ -1,3 +1,11 @@
+---
+title: "Typed Events Examples"
+category: example
+status: active
+lastUpdated: 2025-11-12
+owners: architecture-team
+refreshCadence: on-change
+---
 # Typed Events Example: Code Review & Beta Notes
 
 > Last Updated: 2025-10-17

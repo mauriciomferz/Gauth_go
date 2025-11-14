@@ -1,3 +1,10 @@
+---
+title: Code Quality Improvement Roadmap
+category: roadmap
+status: complete
+lastUpdated: 2025-11-12
+owners: quality-assurance
+---
 # Code Quality Improvement Roadmap
 
 **Status**: Phases 1-5 Complete (Security, Testing, Dependencies, Documentation)

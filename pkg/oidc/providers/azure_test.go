@@ -573,28 +573,28 @@ func TestAzureADProvider_GetTrustLevel(t *testing.T) {
 
 func TestAzureADProvider_IsMultiTenant(t *testing.T) {
 	tests := []struct {
-		name              string
-		tenantID          string
+		name                string
+		tenantID            string
 		expectedMultiTenant bool
 	}{
 		{
-			name:              "Common tenant (multi-tenant)",
-			tenantID:          "common",
+			name:                "Common tenant (multi-tenant)",
+			tenantID:            "common",
 			expectedMultiTenant: true,
 		},
 		{
-			name:              "Organizations tenant (multi-tenant)",
-			tenantID:          "organizations",
+			name:                "Organizations tenant (multi-tenant)",
+			tenantID:            "organizations",
 			expectedMultiTenant: true,
 		},
 		{
-			name:              "Consumers tenant (not multi-tenant)",
-			tenantID:          "consumers",
+			name:                "Consumers tenant (not multi-tenant)",
+			tenantID:            "consumers",
 			expectedMultiTenant: false,
 		},
 		{
-			name:              "Specific tenant GUID (not multi-tenant)",
-			tenantID:          "12345678-1234-1234-1234-123456789012",
+			name:                "Specific tenant GUID (not multi-tenant)",
+			tenantID:            "12345678-1234-1234-1234-123456789012",
 			expectedMultiTenant: false,
 		},
 	}
@@ -612,9 +612,9 @@ func TestAzureADProvider_IsMultiTenant(t *testing.T) {
 
 func TestAzureADProvider_TenantValidation(t *testing.T) {
 	tests := []struct {
-		name           string
-		tenantID       string
-		expectedValid  bool
+		name          string
+		tenantID      string
+		expectedValid bool
 	}{
 		{
 			name:          "Valid GUID",

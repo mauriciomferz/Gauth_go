@@ -6,30 +6,31 @@ import (
 	"context"
 	"fmt"
 	"time"
-
-	"github.com/golang-jwt/jwt/v5"
 )
 
 // TokenExchangeService handles token exchange between external providers and GAuth.
 type TokenExchangeService struct {
-	providerRegistry   ProviderRegistry
-	idTokenService     *IDTokenService
-	tokenValidator     *ExternalTokenValidator
-	jwksFetcher        JWKSFetcher
-	discoveryCache     DiscoveryCache
-	revocationService  *TokenRevocationService
-	refreshTokenService *RefreshTokenService
+	providerRegistry     ProviderRegistry
+	idTokenService       *IDTokenService
+	tokenValidator       *ExternalTokenValidator
+	jwksFetcher          JWKSFetcher
+	discoveryCache       DiscoveryCache
+	revocationService    *TokenRevocationService
+	refreshTokenService  *RefreshTokenService
+	refreshTokenManager  *RefreshTokenManager
+	revocationHandler    *TokenRevocationHandler
+	introspectionHandler *TokenIntrospectionHandler
 }
 
 // TokenExchangeConfig configures the token exchange service.
 type TokenExchangeConfig struct {
-	ProviderRegistry     ProviderRegistry
-	IDTokenService       *IDTokenService
-	TokenValidator       *ExternalTokenValidator
-	JWKSFetcher          JWKSFetcher
-	DiscoveryCache       DiscoveryCache
-	RevocationService    *TokenRevocationService
-	RefreshTokenService  *RefreshTokenService
+	ProviderRegistry    ProviderRegistry
+	IDTokenService      *IDTokenService
+	TokenValidator      *ExternalTokenValidator
+	JWKSFetcher         JWKSFetcher
+	DiscoveryCache      DiscoveryCache
+	RevocationService   *TokenRevocationService
+	RefreshTokenService *RefreshTokenService
 }
 
 // NewTokenExchangeService creates a new token exchange service.
@@ -69,14 +70,41 @@ func NewTokenExchangeService(config TokenExchangeConfig) (*TokenExchangeService,
 		refreshTokenService = NewRefreshTokenService()
 	}
 
+	// Create refresh token manager
+	refreshTokenManager := NewRefreshTokenManager(
+		refreshTokenService,
+		revocationService,
+		config.IDTokenService,
+		config.ProviderRegistry,
+	)
+
+	// Create revocation handler
+	revocationHandler := NewTokenRevocationHandler(
+		revocationService,
+		refreshTokenService,
+		config.IDTokenService,
+		config.ProviderRegistry,
+	)
+
+	// Create introspection handler
+	introspectionHandler := NewTokenIntrospectionHandler(
+		config.IDTokenService,
+		refreshTokenService,
+		revocationService,
+		config.ProviderRegistry,
+	)
+
 	return &TokenExchangeService{
-		providerRegistry:    config.ProviderRegistry,
-		idTokenService:      config.IDTokenService,
-		tokenValidator:      tokenValidator,
-		jwksFetcher:         jwksFetcher,
-		discoveryCache:      discoveryCache,
-		revocationService:   revocationService,
-		refreshTokenService: refreshTokenService,
+		providerRegistry:     config.ProviderRegistry,
+		idTokenService:       config.IDTokenService,
+		tokenValidator:       tokenValidator,
+		jwksFetcher:          jwksFetcher,
+		discoveryCache:       discoveryCache,
+		revocationService:    revocationService,
+		refreshTokenService:  refreshTokenService,
+		refreshTokenManager:  refreshTokenManager,
+		revocationHandler:    revocationHandler,
+		introspectionHandler: introspectionHandler,
 	}, nil
 }
 
@@ -114,6 +142,9 @@ type ExchangeResponse struct {
 
 	// ProviderID is the original provider
 	ProviderID string
+
+	// RefreshToken is the new refresh token (if rotated)
+	RefreshToken string
 }
 
 // ExchangeToken exchanges an external OIDC token for a GAuth token.
@@ -371,97 +402,136 @@ func (s *TokenExchangeService) GetProviderInfo(providerID string) (*ProviderConf
 }
 
 // RevokeExchangedToken revokes a previously exchanged token.
+// Implements RFC 7009 token revocation.
 func (s *TokenExchangeService) RevokeExchangedToken(ctx context.Context, token string, reason string, revokedBy string) error {
-	if token == "" {
-		return fmt.Errorf("token is required")
+	// Build revocation request
+	req := &RevocationRequest{
+		Token:         token,
+		TokenTypeHint: "access_token", // Assume access token by default
+		Reason:        reason,
+		RevokedBy:     revokedBy,
 	}
 
-	// Parse the token to extract the token ID and expiration
-	// For now, we'll use empty audience to allow revocation without validation
-	claims, err := s.idTokenService.ValidateIDToken(ctx, token, "")
+	// Use the revocation handler
+	_, err := s.revocationHandler.RevokeToken(ctx, req)
 	if err != nil {
-		return fmt.Errorf("invalid token: %w", err)
+		// Check if it's a RevocationError (which means validation failed)
+		if revErr, ok := err.(*RevocationError); ok {
+			return fmt.Errorf("revocation failed: %s", revErr.ErrorDescription)
+		}
+		return fmt.Errorf("failed to revoke token: %w", err)
 	}
 
-	// Determine expiration time for revocation entry
-	var expiresAt time.Time
-	if claims.ExpiresAt != nil {
-		expiresAt = claims.ExpiresAt.Time
-	} else {
-		// Default to 24 hours if no expiration
-		expiresAt = time.Now().Add(24 * time.Hour)
-	}
-
-	// Revoke the token
-	tokenID := claims.ID
-	if tokenID == "" {
-		tokenID = token // Use full token as ID if no JTI claim
-	}
-
-	return s.revocationService.RevokeToken(ctx, tokenID, reason, revokedBy, expiresAt)
+	return nil
 }
 
 // RefreshExchangedToken refreshes an exchanged token using a refresh token.
+// Implements RFC 6749 token refresh flow with token rotation.
 func (s *TokenExchangeService) RefreshExchangedToken(ctx context.Context, refreshToken string, providerID string) (*ExchangeResponse, error) {
-	if refreshToken == "" {
-		return nil, fmt.Errorf("refresh token is required")
+	// Build refresh request
+	req := &RefreshTokenRequest{
+		RefreshToken: refreshToken,
+		GrantType:    "refresh_token",
+		ClientID:     providerID,
 	}
 
-	// Get the stored refresh token entry
-	entry, err := s.refreshTokenService.GetRefreshToken(ctx, refreshToken)
+	// Use the refresh token manager to handle the refresh
+	response, err := s.refreshTokenManager.RefreshToken(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("refresh token not found or expired: %w", err)
+		return nil, fmt.Errorf("failed to refresh token: %w", err)
 	}
 
-	// Verify provider ID matches
-	if entry.ProviderID != providerID {
-		return nil, fmt.Errorf("provider ID mismatch: expected %s, got %s", entry.ProviderID, providerID)
-	}
-
-	// Update usage
-	if err := s.refreshTokenService.UpdateRefreshTokenUsage(ctx, refreshToken); err != nil {
-		return nil, fmt.Errorf("failed to update refresh token usage: %w", err)
-	}
-
-	// Get provider configuration
-	provider, err := s.providerRegistry.Get(providerID)
+	// Parse the new ID token to extract claims
+	claims, err := s.idTokenService.ValidateIDToken(ctx, response.IDToken, "")
 	if err != nil {
-		return nil, fmt.Errorf("failed to get provider: %w", err)
+		return nil, fmt.Errorf("failed to validate refreshed ID token: %w", err)
 	}
 
-	// In a real implementation, we would:
-	// 1. Call the provider's token refresh endpoint with the refresh token
-	// 2. Get a new access token and ID token
-	// 3. Validate and exchange the new ID token
-	//
-	// For now, we'll create a new token based on the stored refresh token entry
-	// This is a simplified implementation that doesn't actually call the provider
-
-	// Create new ID token claims using jwt.RegisteredClaims
-	newExpiration := time.Now().Add(1 * time.Hour)
-	claims := &IDTokenClaims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   entry.Subject,
-			Audience:  jwt.ClaimStrings{entry.Audience},
-			Issuer:    provider.IssuerURL,
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(newExpiration),
-			ID:        generateTokenID(), // Generate new token ID
-		},
-	}
-
-	// Generate new GAuth token (in real implementation, this would come from external provider)
-	// For now, return a response indicating successful refresh
-	return &ExchangeResponse{
-		GAuthToken: refreshToken, // Placeholder - in real implementation, this would be a new token
-		ExpiresAt:  newExpiration,
+	// Build exchange response
+	exchangeResponse := &ExchangeResponse{
+		GAuthToken: response.IDToken,
+		ExpiresAt:  claims.ExpiresAt.Time,
 		Claims:     claims,
-		TrustLevel: "medium", // Based on refresh token usage
+		TrustLevel: determineRefreshTrustLevel(claims),
 		ProviderID: providerID,
-	}, nil
+	}
+
+	// Store the new refresh token if rotated
+	if response.RefreshToken != refreshToken {
+		// Update refresh token in context (caller should store this)
+		exchangeResponse.RefreshToken = response.RefreshToken
+	}
+
+	return exchangeResponse, nil
 }
 
 // generateTokenID generates a unique token ID for JTI claim
 func generateTokenID() string {
 	return fmt.Sprintf("jti_%d", time.Now().UnixNano())
+}
+
+// determineRefreshTrustLevel determines the trust level for a refreshed token.
+// Refreshed tokens generally have lower trust than initial authentication.
+func determineRefreshTrustLevel(claims *IDTokenClaims) string {
+	// Check for ACR (Authentication Context Class Reference)
+	if claims.ACR != "" {
+		// If original authentication had high ACR, maintain substantial trust
+		if claims.ACR == "2" || claims.ACR == "3" || claims.ACR == "c1" || claims.ACR == "c2" || claims.ACR == "c3" {
+			return "substantial"
+		}
+		if claims.ACR == "1" {
+			return "substantial"
+		}
+	}
+
+	// Check for AMR (Authentication Methods References)
+	if len(claims.AMR) > 0 {
+		for _, amr := range claims.AMR {
+			// MFA-based authentication maintains substantial trust
+			if amr == "mfa" || amr == "otp" || amr == "sms" || amr == "hwk" || amr == "swk" {
+				return "substantial"
+			}
+		}
+	}
+
+	// Default to low trust for refresh tokens
+	// This follows security best practice that refresh tokens have lower assurance
+	return "low"
+}
+
+// IntrospectToken introspects a token and returns its metadata.
+// Implements RFC 7662 token introspection endpoint.
+func (s *TokenExchangeService) IntrospectToken(ctx context.Context, token string, tokenTypeHint string) (*IntrospectionResponse, error) {
+	// Build introspection request
+	req := &IntrospectionRequest{
+		Token:         token,
+		TokenTypeHint: tokenTypeHint,
+	}
+
+	// Use the introspection handler
+	response, err := s.introspectionHandler.IntrospectToken(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to introspect token: %w", err)
+	}
+
+	return response, nil
+}
+
+// IntrospectTokenWithValidation introspects a token with full validation.
+// This method performs signature verification and full token validation.
+func (s *TokenExchangeService) IntrospectTokenWithValidation(ctx context.Context, token string, tokenTypeHint string, clientID string) (*IntrospectionResponse, error) {
+	// Build introspection request
+	req := &IntrospectionRequest{
+		Token:         token,
+		TokenTypeHint: tokenTypeHint,
+		ClientID:      clientID,
+	}
+
+	// Use the introspection handler with validation
+	response, err := s.introspectionHandler.IntrospectTokenWithValidation(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to introspect token: %w", err)
+	}
+
+	return response, nil
 }

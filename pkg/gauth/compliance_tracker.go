@@ -14,16 +14,16 @@ import (
 type ComplianceTracker interface {
 	// StartTracking begins compliance monitoring for an extended token
 	StartTracking(ctx context.Context, req *ComplianceTrackingRequest) error
-	
+
 	// CheckCompliance performs a compliance check for a specific token
 	CheckCompliance(ctx context.Context, tokenID string) (*ComplianceStatus, error)
-	
+
 	// StopTracking stops compliance monitoring for a token
 	StopTracking(ctx context.Context, tokenID string) error
-	
+
 	// GetTrackingStatus returns the current tracking status
 	GetTrackingStatus(ctx context.Context, tokenID string) (*ComplianceTrackingStatus, error)
-	
+
 	// ListActiveTracking returns all tokens currently being tracked
 	ListActiveTracking(ctx context.Context) ([]string, error)
 }
@@ -51,10 +51,10 @@ type ComplianceTrackingStatus struct {
 
 // MemoryComplianceTracker is an in-memory implementation of ComplianceTracker
 type MemoryComplianceTracker struct {
-	mu             sync.RWMutex
-	tracking       map[string]*ComplianceTrackingStatus
-	stopChannels   map[string]chan struct{}
-	
+	mu           sync.RWMutex
+	tracking     map[string]*ComplianceTrackingStatus
+	stopChannels map[string]chan struct{}
+
 	// Dependencies for compliance checks
 	complianceValidator *ComplianceValidator
 }
@@ -72,18 +72,18 @@ func NewMemoryComplianceTracker(validator *ComplianceValidator) *MemoryComplianc
 func (t *MemoryComplianceTracker) StartTracking(ctx context.Context, req *ComplianceTrackingRequest) error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	
+
 	// Check if already tracking
 	if _, exists := t.tracking[req.ExtendedTokenID]; exists {
 		return fmt.Errorf("already tracking token: %s", req.ExtendedTokenID)
 	}
-	
+
 	// Set default check interval if not provided
 	checkInterval := req.CheckInterval
 	if checkInterval == 0 {
 		checkInterval = 1 * time.Hour // Default: check every hour
 	}
-	
+
 	// Create tracking status
 	now := time.Now()
 	status := &ComplianceTrackingStatus{
@@ -100,16 +100,16 @@ func (t *MemoryComplianceTracker) StartTracking(ctx context.Context, req *Compli
 		},
 		Active: true,
 	}
-	
+
 	t.tracking[req.ExtendedTokenID] = status
-	
+
 	// Create stop channel for this tracking
 	stopChan := make(chan struct{})
 	t.stopChannels[req.ExtendedTokenID] = stopChan
-	
+
 	// Start background monitoring goroutine
 	go t.monitorCompliance(req, status, stopChan, checkInterval)
-	
+
 	return nil
 }
 
@@ -122,13 +122,13 @@ func (t *MemoryComplianceTracker) monitorCompliance(
 ) {
 	ticker := time.NewTicker(checkInterval)
 	defer ticker.Stop()
-	
+
 	for {
 		select {
 		case <-stopChan:
 			// Stop monitoring
 			return
-			
+
 		case <-ticker.C:
 			// Perform compliance check
 			ctx := context.Background()
@@ -138,7 +138,7 @@ func (t *MemoryComplianceTracker) monitorCompliance(
 				fmt.Printf("Compliance check failed for token %s: %v\n", req.ExtendedTokenID, err)
 				continue
 			}
-			
+
 			// Update tracking status
 			t.mu.Lock()
 			status.LastChecked = time.Now()
@@ -146,10 +146,10 @@ func (t *MemoryComplianceTracker) monitorCompliance(
 			status.CheckCount++
 			status.ComplianceStatus = complianceStatus
 			t.mu.Unlock()
-			
+
 			// If non-compliant, log violation
 			if !complianceStatus.Compliant {
-				fmt.Printf("COMPLIANCE VIOLATION for token %s: %v\n", 
+				fmt.Printf("COMPLIANCE VIOLATION for token %s: %v\n",
 					req.ExtendedTokenID, complianceStatus.Violations)
 			}
 		}
@@ -167,9 +167,9 @@ func (t *MemoryComplianceTracker) performComplianceCheck(
 	// 3. Check if any restrictions have been violated
 	// 4. Verify resource owner/server still authorize the client
 	// 5. Check for any revocations
-	
+
 	violations := []string{}
-	
+
 	// Check PoA validity period
 	if req.PoACredential != nil {
 		validityPeriod := req.PoACredential.Requirements.ValidityPeriod
@@ -180,13 +180,13 @@ func (t *MemoryComplianceTracker) performComplianceCheck(
 			violations = append(violations, "PoA has expired")
 		}
 	}
-	
+
 	// Additional checks can be added here:
 	// - Transaction limits exceeded
 	// - Geographic restrictions violated
 	// - Time-based restrictions violated
 	// - Revocation list checks
-	
+
 	now := time.Now()
 	return &ComplianceStatus{
 		Compliant:   len(violations) == 0,
@@ -201,15 +201,15 @@ func (t *MemoryComplianceTracker) CheckCompliance(ctx context.Context, tokenID s
 	t.mu.RLock()
 	status, exists := t.tracking[tokenID]
 	t.mu.RUnlock()
-	
+
 	if !exists {
 		return nil, fmt.Errorf("token not being tracked: %s", tokenID)
 	}
-	
+
 	if !status.Active {
 		return status.ComplianceStatus, nil
 	}
-	
+
 	// Return current compliance status
 	return status.ComplianceStatus, nil
 }
@@ -218,21 +218,21 @@ func (t *MemoryComplianceTracker) CheckCompliance(ctx context.Context, tokenID s
 func (t *MemoryComplianceTracker) StopTracking(ctx context.Context, tokenID string) error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	
+
 	status, exists := t.tracking[tokenID]
 	if !exists {
 		return fmt.Errorf("token not being tracked: %s", tokenID)
 	}
-	
+
 	// Mark as inactive
 	status.Active = false
-	
+
 	// Signal the monitoring goroutine to stop
 	if stopChan, exists := t.stopChannels[tokenID]; exists {
 		close(stopChan)
 		delete(t.stopChannels, tokenID)
 	}
-	
+
 	return nil
 }
 
@@ -240,12 +240,12 @@ func (t *MemoryComplianceTracker) StopTracking(ctx context.Context, tokenID stri
 func (t *MemoryComplianceTracker) GetTrackingStatus(ctx context.Context, tokenID string) (*ComplianceTrackingStatus, error) {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
-	
+
 	status, exists := t.tracking[tokenID]
 	if !exists {
 		return nil, fmt.Errorf("token not being tracked: %s", tokenID)
 	}
-	
+
 	return status, nil
 }
 
@@ -253,14 +253,14 @@ func (t *MemoryComplianceTracker) GetTrackingStatus(ctx context.Context, tokenID
 func (t *MemoryComplianceTracker) ListActiveTracking(ctx context.Context) ([]string, error) {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
-	
+
 	var activeTokens []string
 	for tokenID, status := range t.tracking {
 		if status.Active {
 			activeTokens = append(activeTokens, tokenID)
 		}
 	}
-	
+
 	return activeTokens, nil
 }
 
@@ -268,14 +268,14 @@ func (t *MemoryComplianceTracker) ListActiveTracking(ctx context.Context) ([]str
 func (t *MemoryComplianceTracker) GetStats() map[string]interface{} {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
-	
+
 	stats := make(map[string]interface{})
 	stats["total_tracked"] = len(t.tracking)
-	
+
 	activeCount := 0
 	compliantCount := 0
 	violationCount := 0
-	
+
 	for _, status := range t.tracking {
 		if status.Active {
 			activeCount++
@@ -288,10 +288,10 @@ func (t *MemoryComplianceTracker) GetStats() map[string]interface{} {
 			}
 		}
 	}
-	
+
 	stats["active"] = activeCount
 	stats["compliant"] = compliantCount
 	stats["violations"] = violationCount
-	
+
 	return stats
 }

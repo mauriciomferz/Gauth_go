@@ -1,3 +1,12 @@
+---
+title: Disclaimer (Beta Demonstration / NOT Production Ready)
+category: legal-disclaimer
+status: active
+lastUpdated: 2025-11-12
+owners: compliance-team
+source: manual-curation
+refreshCadence: quarterly
+---
 # DISCLAIMER (Beta Demonstration / NOT Production Ready)
 
 > Last Updated: 2025-10-17

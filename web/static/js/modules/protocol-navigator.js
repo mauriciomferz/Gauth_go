@@ -26,11 +26,14 @@ const PROTOCOL_STEPS = {
         icon: '🔍',
         substeps: [
             { id: 'validate_poa', name: 'Validate PoA Definition', status: 'pending' },
+            { id: 'authorization_chain', name: 'Authorization Chain Validation', status: 'pending' },
+            { id: 'commercial_register', name: 'Commercial Register Check', status: 'pending' },
             { id: 'check_capabilities', name: 'Check AI Capabilities', status: 'pending' },
             { id: 'verify_jurisdiction', name: 'Verify Jurisdiction', status: 'pending' },
+            { id: 'formal_requirements', name: 'Formal Requirements Check', status: 'pending' },
             { id: 'match_policies', name: 'Match Policies', status: 'pending' }
         ],
-        apis: ['/api/v1/poa/validate', '/api/v1/ai/capabilities']
+        apis: ['/api/v1/poa/validate', '/api/v1/ai/capabilities', '/api/v1/authchain/validate']
     },
     SUBSET_REQUEST: {
         id: 'subset_request',
@@ -39,11 +42,14 @@ const PROTOCOL_STEPS = {
         icon: '🎯',
         substeps: [
             { id: 'create_request', name: 'Create Auth Request', status: 'pending' },
+            { id: 'request_compliance', name: 'Request Compliance Validation', status: 'pending' },
             { id: 'select_scope', name: 'Select Scope Subset', status: 'pending' },
+            { id: 'pip_query', name: 'PIP Policy Info Query', status: 'pending' },
             { id: 'pdp_decision', name: 'PDP Decision', status: 'pending' },
-            { id: 'generate_token', name: 'Generate Token', status: 'pending' }
+            { id: 'generate_extended_token', name: 'Generate Extended Token', status: 'pending' },
+            { id: 'grant_compliance', name: 'Grant Compliance Validation', status: 'pending' }
         ],
-        apis: ['/api/v1/authorize', '/api/v1/token']
+        apis: ['/api/v1/authorize', '/api/v1/token', '/api/v1/compliance/validate']
     },
     ENFORCEMENT: {
         id: 'enforcement',
@@ -64,12 +70,14 @@ const PROTOCOL_STEPS = {
         description: 'Token verification and PVP identity validation',
         icon: '✓',
         substeps: [
-            { id: 'validate_token', name: 'Validate Token', status: 'pending' },
-            { id: 'verify_signature', name: 'Verify Signature', status: 'pending' },
-            { id: 'check_revocation', name: 'Check Revocation', status: 'pending' },
-            { id: 'pvp_check', name: 'PVP Identity Check', status: 'pending' }
+            { id: 'validate_extended_token', name: 'Validate Extended Token', status: 'pending' },
+            { id: 'verify_signature', name: 'Verify JWE Signature', status: 'pending' },
+            { id: 'check_revocation', name: 'Check Revocation Status', status: 'pending' },
+            { id: 'pvp_identity', name: 'PVP Identity Verification', status: 'pending' },
+            { id: 'authorization_chain_verify', name: 'Authorization Chain Verify', status: 'pending' },
+            { id: 'formal_requirements_verify', name: 'Formal Requirements Verify', status: 'pending' }
         ],
-        apis: ['/api/v1/validate', '/api/v1/verify']
+        apis: ['/api/v1/validate', '/api/v1/verify', '/api/v1/pvp/verify']
     },
     AUDIT: {
         id: 'audit',
@@ -118,6 +126,7 @@ class ProtocolNavigator {
      * Navigate to a specific step
      */
     navigateToStep(stepId, substepId = null) {
+        console.log('[ProtocolNavigator] navigateToStep:', stepId, substepId);
         const step = Object.values(PROTOCOL_STEPS).find(s => s.id === stepId);
         if (!step) {
             console.error(`Invalid step: ${stepId}`);
@@ -223,6 +232,7 @@ class ProtocolNavigator {
     }
 
     notifyObservers(event, data) {
+        console.log('[ProtocolNavigator] notifyObservers:', event, 'to', this.observers.length, 'observers');
         this.observers.forEach(callback => callback(event, data));
     }
 
@@ -265,19 +275,25 @@ class ProtocolNavigatorUI {
         this.navigator = navigator;
         this.container = document.getElementById(containerId);
         
+        console.log('[ProtocolNavigatorUI] Constructor - container ID:', containerId, 'found:', !!this.container);
+        
         if (!this.container) {
-            console.warn(`Container ${containerId} not found`);
+            console.error(`❌ Container #${containerId} not found in DOM!`);
+            console.log('Available elements:', Array.from(document.querySelectorAll('[id]')).map(el => el.id));
             return;
         }
 
+        console.log('[ProtocolNavigatorUI] Subscribing to navigator events and rendering...');
         this.navigator.subscribe((event, data) => this.handleNavigatorEvent(event, data));
         this.render();
+        console.log('[ProtocolNavigatorUI] Render complete, container innerHTML length:', this.container.innerHTML.length);
     }
 
     /**
      * Handle navigator events
      */
     handleNavigatorEvent(event, data) {
+        console.log('[ProtocolNavigatorUI] handleNavigatorEvent:', event, data);
         switch (event) {
             case 'navigate':
                 this.highlightCurrentStep();
@@ -590,6 +606,15 @@ class ProtocolNavigatorUI {
  * Initialize navigator globally
  */
 function initProtocolNavigator(containerId = 'protocol-navigator') {
+    // Prevent double initialization - return existing instance if already initialized
+    if (window.protocolNav && window.protocolNav.navigator) {
+        console.log('[protocol-navigator] Already initialized, returning existing instance');
+        return {
+            navigator: window.protocolNav.navigator,
+            ui: window.protocolNav.ui
+        };
+    }
+    
     const navigator = new ProtocolNavigator();
     const ui = new ProtocolNavigatorUI(navigator, containerId);
     
@@ -602,6 +627,7 @@ function initProtocolNavigator(containerId = 'protocol-navigator') {
         exportHistory: () => ui.exportHistory()
     };
 
+    console.log('[protocol-navigator] Initialized new instance');
     return { navigator, ui };
 }
 

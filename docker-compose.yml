@@ -37,12 +37,12 @@ services:
     networks:
       - gauth-network
 
-  # GAuth web server (optional - for local development)
-  web-server:
+  # GAuth backend API server
+  backend:
     build:
       context: .
-      dockerfile: Dockerfile.local-arm64
-    container_name: gauth-web-server
+      dockerfile: Dockerfile.production
+    container_name: gauth-backend
     environment:
       # RFC-0111 Configuration
       GAUTH_RFC0111_ENABLED: "1"
@@ -62,7 +62,7 @@ services:
       
       # Server Configuration
       PORT: "8080"
-      GIN_MODE: debug
+      GIN_MODE: release
     ports:
       - "8080:8080"
     depends_on:
@@ -72,9 +72,31 @@ services:
         condition: service_healthy
     networks:
       - gauth-network
-    volumes:
-      - .:/app
-    command: ["./bin/web-server"]
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/api/v1/beta/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # React UI frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+    container_name: gauth-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - gauth-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
 
 volumes:
   postgres_data:

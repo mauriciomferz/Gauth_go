@@ -20,12 +20,12 @@ type FormalRequirementsValidator struct {
 	notaryVerifier NotarialCertificateVerifier
 	idVerifier     IdentityDocumentVerifier
 	sigVerifier    DigitalSignatureVerifier
-	
+
 	// Configuration
-	strictMode             bool
-	requireNotaryForValue  float64 // Threshold requiring notarial certification
-	acceptedIDTypes        []string
-	acceptedJurisdictions  []string
+	strictMode            bool
+	requireNotaryForValue float64 // Threshold requiring notarial certification
+	acceptedIDTypes       []string
+	acceptedJurisdictions []string
 }
 
 // NotarialCertificateVerifier verifies notarial certifications
@@ -54,22 +54,22 @@ type DigitalSignatureVerifier interface {
 
 // NotarialCertificate represents a notarial certification
 type NotarialCertificate struct {
-	CertificateID      string
-	NotaryID           string
-	NotaryName         string
-	NotaryLicense      string
-	Jurisdiction       string
-	IssuingAuthority   string
-	CertificationDate  time.Time
-	ExpirationDate     time.Time
-	DocumentHash       string
-	NotarySeal         []byte
-	NotarySignature    []byte
-	ApostilleAttached  bool
-	ApostilleNumber    string
-	CertificationType  string // "acknowledgment", "jurat", "oath", "affirmation"
-	WitnessStatements  []WitnessStatement
-	Metadata           map[string]interface{}
+	CertificateID     string
+	NotaryID          string
+	NotaryName        string
+	NotaryLicense     string
+	Jurisdiction      string
+	IssuingAuthority  string
+	CertificationDate time.Time
+	ExpirationDate    time.Time
+	DocumentHash      string
+	NotarySeal        []byte
+	NotarySignature   []byte
+	ApostilleAttached bool
+	ApostilleNumber   string
+	CertificationType string // "acknowledgment", "jurat", "oath", "affirmation"
+	WitnessStatements []WitnessStatement
+	Metadata          map[string]interface{}
 }
 
 // WitnessStatement represents a witness attestation
@@ -246,10 +246,10 @@ func (v *FormalRequirementsValidator) ValidateFormalRequirements(
 	digitalSigs []DigitalSignature,
 ) (*FormalRequirementsResult, error) {
 	result := &FormalRequirementsResult{
-		Valid:          true,
-		ValidationDate: time.Now(),
-		Issues:         []string{},
-		Warnings:       []string{},
+		Valid:                       true,
+		ValidationDate:              time.Now(),
+		Issues:                      []string{},
+		Warnings:                    []string{},
 		ApplicableLegalRequirements: []string{},
 	}
 
@@ -265,7 +265,7 @@ func (v *FormalRequirementsValidator) ValidateFormalRequirements(
 	if formalReqs.NotarialCertification {
 		result.ApplicableLegalRequirements = append(result.ApplicableLegalRequirements,
 			"RFC-0115 Section C.1: Notarial certification required")
-		
+
 		if notaryCert == nil {
 			result.Valid = false
 			result.NotarialCertificationValid = false
@@ -290,7 +290,7 @@ func (v *FormalRequirementsValidator) ValidateFormalRequirements(
 	if formalReqs.IDVerificationRequired {
 		result.ApplicableLegalRequirements = append(result.ApplicableLegalRequirements,
 			"RFC-0115 Section C.1: Identity verification required")
-		
+
 		if len(identityDocs) == 0 {
 			result.Valid = false
 			result.IDVerificationValid = false
@@ -315,7 +315,7 @@ func (v *FormalRequirementsValidator) ValidateFormalRequirements(
 	if formalReqs.DigitalSignatures {
 		result.ApplicableLegalRequirements = append(result.ApplicableLegalRequirements,
 			"RFC-0115 Section C.1: Digital signatures required")
-		
+
 		if len(digitalSigs) == 0 {
 			result.Valid = false
 			result.DigitalSignaturesValid = false
@@ -382,7 +382,7 @@ func (v *FormalRequirementsValidator) ValidateNotarialCertification(
 		if err != nil {
 			return nil, fmt.Errorf("failed to verify notary license: %w", err)
 		}
-		
+
 		if licenseInfo.Status != "active" {
 			result.Valid = false
 			result.NotaryLicenseValid = false
@@ -390,7 +390,7 @@ func (v *FormalRequirementsValidator) ValidateNotarialCertification(
 		} else {
 			result.NotaryLicenseValid = true
 		}
-		
+
 		// Check license expiration
 		if time.Now().After(licenseInfo.ExpiryDate) {
 			result.Valid = false
@@ -408,7 +408,7 @@ func (v *FormalRequirementsValidator) ValidateNotarialCertification(
 		result.Valid = false
 		result.ExpirationValid = false
 		result.Issues = append(result.Issues, "Notarial certificate expired")
-	} else if time.Now().After(cert.ExpirationDate.Add(-30*24*time.Hour)) {
+	} else if time.Now().After(cert.ExpirationDate.Add(-30 * 24 * time.Hour)) {
 		result.Warnings = append(result.Warnings, "Notarial certificate expires within 30 days")
 	}
 
@@ -491,14 +491,14 @@ func (v *FormalRequirementsValidator) ValidateIdentityDocuments(
 		if err != nil {
 			return nil, fmt.Errorf("failed to verify document %d: %w", i, err)
 		}
-		
+
 		if !docResult.Valid {
 			allValid = false
 			result.Issues = append(result.Issues, fmt.Sprintf("Document %d (%s): %s",
 				i, doc.DocumentType, strings.Join(docResult.Issues, "; ")))
 		}
 		result.Warnings = append(result.Warnings, docResult.Warnings...)
-		
+
 		// Aggregate results
 		result.DocumentAuthentic = result.DocumentAuthentic || docResult.DocumentAuthentic
 		result.NotExpired = result.NotExpired || docResult.NotExpired
@@ -561,7 +561,7 @@ func (v *FormalRequirementsValidator) validateSingleIdentityDocument(
 		result.Issues = append(result.Issues, "Document expired")
 	} else {
 		result.NotExpired = true
-		if time.Now().After(doc.ExpirationDate.Add(-90*24*time.Hour)) {
+		if time.Now().After(doc.ExpirationDate.Add(-90 * 24 * time.Hour)) {
 			result.Warnings = append(result.Warnings, "Document expires within 90 days")
 		}
 	}
@@ -572,14 +572,14 @@ func (v *FormalRequirementsValidator) validateSingleIdentityDocument(
 		if err != nil {
 			return nil, fmt.Errorf("identity verification service failed: %w", err)
 		}
-		
+
 		result.DocumentAuthentic = verifyResult.DocumentAuthentic
 		result.BiometricMatch = verifyResult.BiometricMatch
 		result.BiometricScore = verifyResult.BiometricScore
 		result.SecurityFeatureOK = verifyResult.SecurityFeatureOK
 		result.IssuingAuthValid = verifyResult.IssuingAuthValid
 		result.ChipDataValid = verifyResult.ChipDataValid
-		
+
 		if !verifyResult.Valid {
 			result.Valid = false
 			result.Issues = append(result.Issues, verifyResult.Issues...)
@@ -649,7 +649,7 @@ func (v *FormalRequirementsValidator) ValidateDigitalSignatures(
 		if err != nil {
 			return nil, fmt.Errorf("signature chain verification failed: %w", err)
 		}
-		
+
 		if !chainResult.Valid {
 			result.Valid = false
 			result.ChainIntegrity = false
@@ -727,10 +727,10 @@ func (v *FormalRequirementsValidator) validateWrittenFormRequirements(
 	}
 
 	// Must have clear authorization scope (AuthorizedActions is a struct, check its fields)
-	if len(poaDef.Authorization.AuthorizedActions.Transactions) == 0 && 
-	   len(poaDef.Authorization.AuthorizedActions.Decisions) == 0 &&
-	   len(poaDef.Authorization.AuthorizedActions.PhysicalActions) == 0 &&
-	   len(poaDef.Authorization.AuthorizedActions.NonPhysicalActions) == 0 {
+	if len(poaDef.Authorization.AuthorizedActions.Transactions) == 0 &&
+		len(poaDef.Authorization.AuthorizedActions.Decisions) == 0 &&
+		len(poaDef.Authorization.AuthorizedActions.PhysicalActions) == 0 &&
+		len(poaDef.Authorization.AuthorizedActions.NonPhysicalActions) == 0 {
 		result.Valid = false
 		result.Issues = append(result.Issues, "No authorized actions specified (written form requirement)")
 	}
@@ -769,15 +769,15 @@ func (v *FormalRequirementsValidator) validateJurisdictionRequirements(
 	case "DE", "German", "Germany":
 		// German law requires notarization for real estate and company matters
 		result.Warnings = append(result.Warnings, "German jurisdiction: Consider notarization for company/real estate matters")
-	
+
 	case "US", "USA", "United States":
 		// US varies by state
 		result.Warnings = append(result.Warnings, "US jurisdiction: Requirements vary by state")
-	
+
 	case "UK", "GB", "United Kingdom":
 		// UK requires specific witness requirements
 		result.Warnings = append(result.Warnings, "UK jurisdiction: Consider witness requirements for certain matters")
-	
+
 	case "FR", "France":
 		// French law has specific notary requirements
 		result.Warnings = append(result.Warnings, "French jurisdiction: Notarization may be required")

@@ -1,3 +1,12 @@
+---
+title: Cryptography Implementation Overview (Beta)
+category: cryptography-guide
+status: draft
+lastUpdated: 2025-11-12
+owners: security-team
+source: internal
+refreshCadence: on-change
+---
 # Cryptography Implementation (Conceptual / NOT Production Ready)
 
 > Last Updated: 2025-10-17

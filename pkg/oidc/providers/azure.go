@@ -20,17 +20,17 @@ const (
 // AzureADClaimMappings defines how Azure AD OIDC claims map to GAuth claims.
 // Azure AD provides enterprise-grade claims with role and group information.
 var AzureADClaimMappings = map[string]string{
-	"oid":                "user_id",           // Object ID (unique identifier)
-	"sub":                "subject",           // Subject (app-specific identifier)
-	"email":              "email",             // User's email address
-	"upn":                "username",          // User Principal Name
-	"name":               "full_name",         // Full name
-	"given_name":         "given_name",        // Given/first name
-	"family_name":        "family_name",       // Family/last name
+	"oid":                "user_id",            // Object ID (unique identifier)
+	"sub":                "subject",            // Subject (app-specific identifier)
+	"email":              "email",              // User's email address
+	"upn":                "username",           // User Principal Name
+	"name":               "full_name",          // Full name
+	"given_name":         "given_name",         // Given/first name
+	"family_name":        "family_name",        // Family/last name
 	"preferred_username": "preferred_username", // Preferred username
-	"roles":              "roles",             // Application roles
-	"groups":             "groups",            // Group memberships
-	"tid":                "tenant_id",         // Tenant ID
+	"roles":              "roles",              // Application roles
+	"groups":             "groups",             // Group memberships
+	"tid":                "tenant_id",          // Tenant ID
 }
 
 // AzureADProvider implements Azure AD-specific OIDC integration.

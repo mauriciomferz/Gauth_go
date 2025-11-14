@@ -13,8 +13,8 @@ import (
 // TransactionExecutor handles RFC-0111 Step (g): Transaction/Decision/Action Request
 // This component enables the client to make requests to resource servers using extended tokens
 type TransactionExecutor struct {
-	tokenValidator     TokenValidator
-	complianceTracker  ComplianceTracker
+	tokenValidator    TokenValidator
+	complianceTracker ComplianceTracker
 }
 
 // TokenValidator validates extended tokens
@@ -36,40 +36,40 @@ func NewTransactionExecutor(
 // TransactionExecutionRequest represents Step (g): Client request with extended token
 type TransactionExecutionRequest struct {
 	// Extended token for authentication and authorization
-	ExtendedToken         string
-	
+	ExtendedToken string
+
 	// Type of request
-	RequestType           string // "transaction", "decision", "action"
-	
+	RequestType string // "transaction", "decision", "action"
+
 	// Transaction details (if RequestType == "transaction")
-	Transaction           *ExecutorTransactionDetails
-	
+	Transaction *ExecutorTransactionDetails
+
 	// Decision details (if RequestType == "decision")
-	Decision              *DecisionDetails
-	
+	Decision *DecisionDetails
+
 	// Action details (if RequestType == "action")
-	Action                *ActionDetails
-	
+	Action *ActionDetails
+
 	// Resource information
-	ResourceID            string
-	ResourceType          string
-	
+	ResourceID   string
+	ResourceType string
+
 	// Additional context
-	Context               map[string]interface{}
-	Timestamp             time.Time
+	Context   map[string]interface{}
+	Timestamp time.Time
 }
 
 // ExecutorTransactionDetails represents a financial or business transaction for Step (g)
 type ExecutorTransactionDetails struct {
-	Type              poa.TransactionType
-	Amount            float64
-	Currency          string
-	FromAccount       string
-	ToAccount         string
-	Counterparty      string
-	Description       string
-	Reference         string
-	AdditionalData    map[string]interface{}
+	Type           poa.TransactionType
+	Amount         float64
+	Currency       string
+	FromAccount    string
+	ToAccount      string
+	Counterparty   string
+	Description    string
+	Reference      string
+	AdditionalData map[string]interface{}
 }
 
 // DecisionDetails represents an AI decision request
@@ -86,13 +86,13 @@ type DecisionDetails struct {
 
 // ActionDetails represents a physical or digital action
 type ActionDetails struct {
-	Type              string // Action type as string
-	Description       string
-	IsPhysical        bool
-	Location          string
-	Coordinates       *GeographicCoordinates
-	SafetyLevel       string
-	AdditionalData    map[string]interface{}
+	Type           string // Action type as string
+	Description    string
+	IsPhysical     bool
+	Location       string
+	Coordinates    *GeographicCoordinates
+	SafetyLevel    string
+	AdditionalData map[string]interface{}
 }
 
 // GeographicCoordinates for physical actions
@@ -105,25 +105,25 @@ type GeographicCoordinates struct {
 // TransactionExecutionResponse represents the result of Step (g)
 type TransactionExecutionResponse struct {
 	// Execution result
-	Success               bool
-	ExecutionID           string
-	ExecutedAt            time.Time
-	
+	Success     bool
+	ExecutionID string
+	ExecutedAt  time.Time
+
 	// Authorization validation
-	TokenValid            bool
-	AuthorizationValid    bool
-	ComplianceValid       bool
-	
+	TokenValid         bool
+	AuthorizationValid bool
+	ComplianceValid    bool
+
 	// Result details
-	ResultData            map[string]interface{}
-	
+	ResultData map[string]interface{}
+
 	// Compliance tracking
-	ComplianceStatus      *ComplianceStatus
-	ViolationsDetected    []string
-	
+	ComplianceStatus   *ComplianceStatus
+	ViolationsDetected []string
+
 	// Error information (if any)
-	ErrorCode             string
-	ErrorMessage          string
+	ErrorCode    string
+	ErrorMessage string
 }
 
 // ExecuteTransaction implements RFC-0111 Step (g): Transaction/Decision/Action Request
@@ -132,7 +132,7 @@ func (e *TransactionExecutor) ExecuteTransaction(
 	ctx context.Context,
 	request *TransactionExecutionRequest,
 ) (*TransactionExecutionResponse, error) {
-	
+
 	// Validate request structure
 	if err := e.validateExecutionRequest(request); err != nil {
 		return &TransactionExecutionResponse{
@@ -142,7 +142,7 @@ func (e *TransactionExecutor) ExecuteTransaction(
 			ErrorMessage: err.Error(),
 		}, nil
 	}
-	
+
 	// STEP (h): Token Validation (part of step g execution)
 	// Validate the extended token
 	extendedToken, err := e.tokenValidator.ValidateExtendedToken(ctx, request.ExtendedToken)
@@ -154,7 +154,7 @@ func (e *TransactionExecutor) ExecuteTransaction(
 			ErrorMessage: fmt.Sprintf("Token validation failed: %v", err),
 		}, nil
 	}
-	
+
 	// Check token expiration
 	expiryTime := extendedToken.IssuedAt.Add(time.Duration(extendedToken.ExpiresIn) * time.Second)
 	if time.Now().After(expiryTime) {
@@ -165,7 +165,7 @@ func (e *TransactionExecutor) ExecuteTransaction(
 			ErrorMessage: "Extended token has expired",
 		}, nil
 	}
-	
+
 	// Validate request matches token scope
 	scopeValid, scopeErr := e.validateRequestScope(request, extendedToken)
 	if !scopeValid {
@@ -177,7 +177,7 @@ func (e *TransactionExecutor) ExecuteTransaction(
 			ErrorMessage:       scopeErr.Error(),
 		}, nil
 	}
-	
+
 	// Validate against power restrictions
 	restrictionsValid, restrictionErr := e.validatePowerRestrictions(request, extendedToken)
 	if !restrictionsValid {
@@ -191,7 +191,7 @@ func (e *TransactionExecutor) ExecuteTransaction(
 			ViolationsDetected: []string{restrictionErr.Error()},
 		}, nil
 	}
-	
+
 	// Track compliance (Step i)
 	// Note: Compliance tracking is handled via CheckCompliance, not TrackAction
 	if e.complianceTracker != nil {
@@ -211,12 +211,12 @@ func (e *TransactionExecutor) ExecuteTransaction(
 			}, nil
 		}
 	}
-	
+
 	// Execute the actual transaction/decision/action
 	// Note: Actual execution is delegated to resource-specific handlers
 	// This component validates authorization and prepares execution
 	executionID := generateExecutionID()
-	
+
 	response := &TransactionExecutionResponse{
 		Success:            true,
 		ExecutionID:        executionID,
@@ -224,7 +224,7 @@ func (e *TransactionExecutor) ExecuteTransaction(
 		TokenValid:         true,
 		AuthorizationValid: true,
 		ComplianceValid:    true,
-		ResultData:         map[string]interface{}{
+		ResultData: map[string]interface{}{
 			"status":       "authorized",
 			"execution_id": executionID,
 			"message":      "Request authorized and ready for execution",
@@ -237,7 +237,7 @@ func (e *TransactionExecutor) ExecuteTransaction(
 		},
 		ViolationsDetected: []string{},
 	}
-	
+
 	return response, nil
 }
 
@@ -249,7 +249,7 @@ func (e *TransactionExecutor) validateExecutionRequest(request *TransactionExecu
 	if request.RequestType == "" {
 		return fmt.Errorf("request type is required")
 	}
-	
+
 	// Validate type-specific details
 	switch request.RequestType {
 	case "transaction":
@@ -267,7 +267,7 @@ func (e *TransactionExecutor) validateExecutionRequest(request *TransactionExecu
 	default:
 		return fmt.Errorf("invalid request type: %s", request.RequestType)
 	}
-	
+
 	return nil
 }
 
@@ -276,12 +276,12 @@ func (e *TransactionExecutor) validateRequestScope(
 	request *TransactionExecutionRequest,
 	token *ExtendedToken,
 ) (bool, error) {
-	
+
 	// Check if request type is in token scope
 	if len(token.Scope) == 0 {
 		return false, fmt.Errorf("token has no scope defined")
 	}
-	
+
 	// Validate based on request type
 	switch request.RequestType {
 	case "transaction":
@@ -291,7 +291,7 @@ func (e *TransactionExecutor) validateRequestScope(
 		// Check if transaction type is authorized
 		// This would check token.PowerOfAttorney.AuthorizedActions.Transactions
 		return true, nil
-		
+
 	case "decision":
 		if request.Decision == nil {
 			return false, fmt.Errorf("decision details missing")
@@ -299,7 +299,7 @@ func (e *TransactionExecutor) validateRequestScope(
 		// Check if decision type is authorized
 		// This would check token.PowerOfAttorney.AuthorizedActions.Decisions
 		return true, nil
-		
+
 	case "action":
 		if request.Action == nil {
 			return false, fmt.Errorf("action details missing")
@@ -307,7 +307,7 @@ func (e *TransactionExecutor) validateRequestScope(
 		// Check if action type is authorized
 		// This would check token.PowerOfAttorney.AuthorizedActions
 		return true, nil
-		
+
 	default:
 		return false, fmt.Errorf("unknown request type: %s", request.RequestType)
 	}
@@ -318,17 +318,17 @@ func (e *TransactionExecutor) validatePowerRestrictions(
 	request *TransactionExecutionRequest,
 	token *ExtendedToken,
 ) (bool, error) {
-	
+
 	if token.PowerOfAttorney == nil {
 		return false, fmt.Errorf("token has no power of attorney defined")
 	}
-	
+
 	// Check token-level restrictions
 	if len(token.Restrictions) == 0 {
 		// No restrictions means everything is allowed within scope
 		return true, nil
 	}
-	
+
 	// Check transaction-specific restrictions
 	if request.RequestType == "transaction" && request.Transaction != nil {
 		// Validate monetary limits from token restrictions
@@ -347,7 +347,7 @@ func (e *TransactionExecutor) validatePowerRestrictions(
 			}
 		}
 	}
-	
+
 	// Check geographic restrictions for physical actions
 	if request.RequestType == "action" && request.Action != nil && request.Action.IsPhysical {
 		for _, restriction := range token.Restrictions {
@@ -357,7 +357,7 @@ func (e *TransactionExecutor) validatePowerRestrictions(
 			}
 		}
 	}
-	
+
 	// Check temporal restrictions (time-based limitations)
 	for _, restriction := range token.Restrictions {
 		if restriction.RestrictionType == "time_limit" {
@@ -366,7 +366,7 @@ func (e *TransactionExecutor) validatePowerRestrictions(
 			// now := time.Now() - would be used for validation
 		}
 	}
-	
+
 	return true, nil
 }
 

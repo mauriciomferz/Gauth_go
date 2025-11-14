@@ -1,3 +1,11 @@
+---
+title: "PostgreSQL Down Alert Runbook"
+category: runbook
+status: active
+lastUpdated: 2025-11-12
+owners: devops-team
+refreshCadence: monthly
+---
 # Alert Runbook: PostgreSQLDown
 
 **Alert Name:** `PostgreSQLDown`  

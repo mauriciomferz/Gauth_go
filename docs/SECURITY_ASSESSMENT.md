@@ -1,3 +1,13 @@
+---
+title: Security Assessment Report
+category: security-assessment
+status: final
+lastUpdated: 2025-11-12
+owners: security-team
+source: internal
+refreshCadence: quarterly
+---
+
 # Security Assessment (Beta Demonstration Implementation)
 
 > Last Updated: 2025-10-17

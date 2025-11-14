@@ -85,7 +85,7 @@ func TestJWTService_CreateToken_ValidUser(t *testing.T) {
 	if len(parts) < 4 {
 		t.Errorf("Expected JWT with at least 4 parts, got %d: %s", len(parts), token)
 	}
-	
+
 	if !strings.HasPrefix(token, "jwt.") {
 		t.Errorf("Expected token to start with 'jwt.', got: %s", token)
 	}
@@ -191,7 +191,7 @@ func TestJWTService_CreateToken_NegativeDuration(t *testing.T) {
 
 	token, err := service.CreateToken("test-user", []string{"read"}, -time.Hour)
 
-	// Current implementation may accept negative duration  
+	// Current implementation may accept negative duration
 	if err != nil {
 		t.Logf("Negative duration rejected: %v", err)
 	} else if token != "" {

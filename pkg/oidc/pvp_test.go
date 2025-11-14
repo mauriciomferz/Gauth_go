@@ -149,11 +149,11 @@ func TestOIDCPowerVerificationPoint_VerifyIdentityProof(t *testing.T) {
 	}
 
 	tests := []struct {
-		name          string
-		request       *gauth.IdentityProofRequest
-		expectValid   bool
-		expectError   bool
-		expectReason  string
+		name         string
+		request      *gauth.IdentityProofRequest
+		expectValid  bool
+		expectError  bool
+		expectReason string
 	}{
 		{
 			name: "valid ID token with sufficient trust",
@@ -292,29 +292,29 @@ func TestOIDCPowerVerificationPoint_VerifyIdentityProof(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result, err := pvp.VerifyIdentityProof(ctx, tt.request)
-			
+
 			if tt.expectError {
 				if err == nil {
 					t.Error("Expected error, got nil")
 				}
 				return
 			}
-			
+
 			if err != nil {
 				t.Errorf("Unexpected error: %v", err)
 				return
 			}
-			
+
 			if result == nil {
 				t.Error("Expected result, got nil")
 				return
 			}
-			
+
 			if result.Valid != tt.expectValid {
-				t.Errorf("Expected Valid=%v, got %v. Reason: %s", 
+				t.Errorf("Expected Valid=%v, got %v. Reason: %s",
 					tt.expectValid, result.Valid, result.FailureReason)
 			}
-			
+
 			if !tt.expectValid && tt.expectReason != "" {
 				if result.FailureReason == "" {
 					t.Error("Expected failure reason, got empty string")
@@ -329,15 +329,15 @@ func TestOIDCPowerVerificationPoint_VerifyIdentityProof(t *testing.T) {
 						}
 					}
 					if !found {
-						t.Errorf("Expected failure reason to contain '%s', got '%s'", 
+						t.Errorf("Expected failure reason to contain '%s', got '%s'",
 							tt.expectReason, result.FailureReason)
 					}
 				}
 			}
-			
+
 			if tt.expectValid {
 				if result.SubjectID != tt.request.SubjectID {
-					t.Errorf("Expected SubjectID=%s, got %s", 
+					t.Errorf("Expected SubjectID=%s, got %s",
 						tt.request.SubjectID, result.SubjectID)
 				}
 				if result.TrustLevel == "" {
@@ -377,7 +377,7 @@ func TestOIDCPowerVerificationPoint_GetSupportedProofMethods(t *testing.T) {
 	}
 
 	expectedMethods := map[string]bool{
-		ProofMethodOIDCIDToken:   true,
+		ProofMethodOIDCIDToken:  true,
 		ProofMethodOIDCExternal: true,
 	}
 

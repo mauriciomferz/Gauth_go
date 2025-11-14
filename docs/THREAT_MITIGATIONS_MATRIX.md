@@ -1,3 +1,12 @@
+---
+title: Threat Mitigations Matrix
+category: security-threat-matrix
+status: active
+lastUpdated: 2025-11-12
+owners: security-team
+source: internal
+refreshCadence: quarterly
+---
 # Threat Mitigations Matrix
 ## GAuth RFC 0111/0115 Security Implementation
 

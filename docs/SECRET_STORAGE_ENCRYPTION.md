@@ -1,3 +1,12 @@
+---
+title: Secret Storage Encryption at Rest
+category: security-storage
+status: implemented
+lastUpdated: 2025-11-12
+owners: security-team
+source: internal
+refreshCadence: quarterly
+---
 # Secret Storage Encryption at Rest
 
 ## Overview

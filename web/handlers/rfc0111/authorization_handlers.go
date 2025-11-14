@@ -50,7 +50,7 @@ func (h *AuthorizationHandlers) RequestToken(c *gin.Context) {
 	// Parse scope string into basic AuthorizationScope
 	// For simple "read write" scopes, create a basic scope with standard actions
 	requestedScope := parseBasicScope(req.Scope)
-	
+
 	response, err := h.gauthService.RequestTokenRFC(c.Request.Context(), &gauth.RFCCompliantAuthorizationRequest{
 		ClientID:         req.ClientID,
 		ResourceOwnerID:  req.ResourceOwnerID,
@@ -141,7 +141,7 @@ func (h *AuthorizationHandlers) IntrospectToken(c *gin.Context) {
 
 	// RFC 7662 compliant token introspection
 	result, err := h.gauthService.ValidateToken(req.Token)
-	
+
 	// Per RFC 7662, return active: false for invalid tokens rather than error
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -178,7 +178,7 @@ func (h *AuthorizationHandlers) RevokeToken(c *gin.Context) {
 
 	// RFC 7009: Revocation endpoint MUST return 200 OK whether or not token existed
 	// Token revocation should be idempotent
-	
+
 	// TODO: Implement actual revocation in token store
 	// For now, acknowledge the revocation request per RFC 7009 spec
 	c.JSON(http.StatusOK, gin.H{
@@ -198,13 +198,13 @@ func parseBasicScope(scopeString string) *poa.AuthorizationScope {
 	if scopeString == "" {
 		return nil
 	}
-	
+
 	// Parse space-separated OAuth scopes
 	scopes := strings.Fields(scopeString)
 	if len(scopes) == 0 {
 		return nil
 	}
-	
+
 	// Map OAuth scopes to RFC-0111 non-physical actions (use predefined constants)
 	var nonPhysicalActions []poa.ActionTypeNonPhysical
 	for _, s := range scopes {
@@ -219,12 +219,12 @@ func parseBasicScope(scopeString string) *poa.AuthorizationScope {
 			nonPhysicalActions = append(nonPhysicalActions, poa.ActionNonPhysicalApproving)
 		}
 	}
-	
+
 	// If no recognized scopes, add analyzing as a safe default
 	if len(nonPhysicalActions) == 0 {
 		nonPhysicalActions = append(nonPhysicalActions, poa.ActionNonPhysicalAnalyzing)
 	}
-	
+
 	scope := &poa.AuthorizationScope{
 		AuthorizationType: poa.AuthorizationType{
 			RepresentationType: "direct",
@@ -241,6 +241,6 @@ func parseBasicScope(scopeString string) *poa.AuthorizationScope {
 			NonPhysicalActions: nonPhysicalActions,
 		},
 	}
-	
+
 	return scope
 }

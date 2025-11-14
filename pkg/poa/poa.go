@@ -40,12 +40,12 @@ type ClientOwnerInfo struct {
 type ClientType string
 
 const (
-	ClientTypeLLM            ClientType = "LLM"
-	ClientTypeDigitalAgent   ClientType = "DigitalAgent"
-	ClientTypeAgenticAI      ClientType = "AgenticAI"
-	ClientTypeHumanoidRobot  ClientType = "HumanoidRobot"
-	ClientTypeRoboticSystem  ClientType = "RoboticSystem"
-	ClientTypeOther          ClientType = "Other"
+	ClientTypeLLM           ClientType = "LLM"
+	ClientTypeDigitalAgent  ClientType = "DigitalAgent"
+	ClientTypeAgenticAI     ClientType = "AgenticAI"
+	ClientTypeHumanoidRobot ClientType = "HumanoidRobot"
+	ClientTypeRoboticSystem ClientType = "RoboticSystem"
+	ClientTypeOther         ClientType = "Other"
 )
 
 type OperationalStatus string
@@ -305,16 +305,16 @@ type AuthorizationType struct {
 type GeographicScope struct {
 	// Type defines the geographic scope level
 	Type GeographicType `json:"type"`
-	
+
 	// Identifier is ISO 3166-1 alpha-2 country code or ISO 3166-2 subdivision code
 	Identifier string `json:"identifier"`
-	
+
 	// Name is human-readable geographic name
 	Name string `json:"name,omitempty"`
-	
+
 	// IncludeSubdivisions indicates if subdivisions are included
 	IncludeSubdivisions bool `json:"include_subdivisions,omitempty"`
-	
+
 	// ExcludedSubdivisions lists explicitly excluded subdivisions
 	ExcludedSubdivisions []string `json:"excluded_subdivisions,omitempty"`
 }
@@ -323,11 +323,11 @@ type GeographicScope struct {
 type GeographicType string
 
 const (
-	GeoTypeGlobal     GeographicType = "Global"
-	GeoTypeRegional   GeographicType = "Regional"     // Multi-country region (e.g., "EU", "ASEAN")
-	GeoTypeNational   GeographicType = "National"     // Country level (ISO 3166-1)
+	GeoTypeGlobal      GeographicType = "Global"
+	GeoTypeRegional    GeographicType = "Regional"    // Multi-country region (e.g., "EU", "ASEAN")
+	GeoTypeNational    GeographicType = "National"    // Country level (ISO 3166-1)
 	GeoTypeSubnational GeographicType = "Subnational" // State/province (ISO 3166-2)
-	GeoTypeMunicipal  GeographicType = "Municipal"    // City/local level
+	GeoTypeMunicipal   GeographicType = "Municipal"   // City/local level
 )
 
 // ValidateGeographicType validates the geographic type
@@ -541,14 +541,14 @@ type Organization struct {
 type Representative struct {
 	// Legacy field for backward compatibility
 	ClientOwner *ClientOwnerInfo `json:"client_owner,omitempty"`
-	
+
 	// RFC-0115 A.2 Representative details
-	Identity             string               `json:"identity"`
-	LegalRelationship    LegalRelationship    `json:"legal_relationship"`
-	RegistrationInfo     *RegistrationInfo    `json:"registration_info,omitempty"`
-	AuthorizationChain   []AuthorizationLink  `json:"authorization_chain,omitempty"`
-	ContactInformation   *ContactInformation  `json:"contact_information,omitempty"`
-	CertificationStatus  *CertificationStatus `json:"certification_status,omitempty"`
+	Identity            string               `json:"identity"`
+	LegalRelationship   LegalRelationship    `json:"legal_relationship"`
+	RegistrationInfo    *RegistrationInfo    `json:"registration_info,omitempty"`
+	AuthorizationChain  []AuthorizationLink  `json:"authorization_chain,omitempty"`
+	ContactInformation  *ContactInformation  `json:"contact_information,omitempty"`
+	CertificationStatus *CertificationStatus `json:"certification_status,omitempty"`
 }
 
 // LegalRelationship defines the representative's relationship to the AI client
@@ -583,7 +583,7 @@ type RegistrationInfo struct {
 type AuthorizationLink struct {
 	FromParty     string `json:"from_party"`
 	ToParty       string `json:"to_party"`
-	GrantedDate   string `json:"granted_date"` // ISO 8601
+	GrantedDate   string `json:"granted_date"`          // ISO 8601
 	ExpiryDate    string `json:"expiry_date,omitempty"` // ISO 8601
 	DocumentRef   string `json:"document_ref,omitempty"`
 	Scope         string `json:"scope"`
@@ -593,12 +593,12 @@ type AuthorizationLink struct {
 
 // ContactInformation contains representative contact details
 type ContactInformation struct {
-	PrimaryContact string   `json:"primary_contact"`
-	Email          string   `json:"email"`
-	Phone          string   `json:"phone,omitempty"`
-	Address        *Address `json:"address,omitempty"`
-	EmergencyContact string `json:"emergency_contact,omitempty"`
-	PreferredLanguage string `json:"preferred_language,omitempty"`
+	PrimaryContact    string   `json:"primary_contact"`
+	Email             string   `json:"email"`
+	Phone             string   `json:"phone,omitempty"`
+	Address           *Address `json:"address,omitempty"`
+	EmergencyContact  string   `json:"emergency_contact,omitempty"`
+	PreferredLanguage string   `json:"preferred_language,omitempty"`
 }
 
 // Address represents a physical or registered address
@@ -615,7 +615,7 @@ type CertificationStatus struct {
 	Certified           bool     `json:"certified"`
 	CertifyingBody      string   `json:"certifying_body,omitempty"`
 	CertificateNumber   string   `json:"certificate_number,omitempty"`
-	IssueDate           string   `json:"issue_date,omitempty"` // ISO 8601
+	IssueDate           string   `json:"issue_date,omitempty"`  // ISO 8601
 	ExpiryDate          string   `json:"expiry_date,omitempty"` // ISO 8601
 	CertificationTypes  []string `json:"certification_types,omitempty"`
 	ComplianceStandards []string `json:"compliance_standards,omitempty"`
@@ -724,7 +724,7 @@ func ValidatePoADefinition(def PoADefinition) error {
 // Example constants for demo compatibility
 const (
 	PrincipalTypeOrganization = "Organization"
-	OrgTypeNonProfit = "NonProfit"
+	OrgTypeNonProfit          = "NonProfit"
 	// ClientTypeLLM moved to proper ClientType enum above
 	// TransactionLoan, TransactionPurchase etc. moved to action_types.go
 	// DecisionFinancial, DecisionStrategic etc. moved to action_types.go
@@ -843,7 +843,7 @@ type ProofOfAuthorization struct {
 	Signatures []string `json:"signatures,omitempty"`
 	SigMode    string   `json:"sig_mode,omitempty"`
 	Threshold  int      `json:"threshold,omitempty"`
-	
+
 	// RFC-0115 Extended Token Format Fields
 	// PoADefinitionID links to the RFC-0115 PoA definition used for this authorization
 	PoADefinitionID string `json:"poa_definition_id,omitempty"`

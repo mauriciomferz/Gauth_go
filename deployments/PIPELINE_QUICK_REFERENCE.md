@@ -1,3 +1,13 @@
+---
+title: CI/CD Pipeline Quick Reference
+category: cicd-quickref
+status: active
+lastUpdated: 2025-11-12
+owners: platform-eng
+source: internal
+refreshCadence: quarterly
+---
+
 # CI/CD Pipeline Quick Reference
 
 **Week 4 Day 4** | Last Updated: November 9, 2025

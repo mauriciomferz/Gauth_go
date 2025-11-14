@@ -25,11 +25,11 @@ const (
 
 // ValidationContext provides context for authorization chain validation
 type ValidationContext struct {
-	Context                context.Context
+	Context                  context.Context
 	CommercialRegisterClient CommercialRegisterClient
-	TrustServiceProvider   TrustServiceProvider
-	RevocationChecker      RevocationChecker
-	StrictMode             bool
+	TrustServiceProvider     TrustServiceProvider
+	RevocationChecker        RevocationChecker
+	StrictMode               bool
 }
 
 // AuthorizationChainValidator validates complete authorization chains per RFC-0111
@@ -89,10 +89,10 @@ func (v *AuthorizationChainValidator) ValidateAuthorizationChain(
 	}
 
 	result := &ChainValidationResult{
-		Valid:             true,
-		ValidationTime:    time.Now(),
-		LinkValidations:   make([]*LinkValidationResult, 0),
-		Warnings:          make([]string, 0),
+		Valid:           true,
+		ValidationTime:  time.Now(),
+		LinkValidations: make([]*LinkValidationResult, 0),
+		Warnings:        make([]string, 0),
 	}
 
 	// Step 1: Validate chain structure
@@ -232,7 +232,7 @@ func (v *AuthorizationChainValidator) validateChainStructure(
 // calculateChainDepth calculates the depth of the authorization chain
 func (v *AuthorizationChainValidator) calculateChainDepth(chain *AuthorizationChain) int {
 	depth := 0
-	
+
 	if chain.OwnersAuthorizer != nil {
 		depth++
 	}
@@ -242,19 +242,19 @@ func (v *AuthorizationChainValidator) calculateChainDepth(chain *AuthorizationCh
 	if chain.Client != nil {
 		depth++
 	}
-	
+
 	// Use the ChainDepth field if available
 	if chain.ChainDepth > depth {
 		depth = chain.ChainDepth
 	}
-	
+
 	return depth
 }
 
 // detectCircularReferences checks for circular references in the authorization chain
 func (v *AuthorizationChainValidator) detectCircularReferences(chain *AuthorizationChain) error {
 	seen := make(map[string]bool)
-	
+
 	// Check owner's authorizer
 	if chain.OwnersAuthorizer != nil {
 		entityID := chain.OwnersAuthorizer.EntityID
@@ -266,7 +266,7 @@ func (v *AuthorizationChainValidator) detectCircularReferences(chain *Authorizat
 		}
 		seen[entityID] = true
 	}
-	
+
 	// Check client owner
 	if chain.ClientOwner != nil {
 		entityID := chain.ClientOwner.EntityID
@@ -277,7 +277,7 @@ func (v *AuthorizationChainValidator) detectCircularReferences(chain *Authorizat
 			}
 		}
 		seen[entityID] = true
-		
+
 		// Check if owner is authorizing itself
 		if chain.OwnersAuthorizer != nil && entityID == chain.OwnersAuthorizer.EntityID {
 			return &GAuthError{
@@ -286,7 +286,7 @@ func (v *AuthorizationChainValidator) detectCircularReferences(chain *Authorizat
 			}
 		}
 	}
-	
+
 	// Check client
 	if chain.Client != nil {
 		entityID := chain.Client.EntityID
@@ -298,7 +298,7 @@ func (v *AuthorizationChainValidator) detectCircularReferences(chain *Authorizat
 		}
 		seen[entityID] = true
 	}
-	
+
 	return nil
 }
 
@@ -306,7 +306,7 @@ func (v *AuthorizationChainValidator) detectCircularReferences(chain *Authorizat
 func (v *AuthorizationChainValidator) validateDelegationPath(chain *AuthorizationChain, result *ChainValidationResult) error {
 	// Validate the 3-level chain structure
 	// Level 1: Owner's Authorizer → Level 2: Client Owner → Level 3: Client
-	
+
 	// Verify authorization types are appropriate for delegation
 	if chain.ClientOwner != nil {
 		// Client Owner must be authorized by Owner's Authorizer
@@ -320,7 +320,7 @@ func (v *AuthorizationChainValidator) validateDelegationPath(chain *Authorizatio
 			}
 		}
 	}
-	
+
 	if chain.Client != nil {
 		// Client must be authorized by Client Owner
 		if chain.Client.AuthorizationType == "delegated" {
@@ -331,7 +331,7 @@ func (v *AuthorizationChainValidator) validateDelegationPath(chain *Authorizatio
 				}
 			}
 		}
-		
+
 		// Verify client status is active
 		if chain.Client.Status != "active" {
 			return &GAuthError{
@@ -340,7 +340,7 @@ func (v *AuthorizationChainValidator) validateDelegationPath(chain *Authorizatio
 			}
 		}
 	}
-	
+
 	return nil
 }
 
@@ -348,58 +348,58 @@ func (v *AuthorizationChainValidator) validateDelegationPath(chain *Authorizatio
 func (v *AuthorizationChainValidator) validateChainExpiration(chain *AuthorizationChain, result *ChainValidationResult) error {
 	now := time.Now()
 	warningThreshold := now.Add(ChainExpirationBuffer)
-	
+
 	// Check owner's authorizer expiration
 	if chain.OwnersAuthorizer != nil && !chain.OwnersAuthorizer.ValidUntil.IsZero() {
 		validUntil := chain.OwnersAuthorizer.ValidUntil
-		
+
 		if now.After(validUntil) {
 			return &GAuthError{
 				Code:    "authorizer_expired",
 				Message: fmt.Sprintf("Owner's authorizer expired at %v", validUntil),
 			}
 		}
-		
+
 		if validUntil.Before(warningThreshold) {
 			result.Warnings = append(result.Warnings,
 				fmt.Sprintf("Owner's authorizer expires soon: %v (within %v)", validUntil, ChainExpirationBuffer))
 		}
 	}
-	
+
 	// Check client owner expiration
 	if chain.ClientOwner != nil && !chain.ClientOwner.ValidUntil.IsZero() {
 		validUntil := chain.ClientOwner.ValidUntil
-		
+
 		if now.After(validUntil) {
 			return &GAuthError{
 				Code:    "owner_expired",
 				Message: fmt.Sprintf("Client owner authorization expired at %v", validUntil),
 			}
 		}
-		
+
 		if validUntil.Before(warningThreshold) {
 			result.Warnings = append(result.Warnings,
 				fmt.Sprintf("Client owner authorization expires soon: %v (within %v)", validUntil, ChainExpirationBuffer))
 		}
 	}
-	
+
 	// Check client expiration
 	if chain.Client != nil && !chain.Client.ValidUntil.IsZero() {
 		validUntil := chain.Client.ValidUntil
-		
+
 		if now.After(validUntil) {
 			return &GAuthError{
 				Code:    "client_expired",
 				Message: fmt.Sprintf("Client authorization expired at %v", validUntil),
 			}
 		}
-		
+
 		if validUntil.Before(warningThreshold) {
 			result.Warnings = append(result.Warnings,
 				fmt.Sprintf("Client authorization expires soon: %v (within %v)", validUntil, ChainExpirationBuffer))
 		}
 	}
-	
+
 	return nil
 }
 
@@ -743,29 +743,29 @@ func (v *AuthorizationChainValidator) validateClient(
 func (v *AuthorizationChainValidator) verifyChainIntegrity(chain *AuthorizationChain) (bool, string) {
 	// Compute chain hash
 	hasher := sha256.New()
-	
+
 	// Hash owner's authorizer
 	hasher.Write([]byte(chain.OwnersAuthorizer.EntityID))
 	hasher.Write([]byte(chain.OwnersAuthorizer.Role))
 	hasher.Write([]byte(chain.OwnersAuthorizer.Status))
-	
+
 	// Hash client owner
 	hasher.Write([]byte(chain.ClientOwner.EntityID))
 	hasher.Write([]byte(chain.ClientOwner.AuthorizedBy))
 	hasher.Write([]byte(chain.ClientOwner.Status))
-	
+
 	// Hash client
 	hasher.Write([]byte(chain.Client.EntityID))
 	hasher.Write([]byte(chain.Client.AuthorizedBy))
 	hasher.Write([]byte(chain.Client.Status))
-	
+
 	computedHash := hex.EncodeToString(hasher.Sum(nil))
-	
+
 	// If chain has existing integrity hash, verify it matches
 	if chain.ChainIntegrity != "" {
 		return chain.ChainIntegrity == computedHash, computedHash
 	}
-	
+
 	// Otherwise, this is the first validation
 	return true, computedHash
 }
@@ -783,8 +783,8 @@ func (v *AuthorizationChainValidator) checkChainRevocations(
 	}
 
 	result := &RevocationCheckResult{
-		Checked: true,
-		Revoked: false,
+		Checked:         true,
+		Revoked:         false,
 		LinkRevocations: make(map[string]bool),
 	}
 
@@ -830,7 +830,7 @@ func (v *AuthorizationChainValidator) checkChainRevocations(
 // validateChainContinuity validates temporal continuity and scope consistency
 func (v *AuthorizationChainValidator) validateChainContinuity(chain *AuthorizationChain) error {
 	// Check temporal continuity: each level's validity must fall within parent's validity
-	
+
 	// Client owner must be valid during authorizer's validity period
 	if chain.ClientOwner.ValidFrom.Before(chain.OwnersAuthorizer.ValidFrom) {
 		return &GAuthError{
@@ -844,7 +844,7 @@ func (v *AuthorizationChainValidator) validateChainContinuity(chain *Authorizati
 			Message: "Client owner validity extends beyond authorizer's validity",
 		}
 	}
-	
+
 	// Client must be valid during owner's validity period
 	if chain.Client.ValidFrom.Before(chain.ClientOwner.ValidFrom) {
 		return &GAuthError{
@@ -858,7 +858,7 @@ func (v *AuthorizationChainValidator) validateChainContinuity(chain *Authorizati
 			Message: "Client validity extends beyond owner's validity",
 		}
 	}
-	
+
 	return nil
 }
 
@@ -872,21 +872,21 @@ func (v *AuthorizationChainValidator) verifyCommercialRegisterEntry(
 	if v.commercialRegisterClient == nil {
 		return false, fmt.Errorf("commercial register client not configured")
 	}
-	
+
 	jurisdiction := ""
 	if legalBasis != nil {
 		jurisdiction = legalBasis.Jurisdiction
 	}
-	
+
 	companyInfo, err := v.commercialRegisterClient.VerifyCompany(ctx, jurisdiction, registerRef)
 	if err != nil {
 		return false, err
 	}
-	
+
 	if !companyInfo.Active {
 		return false, nil
 	}
-	
+
 	// Check if entity is a managing director of the company
 	director, err := v.commercialRegisterClient.VerifyManagingDirector(ctx, registerRef, entityID)
 	if err != nil {
@@ -896,7 +896,7 @@ func (v *AuthorizationChainValidator) verifyCommercialRegisterEntry(
 		}
 		return false, err
 	}
-	
+
 	return director.Active, nil
 }
 
@@ -910,7 +910,7 @@ func (v *AuthorizationChainValidator) verifyIdentityProof(
 	if v.trustServiceProvider == nil {
 		return false, fmt.Errorf("trust service provider not configured")
 	}
-	
+
 	// Parse proof and verify with TSP
 	verificationResult, err := v.trustServiceProvider.VerifyIdentity(ctx, &IdentityDocument{
 		DocumentID:   proof,
@@ -920,39 +920,39 @@ func (v *AuthorizationChainValidator) verifyIdentityProof(
 	if err != nil {
 		return false, err
 	}
-	
+
 	return verificationResult.Verified, nil
 }
 
 // ChainValidationResult represents the result of authorization chain validation
 type ChainValidationResult struct {
-	Valid                bool                      `json:"valid"`
-	ValidationTime       time.Time                 `json:"validation_time"`
-	ValidatedChainDepth  int                       `json:"validated_chain_depth"`
-	LinkValidations      []*LinkValidationResult   `json:"link_validations"`
-	ChainIntegrityValid  bool                      `json:"chain_integrity_valid"`
-	ChainIntegrityHash   string                    `json:"chain_integrity_hash"`
-	RevocationStatus     *RevocationCheckResult    `json:"revocation_status,omitempty"`
-	FailureReason        string                    `json:"failure_reason,omitempty"`
-	Warnings             []string                  `json:"warnings,omitempty"`
+	Valid               bool                    `json:"valid"`
+	ValidationTime      time.Time               `json:"validation_time"`
+	ValidatedChainDepth int                     `json:"validated_chain_depth"`
+	LinkValidations     []*LinkValidationResult `json:"link_validations"`
+	ChainIntegrityValid bool                    `json:"chain_integrity_valid"`
+	ChainIntegrityHash  string                  `json:"chain_integrity_hash"`
+	RevocationStatus    *RevocationCheckResult  `json:"revocation_status,omitempty"`
+	FailureReason       string                  `json:"failure_reason,omitempty"`
+	Warnings            []string                `json:"warnings,omitempty"`
 }
 
 // LinkValidationResult represents validation result for a single authorization link
 type LinkValidationResult struct {
-	Level         int               `json:"level"` // 1=Authorizer, 2=Owner, 3=Client
-	EntityID      string            `json:"entity_id"`
-	EntityRole    string            `json:"entity_role"`
-	Valid         bool              `json:"valid"`
-	Checks        map[string]bool   `json:"checks"`
-	FailureReason string            `json:"failure_reason,omitempty"`
-	Warnings      []string          `json:"warnings,omitempty"`
+	Level         int             `json:"level"` // 1=Authorizer, 2=Owner, 3=Client
+	EntityID      string          `json:"entity_id"`
+	EntityRole    string          `json:"entity_role"`
+	Valid         bool            `json:"valid"`
+	Checks        map[string]bool `json:"checks"`
+	FailureReason string          `json:"failure_reason,omitempty"`
+	Warnings      []string        `json:"warnings,omitempty"`
 }
 
 // RevocationCheckResult represents revocation check results
 type RevocationCheckResult struct {
-	Checked         bool              `json:"checked"`
-	Revoked         bool              `json:"revoked"`
-	RevokedEntity   string            `json:"revoked_entity,omitempty"`
-	LinkRevocations map[string]bool   `json:"link_revocations"`
-	Message         string            `json:"message,omitempty"`
+	Checked         bool            `json:"checked"`
+	Revoked         bool            `json:"revoked"`
+	RevokedEntity   string          `json:"revoked_entity,omitempty"`
+	LinkRevocations map[string]bool `json:"link_revocations"`
+	Message         string          `json:"message,omitempty"`
 }

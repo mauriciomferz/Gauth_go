@@ -1,3 +1,10 @@
+---
+title: GitHub Actions Setup Guide
+category: operations
+status: active
+lastUpdated: 2025-11-12
+owners: devops-team
+---
 # GitHub Actions Setup Guide
 
 This repository uses GitHub Actions for CI/CD pipeline automation. Here's how to properly configure all features.

@@ -1,3 +1,13 @@
+---
+title: Project Organization Overview
+category: project-organization
+status: active
+lastUpdated: 2025-11-12
+owners: platform-eng
+source: internal
+refreshCadence: annually
+---
+
 # Project Organization
 
 > Last Updated: 2025-10-17

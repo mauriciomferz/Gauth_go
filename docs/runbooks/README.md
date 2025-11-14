@@ -1,3 +1,11 @@
+---
+title: "Operational Runbooks Index"
+category: runbook-index
+status: active
+lastUpdated: 2025-11-12
+owners: devops-team
+refreshCadence: monthly
+---
 # Operational Runbooks - Index
 
 This directory contains operational runbooks for all GAuth monitoring alerts. Each runbook provides detailed procedures for responding to specific alerts.

@@ -40,7 +40,7 @@ func (b *IdentityBridge) ConvertIDTokenToIdentityProof(
 			FailureReason: fmt.Sprintf("ID token validation failed: %v", err),
 		}, nil
 	}
-	
+
 	// Extract identity information
 	identity := claims.Subject
 	if claims.Name != "" {
@@ -49,10 +49,10 @@ func (b *IdentityBridge) ConvertIDTokenToIdentityProof(
 	if claims.LegalEntityName != "" {
 		identity = claims.LegalEntityName
 	}
-	
+
 	// Map OIDC ACR to GAuth TrustLevel
 	trustLevel := b.trustMapper.MapACRToTrustLevel(claims.ACR)
-	
+
 	// Build successful identity proof result
 	return &gauth.IdentityProofResult{
 		Valid:         true,
@@ -75,12 +75,12 @@ func (b *IdentityBridge) ConvertIdentityProofToIDToken(
 	if !proof.Valid {
 		return "", fmt.Errorf("cannot issue ID token for invalid identity proof")
 	}
-	
+
 	// Build additional claims from proof
 	additionalClaims := map[string]interface{}{
 		"name": proof.Identity,
 	}
-	
+
 	// Create ID token
 	return b.idTokenService.CreateIDTokenFromIdentity(
 		ctx,
@@ -104,17 +104,17 @@ func NewTrustLevelMapper() *TrustLevelMapper {
 		acrToTrustLevel: make(map[string]string),
 		trustLevelToACR: make(map[string]string),
 	}
-	
+
 	// Initialize default mappings from DefaultACRMappings
 	for _, mapping := range DefaultACRMappings {
 		mapper.acrToTrustLevel[mapping.ACR] = mapping.GAuthTrustLevel
 	}
-	
+
 	// Reverse mappings (trust level → ACR)
 	mapper.trustLevelToACR["low"] = "1"
 	mapper.trustLevelToACR["substantial"] = "substantial"
 	mapper.trustLevelToACR["high"] = "high"
-	
+
 	return mapper
 }
 
@@ -123,7 +123,7 @@ func (m *TrustLevelMapper) MapACRToTrustLevel(acr string) string {
 	if trustLevel, exists := m.acrToTrustLevel[acr]; exists {
 		return trustLevel
 	}
-	
+
 	// Default fallback: low trust
 	return "low"
 }
@@ -133,7 +133,7 @@ func (m *TrustLevelMapper) MapTrustLevelToACR(trustLevel string) string {
 	if acr, exists := m.trustLevelToACR[trustLevel]; exists {
 		return acr
 	}
-	
+
 	// Default fallback: ACR level 0
 	return "0"
 }
@@ -157,14 +157,14 @@ func (m *TrustLevelMapper) compareTrustLevels(actual string, required string) in
 		"substantial": 2,
 		"high":        3,
 	}
-	
+
 	actualValue, actualExists := levels[actual]
 	requiredValue, requiredExists := levels[required]
-	
+
 	if !actualExists || !requiredExists {
 		return -1
 	}
-	
+
 	if actualValue < requiredValue {
 		return -1
 	} else if actualValue == requiredValue {
@@ -178,19 +178,19 @@ func ExtractEntityTypeFromClaims(claims *IDTokenClaims) string {
 	if claims.EntityType != "" {
 		return claims.EntityType
 	}
-	
+
 	// Infer from claims
 	if claims.LegalEntityName != "" {
 		return "legal_entity"
 	}
-	
+
 	return "natural_person"
 }
 
 // ExtractProofDataFromClaims extracts proof data map from ID token claims
 func ExtractProofDataFromClaims(claims *IDTokenClaims) map[string]interface{} {
 	proofData := make(map[string]interface{})
-	
+
 	if claims.Name != "" {
 		proofData["name"] = claims.Name
 	}
@@ -219,7 +219,7 @@ func ExtractProofDataFromClaims(claims *IDTokenClaims) map[string]interface{} {
 	if len(claims.AMR) > 0 {
 		proofData["amr"] = claims.AMR
 	}
-	
+
 	return proofData
 }
 
@@ -235,17 +235,17 @@ func BuildIdentityProofRequestFromIDToken(
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse ID token: %w", err)
 	}
-	
+
 	// Extract entity type
 	entityType := ExtractEntityTypeFromClaims(claims)
-	
+
 	// Extract proof data
 	proofData := ExtractProofDataFromClaims(claims)
-	
+
 	// Map ACR to required level
 	mapper := NewTrustLevelMapper()
 	trustLevel := mapper.MapACRToTrustLevel(claims.ACR)
-	
+
 	return &gauth.IdentityProofRequest{
 		SubjectID:     claims.Subject,
 		IdentityType:  entityType,
@@ -269,18 +269,18 @@ func ValidateIDTokenForIdentityProof(
 	if err != nil {
 		return fmt.Errorf("ID token validation failed: %w", err)
 	}
-	
+
 	// Validate minimum trust level
 	mapper := NewTrustLevelMapper()
 	if !mapper.ValidateMinimumTrustLevel(claims.ACR, minTrustLevel) {
 		return fmt.Errorf("insufficient trust level: ACR %s does not meet minimum %s",
 			claims.ACR, minTrustLevel)
 	}
-	
+
 	// Validate subject exists
 	if claims.Subject == "" {
 		return fmt.Errorf("subject (sub) claim is required")
 	}
-	
+
 	return nil
 }

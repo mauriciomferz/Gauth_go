@@ -17,11 +17,11 @@ type TokenRevocationService struct {
 
 // RevokedTokenEntry represents a revoked token.
 type RevokedTokenEntry struct {
-	TokenID    string
-	RevokedAt  time.Time
-	Reason     string
-	RevokedBy  string
-	ExpiresAt  time.Time // When this revocation entry can be removed
+	TokenID   string
+	RevokedAt time.Time
+	Reason    string
+	RevokedBy string
+	ExpiresAt time.Time // When this revocation entry can be removed
 }
 
 // NewTokenRevocationService creates a new token revocation service.
@@ -171,14 +171,19 @@ type RefreshTokenService struct {
 
 // RefreshTokenEntry represents a stored refresh token.
 type RefreshTokenEntry struct {
-	RefreshToken string
-	ProviderID   string
-	Subject      string
-	Audience     string
-	IssuedAt     time.Time
-	ExpiresAt    time.Time
-	LastUsed     time.Time
-	UseCount     int
+	RefreshToken  string
+	ProviderID    string
+	Subject       string
+	Audience      string
+	Scopes        []string // OAuth2 scopes
+	IssuedAt      time.Time
+	ExpiresAt     time.Time
+	LastUsed      time.Time
+	UseCount      int
+	Revoked       bool   // Revocation status
+	Email         string // User email (OIDC)
+	EmailVerified bool   // Email verification status
+	Name          string // User display name
 }
 
 // NewRefreshTokenService creates a new refresh token service.
@@ -349,7 +354,7 @@ func (s *TokenIntrospectionService) IntrospectToken(ctx context.Context, req Tok
 	// In a real implementation, we'd use a more sophisticated approach
 	// For now, we'll accept any audience for introspection
 	// The caller is responsible for verifying they have access to introspect this token
-	
+
 	// Try to validate with empty audience (will check other claims)
 	claims, err := s.idTokenService.ValidateIDToken(ctx, req.Token, "")
 	if err != nil {

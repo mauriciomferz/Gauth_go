@@ -49,7 +49,7 @@ func (v *GoogleValidator) ValidateToken(ctx context.Context, token string, provi
 	// a) Add 'hd' field to IDTokenClaims
 	// b) Parse raw JWT to extract custom claims
 	// c) Use provider metadata to store and verify domain restrictions
-	
+
 	// For now, we validate what we can from the standard claims
 	if provider.Metadata != nil {
 		if _, ok := provider.Metadata["hosted_domain"].(string); ok {
@@ -98,8 +98,8 @@ func (v *OktaValidator) ValidateToken(ctx context.Context, token string, provide
 			hasMFA := false
 			for _, method := range claims.AMR {
 				// Check for MFA-related authentication methods
-				if method == "mfa" || method == "otp" || method == "sms" || 
-				   method == "hwk" || method == "swk" || method == "tel" {
+				if method == "mfa" || method == "otp" || method == "sms" ||
+					method == "hwk" || method == "swk" || method == "tel" {
 					hasMFA = true
 					break
 				}
@@ -116,7 +116,7 @@ func (v *OktaValidator) ValidateToken(ctx context.Context, token string, provide
 	// a) Adding a groups field to IDTokenClaims
 	// b) Parsing the JWT to extract custom claims
 	// c) Making a separate API call to Okta's /userinfo endpoint
-	
+
 	return claims, nil
 }
 
@@ -161,7 +161,7 @@ func (v *AzureADValidator) ValidateToken(ctx context.Context, token string, prov
 
 	// 2. Verify issuer format (should match Azure AD format)
 	if !strings.Contains(claims.Issuer, "login.microsoftonline.com") &&
-	   !strings.Contains(claims.Issuer, "sts.windows.net") {
+		!strings.Contains(claims.Issuer, "sts.windows.net") {
 		return nil, fmt.Errorf("invalid azure ad issuer: %s", claims.Issuer)
 	}
 
@@ -176,7 +176,7 @@ func (v *AzureADValidator) ValidateToken(ctx context.Context, token string, prov
 	// a) Extending IDTokenClaims with Azure-specific fields
 	// b) Parsing the JWT to extract custom claims
 	// c) Making calls to Microsoft Graph API for additional user information
-	
+
 	return claims, nil
 }
 

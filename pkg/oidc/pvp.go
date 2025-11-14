@@ -27,6 +27,7 @@ type OIDCPVPConfig struct {
 // NewOIDCPowerVerificationPoint creates a new OIDC-based PowerVerificationPoint
 // Parameters:
 //   - config: Configuration including ID token service and optional minimum ACR
+//
 // Returns:
 //   - *OIDCPowerVerificationPoint: The configured PVP instance
 //   - error: Error if configuration is invalid
@@ -55,13 +56,14 @@ func NewOIDCPowerVerificationPoint(config OIDCPVPConfig) (*OIDCPowerVerification
 // Parameters:
 //   - ctx: Request context
 //   - request: Identity proof request containing ID token in proof_data
+//
 // Returns:
 //   - *gauth.IdentityProofResult: Verification result with trust level
 //   - error: Error if verification fails
 func (p *OIDCPowerVerificationPoint) VerifyIdentityProof(ctx context.Context, request *gauth.IdentityProofRequest) (*gauth.IdentityProofResult, error) {
 	// Validate proof method
 	if request.ProofMethod != ProofMethodOIDCIDToken && request.ProofMethod != ProofMethodOIDCExternal {
-		return nil, fmt.Errorf("unsupported proof method: %s (expected %s or %s)", 
+		return nil, fmt.Errorf("unsupported proof method: %s (expected %s or %s)",
 			request.ProofMethod, ProofMethodOIDCIDToken, ProofMethodOIDCExternal)
 	}
 
@@ -108,14 +110,14 @@ func (p *OIDCPowerVerificationPoint) VerifyIdentityProof(ctx context.Context, re
 
 	// Map trust level to ACR for validation
 	actualACR := p.bridge.trustMapper.MapTrustLevelToACR(result.TrustLevel)
-	
+
 	// Validate minimum trust level
 	if !p.bridge.trustMapper.ValidateMinimumTrustLevel(actualACR, requiredACR) {
 		return &gauth.IdentityProofResult{
-			Valid:         false,
-			SubjectID:     request.SubjectID,
-			TrustLevel:    result.TrustLevel,
-			FailureReason: fmt.Sprintf("insufficient trust level: got %s (ACR: %s), required %s", 
+			Valid:      false,
+			SubjectID:  request.SubjectID,
+			TrustLevel: result.TrustLevel,
+			FailureReason: fmt.Sprintf("insufficient trust level: got %s (ACR: %s), required %s",
 				result.TrustLevel, actualACR, requiredACR),
 		}, nil
 	}
@@ -123,9 +125,9 @@ func (p *OIDCPowerVerificationPoint) VerifyIdentityProof(ctx context.Context, re
 	// Verify subject ID matches if provided
 	if request.SubjectID != "" && result.SubjectID != request.SubjectID {
 		return &gauth.IdentityProofResult{
-			Valid:         false,
-			SubjectID:     request.SubjectID,
-			FailureReason: fmt.Sprintf("subject ID mismatch: expected %s, got %s", 
+			Valid:     false,
+			SubjectID: request.SubjectID,
+			FailureReason: fmt.Sprintf("subject ID mismatch: expected %s, got %s",
 				request.SubjectID, result.SubjectID),
 		}, nil
 	}
@@ -157,6 +159,7 @@ func (p *OIDCPowerVerificationPoint) SetRequiredACR(acr string) {
 // ValidateProofData validates that the proof data contains required fields for OIDC verification
 // Parameters:
 //   - proofData: The proof data map to validate
+//
 // Returns:
 //   - error: Validation error, or nil if valid
 func (p *OIDCPowerVerificationPoint) ValidateProofData(proofData map[string]interface{}) error {

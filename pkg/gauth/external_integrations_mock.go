@@ -25,10 +25,10 @@ func NewMockCommercialRegisterClient(strict bool) *MockCommercialRegisterClient 
 		poaRegistrations: make(map[string]*PoARegistration),
 		strict:           strict,
 	}
-	
+
 	// Add some test data
 	mock.seedTestData()
-	
+
 	return mock
 }
 
@@ -54,7 +54,7 @@ func (m *MockCommercialRegisterClient) seedTestData() {
 		VerificationDate:   time.Now(),
 		VerificationSource: "mock_handelsregister",
 	}
-	
+
 	// UK Ltd example
 	m.companies["12345678-UK"] = &CompanyInfo{
 		CompanyID:          "company-uk-001",
@@ -76,7 +76,7 @@ func (m *MockCommercialRegisterClient) seedTestData() {
 		VerificationDate:   time.Now(),
 		VerificationSource: "mock_companies_house",
 	}
-	
+
 	// Director example
 	m.directors["director-001"] = &DirectorInfo{
 		PersonID:              "director-001",
@@ -98,12 +98,12 @@ func (m *MockCommercialRegisterClient) VerifyCompany(
 ) (*CompanyInfo, error) {
 	// Simulate API delay
 	time.Sleep(50 * time.Millisecond)
-	
+
 	// Check if company exists in mock data
 	if company, exists := m.companies[companyID]; exists {
 		return company, nil
 	}
-	
+
 	// In non-strict mode, return a generic valid company
 	if !m.strict {
 		return &CompanyInfo{
@@ -120,7 +120,7 @@ func (m *MockCommercialRegisterClient) VerifyCompany(
 			VerificationSource: "mock_register",
 		}, nil
 	}
-	
+
 	return nil, fmt.Errorf("company not found: %s", companyID)
 }
 
@@ -130,11 +130,11 @@ func (m *MockCommercialRegisterClient) VerifyManagingDirector(
 	personID string,
 ) (*DirectorInfo, error) {
 	time.Sleep(50 * time.Millisecond)
-	
+
 	if director, exists := m.directors[personID]; exists {
 		return director, nil
 	}
-	
+
 	if !m.strict {
 		return &DirectorInfo{
 			PersonID:              personID,
@@ -148,7 +148,7 @@ func (m *MockCommercialRegisterClient) VerifyManagingDirector(
 			VerificationDate:      time.Now(),
 		}, nil
 	}
-	
+
 	return nil, fmt.Errorf("director not found: %s", personID)
 }
 
@@ -158,11 +158,11 @@ func (m *MockCommercialRegisterClient) VerifyPowerOfAttorney(
 	poaID string,
 ) (*PoARegistration, error) {
 	time.Sleep(50 * time.Millisecond)
-	
+
 	if poa, exists := m.poaRegistrations[poaID]; exists {
 		return poa, nil
 	}
-	
+
 	if !m.strict {
 		return &PoARegistration{
 			PoAID:            poaID,
@@ -179,7 +179,7 @@ func (m *MockCommercialRegisterClient) VerifyPowerOfAttorney(
 			VerificationDate: time.Now(),
 		}, nil
 	}
-	
+
 	return nil, fmt.Errorf("power of attorney not found: %s", poaID)
 }
 
@@ -189,7 +189,7 @@ func (m *MockCommercialRegisterClient) GetSignatoryRights(
 	personID string,
 ) (*SignatoryRights, error) {
 	time.Sleep(50 * time.Millisecond)
-	
+
 	if !m.strict {
 		return &SignatoryRights{
 			PersonID:         personID,
@@ -203,7 +203,7 @@ func (m *MockCommercialRegisterClient) GetSignatoryRights(
 			VerificationDate: time.Now(),
 		}, nil
 	}
-	
+
 	return nil, fmt.Errorf("signatory rights not found for person: %s", personID)
 }
 
@@ -212,7 +212,7 @@ func (m *MockCommercialRegisterClient) GetCompanyStructure(
 	companyID string,
 ) (*CompanyStructure, error) {
 	time.Sleep(50 * time.Millisecond)
-	
+
 	if !m.strict {
 		return &CompanyStructure{
 			CompanyID:           companyID,
@@ -222,7 +222,7 @@ func (m *MockCommercialRegisterClient) GetCompanyStructure(
 			VerificationDate:    time.Now(),
 		}, nil
 	}
-	
+
 	return nil, fmt.Errorf("company structure not found: %s", companyID)
 }
 
@@ -245,12 +245,12 @@ func (m *MockTrustServiceProvider) VerifyIdentity(
 	identity *IdentityDocument,
 ) (*VerificationResult, error) {
 	time.Sleep(100 * time.Millisecond)
-	
+
 	// Check cache
 	if result, exists := m.identities[identity.DocumentID]; exists {
 		return result, nil
 	}
-	
+
 	// In non-strict mode, verify all identities successfully
 	if !m.strict {
 		result := &VerificationResult{
@@ -265,7 +265,7 @@ func (m *MockTrustServiceProvider) VerifyIdentity(
 		m.identities[identity.DocumentID] = result
 		return result, nil
 	}
-	
+
 	return nil, fmt.Errorf("identity verification failed for: %s", identity.DocumentID)
 }
 
@@ -276,11 +276,11 @@ func (m *MockTrustServiceProvider) VerifySignature(
 	certID string,
 ) error {
 	time.Sleep(50 * time.Millisecond)
-	
+
 	if !m.strict {
 		return nil // All signatures valid in non-strict mode
 	}
-	
+
 	return fmt.Errorf("signature verification not implemented in strict mode")
 }
 
@@ -289,7 +289,7 @@ func (m *MockTrustServiceProvider) GetCertificateChain(
 	certID string,
 ) ([]*X509Certificate, error) {
 	time.Sleep(50 * time.Millisecond)
-	
+
 	if !m.strict {
 		return []*X509Certificate{
 			{
@@ -302,7 +302,7 @@ func (m *MockTrustServiceProvider) GetCertificateChain(
 			},
 		}, nil
 	}
-	
+
 	return nil, fmt.Errorf("certificate chain not found: %s", certID)
 }
 
@@ -311,7 +311,7 @@ func (m *MockTrustServiceProvider) VerifyTimestamp(
 	timestamp *Timestamp,
 ) (*TimestampValidation, error) {
 	time.Sleep(50 * time.Millisecond)
-	
+
 	if !m.strict {
 		return &TimestampValidation{
 			Valid:            true,
@@ -322,7 +322,7 @@ func (m *MockTrustServiceProvider) VerifyTimestamp(
 			Message:          "Timestamp verified successfully",
 		}, nil
 	}
-	
+
 	return nil, fmt.Errorf("timestamp verification not implemented in strict mode")
 }
 
@@ -330,18 +330,18 @@ func (m *MockTrustServiceProvider) GetQualificationStatus(
 	ctx context.Context,
 ) (*TSPQualificationStatus, error) {
 	time.Sleep(50 * time.Millisecond)
-	
+
 	return &TSPQualificationStatus{
-		ProviderID:          "mock-tsp-001",
-		ProviderName:        "Mock Trust Service Provider",
-		Qualified:           !m.strict, // Qualified in non-strict mode
-		QualificationType:   "mock",
-		AccreditationBody:   "Mock Accreditation Authority",
-		AccreditationDate:   time.Now().AddDate(-2, 0, 0),
-		ServiceTypes:        []string{"identity_verification", "signature", "timestamp"},
-		Jurisdiction:        "EU",
-		Status:              "active",
-		VerificationDate:    time.Now(),
+		ProviderID:        "mock-tsp-001",
+		ProviderName:      "Mock Trust Service Provider",
+		Qualified:         !m.strict, // Qualified in non-strict mode
+		QualificationType: "mock",
+		AccreditationBody: "Mock Accreditation Authority",
+		AccreditationDate: time.Now().AddDate(-2, 0, 0),
+		ServiceTypes:      []string{"identity_verification", "signature", "timestamp"},
+		Jurisdiction:      "EU",
+		Status:            "active",
+		VerificationDate:  time.Now(),
 	}, nil
 }
 
@@ -364,11 +364,11 @@ func (m *MockRevocationChecker) IsRevoked(
 	entityID string,
 ) (bool, error) {
 	time.Sleep(20 * time.Millisecond)
-	
+
 	if revoked, exists := m.revoked[entityID]; exists {
 		return revoked, nil
 	}
-	
+
 	// In non-strict mode, nothing is revoked by default
 	return false, nil
 }
@@ -378,20 +378,20 @@ func (m *MockRevocationChecker) GetRevocationInfo(
 	entityID string,
 ) (*RevocationInfo, error) {
 	time.Sleep(20 * time.Millisecond)
-	
+
 	revoked, _ := m.IsRevoked(ctx, entityID)
-	
+
 	info := &RevocationInfo{
 		EntityID:         entityID,
 		Revoked:          revoked,
 		VerificationDate: time.Now(),
 	}
-	
+
 	if revoked {
 		info.RevocationDate = time.Now().AddDate(0, -1, 0)
 		info.RevocationReason = "Mock revocation for testing"
 	}
-	
+
 	return info, nil
 }
 
@@ -400,12 +400,12 @@ func (m *MockRevocationChecker) CheckCertificateRevocation(
 	certID string,
 ) (*CertificateRevocationStatus, error) {
 	time.Sleep(50 * time.Millisecond)
-	
+
 	revoked := false
 	if strings.Contains(certID, "revoked") {
 		revoked = true
 	}
-	
+
 	status := &CertificateRevocationStatus{
 		CertificateID: certID,
 		Revoked:       revoked,
@@ -413,12 +413,12 @@ func (m *MockRevocationChecker) CheckCertificateRevocation(
 		CheckDate:     time.Now(),
 		NextUpdate:    time.Now().Add(24 * time.Hour),
 	}
-	
+
 	if revoked {
 		status.RevocationDate = time.Now().AddDate(0, -1, 0)
 		status.RevocationReason = "Mock certificate revocation"
 	}
-	
+
 	return status, nil
 }
 

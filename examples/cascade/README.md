@@ -1,3 +1,11 @@
+---
+title: "Cascade Policy Evaluation Examples"
+category: example
+status: active
+lastUpdated: 2025-11-12
+owners: architecture-team
+refreshCadence: on-change
+---
 # Cascading Failure Demo
 
 > Last Updated: 2025-10-17

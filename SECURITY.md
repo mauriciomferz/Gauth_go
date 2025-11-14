@@ -1,3 +1,10 @@
+---
+title: Security Policy
+category: security
+status: active
+lastUpdated: 2025-11-12
+owners: security-team
+---
 # Security Policy
 
 > Last Updated: 2025-11-05

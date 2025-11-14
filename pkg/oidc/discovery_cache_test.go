@@ -244,12 +244,12 @@ func TestInMemoryDiscoveryCache_ExpiredEntry(t *testing.T) {
 func TestInMemoryDiscoveryCache_FetchFromProvider(t *testing.T) {
 	// Create mock OIDC provider
 	mockDoc := OIDCConfiguration{
-		Issuer:                "https://mock.provider.com",
-		AuthorizationEndpoint: "https://mock.provider.com/oauth2/authorize",
-		TokenEndpoint:         "https://mock.provider.com/oauth2/token",
-		JWKSUri:               "https://mock.provider.com/oauth2/jwks",
-		ResponseTypesSupported: []string{"code", "token", "id_token"},
-		SubjectTypesSupported:  []string{"public"},
+		Issuer:                           "https://mock.provider.com",
+		AuthorizationEndpoint:            "https://mock.provider.com/oauth2/authorize",
+		TokenEndpoint:                    "https://mock.provider.com/oauth2/token",
+		JWKSUri:                          "https://mock.provider.com/oauth2/jwks",
+		ResponseTypesSupported:           []string{"code", "token", "id_token"},
+		SubjectTypesSupported:            []string{"public"},
 		IDTokenSigningAlgValuesSupported: []string{"RS256"},
 	}
 

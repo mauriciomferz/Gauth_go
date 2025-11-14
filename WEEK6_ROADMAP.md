@@ -1,3 +1,13 @@
+---
+title: Week 6 Roadmap
+category: roadmap
+status: active
+lastUpdated: 2025-11-12
+owners: product-team
+source: internal
+refreshCadence: monthly
+---
+
 # Week 6 Roadmap: Production Hardening & State Management
 
 **Date:** November 10, 2025  

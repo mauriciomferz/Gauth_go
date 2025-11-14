@@ -1,3 +1,12 @@
+# (Front matter added)
+---
+title: "Token Management Examples"
+category: example
+status: active
+lastUpdated: 2025-11-12
+owners: architecture-team
+refreshCadence: on-change
+---
 # Token Management Examples
 
 > Last Updated: 2025-10-17

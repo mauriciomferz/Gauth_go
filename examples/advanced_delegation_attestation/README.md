@@ -1,3 +1,11 @@
+---
+title: "Advanced Delegation & Attestation Examples"
+category: example
+status: active
+lastUpdated: 2025-11-12
+owners: architecture-team
+refreshCadence: on-change
+---
 # Advanced Delegation & Attestation Example
 
 > Last Updated: 2025-10-17

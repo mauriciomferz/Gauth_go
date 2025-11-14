@@ -217,7 +217,7 @@ func TestSkewMetrics_IsWarningLevel(t *testing.T) {
 		{"Below warning (100)", 100, false},
 		{"At warning threshold (210)", 210, true},
 		{"Above warning (250)", 250, true},
-		{"At max (300)", 300, false},  // Not warning, it's exceeded
+		{"At max (300)", 300, false},    // Not warning, it's exceeded
 		{"Above max (400)", 400, false}, // Not warning, it's exceeded
 		{"Negative below warning (-100)", -100, false},
 		{"Negative at warning (-210)", -210, true},
@@ -319,7 +319,7 @@ func TestClockSkewValidator_EdgeCases(t *testing.T) {
 
 // Helper function for stats string validation
 func containsSkewStats(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || 
+	return len(s) >= len(substr) && (s == substr ||
 		(len(s) > len(substr) && containsSkewStatsHelper(s, substr)))
 }
 

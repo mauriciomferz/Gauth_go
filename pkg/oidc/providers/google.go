@@ -10,30 +10,30 @@ import (
 
 // Google OIDC provider constants
 const (
-	GoogleIssuerURL      = "https://accounts.google.com"
-	GoogleDiscoveryURL   = "https://accounts.google.com/.well-known/openid-configuration"
-	GoogleDefaultTrust   = "substantial"
-	GoogleProviderID     = "google"
-	GoogleProviderName   = "Google"
+	GoogleIssuerURL    = "https://accounts.google.com"
+	GoogleDiscoveryURL = "https://accounts.google.com/.well-known/openid-configuration"
+	GoogleDefaultTrust = "substantial"
+	GoogleProviderID   = "google"
+	GoogleProviderName = "Google"
 )
 
 // GoogleClaimMappings defines how Google OIDC claims map to GAuth claims.
 // Google follows standard OIDC claims closely.
 var GoogleClaimMappings = map[string]string{
-	"sub":            "user_id",           // Unique user identifier
-	"email":          "email",             // User's email address
-	"email_verified": "email_verified",    // Email verification status
-	"name":           "full_name",         // Full name
-	"given_name":     "given_name",        // Given/first name
-	"family_name":    "family_name",       // Family/last name
-	"picture":        "avatar_url",        // Profile picture URL
-	"locale":         "locale",            // User's locale
-	"hd":             "hosted_domain",     // Google Workspace hosted domain
+	"sub":            "user_id",        // Unique user identifier
+	"email":          "email",          // User's email address
+	"email_verified": "email_verified", // Email verification status
+	"name":           "full_name",      // Full name
+	"given_name":     "given_name",     // Given/first name
+	"family_name":    "family_name",    // Family/last name
+	"picture":        "avatar_url",     // Profile picture URL
+	"locale":         "locale",         // User's locale
+	"hd":             "hosted_domain",  // Google Workspace hosted domain
 }
 
 // GoogleProvider implements Google-specific OIDC integration.
 type GoogleProvider struct {
-	config        *oidc.ProviderConfig
+	config         *oidc.ProviderConfig
 	discoveryCache oidc.DiscoveryCache
 	idTokenService *oidc.IDTokenService
 }

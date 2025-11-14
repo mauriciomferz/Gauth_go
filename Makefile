@@ -223,6 +223,13 @@ tidy-all: ## Run go mod tidy across root and any referenced modules (go.work awa
 	fi; \
 	echo "✅ Modules tidied"
 
+tidy-fast: ## Fast hygiene (format-enhanced + vet + minimal lint) without tests
+	@echo "⚡ Fast tidy (imports, format, vet, minimal lint)"; \
+	$(MAKE) format-enhanced; \
+	go vet ./...; \
+	command -v golangci-lint >/dev/null 2>&1 && golangci-lint run --disable-all --enable=ineffassign --enable=errcheck || echo "(golangci-lint skipped)"; \
+	echo "✅ Fast tidy complete"
+
 ## Code quality targets
 lint: ## Run default golangci-lint (project .golangci.yml)
 	@echo "🔍 Running golangci-lint (standard config)..."
@@ -309,6 +316,16 @@ format: ## Format code
 	$(GOFMT) ./...
 	$(GOCMD) mod tidy
 
+format-enhanced: ## Enhanced formatting (goimports + gofmt + tidy via scripts/format.sh)
+	@echo "🛠  Enhanced formatting (imports + canonical style + tidy)"
+	@if [ ! -x scripts/format.sh ]; then chmod +x scripts/format.sh; fi; \
+		scripts/format.sh
+
+format-dry: ## Preview formatting changes without modifying files (DRY=1)
+	@echo "🔍 Dry-run format preview"
+	@if [ ! -x scripts/format.sh ]; then chmod +x scripts/format.sh; fi; \
+		DRY=1 scripts/format.sh || true
+
 lint-fix: ## Apply formatting & import fixes (gofmt + goimports; install tools if missing)
 	@echo "🛠  Auto-fixing common lint issues (format + imports)..."; \
 	if ! command -v goimports >/dev/null 2>&1; then \
@@ -389,6 +406,26 @@ docs: ## Generate aggregated API documentation (scripts/gen-docs.sh -> docs/GENE
 	@echo "📖 Generating aggregated API docs..."
 	@if [ ! -x scripts/gen-docs.sh ]; then chmod +x scripts/gen-docs.sh; fi; \
 	./scripts/gen-docs.sh
+
+docs-validate: ## Validate documentation metadata headers (scripts/docs_index.sh --validate)
+	@echo "🧪 Validating documentation headers..."; \
+	if [ ! -x scripts/docs_index.sh ]; then chmod +x scripts/docs_index.sh; fi; \
+	bash scripts/docs_index.sh --validate
+
+docs-summary: ## Show category counts for documentation corpus
+	@echo "📊 Documentation category summary"; \
+	if [ ! -x scripts/docs_index.sh ]; then chmod +x scripts/docs_index.sh; fi; \
+	bash scripts/docs_index.sh --summary
+
+docs-meta-validate: ## Run Go-based validator for documentation front matter (tools/docvalidate)
+	@echo "🧪 Running Go docs validator..."; \
+	go run ./tools/docvalidate || exit 1; \
+	echo "✅ Docs validation passed"
+
+docs-meta-index: ## Generate taxonomy index (docs/TAXONOMY_INDEX.auto.md) via Go validator
+	@echo "🧪 Generating taxonomy index..."; \
+	go run ./tools/docvalidate --write-index || exit 1; \
+	echo "✅ Taxonomy index written to docs/TAXONOMY_INDEX.auto.md"
 
 help: ## Show this help message
 	@echo "GAuth Makefile Commands:"
@@ -578,6 +615,12 @@ bench: ## Run benchmarks with memory stats (B=regex to filter, default '^Benchma
 	$(GOTEST) -run=^$$ -bench=$$PATTERN -benchmem ./test/benchmarks -count=1 | tee bench.out; \
 	grep -E "^Benchmark" bench.out > bench_summary.txt || true; \
 	echo "📄 Raw output: bench.out"; echo "📝 Summary: bench_summary.txt"
+
+fuzz-cbor: ## Fuzz CBOR codec for PoA (FUZZ_TIME=10s to extend)
+	@echo "🧪 Fuzzing CBOR codec..."; \
+	FUZZ_TIME=$${FUZZ_TIME:-5s}; \
+	$(GOTEST) -run=^$ -fuzz=FuzzCBORCodec -fuzztime=$$FUZZ_TIME ./pkg/poa; \
+	echo "✅ Fuzz run complete"
 
 verify-csp: ## Run CSP verification script (fails if violations found) 
 	@echo "🔐 Verifying Content Security Policy..."; \

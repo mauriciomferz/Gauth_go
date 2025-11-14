@@ -12,28 +12,28 @@ import (
 type ExtendedTokenStore interface {
 	// SaveToken stores a new extended token
 	SaveToken(ctx context.Context, token *ExtendedToken) error
-	
+
 	// GetToken retrieves a token by its access token value
 	GetToken(ctx context.Context, accessToken string) (*ExtendedToken, error)
-	
+
 	// GetTokenByRefreshToken retrieves a token by its refresh token value
 	GetTokenByRefreshToken(ctx context.Context, refreshToken string) (*ExtendedToken, error)
-	
+
 	// RevokeToken marks a token as revoked
 	RevokeToken(ctx context.Context, accessToken string) error
-	
+
 	// IsRevoked checks if a token has been revoked
 	IsRevoked(ctx context.Context, accessToken string) (bool, error)
-	
+
 	// DeleteExpiredTokens removes expired tokens (cleanup operation)
 	DeleteExpiredTokens(ctx context.Context) (int, error)
-	
+
 	// ListTokensByClient returns all tokens for a specific client
 	ListTokensByClient(ctx context.Context, clientID string) ([]*ExtendedToken, error)
-	
+
 	// ListTokensByResourceOwner returns all active (non-revoked, non-expired) tokens for a specific resource owner
 	ListTokensByResourceOwner(ctx context.Context, ownerID string) ([]*ExtendedToken, error)
-	
+
 	// RevokeTokenWithReason marks a token as revoked with a specific reason
 	// The reason is stored in the audit trail or metadata for transparency
 	RevokeTokenWithReason(ctx context.Context, accessToken string, reason string) error
@@ -49,8 +49,8 @@ var (
 
 // TokenMetadata holds additional metadata for token storage
 type TokenMetadata struct {
-	CreatedAt   time.Time
-	RevokedAt   *time.Time
-	LastUsedAt  *time.Time
-	UseCount    int
+	CreatedAt  time.Time
+	RevokedAt  *time.Time
+	LastUsedAt *time.Time
+	UseCount   int
 }

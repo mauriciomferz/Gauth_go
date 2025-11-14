@@ -10,15 +10,15 @@ import (
 
 // PVPRouter routes identity proof requests to appropriate PVP implementations
 type PVPRouter struct {
-	pvps      map[string]PowerVerificationPoint
-	mu        sync.RWMutex
+	pvps       map[string]PowerVerificationPoint
+	mu         sync.RWMutex
 	defaultPVP PowerVerificationPoint
 }
 
 // NewPVPRouter creates a new PVP router
 func NewPVPRouter(defaultPVP PowerVerificationPoint) *PVPRouter {
 	return &PVPRouter{
-		pvps:      make(map[string]PowerVerificationPoint),
+		pvps:       make(map[string]PowerVerificationPoint),
 		defaultPVP: defaultPVP,
 	}
 }
@@ -30,7 +30,7 @@ func NewPVPRouter(defaultPVP PowerVerificationPoint) *PVPRouter {
 func (r *PVPRouter) RegisterPVP(proofMethods []string, pvp PowerVerificationPoint) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	
+
 	for _, method := range proofMethods {
 		r.pvps[method] = pvp
 	}
@@ -42,25 +42,25 @@ func (r *PVPRouter) VerifyIdentityProof(ctx context.Context, request *IdentityPr
 	if request == nil {
 		return nil, fmt.Errorf("identity proof request is required")
 	}
-	
+
 	if request.ProofMethod == "" {
 		return nil, fmt.Errorf("proof method is required")
 	}
-	
+
 	// Look up PVP for proof method
 	r.mu.RLock()
 	pvp, found := r.pvps[request.ProofMethod]
 	r.mu.RUnlock()
-	
+
 	if !found {
 		// Try default PVP if available
 		if r.defaultPVP != nil {
 			return r.defaultPVP.VerifyIdentityProof(ctx, request)
 		}
-		
+
 		return nil, fmt.Errorf("no PVP registered for proof method: %s", request.ProofMethod)
 	}
-	
+
 	return pvp.VerifyIdentityProof(ctx, request)
 }
 
@@ -68,7 +68,7 @@ func (r *PVPRouter) VerifyIdentityProof(ctx context.Context, request *IdentityPr
 func (r *PVPRouter) GetPVP(proofMethod string) (PowerVerificationPoint, bool) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	
+
 	pvp, found := r.pvps[proofMethod]
 	return pvp, found
 }
@@ -77,11 +77,11 @@ func (r *PVPRouter) GetPVP(proofMethod string) (PowerVerificationPoint, bool) {
 func (r *PVPRouter) GetSupportedProofMethods() []string {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	
+
 	methods := make([]string, 0, len(r.pvps))
 	for method := range r.pvps {
 		methods = append(methods, method)
 	}
-	
+
 	return methods
 }

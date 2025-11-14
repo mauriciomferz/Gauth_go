@@ -267,7 +267,7 @@ func TestSimpleAuthenticator_AdminUser(t *testing.T) {
 	if len(adminUser.Roles) == 0 {
 		t.Error("Admin user should have roles")
 	}
-	
+
 	// Check for admin role
 	hasAdminRole := false
 	for _, role := range adminUser.Roles {
@@ -319,7 +319,7 @@ func TestSimpleAuthenticator_RegularUser(t *testing.T) {
 // TestSimpleAuthenticator_Authenticate_InactiveUser tests inactive user authentication
 func TestSimpleAuthenticator_Authenticate_InactiveUser(t *testing.T) {
 	auth := NewAuthenticator(nil)
-	
+
 	// Temporarily mark user as inactive
 	if user, exists := auth.users["user"]; exists {
 		originalActive := user.Active

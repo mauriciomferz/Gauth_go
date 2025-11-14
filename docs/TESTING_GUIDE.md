@@ -1,3 +1,13 @@
+---
+title: Testing Guide
+category: testing-guide
+status: active
+lastUpdated: 2025-11-12
+owners: qa-team
+source: internal
+refreshCadence: quarterly
+---
+
 # GAuth Testing Guide
 
 > Last Updated: 2025-10-17

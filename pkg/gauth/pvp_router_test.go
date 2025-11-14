@@ -39,7 +39,7 @@ func TestNewPVPRouter(t *testing.T) {
 			TrustLevel: "low",
 		},
 	}
-	
+
 	router := NewPVPRouter(defaultPVP)
 	if router == nil {
 		t.Fatal("Expected router, got nil")
@@ -52,7 +52,7 @@ func TestNewPVPRouter(t *testing.T) {
 // TestPVPRouter_RegisterPVP tests PVP registration
 func TestPVPRouter_RegisterPVP(t *testing.T) {
 	router := NewPVPRouter(nil)
-	
+
 	oidcPVP := &MockPVP{
 		result: &IdentityProofResult{
 			Valid:      true,
@@ -61,9 +61,9 @@ func TestPVPRouter_RegisterPVP(t *testing.T) {
 			TrustLevel: "high",
 		},
 	}
-	
+
 	router.RegisterPVP([]string{"oidc_id_token", "oidc_external"}, oidcPVP)
-	
+
 	// Verify registration
 	pvp, found := router.GetPVP("oidc_id_token")
 	if !found {
@@ -72,7 +72,7 @@ func TestPVPRouter_RegisterPVP(t *testing.T) {
 	if pvp != oidcPVP {
 		t.Error("Retrieved PVP does not match registered PVP")
 	}
-	
+
 	pvp, found = router.GetPVP("oidc_external")
 	if !found {
 		t.Error("Expected to find oidc_external PVP")
@@ -85,7 +85,7 @@ func TestPVPRouter_RegisterPVP(t *testing.T) {
 // TestPVPRouter_VerifyIdentityProof tests proof verification routing
 func TestPVPRouter_VerifyIdentityProof(t *testing.T) {
 	ctx := context.Background()
-	
+
 	// Create mock PVPs
 	oidcPVP := &MockPVP{
 		result: &IdentityProofResult{
@@ -95,7 +95,7 @@ func TestPVPRouter_VerifyIdentityProof(t *testing.T) {
 			TrustLevel: "high",
 		},
 	}
-	
+
 	eidasPVP := &MockPVP{
 		result: &IdentityProofResult{
 			Valid:      true,
@@ -104,7 +104,7 @@ func TestPVPRouter_VerifyIdentityProof(t *testing.T) {
 			TrustLevel: "substantial",
 		},
 	}
-	
+
 	defaultPVP := &MockPVP{
 		result: &IdentityProofResult{
 			Valid:      true,
@@ -113,14 +113,14 @@ func TestPVPRouter_VerifyIdentityProof(t *testing.T) {
 			TrustLevel: "low",
 		},
 	}
-	
+
 	router := NewPVPRouter(defaultPVP)
 	router.RegisterPVP([]string{"oidc_id_token", "oidc_external"}, oidcPVP)
 	router.RegisterPVP([]string{"eIDAS"}, eidasPVP)
-	
+
 	tests := []struct {
-		name            string
-		request         *IdentityProofRequest
+		name             string
+		request          *IdentityProofRequest
 		expectedIdentity string
 		expectedTrust    string
 		expectError      bool
@@ -169,8 +169,8 @@ func TestPVPRouter_VerifyIdentityProof(t *testing.T) {
 			expectError:      false,
 		},
 		{
-			name: "nil request",
-			request: nil,
+			name:        "nil request",
+			request:     nil,
 			expectError: true,
 		},
 		{
@@ -183,32 +183,32 @@ func TestPVPRouter_VerifyIdentityProof(t *testing.T) {
 			expectError: true,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result, err := router.VerifyIdentityProof(ctx, tt.request)
-			
+
 			if tt.expectError {
 				if err == nil {
 					t.Error("Expected error, got nil")
 				}
 				return
 			}
-			
+
 			if err != nil {
 				t.Errorf("Unexpected error: %v", err)
 				return
 			}
-			
+
 			if result == nil {
 				t.Error("Expected result, got nil")
 				return
 			}
-			
+
 			if result.Identity != tt.expectedIdentity {
 				t.Errorf("Expected identity '%s', got '%s'", tt.expectedIdentity, result.Identity)
 			}
-			
+
 			if result.TrustLevel != tt.expectedTrust {
 				t.Errorf("Expected trust level '%s', got '%s'", tt.expectedTrust, result.TrustLevel)
 			}
@@ -220,7 +220,7 @@ func TestPVPRouter_VerifyIdentityProof(t *testing.T) {
 func TestPVPRouter_VerifyIdentityProof_NoDefaultPVP(t *testing.T) {
 	ctx := context.Background()
 	router := NewPVPRouter(nil)
-	
+
 	oidcPVP := &MockPVP{
 		result: &IdentityProofResult{
 			Valid:      true,
@@ -229,9 +229,9 @@ func TestPVPRouter_VerifyIdentityProof_NoDefaultPVP(t *testing.T) {
 			TrustLevel: "high",
 		},
 	}
-	
+
 	router.RegisterPVP([]string{"oidc_id_token"}, oidcPVP)
-	
+
 	// Test with unregistered proof method and no default PVP
 	request := &IdentityProofRequest{
 		SubjectID:    "user",
@@ -239,7 +239,7 @@ func TestPVPRouter_VerifyIdentityProof_NoDefaultPVP(t *testing.T) {
 		ProofMethod:  "unknown_method",
 		ProofData:    map[string]interface{}{},
 	}
-	
+
 	result, err := router.VerifyIdentityProof(ctx, request)
 	if err == nil {
 		t.Error("Expected error for unregistered proof method without default PVP")
@@ -252,26 +252,26 @@ func TestPVPRouter_VerifyIdentityProof_NoDefaultPVP(t *testing.T) {
 // TestPVPRouter_GetSupportedProofMethods tests supported methods retrieval
 func TestPVPRouter_GetSupportedProofMethods(t *testing.T) {
 	router := NewPVPRouter(nil)
-	
+
 	oidcPVP := &MockPVP{}
 	eidasPVP := &MockPVP{}
-	
+
 	router.RegisterPVP([]string{"oidc_id_token", "oidc_external"}, oidcPVP)
 	router.RegisterPVP([]string{"eIDAS", "government_id"}, eidasPVP)
-	
+
 	methods := router.GetSupportedProofMethods()
-	
+
 	expectedMethods := map[string]bool{
-		"oidc_id_token":  true,
-		"oidc_external":  true,
-		"eIDAS":          true,
-		"government_id":  true,
+		"oidc_id_token": true,
+		"oidc_external": true,
+		"eIDAS":         true,
+		"government_id": true,
 	}
-	
+
 	if len(methods) != len(expectedMethods) {
 		t.Errorf("Expected %d methods, got %d", len(expectedMethods), len(methods))
 	}
-	
+
 	for _, method := range methods {
 		if !expectedMethods[method] {
 			t.Errorf("Unexpected method: %s", method)
@@ -283,7 +283,7 @@ func TestPVPRouter_GetSupportedProofMethods(t *testing.T) {
 func TestPVPRouter_ConcurrentAccess(t *testing.T) {
 	ctx := context.Background()
 	router := NewPVPRouter(nil)
-	
+
 	oidcPVP := &MockPVP{
 		result: &IdentityProofResult{
 			Valid:      true,
@@ -292,7 +292,7 @@ func TestPVPRouter_ConcurrentAccess(t *testing.T) {
 			TrustLevel: "substantial",
 		},
 	}
-	
+
 	// Register PVP concurrently
 	done := make(chan bool)
 	for i := 0; i < 10; i++ {
@@ -301,11 +301,11 @@ func TestPVPRouter_ConcurrentAccess(t *testing.T) {
 			done <- true
 		}()
 	}
-	
+
 	for i := 0; i < 10; i++ {
 		<-done
 	}
-	
+
 	// Verify concurrently
 	for i := 0; i < 10; i++ {
 		go func() {
@@ -322,7 +322,7 @@ func TestPVPRouter_ConcurrentAccess(t *testing.T) {
 			done <- true
 		}()
 	}
-	
+
 	for i := 0; i < 10; i++ {
 		<-done
 	}

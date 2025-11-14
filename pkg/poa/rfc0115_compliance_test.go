@@ -44,20 +44,20 @@ func TestValidateRFC0115Compliance_Config(t *testing.T) {
 		{
 			name: "Valid config - all flags true, valid days",
 			config: RFC0115Config{
-				ExcludeWeb3:         true,
-				ExcludeAIOperators:  true,
+				ExcludeWeb3:          true,
+				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: true,
-				MaxValidityDays:     365,
+				MaxValidityDays:      365,
 			},
 			wantErr: false,
 		},
 		{
 			name: "Invalid - ExcludeWeb3 false",
 			config: RFC0115Config{
-				ExcludeWeb3:         false,
-				ExcludeAIOperators:  true,
+				ExcludeWeb3:          false,
+				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: true,
-				MaxValidityDays:     365,
+				MaxValidityDays:      365,
 			},
 			wantErr: true,
 			errMsg:  "all exclusion flags must be true",
@@ -65,10 +65,10 @@ func TestValidateRFC0115Compliance_Config(t *testing.T) {
 		{
 			name: "Invalid - ExcludeAIOperators false",
 			config: RFC0115Config{
-				ExcludeWeb3:         true,
-				ExcludeAIOperators:  false,
+				ExcludeWeb3:          true,
+				ExcludeAIOperators:   false,
 				ExcludeDNAIdentities: true,
-				MaxValidityDays:     365,
+				MaxValidityDays:      365,
 			},
 			wantErr: true,
 			errMsg:  "all exclusion flags must be true",
@@ -76,10 +76,10 @@ func TestValidateRFC0115Compliance_Config(t *testing.T) {
 		{
 			name: "Invalid - ExcludeDNAIdentities false",
 			config: RFC0115Config{
-				ExcludeWeb3:         true,
-				ExcludeAIOperators:  true,
+				ExcludeWeb3:          true,
+				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: false,
-				MaxValidityDays:     365,
+				MaxValidityDays:      365,
 			},
 			wantErr: true,
 			errMsg:  "all exclusion flags must be true",
@@ -87,10 +87,10 @@ func TestValidateRFC0115Compliance_Config(t *testing.T) {
 		{
 			name: "Invalid - MaxValidityDays zero",
 			config: RFC0115Config{
-				ExcludeWeb3:         true,
-				ExcludeAIOperators:  true,
+				ExcludeWeb3:          true,
+				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: true,
-				MaxValidityDays:     0,
+				MaxValidityDays:      0,
 			},
 			wantErr: true,
 			errMsg:  "max validity days out of acceptable bounds",
@@ -98,10 +98,10 @@ func TestValidateRFC0115Compliance_Config(t *testing.T) {
 		{
 			name: "Invalid - MaxValidityDays negative",
 			config: RFC0115Config{
-				ExcludeWeb3:         true,
-				ExcludeAIOperators:  true,
+				ExcludeWeb3:          true,
+				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: true,
-				MaxValidityDays:     -10,
+				MaxValidityDays:      -10,
 			},
 			wantErr: true,
 			errMsg:  "max validity days out of acceptable bounds",
@@ -109,10 +109,10 @@ func TestValidateRFC0115Compliance_Config(t *testing.T) {
 		{
 			name: "Invalid - MaxValidityDays exceeds 730",
 			config: RFC0115Config{
-				ExcludeWeb3:         true,
-				ExcludeAIOperators:  true,
+				ExcludeWeb3:          true,
+				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: true,
-				MaxValidityDays:     731,
+				MaxValidityDays:      731,
 			},
 			wantErr: true,
 			errMsg:  "max validity days out of acceptable bounds",
@@ -120,20 +120,20 @@ func TestValidateRFC0115Compliance_Config(t *testing.T) {
 		{
 			name: "Valid - MaxValidityDays at boundary 730",
 			config: RFC0115Config{
-				ExcludeWeb3:         true,
-				ExcludeAIOperators:  true,
+				ExcludeWeb3:          true,
+				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: true,
-				MaxValidityDays:     730,
+				MaxValidityDays:      730,
 			},
 			wantErr: false,
 		},
 		{
 			name: "Valid - MaxValidityDays minimum boundary 1",
 			config: RFC0115Config{
-				ExcludeWeb3:         true,
-				ExcludeAIOperators:  true,
+				ExcludeWeb3:          true,
+				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: true,
-				MaxValidityDays:     1,
+				MaxValidityDays:      1,
 			},
 			wantErr: false,
 		},
@@ -171,7 +171,7 @@ func TestValidateRFC0115Compliance_Definition(t *testing.T) {
 	// ValidateRFC0115Compliance for PoADefinition calls ValidatePoADefinition first,
 	// then performs additional semantic checks. Most coverage comes from the config tests.
 	// This test focuses on ensuring the PoADefinition path is exercised.
-	
+
 	t.Run("PoADefinition validation path coverage", func(t *testing.T) {
 		// This test ensures the PoADefinition switch case is covered
 		// Even an invalid definition will exercise the code path
@@ -185,7 +185,7 @@ func TestValidateRFC0115Compliance_Definition(t *testing.T) {
 				},
 			},
 		}
-		
+
 		err := ValidateRFC0115Compliance(def)
 		if err == nil {
 			t.Error("ValidateRFC0115Compliance() expected error for invalid definition, got nil")
@@ -196,10 +196,10 @@ func TestValidateRFC0115Compliance_Definition(t *testing.T) {
 // TestValidateRFC0115Compliance_CompositeMap tests ValidateRFC0115Compliance with map[string]interface{}
 func TestValidateRFC0115Compliance_CompositeMap(t *testing.T) {
 	validConfig := RFC0115Config{
-		ExcludeWeb3:         true,
-		ExcludeAIOperators:  true,
+		ExcludeWeb3:          true,
+		ExcludeAIOperators:   true,
 		ExcludeDNAIdentities: true,
-		MaxValidityDays:     365,
+		MaxValidityDays:      365,
 	}
 
 	tests := []struct {
@@ -219,18 +219,18 @@ func TestValidateRFC0115Compliance_CompositeMap(t *testing.T) {
 			name: "Invalid config in composite",
 			input: map[string]interface{}{
 				"config": RFC0115Config{
-					ExcludeWeb3:         false,
-					ExcludeAIOperators:  true,
+					ExcludeWeb3:          false,
+					ExcludeAIOperators:   true,
 					ExcludeDNAIdentities: true,
-					MaxValidityDays:     365,
+					MaxValidityDays:      365,
 				},
 			},
 			wantErr: true,
 			errMsg:  "config invalid",
 		},
 		{
-			name: "Empty composite map",
-			input: map[string]interface{}{},
+			name:    "Empty composite map",
+			input:   map[string]interface{}{},
 			wantErr: false,
 		},
 	}
@@ -314,14 +314,14 @@ func TestCanonicalDigest(t *testing.T) {
 	baseTime := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	tests := []struct {
-		name     string
-		poa      *ProofOfAuthorization
-		wantEmpty bool
+		name        string
+		poa         *ProofOfAuthorization
+		wantEmpty   bool
 		checkPrefix string
 	}{
 		{
-			name:     "Nil POA returns empty string",
-			poa:      nil,
+			name:      "Nil POA returns empty string",
+			poa:       nil,
 			wantEmpty: true,
 		},
 		{
@@ -336,7 +336,7 @@ func TestCanonicalDigest(t *testing.T) {
 				ExpiresAt: baseTime.Add(24 * time.Hour),
 				Scope:     []string{"read", "list"},
 			},
-			wantEmpty: false,
+			wantEmpty:   false,
 			checkPrefix: "sha256:",
 		},
 		{
@@ -359,7 +359,7 @@ func TestCanonicalDigest(t *testing.T) {
 					Revocable:   true,
 				},
 			},
-			wantEmpty: false,
+			wantEmpty:   false,
 			checkPrefix: "sha256:",
 		},
 		{
@@ -383,7 +383,7 @@ func TestCanonicalDigest(t *testing.T) {
 					},
 				},
 			},
-			wantEmpty: false,
+			wantEmpty:   false,
 			checkPrefix: "sha256:",
 		},
 		{
@@ -415,13 +415,13 @@ func TestCanonicalDigest(t *testing.T) {
 					},
 				},
 			},
-			wantEmpty: false,
+			wantEmpty:   false,
 			checkPrefix: "sha256:",
 		},
 		{
-			name: "Empty POA",
-			poa: &ProofOfAuthorization{},
-			wantEmpty: false,
+			name:        "Empty POA",
+			poa:         &ProofOfAuthorization{},
+			wantEmpty:   false,
 			checkPrefix: "sha256:",
 		},
 	}
@@ -631,7 +631,7 @@ func TestVerifyDigest_ModifiedPOA(t *testing.T) {
 // TestCanonicalDigest_MetadataExcluded tests that metadata doesn't affect digest
 func TestCanonicalDigest_MetadataExcluded(t *testing.T) {
 	baseTime := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
-	
+
 	poa1 := &ProofOfAuthorization{
 		ID:        "poa_meta",
 		Subject:   "user_meta",
@@ -673,7 +673,7 @@ func TestCanonicalDigest_MetadataExcluded(t *testing.T) {
 // TestCanonicalDigest_AttestationEvidenceExcluded tests that attestation evidence doesn't affect digest
 func TestCanonicalDigest_AttestationEvidenceExcluded(t *testing.T) {
 	baseTime := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
-	
+
 	poa1 := &ProofOfAuthorization{
 		ID:        "poa_att_evi",
 		Subject:   "user_att_evi",

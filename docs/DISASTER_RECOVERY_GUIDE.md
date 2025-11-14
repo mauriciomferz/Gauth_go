@@ -1,3 +1,13 @@
+---
+title: Disaster Recovery Guide
+category: disaster-recovery-guide
+status: active
+lastUpdated: 2025-11-12
+owners: platform-eng
+source: internal
+refreshCadence: annually
+---
+
 # Disaster Recovery Guide
 
 **Document Version:** 1.0  

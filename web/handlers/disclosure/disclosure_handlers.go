@@ -33,7 +33,7 @@ func (h *Handler) ListActiveAuthorizationsHandler(c *gin.Context) {
 
 	clientID := c.Query("client_id")
 	status := c.Query("status")
-	
+
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
 	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
 
@@ -61,7 +61,7 @@ func (h *Handler) ListActiveAuthorizationsHandler(c *gin.Context) {
 func (h *Handler) GetAuthorizationDetailHandler(c *gin.Context) {
 	authorizationID := c.Param("id")
 	resourceOwnerID := c.Query("resource_owner_id")
-	
+
 	if resourceOwnerID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "resource_owner_id is required"})
 		return
@@ -92,7 +92,7 @@ func (h *Handler) RevokeAuthorizationHandler(c *gin.Context) {
 		Reason          string `json:"reason"`
 		RevokedBy       string `json:"revoked_by"`
 	}
-	
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
 		return
@@ -125,7 +125,7 @@ func (h *Handler) RevokeAuthorizationHandler(c *gin.Context) {
 func (h *Handler) GetAuditTrailHandler(c *gin.Context) {
 	authorizationID := c.Param("id")
 	resourceOwnerID := c.Query("resource_owner_id")
-	
+
 	if resourceOwnerID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "resource_owner_id is required"})
 		return

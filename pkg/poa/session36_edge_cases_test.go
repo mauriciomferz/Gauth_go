@@ -18,7 +18,7 @@ func TestEncodeRawPOAChain_LargeItems(t *testing.T) {
 			Signature: make([]byte, 10000),
 			Claims:    map[string]string{"k1": strings.Repeat("x", 10000)},
 		}
-		
+
 		items := []RawPOAItem{largeItem}
 		data, err := EncodeRawPOAChain(items)
 		if err != nil {
@@ -28,7 +28,7 @@ func TestEncodeRawPOAChain_LargeItems(t *testing.T) {
 			t.Error("Should produce non-empty output")
 		}
 	})
-	
+
 	t.Run("Multiple items of varying sizes", func(t *testing.T) {
 		items := []RawPOAItem{
 			{
@@ -55,7 +55,7 @@ func TestEncodeRawPOAChain_LargeItems(t *testing.T) {
 				Claims:    map[string]string{"k": strings.Repeat("v", 1000)},
 			},
 		}
-		
+
 		data, err := EncodeRawPOAChain(items)
 		if err != nil {
 			t.Fatalf("Should encode multiple items: %v", err)
@@ -64,7 +64,7 @@ func TestEncodeRawPOAChain_LargeItems(t *testing.T) {
 			t.Error("Should produce non-empty output")
 		}
 	})
-	
+
 	t.Run("Empty items array", func(t *testing.T) {
 		items := []RawPOAItem{}
 		data, err := EncodeRawPOAChain(items)
@@ -99,7 +99,7 @@ func TestMarshalCBORItem_Comprehensive(t *testing.T) {
 			t.Error("Should start with CBOR map major type")
 		}
 	})
-	
+
 	t.Run("Item with all fields populated", func(t *testing.T) {
 		item := RawPOAItem{
 			ID:        "full-id",
@@ -123,7 +123,7 @@ func TestMarshalCBORItem_Comprehensive(t *testing.T) {
 			t.Error("Should produce output")
 		}
 	})
-	
+
 	t.Run("Item with empty claims", func(t *testing.T) {
 		item := RawPOAItem{
 			ID:      "test-id",
@@ -140,7 +140,7 @@ func TestMarshalCBORItem_Comprehensive(t *testing.T) {
 			t.Error("Should produce output")
 		}
 	})
-	
+
 	t.Run("Item with nil claims", func(t *testing.T) {
 		item := RawPOAItem{
 			ID:      "test-id",
@@ -157,7 +157,7 @@ func TestMarshalCBORItem_Comprehensive(t *testing.T) {
 			t.Error("Should produce output")
 		}
 	})
-	
+
 	t.Run("Item with special characters", func(t *testing.T) {
 		item := RawPOAItem{
 			ID:      "id-with-特殊字符-🎉",
@@ -177,7 +177,7 @@ func TestMarshalCBORItem_Comprehensive(t *testing.T) {
 			t.Error("Should produce output")
 		}
 	})
-	
+
 	t.Run("Item with very long claim values", func(t *testing.T) {
 		item := RawPOAItem{
 			ID:      "test",
@@ -196,7 +196,7 @@ func TestMarshalCBORItem_Comprehensive(t *testing.T) {
 			t.Error("Should produce output")
 		}
 	})
-	
+
 	t.Run("Item with empty signature and prevhash", func(t *testing.T) {
 		item := RawPOAItem{
 			ID:        "test",

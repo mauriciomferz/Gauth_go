@@ -75,7 +75,7 @@ func TestTokenRevocationService(t *testing.T) {
 
 	t.Run("concurrent_operations", func(t *testing.T) {
 		done := make(chan bool, 10)
-		
+
 		for i := 0; i < 10; i++ {
 			go func(idx int) {
 				tokenID := "concurrent_token"
@@ -210,7 +210,7 @@ func TestRefreshTokenService(t *testing.T) {
 
 	t.Run("concurrent_operations", func(t *testing.T) {
 		done := make(chan bool, 10)
-		
+
 		for i := 0; i < 10; i++ {
 			go func(idx int) {
 				entry := &RefreshTokenEntry{

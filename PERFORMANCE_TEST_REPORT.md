@@ -1,3 +1,12 @@
+---
+title: Performance Testing & Optimization Report
+category: performance-report
+status: complete
+lastUpdated: 2025-11-12
+owners: performance-team
+source: internal-report
+refreshCadence: quarterly
+---
 # Performance Testing & Optimization Report
 **Task 8: QA Enhancement Initiative - Performance Testing**
 **Date**: November 11, 2025

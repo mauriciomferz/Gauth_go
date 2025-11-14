@@ -1,3 +1,12 @@
+---
+title: GAuth Complete API Reference
+ category: api-reference
+ status: active
+ lastUpdated: 2025-11-12
+ owners: architecture-team
+ refreshCadence: on-change
+ source: source-code
+ ---
 # GAuth 1.0 Complete API Reference
 
  > Last Updated: 2025-10-19

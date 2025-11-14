@@ -1,3 +1,14 @@
+# ---
+# title: GAuth RFC Gap Matrix
+# category: generated
+# status: active
+# lastUpdated: 2025-11-12
+# owners: tooling
+# generated: true
+# source: gap-matrix-generator
+# refreshCadence: per-compliance-scan
+# tags: [rfc, compliance]
+# ---
 # GAuth RFC Gap Matrix (Generated)
 
 > **Generated:** 2025-11-07T00:00:00Z  

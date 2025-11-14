@@ -1,3 +1,10 @@
+---
+title: RFC-0111 Implementation Architecture
+category: architecture
+status: active
+lastUpdated: 2025-11-12
+owners: architecture-team
+---
 # RFC-0111 Implementation Architecture
 ## Visual Guide to the Solution
 

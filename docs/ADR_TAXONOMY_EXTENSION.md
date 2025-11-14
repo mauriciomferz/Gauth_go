@@ -1,3 +1,12 @@
+---
+title: ADR Taxonomy Extension Governance
+category: adr
+status: proposed
+lastUpdated: 2025-11-12
+owners: architecture-team
+source: internal
+refreshCadence: on-change
+---
 # ADR: Taxonomy Extension Governance (agent_type, sector, action_class)
 
 Status: Proposed

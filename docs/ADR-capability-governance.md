@@ -1,3 +1,12 @@
+---
+title: ADR Capability Governance (Schema Versioning & Hash Anchoring)
+category: adr
+status: proposed
+lastUpdated: 2025-11-12
+owners: architecture-team
+source: internal
+refreshCadence: on-change
+---
 # ADR: Capability Governance (Schema Versioning, Hash Anchoring, Transactional Loader, Audit Pagination)
 
 Date: 2025-10-19

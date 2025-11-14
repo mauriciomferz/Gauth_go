@@ -1,3 +1,10 @@
+---
+title: API Directory Overview
+category: api-reference
+status: active
+lastUpdated: 2025-11-12
+owners: api-team
+---
 # API Directory
 
 > Last Updated: 2025-11-05

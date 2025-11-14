@@ -64,7 +64,7 @@ func (b *PDPBridge) convertRequest(request interface{}) (pdp.Request, error) {
 // convertTokenRequest converts ExtendedTokenRequest to pdp.Request
 func (b *PDPBridge) convertTokenRequest(req *ExtendedTokenRequest) pdp.Request {
 	attrs := make(map[string]string)
-	
+
 	// Add basic attributes
 	if req.GrantID != "" {
 		attrs["grant_id"] = req.GrantID
@@ -75,7 +75,7 @@ func (b *PDPBridge) convertTokenRequest(req *ExtendedTokenRequest) pdp.Request {
 	if req.JurisdictionCode != "" {
 		attrs["jurisdiction"] = req.JurisdictionCode
 	}
-	
+
 	// Add entity information
 	if req.ClientOwnerInfo != nil {
 		attrs["client_owner_id"] = req.ClientOwnerInfo.OwnerID
@@ -84,29 +84,29 @@ func (b *PDPBridge) convertTokenRequest(req *ExtendedTokenRequest) pdp.Request {
 	if req.ResourceOwnerInfo != nil {
 		attrs["resource_owner_id"] = req.ResourceOwnerInfo.OwnerID
 	}
-	
+
 	// Add legal framework
 	if req.LegalFramework != nil && len(req.LegalFramework.ApplicableLaws) > 0 {
 		attrs["legal_framework"] = req.LegalFramework.ApplicableLaws[0]
 	}
-	
+
 	// Determine subject and resource
 	subject := "unknown"
 	if req.ClientOwnerInfo != nil {
 		subject = req.ClientOwnerInfo.OwnerID
 	}
-	
+
 	resource := "unknown"
 	if req.ResourceOwnerInfo != nil {
 		resource = req.ResourceOwnerInfo.OwnerID
 	}
-	
+
 	// Determine action from requested actions
 	action := "access"
 	if len(req.RequestedActions) > 0 {
 		action = req.RequestedActions[0]
 	}
-	
+
 	return pdp.Request{
 		Subject:    subject,
 		Action:     action,
@@ -119,27 +119,27 @@ func (b *PDPBridge) convertTokenRequest(req *ExtendedTokenRequest) pdp.Request {
 // convertAuthRequest converts ExtendedAuthorizationRequest to pdp.Request
 func (b *PDPBridge) convertAuthRequest(req *ExtendedAuthorizationRequest) pdp.Request {
 	attrs := make(map[string]string)
-	
+
 	// Add client information
 	if req.AuthorizationRequest != nil {
 		attrs["client_id"] = req.ClientID
 	}
-	
+
 	// Add legal framework
 	if req.LegalFramework != nil && len(req.LegalFramework.ApplicableLaws) > 0 {
 		attrs["legal_framework"] = req.LegalFramework.ApplicableLaws[0]
 	}
-	
+
 	// Add restrictions
 	if len(req.Restrictions) > 0 {
 		attrs["restrictions_count"] = fmt.Sprintf("%d", len(req.Restrictions))
 	}
-	
+
 	// Add transaction context
 	if len(req.TransactionContext) > 0 {
 		attrs["has_transaction_context"] = "true"
 	}
-	
+
 	// Determine subject, action, resource
 	subject := req.ClientID
 	action := "authorize"
@@ -147,7 +147,7 @@ func (b *PDPBridge) convertAuthRequest(req *ExtendedAuthorizationRequest) pdp.Re
 		action = req.RequestedActions[0]
 	}
 	resource := "authorization_grant"
-	
+
 	return pdp.Request{
 		Subject:    subject,
 		Action:     action,
@@ -160,7 +160,7 @@ func (b *PDPBridge) convertAuthRequest(req *ExtendedAuthorizationRequest) pdp.Re
 // convertGrantRequest converts ExtendedAuthorizationGrant to pdp.Request
 func (b *PDPBridge) convertGrantRequest(grant *ExtendedAuthorizationGrant) pdp.Request {
 	attrs := make(map[string]string)
-	
+
 	// Add grant information
 	if grant.AuthorizationGrant != nil {
 		attrs["grant_id"] = grant.GrantID
@@ -168,17 +168,17 @@ func (b *PDPBridge) convertGrantRequest(grant *ExtendedAuthorizationGrant) pdp.R
 	}
 	attrs["resource_owner_id"] = grant.ResourceOwnerID
 	attrs["issuer_id"] = grant.IssuerID
-	
+
 	// Add legal framework
 	if grant.LegalFramework != nil && len(grant.LegalFramework.ApplicableLaws) > 0 {
 		attrs["legal_framework"] = grant.LegalFramework.ApplicableLaws[0]
 	}
-	
+
 	// Add restrictions
 	if len(grant.Restrictions) > 0 {
 		attrs["restrictions_count"] = fmt.Sprintf("%d", len(grant.Restrictions))
 	}
-	
+
 	return pdp.Request{
 		Subject:    grant.ClientID,
 		Action:     "use_grant",
@@ -191,19 +191,19 @@ func (b *PDPBridge) convertGrantRequest(grant *ExtendedAuthorizationGrant) pdp.R
 // convertMapRequest converts map[string]interface{} to pdp.Request
 func (b *PDPBridge) convertMapRequest(req map[string]interface{}) pdp.Request {
 	attrs := make(map[string]string)
-	
+
 	// Extract common fields
 	subject := getStringFromMap(req, "subject", "unknown")
 	action := getStringFromMap(req, "action", "access")
 	resource := getStringFromMap(req, "resource", "unknown")
-	
+
 	// Convert all other fields to attributes
 	for k, v := range req {
 		if k != "subject" && k != "action" && k != "resource" {
 			attrs[k] = fmt.Sprintf("%v", v)
 		}
 	}
-	
+
 	return pdp.Request{
 		Subject:    subject,
 		Action:     action,

@@ -35,14 +35,14 @@ func NewBoltDailyLimitStore(dbPath string) (*BoltDailyLimitStore, error) {
 		persistence: &dailyLimitPersistence{
 			Version:  "1.0",
 			Data:     make(map[string]map[string]float64),
-		Metadata: make(map[string]interface{}),
-	},
-}
+			Metadata: make(map[string]interface{}),
+		},
+	}
 
-// Ensure directory exists with restricted permissions (0750 instead of 0755)
-if err := os.MkdirAll(filepath.Dir(dbPath), 0750); err != nil {
-	return nil, fmt.Errorf("failed to create directory: %w", err)
-}	// Load existing data
+	// Ensure directory exists with restricted permissions (0750 instead of 0755)
+	if err := os.MkdirAll(filepath.Dir(dbPath), 0750); err != nil {
+		return nil, fmt.Errorf("failed to create directory: %w", err)
+	} // Load existing data
 	if err := store.loadFromDisk(); err != nil {
 		// If file doesn't exist, that's okay - we'll create it on first save
 		if !os.IsNotExist(err) {

@@ -1,3 +1,12 @@
+---
+title: ADR Weighted Multi-Signature Rotation & Attestation Support
+category: adr
+status: accepted
+lastUpdated: 2025-11-12
+owners: architecture-team
+source: internal
+refreshCadence: on-change
+---
 # ADR: Weighted Multi-Signature Rotation & Attestation Support (Public Key Embedding Extension)
 
 Date: 2025-10-28

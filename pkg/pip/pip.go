@@ -70,12 +70,12 @@ type PowerInformationPoint interface {
 
 // AuthorizationValidationRequest represents a request to validate authorization
 type AuthorizationValidationRequest struct {
-	ClientID      string
-	Action        string
-	Resource      string
-	Jurisdiction  string
+	ClientID       string
+	Action         string
+	Resource       string
+	Jurisdiction   string
 	IndustrySector string
-	Timestamp     time.Time
+	Timestamp      time.Time
 }
 
 // AuthorizationValidationResult represents the result of authorization validation
@@ -101,19 +101,19 @@ type CacheStats struct {
 // DefaultPIP is the default implementation of PowerInformationPoint
 type DefaultPIP struct {
 	// Data sources
-	poaService          poa.Service
-	commercialRegister  registry.CommercialRegisterService
-	pvp                 verification.PowerVerificationPoint
-	
+	poaService         poa.Service
+	commercialRegister registry.CommercialRegisterService
+	pvp                verification.PowerVerificationPoint
+
 	// Caching
-	cache               *AuthorizationCache
-	cacheTTL            time.Duration
-	
+	cache    *AuthorizationCache
+	cacheTTL time.Duration
+
 	// Metrics
-	mu                  sync.RWMutex
-	totalRequests       int64
-	cacheHits           int64
-	cacheMisses         int64
+	mu            sync.RWMutex
+	totalRequests int64
+	cacheHits     int64
+	cacheMisses   int64
 }
 
 // NewDefaultPIP creates a new default PIP implementation
@@ -144,7 +144,7 @@ func (pip *DefaultPIP) GetPoADefinition(ctx context.Context, poaID string) (*poa
 	// Retrieve from PoA service
 	// Note: This assumes poa.Service has a method to get PoA by ID
 	// In practice, you'd need to implement this in the poa.Service interface
-	
+
 	// For now, return a placeholder error
 	return nil, fmt.Errorf("PoA retrieval not yet implemented in poa.Service")
 }
@@ -164,7 +164,7 @@ func (pip *DefaultPIP) GetAuthorizationChain(ctx context.Context, clientID strin
 	// 2. Get client owner information
 	// 3. Get owner's authorizer information
 	// 4. Verify each link in the chain
-	
+
 	// Placeholder implementation
 	chain := &gauth.AuthorizationChain{
 		// Would populate OwnersAuthorizer, ClientOwner, Client
@@ -683,7 +683,7 @@ func (c *AuthorizationCache) Size() int {
 func (c *AuthorizationCache) evictIfNeeded() {
 	// Simple eviction: if we exceed maxEntries, clear oldest entries
 	// In practice, you'd use a more sophisticated LRU algorithm
-	
+
 	// Calculate size inline to avoid deadlock (don't call Size() while holding write lock)
 	size := len(c.poaDefinitions) +
 		len(c.authorizationChains) +
@@ -692,7 +692,7 @@ func (c *AuthorizationCache) evictIfNeeded() {
 		len(c.commercialRegister) +
 		len(c.tsps) +
 		len(c.authorizedActions)
-	
+
 	if size > c.maxEntries {
 		// Clear 10% of entries (simple approach)
 		// Real implementation would track access times and evict LRU entries

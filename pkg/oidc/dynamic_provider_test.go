@@ -92,11 +92,11 @@ func TestDynamicProviderService_RegisterWithDiscovery(t *testing.T) {
 	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/.well-known/openid-configuration" {
 			discoveryDoc := DiscoveryMetadata{
-				Issuer:                serverURL,
-				AuthorizationEndpoint: serverURL + "/authorize",
-				TokenEndpoint:         serverURL + "/token",
-				JwksURI:               serverURL + "/jwks",
-				ScopesSupported:       []string{"openid", "profile", "email"},
+				Issuer:                 serverURL,
+				AuthorizationEndpoint:  serverURL + "/authorize",
+				TokenEndpoint:          serverURL + "/token",
+				JwksURI:                serverURL + "/jwks",
+				ScopesSupported:        []string{"openid", "profile", "email"},
 				ResponseTypesSupported: []string{"code"},
 			}
 			w.Header().Set("Content-Type", "application/json")

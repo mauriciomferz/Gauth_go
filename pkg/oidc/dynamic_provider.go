@@ -17,52 +17,52 @@ type DynamicProviderService struct {
 	registry        ProviderRegistry
 	httpClient      *http.Client
 	mu              sync.RWMutex
-	tenantProviders map[string]map[string]bool // tenant -> provider IDs
+	tenantProviders map[string]map[string]bool    // tenant -> provider IDs
 	discoveryMeta   map[string]*DiscoveryMetadata // provider ID -> discovery metadata
 }
 
 // DynamicProviderConfig extends ProviderConfig with dynamic registration options.
 type DynamicProviderConfig struct {
 	ProviderConfig
-	
+
 	// TenantID associates this provider with a specific tenant
 	// Empty string means provider is available to all tenants
 	TenantID string `json:"tenant_id,omitempty"`
-	
+
 	// AutoDiscover enables automatic discovery of provider metadata
 	AutoDiscover bool `json:"auto_discover,omitempty"`
-	
+
 	// DiscoveryURL overrides the default discovery endpoint
 	DiscoveryURL string `json:"discovery_url,omitempty"`
-	
+
 	// RefreshInterval for discovery metadata (0 = no refresh)
 	RefreshInterval time.Duration `json:"refresh_interval,omitempty"`
-	
+
 	// Tags for organizing and filtering providers
 	Tags []string `json:"tags,omitempty"`
 }
 
 // DiscoveryMetadata represents OIDC discovery document metadata.
 type DiscoveryMetadata struct {
-	Issuer                string   `json:"issuer"`
-	AuthorizationEndpoint string   `json:"authorization_endpoint"`
-	TokenEndpoint         string   `json:"token_endpoint"`
-	UserinfoEndpoint      string   `json:"userinfo_endpoint,omitempty"`
-	JwksURI               string   `json:"jwks_uri"`
-	ScopesSupported       []string `json:"scopes_supported,omitempty"`
-	ResponseTypesSupported []string `json:"response_types_supported,omitempty"`
-	SubjectTypesSupported []string `json:"subject_types_supported,omitempty"`
+	Issuer                           string   `json:"issuer"`
+	AuthorizationEndpoint            string   `json:"authorization_endpoint"`
+	TokenEndpoint                    string   `json:"token_endpoint"`
+	UserinfoEndpoint                 string   `json:"userinfo_endpoint,omitempty"`
+	JwksURI                          string   `json:"jwks_uri"`
+	ScopesSupported                  []string `json:"scopes_supported,omitempty"`
+	ResponseTypesSupported           []string `json:"response_types_supported,omitempty"`
+	SubjectTypesSupported            []string `json:"subject_types_supported,omitempty"`
 	IDTokenSigningAlgValuesSupported []string `json:"id_token_signing_alg_values_supported,omitempty"`
 }
 
 // ProviderRegistrationResult contains the result of a provider registration.
 type ProviderRegistrationResult struct {
-	ProviderID       string            `json:"provider_id"`
-	Success          bool              `json:"success"`
-	DiscoveryFetched bool              `json:"discovery_fetched,omitempty"`
+	ProviderID       string             `json:"provider_id"`
+	Success          bool               `json:"success"`
+	DiscoveryFetched bool               `json:"discovery_fetched,omitempty"`
 	Metadata         *DiscoveryMetadata `json:"metadata,omitempty"`
-	Error            string            `json:"error,omitempty"`
-	RegisteredAt     time.Time         `json:"registered_at"`
+	Error            string             `json:"error,omitempty"`
+	RegisteredAt     time.Time          `json:"registered_at"`
 }
 
 // NewDynamicProviderService creates a new dynamic provider service.
@@ -91,7 +91,7 @@ func (s *DynamicProviderService) RegisterProvider(ctx context.Context, cfg Dynam
 		} else {
 			result.DiscoveryFetched = true
 			result.Metadata = metadata
-			
+
 			// Update configuration with discovered metadata
 			if cfg.Metadata == nil {
 				cfg.Metadata = make(map[string]interface{})
@@ -100,7 +100,7 @@ func (s *DynamicProviderService) RegisterProvider(ctx context.Context, cfg Dynam
 			cfg.Metadata["jwks_uri"] = metadata.JwksURI
 			cfg.Metadata["authorization_endpoint"] = metadata.AuthorizationEndpoint
 			cfg.Metadata["token_endpoint"] = metadata.TokenEndpoint
-			
+
 			// Store the discovery metadata
 			s.mu.Lock()
 			s.discoveryMeta[cfg.ID] = metadata
@@ -132,14 +132,14 @@ func (s *DynamicProviderService) UpdateProvider(ctx context.Context, providerID 
 		if err != nil {
 			return fmt.Errorf("discovery failed during update: %w", err)
 		}
-		
+
 		// Update metadata
 		if cfg.Metadata == nil {
 			cfg.Metadata = make(map[string]interface{})
 		}
 		cfg.Metadata["discovery"] = metadata
 		cfg.Metadata["jwks_uri"] = metadata.JwksURI
-		
+
 		// Store the discovery metadata
 		s.mu.Lock()
 		s.discoveryMeta[providerID] = metadata
@@ -402,10 +402,10 @@ func (s *DynamicProviderService) GetProviderStatistics() map[string]interface{} 
 	s.mu.RUnlock()
 
 	return map[string]interface{}{
-		"total_providers":   len(allProviders),
-		"enabled_providers": len(enabledProviders),
-		"disabled_providers": len(allProviders) - len(enabledProviders),
-		"tenant_count":      tenantCount,
+		"total_providers":      len(allProviders),
+		"enabled_providers":    len(enabledProviders),
+		"disabled_providers":   len(allProviders) - len(enabledProviders),
+		"tenant_count":         tenantCount,
 		"multi_tenant_enabled": tenantCount > 0,
 	}
 }

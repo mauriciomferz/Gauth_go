@@ -1,3 +1,12 @@
+---
+title: ADR Multi-Signature / Threshold Enforcement for Power of Attorney
+category: adr
+status: proposed
+lastUpdated: 2025-11-12
+owners: architecture-team
+source: internal
+refreshCadence: on-change
+---
 # ADR: Multi-Signature / Threshold Enforcement for Power of Attorney
 
 Status: Proposed

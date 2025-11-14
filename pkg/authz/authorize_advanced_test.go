@@ -301,12 +301,12 @@ func TestMatchesPolicy(t *testing.T) {
 // TestAuthorize_CombiningAlgorithms tests different policy combining algorithms
 func TestAuthorize_CombiningAlgorithms(t *testing.T) {
 	tests := []struct {
-		name            string
-		combining       CombiningStrategy
-		policies        []Policy
-		request         Request
-		expectedAllow   bool
-		expectedReason  string
+		name           string
+		combining      CombiningStrategy
+		policies       []Policy
+		request        Request
+		expectedAllow  bool
+		expectedReason string
 	}{
 		{
 			name:      "DenyOverrides - deny wins over allow",

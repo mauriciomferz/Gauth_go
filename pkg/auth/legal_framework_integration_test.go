@@ -930,9 +930,9 @@ func TestStandardLegalFramework_TrackApprovalDetails(t *testing.T) {
 	ctx := context.Background()
 
 	tests := []struct {
-		name          string
+		name            string
 		approvalOrEvent interface{}
-		wantErr       bool
+		wantErr         bool
 	}{
 		{
 			name: "Track Approval struct",

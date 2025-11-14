@@ -1,3 +1,13 @@
+---
+title: OIDC Integration Design
+category: design-spec
+status: active
+lastUpdated: 2025-11-12
+owners: platform-eng
+source: internal
+refreshCadence: on-change
+---
+
 # OpenID Connect Integration Architecture Design
 ## RFC-0111 Building Block Implementation
 

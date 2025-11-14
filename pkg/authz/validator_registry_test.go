@@ -161,7 +161,7 @@ func TestValidatorRegistry_Invoke(t *testing.T) {
 		vr := NewValidatorRegistry()
 		var capturedReq Request
 		var capturedPolicy Policy
-		
+
 		vr.Register("data-validator", func(req Request, policy Policy) error {
 			capturedReq = req
 			capturedPolicy = policy

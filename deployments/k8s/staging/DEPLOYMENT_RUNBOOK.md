@@ -1,3 +1,13 @@
+---
+title: Staging Environment Deployment Runbook
+category: runbook
+status: active
+lastUpdated: 2025-11-12
+owners: platform-eng
+source: internal
+refreshCadence: monthly
+---
+
 # GAuth Staging Deployment Runbook
 # Week 4 Day 1: Environment Setup & Deployment Procedures
 

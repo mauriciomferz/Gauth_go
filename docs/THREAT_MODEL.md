@@ -1,3 +1,13 @@
+---
+title: Threat Model Documentation
+category: threat-model
+status: active
+lastUpdated: 2025-11-12
+owners: security-team
+source: internal
+refreshCadence: quarterly
+---
+
 # GAuth Threat Model (RFC 0111 / 0115 Delegation Prototype)
 
 > Status: Updated – October 17, 2025

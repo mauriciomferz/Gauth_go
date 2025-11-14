@@ -1,3 +1,13 @@
+---
+title: Beta MVP Assessment Report
+category: compliance-report
+status: archived
+lastUpdated: 2025-10-30
+owners: compliance-team
+generated: true
+source: repository-state-analysis
+refreshCadence: none
+---
 # Beta MVP Assessment Report
 
 Date: 2025-10-30 (Updated Post Week 3 Replay Protection + Delegation Graph Export + Advanced Scope Inheritance)

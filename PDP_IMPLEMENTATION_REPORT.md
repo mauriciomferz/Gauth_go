@@ -1,3 +1,13 @@
+---
+title: PDP Implementation Report
+category: implementation-report
+status: final
+lastUpdated: 2025-11-12
+owners: platform-eng
+source: internal
+refreshCadence: annually
+---
+
 # PDP Implementation Report - November 12, 2025
 
 ## Executive Summary

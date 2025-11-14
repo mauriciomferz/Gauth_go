@@ -1,3 +1,13 @@
+---
+title: KIND Local Kubernetes Cluster Guide
+category: local-cluster-guide
+status: active
+lastUpdated: 2025-11-12
+owners: platform-eng
+source: internal
+refreshCadence: on-change
+---
+
 # Local Kind Cluster Management Guide
 
 ## Cluster Information

@@ -19,7 +19,7 @@ func (m *mockPDPEngine) Evaluate(ctx context.Context, req pdp.Request) (pdp.Deci
 	if m.returnError != nil {
 		return pdp.Decision{}, m.returnError
 	}
-	
+
 	return pdp.Decision{
 		Allow:    m.allowDecision,
 		Reason:   "test decision",
@@ -124,7 +124,7 @@ func TestPDPBridge_EvaluatePolicy(t *testing.T) {
 
 func TestPDPBridge_ConvertTokenRequest(t *testing.T) {
 	bridge := &PDPBridge{}
-	
+
 	req := &ExtendedTokenRequest{
 		GrantID:          "grant-123",
 		Scope:            []string{"read", "write"},
@@ -160,7 +160,7 @@ func TestPDPBridge_ConvertTokenRequest(t *testing.T) {
 
 func TestPDPBridge_ConvertAuthRequest(t *testing.T) {
 	bridge := &PDPBridge{}
-	
+
 	req := &ExtendedAuthorizationRequest{
 		AuthorizationRequest: &AuthorizationRequest{
 			ClientID: "client-001",
@@ -191,7 +191,7 @@ func TestPDPBridge_ConvertAuthRequest(t *testing.T) {
 
 func TestPDPBridge_ConvertGrantRequest(t *testing.T) {
 	bridge := &PDPBridge{}
-	
+
 	now := time.Now()
 	grant := &ExtendedAuthorizationGrant{
 		AuthorizationGrant: &AuthorizationGrant{
@@ -224,13 +224,13 @@ func TestPDPBridge_ConvertGrantRequest(t *testing.T) {
 
 func TestPDPBridge_ConvertMapRequest(t *testing.T) {
 	bridge := &PDPBridge{}
-	
+
 	req := map[string]interface{}{
-		"subject":      "user-789",
-		"action":       "delete",
-		"resource":     "file-123",
-		"ip_address":   "192.168.1.100",
-		"department":   "engineering",
+		"subject":    "user-789",
+		"action":     "delete",
+		"resource":   "file-123",
+		"ip_address": "192.168.1.100",
+		"department": "engineering",
 	}
 
 	pdpReq := bridge.convertMapRequest(req)

@@ -54,19 +54,19 @@ const (
 
 // IndustrySector represents a specific industry sector with ISIC/NACE classification
 type IndustrySector struct {
-	Code        SectorCode `json:"code"`         // ISIC/NACE section code
-	Division    string     `json:"division"`     // 2-digit division code (optional)
-	Group       string     `json:"group"`        // 3-digit group code (optional)
-	Class       string     `json:"class"`        // 4-digit class code (optional)
-	Description string     `json:"description"`  // Human-readable description
-	Authorized  bool       `json:"authorized"`   // Whether authorization applies to this sector
+	Code        SectorCode `json:"code"`        // ISIC/NACE section code
+	Division    string     `json:"division"`    // 2-digit division code (optional)
+	Group       string     `json:"group"`       // 3-digit group code (optional)
+	Class       string     `json:"class"`       // 4-digit class code (optional)
+	Description string     `json:"description"` // Human-readable description
+	Authorized  bool       `json:"authorized"`  // Whether authorization applies to this sector
 }
 
 // SectorScope represents the collection of authorized sectors for a PoA
 type SectorScope struct {
 	Sectors       []IndustrySector `json:"sectors"`
-	AllSectors    bool             `json:"all_sectors"`     // If true, all sectors authorized
-	ExcludedCodes []SectorCode     `json:"excluded_codes"`  // Explicitly excluded sectors
+	AllSectors    bool             `json:"all_sectors"`    // If true, all sectors authorized
+	ExcludedCodes []SectorCode     `json:"excluded_codes"` // Explicitly excluded sectors
 }
 
 // SectorMetadata provides detailed information about each ISIC/NACE sector

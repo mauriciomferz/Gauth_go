@@ -355,7 +355,7 @@ func TestDecodeRawPOAStreamWith_PrevHashContinuity(t *testing.T) {
 func TestDecodeRawPOAStream_CorruptedData(t *testing.T) {
 	t.Run("Invalid length prefix", func(t *testing.T) {
 		// Create data with invalid length (claims more bytes than available)
-		data := []byte{0x00, 0x00, 0x10, 0x00} // Claims 4096 bytes
+		data := []byte{0x00, 0x00, 0x10, 0x00}  // Claims 4096 bytes
 		data = append(data, []byte{1, 2, 3}...) // But only 3 bytes follow
 
 		r := bytes.NewReader(data)
@@ -633,7 +633,7 @@ func TestEncodeRawPOAChain_EdgeCases(t *testing.T) {
 	t.Run("Item with many claims", func(t *testing.T) {
 		claims := make(map[string]string)
 		for i := 0; i < 20; i++ {
-			claims[string(rune('a'+i))] = string(rune('A'+i))
+			claims[string(rune('a'+i))] = string(rune('A' + i))
 		}
 
 		item := RawPOAItem{
@@ -830,10 +830,10 @@ func TestUnmarshalMinimal(t *testing.T) {
 		// Construct: map(1) { "sig": <bytes but truncated> }
 		// 0xA1 = map(1), 0x63 = text(3), "sig", 0x42 = bytes(2), but only 1 byte follows
 		data := []byte{
-			0xA1,             // map(1)
+			0xA1,                // map(1)
 			0x63, 's', 'i', 'g', // text(3) "sig"
-			0x42,            // bytes(2) - claims 2 bytes
-			0xAA,            // only 1 byte available - truncated!
+			0x42, // bytes(2) - claims 2 bytes
+			0xAA, // only 1 byte available - truncated!
 		}
 		_, err := unmarshalMinimal(data)
 		if err == nil {
@@ -899,8 +899,8 @@ func TestUnmarshalMinimalAt(t *testing.T) {
 		data := []byte{
 			0xA1,                // map(1)
 			0x63, 's', 'i', 'g', // text(3) "sig" - recognized field
-			0x43,                // bytes(3) - claims 3 bytes
-			0x01, 0x02,          // only 2 bytes - truncated!
+			0x43,       // bytes(3) - claims 3 bytes
+			0x01, 0x02, // only 2 bytes - truncated!
 		}
 		_, _, err := unmarshalMinimalAt(data, 1)
 		if err == nil {

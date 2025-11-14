@@ -1,3 +1,12 @@
+---
+title: Performance Baseline
+ category: performance-report
+ status: baseline
+ lastUpdated: 2025-11-12
+ owners: performance-team
+ refreshCadence: quarterly
+ source: benchmark-suite
+ ---
 # Performance Baseline
 
 > Last Updated: 2025-10-17

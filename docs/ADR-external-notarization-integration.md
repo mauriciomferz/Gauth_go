@@ -1,3 +1,12 @@
+---
+title: ADR External Notarization / Timestamp Integration
+category: adr
+status: proposed
+lastUpdated: 2025-11-12
+owners: architecture-team
+source: internal
+refreshCadence: on-change
+---
 # ADR: External Notarization / Timestamp Integration for Capability & Audit Chains
 
 Status: Proposed

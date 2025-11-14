@@ -1,3 +1,13 @@
+---
+title: Backup and Restore Procedures
+category: backup-restore-guide
+status: active
+lastUpdated: 2025-11-12
+owners: platform-eng
+source: internal
+refreshCadence: quarterly
+---
+
 # Backup & Restore Procedures
 
 **Document Version:** 1.0  

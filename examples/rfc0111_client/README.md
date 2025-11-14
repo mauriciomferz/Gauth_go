@@ -1,3 +1,11 @@
+---
+title: "RFC-0111 Client Examples"
+category: example
+status: active
+lastUpdated: 2025-11-12
+owners: architecture-team
+refreshCadence: on-change
+---
 # RFC-0111 Client Examples
 
 This directory contains examples demonstrating how to use the RFC-0111 REST API.

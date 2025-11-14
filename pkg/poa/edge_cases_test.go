@@ -9,17 +9,17 @@ import (
 // TestRecordValidation tests the AuditMetrics interface implementation
 func TestRecordValidation(t *testing.T) {
 	metrics := &DefaultAuditMetrics{}
-	
+
 	poa := &PowerOfAttorney{
 		ID:      "test-poa-1",
 		Parties: []string{"alice", "bob"},
 		Scope:   "test-scope",
 	}
-	
+
 	warnings := []ValidationWarning{
 		{Code: "W001", Message: "Test warning"},
 	}
-	
+
 	// Should not panic - even though it's a stub
 	metrics.RecordValidation(poa, warnings, nil)
 	metrics.RecordValidation(poa, nil, nil)
@@ -30,7 +30,7 @@ func TestRecordValidation(t *testing.T) {
 func TestIssue_DelegationEdgeCases(t *testing.T) {
 	s := NewMemoryService()
 	ctx := context.Background()
-	
+
 	tests := []struct {
 		name    string
 		req     *Request
@@ -77,7 +77,7 @@ func TestIssue_DelegationEdgeCases(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			poa, err := s.Issue(ctx, tt.req)
@@ -109,32 +109,32 @@ func TestIssue_DelegationEdgeCases(t *testing.T) {
 func TestIssue_WithContext(t *testing.T) {
 	s := NewMemoryService()
 	ctx := context.Background()
-	
+
 	req := &Request{
 		Subject:  "user123",
 		Resource: "resource456",
 		Action:   "write",
 		Context: map[string]interface{}{
-			"ip":        "192.168.1.1",
+			"ip":         "192.168.1.1",
 			"user-agent": "test-client/1.0",
-			"custom":    "value",
+			"custom":     "value",
 		},
 	}
-	
+
 	poa, err := s.Issue(ctx, req)
 	if err != nil {
 		t.Fatalf("Issue() error = %v", err)
 	}
-	
+
 	if poa.Metadata == nil {
 		t.Error("Expected metadata to be set")
 		return
 	}
-	
+
 	if len(poa.Metadata) != len(req.Context) {
 		t.Errorf("Metadata length = %d, want %d", len(poa.Metadata), len(req.Context))
 	}
-	
+
 	for key, val := range req.Context {
 		if poa.Metadata[key] != val {
 			t.Errorf("Metadata[%s] = %v, want %v", key, poa.Metadata[key], val)
@@ -145,13 +145,13 @@ func TestIssue_WithContext(t *testing.T) {
 // TestVerifyMultiSig_EdgeCases tests additional edge cases for VerifyMultiSig
 func TestVerifyMultiSig_EdgeCases(t *testing.T) {
 	tests := []struct {
-		name              string
-		poa               *ProofOfAuthorization
-		wantValid         int
-		wantSatisfied     bool
-		wantThreshold     int
-		skip              bool
-		skipReason        string
+		name          string
+		poa           *ProofOfAuthorization
+		wantValid     int
+		wantSatisfied bool
+		wantThreshold int
+		skip          bool
+		skipReason    string
 	}{
 		{
 			name:          "Nil PoA",
@@ -207,7 +207,7 @@ func TestVerifyMultiSig_EdgeCases(t *testing.T) {
 			wantThreshold: 1,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.skip {
@@ -315,7 +315,7 @@ func TestValidateRFC0115Compliance_AdditionalCases(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := ValidateRFC0115Compliance(tt.config)
@@ -329,27 +329,27 @@ func TestValidateRFC0115Compliance_AdditionalCases(t *testing.T) {
 // TestConditionalInterpreter tests the ConditionalInterpreter interface
 func TestConditionalInterpreter(t *testing.T) {
 	interp := &DefaultConditionalInterpreter{}
-	
+
 	conditions := map[string]interface{}{
 		"region": "us-west",
 		"role":   "admin",
 	}
-	
+
 	context := map[string]interface{}{
 		"current_region": "us-west",
 		"user_role":      "admin",
 	}
-	
+
 	result, err := interp.Evaluate(conditions, context)
 	if err != nil {
 		t.Errorf("Evaluate() error = %v", err)
 	}
-	
+
 	// Default implementation returns true
 	if !result {
 		t.Error("Expected Evaluate to return true for default implementation")
 	}
-	
+
 	// Test with nil inputs
 	result, err = interp.Evaluate(nil, nil)
 	if err != nil {
@@ -363,14 +363,14 @@ func TestConditionalInterpreter(t *testing.T) {
 // TestCBORCodec tests the CBORCodec interface implementations
 func TestCBORCodec(t *testing.T) {
 	codec := &DefaultCBORCodec{}
-	
+
 	poa := &PowerOfAttorney{
 		ID:      "test-poa-codec",
 		Parties: []string{"alice", "bob"},
 		Scope:   "test-scope",
 		RawJSON: []byte(`{"test": "data"}`),
 	}
-	
+
 	// Test encoding
 	encoded, err := codec.Encode(poa)
 	if err != nil {
@@ -379,7 +379,7 @@ func TestCBORCodec(t *testing.T) {
 	if encoded == nil {
 		t.Error("Expected non-nil encoded data")
 	}
-	
+
 	// Test decoding
 	decoded, err := codec.Decode(encoded)
 	if err != nil {
@@ -388,7 +388,7 @@ func TestCBORCodec(t *testing.T) {
 	if decoded == nil {
 		t.Error("Expected non-nil decoded PoA")
 	}
-	
+
 	// Test with nil input - these are stub implementations so may panic
 	// We skip these tests due to source code limitations
 	t.Run("Nil handling", func(t *testing.T) {
@@ -399,14 +399,14 @@ func TestCBORCodec(t *testing.T) {
 // TestRawPOAExposer tests the RawPOAExposer interface
 func TestRawPOAExposer(t *testing.T) {
 	exposer := &DefaultRawPOAExposer{}
-	
+
 	poa := &PowerOfAttorney{
 		ID:      "test-poa-expose",
 		Parties: []string{"alice", "bob"},
 		Scope:   "test-scope",
 		RawJSON: []byte(`{"raw": "poa"}`),
 	}
-	
+
 	exposed, err := exposer.Expose(poa)
 	if err != nil {
 		t.Errorf("Expose() error = %v", err)
@@ -414,7 +414,7 @@ func TestRawPOAExposer(t *testing.T) {
 	if exposed == nil {
 		t.Error("Expected non-nil exposed data")
 	}
-	
+
 	// Test with nil input - stub implementation may not handle nil gracefully
 	t.Run("Nil handling", func(t *testing.T) {
 		t.Skip("Stub implementation does not handle nil inputs gracefully")
@@ -431,26 +431,26 @@ func (m *mockValidator) Validate(poA *PowerOfAttorney) ([]ValidationWarning, err
 // TestValidatorRegistry_EdgeCases tests ValidatorRegistry with edge cases
 func TestValidatorRegistry_EdgeCases(t *testing.T) {
 	registry := NewValidatorRegistry()
-	
+
 	// Get non-existent validator
 	v := registry.Get("non-existent")
 	if v != nil {
 		t.Error("Expected nil for non-existent validator")
 	}
-	
+
 	// Register and retrieve
 	mock := &mockValidator{}
 	registry.Register("mock", mock)
-	
+
 	retrieved := registry.Get("mock")
 	if retrieved == nil {
 		t.Error("Expected non-nil validator")
 	}
-	
+
 	// Overwrite existing validator
 	mock2 := &mockValidator{}
 	registry.Register("mock", mock2)
-	
+
 	retrieved2 := registry.Get("mock")
 	if retrieved2 == nil {
 		t.Error("Expected non-nil validator after overwrite")

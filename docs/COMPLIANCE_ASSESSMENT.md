@@ -1,3 +1,13 @@
+---
+title: Compliance Assessment Report
+category: compliance-report
+status: final
+lastUpdated: 2025-11-12
+owners: compliance-team
+source: internal
+refreshCadence: annually
+---
+
 # GAuth Beta Compliance Assessment (RFC-0111 / RFC-0115)
 
 Generated: 2025-10-28

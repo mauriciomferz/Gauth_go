@@ -1,3 +1,13 @@
+---
+title: Alerting Configuration and Guidelines
+category: observability-alerting-guide
+status: active
+lastUpdated: 2025-11-12
+owners: platform-eng
+source: internal
+refreshCadence: quarterly
+---
+
 # Alerting Guide: Capability Anchor Freshness & Integrity
 
 This guide provides sample Prometheus alerting rules and operational recommendations for monitoring the freshness and integrity of capability anchoring.

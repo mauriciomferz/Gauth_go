@@ -18,10 +18,10 @@ import (
 type JWKSFetcher interface {
 	// GetKey retrieves a public key by key ID from a provider's JWKS endpoint
 	GetKey(ctx context.Context, jwksURI, kid string) (interface{}, error)
-	
+
 	// RefreshKeys forces a refresh of the JWKS for a given URI
 	RefreshKeys(ctx context.Context, jwksURI string) error
-	
+
 	// ClearCache clears all cached JWKS
 	ClearCache()
 }
@@ -204,7 +204,7 @@ func (f *InMemoryJWKSFetcher) parseRSAKey(jwk *JWKSKey) (*rsa.PublicKey, error) 
 
 // ExternalTokenValidator validates external OIDC tokens using JWKS
 type ExternalTokenValidator struct {
-	jwksFetcher JWKSFetcher
+	jwksFetcher    JWKSFetcher
 	discoveryCache DiscoveryCache
 }
 

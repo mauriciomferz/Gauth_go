@@ -1,3 +1,13 @@
+---
+title: Architecture Diagram Specification
+category: architecture-spec
+status: active
+lastUpdated: 2025-11-12
+owners: platform-eng
+source: internal
+refreshCadence: quarterly
+---
+
 # Architecture & Interaction Diagram Spec
 
 Purpose: Provide inputs for generating visually consistent diagrams (PlantUML / Mermaid) covering system topology and protocol flows.

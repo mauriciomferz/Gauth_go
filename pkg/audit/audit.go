@@ -206,7 +206,7 @@ func (ml *MemoryLogger) Log(ctx context.Context, entry interface{}) error {
 		ml.droppedEvents++
 		dropped := ml.droppedEvents
 		ml.mu.Unlock()
-		
+
 		// Only log every 100th drop to avoid log spam
 		if dropped%100 == 1 {
 			ml.logger.Warnf("Audit event queue full, dropped %d events (latest: %s)", dropped, event.ID)

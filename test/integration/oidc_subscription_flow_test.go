@@ -16,13 +16,13 @@ import (
 // TestOIDCPVPIntegrationWithSubscriptionFlow tests complete OIDC → GAuth integration
 func TestOIDCPVPIntegrationWithSubscriptionFlow(t *testing.T) {
 	ctx := context.Background()
-	
+
 	// Setup OIDC infrastructure
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		t.Fatalf("Failed to generate RSA key: %v", err)
 	}
-	
+
 	idTokenService, err := oidc.NewIDTokenService(&oidc.IDTokenServiceConfig{
 		IssuerURL:    "https://gauth.example.com",
 		SigningKey:   privateKey,
@@ -31,7 +31,7 @@ func TestOIDCPVPIntegrationWithSubscriptionFlow(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create ID token service: %v", err)
 	}
-	
+
 	oidcPVP, err := oidc.NewOIDCPowerVerificationPoint(oidc.OIDCPVPConfig{
 		IDTokenService: idTokenService,
 		RequiredACR:    "substantial",
@@ -39,7 +39,7 @@ func TestOIDCPVPIntegrationWithSubscriptionFlow(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create OIDC PVP: %v", err)
 	}
-	
+
 	// Issue a valid ID token for the owner's authorizer
 	ownerAuthorizerClaims := &oidc.IDTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -58,7 +58,7 @@ func TestOIDCPVPIntegrationWithSubscriptionFlow(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to issue owner authorizer ID token: %v", err)
 	}
-	
+
 	// Issue a valid ID token for the client owner
 	clientOwnerClaims := &oidc.IDTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -78,7 +78,7 @@ func TestOIDCPVPIntegrationWithSubscriptionFlow(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to issue client owner ID token: %v", err)
 	}
-	
+
 	// Issue a valid ID token for the resource owner
 	resourceOwnerClaims := &oidc.IDTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -97,7 +97,7 @@ func TestOIDCPVPIntegrationWithSubscriptionFlow(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to issue resource owner ID token: %v", err)
 	}
-	
+
 	// Test Step I: Owner's Authorizer Identity Proof with OIDC
 	t.Run("Step I: Owner's Authorizer with OIDC ID Token", func(t *testing.T) {
 		request := &gauth.IdentityProofRequest{
@@ -110,31 +110,31 @@ func TestOIDCPVPIntegrationWithSubscriptionFlow(t *testing.T) {
 			},
 			RequiredLevel: "substantial",
 		}
-		
+
 		result, err := oidcPVP.VerifyIdentityProof(ctx, request)
 		if err != nil {
 			t.Fatalf("Step I failed: %v", err)
 		}
-		
+
 		if !result.Valid {
 			t.Errorf("Expected valid result, got invalid: %s", result.FailureReason)
 		}
-		
+
 		if result.SubjectID != "owner-auth-123" {
 			t.Errorf("Expected SubjectID 'owner-auth-123', got '%s'", result.SubjectID)
 		}
-		
+
 		if result.Identity != "Alice Johnson" {
 			t.Errorf("Expected Identity 'Alice Johnson', got '%s'", result.Identity)
 		}
-		
+
 		if result.TrustLevel != "substantial" {
 			t.Errorf("Expected TrustLevel 'substantial', got '%s'", result.TrustLevel)
 		}
-		
+
 		t.Logf("✓ Step I passed: %s verified with trust level %s", result.Identity, result.TrustLevel)
 	})
-	
+
 	// Test Step III: Client Owner Identity Proof with OIDC
 	t.Run("Step III: Client Owner with OIDC ID Token", func(t *testing.T) {
 		request := &gauth.IdentityProofRequest{
@@ -147,31 +147,31 @@ func TestOIDCPVPIntegrationWithSubscriptionFlow(t *testing.T) {
 			},
 			RequiredLevel: "substantial",
 		}
-		
+
 		result, err := oidcPVP.VerifyIdentityProof(ctx, request)
 		if err != nil {
 			t.Fatalf("Step III failed: %v", err)
 		}
-		
+
 		if !result.Valid {
 			t.Errorf("Expected valid result, got invalid: %s", result.FailureReason)
 		}
-		
+
 		if result.SubjectID != "client-owner-456" {
 			t.Errorf("Expected SubjectID 'client-owner-456', got '%s'", result.SubjectID)
 		}
-		
+
 		if result.Identity != "Example Corp" {
 			t.Errorf("Expected Identity 'Example Corp', got '%s'", result.Identity)
 		}
-		
+
 		if result.TrustLevel != "high" {
 			t.Errorf("Expected TrustLevel 'high', got '%s'", result.TrustLevel)
 		}
-		
+
 		t.Logf("✓ Step III passed: %s verified with trust level %s", result.Identity, result.TrustLevel)
 	})
-	
+
 	// Test Step VI: Resource Owner Identity Proof with OIDC
 	t.Run("Step VI: Resource Owner with OIDC ID Token", func(t *testing.T) {
 		request := &gauth.IdentityProofRequest{
@@ -184,31 +184,31 @@ func TestOIDCPVPIntegrationWithSubscriptionFlow(t *testing.T) {
 			},
 			RequiredLevel: "substantial",
 		}
-		
+
 		result, err := oidcPVP.VerifyIdentityProof(ctx, request)
 		if err != nil {
 			t.Fatalf("Step VI failed: %v", err)
 		}
-		
+
 		if !result.Valid {
 			t.Errorf("Expected valid result, got invalid: %s", result.FailureReason)
 		}
-		
+
 		if result.SubjectID != "resource-owner-789" {
 			t.Errorf("Expected SubjectID 'resource-owner-789', got '%s'", result.SubjectID)
 		}
-		
+
 		if result.Identity != "Carol White" {
 			t.Errorf("Expected Identity 'Carol White', got '%s'", result.Identity)
 		}
-		
+
 		if result.TrustLevel != "substantial" {
 			t.Errorf("Expected TrustLevel 'substantial', got '%s'", result.TrustLevel)
 		}
-		
+
 		t.Logf("✓ Step VI passed: %s verified with trust level %s", result.Identity, result.TrustLevel)
 	})
-	
+
 	// Test with insufficient trust level
 	t.Run("Insufficient trust level rejection", func(t *testing.T) {
 		lowTrustClaims := &oidc.IDTokenClaims{
@@ -227,7 +227,7 @@ func TestOIDCPVPIntegrationWithSubscriptionFlow(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to issue low trust token: %v", err)
 		}
-		
+
 		request := &gauth.IdentityProofRequest{
 			SubjectID:    "low-trust-user",
 			IdentityType: "natural_person",
@@ -238,20 +238,20 @@ func TestOIDCPVPIntegrationWithSubscriptionFlow(t *testing.T) {
 			},
 			RequiredLevel: "substantial",
 		}
-		
+
 		result, err := oidcPVP.VerifyIdentityProof(ctx, request)
 		if err != nil {
 			t.Fatalf("Verification failed: %v", err)
 		}
-		
+
 		if result.Valid {
 			t.Error("Expected invalid result for insufficient trust level")
 		}
-		
+
 		if result.FailureReason == "" {
 			t.Error("Expected failure reason for insufficient trust level")
 		}
-		
+
 		t.Logf("✓ Correctly rejected low trust: %s", result.FailureReason)
 	})
 }
@@ -259,13 +259,13 @@ func TestOIDCPVPIntegrationWithSubscriptionFlow(t *testing.T) {
 // TestOIDCPVPWithPVPRouter tests OIDC PVP integration with PVP router
 func TestOIDCPVPWithPVPRouter(t *testing.T) {
 	ctx := context.Background()
-	
+
 	// Setup OIDC PVP
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		t.Fatalf("Failed to generate RSA key: %v", err)
 	}
-	
+
 	idTokenService, err := oidc.NewIDTokenService(&oidc.IDTokenServiceConfig{
 		IssuerURL:    "https://gauth.example.com",
 		SigningKey:   privateKey,
@@ -274,7 +274,7 @@ func TestOIDCPVPWithPVPRouter(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create ID token service: %v", err)
 	}
-	
+
 	oidcPVP, err := oidc.NewOIDCPowerVerificationPoint(oidc.OIDCPVPConfig{
 		IDTokenService: idTokenService,
 		RequiredACR:    "substantial",
@@ -282,19 +282,19 @@ func TestOIDCPVPWithPVPRouter(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create OIDC PVP: %v", err)
 	}
-	
+
 	// Create router and register OIDC PVP
 	router := gauth.NewPVPRouter(nil)
 	router.RegisterPVP([]string{"oidc_id_token", "oidc_external"}, oidcPVP)
-	
+
 	// Verify supported methods
 	supportedMethods := router.GetSupportedProofMethods()
 	t.Logf("Supported proof methods: %v", supportedMethods)
-	
+
 	if len(supportedMethods) != 2 {
 		t.Errorf("Expected 2 supported methods, got %d", len(supportedMethods))
 	}
-	
+
 	// Issue ID token
 	claims := &oidc.IDTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -313,7 +313,7 @@ func TestOIDCPVPWithPVPRouter(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to issue ID token: %v", err)
 	}
-	
+
 	// Verify through router
 	request := &gauth.IdentityProofRequest{
 		SubjectID:    "test-user",
@@ -325,25 +325,25 @@ func TestOIDCPVPWithPVPRouter(t *testing.T) {
 		},
 		RequiredLevel: "substantial",
 	}
-	
+
 	result, err := router.VerifyIdentityProof(ctx, request)
 	if err != nil {
 		t.Fatalf("Router verification failed: %v", err)
 	}
-	
+
 	if !result.Valid {
 		t.Errorf("Expected valid result, got invalid: %s", result.FailureReason)
 	}
-	
+
 	if result.Identity != "Test User" {
 		t.Errorf("Expected Identity 'Test User', got '%s'", result.Identity)
 	}
-	
+
 	if result.TrustLevel != "high" {
 		t.Errorf("Expected TrustLevel 'high', got '%s'", result.TrustLevel)
 	}
-	
-	t.Logf("✓ Router successfully routed OIDC proof: %s verified with trust level %s", 
+
+	t.Logf("✓ Router successfully routed OIDC proof: %s verified with trust level %s",
 		result.Identity, result.TrustLevel)
 }
 
@@ -354,7 +354,7 @@ func TestMultipleProofMethodsWithRouter(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to generate RSA key: %v", err)
 	}
-	
+
 	idTokenService, err := oidc.NewIDTokenService(&oidc.IDTokenServiceConfig{
 		IssuerURL:    "https://gauth.example.com",
 		SigningKey:   privateKey,
@@ -363,7 +363,7 @@ func TestMultipleProofMethodsWithRouter(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create ID token service: %v", err)
 	}
-	
+
 	oidcPVP, err := oidc.NewOIDCPowerVerificationPoint(oidc.OIDCPVPConfig{
 		IDTokenService: idTokenService,
 		RequiredACR:    "substantial",
@@ -371,21 +371,21 @@ func TestMultipleProofMethodsWithRouter(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create OIDC PVP: %v", err)
 	}
-	
+
 	// Create mock eIDAS PVP
 	eidasPVP := &mockEIDASPVP{}
-	
+
 	// Create router with multiple PVPs
 	router := gauth.NewPVPRouter(nil)
 	router.RegisterPVP([]string{"oidc_id_token", "oidc_external"}, oidcPVP)
 	router.RegisterPVP([]string{"eIDAS"}, eidasPVP)
-	
+
 	// Verify all supported methods
 	supportedMethods := router.GetSupportedProofMethods()
 	if len(supportedMethods) != 3 {
 		t.Errorf("Expected 3 supported methods, got %d", len(supportedMethods))
 	}
-	
+
 	t.Logf("✓ Router supports multiple proof methods: %v", supportedMethods)
 }
 

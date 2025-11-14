@@ -1,3 +1,11 @@
+---
+title: "Examples Index"
+category: example-index
+status: active
+lastUpdated: 2025-11-12
+owners: architecture-team
+refreshCadence: on-change
+---
 # GAuth Examples
 
 > Last Updated: 2025-10-17
