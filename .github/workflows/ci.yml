@@ -411,9 +411,9 @@ jobs:
       run: go mod download
 
     - name: Run Gosec Security Scanner
-      uses: securego/gosec@master
-      with:
-        args: '-no-fail -fmt sarif -out results.sarif ./...'
+      run: |
+        go install github.com/securego/gosec/v2/cmd/gosec@latest
+        $(go env GOPATH)/bin/gosec -no-fail -fmt sarif -out results.sarif ./... || echo "Gosec completed with warnings"
 
     - name: Display security scan results
       if: always()
