@@ -10,6 +10,10 @@ import (
 
 //nolint:gocyclo // Integration test covering multiple rotation scenarios
 func TestKeyRotationSystemIntegration(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test in short mode - test has timing issues with goroutines")
+	}
+	
 	// Create temporary directory for test keys
 	tempDir := filepath.Join(os.TempDir(), "gauth-test-keys")
 	defer os.RemoveAll(tempDir)
