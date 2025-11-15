@@ -1098,11 +1098,13 @@ var _ GAuth = (*Service)(nil)
 
 // PowerAdministrationPoint represents a power administration point
 type PowerAdministrationPoint struct {
-	GAuth       GAuth
-	ID          string    `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"created_at"`
+	GAuth          GAuth
+	ID             string                      `json:"id"`
+	Name           string                      `json:"name"`
+	Description    string                      `json:"description"`
+	CreatedAt      time.Time                   `json:"created_at"`
+	policyStore    map[string]*AuthorizationPolicy // In-memory store (replace with DB in production)
+	policyStoreMux sync.RWMutex                    // Protect concurrent access
 }
 
 // NewPowerAdministrationPoint creates a new power administration point
@@ -1112,6 +1114,7 @@ func NewPowerAdministrationPoint(id, name, description string) *PowerAdministrat
 		Name:        name,
 		Description: description,
 		CreatedAt:   time.Now(),
+		policyStore: make(map[string]*AuthorizationPolicy),
 	}
 }
 
@@ -1125,4 +1128,451 @@ func (p *PowerAdministrationPoint) InvalidateToken(token string) error {
 	// In a real implementation, this would mark the token as invalid
 	// For now, just return success
 	return nil
+}
+
+// ============================================================================
+// Policy Management Methods (using types from pap_types.go)
+// ============================================================================
+
+// CreatePolicy creates a new authorization policy
+func (p *PowerAdministrationPoint) CreatePolicy(ctx context.Context, request *PolicyCreateRequest) (*AuthorizationPolicy, error) {
+	if request == nil {
+		return nil, fmt.Errorf("policy create request cannot be nil")
+	}
+
+	// Validate request
+	if request.PolicyName == "" {
+		return nil, fmt.Errorf("policy name is required")
+	}
+	if request.PolicyType == "" {
+		return nil, fmt.Errorf("policy type is required")
+	}
+
+	// Generate policy ID
+	policyID := fmt.Sprintf("policy_%s_%d", request.PolicyType, time.Now().UnixNano())
+
+	now := time.Now()
+
+	// Create policy
+	policy := &AuthorizationPolicy{
+		PolicyID:         policyID,
+		PolicyType:       request.PolicyType,
+		PolicyVersion:    1,
+		PolicyName:       request.PolicyName,
+		Description:      request.Description,
+		Status:           PolicyStatusDraft,
+		OwnersAuthorizer: request.OwnersAuthorizer,
+		ClientOwner:      request.ClientOwner,
+		PolicyRules:      request.PolicyRules,
+		Scope:            request.Scope,
+		Restrictions:     request.Restrictions,
+		PoATemplate:      request.PoATemplate,
+		CreatedAt:        now,
+		UpdatedAt:        now,
+		ExpiresAt:        request.ExpiresAt,
+		Tags:             request.Tags,
+		Metadata:         request.Metadata,
+	}
+
+	// Store policy
+	p.policyStoreMux.Lock()
+	p.policyStore[policyID] = policy
+	p.policyStoreMux.Unlock()
+
+	return policy, nil
+}
+
+// GetPolicy retrieves a policy by ID
+func (p *PowerAdministrationPoint) GetPolicy(ctx context.Context, policyID string) (*AuthorizationPolicy, error) {
+	p.policyStoreMux.RLock()
+	defer p.policyStoreMux.RUnlock()
+
+	policy, exists := p.policyStore[policyID]
+	if !exists {
+		return nil, fmt.Errorf("policy not found: %s", policyID)
+	}
+
+	return policy, nil
+}
+
+// UpdatePolicy updates an existing policy
+func (p *PowerAdministrationPoint) UpdatePolicy(ctx context.Context, request *PolicyUpdateRequest) (*AuthorizationPolicy, error) {
+	if request == nil {
+		return nil, fmt.Errorf("policy update request cannot be nil")
+	}
+
+	p.policyStoreMux.Lock()
+	defer p.policyStoreMux.Unlock()
+
+	policy, exists := p.policyStore[request.PolicyID]
+	if !exists {
+		return nil, fmt.Errorf("policy not found: %s", request.PolicyID)
+	}
+
+	// Only allow updates to draft or suspended policies
+	if policy.Status != PolicyStatusDraft && policy.Status != PolicyStatusSuspended {
+		return nil, fmt.Errorf("cannot update policy in status: %s", policy.Status)
+	}
+
+	// Update fields if provided
+	if request.PolicyName != nil {
+		policy.PolicyName = *request.PolicyName
+	}
+	if request.Description != nil {
+		policy.Description = *request.Description
+	}
+	if request.PolicyRules != nil {
+		policy.PolicyRules = *request.PolicyRules
+	}
+	if request.Scope != nil {
+		policy.Scope = request.Scope
+	}
+	if request.Restrictions != nil {
+		policy.Restrictions = *request.Restrictions
+	}
+	if request.ExpiresAt != nil {
+		policy.ExpiresAt = request.ExpiresAt
+	}
+	if request.Tags != nil {
+		policy.Tags = *request.Tags
+	}
+	if request.Metadata != nil {
+		policy.Metadata = *request.Metadata
+	}
+
+	policy.PolicyVersion++
+	policy.UpdatedAt = time.Now()
+	policy.ChangeLog = request.ChangeLog
+
+	return policy, nil
+}
+
+// ActivatePolicy activates a draft policy
+func (p *PowerAdministrationPoint) ActivatePolicy(ctx context.Context, policyID, approvedBy string) error {
+	p.policyStoreMux.Lock()
+	defer p.policyStoreMux.Unlock()
+
+	policy, exists := p.policyStore[policyID]
+	if !exists {
+		return fmt.Errorf("policy not found: %s", policyID)
+	}
+
+	if policy.Status != PolicyStatusDraft {
+		return fmt.Errorf("only draft policies can be activated, current status: %s", policy.Status)
+	}
+
+	// Validate policy before activation
+	if err := p.validatePolicy(policy); err != nil {
+		return fmt.Errorf("policy validation failed: %w", err)
+	}
+
+	now := time.Now()
+	policy.Status = PolicyStatusActive
+	policy.ActivatedAt = &now
+	policy.UpdatedAt = now
+	if policy.Metadata == nil {
+		policy.Metadata = make(map[string]interface{})
+	}
+	policy.Metadata["approved_by"] = approvedBy
+
+	return nil
+}
+
+// SuspendPolicy temporarily suspends an active policy
+func (p *PowerAdministrationPoint) SuspendPolicy(ctx context.Context, policyID, reason string) error {
+	p.policyStoreMux.Lock()
+	defer p.policyStoreMux.Unlock()
+
+	policy, exists := p.policyStore[policyID]
+	if !exists {
+		return fmt.Errorf("policy not found: %s", policyID)
+	}
+
+	if policy.Status != PolicyStatusActive {
+		return fmt.Errorf("only active policies can be suspended, current status: %s", policy.Status)
+	}
+
+	policy.Status = PolicyStatusSuspended
+	policy.UpdatedAt = time.Now()
+	if policy.Metadata == nil {
+		policy.Metadata = make(map[string]interface{})
+	}
+	policy.Metadata["suspension_reason"] = reason
+	policy.Metadata["suspended_at"] = time.Now()
+
+	return nil
+}
+
+// RevokePolicy permanently revokes a policy
+func (p *PowerAdministrationPoint) RevokePolicy(ctx context.Context, policyID, reason string) error {
+	p.policyStoreMux.Lock()
+	defer p.policyStoreMux.Unlock()
+
+	policy, exists := p.policyStore[policyID]
+	if !exists {
+		return fmt.Errorf("policy not found: %s", policyID)
+	}
+
+	if policy.Status == PolicyStatusRevoked {
+		return fmt.Errorf("policy already revoked")
+	}
+
+	policy.Status = PolicyStatusRevoked
+	policy.UpdatedAt = time.Now()
+	if policy.Metadata == nil {
+		policy.Metadata = make(map[string]interface{})
+	}
+	policy.Metadata["revocation_reason"] = reason
+	policy.Metadata["revoked_at"] = time.Now()
+
+	return nil
+}
+
+// DeletePolicy deletes a policy (only draft or revoked policies)
+func (p *PowerAdministrationPoint) DeletePolicy(ctx context.Context, policyID string) error {
+	p.policyStoreMux.Lock()
+	defer p.policyStoreMux.Unlock()
+
+	policy, exists := p.policyStore[policyID]
+	if !exists {
+		return fmt.Errorf("policy not found: %s", policyID)
+	}
+
+	// Only allow deletion of draft or revoked policies
+	if policy.Status != PolicyStatusDraft && policy.Status != PolicyStatusRevoked {
+		return fmt.Errorf("cannot delete policy in status: %s (only draft or revoked)", policy.Status)
+	}
+
+	delete(p.policyStore, policyID)
+	return nil
+}
+
+// SearchPolicies searches for policies based on criteria
+func (p *PowerAdministrationPoint) SearchPolicies(ctx context.Context, criteria *PolicySearchCriteria) ([]*AuthorizationPolicy, error) {
+	p.policyStoreMux.RLock()
+	defer p.policyStoreMux.RUnlock()
+
+	var results []*AuthorizationPolicy
+
+	for _, policy := range p.policyStore {
+		if p.matchesCriteria(policy, criteria) {
+			results = append(results, policy)
+		}
+	}
+
+	// Apply limit if specified
+	if criteria != nil && criteria.Limit > 0 && len(results) > criteria.Limit {
+		results = results[:criteria.Limit]
+	}
+
+	return results, nil
+}
+
+// ListPolicies lists all policies (optionally filtered by status)
+func (p *PowerAdministrationPoint) ListPolicies(ctx context.Context, status *PolicyStatus) ([]*AuthorizationPolicy, error) {
+	p.policyStoreMux.RLock()
+	defer p.policyStoreMux.RUnlock()
+
+	var results []*AuthorizationPolicy
+
+	for _, policy := range p.policyStore {
+		if status == nil || policy.Status == *status {
+			results = append(results, policy)
+		}
+	}
+
+	return results, nil
+}
+
+// ValidatePolicy validates a policy's configuration
+func (p *PowerAdministrationPoint) ValidatePolicy(ctx context.Context, policyID string) (*PolicyValidationResult, error) {
+	p.policyStoreMux.RLock()
+	policy, exists := p.policyStore[policyID]
+	p.policyStoreMux.RUnlock()
+
+	if !exists {
+		return nil, fmt.Errorf("policy not found: %s", policyID)
+	}
+
+	result := &PolicyValidationResult{
+		Valid:  true,
+		Errors: []string{},
+	}
+
+	if err := p.validatePolicy(policy); err != nil {
+		result.Valid = false
+		result.Errors = append(result.Errors, err.Error())
+	}
+
+	return result, nil
+}
+
+// PAPAggregateStatistics represents aggregate statistics across all policies
+type PAPAggregateStatistics struct {
+	TotalPolicies      int                  `json:"total_policies"`
+	ActivePolicies     int                  `json:"active_policies"`
+	DraftPolicies      int                  `json:"draft_policies"`
+	SuspendedPolicies  int                  `json:"suspended_policies"`
+	RevokedPolicies    int                  `json:"revoked_policies"`
+	ExpiredPolicies    int                  `json:"expired_policies"`
+	PoliciesByType     map[PolicyType]int   `json:"policies_by_type"`
+}
+
+// GetPolicyStatistics returns aggregate statistics about all policies
+func (p *PowerAdministrationPoint) GetPolicyStatistics(ctx context.Context) (*PAPAggregateStatistics, error) {
+	p.policyStoreMux.RLock()
+	defer p.policyStoreMux.RUnlock()
+
+	stats := &PAPAggregateStatistics{
+		TotalPolicies:      len(p.policyStore),
+		ActivePolicies:     0,
+		DraftPolicies:      0,
+		SuspendedPolicies:  0,
+		RevokedPolicies:    0,
+		ExpiredPolicies:    0,
+		PoliciesByType:     make(map[PolicyType]int),
+	}
+
+	now := time.Now()
+
+	for _, policy := range p.policyStore {
+		// Count by status
+		switch policy.Status {
+		case PolicyStatusActive:
+			stats.ActivePolicies++
+		case PolicyStatusDraft:
+			stats.DraftPolicies++
+		case PolicyStatusSuspended:
+			stats.SuspendedPolicies++
+		case PolicyStatusRevoked:
+			stats.RevokedPolicies++
+		case PolicyStatusExpired:
+			stats.ExpiredPolicies++
+		}
+
+		// Check for expired policies
+		if policy.ExpiresAt != nil && policy.ExpiresAt.Before(now) {
+			stats.ExpiredPolicies++
+		}
+
+		// Count by type
+		stats.PoliciesByType[policy.PolicyType]++
+	}
+
+	return stats, nil
+}
+
+// ============================================================================
+// Internal helper methods
+// ============================================================================
+
+// validatePolicy performs comprehensive validation of a policy
+func (p *PowerAdministrationPoint) validatePolicy(policy *AuthorizationPolicy) error {
+	if policy == nil {
+		return fmt.Errorf("policy cannot be nil")
+	}
+
+	if policy.PolicyName == "" {
+		return fmt.Errorf("policy name is required")
+	}
+
+	if policy.PolicyType == "" {
+		return fmt.Errorf("policy type is required")
+	}
+
+	// Validate expiration date (if set) - should be after creation
+	if policy.ExpiresAt != nil && policy.ExpiresAt.Before(policy.CreatedAt) {
+		return fmt.Errorf("expiration date cannot be before creation date")
+	}
+
+	// Validate rules
+	if len(policy.PolicyRules.AllowedActions) == 0 && len(policy.PolicyRules.DeniedActions) == 0 {
+		return fmt.Errorf("policy must have at least one allowed or denied action")
+	}
+
+	// Validate scope (if provided)
+	if policy.Scope != nil {
+		if len(policy.Scope.Countries) == 0 && len(policy.Scope.Sectors) == 0 &&
+			len(policy.Scope.Entities) == 0 && len(policy.Scope.ClientIDs) == 0 {
+			return fmt.Errorf("policy scope must have at least one defined constraint")
+		}
+	}
+
+	return nil
+}
+
+// matchesCriteria checks if a policy matches search criteria
+func (p *PowerAdministrationPoint) matchesCriteria(policy *AuthorizationPolicy, criteria *PolicySearchCriteria) bool {
+	if criteria == nil {
+		return true
+	}
+
+	// Filter by policy type
+	if len(criteria.PolicyTypes) > 0 {
+		found := false
+		for _, pt := range criteria.PolicyTypes {
+			if policy.PolicyType == pt {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+
+	// Filter by status
+	if len(criteria.Statuses) > 0 {
+		found := false
+		for _, s := range criteria.Statuses {
+			if policy.Status == s {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+
+	// Filter by client owner
+	if criteria.ClientOwner != "" && policy.ClientOwner != criteria.ClientOwner {
+		return false
+	}
+
+	// Filter by owners authorizer
+	if criteria.OwnersAuthorizer != "" && policy.OwnersAuthorizer != criteria.OwnersAuthorizer {
+		return false
+	}
+
+	// Filter by tags
+	if len(criteria.Tags) > 0 {
+		hasAllTags := true
+		for _, tag := range criteria.Tags {
+			found := false
+			for _, policyTag := range policy.Tags {
+				if policyTag == tag {
+					found = true
+					break
+				}
+			}
+			if !found {
+				hasAllTags = false
+				break
+			}
+		}
+		if !hasAllTags {
+			return false
+		}
+	}
+
+	// Filter by created date range
+	if criteria.CreatedAfter != nil && policy.CreatedAt.Before(*criteria.CreatedAfter) {
+		return false
+	}
+	if criteria.CreatedBefore != nil && policy.CreatedAt.After(*criteria.CreatedBefore) {
+		return false
+	}
+
+	return true
 }
