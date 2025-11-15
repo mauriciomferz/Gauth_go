@@ -1317,13 +1317,15 @@ func (p *PowerAdministrationPoint) RevokePolicy(ctx context.Context, policyID, r
 		return fmt.Errorf("policy already revoked")
 	}
 
+	now := time.Now()
 	policy.Status = PolicyStatusRevoked
-	policy.UpdatedAt = time.Now()
+	policy.UpdatedAt = now
+	policy.RevokedAt = &now
 	if policy.Metadata == nil {
 		policy.Metadata = make(map[string]interface{})
 	}
 	policy.Metadata["revocation_reason"] = reason
-	policy.Metadata["revoked_at"] = time.Now()
+	policy.Metadata["revoked_at"] = now
 
 	return nil
 }
