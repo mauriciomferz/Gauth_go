@@ -205,15 +205,24 @@ func (v *simpleTokenValidator) ValidateExtendedToken(ctx context.Context, token 
 	return result.ExtendedToken, nil
 }
 
-// SimplePDP is a basic PDP implementation for RFC-0111 compliance
-// It provides policy-based authorization decisions
+// SimplePDP is a PDP implementation with PAP integration for RFC-0111 compliance
+// It provides policy-based authorization decisions with centralized policy management
 type SimplePDP struct {
-	// Future: could add policy storage/engine here
+	pap *PowerAdministrationPoint
 }
 
 // NewSimplePDP creates a new SimplePDP instance
 func NewSimplePDP() *SimplePDP {
-	return &SimplePDP{}
+	return &SimplePDP{
+		pap: nil, // No PAP integration by default (backward compatible)
+	}
+}
+
+// NewSimplePDPWithPAP creates a new SimplePDP instance with PAP integration
+func NewSimplePDPWithPAP(pap *PowerAdministrationPoint) *SimplePDP {
+	return &SimplePDP{
+		pap: pap,
+	}
 }
 
 // MakeDecision implements the PowerDecisionPoint interface
@@ -323,14 +332,87 @@ func (pdp *SimplePDP) isResourceAuthorized(resourceID string, poaDef *poa.PoADef
 	return true
 }
 
-// AddPolicy adds a policy to the PDP (future enhancement)
+// AddPolicy adds a policy to the PDP via PAP integration
 func (pdp *SimplePDP) AddPolicy(policyID string, policy interface{}) error {
-	// TODO: Implement policy storage when policy engine is added
-	return fmt.Errorf("policy management not yet implemented")
+	if pdp.pap == nil {
+		return fmt.Errorf("PAP not configured - use NewSimplePDPWithPAP() to enable policy management")
+	}
+	
+	// Convert policy interface to AuthorizationPolicy
+	authPolicy, ok := policy.(*AuthorizationPolicy)
+	if !ok {
+		return fmt.Errorf("policy must be of type *AuthorizationPolicy")
+	}
+	
+	// Create policy via PAP
+	request := &PolicyCreateRequest{
+		PolicyName:       authPolicy.PolicyName,
+		PolicyType:       authPolicy.PolicyType,
+		Description:      authPolicy.Description,
+		ClientOwner:      authPolicy.ClientOwner,
+		OwnersAuthorizer: authPolicy.OwnersAuthorizer,
+		PolicyRules:      authPolicy.PolicyRules,
+		Scope:            authPolicy.Scope,
+		Restrictions:     authPolicy.Restrictions,
+		PoATemplate:      authPolicy.PoATemplate,
+		ExpiresAt:        authPolicy.ExpiresAt,
+		Tags:             authPolicy.Tags,
+		Metadata:         authPolicy.Metadata,
+	}
+	
+	createdPolicy, err := pdp.pap.CreatePolicy(context.Background(), request)
+	if err != nil {
+		return fmt.Errorf("failed to create policy via PAP: %w", err)
+	}
+	
+	// Update the policyID if provided policy didn't have one
+	if authPolicy.PolicyID == "" {
+		authPolicy.PolicyID = createdPolicy.PolicyID
+	}
+	
+	return nil
 }
 
-// RemovePolicy removes a policy from the PDP (future enhancement)
+// RemovePolicy removes a policy from the PDP via PAP integration
 func (pdp *SimplePDP) RemovePolicy(policyID string) error {
-	// TODO: Implement policy removal when policy engine is added
-	return fmt.Errorf("policy management not yet implemented")
+	if pdp.pap == nil {
+		return fmt.Errorf("PAP not configured - use NewSimplePDPWithPAP() to enable policy management")
+	}
+	
+	// Delete policy via PAP
+	err := pdp.pap.DeletePolicy(context.Background(), policyID)
+	if err != nil {
+		return fmt.Errorf("failed to delete policy via PAP: %w", err)
+	}
+	
+	return nil
+}
+
+// GetPolicy retrieves a policy from the PDP via PAP integration
+func (pdp *SimplePDP) GetPolicy(policyID string) (*AuthorizationPolicy, error) {
+	if pdp.pap == nil {
+		return nil, fmt.Errorf("PAP not configured - use NewSimplePDPWithPAP() to enable policy management")
+	}
+	
+	policy, err := pdp.pap.GetPolicy(context.Background(), policyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve policy via PAP: %w", err)
+	}
+	
+	return policy, nil
+}
+
+// ListActivePolicies retrieves all active policies from PAP
+func (pdp *SimplePDP) ListActivePolicies() ([]*AuthorizationPolicy, error) {
+	if pdp.pap == nil {
+		return nil, fmt.Errorf("PAP not configured - use NewSimplePDPWithPAP() to enable policy management")
+	}
+	
+	activeStatus := PolicyStatusActive
+	policies, err := pdp.pap.ListPolicies(context.Background(), &activeStatus)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list active policies via PAP: %w", err)
+	}
+	
+	return policies, nil
 }
