@@ -233,6 +233,41 @@ class ApiClient {
     }
   }
 
+  // Phase 2C: Prometheus Metrics Integration
+  /**
+   * Fetch Prometheus metrics in text exposition format
+   * @param endpoint - Prometheus endpoint path (default: /beta/metrics/prometheus)
+   * @returns Raw Prometheus metrics text
+   */
+  async getPrometheusMetrics(endpoint: string = '/beta/metrics/prometheus'): Promise<string> {
+    try {
+      const response = await this.client.get(endpoint, {
+        headers: { 'Accept': 'text/plain' },
+        responseType: 'text'
+      })
+      return response.data as string
+    } catch (error) {
+      console.error(`Failed to fetch Prometheus metrics from ${endpoint}:`, error)
+      throw error
+    }
+  }
+
+  /**
+   * Fetch authorization Prometheus metrics
+   * @returns Raw Prometheus metrics text for authorization service
+   */
+  async getAuthzPrometheusMetrics(): Promise<string> {
+    return this.getPrometheusMetrics('/beta/authz/metrics/prometheus')
+  }
+
+  /**
+   * Fetch global system Prometheus metrics
+   * @returns Raw Prometheus metrics text for global system
+   */
+  async getSystemPrometheusMetrics(): Promise<string> {
+    return this.getPrometheusMetrics('/beta/metrics/prometheus')
+  }
+
   // Policy APIs
   async evaluatePolicy(data: any): Promise<any> {
     // Use PoA authorization which includes policy evaluation
