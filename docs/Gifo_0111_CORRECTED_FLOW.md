@@ -11,17 +11,27 @@
 
 **GAuth builds on OAuth 2.0 and OpenID Connect as its foundation.** The protocol layers are:
 
-### Layer 1: OAuth 2.0 / OpenID Connect Foundation
+### Layer 1: OAuth 2.0 / OpenID Connect Foundation (Inherited)
 - **Resource Server (RS)** - Validates tokens and serves protected resources
-- **Authorization Server (AS)** - Issues access tokens
+- **Authorization Server (AS)** - Issues access tokens, handles authorization flows
 - **Client** - Requests access to protected resources
 - **Resource Owner (RO)** - Grants access to protected resources
+- **Authorization Grants** - Credentials representing RO authorization
+- **Access Tokens** - Bearer tokens for accessing protected resources
 
-### Layer 2: GAuth Extensions (What GAuth Adds)
-- **Extended Tokens** - Beyond OAuth access tokens, includes authorization context
-- **P*P Architecture** - PEP, PDP, PIP, PAP, PVP roles for policy-based access control
-- **Power of Attorney (PoA)** - AI legitimization and transparent authorization tracking
-- **Owner's Authorizer** - Additional role for approving AI actions on behalf of Resource Owner
+### Layer 2: GAuth Extensions (What GAuth Defines/Adds)
+- **Extended Tokens** - Enhanced tokens beyond OAuth access tokens, includes PoA context and authorization chain
+- **P*P Architecture Roles** - PEP (Enforcement), PDP (Decision), PAP (Administration), PIP (Information), PVP (Validation)
+- **Power of Attorney (PoA)** - AI legitimization framework with verifiable authorization chains
+- **Owner's Authorizer** - New role for approving AI actions on behalf of Client Owner
+- **PoA Validation Logic** - Extended AS behavior to validate power delegation chains
+- **Compliance Event Reporting** - Extended RS behavior for AI governance audit trails
+- **AI-Specific Endpoints** - `/transaction`, `/decision`, `/action` for AI operations
+
+**Critical Distinction:**
+- GAuth **uses** the OAuth/OIDC Authorization Server but **extends its token issuance** to include PoA validation
+- GAuth **uses** the OAuth/OIDC Resource Server but **extends its enforcement** to validate PoA claims
+- GAuth **adds** entirely new roles (Owner's Authorizer, P*P architecture) not present in OAuth/OIDC
 
 ---
 
@@ -570,20 +580,29 @@ Resource Servers MUST return standardized errors per OAuth 2.0 Bearer Token Usag
 - **Protocol boundaries clearly defined** - what's OAuth/OIDC vs what's GAuth
 
 ### Protocol Layering Clarification
-**What GAuth Inherits from OAuth/OIDC:**
-- Resource Server role and behavior
-- Token presentation (Authorization: Bearer)
-- Token introspection (RFC 7662)
-- Standard error codes (401, 403, etc.)
-- Client authentication methods
 
-**What GAuth Adds (Extensions):**
-- Extended Tokens (beyond OAuth access tokens)
-- PoA (Power of Attorney) validation
-- P*P architecture (PEP, PDP, PIP, PAP, PVP)
-- Owner's Authorizer role
-- Compliance event reporting for AI governance
-- AI-specific endpoints (transaction, decision, action)
+**What GAuth Inherits from OAuth 2.0 / OpenID Connect:**
+- **Resource Server (RS)** - Core role and behavior for serving protected resources
+- **Authorization Server (AS)** - Core role for authorization flows and token issuance
+- **Client, Resource Owner** - Standard OAuth roles
+- **Authorization Grants** - OAuth grant types (authorization code, etc.)
+- **Access Tokens** - Bearer token format and usage
+- **Token presentation** - Authorization: Bearer header (RFC 6750)
+- **Token introspection** - Validation protocol (RFC 7662)
+- **Error codes** - 401 Unauthorized, 403 Forbidden (RFC 6750)
+- **Client authentication** - client_id, client_secret, PKCE
+
+**What GAuth Extends (Behavior Additions to OAuth/OIDC Components):**
+- **Extended AS behavior** - PoA validation during token issuance
+- **Extended RS behavior** - PoA claim enforcement, compliance event reporting
+- **Extended Token structure** - PoA claims, authorization chain, P*P attributes
+
+**What GAuth Defines (Entirely New Concepts):**
+- **Extended Tokens** - Token type with PoA context beyond OAuth access tokens
+- **Power of Attorney (PoA)** - AI legitimization framework with delegation chains
+- **P*P Architecture** - PEP, PDP, PAP, PIP, PVP roles for policy-based authorization
+- **Owner's Authorizer** - Entirely new role for AI action approval
+- **AI-Specific Operations** - Transaction/decision/action semantics and endpoints
 
 ---
 
