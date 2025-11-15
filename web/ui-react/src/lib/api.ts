@@ -609,6 +609,52 @@ class ApiClient {
   async healthCheck(): Promise<HealthCheckResponse> {
     return this.health()
   }
+
+  // RFC-0111 Subscription Flow APIs
+  async createSubscription(data: { client_id: string, requested_scope: string[] }): Promise<any> {
+    const response = await this.client.post('/rfc0111/subscriptions', data)
+    return response.data
+  }
+
+  async subscriptionStepII(subscriptionId: string, data: any): Promise<any> {
+    const response = await this.client.post(`/rfc0111/subscriptions/${subscriptionId}/step-ii`, data)
+    return response.data
+  }
+
+  async subscriptionStepIII(subscriptionId: string, data: any): Promise<any> {
+    const response = await this.client.post(`/rfc0111/subscriptions/${subscriptionId}/step-iii`, data)
+    return response.data
+  }
+
+  async subscriptionStepIV(subscriptionId: string, data: any): Promise<any> {
+    const response = await this.client.post(`/rfc0111/subscriptions/${subscriptionId}/step-iv`, data)
+    return response.data
+  }
+
+  async subscriptionStepV(subscriptionId: string, data: any): Promise<any> {
+    const response = await this.client.post(`/rfc0111/subscriptions/${subscriptionId}/step-v`, data)
+    return response.data
+  }
+
+  async subscriptionStepVI(subscriptionId: string, data: any): Promise<any> {
+    const response = await this.client.post(`/rfc0111/subscriptions/${subscriptionId}/step-vi`, data)
+    return response.data
+  }
+
+  async subscriptionStepVII(subscriptionId: string, data: any): Promise<any> {
+    const response = await this.client.post(`/rfc0111/subscriptions/${subscriptionId}/step-vii`, data)
+    return response.data
+  }
+
+  async subscriptionStepVIII(subscriptionId: string, data: any): Promise<any> {
+    const response = await this.client.post(`/rfc0111/subscriptions/${subscriptionId}/step-viii`, data)
+    return response.data
+  }
+
+  async getSubscription(subscriptionId: string): Promise<any> {
+    const response = await this.client.get(`/rfc0111/subscriptions/${subscriptionId}`)
+    return response.data
+  }
 }
 
 // Type Definitions
