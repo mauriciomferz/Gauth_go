@@ -417,79 +417,86 @@ class ApiClient {
 
   // PoA APIs (placeholder - need RFC-0111 endpoints)
   async createPoA(data: CreatePoARequest): Promise<PoAResponse> {
-    return this.createDelegation(data) as any
+    // Call the real PoA creation endpoint
+    const response = await this.client.post('/beta/poa', {
+      grantor: data.grantor,
+      grantee: data.representative,
+      scope: data.actions || [],
+      valid_from: new Date().toISOString(),
+      valid_until: new Date(Date.now() + (data.validityDays || 365) * 24 * 60 * 60 * 1000).toISOString(),
+      jurisdiction: data.geographicScope || 'global',
+      agent_type: data.representativeType || 'natural_person'
+    })
+
+    const poa = response.data.poa
+
+    return {
+      id: poa.id,
+      grantor: poa.grantor,
+      representative: poa.grantee,
+      representativeType: poa.agent_type,
+      actions: poa.scope,
+      geographicScope: poa.jurisdiction,
+      validFrom: poa.valid_from,
+      validUntil: poa.valid_until,
+      status: poa.status
+    }
   }
 
   async validatePoA(data: ValidatePoARequest): Promise<PoAValidationResponse> {
-    // Validate against stored delegations
-    const stored = sessionStorage.getItem('delegations') || '[]'
-    const delegations = JSON.parse(stored)
+    // Call the real PoA validation endpoint
+    const response = await this.client.post(`/beta/poa/${data.poaId}/validate`, {
+      action: data.action,
+      context: data.location
+    })
+
+    const validationData = response.data
     
-    // Find matching delegation by poaId
-    const matching = delegations.find((del: any) => del.delegation_id === data.poaId)
-    
+    // Build checks array from validation result
     const checks: ValidationCheck[] = []
-    let isValid = false
     
-    if (matching && matching.status === 'active') {
-      // Check if PoA exists
-      checks.push({ check: 'PoA Exists', result: 'pass' })
-      
-      // Check if action is allowed
-      const actionAllowed = matching.actions.includes(data.action) || matching.actions.includes('*')
-      checks.push({ 
-        check: 'Action Authorized', 
-        result: actionAllowed ? 'pass' : 'fail' 
-      })
-      
-      // Check geographic restrictions
-      const geoAllowed = matching.geoRestrictions.length === 0 || 
-                        matching.geoRestrictions.includes(data.location) ||
-                        matching.geoRestrictions.includes('*')
-      checks.push({ 
-        check: 'Geographic Authorization', 
-        result: geoAllowed ? 'pass' : 'fail' 
-      })
-      
-      // Check expiration
-      const expiresAt = new Date(new Date(matching.createdAt).getTime() + matching.validityPeriod * 24 * 60 * 60 * 1000)
-      const isExpired = expiresAt < new Date()
-      checks.push({ 
-        check: 'Validity Period', 
-        result: isExpired ? 'fail' : 'pass' 
-      })
-      
-      isValid = actionAllowed && geoAllowed && !isExpired
+    if (validationData.valid) {
+      checks.push({ check: 'PoA Status', result: 'pass' })
+      checks.push({ check: 'Action Authorized', result: 'pass' })
+      checks.push({ check: 'Validity Period', result: 'pass' })
     } else {
-      checks.push({ check: 'PoA Exists', result: 'fail' })
-      checks.push({ check: 'Action Authorized', result: 'fail' })
-      checks.push({ check: 'Geographic Authorization', result: 'fail' })
-      checks.push({ check: 'Validity Period', result: 'fail' })
+      checks.push({ check: 'PoA Status', result: 'fail' })
+      if (validationData.reason) {
+        checks.push({ check: 'Validation Failed', result: validationData.reason })
+      }
     }
     
     return {
-      valid: isValid,
+      valid: validationData.valid,
       poaId: data.poaId,
       action: data.action,
       location: data.location,
       checks,
-      validationTime: new Date().toISOString()
+      validationTime: validationData.timestamp || new Date().toISOString()
     }
   }
 
   async listPoAs(): Promise<PoAResponse[]> {
-    // Return stored delegations from session storage
-    const stored = sessionStorage.getItem('delegations') || '[]'
-    const delegations = JSON.parse(stored)
-    
-    return delegations.map((del: any) => ({
-      poaId: del.delegation_id,
-      grantor: del.grantor,
-      representative: del.representative,
-      actions: del.actions,
-      status: del.status,
-      createdAt: del.createdAt,
-      validUntil: new Date(Date.now() + (del.validityPeriod || 365) * 24 * 60 * 60 * 1000).toISOString()
+    // Call the real PoA list endpoint
+    const response = await this.client.get('/beta/poa')
+    const data = response.data
+
+    if (!data.success || !data.poas) {
+      return []
+    }
+
+    return data.poas.map((poa: any) => ({
+      poaId: poa.id,
+      id: poa.id,
+      grantor: poa.grantor,
+      representative: poa.grantee,
+      representativeType: poa.agent_type,
+      actions: poa.scope,
+      geographicScope: poa.jurisdiction,
+      status: poa.status,
+      validFrom: poa.valid_from,
+      validUntil: poa.valid_until,
+      createdAt: poa.created_at
     }))
   }
 

@@ -6060,6 +6060,13 @@ func (s *BetaServer) routes() {
 			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/beta/pvp/verify (PVP identity verification)\n")
 			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/beta/registry/verify-entity (Commercial Registry entity)\n")
 			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/beta/registry/verify-signatory (Commercial Registry signatory)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]   Beta Power of Attorney APIs:\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST   /api/v1/beta/poa (Create PoA)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     GET    /api/v1/beta/poa/:id (Get PoA)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     GET    /api/v1/beta/poa (List PoAs)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     PUT    /api/v1/beta/poa/:id (Update PoA)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     DELETE /api/v1/beta/poa/:id (Revoke PoA)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST   /api/v1/beta/poa/:id/validate (Validate PoA)\n")
 		}
 	} else if err != nil {
 		fmt.Fprintf(os.Stderr, "[RFC-0111] Initialization failed: %v\n", err)
