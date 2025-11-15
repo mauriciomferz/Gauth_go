@@ -99,6 +99,12 @@ type PrometheusMetrics struct {
 	delegationStatusTransitionFailures prom.Counter
 	tokenStatusTransitions             prom.Counter
 	tokenStatusTransitionFailures      prom.Counter
+	// PDP/PEP enforcement and audit metrics
+	pepEnforcements         *prom.CounterVec // labels: allowed (true|false), action_type
+	pepViolations           *prom.CounterVec // labels: violation_type, severity
+	pepEnforcementLatency   prom.Histogram
+	pepAuditBufferEnforcements prom.Gauge
+	pepAuditBufferViolations   prom.Gauge
 	capabilityAnchorEmitted            prom.Counter
 	capabilityAnchorSkipped            prom.Counter
 	capabilityRegistryHashChanged      prom.Counter
@@ -762,6 +768,60 @@ func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 		}
 	}
 	pm.capabilityAnchorAlgorithmEmitted = algoVec
+	
+	// PDP/PEP enforcement and audit metrics
+	pepEnforcements := prom.NewCounterVec(prom.CounterOpts{
+		Namespace:   opts.Namespace,
+		Subsystem:   opts.Subsystem,
+		Name:        "pep_enforcements_total",
+		Help:        "Policy enforcement point decision counts labeled by allowed status and action type",
+		ConstLabels: labels,
+	}, []string{"allowed", "action_type"})
+	if err := reg.Register(pepEnforcements); err != nil {
+		if are, ok := err.(prom.AlreadyRegisteredError); ok {
+			if cv, ok2 := are.ExistingCollector.(*prom.CounterVec); ok2 {
+				pepEnforcements = cv
+			}
+		}
+	}
+	pm.pepEnforcements = pepEnforcements
+
+	pepViolations := prom.NewCounterVec(prom.CounterOpts{
+		Namespace:   opts.Namespace,
+		Subsystem:   opts.Subsystem,
+		Name:        "pep_violations_total",
+		Help:        "Policy enforcement point violation counts labeled by violation type and severity",
+		ConstLabels: labels,
+	}, []string{"violation_type", "severity"})
+	if err := reg.Register(pepViolations); err != nil {
+		if are, ok := err.(prom.AlreadyRegisteredError); ok {
+			if cv, ok2 := are.ExistingCollector.(*prom.CounterVec); ok2 {
+				pepViolations = cv
+			}
+		}
+	}
+	pm.pepViolations = pepViolations
+
+	pepLatencyHist := prom.NewHistogram(prom.HistogramOpts{
+		Namespace:   opts.Namespace,
+		Subsystem:   opts.Subsystem,
+		Name:        "pep_enforcement_latency_seconds",
+		Help:        "Latency of policy enforcement decisions",
+		Buckets:     opts.Buckets,
+		ConstLabels: labels,
+	})
+	if err := reg.Register(pepLatencyHist); err != nil {
+		if are, ok := err.(prom.AlreadyRegisteredError); ok {
+			if h, ok2 := are.ExistingCollector.(prom.Histogram); ok2 {
+				pepLatencyHist = h
+			}
+		}
+	}
+	pm.pepEnforcementLatency = pepLatencyHist
+
+	pm.pepAuditBufferEnforcements = fqGauge("pep_audit_buffer_enforcements", "Current number of enforcement entries in audit buffer")
+	pm.pepAuditBufferViolations = fqGauge("pep_audit_buffer_violations", "Current number of violation entries in audit buffer")
+
 	return pm
 }
 
@@ -1018,6 +1078,38 @@ func (p *PrometheusMetrics) IncCapabilityEnforceAllowed() {
 func (p *PrometheusMetrics) IncCapabilityEnforceDenied() {
 	if p.capabilityEnforceDenied != nil {
 		p.capabilityEnforceDenied.Inc()
+	}
+}
+
+// PDP/PEP enforcement and audit metrics implementation
+func (p *PrometheusMetrics) IncPEPEnforcements(allowed bool, actionType string) {
+	if p.pepEnforcements != nil {
+		allowedStr := "false"
+		if allowed {
+			allowedStr = "true"
+		}
+		p.pepEnforcements.WithLabelValues(allowedStr, actionType).Inc()
+	}
+}
+
+func (p *PrometheusMetrics) IncPEPViolations(violationType, severity string) {
+	if p.pepViolations != nil {
+		p.pepViolations.WithLabelValues(violationType, severity).Inc()
+	}
+}
+
+func (p *PrometheusMetrics) ObservePEPEnforcementLatency(d time.Duration) {
+	if p.pepEnforcementLatency != nil {
+		p.pepEnforcementLatency.Observe(d.Seconds())
+	}
+}
+
+func (p *PrometheusMetrics) SetPEPAuditBufferSize(enforcement, violation int) {
+	if p.pepAuditBufferEnforcements != nil {
+		p.pepAuditBufferEnforcements.Set(float64(enforcement))
+	}
+	if p.pepAuditBufferViolations != nil {
+		p.pepAuditBufferViolations.Set(float64(violation))
 	}
 }
 func (p *PrometheusMetrics) IncModelLimitExceeded() {

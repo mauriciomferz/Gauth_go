@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
 )
 
@@ -17,12 +18,13 @@ type ProductionPEPAuditLogger struct {
 	mu           sync.RWMutex
 	enforcements []EnforcementAuditEntry
 	violations   []ViolationAuditEntry
-	
+
 	// Configuration
 	maxEntries     int
 	enableConsole  bool
 	enableMetrics  bool
-	
+	metrics        metrics.Metrics
+
 	// Statistics
 	totalEnforcements int64
 	totalViolations   int64
@@ -33,13 +35,23 @@ func NewProductionPEPAuditLogger(maxEntries int, enableConsole, enableMetrics bo
 	if maxEntries <= 0 {
 		maxEntries = 10000 // Default to 10k entries
 	}
-	
+
 	return &ProductionPEPAuditLogger{
 		enforcements:  make([]EnforcementAuditEntry, 0, maxEntries),
 		violations:    make([]ViolationAuditEntry, 0, maxEntries),
 		maxEntries:    maxEntries,
 		enableConsole: enableConsole,
 		enableMetrics: enableMetrics,
+		metrics:       metrics.Noop, // Default to noop, can be overridden with SetMetrics
+	}
+}
+
+// SetMetrics configures the metrics collector for the audit logger
+func (l *ProductionPEPAuditLogger) SetMetrics(m metrics.Metrics) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if m != nil {
+		l.metrics = m
 	}
 }
 
@@ -69,15 +81,12 @@ func (l *ProductionPEPAuditLogger) LogEnforcement(ctx context.Context, entry *En
 			entry.Timestamp)
 	}
 
-	// Metrics export (future: Prometheus, OpenTelemetry)
-	if l.enableMetrics {
-		// TODO: Export to Prometheus/OpenTelemetry when integrated
-		// Example: metrics.IncrementCounter("gauth.enforcement.total", map[string]string{
-		//     "allowed": fmt.Sprintf("%v", entry.Allowed),
-		//     "action_type": entry.ActionType,
-		// })
+	// Metrics export
+	if l.enableMetrics && l.metrics != nil {
+		l.metrics.IncPEPEnforcements(entry.Allowed, entry.ActionType)
+		l.metrics.SetPEPAuditBufferSize(len(l.enforcements), len(l.violations))
 	}
-	
+
 	return nil
 }
 
@@ -107,16 +116,11 @@ func (l *ProductionPEPAuditLogger) LogViolation(ctx context.Context, entry *Viol
 	}
 
 	// Metrics and alerting
-	if l.enableMetrics {
-		// TODO: Export metrics and trigger alerts for high-severity violations
-		// Example:
-		// metrics.IncrementCounter("gauth.violation.total", map[string]string{
-		//     "type": entry.ViolationType,
-		//     "severity": entry.Severity,
-		// })
-		// if entry.Severity == "critical" {
-		//     alerts.TriggerAlert("CriticalViolation", entry)
-		// }
+	if l.enableMetrics && l.metrics != nil {
+		l.metrics.IncPEPViolations(entry.ViolationType, entry.Severity)
+		l.metrics.SetPEPAuditBufferSize(len(l.enforcements), len(l.violations))
+		// Note: High-severity violations (critical/high) should be monitored via
+		// Prometheus alerts configured externally (e.g., rate(gauth_rfc0111_pep_violations_total{severity="critical"}[5m]) > threshold)
 	}
 	
 	return nil

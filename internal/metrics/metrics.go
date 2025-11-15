@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 	"os"
 	"sort"
@@ -230,6 +231,18 @@ type Metrics interface {
 	// These are not required by all implementations; callers SHOULD use type assertions.
 	// SetCapabilityAnchorAgeSeconds(age uint64)
 	// SetCapabilityAnchorStale(stale bool)
+	
+	// PDP/PEP enforcement and audit metrics
+	// IncPEPEnforcements increments counter when a policy enforcement point logs an enforcement decision
+	// Labels: allowed (true|false), action_type (e.g. read, write, transaction)
+	IncPEPEnforcements(allowed bool, actionType string)
+	// IncPEPViolations increments counter when a policy violation is logged
+	// Labels: violation_type (e.g. policy_violation, resource_access_denied), severity (critical|high|medium|low)
+	IncPEPViolations(violationType, severity string)
+	// ObservePEPEnforcementLatency records the latency of a policy enforcement decision
+	ObservePEPEnforcementLatency(d time.Duration)
+	// SetPEPAuditBufferSize sets gauge tracking current number of entries in audit buffer (FIFO rotation)
+	SetPEPAuditBufferSize(enforcement, violation int)
 }
 
 // Noop provides a do-nothing implementation used when instrumentation is disabled.
@@ -314,6 +327,10 @@ func (n noop) SetCapabilityAnchorAlgorithmRatio(algo string, ratio float64)     
 func (n noop) SetCapabilityAnchorLastWriteUnix(ts uint64)                                    {}
 func (n noop) IncCapabilityEnforceAllowed()                                                  {}
 func (n noop) IncCapabilityEnforceDenied()                                                   {}
+func (n noop) IncPEPEnforcements(allowed bool, actionType string)                            {}
+func (n noop) IncPEPViolations(violationType, severity string)                               {}
+func (n noop) ObservePEPEnforcementLatency(d time.Duration)                                  {}
+func (n noop) SetPEPAuditBufferSize(enforcement, violation int)                              {}
 func (n noop) IncModelLimitExceeded()                                                        {}
 func (n noop) IncModelOutputLimitExceeded()                                                  {}
 func (n noop) IncModelRateLimitExceeded()                                                    {}
@@ -1315,6 +1332,46 @@ func (m *Memory) SetMaxObservedDelegationDepth(depth int) {
 }
 func (m *Memory) IncCapabilityEnforceAllowed() { atomic.AddUint64(&m.capabilityEnforceAllowed, 1) }
 func (m *Memory) IncCapabilityEnforceDenied()  { atomic.AddUint64(&m.capabilityEnforceDenied, 1) }
+
+// PDP/PEP enforcement and audit metrics
+func (m *Memory) IncPEPEnforcements(allowed bool, actionType string) {
+	// Store labeled counter as map key format: allowed|actionType
+	key := fmt.Sprintf("%v|%s", allowed, actionType)
+	m.decisionMu.Lock()
+	m.decisionCounts[key]++
+	m.decisionMu.Unlock()
+}
+
+func (m *Memory) IncPEPViolations(violationType, severity string) {
+	// Store labeled counter as map key format: violationType|severity
+	key := fmt.Sprintf("%s|%s", violationType, severity)
+	m.decisionReasonMu.Lock()
+	m.decisionReasonCounts[key]++
+	m.decisionReasonMu.Unlock()
+}
+
+func (m *Memory) ObservePEPEnforcementLatency(d time.Duration) {
+	// Store latency in validation reservoir for simplicity (reuse existing infrastructure)
+	ns := uint64(d.Nanoseconds())
+	atomic.AddUint64(&m.validationCount, 1)
+	atomic.AddUint64(&m.validationTotalNS, ns)
+	// Update max
+	for {
+		old := atomic.LoadUint64(&m.validationMaxNS)
+		if ns <= old || atomic.CompareAndSwapUint64(&m.validationMaxNS, old, ns) {
+			break
+		}
+	}
+	// Reservoir sampling
+	idx := atomic.AddUint64(&m.reservoirIndex, 1) - 1
+	m.reservoir[idx&255] = ns
+}
+
+func (m *Memory) SetPEPAuditBufferSize(enforcement, violation int) {
+	// Store as simple gauges (reuse capability counters for simplicity)
+	atomic.StoreUint64(&m.capabilityEnforceAllowed, uint64(enforcement))
+	atomic.StoreUint64(&m.capabilityEnforceDenied, uint64(violation))
+}
 func (m *Memory) IncModelLimitExceeded()       { atomic.AddUint64(&m.modelLimitExceeded, 1) }
 func (m *Memory) IncModelOutputLimitExceeded() { atomic.AddUint64(&m.modelOutputLimitExceeded, 1) }
 func (m *Memory) IncModelRateLimitExceeded()   { atomic.AddUint64(&m.modelRateLimitExceeded, 1) }
