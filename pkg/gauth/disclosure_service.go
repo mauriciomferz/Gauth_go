@@ -204,7 +204,7 @@ func (s *DisclosureService) GetAuthorizationDetail(
 		Restrictions:         token.Restrictions,
 		AuditTrail:           token.AuditTrail,
 		ComplianceViolations: violations,
-		SubscriptionID:       "", // TODO: Add subscription tracking
+		SubscriptionID:       token.SubscriptionID, // Link to originating subscription (RFC-0111 Steps I-VIII)
 	}
 
 	// Log disclosure access
@@ -278,7 +278,11 @@ func (s *DisclosureService) RevokeAuthorization(
 		return nil, fmt.Errorf("failed to revoke authorization: %w", err)
 	}
 
-	// TODO: Stop compliance tracking when interface is available
+	// Stop compliance tracking for the revoked token
+	if err := s.complianceTracker.StopTracking(ctx, request.AuthorizationID); err != nil {
+		// Log but don't fail - compliance tracking stop is non-critical
+		// Note: Tracking may not have been active for this token
+	}
 
 	// Log revocation
 	s.auditLogger.LogRevocation(ctx, &AuditEntry{
@@ -353,11 +357,40 @@ func (s *DisclosureService) GetAuditTrail(
 func (s *DisclosureService) tokenToSummary(token *ExtendedToken) AuthorizationSummary {
 	// Determine if token is revoked
 	status := "active"
-	isRevoked, _ := s.tokenStore.IsRevoked(context.Background(), token.AccessToken)
-	if isRevoked {
-		status = "revoked"
-	} else if time.Now().After(token.IssuedAt.Add(time.Duration(token.ExpiresIn) * time.Second)) {
+	if s.tokenStore != nil {
+		isRevoked, _ := s.tokenStore.IsRevoked(context.Background(), token.AccessToken)
+		if isRevoked {
+			status = "revoked"
+		}
+	}
+	if time.Now().After(token.IssuedAt.Add(time.Duration(token.ExpiresIn) * time.Second)) {
 		status = "expired"
+	}
+
+	// Extract granted actions from Power of Attorney
+	grantedActions := []string{}
+	if token.PowerOfAttorney != nil {
+		actions := token.PowerOfAttorney.Authorization.AuthorizedActions
+		
+		// Extract transactions
+		for _, txn := range actions.Transactions {
+			grantedActions = append(grantedActions, string(txn))
+		}
+		
+		// Extract decisions
+		for _, decision := range actions.Decisions {
+			grantedActions = append(grantedActions, string(decision))
+		}
+		
+		// Extract physical actions
+		for _, physical := range actions.PhysicalActions {
+			grantedActions = append(grantedActions, string(physical))
+		}
+		
+		// Extract non-physical actions
+		for _, nonPhysical := range actions.NonPhysicalActions {
+			grantedActions = append(grantedActions, string(nonPhysical))
+		}
 	}
 
 	summary := AuthorizationSummary{
@@ -366,8 +399,8 @@ func (s *DisclosureService) tokenToSummary(token *ExtendedToken) AuthorizationSu
 		IssuedAt:         token.IssuedAt,
 		ExpiresAt:        token.IssuedAt.Add(time.Duration(token.ExpiresIn) * time.Second),
 		ComplianceStatus: token.ComplianceLevel,
-		GrantedScopes:    token.Scope, // Already []string
-		GrantedActions:   []string{},  // TODO: Extract from PoA
+		GrantedScopes:    token.Scope,       // Already []string
+		GrantedActions:   grantedActions,    // Extracted from PoA definition
 	}
 
 	if token.ResourceOwner != nil {

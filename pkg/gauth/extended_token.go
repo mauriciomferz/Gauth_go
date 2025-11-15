@@ -40,6 +40,9 @@ type ExtendedToken struct {
 	GrantID            string                 `json:"grant_id"`
 	TransactionContext map[string]interface{} `json:"transaction_context,omitempty"`
 
+	// Subscription Tracking (RFC-0111 Steps I-VIII)
+	SubscriptionID string `json:"subscription_id,omitempty"` // Links token to its originating subscription
+
 	// Compliance & Audit
 	ComplianceLevel     string               `json:"compliance_level"`
 	AuditTrail          []AuditEntry         `json:"audit_trail,omitempty"`
