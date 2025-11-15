@@ -288,68 +288,111 @@ class ApiClient {
 
   // PVP APIs (placeholder - need to check if these exist)
   async verifyIdentity(data: VerifyIdentityRequest): Promise<IdentityVerificationResponse> {
-    // Mock identity verification since there's no dedicated endpoint
-    // In production, this would integrate with actual PVP/eIDAS systems
-    
-    // Simulate verification logic based on entity ID format
-    const isLegalEntity = /^(HRB|GmbH|AG|Ltd|Inc|LLC)/i.test(data.entityId)
-    const hasValidFormat = /^[A-Z0-9-]+$/i.test(data.entityId)
-    const minLength = data.entityId.length >= 5
-    
-    // Verification succeeds if:
-    // - Legal Entity: Starts with registry prefix (HRB, etc.) and has valid format
-    // - Individual: Has valid format and minimum length
-    const verified = hasValidFormat && minLength && (
-      (data.type === 'legal_entity' && isLegalEntity) ||
-      (data.type === 'individual' && !isLegalEntity && data.entityId.length >= 8)
-    )
-    
-    return Promise.resolve({
-      verified,
+    // Call the real PVP verification endpoint
+    const response = await this.client.post('/beta/pvp/verify', {
+      document_type: data.tsp, // Use TSP as document type
+      document_number: data.entityId,
+      first_name: data.entityId.split(' ')[0] || 'Unknown',
+      last_name: data.entityId.split(' ')[1] || 'Person',
+      date_of_birth: '1990-01-01', // Default, would come from form in real scenario
+      country: 'AT' // Default, would come from form in real scenario
+    })
+
+    const pvpData = response.data
+
+    if (!pvpData.success || !pvpData.verified) {
+      return {
+        verified: false,
+        identityType: data.type,
+        trustLevel: 'none',
+        entityId: data.entityId,
+        tsp: data.tsp,
+        tspStatus: 'unverified',
+        verificationTime: new Date().toISOString(),
+        cryptographicBinding: 'none'
+      }
+    }
+
+    return {
+      verified: true,
       identityType: data.type,
-      trustLevel: verified ? data.trustLevel : 'none',
+      trustLevel: pvpData.verification_details?.trust_level || data.trustLevel,
       entityId: data.entityId,
       tsp: data.tsp,
-      tspStatus: verified ? 'qualified' : 'unverified',
-      verificationTime: new Date().toISOString(),
-      cryptographicBinding: verified ? 'strong' : 'none'
-    })
+      tspStatus: 'qualified',
+      verificationTime: pvpData.verification_details?.timestamp || new Date().toISOString(),
+      cryptographicBinding: 'strong'
+    }
   }
 
-  // Commercial Registry APIs (placeholder)
+  // Commercial Registry APIs
   async verifyEntity(data: VerifyEntityRequest): Promise<EntityVerificationResponse> {
-    // Mock entity verification since there's no dedicated endpoint
-    // In production, this would call a real commercial registry API
-    return Promise.resolve({
-      verified: true,
-      registrationNumber: data.registrationNumber,
-      legalName: 'Demo Corporation GmbH',
-      jurisdiction: data.jurisdiction,
-      status: 'active',
-      registrationDate: '2020-01-15',
-      legalForm: 'GmbH',
-      managingDirectors: [
-        {
-          name: 'Dr. Jane Smith',
-          position: 'Managing Director',
-          authority: 'full'
-        }
-      ]
+    // Call the real Commercial Registry verification endpoint
+    const response = await this.client.post('/beta/registry/verify-entity', {
+      entity_id: data.registrationNumber,
+      entity_name: '',
+      entity_type: 'GmbH',
+      jurisdiction: data.jurisdiction
     })
+
+    const registryData = response.data
+
+    if (!registryData.success || !registryData.verified) {
+      return {
+        verified: false,
+        registrationNumber: data.registrationNumber,
+        legalName: '',
+        jurisdiction: data.jurisdiction,
+        status: 'unknown',
+        registrationDate: '',
+        legalForm: '',
+        managingDirectors: []
+      }
+    }
+
+    return {
+      verified: true,
+      registrationNumber: registryData.entity.id,
+      legalName: registryData.entity.name,
+      jurisdiction: registryData.entity.jurisdiction,
+      status: registryData.entity.status,
+      registrationDate: registryData.entity.registered_at,
+      legalForm: registryData.entity.entity_type,
+      managingDirectors: [] // Not included in this endpoint response
+    }
   }
 
   async verifySignatory(data: VerifySignatoryRequest): Promise<SignatoryVerificationResponse> {
-    // Mock signatory verification since there's no dedicated endpoint
-    // In production, this would call a real commercial registry API
-    return Promise.resolve({
-      authorized: true,
-      signatoryName: data.signatoryName,
-      entity: data.entity,
-      authorityType: data.authorityType,
-      appointmentDate: '2020-01-15',
-      restrictions: 'none',
-      status: 'active'
+    // Call the real Commercial Registry signatory verification endpoint
+    const response = await this.client.post('/beta/registry/verify-signatory', {
+      entity_id: data.entity,
+      person_id: data.signatoryName, // Using name as person_id for now
+      role: data.authorityType
     })
+
+    const registryData = response.data
+
+    if (!registryData.success || !registryData.verified) {
+      return {
+        authorized: false,
+        signatoryName: data.signatoryName,
+        entity: data.entity,
+        authorityType: data.authorityType,
+        appointmentDate: '',
+        restrictions: 'unknown',
+        status: 'unknown'
+      }
+    }
+
+    return {
+      authorized: registryData.signatory.authorized,
+      signatoryName: data.signatoryName,
+      entity: registryData.signatory.entity_id,
+      authorityType: registryData.signatory.role,
+      appointmentDate: registryData.signatory.valid_from,
+      restrictions: 'none',
+      status: registryData.signatory.authorized ? 'active' : 'inactive'
+    }
   }
 
   // PIP APIs (using authorization endpoints)
@@ -374,79 +417,86 @@ class ApiClient {
 
   // PoA APIs (placeholder - need RFC-0111 endpoints)
   async createPoA(data: CreatePoARequest): Promise<PoAResponse> {
-    return this.createDelegation(data) as any
+    // Call the real PoA creation endpoint
+    const response = await this.client.post('/beta/poa', {
+      grantor: data.grantor,
+      grantee: data.representative,
+      scope: data.actions || [],
+      valid_from: new Date().toISOString(),
+      valid_until: new Date(Date.now() + (data.validityDays || 365) * 24 * 60 * 60 * 1000).toISOString(),
+      jurisdiction: data.geographicScope || 'global',
+      agent_type: data.representativeType || 'natural_person'
+    })
+
+    const poa = response.data.poa
+
+    return {
+      id: poa.id,
+      grantor: poa.grantor,
+      representative: poa.grantee,
+      representativeType: poa.agent_type,
+      actions: poa.scope,
+      geographicScope: poa.jurisdiction,
+      validFrom: poa.valid_from,
+      validUntil: poa.valid_until,
+      status: poa.status
+    }
   }
 
   async validatePoA(data: ValidatePoARequest): Promise<PoAValidationResponse> {
-    // Validate against stored delegations
-    const stored = sessionStorage.getItem('delegations') || '[]'
-    const delegations = JSON.parse(stored)
+    // Call the real PoA validation endpoint
+    const response = await this.client.post(`/beta/poa/${data.poaId}/validate`, {
+      action: data.action,
+      context: data.location
+    })
+
+    const validationData = response.data
     
-    // Find matching delegation by poaId
-    const matching = delegations.find((del: any) => del.delegation_id === data.poaId)
-    
+    // Build checks array from validation result
     const checks: ValidationCheck[] = []
-    let isValid = false
     
-    if (matching && matching.status === 'active') {
-      // Check if PoA exists
-      checks.push({ check: 'PoA Exists', result: 'pass' })
-      
-      // Check if action is allowed
-      const actionAllowed = matching.actions.includes(data.action) || matching.actions.includes('*')
-      checks.push({ 
-        check: 'Action Authorized', 
-        result: actionAllowed ? 'pass' : 'fail' 
-      })
-      
-      // Check geographic restrictions
-      const geoAllowed = matching.geoRestrictions.length === 0 || 
-                        matching.geoRestrictions.includes(data.location) ||
-                        matching.geoRestrictions.includes('*')
-      checks.push({ 
-        check: 'Geographic Authorization', 
-        result: geoAllowed ? 'pass' : 'fail' 
-      })
-      
-      // Check expiration
-      const expiresAt = new Date(new Date(matching.createdAt).getTime() + matching.validityPeriod * 24 * 60 * 60 * 1000)
-      const isExpired = expiresAt < new Date()
-      checks.push({ 
-        check: 'Validity Period', 
-        result: isExpired ? 'fail' : 'pass' 
-      })
-      
-      isValid = actionAllowed && geoAllowed && !isExpired
+    if (validationData.valid) {
+      checks.push({ check: 'PoA Status', result: 'pass' })
+      checks.push({ check: 'Action Authorized', result: 'pass' })
+      checks.push({ check: 'Validity Period', result: 'pass' })
     } else {
-      checks.push({ check: 'PoA Exists', result: 'fail' })
-      checks.push({ check: 'Action Authorized', result: 'fail' })
-      checks.push({ check: 'Geographic Authorization', result: 'fail' })
-      checks.push({ check: 'Validity Period', result: 'fail' })
+      checks.push({ check: 'PoA Status', result: 'fail' })
+      if (validationData.reason) {
+        checks.push({ check: 'Validation Failed', result: validationData.reason })
+      }
     }
     
     return {
-      valid: isValid,
+      valid: validationData.valid,
       poaId: data.poaId,
       action: data.action,
       location: data.location,
       checks,
-      validationTime: new Date().toISOString()
+      validationTime: validationData.timestamp || new Date().toISOString()
     }
   }
 
   async listPoAs(): Promise<PoAResponse[]> {
-    // Return stored delegations from session storage
-    const stored = sessionStorage.getItem('delegations') || '[]'
-    const delegations = JSON.parse(stored)
-    
-    return delegations.map((del: any) => ({
-      poaId: del.delegation_id,
-      grantor: del.grantor,
-      representative: del.representative,
-      actions: del.actions,
-      status: del.status,
-      createdAt: del.createdAt,
-      validUntil: new Date(Date.now() + (del.validityPeriod || 365) * 24 * 60 * 60 * 1000).toISOString()
+    // Call the real PoA list endpoint
+    const response = await this.client.get('/beta/poa')
+    const data = response.data
+
+    if (!data.success || !data.poas) {
+      return []
+    }
+
+    return data.poas.map((poa: any) => ({
+      poaId: poa.id,
+      id: poa.id,
+      grantor: poa.grantor,
+      representative: poa.grantee,
+      representativeType: poa.agent_type,
+      actions: poa.scope,
+      geographicScope: poa.jurisdiction,
+      status: poa.status,
+      validFrom: poa.valid_from,
+      validUntil: poa.valid_until,
+      createdAt: poa.created_at
     }))
   }
 
@@ -558,6 +608,52 @@ class ApiClient {
 
   async healthCheck(): Promise<HealthCheckResponse> {
     return this.health()
+  }
+
+  // RFC-0111 Subscription Flow APIs
+  async createSubscription(data: { client_id: string, requested_scope: string[] }): Promise<any> {
+    const response = await this.client.post('/rfc0111/subscriptions', data)
+    return response.data
+  }
+
+  async subscriptionStepII(subscriptionId: string, data: any): Promise<any> {
+    const response = await this.client.post(`/rfc0111/subscriptions/${subscriptionId}/step-ii`, data)
+    return response.data
+  }
+
+  async subscriptionStepIII(subscriptionId: string, data: any): Promise<any> {
+    const response = await this.client.post(`/rfc0111/subscriptions/${subscriptionId}/step-iii`, data)
+    return response.data
+  }
+
+  async subscriptionStepIV(subscriptionId: string, data: any): Promise<any> {
+    const response = await this.client.post(`/rfc0111/subscriptions/${subscriptionId}/step-iv`, data)
+    return response.data
+  }
+
+  async subscriptionStepV(subscriptionId: string, data: any): Promise<any> {
+    const response = await this.client.post(`/rfc0111/subscriptions/${subscriptionId}/step-v`, data)
+    return response.data
+  }
+
+  async subscriptionStepVI(subscriptionId: string, data: any): Promise<any> {
+    const response = await this.client.post(`/rfc0111/subscriptions/${subscriptionId}/step-vi`, data)
+    return response.data
+  }
+
+  async subscriptionStepVII(subscriptionId: string, data: any): Promise<any> {
+    const response = await this.client.post(`/rfc0111/subscriptions/${subscriptionId}/step-vii`, data)
+    return response.data
+  }
+
+  async subscriptionStepVIII(subscriptionId: string, data: any): Promise<any> {
+    const response = await this.client.post(`/rfc0111/subscriptions/${subscriptionId}/step-viii`, data)
+    return response.data
+  }
+
+  async getSubscription(subscriptionId: string): Promise<any> {
+    const response = await this.client.get(`/rfc0111/subscriptions/${subscriptionId}`)
+    return response.data
   }
 }
 

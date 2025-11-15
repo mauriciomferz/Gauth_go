@@ -6035,6 +6035,10 @@ func (s *BetaServer) routes() {
 				tokenStore,
 			)
 
+			// PHASE 2A ENHANCEMENT: Register Beta API handlers for PVP and Commercial Registry
+			// These endpoints expose the mock external services as HTTP APIs for UI integration
+			s.RegisterBetaExternalServiceEndpoints(rfc0111Components)
+
 			fmt.Fprintf(os.Stderr, "[RFC-0111] Endpoints registered:\n")
 			fmt.Fprintf(os.Stderr, "[RFC-0111]   Subscription Flow (Steps I-VIII):\n")
 			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/rfc0111/subscriptions (Step I: Initiate)\n")
@@ -6052,6 +6056,17 @@ func (s *BetaServer) routes() {
 			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/rfc0111/token/validate (Validate token)\n")
 			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/rfc0111/token/introspect (Introspect token)\n")
 			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/rfc0111/token/revoke (Revoke token)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]   Beta External Service APIs:\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/beta/pvp/verify (PVP identity verification)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/beta/registry/verify-entity (Commercial Registry entity)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/beta/registry/verify-signatory (Commercial Registry signatory)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]   Beta Power of Attorney APIs:\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST   /api/v1/beta/poa (Create PoA)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     GET    /api/v1/beta/poa/:id (Get PoA)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     GET    /api/v1/beta/poa (List PoAs)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     PUT    /api/v1/beta/poa/:id (Update PoA)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     DELETE /api/v1/beta/poa/:id (Revoke PoA)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST   /api/v1/beta/poa/:id/validate (Validate PoA)\n")
 		}
 	} else if err != nil {
 		fmt.Fprintf(os.Stderr, "[RFC-0111] Initialization failed: %v\n", err)
