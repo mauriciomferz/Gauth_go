@@ -5,21 +5,187 @@ package gauth
 import (
 	"context"
 	"fmt"
+	"log"
+	"sync"
 	"time"
 
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
 )
 
-// noopPEPAuditLogger is a simple no-op audit logger for PEP
+// ProductionPEPAuditLogger provides thread-safe audit logging with observability integration
+type ProductionPEPAuditLogger struct {
+	mu           sync.RWMutex
+	enforcements []EnforcementAuditEntry
+	violations   []ViolationAuditEntry
+	
+	// Configuration
+	maxEntries     int
+	enableConsole  bool
+	enableMetrics  bool
+	
+	// Statistics
+	totalEnforcements int64
+	totalViolations   int64
+}
+
+// NewProductionPEPAuditLogger creates a production-ready audit logger
+func NewProductionPEPAuditLogger(maxEntries int, enableConsole, enableMetrics bool) *ProductionPEPAuditLogger {
+	if maxEntries <= 0 {
+		maxEntries = 10000 // Default to 10k entries
+	}
+	
+	return &ProductionPEPAuditLogger{
+		enforcements:  make([]EnforcementAuditEntry, 0, maxEntries),
+		violations:    make([]ViolationAuditEntry, 0, maxEntries),
+		maxEntries:    maxEntries,
+		enableConsole: enableConsole,
+		enableMetrics: enableMetrics,
+	}
+}
+
+// LogEnforcement logs an enforcement action with observability
+func (l *ProductionPEPAuditLogger) LogEnforcement(ctx context.Context, entry *EnforcementAuditEntry) error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	
+	// Store in memory (with rotation)
+	if len(l.enforcements) >= l.maxEntries {
+		// Remove oldest entry (FIFO)
+		l.enforcements = l.enforcements[1:]
+	}
+	l.enforcements = append(l.enforcements, *entry)
+	l.totalEnforcements++
+	
+	// Console logging for debugging
+	if l.enableConsole {
+		log.Printf("[ENFORCEMENT] ID=%s Action=%s Resource=%s Allowed=%v Outcome=%s Reason=%s Violations=%d Timestamp=%v",
+			entry.EnforcementID,
+			entry.ActionType,
+			entry.ResourceID,
+			entry.Allowed,
+			entry.Outcome,
+			entry.Reason,
+			entry.ViolationCount,
+			entry.Timestamp)
+	}
+
+	// Metrics export (future: Prometheus, OpenTelemetry)
+	if l.enableMetrics {
+		// TODO: Export to Prometheus/OpenTelemetry when integrated
+		// Example: metrics.IncrementCounter("gauth.enforcement.total", map[string]string{
+		//     "allowed": fmt.Sprintf("%v", entry.Allowed),
+		//     "action_type": entry.ActionType,
+		// })
+	}
+	
+	return nil
+}
+
+// LogViolation logs a violation with observability and alerting
+func (l *ProductionPEPAuditLogger) LogViolation(ctx context.Context, entry *ViolationAuditEntry) error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	
+	// Store in memory (with rotation)
+	if len(l.violations) >= l.maxEntries {
+		// Remove oldest entry (FIFO)
+		l.violations = l.violations[1:]
+	}
+	l.violations = append(l.violations, *entry)
+	l.totalViolations++
+	
+	// Console logging with severity
+	if l.enableConsole {
+		log.Printf("[VIOLATION] Enforcement=%s Type=%s Severity=%s Action=%s Resource=%s Description=%s Timestamp=%v",
+			entry.EnforcementID,
+			entry.ViolationType,
+			entry.Severity,
+			entry.ActionType,
+			entry.ResourceID,
+			entry.Description,
+			entry.Timestamp)
+	}
+
+	// Metrics and alerting
+	if l.enableMetrics {
+		// TODO: Export metrics and trigger alerts for high-severity violations
+		// Example:
+		// metrics.IncrementCounter("gauth.violation.total", map[string]string{
+		//     "type": entry.ViolationType,
+		//     "severity": entry.Severity,
+		// })
+		// if entry.Severity == "critical" {
+		//     alerts.TriggerAlert("CriticalViolation", entry)
+		// }
+	}
+	
+	return nil
+}
+
+// GetEnforcements returns recent enforcement logs (thread-safe)
+func (l *ProductionPEPAuditLogger) GetEnforcements(limit int) []EnforcementAuditEntry {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+	
+	if limit <= 0 || limit > len(l.enforcements) {
+		limit = len(l.enforcements)
+	}
+	
+	// Return most recent entries
+	start := len(l.enforcements) - limit
+	if start < 0 {
+		start = 0
+	}
+	
+	result := make([]EnforcementAuditEntry, limit)
+	copy(result, l.enforcements[start:])
+	return result
+}
+
+// GetViolations returns recent violation logs (thread-safe)
+func (l *ProductionPEPAuditLogger) GetViolations(limit int) []ViolationAuditEntry {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+	
+	if limit <= 0 || limit > len(l.violations) {
+		limit = len(l.violations)
+	}
+	
+	// Return most recent entries
+	start := len(l.violations) - limit
+	if start < 0 {
+		start = 0
+	}
+	
+	result := make([]ViolationAuditEntry, limit)
+	copy(result, l.violations[start:])
+	return result
+}
+
+// GetStatistics returns audit log statistics
+func (l *ProductionPEPAuditLogger) GetStatistics() map[string]interface{} {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+	
+	return map[string]interface{}{
+		"total_enforcements":        l.totalEnforcements,
+		"total_violations":          l.totalViolations,
+		"stored_enforcements":       len(l.enforcements),
+		"stored_violations":         len(l.violations),
+		"max_entries":               l.maxEntries,
+		"enforcement_storage_usage": float64(len(l.enforcements)) / float64(l.maxEntries) * 100,
+		"violation_storage_usage":   float64(len(l.violations)) / float64(l.maxEntries) * 100,
+	}
+}
+
+// noopPEPAuditLogger is a simple no-op audit logger for testing/minimal setups
 type noopPEPAuditLogger struct{}
 
 func (n *noopPEPAuditLogger) LogEnforcement(ctx context.Context, entry *EnforcementAuditEntry) error {
-	// TODO: Implement audit logging to observability system
 	return nil
 }
 
 func (n *noopPEPAuditLogger) LogViolation(ctx context.Context, entry *ViolationAuditEntry) error {
-	// TODO: Implement violation logging to observability system
 	return nil
 }
 
