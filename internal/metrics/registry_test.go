@@ -142,6 +142,10 @@ func (m *mockCollector) SetCapabilityAnchorAlgorithmRatio(algo string, ratio flo
 }
 func (m *mockCollector) IncCapabilityEnforceAllowed()                    {}
 func (m *mockCollector) IncCapabilityEnforceDenied()                     {}
+func (m *mockCollector) IncPEPEnforcements(allowed bool, actionType string) {}
+func (m *mockCollector) IncPEPViolations(violationType, severity string)   {}
+func (m *mockCollector) ObservePEPEnforcementLatency(d time.Duration)      {}
+func (m *mockCollector) SetPEPAuditBufferSize(enforcement, violation int)  {}
 func (m *mockCollector) IncModelLimitExceeded()                          {}
 func (m *mockCollector) IncModelOutputLimitExceeded()                    {}
 func (m *mockCollector) IncModelRateLimitExceeded()                      {}
