@@ -37,7 +37,7 @@ func TestPAP_CreatePolicy(t *testing.T) {
 			ClientOwner:      "client-001",
 			OwnersAuthorizer: "authorizer-001",
 			PolicyRules: PolicyRules{
-				AllowedActions: []string{"read", "write"},
+				AllowedActions:   []string{"read", "write"},
 				ResourcePatterns: []string{"/api/*"},
 			},
 			Scope: &PolicyScope{
@@ -849,10 +849,10 @@ func TestPAP_GetPolicyStatistics(t *testing.T) {
 		suspend    bool
 		revoke     bool
 	}{
-		{PolicyTypePoA, true, false, false},       // Active PoA
-		{PolicyTypePoA, false, false, false},      // Draft PoA
-		{PolicyTypeScope, true, false, false},     // Active Scope
-		{PolicyTypeScope, true, true, false},      // Suspended Scope
+		{PolicyTypePoA, true, false, false},        // Active PoA
+		{PolicyTypePoA, false, false, false},       // Draft PoA
+		{PolicyTypeScope, true, false, false},      // Active Scope
+		{PolicyTypeScope, true, true, false},       // Suspended Scope
 		{PolicyTypeRestriction, true, false, true}, // Revoked Restriction
 	}
 
@@ -894,10 +894,10 @@ func TestPAP_GetPolicyStatistics(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, stats)
 	assert.Equal(t, 5, stats.TotalPolicies)
-	assert.Equal(t, 2, stats.ActivePolicies)   // 2 active policies
-	assert.Equal(t, 1, stats.DraftPolicies)    // 1 draft policy
+	assert.Equal(t, 2, stats.ActivePolicies)    // 2 active policies
+	assert.Equal(t, 1, stats.DraftPolicies)     // 1 draft policy
 	assert.Equal(t, 1, stats.SuspendedPolicies) // 1 suspended policy
-	assert.Equal(t, 1, stats.RevokedPolicies)  // 1 revoked policy
+	assert.Equal(t, 1, stats.RevokedPolicies)   // 1 revoked policy
 
 	// Check policies by type
 	assert.Equal(t, 2, stats.PoliciesByType[PolicyTypePoA])

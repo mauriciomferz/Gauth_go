@@ -34,64 +34,64 @@ func TestE2E_JWTSerializationRoundTrip(t *testing.T) {
 		time.Hour,                     // tokenExpiry (3600 seconds)
 	)
 
-		t.Run("JWT_Compact_Serialization", func(t *testing.T) {
+	t.Run("JWT_Compact_Serialization", func(t *testing.T) {
 		// Create extended token with minimal valid request
-			request := &ExtendedTokenRequest{
+		request := &ExtendedTokenRequest{
 			GrantID: "test-grant-001",
 			Scope:   []string{"read", "write"},
-				PowerOfAttorney: &poa.PoADefinition{
-					Parties: poa.Parties{
-						Principal:        poa.Principal{Type: "Organization", Identity: "principal-001"},
-						AuthorizedClient: poa.AuthorizedClient{Type: "LLM", Identity: "client-001", StatusEnum: poa.OperationalStatusActive, CapabilityLevel: poa.CapabilityL1},
-					},
-					Authorization: poa.AuthorizationScope{},
-					Requirements: poa.Requirements{ValidityPeriod: poa.ValidityPeriod{StartTime: time.Now().Add(-time.Minute), EndTime: time.Now().Add(time.Hour)}},
+			PowerOfAttorney: &poa.PoADefinition{
+				Parties: poa.Parties{
+					Principal:        poa.Principal{Type: "Organization", Identity: "principal-001"},
+					AuthorizedClient: poa.AuthorizedClient{Type: "LLM", Identity: "client-001", StatusEnum: poa.OperationalStatusActive, CapabilityLevel: poa.CapabilityL1},
 				},
-				// Added required owner's authorizer info & legal framework to satisfy ExtendedTokenService validation
-				OwnersAuthorizerInfo: &OwnersAuthorizerInfo{AuthorizerID: "authorizer-001", AuthorizerName: "Test Authorizer", AuthorizerType: "managing_director", IdentityVerified: true, VerificationMethod: "test", VerificationDate: time.Now()},
-				LegalFramework:       &LegalFrameworkInfo{Jurisdiction: "DE", ApplicableLaws: []string{"TEST-LAW"}},
+				Authorization: poa.AuthorizationScope{},
+				Requirements:  poa.Requirements{ValidityPeriod: poa.ValidityPeriod{StartTime: time.Now().Add(-time.Minute), EndTime: time.Now().Add(time.Hour)}},
+			},
+			// Added required owner's authorizer info & legal framework to satisfy ExtendedTokenService validation
+			OwnersAuthorizerInfo: &OwnersAuthorizerInfo{AuthorizerID: "authorizer-001", AuthorizerName: "Test Authorizer", AuthorizerType: "managing_director", IdentityVerified: true, VerificationMethod: "test", VerificationDate: time.Now()},
+			LegalFramework:       &LegalFrameworkInfo{Jurisdiction: "DE", ApplicableLaws: []string{"TEST-LAW"}},
 			AuthorizationChain: &AuthorizationChain{
-					OwnersAuthorizer: &AuthorizationLink{
-						EntityID:           "authorizer-001",
-						EntityName:         "Test Authorizer",
-						Role:               "authorizer",
-						EntityType:         "organization",
-						AuthorizationType:  "statutory",
-						IdentityVerified:   true,
-						Status:             "active",
-						ValidFrom:          time.Now().Add(-time.Hour),
-						ValidUntil:         time.Now().Add(time.Hour),
-						StatutoryAuthority: "board_resolution_2025",
-						LegalBasis: &LegalBasis{BasisType: "power_of_attorney", Jurisdiction: "DE"},
-						CommercialRegisterRef: "CR-TEST-001",
-						ScopeOfAuthority: []string{"token:issue"},
-					},
-					ClientOwner: &AuthorizationLink{
-						EntityID:          "owner-001",
-						EntityName:        "Test Owner",
-						Role:              "owner",
-						EntityType:        "organization",
-						AuthorizedBy:      "authorizer-001",
-						AuthorizationType: "statutory",
-						IdentityVerified:  true,
-						Status:            "active",
-						ValidFrom:         time.Now().Add(-30 * time.Minute),
-						ValidUntil:        time.Now().Add(30 * time.Minute),
-						ScopeOfAuthority:  []string{"token:delegate"},
-					},
-					Client: &AuthorizationLink{
-						EntityID:          "client-001",
-						EntityName:        "Test Client",
-						Role:              "client",
-						EntityType:        "ai_system",
-						Status:            "active",
-						AuthorizedBy:      "owner-001",
-						AuthorizationType: "delegated",
-						IdentityVerified:  true,
-						ValidFrom:         time.Now().Add(-5 * time.Minute),
-						ValidUntil:        time.Now().Add(25 * time.Minute),
-						ScopeOfAuthority:  []string{"token:use"},
-					},
+				OwnersAuthorizer: &AuthorizationLink{
+					EntityID:              "authorizer-001",
+					EntityName:            "Test Authorizer",
+					Role:                  "authorizer",
+					EntityType:            "organization",
+					AuthorizationType:     "statutory",
+					IdentityVerified:      true,
+					Status:                "active",
+					ValidFrom:             time.Now().Add(-time.Hour),
+					ValidUntil:            time.Now().Add(time.Hour),
+					StatutoryAuthority:    "board_resolution_2025",
+					LegalBasis:            &LegalBasis{BasisType: "power_of_attorney", Jurisdiction: "DE"},
+					CommercialRegisterRef: "CR-TEST-001",
+					ScopeOfAuthority:      []string{"token:issue"},
+				},
+				ClientOwner: &AuthorizationLink{
+					EntityID:          "owner-001",
+					EntityName:        "Test Owner",
+					Role:              "owner",
+					EntityType:        "organization",
+					AuthorizedBy:      "authorizer-001",
+					AuthorizationType: "statutory",
+					IdentityVerified:  true,
+					Status:            "active",
+					ValidFrom:         time.Now().Add(-30 * time.Minute),
+					ValidUntil:        time.Now().Add(30 * time.Minute),
+					ScopeOfAuthority:  []string{"token:delegate"},
+				},
+				Client: &AuthorizationLink{
+					EntityID:          "client-001",
+					EntityName:        "Test Client",
+					Role:              "client",
+					EntityType:        "ai_system",
+					Status:            "active",
+					AuthorizedBy:      "owner-001",
+					AuthorizationType: "delegated",
+					IdentityVerified:  true,
+					ValidFrom:         time.Now().Add(-5 * time.Minute),
+					ValidUntil:        time.Now().Add(25 * time.Minute),
+					ScopeOfAuthority:  []string{"token:use"},
+				},
 			},
 			ClientOwnerInfo: &ClientOwnerInfo{
 				OwnerID:   "owner-001",
@@ -107,13 +107,13 @@ func TestE2E_JWTSerializationRoundTrip(t *testing.T) {
 
 		token, err := tokenService.CreateExtendedToken(ctx, request)
 		if err != nil {
-																					 t.Fatalf("Token creation failed: %v", err)
+			t.Fatalf("Token creation failed: %v", err)
 		}
 
 		// Encode extended token to JWT (AccessToken is internal ID; JWT produced separately)
 		jwtString, err := tokenService.EncodeExtendedToken(ctx, token)
 		if err != nil {
-																					 t.Fatalf("Encoding failed: %v", err)
+			t.Fatalf("Encoding failed: %v", err)
 		}
 
 		// Validate JWT compact serialization format
@@ -129,63 +129,63 @@ func TestE2E_JWTSerializationRoundTrip(t *testing.T) {
 		t.Logf("   Signature length: %d chars", len(parts[2]))
 	})
 
-		t.Run("JWT_Parsing_And_Validation", func(t *testing.T) {
+	t.Run("JWT_Parsing_And_Validation", func(t *testing.T) {
 		// Create token
-			request := &ExtendedTokenRequest{
+		request := &ExtendedTokenRequest{
 			GrantID: "test-grant-002",
 			Scope:   []string{"admin"},
-				PowerOfAttorney: &poa.PoADefinition{
-					Parties: poa.Parties{
-						Principal:        poa.Principal{Type: "Organization", Identity: "principal-002"},
-						AuthorizedClient: poa.AuthorizedClient{Type: "LLM", Identity: "client-002", StatusEnum: poa.OperationalStatusActive, CapabilityLevel: poa.CapabilityL1},
-					},
-					Authorization: poa.AuthorizationScope{},
-					Requirements: poa.Requirements{ValidityPeriod: poa.ValidityPeriod{StartTime: time.Now().Add(-time.Minute), EndTime: time.Now().Add(time.Hour)}},
+			PowerOfAttorney: &poa.PoADefinition{
+				Parties: poa.Parties{
+					Principal:        poa.Principal{Type: "Organization", Identity: "principal-002"},
+					AuthorizedClient: poa.AuthorizedClient{Type: "LLM", Identity: "client-002", StatusEnum: poa.OperationalStatusActive, CapabilityLevel: poa.CapabilityL1},
 				},
-				OwnersAuthorizerInfo: &OwnersAuthorizerInfo{AuthorizerID: "authorizer-002", AuthorizerName: "Admin Authorizer", AuthorizerType: "managing_director", IdentityVerified: true, VerificationMethod: "test", VerificationDate: time.Now()},
-				LegalFramework:       &LegalFrameworkInfo{Jurisdiction: "US", ApplicableLaws: []string{"US-LAW"}},
+				Authorization: poa.AuthorizationScope{},
+				Requirements:  poa.Requirements{ValidityPeriod: poa.ValidityPeriod{StartTime: time.Now().Add(-time.Minute), EndTime: time.Now().Add(time.Hour)}},
+			},
+			OwnersAuthorizerInfo: &OwnersAuthorizerInfo{AuthorizerID: "authorizer-002", AuthorizerName: "Admin Authorizer", AuthorizerType: "managing_director", IdentityVerified: true, VerificationMethod: "test", VerificationDate: time.Now()},
+			LegalFramework:       &LegalFrameworkInfo{Jurisdiction: "US", ApplicableLaws: []string{"US-LAW"}},
 			AuthorizationChain: &AuthorizationChain{
-					OwnersAuthorizer: &AuthorizationLink{
-						EntityID:           "authorizer-002",
-						EntityName:         "Admin Authorizer",
-						Role:               "authorizer",
-						EntityType:         "organization",
-						AuthorizationType:  "statutory",
-						IdentityVerified:   true,
-						Status:             "active",
-						ValidFrom:          time.Now().Add(-time.Hour),
-						ValidUntil:         time.Now().Add(time.Hour),
-						StatutoryAuthority: "board_resolution_2025",
-						LegalBasis: &LegalBasis{BasisType: "power_of_attorney", Jurisdiction: "US"},
-						CommercialRegisterRef: "CR-US-001",
-						ScopeOfAuthority: []string{"token:issue"},
-					},
-					ClientOwner: &AuthorizationLink{
-						EntityID:          "owner-002",
-						EntityName:        "Admin Owner",
-						Role:              "owner",
-						EntityType:        "organization",
-						AuthorizedBy:      "authorizer-002",
-						AuthorizationType: "statutory",
-						IdentityVerified:  true,
-						Status:            "active",
-						ValidFrom:         time.Now().Add(-30 * time.Minute),
-						ValidUntil:        time.Now().Add(30 * time.Minute),
-						ScopeOfAuthority:  []string{"token:delegate"},
-					},
-					Client: &AuthorizationLink{
-						EntityID:          "client-002",
-						EntityName:        "Admin Client",
-						Role:              "client",
-						EntityType:        "ai_system",
-						Status:            "active",
-						AuthorizedBy:      "owner-002",
-						AuthorizationType: "delegated",
-						IdentityVerified:  true,
-						ValidFrom:         time.Now().Add(-5 * time.Minute),
-						ValidUntil:        time.Now().Add(25 * time.Minute),
-						ScopeOfAuthority:  []string{"token:use"},
-					},
+				OwnersAuthorizer: &AuthorizationLink{
+					EntityID:              "authorizer-002",
+					EntityName:            "Admin Authorizer",
+					Role:                  "authorizer",
+					EntityType:            "organization",
+					AuthorizationType:     "statutory",
+					IdentityVerified:      true,
+					Status:                "active",
+					ValidFrom:             time.Now().Add(-time.Hour),
+					ValidUntil:            time.Now().Add(time.Hour),
+					StatutoryAuthority:    "board_resolution_2025",
+					LegalBasis:            &LegalBasis{BasisType: "power_of_attorney", Jurisdiction: "US"},
+					CommercialRegisterRef: "CR-US-001",
+					ScopeOfAuthority:      []string{"token:issue"},
+				},
+				ClientOwner: &AuthorizationLink{
+					EntityID:          "owner-002",
+					EntityName:        "Admin Owner",
+					Role:              "owner",
+					EntityType:        "organization",
+					AuthorizedBy:      "authorizer-002",
+					AuthorizationType: "statutory",
+					IdentityVerified:  true,
+					Status:            "active",
+					ValidFrom:         time.Now().Add(-30 * time.Minute),
+					ValidUntil:        time.Now().Add(30 * time.Minute),
+					ScopeOfAuthority:  []string{"token:delegate"},
+				},
+				Client: &AuthorizationLink{
+					EntityID:          "client-002",
+					EntityName:        "Admin Client",
+					Role:              "client",
+					EntityType:        "ai_system",
+					Status:            "active",
+					AuthorizedBy:      "owner-002",
+					AuthorizationType: "delegated",
+					IdentityVerified:  true,
+					ValidFrom:         time.Now().Add(-5 * time.Minute),
+					ValidUntil:        time.Now().Add(25 * time.Minute),
+					ScopeOfAuthority:  []string{"token:use"},
+				},
 			},
 			ClientOwnerInfo: &ClientOwnerInfo{
 				OwnerID:   "owner-002",
@@ -201,12 +201,12 @@ func TestE2E_JWTSerializationRoundTrip(t *testing.T) {
 
 		createdToken, err := tokenService.CreateExtendedToken(ctx, request)
 		if err != nil {
-																					 t.Fatalf("Token creation failed: %v", err)
+			t.Fatalf("Token creation failed: %v", err)
 		}
 
 		jwtString, err := tokenService.EncodeExtendedToken(ctx, createdToken)
 		if err != nil {
-																					 t.Fatalf("Encoding failed: %v", err)
+			t.Fatalf("Encoding failed: %v", err)
 		}
 
 		// Parse the JWT using golang-jwt library
@@ -251,63 +251,63 @@ func TestE2E_JWTSerializationRoundTrip(t *testing.T) {
 		originalGrantID := "grant-rich-001"
 		originalJurisdiction := "EU"
 
-			request := &ExtendedTokenRequest{
+		request := &ExtendedTokenRequest{
 			GrantID: originalGrantID,
 			Scope:   originalScope,
-				PowerOfAttorney: &poa.PoADefinition{
-					Parties: poa.Parties{
-						Principal:        poa.Principal{Type: "Organization", Identity: "principal-rich"},
-						AuthorizedClient: poa.AuthorizedClient{Type: "LLM", Identity: "client-rich", StatusEnum: poa.OperationalStatusActive, CapabilityLevel: poa.CapabilityL1},
-					},
-					Authorization: poa.AuthorizationScope{},
-					Requirements: poa.Requirements{ValidityPeriod: poa.ValidityPeriod{StartTime: time.Now().Add(-time.Minute), EndTime: time.Now().Add(time.Hour)}},
+			PowerOfAttorney: &poa.PoADefinition{
+				Parties: poa.Parties{
+					Principal:        poa.Principal{Type: "Organization", Identity: "principal-rich"},
+					AuthorizedClient: poa.AuthorizedClient{Type: "LLM", Identity: "client-rich", StatusEnum: poa.OperationalStatusActive, CapabilityLevel: poa.CapabilityL1},
 				},
-				// Single consistent OwnersAuthorizerInfo & LegalFramework matching authorization chain
-				OwnersAuthorizerInfo: &OwnersAuthorizerInfo{AuthorizerID: "authorizer-rich", AuthorizerName: "Rich Authorizer", AuthorizerType: "board_member", IdentityVerified: true, VerificationMethod: "test", VerificationDate: time.Now()},
-				LegalFramework:       &LegalFrameworkInfo{Jurisdiction: originalJurisdiction, ApplicableLaws: []string{"EU-AI-ACT"}},
-				AuthorizationChain: &AuthorizationChain{
-					OwnersAuthorizer: &AuthorizationLink{
-						EntityID:           "authorizer-rich",
-						EntityName:         "Rich Authorizer",
-						Role:               "authorizer",
-						EntityType:         "organization",
-						AuthorizationType:  "statutory",
-						IdentityVerified:   true,
-						Status:             "active",
-						ValidFrom:          time.Now().Add(-time.Hour),
-						ValidUntil:         time.Now().Add(time.Hour),
-						StatutoryAuthority: "board_resolution_2025",
-						LegalBasis: &LegalBasis{BasisType: "power_of_attorney", Jurisdiction: "EU"},
-						CommercialRegisterRef: "CR-EU-001",
-						ScopeOfAuthority: []string{"token:issue"},
-					},
-					ClientOwner: &AuthorizationLink{
-						EntityID:          "owner-rich",
-						EntityName:        "Rich Owner",
-						Role:              "owner",
-						EntityType:        "organization",
-						AuthorizedBy:      "authorizer-rich",
-						AuthorizationType: "statutory",
-						IdentityVerified:  true,
-						Status:            "active",
-						ValidFrom:         time.Now().Add(-30 * time.Minute),
-						ValidUntil:        time.Now().Add(30 * time.Minute),
-						ScopeOfAuthority:  []string{"token:delegate"},
-					},
-					Client: &AuthorizationLink{
-						EntityID:          "client-rich",
-						EntityName:        "Rich Client",
-						Role:              "client",
-						EntityType:        "ai_system",
-						Status:            "active",
-						AuthorizedBy:      "owner-rich",
-						AuthorizationType: "delegated",
-						IdentityVerified:  true,
-						ValidFrom:         time.Now().Add(-5 * time.Minute),
-						ValidUntil:        time.Now().Add(25 * time.Minute),
-						ScopeOfAuthority:  []string{"token:use"},
-					},
+				Authorization: poa.AuthorizationScope{},
+				Requirements:  poa.Requirements{ValidityPeriod: poa.ValidityPeriod{StartTime: time.Now().Add(-time.Minute), EndTime: time.Now().Add(time.Hour)}},
+			},
+			// Single consistent OwnersAuthorizerInfo & LegalFramework matching authorization chain
+			OwnersAuthorizerInfo: &OwnersAuthorizerInfo{AuthorizerID: "authorizer-rich", AuthorizerName: "Rich Authorizer", AuthorizerType: "board_member", IdentityVerified: true, VerificationMethod: "test", VerificationDate: time.Now()},
+			LegalFramework:       &LegalFrameworkInfo{Jurisdiction: originalJurisdiction, ApplicableLaws: []string{"EU-AI-ACT"}},
+			AuthorizationChain: &AuthorizationChain{
+				OwnersAuthorizer: &AuthorizationLink{
+					EntityID:              "authorizer-rich",
+					EntityName:            "Rich Authorizer",
+					Role:                  "authorizer",
+					EntityType:            "organization",
+					AuthorizationType:     "statutory",
+					IdentityVerified:      true,
+					Status:                "active",
+					ValidFrom:             time.Now().Add(-time.Hour),
+					ValidUntil:            time.Now().Add(time.Hour),
+					StatutoryAuthority:    "board_resolution_2025",
+					LegalBasis:            &LegalBasis{BasisType: "power_of_attorney", Jurisdiction: "EU"},
+					CommercialRegisterRef: "CR-EU-001",
+					ScopeOfAuthority:      []string{"token:issue"},
 				},
+				ClientOwner: &AuthorizationLink{
+					EntityID:          "owner-rich",
+					EntityName:        "Rich Owner",
+					Role:              "owner",
+					EntityType:        "organization",
+					AuthorizedBy:      "authorizer-rich",
+					AuthorizationType: "statutory",
+					IdentityVerified:  true,
+					Status:            "active",
+					ValidFrom:         time.Now().Add(-30 * time.Minute),
+					ValidUntil:        time.Now().Add(30 * time.Minute),
+					ScopeOfAuthority:  []string{"token:delegate"},
+				},
+				Client: &AuthorizationLink{
+					EntityID:          "client-rich",
+					EntityName:        "Rich Client",
+					Role:              "client",
+					EntityType:        "ai_system",
+					Status:            "active",
+					AuthorizedBy:      "owner-rich",
+					AuthorizationType: "delegated",
+					IdentityVerified:  true,
+					ValidFrom:         time.Now().Add(-5 * time.Minute),
+					ValidUntil:        time.Now().Add(25 * time.Minute),
+					ScopeOfAuthority:  []string{"token:use"},
+				},
+			},
 			ClientOwnerInfo: &ClientOwnerInfo{
 				OwnerID:   "owner-rich",
 				OwnerName: "Rich Metadata Owner",
@@ -322,12 +322,12 @@ func TestE2E_JWTSerializationRoundTrip(t *testing.T) {
 
 		createdToken, err := tokenService.CreateExtendedToken(ctx, request)
 		if err != nil {
-																					 t.Fatalf("Token creation failed: %v", err)
+			t.Fatalf("Token creation failed: %v", err)
 		}
 
 		jwtString, err := tokenService.EncodeExtendedToken(ctx, createdToken)
 		if err != nil {
-																					 t.Fatalf("Encoding failed: %v", err)
+			t.Fatalf("Encoding failed: %v", err)
 		}
 
 		// Parse and validate claim preservation
@@ -377,62 +377,62 @@ func TestE2E_JWTSerializationRoundTrip(t *testing.T) {
 			time.Second, // 1 second expiry
 		)
 
-			request := &ExtendedTokenRequest{
-				GrantID: "test-grant-expiry",
-				Scope:   []string{"temp"},
-				PowerOfAttorney: &poa.PoADefinition{
-					Parties: poa.Parties{
-						Principal:        poa.Principal{Type: "Organization", Identity: "principal-expiry"},
-						AuthorizedClient: poa.AuthorizedClient{Type: "LLM", Identity: "client-expiry", StatusEnum: poa.OperationalStatusActive, CapabilityLevel: poa.CapabilityL1},
-					},
-					Authorization: poa.AuthorizationScope{},
-					Requirements: poa.Requirements{ValidityPeriod: poa.ValidityPeriod{StartTime: time.Now().Add(-time.Minute), EndTime: time.Now().Add(time.Hour)}},
+		request := &ExtendedTokenRequest{
+			GrantID: "test-grant-expiry",
+			Scope:   []string{"temp"},
+			PowerOfAttorney: &poa.PoADefinition{
+				Parties: poa.Parties{
+					Principal:        poa.Principal{Type: "Organization", Identity: "principal-expiry"},
+					AuthorizedClient: poa.AuthorizedClient{Type: "LLM", Identity: "client-expiry", StatusEnum: poa.OperationalStatusActive, CapabilityLevel: poa.CapabilityL1},
 				},
-				OwnersAuthorizerInfo: &OwnersAuthorizerInfo{AuthorizerID: "authorizer-expiry", AuthorizerName: "Expiry Authorizer", AuthorizerType: "board_member", IdentityVerified: true, VerificationMethod: "test", VerificationDate: time.Now()},
-				LegalFramework: &LegalFrameworkInfo{Jurisdiction: "TEST", ApplicableLaws: []string{"TEST-LAW"}},
-				AuthorizationChain: &AuthorizationChain{
-					OwnersAuthorizer: &AuthorizationLink{
-						EntityID:           "authorizer-expiry",
-						EntityName:         "Expiry Authorizer",
-						Role:               "authorizer",
-						EntityType:         "organization",
-						AuthorizationType:  "statutory",
-						IdentityVerified:   true,
-						Status:             "active",
-						ValidFrom:          time.Now().Add(-time.Hour),
-						ValidUntil:         time.Now().Add(time.Hour),
-						StatutoryAuthority: "board_resolution_2025",
-						LegalBasis: &LegalBasis{BasisType: "power_of_attorney", Jurisdiction: "TEST"},
-						CommercialRegisterRef: "CR-TST-001",
-						ScopeOfAuthority: []string{"token:issue"},
-					},
-					ClientOwner: &AuthorizationLink{
-						EntityID:          "owner-expiry",
-						EntityName:        "Expiry Owner",
-						Role:              "owner",
-						EntityType:        "organization",
-						AuthorizedBy:      "authorizer-expiry",
-						AuthorizationType: "statutory",
-						IdentityVerified:  true,
-						Status:            "active",
-						ValidFrom:         time.Now().Add(-30 * time.Minute),
-						ValidUntil:        time.Now().Add(30 * time.Minute),
-						ScopeOfAuthority:  []string{"token:delegate"},
-					},
-					Client: &AuthorizationLink{
-						EntityID:          "client-expiry",
-						EntityName:        "Expiry Client",
-						Role:              "client",
-						EntityType:        "ai_system",
-						Status:            "active",
-						AuthorizedBy:      "owner-expiry",
-						AuthorizationType: "delegated",
-						IdentityVerified:  true,
-						ValidFrom:         time.Now().Add(-5 * time.Minute),
-						ValidUntil:        time.Now().Add(25 * time.Minute),
-						ScopeOfAuthority:  []string{"token:use"},
-					},
+				Authorization: poa.AuthorizationScope{},
+				Requirements:  poa.Requirements{ValidityPeriod: poa.ValidityPeriod{StartTime: time.Now().Add(-time.Minute), EndTime: time.Now().Add(time.Hour)}},
+			},
+			OwnersAuthorizerInfo: &OwnersAuthorizerInfo{AuthorizerID: "authorizer-expiry", AuthorizerName: "Expiry Authorizer", AuthorizerType: "board_member", IdentityVerified: true, VerificationMethod: "test", VerificationDate: time.Now()},
+			LegalFramework:       &LegalFrameworkInfo{Jurisdiction: "TEST", ApplicableLaws: []string{"TEST-LAW"}},
+			AuthorizationChain: &AuthorizationChain{
+				OwnersAuthorizer: &AuthorizationLink{
+					EntityID:              "authorizer-expiry",
+					EntityName:            "Expiry Authorizer",
+					Role:                  "authorizer",
+					EntityType:            "organization",
+					AuthorizationType:     "statutory",
+					IdentityVerified:      true,
+					Status:                "active",
+					ValidFrom:             time.Now().Add(-time.Hour),
+					ValidUntil:            time.Now().Add(time.Hour),
+					StatutoryAuthority:    "board_resolution_2025",
+					LegalBasis:            &LegalBasis{BasisType: "power_of_attorney", Jurisdiction: "TEST"},
+					CommercialRegisterRef: "CR-TST-001",
+					ScopeOfAuthority:      []string{"token:issue"},
 				},
+				ClientOwner: &AuthorizationLink{
+					EntityID:          "owner-expiry",
+					EntityName:        "Expiry Owner",
+					Role:              "owner",
+					EntityType:        "organization",
+					AuthorizedBy:      "authorizer-expiry",
+					AuthorizationType: "statutory",
+					IdentityVerified:  true,
+					Status:            "active",
+					ValidFrom:         time.Now().Add(-30 * time.Minute),
+					ValidUntil:        time.Now().Add(30 * time.Minute),
+					ScopeOfAuthority:  []string{"token:delegate"},
+				},
+				Client: &AuthorizationLink{
+					EntityID:          "client-expiry",
+					EntityName:        "Expiry Client",
+					Role:              "client",
+					EntityType:        "ai_system",
+					Status:            "active",
+					AuthorizedBy:      "owner-expiry",
+					AuthorizationType: "delegated",
+					IdentityVerified:  true,
+					ValidFrom:         time.Now().Add(-5 * time.Minute),
+					ValidUntil:        time.Now().Add(25 * time.Minute),
+					ScopeOfAuthority:  []string{"token:use"},
+				},
+			},
 			ClientOwnerInfo: &ClientOwnerInfo{
 				OwnerID:   "owner-expiry",
 				OwnerName: "Expiry Test",
@@ -447,12 +447,12 @@ func TestE2E_JWTSerializationRoundTrip(t *testing.T) {
 
 		createdToken, err := shortExpiryService.CreateExtendedToken(ctx, request)
 		if err != nil {
-																					 t.Fatalf("Token creation failed: %v", err)
+			t.Fatalf("Token creation failed: %v", err)
 		}
 
 		jwtString, err := shortExpiryService.EncodeExtendedToken(ctx, createdToken)
 		if err != nil {
-																					 t.Fatalf("Encoding failed: %v", err)
+			t.Fatalf("Encoding failed: %v", err)
 		}
 
 		// Parse and check expiration
@@ -512,61 +512,61 @@ func TestE2E_ExtendedTokenService_Integration(t *testing.T) {
 
 	t.Run("Full_Token_Lifecycle", func(t *testing.T) {
 		// Create
-			request := &ExtendedTokenRequest{
+		request := &ExtendedTokenRequest{
 			GrantID: "lifecycle-grant",
 			Scope:   []string{"full", "lifecycle", "test"},
-				PowerOfAttorney: &poa.PoADefinition{
-					Parties: poa.Parties{
-						Principal:        poa.Principal{Type: "Organization", Identity: "principal-lifecycle"},
-						AuthorizedClient: poa.AuthorizedClient{Type: "LLM", Identity: "client-lifecycle", StatusEnum: poa.OperationalStatusActive, CapabilityLevel: poa.CapabilityL1},
-					},
-					Authorization: poa.AuthorizationScope{},
-					Requirements: poa.Requirements{ValidityPeriod: poa.ValidityPeriod{StartTime: time.Now().Add(-time.Minute), EndTime: time.Now().Add(time.Hour)}},
+			PowerOfAttorney: &poa.PoADefinition{
+				Parties: poa.Parties{
+					Principal:        poa.Principal{Type: "Organization", Identity: "principal-lifecycle"},
+					AuthorizedClient: poa.AuthorizedClient{Type: "LLM", Identity: "client-lifecycle", StatusEnum: poa.OperationalStatusActive, CapabilityLevel: poa.CapabilityL1},
 				},
-				OwnersAuthorizerInfo: &OwnersAuthorizerInfo{AuthorizerID: "authorizer-lifecycle", AuthorizerName: "Lifecycle Authorizer", AuthorizerType: "managing_director", IdentityVerified: true, VerificationMethod: "test", VerificationDate: time.Now()},
-				LegalFramework: &LegalFrameworkInfo{Jurisdiction: "GLOBAL", ApplicableLaws: []string{"GLOBAL-LAW"}},
+				Authorization: poa.AuthorizationScope{},
+				Requirements:  poa.Requirements{ValidityPeriod: poa.ValidityPeriod{StartTime: time.Now().Add(-time.Minute), EndTime: time.Now().Add(time.Hour)}},
+			},
+			OwnersAuthorizerInfo: &OwnersAuthorizerInfo{AuthorizerID: "authorizer-lifecycle", AuthorizerName: "Lifecycle Authorizer", AuthorizerType: "managing_director", IdentityVerified: true, VerificationMethod: "test", VerificationDate: time.Now()},
+			LegalFramework:       &LegalFrameworkInfo{Jurisdiction: "GLOBAL", ApplicableLaws: []string{"GLOBAL-LAW"}},
 			AuthorizationChain: &AuthorizationChain{
-					OwnersAuthorizer: &AuthorizationLink{
-						EntityID:           "authorizer-lifecycle",
-						EntityName:         "Lifecycle Authorizer",
-						Role:               "authorizer",
-						EntityType:         "organization",
-						AuthorizationType:  "statutory",
-						IdentityVerified:   true,
-						Status:             "active",
-						ValidFrom:          time.Now().Add(-time.Hour),
-						ValidUntil:         time.Now().Add(time.Hour),
-						StatutoryAuthority: "board_resolution_2025",
-						LegalBasis: &LegalBasis{BasisType: "power_of_attorney", Jurisdiction: "GLOBAL"},
-						CommercialRegisterRef: "CR-GLB-001",
-						ScopeOfAuthority: []string{"token:issue"},
-					},
-					ClientOwner: &AuthorizationLink{
-						EntityID:          "owner-lifecycle",
-						EntityName:        "Lifecycle Owner",
-						Role:              "owner",
-						EntityType:        "organization",
-						AuthorizedBy:      "authorizer-lifecycle",
-						AuthorizationType: "statutory",
-						IdentityVerified:  true,
-						Status:            "active",
-						ValidFrom:         time.Now().Add(-30 * time.Minute),
-						ValidUntil:        time.Now().Add(30 * time.Minute),
-						ScopeOfAuthority:  []string{"token:delegate"},
-					},
-					Client: &AuthorizationLink{
-						EntityID:          "client-lifecycle",
-						EntityName:        "Lifecycle Client",
-						Role:              "client",
-						EntityType:        "ai_system",
-						Status:            "active",
-						AuthorizedBy:      "owner-lifecycle",
-						AuthorizationType: "delegated",
-						IdentityVerified:  true,
-						ValidFrom:         time.Now().Add(-5 * time.Minute),
-						ValidUntil:        time.Now().Add(25 * time.Minute),
-						ScopeOfAuthority:  []string{"token:use"},
-					},
+				OwnersAuthorizer: &AuthorizationLink{
+					EntityID:              "authorizer-lifecycle",
+					EntityName:            "Lifecycle Authorizer",
+					Role:                  "authorizer",
+					EntityType:            "organization",
+					AuthorizationType:     "statutory",
+					IdentityVerified:      true,
+					Status:                "active",
+					ValidFrom:             time.Now().Add(-time.Hour),
+					ValidUntil:            time.Now().Add(time.Hour),
+					StatutoryAuthority:    "board_resolution_2025",
+					LegalBasis:            &LegalBasis{BasisType: "power_of_attorney", Jurisdiction: "GLOBAL"},
+					CommercialRegisterRef: "CR-GLB-001",
+					ScopeOfAuthority:      []string{"token:issue"},
+				},
+				ClientOwner: &AuthorizationLink{
+					EntityID:          "owner-lifecycle",
+					EntityName:        "Lifecycle Owner",
+					Role:              "owner",
+					EntityType:        "organization",
+					AuthorizedBy:      "authorizer-lifecycle",
+					AuthorizationType: "statutory",
+					IdentityVerified:  true,
+					Status:            "active",
+					ValidFrom:         time.Now().Add(-30 * time.Minute),
+					ValidUntil:        time.Now().Add(30 * time.Minute),
+					ScopeOfAuthority:  []string{"token:delegate"},
+				},
+				Client: &AuthorizationLink{
+					EntityID:          "client-lifecycle",
+					EntityName:        "Lifecycle Client",
+					Role:              "client",
+					EntityType:        "ai_system",
+					Status:            "active",
+					AuthorizedBy:      "owner-lifecycle",
+					AuthorizationType: "delegated",
+					IdentityVerified:  true,
+					ValidFrom:         time.Now().Add(-5 * time.Minute),
+					ValidUntil:        time.Now().Add(25 * time.Minute),
+					ScopeOfAuthority:  []string{"token:use"},
+				},
 			},
 			ClientOwnerInfo: &ClientOwnerInfo{
 				OwnerID:   "lifecycle-owner",
@@ -582,17 +582,17 @@ func TestE2E_ExtendedTokenService_Integration(t *testing.T) {
 
 		token, err := tokenService.CreateExtendedToken(ctx, request)
 		if err != nil {
-																					 t.Fatalf("Creation failed: %v", err)
+			t.Fatalf("Creation failed: %v", err)
 		}
 
 		jwtString, err := tokenService.EncodeExtendedToken(ctx, token)
 		if err != nil {
-																					 t.Fatalf("Encoding failed: %v", err)
+			t.Fatalf("Encoding failed: %v", err)
 		}
 
 		// Validate structure
 		if jwtString == "" {
-																					 t.Fatal("JWT string is empty")
+			t.Fatal("JWT string is empty")
 		}
 		if token.TokenType != "Bearer" {
 			t.Errorf("Expected Bearer, got %s", token.TokenType)

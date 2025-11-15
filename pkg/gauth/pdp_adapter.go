@@ -20,10 +20,10 @@ type ProductionPEPAuditLogger struct {
 	violations   []ViolationAuditEntry
 
 	// Configuration
-	maxEntries     int
-	enableConsole  bool
-	enableMetrics  bool
-	metrics        metrics.Metrics
+	maxEntries    int
+	enableConsole bool
+	enableMetrics bool
+	metrics       metrics.Metrics
 
 	// Statistics
 	totalEnforcements int64
@@ -59,7 +59,7 @@ func (l *ProductionPEPAuditLogger) SetMetrics(m metrics.Metrics) {
 func (l *ProductionPEPAuditLogger) LogEnforcement(ctx context.Context, entry *EnforcementAuditEntry) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	
+
 	// Store in memory (with rotation)
 	if len(l.enforcements) >= l.maxEntries {
 		// Remove oldest entry (FIFO)
@@ -67,7 +67,7 @@ func (l *ProductionPEPAuditLogger) LogEnforcement(ctx context.Context, entry *En
 	}
 	l.enforcements = append(l.enforcements, *entry)
 	l.totalEnforcements++
-	
+
 	// Console logging for debugging
 	if l.enableConsole {
 		log.Printf("[ENFORCEMENT] ID=%s Action=%s Resource=%s Allowed=%v Outcome=%s Reason=%s Violations=%d Timestamp=%v",
@@ -94,7 +94,7 @@ func (l *ProductionPEPAuditLogger) LogEnforcement(ctx context.Context, entry *En
 func (l *ProductionPEPAuditLogger) LogViolation(ctx context.Context, entry *ViolationAuditEntry) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	
+
 	// Store in memory (with rotation)
 	if len(l.violations) >= l.maxEntries {
 		// Remove oldest entry (FIFO)
@@ -102,7 +102,7 @@ func (l *ProductionPEPAuditLogger) LogViolation(ctx context.Context, entry *Viol
 	}
 	l.violations = append(l.violations, *entry)
 	l.totalViolations++
-	
+
 	// Console logging with severity
 	if l.enableConsole {
 		log.Printf("[VIOLATION] Enforcement=%s Type=%s Severity=%s Action=%s Resource=%s Description=%s Timestamp=%v",
@@ -122,7 +122,7 @@ func (l *ProductionPEPAuditLogger) LogViolation(ctx context.Context, entry *Viol
 		// Note: High-severity violations (critical/high) should be monitored via
 		// Prometheus alerts configured externally (e.g., rate(gauth_rfc0111_pep_violations_total{severity="critical"}[5m]) > threshold)
 	}
-	
+
 	return nil
 }
 
@@ -130,17 +130,17 @@ func (l *ProductionPEPAuditLogger) LogViolation(ctx context.Context, entry *Viol
 func (l *ProductionPEPAuditLogger) GetEnforcements(limit int) []EnforcementAuditEntry {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
-	
+
 	if limit <= 0 || limit > len(l.enforcements) {
 		limit = len(l.enforcements)
 	}
-	
+
 	// Return most recent entries
 	start := len(l.enforcements) - limit
 	if start < 0 {
 		start = 0
 	}
-	
+
 	result := make([]EnforcementAuditEntry, limit)
 	copy(result, l.enforcements[start:])
 	return result
@@ -150,17 +150,17 @@ func (l *ProductionPEPAuditLogger) GetEnforcements(limit int) []EnforcementAudit
 func (l *ProductionPEPAuditLogger) GetViolations(limit int) []ViolationAuditEntry {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
-	
+
 	if limit <= 0 || limit > len(l.violations) {
 		limit = len(l.violations)
 	}
-	
+
 	// Return most recent entries
 	start := len(l.violations) - limit
 	if start < 0 {
 		start = 0
 	}
-	
+
 	result := make([]ViolationAuditEntry, limit)
 	copy(result, l.violations[start:])
 	return result
@@ -170,7 +170,7 @@ func (l *ProductionPEPAuditLogger) GetViolations(limit int) []ViolationAuditEntr
 func (l *ProductionPEPAuditLogger) GetStatistics() map[string]interface{} {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
-	
+
 	return map[string]interface{}{
 		"total_enforcements":        l.totalEnforcements,
 		"total_violations":          l.totalViolations,
@@ -341,13 +341,13 @@ func (pdp *SimplePDP) AddPolicy(policyID string, policy interface{}) error {
 	if pdp.pap == nil {
 		return fmt.Errorf("PAP not configured - use NewSimplePDPWithPAP() to enable policy management")
 	}
-	
+
 	// Convert policy interface to AuthorizationPolicy
 	authPolicy, ok := policy.(*AuthorizationPolicy)
 	if !ok {
 		return fmt.Errorf("policy must be of type *AuthorizationPolicy")
 	}
-	
+
 	// Create policy via PAP
 	request := &PolicyCreateRequest{
 		PolicyName:       authPolicy.PolicyName,
@@ -363,17 +363,17 @@ func (pdp *SimplePDP) AddPolicy(policyID string, policy interface{}) error {
 		Tags:             authPolicy.Tags,
 		Metadata:         authPolicy.Metadata,
 	}
-	
+
 	createdPolicy, err := pdp.pap.CreatePolicy(context.Background(), request)
 	if err != nil {
 		return fmt.Errorf("failed to create policy via PAP: %w", err)
 	}
-	
+
 	// Update the policyID if provided policy didn't have one
 	if authPolicy.PolicyID == "" {
 		authPolicy.PolicyID = createdPolicy.PolicyID
 	}
-	
+
 	return nil
 }
 
@@ -382,13 +382,13 @@ func (pdp *SimplePDP) RemovePolicy(policyID string) error {
 	if pdp.pap == nil {
 		return fmt.Errorf("PAP not configured - use NewSimplePDPWithPAP() to enable policy management")
 	}
-	
+
 	// Delete policy via PAP
 	err := pdp.pap.DeletePolicy(context.Background(), policyID)
 	if err != nil {
 		return fmt.Errorf("failed to delete policy via PAP: %w", err)
 	}
-	
+
 	return nil
 }
 
@@ -397,12 +397,12 @@ func (pdp *SimplePDP) GetPolicy(policyID string) (*AuthorizationPolicy, error) {
 	if pdp.pap == nil {
 		return nil, fmt.Errorf("PAP not configured - use NewSimplePDPWithPAP() to enable policy management")
 	}
-	
+
 	policy, err := pdp.pap.GetPolicy(context.Background(), policyID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve policy via PAP: %w", err)
 	}
-	
+
 	return policy, nil
 }
 
@@ -411,12 +411,12 @@ func (pdp *SimplePDP) ListActivePolicies() ([]*AuthorizationPolicy, error) {
 	if pdp.pap == nil {
 		return nil, fmt.Errorf("PAP not configured - use NewSimplePDPWithPAP() to enable policy management")
 	}
-	
+
 	activeStatus := PolicyStatusActive
 	policies, err := pdp.pap.ListPolicies(context.Background(), &activeStatus)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list active policies via PAP: %w", err)
 	}
-	
+
 	return policies, nil
 }

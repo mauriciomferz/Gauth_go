@@ -59,32 +59,32 @@ type AuthorizationPolicy struct {
 	Status        PolicyStatus `json:"status"`
 
 	// Policy owner (Owner's Authorizer)
-	CreatedBy      string    `json:"created_by"`
-	OwnersAuthorizer string  `json:"owners_authorizer"`
-	ClientOwner    string    `json:"client_owner"`
-	OrganizationID string    `json:"organization_id,omitempty"`
+	CreatedBy        string `json:"created_by"`
+	OwnersAuthorizer string `json:"owners_authorizer"`
+	ClientOwner      string `json:"client_owner"`
+	OrganizationID   string `json:"organization_id,omitempty"`
 
 	// Policy content
-	PolicyRules    PolicyRules         `json:"policy_rules"`
-	Scope          *PolicyScope        `json:"scope,omitempty"`
-	Restrictions   []PowerRestriction  `json:"restrictions,omitempty"`
-	PoATemplate    *poa.PowerOfAttorney `json:"poa_template,omitempty"`
+	PolicyRules  PolicyRules          `json:"policy_rules"`
+	Scope        *PolicyScope         `json:"scope,omitempty"`
+	Restrictions []PowerRestriction   `json:"restrictions,omitempty"`
+	PoATemplate  *poa.PowerOfAttorney `json:"poa_template,omitempty"`
 
 	// Lifecycle timestamps
-	CreatedAt  time.Time  `json:"created_at"`
-	UpdatedAt  time.Time  `json:"updated_at"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
 	ActivatedAt *time.Time `json:"activated_at,omitempty"`
-	ExpiresAt  *time.Time `json:"expires_at,omitempty"`
-	RevokedAt  *time.Time `json:"revoked_at,omitempty"`
+	ExpiresAt   *time.Time `json:"expires_at,omitempty"`
+	RevokedAt   *time.Time `json:"revoked_at,omitempty"`
 
 	// Versioning
 	PreviousVersion *string `json:"previous_version,omitempty"`
 	ChangeLog       string  `json:"change_log,omitempty"`
 
 	// Enforcement tracking
-	EnforcementCount int64     `json:"enforcement_count"`
+	EnforcementCount int64      `json:"enforcement_count"`
 	LastEnforcedAt   *time.Time `json:"last_enforced_at,omitempty"`
-	ViolationCount   int64     `json:"violation_count"`
+	ViolationCount   int64      `json:"violation_count"`
 
 	// Metadata
 	Tags     []string               `json:"tags,omitempty"`
@@ -153,32 +153,32 @@ type TimeRestrictions struct {
 
 // PolicyCreateRequest represents a request to create a new policy
 type PolicyCreateRequest struct {
-	PolicyType       PolicyType          `json:"policy_type"`
-	PolicyName       string              `json:"policy_name"`
-	Description      string              `json:"description,omitempty"`
-	ClientOwner      string              `json:"client_owner"`
-	OwnersAuthorizer string              `json:"owners_authorizer"`
-	PolicyRules      PolicyRules         `json:"policy_rules"`
-	Scope            *PolicyScope        `json:"scope,omitempty"`
-	Restrictions     []PowerRestriction  `json:"restrictions,omitempty"`
-	PoATemplate      *poa.PowerOfAttorney `json:"poa_template,omitempty"`
-	ExpiresAt        *time.Time          `json:"expires_at,omitempty"`
-	Tags             []string            `json:"tags,omitempty"`
+	PolicyType       PolicyType             `json:"policy_type"`
+	PolicyName       string                 `json:"policy_name"`
+	Description      string                 `json:"description,omitempty"`
+	ClientOwner      string                 `json:"client_owner"`
+	OwnersAuthorizer string                 `json:"owners_authorizer"`
+	PolicyRules      PolicyRules            `json:"policy_rules"`
+	Scope            *PolicyScope           `json:"scope,omitempty"`
+	Restrictions     []PowerRestriction     `json:"restrictions,omitempty"`
+	PoATemplate      *poa.PowerOfAttorney   `json:"poa_template,omitempty"`
+	ExpiresAt        *time.Time             `json:"expires_at,omitempty"`
+	Tags             []string               `json:"tags,omitempty"`
 	Metadata         map[string]interface{} `json:"metadata,omitempty"`
 }
 
 // PolicyUpdateRequest represents a request to update an existing policy
 type PolicyUpdateRequest struct {
-	PolicyID     string              `json:"policy_id"`
-	PolicyName   *string             `json:"policy_name,omitempty"`
-	Description  *string             `json:"description,omitempty"`
-	PolicyRules  *PolicyRules        `json:"policy_rules,omitempty"`
-	Scope        *PolicyScope        `json:"scope,omitempty"`
-	Restrictions *[]PowerRestriction `json:"restrictions,omitempty"`
-	ExpiresAt    *time.Time          `json:"expires_at,omitempty"`
-	Tags         *[]string           `json:"tags,omitempty"`
+	PolicyID     string                  `json:"policy_id"`
+	PolicyName   *string                 `json:"policy_name,omitempty"`
+	Description  *string                 `json:"description,omitempty"`
+	PolicyRules  *PolicyRules            `json:"policy_rules,omitempty"`
+	Scope        *PolicyScope            `json:"scope,omitempty"`
+	Restrictions *[]PowerRestriction     `json:"restrictions,omitempty"`
+	ExpiresAt    *time.Time              `json:"expires_at,omitempty"`
+	Tags         *[]string               `json:"tags,omitempty"`
 	Metadata     *map[string]interface{} `json:"metadata,omitempty"`
-	ChangeLog    string              `json:"change_log"`
+	ChangeLog    string                  `json:"change_log"`
 }
 
 // PolicySearchCriteria represents criteria for searching policies
@@ -205,8 +205,8 @@ type PolicySearchResult struct {
 
 // PolicyValidationResult represents the result of policy validation
 type PolicyValidationResult struct {
-	Valid  bool     `json:"valid"`
-	Errors []string `json:"errors,omitempty"`
+	Valid    bool     `json:"valid"`
+	Errors   []string `json:"errors,omitempty"`
 	Warnings []string `json:"warnings,omitempty"`
 }
 
@@ -225,11 +225,11 @@ type PolicyEnforcementEvent struct {
 
 // PolicyStatistics represents statistics for a policy
 type PolicyStatistics struct {
-	PolicyID            string    `json:"policy_id"`
-	EnforcementCount    int64     `json:"enforcement_count"`
-	AllowedCount        int64     `json:"allowed_count"`
-	DeniedCount         int64     `json:"denied_count"`
-	ViolationCount      int64     `json:"violation_count"`
-	LastEnforcedAt      *time.Time `json:"last_enforced_at,omitempty"`
-	AverageEnforcementTime float64 `json:"average_enforcement_time_ms"`
+	PolicyID               string     `json:"policy_id"`
+	EnforcementCount       int64      `json:"enforcement_count"`
+	AllowedCount           int64      `json:"allowed_count"`
+	DeniedCount            int64      `json:"denied_count"`
+	ViolationCount         int64      `json:"violation_count"`
+	LastEnforcedAt         *time.Time `json:"last_enforced_at,omitempty"`
+	AverageEnforcementTime float64    `json:"average_enforcement_time_ms"`
 }

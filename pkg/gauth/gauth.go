@@ -1099,10 +1099,10 @@ var _ GAuth = (*Service)(nil)
 // PowerAdministrationPoint represents a power administration point
 type PowerAdministrationPoint struct {
 	GAuth          GAuth
-	ID             string                      `json:"id"`
-	Name           string                      `json:"name"`
-	Description    string                      `json:"description"`
-	CreatedAt      time.Time                   `json:"created_at"`
+	ID             string                          `json:"id"`
+	Name           string                          `json:"name"`
+	Description    string                          `json:"description"`
+	CreatedAt      time.Time                       `json:"created_at"`
 	policyStore    map[string]*AuthorizationPolicy // In-memory store (replace with DB in production)
 	policyStoreMux sync.RWMutex                    // Protect concurrent access
 }
@@ -1411,13 +1411,13 @@ func (p *PowerAdministrationPoint) ValidatePolicy(ctx context.Context, policyID 
 
 // PAPAggregateStatistics represents aggregate statistics across all policies
 type PAPAggregateStatistics struct {
-	TotalPolicies      int                  `json:"total_policies"`
-	ActivePolicies     int                  `json:"active_policies"`
-	DraftPolicies      int                  `json:"draft_policies"`
-	SuspendedPolicies  int                  `json:"suspended_policies"`
-	RevokedPolicies    int                  `json:"revoked_policies"`
-	ExpiredPolicies    int                  `json:"expired_policies"`
-	PoliciesByType     map[PolicyType]int   `json:"policies_by_type"`
+	TotalPolicies     int                `json:"total_policies"`
+	ActivePolicies    int                `json:"active_policies"`
+	DraftPolicies     int                `json:"draft_policies"`
+	SuspendedPolicies int                `json:"suspended_policies"`
+	RevokedPolicies   int                `json:"revoked_policies"`
+	ExpiredPolicies   int                `json:"expired_policies"`
+	PoliciesByType    map[PolicyType]int `json:"policies_by_type"`
 }
 
 // GetPolicyStatistics returns aggregate statistics about all policies
@@ -1426,13 +1426,13 @@ func (p *PowerAdministrationPoint) GetPolicyStatistics(ctx context.Context) (*PA
 	defer p.policyStoreMux.RUnlock()
 
 	stats := &PAPAggregateStatistics{
-		TotalPolicies:      len(p.policyStore),
-		ActivePolicies:     0,
-		DraftPolicies:      0,
-		SuspendedPolicies:  0,
-		RevokedPolicies:    0,
-		ExpiredPolicies:    0,
-		PoliciesByType:     make(map[PolicyType]int),
+		TotalPolicies:     len(p.policyStore),
+		ActivePolicies:    0,
+		DraftPolicies:     0,
+		SuspendedPolicies: 0,
+		RevokedPolicies:   0,
+		ExpiredPolicies:   0,
+		PoliciesByType:    make(map[PolicyType]int),
 	}
 
 	now := time.Now()

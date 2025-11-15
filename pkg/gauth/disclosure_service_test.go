@@ -51,7 +51,7 @@ func TestDisclosureService_TokenToSummary_ExtractsGrantedActions(t *testing.T) {
 		assert.Equal(t, "test-token-123", summary.AuthorizationID)
 		assert.Equal(t, "high", summary.ComplianceStatus)
 		assert.Equal(t, []string{"read", "write"}, summary.GrantedScopes)
-		
+
 		// Verify granted actions were extracted
 		assert.Len(t, summary.GrantedActions, 5)
 		assert.Contains(t, summary.GrantedActions, string(poa.TransactionPurchase))
@@ -103,43 +103,43 @@ func TestDisclosureService_DetermineViolationSeverity(t *testing.T) {
 	service := &DisclosureService{}
 
 	testCases := []struct {
-		name            string
-		violation       string
+		name             string
+		violation        string
 		expectedSeverity string
 	}{
 		{
-			name:            "critical - expired",
-			violation:       "Token has expired",
+			name:             "critical - expired",
+			violation:        "Token has expired",
 			expectedSeverity: "critical",
 		},
 		{
-			name:            "critical - revoked",
-			violation:       "Authorization revoked by owner",
+			name:             "critical - revoked",
+			violation:        "Authorization revoked by owner",
 			expectedSeverity: "critical",
 		},
 		{
-			name:            "critical - invalid",
-			violation:       "Invalid signature detected",
+			name:             "critical - invalid",
+			violation:        "Invalid signature detected",
 			expectedSeverity: "critical",
 		},
 		{
-			name:            "high - exceeded",
-			violation:       "Transaction limit exceeded",
+			name:             "high - exceeded",
+			violation:        "Transaction limit exceeded",
 			expectedSeverity: "high",
 		},
 		{
-			name:            "high - breach",
-			violation:       "Policy breach detected",
+			name:             "high - breach",
+			violation:        "Policy breach detected",
 			expectedSeverity: "high",
 		},
 		{
-			name:            "medium - warning",
-			violation:       "Warning: approaching limit",
+			name:             "medium - warning",
+			violation:        "Warning: approaching limit",
 			expectedSeverity: "medium",
 		},
 		{
-			name:            "low - general",
-			violation:       "General compliance note",
+			name:             "low - general",
+			violation:        "General compliance note",
 			expectedSeverity: "low",
 		},
 	}

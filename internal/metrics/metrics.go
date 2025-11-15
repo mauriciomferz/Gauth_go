@@ -231,7 +231,7 @@ type Metrics interface {
 	// These are not required by all implementations; callers SHOULD use type assertions.
 	// SetCapabilityAnchorAgeSeconds(age uint64)
 	// SetCapabilityAnchorStale(stale bool)
-	
+
 	// PDP/PEP enforcement and audit metrics
 	// IncPEPEnforcements increments counter when a policy enforcement point logs an enforcement decision
 	// Labels: allowed (true|false), action_type (e.g. read, write, transaction)

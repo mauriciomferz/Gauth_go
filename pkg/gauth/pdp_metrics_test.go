@@ -68,7 +68,7 @@ func TestPDPMetricsIntegration_EnforcementMetrics(t *testing.T) {
 		if mf.GetName() == "test_pdp_pep_enforcements_total" {
 			enforcementsFound = true
 			metrics := mf.GetMetric()
-			
+
 			// We should have 2 label combinations: {allowed="true", action_type="read"} and {allowed="false", action_type="write"}
 			if len(metrics) < 2 {
 				t.Errorf("Expected at least 2 enforcement metrics, got %d", len(metrics))
@@ -121,13 +121,13 @@ func TestPDPMetricsIntegration_ViolationMetrics(t *testing.T) {
 
 	// Log critical violation
 	err := logger.LogViolation(ctx, &ViolationAuditEntry{
-		EnforcementID:  "enf-001",
-		Timestamp:      time.Now(),
-		ViolationType:  "policy_violation",
-		Severity:       "critical",
-		ActionType:     "delete",
-		ResourceID:     "resource-001",
-		Description:    "Unauthorized deletion attempt",
+		EnforcementID: "enf-001",
+		Timestamp:     time.Now(),
+		ViolationType: "policy_violation",
+		Severity:      "critical",
+		ActionType:    "delete",
+		ResourceID:    "resource-001",
+		Description:   "Unauthorized deletion attempt",
 	})
 	if err != nil {
 		t.Fatalf("Failed to log violation: %v", err)
@@ -135,13 +135,13 @@ func TestPDPMetricsIntegration_ViolationMetrics(t *testing.T) {
 
 	// Log high severity violation
 	err = logger.LogViolation(ctx, &ViolationAuditEntry{
-		EnforcementID:  "enf-002",
-		Timestamp:      time.Now(),
-		ViolationType:  "resource_access_denied",
-		Severity:       "high",
-		ActionType:     "read",
-		ResourceID:     "resource-002",
-		Description:    "Access to restricted resource",
+		EnforcementID: "enf-002",
+		Timestamp:     time.Now(),
+		ViolationType: "resource_access_denied",
+		Severity:      "high",
+		ActionType:    "read",
+		ResourceID:    "resource-002",
+		Description:   "Access to restricted resource",
 	})
 	if err != nil {
 		t.Fatalf("Failed to log violation: %v", err)
@@ -149,13 +149,13 @@ func TestPDPMetricsIntegration_ViolationMetrics(t *testing.T) {
 
 	// Log medium severity violation
 	err = logger.LogViolation(ctx, &ViolationAuditEntry{
-		EnforcementID:  "enf-003",
-		Timestamp:      time.Now(),
-		ViolationType:  "rate_limit_exceeded",
-		Severity:       "medium",
-		ActionType:     "write",
-		ResourceID:     "resource-003",
-		Description:    "Rate limit exceeded",
+		EnforcementID: "enf-003",
+		Timestamp:     time.Now(),
+		ViolationType: "rate_limit_exceeded",
+		Severity:      "medium",
+		ActionType:    "write",
+		ResourceID:    "resource-003",
+		Description:   "Rate limit exceeded",
 	})
 	if err != nil {
 		t.Fatalf("Failed to log violation: %v", err)
