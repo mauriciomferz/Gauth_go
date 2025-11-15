@@ -6109,6 +6109,9 @@ func (s *BetaServer) routes() {
 		c.Data(200, "text/html; charset=utf-8", []byte("<html><body><h1>GAuth Beta Demo</h1><p>Visit <a href='/index.html'>Full Beta UI</a></p></body></html>"))
 	})
 
+	// API Documentation routes (Swagger UI, ReDoc, OpenAPI spec)
+	s.RegisterAPIDocumentation()
+
 	// Mount modular anchor handlers (override legacy inline path for consistent error taxonomy)
 	betaGrp := s.router.Group("/api/v1/beta")
 	if !s.routeRegistered("/api/v1/beta/capabilities/anchor") {

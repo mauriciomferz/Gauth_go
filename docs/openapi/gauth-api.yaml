@@ -1,0 +1,1621 @@
+openapi: 3.1.0
+info:
+  title: GAuth API
+  version: 1.0.0-beta
+  description: |
+    # GAuth - OAuth 2.0 Authorization Server with RFC-0111 Compliance
+    
+    GAuth is a comprehensive OAuth 2.0 authorization server implementing RFC-0111 subscription flow,
+    Power of Attorney (PoA) management, policy-based authorization, and advanced security features.
+    
+    ## Key Features
+    
+    - **RFC-0111 Compliance**: 8-step subscription flow (Steps I-VIII)
+    - **Power of Attorney**: Complete PoA lifecycle management (CRUD operations)
+    - **Policy Management**: Version-controlled policy bundles with rollback
+    - **Authorization**: Policy-based decision engine with caching
+    - **Security**: Rate limiting, CORS, security headers, audit logging
+    - **Monitoring**: Prometheus metrics and comprehensive observability
+    - **Identity Verification**: PVP (Person Verification Protocol) integration
+    - **Commercial Registry**: Entity and signatory verification
+    
+    ## Authentication
+    
+    Most endpoints require authentication via:
+    - Bearer tokens (OAuth 2.0 access tokens)
+    - API keys (custom header: `X-API-Key`)
+    - Client credentials (for service-to-service)
+    
+    ## Rate Limiting
+    
+    API requests are rate-limited:
+    - **Default**: 100 requests/second per IP
+    - **Strict endpoints** (tokens, delegation): 10 requests/second
+    - **Moderate endpoints** (subscriptions, registry): 50 requests/second
+    
+    Rate limit information is returned in headers:
+    - `X-RateLimit-Limit`: Maximum requests per window
+    - `X-RateLimit-Remaining`: Remaining requests
+    - `X-RateLimit-Reset`: Reset time (Unix timestamp)
+    
+    ## Versioning
+    
+    Current API version: `v1/beta`
+    
+    All endpoints include version headers:
+    - `X-API-Version: beta` - Current version
+    - `X-API-Deprecated: true` - Deprecation status
+    - `X-API-Replacement: /api/v1/beta` - Recommended replacement
+    
+    ## Support
+    
+    - Documentation: https://github.com/mauriciomferz/Gauth_go
+    - Issues: https://github.com/mauriciomferz/Gauth_go/issues
+    - Email: support@gauth.example.com
+  
+  contact:
+    name: GAuth Support
+    email: support@gauth.example.com
+    url: https://github.com/mauriciomferz/Gauth_go
+  
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  - url: https://api.gauth.example.com
+    description: Production server
+  - url: https://staging-api.gauth.example.com
+    description: Staging server
+
+tags:
+  - name: System
+    description: Health checks, system information, and service status
+  - name: RFC-0111
+    description: RFC-0111 compliant subscription flow (Steps I-VIII) and authorization
+  - name: Tokens
+    description: Token creation, validation, revocation, and lifecycle management
+  - name: Power of Attorney
+    description: PoA creation, validation, CRUD operations
+  - name: Authorization
+    description: Policy-based authorization evaluation and metrics
+  - name: Policy
+    description: Policy bundle management, versioning, and evaluation
+  - name: Delegation
+    description: Delegation creation, revocation, and status management
+  - name: PVP
+    description: Person Verification Protocol for identity verification
+  - name: Registry
+    description: Commercial registry entity and signatory verification
+  - name: Capabilities
+    description: Capability management, negotiation, and anchoring
+  - name: Audit
+    description: Audit logging, event tracking, and compliance
+  - name: Metrics
+    description: Prometheus metrics and observability endpoints
+  - name: Rotation
+    description: Key rotation management and verification
+  - name: Examples
+    description: Example catalog and execution for testing
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
+
+paths:
+  # ============================================================================
+  # SYSTEM ENDPOINTS
+  # ============================================================================
+  
+  /api/v1/beta/health:
+    get:
+      tags: [System]
+      summary: Health check endpoint
+      description: Returns the health status of the GAuth server
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  timestamp:
+                    type: string
+                    format: date-time
+                  version:
+                    type: string
+                    example: 1.0.0-beta
+              examples:
+                healthy:
+                  value:
+                    status: healthy
+                    timestamp: "2025-11-15T10:30:00Z"
+                    version: "1.0.0-beta"
+  
+  /api/v1/beta/info:
+    get:
+      tags: [System]
+      summary: Server information
+      description: Returns detailed server information including version, configuration, and capabilities
+      operationId: getInfo
+      responses:
+        '200':
+          description: Server information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                  build_time:
+                    type: string
+                  go_version:
+                    type: string
+                  rfc0111_enabled:
+                    type: boolean
+                  capabilities:
+                    type: array
+                    items:
+                      type: string
+  
+  /api/v1/beta/ping:
+    get:
+      tags: [System]
+      summary: Ping endpoint
+      description: Simple ping endpoint for connectivity testing
+      operationId: ping
+      responses:
+        '200':
+          description: Pong response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: pong
+  
+  # ============================================================================
+  # RFC-0111 SUBSCRIPTION FLOW ENDPOINTS
+  # ============================================================================
+  
+  /api/v1/rfc0111/subscriptions:
+    post:
+      tags: [RFC-0111]
+      summary: Create subscription (Step I)
+      description: |
+        Initiates RFC-0111 subscription flow by creating a new subscription.
+        This is Step I of the 8-step subscription process.
+        
+        After creating a subscription, execute Steps II-VIII in sequence:
+        1. Step I: Initiate (this endpoint)
+        2. Step II: Authorizer Authentication (PVP)
+        3. Step III: Client Owner Identification
+        4. Step IV: Client Owner Authorization (Commercial Registry)
+        5. Step V: Client Authorization (PoA Proof)
+        6. Step VI: Resource Owner Identification
+        7. Step VII: Resource Owner Authorization
+        8. Step VIII: Resource Server Verification
+      operationId: createSubscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - client_id
+                - scope
+              properties:
+                client_id:
+                  type: string
+                  description: Client identifier
+                  example: test-client-123
+                scope:
+                  type: string
+                  description: Requested scope
+                  example: read:documents write:reports
+                redirect_uri:
+                  type: string
+                  format: uri
+                  description: Redirect URI after completion
+                  example: https://app.example.com/callback
+                state:
+                  type: string
+                  description: Client state parameter
+            examples:
+              basic:
+                value:
+                  client_id: test-client-123
+                  scope: read write
+              advanced:
+                value:
+                  client_id: enterprise-app
+                  scope: read:documents write:reports admin:users
+                  redirect_uri: https://app.example.com/callback
+                  state: abc123xyz
+      responses:
+        '201':
+          description: Subscription created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+              examples:
+                success:
+                  value:
+                    id: sub_1234567890abcdef
+                    client_id: test-client-123
+                    scope: read write
+                    status: initiated
+                    created_at: "2025-11-15T10:30:00Z"
+                    current_step: I
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+    
+    get:
+      tags: [RFC-0111]
+      summary: List subscriptions
+      description: Retrieves a list of all subscriptions with optional filtering
+      operationId: listSubscriptions
+      parameters:
+        - name: client_id
+          in: query
+          description: Filter by client ID
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Filter by subscription status
+          schema:
+            type: string
+            enum: [initiated, in_progress, completed, failed]
+        - name: limit
+          in: query
+          description: Maximum number of results
+          schema:
+            type: integer
+            default: 50
+            maximum: 100
+        - name: offset
+          in: query
+          description: Pagination offset
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of subscriptions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subscriptions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Subscription'
+                  total:
+                    type: integer
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+  
+  /api/v1/rfc0111/subscriptions/{id}:
+    get:
+      tags: [RFC-0111]
+      summary: Get subscription details
+      description: Retrieves detailed information about a specific subscription
+      operationId: getSubscription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Subscription ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Subscription details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  
+  /api/v1/rfc0111/subscriptions/{id}/step-ii:
+    post:
+      tags: [RFC-0111]
+      summary: Execute Step II - Authorizer Authentication
+      description: |
+        Executes Step II of RFC-0111 subscription flow: Authorizer Authentication via PVP.
+        Verifies the authorizer's identity using Person Verification Protocol.
+      operationId: executeStepII
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                proof_type:
+                  type: string
+                  enum: [document, biometric, challenge]
+                proof_data:
+                  type: string
+                  description: Base64-encoded proof data
+      responses:
+        '200':
+          description: Step II completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StepResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  
+  /api/v1/rfc0111/subscriptions/{id}/step-iii:
+    post:
+      tags: [RFC-0111]
+      summary: Execute Step III - Client Owner Identification
+      operationId: executeStepIII
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Step III completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StepResult'
+  
+  /api/v1/rfc0111/subscriptions/{id}/step-iv:
+    post:
+      tags: [RFC-0111]
+      summary: Execute Step IV - Client Owner Authorization
+      description: Verifies client owner via commercial registry
+      operationId: executeStepIV
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Step IV completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StepResult'
+  
+  /api/v1/rfc0111/subscriptions/{id}/step-v:
+    post:
+      tags: [RFC-0111]
+      summary: Execute Step V - Client Authorization
+      description: Verifies client with PoA proof
+      operationId: executeStepV
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Step V completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StepResult'
+  
+  /api/v1/rfc0111/subscriptions/{id}/step-vi:
+    post:
+      tags: [RFC-0111]
+      summary: Execute Step VI - Resource Owner Identification
+      operationId: executeStepVI
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Step VI completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StepResult'
+  
+  /api/v1/rfc0111/subscriptions/{id}/step-vii:
+    post:
+      tags: [RFC-0111]
+      summary: Execute Step VII - Resource Owner Authorization
+      operationId: executeStepVII
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Step VII completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StepResult'
+  
+  /api/v1/rfc0111/subscriptions/{id}/step-viii:
+    post:
+      tags: [RFC-0111]
+      summary: Execute Step VIII - Resource Server Verification
+      description: |
+        Final step of RFC-0111 subscription flow. Upon successful completion,
+        returns an access token that can be used for API requests.
+      operationId: executeStepVIII
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Subscription completed, token issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: completed
+                  token:
+                    type: string
+                    description: JWT access token
+                  token_type:
+                    type: string
+                    example: Bearer
+                  expires_in:
+                    type: integer
+                    description: Token expiration in seconds
+                    example: 3600
+              examples:
+                success:
+                  value:
+                    status: completed
+                    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                    token_type: Bearer
+                    expires_in: 3600
+  
+  # ============================================================================
+  # POWER OF ATTORNEY (PoA) ENDPOINTS
+  # ============================================================================
+  
+  /api/v1/beta/poa:
+    post:
+      tags: [Power of Attorney]
+      summary: Create Power of Attorney
+      description: |
+        Creates a new Power of Attorney delegation granting specific permissions
+        from a grantor to a grantee for defined resources and time period.
+      operationId: createPoA
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PoACreate'
+            examples:
+              basic:
+                value:
+                  grantor: alice@example.com
+                  grantee: bob@example.com
+                  scope: ["read:documents"]
+                  valid_from: "2025-01-01T00:00:00Z"
+                  valid_until: "2025-12-31T23:59:59Z"
+              advanced:
+                value:
+                  grantor: alice@example.com
+                  grantee: bob@example.com
+                  scope: ["read:documents", "write:reports", "admin:users"]
+                  valid_from: "2025-01-01T00:00:00Z"
+                  valid_until: "2025-12-31T23:59:59Z"
+                  resource_pattern: "/api/documents/*"
+                  max_uses: 100
+                  constraints:
+                    ip_whitelist: ["192.168.1.0/24"]
+                    time_windows: ["09:00-17:00"]
+      responses:
+        '201':
+          description: PoA created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PoA'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+    
+    get:
+      tags: [Power of Attorney]
+      summary: List Powers of Attorney
+      description: Retrieves a list of PoAs with optional filtering
+      operationId: listPoAs
+      parameters:
+        - name: grantor
+          in: query
+          schema:
+            type: string
+        - name: grantee
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, expired, revoked]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of PoAs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  poas:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PoA'
+                  total:
+                    type: integer
+  
+  /api/v1/beta/poa/{id}:
+    get:
+      tags: [Power of Attorney]
+      summary: Get PoA details
+      operationId: getPoA
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: PoA details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PoA'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    put:
+      tags: [Power of Attorney]
+      summary: Update PoA
+      operationId: updatePoA
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                scope:
+                  type: array
+                  items:
+                    type: string
+                valid_until:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: PoA updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PoA'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    delete:
+      tags: [Power of Attorney]
+      summary: Revoke PoA
+      description: Revokes an active Power of Attorney
+      operationId: revokePoA
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: PoA revoked successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  status:
+                    type: string
+                    example: revoked
+                  revoked_at:
+                    type: string
+                    format: date-time
+        '404':
+          $ref: '#/components/responses/NotFound'
+  
+  /api/v1/beta/poa/{id}/validate:
+    post:
+      tags: [Power of Attorney]
+      summary: Validate PoA
+      description: |
+        Validates a Power of Attorney for a specific action.
+        Checks temporal validity, scope permissions, resource access, and usage limits.
+      operationId: validatePoA
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - action
+              properties:
+                action:
+                  type: string
+                  description: Action to validate
+                  example: read:documents
+                resource:
+                  type: string
+                  description: Resource path
+                  example: /api/documents/report.pdf
+                context:
+                  type: object
+                  description: Additional context for validation
+                  properties:
+                    ip_address:
+                      type: string
+                    user_agent:
+                      type: string
+                    timestamp:
+                      type: string
+                      format: date-time
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                  poa_id:
+                    type: string
+                  action:
+                    type: string
+                  reason:
+                    type: string
+                    description: Validation failure reason (if invalid)
+                  validated_at:
+                    type: string
+                    format: date-time
+              examples:
+                valid:
+                  value:
+                    valid: true
+                    poa_id: poa_abc123
+                    action: read:documents
+                    validated_at: "2025-11-15T10:30:00Z"
+                invalid:
+                  value:
+                    valid: false
+                    poa_id: poa_abc123
+                    action: write:documents
+                    reason: scope_not_granted
+                    validated_at: "2025-11-15T10:30:00Z"
+        '404':
+          $ref: '#/components/responses/NotFound'
+  
+  # ============================================================================
+  # PVP (PERSON VERIFICATION PROTOCOL) ENDPOINTS
+  # ============================================================================
+  
+  /api/v1/beta/pvp/verify:
+    post:
+      tags: [PVP]
+      summary: Verify identity via PVP
+      description: |
+        Verifies a person's identity using the Person Verification Protocol.
+        Supports multiple proof types: document, biometric, or challenge-response.
+      operationId: verifyPVP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - subject
+                - proof_type
+                - proof_data
+              properties:
+                subject:
+                  type: string
+                  description: Subject identifier (email, DID, etc.)
+                  example: alice@example.com
+                proof_type:
+                  type: string
+                  enum: [document, biometric, challenge]
+                  description: Type of verification proof
+                proof_data:
+                  type: string
+                  description: Base64-encoded proof data
+            examples:
+              document:
+                value:
+                  subject: alice@example.com
+                  proof_type: document
+                  proof_data: base64_encoded_document_scan
+              biometric:
+                value:
+                  subject: bob@example.com
+                  proof_type: biometric
+                  proof_data: base64_encoded_fingerprint
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                  subject:
+                    type: string
+                  verified_at:
+                    type: string
+                    format: date-time
+                  proof_type:
+                    type: string
+                  confidence_score:
+                    type: number
+                    format: float
+                    minimum: 0
+                    maximum: 1
+                    description: Confidence score (0-1)
+              examples:
+                success:
+                  value:
+                    valid: true
+                    subject: alice@example.com
+                    verified_at: "2025-11-15T10:30:00Z"
+                    proof_type: document
+                    confidence_score: 0.95
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+  
+  # ============================================================================
+  # COMMERCIAL REGISTRY ENDPOINTS
+  # ============================================================================
+  
+  /api/v1/beta/registry/verify-entity:
+    post:
+      tags: [Registry]
+      summary: Verify commercial entity
+      description: |
+        Verifies a commercial entity in the registry system.
+        Supports multiple registry types (Germany HRB, UK Companies House, etc.)
+      operationId: verifyEntity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - entity_id
+                - registry
+              properties:
+                entity_id:
+                  type: string
+                  description: Entity identifier in the registry
+                  example: HRB12345-DE
+                registry:
+                  type: string
+                  description: Registry system identifier
+                  example: germany_hrb
+                  enum: [germany_hrb, uk_companies_house, us_sec]
+            examples:
+              german_company:
+                value:
+                  entity_id: HRB12345-DE
+                  registry: germany_hrb
+              uk_company:
+                value:
+                  entity_id: "12345678"
+                  registry: uk_companies_house
+      responses:
+        '200':
+          description: Entity verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                  entity_id:
+                    type: string
+                  registry:
+                    type: string
+                  entity_name:
+                    type: string
+                  status:
+                    type: string
+                    enum: [active, dissolved, pending]
+                  verified_at:
+                    type: string
+                    format: date-time
+              examples:
+                success:
+                  value:
+                    valid: true
+                    entity_id: HRB12345-DE
+                    registry: germany_hrb
+                    entity_name: Acme GmbH
+                    status: active
+                    verified_at: "2025-11-15T10:30:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  
+  /api/v1/beta/registry/verify-signatory:
+    post:
+      tags: [Registry]
+      summary: Verify signatory authority
+      description: Verifies that a person has signatory authority for an entity
+      operationId: verifySignatory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - signatory_id
+                - entity_id
+                - role
+              properties:
+                signatory_id:
+                  type: string
+                  description: Signatory identifier
+                  example: "12345678-GB"
+                entity_id:
+                  type: string
+                  description: Entity identifier
+                  example: HRB12345-DE
+                role:
+                  type: string
+                  description: Required role/authority level
+                  example: director
+                  enum: [director, ceo, cfo, authorized_rep]
+      responses:
+        '200':
+          description: Signatory verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                  signatory_id:
+                    type: string
+                  entity_id:
+                    type: string
+                  role:
+                    type: string
+                  authority_level:
+                    type: string
+                  verified_at:
+                    type: string
+                    format: date-time
+  
+  # ============================================================================
+  # AUTHORIZATION ENDPOINTS
+  # ============================================================================
+  
+  /api/v1/beta/authz/evaluate:
+    post:
+      tags: [Authorization]
+      summary: Evaluate authorization
+      description: |
+        Evaluates an authorization request against loaded policies.
+        Returns permit/deny decision with policy evaluation details.
+      operationId: evaluateAuthorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - subject
+                - action
+                - resource
+              properties:
+                subject:
+                  type: string
+                  description: Subject performing the action
+                  example: alice@example.com
+                action:
+                  type: string
+                  description: Action being performed
+                  example: read
+                resource:
+                  type: string
+                  description: Resource being accessed
+                  example: /api/documents/report.pdf
+                context:
+                  type: object
+                  description: Additional context attributes
+                  properties:
+                    ip_address:
+                      type: string
+                    time:
+                      type: string
+                      format: date-time
+                    department:
+                      type: string
+            examples:
+              read_document:
+                value:
+                  subject: alice@example.com
+                  action: read
+                  resource: /api/documents/report.pdf
+              write_with_context:
+                value:
+                  subject: bob@example.com
+                  action: write
+                  resource: /api/documents/new-report.pdf
+                  context:
+                    ip_address: 192.168.1.100
+                    department: engineering
+      responses:
+        '200':
+          description: Authorization decision
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  decision:
+                    type: string
+                    enum: [permit, deny]
+                  policy_id:
+                    type: string
+                  reason:
+                    type: string
+                  evaluated_at:
+                    type: string
+                    format: date-time
+                  cache_hit:
+                    type: boolean
+              examples:
+                permit:
+                  value:
+                    decision: permit
+                    policy_id: policy_v1_abc123
+                    reason: matched_allow_rule
+                    evaluated_at: "2025-11-15T10:30:00Z"
+                    cache_hit: false
+                deny:
+                  value:
+                    decision: deny
+                    policy_id: policy_v1_abc123
+                    reason: no_matching_rule
+                    evaluated_at: "2025-11-15T10:30:00Z"
+                    cache_hit: false
+  
+  /api/v1/beta/authz/metrics:
+    get:
+      tags: [Authorization]
+      summary: Get authorization metrics
+      description: Returns authorization engine metrics including cache statistics
+      operationId: getAuthzMetrics
+      responses:
+        '200':
+          description: Authorization metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cache:
+                    type: object
+                    properties:
+                      hits:
+                        type: integer
+                      misses:
+                        type: integer
+                      size:
+                        type: integer
+                      hit_rate:
+                        type: number
+                        format: float
+                  decisions:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      permit:
+                        type: integer
+                      deny:
+                        type: integer
+  
+  # ============================================================================
+  # POLICY MANAGEMENT ENDPOINTS
+  # ============================================================================
+  
+  /api/v1/beta/policy/head/policies:
+    get:
+      tags: [Policy]
+      summary: List active policies
+      description: Returns list of currently active policy rules
+      operationId: listActivePolicies
+      responses:
+        '200':
+          description: List of active policies
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  policies:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PolicyRule'
+  
+  /api/v1/beta/policy/bundles:
+    post:
+      tags: [Policy]
+      summary: Add policy bundle
+      description: Uploads a new policy bundle
+      operationId: addPolicyBundle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - version
+                - policies
+              properties:
+                version:
+                  type: string
+                policies:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PolicyRule'
+      responses:
+        '201':
+          description: Policy bundle added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bundle_hash:
+                    type: string
+                  version:
+                    type: string
+  
+  /api/v1/beta/policy/evaluate:
+    post:
+      tags: [Policy]
+      summary: Evaluate policy
+      description: Evaluates a policy rule against test data
+      operationId: evaluatePolicy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                policy:
+                  $ref: '#/components/schemas/PolicyRule'
+                input:
+                  type: object
+      responses:
+        '200':
+          description: Policy evaluation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+                  matched_rules:
+                    type: array
+                    items:
+                      type: string
+  
+  # ============================================================================
+  # TOKEN ENDPOINTS
+  # ============================================================================
+  
+  /api/v1/token/create:
+    post:
+      tags: [Tokens]
+      summary: Create token
+      description: Creates a new access token
+      operationId: createToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - client_id
+                - scope
+              properties:
+                client_id:
+                  type: string
+                scope:
+                  type: string
+                expires_in:
+                  type: integer
+                  description: Token lifetime in seconds
+      responses:
+        '201':
+          description: Token created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+  
+  /api/v1/token/validate:
+    post:
+      tags: [Tokens]
+      summary: Validate token
+      description: Validates an access token
+      operationId: validateToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+      responses:
+        '200':
+          description: Token validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                  claims:
+                    type: object
+                  expires_at:
+                    type: string
+                    format: date-time
+  
+  /api/v1/token/revoke:
+    post:
+      tags: [Tokens]
+      summary: Revoke token
+      description: Revokes an active access token
+      operationId: revokeToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+      responses:
+        '200':
+          description: Token revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  revoked:
+                    type: boolean
+                  revoked_at:
+                    type: string
+                    format: date-time
+  
+  # ============================================================================
+  # METRICS ENDPOINTS
+  # ============================================================================
+  
+  /api/v1/beta/metrics/prometheus:
+    get:
+      tags: [Metrics]
+      summary: Prometheus metrics
+      description: Returns all metrics in Prometheus text format
+      operationId: getPrometheusMetrics
+      responses:
+        '200':
+          description: Prometheus metrics
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |
+                # HELP gauth_requests_total Total HTTP requests
+                # TYPE gauth_requests_total counter
+                gauth_requests_total{method="GET",status="200"} 1234
+  
+  /metrics:
+    get:
+      tags: [Metrics]
+      summary: Root Prometheus endpoint
+      description: Standard Prometheus metrics endpoint for scraping
+      operationId: getMetrics
+      responses:
+        '200':
+          description: Prometheus metrics
+          content:
+            text/plain:
+              schema:
+                type: string
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from RFC-0111 subscription flow
+    
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for service-to-service authentication
+  
+  schemas:
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique subscription identifier
+          example: sub_1234567890abcdef
+        client_id:
+          type: string
+          description: Client identifier
+          example: test-client-123
+        scope:
+          type: string
+          description: Requested permissions scope
+          example: read write
+        status:
+          type: string
+          enum: [initiated, in_progress, completed, failed]
+          description: Current subscription status
+        current_step:
+          type: string
+          enum: [I, II, III, IV, V, VI, VII, VIII]
+          description: Current step in RFC-0111 flow
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+    
+    StepResult:
+      type: object
+      properties:
+        subscription_id:
+          type: string
+        step:
+          type: string
+        status:
+          type: string
+          enum: [success, failed]
+        message:
+          type: string
+        completed_at:
+          type: string
+          format: date-time
+    
+    PoACreate:
+      type: object
+      required:
+        - grantor
+        - grantee
+        - scope
+        - valid_from
+        - valid_until
+      properties:
+        grantor:
+          type: string
+          description: Entity granting the authority
+          example: alice@example.com
+        grantee:
+          type: string
+          description: Entity receiving the authority
+          example: bob@example.com
+        scope:
+          type: array
+          items:
+            type: string
+          description: List of granted permissions
+          example: ["read:documents", "write:reports"]
+        valid_from:
+          type: string
+          format: date-time
+          description: Start of validity period
+        valid_until:
+          type: string
+          format: date-time
+          description: End of validity period
+        resource_pattern:
+          type: string
+          description: Resource path pattern (supports wildcards)
+          example: /api/documents/*
+        max_uses:
+          type: integer
+          description: Maximum number of uses (0 = unlimited)
+          default: 0
+        constraints:
+          type: object
+          description: Additional constraints
+          properties:
+            ip_whitelist:
+              type: array
+              items:
+                type: string
+              description: Allowed IP addresses/ranges
+            time_windows:
+              type: array
+              items:
+                type: string
+              description: Allowed time windows (HH:MM-HH:MM format)
+    
+    PoA:
+      allOf:
+        - $ref: '#/components/schemas/PoACreate'
+        - type: object
+          properties:
+            id:
+              type: string
+              description: Unique PoA identifier
+              example: poa_abc123def456
+            status:
+              type: string
+              enum: [active, expired, revoked]
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+            revoked_at:
+              type: string
+              format: date-time
+              nullable: true
+            use_count:
+              type: integer
+              description: Number of times PoA has been used
+    
+    PolicyRule:
+      type: object
+      properties:
+        id:
+          type: string
+        effect:
+          type: string
+          enum: [allow, deny]
+        subjects:
+          type: array
+          items:
+            type: string
+        actions:
+          type: array
+          items:
+            type: string
+        resources:
+          type: array
+          items:
+            type: string
+        conditions:
+          type: object
+    
+    Token:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: JWT access token
+        token_type:
+          type: string
+          example: Bearer
+        expires_in:
+          type: integer
+          description: Token lifetime in seconds
+        scope:
+          type: string
+        issued_at:
+          type: string
+          format: date-time
+    
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error code
+        error_description:
+          type: string
+          description: Human-readable error description
+        error_uri:
+          type: string
+          format: uri
+          description: URI to error documentation
+        timestamp:
+          type: string
+          format: date-time
+  
+  responses:
+    BadRequest:
+      description: Bad request - invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: invalid_request
+            error_description: Missing required parameter 'client_id'
+            timestamp: "2025-11-15T10:30:00Z"
+    
+    Unauthorized:
+      description: Unauthorized - authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: unauthorized
+            error_description: Valid authentication credentials required
+            timestamp: "2025-11-15T10:30:00Z"
+    
+    Forbidden:
+      description: Forbidden - insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: forbidden
+            error_description: Insufficient permissions to access this resource
+            timestamp: "2025-11-15T10:30:00Z"
+    
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: not_found
+            error_description: The requested resource was not found
+            timestamp: "2025-11-15T10:30:00Z"
+    
+    RateLimitExceeded:
+      description: Rate limit exceeded
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+          description: Request limit per window
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Remaining requests in window
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+          description: Time when the limit resets (Unix timestamp)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: rate_limit_exceeded
+            error_description: Too many requests. Please retry after rate limit reset.
+            timestamp: "2025-11-15T10:30:00Z"
+    
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: internal_error
+            error_description: An unexpected error occurred
+            timestamp: "2025-11-15T10:30:00Z"

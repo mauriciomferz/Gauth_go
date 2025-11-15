@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GAuth API - ReDoc</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAIvSURBVFhH7ZbPaxNBFMff" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="redoc-container"></div>
+    <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+    <script>
+        Redoc.init(
+            "{{SPEC_URL}}", 
+            {
+                scrollYOffset: 50,
+                hideDownloadButton: false,
+                disableSearch: false,
+                expandResponses: "200,201",
+                jsonSampleExpandLevel: 2,
+                hideSingleRequestSampleTab: false,
+                menuToggle: true,
+                nativeScrollbars: false,
+                pathInMiddlePanel: false,
+                requiredPropsFirst: true,
+                sortPropsAlphabetically: false,
+                expandSingleSchemaField: true,
+                theme: {
+                    spacing: {
+                        sectionHorizontal: 20,
+                        sectionVertical: 20
+                    },
+                    colors: {
+                        primary: {
+                            main: '#667eea'
+                        },
+                        success: {
+                            main: '#48bb78'
+                        },
+                        warning: {
+                            main: '#ed8936'
+                        },
+                        error: {
+                            main: '#f56565'
+                        },
+                        http: {
+                            get: '#48bb78',
+                            post: '#667eea',
+                            put: '#ed8936',
+                            delete: '#f56565',
+                            patch: '#9f7aea'
+                        }
+                    },
+                    typography: {
+                        fontSize: '14px',
+                        lineHeight: '1.5em',
+                        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif',
+                        headings: {
+                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif',
+                            fontWeight: '600'
+                        },
+                        code: {
+                            fontSize: '13px',
+                            fontFamily: 'Courier, monospace',
+                            lineHeight: '1.5em',
+                            fontWeight: '400',
+                            color: '#e53e3e',
+                            backgroundColor: 'rgba(229, 62, 62, 0.1)',
+                            wrap: false
+                        }
+                    },
+                    sidebar: {
+                        backgroundColor: '#f7fafc',
+                        textColor: '#2d3748',
+                        activeTextColor: '#667eea'
+                    },
+                    rightPanel: {
+                        backgroundColor: '#2d3748',
+                        textColor: '#f7fafc'
+                    }
+                }
+            },
+            document.getElementById('redoc-container')
+        );
+    </script>
+</body>
+</html>
