@@ -288,68 +288,111 @@ class ApiClient {
 
   // PVP APIs (placeholder - need to check if these exist)
   async verifyIdentity(data: VerifyIdentityRequest): Promise<IdentityVerificationResponse> {
-    // Mock identity verification since there's no dedicated endpoint
-    // In production, this would integrate with actual PVP/eIDAS systems
-    
-    // Simulate verification logic based on entity ID format
-    const isLegalEntity = /^(HRB|GmbH|AG|Ltd|Inc|LLC)/i.test(data.entityId)
-    const hasValidFormat = /^[A-Z0-9-]+$/i.test(data.entityId)
-    const minLength = data.entityId.length >= 5
-    
-    // Verification succeeds if:
-    // - Legal Entity: Starts with registry prefix (HRB, etc.) and has valid format
-    // - Individual: Has valid format and minimum length
-    const verified = hasValidFormat && minLength && (
-      (data.type === 'legal_entity' && isLegalEntity) ||
-      (data.type === 'individual' && !isLegalEntity && data.entityId.length >= 8)
-    )
-    
-    return Promise.resolve({
-      verified,
+    // Call the real PVP verification endpoint
+    const response = await this.client.post('/beta/pvp/verify', {
+      document_type: data.tsp, // Use TSP as document type
+      document_number: data.entityId,
+      first_name: data.entityId.split(' ')[0] || 'Unknown',
+      last_name: data.entityId.split(' ')[1] || 'Person',
+      date_of_birth: '1990-01-01', // Default, would come from form in real scenario
+      country: 'AT' // Default, would come from form in real scenario
+    })
+
+    const pvpData = response.data
+
+    if (!pvpData.success || !pvpData.verified) {
+      return {
+        verified: false,
+        identityType: data.type,
+        trustLevel: 'none',
+        entityId: data.entityId,
+        tsp: data.tsp,
+        tspStatus: 'unverified',
+        verificationTime: new Date().toISOString(),
+        cryptographicBinding: 'none'
+      }
+    }
+
+    return {
+      verified: true,
       identityType: data.type,
-      trustLevel: verified ? data.trustLevel : 'none',
+      trustLevel: pvpData.verification_details?.trust_level || data.trustLevel,
       entityId: data.entityId,
       tsp: data.tsp,
-      tspStatus: verified ? 'qualified' : 'unverified',
-      verificationTime: new Date().toISOString(),
-      cryptographicBinding: verified ? 'strong' : 'none'
-    })
+      tspStatus: 'qualified',
+      verificationTime: pvpData.verification_details?.timestamp || new Date().toISOString(),
+      cryptographicBinding: 'strong'
+    }
   }
 
-  // Commercial Registry APIs (placeholder)
+  // Commercial Registry APIs
   async verifyEntity(data: VerifyEntityRequest): Promise<EntityVerificationResponse> {
-    // Mock entity verification since there's no dedicated endpoint
-    // In production, this would call a real commercial registry API
-    return Promise.resolve({
-      verified: true,
-      registrationNumber: data.registrationNumber,
-      legalName: 'Demo Corporation GmbH',
-      jurisdiction: data.jurisdiction,
-      status: 'active',
-      registrationDate: '2020-01-15',
-      legalForm: 'GmbH',
-      managingDirectors: [
-        {
-          name: 'Dr. Jane Smith',
-          position: 'Managing Director',
-          authority: 'full'
-        }
-      ]
+    // Call the real Commercial Registry verification endpoint
+    const response = await this.client.post('/beta/registry/verify-entity', {
+      entity_id: data.registrationNumber,
+      entity_name: '',
+      entity_type: 'GmbH',
+      jurisdiction: data.jurisdiction
     })
+
+    const registryData = response.data
+
+    if (!registryData.success || !registryData.verified) {
+      return {
+        verified: false,
+        registrationNumber: data.registrationNumber,
+        legalName: '',
+        jurisdiction: data.jurisdiction,
+        status: 'unknown',
+        registrationDate: '',
+        legalForm: '',
+        managingDirectors: []
+      }
+    }
+
+    return {
+      verified: true,
+      registrationNumber: registryData.entity.id,
+      legalName: registryData.entity.name,
+      jurisdiction: registryData.entity.jurisdiction,
+      status: registryData.entity.status,
+      registrationDate: registryData.entity.registered_at,
+      legalForm: registryData.entity.entity_type,
+      managingDirectors: [] // Not included in this endpoint response
+    }
   }
 
   async verifySignatory(data: VerifySignatoryRequest): Promise<SignatoryVerificationResponse> {
-    // Mock signatory verification since there's no dedicated endpoint
-    // In production, this would call a real commercial registry API
-    return Promise.resolve({
-      authorized: true,
-      signatoryName: data.signatoryName,
-      entity: data.entity,
-      authorityType: data.authorityType,
-      appointmentDate: '2020-01-15',
-      restrictions: 'none',
-      status: 'active'
+    // Call the real Commercial Registry signatory verification endpoint
+    const response = await this.client.post('/beta/registry/verify-signatory', {
+      entity_id: data.entity,
+      person_id: data.signatoryName, // Using name as person_id for now
+      role: data.authorityType
     })
+
+    const registryData = response.data
+
+    if (!registryData.success || !registryData.verified) {
+      return {
+        authorized: false,
+        signatoryName: data.signatoryName,
+        entity: data.entity,
+        authorityType: data.authorityType,
+        appointmentDate: '',
+        restrictions: 'unknown',
+        status: 'unknown'
+      }
+    }
+
+    return {
+      authorized: registryData.signatory.authorized,
+      signatoryName: data.signatoryName,
+      entity: registryData.signatory.entity_id,
+      authorityType: registryData.signatory.role,
+      appointmentDate: registryData.signatory.valid_from,
+      restrictions: 'none',
+      status: registryData.signatory.authorized ? 'active' : 'inactive'
+    }
   }
 
   // PIP APIs (using authorization endpoints)
