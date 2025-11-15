@@ -2,7 +2,6 @@
 package security
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"strconv"

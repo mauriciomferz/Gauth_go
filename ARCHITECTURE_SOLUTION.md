@@ -120,11 +120,11 @@ owners: architecture-team
        ↓
 ┌──────────────────────────────────────┐
 │  UNUSED VALIDATION FUNCTIONS         │
-│  - ValidateRequestCompliance() ❌     │  ← 200 lines, never called
-│  - ValidateGrantCompliance() ❌       │  ← 150 lines, never called
-│  - ValidateAuthorizationChain() ❌    │  ← 720 lines, never called
-│  - ValidateFormalRequirements() ❌    │  ← 814 lines, never called
-│  - CreateExtendedToken() ❌           │  ← 400 lines, never called
+│  - ValidateRequestCompliance() ❌    │  ← 200 lines, never called
+│  - ValidateGrantCompliance() ❌      │  ← 150 lines, never called
+│  - ValidateAuthorizationChain() ❌   │  ← 720 lines, never called
+│  - ValidateFormalRequirements() ❌   │  ← 814 lines, never called
+│  - CreateExtendedToken() ❌          │  ← 400 lines, never called
 └──────────────────────────────────────┘
 ```
 

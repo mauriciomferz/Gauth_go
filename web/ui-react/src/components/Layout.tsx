@@ -43,7 +43,10 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+      <header
+        className="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm"
+        role="banner"
+      >
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -80,7 +83,11 @@ export default function Layout({ children }: LayoutProps) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex gap-1 overflow-x-auto pb-2 -mb-px scrollbar-hide">
+          <nav
+            className="flex gap-1 overflow-x-auto pb-2 -mb-px scrollbar-hide"
+            role="navigation"
+            aria-label="Main navigation"
+          >
             {navigation.map((item) => (
               <NavLink
                 key={item.name}
@@ -103,10 +110,20 @@ export default function Layout({ children }: LayoutProps) {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 lg:px-8 py-8">{children}</main>
+      <main
+        id="main-content"
+        className="container mx-auto px-4 lg:px-8 py-8"
+        role="main"
+        aria-label="Main content"
+      >
+        {children}
+      </main>
 
       {/* Footer */}
-      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-12">
+      <footer
+        className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-12"
+        role="contentinfo"
+      >
         <div className="container mx-auto px-4 lg:px-8 py-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
