@@ -560,6 +560,22 @@ func (reg *CollectorRegistry) IncCapabilityEnforceDenied() {
 	reg.dispatch(func(c MetricsCollector) { c.IncCapabilityEnforceDenied() })
 }
 
+func (reg *CollectorRegistry) IncPEPEnforcements(allowed bool, actionType string) {
+	reg.dispatch(func(c MetricsCollector) { c.IncPEPEnforcements(allowed, actionType) })
+}
+
+func (reg *CollectorRegistry) IncPEPViolations(violationType, severity string) {
+	reg.dispatch(func(c MetricsCollector) { c.IncPEPViolations(violationType, severity) })
+}
+
+func (reg *CollectorRegistry) ObservePEPEnforcementLatency(d time.Duration) {
+	reg.dispatch(func(c MetricsCollector) { c.ObservePEPEnforcementLatency(d) })
+}
+
+func (reg *CollectorRegistry) SetPEPAuditBufferSize(enforcement, violation int) {
+	reg.dispatch(func(c MetricsCollector) { c.SetPEPAuditBufferSize(enforcement, violation) })
+}
+
 func (reg *CollectorRegistry) IncModelLimitExceeded() {
 	reg.dispatch(func(c MetricsCollector) { c.IncModelLimitExceeded() })
 }
