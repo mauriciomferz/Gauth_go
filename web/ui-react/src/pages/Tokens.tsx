@@ -6,6 +6,7 @@ import { Key, CheckCircle, Copy, Clock } from 'lucide-react'
 import { apiClient, TokenResponse, TokenValidationResponse } from '../lib/api'
 import { toast } from 'sonner'
 import { formatDate } from '../lib/utils'
+import { SubscriptionWizard } from '../components/subscription/SubscriptionWizard'
 
 interface CreateTokenForm {
   clientId: string
@@ -28,6 +29,7 @@ export default function Tokens() {
   const [validationResult, setValidationResult] = useState<TokenValidationResponse | null>(null)
   const [loading, setLoading] = useState(false)
   const [recentTokens, setRecentTokens] = useState<TokenResponse[]>([])
+  const [showWizard, setShowWizard] = useState(false)
 
   const handleCreateToken = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -85,9 +87,52 @@ export default function Tokens() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Create Token */}
-        <Card title="Create Extended Token" icon={<Key className="h-6 w-6" />}>
-          <form onSubmit={handleCreateToken} className="space-y-4">
+        {/* Create Token - RFC-0111 Wizard */}
+        <Card title="Create Extended Token (RFC-0111)" icon={<Key className="h-6 w-6" />}>
+          {!showWizard ? (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Create a new RFC-0111 compliant extended token using the 8-step subscription flow with
+                multi-level authorization.
+              </p>
+              <Button
+                onClick={() => setShowWizard(true)}
+                icon={<Key className="h-4 w-4" />}
+              >
+                Start Subscription Wizard
+              </Button>
+            </div>
+          ) : (
+            <SubscriptionWizard
+              onComplete={(token) => {
+                const newToken: TokenResponse = {
+                  token,
+                  clientId: 'RFC-0111 Subscription',
+                  scope: ['read', 'write'],
+                  expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                  authorizationChain: {
+                    ownersAuthorizer: 'RFC-0111 Flow',
+                    clientOwner: 'RFC-0111 Flow',
+                    client: 'RFC-0111 Flow',
+                  },
+                }
+                setCreatedToken(newToken)
+                setRecentTokens([newToken, ...recentTokens.slice(0, 4)])
+                setShowWizard(false)
+                toast.success('Token created via RFC-0111 subscription flow!')
+              }}
+              onCancel={() => setShowWizard(false)}
+            />
+          )}
+
+          {/* Legacy Form - Keep for reference */}
+          {!showWizard && (
+            <>
+              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
+                  Legacy Form (For Testing)
+                </h4>
+                <form onSubmit={handleCreateToken} className="space-y-4">
             <Input
               label="Client ID"
               value={createForm.clientId}
@@ -128,11 +173,14 @@ export default function Tokens() {
               required
             />
             <Button type="submit" loading={loading} icon={<Key className="h-4 w-4" />}>
-              Create Token
+              Create Token (Legacy)
             </Button>
           </form>
+              </div>
+            </>
+          )}
 
-          {createdToken && (
+          {createdToken && !showWizard && (
             <div className="mt-6 p-4 bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800 rounded-lg">
               <div className="flex items-center gap-2 mb-3">
                 <CheckCircle className="h-5 w-5 text-success-600 dark:text-success-400" />
