@@ -191,8 +191,8 @@ func (s *DisclosureService) GetAuthorizationDetail(
 		return nil, fmt.Errorf("unauthorized: not the resource owner")
 	}
 
-	// Get compliance violations (stub for now)
-	violations := []ComplianceViolation{}
+	// Get compliance violations from tracking system
+	violations := s.getComplianceViolations(ctx, authorizationID)
 
 	// Build detail
 	detail := &AuthorizationDetail{
@@ -428,6 +428,91 @@ func (s *DisclosureService) tokenToSummary(token *ExtendedToken) AuthorizationSu
 	summary.ActiveRestrictions = restrictions
 
 	return summary
+}
+
+// getComplianceViolations retrieves compliance violations for a token from the tracking system
+func (s *DisclosureService) getComplianceViolations(ctx context.Context, tokenID string) []ComplianceViolation {
+	violations := []ComplianceViolation{}
+
+	// Get tracking status from compliance tracker
+	status, err := s.complianceTracker.GetTrackingStatus(ctx, tokenID)
+	if err != nil {
+		// Token may not be tracked or tracking already stopped - return empty violations
+		return violations
+	}
+
+	// Check if tracking is active and has compliance status
+	if !status.Active || status.ComplianceStatus == nil {
+		return violations
+	}
+
+	// Convert string violations to structured ComplianceViolation objects
+	for i, v := range status.ComplianceStatus.Violations {
+		violations = append(violations, ComplianceViolation{
+			ViolationID:   fmt.Sprintf("%s-v%d", tokenID, i+1),
+			DetectedAt:    status.LastChecked,
+			ViolationType: "compliance_check",
+			Severity:      s.determineViolationSeverity(v),
+			Description:   v,
+			Resolved:      false,
+		})
+	}
+
+	return violations
+}
+
+// determineViolationSeverity analyzes violation description to determine severity
+func (s *DisclosureService) determineViolationSeverity(violation string) string {
+	violationLower := fmt.Sprintf("%v", violation)
+	
+	// Critical severity indicators
+	if containsAny(violationLower, "expired", "revoked", "invalid", "unauthorized") {
+		return "critical"
+	}
+	
+	// High severity indicators
+	if containsAny(violationLower, "exceeded", "breach", "violation", "denied") {
+		return "high"
+	}
+	
+	// Medium severity indicators
+	if containsAny(violationLower, "warning", "approaching", "near") {
+		return "medium"
+	}
+	
+	// Default to low severity
+	return "low"
+}
+
+// containsAny checks if s contains any of the substrings (case-insensitive)
+func containsAny(s string, substrings ...string) bool {
+	s = fmt.Sprintf("%v", s)
+	for _, substr := range substrings {
+		if len(s) >= len(substr) {
+			for i := 0; i <= len(s)-len(substr); i++ {
+				match := true
+				for j := 0; j < len(substr); j++ {
+					c1 := s[i+j]
+					c2 := substr[j]
+					// Simple case-insensitive comparison
+					if c1 >= 'A' && c1 <= 'Z' {
+						c1 = c1 + 32
+					}
+					if c2 >= 'A' && c2 <= 'Z' {
+						c2 = c2 + 32
+					}
+					if c1 != c2 {
+						match = false
+						break
+					}
+				}
+				if match {
+					return true
+				}
+			}
+		}
+	}
+	return false
 }
 
 // AuditLogger interface for audit trail management

@@ -1,6 +1,8 @@
 package gauth
 
 import (
+	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -95,4 +97,117 @@ func TestDisclosureService_SubscriptionTracking(t *testing.T) {
 		// Verify subscription ID is populated
 		assert.Equal(t, "subscription-abc-123", token.SubscriptionID)
 	})
+}
+
+func TestDisclosureService_DetermineViolationSeverity(t *testing.T) {
+	service := &DisclosureService{}
+
+	testCases := []struct {
+		name            string
+		violation       string
+		expectedSeverity string
+	}{
+		{
+			name:            "critical - expired",
+			violation:       "Token has expired",
+			expectedSeverity: "critical",
+		},
+		{
+			name:            "critical - revoked",
+			violation:       "Authorization revoked by owner",
+			expectedSeverity: "critical",
+		},
+		{
+			name:            "critical - invalid",
+			violation:       "Invalid signature detected",
+			expectedSeverity: "critical",
+		},
+		{
+			name:            "high - exceeded",
+			violation:       "Transaction limit exceeded",
+			expectedSeverity: "high",
+		},
+		{
+			name:            "high - breach",
+			violation:       "Policy breach detected",
+			expectedSeverity: "high",
+		},
+		{
+			name:            "medium - warning",
+			violation:       "Warning: approaching limit",
+			expectedSeverity: "medium",
+		},
+		{
+			name:            "low - general",
+			violation:       "General compliance note",
+			expectedSeverity: "low",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			severity := service.determineViolationSeverity(tc.violation)
+			assert.Equal(t, tc.expectedSeverity, severity)
+		})
+	}
+}
+
+func TestDisclosureService_ComplianceViolationsRetrieval(t *testing.T) {
+	t.Run("returns empty violations when token not tracked", func(t *testing.T) {
+		// Create mock tracker that returns error
+		mockTracker := &mockComplianceTracker{
+			shouldError: true,
+		}
+
+		service := &DisclosureService{
+			complianceTracker: mockTracker,
+		}
+
+		violations := service.getComplianceViolations(nil, "unknown-token")
+		assert.Empty(t, violations)
+	})
+
+	t.Run("returns empty violations when tracking inactive", func(t *testing.T) {
+		mockTracker := &mockComplianceTracker{
+			status: &ComplianceTrackingStatus{
+				Active: false,
+			},
+		}
+
+		service := &DisclosureService{
+			complianceTracker: mockTracker,
+		}
+
+		violations := service.getComplianceViolations(nil, "inactive-token")
+		assert.Empty(t, violations)
+	})
+}
+
+// mockComplianceTracker for testing
+type mockComplianceTracker struct {
+	shouldError bool
+	status      *ComplianceTrackingStatus
+}
+
+func (m *mockComplianceTracker) StartTracking(ctx context.Context, req *ComplianceTrackingRequest) error {
+	return nil
+}
+
+func (m *mockComplianceTracker) CheckCompliance(ctx context.Context, tokenID string) (*ComplianceStatus, error) {
+	return nil, nil
+}
+
+func (m *mockComplianceTracker) StopTracking(ctx context.Context, tokenID string) error {
+	return nil
+}
+
+func (m *mockComplianceTracker) GetTrackingStatus(ctx context.Context, tokenID string) (*ComplianceTrackingStatus, error) {
+	if m.shouldError {
+		return nil, fmt.Errorf("token not tracked")
+	}
+	return m.status, nil
+}
+
+func (m *mockComplianceTracker) ListActiveTracking(ctx context.Context) ([]string, error) {
+	return nil, nil
 }
