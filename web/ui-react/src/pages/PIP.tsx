@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, StatCard } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { Input, Textarea } from '@/components/Form';
@@ -20,7 +20,35 @@ export default function PIP() {
   const [context, setContext] = useState('{}');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ValidationResult | null>(null);
-  const [cacheStats, setCacheStats] = useState({ hits: 1247, misses: 83, hitRate: '93.8%' });
+  const [cacheStats, setCacheStats] = useState({ hits: 0, misses: 0, hitRate: '0%' });
+  const [policies, setPolicies] = useState<any[]>([]);
+  const [loadingPolicies, setLoadingPolicies] = useState(true);
+
+  // Load cache stats and policies on component mount
+  useEffect(() => {
+    loadInitialData();
+  }, []);
+
+  const loadInitialData = async () => {
+    try {
+      // Fetch real cache statistics
+      const stats = await apiClient.getAuthzCacheMetrics();
+      setCacheStats({
+        hits: stats.hits,
+        misses: stats.misses,
+        hitRate: `${(stats.hitRate * 100).toFixed(1)}%`
+      });
+
+      // Fetch active policies
+      setLoadingPolicies(true);
+      const activePolicies = await apiClient.getActivePolicies();
+      setPolicies(activePolicies);
+    } catch (error) {
+      console.error('Failed to load initial data:', error);
+    } finally {
+      setLoadingPolicies(false);
+    }
+  };
 
   const handleValidate = async () => {
     if (!tokenId || !resource || !action) {
@@ -56,8 +84,8 @@ export default function PIP() {
         toast.error('Authorization denied');
       }
 
-      // Update cache stats
-      const stats = await apiClient.getCacheStats();
+      // Update cache stats from real backend
+      const stats = await apiClient.getAuthzCacheMetrics();
       setCacheStats({
         hits: stats.hits,
         misses: stats.misses,
@@ -217,28 +245,26 @@ export default function PIP() {
 
       {/* Active Policies Info */}
       <Card title="Active Policy Rules">
-        <div className="space-y-3">
-          <PolicyRule
-            name="Admin Full Access"
-            description="Grant all permissions to admin role"
-            status="active"
-          />
-          <PolicyRule
-            name="User Read-Only"
-            description="Allow read operations for standard users"
-            status="active"
-          />
-          <PolicyRule
-            name="Rate Limiting"
-            description="Maximum 100 requests per minute per token"
-            status="active"
-          />
-          <PolicyRule
-            name="Geographic Restriction"
-            description="Block requests from sanctioned countries"
-            status="active"
-          />
-        </div>
+        {loadingPolicies ? (
+          <div className="text-center py-8 text-muted-foreground">
+            Loading active policies...
+          </div>
+        ) : policies.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            No active policies found. Policies will appear here when loaded from the backend.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {policies.map((policy) => (
+              <PolicyRule
+                key={policy.id}
+                name={policy.name}
+                description={policy.description}
+                status={policy.status}
+              />
+            ))}
+          </div>
+        )}
       </Card>
     </div>
   );

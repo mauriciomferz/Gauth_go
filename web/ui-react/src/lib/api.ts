@@ -145,60 +145,92 @@ class ApiClient {
     return response.data
   }
 
-  // Authorization & Policy APIs (using beta endpoints)
+  // Authorization & Policy APIs (using beta endpoints) - Phase 2B Enhanced
   async checkAuthorization(data: AuthorizationRequest): Promise<AuthorizationResponse> {
-    try {
-      // Use beta authz/evaluate endpoint
-      // Backend expects: subject, resource, action, context (all strings)
-      const response = await this.client.post('/beta/authz/evaluate', {
-        subject: data.clientId,
-        action: data.action,
-        resource: data.geographic || 'default',
-        context: data.sector ? { sector: data.sector } : {}
-      })
-      
-      const backendData = response.data
-      return {
-        authorized: backendData.allowed || backendData.authorized || false,
-        allowed: backendData.allowed || backendData.authorized || false,
-        clientId: data.clientId,
-        action: data.action,
-        geographicScope: data.geographic,
-        industrySector: data.sector || 'general',
-        cacheHit: backendData.cache_hit || false,
-        processingTime: backendData.processing_time || `${backendData.evaluation_time || 0}ms`,
-        evaluationTime: backendData.evaluation_time || 0,
-        policies: backendData.policies || [],
-        policyChecks: backendData.policy_checks || []
-      }
-    } catch (error) {
-      console.error('Authorization check failed, using fallback:', error)
-      // Fallback to mock for demo purposes
-      const allowed = Math.random() > 0.3
-      return {
-        authorized: allowed,
-        allowed: allowed,
-        clientId: data.clientId,
-        action: data.action,
-        geographicScope: data.geographic,
-        industrySector: data.sector || 'general',
-        cacheHit: false,
-        processingTime: '25ms',
-        evaluationTime: 25,
-        policies: ['Fallback Policy'],
-        policyChecks: []
-      }
+    // Use beta authz/evaluate endpoint
+    // Backend expects: subject, resource, action, context (all strings)
+    const response = await this.client.post('/beta/authz/evaluate', {
+      subject: data.clientId,
+      action: data.action,
+      resource: data.geographic || 'default',
+      context: data.sector ? { sector: data.sector } : {}
+    })
+    
+    const backendData = response.data
+    return {
+      authorized: backendData.allowed || backendData.authorized || false,
+      allowed: backendData.allowed || backendData.authorized || false,
+      clientId: data.clientId,
+      action: data.action,
+      geographicScope: data.geographic,
+      industrySector: data.sector || 'general',
+      cacheHit: backendData.cache_hit || false,
+      processingTime: backendData.processing_time || `${backendData.evaluation_time || 0}ms`,
+      evaluationTime: backendData.evaluation_time || 0,
+      policies: backendData.policies || [],
+      policyChecks: backendData.policy_checks || []
     }
   }
 
   async getAuthzMetrics(): Promise<any> {
-    const response = await this.client.get('/poa/metrics')
+    const response = await this.client.get('/beta/authz/metrics')
     return response.data
   }
   
   async getDecisionMetrics(): Promise<any> {
     const response = await this.client.get('/token/metrics')
     return response.data
+  }
+
+  // Phase 2B: Real cache metrics for PIP page
+  async getAuthzCacheMetrics(): Promise<CacheStats> {
+    try {
+      const response = await this.client.get('/beta/authz/metrics')
+      const metrics = response.data
+      
+      // Parse cache metrics from backend response
+      const hits = metrics.cache_hits || 0
+      const misses = metrics.cache_misses || 0
+      const total = hits + misses
+      
+      return {
+        hits,
+        misses,
+        hitRate: total > 0 ? hits / total : 0,
+        totalRequests: total,
+        evictions: metrics.cache_evictions || 0
+      }
+    } catch (error) {
+      console.error('Failed to fetch cache metrics:', error)
+      // Return zero stats on error
+      return {
+        hits: 0,
+        misses: 0,
+        hitRate: 0,
+        totalRequests: 0,
+        evictions: 0
+      }
+    }
+  }
+
+  // Phase 2B: Get active policies from backend
+  async getActivePolicies(): Promise<PolicyRule[]> {
+    try {
+      const response = await this.client.get('/beta/policy/head/policies')
+      const policies = response.data.policies || []
+      
+      return policies.map((p: any) => ({
+        id: p.id || p.name,
+        name: p.name || 'Unnamed Policy',
+        description: p.description || p.purpose || '',
+        status: (p.enabled !== false && p.active !== false) ? 'active' : 'inactive',
+        priority: p.priority || 0
+      }))
+    } catch (error) {
+      console.error('Failed to fetch active policies:', error)
+      // Return empty array on error
+      return []
+    }
   }
 
   // Policy APIs
@@ -811,6 +843,14 @@ export interface CacheStats {
   totalRequests: number
   size?: number
   evictions?: number
+}
+
+export interface PolicyRule {
+  id: string
+  name: string
+  description: string
+  status: 'active' | 'inactive'
+  priority?: number
 }
 
 export interface CreatePoARequest {
