@@ -41,7 +41,7 @@
 | **PVP** | `POST /api/v1/beta/pvp/verify` | `POST /api/v1/beta/pvp/verify` | ✅ **Phase 2A** |
 | **Registry** | `POST /api/v1/beta/registry/verify-entity` | `POST /api/v1/beta/registry/verify-entity` | ✅ **Phase 2A** |
 | **Registry** | `POST /api/v1/beta/registry/verify-signatory` | `POST /api/v1/beta/registry/verify-signatory` | ✅ **Phase 2A** |
-| **PIP** | `POST /api/v1/pip/validate` | `POST /api/v1/beta/authz/evaluate` | ⏳ Future |
+| **PIP** | `POST /api/v1/pip/validate` | `POST /api/v1/beta/authz/evaluate` | ✅ **Phase 2B** |
 | **PoA** | `POST /api/v1/beta/poa` | `POST /api/v1/beta/poa` (+ 5 more endpoints) | ✅ **Phase 2A** |
 | **PoA** | `POST /api/v1/beta/poa/:id/validate` | `POST /api/v1/beta/poa/:id/validate` | ✅ **Phase 2A** |
 | **Metrics** | `GET /api/v1/metrics` | `GET /api/v1/beta/metrics/prometheus` | ⏳ Future |
@@ -275,14 +275,31 @@ POST /api/v1/beta/examples/run/jobs/:id/cancel
 - `6f873522`: Day 3 - Subscription wizard component
 - `fad92232`: Day 3 - Tokens page integration
 
-### Phase 2B: Authorization/PIP Integration ⏳ PLANNED
-**Goal**: Make PIP page functional with authz/evaluate
+### Phase 2B: Authorization/PIP Integration ✅ COMPLETE
+**Goal**: Make PIP page functional with authz/evaluate  
+**Duration**: November 15, 2025 (2 hours)  
+**Status**: 100% Complete
 
-**Planned Tasks**:
-1. ⏳ Map to `/beta/authz/evaluate`
-2. ⏳ Update payload structure for authorization
-3. ⏳ Update `validateAuthorization()` in api.ts
-4. ⏳ Test PIP page with real backend
+**Completed Tasks**:
+1. ✅ Verified `/beta/authz/evaluate` integration (already working)
+2. ✅ Implemented `getAuthzCacheMetrics()` for real cache stats
+3. ✅ Implemented `getActivePolicies()` for dynamic policy list
+4. ✅ Updated PIP page to load cache metrics from backend
+5. ✅ Updated PIP page to load active policies from backend
+6. ✅ Removed fallback mock code in `checkAuthorization()`
+7. ✅ Enhanced error handling (no more silent fallbacks)
+8. ✅ All PIP functionality using real backend
+
+**New API Methods**:
+- `getAuthzCacheMetrics()` - GET /beta/authz/metrics
+- `getActivePolicies()` - GET /beta/policy/head/policies
+
+**Frontend Changes**:
+- PIP.tsx: useEffect to load initial data on mount
+- PIP.tsx: Real-time cache stats updates
+- PIP.tsx: Dynamic policy list with loading/empty states
+- api.ts: Two new methods + PolicyRule interface
+- api.ts: Removed try-catch fallback in checkAuthorization()
 
 ### Phase 2C: Metrics Integration ⏳ PLANNED
 **Goal**: Make Metrics page functional with Prometheus data
