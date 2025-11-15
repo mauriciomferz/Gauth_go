@@ -1,0 +1,185 @@
+# Security Monitoring Alerts for Prometheus
+# These rules detect suspicious security events and potential attacks
+
+groups:
+  - name: security_alerts
+    interval: 30s
+    rules:
+      # Rate Limiting Alerts
+      - alert: HighRateLimitViolations
+        expr: rate(gauth_rate_limit_violations_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "High rate of rate limit violations detected"
+          description: "Rate limit violations are occurring at {{ $value }} per second over the last 5 minutes"
+      
+      - alert: DDoSAttackDetected
+        expr: rate(gauth_ddos_blocked_total[1m]) > 50
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "Potential DDoS attack detected"
+          description: "DDoS protection has blocked {{ $value }} requests per second in the last minute"
+      
+      # Authentication Alerts
+      - alert: HighAuthenticationFailureRate
+        expr: rate(gauth_authentication_failures_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "High authentication failure rate"
+          description: "Authentication failures are occurring at {{ $value }} per second"
+      
+      - alert: SuspiciousAuthenticationActivity
+        expr: rate(gauth_authentication_failures_total[1m]) > 20
+        for: 30s
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "Suspicious authentication activity detected"
+          description: "Possible brute force attack - {{ $value }} failed authentication attempts per second"
+      
+      # Input Validation Alerts
+      - alert: SQLInjectionAttempts
+        expr: rate(gauth_sql_injection_attempts_total[5m]) > 1
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "SQL injection attempts detected"
+          description: "{{ $value }} SQL injection attempts per second detected"
+      
+      - alert: XSSAttempts
+        expr: rate(gauth_xss_attempts_total[5m]) > 1
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "XSS attempts detected"
+          description: "{{ $value }} XSS attempts per second detected"
+      
+      - alert: PathTraversalAttempts
+        expr: rate(gauth_path_traversal_attempts_total[5m]) > 1
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "Path traversal attempts detected"
+          description: "{{ $value }} path traversal attempts per second detected"
+      
+      # CORS Alerts
+      - alert: UnauthorizedCORSAttempts
+        expr: rate(gauth_cors_rejected_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "High rate of unauthorized CORS requests"
+          description: "{{ $value }} unauthorized CORS requests per second from unknown origins"
+      
+      # Token Operations Alerts
+      - alert: UnusualTokenCreationRate
+        expr: rate(gauth_token_created_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "Unusual token creation rate"
+          description: "Token creation rate is {{ $value }} per second, which is unusually high"
+      
+      - alert: HighTokenValidationFailureRate
+        expr: rate(gauth_token_validation_failures_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "High token validation failure rate"
+          description: "Token validation failures at {{ $value }} per second"
+      
+      # Audit Log Alerts
+      - alert: HighSecurityEventRate
+        expr: rate(gauth_security_events_total[5m]) > 20
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "High rate of security events"
+          description: "Security events are occurring at {{ $value }} per second"
+      
+      - alert: CriticalSecurityEvent
+        expr: increase(gauth_critical_security_events_total[1m]) > 0
+        for: 0s
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "Critical security event detected"
+          description: "A critical security event has been logged"
+      
+      # Error Rate Alerts
+      - alert: HighServerErrorRate
+        expr: rate(gauth_http_requests_total{status=~"5.."}[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+          category: reliability
+        annotations:
+          summary: "High server error rate"
+          description: "Server errors (5xx) are occurring at {{ $value }} per second"
+      
+      - alert: HighClientErrorRate
+        expr: rate(gauth_http_requests_total{status=~"4.."}[5m]) > 20
+        for: 5m
+        labels:
+          severity: info
+          category: reliability
+        annotations:
+          summary: "High client error rate"
+          description: "Client errors (4xx) are occurring at {{ $value }} per second"
+      
+      # Resource Exhaustion
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes > 1073741824  # 1GB
+        for: 5m
+        labels:
+          severity: warning
+          category: resource
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ humanize $value }}"
+      
+      - alert: HighGoroutineCount
+        expr: go_goroutines > 1000
+        for: 5m
+        labels:
+          severity: warning
+          category: resource
+        annotations:
+          summary: "High goroutine count"
+          description: "Goroutine count is {{ $value }}"
+      
+      # Security Configuration Alerts
+      - alert: InsecureConfiguration
+        expr: gauth_insecure_config_enabled > 0
+        for: 1m
+        labels:
+          severity: warning
+          category: configuration
+        annotations:
+          summary: "Insecure configuration detected"
+          description: "Development mode or insecure configuration is enabled in production"
