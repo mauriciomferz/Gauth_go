@@ -149,8 +149,9 @@ class ApiClient {
   async checkAuthorization(data: AuthorizationRequest): Promise<AuthorizationResponse> {
     try {
       // Use beta authz/evaluate endpoint
+      // Backend expects: subject, resource, action, context (all strings)
       const response = await this.client.post('/beta/authz/evaluate', {
-        client_id: data.clientId,
+        subject: data.clientId,
         action: data.action,
         resource: data.geographic || 'default',
         context: data.sector ? { sector: data.sector } : {}
