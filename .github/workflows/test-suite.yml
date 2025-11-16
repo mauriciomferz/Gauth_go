@@ -51,10 +51,22 @@ jobs:
           
           # Run tests on each package separately to avoid argument length issues
           # Use for loop to properly propagate exit codes
+          FAILED=0
           for pkg in $PACKAGES; do
             echo "Testing $pkg..."
-            go test -v "$pkg" -skip "TestPAP_ConcurrentAccess|TestPAP_GetPolicyStatistics|TestSSETransportConnect" -timeout 5m -vet=off || exit 1
+            if ! go test -v "$pkg" -skip "TestPAP_ConcurrentAccess|TestPAP_GetPolicyStatistics|TestSSETransportConnect" -timeout 5m -vet=off; then
+              echo "❌ Tests failed for $pkg"
+              FAILED=1
+              break
+            fi
           done
+          
+          if [ $FAILED -eq 1 ]; then
+            echo "❌ pkg tests failed"
+            exit 1
+          fi
+          
+          echo "✅ All tests passed"
       
       - name: Generate coverage report
         if: success()
