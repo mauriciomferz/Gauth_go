@@ -44,6 +44,8 @@ jobs:
           # Skip SSE transport test due to race condition on channel close
           # Skip loadtest and crypto integration tests that require services/have timeouts
           
+          set -e  # Exit immediately if any command fails
+          
           # Build the package list
           PACKAGES=$(go list ./pkg/... ./internal/... | grep -v '/pkg/loadtest$' | grep -v '/internal/crypto$')
           PKG_COUNT=$(echo "$PACKAGES" | wc -l)
@@ -62,11 +64,12 @@ jobs:
           done
           
           if [ $FAILED -eq 1 ]; then
-            echo "❌ pkg tests failed"
+            echo "Tests failed"
             exit 1
           fi
           
-          echo "✅ All tests passed"
+          echo "All tests passed successfully"
+          exit 0
       
       - name: Generate coverage report
         if: success()
