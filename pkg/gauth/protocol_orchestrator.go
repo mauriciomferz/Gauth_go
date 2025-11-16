@@ -65,6 +65,9 @@ type RFCCompliantAuthorizationRequest struct {
 	// Power of Attorney reference
 	PoACredentialRef string
 
+	// Geographic context for scope validation (ISO 3166-1 alpha-2 or ISO 3166-2)
+	Jurisdiction string
+
 	// Additional context
 	Context map[string]interface{}
 }
@@ -207,6 +210,7 @@ func (o *ProtocolOrchestrator) ExecuteRFCCompliantFlow(
 		LegalFramework:     legalFramework,
 		RequestedActions:   requestedActions,
 		TransactionContext: request.Context,
+		Jurisdiction:       request.Jurisdiction,
 		RequestTime:        time.Now(),
 	}
 

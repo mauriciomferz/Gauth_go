@@ -42,6 +42,7 @@ type ExtendedAuthorizationRequest struct {
 	Restrictions          []PowerRestriction     `json:"restrictions,omitempty"`
 	RequestedActions      []string               `json:"requested_actions,omitempty"`
 	TransactionContext    map[string]interface{} `json:"transaction_context,omitempty"`
+	Jurisdiction          string                 `json:"jurisdiction,omitempty"` // ISO 3166-1 alpha-2 country code or ISO 3166-2 subdivision
 	RequestTime           time.Time              `json:"request_time"`
 }
 
@@ -111,6 +112,19 @@ func (v *ComplianceValidator) ValidateRequestCompliance(
 			return result, err
 		}
 		result.Checks["power_of_attorney"] = true
+
+		// Step 4a: Validate geographic scope if jurisdiction is provided
+		if request.Jurisdiction != "" {
+			if err := v.validateGeographicScope(ctx, request, result); err != nil {
+				result.Valid = false
+				result.FailureReason = fmt.Sprintf("Geographic scope validation failed: %v", err)
+				return result, err
+			}
+			result.Checks["geographic_scope"] = true
+		} else {
+			result.Warnings = append(result.Warnings, "No jurisdiction specified - geographic scope cannot be validated")
+			result.Checks["geographic_scope"] = false
+		}
 	} else {
 		if v.strictMode {
 			result.Valid = false
@@ -334,6 +348,65 @@ func (v *ComplianceValidator) validatePoA(
 	}
 
 	return nil
+}
+
+// validateGeographicScope validates that the requested operation is within PoA geographic boundaries
+func (v *ComplianceValidator) validateGeographicScope(
+	ctx context.Context,
+	request *ExtendedAuthorizationRequest,
+	result *RequestComplianceResult,
+) error {
+	if request.PowerOfAttorney == nil {
+		return &GAuthError{
+			Code:    "missing_poa",
+			Message: "Cannot validate geographic scope without PoA",
+		}
+	}
+
+	// Get applicable regions from PoA authorization scope
+	applicableRegions := request.PowerOfAttorney.Authorization.ApplicableRegions
+
+	// If no regions are defined, check if this is intentional or an error
+	if len(applicableRegions) == 0 {
+		if v.strictMode {
+			result.Checks["geographic_scope"] = false
+			return &GAuthError{
+				Code:    "no_geographic_scope",
+				Message: "PoA does not define any geographic scope - authorization denied",
+			}
+		}
+		result.Warnings = append(result.Warnings, "PoA has no geographic scope defined - assuming restricted access")
+		return nil
+	}
+
+	// Check if the requested jurisdiction is authorized
+	if !poa.IsAuthorizedInRegion(applicableRegions, request.Jurisdiction) {
+		result.Checks["geographic_scope"] = false
+		return &GAuthError{
+			Code:    "geographic_scope_violation",
+			Message: fmt.Sprintf("Operation in jurisdiction '%s' is not authorized by PoA. Authorized regions: %v",
+				request.Jurisdiction, formatRegions(applicableRegions)),
+		}
+	}
+
+	// Validation succeeded - mark check as passed
+	result.Checks["geographic_scope"] = true
+	return nil
+}
+
+// formatRegions formats geographic scopes for error messages
+func formatRegions(scopes []poa.GeographicScope) []string {
+	regions := make([]string, len(scopes))
+	for i, scope := range scopes {
+		if scope.Type == poa.GeoTypeGlobal {
+			regions[i] = "Global"
+		} else if scope.Name != "" {
+			regions[i] = fmt.Sprintf("%s (%s)", scope.Name, scope.Identifier)
+		} else {
+			regions[i] = scope.Identifier
+		}
+	}
+	return regions
 }
 
 // validateRequestedScope validates the requested scope

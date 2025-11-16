@@ -29,7 +29,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("✓ Step II completed\n")
+	fmt.Println("✓ Step II completed")
 
 	// Step III: Client Owner Identity Proof
 	fmt.Println("Step III: Verifying client owner identity...")
@@ -37,7 +37,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("✓ Step III completed\n")
+	fmt.Println("✓ Step III completed")
 
 	// Check final status
 	fmt.Println("Checking subscription status...")
