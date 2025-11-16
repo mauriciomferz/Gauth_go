@@ -9,7 +9,7 @@ on:
 
 env:
   NODE_VERSION: '20.x'
-  GO_VERSION: '1.23'  # Required for covdata tool
+  GO_VERSION: '1.22'  # Stable version without covdata issues
 
 jobs:
   # Backend tests
@@ -39,8 +39,14 @@ jobs:
       - name: Run backend tests
         run: |
           # Skip flaky tests in CI
-          go test ./... -v -skip "TestPAP_ConcurrentAccess|TestPAP_GetPolicyStatistics" -coverprofile=coverage.out -timeout 5m || exit 1
-          go tool cover -html=coverage.out -o coverage.html || echo "Coverage report generation failed"
+          go test ./... -v -skip "TestPAP_ConcurrentAccess|TestPAP_GetPolicyStatistics" -timeout 5m
+      
+      - name: Generate coverage report
+        if: success()
+        continue-on-error: true
+        run: |
+          go test ./pkg/... ./internal/... -coverprofile=coverage.out -timeout 5m
+          go tool cover -html=coverage.out -o coverage.html
       
       - name: Upload coverage
         uses: actions/upload-artifact@v4
