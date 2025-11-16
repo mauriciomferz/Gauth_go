@@ -56,25 +56,36 @@ jobs:
           # Use for loop to properly propagate exit codes
           FAILED=0
           PASSED=0
+          SKIPPED=0
           for pkg in $PACKAGES; do
-            echo "Testing $pkg..."
+            echo "::group::Testing $pkg"
+            # Check if package has test files
+            if ! go list -f '{{if .TestGoFiles}}1{{end}}{{if .XTestGoFiles}}1{{end}}' "$pkg" | grep -q 1; then
+              echo "No test files in $pkg - skipping"
+              SKIPPED=$((SKIPPED + 1))
+              echo "::endgroup::"
+              continue
+            fi
+            
             if go test -v "$pkg" -skip "TestPAP_ConcurrentAccess|TestPAP_GetPolicyStatistics|TestSSETransportConnect" -timeout 5m -vet=off; then
               PASSED=$((PASSED + 1))
+              echo "::endgroup::"
             else
-              echo "FAILED: $pkg"
+              echo "::error::FAILED: $pkg"
+              echo "::endgroup::"
               FAILED=1
               break
             fi
           done
           
-          echo "Completed testing. Passed: $PASSED packages"
+          echo "::notice::Test summary - Passed: $PASSED, Skipped: $SKIPPED, Failed: $FAILED"
           
           if [ $FAILED -eq 1 ]; then
-            echo "Tests failed - exiting with error"
+            echo "::error::Tests failed - exiting with error"
             exit 1
           fi
           
-          echo "All tests passed successfully"
+          echo "::notice::All tests passed successfully"
       
       - name: Generate coverage report
         if: success()
