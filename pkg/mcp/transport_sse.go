@@ -359,7 +359,9 @@ func (t *SSETransport) handleDisconnect(err error) {
 	}
 	
 	// Attempt reconnection
+	t.wg.Add(1)
 	go func() {
+		defer t.wg.Done()
 		if err := t.connectWithRetry(t.ctx, 1); err != nil {
 			// Use select to avoid panic if channel is closed
 			select {

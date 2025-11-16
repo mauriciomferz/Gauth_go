@@ -41,12 +41,11 @@ jobs:
           # Skip flaky tests, integration tests, and packages without tests
           # Focus on pkg/ and internal/ which contain the actual testable code
           # Disable coverage mode to avoid covdata issues
-          # Skip SSE transport test due to race condition on channel close
           # Skip loadtest and crypto integration tests that require services/have timeouts
           
           # Build the package list
-          # Exclude: loadtest (hangs), crypto (timeouts), mcp (SSE race condition)
-          PACKAGES=$(go list ./pkg/... ./internal/... | grep -v '/pkg/loadtest$' | grep -v '/internal/crypto$' | grep -v '/pkg/mcp$' || true)
+          # Exclude: loadtest (hangs), crypto (timeouts)
+          PACKAGES=$(go list ./pkg/... ./internal/... | grep -v '/pkg/loadtest$' | grep -v '/internal/crypto$' || true)
           
           set -e  # Exit immediately if any command fails (after safe commands)
           PKG_COUNT=$(echo "$PACKAGES" | wc -l)
@@ -93,7 +92,7 @@ jobs:
         run: |
           # Generate coverage by testing each package separately to avoid conflicts
           # When using -coverprofile with multiple packages, only one file can be written
-          PACKAGES=$(go list ./pkg/... ./internal/... | grep -v '/pkg/loadtest$' | grep -v '/internal/crypto$' | grep -v '/pkg/mcp$' || true)
+          PACKAGES=$(go list ./pkg/... ./internal/... | grep -v '/pkg/loadtest$' | grep -v '/internal/crypto$' || true)
           
           # Test packages individually and merge coverage
           echo "mode: set" > coverage.out
