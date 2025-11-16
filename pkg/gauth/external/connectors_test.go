@@ -12,7 +12,6 @@ func TestBrazilCPFValidation(t *testing.T) {
 		GovBrURL:       "https://sso.staging.acesso.gov.br",
 		GovBrClientID:  "test_client",
 		GovBrSecret:    "test_secret",
-		GovBrRedirect:  "http://localhost/callback",
 		RequestTimeout: 30 * time.Second,
 	}
 
@@ -62,7 +61,7 @@ func TestBrazilCPFValidation(t *testing.T) {
 func TestCanadaSINValidation(t *testing.T) {
 	config := &CanadaConnectorConfig{
 		ServiceCanadaURL: "https://api.servicecanada.gc.ca",
-		APIKey:           "test_key",
+		ServiceCanadaKey: "test_key",
 		RequestTimeout:   30 * time.Second,
 	}
 
@@ -89,8 +88,7 @@ func TestCanadaSINValidation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			req := &SINRequest{
 				SIN:         tt.sin,
-				FirstName:   "John",
-				LastName:    "Doe",
+				Name:        "John Doe",
 				DateOfBirth: "1990-01-15",
 			}
 
@@ -102,8 +100,8 @@ func TestCanadaSINValidation(t *testing.T) {
 			if resp != nil && resp.Valid != tt.wantValid {
 				t.Errorf("Expected Valid=%v, got %v", tt.wantValid, resp.Valid)
 			}
-			if resp != nil && tt.sinType != "" && resp.SINType != tt.sinType {
-				t.Errorf("Expected SINType=%s, got %s", tt.sinType, resp.SINType)
+			if resp != nil && tt.sinType != "" && resp.Type != tt.sinType {
+				t.Errorf("Expected Type=%s, got %s", tt.sinType, resp.Type)
 			}
 		})
 	}
@@ -302,7 +300,6 @@ func BenchmarkBrazilCPFValidation(b *testing.B) {
 		GovBrURL:       "https://sso.staging.acesso.gov.br",
 		GovBrClientID:  "test",
 		GovBrSecret:    "test",
-		GovBrRedirect:  "http://localhost/callback",
 		RequestTimeout: 30 * time.Second,
 	}
 	
@@ -325,7 +322,7 @@ func BenchmarkBrazilCPFValidation(b *testing.B) {
 func BenchmarkCanadaSINLuhn(b *testing.B) {
 	config := &CanadaConnectorConfig{
 		ServiceCanadaURL: "https://api.servicecanada.gc.ca",
-		APIKey:           "test",
+		ServiceCanadaKey: "test",
 		RequestTimeout:   30 * time.Second,
 	}
 	
@@ -334,8 +331,7 @@ func BenchmarkCanadaSINLuhn(b *testing.B) {
 	
 	req := &SINRequest{
 		SIN:         "046454286",
-		FirstName:   "John",
-		LastName:    "Doe",
+		Name:        "John Doe",
 		DateOfBirth: "1990-01-15",
 	}
 	
