@@ -43,10 +43,16 @@ jobs:
           # Disable coverage mode to avoid covdata issues
           # Skip SSE transport test due to race condition on channel close
           # Skip loadtest and crypto integration tests that require services/have timeouts
-          set -o pipefail
+          
+          # Build the package list
           PACKAGES=$(go list ./pkg/... ./internal/... | grep -v '/pkg/loadtest$' | grep -v '/internal/crypto$')
-          echo "Testing $(echo "$PACKAGES" | wc -l) packages"
-          echo "$PACKAGES" | xargs go test -v -skip "TestPAP_ConcurrentAccess|TestPAP_GetPolicyStatistics|TestSSETransportConnect" -timeout 5m -vet=off
+          PKG_COUNT=$(echo "$PACKAGES" | wc -l)
+          echo "Testing $PKG_COUNT packages"
+          
+          # Run tests on each package separately to avoid argument length issues
+          echo "$PACKAGES" | while read -r pkg; do
+            go test -v "$pkg" -skip "TestPAP_ConcurrentAccess|TestPAP_GetPolicyStatistics|TestSSETransportConnect" -timeout 5m -vet=off || exit 1
+          done
       
       - name: Generate coverage report
         if: success()
