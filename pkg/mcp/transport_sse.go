@@ -255,7 +255,12 @@ func (t *SSETransport) readPump() {
 	}
 	
 	if err := scanner.Err(); err != nil {
-		t.errorCh <- fmt.Errorf("scanner error: %w", err)
+		// Use select to avoid panic if channel is closed
+		select {
+		case t.errorCh <- fmt.Errorf("scanner error: %w", err):
+		case <-t.ctx.Done():
+			// Transport is closing, ignore error
+		}
 	}
 }
 
@@ -283,7 +288,12 @@ func (t *SSETransport) processEvent(event *sseEvent) {
 		// Heartbeat event, no action needed
 		
 	case "error":
-		t.errorCh <- fmt.Errorf("server error: %s", event.Data)
+		// Use select to avoid panic if channel is closed
+		select {
+		case t.errorCh <- fmt.Errorf("server error: %s", event.Data):
+		case <-t.ctx.Done():
+			// Transport is closing, ignore error
+		}
 	}
 }
 
@@ -351,7 +361,12 @@ func (t *SSETransport) handleDisconnect(err error) {
 	// Attempt reconnection
 	go func() {
 		if err := t.connectWithRetry(t.ctx, 1); err != nil {
-			t.errorCh <- fmt.Errorf("reconnection failed: %w", err)
+			// Use select to avoid panic if channel is closed
+			select {
+			case t.errorCh <- fmt.Errorf("reconnection failed: %w", err):
+			case <-t.ctx.Done():
+				// Transport is closing, ignore error
+			}
 		}
 	}()
 }
