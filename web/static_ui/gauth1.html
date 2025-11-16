@@ -274,6 +274,21 @@
                                 <input type="text" id="token-scope" placeholder="read, write, admin" value="read,write" required>
                             </div>
                             <div class="form-group">
+                                <label>Jurisdiction (ISO 3166-1/3166-2)</label>
+                                <select id="token-jurisdiction">
+                                    <option value="">-- Select Jurisdiction (Optional) --</option>
+                                    <option value="DE">Germany (DE)</option>
+                                    <option value="US">United States (US)</option>
+                                    <option value="GB">United Kingdom (GB)</option>
+                                    <option value="FR">France (FR)</option>
+                                    <option value="AT">Austria (AT)</option>
+                                    <option value="CH">Switzerland (CH)</option>
+                                    <option value="DE-BY">Bavaria, Germany (DE-BY)</option>
+                                    <option value="US-CA">California, USA (US-CA)</option>
+                                </select>
+                                <small style="color: #6c757d; margin-top: 0.25rem; display: block;">Geographic scope validation - tests RFC-0115 Section B.3 compliance</small>
+                            </div>
+                            <div class="form-group">
                                 <label>Expiration (hours)</label>
                                 <input type="number" id="token-expiration" value="24" min="1" max="720" required>
                             </div>

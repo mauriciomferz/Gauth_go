@@ -145,6 +145,7 @@ async function createExtendedToken() {
             ownersAuthorizer: document.getElementById('token-owner-auth').value,
             clientOwner: document.getElementById('token-client-owner').value,
             scope: document.getElementById('token-scope').value.split(',').map(s => s.trim()),
+            jurisdiction: document.getElementById('token-jurisdiction').value,
             expirationHours: parseInt(document.getElementById('token-expiration').value)
         };
         
@@ -156,6 +157,7 @@ async function createExtendedToken() {
             clientId: tokenData.clientId,
             expiresAt: new Date(Date.now() + tokenData.expirationHours * 3600000).toISOString(),
             scope: tokenData.scope,
+            jurisdiction: tokenData.jurisdiction,
             authorizationChain: {
                 ownersAuthorizer: tokenData.ownersAuthorizer,
                 clientOwner: tokenData.clientOwner,
@@ -498,11 +500,17 @@ async function runE2ETest(testType) {
 function displayTokenResult(element, token, isSuccess) {
     element.style.display = 'block';
     element.className = `result-box ${isSuccess ? 'success' : 'error'}`;
+    
+    const jurisdictionInfo = token.jurisdiction
+        ? `<p><strong>Jurisdiction:</strong> ${token.jurisdiction} <span class="badge badge-info">Geographic Scope Validated</span></p>`
+        : '';
+    
     element.innerHTML = `
         <h4><i class="fas fa-check-circle"></i> Token Created Successfully</h4>
         <p><strong>Client ID:</strong> ${token.clientId}</p>
         <p><strong>Expires:</strong> ${new Date(token.expiresAt).toLocaleString()}</p>
         <p><strong>Scope:</strong> ${token.scope.join(', ')}</p>
+        ${jurisdictionInfo}
         <p><strong>Authorization Chain:</strong></p>
         <ul>
             <li>Owner's Authorizer: ${token.authorizationChain.ownersAuthorizer}</li>
