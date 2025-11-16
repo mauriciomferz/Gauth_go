@@ -857,7 +857,7 @@ func (v *USIdentityVerifier) executeWithRetry(
 	for attempt := 0; attempt <= v.config.MaxRetries; attempt++ {
 		// Check circuit breaker
 		if v.config.CircuitBreaker != nil {
-			err := v.config.CircuitBreaker.Execute(executeFn)
+			err := v.config.CircuitBreaker.Call(executeFn)
 			if err == nil {
 				return result, nil
 			}

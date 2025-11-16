@@ -359,7 +359,7 @@ func (c *DEEIDConnector) VerifyEID(ctx context.Context, req *DEEIDVerificationRe
 	var err error
 	
 	if c.config.CircuitBreaker != nil {
-		err = c.config.CircuitBreaker.Execute(func() error {
+		err = c.config.CircuitBreaker.Call(func() error {
 			result, err = c.performVerification(ctx, req)
 			return err
 		})

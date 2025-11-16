@@ -290,7 +290,7 @@ func (ac *AustraliaIdentityConnector) VerifyDriverLicense(ctx context.Context, r
 	// 3. Validate license classes
 	
 	// Mock response for demonstration
-	response := &DriverLicenseResponse{
+	response := &AUDriverLicenseResponse{
 		Valid:         true,
 		LicenseNumber: req.LicenseNumber,
 		Name:          req.Name,

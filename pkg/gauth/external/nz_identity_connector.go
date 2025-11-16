@@ -217,7 +217,7 @@ func (nc *NZIdentityConnector) VerifyDriverLicense(ctx context.Context, req *NZD
 	
 	// Validate license number format (2 letters + 6 digits)
 	if !regexp.MustCompile(`^[A-Z]{2}\d{6}$`).MatchString(licenseNumber) {
-		return &DriverLicenseResponse{
+		return &NZDriverLicenseResponse{
 			Valid: false,
 			Error: "Invalid license number format (must be 2 letters + 6 digits)",
 		}, nil
@@ -225,7 +225,7 @@ func (nc *NZIdentityConnector) VerifyDriverLicense(ctx context.Context, req *NZD
 	
 	// Validate version number (2 digits)
 	if !regexp.MustCompile(`^\d{2}$`).MatchString(req.Version) {
-		return &DriverLicenseResponse{
+		return &NZDriverLicenseResponse{
 			Valid: false,
 			Error: "Invalid version number (must be 2 digits)",
 		}, nil
@@ -237,7 +237,7 @@ func (nc *NZIdentityConnector) VerifyDriverLicense(ctx context.Context, req *NZD
 	// 3. Validate license classes and endorsements
 	
 	// Mock response for demonstration
-	response := &DriverLicenseResponse{
+	response := &NZDriverLicenseResponse{
 		Valid:         true,
 		LicenseNumber: licenseNumber,
 		Version:       req.Version,
@@ -263,7 +263,7 @@ func (nc *NZIdentityConnector) VerifyPassport(ctx context.Context, req *NZPasspo
 	
 	// Validate passport number format (2 letters + 6 digits or 1 letter + 7 digits)
 	if !regexp.MustCompile(`^([A-Z]{2}\d{6}|[A-Z]\d{7})$`).MatchString(passportNumber) {
-		return &PassportResponse{
+		return &NZPassportResponse{
 			Valid: false,
 			Error: "Invalid passport number format",
 		}, nil
@@ -275,7 +275,7 @@ func (nc *NZIdentityConnector) VerifyPassport(ctx context.Context, req *NZPasspo
 	// 3. Validate against border control records
 	
 	// Mock response for demonstration
-	response := &PassportResponse{
+	response := &NZPassportResponse{
 		Valid:            true,
 		PassportNumber:   passportNumber,
 		GivenNames:       req.FirstName,

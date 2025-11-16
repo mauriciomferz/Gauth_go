@@ -254,14 +254,14 @@ func (nc *NigeriaIdentityConnector) VerifyDriverLicense(ctx context.Context, req
 	
 	// Validate license number format (3 letters + 8 digits + 2 letters)
 	if !regexp.MustCompile(`^[A-Z]{3}\d{8}[A-Z]{2}$`).MatchString(licenseNumber) {
-		return &DriverLicenseResponse{
+		return &NGDriverLicenseResponse{
 			Valid: false,
 			Error: "Invalid license number format",
 		}, nil
 	}
 	
 	// In production, this would verify with FRSC database
-	response := &DriverLicenseResponse{
+	response := &NGDriverLicenseResponse{
 		Valid:         true,
 		LicenseNumber: licenseNumber,
 		FirstName:     req.FirstName,
@@ -287,14 +287,14 @@ func (nc *NigeriaIdentityConnector) VerifyPassport(ctx context.Context, req *NGP
 	
 	// Validate passport number format (letter + 8 digits)
 	if !regexp.MustCompile(`^[A-Z]\d{8}$`).MatchString(passportNumber) {
-		return &PassportResponse{
+		return &NGPassportResponse{
 			Valid: false,
 			Error: "Invalid passport number format",
 		}, nil
 	}
 	
 	// In production, this would verify with Nigeria Immigration Service
-	response := &PassportResponse{
+	response := &NGPassportResponse{
 		Valid:            true,
 		PassportNumber:   passportNumber,
 		Surname:          req.Surname,

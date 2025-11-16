@@ -338,7 +338,7 @@ func (jc *JapanIdentityConnector) VerifyDriverLicense(ctx context.Context, req *
 	
 	// Validate format (12 digits)
 	if !regexp.MustCompile(`^\d{12}$`).MatchString(licenseNumber) {
-		return &DriverLicenseResponse{
+		return &JPDriverLicenseResponse{
 			Valid: false,
 			Error: "Invalid license number format (must be 12 digits)",
 		}, nil
@@ -353,7 +353,7 @@ func (jc *JapanIdentityConnector) VerifyDriverLicense(ctx context.Context, req *
 	// 3. Validate license types and conditions
 	
 	// Mock response for demonstration
-	response := &DriverLicenseResponse{
+	response := &JPDriverLicenseResponse{
 		Valid:         true,
 		LicenseNumber: licenseNumber,
 		Name:          req.Name,

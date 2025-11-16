@@ -226,14 +226,14 @@ func (zac *SouthAfricaIdentityConnector) VerifyDriverLicense(ctx context.Context
 	
 	// Validate ID number first
 	if !regexp.MustCompile(`^\d{13}$`).MatchString(req.IDNumber) {
-		return &DriverLicenseResponse{
+		return &ZADriverLicenseResponse{
 			Valid: false,
 			Error: "Invalid ID number format",
 		}, nil
 	}
 	
 	// In production, this would verify with NATIS (National Traffic Information System)
-	response := &DriverLicenseResponse{
+	response := &ZADriverLicenseResponse{
 		Valid:         true,
 		LicenseNumber: req.LicenseNumber,
 		IDNumber:      req.IDNumber,
@@ -259,14 +259,14 @@ func (zac *SouthAfricaIdentityConnector) VerifyPassport(ctx context.Context, req
 	
 	// Validate passport number format (letter + 8 digits)
 	if !regexp.MustCompile(`^[A-Z]\d{8}$`).MatchString(passportNumber) {
-		return &PassportResponse{
+		return &ZAPassportResponse{
 			Valid: false,
 			Error: "Invalid passport number format",
 		}, nil
 	}
 	
 	// In production, this would verify with Department of Home Affairs
-	response := &PassportResponse{
+	response := &ZAPassportResponse{
 		Valid:            true,
 		PassportNumber:   passportNumber,
 		IDNumber:         req.IDNumber,

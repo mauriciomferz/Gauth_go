@@ -243,14 +243,14 @@ func (kc *KenyaIdentityConnector) VerifyDriverLicense(ctx context.Context, req *
 	
 	// Validate license number format (variable format)
 	if len(licenseNumber) < 8 {
-		return &DriverLicenseResponse{
+		return &KEDriverLicenseResponse{
 			Valid: false,
 			Error: "Invalid license number format",
 		}, nil
 	}
 	
 	// In production, this would verify with NTSA database
-	response := &DriverLicenseResponse{
+	response := &KEDriverLicenseResponse{
 		Valid:         true,
 		LicenseNumber: licenseNumber,
 		FirstName:     req.FirstName,
@@ -275,14 +275,14 @@ func (kc *KenyaIdentityConnector) VerifyPassport(ctx context.Context, req *KEPas
 	
 	// Validate passport number format (letter + 7 digits or similar patterns)
 	if !regexp.MustCompile(`^[A-Z]\d{7}$`).MatchString(passportNumber) {
-		return &PassportResponse{
+		return &KEPassportResponse{
 			Valid: false,
 			Error: "Invalid passport number format",
 		}, nil
 	}
 	
 	// In production, this would verify with Directorate of Immigration Services
-	response := &PassportResponse{
+	response := &KEPassportResponse{
 		Valid:            true,
 		PassportNumber:   passportNumber,
 		Surname:          req.Surname,

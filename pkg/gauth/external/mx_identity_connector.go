@@ -334,14 +334,14 @@ func (mc *MexicoIdentityConnector) VerifyPassport(ctx context.Context, req *MXPa
 	
 	// Validate passport number format (letter + 8 digits)
 	if !regexp.MustCompile(`^[A-Z]\d{8}$`).MatchString(passportNumber) {
-		return &PassportResponse{
+		return &MXPassportResponse{
 			Valid: false,
 			Error: "Invalid passport number format",
 		}, nil
 	}
 	
 	// In production, this would verify with SRE (Secretaría de Relaciones Exteriores)
-	response := &PassportResponse{
+	response := &MXPassportResponse{
 		Valid:            true,
 		PassportNumber:   passportNumber,
 		GivenNames:       req.FirstName,
