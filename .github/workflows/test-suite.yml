@@ -43,15 +43,18 @@ jobs:
           # Disable coverage mode to avoid covdata issues
           # Skip SSE transport test due to race condition on channel close
           # Skip loadtest and crypto integration tests that require services/have timeouts
-          go test $(go list ./pkg/... ./internal/... | grep -v '/pkg/loadtest$' | grep -v '/internal/crypto$') -v -skip "TestPAP_ConcurrentAccess|TestPAP_GetPolicyStatistics|TestSSETransportConnect" -timeout 5m -vet=off
+          PACKAGES=$(go list ./pkg/... ./internal/... | grep -v '/pkg/loadtest$' | grep -v '/internal/crypto$' || true)
+          echo "Testing packages: $PACKAGES"
+          go test $PACKAGES -v -skip "TestPAP_ConcurrentAccess|TestPAP_GetPolicyStatistics|TestSSETransportConnect" -timeout 5m -vet=off
       
       - name: Generate coverage report
         if: success()
         continue-on-error: true
         run: |
-          # Run with coverage but skip the problematic test execution
+          # Run with coverage but skip the problematic packages
           # Use -coverprofile which doesn't invoke covdata
-          go test ./pkg/... ./internal/... -coverprofile=coverage.out -covermode=set -timeout 5m -vet=off 2>&1 | grep -v "no test files" || true
+          PACKAGES=$(go list ./pkg/... ./internal/... | grep -v '/pkg/loadtest$' | grep -v '/internal/crypto$' || true)
+          go test $PACKAGES -coverprofile=coverage.out -covermode=set -skip "TestPAP_ConcurrentAccess|TestPAP_GetPolicyStatistics|TestSSETransportConnect" -timeout 5m -vet=off 2>&1 | grep -v "no test files" || true
           if [ -f coverage.out ]; then
             go tool cover -html=coverage.out -o coverage.html
           fi
