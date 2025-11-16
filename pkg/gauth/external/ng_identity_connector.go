@@ -99,7 +99,7 @@ type BVNResponse struct {
 }
 
 // DriverLicenseRequest driver's license validation request
-type DriverLicenseRequest struct {
+type NGDriverLicenseRequest struct {
 	LicenseNumber   string `json:"license_number" validate:"required"`
 	FirstName       string `json:"first_name" validate:"required"`
 	Surname         string `json:"surname" validate:"required"`
@@ -107,7 +107,7 @@ type DriverLicenseRequest struct {
 }
 
 // DriverLicenseResponse driver's license validation response
-type DriverLicenseResponse struct {
+type NGDriverLicenseResponse struct {
 	Valid           bool       `json:"valid"`
 	LicenseNumber   string     `json:"license_number"`
 	FirstName       string     `json:"first_name"`
@@ -132,7 +132,7 @@ type NGAddress struct {
 }
 
 // PassportRequest passport validation request
-type PassportRequest struct {
+type NGPassportRequest struct {
 	PassportNumber  string `json:"passport_number" validate:"required"`
 	Surname         string `json:"surname" validate:"required"`
 	GivenNames      string `json:"given_names" validate:"required"`
@@ -141,7 +141,7 @@ type PassportRequest struct {
 }
 
 // PassportResponse passport validation response
-type PassportResponse struct {
+type NGPassportResponse struct {
 	Valid            bool   `json:"valid"`
 	PassportNumber   string `json:"passport_number"`
 	Surname          string `json:"surname"`
@@ -244,7 +244,7 @@ func (nc *NigeriaIdentityConnector) ValidateBVN(ctx context.Context, req *BVNReq
 }
 
 // VerifyDriverLicense verifies Nigerian driver's license
-func (nc *NigeriaIdentityConnector) VerifyDriverLicense(ctx context.Context, req *DriverLicenseRequest) (*DriverLicenseResponse, error) {
+func (nc *NigeriaIdentityConnector) VerifyDriverLicense(ctx context.Context, req *NGDriverLicenseRequest) (*NGDriverLicenseResponse, error) {
 	// Validate request
 	if err := nc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -277,7 +277,7 @@ func (nc *NigeriaIdentityConnector) VerifyDriverLicense(ctx context.Context, req
 }
 
 // VerifyPassport verifies Nigerian passport
-func (nc *NigeriaIdentityConnector) VerifyPassport(ctx context.Context, req *PassportRequest) (*PassportResponse, error) {
+func (nc *NigeriaIdentityConnector) VerifyPassport(ctx context.Context, req *NGPassportRequest) (*NGPassportResponse, error) {
 	// Validate request
 	if err := nc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)

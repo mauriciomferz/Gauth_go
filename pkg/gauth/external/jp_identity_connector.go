@@ -144,16 +144,16 @@ type ResidenceCardResponse struct {
 	Error             string     `json:"error,omitempty"`
 }
 
-// DriverLicenseRequest driver's license validation request
-type DriverLicenseRequest struct {
+// JPDriverLicenseRequest driver's license validation request for Japan
+type JPDriverLicenseRequest struct {
 	LicenseNumber   string `json:"license_number" validate:"required,len=12"`
 	Name            *JPName `json:"name" validate:"required"`
 	DateOfBirth     string `json:"date_of_birth" validate:"required"`
 	IssuingPrefecture string `json:"issuing_prefecture"`
 }
 
-// DriverLicenseResponse driver's license validation response
-type DriverLicenseResponse struct {
+// JPDriverLicenseResponse driver's license validation response for Japan
+type JPDriverLicenseResponse struct {
 	Valid             bool       `json:"valid"`
 	LicenseNumber     string     `json:"license_number"`
 	Name              *JPName    `json:"name"`
@@ -328,7 +328,7 @@ func (jc *JapanIdentityConnector) VerifyResidenceCard(ctx context.Context, req *
 }
 
 // VerifyDriverLicense verifies Japanese driver's license
-func (jc *JapanIdentityConnector) VerifyDriverLicense(ctx context.Context, req *DriverLicenseRequest) (*DriverLicenseResponse, error) {
+func (jc *JapanIdentityConnector) VerifyDriverLicense(ctx context.Context, req *JPDriverLicenseRequest) (*JPDriverLicenseResponse, error) {
 	// Validate request
 	if err := jc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -360,7 +360,6 @@ func (jc *JapanIdentityConnector) VerifyDriverLicense(ctx context.Context, req *
 		DateOfBirth:   req.DateOfBirth,
 		IssueDate:     "2020-01-15",
 		ExpiryDate:    "2027-01-15",
-		LicenseTypes:  []string{"普通", "原付"}, // Regular car, Moped
 		IssuingAuthority: fmt.Sprintf("Prefecture %s Public Safety Commission", prefectureCode),
 	}
 	

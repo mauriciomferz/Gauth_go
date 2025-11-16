@@ -57,7 +57,7 @@ type IDNumberResponse struct {
 }
 
 // DriverLicenseRequest driver's license validation request
-type DriverLicenseRequest struct {
+type ZADriverLicenseRequest struct {
 	LicenseNumber   string `json:"license_number" validate:"required"`
 	IDNumber        string `json:"id_number" validate:"required,len=13"`
 	FirstName       string `json:"first_name" validate:"required"`
@@ -66,7 +66,7 @@ type DriverLicenseRequest struct {
 }
 
 // DriverLicenseResponse driver's license validation response
-type DriverLicenseResponse struct {
+type ZADriverLicenseResponse struct {
 	Valid           bool       `json:"valid"`
 	LicenseNumber   string     `json:"license_number"`
 	IDNumber        string     `json:"id_number"`
@@ -93,7 +93,7 @@ type ZAAddress struct {
 }
 
 // PassportRequest passport validation request
-type PassportRequest struct {
+type ZAPassportRequest struct {
 	PassportNumber  string `json:"passport_number" validate:"required"`
 	IDNumber        string `json:"id_number,omitempty"`
 	Surname         string `json:"surname" validate:"required"`
@@ -103,7 +103,7 @@ type PassportRequest struct {
 }
 
 // PassportResponse passport validation response
-type PassportResponse struct {
+type ZAPassportResponse struct {
 	Valid            bool   `json:"valid"`
 	PassportNumber   string `json:"passport_number"`
 	IDNumber         string `json:"id_number,omitempty"`
@@ -218,7 +218,7 @@ func (zac *SouthAfricaIdentityConnector) ValidateIDNumber(ctx context.Context, r
 }
 
 // VerifyDriverLicense verifies South African driver's license
-func (zac *SouthAfricaIdentityConnector) VerifyDriverLicense(ctx context.Context, req *DriverLicenseRequest) (*DriverLicenseResponse, error) {
+func (zac *SouthAfricaIdentityConnector) VerifyDriverLicense(ctx context.Context, req *ZADriverLicenseRequest) (*ZADriverLicenseResponse, error) {
 	// Validate request
 	if err := zac.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -249,7 +249,7 @@ func (zac *SouthAfricaIdentityConnector) VerifyDriverLicense(ctx context.Context
 }
 
 // VerifyPassport verifies South African passport
-func (zac *SouthAfricaIdentityConnector) VerifyPassport(ctx context.Context, req *PassportRequest) (*PassportResponse, error) {
+func (zac *SouthAfricaIdentityConnector) VerifyPassport(ctx context.Context, req *ZAPassportRequest) (*ZAPassportResponse, error) {
 	// Validate request
 	if err := zac.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)

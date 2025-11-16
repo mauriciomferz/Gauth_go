@@ -87,7 +87,7 @@ type NZAddress struct {
 }
 
 // DriverLicenseRequest driver's license validation request
-type DriverLicenseRequest struct {
+type NZDriverLicenseRequest struct {
 	LicenseNumber   string `json:"license_number" validate:"required"`
 	Version         string `json:"version" validate:"required"` // 2-digit version number
 	FirstName       string `json:"first_name" validate:"required"`
@@ -96,7 +96,7 @@ type DriverLicenseRequest struct {
 }
 
 // DriverLicenseResponse driver's license validation response
-type DriverLicenseResponse struct {
+type NZDriverLicenseResponse struct {
 	Valid           bool       `json:"valid"`
 	LicenseNumber   string     `json:"license_number"`
 	Version         string     `json:"version"`
@@ -115,7 +115,7 @@ type DriverLicenseResponse struct {
 }
 
 // PassportRequest passport validation request
-type PassportRequest struct {
+type NZPassportRequest struct {
 	PassportNumber  string `json:"passport_number" validate:"required"`
 	FirstName       string `json:"first_name" validate:"required"`
 	Surname         string `json:"surname" validate:"required"`
@@ -124,7 +124,7 @@ type PassportRequest struct {
 }
 
 // PassportResponse passport validation response
-type PassportResponse struct {
+type NZPassportResponse struct {
 	Valid            bool   `json:"valid"`
 	PassportNumber   string `json:"passport_number"`
 	GivenNames       string `json:"given_names"`
@@ -207,7 +207,7 @@ func (nc *NZIdentityConnector) AuthenticateRealMe(ctx context.Context, req *Real
 }
 
 // VerifyDriverLicense verifies New Zealand driver's license
-func (nc *NZIdentityConnector) VerifyDriverLicense(ctx context.Context, req *DriverLicenseRequest) (*DriverLicenseResponse, error) {
+func (nc *NZIdentityConnector) VerifyDriverLicense(ctx context.Context, req *NZDriverLicenseRequest) (*NZDriverLicenseResponse, error) {
 	// Validate request
 	if err := nc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -253,7 +253,7 @@ func (nc *NZIdentityConnector) VerifyDriverLicense(ctx context.Context, req *Dri
 }
 
 // VerifyPassport verifies New Zealand passport
-func (nc *NZIdentityConnector) VerifyPassport(ctx context.Context, req *PassportRequest) (*PassportResponse, error) {
+func (nc *NZIdentityConnector) VerifyPassport(ctx context.Context, req *NZPassportRequest) (*NZPassportResponse, error) {
 	// Validate request
 	if err := nc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)

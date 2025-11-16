@@ -90,7 +90,7 @@ type HudumaNambaResponse struct {
 }
 
 // DriverLicenseRequest driver's license validation request
-type DriverLicenseRequest struct {
+type KEDriverLicenseRequest struct {
 	LicenseNumber   string `json:"license_number" validate:"required"`
 	FirstName       string `json:"first_name" validate:"required"`
 	Surname         string `json:"surname" validate:"required"`
@@ -98,7 +98,7 @@ type DriverLicenseRequest struct {
 }
 
 // DriverLicenseResponse driver's license validation response
-type DriverLicenseResponse struct {
+type KEDriverLicenseResponse struct {
 	Valid           bool       `json:"valid"`
 	LicenseNumber   string     `json:"license_number"`
 	FirstName       string     `json:"first_name"`
@@ -123,7 +123,7 @@ type KEAddress struct {
 }
 
 // PassportRequest passport validation request
-type PassportRequest struct {
+type KEPassportRequest struct {
 	PassportNumber  string `json:"passport_number" validate:"required"`
 	Surname         string `json:"surname" validate:"required"`
 	GivenNames      string `json:"given_names" validate:"required"`
@@ -132,7 +132,7 @@ type PassportRequest struct {
 }
 
 // PassportResponse passport validation response
-type PassportResponse struct {
+type KEPassportResponse struct {
 	Valid            bool   `json:"valid"`
 	PassportNumber   string `json:"passport_number"`
 	Surname          string `json:"surname"`
@@ -233,7 +233,7 @@ func (kc *KenyaIdentityConnector) ValidateHudumaNamba(ctx context.Context, req *
 }
 
 // VerifyDriverLicense verifies Kenyan driver's license
-func (kc *KenyaIdentityConnector) VerifyDriverLicense(ctx context.Context, req *DriverLicenseRequest) (*DriverLicenseResponse, error) {
+func (kc *KenyaIdentityConnector) VerifyDriverLicense(ctx context.Context, req *KEDriverLicenseRequest) (*KEDriverLicenseResponse, error) {
 	// Validate request
 	if err := kc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -265,7 +265,7 @@ func (kc *KenyaIdentityConnector) VerifyDriverLicense(ctx context.Context, req *
 }
 
 // VerifyPassport verifies Kenyan passport
-func (kc *KenyaIdentityConnector) VerifyPassport(ctx context.Context, req *PassportRequest) (*PassportResponse, error) {
+func (kc *KenyaIdentityConnector) VerifyPassport(ctx context.Context, req *KEPassportRequest) (*KEPassportResponse, error) {
 	// Validate request
 	if err := kc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)

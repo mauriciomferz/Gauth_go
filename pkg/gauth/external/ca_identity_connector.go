@@ -58,25 +58,29 @@ type SINResponse struct {
 	Error            string `json:"error,omitempty"`
 }
 
-// Note: DriverLicenseRequest, DriverLicenseResponse, PassportRequest, and PassportResponse
-// are now defined in connector_utils.go as shared types
-
-// CADriverLicenseRequest driver's license validation request (CA-specific fields)
+// DriverLicenseRequest driver's license validation request for Canada
 type CADriverLicenseRequest struct {
-	DriverLicenseRequest
+	LicenseNumber   string `json:"license_number" validate:"required"`
+	Name            string `json:"name" validate:"required"`
+	DateOfBirth     string `json:"date_of_birth" validate:"required"`
 	Province        string `json:"province" validate:"required,oneof=ON QC BC AB MB SK NS NB NL PE NT YT NU"`
 }
 
-// CADriverLicenseResponse driver's license validation response (CA-specific fields)
+// DriverLicenseResponse driver's license validation response for Canada
 type CADriverLicenseResponse struct {
-	DriverLicenseResponse
-	Province        string     `json:"province"`
-	Address         *CAAddress `json:"address,omitempty"`
-	IssueDate       string     `json:"issue_date"`
-	ExpiryDate      string     `json:"expiry_date"`
-	LicenseClass    []string   `json:"license_class"` // G, G2, M, M2, A, D, etc.
-	Conditions      string     `json:"conditions,omitempty"`
-	Endorsements    []string   `json:"endorsements,omitempty"`
+	Valid            bool       `json:"valid"`
+	LicenseNumber    string     `json:"license_number"`
+	Name             string     `json:"name"`
+	DateOfBirth      string     `json:"date_of_birth"`
+	Province         string     `json:"province"`
+	Address          *CAAddress `json:"address,omitempty"`
+	IssueDate        string     `json:"issue_date"`
+	ExpiryDate       string     `json:"expiry_date"`
+	LicenseClass     string     `json:"license_class"` // G, G2, M, M2, A, D, etc.
+	Conditions       string     `json:"conditions,omitempty"`
+	Endorsements     []string   `json:"endorsements,omitempty"`
+	IssuingAuthority string     `json:"issuing_authority,omitempty"`
+	Error            string     `json:"error,omitempty"`
 }
 
 // CAAddress Canadian address structure
@@ -90,16 +94,29 @@ type CAAddress struct {
 	Country      string `json:"country"`
 }
 
-// CAPassportResponse passport validation response (CA-specific fields)
+// CAPassportRequest passport verification request for Canada
+type CAPassportRequest struct {
+	PassportNumber  string `json:"passport_number" validate:"required"`
+	FirstName       string `json:"first_name" validate:"required"`
+	LastName        string `json:"last_name" validate:"required"`
+	DateOfBirth     string `json:"date_of_birth" validate:"required"`
+	Nationality     string `json:"nationality,omitempty"`
+	Gender          string `json:"gender,omitempty"`
+}
+
+// CAPassportResponse passport verification response for Canada
 type CAPassportResponse struct {
-	PassportResponse
-	Surname          string `json:"surname"`
-	GivenNames       string `json:"given_names"`
-	Gender           string `json:"gender"`
-	PlaceOfBirth     string `json:"place_of_birth"`
-	DateOfIssue      string `json:"date_of_issue"`
-	DateOfExpiry     string `json:"date_of_expiry"`
-	IssuingAuthority string `json:"issuing_authority"`
+	Valid            bool   `json:"valid"`
+	PassportNumber   string `json:"passport_number"`
+	FirstName        string `json:"first_name"`
+	LastName         string `json:"last_name"`
+	DateOfBirth      string `json:"date_of_birth"`
+	Nationality      string `json:"nationality,omitempty"`
+	Gender           string `json:"gender,omitempty"`
+	IssueDate        string `json:"issue_date,omitempty"`
+	ExpiryDate       string `json:"expiry_date,omitempty"`
+	IssuingAuthority string `json:"issuing_authority,omitempty"`
+	Error            string `json:"error,omitempty"`
 }
 
 // HealthCardRequest provincial health card validation request
@@ -208,7 +225,7 @@ func (cc *CanadaIdentityConnector) ValidateSIN(ctx context.Context, req *SINRequ
 }
 
 // VerifyDriverLicense verifies Canadian driver's license
-func (cc *CanadaIdentityConnector) VerifyDriverLicense(ctx context.Context, req *DriverLicenseRequest) (*DriverLicenseResponse, error) {
+func (cc *CanadaIdentityConnector) VerifyDriverLicense(ctx context.Context, req *CADriverLicenseRequest) (*CADriverLicenseResponse, error) {
 	// Validate request
 	if err := cc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -216,7 +233,7 @@ func (cc *CanadaIdentityConnector) VerifyDriverLicense(ctx context.Context, req 
 	
 	// Validate license number format (varies by province)
 	if !cc.validateLicenseFormat(req.LicenseNumber, req.Province) {
-		return &DriverLicenseResponse{
+		return &CADriverLicenseResponse{
 			Valid: false,
 			Error: fmt.Sprintf("Invalid license number format for province %s", req.Province),
 		}, nil
@@ -228,23 +245,21 @@ func (cc *CanadaIdentityConnector) VerifyDriverLicense(ctx context.Context, req 
 	// 3. Validate demerit points
 	
 	// Mock response for demonstration
-	response := &DriverLicenseResponse{
+	response := &CADriverLicenseResponse{
 		Valid:         true,
 		LicenseNumber: req.LicenseNumber,
-		Province:      req.Province,
-		FirstName:     req.FirstName,
-		LastName:      req.LastName,
+		Name:          req.Name,
 		DateOfBirth:   req.DateOfBirth,
 		IssueDate:     "2020-01-15",
 		ExpiryDate:    "2025-01-15",
-		LicenseClass:  []string{"G"}, // Full license
+		LicenseClass:  "G", // Full license
 	}
 	
 	return response, nil
 }
 
 // VerifyPassport verifies Canadian passport
-func (cc *CanadaIdentityConnector) VerifyPassport(ctx context.Context, req *PassportRequest) (*PassportResponse, error) {
+func (cc *CanadaIdentityConnector) VerifyPassport(ctx context.Context, req *CAPassportRequest) (*CAPassportResponse, error) {
 	// Validate request
 	if err := cc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -254,22 +269,23 @@ func (cc *CanadaIdentityConnector) VerifyPassport(ctx context.Context, req *Pass
 	
 	// Validate passport number format (2 letters + 6 digits)
 	if !regexp.MustCompile(`^[A-Z]{2}\d{6}$`).MatchString(passportNumber) {
-		return &PassportResponse{
+		return &CAPassportResponse{
 			Valid: false,
 			Error: "Invalid passport number format",
 		}, nil
 	}
 	
 	// In production, this would verify with IRCC (Immigration, Refugees and Citizenship Canada)
-	response := &PassportResponse{
+	response := &CAPassportResponse{
 		Valid:            true,
 		PassportNumber:   passportNumber,
-		Surname:          req.LastName,
-		GivenNames:       req.FirstName,
+		FirstName:        req.FirstName,
+		LastName:         req.LastName,
 		DateOfBirth:      req.DateOfBirth,
 		Nationality:      "CAN",
-		DateOfIssue:      "2020-01-15",
-		DateOfExpiry:     "2030-01-15",
+		Gender:           req.Gender,
+		IssueDate:        "2020-01-15",
+		ExpiryDate:       "2030-01-15",
 		IssuingAuthority: "Canada",
 	}
 	

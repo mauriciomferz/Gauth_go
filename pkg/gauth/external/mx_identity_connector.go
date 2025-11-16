@@ -120,7 +120,7 @@ type MXAddress struct {
 }
 
 // PassportRequest passport validation request
-type PassportRequest struct {
+type MXPassportRequest struct {
 	PassportNumber  string `json:"passport_number" validate:"required"`
 	FirstName       string `json:"first_name" validate:"required"`
 	LastName        string `json:"last_name" validate:"required"`
@@ -129,7 +129,7 @@ type PassportRequest struct {
 }
 
 // PassportResponse passport validation response
-type PassportResponse struct {
+type MXPassportResponse struct {
 	Valid            bool   `json:"valid"`
 	PassportNumber   string `json:"passport_number"`
 	GivenNames       string `json:"given_names"`
@@ -324,7 +324,7 @@ func (mc *MexicoIdentityConnector) VerifyINE(ctx context.Context, req *INEReques
 }
 
 // VerifyPassport verifies Mexican passport
-func (mc *MexicoIdentityConnector) VerifyPassport(ctx context.Context, req *PassportRequest) (*PassportResponse, error) {
+func (mc *MexicoIdentityConnector) VerifyPassport(ctx context.Context, req *MXPassportRequest) (*MXPassportResponse, error) {
 	// Validate request
 	if err := mc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)

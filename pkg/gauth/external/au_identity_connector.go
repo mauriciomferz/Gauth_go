@@ -106,39 +106,55 @@ type MedicareCardResponse struct {
 	Error           string     `json:"error,omitempty"`
 }
 
-// Note: DriverLicenseRequest, DriverLicenseResponse, PassportRequest, and PassportResponse
-// are now defined in connector_utils.go as shared types
-
-// AUDriverLicenseRequest driver's license validation request (AU-specific fields)
+// DriverLicenseRequest driver's license validation request for Australia
 type AUDriverLicenseRequest struct {
-	DriverLicenseRequest
+	LicenseNumber   string `json:"license_number" validate:"required"`
+	Name            string `json:"name" validate:"required"`
+	DateOfBirth     string `json:"date_of_birth" validate:"required"`
 	State           string `json:"state" validate:"required,oneof=NSW VIC QLD SA WA TAS NT ACT"`
 	CardNumber      string `json:"card_number,omitempty"` // For states that use card numbers
 }
 
-// AUDriverLicenseResponse driver's license validation response (AU-specific fields)
+// DriverLicenseResponse driver's license validation response for Australia
 type AUDriverLicenseResponse struct {
-	DriverLicenseResponse
-	State           string     `json:"state"`
-	CardNumber      string     `json:"card_number,omitempty"`
-	Address         *AUAddress `json:"address"`
-	IssueDate       string     `json:"issue_date"`
-	ExpiryDate      string     `json:"expiry_date"`
-	LicenseClass    []string   `json:"license_class"` // C, LR, MR, HR, HC, MC, etc.
-	Conditions      string     `json:"conditions,omitempty"`
+	Valid            bool       `json:"valid"`
+	LicenseNumber    string     `json:"license_number"`
+	Name             string     `json:"name"`
+	DateOfBirth      string     `json:"date_of_birth"`
+	State            string     `json:"state"`
+	CardNumber       string     `json:"card_number,omitempty"`
+	Address          *AUAddress `json:"address"`
+	IssueDate        string     `json:"issue_date"`
+	ExpiryDate       string     `json:"expiry_date"`
+	LicenseClass     string     `json:"license_class"` // C, LR, MR, HR, HC, MC, etc.
+	Conditions       string     `json:"conditions,omitempty"`
+	IssuingAuthority string     `json:"issuing_authority,omitempty"`
+	Error            string     `json:"error,omitempty"`
 }
 
-// AUPassportResponse passport validation response (AU-specific fields)
+// PassportRequest passport verification request for Australia
+type AUPassportRequest struct {
+	PassportNumber  string `json:"passport_number" validate:"required"`
+	FirstName       string `json:"first_name" validate:"required"`
+	LastName        string `json:"last_name" validate:"required"`
+	DateOfBirth     string `json:"date_of_birth" validate:"required"`
+	Nationality     string `json:"nationality,omitempty"`
+	Gender          string `json:"gender,omitempty"`
+}
+
+// PassportResponse passport verification response for Australia
 type AUPassportResponse struct {
-	PassportResponse
-	GivenNames      string `json:"given_names"`
-	Surname         string `json:"surname"`
-	Gender          string `json:"gender"`
-	PlaceOfBirth    string `json:"place_of_birth"`
-	DateOfIssue     string `json:"date_of_issue"`
-	DateOfExpiry    string `json:"date_of_expiry"`
-	IssuingAuthority string `json:"issuing_authority"`
-	Error           string `json:"error,omitempty"`
+	Valid            bool   `json:"valid"`
+	PassportNumber   string `json:"passport_number"`
+	FirstName        string `json:"first_name"`
+	LastName         string `json:"last_name"`
+	DateOfBirth      string `json:"date_of_birth"`
+	Nationality      string `json:"nationality,omitempty"`
+	Gender           string `json:"gender,omitempty"`
+	IssueDate        string `json:"issue_date,omitempty"`
+	ExpiryDate       string `json:"expiry_date,omitempty"`
+	IssuingAuthority string `json:"issuing_authority,omitempty"`
+	Error            string `json:"error,omitempty"`
 }
 
 // NewAustraliaIdentityConnector creates a new Australian identity connector
@@ -254,7 +270,7 @@ func (ac *AustraliaIdentityConnector) ValidateMedicareCard(ctx context.Context, 
 }
 
 // VerifyDriverLicense verifies Australian driver's license
-func (ac *AustraliaIdentityConnector) VerifyDriverLicense(ctx context.Context, req *DriverLicenseRequest) (*DriverLicenseResponse, error) {
+func (ac *AustraliaIdentityConnector) VerifyDriverLicense(ctx context.Context, req *AUDriverLicenseRequest) (*AUDriverLicenseResponse, error) {
 	// Validate request
 	if err := ac.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -262,7 +278,7 @@ func (ac *AustraliaIdentityConnector) VerifyDriverLicense(ctx context.Context, r
 	
 	// Validate license number format (varies by state)
 	if !ac.validateLicenseNumberFormat(req.LicenseNumber, req.State) {
-		return &DriverLicenseResponse{
+		return &AUDriverLicenseResponse{
 			Valid: false,
 			Error: fmt.Sprintf("Invalid license number format for state %s", req.State),
 		}, nil
@@ -277,20 +293,18 @@ func (ac *AustraliaIdentityConnector) VerifyDriverLicense(ctx context.Context, r
 	response := &DriverLicenseResponse{
 		Valid:         true,
 		LicenseNumber: req.LicenseNumber,
-		State:         req.State,
-		GivenName:     req.FirstName,
-		FamilyName:    req.FamilyName,
+		Name:          req.Name,
 		DateOfBirth:   req.DateOfBirth,
 		IssueDate:     "2020-01-15",
 		ExpiryDate:    "2030-01-15",
-		LicenseClass:  []string{"C"}, // Car license
+		LicenseClass:  "C", // Car license
 	}
 	
 	return response, nil
 }
 
 // VerifyPassport verifies Australian passport
-func (ac *AustraliaIdentityConnector) VerifyPassport(ctx context.Context, req *PassportRequest) (*PassportResponse, error) {
+func (ac *AustraliaIdentityConnector) VerifyPassport(ctx context.Context, req *AUPassportRequest) (*AUPassportResponse, error) {
 	// Validate request
 	if err := ac.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -300,22 +314,23 @@ func (ac *AustraliaIdentityConnector) VerifyPassport(ctx context.Context, req *P
 	
 	// Validate passport number format (1 or 2 letters + 7 digits)
 	if !regexp.MustCompile(`^[A-Z]{1,2}\d{7}$`).MatchString(passportNumber) {
-		return &PassportResponse{
+		return &AUPassportResponse{
 			Valid: false,
 			Error: "Invalid passport number format",
 		}, nil
 	}
 	
 	// In production, this would verify with Department of Foreign Affairs and Trade
-	response := &PassportResponse{
+	response := &AUPassportResponse{
 		Valid:            true,
 		PassportNumber:   passportNumber,
-		GivenNames:       req.FirstName,
-		Surname:          req.FamilyName,
+		FirstName:        req.FirstName,
+		LastName:         req.LastName,
 		DateOfBirth:      req.DateOfBirth,
 		Nationality:      "AUS",
-		DateOfIssue:      "2020-01-15",
-		DateOfExpiry:     "2030-01-15",
+		Gender:           req.Gender,
+		IssueDate:        "2020-01-15",
+		ExpiryDate:       "2030-01-15",
 		IssuingAuthority: "Commonwealth of Australia",
 	}
 	

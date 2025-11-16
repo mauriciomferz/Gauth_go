@@ -205,3 +205,7 @@ type CircuitBreakerError struct {
 func (e *CircuitBreakerError) Error() string {
 	return e.Message
 }
+
+// Common shared types across connectors
+// Note: Each country connector defines its own specific request/response types
+// to accommodate country-specific validation requirements and data structures
