@@ -487,7 +487,7 @@ func TestCircuitBreaker_FailureHandling(t *testing.T) {
 	// Circuit breaker should now be open
 	_, err := verifier.VerifyPassport(context.Background(), req)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), ErrCircuitBreakerOpen)
+	assert.Contains(t, err.Error(), "circuit breaker is open")
 
 	// Wait for reset timeout
 	time.Sleep(150 * time.Millisecond)

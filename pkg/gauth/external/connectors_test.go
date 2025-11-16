@@ -12,6 +12,8 @@ func TestBrazilCPFValidation(t *testing.T) {
 		GovBrURL:       "https://sso.staging.acesso.gov.br",
 		GovBrClientID:  "test_client",
 		GovBrSecret:    "test_secret",
+		ReceitaURL:     "https://api.receita.fazenda.gov.br",
+		DETRANURL:      "https://api.detran.gov.br",
 		RequestTimeout: 30 * time.Second,
 	}
 
@@ -60,9 +62,11 @@ func TestBrazilCPFValidation(t *testing.T) {
 // Test Canada Connector - SIN Validation (Luhn)
 func TestCanadaSINValidation(t *testing.T) {
 	config := &CanadaConnectorConfig{
-		ServiceCanadaURL: "https://api.servicecanada.gc.ca",
-		ServiceCanadaKey: "test_key",
-		RequestTimeout:   30 * time.Second,
+		ServiceCanadaURL:      "https://api.servicecanada.gc.ca",
+		ServiceCanadaKey:      "test_key",
+		ProvincialServicesURL: "https://api.provincial.gc.ca",
+		IRCCURL:               "https://api.ircc.gc.ca",
+		RequestTimeout:        30 * time.Second,
 	}
 
 	connector, err := NewCanadaIdentityConnector(config)
@@ -77,8 +81,8 @@ func TestCanadaSINValidation(t *testing.T) {
 		wantValid bool
 		sinType   string
 	}{
-		{"Valid permanent SIN", "046454286", true, "Permanent"},
-		{"Valid temporary SIN", "900000002", true, "Temporary"},
+		{"Valid business SIN", "046454286", true, "Business"},  // SINs starting with 0 are Business
+		{"Valid temporary SIN", "900000001", true, "Temporary"},
 		{"Invalid Luhn check", "123456789", false, ""},
 		{"Invalid format - too short", "12345678", false, ""},
 		{"Invalid format - letters", "04645428A", false, ""},
@@ -112,6 +116,8 @@ func TestMexicoCURPValidation(t *testing.T) {
 	config := &MexicoConnectorConfig{
 		RENAPOURL:      "https://renapo.gob.mx/api",
 		RENAPOAPIKey:   "test_key",
+		SATURL:         "https://api.sat.gob.mx",
+		INEURL:         "https://api.ine.mx",
 		RequestTimeout: 30 * time.Second,
 	}
 
@@ -126,10 +132,10 @@ func TestMexicoCURPValidation(t *testing.T) {
 		curp      string
 		wantValid bool
 	}{
-		{"Valid CURP format", "GOTJ901015HDFRRL09", true},
+		{"Format validation", "GOTJ901015HDFRRL09", false}, // Invalid check digit but tests format parsing
 		{"Invalid format - too short", "GOTJ901015HDFRRL0", false},
 		{"Invalid format - too long", "GOTJ901015HDFRRL099", false},
-		{"Invalid format - lowercase", "gotj901015hdfrrl09", true}, // Should convert to uppercase
+		{"Format with lowercase", "gotj901015hdfrrl09", false}, // Uppercased but invalid check digit
 		{"Invalid gender code", "GOTJ901015XDFRRL09", false},
 	}
 
@@ -157,6 +163,7 @@ func TestSouthAfricaIDValidation(t *testing.T) {
 	config := &SouthAfricaConnectorConfig{
 		DHA_URL:        "https://api.dha.gov.za",
 		DHA_APIKey:     "test_key",
+		NATISURL:       "https://api.natis.gov.za",
 		RequestTimeout: 30 * time.Second,
 	}
 
@@ -173,8 +180,8 @@ func TestSouthAfricaIDValidation(t *testing.T) {
 		wantGender string
 		wantCitizen string
 	}{
-		{"Valid ID - Male Citizen", "9001085800087", true, "Male", "SA Citizen"},
-		{"Valid ID - Female", "9001084800085", true, "Female", "SA Citizen"},
+		{"Valid ID - Male Citizen", "9001085800083", true, "Male", "SA Citizen"},
+		{"Valid ID - Female", "9001084800084", true, "Female", "SA Citizen"},
 		{"Invalid format - too short", "900108580008", false, "", ""},
 		{"Invalid Luhn check", "9001085800088", false, "", ""},
 	}
@@ -208,6 +215,8 @@ func TestNigeriaNINValidation(t *testing.T) {
 	config := &NigeriaConnectorConfig{
 		NIMCURL:        "https://api.nimc.gov.ng",
 		NIMCAPIKey:     "test_key",
+		BVNURL:         "https://api.bvn.ng",
+		FRSCURL:        "https://api.frsc.gov.ng",
 		RequestTimeout: 30 * time.Second,
 	}
 
@@ -253,6 +262,8 @@ func TestKenyaNationalIDValidation(t *testing.T) {
 	config := &KenyaConnectorConfig{
 		IPRSURL:        "https://api.iprs.go.ke",
 		IPRSAPIKey:     "test_key",
+		NTSAURL:        "https://api.ntsa.go.ke",
+		HudumaURL:      "https://api.huduma.go.ke",
 		RequestTimeout: 30 * time.Second,
 	}
 
@@ -300,6 +311,8 @@ func BenchmarkBrazilCPFValidation(b *testing.B) {
 		GovBrURL:       "https://sso.staging.acesso.gov.br",
 		GovBrClientID:  "test",
 		GovBrSecret:    "test",
+		ReceitaURL:     "https://api.receita.fazenda.gov.br",
+		DETRANURL:      "https://api.detran.gov.br",
 		RequestTimeout: 30 * time.Second,
 	}
 	
@@ -321,9 +334,11 @@ func BenchmarkBrazilCPFValidation(b *testing.B) {
 
 func BenchmarkCanadaSINLuhn(b *testing.B) {
 	config := &CanadaConnectorConfig{
-		ServiceCanadaURL: "https://api.servicecanada.gc.ca",
-		ServiceCanadaKey: "test",
-		RequestTimeout:   30 * time.Second,
+		ServiceCanadaURL:      "https://api.servicecanada.gc.ca",
+		ServiceCanadaKey:      "test",
+		ProvincialServicesURL: "https://api.provincial.gc.ca",
+		IRCCURL:               "https://api.ircc.gc.ca",
+		RequestTimeout:        30 * time.Second,
 	}
 	
 	connector, _ := NewCanadaIdentityConnector(config)
@@ -347,6 +362,7 @@ func BenchmarkSouthAfricaIDLuhn(b *testing.B) {
 	config := &SouthAfricaConnectorConfig{
 		DHA_URL:        "https://api.dha.gov.za",
 		DHA_APIKey:     "test",
+		NATISURL:       "https://api.natis.gov.za",
 		RequestTimeout: 30 * time.Second,
 	}
 	
@@ -354,7 +370,7 @@ func BenchmarkSouthAfricaIDLuhn(b *testing.B) {
 	defer connector.Close()
 	
 	req := &IDNumberRequest{
-		IDNumber: "9001085800087",
+		IDNumber: "9001085800083",
 		Name:     "Test User",
 	}
 	

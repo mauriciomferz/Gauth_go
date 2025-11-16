@@ -241,7 +241,16 @@ func (bc *BrazilIdentityConnector) ValidateCPF(ctx context.Context, req *CPFRequ
 	}
 	
 	// Check for known invalid CPFs (all same digit)
-	if regexp.MustCompile(`^(\d)\1{10}$`).MatchString(cpf) {
+	// Check common invalid patterns: 00000000000, 11111111111, etc.
+	allSame := true
+	firstDigit := cpf[0]
+	for i := 1; i < len(cpf); i++ {
+		if cpf[i] != firstDigit {
+			allSame = false
+			break
+		}
+	}
+	if allSame {
 		return &CPFResponse{
 			Valid: false,
 			Error: "Invalid CPF (all digits are the same)",
