@@ -34,20 +34,29 @@ Modern React-based Single Page Application (SPA) for the GAuth 1.0 RFC-0111/0115
 
 - Node.js 18+ and npm (or yarn/pnpm)
 - GAuth Go backend running on `localhost:8080`
+- **IMPORTANT**: Backend must have `GAUTH_RFC0111_ENABLED=1` environment variable set (Phase 2A endpoints)
 
 ### Installation
 
-1. **Navigate to the UI directory:**
+1. **Start the GAuth backend** (from project root):
+   ```bash
+   # REQUIRED: Set GAUTH_RFC0111_ENABLED=1 to enable Phase 2A endpoints
+   GAUTH_DEV_INDEX=1 GAUTH_RFC0111_ENABLED=1 go run ./cmd/web-server
+   ```
+   
+   Backend will start on `http://localhost:8080`
+
+2. **Navigate to the UI directory:**
    ```bash
    cd web/ui-react
    ```
 
-2. **Install dependencies:**
+3. **Install dependencies:**
    ```bash
    npm install
    ```
 
-3. **Start development server:**
+4. **Start development server:**
    ```bash
    npm run dev
    ```
@@ -122,12 +131,14 @@ web/ui-react/
 
 The `lib/api.ts` file provides a complete API client with TypeScript types for all GAuth backend endpoints:
 
-- Token operations (create, validate)
-- PVP identity verification
-- Commercial registry queries
-- PIP authorization validation
-- PoA management
-- Metrics and health checks
+- **Token operations** - Create, validate (RFC-0111)
+- **PVP identity verification** - `POST /api/v1/beta/pvp/verify` ✅ Phase 2A
+- **Commercial registry queries** - `POST /api/v1/beta/registry/verify-entity|verify-signatory` ✅ Phase 2A
+- **PoA management** - Full CRUD at `/api/v1/beta/poa` ✅ Phase 2A
+- **PIP authorization validation** - Policy checks
+- **Metrics and health checks** - Prometheus metrics
+
+**Phase 2A Complete**: All UI pages now use real backend endpoints (0 mocks remaining)
 
 ### State Management
 
@@ -236,6 +247,25 @@ server: {
 ### API Connection Issues
 
 Ensure the Go backend is running on `localhost:8080`. Check proxy configuration in `vite.config.ts`.
+
+### Phase 2A Endpoints Return 404
+
+**Problem**: `/api/v1/beta/pvp/verify`, `/api/v1/beta/registry/*`, or `/api/v1/beta/poa/*` endpoints return 404.
+
+**Solution**: Start backend with `GAUTH_RFC0111_ENABLED=1`:
+```bash
+GAUTH_DEV_INDEX=1 GAUTH_RFC0111_ENABLED=1 go run ./cmd/web-server
+```
+
+**Verify**: Check backend logs for this message:
+```
+[RFC-0111] Endpoints registered:
+[RFC-0111]   Beta External Service APIs:
+[RFC-0111]     POST /api/v1/beta/pvp/verify (PVP identity verification)
+...
+```
+
+See [Phase 2A Quick Start Guide](../../docs/PHASE_2A_QUICK_START.md) for full details.
 
 ## 🚢 Deployment
 

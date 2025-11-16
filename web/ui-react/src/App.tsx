@@ -12,6 +12,7 @@ const PVP = lazy(() => import('./pages/PVP'))
 const Registry = lazy(() => import('./pages/Registry'))
 const PIP = lazy(() => import('./pages/PIP'))
 const PoA = lazy(() => import('./pages/PoA'))
+const MCP = lazy(() => import('./pages/MCP'))
 const E2ETesting = lazy(() => import('./pages/E2ETesting'))
 const Metrics = lazy(() => import('./pages/Metrics'))
 const Login = lazy(() => import('./pages/Login'))
@@ -41,6 +42,7 @@ function App() {
             <Route path="/registry" element={<Registry />} />
             <Route path="/pip" element={<PIP />} />
             <Route path="/poa" element={<PoA />} />
+            <Route path="/mcp" element={<MCP />} />
             <Route path="/e2e" element={<E2ETesting />} />
             <Route path="/metrics" element={<Metrics />} />
             <Route path="/login" element={<Login />} />

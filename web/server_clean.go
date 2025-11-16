@@ -56,10 +56,12 @@ import (
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/delegation"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
 	ratelimit "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/limits"
+	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/mcp"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
 	anchorHandlers "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/anchor"
 	auditHandlers "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/audit"
+	betaHandlers "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/beta"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	promhttp "github.com/prometheus/client_golang/prometheus/promhttp"
@@ -548,6 +550,8 @@ type BetaServer struct {
 	combinedAnchorChain []combinedAnchorEntry
 	// Rotation V2 continuity tracking (test support). Stores last artifact canonical digest.
 	rotationV2LastHash string
+	// MCP connection manager for Phase 2B MCP Integration
+	mcpConnectionManager *mcp.ConnectionManager
 }
 
 // apiCryptoAlgorithms returns a static list of supported crypto algorithms.
@@ -4320,6 +4324,12 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 		c.Next()
 	})
 
+	// Phase 2B: Initialize MCP Connection Manager (if enabled)
+	if os.Getenv("GAUTH_MCP_ENABLED") == "1" {
+		s.mcpConnectionManager = mcp.NewConnectionManager()
+		fmt.Fprintf(os.Stderr, "[MCP] Connection manager initialized (GAUTH_MCP_ENABLED=1)\n")
+	}
+
 	s.routes()
 
 	// Optional route debug logging (enable with GAUTH_DEBUG_ROUTES=1)
@@ -6098,6 +6108,27 @@ func (s *BetaServer) routes() {
 		}
 		c.JSON(http.StatusOK, gin.H{"success": true, "poa_id": updated.ID, "total_evidence_hashes": len(updated.EvidenceHashes)})
 	})
+
+	// PHASE 2B: MCP Integration API endpoints (Beta)
+	if os.Getenv("GAUTH_MCP_ENABLED") == "1" {
+		mcpHandlers := betaHandlers.NewMCPHandlers(s.mcpConnectionManager)
+		mcpGroup := s.router.Group("/api/v1/beta/mcp")
+		mcpGroup.POST("/servers", mcpHandlers.RegisterServer)
+		mcpGroup.GET("/servers", mcpHandlers.ListServers)
+		mcpGroup.GET("/servers/:id/resources", mcpHandlers.ListResources)
+		mcpGroup.POST("/servers/:id/resources/read", mcpHandlers.ReadResource)
+		mcpGroup.POST("/servers/:id/tools/call", mcpHandlers.CallTool)
+		mcpGroup.GET("/servers/:id/tools", mcpHandlers.ListTools)
+		mcpGroup.DELETE("/servers/:id", mcpHandlers.DisconnectServer)
+		fmt.Fprintf(os.Stderr, "[MCP] Endpoints registered:\n")
+		fmt.Fprintf(os.Stderr, "[MCP]   POST   /api/v1/beta/mcp/servers (Register MCP server)\n")
+		fmt.Fprintf(os.Stderr, "[MCP]   GET    /api/v1/beta/mcp/servers (List MCP servers)\n")
+		fmt.Fprintf(os.Stderr, "[MCP]   GET    /api/v1/beta/mcp/servers/:id/resources (List resources)\n")
+		fmt.Fprintf(os.Stderr, "[MCP]   POST   /api/v1/beta/mcp/servers/:id/resources/read (Read resource)\n")
+		fmt.Fprintf(os.Stderr, "[MCP]   POST   /api/v1/beta/mcp/servers/:id/tools/call (Call tool)\n")
+		fmt.Fprintf(os.Stderr, "[MCP]   GET    /api/v1/beta/mcp/servers/:id/tools (List tools)\n")
+		fmt.Fprintf(os.Stderr, "[MCP]   DELETE /api/v1/beta/mcp/servers/:id (Disconnect server)\n")
+	}
 
 	// Favicon using embedded 1x1 gif (prevents 404 noise in logs)
 	s.router.GET("/favicon.ico", func(c *gin.Context) {

@@ -16,23 +16,25 @@ owners: core-maintainers
 
 A complete Go implementation of the GAuth authorization framework (RFC 0111/0115) with delegated authorization, proof-of-authorization tokens, and comprehensive security features.
 
-**✨ Latest Updates (Nov 14, 2025):**
-- **CI/CD Hardening:** Complete workflow resilience for missing credentials (Docker, Kubernetes, Slack)
-- **Enhanced Protocol Flow:** 30 substeps (was 19) reflecting 95% RFC compliance
-- **Authorization Chain Validation:** Complete chain verification with PVP integration
-- **Extended JWT Tokens:** Enhanced claims with PIP data and formal requirements
-- **Policy Information Point (PIP):** Full integration with authorization decisions
-- **Commercial Register:** Entity verification with jurisdictional compliance
-- **Updated UI:** PoA visualization and Protocol Flow interface improvements
+**✨ Latest Updates (Nov 16, 2025):**
+- **Phase 2A Complete:** 11 backend API endpoints implemented and tested (PVP, Registry, PoA CRUD)
+- **Zero UI Mocks:** All React pages now use real backend endpoints
+- **Comprehensive Docs:** Phase 2A completion report, testing results, and quick start guide
+- **Backend Requirement:** Server must set `GAUTH_RFC0111_ENABLED=1` to enable Phase 2A endpoints
+
+**Previous Updates (Nov 14, 2025):**
+- CI/CD Hardening, Enhanced Protocol Flow (30 substeps), Authorization Chain Validation
+- Extended JWT Tokens, PIP Integration, Commercial Register, Updated UI
 
 > Quick Dev Start
 > ```bash
-> # Backend
-> go build -o bin/web-server ./cmd/web-server && ./bin/web-server
+> # Backend (IMPORTANT: Set GAUTH_RFC0111_ENABLED=1 for Phase 2A endpoints)
+> GAUTH_DEV_INDEX=1 GAUTH_RFC0111_ENABLED=1 go run ./cmd/web-server
 > # Frontend
 > cd web/ui-react && npm install && npm run dev
 > ```
 > API: http://localhost:8080  UI: http://localhost:3000
+> **Phase 2A**: 11 backend endpoints active (PVP, Registry, PoA)
 > Vite proxy forwards /api -> backend; CORS middleware reflects Origin for local dev.
 
 **Status**: Beta (November 14, 2025)
@@ -115,8 +117,12 @@ cd Gauth_go
 # Run tests
 go test ./...
 
-# Build the web demo
-go build -o bin/web-server ./cmd/web-server && ./bin/web-server
+# Run the web server (with Phase 2A endpoints enabled)
+GAUTH_DEV_INDEX=1 GAUTH_RFC0111_ENABLED=1 go run ./cmd/web-server
+
+# Or build and run
+go build -o bin/web-server ./cmd/web-server
+GAUTH_DEV_INDEX=1 GAUTH_RFC0111_ENABLED=1 ./bin/web-server
 ```
 
 Visit http://localhost:8080 (API) and http://localhost:3000 (UI) to explore the interactive system.
@@ -127,24 +133,28 @@ The webapp provides a comprehensive UI for testing and demonstrating GAuth capab
 
 **Features:**
 - 🎯 **Token Management** - Create, validate, and manage authorization tokens with JWT/JWE support
-- 👤 **Identity Verification (PVP)** - Test identity verification with legal entity and individual validation
-- 🏢 **Registry Integration** - Entity lookup and verification with jurisdictional compliance
+- 👤 **Identity Verification (PVP)** - ✅ Real backend endpoint (`/beta/pvp/verify`)
+- 🏢 **Registry Integration** - ✅ Real backend endpoints (`/beta/registry/*`)
 - 🔐 **Authorization (PIP)** - Policy-based authorization with ABAC/RBAC support
-- 📜 **Power of Attorney (PoA)** - Create and validate delegation chains with geographic restrictions
+- 📜 **Power of Attorney (PoA)** - ✅ Full CRUD API (`/beta/poa/*`) - create, validate, manage delegations
 - 📊 **Real-time Metrics** - Live system performance, latency, cache statistics, and component health
 - 🧪 **E2E Testing** - Integrated test suite with 13 automated tests and detailed reporting
 - 📈 **Dynamic Analytics** - Interactive charts showing request volume and latency trends
 
+**✨ Phase 2A Complete**: All UI mocks replaced with real backend APIs (11 endpoints)
+
 **Quick Start:**
 ```bash
-# Backend (Go server on port 8080)
-go run ./cmd/web-server
+# Backend (Go server on port 8080) - REQUIRED: Set GAUTH_RFC0111_ENABLED=1
+GAUTH_DEV_INDEX=1 GAUTH_RFC0111_ENABLED=1 go run ./cmd/web-server
 
 # Frontend (React + Vite on port 3000)
 cd web/ui-react
 npm install
 npm run dev
 ```
+
+**Important**: Without `GAUTH_RFC0111_ENABLED=1`, Phase 2A endpoints will return 404. See [Phase 2A Quick Start](docs/PHASE_2A_QUICK_START.md).
 
 **Expose to Internet (VS Code):**
 1. Press `Cmd+J` (Mac) or `Ctrl+J` (Windows/Linux) to open bottom panel

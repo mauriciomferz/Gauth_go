@@ -1,6 +1,21 @@
 // protocol-navigator.js - GAuth Protocol Flow Navigator
 // Peer-level menu system showing current position in GAuth workflow
 // Inspired by Entra Agent ID style navigation
+//
+// Updated: November 16, 2025 - Phase 2A Integration & Token Security
+// Phase 2A Backend Integration:
+//   - PVP Identity Verification (/api/v1/beta/pvp/verify)
+//   - Registry Entity/Signatory Verification (/api/v1/beta/registry/*)
+//   - Power of Attorney (PoA) Management (/api/v1/beta/poa/*)
+//   - RFC-0111 Token Authorization (/api/v1/rfc0111/authorize)
+//   - Token Security Validation (/api/v1/rfc0111/token/validate)
+//
+// Token Security Model:
+//   - Full RFC-0111 token creation requires 8-step subscription flow
+//   - Mock tokens are correctly rejected with 401 (security working)
+//   - Valid tokens require completed subscription + PoA credential
+//
+// Environment: Requires GAUTH_RFC0111_ENABLED=1
 
 /**
  * GAuth Protocol Flow Steps
@@ -33,7 +48,14 @@ const PROTOCOL_STEPS = {
             { id: 'formal_requirements', name: 'Formal Requirements Check', status: 'pending' },
             { id: 'match_policies', name: 'Match Policies', status: 'pending' }
         ],
-        apis: ['/api/v1/poa/validate', '/api/v1/ai/capabilities', '/api/v1/authchain/validate']
+        apis: [
+            '/api/v1/beta/poa',
+            '/api/v1/beta/poa/:id/validate',
+            '/api/v1/beta/registry/verify-entity',
+            '/api/v1/beta/registry/verify-signatory',
+            '/api/v1/ai/capabilities',
+            '/api/v1/authchain/validate'
+        ]
     },
     SUBSET_REQUEST: {
         id: 'subset_request',
@@ -41,6 +63,7 @@ const PROTOCOL_STEPS = {
         description: 'Authorization request with scope subset selection',
         icon: '🎯',
         substeps: [
+            { id: 'subscription_flow', name: 'RFC-0111 Subscription (Steps I-VIII)', status: 'pending' },
             { id: 'create_request', name: 'Create Auth Request', status: 'pending' },
             { id: 'request_compliance', name: 'Request Compliance Validation', status: 'pending' },
             { id: 'select_scope', name: 'Select Scope Subset', status: 'pending' },
@@ -49,7 +72,19 @@ const PROTOCOL_STEPS = {
             { id: 'generate_extended_token', name: 'Generate Extended Token', status: 'pending' },
             { id: 'grant_compliance', name: 'Grant Compliance Validation', status: 'pending' }
         ],
-        apis: ['/api/v1/authorize', '/api/v1/token', '/api/v1/compliance/validate']
+        apis: [
+            '/api/v1/rfc0111/subscriptions',
+            '/api/v1/rfc0111/authorize',
+            '/api/v1/authorize',
+            '/api/v1/token',
+            '/api/v1/compliance/validate',
+            '/api/v1/beta/poa'
+        ],
+        notes: [
+            'RFC-0111 requires 8-step subscription before token generation',
+            'Steps I-VIII: Identity proofs, authentication, authorization checks',
+            'Token generation uses completed subscription + PoA credential'
+        ]
     },
     ENFORCEMENT: {
         id: 'enforcement',
@@ -67,9 +102,10 @@ const PROTOCOL_STEPS = {
     VERIFICATION: {
         id: 'verification',
         name: 'Verification',
-        description: 'Token verification and PVP identity validation',
+        description: 'Token security validation and PVP identity verification',
         icon: '✓',
         substeps: [
+            { id: 'token_security', name: 'Token Security Validation', status: 'pending' },
             { id: 'validate_extended_token', name: 'Validate Extended Token', status: 'pending' },
             { id: 'verify_signature', name: 'Verify JWE Signature', status: 'pending' },
             { id: 'check_revocation', name: 'Check Revocation Status', status: 'pending' },
@@ -77,7 +113,17 @@ const PROTOCOL_STEPS = {
             { id: 'authorization_chain_verify', name: 'Authorization Chain Verify', status: 'pending' },
             { id: 'formal_requirements_verify', name: 'Formal Requirements Verify', status: 'pending' }
         ],
-        apis: ['/api/v1/validate', '/api/v1/verify', '/api/v1/pvp/verify']
+        apis: [
+            '/api/v1/rfc0111/token/validate',
+            '/api/v1/validate',
+            '/api/v1/verify',
+            '/api/v1/beta/pvp/verify'
+        ],
+        notes: [
+            'Token validation properly rejects invalid/mock tokens with 401',
+            'Valid tokens require completed RFC-0111 subscription flow (8 steps)',
+            'Security validation confirms proper authentication enforcement'
+        ]
     },
     AUDIT: {
         id: 'audit',
@@ -381,6 +427,14 @@ class ProtocolNavigatorUI {
                     <div class="step-apis">
                         <strong>APIs:</strong> ${step.apis.join(', ')}
                     </div>
+                    ${step.notes ? `
+                    <div class="step-notes">
+                        <strong>Notes:</strong>
+                        <ul>
+                            ${step.notes.map(note => `<li>${note}</li>`).join('')}
+                        </ul>
+                    </div>
+                    ` : ''}
                 </div>
             `;
         }).join('');

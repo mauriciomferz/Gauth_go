@@ -597,14 +597,23 @@ Use environment variables or secret management service:
 
 ```bash
 # .env.production (DO NOT COMMIT)
+
+# === REQUIRED: Phase 2A Backend Endpoints ===
+GAUTH_RFC0111_ENABLED=1         # MUST be set to enable Phase 2A endpoints
+                                # Without this, /beta/pvp/verify, /beta/registry/*, and /beta/poa/* return 404
+GAUTH_DEV_INDEX=1               # Optional: Serve UI from disk for development
+
+# === Database Configuration ===
 DB_HOST=postgres.example.com
 DB_NAME=gauth_production
 DB_USER=gauth_app
 DB_PASSWORD=<secure-password>
 
+# === Cache Configuration ===
 REDIS_HOST=redis.example.com
 REDIS_PASSWORD=<secure-password>
 
+# === External Service APIs ===
 HANDELSREGISTER_API_URL=https://handelsregister.de/api/v1
 HANDELSREGISTER_API_KEY=<api-key>
 
@@ -618,6 +627,7 @@ IDENTITY_WEBHOOK_SECRET=<webhook-secret>
 NOTARY_API_URL=https://notary.example.com
 NOTARY_API_KEY=<api-key>
 
+# === Notification & Monitoring ===
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
 SMTP_HOST=smtp.example.com
 

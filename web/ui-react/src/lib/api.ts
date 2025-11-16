@@ -49,11 +49,25 @@ class ApiClient {
 
   // Token APIs (using mock for now - RFC-0111 requires full subscription flow)
   async createToken(data: CreateTokenRequest): Promise<TokenResponse> {
-    // NOTE: Full RFC-0111 token creation requires a subscription flow (Steps I-VIII)
-    // followed by authorization request. For UI demo purposes, we generate a mock token.
-    // TODO: Implement full subscription flow UI when needed.
+    // NOTE: Full RFC-0111 token creation requires completing all 8 subscription steps
+    // (Steps I-VIII) followed by authorization request. This is a complex multi-step
+    // process involving identity proofs, authentication, and authorization checks.
+    //
+    // For E2E testing purposes, we return a mock token. In production, implement the
+    // full subscription flow through the UI or use pre-established subscriptions.
+    //
+    // To implement full flow:
+    // 1. POST /api/v1/rfc0111/subscriptions (Step I: Owner's Authorizer Identity)
+    // 2. POST /api/v1/rfc0111/subscriptions/:id/step-ii (Authorizer Auth Proof)
+    // 3. POST /api/v1/rfc0111/subscriptions/:id/step-iii (Client Owner Identity)
+    // 4. POST /api/v1/rfc0111/subscriptions/:id/step-iv (Client Owner Auth)
+    // 5. POST /api/v1/rfc0111/subscriptions/:id/step-v (Client Authorization)
+    // 6. POST /api/v1/rfc0111/subscriptions/:id/step-vi (Resource Owner Identity)
+    // 7. POST /api/v1/rfc0111/subscriptions/:id/step-vii (Resource Owner Auth)
+    // 8. POST /api/v1/rfc0111/subscriptions/:id/step-viii (Resource Server Auth)
+    // 9. POST /api/v1/rfc0111/authorize (Request token with subscription + PoA)
     
-    // Generate a mock JWT-like token
+    // Generate a mock JWT-like token for testing
     const header = btoa(JSON.stringify({ alg: 'RS256', typ: 'JWT', kid: 'demo-key' }))
     const payload = btoa(JSON.stringify({
       sub: data.clientId,
@@ -354,26 +368,43 @@ class ApiClient {
   }
 
   // PVP APIs (placeholder - need to check if these exist)
-  async verifyIdentity(data: VerifyIdentityRequest): Promise<IdentityVerificationResponse> {
-    // Call the real PVP verification endpoint
-    const response = await this.client.post('/beta/pvp/verify', {
-      document_type: data.tsp, // Use TSP as document type
-      document_number: data.entityId,
-      first_name: data.entityId.split(' ')[0] || 'Unknown',
-      last_name: data.entityId.split(' ')[1] || 'Person',
-      date_of_birth: '1990-01-01', // Default, would come from form in real scenario
-      country: 'AT' // Default, would come from form in real scenario
-    })
+  async verifyIdentity(data: any): Promise<IdentityVerificationResponse> {
+    // Support both old and new (Phase 2A) formats
+    const isPhase2AFormat = data.documentType || data.documentNumber;
+    
+    let requestPayload;
+    if (isPhase2AFormat) {
+      // Phase 2A format - use directly
+      requestPayload = {
+        document_type: data.documentType,
+        document_number: data.documentNumber,
+        first_name: data.firstName,
+        last_name: data.lastName,
+        date_of_birth: data.dateOfBirth,
+        country: data.country
+      };
+    } else {
+      // Legacy format - convert to Phase 2A
+      requestPayload = {
+        document_type: data.tsp || 'passport',
+        document_number: data.entityId,
+        first_name: data.entityId?.split(' ')[0] || 'Unknown',
+        last_name: data.entityId?.split(' ')[1] || 'Person',
+        date_of_birth: '1990-01-01',
+        country: 'AT'
+      };
+    }
 
+    const response = await this.client.post('/beta/pvp/verify', requestPayload)
     const pvpData = response.data
 
     if (!pvpData.success || !pvpData.verified) {
       return {
         verified: false,
-        identityType: data.type,
+        identityType: data.type || 'natural_person',
         trustLevel: 'none',
-        entityId: data.entityId,
-        tsp: data.tsp,
+        entityId: data.entityId || data.documentNumber,
+        tsp: data.tsp || 'pvp',
         tspStatus: 'unverified',
         verificationTime: new Date().toISOString(),
         cryptographicBinding: 'none'
@@ -382,10 +413,10 @@ class ApiClient {
 
     return {
       verified: true,
-      identityType: data.type,
-      trustLevel: pvpData.verification_details?.trust_level || data.trustLevel,
-      entityId: data.entityId,
-      tsp: data.tsp,
+      identityType: data.type || 'natural_person',
+      trustLevel: pvpData.verification_details?.trust_level || data.trustLevel || 'high',
+      entityId: data.entityId || data.documentNumber,
+      tsp: data.tsp || 'pvp',
       tspStatus: 'qualified',
       verificationTime: pvpData.verification_details?.timestamp || new Date().toISOString(),
       cryptographicBinding: 'strong'
@@ -393,12 +424,12 @@ class ApiClient {
   }
 
   // Commercial Registry APIs
-  async verifyEntity(data: VerifyEntityRequest): Promise<EntityVerificationResponse> {
+  async verifyEntity(data: any): Promise<EntityVerificationResponse> {
     // Call the real Commercial Registry verification endpoint
     const response = await this.client.post('/beta/registry/verify-entity', {
       entity_id: data.registrationNumber,
-      entity_name: '',
-      entity_type: 'GmbH',
+      entity_name: data.entityName || 'Test Company',
+      entity_type: 'corporation',
       jurisdiction: data.jurisdiction
     })
 
@@ -408,7 +439,7 @@ class ApiClient {
       return {
         verified: false,
         registrationNumber: data.registrationNumber,
-        legalName: '',
+        legalName: data.entityName || '',
         jurisdiction: data.jurisdiction,
         status: 'unknown',
         registrationDate: '',
@@ -419,7 +450,7 @@ class ApiClient {
 
     return {
       verified: true,
-      registrationNumber: registryData.entity.id,
+      registrationNumber: registryData.entity.id || registryData.entity.registration_number,
       legalName: registryData.entity.name,
       jurisdiction: registryData.entity.jurisdiction,
       status: registryData.entity.status,
@@ -483,17 +514,32 @@ class ApiClient {
   }
 
   // PoA APIs (placeholder - need RFC-0111 endpoints)
-  async createPoA(data: CreatePoARequest): Promise<PoAResponse> {
-    // Call the real PoA creation endpoint
-    const response = await this.client.post('/beta/poa', {
+  async createPoA(data: any): Promise<PoAResponse> {
+    // Support both old and new formats
+    const validFrom = data.validFrom || data.restrictions?.temporal?.validFrom || new Date().toISOString();
+    const validUntil = data.validUntil || new Date(Date.now() + (data.validityDays || 365) * 24 * 60 * 60 * 1000).toISOString();
+    
+    const payload: any = {
       grantor: data.grantor,
-      grantee: data.representative,
-      scope: data.actions || [],
-      valid_from: new Date().toISOString(),
-      valid_until: new Date(Date.now() + (data.validityDays || 365) * 24 * 60 * 60 * 1000).toISOString(),
-      jurisdiction: data.geographicScope || 'global',
-      agent_type: data.representativeType || 'natural_person'
-    })
+      grantee: data.grantee || data.representative,
+      scope: data.scope || data.actions || [],
+      valid_from: validFrom,
+      valid_until: validUntil
+    };
+    
+    // Optional fields - only add if they have simple values
+    if (data.jurisdiction || data.geographicScope) {
+      payload.jurisdiction = data.jurisdiction || data.geographicScope;
+    } else if (data.restrictions?.geographic?.[0]) {
+      payload.jurisdiction = data.restrictions.geographic[0];
+    }
+    
+    if (data.agent_type || data.representativeType) {
+      payload.agent_type = data.agent_type || data.representativeType;
+    }
+    
+    // Call the real PoA creation endpoint
+    const response = await this.client.post('/beta/poa', payload)
 
     const poa = response.data.poa
 
@@ -510,11 +556,27 @@ class ApiClient {
     }
   }
 
-  async validatePoA(data: ValidatePoARequest): Promise<PoAValidationResponse> {
+  async validatePoA(poaIdOrData: string | any, action?: string): Promise<PoAValidationResponse> {
+    // Support both function signature styles
+    let poaId: string;
+    let actionToValidate: string;
+    let location: string | undefined;
+    
+    if (typeof poaIdOrData === 'string') {
+      // New style: validatePoA(id, action)
+      poaId = poaIdOrData;
+      actionToValidate = action || 'read';
+    } else {
+      // Old style: validatePoA({ poaId, action, location })
+      poaId = poaIdOrData.poaId;
+      actionToValidate = poaIdOrData.action;
+      location = poaIdOrData.location;
+    }
+    
     // Call the real PoA validation endpoint
-    const response = await this.client.post(`/beta/poa/${data.poaId}/validate`, {
-      action: data.action,
-      context: data.location
+    const response = await this.client.post(`/beta/poa/${poaId}/validate`, {
+      action: actionToValidate,
+      context: location || ''
     })
 
     const validationData = response.data
@@ -535,9 +597,9 @@ class ApiClient {
     
     return {
       valid: validationData.valid,
-      poaId: data.poaId,
-      action: data.action,
-      location: data.location,
+      poaId: poaId,
+      action: actionToValidate,
+      location: location || '',
       checks,
       validationTime: validationData.timestamp || new Date().toISOString()
     }
@@ -720,6 +782,45 @@ class ApiClient {
 
   async getSubscription(subscriptionId: string): Promise<any> {
     const response = await this.client.get(`/rfc0111/subscriptions/${subscriptionId}`)
+    return response.data
+  }
+
+  // MCP (Model Context Protocol) APIs
+  async registerMCPServer(config: MCPServerConfig): Promise<{ success: boolean; server_id: string; message: string }> {
+    const response = await this.client.post('/beta/mcp/servers', config)
+    return response.data
+  }
+
+  async listMCPServers(): Promise<MCPServersResponse> {
+    const response = await this.client.get('/beta/mcp/servers')
+    return response.data
+  }
+
+  async listMCPResources(serverId: string): Promise<MCPResourcesResponse> {
+    const response = await this.client.get(`/beta/mcp/servers/${serverId}/resources`)
+    return response.data
+  }
+
+  async readMCPResource(serverId: string, uri: string): Promise<MCPResourceReadResponse> {
+    const response = await this.client.post(`/beta/mcp/servers/${serverId}/resources/read`, { uri })
+    return response.data
+  }
+
+  async callMCPTool(serverId: string, name: string, args: Record<string, unknown>): Promise<MCPToolCallResponse> {
+    const response = await this.client.post(`/beta/mcp/servers/${serverId}/tools/call`, {
+      name,
+      arguments: args
+    })
+    return response.data
+  }
+
+  async listMCPTools(serverId: string): Promise<MCPToolsResponse> {
+    const response = await this.client.get(`/beta/mcp/servers/${serverId}/tools`)
+    return response.data
+  }
+
+  async disconnectMCPServer(serverId: string): Promise<{ success: boolean; server_id: string; message: string }> {
+    const response = await this.client.delete(`/beta/mcp/servers/${serverId}`)
     return response.data
   }
 }
@@ -987,6 +1088,78 @@ export interface MFAResult {
   token?: string // session / access token
   expiresAt?: string
   error?: string
+}
+
+// MCP Types
+export interface MCPServerConfig {
+  id: string
+  name: string
+  description?: string
+  transport_type: string
+  command?: string
+  args?: string[]
+  url?: string
+  require_auth?: boolean
+  allowed_scopes?: string[]
+  metadata?: Record<string, string>
+}
+
+export interface MCPServer extends MCPServerConfig {
+  status: 'connected' | 'disconnected'
+}
+
+export interface MCPResource {
+  uri: string
+  name: string
+  description?: string
+  mime_type?: string
+}
+
+export interface MCPResourceContent {
+  uri: string
+  mime_type?: string
+  text?: string
+}
+
+export interface MCPTool {
+  name: string
+  description?: string
+  input_schema?: Record<string, unknown>
+}
+
+export interface MCPToolContent {
+  type: string
+  text?: string
+}
+
+export interface MCPServersResponse {
+  servers: MCPServer[]
+  count: number
+}
+
+export interface MCPResourcesResponse {
+  server_id: string
+  resources: MCPResource[]
+  count: number
+}
+
+export interface MCPResourceReadResponse {
+  server_id: string
+  uri: string
+  contents: MCPResourceContent[]
+}
+
+export interface MCPToolsResponse {
+  server_id: string
+  tools: MCPTool[]
+  count: number
+}
+
+export interface MCPToolCallResponse {
+  server_id: string
+  tool: string
+  is_error: boolean
+  content: MCPToolContent[]
 }
 
 export const apiClient = new ApiClient()

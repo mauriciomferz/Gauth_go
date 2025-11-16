@@ -115,11 +115,17 @@ func (m *ConnectionManager) GetClient(ctx context.Context, serverID string) (*MC
 			return nil, fmt.Errorf("failed to create stdio transport: %w", err)
 		}
 	case "websocket":
-		// TODO: Implement WebSocket transport in Phase 4
-		return nil, fmt.Errorf("websocket transport not yet implemented")
+		wsTransport := NewWebSocketTransport(config.URL, nil)
+		if err := wsTransport.Connect(ctx); err != nil {
+			return nil, fmt.Errorf("failed to connect websocket transport: %w", err)
+		}
+		transport = wsTransport
 	case "http-sse":
-		// TODO: Implement HTTP-SSE transport in Phase 4
-		return nil, fmt.Errorf("http-sse transport not yet implemented")
+		sseTransport := NewSSETransport(config.URL, nil)
+		if err := sseTransport.Connect(ctx); err != nil {
+			return nil, fmt.Errorf("failed to connect SSE transport: %w", err)
+		}
+		transport = sseTransport
 	default:
 		return nil, fmt.Errorf("unsupported transport type: %s", config.TransportType)
 	}

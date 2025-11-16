@@ -12,64 +12,7 @@ import (
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
 )
 
-// CircuitBreakerState represents the state of a circuit breaker
-type CircuitBreakerState int
-
-const (
-	CircuitClosed CircuitBreakerState = iota
-	CircuitOpen
-	CircuitHalfOpen
-)
-
-// CircuitBreaker implements the circuit breaker pattern
-type CircuitBreaker struct {
-	maxFailures     int
-	timeout         time.Duration
-	resetTimeout    time.Duration
-	state           CircuitBreakerState
-	failures        int
-	lastFailureTime time.Time
-}
-
-// NewCircuitBreaker creates a new circuit breaker
-func NewCircuitBreaker(maxFailures int, timeout, resetTimeout time.Duration) *CircuitBreaker {
-	return &CircuitBreaker{
-		maxFailures:  maxFailures,
-		timeout:      timeout,
-		resetTimeout: resetTimeout,
-		state:        CircuitClosed,
-	}
-}
-
-// Execute runs a function through the circuit breaker
-func (cb *CircuitBreaker) Execute(fn func() error) error {
-	if cb.state == CircuitOpen {
-		if time.Since(cb.lastFailureTime) > cb.resetTimeout {
-			cb.state = CircuitHalfOpen
-			cb.failures = 0
-		} else {
-			return fmt.Errorf("circuit breaker is open")
-		}
-	}
-
-	err := fn()
-	if err != nil {
-		cb.failures++
-		cb.lastFailureTime = time.Now()
-
-		if cb.failures >= cb.maxFailures {
-			cb.state = CircuitOpen
-		}
-		return err
-	}
-
-	// Success - reset or close circuit
-	if cb.state == CircuitHalfOpen {
-		cb.state = CircuitClosed
-	}
-	cb.failures = 0
-	return nil
-}
+// Note: CircuitBreaker and related types are now defined in connector_utils.go to avoid duplication
 
 // PVPClientConfig holds configuration for PVP client
 type PVPClientConfig struct {
@@ -120,7 +63,7 @@ func (c *PVPClient) VerifyIdentity(
 	var finalResult *gauth.IdentityVerificationResult
 
 	// Execute with circuit breaker
-	err := c.config.CircuitBreaker.Execute(func() error {
+	err := c.config.CircuitBreaker.Call(func() error {
 		// Implement retry logic
 		for attempt := 0; attempt <= c.config.MaxRetries; attempt++ {
 			if attempt > 0 {
@@ -288,7 +231,7 @@ func (c *PIPClient) GetPolicy(
 	var policy *gauth.PowerOfAttorneyPolicy
 
 	// Execute with circuit breaker and retry logic
-	err := c.config.CircuitBreaker.Execute(func() error {
+	err := c.config.CircuitBreaker.Call(func() error {
 		for attempt := 0; attempt <= c.config.MaxRetries; attempt++ {
 			if attempt > 0 {
 				select {
