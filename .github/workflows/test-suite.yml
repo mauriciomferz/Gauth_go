@@ -51,11 +51,21 @@ jobs:
         if: success()
         continue-on-error: true
         run: |
-          # Run with coverage but skip the problematic packages
-          # Use -coverprofile which doesn't invoke covdata
+          # Generate coverage by testing each package separately to avoid conflicts
+          # When using -coverprofile with multiple packages, only one file can be written
           PACKAGES=$(go list ./pkg/... ./internal/... | grep -v '/pkg/loadtest$' | grep -v '/internal/crypto$' || true)
-          go test $PACKAGES -coverprofile=coverage.out -covermode=set -skip "TestPAP_ConcurrentAccess|TestPAP_GetPolicyStatistics|TestSSETransportConnect" -timeout 5m -vet=off 2>&1 | grep -v "no test files" || true
-          if [ -f coverage.out ]; then
+          
+          # Test packages individually and merge coverage
+          echo "mode: set" > coverage.out
+          for pkg in $PACKAGES; do
+            go test "$pkg" -coverprofile=pkg.cover -covermode=set -skip "TestPAP_ConcurrentAccess|TestPAP_GetPolicyStatistics|TestSSETransportConnect" -vet=off 2>/dev/null || true
+            if [ -f pkg.cover ]; then
+              tail -n +2 pkg.cover >> coverage.out
+              rm pkg.cover
+            fi
+          done
+          
+          if [ -f coverage.out ] && [ $(wc -l < coverage.out) -gt 1 ]; then
             go tool cover -html=coverage.out -o coverage.html
           fi
       
