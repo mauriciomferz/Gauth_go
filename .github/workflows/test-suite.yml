@@ -38,8 +38,9 @@ jobs:
       
       - name: Run backend tests
         run: |
-          # Skip flaky tests in CI
-          go test ./... -v -skip "TestPAP_ConcurrentAccess|TestPAP_GetPolicyStatistics" -timeout 5m
+          # Skip flaky tests and packages without tests
+          # Focus on pkg/ and internal/ which contain the actual testable code
+          go test ./pkg/... ./internal/... -v -skip "TestPAP_ConcurrentAccess|TestPAP_GetPolicyStatistics" -timeout 5m
       
       - name: Generate coverage report
         if: success()
