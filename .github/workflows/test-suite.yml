@@ -44,11 +44,11 @@ jobs:
           # Skip SSE transport test due to race condition on channel close
           # Skip loadtest and crypto integration tests that require services/have timeouts
           
-          set -e  # Exit immediately if any command fails
-          
           # Build the package list
           # Exclude: loadtest (hangs), crypto (timeouts), mcp (SSE race condition)
-          PACKAGES=$(go list ./pkg/... ./internal/... | grep -v '/pkg/loadtest$' | grep -v '/internal/crypto$' | grep -v '/pkg/mcp$')
+          PACKAGES=$(go list ./pkg/... ./internal/... | grep -v '/pkg/loadtest$' | grep -v '/internal/crypto$' | grep -v '/pkg/mcp$' || true)
+          
+          set -e  # Exit immediately if any command fails (after safe commands)
           PKG_COUNT=$(echo "$PACKAGES" | wc -l)
           echo "Testing $PKG_COUNT packages"
           
