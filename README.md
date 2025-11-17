@@ -12,55 +12,45 @@ owners: core-maintainers
 [![Gap Matrix](docs/badges/gap-matrix.svg)](docs/GAP_MATRIX.auto.md)
 
 > **🚀 BETA-READY** - Comprehensive security audit, extensive testing (689+ test cases), complete documentation. Suitable for testing and evaluation.
-> **Last Updated:** 2025-11-14 (✨ CI/CD hardening complete, 95% RFC compliance, enhanced protocol flow with 30 substeps, UI updates)
+> **Last Updated:** 2025-11-17 (✨ Login & MCP tabs added, UI enhancements, configuration updates)
 
 **✨ Latest Updates (Nov 17, 2025):**
+- **🔐 Login Tab Added:** Multi-step authentication with credentials and MFA verification (TOTP, SMS, Email)
+- **🤖 MCP Tab Added:** Model Context Protocol server management with stdio, WebSocket, and HTTP-SSE transport support
+- **Phase 2A Complete:** 11 backend API endpoints implemented and tested (PVP, Registry, PoA CRUD)
 - **MCP SSE Transport Fixed:** Race condition resolved in HTTP-SSE transport with proper WaitGroup tracking
 - **18-Country Identity Verification:** Complete identity connectors for US, DE, UK, FR, IT, ES, SE, NL, AE, SA, JP, AU, SG, KR, IN, NZ, BR, CA, MX, ZA, NG, KE
 - **Geographic Scope Validation:** ISO 3166-1/3166-2 compliant validation with <1μs performance
-- **CI/CD Enhanced:** Package filtering, GitHub Actions annotations, comprehensive test summaries
-- **Beta Ready:** 95% RFC compliance (47/48 requirements), all critical features complete
-
-**Previous Updates (Nov 16, 2025):**
-
-**✨ Latest Updates (Nov 17, 2025):**
-- **MCP SSE Transport Fixed:** Race condition resolved in HTTP-SSE transport with proper WaitGroup tracking
-- **18-Country Identity Verification:** Complete identity connectors for US, DE, UK, FR, IT, ES, SE, NL, AE, SA, JP, AU, SG, KR, IN, NZ, BR, CA, MX, ZA, NG, KE
-- **Geographic Scope Validation:** ISO 3166-1/3166-2 compliant validation with <1μs performance
-- **CI/CD Enhanced:** Package filtering, GitHub Actions annotations, comprehensive test summaries
-- **Beta Ready:** 95% RFC compliance (47/48 requirements), all critical features complete
-
-**Previous Updates (Nov 16, 2025):**
+- **Zero UI Mocks:** All React pages now use real backend endpoints
+- **Configuration Updated:** New environment variables for Login, MFA, and MCP features
 
 A complete Go implementation of the GAuth authorization framework (RFC 0111/0115) with delegated authorization, proof-of-authorization tokens, and comprehensive security features.
-
-**✨ Latest Updates (Nov 17, 2025):**
-- **Phase 2A Complete:** 11 backend API endpoints implemented and tested (PVP, Registry, PoA CRUD)
-- **Zero UI Mocks:** All React pages now use real backend endpoints
-- **Comprehensive Docs:** Phase 2A completion report, testing results, and quick start guide
-- **Backend Requirement:** Server must set `GAUTH_RFC0111_ENABLED=1` to enable Phase 2A endpoints
 
 **Previous Updates (Nov 14, 2025):**
 - CI/CD Hardening, Enhanced Protocol Flow (30 substeps), Authorization Chain Validation
 - Extended JWT Tokens, PIP Integration, Commercial Register, Updated UI
 
-> Quick Dev Start
+> **Quick Dev Start**
 > ```bash
 > # Backend (IMPORTANT: Set GAUTH_RFC0111_ENABLED=1 for Phase 2A endpoints)
-> GAUTH_DEV_INDEX=1 GAUTH_RFC0111_ENABLED=1 go run ./cmd/web-server
-> # Frontend
+> GAUTH_DEV_INDEX=1 GAUTH_RFC0111_ENABLED=1 GAUTH_USE_JWT_LIB=1 go run ./cmd/web-server
+> # Frontend (React)
 > cd web/ui-react && npm install && npm run dev
 > ```
-> API: http://localhost:8080  UI: http://localhost:3000
-> **Phase 2A**: 11 backend endpoints active (PVP, Registry, PoA)
-> Vite proxy forwards /api -> backend; CORS middleware reflects Origin for local dev.
+> **Access Points:**
+> - 🌐 **API Server:** http://localhost:8080
+> - ⚛️ **React UI:** http://localhost:3000 (full SPA with routing)
+> - 📄 **Static HTML UI:** http://localhost:8080/gauth1.html (includes Login & MCP tabs)
+>
+> **Features:** RFC-0111 8-step subscription wizard, Login with MFA, MCP server management, 11 Phase 2A backend endpoints (PVP, Registry, PoA)
 
-**Status**: Beta (November 14, 2025)
+**Status**: Beta (November 17, 2025)
 - ✅ **CI/CD:** Resilient workflows with graceful degradation for missing infrastructure
 - ✅ **Security:** All HIGH severity issues resolved, 215 gosec findings documented
 - ✅ **Testing:** 49-97% coverage across core packages (689+ test cases)
 - ✅ **Dependencies:** All current, zero known CVEs
 - ✅ **Documentation:** 1,633+ lines (7 packages + architecture)
+- ✅ **UI Features:** Login with MFA, MCP server management, RFC-0111 8-step subscription wizard
 
 See [Dockerfiles Summary](DOCKERFILES_SUMMARY.md) for container build details. See also `CODEOWNERS` for ownership mapping.
 
@@ -150,11 +140,13 @@ Visit http://localhost:8080 (API) and http://localhost:3000 (UI) to explore the 
 The webapp provides a comprehensive UI for testing and demonstrating GAuth capabilities:
 
 **Features:**
+- 🔐 **Secure Login** - Multi-step authentication with credentials and MFA verification (TOTP, SMS)
 - 🎯 **Token Management** - Create, validate, and manage authorization tokens with JWT/JWE support
 - 👤 **Identity Verification (PVP)** - ✅ Real backend endpoint (`/beta/pvp/verify`)
 - 🏢 **Registry Integration** - ✅ Real backend endpoints (`/beta/registry/*`)
 - 🔐 **Authorization (PIP)** - Policy-based authorization with ABAC/RBAC support
 - 📜 **Power of Attorney (PoA)** - ✅ Full CRUD API (`/beta/poa/*`) - create, validate, manage delegations
+- 🤖 **MCP Integration** - Model Context Protocol server management with resource reading and tool execution
 - 📊 **Real-time Metrics** - Live system performance, latency, cache statistics, and component health
 - 🧪 **E2E Testing** - Integrated test suite with 13 automated tests and detailed reporting
 - 📈 **Dynamic Analytics** - Interactive charts showing request volume and latency trends
@@ -201,16 +193,20 @@ Backend environment defaults are documented in `.env.backend.example` (copy and 
 
 A modern **React + TypeScript** web interface showcasing all GAuth capabilities with real-time testing:
 
+- **Secure Login** - Multi-factor authentication with credentials and MFA verification (TOTP/SMS/Email)
 - **Token Operations** - Create, validate, and manage tokens with scope-based authorization
 - **Identity Verification (PVP)** - Mock identity verification with entity type detection
 - **Registry Services** - Entity lookup with jurisdictional compliance checks
 - **Authorization (PIP)** - Policy evaluation with geographic and sector-based rules
 - **Power of Attorney** - Create and validate delegation chains with action restrictions
+- **MCP Integration** - Model Context Protocol server management supporting stdio, WebSocket, and HTTP-SSE transports
 - **Live Metrics** - Real-time system performance with auto-refresh (request/sec, latency, cache hit rate)
 - **E2E Testing** - Automated test suite with 13 tests covering all major flows
 - **Dynamic Analytics** - Interactive charts and component health monitoring
 
-**Access:** http://localhost:3000 after running `npm run dev` in `web/ui-react/`
+**Access:**
+- React UI: http://localhost:3000 (run `npm run dev` in `web/ui-react/`)
+- Static HTML UI: http://localhost:8080/gauth1.html (includes Login and MCP tabs)
 
 ## Core Features
 
@@ -233,9 +229,12 @@ A modern **React + TypeScript** web interface showcasing all GAuth capabilities 
 - **AI Governance** - AI capability matrix with risk-level enforcement
 
 ### Developer Experience
-- **Interactive Web UI** - Live token creation, validation, and revocation
+- **Interactive Web UI** - Live token creation, validation, and revocation with React SPA and static HTML
+- **Secure Authentication** - Multi-step login with MFA support (TOTP, SMS, Email)
+- **MCP Integration** - Model Context Protocol server management with multiple transport types
+- **RFC-0111 Wizard** - 8-step subscription flow with visual progress tracking
 - **OpenAPI Specification** - Complete API documentation
-- **Comprehensive Testing** - Property tests, fuzz tests, integration tests
+- **Comprehensive Testing** - Property tests, fuzz tests, integration tests (689+ test cases)
 - **Observability** - Prometheus metrics, distributed tracing support
 
 ### Persistence & Scalability
@@ -329,9 +328,11 @@ if result.Decision == pdp.Allow {
 
 The included web demo (`cmd/web-server`) provides:
 
-- **Token Management** - Create, validate, and revoke tokens
+- **Secure Login** - Multi-step authentication with MFA support (available in static HTML UI)
+- **Token Management** - Create, validate, and revoke tokens with RFC-0111 8-step subscription wizard
 - **Delegation Chains** - Visualize delegation hierarchies
 - **Policy Testing** - Test policies against requests
+- **MCP Integration** - Model Context Protocol server management (stdio/WebSocket/HTTP-SSE transports)
 - **Metrics Dashboard** - Real-time authorization metrics
 - **Audit Log Viewer** - Browse cryptographic audit trails
 - **Key Rotation** - Manual and automatic key rotation controls
@@ -392,9 +393,19 @@ GAUTH_HOST=localhost
 
 GAUTH_CORS_ALLOW=*           # Development only; restrict domains in production
 
+# Feature Flags
+GAUTH_DEV_INDEX=1            # Enable development index page
+GAUTH_RFC0111_ENABLED=1      # Enable RFC-0111 subscription endpoints (required for Phase 2A)
+GAUTH_USE_JWT_LIB=1          # Use JWT library for token operations
+
 # Security
 GAUTH_JWT_SIGNING_KEY=your-secret-key
 GAUTH_ENABLE_REPLAY_PROTECTION=true
+
+# Authentication & MFA
+GAUTH_SESSION_TIMEOUT=24h    # Session token timeout
+GAUTH_MFA_ENABLED=true       # Enable multi-factor authentication
+GAUTH_MFA_METHODS=totp,sms,email  # Supported MFA methods
 
 # Key Rotation
 GAUTH_KEY_ROTATION_INTERVAL=720h
@@ -403,6 +414,10 @@ GAUTH_KEY_ROTATION_AUTO=true
 # External Anchoring
 GAUTH_ANCHOR_ROTATIONS=true
 GAUTH_TSA_ENDPOINT=https://tsa.example.com
+
+# Model Context Protocol (MCP)
+GAUTH_MCP_ENABLED=true       # Enable MCP server management
+GAUTH_MCP_TRANSPORTS=stdio,websocket,http-sse  # Supported transport types
 
 # Observability
 GAUTH_METRICS_ENABLED=true
