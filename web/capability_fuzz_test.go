@@ -95,6 +95,7 @@ func FuzzCapabilityReload(f *testing.F) {
 		}
 		t.Setenv("GAUTH_CAPABILITIES_PATH", capFile)
 		srv := NewBetaServer(":0")
+		t.Cleanup(func() { srv.Shutdown() })
 		disc := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
 		var doc map[string]any
 		if err := json.Unmarshal(disc.Body.Bytes(), &doc); err != nil {

@@ -23,6 +23,7 @@ func TestModelLimitsAttestationDomainSignatureInvalid(t *testing.T) {
 	t.Setenv("GAUTH_MODEL_LIMITS_PATH", limitsFile.Name())
 
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Fetch attestation with dual signatures
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, "/api/v1/model/limits/attestation", nil)

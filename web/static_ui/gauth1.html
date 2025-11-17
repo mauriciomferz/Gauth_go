@@ -137,6 +137,18 @@
                         <i class="fas fa-gavel" aria-hidden="true"></i>
                         <span>PIP</span>
                     </button>
+                    <button class="nav-link" data-tab="pap" aria-label="Policy Administration Point">
+                        <i class="fas fa-file-alt" aria-hidden="true"></i>
+                        <span>PAP</span>
+                    </button>
+                    <button class="nav-link" data-tab="pdp" aria-label="Policy Decision Point">
+                        <i class="fas fa-gavel" aria-hidden="true"></i>
+                        <span>PDP</span>
+                    </button>
+                    <button class="nav-link" data-tab="pep" aria-label="Policy Enforcement Point">
+                        <i class="fas fa-shield-halved" aria-hidden="true"></i>
+                        <span>PEP</span>
+                    </button>
                     <button class="nav-link" data-tab="poa" aria-label="Power of Attorney">
                         <i class="fas fa-file-contract" aria-hidden="true"></i>
                         <span>PoA</span>
@@ -153,6 +165,10 @@
                         <i class="fas fa-chart-line" aria-hidden="true"></i>
                         <span>Metrics</span>
                     </button>
+                    <a href="/api/docs" class="nav-link" target="_blank" aria-label="API Documentation" style="text-decoration: none; color: inherit;">
+                        <i class="fas fa-book" aria-hidden="true"></i>
+                        <span>API Docs</span>
+                    </a>
                 </nav>
                 <div class="theme-toggle">
                     <button id="theme-toggle-btn" title="Toggle dark/light theme" aria-label="Toggle theme">
@@ -270,6 +286,18 @@
                                 <span class="badge badge-success">Active</span>
                             </div>
                             <div class="component-item">
+                                <span class="component-name">PAP (Policy Administration)</span>
+                                <span class="badge badge-success">Active</span>
+                            </div>
+                            <div class="component-item">
+                                <span class="component-name">PDP (Policy Decision)</span>
+                                <span class="badge badge-success">Active</span>
+                            </div>
+                            <div class="component-item">
+                                <span class="component-name">PEP (Policy Enforcement)</span>
+                                <span class="badge badge-success">Active</span>
+                            </div>
+                            <div class="component-item">
                                 <span class="component-name">PoA (Power of Attorney)</span>
                                 <span class="badge badge-success">Active</span>
                             </div>
@@ -283,6 +311,9 @@
                             <li>Use <strong>PVP</strong> to verify identity chains with eIDAS</li>
                             <li>Check <strong>Commercial Register</strong> for entity validation</li>
                             <li>Test <strong>PIP</strong> for authorization decisions</li>
+                            <li>Create and manage policies with <strong>PAP</strong></li>
+                            <li>Make authorization decisions with <strong>PDP</strong></li>
+                            <li>Enforce authorization using <strong>PEP</strong></li>
                             <li>Manage <strong>PoA</strong> delegations and permissions</li>
                             <li>Run <strong>E2E Tests</strong> to validate complete flows</li>
                         </ol>
@@ -691,6 +722,152 @@
                 </div>
             </div>
 
+            <!-- PDP Tab -->
+            <div id="pdp-tab" class="tab-content">
+                <div class="tab-header">
+                    <h2><i class="fas fa-gavel"></i> Policy Decision Point (PDP)</h2>
+                    <p>Make authorization decisions based on policies and context</p>
+                </div>
+
+                <!-- Authorization Decision -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-balance-scale"></i> Make Authorization Decision</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="pdp-decision-form">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="decision-subject">Subject *</label>
+                                    <input type="text" id="decision-subject" placeholder="user:alice@example.com" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="decision-resource">Resource *</label>
+                                    <input type="text" id="decision-resource" placeholder="/api/patients/12345" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="decision-action">Action *</label>
+                                    <select id="decision-action" required>
+                                        <option value="">Select action</option>
+                                        <option value="read">Read</option>
+                                        <option value="write">Write</option>
+                                        <option value="update">Update</option>
+                                        <option value="delete">Delete</option>
+                                        <option value="execute">Execute</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="decision-role">User Role</label>
+                                    <input type="text" id="decision-role" placeholder="doctor">
+                                </div>
+                                <div class="form-group">
+                                    <label for="decision-department">Department</label>
+                                    <input type="text" id="decision-department" placeholder="cardiology">
+                                </div>
+                                <div class="form-group">
+                                    <label for="decision-location">Location</label>
+                                    <input type="text" id="decision-location" placeholder="US-CA">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-gavel"></i> Evaluate Decision
+                            </button>
+                        </form>
+                        <div id="pdp-decision-result" class="result-container" style="display: none;">
+                            <h4>Decision Result</h4>
+                            <div id="pdp-decision-content"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Policy Evaluation -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-check-circle"></i> Policy Evaluation</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="pdp-evaluate-form">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="eval-policy-id">Policy ID *</label>
+                                    <input type="text" id="eval-policy-id" placeholder="policy-001" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="eval-context">Context (JSON)</label>
+                                    <textarea id="eval-context" rows="4" placeholder='{"user":"alice", "role":"admin"}'></textarea>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check-circle"></i> Evaluate Policy
+                            </button>
+                        </form>
+                        <div id="pdp-evaluate-result" class="result-container" style="display: none;">
+                            <h4>Evaluation Result</h4>
+                            <div id="pdp-evaluate-content"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Decisions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-history"></i> Recent Decisions</h3>
+                        <button class="btn btn-secondary" id="pdp-refresh-decisions-btn">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table id="pdp-decisions-table">
+                                <thead>
+                                    <tr>
+                                        <th>Decision ID</th>
+                                        <th>Subject</th>
+                                        <th>Resource</th>
+                                        <th>Action</th>
+                                        <th>Decision</th>
+                                        <th>Reason</th>
+                                        <th>Timestamp</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pdp-decisions-tbody">
+                                    <tr>
+                                        <td colspan="7" class="text-center">No recent decisions</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PDP Performance Metrics -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-line"></i> PDP Performance</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <div class="metric-label">Total Decisions</div>
+                                <div class="metric-value" id="pdp-total-decisions">0</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Permit Rate</div>
+                                <div class="metric-value" id="pdp-permit-rate">0%</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Deny Rate</div>
+                                <div class="metric-value" id="pdp-deny-rate">0%</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Avg Response Time</div>
+                                <div class="metric-value" id="pdp-avg-response">0ms</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- PIP Tab -->
             <div class="tab-content" id="pip-tab">
                 <h2><i class="fas fa-gavel"></i> PIP - Policy Information Point</h2>
@@ -772,6 +949,228 @@
                         <div class="metric-item">
                             <span class="metric-label">Cache Get</span>
                             <span class="metric-value">21.59 ns/op</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAP Tab -->
+            <div class="tab-content" id="pap-tab">
+                <h2><i class="fas fa-file-alt"></i> PAP - Policy Administration Point</h2>
+                <p class="tab-description">Create, manage, and maintain authorization policies with versioning, activation, and lifecycle management.</p>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <h3><i class="fas fa-plus-circle"></i> Create Policy</h3>
+                        <form id="create-policy-form" class="form">
+                            <div class="form-group">
+                                <label>Policy Type</label>
+                                <select id="policy-type" required>
+                                    <option value="poa">Power of Attorney</option>
+                                    <option value="scope">Scope</option>
+                                    <option value="delegation">Delegation</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Policy Name</label>
+                                <input type="text" id="policy-name" placeholder="Healthcare Access Policy" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea id="policy-description" rows="3" placeholder="Policy purpose and details..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Client Owner</label>
+                                <input type="text" id="policy-client-owner" placeholder="client-001" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Owner's Authorizer</label>
+                                <input type="text" id="policy-authorizer" placeholder="authorizer-001" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Allowed Actions (comma-separated)</label>
+                                <input type="text" id="policy-actions" placeholder="read, write, execute" value="read, write">
+                            </div>
+                            <div class="form-group">
+                                <label>Geographic Scope (comma-separated)</label>
+                                <input type="text" id="policy-countries" placeholder="US, CA, GB" value="US, CA">
+                            </div>
+                            <div class="form-group">
+                                <label>Industry Sectors (comma-separated)</label>
+                                <input type="text" id="policy-sectors" placeholder="healthcare, finance" value="healthcare">
+                            </div>
+                            <div class="form-group">
+                                <label>Tags (comma-separated)</label>
+                                <input type="text" id="policy-tags" placeholder="production, healthcare">
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Create Policy
+                            </button>
+                        </form>
+                        <div id="policy-create-result" class="result-box" style="display: none;"></div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fas fa-search"></i> Manage Policies</h3>
+                        <form id="search-policy-form" class="form">
+                            <div class="form-group">
+                                <label>Policy ID</label>
+                                <input type="text" id="search-policy-id" placeholder="pol_123456789">
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Get Policy
+                            </button>
+                        </form>
+                        <div id="policy-details" class="result-box" style="display: none;"></div>
+                        
+                        <div id="policy-actions" style="display: none; margin-top: 1rem;">
+                            <h4 style="font-size: 1rem; margin-bottom: 0.75rem;">Policy Actions</h4>
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                <button id="activate-policy-btn" class="btn btn-primary" style="font-size: 0.875rem;">
+                                    <i class="fas fa-check-circle"></i> Activate
+                                </button>
+                                <button id="suspend-policy-btn" class="btn btn-secondary" style="font-size: 0.875rem;">
+                                    <i class="fas fa-pause-circle"></i> Suspend
+                                </button>
+                                <button id="revoke-policy-btn" class="btn btn-secondary" style="font-size: 0.875rem;">
+                                    <i class="fas fa-ban"></i> Revoke
+                                </button>
+                                <button id="delete-policy-btn" class="btn btn-secondary" style="font-size: 0.875rem;">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-list"></i> Active Policies</h3>
+                    <div id="active-policies" class="table-responsive">
+                        <p class="text-muted">No policies created yet. Use the form above to create your first policy.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-chart-bar"></i> PAP Performance</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">Policy Creation</span>
+                            <span class="metric-value">&lt;1 ms</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Policy Activation</span>
+                            <span class="metric-value">&lt;1 ms</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Policy Updates</span>
+                            <span class="metric-value">&lt;1 ms</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Total Policies</span>
+                            <span class="metric-value" id="pap-total-policies">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PEP Tab -->
+            <div class="tab-content" id="pep-tab">
+                <h2><i class="fas fa-shield-halved"></i> PEP - Policy Enforcement Point</h2>
+                <p class="tab-description">Enforce authorization decisions at runtime with token validation, scope checking, and compliance tracking.</p>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <h3><i class="fas fa-check-circle"></i> Enforce Authorization</h3>
+                        <form id="enforce-authz-form" class="form">
+                            <div class="form-group">
+                                <label>Extended Token (JWT)</label>
+                                <textarea id="enforce-token" rows="4" placeholder="Paste extended token here..." required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Action Type</label>
+                                <select id="enforce-action-type" required>
+                                    <option value="transaction">Transaction</option>
+                                    <option value="decision">Decision</option>
+                                    <option value="physical_action">Physical Action</option>
+                                    <option value="non_physical_action">Non-Physical Action</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Transaction/Action Type</label>
+                                <input type="text" id="enforce-transaction-type" placeholder="payment, transfer, execute" value="payment">
+                            </div>
+                            <div class="form-group">
+                                <label>Resource ID</label>
+                                <input type="text" id="enforce-resource-id" placeholder="resource-123" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Enforcement Mode</label>
+                                <select id="enforce-mode">
+                                    <option value="strict">Strict (Block on violation)</option>
+                                    <option value="advisory">Advisory (Log only)</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-shield-alt"></i> Enforce Authorization
+                            </button>
+                        </form>
+                        <div id="enforce-result" class="result-box" style="display: none;"></div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fas fa-server"></i> Supply-Side vs Demand-Side</h3>
+                        <div style="margin-bottom: 1.5rem;">
+                            <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">
+                                <i class="fas fa-user"></i> Supply-Side PEP (Client)
+                            </h4>
+                            <p class="text-muted" style="font-size: 0.875rem; margin-bottom: 1rem;">
+                                Client enforces its own authorization compliance before making requests.
+                            </p>
+                            <button class="btn btn-primary" id="test-supply-side-btn">
+                                <i class="fas fa-play"></i> Test Supply-Side Enforcement
+                            </button>
+                        </div>
+                        
+                        <div style="border-top: 1px solid #e5e7eb; padding-top: 1.5rem;">
+                            <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">
+                                <i class="fas fa-database"></i> Demand-Side PEP (Resource Server)
+                            </h4>
+                            <p class="text-muted" style="font-size: 0.875rem; margin-bottom: 1rem;">
+                                Resource server validates client authorization from the resource owner perspective.
+                            </p>
+                            <button class="btn btn-primary" id="test-demand-side-btn">
+                                <i class="fas fa-play"></i> Test Demand-Side Validation
+                            </button>
+                        </div>
+                        <div id="pep-test-result" class="result-box" style="display: none; margin-top: 1rem;"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Recent Violations</h3>
+                    <div id="pep-violations" class="table-responsive">
+                        <p class="text-muted">No violations detected. All enforcement checks passed.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-bolt"></i> PEP Performance</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">Token Validation</span>
+                            <span class="metric-value">&lt;1 µs</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Scope Validation</span>
+                            <span class="metric-value">&lt;500 ns</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">PDP Decision</span>
+                            <span class="metric-value">257 ns</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Total Enforcements</span>
+                            <span class="metric-value" id="pep-total-enforcements">0</span>
                         </div>
                     </div>
                 </div>

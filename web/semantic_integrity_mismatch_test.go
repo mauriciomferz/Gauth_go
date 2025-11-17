@@ -15,6 +15,7 @@ func TestSemanticIntegrityMismatch(t *testing.T) {
 	persistPath := tmp + "/semantic_prev_hash.txt"
 	os.Setenv("GAUTH_SEMANTIC_INTEGRITY_PERSIST_PATH", persistPath)
 	s := NewBetaServer("")
+	t.Cleanup(func() { s.Shutdown() })
 	// First call establishes baseline and writes current hash.
 	w1 := httptest.NewRecorder()
 	req1, _ := http.NewRequest("GET", "/api/v1/diagnostics/semantic", http.NoBody)

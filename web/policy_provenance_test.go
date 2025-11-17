@@ -9,6 +9,7 @@ import (
 // TestPolicyProvenanceEndpoint verifies provenance returns expected keys even when empty.
 func TestPolicyProvenanceEndpoint(t *testing.T) {
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/api/v1/beta/policy/provenance", nil)
 	srv.router.ServeHTTP(w, req)
@@ -30,6 +31,7 @@ func TestPolicyProvenanceEndpoint(t *testing.T) {
 // TestPolicyProvenanceUnknownHash queries an unknown hash and expects success=false or not verified indicators.
 func TestPolicyProvenanceUnknownHash(t *testing.T) {
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Force empty registry scenario (if seeding disabled this remains empty); request with hash param
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/api/v1/beta/policy/provenance?hash=nonexistentdeadbeef", nil)

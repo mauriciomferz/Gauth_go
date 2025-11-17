@@ -38,6 +38,7 @@ func TestModelLimitsAttestationNotarization(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMIT_SURGE_MIN_EVENTS", "1")
 
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	if internalCrypto.GlobalEdDSARegistry == nil || internalCrypto.GlobalEdDSARegistry.Active() == nil {
 		t.Fatalf("expected eddsa registry active")
 	}

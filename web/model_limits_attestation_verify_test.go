@@ -28,6 +28,7 @@ func TestModelLimitsAttestationVerify(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMIT_ANCHOR_INTERVAL", "1")
 
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	if internalCrypto.GlobalEdDSARegistry == nil || internalCrypto.GlobalEdDSARegistry.Active() == nil {
 		t.Fatalf("eddsa registry inactive")
 	}
@@ -128,6 +129,7 @@ func TestModelLimitsAttestationKeys(t *testing.T) {
 	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
 	t.Setenv("GAUTH_MODEL_LIMIT_ATTEST_SIGN", "1")
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	if internalCrypto.GlobalEdDSARegistry == nil || internalCrypto.GlobalEdDSARegistry.Active() == nil {
 		t.Fatalf("eddsa registry inactive")
 	}

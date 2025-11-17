@@ -12,6 +12,7 @@ import (
 func TestLegacyAliasDisabled(t *testing.T) {
 	testutil.WithEnv(t, "GAUTH_DISABLE_LEGACY_GOVERNANCE_ALIAS", "1", func() {
 		srv := NewBetaServer("")
+		t.Cleanup(func() { srv.Shutdown() })
 		rr := httptest.NewRecorder()
 		req, _ := http.NewRequest("GET", "/api/governance/lifecycle_timeline", nil)
 		srv.router.ServeHTTP(rr, req)

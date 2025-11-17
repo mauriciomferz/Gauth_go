@@ -2,6 +2,8 @@
 package rfc0111
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"net/http"
 	"strings"
 
@@ -115,14 +117,29 @@ func (h *AuthorizationHandlers) ValidateToken(c *gin.Context) {
 		return
 	}
 
-	// Return validation result
-	c.JSON(http.StatusOK, gin.H{
+	// Parse token to get decoded claims for display
+	var decoded map[string]interface{}
+	parts := strings.Split(req.Token, ".")
+	if len(parts) == 3 {
+		if payload, err := base64.RawURLEncoding.DecodeString(parts[1]); err == nil {
+			json.Unmarshal(payload, &decoded)
+		}
+	}
+
+	// Return validation result with decoded claims
+	response := gin.H{
 		"success":   true,
 		"valid":     result.Valid,
 		"active":    result.Valid,
 		"client_id": result.ClientID,
 		"scope":     result.Scope,
-	})
+	}
+	
+	if decoded != nil {
+		response["decoded"] = decoded
+	}
+	
+	c.JSON(http.StatusOK, response)
 }
 
 // IntrospectToken handles POST /api/v1/rfc0111/token/introspect

@@ -13,6 +13,7 @@ import (
 func TestSemanticReactiveThrottle(t *testing.T) {
 	os.Setenv("GAUTH_SEMANTIC_ANOMALY_Z_THRESHOLD", "0.0") // treat any >=0 score as exceed
 	s := NewBetaServer("")
+	t.Cleanup(func() { s.Shutdown() })
 	// Synthetically vary semantic history snapshots to generate changing per-category rates.
 	// We directly manipulate semanticHistory before requesting diagnostics to accumulate EWMA samples.
 	base := time.Now().Add(-40 * time.Second)

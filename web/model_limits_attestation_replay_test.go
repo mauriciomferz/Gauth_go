@@ -24,6 +24,7 @@ func TestModelLimitsAttestationReplay(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMIT_ANCHOR_INTERVAL", "1")
 
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 
 	// Generate exceed event to populate audit/anchor
 	w1 := httptest.NewRecorder()

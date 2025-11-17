@@ -23,6 +23,7 @@ func TestModelLimitExceededMetric(t *testing.T) {
 	f.Close()
 	os.Setenv("GAUTH_MODEL_LIMITS_PATH", f.Name())
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	mem, ok := bs.metrics.(*imetrics.Memory)
 	if !ok {
 		t.Fatalf("expected memory metrics implementation")

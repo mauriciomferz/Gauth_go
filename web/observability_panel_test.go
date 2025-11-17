@@ -12,6 +12,7 @@ import (
 func TestObservabilityPanelPresence(t *testing.T) {
 	t.Skip("Observability panel moved to dedicated dashboard - index.html is now marketing page")
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/index.html", nil)
 	srv.router.ServeHTTP(w, req)

@@ -13,6 +13,8 @@ import {
   Shield,
   Moon,
   Sun,
+  FileCheck,
+  ShieldCheck,
 } from 'lucide-react'
 import { useThemeStore } from '../store/theme'
 import { cn } from '../lib/utils'
@@ -27,6 +29,9 @@ const navigation = [
   { name: 'PVP', href: '/pvp', icon: UserCheck },
   { name: 'Registry', href: '/registry', icon: Building2 },
   { name: 'PIP', href: '/pip', icon: Gavel },
+  { name: 'PAP', href: '/pap', icon: FileText },
+  { name: 'PDP', href: '/pdp', icon: FileCheck },
+  { name: 'PEP', href: '/pep', icon: ShieldCheck },
   { name: 'PoA', href: '/poa', icon: FileText },
   { name: 'MCP', href: '/mcp', icon: Plug },
   { name: 'E2E Testing', href: '/e2e', icon: Activity },

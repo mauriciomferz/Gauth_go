@@ -29,6 +29,7 @@ func TestExternalAnchorMetricsRetrySuccess(t *testing.T) {
 	reg := prom.NewRegistry()
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111", Registry: reg})
 	srv := NewBetaServerWithMetrics(":0", pm) // server needed for startup attempt
+	t.Cleanup(func() { srv.Shutdown() })
 	// Wait for initial attempt + potential retries to finish.
 	time.Sleep(400 * time.Millisecond)
 	rec := httptest.NewRecorder()

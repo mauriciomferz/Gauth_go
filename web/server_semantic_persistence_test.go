@@ -18,6 +18,7 @@ func TestSemanticEWMAStatePersistence(t *testing.T) {
 	memAuthz.AddPolicy(authz.Policy{ID: "allow-all-alice", Subject: "alice", Resource: "*", Actions: []string{"*"}, Effect: authz.Allow})
 	svc := rfc0111.NewService(audit.NewMemoryLogger(nil), memAuthz)
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	bs.rfc0111Service = svc
 	bs.initSemanticAnomaly()
 	// Simulate semantic counter increments to produce rate samples.
@@ -52,6 +53,7 @@ func TestSemanticEWMAStatePersistence(t *testing.T) {
 	}
 	// Create new server instance and load file.
 	bs2 := NewBetaServer("")
+	t.Cleanup(func() { bs2.Shutdown() })
 	bs2.rfc0111Service = svc
 	bs2.semanticPersistPath = persistPath
 	bs2.loadSemanticPersistence()

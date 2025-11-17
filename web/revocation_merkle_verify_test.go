@@ -17,6 +17,7 @@ import (
 func TestRevocationMerkleProofVerification(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	s := NewBetaServer("")
+	t.Cleanup(func() { s.Shutdown() })
 	if s.revocationChain == nil {
 		s.revocationChain = delegation.NewRevocationChain()
 	}

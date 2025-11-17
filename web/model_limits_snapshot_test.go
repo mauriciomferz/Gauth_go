@@ -23,6 +23,7 @@ func TestModelLimitsSnapshotHashChange(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMITS_PATH", tmp.Name())
 	os.Setenv("GAUTH_MODEL_LIMITS_RELOAD_INTERVAL", "1")
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 
 	getHash := func() string {
 		w := httptest.NewRecorder()

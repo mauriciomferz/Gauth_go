@@ -10,6 +10,7 @@ import (
 // TestTokenIssuanceReplayNonce ensures duplicate nonce rejection (simulated by forcing replayStore state).
 func TestTokenIssuanceReplayNonce(t *testing.T) {
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Manually record a nonce then attempt to create token using same nonce by temporarily swapping randomNonce.
 	// Since randomNonce is internal, we simulate by directly marking a generated nonce and then patching replayStore.Seen logic via second call.
 	n := "fixednonce123" // 12 chars

@@ -32,6 +32,7 @@ func TestCapabilityAnchorMaterialSigned(t *testing.T) {
 	t.Setenv("GAUTH_CAPABILITIES_PATH", capFile)
 
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Perform explicit reload (idempotent) to make sure emission executed.
 	_ = performRequest(srv.router, "POST", "/api/v1/beta/capabilities/reload")
 

@@ -20,6 +20,7 @@ func TestCapabilityPersistenceMissingSchemaVersion(t *testing.T) {
 	tmp.Close()
 	t.Setenv("GAUTH_CAPABILITIES_PATH", tmp.Name())
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 
 	// Confirm initial load succeeded (source should be file, schema version present)
 	disc1 := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")

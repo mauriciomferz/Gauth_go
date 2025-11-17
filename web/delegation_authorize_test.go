@@ -22,6 +22,7 @@ func performAuthorize(bs *BetaServer, body any) *httptest.ResponseRecorder {
 // TestDelegationAuthorizeSuccess builds a 2-link narrowing chain and expects chain_verified.
 func TestDelegationAuthorizeSuccess(t *testing.T) {
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	expires := time.Now().Add(2 * time.Minute).Format(time.RFC3339)
 	body := map[string]any{
 		"client_id":    "c1",
@@ -47,6 +48,7 @@ func TestDelegationAuthorizeSuccess(t *testing.T) {
 // TestDelegationAuthorizeScopeWidening ensures widening causes 400.
 func TestDelegationAuthorizeScopeWidening(t *testing.T) {
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	expires := time.Now().Add(2 * time.Minute).Format(time.RFC3339)
 	body := map[string]any{
 		"client_id":    "c1",
@@ -73,6 +75,7 @@ func TestDelegationAuthorizeScopeWidening(t *testing.T) {
 // TestDelegationAuthorizeScopeViolation ensures request scope lacking delegated action fails.
 func TestDelegationAuthorizeScopeViolation(t *testing.T) {
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	expires := time.Now().Add(2 * time.Minute).Format(time.RFC3339)
 	body := map[string]any{
 		"client_id":    "c1",
@@ -98,6 +101,7 @@ func TestDelegationAuthorizeScopeViolation(t *testing.T) {
 // TestDelegationAuthorizeExpired ensures expired delegation rejected.
 func TestDelegationAuthorizeExpired(t *testing.T) {
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	expired := time.Now().Add(-1 * time.Minute).Format(time.RFC3339)
 	body := map[string]any{
 		"client_id":    "c1",

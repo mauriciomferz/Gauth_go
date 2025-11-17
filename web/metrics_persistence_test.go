@@ -18,6 +18,7 @@ func TestMetricsPersistence(t *testing.T) {
 	tmpFile.Close()
 	os.Setenv("GAUTH_METRICS_PERSIST_PATH", path)
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 
 	// Perform token lifecycle transitions
 	rrCreate := doPOST(t, srv, "/api/v1/token/create", "{}")
@@ -66,6 +67,7 @@ func TestMetricsPersistence(t *testing.T) {
 
 	// Create new server loading same file
 	srv2 := NewBetaServer("")
+	t.Cleanup(func() { srv2.Shutdown() })
 	// Force same path again
 	os.Setenv("GAUTH_METRICS_PERSIST_PATH", path)
 	// Manually enable persistence load (since env read occurred earlier in constructor)

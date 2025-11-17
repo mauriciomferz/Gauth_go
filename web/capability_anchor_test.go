@@ -12,6 +12,7 @@ func TestCapabilityAnchoringLifecycle(t *testing.T) {
 	t.Setenv("GAUTH_ANCHOR_PROVIDER", "memory")
 	t.Setenv("GAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Initial latest should show anchored=false
 	w0 := httptest.NewRecorder()
 	req0 := httptest.NewRequest("GET", "/api/v1/beta/capabilities/anchor/latest", nil)
@@ -102,6 +103,7 @@ func TestCapabilityAnchorDisabled(t *testing.T) {
 	os.Unsetenv("GAUTH_CAPABILITY_ANCHOR_ENABLE")
 	t.Setenv("GAUTH_ANCHOR_PROVIDER", "memory")
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/api/v1/beta/capabilities/anchor", nil)
 	srv.router.ServeHTTP(w, req)

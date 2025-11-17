@@ -17,6 +17,7 @@ func TestViolationPersistenceVerify(t *testing.T) {
 	os.Setenv("GAUTH_VIOLATION_PERSIST_PATH", path)
 	os.Setenv("GAUTH_VIOLATION_PERSIST_NO_THROTTLE", "1")
 	srv := NewBetaServer("8131")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Trigger some violations
 	for i := 0; i < 3; i++ {
 		w := httptest.NewRecorder()
@@ -109,6 +110,7 @@ func TestSemanticPersistenceVerify(t *testing.T) {
 	os.Setenv("GAUTH_SEMANTIC_PERSIST_PATH", path)
 	os.Setenv("GAUTH_SEMANTIC_PERSIST_NO_THROTTLE", "1")
 	srv := NewBetaServer("8132")
+	t.Cleanup(func() { srv.Shutdown() })
 	if srv.rfc0111Service == nil {
 		t.Fatalf("semantic service not initialized")
 	}

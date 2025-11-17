@@ -9,6 +9,7 @@ import (
 // TestRevocationConsistencySizesTrivial verifies trivial proof returned when older==newer==current length.
 func TestRevocationConsistencySizesTrivial(t *testing.T) {
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Empty chain length expected => trivial when requesting 0,0
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/api/v1/token/revocation/consistency_sizes?older=0&newer=0", nil)
@@ -35,6 +36,7 @@ func TestRevocationConsistencySizesTrivial(t *testing.T) {
 // TestRevocationConsistencySizesUnavailable verifies differing sizes produce 501 proof_unavailable.
 func TestRevocationConsistencySizesUnavailable(t *testing.T) {
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/api/v1/token/revocation/consistency_sizes?older=0&newer=1", nil)
 	srv.router.ServeHTTP(w, req)

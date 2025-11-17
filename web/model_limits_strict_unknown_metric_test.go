@@ -16,6 +16,7 @@ func TestModelLimitsStrictUnknownMetric(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMITS_STRICT_UNKNOWN", "1")
 	defer os.Unsetenv("GAUTH_MODEL_LIMITS_STRICT_UNKNOWN")
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	// Swap in Prometheus adapter so counter is exposed via exposition endpoint.
 	bs.metrics = pm.NewPrometheusMetrics(pm.PrometheusAdapterOptions{})
 

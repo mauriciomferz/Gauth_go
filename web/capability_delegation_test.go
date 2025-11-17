@@ -22,6 +22,7 @@ func doPost(bs *BetaServer, path string, body any) *httptest.ResponseRecorder {
 func TestDelegationCreateCapabilityEnforcement(t *testing.T) {
 	t.Setenv("GAUTH_CAPABILITY_ENFORCE", "1")
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	// Missing capability should yield 403
 	resp := doPost(bs, "/api/v1/delegation/create", map[string]any{"delegation_id": "d1", "subject": "s1", "delegate": "dlt"})
 	if resp.Code != 403 {
@@ -44,6 +45,7 @@ func TestDelegationCreateCapabilityEnforcement(t *testing.T) {
 func TestDelegationRevokeCapabilityEnforcement(t *testing.T) {
 	t.Setenv("GAUTH_CAPABILITY_ENFORCE", "1")
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	// First create delegation with required capability
 	createResp := doPost(bs, "/api/v1/delegation/create", map[string]any{"delegation_id": "d1", "subject": "s1", "delegate": "dlt", "claims": map[string]any{"cap": []string{"cap.delegation.create"}}})
 	if createResp.Code != 200 {

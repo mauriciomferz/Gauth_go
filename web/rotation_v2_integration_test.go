@@ -35,6 +35,7 @@ func TestRotationV2SigningIntegration(t *testing.T) {
 	t.Setenv("GAUTH_ROTATIONS_V2_SIGN", "1")
 
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	art, verified, perAlg, failures, err := srv.buildAndOptionallySignRotationV2()
 	if err != nil {
 		t.Fatalf("buildAndOptionallySignRotationV2 error: %v", err)

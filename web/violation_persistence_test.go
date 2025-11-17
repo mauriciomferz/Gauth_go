@@ -17,6 +17,7 @@ func TestViolationPersistence(t *testing.T) {
 	os.Setenv("GAUTH_VIOLATION_AUTOSAVE_SEC", "0") // disable autosave loop for test
 	os.Setenv("GAUTH_VIOLATION_PERSIST_NO_THROTTLE", "1")
 	srv := NewBetaServer("8091")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Trigger some violations (empty token)
 	for i := 0; i < 5; i++ {
 		w := httptest.NewRecorder()
@@ -56,6 +57,7 @@ func TestViolationPersistence(t *testing.T) {
 	}
 	// New server should restore counters
 	srv2 := NewBetaServer("8092")
+	t.Cleanup(func() { srv2.Shutdown() })
 	snap := srv2.primaryAuthService.ViolationSnapshot()
 	if snap["missing_claim"] < 5 {
 		t.Fatalf("restored missing_claim expected >=5 got %d", snap["missing_claim"])

@@ -14,6 +14,7 @@ import (
 // histogram buckets, count, and p99 line after a few evaluations.
 func TestAuthzMetricsPrometheus(t *testing.T) {
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Prime with a few evaluations to populate latency buckets.
 	for i := 0; i < 7; i++ {
 		payload := map[string]any{

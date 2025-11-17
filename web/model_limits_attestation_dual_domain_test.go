@@ -33,6 +33,7 @@ func TestModelLimitsAttestationDualDomainSignature(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMITS_STRICT_UNKNOWN", "1")
 
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	if internalCrypto.GlobalEdDSARegistry == nil || internalCrypto.GlobalEdDSARegistry.Active() == nil {
 		t.Fatalf("expected eddsa registry active")
 	}

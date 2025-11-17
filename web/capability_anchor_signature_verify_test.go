@@ -39,6 +39,7 @@ func TestCapabilityAnchorEndpointSignatureVerification(t *testing.T) {
 	t.Setenv("GAUTH_SKIP_SMOKETEST", "1")
 
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Capture active key immediately after server creation.
 	var pub ed25519.PublicKey
 	var kid string

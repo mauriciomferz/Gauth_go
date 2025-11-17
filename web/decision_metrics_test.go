@@ -10,6 +10,7 @@ import (
 // TestDecisionMetricsEndpoint validates /api/v1/beta/metrics/decisions returns deterministic labeled counts.
 func TestDecisionMetricsEndpoint(t *testing.T) {
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Record several lifecycle decisions via token status update and delegation status update endpoints.
 	// Use token create to get a token id.
 	reqCreate := httptest.NewRequest("POST", "/api/v1/token/create", strings.NewReader(`{"subject":"alice@example.com","scopes":["demo"],"audience":["beta"],"ttl_seconds":10}`))

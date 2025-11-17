@@ -37,6 +37,7 @@ func TestCapabilityAnchorAlgorithmMetrics(t *testing.T) {
 	})
 	m := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics("0", m)
+	t.Cleanup(func() { srv.Shutdown() })
 	// Perform a second explicit capability load now that anchor file path has been configured
 	// so that emission block inside loadCapabilitiesFromFile observes non-empty capAnchorFilePath.
 	if err := srv.loadCapabilitiesFromFile(capPath); err != nil {

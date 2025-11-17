@@ -50,6 +50,7 @@ func TestRotationSummary_MultiSignature(t *testing.T) {
 	}
 	cryptoInt.GlobalEdDSARegistry = m
 	s := NewBetaServer("")
+	t.Cleanup(func() { s.Shutdown() })
 	s.rotationLedger = led
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/beta/rotations/summary", http.NoBody)

@@ -13,6 +13,7 @@ func TestCapabilityLifecycleDiscovery(t *testing.T) {
 	t.Setenv("GAUTH_CAP_LIFECYCLE_SUNSET_ENFORCE", "1")
 	capability.Reset([]capability.Capability{})
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	resp := doGET(t, srv, "/api/v1/beta/info")
 	if resp.Code != 200 {
 		t.Fatalf("expected 200 got %d", resp.Code)

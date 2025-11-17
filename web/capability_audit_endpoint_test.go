@@ -9,6 +9,7 @@ import (
 func TestCapabilityAuditEndpoint(t *testing.T) {
 	t.Setenv("GAUTH_CAPABILITY_ENFORCE", "1")
 	bs := NewBetaServer(":0")
+	t.Cleanup(func() { bs.Shutdown() })
 	// Trigger denial (missing capability)
 	resp := doPost(bs, "/api/v1/delegation/create", map[string]any{"delegation_id": "audit1", "subject": "alice", "delegate": "bob"})
 	if resp.Code != 403 {

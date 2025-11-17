@@ -31,6 +31,7 @@ func TestCapabilityAnchorMetrics(t *testing.T) {
 	t.Setenv("GAUTH_DISABLE_BG_POLLS", "1")
 	t.Setenv("GAUTH_SKIP_SMOKETEST", "1")
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// First reload triggers emission (metrics emitted++)
 	_ = performRequest(srv.router, "POST", "/api/v1/beta/capabilities/reload")
 	// Second reload should be skipped due to interval throttle (metrics skipped++)

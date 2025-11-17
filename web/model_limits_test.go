@@ -35,6 +35,7 @@ func TestModelValidateLimits(t *testing.T) {
 	f.Close()
 	os.Setenv("GAUTH_MODEL_LIMITS_PATH", f.Name())
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	// Unknown model (should allow)
 	resp := postModelValidate(bs, map[string]any{"model_id": "other-model", "input_tokens": 500})
 	if resp.Code != 200 {

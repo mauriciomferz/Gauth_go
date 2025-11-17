@@ -22,6 +22,7 @@ func performAuthorizePost(bs *BetaServer, body any) *httptest.ResponseRecorder {
 // TestDelegationRevocationHead ensures revoking the head delegation denies authorization.
 func TestDelegationRevocationHead(t *testing.T) {
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	expires := time.Now().Add(2 * time.Minute).Format(time.RFC3339)
 	body := map[string]any{
 		"client_id":    "c1",
@@ -49,6 +50,7 @@ func TestDelegationRevocationHead(t *testing.T) {
 // TestDelegationRevocationMiddle ensures revoking a middle delegation denies authorization.
 func TestDelegationRevocationMiddle(t *testing.T) {
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	expires := time.Now().Add(2 * time.Minute).Format(time.RFC3339)
 	body := map[string]any{
 		"client_id":    "c1",
@@ -76,6 +78,7 @@ func TestDelegationRevocationMiddle(t *testing.T) {
 // TestDelegationRevocationNone ensures no revocations allow success.
 func TestDelegationRevocationNone(t *testing.T) {
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	expires := time.Now().Add(2 * time.Minute).Format(time.RFC3339)
 	body := map[string]any{
 		"client_id":    "c1",

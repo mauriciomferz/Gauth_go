@@ -9,6 +9,7 @@ import (
 // TestLatencyPercentilesEndpoint ensures the latency percentile endpoint responds with expected shape.
 func TestLatencyPercentilesEndpoint(t *testing.T) {
 	srv := NewBetaServer("0")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := httptest.NewRecorder()
 	srv.router.ServeHTTP(w, httptest.NewRequest("GET", "/api/v1/beta/metrics/latency", nil))
 	if w.Code != 200 {

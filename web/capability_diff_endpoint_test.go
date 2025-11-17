@@ -20,6 +20,7 @@ func perform(server *BetaServer, path string) *httptest.ResponseRecorder {
 
 func TestCapabilityDiffAddedRemovedModified(t *testing.T) {
 	srv := NewBetaServer("0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Baseline capabilities: A, B (overwrite static seed after server init)
 	capability.Reset([]capability.Capability{
 		{ID: "cap.A", Version: "1.0", Stable: true},
@@ -89,6 +90,7 @@ func TestCapabilityDiffAddedRemovedModified(t *testing.T) {
 func TestCapabilityDiffUnknownBaseline(t *testing.T) {
 	capability.Reset([]capability.Capability{{ID: "cap.X", Version: "1.0", Stable: true}})
 	srv := NewBetaServer("0")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := perform(srv, "/api/v1/capabilities/diff?since=sha256:deadbeef")
 	if w.Code != 404 {
 		t.Fatalf("expected 404 for unknown baseline; got %d body=%s", w.Code, w.Body.String())

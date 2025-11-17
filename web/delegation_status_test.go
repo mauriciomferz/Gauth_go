@@ -10,6 +10,7 @@ import (
 
 func TestDelegationStatusLifecycle(t *testing.T) {
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	// 1. Initialize delegation with active
 	rrInit := doPOST(t, srv, "/api/v1/delegation/status/update", `{"delegation_id":"del1","new_status":"active"}`)
 	if rrInit.Code != http.StatusOK {
@@ -89,6 +90,7 @@ func TestDelegationStatusLifecycle(t *testing.T) {
 
 func TestDelegationStatusInitializeTerminated(t *testing.T) {
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	rrInit := doPOST(t, srv, "/api/v1/delegation/status/update", `{"delegation_id":"delT","new_status":"terminated"}`)
 	if rrInit.Code != http.StatusOK {
 		t.Fatalf("init terminated expected 200 got %d", rrInit.Code)
@@ -102,6 +104,7 @@ func TestDelegationStatusInitializeTerminated(t *testing.T) {
 
 func TestDelegationStatusUnsupported(t *testing.T) {
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	rrBad := doPOST(t, srv, "/api/v1/delegation/status/update", `{"delegation_id":"delX","new_status":"disabled"}`)
 	if rrBad.Code != http.StatusBadRequest {
 		t.Fatalf("expected 400 unsupported status got %d", rrBad.Code)
@@ -110,6 +113,7 @@ func TestDelegationStatusUnsupported(t *testing.T) {
 
 func TestDelegationStatusNoChange(t *testing.T) {
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	rrInit := doPOST(t, srv, "/api/v1/delegation/status/update", `{"delegation_id":"delNC","new_status":"active"}`)
 	if rrInit.Code != http.StatusOK {
 		t.Fatalf("init active expected 200 got %d", rrInit.Code)

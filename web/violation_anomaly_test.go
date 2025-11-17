@@ -11,6 +11,7 @@ import (
 // TestViolationAnomalyMetrics ensures anomaly section fields populate and rate increases after multiple invalid validations.
 func TestViolationAnomalyMetrics(t *testing.T) {
 	srv := NewBetaServer("8082")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Generate several invalid validation attempts (empty token triggers missing_claim)
 	for i := 0; i < 15; i++ {
 		w := httptest.NewRecorder()

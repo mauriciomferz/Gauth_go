@@ -17,6 +17,7 @@ func buildTestServer(t *testing.T) *BetaServer {
 	t.Helper()
 	gin.SetMode(gin.TestMode)
 	s := NewBetaServer("")
+	t.Cleanup(func() { s.Shutdown() })
 	// Attach a fresh key manager (1h TTL) for signatures.
 	km, err := crypto.NewManager(time.Hour)
 	if err != nil {

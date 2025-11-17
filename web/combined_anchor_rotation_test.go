@@ -26,6 +26,7 @@ func TestCombinedAnchorEmissionWithRotation(t *testing.T) {
 
 	mem := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics(":0", mem)
+	t.Cleanup(func() { srv.Shutdown() })
 	// Seed capability hash
 	srv.capabilityRegistryHash = "feedfacecafedead"
 	// Append a rotation descriptor to ledger directly (simulate key rotation event)

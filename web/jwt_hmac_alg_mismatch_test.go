@@ -17,6 +17,7 @@ func TestJWTHMACAlgMismatch(t *testing.T) {
 	os.Setenv("GAUTH_JWT_SECRET", "demo-hmac-secret-1234567890")
 	os.Setenv("GAUTH_JWT_KID", "demo-hmac")
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 
 	// Issue token using current expected HS256 (server will sign with HS256)
 	iw := httptest.NewRecorder()

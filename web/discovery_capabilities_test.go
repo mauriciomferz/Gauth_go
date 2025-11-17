@@ -11,6 +11,7 @@ import (
 // TestDiscoveryCapabilityRegistry ensures dynamic capability registry and ordered action capabilities are exposed.
 func TestDiscoveryCapabilityRegistry(t *testing.T) {
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/.well-known/gauth-configuration", nil)
 	srv.router.ServeHTTP(w, req)
@@ -83,6 +84,7 @@ func TestDiscoveryCapabilityRegistry(t *testing.T) {
 func TestDiscoveryCapabilityEnforcementFlag(t *testing.T) {
 	t.Setenv("GAUTH_CAPABILITY_ENFORCE", "1")
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/.well-known/gauth-configuration", nil)
 	srv.router.ServeHTTP(w, req)
@@ -135,6 +137,7 @@ func TestDiscoveryCapabilityEnforcementFlag(t *testing.T) {
 func TestAuditCapabilitiesPagination(t *testing.T) {
 	t.Setenv("GAUTH_CAPABILITY_ENFORCE", "1")
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Generate > limit entries (use capability_enforce denials by triggering missing capability for issue action)
 	// We invoke token issuance without required capability claims repeatedly.
 	limit := 5

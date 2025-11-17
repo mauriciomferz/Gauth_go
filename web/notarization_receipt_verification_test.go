@@ -27,6 +27,7 @@ func TestNotarizationReceiptVerification(t *testing.T) {
 	t.Setenv("GAUTH_CAP_ANCHOR_NOTARY_PROVIDER", "memory")
 	t.Setenv("GAUTH_NOTARY_RECEIPT_PERSIST_PATH", receiptPath)
 	srv := NewBetaServer("0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Trigger second emission to ensure persistence exists
 	time.Sleep(1100 * time.Millisecond)
 	if err := os.WriteFile(capFile, []byte(testutil.CapTransferIssueV1), 0o600); err != nil {

@@ -9,6 +9,7 @@ import (
 func TestCapabilityNegotiationBasic(t *testing.T) {
 	// Seed server (static capabilities already registered in NewBetaServer)
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Request with supported versions (1.0) for existing capabilities plus an unknown capability.
 	reqBody := map[string]any{
 		"client_versions": map[string][]string{
@@ -47,6 +48,7 @@ func TestCapabilityNegotiationBasic(t *testing.T) {
 // TestCapabilityNegotiationInvalidPayload ensures 400 on empty client_versions.
 func TestCapabilityNegotiationInvalidPayload(t *testing.T) {
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	resp := doPost(srv, "/api/v1/beta/capabilities/negotiate", map[string]any{"client_versions": map[string][]string{}})
 	if resp.Code != 400 {
 		t.Fatalf("expected 400 invalid payload got %d", resp.Code)

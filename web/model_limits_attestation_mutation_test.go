@@ -22,6 +22,7 @@ func TestModelLimitsAttestationMutation(t *testing.T) {
 	t.Setenv("GAUTH_MODEL_LIMITS_PATH", limitsFile.Name())
 
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Acquire attestation via router (mirrors other tests)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, "/api/v1/model/limits/attestation", nil)

@@ -29,6 +29,7 @@ func TestModelUserLimitsPrometheusExposition(t *testing.T) {
 	t.Setenv("GAUTH_MODEL_LIMITS_PATH", f.Name())
 	// Enable Prometheus exposition endpoint (already active by default on /api/v1/beta/metrics/prometheus)
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Replace memory metrics with Prometheus adapter to ensure counters are exposed via exposition endpoints.
 	regMetrics := pm.NewPrometheusMetrics(pm.PrometheusAdapterOptions{})
 	srv.metrics = regMetrics

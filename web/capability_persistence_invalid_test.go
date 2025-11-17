@@ -20,6 +20,7 @@ func TestCapabilityPersistenceInvalidMapping(t *testing.T) {
 	tmp.Close()
 	t.Setenv("GAUTH_CAPABILITIES_PATH", tmp.Name())
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 
 	// modify file referencing unknown capability id
 	//nolint:gosec // G306: test file permissions
@@ -69,6 +70,7 @@ func TestCapabilityPersistenceDuplicateID(t *testing.T) {
 	tmp.Close()
 	t.Setenv("GAUTH_CAPABILITIES_PATH", tmp.Name())
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 
 	// write duplicate IDs
 	//nolint:gosec // G306: test file permissions

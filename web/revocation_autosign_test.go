@@ -16,6 +16,7 @@ func TestRevocationAutoSignDuplicateSuppression(t *testing.T) {
 	defer os.Unsetenv("GAUTH_TOKEN_SIG_MODE")
 
 	s := NewBetaServer("")
+	t.Cleanup(func() { s.Shutdown() })
 	// Append a single revocation event so auto-sign logic is eligible.
 	ev := delegation.RevocationEvent{ID: "rev-test-1", DelegationID: "del1", Reason: string(delegation.RevocationReasonUserRequest)}
 	if _, err := s.revocationChain.Append(ev); err != nil {

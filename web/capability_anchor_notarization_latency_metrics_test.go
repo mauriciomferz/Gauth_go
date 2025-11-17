@@ -16,6 +16,7 @@ func TestCapabilityAnchorNotarizationLatencyHistogram(t *testing.T) {
 	// We don't rely on emission path; directly observe a latency via adapter method.
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth"})
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	srv.metrics = pm
 	// Simulate latency observation (e.g., 12ms) using type assertion.
 	if obs, ok := srv.metrics.(interface{ ObserveCapabilityAnchorNotarizationLatency(time.Duration) }); ok {

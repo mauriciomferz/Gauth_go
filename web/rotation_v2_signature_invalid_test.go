@@ -26,6 +26,7 @@ func TestRotationV2SignatureInvalid(t *testing.T) {
 	t.Setenv("GAUTH_ROTATIONS_V2_SIGN", "1")
 	t.Setenv("GAUTH_ROTATIONS_V2_AUTO_GEN", "1")
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	art, verifiedOriginal, _, failuresOriginal, err := srv.buildAndOptionallySignRotationV2()
 	if err != nil {
 		t.Fatalf("initial build error: %v", err)

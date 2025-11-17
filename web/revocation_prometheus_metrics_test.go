@@ -14,6 +14,7 @@ import (
 func TestRevocationAutoSignPrometheusMetrics(t *testing.T) {
 	t.Setenv("GAUTH_OTEL_METRICS_ENABLE", "0") // keep deterministic & fast
 	s := NewBetaServerWithMetrics(":0", imetrics.NewMemory())
+	t.Cleanup(func() { s.Shutdown() })
 	defer s.Shutdown()
 	// Ensure revocation chain exists
 	if s.revocationChain == nil {

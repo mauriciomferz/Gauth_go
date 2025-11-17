@@ -39,6 +39,7 @@ func TestRotationV2Endpoint(t *testing.T) {
 	}()
 
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Build test HTTP recorder
 	w1 := performRequest(srv.router, http.MethodGet, "/api/v1/rotation/summary/v2")
 	if w1.Code != 200 {

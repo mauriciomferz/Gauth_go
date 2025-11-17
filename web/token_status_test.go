@@ -20,6 +20,7 @@ func doPOST(t *testing.T, srv *BetaServer, path string, body string) *httptest.R
 
 func TestTokenStatusTransitions(t *testing.T) {
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	// 1. Create token
 	rrCreate := doPOST(t, srv, "/api/v1/token/create", `{"ttl_seconds":120}`)
 	if rrCreate.Code != 201 {

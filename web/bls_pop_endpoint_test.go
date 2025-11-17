@@ -17,6 +17,7 @@ func TestBLSPoPIssueAndVerify(t *testing.T) {
 	os.Setenv("GAUTH_ALLOW_POP_PRIV_EXPORT", "1")
 	mem := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics(":0", mem)
+	t.Cleanup(func() { srv.Shutdown() })
 	msgB64 := base64.StdEncoding.EncodeToString([]byte("pop flow"))
 	issueReq := map[string]interface{}{"mode": "issue", "message_b64": msgB64, "participants": 3, "require_pop": true}
 	ib, _ := json.Marshal(issueReq)
@@ -106,6 +107,7 @@ func TestBLSPoPFailure(t *testing.T) {
 	os.Setenv("GAUTH_ALLOW_POP_PRIV_EXPORT", "1")
 	mem := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics(":0", mem)
+	t.Cleanup(func() { srv.Shutdown() })
 	msgB64 := base64.StdEncoding.EncodeToString([]byte("pop fail"))
 	issueReq := map[string]interface{}{"mode": "issue", "message_b64": msgB64, "participants": 2, "require_pop": true}
 	ib, _ := json.Marshal(issueReq)
@@ -169,6 +171,7 @@ func TestBLSPoPFailure(t *testing.T) {
 func TestBLSPoPEdgeCases(t *testing.T) {
 	mem := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics(":0", mem)
+	t.Cleanup(func() { srv.Shutdown() })
 	// 1. Empty pairs
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/api/v1/crypto/bls/pop/verify", bytes.NewReader([]byte(`{"pairs":[]}`)))

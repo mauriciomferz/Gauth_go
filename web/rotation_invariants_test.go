@@ -63,6 +63,7 @@ func TestRotationSummary_ContinuityGap(t *testing.T) {
 	}
 	os.Setenv("GAUTH_ROTATION_LEDGER_PATH", ledgerPath)
 	s := NewBetaServer("")
+	t.Cleanup(func() { s.Shutdown() })
 	// Directly attach ledger to server (env path initialization not triggered in tests reliably)
 	led := notary.NewRotationLedger(ledgerPath)
 	if err := led.Load(); err != nil {
@@ -131,6 +132,7 @@ func TestRotationSummary_SignatureMissing(t *testing.T) {
 	}
 	cryptoInt.GlobalEdDSARegistry = m
 	s := NewBetaServer("")
+	t.Cleanup(func() { s.Shutdown() })
 	s.rotationLedger = led
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/beta/rotations/summary", http.NoBody)
@@ -185,6 +187,7 @@ func TestRotationSummary_SignatureValid(t *testing.T) {
 	}
 	cryptoInt.GlobalEdDSARegistry = m
 	s := NewBetaServer("")
+	t.Cleanup(func() { s.Shutdown() })
 	s.rotationLedger = led
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/beta/rotations/summary", http.NoBody)

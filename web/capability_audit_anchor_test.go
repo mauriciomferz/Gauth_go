@@ -12,6 +12,7 @@ func TestCapabilityAuditChainAnchoring(t *testing.T) {
 	t.Setenv("GAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
 	t.Setenv("GAUTH_CAP_AUDIT_PERSIST_PATH", t.TempDir()+"/cap_audit_tip.json")
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Produce at least one audit chained event
 	_ = doPost(srv, "/api/v1/delegation/create", map[string]any{"delegation_id": "a1", "subject": "alice", "delegate": "bob", "claims": map[string]any{"cap": []string{"cap.delegation.create"}}})
 	if srv.capAuditPrevHash == "" {

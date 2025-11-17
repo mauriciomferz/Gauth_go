@@ -11,6 +11,7 @@ func TestEdDSAPublicKeyEndpointDisabled(t *testing.T) {
 	// Some other package tests use os.Setenv without unset, so we defensively override here.
 	t.Setenv("GAUTH_TOKEN_SIG_MODE", "hmac")
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, "GET", "/api/v1/beta/keys/eddsa")
 	if w.Code != 200 {
 		t.Fatalf("status %d", w.Code)

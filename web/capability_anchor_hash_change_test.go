@@ -29,6 +29,7 @@ func TestCapabilityAnchorHashChange(t *testing.T) {
 	t.Setenv("GAUTH_DISABLE_BG_POLLS", "1")
 	t.Setenv("GAUTH_SKIP_SMOKETEST", "1")
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	_ = performRequest(srv.router, "POST", "/api/v1/beta/capabilities/reload")
 	mem, ok := srv.metrics.(*imetrics.Memory)
 	if !ok {

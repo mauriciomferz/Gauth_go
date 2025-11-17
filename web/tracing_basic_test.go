@@ -17,6 +17,7 @@ func TestTracingEnabledEmitsSpans(t *testing.T) {
 		os.Unsetenv("GAUTH_TRACING_SAMPLE_RATIO")
 	}()
 	srv := NewBetaServer("0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Token create
 	body := bytes.NewBufferString(`{"ttl_seconds":120}`)
 	w1 := httptest.NewRecorder()
@@ -61,6 +62,7 @@ func TestTracingDisabledNoSpans(t *testing.T) {
 	os.Unsetenv("GAUTH_OTEL_ENABLE")
 	os.Unsetenv("GAUTH_TRACING_SAMPLE_RATIO")
 	srv := NewBetaServer("0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Token create
 	body := bytes.NewBufferString(`{"ttl_seconds":60}`)
 	w1 := httptest.NewRecorder()
@@ -100,6 +102,7 @@ func TestTracingSampleRatioZeroEmitsSpans(t *testing.T) {
 		os.Unsetenv("GAUTH_TRACING_SAMPLE_RATIO")
 	}()
 	srv := NewBetaServer("0")
+	t.Cleanup(func() { srv.Shutdown() })
 	body := bytes.NewBufferString(`{"ttl_seconds":45}`)
 	w1 := httptest.NewRecorder()
 	srv.router.ServeHTTP(w1, httptest.NewRequest("POST", "/api/v1/token/create", body))
@@ -143,6 +146,7 @@ func TestTracingSampleRatioMidApproximatelySamples(t *testing.T) {
 		os.Unsetenv("GAUTH_TRACING_SAMPLE_RATIO")
 	}()
 	srv := NewBetaServer("0")
+	t.Cleanup(func() { srv.Shutdown() })
 	iterations := 40
 	for i := 0; i < iterations; i++ {
 		// create

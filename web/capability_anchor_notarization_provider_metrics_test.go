@@ -19,6 +19,7 @@ func TestCapabilityAnchorNotarizationProviderMetrics(t *testing.T) {
 	os.Setenv("GAUTH_NOTARY_STUB_MAX_LATENCY_MS", "2")
 	os.Setenv("GAUTH_NOTARY_STUB_FAIL_PROB", "0")
 	srv := NewBetaServer("0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Replace default memory metrics with Prometheus adapter to access provider-labeled methods.
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "cap_anchor"})
 	srv.metrics = pm

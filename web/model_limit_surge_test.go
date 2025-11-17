@@ -22,6 +22,7 @@ func TestModelLimitSurgeDetection(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMIT_SURGE_FACTOR", "1.0") // make threshold easier (last10 > avg*1)
 	os.Setenv("GAUTH_MODEL_LIMIT_SURGE_MIN_EVENTS", "3")
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	mem, ok := bs.metrics.(*imetrics.Memory)
 	if !ok {
 		t.Fatalf("expected memory metrics implementation")

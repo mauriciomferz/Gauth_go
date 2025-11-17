@@ -20,6 +20,7 @@ func TestModelLimitAuditChain(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMITS_PATH", limitsFile.Name())
 	os.Setenv("GAUTH_MODEL_LIMIT_AUDIT_PATH", auditFile.Name())
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	// exceed input
 	doAuditReq(bs, map[string]any{"model_id": "demo-model", "input_tokens": 50})
 	// exceed rate (first allowed, second exceeds)

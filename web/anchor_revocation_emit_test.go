@@ -23,6 +23,7 @@ func buildTestServerMinimal() *BetaServer {
 
 func TestRevocationAnchorEmit_EmptyChain(t *testing.T) {
 	s := buildTestServerMinimal()
+	t.Cleanup(func() { s.Shutdown() })
 	// Attach anchor client to avoid client_unavailable error, keep chain empty to trigger revocation_chain_empty
 	s.anchorClient = anchor.NewMemoryAnchor()
 	if len(s.revocationChain.Events()) != 0 {
@@ -44,6 +45,7 @@ func TestRevocationAnchorEmit_EmptyChain(t *testing.T) {
 
 func TestRevocationAnchorEmit_Success(t *testing.T) {
 	s := buildTestServerMinimal()
+	t.Cleanup(func() { s.Shutdown() })
 	// Populate chain with one event
 	ev := delegation.RevocationEvent{ID: "rev-1", DelegationID: "del-1", Reason: string(delegation.RevocationReasonUserRequest)}
 	if _, err := s.revocationChain.Append(ev); err != nil {
@@ -87,6 +89,7 @@ func TestRevocationAnchorEmit_Success(t *testing.T) {
 
 func TestRevocationAnchorEmit_NoAnchorClient(t *testing.T) {
 	s := buildTestServerMinimal()
+	t.Cleanup(func() { s.Shutdown() })
 	// Populate chain but do not set anchor client
 	ev := delegation.RevocationEvent{ID: "rev-2", DelegationID: "del-2", Reason: string(delegation.RevocationReasonUserRequest)}
 	_, _ = s.revocationChain.Append(ev)

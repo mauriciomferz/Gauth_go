@@ -48,6 +48,7 @@ func TestPolicyLifecycleIntegration(t *testing.T) {
 	defer os.Unsetenv("GAUTH_SEED_POLICY")
 
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 
 	// 1. provenance should be empty
 	var prov struct {

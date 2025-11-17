@@ -10,6 +10,7 @@ import (
 // TestPolicyHeadPolicies ensures the new endpoint returns the seeded policies.
 func TestPolicyHeadPolicies(t *testing.T) {
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	rec := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/beta/policy/head/policies", nil)
 	bs.router.ServeHTTP(rec, req)

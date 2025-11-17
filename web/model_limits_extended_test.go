@@ -23,6 +23,7 @@ func TestModelExtendedLimits(t *testing.T) {
 	f.Close()
 	os.Setenv("GAUTH_MODEL_LIMITS_PATH", f.Name())
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	// 1. Within all limits
 	resp := doModelReq(bs, map[string]any{"model_id": "demo-model", "input_tokens": 50, "output_tokens": 75})
 	if resp.Code != 200 {

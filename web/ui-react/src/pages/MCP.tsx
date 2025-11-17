@@ -261,20 +261,20 @@ export default function MCP() {
         <StatCard
           title="Total Servers"
           value={servers.length}
-          icon={Server}
-          gradient="from-blue-500 to-blue-600"
+          icon={<Server className="w-6 h-6" />}
+          gradient="linear-gradient(to right, rgb(59, 130, 246), rgb(37, 99, 235))"
         />
         <StatCard
           title="Connected"
           value={connectedCount}
-          icon={CheckCircle}
-          gradient="from-green-500 to-green-600"
+          icon={<CheckCircle className="w-6 h-6" />}
+          gradient="linear-gradient(to right, rgb(34, 197, 94), rgb(22, 163, 74))"
         />
         <StatCard
           title="Available Tools"
           value={tools.length}
-          icon={Wrench}
-          gradient="from-purple-500 to-purple-600"
+          icon={<Wrench className="w-6 h-6" />}
+          gradient="linear-gradient(to right, rgb(168, 85, 247), rgb(147, 51, 234))"
         />
       </div>
 

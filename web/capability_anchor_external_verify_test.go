@@ -10,6 +10,7 @@ import (
 func TestExternalAnchorVerifySuccess(t *testing.T) {
 	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Allow initial anchor
 	time.Sleep(30 * time.Millisecond)
 	rec := httptest.NewRecorder()
@@ -29,6 +30,7 @@ func TestExternalAnchorVerifyFailure(t *testing.T) {
 	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "tsa_stub")
 	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB", "1") // always fail
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Give stub time to attempt initial anchor (should fail) then request verify.
 	time.Sleep(40 * time.Millisecond)
 	rec := httptest.NewRecorder()

@@ -16,6 +16,7 @@ import (
 func TestBLSAggregateIssueAndVerify(t *testing.T) {
 	mem := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics(":0", mem)
+	t.Cleanup(func() { srv.Shutdown() })
 	msg := []byte("hello aggregated bls")
 	msgB64 := base64.StdEncoding.EncodeToString(msg)
 
@@ -115,6 +116,7 @@ func TestBLSAggregateIssueAndVerify(t *testing.T) {
 func TestBLSAggregateVerifyTamper(t *testing.T) {
 	mem := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics(":0", mem)
+	t.Cleanup(func() { srv.Shutdown() })
 	msgB64 := base64.StdEncoding.EncodeToString([]byte("tamper case"))
 	// Issue
 	ib, _ := json.Marshal(map[string]interface{}{"mode": "issue", "message_b64": msgB64, "participants": 3})
@@ -175,6 +177,7 @@ func TestBLSAggregateVerifyTamper(t *testing.T) {
 func TestBLSAggregateBadMode(t *testing.T) {
 	mem := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics(":0", mem)
+	t.Cleanup(func() { srv.Shutdown() })
 	msgB64 := base64.StdEncoding.EncodeToString([]byte("x"))
 	badReq := map[string]interface{}{"mode": "foo", "message_b64": msgB64, "participants": 1}
 	b, _ := json.Marshal(badReq)
@@ -190,6 +193,7 @@ func TestBLSAggregateBadMode(t *testing.T) {
 func TestBLSAggregateMissingMessage(t *testing.T) {
 	mem := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics(":0", mem)
+	t.Cleanup(func() { srv.Shutdown() })
 	badReq := map[string]interface{}{"mode": "issue", "participants": 2}
 	b, _ := json.Marshal(badReq)
 	w := httptest.NewRecorder()
@@ -204,6 +208,7 @@ func TestBLSAggregateMissingMessage(t *testing.T) {
 func TestBLSAggregateLatencyAdvances(t *testing.T) {
 	mem := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics(":0", mem)
+	t.Cleanup(func() { srv.Shutdown() })
 	msgB64 := base64.StdEncoding.EncodeToString([]byte("latency check"))
 	// issue
 	ib, _ := json.Marshal(map[string]interface{}{"mode": "issue", "message_b64": msgB64, "participants": 2})
@@ -243,6 +248,7 @@ func TestBLSAggregateLatencyAdvances(t *testing.T) {
 func TestBLSAggregatePublicKeyDecodeFailure(t *testing.T) {
 	mem := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics(":0", mem)
+	t.Cleanup(func() { srv.Shutdown() })
 	msgB64 := base64.StdEncoding.EncodeToString([]byte("decode fail"))
 	// Issue a valid aggregated signature with 2 participants to get a signature to reuse.
 	ib, _ := json.Marshal(map[string]interface{}{"mode": "issue", "message_b64": msgB64, "participants": 2})
@@ -277,6 +283,7 @@ func TestBLSAggregatePublicKeyDecodeFailure(t *testing.T) {
 func TestBLSAggregateAggregatedSignatureDecodeFailure(t *testing.T) {
 	mem := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics(":0", mem)
+	t.Cleanup(func() { srv.Shutdown() })
 	msgB64 := base64.StdEncoding.EncodeToString([]byte("sig decode fail"))
 	// Issue to obtain public keys (ignore signature returned; we'll replace with invalid string).
 	ib, _ := json.Marshal(map[string]interface{}{"mode": "issue", "message_b64": msgB64, "participants": 3})

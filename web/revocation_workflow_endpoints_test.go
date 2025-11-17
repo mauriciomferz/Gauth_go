@@ -30,6 +30,7 @@ func TestRevocationWorkflowEndpoints_CountQuorum(t *testing.T) {
 	t.Setenv("GAUTH_SEED_POLICY", "1")
 	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111"})
 	srv := NewBetaServerWithMetrics("", pm)
+	t.Cleanup(func() { srv.Shutdown() })
 	// Issue a PoA via underlying service directly (simplest path): we need service reference
 	svc, ok := srv.rfc0111Service.(*rfc0111.Service)
 	if !ok || svc == nil {
@@ -89,6 +90,7 @@ func TestRevocationWorkflowEndpoints_Unauthorized(t *testing.T) {
 	/*
 		pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111"})
 		srv := NewBetaServerWithMetrics("", pm)
+		t.Cleanup(func() { srv.Shutdown() })
 		poaID := "poa-test-unauthorized"
 
 		// Unauthorized initiation attempt by 'bob'

@@ -3400,6 +3400,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 	// Learning Lab endpoints for full button functionality
 	s.AddLearningLabEndpoints()
 
+	// P*P Architecture endpoints (PAP, PDP, PEP)
+	s.AddPPPEndpoints()
+
 	go func() {
 		ticker := time.NewTicker(30 * time.Second)
 		defer ticker.Stop()
@@ -4312,10 +4315,10 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 		nonce := randomNonce(16)
 		c.Set("csp-nonce", nonce)
 		c.Header("Content-Security-Policy", strings.Join([]string{
-			"default-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
-			"script-src 'self' 'nonce-" + nonce + "' 'unsafe-inline' 'unsafe-hashes' 'sha256-biFQTroSCI3Z5BmsMGyEE2jFZdwjjG1Oe7JLytgH6jM=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
-			"style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
-			"font-src 'self' https://cdnjs.cloudflare.com data:",
+			"default-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.redoc.ly https://unpkg.com",
+			"script-src 'self' 'nonce-" + nonce + "' 'unsafe-inline' 'unsafe-hashes' 'sha256-biFQTroSCI3Z5BmsMGyEE2jFZdwjjG1Oe7JLytgH6jM=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.redoc.ly https://unpkg.com",
+			"style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.redoc.ly https://unpkg.com",
+			"font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com data:",
 			"img-src 'self' data:",
 			"connect-src 'self'",
 			"frame-ancestors 'none'",
@@ -6017,10 +6020,19 @@ func (s *BetaServer) routes() {
 			time.Hour,       // default token TTL
 		)
 
+		// Get JWT signing key (same as used in token generation)
+		jwtSecret := os.Getenv("GAUTH_JWT_SECRET")
+		if jwtSecret == "" {
+			jwtSecret = devSecretDemo
+		}
+		
 		gauthService, err := gauth.New(
 			gauth.Config{
-				ClientID:     "rfc0111-demo",
-				ClientSecret: "demo-secret",
+				ClientID:          "rfc0111-demo",
+				ClientSecret:      "demo-secret",
+				SigningKey:        jwtSecret,
+				AuthServerURL:     os.Getenv("GAUTH_ISSUER"),
+				AccessTokenExpiry: 24 * time.Hour,
 			},
 			gauth.WithRFCCompliance(
 				rfc0111Components.SubscriptionStore,
@@ -6498,7 +6510,7 @@ func (s *BetaServer) routes() {
 
 	// Serve OpenAPI YAML (static). Loaded lazily to avoid startup dependency if file missing.
 	s.router.GET("/openapi.yaml", func(c *gin.Context) {
-		paths := []string{"docs/openapi.yaml", "./docs/openapi.yaml", "../docs/openapi.yaml"}
+		paths := []string{"docs/openapi/gauth-api.yaml", "./docs/openapi/gauth-api.yaml", "../docs/openapi/gauth-api.yaml"}
 		var data []byte
 		var err error
 		for _, p := range paths {
@@ -6522,7 +6534,7 @@ func (s *BetaServer) routes() {
 
 	// Serve OpenAPI as JSON (conversion attempt). If YAML parse fails, return raw text.
 	s.router.GET("/api/v1/openapi", func(c *gin.Context) {
-		paths := []string{"docs/openapi.yaml", "./docs/openapi.yaml", "../docs/openapi.yaml"}
+		paths := []string{"docs/openapi/gauth-api.yaml", "./docs/openapi/gauth-api.yaml", "../docs/openapi/gauth-api.yaml"}
 		var data []byte
 		var err error
 		for _, p := range paths {
@@ -6541,13 +6553,18 @@ func (s *BetaServer) routes() {
 			c.JSON(200, gin.H{"raw": string(data), "warning": "yaml_unmarshal_failed"})
 			return
 		}
-		etag := fmt.Sprintf("W/\"%x\"", sha256.Sum256(data))
+		jsonData, err := json.Marshal(anyDoc)
+		if err != nil {
+			c.JSON(500, gin.H{"error": "json_marshal_failed", "message": err.Error()})
+			return
+		}
+		etag := fmt.Sprintf("W/\"%x\"", sha256.Sum256(jsonData))
 		c.Header("ETag", etag)
 		if inm := c.GetHeader("If-None-Match"); inm != "" && inm == etag {
 			c.Status(304)
 			return
 		}
-		c.JSON(200, anyDoc)
+		c.Data(200, "application/json", jsonData)
 	})
 
 	// Serve governance fragment (YAML)
@@ -7608,6 +7625,27 @@ func (s *BetaServer) routes() {
 		c.String(500, "error determining working directory")
 	})
 
+	// Serve gauth1.html at /ui/ path as well
+	s.router.GET("/ui/gauth1.html", func(c *gin.Context) {
+		if wd, err := os.Getwd(); err == nil {
+			path := wd + "/web/static_ui/gauth1.html"
+			if b, err := os.ReadFile(path); err == nil {
+				c.Header("Content-Type", "text/html")
+				c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+				if os.Getenv("GAUTH_DEV_INDEX") == "1" {
+					fmt.Fprintf(os.Stderr, "[debug] serving disk gauth1.html at /ui/ (%d bytes)\n", len(b))
+				}
+				c.Data(200, "text/html; charset=utf-8", b)
+				return
+			} else {
+				fmt.Fprintf(os.Stderr, "[debug] disk gauth1.html at /ui/ read failed: %v\n", err)
+				c.String(404, "gauth1.html not found")
+				return
+			}
+		}
+		c.String(500, "error determining working directory")
+	})
+
 	// Serve gauth1.css
 	s.router.GET("/ui/gauth1.css", func(c *gin.Context) {
 		if wd, err := os.Getwd(); err == nil {
@@ -7643,6 +7681,153 @@ func (s *BetaServer) routes() {
 		}
 		c.String(500, "error determining working directory")
 	})
+
+	// Serve OpenAPI specification
+	if !s.routeRegistered("/api/openapi/gauth.yaml") {
+		s.router.GET("/api/openapi/gauth.yaml", func(c *gin.Context) {
+			if wd, err := os.Getwd(); err == nil {
+				path := wd + "/api/openapi/gauth.yaml"
+				if b, err := os.ReadFile(path); err == nil {
+					c.Header("Content-Type", "application/x-yaml")
+					c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+					c.Data(200, "application/x-yaml", b)
+					return
+				} else {
+					fmt.Fprintf(os.Stderr, "[debug] OpenAPI spec read failed: %v\n", err)
+					c.String(404, "OpenAPI specification not found")
+					return
+				}
+			}
+			c.String(500, "error determining working directory")
+		})
+	}
+
+	// Serve Swagger UI for API documentation
+	if !s.routeRegistered("/api/docs") {
+		s.router.GET("/api/docs", func(c *gin.Context) {
+		html := `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAuth API Documentation - RFC-0150 Authorization Framework</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        .topbar {
+            display: none;
+        }
+        .swagger-ui .info .title {
+            font-size: 2.5em;
+        }
+    </style>
+</head>
+<body>
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = function() {
+            window.ui = SwaggerUIBundle({
+                url: '/api/openapi/gauth.yaml',
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                defaultModelsExpandDepth: 1,
+                defaultModelExpandDepth: 1,
+                docExpansion: "list",
+                filter: true,
+                tryItOutEnabled: true,
+                persistAuthorization: true
+            });
+        };
+    </script>
+</body>
+</html>`
+			c.Header("Content-Type", "text/html; charset=utf-8")
+			c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+			c.String(200, html)
+		})
+	}
+
+	// Serve Swagger UI at /api/docs/swagger
+	if !s.routeRegistered("/api/docs/swagger") {
+		s.router.GET("/api/docs/swagger", func(c *gin.Context) {
+			html := `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAuth API - Swagger UI</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui.css" />
+    <style>
+        body { margin: 0; padding: 0; }
+        .topbar { display: none; }
+    </style>
+</head>
+<body>
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = function() {
+            SwaggerUIBundle({
+                url: '/api/openapi/gauth.yaml',
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+                plugins: [SwaggerUIBundle.plugins.DownloadUrl],
+                layout: "StandaloneLayout",
+                defaultModelsExpandDepth: 1,
+                docExpansion: "list",
+                filter: true,
+                tryItOutEnabled: true,
+                persistAuthorization: true
+            });
+        };
+    </script>
+</body>
+</html>`
+			c.Header("Content-Type", "text/html; charset=utf-8")
+			c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+			c.String(200, html)
+		})
+	}
+
+	// Serve ReDoc at /api/docs/redoc
+	if !s.routeRegistered("/api/docs/redoc") {
+		s.router.GET("/api/docs/redoc", func(c *gin.Context) {
+			html := `<!DOCTYPE html>
+<html>
+<head>
+    <title>GAuth API - ReDoc</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; }
+    </style>
+</head>
+<body>
+    <redoc spec-url='/api/openapi/gauth.yaml'></redoc>
+    <script src="https://cdn.jsdelivr.net/npm/redoc@latest/bundles/redoc.standalone.js"></script>
+</body>
+</html>`
+			c.Header("Content-Type", "text/html; charset=utf-8")
+			c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+			c.String(200, html)
+		})
+	}
 
 	// Serve demo.html (comprehensive feature demonstration)
 	s.router.GET("/demo.html", func(c *gin.Context) {

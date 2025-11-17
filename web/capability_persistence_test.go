@@ -27,6 +27,7 @@ func TestCapabilityPersistenceAndReload(t *testing.T) {
 	}
 	t.Setenv("GAUTH_CAPABILITIES_PATH", tmp.Name())
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 
 	// Discovery should show source = file and capabilities from file
 	resp := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
@@ -123,6 +124,7 @@ func TestCapabilityRegistryHashPreservedOnFailedReload(t *testing.T) {
 	tmp.Close()
 	t.Setenv("GAUTH_CAPABILITIES_PATH", tmp.Name())
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	d1 := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
 	if d1.Code != 200 {
 		t.Fatalf("discovery status=%d", d1.Code)
@@ -175,6 +177,7 @@ func TestCapabilityRegistryHashDeterminism(t *testing.T) {
 	tmp1.Close()
 	t.Setenv("GAUTH_CAPABILITIES_PATH", tmp1.Name())
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	dA := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
 	if dA.Code != 200 {
 		t.Fatalf("status %d", dA.Code)

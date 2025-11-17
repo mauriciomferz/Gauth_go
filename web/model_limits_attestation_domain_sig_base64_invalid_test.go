@@ -20,6 +20,7 @@ func TestModelLimitsAttestationDomainSignatureBase64Invalid(t *testing.T) {
 	lf.Close()
 	t.Setenv("GAUTH_MODEL_LIMITS_PATH", lf.Name())
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, "/api/v1/model/limits/attestation", nil)
 	srv.router.ServeHTTP(w, req)

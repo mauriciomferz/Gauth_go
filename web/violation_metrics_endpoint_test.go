@@ -9,6 +9,7 @@ import (
 // TestViolationMetricsEndpoint verifies the JSON structure of /api/v1/beta/metrics/violations.
 func TestViolationMetricsEndpoint(t *testing.T) {
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Exercise some token validation failure paths indirectly by calling /api/v1/token/validate with malformed payloads.
 	// (Will increment missing_claim due to empty token value.)
 	for i := 0; i < 3; i++ {

@@ -13,6 +13,7 @@ import (
 func TestLegacyAliasTelemetry(t *testing.T) {
 	testutil.WithEnv(t, "GAUTH_DISABLE_LEGACY_GOVERNANCE_ALIAS", "", func() {
 		srv := NewBetaServer("")
+		t.Cleanup(func() { srv.Shutdown() })
 		// Baseline metrics
 		m1 := httptest.NewRecorder()
 		req1, _ := http.NewRequest("GET", "/api/v1/beta/metrics/lifecycle", nil)

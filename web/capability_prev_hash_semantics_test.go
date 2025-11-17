@@ -25,6 +25,7 @@ func TestCapabilityRegistryPrevHashPermutationSemantics(t *testing.T) {
 	}
 	t.Setenv("GAUTH_CAPABILITIES_PATH", tmp.Name())
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 
 	// Initial discovery
 	d1 := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")

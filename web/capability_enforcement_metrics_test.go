@@ -25,6 +25,7 @@ func TestCapabilityEnforcementMetrics(t *testing.T) {
 	t.Setenv("GAUTH_CAPABILITY_ENFORCE", "1")
 	mem := imetrics.NewMemory()
 	bs := NewBetaServerWithMetrics("", mem)
+	t.Cleanup(func() { bs.Shutdown() })
 	// Denied create (missing capability)
 	resp := doPostMetrics(bs, "/api/v1/delegation/create", map[string]any{"delegation_id": "c1", "subject": "s1", "delegate": "dlt"})
 	if resp.Code != 403 {

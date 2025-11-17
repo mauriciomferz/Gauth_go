@@ -11,6 +11,7 @@ import (
 func TestSemanticRatesPrometheus(t *testing.T) {
 	os.Setenv("GAUTH_SEMANTIC_PERSIST_PATH", "") // disable persistence interference
 	srv := NewBetaServer("8123")
+	t.Cleanup(func() { srv.Shutdown() })
 	if srv.rfc0111Service == nil {
 		t.Fatalf("RFC0111 service not initialized; GAUTH_DISABLE_RFC0111_SERVICE should not be set")
 	}

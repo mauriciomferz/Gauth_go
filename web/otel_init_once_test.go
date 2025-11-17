@@ -24,7 +24,9 @@ func TestOTELInitOnce(t *testing.T) {
 
 	// Construct two servers (minimal) then shutdown
 	s1 := NewBetaServerWithMetrics(":0", metrics.NewMemory())
+	t.Cleanup(func() { s1.Shutdown() })
 	s2 := NewBetaServerWithMetrics(":0", metrics.NewMemory())
+	t.Cleanup(func() { s2.Shutdown() })
 
 	s1.Shutdown()
 	s2.Shutdown()

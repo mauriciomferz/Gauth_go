@@ -21,6 +21,7 @@ func doGET(t *testing.T, srv *BetaServer, path string) *httptest.ResponseRecorde
 // and are exposed via /api/v1/beta/metrics/lifecycle.
 func TestLifecycleMetricsEndpoint(t *testing.T) {
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Create token
 	rrCreate := httptest.NewRecorder()
 	reqCreate := httptest.NewRequest(http.MethodPost, "/api/v1/token/create", nil)

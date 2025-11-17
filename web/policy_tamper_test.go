@@ -13,6 +13,7 @@ func TestPolicyProvenanceTamperDetection(t *testing.T) {
 	os.Setenv("GAUTH_POLICY_ADMIN_TOKEN", "adm")
 	defer os.Unsetenv("GAUTH_POLICY_ADMIN_TOKEN")
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 
 	// helper to POST bundle
 	post := func(body string, want int) {

@@ -14,6 +14,7 @@ func TestTSAAnchorAndVerify(t *testing.T) {
 	t.Setenv("GAUTH_TSA_ENDPOINTS_ENABLE", "1")
 	// Need capability registry hash to validate verify path; server seeds static hash when no file.
 	s := NewBetaServer("")
+	t.Cleanup(func() { s.Shutdown() })
 	// Submit anchor
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/api/v1/beta/tsa/anchor", bytesJSON(map[string]string{"hash": "demo-hash-value"}))

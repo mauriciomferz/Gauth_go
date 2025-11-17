@@ -138,6 +138,9 @@ export default function Overview() {
               'PVP (Identity Verification)',
               'Commercial Register',
               'PIP (Policy Info Point)',
+              'PAP (Policy Administration)',
+              'PDP (Policy Decision)',
+              'PEP (Policy Enforcement)',
               'PoA (Power of Attorney)',
             ].map((component) => (
               <div
@@ -175,6 +178,18 @@ export default function Overview() {
             </li>
             <li className="flex gap-2">
               <span className="font-semibold text-primary-500">5.</span>
+              Create and manage policies with <strong>PAP</strong>
+            </li>
+            <li className="flex gap-2">
+              <span className="font-semibold text-primary-500">6.</span>
+              Make authorization decisions with <strong>PDP</strong>
+            </li>
+            <li className="flex gap-2">
+              <span className="font-semibold text-primary-500">7.</span>
+              Enforce authorization using <strong>PEP</strong>
+            </li>
+            <li className="flex gap-2">
+              <span className="font-semibold text-primary-500">8.</span>
               Manage <strong>PoA</strong> delegations and permissions
             </li>
           </ol>

@@ -17,6 +17,7 @@ import (
 func TestVerificationPackageEndToEnd(t *testing.T) {
 	os.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
 	s := NewBetaServer("")
+	t.Cleanup(func() { s.Shutdown() })
 	km, err := crypto.NewManager(time.Hour)
 	if err != nil {
 		t.Fatalf("km init: %v", err)

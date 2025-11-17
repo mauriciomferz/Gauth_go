@@ -22,6 +22,7 @@ func TestExternalAnchorMetricsFailureStrict(t *testing.T) {
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111", Registry: reg})
 	// Construct server with provided metrics adapter so initial attempted (and failing) anchor uses Prometheus.
 	srv := NewBetaServerWithMetrics(":0", pm)
+	t.Cleanup(func() { srv.Shutdown() })
 	// Sleep briefly to allow initial attempted (and failing) anchor using normalized provider label.
 	time.Sleep(40 * time.Millisecond)
 	// Status endpoint should NOT include external_anchor_receipt since provider always fails.

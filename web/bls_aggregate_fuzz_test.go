@@ -23,6 +23,7 @@ func FuzzBLSAggregateEndpoint(f *testing.F) {
 	f.Fuzz(func(t *testing.T, raw string) {
 		mem := imetrics.NewMemory()
 		srv := NewBetaServerWithMetrics(":0", mem)
+		t.Cleanup(func() { srv.Shutdown() })
 		// Randomly decide small mutations if input looks like JSON.
 		if len(raw) > 2048 {
 			raw = raw[:2048]

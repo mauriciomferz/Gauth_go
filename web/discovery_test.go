@@ -9,6 +9,7 @@ import (
 
 func TestWellKnownDiscovery(t *testing.T) {
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Build request
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/.well-known/gauth-configuration", nil)
@@ -49,6 +50,7 @@ func TestDiscoveryExactKeys(t *testing.T) {
 	os.Unsetenv("GAUTH_USE_JWT_LIB")
 	os.Setenv("GAUTH_TOKEN_SIG_MODE", "hmac") // force legacy HMAC to ensure JWKS suppression
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
 	if w.Code != 200 {
 		t.Fatalf("status %d", w.Code)
@@ -74,6 +76,7 @@ func TestDiscoveryExactKeys(t *testing.T) {
 	os.Setenv("GAUTH_USE_JWT_LIB", "1")
 	os.Setenv("GAUTH_JWT_KID", "demo-key")
 	srv2 := NewBetaServer(":0")
+	t.Cleanup(func() { srv2.Shutdown() })
 	w2 := performRequest(srv2.router, "GET", "/.well-known/gauth-configuration")
 	var body2 map[string]any
 	if err := json.Unmarshal(w2.Body.Bytes(), &body2); err != nil {
@@ -87,6 +90,7 @@ func TestDiscoveryExactKeys(t *testing.T) {
 	os.Unsetenv("GAUTH_USE_JWT_LIB")
 	os.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
 	srv3 := NewBetaServer(":0")
+	t.Cleanup(func() { srv3.Shutdown() })
 	w3 := performRequest(srv3.router, "GET", "/.well-known/gauth-configuration")
 	var body3 map[string]any
 	if err := json.Unmarshal(w3.Body.Bytes(), &body3); err != nil {
@@ -101,6 +105,7 @@ func TestDiscoveryExactKeys(t *testing.T) {
 func TestDiscoveryAnchoringFields(t *testing.T) {
 	os.Setenv("GAUTH_ANCHOR_PROVIDER", "memory")
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
 	if w.Code != 200 {
 		t.Fatalf("status %d", w.Code)
@@ -128,6 +133,7 @@ func TestDiscoveryMultiSigWeights(t *testing.T) {
 	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "5")
 	os.Setenv("GAUTH_MULTI_SIG_WEIGHTS", "signerA=3,signerB=2")
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
 	if w.Code != 200 {
 		t.Fatalf("status %d", w.Code)
@@ -153,6 +159,7 @@ func TestDiscoveryMultiSigWeightsInvalid(t *testing.T) {
 	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "5")
 	os.Setenv("GAUTH_MULTI_SIG_WEIGHTS", "signerA=2,signerB=2") // total 4 < threshold 5
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
 	var body map[string]any
 	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {

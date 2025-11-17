@@ -20,6 +20,7 @@ func TestCapabilityAnchorEmissionMetrics(t *testing.T) {
 	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "5ms")
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111"})
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Enable anchoring endpoints
 	t.Setenv("GAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
 	t.Setenv("GAUTH_ANCHOR_PROVIDER", "memory")

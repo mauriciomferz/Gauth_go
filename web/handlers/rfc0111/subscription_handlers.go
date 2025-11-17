@@ -12,10 +12,13 @@ package rfc0111
 
 import (
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // SubscriptionHandlers encapsulates RFC-0111 subscription API handlers.
@@ -539,10 +542,97 @@ func (h *SubscriptionHandlers) ExecuteStepVIII(c *gin.Context) {
 		return
 	}
 
+	// Get the completed subscription to generate token
+	subscription, err := h.subscriptionManager.GetSubscriptionStatus(c.Request.Context(), subscriptionID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "token_generation_failed",
+			"message": "Failed to retrieve subscription details",
+		})
+		return
+	}
+
+	// Generate extended token JWT
+	token, err := generateExtendedTokenFromSubscription(subscription)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "token_generation_failed",
+			"message": err.Error(),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"subscription_id": subscriptionID,
 		"step":            "VIII",
 		"status":          "completed",
 		"message":         "Subscription flow complete - all steps verified",
+		"token":           token,
+		"access_token":    token,
 	})
+}
+
+// Helper function to generate extended token from completed subscription
+func generateExtendedTokenFromSubscription(sub *gauth.Subscription) (string, error) {
+	now := time.Now()
+	exp := now.Add(24 * time.Hour) // Token valid for 24 hours
+	
+	// Extract client and resource information
+	var clientID, clientOwnerID, resourceOwnerID, resourceServerID string
+	if sub.ClientAuthorizationGrant != nil {
+		clientID = sub.ClientAuthorizationGrant.ClientID
+		clientOwnerID = sub.ClientAuthorizationGrant.ClientOwnerID
+	}
+	if sub.ResourceOwnerIdentity != nil {
+		resourceOwnerID = sub.ResourceOwnerIdentity.SubjectID
+	}
+	if sub.ResourceServerAuth != nil {
+		resourceServerID = sub.ResourceServerAuth.ServerID
+	}
+	
+	// Get issuer from environment (matches gauth service configuration)
+	issuer := os.Getenv("GAUTH_ISSUER")
+	if issuer == "" {
+		issuer = "http://localhost:8080" // Default for dev
+	}
+	
+	// Build RFC-0111 extended token claims
+	claims := jwt.MapClaims{
+		"iss": issuer,
+		"sub": clientOwnerID,
+		"aud": []string{resourceServerID},
+		"exp": exp.Unix(),
+		"iat": now.Unix(),
+		"jti": sub.ID,
+		"subscription_id": sub.ID,
+		"client_id": clientID,
+		"client_owner": clientOwnerID,
+		"resource_owner": resourceOwnerID,
+		"resource_server": resourceServerID,
+		"scope": "extended_authorization",
+		"poa_credential": sub.ClientAuthorizationGrant != nil && sub.ClientAuthorizationGrant.PoACredential != nil,
+		"token_type": "extended",
+	}
+	
+	// Use the same signing key as the rest of the application
+	// This ensures tokens can be validated consistently
+	signingKey := getJWTSigningKey()
+	
+	// Create and sign JWT
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(signingKey)
+	if err != nil {
+		return "", err
+	}
+	
+	return tokenString, nil
+}
+
+// getJWTSigningKey returns the JWT signing key from environment or default
+func getJWTSigningKey() []byte {
+	secret := os.Getenv("GAUTH_JWT_SECRET")
+	if secret == "" {
+		secret = "dev-secret-demo-00000000000000000000000000000000"
+	}
+	return []byte(secret)
 }

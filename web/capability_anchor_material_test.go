@@ -30,6 +30,7 @@ func TestCapabilityAnchorMaterial(t *testing.T) {
 	}
 	t.Setenv("GAUTH_CAPABILITIES_PATH", capFile)
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Anchor artifact might emit only after file load; perform explicit reload to ensure loader executed (idempotent)
 	_ = performRequest(srv.router, "POST", "/api/v1/beta/capabilities/reload")
 	b, err := os.ReadFile(tmp.Name())

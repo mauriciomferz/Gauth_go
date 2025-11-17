@@ -38,6 +38,7 @@ func TestCapabilityAnchorPrometheusGauge(t *testing.T) {
 	reg := prom.NewRegistry()
 	// Create server; then swap metrics to Prometheus adapter for test.
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Replace metrics with Prometheus implementation.
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Registry: reg, Namespace: "gauth", Subsystem: "rfc0111"})
 	srv.metrics = pm

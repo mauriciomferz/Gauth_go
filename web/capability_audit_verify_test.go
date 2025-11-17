@@ -13,6 +13,7 @@ func TestCapabilityAuditVerifyConfigured(t *testing.T) {
 	tempPath := t.TempDir() + "/cap_audit_tip.json"
 	t.Setenv("GAUTH_CAP_AUDIT_PERSIST_PATH", tempPath) // (future env if wired) fallback: we manually set field after server init
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Trigger a delegation create to produce chain tip
 	_ = doPost(srv, "/api/v1/delegation/create", map[string]any{"delegation_id": "ver1", "subject": "alice", "delegate": "bob", "claims": map[string]any{"cap": []string{"cap.delegation.create"}}})
 	resp := performRequest(srv.router, "GET", "/api/v1/beta/capabilities/audit/verify")
@@ -47,6 +48,7 @@ func TestCapabilityAuditVerifyConfigured(t *testing.T) {
 // TestCapabilityAuditVerifyUnconfigured returns configured=false when no path set.
 func TestCapabilityAuditVerifyUnconfigured(t *testing.T) {
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	resp := performRequest(srv.router, "GET", "/api/v1/beta/capabilities/audit/verify")
 	if resp.Code != 200 {
 		t.Fatalf("expected 200 verify got %d", resp.Code)

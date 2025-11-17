@@ -14,6 +14,7 @@ func TestExternalAnchorPrometheusMetrics(t *testing.T) {
 	// Initialize Prometheus adapter (registers metrics in default registry).
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111"})
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	srv.metrics = pm
 	// Allow initial anchor attempt and background age update.
 	time.Sleep(60 * time.Millisecond)

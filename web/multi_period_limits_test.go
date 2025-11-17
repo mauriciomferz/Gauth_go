@@ -28,6 +28,7 @@ func TestMultiPeriodRateLimits(t *testing.T) {
 	defer os.Unsetenv("GAUTH_MODEL_LIMITS_PATH")
 
 	s := NewBetaServer("0")
+	t.Cleanup(func() { s.Shutdown() })
 	s.loadModelLimitsFromDisk()
 
 	// Send 11 requests within 1 minute - should hit per-minute limit
@@ -79,6 +80,7 @@ func TestMultiPeriodHourlyLimit(t *testing.T) {
 	defer os.Unsetenv("GAUTH_MODEL_LIMITS_PATH")
 
 	s := NewBetaServer("0")
+	t.Cleanup(func() { s.Shutdown() })
 	s.loadModelLimitsFromDisk()
 
 	// Send 16 requests - should hit hourly limit before minute limit
@@ -126,6 +128,7 @@ func TestMultiPeriodDailyLimit(t *testing.T) {
 	defer os.Unsetenv("GAUTH_MODEL_LIMITS_PATH")
 
 	s := NewBetaServer("0")
+	t.Cleanup(func() { s.Shutdown() })
 	s.loadModelLimitsFromDisk()
 
 	// Verify extended limits parsed correctly
@@ -165,6 +168,7 @@ func TestBackwardCompatibilityPerMinute(t *testing.T) {
 	defer os.Unsetenv("GAUTH_MODEL_LIMITS_PATH")
 
 	s := NewBetaServer("0")
+	t.Cleanup(func() { s.Shutdown() })
 	s.loadModelLimitsFromDisk()
 
 	// Send 6 requests - should hit legacy limit
@@ -209,6 +213,7 @@ func TestBothLegacyAndExtended(t *testing.T) {
 	defer os.Unsetenv("GAUTH_MODEL_LIMITS_PATH")
 
 	s := NewBetaServer("0")
+	t.Cleanup(func() { s.Shutdown() })
 	s.loadModelLimitsFromDisk()
 
 	// Send 6 requests - should hit legacy per-minute limit first
@@ -254,6 +259,7 @@ func TestPeriodRollover(t *testing.T) {
 	defer os.Unsetenv("GAUTH_MODEL_LIMITS_PATH")
 
 	s := NewBetaServer("0")
+	t.Cleanup(func() { s.Shutdown() })
 	s.loadModelLimitsFromDisk()
 
 	// Send 3 requests - should succeed
@@ -312,6 +318,7 @@ func TestInvalidRateLimitFormat(t *testing.T) {
 	defer os.Unsetenv("GAUTH_MODEL_LIMITS_PATH")
 
 	s := NewBetaServer("0")
+	t.Cleanup(func() { s.Shutdown() })
 
 	// Capture stderr to verify error logging
 	oldStderr := os.Stderr

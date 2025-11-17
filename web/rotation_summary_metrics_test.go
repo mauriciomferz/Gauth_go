@@ -28,6 +28,7 @@ func TestRotationSummaryMetrics(t *testing.T) {
 		cryptoInt.GlobalEdDSARegistry = m
 	}
 	srv := NewBetaServer("0")
+	t.Cleanup(func() { srv.Shutdown() })
 	led, ok := srv.rotationLedger.(*notary.RotationLedger)
 	if !ok {
 		t.Fatalf("ledger type assertion failed")

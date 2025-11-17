@@ -30,6 +30,7 @@ type timelineEvent struct {
 // TestLifecycleTimelineBasic exercises initialization, noop and status_change events for token and delegation flows.
 func TestLifecycleTimelineBasic(t *testing.T) {
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 
 	// 1. Initialize a delegation and token status transitions to populate events
 	// Delegation init

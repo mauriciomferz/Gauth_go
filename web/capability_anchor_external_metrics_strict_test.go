@@ -19,6 +19,7 @@ func TestExternalAnchorMetricsStrict(t *testing.T) {
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111", Registry: reg})
 	// Use metrics-aware constructor so startup external anchoring attempt records directly into Prometheus.
 	srv := NewBetaServerWithMetrics(":0", pm)
+	t.Cleanup(func() { srv.Shutdown() })
 	// Allow initial anchor attempt
 	time.Sleep(50 * time.Millisecond)
 	// Issue an additional latency observation to ensure histogram bucket increments beyond startup attempt.

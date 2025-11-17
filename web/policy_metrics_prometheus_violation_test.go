@@ -11,6 +11,7 @@ import (
 // TestPolicyMetricsPrometheusViolationCounters ensures violation counters lines are present.
 func TestPolicyMetricsPrometheusViolationCounters(t *testing.T) {
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Trigger some increments: evaluate unsupported policy action to produce unauthorized
 	// For simplicity we directly touch the metrics if available
 	if mm, ok := srv.metrics.(*imetrics.Memory); ok {

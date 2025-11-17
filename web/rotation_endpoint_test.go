@@ -22,6 +22,7 @@ func TestRotationsVerificationEndpoint(t *testing.T) {
 	os.Setenv("GAUTH_NOTARY_RECEIPT_PERSIST_PATH", path)
 	// Initialize server (will load empty store)
 	srv := NewBetaServer("0")
+	t.Cleanup(func() { srv.Shutdown() })
 	if srv == nil {
 		t.Fatalf("server init failed")
 	}

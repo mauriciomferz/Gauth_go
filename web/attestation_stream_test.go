@@ -22,6 +22,7 @@ func TestAttestationStreamInitial(t *testing.T) {
 	_ = auditFile.Close()
 	os.Setenv("GAUTH_MODEL_LIMIT_AUDIT_PATH", auditFile.Name())
 	ts := NewBetaServer("0")
+	t.Cleanup(func() { ts.Shutdown() })
 	live := httptest.NewServer(ts.router)
 	defer live.Close()
 	client := live.Client()

@@ -16,6 +16,7 @@ func TestCapabilityAnchorNotaryProviderSelection(t *testing.T) {
 	os.Setenv("GAUTH_NOTARY_STUB_FAIL_PROB", "0") // deterministic success
 
 	srv := NewBetaServer("0")
+	t.Cleanup(func() { srv.Shutdown() })
 	if srv.notarizer == nil {
 		t.Fatalf("expected notarizer to be initialized")
 	}

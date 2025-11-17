@@ -21,6 +21,7 @@ func TestModelLimitsDynamicReload(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMITS_PATH", tmp.Name())
 	os.Setenv("GAUTH_MODEL_LIMITS_RELOAD_INTERVAL", "1") // poll every second
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	// Initial request within 400 tokens allowed (limit 500)
 	if r := doModelReq(bs, map[string]any{"model_id": "reload-model", "input_tokens": 400}); r.Code != 200 {
 		t.Fatalf("expected initial allow got %d body=%s", r.Code, r.Body.String())

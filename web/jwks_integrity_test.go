@@ -15,6 +15,7 @@ func TestJWKSDiscoveryMetadata(t *testing.T) {
 	os.Setenv("GAUTH_USE_JWT_LIB", "1")
 	os.Setenv("GAUTH_JWT_ALG", "RS256")
 	s := NewBetaServer("0")
+	t.Cleanup(func() { s.Shutdown() })
 	// First fetch JWKS to initialize metadata
 	w1 := httptest.NewRecorder()
 	req1 := httptest.NewRequest("GET", "/.well-known/jwks.json", nil)
@@ -53,6 +54,7 @@ func TestJWKSConditionalETag(t *testing.T) {
 	os.Setenv("GAUTH_USE_JWT_LIB", "1")
 	os.Setenv("GAUTH_JWT_ALG", "RS256")
 	s := NewBetaServer("0")
+	t.Cleanup(func() { s.Shutdown() })
 	w1 := httptest.NewRecorder()
 	req1 := httptest.NewRequest("GET", "/.well-known/jwks.json", nil)
 	s.router.ServeHTTP(w1, req1)
@@ -79,6 +81,7 @@ func TestJWKSOptionalSignature(t *testing.T) {
 	os.Setenv("GAUTH_JWT_ALG", "RS256")
 	// Disabled path
 	s := NewBetaServer("0")
+	t.Cleanup(func() { s.Shutdown() })
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/.well-known/jwks.json", nil)
 	s.router.ServeHTTP(w, req)
@@ -89,6 +92,7 @@ func TestJWKSOptionalSignature(t *testing.T) {
 	os.Setenv("GAUTH_JWKS_SIGNING_KEY", "jwks-demo-secret")
 	os.Setenv("GAUTH_JWKS_SIGNING_KEY_ENABLED", "1")
 	s2 := NewBetaServer("0")
+	t.Cleanup(func() { s2.Shutdown() })
 	w2 := httptest.NewRecorder()
 	req2 := httptest.NewRequest("GET", "/.well-known/jwks.json", nil)
 	s2.router.ServeHTTP(w2, req2)
@@ -111,6 +115,7 @@ func TestJWKSDeprecationMetadata(t *testing.T) {
 	defer os.Unsetenv("GAUTH_EDDSA_AUTO_ROTATE")
 	// Create server first (initializes crypto manager with 24h TTL)
 	s := NewBetaServer("0")
+	t.Cleanup(func() { s.Shutdown() })
 	// Replace with short-TTL manager to trigger deprecation
 	ttl := 10 * time.Second
 	km, err := crypto.NewManager(ttl)
@@ -166,6 +171,7 @@ func TestJWKSDeprecationWarningHeader(t *testing.T) {
 	defer os.Unsetenv("GAUTH_EDDSA_AUTO_ROTATE")
 	// Create server first
 	s := NewBetaServer("0")
+	t.Cleanup(func() { s.Shutdown() })
 	// Replace with short-TTL manager
 	ttl := 10 * time.Second
 	km, err := crypto.NewManager(ttl)
@@ -211,6 +217,7 @@ func TestJWKSNoWarningWhenNoDeprecation(t *testing.T) {
 	}
 	crypto.GlobalEdDSARegistry = km
 	s := NewBetaServer("0")
+	t.Cleanup(func() { s.Shutdown() })
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/.well-known/jwks.json", nil)
 	s.router.ServeHTTP(w, req)

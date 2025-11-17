@@ -22,6 +22,7 @@ func FuzzModelLimitAuditChain(f *testing.F) {
 		auditFile.Close()
 		os.Setenv("GAUTH_MODEL_LIMIT_AUDIT_PATH", auditFile.Name())
 		bs := NewBetaServer("")
+		t.Cleanup(func() { bs.Shutdown() })
 		// Feed events: interpret bytes as triplets (kind selector, provided, limit)
 		for i := 0; i+2 < len(data); i += 3 {
 			kindByte := data[i] % 3

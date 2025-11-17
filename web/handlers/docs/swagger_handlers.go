@@ -23,10 +23,15 @@ func SwaggerUIHandler(c *gin.Context) {
 		scheme = "https"
 	}
 	host := c.Request.Host
-	specURL := scheme + "://" + host + "/api/docs/openapi.yaml"
+	specURL := scheme + "://" + host + "/openapi.yaml"
 
-	// Replace the spec URL placeholder in the HTML
+	// Get the CSP nonce from the context
+	nonce, _ := c.Get("csp-nonce")
+	nonceStr, _ := nonce.(string)
+
+	// Replace placeholders in the HTML
 	html := strings.ReplaceAll(swaggerUIHTML, "{{SPEC_URL}}", specURL)
+	html = strings.ReplaceAll(html, "{{NONCE}}", nonceStr)
 
 	c.Header("Content-Type", "text/html; charset=utf-8")
 	c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
@@ -41,10 +46,15 @@ func ReDocHandler(c *gin.Context) {
 		scheme = "https"
 	}
 	host := c.Request.Host
-	specURL := scheme + "://" + host + "/api/docs/openapi.yaml"
+	specURL := scheme + "://" + host + "/openapi.yaml"
 
-	// Replace the spec URL placeholder in the HTML
+	// Get the CSP nonce from the context
+	nonce, _ := c.Get("csp-nonce")
+	nonceStr, _ := nonce.(string)
+
+	// Replace placeholders in the HTML
 	html := strings.ReplaceAll(redocHTML, "{{SPEC_URL}}", specURL)
+	html = strings.ReplaceAll(html, "{{NONCE}}", nonceStr)
 
 	c.Header("Content-Type", "text/html; charset=utf-8")
 	c.Header("Cache-Control", "no-cache, no-store, must-revalidate")

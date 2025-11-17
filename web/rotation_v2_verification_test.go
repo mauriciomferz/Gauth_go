@@ -42,6 +42,7 @@ func TestRotationV2VerifiedWeightSuccess(t *testing.T) {
 	installTestKey(t, "k2")
 	// Use full server initialization so route wiring matches production: /api/v1/beta/rotations/summary/v2
 	srv := NewBetaServerWithMetrics("", nil)
+	t.Cleanup(func() { srv.Shutdown() })
 	// Provide a rotation ledger with dummy entries to satisfy endpoint preconditions
 	ledgerPath := filepath.Join(t.TempDir(), "rotation_ledger.json")
 	srv.rotationLedger = notary.NewRotationLedger(ledgerPath)
@@ -76,6 +77,7 @@ func TestRotationV2ThresholdUnsatisfied(t *testing.T) {
 	os.Unsetenv("GAUTH_ROTATIONS_V2_ED25519_KEYS")
 	installTestKey(t, "k1") // single key -> verified weight 2 < threshold 3
 	srv := NewBetaServerWithMetrics("", nil)
+	t.Cleanup(func() { srv.Shutdown() })
 	ledgerPath := filepath.Join(t.TempDir(), "rotation_ledger.json")
 	srv.rotationLedger = notary.NewRotationLedger(ledgerPath)
 	if _, err := srv.rotationLedger.AppendDescriptor(&notary.KeyRotationDescriptor{OldKeyID: "a", NewKeyID: "b"}); err != nil {

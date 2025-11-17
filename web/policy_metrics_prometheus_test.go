@@ -11,6 +11,7 @@ import (
 // TestPolicyMetricsPrometheus ensures Prometheus exposition contains expected metric lines after evaluations.
 func TestPolicyMetricsPrometheus(t *testing.T) {
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	// Run a few evaluations to populate metrics & latency histogram.
 	payloads := []string{
 		`{"subject":"alice@example.com","action":"read","resource":"report:finance","attrs":{}}`,

@@ -19,6 +19,7 @@ func TestCapabilitySunsetEnforcement(t *testing.T) {
 	// Reset registry to avoid cross-test contamination
 	capability.Reset([]capability.Capability{})
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Register a capability already sunset (timestamp in past)
 	past := "2025-01-01T00:00:00Z"
 	capability.Register(capability.Capability{ID: "cap.sunset.demo", Version: "1.0", Stable: false, SunsetAfter: past})

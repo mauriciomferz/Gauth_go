@@ -11,6 +11,7 @@ import (
 // TestAuthzMetricsEndpoint ensures metrics JSON shape is returned.
 func TestAuthzMetricsEndpoint(t *testing.T) {
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/beta/authz/metrics", nil)
 	srv.router.ServeHTTP(w, req)
@@ -34,6 +35,7 @@ func TestAuthzMetricsEndpoint(t *testing.T) {
 // TestAuthzEvaluateEndpoint performs an evaluation and expects a decision object.
 func TestAuthzEvaluateEndpoint(t *testing.T) {
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	body := map[string]any{"subject": "alice@example.com", "resource": "report:finance", "action": "read", "context": map[string]string{"department": "finance"}}
 	b, _ := json.Marshal(body)
 	w := httptest.NewRecorder()

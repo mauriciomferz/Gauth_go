@@ -17,6 +17,7 @@ func TestSemanticDiagnostics_Unwired(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	t.Setenv("GAUTH_DISABLE_RFC0111_SERVICE", "1")
 	s := NewBetaServer("")
+	t.Cleanup(func() { s.Shutdown() })
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/diagnostics/semantic", nil)
 	s.router.ServeHTTP(w, req)
@@ -56,6 +57,7 @@ func TestSemanticDiagnostics_UnwiredStrictUnavailable(t *testing.T) {
 	t.Setenv("GAUTH_DISABLE_RFC0111_SERVICE", "1")
 	t.Setenv("GAUTH_SEMANTIC_DIAGNOSTICS_REQUIRE_WIRED", "1")
 	s := NewBetaServer("")
+	t.Cleanup(func() { s.Shutdown() })
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/diagnostics/semantic", nil)
 	s.router.ServeHTTP(w, req)
@@ -106,6 +108,7 @@ func (m *mockRFC0111Service) SemanticSnapshot() map[string]uint64 {
 func TestSemanticDiagnostics_Wired(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	s := NewBetaServer("")
+	t.Cleanup(func() { s.Shutdown() })
 	// Inject mock service with evolving counters to force rate changes.
 	s.rfc0111Service = &mockRFC0111Service{snapshots: []map[string]uint64{
 		{"scope_violation": 10, "restriction_mismatch": 3},

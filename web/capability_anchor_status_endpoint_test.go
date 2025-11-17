@@ -28,6 +28,7 @@ func TestCapabilityAnchorStatusEndpoint(t *testing.T) {
 	t.Setenv("GAUTH_DISABLE_BG_POLLS", "1")
 	t.Setenv("GAUTH_SKIP_SMOKETEST", "1")
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Trigger emission then a skip
 	_ = performRequest(srv.router, "POST", "/api/v1/beta/capabilities/reload")
 	_ = performRequest(srv.router, "POST", "/api/v1/beta/capabilities/reload")

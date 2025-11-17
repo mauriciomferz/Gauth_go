@@ -34,6 +34,7 @@ func TestPolicyManifestDeterministic(t *testing.T) {
 	// Seed capability registry
 	capability.Reset([]capability.Capability{{ID: "cap.transfer", Version: "v1", Stable: true}, {ID: "cap.issue", Version: "v1", Stable: true}})
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// First request
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/api/v1/policy/manifest", nil)
@@ -85,6 +86,7 @@ func TestPolicyManifestSignatureVerifyAndTamper(t *testing.T) {
 	prepareEdDSAKey(t)
 	capability.Reset([]capability.Capability{{ID: "cap.transfer", Version: "v1", Stable: true}})
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/api/v1/policy/manifest", nil)
 	srv.router.ServeHTTP(w, r)
@@ -185,6 +187,7 @@ func TestPolicyManifestSigningUnavailable(t *testing.T) {
 	cryptopkg.GlobalEdDSARegistry = nil
 	defer func() { cryptopkg.GlobalEdDSARegistry = saved }()
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/api/v1/policy/manifest", nil)
 	srv.router.ServeHTTP(w, r)
@@ -211,6 +214,7 @@ func TestPolicyManifestETagMismatch(t *testing.T) {
 	prepareEdDSAKey(t)
 	capability.Reset([]capability.Capability{{ID: "cap.transfer", Version: "v1", Stable: true}})
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// First request to get real ETag
 	w1 := httptest.NewRecorder()
 	r1 := httptest.NewRequest("GET", "/api/v1/policy/manifest", nil)
@@ -253,6 +257,7 @@ func TestPolicyManifestSignerInterface(t *testing.T) {
 	prepareEdDSAKey(t)
 	capability.Reset([]capability.Capability{{ID: "cap.transfer", Version: "v1", Stable: true}})
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	canon, raw, _, err := srv.buildPolicyManifest()
 	if err != nil {
 		t.Fatalf("buildPolicyManifest error: %v", err)

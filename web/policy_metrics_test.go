@@ -11,6 +11,7 @@ import (
 // TestPolicyMetricsEndpoint verifies counters increment after evaluations.
 func TestPolicyMetricsEndpoint(t *testing.T) {
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	// Perform two evaluations (one allow, one deny if possible)
 	// Allow case: alice read report:finance
 	allowReqBody := `{"subject":"alice@example.com","action":"read","resource":"report:finance","attrs":{}}`

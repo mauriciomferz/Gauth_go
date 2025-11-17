@@ -27,6 +27,7 @@ func TestAttestationStreamSurgeTrigger(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMIT_AUDIT_PATH", auditFile.Name())
 	// Server
 	ts := NewBetaServer("0")
+	t.Cleanup(func() { ts.Shutdown() })
 	live := httptest.NewServer(ts.router)
 	defer live.Close()
 	resp, err := live.Client().Get(live.URL + "/api/v1/model/limits/attestation/stream")

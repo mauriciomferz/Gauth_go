@@ -25,6 +25,7 @@ func TestAttestationStreamAuditTrigger(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMIT_AUDIT_PATH", auditFile.Name())
 	// Create server
 	ts := NewBetaServer("0")
+	t.Cleanup(func() { ts.Shutdown() })
 	live := httptest.NewServer(ts.router)
 	defer live.Close()
 	// Open stream

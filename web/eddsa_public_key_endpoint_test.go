@@ -11,6 +11,7 @@ import (
 func TestEdDSAPublicKeyEndpoint(t *testing.T) {
 	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, "GET", "/api/v1/beta/keys/eddsa")
 	if w.Code != 200 {
 		t.Fatalf("status %d body=%s", w.Code, w.Body.String())

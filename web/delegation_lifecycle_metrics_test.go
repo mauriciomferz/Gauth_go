@@ -9,6 +9,7 @@ import (
 // TestDelegationLifecycleMetrics validates delegation status transition & failure counters.
 func TestDelegationLifecycleMetrics(t *testing.T) {
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 
 	// Initialize delegation active
 	rrInit := doPOST(t, srv, "/api/v1/delegation/status/update", `{"delegation_id":"d1","new_status":"active"}`)

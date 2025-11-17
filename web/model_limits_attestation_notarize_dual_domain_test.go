@@ -35,6 +35,7 @@ func TestModelLimitsAttestationNotarizeDualDomain(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMIT_ANCHOR_INTERVAL", "1")
 
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Wire in-memory notarizer so apiModelLimitsAttestation path includes receipt.
 	srv.notarizer = internalNotary.NewMemory()
 	if internalCrypto.GlobalEdDSARegistry == nil || internalCrypto.GlobalEdDSARegistry.Active() == nil {

@@ -19,6 +19,7 @@ import (
 func TestAttestationIntegrity_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	s := NewBetaServer("")
+	t.Cleanup(func() { s.Shutdown() })
 	// Register ephemeral key into global registry for test
 	pub, priv, _ := ed25519.GenerateKey(nil)
 	// Construct temporary manager with single active key if Manager type exposes a simple constructor; fall back to manual minimal struct if not.
@@ -113,6 +114,7 @@ func TestAttestationIntegrity_Success(t *testing.T) {
 func TestAttestationIntegrity_SignatureInvalid(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	s := NewBetaServer("")
+	t.Cleanup(func() { s.Shutdown() })
 	pub, priv, _ := ed25519.GenerateKey(nil)
 	m2, _ := cryptoInt.NewManager(1 * time.Hour)
 	if ak := m2.Active(); ak != nil {

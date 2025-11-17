@@ -9,6 +9,7 @@ import (
 // TestRB3DiscoveryBasic verifies required fields and caching semantics.
 func TestRB3DiscoveryBasic(t *testing.T) {
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/api/v1/discovery", nil)
 	srv.router.ServeHTTP(w, req)

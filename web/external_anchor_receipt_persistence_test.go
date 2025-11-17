@@ -27,6 +27,7 @@ func TestExternalAnchorReceiptPersistence(t *testing.T) {
 	os.Setenv("GAUTH_SEED_POLICY", "0") // reduce noise
 
 	srv := NewBetaServer("0")
+	t.Cleanup(func() { srv.Shutdown() })
 	if srv.externalReceiptStore == nil {
 		t.Fatalf("expected external receipt store configured")
 	}

@@ -16,6 +16,7 @@ func TestExternalAnchorMetricsIsolatedRegistry(t *testing.T) {
 	reg := prom.NewRegistry()
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111", Registry: reg})
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	srv.metrics = pm
 	// Allow initial anchor attempt.
 	time.Sleep(40 * time.Millisecond)

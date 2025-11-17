@@ -39,6 +39,7 @@ func TestCapabilityAnchorNotarizationMetrics(t *testing.T) {
 	t.Setenv("GAUTH_CAP_ANCHOR_NOTARY_PROVIDER", "memory")
 	t.Setenv("GAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Manually invoke notarizer to simulate emission path (simplifies test; emission path validated elsewhere).
 	if srv.notarizer == nil {
 		t.Fatalf("notarizer nil")
@@ -99,6 +100,7 @@ func TestCapabilityAnchorNotarizationFailureCounter(t *testing.T) {
 	t.Setenv("GAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth"})
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	srv.metrics = pm
 	// Replace notarizer with failing implementation BEFORE triggering second emission via reload.
 	srv.notarizer = failingImpl{}

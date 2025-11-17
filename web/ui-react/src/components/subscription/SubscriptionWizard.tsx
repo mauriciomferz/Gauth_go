@@ -31,7 +31,7 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
   // Form data for simplified demo
   const [formData, setFormData] = useState({
     clientId: 'demo-client-' + Date.now(),
-    authorizerSubject: 'authorizer-123',
+    authorizerSubject: 'director-001',
     clientOwner: 'owner-456',
     resourceOwner: 'resource-789',
     resourceServer: 'server-001',
@@ -92,8 +92,14 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
 
   const executeStepI = async () => {
     const response = await apiClient.createSubscription({
-      client_id: formData.clientId,
-      requested_scope: formData.scope
+      owners_authorizer_id: 'director-001',
+      identity_proof_request: {
+        subject_id: 'director-001',
+        identity_type: 'natural_person',
+        proof_method: 'eIDAS',
+        proof_data: { verified: true, eidas_level: 'high' },
+        required_level: 'high'
+      }
     })
     
     setState(prev => ({
@@ -105,9 +111,8 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
 
   const executeStepII = async () => {
     await apiClient.subscriptionStepII(state.subscriptionId!, {
-      subject_id: formData.authorizerSubject,
-      proof_method: 'eIDAS',
-      proof_data: { verified: true }
+      commercial_register_ref: 'HRB-12345-DE',
+      jurisdiction: 'DE'
     })
     
     setState(prev => ({ ...prev, currentStep: 3 }))
@@ -116,18 +121,78 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
   const executeStepIII = async () => {
     await apiClient.subscriptionStepIII(state.subscriptionId!, {
       subject_id: formData.clientOwner,
+      identity_type: 'natural_person',
       proof_method: 'eIDAS',
-      proof_data: { verified: true }
+      proof_data: { verified: true, eidas_level: 'high' },
+      required_level: 'high'
     })
     
     setState(prev => ({ ...prev, currentStep: 4 }))
   }
 
   const executeStepIV = async () => {
+    const now = new Date().toISOString()
     await apiClient.subscriptionStepIV(state.subscriptionId!, {
-      entity_id: formData.clientOwner,
-      proof_method: 'commercial_register',
-      proof_data: { verified: true }
+      authorization_chain: {
+        owners_authorizer: {
+          entity_id: 'director-001',
+          entity_type: 'natural_person',
+          entity_name: 'Max Mustermann',
+          role: 'authorizer',
+          authorization_date: now,
+          authorization_type: 'statutory',
+          statutory_authority: 'Managing Director per § 35 GmbHG',
+          commercial_register_ref: 'HRB-12345-DE',
+          identity_verified: true,
+          verification_method: 'eIDAS',
+          scope_of_authority: ['client_registration'],
+          valid_from: now,
+          valid_until: new Date(Date.now() + 365*24*60*60*1000).toISOString(),
+          status: 'active',
+          legal_basis: {
+            basis_type: 'company_law',
+            jurisdiction: 'DE',
+            registration_number: 'HRB-12345-DE'
+          }
+        },
+        client_owner: {
+          entity_id: formData.clientOwner,
+          entity_type: 'natural_person',
+          entity_name: 'Demo Client Owner',
+          role: 'owner',
+          authorized_by: 'director-001',
+          authorization_date: now,
+          authorization_type: 'delegated',
+          identity_verified: true,
+          verification_method: 'eIDAS',
+          scope_of_authority: ['ai_system_operation'],
+          valid_from: now,
+          valid_until: new Date(Date.now() + 365*24*60*60*1000).toISOString(),
+          status: 'active',
+          legal_basis: {
+            basis_type: 'power_of_attorney',
+            jurisdiction: 'DE'
+          }
+        },
+        client: {
+          entity_id: formData.clientId,
+          entity_type: 'ai_system',
+          entity_name: 'Demo AI Client',
+          role: 'client',
+          authorized_by: formData.clientOwner,
+          authorization_date: now,
+          authorization_type: 'delegated',
+          identity_verified: true,
+          scope_of_authority: ['resource_access'],
+          valid_from: now,
+          valid_until: new Date(Date.now() + 365*24*60*60*1000).toISOString(),
+          status: 'active',
+          legal_basis: {
+            basis_type: 'contractual',
+            jurisdiction: 'DE'
+          }
+        }
+      }
     })
     
     setState(prev => ({ ...prev, currentStep: 5 }))
@@ -136,7 +201,34 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
   const executeStepV = async () => {
     await apiClient.subscriptionStepV(state.subscriptionId!, {
       client_id: formData.clientId,
-      poa_proof: { valid: true }
+      poa_credential: {
+        parties: {
+          principal: {
+            type: 'natural_person',
+            identity: formData.clientOwner
+          },
+          authorized_client: {
+            type: 'ai_system',
+            identity: formData.clientId,
+            operational_status: 'active',
+            capability_level: 'L3'
+          }
+        },
+        authorization: {
+          authorized_actions: {
+            non_physical_actions: ['analyzing', 'documenting']
+          }
+        },
+        requirements: {
+          jurisdiction_law: {
+            language: 'en',
+            governing_law: 'EU-GDPR',
+            place_of_jurisdiction: 'Germany'
+          }
+        }
+      },
+      enable_identity_sharing: true,
+      enable_prompting: false
     })
     
     setState(prev => ({ ...prev, currentStep: 6 }))
@@ -145,18 +237,78 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
   const executeStepVI = async () => {
     await apiClient.subscriptionStepVI(state.subscriptionId!, {
       subject_id: formData.resourceOwner,
+      identity_type: 'natural_person',
       proof_method: 'eIDAS',
-      proof_data: { verified: true }
+      proof_data: { verified: true, eidas_level: 'high' },
+      required_level: 'high'
     })
     
     setState(prev => ({ ...prev, currentStep: 7 }))
   }
 
   const executeStepVII = async () => {
+    const now = new Date().toISOString()
     await apiClient.subscriptionStepVII(state.subscriptionId!, {
-      entity_id: formData.resourceOwner,
-      proof_method: 'commercial_register',
-      proof_data: { verified: true }
+      authorization_chain: {
+        owners_authorizer: {
+          entity_id: 'director-001',
+          entity_type: 'natural_person',
+          entity_name: 'Max Mustermann',
+          role: 'authorizer',
+          authorization_date: now,
+          authorization_type: 'statutory',
+          statutory_authority: 'Managing Director per § 35 GmbHG',
+          commercial_register_ref: 'HRB-12345-DE',
+          identity_verified: true,
+          verification_method: 'eIDAS',
+          scope_of_authority: ['resource_authorization'],
+          valid_from: now,
+          valid_until: new Date(Date.now() + 365*24*60*60*1000).toISOString(),
+          status: 'active',
+          legal_basis: {
+            basis_type: 'company_law',
+            jurisdiction: 'DE',
+            registration_number: 'HRB-12345-DE'
+          }
+        },
+        client_owner: {
+          entity_id: formData.resourceOwner,
+          entity_type: 'natural_person',
+          entity_name: 'Demo Resource Owner',
+          role: 'owner',
+          authorized_by: 'director-001',
+          authorization_date: now,
+          authorization_type: 'delegated',
+          identity_verified: true,
+          verification_method: 'eIDAS',
+          scope_of_authority: ['resource_management'],
+          valid_from: now,
+          valid_until: new Date(Date.now() + 365*24*60*60*1000).toISOString(),
+          status: 'active',
+          legal_basis: {
+            basis_type: 'power_of_attorney',
+            jurisdiction: 'DE'
+          }
+        },
+        client: {
+          entity_id: formData.clientId,
+          entity_type: 'ai_system',
+          entity_name: 'Demo AI Client',
+          role: 'client',
+          authorized_by: formData.resourceOwner,
+          authorization_date: now,
+          authorization_type: 'delegated',
+          identity_verified: true,
+          scope_of_authority: ['data_access'],
+          valid_from: now,
+          valid_until: new Date(Date.now() + 365*24*60*60*1000).toISOString(),
+          status: 'active',
+          legal_basis: {
+            basis_type: 'contractual',
+            jurisdiction: 'DE'
+          }
+        }
+      }
     })
     
     setState(prev => ({ ...prev, currentStep: 8 }))
@@ -164,8 +316,15 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
 
   const executeStepVIII = async () => {
     const response = await apiClient.subscriptionStepVIII(state.subscriptionId!, {
-      server_id: formData.resourceServer,
-      authorization_proof: { valid: true }
+      resource_server_id: formData.resourceServer,
+      server_public_key: 'demo-server-public-key-' + Date.now(),
+      server_endpoint: 'https://api.example.com/resources',
+      resource_types: ['documents', 'data', 'files'],
+      allowed_operations: ['read', 'write', 'delete'],
+      authorization_proof: {
+        proof_type: 'server_credential',
+        verified_at: new Date().toISOString()
+      }
     })
     
     const token = response.token || response.access_token

@@ -15,6 +15,7 @@ func TestEnforceCapabilitiesSunsetUnit(t *testing.T) {
 	// Sunset time in past relative to test date
 	capability.Register(capability.Capability{ID: "cap.unit.sunset", Version: "1.0", Stable: true, SunsetAfter: "2025-01-01T00:00:00Z"})
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Override required action mapping directly
 	srv.requiredActionCaps["delegation:create"] = []string{"cap.unit.sunset"}
 	// Claims provide the capability (which should be denied due to sunset)

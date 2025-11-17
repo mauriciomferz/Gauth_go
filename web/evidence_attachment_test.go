@@ -51,6 +51,7 @@ func TestEvidenceAttachment_SuccessAndDuplicate(t *testing.T) {
 	t.Setenv("GAUTH_SEED_POLICY", "1")
 	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111"})
 	srv := NewBetaServerWithMetrics("", pm)
+	t.Cleanup(func() { srv.Shutdown() })
 
 	poaID, err := createTestPOA(srv)
 	if err != nil {
@@ -92,6 +93,7 @@ func TestEvidenceAttachment_InvalidHash(t *testing.T) {
 	t.Setenv("GAUTH_SEED_POLICY", "1")
 	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111"})
 	srv := NewBetaServerWithMetrics("", pm)
+	t.Cleanup(func() { srv.Shutdown() })
 
 	poaID, err := createTestPOA(srv)
 	if err != nil {
@@ -123,6 +125,7 @@ func TestEvidenceAttachment_NotFound(t *testing.T) {
 	t.Setenv("GAUTH_SEED_POLICY", "1")
 	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111"})
 	srv := NewBetaServerWithMetrics("", pm)
+	t.Cleanup(func() { srv.Shutdown() })
 	payload := map[string]any{"hashes": []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}}
 	res := performJSONPostEvidence(srv, "/api/v1/beta/poa/does-not-exist/evidence", payload)
 	if res.Code != 404 && res.Code != 400 {

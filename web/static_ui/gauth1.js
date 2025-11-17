@@ -1013,13 +1013,25 @@ function displayTokenResult(element, token, isSuccess) {
             <li>Client: ${token.authorizationChain.client}</li>
         </ul>
         <div style="position: relative;">
-            <button onclick="navigator.clipboard.writeText('${tokenStr.replace(/'/g, "\\'")}'); this.innerHTML='<i class=\\'fas fa-check\\'></i> Copied!'; setTimeout(() => this.innerHTML='<i class=\\'fas fa-copy\\'></i> Copy Token', 2000)" 
-                    class="btn btn-secondary" style="position: absolute; top: 0.5rem; right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+            <button class="btn btn-secondary token-copy-btn" style="position: absolute; top: 0.5rem; right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.75rem;">
                 <i class="fas fa-copy"></i> Copy Token
             </button>
             <pre style="padding-top: 2.5rem;">${tokenStr}</pre>
         </div>
     `;
+    
+    // Add event listener for copy button
+    const copyBtn = element.querySelector('.token-copy-btn');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', function() {
+            navigator.clipboard.writeText(tokenStr);
+            const originalHTML = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            setTimeout(() => {
+                this.innerHTML = originalHTML;
+            }, 2000);
+        });
+    }
 }
 
 function displayValidationResult(element, validation) {
@@ -1806,6 +1818,730 @@ function resetLogin() {
     setLoginStep('credentials');
 }
 
+// ============================================================================
+// PAP (Policy Administration Point) Functions
+// ============================================================================
+
+// Initialize PAP forms
+function initPAPForms() {
+    // Create Policy Form
+    const createPolicyForm = document.getElementById('create-policy-form');
+    if (createPolicyForm) {
+        createPolicyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await handleCreatePolicy();
+        });
+    }
+
+    // Search Policy Form
+    const searchPolicyForm = document.getElementById('search-policy-form');
+    if (searchPolicyForm) {
+        searchPolicyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await handleSearchPolicy();
+        });
+    }
+
+    // Policy Action Buttons
+    const activateBtn = document.getElementById('activate-policy-btn');
+    const suspendBtn = document.getElementById('suspend-policy-btn');
+    const revokeBtn = document.getElementById('revoke-policy-btn');
+    const deleteBtn = document.getElementById('delete-policy-btn');
+
+    if (activateBtn) activateBtn.addEventListener('click', () => handlePolicyAction('activate'));
+    if (suspendBtn) suspendBtn.addEventListener('click', () => handlePolicyAction('suspend'));
+    if (revokeBtn) revokeBtn.addEventListener('click', () => handlePolicyAction('revoke'));
+    if (deleteBtn) deleteBtn.addEventListener('click', () => handlePolicyAction('delete'));
+}
+
+async function handleCreatePolicy() {
+    const resultDiv = document.getElementById('policy-create-result');
+    const submitBtn = document.querySelector('#create-policy-form button[type="submit"]');
+
+    try {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner loading"></i> Creating...';
+
+        const actions = document.getElementById('policy-actions').value.split(',').map(a => a.trim());
+        const countries = document.getElementById('policy-countries').value.split(',').map(c => c.trim());
+        const sectors = document.getElementById('policy-sectors').value.split(',').map(s => s.trim());
+        const tags = document.getElementById('policy-tags').value.split(',').map(t => t.trim()).filter(t => t);
+
+        const policyData = {
+            policy_type: document.getElementById('policy-type').value,
+            policy_name: document.getElementById('policy-name').value,
+            description: document.getElementById('policy-description').value,
+            client_owner: document.getElementById('policy-client-owner').value,
+            owners_authorizer: document.getElementById('policy-authorizer').value,
+            policy_rules: {
+                allowed_actions: actions
+            },
+            scope: {
+                countries: countries,
+                sectors: sectors
+            },
+            tags: tags
+        };
+
+        const response = await fetch('/api/v1/pap/policies', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(policyData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            resultDiv.style.display = 'block';
+            resultDiv.style.background = '#d1fae5';
+            resultDiv.style.borderColor = '#6ee7b7';
+            resultDiv.innerHTML = `
+                <h4 style="color: #065f46; margin-bottom: 0.5rem;">✅ Policy Created</h4>
+                <div style="font-family: monospace; font-size: 0.875rem;">
+                    <div><strong>Policy ID:</strong> ${data.policy_id}</div>
+                    <div><strong>Name:</strong> ${data.policy_name}</div>
+                    <div><strong>Type:</strong> ${data.policy_type}</div>
+                    <div><strong>Status:</strong> <span class="badge badge-secondary">${data.status}</span></div>
+                    <div><strong>Version:</strong> ${data.policy_version}</div>
+                    <div><strong>Created:</strong> ${new Date(data.created_at).toLocaleString()}</div>
+                </div>
+                <p style="margin-top: 1rem; color: #065f46;">
+                    <i class="fas fa-info-circle"></i> Policy is in DRAFT status. Activate it to enforce.
+                </p>
+            `;
+
+            // Store policy ID for actions
+            state.currentPolicyId = data.policy_id;
+
+            // Refresh active policies list
+            loadActivePolicies();
+        } else {
+            throw new Error(data.error || 'Failed to create policy');
+        }
+    } catch (error) {
+        resultDiv.style.display = 'block';
+        resultDiv.style.background = '#fee';
+        resultDiv.style.borderColor = '#f88';
+        resultDiv.innerHTML = `<h4 style="color: #991b1b;">❌ Error</h4><p>${error.message}</p>`;
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-plus"></i> Create Policy';
+    }
+}
+
+async function handleSearchPolicy() {
+    const policyId = document.getElementById('search-policy-id').value;
+    const resultDiv = document.getElementById('policy-details');
+    const actionsDiv = document.getElementById('policy-actions');
+
+    if (!policyId) {
+        alert('Enter Policy ID');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/v1/pap/policies/${policyId}`);
+        const data = await response.json();
+
+        if (response.ok) {
+            resultDiv.style.display = 'block';
+            resultDiv.style.background = '#eff6ff';
+            resultDiv.style.borderColor = '#93c5fd';
+            resultDiv.innerHTML = `
+                <h4 style="color: #1e40af; margin-bottom: 0.5rem;">Policy Details</h4>
+                <div style="font-family: monospace; font-size: 0.875rem;">
+                    <div><strong>Policy ID:</strong> ${data.policy_id}</div>
+                    <div><strong>Name:</strong> ${data.policy_name}</div>
+                    <div><strong>Type:</strong> ${data.policy_type}</div>
+                    <div><strong>Status:</strong> <span class="badge badge-${data.status === 'active' ? 'success' : 'secondary'}">${data.status}</span></div>
+                    <div><strong>Version:</strong> ${data.policy_version}</div>
+                    <div><strong>Client Owner:</strong> ${data.client_owner}</div>
+                    <div><strong>Authorizer:</strong> ${data.owners_authorizer}</div>
+                    <div><strong>Actions:</strong> ${data.policy_rules?.allowed_actions?.join(', ')}</div>
+                    ${data.scope?.countries ? `<div><strong>Countries:</strong> ${data.scope.countries.join(', ')}</div>` : ''}
+                    ${data.tags ? `<div><strong>Tags:</strong> ${data.tags.join(', ')}</div>` : ''}
+                    <div><strong>Created:</strong> ${new Date(data.created_at).toLocaleString()}</div>
+                    <div><strong>Updated:</strong> ${new Date(data.updated_at).toLocaleString()}</div>
+                </div>
+            `;
+
+            // Store current policy for actions
+            state.currentPolicyId = policyId;
+            state.currentPolicyStatus = data.status;
+            actionsDiv.style.display = 'block';
+        } else {
+            throw new Error(data.error || 'Policy not found');
+        }
+    } catch (error) {
+        resultDiv.style.display = 'block';
+        resultDiv.style.background = '#fee';
+        resultDiv.style.borderColor = '#f88';
+        resultDiv.innerHTML = `<h4 style="color: #991b1b;">❌ Error</h4><p>${error.message}</p>`;
+        actionsDiv.style.display = 'none';
+    }
+}
+
+async function handlePolicyAction(action) {
+    if (!state.currentPolicyId) {
+        alert('No policy selected. Search for a policy first.');
+        return;
+    }
+
+    const confirmMsg = {
+        activate: 'Activate this policy? It will be enforced immediately.',
+        suspend: 'Suspend this policy? It will stop being enforced.',
+        revoke: 'Revoke this policy? This action is permanent.',
+        delete: 'Delete this policy? This cannot be undone.'
+    };
+
+    if (!confirm(confirmMsg[action])) return;
+
+    const resultDiv = document.getElementById('policy-details');
+
+    try {
+        let endpoint = '';
+        let method = 'POST';
+        let body = null;
+
+        switch (action) {
+            case 'activate':
+                endpoint = `/api/v1/pap/policies/${state.currentPolicyId}/activate`;
+                body = JSON.stringify({ approved_by: 'admin-001' });
+                break;
+            case 'suspend':
+                endpoint = `/api/v1/pap/policies/${state.currentPolicyId}/suspend`;
+                body = JSON.stringify({ reason: 'Suspended by admin' });
+                break;
+            case 'revoke':
+                endpoint = `/api/v1/pap/policies/${state.currentPolicyId}/revoke`;
+                body = JSON.stringify({ reason: 'Revoked by admin' });
+                break;
+            case 'delete':
+                endpoint = `/api/v1/pap/policies/${state.currentPolicyId}`;
+                method = 'DELETE';
+                break;
+        }
+
+        const response = await fetch(endpoint, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: body
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            resultDiv.style.display = 'block';
+            resultDiv.style.background = '#d1fae5';
+            resultDiv.style.borderColor = '#6ee7b7';
+            resultDiv.innerHTML = `
+                <h4 style="color: #065f46;">✅ ${action.charAt(0).toUpperCase() + action.slice(1)} Successful</h4>
+                <p>Policy ${state.currentPolicyId} has been ${action}d.</p>
+            `;
+
+            // Refresh search
+            if (action !== 'delete') {
+                setTimeout(() => handleSearchPolicy(), 1000);
+            } else {
+                document.getElementById('policy-actions').style.display = 'none';
+                state.currentPolicyId = null;
+            }
+
+            loadActivePolicies();
+        } else {
+            throw new Error(data.error || `Failed to ${action} policy`);
+        }
+    } catch (error) {
+        resultDiv.style.display = 'block';
+        resultDiv.style.background = '#fee';
+        resultDiv.style.borderColor = '#f88';
+        resultDiv.innerHTML = `<h4 style="color: #991b1b;">❌ Error</h4><p>${error.message}</p>`;
+    }
+}
+
+async function loadActivePolicies() {
+    const container = document.getElementById('active-policies');
+
+    try {
+        const response = await fetch('/api/v1/pap/policies?status=active&limit=10');
+        const data = await response.json();
+
+        if (response.ok && data.policies && data.policies.length > 0) {
+            container.innerHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Policy ID</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Version</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.policies.map(p => `
+                            <tr>
+                                <td><code>${p.policy_id.substring(0, 16)}...</code></td>
+                                <td>${p.policy_name}</td>
+                                <td>${p.policy_type}</td>
+                                <td><span class="badge badge-success">${p.status}</span></td>
+                                <td>${p.policy_version}</td>
+                                <td>${new Date(p.created_at).toLocaleDateString()}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            // Update counter
+            document.getElementById('pap-total-policies').textContent = data.total || data.policies.length;
+        } else {
+            container.innerHTML = '<p class="text-muted">No active policies found.</p>';
+        }
+    } catch (error) {
+        console.error('Failed to load policies:', error);
+    }
+}
+
+// ============================================================================
+// PEP (Policy Enforcement Point) Functions
+// ============================================================================
+
+// Initialize PEP forms
+function initPEPForms() {
+    // Enforce Authorization Form
+    const enforceForm = document.getElementById('enforce-authz-form');
+    if (enforceForm) {
+        enforceForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await handleEnforceAuthorization();
+        });
+    }
+
+    // Test buttons
+    const supplyBtn = document.getElementById('test-supply-side-btn');
+    const demandBtn = document.getElementById('test-demand-side-btn');
+
+    if (supplyBtn) supplyBtn.addEventListener('click', () => handleTestPEP('supply'));
+    if (demandBtn) demandBtn.addEventListener('click', () => handleTestPEP('demand'));
+}
+
+async function handleEnforceAuthorization() {
+    const resultDiv = document.getElementById('enforce-result');
+    const submitBtn = document.querySelector('#enforce-authz-form button[type="submit"]');
+
+    try {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner loading"></i> Enforcing...';
+
+        const enforcementRequest = {
+            extended_token: document.getElementById('enforce-token').value,
+            action_type: document.getElementById('enforce-action-type').value,
+            transaction_type: document.getElementById('enforce-transaction-type').value,
+            resource_id: document.getElementById('enforce-resource-id').value,
+            enforcement_mode: document.getElementById('enforce-mode').value,
+            context: {
+                timestamp: new Date().toISOString(),
+                source: 'gauth-dashboard'
+            }
+        };
+
+        const response = await fetch('/api/v1/pep/enforce', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(enforcementRequest)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            const allowed = data.allowed;
+            resultDiv.style.display = 'block';
+            resultDiv.style.background = allowed ? '#d1fae5' : '#fee';
+            resultDiv.style.borderColor = allowed ? '#6ee7b7' : '#f88';
+
+            let html = `
+                <h4 style="color: ${allowed ? '#065f46' : '#991b1b'}; margin-bottom: 0.5rem;">
+                    ${allowed ? '✅ Authorization ALLOWED' : '❌ Authorization DENIED'}
+                </h4>
+                <div style="font-family: monospace; font-size: 0.875rem;">
+                    <div><strong>Enforcement ID:</strong> ${data.enforcement_id}</div>
+                    <div><strong>Token Valid:</strong> ${data.token_valid ? '✓' : '✗'}</div>
+                    <div><strong>Scope Valid:</strong> ${data.scope_valid ? '✓' : '✗'}</div>
+                    <div><strong>Restrictions Valid:</strong> ${data.restrictions_valid ? '✓' : '✗'}</div>
+                    <div><strong>PDP Decision:</strong> ${data.pdp_decision || 'N/A'}</div>
+                    ${data.allow_reason ? `<div><strong>Reason:</strong> ${data.allow_reason}</div>` : ''}
+                    ${data.deny_reason ? `<div><strong>Deny Reason:</strong> ${data.deny_reason}</div>` : ''}
+                    <div><strong>Enforced At:</strong> ${new Date(data.enforced_at).toLocaleString()}</div>
+                </div>
+            `;
+
+            if (data.violations && data.violations.length > 0) {
+                html += `
+                    <div style="margin-top: 1rem; padding: 0.75rem; background: #fff3cd; border-radius: 0.5rem;">
+                        <h5 style="margin-bottom: 0.5rem;">⚠️ Violations Detected (${data.violations.length})</h5>
+                        ${data.violations.map(v => `
+                            <div style="margin-bottom: 0.5rem; font-size: 0.875rem;">
+                                <strong>${v.violation_type}</strong> (${v.severity}): ${v.description}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                // Update violations list
+                updateViolationsList(data.violations);
+            }
+
+            resultDiv.innerHTML = html;
+
+            // Update counter
+            const currentCount = parseInt(document.getElementById('pep-total-enforcements').textContent);
+            document.getElementById('pep-total-enforcements').textContent = currentCount + 1;
+        } else {
+            throw new Error(data.error || 'Enforcement failed');
+        }
+    } catch (error) {
+        resultDiv.style.display = 'block';
+        resultDiv.style.background = '#fee';
+        resultDiv.style.borderColor = '#f88';
+        resultDiv.innerHTML = `<h4 style="color: #991b1b;">❌ Error</h4><p>${error.message}</p>`;
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Enforce Authorization';
+    }
+}
+
+async function handleTestPEP(side) {
+    const resultDiv = document.getElementById('pep-test-result');
+    const button = document.getElementById(`test-${side}-side-btn`);
+
+    try {
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner loading"></i> Testing...';
+
+        // Create test request
+        const testRequest = {
+            side: side,
+            action_type: 'transaction',
+            transaction_type: 'test_payment',
+            resource_id: 'test-resource-123'
+        };
+
+        const response = await fetch(`/api/v1/pep/test/${side}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(testRequest)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            resultDiv.style.display = 'block';
+            resultDiv.style.background = '#eff6ff';
+            resultDiv.style.borderColor = '#93c5fd';
+            resultDiv.innerHTML = `
+                <h4 style="color: #1e40af;">✅ ${side === 'supply' ? 'Supply' : 'Demand'}-Side Test Complete</h4>
+                <div style="font-family: monospace; font-size: 0.875rem;">
+                    <div><strong>Test ID:</strong> ${data.test_id || 'N/A'}</div>
+                    <div><strong>Result:</strong> ${data.result || 'PASS'}</div>
+                    <div><strong>Validation Time:</strong> ${data.duration || '< 1ms'}</div>
+                </div>
+                <p style="margin-top: 0.75rem; color: #1e40af;">
+                    ${side === 'supply' 
+                        ? '✓ Client-side enforcement validated authorization before making request.' 
+                        : '✓ Resource server validated client authorization from owner perspective.'}
+                </p>
+            `;
+        } else {
+            throw new Error(data.error || 'Test failed');
+        }
+    } catch (error) {
+        resultDiv.style.display = 'block';
+        resultDiv.style.background = '#fee';
+        resultDiv.style.borderColor = '#f88';
+        resultDiv.innerHTML = `<h4 style="color: #991b1b;">❌ Test Failed</h4><p>${error.message}</p>`;
+    } finally {
+        button.disabled = false;
+        button.innerHTML = `<i class="fas fa-play"></i> Test ${side === 'supply' ? 'Supply' : 'Demand'}-Side Enforcement`;
+    }
+}
+
+function updateViolationsList(violations) {
+    const container = document.getElementById('pep-violations');
+
+    if (violations && violations.length > 0) {
+        container.innerHTML = `
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Severity</th>
+                        <th>Description</th>
+                        <th>Detected At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${violations.map(v => `
+                        <tr>
+                            <td><code>${v.violation_type}</code></td>
+                            <td><span class="badge badge-${v.severity === 'critical' ? 'danger' : 'warning'}">${v.severity}</span></td>
+                            <td>${v.description}</td>
+                            <td>${new Date(v.detected_at).toLocaleString()}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+}
+
+// ============================================================================
+// PDP Functions
+// ============================================================================
+
+function initPDPForms() {
+    const decisionForm = document.getElementById('pdp-decision-form');
+    const evaluateForm = document.getElementById('pdp-evaluate-form');
+    const refreshBtn = document.getElementById('pdp-refresh-decisions-btn');
+    
+    if (decisionForm) {
+        decisionForm.addEventListener('submit', handleMakeDecision);
+    }
+    
+    if (evaluateForm) {
+        evaluateForm.addEventListener('submit', handleEvaluatePolicy);
+    }
+    
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            loadRecentDecisions();
+        });
+    }
+}
+
+async function handleMakeDecision(e) {
+    e.preventDefault();
+    
+    const subject = document.getElementById('decision-subject').value;
+    const resource = document.getElementById('decision-resource').value;
+    const action = document.getElementById('decision-action').value;
+    const role = document.getElementById('decision-role').value;
+    const department = document.getElementById('decision-department').value;
+    const location = document.getElementById('decision-location').value;
+    
+    const request = {
+        subject,
+        resource,
+        action,
+        context: {
+            role: role || undefined,
+            department: department || undefined,
+            location: location || undefined,
+            ip_address: '192.168.1.100',
+            timestamp: new Date().toISOString()
+        }
+    };
+    
+    try {
+        const response = await fetch('/api/v1/pdp/decision', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(request)
+        });
+        
+        const result = await response.json();
+        const resultContainer = document.getElementById('pdp-decision-result');
+        const resultContent = document.getElementById('pdp-decision-content');
+        
+        if (response.ok) {
+            const authorized = result.authorized || result.decision === 'permit';
+            resultContent.innerHTML = `
+                <div class="result-success">
+                    <div class="result-field">
+                        <strong>Decision ID:</strong> <code>${result.decision_id}</code>
+                    </div>
+                    <div class="result-field">
+                        <strong>Decision:</strong> 
+                        <span class="badge badge-${authorized ? 'success' : 'danger'}">
+                            ${authorized ? 'PERMIT' : 'DENY'}
+                        </span>
+                    </div>
+                    <div class="result-field">
+                        <strong>Reason:</strong> ${result.reason || 'N/A'}
+                    </div>
+                    <div class="result-field">
+                        <strong>Authorized:</strong> ${authorized ? '✅ Yes' : '❌ No'}
+                    </div>
+                    ${result.valid_until ? `
+                        <div class="result-field">
+                            <strong>Valid Until:</strong> ${new Date(result.valid_until).toLocaleString()}
+                        </div>
+                    ` : ''}
+                    ${result.conditions && result.conditions.length > 0 ? `
+                        <div class="result-field">
+                            <strong>Conditions:</strong>
+                            <ul>
+                                ${result.conditions.map(c => `<li>${c}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            resultContainer.style.display = 'block';
+            loadRecentDecisions();
+            updatePDPMetrics();
+        } else {
+            resultContent.innerHTML = `
+                <div class="result-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <strong>Error:</strong> ${result.error || 'Decision failed'}
+                </div>
+            `;
+            resultContainer.style.display = 'block';
+        }
+    } catch (error) {
+        const resultContainer = document.getElementById('pdp-decision-result');
+        const resultContent = document.getElementById('pdp-decision-content');
+        resultContent.innerHTML = `
+            <div class="result-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <strong>Error:</strong> ${error.message}
+            </div>
+        `;
+        resultContainer.style.display = 'block';
+    }
+}
+
+async function handleEvaluatePolicy(e) {
+    e.preventDefault();
+    
+    const policyId = document.getElementById('eval-policy-id').value;
+    const contextStr = document.getElementById('eval-context').value;
+    
+    let context = {};
+    if (contextStr) {
+        try {
+            context = JSON.parse(contextStr);
+        } catch (error) {
+            alert('Invalid JSON in context field');
+            return;
+        }
+    }
+    
+    try {
+        const response = await fetch(`/api/v1/pdp/evaluate/${policyId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ context })
+        });
+        
+        const result = await response.json();
+        const resultContainer = document.getElementById('pdp-evaluate-result');
+        const resultContent = document.getElementById('pdp-evaluate-content');
+        
+        if (response.ok) {
+            resultContent.innerHTML = `
+                <div class="result-success">
+                    <div class="result-field">
+                        <strong>Policy ID:</strong> <code>${result.policy_id}</code>
+                    </div>
+                    <div class="result-field">
+                        <strong>Evaluation Result:</strong> 
+                        <span class="badge badge-${result.result === 'pass' ? 'success' : 'danger'}">
+                            ${result.result || 'N/A'}
+                        </span>
+                    </div>
+                    <div class="result-field">
+                        <strong>Details:</strong> ${result.details || 'Policy evaluated successfully'}
+                    </div>
+                    ${result.matched_rules ? `
+                        <div class="result-field">
+                            <strong>Matched Rules:</strong> ${result.matched_rules}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            resultContainer.style.display = 'block';
+        } else {
+            resultContent.innerHTML = `
+                <div class="result-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <strong>Error:</strong> ${result.error || 'Evaluation failed'}
+                </div>
+            `;
+            resultContainer.style.display = 'block';
+        }
+    } catch (error) {
+        const resultContainer = document.getElementById('pdp-evaluate-result');
+        const resultContent = document.getElementById('pdp-evaluate-content');
+        resultContent.innerHTML = `
+            <div class="result-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <strong>Error:</strong> ${error.message}
+            </div>
+        `;
+        resultContainer.style.display = 'block';
+    }
+}
+
+async function loadRecentDecisions() {
+    try {
+        const response = await fetch('/api/v1/pdp/decisions/recent?limit=10');
+        const result = await response.json();
+        
+        const tbody = document.getElementById('pdp-decisions-tbody');
+        
+        if (response.ok && result.decisions && result.decisions.length > 0) {
+            tbody.innerHTML = result.decisions.map(decision => `
+                <tr>
+                    <td><code>${decision.decision_id}</code></td>
+                    <td>${decision.subject}</td>
+                    <td>${decision.resource}</td>
+                    <td><code>${decision.action}</code></td>
+                    <td>
+                        <span class="badge badge-${decision.authorized ? 'success' : 'danger'}">
+                            ${decision.authorized ? 'PERMIT' : 'DENY'}
+                        </span>
+                    </td>
+                    <td>${decision.reason}</td>
+                    <td>${new Date(decision.timestamp).toLocaleString()}</td>
+                </tr>
+            `).join('');
+        } else {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center">No recent decisions</td></tr>';
+        }
+    } catch (error) {
+        console.error('Failed to load recent decisions:', error);
+    }
+}
+
+async function updatePDPMetrics() {
+    try {
+        const response = await fetch('/api/v1/pdp/metrics');
+        const metrics = await response.json();
+        
+        if (response.ok) {
+            document.getElementById('pdp-total-decisions').textContent = metrics.total_decisions || 0;
+            document.getElementById('pdp-permit-rate').textContent = 
+                (metrics.permit_rate || 0).toFixed(1) + '%';
+            document.getElementById('pdp-deny-rate').textContent = 
+                (metrics.deny_rate || 0).toFixed(1) + '%';
+            document.getElementById('pdp-avg-response').textContent = 
+                (metrics.avg_response_time || 0).toFixed(0) + 'ms';
+        }
+    } catch (error) {
+        console.error('Failed to load PDP metrics:', error);
+    }
+}
+
+// Initialize PAP, PDP, and PEP when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    initPAPForms();
+    initPDPForms();
+    initPEPForms();
+});
+
 // Export for debugging
 window.gauthApp = {
     state,
@@ -1814,5 +2550,13 @@ window.gauthApp = {
     switchTab,
     loadMetrics,
     loadCacheStats,
-    loadMCPServers
+    loadMCPServers,
+    handleCreatePolicy,
+    handleSearchPolicy,
+    handleMakeDecision,
+    handleEvaluatePolicy,
+    loadRecentDecisions,
+    updatePDPMetrics,
+    handleEnforceAuthorization,
+    loadActivePolicies
 };

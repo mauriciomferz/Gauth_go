@@ -23,6 +23,7 @@ func TestModelLimitsAttestation(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMIT_ANCHOR_INTERVAL", "1")
 	os.Setenv("GAUTH_MODEL_LIMITS_STRICT_UNKNOWN", "1")
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	// Trigger a couple exceed events to populate audit + anchor chains.
 	for i := 0; i < 2; i++ {
 		w := httptest.NewRecorder()

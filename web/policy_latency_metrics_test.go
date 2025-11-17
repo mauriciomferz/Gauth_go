@@ -11,6 +11,7 @@ import (
 // TestPolicyLatencyMetrics validates p99 presence and non-zero histogram counts after evaluations.
 func TestPolicyLatencyMetrics(t *testing.T) {
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	// Fire several evaluations to populate buckets
 	payloads := []string{
 		`{"subject":"alice@example.com","action":"read","resource":"report:finance","attrs":{}}`,

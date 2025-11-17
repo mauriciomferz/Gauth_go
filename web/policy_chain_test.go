@@ -10,6 +10,7 @@ import (
 // TestPolicyChainEndpoint verifies the policy chain endpoint does not panic and returns success JSON.
 func TestPolicyChainEndpoint(t *testing.T) {
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	rec := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/beta/policy/chain?offset=0&limit=10", nil)
 	bs.router.ServeHTTP(rec, req)

@@ -22,6 +22,7 @@ func TestRevocationAnchoring(t *testing.T) {
 		os.Unsetenv("GAUTH_TOKEN_SIG_MODE")
 	}()
 	s := NewBetaServer("")
+	t.Cleanup(func() { s.Shutdown() })
 	// Key manager should be initialized already in server init; if not, force it.
 	if crypto.GlobalEdDSARegistry == nil {
 		km, _ := crypto.NewManager(time.Hour)

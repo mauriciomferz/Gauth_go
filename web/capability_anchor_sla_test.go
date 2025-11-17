@@ -22,6 +22,7 @@ func TestCapabilityAnchorSLAStale(t *testing.T) {
 	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m")
 	t.Setenv("GAUTH_CAP_ANCHOR_STALE_THRESHOLD_SECONDS", "2") // very small threshold for test
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Simulate a last write 5 seconds ago (beyond threshold)
 	srv.capAnchorLastWrite = time.Now().Add(-5 * time.Second)
 	// Trigger monitor tick manually by computing age & stale
@@ -51,6 +52,7 @@ func TestCapabilityAnchorSLAFresh(t *testing.T) {
 	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m")
 	t.Setenv("GAUTH_CAP_ANCHOR_STALE_THRESHOLD_SECONDS", "10") // threshold higher than age
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	srv.capAnchorLastWrite = time.Now().Add(-2 * time.Second)
 	age := uint64(time.Since(srv.capAnchorLastWrite).Seconds())
 	srv.capAnchorLastAgeSeconds.Store(age)

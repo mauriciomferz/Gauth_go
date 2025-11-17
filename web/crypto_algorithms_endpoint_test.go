@@ -8,6 +8,7 @@ import (
 // TestCryptoAlgorithmsEndpoint verifies the introspection endpoint lists expected algorithms.
 func TestCryptoAlgorithmsEndpoint(t *testing.T) {
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := PerformRequest(srv, "GET", "/api/v1/crypto/algorithms")
 	if w.Code != 200 {
 		t.Fatalf("status %d", w.Code)

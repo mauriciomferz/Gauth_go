@@ -823,6 +823,22 @@ class ApiClient {
     const response = await this.client.delete(`/beta/mcp/servers/${serverId}`)
     return response.data
   }
+
+  // Generic request method for flexibility
+  async request<T = any>(config: {
+    method: string
+    url: string
+    data?: any
+    params?: any
+  }): Promise<{ data: T }> {
+    const response = await this.client.request({
+      method: config.method,
+      url: config.url,
+      data: config.data,
+      params: config.params
+    })
+    return { data: response.data }
+  }
 }
 
 // Type Definitions

@@ -41,7 +41,7 @@
     <div id="swagger-ui"></div>
     <script src="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui-bundle.js" charset="UTF-8"></script>
     <script src="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui-standalone-preset.js" charset="UTF-8"></script>
-    <script>
+    <script nonce="{{NONCE}}">
         window.onload = function() {
             const ui = SwaggerUIBundle({
                 url: "{{SPEC_URL}}",

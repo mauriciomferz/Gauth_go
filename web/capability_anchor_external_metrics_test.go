@@ -15,6 +15,7 @@ func TestExternalAnchorMetrics(t *testing.T) {
 	t.Setenv("GAUTH_CAPABILITIES_PATH", "") // ensure static seed
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111"})
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Inject Prometheus metrics adapter
 	srv.metrics = pm
 	// Force capability reload to trigger emission path (anchor artifact emission invokes external provider)
@@ -43,6 +44,7 @@ func TestExternalAnchorFailureMetrics(t *testing.T) {
 	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB", "1") // always fail
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111"})
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	srv.metrics = pm
 	// Trigger capability reload to attempt anchor
 	time.Sleep(20 * time.Millisecond)

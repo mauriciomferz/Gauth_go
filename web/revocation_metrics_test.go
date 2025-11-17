@@ -21,6 +21,7 @@ func TestRevocationAutoSignMetrics(t *testing.T) {
 	// Disable OTEL exporter for speed; Prometheus endpoint is independent of OTEL.
 	t.Setenv("GAUTH_OTEL_METRICS_ENABLE", "0")
 	s := NewBetaServerWithMetrics(":0", imetrics.NewMemory())
+	t.Cleanup(func() { s.Shutdown() })
 	defer s.Shutdown()
 
 	parseProm := func() (emitted, skippedEmpty, skippedDup int64) {

@@ -40,6 +40,7 @@ func TestModelLimitAuditAnchoring(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMIT_ANCHOR_INTERVAL", "2") // anchor every 2 audit entries
 
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 
 	exceed := func() {
 		w := httptest.NewRecorder()

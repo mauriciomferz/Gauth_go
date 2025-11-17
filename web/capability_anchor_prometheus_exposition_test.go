@@ -12,6 +12,7 @@ func TestCapabilityAnchorPrometheusExposition(t *testing.T) {
 	// We set file path env to trigger emission.
 	t.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", t.TempDir()+"/anchor.json")
 	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, "GET", "/api/v1/beta/capabilities/anchor/metrics/prometheus")
 	if w.Code != 200 {
 		t.Fatalf("status %d", w.Code)

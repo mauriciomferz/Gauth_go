@@ -32,6 +32,7 @@ func TestRotationSummaryEndpointAnchoring(t *testing.T) {
 	}
 	// Initialize server
 	srv := NewBetaServer("0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Append two descriptors through ledger directly (simulate rotation activity).
 	led, ok := srv.rotationLedger.(*notary.RotationLedger)
 	if !ok {

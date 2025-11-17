@@ -20,6 +20,7 @@ func TestCombinedAnchorEmission(t *testing.T) {
 	os.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory") // ensure provider initialization triggers receipt store setup
 	mem := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics(":0", mem)
+	t.Cleanup(func() { srv.Shutdown() })
 	// Seed capability registry hash directly (prototype placeholder).
 	srv.capabilityRegistryHash = "deadbeefcafecafe"
 

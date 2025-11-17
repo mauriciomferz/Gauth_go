@@ -9,6 +9,7 @@ import (
 // TestViolationMetricsPrometheus ensures Prometheus exposition contains expected metric lines.
 func TestViolationMetricsPrometheus(t *testing.T) {
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Trigger some failures to get non-zero counters.
 	for i := 0; i < 2; i++ {
 		w := httptest.NewRecorder()

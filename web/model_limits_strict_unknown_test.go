@@ -17,6 +17,7 @@ func TestModelLimitsStrictUnknown(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMITS_PATH", f.Name())
 	os.Setenv("GAUTH_MODEL_LIMITS_STRICT_UNKNOWN", "1")
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	// Request for unknown model
 	w := httptest.NewRecorder()
 	body := map[string]any{"model_id": "unknown-model", "input_tokens": 10}

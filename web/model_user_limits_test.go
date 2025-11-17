@@ -22,6 +22,7 @@ func TestModelUserLimits(t *testing.T) {
 	f.Close()
 	os.Setenv("GAUTH_MODEL_LIMITS_PATH", f.Name())
 	bs := NewBetaServer("")
+	t.Cleanup(func() { bs.Shutdown() })
 	// 1. Alice within all per-user limits
 	resp := doModelReq(bs, map[string]any{"model_id": "demo-model", "user_id": "alice", "input_tokens": 50, "output_tokens": 70})
 	if resp.Code != 200 {

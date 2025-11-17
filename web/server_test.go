@@ -22,6 +22,7 @@ func performRequest(r http.Handler, method, path string) *httptest.ResponseRecor
 
 func TestRootServesHTML(t *testing.T) {
 	srv := setupTestServer()
+	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, http.MethodGet, "/")
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected status 200, got %d", w.Code)
@@ -36,6 +37,7 @@ func TestRootServesHTML(t *testing.T) {
 
 func TestHealthEndpoint(t *testing.T) {
 	srv := setupTestServer()
+	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, http.MethodGet, "/api/v1/beta/health")
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d", w.Code)
@@ -51,6 +53,7 @@ func TestHealthEndpoint(t *testing.T) {
 
 func TestInfoEndpoint(t *testing.T) {
 	srv := setupTestServer()
+	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, http.MethodGet, "/api/v1/beta/info")
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d", w.Code)
@@ -69,6 +72,7 @@ func TestInfoEndpoint(t *testing.T) {
 
 func TestPingEndpoint(t *testing.T) {
 	srv := setupTestServer()
+	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, http.MethodGet, "/api/v1/beta/ping")
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d", w.Code)
@@ -84,6 +88,7 @@ func TestPingEndpoint(t *testing.T) {
 
 func TestCSPHeaderPresent(t *testing.T) {
 	srv := setupTestServer()
+	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, http.MethodGet, "/")
 	csp := w.Header().Get("Content-Security-Policy")
 	if csp == "" {
@@ -96,6 +101,7 @@ func TestCSPHeaderPresent(t *testing.T) {
 
 func TestPOAMetrics(t *testing.T) {
 	srv := setupTestServer()
+	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, http.MethodGet, "/api/v1/poa/metrics")
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected 200 got %d", w.Code)
@@ -104,6 +110,7 @@ func TestPOAMetrics(t *testing.T) {
 
 func TestPOAAuthorizeError(t *testing.T) {
 	srv := setupTestServer()
+	t.Cleanup(func() { srv.Shutdown() })
 	// Missing required fields should trigger 400
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/poa/authorize", strings.NewReader(`{"client_id":"x"}`))
 	req.Header.Set("Content-Type", "application/json")
@@ -116,6 +123,7 @@ func TestPOAAuthorizeError(t *testing.T) {
 
 func TestBetaVersionHeader(t *testing.T) {
 	srv := setupTestServer()
+	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, http.MethodGet, "/api/v1/beta/health")
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d", w.Code)
@@ -127,6 +135,7 @@ func TestBetaVersionHeader(t *testing.T) {
 
 func TestEducationalDeprecationHeaders(t *testing.T) {
 	srv := setupTestServer()
+	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, http.MethodGet, "/api/v1/beta/health")
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d", w.Code)

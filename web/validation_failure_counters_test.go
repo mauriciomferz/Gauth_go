@@ -16,6 +16,7 @@ func TestValidationFailureCounters(t *testing.T) {
 	m := imetrics.NewMemory()
 	// NewBetaServer signature currently expects config string (observed in other tests). We will set metrics manually.
 	srv := NewBetaServer("")
+	t.Cleanup(func() { srv.Shutdown() })
 	srv.metrics = m
 	r := srv.router
 

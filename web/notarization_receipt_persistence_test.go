@@ -42,6 +42,7 @@ func TestNotarizationReceiptPersistence(t *testing.T) {
 	t.Setenv("GAUTH_NOTARY_RECEIPT_PERSIST_PATH", receiptPath)
 
 	srv := NewBetaServer("0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// NOTE: During NewBetaServer initialization the capability file is loaded BEFORE the notarizer & receiptStore are initialized.
 	// Therefore the first anchor emission + notarization occurs without persistence (receiptStore still nil).
 	// We trigger a second capability reload (after waiting >= write interval and mutating the file) to ensure persistence occurs.

@@ -18,6 +18,7 @@ func buildMultiSigServer(t *testing.T) *BetaServer {
 	t.Helper()
 	gin.SetMode(gin.TestMode)
 	s := NewBetaServer("")
+	t.Cleanup(func() { s.Shutdown() })
 	km, err := crypto.NewManager(time.Hour)
 	if err != nil {
 		t.Fatalf("km init: %v", err)
