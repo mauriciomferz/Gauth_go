@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAuth API Documentation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .header p {
+            font-size: 1.2em;
+            color: #7f8c8d;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+        .card h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card p {
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+        .card a {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+        .card a:hover {
+            background: #2980b9;
+        }
+        .spec-link {
+            text-align: center;
+            margin-top: 40px;
+            padding: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .spec-link a {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+        .spec-link a:hover {
+            text-decoration: underline;
+        }
+        .icon {
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔐 GAuth API</h1>
+        <p>RFC-0150 Authorization Framework Documentation</p>
+    </div>
+
+    <div class="cards">
+        <div class="card">
+            <h2><span class="icon">📘</span> Swagger UI</h2>
+            <p>Interactive API documentation with "Try it out" functionality. Perfect for testing endpoints and exploring the API structure.</p>
+            <a href="swagger.html">Open Swagger UI →</a>
+        </div>
+
+        <div class="card">
+            <h2><span class="icon">📗</span> ReDoc</h2>
+            <p>Clean, three-panel documentation optimized for reading. Beautiful layout with search and navigation.</p>
+            <a href="redoc.html">Open ReDoc →</a>
+        </div>
+
+        <div class="card">
+            <h2><span class="icon">📄</span> OpenAPI Spec</h2>
+            <p>Raw OpenAPI 3.1.0 specification in YAML format. Use this to generate client SDKs or import into other tools.</p>
+            <a href="openapi.yaml" download>Download YAML →</a>
+        </div>
+    </div>
+
+    <div class="spec-link">
+        <p><strong>Direct API Spec URL:</strong><br>
+        <a href="openapi.yaml">https://mauriciomferz.github.io/Gauth_go/openapi.yaml</a></p>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px; color: #95a5a6;">
+        <p>GAuth - RFC-0150 Authorization Framework | November 2025</p>
+    </div>
+</body>
+</html>
