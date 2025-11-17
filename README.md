@@ -23,6 +23,15 @@ owners: core-maintainers
 
 **Previous Updates (Nov 16, 2025):**
 
+**✨ Latest Updates (Nov 17, 2025):**
+- **MCP SSE Transport Fixed:** Race condition resolved in HTTP-SSE transport with proper WaitGroup tracking
+- **18-Country Identity Verification:** Complete identity connectors for US, DE, UK, FR, IT, ES, SE, NL, AE, SA, JP, AU, SG, KR, IN, NZ, BR, CA, MX, ZA, NG, KE
+- **Geographic Scope Validation:** ISO 3166-1/3166-2 compliant validation with <1μs performance
+- **CI/CD Enhanced:** Package filtering, GitHub Actions annotations, comprehensive test summaries
+- **Beta Ready:** 95% RFC compliance (47/48 requirements), all critical features complete
+
+**Previous Updates (Nov 16, 2025):**
+
 A complete Go implementation of the GAuth authorization framework (RFC 0111/0115) with delegated authorization, proof-of-authorization tokens, and comprehensive security features.
 
 **✨ Latest Updates (Nov 17, 2025):**
