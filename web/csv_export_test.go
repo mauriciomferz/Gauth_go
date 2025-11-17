@@ -10,7 +10,11 @@ import (
 
 // helper to spin up minimal server (reusing existing newBetaServer logic if available) else create router manually.
 func newTestServer(t *testing.T) *BetaServer {
-	return NewBetaServer("")
+	srv := NewBetaServer("")
+	t.Cleanup(func() {
+		srv.Shutdown()
+	})
+	return srv
 }
 
 // seedLifecycleEvent ensures at least one lifecycle event exists (delegation init) for timeline tests.

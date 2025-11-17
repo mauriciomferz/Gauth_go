@@ -16,6 +16,9 @@ func newTestServerWithRevocations(t *testing.T, n int) *BetaServer {
 	t.Helper()
 	gin.SetMode(gin.TestMode)
 	srv := NewBetaServer("")
+	t.Cleanup(func() {
+		srv.Shutdown()
+	})
 	// ensure chain exists
 	if srv.revocationChain == nil {
 		srv.revocationChain = delegation.NewRevocationChain()
