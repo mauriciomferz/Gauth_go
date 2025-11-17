@@ -8,9 +8,43 @@
     <meta name="author" content="Gimel Foundation">
     <title>GAuth 1.0 - RFC-0111/0115 Dashboard | Production-Ready Authorization Framework</title>
     <link rel="stylesheet" href="/ui/gauth1.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqk1w27i+gXGFjz+UYYi6ZV7gzGrD5PnN1Spo3L9gV9A6FEXHgNs+ckr4X2UmJ8a3kMV5Akmw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
     <style>
+        /* Wizard Progress Styles */
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .step-circle {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+        .step-label {
+            font-size: 0.75rem;
+            text-align: center;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        .progress-line {
+            flex: 1;
+            height: 2px;
+            background: #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        .wizard-step-form {
+            min-height: 100px;
+        }
+        
         /* Loading indicator */
         .page-loader {
             position: fixed;
@@ -83,6 +117,10 @@
                         <i class="fas fa-home" aria-hidden="true"></i>
                         <span>Overview</span>
                     </button>
+                    <button class="nav-link" data-tab="login" aria-label="Secure Login">
+                        <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
+                        <span>Login</span>
+                    </button>
                     <button class="nav-link" data-tab="tokens" aria-label="Extended Tokens Management">
                         <i class="fas fa-key" aria-hidden="true"></i>
                         <span>Extended Tokens</span>
@@ -106,6 +144,10 @@
                     <button class="nav-link" data-tab="e2e" aria-label="End-to-End Testing">
                         <i class="fas fa-project-diagram" aria-hidden="true"></i>
                         <span>E2E Testing</span>
+                    </button>
+                    <button class="nav-link" data-tab="mcp" aria-label="Model Context Protocol">
+                        <i class="fas fa-server" aria-hidden="true"></i>
+                        <span>MCP</span>
                     </button>
                     <button class="nav-link" data-tab="metrics" aria-label="System Metrics">
                         <i class="fas fa-chart-line" aria-hidden="true"></i>
@@ -248,6 +290,90 @@
                 </div>
             </div>
 
+            <!-- Login Tab -->
+            <div class="tab-content" id="login-tab">
+                <div style="max-width: 500px; margin: 0 auto;">
+                    <div style="display: flex; align-items: center; gap: 1rem; justify-content: center; margin-bottom: 2rem;">
+                        <i class="fas fa-shield-alt" style="font-size: 2.5rem; color: var(--primary-600);"></i>
+                        <h1 style="font-size: 1.5rem; font-weight: bold; margin: 0;">Secure Login</h1>
+                    </div>
+
+                    <!-- Credentials Step -->
+                    <div id="login-step-credentials" class="login-step">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-key"></i> Credentials</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="login-credentials-form">
+                                    <div class="form-group">
+                                        <label for="login-username">Username</label>
+                                        <input type="text" id="login-username" class="form-control" placeholder="you@example.com" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="login-password">Password</label>
+                                        <input type="password" id="login-password" class="form-control" placeholder="••••••••" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                        <i class="fas fa-arrow-right"></i> Continue
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MFA Step -->
+                    <div id="login-step-mfa" class="login-step" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-lock"></i> Multi-Factor Authentication</h3>
+                            </div>
+                            <div class="card-body">
+                                <div id="mfa-methods" class="form-group" style="display: none;">
+                                    <label>MFA Method</label>
+                                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                        <!-- MFA method buttons will be dynamically added here -->
+                                    </div>
+                                </div>
+                                <form id="login-mfa-form">
+                                    <div class="form-group">
+                                        <label for="login-mfa-code">Enter <span id="mfa-method-label">TOTP</span> Code</label>
+                                        <input type="text" id="login-mfa-code" class="form-control" placeholder="123456" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;">
+                                        <i class="fas fa-check"></i> Verify MFA
+                                    </button>
+                                    <button type="button" id="mfa-back-btn" class="btn btn-secondary" style="width: 100%;">
+                                        <i class="fas fa-arrow-left"></i> Back
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Success Step -->
+                    <div id="login-step-success" class="login-step" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-check-circle"></i> Login Successful</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle"></i>
+                                    <p style="margin: 0.5rem 0 0 0;">You are now authenticated. A session token has been established.</p>
+                                </div>
+                                <div id="login-session-info" style="margin-top: 1rem; padding: 1rem; background: #f9fafb; border-radius: 0.5rem; font-size: 0.875rem;">
+                                    <!-- Session details will be displayed here -->
+                                </div>
+                                <button type="button" id="logout-btn" class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">
+                                    <i class="fas fa-sign-out-alt"></i> Log out
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Extended Tokens Tab -->
             <div class="tab-content" id="tokens-tab">
                 <h2><i class="fas fa-key"></i> Extended Token Management</h2>
@@ -255,48 +381,123 @@
 
                 <div class="cards-grid">
                     <div class="card">
-                        <h3><i class="fas fa-plus-circle"></i> Create Extended Token</h3>
-                        <form id="create-token-form" class="form">
-                            <div class="form-group">
-                                <label>Client ID</label>
-                                <input type="text" id="token-client-id" placeholder="client-123" value="demo-client-001" required>
+                        <h3><i class="fas fa-plus-circle"></i> Create Extended Token (RFC-0111)</h3>
+                        <div id="wizard-container">
+                            <div id="wizard-intro" style="display: block;">
+                                <p class="text-muted" style="margin-bottom: 1rem;">
+                                    Create a new RFC-0111 compliant extended token using the 8-step subscription flow with multi-level authorization.
+                                </p>
+                                <button class="btn btn-primary" id="start-wizard-btn">
+                                    <i class="fas fa-magic"></i> Start Subscription Wizard
+                                </button>
                             </div>
-                            <div class="form-group">
-                                <label>Owner's Authorizer Entity</label>
-                                <input type="text" id="token-owner-auth" placeholder="HRB12345-DE" value="HRB12345-DE" required>
+                            
+                            <!-- Subscription Wizard -->
+                            <div id="subscription-wizard" style="display: none;">
+                                <!-- Progress Indicator -->
+                                <div class="wizard-progress" style="margin-bottom: 2rem;">
+                                    <div class="progress-steps" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+                                        <div class="progress-step" data-step="1">
+                                            <div class="step-circle">1</div>
+                                            <div class="step-label">Initiate</div>
+                                        </div>
+                                        <div class="progress-line"></div>
+                                        <div class="progress-step" data-step="2">
+                                            <div class="step-circle">2</div>
+                                            <div class="step-label">Authorizer</div>
+                                        </div>
+                                        <div class="progress-line"></div>
+                                        <div class="progress-step" data-step="3">
+                                            <div class="step-circle">3</div>
+                                            <div class="step-label">Owner ID</div>
+                                        </div>
+                                        <div class="progress-line"></div>
+                                        <div class="progress-step" data-step="4">
+                                            <div class="step-circle">4</div>
+                                            <div class="step-label">Owner Auth</div>
+                                        </div>
+                                        <div class="progress-line"></div>
+                                        <div class="progress-step" data-step="5">
+                                            <div class="step-circle">5</div>
+                                            <div class="step-label">Client</div>
+                                        </div>
+                                        <div class="progress-line"></div>
+                                        <div class="progress-step" data-step="6">
+                                            <div class="step-circle">6</div>
+                                            <div class="step-label">Resource ID</div>
+                                        </div>
+                                        <div class="progress-line"></div>
+                                        <div class="progress-step" data-step="7">
+                                            <div class="step-circle">7</div>
+                                            <div class="step-label">Resource Auth</div>
+                                        </div>
+                                        <div class="progress-line"></div>
+                                        <div class="progress-step" data-step="8">
+                                            <div class="step-circle">8</div>
+                                            <div class="step-label">Complete</div>
+                                        </div>
+                                    </div>
+                                    <div class="current-step-info" style="text-align: center;">
+                                        <h3 class="step-title" style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">Step 1: Initiate</h3>
+                                        <p class="step-description" style="color: #6c757d; font-size: 0.875rem;">Create subscription</p>
+                                    </div>
+                                </div>
+
+                                <!-- Step Forms -->
+                                <div id="wizard-forms">
+                                    <!-- Step 1 -->
+                                    <div class="wizard-step-form" data-step="1" style="display: none;">
+                                        <div class="form-group">
+                                            <label>Client ID</label>
+                                            <input type="text" id="wizard-client-id" placeholder="demo-client-001" value="demo-client-001">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Requested Scope (comma-separated)</label>
+                                            <input type="text" id="wizard-scope" placeholder="read, write" value="read, write">
+                                        </div>
+                                    </div>
+
+                                    <!-- Other steps will be handled automatically -->
+                                    <div class="wizard-step-form" data-step="2" style="display: none;">
+                                        <p class="text-muted">Verifying authorizer identity with commercial register...</p>
+                                    </div>
+                                    <div class="wizard-step-form" data-step="3" style="display: none;">
+                                        <p class="text-muted">Verifying client owner identity...</p>
+                                    </div>
+                                    <div class="wizard-step-form" data-step="4" style="display: none;">
+                                        <p class="text-muted">Building client owner authorization chain...</p>
+                                    </div>
+                                    <div class="wizard-step-form" data-step="5" style="display: none;">
+                                        <p class="text-muted">Attaching Power of Attorney credential...</p>
+                                    </div>
+                                    <div class="wizard-step-form" data-step="6" style="display: none;">
+                                        <p class="text-muted">Verifying resource owner identity...</p>
+                                    </div>
+                                    <div class="wizard-step-form" data-step="7" style="display: none;">
+                                        <p class="text-muted">Building resource owner authorization chain...</p>
+                                    </div>
+                                    <div class="wizard-step-form" data-step="8" style="display: none;">
+                                        <p class="text-muted">Configuring resource server and generating token...</p>
+                                    </div>
+                                </div>
+
+                                <!-- Wizard Controls -->
+                                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                                    <button class="btn btn-secondary" id="wizard-cancel-btn">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                    <button class="btn btn-primary" id="wizard-execute-btn" style="flex: 1;">
+                                        <i class="fas fa-arrow-right"></i> Execute Step
+                                    </button>
+                                </div>
+
+                                <!-- Error Display -->
+                                <div id="wizard-error" class="result-box" style="display: none; margin-top: 1rem; background: #fee; border-color: #f88;"></div>
                             </div>
-                            <div class="form-group">
-                                <label>Client Owner Entity</label>
-                                <input type="text" id="token-client-owner" placeholder="12345678-GB" value="12345678-GB" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Scope (comma-separated)</label>
-                                <input type="text" id="token-scope" placeholder="read, write, admin" value="read,write" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Jurisdiction (ISO 3166-1/3166-2)</label>
-                                <select id="token-jurisdiction">
-                                    <option value="">-- Select Jurisdiction (Optional) --</option>
-                                    <option value="DE">Germany (DE)</option>
-                                    <option value="US">United States (US)</option>
-                                    <option value="GB">United Kingdom (GB)</option>
-                                    <option value="FR">France (FR)</option>
-                                    <option value="AT">Austria (AT)</option>
-                                    <option value="CH">Switzerland (CH)</option>
-                                    <option value="DE-BY">Bavaria, Germany (DE-BY)</option>
-                                    <option value="US-CA">California, USA (US-CA)</option>
-                                </select>
-                                <small style="color: #6c757d; margin-top: 0.25rem; display: block;">Geographic scope validation - tests RFC-0115 Section B.3 compliance</small>
-                            </div>
-                            <div class="form-group">
-                                <label>Expiration (hours)</label>
-                                <input type="number" id="token-expiration" value="24" min="1" max="720" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Create Token
-                            </button>
-                        </form>
-                        <div id="token-result" class="result-box" style="display: none;"></div>
+                        </div>
+
+                        <!-- Token Result (shown after wizard completion) -->
+                        <div id="token-result" class="result-box" style="display: none; margin-top: 1.5rem;"></div>
                     </div>
 
                     <div class="card">
@@ -317,7 +518,7 @@
                 <div class="card">
                     <h3><i class="fas fa-list"></i> Recent Tokens</h3>
                     <div id="recent-tokens" class="table-responsive">
-                        <p class="text-muted">No tokens created yet. Use the form above to create your first token.</p>
+                        <p class="text-muted">No tokens created yet. Use the subscription wizard above to create your first token.</p>
                     </div>
                 </div>
             </div>
@@ -748,6 +949,134 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MCP Tab -->
+            <div class="tab-content" id="mcp-tab">
+                <h2><i class="fas fa-server"></i> Model Context Protocol</h2>
+                <p class="tab-description">Manage MCP servers and interact with AI model resources and tools.</p>
+
+                <div class="stats-grid" role="region" aria-label="MCP Statistics">
+                    <article class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="mcp-total-servers">0</h3>
+                            <p>Total Servers</p>
+                        </div>
+                    </article>
+                    <article class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="mcp-connected-servers">0</h3>
+                            <p>Connected</p>
+                        </div>
+                    </article>
+                    <article class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%)">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="mcp-total-tools">0</h3>
+                            <p>Available Tools</p>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <h3><i class="fas fa-plus-circle"></i> Register MCP Server</h3>
+                        <form id="register-mcp-form" class="form">
+                            <div class="form-group">
+                                <label>Server ID</label>
+                                <input type="text" id="mcp-server-id" placeholder="filesystem-server" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Server Name</label>
+                                <input type="text" id="mcp-server-name" placeholder="Filesystem MCP Server" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <input type="text" id="mcp-server-description" placeholder="Provides file system access">
+                            </div>
+                            <div class="form-group">
+                                <label>Transport Type</label>
+                                <select id="mcp-transport-type">
+                                    <option value="stdio">Standard I/O (subprocess)</option>
+                                    <option value="websocket">WebSocket</option>
+                                    <option value="http-sse">HTTP Server-Sent Events</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="mcp-stdio-fields">
+                                <label>Command</label>
+                                <input type="text" id="mcp-command" placeholder="npx -y @modelcontextprotocol/server-filesystem">
+                                <label style="margin-top: 1rem;">Arguments (comma-separated)</label>
+                                <input type="text" id="mcp-args" placeholder="/path/to/allowed/directory">
+                            </div>
+                            <div class="form-group" id="mcp-url-field" style="display: none;">
+                                <label>URL</label>
+                                <input type="text" id="mcp-url" placeholder="ws://localhost:8000/mcp">
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Register Server
+                            </button>
+                        </form>
+                        <div id="mcp-register-result" class="result-box" style="display: none;"></div>
+                    </div>
+
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3><i class="fas fa-list"></i> MCP Servers</h3>
+                            <button class="btn btn-secondary" id="mcp-refresh-btn" style="padding: 0.5rem 1rem;">
+                                <i class="fas fa-sync"></i> Refresh
+                            </button>
+                        </div>
+                        <div id="mcp-servers-list">
+                            <p class="text-muted">No servers registered. Use the form to register your first MCP server.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="mcp-server-details" style="display: none;">
+                    <div class="cards-grid">
+                        <div class="card">
+                            <h3><i class="fas fa-file-alt"></i> Resources</h3>
+                            <div id="mcp-resources-list">
+                                <p class="text-muted">No resources available</p>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h3><i class="fas fa-tools"></i> Tools</h3>
+                            <div id="mcp-tools-list">
+                                <p class="text-muted">No tools available</p>
+                            </div>
+                            <div id="mcp-tool-executor" style="display: none; margin-top: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 0.5rem;">
+                                <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem;">Execute Tool</h4>
+                                <form id="execute-tool-form" class="form">
+                                    <div class="form-group">
+                                        <label>Tool Name</label>
+                                        <select id="tool-name-select" required>
+                                            <option value="">Select a tool...</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Arguments (JSON)</label>
+                                        <textarea id="tool-arguments" rows="3" placeholder='{"param": "value"}'>{
+}</textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-play"></i> Execute Tool
+                                    </button>
+                                </form>
+                                <div id="tool-result" class="result-box" style="display: none; margin-top: 1rem;"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
