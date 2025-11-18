@@ -12,13 +12,13 @@ test.describe('Backend API Integration', () => {
   
   test.describe('Health and Status', () => {
     test('should have healthy backend', async ({ request }) => {
-      const response = await request.get(`${API_BASE}/health`)
+      const response = await request.get(`${API_BASE}/api/v1/beta/health`)
       expect(response.ok()).toBeTruthy()
       expect(response.status()).toBe(200)
     })
 
     test('should return API version info', async ({ request }) => {
-      const response = await request.get(`${API_BASE}/api/v1/beta/health`)
+      const response = await request.get(`${API_BASE}/api/v1/beta/info`)
       expect(response.ok() || response.status() === 404).toBeTruthy()
     })
   })

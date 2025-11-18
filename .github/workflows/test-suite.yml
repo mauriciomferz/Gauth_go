@@ -235,7 +235,7 @@ jobs:
         run: |
           go run ./cmd/web-server &
           echo $! > backend.pid
-          timeout 120 bash -c 'until curl -f http://localhost:8080/health 2>/dev/null; do sleep 3; done' || echo "Backend health check timeout"
+          timeout 120 bash -c 'until curl -f http://localhost:8080/api/v1/beta/health 2>/dev/null; do sleep 3; done' || echo "Backend health check timeout"
       
       - name: Run API tests
         working-directory: web/ui-react
