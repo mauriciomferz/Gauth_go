@@ -34,14 +34,17 @@ type Agent struct {
 	confidence      float64 // Minimum confidence threshold (0.0 - 1.0)
 	enabled         bool
 	mu              sync.RWMutex
-	metrics         *AgentMetrics
+	metrics         *EnforcementMetrics
 	policyEngine    PolicyEngine
 	contextAnalyzer ContextAnalyzer
 	riskScorer      RiskScorer
 }
 
-// AgentMetrics tracks G-Agent performance metrics
-type AgentMetrics struct {
+// EnforcementMetrics tracks G-Agent enforcement decision outcomes.
+// Note: These are enforcement outcome statistics (decisions made, violations detected),
+// not system performance metrics. The name reflects what is being measured:
+// the results and effectiveness of authorization enforcement decisions.
+type EnforcementMetrics struct {
 	TotalEvaluations   int64
 	AllowSuggestions   int64
 	DenySuggestions    int64
@@ -111,7 +114,7 @@ func NewAgent(id, name, model, provider string, confidenceThreshold float64) *Ag
 		provider:   provider,
 		confidence: confidenceThreshold,
 		enabled:    true,
-		metrics:    &AgentMetrics{},
+		metrics:    &EnforcementMetrics{},
 	}
 }
 
@@ -187,12 +190,15 @@ func (a *Agent) evaluatePolicy(ctx context.Context, req *enforcement.Enforcement
 		return engine.EvaluatePolicy(ctx, req)
 	}
 
-	// Default policy evaluation (simple rule-based)
+	// SECURITY: Fail-safe default - deny when policy engine is not configured.
+	// This follows the principle of "secure by default". If you need to allow
+	// requests without a policy engine, explicitly configure AllowWithoutPolicy
+	// in your agent configuration.
 	return PolicyDecision{
-		Decision:      "allow",
+		Decision:      "deny",
 		AppliedRules:  []string{},
-		Violations:    []string{},
-		Justification: "No policy engine configured, default allow",
+		Violations:    []string{"no_policy_engine_configured"},
+		Justification: "No policy engine configured - deny by default (fail-safe)",
 	}, nil
 }
 
@@ -377,12 +383,12 @@ func (a *Agent) updateMetrics(rec *enforcement.AIRecommendation, latencyMs int64
 	a.metrics.AverageLatencyMs = ((a.metrics.AverageLatencyMs * (totalEval - 1)) + float64(latencyMs)) / totalEval
 }
 
-// GetMetrics returns a copy of agent metrics (safe for concurrent access)
-func (a *Agent) GetMetrics() AgentMetrics {
+// GetMetrics returns a copy of enforcement metrics (safe for concurrent access)
+func (a *Agent) GetMetrics() EnforcementMetrics {
 	a.metrics.mu.RLock()
 	defer a.metrics.mu.RUnlock()
 	// Return a copy without the mutex to avoid copylocks
-	return AgentMetrics{
+	return EnforcementMetrics{
 		TotalEvaluations:   a.metrics.TotalEvaluations,
 		AllowSuggestions:   a.metrics.AllowSuggestions,
 		DenySuggestions:    a.metrics.DenySuggestions,
@@ -448,8 +454,8 @@ type AgentInfo struct {
 	HasRiskScorer       bool    `json:"has_risk_scorer"`
 }
 
-// MarshalJSON implements json.Marshaler for AgentMetrics
-func (m *AgentMetrics) MarshalJSON() ([]byte, error) {
+// MarshalJSON implements json.Marshaler for EnforcementMetrics
+func (m *EnforcementMetrics) MarshalJSON() ([]byte, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 

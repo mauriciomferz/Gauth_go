@@ -68,7 +68,34 @@ type Rule struct {
 	UpdatedAt   time.Time
 }
 
-// EnforcementRequest represents a request for enforcement evaluation
+// EnforcementRequest represents a request for enforcement evaluation.
+//
+// Field Semantics:
+//
+// Subject: Identifier of the user or AI agent performing the action.
+//   Examples: "user:alice@example.com", "agent:diagnostic-ai-v2", "service:billing-processor"
+//
+// Resource: Semantic resource identifier representing the target of the action.
+//   This should express INTENT, not implementation details.
+//   Examples:
+//     - Simple: "patient-record:12345", "financial-report:Q4-2024"
+//     - Hierarchical: "medical:patient:12345:medications", "cloud:storage:bucket:documents"
+//     - Complex operations: "treatment-plan:12345:recommend", "diagnosis:generate:patient:12345"
+//   Avoid low-level paths like "POST /api/v1/patients/12345/medications?action=add"
+//
+// Action: Semantic action type describing the operation intent.
+//   Beyond simple read/write - use domain-specific verbs:
+//   Examples:
+//     - Data operations: "read", "write", "update", "delete", "create"
+//     - Medical domain: "diagnose", "prescribe", "analyze", "recommend"
+//     - Financial domain: "transfer", "approve", "audit", "reconcile"
+//     - AI operations: "train", "infer", "explain", "delegate"
+//     - Hierarchical: "medical.diagnose", "financial.transaction.execute"
+//
+// Context: Additional contextual information for enforcement decisions.
+//   Examples: time-of-day, geographic location, authentication method, risk indicators
+//
+// Disclosures: Required transparency disclosures (e.g., AI involvement, data usage)
 type EnforcementRequest struct {
 	Subject     string                  `json:"subject"`
 	Resource    string                  `json:"resource"`
