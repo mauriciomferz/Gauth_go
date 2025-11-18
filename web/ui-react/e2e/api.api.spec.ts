@@ -223,7 +223,7 @@ test.describe('Backend API Integration', () => {
   test.describe('Performance', () => {
     test('should respond quickly to health checks', async ({ request }) => {
       const start = Date.now()
-      const response = await request.get(`${API_BASE}/health`)
+      const response = await request.get(`${API_BASE}/api/v1/beta/health`)
       const duration = Date.now() - start
       
       expect(response.ok()).toBeTruthy()
@@ -234,7 +234,7 @@ test.describe('Backend API Integration', () => {
 
     test('should handle concurrent requests', async ({ request }) => {
       const requests = Array(10).fill(null).map(() => 
-        request.get(`${API_BASE}/health`)
+        request.get(`${API_BASE}/api/v1/beta/health`)
       )
       
       const responses = await Promise.all(requests)

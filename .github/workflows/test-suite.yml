@@ -229,7 +229,7 @@ jobs:
       
       - name: Install Playwright
         working-directory: web/ui-react
-        run: npx playwright install
+        run: npx playwright install --with-deps
       
       - name: Start backend server
         run: |
