@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: GAuth Learning Lab API
-  version: 1.0.0
+  version: 0.4.0-beta
   description: >-
     RFC-0150 compliant authorization framework API for learning, experimentation, and compliance validation.
     This comprehensive implementation provides endpoints for evaluation and demonstration of GAuth concepts,
@@ -283,6 +283,108 @@ paths:
       responses:
         '200': { $ref: '#/components/responses/BLSPoPVerifyOk' }
         '400': { $ref: '#/components/responses/BadRequest' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/crypto/algorithms:
+    get:
+      summary: List supported cryptographic algorithms
+      tags: [crypto]
+      operationId: getCryptoAlgorithms
+      description: |
+        Returns a list of all supported cryptographic signature algorithms, including their names and whether they support aggregation.
+      responses:
+        '200':
+          description: List of supported algorithms
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, algorithms]
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  algorithms:
+                    type: array
+                    items:
+                      type: object
+                      required: [name, aggregated_supported]
+                      properties:
+                        name:
+                          type: string
+                          example: "bls12-381"
+                        aggregated_supported:
+                          type: boolean
+                          example: true
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/anchor/chain:
+    get:
+      summary: Retrieve combined anchor chain
+      tags: [anchor]
+      operationId: getAnchorChain
+      description: |
+        Returns the complete chain of combined anchor tokens, including capability registry and rotation hashes.
+      responses:
+        '200':
+          description: Combined anchor chain
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, chain]
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  chain:
+                    type: array
+                    items:
+                      type: object
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/anchor/emitCombined:
+    post:
+      summary: Emit combined anchor token
+      tags: [anchor]
+      operationId: postAnchorEmitCombined
+      description: |
+        Creates a combined anchor token that includes both capability registry hash and rotation head hash.
+      responses:
+        '200':
+          description: Combined anchor emitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, digest]
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  digest:
+                    type: string
+                    example: "deadbeefcafecafe"
+        '500': { $ref: '#/components/responses/InternalError' }
+  /api/v1/anchor/verifyChain:
+    get:
+      summary: Verify combined anchor chain integrity
+      tags: [anchor]
+      operationId: getAnchorVerifyChain
+      description: |
+        Verifies the integrity of the combined anchor chain by checking hash continuity.
+      responses:
+        '200':
+          description: Chain verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, status]
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status:
+                    type: string
+                    example: "ok"
         '500': { $ref: '#/components/responses/InternalError' }
   /api/v1/anchor/revocation/emit:
     post:
@@ -890,6 +992,37 @@ paths:
         '500': { $ref: '#/components/responses/InternalError' }
 components:
   schemas:
+    CombinedAnchorToken:
+      type: object
+      description: Combined anchor token containing capability registry and rotation hashes
+      properties:
+        capability_hash:
+          type: string
+          description: Hash of the capability registry
+        rotation_head:
+          type: string
+          description: Current rotation head hash
+        digest:
+          type: string
+          description: Combined digest of both hashes
+        timestamp:
+          type: string
+          format: date-time
+      required: [capability_hash, digest]
+    ErrorResponse:
+      type: object
+      description: Standard error response
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+      required: [success, error]
     BLSAggregateParticipant:
       type: object
       properties:
