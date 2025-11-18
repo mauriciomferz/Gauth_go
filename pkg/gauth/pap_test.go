@@ -3,6 +3,8 @@ package gauth
 
 import (
 	"context"
+	"fmt"
+	"sync"
 	"testing"
 	"time"
 
@@ -910,13 +912,20 @@ func TestPAP_ConcurrentAccess(t *testing.T) {
 	pap := NewPowerAdministrationPoint("pap-001", "Test PAP", "Test PAP")
 	ctx := context.Background()
 
+	// Use sync.WaitGroup for proper synchronization
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	errors := make([]error, 0)
+
 	// Create multiple policies concurrently
-	done := make(chan bool, 10)
 	for i := 0; i < 10; i++ {
+		wg.Add(1)
 		go func(index int) {
+			defer wg.Done()
+			
 			createRequest := &PolicyCreateRequest{
 				PolicyType:       PolicyTypePoA,
-				PolicyName:       "Concurrent Policy " + string(rune('A'+index)),
+				PolicyName:       fmt.Sprintf("Concurrent Policy %c", 'A'+index),
 				ClientOwner:      "client-001",
 				OwnersAuthorizer: "authorizer-001",
 				PolicyRules: PolicyRules{
@@ -925,20 +934,35 @@ func TestPAP_ConcurrentAccess(t *testing.T) {
 			}
 
 			_, err := pap.CreatePolicy(ctx, createRequest)
-			assert.NoError(t, err)
-			done <- true
+			if err != nil {
+				mu.Lock()
+				errors = append(errors, err)
+				mu.Unlock()
+			}
 		}(i)
 	}
 
 	// Wait for all goroutines to complete
-	for i := 0; i < 10; i++ {
-		<-done
+	wg.Wait()
+
+	// Check for errors during creation
+	if len(errors) > 0 {
+		t.Logf("Errors during concurrent policy creation: %v", errors)
 	}
+	require.Empty(t, errors, "Expected no errors during concurrent policy creation")
 
 	// Verify all policies were created
 	policies, err := pap.ListPolicies(ctx, nil)
 	require.NoError(t, err)
-	assert.Len(t, policies, 10)
+	
+	// Add detailed logging if assertion fails
+	if len(policies) != 10 {
+		t.Logf("Expected 10 policies but got %d", len(policies))
+		for i, p := range policies {
+			t.Logf("  Policy %d: %s (%s)", i+1, p.PolicyID, p.PolicyName)
+		}
+	}
+	assert.Len(t, policies, 10, "Expected exactly 10 policies to be created")
 }
 
 // TestPAP_PolicyLifecycleFlow tests complete policy lifecycle

@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
@@ -1105,6 +1106,7 @@ type PowerAdministrationPoint struct {
 	CreatedAt      time.Time                       `json:"created_at"`
 	policyStore    map[string]*AuthorizationPolicy // In-memory store (replace with DB in production)
 	policyStoreMux sync.RWMutex                    // Protect concurrent access
+	policyIDCounter int64                           // Atomic counter for unique policy IDs
 }
 
 // NewPowerAdministrationPoint creates a new power administration point
@@ -1148,8 +1150,9 @@ func (p *PowerAdministrationPoint) CreatePolicy(ctx context.Context, request *Po
 		return nil, fmt.Errorf("policy type is required")
 	}
 
-	// Generate policy ID
-	policyID := fmt.Sprintf("policy_%s_%d", request.PolicyType, time.Now().UnixNano())
+	// Generate unique policy ID using atomic counter to prevent collisions in concurrent scenarios
+	counter := atomic.AddInt64(&p.policyIDCounter, 1)
+	policyID := fmt.Sprintf("policy_%s_%d_%d", request.PolicyType, time.Now().UnixNano(), counter)
 
 	now := time.Now()
 
