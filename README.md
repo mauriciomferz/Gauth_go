@@ -2,7 +2,7 @@
 title: GAuth 1.0 README
 category: overview
 status: beta-ready
-lastUpdated: 2025-11-17
+lastUpdated: 2025-11-19
 owners: core-maintainers
 ---
 # GAuth 1.0 - Go Implementation
@@ -12,7 +12,7 @@ owners: core-maintainers
 [![Gap Matrix](docs/badges/gap-matrix.svg)](docs/GAP_MATRIX.auto.md)
 
 > **🚀 BETA-READY** - Comprehensive security audit, extensive testing (689+ test cases), complete documentation. Suitable for testing and evaluation.
-> **Last Updated:** 2025-11-17 (✨ Login & MCP tabs added, UI enhancements, configuration updates)
+> **Last Updated:** 2025-11-19 (📚 Documentation refresh, architecture updates, configuration accuracy improvements)
 
 **✨ Latest Updates (Nov 17, 2025):**
 - **🔐 Login Tab Added:** Multi-step authentication with credentials and MFA verification (TOTP, SMS, Email)
@@ -41,10 +41,15 @@ A complete Go implementation of the GAuth authorization framework (RFC 0111/0115
 > - 🌐 **API Server:** http://localhost:8080
 > - ⚛️ **React UI:** http://localhost:3000 (full SPA with routing)
 > - 📄 **Static HTML UI:** http://localhost:8080/gauth1.html (includes Login & MCP tabs)
+> - 📚 **API Documentation:**
+>   - **Swagger UI:** http://localhost:8080/api/docs/swagger
+>   - **ReDoc:** http://localhost:8080/api/docs/redoc
+>   - **Default:** http://localhost:8080/api/docs
+> - 📋 **OpenAPI Spec:** http://localhost:8080/api/openapi/gauth.yaml
 >
 > **Features:** RFC-0111 8-step subscription wizard, Login with MFA, MCP server management, 11 Phase 2A backend endpoints (PVP, Registry, PoA)
 
-**Status**: Beta (November 17, 2025)
+**Status**: Beta (November 19, 2025)
 - ✅ **CI/CD:** Resilient workflows with graceful degradation for missing infrastructure
 - ✅ **Security:** All HIGH severity issues resolved, 215 gosec findings documented
 - ✅ **Testing:** 49-97% coverage across core packages (689+ test cases)
@@ -56,7 +61,7 @@ See [Dockerfiles Summary](DOCKERFILES_SUMMARY.md) for container build details. S
 
 ## 🎉 100% RFC Conformance Achieved
 
-**Status**: 45/45 requirements implemented with enhanced protocol flow (November 14, 2025)
+**Status**: 45/45 requirements implemented with enhanced protocol flow (November 2025)
 
 - ✅ P0 (Critical): 11/11 complete (100%)
 - ✅ P1 (High): 10/10 complete (100%)
@@ -250,25 +255,67 @@ A modern **React + TypeScript** web interface showcasing all GAuth capabilities 
 ## Architecture
 
 ```
-cmd/
-├── web-server/          # Web demo server
-├── conformance/         # RFC conformance testing
-└── coverage/            # Test coverage tools
+cmd/                    # 20+ executable commands
+├── web-server/         # Main web demo server
+├── conformance/        # RFC conformance testing
+├── coverage/           # Test coverage tools
+├── gauth-server/       # Standalone auth server
+├── auditor/           # Audit log analysis
+├── mock-server/       # Mock external services
+└── ...                # See cmd/ directory for complete list
 
-pkg/
-├── gauth/              # Core authorization logic
-├── delegation/         # Delegation chain management
-├── pdp/                # Policy decision point
-├── crypto/             # Cryptographic operations
-├── ledger/             # Audit ledger
-├── compliance/         # Attestation & compliance
-└── notarization/       # External anchoring
+pkg/                    # 40+ packages organized by domain
+# Core Authorization
+├── gauth/             # Core authorization logic & PAP
+├── auth/              # Authentication primitives
+├── authz/             # Authorization engine
+├── delegation/        # Delegation chain management
+├── pdp/               # Policy decision point
+├── pip/               # Policy information point
+├── poa/               # Power of attorney
+├── policy/            # Policy management
 
-internal/
-├── ai/                 # AI capability governance
-├── crypto/             # Internal crypto utilities
-├── pdp/                # PDP cache & distributed support
-└── jurisdiction/       # Multi-jurisdiction support
+# Security & Compliance
+├── crypto/            # Cryptographic operations
+├── enforcement/       # Rule-based enforcement (NEW)
+├── gagent/            # G-Agent API for AI (NEW)
+├── compliance/        # Attestation & compliance
+├── audit/             # Audit logging
+
+# External Integration
+├── oidc/              # OpenID Connect (NEW)
+├── registry/          # Entity registry (NEW)
+├── rfc0111/           # RFC-0111 implementation (NEW)
+├── mcp/               # Model Context Protocol (NEW)
+
+# Infrastructure
+├── ledger/            # Audit ledger
+├── notarization/      # External anchoring
+├── cache/             # Caching layer
+├── metrics/           # Metrics collection
+├── events/            # Event system
+├── replay/            # Replay protection
+├── store/             # Storage abstraction
+└── token/             # Token utilities
+
+internal/              # 36 internal packages
+├── anchor/            # Anchoring utilities
+├── attestation/       # Attestation logic
+├── authorization/     # Authorization internals
+├── capability/        # Capability-based access
+├── cascade/           # Cascade deletion
+├── circuit/           # Circuit breaker
+├── conditions/        # Condition evaluation
+├── config/            # Configuration management
+├── crypto/            # Internal crypto utilities
+├── jurisdiction/      # Multi-jurisdiction support
+├── metrics/           # Metrics internals
+├── monitoring/        # Monitoring utilities
+├── pdp/               # PDP cache & distributed support
+├── policy/            # Policy internals
+├── secrets/           # Secret management
+├── security/          # Security utilities
+└── ...               # See internal/ directory for complete list
 ```
 
 ## API Examples (Selected)
@@ -393,38 +440,48 @@ GAUTH_HOST=localhost
 
 GAUTH_CORS_ALLOW=*           # Development only; restrict domains in production
 
+# Core Server
+GAUTH_PORT=8080
+GAUTH_HOST=localhost
+
+# CORS Configuration
+GAUTH_CORS_ALLOW=http://localhost:3000,http://localhost:5173  # Development origins (restrict in production)
+
 # Feature Flags
 GAUTH_DEV_INDEX=1            # Enable development index page
 GAUTH_RFC0111_ENABLED=1      # Enable RFC-0111 subscription endpoints (required for Phase 2A)
 GAUTH_USE_JWT_LIB=1          # Use JWT library for token operations
+GAUTH_BETA=1                 # Enable beta features
 
-# Security
-GAUTH_JWT_SIGNING_KEY=your-secret-key
+# Security & Tokens
+GAUTH_JWT_SIGNING_KEY=dev-please-change    # JWT signing key (change in production)
 GAUTH_ENABLE_REPLAY_PROTECTION=true
-
-# Authentication & MFA
-GAUTH_SESSION_TIMEOUT=24h    # Session token timeout
-GAUTH_MFA_ENABLED=true       # Enable multi-factor authentication
-GAUTH_MFA_METHODS=totp,sms,email  # Supported MFA methods
+GAUTH_TOKEN_SIG_MODE=eddsa                 # Token signature algorithm
 
 # Key Rotation
 GAUTH_KEY_ROTATION_INTERVAL=720h
 GAUTH_KEY_ROTATION_AUTO=true
 
-# External Anchoring
-GAUTH_ANCHOR_ROTATIONS=true
-GAUTH_TSA_ENDPOINT=https://tsa.example.com
-
-# Model Context Protocol (MCP)
-GAUTH_MCP_ENABLED=true       # Enable MCP server management
-GAUTH_MCP_TRANSPORTS=stdio,websocket,http-sse  # Supported transport types
+# External Anchoring / Timestamp Authority
+GAUTH_ANCHOR_ROTATIONS=false
+GAUTH_TSA_ENDPOINT=                        # Optional TSA endpoint
 
 # Observability
 GAUTH_METRICS_ENABLED=true
-GAUTH_TRACING_ENABLED=true
+GAUTH_METRICS_PERSIST_PATH=./data/metrics.db
+GAUTH_TRACING_ENABLED=false
+GAUTH_ENABLE_PROMETHEUS=true
+GAUTH_ENABLE_OPENAPI=true
+
+# Database (PostgreSQL - optional)
+GAUTH_DB_HOST=localhost
+GAUTH_DB_PORT=5432
+GAUTH_DB_USER=gauth
+GAUTH_DB_PASSWORD=dev-password-change-me
+GAUTH_DB_NAME=gauth
 ```
 
-See `.env.backend.example` for a fuller set including persistence and feature flags.
+**Note:** MFA and MCP features are implemented in the UI but environment variable configuration is handled internally. See `.env.backend.example` for complete configuration including database persistence.
 
 ## Testing (Backend & Frontend)
 
@@ -460,6 +517,7 @@ npm run test:e2e     # Playwright end-to-end tests
 
 - [Gap Matrix](docs/GAP_MATRIX.auto.md) - RFC compliance tracking
 - [API Documentation](api/openapi/gauth-api.yaml) - OpenAPI specification
+- [P*P Architecture User Guide](docs/P_STAR_P_USER_GUIDE.md) - Complete guide to Policy Administration, Decision, Information, Verification, and Enforcement Points
 - [Threat Model](docs/THREAT_MITIGATIONS_MATRIX.yaml) - Security analysis
 - [Architecture](ARCHITECTURE_SOLUTION.md) - System architecture
 - [Docs Index](docs/INDEX.md) - Curated navigation of gap, compliance & performance reports
