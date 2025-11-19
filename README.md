@@ -95,7 +95,7 @@ See [Gap Matrix](docs/GAP_MATRIX.auto.md) for detailed implementation status.
 
 ### Documentation ✅
 - 7 core packages with comprehensive godoc documentation (1,133 lines)
-- Architecture documentation with system design: [ORGANIZATION.md](ORGANIZATION.md)
+- Architecture documentation with system design: [ARCHITECTURE_SOLUTION.md](ARCHITECTURE_SOLUTION.md)
 - 20+ runnable code examples
 - Integration patterns and deployment models
 - Performance characteristics documented
@@ -461,7 +461,7 @@ npm run test:e2e     # Playwright end-to-end tests
 - [Gap Matrix](docs/GAP_MATRIX.auto.md) - RFC compliance tracking
 - [API Documentation](api/openapi/gauth-api.yaml) - OpenAPI specification
 - [Threat Model](docs/THREAT_MITIGATIONS_MATRIX.yaml) - Security analysis
-- [Architecture](ORGANIZATION.md) - System architecture
+- [Architecture](ARCHITECTURE_SOLUTION.md) - System architecture
 - [Docs Index](docs/INDEX.md) - Curated navigation of gap, compliance & performance reports
 - [Contributing](CONTRIBUTORS.md) - Contribution guidelines
 - [Security](SECURITY.md) - Security policy
