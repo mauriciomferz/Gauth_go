@@ -434,12 +434,6 @@ SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
 Configuration via environment variables:
 
 ```bash
-# Server
-GAUTH_PORT=8080
-GAUTH_HOST=localhost
-
-GAUTH_CORS_ALLOW=*           # Development only; restrict domains in production
-
 # Core Server
 GAUTH_PORT=8080
 GAUTH_HOST=localhost
@@ -502,8 +496,10 @@ go test ./conformance/...
 go test -coverprofile=coverage.out ./... && go tool cover -html=coverage.out
 
 # Frontend (from web/ui-react)
-npm run test         # unit/component (if configured)
-npm run test:e2e     # Playwright end-to-end tests
+npm run test         # Run unit tests with Vitest
+npm run test:unit    # Run unit tests once
+npm run test:e2e     # Run Playwright end-to-end tests
+npm run test:e2e:ui  # Run E2E tests with UI mode
 ```
 
 ## Performance
@@ -527,7 +523,7 @@ npm run test:e2e     # Playwright end-to-end tests
 
 ## Project Status
 
-This implementation achieves **100% conformance** with RFC 0111/0115 specifications:
+This implementation achieves **95% conformance** with RFC 0111/0115 specifications (45/45 requirements with P2 at 95.2%):
 
 - ✅ All core authorization primitives
 - ✅ Complete delegation chain support
@@ -591,10 +587,13 @@ Contributions welcome! See [CONTRIBUTORS.md](CONTRIBUTORS.md) for guidelines.
 
 ### Development Tooling
 
-- `make hygiene` – format, tidy modules, generate TODO report
-- `make ci` – local CI pipeline (format check, vet, lint, race tests)
+- `make hygiene` – run tidy plus TODO report (fast combined hygiene)
+- `make ci` – full CI suite locally (format check, vet, lint, race tests)
+- `make test` – run all tests (CI-safe, without race detection)
+- `make test-race` – run tests with race detection (for development)
+- `make build` – build all binaries with adaptive path detection
 - `scripts/dev-up.sh` – start backend + frontend together
-- `make gap-matrix` – regenerate RFC implementation status
+- `make gap-matrix` – regenerate GAP_MATRIX.auto.md
 - `make spec-contract` – enforce OpenAPI coverage/metadata completeness
 
 For ownership clarity see [docs/STRUCTURE.md](docs/STRUCTURE.md) (proposed CODEOWNERS mapping).
