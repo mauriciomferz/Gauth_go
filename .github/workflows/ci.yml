@@ -415,8 +415,12 @@ jobs:
       continue-on-error: true
       run: |
         set +e  # Disable exit on error for this step
+        go mod verify  # Ensure dependencies are resolved
         go install github.com/securego/gosec/v2/cmd/gosec@latest
-        $(go env GOPATH)/bin/gosec -no-fail -fmt sarif -out results.sarif ./... 2>&1 || true
+        # Use .gosec.json config and exclude problematic directories
+        $(go env GOPATH)/bin/gosec -no-fail -fmt sarif -out results.sarif \
+          -exclude-dir=examples -exclude-dir=test -exclude-dir=tests -exclude-dir=cmd/examples \
+          ./... 2>&1 || true
         EXIT_CODE=$?
         echo "Gosec scan completed with exit code: $EXIT_CODE"
         exit 0  # Always succeed

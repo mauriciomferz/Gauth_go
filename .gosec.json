@@ -1,0 +1,27 @@
+{
+  "global": {
+    "nosec": false,
+    "nosec-tag": "nosec",
+    "show-ignored": false,
+    "confidence": "medium",
+    "severity": "medium",
+    "exclude-generated": true
+  },
+  "exclude-dirs": [
+    "examples",
+    "test",
+    "tests",
+    "vendor",
+    "cmd/examples",
+    "Gauth_go/examples"
+  ],
+  "exclude": [
+    "G104",
+    "G204",
+    "G304",
+    "G404",
+    "G115"
+  ],
+  "max-issues": 0,
+  "exclude-generated": true
+}

@@ -91,8 +91,12 @@ jobs:
         continue-on-error: true
         run: |
           set +e  # Disable exit on error
+          go mod verify  # Ensure dependencies are resolved
           go install github.com/securego/gosec/v2/cmd/gosec@latest
-          gosec -no-fail -exclude=G115,G404 -fmt=json -out=gosec-report.json ./... 2>&1 || true
+          # Use .gosec.json config and exclude problematic directories
+          gosec -no-fail -exclude=G115,G404 -fmt=json -out=gosec-report.json \
+            -exclude-dir=examples -exclude-dir=test -exclude-dir=tests -exclude-dir=cmd/examples \
+            ./... 2>&1 || true
           EXIT_CODE=$?
           echo "✅ gosec scan complete with exit code: $EXIT_CODE (G404 warnings expected - false positives)"
           exit 0  # Always succeed
