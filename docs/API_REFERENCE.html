@@ -1,0 +1,1920 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>GAuth - API_REFERENCE</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">GAuth - API_REFERENCE</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#revocation-transparency-endpoint-examples-beta"
+id="toc-revocation-transparency-endpoint-examples-beta">🌲 Revocation
+Transparency Endpoint Examples (Beta)</a>
+<ul>
+<li><a href="#consistency-proof-prototype"
+id="toc-consistency-proof-prototype">Consistency Proof
+(Prototype)</a></li>
+<li><a href="#revocation-consistency-proof-v2-logarithmic"
+id="toc-revocation-consistency-proof-v2-logarithmic">Revocation
+Consistency Proof V2 (Logarithmic)</a></li>
+<li><a href="#full-poa-embedding-rawpoa-poaversion"
+id="toc-full-poa-embedding-rawpoa-poaversion">� Full PoA Embedding
+(RawPOA / PoAVersion)</a></li>
+<li><a href="#signed-tree-head-multi-sig-key-rotation-endpoints"
+id="toc-signed-tree-head-multi-sig-key-rotation-endpoints">�🔏 Signed
+Tree Head (Multi-Sig) &amp; Key Rotation Endpoints</a></li>
+<li><a href="#discovery-sth-excerpt"
+id="toc-discovery-sth-excerpt">Discovery STH Excerpt</a></li>
+<li><a href="#jwks-endpoint" id="toc-jwks-endpoint">🔐 JWKS
+Endpoint</a></li>
+<li><a href="#notarization-receipt-chain-verification-prototype"
+id="toc-notarization-receipt-chain-verification-prototype">🧾
+Notarization Receipt Chain Verification (Prototype)</a></li>
+<li><a href="#external-capability-anchoring-prototype"
+id="toc-external-capability-anchoring-prototype">🌐 External Capability
+Anchoring (Prototype)</a></li>
+<li><a href="#snapshot-metrics-integrity"
+id="toc-snapshot-metrics-integrity">📊 Snapshot Metrics &amp;
+Integrity</a></li>
+<li><a href="#jti-ttl-replay-protection"
+id="toc-jti-ttl-replay-protection">🕒 JTI TTL &amp; Replay
+Protection</a></li>
+</ul></li>
+<li><a href="#table-of-contents" id="toc-table-of-contents">📋
+<strong>Table of Contents</strong></a></li>
+<li><a href="#core-service-api" id="toc-core-service-api">🏗️
+<strong>Core Service API</strong></a>
+<ul>
+<li><a href="#rfccompliantservice"
+id="toc-rfccompliantservice"><strong>RFCCompliantService</strong></a></li>
+<li><a href="#creategauthtoken-future-enhancement"
+id="toc-creategauthtoken-future-enhancement"><strong>CreateGAuthToken</strong>
+(Future Enhancement)</a></li>
+</ul></li>
+<li><a href="#rfc-115-poa-definition-api"
+id="toc-rfc-115-poa-definition-api">📋 <strong>RFC 115 PoA Definition
+API</strong></a>
+<ul>
+<li><a href="#poa-definition-structure"
+id="toc-poa-definition-structure"><strong>PoA Definition
+Structure</strong></a></li>
+<li><a href="#section-a-parties"
+id="toc-section-a-parties"><strong>Section A: Parties</strong></a></li>
+<li><a href="#section-b-authorization-type-scope"
+id="toc-section-b-authorization-type-scope"><strong>Section B:
+Authorization Type &amp; Scope</strong></a></li>
+<li><a href="#section-c-requirements"
+id="toc-section-c-requirements"><strong>Section C:
+Requirements</strong></a></li>
+</ul></li>
+<li><a href="#professional-foundation-api"
+id="toc-professional-foundation-api">🔐 <strong>Professional Foundation
+API</strong></a>
+<ul>
+<li><a href="#properjwtservice"
+id="toc-properjwtservice"><strong>ProperJWTService</strong></a></li>
+<li><a href="#legalframeworkvalidator"
+id="toc-legalframeworkvalidator"><strong>LegalFrameworkValidator</strong></a></li>
+</ul></li>
+<li><a href="#response-types" id="toc-response-types">📊
+<strong>Response Types</strong></a>
+<ul>
+<li><a href="#gauthresponse"
+id="toc-gauthresponse"><strong>GAuthResponse</strong></a></li>
+<li><a href="#poavalidationresult"
+id="toc-poavalidationresult"><strong>PoAValidationResult</strong></a></li>
+<li><a href="#gauthtoken"
+id="toc-gauthtoken"><strong>GAuthToken</strong></a></li>
+</ul></li>
+<li><a href="#error-handling" id="toc-error-handling">🚨 <strong>Error
+Handling</strong></a>
+<ul>
+<li><a href="#error-types" id="toc-error-types"><strong>Error
+Types</strong></a></li>
+<li><a href="#common-error-codes"
+id="toc-common-error-codes"><strong>Common Error Codes</strong></a></li>
+</ul></li>
+<li><a href="#usage-examples" id="toc-usage-examples">📖 <strong>Usage
+Examples</strong></a>
+<ul>
+<li><a href="#complete-rfc-implementation-example"
+id="toc-complete-rfc-implementation-example"><strong>Complete RFC
+Implementation Example</strong></a></li>
+</ul></li>
+<li><a href="#infrastructure-resilience-utilities"
+id="toc-infrastructure-resilience-utilities">Infrastructure &amp;
+Resilience Utilities</a>
+<ul>
+<li><a href="#circuit-breaker" id="toc-circuit-breaker">Circuit
+Breaker</a></li>
+<li><a href="#rate-limiter-simplified"
+id="toc-rate-limiter-simplified">Rate Limiter (Simplified)</a></li>
+<li><a href="#metrics-collector" id="toc-metrics-collector">Metrics
+Collector</a></li>
+<li><a href="#authorization-policy-model-update"
+id="toc-authorization-policy-model-update">Authorization Policy Model
+Update</a></li>
+<li><a href="#audit-event-api-change"
+id="toc-audit-event-api-change">Audit Event API Change</a></li>
+<li><a href="#token-store-changes" id="toc-token-store-changes">Token
+Store Changes</a></li>
+<li><a href="#http-deprecation-headers"
+id="toc-http-deprecation-headers">HTTP Deprecation Headers</a></li>
+</ul></li>
+</ul>
+</nav>
+<h2 id="revocation-transparency-endpoint-examples-beta">🌲 Revocation
+Transparency Endpoint Examples (Beta)</h2>
+<blockquote>
+<p>For internal model details (Merkle accumulator, Signed Tree Heads
+v1/v2, multi-sig threshold &amp; weights, persistence, consistency
+proofs) consult <code>REVOCATION_TRANSPARENCY.md</code>. ### Inclusion
+Proof <code>GET /api/v1/token/revocation/proof</code> (exactly one of
+<code>id</code>, <code>index</code>, or <code>hash</code> required)
+Example:</p>
+</blockquote>
+<pre><code>curl -s &quot;http://localhost:8080/api/v1/token/revocation/proof?hash=4f8c...&quot; | jq</code></pre>
+<p>Success response:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;root&quot;</span><span class="fu">:</span> <span class="st">&quot;b6f1c9e3dc...&quot;</span><span class="fu">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;leaf_hash&quot;</span><span class="fu">:</span> <span class="st">&quot;4f8c2e91a5...&quot;</span><span class="fu">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;leaf_digest&quot;</span><span class="fu">:</span> <span class="st">&quot;0f9a7c...&quot;</span><span class="fu">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;index&quot;</span><span class="fu">:</span> <span class="dv">41</span><span class="fu">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;chain_length&quot;</span><span class="fu">:</span> <span class="dv">42</span><span class="fu">,</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;proof&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;sibling&quot;</span><span class="fu">:</span> <span class="st">&quot;ab12...&quot;</span><span class="fu">,</span> <span class="dt">&quot;position&quot;</span><span class="fu">:</span> <span class="st">&quot;R&quot;</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;sibling&quot;</span><span class="fu">:</span> <span class="st">&quot;77fe...&quot;</span><span class="fu">,</span> <span class="dt">&quot;position&quot;</span><span class="fu">:</span> <span class="st">&quot;L&quot;</span><span class="fu">}</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;verified&quot;</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Error (missing query parameter):</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;error&quot;</span><span class="fu">:</span> <span class="st">&quot;missing_query_param&quot;</span><span class="fu">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;message&quot;</span><span class="fu">:</span> <span class="st">&quot;one of id, index, hash must be provided&quot;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="consistency-proof-prototype">Consistency Proof (Prototype)</h3>
+<p><code>GET /api/v1/token/revocation/consistency?start=&lt;start_index&gt;</code>
+Example:</p>
+<pre><code>curl -s &quot;http://localhost:8080/api/v1/token/revocation/consistency?start=0&quot; | jq</code></pre>
+<p>Success response:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;start_length&quot;</span><span class="fu">:</span> <span class="dv">5</span><span class="fu">,</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;end_length&quot;</span><span class="fu">:</span> <span class="dv">42</span><span class="fu">,</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;start_root&quot;</span><span class="fu">:</span> <span class="st">&quot;91ab...&quot;</span><span class="fu">,</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;end_root&quot;</span><span class="fu">:</span> <span class="st">&quot;b6f1c9...&quot;</span><span class="fu">,</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;new_leaves&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;4f8c2e91a5...&quot;</span><span class="ot">,</span> <span class="st">&quot;8aa7bc11e3...&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;verified&quot;</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="revocation-consistency-proof-v2-logarithmic">Revocation
+Consistency Proof V2 (Logarithmic)</h3>
+<p>Endpoint:
+<code>GET /api/v1/token/revocation/consistency_v2?start=&lt;tree_head_index&gt;</code></p>
+<p>Returns an RFC6962-style (prototype) JSON object:</p>
+<pre><code>{
+    &quot;success&quot;: true,
+    &quot;proof&quot;: {
+        &quot;start_length&quot;: &lt;int&gt;,
+        &quot;end_length&quot;: &lt;int&gt;,
+        &quot;path&quot;: [&quot;&lt;hexNode&gt;&quot;, ...],
+        &quot;start_root&quot;: &quot;&lt;hex&gt;&quot;,
+        &quot;end_root&quot;: &quot;&lt;hex&gt;&quot;
+    },
+    &quot;latest_tree_head&quot;: { ... SignedTreeHead ... }
+}</code></pre>
+<p>Characteristics: - Path size is logarithmic relative to end_length. -
+Demonstrates append-only growth from <code>start_length</code> to
+<code>end_length</code>. - Provides optional prefix subtree
+decomposition (<code>prefix_roots</code>, <code>prefix_sizes</code>)
+representing maximal power-of-two aligned blocks covering the first
+<code>start_length</code> leaves (binary decomposition).
+Sum(prefix_sizes) == start_length. - If the revocation chain is
+currently empty (no events appended), <code>latest_tree_head</code> MAY
+be <code>null</code> (or omitted) because <code>SignTreeHead()</code>
+now returns <code>nil</code> for empty chains (see “Empty Chain
+Behavior” in <code>REVOCATION_TRANSPARENCY.md</code>). Clients must
+handle this case gracefully. - Current verification
+(<code>VerifyConsistencyProofV2</code>) still rebuilds the start tree
+for canonical root validation, but additionally validates each prefix
+root matches the corresponding subtree. Experimental fast reconstruction
+(feature flag <code>GAUTH_CONSISTENCY_V2_FAST=1</code>) currently
+succeeds only when <code>start_length</code> is a power of two (single
+prefix block); multi-block reconstruction is deferred.</p>
+<p>Additional Fields (Optimization Phase): | Field | Description |
+|——-|————-| | <code>prefix_bridges</code> | Sequence of intermediate
+merged subtree digests produced by right-to-left reduction over the
+prefix blocks; enables fast deterministic reconstruction of
+<code>start_root</code> without full tree rebuild when fast flag
+enabled. |</p>
+<p>Generation Algorithm (Optimized): 1. Streaming Segment Stack: Leaves
+up to <code>start_length</code> are ingested one by one, forming a stack
+of <code>(hash,size)</code> segments. Adjacent equal-sized segments
+merge immediately (size doubles) yielding a canonical power-of-two
+decomposition of the processed prefix. 2. Prefix Blocks: The final stack
+embodies <code>prefix_roots</code>/<code>prefix_sizes</code> (left →
+right). This avoids constructing all tree levels (<code>O(n)</code>
+memory) while retaining <code>O(n)</code> leaf hashing cost. 3. Bridges
+Construction: A right-to-left reduction merges the last two segments
+repeatedly (with consolidation when equal sizes arise) producing
+<code>prefix_bridges</code>. These bridges mirror the exact merge order
+of the canonical tree formation for heterogeneous block boundaries. 4.
+Consistency Path: (Current phase) A temporary Merkle tree is still built
+to derive the logarithmic path between historical and latest tree heads.
+Future phase will replace this with pure streaming interval math
+eliminating remaining <code>O(n)</code> generation overhead.</p>
+<p>Fast Reconstruction:
+<code>ReconstructStartRootFromPrefixBlocks(prefix_roots, prefix_sizes, start_length, prefix_bridges)</code>
+validates invariants and performs a reduction using bridges to obtain
+<code>start_root</code> in <code>O(k)</code> where
+<code>k = len(prefix_roots) + len(prefix_bridges)</code> (typically
+<code>&lt; 2*log2(start_length)</code>). If the feature flag
+<code>GAUTH_CONSISTENCY_V2_FAST=1</code> is set, verification attempts
+this reconstruction and compares the result against the canonical
+rebuilt root; any mismatch causes verification failure.</p>
+<p>Auditor Endpoint Enhancement:
+<code>GET /api/v1/token/revocation/audit_consistency?start=&lt;tree_head_index&gt;</code>
+returns both legacy (full rebuild) and fast reconstruction timings:</p>
+<pre class="jsonc"><code>{
+    &quot;success&quot;: true,
+    &quot;proof&quot;: { ... },
+    &quot;legacy_duration_ns&quot;: 1203487,
+    &quot;fast_duration_ns&quot;: 19834,
+    &quot;fast_root_matches&quot;: true
+}</code></pre>
+<p>Use this to externally validate performance characteristics and
+detect any divergence between approaches.</p>
+<p>Benchmark Snapshot (Generation Phase): | Leaves | New Gen (ns/op) |
+Legacy Gen (ns/op) | Alloc (new) | Alloc (legacy) |
+|——–|—————–|——————–|————-|—————-| | 64 | ~32.5µs | ~51.8µs | 73KB |
+118KB | | 256 | ~129.7µs | ~203.7µs | 294KB | 472KB | | 1024 | ~530.8µs
+| ~837.3µs | 1.20MB | 1.93MB | | 4096 | ~2.22ms | ~3.55ms | 4.77MB |
+7.70MB | (*Apple M3 Pro, Go 1.22+, benchtime 0.2s; values approximate;
+see <code>consistency_generation_bench_test.go</code> for details.)</p>
+<p>Client Guidance (Updated): 1. Validate prefix decomposition
+(<code>prefix_roots</code>/<code>prefix_sizes</code>) and optionally
+<code>prefix_bridges</code> if using fast path. 2. Attempt fast
+reconstruction when flag enabled; fall back to canonical full rebuild if
+disabled or reconstruction returns empty string. 3. Verify append-only
+via path as before; ensure <code>path</code> length within logarithmic
+bound. 4. Record auditor metrics for monitoring (e.g., anomaly detection
+if fast_root mismatch appears).</p>
+<p>Limitations (Updated): - Consistency path still incurs an
+<code>O(n)</code> temporary tree build (optimization forthcoming). -
+Range hashing and interval-based sibling derivation are deferred to next
+phase to eliminate remaining rebuild cost. - Prefix bridges rely on
+deterministic merge ordering; any alteration in merge policy requires
+bridge sequence regeneration logic update.</p>
+<p>Client Guidance: 1. Verify <code>start_root</code> and
+<code>end_root</code> against locally reconstructed Merkle trees (or
+incremental state). 2. Ensure <code>path</code> length is within allowed
+logarithmic bounds. 3. (Future) Reconstruct start root using path-only
+algorithm to avoid full rebuild.</p>
+<p>Use Cases: - Efficient audit of revocation chain evolution. -
+Potential integration with external transparency monitors anchoring only
+periodic tree heads.</p>
+<p>Limitations (Prototype): - Path-only reconstruction using prefix
+blocks is not yet active (meta-tree algorithm deferred for correctness);
+integrity currently relies on full start &amp; end tree recomputation
+plus prefix subtree matching. - Merkle tree uses copy-up promotion for
+odd nodes; path algorithm adapted accordingly. ### 🪪 Power of Attorney
+Semantic Validation Modes</p>
+<p>The service supports selectable semantic validation tiers for
+delegation issuance controlled by <code>GAUTH_POA_VALIDATOR</code>:</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 32%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Env Value</th>
+<th>Characteristics</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Basic (default)</td>
+<td><code>basic</code> or unset</td>
+<td>Backwards-compatible minimal invariants: prevent non-wildcard
+self-delegation, enforce <code>valid_from &lt; valid_until</code>,
+require <code>jurisdiction</code> for <code>regulatory:</code> scopes,
+placeholder joint delegation rule (<code>joint:</code> requires
+<code>signatures</code> ≥2), numeric format sanity
+(<code>max_amount</code>, <code>max_daily_amount</code>,
+<code>currency</code> if present). Wildcard allowed for self-delegation
+only.</td>
+</tr>
+<tr>
+<td>Advanced</td>
+<td><code>advanced</code></td>
+<td>Superset governance rules: mandatory <code>currency</code>
+restriction and 30‑day duration cap for any <code>transaction:</code>
+scope, wildcard scope disabled unless
+<code>GAUTH_ALLOW_WILDCARD=1</code>, syntax validation for
+<code>valid_hours</code> (<code>HH-HH</code>, wrap-around allowed) and
+<code>valid_weekdays</code> (comma-separated 0–6 unique), optional
+inline multi-signature restriction unless
+<code>GAUTH_ALLOW_INLINE_MULTISIG=1</code>, aggregate scope length
+limiting via <code>GAUTH_MAX_SCOPE_AGG_LEN</code>, runtime enforcement
+of <code>valid_hours</code> + <code>valid_weekdays</code> during token
+verification.</td>
+</tr>
+<tr>
+<td>None</td>
+<td><code>none</code></td>
+<td>Disables semantic validation (not recommended for production). Only
+basic structural field checks apply.</td>
+</tr>
+</tbody>
+</table>
+<p>Additional related environment variables:</p>
+<table>
+<colgroup>
+<col style="width: 35%" />
+<col style="width: 64%" />
+</colgroup>
+<thead>
+<tr>
+<th>Env</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GAUTH_ALLOW_WILDCARD</code></td>
+<td>Set to <code>1</code> to permit <code>*</code> scope under Advanced
+mode.</td>
+</tr>
+<tr>
+<td><code>GAUTH_ALLOW_INLINE_MULTISIG</code></td>
+<td>Set to <code>1</code> to allow providing
+<code>MultiSignatures</code> inline at issuance when
+<code>threshold &gt; 1</code>.</td>
+</tr>
+<tr>
+<td><code>GAUTH_MAX_SCOPE_AGG_LEN</code></td>
+<td>Integer limit for aggregate length of all scope entries
+(Advanced).</td>
+</tr>
+<tr>
+<td><code>GAUTH_POA_VALIDATOR</code></td>
+<td>Selects validator mode (<code>advanced</code>, <code>basic</code>,
+<code>none</code>).</td>
+</tr>
+</tbody>
+</table>
+<p>Restriction Keys (current set): <code>currency</code>,
+<code>jurisdiction</code>, <code>signatures</code>,
+<code>max_amount</code>, <code>max_daily_amount</code>,
+<code>valid_hours</code>, <code>valid_weekdays</code>. Future
+enhancements will add a warning channel and persistent counters for
+daily limit usage.</p>
+<p>Runtime Conditional Enforcement: <code>valid_hours</code> and
+<code>valid_weekdays</code> are syntactically validated at issuance in
+Advanced mode and enforced during <code>VerifyToken</code>. Tokens
+presented outside permitted windows return an <code>unauthorized</code>
+RFC error (<code>outside permitted hours</code> or
+<code>outside permitted weekdays</code>). Wrap-around hour windows
+(e.g., <code>22-06</code>) are supported.</p>
+<h3 id="full-poa-embedding-rawpoa-poaversion">� Full PoA Embedding
+(RawPOA / PoAVersion)</h3>
+<p>EnvelopeV2 supports optional embedding of the full canonical PoA JSON
+for deterministic replay, external audit, and interoperability.</p>
+<p>Environment Variables: | Env | Purpose | Default | |—–|———|———| |
+<code>GAUTH_POA_ENVELOPE_V2</code> | Enables EnvelopeV2 issuance (adds
+canonical digest &amp; multi-sig metadata). | unset (V1) | |
+<code>GAUTH_EMBED_FULL_POA</code> | When <code>1</code>, embeds
+canonical PoA JSON into <code>RawPOA</code> and sets
+<code>PoAVersion</code> (<code>poa/v1</code>). | unset (disabled) | |
+<code>GAUTH_MAX_RAW_POA_BYTES</code> | Max allowed canonical JSON length
+for embedding; skip &amp; count if exceeded. | 8192 |</p>
+<p>Behavior: 1. Canonical JSON produced once via
+<code>CanonicalPOADigest</code> and reused for <code>RawPOA</code>
+(ordering preserved: sorted scope &amp; restriction keys; RFC3339 UTC
+timestamps). 2. Disabled flags or oversize payload ⇒ <code>RawPOA</code>
+omitted (token still valid) maintaining backward compatibility. 3. Size
+violations increment omission counter
+(<code>envelope_raw_poa_too_large_total</code>). 4.
+<code>PoAVersion</code> fixed to <code>poa/v1</code> (future semantic
+evolution may introduce <code>poa/v2</code>).</p>
+<p>Metrics: | Metric | Type | Description | |——–|——|————-| |
+<code>envelope_raw_poa_embedded_total</code> | Counter | Successful
+embeddings within size cap. | |
+<code>envelope_raw_poa_too_large_total</code> | Counter | Embedding
+skipped due to size limit exceeded. |</p>
+<p>Operational Guidance: * Track adoption ratio with custom recording
+rule: embedded_total / envelope_v2_issued_total. * Alert if omission
+counter spikes (may indicate oversized PoAs or cap tuning need).</p>
+<p>Security Notes: * Always verify <code>canonical_digest</code> against
+recomputed canonical JSON before trusting <code>RawPOA</code> content. *
+Embedding increases token size; keep cap conservative and benchmark
+before raising.</p>
+<p>Future Roadmap: * CBOR compact encoding
+(<code>GAUTH_EMBED_FULL_POA_FORMAT=cbor</code>). * Verification helper
+exposing RawPOA directly (avoid manual envelope parsing). * Streaming /
+chunking strategy for very large PoAs. * Warning channel &amp; audit
+persistence of embedded PoA snapshots.</p>
+<h3 id="signed-tree-head-multi-sig-key-rotation-endpoints">�🔏 Signed
+Tree Head (Multi-Sig) &amp; Key Rotation Endpoints</h3>
+<p>Multi-signature protection provides stronger assurance over
+append-only revocation transparency by requiring a configured cumulative
+weight threshold across distinct Ed25519 signing keys.</p>
+<h4 id="core-endpoints">Core Endpoints</h4>
+<table>
+<colgroup>
+<col style="width: 37%" />
+<col style="width: 29%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/api/v1/crypto/eddsa/keys</code></td>
+<td>GET</td>
+<td>List active &amp; historical Ed25519 public keys (base64url raw
+32-byte) with <code>kid</code>, optional expiry metadata.</td>
+</tr>
+<tr>
+<td><code>/api/v1/crypto/rotate</code></td>
+<td>POST</td>
+<td>Force a key rotation (development / testing). Automatically signs
+latest Merkle tree head post-rotation.</td>
+</tr>
+<tr>
+<td><code>/api/v1/crypto/ensure-threshold</code></td>
+<td>POST</td>
+<td>Iteratively rotates until satisfied weight ≥ configured threshold
+(bounded attempts). Useful in demos to auto-populate multi-sig
+state.</td>
+</tr>
+<tr>
+<td><code>/api/v1/token/revocation/head</code></td>
+<td>GET</td>
+<td>Latest signed tree head (STH) with multi-sig signature array,
+threshold data and aggregate hash.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="signed-tree-head-json-structure">Signed Tree Head JSON
+Structure</h4>
+<p>Example (abridged):</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;version&quot;</span><span class="fu">:</span> <span class="dv">2</span><span class="fu">,</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;merkle_root&quot;</span><span class="fu">:</span> <span class="st">&quot;b6f1c9e3dc...&quot;</span><span class="fu">,</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;chain_length&quot;</span><span class="fu">:</span> <span class="dv">42</span><span class="fu">,</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;aggregate_hash&quot;</span><span class="fu">:</span> <span class="st">&quot;e1f2...&quot;</span><span class="fu">,</span>             <span class="er">//</span> <span class="er">hash</span> <span class="er">chaining</span> <span class="er">revocation</span> <span class="er">events</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;threshold&quot;</span><span class="fu">:</span> <span class="dv">5</span><span class="fu">,</span>                           <span class="er">//</span> <span class="er">required</span> <span class="er">cumulative</span> <span class="er">weight</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;weights_total&quot;</span><span class="fu">:</span> <span class="dv">7</span><span class="fu">,</span>                       <span class="er">//</span> <span class="er">sum</span> <span class="er">of</span> <span class="er">all</span> <span class="er">active</span> <span class="er">key</span> <span class="er">weights</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;satisfied_weight&quot;</span><span class="fu">:</span> <span class="dv">5</span><span class="fu">,</span>                    <span class="er">//</span> <span class="er">sum</span> <span class="er">of</span> <span class="er">weights</span> <span class="er">of</span> <span class="er">included</span> <span class="er">signatures</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;signatures&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span><span class="dt">&quot;kid&quot;</span><span class="fu">:</span><span class="st">&quot;ed25519:ab12&quot;</span><span class="fu">,</span><span class="dt">&quot;alg&quot;</span><span class="fu">:</span><span class="st">&quot;EdDSA&quot;</span><span class="fu">,</span><span class="dt">&quot;weight&quot;</span><span class="fu">:</span><span class="dv">3</span><span class="fu">,</span><span class="dt">&quot;sig&quot;</span><span class="fu">:</span><span class="st">&quot;base64urlSignature1&quot;</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span><span class="dt">&quot;kid&quot;</span><span class="fu">:</span><span class="st">&quot;ed25519:cd34&quot;</span><span class="fu">,</span><span class="dt">&quot;alg&quot;</span><span class="fu">:</span><span class="st">&quot;EdDSA&quot;</span><span class="fu">,</span><span class="dt">&quot;weight&quot;</span><span class="fu">:</span><span class="dv">2</span><span class="fu">,</span><span class="dt">&quot;sig&quot;</span><span class="fu">:</span><span class="st">&quot;base64urlSignature2&quot;</span><span class="fu">}</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Fields: | Field | Description | |——-|————-| | <code>version</code> |
+Tree head schema version. | | <code>merkle_root</code> | Current Merkle
+root over all revocation event hashes. | | <code>chain_length</code> |
+Number of revocation events appended. | | <code>aggregate_hash</code> |
+Linear linkage accumulator hash (integrity chain). | |
+<code>threshold</code> | Required minimum cumulative weight for
+multi-sig validity. | | <code>weights_total</code> | Sum of all active
+signer weights. | | <code>satisfied_weight</code> | Weight achieved by
+present signatures. | | <code>signatures[].kid</code> | Key identifier
+of signer. | | <code>signatures[].weight</code> | Assigned integer
+weight for signer. | | <code>signatures[].sig</code> | Base64url Ed25519
+detached signature over canonical STH payload. | |
+<code>signatures[].alg</code> | Algorithm (currently
+<code>EdDSA</code>). |</p>
+<h4 id="canonical-signing-payload">Canonical Signing Payload</h4>
+<pre><code>GAUTH_TREE_HEAD:{&quot;version&quot;:&lt;int&gt;,&quot;merkle_root&quot;:&quot;&lt;hex&gt;&quot;,&quot;chain_length&quot;:&lt;int&gt;,&quot;aggregate_hash&quot;:&quot;&lt;hex&gt;&quot;,&quot;threshold&quot;:&lt;int&gt;,&quot;weights_total&quot;:&lt;int&gt;,&quot;satisfied_weight&quot;:&lt;int&gt;}</code></pre>
+<p>(Order fixed; no whitespace; numeric values unquoted.)</p>
+<h4 id="client-verification-flow-multi-sig-panel">Client Verification
+Flow (Multi-Sig Panel)</h4>
+<ol type="1">
+<li>Fetch latest STH (<code>/api/v1/token/revocation/head</code>).</li>
+<li>Fetch public keys (<code>/api/v1/crypto/eddsa/keys</code>).</li>
+<li>Reconstruct canonical payload (above) and obtain bytes via
+UTF-8.</li>
+<li>Attempt WebCrypto Ed25519 verification
+(<code>subtle.verify</code>).</li>
+<li>If unsupported, fallback to tweetnacl-based verification via
+<code>verifyEd25519</code> (constant-time-ish detached signature
+verify). The fallback is injected at runtime and can be overridden via
+<code>setEd25519Impl</code> for testing.</li>
+<li>Aggregate per-signature results and compute cumulative satisfied
+weight; display threshold status badge.</li>
+</ol>
+<p>Verification Badges: | Badge | Meaning | |——-|———| |
+<code>Threshold Met</code> (green) |
+<code>satisfied_weight &gt;= threshold</code> | | <code>Partial</code>
+(amber) | Not enough cumulative weight yet | | <code>Verified X/Y</code>
+(green) | All Y signatures verified (X = Y) | |
+<code>Verified X/Y</code> (red) | At least one signature failed
+verification |</p>
+<p>Per-Signature Status Cell: | Value | Meaning | |——-|———| |
+<code>ok</code> | Signature verified (WebCrypto or fallback) | |
+<code>fail</code> | Verification failed (error tooltip with reason) | |
+<code>n/a</code> | Missing verification attempt (no signature present)
+|</p>
+<p>Error Codes (tooltips): | Code | Cause | |——|——-| |
+<code>missing_public_key</code> | Key map lacked entry for signer
+<code>kid</code> | | <code>webcrypto_unsupported</code> | Browser lacks
+Ed25519 WebCrypto implementation | | <code>verify_failed</code> |
+WebCrypto verification returned false | |
+<code>fallback_unverified</code> | Fallback verify returned false | |
+<code>exception</code> | Exception thrown during processing |</p>
+<h4 id="rotation-semantics">Rotation Semantics</h4>
+<p>Each successful rotation (development endpoint) triggers automatic
+signing of the new tree head. This accelerates demo environments by
+quickly accumulating multi-sig signatures after multiple rotations.
+Production rotation mechanism would persist prior keys and follow
+stricter authorization &amp; dual-signature protocols.</p>
+<h4 id="environment-variables-multi-sig">Environment Variables
+(Multi-Sig)</h4>
+<table>
+<colgroup>
+<col style="width: 35%" />
+<col style="width: 64%" />
+</colgroup>
+<thead>
+<tr>
+<th>Env</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GAUTH_MSIG_THRESHOLD</code></td>
+<td>Numeric threshold required for multi-sig validity.</td>
+</tr>
+<tr>
+<td><code>GAUTH_MSIG_WEIGHTS</code></td>
+<td>Comma-separated weights for keys in rotation order
+(e.g. <code>3,2,1</code>).</td>
+</tr>
+<tr>
+<td><code>GAUTH_MSIG_AUTO_SIGN=1</code></td>
+<td>Auto-sign tree head after any rotation.</td>
+</tr>
+<tr>
+<td><code>GAUTH_EDDSA_ROTATION_INTERVAL_SEC</code></td>
+<td>Background rotation interval (if scheduler enabled).</td>
+</tr>
+<tr>
+<td><code>GAUTH_EDDSA_MAX_HISTORY</code></td>
+<td>Max historical keys retained/exposed via keys endpoint.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="security-ux-notes">Security &amp; UX Notes</h4>
+<ul>
+<li>Fallback verification is only used when native Ed25519 unavailable;
+it relies on audited tweetnacl implementation (public domain). Avoid
+downgrading silently—panel exposes <code>webcrypto_unsupported</code>
+reason.</li>
+<li>Threshold satisfaction shown independently from signature
+cryptographic verification; a satisfied threshold with failed
+signature(s) should be treated as untrusted.</li>
+<li>Canonical payload versioning ensures forward-compatible extensions
+(additional fields must be added only after version increment).</li>
+<li>For accessibility, badges include <code>aria-label</code> and
+deterministic color contrast; future enhancement will add live region
+updates.</li>
+</ul>
+<p>Roadmap (Multi-Sig): * Dual-signature rotation descriptors anchoring
+both retiring and successor keys. * External auditor endpoint returning
+historical STH sequence + batch verification summary. * Path-only
+consistency proof derivation eliminating full tree rebuild in
+verification. * Optional signature aggregation (MLS-style) to compress
+multiple Ed25519 signatures.</p>
+<h3 id="discovery-sth-excerpt">Discovery STH Excerpt</h3>
+<p><code>GET /.well-known/gauth-configuration</code></p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;revocation_support&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;enabled&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;sth_latest&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;version&quot;</span><span class="fu">:</span> <span class="dv">2</span><span class="fu">,</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;merkle_root&quot;</span><span class="fu">:</span> <span class="st">&quot;b6f1c9e3dc...&quot;</span><span class="fu">,</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;chain_length&quot;</span><span class="fu">:</span> <span class="dv">42</span><span class="fu">,</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;aggregate_hash&quot;</span><span class="fu">:</span> <span class="st">&quot;e1f2...&quot;</span><span class="fu">,</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;threshold&quot;</span><span class="fu">:</span> <span class="dv">5</span><span class="fu">,</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;weights_total&quot;</span><span class="fu">:</span> <span class="dv">7</span><span class="fu">,</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;satisfied_weight&quot;</span><span class="fu">:</span> <span class="dv">5</span><span class="fu">,</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;signatures&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;kid&quot;</span><span class="fu">:</span> <span class="st">&quot;signerA&quot;</span><span class="fu">,</span> <span class="dt">&quot;alg&quot;</span><span class="fu">:</span> <span class="st">&quot;EdDSA&quot;</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;kid&quot;</span><span class="fu">:</span> <span class="st">&quot;signerC&quot;</span><span class="fu">,</span> <span class="dt">&quot;alg&quot;</span><span class="fu">:</span> <span class="st">&quot;EdDSA&quot;</span><span class="fu">}</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Clients must fetch JWKS (<code>/.well-known/jwks.json</code>) to
+obtain Ed25519 public keys for each <code>kid</code> and verify
+multi-signature threshold satisfaction.</p>
+<h3 id="jwks-endpoint">🔐 JWKS Endpoint</h3>
+<p><code>GET /.well-known/jwks.json</code></p>
+<p>Returns a JSON Web Key Set containing: - RSA key (RS256) when
+<code>GAUTH_USE_JWT_LIB=1</code> and <code>GAUTH_JWT_ALG=RS256</code> -
+Symmetric placeholder (oct) when only HMAC mode active - Ed25519 public
+keys as OKP JWK objects when <code>GAUTH_TOKEN_SIG_MODE=eddsa</code></p>
+<p>Example response (EdDSA + RS256 hybrid):</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;keys&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span><span class="dt">&quot;kty&quot;</span><span class="fu">:</span><span class="st">&quot;RSA&quot;</span><span class="fu">,</span><span class="dt">&quot;alg&quot;</span><span class="fu">:</span><span class="st">&quot;RS256&quot;</span><span class="fu">,</span><span class="dt">&quot;kid&quot;</span><span class="fu">:</span><span class="st">&quot;demo-rsa&quot;</span><span class="fu">,</span><span class="dt">&quot;use&quot;</span><span class="fu">:</span><span class="st">&quot;sig&quot;</span><span class="fu">,</span><span class="dt">&quot;n&quot;</span><span class="fu">:</span><span class="st">&quot;...&quot;</span><span class="fu">,</span><span class="dt">&quot;e&quot;</span><span class="fu">:</span><span class="st">&quot;AQAB&quot;</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span><span class="dt">&quot;kty&quot;</span><span class="fu">:</span><span class="st">&quot;OKP&quot;</span><span class="fu">,</span><span class="dt">&quot;crv&quot;</span><span class="fu">:</span><span class="st">&quot;Ed25519&quot;</span><span class="fu">,</span><span class="dt">&quot;alg&quot;</span><span class="fu">:</span><span class="st">&quot;EdDSA&quot;</span><span class="fu">,</span><span class="dt">&quot;kid&quot;</span><span class="fu">:</span><span class="st">&quot;AbCdEf12&quot;</span><span class="fu">,</span><span class="dt">&quot;use&quot;</span><span class="fu">:</span><span class="st">&quot;sig&quot;</span><span class="fu">,</span><span class="dt">&quot;x&quot;</span><span class="fu">:</span><span class="st">&quot;base64urlPublicKey&quot;</span><span class="fu">,</span><span class="dt">&quot;expires_at&quot;</span><span class="fu">:</span><span class="st">&quot;2025-10-19T00:00:00Z&quot;</span><span class="fu">}</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Headers: - <code>ETag</code>: Weak hash of canonical JWKS JSON for
+client caching (supports <code>If-None-Match</code> → <code>304</code>).
+- <code>X-JWKS-Signature</code> + <code>X-JWKS-Signature-Alg</code>:
+Present only when <code>GAUTH_JWKS_SIGNING_KEY_ENABLED=1</code>
+(HMAC-SHA256 integrity hint). -
+<code>X-Key-Rotation-Interval-Days</code>: Optional rotation interval
+metadata if provided via env.</p>
+<p>Rotation Metadata surfaced in discovery
+(<code>/.well-known/gauth-configuration</code>): -
+<code>jwks_etag</code>: Mirrors current JWKS ETag once fetched at least
+once. - <code>jwks_last_rotated</code>: Timestamp updated whenever ETag
+changes (new key material).</p>
+<h3 id="notarization-receipt-chain-verification-prototype">🧾
+Notarization Receipt Chain Verification (Prototype)</h3>
+<p><code>GET /api/v1/beta/notarization/receipts/verify</code></p>
+<p>Verifies integrity of the persisted capability anchor notarization
+receipt chain.</p>
+<p>Response (configured, non-empty, integrity ok):</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;success&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;configured&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;integrity&quot;</span><span class="fu">:</span> <span class="st">&quot;ok&quot;</span><span class="fu">,</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;total&quot;</span><span class="fu">:</span> <span class="dv">3</span><span class="fu">,</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;chain_head&quot;</span><span class="fu">:</span> <span class="st">&quot;b2f4...&quot;</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Response (mismatch detected):</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;success&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;configured&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;integrity&quot;</span><span class="fu">:</span> <span class="st">&quot;mismatch&quot;</span><span class="fu">,</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;total&quot;</span><span class="fu">:</span> <span class="dv">3</span><span class="fu">,</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;details&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;mismatch_index&quot;</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;expected&quot;</span><span class="fu">:</span> <span class="st">&quot;0a9c...&quot;</span><span class="fu">,</span>      <span class="er">//</span> <span class="er">recomputed</span> <span class="er">chain</span> <span class="er">hash</span> <span class="er">for</span> <span class="er">entry</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;stored&quot;</span><span class="fu">:</span> <span class="st">&quot;deadbeef...&quot;</span><span class="fu">,</span>     <span class="er">//</span> <span class="er">stored</span> <span class="er">chain_hash</span> <span class="er">field</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;prev_expected&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span>         <span class="er">//</span> <span class="er">previous</span> <span class="er">linkage</span> <span class="er">hash</span> <span class="er">expected</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;prev_stored&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span>            <span class="er">//</span> <span class="er">stored</span> <span class="er">prev_hash</span> <span class="er">for</span> <span class="er">entry</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Response (empty chain):</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;success&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;configured&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;integrity&quot;</span><span class="fu">:</span> <span class="st">&quot;empty&quot;</span><span class="fu">,</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;total&quot;</span><span class="fu">:</span> <span class="dv">0</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Fields: | Field | Description | |——-|————-| | <code>integrity</code>
+| <code>ok</code> | <code>mismatch</code> | <code>empty</code> | |
+<code>chain_head</code> | Last entry <code>chain_hash</code> (present
+only when integrity ok) | | <code>mismatch_index</code> | Zero-based
+index of first invalid entry (only on mismatch) | |
+<code>expected</code> / <code>stored</code> | Recomputed vs stored chain
+hash for failing entry | | <code>prev_expected</code> /
+<code>prev_stored</code> | Linkage validation for the failing entry’s
+predecessor |</p>
+<p>Related Endpoints: *
+<code>GET /api/v1/beta/notarization/receipts/latest</code> – latest
+stored receipt object. *
+<code>GET /api/v1/beta/notarization/receipts</code> – list of chain
+entries with linkage fields.</p>
+<p>Metrics Integration: * Gauge:
+<code>capability_anchor_notarization_receipts_integrity</code> (ok=1
+mismatch=0 unconfigured/legacy/empty=-1) * Histogram:
+<code>capability_anchor_notarization_latency_seconds</code> (+ provider
+labeled variant) * Counter:
+<code>capability_anchor_notarization_failures_total</code> (+ provider
+labeled variant) * Custom Prometheus Endpoint:
+<code>/api/v1/beta/capabilities/anchor/metrics/prometheus</code> mirrors
+the integrity gauge (HELP/TYPE + value) for light scrapes. Force a fresh
+recomputation with <code>?verify=1</code>.</p>
+<p>Environment Variables: | Env | Purpose | |—–|———| |
+<code>GAUTH_CAP_ANCHOR_NOTARIZE=1</code> | Enables notarization+receipt
+path | | <code>GAUTH_NOTARY_RECEIPT_PERSIST_PATH</code> | Receipt chain
+persistence file | | <code>GAUTH_NOTARY_RECEIPT_VERIFY_INTERVAL</code> |
+Background verify loop interval seconds (&gt;=30) | |
+<code>GAUTH_CAP_ANCHOR_NOTARY_PROVIDER</code> | Provider selector
+(<code>memory</code>,<code>external_stub</code>) | |
+<code>GAUTH_NOTARY_RECEIPT_VERIFY_FRESHNESS_SECONDS</code> | Max age
+(seconds) before auto re-verification in custom Prometheus endpoint
+(default 120) |</p>
+<p>Additional Environment Variables (Recent Additions): | Env | Purpose
+| |—–|———| | <code>GAUTH_NOTARY_VERIFY_MIN_INTERVAL_SECONDS</code> |
+Adaptive verification lower bound (seconds) controlling minimum
+recomputation cadence | |
+<code>GAUTH_NOTARY_VERIFY_MAX_INTERVAL_SECONDS</code> | Adaptive
+verification upper bound; interval expands toward this under low
+append/mismatch rates | | <code>GAUTH_NOTARY_MERKLE_ENABLED=1</code> |
+Enable Merkle root computation per receipt (field
+<code>merkle_root</code> appears) | |
+<code>GAUTH_TSA_STUB_MIN_LATENCY_MS</code> /
+<code>GAUTH_TSA_STUB_MAX_LATENCY_MS</code> | Configure stub TSA latency
+simulation window | | <code>GAUTH_TSA_STUB_PROVIDER_NAME</code> |
+Override provider name for stub TSA receipts | |
+<code>GAUTH_TSA_STUB_POLICY_OID</code> | Policy OID placeholder for
+RFC3161 scaffold | | <code>GAUTH_TLOG_STUB_MIN_LATENCY_MS</code> /
+<code>GAUTH_TLOG_STUB_MAX_LATENCY_MS</code> | Configure stub
+transparency log latency simulation window | |
+<code>GAUTH_TLOG_STUB_PROVIDER_NAME</code> | Override provider name for
+transparency log stub |</p>
+<h3 id="external-capability-anchoring-prototype">🌐 External Capability
+Anchoring (Prototype)</h3>
+<p>External anchoring publishes the canonical capability registry hash
+to an external timestamping / transparency provider distinct from the
+internal memory anchor client and notarization path.</p>
+<p>Environment Variables: | Env | Purpose | |—–|———| |
+<code>GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER</code> | Select external
+provider (<code>memory</code> in-process demo or <code>tsa_stub</code>
+latency/failure simulation). | |
+<code>GAUTH_CAP_EXTERNAL_ANCHOR_MIN_MS</code> | Minimum simulated
+latency (ms) for <code>tsa_stub</code> provider (default 25). | |
+<code>GAUTH_CAP_EXTERNAL_ANCHOR_MAX_MS</code> | Maximum simulated
+latency (ms) for <code>tsa_stub</code> provider (default 120). | |
+<code>GAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB</code> | Failure probability
+(0.0–1.0) for <code>tsa_stub</code> to exercise retry/error paths
+(default 0). | | <code>GAUTH_CAP_EXTERNAL_ANCHOR_RETRIES</code> | Number
+of retry attempts after the initial attempt (exponential backoff).
+Default 0 (no retries). | |
+<code>GAUTH_CAP_EXTERNAL_ANCHOR_RETRY_BASE_MS</code> | Base backoff (ms)
+before first retry (default 50). Each retry doubles this base (2^n) and
+applies ±20% jitter. |</p>
+<p>Receipt Object (provider-specific, memory &amp; stub share
+shape):</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;hash&quot;</span><span class="fu">:</span> <span class="st">&quot;sha256:...&quot;</span><span class="fu">,</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="st">&quot;2025-10-20T18:59:12.345678901Z&quot;</span><span class="fu">,</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;provider&quot;</span><span class="fu">:</span> <span class="st">&quot;tsa_stub&quot;</span><span class="fu">,</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;version&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;proof&quot;</span><span class="fu">:</span> <span class="st">&quot;...&quot;</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Provider Label Normalization: The metrics label for the TSA stub
+provider uses a dash (<code>tsa-stub</code>) while the environment
+selector uses an underscore
+(<code>GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER=tsa_stub</code>). Internally
+the provider implementation emits <code>provider:"tsa-stub"</code> in
+receipts; the metrics helper normalizes the env value
+<code>tsa_stub</code> → <code>tsa-stub</code> to ensure consistent
+labeled counters/histograms. Memory provider passes through unchanged
+(<code>memory</code>). Custom providers should prefer dash-separated
+labels for Prometheus cardinality hygiene.</p>
+<p>Endpoints: | Endpoint | Method | Purpose | |———-|——–|———| |
+<code>/api/v1/beta/capabilities/anchor/status</code> | GET | Includes
+<code>external_anchor_receipt</code> when at least one external anchor
+succeeded. | | <code>/api/v1/beta/capabilities/anchor/verify</code> |
+POST | Verifies a posted receipt object (hash/timestamp/provider)
+against provider logic. | |
+<code>/api/v1/beta/capabilities/anchor/external/receipts/latest</code> |
+GET | Latest persisted external anchor receipt (with
+<code>prev_hash</code> and <code>chain_hash</code>). | |
+<code>/api/v1/beta/capabilities/anchor/external/receipts</code> | GET |
+Full external anchor receipt chain (append-only order). | |
+<code>/api/v1/beta/capabilities/anchor/external/receipts/verify</code> |
+GET | External receipt chain integrity verification (reports ok |
+mismatch | empty plus diagnostics). |</p>
+<p>Metrics Adapter Injection: To ensure the initial external anchoring
+attempt (performed during server startup when a capability registry hash
+is already available) records into a custom metrics backend, use the new
+constructor:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>reg <span class="op">:=</span> prometheus<span class="op">.</span>NewRegistry<span class="op">()</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>pm  <span class="op">:=</span> metrics<span class="op">.</span>NewPrometheusMetrics<span class="op">(</span>metrics<span class="op">.</span>PrometheusAdapterOptions<span class="op">{</span>Namespace<span class="op">:</span> <span class="st">&quot;gauth&quot;</span><span class="op">,</span> Subsystem<span class="op">:</span> <span class="st">&quot;rfc0111&quot;</span><span class="op">,</span> Registry<span class="op">:</span> reg<span class="op">})</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>srv <span class="op">:=</span> web<span class="op">.</span>NewBetaServerWithMetrics<span class="op">(</span><span class="st">&quot;:0&quot;</span><span class="op">,</span> pm<span class="op">)</span></span></code></pre></div>
+<p>This avoids the earlier pattern of constructing with
+<code>NewBetaServer</code> then replacing <code>srv.metrics</code>
+(which missed startup side-effects such as the initial external anchor
+attempt). Tests targeting strict Prometheus assertions should prefer
+<code>NewBetaServerWithMetrics</code>. |
+<code>/api/v1/beta/capabilities/anchor/external/receipt</code> | GET |
+Latest external anchor receipt only (configured provider). | |
+<code>/api/v1/beta/capabilities/anchor/external/verify</code> | GET |
+Performs provider-level verification of latest receipt
+(<code>verified:true|false</code>). |</p>
+<p>Metrics (Prometheus Adapter): | Metric | Type | Labels | Description
+| |——–|——|——–|————-| | <code>external_anchor_attempts_total</code> |
+Counter | <code>provider</code> | Total external anchoring attempts
+initiated. | | <code>external_anchor_failures_total</code> | Counter |
+<code>provider</code> | Failed anchoring attempts. | |
+<code>external_anchor_latency_seconds</code> | Histogram |
+<code>provider</code> | Latency distribution of successful external
+anchoring operations. | | <code>external_anchor_age_seconds</code> |
+Gauge | none | Seconds since last successful external anchor (0 when
+never). | | <code>external_anchor_last_hash_len</code> | Gauge | none |
+Length of last externally anchored hash (0 when none). | |
+<code>capability_external_anchor_receipts_integrity</code> | Gauge |
+none | External receipt chain integrity
+(1=ok,0=mismatch,-1=unconfigured/empty). | |
+<code>capability_external_anchor_receipts_last_verify_age_seconds</code>
+| Gauge | none | Seconds since last external receipt chain integrity
+verification. | | <code>capability_external_anchor_receipts_total</code>
+| Counter | none | Total persisted external anchor receipt entries.
+|</p>
+<p>Startup Behavior: An initial anchoring attempt is performed
+immediately during server initialization (if a capability registry hash
+already exists) to ensure observability for static demo seeds.</p>
+<p>Failure Simulation: Retry Behavior: If
+<code>GAUTH_CAP_EXTERNAL_ANCHOR_RETRIES</code> &gt; 0, the server
+performs additional attempts upon failure using exponential backoff:
+<code>delay = base_ms * 2^attempt</code> with a ±20% jitter adjustment.
+Each attempt (initial + retries) records its own metrics (attempt
+counter increment; failures or latency histogram sample). Successful
+attempts short-circuit remaining retries. The hash length gauge is
+updated only on success. Provider-labeled counters reflect total
+attempts and failures across all retries. Set
+<code>GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER=tsa_stub</code> with
+<code>GAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB=1</code> to force failures;
+status payload will omit <code>external_anchor_receipt</code> and
+failure counter increments.</p>
+<p>Verification Semantics: <code>/external/verify</code> invokes
+provider <code>Verify</code>; memory provider always succeeds when hash
+matches, while stub may return errors if simulated state diverges.</p>
+<p>Observability Guidance: 1. Scrape <code>/metrics</code> for labeled
+counters/histogram buckets. 2. Monitor
+<code>external_anchor_age_seconds</code> for freshness. 3. Alert on high
+failure ratio; consider provider fallback.</p>
+<p>Roadmap: * Add real TSA / transparency log provider implementation
+(RFC3161, RFC6962). * (Completed) Persist external receipts with
+hash-chain linkage similar to notarization chain (see new
+<code>/external/receipts</code> endpoints &amp; integrity metrics). *
+Integrate multi-provider quorum anchoring. * Export proof verification /
+inclusion path endpoints when transparency log present.</p>
+<p>Receipt Object Extensions: Unified Recording Helper: When
+instrumenting a single external anchoring operation manually
+(e.g. custom provider integration code outside the server), prefer the
+consolidated helper to ensure unlabeled and provider-labeled metrics
+remain synchronized:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">// success path</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>pm<span class="op">.</span>RecordExternalAnchorResult<span class="op">(</span>providerTag<span class="op">,</span> <span class="ot">true</span><span class="op">,</span> latency<span class="op">,</span> <span class="bu">len</span><span class="op">(</span>hashHex<span class="op">))</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co">// failure path</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>pm<span class="op">.</span>RecordExternalAnchorResult<span class="op">(</span>providerTag<span class="op">,</span> <span class="ot">false</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="dv">0</span><span class="op">)</span></span></code></pre></div>
+<p>Behavior: * Always increments attempts counters (unlabeled +
+provider). * On success: observes latency (both histograms) and sets
+last hash length gauge. * On failure: increments failure counters
+(unlabeled + provider). * Does NOT set age gauge directly (background
+server loop handles freshness).</p>
+<p>Backward compatibility: existing
+<code>IncExternalAnchorAttempts</code>,
+<code>IncExternalAnchorFailures</code>,
+<code>ObserveExternalAnchorLatency</code>, and
+<code>SetExternalAnchorLastHashLen</code> remain available; the server
+now prefers the unified helper when present.</p>
+<p>The persisted receipt entries (via
+<code>/api/v1/beta/notarization/receipts</code> and latest endpoint) may
+now include optional fields: | Field | Description | |——-|————-| |
+<code>merkle_root</code> | Present when Merkle feature enabled; binary
+Merkle tree root over all leaf entry digests up to this entry. Leaves =
+sha256 of base JSON (excluding <code>chain_hash</code>,
+<code>merkle_root</code>). | | <code>rotation</code> | Key rotation
+descriptor if the receipt represents a rotation event (continuity
+metadata). |</p>
+<p>Key Rotation Descriptor (<code>rotation</code>):</p>
+<pre class="jsonc"><code>&quot;rotation&quot;: {
+    &quot;old_key_id&quot;: &quot;ed25519:abcd...&quot;,
+    &quot;new_key_id&quot;: &quot;ed25519:ef01...&quot;,
+    &quot;effective_time&quot;: &quot;2025-10-20T12:00:00Z&quot;,
+    &quot;reason&quot;: &quot;scheduled&quot;,
+    &quot;prev_rotation_hash&quot;: &quot;&lt;chain_hash_of_previous_rotation_receipt&gt;&quot;
+}</code></pre>
+<p>Purpose: preserve continuity and audit trail of signing keys; future
+enhancement will require dual signatures (old + new key) over
+descriptor. ### 🔄 Key Rotation Verification (Prototype)</p>
+<p><code>GET /api/v1/beta/rotations/verification</code></p>
+<p>Audits continuity (<code>prev_rotation_hash</code> linkage) and
+dual-signature validity of recorded key rotation descriptors embedded in
+notarization receipts.</p>
+<p>Example Response (abridged):</p>
+<pre class="jsonc"><code>{
+    &quot;success&quot;: true,
+    &quot;configured&quot;: true,
+    &quot;generated_at&quot;: &quot;2025-10-20T12:34:56Z&quot;,
+    &quot;summary&quot;: {
+        &quot;total&quot;: 2,
+        &quot;all_continuity_ok&quot;: true,
+        &quot;all_signatures_ok&quot;: false,
+        &quot;failures&quot;: 1,
+        &quot;results&quot;: [
+            {&quot;index&quot;:0,&quot;old_key_id&quot;:&quot;ed25519:aa12bb34&quot;,&quot;new_key_id&quot;:&quot;ed25519:cc56dd78&quot;,&quot;continuity_ok&quot;:true,&quot;signatures_ok&quot;:true},
+            {&quot;index&quot;:1,&quot;old_key_id&quot;:&quot;ed25519:cc56dd78&quot;,&quot;new_key_id&quot;:&quot;ed25519:ee90ff11&quot;,&quot;continuity_ok&quot;:true,&quot;signatures_ok&quot;:false,&quot;reason&quot;:&quot;missing_old_signature&quot;}
+        ]
+    }
+}</code></pre>
+<p>Per-Descriptor Fields: | Field | Description | |——-|————-| |
+<code>index</code> | Sequence position (0-based) | |
+<code>old_key_id</code> / <code>new_key_id</code> | Key identifiers
+bound to descriptor | | <code>continuity_ok</code> | Whether
+<code>prev_rotation_hash</code> matches previous rotation receipt hash
+(empty allowed for first) | | <code>signatures_ok</code> | Both old
+&amp; new key signatures present and verified | | <code>reason</code> |
+First failure reason (present only on failure) | |
+<code>prev_hash_expected</code> / <code>prev_hash_actual</code> |
+Continuity diagnostics when prior hash known |</p>
+<p>Aggregate Fields: | Field | Description | |——-|————-| |
+<code>total</code> | Number of descriptors evaluated | |
+<code>all_continuity_ok</code> | No continuity failures encountered | |
+<code>all_signatures_ok</code> | All dual signatures validated | |
+<code>failures</code> | Count of descriptors with any failure |</p>
+<p>Failure Reasons: | Reason | Meaning | |——–|———| |
+<code>descriptor_nil</code> | Nil descriptor entry | |
+<code>continuity_failure</code> | Previous linkage mismatch or
+unexpected non-empty genesis prev hash | |
+<code>kid_not_found_old</code> | Old key public key material unavailable
+| | <code>kid_not_found_new</code> | New key public key material
+unavailable | | <code>kid_mismatch_old</code> | Old key ID mismatch vs
+derived ID | | <code>kid_mismatch_new</code> | New key ID mismatch vs
+derived ID | | <code>missing_old_signature</code> | Old key signature
+field empty | | <code>missing_new_signature</code> | New key signature
+field empty | | <code>old_sig_invalid</code> | Old signature fails
+Ed25519 verify / decode | | <code>new_sig_invalid</code> | New signature
+verification failure | | <code>serialization_error</code> | Canonical
+payload marshal failed |</p>
+<p>Metrics: | Metric | Description | |——–|————-| |
+<code>gauth_rotation_verification_latency_seconds</code> | Histogram of
+verification latency | |
+<code>gauth_rotation_verification_total{outcome="success|failure"}</code>
+| Counter labeled by outcome (any failure =&gt; failure) | |
+<code>gauth_rotation_verification_failure_reason_total{reason="&lt;code&gt;"}</code>
+| Counter per failing descriptor categorized by first failure reason
+|</p>
+<p>Current Limitations: * Public key resolution not yet wired—missing
+keys produce <code>kid_not_found_old/new</code>. * Rotation descriptors
+must be embedded in receipts; external persistence forthcoming. * No
+signed summary artifact yet (planned for hardening phase).</p>
+<p>Roadmap: * Persistent rotation receipt log with independent integrity
+chain. * RFC3161/Sigstore timestamping of rotation chain heads. *
+Inclusion proofs &amp; Merkle subtree optimization for descriptor
+sets.</p>
+<p>Stub Provider Interfaces: - TSA Scaffold
+(<code>internal/notary/tsa_stub.go</code>): <code>Timestamp</code>
+method returns synthetic <code>TSAResponse</code> with
+<code>emulated_serial</code> and <code>emulated_policy_oid</code>. -
+Transparency Log Scaffold
+(<code>internal/notary/transparency_log_stub.go</code>):
+<code>Log</code> method returns synthetic
+<code>TransparencyLogEntryResponse</code> with
+<code>emulated_leaf_id</code>, <code>emulated_root_ref</code>.</p>
+<p>Adaptive Verification Notes: - Background verification interval
+dynamically recalculates between min/max bounds based on append rate and
+mismatch occurrences. - Force immediate recomputation via custom
+Prometheus endpoint <code>?verify=1</code> or when freshness threshold
+exceeded. - Gauge
+<code>capability_anchor_notarization_receipts_last_verify_age_seconds</code>
+exposes age since last integrity verification; alert if near max
+interval * 2.</p>
+<p>Merkle Root Verification (Auditor Guidance): 1. Fetch
+<code>/api/v1/beta/notarization/receipts</code>. 2. For each entry
+reconstruct leaf digest (sha256 over base JSON minus chain fields)
+maintaining ordered list. 3. Recompute Merkle root using pairwise
+hashing duplicating last node when level has odd count; compare to final
+entry’s <code>merkle_root</code>. 4. Cross-check final
+<code>chain_hash</code> for chain linkage integrity.</p>
+<p>Rotation Audit Flow (Future): 1. Identify all receipts with
+<code>rotation</code> present. 2. Verify linear continuity via
+<code>prev_rotation_hash</code> forming rotation chain. 3. Validate dual
+signatures over descriptor referencing both key IDs.</p>
+<p>Dual-Signature Fields (Implemented): | Field | Description |
+|——-|————-| | <code>old_key_signature</code> | Ed25519 signature
+produced by retiring key over canonical, prefixed descriptor payload | |
+<code>new_key_signature</code> | Ed25519 signature produced by successor
+key over same canonical payload |</p>
+<p>Verification Failure Codes: | Code | Meaning | |——|———| |
+<code>kid_mismatch_old</code> | Provided old public key does not derive
+same key id | | <code>kid_mismatch_new</code> | Provided new public key
+does not derive same key id | | <code>missing_old_signature</code> | Old
+key signature absent | | <code>missing_new_signature</code> | New key
+signature absent | | <code>old_sig_invalid</code> | Old signature fails
+verification | | <code>new_sig_invalid</code> | New signature fails
+verification | | <code>serialization_error</code> | Canonical descriptor
+could not be serialized |</p>
+<p>Canonical Signing Payload:</p>
+<pre><code>GAUTH_ROTATION_DESCRIPTOR:{&quot;old_key_id&quot;:&quot;...&quot;,&quot;new_key_id&quot;:&quot;...&quot;,&quot;effective_time&quot;:&quot;...&quot;,&quot;reason&quot;:&quot;...&quot;,&quot;prev_rotation_hash&quot;:&quot;...&quot;}</code></pre>
+<h3 id="snapshot-metrics-integrity">📊 Snapshot Metrics &amp;
+Integrity</h3>
+<p>Metrics exposed during snapshot operations (Prometheus): | Metric |
+Type | Labels | Description | |——–|——|——–|————-| |
+<code>gauth_snapshot_generation_latency_seconds</code> | Histogram | - |
+Generation latency | | <code>gauth_snapshot_generation_total</code> |
+Counter | outcome | Attempts (success|error) | |
+<code>gauth_snapshot_verification_latency_seconds</code> | Histogram | -
+| Verification latency | |
+<code>gauth_snapshot_verification_total</code> | Counter | outcome |
+Attempts (success|failure|error) |</p>
+<p>Snapshot Verification Result Fields: | Field | Meaning | |——-|———| |
+<code>valid</code> | All comparisons succeeded (hash, merkle, chain
+head, count) | | <code>hash_match</code> | Snapshot self-hash matches
+recomputed digest | | <code>merkle_match</code> | Merkle root matches
+recomputed tree (or absent when disabled) | |
+<code>chain_head_match</code> | Chain head hash equals current store
+head | | <code>receipt_count_ok</code> | Receipt count equals current
+store length | | <code>reason</code> | First failing condition
+(precedence: merkle&gt;hash&gt;chain_head&gt;receipt_count) |</p>
+<p>Exit Codes (CLI): reference README section for mapping (0 success;
+non-zero failure/error categories).</p>
+<p>Alerting Recommendation: Trigger alert when integrity gauge == 0
+(mismatch) for 2 consecutive scrapes. Suppress alerts for value -1
+(unconfigured/empty/legacy).</p>
+<h3 id="jti-ttl-replay-protection">🕒 JTI TTL &amp; Replay
+Protection</h3>
+<p>The token service enforces fail-closed replay detection on the
+<code>jti</code> claim. In-memory JTIs expire after a TTL window: -
+Configure with <code>GAUTH_JTI_TTL_SEC</code> (default 600 seconds). -
+On validation, a duplicate JTI within the TTL window ⇒ token rejected. -
+Opportunistic eviction runs when the in-memory map exceeds 500 entries.
+- Pluggable persistence layer can be injected via
+<code>WithReplayStore</code> to enforce durable uniqueness.</p>
+<p>Edge Cases: - Expired JTI entries (older than TTL) are removed
+lazily, allowing reuse (treated as a fresh token). - Absent or empty
+<code>jti</code> ⇒ immediate rejection.</p>
+<p>Security Considerations: - For production deployments use a durable
+store (e.g., Redis) implementing <code>ReplayStore</code> to survive
+restarts and coordinate across replicas. - TTL tuning balances memory
+footprint vs. replay window risk; choose a value aligned with average
+token lifetime. — Need context? See: README.md | docs/ARCHITECTURE.md |
+docs/GETTING_STARTED.md # (Metadata moved to top) GAuth RFC API
+Reference</p>
+<blockquote>
+<p>Last Updated: 2025-10-21 Status: Active</p>
+</blockquote>
+<blockquote>
+<p>Beta reference – NOT production ready. Interfaces and examples may be
+incomplete or simplified. See <code>../DISCLAIMER.md</code> for
+intentionally missing security, policy, and lifecycle controls.</p>
+</blockquote>
+<p><strong>Beta Demonstration API Documentation (NOT Production
+Ready)</strong></p>
+<p>Complete Go library API reference for GiFo-RFC-0111 (GAuth 1.0) and
+GiFo-RFC-0115 (PoA Definition) implementation.</p>
+<blockquote>
+<p><strong>📝 Note</strong>: This document covers the Go library API.
+For the web demonstration API documentation, see <a
+href="./COMPLETE_API_REFERENCE.md">COMPLETE_API_REFERENCE.md</a> which
+includes both library and web API documentation.</p>
+</blockquote>
+<h2 id="table-of-contents">📋 <strong>Table of Contents</strong></h2>
+<ol type="1">
+<li><a href="#core-service-api">Core Service API</a></li>
+<li><a href="#rfc-111-authorization-api">RFC 111 Authorization
+API</a></li>
+<li><a href="#rfc-115-poa-definition-api">RFC 115 PoA Definition
+API</a></li>
+<li><a href="#professional-foundation-api">Professional Foundation
+API</a></li>
+<li><a href="#data-types-reference">Data Types Reference</a></li>
+<li><a href="#error-handling">Error Handling</a></li>
+<li><a href="#examples">Examples</a></li>
+<li><a href="#infrastructure--resilience-utilities">Infrastructure &amp;
+Resilience Utilities</a>
+<ul>
+<li><a href="#circuit-breaker">Circuit Breaker</a></li>
+<li><a href="#rate-limiter-simplified">Rate Limiter
+(Simplified)</a></li>
+<li><a href="#metrics-collector">Metrics Collector</a></li>
+<li><a href="#authorization-policy-model-update">Authorization Policy
+Model Update</a></li>
+<li><a href="#audit-event-api-change">Audit Event API Change</a></li>
+<li><a href="#token-store-changes">Token Store Changes</a></li>
+</ul></li>
+</ol>
+<blockquote>
+<p><strong>🌐 Web API</strong>: For REST API endpoints used by the
+webapp demo, see <a
+href="./COMPLETE_API_REFERENCE.md">COMPLETE_API_REFERENCE.md</a></p>
+</blockquote>
+<h2 id="core-service-api">🏗️ <strong>Core Service API</strong></h2>
+<h3 id="rfccompliantservice"><strong>RFCCompliantService</strong></h3>
+<p>The main service implementing both RFC 111 and RFC 115
+specifications.</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> RFCCompliantService <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    jwtService         <span class="op">*</span>ProperJWTService</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    legalValidator     <span class="op">*</span>LegalFrameworkValidator</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    delegationManager  <span class="op">*</span>DelegationManager</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    attestationService <span class="op">*</span>AttestationService</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="constructor"><strong>Constructor</strong></h4>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewRFCCompliantService<span class="op">(</span>issuer<span class="op">,</span> audience <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>RFCCompliantService<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Parameters:</strong> - <code>issuer</code> (string): The
+issuer identifier for JWT tokens - <code>audience</code> (string): The
+intended audience for JWT tokens</p>
+<p><strong>Returns:</strong> - <code>*RFCCompliantService</code>:
+Configured service instance - <code>error</code>: Configuration or
+initialization error</p>
+<p><strong>Example:</strong></p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>service<span class="op">,</span> err <span class="op">:=</span> auth<span class="op">.</span>NewRFCCompliantService<span class="op">(</span><span class="st">&quot;my-company&quot;</span><span class="op">,</span> <span class="st">&quot;ai-authorization&quot;</span><span class="op">)</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>### Signature <span class="op">&amp;</span> Semantic Validation Options <span class="op">(</span>RFC <span class="bn">0111</span> Service<span class="op">)</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>The lower<span class="op">-</span>level <span class="st">`rfc0111.Service`</span> <span class="op">(</span>delegation issuance <span class="op">/</span> token verification<span class="op">)</span> now supports additional functional options<span class="op">:</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="st">```go</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="st">// Enforce signature presence (abort issuance if signing fails)</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="st">func WithMandatorySignatures() rfc0111.Option</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="st">// Provide a signing key (returned Signer must implement ed25519 or supported algorithm)</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="st">func WithSignerProvider(fn func() (cr.Signer, error)) rfc0111.Option</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="st">// Install semantic validator executing cross-field invariants before signing/persistence</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="st">func WithSemanticValidator(v rfc0111.PoAValidator) rfc0111.Option</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="st">// Enforce strict authenticity (missing public key at verification becomes integrity failure)</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="st">func WithStrictAuthenticity() rfc0111.Option</span></span></code></pre></div>
+<p>Canonical Digest &amp; Signature:</p>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>digestHex<span class="op">,</span> canonicalJSON<span class="op">,</span> err <span class="op">:=</span> rfc0111<span class="op">.</span>CanonicalPOADigest<span class="op">(&amp;</span>poa<span class="op">)</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Signature covers domain-separated canonical JSON; exclusion of mutable fields preserves validity through lifecycle.</span></span></code></pre></div>
+<p>Validator Interface:</p>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PoAValidator <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    Validate<span class="op">(*</span>rfc0111<span class="op">.</span>PowerOfAttorney<span class="op">)</span> <span class="dt">error</span> <span class="co">// return rfc.ErrInvalidRequest on semantic violation</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Provided prototype implementation:</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BasicPoAValidator <span class="kw">struct</span><span class="op">{}</span></span></code></pre></div>
+<p>Prototype Semantic Rules (BasicPoAValidator): 1. Disallow
+self-delegation unless wildcard-only scope. 2. Require
+<code>currency</code> restriction for any <code>transaction:</code>
+scope. 3. Enforce temporal ordering (<code>valid_from</code> &lt;
+<code>valid_until</code>). 4. Cap <code>transaction:</code> delegation
+duration to 30 days. 5. Normalize nil restriction map.</p>
+<p>Activation Example:</p>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>svc <span class="op">:=</span> rfc0111<span class="op">.</span>NewService<span class="op">(</span>audit<span class="op">.</span>NewMemoryLogger<span class="op">(</span><span class="ot">nil</span><span class="op">),</span> authz<span class="op">.</span>NewMemoryAuthorizer<span class="op">(),</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    rfc0111<span class="op">.</span>WithSignerProvider<span class="op">(</span><span class="kw">func</span><span class="op">()</span> <span class="op">(</span>cr<span class="op">.</span>Signer<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span> kp<span class="op">,</span> _ <span class="op">:=</span> cr<span class="op">.</span>NewInMemoryEd25519Provider<span class="op">();</span> <span class="cf">return</span> kp<span class="op">.</span>ActiveSigner<span class="op">()</span> <span class="op">}),</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    rfc0111<span class="op">.</span>WithMandatorySignatures<span class="op">(),</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    rfc0111<span class="op">.</span>WithSemanticValidator<span class="op">(</span>rfc0111<span class="op">.</span>BasicPoAValidator<span class="op">{}),</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<p>Token Verification now sets <code>SignatureValid</code> and
+<code>PublicKeyFound</code> flags in
+<code>TokenVerificationResult</code> if signature present.</p>
+<p>RawPOA Exposure: <code>TokenVerificationResult</code> now includes
+<code>raw_poa</code> and <code>poa_version</code> fields when a token
+was issued as EnvelopeV2 with full PoA embedding enabled and within size
+limits. These fields are omitted when embedding disabled or size cap
+exceeded. Always verify <code>canonical_digest</code> independently
+before trusting embedded JSON. Future versions may add
+<code>raw_poa_cbor</code> for compact representation.</p>
+<p>if err != nil { return fmt.Errorf(“service creation failed: %w”, err)
+}</p>
+<pre><code>
+## 🎯 **RFC 111 Authorization API**
+
+### **AuthorizeGAuth**
+
+Main authorization method implementing complete RFC 111 flow with RFC 115 PoA Definition validation.
+
+```go
+func (s *RFCCompliantService) AuthorizeGAuth(ctx context.Context, req GAuthRequest) (*GAuthResponse, error)</code></pre>
+<p><strong>Parameters:</strong> - <code>ctx</code> (context.Context):
+Request context for cancellation and timeout - <code>req</code>
+(GAuthRequest): Complete RFC-compliant authorization request</p>
+<p><strong>Returns:</strong> - <code>*GAuthResponse</code>:
+Authorization response with compliance validation - <code>error</code>:
+Authorization or validation error</p>
+<p><strong>Process Flow:</strong> 1. Validates PoA Definition (RFC 115)
+2. Validates principal capacity (RFC 111) 3. Validates AI client
+capabilities 4. Validates legal compliance 5. Generates authorization
+code 6. Creates comprehensive audit record</p>
+<p><strong>Example:</strong></p>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>response<span class="op">,</span> err <span class="op">:=</span> service<span class="op">.</span>AuthorizeGAuth<span class="op">(</span>ctx<span class="op">,</span> auth<span class="op">.</span>GAuthRequest<span class="op">{</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    ClientID<span class="op">:</span>     <span class="st">&quot;ai_agent_v1&quot;</span><span class="op">,</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    ResponseType<span class="op">:</span> <span class="st">&quot;code&quot;</span><span class="op">,</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    Scope<span class="op">:</span>        <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;financial_advisory&quot;</span><span class="op">},</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    PowerType<span class="op">:</span>    <span class="st">&quot;financial_advisory_powers&quot;</span><span class="op">,</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    PrincipalID<span class="op">:</span>  <span class="st">&quot;corp_ceo_123&quot;</span><span class="op">,</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    AIAgentID<span class="op">:</span>    <span class="st">&quot;ai_financial_advisor&quot;</span><span class="op">,</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    Jurisdiction<span class="op">:</span> <span class="st">&quot;US&quot;</span><span class="op">,</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    PoADefinition<span class="op">:</span> poaDefinition<span class="op">,</span> <span class="co">// Complete RFC 115 structure</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="op">})</span></span></code></pre></div>
+<h3
+id="creategauthtoken-future-enhancement"><strong>CreateGAuthToken</strong>
+(Future Enhancement)</h3>
+<p>Exchange authorization code for extended token with comprehensive
+metadata.</p>
+<div class="sourceCode" id="cb29"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>RFCCompliantService<span class="op">)</span> CreateGAuthToken<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> authCode <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>GAuthToken<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<h2 id="rfc-115-poa-definition-api">📋 <strong>RFC 115 PoA Definition
+API</strong></h2>
+<h3 id="poa-definition-structure"><strong>PoA Definition
+Structure</strong></h3>
+<p>Complete implementation of RFC 115 Power-of-Attorney Credential
+Definition.</p>
+<div class="sourceCode" id="cb30"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PoADefinition <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    Principal         Principal         <span class="st">`json:&quot;principal&quot;`</span>          <span class="co">// Section 3.A</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    Authorizer        Authorizer        <span class="st">`json:&quot;authorizer&quot;`</span>         <span class="co">// Section 3.A</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    Client           ClientAI          <span class="st">`json:&quot;client&quot;`</span>             <span class="co">// Section 3.A</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    AuthorizationType AuthorizationType <span class="st">`json:&quot;authorization_type&quot;`</span> <span class="co">// Section 3.B</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    ScopeDefinition   ScopeDefinition   <span class="st">`json:&quot;scope_definition&quot;`</span>   <span class="co">// Section 3.B</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    Requirements     Requirements      <span class="st">`json:&quot;requirements&quot;`</span>       <span class="co">// Section 3.C</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="section-a-parties"><strong>Section A: Parties</strong></h3>
+<h4 id="principal"><strong>Principal</strong></h4>
+<div class="sourceCode" id="cb31"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Principal <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    Type         PrincipalType <span class="st">`json:&quot;type&quot;`</span>                    <span class="co">// &quot;individual&quot; or &quot;organization&quot;</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    Identity     <span class="dt">string</span>        <span class="st">`json:&quot;identity&quot;`</span>                <span class="co">// Unique identifier</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    Organization <span class="op">*</span>Organization <span class="st">`json:&quot;organization,omitempty&quot;`</span>  <span class="co">// Required if type is &quot;organization&quot;</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PrincipalType <span class="dt">string</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>    PrincipalTypeIndividual   PrincipalType <span class="op">=</span> <span class="st">&quot;individual&quot;</span></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>    PrincipalTypeOrganization PrincipalType <span class="op">=</span> <span class="st">&quot;organization&quot;</span></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<h4 id="organization"><strong>Organization</strong></h4>
+<div class="sourceCode" id="cb32"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Organization <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    Type                OrganizationType <span class="st">`json:&quot;type&quot;`</span>                 <span class="co">// Commercial, public, non-profit, etc.</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    Name                <span class="dt">string</span>           <span class="st">`json:&quot;name&quot;`</span>                 <span class="co">// Organization name</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    RegisterEntry       <span class="dt">string</span>           <span class="st">`json:&quot;register_entry&quot;`</span>       <span class="co">// Commercial register entry</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    ManagingDirector    <span class="dt">string</span>           <span class="st">`json:&quot;managing_director&quot;`</span>    <span class="co">// Current managing director</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    RegisteredAuthority <span class="dt">bool</span>             <span class="st">`json:&quot;registered_authority&quot;`</span> <span class="co">// Has registered authority</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> OrganizationType <span class="dt">string</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>    OrgTypeCommercial   OrganizationType <span class="op">=</span> <span class="st">&quot;commercial_enterprise&quot;</span>    <span class="co">// AG, Ltd., partnership</span></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>    OrgTypePublic       OrganizationType <span class="op">=</span> <span class="st">&quot;public_authority&quot;</span>         <span class="co">// Federal, state, municipal</span></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>    OrgTypeNonProfit    OrganizationType <span class="op">=</span> <span class="st">&quot;non_profit_organization&quot;</span>  <span class="co">// Foundation, gGmbH</span></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>    OrgTypeAssociation  OrganizationType <span class="op">=</span> <span class="st">&quot;association&quot;</span>              <span class="co">// Non-profit or non-charitable</span></span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>    OrgTypeOther        OrganizationType <span class="op">=</span> <span class="st">&quot;other&quot;</span>                    <span class="co">// Church, cooperative, etc.</span></span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<h4 id="clientai"><strong>ClientAI</strong></h4>
+<div class="sourceCode" id="cb33"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ClientAI <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    Type              ClientType <span class="st">`json:&quot;type&quot;`</span>               <span class="co">// LLM, agent, agentic AI, robot</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    Identity          <span class="dt">string</span>     <span class="st">`json:&quot;identity&quot;`</span>           <span class="co">// Unique AI identifier</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    Version           <span class="dt">string</span>     <span class="st">`json:&quot;version&quot;`</span>            <span class="co">// AI version</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    OperationalStatus <span class="dt">string</span>     <span class="st">`json:&quot;operational_status&quot;`</span> <span class="co">// &quot;active&quot;, &quot;revoked&quot;, etc.</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ClientType <span class="dt">string</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>    ClientTypeLLM       ClientType <span class="op">=</span> <span class="st">&quot;llm&quot;</span>            <span class="co">// Large Language Model</span></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>    ClientTypeAgent     ClientType <span class="op">=</span> <span class="st">&quot;digital_agent&quot;</span>  <span class="co">// Single digital agent</span></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>    ClientTypeAgenticAI ClientType <span class="op">=</span> <span class="st">&quot;agentic_ai&quot;</span>     <span class="co">// Team of agents</span></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>    ClientTypeRobot     ClientType <span class="op">=</span> <span class="st">&quot;humanoid_robot&quot;</span> <span class="co">// Physical humanoid robot</span></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>    ClientTypeOther     ClientType <span class="op">=</span> <span class="st">&quot;other&quot;</span>          <span class="co">// Other AI types</span></span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<h3 id="section-b-authorization-type-scope"><strong>Section B:
+Authorization Type &amp; Scope</strong></h3>
+<h4 id="authorizationtype"><strong>AuthorizationType</strong></h4>
+<div class="sourceCode" id="cb34"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> AuthorizationType <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    RepresentationType    RepresentationType <span class="st">`json:&quot;representation_type&quot;`</span>     <span class="co">// Sole or joint</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    RestrictionsExclusions <span class="op">[]</span><span class="dt">string</span>          <span class="st">`json:&quot;restrictions_exclusions&quot;`</span> <span class="co">// Specific exclusions</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    SubProxyAuthority     <span class="dt">bool</span>              <span class="st">`json:&quot;sub_proxy_authority&quot;`</span>     <span class="co">// Can delegate further</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    SignatureType         SignatureType     <span class="st">`json:&quot;signature_type&quot;`</span>          <span class="co">// Single, joint, collective</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> RepresentationType <span class="dt">string</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    RepresentationSole  RepresentationType <span class="op">=</span> <span class="st">&quot;sole&quot;</span>  <span class="co">// Sole representation</span></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    RepresentationJoint RepresentationType <span class="op">=</span> <span class="st">&quot;joint&quot;</span> <span class="co">// Joint representation</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SignatureType <span class="dt">string</span></span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>    SignatureSingle     SignatureType <span class="op">=</span> <span class="st">&quot;single&quot;</span>     <span class="co">// Single signature authority</span></span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>    SignatureJoint      SignatureType <span class="op">=</span> <span class="st">&quot;joint&quot;</span>      <span class="co">// Joint signature required  </span></span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>    SignatureCollective SignatureType <span class="op">=</span> <span class="st">&quot;collective&quot;</span> <span class="co">// Collective signature required</span></span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<h4 id="scopedefinition"><strong>ScopeDefinition</strong></h4>
+<div class="sourceCode" id="cb35"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ScopeDefinition <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    ApplicableSectors  <span class="op">[]</span>IndustrySector   <span class="st">`json:&quot;applicable_sectors&quot;`</span>  <span class="co">// ISIC/NACE industry codes</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    ApplicableRegions  <span class="op">[]</span>GeographicScope  <span class="st">`json:&quot;applicable_regions&quot;`</span>  <span class="co">// Geographic constraints</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    AuthorizedActions  AuthorizedActions  <span class="st">`json:&quot;authorized_actions&quot;`</span>  <span class="co">// Permitted actions</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="industry-sectors-isicnace"><strong>Industry Sectors
+(ISIC/NACE)</strong></h4>
+<div class="sourceCode" id="cb36"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> IndustrySector <span class="dt">string</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    SectorAgriculture     IndustrySector <span class="op">=</span> <span class="st">&quot;agriculture_forestry_fishing&quot;</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    SectorMining          IndustrySector <span class="op">=</span> <span class="st">&quot;mining_quarrying&quot;</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    SectorManufacturing   IndustrySector <span class="op">=</span> <span class="st">&quot;manufacturing&quot;</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    SectorEnergy          IndustrySector <span class="op">=</span> <span class="st">&quot;energy_supply&quot;</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    SectorWater           IndustrySector <span class="op">=</span> <span class="st">&quot;water_supply&quot;</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    SectorWaste           IndustrySector <span class="op">=</span> <span class="st">&quot;waste_management&quot;</span></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>    SectorConstruction    IndustrySector <span class="op">=</span> <span class="st">&quot;construction&quot;</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>    SectorTrade           IndustrySector <span class="op">=</span> <span class="st">&quot;trade&quot;</span></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>    SectorTransport       IndustrySector <span class="op">=</span> <span class="st">&quot;transport_storage&quot;</span></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>    SectorHospitality     IndustrySector <span class="op">=</span> <span class="st">&quot;hospitality&quot;</span></span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>    SectorICT             IndustrySector <span class="op">=</span> <span class="st">&quot;information_communication&quot;</span></span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>    SectorFinancial       IndustrySector <span class="op">=</span> <span class="st">&quot;financial_insurance&quot;</span></span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>    SectorRealEstate      IndustrySector <span class="op">=</span> <span class="st">&quot;real_estate&quot;</span></span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>    SectorProfessional    IndustrySector <span class="op">=</span> <span class="st">&quot;professional_scientific&quot;</span></span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>    SectorBusiness        IndustrySector <span class="op">=</span> <span class="st">&quot;business_services&quot;</span></span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>    SectorPublicAdmin     IndustrySector <span class="op">=</span> <span class="st">&quot;public_administration&quot;</span></span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>    SectorEducation       IndustrySector <span class="op">=</span> <span class="st">&quot;education&quot;</span></span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>    SectorHealth          IndustrySector <span class="op">=</span> <span class="st">&quot;health_social_work&quot;</span></span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>    SectorArts            IndustrySector <span class="op">=</span> <span class="st">&quot;arts_entertainment&quot;</span></span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>    SectorOtherServices   IndustrySector <span class="op">=</span> <span class="st">&quot;other_services&quot;</span></span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<h4 id="geographic-scope"><strong>Geographic Scope</strong></h4>
+<div class="sourceCode" id="cb37"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> GeographicScope <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    Type        GeographicType <span class="st">`json:&quot;type&quot;`</span>                   <span class="co">// Global, national, regional, etc.</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    Identifier  <span class="dt">string</span>         <span class="st">`json:&quot;identifier&quot;`</span>             <span class="co">// Country code, region name, etc.</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    Description <span class="dt">string</span>         <span class="st">`json:&quot;description,omitempty&quot;`</span>  <span class="co">// Human-readable description</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> GeographicType <span class="dt">string</span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>    GeoTypeGlobal      GeographicType <span class="op">=</span> <span class="st">&quot;global&quot;</span>           <span class="co">// Global operations</span></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>    GeoTypeNational    GeographicType <span class="op">=</span> <span class="st">&quot;national&quot;</span>         <span class="co">// Specific country (specify identifier)</span></span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>    GeoTypeRegional    GeographicType <span class="op">=</span> <span class="st">&quot;regional&quot;</span>         <span class="co">// DACH, Benelux, NAFTA, etc.</span></span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>    GeoTypeSubnational GeographicType <span class="op">=</span> <span class="st">&quot;subnational&quot;</span>      <span class="co">// States, provinces, municipalities</span></span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>    GeoTypeSpecific    GeographicType <span class="op">=</span> <span class="st">&quot;specific_location&quot;</span> <span class="co">// Specific branches or locations</span></span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<h4 id="authorized-actions"><strong>Authorized Actions</strong></h4>
+<div class="sourceCode" id="cb38"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> AuthorizedActions <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>    Transactions      <span class="op">[]</span>TransactionType   <span class="st">`json:&quot;transactions&quot;`</span>        <span class="co">// Financial transactions</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    Decisions         <span class="op">[]</span>DecisionType      <span class="st">`json:&quot;decisions&quot;`</span>           <span class="co">// Business decisions</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    NonPhysicalActions <span class="op">[]</span>NonPhysicalAction <span class="st">`json:&quot;non_physical_actions&quot;`</span> <span class="co">// Information actions</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    PhysicalActions   <span class="op">[]</span>PhysicalAction    <span class="st">`json:&quot;physical_actions&quot;`</span>    <span class="co">// Physical world actions</span></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Transaction Types</span></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TransactionType <span class="dt">string</span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>    TransactionLoan     TransactionType <span class="op">=</span> <span class="st">&quot;loan_transactions&quot;</span></span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>    TransactionPurchase TransactionType <span class="op">=</span> <span class="st">&quot;purchase_transactions&quot;</span>  </span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>    TransactionSale     TransactionType <span class="op">=</span> <span class="st">&quot;sale_transactions&quot;</span></span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>    TransactionLease    TransactionType <span class="op">=</span> <span class="st">&quot;leasing_rental&quot;</span></span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a><span class="co">// Decision Types</span></span>
+<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> DecisionType <span class="dt">string</span></span>
+<span id="cb38-19"><a href="#cb38-19" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb38-20"><a href="#cb38-20" aria-hidden="true" tabindex="-1"></a>    DecisionPersonnel    DecisionType <span class="op">=</span> <span class="st">&quot;personnel_decisions&quot;</span>    <span class="co">// Hiring, dismissal, development</span></span>
+<span id="cb38-21"><a href="#cb38-21" aria-hidden="true" tabindex="-1"></a>    DecisionFinancial    DecisionType <span class="op">=</span> <span class="st">&quot;financial_commitments&quot;</span>  <span class="co">// Contracts, expenses, investments</span></span>
+<span id="cb38-22"><a href="#cb38-22" aria-hidden="true" tabindex="-1"></a>    DecisionBuySell      DecisionType <span class="op">=</span> <span class="st">&quot;buy_sell_transactions&quot;</span>  <span class="co">// Asset acquisition/disposal</span></span>
+<span id="cb38-23"><a href="#cb38-23" aria-hidden="true" tabindex="-1"></a>    DecisionConceptual   DecisionType <span class="op">=</span> <span class="st">&quot;conceptual_determinations&quot;</span> <span class="co">// Business models, concepts</span></span>
+<span id="cb38-24"><a href="#cb38-24" aria-hidden="true" tabindex="-1"></a>    DecisionDesign       DecisionType <span class="op">=</span> <span class="st">&quot;design_decisions&quot;</span>       <span class="co">// Branding, architecture</span></span>
+<span id="cb38-25"><a href="#cb38-25" aria-hidden="true" tabindex="-1"></a>    DecisionInformation  DecisionType <span class="op">=</span> <span class="st">&quot;information_sharing&quot;</span>    <span class="co">// Data disclosure, PR</span></span>
+<span id="cb38-26"><a href="#cb38-26" aria-hidden="true" tabindex="-1"></a>    DecisionStrategic    DecisionType <span class="op">=</span> <span class="st">&quot;strategic_decisions&quot;</span>    <span class="co">// M&amp;A, partnerships, strategy</span></span>
+<span id="cb38-27"><a href="#cb38-27" aria-hidden="true" tabindex="-1"></a>    DecisionLegal        DecisionType <span class="op">=</span> <span class="st">&quot;legal_proceedings&quot;</span>      <span class="co">// Legal actions</span></span>
+<span id="cb38-28"><a href="#cb38-28" aria-hidden="true" tabindex="-1"></a>    DecisionAsset        DecisionType <span class="op">=</span> <span class="st">&quot;asset_management&quot;</span>       <span class="co">// Asset management decisions</span></span>
+<span id="cb38-29"><a href="#cb38-29" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb38-30"><a href="#cb38-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-31"><a href="#cb38-31" aria-hidden="true" tabindex="-1"></a><span class="co">// Non-Physical Actions</span></span>
+<span id="cb38-32"><a href="#cb38-32" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> NonPhysicalAction <span class="dt">string</span></span>
+<span id="cb38-33"><a href="#cb38-33" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb38-34"><a href="#cb38-34" aria-hidden="true" tabindex="-1"></a>    ActionSharing      NonPhysicalAction <span class="op">=</span> <span class="st">&quot;sharing_presenting&quot;</span></span>
+<span id="cb38-35"><a href="#cb38-35" aria-hidden="true" tabindex="-1"></a>    ActionBrainstorm   NonPhysicalAction <span class="op">=</span> <span class="st">&quot;brainstorming&quot;</span></span>
+<span id="cb38-36"><a href="#cb38-36" aria-hidden="true" tabindex="-1"></a>    ActionResearch     NonPhysicalAction <span class="op">=</span> <span class="st">&quot;researching_rag&quot;</span>    <span class="co">// Including RAG operations</span></span>
+<span id="cb38-37"><a href="#cb38-37" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb38-38"><a href="#cb38-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-39"><a href="#cb38-39" aria-hidden="true" tabindex="-1"></a><span class="co">// Physical Actions (primarily for humanoid robots)</span></span>
+<span id="cb38-40"><a href="#cb38-40" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PhysicalAction <span class="dt">string</span></span>
+<span id="cb38-41"><a href="#cb38-41" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb38-42"><a href="#cb38-42" aria-hidden="true" tabindex="-1"></a>    ActionShipment     PhysicalAction <span class="op">=</span> <span class="st">&quot;shipments&quot;</span>      <span class="co">// Ocean, air, truck shipments</span></span>
+<span id="cb38-43"><a href="#cb38-43" aria-hidden="true" tabindex="-1"></a>    ActionProduction   PhysicalAction <span class="op">=</span> <span class="st">&quot;production&quot;</span>     <span class="co">// Manufacturing processes (for demonstration only; NOT production ready)</span></span>
+<span id="cb38-44"><a href="#cb38-44" aria-hidden="true" tabindex="-1"></a>    ActionRecycling    PhysicalAction <span class="op">=</span> <span class="st">&quot;recycling&quot;</span>      <span class="co">// Recycling operations</span></span>
+<span id="cb38-45"><a href="#cb38-45" aria-hidden="true" tabindex="-1"></a>    ActionStorage      PhysicalAction <span class="op">=</span> <span class="st">&quot;storage&quot;</span>        <span class="co">// Physical storage operations</span></span>
+<span id="cb38-46"><a href="#cb38-46" aria-hidden="true" tabindex="-1"></a>    ActionCustomization PhysicalAction <span class="op">=</span> <span class="st">&quot;customization&quot;</span> <span class="co">// Product customization</span></span>
+<span id="cb38-47"><a href="#cb38-47" aria-hidden="true" tabindex="-1"></a>    ActionPackage      PhysicalAction <span class="op">=</span> <span class="st">&quot;package&quot;</span>        <span class="co">// Packaging operations</span></span>
+<span id="cb38-48"><a href="#cb38-48" aria-hidden="true" tabindex="-1"></a>    ActionClean        PhysicalAction <span class="op">=</span> <span class="st">&quot;clean&quot;</span>          <span class="co">// Cleaning operations</span></span>
+<span id="cb38-49"><a href="#cb38-49" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<h3 id="section-c-requirements"><strong>Section C:
+Requirements</strong></h3>
+<h4 id="requirements-structure"><strong>Requirements
+Structure</strong></h4>
+<div class="sourceCode" id="cb39"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Requirements <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>    ValidityPeriod    ValidityPeriod    <span class="st">`json:&quot;validity_period&quot;`</span>     <span class="co">// Time constraints</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    FormalRequirements FormalRequirements <span class="st">`json:&quot;formal_requirements&quot;`</span> <span class="co">// Legal formalities</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    PowerLimits       PowerLimits       <span class="st">`json:&quot;power_limits&quot;`</span>        <span class="co">// Authority limitations</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    SpecificRights    SpecificRights    <span class="st">`json:&quot;specific_rights&quot;`</span>     <span class="co">// Rights and obligations</span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    SpecialConditions SpecialConditions <span class="st">`json:&quot;special_conditions&quot;`</span>  <span class="co">// Special conditions</span></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>    DeathIncapacity   DeathIncapacity   <span class="st">`json:&quot;death_incapacity&quot;`</span>    <span class="co">// Death/incapacity rules</span></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>    SecurityCompliance SecurityCompliance <span class="st">`json:&quot;security_compliance&quot;`</span> <span class="co">// Security requirements</span></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>    JurisdictionLaw   JurisdictionLaw   <span class="st">`json:&quot;jurisdiction_law&quot;`</span>    <span class="co">// Legal framework</span></span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>    ConflictResolution ConflictResolution <span class="st">`json:&quot;conflict_resolution&quot;`</span> <span class="co">// Dispute resolution</span></span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="validityperiod"><strong>ValidityPeriod</strong></h4>
+<div class="sourceCode" id="cb40"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ValidityPeriod <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    StartTime       time<span class="op">.</span>Time      <span class="st">`json:&quot;start_time&quot;`</span>        <span class="co">// Authorization start time</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    EndTime         time<span class="op">.</span>Time      <span class="st">`json:&quot;end_time&quot;`</span>          <span class="co">// Authorization end time (max 1 year)</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    TimeWindows     <span class="op">[]</span>TimeWindow   <span class="st">`json:&quot;time_windows&quot;`</span>      <span class="co">// Operational time windows</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    GeoConstraints  <span class="op">[]</span><span class="dt">string</span>       <span class="st">`json:&quot;geo_constraints&quot;`</span>   <span class="co">// Geographic restrictions</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    SuspensionRules <span class="op">[]</span><span class="dt">string</span>       <span class="st">`json:&quot;suspension_rules&quot;`</span>  <span class="co">// Automatic suspension conditions</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TimeWindow <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>    Start    <span class="dt">string</span>   <span class="st">`json:&quot;start&quot;`</span>    <span class="co">// Start time (HH:MM format)</span></span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>    End      <span class="dt">string</span>   <span class="st">`json:&quot;end&quot;`</span>      <span class="co">// End time (HH:MM format)</span></span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>    Timezone <span class="dt">string</span>   <span class="st">`json:&quot;timezone&quot;`</span> <span class="co">// Timezone identifier</span></span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>    Days     <span class="op">[]</span><span class="dt">string</span> <span class="st">`json:&quot;days&quot;`</span>     <span class="co">// Days of week (Mon, Tue, etc.)</span></span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="powerlimits"><strong>PowerLimits</strong></h4>
+<div class="sourceCode" id="cb41"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PowerLimits <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    PowerLevels        <span class="op">[]</span>PowerLevel     <span class="st">`json:&quot;power_levels&quot;`</span>         <span class="co">// Amount and transaction limits</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    InteractionBoundaries <span class="op">[]</span><span class="dt">string</span>      <span class="st">`json:&quot;interaction_boundaries&quot;`</span> <span class="co">// Data access, collaboration limits</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    ToolLimitations    <span class="op">[]</span><span class="dt">string</span>         <span class="st">`json:&quot;tool_limitations&quot;`</span>     <span class="co">// Permitted tools and APIs</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    OutcomeLimitations <span class="op">[]</span><span class="dt">string</span>         <span class="st">`json:&quot;outcome_limitations&quot;`</span>  <span class="co">// Intended outcome constraints</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>    ModelLimits        <span class="op">[]</span>ModelLimit     <span class="st">`json:&quot;model_limits&quot;`</span>         <span class="co">// AI model restrictions</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>    BehavioralLimits   <span class="op">[]</span><span class="dt">string</span>         <span class="st">`json:&quot;behavioral_limits&quot;`</span>    <span class="co">// Action restrictions</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    QuantumResistance  <span class="dt">bool</span>             <span class="st">`json:&quot;quantum_resistance&quot;`</span>   <span class="co">// Require quantum-resistant crypto</span></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>    ExplicitExclusions <span class="op">[]</span><span class="dt">string</span>         <span class="st">`json:&quot;explicit_exclusions&quot;`</span>  <span class="co">// Explicitly forbidden actions</span></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PowerLevel <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>    Type        <span class="dt">string</span>  <span class="st">`json:&quot;type&quot;`</span>        <span class="co">// &quot;amount&quot;, &quot;transaction_type&quot;, etc.</span></span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>    Limit       <span class="dt">float64</span> <span class="st">`json:&quot;limit&quot;`</span>       <span class="co">// Numerical limit value</span></span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>    Currency    <span class="dt">string</span>  <span class="st">`json:&quot;currency&quot;`</span>    <span class="co">// Currency code (if applicable)</span></span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>    Description <span class="dt">string</span>  <span class="st">`json:&quot;description&quot;`</span> <span class="co">// Human-readable description</span></span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ModelLimit <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a>    ParameterCount   <span class="dt">int64</span>    <span class="st">`json:&quot;parameter_count&quot;`</span>   <span class="co">// Maximum model parameters</span></span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a>    ReasoningMethods <span class="op">[]</span><span class="dt">string</span> <span class="st">`json:&quot;reasoning_methods&quot;`</span> <span class="co">// Permitted reasoning methods</span></span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a>    TrainingMethods  <span class="op">[]</span><span class="dt">string</span> <span class="st">`json:&quot;training_methods&quot;`</span>  <span class="co">// Permitted training approaches</span></span>
+<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a>    Description      <span class="dt">string</span>   <span class="st">`json:&quot;description&quot;`</span>       <span class="co">// Limit description</span></span>
+<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="jurisdictionlaw"><strong>JurisdictionLaw</strong></h4>
+<div class="sourceCode" id="cb42"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> JurisdictionLaw <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    Language           <span class="dt">string</span>   <span class="st">`json:&quot;language&quot;`</span>             <span class="co">// Contract language</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    GoverningLaw       <span class="dt">string</span>   <span class="st">`json:&quot;governing_law&quot;`</span>        <span class="co">// Applicable legal framework</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    PlaceOfJurisdiction <span class="dt">string</span>   <span class="st">`json:&quot;place_of_jurisdiction&quot;`</span> <span class="co">// Legal jurisdiction</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>    AttachedDocuments  <span class="op">[]</span><span class="dt">string</span> <span class="st">`json:&quot;attached_documents&quot;`</span>   <span class="co">// Referenced legal documents</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="professional-foundation-api">🔐 <strong>Professional Foundation
+API</strong></h2>
+<h3 id="properjwtservice"><strong>ProperJWTService</strong></h3>
+<p>Development JWT implementation with RSA-256 signatures.</p>
+<div class="sourceCode" id="cb43"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ProperJWTService <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    privateKey <span class="op">*</span>rsa<span class="op">.</span>PrivateKey</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    publicKey  <span class="op">*</span>rsa<span class="op">.</span>PublicKey</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    issuer     <span class="dt">string</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    audience   <span class="dt">string</span></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewProperJWTService<span class="op">(</span>issuer<span class="op">,</span> audience <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>ProperJWTService<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>ProperJWTService<span class="op">)</span> CreateToken<span class="op">(</span>subject <span class="dt">string</span><span class="op">,</span> scope <span class="op">[]</span><span class="dt">string</span><span class="op">,</span> expiry time<span class="op">.</span>Duration<span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>ProperJWTService<span class="op">)</span> ValidateToken<span class="op">(</span>tokenString <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>CustomClaims<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<h3
+id="legalframeworkvalidator"><strong>LegalFrameworkValidator</strong></h3>
+<p>Multi-jurisdiction legal validation.</p>
+<div class="sourceCode" id="cb44"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LegalFrameworkValidator <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>    supportedJurisdictions <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">bool</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    supportedEntityTypes   <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">bool</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    complianceRules       <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">][]</span><span class="dt">string</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>LegalFrameworkValidator<span class="op">)</span> ValidateFramework<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> framework LegalFramework<span class="op">)</span> <span class="dt">error</span></span></code></pre></div>
+<h2 id="response-types">📊 <strong>Response Types</strong></h2>
+<h3 id="gauthresponse"><strong>GAuthResponse</strong></h3>
+<div class="sourceCode" id="cb45"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> GAuthResponse <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>    AuthorizationCode <span class="dt">string</span>              <span class="st">`json:&quot;code&quot;`</span>              <span class="co">// OAuth authorization code</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>    State            <span class="dt">string</span>              <span class="st">`json:&quot;state&quot;`</span>             <span class="co">// CSRF protection state</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>    ExtendedToken    <span class="dt">string</span>              <span class="st">`json:&quot;extended_token&quot;`</span>    <span class="co">// Optional immediate token</span></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    LegalCompliance  <span class="dt">bool</span>                <span class="st">`json:&quot;legal_compliance&quot;`</span>  <span class="co">// Legal validation result</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>    AuditRecordID    <span class="dt">string</span>              <span class="st">`json:&quot;audit_record_id&quot;`</span>   <span class="co">// Audit trail identifier</span></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>    ExpiresIn        <span class="dt">int</span>                 <span class="st">`json:&quot;expires_in&quot;`</span>        <span class="co">// Code expiration (seconds)</span></span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>    Scope           <span class="op">[]</span><span class="dt">string</span>            <span class="st">`json:&quot;scope&quot;`</span>             <span class="co">// Granted scopes</span></span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>    PoAValidation   PoAValidationResult <span class="st">`json:&quot;poa_validation&quot;`</span>    <span class="co">// PoA validation details</span></span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="poavalidationresult"><strong>PoAValidationResult</strong></h3>
+<div class="sourceCode" id="cb46"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PoAValidationResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>    Valid             <span class="dt">bool</span>     <span class="st">`json:&quot;valid&quot;`</span>              <span class="co">// Overall validation result</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    ValidationErrors  <span class="op">[]</span><span class="dt">string</span> <span class="st">`json:&quot;validation_errors&quot;`</span>  <span class="co">// Specific validation errors</span></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>    ComplianceLevel   <span class="dt">string</span>   <span class="st">`json:&quot;compliance_level&quot;`</span>   <span class="co">// &quot;rfc115_compliant&quot;, etc.</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>    AttestationStatus <span class="dt">string</span>   <span class="st">`json:&quot;attestation_status&quot;`</span> <span class="co">// &quot;validated&quot;, &quot;pending&quot;, etc.</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="gauthtoken"><strong>GAuthToken</strong></h3>
+<div class="sourceCode" id="cb47"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> GAuthToken <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>    AccessToken      <span class="dt">string</span>           <span class="st">`json:&quot;access_token&quot;`</span>      <span class="co">// JWT access token</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    TokenType        <span class="dt">string</span>           <span class="st">`json:&quot;token_type&quot;`</span>        <span class="co">// &quot;bearer&quot;</span></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    ExpiresIn        <span class="dt">int</span>              <span class="st">`json:&quot;expires_in&quot;`</span>        <span class="co">// Token expiration (seconds)</span></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    Scope           <span class="op">[]</span><span class="dt">string</span>         <span class="st">`json:&quot;scope&quot;`</span>             <span class="co">// Token scopes</span></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>    ExtendedMetadata ExtendedMetadata <span class="st">`json:&quot;extended_metadata&quot;`</span> <span class="co">// PoA metadata</span></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ExtendedMetadata <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>    PowerType        <span class="dt">string</span>        <span class="st">`json:&quot;power_type&quot;`</span>         <span class="co">// Type of power granted</span></span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>    PrincipalID      <span class="dt">string</span>        <span class="st">`json:&quot;principal_id&quot;`</span>       <span class="co">// Principal identifier</span></span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>    AIAgentID        <span class="dt">string</span>        <span class="st">`json:&quot;ai_agent_id&quot;`</span>        <span class="co">// AI agent identifier</span></span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a>    PoADefinition    PoADefinition <span class="st">`json:&quot;poa_definition&quot;`</span>     <span class="co">// Complete PoA definition</span></span>
+<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a>    AttestationLevel <span class="dt">string</span>        <span class="st">`json:&quot;attestation_level&quot;`</span>  <span class="co">// Attestation level achieved</span></span>
+<span id="cb47-15"><a href="#cb47-15" aria-hidden="true" tabindex="-1"></a>    ComplianceProof  <span class="op">[]</span><span class="dt">string</span>      <span class="st">`json:&quot;compliance_proof&quot;`</span>   <span class="co">// Compliance validation proof</span></span>
+<span id="cb47-16"><a href="#cb47-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="error-handling">🚨 <strong>Error Handling</strong></h2>
+<h3 id="error-types"><strong>Error Types</strong></h3>
+<div class="sourceCode" id="cb48"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co">// RFC validation errors</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> RFCValidationError <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    Code    <span class="dt">string</span> <span class="st">`json:&quot;code&quot;`</span>    <span class="co">// Error code (e.g., &quot;invalid_principal&quot;)</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>    Message <span class="dt">string</span> <span class="st">`json:&quot;message&quot;`</span> <span class="co">// Human-readable message</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>    Field   <span class="dt">string</span> <span class="st">`json:&quot;field&quot;`</span>   <span class="co">// Field that caused the error</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Legal compliance errors</span></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LegalComplianceError <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>    Jurisdiction <span class="dt">string</span> <span class="st">`json:&quot;jurisdiction&quot;`</span> <span class="co">// Jurisdiction where error occurred</span></span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>    Regulation   <span class="dt">string</span> <span class="st">`json:&quot;regulation&quot;`</span>   <span class="co">// Specific regulation violated</span></span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>    Description  <span class="dt">string</span> <span class="st">`json:&quot;description&quot;`</span>  <span class="co">// Error description</span></span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a><span class="co">// AI capability errors</span></span>
+<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> AICapabilityError <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a>    ClientID   <span class="dt">string</span> <span class="st">`json:&quot;client_id&quot;`</span>   <span class="co">// AI client identifier</span></span>
+<span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a>    Capability <span class="dt">string</span> <span class="st">`json:&quot;capability&quot;`</span>  <span class="co">// Missing capability</span></span>
+<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a>    PowerType  <span class="dt">string</span> <span class="st">`json:&quot;power_type&quot;`</span>  <span class="co">// Power type requiring capability</span></span>
+<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="common-error-codes"><strong>Common Error Codes</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Error Code</th>
+<th>Description</th>
+<th>HTTP Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>invalid_request</code></td>
+<td>Malformed request structure</td>
+<td>400</td>
+</tr>
+<tr>
+<td><code>invalid_principal</code></td>
+<td>Principal validation failed</td>
+<td>400</td>
+</tr>
+<tr>
+<td><code>invalid_client</code></td>
+<td>AI client validation failed</td>
+<td>400</td>
+</tr>
+<tr>
+<td><code>unsupported_jurisdiction</code></td>
+<td>Jurisdiction not supported</td>
+<td>400</td>
+</tr>
+<tr>
+<td><code>insufficient_capabilities</code></td>
+<td>AI lacks required capabilities</td>
+<td>403</td>
+</tr>
+<tr>
+<td><code>excessive_power_limits</code></td>
+<td>Requested powers exceed limits</td>
+<td>403</td>
+</tr>
+<tr>
+<td><code>legal_compliance_failure</code></td>
+<td>Legal framework validation failed</td>
+<td>403</td>
+</tr>
+<tr>
+<td><code>invalid_poa_definition</code></td>
+<td>PoA Definition validation failed</td>
+<td>400</td>
+</tr>
+</tbody>
+</table>
+<h2 id="usage-examples">📖 <strong>Usage Examples</strong></h2>
+<h3 id="complete-rfc-implementation-example"><strong>Complete RFC
+Implementation Example</strong></h3>
+<div class="sourceCode" id="cb49"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> main</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fmt&quot;</span></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/Gimel-Foundation/gauth/pkg/auth&quot;</span></span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Create service</span></span>
+<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a>    service<span class="op">,</span> err <span class="op">:=</span> auth<span class="op">.</span>NewRFCCompliantService<span class="op">(</span><span class="st">&quot;GlobalTech&quot;</span><span class="op">,</span> <span class="st">&quot;ai-authorization&quot;</span><span class="op">)</span></span>
+<span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb49-14"><a href="#cb49-14" aria-hidden="true" tabindex="-1"></a>        <span class="bu">panic</span><span class="op">(</span>err<span class="op">)</span></span>
+<span id="cb49-15"><a href="#cb49-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb49-16"><a href="#cb49-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb49-17"><a href="#cb49-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Create comprehensive PoA Definition</span></span>
+<span id="cb49-18"><a href="#cb49-18" aria-hidden="true" tabindex="-1"></a>    poa <span class="op">:=</span> auth<span class="op">.</span>PoADefinition<span class="op">{</span></span>
+<span id="cb49-19"><a href="#cb49-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">// A. Parties</span></span>
+<span id="cb49-20"><a href="#cb49-20" aria-hidden="true" tabindex="-1"></a>        Principal<span class="op">:</span> auth<span class="op">.</span>Principal<span class="op">{</span></span>
+<span id="cb49-21"><a href="#cb49-21" aria-hidden="true" tabindex="-1"></a>            Type<span class="op">:</span>     auth<span class="op">.</span>PrincipalTypeOrganization<span class="op">,</span></span>
+<span id="cb49-22"><a href="#cb49-22" aria-hidden="true" tabindex="-1"></a>            Identity<span class="op">:</span> <span class="st">&quot;GlobalTech-Corp-2025&quot;</span><span class="op">,</span></span>
+<span id="cb49-23"><a href="#cb49-23" aria-hidden="true" tabindex="-1"></a>            Organization<span class="op">:</span> <span class="op">&amp;</span>auth<span class="op">.</span>Organization<span class="op">{</span></span>
+<span id="cb49-24"><a href="#cb49-24" aria-hidden="true" tabindex="-1"></a>                Type<span class="op">:</span>                auth<span class="op">.</span>OrgTypeCommercial<span class="op">,</span></span>
+<span id="cb49-25"><a href="#cb49-25" aria-hidden="true" tabindex="-1"></a>                Name<span class="op">:</span>                <span class="st">&quot;GlobalTech Corporation&quot;</span><span class="op">,</span></span>
+<span id="cb49-26"><a href="#cb49-26" aria-hidden="true" tabindex="-1"></a>                RegisterEntry<span class="op">:</span>       <span class="st">&quot;HRB-123456&quot;</span><span class="op">,</span></span>
+<span id="cb49-27"><a href="#cb49-27" aria-hidden="true" tabindex="-1"></a>                ManagingDirector<span class="op">:</span>    <span class="st">&quot;Dr. Sarah Johnson&quot;</span><span class="op">,</span></span>
+<span id="cb49-28"><a href="#cb49-28" aria-hidden="true" tabindex="-1"></a>                RegisteredAuthority<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb49-29"><a href="#cb49-29" aria-hidden="true" tabindex="-1"></a>            <span class="op">},</span></span>
+<span id="cb49-30"><a href="#cb49-30" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb49-31"><a href="#cb49-31" aria-hidden="true" tabindex="-1"></a>        Client<span class="op">:</span> auth<span class="op">.</span>ClientAI<span class="op">{</span></span>
+<span id="cb49-32"><a href="#cb49-32" aria-hidden="true" tabindex="-1"></a>            Type<span class="op">:</span>              auth<span class="op">.</span>ClientTypeAgenticAI<span class="op">,</span></span>
+<span id="cb49-33"><a href="#cb49-33" aria-hidden="true" tabindex="-1"></a>            Identity<span class="op">:</span>          <span class="st">&quot;ai_financial_advisor_v3&quot;</span><span class="op">,</span></span>
+<span id="cb49-34"><a href="#cb49-34" aria-hidden="true" tabindex="-1"></a>            Version<span class="op">:</span>           <span class="st">&quot;3.2.1-prod&quot;</span><span class="op">,</span> # <span class="op">(</span><span class="cf">for</span> demonstration only<span class="op">;</span> NOT production ready<span class="op">)</span></span>
+<span id="cb49-35"><a href="#cb49-35" aria-hidden="true" tabindex="-1"></a>            OperationalStatus<span class="op">:</span> <span class="st">&quot;active&quot;</span><span class="op">,</span></span>
+<span id="cb49-36"><a href="#cb49-36" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb49-37"><a href="#cb49-37" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb49-38"><a href="#cb49-38" aria-hidden="true" tabindex="-1"></a>        <span class="co">// B. Authorization Type &amp; Scope</span></span>
+<span id="cb49-39"><a href="#cb49-39" aria-hidden="true" tabindex="-1"></a>        AuthorizationType<span class="op">:</span> auth<span class="op">.</span>AuthorizationType<span class="op">{</span></span>
+<span id="cb49-40"><a href="#cb49-40" aria-hidden="true" tabindex="-1"></a>            RepresentationType<span class="op">:</span> auth<span class="op">.</span>RepresentationSole<span class="op">,</span></span>
+<span id="cb49-41"><a href="#cb49-41" aria-hidden="true" tabindex="-1"></a>            SignatureType<span class="op">:</span>      auth<span class="op">.</span>SignatureSingle<span class="op">,</span></span>
+<span id="cb49-42"><a href="#cb49-42" aria-hidden="true" tabindex="-1"></a>            SubProxyAuthority<span class="op">:</span>  <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb49-43"><a href="#cb49-43" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb49-44"><a href="#cb49-44" aria-hidden="true" tabindex="-1"></a>        ScopeDefinition<span class="op">:</span> auth<span class="op">.</span>ScopeDefinition<span class="op">{</span></span>
+<span id="cb49-45"><a href="#cb49-45" aria-hidden="true" tabindex="-1"></a>            ApplicableSectors<span class="op">:</span> <span class="op">[]</span>auth<span class="op">.</span>IndustrySector<span class="op">{</span></span>
+<span id="cb49-46"><a href="#cb49-46" aria-hidden="true" tabindex="-1"></a>                auth<span class="op">.</span>SectorFinancial<span class="op">,</span> auth<span class="op">.</span>SectorICT<span class="op">,</span></span>
+<span id="cb49-47"><a href="#cb49-47" aria-hidden="true" tabindex="-1"></a>            <span class="op">},</span></span>
+<span id="cb49-48"><a href="#cb49-48" aria-hidden="true" tabindex="-1"></a>            ApplicableRegions<span class="op">:</span> <span class="op">[]</span>auth<span class="op">.</span>GeographicScope<span class="op">{</span></span>
+<span id="cb49-49"><a href="#cb49-49" aria-hidden="true" tabindex="-1"></a>                <span class="op">{</span>Type<span class="op">:</span> auth<span class="op">.</span>GeoTypeNational<span class="op">,</span> Identifier<span class="op">:</span> <span class="st">&quot;US&quot;</span><span class="op">},</span></span>
+<span id="cb49-50"><a href="#cb49-50" aria-hidden="true" tabindex="-1"></a>                <span class="op">{</span>Type<span class="op">:</span> auth<span class="op">.</span>GeoTypeRegional<span class="op">,</span> Identifier<span class="op">:</span> <span class="st">&quot;EU&quot;</span><span class="op">},</span></span>
+<span id="cb49-51"><a href="#cb49-51" aria-hidden="true" tabindex="-1"></a>            <span class="op">},</span></span>
+<span id="cb49-52"><a href="#cb49-52" aria-hidden="true" tabindex="-1"></a>            AuthorizedActions<span class="op">:</span> auth<span class="op">.</span>AuthorizedActions<span class="op">{</span></span>
+<span id="cb49-53"><a href="#cb49-53" aria-hidden="true" tabindex="-1"></a>                Transactions<span class="op">:</span> <span class="op">[]</span>auth<span class="op">.</span>TransactionType<span class="op">{</span></span>
+<span id="cb49-54"><a href="#cb49-54" aria-hidden="true" tabindex="-1"></a>                    auth<span class="op">.</span>TransactionPurchase<span class="op">,</span> auth<span class="op">.</span>TransactionSale<span class="op">,</span></span>
+<span id="cb49-55"><a href="#cb49-55" aria-hidden="true" tabindex="-1"></a>                <span class="op">},</span></span>
+<span id="cb49-56"><a href="#cb49-56" aria-hidden="true" tabindex="-1"></a>                Decisions<span class="op">:</span> <span class="op">[]</span>auth<span class="op">.</span>DecisionType<span class="op">{</span></span>
+<span id="cb49-57"><a href="#cb49-57" aria-hidden="true" tabindex="-1"></a>                    auth<span class="op">.</span>DecisionFinancial<span class="op">,</span> auth<span class="op">.</span>DecisionInformation<span class="op">,</span></span>
+<span id="cb49-58"><a href="#cb49-58" aria-hidden="true" tabindex="-1"></a>                <span class="op">},</span></span>
+<span id="cb49-59"><a href="#cb49-59" aria-hidden="true" tabindex="-1"></a>                NonPhysicalActions<span class="op">:</span> <span class="op">[]</span>auth<span class="op">.</span>NonPhysicalAction<span class="op">{</span></span>
+<span id="cb49-60"><a href="#cb49-60" aria-hidden="true" tabindex="-1"></a>                    auth<span class="op">.</span>ActionResearch<span class="op">,</span> auth<span class="op">.</span>ActionSharing<span class="op">,</span></span>
+<span id="cb49-61"><a href="#cb49-61" aria-hidden="true" tabindex="-1"></a>                <span class="op">},</span></span>
+<span id="cb49-62"><a href="#cb49-62" aria-hidden="true" tabindex="-1"></a>            <span class="op">},</span></span>
+<span id="cb49-63"><a href="#cb49-63" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb49-64"><a href="#cb49-64" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb49-65"><a href="#cb49-65" aria-hidden="true" tabindex="-1"></a>        <span class="co">// C. Requirements</span></span>
+<span id="cb49-66"><a href="#cb49-66" aria-hidden="true" tabindex="-1"></a>        Requirements<span class="op">:</span> auth<span class="op">.</span>Requirements<span class="op">{</span></span>
+<span id="cb49-67"><a href="#cb49-67" aria-hidden="true" tabindex="-1"></a>            ValidityPeriod<span class="op">:</span> auth<span class="op">.</span>ValidityPeriod<span class="op">{</span></span>
+<span id="cb49-68"><a href="#cb49-68" aria-hidden="true" tabindex="-1"></a>                StartTime<span class="op">:</span> time<span class="op">.</span>Now<span class="op">(),</span></span>
+<span id="cb49-69"><a href="#cb49-69" aria-hidden="true" tabindex="-1"></a>                EndTime<span class="op">:</span>   time<span class="op">.</span>Now<span class="op">().</span>Add<span class="op">(</span><span class="dv">90</span> <span class="op">*</span> <span class="dv">24</span> <span class="op">*</span> time<span class="op">.</span>Hour<span class="op">),</span></span>
+<span id="cb49-70"><a href="#cb49-70" aria-hidden="true" tabindex="-1"></a>                TimeWindows<span class="op">:</span> <span class="op">[]</span>auth<span class="op">.</span>TimeWindow<span class="op">{</span></span>
+<span id="cb49-71"><a href="#cb49-71" aria-hidden="true" tabindex="-1"></a>                    <span class="op">{</span>Start<span class="op">:</span> <span class="st">&quot;09:00&quot;</span><span class="op">,</span> End<span class="op">:</span> <span class="st">&quot;17:00&quot;</span><span class="op">,</span> Timezone<span class="op">:</span> <span class="st">&quot;EST&quot;</span><span class="op">},</span></span>
+<span id="cb49-72"><a href="#cb49-72" aria-hidden="true" tabindex="-1"></a>                <span class="op">},</span></span>
+<span id="cb49-73"><a href="#cb49-73" aria-hidden="true" tabindex="-1"></a>            <span class="op">},</span></span>
+<span id="cb49-74"><a href="#cb49-74" aria-hidden="true" tabindex="-1"></a>            PowerLimits<span class="op">:</span> auth<span class="op">.</span>PowerLimits<span class="op">{</span></span>
+<span id="cb49-75"><a href="#cb49-75" aria-hidden="true" tabindex="-1"></a>                PowerLevels<span class="op">:</span> <span class="op">[]</span>auth<span class="op">.</span>PowerLevel<span class="op">{</span></span>
+<span id="cb49-76"><a href="#cb49-76" aria-hidden="true" tabindex="-1"></a>                    <span class="op">{</span>Type<span class="op">:</span> <span class="st">&quot;transaction_value&quot;</span><span class="op">,</span> Limit<span class="op">:</span> <span class="fl">500000.0</span><span class="op">,</span> Currency<span class="op">:</span> <span class="st">&quot;USD&quot;</span><span class="op">},</span></span>
+<span id="cb49-77"><a href="#cb49-77" aria-hidden="true" tabindex="-1"></a>                    <span class="op">{</span>Type<span class="op">:</span> <span class="st">&quot;daily_limit&quot;</span><span class="op">,</span> Limit<span class="op">:</span> <span class="fl">1000000.0</span><span class="op">,</span> Currency<span class="op">:</span> <span class="st">&quot;USD&quot;</span><span class="op">},</span></span>
+<span id="cb49-78"><a href="#cb49-78" aria-hidden="true" tabindex="-1"></a>                <span class="op">},</span></span>
+<span id="cb49-79"><a href="#cb49-79" aria-hidden="true" tabindex="-1"></a>                QuantumResistance<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb49-80"><a href="#cb49-80" aria-hidden="true" tabindex="-1"></a>                ExplicitExclusions<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;cryptocurrency_trading&quot;</span><span class="op">},</span></span>
+<span id="cb49-81"><a href="#cb49-81" aria-hidden="true" tabindex="-1"></a>            <span class="op">},</span></span>
+<span id="cb49-82"><a href="#cb49-82" aria-hidden="true" tabindex="-1"></a>            JurisdictionLaw<span class="op">:</span> auth<span class="op">.</span>JurisdictionLaw<span class="op">{</span></span>
+<span id="cb49-83"><a href="#cb49-83" aria-hidden="true" tabindex="-1"></a>                Language<span class="op">:</span>           <span class="st">&quot;English&quot;</span><span class="op">,</span></span>
+<span id="cb49-84"><a href="#cb49-84" aria-hidden="true" tabindex="-1"></a>                GoverningLaw<span class="op">:</span>       <span class="st">&quot;Delaware_Corporate_Law&quot;</span><span class="op">,</span></span>
+<span id="cb49-85"><a href="#cb49-85" aria-hidden="true" tabindex="-1"></a>                PlaceOfJurisdiction<span class="op">:</span> <span class="st">&quot;US&quot;</span><span class="op">,</span></span>
+<span id="cb49-86"><a href="#cb49-86" aria-hidden="true" tabindex="-1"></a>            <span class="op">},</span></span>
+<span id="cb49-87"><a href="#cb49-87" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb49-88"><a href="#cb49-88" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb49-89"><a href="#cb49-89" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb49-90"><a href="#cb49-90" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Create GAuth request</span></span>
+<span id="cb49-91"><a href="#cb49-91" aria-hidden="true" tabindex="-1"></a>    request <span class="op">:=</span> auth<span class="op">.</span>GAuthRequest<span class="op">{</span></span>
+<span id="cb49-92"><a href="#cb49-92" aria-hidden="true" tabindex="-1"></a>        ClientID<span class="op">:</span>     <span class="st">&quot;ai_financial_advisor_v3&quot;</span><span class="op">,</span></span>
+<span id="cb49-93"><a href="#cb49-93" aria-hidden="true" tabindex="-1"></a>        ResponseType<span class="op">:</span> <span class="st">&quot;code&quot;</span><span class="op">,</span></span>
+<span id="cb49-94"><a href="#cb49-94" aria-hidden="true" tabindex="-1"></a>        Scope<span class="op">:</span>        <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;financial_advisory&quot;</span><span class="op">,</span> <span class="st">&quot;asset_management&quot;</span><span class="op">},</span></span>
+<span id="cb49-95"><a href="#cb49-95" aria-hidden="true" tabindex="-1"></a>    State<span class="op">:</span>        <span class="st">&quot;secure_state_token_2025&quot;</span><span class="op">,</span> # <span class="op">(</span><span class="cf">for</span> demonstration only<span class="op">;</span> NOT production ready<span class="op">)</span></span>
+<span id="cb49-96"><a href="#cb49-96" aria-hidden="true" tabindex="-1"></a>        PowerType<span class="op">:</span>    <span class="st">&quot;financial_advisory_powers&quot;</span><span class="op">,</span></span>
+<span id="cb49-97"><a href="#cb49-97" aria-hidden="true" tabindex="-1"></a>        PrincipalID<span class="op">:</span>  <span class="st">&quot;GlobalTech-Corp-2025&quot;</span><span class="op">,</span></span>
+<span id="cb49-98"><a href="#cb49-98" aria-hidden="true" tabindex="-1"></a>        AIAgentID<span class="op">:</span>    <span class="st">&quot;ai_financial_advisor_v3&quot;</span><span class="op">,</span></span>
+<span id="cb49-99"><a href="#cb49-99" aria-hidden="true" tabindex="-1"></a>        Jurisdiction<span class="op">:</span> <span class="st">&quot;US&quot;</span><span class="op">,</span></span>
+<span id="cb49-100"><a href="#cb49-100" aria-hidden="true" tabindex="-1"></a>        PoADefinition<span class="op">:</span> poa<span class="op">,</span></span>
+<span id="cb49-101"><a href="#cb49-101" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb49-102"><a href="#cb49-102" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb49-103"><a href="#cb49-103" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Authorize with full RFC validation</span></span>
+<span id="cb49-104"><a href="#cb49-104" aria-hidden="true" tabindex="-1"></a>    response<span class="op">,</span> err <span class="op">:=</span> service<span class="op">.</span>AuthorizeGAuth<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> request<span class="op">)</span></span>
+<span id="cb49-105"><a href="#cb49-105" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb49-106"><a href="#cb49-106" aria-hidden="true" tabindex="-1"></a>        fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;❌ Authorization failed: %v</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb49-107"><a href="#cb49-107" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb49-108"><a href="#cb49-108" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb49-109"><a href="#cb49-109" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb49-110"><a href="#cb49-110" aria-hidden="true" tabindex="-1"></a>    fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;✅ Authorization successful!</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb49-111"><a href="#cb49-111" aria-hidden="true" tabindex="-1"></a>    fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Authorization Code: %s</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> response<span class="op">.</span>AuthorizationCode<span class="op">[:</span><span class="dv">20</span><span class="op">]+</span><span class="st">&quot;...&quot;</span><span class="op">)</span></span>
+<span id="cb49-112"><a href="#cb49-112" aria-hidden="true" tabindex="-1"></a>    fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Legal Compliance: %v</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> response<span class="op">.</span>LegalCompliance<span class="op">)</span></span>
+<span id="cb49-113"><a href="#cb49-113" aria-hidden="true" tabindex="-1"></a>    fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Compliance Level: %s</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> response<span class="op">.</span>PoAValidation<span class="op">.</span>ComplianceLevel<span class="op">)</span></span>
+<span id="cb49-114"><a href="#cb49-114" aria-hidden="true" tabindex="-1"></a>    fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Attestation Status: %s</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> response<span class="op">.</span>PoAValidation<span class="op">.</span>AttestationStatus<span class="op">)</span></span>
+<span id="cb49-115"><a href="#cb49-115" aria-hidden="true" tabindex="-1"></a>    fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Audit Record: %s</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> response<span class="op">.</span>AuditRecordID<span class="op">)</span></span>
+<span id="cb49-116"><a href="#cb49-116" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<p><em>This API reference provides complete documentation for the
+official Gimel Foundation GAuth RFC implementation. For additional
+examples and guides, see the <a
+href="../docs/GETTING_STARTED.md">Getting Started Guide</a> and <a
+href="../docs/RFC_ARCHITECTURE.md">RFC Architecture
+Documentation</a>.</em></p>
+<hr />
+<h2 id="infrastructure-resilience-utilities">Infrastructure &amp;
+Resilience Utilities</h2>
+<h3 id="circuit-breaker">Circuit Breaker</h3>
+<p>The circuit breaker now uses an options-driven constructor:</p>
+<div class="sourceCode" id="cb50"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Options <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>    Name             <span class="dt">string</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>    FailureThreshold <span class="dt">int</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>    ResetTimeout     time<span class="op">.</span>Duration</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>    HalfOpenLimit    <span class="dt">int</span> <span class="co">// reserved</span></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>cb <span class="op">:=</span> circuit<span class="op">.</span>NewBreaker<span class="op">(</span>circuit<span class="op">.</span>Options<span class="op">{</span> Name<span class="op">:</span> <span class="st">&quot;auth-service&quot;</span><span class="op">,</span> FailureThreshold<span class="op">:</span> <span class="dv">5</span><span class="op">,</span> ResetTimeout<span class="op">:</span> <span class="dv">10</span> <span class="op">*</span> time<span class="op">.</span>Second <span class="op">})</span></span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>err <span class="op">:=</span> cb<span class="op">.</span>Execute<span class="op">(</span>ctx<span class="op">,</span> <span class="kw">func</span><span class="op">()</span> <span class="dt">error</span> <span class="op">{</span> <span class="cf">return</span> maybeFailingOperation<span class="op">()</span> <span class="op">})</span></span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a>state <span class="op">:=</span> cb<span class="op">.</span>GetState<span class="op">()</span> <span class="co">// circuit.StateClosed | StateOpen | StateHalfOpen</span></span></code></pre></div>
+<p>Deprecated shim retained (will be removed in a future release):</p>
+<div class="sourceCode" id="cb51"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Deprecated: use NewBreaker</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>legacy <span class="op">:=</span> circuit<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;auth-service&quot;</span><span class="op">,</span> <span class="dv">5</span><span class="op">,</span> <span class="dv">10</span><span class="op">*</span>time<span class="op">.</span>Second<span class="op">)</span></span></code></pre></div>
+<h3 id="rate-limiter-simplified">Rate Limiter (Simplified)</h3>
+<p>Unified token bucket implementation in <code>pkg/rate</code>:</p>
+<div class="sourceCode" id="cb52"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Config <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>    RequestsPerSecond <span class="dt">int</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>    BurstSize         <span class="dt">int</span></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>    WindowSize        time<span class="op">.</span>Duration <span class="co">// used for aliasing / demos</span></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>lim <span class="op">:=</span> rate<span class="op">.</span>NewLimiter<span class="op">(</span>rate<span class="op">.</span>Config<span class="op">{</span>RequestsPerSecond<span class="op">:</span> <span class="dv">50</span><span class="op">,</span> BurstSize<span class="op">:</span> <span class="dv">100</span><span class="op">,</span> WindowSize<span class="op">:</span> time<span class="op">.</span>Second<span class="op">})</span></span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> lim<span class="op">.</span>Allow<span class="op">()</span> <span class="op">{</span> <span class="co">/* proceed */</span> <span class="op">}</span></span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>_ <span class="op">=</span> lim<span class="op">.</span>Wait<span class="op">(</span>ctx<span class="op">)</span> <span class="co">// blocks until allowed</span></span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>remaining <span class="op">:=</span> lim<span class="op">.</span>GetRemainingRequests<span class="op">(</span><span class="st">&quot;client-id&quot;</span><span class="op">)</span> <span class="co">// approximate</span></span></code></pre></div>
+<p>Aliases for demo compatibility:</p>
+<div class="sourceCode" id="cb53"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>enh <span class="op">:=</span> rate<span class="op">.</span>NewEnhancedConfig<span class="op">(</span><span class="dv">25</span><span class="op">,</span> time<span class="op">.</span>Second<span class="op">)</span> <span class="co">// returns EnhancedConfig with underlying Config</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>tb <span class="op">:=</span> rate<span class="op">.</span>NewTokenBucket<span class="op">(</span>enh<span class="op">)</span>                 <span class="co">// wrapper with Allow() error</span></span></code></pre></div>
+<p>Removed / Deprecated: - Sliding window &amp; distributed public
+constructors (examples and benchmarks now skipped / removed).</p>
+<h3 id="metrics-collector">Metrics Collector</h3>
+<p>Enhanced collector returns aggregated metric map:</p>
+<div class="sourceCode" id="cb54"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>mc <span class="op">:=</span> monitoring<span class="op">.</span>NewMetricsCollector<span class="op">()</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>mc<span class="op">.</span>IncrementWithLabels<span class="op">(</span><span class="st">&quot;transactions_total&quot;</span><span class="op">,</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;status&quot;</span><span class="op">:</span><span class="st">&quot;success&quot;</span><span class="op">})</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>mc<span class="op">.</span>GaugeWithLabels<span class="op">(</span><span class="st">&quot;response_time_seconds&quot;</span><span class="op">,</span> <span class="fl">0.123</span><span class="op">,</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>metrics <span class="op">:=</span> mc<span class="op">.</span>GetAllMetrics<span class="op">()</span> <span class="co">// map[string]monitoring.MetricValue{ Name: {Value, Labels} }</span></span></code></pre></div>
+<p>Structural change: <code>GetAllMetrics()</code> no longer returns
+per-label series grouped by name — tests should assert presence and
+basic value thresholds rather than specific label combinations.</p>
+<h3 id="authorization-policy-model-update">Authorization Policy Model
+Update</h3>
+<p>New simplified policy struct (plural resource/action containers
+removed):</p>
+<div class="sourceCode" id="cb55"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Policy <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>    Subject  <span class="dt">string</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>    Resource <span class="dt">string</span></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>    Actions  <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>    Effect   <span class="dt">string</span> <span class="co">// typically &quot;allow&quot; or &quot;deny&quot;</span></span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>authorizer<span class="op">.</span>AddPolicy<span class="op">(</span>Policy<span class="op">{</span>Subject<span class="op">:</span> <span class="st">&quot;user-1&quot;</span><span class="op">,</span> Resource<span class="op">:</span> <span class="st">&quot;payments&quot;</span><span class="op">,</span> Actions<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;read&quot;</span><span class="op">,</span><span class="st">&quot;create&quot;</span><span class="op">},</span> Effect<span class="op">:</span> <span class="st">&quot;allow&quot;</span><span class="op">})</span></span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a>decision <span class="op">:=</span> authorizer<span class="op">.</span>Authorize<span class="op">(</span>Request<span class="op">{</span>Subject<span class="op">:</span> <span class="st">&quot;user-1&quot;</span><span class="op">,</span> Resource<span class="op">:</span> <span class="st">&quot;payments&quot;</span><span class="op">,</span> Action<span class="op">:</span> <span class="st">&quot;read&quot;</span><span class="op">})</span></span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> decision<span class="op">.</span>Allow <span class="op">{</span> <span class="co">/* authorized */</span> <span class="op">}</span></span></code></pre></div>
+<h3 id="audit-event-api-change">Audit Event API Change</h3>
+<p>Deprecated fluent builder
+(<code>audit.NewEntry()...WithActor()...</code>) replaced by event
+factory:</p>
+<div class="sourceCode" id="cb56"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>evt <span class="op">:=</span> audit<span class="op">.</span>NewEvent<span class="op">(</span>audit<span class="op">.</span>EventTypeAuthentication<span class="op">,</span> audit<span class="op">.</span>ActionLogin<span class="op">,</span> audit<span class="op">.</span>ResultSuccess<span class="op">)</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>evt<span class="op">.</span>Subject <span class="op">=</span> <span class="st">&quot;user123&quot;</span></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>logger <span class="op">:=</span> audit<span class="op">.</span>NewAuditLogger<span class="op">()</span></span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>_ <span class="op">=</span> logger<span class="op">.</span>Log<span class="op">(</span>ctx<span class="op">,</span> evt<span class="op">)</span></span></code></pre></div>
+<p>Benchmarks updated accordingly; the old chain methods are
+removed.</p>
+<h3 id="token-store-changes">Token Store Changes</h3>
+<p>Distributed token store helpers (<code>NewDistributedStore</code>,
+<code>DistributedConfig</code>) removed from integration tests (no
+implementation in current module scope). Memory store remains
+primary:</p>
+<div class="sourceCode" id="cb57"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>store <span class="op">:=</span> token<span class="op">.</span>NewMemoryStore<span class="op">(</span>time<span class="op">.</span>Hour<span class="op">)</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="co">// save / get / revoke tokens</span></span></code></pre></div>
+<h3 id="http-deprecation-headers">HTTP Deprecation Headers</h3>
+<p>Beta HTTP routes now emit the following headers to signal API
+evolution:</p>
+<pre><code>X-API-Deprecated: true
+X-API-Replacement: /api/v1/beta</code></pre>
+<p>Clients should plan migration paths accordingly.</p>
+<hr />
+<hr />
+<p>Need context? See: README.md | docs/ARCHITECTURE.md |
+docs/GETTING_STARTED.md</p>
+</body>
+</html>
