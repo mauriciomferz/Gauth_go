@@ -23,6 +23,10 @@ export class PoAGraphVisualizer {
         this.particleSystems = new Map();
         this.animationId = null;
         this.starField = null;
+        // Store last loaded graph for export/screenshot logic
+        this.graphData = null;
+        // Optional stats update callback
+        this.onStatsUpdate = null;
         
         this.init();
     }
@@ -30,24 +34,25 @@ export class PoAGraphVisualizer {
     init() {
         // Scene with Star Wars deep space background
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x000000); // Pure black space
-        this.scene.fog = new THREE.FogExp2(0x000814, 0.008); // Very subtle blue fog
-        
+        this.scene.background = new THREE.Color(0x000000);
+        this.scene.fog = new THREE.FogExp2(0x000814, 0.008);
+
         // Camera
         const aspect = this.container.clientWidth / this.container.clientHeight;
         this.camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
         this.camera.position.set(15, 15, 15);
-        
+
         // Renderer
-        this.renderer = new THREE.WebGLRenderer({ 
-            antialias: true, 
+        this.renderer = new THREE.WebGLRenderer({
+            antialias: true,
             alpha: true,
-            powerPreference: 'high-performance'
+            powerPreference: 'high-performance',
+            preserveDrawingBuffer: true // enable screenshots via toBlob()
         });
         this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         this.container.appendChild(this.renderer.domElement);
-        
+
         // Enhanced Controls with zoom and navigation
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
@@ -56,131 +61,82 @@ export class PoAGraphVisualizer {
         this.controls.minDistance = 2;
         this.controls.maxDistance = 100;
         this.controls.maxPolarAngle = Math.PI;
-        
+
         // Smooth zoom controls
         this.controls.zoomSpeed = 1.2;
         this.controls.rotateSpeed = 0.5;
         this.controls.panSpeed = 0.8;
-        
+
         // Enable all navigation
         this.controls.enableZoom = true;
         this.controls.enableRotate = true;
         this.controls.enablePan = true;
-        
+
         // Lighting for star-like environment
         this.setupStarLighting();
-        
+
         // Create background star field
         this.createStarField();
-        
+
         // Handle resize
         window.addEventListener('resize', () => this.onResize());
-        
+
         // Add mouse interaction
         this.setupMouseInteraction();
-        
+
         // Start animation loop
         this.animate();
     }
-    
+
     setupStarLighting() {
-        // Ambient light with cool Star Wars space glow
         const ambientLight = new THREE.AmbientLight(0x1a1a2e, 0.4);
         this.scene.add(ambientLight);
-        
-        // Directional light (distant sun/star)
         const sunLight = new THREE.DirectionalLight(0xccddff, 0.6);
         sunLight.position.set(50, 50, 50);
         this.scene.add(sunLight);
-        
-        // Point lights for Star Wars atmosphere (blue/white)
         const starLight1 = new THREE.PointLight(0x6699ff, 1.8, 100);
         starLight1.position.set(20, 20, 20);
         this.scene.add(starLight1);
-        
         const starLight2 = new THREE.PointLight(0xffffff, 1.2, 100);
         starLight2.position.set(-20, 20, -20);
         this.scene.add(starLight2);
-        
         const starLight3 = new THREE.PointLight(0x8899ff, 1.0, 100);
         starLight3.position.set(0, -20, 20);
         this.scene.add(starLight3);
     }
-    
-    /**
-     * Create Star Wars deep space starfield background
-     */
+
     createStarField() {
         const starGeometry = new THREE.BufferGeometry();
-        const particleCount = 5000; // Dense starfield like original Star Wars
+        const particleCount = 5000;
         const positions = new Float32Array(particleCount * 3);
         const colors = new Float32Array(particleCount * 3);
         const sizes = new Float32Array(particleCount);
         const velocities = [];
-        
         for (let i = 0; i < particleCount; i++) {
             const i3 = i * 3;
-            
-            // Random spherical distribution (distant stars)
             const theta = Math.random() * Math.PI * 2;
             const phi = Math.acos((Math.random() * 2) - 1);
             const radius = 50 + Math.random() * 40;
-            
             positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
             positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
             positions[i3 + 2] = radius * Math.cos(phi);
-            
-            // Star Wars color palette: mostly white/blue stars with some yellow
             const colorType = Math.random();
             if (colorType < 0.7) {
-                // White stars (most common)
                 const whiteness = 0.8 + Math.random() * 0.2;
-                colors[i3] = whiteness;
-                colors[i3 + 1] = whiteness;
-                colors[i3 + 2] = whiteness;
+                colors[i3] = whiteness; colors[i3 + 1] = whiteness; colors[i3 + 2] = whiteness;
             } else if (colorType < 0.9) {
-                // Blue-white stars
-                colors[i3] = 0.7 + Math.random() * 0.2;
-                colors[i3 + 1] = 0.8 + Math.random() * 0.2;
-                colors[i3 + 2] = 0.9 + Math.random() * 0.1;
+                colors[i3] = 0.7 + Math.random() * 0.2; colors[i3 + 1] = 0.8 + Math.random() * 0.2; colors[i3 + 2] = 0.9 + Math.random() * 0.1;
             } else {
-                // Yellow stars (distant suns)
-                colors[i3] = 0.9 + Math.random() * 0.1;
-                colors[i3 + 1] = 0.8 + Math.random() * 0.2;
-                colors[i3 + 2] = 0.5 + Math.random() * 0.3;
+                colors[i3] = 0.9 + Math.random() * 0.1; colors[i3 + 1] = 0.8 + Math.random() * 0.2; colors[i3 + 2] = 0.5 + Math.random() * 0.3;
             }
-            
-            // Varied star sizes (some bright, some dim)
             const brightness = Math.random();
-            if (brightness > 0.95) {
-                sizes[i] = 0.3 + Math.random() * 0.2; // Bright stars
-            } else if (brightness > 0.8) {
-                sizes[i] = 0.15 + Math.random() * 0.1; // Medium stars
-            } else {
-                sizes[i] = 0.05 + Math.random() * 0.05; // Distant stars
-            }
-            
-            // Very slow rotation (space is vast and still)
-            velocities.push({
-                x: (Math.random() - 0.5) * 0.002,
-                y: (Math.random() - 0.5) * 0.002,
-                z: (Math.random() - 0.5) * 0.002
-            });
+            if (brightness > 0.95) sizes[i] = 0.3 + Math.random() * 0.2; else if (brightness > 0.8) sizes[i] = 0.15 + Math.random() * 0.1; else sizes[i] = 0.05 + Math.random() * 0.05;
+            velocities.push({ x: (Math.random() - 0.5) * 0.002, y: (Math.random() - 0.5) * 0.002, z: (Math.random() - 0.5) * 0.002 });
         }
-        
         starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         starGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
         starGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-        
-        const starMaterial = new THREE.PointsMaterial({
-            size: 0.2,
-            vertexColors: true,
-            transparent: true,
-            opacity: 0.9,
-            sizeAttenuation: true,
-            blending: THREE.AdditiveBlending
-        });
-        
+        const starMaterial = new THREE.PointsMaterial({ size: 0.2, vertexColors: true, transparent: true, opacity: 0.9, sizeAttenuation: true, blending: THREE.AdditiveBlending });
         this.starField = new THREE.Points(starGeometry, starMaterial);
         this.starField.userData.velocities = velocities;
         this.scene.add(this.starField);
@@ -216,6 +172,8 @@ export class PoAGraphVisualizer {
     async loadGraph(graphData) {
         // Clear existing visualization
         this.clearGraph();
+        // Persist graph for export
+        this.graphData = graphData || { nodes: [], edges: [] };
         
         // Parse nodes and convert to 3D star coordinates
         const nodes = this.parseNodesToStarCoordinates(graphData.nodes);
@@ -228,6 +186,19 @@ export class PoAGraphVisualizer {
         // Create edges
         for (const edge of graphData.edges) {
             this.createEdge(edge);
+        }
+
+        // Compute basic stats for UI panels
+        const stats = {
+            total_nodes: nodes.length,
+            total_edges: graphData.edges.length,
+            active_nodes: nodes.filter(n => n.status === 'active').length,
+            pending_nodes: nodes.filter(n => n.status === 'pending').length,
+            revoked_nodes: nodes.filter(n => n.status === 'revoked').length
+        };
+        this.graphData.stats = stats;
+        if (typeof this.onStatsUpdate === 'function') {
+            this.onStatsUpdate(stats);
         }
     }
     
@@ -814,6 +785,7 @@ export class PoAGraphVisualizer {
      * Clear the graph and particle systems
      */
     clearGraph() {
+        console.log('[PoA][Visualizer] clearGraph invoked. nodes=', this.nodes.size, 'edges=', this.edges.length);
         // Remove nodes
         this.nodes.forEach(node => {
             this.scene.remove(node);
@@ -844,6 +816,9 @@ export class PoAGraphVisualizer {
             }
         });
         objectsToRemove.forEach(obj => this.scene.remove(obj));
+        // Reset stored graph
+        this.graphData = null;
+        console.log('[PoA][Visualizer] clearGraph completed. sceneChildren=', this.scene.children.length);
     }
     
     /**
@@ -1655,6 +1630,9 @@ function generateComplexGraph() {
     ];
     return { nodes, edges, stats: { total_nodes: 10, total_edges: 10, active_nodes: 5, pending_nodes: 3, revoked_nodes: 1 } };
 }
+
+// Post-load diagnostic (placed after definitions to avoid TDZ)
+console.log('[PoA] poa-viz module loaded', { ts: new Date().toISOString(), exports: Object.keys({PoAGraphVisualizer, generateDemoGraph}) });
 
 /**
  * ============================================================================

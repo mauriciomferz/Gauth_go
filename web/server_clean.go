@@ -3046,6 +3046,9 @@ var embeddedAriaTabsJS []byte
 //go:embed static/js/modules/*.js
 var embeddedModuleJS embed.FS
 
+//go:embed static/js/pages/*.js
+var embeddedPagesJS embed.FS
+
 // ExampleMeta defines catalog metadata for an example.
 type ExampleMeta struct {
 	ID               string `json:"id"`
@@ -4314,16 +4317,20 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 		// Per-request nonce for tightening CSP (remove unsafe-inline for our own scripts; external CDNs allowed).
 		nonce := randomNonce(16)
 		c.Set("csp-nonce", nonce)
-		c.Header("Content-Security-Policy", strings.Join([]string{
-			"default-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.redoc.ly https://unpkg.com",
-			"script-src 'self' 'nonce-" + nonce + "' 'unsafe-inline' 'unsafe-hashes' 'sha256-biFQTroSCI3Z5BmsMGyEE2jFZdwjjG1Oe7JLytgH6jM=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.redoc.ly https://unpkg.com",
-			"style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.redoc.ly https://unpkg.com",
-			"font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com data:",
-			"img-src 'self' data:",
-			"connect-src 'self'",
-			"frame-ancestors 'none'",
-			"base-uri 'self'",
-		}, "; "))
+		// Skip default CSP for paths that set their own stricter policy
+		path := c.Request.URL.Path
+		if path != "/poa-visualization" && path != "/poa-visualization.html" {
+			c.Header("Content-Security-Policy", strings.Join([]string{
+				"default-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.redoc.ly https://unpkg.com",
+				"script-src 'self' 'nonce-" + nonce + "' 'unsafe-inline' 'unsafe-hashes' 'sha256-biFQTroSCI3Z5BmsMGyEE2jFZdwjjG1Oe7JLytgH6jM=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.redoc.ly https://unpkg.com",
+				"style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.redoc.ly https://unpkg.com",
+				"font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com data:",
+				"img-src 'self' data:",
+				"connect-src 'self'",
+				"frame-ancestors 'none'",
+				"base-uri 'self'",
+			}, "; "))
+		}
 		c.Next()
 	})
 
@@ -5947,23 +5954,6 @@ func (s *BetaServer) routes() {
 
 	// --- PoA Visualization Endpoints (Item 3) ---
 	SetupVisualizationRoutes(s.router)
-	// Visualization demo page
-	s.router.GET("/poa-visualization", func(c *gin.Context) {
-		c.Header("Content-Type", "text/html; charset=utf-8")
-		if os.Getenv("GAUTH_DEV_INDEX") == "1" {
-			wd, _ := os.Getwd()
-			b, err := os.ReadFile(wd + "/web/templates/poa-visualization.html")
-			if err == nil {
-				c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
-				c.Header("Pragma", "no-cache")
-				c.Header("Expires", "0")
-				serveWithNonce(c, b)
-				return
-			}
-		}
-		// TODO: Embed poa-visualization.html via go:embed for production
-		c.String(404, "poa-visualization.html not available")
-	})
 
 	// --- Audit Trail Endpoints ---
 	s.router.GET("/api/v1/audit/logs", s.apiAuditList)
@@ -7584,8 +7574,23 @@ func (s *BetaServer) routes() {
 	s.router.GET("/protocol-flow.html", protocolFlowHandler)
 	s.router.GET("/protocol-flow", protocolFlowHandler)
 
-	// Serve poa-visualization.html (Item 3 PoA Map Visualization)
-	s.router.GET("/poa-visualization.html", func(c *gin.Context) {
+	// Unified PoA visualization handler for both /poa-visualization and /poa-visualization.html
+	poaVisHandler := func(c *gin.Context) {
+		// Use nonce from middleware (already set in c.Set("csp-nonce"))
+		var nonce string
+		if nonceVal, exists := c.Get("csp-nonce"); exists {
+			nonce = nonceVal.(string)
+		} else {
+			// Fallback if middleware didn't run
+			nonceBytes := make([]byte, 16)
+			crand.Read(nonceBytes)
+			nonce = base64.StdEncoding.EncodeToString(nonceBytes)
+			c.Set("csp-nonce", nonce)
+		}
+		
+		// Override with strict CSP (no unsafe-inline for scripts)
+		cspPolicy := fmt.Sprintf("default-src 'self'; script-src 'self' 'nonce-%s' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://cdn.jsdelivr.net; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'", nonce)
+		
 		if os.Getenv("GAUTH_DEV_INDEX") == "1" {
 			if wd, err := os.Getwd(); err == nil {
 				path := wd + "/web/templates/poa-visualization.html"
@@ -7593,17 +7598,23 @@ func (s *BetaServer) routes() {
 					c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
 					c.Header("Pragma", "no-cache")
 					c.Header("Expires", "0")
-					fmt.Fprintf(os.Stderr, "[debug] serving disk poa-visualization.html (%d bytes)\n", len(b))
+					c.Header("Content-Security-Policy", cspPolicy)
+					fmt.Fprintf(os.Stderr, "[debug] serving disk poa-visualization.html (%d bytes) with nonce=%s CSP=%s\n", len(b), nonce, cspPolicy[:80])
 					serveWithNonce(c, b)
 					return
-				} else {
+				} else if err != nil {
 					fmt.Fprintf(os.Stderr, "[debug] disk poa-visualization read failed: %v\n", err)
 				}
 			}
 		}
-		// Fallback: serve embedded or minimal HTML
+		// Fallback always returns a 200 minimal page (avoid 404 confusion between .html and non-.html routes)
+		c.Header("Content-Security-Policy", cspPolicy)
 		c.String(200, `<!DOCTYPE html><html><head><title>PoA Visualization</title></head><body><h1>GAuth PoA Map Visualization</h1><p>Loading...</p></body></html>`)
-	})
+	}
+	s.router.GET("/poa-visualization.html", poaVisHandler)
+	s.router.GET("/poa-visualization", poaVisHandler)
+	s.router.HEAD("/poa-visualization.html", poaVisHandler)
+	s.router.HEAD("/poa-visualization", poaVisHandler)
 
 	// Serve gauth1.html (GAuth 1.0 Dashboard)
 	s.router.GET("/gauth1.html", func(c *gin.Context) {
@@ -7855,6 +7866,128 @@ func (s *BetaServer) routes() {
 	s.router.GET("/static/js/app.js", func(c *gin.Context) { c.Data(200, "application/javascript; charset=utf-8", embeddedAppJS) })
 	s.router.GET("/static/js/log_stream_panel.js", func(c *gin.Context) { c.Data(200, "application/javascript; charset=utf-8", embeddedLogStreamJS) })
 	s.router.GET("/static/js/aria-tabs.js", func(c *gin.Context) { c.Data(200, "application/javascript; charset=utf-8", embeddedAriaTabsJS) })
+	
+	// Always serve visualization page scripts from disk if present (outside dev gating to avoid 404/mime mismatch)
+	s.router.GET("/static/js/pages/:file", func(c *gin.Context) {
+		name := c.Param("file")
+		if name == "" || strings.Contains(name, "..") || strings.Contains(name, "/") {
+			c.String(400, "invalid file")
+			return
+		}
+		// Candidate roots: current wd and its parents (up to 3 levels) to handle server start from subdirectory.
+		var roots []string
+		if wd, err := os.Getwd(); err == nil {
+			roots = append(roots, wd)
+			p := wd
+			for i := 0; i < 3; i++ { // up to 3 parent levels
+				pp := filepath.Dir(p)
+				if pp == p { break }
+				roots = append(roots, pp)
+				p = pp
+			}
+		}
+		if exe, err := os.Executable(); err == nil {
+			exeDir := filepath.Dir(exe)
+			roots = append(roots, exeDir)
+		}
+		seen := map[string]struct{}{}
+		var tried []string
+		for _, r := range roots {
+			if _, ok := seen[r]; ok { continue }
+			seen[r] = struct{}{}
+			full := filepath.Join(r, "web", "static", "js", "pages", name)
+			tried = append(tried, full)
+			b, err := os.ReadFile(full)
+			if err == nil {
+				fmt.Fprintf(os.Stderr, "[debug] served pages script %s (root=%s bytes=%d)\n", name, r, len(b))
+				c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+				c.Header("Pragma", "no-cache")
+				c.Header("Expires", "0")
+				c.Data(200, "application/javascript; charset=utf-8", b)
+				return
+			}
+			fmt.Fprintf(os.Stderr, "[debug] miss pages script candidate=%s err=%v\n", full, err)
+		}
+		// Embedded fallback
+		if b, err := embeddedPagesJS.ReadFile("static/js/pages/" + name); err == nil {
+			fmt.Fprintf(os.Stderr, "[debug] served embedded pages script %s (bytes=%d)\n", name, len(b))
+			c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+			c.Header("Pragma", "no-cache")
+			c.Header("Expires", "0")
+			c.Data(200, "application/javascript; charset=utf-8", b)
+			return
+		}
+		// 404 diagnostic includes attempted paths (delimited by newline) to aid troubleshooting
+		c.String(404, "not found\n"+strings.Join(tried, "\n"))
+	})
+
+	// Diagnostics: enumerate PoA visualization asset resolution status
+	s.router.GET("/debug/poa-viz-assets", func(c *gin.Context) {
+		assetNames := []string{
+			"pages/poa-visualization-init.js",
+			"pages/poa-visualization-enhancements.js",
+			"pages/poa-visualization-diagnostics.js",
+			"importmap.json",
+			"modules/poa-viz.js",
+		}
+		// Build candidate roots identical to page script route
+		var roots []string
+		if wd, err := os.Getwd(); err == nil {
+			roots = append(roots, wd)
+			p := wd
+			for i := 0; i < 3; i++ {
+				pp := filepath.Dir(p)
+				if pp == p { break }
+				roots = append(roots, pp)
+				p = pp
+			}
+		}
+		if exe, err := os.Executable(); err == nil {
+			exeDir := filepath.Dir(exe)
+			roots = append(roots, exeDir)
+		}
+		seen := map[string]struct{}{}
+		var uniqueRoots []string
+		for _, r := range roots { if _, ok := seen[r]; !ok { uniqueRoots = append(uniqueRoots, r); seen[r]=struct{}{} } }
+		results := make([]map[string]interface{}, 0, len(assetNames))
+		for _, an := range assetNames {
+			found := false
+			var foundPath string
+			for _, r := range uniqueRoots {
+				candidate := filepath.Join(r, "web", "static", "js", an)
+				if b, err := os.ReadFile(candidate); err == nil && len(b) > 0 {
+					found = true
+					foundPath = candidate
+					break
+				}
+			}
+			results = append(results, map[string]interface{}{
+				"asset": an,
+				"found": found,
+				"path":  foundPath,
+			})
+		}
+		c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+		c.Header("Pragma", "no-cache")
+		c.Header("Expires", "0")
+		c.JSON(200, gin.H{"roots": uniqueRoots, "assets": results})
+	})
+	
+	// Import map explicit route (same rationale)
+	s.router.GET("/static/js/importmap.json", func(c *gin.Context) {
+		if wd, err := os.Getwd(); err == nil {
+			full := wd + "/web/static/js/importmap.json"
+			if b, err := os.ReadFile(full); err == nil {
+				c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+				c.Header("Pragma", "no-cache")
+				c.Header("Expires", "0")
+				c.Data(200, "application/importmap+json; charset=utf-8", b)
+				return
+			}
+			fmt.Fprintf(os.Stderr, "[debug] importmap read miss %s: %v\n", full, err)
+		}
+		c.String(404, "not found")
+	})
 
 	// Development convenience: serve all JS files from disk if GAUTH_DEV_INDEX=1
 	if os.Getenv("GAUTH_DEV_INDEX") == "1" {
@@ -7876,6 +8009,42 @@ func (s *BetaServer) routes() {
 				}
 				c.Data(200, "application/javascript; charset=utf-8", b)
 			})
+			s.router.HEAD("/static/js/pages/:file", func(c *gin.Context) {
+				name := c.Param("file")
+				if name == "" || strings.Contains(name, "..") || strings.Contains(name, "/") {
+					c.String(400, "invalid file")
+					return
+				}
+				// Attempt same resolution logic as GET but omit body
+				roots := []string{}
+				if wd, err := os.Getwd(); err == nil { roots = append(roots, wd) }
+				if ex, err := os.Executable(); err == nil { roots = append(roots, filepath.Dir(ex)) }
+				seen := map[string]struct{}{}; unique := []string{}
+				for _, r := range roots { if _, ok := seen[r]; !ok { unique = append(unique, r); seen[r]=struct{}{} } }
+				var found bool
+				for _, r := range unique {
+					candidate := filepath.Join(r, "web", "static", "js", "pages", name)
+					if b, err := os.ReadFile(candidate); err == nil && len(b) > 0 {
+						found = true
+						break
+					}
+				}
+				if !found {
+					// Try embedded fallback via embeddedPagesJS FS
+					if b, err := embeddedPagesJS.ReadFile("static/js/pages/" + name); err == nil && len(b) > 0 {
+						found = true
+					}
+				}
+				if !found {
+					c.String(404, "not found")
+					return
+				}
+				c.Header("Content-Type", "application/javascript; charset=utf-8")
+				c.Status(200)
+			})
+
+			// (Pages route moved outside dev gating for reliability)
+
 
 			// Also serve all CSS files from disk
 			cssPath := wd + "/web/static/css"
