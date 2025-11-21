@@ -72,7 +72,7 @@ func TestMCPClient_ListResources(t *testing.T) {
 		Result: json.RawMessage(`{
 			"resources": [
 				{
-					"uri": "file:///data/test.txt",
+					"uri": "mcp://server/data/test.txt",
 					"name": "Test File",
 					"mimeType": "text/plain"
 				}
@@ -95,8 +95,8 @@ func TestMCPClient_ListResources(t *testing.T) {
 		t.Errorf("Expected 1 resource, got %d", len(result.Resources))
 	}
 
-	if result.Resources[0].URI != "file:///data/test.txt" {
-		t.Errorf("Expected URI 'file:///data/test.txt', got '%s'", result.Resources[0].URI)
+	if result.Resources[0].URI != "mcp://server/data/test.txt" {
+		t.Errorf("Expected URI 'mcp://server/data/test.txt', got '%s'", result.Resources[0].URI)
 	}
 
 	// Verify request was sent
@@ -125,7 +125,7 @@ func TestMCPClient_ReadResource(t *testing.T) {
 		Result: json.RawMessage(`{
 			"contents": [
 				{
-					"uri": "file:///data/test.txt",
+					"uri": "mcp://server/data/test.txt",
 					"mimeType": "text/plain",
 					"text": "Hello, World!"
 				}
@@ -136,9 +136,9 @@ func TestMCPClient_ReadResource(t *testing.T) {
 		t.Fatalf("Failed to queue response: %v", err)
 	}
 
-	// Call ReadResource
+	// Call ReadResource - using mcp:// scheme (allowed by SSRF protection)
 	ctx := context.Background()
-	result, err := client.ReadResource(ctx, "file:///data/test.txt")
+	result, err := client.ReadResource(ctx, "mcp://server/data/test.txt")
 	if err != nil {
 		t.Fatalf("ReadResource failed: %v", err)
 	}
