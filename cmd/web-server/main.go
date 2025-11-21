@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/config"
+	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/security"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web"
 )
 
@@ -70,6 +71,21 @@ func main() {
 			}
 		}()
 	}
+
+	// SECURITY: Validate critical configuration before starting server
+	productionMode := security.ProductionModeDetector()
+	if productionMode {
+		log.Println("[SECURITY] Production mode detected - enforcing security validations")
+	} else {
+		log.Println("[SECURITY] Development mode detected - reduced security requirements")
+	}
+
+	validator := security.NewStartupValidator(productionMode)
+	if err := validator.ValidateAll(); err != nil {
+		log.Fatalf("[SECURITY] FATAL: %v\n\nSERVER STARTUP BLOCKED. Fix the above security issues and restart.\n", err)
+	}
+
+	log.Println("[SECURITY] All security validations passed ✓")
 
 	// Prefer new beta constructor (legacy NewEducationalServer retained as alias)
 	srv := web.NewBetaServer(port)

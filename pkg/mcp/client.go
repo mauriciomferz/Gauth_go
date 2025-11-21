@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync/atomic"
+
+	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/security"
 )
 
 // MCPClient represents an MCP protocol client
@@ -55,6 +57,13 @@ func (c *MCPClient) ListResources(ctx context.Context) (*ResourcesListResponse, 
 
 // ReadResource reads content from specified resource URI
 func (c *MCPClient) ReadResource(ctx context.Context, uri string) (*ResourceReadResponse, error) {
+	// SECURITY: Validate URI to prevent SSRF attacks
+	// For MCP, we allow mcp:// and https:// schemes
+	validator := security.NewURIValidatorWithSchemes([]string{"mcp", "https"})
+	if err := validator.ValidateURI(uri); err != nil {
+		return nil, fmt.Errorf("URI validation failed (SSRF protection): %w", err)
+	}
+
 	request := &JSONRPCRequest{
 		JSONRPC: "2.0",
 		ID:      c.nextRequestID(),
