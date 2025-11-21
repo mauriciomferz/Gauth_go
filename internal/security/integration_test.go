@@ -309,7 +309,8 @@ func (m *mockTransport) Send(ctx context.Context, message []byte) error {
 }
 
 func (m *mockTransport) Receive(ctx context.Context) ([]byte, error) {
-	return []byte(`{"result": {}}`), nil
+	// Return a valid JSONRPC response with matching ID
+	return []byte(`{"jsonrpc": "2.0", "id": 1, "result": {"contents": [{"uri": "test", "text": "test"}]}}`), nil
 }
 
 func (m *mockTransport) Close() error {

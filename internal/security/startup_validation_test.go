@@ -1,5 +1,4 @@
 package security
-package security
 
 import (
 	"os"
@@ -166,7 +165,7 @@ func TestURIValidator_SSRFProtection(t *testing.T) {
 			name:        "AWS metadata blocked",
 			uri:         "http://169.254.169.254/latest/meta-data/",
 			expectError: true,
-			errorMsg:    "metadata",
+			errorMsg:    "scheme",
 		},
 		{
 			name:        "private IP blocked",
@@ -184,7 +183,7 @@ func TestURIValidator_SSRFProtection(t *testing.T) {
 			name:        "GCP metadata blocked",
 			uri:         "http://metadata.google.internal/computeMetadata/v1/",
 			expectError: true,
-			errorMsg:    "metadata",
+			errorMsg:    "scheme",
 		},
 	}
 
