@@ -84,7 +84,8 @@ func TestEmbeddingSizeLimit(t *testing.T) {
 	// Create large scope (within validation limits but exceeds embedding size)
 	scope := make([]string, 30) // Under limit of 32
 	for i := 0; i < 30; i++ {
-		scope[i] = strings.Repeat("a", 100)
+		// Create unique scopes to avoid duplicate validation errors (VULN-01 security fix)
+		scope[i] = "scope:" + strings.Repeat("a", 90) + ":item" + string(rune('a'+i))
 	}
 
 	req := DelegationRequest{

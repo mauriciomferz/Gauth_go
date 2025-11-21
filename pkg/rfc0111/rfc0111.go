@@ -2958,19 +2958,27 @@ func (s *Service) validateGrantorScopes(ctx context.Context, grantor string, req
 	}
 
 	// Extract all scopes from permissions (permissions have Actions field which represents scopes)
-	grantorScopes := make([]string, 0)
+	grantorScopesMap := make(map[string]struct{})
 	for _, perm := range permissions {
 		if !perm.Granted {
 			continue
 		}
 		// Permissions have Actions which correspond to scopes
 		// Resource patterns can also define scope coverage (e.g., "document:*" covers all document actions)
-		grantorScopes = append(grantorScopes, perm.Actions...)
+		for _, action := range perm.Actions {
+			grantorScopesMap[action] = struct{}{}
+		}
 		
 		// If resource has wildcard, add it as a scope pattern for validation
 		if strings.Contains(perm.Resource, "*") {
-			grantorScopes = append(grantorScopes, perm.Resource)
+			grantorScopesMap[perm.Resource] = struct{}{}
 		}
+	}
+
+	// Convert map to slice (automatically deduplicated)
+	grantorScopes := make([]string, 0, len(grantorScopesMap))
+	for scope := range grantorScopesMap {
+		grantorScopes = append(grantorScopes, scope)
 	}
 
 	// Use the same subset validation logic as hierarchical delegation
