@@ -22,6 +22,11 @@ func (s simpleAllowAuthorizer) Authorize(ctx context.Context, r authz.Request) (
 	return authz.Decision{Allow: true}, nil
 }
 
+func (s simpleAllowAuthorizer) GetPermissions(ctx context.Context, subject string) ([]authz.Permission, error) {
+	// Return empty permissions list for test authorizer
+	return []authz.Permission{}, nil
+}
+
 func newServiceWithSigner(t *testing.T) *rfc0111.Service {
 	kms, err := cr.NewInMemoryEd25519Provider()
 	if err != nil {

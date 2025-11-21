@@ -192,6 +192,9 @@ func (m *mockCollector) IncCascadeDepthLimitReached()                    {}
 func (m *mockCollector) IncCascadeBatchProcessed()                       {}
 func (m *mockCollector) SetCascadeMaxDepthReached(depth int)             {}
 func (m *mockCollector) IncCascadeProcessingErrors()                     {}
+func (m *mockCollector) IncJurisdictionEnforcementErrors()               {}
+func (m *mockCollector) IncJurisdictionEnforcementDenials()              {}
+func (m *mockCollector) IncJurisdictionEnforcementAllows()               {}
 
 // TestCollectorRegistry_Registration tests basic registration and deregistration.
 func TestCollectorRegistry_Registration(t *testing.T) {
