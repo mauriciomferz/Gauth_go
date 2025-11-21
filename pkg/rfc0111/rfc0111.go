@@ -1252,6 +1252,14 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 			return nil, rfc.New(rfc.ErrUnauthorized, fmt.Sprintf("unknown token type: %s", env2.AdvancedClaims.TokenType))
 		}
 	}
+	// SECURITY FIX 4: Algorithm Whitelist Validation (CVE-2025-GAUTH-004)
+	// Prevents algorithm confusion attacks ("none", "HS256" when expecting "Ed25519")
+	if poa.Signature != nil {
+		if err := s.ValidateAlgorithmWhitelist(poa.Signature.Algorithm); err != nil {
+			return nil, err
+		}
+	}
+
 	// Authenticity verification (shared helper)
 	if poa.Signature != nil {
 		verr := s.verifyPOASignature(poa)
@@ -1329,15 +1337,23 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 			return nil, err
 		}
 	}
-	// Subject enforcement: prefer typed key then legacy fallback for transitional callers.
+	// SECURITY FIX 1: Agent-Session Binding Enforcement (CVE-2025-GAUTH-001)
+	// Prevents impersonation attacks where attacker presents someone else's valid PoA
+	// Extract session user from context (prefer typed key, fallback to legacy string key)
+	var sessionUser string
 	if sub := ctx.Value(ctxKeySubject); sub != nil {
-		if sStr, ok2 := sub.(string); ok2 && sStr != res.Grantee {
-			return nil, rfc.New(rfc.ErrUnauthorized, "subject mismatch")
+		if sStr, ok2 := sub.(string); ok2 {
+			sessionUser = sStr
 		}
-	} else if legacy := ctx.Value(LegacyCtxSubject); legacy != nil { // legacy string key path
-		if sStr, ok2 := legacy.(string); ok2 && sStr != res.Grantee {
-			return nil, rfc.New(rfc.ErrUnauthorized, "subject mismatch")
+	} else if legacy := ctx.Value(LegacyCtxSubject); legacy != nil {
+		if sStr, ok2 := legacy.(string); ok2 {
+			sessionUser = sStr
 		}
+	}
+	
+	// CRITICAL: Enforce holder-of-key binding (session user MUST match PoA grantee)
+	if err := s.EnforceAgentSessionBinding(ctx, poa, sessionUser); err != nil {
+		return nil, err
 	}
 	if res.Expired {
 		return res, rfc.New(rfc.ErrExpired, "token expired")
