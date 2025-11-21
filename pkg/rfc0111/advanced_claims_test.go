@@ -16,7 +16,7 @@ import (
 // TestAdvancedClaims_GenerationFeatureGated verifies that AdvancedClaims are only populated
 // when GAUTH_ADVANCED_CLAIMS=1, ensuring backward compatibility.
 func TestAdvancedClaims_GenerationFeatureGated(t *testing.T) {
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 	svc := newTestService()
 
 	// Create delegation via CreateDelegation
@@ -79,7 +79,7 @@ func TestAdvancedClaims_GenerationFeatureGated(t *testing.T) {
 // TestAdvancedClaims_BackwardCompatibility verifies that tokens without AdvancedClaims
 // still validate correctly (pre-P2.10 tokens).
 func TestAdvancedClaims_BackwardCompatibility(t *testing.T) {
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 	svc := newTestService()
 
 	// Create POA

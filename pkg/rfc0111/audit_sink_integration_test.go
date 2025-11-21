@@ -85,7 +85,7 @@ func TestAuditSinkIntegration_Disabled(t *testing.T) {
 		Duration: 1 * time.Hour,
 	}
 
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob@example.com")
 	resp, err := svc.CreateDelegationCtx(ctx, req)
 	if err != nil {
 		t.Fatalf("CreateDelegation failed: %v", err)
@@ -122,7 +122,7 @@ func TestAuditSinkIntegration_CreateDelegation(t *testing.T) {
 		Duration: 2 * time.Hour,
 	}
 
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob@example.com")
 	resp, err := svc.CreateDelegationCtx(ctx, req)
 	if err != nil {
 		t.Fatalf("CreateDelegation failed: %v", err)
@@ -172,7 +172,7 @@ func TestAuditSinkIntegration_VerifyToken(t *testing.T) {
 		Duration: 1 * time.Hour,
 	}
 
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob@example.com")
 	resp, err := svc.CreateDelegationCtx(ctx, req)
 	if err != nil {
 		t.Fatalf("CreateDelegation failed: %v", err)
@@ -227,7 +227,7 @@ func TestAuditSinkIntegration_RevokeToken(t *testing.T) {
 		Duration: 1 * time.Hour,
 	}
 
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob@example.com")
 	resp, err := svc.CreateDelegationCtx(ctx, req)
 	if err != nil {
 		t.Fatalf("CreateDelegation failed: %v", err)
@@ -283,7 +283,7 @@ func TestAuditSinkIntegration_AsyncSink(t *testing.T) {
 		Duration: 1 * time.Hour,
 	}
 
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob@example.com")
 	_, err := svc.CreateDelegationCtx(ctx, req)
 	if err != nil {
 		t.Fatalf("CreateDelegation failed: %v", err)
@@ -317,7 +317,7 @@ func TestAuditSinkIntegration_ErrorHandling(t *testing.T) {
 		Duration: 1 * time.Hour,
 	}
 
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob@example.com")
 	resp, err := svc.CreateDelegationCtx(ctx, req)
 
 	// Operation should succeed despite sink error (fail-open behavior)
@@ -365,7 +365,7 @@ func TestAuditSinkIntegration_MultiplexSink(t *testing.T) {
 		Duration: 1 * time.Hour,
 	}
 
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob@example.com")
 	_, err := svc.CreateDelegationCtx(ctx, req)
 	if err != nil {
 		t.Fatalf("CreateDelegation failed: %v", err)
@@ -408,7 +408,7 @@ func TestAuditSinkIntegration_FilteredSink(t *testing.T) {
 		Duration: 1 * time.Hour,
 	}
 
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob@example.com")
 	resp, err := svc.CreateDelegationCtx(ctx, req)
 	if err != nil {
 		t.Fatalf("CreateDelegation failed: %v", err)
@@ -448,7 +448,7 @@ func TestAuditSinkIntegration_FilterByEventType(t *testing.T) {
 		Duration: 1 * time.Hour,
 	}
 
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob@example.com")
 	_, err := svc.CreateDelegationCtx(ctx, req)
 	if err != nil {
 		t.Fatalf("CreateDelegation failed: %v", err)
@@ -485,7 +485,7 @@ func TestAuditSinkIntegration_FilterByResult(t *testing.T) {
 		Duration: 1 * time.Hour,
 	}
 
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob@example.com")
 	_, err := svc.CreateDelegationCtx(ctx, req)
 
 	// Expect authorization failure
@@ -529,7 +529,7 @@ func TestAsyncAuditSink_BufferOverflow(t *testing.T) {
 	authorizer := &allowAllAuditSinkAuthorizer{}
 	svc := NewService(logger, authorizer, WithAuditSink(asyncSink))
 
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob@example.com")
 
 	// Send multiple events quickly to overflow buffer
 	for i := 0; i < 10; i++ {

@@ -25,12 +25,13 @@ func TestRawPOAExposedWhenEmbedded(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateDelegation error: %v", err)
 	}
-	vr, err := svc.VerifyToken(testCtx(), resp.AuthToken)
+	ctx := WithSubject(testCtx(), "g2")
+	vr, err := svc.VerifyToken(ctx, resp.AuthToken)
 	if err != nil {
 		t.Fatalf("VerifyToken error: %v", err)
 	}
 	if vr.RawPOA == "" {
-		t.Fatalf("expected RawPOA populated on verification result")
+		t.Fatalf("expected RawPOA populated when embedding enabled")
 	}
 	if vr.PoAVersion != "poa/v1" {
 		t.Fatalf("expected poa/v1, got %s", vr.PoAVersion)
@@ -52,7 +53,8 @@ func TestRawPOAAbsentWhenDisabled(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateDelegation error: %v", err)
 	}
-	vr, err := svc.VerifyToken(testCtx(), resp.AuthToken)
+	ctx := WithSubject(testCtx(), "g2")
+	vr, err := svc.VerifyToken(ctx, resp.AuthToken)
 	if err != nil {
 		t.Fatalf("VerifyToken error: %v", err)
 	}
@@ -78,7 +80,8 @@ func TestRawPOAOmittedWhenSizeExceeded(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateDelegation error: %v", err)
 	}
-	vr, err := svc.VerifyToken(testCtx(), resp.AuthToken)
+	ctx := WithSubject(testCtx(), "g2")
+	vr, err := svc.VerifyToken(ctx, resp.AuthToken)
 	if err != nil {
 		t.Fatalf("VerifyToken error: %v", err)
 	}

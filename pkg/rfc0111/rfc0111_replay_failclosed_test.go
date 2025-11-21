@@ -37,7 +37,8 @@ func TestReplayFailClosed(t *testing.T) {
 	}
 
 	// Verification should fail due to replay store error (Seen path).
-	_, verr := svc.VerifyToken(context.Background(), resp.AuthToken)
+	ctx := WithSubject(context.Background(), "bob@example.com")
+	_, verr := svc.VerifyToken(ctx, resp.AuthToken)
 	if verr == nil {
 		t.Fatalf("expected error due to replay store failure")
 	}
@@ -64,7 +65,8 @@ func TestReplayFailClosedRecord(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create delegation failed: %v", err)
 	}
-	_, verr := svc.VerifyToken(context.Background(), resp.AuthToken)
+	ctx := WithSubject(context.Background(), "bob@example.com")
+	_, verr := svc.VerifyToken(ctx, resp.AuthToken)
 	if verr == nil {
 		t.Fatalf("expected error due to replay store failure (record)")
 	}

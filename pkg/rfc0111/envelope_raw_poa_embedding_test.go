@@ -32,7 +32,8 @@ func TestRawPOAEmbeddingEnabled(t *testing.T) {
 	}
 	// Decrypt token and inspect envelope V2 fields.
 	// We reuse VerifyToken to parse; it will look up POA but that's fine.
-	vr, err := svc.VerifyToken(testCtx(), resp.AuthToken)
+	ctx := WithSubject(testCtx(), "g2")
+	vr, err := svc.VerifyToken(ctx, resp.AuthToken)
 	if err != nil {
 		t.Fatalf("VerifyToken error: %v", err)
 	}

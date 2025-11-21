@@ -80,7 +80,7 @@ func TestBLSAggregationRoundTrip(t *testing.T) {
 // TestBatchTokenVerification tests parallel batch verification
 func TestBatchTokenVerification(t *testing.T) {
 	svc := aggregationTestService()
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 
 	// Create 10 valid tokens
 	const numTokens = 10
@@ -217,7 +217,7 @@ func TestMultiAlgorithmCoexistence(t *testing.T) {
 	// BLS aggregation is separate and used for batch verification
 
 	svc := aggregationTestService()
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 
 	// Create regular Ed25519 token
 	req := DelegationRequest{
@@ -253,7 +253,7 @@ func TestAggregationPerformance(t *testing.T) {
 	}
 
 	svc := aggregationTestService()
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 
 	// Create 50 tokens
 	const numTokens = 50
@@ -374,7 +374,7 @@ func TestBatchVerificationCancellation(t *testing.T) {
 // TestBLSEnvironmentFlags tests BLS configuration via environment variables
 func TestBLSEnvironmentFlags(t *testing.T) {
 	svc := aggregationTestService()
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 
 	// Create test tokens
 	tokens := make([]string, 3)

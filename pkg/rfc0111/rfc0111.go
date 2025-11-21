@@ -781,10 +781,25 @@ func WithEnhancedValidator(v *EnhancedPoAValidator) Option {
 func WithMandatorySignatures() Option { return func(s *Service) { s.mandatorySignatures = true } }
 
 // WithReplayFailClosed enforces fail-closed semantics on distributed replay protection.
+// This is the DEFAULT behavior (secure by default). Use WithReplayFailOpen() to opt-out.
 // When enabled, any error from the ReplayStore (Seen or Record) aborts verification instead
 // of being treated as a cache miss. This increases security (no silent replay bypass on store
 // outage) but can reduce availability if the store is unstable.
 func WithReplayFailClosed() Option { return func(s *Service) { s.failClosedReplay = true } }
+
+// WithReplayFailOpen allows fail-open behavior for replay/revocation checks (UNSAFE - availability over security).
+// WARNING: This reduces security. Only use in high-availability deployments where infrastructure
+// outages must not block transactions. In fail-open mode, Redis/store errors are treated as "not seen"
+// allowing potentially revoked credentials to be accepted during outages.
+func WithReplayFailOpen() Option { return func(s *Service) { s.failClosedReplay = false } }
+
+// WithStrictConstraintValidation enables fail-closed constraint validation.
+// When enabled, any constraint key in poa.Restrictions that is not explicitly handled
+// (max_amount, max_daily_amount, currency) AND not provided in ValidationContext.Metadata
+// will cause validation to FAIL with ErrRestrictionExceeded.
+// This prevents silent bypassing of unknown constraints (e.g., "requires_mfa", "allowed_geo").
+// Default: false (for backward compatibility - unknown constraints are ignored if not provided)
+func WithStrictConstraintValidation() Option { return func(s *Service) { s.strictConstraints = true } }
 
 // WithPDP injects a PDP engine; if present it overrides legacy Authorizer for delegation authorization decisions.
 func WithPDP(engine pdp.Engine) Option {
@@ -806,20 +821,26 @@ func WithLedger(l ledger.Store) Option {
 }
 
 // NewService creates a new RFC 0111 service (in-memory prototype) with optional functional options.
+// SECURITY DEFAULTS:
+//   - failClosedReplay: true (revocation/replay checks fail-closed on store errors)
+//   - strictConstraints: false (unknown constraints ignored for backward compatibility)
+// Use WithReplayFailOpen() to opt into fail-open behavior (reduces security, increases availability)
+// Use WithStrictConstraintValidation() to reject unknown constraints (increases security)
 func NewService(auditLogger *audit.MemoryLogger, authorizer authz.Authorizer, opts ...Option) *Service {
 	s := &Service{
-		repo:         newMemoryRepository(),
-		audit:        auditLogger,
-		authz:        authorizer,
-		nowFn:        time.Now,
-		revChain:     delegation.NewRevocationChain(),
-		issChain:     NewDelegationChain(),
-		tokenKey:     generateLocalKey(),
-		keyRing:      keyring.NewKeyRing(),
-		metrics:      metrics.Noop,
-		limits:       ValidationLimits{},
-		poaValidator: selectPoAValidator(),
-		dailyAmounts: make(map[string]float64),
+		repo:             newMemoryRepository(),
+		audit:            auditLogger,
+		authz:            authorizer,
+		nowFn:            time.Now,
+		revChain:         delegation.NewRevocationChain(),
+		issChain:         NewDelegationChain(),
+		tokenKey:         generateLocalKey(),
+		keyRing:          keyring.NewKeyRing(),
+		metrics:          metrics.Noop,
+		limits:           ValidationLimits{},
+		poaValidator:     selectPoAValidator(),
+		dailyAmounts:     make(map[string]float64),
+		failClosedReplay: true, // SECURE BY DEFAULT: fail-closed on revocation/replay errors
 	}
 	// Optional persistent repository activation via env path
 	if path := os.Getenv("GAUTH_PERSIST_PATH"); path != "" {
@@ -1351,6 +1372,16 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 		}
 	}
 	
+	// DEFENSIVE CHECK: sessionUser MUST be populated by secure middleware
+	// If empty, the integration is misconfigured (missing mTLS/DPoP/OAuth2 middleware)
+	if sessionUser == "" {
+		if s.metrics != nil {
+			s.metrics.IncUnauthorized()
+		}
+		return nil, rfc.New(rfc.ErrConfiguration,
+			"sessionUser not found in context - integration error: ctxKeySubject must be populated by authentication middleware (mTLS, DPoP, OAuth2)")
+	}
+	
 	// CRITICAL: Enforce holder-of-key binding (session user MUST match PoA grantee)
 	if err := s.EnforceAgentSessionBinding(ctx, poa, sessionUser); err != nil {
 		return nil, err
@@ -1616,7 +1647,8 @@ type Service struct {
 	replay                  *replayCache                // optional in-memory replay protection
 	replayStore             ReplayStore                 // optional external distributed replay store (takes precedence if non-nil)
 	sigReplayStore          SignatureReplayStore        // optional signature replay protection store (issuance path)
-	failClosedReplay        bool                        // if true, replay store errors become invalid_request instead of fail-open
+	failClosedReplay        bool                        // if true, replay store errors become invalid_request instead of fail-open (DEFAULT: true, secure by default)
+	strictConstraints       bool                        // if true, unknown/unvalidated constraints cause rejection (DEFAULT: false, for backward compatibility)
 	limits                  ValidationLimits            // configurable validation limits
 	poaValidator            PoAValidator                // semantic validator applied post basic validation
 	enhancedValidator       *EnhancedPoAValidator       // enhanced validator with warning collection and daily limits (optional)
@@ -3188,16 +3220,38 @@ func (s *Service) validateDelegationEx(ctx context.Context, poaID, grantee strin
 	}
 
 	// Generic restriction validation
-	if vctx.Metadata != nil {
-		for rk, rv := range poa.Restrictions {
-			if rk == "max_amount" || rk == "max_daily_amount" || rk == "currency" {
-				continue // Already handled
-			}
-			if provided, ok := vctx.Metadata[rk]; ok && provided != rv {
-				s.semanticCounters.RestrictionMismatch++
-				return rfc.New(rfc.ErrRestrictionExceeded, fmt.Sprintf("restriction %s mismatch: expected %s, got %s", rk, rv, provided))
+	knownConstraints := map[string]bool{
+		"max_amount":       true,
+		"max_daily_amount": true,
+		"currency":         true,
+	}
+	
+	for rk, rv := range poa.Restrictions {
+		if knownConstraints[rk] {
+			continue // Already handled above
+		}
+		
+		// Check if caller provided metadata for this constraint
+		if vctx.Metadata != nil {
+			if provided, ok := vctx.Metadata[rk]; ok {
+				// Constraint provided - validate it
+				if provided != rv {
+					s.semanticCounters.RestrictionMismatch++
+					return rfc.New(rfc.ErrRestrictionExceeded, fmt.Sprintf("restriction %s mismatch: expected %s, got %s", rk, rv, provided))
+				}
+				// Constraint matches - continue to next
+				continue
 			}
 		}
+		
+		// Constraint NOT provided by caller
+		// In strict mode: REJECT (unknown constraint cannot be validated)
+		// In permissive mode: IGNORE (assume caller doesn't support this constraint)
+		if s.strictConstraints {
+			s.semanticCounters.RestrictionMismatch++
+			return rfc.New(rfc.ErrRestrictionExceeded, fmt.Sprintf("unknown constraint %s=%s cannot be validated (strict mode enabled)", rk, rv))
+		}
+		// Permissive mode: silently ignore unknown constraints (backward compatible)
 	}
 
 	// Audit successful validation

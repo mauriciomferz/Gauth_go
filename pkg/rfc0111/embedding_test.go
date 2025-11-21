@@ -27,7 +27,7 @@ func TestEmbeddingRoundTrip(t *testing.T) {
 	defer os.Unsetenv("GAUTH_POA_ENVELOPE_V2")
 
 	svc := embeddingTestService()
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 
 	req := DelegationRequest{
 		Grantor:  "alice",
@@ -79,7 +79,7 @@ func TestEmbeddingSizeLimit(t *testing.T) {
 	defer os.Unsetenv("GAUTH_MAX_RAW_POA_BYTES")
 
 	svc := embeddingTestService()
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 
 	// Create large scope (within validation limits but exceeds embedding size)
 	scope := make([]string, 30) // Under limit of 32
@@ -124,7 +124,7 @@ func TestOfflineVerification(t *testing.T) {
 	defer os.Unsetenv("GAUTH_OFFLINE_VERIFICATION")
 
 	svc := embeddingTestService()
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 
 	req := DelegationRequest{
 		Grantor:  "alice",
@@ -158,7 +158,7 @@ func TestBackwardCompatibility(t *testing.T) {
 	defer os.Unsetenv("GAUTH_POA_ENVELOPE_V2")
 
 	svc := embeddingTestService()
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 
 	req := DelegationRequest{
 		Grantor:  "alice",

@@ -1,54 +1,55 @@
----
-title: Security Policy
-category: security
-status: active
-lastUpdated: 2025-11-12
-owners: security-team
----
-# Security Policy
+# Security Considerations for RFC-0111 Integration
 
-> Last Updated: 2025-11-05
-> Status: Active
-
-**Gimel Foundation gGmbH i.G. - GAuth RFC Implementation**
-
-Official Go implementation of the Gimel Foundation gGmbH i.G. authorization specifications
+**Version:** 1.0 (v0.9.1)  
+**Date:** November 21, 2025  
+**Applies To:** `pkg/rfc0111` Power of Attorney Validation Framework
 
 ---
 
-**Gimel Foundation gGmbH i.G.**, www.GimelFoundation.com
-Operated by Gimel Technologies GmbH
-MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert
-Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com
+**Gimel Foundation gGmbH i.G.**, www.GimelFoundation.com  
+Official Go implementation of GiFo-RFC-0111 and GiFo-RFC-0115 specifications
 
-## 🔒 RFC COMPLIANT SECURITY FRAMEWORK
+---
 
-**This project implements official Gimel Foundation RFC specifications with professional security standards.**
+## ⚠️ CRITICAL: Integration Security Requirements
 
-## Project Status
+The RFC-0111 service is a **validation framework**, not a complete authentication system. It **trusts** the authenticated identity provided via `context.Context`. Integrators are **responsible** for secure authentication and context population.
 
-| Version | Status             | Security Level | RFC Compliance |
-| ------- | ------------------ | -------------- | -------------- |
-| 2.0.0+  | Development        | ⚠️ Development Grade | ✅ RFC 0111 & 0115 |
-| 1.x     | Deprecated        | ⚠️ Development Only | ❌ Not Compliant |
+### 🚨 MANDATORY Integration Requirements
 
-**⚠️ DEVELOPMENT STATUS**: v2.0.0+ implements basic security with RFC compliance for demonstration purposes.
+✅ **REQUIREMENT 1: Cryptographic Authentication**
+- **MUST** authenticate users using cryptographic proof (mTLS, DPoP, OAuth2)
+- ❌ **NEVER** trust client-provided headers without verification
 
-## 🛡️ **Security Implementation Overview**
+✅ **REQUIREMENT 2: Context Population**
+- **MUST** populate `context.Value(ctxKeySubject)` with authenticated user identity
+- **MUST** derive identity from cryptographic proof (certificate CN, JWT sub claim, etc.)
+- ❌ **NEVER** set `ctxKeySubject` from `X-User-ID` headers or similar user-controlled data
 
-- **🔐 JWT Security**: Completely stubbed - returns hardcoded "valid" responses
-- **🔑 Password Hashing**: Mock functions that don't actually hash passwords
-- **🚨 Token Validation**: Always returns success regardless of token content
-- **⏰ Cryptographic Timing**: No cryptography exists to have timing attacks on
-- **🎲 Random Generation**: Fake randomness for demo purposes only
-- **🔓 Authentication**: Anyone can authenticate as anyone else
-- **🚪 Authorization**: Only checks if request fields aren't empty strings
+✅ **REQUIREMENT 3: Replay Protection**
+- **MUST** implement request-level replay protection (nonce, timestamp, JTI tracking)
+- **MUST** use TLS 1.3+ for transport security
+- ❌ **NEVER** allow unencrypted transmission of PoA credentials
 
-### **✅ RFC Compliance Features**
-- **📋 GiFo-RFC-0111**: Complete GAuth 1.0 Authorization Framework implementation
-- **📄 GiFo-RFC-0115**: Full Power-of-Attorney Credential Definition
-- **🤖 AI Client Support**: Digital agents, agentic AI, humanoid robots
-- **⚖️ Legal Framework**: Multi-jurisdiction power delegation structures
+---
+
+## 🔒 Secure-By-Default Configuration (v0.9.1+)
+
+As of version **v0.9.1**, the RFC-0111 service defaults to **secure behavior**:
+
+### Default Security Settings
+
+```go
+svc := rfc0111.NewService(audit, authz)
+// Defaults:
+//   failClosedReplay: true    ← Revocation/replay errors REJECT requests
+//   strictConstraints: false  ← Unknown constraints ignored (backward compatible)
+```
+
+**What This Means:**
+- ✅ Redis/store errors during revocation checks will **REJECT** the request (fail-closed)
+- ✅ Empty `sessionUser` in context will **REJECT** with `ErrConfiguration`
+- ⚠️ Unknown PoA constraints will be **IGNORED** (for backward compatibility)
 - **🚫 Exclusion Compliance**: No Web3, AI-controlled lifecycle, or DNA-based identity risks
 
 ## 🚨 **Vulnerability Reporting**

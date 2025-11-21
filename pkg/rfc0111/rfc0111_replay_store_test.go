@@ -27,11 +27,12 @@ func TestReplayStorePrecedence(t *testing.T) {
 	}
 
 	// First verify should succeed (store miss)
-	if _, err := svc.VerifyToken(context.Background(), resp.AuthToken); err != nil {
+	ctx := WithSubject(context.Background(), "bob@example.com")
+	if _, err := svc.VerifyToken(ctx, resp.AuthToken); err != nil {
 		t.Fatalf("first verify unexpected error: %v", err)
 	}
 	// Second verify should be replay via store.
-	_, err2 := svc.VerifyToken(context.Background(), resp.AuthToken)
+	_, err2 := svc.VerifyToken(ctx, resp.AuthToken)
 	if err2 == nil {
 		t.Fatalf("expected replay error on second verify")
 	}

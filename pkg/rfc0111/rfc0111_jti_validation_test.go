@@ -51,7 +51,8 @@ func TestVerifyTokenMalformedJTI(t *testing.T) {
 	if err != nil {
 		t.Fatalf("encrypt: %v", err)
 	}
-	_, verr := svc.VerifyToken(context.Background(), badTok)
+	ctx := WithSubject(context.Background(), "grantee")
+	_, verr := svc.VerifyToken(ctx, badTok)
 	if verr == nil {
 		t.Fatalf("expected invalid_request error for malformed jti")
 	}
@@ -74,7 +75,8 @@ func TestVerifyTokenMissingJTIWithReplayProtection(t *testing.T) {
 	if err != nil {
 		t.Fatalf("encrypt: %v", err)
 	}
-	_, verr := svc.VerifyToken(context.Background(), mutatedTok)
+	ctx := WithSubject(context.Background(), "grantee")
+	_, verr := svc.VerifyToken(ctx, mutatedTok)
 	if verr == nil {
 		t.Fatalf("expected invalid_request for missing jti under replay protection")
 	}
@@ -82,7 +84,7 @@ func TestVerifyTokenMissingJTIWithReplayProtection(t *testing.T) {
 	if _, ok := svc.repo.Get(env.DelegationID); !ok {
 		t.Fatalf("delegation missing")
 	}
-	if _, cerr := svc.VerifyToken(context.Background(), tok); cerr != nil {
+	if _, cerr := svc.VerifyToken(ctx, tok); cerr != nil {
 		t.Fatalf("expected original token to verify: %v", cerr)
 	}
 }
@@ -91,7 +93,8 @@ func TestVerifyTokenValidUUIDv4Passes(t *testing.T) {
 	svc := newBasicService()
 	tok, _ := issueAndDecrypt(t, svc)
 	// Just verify original token passes (UUID v4 generated internally)
-	if _, err := svc.VerifyToken(context.Background(), tok); err != nil {
+	ctx := WithSubject(context.Background(), "grantee")
+	if _, err := svc.VerifyToken(ctx, tok); err != nil {
 		t.Fatalf("verify failed for valid token: %v", err)
 	}
 }

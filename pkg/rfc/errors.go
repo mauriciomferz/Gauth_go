@@ -17,6 +17,7 @@ const (
 	ErrInternal                ErrorCode = "internal_error"
 	ErrReplay                  ErrorCode = "replay"
 	ErrDelegationDepthExceeded ErrorCode = "delegation_depth_exceeded"
+	ErrConfiguration           ErrorCode = "configuration_error" // Integration/configuration error (e.g., missing context values)
 )
 
 // RFCError wraps an error with a code and message.

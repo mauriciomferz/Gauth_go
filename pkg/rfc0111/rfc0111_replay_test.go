@@ -27,7 +27,8 @@ func TestReplayProtection(t *testing.T) {
 	}
 
 	// First verification should succeed.
-	vres, verr := svc.VerifyToken(context.Background(), resp.AuthToken)
+	ctx := WithSubject(context.Background(), "bob@example.com")
+	vres, verr := svc.VerifyToken(ctx, resp.AuthToken)
 	if verr != nil {
 		t.Fatalf("first verify unexpected error: %v", verr)
 	}
@@ -36,7 +37,7 @@ func TestReplayProtection(t *testing.T) {
 	}
 
 	// Second verification should be replay rejected.
-	vres2, verr2 := svc.VerifyToken(context.Background(), resp.AuthToken)
+	vres2, verr2 := svc.VerifyToken(ctx, resp.AuthToken)
 	if verr2 == nil {
 		t.Fatalf("expected error on replay but got none")
 	}

@@ -12,7 +12,7 @@ import (
 
 // TestSuspendDelegation_Success validates successful suspension of an active delegation.
 func TestSuspendDelegation_Success(t *testing.T) {
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 	svc, cleanup := setupTestService(t)
 	defer cleanup()
 
@@ -65,7 +65,7 @@ func TestSuspendDelegation_Success(t *testing.T) {
 
 // TestSuspendDelegation_InvalidStatus validates rejection of suspension for non-active delegations.
 func TestSuspendDelegation_InvalidStatus(t *testing.T) {
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 	svc, cleanup := setupTestService(t)
 	defer cleanup()
 
@@ -99,7 +99,7 @@ func TestSuspendDelegation_InvalidStatus(t *testing.T) {
 
 // TestSuspendDelegation_Unauthorized validates only grantor can suspend.
 func TestSuspendDelegation_Unauthorized(t *testing.T) {
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 	svc, cleanup := setupTestService(t)
 	defer cleanup()
 
@@ -124,7 +124,7 @@ func TestSuspendDelegation_Unauthorized(t *testing.T) {
 
 // TestResumeDelegation_Success validates successful resumption of a suspended delegation.
 func TestResumeDelegation_Success(t *testing.T) {
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 	svc, cleanup := setupTestService(t)
 	defer cleanup()
 
@@ -178,7 +178,7 @@ func TestResumeDelegation_Success(t *testing.T) {
 
 // TestResumeDelegation_InvalidStatus validates rejection of resumption for non-suspended delegations.
 func TestResumeDelegation_InvalidStatus(t *testing.T) {
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 	svc, cleanup := setupTestService(t)
 	defer cleanup()
 
@@ -211,7 +211,7 @@ func TestResumeDelegation_InvalidStatus(t *testing.T) {
 
 // TestUpdateDelegationScope_Success validates successful scope reduction.
 func TestUpdateDelegationScope_Success(t *testing.T) {
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 	svc, cleanup := setupTestService(t)
 	defer cleanup()
 
@@ -270,7 +270,7 @@ func TestUpdateDelegationScope_Success(t *testing.T) {
 
 // TestUpdateDelegationScope_InvalidSubset validates rejection when new scope is not a subset.
 func TestUpdateDelegationScope_InvalidSubset(t *testing.T) {
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 	svc, cleanup := setupTestService(t)
 	defer cleanup()
 
@@ -296,7 +296,7 @@ func TestUpdateDelegationScope_InvalidSubset(t *testing.T) {
 
 // TestUpdateDelegationScope_EmptyScope validates rejection of empty scope.
 func TestUpdateDelegationScope_EmptyScope(t *testing.T) {
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 	svc, cleanup := setupTestService(t)
 	defer cleanup()
 
@@ -315,7 +315,7 @@ func TestUpdateDelegationScope_EmptyScope(t *testing.T) {
 
 // TestUpdateDelegationScope_NoChange validates rejection when scope is identical.
 func TestUpdateDelegationScope_NoChange(t *testing.T) {
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 	svc, cleanup := setupTestService(t)
 	defer cleanup()
 
@@ -334,7 +334,7 @@ func TestUpdateDelegationScope_NoChange(t *testing.T) {
 
 // TestUpdateDelegationScope_SuspendedDelegation validates scope update on suspended delegation.
 func TestUpdateDelegationScope_SuspendedDelegation(t *testing.T) {
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 	svc, cleanup := setupTestService(t)
 	defer cleanup()
 
@@ -364,7 +364,7 @@ func TestUpdateDelegationScope_SuspendedDelegation(t *testing.T) {
 // TestVerifyToken_SuspendedDelegation validates token verification rejects suspended delegations.
 func TestVerifyToken_SuspendedDelegation(t *testing.T) {
 	t.Skip("Skipping token generation test - requires full PASETO setup")
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 	svc, cleanup := setupTestService(t)
 	defer cleanup()
 
@@ -414,7 +414,7 @@ func TestVerifyToken_SuspendedDelegation(t *testing.T) {
 // TestSuspensionResumptionCycle validates full lifecycle.
 func TestSuspensionResumptionCycle(t *testing.T) {
 	t.Skip("Skipping token generation test - requires full PASETO setup")
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob")
 	svc, cleanup := setupTestService(t)
 	defer cleanup()
 

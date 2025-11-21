@@ -46,7 +46,7 @@ func TestJurisdictionIntegration_Disabled(t *testing.T) {
 		Duration: 1 * time.Hour,
 	}
 
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob@example.com")
 	resp, err := svc.CreateDelegationCtx(ctx, req)
 	if err != nil {
 		t.Fatalf("CreateDelegation should succeed when enforcement disabled: %v", err)
@@ -59,7 +59,7 @@ func TestJurisdictionIntegration_Disabled(t *testing.T) {
 // TestJurisdictionIntegration_EUGDPRConsent tests EU GDPR consent validation during delegation creation.
 func TestJurisdictionIntegration_EUGDPRConsent(t *testing.T) {
 	svc := jurisdictionTestService()
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob@example.com")
 
 	// Test 1: EU jurisdiction with GDPR consent - ALLOW
 	reqWithConsent := DelegationRequest{
@@ -108,7 +108,7 @@ func TestJurisdictionIntegration_EUGDPRConsent(t *testing.T) {
 // TestJurisdictionIntegration_USCCPAOptOut tests US CCPA opt-out validation.
 func TestJurisdictionIntegration_USCCPAOptOut(t *testing.T) {
 	svc := jurisdictionTestService()
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob@example.com")
 
 	// Test 1: US jurisdiction without CCPA opt-out - ALLOW
 	reqNoOptOut := DelegationRequest{
@@ -153,7 +153,7 @@ func TestJurisdictionIntegration_USCCPAOptOut(t *testing.T) {
 // TestJurisdictionIntegration_CrossBorderDataTransfer tests cross-border data transfer rules.
 func TestJurisdictionIntegration_CrossBorderDataTransfer(t *testing.T) {
 	svc := jurisdictionTestService()
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob@example.com")
 
 	// Test 1: EU to UK cross-border transfer (adequacy country) - ALLOW
 	reqEUtoUK := DelegationRequest{
@@ -198,7 +198,7 @@ func TestJurisdictionIntegration_CrossBorderDataTransfer(t *testing.T) {
 // TestJurisdictionIntegration_DataResidency tests data residency enforcement.
 func TestJurisdictionIntegration_DataResidency(t *testing.T) {
 	svc := jurisdictionTestService()
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob@example.com")
 
 	// Test 1: EU personal data staying in EU - ALLOW
 	reqResidencyOK := DelegationRequest{
@@ -245,7 +245,7 @@ func TestJurisdictionIntegration_DataResidency(t *testing.T) {
 // TestJurisdictionIntegration_BlockedActions tests jurisdiction-specific blocked actions.
 func TestJurisdictionIntegration_BlockedActions(t *testing.T) {
 	svc := jurisdictionTestService()
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob@example.com")
 
 	// Test 1: EU blocked action "unrestricted_data_export" - DENY
 	reqBlockedAction := DelegationRequest{
@@ -288,7 +288,7 @@ func TestJurisdictionIntegration_BlockedActions(t *testing.T) {
 // TestJurisdictionIntegration_VerifyTokenEnforcement tests jurisdiction enforcement during token verification.
 func TestJurisdictionIntegration_VerifyTokenEnforcement(t *testing.T) {
 	svc := jurisdictionTestService()
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob@eubank.com")
 
 	// Create a delegation with EU jurisdiction
 	req := DelegationRequest{
@@ -355,7 +355,7 @@ func TestExtractJurisdictionFromPOA(t *testing.T) {
 // TestValidateJurisdictionCompliance tests standalone compliance validation.
 func TestValidateJurisdictionCompliance(t *testing.T) {
 	svc := jurisdictionTestService()
-	ctx := context.Background()
+	ctx := WithSubject(context.Background(), "bob@example.com")
 
 	// Test 1: Valid action in jurisdiction
 	poa1 := &PowerOfAttorney{

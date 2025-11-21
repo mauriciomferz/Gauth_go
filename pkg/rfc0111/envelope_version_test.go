@@ -65,7 +65,8 @@ func TestEnvelopeVersionIssuanceAndVerification(t *testing.T) {
 		t.Fatalf("expected envelope v2 issued counter >0")
 	}
 	// Verify V2 token
-	vr2, verr2 := svc.VerifyToken(tContext(), resp2.AuthToken)
+	ctx2 := WithSubject(context.Background(), "dave@example.com")
+	vr2, verr2 := svc.VerifyToken(ctx2, resp2.AuthToken)
 	if verr2 != nil {
 		t.Fatalf("verify v2 failed: %v", verr2)
 	}
@@ -98,7 +99,8 @@ func TestEnvelopeV2IncludesSatisfiedFields(t *testing.T) {
 		t.Fatalf("empty token v2 synthetic multi-sig")
 	}
 	// Verify token
-	vr, err := svc.VerifyToken(tContext(), tok)
+	ctx := WithSubject(context.Background(), "h@example.com")
+	vr, err := svc.VerifyToken(ctx, tok)
 	if err != nil {
 		t.Fatalf("verify v2 synthetic failed: %v", err)
 	}
@@ -211,4 +213,4 @@ func TestEnvelopeDigestMismatchCounter(t *testing.T) {
 }
 
 // tContext provides a simple cancellable background context placeholder (allows future enrichment).
-func tContext() context.Context { return context.Background() }
+func tContext() context.Context { return WithSubject(context.Background(), "bob@example.com") }
