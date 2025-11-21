@@ -96,6 +96,10 @@ func (a *allowAllAuthorizer) Authorize(ctx context.Context, req authz.Request) (
 	return authz.Decision{Allow: true, Reason: "allow_all"}, nil
 }
 
+func (a *allowAllAuthorizer) GetPermissions(ctx context.Context, subject string) ([]authz.Permission, error) {
+	return []authz.Permission{{Resource: "*", Actions: []string{"*"}, Granted: true}}, nil
+}
+
 // decryptEnvelopeV2ForTest mirrors Verification logic to extract EnvelopeV2 for test assertions.
 func decryptEnvelopeV2ForTest(s *Service, tok string) (*token.EnvelopeV2, error) {
 	v2 := paseto.NewV2()

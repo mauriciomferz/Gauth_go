@@ -143,3 +143,7 @@ type authzAllowAll struct{}
 func (a authzAllowAll) Authorize(ctx context.Context, r authz.Request) (authz.Decision, error) {
 	return authz.Decision{Allow: true}, nil
 }
+
+func (a authzAllowAll) GetPermissions(ctx context.Context, subject string) ([]authz.Permission, error) {
+	return []authz.Permission{{Resource: "*", Actions: []string{"*"}, Granted: true}}, nil
+}

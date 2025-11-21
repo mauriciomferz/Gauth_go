@@ -22,6 +22,13 @@ func (a *allowAllAuditSinkAuthorizer) Authorize(ctx context.Context, req authz.R
 	return authz.Decision{Allow: true, Reason: "test-allow-all"}, nil
 }
 
+func (a *allowAllAuditSinkAuthorizer) GetPermissions(ctx context.Context, subject string) ([]authz.Permission, error) {
+	// Test authorizer grants all permissions
+	return []authz.Permission{
+		{Resource: "*", Actions: []string{"*"}, Granted: true},
+	}, nil
+}
+
 func (a *allowAllAuditSinkAuthorizer) LoadPolicies(ctx context.Context, policies []authz.Policy) error {
 	return nil
 }
@@ -502,6 +509,11 @@ type denyAllAuthorizer struct{}
 
 func (a *denyAllAuthorizer) Authorize(ctx context.Context, req authz.Request) (authz.Decision, error) {
 	return authz.Decision{Allow: false, Reason: "test-deny-all"}, nil
+}
+
+func (a *denyAllAuthorizer) GetPermissions(ctx context.Context, subject string) ([]authz.Permission, error) {
+	// Test authorizer that denies: no permissions
+	return []authz.Permission{}, nil
 }
 
 func (a *denyAllAuthorizer) LoadPolicies(ctx context.Context, policies []authz.Policy) error {

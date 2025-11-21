@@ -17,6 +17,10 @@ func (a *allowAllJurisdictionAuthorizer) Authorize(ctx context.Context, req auth
 	return authz.Decision{Allow: true, Reason: "test allow-all"}, nil
 }
 
+func (a *allowAllJurisdictionAuthorizer) GetPermissions(ctx context.Context, subject string) ([]authz.Permission, error) {
+	return []authz.Permission{{Resource: "*", Actions: []string{"*"}, Granted: true}}, nil
+}
+
 // jurisdictionTestService creates a test service with jurisdiction enforcement enabled.
 func jurisdictionTestService() *Service {
 	logger := audit.NewMemoryLogger(nil)

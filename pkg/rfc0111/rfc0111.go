@@ -2041,6 +2041,29 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 		}
 	}
 
+	// SECURITY: Verify grantor actually possesses the scopes they're trying to delegate (VULN-01 mitigation).
+	// This prevents scope escalation attacks where an agent with limited scopes tries to delegate broader scopes.
+	// Feature-gated by GAUTH_ENFORCE_GRANTOR_SCOPES (enabled by default for security).
+	enforceGrantorScopes := os.Getenv("GAUTH_ENFORCE_GRANTOR_SCOPES") != "0" // Default enabled
+	if enforceGrantorScopes {
+		if err := s.validateGrantorScopes(ctx, req.Grantor, req.Scope); err != nil {
+			// Audit the scope escalation attempt
+			event := audit.NewEvent(audit.TypeAuth, "create_delegation_scope_escalation", audit.ResultFailure)
+			event.Subject = req.Grantor
+			event.Object = "poa"
+			if event.Metadata == nil {
+				event.Metadata = map[string]interface{}{}
+			}
+			event.Metadata["requested_scope"] = req.Scope
+			event.Metadata["reason"] = err.Error()
+			if logErr := s.audit.Log(ctx, event); logErr != nil {
+				// Log error but don't fail the security check
+			}
+			s.sendToAuditSink(ctx, event)
+			return nil, rfc.New(rfc.ErrUnauthorized, fmt.Sprintf("grantor scope escalation blocked: %v", err))
+		}
+	}
+
 	// Check authorization via PDP if present; otherwise legacy authorizer.
 	if s.pdp != nil {
 		pdpDec, err := s.pdp.Evaluate(ctx, pdp.Request{Subject: req.Grantor, Action: "create_delegation", Resource: "poa", Attributes: map[string]string{"grantee": req.Grantee}, Time: s.nowFn()})
@@ -2903,6 +2926,59 @@ func (s *Service) ValidateDelegationRich(ctx context.Context, poaID, grantee str
 	}
 	// Send to external audit sink (P1.4)
 	s.sendToAuditSink(ctx, event)
+	return nil
+}
+
+// validateGrantorScopes verifies that the grantor actually possesses the scopes they're trying to delegate.
+// This is a critical security control (VULN-01 mitigation) to prevent scope escalation attacks where an agent
+// with limited permissions attempts to delegate broader permissions they don't have.
+//
+// The function queries the authorization system to retrieve the grantor's actual permissions and validates
+// that each requested delegation scope is covered by the grantor's permissions using the same subset semantics
+// as hierarchical delegation validation (exact match, wildcard prefix, global wildcard, regex patterns).
+//
+// Returns error if:
+//   - Grantor has no permissions (authz.GetPermissions returns empty)
+//   - Any requested scope is not covered by grantor's permissions
+//   - Authorization system query fails
+func (s *Service) validateGrantorScopes(ctx context.Context, grantor string, requestedScopes []string) error {
+	if len(requestedScopes) == 0 {
+		return fmt.Errorf("requested scopes empty")
+	}
+
+	// Query authorization system for grantor's actual permissions
+	permissions, err := s.authz.GetPermissions(ctx, grantor)
+	if err != nil {
+		return fmt.Errorf("failed to query grantor permissions: %w", err)
+	}
+
+	// If grantor has no permissions, they cannot delegate anything
+	if len(permissions) == 0 {
+		return fmt.Errorf("grantor %s has no permissions", grantor)
+	}
+
+	// Extract all scopes from permissions (permissions have Actions field which represents scopes)
+	grantorScopes := make([]string, 0)
+	for _, perm := range permissions {
+		if !perm.Granted {
+			continue
+		}
+		// Permissions have Actions which correspond to scopes
+		// Resource patterns can also define scope coverage (e.g., "document:*" covers all document actions)
+		grantorScopes = append(grantorScopes, perm.Actions...)
+		
+		// If resource has wildcard, add it as a scope pattern for validation
+		if strings.Contains(perm.Resource, "*") {
+			grantorScopes = append(grantorScopes, perm.Resource)
+		}
+	}
+
+	// Use the same subset validation logic as hierarchical delegation
+	// This ensures consistent scope checking across the system
+	if err := validateInheritedScope(grantorScopes, requestedScopes); err != nil {
+		return fmt.Errorf("grantor scopes insufficient: %w", err)
+	}
+
 	return nil
 }
 

@@ -18,6 +18,10 @@ func (m mockAuthorizer) Authorize(_ context.Context, _ authz.Request) (authz.Dec
 	return authz.Decision{Allow: true}, nil
 }
 
+func (m mockAuthorizer) GetPermissions(ctx context.Context, subject string) ([]authz.Permission, error) {
+	return []authz.Permission{{Resource: "*", Actions: []string{"*"}, Granted: true}}, nil
+}
+
 // failingAnchorClient returns error for every attempt
 type failingAnchorClient struct{}
 
