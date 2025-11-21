@@ -931,6 +931,19 @@ func (p *PrometheusMetrics) IncCascadeProcessingErrors() {
 	}
 }
 
+// Jurisdiction enforcement metrics (P1.3)
+func (p *PrometheusMetrics) IncJurisdictionEnforcementErrors() {
+	// Implementation can be added when Prometheus counters are initialized
+}
+
+func (p *PrometheusMetrics) IncJurisdictionEnforcementDenials() {
+	// Implementation can be added when Prometheus counters are initialized
+}
+
+func (p *PrometheusMetrics) IncJurisdictionEnforcementAllows() {
+	// Implementation can be added when Prometheus counters are initialized
+}
+
 // SetSunsetPhaseSatisfactionProgress sets 0..1 gauge indicating fraction of window satisfied.
 func (p *PrometheusMetrics) SetSunsetPhaseSatisfactionProgress(progress float64) {
 	if p.sunsetPhaseSatisfactionGauge == nil {

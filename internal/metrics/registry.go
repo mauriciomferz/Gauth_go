@@ -753,3 +753,15 @@ func (reg *CollectorRegistry) SetCascadeMaxDepthReached(depth int) {
 func (reg *CollectorRegistry) IncCascadeProcessingErrors() {
 	reg.dispatch(func(c MetricsCollector) { c.IncCascadeProcessingErrors() })
 }
+
+func (reg *CollectorRegistry) IncJurisdictionEnforcementErrors() {
+	reg.dispatch(func(c MetricsCollector) { c.IncJurisdictionEnforcementErrors() })
+}
+
+func (reg *CollectorRegistry) IncJurisdictionEnforcementDenials() {
+	reg.dispatch(func(c MetricsCollector) { c.IncJurisdictionEnforcementDenials() })
+}
+
+func (reg *CollectorRegistry) IncJurisdictionEnforcementAllows() {
+	reg.dispatch(func(c MetricsCollector) { c.IncJurisdictionEnforcementAllows() })
+}

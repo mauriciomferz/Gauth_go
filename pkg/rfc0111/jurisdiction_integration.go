@@ -109,13 +109,17 @@ func (s *Service) enforceJurisdictionOnIssuance(ctx context.Context, req Delegat
 	)
 	if err != nil {
 		// Enforcement check failed (engine error)
-		// TODO(P1.3): Add s.metrics.IncJurisdictionEnforcementErrors() when metrics interface updated
+		if s.metrics != nil {
+			s.metrics.IncJurisdictionEnforcementErrors()
+		}
 		return fmt.Errorf("jurisdiction enforcement failed: %w", err)
 	}
 
 	if !decision.Allowed {
 		// Enforcement denied the operation
-		// TODO(P1.3): Add s.metrics.IncJurisdictionEnforcementDenials() when metrics interface updated
+		if s.metrics != nil {
+			s.metrics.IncJurisdictionEnforcementDenials()
+		}
 		// Build detailed violation message
 		violationMsg := fmt.Sprintf("jurisdiction %s denied operation", decision.Jurisdiction)
 		if len(decision.Violations) > 0 {
@@ -128,7 +132,9 @@ func (s *Service) enforceJurisdictionOnIssuance(ctx context.Context, req Delegat
 	}
 
 	// Enforcement allowed
-	// TODO(P1.3): Add s.metrics.IncJurisdictionEnforcementAllows() when metrics interface updated
+	if s.metrics != nil {
+		s.metrics.IncJurisdictionEnforcementAllows()
+	}
 	return nil
 }
 
@@ -194,12 +200,16 @@ func (s *Service) enforceJurisdictionOnVerification(ctx context.Context, poa *Po
 		enforcementClaims, // claims
 	)
 	if err != nil {
-		// TODO(P1.3): Add s.metrics.IncJurisdictionEnforcementErrors() when metrics interface updated
-		return fmt.Errorf("jurisdiction enforcement failed: %w", err)
+		if s.metrics != nil {
+			s.metrics.IncJurisdictionEnforcementErrors()
+		}
+		return fmt.Errorf("jurisdiction enforcement failed during verification: %w", err)
 	}
 
 	if !decision.Allowed {
-		// TODO(P1.3): Add s.metrics.IncJurisdictionEnforcementDenials() when metrics interface updated
+		if s.metrics != nil {
+			s.metrics.IncJurisdictionEnforcementDenials()
+		}
 		violationMsg := fmt.Sprintf("jurisdiction %s denied token usage", decision.Jurisdiction)
 		if len(decision.Violations) > 0 {
 			violationMsg += fmt.Sprintf(": %v", decision.Violations)
@@ -207,7 +217,9 @@ func (s *Service) enforceJurisdictionOnVerification(ctx context.Context, poa *Po
 		return fmt.Errorf("%s", violationMsg)
 	}
 
-	// TODO(P1.3): Add s.metrics.IncJurisdictionEnforcementAllows() when metrics interface updated
+	if s.metrics != nil {
+		s.metrics.IncJurisdictionEnforcementAllows()
+	}
 	return nil
 }
 

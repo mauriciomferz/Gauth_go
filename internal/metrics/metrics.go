@@ -243,6 +243,14 @@ type Metrics interface {
 	ObservePEPEnforcementLatency(d time.Duration)
 	// SetPEPAuditBufferSize sets gauge tracking current number of entries in audit buffer (FIFO rotation)
 	SetPEPAuditBufferSize(enforcement, violation int)
+
+	// Jurisdiction enforcement metrics (P1.3)
+	// IncJurisdictionEnforcementErrors increments counter when jurisdiction enforcement check fails
+	IncJurisdictionEnforcementErrors()
+	// IncJurisdictionEnforcementDenials increments counter when jurisdiction enforcement denies operation
+	IncJurisdictionEnforcementDenials()
+	// IncJurisdictionEnforcementAllows increments counter when jurisdiction enforcement allows operation
+	IncJurisdictionEnforcementAllows()
 }
 
 // Noop provides a do-nothing implementation used when instrumentation is disabled.
@@ -378,6 +386,9 @@ func (n noop) IncCascadeDepthLimitReached()                    {}
 func (n noop) IncCascadeBatchProcessed()                       {}
 func (n noop) SetCascadeMaxDepthReached(depth int)             {}
 func (n noop) IncCascadeProcessingErrors()                     {}
+func (n noop) IncJurisdictionEnforcementErrors()               {}
+func (n noop) IncJurisdictionEnforcementDenials()              {}
+func (n noop) IncJurisdictionEnforcementAllows()               {}
 
 // Memory is a simple in-process metrics collector used for tests and benchmarks.
 // It is intentionally minimal and lock-free for write paths using atomics.
@@ -583,6 +594,11 @@ type Memory struct {
 	cascadeBatchProcessed           uint64
 	cascadeMaxDepthReachedGauge     uint64
 	cascadeProcessingErrors         uint64
+
+	// Jurisdiction enforcement metrics (P1.3)
+	jurisdictionEnforcementErrors  uint64
+	jurisdictionEnforcementDenials uint64
+	jurisdictionEnforcementAllows  uint64
 }
 
 // IncEvidenceAttachment increments successful evidence hash attachment counter.
@@ -655,6 +671,17 @@ func (m *Memory) SetCascadeMaxDepthReached(depth int) {
 	}
 }
 func (m *Memory) IncCascadeProcessingErrors() { atomic.AddUint64(&m.cascadeProcessingErrors, 1) }
+
+// Jurisdiction enforcement metrics
+func (m *Memory) IncJurisdictionEnforcementErrors() {
+	atomic.AddUint64(&m.jurisdictionEnforcementErrors, 1)
+}
+func (m *Memory) IncJurisdictionEnforcementDenials() {
+	atomic.AddUint64(&m.jurisdictionEnforcementDenials, 1)
+}
+func (m *Memory) IncJurisdictionEnforcementAllows() {
+	atomic.AddUint64(&m.jurisdictionEnforcementAllows, 1)
+}
 
 // ValidationLatencyPercentiles returns approximate p50, p95, p99 validation latency using the reservoir.
 // Falls back to zero durations when insufficient samples. Computation mirrors Snapshot() logic.
