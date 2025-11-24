@@ -53,17 +53,21 @@ import (
 	authpkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/auth"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/authz"
 	cryptopkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/crypto"
+	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/database"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/delegation"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
 	ratelimit "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/limits"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/mcp"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+	adminHandlers "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/admin"
 	anchorHandlers "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/anchor"
 	auditHandlers "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/audit"
+	authHandlers "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/auth"
 	betaHandlers "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/beta"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/prometheus/client_golang/prometheus"
 	promhttp "github.com/prometheus/client_golang/prometheus/promhttp"
 	otel "go.opentelemetry.io/otel"
 	stdoutmetric "go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
@@ -3088,7 +3092,7 @@ func corsMiddleware() gin.HandlerFunc {
 			}
 			c.Header("Vary", "Origin")
 			c.Header("Access-Control-Allow-Credentials", "true")
-			c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
+			c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, X-Tenant-ID")
 			c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 		}
 		if c.Request.Method == http.MethodOptions {
@@ -3549,6 +3553,128 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 	if s.semanticPersistPath != "" && s.rfc0111Service != nil {
 		s.loadSemanticPersistence()
 	}
+
+	// Initialize PostgreSQL database connection for admin handlers
+	if dbHost := os.Getenv("DB_HOST"); dbHost != "" {
+		dbCfg := &database.Config{
+			Host:              dbHost,
+			Port:              atoiDefault(os.Getenv("DB_PORT"), 5432),
+			User:              os.Getenv("DB_USER"),
+			Password:          os.Getenv("DB_PASSWORD"),
+			Database:          os.Getenv("DB_NAME"),
+			SSLMode:           os.Getenv("DB_SSLMODE"),
+			MaxConns:          int32(atoiDefault(os.Getenv("DB_MAX_CONNS"), 25)),
+			MinConns:          int32(atoiDefault(os.Getenv("DB_MIN_CONNS"), 5)),
+			MaxConnLifetime:   time.Duration(atoiDefault(os.Getenv("DB_MAX_CONN_LIFETIME_MIN"), 60)) * time.Minute,
+			MaxConnIdleTime:   time.Duration(atoiDefault(os.Getenv("DB_MAX_CONN_IDLE_MIN"), 30)) * time.Minute,
+			HealthCheckPeriod: time.Duration(atoiDefault(os.Getenv("DB_HEALTH_CHECK_SEC"), 60)) * time.Second,
+		}
+		db, err := database.NewDB(dbCfg)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "[FATAL] database connection failed: %v\n", err)
+			fmt.Fprintln(os.Stderr, "[FATAL] database is required for admin handlers - exiting")
+			os.Exit(1)
+		} else {
+			dbPool := db.Pool
+			fmt.Fprintln(os.Stderr, "[database] PostgreSQL connection established")
+
+			// Initialize and register admin handlers with tenant middleware
+			adminGroup := r.Group("/api/admin")
+			adminGroup.Use(func(c *gin.Context) {
+				// Extract tenant_id from header or query parameter
+				tenantID := c.GetHeader("X-Tenant-ID")
+				if tenantID == "" {
+					tenantID = c.Query("tenant_id")
+				}
+				if tenantID != "" {
+					c.Set("tenant_id", tenantID)
+				}
+				c.Next()
+			})
+
+
+		// Authentication handler (must be registered first)
+			jwtSecret := os.Getenv("GAUTH_JWT_SIGNING_KEY")
+			if jwtSecret == "" {
+				jwtSecret = "dev-secret-change-in-production"
+			}
+			authHandler := adminHandlers.NewAuthHandler(jwtSecret)
+			authHandler.RegisterRoutes(adminGroup)
+
+			// Power of Attorney handler
+			poaHandler := adminHandlers.NewPoAHandler(dbPool)
+			poaHandler.RegisterRoutes(adminGroup)
+
+			// Resilience patterns handler
+			resilienceHandler := adminHandlers.NewResilienceHandler(dbPool)
+			resilienceHandler.RegisterRoutes(adminGroup)
+
+			// Event system handler
+			eventHandler := adminHandlers.NewEventHandler(dbPool)
+			eventHandler.RegisterRoutes(adminGroup)
+
+			// Authorization engine handler
+			authzHandler := adminHandlers.NewAuthorizationHandler(dbPool)
+			authzHandler.RegisterRoutes(adminGroup)
+
+			// Configuration management handler
+			configHandler := adminHandlers.NewConfigHandler(dbPool)
+			configHandler.RegisterRoutes(adminGroup)
+
+			// Metrics handler (requires prometheus registry and database)
+			registry := prometheus.NewRegistry()
+			metricsHandler := adminHandlers.NewMetricsHandler(registry, dbPool)
+			metricsHandler.RegisterRoutes(adminGroup)
+
+			// Token management handler
+			tokenHandler := adminHandlers.NewTokenHandler(dbPool, nil)
+			tokenHandler.RegisterRoutes(adminGroup)
+
+			// Audit trail handler
+			auditHandler := adminHandlers.NewAuditHandler(dbPool)
+			auditHandler.RegisterRoutes(adminGroup)
+
+			// Subscriber management handler
+			subscriberHandler := adminHandlers.NewSubscriberHandler(dbPool)
+			subscriberHandler.RegisterRoutes(adminGroup)
+
+			// Revocation handler
+			revocationHandler := adminHandlers.NewRevocationHandler(dbPool)
+			revocationHandler.RegisterRoutes(adminGroup)
+
+			// API Key management handler
+			apiKeyHandler := adminHandlers.NewAPIKeyHandler(dbPool)
+			apiKeyHandler.RegisterRoutes(adminGroup)
+
+			// Security settings handler
+			securityHandler := adminHandlers.NewSecurityHandler(dbPool)
+			securityHandler.RegisterRoutes(adminGroup)
+
+		// OIDC providers handler
+		oidcHandler := adminHandlers.NewOIDCHandler(dbPool)
+		oidcHandler.RegisterRoutes(adminGroup)
+
+		// Policy Templates handler
+		policyTemplatesHandler := adminHandlers.NewPolicyTemplatesHandler(dbPool)
+		adminGroup.GET("/policy-templates", policyTemplatesHandler.ListPolicyTemplates)
+		adminGroup.GET("/policy-templates/:id", policyTemplatesHandler.GetPolicyTemplate)
+		adminGroup.POST("/policy-templates", policyTemplatesHandler.CreatePolicyTemplate)
+		adminGroup.PUT("/policy-templates/:id", policyTemplatesHandler.UpdatePolicyTemplate)
+		adminGroup.POST("/policy-templates/:id/clone", policyTemplatesHandler.ClonePolicyTemplate)
+		adminGroup.DELETE("/policy-templates/:id", policyTemplatesHandler.DeletePolicyTemplate)
+
+		fmt.Fprintln(os.Stderr, "[admin] handlers registered: auth, poa, resilience, events, authz, config, tokens, metrics, audit, subscribers, revocation, api-keys, security, oidc, policy-templates (15 total)")			// OIDC authentication flow handler
+			oidcAuthHandler := authHandlers.NewOIDCAuthHandler(dbPool)
+			authGroup := r.Group("/auth")
+			oidcAuthHandler.RegisterRoutes(authGroup)
+			fmt.Fprintln(os.Stderr, "[auth] OIDC authentication flow handler registered")
+		}
+	} else {
+		fmt.Fprintln(os.Stderr, "[FATAL] DB_HOST not configured - database is required for admin endpoints")
+		fmt.Fprintln(os.Stderr, "[FATAL] Please set DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME environment variables")
+		os.Exit(1)
+	}
+
 	// Policy chain persistence path (optional) POLICY_CHAIN_STATE_PATH
 	if pp := os.Getenv("POLICY_CHAIN_STATE_PATH"); pp != "" {
 		if strings.HasPrefix(pp, "~") {

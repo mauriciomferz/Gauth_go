@@ -1,11 +1,25 @@
 import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { Toaster } from 'sonner'
-import { ErrorBoundary } from './components/ErrorBoundary'
-import Layout from './components/Layout'
-import { Loader2 } from 'lucide-react'
+import { Spinner } from '@fluentui/react-components'
+import AdminLogin from './pages/AdminLogin'
+import AdminLayout from './components/AdminLayout'
 
-// Lazy load pages for better performance and code splitting
+// Lazy load admin pages for better performance and code splitting
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'))
+const SystemMetrics = lazy(() => import('./pages/admin/SystemMetrics'))
+const Subscribers = lazy(() => import('./pages/admin/Subscribers'))
+const SubscribersList = lazy(() => import('./pages/admin/SubscribersList'))
+const TokenManagement = lazy(() => import('./pages/admin/TokenManagement'))
+const AuthorizationEngine = lazy(() => import('./pages/admin/AuthorizationEngine'))
+const PowerOfAttorney = lazy(() => import('./pages/admin/PowerOfAttorney'))
+const EventSystem = lazy(() => import('./pages/admin/EventSystem'))
+const ResiliencePatterns = lazy(() => import('./pages/admin/ResiliencePatterns'))
+const AuditTrail = lazy(() => import('./pages/admin/AuditTrail'))
+const ConfigurationManager = lazy(() => import('./pages/admin/ConfigurationManager'))
+const RevocationTransparency = lazy(() => import('./pages/admin/RevocationTransparency'))
+const OIDCProviders = lazy(() => import('./pages/admin/OIDCProviders'))
+const AuthCallback = lazy(() => import('./pages/AuthCallback'))
+const OIDCLogin = lazy(() => import('./pages/OIDCLogin'))
 const Overview = lazy(() => import('./pages/Overview'))
 const Tokens = lazy(() => import('./pages/Tokens'))
 const PVP = lazy(() => import('./pages/PVP'))
@@ -23,40 +37,57 @@ const Login = lazy(() => import('./pages/Login'))
 // Loading fallback component
 function PageLoader() {
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="text-center">
-        <Loader2 className="h-12 w-12 animate-spin text-primary-500 mx-auto mb-4" aria-hidden="true" />
-        <p className="text-gray-600 dark:text-gray-400">Loading page...</p>
-      </div>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <Spinner size="large" label="Loading..." />
     </div>
   )
 }
 
 function App() {
   return (
-    <ErrorBoundary>
-      <Layout>
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/" element={<Navigate to="/overview" replace />} />
-            <Route path="/overview" element={<Overview />} />
-            <Route path="/tokens" element={<Tokens />} />
-            <Route path="/pvp" element={<PVP />} />
-            <Route path="/registry" element={<Registry />} />
-            <Route path="/pip" element={<PIP />} />
-            <Route path="/pap" element={<PAP />} />
-            <Route path="/pdp" element={<PDP />} />
-            <Route path="/pep" element={<PEP />} />
-            <Route path="/poa" element={<PoA />} />
-            <Route path="/mcp" element={<MCP />} />
-            <Route path="/e2e" element={<E2ETesting />} />
-            <Route path="/metrics" element={<Metrics />} />
-            <Route path="/login" element={<Login />} />
-          </Routes>
-        </Suspense>
-      </Layout>
-      <Toaster richColors position="top-right" />
-    </ErrorBoundary>
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        {/* OIDC Authentication Routes */}
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/oidc-login" element={<OIDCLogin />} />
+
+        {/* Admin Portal Routes */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/*" element={<AdminLayout />}>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="metrics" element={<SystemMetrics />} />
+          <Route path="subscribers" element={<Subscribers />} />
+          <Route path="subscribers/list" element={<SubscribersList />} />
+          <Route path="tokens" element={<TokenManagement />} />
+          <Route path="authorization" element={<AuthorizationEngine />} />
+          <Route path="poa" element={<PowerOfAttorney />} />
+          <Route path="events" element={<EventSystem />} />
+          <Route path="resilience" element={<ResiliencePatterns />} />
+          <Route path="audit" element={<AuditTrail />} />
+          <Route path="revocation" element={<RevocationTransparency />} />
+          <Route path="configuration" element={<ConfigurationManager />} />
+          <Route path="oidc-providers" element={<OIDCProviders />} />
+          <Route path="performance" element={<div>Performance Page (Coming Soon)</div>} />
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+        </Route>
+
+        {/* Legacy/User Routes - Keep existing functionality */}
+        <Route path="/" element={<Navigate to="/overview" replace />} />
+        <Route path="/overview" element={<Overview />} />
+        <Route path="/tokens" element={<Tokens />} />
+        <Route path="/pvp" element={<PVP />} />
+        <Route path="/registry" element={<Registry />} />
+        <Route path="/pip" element={<PIP />} />
+        <Route path="/pap" element={<PAP />} />
+        <Route path="/pdp" element={<PDP />} />
+        <Route path="/pep" element={<PEP />} />
+        <Route path="/poa" element={<PoA />} />
+        <Route path="/mcp" element={<MCP />} />
+        <Route path="/e2e" element={<E2ETesting />} />
+        <Route path="/metrics" element={<Metrics />} />
+        <Route path="/login" element={<Login />} />
+      </Routes>
+    </Suspense>
   )
 }
 

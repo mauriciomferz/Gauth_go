@@ -1,0 +1,135 @@
+==========================================
+Seeding Admin Handlers with Sample Data
+==========================================
+
+1. Creating Circuit Breaker...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   433  100   284  100   149  37962  19917 --:--:-- --:--:-- --:--:-- 61857
+{
+  "id": "0427e0b0-cbb0-4936-98d9-7351c6688655",
+  "name": "payment-service-breaker",
+  "service": "payment-api",
+  "state": "closed",
+  "failureThreshold": 5,
+  "successThreshold": 2,
+  "timeout": 30000,
+  "failures": 0,
+  "successes": 0,
+  "lastStateChange": "2025-11-23T00:02:51+01:00",
+  "totalRequests": 0,
+  "failureRate": 0
+}
+
+2. Creating Rate Limiter...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   192  100    41  100   151  29411   105k --:--:-- --:--:-- --:--:--  187k
+{
+  "error": "Failed to create rate limiter"
+}
+
+3. Creating Retry Policy...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   236  100    41  100   195   9715  46208 --:--:-- --:--:-- --:--:-- 59000
+{
+  "error": "Failed to create retry policy"
+}
+
+4. Creating Authorization Policy...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   232  100    35  100   197  15237  85764 --:--:-- --:--:-- --:--:--  113k
+{
+  "error": "Failed to create policy"
+}
+
+5. Creating Configuration Variable...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   209  100    37  100   172  19290  89676 --:--:-- --:--:-- --:--:--  204k
+{
+  "error": "Failed to create variable"
+}
+
+6. Creating Feature Flag...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   185  100    33  100   152   8899  40992 --:--:-- --:--:-- --:--:-- 61666
+{
+  "error": "Failed to create flag"
+}
+
+==========================================
+Sample Data Seeding Complete!
+==========================================
+
+Now testing GET endpoints to verify data...
+
+1. List Circuit Breakers:
+{
+  "circuitBreakers": [
+    {
+      "id": "0427e0b0-cbb0-4936-98d9-7351c6688655",
+      "name": "payment-service-breaker",
+      "service": "payment-api",
+      "state": "closed",
+      "failureThreshold": 5,
+      "successThreshold": 2,
+      "timeout": 30000,
+      "failures": 0,
+      "successes": 0,
+      "lastStateChange": "2025-11-23T00:02:51+01:00",
+      "totalRequests": 0,
+      "failureRate": 0
+    }
+  ],
+  "total": 1
+}
+
+2. List Rate Limiters:
+{
+  "error": "Failed to list rate limiters"
+}
+
+3. List Retry Policies:
+{
+  "error": "Failed to list retry policies"
+}
+
+4. List Authorization Policies:
+{
+  "policies": [
+    {
+      "id": "89ecc312-b16e-4f57-bea0-b5ae7c209158",
+      "name": "admin-access-policy",
+      "description": "Full admin access policy",
+      "status": "draft",
+      "effect": "allow",
+      "actions": [
+        "*"
+      ],
+      "resources": [
+        "*"
+      ],
+      "createdAt": "2025-11-23T00:00:59+01:00",
+      "updatedAt": "2025-11-23T00:00:59+01:00"
+    }
+  ],
+  "total": 1
+}
+
+5. List Configuration Variables:
+{
+  "variables": []
+}
+
+6. List Feature Flags:
+{
+  "flags": []
+}
+
+==========================================
+All handlers tested with sample data!
+==========================================

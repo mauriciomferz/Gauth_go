@@ -1,0 +1,725 @@
+import { useState, useEffect } from 'react';
+import {
+  makeStyles,
+  tokens,
+  Card,
+  Text,
+  Title3,
+  Button,
+  Input,
+  Tab,
+  TabList,
+  Badge,
+  Field,
+  Dropdown,
+  Option,
+  Textarea,
+  DataGrid,
+  DataGridBody,
+  DataGridRow,
+  DataGridHeader,
+  DataGridHeaderCell,
+  DataGridCell,
+  TableCellLayout,
+  TableColumnDefinition,
+  createTableColumn,
+  Dialog,
+  DialogTrigger,
+  DialogSurface,
+  DialogTitle,
+  DialogBody,
+  DialogActions,
+  DialogContent,
+  Checkbox,
+  Switch,
+  Label,
+} from '@fluentui/react-components';
+import {
+  Alert24Regular,
+  Add24Regular,
+  Play24Regular,
+  Pause24Regular,
+  Delete24Regular,
+  Eye24Regular,
+  Edit24Regular,
+  Flash24Regular,
+  Filter24Regular,
+} from '@fluentui/react-icons';
+
+// Import admin API hooks
+import { useEvents, useEventTypes } from '../../hooks/useAdminApi';
+import { apiPost, apiDelete } from '../../utils/api';
+
+const useStyles = makeStyles({
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '24px',
+  },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+  },
+  cardsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+    gap: '16px',
+  },
+  card: {
+    padding: '20px',
+  },
+  metricValue: {
+    fontSize: '32px',
+    fontWeight: 600,
+    marginBottom: '8px',
+  },
+  metricLabel: {
+    fontSize: '14px',
+    color: tokens.colorNeutralForeground3,
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+  },
+  twoColumn: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '16px',
+  },
+  eventStream: {
+    backgroundColor: tokens.colorNeutralBackground3,
+    borderRadius: '4px',
+    padding: '16px',
+    maxHeight: '500px',
+    overflowY: 'auto',
+    fontFamily: 'monospace',
+    fontSize: '12px',
+  },
+  eventItem: {
+    padding: '8px',
+    marginBottom: '8px',
+    borderRadius: '4px',
+    backgroundColor: tokens.colorNeutralBackground1,
+    border: `1px solid ${tokens.colorNeutralStroke1}`,
+  },
+  eventHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    marginBottom: '4px',
+  },
+  filterPanel: {
+    display: 'flex',
+    gap: '12px',
+    marginBottom: '16px',
+    flexWrap: 'wrap',
+  },
+  handlerCard: {
+    padding: '16px',
+    border: `1px solid ${tokens.colorNeutralStroke1}`,
+    borderRadius: '4px',
+    marginBottom: '12px',
+  },
+  handlerHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '8px',
+  },
+  codeEditor: {
+    fontFamily: 'monospace',
+    fontSize: '13px',
+    width: '100%',
+    minHeight: '200px',
+    border: 'none',
+    outline: 'none',
+    resize: 'vertical',
+    backgroundColor: tokens.colorNeutralBackground3,
+    padding: '8px',
+    borderRadius: '4px',
+  },
+});
+
+interface Event {
+  id: string;
+  type: string;
+  category: string;
+  timestamp: string;
+  source: string;
+  severity: string;
+  data: any;
+  metadata: any;
+}
+
+interface EventHandler {
+  id: string;
+  name: string;
+  eventTypes: string[];
+  endpoint: string;
+  method: string;
+  enabled: boolean;
+  retryPolicy: string;
+  timeout: number;
+  lastTriggered?: string;
+  successRate: number;
+}
+
+interface EventType {
+  type: string;
+  category: string;
+  description: string;
+  schema: string;
+  count: number;
+}
+
+export default function EventSystem() {
+  const classes = useStyles();
+  const [selectedTab, setSelectedTab] = useState<string>('dashboard');
+  const [events, setEvents] = useState<Event[]>([]);
+  const [handlers, setHandlers] = useState<EventHandler[]>([]);
+  const [eventTypes, setEventTypes] = useState<EventType[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [streaming, setStreaming] = useState(false);
+  const [handlerDialogOpen, setHandlerDialogOpen] = useState(false);
+
+  // Filter state
+  const [filterCategory, setFilterCategory] = useState('all');
+  const [filterSeverity, setFilterSeverity] = useState('all');
+  const [filterSource, setFilterSource] = useState('');
+
+  // Handler form state
+  const [handlerName, setHandlerName] = useState('');
+  const [handlerEndpoint, setHandlerEndpoint] = useState('');
+  const [handlerMethod, setHandlerMethod] = useState('POST');
+  const [handlerEventTypes, setHandlerEventTypes] = useState<string[]>([]);
+  const [handlerTimeout, setHandlerTimeout] = useState('5000');
+  const [handlerRetryPolicy, setHandlerRetryPolicy] = useState('exponential');
+
+  useEffect(() => {
+    refetchEventTypes();
+    fetchHandlers();
+    fetchRecentEvents();
+  }, []);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (streaming) {
+      interval = setInterval(() => {
+        fetchRecentEvents();
+      }, 2000);
+    }
+    return () => clearInterval(interval);
+  }, [streaming]);
+
+  // Use hooks for data fetching
+  const { data: eventTypesData, refetch: refetchEventTypes } = useEventTypes();
+  const { data: eventsData, refetch: refetchEvents } = useEvents();
+
+  // Update local state when data changes
+  useEffect(() => {
+    if (eventTypesData?.eventTypes) setEventTypes(eventTypesData.eventTypes);
+  }, [eventTypesData]);
+
+  useEffect(() => {
+    if (eventsData?.events) setEvents(eventsData.events);
+  }, [eventsData]);
+
+  const fetchHandlers = async () => {
+    try {
+      const response = await apiPost('/api/admin/events/handlers', {});
+      const data = await response.json();
+      setHandlers(data.handlers || []);
+    } catch (error) {
+      console.error('Failed to fetch handlers:', error);
+    }
+  };
+
+  const fetchRecentEvents = async () => {
+    refetchEvents();
+  };
+
+  const handleCreateHandler = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/events/handlers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+        body: JSON.stringify({
+          name: handlerName,
+          endpoint: handlerEndpoint,
+          method: handlerMethod,
+          eventTypes: handlerEventTypes,
+          timeout: parseInt(handlerTimeout),
+          retryPolicy: handlerRetryPolicy,
+        }),
+      });
+
+      if (response.ok) {
+        fetchHandlers();
+        setHandlerDialogOpen(false);
+        resetHandlerForm();
+      }
+    } catch (error) {
+      console.error('Failed to create handler:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleHandler = async (handlerId: string, enabled: boolean) => {
+    try {
+      await fetch(`/api/admin/events/handlers/${handlerId}/toggle`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+        body: JSON.stringify({ enabled }),
+      });
+      fetchHandlers();
+    } catch (error) {
+      console.error('Failed to toggle handler:', error);
+    }
+  };
+
+  const handleDeleteHandler = async (handlerId: string) => {
+    try {
+      await fetch(`/api/admin/events/handlers/${handlerId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+      });
+      fetchHandlers();
+    } catch (error) {
+      console.error('Failed to delete handler:', error);
+    }
+  };
+
+  const resetHandlerForm = () => {
+    setHandlerName('');
+    setHandlerEndpoint('');
+    setHandlerMethod('POST');
+    setHandlerEventTypes([]);
+    setHandlerTimeout('5000');
+    setHandlerRetryPolicy('exponential');
+  };
+
+  const getSeverityBadge = (severity: string) => {
+    switch (severity) {
+      case 'critical':
+        return <Badge appearance="filled" color="danger">Critical</Badge>;
+      case 'error':
+        return <Badge appearance="filled" color="danger">Error</Badge>;
+      case 'warning':
+        return <Badge appearance="filled" color="warning">Warning</Badge>;
+      case 'info':
+        return <Badge appearance="filled" color="informative">Info</Badge>;
+      case 'debug':
+        return <Badge appearance="filled">Debug</Badge>;
+      default:
+        return <Badge>{severity}</Badge>;
+    }
+  };
+
+  const getCategoryBadge = (category: string) => {
+    const colors: Record<string, any> = {
+      auth: 'brand',
+      audit: 'important',
+      token: 'success',
+      system: 'informative',
+    };
+    return <Badge appearance="tint" color={colors[category] || 'subtle'}>{category}</Badge>;
+  };
+
+  const filteredEvents = events.filter(event => {
+    if (filterCategory !== 'all' && event.category !== filterCategory) return false;
+    if (filterSeverity !== 'all' && event.severity !== filterSeverity) return false;
+    if (filterSource && !event.source.toLowerCase().includes(filterSource.toLowerCase())) return false;
+    return true;
+  });
+
+  const eventColumns: TableColumnDefinition<Event>[] = [
+    createTableColumn<Event>({
+      columnId: 'timestamp',
+      renderHeaderCell: () => 'Timestamp',
+      renderCell: (item) => (
+        <TableCellLayout>
+          <Text size={200}>{new Date(item.timestamp).toLocaleString()}</Text>
+        </TableCellLayout>
+      ),
+    }),
+    createTableColumn<Event>({
+      columnId: 'type',
+      renderHeaderCell: () => 'Event Type',
+      renderCell: (item) => (
+        <TableCellLayout>
+          <Text weight="semibold">{item.type}</Text>
+        </TableCellLayout>
+      ),
+    }),
+    createTableColumn<Event>({
+      columnId: 'category',
+      renderHeaderCell: () => 'Category',
+      renderCell: (item) => (
+        <TableCellLayout>
+          {getCategoryBadge(item.category)}
+        </TableCellLayout>
+      ),
+    }),
+    createTableColumn<Event>({
+      columnId: 'severity',
+      renderHeaderCell: () => 'Severity',
+      renderCell: (item) => (
+        <TableCellLayout>
+          {getSeverityBadge(item.severity)}
+        </TableCellLayout>
+      ),
+    }),
+    createTableColumn<Event>({
+      columnId: 'source',
+      renderHeaderCell: () => 'Source',
+      renderCell: (item) => (
+        <TableCellLayout>
+          <Text size={200}>{item.source}</Text>
+        </TableCellLayout>
+      ),
+    }),
+    createTableColumn<Event>({
+      columnId: 'actions',
+      renderHeaderCell: () => 'Actions',
+      renderCell: (item) => (
+        <TableCellLayout>
+          <Button size="small" icon={<Eye24Regular />} />
+        </TableCellLayout>
+      ),
+    }),
+  ];
+
+  const totalEvents = eventTypes.reduce((sum, et) => sum + et.count, 0);
+  const enabledHandlers = handlers.filter(h => h.enabled).length;
+  const avgSuccessRate = handlers.length > 0 
+    ? Math.round(handlers.reduce((sum, h) => sum + h.successRate, 0) / handlers.length)
+    : 0;
+
+  return (
+    <div className={classes.container}>
+      <div className={classes.header}>
+        <div className={classes.headerLeft}>
+          <Alert24Regular style={{ fontSize: '24px' }} />
+          <Title3>Event System Configuration</Title3>
+        </div>
+        {selectedTab === 'handlers' && (
+          <Dialog open={handlerDialogOpen} onOpenChange={(_, data) => setHandlerDialogOpen(data.open)}>
+            <DialogTrigger>
+              <Button appearance="primary" icon={<Add24Regular />}>
+                Add Handler
+              </Button>
+            </DialogTrigger>
+            <DialogSurface style={{ maxWidth: '700px' }}>
+              <DialogBody>
+                <DialogTitle>Create Event Handler</DialogTitle>
+                <DialogContent>
+                  <div className={classes.form}>
+                    <Field label="Handler Name" required>
+                      <Input
+                        value={handlerName}
+                        onChange={(e) => setHandlerName(e.target.value)}
+                        placeholder="webhook-notification-handler"
+                      />
+                    </Field>
+
+                    <Field label="Endpoint URL" required>
+                      <Input
+                        value={handlerEndpoint}
+                        onChange={(e) => setHandlerEndpoint(e.target.value)}
+                        placeholder="https://api.example.com/webhooks/events"
+                      />
+                    </Field>
+
+                    <div className={classes.twoColumn}>
+                      <Field label="HTTP Method">
+                        <Dropdown
+                          value={handlerMethod}
+                          onOptionSelect={(_, data) => setHandlerMethod(data.optionValue as string)}
+                        >
+                          <Option value="POST">POST</Option>
+                          <Option value="PUT">PUT</Option>
+                          <Option value="PATCH">PATCH</Option>
+                        </Dropdown>
+                      </Field>
+
+                      <Field label="Timeout (ms)">
+                        <Input
+                          type="number"
+                          value={handlerTimeout}
+                          onChange={(e) => setHandlerTimeout(e.target.value)}
+                          placeholder="5000"
+                        />
+                      </Field>
+                    </div>
+
+                    <Field label="Retry Policy">
+                      <Dropdown
+                        value={handlerRetryPolicy}
+                        onOptionSelect={(_, data) => setHandlerRetryPolicy(data.optionValue as string)}
+                      >
+                        <Option value="none">None</Option>
+                        <Option value="linear">Linear Backoff</Option>
+                        <Option value="exponential">Exponential Backoff</Option>
+                      </Dropdown>
+                    </Field>
+
+                    <Field label="Event Types">
+                      <Text size={200} style={{ marginBottom: '8px' }}>
+                        Select which event types trigger this handler
+                      </Text>
+                      {eventTypes.slice(0, 8).map((et) => (
+                        <Checkbox
+                          key={et.type}
+                          checked={handlerEventTypes.includes(et.type)}
+                          onChange={() => {
+                            setHandlerEventTypes(prev =>
+                              prev.includes(et.type)
+                                ? prev.filter(t => t !== et.type)
+                                : [...prev, et.type]
+                            );
+                          }}
+                          label={`${et.type} (${et.category})`}
+                        />
+                      ))}
+                    </Field>
+                  </div>
+                </DialogContent>
+                <DialogActions>
+                  <Button appearance="secondary" onClick={() => setHandlerDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    appearance="primary"
+                    onClick={handleCreateHandler}
+                    disabled={loading || !handlerName || !handlerEndpoint || handlerEventTypes.length === 0}
+                  >
+                    {loading ? 'Creating...' : 'Create Handler'}
+                  </Button>
+                </DialogActions>
+              </DialogBody>
+            </DialogSurface>
+          </Dialog>
+        )}
+      </div>
+
+      {/* Overview Cards */}
+      <div className={classes.cardsGrid}>
+        <Card className={classes.card}>
+          <Text className={classes.metricValue} style={{ color: tokens.colorBrandForeground1 }}>
+            {totalEvents.toLocaleString()}
+          </Text>
+          <Text className={classes.metricLabel}>Total Events</Text>
+        </Card>
+
+        <Card className={classes.card}>
+          <Text className={classes.metricValue} style={{ color: tokens.colorPaletteGreenForeground1 }}>
+            {eventTypes.length}
+          </Text>
+          <Text className={classes.metricLabel}>Event Types</Text>
+        </Card>
+
+        <Card className={classes.card}>
+          <Text className={classes.metricValue} style={{ color: tokens.colorPaletteGreenForeground1 }}>
+            {enabledHandlers}
+          </Text>
+          <Text className={classes.metricLabel}>Active Handlers</Text>
+        </Card>
+
+        <Card className={classes.card}>
+          <Text className={classes.metricValue}>
+            {avgSuccessRate}%
+          </Text>
+          <Text className={classes.metricLabel}>Handler Success Rate</Text>
+        </Card>
+      </div>
+
+      {/* Main Tabs */}
+      <Card className={classes.card}>
+        <Tabs selectedValue={selectedTab} onTabSelect={(_, data) => setSelectedTab(data.value as string)}>
+          <TabList>
+            <Tab value="dashboard" icon={<Alert24Regular />}>Event Types</Tab>
+            <Tab value="stream" icon={<Flash24Regular />}>Live Stream</Tab>
+            <Tab value="handlers" icon={<Filter24Regular />}>Handlers</Tab>
+          </TabList>
+
+          {/* Event Types Dashboard */}
+          {selectedTab === 'dashboard' && (
+            <div style={{ marginTop: '24px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+                {eventTypes.map((eventType) => (
+                  <Card key={eventType.type} style={{ padding: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
+                      <div>
+                        <Text weight="semibold" size={400}>{eventType.type}</Text>
+                        {getCategoryBadge(eventType.category)}
+                      </div>
+                      <Text weight="bold" size={500}>{eventType.count.toLocaleString()}</Text>
+                    </div>
+                    <Text size={200} style={{ color: tokens.colorNeutralForeground3, marginBottom: '8px' }}>
+                      {eventType.description}
+                    </Text>
+                    <Text size={100} style={{ fontFamily: 'monospace', color: tokens.colorNeutralForeground3 }}>
+                      Schema: {eventType.schema}
+                    </Text>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Live Event Stream */}
+          {selectedTab === 'stream' && (
+            <div style={{ marginTop: '24px' }}>
+              <div className={classes.filterPanel}>
+                <Button
+                  appearance={streaming ? 'primary' : 'secondary'}
+                  icon={streaming ? <Pause24Regular /> : <Play24Regular />}
+                  onClick={() => setStreaming(!streaming)}
+                >
+                  {streaming ? 'Pause Stream' : 'Start Stream'}
+                </Button>
+
+                <Dropdown
+                  placeholder="Category"
+                  value={filterCategory}
+                  onOptionSelect={(_, data) => setFilterCategory(data.optionValue as string)}
+                >
+                  <Option value="all">All Categories</Option>
+                  <Option value="auth">Auth</Option>
+                  <Option value="audit">Audit</Option>
+                  <Option value="token">Token</Option>
+                  <Option value="system">System</Option>
+                </Dropdown>
+
+                <Dropdown
+                  placeholder="Severity"
+                  value={filterSeverity}
+                  onOptionSelect={(_, data) => setFilterSeverity(data.optionValue as string)}
+                >
+                  <Option value="all">All Severities</Option>
+                  <Option value="critical">Critical</Option>
+                  <Option value="error">Error</Option>
+                  <Option value="warning">Warning</Option>
+                  <Option value="info">Info</Option>
+                  <Option value="debug">Debug</Option>
+                </Dropdown>
+
+                <Input
+                  placeholder="Filter by source..."
+                  value={filterSource}
+                  onChange={(e) => setFilterSource(e.target.value)}
+                  style={{ minWidth: '200px' }}
+                />
+              </div>
+
+              <DataGrid items={filteredEvents} columns={eventColumns} sortable resizableColumns>
+                <DataGridHeader>
+                  <DataGridRow>
+                    {({ renderHeaderCell }) => (
+                      <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
+                    )}
+                  </DataGridRow>
+                </DataGridHeader>
+                <DataGridBody<Event>>
+                  {({ item, rowId }) => (
+                    <DataGridRow<Event> key={rowId}>
+                      {({ renderCell }) => (
+                        <DataGridCell>{renderCell(item)}</DataGridCell>
+                      )}
+                    </DataGridRow>
+                  )}
+                </DataGridBody>
+              </DataGrid>
+            </div>
+          )}
+
+          {/* Handlers Registry */}
+          {selectedTab === 'handlers' && (
+            <div style={{ marginTop: '24px' }}>
+              {handlers.map((handler) => (
+                <div key={handler.id} className={classes.handlerCard}>
+                  <div className={classes.handlerHeader}>
+                    <div>
+                      <Text weight="semibold" size={400}>{handler.name}</Text>
+                      <Text size={200} style={{ color: tokens.colorNeutralForeground3, display: 'block' }}>
+                        {handler.method} {handler.endpoint}
+                      </Text>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <Badge appearance="filled" color={handler.enabled ? 'success' : 'danger'}>
+                        {handler.enabled ? 'Enabled' : 'Disabled'}
+                      </Badge>
+                      <Switch
+                        checked={handler.enabled}
+                        onChange={(_, data) => handleToggleHandler(handler.id, data.checked)}
+                      />
+                      <Button size="small" icon={<Edit24Regular />} />
+                      <Button size="small" icon={<Delete24Regular />} onClick={() => handleDeleteHandler(handler.id)} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginTop: '12px' }}>
+                    <div>
+                      <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>Event Types</Text>
+                      <Text weight="semibold">{handler.eventTypes.length}</Text>
+                    </div>
+                    <div>
+                      <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>Timeout</Text>
+                      <Text weight="semibold">{handler.timeout}ms</Text>
+                    </div>
+                    <div>
+                      <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>Retry Policy</Text>
+                      <Text weight="semibold">{handler.retryPolicy}</Text>
+                    </div>
+                    <div>
+                      <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>Success Rate</Text>
+                      <Text weight="semibold" style={{ color: handler.successRate > 90 ? tokens.colorPaletteGreenForeground1 : tokens.colorPaletteRedForeground1 }}>
+                        {handler.successRate}%
+                      </Text>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '8px' }}>
+                    <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                      Subscribed to: {handler.eventTypes.join(', ')}
+                    </Text>
+                  </div>
+
+                  {handler.lastTriggered && (
+                    <Text size={200} style={{ color: tokens.colorNeutralForeground3, marginTop: '8px' }}>
+                      Last triggered: {new Date(handler.lastTriggered).toLocaleString()}
+                    </Text>
+                  )}
+                </div>
+              ))}
+
+              {handlers.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '40px' }}>
+                  <Text size={400} style={{ color: tokens.colorNeutralForeground3 }}>
+                    No event handlers configured. Click "Add Handler" to create one.
+                  </Text>
+                </div>
+              )}
+            </div>
+          )}
+        </Tabs>
+      </Card>
+    </div>
+  );
+}

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Card } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Form'
@@ -9,6 +10,7 @@ import { Shield, Key, Lock } from 'lucide-react'
 type Step = 'credentials' | 'mfa' | 'success'
 
 export default function Login() {
+  const navigate = useNavigate()
   const [step, setStep] = useState<Step>('credentials')
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState<LoginRequest>({ username: '', password: '' })
@@ -96,7 +98,22 @@ export default function Login() {
               placeholder="••••••••"
             />
             <Button onClick={handleCredentials} loading={loading} className="w-full">
-              Continue
+              Sign In
+            </Button>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">Or</span>
+              </div>
+            </div>
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={() => navigate('/oidc-login')}
+            >
+              Sign in with SSO Provider
             </Button>
           </div>
         </Card>

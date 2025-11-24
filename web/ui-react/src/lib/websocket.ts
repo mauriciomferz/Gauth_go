@@ -9,6 +9,14 @@ interface EventMessage {
   timestamp: string
 }
 
+interface MetricsUpdate {
+  systemMetrics?: any
+  componentHealth?: any
+  performanceHistory?: any
+  tokenViolations?: any
+  semanticCounters?: any
+}
+
 type EventCallback = (message: EventMessage) => void
 
 class WebSocketManager {
@@ -155,5 +163,14 @@ export function useWebSocketEvent(eventType: string, callback: EventCallback) {
   return { isConnected }
 }
 
+// React hook for metrics updates
+export function useMetricsStream(callback: (metrics: MetricsUpdate) => void) {
+  return useWebSocketEvent('metrics', (message) => {
+    if (message.data) {
+      callback(message.data as MetricsUpdate)
+    }
+  })
+}
+
 // Export types
-export type { EventMessage, EventCallback }
+export type { EventMessage, EventCallback, MetricsUpdate }

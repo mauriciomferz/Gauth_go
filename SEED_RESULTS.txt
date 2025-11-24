@@ -1,0 +1,110 @@
+==========================================
+Seeding Admin Handlers with Sample Data
+==========================================
+
+1. Creating Circuit Breaker...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   379  100   213  100   166  37493  29220 --:--:-- --:--:-- --:--:-- 75800
+{
+  "error": "Key: 'CircuitBreakerRequest.Service' Error:Field validation for 'Service' failed on the 'required' tag\nKey: 'CircuitBreakerRequest.Timeout' Error:Field validation for 'Timeout' failed on the 'min' tag"
+}
+
+2. Creating Rate Limiter...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   524  100   414  100   110   151k  41090 --:--:-- --:--:-- --:--:--  255k
+{
+  "error": "Key: 'RateLimiterRequest.Resource' Error:Field validation for 'Resource' failed on the 'required' tag\nKey: 'RateLimiterRequest.Algorithm' Error:Field validation for 'Algorithm' failed on the 'required' tag\nKey: 'RateLimiterRequest.Limit' Error:Field validation for 'Limit' failed on the 'required' tag\nKey: 'RateLimiterRequest.Window' Error:Field validation for 'Window' failed on the 'required' tag"
+}
+
+3. Creating Event Type...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   145  100    18  100   127  14729   101k --:--:-- --:--:-- --:--:--  141k
+jq: parse error: Invalid numeric literal at line 1, column 9
+404
+Event type creation failed or returned error
+
+4. Creating Authorization Policy...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   232  100    35  100   197    997   5616 --:--:-- --:--:-- --:--:--  6444100   232  100    35  100   197    985   5548 --:--:-- --:--:-- --:--:--  6444
+{
+  "error": "Failed to create policy"
+}
+
+5. Creating Configuration Variable...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   208  100    37  100   171   1601   7403 --:--:-- --:--:-- --:--:--  9043
+{
+  "error": "Failed to create variable"
+}
+
+6. Creating Feature Flag...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   322  100   186  100   136   105k  78932 --:--:-- --:--:-- --:--:--  314k
+{
+  "error": "Key: 'FlagRequest.Name' Error:Field validation for 'Name' failed on the 'required' tag\nKey: 'FlagRequest.Type' Error:Field validation for 'Type' failed on the 'required' tag"
+}
+
+==========================================
+Sample Data Seeding Complete!
+==========================================
+
+Now testing GET endpoints to verify data...
+
+1. List Circuit Breakers:
+{
+  "circuitBreakers": [],
+  "total": 0
+}
+
+2. List Rate Limiters:
+{
+  "error": "Failed to list rate limiters"
+}
+
+3. List Event Types:
+{
+  "eventTypes": [],
+  "total": 0
+}
+
+4. List Authorization Policies:
+{
+  "policies": [
+    {
+      "id": "89ecc312-b16e-4f57-bea0-b5ae7c209158",
+      "name": "admin-access-policy",
+      "description": "Full admin access policy",
+      "status": "draft",
+      "effect": "allow",
+      "actions": [
+        "*"
+      ],
+      "resources": [
+        "*"
+      ],
+      "createdAt": "2025-11-23T00:00:59+01:00",
+      "updatedAt": "2025-11-23T00:00:59+01:00"
+    }
+  ],
+  "total": 1
+}
+
+5. List Configuration Variables:
+{
+  "variables": []
+}
+
+6. List Feature Flags:
+{
+  "flags": []
+}
+
+==========================================
+All handlers tested with sample data!
+==========================================
