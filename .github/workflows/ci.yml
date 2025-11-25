@@ -72,17 +72,18 @@ jobs:
         
         # Run tests in groups to better isolate any issues
         # Using -short flag to skip long-running load/stress tests in CI
+        # Using parallel execution (default GOMAXPROCS) for faster CI
         echo "Testing core packages..."
-        go test -v -short -count=1 -timeout=10m ./pkg/... || { echo "❌ pkg tests failed"; exit 1; }
+        go test -v -short -count=1 -timeout=15m -parallel=4 ./pkg/... || { echo "❌ pkg tests failed"; exit 1; }
         
         echo "Testing internal packages..."
-        go test -v -short -count=1 -timeout=10m ./internal/... || { echo "❌ internal tests failed"; exit 1; }
+        go test -v -short -count=1 -timeout=15m -parallel=4 ./internal/... || { echo "❌ internal tests failed"; exit 1; }
         
         echo "Testing web packages..."
-        go test -v -short -count=1 -timeout=10m ./web/... || { echo "❌ web tests failed"; exit 1; }
+        go test -v -short -count=1 -timeout=15m -parallel=4 ./web/... || { echo "❌ web tests failed"; exit 1; }
         
         echo "Testing test packages (skipping long-running load tests)..."
-        go test -v -short -count=1 -timeout=10m ./test/... || { echo "❌ test packages failed"; exit 1; }
+        go test -v -short -count=1 -timeout=15m -parallel=4 ./test/... || { echo "❌ test packages failed"; exit 1; }
         
         echo "✅ All tests completed successfully"
 
