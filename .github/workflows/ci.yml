@@ -90,6 +90,14 @@ jobs:
         echo "✅ internal tests passed"
         
         echo "Testing web packages..."
+        # Web tests require database configuration
+        export DB_HOST=localhost
+        export DB_PORT=5432
+        export DB_USER=gauth
+        export DB_PASSWORD=gauth_test_pass
+        export DB_NAME=gauth
+        export DB_SSLMODE=disable
+        export GAUTH_JWT_SIGNING_KEY=test-jwt-signing-key-for-ci
         if ! go test -short -count=1 -timeout=15m -parallel=4 ./web/...; then
           echo "❌ web tests failed"
           exit 1
