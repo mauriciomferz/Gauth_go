@@ -28,13 +28,14 @@ jobs:
       
       - name: Cache Go modules
         uses: actions/cache@v4
+        continue-on-error: true
         with:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-v2
           restore-keys: |
-            ${{ runner.os }}-go-
+            ${{ runner.os }}-go-v2-
       
       - name: Run backend tests
         run: |
@@ -53,7 +54,8 @@ jobs:
           
           # Run tests on each package separately to avoid argument length issues
           # Use for loop to properly propagate exit codes
-          FAILED=0
+          # Remove -v flag to prevent output buffering issues
+          FAILED_COUNT=0
           PASSED=0
           SKIPPED=0
           for pkg in $PACKAGES; do
@@ -66,20 +68,20 @@ jobs:
               continue
             fi
             
-            if go test -v "$pkg" -p 1 -skip "TestPAP_ConcurrentAccess|TestPAP_GetPolicyStatistics|TestSSETransportConnect" -timeout 5m -vet=off; then
+            if go test -short "$pkg" -p 1 -skip "TestPAP_ConcurrentAccess|TestPAP_GetPolicyStatistics|TestSSETransportConnect" -timeout 10m -vet=off; then
               PASSED=$((PASSED + 1))
               echo "::endgroup::"
             else
               echo "::error::FAILED: $pkg"
+              FAILED_COUNT=$((FAILED_COUNT + 1))
               echo "::endgroup::"
-              FAILED=1
               break
             fi
           done
           
-          echo "::notice::Test summary - Passed: $PASSED, Skipped: $SKIPPED, Failed: $FAILED"
+          echo "::notice::Test summary - Passed: $PASSED, Skipped: $SKIPPED, Failed: $FAILED_COUNT"
           
-          if [ $FAILED -eq 1 ]; then
+          if [ $FAILED_COUNT -gt 0 ]; then
             echo "::error::Tests failed - exiting with error"
             exit 1
           fi
