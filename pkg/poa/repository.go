@@ -2,8 +2,8 @@ package poa
 
 import (
 	"context"
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -137,7 +137,7 @@ func (r *Repository) ListPoAs(ctx context.Context, tenantID string, limit, offse
 		LIMIT $2 OFFSET $3
 	`
 	
-	fmt.Printf("[POA-DEBUG] About to query with tenant=%s, tenant=%s", tenantID)
+	fmt.Printf("[POA-DEBUG] About to query with tenant=%s, limit=%d, offset=%d\n", tenantID, limit, offset)
 	rows, err := r.db.Query(ctx, query, tenantID, limit, offset)
 	if err != nil {
 		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
@@ -370,7 +370,7 @@ func (r *Repository) GetPoAStats(ctx context.Context, tenantID string) (*PoAStat
 		GROUP BY representative_type
 	`
 	
-	fmt.Printf("[POA-DEBUG] About to query with tenant=%s, tenant=%s", tenantID)
+	fmt.Printf("[POA-DEBUG] About to query with tenant=%s\n", tenantID)
 	rows, err := r.db.Query(ctx, repTypeQuery, tenantID)
 	if err != nil {
 		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
@@ -482,7 +482,11 @@ func (r *Repository) ListTemplates(ctx context.Context, tenantID *string) ([]PoA
 		ORDER BY is_system_template DESC, template_name
 	`
 	
-	fmt.Printf("[POA-DEBUG] About to query with tenant=%s, tenant=%s", tenantID)
+	var tenantIDVal string
+	if tenantID != nil {
+		tenantIDVal = *tenantID
+	}
+	fmt.Printf("[POA-DEBUG] About to query with tenant=%s\n", tenantIDVal)
 	rows, err := r.db.Query(ctx, query, tenantID)
 	if err != nil {
 		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)

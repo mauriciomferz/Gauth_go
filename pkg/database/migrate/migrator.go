@@ -1,334 +1,318 @@
 package migrate
-package migrate
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}	return nil	log.Println("All data cleared from database")	}		return fmt.Errorf("failed to commit transaction: %w", err)	if err := tx.Commit(); err != nil {	}		}			return fmt.Errorf("failed to truncate table %s: %w", table, err)		if _, err := tx.ExecContext(ctx, query); err != nil {		query := fmt.Sprintf("TRUNCATE TABLE %s CASCADE", table)	for _, table := range tables {	defer tx.Rollback()	}		return fmt.Errorf("failed to begin transaction: %w", err)	if err != nil {	tx, err := m.db.BeginTx(ctx, nil)	}		"token_blacklist", "tokens", "subscribers",		"authorization_logs", "policy_attributes", "policies",		"poa_templates", "poa_records",		"event_handlers", "events", "event_types",		"bulkheads", "retry_policies", "rate_limiters", "circuit_breakers",		"siem_integrations", "event_correlation_patterns", "compliance_reports", "audit_events",		"feature_flags", "tenant_config_overrides", "service_configs", "config_files", "config_variables",		"append_only_log", "revocations", "merkle_proofs", "merkle_tree_nodes",	tables := []string{	log.Println("WARNING: Clearing all data from database...")func (m *Migrator) ClearData(ctx context.Context) error {// ClearData removes all data from the database (for testing)}	return nil	log.Println("✓ Seeded 3 PoA templates")		}		return fmt.Errorf("failed to seed PoA templates: %w", err)	if err != nil {	_, err := tx.ExecContext(ctx, query)		`		ON CONFLICT DO NOTHING		 ARRAY['manage_users', 'view_reports', 'configure_settings'], 90, true)		('Administrative Template', 'Standard administrative access', 'administrative',				 ARRAY['view_finances', 'approve_payments', 'manage_budgets'], 180, true),		('Financial Operations', 'Access to financial and payment operations', 'financial',				 ARRAY['read', 'write', 'delete', 'manage'], 365, true),		('Full Access Template', 'Complete access to all resources', 'full',		) VALUES			default_actions, default_duration_days, is_system_template			template_name, description, scope_type, 		INSERT INTO poa_templates (	query := `func (m *Migrator) seedPoATemplates(ctx context.Context, tx *sql.Tx) error {}	return nil	log.Println("✓ Seeded 12 system event types")		}		return fmt.Errorf("failed to seed event types: %w", err)	if err != nil {	_, err := tx.ExecContext(ctx, query)		`		ON CONFLICT (event_type) DO NOTHING		('config.changed', 'configuration', 'Configuration changed', 'high', true, 365)		('poa.revoked', 'power_of_attorney', 'PoA revoked', 'high', true, 365),		('poa.created', 'power_of_attorney', 'New PoA created', 'medium', true, 365),		('policy.deleted', 'authorization', 'Policy deleted', 'high', true, 365),		('policy.updated', 'authorization', 'Policy updated', 'medium', true, 365),		('policy.created', 'authorization', 'New policy created', 'medium', true, 365),		('token.expired', 'token', 'Token expired', 'low', true, 30),		('token.revoked', 'token', 'Token revoked', 'high', true, 365),		('token.issued', 'token', 'New token issued', 'info', true, 90),		('user.login.failed', 'authentication', 'Failed login attempt', 'medium', true, 180),		('user.logout', 'authentication', 'User logged out', 'info', true, 90),		('user.login', 'authentication', 'User successfully logged in', 'info', true, 90),		) VALUES			event_type, category, description, severity, is_system_event, retention_days		INSERT INTO event_types (	query := `func (m *Migrator) seedEventTypes(ctx context.Context, tx *sql.Tx) error {}	return nil	log.Println("✓ Seeded 4 sample subscribers")		}		return fmt.Errorf("failed to seed subscribers: %w", err)	if err != nil {	_, err := tx.ExecContext(ctx, query)		`		ON CONFLICT (tenant_id) DO NOTHING		 'admin@betatest.com', 'Alice Tester', 'betatest.com')		 ARRAY['email'], 'admin@betatest.com',		 'trial_template', 'basic',		 'auth0', 'https://beta.auth0.com', 'beta-client-id',		('Beta Testing Co', 'beta-test', 'pending', 'free',				 'admin@globalservices.com', 'Bob Manager', 'globalservices.com'),		 ARRAY['email'], 'admin@globalservices.com',		 'standard_template', 'soc2',		 'google', 'https://accounts.google.com', 'global-client-id',		('Global Services Ltd', 'global-services', 'active', 'standard',				 'admin@techstart.io', 'Jane Startup', 'techstart.io'),		 ARRAY['email', 'slack'], 'admin@techstart.io',		 'startup_flexible', 'ccpa',		 'azure', 'https://login.microsoftonline.com/techstart', 'techstart-client-id',		('TechStart Inc', 'techstart', 'active', 'premium',				 'admin@acme.com', 'John Admin', 'acme.com'),		 ARRAY['email', 'webhook'], 'admin@acme.com',		 'enterprise_standard', 'gdpr',		 'okta', 'https://acme.okta.com', 'acme-client-id',		('Acme Corporation', 'acme-corp', 'active', 'enterprise',		) VALUES			contact_email, contact_name, domain			notification_channels, notification_email,			policy_template, legal_framework,			oidc_provider, oidc_issuer, oidc_client_id,			tenant_name, tenant_id, status, tier, 		INSERT INTO subscribers (	query := `func (m *Migrator) seedSubscribers(ctx context.Context, tx *sql.Tx) error {}	return nil	log.Println("Seed data inserted successfully")	}		return fmt.Errorf("failed to commit transaction: %w", err)	if err := tx.Commit(); err != nil {	// Commit transaction	}		return fmt.Errorf("failed to seed PoA templates: %w", err)	if err := m.seedPoATemplates(ctx, tx); err != nil {	// Seed PoA templates	}		return fmt.Errorf("failed to seed event types: %w", err)	if err := m.seedEventTypes(ctx, tx); err != nil {	// Seed event types	}		return fmt.Errorf("failed to seed subscribers: %w", err)	if err := m.seedSubscribers(ctx, tx); err != nil {	// Seed subscribers	defer tx.Rollback()	}		return fmt.Errorf("failed to begin transaction: %w", err)	if err != nil {	tx, err := m.db.BeginTx(ctx, nil)	// Start transaction	log.Println("Seeding initial data...")func (m *Migrator) SeedData(ctx context.Context) error {// SeedData populates the database with initial/demo data// ============================================================================// SEED DATA FUNCTIONS// ============================================================================}	return status, nil	}		status += " (dirty - migration failed, use Force to fix)"	if dirty {	status := fmt.Sprintf("Current version: %d", version)	}		return "No migrations applied", nil	if version == 0 {	}		return "", err	if err != nil {	version, dirty, err := m.Version()func (m *Migrator) Status() (string, error) {// Status returns the current migration status}	return version, dirty, nil	}		return 0, false, fmt.Errorf("failed to get migration version: %w", err)		}			return 0, false, nil		if err == migrate.ErrNilVersion {	if err != nil {	version, dirty, err := m.migrate.Version()func (m *Migrator) Version() (uint, bool, error) {// Version returns the current migration version}	return nil	log.Println("Migration version forced successfully")	}		return fmt.Errorf("failed to force migration version: %w", err)	if err := m.migrate.Force(version); err != nil {	log.Printf("Forcing migration version to %d...\n", version)func (m *Migrator) Force(version int) error {// Use with caution - typically for fixing dirty database state// Force sets the migration version without running migrations}	return nil	log.Println("Migration steps completed successfully")	}		return fmt.Errorf("failed to run migration steps: %w", err)		}			return nil			log.Println("No migrations to run")		if err == migrate.ErrNoChange {	if err := m.migrate.Steps(n); err != nil {	log.Printf("Running %d migration steps...\n", n)func (m *Migrator) Steps(n int) error {// n < 0 applies n down migrations// n > 0 applies n up migrations// Steps runs n migration steps}	return nil	log.Println("Rollback completed successfully")	}		return fmt.Errorf("failed to roll back migrations: %w", err)		}			return nil			log.Println("No migrations to roll back")		if err == migrate.ErrNoChange {	if err := m.migrate.Down(); err != nil {	log.Println("Rolling back all migrations...")func (m *Migrator) Down() error {// Down rolls back all migrations}	return nil	log.Println("Migrations completed successfully")	}		return fmt.Errorf("failed to run migrations: %w", err)		}			return nil			log.Println("No migrations to run")		if err == migrate.ErrNoChange {	if err := m.migrate.Up(); err != nil {	log.Println("Running migrations up...")func (m *Migrator) Up() error {// Up runs all available migrations}	return nil	}		return m.db.Close()	if m.db != nil {func (m *Migrator) Close() error {// Close closes the migrator and database connection}	}, nil		migrate: m,		db:      db,	return &Migrator{	}		return nil, fmt.Errorf("failed to create migrate instance: %w", err)		db.Close()	if err != nil {	m, err := migrate.NewWithInstance("iofs", sourceDriver, "postgres", driver)	// Create migrate instance	}		return nil, fmt.Errorf("failed to create source driver: %w", err)		db.Close()	if err != nil {	sourceDriver, err := iofs.New(migrationsFS, "migrations")	// Create source from embedded filesystem	}		return nil, fmt.Errorf("failed to create postgres driver: %w", err)		db.Close()	if err != nil {	driver, err := postgres.WithInstance(db, &postgres.Config{})	// Create driver instance	}		return nil, fmt.Errorf("failed to ping database: %w", err)		db.Close()	if err := db.Ping(); err != nil {	// Test connection	}		return nil, fmt.Errorf("failed to open database: %w", err)	if err != nil {	db, err := sql.Open("pgx", databaseURL)	// Open database connectionfunc NewMigrator(databaseURL string) (*Migrator, error) {// NewMigrator creates a new migrator instance}	migrate *migrate.Migrate	db      *sql.DBtype Migrator struct {// Migrator handles database migrationsvar migrationsFS embed.FS//go:embed migrations/*.sql)	_ "github.com/jackc/pgx/v5/stdlib"	"github.com/golang-migrate/migrate/v4/source/iofs"	"github.com/golang-migrate/migrate/v4/database/postgres"	"github.com/golang-migrate/migrate/v4"	"log"	"fmt"	"embed"	"database/sql"	"context"import (
+import (
+	"context"
+	"database/sql"
+	"embed"
+	"fmt"
+	"log"
+
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
+	_ "github.com/jackc/pgx/v5/stdlib"
+)
+
+//go:embed migrations/*.sql
+var migrationsFS embed.FS
+
+// Migrator handles database migrations
+type Migrator struct {
+	db      *sql.DB
+	migrate *migrate.Migrate
+}
+
+// NewMigrator creates a new migrator instance
+func NewMigrator(databaseURL string) (*Migrator, error) {
+	// Open database connection
+	db, err := sql.Open("pgx", databaseURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open database: %w", err)
+	}
+
+	// Test connection
+	if err := db.Ping(); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("failed to ping database: %w", err)
+	}
+
+	// Create driver instance
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		db.Close()
+		return nil, fmt.Errorf("failed to create postgres driver: %w", err)
+	}
+
+	// Create source from embedded filesystem
+	sourceDriver, err := iofs.New(migrationsFS, "migrations")
+	if err != nil {
+		db.Close()
+		return nil, fmt.Errorf("failed to create source driver: %w", err)
+	}
+
+	// Create migrate instance
+	m, err := migrate.NewWithInstance("iofs", sourceDriver, "postgres", driver)
+	if err != nil {
+		db.Close()
+		return nil, fmt.Errorf("failed to create migrate instance: %w", err)
+	}
+
+	return &Migrator{
+		db:      db,
+		migrate: m,
+	}, nil
+}
+
+// Close closes the migrator and database connection
+func (m *Migrator) Close() error {
+	if m.db != nil {
+		return m.db.Close()
+	}
+	return nil
+}
+
+// Up runs all available migrations
+func (m *Migrator) Up() error {
+	log.Println("Running migrations up...")
+	if err := m.migrate.Up(); err != nil {
+		if err == migrate.ErrNoChange {
+			log.Println("No migrations to run")
+			return nil
+		}
+		return fmt.Errorf("failed to run migrations: %w", err)
+	}
+	log.Println("Migrations completed successfully")
+	return nil
+}
+
+// Down rolls back all migrations
+func (m *Migrator) Down() error {
+	log.Println("Rolling back all migrations...")
+	if err := m.migrate.Down(); err != nil {
+		if err == migrate.ErrNoChange {
+			log.Println("No migrations to roll back")
+			return nil
+		}
+		return fmt.Errorf("failed to roll back migrations: %w", err)
+	}
+	log.Println("Rollback completed successfully")
+	return nil
+}
+
+// Steps runs n migration steps
+// n > 0 applies n up migrations
+// n < 0 applies n down migrations
+func (m *Migrator) Steps(n int) error {
+	log.Printf("Running %d migration steps...\n", n)
+	if err := m.migrate.Steps(n); err != nil {
+		if err == migrate.ErrNoChange {
+			log.Println("No migrations to run")
+			return nil
+		}
+		return fmt.Errorf("failed to run migration steps: %w", err)
+	}
+	log.Println("Migration steps completed successfully")
+	return nil
+}
+
+// Force sets the migration version without running migrations
+// Use with caution - typically for fixing dirty database state
+func (m *Migrator) Force(version int) error {
+	log.Printf("Forcing migration version to %d...\n", version)
+	if err := m.migrate.Force(version); err != nil {
+		return fmt.Errorf("failed to force migration version: %w", err)
+	}
+	log.Println("Migration version forced successfully")
+	return nil
+}
+
+// Version returns the current migration version
+func (m *Migrator) Version() (uint, bool, error) {
+	version, dirty, err := m.migrate.Version()
+	if err != nil {
+		if err == migrate.ErrNilVersion {
+			return 0, false, nil
+		}
+		return 0, false, fmt.Errorf("failed to get migration version: %w", err)
+	}
+	return version, dirty, nil
+}
+
+// Status returns the current migration status
+func (m *Migrator) Status() (string, error) {
+	version, dirty, err := m.Version()
+	if err != nil {
+		return "", err
+	}
+	if version == 0 {
+		return "No migrations applied", nil
+	}
+	status := fmt.Sprintf("Current version: %d", version)
+	if dirty {
+		status += " (dirty - migration failed, use Force to fix)"
+	}
+	return status, nil
+}
+
+// ============================================================================
+// SEED DATA FUNCTIONS
+// ============================================================================
+
+// SeedData populates the database with initial/demo data
+func (m *Migrator) SeedData(ctx context.Context) error {
+	log.Println("Seeding initial data...")
+
+	// Start transaction
+	tx, err := m.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	// Seed subscribers
+	if err := m.seedSubscribers(ctx, tx); err != nil {
+		return fmt.Errorf("failed to seed subscribers: %w", err)
+	}
+
+	// Seed event types
+	if err := m.seedEventTypes(ctx, tx); err != nil {
+		return fmt.Errorf("failed to seed event types: %w", err)
+	}
+
+	// Seed PoA templates
+	if err := m.seedPoATemplates(ctx, tx); err != nil {
+		return fmt.Errorf("failed to seed PoA templates: %w", err)
+	}
+
+	// Commit transaction
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	log.Println("Seed data inserted successfully")
+	return nil
+}
+
+func (m *Migrator) seedSubscribers(ctx context.Context, tx *sql.Tx) error {
+	query := `
+		INSERT INTO subscribers (
+			tenant_name, tenant_id, status, tier, 
+			oidc_provider, oidc_issuer, oidc_client_id,
+			policy_template, legal_framework,
+			notification_channels, notification_email,
+			contact_email, contact_name, domain
+		) VALUES
+		('Acme Corporation', 'acme-corp', 'active', 'enterprise',
+			'okta', 'https://acme.okta.com', 'acme-client-id',
+			'enterprise_standard', 'gdpr',
+			ARRAY['email', 'webhook'], 'admin@acme.com',
+			'admin@acme.com', 'John Admin', 'acme.com'),
+		('TechStart Inc', 'techstart', 'active', 'premium',
+			'azure', 'https://login.microsoftonline.com/techstart', 'techstart-client-id',
+			'startup_flexible', 'ccpa',
+			ARRAY['email', 'slack'], 'admin@techstart.io',
+			'admin@techstart.io', 'Jane Startup', 'techstart.io'),
+		('Global Services Ltd', 'global-services', 'active', 'standard',
+			'google', 'https://accounts.google.com', 'global-client-id',
+			'standard_template', 'soc2',
+			ARRAY['email'], 'admin@globalservices.com',
+			'admin@globalservices.com', 'Bob Manager', 'globalservices.com'),
+		('Beta Testing Co', 'beta-test', 'pending', 'free',
+			'auth0', 'https://beta.auth0.com', 'beta-client-id',
+			'trial_template', 'basic',
+			ARRAY['email'], 'admin@betatest.com',
+			'admin@betatest.com', 'Alice Tester', 'betatest.com')
+		ON CONFLICT (tenant_id) DO NOTHING
+	`
+	_, err := tx.ExecContext(ctx, query)
+	if err != nil {
+		return fmt.Errorf("failed to seed subscribers: %w", err)
+	}
+	log.Println("✓ Seeded 4 sample subscribers")
+	return nil
+}
+
+func (m *Migrator) seedEventTypes(ctx context.Context, tx *sql.Tx) error {
+	query := `
+		INSERT INTO event_types (
+			event_type, category, description, severity, is_system_event, retention_days
+		) VALUES
+		('user.login', 'authentication', 'User successfully logged in', 'info', true, 90),
+		('user.logout', 'authentication', 'User logged out', 'info', true, 90),
+		('user.login.failed', 'authentication', 'Failed login attempt', 'medium', true, 180),
+		('token.issued', 'token', 'New token issued', 'info', true, 90),
+		('token.revoked', 'token', 'Token revoked', 'high', true, 365),
+		('token.expired', 'token', 'Token expired', 'low', true, 30),
+		('policy.created', 'authorization', 'New policy created', 'medium', true, 365),
+		('policy.updated', 'authorization', 'Policy updated', 'medium', true, 365),
+		('policy.deleted', 'authorization', 'Policy deleted', 'high', true, 365),
+		('poa.created', 'power_of_attorney', 'New PoA created', 'medium', true, 365),
+		('poa.revoked', 'power_of_attorney', 'PoA revoked', 'high', true, 365),
+		('config.changed', 'configuration', 'Configuration changed', 'high', true, 365)
+		ON CONFLICT (event_type) DO NOTHING
+	`
+	_, err := tx.ExecContext(ctx, query)
+	if err != nil {
+		return fmt.Errorf("failed to seed event types: %w", err)
+	}
+	log.Println("✓ Seeded 12 system event types")
+	return nil
+}
+
+func (m *Migrator) seedPoATemplates(ctx context.Context, tx *sql.Tx) error {
+	query := `
+		INSERT INTO poa_templates (
+			template_name, description, scope_type, 
+			default_actions, default_duration_days, is_system_template
+		) VALUES
+		('Full Access Template', 'Complete access to all resources', 'full',
+			ARRAY['read', 'write', 'delete', 'manage'], 365, true),
+		('Financial Operations', 'Access to financial and payment operations', 'financial',
+			ARRAY['view_finances', 'approve_payments', 'manage_budgets'], 180, true),
+		('Administrative Template', 'Standard administrative access', 'administrative',
+			ARRAY['manage_users', 'view_reports', 'configure_settings'], 90, true)
+		ON CONFLICT DO NOTHING
+	`
+	_, err := tx.ExecContext(ctx, query)
+	if err != nil {
+		return fmt.Errorf("failed to seed PoA templates: %w", err)
+	}
+	log.Println("✓ Seeded 3 PoA templates")
+	return nil
+}
+
+// ClearData removes all data from the database (for testing)
+func (m *Migrator) ClearData(ctx context.Context) error {
+	log.Println("WARNING: Clearing all data from database...")
+	
+	tables := []string{
+		"merkle_tree_nodes", "merkle_proofs", "revocations", "append_only_log",
+		"config_variables", "config_files", "service_configs", "tenant_config_overrides", "feature_flags",
+		"audit_events", "compliance_reports", "event_correlation_patterns", "siem_integrations",
+		"circuit_breakers", "rate_limiters", "retry_policies", "bulkheads",
+		"event_types", "events", "event_handlers",
+		"poa_records", "poa_templates",
+		"policies", "policy_attributes", "authorization_logs",
+		"subscribers", "tokens", "token_blacklist",
+	}
+	
+	tx, err := m.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback()
+	
+	for _, table := range tables {
+		query := fmt.Sprintf("TRUNCATE TABLE %s CASCADE", table)
+		if _, err := tx.ExecContext(ctx, query); err != nil {
+			return fmt.Errorf("failed to truncate table %s: %w", table, err)
+		}
+	}
+	
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+	
+	log.Println("All data cleared from database")
+	return nil
+}

@@ -1,5 +1,4 @@
 package dbmigrate
-package main
 
 import (
 
