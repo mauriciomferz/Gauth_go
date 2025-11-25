@@ -92,8 +92,9 @@ jobs:
         echo "Testing web packages..."
         # Web tests run without database (admin handlers are skipped when DB_HOST is not set)
         # Clear DB_HOST to prevent database connection attempts during tests
+        # Note: web tests include fuzz tests which need longer timeout, don't use -short
         unset DB_HOST DB_PORT DB_USER DB_PASSWORD DB_NAME DB_SSLMODE
-        if ! go test -short -count=1 -timeout=15m -parallel=4 ./web/...; then
+        if ! go test -count=1 -timeout=20m -parallel=2 ./web/...; then
           echo "❌ web tests failed"
           exit 1
         fi
