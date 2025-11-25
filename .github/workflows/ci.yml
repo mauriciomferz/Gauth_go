@@ -72,20 +72,38 @@ jobs:
         
         # Run tests in groups to better isolate any issues
         # Using -short flag to skip long-running load/stress tests in CI
-        # Using parallel execution (default GOMAXPROCS) for faster CI
+        # Using parallel execution for faster CI
+        # Capture exit codes explicitly to avoid false failures
+        
         echo "Testing core packages..."
-        go test -v -short -count=1 -timeout=15m -parallel=4 ./pkg/... || { echo "❌ pkg tests failed"; exit 1; }
+        if ! go test -short -count=1 -timeout=15m -parallel=4 ./pkg/...; then
+          echo "❌ pkg tests failed"
+          exit 1
+        fi
+        echo "✅ pkg tests passed"
         
         echo "Testing internal packages..."
-        go test -v -short -count=1 -timeout=15m -parallel=4 ./internal/... || { echo "❌ internal tests failed"; exit 1; }
+        if ! go test -short -count=1 -timeout=15m -parallel=4 ./internal/...; then
+          echo "❌ internal tests failed"
+          exit 1
+        fi
+        echo "✅ internal tests passed"
         
         echo "Testing web packages..."
-        go test -v -short -count=1 -timeout=15m -parallel=4 ./web/... || { echo "❌ web tests failed"; exit 1; }
+        if ! go test -short -count=1 -timeout=15m -parallel=4 ./web/...; then
+          echo "❌ web tests failed"
+          exit 1
+        fi
+        echo "✅ web tests passed"
         
         echo "Testing test packages (skipping long-running load tests)..."
-        go test -v -short -count=1 -timeout=15m -parallel=4 ./test/... || { echo "❌ test packages failed"; exit 1; }
+        if ! go test -short -count=1 -timeout=15m -parallel=4 ./test/...; then
+          echo "❌ test packages failed"
+          exit 1
+        fi
+        echo "✅ test packages passed"
         
-        echo "✅ All tests completed successfully"
+        echo "🎉 All tests completed successfully"
 
     - name: Install golangci-lint from source
       run: |
