@@ -3670,9 +3670,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 			fmt.Fprintln(os.Stderr, "[auth] OIDC authentication flow handler registered")
 		}
 	} else {
-		fmt.Fprintln(os.Stderr, "[FATAL] DB_HOST not configured - database is required for admin endpoints")
-		fmt.Fprintln(os.Stderr, "[FATAL] Please set DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME environment variables")
-		os.Exit(1)
+		fmt.Fprintln(os.Stderr, "[WARNING] DB_HOST not configured - admin endpoints will not be available")
+		fmt.Fprintln(os.Stderr, "[WARNING] Set DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME to enable admin features")
 	}
 
 	// Policy chain persistence path (optional) POLICY_CHAIN_STATE_PATH
