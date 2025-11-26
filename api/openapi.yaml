@@ -1,0 +1,1760 @@
+openapi: 3.0.3
+info:
+  title: GAuth+ Authorization API
+  description: |
+    Enterprise-grade authorization system with AI-powered capabilities, featuring comprehensive 
+    Power of Attorney (PoA) management, blockchain-backed verification, and advanced delegation 
+    patterns including successor designation, dual control, capability-based access, and 
+    fiduciary responsibility tracking.
+    
+    ## Key Features
+    - **Blockchain Integration** - Immutable audit trail with public verification
+    - **AI Authorization** - Commercial register for AI systems
+    - **Advanced Delegation** - Successor, dual control, capability, fiduciary patterns
+    - **Public Verification API** - Zero-trust verification for relying parties
+    - **Production Monitoring** - Comprehensive Prometheus + Grafana dashboards
+    
+    ## Authentication
+    Most endpoints require JWT authentication. Public blockchain verification endpoints 
+    (`/api/v1/public/blockchain/*`) do not require authentication.
+    
+  version: 1.0.0
+  contact:
+    name: GAuth+ Team
+    url: https://github.com/mauriciomferz/Gauth_go
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: https://api.gauthplus.example.com
+    description: Production server
+
+tags:
+  - name: Power of Attorney
+    description: Core PoA operations (CRUD, verification, chains)
+  - name: Successor Designation
+    description: Automatic successor activation on principal incapacity
+  - name: Delegation
+    description: Multi-level delegation chains with authority inheritance
+  - name: Dual Control
+    description: Multi-party authorization with quorum-based approval
+  - name: Capability
+    description: Fine-grained permission system with resource-specific access
+  - name: Fiduciary
+    description: Legal duty tracking and conflict of interest detection
+  - name: Blockchain Verification (Public)
+    description: Public blockchain verification endpoints (no authentication required)
+  - name: Admin & Monitoring
+    description: System administration and monitoring endpoints
+
+security:
+  - BearerAuth: []
+
+paths:
+  # Core PoA Operations
+  /api/v1/poa:
+    post:
+      tags:
+        - Power of Attorney
+      summary: Create a new Power of Attorney
+      description: Creates a new PoA with issuer, grantee, scope, and optional restrictions
+      operationId: createPoA
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePoARequest'
+            examples:
+              basic:
+                summary: Basic PoA
+                value:
+                  issuer_id: "principal-123"
+                  grantee_id: "representative-456"
+                  structured_scope:
+                    actions: ["banking", "legal"]
+                    resources: ["accounts"]
+                  valid_from: "2025-01-01T00:00:00Z"
+                  valid_until: "2026-01-01T00:00:00Z"
+              withRestrictions:
+                summary: PoA with restrictions
+                value:
+                  issuer_id: "principal-123"
+                  grantee_id: "representative-456"
+                  structured_scope:
+                    actions: ["banking"]
+                  restrictions:
+                    value_limit: 10000
+                    geographic_restrictions: ["US", "CA"]
+                  valid_from: "2025-01-01T00:00:00Z"
+                  valid_until: "2026-01-01T00:00:00Z"
+      responses:
+        '201':
+          description: PoA created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PoAResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/poa/{id}:
+    get:
+      tags:
+        - Power of Attorney
+      summary: Get PoA details
+      description: Retrieves complete details of a Power of Attorney
+      operationId: getPoA
+      parameters:
+        - $ref: '#/components/parameters/PoAId'
+      responses:
+        '200':
+          description: PoA details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PoAResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    put:
+      tags:
+        - Power of Attorney
+      summary: Update PoA
+      description: Updates an existing PoA (creates new version)
+      operationId: updatePoA
+      parameters:
+        - $ref: '#/components/parameters/PoAId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePoARequest'
+      responses:
+        '200':
+          description: PoA updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PoAResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    delete:
+      tags:
+        - Power of Attorney
+      summary: Revoke PoA
+      description: Revokes a Power of Attorney
+      operationId: revokePoA
+      parameters:
+        - $ref: '#/components/parameters/PoAId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - revoked_by
+                - reason
+              properties:
+                revoked_by:
+                  type: string
+                  description: ID of user revoking the PoA
+                reason:
+                  type: string
+                  description: Reason for revocation
+      responses:
+        '200':
+          description: PoA revoked successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "PoA revoked successfully"
+                  revoked_at:
+                    type: string
+                    format: date-time
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/poa/principal/{id}:
+    get:
+      tags:
+        - Power of Attorney
+      summary: List PoAs by principal (issuer)
+      description: Retrieves all PoAs where the specified user is the issuer
+      operationId: listPoAsByPrincipal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Principal (issuer) ID
+      responses:
+        '200':
+          description: List of PoAs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  poas:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PoAResponse'
+                  total:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/poa/representative/{id}:
+    get:
+      tags:
+        - Power of Attorney
+      summary: List PoAs by representative (grantee)
+      description: Retrieves all PoAs where the specified user is the grantee
+      operationId: listPoAsByRepresentative
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Representative (grantee) ID
+      responses:
+        '200':
+          description: List of PoAs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  poas:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PoAResponse'
+                  total:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/poa/{id}/verify:
+    post:
+      tags:
+        - Power of Attorney
+      summary: Verify PoA
+      description: Performs comprehensive verification of a PoA
+      operationId: verifyPoA
+      parameters:
+        - $ref: '#/components/parameters/PoAId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  description: Optional action to verify against scope
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationResult'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/poa/{id}/chain:
+    get:
+      tags:
+        - Power of Attorney
+      summary: Get delegation chain
+      description: Retrieves the complete delegation chain for a PoA
+      operationId: getPoAChain
+      parameters:
+        - $ref: '#/components/parameters/PoAId'
+      responses:
+        '200':
+          description: Delegation chain retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chain:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuthorityLink'
+                  depth:
+                    type: integer
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # Successor Designation
+  /api/v1/successor:
+    post:
+      tags:
+        - Successor Designation
+      summary: Create successor designation
+      description: Designates a successor for automatic activation on principal incapacity/death
+      operationId: createSuccessor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSuccessorRequest'
+      responses:
+        '201':
+          description: Successor designation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessorResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/successor/trigger:
+    get:
+      tags:
+        - Successor Designation
+      summary: Trigger successor activation
+      description: Activates successor upon verification of trigger condition
+      operationId: triggerSuccessor
+      parameters:
+        - name: principal_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Principal ID for successor activation
+        - name: trigger_reason
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [incapacity, death, resignation]
+      responses:
+        '200':
+          description: Successor activated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  activated_successors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SuccessorResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # Delegation
+  /api/v1/delegation:
+    post:
+      tags:
+        - Delegation
+      summary: Create delegation
+      description: Creates a delegation chain (A→B→C) with scope narrowing
+      operationId: createDelegation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDelegationRequest'
+      responses:
+        '201':
+          description: Delegation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DelegationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/delegation/resolve/{id}:
+    get:
+      tags:
+        - Delegation
+      summary: Resolve delegation chain
+      description: Resolves complete delegation chain with authority validation
+      operationId: resolveDelegationChain
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Starting PoA ID
+      responses:
+        '200':
+          description: Delegation chain resolved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chain:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DelegationResponse'
+                  is_valid:
+                    type: boolean
+                  circular_detected:
+                    type: boolean
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # Dual Control
+  /api/v1/dual-control:
+    post:
+      tags:
+        - Dual Control
+      summary: Create dual control requirement
+      description: Creates multi-party authorization requirement (2-of-3, 3-of-5, etc.)
+      operationId: createDualControl
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDualControlRequest'
+      responses:
+        '201':
+          description: Dual control requirement created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DualControlResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/dual-control/{id}/verify:
+    get:
+      tags:
+        - Dual Control
+      summary: Verify dual control requirement
+      description: Checks if required quorum has been met
+      operationId: verifyDualControl
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Dual control requirement ID
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  is_satisfied:
+                    type: boolean
+                  required_approvals:
+                    type: integer
+                  current_approvals:
+                    type: integer
+                  approvers:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # Capability
+  /api/v1/capability:
+    post:
+      tags:
+        - Capability
+      summary: Create capability grant
+      description: Grants fine-grained permissions with resource-specific access
+      operationId: createCapability
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCapabilityRequest'
+      responses:
+        '201':
+          description: Capability created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapabilityResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/capability/{id}/verify:
+    get:
+      tags:
+        - Capability
+      summary: Verify capability
+      description: Checks if user has required capability for resource/action
+      operationId: verifyCapability
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Capability ID
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  has_capability:
+                    type: boolean
+                  capability:
+                    $ref: '#/components/schemas/CapabilityResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # Fiduciary
+  /api/v1/fiduciary:
+    post:
+      tags:
+        - Fiduciary
+      summary: Create fiduciary responsibility
+      description: Tracks legal duties and conflict of interest
+      operationId: createFiduciary
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFiduciaryRequest'
+      responses:
+        '201':
+          description: Fiduciary responsibility created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FiduciaryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/fiduciary/{id}/audit:
+    get:
+      tags:
+        - Fiduciary
+      summary: Get fiduciary audit trail
+      description: Retrieves complete audit trail of fiduciary actions
+      operationId: getFiduciaryAudit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Fiduciary ID
+      responses:
+        '200':
+          description: Audit trail retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  audit_entries:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        timestamp:
+                          type: string
+                          format: date-time
+                        action:
+                          type: string
+                        user_id:
+                          type: string
+                        details:
+                          type: object
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # Verification
+  /api/v1/verification/report:
+    post:
+      tags:
+        - Power of Attorney
+      summary: Generate verification report
+      description: Generates comprehensive verification report for PoA
+      operationId: generateVerificationReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - poa_id
+              properties:
+                poa_id:
+                  type: string
+                action:
+                  type: string
+                  description: Optional action to verify
+      responses:
+        '200':
+          description: Verification report generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationReport'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # Public Blockchain Verification (No Authentication Required)
+  /api/v1/public/blockchain/verify/{poa_id}:
+    get:
+      tags:
+        - Blockchain Verification (Public)
+      summary: Full blockchain verification
+      description: Performs complete PoA verification with cryptographic proof (PUBLIC - No auth required)
+      operationId: publicVerifyPoA
+      security: []  # No authentication required
+      parameters:
+        - name: poa_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: PoA ID to verify
+      responses:
+        '200':
+          description: Verification result with proof
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicVerificationResult'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/public/blockchain/verify/{poa_id}/status:
+    get:
+      tags:
+        - Blockchain Verification (Public)
+      summary: Quick status check
+      description: Returns quick PoA status (active/revoked/expired) (PUBLIC - No auth required)
+      operationId: publicPoAStatus
+      security: []
+      parameters:
+        - name: poa_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: PoA status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  poa_id:
+                    type: string
+                  status:
+                    type: string
+                    enum: [active, revoked, expired]
+                  valid_from:
+                    type: string
+                    format: date-time
+                  valid_until:
+                    type: string
+                    format: date-time
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/public/blockchain/verify/{poa_id}/proof:
+    get:
+      tags:
+        - Blockchain Verification (Public)
+      summary: Get cryptographic proof
+      description: Returns cryptographic proof of PoA registration on blockchain (PUBLIC - No auth required)
+      operationId: publicGetProof
+      security: []
+      parameters:
+        - name: poa_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cryptographic proof
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationProof'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/public/blockchain/verify/agent/{agent_id}:
+    get:
+      tags:
+        - Blockchain Verification (Public)
+      summary: Verify AI agent registration
+      description: Verifies AI agent registration on blockchain (PUBLIC - No auth required)
+      operationId: publicVerifyAgent
+      security: []
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: AI agent verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agent_id:
+                    type: string
+                  is_registered:
+                    type: boolean
+                  registration_tx_hash:
+                    type: string
+                  registration_date:
+                    type: string
+                    format: date-time
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/public/blockchain/verify/agent/{agent_id}/powers:
+    get:
+      tags:
+        - Blockchain Verification (Public)
+      summary: Get AI agent powers
+      description: Lists all PoAs granted to an AI agent (PUBLIC - No auth required)
+      operationId: publicGetAgentPowers
+      security: []
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of PoAs granted to agent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agent_id:
+                    type: string
+                  powers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PoASummary'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/public/blockchain/issuer/{issuer_id}/poas:
+    get:
+      tags:
+        - Blockchain Verification (Public)
+      summary: List PoAs by issuer
+      description: Lists all PoAs issued by a principal (PUBLIC - No auth required)
+      operationId: publicListPoAsByIssuer
+      security: []
+      parameters:
+        - name: issuer_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of PoAs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  issuer_id:
+                    type: string
+                  poas:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PoASummary'
+                  total:
+                    type: integer
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/public/blockchain/grantee/{grantee_id}/poas:
+    get:
+      tags:
+        - Blockchain Verification (Public)
+      summary: List PoAs by grantee
+      description: Lists all PoAs granted to a representative (PUBLIC - No auth required)
+      operationId: publicListPoAsByGrantee
+      security: []
+      parameters:
+        - name: grantee_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of PoAs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  grantee_id:
+                    type: string
+                  poas:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PoASummary'
+                  total:
+                    type: integer
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/public/blockchain/explorer/{poa_id}:
+    get:
+      tags:
+        - Blockchain Verification (Public)
+      summary: Get blockchain explorer URL
+      description: Returns URL to view PoA transaction on blockchain explorer (PUBLIC - No auth required)
+      operationId: publicGetExplorerURL
+      security: []
+      parameters:
+        - name: poa_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Explorer URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  poa_id:
+                    type: string
+                  explorer_url:
+                    type: string
+                    format: uri
+                    example: "https://sepolia.etherscan.io/tx/0x123..."
+                  network:
+                    type: string
+                    example: "sepolia"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/public/blockchain/health:
+    get:
+      tags:
+        - Blockchain Verification (Public)
+      summary: Health check
+      description: Returns blockchain service health status (PUBLIC - No auth required)
+      operationId: publicBlockchainHealth
+      security: []
+      responses:
+        '200':
+          description: Service healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  blockchain_connected:
+                    type: boolean
+                  current_block:
+                    type: integer
+                  sync_lag_blocks:
+                    type: integer
+        '503':
+          description: Service unhealthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "unhealthy"
+                  error:
+                    type: string
+
+  # Admin & Monitoring
+  /health:
+    get:
+      tags:
+        - Admin & Monitoring
+      summary: Service health check
+      description: Returns overall service health status
+      operationId: healthCheck
+      security: []
+      responses:
+        '200':
+          description: Service healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  database:
+                    type: string
+                    example: "connected"
+                  uptime:
+                    type: integer
+                    description: Uptime in seconds
+
+  /metrics:
+    get:
+      tags:
+        - Admin & Monitoring
+      summary: Prometheus metrics
+      description: Returns Prometheus-formatted metrics
+      operationId: getMetrics
+      security: []
+      responses:
+        '200':
+          description: Metrics in Prometheus format
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /api/v1/admin/stats:
+    get:
+      tags:
+        - Admin & Monitoring
+      summary: System statistics
+      description: Returns comprehensive system statistics
+      operationId: getSystemStats
+      responses:
+        '200':
+          description: System statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_poas:
+                    type: integer
+                  active_poas:
+                    type: integer
+                  revoked_poas:
+                    type: integer
+                  total_verifications:
+                    type: integer
+                  blockchain_synced:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/admin/sync/status:
+    get:
+      tags:
+        - Admin & Monitoring
+      summary: Blockchain sync status
+      description: Returns current blockchain synchronization status
+      operationId: getSyncStatus
+      responses:
+        '200':
+          description: Sync status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/admin/sync/trigger:
+    post:
+      tags:
+        - Admin & Monitoring
+      summary: Trigger manual sync
+      description: Manually triggers blockchain synchronization
+      operationId: triggerSync
+      responses:
+        '202':
+          description: Sync triggered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Sync triggered"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/admin/consistency:
+    get:
+      tags:
+        - Admin & Monitoring
+      summary: Get consistency report
+      description: Returns DB-blockchain consistency check results
+      operationId: getConsistencyReport
+      responses:
+        '200':
+          description: Consistency report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsistencyReport'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/admin/cache/clear:
+    post:
+      tags:
+        - Admin & Monitoring
+      summary: Clear verification cache
+      description: Clears the verification result cache
+      operationId: clearCache
+      responses:
+        '200':
+          description: Cache cleared successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Cache cleared"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/admin/audit:
+    get:
+      tags:
+        - Admin & Monitoring
+      summary: Get audit log
+      description: Retrieves audit log entries with filtering
+      operationId: getAuditLog
+      parameters:
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: user_id
+          in: query
+          schema:
+            type: string
+        - name: action
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+      responses:
+        '200':
+          description: Audit log entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entries:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        timestamp:
+                          type: string
+                          format: date-time
+                        user_id:
+                          type: string
+                        action:
+                          type: string
+                        resource_id:
+                          type: string
+                        details:
+                          type: object
+                  total:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token authentication
+
+  parameters:
+    PoAId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Power of Attorney ID
+
+  schemas:
+    CreatePoARequest:
+      type: object
+      required:
+        - issuer_id
+        - grantee_id
+        - structured_scope
+        - valid_from
+        - valid_until
+      properties:
+        issuer_id:
+          type: string
+          description: Principal (issuer) ID
+        grantee_id:
+          type: string
+          description: Representative (grantee) ID
+        structured_scope:
+          type: object
+          description: Structured scope definition
+          properties:
+            actions:
+              type: array
+              items:
+                type: string
+            resources:
+              type: array
+              items:
+                type: string
+        restrictions:
+          type: object
+          description: Optional restrictions
+          properties:
+            value_limit:
+              type: number
+            geographic_restrictions:
+              type: array
+              items:
+                type: string
+            temporal_restrictions:
+              type: object
+        attestations:
+          type: object
+          description: Optional attestations (notary, witnesses, etc.)
+        valid_from:
+          type: string
+          format: date-time
+        valid_until:
+          type: string
+          format: date-time
+        successor_id:
+          type: string
+          description: Optional successor designation
+
+    UpdatePoARequest:
+      type: object
+      properties:
+        structured_scope:
+          type: object
+        restrictions:
+          type: object
+        valid_until:
+          type: string
+          format: date-time
+
+    PoAResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        issuer_id:
+          type: string
+        grantee_id:
+          type: string
+        successor_id:
+          type: string
+        structured_scope:
+          type: object
+        restrictions:
+          type: object
+        attestations:
+          type: object
+        version_number:
+          type: integer
+        status:
+          type: string
+          enum: [active, revoked, expired]
+        valid_from:
+          type: string
+          format: date-time
+        valid_until:
+          type: string
+          format: date-time
+        revoked_at:
+          type: string
+          format: date-time
+        revoked_by:
+          type: string
+        revocation_reason:
+          type: string
+        blockchain_tx_hash:
+          type: string
+        blockchain_block:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    PoASummary:
+      type: object
+      properties:
+        id:
+          type: string
+        issuer_id:
+          type: string
+        grantee_id:
+          type: string
+        status:
+          type: string
+        valid_from:
+          type: string
+          format: date-time
+        valid_until:
+          type: string
+          format: date-time
+
+    VerificationResult:
+      type: object
+      properties:
+        is_valid:
+          type: boolean
+        poa_id:
+          type: string
+        verification_timestamp:
+          type: string
+          format: date-time
+        checks:
+          type: object
+          properties:
+            status_active:
+              type: boolean
+            not_revoked:
+              type: boolean
+            within_validity_period:
+              type: boolean
+            scope_valid:
+              type: boolean
+            restrictions_met:
+              type: boolean
+        errors:
+          type: array
+          items:
+            type: string
+
+    VerificationReport:
+      type: object
+      properties:
+        report_id:
+          type: string
+        poa_id:
+          type: string
+        generated_at:
+          type: string
+          format: date-time
+        verification_result:
+          $ref: '#/components/schemas/VerificationResult'
+        principal_status:
+          type: object
+        representative_position:
+          type: object
+        attestation_verification:
+          type: object
+        authorization_chain:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthorityLink'
+
+    AuthorityLink:
+      type: object
+      properties:
+        level:
+          type: integer
+        poa_id:
+          type: string
+        issuer_id:
+          type: string
+        grantee_id:
+          type: string
+        scope:
+          type: object
+        is_valid:
+          type: boolean
+
+    PublicVerificationResult:
+      type: object
+      properties:
+        poa_id:
+          type: string
+        is_valid:
+          type: boolean
+        status:
+          type: string
+        verification_proof:
+          $ref: '#/components/schemas/VerificationProof'
+        blockchain_record:
+          type: object
+          properties:
+            tx_hash:
+              type: string
+            block_number:
+              type: integer
+            timestamp:
+              type: string
+              format: date-time
+
+    VerificationProof:
+      type: object
+      properties:
+        proof_type:
+          type: string
+        blockchain_tx_hash:
+          type: string
+        block_number:
+          type: integer
+        merkle_proof:
+          type: array
+          items:
+            type: string
+        signature:
+          type: string
+
+    CreateSuccessorRequest:
+      type: object
+      required:
+        - principal_id
+        - successor_id
+        - activation_conditions
+      properties:
+        principal_id:
+          type: string
+        successor_id:
+          type: string
+        activation_conditions:
+          type: object
+          properties:
+            triggers:
+              type: array
+              items:
+                type: string
+                enum: [incapacity, death, resignation]
+        priority:
+          type: integer
+          description: Successor priority (lower number = higher priority)
+
+    SuccessorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        principal_id:
+          type: string
+        successor_id:
+          type: string
+        activation_conditions:
+          type: object
+        priority:
+          type: integer
+        is_active:
+          type: boolean
+        activated_at:
+          type: string
+          format: date-time
+
+    CreateDelegationRequest:
+      type: object
+      required:
+        - parent_poa_id
+        - delegate_id
+        - delegated_scope
+      properties:
+        parent_poa_id:
+          type: string
+        delegate_id:
+          type: string
+        delegated_scope:
+          type: object
+          description: Must be narrower than parent scope
+        valid_until:
+          type: string
+          format: date-time
+
+    DelegationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        parent_poa_id:
+          type: string
+        delegate_id:
+          type: string
+        delegated_scope:
+          type: object
+        depth:
+          type: integer
+        is_valid:
+          type: boolean
+
+    CreateDualControlRequest:
+      type: object
+      required:
+        - poa_id
+        - required_approvers
+        - required_approvals
+      properties:
+        poa_id:
+          type: string
+        required_approvers:
+          type: array
+          items:
+            type: string
+          description: List of user IDs who can approve
+        required_approvals:
+          type: integer
+          description: Number of approvals required (quorum)
+        approval_window:
+          type: integer
+          description: Time window in seconds for approvals
+
+    DualControlResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        poa_id:
+          type: string
+        required_approvers:
+          type: array
+          items:
+            type: string
+        required_approvals:
+          type: integer
+        current_approvals:
+          type: integer
+        is_satisfied:
+          type: boolean
+
+    CreateCapabilityRequest:
+      type: object
+      required:
+        - user_id
+        - resource
+        - actions
+      properties:
+        user_id:
+          type: string
+        resource:
+          type: string
+        actions:
+          type: array
+          items:
+            type: string
+        conditions:
+          type: object
+        valid_from:
+          type: string
+          format: date-time
+        valid_until:
+          type: string
+          format: date-time
+
+    CapabilityResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        user_id:
+          type: string
+        resource:
+          type: string
+        actions:
+          type: array
+          items:
+            type: string
+        conditions:
+          type: object
+        is_valid:
+          type: boolean
+
+    CreateFiduciaryRequest:
+      type: object
+      required:
+        - poa_id
+        - fiduciary_id
+        - duties
+      properties:
+        poa_id:
+          type: string
+        fiduciary_id:
+          type: string
+        duties:
+          type: array
+          items:
+            type: string
+        conflict_of_interest_check:
+          type: boolean
+
+    FiduciaryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        poa_id:
+          type: string
+        fiduciary_id:
+          type: string
+        duties:
+          type: array
+          items:
+            type: string
+        has_conflict:
+          type: boolean
+        audit_trail:
+          type: array
+          items:
+            type: object
+
+    SyncStatus:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum: [immediate, async, batch]
+        last_sync:
+          type: string
+          format: date-time
+        pending_operations:
+          type: integer
+        failed_operations:
+          type: integer
+        blockchain_height:
+          type: integer
+        db_sync_block:
+          type: integer
+        lag_blocks:
+          type: integer
+
+    ConsistencyReport:
+      type: object
+      properties:
+        check_timestamp:
+          type: string
+          format: date-time
+        total_records:
+          type: integer
+        consistent_records:
+          type: integer
+        inconsistent_records:
+          type: integer
+        inconsistencies:
+          type: array
+          items:
+            type: object
+            properties:
+              poa_id:
+                type: string
+              issue:
+                type: string
+              db_state:
+                type: object
+              blockchain_state:
+                type: object
+
+  responses:
+    BadRequest:
+      description: Bad request - Invalid input
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              details:
+                type: object
+
+    Unauthorized:
+      description: Unauthorized - Authentication required
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Authentication required"
+
+    NotFound:
+      description: Not found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Resource not found"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              request_id:
+                type: string
