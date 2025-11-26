@@ -13,10 +13,12 @@ import (
 
 // ComplianceValidator performs RFC-0111 Section 6 compliance validation
 type ComplianceValidator struct {
-	chainValidator *AuthorizationChainValidator
-	pipClient      PIPClient
-	pdpClient      PDPClient
-	strictMode     bool
+	chainValidator     *AuthorizationChainValidator
+	gauthPlusValidator *GAuthPlusValidator
+	pipClient          PIPClient
+	pdpClient          PDPClient
+	strictMode         bool
+	enforceGAuthPlus   bool
 }
 
 // NewComplianceValidator creates a new compliance validator
@@ -26,11 +28,23 @@ func NewComplianceValidator(
 	pdpClient PDPClient,
 ) *ComplianceValidator {
 	return &ComplianceValidator{
-		chainValidator: chainValidator,
-		pipClient:      pipClient,
-		pdpClient:      pdpClient,
-		strictMode:     true,
+		chainValidator:   chainValidator,
+		pipClient:        pipClient,
+		pdpClient:        pdpClient,
+		strictMode:       true,
+		enforceGAuthPlus: false, // Disabled by default for backward compatibility
 	}
+}
+
+// SetGAuthPlusValidator sets the GAuth+ validator and enables enforcement
+func (v *ComplianceValidator) SetGAuthPlusValidator(gauthPlusValidator *GAuthPlusValidator) {
+	v.gauthPlusValidator = gauthPlusValidator
+	v.enforceGAuthPlus = true
+}
+
+// SetEnforceGAuthPlus enables/disables GAuth+ enforcement
+func (v *ComplianceValidator) SetEnforceGAuthPlus(enforce bool) {
+	v.enforceGAuthPlus = enforce
 }
 
 // ExtendedAuthorizationRequest represents an RFC-0111 compliant authorization request
@@ -51,6 +65,7 @@ type ExtendedAuthorizationGrant struct {
 	*AuthorizationGrant                     // Embed existing type for compatibility
 	ResourceOwnerID     string              `json:"resource_owner_id"`
 	IssuerID            string              `json:"issuer_id"`
+	PowerOfAttorney     *poa.PoADefinition  `json:"power_of_attorney,omitempty"`
 	AuthorizationChain  *AuthorizationChain `json:"authorization_chain,omitempty"`
 	LegalFramework      *LegalFrameworkInfo `json:"legal_framework,omitempty"`
 	Restrictions        []PowerRestriction  `json:"restrictions,omitempty"`
@@ -58,6 +73,7 @@ type ExtendedAuthorizationGrant struct {
 	ExpiresAt           time.Time           `json:"expires_at"`
 	ConsentTimestamp    time.Time           `json:"consent_timestamp"`
 	GrantCode           string              `json:"grant_code,omitempty"`
+	GrantedActions      []string            `json:"granted_actions,omitempty"` // Actions authorized by this grant
 }
 
 // ValidateRequestCompliance implements RFC-0111 Section 6 step (b)
@@ -113,7 +129,22 @@ func (v *ComplianceValidator) ValidateRequestCompliance(
 		}
 		result.Checks["power_of_attorney"] = true
 
-		// Step 4a: Validate geographic scope if jurisdiction is provided
+		// Step 4a: Validate GAuth+ policies (successor, delegation, dual control, capabilities, fiduciary)
+		actionType := ""
+		if len(request.RequestedActions) > 0 {
+			actionType = request.RequestedActions[0]
+		}
+		agentID := request.PowerOfAttorney.Parties.AuthorizedClient.Identity
+		// Note: PoADefinition doesn't have ID field, using agent identity as placeholder
+		// In production, PoA ID should be tracked separately in request metadata
+		poaID := agentID // TODO: Get actual PoA ID from request metadata
+		if err := v.validatePoAWithGAuthPlus(ctx, poaID, request.PowerOfAttorney, agentID, actionType, result); err != nil {
+			result.Valid = false
+			result.FailureReason = fmt.Sprintf("GAuth+ validation failed: %v", err)
+			return result, err
+		}
+
+		// Step 4b: Validate geographic scope if jurisdiction is provided
 		if request.Jurisdiction != "" {
 			if err := v.validateGeographicScope(ctx, request, result); err != nil {
 				result.Valid = false
@@ -234,6 +265,35 @@ func (v *ComplianceValidator) ValidateGrantCompliance(
 		}
 	}
 
+	// Step 5a: Validate GAuth+ policies for the grant
+	if grant.PowerOfAttorney != nil {
+		actionType := ""
+		if len(grant.GrantedActions) > 0 {
+			actionType = grant.GrantedActions[0]
+		}
+		agentID := grant.PowerOfAttorney.Parties.AuthorizedClient.Identity
+		// Note: PoADefinition doesn't have ID field, using agent identity as placeholder
+		poaID := agentID // TODO: Get actual PoA ID from grant metadata
+		
+		// Create a temporary request result for GAuth+ validation
+		grantResult := &RequestComplianceResult{
+			Valid:    true,
+			Checks:   make(map[string]bool),
+			Warnings: make([]string, 0),
+		}
+		
+		if err := v.validatePoAWithGAuthPlus(ctx, poaID, grant.PowerOfAttorney, agentID, actionType, grantResult); err != nil {
+			result.Valid = false
+			result.FailureReason = fmt.Sprintf("GAuth+ validation failed: %v", err)
+			result.GAuthPlusValidation = grantResult.GAuthPlusValidation
+			return result, err
+		}
+		
+		// Transfer GAuth+ validation results to grant result
+		result.GAuthPlusValidation = grantResult.GAuthPlusValidation
+		result.Warnings = append(result.Warnings, grantResult.Warnings...)
+	}
+
 	// Step 6: Validate legal framework consistency
 	if err := v.validateGrantLegalFramework(ctx, grant, result); err != nil {
 		result.Valid = false
@@ -344,6 +404,44 @@ func (v *ComplianceValidator) validatePoA(
 		return &GAuthError{
 			Code:    "inactive_poa",
 			Message: fmt.Sprintf("PoA authorized client is not active: %s", poaDef.Parties.AuthorizedClient.StatusEnum),
+		}
+	}
+
+	return nil
+}
+
+// validatePoAWithGAuthPlus performs GAuth+ validation on the PoA
+func (v *ComplianceValidator) validatePoAWithGAuthPlus(
+	ctx context.Context,
+	poaID string,
+	poaDef *poa.PoADefinition,
+	agentID string,
+	actionType string,
+	result *RequestComplianceResult,
+) error {
+	if !v.enforceGAuthPlus || v.gauthPlusValidator == nil {
+		// GAuth+ enforcement disabled or validator not set
+		return nil
+	}
+
+	gauthPlusResult, err := v.gauthPlusValidator.ValidatePoAWithGAuthPlus(ctx, poaID, poaDef, agentID, actionType)
+	if err != nil {
+		return fmt.Errorf("GAuth+ validation failed: %w", err)
+	}
+
+	result.GAuthPlusValidation = gauthPlusResult
+	result.Checks["gauthplus_validation"] = gauthPlusResult.Valid
+
+	// Merge GAuth+ warnings into result warnings
+	if len(gauthPlusResult.Warnings) > 0 {
+		result.Warnings = append(result.Warnings, gauthPlusResult.Warnings...)
+	}
+
+	// If GAuth+ validation failed, add failure reason
+	if !gauthPlusResult.Valid {
+		return &GAuthError{
+			Code:    "gauthplus_validation_failed",
+			Message: gauthPlusResult.FailureReason,
 		}
 	}
 
@@ -718,22 +816,24 @@ func (v *ComplianceValidator) validateGrantRestrictions(
 
 // RequestComplianceResult represents request compliance validation result
 type RequestComplianceResult struct {
-	Valid           bool                   `json:"valid"`
-	ValidationTime  time.Time              `json:"validation_time"`
-	Checks          map[string]bool        `json:"checks"`
-	ChainValidation *ChainValidationResult `json:"chain_validation,omitempty"`
-	FailureReason   string                 `json:"failure_reason,omitempty"`
-	Warnings        []string               `json:"warnings,omitempty"`
+	Valid               bool                        `json:"valid"`
+	ValidationTime      time.Time                   `json:"validation_time"`
+	Checks              map[string]bool             `json:"checks"`
+	ChainValidation     *ChainValidationResult      `json:"chain_validation,omitempty"`
+	GAuthPlusValidation *GAuthPlusValidationResult  `json:"gauthplus_validation,omitempty"`
+	FailureReason       string                      `json:"failure_reason,omitempty"`
+	Warnings            []string                    `json:"warnings,omitempty"`
 }
 
 // GrantComplianceResult represents grant compliance validation result
 type GrantComplianceResult struct {
-	Valid           bool                   `json:"valid"`
-	ValidationTime  time.Time              `json:"validation_time"`
-	Checks          map[string]bool        `json:"checks"`
-	ChainValidation *ChainValidationResult `json:"chain_validation,omitempty"`
-	FailureReason   string                 `json:"failure_reason,omitempty"`
-	Warnings        []string               `json:"warnings,omitempty"`
+	Valid               bool                        `json:"valid"`
+	ValidationTime      time.Time                   `json:"validation_time"`
+	Checks              map[string]bool             `json:"checks"`
+	ChainValidation     *ChainValidationResult      `json:"chain_validation,omitempty"`
+	GAuthPlusValidation *GAuthPlusValidationResult  `json:"gauthplus_validation,omitempty"`
+	FailureReason       string                      `json:"failure_reason,omitempty"`
+	Warnings            []string                    `json:"warnings,omitempty"`
 }
 
 // PIPClient interface for Power Information Point

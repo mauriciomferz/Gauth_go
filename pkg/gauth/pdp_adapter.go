@@ -212,21 +212,36 @@ func (v *simpleTokenValidator) ValidateExtendedToken(ctx context.Context, token 
 // SimplePDP is a PDP implementation with PAP integration for RFC-0111 compliance
 // It provides policy-based authorization decisions with centralized policy management
 type SimplePDP struct {
-	pap *PowerAdministrationPoint
+	pap                *PowerAdministrationPoint
+	gauthPlusValidator *GAuthPlusValidator
+	enforceGAuthPlus   bool
 }
 
 // NewSimplePDP creates a new SimplePDP instance
 func NewSimplePDP() *SimplePDP {
 	return &SimplePDP{
-		pap: nil, // No PAP integration by default (backward compatible)
+		pap:              nil,   // No PAP integration by default (backward compatible)
+		enforceGAuthPlus: false, // GAuth+ disabled by default
 	}
 }
 
 // NewSimplePDPWithPAP creates a new SimplePDP instance with PAP integration
 func NewSimplePDPWithPAP(pap *PowerAdministrationPoint) *SimplePDP {
 	return &SimplePDP{
-		pap: pap,
+		pap:              pap,
+		enforceGAuthPlus: false,
 	}
+}
+
+// SetGAuthPlusValidator sets the GAuth+ validator and enables enforcement
+func (pdp *SimplePDP) SetGAuthPlusValidator(validator *GAuthPlusValidator) {
+	pdp.gauthPlusValidator = validator
+	pdp.enforceGAuthPlus = true
+}
+
+// SetEnforceGAuthPlus enables/disables GAuth+ enforcement
+func (pdp *SimplePDP) SetEnforceGAuthPlus(enforce bool) {
+	pdp.enforceGAuthPlus = enforce
 }
 
 // MakeDecision implements the PowerDecisionPoint interface
@@ -270,18 +285,48 @@ func (pdp *SimplePDP) evaluateRequest(request *AuthorizationDecisionRequest) (bo
 		return false, "authorization chain not validated"
 	}
 
-	// Step 3: Check action type against authorized scope
+	// Step 3: Check GAuth+ policies (if enabled)
+	if pdp.enforceGAuthPlus && pdp.gauthPlusValidator != nil {
+		agentID := request.PowerOfAttorney.Parties.AuthorizedClient.Identity
+		// Note: Using agent identity as PoA ID placeholder
+		// In production, track PoA ID separately in AuthorizationDecisionRequest
+		poaID := agentID // TODO: Get actual PoA ID from request
+		gauthPlusResult, err := pdp.gauthPlusValidator.ValidatePoAWithGAuthPlus(
+			context.Background(),
+			poaID,
+			request.PowerOfAttorney,
+			agentID,
+			request.ActionType,
+		)
+		
+		if err != nil {
+			return false, fmt.Sprintf("GAuth+ validation error: %v", err)
+		}
+		
+		if !gauthPlusResult.Valid {
+			return false, fmt.Sprintf("GAuth+ policy violation: %s", gauthPlusResult.FailureReason)
+		}
+		
+		// Log any GAuth+ warnings (successor takeover, capability expiration, etc.)
+		if len(gauthPlusResult.Warnings) > 0 {
+			for _, warning := range gauthPlusResult.Warnings {
+				log.Printf("GAuth+ Warning: %s", warning)
+			}
+		}
+	}
+
+	// Step 4: Check action type against authorized scope
 	if !pdp.isActionAuthorized(request.ActionType, request.PowerOfAttorney) {
 		return false, fmt.Sprintf("action type '%s' not authorized in PoA", request.ActionType)
 	}
 
-	// Step 4: Check resource access
+	// Step 5: Check resource access
 	if request.ResourceID != "" && !pdp.isResourceAuthorized(request.ResourceID, request.PowerOfAttorney) {
 		return false, fmt.Sprintf("resource '%s' not authorized in PoA scope", request.ResourceID)
 	}
 
 	// All checks passed
-	return true, "authorization granted per PoA and chain validation"
+	return true, "authorization granted per PoA, chain, and GAuth+ validation"
 }
 
 // isActionAuthorized checks if the action type is allowed in the PoA

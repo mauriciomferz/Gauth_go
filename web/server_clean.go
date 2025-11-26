@@ -3663,7 +3663,11 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 		adminGroup.POST("/policy-templates/:id/clone", policyTemplatesHandler.ClonePolicyTemplate)
 		adminGroup.DELETE("/policy-templates/:id", policyTemplatesHandler.DeletePolicyTemplate)
 
-		fmt.Fprintln(os.Stderr, "[admin] handlers registered: auth, poa, resilience, events, authz, config, tokens, metrics, audit, subscribers, revocation, api-keys, security, oidc, policy-templates (15 total)")			// OIDC authentication flow handler
+		// GAuth+ enhanced authorization handler
+		gauthPlusHandler := adminHandlers.NewGAuthPlusHandler(dbPool)
+		gauthPlusHandler.RegisterRoutes(adminGroup)
+
+		fmt.Fprintln(os.Stderr, "[admin] handlers registered: auth, poa, resilience, events, authz, config, tokens, metrics, audit, subscribers, revocation, api-keys, security, oidc, policy-templates, gauthplus (16 total)")			// OIDC authentication flow handler
 			oidcAuthHandler := authHandlers.NewOIDCAuthHandler(dbPool)
 			authGroup := r.Group("/auth")
 			oidcAuthHandler.RegisterRoutes(authGroup)
@@ -6205,6 +6209,9 @@ func (s *BetaServer) routes() {
 			fmt.Fprintf(os.Stderr, "[RFC-0111]     DELETE /api/v1/beta/poa/:id (Revoke PoA)\n")
 			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST   /api/v1/beta/poa/:id/validate (Validate PoA)\n")
 		}
+
+		// Initialize GAuth+ management API endpoints if enabled
+		s.InitializeGAuthPlusEndpoints()
 	} else if err != nil {
 		fmt.Fprintf(os.Stderr, "[RFC-0111] Initialization failed: %v\n", err)
 	}
