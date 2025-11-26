@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauthplus"
+	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/metrics"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
 )
 
@@ -217,6 +218,11 @@ func (v *GAuthPlusValidator) checkSuccessorStatus(
 	poaID string,
 	primaryAgentID string,
 ) (*SuccessorCheckResult, error) {
+	start := time.Now()
+	defer func() {
+		metrics.RecordGAuthPlusValidation("successor", "checked", time.Since(start).Seconds())
+	}()
+
 	result := &SuccessorCheckResult{
 		CheckPerformed:   true,
 		SuccessorActive:  false,
@@ -237,6 +243,7 @@ func (v *GAuthPlusValidator) checkSuccessorStatus(
 		result.SuccessorActive = true
 		result.ActiveSuccessor = activeSuccessor
 		result.EffectiveAgentID = activeSuccessor.SuccessorAgentID
+		metrics.RecordGAuthPlusSuccessorActivation()
 	}
 
 	return result, nil
@@ -248,6 +255,11 @@ func (v *GAuthPlusValidator) checkDelegationChain(
 	poaID string,
 	agentID string,
 ) (*DelegationCheckResult, error) {
+	start := time.Now()
+	defer func() {
+		metrics.RecordGAuthPlusValidation("delegation", "checked", time.Since(start).Seconds())
+	}()
+
 	result := &DelegationCheckResult{
 		CheckPerformed:   true,
 		DelegationValid:  true,
@@ -268,6 +280,11 @@ func (v *GAuthPlusValidator) checkDelegationChain(
 
 	result.DelegationChain = chain
 	result.CurrentDepth = len(chain)
+	
+	// Record delegation depth metric
+	if len(chain) > 0 {
+		metrics.RecordGAuthPlusDelegationDepth(len(chain))
+	}
 
 	// Check max depth from first delegation (if any)
 	if len(chain) > 0 {

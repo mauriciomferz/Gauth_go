@@ -246,6 +246,95 @@ var (
 			Buckets: []float64{.001, .005, .01, .025, .05, .1},
 		},
 	)
+
+	// GAuth+ Metrics
+	GAuthPlusValidationsTotal = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "gauthplus_validations_total",
+			Help: "Total number of GAuth+ validations performed",
+		},
+		[]string{"feature", "result"},
+	)
+
+	GAuthPlusValidationDuration = promauto.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    "gauthplus_validation_duration_seconds",
+			Help:    "Duration of GAuth+ feature validations in seconds",
+			Buckets: []float64{.001, .005, .01, .025, .05, .1, .25, .5},
+		},
+		[]string{"feature"},
+	)
+
+	GAuthPlusCacheHits = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "gauthplus_cache_hits_total",
+			Help: "Total number of GAuth+ cache hits",
+		},
+		[]string{"cache_type"},
+	)
+
+	GAuthPlusCacheMisses = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "gauthplus_cache_misses_total",
+			Help: "Total number of GAuth+ cache misses",
+		},
+		[]string{"cache_type"},
+	)
+
+	GAuthPlusCacheSize = promauto.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "gauthplus_cache_size",
+			Help: "Current number of entries in GAuth+ caches",
+		},
+		[]string{"cache_type"},
+	)
+
+	GAuthPlusPolicyViolations = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "gauthplus_policy_violations_total",
+			Help: "Total number of GAuth+ policy violations detected",
+		},
+		[]string{"policy_type", "severity"},
+	)
+
+	GAuthPlusSuccessorActivations = promauto.NewCounter(
+		prometheus.CounterOpts{
+			Name: "gauthplus_successor_activations_total",
+			Help: "Total number of successor AI activations",
+		},
+	)
+
+	GAuthPlusDelegationDepth = promauto.NewHistogram(
+		prometheus.HistogramOpts{
+			Name:    "gauthplus_delegation_depth",
+			Help:    "Distribution of delegation chain depths",
+			Buckets: []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+		},
+	)
+
+	GAuthPlusDualControlApprovals = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "gauthplus_dual_control_approvals_total",
+			Help: "Total number of dual control approvals",
+		},
+		[]string{"action_type", "status"},
+	)
+
+	GAuthPlusCapabilityLevel = promauto.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "gauthplus_capability_level",
+			Help: "Current capability level of AI agents (L0-L5 mapped to 0-5)",
+		},
+		[]string{"agent_id"},
+	)
+
+	GAuthPlusFiduciaryViolations = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "gauthplus_fiduciary_violations_total",
+			Help: "Total number of fiduciary duty violations",
+		},
+		[]string{"duty_type", "severity"},
+	)
 )
 
 // RecordMCPRequest records an MCP request with status
@@ -302,4 +391,73 @@ func RecordError(errorType, component string) {
 func RecordAuditLog(eventType string, duration float64) {
 	AuditLogsWritten.WithLabelValues(eventType).Inc()
 	AuditLogWriteDuration.Observe(duration)
+}
+
+// GAuth+ Metric Recording Functions
+
+// RecordGAuthPlusValidation records a GAuth+ feature validation
+func RecordGAuthPlusValidation(feature, result string, duration float64) {
+	GAuthPlusValidationsTotal.WithLabelValues(feature, result).Inc()
+	GAuthPlusValidationDuration.WithLabelValues(feature).Observe(duration)
+}
+
+// RecordGAuthPlusCacheOperation records a cache hit or miss
+func RecordGAuthPlusCacheOperation(cacheType string, hit bool) {
+	if hit {
+		GAuthPlusCacheHits.WithLabelValues(cacheType).Inc()
+	} else {
+		GAuthPlusCacheMisses.WithLabelValues(cacheType).Inc()
+	}
+}
+
+// UpdateGAuthPlusCacheSize updates the current cache size
+func UpdateGAuthPlusCacheSize(cacheType string, size int) {
+	GAuthPlusCacheSize.WithLabelValues(cacheType).Set(float64(size))
+}
+
+// RecordGAuthPlusPolicyViolation records a policy violation
+func RecordGAuthPlusPolicyViolation(policyType, severity string) {
+	GAuthPlusPolicyViolations.WithLabelValues(policyType, severity).Inc()
+}
+
+// RecordGAuthPlusSuccessorActivation records a successor activation
+func RecordGAuthPlusSuccessorActivation() {
+	GAuthPlusSuccessorActivations.Inc()
+}
+
+// RecordGAuthPlusDelegationDepth records the depth of a delegation chain
+func RecordGAuthPlusDelegationDepth(depth int) {
+	GAuthPlusDelegationDepth.Observe(float64(depth))
+}
+
+// RecordGAuthPlusDualControlApproval records a dual control approval
+func RecordGAuthPlusDualControlApproval(actionType, status string) {
+	GAuthPlusDualControlApprovals.WithLabelValues(actionType, status).Inc()
+}
+
+// UpdateGAuthPlusCapabilityLevel updates an agent's capability level (L0-L5 → 0-5)
+func UpdateGAuthPlusCapabilityLevel(agentID, level string) {
+	var numericLevel float64
+	switch level {
+	case "L0":
+		numericLevel = 0
+	case "L1":
+		numericLevel = 1
+	case "L2":
+		numericLevel = 2
+	case "L3":
+		numericLevel = 3
+	case "L4":
+		numericLevel = 4
+	case "L5":
+		numericLevel = 5
+	default:
+		numericLevel = 0
+	}
+	GAuthPlusCapabilityLevel.WithLabelValues(agentID).Set(numericLevel)
+}
+
+// RecordGAuthPlusFiduciaryViolation records a fiduciary duty violation
+func RecordGAuthPlusFiduciaryViolation(dutyType, severity string) {
+	GAuthPlusFiduciaryViolations.WithLabelValues(dutyType, severity).Inc()
 }

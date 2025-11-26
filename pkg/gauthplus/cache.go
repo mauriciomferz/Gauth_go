@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 	"time"
+
+	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/metrics"
 )
 
 // CapabilityCache provides thread-safe caching for AI capability assessments
@@ -51,14 +53,17 @@ func (c *CapabilityCache) Get(agentID string) (*AICapabilityAssessment, bool) {
 
 	entry, exists := c.cache[agentID]
 	if !exists {
+		metrics.RecordGAuthPlusCacheOperation("capability", false)
 		return nil, false
 	}
 
 	// Check if expired
 	if time.Now().After(entry.expiresAt) {
+		metrics.RecordGAuthPlusCacheOperation("capability", false)
 		return nil, false
 	}
 
+	metrics.RecordGAuthPlusCacheOperation("capability", true)
 	return entry.data, true
 }
 
@@ -71,6 +76,7 @@ func (c *CapabilityCache) Set(agentID string, assessment *AICapabilityAssessment
 		data:      assessment,
 		expiresAt: time.Now().Add(c.ttl),
 	}
+	metrics.UpdateGAuthPlusCacheSize("capability", len(c.cache))
 }
 
 // Invalidate removes a specific entry from cache
@@ -122,14 +128,17 @@ func (d *DelegationChainCache) Get(agentID string) ([]*AIDelegation, bool) {
 
 	entry, exists := d.cache[agentID]
 	if !exists {
+		metrics.RecordGAuthPlusCacheOperation("delegation", false)
 		return nil, false
 	}
 
 	// Check if expired
 	if time.Now().After(entry.expiresAt) {
+		metrics.RecordGAuthPlusCacheOperation("delegation", false)
 		return nil, false
 	}
 
+	metrics.RecordGAuthPlusCacheOperation("delegation", true)
 	return entry.data, true
 }
 
@@ -142,6 +151,7 @@ func (d *DelegationChainCache) Set(agentID string, chain []*AIDelegation) {
 		data:      chain,
 		expiresAt: time.Now().Add(d.ttl),
 	}
+	metrics.UpdateGAuthPlusCacheSize("delegation", len(d.cache))
 }
 
 // Invalidate removes a specific entry from cache
