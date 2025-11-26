@@ -53,13 +53,13 @@ func (h *WebhookHandler) CreateWebhook(w http.ResponseWriter, r *http.Request) {
 
 	var req webhook.CreateWebhookRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		respondError(w, http.StatusBadRequest, "invalid_request", "Invalid request body")
+		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
 	wh, secret, err := h.manager.CreateWebhook(r.Context(), userID, &req)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "creation_failed", err.Error())
+		respondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -76,7 +76,7 @@ func (h *WebhookHandler) CreateWebhook(w http.ResponseWriter, r *http.Request) {
 func (h *WebhookHandler) ListWebhooks(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("user_id").(string)
 	if !ok {
-		respondError(w, http.StatusUnauthorized, "unauthorized", "User not authenticated")
+		respondError(w, http.StatusUnauthorized, "User not authenticated")
 		return
 	}
 
@@ -92,7 +92,7 @@ func (h *WebhookHandler) ListWebhooks(w http.ResponseWriter, r *http.Request) {
 
 	webhooks, err := h.manager.ListWebhooks(r.Context(), query)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "list_failed", err.Error())
+		respondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -128,17 +128,17 @@ func (h *WebhookHandler) UpdateWebhook(w http.ResponseWriter, r *http.Request) {
 
 	var req webhook.UpdateWebhookRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		respondError(w, http.StatusBadRequest, "invalid_request", "Invalid request body")
+		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
 	wh, err := h.manager.UpdateWebhook(r.Context(), id, &req)
 	if err != nil {
 		if err == webhook.ErrWebhookNotFound {
-			respondError(w, http.StatusNotFound, "not_found", "Webhook not found")
+			respondError(w, http.StatusNotFound, "Webhook not found")
 			return
 		}
-		respondError(w, http.StatusInternalServerError, "update_failed", err.Error())
+		respondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -153,10 +153,10 @@ func (h *WebhookHandler) DeleteWebhook(w http.ResponseWriter, r *http.Request) {
 	err := h.manager.DeleteWebhook(r.Context(), id)
 	if err != nil {
 		if err == webhook.ErrWebhookNotFound {
-			respondError(w, http.StatusNotFound, "not_found", "Webhook not found")
+			respondError(w, http.StatusNotFound, "Webhook not found")
 			return
 		}
-		respondError(w, http.StatusInternalServerError, "delete_failed", err.Error())
+		respondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -173,10 +173,10 @@ func (h *WebhookHandler) RegenerateSecret(w http.ResponseWriter, r *http.Request
 	secret, err := h.manager.RegenerateSecret(r.Context(), id)
 	if err != nil {
 		if err == webhook.ErrWebhookNotFound {
-			respondError(w, http.StatusNotFound, "not_found", "Webhook not found")
+			respondError(w, http.StatusNotFound, "Webhook not found")
 			return
 		}
-		respondError(w, http.StatusInternalServerError, "regenerate_failed", err.Error())
+		respondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -193,7 +193,7 @@ func (h *WebhookHandler) TestWebhook(w http.ResponseWriter, r *http.Request) {
 
 	userID, ok := r.Context().Value("user_id").(string)
 	if !ok {
-		respondError(w, http.StatusUnauthorized, "unauthorized", "User not authenticated")
+		respondError(w, http.StatusUnauthorized, "User not authenticated")
 		return
 	}
 
@@ -201,10 +201,10 @@ func (h *WebhookHandler) TestWebhook(w http.ResponseWriter, r *http.Request) {
 	wh, err := h.manager.GetWebhook(r.Context(), id)
 	if err != nil {
 		if err == webhook.ErrWebhookNotFound {
-			respondError(w, http.StatusNotFound, "not_found", "Webhook not found")
+			respondError(w, http.StatusNotFound, "Webhook not found")
 			return
 		}
-		respondError(w, http.StatusInternalServerError, "fetch_failed", err.Error())
+		respondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -212,7 +212,7 @@ func (h *WebhookHandler) TestWebhook(w http.ResponseWriter, r *http.Request) {
 	testEvent := &webhook.Event{
 		ID:        "test-" + id,
 		Type:      webhook.EventPoACreated,
-		Timestamp: r.Context().Value("timestamp").(time.Time),
+		Timestamp: time.Now(),
 		UserID:    userID,
 		Data: map[string]interface{}{
 			"test":    true,
@@ -227,7 +227,7 @@ func (h *WebhookHandler) TestWebhook(w http.ResponseWriter, r *http.Request) {
 	// Dispatch test event
 	err = h.dispatcher.Dispatch(r.Context(), testEvent)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "dispatch_failed", err.Error())
+		respondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -249,7 +249,7 @@ func (h *WebhookHandler) ListDeliveries(w http.ResponseWriter, r *http.Request) 
 
 	deliveries, err := h.dispatcher.ListDeliveries(r.Context(), query)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "list_failed", err.Error())
+		respondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -266,7 +266,7 @@ func (h *WebhookHandler) GetDelivery(w http.ResponseWriter, r *http.Request) {
 
 	delivery, err := h.dispatcher.GetDelivery(r.Context(), deliveryID)
 	if err != nil {
-		respondError(w, http.StatusNotFound, "not_found", "Delivery not found")
+		respondError(w, http.StatusNotFound, "Delivery not found")
 		return
 	}
 
@@ -281,10 +281,10 @@ func (h *WebhookHandler) GetWebhookStats(w http.ResponseWriter, r *http.Request)
 	stats, err := h.manager.GetWebhookStats(r.Context(), id)
 	if err != nil {
 		if err == webhook.ErrWebhookNotFound {
-			respondError(w, http.StatusNotFound, "not_found", "Webhook not found")
+			respondError(w, http.StatusNotFound, "Webhook not found")
 			return
 		}
-		respondError(w, http.StatusInternalServerError, "stats_failed", err.Error())
+		respondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -299,10 +299,9 @@ func respondJSON(w http.ResponseWriter, status int, data interface{}) {
 	json.NewEncoder(w).Encode(data)
 }
 
-func respondError(w http.ResponseWriter, status int, code, message string) {
+func respondError(w http.ResponseWriter, status int, message string) {
 	respondJSON(w, status, map[string]interface{}{
 		"error": map[string]string{
-			"code":    code,
 			"message": message,
 		},
 	})
