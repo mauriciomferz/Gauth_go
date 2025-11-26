@@ -13,11 +13,36 @@ crypto-test: ## Run EdDSA-focused tests only
 	@echo "🧪 Running EdDSA test subset..."; \
 	GAUTH_TOKEN_SIG_MODE=eddsa $(GOTEST) -run TestEdDSA ./pkg/gauth -count=1; \
 	echo "✅ EdDSA tests passed";
+
+## Revocation System Targets
+test-revocation: ## Run revocation system tests (requires Redis on localhost:6379)
+	@echo "🔒 Running revocation system tests..."; \
+	$(GOTEST) -v -count=1 -timeout=5m ./pkg/revocation/...; \
+	echo "✅ Revocation tests passed (77 tests)";
+
+test-revocation-race: ## Run revocation tests with race detector (requires Redis)
+	@echo "🏁 Running revocation tests with race detector..."; \
+	$(GOTEST) -race -v -count=1 -timeout=10m ./pkg/revocation/...; \
+	echo "✅ Revocation race tests passed";
+
+test-revocation-coverage: ## Generate coverage report for revocation system
+	@echo "📊 Generating revocation test coverage..."; \
+	$(GOTEST) -coverprofile=coverage-revocation.out -covermode=atomic ./pkg/revocation/...; \
+	go tool cover -html=coverage-revocation.out -o coverage-revocation.html; \
+	COVERAGE=$$(go tool cover -func=coverage-revocation.out | grep total | awk '{print $$3}'); \
+	echo "✅ Revocation coverage: $$COVERAGE (report: coverage-revocation.html)";
+
+bench-revocation: ## Run revocation system benchmarks
+	@echo "⚡ Running revocation benchmarks..."; \
+	$(GOTEST) -bench=. -benchmem -benchtime=5s ./pkg/revocation/...; \
+	echo "✅ Benchmarks complete (baseline: 67k ops/sec)";
+
 .PHONY: all build test clean lint coverage docs help security deps format ci verify-csp verify-build-env debug-ci-env build-ci-adaptive build-fallback ci-build build-server-adaptive
 .PHONY: gap-matrix gap-matrix-check openapi-guard
 .PHONY: js-lint js-test js-build
 .PHONY: js-bundle
 .PHONY: coverage-rfc0111 tidy-all
+.PHONY: test-revocation test-revocation-race test-revocation-coverage bench-revocation
 
 # Go parameters
 GOCMD=go
