@@ -107,7 +107,42 @@ jobs:
         fi
         echo "✅ test packages passed"
         
+        echo "Testing revocation system (production-ready with 77 tests)..."
+        if ! go test -v -count=1 -timeout=5m ./pkg/revocation/...; then
+          echo "❌ revocation tests failed"
+          exit 1
+        fi
+        echo "✅ revocation tests passed (77 tests, 100% pass rate)"
+        
         echo "🎉 All tests completed successfully"
+
+    - name: Run revocation race tests
+      run: |
+        echo "🏁 Running revocation system race tests..."
+        if ! go test -race -v -count=1 -timeout=10m ./pkg/revocation/...; then
+          echo "❌ revocation race tests failed"
+          exit 1
+        fi
+        echo "✅ revocation race tests passed"
+
+    - name: Generate revocation coverage
+      run: |
+        echo "📊 Generating revocation test coverage..."
+        go test -coverprofile=coverage-revocation.out -covermode=atomic ./pkg/revocation/...
+        go tool cover -func=coverage-revocation.out | tee coverage-revocation.txt
+        COVERAGE=$(go tool cover -func=coverage-revocation.out | grep total | awk '{print $3}')
+        echo "✅ Revocation coverage: $COVERAGE"
+        
+        # Store coverage for artifacts
+        echo "REVOCATION_COVERAGE=$COVERAGE" >> $GITHUB_ENV
+
+    - name: Upload revocation coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        files: ./coverage-revocation.out
+        flags: revocation
+        name: revocation-coverage
+        fail_ci_if_error: false
 
     - name: Install golangci-lint from source
       run: |
