@@ -1,7 +1,7 @@
 package web
 
 import (
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/docs"
+	"github.com/mauriciomferz/Gauth_go/web/handlers/docs"
 )
 
 // RegisterAPIDocumentation registers API documentation endpoints (Swagger UI, ReDoc, OpenAPI spec)

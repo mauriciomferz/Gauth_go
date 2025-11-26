@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	imetrics "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
-	notary "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
+	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
 )
 
 // TestCombinedAnchorEmissionWithRotation ensures rotation ledger head participates in combined hash.

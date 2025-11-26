@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	a "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/testutil"
+	a "github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/testutil"
 )
 
 const benchUser = "user"

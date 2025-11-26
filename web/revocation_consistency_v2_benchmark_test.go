@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	delegation "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/delegation"
+	delegation "github.com/mauriciomferz/Gauth_go/pkg/delegation"
 )
 
 // BenchmarkRevocationConsistencyV2Proof measures generation + verification latency for

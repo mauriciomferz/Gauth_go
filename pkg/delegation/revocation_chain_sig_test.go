@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
+	"github.com/mauriciomferz/Gauth_go/internal/crypto"
 )
 
 // helper to init a short-lived manager (1h TTL) and assign to global registry.

@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"sort"
 
-	gerrs "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/errors"
+	gerrs "github.com/mauriciomferz/Gauth_go/pkg/errors"
 )
 
 // Category represents a coarse grouping for error codes to enable filtering

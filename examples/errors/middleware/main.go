@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	mw "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/examples/errors/middleware/internal"
-	gautherr "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/errors"
+	mw "github.com/mauriciomferz/Gauth_go/examples/errors/middleware/internal"
+	gautherr "github.com/mauriciomferz/Gauth_go/pkg/errors"
 )
 
 // demoHandler is a sample handler that always returns an error

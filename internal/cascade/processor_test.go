@@ -5,16 +5,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/config"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+	"github.com/mauriciomferz/Gauth_go/internal/config"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 )
 
 //nolint:gocyclo // Comprehensive cascade processor test
 func TestCascadeProcessor(t *testing.T) {
-	createTestPOA := func(id, parentID string, depth int) *rfc0111.PowerOfAttorney {
+	createTestPOA := func(id, parentID string, depth int) *gauth_rfc_001.PowerOfAttorney {
 		now := time.Now().UTC()
-		return &rfc0111.PowerOfAttorney{
+		return &gauth_rfc_001.PowerOfAttorney{
 			ID:          id,
 			Version:     1,
 			Grantor:     "alice",
@@ -22,7 +22,7 @@ func TestCascadeProcessor(t *testing.T) {
 			Scope:       []string{"read"},
 			ValidFrom:   now,
 			ValidUntil:  now.Add(time.Hour),
-			Status:      rfc0111.POAStatusActive,
+			Status:      gauth_rfc_001.POAStatusActive,
 			CreatedAt:   now,
 			UpdatedAt:   now,
 			ParentPOAID: parentID,
@@ -30,8 +30,8 @@ func TestCascadeProcessor(t *testing.T) {
 		}
 	}
 
-	setupHierarchy := func() (*memoryRepo, []*rfc0111.PowerOfAttorney) {
-		repo := &memoryRepo{store: make(map[string]*rfc0111.PowerOfAttorney)}
+	setupHierarchy := func() (*memoryRepo, []*gauth_rfc_001.PowerOfAttorney) {
+		repo := &memoryRepo{store: make(map[string]*gauth_rfc_001.PowerOfAttorney)}
 
 		// Create hierarchy: root -> child1 -> grandchild1
 		//                        -> child2
@@ -40,7 +40,7 @@ func TestCascadeProcessor(t *testing.T) {
 		child2 := createTestPOA("child2", "root", 1)
 		grandchild1 := createTestPOA("grandchild1", "child1", 2)
 
-		poas := []*rfc0111.PowerOfAttorney{root, child1, child2, grandchild1}
+		poas := []*gauth_rfc_001.PowerOfAttorney{root, child1, child2, grandchild1}
 		for _, poa := range poas {
 			_ = repo.Create(poa)
 		}
@@ -84,23 +84,23 @@ func TestCascadeProcessor(t *testing.T) {
 
 		// Check that descendants are actually revoked
 		child1, _ := repo.Get("child1")
-		if child1.Status != rfc0111.POAStatusRevoked {
+		if child1.Status != gauth_rfc_001.POAStatusRevoked {
 			t.Errorf("child1 should be revoked, got %s", child1.Status)
 		}
 
 		child2, _ := repo.Get("child2")
-		if child2.Status != rfc0111.POAStatusRevoked {
+		if child2.Status != gauth_rfc_001.POAStatusRevoked {
 			t.Errorf("child2 should be revoked, got %s", child2.Status)
 		}
 
 		grandchild1, _ := repo.Get("grandchild1")
-		if grandchild1.Status != rfc0111.POAStatusRevoked {
+		if grandchild1.Status != gauth_rfc_001.POAStatusRevoked {
 			t.Errorf("grandchild1 should be revoked, got %s", grandchild1.Status)
 		}
 
 		// Root should remain unchanged
 		root, _ := repo.Get("root")
-		if root.Status != rfc0111.POAStatusActive {
+		if root.Status != gauth_rfc_001.POAStatusActive {
 			t.Errorf("root should remain active, got %s", root.Status)
 		}
 	})
@@ -129,7 +129,7 @@ func TestCascadeProcessor(t *testing.T) {
 
 		// Check that descendants are suspended
 		child1, _ := repo.Get("child1")
-		if child1.Status != rfc0111.POAStatusSuspended {
+		if child1.Status != gauth_rfc_001.POAStatusSuspended {
 			t.Errorf("child1 should be suspended, got %s", child1.Status)
 		}
 
@@ -219,13 +219,13 @@ func TestCascadeProcessor(t *testing.T) {
 
 		// Check that grandchild is not revoked
 		grandchild1, _ := repo.Get("grandchild1")
-		if grandchild1.Status != rfc0111.POAStatusActive {
+		if grandchild1.Status != gauth_rfc_001.POAStatusActive {
 			t.Errorf("grandchild1 should remain active with depth limit, got %s", grandchild1.Status)
 		}
 
 		// But children should be revoked
 		child1, _ := repo.Get("child1")
-		if child1.Status != rfc0111.POAStatusRevoked {
+		if child1.Status != gauth_rfc_001.POAStatusRevoked {
 			t.Errorf("child1 should be revoked, got %s", child1.Status)
 		}
 	})
@@ -282,7 +282,7 @@ func TestCascadeProcessor(t *testing.T) {
 	})
 
 	t.Run("no descendants to process", func(t *testing.T) {
-		repo := &memoryRepo{store: make(map[string]*rfc0111.PowerOfAttorney)}
+		repo := &memoryRepo{store: make(map[string]*gauth_rfc_001.PowerOfAttorney)}
 
 		// Only create root with no children
 		root := createTestPOA("root", "", 0)
@@ -342,21 +342,21 @@ func TestCascadeProcessor(t *testing.T) {
 
 // memoryRepo is a test implementation of POARepository
 type memoryRepo struct {
-	store map[string]*rfc0111.PowerOfAttorney
+	store map[string]*gauth_rfc_001.PowerOfAttorney
 }
 
-func (m *memoryRepo) Create(p *rfc0111.PowerOfAttorney) error {
+func (m *memoryRepo) Create(p *gauth_rfc_001.PowerOfAttorney) error {
 	m.store[p.ID] = p
 	return nil
 }
 
-func (m *memoryRepo) Get(id string) (*rfc0111.PowerOfAttorney, bool) {
+func (m *memoryRepo) Get(id string) (*gauth_rfc_001.PowerOfAttorney, bool) {
 	p, ok := m.store[id]
 	return p, ok
 }
 
-func (m *memoryRepo) ListByPrincipal(principal string) []*rfc0111.PowerOfAttorney {
-	var result []*rfc0111.PowerOfAttorney
+func (m *memoryRepo) ListByPrincipal(principal string) []*gauth_rfc_001.PowerOfAttorney {
+	var result []*gauth_rfc_001.PowerOfAttorney
 	for _, p := range m.store {
 		if p.Grantor == principal || p.Grantee == principal {
 			result = append(result, p)
@@ -365,7 +365,7 @@ func (m *memoryRepo) ListByPrincipal(principal string) []*rfc0111.PowerOfAttorne
 	return result
 }
 
-func (m *memoryRepo) Update(p *rfc0111.PowerOfAttorney) error {
+func (m *memoryRepo) Update(p *gauth_rfc_001.PowerOfAttorney) error {
 	if _, ok := m.store[p.ID]; !ok {
 		return nil // Not found
 	}
@@ -373,12 +373,12 @@ func (m *memoryRepo) Update(p *rfc0111.PowerOfAttorney) error {
 	return nil
 }
 
-func (m *memoryRepo) ListDescendants(parentPoaID string, maxDepth int) ([]*rfc0111.PowerOfAttorney, error) {
+func (m *memoryRepo) ListDescendants(parentPoaID string, maxDepth int) ([]*gauth_rfc_001.PowerOfAttorney, error) {
 	if parentPoaID == "" {
-		return []*rfc0111.PowerOfAttorney{}, nil
+		return []*gauth_rfc_001.PowerOfAttorney{}, nil
 	}
 
-	var result []*rfc0111.PowerOfAttorney
+	var result []*gauth_rfc_001.PowerOfAttorney
 	visited := make(map[string]bool)
 
 	var findDescendants func(currentParentID string, currentDepth int)

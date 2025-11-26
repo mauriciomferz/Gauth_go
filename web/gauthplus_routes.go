@@ -1,8 +1,8 @@
 package web
 
 import (
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauthplus"
-	gauthplushandlers "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/gauthplus"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
+	gauthplushandlers "github.com/mauriciomferz/Gauth_go/web/handlers/gauthplus"
 )
 
 // RegisterGAuthPlusEndpoints registers all GAuth+ management endpoints for the five advanced features:

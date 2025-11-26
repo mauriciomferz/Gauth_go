@@ -14,7 +14,7 @@ This PR merges the `beta-refactor` branch, delivering a cleanup of web static as
 - Added RFC compliance planning document: `docs/RFC_COMPLIANCE_MATRIX.md`.
 - Converted placeholder test to scaffolding: `web/bundle_substitution_test.go` now has structured (skipped) subtests for future bundle substitution integrity.
 
-## Compliance Status (RFC 111 / RFC 115)
+## Compliance Status (GAuth-RFC-001 (formerly RFC 111) / GAuth-RFC-002 (formerly RFC 115))
 Implementation remains partial. New matrix highlights missing areas (delegation artifacts, substitution detection, revocation, expiry, crypto specification, interoperability). No new functional compliance added in this PR—only documentation scaffolding.
 
 ## Testing

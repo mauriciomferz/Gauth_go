@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/token"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 // Summary types (lightweight – do not duplicate full config domain models)

@@ -8,15 +8,15 @@
 // 4. Authentication and authorization middleware
 //
 // The subscription flow follows RFC-0111 Steps I-VIII, and authorization follows Steps a-i.
-package rfc0111
+package gauth_rfc_001
 
 import (
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )

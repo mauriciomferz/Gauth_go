@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/authz"
+	"github.com/mauriciomferz/Gauth_go/pkg/authz"
 )
 
 // TestPolicyExpressionBasic ensures simple subject + context expression works.

@@ -3,7 +3,7 @@ package prometheus
 import (
 	"net/http"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/monitoring"
+	"github.com/mauriciomferz/Gauth_go/internal/monitoring"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )

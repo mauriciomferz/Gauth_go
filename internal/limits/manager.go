@@ -26,7 +26,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/config"
+	"github.com/mauriciomferz/Gauth_go/internal/config"
 )
 
 // Manager coordinates a Store and a persistence ticker.

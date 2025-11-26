@@ -20,9 +20,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/authz"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 )
 
 // DemoResult captures key outcomes for testing & introspection while keeping
@@ -46,7 +46,7 @@ type scenarioParams struct {
 	performRevoke        bool                         // if false, skip revoke
 	postRevokeValidation bool                         // if true, attempt post-revoke validation
 	largeJSON            bool                         // if true, force JSON truncation path
-	modifyConfig         func(*rfc0111.RFC0111Config) // optional mutator to trigger config errors
+	modifyConfig         func(*gauth_rfc_001.RFC0111Config) // optional mutator to trigger config errors
 }
 
 // runDemoInternal executes the scenario described by params and returns DemoResult or error explaining failure.
@@ -55,7 +55,7 @@ func runDemoInternal(p scenarioParams) (*DemoResult, error) {
 	if p.modifyConfig != nil {
 		p.modifyConfig(cfg)
 	}
-	if err := rfc0111.ValidateRFC0111Compliance(cfg); err != nil {
+	if err := gauth_rfc_001.ValidateRFC0111Compliance(cfg); err != nil {
 		return nil, fmt.Errorf("config invalid: %w", err)
 	}
 	auditLogger := audit.NewMemoryLogger(nil)
@@ -69,8 +69,8 @@ func runDemoInternal(p scenarioParams) (*DemoResult, error) {
 	if p.allowInvalidAction {
 		authorizer.AddPolicy(authz.Policy{ID: "allow-admin-delete", Subject: p.grantor, Resource: "poa", Actions: []string{"admin:delete"}, Effect: authz.Allow})
 	}
-	svc := rfc0111.NewService(auditLogger, authorizer)
-	req := rfc0111.DelegationRequest{Grantor: p.grantor, Grantee: p.grantee, Scope: []string{"transaction:execute", "account:read"}, Duration: 2 * time.Hour}
+	svc := gauth_rfc_001.NewService(auditLogger, authorizer)
+	req := gauth_rfc_001.DelegationRequest{Grantor: p.grantor, Grantee: p.grantee, Scope: []string{"transaction:execute", "account:read"}, Duration: 2 * time.Hour}
 	delegation, err := svc.CreateDelegation(req)
 	if err != nil {
 		return nil, fmt.Errorf("create delegation failed: %w", err)
@@ -87,7 +87,7 @@ func runDemoInternal(p scenarioParams) (*DemoResult, error) {
 	} else if !p.allowInvalidAction { // action unexpectedly allowed
 		return nil, fmt.Errorf("expected invalid action rejection")
 	}
-	framework := rfc0111.GAuth10Framework{AuthServer: cfg.AuthorizationServerURL, Clients: []string{p.grantee}}
+	framework := gauth_rfc_001.GAuth10Framework{AuthServer: cfg.AuthorizationServerURL, Clients: []string{p.grantee}}
 	meta, _ := framework.ToJSON()
 	out := map[string]interface{}{"delegation": delegation.POA, "auth_token": delegation.AuthToken, "framework": json.RawMessage(meta)}
 	if p.largeJSON {
@@ -184,8 +184,8 @@ func main() {
 	fmt.Println("\nAll RFC-0111 demo steps completed (beta demonstration – non-production).")
 }
 
-func createRFC0111Config() *rfc0111.RFC0111Config {
-	return &rfc0111.RFC0111Config{
+func createRFC0111Config() *gauth_rfc_001.RFC0111Config {
+	return &gauth_rfc_001.RFC0111Config{
 		AuthorizationServerURL:    "https://auth.gimelfoundation.com",
 		TrustServiceProvider:      "Gimel Foundation Trust Services",
 		RequireNotarization:       true,

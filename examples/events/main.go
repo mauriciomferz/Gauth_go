@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/events"
+	"github.com/mauriciomferz/Gauth_go/pkg/events"
 )
 
 // CustomEventHandler demonstrates how to implement an event handler for typed events

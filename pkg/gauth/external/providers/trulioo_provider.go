@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth/external"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth/external"
 )
 
 // TruliooProvider implements USIdentityAPIProvider for Trulioo GlobalGateway API

@@ -3,8 +3,8 @@ package web
 import (
 	"time"
 
-	errorscatalog "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/errors"
-	gerrs "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/errors"
+	errorscatalog "github.com/mauriciomferz/Gauth_go/internal/errors"
+	gerrs "github.com/mauriciomferz/Gauth_go/pkg/errors"
 	"github.com/gin-gonic/gin"
 )
 

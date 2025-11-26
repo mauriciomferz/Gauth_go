@@ -38,7 +38,7 @@ import (
 	"strings"
 	"time"
 
-	imetrics "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
+	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
 )
 
 const (

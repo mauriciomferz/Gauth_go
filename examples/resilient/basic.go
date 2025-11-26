@@ -6,9 +6,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/circuit"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/monitoring"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/internal/circuit"
+	"github.com/mauriciomferz/Gauth_go/internal/monitoring"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
 // ResilientService combines circuit breaker and monitoring

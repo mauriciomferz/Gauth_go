@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	metricsPkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
+	metricsPkg "github.com/mauriciomferz/Gauth_go/internal/metrics"
 )
 
 // TestReplayNonceStore_CorruptionRecovery ensures malformed WAL lines are skipped and counted.

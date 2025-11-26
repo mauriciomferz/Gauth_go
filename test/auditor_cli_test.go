@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	cryptoReg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
-	auditor "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/auditor"
-	poa "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
+	cryptoReg "github.com/mauriciomferz/Gauth_go/internal/crypto"
+	auditor "github.com/mauriciomferz/Gauth_go/pkg/auditor"
+	poa "github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
 
 // buildSigningPayload mirrors unexported buildPoASigningPayload for test signature generation.

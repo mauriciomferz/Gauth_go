@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/authz"
-	rfc0111 "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	gauth_rfc_001 "github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 )
 
 func TestDelegationGraphExport(t *testing.T) {
@@ -25,10 +25,10 @@ func TestDelegationGraphExport(t *testing.T) {
 		Effect:   authz.Allow,
 	})
 
-	svc := rfc0111.NewService(auditLogger, authorizer)
+	svc := gauth_rfc_001.NewService(auditLogger, authorizer)
 
 	// Create delegations through the service (this will populate the repo)
-	rootResp, err := svc.CreateDelegationCtx(context.Background(), rfc0111.DelegationRequest{
+	rootResp, err := svc.CreateDelegationCtx(context.Background(), gauth_rfc_001.DelegationRequest{
 		Grantor:  "alice",
 		Grantee:  "agentA",
 		Scope:    []string{"scope.x"},
@@ -38,7 +38,7 @@ func TestDelegationGraphExport(t *testing.T) {
 		t.Fatalf("create root delegation: %v", err)
 	}
 
-	childResp, err := svc.CreateDelegationCtx(context.Background(), rfc0111.DelegationRequest{
+	childResp, err := svc.CreateDelegationCtx(context.Background(), gauth_rfc_001.DelegationRequest{
 		Grantor:     "agentA",
 		Grantee:     "agentB",
 		Scope:       []string{"scope.x"},
@@ -49,7 +49,7 @@ func TestDelegationGraphExport(t *testing.T) {
 		t.Fatalf("create child delegation: %v", err)
 	}
 
-	grandResp, err := svc.CreateDelegationCtx(context.Background(), rfc0111.DelegationRequest{
+	grandResp, err := svc.CreateDelegationCtx(context.Background(), gauth_rfc_001.DelegationRequest{
 		Grantor:     "agentB",
 		Grantee:     "agentC",
 		Scope:       []string{"scope.x"},
@@ -71,7 +71,7 @@ func TestDelegationGraphExport(t *testing.T) {
 	}
 
 	// verify parent linkage and depth
-	find := func(id string) *rfc0111.DelegationGraphNode {
+	find := func(id string) *gauth_rfc_001.DelegationGraphNode {
 		for _, n := range nodes {
 			if n.ID == id {
 				return &n

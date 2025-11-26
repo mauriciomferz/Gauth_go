@@ -14,10 +14,10 @@ import (
 	"testing"
 	"time"
 
-	imetrics "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/authz"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 )
 
 // LoadTestConfig defines parameters for load testing.
@@ -313,10 +313,10 @@ func runLoadTest(t *testing.T, config LoadTestConfig) *LoadTestResult {
 
 	// Use memory logger without stdout output to suppress audit noise during load tests
 	// Use large queue size (50000) to handle high throughput without dropping events
-	svc := rfc0111.NewService(
+	svc := gauth_rfc_001.NewService(
 		audit.NewMemoryLoggerWithQueueSize(nil, 50000),
 		authzMem,
-		rfc0111.WithMetrics(imetrics.NewMemory()),
+		gauth_rfc_001.WithMetrics(imetrics.NewMemory()),
 	)
 
 	// Shared state
@@ -334,7 +334,7 @@ func runLoadTest(t *testing.T, config LoadTestConfig) *LoadTestResult {
 	// Pre-create some delegations for validate/revoke operations
 	poaIDs := make([]string, 100)
 	for i := 0; i < len(poaIDs); i++ {
-		req := rfc0111.DelegationRequest{
+		req := gauth_rfc_001.DelegationRequest{
 			Grantor:  fmt.Sprintf("user%d", i%10),
 			Grantee:  fmt.Sprintf("service%d", i%5),
 			Scope:    generateScopes(config.ScopeCount),
@@ -399,7 +399,7 @@ func runLoadTest(t *testing.T, config LoadTestConfig) *LoadTestResult {
 
 				switch opType {
 				case "create":
-					req := rfc0111.DelegationRequest{
+					req := gauth_rfc_001.DelegationRequest{
 						Grantor:  fmt.Sprintf("worker%d", workerID),
 						Grantee:  fmt.Sprintf("service%d", workerID%5),
 						Scope:    generateScopes(config.ScopeCount),
@@ -419,7 +419,7 @@ func runLoadTest(t *testing.T, config LoadTestConfig) *LoadTestResult {
 					atomic.AddUint64(&revokeOps, 1)
 					// Re-create for future revoke attempts
 					if err == nil {
-						req := rfc0111.DelegationRequest{
+						req := gauth_rfc_001.DelegationRequest{
 							Grantor:  fmt.Sprintf("user%d", workerID%10),
 							Grantee:  fmt.Sprintf("service%d", workerID%5),
 							Scope:    generateScopes(config.ScopeCount),

@@ -16,8 +16,8 @@ import (
 	"log"
 	"os"
 
-	fssecrets "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/secrets"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/secret"
+	fssecrets "github.com/mauriciomferz/Gauth_go/internal/secrets"
+	"github.com/mauriciomferz/Gauth_go/pkg/secret"
 )
 
 // SecretStorageDemo demonstrates dual secret provider implementation resolving sec8.item1 DRIFT ISSUE.

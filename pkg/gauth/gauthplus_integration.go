@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauthplus"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/metrics"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
+	"github.com/mauriciomferz/Gauth_go/pkg/metrics"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
 
 // GAuthPlusValidator validates GAuth+ policies during authorization

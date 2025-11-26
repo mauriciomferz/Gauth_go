@@ -4,7 +4,7 @@ package store
 
 import (
 	// no need for context or time
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/token"
+	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 // Re-export types from token package for compatibility

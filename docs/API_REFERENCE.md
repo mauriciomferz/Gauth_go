@@ -738,8 +738,8 @@ Complete Go library API reference for GiFo-RFC-0111 (GAuth 1.0) and GiFo-RFC-011
 ## 📋 **Table of Contents**
 
 1. [Core Service API](#core-service-api)
-2. [RFC 111 Authorization API](#rfc-111-authorization-api)
-3. [RFC 115 PoA Definition API](#rfc-115-poa-definition-api)
+2. [GAuth-RFC-001 (formerly RFC 111) Authorization API](#rfc-111-authorization-api)
+3. [GAuth-RFC-002 (formerly RFC 115) PoA Definition API](#rfc-115-poa-definition-api)
 4. [Professional Foundation API](#professional-foundation-api)
 5. [Data Types Reference](#data-types-reference)
 6. [Error Handling](#error-handling)
@@ -758,7 +758,7 @@ Complete Go library API reference for GiFo-RFC-0111 (GAuth 1.0) and GiFo-RFC-011
 
 ### **RFCCompliantService**
 
-The main service implementing both RFC 111 and RFC 115 specifications.
+The main service implementing both GAuth-RFC-001 (formerly RFC 111) and GAuth-RFC-002 (formerly RFC 115) specifications.
 
 ```go
 type RFCCompliantService struct {
@@ -843,11 +843,11 @@ if err != nil {
 }
 ```
 
-## 🎯 **RFC 111 Authorization API**
+## 🎯 **GAuth-RFC-001 (formerly RFC 111) Authorization API**
 
 ### **AuthorizeGAuth**
 
-Main authorization method implementing complete RFC 111 flow with RFC 115 PoA Definition validation.
+Main authorization method implementing complete GAuth-RFC-001 (formerly RFC 111) flow with GAuth-RFC-002 (formerly RFC 115) PoA Definition validation.
 
 ```go
 func (s *RFCCompliantService) AuthorizeGAuth(ctx context.Context, req GAuthRequest) (*GAuthResponse, error)
@@ -862,8 +862,8 @@ func (s *RFCCompliantService) AuthorizeGAuth(ctx context.Context, req GAuthReque
 - `error`: Authorization or validation error
 
 **Process Flow:**
-1. Validates PoA Definition (RFC 115)
-2. Validates principal capacity (RFC 111)
+1. Validates PoA Definition (GAuth-RFC-002 (formerly RFC 115))
+2. Validates principal capacity (GAuth-RFC-001 (formerly RFC 111))
 3. Validates AI client capabilities
 4. Validates legal compliance
 5. Generates authorization code
@@ -879,7 +879,7 @@ response, err := service.AuthorizeGAuth(ctx, auth.GAuthRequest{
     PrincipalID:  "corp_ceo_123",
     AIAgentID:    "ai_financial_advisor",
     Jurisdiction: "US",
-    PoADefinition: poaDefinition, // Complete RFC 115 structure
+    PoADefinition: poaDefinition, // Complete GAuth-RFC-002 (formerly RFC 115) structure
 })
 ```
 
@@ -891,11 +891,11 @@ Exchange authorization code for extended token with comprehensive metadata.
 func (s *RFCCompliantService) CreateGAuthToken(ctx context.Context, authCode string) (*GAuthToken, error)
 ```
 
-## 📋 **RFC 115 PoA Definition API**
+## 📋 **GAuth-RFC-002 (formerly RFC 115) PoA Definition API**
 
 ### **PoA Definition Structure**
 
-Complete implementation of RFC 115 Power-of-Attorney Credential Definition.
+Complete implementation of GAuth-RFC-002 (formerly RFC 115) Power-of-Attorney Credential Definition.
 
 ```go
 type PoADefinition struct {

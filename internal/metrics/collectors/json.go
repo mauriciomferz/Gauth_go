@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
+	"github.com/mauriciomferz/Gauth_go/internal/metrics"
 )
 
 // JSONCollector exports metrics as JSON for debugging and testing.

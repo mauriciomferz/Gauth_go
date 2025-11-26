@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web"
+	"github.com/mauriciomferz/Gauth_go/internal/notary"
+	"github.com/mauriciomferz/Gauth_go/web"
 	"github.com/gin-gonic/gin"
 )
 

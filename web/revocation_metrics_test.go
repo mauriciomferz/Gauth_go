@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	imetrics "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
-	delegation "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/delegation"
+	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	delegation "github.com/mauriciomferz/Gauth_go/pkg/delegation"
 )
 
 // TestRevocationAutoSignMetrics validates the emitted / skipped counters for the auto-sign logic.

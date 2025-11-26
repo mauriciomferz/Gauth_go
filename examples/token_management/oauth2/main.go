@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	token "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/token"
+	token "github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
 // joinScopes joins a slice of scopes into a comma-separated string

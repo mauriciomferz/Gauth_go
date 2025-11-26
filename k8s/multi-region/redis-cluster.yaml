@@ -1,0 +1,405 @@
+# Redis Cluster Configuration for Multi-Region
+# 6 nodes per region: 3 masters + 3 replicas
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-cluster-config
+  namespace: gauth
+data:
+  redis.conf: |
+    # Cluster Configuration
+    cluster-enabled yes
+    cluster-config-file /data/nodes.conf
+    cluster-node-timeout 5000
+    cluster-require-full-coverage no
+    cluster-migration-barrier 1
+    
+    # Network
+    bind 0.0.0.0
+    protected-mode no
+    port 6379
+    tcp-backlog 511
+    timeout 0
+    tcp-keepalive 300
+    
+    # General
+    daemonize no
+    supervised no
+    pidfile /var/run/redis.pid
+    loglevel notice
+    logfile ""
+    databases 16
+    
+    # Snapshotting
+    save 900 1
+    save 300 10
+    save 60 10000
+    stop-writes-on-bgsave-error yes
+    rdbcompression yes
+    rdbchecksum yes
+    dbfilename dump.rdb
+    dir /data
+    
+    # Replication
+    replica-serve-stale-data yes
+    replica-read-only no  # Multi-master mode
+    repl-diskless-sync no
+    repl-diskless-sync-delay 5
+    repl-disable-tcp-nodelay no
+    replica-priority 100
+    min-replicas-to-write 1
+    min-replicas-max-lag 10
+    
+    # Security
+    requirepass ${REDIS_PASSWORD}
+    masterauth ${REDIS_PASSWORD}
+    
+    # Append Only File
+    appendonly yes
+    appendfilename "appendonly.aof"
+    appendfsync everysec
+    no-appendfsync-on-rewrite no
+    auto-aof-rewrite-percentage 100
+    auto-aof-rewrite-min-size 64mb
+    aof-load-truncated yes
+    aof-use-rdb-preamble yes
+    
+    # Memory Management
+    maxmemory 2gb
+    maxmemory-policy allkeys-lru
+    maxmemory-samples 5
+    
+    # Lazy Freeing
+    lazyfree-lazy-eviction no
+    lazyfree-lazy-expire no
+    lazyfree-lazy-server-del no
+    replica-lazy-flush no
+    
+    # Advanced
+    activerehashing yes
+    client-output-buffer-limit normal 0 0 0
+    client-output-buffer-limit replica 256mb 64mb 60
+    client-output-buffer-limit pubsub 32mb 8mb 60
+    hz 10
+    dynamic-hz yes
+
+---
+# Redis StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-cluster
+  namespace: gauth
+spec:
+  serviceName: redis-cluster
+  replicas: 6
+  selector:
+    matchLabels:
+      app: redis-cluster
+  template:
+    metadata:
+      labels:
+        app: redis-cluster
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - redis-cluster
+                topologyKey: kubernetes.io/hostname
+      containers:
+        - name: redis
+          image: redis:7.2-alpine
+          command:
+            - redis-server
+          args:
+            - /conf/redis.conf
+          ports:
+            - containerPort: 6379
+              name: client
+            - containerPort: 16379
+              name: gossip
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secrets
+                  key: password
+          volumeMounts:
+            - name: conf
+              mountPath: /conf
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+            limits:
+              cpu: 2000m
+              memory: 4Gi
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - redis-cli -a $REDIS_PASSWORD ping
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - redis-cli -a $REDIS_PASSWORD ping
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: conf
+          configMap:
+            name: redis-cluster-config
+            items:
+              - key: redis.conf
+                path: redis.conf
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: fast-ssd
+        resources:
+          requests:
+            storage: 20Gi
+
+---
+# Redis Service (for cluster communication)
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-cluster
+  namespace: gauth
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - port: 6379
+      targetPort: 6379
+      name: client
+    - port: 16379
+      targetPort: 16379
+      name: gossip
+  selector:
+    app: redis-cluster
+
+---
+# Redis Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: redis-secrets
+  namespace: gauth
+type: Opaque
+stringData:
+  password: CHANGE_IN_PRODUCTION
+
+---
+# Redis Cluster Initialization Job
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: redis-cluster-init
+  namespace: gauth
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: redis-cluster-init
+          image: redis:7.2-alpine
+          command:
+            - /bin/sh
+            - -c
+            - |
+              # Wait for all pods to be ready
+              for i in $(seq 0 5); do
+                until redis-cli -h redis-cluster-$i.redis-cluster.gauth.svc -a $REDIS_PASSWORD ping; do
+                  echo "Waiting for redis-cluster-$i..."
+                  sleep 2
+                done
+              done
+              
+              # Create cluster
+              redis-cli -a $REDIS_PASSWORD --cluster create \
+                redis-cluster-0.redis-cluster.gauth.svc:6379 \
+                redis-cluster-1.redis-cluster.gauth.svc:6379 \
+                redis-cluster-2.redis-cluster.gauth.svc:6379 \
+                redis-cluster-3.redis-cluster.gauth.svc:6379 \
+                redis-cluster-4.redis-cluster.gauth.svc:6379 \
+                redis-cluster-5.redis-cluster.gauth.svc:6379 \
+                --cluster-replicas 1 \
+                --cluster-yes
+              
+              echo "Redis cluster created successfully!"
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secrets
+                  key: password
+
+---
+# Redis Exporter for Prometheus
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-exporter
+  namespace: gauth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-exporter
+  template:
+    metadata:
+      labels:
+        app: redis-exporter
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9121"
+    spec:
+      containers:
+        - name: redis-exporter
+          image: oliver006/redis_exporter:latest
+          ports:
+            - containerPort: 9121
+              name: metrics
+          env:
+            - name: REDIS_ADDR
+              value: redis://redis-cluster-0.redis-cluster.gauth.svc:6379,redis://redis-cluster-1.redis-cluster.gauth.svc:6379,redis://redis-cluster-2.redis-cluster.gauth.svc:6379
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secrets
+                  key: password
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
+---
+# Cross-Region Redis Replication ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-cross-region-config
+  namespace: gauth
+data:
+  sync-script.sh: |
+    #!/bin/bash
+    # Cross-region Redis replication script
+    
+    set -e
+    
+    PRIMARY_REGION="us-east-1"
+    REPLICA_REGIONS=("eu-west-1" "ap-south-1")
+    
+    REDIS_PASSWORD=$(cat /secrets/redis-password)
+    
+    # Function to sync key from primary to replicas
+    sync_key() {
+      local key=$1
+      local value=$(redis-cli -h redis-cluster.${PRIMARY_REGION}.svc -a $REDIS_PASSWORD GET "$key")
+      
+      for region in "${REPLICA_REGIONS[@]}"; do
+        redis-cli -h redis-cluster.${region}.svc -a $REDIS_PASSWORD SET "$key" "$value" &
+      done
+      
+      wait
+    }
+    
+    # Function to invalidate key across all regions
+    invalidate_key() {
+      local key=$1
+      
+      for region in us-east-1 "${REPLICA_REGIONS[@]}"; do
+        redis-cli -h redis-cluster.${region}.svc -a $REDIS_PASSWORD DEL "$key" &
+      done
+      
+      wait
+    }
+    
+    # Monitor keyspace events for replication
+    redis-cli -h redis-cluster.${PRIMARY_REGION}.svc -a $REDIS_PASSWORD \
+      --csv PSUBSCRIBE '__keyspace@0__:*' | \
+      while IFS=',' read channel message; do
+        key=$(echo $channel | sed 's/__keyspace@0__://g')
+        
+        case $message in
+          *set*)
+            echo "Syncing key: $key"
+            sync_key "$key"
+            ;;
+          *del*)
+            echo "Invalidating key: $key"
+            invalidate_key "$key"
+            ;;
+        esac
+      done
+
+---
+# Cross-Region Sync CronJob
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: redis-cross-region-sync
+  namespace: gauth
+spec:
+  schedule: "*/5 * * * *"  # Every 5 minutes
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: sync
+              image: redis:7.2-alpine
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  # Full sync of critical keys
+                  redis-cli -h redis-cluster.us-east-1.svc -a $REDIS_PASSWORD \
+                    --scan --pattern "poa:*" | \
+                    while read key; do
+                      value=$(redis-cli -h redis-cluster.us-east-1.svc -a $REDIS_PASSWORD GET "$key")
+                      ttl=$(redis-cli -h redis-cluster.us-east-1.svc -a $REDIS_PASSWORD TTL "$key")
+                      
+                      # Replicate to EU
+                      if [ "$ttl" -gt 0 ]; then
+                        redis-cli -h redis-cluster.eu-west-1.svc -a $REDIS_PASSWORD SETEX "$key" "$ttl" "$value"
+                      else
+                        redis-cli -h redis-cluster.eu-west-1.svc -a $REDIS_PASSWORD SET "$key" "$value"
+                      fi
+                      
+                      # Replicate to APAC
+                      if [ "$ttl" -gt 0 ]; then
+                        redis-cli -h redis-cluster.ap-south-1.svc -a $REDIS_PASSWORD SETEX "$key" "$ttl" "$value"
+                      else
+                        redis-cli -h redis-cluster.ap-south-1.svc -a $REDIS_PASSWORD SET "$key" "$value"
+                      fi
+                    done
+              env:
+                - name: REDIS_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: redis-secrets
+                      key: password
+          restartPolicy: OnFailure

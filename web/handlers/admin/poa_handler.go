@@ -1,26 +1,36 @@
 package admin
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
+	"github.com/mauriciomferz/Gauth_go/pkg/cache"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // PoAHandler manages Power of Attorney operations for the admin portal
 type PoAHandler struct {
-	repo *poa.Repository
+	repo       *poa.Repository
+	cache      cache.Cache
+	keyBuilder *cache.KeyBuilder
 }
 
 // NewPoAHandler creates a new PoA handler instance
 func NewPoAHandler(db *pgxpool.Pool) *PoAHandler {
 	return &PoAHandler{
-		repo: poa.NewRepository(db),
+		repo:       poa.NewRepository(db),
+		cache:      nil, // Will be set by SetCache if cache is available
+		keyBuilder: cache.NewKeyBuilder(),
 	}
+}
+
+// SetCache sets the cache instance for the handler
+func (h *PoAHandler) SetCache(c cache.Cache) {
+	h.cache = c
 }
 
 // PowerOfAttorney represents a power of attorney delegation
@@ -222,6 +232,18 @@ func (h *PoAHandler) GetPoA(c *gin.Context) {
 	
 	poaID := c.Param("id")
 	
+	// Try cache first if available
+	if h.cache != nil {
+		cacheKey := h.keyBuilder.PoAKey(poaID)
+		if cached, err := h.cache.Get(c.Request.Context(), cacheKey); err == nil && cached != nil {
+			var poa PowerOfAttorney
+			if err := json.Unmarshal(cached, &poa); err == nil {
+				c.JSON(http.StatusOK, poa)
+				return
+			}
+		}
+	}
+	
 	record, err := h.repo.GetPoA(c.Request.Context(), tenantID, poaID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "PoA not found"})
@@ -252,6 +274,14 @@ func (h *PoAHandler) GetPoA(c *gin.Context) {
 		CreatedAt:          record.CreatedAt.Format(time.RFC3339),
 	}
 
+	// Cache the response (1 minute TTL for PoA data)
+	if h.cache != nil {
+		if data, err := json.Marshal(poa); err == nil {
+			cacheKey := h.keyBuilder.PoAKey(poaID)
+			_ = h.cache.Set(c.Request.Context(), cacheKey, data, 1*time.Minute)
+		}
+	}
+
 	c.JSON(http.StatusOK, poa)
 }
 
@@ -265,6 +295,14 @@ func (h *PoAHandler) RevokePoA(c *gin.Context) {
 	}
 	
 	poaID := c.Param("id")
+	
+	// Invalidate cache before revoking
+	if h.cache != nil {
+		pattern := h.keyBuilder.InvalidatePoAPattern(poaID)
+		_ = h.cache.DeletePattern(c.Request.Context(), pattern)
+		_ = h.cache.Delete(c.Request.Context(), h.keyBuilder.PoAKey(poaID))
+	}
+	
 	revokedBy := c.GetString("user_id")
 	if revokedBy == "" {
 		revokedBy = "admin"

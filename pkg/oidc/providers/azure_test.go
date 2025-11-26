@@ -6,7 +6,7 @@ import (
 	"crypto/rsa"
 	"testing"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/oidc"
+	"github.com/mauriciomferz/Gauth_go/pkg/oidc"
 	"github.com/golang-jwt/jwt/v5"
 )
 

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	a "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
-	c "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/compliance"
-	p "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy"
-	v "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/validation"
+	a "github.com/mauriciomferz/Gauth_go/pkg/audit"
+	c "github.com/mauriciomferz/Gauth_go/pkg/compliance"
+	p "github.com/mauriciomferz/Gauth_go/pkg/policy"
+	v "github.com/mauriciomferz/Gauth_go/pkg/validation"
 )
 
 // integration_demo shows how the new beta scaffolding components could be wired together.

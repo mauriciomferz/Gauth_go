@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	imetrics "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/testutil"
+	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	"github.com/mauriciomferz/Gauth_go/web/testutil"
 )
 
 // TestCapabilityAnchorHashChange triggers a semantic hash change by modifying capability set

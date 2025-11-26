@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
 
 // ComplianceValidator performs RFC-0111 Section 6 compliance validation

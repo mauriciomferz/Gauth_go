@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"sync/atomic"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/security"
+	"github.com/mauriciomferz/Gauth_go/internal/security"
 )
 
 // MCPClient represents an MCP protocol client

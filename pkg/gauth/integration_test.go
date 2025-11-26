@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
 
 // TestAuthorizationChainValidation tests the authorization chain validator

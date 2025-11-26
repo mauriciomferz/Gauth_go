@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/authz"
-	cr "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/crypto"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	cr "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 )
 
 // EnhancedPoAValidatorExample demonstrates real Service integration with enhanced PoA validator
@@ -29,25 +29,25 @@ func main() {
 	dbPath := filepath.Join(tempDir, "daily_limits.json")
 
 	// Initialize daily limit store with persistent storage
-	store, err := rfc0111.NewBoltDailyLimitStore(dbPath)
+	store, err := gauth_rfc_001.NewBoltDailyLimitStore(dbPath)
 	if err != nil {
 		log.Fatalf("Failed to create daily limit store: %v", err)
 	}
 	fmt.Printf("✅ Daily limit store initialized: %s\n", dbPath)
 
 	// Initialize conditional expression engine
-	engine := rfc0111.NewSimpleConditionalEngine()
+	engine := gauth_rfc_001.NewSimpleConditionalEngine()
 	fmt.Println("✅ Conditional expression engine initialized")
 
 	// Initialize metrics recorder
-	metrics := rfc0111.NewInMemoryValidationMetrics()
+	metrics := gauth_rfc_001.NewInMemoryValidationMetrics()
 	fmt.Println("✅ Validation metrics recorder initialized")
 
 	// Create enhanced validator with all components
-	enhancedValidator := rfc0111.NewEnhancedPoAValidator(
-		rfc0111.WithDailyLimitStore(store),
-		rfc0111.WithConditionalEngine(engine),
-		rfc0111.WithMetricsRecorder(metrics),
+	enhancedValidator := gauth_rfc_001.NewEnhancedPoAValidator(
+		gauth_rfc_001.WithDailyLimitStore(store),
+		gauth_rfc_001.WithConditionalEngine(engine),
+		gauth_rfc_001.WithMetricsRecorder(metrics),
 	)
 	fmt.Println("✅ Enhanced PoA validator created")
 
@@ -81,9 +81,9 @@ func main() {
 	})
 
 	// Create service with enhanced validator integrated
-	svc := rfc0111.NewService(auditLogger, authorizer,
-		rfc0111.WithEnhancedValidator(enhancedValidator),
-		rfc0111.WithSignerProvider(kp.ActiveSigner),
+	svc := gauth_rfc_001.NewService(auditLogger, authorizer,
+		gauth_rfc_001.WithEnhancedValidator(enhancedValidator),
+		gauth_rfc_001.WithSignerProvider(kp.ActiveSigner),
 	)
 	fmt.Println("✅ RFC0111 service created with enhanced validation")
 
@@ -92,7 +92,7 @@ func main() {
 
 	// Scenario 1: High-value delegation that triggers warning
 	fmt.Println("\n💰 Scenario 1: High-value financial delegation...")
-	req1 := rfc0111.DelegationRequest{
+	req1 := gauth_rfc_001.DelegationRequest{
 		Grantor:  "alice@company.com",
 		Grantee:  "bob@company.com",
 		Scope:    []string{"transaction:withdraw"},
@@ -116,7 +116,7 @@ func main() {
 
 	// Scenario 2: Delegation with daily limits
 	fmt.Println("\n� Scenario 2: Delegation with daily limit tracking...")
-	req2 := rfc0111.DelegationRequest{
+	req2 := gauth_rfc_001.DelegationRequest{
 		Grantor:  "corporate@company.com",
 		Grantee:  "agent@company.com",
 		Scope:    []string{"transaction:payment"},

@@ -10,7 +10,7 @@ import (
 	"os"
 	"testing"
 
-	internalCrypto "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
+	internalCrypto "github.com/mauriciomferz/Gauth_go/internal/crypto"
 )
 
 // TestModelLimitsAttestationVerify exercises the verification endpoint with a valid and tampered attestation.

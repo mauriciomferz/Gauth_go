@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/authz"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/testutil"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
+	"github.com/mauriciomferz/Gauth_go/pkg/testutil"
 )
 
 // BenchmarkDelegationLifecycle benchmarks create -> validate -> revoke for a single delegation.
@@ -16,12 +16,12 @@ func BenchmarkDelegationLifecycle(b *testing.B) {
 	authorizer := authz.NewMemoryAuthorizer()
 	authorizer.AddPolicy(authz.Policy{ID: "allow-create", Subject: "alice@example.com", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
 	authorizer.AddPolicy(authz.Policy{ID: "allow-revoke", Subject: "alice@example.com", Resource: "*", Actions: []string{"revoke_delegation"}, Effect: authz.Allow})
-	svc := rfc0111.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer)
+	svc := gauth_rfc_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer)
 
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		req := rfc0111.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: 5 * time.Minute}
+		req := gauth_rfc_001.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: 5 * time.Minute}
 		resp, err := svc.CreateDelegationCtx(context.Background(), req)
 		if err != nil {
 			b.Fatalf("create failed: %v", err)
@@ -48,8 +48,8 @@ func BenchmarkDelegationValidateOnly(b *testing.B) {
 		authorizer := authz.NewMemoryAuthorizer()
 		authorizer.AddPolicy(authz.Policy{ID: "allow-create", Subject: "alice@example.com", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
 		authorizer.AddPolicy(authz.Policy{ID: "allow-revoke", Subject: "alice@example.com", Resource: "*", Actions: []string{"revoke_delegation"}, Effect: authz.Allow})
-		svc := rfc0111.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer)
-		req := rfc0111.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: time.Hour}
+		svc := gauth_rfc_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer)
+		req := gauth_rfc_001.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: time.Hour}
 		resp, err := svc.CreateDelegation(req)
 		if err != nil {
 			b.Fatalf("setup create failed: %v", err)

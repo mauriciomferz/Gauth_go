@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	pm "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
+	pm "github.com/mauriciomferz/Gauth_go/internal/metrics"
 )
 
 // TestModelLimitsStrictUnknownMetric ensures the dedicated unknown model counter increments when strict mode denies a request.

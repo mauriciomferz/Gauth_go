@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/testutil"
+	"github.com/mauriciomferz/Gauth_go/web/testutil"
 )
 
 // TestPolicyPersistenceRoundTrip verifies that setting POLICY_CHAIN_STATE_PATH persists appended bundles and they reload on new server instance.

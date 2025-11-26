@@ -15,9 +15,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/config"
-	imetrics "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/internal/config"
+	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 

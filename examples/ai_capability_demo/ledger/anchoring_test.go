@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/examples/ai_capability_demo/ledger"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/ai"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+	"github.com/mauriciomferz/Gauth_go/examples/ai_capability_demo/ledger"
+	"github.com/mauriciomferz/Gauth_go/internal/ai"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 	"github.com/gin-gonic/gin"
 )
 
@@ -37,7 +37,7 @@ func setupRouterAndLedger() (*gin.Engine, *ledger.Ledger) {
 		c.JSON(200, gin.H{"allowed": allowed, "metadata": meta})
 	})
 	router.POST("/demo/poa/issue", func(c *gin.Context) {
-		poa := &rfc0111.PowerOfAttorney{ID: "t1", Version: 1, Grantor: "g1", Grantee: "g2", Scope: []string{"transaction:read"}, Restrictions: map[string]string{}, ValidFrom: time.Now().UTC(), ValidUntil: time.Now().UTC().Add(time.Hour), Status: rfc0111.POAStatusActive, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()}
+		poa := &gauth_rfc_001.PowerOfAttorney{ID: "t1", Version: 1, Grantor: "g1", Grantee: "g2", Scope: []string{"transaction:read"}, Restrictions: map[string]string{}, ValidFrom: time.Now().UTC(), ValidUntil: time.Now().UTC().Add(time.Hour), Status: gauth_rfc_001.POAStatusActive, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()}
 		b, _ := json.Marshal(map[string]any{"event": "poa_issue", "poa_id": poa.ID})
 		l.Append("poa_issue", string(b), "")
 		c.JSON(200, gin.H{"poa_id": poa.ID})

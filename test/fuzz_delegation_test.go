@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/authz"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/testutil"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
+	"github.com/mauriciomferz/Gauth_go/pkg/testutil"
 )
 
 // FuzzCreateDelegation validates that CreateDelegation never panics with arbitrary input and enforces invariants.
@@ -26,7 +26,7 @@ func FuzzCreateDelegation(f *testing.F) {
 			authorizer.AddPolicy(authz.Policy{ID: "allow-create", Subject: grantor, Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
 		}
 		logger := audit.NewMemoryLogger(testutil.NoopLogger{})
-		svc := rfc0111.NewService(logger, authorizer)
+		svc := gauth_rfc_001.NewService(logger, authorizer)
 
 		// Normalize duration
 		if durationSeconds < 0 {
@@ -36,7 +36,7 @@ func FuzzCreateDelegation(f *testing.F) {
 			durationSeconds = 86400
 		} // clamp at 24h
 		dur := time.Duration(durationSeconds) * time.Second
-		req := rfc0111.DelegationRequest{Grantor: grantor, Grantee: grantee, Scope: []string{}, Duration: dur}
+		req := gauth_rfc_001.DelegationRequest{Grantor: grantor, Grantee: grantee, Scope: []string{}, Duration: dur}
 		if action != "" {
 			req.Scope = []string{action}
 		}

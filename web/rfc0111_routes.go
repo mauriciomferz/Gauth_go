@@ -1,8 +1,8 @@
 package web
 
 import (
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
-	rfc0111handlers "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/rfc0111"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	rfc0111handlers "github.com/mauriciomferz/Gauth_go/web/handlers/rfc0111"
 )
 
 // RegisterRFC0111Endpoints registers all RFC-0111 subscription and authorization endpoints.

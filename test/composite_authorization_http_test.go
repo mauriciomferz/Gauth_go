@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	web "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web"
+	web "github.com/mauriciomferz/Gauth_go/web"
 )
 
 func TestCompositeAuthorizationHTTP(t *testing.T) {

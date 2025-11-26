@@ -1,0 +1,730 @@
+# Kubernetes mTLS Configuration for GAuth
+# This file contains all necessary Kubernetes manifests for implementing mTLS
+
+---
+# Namespace for security components
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gauth-security
+  labels:
+    app: gauth
+    component: security
+    istio-injection: enabled
+
+---
+# Cert-Manager Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager
+  labels:
+    app: cert-manager
+
+---
+# HashiCorp Vault Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vault
+  labels:
+    app: vault
+
+---
+# Service Account for Vault integration
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cert-manager-vault
+  namespace: cert-manager
+
+---
+# ClusterRole for cert-manager to access Vault
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cert-manager-vault-access
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["serviceaccounts/token"]
+  verbs: ["create"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cert-manager-vault-access
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cert-manager-vault-access
+subjects:
+- kind: ServiceAccount
+  name: cert-manager-vault
+  namespace: cert-manager
+
+---
+# Vault ClusterIssuer for server certificates
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: gauth-vault-issuer
+spec:
+  vault:
+    server: https://vault.vault.svc.cluster.local:8200
+    path: pki_int/sign/gauth-server
+    caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCi4uLgo=  # Base64 encoded CA cert
+    auth:
+      kubernetes:
+        role: cert-manager
+        mountPath: /v1/auth/kubernetes
+        serviceAccountRef:
+          name: cert-manager-vault
+          
+---
+# Vault ClusterIssuer for client certificates
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: gauth-vault-client-issuer
+spec:
+  vault:
+    server: https://vault.vault.svc.cluster.local:8200
+    path: pki_int/sign/gauth-client
+    caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCi4uLgo=
+    auth:
+      kubernetes:
+        role: cert-manager
+        mountPath: /v1/auth/kubernetes
+        serviceAccountRef:
+          name: cert-manager-vault
+
+---
+# Server Certificate for GAuth API
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: gauth-api-server-cert
+  namespace: gauth
+spec:
+  secretName: gauth-api-server-tls
+  duration: 168h  # 7 days
+  renewBefore: 24h  # Renew 1 day before expiry
+  
+  subject:
+    organizations:
+      - GAuth
+    organizationalUnits:
+      - API Services
+      
+  commonName: gauth-api.example.com
+  
+  dnsNames:
+    - gauth-api.example.com
+    - "*.gauth-api.example.com"
+    - gauth-api.gauth.svc.cluster.local
+    - gauth-api.internal
+    - localhost
+    
+  ipAddresses:
+    - 10.0.1.100
+    - 127.0.0.1
+    
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+    
+  privateKey:
+    algorithm: RSA
+    size: 2048
+    rotationPolicy: Always
+    
+  issuerRef:
+    name: gauth-vault-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+
+---
+# Client Certificate for internal services
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: gauth-internal-client-cert
+  namespace: gauth
+spec:
+  secretName: gauth-internal-client-tls
+  duration: 720h  # 30 days
+  renewBefore: 168h  # Renew 7 days before expiry
+  
+  subject:
+    organizations:
+      - GAuth
+    organizationalUnits:
+      - Internal Services
+    serialNumber: "gauth-internal-001"
+      
+  commonName: gauth-internal.client.gauth.internal
+  
+  dnsNames:
+    - gauth-internal.client.gauth.internal
+    - "*.gauth.svc.cluster.local"
+    
+  usages:
+    - digital signature
+    - key agreement
+    - client auth
+    
+  privateKey:
+    algorithm: RSA
+    size: 2048
+    rotationPolicy: Always
+    
+  issuerRef:
+    name: gauth-vault-client-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+
+---
+# ConfigMap for CA Bundle (for clients to verify server)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gauth-ca-bundle
+  namespace: gauth
+data:
+  ca-bundle.crt: |
+    -----BEGIN CERTIFICATE-----
+    # Root CA Certificate (will be populated by init script)
+    -----END CERTIFICATE-----
+    -----BEGIN CERTIFICATE-----
+    # Intermediate CA Certificate
+    -----END CERTIFICATE-----
+
+---
+# Nginx ConfigMap with mTLS configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-mtls-config
+  namespace: gauth
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes auto;
+    error_log /var/log/nginx/error.log warn;
+    pid /var/run/nginx.pid;
+
+    events {
+        worker_connections 4096;
+        use epoll;
+        multi_accept on;
+    }
+
+    http {
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
+
+        log_format json_combined escape=json
+        '{'
+          '"time_local":"$time_local",'
+          '"remote_addr":"$remote_addr",'
+          '"request":"$request",'
+          '"status":"$status",'
+          '"body_bytes_sent":"$body_bytes_sent",'
+          '"request_time":"$request_time",'
+          '"ssl_client_verify":"$ssl_client_verify",'
+          '"ssl_client_s_dn":"$ssl_client_s_dn",'
+          '"ssl_client_serial":"$ssl_client_serial",'
+          '"ssl_cipher":"$ssl_cipher",'
+          '"ssl_protocol":"$ssl_protocol"'
+        '}';
+
+        access_log /var/log/nginx/access.log json_combined;
+
+        sendfile on;
+        tcp_nopush on;
+        tcp_nodelay on;
+        keepalive_timeout 65;
+        types_hash_max_size 2048;
+        server_tokens off;
+
+        # Security headers
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+        add_header X-Frame-Options DENY always;
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-XSS-Protection "1; mode=block" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+        # Rate limiting
+        limit_req_zone $ssl_client_serial zone=client_cert:10m rate=100r/s;
+        limit_req_status 429;
+
+        # Upstream backend
+        upstream gauth_backend {
+            least_conn;
+            server gauth-api:8080 max_fails=3 fail_timeout=30s;
+            server gauth-api:8080 max_fails=3 fail_timeout=30s backup;
+            keepalive 32;
+        }
+
+        # mTLS Server
+        server {
+            listen 443 ssl http2;
+            server_name gauth-api.example.com;
+
+            # Server certificate (auto-rotated)
+            ssl_certificate /etc/nginx/certs/tls.crt;
+            ssl_certificate_key /etc/nginx/certs/tls.key;
+
+            # Client certificate validation (REQUIRED)
+            ssl_client_certificate /etc/nginx/certs/ca-bundle.crt;
+            ssl_verify_client on;
+            ssl_verify_depth 3;
+
+            # CRL checking (optional but recommended)
+            # ssl_crl /etc/nginx/certs/crl.pem;
+
+            # OCSP stapling
+            ssl_stapling on;
+            ssl_stapling_verify on;
+            ssl_trusted_certificate /etc/nginx/certs/ca-bundle.crt;
+            resolver 8.8.8.8 8.8.4.4 valid=300s;
+            resolver_timeout 5s;
+
+            # TLS 1.3 only with strong ciphers
+            ssl_protocols TLSv1.3;
+            ssl_ciphers 'TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256';
+            ssl_prefer_server_ciphers on;
+
+            # Session settings
+            ssl_session_cache shared:SSL:50m;
+            ssl_session_timeout 1d;
+            ssl_session_tickets off;
+
+            # Buffer settings
+            client_max_body_size 10M;
+            client_body_buffer_size 128k;
+
+            # Proxy to backend
+            location / {
+                # Rate limiting by client certificate
+                limit_req zone=client_cert burst=20 nodelay;
+
+                # Pass client certificate info
+                proxy_set_header X-SSL-Client-Cert $ssl_client_cert;
+                proxy_set_header X-SSL-Client-S-DN $ssl_client_s_dn;
+                proxy_set_header X-SSL-Client-I-DN $ssl_client_i_dn;
+                proxy_set_header X-SSL-Client-Serial $ssl_client_serial;
+                proxy_set_header X-SSL-Client-Verify $ssl_client_verify;
+                proxy_set_header X-SSL-Protocol $ssl_protocol;
+                proxy_set_header X-SSL-Cipher $ssl_cipher;
+
+                # Standard proxy headers
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+
+                # Timeouts
+                proxy_connect_timeout 5s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+
+                proxy_pass http://gauth_backend;
+
+                # Connection settings
+                proxy_http_version 1.1;
+                proxy_set_header Connection "";
+            }
+
+            # Health check (no client cert required)
+            location /health {
+                ssl_verify_client optional;
+                access_log off;
+                proxy_pass http://gauth_backend/health;
+            }
+
+            # Metrics endpoint (internal only)
+            location /metrics {
+                allow 10.0.0.0/8;
+                deny all;
+                ssl_verify_client optional_no_ca;
+                proxy_pass http://gauth_backend/metrics;
+            }
+        }
+
+        # HTTP redirect to HTTPS
+        server {
+            listen 80;
+            server_name gauth-api.example.com;
+            return 301 https://$server_name$request_uri;
+        }
+    }
+
+---
+# Nginx Deployment with mTLS
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-mtls
+  namespace: gauth
+  labels:
+    app: nginx-mtls
+    component: ingress
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-mtls
+  template:
+    metadata:
+      labels:
+        app: nginx-mtls
+        component: ingress
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9113"
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - nginx-mtls
+              topologyKey: kubernetes.io/hostname
+      
+      containers:
+      # Main Nginx container
+      - name: nginx
+        image: nginx:1.25-alpine
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        - containerPort: 443
+          name: https
+          protocol: TCP
+        
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+        
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+          readOnly: true
+        - name: server-certs
+          mountPath: /etc/nginx/certs
+          readOnly: true
+        - name: ca-bundle
+          mountPath: /etc/nginx/certs/ca-bundle.crt
+          subPath: ca-bundle.crt
+          readOnly: true
+        
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 443
+            scheme: HTTPS
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 443
+            scheme: HTTPS
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+      
+      # Nginx Prometheus Exporter sidecar
+      - name: nginx-exporter
+        image: nginx/nginx-prometheus-exporter:0.11
+        args:
+        - -nginx.scrape-uri=http://localhost:80/stub_status
+        ports:
+        - containerPort: 9113
+          name: metrics
+          protocol: TCP
+        
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+      
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-mtls-config
+      - name: server-certs
+        secret:
+          secretName: gauth-api-server-tls
+      - name: ca-bundle
+        configMap:
+          name: gauth-ca-bundle
+
+---
+# Service for Nginx
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-mtls
+  namespace: gauth
+  labels:
+    app: nginx-mtls
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "tcp"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
+spec:
+  type: LoadBalancer
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800  # 3 hours
+  ports:
+  - name: https
+    port: 443
+    targetPort: 443
+    protocol: TCP
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  selector:
+    app: nginx-mtls
+
+---
+# PodDisruptionBudget for Nginx
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: nginx-mtls-pdb
+  namespace: gauth
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: nginx-mtls
+
+---
+# HorizontalPodAutoscaler for Nginx
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: nginx-mtls-hpa
+  namespace: gauth
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: nginx-mtls
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 30
+
+---
+# Istio PeerAuthentication for service mesh mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default-mtls-strict
+  namespace: gauth
+spec:
+  mtls:
+    mode: STRICT
+
+---
+# Istio AuthorizationPolicy
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: gauth-api-authz
+  namespace: gauth
+spec:
+  selector:
+    matchLabels:
+      app: gauth-api
+  action: ALLOW
+  rules:
+  # Allow requests with valid mTLS certificates
+  - from:
+    - source:
+        principals: ["cluster.local/ns/gauth/sa/*"]
+        notPrincipals: ["cluster.local/ns/gauth/sa/unauthorized"]
+    to:
+    - operation:
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
+        paths: ["/api/*", "/v1/*"]
+        notPaths: ["/api/internal/*"]
+    when:
+    - key: request.auth.claims[aud]
+      values: ["gauth-api"]
+  
+  # Allow health checks from anywhere
+  - to:
+    - operation:
+        methods: ["GET"]
+        paths: ["/health", "/readiness"]
+
+---
+# Istio DestinationRule with mTLS
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: gauth-api-mtls
+  namespace: gauth
+spec:
+  host: gauth-api.gauth.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+      clientCertificate: /etc/certs/cert-chain.pem
+      privateKey: /etc/certs/key.pem
+      caCertificates: /etc/certs/root-cert.pem
+      sni: gauth-api.gauth.svc.cluster.local
+    connectionPool:
+      tcp:
+        maxConnections: 1000
+        connectTimeout: 5s
+      http:
+        http2MaxRequests: 1000
+        maxRequestsPerConnection: 10
+    outlierDetection:
+      consecutiveErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+
+---
+# NetworkPolicy for mTLS enforcement
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gauth-api-network-policy
+  namespace: gauth
+spec:
+  podSelector:
+    matchLabels:
+      app: gauth-api
+  policyTypes:
+  - Ingress
+  - Egress
+  
+  ingress:
+  # Allow from nginx-mtls (already does TLS termination)
+  - from:
+    - podSelector:
+        matchLabels:
+          app: nginx-mtls
+    ports:
+    - protocol: TCP
+      port: 8080
+  
+  # Allow from other gauth services (with mTLS via Istio)
+  - from:
+    - podSelector:
+        matchLabels:
+          app: gauth
+    ports:
+    - protocol: TCP
+      port: 8080
+  
+  # Allow Prometheus scraping
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 9090
+  
+  egress:
+  # Allow DNS
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53
+  
+  # Allow PostgreSQL
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgresql
+    ports:
+    - protocol: TCP
+      port: 5432
+  
+  # Allow Redis
+  - to:
+    - podSelector:
+        matchLabels:
+          app: redis
+    ports:
+    - protocol: TCP
+      port: 6379
+  
+  # Allow Vault
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: vault
+    ports:
+    - protocol: TCP
+      port: 8200
+  
+  # Allow HTTPS egress for webhooks
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 443

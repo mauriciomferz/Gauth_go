@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/errors"
+	"github.com/mauriciomferz/Gauth_go/pkg/errors"
 )
 
 func main() {

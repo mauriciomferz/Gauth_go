@@ -24,7 +24,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 )
 
 // SignatureStatus represents the current state of signature collection.
@@ -93,7 +93,7 @@ func NewSignatureManager(verifier VerificationProvider) *SignatureManager {
 // InitiateCollection starts signature collection for a PoA.
 func (sm *SignatureManager) InitiateCollection(
 	ctx context.Context,
-	poa *rfc0111.PowerOfAttorney,
+	poa *gauth_rfc_001.PowerOfAttorney,
 	expiresIn time.Duration,
 ) error {
 	if poa == nil {
@@ -107,7 +107,7 @@ func (sm *SignatureManager) InitiateCollection(
 	}
 
 	// Compute canonical digest
-	digestHex, _, err := rfc0111.CanonicalPOADigest(poa)
+	digestHex, _, err := gauth_rfc_001.CanonicalPOADigest(poa)
 	if err != nil {
 		return fmt.Errorf("canonical digest failed: %w", err)
 	}
@@ -315,7 +315,7 @@ func (sm *SignatureManager) isThresholdMetLocked(state *PoASignatureState) bool 
 }
 
 // GetSignatures returns all collected signatures for a PoA.
-func (sm *SignatureManager) GetSignatures(ctx context.Context, poaID string) (map[string]*rfc0111.POASignature, error) {
+func (sm *SignatureManager) GetSignatures(ctx context.Context, poaID string) (map[string]*gauth_rfc_001.POASignature, error) {
 	sm.mu.RLock()
 	defer sm.mu.RUnlock()
 
@@ -325,9 +325,9 @@ func (sm *SignatureManager) GetSignatures(ctx context.Context, poaID string) (ma
 	}
 
 	// Convert to RFC0111 format
-	result := make(map[string]*rfc0111.POASignature, len(state.Signatures))
+	result := make(map[string]*gauth_rfc_001.POASignature, len(state.Signatures))
 	for signerID, record := range state.Signatures {
-		result[signerID] = &rfc0111.POASignature{
+		result[signerID] = &gauth_rfc_001.POASignature{
 			Algorithm: "ed25519",
 			KeyID:     record.KeyID,
 			SigBase64: record.Signature,

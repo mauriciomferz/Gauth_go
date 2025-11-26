@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	imetrics "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
+	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	"github.com/mauriciomferz/Gauth_go/internal/notary"
 )
 
 // TestCapabilityAnchorNotarizationProviderMetrics ensures provider-labeled metrics are recorded.

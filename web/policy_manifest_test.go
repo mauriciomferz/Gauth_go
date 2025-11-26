@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/capability"
-	cryptopkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
-	metrics "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
+	"github.com/mauriciomferz/Gauth_go/internal/capability"
+	cryptopkg "github.com/mauriciomferz/Gauth_go/internal/crypto"
+	metrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
 )
 
 // prepareEdDSAKey ensures an active EdDSA key exists for signing tests.

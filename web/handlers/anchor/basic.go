@@ -11,7 +11,7 @@ import (
 	"os"
 	"time"
 
-	anchorpkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/anchor"
+	anchorpkg "github.com/mauriciomferz/Gauth_go/pkg/anchor"
 	"github.com/gin-gonic/gin"
 )
 

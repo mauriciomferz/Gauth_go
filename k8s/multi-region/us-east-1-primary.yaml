@@ -1,0 +1,451 @@
+# Multi-Region Kubernetes Deployment Configuration
+# Region: us-east-1 (Primary)
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gauth
+  labels:
+    region: us-east-1
+    role: primary
+
+---
+# ConfigMap with region-specific configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gauth-config
+  namespace: gauth
+data:
+  REGION: "us-east-1"
+  REGION_ROLE: "primary"
+  DB_HOST: "postgresql.gauth.svc.cluster.local"
+  DB_PORT: "5432"
+  DB_NAME: "gauth"
+  DB_SSLMODE: "require"
+  REDIS_HOST: "redis-cluster.gauth.svc.cluster.local"
+  REDIS_PORT: "6379"
+  REDIS_CLUSTER_MODE: "true"
+  
+  # Replication endpoints
+  REPLICA_REGIONS: "eu-west-1,ap-south-1"
+  EU_WEST_1_ENDPOINT: "https://gauth.eu-west-1.example.com"
+  AP_SOUTH_1_ENDPOINT: "https://gauth.ap-south-1.example.com"
+  
+  # Monitoring
+  PROMETHEUS_ENDPOINT: "http://prometheus.monitoring.svc:9090"
+  JAEGER_ENDPOINT: "http://jaeger.monitoring.svc:14268/api/traces"
+
+---
+# Secret for sensitive data
+apiVersion: v1
+kind: Secret
+metadata:
+  name: gauth-secrets
+  namespace: gauth
+type: Opaque
+stringData:
+  DB_USER: "gauth_admin"
+  DB_PASSWORD: "CHANGE_IN_PRODUCTION"
+  REDIS_PASSWORD: "CHANGE_IN_PRODUCTION"
+  JWT_SIGNING_KEY: "CHANGE_IN_PRODUCTION"
+  CROSS_REGION_API_KEY: "CHANGE_IN_PRODUCTION"
+
+---
+# Deployment with High Availability
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gauth
+  namespace: gauth
+  labels:
+    app: gauth
+    region: us-east-1
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: gauth
+  template:
+    metadata:
+      labels:
+        app: gauth
+        region: us-east-1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/api/v1/admin/metrics/prometheus"
+    spec:
+      # Anti-affinity to spread across nodes
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - gauth
+              topologyKey: kubernetes.io/hostname
+        
+        # Prefer different availability zones
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - gauth
+                topologyKey: topology.kubernetes.io/zone
+      
+      containers:
+        - name: gauth
+          image: gauth:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          
+          env:
+            - name: REGION
+              valueFrom:
+                configMapKeyRef:
+                  name: gauth-config
+                  key: REGION
+            
+            - name: REGION_ROLE
+              valueFrom:
+                configMapKeyRef:
+                  name: gauth-config
+                  key: REGION_ROLE
+            
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: gauth-config
+                  key: DB_HOST
+            
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: gauth-config
+                  key: DB_PORT
+            
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: gauth-config
+                  key: DB_NAME
+            
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: gauth-secrets
+                  key: DB_USER
+            
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gauth-secrets
+                  key: DB_PASSWORD
+            
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: gauth-config
+                  key: REDIS_HOST
+            
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gauth-secrets
+                  key: REDIS_PASSWORD
+            
+            - name: GAUTH_JWT_SIGNING_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: gauth-secrets
+                  key: JWT_SIGNING_KEY
+          
+          # Resource limits
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+          
+          # Liveness probe
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          
+          # Readiness probe
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
+          
+          # Startup probe (for slow starts)
+          startupProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 30
+          
+          # Security context
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          
+          # Volume mounts
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: cache
+              mountPath: /var/cache/gauth
+      
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: cache
+          emptyDir: {}
+      
+      # Graceful shutdown
+      terminationGracePeriodSeconds: 30
+      
+      # Service account
+      serviceAccountName: gauth
+
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: gauth
+  namespace: gauth
+  labels:
+    app: gauth
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+spec:
+  type: LoadBalancer
+  selector:
+    app: gauth
+  ports:
+    - port: 443
+      targetPort: 8080
+      protocol: TCP
+      name: https
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800  # 3 hours
+
+---
+# Horizontal Pod Autoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: gauth-hpa
+  namespace: gauth
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gauth
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+    - type: Pods
+      pods:
+        metric:
+          name: http_requests_per_second
+        target:
+          type: AverageValue
+          averageValue: "1000"
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 10
+          periodSeconds: 60
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+      selectPolicy: Min
+
+---
+# Pod Disruption Budget
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: gauth-pdb
+  namespace: gauth
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: gauth
+
+---
+# ServiceAccount
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gauth
+  namespace: gauth
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/gauth-service-role
+
+---
+# Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gauth-network-policy
+  namespace: gauth
+spec:
+  podSelector:
+    matchLabels:
+      app: gauth
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow from ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+    
+    # Allow from monitoring
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 8080
+  
+  egress:
+    # Allow to PostgreSQL
+    - to:
+        - podSelector:
+            matchLabels:
+              app: postgresql
+      ports:
+        - protocol: TCP
+          port: 5432
+    
+    # Allow to Redis
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    
+    # Allow DNS
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+    
+    # Allow HTTPS egress (for cross-region)
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 443
+
+---
+# Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gauth-ingress
+  namespace: gauth
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+spec:
+  tls:
+    - hosts:
+        - gauth.us-east-1.example.com
+      secretName: gauth-tls
+  rules:
+    - host: gauth.us-east-1.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gauth
+                port:
+                  number: 443

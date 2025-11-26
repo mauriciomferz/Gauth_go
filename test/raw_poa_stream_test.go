@@ -5,7 +5,7 @@ import (
 	"crypto/sha256"
 	"testing"
 
-	poa "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
+	poa "github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
 
 func TestRawPOAStreamBasic(t *testing.T) {

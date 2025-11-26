@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/capability"
+	"github.com/mauriciomferz/Gauth_go/internal/capability"
 )
 
 // canonicalSerialize replicates the canonical capability registry serialization used for hashing.

@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/rfc"
+	"github.com/mauriciomferz/Gauth_go/internal/rfc"
 	"github.com/pkg/errors"
 )
 
@@ -21,7 +21,7 @@ func main() {
 	flag.Parse()
 
 	files := []struct{ Name, ID string }{
-		{"rfc0111.md", "0111"},
+		{"gauth_rfc_001.md", "0111"},
 		{"rfc0115.md", "0115"},
 	}
 

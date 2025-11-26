@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	webpkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web"
+	webpkg "github.com/mauriciomferz/Gauth_go/web"
 )
 
 // TestMain boots a beta server on :8080 so smoketests are self-contained and

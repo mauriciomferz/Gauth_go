@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/capability"
+	"github.com/mauriciomferz/Gauth_go/internal/capability"
 )
 
 // canonicalRegistryHash computes the deterministic hash of the registry (mirrors server seed logic).

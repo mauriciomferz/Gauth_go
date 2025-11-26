@@ -47,7 +47,7 @@ This document describes the architecture of the GAuth RFC implementation demonst
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## 🏗️ **RFC 111: P*P Architecture Implementation**
+## 🏗️ **GAuth-RFC-001 (formerly RFC 111): P*P Architecture Implementation**
 
 ### **Power*Point (P*P) Components**
 The GAuth implementation follows the P*P architecture as specified in GiFo-RFC-0111, emphasizing "Power" rather than "Policy":
@@ -116,7 +116,7 @@ func (d *DemandSidePEP) ValidateClientCompliance(ctx context.Context, req *Enfor
 ```
 
 #### **🎯 Power Decision Point (PDP)**
-Central authorization decisions based on RFC 115 PoA Definition:
+Central authorization decisions based on GAuth-RFC-002 (formerly RFC 115) PoA Definition:
 
 ```go
 func (s *RFCCompliantService) AuthorizeGAuth(ctx context.Context, req GAuthRequest) (*GAuthResponse, error) {
@@ -183,23 +183,23 @@ func (v *LegalFrameworkValidator) VerifyIdentities(ctx context.Context, poa PoAD
 }
 ```
 
-## 📋 **RFC 115: PoA Definition Architecture**
+## 📋 **GAuth-RFC-002 (formerly RFC 115): PoA Definition Architecture**
 
 ### **Complete PoA Definition Structure**
-The architecture implements the full RFC 115 specification:
+The architecture implements the full GAuth-RFC-002 (formerly RFC 115) specification:
 
 ```go
 type PoADefinition struct {
-    // A. Parties (RFC 115 Section 3.A)
+    // A. Parties (GAuth-RFC-002 (formerly RFC 115) Section 3.A)
     Principal    Principal    `json:"principal"`     // Entity granting authority
     Authorizer   Authorizer   `json:"authorizer"`    // Representatives & authority chain
     Client       ClientAI     `json:"client"`       // AI system receiving authority
     
-    // B. Type and Scope of Authorization (RFC 115 Section 3.B)
+    // B. Type and Scope of Authorization (GAuth-RFC-002 (formerly RFC 115) Section 3.B)
     AuthorizationType AuthorizationType `json:"authorization_type"` // Sole/joint representation
     ScopeDefinition   ScopeDefinition   `json:"scope_definition"`   // Industries, regions, actions
     
-    // C. Requirements (RFC 115 Section 3.C)
+    // C. Requirements (GAuth-RFC-002 (formerly RFC 115) Section 3.C)
     Requirements Requirements `json:"requirements"` // Validity, limits, legal, security
 }
 ```
@@ -274,12 +274,12 @@ type ProperCrypto struct {
 ### **Multi-Layer Security Validation**
 ```go
 func (s *RFCCompliantService) validateComprehensively(ctx context.Context, req GAuthRequest) error {
-    // Layer 1: PoA Definition validation (RFC 115)
+    // Layer 1: PoA Definition validation (GAuth-RFC-002 (formerly RFC 115))
     if err := s.validatePoADefinition(ctx, req.PoADefinition); err != nil {
         return fmt.Errorf("PoA validation failed: %w", err)
     }
     
-    // Layer 2: Principal capacity validation (RFC 111)
+    // Layer 2: Principal capacity validation (GAuth-RFC-001 (formerly RFC 111))
     if err := s.validatePrincipalCapacity(ctx, req.PrincipalID, req.PowerType); err != nil {
         return fmt.Errorf("principal validation failed: %w", err)
     }
@@ -394,7 +394,7 @@ type ExtendedToken struct {
     ExpiresIn    int      `json:"expires_in"`
     Scope       []string `json:"scope"`
     
-    // GAuth RFC 111 extensions
+    // GAuth GAuth-RFC-001 (formerly RFC 111) extensions
     ExtendedMetadata ExtendedMetadata `json:"extended_metadata"`
 }
 
@@ -421,7 +421,7 @@ type ExtendedMetadata struct {
 ### **Complete RFC Authorization Flow**
 ```
 1. GAuth Request Reception
-   ├─ Parse PoA Definition (RFC 115)
+   ├─ Parse PoA Definition (GAuth-RFC-002 (formerly RFC 115))
    ├─ Extract Principal/Client/Authorizer
    └─ Validate request structure
 

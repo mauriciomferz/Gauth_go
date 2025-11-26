@@ -5,8 +5,8 @@
 
 This example demonstrates a professional implementation of RFC-0111 and RFC-0115 in the GAuth 1.0 framework. It covers:
 
-- Power-of-Attorney authorization for AI agents (RFC-111)
-- Advanced delegation and attestation (RFC-115)
+- Power-of-Attorney authorization for AI agents (GAuth-RFC-001)
+- Advanced delegation and attestation (GAuth-RFC-002)
 - Legal compliance, audit trail, and token management
 
 ## How to Run
@@ -16,7 +16,7 @@ go run main.go
 ```
 
 ## What to Expect
-- The output will show successful RFC 111 and RFC 115 flows, including authorization codes, tokens, delegation, and compliance status.
+- The output will show successful GAuth-RFC-001 (formerly RFC 111) and GAuth-RFC-002 (formerly RFC 115) flows, including authorization codes, tokens, delegation, and compliance status.
 - All validation logic is implemented (no stubs).
 - Errors and edge cases are handled professionally.
 

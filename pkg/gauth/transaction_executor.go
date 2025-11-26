@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
 
 // TransactionExecutor handles RFC-0111 Step (g): Transaction/Decision/Action Request

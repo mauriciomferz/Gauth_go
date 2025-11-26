@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
 	"github.com/mauriciomferz/Gauth_go/pkg/webhook"
+	"github.com/gorilla/mux"
 )
 
 // WebhookHandler handles webhook-related HTTP requests

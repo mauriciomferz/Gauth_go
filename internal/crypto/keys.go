@@ -20,8 +20,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/tracing"
-	ledger "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger"
+	"github.com/mauriciomferz/Gauth_go/internal/tracing"
+	ledger "github.com/mauriciomferz/Gauth_go/pkg/ledger"
 )
 
 // Key represents a signing key (Ed25519) with metadata.

@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/config"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+	"github.com/mauriciomferz/Gauth_go/internal/config"
+	"github.com/mauriciomferz/Gauth_go/internal/metrics"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 )
 
 // TestCascadeProcessorComprehensive adds comprehensive test scenarios for cascade revocation
@@ -17,9 +17,9 @@ import (
 //nolint:gocyclo // End-to-end cascade testing
 func TestCascadeProcessorComprehensive(t *testing.T) {
 	// Helper to create a test POA with realistic attributes
-	createRealisticPOA := func(id, parentID, grantor, grantee string, scope []string, depth int) *rfc0111.PowerOfAttorney {
+	createRealisticPOA := func(id, parentID, grantor, grantee string, scope []string, depth int) *gauth_rfc_001.PowerOfAttorney {
 		now := time.Now().UTC()
-		return &rfc0111.PowerOfAttorney{
+		return &gauth_rfc_001.PowerOfAttorney{
 			ID:          id,
 			Version:     1,
 			Grantor:     grantor,
@@ -27,7 +27,7 @@ func TestCascadeProcessorComprehensive(t *testing.T) {
 			Scope:       scope,
 			ValidFrom:   now,
 			ValidUntil:  now.Add(24 * time.Hour),
-			Status:      rfc0111.POAStatusActive,
+			Status:      gauth_rfc_001.POAStatusActive,
 			CreatedAt:   now,
 			UpdatedAt:   now,
 			ParentPOAID: parentID,
@@ -36,9 +36,9 @@ func TestCascadeProcessorComprehensive(t *testing.T) {
 	}
 
 	// Setup a complex delegation tree for realistic testing
-	setupComplexHierarchy := func() (*memoryRepo, map[string]*rfc0111.PowerOfAttorney) {
-		repo := &memoryRepo{store: make(map[string]*rfc0111.PowerOfAttorney)}
-		poas := make(map[string]*rfc0111.PowerOfAttorney)
+	setupComplexHierarchy := func() (*memoryRepo, map[string]*gauth_rfc_001.PowerOfAttorney) {
+		repo := &memoryRepo{store: make(map[string]*gauth_rfc_001.PowerOfAttorney)}
+		poas := make(map[string]*gauth_rfc_001.PowerOfAttorney)
 
 		// Create a complex tree:
 		// ceo -> [cto, cfo]
@@ -63,7 +63,7 @@ func TestCascadeProcessorComprehensive(t *testing.T) {
 		analyst1 := createRealisticPOA("analyst1", "finance-lead", "finance-lead", "analyst1", []string{"finance.reporting.monthly"}, 3)
 		analyst2 := createRealisticPOA("analyst2", "finance-lead", "finance-lead", "analyst2", []string{"finance.reporting.quarterly"}, 3)
 
-		allPOAs := []*rfc0111.PowerOfAttorney{
+		allPOAs := []*gauth_rfc_001.PowerOfAttorney{
 			ceo, cto, cfo, engLead1, engLead2, financeLead,
 			dev1, dev2, dev3, analyst1, analyst2,
 		}
@@ -112,7 +112,7 @@ func TestCascadeProcessorComprehensive(t *testing.T) {
 				t.Errorf("POA %s should exist", id)
 				continue
 			}
-			if poa.Status != rfc0111.POAStatusRevoked {
+			if poa.Status != gauth_rfc_001.POAStatusRevoked {
 				t.Errorf("POA %s should be revoked, got status: %s", id, poa.Status)
 			}
 		}
@@ -125,7 +125,7 @@ func TestCascadeProcessorComprehensive(t *testing.T) {
 				t.Errorf("POA %s should exist", id)
 				continue
 			}
-			if poa.Status != rfc0111.POAStatusActive {
+			if poa.Status != gauth_rfc_001.POAStatusActive {
 				t.Errorf("POA %s should remain active, got status: %s", id, poa.Status)
 			}
 		}
@@ -184,7 +184,7 @@ func TestCascadeProcessorComprehensive(t *testing.T) {
 				t.Errorf("POA %s should exist", id)
 				continue
 			}
-			if poa.Status != rfc0111.POAStatusSuspended {
+			if poa.Status != gauth_rfc_001.POAStatusSuspended {
 				t.Errorf("POA %s should be suspended, got status: %s", id, poa.Status)
 			}
 		}
@@ -192,7 +192,7 @@ func TestCascadeProcessorComprehensive(t *testing.T) {
 
 	t.Run("performance test - deep hierarchy", func(t *testing.T) {
 		// Create a deep chain: root -> level1 -> level2 -> ... -> level20
-		repo := &memoryRepo{store: make(map[string]*rfc0111.PowerOfAttorney)}
+		repo := &memoryRepo{store: make(map[string]*gauth_rfc_001.PowerOfAttorney)}
 
 		const maxLevels = 20
 		var previousID = ""
@@ -250,7 +250,7 @@ func TestCascadeProcessorComprehensive(t *testing.T) {
 	t.Run("error injection - repository failures", func(t *testing.T) {
 		// Create a failing repository that simulates partial failures
 		failingRepo := &failingMemoryRepo{
-			memoryRepo:  &memoryRepo{store: make(map[string]*rfc0111.PowerOfAttorney)},
+			memoryRepo:  &memoryRepo{store: make(map[string]*gauth_rfc_001.PowerOfAttorney)},
 			failureRate: 0.3, // 30% failure rate
 			failAfterID: "failure-point",
 		}
@@ -261,7 +261,7 @@ func TestCascadeProcessorComprehensive(t *testing.T) {
 		failurePoint := createRealisticPOA("failure-point", "root", "bob", "dave", []string{"write.*"}, 1)
 		child3 := createRealisticPOA("child3", "root", "bob", "eve", []string{"admin.*"}, 1)
 
-		for _, poa := range []*rfc0111.PowerOfAttorney{root, child1, failurePoint, child3} {
+		for _, poa := range []*gauth_rfc_001.PowerOfAttorney{root, child1, failurePoint, child3} {
 			_ = failingRepo.Create(poa)
 		}
 
@@ -398,7 +398,7 @@ type failingMemoryRepo struct {
 	updateCalls int
 }
 
-func (f *failingMemoryRepo) Update(p *rfc0111.PowerOfAttorney) error {
+func (f *failingMemoryRepo) Update(p *gauth_rfc_001.PowerOfAttorney) error {
 	f.updateCalls++
 
 	// Fail updates after encountering the specific ID

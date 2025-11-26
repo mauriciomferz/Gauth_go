@@ -3,7 +3,7 @@ package test
 import (
 	"testing"
 
-	a "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
+	a "github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/stretchr/testify/require"
 )
 

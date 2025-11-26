@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	notary "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
+	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
 )
 
 // TestRotationV2Endpoint verifies artifact shape, threshold evaluation and continuity advancement when verified weight meets threshold.

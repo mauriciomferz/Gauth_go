@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	imetrics "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
-	iobligations "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/obligations"
+	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	iobligations "github.com/mauriciomferz/Gauth_go/internal/obligations"
 	prom "github.com/prometheus/client_golang/prometheus"
 	dto "github.com/prometheus/client_model/go"
 )

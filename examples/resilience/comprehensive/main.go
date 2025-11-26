@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/resilience"
+	"github.com/mauriciomferz/Gauth_go/pkg/resilience"
 )
 
 // SimulatedService represents an external service that might fail

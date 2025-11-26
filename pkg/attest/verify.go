@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
+	"github.com/mauriciomferz/Gauth_go/internal/crypto"
 )
 
 // Domain separation prefix identical to signing path for model limits attestation.

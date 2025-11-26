@@ -41,30 +41,32 @@ import (
 
 	bls "github.com/herumi/bls-eth-go-binary/bls"
 
-	anchorint "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/anchor"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/capability"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/limits"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/tracing"
-	anchor "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/anchor"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
-	authpkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/auth"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/authz"
-	cryptopkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/crypto"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/database"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/delegation"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
-	ratelimit "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/limits"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/mcp"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
-	adminHandlers "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/admin"
-	anchorHandlers "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/anchor"
-	auditHandlers "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/audit"
-	authHandlers "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/auth"
-	betaHandlers "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/beta"
+	anchorint "github.com/mauriciomferz/Gauth_go/internal/anchor"
+	"github.com/mauriciomferz/Gauth_go/internal/capability"
+	"github.com/mauriciomferz/Gauth_go/internal/crypto"
+	"github.com/mauriciomferz/Gauth_go/internal/limits"
+	"github.com/mauriciomferz/Gauth_go/internal/metrics"
+	"github.com/mauriciomferz/Gauth_go/internal/notary"
+	"github.com/mauriciomferz/Gauth_go/internal/tracing"
+	anchor "github.com/mauriciomferz/Gauth_go/pkg/anchor"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	authpkg "github.com/mauriciomferz/Gauth_go/pkg/auth"
+	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	"github.com/mauriciomferz/Gauth_go/pkg/cache"
+	cacheConfig "github.com/mauriciomferz/Gauth_go/pkg/config"
+	cryptopkg "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	"github.com/mauriciomferz/Gauth_go/pkg/database"
+	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	ratelimit "github.com/mauriciomferz/Gauth_go/pkg/limits"
+	"github.com/mauriciomferz/Gauth_go/pkg/mcp"
+	"github.com/mauriciomferz/Gauth_go/pkg/policy"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
+	adminHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/admin"
+	anchorHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/anchor"
+	auditHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/audit"
+	authHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/auth"
+	betaHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/beta"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/prometheus/client_golang/prometheus"
@@ -293,15 +295,15 @@ type BetaServer struct {
 	// These are no-ops when GAUTH_DISABLE_RFC0111_SERVICE=1 (service nil) and handlers will fail closed.
 	rfc0111Service interface {
 		SemanticSnapshot() map[string]uint64
-		InitiateRevocation(ctx context.Context, req rfc0111.RevocationRequest) error
+		InitiateRevocation(ctx context.Context, req gauth_rfc_001.RevocationRequest) error
 		ApproveRevocation(ctx context.Context, poaID, approver string) error
 		CancelRevocation(ctx context.Context, poaID, actor string) error
 	}
 	// RFC service reference for hierarchical digest features and delegation graph building
 	rfcService interface {
-		BuildDelegationGraph(ctx context.Context) ([]rfc0111.DelegationGraphNode, error)
-		AttachEvidenceHashes(ctx context.Context, poaID string, hashes []string) (*rfc0111.PowerOfAttorney, error)
-		ListDelegations(userID string) ([]*rfc0111.PowerOfAttorney, error)
+		BuildDelegationGraph(ctx context.Context) ([]gauth_rfc_001.DelegationGraphNode, error)
+		AttachEvidenceHashes(ctx context.Context, poaID string, hashes []string) (*gauth_rfc_001.PowerOfAttorney, error)
+		ListDelegations(userID string) ([]*gauth_rfc_001.PowerOfAttorney, error)
 	}
 	// Violation anomaly detection history (monotonic total counter checkpoints)
 	violationHistMu  sync.Mutex
@@ -1284,7 +1286,7 @@ func (s *BetaServer) Routes() []gin.RouteInfo { return s.router.Routes() }
 
 // apiSemanticCounters exposes prototype PoA semantic counters if an RFC0111 service were wired.
 // Currently BetaServer does not hold a reference to the RFC0111 service; returns empty set.
-// Future wiring: inject rfc0111.Service and read exported semantic snapshot.
+// Future wiring: inject gauth_rfc_001.Service and read exported semantic snapshot.
 func (s *BetaServer) apiSemanticCounters(c *gin.Context) {
 	if s.rfc0111Service == nil {
 		c.JSON(200, gin.H{"success": true, "counters": map[string]uint64{}, "wired": false})
@@ -1352,7 +1354,7 @@ func (s *BetaServer) mountRevocationWorkflow() {
 				c.JSON(400, gin.H{"success": false, "error": "invalid_payload"})
 				return
 			}
-			req := rfc0111.RevocationRequest{POAID: id, Initiator: in.Initiator, Reason: in.Reason}
+			req := gauth_rfc_001.RevocationRequest{POAID: id, Initiator: in.Initiator, Reason: in.Reason}
 			if err := s.rfc0111Service.InitiateRevocation(c, req); err != nil {
 				code := mapRevocationErr(err)
 				status := httpStatusForRevocationErr(code)
@@ -2784,7 +2786,7 @@ func (s *BetaServer) loadSemanticPersistence() {
 	if len(data.Counters) == 0 {
 		return
 	}
-	if svc, ok := s.rfc0111Service.(*rfc0111.Service); ok {
+	if svc, ok := s.rfc0111Service.(*gauth_rfc_001.Service); ok {
 		svc.SetSemanticSnapshot(data.Counters)
 		// seed history with restored snapshot for baseline anomaly rate calculations
 		s.semanticHistMu.Lock()
@@ -3543,7 +3545,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 			s.authorizer = authz.NewMemoryAuthorizer()
 		}
 		// Functional options: enable mandatory signatures when GAUTH_MULTI_SIG_STRICT set (already handled internally by NewService via env).
-		svc := rfc0111.NewService(memAudit, s.authorizer)
+		svc := gauth_rfc_001.NewService(memAudit, s.authorizer)
 		s.rfc0111Service = svc
 		fmt.Fprintln(os.Stderr, "[rfc0111] service initialized (semantic counters active)")
 		// Mount dual-control revocation workflow HTTP endpoints.
@@ -3646,15 +3648,29 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 			apiKeyHandler := adminHandlers.NewAPIKeyHandler(dbPool)
 			apiKeyHandler.RegisterRoutes(adminGroup)
 
-			// Security settings handler
-			securityHandler := adminHandlers.NewSecurityHandler(dbPool)
-			securityHandler.RegisterRoutes(adminGroup)
+		// Security settings handler
+		securityHandler := adminHandlers.NewSecurityHandler(dbPool)
+		securityHandler.RegisterRoutes(adminGroup)
+
+		// Cache management handler
+		cacheConf := cacheConfig.LoadCacheConfig()
+		if err := cacheConfig.ValidateCacheConfig(cacheConf); err != nil {
+			log.Printf("[WARNING] Invalid cache configuration: %v - using memory cache fallback", err)
+			cacheConf.Type = "memory"
+		}
+		cacheInstance := cache.NewCacheWithFallback(cacheConf)
+		defer cacheInstance.Close()
+		
+		// Set cache on PoA handler
+		poaHandler.SetCache(cacheInstance)
+		poaHandler.RegisterRoutes(adminGroup)
+		
+		cacheHandler := adminHandlers.NewCacheHandler(cacheInstance)
+		cacheHandler.RegisterRoutes(adminGroup)
 
 		// OIDC providers handler
 		oidcHandler := adminHandlers.NewOIDCHandler(dbPool)
-		oidcHandler.RegisterRoutes(adminGroup)
-
-		// Policy Templates handler
+		oidcHandler.RegisterRoutes(adminGroup)		// Policy Templates handler
 		policyTemplatesHandler := adminHandlers.NewPolicyTemplatesHandler(dbPool)
 		adminGroup.GET("/policy-templates", policyTemplatesHandler.ListPolicyTemplates)
 		adminGroup.GET("/policy-templates/:id", policyTemplatesHandler.GetPolicyTemplate)
@@ -3667,7 +3683,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 		gauthPlusHandler := adminHandlers.NewGAuthPlusHandler(dbPool)
 		gauthPlusHandler.RegisterRoutes(adminGroup)
 
-		fmt.Fprintln(os.Stderr, "[admin] handlers registered: auth, poa, resilience, events, authz, config, tokens, metrics, audit, subscribers, revocation, api-keys, security, oidc, policy-templates, gauthplus (16 total)")			// OIDC authentication flow handler
+		fmt.Fprintln(os.Stderr, "[admin] handlers registered: auth, poa, resilience, events, authz, config, tokens, metrics, audit, subscribers, revocation, api-keys, security, cache, oidc, policy-templates, gauthplus (17 total)")			// OIDC authentication flow handler
 			oidcAuthHandler := authHandlers.NewOIDCAuthHandler(dbPool)
 			authGroup := r.Group("/auth")
 			oidcAuthHandler.RegisterRoutes(authGroup)
@@ -7232,9 +7248,9 @@ func (s *BetaServer) routes() {
 		}
 		s.delegationStatusMu.RUnlock()
 		// Attempt to enrich with parent-child edges from RFC0111 repository if service available
-		if svc, ok := s.rfc0111Service.(*rfc0111.Service); ok && svc != nil {
+		if svc, ok := s.rfc0111Service.(*gauth_rfc_001.Service); ok && svc != nil {
 			// The repository interface lacks a full scan; approximate by iterating over principals seen in status map (union grantor/grantee covered by map keys) then de-duplicating.
-			seen := make(map[string]*rfc0111.PowerOfAttorney)
+			seen := make(map[string]*gauth_rfc_001.PowerOfAttorney)
 			principals := make(map[string]struct{})
 			for _, n := range nodes {
 				principals[n["id"].(string)] = struct{}{}

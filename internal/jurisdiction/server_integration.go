@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/compliance"
+	"github.com/mauriciomferz/Gauth_go/pkg/compliance"
 )
 
 // ServerIntegration integrates jurisdiction enforcement with the GAuth server.

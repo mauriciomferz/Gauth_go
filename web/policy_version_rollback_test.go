@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy"
+	"github.com/mauriciomferz/Gauth_go/pkg/policy"
 )
 
 // TestPolicyVersionAndRollback covers auto-increment, rollback behavior and evaluation version tagging.

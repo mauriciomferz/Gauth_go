@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/examples/cascade/pkg/mesh"
+	"github.com/mauriciomferz/Gauth_go/examples/cascade/pkg/mesh"
 )
 
 func main() {

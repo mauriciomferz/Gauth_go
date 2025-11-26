@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 )
 
 func TestScenarioRunnerSuccessMinimal(t *testing.T) {
@@ -36,7 +36,7 @@ func TestScenarioRunnerMissingRevokePolicy(t *testing.T) {
 }
 
 func TestScenarioRunnerConfigMutationFailure(t *testing.T) {
-	_, err := runDemoInternal(scenarioParams{grantor: "cm@example.com", grantee: "cg@example.com", allowCreatePolicy: true, modifyConfig: func(cfg *rfc0111.RFC0111Config) { cfg.MaxDelegationDepth = 0 }})
+	_, err := runDemoInternal(scenarioParams{grantor: "cm@example.com", grantee: "cg@example.com", allowCreatePolicy: true, modifyConfig: func(cfg *gauth_rfc_001.RFC0111Config) { cfg.MaxDelegationDepth = 0 }})
 	if err == nil {
 		t.Fatalf("expected config validation failure")
 	}

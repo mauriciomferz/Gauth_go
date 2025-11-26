@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	anchorint "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/anchor"
-	externalreceipts "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/externalreceipts"
+	anchorint "github.com/mauriciomferz/Gauth_go/internal/anchor"
+	externalreceipts "github.com/mauriciomferz/Gauth_go/web/handlers/externalreceipts"
 	"github.com/gin-gonic/gin"
 )
 

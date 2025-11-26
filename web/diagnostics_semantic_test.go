@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 	"github.com/gin-gonic/gin"
 )
 
@@ -81,7 +81,7 @@ type mockRFC0111Service struct {
 
 // Revocation workflow methods (no-op) to satisfy extended interface for tests.
 // They return nil to simulate successful operations without affecting snapshots.
-func (m *mockRFC0111Service) InitiateRevocation(ctx context.Context, req rfc0111.RevocationRequest) error {
+func (m *mockRFC0111Service) InitiateRevocation(ctx context.Context, req gauth_rfc_001.RevocationRequest) error {
 	return nil
 }
 func (m *mockRFC0111Service) ApproveRevocation(ctx context.Context, poaID, approver string) error {

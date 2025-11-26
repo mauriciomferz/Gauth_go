@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/enforcement"
+	"github.com/mauriciomferz/Gauth_go/pkg/enforcement"
 )
 
 // Risk level constants

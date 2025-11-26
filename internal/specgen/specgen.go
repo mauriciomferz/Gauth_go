@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	webpkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web"
+	webpkg "github.com/mauriciomferz/Gauth_go/web"
 	"gopkg.in/yaml.v3"
 )
 

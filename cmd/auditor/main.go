@@ -20,11 +20,11 @@ import (
 	"sync"
 	"time"
 
-	cryptoReg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
-	auditor "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/auditor"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/delegation"
-	poa "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
+	cryptoReg "github.com/mauriciomferz/Gauth_go/internal/crypto"
+	"github.com/mauriciomferz/Gauth_go/internal/notary"
+	auditor "github.com/mauriciomferz/Gauth_go/pkg/auditor"
+	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
+	poa "github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
 
 // AuditorResult is a generic result envelope printed as JSON.

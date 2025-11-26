@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	gauthErrors "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/errors"
+	gauthErrors "github.com/mauriciomferz/Gauth_go/pkg/errors"
 )
 
 // Define custom context keys

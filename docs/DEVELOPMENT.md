@@ -188,7 +188,7 @@ if err != nil {
     log.Fatal(err)
 }
 
-// Create comprehensive PoA Definition (RFC 115)
+// Create comprehensive PoA Definition (GAuth-RFC-002 (formerly RFC 115))
 poa := auth.PoADefinition{
     Principal: auth.Principal{
         Type:     auth.PrincipalTypeOrganization,
@@ -199,7 +199,7 @@ poa := auth.PoADefinition{
             RegisteredAuthority: true,
         },
     },
-    // ... complete RFC 115 structure
+    // ... complete GAuth-RFC-002 (formerly RFC 115) structure
 }
 
 // Authorize with full RFC validation

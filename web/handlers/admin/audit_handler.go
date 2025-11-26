@@ -1,24 +1,40 @@
 package admin
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // AuditHandler manages audit trail operations for the admin portal
 type AuditHandler struct {
-	repo *audit.Repository
+	repo          *audit.Repository
+	exportService *audit.ExportService
 }
 
 // NewAuditHandler creates a new audit handler instance
 func NewAuditHandler(db *pgxpool.Pool) *AuditHandler {
+	repo := audit.NewRepository(db)
+	exportService := audit.NewExportService(repo, "/tmp/gauth-audit-exports")
+	
+	// Start cleanup routine for expired exports
+	go func() {
+		ticker := time.NewTicker(1 * time.Hour)
+		defer ticker.Stop()
+		for range ticker.C {
+			exportService.CleanupExpiredJobs()
+		}
+	}()
+	
 	return &AuditHandler{
-		repo: audit.NewRepository(db),
+		repo:          repo,
+		exportService: exportService,
 	}
 }
 
@@ -97,8 +113,14 @@ type SIEMRequest struct {
 
 // ExportRequest represents the request to export audit trail
 type ExportRequest struct {
-	Format    string `json:"format" binding:"required,oneof=json csv syslog cef"`
-	DateRange string `json:"dateRange" binding:"required"`
+	Format       string  `json:"format" binding:"required,oneof=json csv syslog cef"`
+	DateRange    string  `json:"dateRange" binding:"required"`
+	Category     *string `json:"category"`
+	Severity     *string `json:"severity"`
+	Actor        *string `json:"actor"`
+	Action       *string `json:"action"`
+	ResourceType *string `json:"resourceType"`
+	Compressed   bool    `json:"compressed"`
 }
 
 // ListAuditEvents returns audit events with optional filtering
@@ -342,22 +364,205 @@ func (h *AuditHandler) VerifyEvent(c *gin.Context) {
 	c.JSON(http.StatusOK, verification)
 }
 
-// ExportAuditTrail exports audit trail in specified format
+// ExportAuditTrail initiates an async export job
 // POST /api/admin/audit/export
 func (h *AuditHandler) ExportAuditTrail(c *gin.Context) {
+	tenantID := c.GetString("tenant_id")
+	if tenantID == "" {
+		tenantID = "default-tenant"
+	}
+	
 	var req ExportRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// TODO: Generate export file based on format and date range
-	// TODO: Support JSON, CSV, Syslog, CEF formats
+	// Parse date range
+	startDate, endDate, err := h.parseDateRange(req.DateRange)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("invalid date range: %v", err)})
+		return
+	}
 	
-	// Export audit data
-	c.Header("Content-Disposition", "attachment; filename=audit-trail."+req.Format)
-	c.Header("Content-Type", "application/octet-stream")
-	c.String(http.StatusOK, "Audit trail export data")
+	// Build filter
+	filter := audit.ExportFilter{
+		StartDate: startDate,
+		EndDate:   endDate,
+		Limit:     10000, // Max 10,000 events per export
+	}
+	
+	if req.Category != nil {
+		filter.Category = *req.Category
+	}
+	if req.Severity != nil {
+		filter.Severity = *req.Severity
+	}
+	if req.Actor != nil {
+		filter.Actor = *req.Actor
+	}
+	if req.Action != nil {
+		filter.Action = *req.Action
+	}
+	if req.ResourceType != nil {
+		filter.ResourceType = *req.ResourceType
+	}
+	
+	// Parse format
+	format := audit.ExportFormat(req.Format)
+	
+	// Create export job
+	job, err := h.exportService.CreateExportJob(c.Request.Context(), tenantID, format, filter, req.Compressed)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to create export job: %v", err)})
+		return
+	}
+	
+	c.JSON(http.StatusAccepted, gin.H{
+		"jobId":     job.ID,
+		"status":    job.Status,
+		"format":    job.Format,
+		"createdAt": job.CreatedAt.Format(time.RFC3339),
+		"expiresAt": job.ExpiresAt.Format(time.RFC3339),
+	})
+}
+
+// GetExportStatus retrieves the status of an export job
+// GET /api/admin/audit/export/:id
+func (h *AuditHandler) GetExportStatus(c *gin.Context) {
+	jobID := c.Param("id")
+	
+	job, err := h.exportService.GetExportJob(jobID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "export job not found"})
+		return
+	}
+	
+	response := gin.H{
+		"jobId":       job.ID,
+		"status":      job.Status,
+		"format":      job.Format,
+		"compressed":  job.Compressed,
+		"totalEvents": job.TotalEvents,
+		"fileSize":    job.FileSize,
+		"createdAt":   job.CreatedAt.Format(time.RFC3339),
+		"expiresAt":   job.ExpiresAt.Format(time.RFC3339),
+	}
+	
+	if job.CompletedAt != nil {
+		response["completedAt"] = job.CompletedAt.Format(time.RFC3339)
+	}
+	
+	if job.Error != "" {
+		response["error"] = job.Error
+	}
+	
+	c.JSON(http.StatusOK, response)
+}
+
+// DownloadExport downloads a completed export file
+// GET /api/admin/audit/export/:id/download
+func (h *AuditHandler) DownloadExport(c *gin.Context) {
+	jobID := c.Param("id")
+	
+	job, err := h.exportService.GetExportJob(jobID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "export job not found"})
+		return
+	}
+	
+	if job.Status != audit.ExportStatusCompleted {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("export not ready (status: %s)", job.Status)})
+		return
+	}
+	
+	// Determine content type and filename
+	ext := string(job.Format)
+	contentType := "application/octet-stream"
+	
+	switch job.Format {
+	case audit.ExportFormatJSON:
+		contentType = "application/json"
+	case audit.ExportFormatCSV:
+		contentType = "text/csv"
+	case audit.ExportFormatSyslog, audit.ExportFormatCEF:
+		contentType = "text/plain"
+	}
+	
+	if job.Compressed {
+		ext += ".gz"
+		contentType = "application/gzip"
+	}
+	
+	filename := fmt.Sprintf("audit-export-%s.%s", time.Now().Format("20060102-150405"), ext)
+	
+	// Set headers
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+	c.Header("Content-Type", contentType)
+	c.Header("Content-Length", fmt.Sprintf("%d", job.FileSize))
+	
+	// Stream file
+	c.File(job.FilePath)
+}
+
+// DeleteExport deletes an export job and its file
+// DELETE /api/admin/audit/export/:id
+func (h *AuditHandler) DeleteExport(c *gin.Context) {
+	jobID := c.Param("id")
+	
+	if err := h.exportService.DeleteExportJob(jobID); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "export job not found"})
+		return
+	}
+	
+	c.JSON(http.StatusOK, gin.H{"message": "export job deleted"})
+}
+
+// parseDateRange parses date range string into start and end times
+func (h *AuditHandler) parseDateRange(dateRange string) (time.Time, time.Time, error) {
+	now := time.Now()
+	var startDate, endDate time.Time
+	
+	switch dateRange {
+	case "last-1h":
+		startDate = now.Add(-1 * time.Hour)
+		endDate = now
+	case "last-24h":
+		startDate = now.Add(-24 * time.Hour)
+		endDate = now
+	case "last-7d":
+		startDate = now.AddDate(0, 0, -7)
+		endDate = now
+	case "last-30d":
+		startDate = now.AddDate(0, 0, -30)
+		endDate = now
+	case "all":
+		// All time - use a very old date
+		startDate = time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
+		endDate = now
+	default:
+		// Try to parse custom range format: "YYYY-MM-DD,YYYY-MM-DD"
+		parts := strings.Split(dateRange, ",")
+		if len(parts) != 2 {
+			return time.Time{}, time.Time{}, fmt.Errorf("invalid date range format")
+		}
+		
+		var err error
+		startDate, err = time.Parse("2006-01-02", strings.TrimSpace(parts[0]))
+		if err != nil {
+			return time.Time{}, time.Time{}, fmt.Errorf("invalid start date: %v", err)
+		}
+		
+		endDate, err = time.Parse("2006-01-02", strings.TrimSpace(parts[1]))
+		if err != nil {
+			return time.Time{}, time.Time{}, fmt.Errorf("invalid end date: %v", err)
+		}
+		
+		// Set end date to end of day
+		endDate = endDate.Add(24*time.Hour - time.Second)
+	}
+	
+	return startDate, endDate, nil
 }
 
 // ListSIEMIntegrations returns all SIEM integrations
@@ -552,7 +757,12 @@ func (h *AuditHandler) RegisterRoutes(router *gin.RouterGroup) {
 		// Audit Events
 		audit.GET("/events", h.ListAuditEvents)
 		audit.GET("/verify/:id", h.VerifyEvent)
+		
+		// Export endpoints (async export with job tracking)
 		audit.POST("/export", h.ExportAuditTrail)
+		audit.GET("/export/:id", h.GetExportStatus)
+		audit.GET("/export/:id/download", h.DownloadExport)
+		audit.DELETE("/export/:id", h.DeleteExport)
 
 		// Compliance
 		audit.GET("/compliance", h.GetComplianceReports)

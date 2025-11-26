@@ -6,13 +6,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/attest"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/authz"
-	cr "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/crypto"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc"
-	rfc0111 "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+	"github.com/mauriciomferz/Gauth_go/internal/metrics"
+	"github.com/mauriciomferz/Gauth_go/pkg/attest"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	cr "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	"github.com/mauriciomferz/Gauth_go/pkg/rfc"
+	gauth_rfc_001 "github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 )
 
 // simpleAllowAuthorizer always allows
@@ -27,29 +27,29 @@ func (s simpleAllowAuthorizer) GetPermissions(ctx context.Context, subject strin
 	return []authz.Permission{}, nil
 }
 
-func newServiceWithSigner(t *testing.T) *rfc0111.Service {
+func newServiceWithSigner(t *testing.T) *gauth_rfc_001.Service {
 	kms, err := cr.NewInMemoryEd25519Provider()
 	if err != nil {
 		t.Fatalf("kms init: %v", err)
 	}
 	auditLogger := audit.NewMemoryLogger(nil)
-	svc := rfc0111.NewService(auditLogger, simpleAllowAuthorizer{}, rfc0111.WithKMS(kms))
+	svc := gauth_rfc_001.NewService(auditLogger, simpleAllowAuthorizer{}, gauth_rfc_001.WithKMS(kms))
 	return svc
 }
 
 // newServiceWithSignerAndAnchors constructs a service with a supplied (possibly empty)
 // trust anchor registry for attestation enforcement tests.
-func newServiceWithSignerAndAnchors(t *testing.T, reg *attest.TrustAnchorRegistry, m metrics.Metrics) (*rfc0111.Service, cr.KMS) {
+func newServiceWithSignerAndAnchors(t *testing.T, reg *attest.TrustAnchorRegistry, m metrics.Metrics) (*gauth_rfc_001.Service, cr.KMS) {
 	kms, err := cr.NewInMemoryEd25519Provider()
 	if err != nil {
 		t.Fatalf("kms init: %v", err)
 	}
 	auditLogger := audit.NewMemoryLogger(nil)
-	opts := []rfc0111.Option{rfc0111.WithKMS(kms), rfc0111.WithAttestationTrustAnchors(reg)}
+	opts := []gauth_rfc_001.Option{gauth_rfc_001.WithKMS(kms), gauth_rfc_001.WithAttestationTrustAnchors(reg)}
 	if m != nil {
-		opts = append(opts, rfc0111.WithMetrics(m))
+		opts = append(opts, gauth_rfc_001.WithMetrics(m))
 	}
-	svc := rfc0111.NewService(auditLogger, simpleAllowAuthorizer{}, opts...)
+	svc := gauth_rfc_001.NewService(auditLogger, simpleAllowAuthorizer{}, opts...)
 	return svc, kms
 }
 

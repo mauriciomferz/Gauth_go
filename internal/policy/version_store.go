@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	pkgpolicy "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy"
+	pkgpolicy "github.com/mauriciomferz/Gauth_go/pkg/policy"
 	bolt "go.etcd.io/bbolt"
 )
 

@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/anchor"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger"
+	"github.com/mauriciomferz/Gauth_go/internal/anchor"
+	"github.com/mauriciomferz/Gauth_go/pkg/ledger"
 )
 
 // ExternalAuditAnchorDemo demonstrates the integrated external audit anchoring system.

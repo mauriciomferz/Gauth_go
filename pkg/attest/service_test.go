@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	internalCrypto "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
-	testutil "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/test/testutil"
+	internalCrypto "github.com/mauriciomferz/Gauth_go/internal/crypto"
+	"github.com/mauriciomferz/Gauth_go/internal/notary"
+	testutil "github.com/mauriciomferz/Gauth_go/test/testutil"
 )
 
 // helper to setup fresh key state each test

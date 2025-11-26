@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/events"
+	"github.com/mauriciomferz/Gauth_go/pkg/events"
 )
 
 // This example demonstrates using the enhanced typed metadata system

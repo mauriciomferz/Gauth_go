@@ -40,5 +40,5 @@
     "4. Verify EdDSA signature over canonical tree head payload (domain-separated).",
     "5. Accept revocation inclusion as valid if all checks succeed."
   ],
-  "rfc_refs": ["rfc111:revocation_anchor", "rfc111:revocation_inclusion"]
+  "rfc_refs": ["gauth_rfc_001:revocation_anchor", "gauth_rfc_001:revocation_inclusion"]
 }

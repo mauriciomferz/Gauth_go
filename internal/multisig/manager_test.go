@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 )
 
 // mockVerifier implements VerificationProvider for testing
@@ -63,7 +63,7 @@ func TestSignatureManager_InitiateCollection(t *testing.T) {
 	verifier := &mockVerifier{keys: make(map[string]ed25519.PublicKey)}
 	manager := NewSignatureManager(verifier)
 
-	poa := &rfc0111.PowerOfAttorney{
+	poa := &gauth_rfc_001.PowerOfAttorney{
 		ID:        "poa-1",
 		Grantor:   "alice",
 		Grantee:   "agent",
@@ -114,7 +114,7 @@ func TestSignatureManager_SubmitSignature(t *testing.T) {
 	}
 	manager := NewSignatureManager(verifier)
 
-	poa := &rfc0111.PowerOfAttorney{
+	poa := &gauth_rfc_001.PowerOfAttorney{
 		ID:        "poa-2",
 		Grantor:   "alice",
 		Grantee:   "agent",
@@ -177,7 +177,7 @@ func TestSignatureManager_DuplicateSignature(t *testing.T) {
 	}
 	manager := NewSignatureManager(verifier)
 
-	poa := &rfc0111.PowerOfAttorney{
+	poa := &gauth_rfc_001.PowerOfAttorney{
 		ID:        "poa-3",
 		Grantor:   "alice",
 		Grantee:   "agent",
@@ -221,7 +221,7 @@ func TestSignatureManager_InvalidSignature(t *testing.T) {
 	}
 	manager := NewSignatureManager(verifier)
 
-	poa := &rfc0111.PowerOfAttorney{
+	poa := &gauth_rfc_001.PowerOfAttorney{
 		ID:        "poa-4",
 		Grantor:   "alice",
 		Grantee:   "agent",
@@ -259,7 +259,7 @@ func TestSignatureManager_UnauthorizedSigner(t *testing.T) {
 	}
 	manager := NewSignatureManager(verifier)
 
-	poa := &rfc0111.PowerOfAttorney{
+	poa := &gauth_rfc_001.PowerOfAttorney{
 		ID:        "poa-5",
 		Grantor:   "alice",
 		Grantee:   "agent",
@@ -298,7 +298,7 @@ func TestSignatureManager_ActivatePoA(t *testing.T) {
 	}
 	manager := NewSignatureManager(verifier)
 
-	poa := &rfc0111.PowerOfAttorney{
+	poa := &gauth_rfc_001.PowerOfAttorney{
 		ID:        "poa-6",
 		Grantor:   "alice",
 		Grantee:   "agent",
@@ -357,7 +357,7 @@ func TestSignatureManager_Expiration(t *testing.T) {
 	}
 	manager := NewSignatureManager(verifier)
 
-	poa := &rfc0111.PowerOfAttorney{
+	poa := &gauth_rfc_001.PowerOfAttorney{
 		ID:        "poa-7",
 		Grantor:   "alice",
 		Grantee:   "agent",
@@ -406,7 +406,7 @@ func TestSignatureManager_GetSignatures(t *testing.T) {
 	}
 	manager := NewSignatureManager(verifier)
 
-	poa := &rfc0111.PowerOfAttorney{
+	poa := &gauth_rfc_001.PowerOfAttorney{
 		ID:        "poa-8",
 		Grantor:   "alice",
 		Grantee:   "agent",
@@ -472,12 +472,12 @@ func TestSignatureManager_ListPending(t *testing.T) {
 	ctx := context.Background()
 
 	// Create multiple PoAs
-	poa1 := &rfc0111.PowerOfAttorney{
+	poa1 := &gauth_rfc_001.PowerOfAttorney{
 		ID:        "poa-pending-1",
 		Threshold: 2,
 		Signers:   []string{"alice", "bob"},
 	}
-	poa2 := &rfc0111.PowerOfAttorney{
+	poa2 := &gauth_rfc_001.PowerOfAttorney{
 		ID:        "poa-pending-2",
 		Threshold: 2,
 		Signers:   []string{"carol", "dave"},
@@ -496,7 +496,7 @@ func TestSignatureManager_RejectCollection(t *testing.T) {
 	verifier := &mockVerifier{keys: make(map[string]ed25519.PublicKey)}
 	manager := NewSignatureManager(verifier)
 
-	poa := &rfc0111.PowerOfAttorney{
+	poa := &gauth_rfc_001.PowerOfAttorney{
 		ID:        "poa-reject",
 		Threshold: 2,
 		Signers:   []string{"alice", "bob"},

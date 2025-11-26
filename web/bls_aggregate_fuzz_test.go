@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	imetrics "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
+	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
 )
 
 // FuzzBLSAggregateEndpoint exercises the aggregate endpoint with malformed / random inputs to surface panics.

@@ -1,0 +1,367 @@
+# PostgreSQL Streaming Replication Configuration
+# Multi-Region Setup with Patroni for High Availability
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: patroni-config
+  namespace: gauth
+data:
+  patroni.yml: |
+    scope: gauth-postgres
+    namespace: /db/
+    name: ${HOSTNAME}
+    
+    restapi:
+      listen: 0.0.0.0:8008
+      connect_address: ${HOSTNAME}.postgresql.gauth.svc:8008
+    
+    etcd:
+      hosts: etcd-0.etcd.gauth.svc:2379,etcd-1.etcd.gauth.svc:2379,etcd-2.etcd.gauth.svc:2379
+    
+    bootstrap:
+      dcs:
+        ttl: 30
+        loop_wait: 10
+        retry_timeout: 10
+        maximum_lag_on_failover: 1048576  # 1MB
+        master_start_timeout: 300
+        synchronous_mode: true
+        synchronous_mode_strict: false
+        postgresql:
+          use_pg_rewind: true
+          use_slots: true
+          parameters:
+            # Replication settings
+            wal_level: replica
+            hot_standby: on
+            max_connections: 500
+            max_wal_senders: 10
+            max_replication_slots: 10
+            wal_keep_size: 1024  # MB
+            
+            # Synchronous replication (for DR region)
+            synchronous_commit: remote_apply
+            synchronous_standby_names: 'ANY 1 (postgresql-dr-*)'
+            
+            # Performance
+            shared_buffers: 4GB
+            effective_cache_size: 12GB
+            maintenance_work_mem: 1GB
+            checkpoint_completion_target: 0.9
+            wal_buffers: 16MB
+            default_statistics_target: 100
+            random_page_cost: 1.1
+            effective_io_concurrency: 200
+            work_mem: 20MB
+            min_wal_size: 2GB
+            max_wal_size: 8GB
+            
+            # Logging
+            log_destination: 'stderr'
+            logging_collector: on
+            log_directory: '/var/log/postgresql'
+            log_filename: 'postgresql-%Y-%m-%d.log'
+            log_line_prefix: '%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
+            log_checkpoints: on
+            log_connections: on
+            log_disconnections: on
+            log_duration: off
+            log_lock_waits: on
+            log_statement: 'ddl'
+            log_temp_files: 0
+      
+      initdb:
+        - encoding: UTF8
+        - data-checksums
+      
+      pg_hba:
+        - host replication replicator 0.0.0.0/0 md5
+        - host all all 0.0.0.0/0 md5
+        - host all all ::0/0 md5
+    
+    postgresql:
+      listen: 0.0.0.0:5432
+      connect_address: ${HOSTNAME}.postgresql.gauth.svc:5432
+      data_dir: /var/lib/postgresql/data
+      pgpass: /tmp/pgpass
+      authentication:
+        replication:
+          username: replicator
+          password: ${REPLICATION_PASSWORD}
+        superuser:
+          username: postgres
+          password: ${POSTGRES_PASSWORD}
+      parameters:
+        unix_socket_directories: '/var/run/postgresql'
+    
+    tags:
+      nofailover: false
+      noloadbalance: false
+      clonefrom: false
+      nosync: false
+
+---
+# PostgreSQL StatefulSet with Patroni
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgresql
+  namespace: gauth
+spec:
+  serviceName: postgresql
+  replicas: 3
+  selector:
+    matchLabels:
+      app: postgresql
+  template:
+    metadata:
+      labels:
+        app: postgresql
+    spec:
+      serviceAccountName: postgresql
+      containers:
+        - name: postgresql
+          image: registry.opensource.zalan.do/acid/spilo-15:3.0-p1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+              name: postgresql
+            - containerPort: 8008
+              name: patroni
+          env:
+            - name: PATRONI_KUBERNETES_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: PATRONI_KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: PATRONI_KUBERNETES_LABELS
+              value: '{app: postgresql}'
+            - name: PATRONI_SUPERUSER_USERNAME
+              value: postgres
+            - name: PATRONI_SUPERUSER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-secrets
+                  key: superuser-password
+            - name: PATRONI_REPLICATION_USERNAME
+              value: replicator
+            - name: PATRONI_REPLICATION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-secrets
+                  key: replication-password
+            - name: PATRONI_SCOPE
+              value: gauth-postgres
+            - name: PATRONI_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: PATRONI_POSTGRESQL_DATA_DIR
+              value: /var/lib/postgresql/data
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          volumeMounts:
+            - name: postgresql-data
+              mountPath: /var/lib/postgresql/data
+            - name: patroni-config
+              mountPath: /etc/patroni
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 4Gi
+            limits:
+              cpu: 4000m
+              memory: 8Gi
+          livenessProbe:
+            httpGet:
+              path: /liveness
+              port: 8008
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 8008
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: patroni-config
+          configMap:
+            name: patroni-config
+  volumeClaimTemplates:
+    - metadata:
+        name: postgresql-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: fast-ssd
+        resources:
+          requests:
+            storage: 100Gi
+
+---
+# PostgreSQL Service (Read/Write - Primary)
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql
+  namespace: gauth
+  labels:
+    app: postgresql
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: postgresql
+  selector:
+    app: postgresql
+    role: master
+
+---
+# PostgreSQL Service (Read-Only Replicas)
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql-replica
+  namespace: gauth
+  labels:
+    app: postgresql
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: postgresql
+  selector:
+    app: postgresql
+    role: replica
+
+---
+# PostgreSQL Headless Service (for StatefulSet)
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql-headless
+  namespace: gauth
+spec:
+  clusterIP: None
+  ports:
+    - port: 5432
+      name: postgresql
+    - port: 8008
+      name: patroni
+  selector:
+    app: postgresql
+
+---
+# ServiceAccount for Patroni
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: postgresql
+  namespace: gauth
+
+---
+# Role for Patroni
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: postgresql
+  namespace: gauth
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["create", "get", "list", "patch", "update", "watch"]
+  - apiGroups: [""]
+    resources: ["endpoints"]
+    verbs: ["get", "patch", "update", "create", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "patch", "update", "watch"]
+
+---
+# RoleBinding for Patroni
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: postgresql
+  namespace: gauth
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: postgresql
+subjects:
+  - kind: ServiceAccount
+    name: postgresql
+
+---
+# Secret for PostgreSQL passwords
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgresql-secrets
+  namespace: gauth
+type: Opaque
+stringData:
+  superuser-password: CHANGE_IN_PRODUCTION
+  replication-password: CHANGE_IN_PRODUCTION
+
+---
+# CronJob for PostgreSQL backups
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgresql-backup
+  namespace: gauth
+spec:
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: backup
+              image: postgres:15
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  pg_dump -h postgresql.gauth.svc -U postgres -d gauth | \
+                  gzip > /backups/gauth-$(date +%Y%m%d-%H%M%S).sql.gz
+                  
+                  # Upload to S3
+                  aws s3 cp /backups/gauth-$(date +%Y%m%d-%H%M%S).sql.gz \
+                    s3://gauth-backups/postgresql/$(date +%Y%m%d-%H%M%S).sql.gz
+                  
+                  # Clean up local backup
+                  rm /backups/gauth-$(date +%Y%m%d-%H%M%S).sql.gz
+                  
+                  # Delete backups older than 30 days
+                  aws s3 ls s3://gauth-backups/postgresql/ | \
+                    awk '{print $4}' | \
+                    while read file; do
+                      file_date=$(echo $file | grep -oP '\d{8}')
+                      days_old=$(( ($(date +%s) - $(date -d $file_date +%s)) / 86400 ))
+                      if [ $days_old -gt 30 ]; then
+                        aws s3 rm s3://gauth-backups/postgresql/$file
+                      fi
+                    done
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgresql-secrets
+                      key: superuser-password
+              volumeMounts:
+                - name: backups
+                  mountPath: /backups
+          volumes:
+            - name: backups
+              emptyDir: {}
+          restartPolicy: OnFailure

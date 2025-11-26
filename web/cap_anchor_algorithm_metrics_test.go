@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	imetrics "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
-	cryptopkg "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/crypto"
+	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	cryptopkg "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 // TestCapabilityAnchorAlgorithmMetrics verifies per-algorithm capability anchor emission counters

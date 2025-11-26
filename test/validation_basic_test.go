@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	v "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/validation"
+	v "github.com/mauriciomferz/Gauth_go/pkg/validation"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

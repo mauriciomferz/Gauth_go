@@ -12,9 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/config"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/security"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web"
+	"github.com/mauriciomferz/Gauth_go/internal/config"
+	"github.com/mauriciomferz/Gauth_go/internal/security"
+	"github.com/mauriciomferz/Gauth_go/web"
 )
 
 // The web-server binary provides the long-running HTTP API for the beta demonstration.

@@ -90,7 +90,7 @@ go build ./pkg/auth
 go run examples/official_rfc_compliance_test/main.go
 ```
 
-## 🎯 **First RFC 111 Implementation**
+## 🎯 **First GAuth-RFC-001 (formerly RFC 111) Implementation**
 
 ### **Basic GAuth Authorization**
 

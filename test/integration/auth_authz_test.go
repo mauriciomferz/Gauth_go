@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/authz"
+	"github.com/mauriciomferz/Gauth_go/pkg/authz"
 )
 
 // --- TEST COMPATIBILITY PATCHES ---

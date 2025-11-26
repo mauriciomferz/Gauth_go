@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/authz"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 )
 
 func TestRunDemoWithLargeJSON(t *testing.T) {
@@ -31,15 +31,15 @@ func TestRunDemoFailureScenarios(t *testing.T) {
 	// Scenario 1: Invalid config (delegation depth 0)
 	cfg := createRFC0111Config()
 	cfg.MaxDelegationDepth = 0
-	if err := rfc0111.ValidateRFC0111Compliance(cfg); err == nil {
+	if err := gauth_rfc_001.ValidateRFC0111Compliance(cfg); err == nil {
 		t.Fatalf("expected config validation failure for depth=0")
 	}
 	// Scenario 2: Missing revoke permission (simulate by crafting custom function locally)
 	auditLogger := audit.NewMemoryLogger(nil)
 	authorizer := authz.NewMemoryAuthorizer()
 	authorizer.AddPolicy(authz.Policy{ID: "allow-create-only", Subject: "principal@example.com", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
-	svc := rfc0111.NewService(auditLogger, authorizer)
-	req := rfc0111.DelegationRequest{Grantor: "principal@example.com", Grantee: "agent@example.com", Scope: []string{"transaction:execute"}, Duration: time.Hour}
+	svc := gauth_rfc_001.NewService(auditLogger, authorizer)
+	req := gauth_rfc_001.DelegationRequest{Grantor: "principal@example.com", Grantee: "agent@example.com", Scope: []string{"transaction:execute"}, Duration: time.Hour}
 	delegation, err := svc.CreateDelegation(req)
 	if err != nil {
 		t.Fatalf("unexpected create failure: %v", err)

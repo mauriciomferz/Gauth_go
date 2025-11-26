@@ -81,7 +81,7 @@ cascade_main
 # Test executables
 advanced
 advanced_revocation_flow
-advanced_rfc111_flow
+advanced_gauth_rfc_001_flow
 advanced_server
 basic_server
 combined_rfc_demo
@@ -94,7 +94,7 @@ ledger-verify
 microservices
 multisig-bench
 professional_interfaces_demo
-rfc111_protocol_flow
+gauth_rfc_001_protocol_flow
 rfc_0115_poa_definition
 rfc_functional_test
 rfc_implementation_demo
@@ -171,7 +171,7 @@ gauth-demo
 gauth-demo-*
 gauth-backend*
 gauth-enhanced-*
-gauth-rfc111-*
+gauth-gauth_rfc_001-*
 # Ignore built server binaries but not source directories
 bin/*-server
 bin/web-server-new

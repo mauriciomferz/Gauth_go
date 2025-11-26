@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/authz"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 )
 
 // TestSemanticEWMAStatePersistence ensures EWMA anomaly stats survive save/load cycles.
@@ -16,7 +16,7 @@ func TestSemanticEWMAStatePersistence(t *testing.T) {
 	// Set up RFC0111 service and BetaServer wiring minimally.
 	memAuthz := authz.NewMemoryAuthorizer()
 	memAuthz.AddPolicy(authz.Policy{ID: "allow-all-alice", Subject: "alice", Resource: "*", Actions: []string{"*"}, Effect: authz.Allow})
-	svc := rfc0111.NewService(audit.NewMemoryLogger(nil), memAuthz)
+	svc := gauth_rfc_001.NewService(audit.NewMemoryLogger(nil), memAuthz)
 	bs := NewBetaServer("")
 	t.Cleanup(func() { bs.Shutdown() })
 	bs.rfc0111Service = svc

@@ -1,0 +1,83 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'gauth-production'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+# Load rules once and periodically evaluate them
+rule_files:
+  - '/etc/prometheus/alerts/*.yml'
+
+# Scrape configurations
+scrape_configs:
+  # GAuth application metrics
+  - job_name: 'gauth'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+    metrics_path: '/api/v1/admin/metrics/prometheus'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Node Exporter - Host metrics
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # PostgreSQL metrics
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+
+  # Redis metrics
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+
+  # AlertManager
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+
+  # Additional GAuth endpoints
+  - job_name: 'gauth-authz'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+    metrics_path: '/api/v1/beta/authz/metrics/prometheus'
+    scrape_interval: 15s
+
+  - job_name: 'gauth-policy'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+    metrics_path: '/api/v1/beta/policy/metrics/prometheus'
+    scrape_interval: 15s
+
+  - job_name: 'gauth-violations'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+    metrics_path: '/api/v1/beta/metrics/violations/prometheus'
+    scrape_interval: 15s
+
+  - job_name: 'gauth-capabilities'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+    metrics_path: '/api/v1/beta/capabilities/anchor/metrics/prometheus'
+    scrape_interval: 15s
+
+  - job_name: 'gauth-revocation'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+    metrics_path: '/api/v1/beta/metrics/revocation/auto-sign/prometheus'
+    scrape_interval: 15s

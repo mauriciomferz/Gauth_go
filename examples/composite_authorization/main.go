@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/auth"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/authz"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/auth"
+	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 )
 
 // Composite demo flow:
@@ -46,8 +46,8 @@ func main() {
 	}
 
 	// --- RFC0111 service with revocation chain ---
-	svc := rfc0111.NewService(audit.NewMemoryLogger(nil), az)
-	delResp, err := svc.CreateDelegationCtx(ctx, rfc0111.DelegationRequest{Grantor: "alice", Grantee: "bob", Scope: []string{"read"}, Restrictions: map[string]string{"classification": "public"}, Duration: time.Hour})
+	svc := gauth_rfc_001.NewService(audit.NewMemoryLogger(nil), az)
+	delResp, err := svc.CreateDelegationCtx(ctx, gauth_rfc_001.DelegationRequest{Grantor: "alice", Grantee: "bob", Scope: []string{"read"}, Restrictions: map[string]string{"classification": "public"}, Duration: time.Hour})
 	if err != nil {
 		fmt.Println("Delegation create failed:", err)
 		return

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -43,14 +43,14 @@ type ValidatePoARequest struct {
 // PoAResponse represents a Power of Attorney response
 type PoAResponse struct {
 	Success bool                      `json:"success"`
-	PoA     *rfc0111.PowerOfAttorney  `json:"poa,omitempty"`
+	PoA     *gauth_rfc_001.PowerOfAttorney  `json:"poa,omitempty"`
 	Error   string                    `json:"error,omitempty"`
 }
 
 // PoAListResponse represents a list of Power of Attorney documents
 type PoAListResponse struct {
 	Success bool                        `json:"success"`
-	PoAs    []*rfc0111.PowerOfAttorney  `json:"poas,omitempty"`
+	PoAs    []*gauth_rfc_001.PowerOfAttorney  `json:"poas,omitempty"`
 	Total   int                         `json:"total"`
 	Error   string                      `json:"error,omitempty"`
 }
@@ -59,7 +59,7 @@ type PoAListResponse struct {
 type PoAValidationResponse struct {
 	Success   bool                     `json:"success"`
 	Valid     bool                     `json:"valid"`
-	PoA       *rfc0111.PowerOfAttorney `json:"poa,omitempty"`
+	PoA       *gauth_rfc_001.PowerOfAttorney `json:"poa,omitempty"`
 	Reason    string                   `json:"reason,omitempty"`
 	Timestamp time.Time                `json:"timestamp"`
 	Error     string                   `json:"error,omitempty"`
@@ -67,13 +67,13 @@ type PoAValidationResponse struct {
 
 // PoAHandler provides HTTP handlers for Power of Attorney CRUD operations
 type PoAHandler struct {
-	store map[string]*rfc0111.PowerOfAttorney // In-memory store for demo
+	store map[string]*gauth_rfc_001.PowerOfAttorney // In-memory store for demo
 }
 
 // NewPoAHandler creates a new PoA HTTP handler
 func NewPoAHandler() *PoAHandler {
 	return &PoAHandler{
-		store: make(map[string]*rfc0111.PowerOfAttorney),
+		store: make(map[string]*gauth_rfc_001.PowerOfAttorney),
 	}
 }
 
@@ -135,7 +135,7 @@ func (h *PoAHandler) HandleCreate(c *gin.Context) {
 
 	// Create new PoA
 	now := time.Now()
-	poa := &rfc0111.PowerOfAttorney{
+	poa := &gauth_rfc_001.PowerOfAttorney{
 		ID:           uuid.New().String(),
 		Version:      3,
 		Grantor:      req.Grantor,
@@ -147,7 +147,7 @@ func (h *PoAHandler) HandleCreate(c *gin.Context) {
 		ActionClass:  req.ActionClass,
 		ValidFrom:    validFrom,
 		ValidUntil:   validUntil,
-		Status:       rfc0111.POAStatusActive,
+		Status:       gauth_rfc_001.POAStatusActive,
 		CreatedAt:    now,
 		UpdatedAt:    now,
 		Jurisdiction: req.Jurisdiction,
@@ -211,7 +211,7 @@ func (h *PoAHandler) HandleList(c *gin.Context) {
 	grantee := c.Query("grantee")
 	status := c.Query("status")
 
-	var filtered []*rfc0111.PowerOfAttorney
+	var filtered []*gauth_rfc_001.PowerOfAttorney
 
 	for _, poa := range h.store {
 		// Apply filters
@@ -291,7 +291,7 @@ func (h *PoAHandler) HandleUpdate(c *gin.Context) {
 		poa.ValidUntil = validUntil
 	}
 	if req.Status != "" {
-		poa.Status = rfc0111.POAStatus(req.Status)
+		poa.Status = gauth_rfc_001.POAStatus(req.Status)
 	}
 
 	poa.UpdatedAt = time.Now()
@@ -325,7 +325,7 @@ func (h *PoAHandler) HandleDelete(c *gin.Context) {
 
 	// Mark as revoked instead of deleting
 	now := time.Now()
-	poa.Status = rfc0111.POAStatusRevoked
+	poa.Status = gauth_rfc_001.POAStatusRevoked
 	poa.RevokedAt = &now
 	poa.RevocationReason = "Revoked via API"
 	poa.UpdatedAt = now
@@ -416,9 +416,9 @@ func (h *PoAHandler) HandleValidate(c *gin.Context) {
 }
 
 // validatePoA performs the actual validation logic
-func (h *PoAHandler) validatePoA(ctx context.Context, poa *rfc0111.PowerOfAttorney, action string, checkTime time.Time) (bool, string) {
+func (h *PoAHandler) validatePoA(ctx context.Context, poa *gauth_rfc_001.PowerOfAttorney, action string, checkTime time.Time) (bool, string) {
 	// Check if PoA is active
-	if poa.Status != rfc0111.POAStatusActive {
+	if poa.Status != gauth_rfc_001.POAStatusActive {
 		return false, "PoA is not active (status: " + string(poa.Status) + ")"
 	}
 

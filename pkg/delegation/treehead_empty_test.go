@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	crypto "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
+	crypto "github.com/mauriciomferz/Gauth_go/internal/crypto"
 )
 
 // TestSignTreeHeadEmptyChain ensures calling SignTreeHead on an empty revocation chain

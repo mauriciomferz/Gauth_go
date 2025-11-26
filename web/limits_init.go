@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/limits"
+	"github.com/mauriciomferz/Gauth_go/internal/limits"
 )
 
 // initLimitsManager initializes the limits manager (idempotent). Logs to stdout on failure.

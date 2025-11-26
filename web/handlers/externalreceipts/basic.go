@@ -14,7 +14,7 @@ import (
 	"net/http"
 	"time"
 
-	anchorint "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/anchor"
+	anchorint "github.com/mauriciomferz/Gauth_go/internal/anchor"
 	"github.com/gin-gonic/gin"
 )
 

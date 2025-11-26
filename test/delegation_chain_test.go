@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/delegation"
+	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
 )
 
 func TestDelegationChainIntegrity(t *testing.T) {

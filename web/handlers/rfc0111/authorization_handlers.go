@@ -1,5 +1,5 @@
 // Package rfc0111 provides HTTP handlers for RFC-0111 authorization flows.
-package rfc0111
+package gauth_rfc_001
 
 import (
 	"encoding/base64"
@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 	"github.com/gin-gonic/gin"
 )
 

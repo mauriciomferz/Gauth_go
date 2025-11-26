@@ -340,7 +340,7 @@ kubectl get hpa -n gauth-staging --watch
    - Expected: 2500+ tests pass
    - Expected: >80% coverage
 6. **Run RFC compliance tests**: `go test -tags=compliance ./test/conformance/...`
-   - Expected: All RFC 2104, RFC 5869, RFC 6238, RFC 6979, RFC 8032, RFC 8235, RFC 111, RFC 7519 tests pass
+   - Expected: All RFC 2104, RFC 5869, RFC 6238, RFC 6979, RFC 8032, RFC 8235, GAuth-RFC-001 (formerly RFC 111), RFC 7519 tests pass
 7. **Run security regression tests**: `go test -tags=security ./test/security/...`
    - Expected: All SSRF, timing attack, injection tests pass
 8. **Upload coverage**: Upload coverage.out to Codecov (optional)

@@ -3,7 +3,7 @@ package auditor
 import (
 	"fmt"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/delegation"
+	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
 )
 
 // RevocationProofResult captures inclusion verification outcome for a single revocation event.

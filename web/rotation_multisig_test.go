@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	cryptoInt "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
-	notary "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
+	cryptoInt "github.com/mauriciomferz/Gauth_go/internal/crypto"
+	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
 )
 
 // TestRotationSummary_MultiSignature ensures multi-signature mode emits multiple signatures and threshold fields.

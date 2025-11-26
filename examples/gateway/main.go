@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/circuit"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/ratelimit"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/resilience"
+	"github.com/mauriciomferz/Gauth_go/internal/circuit"
+	"github.com/mauriciomferz/Gauth_go/internal/ratelimit"
+	"github.com/mauriciomferz/Gauth_go/internal/resilience"
 )
 
 // APIGateway demonstrates resilience patterns in an API Gateway

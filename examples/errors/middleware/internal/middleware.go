@@ -8,7 +8,7 @@ import (
 
 	stderrs "errors"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/errors"
+	"github.com/mauriciomferz/Gauth_go/pkg/errors"
 	"github.com/google/uuid"
 )
 

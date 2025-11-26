@@ -1,4 +1,4 @@
-# RFC 111 & RFC 115 Gap Analysis (Beta Snapshot)
+# GAuth-RFC-001 (formerly RFC 111) & GAuth-RFC-002 (formerly RFC 115) Gap Analysis (Beta Snapshot)
 
 Date: 2025-10-26
 Scope: Implementation state of delegation (RFC111) and multi-signature / serialization (RFC115) features in `main` branch.
@@ -9,7 +9,7 @@ Scope: Implementation state of delegation (RFC111) and multi-signature / seriali
 - MISSING: Not yet implemented.
 - DEFERRED: Explicitly postponed (out of beta scope).
 
-## RFC 111 (Delegation & Validation)
+## GAuth-RFC-001 (formerly RFC 111) (Delegation & Validation)
 | Requirement | Status | Evidence | Gap / Notes |
 |-------------|--------|----------|-------------|
 | Canonical POA digest deterministic across permutations | IMPLEMENTED | `canonical_permutation_test.go` | Control char escape covered; add fuzzing later (DEFERRED). |
@@ -28,7 +28,7 @@ Scope: Implementation state of delegation (RFC111) and multi-signature / seriali
 | Rights & obligations serialization | MISSING | N/A | Introduce arrays in POA & enforcement hooks. |
 | External anchoring of capability + revocation chain tips | PARTIAL | Combined anchor endpoint for capability; revocation not yet | Add revocation anchor emission + OpenAPI. |
 
-## RFC 115 (Multi-Signature & Enhanced Serialization)
+## GAuth-RFC-002 (formerly RFC 115) (Multi-Signature & Enhanced Serialization)
 | Requirement | Status | Evidence | Gap / Notes |
 |-------------|--------|----------|-------------|
 | Domain separation & version switching (single vs multi-sig) | IMPLEMENTED | Canonical digest conditional fields | V2 transition doc MISSING. |

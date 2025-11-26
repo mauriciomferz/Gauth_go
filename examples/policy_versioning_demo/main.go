@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/policy"
-	pkgpolicy "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/policy"
+	"github.com/mauriciomferz/Gauth_go/internal/policy"
+	pkgpolicy "github.com/mauriciomferz/Gauth_go/pkg/policy"
 )
 
 func main() {

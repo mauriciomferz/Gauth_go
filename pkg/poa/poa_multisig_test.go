@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	internalCrypto "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/crypto"
+	internalCrypto "github.com/mauriciomferz/Gauth_go/internal/crypto"
 )
 
 // helper to ensure eddsa registry seeded

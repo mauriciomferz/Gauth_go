@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/pdp"
+	"github.com/mauriciomferz/Gauth_go/pkg/pdp"
 )
 
 // PDPBridge implements PDPClient interface by wrapping pkg/pdp.Engine

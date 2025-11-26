@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"testing"
 
-	pm "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
+	pm "github.com/mauriciomferz/Gauth_go/internal/metrics"
 )
 
 // TestModelUserLimitsPrometheusExposition ensures per-user exceed counters are exposed after triggering violations.

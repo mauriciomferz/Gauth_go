@@ -6,8 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+	"github.com/mauriciomferz/Gauth_go/internal/metrics"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 )
 
 // helper to perform JSON POST
@@ -32,7 +32,7 @@ func TestRevocationWorkflowEndpoints_CountQuorum(t *testing.T) {
 	srv := NewBetaServerWithMetrics("", pm)
 	t.Cleanup(func() { srv.Shutdown() })
 	// Issue a PoA via underlying service directly (simplest path): we need service reference
-	svc, ok := srv.rfc0111Service.(*rfc0111.Service)
+	svc, ok := srv.rfc0111Service.(*gauth_rfc_001.Service)
 	if !ok || svc == nil {
 		// Service should be wired; fail test if not
 		t.Fatalf("RFC0111 service not wired")
@@ -115,7 +115,7 @@ func TestRevocationWorkflowEndpoints_WeightQuorum(t *testing.T) {
 	// TODO: Re-enable this test when TestInjectPOA method is implemented
 	/*
 		poaID := "poa_weight_test"
-		poa := &rfc0111.PowerOfAttorney{
+		poa := &gauth_rfc_001.PowerOfAttorney{
 			ID:         poaID,
 			Grantor:    "grantor",
 			Grantee:    "grantee",
@@ -123,7 +123,7 @@ func TestRevocationWorkflowEndpoints_WeightQuorum(t *testing.T) {
 			Controllers: []string{"controllerA", "controllerB", "controllerC"},
 			ValidFrom:  time.Now().Add(-1 * time.Minute),
 			ValidUntil: time.Now().Add(10 * time.Minute),
-			Status:     rfc0111.POAStatusActive,
+			Status:     gauth_rfc_001.POAStatusActive,
 			CreatedAt:  time.Now(),
 			UpdatedAt:  time.Now(),
 			Version:    1,
