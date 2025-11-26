@@ -34,6 +34,7 @@ import {
   Database24Regular,
   DocumentCheckmark24Regular,
   Shield24Regular,
+  Bot24Regular,
 } from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
@@ -221,6 +222,12 @@ const navItems: NavItem[] = [
     label: 'Audit Trail',
     icon: <DocumentBulletList24Regular />,
     path: '/admin/audit',
+  },
+  {
+    id: 'gauthplus',
+    label: 'GAuth+',
+    icon: <Bot24Regular />,
+    path: '/admin/gauthplus',
   },
   {
     id: 'revocation',
