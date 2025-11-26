@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
 	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth/mocks"
@@ -187,13 +188,33 @@ func initializeGAuthPlus(components *gauth.RFC0111Components) (map[string]interf
 	fiduciaryService := gauthplus.NewPostgreSQLFiduciaryDutyService(db)
 	capabilityService := gauthplus.NewPostgreSQLCapabilityAssessmentService(db)
 
-	// Create GAuth+ validator
+	// Wrap services with caching for performance optimization
+	// Capability assessments change infrequently (monthly reviews) - 5 minute TTL
+	cachedCapabilityService := gauthplus.NewCachedCapabilityService(capabilityService, 5*time.Minute)
+	
+	// Delegation chains more volatile - 1 minute TTL
+	cachedDelegationService := gauthplus.NewCachedDelegationService(delegationService, 1*time.Minute)
+
+	// Start background cache cleanup (every 5 minutes)
+	go func() {
+		ticker := time.NewTicker(5 * time.Minute)
+		defer ticker.Stop()
+		for range ticker.C {
+			// Clean expired entries from both caches
+			cachedCapabilityService.GetCache().CleanExpired()
+			cachedDelegationService.GetCache().CleanExpired()
+		}
+	}()
+
+	fmt.Fprintf(os.Stderr, "[GAuth+] Performance optimization: Caching enabled (capability TTL: 5m, delegation TTL: 1m)\n")
+
+	// Create GAuth+ validator with cached services
 	gauthPlusValidator := gauth.NewGAuthPlusValidator(
 		successorService,
-		delegationService,
+		cachedDelegationService,  // Use cached version
 		dualControlService,
 		fiduciaryService,
-		capabilityService,
+		cachedCapabilityService,  // Use cached version
 	)
 
 	// Configure enforcement modes based on environment variables

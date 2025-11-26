@@ -15,22 +15,23 @@ import (
 // GAuthPlusValidator validates GAuth+ policies during authorization
 type GAuthPlusValidator struct {
 	successorService     *gauthplus.PostgreSQLSuccessorService
-	delegationService    *gauthplus.PostgreSQLDelegationService
+	delegationService    gauthplus.DelegationService  // Use interface for caching support
 	dualControlService   *gauthplus.PostgreSQLDualControlService
 	fiduciaryService     *gauthplus.PostgreSQLFiduciaryDutyService
-	capabilityService    *gauthplus.PostgreSQLCapabilityAssessmentService
+	capabilityService    gauthplus.CapabilityAssessmentService  // Use interface for caching support
 	enforceCapabilities  bool
 	enforceDualControl   bool
 	enforceFiduciary     bool
 }
 
 // NewGAuthPlusValidator creates a new GAuth+ validator
+// Accepts interface types for delegation and capability services to support caching
 func NewGAuthPlusValidator(
 	successorService *gauthplus.PostgreSQLSuccessorService,
-	delegationService *gauthplus.PostgreSQLDelegationService,
+	delegationService gauthplus.DelegationService,
 	dualControlService *gauthplus.PostgreSQLDualControlService,
 	fiduciaryService *gauthplus.PostgreSQLFiduciaryDutyService,
-	capabilityService *gauthplus.PostgreSQLCapabilityAssessmentService,
+	capabilityService gauthplus.CapabilityAssessmentService,
 ) *GAuthPlusValidator {
 	return &GAuthPlusValidator{
 		successorService:     successorService,

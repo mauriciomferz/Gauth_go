@@ -243,6 +243,21 @@ func (s *CachedCapabilityService) CreateAssessment(ctx context.Context, assessme
 	return nil
 }
 
+// CheckCapabilityMatch delegates to underlying service (no caching)
+func (s *CachedCapabilityService) CheckCapabilityMatch(ctx context.Context, agentID string, requirements *CapabilityRequirements) (bool, []string, error) {
+	return s.service.CheckCapabilityMatch(ctx, agentID, requirements)
+}
+
+// GetExpiringAssessments delegates to underlying service (no caching)
+func (s *CachedCapabilityService) GetExpiringAssessments(ctx context.Context, daysUntilExpiry int) ([]*AICapabilityAssessment, error) {
+	return s.service.GetExpiringAssessments(ctx, daysUntilExpiry)
+}
+
+// GetCache returns the underlying cache for direct access (e.g., cleanup)
+func (s *CachedCapabilityService) GetCache() *CapabilityCache {
+	return s.cache
+}
+
 // CachedDelegationService wraps a DelegationService with caching
 type CachedDelegationService struct {
 	service DelegationService
@@ -310,4 +325,9 @@ func (s *CachedDelegationService) ValidateDelegation(ctx context.Context, source
 // CheckMaxDepthExceeded delegates to underlying service (no caching)
 func (s *CachedDelegationService) CheckMaxDepthExceeded(ctx context.Context, sourceAgentID string, currentDepth int) (bool, error) {
 	return s.service.CheckMaxDepthExceeded(ctx, sourceAgentID, currentDepth)
+}
+
+// GetCache returns the underlying cache for direct access (e.g., cleanup)
+func (s *CachedDelegationService) GetCache() *DelegationChainCache {
+	return s.cache
 }
