@@ -4,7 +4,7 @@ services:
   # Main GAuth service
   gauth:
     build:
-      context: .
+      context: ../..
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
@@ -73,7 +73,7 @@ services:
 
   # HashiCorp Vault for secrets management
   vault:
-    image: vault:1.15
+    image: hashicorp/vault:1.15
     cap_add:
       - IPC_LOCK
     environment:
