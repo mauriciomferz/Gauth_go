@@ -489,28 +489,28 @@ func (a *Authorizer) AuthorizeRequest(req *Request, poa *PoA) error {
 ┌──────────────────────────────────────────────────────┐
 │             AI Agent (Untrusted Code)                │
 │                                                      │
-│  ┌────────────────────────────────────────────┐    │
-│  │   AWS Nitro Enclave / Intel SGX TEE        │    │
-│  │   (Trusted Execution Environment)          │    │
-│  │                                            │    │
-│  │   ┌─────────────────────────────────┐     │    │
-│  │   │  AI Logic (Python/Go)           │     │    │
-│  │   │  - Trading algorithms           │     │    │
-│  │   │  - Decision making              │     │    │
-│  │   └─────────────────────────────────┘     │    │
-│  │                                            │    │
-│  │   ┌─────────────────────────────────┐     │    │
-│  │   │  TPM / Nitro Hypervisor         │     │    │
-│  │   │  - Measures code integrity      │     │    │
-│  │   │  - Signs attestation with HW key│     │    │
-│  │   │  - Region ID from hypervisor    │     │    │
-│  │   └─────────────────────────────────┘     │    │
-│  │                                            │    │
-│  │   Attestation Output:                     │    │
-│  │   ✅ Code Hash: 0xabc123...              │    │
-│  │   ✅ Region: eu-west-1a                   │    │
-│  │   ✅ Signature: <hardware-signed>         │    │
-│  └────────────────────────────────────────────┘    │
+│  ┌────────────────────────────────────────────┐      │
+│  │   AWS Nitro Enclave / Intel SGX TEE        │      │
+│  │   (Trusted Execution Environment)          │      │
+│  │                                            │      │
+│  │   ┌─────────────────────────────────┐      │      │
+│  │   │  AI Logic (Python/Go)           │      │      │
+│  │   │  - Trading algorithms           │      │      │
+│  │   │  - Decision making              │      │      │
+│  │   └─────────────────────────────────┘      │      │
+│  │                                            │      │
+│  │   ┌─────────────────────────────────┐      │      │
+│  │   │  TPM / Nitro Hypervisor         │      │      │
+│  │   │  - Measures code integrity      │      │      │
+│  │   │  - Signs attestation with HW key│      │      │
+│  │   │  - Region ID from hypervisor    │      │      │
+│  │   └─────────────────────────────────┘      │      │
+│  │                                            │      │
+│  │   Attestation Output:                      │      │
+│  │   ✅ Code Hash: 0xabc123...                │      │
+│  │   ✅ Region: eu-west-1a                    │      │
+│  │   ✅ Signature: <hardware-signed>          │      │
+│  └────────────────────────────────────────────┘      │
 └──────────────────────────────────────────────────────┘
                       │
                       ▼
@@ -1186,44 +1186,44 @@ func (i *Issuer) CreatePoA(ctx context.Context, poa *PoA) error {
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    GAuth Security Layers                         │
+│                    GAuth Security Layers                        │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
+│                                                                 │
 │  Layer 1: Identity Verification (CRITICAL-5 Remediation)        │
-│  ┌────────────────────────────────────────────────────────┐    │
-│  │ - Hardware Key (YubiKey) + Biometric                   │    │
-│  │ - Dual-channel confirmation (SMS + Email)              │    │
-│  │ - Time-delayed activation (24-hour cancellation window)│    │
-│  └────────────────────────────────────────────────────────┘    │
-│                                                                  │
+│  ┌────────────────────────────────────────────────────────┐     │
+│  │ - Hardware Key (YubiKey) + Biometric                   │     │
+│  │ - Dual-channel confirmation (SMS + Email)              │     │
+│  │ - Time-delayed activation (24-hour cancellation window)│     │
+│  └────────────────────────────────────────────────────────┘     │
+│                                                                 │
 │  Layer 2: Geographic Attestation (CRITICAL-2 Remediation)       │
-│  ┌────────────────────────────────────────────────────────┐    │
-│  │ - TEE Attestation (AWS Nitro / Intel SGX)             │    │
-│  │ - Hardware-signed datacenter proof                     │    │
-│  │ - Certificate chain validation                         │    │
-│  └────────────────────────────────────────────────────────┘    │
-│                                                                  │
+│  ┌────────────────────────────────────────────────────────┐     │
+│  │ - TEE Attestation (AWS Nitro / Intel SGX)              │     │
+│  │ - Hardware-signed datacenter proof                     │     │
+│  │ - Certificate chain validation                         │     │
+│  └────────────────────────────────────────────────────────┘     │
+│                                                                 │
 │  Layer 3: Authorization Constraints (CRITICAL-3 Remediation)    │
-│  ┌────────────────────────────────────────────────────────┐    │
-│  │ - Semantic Allow-Listing (contract addresses)          │    │
-│  │ - Hard limits (no subjective "risk")                   │    │
-│  │ - Circuit breakers (auto-halt on loss threshold)       │    │
-│  └────────────────────────────────────────────────────────┘    │
-│                                                                  │
+│  ┌────────────────────────────────────────────────────────┐     │
+│  │ - Semantic Allow-Listing (contract addresses)          │     │
+│  │ - Hard limits (no subjective "risk")                   │     │
+│  │ - Circuit breakers (auto-halt on loss threshold)       │     │
+│  └────────────────────────────────────────────────────────┘     │
+│                                                                 │
 │  Layer 4: Real-Time Revocation (CRITICAL-1 Remediation)         │
-│  ┌────────────────────────────────────────────────────────┐    │
-│  │ - Emergency revocation oracle (sub-second)             │    │
-│  │ - Flashbots private mempool (prevent front-running)    │    │
-│  │ - WebSocket broadcast to all validators                │    │
-│  └────────────────────────────────────────────────────────┘    │
-│                                                                  │
+│  ┌────────────────────────────────────────────────────────┐     │
+│  │ - Emergency revocation oracle (sub-second)             │     │
+│  │ - Flashbots private mempool (prevent front-running)    │     │
+│  │ - WebSocket broadcast to all validators                │     │
+│  └────────────────────────────────────────────────────────┘     │
+│                                                                 │
 │  Layer 5: Standards Compliance (CRITICAL-4 Remediation)         │
-│  ┌────────────────────────────────────────────────────────┐    │
-│  │ - Rename GAuth-RFC-001/115 to GAuth-RFC-001/002             │    │
-│  │ - Clear documentation disclaimers                      │    │
-│  │ - No false claims about fiduciary duty encoding        │    │
-│  └────────────────────────────────────────────────────────┘    │
-│                                                                  │
+│  ┌────────────────────────────────────────────────────────┐     │
+│  │ - Rename GAuth-RFC-001/115 to GAuth-RFC-001/002        │     │
+│  │ - Clear documentation disclaimers                      │     │
+│  │ - No false claims about fiduciary duty encoding        │     │
+│  └────────────────────────────────────────────────────────┘     │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
