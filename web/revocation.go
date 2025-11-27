@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -9,7 +10,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
 	"github.com/mauriciomferz/Gauth_go/pkg/revocation"
 )
 
@@ -17,29 +17,17 @@ import (
 // It provides emergency revocation, two-phase revocation, optimistic revocation, and
 // circuit breaker functionality via HTTP endpoints.
 type RevocationService struct {
-	redisClient *redis.Client
-	oracle      *revocation.EmergencyRevocationOracle
-	twoPhase    *revocation.TwoPhaseRevocation
-	optimistic  *revocation.OptimisticRevocation
-	circuit     *revocation.CircuitBreaker
-	enabled     bool
-	logger      *revocationLogger
-}
-
-// revocationLogger implements the revocation.Logger interface
-type revocationLogger struct{}
-
-func (l *revocationLogger) Info(msg string, args ...interface{})  { log.Printf("[revocation] INFO: "+msg, args...) }
-func (l *revocationLogger) Warn(msg string, args ...interface{})  { log.Printf("[revocation] WARN: "+msg, args...) }
-func (l *revocationLogger) Error(msg string, args ...interface{}) { log.Printf("[revocation] ERROR: "+msg, args...) }
-func (l *revocationLogger) Debug(msg string, args ...interface{}) {
-	if os.Getenv("GAUTH_REVOCATION_DEBUG") == "1" {
-		log.Printf("[revocation] DEBUG: "+msg, args...)
-	}
+	redisAddrs []string
+	oracle     *revocation.EmergencyRevocationOracle
+	twoPhase   *revocation.TwoPhaseRevocation
+	optimistic *revocation.OptimisticRevocation
+	circuit    *revocation.CircuitBreaker
+	enabled    bool
+	logger     revocation.Logger
 }
 
 // NewRevocationService initializes the revocation system with Redis connection.
-// It returns nil if GAUTH_REVOCATION_ENABLED != "1" or Redis connection fails.
+// It returns nil if GAUTH_REVOCATION_ENABLED != "1" or initialization fails.
 func NewRevocationService(ctx context.Context) *RevocationService {
 	// Check if revocation system is enabled
 	if os.Getenv("GAUTH_REVOCATION_ENABLED") != "1" {
@@ -56,148 +44,131 @@ func NewRevocationService(ctx context.Context) *RevocationService {
 	if redisPort == "" {
 		redisPort = "6379"
 	}
-	redisPassword := os.Getenv("REDIS_PASSWORD")
-	redisDB := 0
-	if dbStr := os.Getenv("REDIS_DB"); dbStr != "" {
-		if db, err := strconv.Atoi(dbStr); err == nil {
-			redisDB = db
-		}
-	}
 
-	// Create Redis client
-	client := redis.NewClient(&redis.Options{
-		Addr:         redisHost + ":" + redisPort,
-		Password:     redisPassword,
-		DB:           redisDB,
-		DialTimeout:  5 * time.Second,
-		ReadTimeout:  3 * time.Second,
-		WriteTimeout: 3 * time.Second,
-		PoolSize:     10,
-		MinIdleConns: 2,
-	})
+	redisAddrs := []string{redisHost + ":" + redisPort}
+	logger := revocation.NewSimpleLogger("revocation")
 
-	// Test Redis connection
-	if err := client.Ping(ctx).Err(); err != nil {
-		log.Printf("[revocation] Failed to connect to Redis at %s:%s: %v", redisHost, redisPort, err)
-		log.Println("[revocation] Revocation system will be disabled")
-		return &RevocationService{enabled: false}
-	}
-
-	logger := &revocationLogger{}
-	log.Printf("[revocation] Connected to Redis at %s:%s", redisHost, redisPort)
+	log.Printf("[revocation] Connecting to Redis at %s:%s", redisHost, redisPort)
 
 	// Initialize Emergency Oracle
-	oracleConfig := revocation.DefaultOracleConfig()
-	if channelStr := os.Getenv("GAUTH_REVOCATION_ORACLE_CHANNEL"); channelStr != "" {
-		oracleConfig.Channel = channelStr
-	}
-	oracle, err := revocation.NewEmergencyRevocationOracle(client, oracleConfig, logger)
+	oracle, err := revocation.NewEmergencyOracle(redisAddrs, logger)
 	if err != nil {
 		log.Printf("[revocation] Failed to initialize oracle: %v", err)
-		client.Close()
 		return &RevocationService{enabled: false}
 	}
 
 	// Initialize Two-Phase Revocation
-	twoPhaseConfig := revocation.DefaultTwoPhaseConfig()
+	twoPhase, err := revocation.NewTwoPhaseRevocation(oracle, redisAddrs, logger)
+	if err != nil {
+		log.Printf("[revocation] Failed to initialize two-phase revocation: %v", err)
+		oracle.Close()
+		return &RevocationService{enabled: false}
+	}
+
+	// Configure two-phase timeout
 	if timeoutStr := os.Getenv("GAUTH_REVOCATION_TWOPHASE_TIMEOUT"); timeoutStr != "" {
 		if timeout, err := time.ParseDuration(timeoutStr); err == nil {
-			twoPhaseConfig.DisableTimeout = timeout
+			twoPhase.SetDisableTimeout(timeout)
 		}
-	}
-	twoPhase, err := revocation.NewTwoPhaseRevocation(client, twoPhaseConfig, logger)
-	if err != nil {
-		log.Printf("[revocation] Failed to initialize two-phase: %v", err)
-		oracle.Stop()
-		client.Close()
-		return &RevocationService{enabled: false}
 	}
 
 	// Initialize Optimistic Revocation
-	optimisticConfig := revocation.DefaultOptimisticConfig()
-	if windowStr := os.Getenv("GAUTH_REVOCATION_OPTIMISTIC_WINDOW"); windowStr != "" {
-		if window, err := time.ParseDuration(windowStr); err == nil {
-			optimisticConfig.ChallengeWindow = window
-		}
-	}
-	optimistic, err := revocation.NewOptimisticRevocation(client, optimisticConfig, logger)
+	optimistic, err := revocation.NewOptimisticRevocation(redisAddrs, oracle, logger)
 	if err != nil {
-		log.Printf("[revocation] Failed to initialize optimistic: %v", err)
-		twoPhase.Stop()
-		oracle.Stop()
-		client.Close()
+		log.Printf("[revocation] Failed to initialize optimistic revocation: %v", err)
+		twoPhase.Close()
+		oracle.Close()
 		return &RevocationService{enabled: false}
 	}
 
-	// Initialize Circuit Breaker
-	circuitConfig := revocation.DefaultCircuitConfig()
-	if rateLimitStr := os.Getenv("GAUTH_REVOCATION_CIRCUIT_RATE"); rateLimitStr != "" {
-		if rateLimit, err := strconv.Atoi(rateLimitStr); err == nil {
-			circuitConfig.RateLimitPerMin = rateLimit
+	// Configure optimistic revocation
+	if windowStr := os.Getenv("GAUTH_REVOCATION_OPTIMISTIC_WINDOW"); windowStr != "" {
+		if window, err := time.ParseDuration(windowStr); err == nil {
+			optimistic.SetChallengeWindow(window)
 		}
 	}
-	circuit, err := revocation.NewCircuitBreaker(client, circuitConfig, logger)
+
+	// Initialize Circuit Breaker
+	rateLimit := 10
+	if rateLimitStr := os.Getenv("GAUTH_REVOCATION_CIRCUIT_RATE"); rateLimitStr != "" {
+		if rate, err := strconv.Atoi(rateLimitStr); err == nil {
+			rateLimit = rate
+		}
+	}
+
+	config := &revocation.RateLimitConfig{
+		MaxTxPerMinute:    rateLimit,
+		MaxTxPerHour:      rateLimit * 6,
+		MaxValuePerMinute: 10000000000000000000,     // 10 ETH per minute (10^19 Wei)
+		MaxValuePerHour:   18446744073709551615,     // Max uint64 value (~18.4 ETH per hour due to overflow limitation)
+		MaxFailureRate:    0.1,                      // 10% max failure rate
+		FailureWindowSecs: 60,
+	}
+
+	circuit, err := revocation.NewCircuitBreaker(redisAddrs, config, logger)
 	if err != nil {
 		log.Printf("[revocation] Failed to initialize circuit breaker: %v", err)
-		optimistic.Stop()
-		twoPhase.Stop()
-		oracle.Stop()
-		client.Close()
+		optimistic.Close()
+		twoPhase.Close()
+		oracle.Close()
 		return &RevocationService{enabled: false}
 	}
 
 	log.Println("[revocation] All revocation components initialized successfully")
-	log.Printf("[revocation] Oracle channel: %s", oracleConfig.Channel)
-	log.Printf("[revocation] Two-phase timeout: %v", twoPhaseConfig.DisableTimeout)
-	log.Printf("[revocation] Optimistic window: %v", optimisticConfig.ChallengeWindow)
-	log.Printf("[revocation] Circuit rate limit: %d/min", circuitConfig.RateLimitPerMin)
 
 	return &RevocationService{
-		redisClient: client,
-		oracle:      oracle,
-		twoPhase:    twoPhase,
-		optimistic:  optimistic,
-		circuit:     circuit,
-		enabled:     true,
-		logger:      logger,
+		redisAddrs: redisAddrs,
+		oracle:     oracle,
+		twoPhase:   twoPhase,
+		optimistic: optimistic,
+		circuit:    circuit,
+		enabled:    true,
+		logger:     logger,
 	}
 }
 
-// Close gracefully shuts down the revocation service and closes Redis connection.
+// Close gracefully shuts down all revocation components
 func (rs *RevocationService) Close() error {
 	if !rs.enabled {
 		return nil
 	}
 
-	log.Println("[revocation] Shutting down revocation service...")
-	
+	var errs []error
+
 	if rs.circuit != nil {
-		rs.circuit.Stop()
-	}
-	if rs.optimistic != nil {
-		rs.optimistic.Stop()
-	}
-	if rs.twoPhase != nil {
-		rs.twoPhase.Stop()
-	}
-	if rs.oracle != nil {
-		rs.oracle.Stop()
-	}
-	if rs.redisClient != nil {
-		if err := rs.redisClient.Close(); err != nil {
-			log.Printf("[revocation] Error closing Redis: %v", err)
-			return err
+		if err := rs.circuit.Close(); err != nil {
+			errs = append(errs, fmt.Errorf("circuit breaker close: %w", err))
 		}
 	}
 
-	log.Println("[revocation] Revocation service shut down successfully")
+	if rs.optimistic != nil {
+		if err := rs.optimistic.Close(); err != nil {
+			errs = append(errs, fmt.Errorf("optimistic close: %w", err))
+		}
+	}
+
+	if rs.twoPhase != nil {
+		if err := rs.twoPhase.Close(); err != nil {
+			errs = append(errs, fmt.Errorf("two-phase close: %w", err))
+		}
+	}
+
+	if rs.oracle != nil {
+		if err := rs.oracle.Close(); err != nil {
+			errs = append(errs, fmt.Errorf("oracle close: %w", err))
+		}
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("revocation service close errors: %v", errs)
+	}
+
 	return nil
 }
 
-// RegisterHandlers registers all revocation HTTP endpoints on the provided Gin router group.
+// RegisterHandlers registers all revocation HTTP endpoints
 func (rs *RevocationService) RegisterHandlers(group *gin.RouterGroup) {
 	if !rs.enabled {
-		// Register disabled handlers that return 503
 		rs.registerDisabledHandlers(group)
 		return
 	}
@@ -222,103 +193,111 @@ func (rs *RevocationService) RegisterHandlers(group *gin.RouterGroup) {
 	// Unified validation endpoint
 	group.POST("/revocation/validate", rs.handleValidateTransaction)
 
-	// Health check endpoint
+	// Health check
 	group.GET("/revocation/health", rs.handleHealth)
 
 	log.Println("[revocation] Registered 13 revocation HTTP endpoints")
 }
 
-// registerDisabledHandlers registers handlers that return 503 when revocation is disabled
+// registerDisabledHandlers returns 503 for all endpoints when system is disabled
 func (rs *RevocationService) registerDisabledHandlers(group *gin.RouterGroup) {
-	disabled := func(c *gin.Context) {
+	handler := func(c *gin.Context) {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"success": false,
 			"error":   "revocation_disabled",
-			"message": "Revocation system is not enabled. Set GAUTH_REVOCATION_ENABLED=1 and ensure Redis is available.",
+			"message": "Revocation system is not enabled. Set GAUTH_REVOCATION_ENABLED=1 and configure Redis.",
 		})
 	}
 
-	group.POST("/revocation/disable", disabled)
-	group.POST("/revocation/revoke", disabled)
-	group.POST("/revocation/cancel", disabled)
-	group.GET("/revocation/status", disabled)
-	group.POST("/revocation/optimistic/pending", disabled)
-	group.POST("/revocation/optimistic/finalize", disabled)
-	group.POST("/revocation/optimistic/challenge", disabled)
-	group.GET("/revocation/circuit/metrics", disabled)
-	group.POST("/revocation/circuit/reset", disabled)
-	group.POST("/revocation/circuit/suspend", disabled)
-	group.POST("/revocation/circuit/resume", disabled)
-	group.POST("/revocation/validate", disabled)
-	
-	group.GET("/revocation/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"enabled": false,
-			"message": "Revocation system is disabled",
-		})
-	})
-
-	log.Println("[revocation] Registered disabled handlers (revocation system not enabled)")
+	group.POST("/revocation/disable", handler)
+	group.POST("/revocation/revoke", handler)
+	group.POST("/revocation/cancel", handler)
+	group.GET("/revocation/status", handler)
+	group.POST("/revocation/optimistic/pending", handler)
+	group.POST("/revocation/optimistic/finalize", handler)
+	group.POST("/revocation/optimistic/challenge", handler)
+	group.GET("/revocation/circuit/metrics", handler)
+	group.POST("/revocation/circuit/reset", handler)
+	group.POST("/revocation/circuit/suspend", handler)
+	group.POST("/revocation/circuit/resume", handler)
+	group.POST("/revocation/validate", handler)
+	group.GET("/revocation/health", handler)
 }
 
-// HTTP Handler implementations
+// ============================================================================
+// TWO-PHASE REVOCATION HANDLERS
+// ============================================================================
 
+// handleDisablePoA disables a PoA (Phase 1: reversible)
 func (rs *RevocationService) handleDisablePoA(c *gin.Context) {
 	var req struct {
-		PoAID  string `json:"poa_id" binding:"required"`
-		Reason string `json:"reason"`
+		PoAID     string `json:"poa_id" binding:"required"`
+		Principal string `json:"principal" binding:"required"`
+		Reason    string `json:"reason" binding:"required"`
 	}
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "invalid_request", "message": err.Error()})
 		return
 	}
 
-	if err := rs.twoPhase.Disable(c.Request.Context(), req.PoAID, req.Reason); err != nil {
+	ctx := c.Request.Context()
+	if err := rs.twoPhase.DisablePoA(ctx, req.PoAID, req.Principal, req.Reason); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "disable_failed", "message": err.Error()})
 		return
 	}
 
+	state, _ := rs.twoPhase.GetPoAState(ctx, req.PoAID)
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"poa_id":  req.PoAID,
 		"status":  "disabled",
-		"message": "PoA temporarily disabled. Call /revocation/revoke to finalize or /revocation/cancel to revert.",
+		"state":   state,
+		"message": "PoA disabled successfully",
 	})
 }
 
+// handleRevokePoA permanently revokes a PoA (Phase 2: irreversible)
 func (rs *RevocationService) handleRevokePoA(c *gin.Context) {
 	var req struct {
 		PoAID  string `json:"poa_id" binding:"required"`
-		Reason string `json:"reason"`
+		Reason string `json:"reason" binding:"required"`
 	}
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "invalid_request", "message": err.Error()})
 		return
 	}
 
-	if err := rs.twoPhase.Revoke(c.Request.Context(), req.PoAID, req.Reason); err != nil {
+	ctx := c.Request.Context()
+	if err := rs.twoPhase.RevokePoA(ctx, req.PoAID, req.Reason); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "revoke_failed", "message": err.Error()})
 		return
 	}
 
+	state, _ := rs.twoPhase.GetPoAState(ctx, req.PoAID)
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"poa_id":  req.PoAID,
 		"status":  "revoked",
-		"message": "PoA permanently revoked.",
+		"state":   state,
+		"message": "PoA permanently revoked",
 	})
 }
 
+// handleCancelDisable cancels a disabled PoA (returns to active)
 func (rs *RevocationService) handleCancelDisable(c *gin.Context) {
 	var req struct {
 		PoAID string `json:"poa_id" binding:"required"`
 	}
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "invalid_request", "message": err.Error()})
 		return
 	}
 
-	if err := rs.twoPhase.CancelDisable(c.Request.Context(), req.PoAID); err != nil {
+	ctx := c.Request.Context()
+	if err := rs.twoPhase.CancelDisable(ctx, req.PoAID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "cancel_failed", "message": err.Error()})
 		return
 	}
@@ -327,130 +306,177 @@ func (rs *RevocationService) handleCancelDisable(c *gin.Context) {
 		"success": true,
 		"poa_id":  req.PoAID,
 		"status":  "active",
-		"message": "Disable cancelled. PoA is now active.",
+		"message": "PoA re-enabled successfully",
 	})
 }
 
+// handleGetStatus retrieves comprehensive revocation status for a PoA
 func (rs *RevocationService) handleGetStatus(c *gin.Context) {
 	poaID := c.Query("poa_id")
 	if poaID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "missing_poa_id"})
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "missing_poa_id", "message": "poa_id parameter required"})
 		return
 	}
 
-	status, err := rs.twoPhase.GetStatus(c.Request.Context(), poaID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "status_check_failed", "message": err.Error()})
-		return
-	}
+	ctx := c.Request.Context()
+
+	// Get status from all systems
+	twoPhaseState, _ := rs.twoPhase.GetPoAState(ctx, poaID)
+	twoPhaseUsable, twoPhaseMsg, _ := rs.twoPhase.IsPoAUsable(ctx, poaID)
+
+	optimisticState, _ := rs.optimistic.GetRevocationState(ctx, poaID)
+	optimisticUsable, optimisticMsg, _ := rs.optimistic.IsPoAUsable(ctx, poaID)
+
+	circuitMetrics, _ := rs.circuit.GetMetrics(ctx, poaID)
+	circuitAllowed, circuitMsg, _ := rs.circuit.IsPoAAllowed(ctx, poaID)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"poa_id":  poaID,
-		"status":  status,
+		"two_phase": gin.H{
+			"state":   twoPhaseState,
+			"usable":  twoPhaseUsable,
+			"message": twoPhaseMsg,
+		},
+		"optimistic": gin.H{
+			"state":   optimisticState,
+			"usable":  optimisticUsable,
+			"message": optimisticMsg,
+		},
+		"circuit_breaker": gin.H{
+			"metrics": circuitMetrics,
+			"allowed": circuitAllowed,
+			"message": circuitMsg,
+		},
+		"overall_allowed": twoPhaseUsable && optimisticUsable && circuitAllowed,
 	})
 }
 
+// ============================================================================
+// OPTIMISTIC REVOCATION HANDLERS
+// ============================================================================
+
+// handleMarkPending marks a PoA as pending revocation (with collateral)
 func (rs *RevocationService) handleMarkPending(c *gin.Context) {
 	var req struct {
-		PoAID      string  `json:"poa_id" binding:"required"`
-		Collateral float64 `json:"collateral" binding:"required"`
-		Reason     string  `json:"reason"`
+		PoAID      string `json:"poa_id" binding:"required"`
+		Principal  string `json:"principal" binding:"required"`
+		Reason     string `json:"reason" binding:"required"`
+		Collateral uint64 `json:"collateral" binding:"required"`
 	}
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "invalid_request", "message": err.Error()})
 		return
 	}
 
-	if err := rs.optimistic.MarkPending(c.Request.Context(), req.PoAID, req.Collateral, req.Reason); err != nil {
+	ctx := c.Request.Context()
+	if err := rs.optimistic.MarkPendingRevocation(ctx, req.PoAID, req.Principal, req.Reason, req.Collateral); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "mark_pending_failed", "message": err.Error()})
 		return
 	}
 
+	state, _ := rs.optimistic.GetRevocationState(ctx, req.PoAID)
 	c.JSON(http.StatusOK, gin.H{
-		"success":    true,
-		"poa_id":     req.PoAID,
-		"status":     "pending",
-		"collateral": req.Collateral,
-		"message":    "Revocation marked pending. Can be challenged within challenge window.",
+		"success": true,
+		"poa_id":  req.PoAID,
+		"status":  "pending",
+		"state":   state,
+		"message": "PoA marked as pending revocation",
 	})
 }
 
+// handleFinalize finalizes a pending revocation
 func (rs *RevocationService) handleFinalize(c *gin.Context) {
 	var req struct {
 		PoAID string `json:"poa_id" binding:"required"`
 	}
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "invalid_request", "message": err.Error()})
 		return
 	}
 
-	if err := rs.optimistic.Finalize(c.Request.Context(), req.PoAID); err != nil {
+	ctx := c.Request.Context()
+	if err := rs.optimistic.FinalizeRevocation(ctx, req.PoAID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "finalize_failed", "message": err.Error()})
 		return
 	}
 
+	state, _ := rs.optimistic.GetRevocationState(ctx, req.PoAID)
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"poa_id":  req.PoAID,
 		"status":  "finalized",
-		"message": "Revocation finalized. PoA is now revoked.",
+		"state":   state,
+		"message": "PoA revocation finalized",
 	})
 }
 
+// handleChallenge challenges a pending revocation
 func (rs *RevocationService) handleChallenge(c *gin.Context) {
 	var req struct {
-		PoAID    string `json:"poa_id" binding:"required"`
-		Evidence string `json:"evidence"`
+		PoAID      string `json:"poa_id" binding:"required"`
+		Challenger string `json:"challenger" binding:"required"`
+		Evidence   string `json:"evidence" binding:"required"`
 	}
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "invalid_request", "message": err.Error()})
 		return
 	}
 
-	if err := rs.optimistic.Challenge(c.Request.Context(), req.PoAID, req.Evidence); err != nil {
+	ctx := c.Request.Context()
+	if err := rs.optimistic.ChallengeRevocation(ctx, req.PoAID, req.Challenger, req.Evidence); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "challenge_failed", "message": err.Error()})
 		return
 	}
 
+	state, _ := rs.optimistic.GetRevocationState(ctx, req.PoAID)
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"poa_id":  req.PoAID,
 		"status":  "challenged",
-		"message": "Revocation challenged successfully.",
+		"state":   state,
+		"message": "Revocation challenged successfully, collateral slashed",
 	})
 }
 
+// ============================================================================
+// CIRCUIT BREAKER HANDLERS
+// ============================================================================
+
+// handleGetMetrics retrieves circuit breaker metrics for a PoA
 func (rs *RevocationService) handleGetMetrics(c *gin.Context) {
 	poaID := c.Query("poa_id")
 	if poaID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "missing_poa_id"})
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "missing_poa_id", "message": "poa_id parameter required"})
 		return
 	}
 
-	metrics, err := rs.circuit.GetMetrics(c.Request.Context(), poaID)
+	ctx := c.Request.Context()
+	metrics, err := rs.circuit.GetMetrics(ctx, poaID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "get_metrics_failed", "message": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"poa_id":  poaID,
-		"metrics": metrics,
-	})
+	c.JSON(http.StatusOK, metrics)
 }
 
+// handleResetMetrics resets circuit breaker metrics for a PoA (admin)
 func (rs *RevocationService) handleResetMetrics(c *gin.Context) {
 	var req struct {
 		PoAID string `json:"poa_id" binding:"required"`
 	}
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "invalid_request", "message": err.Error()})
 		return
 	}
 
-	if err := rs.circuit.ResetMetrics(c.Request.Context(), req.PoAID); err != nil {
+	ctx := c.Request.Context()
+	if err := rs.circuit.ResetMetrics(ctx, req.PoAID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "reset_failed", "message": err.Error()})
 		return
 	}
@@ -458,21 +484,26 @@ func (rs *RevocationService) handleResetMetrics(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"poa_id":  req.PoAID,
-		"message": "Circuit breaker metrics reset.",
+		"status":  "reset",
+		"message": "Metrics reset successfully",
 	})
 }
 
+// handleManualSuspend manually suspends a PoA (admin)
 func (rs *RevocationService) handleManualSuspend(c *gin.Context) {
 	var req struct {
 		PoAID  string `json:"poa_id" binding:"required"`
-		Reason string `json:"reason"`
+		Reason string `json:"reason" binding:"required"`
 	}
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "invalid_request", "message": err.Error()})
 		return
 	}
 
-	if err := rs.circuit.ManualSuspend(c.Request.Context(), req.PoAID, req.Reason); err != nil {
+	ctx := c.Request.Context()
+	reason := revocation.SuspensionReason(req.Reason)
+	if err := rs.circuit.ManualSuspend(ctx, req.PoAID, reason); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "suspend_failed", "message": err.Error()})
 		return
 	}
@@ -481,20 +512,23 @@ func (rs *RevocationService) handleManualSuspend(c *gin.Context) {
 		"success": true,
 		"poa_id":  req.PoAID,
 		"status":  "suspended",
-		"message": "Circuit breaker manually suspended.",
+		"message": "PoA manually suspended",
 	})
 }
 
+// handleManualResume manually resumes a suspended PoA (admin)
 func (rs *RevocationService) handleManualResume(c *gin.Context) {
 	var req struct {
 		PoAID string `json:"poa_id" binding:"required"`
 	}
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "invalid_request", "message": err.Error()})
 		return
 	}
 
-	if err := rs.circuit.ManualResume(c.Request.Context(), req.PoAID); err != nil {
+	ctx := c.Request.Context()
+	if err := rs.circuit.ManualResume(ctx, req.PoAID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "resume_failed", "message": err.Error()})
 		return
 	}
@@ -503,18 +537,22 @@ func (rs *RevocationService) handleManualResume(c *gin.Context) {
 		"success": true,
 		"poa_id":  req.PoAID,
 		"status":  "resumed",
-		"message": "Circuit breaker manually resumed.",
+		"message": "PoA manually resumed",
 	})
 }
 
+// ============================================================================
+// UNIFIED VALIDATION
+// ============================================================================
+
+// handleValidateTransaction validates a transaction against all revocation systems
 func (rs *RevocationService) handleValidateTransaction(c *gin.Context) {
 	var req struct {
-		PoAID       string  `json:"poa_id" binding:"required"`
-		TxID        string  `json:"tx_id" binding:"required"`
-		TxValue     float64 `json:"tx_value" binding:"required"`
-		TxType      string  `json:"tx_type"`
-		FailureRate float64 `json:"failure_rate"`
+		PoAID   string `json:"poa_id" binding:"required"`
+		Value   uint64 `json:"value"`
+		Success bool   `json:"success"`
 	}
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "invalid_request", "message": err.Error()})
 		return
@@ -522,54 +560,72 @@ func (rs *RevocationService) handleValidateTransaction(c *gin.Context) {
 
 	ctx := c.Request.Context()
 
-	// Check two-phase revocation status
-	twoPhaseStatus, err := rs.twoPhase.GetStatus(ctx, req.PoAID)
-	if err == nil && (twoPhaseStatus == "disabled" || twoPhaseStatus == "revoked") {
-		c.JSON(http.StatusForbidden, gin.H{
-			"success": false,
-			"error":   "poa_revoked",
-			"status":  twoPhaseStatus,
-			"message": "Transaction blocked: PoA is " + twoPhaseStatus,
-		})
-		return
-	}
-
-	// Check optimistic revocation status
-	optimisticStatus, err := rs.optimistic.GetStatus(ctx, req.PoAID)
-	if err == nil && (optimisticStatus == "pending" || optimisticStatus == "finalized") {
-		c.JSON(http.StatusForbidden, gin.H{
-			"success": false,
-			"error":   "poa_revoked",
-			"status":  optimisticStatus,
-			"message": "Transaction blocked: PoA revocation is " + optimisticStatus,
-		})
-		return
-	}
-
-	// Check circuit breaker
-	allowed, err := rs.circuit.AllowTransaction(ctx, req.PoAID, req.TxValue, req.FailureRate)
+	// 1. Check circuit breaker (rate limits)
+	allowed, message, err := rs.circuit.IsPoAAllowed(ctx, req.PoAID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "validation_failed", "message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "circuit_check_failed", "message": err.Error()})
 		return
 	}
 	if !allowed {
-		c.JSON(http.StatusTooManyRequests, gin.H{
+		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"error":   "rate_limited",
-			"message": "Transaction blocked by circuit breaker",
+			"allowed": false,
+			"reason":  "circuit_breaker",
+			"message": message,
 		})
 		return
 	}
 
+	// 2. Check two-phase revocation
+	usable, message, err := rs.twoPhase.IsPoAUsable(ctx, req.PoAID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "two_phase_check_failed", "message": err.Error()})
+		return
+	}
+	if !usable {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"allowed": false,
+			"reason":  "two_phase_revocation",
+			"message": message,
+		})
+		return
+	}
+
+	// 3. Check optimistic revocation
+	usable, message, err = rs.optimistic.IsPoAUsable(ctx, req.PoAID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "optimistic_check_failed", "message": err.Error()})
+		return
+	}
+	if !usable {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"allowed": false,
+			"reason":  "optimistic_revocation",
+			"message": message,
+		})
+		return
+	}
+
+	// 4. Record transaction in circuit breaker
+	if err := rs.circuit.RecordTransaction(ctx, req.PoAID, req.Value, req.Success); err != nil {
+		log.Printf("[revocation] Failed to record transaction: %v", err)
+	}
+
+	// All checks passed
 	c.JSON(http.StatusOK, gin.H{
-		"success":   true,
-		"poa_id":    req.PoAID,
-		"tx_id":     req.TxID,
-		"validated": true,
-		"message":   "Transaction validated successfully",
+		"success": true,
+		"allowed": true,
+		"message": "Transaction validated successfully",
 	})
 }
 
+// ============================================================================
+// HEALTH CHECK
+// ============================================================================
+
+// handleHealth provides a health check endpoint
 func (rs *RevocationService) handleHealth(c *gin.Context) {
 	if !rs.enabled {
 		c.JSON(http.StatusOK, gin.H{
@@ -579,40 +635,22 @@ func (rs *RevocationService) handleHealth(c *gin.Context) {
 		return
 	}
 
-	// Check Redis connection
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-	
-	redisHealthy := rs.redisClient.Ping(ctx).Err() == nil
-
-	health := gin.H{
-		"enabled": true,
-		"redis":   redisHealthy,
-		"components": gin.H{
-			"oracle":     rs.oracle != nil,
-			"two_phase":  rs.twoPhase != nil,
-			"optimistic": rs.optimistic != nil,
-			"circuit":    rs.circuit != nil,
-		},
-	}
-
-	if !redisHealthy {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"success": false,
-			"health":  health,
-			"message": "Redis connection unhealthy",
-		})
-		return
-	}
-
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"health":  health,
+		"health": gin.H{
+			"enabled": true,
+			"components": gin.H{
+				"oracle":     rs.oracle != nil,
+				"two_phase":  rs.twoPhase != nil,
+				"optimistic": rs.optimistic != nil,
+				"circuit":    rs.circuit != nil,
+			},
+		},
 		"message": "Revocation system healthy",
 	})
 }
 
-// GetStats returns current statistics for monitoring/metrics
+// GetStats returns monitoring statistics
 func (rs *RevocationService) GetStats() map[string]interface{} {
 	if !rs.enabled {
 		return map[string]interface{}{
@@ -622,14 +660,11 @@ func (rs *RevocationService) GetStats() map[string]interface{} {
 
 	return map[string]interface{}{
 		"enabled": true,
-		"redis": map[string]interface{}{
-			"pool_stats": rs.redisClient.PoolStats(),
-		},
-		"components": []string{
-			"emergency_oracle",
-			"two_phase_revocation",
-			"optimistic_revocation",
-			"circuit_breaker",
+		"components": map[string]bool{
+			"oracle":     rs.oracle != nil,
+			"two_phase":  rs.twoPhase != nil,
+			"optimistic": rs.optimistic != nil,
+			"circuit":    rs.circuit != nil,
 		},
 	}
 }
