@@ -256,7 +256,7 @@ func (bi *BatchInserter) BatchInsertPoAs(ctx context.Context, poas []interface{}
 
 	batch := &pgx.Batch{}
 
-	for _, poa := range poas {
+	for range poas {
 		// Type assert to your PoA struct
 		// This is a placeholder - adjust based on your actual PoA struct
 		batch.Queue(
