@@ -405,3 +405,4 @@ func TestPropertyStateQueriesAreConsistent(t *testing.T) {
 
 	t.Logf("✅ Property verified: State queries are consistent (5 identical results)")
 }
+ 
