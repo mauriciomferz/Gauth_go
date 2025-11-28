@@ -70,13 +70,13 @@ type HandlerRequest struct {
 // ListEventTypes returns all available event types
 // GET /api/admin/events/types
 func (h *EventHandler) ListEventTypes(c *gin.Context) {
-	tenantID, exists := c.Get("tenant_id")
-	if !exists {
+	tenantID := c.GetString("tenant_id")
+	if tenantID == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Tenant ID not found"})
 		return
 	}
 
-	ets, err := h.repo.ListEventTypes(c.Request.Context(), tenantID.(string))
+	ets, err := h.repo.ListEventTypes(c.Request.Context(), tenantID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch event types"})
 		return
@@ -103,8 +103,8 @@ func (h *EventHandler) ListEventTypes(c *gin.Context) {
 // GetEventStream returns recent events with optional filtering
 // GET /api/admin/events/stream
 func (h *EventHandler) GetEventStream(c *gin.Context) {
-	tenantID, exists := c.Get("tenant_id")
-	if !exists {
+	tenantID := c.GetString("tenant_id")
+	if tenantID == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Tenant ID not found"})
 		return
 	}
@@ -117,7 +117,7 @@ func (h *EventHandler) GetEventStream(c *gin.Context) {
 		Limit:    100, // Default limit
 	}
 
-	es, err := h.repo.ListEvents(c.Request.Context(), tenantID.(string), filters)
+	es, err := h.repo.ListEvents(c.Request.Context(), tenantID, filters)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch events"})
 		return
@@ -268,8 +268,8 @@ func (h *EventHandler) ListHandlers(c *gin.Context) {
 // CreateHandler creates a new event handler
 // POST /api/admin/events/handlers
 func (h *EventHandler) CreateHandler(c *gin.Context) {
-	tenantID, exists := c.Get("tenant_id")
-	if !exists {
+	tenantID := c.GetString("tenant_id")
+	if tenantID == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Tenant ID not found"})
 		return
 	}
@@ -284,7 +284,7 @@ func (h *EventHandler) CreateHandler(c *gin.Context) {
 	var createdHandler *events.EventHandlerRecord
 	for _, eventType := range req.EventTypes {
 		handler := &events.EventHandlerRecord{
-			TenantID:       tenantID.(string),
+			TenantID:       tenantID,
 			HandlerName:    req.Name,
 			EventType:      eventType,
 			HandlerType:    "webhook",
@@ -324,8 +324,8 @@ func (h *EventHandler) CreateHandler(c *gin.Context) {
 // ToggleHandler enables or disables an event handler
 // POST /api/admin/events/handlers/:id/toggle
 func (h *EventHandler) ToggleHandler(c *gin.Context) {
-	tenantID, exists := c.Get("tenant_id")
-	if !exists {
+	tenantID := c.GetString("tenant_id")
+	if tenantID == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Tenant ID not found"})
 		return
 	}
@@ -345,7 +345,7 @@ func (h *EventHandler) ToggleHandler(c *gin.Context) {
 		status = "active"
 	}
 
-	if err := h.repo.UpdateHandlerStatus(c.Request.Context(), tenantID.(string), handlerID, status); err != nil {
+	if err := h.repo.UpdateHandlerStatus(c.Request.Context(), tenantID, handlerID, status); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update handler"})
 		return
 	}
@@ -360,15 +360,15 @@ func (h *EventHandler) ToggleHandler(c *gin.Context) {
 // DeleteHandler removes an event handler
 // DELETE /api/admin/events/handlers/:id
 func (h *EventHandler) DeleteHandler(c *gin.Context) {
-	tenantID, exists := c.Get("tenant_id")
-	if !exists {
+	tenantID := c.GetString("tenant_id")
+	if tenantID == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Tenant ID not found"})
 		return
 	}
 
 	handlerID := c.Param("id")
 
-	if err := h.repo.DeleteHandler(c.Request.Context(), tenantID.(string), handlerID); err != nil {
+	if err := h.repo.DeleteHandler(c.Request.Context(), tenantID, handlerID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete handler"})
 		return
 	}
@@ -383,13 +383,13 @@ func (h *EventHandler) DeleteHandler(c *gin.Context) {
 // GetEventMetrics returns event system metrics
 // GET /api/admin/events/metrics
 func (h *EventHandler) GetEventMetrics(c *gin.Context) {
-	tenantID, exists := c.Get("tenant_id")
-	if !exists {
+	tenantID := c.GetString("tenant_id")
+	if tenantID == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Tenant ID not found"})
 		return
 	}
 
-	stats, err := h.repo.GetEventMetrics(c.Request.Context(), tenantID.(string))
+	stats, err := h.repo.GetEventMetrics(c.Request.Context(), tenantID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch metrics"})
 		return
@@ -430,8 +430,8 @@ func (h *EventHandler) GetEventMetrics(c *gin.Context) {
 // TestHandler sends a test event to a handler
 // POST /api/admin/events/handlers/:id/test
 func (h *EventHandler) TestHandler(c *gin.Context) {
-	tenantID, exists := c.Get("tenant_id")
-	if !exists {
+	tenantID := c.GetString("tenant_id")
+	if tenantID == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Tenant ID not found"})
 		return
 	}
@@ -439,7 +439,7 @@ func (h *EventHandler) TestHandler(c *gin.Context) {
 	handlerID := c.Param("id")
 
 	// Get handler from database to verify it exists
-	handlers, err := h.repo.ListHandlers(c.Request.Context(), tenantID.(string))
+	handlers, err := h.repo.ListHandlers(c.Request.Context(), tenantID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch handler"})
 		return

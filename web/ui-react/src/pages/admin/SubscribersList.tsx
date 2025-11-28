@@ -154,7 +154,20 @@ export default function SubscribersList() {
       const response = await fetch(`/api/admin/subscribers?${params.toString()}`);
       
       if (!response.ok) {
-        throw new Error('Failed to fetch subscribers');
+        if (response.status === 404) {
+          throw new Error('Subscribers endpoint requires database connection');
+        }
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to fetch subscribers');
+        }
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Invalid response format from server');
       }
 
       const data = await response.json();
@@ -218,8 +231,11 @@ export default function SubscribersList() {
         `http://localhost:8080/api/admin/security-settings?tenant_id=${subscriber.tenantId}`
       );
       if (response.ok) {
-        const data = await response.json();
-        setSecuritySettings(data);
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          setSecuritySettings(data);
+        }
       }
     } catch (error) {
       console.error('Failed to load security settings:', error);
@@ -231,8 +247,11 @@ export default function SubscribersList() {
         `http://localhost:8080/api/admin/api-keys?tenant_id=${subscriber.tenantId}`
       );
       if (response.ok) {
-        const data = await response.json();
-        setApiKeys(data.apiKeys || []);
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          setApiKeys(data.apiKeys || []);
+        }
       }
     } catch (error) {
       console.error('Failed to load API keys:', error);
@@ -472,16 +491,24 @@ export default function SubscribersList() {
                             });
                             
                             if (response.ok) {
-                              const data = await response.json();
-                              alert(`API Key Created!\n\nKey: ${data.secretKey}\n\nStore this securely - it won't be shown again!`);
-                              
-                              // Reload API keys
-                              const listResponse = await fetch(
-                                `http://localhost:8080/api/admin/api-keys?tenant_id=${selectedSubscriber.tenantId}`
-                              );
-                              if (listResponse.ok) {
-                                const listData = await listResponse.json();
-                                setApiKeys(listData.apiKeys || []);
+                              const contentType = response.headers.get('content-type');
+                              if (contentType && contentType.includes('application/json')) {
+                                const data = await response.json();
+                                alert(`API Key Created!\n\nKey: ${data.secretKey}\n\nStore this securely - it won't be shown again!`);
+                                
+                                // Reload API keys
+                                const listResponse = await fetch(
+                                  `http://localhost:8080/api/admin/api-keys?tenant_id=${selectedSubscriber.tenantId}`
+                                );
+                                if (listResponse.ok) {
+                                  const listContentType = listResponse.headers.get('content-type');
+                                  if (listContentType && listContentType.includes('application/json')) {
+                                    const listData = await listResponse.json();
+                                    setApiKeys(listData.apiKeys || []);
+                                  }
+                                }
+                              } else {
+                                alert('API endpoint not available in dev mode');
                               }
                             } else {
                               alert('Failed to create API key');
@@ -564,8 +591,11 @@ export default function SubscribersList() {
                                             `http://localhost:8080/api/admin/api-keys?tenant_id=${selectedSubscriber.tenantId}`
                                           );
                                           if (listResponse.ok) {
-                                            const listData = await listResponse.json();
-                                            setApiKeys(listData.apiKeys || []);
+                                            const contentType = listResponse.headers.get('content-type');
+                                            if (contentType && contentType.includes('application/json')) {
+                                              const listData = await listResponse.json();
+                                              setApiKeys(listData.apiKeys || []);
+                                            }
                                           }
                                         } else {
                                           alert('Failed to revoke API key');

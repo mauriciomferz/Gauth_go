@@ -140,7 +140,7 @@ export default function DualControlPanel() {
                   <TableCell>{approval.action_description}</TableCell>
                   <TableCell>{approval.requested_by}</TableCell>
                   <TableCell>
-                    {approval.approved_by.length}/{approval.required_approvers}
+                    {(approval.approved_by || []).length}/{approval.required_approvers}
                   </TableCell>
                   <TableCell>{getStatusBadge(approval.status)}</TableCell>
                   <TableCell>

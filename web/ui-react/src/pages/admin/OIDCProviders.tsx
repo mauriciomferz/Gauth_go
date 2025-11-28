@@ -171,12 +171,25 @@ export default function OIDCProviders() {
     try {
       setLoading(true);
       const response = await fetch(`http://localhost:8080/api/admin/oidc-providers?tenant_id=${tenantId}`);
+      
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `Server error: ${response.status}`);
+        } else if (response.status === 404) {
+          throw new Error('OIDC Providers endpoint requires database connection. Start the backend with DB_HOST configured to access this feature.');
+        } else {
+          throw new Error(`Server error: ${response.status}`);
+        }
+      }
+      
       const data = await response.json();
       setProviders(data.providers || []);
       setError(null);
     } catch (err) {
-      setError('Failed to load OIDC providers');
-      console.error(err);
+      setError(err instanceof Error ? err.message : 'Failed to load OIDC providers');
+      console.error('Error loading providers:', err);
     } finally {
       setLoading(false);
     }
@@ -224,12 +237,17 @@ export default function OIDCProviders() {
         setSuccess('Provider deleted successfully');
         loadProviders();
       } else {
-        const data = await response.json();
-        setError(data.error || 'Failed to delete provider');
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          setError(data.error || 'Failed to delete provider');
+        } else {
+          setError(`Failed to delete provider: ${response.status}`);
+        }
       }
     } catch (err) {
-      setError('Failed to delete provider');
-      console.error(err);
+      setError(err instanceof Error ? err.message : 'Failed to delete provider');
+      console.error('Error deleting provider:', err);
     }
   };
 
@@ -241,6 +259,15 @@ export default function OIDCProviders() {
         { method: 'POST' }
       );
 
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Invalid response format');
+      }
+
       const data = await response.json();
       if (data.success) {
         setSuccess('Provider configuration is valid');
@@ -248,8 +275,8 @@ export default function OIDCProviders() {
         setError('Provider validation failed');
       }
     } catch (err) {
-      setError('Failed to test provider connectivity');
-      console.error(err);
+      setError(err instanceof Error ? err.message : 'Failed to test provider connectivity');
+      console.error('Error testing provider:', err);
     } finally {
       setTestingProvider(null);
     }
@@ -295,12 +322,17 @@ export default function OIDCProviders() {
         setDialogOpen(false);
         loadProviders();
       } else {
-        const data = await response.json();
-        setError(data.error || 'Failed to save provider');
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          setError(data.error || 'Failed to save provider');
+        } else {
+          setError(`Failed to save provider: ${response.status}`);
+        }
       }
     } catch (err) {
-      setError('Failed to save provider');
-      console.error(err);
+      setError(err instanceof Error ? err.message : 'Failed to save provider');
+      console.error('Error saving provider:', err);
     }
   };
 

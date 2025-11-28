@@ -163,20 +163,32 @@ export default function Dashboard() {
       ]);
 
       if (metricsResponse.ok) {
+        const contentType = metricsResponse.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          console.warn('Dashboard: Metrics endpoint returned non-JSON response');
+          return;
+        }
+        
         const metricsData = await metricsResponse.json();
         
         // Get real active policies count from database
         let activePolicies = 0;
         if (policiesResponse.ok) {
-          const policiesData = await policiesResponse.json();
-          activePolicies = policiesData.policies?.filter((p: any) => p.status === 'active').length || 0;
+          const policyContentType = policiesResponse.headers.get('content-type');
+          if (policyContentType && policyContentType.includes('application/json')) {
+            const policiesData = await policiesResponse.json();
+            activePolicies = policiesData.policies?.filter((p: any) => p.status === 'active').length || 0;
+          }
         }
 
         // Get real subscribers count
         let activeSubscribers = 0;
         if (subscribersResponse.ok) {
-          const subscribersData = await subscribersResponse.json();
-          activeSubscribers = subscribersData.subscribers?.filter((s: any) => s.status === 'active').length || 0;
+          const subscriberContentType = subscribersResponse.headers.get('content-type');
+          if (subscriberContentType && subscriberContentType.includes('application/json')) {
+            const subscribersData = await subscribersResponse.json();
+            activeSubscribers = subscribersData.subscribers?.filter((s: any) => s.status === 'active').length || 0;
+          }
         }
 
         // Use metrics data for authorization requests count

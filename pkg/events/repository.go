@@ -242,9 +242,8 @@ type EventFilters struct {
 func (r *Repository) ListHandlers(ctx context.Context, tenantID string) ([]EventHandlerRecord, error) {
 	query := `
 		SELECT 
-			id, tenant_id, handler_name, event_type, handler_type, status,
-			endpoint_url, http_method, headers, retry_config, timeout_seconds,
-			success_count, failure_count, last_success_at, last_failure_at,
+			id, tenant_id, handler_name, event_type, 
+			endpoint, method, headers, timeout_seconds, retry_count, enabled,
 			created_at, updated_at
 		FROM event_handlers
 		WHERE tenant_id = $1
@@ -260,15 +259,37 @@ func (r *Repository) ListHandlers(ctx context.Context, tenantID string) ([]Event
 	var handlers []EventHandlerRecord
 	for rows.Next() {
 		var h EventHandlerRecord
+		var endpoint, method string
+		var retryCount int
+		var enabled bool
+		
 		err := rows.Scan(
-			&h.ID, &h.TenantID, &h.HandlerName, &h.EventType, &h.HandlerType, &h.Status,
-			&h.EndpointURL, &h.HTTPMethod, &h.Headers, &h.RetryConfig, &h.TimeoutSeconds,
-			&h.SuccessCount, &h.FailureCount, &h.LastSuccessAt, &h.LastFailureAt,
+			&h.ID, &h.TenantID, &h.HandlerName, &h.EventType,
+			&endpoint, &method, &h.Headers, &h.TimeoutSeconds, &retryCount, &enabled,
 			&h.CreatedAt, &h.UpdatedAt,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan event handler: %w", err)
 		}
+
+		// Map database fields to struct fields
+		h.EndpointURL = &endpoint
+		h.HTTPMethod = &method
+		h.Status = "active"
+		if !enabled {
+			h.Status = "inactive"
+		}
+		h.HandlerType = "webhook" // default type
+		
+		// Set retry config from retry_count
+		h.RetryConfig = map[string]interface{}{
+			"max_retries": retryCount,
+		}
+		
+		// Initialize counters (no stats in current table)
+		h.SuccessCount = 0
+		h.FailureCount = 0
+
 		handlers = append(handlers, h)
 	}
 
@@ -279,16 +300,38 @@ func (r *Repository) ListHandlers(ctx context.Context, tenantID string) ([]Event
 func (r *Repository) CreateHandler(ctx context.Context, h *EventHandlerRecord) error {
 	query := `
 		INSERT INTO event_handlers (
-			tenant_id, handler_name, event_type, handler_type, status,
-			endpoint_url, http_method, headers, retry_config, timeout_seconds,
-			created_at, updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
+			tenant_id, handler_name, event_type,
+			endpoint, method, headers, timeout_seconds, retry_count, enabled
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		RETURNING id, created_at, updated_at
 	`
 
+	var endpoint, method string
+	var retryCount int
+	var enabled bool
+	
+	if h.EndpointURL != nil {
+		endpoint = *h.EndpointURL
+	}
+	if h.HTTPMethod != nil {
+		method = *h.HTTPMethod
+	}
+	enabled = (h.Status == "active")
+	
+	// Extract retry count from retry config
+	if h.RetryConfig != nil {
+		if maxRetries, ok := h.RetryConfig["max_retries"].(int); ok {
+			retryCount = maxRetries
+		} else {
+			retryCount = 3 // default
+		}
+	} else {
+		retryCount = 3 // default
+	}
+
 	err := r.db.QueryRow(ctx, query,
-		h.TenantID, h.HandlerName, h.EventType, h.HandlerType, h.Status,
-		h.EndpointURL, h.HTTPMethod, h.Headers, h.RetryConfig, h.TimeoutSeconds,
+		h.TenantID, h.HandlerName, h.EventType,
+		endpoint, method, h.Headers, h.TimeoutSeconds, retryCount, enabled,
 	).Scan(&h.ID, &h.CreatedAt, &h.UpdatedAt)
 
 	if err != nil {
@@ -300,13 +343,15 @@ func (r *Repository) CreateHandler(ctx context.Context, h *EventHandlerRecord) e
 
 // UpdateHandlerStatus updates the status (enabled/disabled) of an event handler
 func (r *Repository) UpdateHandlerStatus(ctx context.Context, tenantID, handlerID, status string) error {
+	enabled := (status == "active")
+	
 	query := `
 		UPDATE event_handlers
-		SET status = $1, updated_at = NOW()
+		SET enabled = $1, updated_at = CURRENT_TIMESTAMP
 		WHERE tenant_id = $2 AND id = $3
 	`
 
-	result, err := r.db.Exec(ctx, query, status, tenantID, handlerID)
+	result, err := r.db.Exec(ctx, query, enabled, tenantID, handlerID)
 	if err != nil {
 		return fmt.Errorf("failed to update handler status: %w", err)
 	}

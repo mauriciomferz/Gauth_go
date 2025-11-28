@@ -94,7 +94,7 @@ func (r *Repository) CreatePoA(ctx context.Context, poa *PoARecord) error {
 			representative_id, representative_name, representative_type,
 			scope_type, actions, geographic_regions,
 			status, valid_from, valid_until, conditions, metadata, updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
 		RETURNING id, created_at
 	`
 	
@@ -102,7 +102,7 @@ func (r *Repository) CreatePoA(ctx context.Context, poa *PoARecord) error {
 		poa.TenantID, poa.PoAName, poa.GrantorID, poa.GrantorName,
 		poa.RepresentativeID, poa.RepresentativeName, poa.RepresentativeType,
 		poa.ScopeType, poa.Actions, poa.GeographicRegions,
-		poa.Status, poa.ValidFrom, poa.ValidUntil, poa.Conditions, poa.Metadata,
+		poa.Status, poa.ValidFrom, poa.ValidUntil, poa.Conditions, poa.Metadata, time.Now(),
 	).Scan(&poa.ID, &poa.CreatedAt)
 	
 	if err != nil {

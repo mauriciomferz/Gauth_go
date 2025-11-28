@@ -3671,7 +3671,6 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 		
 		// Set cache on PoA handler
 		poaHandler.SetCache(cacheInstance)
-		poaHandler.RegisterRoutes(adminGroup)
 		
 		cacheHandler := adminHandlers.NewCacheHandler(cacheInstance)
 		cacheHandler.RegisterRoutes(adminGroup)
@@ -3698,8 +3697,31 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 			fmt.Fprintln(os.Stderr, "[auth] OIDC authentication flow handler registered")
 		}
 	} else {
-		fmt.Fprintln(os.Stderr, "[WARNING] DB_HOST not configured - admin endpoints will not be available")
-		fmt.Fprintln(os.Stderr, "[WARNING] Set DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME to enable admin features")
+		// Development mode: Register minimal auth handler without database
+		fmt.Fprintln(os.Stderr, "[WARNING] DB_HOST not configured - running in DEVELOPMENT mode")
+		fmt.Fprintln(os.Stderr, "[DEV] Admin authentication endpoint available (database-free mode)")
+		fmt.Fprintln(os.Stderr, "[DEV] Other admin endpoints require database - set DB_HOST to enable")
+		
+		adminGroup := r.Group("/api/admin")
+		adminGroup.Use(func(c *gin.Context) {
+			tenantID := c.GetHeader("X-Tenant-ID")
+			if tenantID == "" {
+				tenantID = c.Query("tenant_id")
+			}
+			if tenantID != "" {
+				c.Set("tenant_id", tenantID)
+			}
+			c.Next()
+		})
+		
+		jwtSecret := os.Getenv("GAUTH_JWT_SIGNING_KEY")
+		if jwtSecret == "" {
+			jwtSecret = "dev-secret-change-in-production"
+		}
+		authHandler := adminHandlers.NewAuthHandler(jwtSecret)
+		authHandler.RegisterRoutes(adminGroup)
+		fmt.Fprintln(os.Stderr, "[DEV] Auth handler registered: POST /api/admin/auth/login")
+		fmt.Fprintln(os.Stderr, "[DEV] Test credentials: admin@example.com / password")
 	}
 
 	// Initialize production-grade revocation system (Emergency Oracle + Two-Phase + Optimistic + Circuit Breaker)

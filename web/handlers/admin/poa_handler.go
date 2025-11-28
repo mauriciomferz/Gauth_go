@@ -2,14 +2,15 @@ package admin
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/cache"
-	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/mauriciomferz/Gauth_go/pkg/cache"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
 
 // PoAHandler manages Power of Attorney operations for the admin portal
@@ -141,17 +142,22 @@ func (h *PoAHandler) ListPoAs(c *gin.Context) {
 // CreatePoA creates a new Power of Attorney delegation
 // POST /api/admin/poa
 func (h *PoAHandler) CreatePoA(c *gin.Context) {
+	fmt.Printf("[POA-CREATE] Request received from %s\n", c.ClientIP())
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
+		fmt.Printf("[POA-CREATE] ERROR: tenant_id missing\n")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
+	fmt.Printf("[POA-CREATE] Tenant ID: %s\n", tenantID)
 	
 	var req PoARequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		fmt.Printf("[POA-CREATE] ERROR: Failed to bind JSON: %v\n", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	fmt.Printf("[POA-CREATE] Request data: %+v\n", req)
 
 	// Parse time periods
 	validFrom, err := time.Parse(time.RFC3339, req.ValidFrom)

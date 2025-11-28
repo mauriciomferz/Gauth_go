@@ -95,8 +95,13 @@ export default function SuccessorPanel() {
       setLoading(true)
       const response = await gauthPlusAPI.getActiveSuccessor(poaId)
       setActiveSuccessor(response.active_successor)
-    } catch (error) {
-      console.error('Failed to fetch active successor:', error)
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        // Endpoint not available (dev mode without database) - silently handle
+        setActiveSuccessor(null)
+      } else {
+        console.error('Failed to fetch active successor:', error)
+      }
     } finally {
       setLoading(false)
     }
@@ -106,8 +111,13 @@ export default function SuccessorPanel() {
     try {
       const response = await gauthPlusAPI.listSuccessorHistory(poaId)
       setHistory(response.history || [])
-    } catch (error) {
-      console.error('Failed to fetch history:', error)
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        // Endpoint not available (dev mode without database) - silently handle
+        setHistory([])
+      } else {
+        console.error('Failed to fetch history:', error)
+      }
     }
   }
 

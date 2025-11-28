@@ -43,11 +43,23 @@ jobs:
     - name: Run benchmarks
       run: |
         echo "⚡ Running revocation system benchmarks..."
+        set -o pipefail
         go test -bench=. -benchmem -benchtime=5s -timeout=15m \
-          ./pkg/revocation/... | tee benchmark-results.txt
-        echo "✅ Benchmarks complete"
+          ./pkg/revocation/... 2>&1 | tee benchmark-results.txt
+        
+        # Check if any benchmarks actually ran
+        if grep -q "^Benchmark" benchmark-results.txt; then
+          echo "✅ Benchmarks complete - results found"
+          echo "BENCHMARKS_FOUND=true" >> $GITHUB_ENV
+        else
+          echo "⚠️ No benchmark results found in output"
+          echo "BENCHMARKS_FOUND=false" >> $GITHUB_ENV
+          echo "Raw output:"
+          cat benchmark-results.txt
+        fi
 
     - name: Store benchmark results
+      if: env.BENCHMARKS_FOUND == 'true'
       uses: benchmark-action/github-action-benchmark@v1
       with:
         tool: 'go'
@@ -59,6 +71,17 @@ jobs:
         comment-on-alert: true
         fail-on-alert: false
         alert-comment-cc-users: '@mauriciomferz'
+
+    - name: Store benchmark results (fallback)
+      if: env.BENCHMARKS_FOUND == 'false'
+      run: |
+        echo "📊 No benchmark results to store"
+        echo "This may be normal if:"
+        echo "- No benchmark functions exist yet in pkg/revocation"
+        echo "- Tests failed before benchmarks could run"
+        echo "- Redis connection issues prevented benchmark execution"
+        echo ""
+        echo "To add benchmarks, create functions starting with 'func Benchmark' in *_test.go files"
 
     - name: Upload benchmark artifacts
       uses: actions/upload-artifact@v4

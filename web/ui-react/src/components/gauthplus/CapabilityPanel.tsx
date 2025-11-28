@@ -171,7 +171,7 @@ export default function CapabilityPanel() {
             <div style={{ marginTop: '24px' }}>
               <Text weight="semibold">Domain Scores</Text>
               <div className={styles.domainsGrid}>
-                {Object.entries(assessment.domain_scores).map(([domain, score]) => (
+                {Object.entries(assessment.domain_scores || {}).map(([domain, score]) => (
                   <div key={domain} className={styles.domainCard}>
                     <Text size={200} weight="semibold">
                       {domain}

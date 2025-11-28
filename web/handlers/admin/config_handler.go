@@ -119,7 +119,7 @@ type ToggleRequest struct {
 
 // ListVariables lists all environment variables
 func (h *ConfigHandler) ListVariables(c *gin.Context) {
-	tenantID := c.GetString("tenantID")
+	tenantID := c.GetString("tenant_id")
 
 	vars, err := h.repo.ListVariables(c.Request.Context(), tenantID)
 	if err != nil {
@@ -168,8 +168,8 @@ func (h *ConfigHandler) CreateVariable(c *gin.Context) {
 		return
 	}
 
-	tenantID := c.GetString("tenantID")
-	userID := c.GetString("userID")
+	tenantID := c.GetString("tenant_id")
+	userID := c.GetString("user_id")
 
 	varType := req.Type
 	if varType == "" {
@@ -210,8 +210,8 @@ func (h *ConfigHandler) UpdateVariable(c *gin.Context) {
 		return
 	}
 
-	tenantID := c.GetString("tenantID")
-	userID := c.GetString("userID")
+	tenantID := c.GetString("tenant_id")
+	userID := c.GetString("user_id")
 
 	varType := req.Type
 	if varType == "" {
@@ -243,7 +243,7 @@ func (h *ConfigHandler) UpdateVariable(c *gin.Context) {
 // DeleteVariable deletes an environment variable
 func (h *ConfigHandler) DeleteVariable(c *gin.Context) {
 	key := c.Param("key")
-	tenantID := c.GetString("tenantID")
+	tenantID := c.GetString("tenant_id")
 
 	if err := h.repo.DeleteVariable(c.Request.Context(), tenantID, key); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete variable"})
@@ -258,7 +258,7 @@ func (h *ConfigHandler) DeleteVariable(c *gin.Context) {
 
 // GetYAMLConfig retrieves YAML configuration
 func (h *ConfigHandler) GetYAMLConfig(c *gin.Context) {
-	tenantID := c.GetString("tenantID")
+	tenantID := c.GetString("tenant_id")
 
 	file, err := h.repo.GetConfigFile(c.Request.Context(), tenantID, "gauth-config", "yaml")
 	if err != nil {
@@ -279,8 +279,8 @@ func (h *ConfigHandler) UpdateYAMLConfig(c *gin.Context) {
 		return
 	}
 
-	tenantID := c.GetString("tenantID")
-	userID := c.GetString("userID")
+	tenantID := c.GetString("tenant_id")
+	userID := c.GetString("user_id")
 
 	file := config.ConfigFileRecord{
 		TenantID:    &tenantID,
@@ -303,7 +303,7 @@ func (h *ConfigHandler) UpdateYAMLConfig(c *gin.Context) {
 
 // GetJSONConfig retrieves JSON configuration
 func (h *ConfigHandler) GetJSONConfig(c *gin.Context) {
-	tenantID := c.GetString("tenantID")
+	tenantID := c.GetString("tenant_id")
 
 	file, err := h.repo.GetConfigFile(c.Request.Context(), tenantID, "gauth-config", "json")
 	if err != nil {
@@ -324,8 +324,8 @@ func (h *ConfigHandler) UpdateJSONConfig(c *gin.Context) {
 		return
 	}
 
-	tenantID := c.GetString("tenantID")
-	userID := c.GetString("userID")
+	tenantID := c.GetString("tenant_id")
+	userID := c.GetString("user_id")
 
 	file := config.ConfigFileRecord{
 		TenantID:    &tenantID,
@@ -348,7 +348,7 @@ func (h *ConfigHandler) UpdateJSONConfig(c *gin.Context) {
 
 // ListServices lists all services and their reload status
 func (h *ConfigHandler) ListServices(c *gin.Context) {
-	tenantID := c.GetString("tenantID")
+	tenantID := c.GetString("tenant_id")
 
 	configs, err := h.repo.ListServiceConfigs(c.Request.Context(), tenantID)
 	if err != nil {
@@ -393,7 +393,7 @@ func (h *ConfigHandler) ReloadService(c *gin.Context) {
 		return
 	}
 
-	tenantID := c.GetString("tenantID")
+	tenantID := c.GetString("tenant_id")
 
 	if err := h.repo.UpdateServiceReload(c.Request.Context(), tenantID, req.Service); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reload service"})
@@ -408,7 +408,7 @@ func (h *ConfigHandler) ReloadService(c *gin.Context) {
 
 // ListVersions lists configuration version history
 func (h *ConfigHandler) ListVersions(c *gin.Context) {
-	tenantID := c.GetString("tenantID")
+	tenantID := c.GetString("tenant_id")
 
 	files, err := h.repo.ListConfigVersions(c.Request.Context(), tenantID)
 	if err != nil {
@@ -446,7 +446,7 @@ func (h *ConfigHandler) ListVersions(c *gin.Context) {
 // GetVersionDiff retrieves the diff for a specific version
 func (h *ConfigHandler) GetVersionDiff(c *gin.Context) {
 	versionID := c.Param("id")
-	tenantID := c.GetString("tenantID")
+	tenantID := c.GetString("tenant_id")
 
 	file, err := h.repo.GetConfigVersion(c.Request.Context(), tenantID, versionID)
 	if err != nil {
@@ -466,7 +466,7 @@ func (h *ConfigHandler) GetVersionDiff(c *gin.Context) {
 // RollbackVersion rolls back to a specific configuration version
 func (h *ConfigHandler) RollbackVersion(c *gin.Context) {
 	versionID := c.Param("id")
-	tenantID := c.GetString("tenantID")
+	tenantID := c.GetString("tenant_id")
 
 	file, err := h.repo.GetConfigVersion(c.Request.Context(), tenantID, versionID)
 	if err != nil {
@@ -474,7 +474,7 @@ func (h *ConfigHandler) RollbackVersion(c *gin.Context) {
 		return
 	}
 
-	userID := c.GetString("userID")
+	userID := c.GetString("user_id")
 	rollbackFile := config.ConfigFileRecord{
 		TenantID:    file.TenantID,
 		FileName:    file.FileName,
@@ -497,7 +497,7 @@ func (h *ConfigHandler) RollbackVersion(c *gin.Context) {
 
 // ListTenantOverrides lists all tenant-specific configuration overrides
 func (h *ConfigHandler) ListTenantOverrides(c *gin.Context) {
-	tenantID := c.GetString("tenantID")
+	tenantID := c.GetString("tenant_id")
 
 	overridesDB, err := h.repo.ListTenantOverrides(c.Request.Context(), tenantID)
 	if err != nil {
@@ -542,7 +542,7 @@ func (h *ConfigHandler) CreateTenantOverride(c *gin.Context) {
 		return
 	}
 
-	userID := c.GetString("userID")
+	userID := c.GetString("user_id")
 
 	for key, value := range req.Overrides {
 		override := config.TenantOverrideRecord{
@@ -574,7 +574,7 @@ func (h *ConfigHandler) ToggleTenantOverride(c *gin.Context) {
 		return
 	}
 
-	tenantID := c.GetString("tenantID")
+	tenantID := c.GetString("tenant_id")
 	enabled := false
 	if req.Active != nil {
 		enabled = *req.Active
@@ -595,7 +595,7 @@ func (h *ConfigHandler) ToggleTenantOverride(c *gin.Context) {
 // DeleteTenantOverride deletes a tenant override
 func (h *ConfigHandler) DeleteTenantOverride(c *gin.Context) {
 	overrideID := c.Param("id")
-	tenantID := c.GetString("tenantID")
+	tenantID := c.GetString("tenant_id")
 
 	if err := h.repo.DeleteTenantOverride(c.Request.Context(), tenantID, overrideID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete override"})
@@ -610,7 +610,7 @@ func (h *ConfigHandler) DeleteTenantOverride(c *gin.Context) {
 
 // ListFeatureFlags lists all feature flags
 func (h *ConfigHandler) ListFeatureFlags(c *gin.Context) {
-	tenantID := c.GetString("tenantID")
+	tenantID := c.GetString("tenant_id")
 
 	flagsDB, err := h.repo.ListFeatureFlags(c.Request.Context(), tenantID)
 	if err != nil {
@@ -668,8 +668,8 @@ func (h *ConfigHandler) CreateFeatureFlag(c *gin.Context) {
 		return
 	}
 
-	tenantID := c.GetString("tenantID")
-	userID := c.GetString("userID")
+	tenantID := c.GetString("tenant_id")
+	userID := c.GetString("user_id")
 
 	flag := config.FeatureFlagRecord{
 		TenantID:          &tenantID,
@@ -704,7 +704,7 @@ func (h *ConfigHandler) ToggleFeatureFlag(c *gin.Context) {
 		return
 	}
 
-	tenantID := c.GetString("tenantID")
+	tenantID := c.GetString("tenant_id")
 	enabled := false
 	if req.Enabled != nil {
 		enabled = *req.Enabled
@@ -725,7 +725,7 @@ func (h *ConfigHandler) ToggleFeatureFlag(c *gin.Context) {
 // DeleteFeatureFlag deletes a feature flag
 func (h *ConfigHandler) DeleteFeatureFlag(c *gin.Context) {
 	flagID := c.Param("id")
-	tenantID := c.GetString("tenantID")
+	tenantID := c.GetString("tenant_id")
 
 	if err := h.repo.DeleteFeatureFlag(c.Request.Context(), tenantID, flagID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete flag"})
