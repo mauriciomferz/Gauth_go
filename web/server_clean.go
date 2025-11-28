@@ -69,6 +69,7 @@ import (
 	auditHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/audit"
 	authHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/auth"
 	betaHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/beta"
+	mcpHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/mcp"
 	"github.com/prometheus/client_golang/prometheus"
 	promhttp "github.com/prometheus/client_golang/prometheus/promhttp"
 	otel "go.opentelemetry.io/otel"
@@ -3723,6 +3724,12 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 		fmt.Fprintln(os.Stderr, "[DEV] Auth handler registered: POST /api/admin/auth/login")
 		fmt.Fprintln(os.Stderr, "[DEV] Test credentials: admin@example.com / password")
 	}
+
+	// MCP (Model Context Protocol) handler - works with or without database
+	mcpHandler := mcpHandlers.NewMCPHandler()
+	gauthAPIGroup := r.Group("/api/v1/gauth")
+	mcpHandler.RegisterRoutes(gauthAPIGroup)
+	fmt.Fprintln(os.Stderr, "[mcp] Model Context Protocol handler registered at /api/v1/gauth/mcp/*")
 
 	// Initialize production-grade revocation system (Emergency Oracle + Two-Phase + Optimistic + Circuit Breaker)
 	// Enabled via GAUTH_REVOCATION_ENABLED=1; requires Redis connection
