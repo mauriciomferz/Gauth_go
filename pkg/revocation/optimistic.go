@@ -346,7 +346,10 @@ func (o *OptimisticRevocation) ChallengeRevocation(ctx context.Context, poaID, c
 func (o *OptimisticRevocation) GetRevocationState(ctx context.Context, poaID string) (*OptimisticRevocationState, error) {
 	// Check local cache first
 	if cached, ok := o.states.Load(poaID); ok {
-		return cached.(*OptimisticRevocationState), nil
+		// Return a copy to prevent race conditions when state is modified concurrently
+		original := cached.(*OptimisticRevocationState)
+		stateCopy := *original
+		return &stateCopy, nil
 	}
 
 	// Check Redis

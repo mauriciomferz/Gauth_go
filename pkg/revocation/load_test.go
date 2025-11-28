@@ -69,21 +69,29 @@ func (m *LoadTestMetrics) Throughput() float64 {
 	if duration == 0 {
 		return 0
 	}
-	return float64(m.TotalOps) / duration
+	totalOps := atomic.LoadInt64(&m.TotalOps)
+	return float64(totalOps) / duration
 }
 
 func (m *LoadTestMetrics) AvgLatency() time.Duration {
-	if m.TotalOps == 0 {
+	totalOps := atomic.LoadInt64(&m.TotalOps)
+	if totalOps == 0 {
 		return 0
 	}
-	return time.Duration(m.TotalLatencyNs / m.TotalOps)
+	totalLatencyNs := atomic.LoadInt64(&m.TotalLatencyNs)
+	return time.Duration(totalLatencyNs / totalOps)
 }
 
 func (m *LoadTestMetrics) PrintSummary(t *testing.T, testName string) {
+	// Read all atomic counters atomically to avoid race conditions
+	totalOps := atomic.LoadInt64(&m.TotalOps)
+	successOps := atomic.LoadInt64(&m.SuccessOps)
+	failedOps := atomic.LoadInt64(&m.FailedOps)
+	
 	t.Logf("\n=== %s Load Test Results ===", testName)
-	t.Logf("Total Ops: %d", m.TotalOps)
-	t.Logf("Success: %d (%.2f%%)", m.SuccessOps, float64(m.SuccessOps)/float64(m.TotalOps)*100)
-	t.Logf("Failed: %d (%.2f%%)", m.FailedOps, float64(m.FailedOps)/float64(m.TotalOps)*100)
+	t.Logf("Total Ops: %d", totalOps)
+	t.Logf("Success: %d (%.2f%%)", successOps, float64(successOps)/float64(totalOps)*100)
+	t.Logf("Failed: %d (%.2f%%)", failedOps, float64(failedOps)/float64(totalOps)*100)
 	t.Logf("Duration: %v", m.EndTime.Sub(m.StartTime))
 	t.Logf("Throughput: %.2f ops/sec", m.Throughput())
 	t.Logf("Avg Latency: %v", m.AvgLatency())
