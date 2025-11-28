@@ -53,6 +53,7 @@ type RateLimitConfig struct {
 
 // CircuitBreakerMetrics tracks PoA activity metrics
 type CircuitBreakerMetrics struct {
+	mu                   sync.Mutex            `json:"-"` // Protects all fields from concurrent access
 	PoAID                string                `json:"poa_id"`
 	State                CircuitBreakerState   `json:"state"`
 	TxCountLastMinute    int                   `json:"tx_count_last_minute"`
@@ -129,6 +130,10 @@ func (cb *CircuitBreaker) RecordTransaction(ctx context.Context, poaID string, v
 	if err != nil {
 		return fmt.Errorf("failed to get metrics: %w", err)
 	}
+
+	// Lock metrics for thread-safe access
+	metrics.mu.Lock()
+	defer metrics.mu.Unlock()
 
 	// Check if circuit is open
 	if metrics.State == CircuitBreakerOpen {
@@ -299,6 +304,9 @@ func (cb *CircuitBreaker) IsPoAAllowed(ctx context.Context, poaID string) (bool,
 		return false, "", fmt.Errorf("failed to get metrics: %w", err)
 	}
 
+	metrics.mu.Lock()
+	defer metrics.mu.Unlock()
+
 	switch metrics.State {
 	case CircuitBreakerClosed:
 		return true, "Circuit CLOSED (normal operation)", nil
@@ -327,7 +335,31 @@ func (cb *CircuitBreaker) IsPoAAllowed(ctx context.Context, poaID string) (bool,
 
 // GetMetrics retrieves current metrics for a PoA
 func (cb *CircuitBreaker) GetMetrics(ctx context.Context, poaID string) (*CircuitBreakerMetrics, error) {
-	return cb.getOrCreateMetrics(ctx, poaID)
+	metrics, err := cb.getOrCreateMetrics(ctx, poaID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Return a copy to prevent race conditions (but don't copy the mutex)
+	metrics.mu.Lock()
+	metricsCopy := CircuitBreakerMetrics{
+		PoAID:               metrics.PoAID,
+		State:               metrics.State,
+		TxCountLastMinute:   metrics.TxCountLastMinute,
+		TxCountLastHour:     metrics.TxCountLastHour,
+		ValueLastMinute:     metrics.ValueLastMinute,
+		ValueLastHour:       metrics.ValueLastHour,
+		FailedTxCount:       metrics.FailedTxCount,
+		TotalTxCount:        metrics.TotalTxCount,
+		LastTxTimestamp:     metrics.LastTxTimestamp,
+		SuspendedAt:         metrics.SuspendedAt,
+		SuspensionReason:    metrics.SuspensionReason,
+		RecoveryAttemptedAt: metrics.RecoveryAttemptedAt,
+		TestTxAllowed:       metrics.TestTxAllowed,
+	}
+	metrics.mu.Unlock()
+
+	return &metricsCopy, nil
 }
 
 // ResetMetrics resets all metrics for a PoA (admin operation)
@@ -364,7 +396,9 @@ func (cb *CircuitBreaker) ManualSuspend(ctx context.Context, poaID string, reaso
 		return fmt.Errorf("failed to get metrics: %w", err)
 	}
 
+	metrics.mu.Lock()
 	cb.openCircuit(ctx, poaID, metrics, reason)
+	metrics.mu.Unlock()
 	
 	cb.logger.Infof("✅ PoA %s manually suspended", poaID)
 	return nil
@@ -378,6 +412,9 @@ func (cb *CircuitBreaker) ManualResume(ctx context.Context, poaID string) error 
 	if err != nil {
 		return fmt.Errorf("failed to get metrics: %w", err)
 	}
+
+	metrics.mu.Lock()
+	defer metrics.mu.Unlock()
 
 	if metrics.State != CircuitBreakerOpen {
 		return fmt.Errorf("PoA %s not suspended (current state: %s)", poaID, metrics.State)
