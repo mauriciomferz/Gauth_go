@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { addTenantParam } from '../../utils/tenant';
 import {
   makeStyles,
   shorthands,
@@ -405,68 +406,104 @@ const ConfigurationManager: React.FC = () => {
 
   const fetchVariables = async () => {
     try {
-      const response = await fetch('/api/admin/config/variables');
+      const response = await fetch(addTenantParam('/api/admin/config/variables'));
+      if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
+        setVariables([]);
+        return;
+      }
       const data = await response.json();
       setVariables(data.variables || []);
     } catch (error) {
-      console.error('Failed to fetch variables:', error);
+      if (!(error instanceof SyntaxError)) {
+        console.error('Failed to fetch variables:', error);
+      }
     }
   };
 
   const fetchConfigContent = async () => {
     try {
-      const response = await fetch(`/api/admin/config/${configFormat}`);
+      const response = await fetch(addTenantParam(`/api/admin/config/${configFormat}`));
+      if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
+        setConfigContent('');
+        return;
+      }
       const data = await response.json();
       setConfigContent(data.content || '');
     } catch (error) {
-      console.error('Failed to fetch config content:', error);
+      if (!(error instanceof SyntaxError)) {
+        console.error('Failed to fetch config content:', error);
+      }
     }
   };
 
   const fetchServices = async () => {
     try {
-      const response = await fetch('/api/admin/config/services');
+      const response = await fetch(addTenantParam('/api/admin/config/services'));
+      if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
+        setServices([]);
+        return;
+      }
       const data = await response.json();
       setServices(data.services || []);
     } catch (error) {
-      console.error('Failed to fetch services:', error);
+      if (!(error instanceof SyntaxError)) {
+        console.error('Failed to fetch services:', error);
+      }
     }
   };
 
   const fetchVersions = async () => {
     try {
-      const response = await fetch('/api/admin/config/versions');
+      const response = await fetch(addTenantParam('/api/admin/config/versions'));
+      if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
+        setVersions([]);
+        return;
+      }
       const data = await response.json();
       setVersions(data.versions || []);
     } catch (error) {
-      console.error('Failed to fetch versions:', error);
+      if (!(error instanceof SyntaxError)) {
+        console.error('Failed to fetch versions:', error);
+      }
     }
   };
 
   const fetchOverrides = async () => {
     try {
-      const response = await fetch('/api/admin/config/tenant-overrides');
+      const response = await fetch(addTenantParam('/api/admin/config/tenant-overrides'));
+      if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
+        setOverrides([]);
+        return;
+      }
       const data = await response.json();
       setOverrides(data.overrides || []);
     } catch (error) {
-      console.error('Failed to fetch overrides:', error);
+      if (!(error instanceof SyntaxError)) {
+        console.error('Failed to fetch overrides:', error);
+      }
     }
   };
 
   const fetchFlags = async () => {
     try {
-      const response = await fetch('/api/admin/config/feature-flags');
+      const response = await fetch(addTenantParam('/api/admin/config/feature-flags'));
+      if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
+        setFlags([]);
+        return;
+      }
       const data = await response.json();
       setFlags(data.flags || []);
     } catch (error) {
-      console.error('Failed to fetch flags:', error);
+      if (!(error instanceof SyntaxError)) {
+        console.error('Failed to fetch flags:', error);
+      }
     }
   };
 
   const handleCreateVariable = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/config/variables', {
+      const response = await fetch(addTenantParam('/api/admin/config/variables'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(variableForm),
@@ -504,7 +541,7 @@ const ConfigurationManager: React.FC = () => {
   const handleUpdateVariable = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/admin/config/variables/${editingVariable?.key}`, {
+      const response = await fetch(addTenantParam(`/api/admin/config/variables/${editingVariable?.key}`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(variableForm),
@@ -531,7 +568,7 @@ const ConfigurationManager: React.FC = () => {
   const handleDeleteVariable = async (key: string) => {
     if (!confirm(`Are you sure you want to delete variable "${key}"?`)) return;
     try {
-      const response = await fetch(`/api/admin/config/variables/${key}`, {
+      const response = await fetch(addTenantParam(`/api/admin/config/variables/${key}`), {
         method: 'DELETE',
       });
       if (response.ok) {
@@ -545,7 +582,7 @@ const ConfigurationManager: React.FC = () => {
   const handleSaveConfig = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/admin/config/${configFormat}`, {
+      const response = await fetch(addTenantParam(`/api/admin/config/${configFormat}`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: configContent }),
@@ -564,7 +601,7 @@ const ConfigurationManager: React.FC = () => {
   const handleReloadService = async (serviceName: string) => {
     try {
       setReloading(true);
-      const response = await fetch('/api/admin/config/reload', {
+      const response = await fetch(addTenantParam('/api/admin/config/reload'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ service: serviceName }),
@@ -581,7 +618,7 @@ const ConfigurationManager: React.FC = () => {
 
   const handleViewDiff = async (versionId: string) => {
     try {
-      const response = await fetch(`/api/admin/config/versions/${versionId}/diff`);
+      const response = await fetch(addTenantParam(`/api/admin/config/versions/${versionId}/diff`));
       const data = await response.json();
       setDiffContent(data.diff || '');
       setSelectedVersion(versions.find(v => v.id === versionId) || null);
@@ -594,7 +631,7 @@ const ConfigurationManager: React.FC = () => {
     if (!confirm('Are you sure you want to rollback to this version?')) return;
     try {
       setLoading(true);
-      const response = await fetch(`/api/admin/config/versions/${versionId}/rollback`, {
+      const response = await fetch(addTenantParam(`/api/admin/config/versions/${versionId}/rollback`), {
         method: 'POST',
       });
       if (response.ok) {
@@ -612,7 +649,7 @@ const ConfigurationManager: React.FC = () => {
   const handleCreateOverride = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/config/tenant-overrides', {
+      const response = await fetch(addTenantParam('/api/admin/config/tenant-overrides'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(overrideForm),
@@ -635,7 +672,7 @@ const ConfigurationManager: React.FC = () => {
 
   const handleToggleOverride = async (id: string, active: boolean) => {
     try {
-      const response = await fetch(`/api/admin/config/tenant-overrides/${id}/toggle`, {
+      const response = await fetch(addTenantParam(`/api/admin/config/tenant-overrides/${id}/toggle`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ active }),
@@ -651,7 +688,7 @@ const ConfigurationManager: React.FC = () => {
   const handleDeleteOverride = async (id: string) => {
     if (!confirm('Are you sure you want to delete this tenant override?')) return;
     try {
-      const response = await fetch(`/api/admin/config/tenant-overrides/${id}`, {
+      const response = await fetch(addTenantParam(`/api/admin/config/tenant-overrides/${id}`), {
         method: 'DELETE',
       });
       if (response.ok) {
@@ -665,7 +702,7 @@ const ConfigurationManager: React.FC = () => {
   const handleCreateFlag = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/config/feature-flags', {
+      const response = await fetch(addTenantParam('/api/admin/config/feature-flags'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(flagForm),
@@ -691,7 +728,7 @@ const ConfigurationManager: React.FC = () => {
 
   const handleToggleFlag = async (id: string, enabled: boolean) => {
     try {
-      const response = await fetch(`/api/admin/config/feature-flags/${id}/toggle`, {
+      const response = await fetch(addTenantParam(`/api/admin/config/feature-flags/${id}/toggle`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ enabled }),
@@ -707,7 +744,7 @@ const ConfigurationManager: React.FC = () => {
   const handleDeleteFlag = async (id: string) => {
     if (!confirm('Are you sure you want to delete this feature flag?')) return;
     try {
-      const response = await fetch(`/api/admin/config/feature-flags/${id}`, {
+      const response = await fetch(addTenantParam(`/api/admin/config/feature-flags/${id}`), {
         method: 'DELETE',
       });
       if (response.ok) {

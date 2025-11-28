@@ -49,6 +49,7 @@ import {
 
 // Import admin API hooks
 import { useAuthorizationPolicies, useAuthzMutations } from '../../hooks/useAdminApi';
+import { addTenantParam } from '../../utils/tenant';
 
 const useStyles = makeStyles({
   container: {
@@ -213,7 +214,7 @@ export default function AuthorizationEngine() {
 
   const fetchPolicies = async () => {
     try {
-      const response = await fetch('/api/admin/authz/policies?tenant_id=test-tenant-1', {
+      const response = await fetch(addTenantParam('/api/admin/authz/policies'), {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
         },
@@ -229,7 +230,7 @@ export default function AuthorizationEngine() {
 
   const fetchAttributes = async () => {
     try {
-      const response = await fetch('/api/admin/authz/attributes?tenant_id=test-tenant-1', {
+      const response = await fetch(addTenantParam('/api/admin/authz/attributes'), {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
         },
@@ -245,7 +246,7 @@ export default function AuthorizationEngine() {
 
   const fetchDecisions = async () => {
     try {
-      const response = await fetch('/api/admin/authz/decisions?tenant_id=test-tenant-1', {
+      const response = await fetch(addTenantParam('/api/admin/authz/decisions'), {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
         },
@@ -262,7 +263,7 @@ export default function AuthorizationEngine() {
   const handleCreatePolicy = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/authz/policies?tenant_id=test-tenant-1', {
+      const response = await fetch(addTenantParam('/api/admin/authz/policies'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -295,7 +296,7 @@ export default function AuthorizationEngine() {
 
     setLoading(true);
     try {
-      const response = await fetch(`/api/admin/authz/policies/${selectedPolicy.id}?tenant_id=test-tenant-1`, {
+      const response = await fetch(addTenantParam(`/api/admin/authz/policies/${selectedPolicy.id}`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -325,7 +326,7 @@ export default function AuthorizationEngine() {
 
   const handleDeletePolicy = async (policyId: string) => {
     try {
-      await fetch(`/api/admin/authz/policies/${policyId}?tenant_id=test-tenant-1`, {
+      await fetch(addTenantParam(`/api/admin/authz/policies/${policyId}`), {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
@@ -353,7 +354,7 @@ export default function AuthorizationEngine() {
         }
       }
       
-      const response = await fetch('/api/admin/authz/simulate?tenant_id=test-tenant-1', {
+      const response = await fetch(addTenantParam('/api/admin/authz/simulate'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -384,7 +385,7 @@ export default function AuthorizationEngine() {
   const handleCreateAttribute = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/authz/attributes?tenant_id=test-tenant-1', {
+      const response = await fetch(addTenantParam('/api/admin/authz/attributes'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -414,7 +415,7 @@ export default function AuthorizationEngine() {
     if (!confirm('Are you sure you want to delete this attribute?')) return;
     
     try {
-      const response = await fetch(`/api/admin/authz/attributes/${id}?tenant_id=test-tenant-1`, {
+      const response = await fetch(addTenantParam(`/api/admin/authz/attributes/${id}`), {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('admin_token')}`,

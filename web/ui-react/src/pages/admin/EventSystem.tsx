@@ -49,6 +49,7 @@ import {
 // Import admin API hooks
 import { useEvents, useEventTypes } from '../../hooks/useAdminApi';
 import { apiPost, apiDelete } from '../../utils/api';
+import { addTenantParam } from '../../utils/tenant';
 
 const useStyles = makeStyles({
   container: {
@@ -232,7 +233,7 @@ export default function EventSystem() {
 
   const fetchHandlers = async () => {
     try {
-      const response = await fetch('/api/admin/events/handlers?tenant_id=test-tenant-1', {
+      const response = await fetch(addTenantParam('/api/admin/events/handlers'), {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
         },
@@ -253,7 +254,7 @@ export default function EventSystem() {
   const handleCreateHandler = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/events/handlers', {
+      const response = await fetch(addTenantParam('/api/admin/events/handlers'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -283,7 +284,7 @@ export default function EventSystem() {
 
   const handleToggleHandler = async (handlerId: string, enabled: boolean) => {
     try {
-      await fetch(`/api/admin/events/handlers/${handlerId}/toggle`, {
+      await fetch(addTenantParam(`/api/admin/events/handlers/${handlerId}/toggle`), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -299,7 +300,7 @@ export default function EventSystem() {
 
   const handleDeleteHandler = async (handlerId: string) => {
     try {
-      await fetch(`/api/admin/events/handlers/${handlerId}`, {
+      await fetch(addTenantParam(`/api/admin/events/handlers/${handlerId}`), {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('admin_token')}`,

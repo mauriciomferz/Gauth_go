@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { addTenantParam } from '../../utils/tenant'
 import {
   makeStyles,
   Text,
@@ -356,7 +357,7 @@ export default function ResiliencePatterns() {
 
   const fetchBulkheads = async () => {
     try {
-      const response = await fetch('/api/admin/resilience/bulkheads')
+      const response = await fetch(addTenantParam('/api/admin/resilience/bulkheads'))
       const data = await response.json()
       setBulkheads(data.bulkheads || [])
     } catch (error) {
@@ -366,7 +367,7 @@ export default function ResiliencePatterns() {
 
   const fetchCompositePatterns = async () => {
     try {
-      const response = await fetch('/api/admin/resilience/composite-patterns')
+      const response = await fetch(addTenantParam('/api/admin/resilience/composite-patterns'))
       const data = await response.json()
       setCompositePatterns(data.patterns || [])
     } catch (error) {
@@ -394,7 +395,7 @@ export default function ResiliencePatterns() {
   const handleUpdateCircuitBreaker = async () => {
     if (!editingCb) return
     try {
-      await fetch(`/api/admin/resilience/circuit-breakers/${editingCb.id}`, {
+      await fetch(addTenantParam(`/api/admin/resilience/circuit-breakers/${editingCb.id}`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -416,7 +417,7 @@ export default function ResiliencePatterns() {
 
   const handleResetCircuitBreaker = async (id: string) => {
     try {
-      await fetch(`/api/admin/resilience/circuit-breakers/${id}/reset`, {
+      await fetch(addTenantParam(`/api/admin/resilience/circuit-breakers/${id}/reset`), {
         method: 'POST',
       })
       refetchCbs()
@@ -427,7 +428,7 @@ export default function ResiliencePatterns() {
 
   const handleDeleteCircuitBreaker = async (id: string) => {
     try {
-      await fetch(`/api/admin/resilience/circuit-breakers/${id}`, {
+      await fetch(addTenantParam(`/api/admin/resilience/circuit-breakers/${id}`), {
         method: 'DELETE',
       })
       refetchCbs()
@@ -456,7 +457,7 @@ export default function ResiliencePatterns() {
 
   const handleDeleteRateLimiter = async (id: string) => {
     try {
-      await fetch(`/api/admin/resilience/rate-limiters/${id}`, {
+      await fetch(addTenantParam(`/api/admin/resilience/rate-limiters/${id}`), {
         method: 'DELETE',
       })
       refetchRls()
@@ -486,7 +487,7 @@ export default function ResiliencePatterns() {
 
   const handleDeleteRetryPolicy = async (id: string) => {
     try {
-      await fetch(`/api/admin/resilience/retry-policies/${id}`, {
+      await fetch(addTenantParam(`/api/admin/resilience/retry-policies/${id}`), {
         method: 'DELETE',
       })
       refetchRps()
@@ -497,7 +498,7 @@ export default function ResiliencePatterns() {
 
   const handleCreateBulkhead = async () => {
     try {
-      await fetch('/api/admin/resilience/bulkheads', {
+      await fetch(addTenantParam('/api/admin/resilience/bulkheads'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -518,7 +519,7 @@ export default function ResiliencePatterns() {
 
   const handleDeleteBulkhead = async (id: string) => {
     try {
-      await fetch(`/api/admin/resilience/bulkheads/${id}`, {
+      await fetch(addTenantParam(`/api/admin/resilience/bulkheads/${id}`), {
         method: 'DELETE',
       })
       fetchBulkheads()
@@ -529,7 +530,7 @@ export default function ResiliencePatterns() {
 
   const handleCreateCompositePattern = async () => {
     try {
-      await fetch('/api/admin/resilience/composite-patterns', {
+      await fetch(addTenantParam('/api/admin/resilience/composite-patterns'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -549,7 +550,7 @@ export default function ResiliencePatterns() {
 
   const handleToggleCompositePattern = async (id: string, enabled: boolean) => {
     try {
-      await fetch(`/api/admin/resilience/composite-patterns/${id}/toggle`, {
+      await fetch(addTenantParam(`/api/admin/resilience/composite-patterns/${id}/toggle`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ enabled }),
@@ -562,7 +563,7 @@ export default function ResiliencePatterns() {
 
   const handleDeleteCompositePattern = async (id: string) => {
     try {
-      await fetch(`/api/admin/resilience/composite-patterns/${id}`, {
+      await fetch(addTenantParam(`/api/admin/resilience/composite-patterns/${id}`), {
         method: 'DELETE',
       })
       fetchCompositePatterns()
