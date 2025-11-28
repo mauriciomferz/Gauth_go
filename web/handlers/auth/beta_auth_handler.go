@@ -156,4 +156,6 @@ func (h *BetaAuthHandler) generateToken(challengeID string) (string, string, err
 func (h *BetaAuthHandler) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/login/init", h.LoginInit)
 	router.POST("/login/mfa", h.MFAVerify)
+	// Alternative path for frontend compatibility
+	router.POST("/mfa/verify", h.MFAVerify)
 }
