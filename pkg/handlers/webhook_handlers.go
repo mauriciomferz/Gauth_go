@@ -47,7 +47,7 @@ func (h *WebhookHandler) CreateWebhook(w http.ResponseWriter, r *http.Request) {
 	// Get user ID from context (set by auth middleware)
 	userID, ok := r.Context().Value("user_id").(string)
 	if !ok {
-		respondError(w, http.StatusUnauthorized, "unauthorized", "User not authenticated")
+		respondError(w, http.StatusUnauthorized, "User not authenticated")
 		return
 	}
 
@@ -110,10 +110,10 @@ func (h *WebhookHandler) GetWebhook(w http.ResponseWriter, r *http.Request) {
 	wh, err := h.manager.GetWebhook(r.Context(), id)
 	if err != nil {
 		if err == webhook.ErrWebhookNotFound {
-			respondError(w, http.StatusNotFound, "not_found", "Webhook not found")
+			respondError(w, http.StatusNotFound, "Webhook not found")
 			return
 		}
-		respondError(w, http.StatusInternalServerError, "fetch_failed", err.Error())
+		respondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -293,16 +293,4 @@ func (h *WebhookHandler) GetWebhookStats(w http.ResponseWriter, r *http.Request)
 
 // Helper functions (reuse from existing handlers or define here)
 
-func respondJSON(w http.ResponseWriter, status int, data interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(data)
-}
 
-func respondError(w http.ResponseWriter, status int, message string) {
-	respondJSON(w, status, map[string]interface{}{
-		"error": map[string]string{
-			"message": message,
-		},
-	})
-}

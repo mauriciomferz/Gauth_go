@@ -1,247 +1,245 @@
 package middleware
-package middleware
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}	return hex.EncodeToString(hash[:])	hash := sha256.Sum256([]byte(key))func HashAPIKey(key string) string {// HashAPIKey creates a SHA-256 hash of an API key for secure storage}	fmt.Fprintf(w, `{"message":"Rate limit reset for key: %s"}`, key)	w.Header().Set("Content-Type", "application/json")		// For now, just return success	// This would need to be implemented in your RateLimiter interface		key := vars["key"]	vars := mux.Vars(r)func (m *RateLimitMiddleware) handleReset(w http.ResponseWriter, r *http.Request) {// handleReset resets the rate limit for a key}		key, stats.RequestsAllowed, stats.RequestsDenied, stats.ResetAt.Format(time.RFC3339))	fmt.Fprintf(w, `{"key":"%s","requests_allowed":%d,"requests_denied":%d,"reset_at":"%s"}`,	w.Header().Set("Content-Type", "application/json")		}		return		m.respondError(w, http.StatusNotFound, "key_not_found", "Rate limit key not found")	if stats == nil {	stats := m.limiter.GetStats(key)		key := vars["key"]	vars := mux.Vars(r)func (m *RateLimitMiddleware) handleGetStats(w http.ResponseWriter, r *http.Request) {// handleGetStats returns rate limiting statistics for a key}	r.HandleFunc("/api/v1/admin/apikeys/{id}/regenerate", keyManager.handleRegenerateAPIKey).Methods("POST")	r.HandleFunc("/api/v1/admin/apikeys/{id}", keyManager.handleDeleteAPIKey).Methods("DELETE")	r.HandleFunc("/api/v1/admin/apikeys/{id}", keyManager.handleUpdateAPIKey).Methods("PUT")	r.HandleFunc("/api/v1/admin/apikeys/{id}", keyManager.handleGetAPIKey).Methods("GET")	r.HandleFunc("/api/v1/admin/apikeys", keyManager.handleListAPIKeys).Methods("GET")	r.HandleFunc("/api/v1/admin/apikeys", keyManager.handleCreateAPIKey).Methods("POST")	// API Key management endpoints		r.HandleFunc("/api/v1/admin/ratelimit/reset/{key}", m.handleReset).Methods("POST")	r.HandleFunc("/api/v1/admin/ratelimit/stats/{key}", m.handleGetStats).Methods("GET")func (m *RateLimitMiddleware) RegisterRoutes(r *mux.Router, keyManager *APIKeyManager) {// RegisterRoutes adds rate limit management endpoints to the router}	return time.Minute, true	// For now, return a default	// This would need to be implemented based on your RateLimitError typefunc getRetryAfter(err error) (time.Duration, bool) {// getRetryAfter extracts retry-after duration from rate limit error}	fmt.Fprintf(w, `{"error":{"code":"%s","message":"%s"}}`, code, message)	w.WriteStatus(status)	w.Header().Set("Content-Type", "application/json")func (m *RateLimitMiddleware) respondError(w http.ResponseWriter, status int, code, message string) {// respondError sends an error response}	return ip		}		ip = ip[:idx]	if idx := strings.LastIndex(ip, ":"); idx != -1 {	// Remove port if present	ip := r.RemoteAddr	// Fall back to RemoteAddr		}		return xri	if xri := r.Header.Get("X-Real-IP"); xri != "" {	// Check X-Real-IP header		}		}			return strings.TrimSpace(ips[0])		if len(ips) > 0 {		ips := strings.Split(xff, ",")	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {	// Check X-Forwarded-For header (load balancer/proxy)func (m *RateLimitMiddleware) extractIP(r *http.Request) string {// extractIP extracts the client IP address from the request}	return ""		}		return apiKey	if apiKey := r.URL.Query().Get("api_key"); apiKey != "" {	// Check query parameter (less secure, for backward compatibility)		}		return apiKey	if apiKey := r.Header.Get("X-API-Key"); apiKey != "" {	// Check X-API-Key header		}		return strings.TrimPrefix(authHeader, "Bearer ")	if strings.HasPrefix(authHeader, "Bearer ") {	authHeader := r.Header.Get("Authorization")	// Check Authorization header (Bearer token format)func (m *RateLimitMiddleware) extractAPIKey(r *http.Request) string {// extractAPIKey extracts the API key from request headers or query parameters}	})		next.ServeHTTP(w, r)				}			w.Header().Set("X-RateLimit-Reset", fmt.Sprintf("%d", stats.ResetAt.Unix()))			w.Header().Set("X-RateLimit-Remaining", fmt.Sprintf("%d", remaining))			}				remaining = 0			if remaining < 0 {			remaining := apiKeyInfo.RateLimit - int(stats.RequestsDenied)			w.Header().Set("X-RateLimit-Limit", fmt.Sprintf("%d", apiKeyInfo.RateLimit))			stats := m.limiter.GetStats(rateLimitKey)			// Set rate limit headers for successful requests						r = r.WithContext(ctx)			ctx := context.WithValue(r.Context(), "api_key", apiKeyInfo)		if apiKeyInfo != nil {		// Add API key info to context if available				}			return			m.respondError(w, http.StatusTooManyRequests, "rate_limit_exceeded", err.Error())						}				w.Header().Set("Retry-After", fmt.Sprintf("%d", int(retryAfter.Seconds())))			if retryAfter, ok := getRetryAfter(err); ok {						w.Header().Set("X-RateLimit-Reset", fmt.Sprintf("%d", stats.ResetAt.Unix()))			w.Header().Set("X-RateLimit-Remaining", "0")			w.Header().Set("X-RateLimit-Limit", fmt.Sprintf("%d", apiKeyInfo.RateLimit))			// Set rate limit headers						stats := m.limiter.GetStats(rateLimitKey)		if err := m.limiter.Allow(r.Context(), rateLimitKey); err != nil {		// Check rate limit				}			return			m.respondError(w, http.StatusUnauthorized, "missing_api_key", "API key required")		} else {			rateLimitKey = fmt.Sprintf("ip:%s", ip)			ip := m.extractIP(r)			// Fall back to IP-based rate limiting		} else if m.useIPAsFallback {			rateLimitKey = fmt.Sprintf("apikey:%s", apiKeyInfo.ID)						}				return				m.respondError(w, http.StatusForbidden, "api_key_expired", "API key has expired")			if apiKeyInfo.ExpiresAt != nil && time.Now().After(*apiKeyInfo.ExpiresAt) {						}				return				m.respondError(w, http.StatusForbidden, "api_key_disabled", "API key has been disabled")			if !apiKeyInfo.Enabled {						}				return				m.respondError(w, http.StatusUnauthorized, "invalid_api_key", "Invalid API key")			if err != nil {			apiKeyInfo, err = m.keyStore.ValidateKey(r.Context(), apiKey)			var err error			// Validate API key		if apiKey != "" {				var apiKeyInfo *APIKey		var rateLimitKey string				apiKey := m.extractAPIKey(r)		// Extract API key from header or query parameter	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {func (m *RateLimitMiddleware) Handler(next http.Handler) http.Handler {// Handler wraps an HTTP handler with rate limiting}	}		useIPAsFallback: useIPAsFallback,		keyStore: keyStore,		limiter: limiter,	return &RateLimitMiddleware{func NewRateLimitMiddleware(limiter RateLimiter, keyStore APIKeyStore, useIPAsFallback bool) *RateLimitMiddleware {// NewRateLimitMiddleware creates a new rate limiting middleware}	LastUsedAt  *time.Time	CreatedAt   time.Time	ExpiresAt   *time.Time	Enabled     bool	RateLimit   int  // requests per second	Scopes      []string	UserID      string	Name        string	HashedKey   string	ID          stringtype APIKey struct {// APIKey represents an API key with its metadata}	GetKeyByID(ctx context.Context, keyID string) (*APIKey, error)	ValidateKey(ctx context.Context, key string) (*APIKey, error)type APIKeyStore interface {// APIKeyStore interface for API key management}	ResetAt         time.Time	RequestsDenied  int64	RequestsAllowed int64type Stats struct {// Stats represents rate limiting statistics}	GetStats(key string) *Stats	Allow(ctx context.Context, key string) errortype RateLimiter interface {// RateLimiter interface for rate limiting}	useIPAsFallback bool	keyStore APIKeyStore	limiter RateLimitertype RateLimitMiddleware struct {// RateLimitMiddleware applies rate limiting based on API key or IP address)	"github.com/gorilla/mux"	"time"	"strings"	"net/http"	"fmt"	"encoding/hex"	"crypto/sha256"	"context"import (
+import (
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/gorilla/mux"
+)
+
+// RateLimitMiddleware applies rate limiting based on API key or IP address
+type RateLimitMiddleware struct {
+	limiter         RateLimiter
+	keyStore        APIKeyStore
+	useIPAsFallback bool
+}
+
+// RateLimiter interface for rate limiting
+type RateLimiter interface {
+	Allow(ctx context.Context, key string) error
+	GetStats(key string) *Stats
+}
+
+// Stats represents rate limiting statistics
+type Stats struct {
+	RequestsAllowed int64
+	RequestsDenied  int64
+	ResetAt         time.Time
+}
+
+// APIKeyStore interface for API key management
+type APIKeyStore interface {
+	ValidateKey(ctx context.Context, key string) (*APIKey, error)
+	GetKeyByID(ctx context.Context, keyID string) (*APIKey, error)
+	CreateKey(ctx context.Context, key *APIKey) error
+	UpdateKey(ctx context.Context, key *APIKey) error
+	DeleteKey(ctx context.Context, keyID string) error
+	ListKeys(ctx context.Context, userID string) ([]*APIKey, error)
+}
+
+// APIKey represents an API key with its metadata
+type APIKey struct {
+	ID          string
+	HashedKey   string
+	Name        string
+	UserID      string
+	Scopes      []string
+	RateLimit   int  // requests per second
+	Enabled     bool
+	ExpiresAt   *time.Time
+	CreatedAt   time.Time
+	LastUsedAt  *time.Time
+}
+
+// NewRateLimitMiddleware creates a new rate limiting middleware
+func NewRateLimitMiddleware(limiter RateLimiter, keyStore APIKeyStore, useIPAsFallback bool) *RateLimitMiddleware {
+	return &RateLimitMiddleware{
+		limiter:         limiter,
+		keyStore:        keyStore,
+		useIPAsFallback: useIPAsFallback,
+	}
+}
+
+// Handler wraps an HTTP handler with rate limiting
+func (m *RateLimitMiddleware) Handler(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Extract API key from header or query parameter
+		apiKey := m.extractAPIKey(r)
+		var apiKeyInfo *APIKey
+		var rateLimitKey string
+
+		// Validate API key
+		if apiKey != "" {
+			var err error
+			apiKeyInfo, err = m.keyStore.ValidateKey(r.Context(), apiKey)
+			if err != nil {
+				m.respondError(w, http.StatusUnauthorized, "invalid_api_key", "Invalid API key")
+				return
+			}
+			if !apiKeyInfo.Enabled {
+				m.respondError(w, http.StatusForbidden, "api_key_disabled", "API key has been disabled")
+				return
+			}
+			if apiKeyInfo.ExpiresAt != nil && time.Now().After(*apiKeyInfo.ExpiresAt) {
+				m.respondError(w, http.StatusForbidden, "api_key_expired", "API key has expired")
+				return
+			}
+			rateLimitKey = fmt.Sprintf("apikey:%s", apiKeyInfo.ID)
+		} else if m.useIPAsFallback {
+			// Fall back to IP-based rate limiting
+			ip := m.extractIP(r)
+			rateLimitKey = fmt.Sprintf("ip:%s", ip)
+		} else {
+			m.respondError(w, http.StatusUnauthorized, "missing_api_key", "API key required")
+			return
+		}
+
+		// Check rate limit
+		if err := m.limiter.Allow(r.Context(), rateLimitKey); err != nil {
+			stats := m.limiter.GetStats(rateLimitKey)
+			// Set rate limit headers
+			if apiKeyInfo != nil {
+				w.Header().Set("X-RateLimit-Limit", fmt.Sprintf("%d", apiKeyInfo.RateLimit))
+			}
+			w.Header().Set("X-RateLimit-Remaining", "0")
+			w.Header().Set("X-RateLimit-Reset", fmt.Sprintf("%d", stats.ResetAt.Unix()))
+			// Set retry-after header
+			if retryAfter, ok := getRetryAfter(err); ok {
+				w.Header().Set("Retry-After", fmt.Sprintf("%d", int(retryAfter.Seconds())))
+			}
+			m.respondError(w, http.StatusTooManyRequests, "rate_limit_exceeded", err.Error())
+			return
+		}
+
+		// Add API key info to context if available
+		if apiKeyInfo != nil {
+			ctx := context.WithValue(r.Context(), "api_key", apiKeyInfo)
+			r = r.WithContext(ctx)
+			// Set rate limit headers for successful requests
+			stats := m.limiter.GetStats(rateLimitKey)
+			w.Header().Set("X-RateLimit-Limit", fmt.Sprintf("%d", apiKeyInfo.RateLimit))
+			remaining := apiKeyInfo.RateLimit - int(stats.RequestsDenied)
+			if remaining < 0 {
+				remaining = 0
+			}
+			w.Header().Set("X-RateLimit-Remaining", fmt.Sprintf("%d", remaining))
+			w.Header().Set("X-RateLimit-Reset", fmt.Sprintf("%d", stats.ResetAt.Unix()))
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+// extractAPIKey extracts the API key from request headers or query parameters
+func (m *RateLimitMiddleware) extractAPIKey(r *http.Request) string {
+	// Check Authorization header (Bearer token format)
+	authHeader := r.Header.Get("Authorization")
+	if strings.HasPrefix(authHeader, "Bearer ") {
+		return strings.TrimPrefix(authHeader, "Bearer ")
+	}
+	
+	// Check X-API-Key header
+	if apiKey := r.Header.Get("X-API-Key"); apiKey != "" {
+		return apiKey
+	}
+	
+	// Check query parameter (less secure, for backward compatibility)
+	if apiKey := r.URL.Query().Get("api_key"); apiKey != "" {
+		return apiKey
+	}
+	
+	return ""
+}
+
+// extractIP extracts the client IP address from the request
+func (m *RateLimitMiddleware) extractIP(r *http.Request) string {
+	// Check X-Forwarded-For header (load balancer/proxy)
+	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+		ips := strings.Split(xff, ",")
+		if len(ips) > 0 {
+			return strings.TrimSpace(ips[0])
+		}
+	}
+	
+	// Check X-Real-IP header
+	if xri := r.Header.Get("X-Real-IP"); xri != "" {
+		return xri
+	}
+	
+	// Fall back to RemoteAddr
+	ip := r.RemoteAddr
+	// Remove port if present
+	if idx := strings.LastIndex(ip, ":"); idx != -1 {
+		ip = ip[:idx]
+	}
+	
+	return ip
+}
+
+// respondError sends an error response
+func (m *RateLimitMiddleware) respondError(w http.ResponseWriter, status int, code, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	fmt.Fprintf(w, `{"error":{"code":"%s","message":"%s"}}`, code, message)
+}
+
+// getRetryAfter extracts retry-after duration from rate limit error
+func getRetryAfter(err error) (time.Duration, bool) {
+	// This would need to be implemented based on your RateLimitError type
+	// For now, return a default
+	return time.Minute, true
+}
+
+// RegisterRoutes adds rate limit management endpoints to the router
+func (m *RateLimitMiddleware) RegisterRoutes(r *mux.Router, keyManager *APIKeyManager) {
+	// Rate limiting endpoints
+	r.HandleFunc("/api/v1/admin/ratelimit/stats/{key}", m.handleGetStats).Methods("GET")
+	r.HandleFunc("/api/v1/admin/ratelimit/reset/{key}", m.handleReset).Methods("POST")
+	
+	// API Key management endpoints
+	r.HandleFunc("/api/v1/admin/apikeys", keyManager.handleCreateAPIKey).Methods("POST")
+	r.HandleFunc("/api/v1/admin/apikeys", keyManager.handleListAPIKeys).Methods("GET")
+	r.HandleFunc("/api/v1/admin/apikeys/{id}", keyManager.handleGetAPIKey).Methods("GET")
+	r.HandleFunc("/api/v1/admin/apikeys/{id}", keyManager.handleUpdateAPIKey).Methods("PUT")
+	r.HandleFunc("/api/v1/admin/apikeys/{id}", keyManager.handleDeleteAPIKey).Methods("DELETE")
+	r.HandleFunc("/api/v1/admin/apikeys/{id}/regenerate", keyManager.handleRegenerateAPIKey).Methods("POST")
+}
+
+// handleGetStats returns rate limiting statistics for a key
+func (m *RateLimitMiddleware) handleGetStats(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["key"]
+	
+	stats := m.limiter.GetStats(key)
+	if stats == nil {
+		m.respondError(w, http.StatusNotFound, "key_not_found", "Rate limit key not found")
+		return
+	}
+	
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, `{"key":"%s","requests_allowed":%d,"requests_denied":%d,"reset_at":"%s"}`,
+		key, stats.RequestsAllowed, stats.RequestsDenied, stats.ResetAt.Format(time.RFC3339))
+}
+
+// handleReset resets the rate limit for a key
+func (m *RateLimitMiddleware) handleReset(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["key"]
+	
+	// This would need to be implemented in your RateLimiter interface
+	// For now, just return success
+	
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, `{"message":"Rate limit reset for key: %s"}`, key)
+}
+
+// HashAPIKey creates a SHA-256 hash of an API key for secure storage
+func HashAPIKey(key string) string {
+	hash := sha256.Sum256([]byte(key))
+	return hex.EncodeToString(hash[:])
+}

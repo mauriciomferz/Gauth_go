@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
@@ -313,26 +312,4 @@ func respondJSON(w http.ResponseWriter, status int, data interface{}) {
 	json.NewEncoder(w).Encode(data)
 }
 
-// CreateKey creates a new API key in the store
-func (s *APIKeyStore) CreateKey(ctx context.Context, key *APIKey) error {
-	// Implementation would go here
-	return nil
-}
 
-// UpdateKey updates an existing API key
-func (s *APIKeyStore) UpdateKey(ctx context.Context, key *APIKey) error {
-	// Implementation would go here
-	return nil
-}
-
-// DeleteKey deletes an API key
-func (s *APIKeyStore) DeleteKey(ctx context.Context, keyID string) error {
-	// Implementation would go here
-	return nil
-}
-
-// ListKeys lists API keys, optionally filtered by user ID
-func (s *APIKeyStore) ListKeys(ctx context.Context, userID string) ([]*APIKey, error) {
-	// Implementation would go here
-	return nil, nil
-}

@@ -11,7 +11,7 @@ type PoAStore interface {
 	GetPoA(ctx context.Context, poaID string) (*EnhancedPoA, error)
 	GetPoAsByStatus(ctx context.Context, status string) ([]*EnhancedPoA, error)
 	UpdatePoABlockchainInfo(ctx context.Context, poaID string, txHash string, blockNumber int64) error
-	GetUnsynced PoAs(ctx context.Context, limit int) ([]*EnhancedPoA, error)
+	GetUnsyncedPoAs(ctx context.Context, limit int) ([]*EnhancedPoA, error)
 }
 
 // EnhancedPoA represents the enhanced Power of Attorney structure
@@ -161,27 +161,6 @@ type SyncStatus struct {
 	PendingSyncs       int       `json:"pending_syncs"`
 	FailedSyncs        int       `json:"failed_syncs"`
 	IsHealthy          bool      `json:"is_healthy"`
-}
-
-// BlockchainRegistry defines the interface for blockchain operations
-type BlockchainRegistry interface {
-	// Core PoA operations
-	RegisterPoA(ctx context.Context, record *PoARecord) (txHash string, err error)
-	RevokePoA(ctx context.Context, poaID string, revokedBy string, reason string) (txHash string, err error)
-	UpdatePoAStatus(ctx context.Context, poaID string, status string) (txHash string, err error)
-	VerifyPoAOnChain(ctx context.Context, poaID string) (*BlockchainPoARecord, error)
-	
-	// Query operations
-	GetPublicVerificationURL(poaID string) string
-	ListPoAsByIssuer(ctx context.Context, issuerID string) ([]*BlockchainPoARecord, error)
-	ListPoAsByGrantee(ctx context.Context, granteeID string) ([]*BlockchainPoARecord, error)
-	
-	// AI Agent operations
-	RegisterAIAgent(ctx context.Context, registration *AIAgentRegistration) (registrationID string, txHash string, err error)
-	
-	// Blockchain status
-	GetBlockchainHeight(ctx context.Context) (int64, error)
-	GetTransactionStatus(ctx context.Context, txHash string) (*TransactionStatus, error)
 }
 
 // CommercialRegisterService defines the interface for commercial register operations
