@@ -313,7 +313,10 @@ func (t *TwoPhaseRevocation) CancelDisable(ctx context.Context, poaID string) er
 func (t *TwoPhaseRevocation) GetPoAState(ctx context.Context, poaID string) (*PoAState, error) {
 	// Check local cache first
 	if cached, ok := t.states.Load(poaID); ok {
-		return cached.(*PoAState), nil
+		// Return a copy to prevent race conditions when callers read while other goroutines modify
+		original := cached.(*PoAState)
+		stateCopy := *original
+		return &stateCopy, nil
 	}
 
 	// Check Redis
@@ -335,7 +338,9 @@ func (t *TwoPhaseRevocation) GetPoAState(ctx context.Context, poaID string) (*Po
 	// Update local cache
 	t.states.Store(poaID, &state)
 
-	return &state, nil
+	// Return a copy to prevent race conditions
+	stateCopy := state
+	return &stateCopy, nil
 }
 
 // IsPoAUsable checks if a PoA can be used for new transactions
