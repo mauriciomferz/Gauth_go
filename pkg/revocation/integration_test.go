@@ -61,6 +61,7 @@ func setupIntegrationEnv(t *testing.T) *IntegrationTestEnv {
 		oracle:         oracle,
 		disableTimeout: 30 * time.Second,
 		states:         sync.Map{},
+		autoRevokeTimers: make(map[string]*time.Timer),
 	}
 
 	opt := &OptimisticRevocation{
@@ -594,6 +595,7 @@ func TestE2E_DataPersistenceAcrossRestarts(t *testing.T) {
 		oracle:         oracle,
 		disableTimeout: 30 * time.Second,
 		states:         sync.Map{},
+		autoRevokeTimers: make(map[string]*time.Timer),
 	}
 
 	env.OptimisticRevocation = &OptimisticRevocation{

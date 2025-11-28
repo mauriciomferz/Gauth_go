@@ -31,10 +31,11 @@ func setupTwoPhaseTest(t *testing.T) (*TwoPhaseRevocation, *miniredis.Miniredis)
 	require.NoError(t, err)
 
 	tpr := &TwoPhaseRevocation{
-		redis:          redisClient,
-		logger:         logger,
-		oracle:         oracle,
-		disableTimeout: 30 * time.Second,
+		redis:            redisClient,
+		logger:           logger,
+		oracle:           oracle,
+		disableTimeout:   30 * time.Second,
+		autoRevokeTimers: make(map[string]*time.Timer),
 	}
 
 	return tpr, mr

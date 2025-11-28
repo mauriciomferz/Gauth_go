@@ -53,6 +53,7 @@ func FuzzTwoPhaseDisablePoA(f *testing.F) {
 			redis:          redisClient,
 			logger:         logger,
 			oracle:         oracle,
+                        autoRevokeTimers: make(map[string]*time.Timer),
 			disableTimeout: 30 * time.Second,
 		}
 		defer tpr.Close()
@@ -109,6 +110,7 @@ func FuzzTwoPhaseRevokePoA(f *testing.F) {
 			redis:          redisClient,
 			logger:         logger,
 			oracle:         oracle,
+                        autoRevokeTimers: make(map[string]*time.Timer),
 			disableTimeout: 30 * time.Second,
 		}
 		defer tpr.Close()
@@ -313,21 +315,20 @@ func FuzzGetPoAState(f *testing.F) {
 			t.Skip()
 		}
 
-		tpr := &TwoPhaseRevocation{
-			redis:          redisClient,
-			logger:         logger,
-			oracle:         oracle,
-			disableTimeout: 30 * time.Second,
-		}
-		defer tpr.Close()
+	tpr := &TwoPhaseRevocation{
+		redis:          redisClient,
+		logger:         logger,
+		oracle:         oracle,
+		disableTimeout: 30 * time.Second,
+		autoRevokeTimers: make(map[string]*time.Timer),
+	}
+	defer tpr.Close()
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-		defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
 
-		// Should never panic, even with malicious inputs
-		state, err := tpr.GetPoAState(ctx, poaID)
-		
-		// Empty poaID should return error or nil state
+	// Should never panic, even with malicious inputs
+	state, err := tpr.GetPoAState(ctx, poaID)		// Empty poaID should return error or nil state
 		if poaID == "" {
 			if state != nil && err == nil {
 				t.Errorf("Expected error or nil state for empty poaID")

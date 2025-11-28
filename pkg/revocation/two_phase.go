@@ -46,6 +46,8 @@ type TwoPhaseRevocation struct {
 	logger         Logger
 	disableTimeout time.Duration // How long before auto-revoke (default: 30 seconds)
 	states         sync.Map      // poaID → *PoAState (local cache)
+	autoRevokeMu   sync.Mutex    // Protects autoRevokeTimers
+	autoRevokeTimers map[string]*time.Timer // poaID → timer for auto-revoke
 }
 
 // NewTwoPhaseRevocation creates a new two-phase revocation system
@@ -77,10 +79,11 @@ func NewTwoPhaseRevocation(oracle *EmergencyRevocationOracle, redisAddrs []strin
 	}
 
 	tpr := &TwoPhaseRevocation{
-		oracle:         oracle,
-		redis:          rdb,
-		logger:         logger,
-		disableTimeout: 30 * time.Second, // Default: auto-revoke after 30 seconds
+		oracle:           oracle,
+		redis:            rdb,
+		logger:           logger,
+		disableTimeout:   30 * time.Second, // Default: auto-revoke after 30 seconds
+		autoRevokeTimers: make(map[string]*time.Timer),
 	}
 
 	logger.Info("Two-Phase Revocation system initialized")
@@ -148,8 +151,15 @@ func (t *TwoPhaseRevocation) DisablePoA(ctx context.Context, poaID, principal, r
 		// Continue - Redis state is primary source of truth
 	}
 
-	// Schedule auto-revoke after timeout
-	go t.scheduleAutoRevoke(poaID, t.disableTimeout)
+	// Schedule auto-revoke after timeout (cancel any existing timer first)
+	t.autoRevokeMu.Lock()
+	if existingTimer, ok := t.autoRevokeTimers[poaID]; ok {
+		existingTimer.Stop()
+	}
+	t.autoRevokeTimers[poaID] = time.AfterFunc(t.disableTimeout, func() {
+		t.performAutoRevoke(poaID)
+	})
+	t.autoRevokeMu.Unlock()
 
 	duration := time.Since(start)
 	t.logger.Infof("✅ Phase 1 complete: PoA %s disabled in %v (cancellable for %v)", 
@@ -158,12 +168,15 @@ func (t *TwoPhaseRevocation) DisablePoA(ctx context.Context, poaID, principal, r
 	return nil
 }
 
-// scheduleAutoRevoke automatically revokes a PoA after the disable timeout
-func (t *TwoPhaseRevocation) scheduleAutoRevoke(poaID string, timeout time.Duration) {
-	time.Sleep(timeout)
-
+// performAutoRevoke automatically revokes a PoA after the disable timeout
+func (t *TwoPhaseRevocation) performAutoRevoke(poaID string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
+	// Clean up timer from map
+	t.autoRevokeMu.Lock()
+	delete(t.autoRevokeTimers, poaID)
+	t.autoRevokeMu.Unlock()
 
 	// Check if still disabled (might have been cancelled or manually revoked)
 	state, err := t.GetPoAState(ctx, poaID)
@@ -267,6 +280,14 @@ func (t *TwoPhaseRevocation) CancelDisable(ctx context.Context, poaID string) er
 		return fmt.Errorf("cancellation window expired (deadline was %v)", state.CancellableUntil)
 	}
 
+	// Cancel any pending auto-revoke timer
+	t.autoRevokeMu.Lock()
+	if timer, ok := t.autoRevokeTimers[poaID]; ok {
+		timer.Stop()
+		delete(t.autoRevokeTimers, poaID)
+	}
+	t.autoRevokeMu.Unlock()
+
 	// Delete state (returns to ACTIVE)
 	key := fmt.Sprintf("poa_state:%s", poaID)
 	if err := t.redis.Del(ctx, key).Err(); err != nil {
@@ -356,6 +377,14 @@ func (t *TwoPhaseRevocation) GetDisableTimeout() time.Duration {
 
 // Close gracefully shuts down the two-phase revocation system
 func (t *TwoPhaseRevocation) Close() error {
+	// Cancel all pending auto-revoke timers
+	t.autoRevokeMu.Lock()
+	for poaID, timer := range t.autoRevokeTimers {
+		timer.Stop()
+		delete(t.autoRevokeTimers, poaID)
+	}
+	t.autoRevokeMu.Unlock()
+
 	if err := t.redis.Close(); err != nil {
 		return fmt.Errorf("failed to close Redis connection: %w", err)
 	}
