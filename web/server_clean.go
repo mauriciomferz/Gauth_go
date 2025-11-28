@@ -6332,6 +6332,18 @@ func (s *BetaServer) routes() {
 		fmt.Fprintf(os.Stderr, "[MCP]   DELETE /api/v1/beta/mcp/servers/:id (Disconnect server)\n")
 	}
 
+	// PHASE 2B: Beta Auth API endpoints for frontend authentication
+	jwtSecret := os.Getenv("GAUTH_JWT_SIGNING_KEY")
+	if jwtSecret == "" {
+		jwtSecret = "dev-secret-change-in-production"
+	}
+	betaAuthHandler := authHandlers.NewBetaAuthHandler(jwtSecret)
+	authGroup := s.router.Group("/api/v1/beta/auth")
+	betaAuthHandler.RegisterRoutes(authGroup)
+	fmt.Fprintf(os.Stderr, "[Auth] Beta authentication endpoints registered:\n")
+	fmt.Fprintf(os.Stderr, "[Auth]   POST   /api/v1/beta/auth/login/init (Initiate login)\n")
+	fmt.Fprintf(os.Stderr, "[Auth]   POST   /api/v1/beta/auth/login/mfa (Verify MFA and get JWT)\n")
+
 	// Favicon using embedded 1x1 gif (prevents 404 noise in logs)
 	s.router.GET("/favicon.ico", func(c *gin.Context) {
 		c.Data(200, "image/gif", transparent1x1Gif)
