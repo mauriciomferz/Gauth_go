@@ -14,6 +14,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// raceEnabled is set in race_enabled.go and race_disabled.go based on build tags
+var raceEnabled bool
+
 // Load Testing Suite
 // Measures throughput, latency percentiles, and resource usage under high load
 
@@ -369,6 +372,11 @@ func TestLoad_SustainedLoad(t *testing.T) {
 func TestLoad_LargePoASet(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping load test in short mode")
+	}
+	
+	// Skip performance tests when race detector is enabled (adds 5-10x overhead)
+	if raceEnabled {
+		t.Skip("Skipping performance test with race detector enabled")
 	}
 
 	tpr, mr := setupTwoPhaseTest(t)
