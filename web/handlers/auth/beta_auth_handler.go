@@ -45,10 +45,38 @@ type MFAVerifyRequest struct {
 
 // MFAVerifyResponse represents MFA verification response
 type MFAVerifyResponse struct {
-	Success   bool   `json:"success"`
-	Token     string `json:"token,omitempty"`
-	ExpiresAt string `json:"expiresAt,omitempty"`
-	Error     string `json:"error,omitempty"`
+	Success      bool   `json:"success"`
+	Token        string `json:"token,omitempty"`
+	RefreshToken string `json:"refreshToken,omitempty"`
+	ExpiresAt    string `json:"expiresAt,omitempty"`
+	TokenType    string `json:"tokenType,omitempty"`
+	Error        string `json:"error,omitempty"`
+}
+
+// RefreshTokenRequest represents token refresh request
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refreshToken" binding:"required"`
+}
+
+// RefreshTokenResponse represents token refresh response
+type RefreshTokenResponse struct {
+	Success      bool   `json:"success"`
+	Token        string `json:"token,omitempty"`
+	RefreshToken string `json:"refreshToken,omitempty"`
+	ExpiresAt    string `json:"expiresAt,omitempty"`
+	Error        string `json:"error,omitempty"`
+}
+
+// LogoutRequest represents logout request
+type LogoutRequest struct {
+	Token string `json:"token" binding:"required"`
+}
+
+// LogoutResponse represents logout response
+type LogoutResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message,omitempty"`
+	Error   string `json:"error,omitempty"`
 }
 
 // LoginInit initiates the login process (step 1 of 2)
@@ -107,7 +135,7 @@ func (h *BetaAuthHandler) MFAVerify(c *gin.Context) {
 	// For development, accept test code "123456"
 	// In production, this would validate against TOTP/SMS/Email codes
 	if req.Code == "123456" {
-		// Generate JWT token
+		// Generate JWT access token
 		token, expiresAt, err := h.generateToken(req.ChallengeID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, MFAVerifyResponse{
@@ -117,10 +145,22 @@ func (h *BetaAuthHandler) MFAVerify(c *gin.Context) {
 			return
 		}
 
+		// Generate refresh token (valid for 7 days)
+		refreshToken, _, err := h.generateRefreshToken(req.ChallengeID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, MFAVerifyResponse{
+				Success: false,
+				Error:   "Failed to generate refresh token",
+			})
+			return
+		}
+
 		c.JSON(http.StatusOK, MFAVerifyResponse{
-			Success:   true,
-			Token:     token,
-			ExpiresAt: expiresAt,
+			Success:      true,
+			Token:        token,
+			RefreshToken: refreshToken,
+			ExpiresAt:    expiresAt,
+			TokenType:    "Bearer",
 		})
 		return
 	}
@@ -131,14 +171,15 @@ func (h *BetaAuthHandler) MFAVerify(c *gin.Context) {
 	})
 }
 
-// generateToken creates a JWT token
+// generateToken creates a JWT access token (valid for 1 hour)
 func (h *BetaAuthHandler) generateToken(challengeID string) (string, string, error) {
-	expiresAt := time.Now().Add(24 * time.Hour)
+	expiresAt := time.Now().Add(1 * time.Hour)
 	claims := jwt.MapClaims{
 		"user_id":      "user-1",
 		"username":     "admin",
 		"role":         "admin",
 		"challenge_id": challengeID,
+		"token_type":   "access",
 		"exp":          expiresAt.Unix(),
 		"iat":          time.Now().Unix(),
 	}
@@ -152,10 +193,129 @@ func (h *BetaAuthHandler) generateToken(challengeID string) (string, string, err
 	return tokenString, expiresAt.Format(time.RFC3339), nil
 }
 
+// generateRefreshToken creates a JWT refresh token (valid for 7 days)
+func (h *BetaAuthHandler) generateRefreshToken(challengeID string) (string, string, error) {
+	expiresAt := time.Now().Add(7 * 24 * time.Hour)
+	claims := jwt.MapClaims{
+		"user_id":      "user-1",
+		"username":     "admin",
+		"challenge_id": challengeID,
+		"token_type":   "refresh",
+		"exp":          expiresAt.Unix(),
+		"iat":          time.Now().Unix(),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString([]byte(h.jwtSecret))
+	if err != nil {
+		return "", "", err
+	}
+
+	return tokenString, expiresAt.Format(time.RFC3339), nil
+}
+
+// RefreshToken generates a new access token from a refresh token
+func (h *BetaAuthHandler) RefreshToken(c *gin.Context) {
+	var req RefreshTokenRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, RefreshTokenResponse{
+			Success: false,
+			Error:   "Invalid request format",
+		})
+		return
+	}
+
+	// Parse and validate refresh token
+	token, err := jwt.Parse(req.RefreshToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, jwt.ErrSignatureInvalid
+		}
+		return []byte(h.jwtSecret), nil
+	})
+
+	if err != nil || !token.Valid {
+		c.JSON(http.StatusUnauthorized, RefreshTokenResponse{
+			Success: false,
+			Error:   "Invalid or expired refresh token",
+		})
+		return
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, RefreshTokenResponse{
+			Success: false,
+			Error:   "Invalid token claims",
+		})
+		return
+	}
+
+	// Verify it's a refresh token
+	tokenType, ok := claims["token_type"].(string)
+	if !ok || tokenType != "refresh" {
+		c.JSON(http.StatusUnauthorized, RefreshTokenResponse{
+			Success: false,
+			Error:   "Invalid token type",
+		})
+		return
+	}
+
+	challengeID, _ := claims["challenge_id"].(string)
+
+	// Generate new access token
+	newToken, expiresAt, err := h.generateToken(challengeID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, RefreshTokenResponse{
+			Success: false,
+			Error:   "Failed to generate new token",
+		})
+		return
+	}
+
+	// Generate new refresh token
+	newRefreshToken, _, err := h.generateRefreshToken(challengeID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, RefreshTokenResponse{
+			Success: false,
+			Error:   "Failed to generate new refresh token",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, RefreshTokenResponse{
+		Success:      true,
+		Token:        newToken,
+		RefreshToken: newRefreshToken,
+		ExpiresAt:    expiresAt,
+	})
+}
+
+// Logout invalidates a token (in production, add to token blacklist)
+func (h *BetaAuthHandler) Logout(c *gin.Context) {
+	var req LogoutRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, LogoutResponse{
+			Success: false,
+			Error:   "Invalid request format",
+		})
+		return
+	}
+
+	// In production, add token to blacklist/revocation list
+	// For now, just return success
+	c.JSON(http.StatusOK, LogoutResponse{
+		Success: true,
+		Message: "Logout successful",
+	})
+}
+
 // RegisterRoutes registers beta auth routes
 func (h *BetaAuthHandler) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/login/init", h.LoginInit)
 	router.POST("/login/mfa", h.MFAVerify)
 	// Alternative path for frontend compatibility
 	router.POST("/mfa/verify", h.MFAVerify)
+	// Token management
+	router.POST("/token/refresh", h.RefreshToken)
+	router.POST("/logout", h.Logout)
 }

@@ -2,6 +2,8 @@ package mcp
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -23,13 +25,79 @@ func NewMCPHandler() *MCPHandler {
 
 // RegisterRoutes registers all MCP endpoints to the given router group
 func (h *MCPHandler) RegisterRoutes(r *gin.RouterGroup) {
+	r.GET("/mcp/health", h.HealthCheck)
 	r.GET("/mcp/servers", h.ListServers)
 	r.POST("/mcp/servers", h.RegisterServer)
 	r.DELETE("/mcp/servers/:id", h.DisconnectServer)
+	r.GET("/mcp/servers/:id/status", h.GetServerStatus)
 	r.GET("/mcp/servers/:id/resources", h.ListResources)
 	r.POST("/mcp/servers/:id/resources/read", h.ReadResource)
 	r.GET("/mcp/servers/:id/tools", h.ListTools)
 	r.POST("/mcp/servers/:id/tools/call", h.CallTool)
+}
+
+// HealthCheck returns the health status of the MCP handler
+func (h *MCPHandler) HealthCheck(c *gin.Context) {
+	serverIDs := h.connManager.ListServers()
+	status := h.connManager.GetConnectionStatus()
+	
+	connected := 0
+	disconnected := 0
+	for _, stat := range status {
+		if stat == "connected" {
+			connected++
+		} else {
+			disconnected++
+		}
+	}
+	
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"status":  "healthy",
+		"servers": gin.H{
+			"total":        len(serverIDs),
+			"connected":    connected,
+			"disconnected": disconnected,
+		},
+		"timestamp": time.Now().Format(time.RFC3339),
+	})
+}
+
+// GetServerStatus returns the status of a specific MCP server
+func (h *MCPHandler) GetServerStatus(c *gin.Context) {
+	serverID := c.Param("id")
+	
+	if serverID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "invalid_request",
+			"message": "Server ID is required",
+		})
+		return
+	}
+	
+	config, err := h.connManager.GetServerConfig(serverID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"error":   "server_not_found",
+			"message": fmt.Sprintf("Server '%s' not found", serverID),
+		})
+		return
+	}
+	
+	status := h.connManager.GetConnectionStatus()
+	
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"server": gin.H{
+			"id":             config.ID,
+			"name":           config.Name,
+			"description":    config.Description,
+			"transport_type": config.TransportType,
+			"status":         status[serverID],
+		},
+	})
 }
 
 // ListServers returns all registered MCP servers
@@ -85,6 +153,36 @@ func (h *MCPHandler) RegisterServer(c *gin.Context) {
 		return
 	}
 	
+	// Validate transport type
+	if req.TransportType != "stdio" && req.TransportType != "http" && req.TransportType != "https" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "invalid_transport_type",
+			"message": "Transport type must be 'stdio', 'http', or 'https'",
+		})
+		return
+	}
+	
+	// Validate stdio transport has command
+	if req.TransportType == "stdio" && req.Command == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "missing_command",
+			"message": "Command is required for stdio transport",
+		})
+		return
+	}
+	
+	// Validate http/https transport has URL
+	if (req.TransportType == "http" || req.TransportType == "https") && req.URL == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "missing_url",
+			"message": "URL is required for http/https transport",
+		})
+		return
+	}
+	
 	config := &mcp.ServerConfig{
 		ID:            req.ID,
 		Name:          req.Name,
@@ -130,7 +228,24 @@ func (h *MCPHandler) RegisterServer(c *gin.Context) {
 func (h *MCPHandler) DisconnectServer(c *gin.Context) {
 	serverID := c.Param("id")
 	
+	if serverID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "invalid_request",
+			"message": "Server ID is required",
+		})
+		return
+	}
+	
 	if err := h.connManager.UnregisterServer(serverID); err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			c.JSON(http.StatusGatewayTimeout, gin.H{
+				"success": false,
+				"error":   "timeout",
+				"message": "Server disconnection timed out",
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"error":   "disconnect_failed",
@@ -140,8 +255,9 @@ func (h *MCPHandler) DisconnectServer(c *gin.Context) {
 	}
 	
 	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "Server disconnected successfully",
+		"success":   true,
+		"message":   "Server disconnected successfully",
+		"server_id": serverID,
 	})
 }
 
@@ -149,15 +265,32 @@ func (h *MCPHandler) DisconnectServer(c *gin.Context) {
 func (h *MCPHandler) ListResources(c *gin.Context) {
 	serverID := c.Param("id")
 	
+	if serverID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "invalid_request",
+			"message": "Server ID is required",
+		})
+		return
+	}
+	
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 	
 	client, err := h.connManager.GetClient(ctx, serverID)
 	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			c.JSON(http.StatusGatewayTimeout, gin.H{
+				"success": false,
+				"error":   "timeout",
+				"message": "Connection to server timed out",
+			})
+			return
+		}
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"error":   "server_not_found",
-			"message": err.Error(),
+			"message": fmt.Sprintf("Server '%s' not found or not connected", serverID),
 		})
 		return
 	}
