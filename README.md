@@ -14,15 +14,15 @@ owners: core-maintainers
 > **🚀 BETA-READY** - Comprehensive security audit, extensive testing (689+ test cases), complete documentation. Suitable for testing and evaluation.
 > **Last Updated:** 2025-11-19 (📚 Documentation refresh, architecture updates, configuration accuracy improvements)
 
-**✨ Latest Updates (Nov 17, 2025):**
+**✨ Latest Updates (Nov 29, 2025):**
+- **🔐 Enhanced Auth API:** Refresh token support with 7-day expiration, improved JWT flow with userId, username, and role claims
+- **📚 API Documentation:** Comprehensive API_REFERENCE.md with all authentication and MCP endpoints documented
+- **✅ All Tests Passing:** 76 revocation race tests passing with race detector enabled (26.4s runtime)
+- **🔧 Improved Error Handling:** Better validation and standardized error responses across MCP and auth endpoints
 - **🔐 Login Tab Added:** Multi-step authentication with credentials and MFA verification (TOTP, SMS, Email)
 - **🤖 MCP Tab Added:** Model Context Protocol server management with stdio, WebSocket, and HTTP-SSE transport support
 - **Phase 2A Complete:** 11 backend API endpoints implemented and tested (PVP, Registry, PoA CRUD)
-- **MCP SSE Transport Fixed:** Race condition resolved in HTTP-SSE transport with proper WaitGroup tracking
 - **18-Country Identity Verification:** Complete identity connectors for US, DE, UK, FR, IT, ES, SE, NL, AE, SA, JP, AU, SG, KR, IN, NZ, BR, CA, MX, ZA, NG, KE
-- **Geographic Scope Validation:** ISO 3166-1/3166-2 compliant validation with <1μs performance
-- **Zero UI Mocks:** All React pages now use real backend endpoints
-- **Configuration Updated:** New environment variables for Login, MFA, and MCP features
 
 A complete Go implementation of the GAuth authorization framework (RFC 0111/0115) with delegated authorization, proof-of-authorization tokens, and comprehensive security features.
 
@@ -47,9 +47,11 @@ A complete Go implementation of the GAuth authorization framework (RFC 0111/0115
 >   - **Default:** http://localhost:8080/api/docs
 > - 📋 **OpenAPI Spec:** http://localhost:8080/api/openapi/gauth.yaml
 >
-> **Features:** RFC-0111 8-step subscription wizard, Login with MFA, MCP server management, 11 Phase 2A backend endpoints (PVP, Registry, PoA)
+> **Features:** RFC-0111 8-step subscription wizard, Login with MFA (refresh tokens), MCP server management, 11 Phase 2A backend endpoints (PVP, Registry, PoA)
+> 
+> **📖 API Reference:** See [API_REFERENCE.md](API_REFERENCE.md) for complete API documentation with examples
 
-**Status**: Beta (November 19, 2025)
+**Status**: Beta (November 29, 2025)
 - ✅ **CI/CD:** Resilient workflows with graceful degradation for missing infrastructure
 - ✅ **Security:** All HIGH severity issues resolved, 215 gosec findings documented
 - ✅ **Testing:** 49-97% coverage across core packages (689+ test cases)
