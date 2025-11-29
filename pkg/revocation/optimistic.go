@@ -53,6 +53,9 @@ type OptimisticRevocation struct {
 	mempoolClearTime   time.Duration // Estimated time for mempool to clear (default: 60 seconds)
 	minCollateral      uint64        // Minimum collateral required (Wei)
 	states             sync.Map      // poaID → *OptimisticRevocationState
+	wg                 sync.WaitGroup // Track background goroutines
+	shutdown           chan struct{}  // Signal to stop background tasks
+	shutdownOnce       sync.Once      // Ensure shutdown happens once
 }
 
 // NewOptimisticRevocation creates a new optimistic revocation system
@@ -90,6 +93,7 @@ func NewOptimisticRevocation(redisAddrs []string, oracle *EmergencyRevocationOra
 		challengeWindow:  15 * time.Minute,
 		mempoolClearTime: 60 * time.Second,
 		minCollateral:    1e18, // 1 ETH minimum
+		shutdown:         make(chan struct{}),
 	}
 
 	logger.Info("Optimistic Revocation system initialized")
@@ -172,6 +176,7 @@ func (o *OptimisticRevocation) MarkPendingRevocation(ctx context.Context, poaID,
 	}
 
 	// Schedule automatic finalization after mempool clears
+	o.wg.Add(1)
 	go o.scheduleFinalization(poaID, o.mempoolClearTime)
 
 	duration := time.Since(start)
@@ -183,7 +188,16 @@ func (o *OptimisticRevocation) MarkPendingRevocation(ctx context.Context, poaID,
 
 // scheduleFinalization automatically finalizes a pending revocation after mempool clears
 func (o *OptimisticRevocation) scheduleFinalization(poaID string, delay time.Duration) {
-	time.Sleep(delay)
+	defer o.wg.Done()
+	
+	// Wait for delay or shutdown signal
+	select {
+	case <-time.After(delay):
+		// Continue with finalization
+	case <-o.shutdown:
+		// Shutdown requested, exit early
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -445,6 +459,14 @@ func (o *OptimisticRevocation) GetMinCollateral() uint64 {
 
 // Close gracefully shuts down the optimistic revocation system
 func (o *OptimisticRevocation) Close() error {
+	// Signal all background goroutines to stop
+	o.shutdownOnce.Do(func() {
+		close(o.shutdown)
+	})
+	
+	// Wait for all background goroutines to complete
+	o.wg.Wait()
+	
 	if err := o.redis.Close(); err != nil {
 		return fmt.Errorf("failed to close Redis connection: %w", err)
 	}

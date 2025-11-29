@@ -211,6 +211,7 @@ func FuzzOptimisticInitiateRevocation(f *testing.F) {
 			challengeWindow:  5 * time.Minute,
 			mempoolClearTime: 10 * time.Minute,
 			minCollateral:    1000,
+			shutdown:         make(chan struct{}),
 		}
 		defer opt.Close()
 
@@ -268,6 +269,7 @@ func FuzzOptimisticChallengeRevocation(f *testing.F) {
 			challengeWindow:  5 * time.Minute,
 			mempoolClearTime: 10 * time.Minute,
 			minCollateral:    1000,
+			shutdown:         make(chan struct{}),
 		}
 		defer opt.Close()
 

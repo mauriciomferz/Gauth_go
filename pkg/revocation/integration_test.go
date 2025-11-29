@@ -72,6 +72,7 @@ func setupIntegrationEnv(t *testing.T) *IntegrationTestEnv {
 		mempoolClearTime: 10 * time.Minute, // Long enough to test before auto-finalize
 		minCollateral:    1000,
 		states:           sync.Map{},
+		shutdown:         make(chan struct{}),
 	}
 
 	return &IntegrationTestEnv{
@@ -606,6 +607,7 @@ func TestE2E_DataPersistenceAcrossRestarts(t *testing.T) {
 		mempoolClearTime: 10 * time.Minute,
 		minCollateral:    1000,
 		states:           sync.Map{},
+		shutdown:         make(chan struct{}),
 	}
 
 	// Update env.RedisClient to new client for cleanup

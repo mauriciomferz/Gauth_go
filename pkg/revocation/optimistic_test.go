@@ -34,6 +34,7 @@ func setupOptimisticTest(t *testing.T) (*OptimisticRevocation, *miniredis.Minire
 		challengeWindow:  5 * time.Second,  // Short window for tests
 		mempoolClearTime: 200 * time.Millisecond,
 		minCollateral:    1e18, // 1 ETH
+		shutdown:         make(chan struct{}),
 	}
 
 	return or, mr
