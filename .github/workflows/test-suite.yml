@@ -17,6 +17,31 @@ jobs:
     name: Backend Tests
     runs-on: ubuntu-latest
     
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: gauth_admin
+          POSTGRES_PASSWORD: gauth_dev_password
+          POSTGRES_DB: gauth
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -37,7 +62,24 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-v2-
       
+      - name: Wait for services
+        run: |
+          echo "Waiting for Redis..."
+          timeout 30 bash -c 'until nc -z localhost 6379; do sleep 1; done'
+          echo "Waiting for PostgreSQL..."
+          timeout 30 bash -c 'until nc -z localhost 5432; do sleep 1; done'
+          echo "Services are ready"
+      
       - name: Run backend tests
+        env:
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: gauth_admin
+          DB_PASSWORD: gauth_dev_password
+          DB_NAME: gauth
+          DB_SSLMODE: disable
         run: |
           # Skip flaky tests, integration tests, and packages without tests
           # Focus on pkg/ and internal/ which contain the actual testable code
