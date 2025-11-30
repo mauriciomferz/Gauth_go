@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gin-gonic/gin"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
-	"github.com/gin-gonic/gin"
 )
 
 // AuthorizationHandlers encapsulates RFC-0111 authorization API handlers.

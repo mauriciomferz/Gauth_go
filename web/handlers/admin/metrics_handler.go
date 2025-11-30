@@ -363,7 +363,7 @@ func (h *MetricsHandler) getSemanticCounters(ctx context.Context) SemanticCounte
 		// Get real anchor validation counts from audit events
 		var validations, resolutions, failed int64
 		
-		h.db.QueryRow(ctx, `
+		_ = h.db.QueryRow(ctx, `
 			SELECT 
 				COUNT(CASE WHEN action = 'validate_anchor' THEN 1 END) as validations,
 				COUNT(CASE WHEN action = 'resolve_anchor' THEN 1 END) as resolutions,

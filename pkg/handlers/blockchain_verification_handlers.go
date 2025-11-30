@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/blockchain"
 	"github.com/gorilla/mux"
+	"github.com/mauriciomferz/Gauth_go/pkg/blockchain"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )

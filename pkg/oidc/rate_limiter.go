@@ -548,10 +548,10 @@ func RateLimitMiddleware(service *RateLimitService, endpoint string) func(http.H
 				w.WriteHeader(http.StatusTooManyRequests)
 
 				if oidcErr, ok := err.(*OIDCError); ok {
-					w.Write([]byte(fmt.Sprintf(`{"error":"%s","error_description":"%s"}`,
-						oidcErr.ErrorCode, oidcErr.ErrorDescription)))
+					_, _ = w.Write([]byte(fmt.Sprintf(`{"error":"%s","error_description":"%s"}`,
+						oidcErr.ErrorCode, oidcErr.ErrorDescription))) // Error response; ignore write error
 				} else {
-					w.Write([]byte(`{"error":"rate_limit_exceeded","error_description":"Too many requests"}`))
+					_, _ = w.Write([]byte(`{"error":"rate_limit_exceeded","error_description":"Too many requests"}`)) // Error response; ignore write error
 				}
 				return
 			}

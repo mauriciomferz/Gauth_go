@@ -35,7 +35,7 @@ The **P*P Architecture** (pronounced "P-Star-P") is the core authorization frame
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    Authorization Flow                    │
+│                    Authorization Flow                   │
 └─────────────────────────────────────────────────────────┘
                            │
                            ▼
@@ -50,7 +50,7 @@ The **P*P Architecture** (pronounced "P-Star-P") is the core authorization frame
        ┌──────────┐ ┌──────────┐ ┌──────────┐
        │   PVP    │ │   PIP    │ │   PDP    │
        │ Verify   │ │ Retrieve │ │ Decision │
-       │ Identity │ │ Attributes│ │  Making  │
+       │ Identity │ │ Attributes│ │  Making │
        └──────────┘ └──────────┘ └──────────┘
               │            │            │
               └────────────┼────────────┘
@@ -552,7 +552,7 @@ The **Policy Information Point** retrieves contextual attributes and information
 
 ```
 ┌─────────────────────────────────────────────┐
-│              Policy Information Point        │
+│              Policy Information Point       │
 └─────────────────────────────────────────────┘
          │                │                │
          ▼                ▼                ▼
@@ -891,16 +891,16 @@ The **Policy Enforcement Point** intercepts requests, validates tokens, consults
                 ▼
 ┌──────────────────────────────────────────┐
 │  3. Validate Token (JWT/JWE)             │
-│     → Extract claims                      │
-│     → Verify signature                    │
-│     → Check expiration                    │
+│     → Extract claims                     │
+│     → Verify signature                   │
+│     → Check expiration                   │
 └───────────────┬──────────────────────────┘
                 │
                 ▼
 ┌──────────────────────────────────────────┐
 │  4. Consult PDP for Decision             │
-│     → Pass subject, resource, action      │
-│     → Include context attributes          │
+│     → Pass subject, resource, action     │
+│     → Include context attributes         │
 └───────────────┬──────────────────────────┘
                 │
                 ▼
