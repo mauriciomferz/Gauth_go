@@ -232,16 +232,16 @@ func (c *Client) GetBlacklistedTokens(ctx context.Context, cursor uint64, count 
 // IncrementRateLimit increments the rate limit counter for a key
 func (c *Client) IncrementRateLimit(ctx context.Context, key string, window time.Duration) (int64, error) {
 	rateLimitKey := fmt.Sprintf("ratelimit:%s", key)
-	
+
 	pipe := c.client.Pipeline()
 	incr := pipe.Incr(ctx, rateLimitKey)
 	pipe.Expire(ctx, rateLimitKey, window)
-	
+
 	_, err := pipe.Exec(ctx)
 	if err != nil {
 		return 0, fmt.Errorf("failed to increment rate limit: %w", err)
 	}
-	
+
 	return incr.Val(), nil
 }
 

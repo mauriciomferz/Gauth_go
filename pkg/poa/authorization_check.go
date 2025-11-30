@@ -19,13 +19,13 @@ import (
 //  2. AI Agent "agent-malicious" requests PoA from Bob with scope=["read", "write", "admin", "delete"]
 //  3. WITHOUT THIS CHECK: Signature validates (Bob signed it) → PoA granted → Agent has admin rights
 //  4. WITH THIS CHECK: System queries Bob's actual permissions → ["read", "write", "update"]
-//                      → Requested scope ["admin", "delete"] NOT SUBSET → PoA rejected
+//     → Requested scope ["admin", "delete"] NOT SUBSET → PoA rejected
 //
 // Implementation Requirements:
-//  - MUST query authoritative source (RBAC system, database, IAM)
-//  - MUST perform INTERSECTION check: requested_scope ⊆ principal_actual_permissions
-//  - SHOULD cache results with short TTL (30-60s) for performance
-//  - MUST fail-closed: If permission lookup fails, reject the PoA
+//   - MUST query authoritative source (RBAC system, database, IAM)
+//   - MUST perform INTERSECTION check: requested_scope ⊆ principal_actual_permissions
+//   - SHOULD cache results with short TTL (30-60s) for performance
+//   - MUST fail-closed: If permission lookup fails, reject the PoA
 type AuthorizationChecker interface {
 	// GetPrincipalPermissions retrieves the complete set of permissions/scopes
 	// that the principal (grantor) actually holds in the system.
