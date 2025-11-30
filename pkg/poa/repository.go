@@ -12,7 +12,8 @@ import (
 
 // Repository handles Power of Attorney data operations
 type Repository struct {
-	db *pgxpool.Pool
+	db          *pgxpool.Pool
+	authChecker AuthorizationChecker
 }
 
 // NewRepository creates a new PoA repository
