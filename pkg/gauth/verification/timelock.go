@@ -121,14 +121,20 @@ func (t *TimelockPoA) CreateWithDelay(ctx context.Context, poa *PoAData) (string
 
 	// Schedule activation
 	timer := time.AfterFunc(t.defaultDelay, func() {
-		t.activatePoA(context.Background(), poa.ID)
+		if err := t.activatePoA(context.Background(), poa.ID); err != nil {
+			// Log error but don't block timer callback
+			_ = err
+		}
 	})
 	t.activationTimers.Store(poa.ID, timer)
 
 	// Schedule reminder at 12 hours (halfway point)
 	reminderDelay := t.defaultDelay / 2
 	time.AfterFunc(reminderDelay, func() {
-		t.sendReminderNotification(context.Background(), poa.ID)
+		if err := t.sendReminderNotification(context.Background(), poa.ID); err != nil {
+			// Log error but don't block timer callback
+			_ = err
+		}
 	})
 
 	return poa.ID, cancelURL, nil

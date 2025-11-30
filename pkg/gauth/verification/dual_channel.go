@@ -158,7 +158,10 @@ func generateSecureCode(length int) (string, error) {
 // generateChallengeID generates a unique challenge identifier.
 func generateChallengeID() string {
 	bytes := make([]byte, 16)
-	rand.Read(bytes)
+	if _, err := rand.Read(bytes); err != nil {
+		// Fallback to timestamp-based ID if crypto/rand fails
+		return fmt.Sprintf("ch_%d", time.Now().UnixNano())
+	}
 	return fmt.Sprintf("ch_%x", bytes)
 }
 

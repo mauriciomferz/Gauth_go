@@ -580,8 +580,9 @@ func (r *Repository) GetResilienceStats(ctx context.Context, tenantID string) (*
 	// Calculate average failure rate
 	if totalRequests > 0 {
 		var totalFailures int64
-		r.db.QueryRow(ctx, `SELECT COALESCE(SUM(failure_count), 0) FROM circuit_breakers WHERE tenant_id = $1`, tenantID).Scan(&totalFailures)
-		stats.CircuitBreakers.AvgFailureRate = float64(totalFailures) / float64(totalRequests) * 100
+		if err := r.db.QueryRow(ctx, `SELECT COALESCE(SUM(failure_count), 0) FROM circuit_breakers WHERE tenant_id = $1`, tenantID).Scan(&totalFailures); err == nil {
+			stats.CircuitBreakers.AvgFailureRate = float64(totalFailures) / float64(totalRequests) * 100
+		}
 	}
 	
 	// Rate limiter stats

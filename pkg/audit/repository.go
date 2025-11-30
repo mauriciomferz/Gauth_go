@@ -237,15 +237,15 @@ func (r *Repository) ListEvents(ctx context.Context, filters EventFilters) ([]Au
 			return nil, 0, fmt.Errorf("failed to scan event: %w", err)
 		}
 
-		// Unmarshal JSONB fields
+		// Unmarshal JSONB fields (ignore errors for partial data)
 		if beforeState != nil {
-			json.Unmarshal(beforeState, &evt.BeforeState)
+			_ = json.Unmarshal(beforeState, &evt.BeforeState)
 		}
 		if afterState != nil {
-			json.Unmarshal(afterState, &evt.AfterState)
+			_ = json.Unmarshal(afterState, &evt.AfterState)
 		}
 		if changes != nil {
-			json.Unmarshal(changes, &evt.Changes)
+			_ = json.Unmarshal(changes, &evt.Changes)
 		}
 
 		events = append(events, evt)
@@ -324,7 +324,7 @@ func (r *Repository) CreateEventsBulk(ctx context.Context, events []*AuditEvent)
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	// Get previous hash
 	var previousHash *string
