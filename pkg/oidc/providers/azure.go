@@ -15,6 +15,9 @@ const (
 	AzureADProviderName   = "Azure AD"
 	AzureADDefaultTrust   = "substantial"
 	AzureADCommonEndpoint = "https://login.microsoftonline.com/common/v2.0"
+
+trustLevelHigh        = "high"
+trustLevelSubstantial = "substantial"
 )
 
 // AzureADClaimMappings defines how Azure AD OIDC claims map to GAuth claims.
@@ -252,23 +255,23 @@ func (p *AzureADProvider) GetTrustLevel(claims *oidc.IDTokenClaims) string {
 		case "0":
 			return "low" // No specific authentication context
 		case "1":
-			return "substantial" // Password authentication
+			return trustLevelSubstantial // Password authentication
 		case "2", "3":
-			return "high" // Multi-factor or higher
+			return trustLevelHigh // Multi-factor or higher
 		case "c1", "c2", "c3":
-			return "high" // Conditional access policies (MFA enforced)
+			return trustLevelHigh // Conditional access policies (MFA enforced)
 		}
 	}
 
 	// Check AMR for MFA indicators
 	if p.hasMFA(claims) {
-		return "high"
+		return trustLevelHigh
 	}
 
 	// Check for password authentication
 	for _, method := range claims.AMR {
 		if method == "pwd" {
-			return "substantial" // Password authentication
+			return trustLevelSubstantial // Password authentication
 		}
 	}
 

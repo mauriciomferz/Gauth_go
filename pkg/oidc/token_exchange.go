@@ -304,9 +304,9 @@ func (s *TokenExchangeService) mapTrustLevel(provider *ProviderConfig, claims *I
 		// Common eIDAS levels
 		switch claims.ACR {
 		case "high", "urn:eidas:loa:high":
-			return "high"
+			return trustLevelHigh
 		case "substantial", "urn:eidas:loa:substantial":
-			return "substantial"
+			return trustLevelSubstantial
 		case "low", "urn:eidas:loa:low":
 			return "low"
 		}
@@ -316,7 +316,7 @@ func (s *TokenExchangeService) mapTrustLevel(provider *ProviderConfig, claims *I
 	for _, method := range claims.AMR {
 		switch method {
 		case "mfa", "otp", "sms", "hwk", "swk", "tel":
-			return "high"
+			return trustLevelHigh
 		}
 	}
 
@@ -325,7 +325,7 @@ func (s *TokenExchangeService) mapTrustLevel(provider *ProviderConfig, claims *I
 		return provider.DefaultTrustLevel
 	}
 
-	return "substantial"
+	return trustLevelSubstantial
 }
 
 // BatchExchangeRequest represents multiple token exchange requests.
@@ -477,10 +477,10 @@ func determineRefreshTrustLevel(claims *IDTokenClaims) string {
 	if claims.ACR != "" {
 		// If original authentication had high ACR, maintain substantial trust
 		if claims.ACR == "2" || claims.ACR == "3" || claims.ACR == "c1" || claims.ACR == "c2" || claims.ACR == "c3" {
-			return "substantial"
+			return trustLevelSubstantial
 		}
 		if claims.ACR == "1" {
-			return "substantial"
+			return trustLevelSubstantial
 		}
 	}
 
@@ -489,7 +489,7 @@ func determineRefreshTrustLevel(claims *IDTokenClaims) string {
 		for _, amr := range claims.AMR {
 			// MFA-based authentication maintains substantial trust
 			if amr == "mfa" || amr == "otp" || amr == "sms" || amr == "hwk" || amr == "swk" {
-				return "substantial"
+				return trustLevelSubstantial
 			}
 		}
 	}

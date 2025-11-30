@@ -39,7 +39,7 @@ func NewOIDCPowerVerificationPoint(config OIDCPVPConfig) (*OIDCPowerVerification
 	// Default to substantial if not specified
 	requiredACR := config.RequiredACR
 	if requiredACR == "" {
-		requiredACR = "substantial"
+		requiredACR = trustLevelSubstantial
 	}
 
 	bridge := NewIdentityBridge(config.IDTokenService)
