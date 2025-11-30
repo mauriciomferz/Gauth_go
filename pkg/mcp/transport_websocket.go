@@ -214,7 +214,7 @@ func (t *WebSocketTransport) writePump() {
 				continue
 			}
 			
-			conn.SetWriteDeadline(time.Now().Add(writeWait))
+			_ = conn.SetWriteDeadline(time.Now().Add(writeWait)) // Best effort deadline
 			
 			if err := conn.WriteMessage(websocket.TextMessage, data); err != nil {
 				t.errorCh <- fmt.Errorf("write error: %w", err)
@@ -247,7 +247,7 @@ func (t *WebSocketTransport) pingPump() {
 				continue
 			}
 			
-			conn.SetWriteDeadline(time.Now().Add(writeWait))
+			_ = conn.SetWriteDeadline(time.Now().Add(writeWait)) // Best effort deadline
 			if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
 			}
