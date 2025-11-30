@@ -1,9 +1,7 @@
-package opaintegration
 package main
 
 import (
 	"context"
-	"embed"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -13,18 +11,17 @@ import (
 	"github.com/open-policy-agent/opa/rego"
 )
 
-//go:embed policies/*.rego
-var policies embed.FS
+// Note: Policy loading removed - use OPA server with ConfigMaps in production
 
 // OPAScopeValidator validates scopes using OPA Rego policies
 type OPAScopeValidator struct {
 	query rego.PreparedEvalQuery
 }
 
-// NewOPAScopeValidator creates a validator with embedded Rego policy
+// NewOPAScopeValidator creates a validator loading policy from file
 func NewOPAScopeValidator() (*OPAScopeValidator, error) {
-	// Read embedded policy
-	policyBytes, err := policies.ReadFile("policies/scope_validation.rego")
+	// Read policy from filesystem
+	policyBytes, err := os.ReadFile("policies/gauth_basic.rego")
 	if err != nil {
 		return nil, fmt.Errorf("failed to read policy: %w", err)
 	}
@@ -32,7 +29,7 @@ func NewOPAScopeValidator() (*OPAScopeValidator, error) {
 	// Prepare query
 	query, err := rego.New(
 		rego.Query("data.gauth.authz.allow"),
-		rego.Module("scope_validation.rego", string(policyBytes)),
+		rego.Module("gauth_basic.rego", string(policyBytes)),
 	).PrepareForEval(context.Background())
 
 	if err != nil {
