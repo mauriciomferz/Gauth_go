@@ -369,7 +369,7 @@ func (h *MetricsHandler) getSemanticCounters(ctx context.Context) SemanticCounte
 				COUNT(CASE WHEN action = 'resolve_anchor' THEN 1 END) as resolutions,
 				COUNT(CASE WHEN action = 'validate_anchor' AND result = 'failure' THEN 1 END) as failed
 			FROM audit_events
-		`).Scan(&validations, &resolutions, &failed)
+		`).Scan(&validations, &resolutions, &failed) // Best effort metrics
 		
 		counters.CapabilityAnchorValidations = validations
 		counters.CapabilityAnchorResolutions = resolutions

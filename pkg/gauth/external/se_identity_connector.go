@@ -323,7 +323,7 @@ func (sc *SwedenIdentityConnector) ValidatePersonnummer(ctx context.Context, req
 	
 	// Validate month (01-12)
 	var monthInt int
-	fmt.Sscanf(month, "%d", &monthInt)
+	_, _ = fmt.Sscanf(month, "%d", &monthInt) // Best effort parse
 	if monthInt < 1 || monthInt > 12 {
 		return &PersonnummerResponse{
 			Valid: false,
@@ -350,7 +350,7 @@ func (sc *SwedenIdentityConnector) ValidatePersonnummer(ctx context.Context, req
 	
 	// Determine gender (odd = male, even = female)
 	var birthNumInt int
-	fmt.Sscanf(birthNum, "%d", &birthNumInt)
+	_, _ = fmt.Sscanf(birthNum, "%d", &birthNumInt) // Best effort parse
 	gender := "female"
 	if birthNumInt%2 == 1 {
 		gender = "male"
