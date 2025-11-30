@@ -407,9 +407,9 @@ func NewUKIdentityConnector(config *UKIdentityConnectorConfig) (*UKIdentityConne
 	}
 	
 	// Register custom validators
-	connector.validator.RegisterValidation("uk_postcode", validateUKPostcode)
-	connector.validator.RegisterValidation("uk_driving_licence", validateUKDrivingLicence)
-	connector.validator.RegisterValidation("uk_passport", validateUKPassport)
+	_ = connector.validator.RegisterValidation("uk_postcode", validateUKPostcode) // Registration failures are acceptable; fallback to standard validation
+	_ = connector.validator.RegisterValidation("uk_driving_licence", validateUKDrivingLicence)
+	_ = connector.validator.RegisterValidation("uk_passport", validateUKPassport)
 	
 	return connector, nil
 }

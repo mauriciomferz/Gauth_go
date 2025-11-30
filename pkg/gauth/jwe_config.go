@@ -68,7 +68,7 @@ func DefaultJWEConfig() *JWEConfig {
 func DevelopmentJWEConfig() *JWEConfig {
 	// Generate a random 256-bit symmetric key
 	key := make([]byte, 32)
-	rand.Read(key)
+	_, _ = rand.Read(key) // crypto/rand.Read always succeeds on supported platforms
 
 	return &JWEConfig{
 		Enabled:         true,

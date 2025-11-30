@@ -286,7 +286,7 @@ func (fc *FranceIdentityConnector) ValidateINSEENumber(ctx context.Context, req 
 	
 	// Validate month (01-12 or 20-50 for special cases)
 	var monthInt int
-	fmt.Sscanf(month, "%d", &monthInt)
+	_, _ = fmt.Sscanf(month, "%d", &monthInt) // Best effort parsing; will be 0 if invalid
 	if (monthInt < 1 || monthInt > 12) && (monthInt < 20 || monthInt > 50) {
 		return &INSEENumberResponse{Valid: false, Error: "Invalid month"}, nil
 	}
@@ -295,11 +295,11 @@ func (fc *FranceIdentityConnector) ValidateINSEENumber(ctx context.Context, req 
 	// Take first 13 digits and compute: 97 - (number mod 97)
 	baseNumber := inseeNumber[0:13]
 	var baseNum int64
-	fmt.Sscanf(baseNumber, "%d", &baseNum)
+	_, _ = fmt.Sscanf(baseNumber, "%d", &baseNum) // Best effort parsing; will be 0 if invalid
 	
 	calculatedKey := 97 - (baseNum % 97)
 	var providedKey int
-	fmt.Sscanf(controlKey, "%d", &providedKey)
+	_, _ = fmt.Sscanf(controlKey, "%d", &providedKey) // Best effort parsing; will be 0 if invalid
 	
 	if int64(providedKey) != calculatedKey {
 		return &INSEENumberResponse{
