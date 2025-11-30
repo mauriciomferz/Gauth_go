@@ -88,7 +88,7 @@ func (h *TokenHandler) CreateToken(c *gin.Context) {
 
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 
 	// Generate token
@@ -129,7 +129,7 @@ func (h *TokenHandler) CreateToken(c *gin.Context) {
 func (h *TokenHandler) ListTokens(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 
 	// Parse query parameters
@@ -205,7 +205,7 @@ func (h *TokenHandler) ListTokens(c *gin.Context) {
 func (h *TokenHandler) GetToken(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 	tokenID := c.Param("id")
 
@@ -257,7 +257,7 @@ func (h *TokenHandler) ValidateToken(c *gin.Context) {
 
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 
 	// Extract token ID from token string
@@ -341,7 +341,7 @@ func (h *TokenHandler) ValidateToken(c *gin.Context) {
 func (h *TokenHandler) RevokeToken(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 	tokenID := c.Param("id")
 
@@ -409,7 +409,7 @@ func (h *TokenHandler) RevokeToken(c *gin.Context) {
 func (h *TokenHandler) RefreshToken(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 	tokenID := c.Param("id")
 
@@ -479,7 +479,7 @@ func (h *TokenHandler) RefreshToken(c *gin.Context) {
 func (h *TokenHandler) GetTokenMetrics(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 
 	metrics, err := h.repo.GetTokenMetrics(c.Request.Context(), tenantID)
@@ -496,7 +496,7 @@ func (h *TokenHandler) GetTokenMetrics(c *gin.Context) {
 func (h *TokenHandler) SearchTokens(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 
 	subscriberID := c.Query("subscriberId")
