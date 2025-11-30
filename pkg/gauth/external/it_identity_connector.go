@@ -261,7 +261,7 @@ func (ic *ItalyIdentityConnector) ValidateCodiceFiscale(ctx context.Context, req
 	// Decode day and gender
 	// Males: 01-31, Females: 41-71 (day + 40)
 	var dayInt int
-	fmt.Sscanf(day, "%d", &dayInt)
+	_, _ = fmt.Sscanf(day, "%d", &dayInt) // Best effort parsing; will be 0 if invalid
 	gender := "M"
 	if dayInt > 40 {
 		gender = "F"

@@ -299,7 +299,7 @@ func (sc *SwedenIdentityConnector) ValidatePersonnummer(ctx context.Context, req
 		// 10 digits - assume current century
 		currentYear := time.Now().Year()
 		var y int
-		fmt.Sscanf(pnr[0:2], "%d", &y)
+		_, _ = fmt.Sscanf(pnr[0:2], "%d", &y) // Best effort parsing; will be 0 if invalid
 		if y > currentYear%100 {
 			century = fmt.Sprintf("%d", (currentYear/100)-1)
 		} else {
@@ -314,7 +314,7 @@ func (sc *SwedenIdentityConnector) ValidatePersonnummer(ctx context.Context, req
 	
 	// Check for coordination number (day + 60)
 	var dayInt int
-	fmt.Sscanf(day, "%d", &dayInt)
+	_, _ = fmt.Sscanf(day, "%d", &dayInt) // Best effort parsing; will be 0 if invalid
 	if dayInt > 60 {
 		isCoordination = true
 		dayInt -= 60
