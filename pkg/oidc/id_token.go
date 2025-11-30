@@ -11,6 +11,12 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+const (
+	trustLevelLow         = "low"
+	trustLevelSubstantial = "substantial"
+	trustLevelHigh        = "high"
+)
+
 // IDTokenService handles OIDC ID Token issuance and validation
 // Spec: OpenID Connect Core 1.0 Section 2 (ID Token), Section 3.1.3.3 (Validation)
 type IDTokenService struct {
@@ -277,12 +283,12 @@ func (s *IDTokenService) CreateIDTokenFromIdentity(
 // mapTrustLevelToACR maps GAuth trust level to OIDC ACR value
 func (s *IDTokenService) mapTrustLevelToACR(trustLevel string) string {
 	switch trustLevel {
-	case "low":
+	case trustLevelLow:
 		return "1"
-	case "substantial":
-		return "substantial"
-	case "high":
-		return "high"
+	case trustLevelSubstantial:
+		return trustLevelSubstantial
+	case trustLevelHigh:
+		return trustLevelHigh
 	default:
 		return "0"
 	}

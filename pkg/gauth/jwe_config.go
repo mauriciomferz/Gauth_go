@@ -15,6 +15,7 @@ import (
 
 const (
 	algorithmRSAOAEP256 = "RSA-OAEP-256"
+	algorithmA256KW     = "A256KW"
 )
 
 // JWEConfig defines configuration for JWE token encryption
@@ -25,7 +26,7 @@ type JWEConfig struct {
 	Enabled bool
 
 	// Algorithm specifies the key encryption algorithm
-	// Supported: "RSA-OAEP-256" (recommended), "A256KW" (symmetric)
+	// Supported: "RSA-OAEP-256" (recommended), algorithmA256KW (symmetric)
 	// Default: "RSA-OAEP-256"
 	Algorithm string
 
@@ -43,7 +44,7 @@ type JWEConfig struct {
 	PrivateKeyPath string
 
 	// SymmetricKey is the AES key for symmetric encryption (A256KW)
-	// Only used if Algorithm is "A256KW"
+	// Only used if Algorithm is algorithmA256KW
 	// Length: 32 bytes (256 bits) for A256KW
 	SymmetricKey []byte
 
@@ -76,7 +77,7 @@ func DevelopmentJWEConfig() *JWEConfig {
 
 	return &JWEConfig{
 		Enabled:         true,
-		Algorithm:       "A256KW",
+		Algorithm:       algorithmA256KW,
 		Encryption:      "A256GCM",
 		SymmetricKey:    key,
 		KeyID:           "gauth-dev-2025-11",
@@ -114,7 +115,7 @@ func (c *JWEConfig) Validate() error {
 	}
 
 	// Validate algorithm
-	if c.Algorithm != algorithmRSAOAEP256 && c.Algorithm != "A256KW" {
+	if c.Algorithm != algorithmRSAOAEP256 && c.Algorithm != algorithmA256KW {
 		return fmt.Errorf("unsupported JWE algorithm: %s (supported: RSA-OAEP-256, A256KW)", c.Algorithm)
 	}
 
@@ -138,7 +139,7 @@ func (c *JWEConfig) Validate() error {
 		if _, err := os.Stat(c.PrivateKeyPath); err != nil {
 			return fmt.Errorf("private key file not found: %w", err)
 		}
-	} else if c.Algorithm == "A256KW" {
+	} else if c.Algorithm == algorithmA256KW {
 		if len(c.SymmetricKey) != 32 {
 			return fmt.Errorf("SymmetricKey must be 32 bytes for A256KW (got %d bytes)", len(c.SymmetricKey))
 		}

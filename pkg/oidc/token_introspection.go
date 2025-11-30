@@ -11,13 +11,17 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+const (
+	tokenTypeRefreshToken = "refresh_token"
+)
+
 // IntrospectionRequest represents a token introspection request per RFC 7662.
 type IntrospectionRequest struct {
 	// Token is the token to introspect (required)
 	Token string `json:"token"`
 
 	// TokenTypeHint indicates the type of token (optional)
-	// Valid values: "access_token" or "refresh_token"
+	// Valid values: "access_token" or tokenTypeRefreshToken
 	TokenTypeHint string `json:"token_type_hint,omitempty"`
 
 	// ClientID is the client identifier (required for authentication)
@@ -113,7 +117,7 @@ func (h *TokenIntrospectionHandler) IntrospectToken(ctx context.Context, req *In
 	}
 
 	// Try to introspect as refresh token first if hint suggests it
-	if req.TokenTypeHint == "refresh_token" {
+	if req.TokenTypeHint == tokenTypeRefreshToken {
 		if resp, err := h.introspectRefreshToken(ctx, req.Token); err == nil {
 			return resp, nil
 		}
@@ -130,7 +134,7 @@ func (h *TokenIntrospectionHandler) IntrospectToken(ctx context.Context, req *In
 	}
 
 	// Try refresh token if we haven't already
-	if req.TokenTypeHint != "refresh_token" {
+	if req.TokenTypeHint != tokenTypeRefreshToken {
 		if resp, err := h.introspectRefreshToken(ctx, req.Token); err == nil {
 			return resp, nil
 		}
@@ -152,7 +156,7 @@ func (h *TokenIntrospectionHandler) validateIntrospectionRequest(req *Introspect
 
 	// Validate token type hint if provided
 	if req.TokenTypeHint != "" {
-		if req.TokenTypeHint != "access_token" && req.TokenTypeHint != "refresh_token" {
+		if req.TokenTypeHint != "access_token" && req.TokenTypeHint != tokenTypeRefreshToken {
 			return &IntrospectionError{
 				ErrorCode:        ErrorUnsupportedTokenType,
 				ErrorDescription: "token_type_hint must be 'access_token' or 'refresh_token'",
@@ -298,7 +302,7 @@ func (h *TokenIntrospectionHandler) introspectRefreshToken(ctx context.Context, 
 	// Build response
 	resp := &IntrospectionResponse{
 		Active:    true,
-		TokenType: "refresh_token",
+		TokenType: tokenTypeRefreshToken,
 		Sub:       entry.Subject,
 		Aud:       entry.Audience,
 		ClientID:  entry.Audience,
@@ -342,14 +346,14 @@ func (h *TokenIntrospectionHandler) IntrospectTokenWithValidation(ctx context.Co
 	}
 
 	// Try to introspect as refresh token first if hint suggests it
-	if req.TokenTypeHint == "refresh_token" {
+	if req.TokenTypeHint == tokenTypeRefreshToken {
 		if resp, err := h.introspectRefreshToken(ctx, req.Token); err == nil {
 			return resp, nil
 		}
 	}
 
 	// Try to validate as access token (ID token) with full validation
-	if req.TokenTypeHint != "refresh_token" {
+	if req.TokenTypeHint != tokenTypeRefreshToken {
 		// Validate the ID token (this includes signature verification)
 		claims, err := h.idTokenService.ValidateIDToken(ctx, req.Token, req.ClientID)
 		if err == nil {
@@ -385,7 +389,7 @@ func (h *TokenIntrospectionHandler) IntrospectTokenWithValidation(ctx context.Co
 	}
 
 	// Try refresh token if hint allows
-	if req.TokenTypeHint == "" || req.TokenTypeHint == "refresh_token" {
+	if req.TokenTypeHint == "" || req.TokenTypeHint == tokenTypeRefreshToken {
 		if resp, err := h.introspectRefreshToken(ctx, req.Token); err == nil {
 			return resp, nil
 		}

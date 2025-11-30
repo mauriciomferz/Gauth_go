@@ -9,6 +9,10 @@ import (
 	"sync"
 )
 
+const (
+	signingAlgorithmRS256 = "RS256"
+)
+
 // DiscoveryService provides OpenID Connect Discovery functionality
 // Spec: OpenID Connect Discovery 1.0
 // Endpoint: /.well-known/openid-configuration
@@ -55,7 +59,7 @@ func (s *DiscoveryService) buildDefaultConfiguration() *OIDCConfiguration {
 			"pairwise", // Subject identifier: different per client
 		},
 		IDTokenSigningAlgValuesSupported: []string{
-			"RS256", // RSA with SHA-256 (REQUIRED by spec)
+			signingAlgorithmRS256, // RSA with SHA-256 (REQUIRED by spec)
 			"RS384",
 			"RS512",
 			"ES256", // ECDSA with SHA-256
@@ -184,7 +188,7 @@ func (s *DiscoveryService) ValidateConfiguration() error {
 	// RS256 MUST be supported (per spec)
 	hasRS256 := false
 	for _, alg := range config.IDTokenSigningAlgValuesSupported {
-		if alg == "RS256" {
+		if alg == signingAlgorithmRS256 {
 			hasRS256 = true
 			break
 		}

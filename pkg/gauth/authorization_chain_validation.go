@@ -333,7 +333,7 @@ func (v *AuthorizationChainValidator) validateDelegationPath(chain *Authorizatio
 		}
 
 		// Verify client status is active
-		if chain.Client.Status != "active" {
+		if chain.Client.Status != string(PolicyStatusActive) {
 			return &GAuthError{
 				Code:    "inactive_client",
 				Message: fmt.Sprintf("Client has invalid status: %s", chain.Client.Status),
@@ -429,7 +429,7 @@ func (v *AuthorizationChainValidator) validateOwnersAuthorizer(
 	result.Checks["identity_verified"] = true
 
 	// Check 2: Status validation
-	if authorizer.Status != "active" {
+	if authorizer.Status != string(PolicyStatusActive) {
 		result.Valid = false
 		result.FailureReason = fmt.Sprintf("Invalid status: %s", authorizer.Status)
 		result.Checks["status_active"] = false
@@ -586,7 +586,7 @@ func (v *AuthorizationChainValidator) validateClientOwner(
 	result.Checks["identity_verified"] = true
 
 	// Check 2: Status validation
-	if owner.Status != "active" {
+	if owner.Status != string(PolicyStatusActive) {
 		result.Valid = false
 		result.FailureReason = fmt.Sprintf("Invalid status: %s", owner.Status)
 		result.Checks["status_active"] = false
@@ -680,7 +680,7 @@ func (v *AuthorizationChainValidator) validateClient(
 	result.Checks["identity_verified"] = true
 
 	// Check 2: Status validation
-	if client.Status != "active" {
+	if client.Status != string(PolicyStatusActive) {
 		result.Valid = false
 		result.FailureReason = fmt.Sprintf("Invalid status: %s", client.Status)
 		result.Checks["status_active"] = false

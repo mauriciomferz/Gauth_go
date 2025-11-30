@@ -9,6 +9,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
+const (
+	statusSuccess = "success"
+)
+
 // MetricsCollector provides Prometheus metrics for OIDC operations.
 type MetricsCollector struct {
 	// Request metrics
@@ -374,9 +378,9 @@ func NewStorageMetricsWrapper(backend StorageBackend, metrics *MetricsCollector,
 func (s *StorageMetricsWrapper) StoreRefreshToken(ctx context.Context, entry *RefreshTokenEntry) error {
 	start := time.Now()
 	err := s.backend.StoreRefreshToken(ctx, entry)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("store_refresh_token", s.backendName, status, time.Since(start))
 	return err
@@ -386,9 +390,9 @@ func (s *StorageMetricsWrapper) StoreRefreshToken(ctx context.Context, entry *Re
 func (s *StorageMetricsWrapper) GetRefreshToken(ctx context.Context, tokenHash string) (*RefreshTokenEntry, error) {
 	start := time.Now()
 	entry, err := s.backend.GetRefreshToken(ctx, tokenHash)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("get_refresh_token", s.backendName, status, time.Since(start))
 	return entry, err
@@ -398,9 +402,9 @@ func (s *StorageMetricsWrapper) GetRefreshToken(ctx context.Context, tokenHash s
 func (s *StorageMetricsWrapper) DeleteRefreshToken(ctx context.Context, tokenHash string) error {
 	start := time.Now()
 	err := s.backend.DeleteRefreshToken(ctx, tokenHash)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("delete_refresh_token", s.backendName, status, time.Since(start))
 	return err
@@ -410,9 +414,9 @@ func (s *StorageMetricsWrapper) DeleteRefreshToken(ctx context.Context, tokenHas
 func (s *StorageMetricsWrapper) ListRefreshTokensByUser(ctx context.Context, userID string) ([]*RefreshTokenEntry, error) {
 	start := time.Now()
 	entries, err := s.backend.ListRefreshTokensByUser(ctx, userID)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("list_refresh_tokens_by_user", s.backendName, status, time.Since(start))
 	return entries, err
@@ -422,9 +426,9 @@ func (s *StorageMetricsWrapper) ListRefreshTokensByUser(ctx context.Context, use
 func (s *StorageMetricsWrapper) ListRefreshTokensByClient(ctx context.Context, clientID string) ([]*RefreshTokenEntry, error) {
 	start := time.Now()
 	entries, err := s.backend.ListRefreshTokensByClient(ctx, clientID)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("list_refresh_tokens_by_client", s.backendName, status, time.Since(start))
 	return entries, err
@@ -434,9 +438,9 @@ func (s *StorageMetricsWrapper) ListRefreshTokensByClient(ctx context.Context, c
 func (s *StorageMetricsWrapper) CleanupExpiredRefreshTokens(ctx context.Context) (int, error) {
 	start := time.Now()
 	count, err := s.backend.CleanupExpiredRefreshTokens(ctx)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("cleanup_expired_refresh_tokens", s.backendName, status, time.Since(start))
 	return count, err
@@ -446,9 +450,9 @@ func (s *StorageMetricsWrapper) CleanupExpiredRefreshTokens(ctx context.Context)
 func (s *StorageMetricsWrapper) StoreRevokedToken(ctx context.Context, entry *RevokedTokenEntry) error {
 	start := time.Now()
 	err := s.backend.StoreRevokedToken(ctx, entry)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("store_revoked_token", s.backendName, status, time.Since(start))
 	return err
@@ -458,9 +462,9 @@ func (s *StorageMetricsWrapper) StoreRevokedToken(ctx context.Context, entry *Re
 func (s *StorageMetricsWrapper) IsTokenRevoked(ctx context.Context, tokenHash string) (bool, error) {
 	start := time.Now()
 	revoked, err := s.backend.IsTokenRevoked(ctx, tokenHash)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("is_token_revoked", s.backendName, status, time.Since(start))
 	return revoked, err
@@ -470,9 +474,9 @@ func (s *StorageMetricsWrapper) IsTokenRevoked(ctx context.Context, tokenHash st
 func (s *StorageMetricsWrapper) CleanupExpiredRevocations(ctx context.Context) (int, error) {
 	start := time.Now()
 	count, err := s.backend.CleanupExpiredRevocations(ctx)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("cleanup_expired_revocations", s.backendName, status, time.Since(start))
 	return count, err
@@ -482,9 +486,9 @@ func (s *StorageMetricsWrapper) CleanupExpiredRevocations(ctx context.Context) (
 func (s *StorageMetricsWrapper) StoreDeviceCode(ctx context.Context, entry *DeviceCodeEntry) error {
 	start := time.Now()
 	err := s.backend.StoreDeviceCode(ctx, entry)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("store_device_code", s.backendName, status, time.Since(start))
 	return err
@@ -494,9 +498,9 @@ func (s *StorageMetricsWrapper) StoreDeviceCode(ctx context.Context, entry *Devi
 func (s *StorageMetricsWrapper) GetDeviceCodeByDeviceCode(ctx context.Context, deviceCode string) (*DeviceCodeEntry, error) {
 	start := time.Now()
 	entry, err := s.backend.GetDeviceCodeByDeviceCode(ctx, deviceCode)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("get_device_code_by_device_code", s.backendName, status, time.Since(start))
 	return entry, err
@@ -506,9 +510,9 @@ func (s *StorageMetricsWrapper) GetDeviceCodeByDeviceCode(ctx context.Context, d
 func (s *StorageMetricsWrapper) GetDeviceCodeByUserCode(ctx context.Context, userCode string) (*DeviceCodeEntry, error) {
 	start := time.Now()
 	entry, err := s.backend.GetDeviceCodeByUserCode(ctx, userCode)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("get_device_code_by_user_code", s.backendName, status, time.Since(start))
 	return entry, err
@@ -518,9 +522,9 @@ func (s *StorageMetricsWrapper) GetDeviceCodeByUserCode(ctx context.Context, use
 func (s *StorageMetricsWrapper) UpdateDeviceCodeStatus(ctx context.Context, deviceCode string, entry *DeviceCodeEntry) error {
 	start := time.Now()
 	err := s.backend.UpdateDeviceCodeStatus(ctx, deviceCode, entry)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("update_device_code_status", s.backendName, status, time.Since(start))
 	return err
@@ -530,9 +534,9 @@ func (s *StorageMetricsWrapper) UpdateDeviceCodeStatus(ctx context.Context, devi
 func (s *StorageMetricsWrapper) DeleteDeviceCode(ctx context.Context, deviceCode string) error {
 	start := time.Now()
 	err := s.backend.DeleteDeviceCode(ctx, deviceCode)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("delete_device_code", s.backendName, status, time.Since(start))
 	return err
@@ -542,9 +546,9 @@ func (s *StorageMetricsWrapper) DeleteDeviceCode(ctx context.Context, deviceCode
 func (s *StorageMetricsWrapper) CleanupExpiredDeviceCodes(ctx context.Context) (int, error) {
 	start := time.Now()
 	count, err := s.backend.CleanupExpiredDeviceCodes(ctx)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("cleanup_expired_device_codes", s.backendName, status, time.Since(start))
 	return count, err
@@ -554,9 +558,9 @@ func (s *StorageMetricsWrapper) CleanupExpiredDeviceCodes(ctx context.Context) (
 func (s *StorageMetricsWrapper) StorePARRequest(ctx context.Context, requestURI string, entry *RequestURIEntry) error {
 	start := time.Now()
 	err := s.backend.StorePARRequest(ctx, requestURI, entry)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("store_par_request", s.backendName, status, time.Since(start))
 	return err
@@ -566,9 +570,9 @@ func (s *StorageMetricsWrapper) StorePARRequest(ctx context.Context, requestURI 
 func (s *StorageMetricsWrapper) GetPARRequest(ctx context.Context, requestURI string) (*RequestURIEntry, error) {
 	start := time.Now()
 	entry, err := s.backend.GetPARRequest(ctx, requestURI)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("get_par_request", s.backendName, status, time.Since(start))
 	return entry, err
@@ -578,9 +582,9 @@ func (s *StorageMetricsWrapper) GetPARRequest(ctx context.Context, requestURI st
 func (s *StorageMetricsWrapper) DeletePARRequest(ctx context.Context, requestURI string) error {
 	start := time.Now()
 	err := s.backend.DeletePARRequest(ctx, requestURI)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("delete_par_request", s.backendName, status, time.Since(start))
 	return err
@@ -590,9 +594,9 @@ func (s *StorageMetricsWrapper) DeletePARRequest(ctx context.Context, requestURI
 func (s *StorageMetricsWrapper) MarkPARRequestUsed(ctx context.Context, requestURI string) error {
 	start := time.Now()
 	err := s.backend.MarkPARRequestUsed(ctx, requestURI)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("mark_par_request_used", s.backendName, status, time.Since(start))
 	return err
@@ -602,9 +606,9 @@ func (s *StorageMetricsWrapper) MarkPARRequestUsed(ctx context.Context, requestU
 func (s *StorageMetricsWrapper) CleanupExpiredPARRequests(ctx context.Context) (int, error) {
 	start := time.Now()
 	count, err := s.backend.CleanupExpiredPARRequests(ctx)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("cleanup_expired_par_requests", s.backendName, status, time.Since(start))
 	return count, err
@@ -614,9 +618,9 @@ func (s *StorageMetricsWrapper) CleanupExpiredPARRequests(ctx context.Context) (
 func (s *StorageMetricsWrapper) Ping(ctx context.Context) error {
 	start := time.Now()
 	err := s.backend.Ping(ctx)
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("ping", s.backendName, status, time.Since(start))
 	return err
@@ -626,9 +630,9 @@ func (s *StorageMetricsWrapper) Ping(ctx context.Context) error {
 func (s *StorageMetricsWrapper) Close() error {
 	start := time.Now()
 	err := s.backend.Close()
-	status := "success"
+	status := statusSuccess
 	if err != nil {
-		status = "error"
+		status = string(LogLevelError)
 	}
 	s.metrics.RecordStorageOperation("close", s.backendName, status, time.Since(start))
 	return err

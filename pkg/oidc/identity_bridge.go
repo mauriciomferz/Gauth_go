@@ -111,9 +111,9 @@ func NewTrustLevelMapper() *TrustLevelMapper {
 	}
 
 	// Reverse mappings (trust level → ACR)
-	mapper.trustLevelToACR["low"] = "1"
-	mapper.trustLevelToACR["substantial"] = "substantial"
-	mapper.trustLevelToACR["high"] = "high"
+	mapper.trustLevelToACR[trustLevelLow] = "1"
+	mapper.trustLevelToACR[trustLevelSubstantial] = trustLevelSubstantial
+	mapper.trustLevelToACR[trustLevelHigh] = trustLevelHigh
 
 	return mapper
 }
@@ -125,7 +125,7 @@ func (m *TrustLevelMapper) MapACRToTrustLevel(acr string) string {
 	}
 
 	// Default fallback: low trust
-	return "low"
+	return trustLevelLow
 }
 
 // MapTrustLevelToACR maps GAuth trust level to OIDC ACR value
