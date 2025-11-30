@@ -15,10 +15,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
-	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
 
 // SubscriptionHandlers encapsulates RFC-0111 subscription API handlers.
@@ -576,7 +576,7 @@ func (h *SubscriptionHandlers) ExecuteStepVIII(c *gin.Context) {
 func generateExtendedTokenFromSubscription(sub *gauth.Subscription) (string, error) {
 	now := time.Now()
 	exp := now.Add(24 * time.Hour) // Token valid for 24 hours
-	
+
 	// Extract client and resource information
 	var clientID, clientOwnerID, resourceOwnerID, resourceServerID string
 	if sub.ClientAuthorizationGrant != nil {
@@ -589,42 +589,42 @@ func generateExtendedTokenFromSubscription(sub *gauth.Subscription) (string, err
 	if sub.ResourceServerAuth != nil {
 		resourceServerID = sub.ResourceServerAuth.ServerID
 	}
-	
+
 	// Get issuer from environment (matches gauth service configuration)
 	issuer := os.Getenv("GAUTH_ISSUER")
 	if issuer == "" {
 		issuer = "http://localhost:8080" // Default for dev
 	}
-	
+
 	// Build RFC-0111 extended token claims
 	claims := jwt.MapClaims{
-		"iss": issuer,
-		"sub": clientOwnerID,
-		"aud": []string{resourceServerID},
-		"exp": exp.Unix(),
-		"iat": now.Unix(),
-		"jti": sub.ID,
+		"iss":             issuer,
+		"sub":             clientOwnerID,
+		"aud":             []string{resourceServerID},
+		"exp":             exp.Unix(),
+		"iat":             now.Unix(),
+		"jti":             sub.ID,
 		"subscription_id": sub.ID,
-		"client_id": clientID,
-		"client_owner": clientOwnerID,
-		"resource_owner": resourceOwnerID,
+		"client_id":       clientID,
+		"client_owner":    clientOwnerID,
+		"resource_owner":  resourceOwnerID,
 		"resource_server": resourceServerID,
-		"scope": "extended_authorization",
-		"poa_credential": sub.ClientAuthorizationGrant != nil && sub.ClientAuthorizationGrant.PoACredential != nil,
-		"token_type": "extended",
+		"scope":           "extended_authorization",
+		"poa_credential":  sub.ClientAuthorizationGrant != nil && sub.ClientAuthorizationGrant.PoACredential != nil,
+		"token_type":      "extended",
 	}
-	
+
 	// Use the same signing key as the rest of the application
 	// This ensures tokens can be validated consistently
 	signingKey := getJWTSigningKey()
-	
+
 	// Create and sign JWT
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(signingKey)
 	if err != nil {
 		return "", err
 	}
-	
+
 	return tokenString, nil
 }
 

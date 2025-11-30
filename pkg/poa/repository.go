@@ -32,64 +32,65 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 // can forge a valid signature (e.g., compromised key, social engineering).
 //
 // Example:
-//   repo := NewRepository(db)
-//   authChecker := NewDefaultAuthorizationChecker(repo)
-//   repo.SetAuthorizationChecker(authChecker)
+//
+//	repo := NewRepository(db)
+//	authChecker := NewDefaultAuthorizationChecker(repo)
+//	repo.SetAuthorizationChecker(authChecker)
 func (r *Repository) SetAuthorizationChecker(checker AuthorizationChecker) {
 	r.authChecker = checker
 }
 
 // PoARecord represents a power of attorney delegation in the database
 type PoARecord struct {
-	ID                 string    `json:"id"`
-	TenantID           string    `json:"tenantId"`
-	PoAName            string    `json:"poaName"`
-	GrantorID          string    `json:"grantorId"`
-	GrantorName        string    `json:"grantorName"`
-	RepresentativeID   string    `json:"representativeId"`
-	RepresentativeName string    `json:"representativeName"`
-	RepresentativeType string    `json:"representativeType"`
-	ScopeType          string    `json:"scopeType"`
-	Actions            []string  `json:"actions"`
-	GeographicRegions  []string  `json:"geographicRegions"`
-	Status             string    `json:"status"`
-	CreatedAt          time.Time `json:"createdAt"`
-	ApprovedAt         *time.Time `json:"approvedAt,omitempty"`
-	ApprovedBy         *string   `json:"approvedBy,omitempty"`
-	RevokedAt          *time.Time `json:"revokedAt,omitempty"`
-	RevokedBy          *string   `json:"revokedBy,omitempty"`
-	RevocationReason   *string   `json:"revocationReason,omitempty"`
-	ValidFrom          time.Time `json:"validFrom"`
-	ValidUntil         time.Time `json:"validUntil"`
+	ID                 string           `json:"id"`
+	TenantID           string           `json:"tenantId"`
+	PoAName            string           `json:"poaName"`
+	GrantorID          string           `json:"grantorId"`
+	GrantorName        string           `json:"grantorName"`
+	RepresentativeID   string           `json:"representativeId"`
+	RepresentativeName string           `json:"representativeName"`
+	RepresentativeType string           `json:"representativeType"`
+	ScopeType          string           `json:"scopeType"`
+	Actions            []string         `json:"actions"`
+	GeographicRegions  []string         `json:"geographicRegions"`
+	Status             string           `json:"status"`
+	CreatedAt          time.Time        `json:"createdAt"`
+	ApprovedAt         *time.Time       `json:"approvedAt,omitempty"`
+	ApprovedBy         *string          `json:"approvedBy,omitempty"`
+	RevokedAt          *time.Time       `json:"revokedAt,omitempty"`
+	RevokedBy          *string          `json:"revokedBy,omitempty"`
+	RevocationReason   *string          `json:"revocationReason,omitempty"`
+	ValidFrom          time.Time        `json:"validFrom"`
+	ValidUntil         time.Time        `json:"validUntil"`
 	Conditions         *json.RawMessage `json:"conditions,omitempty"`
 	Metadata           *json.RawMessage `json:"metadata,omitempty"`
-	UpdatedAt          *time.Time `json:"updatedAt,omitempty"`
+	UpdatedAt          *time.Time       `json:"updatedAt,omitempty"`
 }
 
 // PoATemplate represents a power of attorney template
 type PoATemplate struct {
-	ID                  string                 `json:"id"`
-	TenantID            *string                `json:"tenantId,omitempty"`
-	TemplateName        string                 `json:"templateName"`
-	Description         *string                `json:"description,omitempty"`
-	ScopeType           string                 `json:"scopeType"`
-	DefaultActions      []string               `json:"defaultActions"`
-	DefaultDurationDays *int                   `json:"defaultDurationDays,omitempty"`
-	ConditionsSchema         *json.RawMessage `json:"conditionsSchema,omitempty"`
-	CreatedAt           time.Time              `json:"createdAt"`
-	CreatedBy           *string                `json:"createdBy,omitempty"`
-	IsSystemTemplate    bool                   `json:"isSystemTemplate"`
+	ID                  string           `json:"id"`
+	TenantID            *string          `json:"tenantId,omitempty"`
+	TemplateName        string           `json:"templateName"`
+	Description         *string          `json:"description,omitempty"`
+	ScopeType           string           `json:"scopeType"`
+	DefaultActions      []string         `json:"defaultActions"`
+	DefaultDurationDays *int             `json:"defaultDurationDays,omitempty"`
+	ConditionsSchema    *json.RawMessage `json:"conditionsSchema,omitempty"`
+	CreatedAt           time.Time        `json:"createdAt"`
+	CreatedBy           *string          `json:"createdBy,omitempty"`
+	IsSystemTemplate    bool             `json:"isSystemTemplate"`
 }
 
 // PoAStats represents aggregate statistics for power of attorneys
 type PoAStats struct {
-	TotalPoAs      int                       `json:"totalPoas"`
-	ActivePoAs     int                       `json:"activePoas"`
-	PendingPoAs    int                       `json:"pendingPoas"`
-	ExpiredPoAs    int                       `json:"expiredPoas"`
-	RevokedPoAs    int                       `json:"revokedPoas"`
-	ByRepType      map[string]int            `json:"byRepresentativeType"`
-	TopActions     []ActionCount             `json:"topActions"`
+	TotalPoAs       int                      `json:"totalPoas"`
+	ActivePoAs      int                      `json:"activePoas"`
+	PendingPoAs     int                      `json:"pendingPoas"`
+	ExpiredPoAs     int                      `json:"expiredPoas"`
+	RevokedPoAs     int                      `json:"revokedPoas"`
+	ByRepType       map[string]int           `json:"byRepresentativeType"`
+	TopActions      []ActionCount            `json:"topActions"`
 	GeoDistribution []GeographicDistribution `json:"geographicDistribution"`
 }
 
@@ -116,19 +117,19 @@ func (r *Repository) CreatePoA(ctx context.Context, poa *PoARecord) error {
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
 		RETURNING id, created_at
 	`
-	
+
 	err := r.db.QueryRow(ctx, query,
 		poa.TenantID, poa.PoAName, poa.GrantorID, poa.GrantorName,
 		poa.RepresentativeID, poa.RepresentativeName, poa.RepresentativeType,
 		poa.ScopeType, poa.Actions, poa.GeographicRegions,
 		poa.Status, poa.ValidFrom, poa.ValidUntil, poa.Conditions, poa.Metadata, time.Now(),
 	).Scan(&poa.ID, &poa.CreatedAt)
-	
+
 	if err != nil {
 		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return fmt.Errorf("failed to create PoA: %w", err)
 	}
-	
+
 	return nil
 }
 
@@ -140,7 +141,7 @@ func (r *Repository) ListPoAs(ctx context.Context, tenantID string, limit, offse
 	if err := r.db.QueryRow(ctx, countQuery, tenantID).Scan(&total); err != nil {
 		return nil, 0, fmt.Errorf("failed to count PoAs: %w", err)
 	}
-	
+
 	// Get paginated records
 	query := `
 		SELECT 
@@ -155,7 +156,7 @@ func (r *Repository) ListPoAs(ctx context.Context, tenantID string, limit, offse
 		ORDER BY created_at DESC
 		LIMIT $2 OFFSET $3
 	`
-	
+
 	fmt.Printf("[POA-DEBUG] About to query with tenant=%s, limit=%d, offset=%d\n", tenantID, limit, offset)
 	rows, err := r.db.Query(ctx, query, tenantID, limit, offset)
 	if err != nil {
@@ -175,7 +176,7 @@ func (r *Repository) ListPoAs(ctx context.Context, tenantID string, limit, offse
 			&poa.ValidFrom, &poa.ValidUntil, &conditionsJSON, &metadataJSON, &poa.UpdatedAt,
 		)
 		if err != nil {
-		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
+			fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 			fmt.Printf("[POA-SCAN-ERROR] Failed to scan PoA row: %v\n", err)
 			return nil, 0, fmt.Errorf("failed to scan PoA: %w", err)
 		}
@@ -189,11 +190,11 @@ func (r *Repository) ListPoAs(ctx context.Context, tenantID string, limit, offse
 		}
 		poas = append(poas, poa)
 	}
-	
+
 	if err := rows.Err(); err != nil {
 		return nil, 0, fmt.Errorf("error iterating PoAs: %w", err)
 	}
-	
+
 	return poas, total, nil
 }
 
@@ -210,7 +211,7 @@ func (r *Repository) GetPoA(ctx context.Context, tenantID, poaID string) (*PoARe
 		FROM power_of_attorney
 		WHERE tenant_id = $1 AND id = $2
 	`
-	
+
 	var poa PoARecord
 	err := r.db.QueryRow(ctx, query, tenantID, poaID).Scan(
 		&poa.ID, &poa.TenantID, &poa.PoAName, &poa.GrantorID, &poa.GrantorName,
@@ -220,7 +221,7 @@ func (r *Repository) GetPoA(ctx context.Context, tenantID, poaID string) (*PoARe
 		&poa.RevokedAt, &poa.RevokedBy, &poa.RevocationReason,
 		&poa.ValidFrom, &poa.ValidUntil, &poa.Conditions, &poa.Metadata,
 	)
-	
+
 	if err == pgx.ErrNoRows {
 		return nil, fmt.Errorf("PoA not found")
 	}
@@ -228,7 +229,7 @@ func (r *Repository) GetPoA(ctx context.Context, tenantID, poaID string) (*PoARe
 		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return nil, fmt.Errorf("failed to get PoA: %w", err)
 	}
-	
+
 	return &poa, nil
 }
 
@@ -243,10 +244,10 @@ func (r *Repository) RevokePoA(ctx context.Context, tenantID, poaID, revokedBy, 
 		WHERE tenant_id = $1 AND id = $2 AND status != 'revoked'
 		RETURNING id
 	`
-	
+
 	var returnedID string
 	err := r.db.QueryRow(ctx, query, tenantID, poaID, revokedBy, reason).Scan(&returnedID)
-	
+
 	if err == pgx.ErrNoRows {
 		return fmt.Errorf("PoA not found or already revoked")
 	}
@@ -254,7 +255,7 @@ func (r *Repository) RevokePoA(ctx context.Context, tenantID, poaID, revokedBy, 
 		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return fmt.Errorf("failed to revoke PoA: %w", err)
 	}
-	
+
 	return nil
 }
 
@@ -268,10 +269,10 @@ func (r *Repository) ApprovePoA(ctx context.Context, tenantID, poaID, approvedBy
 		WHERE tenant_id = $1 AND id = $2 AND status = 'pending'
 		RETURNING id
 	`
-	
+
 	var returnedID string
 	err := r.db.QueryRow(ctx, query, tenantID, poaID, approvedBy).Scan(&returnedID)
-	
+
 	if err == pgx.ErrNoRows {
 		return fmt.Errorf("PoA not found or not in pending status")
 	}
@@ -279,7 +280,7 @@ func (r *Repository) ApprovePoA(ctx context.Context, tenantID, poaID, approvedBy
 		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return fmt.Errorf("failed to approve PoA: %w", err)
 	}
-	
+
 	return nil
 }
 
@@ -295,10 +296,10 @@ func (r *Repository) RejectPoA(ctx context.Context, tenantID, poaID, rejectedBy,
 		WHERE tenant_id = $1 AND id = $2 AND status = 'pending'
 		RETURNING id
 	`
-	
+
 	var returnedID string
 	err := r.db.QueryRow(ctx, query, tenantID, poaID, rejectedBy, "Rejected: "+reason).Scan(&returnedID)
-	
+
 	if err == pgx.ErrNoRows {
 		return fmt.Errorf("PoA not found or not in pending status")
 	}
@@ -306,12 +307,12 @@ func (r *Repository) RejectPoA(ctx context.Context, tenantID, poaID, rejectedBy,
 		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return fmt.Errorf("failed to reject PoA: %w", err)
 	}
-	
+
 	return nil
 }
 
 // ValidatePoA checks if a representative can perform an action for a grantor.
-// 
+//
 // Security Enhancement (CVE-2025-GAUTH-005): Now performs TWO-LEVEL validation:
 //  1. Database check: PoA exists, is active, contains requested action (EXISTING)
 //  2. Authorization check: Grantor actually holds permissions being delegated (NEW)
@@ -341,7 +342,7 @@ func (r *Repository) ValidatePoA(ctx context.Context, tenantID, grantorID, repre
 		ORDER BY created_at DESC
 		LIMIT 1
 	`
-	
+
 	var poa PoARecord
 	err := r.db.QueryRow(ctx, query, tenantID, grantorID, representativeID, action).Scan(
 		&poa.ID, &poa.TenantID, &poa.PoAName, &poa.GrantorID, &poa.GrantorName,
@@ -351,7 +352,7 @@ func (r *Repository) ValidatePoA(ctx context.Context, tenantID, grantorID, repre
 		&poa.RevokedAt, &poa.RevokedBy, &poa.RevocationReason,
 		&poa.ValidFrom, &poa.ValidUntil, &poa.Conditions, &poa.Metadata,
 	)
-	
+
 	if err == pgx.ErrNoRows {
 		return nil, false, "No valid Power of Attorney found"
 	}
@@ -359,7 +360,7 @@ func (r *Repository) ValidatePoA(ctx context.Context, tenantID, grantorID, repre
 		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return nil, false, fmt.Sprintf("Error validating PoA: %v", err)
 	}
-	
+
 	// SECURITY FIX: Verify grantor actually holds the permissions being delegated
 	// This prevents privilege escalation where a delegate requests scopes beyond
 	// what the principal possesses (e.g., "Editor" delegating "Admin" rights)
@@ -371,21 +372,21 @@ func (r *Repository) ValidatePoA(ctx context.Context, tenantID, grantorID, repre
 			grantorID,
 			poa.Actions, // All actions in the PoA must be authorized
 		)
-		
+
 		if err != nil {
 			// Fail-closed: Authorization check failure = reject
 			fmt.Printf("[POA-SECURITY] Authorization check failed for grantor=%s: %v\n", grantorID, err)
 			return nil, false, fmt.Sprintf("Authorization verification failed: %v", err)
 		}
-		
+
 		if !valid {
 			// Privilege escalation detected
-			fmt.Printf("[POA-SECURITY] Privilege escalation blocked: grantor=%s lacks permissions %v\n", 
+			fmt.Printf("[POA-SECURITY] Privilege escalation blocked: grantor=%s lacks permissions %v\n",
 				grantorID, unauthorized)
 			return nil, false, fmt.Sprintf("Grantor does not hold required permissions: %v", unauthorized)
 		}
 	}
-	
+
 	return &poa, true, "Valid Power of Attorney found"
 }
 
@@ -396,7 +397,7 @@ func (r *Repository) GetPoAStats(ctx context.Context, tenantID string) (*PoAStat
 		TopActions:      []ActionCount{},
 		GeoDistribution: []GeographicDistribution{},
 	}
-	
+
 	// Get status counts
 	statusQuery := `
 		SELECT 
@@ -408,7 +409,7 @@ func (r *Repository) GetPoAStats(ctx context.Context, tenantID string) (*PoAStat
 		FROM power_of_attorney
 		WHERE tenant_id = $1
 	`
-	
+
 	err := r.db.QueryRow(ctx, statusQuery, tenantID).Scan(
 		&stats.ActivePoAs, &stats.PendingPoAs, &stats.ExpiredPoAs, &stats.RevokedPoAs, &stats.TotalPoAs,
 	)
@@ -416,7 +417,7 @@ func (r *Repository) GetPoAStats(ctx context.Context, tenantID string) (*PoAStat
 		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return nil, fmt.Errorf("failed to get status counts: %w", err)
 	}
-	
+
 	// Get counts by representative type
 	repTypeQuery := `
 		SELECT representative_type, COUNT(*) as count
@@ -424,7 +425,7 @@ func (r *Repository) GetPoAStats(ctx context.Context, tenantID string) (*PoAStat
 		WHERE tenant_id = $1
 		GROUP BY representative_type
 	`
-	
+
 	fmt.Printf("[POA-DEBUG] About to query with tenant=%s\n", tenantID)
 	rows, err := r.db.Query(ctx, repTypeQuery, tenantID)
 	if err != nil {
@@ -432,7 +433,7 @@ func (r *Repository) GetPoAStats(ctx context.Context, tenantID string) (*PoAStat
 		return nil, fmt.Errorf("failed to get rep type counts: %w", err)
 	}
 	defer rows.Close()
-	
+
 	for rows.Next() {
 		var repType string
 		var count int
@@ -441,7 +442,7 @@ func (r *Repository) GetPoAStats(ctx context.Context, tenantID string) (*PoAStat
 		}
 		stats.ByRepType[repType] = count
 	}
-	
+
 	// Get top actions (unnest array and count)
 	actionsQuery := `
 		SELECT action, COUNT(*) as count
@@ -454,14 +455,14 @@ func (r *Repository) GetPoAStats(ctx context.Context, tenantID string) (*PoAStat
 		ORDER BY count DESC
 		LIMIT 10
 	`
-	
+
 	rows, err = r.db.Query(ctx, actionsQuery, tenantID)
 	if err != nil {
 		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return nil, fmt.Errorf("failed to get action counts: %w", err)
 	}
 	defer rows.Close()
-	
+
 	for rows.Next() {
 		var ac ActionCount
 		if err := rows.Scan(&ac.Action, &ac.Count); err != nil {
@@ -469,7 +470,7 @@ func (r *Repository) GetPoAStats(ctx context.Context, tenantID string) (*PoAStat
 		}
 		stats.TopActions = append(stats.TopActions, ac)
 	}
-	
+
 	// Get geographic distribution
 	geoQuery := `
 		SELECT region, COUNT(*) as count
@@ -481,14 +482,14 @@ func (r *Repository) GetPoAStats(ctx context.Context, tenantID string) (*PoAStat
 		GROUP BY region
 		ORDER BY count DESC
 	`
-	
+
 	rows, err = r.db.Query(ctx, geoQuery, tenantID)
 	if err != nil {
 		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return nil, fmt.Errorf("failed to get geo distribution: %w", err)
 	}
 	defer rows.Close()
-	
+
 	for rows.Next() {
 		var gd GeographicDistribution
 		if err := rows.Scan(&gd.Region, &gd.Count); err != nil {
@@ -496,7 +497,7 @@ func (r *Repository) GetPoAStats(ctx context.Context, tenantID string) (*PoAStat
 		}
 		stats.GeoDistribution = append(stats.GeoDistribution, gd)
 	}
-	
+
 	return stats, nil
 }
 
@@ -510,18 +511,18 @@ func (r *Repository) CreateTemplate(ctx context.Context, template *PoATemplate) 
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		RETURNING id, created_at
 	`
-	
+
 	err := r.db.QueryRow(ctx, query,
 		template.TenantID, template.TemplateName, template.Description, template.ScopeType,
 		template.DefaultActions, template.DefaultDurationDays, template.ConditionsSchema,
 		template.CreatedBy, template.IsSystemTemplate,
 	).Scan(&template.ID, &template.CreatedAt)
-	
+
 	if err != nil {
 		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return fmt.Errorf("failed to create template: %w", err)
 	}
-	
+
 	return nil
 }
 
@@ -536,7 +537,7 @@ func (r *Repository) ListTemplates(ctx context.Context, tenantID *string) ([]PoA
 		WHERE tenant_id = $1 OR tenant_id IS NULL OR is_system_template = true
 		ORDER BY is_system_template DESC, template_name
 	`
-	
+
 	var tenantIDVal string
 	if tenantID != nil {
 		tenantIDVal = *tenantID
@@ -548,7 +549,7 @@ func (r *Repository) ListTemplates(ctx context.Context, tenantID *string) ([]PoA
 		return nil, fmt.Errorf("failed to list templates: %w", err)
 	}
 	defer rows.Close()
-	
+
 	var templates []PoATemplate
 	for rows.Next() {
 		var t PoATemplate
@@ -558,15 +559,15 @@ func (r *Repository) ListTemplates(ctx context.Context, tenantID *string) ([]PoA
 			&t.CreatedAt, &t.CreatedBy, &t.IsSystemTemplate,
 		)
 		if err != nil {
-		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
+			fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 			return nil, fmt.Errorf("failed to scan template: %w", err)
 		}
 		templates = append(templates, t)
 	}
-	
+
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("error iterating templates: %w", err)
 	}
-	
+
 	return templates, nil
 }

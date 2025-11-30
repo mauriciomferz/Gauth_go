@@ -134,11 +134,11 @@ func (h *AuthorizationHandlers) ValidateToken(c *gin.Context) {
 		"client_id": result.ClientID,
 		"scope":     result.Scope,
 	}
-	
+
 	if decoded != nil {
 		response["decoded"] = decoded
 	}
-	
+
 	c.JSON(http.StatusOK, response)
 }
 
