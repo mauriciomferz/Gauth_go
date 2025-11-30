@@ -154,7 +154,7 @@ func TestChaos_RapidStateTransitions(t *testing.T) {
 	for cycle := 0; cycle < 3; cycle++ {
 		// Open circuit
 		for i := 0; i < 11; i++ {
-			cb.RecordTransaction(ctx, poaID, 1e17, true)
+			_ = cb.RecordTransaction(ctx, poaID, 1e17, true) // Intentionally ignoring in test setup
 		}
 
 		// Verify OPEN
@@ -358,7 +358,7 @@ func TestChaos_StaleMetrics(t *testing.T) {
 	// Verify metrics are actually reset
 	metrics, err := cb.GetMetrics(ctx, poaID)
 	require.NoError(t, err)
-	assert.Equal(t, 0, int(metrics.TotalTxCount), "Metrics should be reset")
+	assert.Equal(t, 0, metrics.TotalTxCount, "Metrics should be reset")
 	t.Log("✅ Stale metrics handled: cache and storage remain consistent")
 }
 
@@ -482,9 +482,9 @@ func TestChaos_DeadlockPrevention(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			for j := 0; j < 10; j++ {
-				cb.RecordTransaction(ctx, poaID, 1e17, true)
-				cb.GetMetrics(ctx, poaID)
-				cb.IsPoAAllowed(ctx, poaID)
+				_ = cb.RecordTransaction(ctx, poaID, 1e17, true) // Stress test - errors expected
+				_, _ = cb.GetMetrics(ctx, poaID)
+				_, _, _ = cb.IsPoAAllowed(ctx, poaID)
 			}
 		}()
 	}

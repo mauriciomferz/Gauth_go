@@ -169,7 +169,7 @@ func TestCircuitBreaker_AutoRecovery(t *testing.T) {
 
 	// Trigger suspension by exceeding tx rate limit
 	for i := 0; i < 11; i++ {
-		cb.RecordTransaction(ctx, poaID, 1e17, true)
+		_ = cb.RecordTransaction(ctx, poaID, 1e17, true) // Intentionally triggering limit
 	}
 
 	// Verify circuit is open

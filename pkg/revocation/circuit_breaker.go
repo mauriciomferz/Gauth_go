@@ -173,7 +173,9 @@ func (cb *CircuitBreaker) RecordTransaction(ctx context.Context, poaID string, v
 			} else {
 				metrics.FailedTxCount++
 			}
-			cb.storeMetrics(ctx, metrics)
+			if err := cb.storeMetrics(ctx, metrics); err != nil {
+				cb.logger.Errorf("Failed to store metrics (non-fatal): %v", err)
+			}
 			return nil
 		} else {
 			return fmt.Errorf("circuit breaker OPEN for PoA %s (suspended: %s, reason: %s)", 
@@ -321,7 +323,9 @@ func (cb *CircuitBreaker) IsPoAAllowed(ctx context.Context, poaID string) (bool,
 		metrics.State = CircuitBreakerHalfOpen
 		metrics.RecoveryAttemptedAt = time.Now()
 		metrics.TestTxAllowed = cb.recoveryTestCount
-		cb.storeMetrics(ctx, metrics)
+		if err := cb.storeMetrics(ctx, metrics); err != nil {
+			cb.logger.Errorf("Failed to store metrics (non-fatal): %v", err)
+		}
 		return true, "Circuit HALF_OPEN (testing recovery)", nil
 	
 	case CircuitBreakerHalfOpen:
