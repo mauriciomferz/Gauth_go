@@ -433,7 +433,7 @@ func TestExternalTokenValidator_ValidateToken_ExpiredToken(t *testing.T) {
 	// Setup servers
 	jwks := createJWKSFromRSAKey(&privateKey.PublicKey, kid)
 	jwksServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(jwks)
+		_ = json.NewEncoder(w).Encode(jwks)
 	}))
 	defer jwksServer.Close()
 
@@ -482,7 +482,7 @@ func TestExternalTokenValidator_ValidateToken_InvalidIssuer(t *testing.T) {
 	// Setup servers
 	jwks := createJWKSFromRSAKey(&privateKey.PublicKey, kid)
 	jwksServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(jwks)
+		_ = json.NewEncoder(w).Encode(jwks)
 	}))
 	defer jwksServer.Close()
 
@@ -531,7 +531,7 @@ func TestExternalTokenValidator_ValidateToken_InvalidAudience(t *testing.T) {
 	// Setup servers
 	jwks := createJWKSFromRSAKey(&privateKey.PublicKey, kid)
 	jwksServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(jwks)
+		_ = json.NewEncoder(w).Encode(jwks)
 	}))
 	defer jwksServer.Close()
 
