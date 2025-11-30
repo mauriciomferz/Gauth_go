@@ -1,0 +1,88 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: gauth-hpa
+  namespace: gauth-system
+  labels:
+    app: gauth
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gauth-with-opa
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  # CPU-based scaling
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  # Memory-based scaling
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  # Custom metric: OPA request rate (requires Prometheus adapter)
+  - type: Pods
+    pods:
+      metric:
+        name: opa_http_requests_per_second
+      target:
+        type: AverageValue
+        averageValue: "100"
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300  # Wait 5 minutes before scaling down
+      policies:
+      - type: Percent
+        value: 50  # Scale down max 50% of pods at a time
+        periodSeconds: 60
+      - type: Pods
+        value: 2  # Scale down max 2 pods at a time
+        periodSeconds: 60
+      selectPolicy: Min
+    scaleUp:
+      stabilizationWindowSeconds: 0  # Scale up immediately
+      policies:
+      - type: Percent
+        value: 100  # Scale up max 100% of pods at a time
+        periodSeconds: 30
+      - type: Pods
+        value: 4  # Scale up max 4 pods at a time
+        periodSeconds: 30
+      selectPolicy: Max
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gauth-hpa-config
+  namespace: gauth-system
+data:
+  scaling-notes: |
+    HPA Configuration Notes:
+    
+    Scaling Triggers:
+    - CPU > 70%: Scale up
+    - Memory > 80%: Scale up
+    - OPA requests > 100/sec per pod: Scale up
+    
+    Scale-up behavior:
+    - Immediate (no stabilization window)
+    - Max 100% increase or 4 pods per 30 seconds
+    
+    Scale-down behavior:
+    - Wait 5 minutes after last scale event
+    - Max 50% decrease or 2 pods per 60 seconds
+    
+    Min/Max replicas:
+    - Minimum: 3 (for high availability)
+    - Maximum: 10 (cost control)
+    
+    Monitoring:
+    kubectl get hpa gauth-hpa -n gauth-system -w

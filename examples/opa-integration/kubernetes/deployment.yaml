@@ -1,0 +1,249 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gauth-with-opa
+  namespace: gauth-system
+  labels:
+    app: gauth
+    component: web-server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: gauth
+      component: web-server
+  template:
+    metadata:
+      labels:
+        app: gauth
+        component: web-server
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8181"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: gauth
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      
+      containers:
+      # Main GAuth application
+      - name: gauth
+        image: gauth:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        env:
+        - name: GAUTH_OPA_ENABLED
+          value: "true"
+        - name: GAUTH_OPA_URL
+          value: "http://localhost:8181"
+        - name: GAUTH_JWT_SIGNING_KEY
+          valueFrom:
+            secretKeyRef:
+              name: gauth-secrets
+              key: jwt-signing-key
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: gauth-config
+              key: db-host
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: gauth-config
+              key: db-port
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: gauth-config
+              key: db-name
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: gauth-db-secrets
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: gauth-db-secrets
+              key: password
+        - name: DB_SSLMODE
+          value: "require"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: cache
+          mountPath: /app/cache
+
+      # OPA Sidecar
+      - name: opa
+        image: openpolicyagent/opa:0.60.0-rootless
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8181
+          protocol: TCP
+        args:
+        - "run"
+        - "--server"
+        - "--addr=:8181"
+        - "--set=decision_logs.console=true"
+        - "--set=status.console=true"
+        - "/policies"
+        env:
+        - name: OPA_LOG_LEVEL
+          value: "info"
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health?bundle=true
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: opa-policies
+          mountPath: /policies
+          readOnly: true
+        - name: opa-tmp
+          mountPath: /tmp
+
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: cache
+        emptyDir: {}
+      - name: opa-tmp
+        emptyDir: {}
+      - name: opa-policies
+        configMap:
+          name: opa-policies
+
+      # Pod topology spread for high availability
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: gauth
+            component: web-server
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app: gauth
+            component: web-server
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gauth
+  namespace: gauth-system
+  labels:
+    app: gauth
+    component: web-server
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+    protocol: TCP
+  - name: opa-http
+    port: 8181
+    targetPort: 8181
+    protocol: TCP
+  selector:
+    app: gauth
+    component: web-server
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: gauth-pdb
+  namespace: gauth-system
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: gauth
+      component: web-server
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gauth
+  namespace: gauth-system
+  labels:
+    app: gauth
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gauth-config
+  namespace: gauth-system
+data:
+  db-host: "postgresql.database.svc.cluster.local"
+  db-port: "5432"
+  db-name: "gauth"
+  opa-url: "http://localhost:8181"

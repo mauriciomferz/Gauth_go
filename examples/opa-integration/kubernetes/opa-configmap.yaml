@@ -1,0 +1,108 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: opa-policies
+  namespace: gauth-system
+data:
+  scope_validation.rego: |
+    package gauth.authz
+
+    # Default deny
+    default allow = false
+
+    # Rule 1: Validate scope coverage
+    allow {
+        input.action == "validate_scope"
+        all_child_scopes_covered
+    }
+
+    # Helper: Check if all child scopes are covered by parent scopes
+    all_child_scopes_covered {
+        count(uncovered_scopes) == 0
+    }
+
+    # Find uncovered child scopes
+    uncovered_scopes[child_scope] {
+        child_scope := input.child_scopes[_]
+        not scope_covered(child_scope)
+    }
+
+    # Check if a child scope is covered by any parent scope
+    scope_covered(child_scope) {
+        parent_scope := input.parent_scopes[_]
+        scope_matches(parent_scope, child_scope)
+    }
+
+    # Pattern matching rules
+    scope_matches(parent, child) {
+        parent == child  # Exact match
+    }
+
+    scope_matches(parent, child) {
+        endswith(parent, ":*")  # Wildcard match
+        prefix := trim_suffix(parent, ":*")
+        startswith(child, prefix)
+    }
+
+    # Rule 2: ABAC - Department-based access
+    allow {
+        input.action == "validate_scope"
+        input.user.department == "engineering"
+        all_child_scopes_covered
+    }
+
+    # Rule 3: ABAC - Clearance level
+    allow {
+        input.action == "validate_scope"
+        input.user.clearance_level >= 3
+        all_child_scopes_covered
+    }
+
+    # Rule 4: Time-based access control
+    allow {
+        input.action == "validate_scope"
+        is_business_hours
+        all_child_scopes_covered
+    }
+
+    is_business_hours {
+        hour := time.clock(time.now_ns())[0]
+        hour >= 9
+        hour < 18
+    }
+
+    # Rule 5: Multi-tenant isolation
+    allow {
+        input.action == "validate_scope"
+        tenant_isolated
+        all_child_scopes_covered
+    }
+
+    tenant_isolated {
+        input.tenant_id != ""
+        every child in input.child_scopes {
+            startswith(child, sprintf("tenant:%s:", [input.tenant_id]))
+        }
+    }
+
+    # Audit: Decision details
+    decision_details = {
+        "allow": allow,
+        "reason": reason,
+        "timestamp": time.now_ns(),
+        "matched_scopes": matched_scopes
+    }
+
+    reason = "All child scopes are covered by parent scopes" {
+        all_child_scopes_covered
+    } else = sprintf("Uncovered child scopes: %v", [uncovered_scopes])
+
+    matched_scopes[match] {
+        child := input.child_scopes[_]
+        parent := input.parent_scopes[_]
+        scope_matches(parent, child)
+        match := {
+            "child": child,
+            "parent": parent
+        }
+    }
