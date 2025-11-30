@@ -12,6 +12,10 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth/external"
 )
 
+const (
+	truliooStatusMatch = "match"
+)
+
 // TruliooProvider implements USIdentityAPIProvider for Trulioo GlobalGateway API
 // API Documentation: https://developer.trulioo.com/docs
 type TruliooProvider struct {
@@ -202,7 +206,7 @@ func (t *TruliooProvider) ValidateSSN(ctx context.Context, req *external.SSNVali
 
 	// Convert to SSNValidationResult
 	result := &external.SSNValidationResult{
-		Valid:                 truliooResp.RecordStatus == "match",
+		Valid:                 truliooResp.RecordStatus == truliooStatusMatch,
 		ValidationLevel:       req.ValidationLevel,
 		FormatValid:           true, // Trulioo validates format
 		ProviderName:          t.name,
@@ -212,7 +216,7 @@ func (t *TruliooProvider) ValidateSSN(ctx context.Context, req *external.SSNVali
 	}
 
 	// Calculate confidence score based on match status
-	if truliooResp.RecordStatus == "match" {
+	if truliooResp.RecordStatus == truliooStatusMatch {
 		result.ConfidenceScore = 0.95
 	} else if truliooResp.RecordStatus == "nomatch" {
 		result.ConfidenceScore = 0.1
@@ -227,14 +231,14 @@ func (t *TruliooProvider) ValidateSSN(ctx context.Context, req *external.SSNVali
 			case "FirstGivenName", "FirstSurName":
 				if result.NameMatch == nil {
 					result.NameMatch = &external.NameMatchResult{
-						Matched: field.Status == "match",
+						Matched: field.Status == truliooStatusMatch,
 						Score:   calculateMatchScore(field.Status),
 					}
 				}
 			case "DayOfBirth", "MonthOfBirth", "YearOfBirth":
 				if result.DOBMatch == nil {
 					result.DOBMatch = &external.DOBMatchResult{
-						Matched: field.Status == "match",
+						Matched: field.Status == truliooStatusMatch,
 					}
 				}
 			}
@@ -425,7 +429,7 @@ func (t *TruliooProvider) parseVerificationResponse(
 	}
 
 	// Determine verification status
-	verified := truliooResp.RecordStatus == "match"
+	verified := truliooResp.RecordStatus == truliooStatusMatch
 	
 	// Determine verification level
 	verificationLevel := external.VerificationLevelBasic
@@ -564,7 +568,7 @@ func (t *TruliooProvider) makeRequest(ctx context.Context, method, path string, 
 
 func convertTruliooStatus(status string) external.CheckStatus {
 	switch status {
-	case "match":
+	case truliooStatusMatch:
 		return external.CheckStatusPassed
 	case "nomatch":
 		return external.CheckStatusFailed
@@ -577,7 +581,7 @@ func convertTruliooStatus(status string) external.CheckStatus {
 
 func calculateMatchScore(status string) float64 {
 	switch status {
-	case "match":
+	case truliooStatusMatch:
 		return 1.0
 	case "nomatch":
 		return 0.0

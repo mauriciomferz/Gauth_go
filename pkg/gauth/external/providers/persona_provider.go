@@ -12,6 +12,10 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth/external"
 )
 
+const (
+	personaStatusPassed = "passed"
+)
+
 // PersonaProvider implements USIdentityAPIProvider for Persona API
 // API Documentation: https://docs.withpersona.com/reference
 type PersonaProvider struct {
@@ -190,7 +194,7 @@ func (p *PersonaProvider) ValidateSSN(ctx context.Context, req *external.SSNVali
 
 	// Convert to SSNValidationResult
 	result := &external.SSNValidationResult{
-		Valid:           personaResp.Data.Attributes.Status == "passed",
+		Valid:           personaResp.Data.Attributes.Status == personaStatusPassed,
 		ValidationLevel: req.ValidationLevel,
 		ConfidenceScore: personaResp.Data.Attributes.VerificationScore,
 		FormatValid:     true, // Persona validates format
@@ -217,7 +221,7 @@ func (p *PersonaProvider) ValidateSSN(ctx context.Context, req *external.SSNVali
 	// Check for deceased status from checks
 	for _, check := range personaResp.Data.Attributes.Checks {
 		if check.Name == "deceased" {
-			result.NotDeceased = check.Status == "passed"
+			result.NotDeceased = check.Status == personaStatusPassed
 		}
 	}
 
@@ -389,7 +393,7 @@ func (p *PersonaProvider) parseVerificationResponse(
 
 	// Convert status to verification level
 	verificationLevel := external.VerificationLevelStandard
-	if personaResp.Data.Attributes.Status == "passed" {
+	if personaResp.Data.Attributes.Status == personaStatusPassed {
 		verificationLevel = external.VerificationLevelEnhanced
 	}
 
@@ -421,7 +425,7 @@ func (p *PersonaProvider) parseVerificationResponse(
 	}
 
 	result := &external.IdentityVerificationResult{
-		Verified:              personaResp.Data.Attributes.Status == "passed",
+		Verified:              personaResp.Data.Attributes.Status == personaStatusPassed,
 		VerificationLevel:     verificationLevel,
 		ConfidenceScore:       personaResp.Data.Attributes.VerificationScore,
 		DocumentType:          docType,
@@ -494,7 +498,7 @@ func (p *PersonaProvider) makeRequest(ctx context.Context, method, path string, 
 
 func convertPersonaStatus(status string) external.CheckStatus {
 	switch status {
-	case "passed":
+	case personaStatusPassed:
 		return external.CheckStatusPassed
 	case "failed":
 		return external.CheckStatusFailed

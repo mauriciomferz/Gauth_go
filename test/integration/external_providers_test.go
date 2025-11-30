@@ -98,7 +98,7 @@ func registerGoogleProvider(t *testing.T, registry *oidc.InMemoryProviderRegistr
 	t.Helper()
 
 	config := oidc.ProviderConfig{
-		ID:                "google",
+		ID:                testProviderGoogle,
 		Name:              "Google",
 		IssuerURL:         "https://accounts.google.com",
 		ClientID:          "test-google-client-id",
@@ -184,12 +184,12 @@ func testGoogleToGAuthExchange(t *testing.T, ctx context.Context, privateKey *rs
 
 	// The actual exchange would validate the external token
 	// For this integration test, we verify the service accepts Google provider
-	info, err := tokenExchange.GetProviderInfo("google")
+	info, err := tokenExchange.GetProviderInfo(testProviderGoogle)
 	if err != nil {
 		t.Errorf("Failed to get Google provider info: %v", err)
 	}
 
-	if info.ID != "google" {
+	if info.ID != testProviderGoogle {
 		t.Errorf("Expected Google provider ID but got %s", info.ID)
 	}
 
@@ -197,7 +197,7 @@ func testGoogleToGAuthExchange(t *testing.T, ctx context.Context, privateKey *rs
 	providers := tokenExchange.GetSupportedProviders()
 	hasGoogle := false
 	for _, p := range providers {
-		if p == "google" {
+		if p == testProviderGoogle {
 			hasGoogle = true
 			break
 		}
@@ -298,7 +298,7 @@ func testMultiProviderBatchExchange(t *testing.T, ctx context.Context, privateKe
 	// Test batch exchange with all three providers
 	requests := []oidc.ExchangeRequest{
 		{
-			ProviderID:    "google",
+			ProviderID:    testProviderGoogle,
 			ExternalToken: "mock-google-token",
 			Audience:      "gauth-audience",
 			Subject:       "google-user-12345",
@@ -344,7 +344,7 @@ func testMultiProviderBatchExchange(t *testing.T, ctx context.Context, privateKe
 	}
 
 	t.Logf("✓ Batch exchange processed %d requests", len(requests))
-	t.Logf("  - Google request included: %v", requests[0].ProviderID == "google")
+	t.Logf("  - Google request included: %v", requests[0].ProviderID == testProviderGoogle)
 	t.Logf("  - Okta request included: %v", requests[1].ProviderID == "okta")
 	t.Logf("  - Azure AD request included: %v", requests[2].ProviderID == "azure_ad")
 	t.Logf("  - All providers validated (expected errors due to mock tokens): %d", errorCount)
@@ -361,7 +361,7 @@ func testTrustLevelPreservation(t *testing.T, ctx context.Context, privateKey *r
 	}{
 		{
 			name:       "Google substantial trust",
-			providerID: "google",
+			providerID: testProviderGoogle,
 			claims: &oidc.IDTokenClaims{
 				ACR: "substantial",
 				AMR: []string{"pwd"},
@@ -370,7 +370,7 @@ func testTrustLevelPreservation(t *testing.T, ctx context.Context, privateKey *r
 		},
 		{
 			name:       "Google high trust with MFA",
-			providerID: "google",
+			providerID: testProviderGoogle,
 			claims: &oidc.IDTokenClaims{
 				ACR: "substantial",
 				AMR: []string{"pwd", "mfa"},
@@ -397,7 +397,7 @@ func testTrustLevelPreservation(t *testing.T, ctx context.Context, privateKey *r
 		},
 		{
 			name:       "eIDAS high level",
-			providerID: "google",
+			providerID: testProviderGoogle,
 			claims: &oidc.IDTokenClaims{
 				ACR: "urn:eidas:loa:high",
 			},
@@ -434,7 +434,7 @@ func testClaimNormalizationAcrossProviders(t *testing.T, ctx context.Context, pr
 		expectedKeys []string
 	}{
 		{
-			id: "google",
+			id: testProviderGoogle,
 			mappings: map[string]string{
 				"sub":   "user_id",
 				"email": "email",
@@ -488,7 +488,7 @@ func testProviderValidationWithoutExchange(t *testing.T, ctx context.Context, to
 		expectErr  bool
 	}{
 		{
-			providerID: "google",
+			providerID: testProviderGoogle,
 			token:      "mock-google-token",
 			audience:   "test-audience",
 			expectErr:  true, // Will fail because validation not implemented
@@ -536,14 +536,14 @@ func testProviderValidationWithoutExchange(t *testing.T, ctx context.Context, to
 
 func testDisabledProviderHandling(t *testing.T, ctx context.Context, registry *oidc.InMemoryProviderRegistry, tokenExchange *oidc.TokenExchangeService) {
 	// Disable Google provider temporarily
-	if err := registry.Disable("google"); err != nil {
+	if err := registry.Disable(testProviderGoogle); err != nil {
 		t.Fatalf("Failed to disable Google provider: %v", err)
 	}
 
 	// Verify it's not in supported providers
 	providers := tokenExchange.GetSupportedProviders()
 	for _, p := range providers {
-		if p == "google" {
+		if p == testProviderGoogle {
 			t.Error("Google provider still appears in supported list after disabling")
 		}
 	}
@@ -552,7 +552,7 @@ func testDisabledProviderHandling(t *testing.T, ctx context.Context, registry *o
 
 	// Try to exchange token with disabled provider
 	request := oidc.ExchangeRequest{
-		ProviderID:    "google",
+		ProviderID:    testProviderGoogle,
 		ExternalToken: "test-token",
 		Audience:      "test-audience",
 	}
@@ -565,7 +565,7 @@ func testDisabledProviderHandling(t *testing.T, ctx context.Context, registry *o
 	t.Logf("✓ Token exchange correctly rejected disabled provider: %v", err)
 
 	// Re-enable for other tests
-	if err := registry.Enable("google"); err != nil {
+	if err := registry.Enable(testProviderGoogle); err != nil {
 		t.Fatalf("Failed to re-enable Google provider: %v", err)
 	}
 
@@ -573,7 +573,7 @@ func testDisabledProviderHandling(t *testing.T, ctx context.Context, registry *o
 	providers = tokenExchange.GetSupportedProviders()
 	hasGoogle := false
 	for _, p := range providers {
-		if p == "google" {
+		if p == testProviderGoogle {
 			hasGoogle = true
 			break
 		}
@@ -597,7 +597,7 @@ func TestProviderDiscoveryIntegration(t *testing.T) {
 		expectedURL string
 	}{
 		{
-			id:          "google",
+			id:          testProviderGoogle,
 			issuerURL:   "https://accounts.google.com",
 			expectedURL: "https://accounts.google.com/.well-known/openid-configuration",
 		},
@@ -673,7 +673,7 @@ func TestProviderRegistryIntegration(t *testing.T) {
 	})
 
 	t.Run("Get Individual Providers", func(t *testing.T) {
-		for _, id := range []string{"google", "okta", "azure_ad"} {
+		for _, id := range []string{testProviderGoogle, "okta", "azure_ad"} {
 			provider, err := providerRegistry.Get(id)
 			if err != nil {
 				t.Errorf("Failed to get provider %s: %v", id, err)
@@ -690,19 +690,19 @@ func TestProviderRegistryIntegration(t *testing.T) {
 
 	t.Run("Update Provider Configuration", func(t *testing.T) {
 		// Get Google provider
-		google, err := providerRegistry.Get("google")
+		google, err := providerRegistry.Get(testProviderGoogle)
 		if err != nil {
 			t.Fatalf("Failed to get Google provider: %v", err)
 		}
 
 		// Update default trust level
 		google.DefaultTrustLevel = "high"
-		if err := providerRegistry.Update("google", *google); err != nil {
+		if err := providerRegistry.Update(testProviderGoogle, *google); err != nil {
 			t.Errorf("Failed to update provider: %v", err)
 		}
 
 		// Verify update
-		updated, err := providerRegistry.Get("google")
+		updated, err := providerRegistry.Get(testProviderGoogle)
 		if err != nil {
 			t.Fatalf("Failed to get updated provider: %v", err)
 		}
@@ -713,7 +713,7 @@ func TestProviderRegistryIntegration(t *testing.T) {
 
 		// Restore original value
 		updated.DefaultTrustLevel = "substantial"
-		if err := providerRegistry.Update("google", *updated); err != nil {
+		if err := providerRegistry.Update(testProviderGoogle, *updated); err != nil {
 			t.Errorf("Failed to restore provider: %v", err)
 		}
 

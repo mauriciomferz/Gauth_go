@@ -66,7 +66,7 @@ func TestJWTService_CreateToken_ValidUser(t *testing.T) {
 		t.Fatalf("Failed to create JWT service: %v", err)
 	}
 
-	userID := "test-user"
+	userID := testUserID
 	scopes := []string{"read", "write"}
 	duration := time.Hour
 
@@ -115,7 +115,7 @@ func TestJWTService_CreateToken_NoScopes(t *testing.T) {
 		t.Fatalf("Failed to create JWT service: %v", err)
 	}
 
-	token, err := service.CreateToken("test-user", nil, time.Hour)
+	token, err := service.CreateToken(testUserID, nil, time.Hour)
 
 	// Should accept nil scopes (may be optional)
 	if err != nil {
@@ -134,7 +134,7 @@ func TestJWTService_CreateToken_EmptyScopes(t *testing.T) {
 		t.Fatalf("Failed to create JWT service: %v", err)
 	}
 
-	token, err := service.CreateToken("test-user", []string{}, time.Hour)
+	token, err := service.CreateToken(testUserID, []string{}, time.Hour)
 
 	// Should accept empty scope list
 	if err != nil {
@@ -154,7 +154,7 @@ func TestJWTService_CreateToken_MultipleScopes(t *testing.T) {
 	}
 
 	scopes := []string{"read", "write", "admin", "delete", "create"}
-	token, err := service.CreateToken("test-user", scopes, time.Hour)
+	token, err := service.CreateToken(testUserID, scopes, time.Hour)
 
 	if err != nil {
 		t.Errorf("Expected no error with multiple scopes, got: %v", err)
@@ -172,7 +172,7 @@ func TestJWTService_CreateToken_ZeroDuration(t *testing.T) {
 		t.Fatalf("Failed to create JWT service: %v", err)
 	}
 
-	token, err := service.CreateToken("test-user", []string{"read"}, 0)
+	token, err := service.CreateToken(testUserID, []string{"read"}, 0)
 
 	// Current implementation may accept zero duration
 	if err != nil {
@@ -189,7 +189,7 @@ func TestJWTService_CreateToken_NegativeDuration(t *testing.T) {
 		t.Fatalf("Failed to create JWT service: %v", err)
 	}
 
-	token, err := service.CreateToken("test-user", []string{"read"}, -time.Hour)
+	token, err := service.CreateToken(testUserID, []string{"read"}, -time.Hour)
 
 	// Current implementation may accept negative duration
 	if err != nil {
@@ -207,7 +207,7 @@ func TestJWTService_CreateToken_LongDuration(t *testing.T) {
 	}
 
 	duration := 365 * 24 * time.Hour // 1 year
-	token, err := service.CreateToken("test-user", []string{"read"}, duration)
+	token, err := service.CreateToken(testUserID, []string{"read"}, duration)
 
 	// Should accept long duration
 	if err != nil {
@@ -226,7 +226,7 @@ func TestJWTService_ValidateToken_ValidToken(t *testing.T) {
 		t.Fatalf("Failed to create JWT service: %v", err)
 	}
 
-	userID := "test-user"
+	userID := testUserID
 	scopes := []string{"read", "write"}
 	duration := time.Hour
 
@@ -310,7 +310,7 @@ func TestJWTService_ValidateToken_WrongSignature(t *testing.T) {
 	service2, _ := NewProperJWTService("issuer2", "audience2")
 
 	// Create token with service1
-	token, err := service1.CreateToken("test-user", []string{"read"}, time.Hour)
+	token, err := service1.CreateToken(testUserID, []string{"read"}, time.Hour)
 	if err != nil {
 		t.Fatalf("Failed to create token: %v", err)
 	}
@@ -334,7 +334,7 @@ func TestJWTService_ValidateToken_ExpiredToken(t *testing.T) {
 	}
 
 	// Create token with very short duration
-	token, err := service.CreateToken("test-user", []string{"read"}, 1*time.Nanosecond)
+	token, err := service.CreateToken(testUserID, []string{"read"}, 1*time.Nanosecond)
 	if err != nil {
 		t.Fatalf("Failed to create token: %v", err)
 	}
@@ -487,7 +487,7 @@ func TestJWTService_TokenRoundtrip(t *testing.T) {
 		t.Fatalf("Failed to create JWT service: %v", err)
 	}
 
-	userID := "test-user"
+	userID := testUserID
 	scopes := []string{"read", "write", "admin"}
 	duration := time.Hour
 
@@ -541,7 +541,7 @@ func TestJWTService_ConcurrentCreateToken(t *testing.T) {
 
 	for i := 0; i < concurrency; i++ {
 		go func(id int) {
-			token, err := service.CreateToken("test-user", []string{"read"}, time.Hour)
+			token, err := service.CreateToken(testUserID, []string{"read"}, time.Hour)
 			if err != nil {
 				done <- err
 				return
@@ -578,7 +578,7 @@ func TestJWTService_ConcurrentValidateToken(t *testing.T) {
 	}
 
 	// Create token
-	token, err := service.CreateToken("test-user", []string{"read"}, time.Hour)
+	token, err := service.CreateToken(testUserID, []string{"read"}, time.Hour)
 	if err != nil {
 		t.Fatalf("Failed to create token: %v", err)
 	}

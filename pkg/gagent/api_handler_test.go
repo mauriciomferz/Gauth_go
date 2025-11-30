@@ -22,7 +22,7 @@ func TestListAgents(t *testing.T) {
 	router, handler := setupTestRouter()
 
 	// Register test agents
-	agent1 := NewAgent("agent-1", "Agent 1", "gpt-4", "openai", 0.8)
+	agent1 := NewAgent(testAgentID, "Agent 1", "gpt-4", "openai", 0.8)
 	agent2 := NewAgent("agent-2", "Agent 2", "claude-3", "anthropic", 0.7)
 	handler.RegisterAgent(agent1)
 	handler.RegisterAgent(agent2)
@@ -53,7 +53,7 @@ func TestListAgents(t *testing.T) {
 func TestGetAgentInfo(t *testing.T) {
 	router, handler := setupTestRouter()
 
-	agent := NewAgent("agent-1", "Test Agent", "gpt-4", "openai", 0.8)
+	agent := NewAgent(testAgentID, "Test Agent", "gpt-4", "openai", 0.8)
 	handler.RegisterAgent(agent)
 
 	w := httptest.NewRecorder()
@@ -74,7 +74,7 @@ func TestGetAgentInfo(t *testing.T) {
 	}
 
 	agentData := response["agent"].(map[string]interface{})
-	if agentData["id"].(string) != "agent-1" {
+	if agentData["id"].(string) != testAgentID {
 		t.Errorf("Expected agent ID 'agent-1', got %s", agentData["id"].(string))
 	}
 }
@@ -94,7 +94,7 @@ func TestGetAgentInfoNotFound(t *testing.T) {
 func TestEnableDisableAgent(t *testing.T) {
 	router, handler := setupTestRouter()
 
-	agent := NewAgent("agent-1", "Test Agent", "gpt-4", "openai", 0.8)
+	agent := NewAgent(testAgentID, "Test Agent", "gpt-4", "openai", 0.8)
 	handler.RegisterAgent(agent)
 
 	// Disable agent
@@ -127,7 +127,7 @@ func TestEnableDisableAgent(t *testing.T) {
 func TestGetAgentMetrics(t *testing.T) {
 	router, handler := setupTestRouter()
 
-	agent := NewAgent("agent-1", "Test Agent", "gpt-4", "openai", 0.8)
+	agent := NewAgent(testAgentID, "Test Agent", "gpt-4", "openai", 0.8)
 	handler.RegisterAgent(agent)
 
 	w := httptest.NewRecorder()
@@ -157,11 +157,11 @@ func TestGetAgentMetrics(t *testing.T) {
 func TestAPIEvaluateEnforcement(t *testing.T) {
 	router, handler := setupTestRouter()
 
-	agent := NewAgent("agent-1", "Test Agent", "gpt-4", "openai", 0.8)
+	agent := NewAgent(testAgentID, "Test Agent", "gpt-4", "openai", 0.8)
 	handler.RegisterAgent(agent)
 
 	requestBody := map[string]interface{}{
-		"agent_id": "agent-1",
+		"agent_id": testAgentID,
 		"subject":  "user:alice",
 		"resource": "file:document.pdf",
 		"action":   "read",
@@ -190,7 +190,7 @@ func TestAPIEvaluateEnforcement(t *testing.T) {
 	}
 
 	recommendation := response["recommendation"].(map[string]interface{})
-	if recommendation["agent_id"].(string) != "agent-1" {
+	if recommendation["agent_id"].(string) != testAgentID {
 		t.Error("Recommendation should have agent_id")
 	}
 
@@ -206,12 +206,12 @@ func TestAPIEvaluateEnforcement(t *testing.T) {
 func TestEvaluateEnforcementInvalidRequest(t *testing.T) {
 	router, handler := setupTestRouter()
 
-	agent := NewAgent("agent-1", "Test Agent", "gpt-4", "openai", 0.8)
+	agent := NewAgent(testAgentID, "Test Agent", "gpt-4", "openai", 0.8)
 	handler.RegisterAgent(agent)
 
 	// Missing required fields
 	requestBody := map[string]interface{}{
-		"agent_id": "agent-1",
+		"agent_id": testAgentID,
 		"subject":  "user:alice",
 		// Missing resource and action
 	}
@@ -230,11 +230,11 @@ func TestEvaluateEnforcementInvalidRequest(t *testing.T) {
 func TestEvaluateBatch(t *testing.T) {
 	router, handler := setupTestRouter()
 
-	agent := NewAgent("agent-1", "Test Agent", "gpt-4", "openai", 0.8)
+	agent := NewAgent(testAgentID, "Test Agent", "gpt-4", "openai", 0.8)
 	handler.RegisterAgent(agent)
 
 	requestBody := map[string]interface{}{
-		"agent_id": "agent-1",
+		"agent_id": testAgentID,
 		"requests": []map[string]interface{}{
 			{
 				"subject":  "user:alice",
@@ -277,7 +277,7 @@ func TestEvaluateBatch(t *testing.T) {
 func TestHealthCheck(t *testing.T) {
 	router, handler := setupTestRouter()
 
-	agent1 := NewAgent("agent-1", "Agent 1", "gpt-4", "openai", 0.8)
+	agent1 := NewAgent(testAgentID, "Agent 1", "gpt-4", "openai", 0.8)
 	agent2 := NewAgent("agent-2", "Agent 2", "claude-3", "anthropic", 0.7)
 	agent2.Disable()
 	handler.RegisterAgent(agent1)
