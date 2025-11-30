@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
 )
 
 // GAuthPlusHandler handles GAuth+ enhanced authorization features
