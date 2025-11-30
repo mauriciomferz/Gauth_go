@@ -124,22 +124,22 @@ export GAUTH_REPLAY_FAIL_CLOSED=1
 
 ```
 ┌─────────────────────────────────────────────────┐
-│ TIER 1: Local Cache (<1µs)                     │
-│ - In-memory map: poaID → RevocationEvent       │
-│ - Updated via Redis Pub/Sub                    │
+│ TIER 1: Local Cache (<1µs)                      │
+│ - In-memory map: poaID → RevocationEvent        │
+│ - Updated via Redis Pub/Sub                     │
 │ - No network latency                            │
 └─────────────────────────────────────────────────┘
                      ↓ (cache miss)
 ┌─────────────────────────────────────────────────┐
-│ TIER 2: Redis Cluster (~1ms)                   │
-│ - Distributed cache across all servers         │
-│ - Atomic operations (GET/SET)                  │
-│ - TTL: 90 days for finalized revocations      │
+│ TIER 2: Redis Cluster (~1ms)                    │
+│ - Distributed cache across all servers          │
+│ - Atomic operations (GET/SET)                   │
+│ - TTL: 90 days for finalized revocations        │
 └─────────────────────────────────────────────────┘
                      ↓ (cache miss)
 ┌─────────────────────────────────────────────────┐
-│ TIER 3: Blockchain (~100ms)                    │
-│ - Authoritative source of truth                │
+│ TIER 3: Blockchain (~100ms)                     │
+│ - Authoritative source of truth                 │
 │ - Permanent immutable record                    │
 └─────────────────────────────────────────────────┘
 ```
@@ -573,7 +573,7 @@ rate(gauth_max_depth_exceeded_total[5m]) > 2
 └─────────────────────────────────────────────────┘
                      ↓
 ┌─────────────────────────────────────────────────┐
-│ TRUST BOUNDARY 1: TLS Termination              │
+│ TRUST BOUNDARY 1: TLS Termination               │
 │ Mitigations: Certificate pinning, HSTS          │
 └─────────────────────────────────────────────────┘
                      ↓
