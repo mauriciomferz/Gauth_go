@@ -199,8 +199,8 @@ func (h *PolicyTemplatesHandler) ListPolicyTemplates(c *gin.Context) {
 			return
 		}
 
-		json.Unmarshal(policyRulesJSON, &t.PolicyRules)
-		json.Unmarshal(variablesJSON, &t.Variables)
+		_ = json.Unmarshal(policyRulesJSON, &t.PolicyRules) // Tolerate partial data
+		_ = json.Unmarshal(variablesJSON, &t.Variables) // Tolerate partial data
 
 		templates = append(templates, t)
 	}

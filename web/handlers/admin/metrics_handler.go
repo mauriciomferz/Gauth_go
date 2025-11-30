@@ -377,7 +377,7 @@ func (h *MetricsHandler) getSemanticCounters(ctx context.Context) SemanticCounte
 		
 		// Get active anchors count
 		var active, cached int64
-		h.db.QueryRow(ctx, "SELECT COUNT(*) FROM authorization_policies WHERE status = 'active'").Scan(&active)
+		_ = h.db.QueryRow(ctx, "SELECT COUNT(*) FROM authorization_policies WHERE status = 'active'").Scan(&active) // Best effort metrics
 		counters.ActiveAnchors = active
 		counters.CachedAnchors = cached
 		

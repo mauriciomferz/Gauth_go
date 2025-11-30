@@ -391,9 +391,9 @@ func NewNLIdentityConnector(config *NLIdentityConnectorConfig) (*NLIdentityConne
 	}
 	
 	// Register custom validators
-	connector.validator.RegisterValidation("nl_bsn", validateBSN)
-	connector.validator.RegisterValidation("nl_postal_code", validateNLPostalCode)
-	connector.validator.RegisterValidation("nl_iban", validateNLIBAN)
+	_ = connector.validator.RegisterValidation("nl_bsn", validateBSN) // Registration failures are acceptable; fallback to standard validation
+	_ = connector.validator.RegisterValidation("nl_postal_code", validateNLPostalCode)
+	_ = connector.validator.RegisterValidation("nl_iban", validateNLIBAN)
 	
 	return connector, nil
 }

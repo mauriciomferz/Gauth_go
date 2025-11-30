@@ -583,7 +583,7 @@ func (r *Repository) ListCorrelationPatterns(ctx context.Context, tenantID strin
 
 		// Unmarshal JSONB
 		if conditions != nil {
-			json.Unmarshal(conditions, &pattern.Conditions)
+			_ = json.Unmarshal(conditions, &pattern.Conditions) // Tolerate partial data
 		}
 
 		patterns = append(patterns, pattern)

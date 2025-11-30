@@ -7795,7 +7795,7 @@ func (s *BetaServer) routes() {
 		} else {
 			// Fallback if middleware didn't run
 			nonceBytes := make([]byte, 16)
-			crand.Read(nonceBytes)
+			_, _ = crand.Read(nonceBytes) // crypto/rand.Read always succeeds on supported platforms
 			nonce = base64.StdEncoding.EncodeToString(nonceBytes)
 			c.Set("csp-nonce", nonce)
 		}

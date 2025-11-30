@@ -122,7 +122,7 @@ func (h *AuthorizationHandlers) ValidateToken(c *gin.Context) {
 	parts := strings.Split(req.Token, ".")
 	if len(parts) == 3 {
 		if payload, err := base64.RawURLEncoding.DecodeString(parts[1]); err == nil {
-			json.Unmarshal(payload, &decoded)
+			_ = json.Unmarshal(payload, &decoded) // Best effort decoding for display only
 		}
 	}
 

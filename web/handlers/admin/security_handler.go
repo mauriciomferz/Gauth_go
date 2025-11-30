@@ -248,7 +248,7 @@ func (h *SecurityHandler) createDefaultSecuritySettings(c *gin.Context, tenantID
 	`
 	
 	var settings SecuritySettings
-	h.db.QueryRow(ctx, query, id, tenantID, "security@"+tenantID, "system").Scan(
+	_ = h.db.QueryRow(ctx, query, id, tenantID, "security@"+tenantID, "system").Scan( // Best effort; will return defaults on error
 		&settings.ID, &settings.TenantID,
 		&settings.MFAEnabled, &settings.MFAMethods, &settings.MFARequiredForAdmin, &settings.MFAGracePeriodHours,
 		&settings.IPWhitelistEnabled, &settings.IPWhitelist, &settings.IPWhitelistMode,

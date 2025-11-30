@@ -341,7 +341,7 @@ func (uc *UAEIdentityConnector) validateEmiratesIDFormat(emiratesID string) (boo
 	
 	// Validate year (reasonable range: 1900-current year)
 	var year int
-	fmt.Sscanf(components["year"], "%d", &year)
+	_, _ = fmt.Sscanf(components["year"], "%d", &year) // Best effort parsing; will be 0 if invalid
 	currentYear := time.Now().Year()
 	if year < 1900 || year > currentYear {
 		return false, nil

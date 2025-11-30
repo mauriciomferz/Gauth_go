@@ -359,7 +359,7 @@ func (sc *SpainIdentityConnector) validateDNINumber(dni string) (bool, string) {
 	
 	// Calculate control letter
 	var num int
-	fmt.Sscanf(number, "%d", &num)
+	_, _ = fmt.Sscanf(number, "%d", &num) // Best effort parsing; will be 0 if invalid
 	
 	letters := "TRWAGMYFPDXBNJZSQVHLCKE"
 	expectedLetter := string(letters[num%23])
@@ -393,7 +393,7 @@ func (sc *SpainIdentityConnector) validateNIENumber(nie string) (bool, string) {
 	// Calculate control letter
 	fullNumber := prefix + number
 	var num int
-	fmt.Sscanf(fullNumber, "%d", &num)
+	_, _ = fmt.Sscanf(fullNumber, "%d", &num) // Best effort parsing; will be 0 if invalid
 	
 	letters := "TRWAGMYFPDXBNJZSQVHLCKE"
 	expectedLetter := string(letters[num%23])
