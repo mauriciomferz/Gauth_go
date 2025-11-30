@@ -16,27 +16,27 @@ type OptimisticRevocationStatus string
 const (
 	// OptimisticStatusPending indicates revocation is pending (mempool clearing)
 	OptimisticStatusPending OptimisticRevocationStatus = "PENDING"
-	
+
 	// OptimisticStatusFinalized indicates revocation is finalized (on-chain)
 	OptimisticStatusFinalized OptimisticRevocationStatus = "FINALIZED"
-	
+
 	// OptimisticStatusChallenged indicates the revocation was challenged (collateral slashed)
 	OptimisticStatusChallenged OptimisticRevocationStatus = "CHALLENGED"
 )
 
 // OptimisticRevocationState tracks the state of an optimistic revocation
 type OptimisticRevocationState struct {
-	PoAID              string                       `json:"poa_id"`
-	Status             OptimisticRevocationStatus   `json:"status"`
-	PendingAt          time.Time                    `json:"pending_at,omitempty"`
-	FinalizedAt        time.Time                    `json:"finalized_at,omitempty"`
-	ChallengedAt       time.Time                    `json:"challenged_at,omitempty"`
-	Reason             string                       `json:"reason"`
-	Principal          string                       `json:"principal"`
-	Collateral         uint64                       `json:"collateral"`         // Wei deposited
-	ChallengeDeadline  time.Time                    `json:"challenge_deadline"` // When challenge window closes
-	MempoolTxCount     int                          `json:"mempool_tx_count"`   // Pending txs at revocation
-	ClearedTxCount     int                          `json:"cleared_tx_count"`   // How many cleared
+	PoAID             string                     `json:"poa_id"`
+	Status            OptimisticRevocationStatus `json:"status"`
+	PendingAt         time.Time                  `json:"pending_at,omitempty"`
+	FinalizedAt       time.Time                  `json:"finalized_at,omitempty"`
+	ChallengedAt      time.Time                  `json:"challenged_at,omitempty"`
+	Reason            string                     `json:"reason"`
+	Principal         string                     `json:"principal"`
+	Collateral        uint64                     `json:"collateral"`         // Wei deposited
+	ChallengeDeadline time.Time                  `json:"challenge_deadline"` // When challenge window closes
+	MempoolTxCount    int                        `json:"mempool_tx_count"`   // Pending txs at revocation
+	ClearedTxCount    int                        `json:"cleared_tx_count"`   // How many cleared
 }
 
 // OptimisticRevocation implements optimistic revocation with collateral
@@ -46,16 +46,16 @@ type OptimisticRevocationState struct {
 // 3. Requires collateral deposit (slashed if revocation was malicious)
 // 4. Provides challenge window for disputes
 type OptimisticRevocation struct {
-	redis              *redis.ClusterClient
-	logger             Logger
-	oracle             *EmergencyRevocationOracle
-	challengeWindow    time.Duration // How long validators can challenge (default: 15 minutes)
-	mempoolClearTime   time.Duration // Estimated time for mempool to clear (default: 60 seconds)
-	minCollateral      uint64        // Minimum collateral required (Wei)
-	states             sync.Map      // poaID → *OptimisticRevocationState
-	wg                 sync.WaitGroup // Track background goroutines
-	shutdown           chan struct{}  // Signal to stop background tasks
-	shutdownOnce       sync.Once      // Ensure shutdown happens once
+	redis            *redis.ClusterClient
+	logger           Logger
+	oracle           *EmergencyRevocationOracle
+	challengeWindow  time.Duration  // How long validators can challenge (default: 15 minutes)
+	mempoolClearTime time.Duration  // Estimated time for mempool to clear (default: 60 seconds)
+	minCollateral    uint64         // Minimum collateral required (Wei)
+	states           sync.Map       // poaID → *OptimisticRevocationState
+	wg               sync.WaitGroup // Track background goroutines
+	shutdown         chan struct{}  // Signal to stop background tasks
+	shutdownOnce     sync.Once      // Ensure shutdown happens once
 }
 
 // NewOptimisticRevocation creates a new optimistic revocation system
@@ -180,7 +180,7 @@ func (o *OptimisticRevocation) MarkPendingRevocation(ctx context.Context, poaID,
 	go o.scheduleFinalization(poaID, o.mempoolClearTime)
 
 	duration := time.Since(start)
-	o.logger.Infof("✅ PoA %s marked as pending revocation in %v (collateral: %d Wei, mempool: %d txs)", 
+	o.logger.Infof("✅ PoA %s marked as pending revocation in %v (collateral: %d Wei, mempool: %d txs)",
 		poaID, duration, collateral, mempoolTxCount)
 
 	return nil
@@ -189,7 +189,7 @@ func (o *OptimisticRevocation) MarkPendingRevocation(ctx context.Context, poaID,
 // scheduleFinalization automatically finalizes a pending revocation after mempool clears
 func (o *OptimisticRevocation) scheduleFinalization(poaID string, delay time.Duration) {
 	defer o.wg.Done()
-	
+
 	// Wait for delay or shutdown signal
 	select {
 	case <-time.After(delay):
@@ -288,7 +288,7 @@ func (o *OptimisticRevocation) FinalizeRevocation(ctx context.Context, poaID str
 	o.logger.Infof("Collateral release: %d Wei to %s", state.Collateral, state.Principal)
 
 	duration := time.Since(start)
-	o.logger.Infof("✅ PoA %s finalized in %v (cleared %d/%d mempool txs)", 
+	o.logger.Infof("✅ PoA %s finalized in %v (cleared %d/%d mempool txs)",
 		poaID, duration, state.ClearedTxCount, state.MempoolTxCount)
 
 	return nil
@@ -339,7 +339,7 @@ func (o *OptimisticRevocation) ChallengeRevocation(ctx context.Context, poaID, c
 	o.states.Store(poaID, state)
 
 	// Slash collateral (in production, send to challenger or burn)
-	o.logger.Infof("Collateral slashed: %d Wei from %s (challenger: %s)", 
+	o.logger.Infof("Collateral slashed: %d Wei from %s (challenger: %s)",
 		state.Collateral, state.Principal, challenger)
 	o.logger.Infof("Challenge evidence: %s", evidence)
 
@@ -350,7 +350,7 @@ func (o *OptimisticRevocation) ChallengeRevocation(ctx context.Context, poaID, c
 	}
 
 	duration := time.Since(start)
-	o.logger.Infof("✅ Challenge successful in %v: PoA %s returned to active, collateral slashed", 
+	o.logger.Infof("✅ Challenge successful in %v: PoA %s returned to active, collateral slashed",
 		poaID, duration)
 
 	return nil
@@ -403,10 +403,10 @@ func (o *OptimisticRevocation) IsPoAUsable(ctx context.Context, poaID string) (b
 
 	switch state.Status {
 	case OptimisticStatusPending:
-		return false, fmt.Sprintf("PoA revocation pending (reason: %s, challenge deadline: %v)", 
+		return false, fmt.Sprintf("PoA revocation pending (reason: %s, challenge deadline: %v)",
 			state.Reason, state.ChallengeDeadline), nil
 	case OptimisticStatusFinalized:
-		return false, fmt.Sprintf("PoA permanently revoked (reason: %s, finalized at: %v)", 
+		return false, fmt.Sprintf("PoA permanently revoked (reason: %s, finalized at: %v)",
 			state.Reason, state.FinalizedAt), nil
 	case OptimisticStatusChallenged:
 		// Challenged = returned to active
@@ -463,10 +463,10 @@ func (o *OptimisticRevocation) Close() error {
 	o.shutdownOnce.Do(func() {
 		close(o.shutdown)
 	})
-	
+
 	// Wait for all background goroutines to complete
 	o.wg.Wait()
-	
+
 	if err := o.redis.Close(); err != nil {
 		return fmt.Errorf("failed to close Redis connection: %w", err)
 	}

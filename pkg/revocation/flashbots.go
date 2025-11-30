@@ -18,12 +18,12 @@ import (
 // FlashbotsRevocation submits revocation transactions via Flashbots private mempool
 // This eliminates front-running vulnerability by hiding transactions until block inclusion
 type FlashbotsRevocation struct {
-	client         *ethclient.Client
-	flashbotsURL   string
-	signingKey     *ecdsa.PrivateKey
-	contractAddr   common.Address
-	chainID        *big.Int
-	logger         Logger
+	client       *ethclient.Client
+	flashbotsURL string
+	signingKey   *ecdsa.PrivateKey
+	contractAddr common.Address
+	chainID      *big.Int
+	logger       Logger
 }
 
 // FlashbotsConfig contains configuration for Flashbots integration

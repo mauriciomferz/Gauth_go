@@ -16,10 +16,10 @@ type CircuitBreakerState string
 const (
 	// CircuitBreakerClosed indicates normal operation (PoA usable)
 	CircuitBreakerClosed CircuitBreakerState = "CLOSED"
-	
+
 	// CircuitBreakerOpen indicates circuit is open (PoA suspended)
 	CircuitBreakerOpen CircuitBreakerState = "OPEN"
-	
+
 	// CircuitBreakerHalfOpen indicates circuit is testing (limited transactions allowed)
 	CircuitBreakerHalfOpen CircuitBreakerState = "HALF_OPEN"
 )
@@ -30,54 +30,54 @@ type SuspensionReason string
 const (
 	// SuspensionRateLimitTx indicates too many transactions per time window
 	SuspensionRateLimitTx SuspensionReason = "RATE_LIMIT_TX"
-	
+
 	// SuspensionRateLimitValue indicates too much value transferred per time window
 	SuspensionRateLimitValue SuspensionReason = "RATE_LIMIT_VALUE"
-	
+
 	// SuspensionAnomalousPattern indicates unusual transaction patterns detected
 	SuspensionAnomalousPattern SuspensionReason = "ANOMALOUS_PATTERN"
-	
+
 	// SuspensionFailureThreshold indicates too many failed transactions
 	SuspensionFailureThreshold SuspensionReason = "FAILURE_THRESHOLD"
 )
 
 // RateLimitConfig defines rate limiting thresholds
 type RateLimitConfig struct {
-	MaxTxPerMinute     int    `json:"max_tx_per_minute"`      // Maximum transactions per minute
-	MaxTxPerHour       int    `json:"max_tx_per_hour"`        // Maximum transactions per hour
-	MaxValuePerMinute  uint64 `json:"max_value_per_minute"`   // Maximum Wei per minute
-	MaxValuePerHour    uint64 `json:"max_value_per_hour"`     // Maximum Wei per hour
-	MaxFailureRate     float64 `json:"max_failure_rate"`      // Maximum failure rate (0.0-1.0)
-	FailureWindowSecs  int    `json:"failure_window_secs"`    // Window for failure rate calculation
+	MaxTxPerMinute    int     `json:"max_tx_per_minute"`    // Maximum transactions per minute
+	MaxTxPerHour      int     `json:"max_tx_per_hour"`      // Maximum transactions per hour
+	MaxValuePerMinute uint64  `json:"max_value_per_minute"` // Maximum Wei per minute
+	MaxValuePerHour   uint64  `json:"max_value_per_hour"`   // Maximum Wei per hour
+	MaxFailureRate    float64 `json:"max_failure_rate"`     // Maximum failure rate (0.0-1.0)
+	FailureWindowSecs int     `json:"failure_window_secs"`  // Window for failure rate calculation
 }
 
 // CircuitBreakerMetrics tracks PoA activity metrics
 type CircuitBreakerMetrics struct {
-	mu                   sync.Mutex            `json:"-"` // Protects all fields from concurrent access
-	PoAID                string                `json:"poa_id"`
-	State                CircuitBreakerState   `json:"state"`
-	TxCountLastMinute    int                   `json:"tx_count_last_minute"`
-	TxCountLastHour      int                   `json:"tx_count_last_hour"`
-	ValueLastMinute      uint64                `json:"value_last_minute"`  // Wei
-	ValueLastHour        uint64                `json:"value_last_hour"`     // Wei
-	FailedTxCount        int                   `json:"failed_tx_count"`
-	TotalTxCount         int                   `json:"total_tx_count"`
-	LastTxTimestamp      time.Time             `json:"last_tx_timestamp"`
-	SuspendedAt          time.Time             `json:"suspended_at,omitempty"`
-	SuspensionReason     SuspensionReason      `json:"suspension_reason,omitempty"`
-	RecoveryAttemptedAt  time.Time             `json:"recovery_attempted_at,omitempty"`
-	TestTxAllowed        int                   `json:"test_tx_allowed"`     // In HALF_OPEN state
+	mu                  sync.Mutex          `json:"-"` // Protects all fields from concurrent access
+	PoAID               string              `json:"poa_id"`
+	State               CircuitBreakerState `json:"state"`
+	TxCountLastMinute   int                 `json:"tx_count_last_minute"`
+	TxCountLastHour     int                 `json:"tx_count_last_hour"`
+	ValueLastMinute     uint64              `json:"value_last_minute"` // Wei
+	ValueLastHour       uint64              `json:"value_last_hour"`   // Wei
+	FailedTxCount       int                 `json:"failed_tx_count"`
+	TotalTxCount        int                 `json:"total_tx_count"`
+	LastTxTimestamp     time.Time           `json:"last_tx_timestamp"`
+	SuspendedAt         time.Time           `json:"suspended_at,omitempty"`
+	SuspensionReason    SuspensionReason    `json:"suspension_reason,omitempty"`
+	RecoveryAttemptedAt time.Time           `json:"recovery_attempted_at,omitempty"`
+	TestTxAllowed       int                 `json:"test_tx_allowed"` // In HALF_OPEN state
 }
 
 // CircuitBreaker implements circuit breaker pattern with rate limiting
 // Automatically suspends PoAs that exhibit suspicious behavior patterns
 type CircuitBreaker struct {
-	redis              redis.UniversalClient  // Supports both regular and cluster clients
+	redis              redis.UniversalClient // Supports both regular and cluster clients
 	logger             Logger
 	config             *RateLimitConfig
-	metrics            sync.Map                // poaID → *CircuitBreakerMetrics
-	suspensionDuration time.Duration           // How long to keep circuit open
-	recoveryTestCount  int                     // Number of test transactions in HALF_OPEN
+	metrics            sync.Map      // poaID → *CircuitBreakerMetrics
+	suspensionDuration time.Duration // How long to keep circuit open
+	recoveryTestCount  int           // Number of test transactions in HALF_OPEN
 }
 
 // NewCircuitBreaker creates a new circuit breaker with rate limiting
@@ -112,8 +112,8 @@ func NewCircuitBreaker(redisAddrs []string, config *RateLimitConfig, logger Logg
 		redis:              rdb,
 		logger:             logger,
 		config:             config,
-		suspensionDuration: 5 * time.Minute,  // Default: 5 minutes
-		recoveryTestCount:  10,               // Default: 10 test transactions
+		suspensionDuration: 5 * time.Minute, // Default: 5 minutes
+		recoveryTestCount:  10,              // Default: 10 test transactions
 	}
 
 	logger.Info("Circuit Breaker system initialized")
@@ -178,7 +178,7 @@ func (cb *CircuitBreaker) RecordTransaction(ctx context.Context, poaID string, v
 			}
 			return nil
 		} else {
-			return fmt.Errorf("circuit breaker OPEN for PoA %s (suspended: %s, reason: %s)", 
+			return fmt.Errorf("circuit breaker OPEN for PoA %s (suspended: %s, reason: %s)",
 				poaID, metrics.SuspensionReason, metrics.SuspensionReason)
 		}
 	}
@@ -187,9 +187,9 @@ func (cb *CircuitBreaker) RecordTransaction(ctx context.Context, poaID string, v
 	if metrics.State == CircuitBreakerHalfOpen {
 		// Decrement remaining test transactions
 		metrics.TestTxAllowed--
-		cb.logger.Infof("Circuit HALF_OPEN for PoA %s: test tx %d/%d", 
-			poaID, cb.recoveryTestCount - metrics.TestTxAllowed, cb.recoveryTestCount)
-		
+		cb.logger.Infof("Circuit HALF_OPEN for PoA %s: test tx %d/%d",
+			poaID, cb.recoveryTestCount-metrics.TestTxAllowed, cb.recoveryTestCount)
+
 		// Check if all test transactions completed
 		if metrics.TestTxAllowed <= 0 {
 			// All test transactions completed successfully - close circuit
@@ -247,28 +247,28 @@ func (cb *CircuitBreaker) checkRateLimits(ctx context.Context, poaID string, met
 	// Check transaction rate (per minute)
 	if metrics.TxCountLastMinute > cb.config.MaxTxPerMinute {
 		cb.openCircuit(ctx, poaID, metrics, SuspensionRateLimitTx)
-		return fmt.Errorf("transaction rate limit exceeded: %d tx/min (max: %d)", 
+		return fmt.Errorf("transaction rate limit exceeded: %d tx/min (max: %d)",
 			metrics.TxCountLastMinute, cb.config.MaxTxPerMinute)
 	}
 
 	// Check transaction rate (per hour)
 	if metrics.TxCountLastHour > cb.config.MaxTxPerHour {
 		cb.openCircuit(ctx, poaID, metrics, SuspensionRateLimitTx)
-		return fmt.Errorf("transaction rate limit exceeded: %d tx/hour (max: %d)", 
+		return fmt.Errorf("transaction rate limit exceeded: %d tx/hour (max: %d)",
 			metrics.TxCountLastHour, cb.config.MaxTxPerHour)
 	}
 
 	// Check value rate (per minute)
 	if metrics.ValueLastMinute > cb.config.MaxValuePerMinute {
 		cb.openCircuit(ctx, poaID, metrics, SuspensionRateLimitValue)
-		return fmt.Errorf("value rate limit exceeded: %d Wei/min (max: %d)", 
+		return fmt.Errorf("value rate limit exceeded: %d Wei/min (max: %d)",
 			metrics.ValueLastMinute, cb.config.MaxValuePerMinute)
 	}
 
 	// Check value rate (per hour)
 	if metrics.ValueLastHour > cb.config.MaxValuePerHour {
 		cb.openCircuit(ctx, poaID, metrics, SuspensionRateLimitValue)
-		return fmt.Errorf("value rate limit exceeded: %d Wei/hour (max: %d)", 
+		return fmt.Errorf("value rate limit exceeded: %d Wei/hour (max: %d)",
 			metrics.ValueLastHour, cb.config.MaxValuePerHour)
 	}
 
@@ -277,7 +277,7 @@ func (cb *CircuitBreaker) checkRateLimits(ctx context.Context, poaID string, met
 		failureRate := float64(metrics.FailedTxCount) / float64(metrics.TotalTxCount)
 		if failureRate > cb.config.MaxFailureRate {
 			cb.openCircuit(ctx, poaID, metrics, SuspensionFailureThreshold)
-			return fmt.Errorf("failure rate exceeded: %.2f%% (max: %.2f%%)", 
+			return fmt.Errorf("failure rate exceeded: %.2f%% (max: %.2f%%)",
 				failureRate*100, cb.config.MaxFailureRate*100)
 		}
 	}
@@ -288,7 +288,7 @@ func (cb *CircuitBreaker) checkRateLimits(ctx context.Context, poaID string, met
 // openCircuit suspends a PoA by opening its circuit breaker
 func (cb *CircuitBreaker) openCircuit(ctx context.Context, poaID string, metrics *CircuitBreakerMetrics, reason SuspensionReason) {
 	cb.logger.Warnf("🔴 Opening circuit for PoA %s (reason: %s)", poaID, reason)
-	
+
 	metrics.State = CircuitBreakerOpen
 	metrics.SuspendedAt = time.Now()
 	metrics.SuspensionReason = reason
@@ -312,11 +312,11 @@ func (cb *CircuitBreaker) IsPoAAllowed(ctx context.Context, poaID string) (bool,
 	switch metrics.State {
 	case CircuitBreakerClosed:
 		return true, "Circuit CLOSED (normal operation)", nil
-	
+
 	case CircuitBreakerOpen:
 		remainingTime := cb.suspensionDuration - time.Since(metrics.SuspendedAt)
 		if remainingTime > 0 {
-			return false, fmt.Sprintf("Circuit OPEN (suspended for %s, reason: %s)", 
+			return false, fmt.Sprintf("Circuit OPEN (suspended for %s, reason: %s)",
 				remainingTime.Round(time.Second), metrics.SuspensionReason), nil
 		}
 		// Suspension expired - move to HALF_OPEN
@@ -327,11 +327,11 @@ func (cb *CircuitBreaker) IsPoAAllowed(ctx context.Context, poaID string) (bool,
 			cb.logger.Errorf("Failed to store metrics (non-fatal): %v", err)
 		}
 		return true, "Circuit HALF_OPEN (testing recovery)", nil
-	
+
 	case CircuitBreakerHalfOpen:
-		return true, fmt.Sprintf("Circuit HALF_OPEN (test tx %d/%d remaining)", 
+		return true, fmt.Sprintf("Circuit HALF_OPEN (test tx %d/%d remaining)",
 			metrics.TestTxAllowed, cb.recoveryTestCount), nil
-	
+
 	default:
 		return false, fmt.Sprintf("Unknown circuit state: %s", metrics.State), nil
 	}
@@ -369,7 +369,7 @@ func (cb *CircuitBreaker) GetMetrics(ctx context.Context, poaID string) (*Circui
 // ResetMetrics resets all metrics for a PoA (admin operation)
 func (cb *CircuitBreaker) ResetMetrics(ctx context.Context, poaID string) error {
 	cb.logger.Infof("Resetting metrics for PoA %s", poaID)
-	
+
 	metrics := &CircuitBreakerMetrics{
 		PoAID:             poaID,
 		State:             CircuitBreakerClosed,
@@ -394,7 +394,7 @@ func (cb *CircuitBreaker) ResetMetrics(ctx context.Context, poaID string) error 
 // ManualSuspend manually suspends a PoA (admin operation)
 func (cb *CircuitBreaker) ManualSuspend(ctx context.Context, poaID string, reason SuspensionReason) error {
 	cb.logger.Infof("Manually suspending PoA %s (reason: %s)", poaID, reason)
-	
+
 	metrics, err := cb.getOrCreateMetrics(ctx, poaID)
 	if err != nil {
 		return fmt.Errorf("failed to get metrics: %w", err)
@@ -403,7 +403,7 @@ func (cb *CircuitBreaker) ManualSuspend(ctx context.Context, poaID string, reaso
 	metrics.mu.Lock()
 	cb.openCircuit(ctx, poaID, metrics, reason)
 	metrics.mu.Unlock()
-	
+
 	cb.logger.Infof("✅ PoA %s manually suspended", poaID)
 	return nil
 }
@@ -411,7 +411,7 @@ func (cb *CircuitBreaker) ManualSuspend(ctx context.Context, poaID string, reaso
 // ManualResume manually resumes a suspended PoA (admin operation)
 func (cb *CircuitBreaker) ManualResume(ctx context.Context, poaID string) error {
 	cb.logger.Infof("Manually resuming PoA %s", poaID)
-	
+
 	metrics, err := cb.getOrCreateMetrics(ctx, poaID)
 	if err != nil {
 		return fmt.Errorf("failed to get metrics: %w", err)
@@ -480,7 +480,7 @@ func (cb *CircuitBreaker) getOrCreateMetrics(ctx context.Context, poaID string) 
 // storeMetrics persists metrics to Redis
 func (cb *CircuitBreaker) storeMetrics(ctx context.Context, metrics *CircuitBreakerMetrics) error {
 	key := fmt.Sprintf("circuit_breaker:%s", metrics.PoAID)
-	
+
 	data, err := json.Marshal(metrics)
 	if err != nil {
 		return fmt.Errorf("failed to marshal metrics: %w", err)
