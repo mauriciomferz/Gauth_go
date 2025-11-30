@@ -341,7 +341,7 @@ func (h *AuditHandler) VerifyEvent(c *gin.Context) {
 	eventID := c.Param("id")
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 
 	// Verify hash chain integrity
@@ -374,7 +374,7 @@ func (h *AuditHandler) VerifyEvent(c *gin.Context) {
 func (h *AuditHandler) ExportAuditTrail(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 	
 	var req ExportRequest
@@ -627,7 +627,7 @@ func (h *AuditHandler) CreateSIEMIntegration(c *gin.Context) {
 
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 
 	// TODO: Validate SIEM endpoint connectivity
@@ -689,7 +689,7 @@ func (h *AuditHandler) DeleteSIEMIntegration(c *gin.Context) {
 	siemID := c.Param("id")
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 
 	err := h.repo.DeleteSIEMIntegration(c.Request.Context(), tenantID, siemID)

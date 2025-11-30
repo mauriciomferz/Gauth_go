@@ -238,18 +238,18 @@ func (h *EventHandler) ListHandlers(c *gin.Context) {
 				method = *eh.HTTPMethod
 			}
 
-			handlerMap[eh.ID] = &Handler{
-				ID:            eh.ID,
-				Name:          eh.HandlerName,
-				EventTypes:    []string{eh.EventType},
-				Endpoint:      endpoint,
-				Method:        method,
-				Enabled:       eh.Status == "active",
-				RetryPolicy:   retryPolicy,
-				Timeout:       eh.TimeoutSeconds * 1000, // Convert to ms
-				LastTriggered: lastTriggered,
-				SuccessRate:   successRate,
-			}
+		handlerMap[eh.ID] = &Handler{
+			ID:            eh.ID,
+			Name:          eh.HandlerName,
+			EventTypes:    []string{eh.EventType},
+			Endpoint:      endpoint,
+			Method:        method,
+			Enabled:       eh.Status == statusActive,
+			RetryPolicy:   retryPolicy,
+			Timeout:       eh.TimeoutSeconds * 1000, // Convert to ms
+			LastTriggered: lastTriggered,
+			SuccessRate:   successRate,
+		}
 		}
 	}
 
@@ -288,7 +288,7 @@ func (h *EventHandler) CreateHandler(c *gin.Context) {
 			HandlerName:    req.Name,
 			EventType:      eventType,
 			HandlerType:    "webhook",
-			Status:         "active",
+			Status:         statusActive,
 			EndpointURL:    &req.Endpoint,
 			HTTPMethod:     &req.Method,
 			RetryConfig:    map[string]interface{}{"policy": req.RetryPolicy},
@@ -342,7 +342,7 @@ func (h *EventHandler) ToggleHandler(c *gin.Context) {
 
 	status := "inactive"
 	if req.Enabled {
-		status = "active"
+		status = statusActive
 	}
 
 	if err := h.repo.UpdateHandlerStatus(c.Request.Context(), tenantID, handlerID, status); err != nil {
