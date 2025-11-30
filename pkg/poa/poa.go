@@ -197,7 +197,7 @@ func (ac *AuthorizedClient) GetRiskLevel() string {
 		case CapabilityL3:
 			return "medium-high"
 		case CapabilityL1, CapabilityL2:
-			return "medium"
+			return string(RiskMedium)
 		default:
 			return "low"
 		}
@@ -206,7 +206,7 @@ func (ac *AuthorizedClient) GetRiskLevel() string {
 	case CapabilityL5:
 		return "medium-high"
 	case CapabilityL4:
-		return "medium"
+		return string(RiskMedium)
 	case CapabilityL2, CapabilityL3:
 		return "medium-low"
 	default:

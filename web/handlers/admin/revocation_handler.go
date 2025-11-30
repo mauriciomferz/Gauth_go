@@ -102,7 +102,7 @@ type VerificationResult struct {
 func (h *RevocationHandler) GetMerkleTree(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 
 	// Get latest tree version
@@ -158,7 +158,7 @@ func (h *RevocationHandler) GetMerkleTree(c *gin.Context) {
 func (h *RevocationHandler) ListProofs(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 
 	// Parse pagination
@@ -223,7 +223,7 @@ func (h *RevocationHandler) GenerateProof(c *gin.Context) {
 
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 
 	// Get latest tree version
@@ -387,7 +387,7 @@ func (h *RevocationHandler) VerifyProof(c *gin.Context) {
 	if valid {
 		tenantID := c.GetString("tenant_id")
 		if tenantID == "" {
-			tenantID = "default-tenant"
+			tenantID = defaultTenantID
 		}
 
 		treeVersion, _ := h.repo.GetLatestTreeVersion(c.Request.Context(), tenantID)
@@ -414,7 +414,7 @@ func (h *RevocationHandler) VerifyProof(c *gin.Context) {
 func (h *RevocationHandler) ListRevocations(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 
 	// Parse pagination
@@ -465,7 +465,7 @@ func (h *RevocationHandler) ListRevocations(c *gin.Context) {
 func (h *RevocationHandler) GetAppendOnlyLog(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 
 	// Get revocations to build log from
@@ -524,7 +524,7 @@ func (h *RevocationHandler) GetAppendOnlyLog(c *gin.Context) {
 func (h *RevocationHandler) GetRevocationMetrics(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 
 	// Get stats from repository

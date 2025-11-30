@@ -162,7 +162,7 @@ func (h *GAuthPlusHandler) CreateDelegation(c *gin.Context) {
 	}
 	delegation.CreatedAt = time.Now().UTC()
 	delegation.UpdatedAt = time.Now().UTC()
-	delegation.Status = "active"
+	delegation.Status = statusActive
 
 	if err := h.delegationService.CreateDelegation(c.Request.Context(), &delegation); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
