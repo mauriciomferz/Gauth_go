@@ -92,6 +92,12 @@ See [Gap Matrix](docs/GAP_MATRIX.auto.md) for detailed implementation status.
 - CI/CD pipelines hardened with continue-on-error patterns
 - Full security policy: [SECURITY.md](SECURITY.md)
 
+**🔒 IMPORTANT SECURITY NOTICE (CV-2025-005):**
+- **BoltDB DEPRECATED** for production containerized deployments (ephemeral storage vulnerability)
+- **Redis REQUIRED** for production Kubernetes/Docker deployments
+- See [REPLAY_STORE_MIGRATION_GUIDE.md](REPLAY_STORE_MIGRATION_GUIDE.md) for migration instructions
+- See [SECURITY_AUDIT_CRITICAL_REVIEW.md](SECURITY_AUDIT_CRITICAL_REVIEW.md) for full details
+
 ### Testing ✅
 - **pkg/auth**: 97.8% coverage (325 test cases)
 - **pkg/authz**: 84.3% coverage (131+ test cases)

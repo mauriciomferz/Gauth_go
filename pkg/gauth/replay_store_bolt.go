@@ -11,11 +11,18 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/mauriciomferz/Gauth_go/internal/security"
 	bolt "go.etcd.io/bbolt"
 )
 
 // BoltReplayStore implements durable replay detection using BoltDB.
 // Addresses gap sec6.item1 (P1): Durable replay persistence with eviction controls.
+//
+// SECURITY WARNING (V-2025-005): BoltDB is UNSAFE for containerized deployments
+// due to ephemeral storage vulnerability. See SECURITY_AUDIT_CRITICAL_REVIEW.md.
+//
+// DEPRECATED for production use in containers. Use Redis or other distributed
+// store for production deployments. See REPLAY_STORE_MIGRATION_GUIDE.md.
 type BoltReplayStore struct {
 	db         *bolt.DB
 	bucketName []byte
@@ -25,7 +32,37 @@ type BoltReplayStore struct {
 // NewBoltReplayStore creates a new BoltDB-backed replay store.
 // The path parameter specifies where the database file should be created.
 // TTL determines how long JTI entries are retained before expiration.
+//
+// SECURITY: This function performs container environment detection. If running
+// in a containerized environment (Docker, Kubernetes, Podman) with ephemeral
+// storage paths (/tmp, /var/tmp, emptyDir), it will FAIL with a detailed error
+// message explaining the security vulnerability and remediation options.
+//
+// To bypass this check (NOT RECOMMENDED), set GAUTH_ALLOW_UNSAFE_BOLTDB=1.
+// This should ONLY be used for development/testing, never in production.
 func NewBoltReplayStore(path string, ttl time.Duration) (*BoltReplayStore, error) {
+	// SECURITY CHECK: Validate path is safe for persistent storage in containers
+	// This prevents CV-2025-005 vulnerability (ephemeral storage replay bypass)
+	if security.ShouldEnforceContainerSafety() {
+		// Allow bypass for development/testing ONLY
+		if os.Getenv("GAUTH_ALLOW_UNSAFE_BOLTDB") != "1" {
+			if err := security.ValidatePathForPersistence(path, "replay protection"); err != nil {
+				return nil, fmt.Errorf("BoltDB SECURITY VIOLATION (CV-2025-005): %w\n\n"+
+					"CRITICAL: BoltDB is DEPRECATED for production use in containers.\n"+
+					"Use Redis (recommended) or PostgreSQL for distributed replay protection.\n\n"+
+					"For development/testing ONLY, set GAUTH_ALLOW_UNSAFE_BOLTDB=1 to bypass.\n"+
+					"See REPLAY_STORE_MIGRATION_GUIDE.md for migration instructions.", err)
+			}
+		} else {
+			// Log warning when bypass is used
+			fmt.Fprintf(os.Stderr, "[SECURITY WARNING] GAUTH_ALLOW_UNSAFE_BOLTDB=1 detected\n")
+			fmt.Fprintf(os.Stderr, "[SECURITY WARNING] BoltDB container safety checks BYPASSED\n")
+			fmt.Fprintf(os.Stderr, "[SECURITY WARNING] %s\n", security.GetContainerInfo())
+			fmt.Fprintf(os.Stderr, "[SECURITY WARNING] Path: %s (may be ephemeral)\n", path)
+			fmt.Fprintf(os.Stderr, "[SECURITY WARNING] This is UNSAFE for production use!\n")
+		}
+	}
+
 	// Ensure directory exists with restricted permissions (0750 instead of 0755)
 	if dir := filepath.Dir(path); dir != "." {
 		if err := os.MkdirAll(dir, 0750); err != nil {

@@ -30,6 +30,7 @@ func (v *StartupValidator) ValidateAll() error {
 	v.validateProductionMode()
 	v.validateCORSConfiguration()
 	v.validateDatabaseCredentials()
+	v.validateReplayStore() // CV-2025-005: Container replay store validation
 
 	if len(v.errors) > 0 {
 		return fmt.Errorf("security validation failed:\n%s", strings.Join(v.errors, "\n"))
@@ -167,6 +168,58 @@ func (v *StartupValidator) validateDatabaseCredentials() {
 				))
 			}
 			break
+		}
+	}
+}
+
+// validateReplayStore checks replay store configuration for security
+// Addresses CV-2025-005: BoltDB ephemeral storage vulnerability
+func (v *StartupValidator) validateReplayStore() {
+	// Check if we're in a container
+	env, inContainer := IsRunningInContainer()
+
+	if inContainer {
+		// In containers, BoltDB is extremely risky
+		if os.Getenv("GAUTH_REPLAY_STORE") == "bolt" || os.Getenv("GAUTH_REPLAY_STORE_PATH") != "" {
+			if os.Getenv("GAUTH_ALLOW_UNSAFE_BOLTDB") == "1" {
+				v.warnings = append(v.warnings, fmt.Sprintf(
+					"BoltDB replay store enabled in %s with safety bypass - UNSAFE for production (CV-2025-005). "+
+						"Replay protection will FAIL after container restart unless using persistent volume. "+
+						"Migrate to Redis for production deployments. See REPLAY_STORE_MIGRATION_GUIDE.md",
+					env,
+				))
+			} else {
+				// This is good - safety checks are active
+				if v.productionMode {
+					v.warnings = append(v.warnings, fmt.Sprintf(
+						"Running in %s - ensure replay store uses Redis or persistent volume (not BoltDB with ephemeral storage)",
+						env,
+					))
+				}
+			}
+		}
+
+		// Recommend Redis for production in containers
+		if v.productionMode {
+			redisHost := os.Getenv("REDIS_HOST")
+			redisAddr := os.Getenv("REDIS_ADDR")
+			if redisHost == "" && redisAddr == "" {
+				v.warnings = append(v.warnings, fmt.Sprintf(
+					"Running in %s without Redis configuration - replay store may not persist across restarts. "+
+						"Set REDIS_HOST or REDIS_ADDR for production deployments.",
+					env,
+				))
+			}
+		}
+	}
+
+	// General production recommendations
+	if v.productionMode {
+		// Check for in-memory replay store in production
+		if os.Getenv("GAUTH_REPLAY_STORE") == "memory" {
+			v.warnings = append(v.warnings,
+				"In-memory replay store detected in production - replay protection will not persist across restarts. "+
+					"Use Redis or distributed store for production.")
 		}
 	}
 }

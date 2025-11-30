@@ -179,13 +179,27 @@ $ trivy fs --security-checks vuln .
 
 ### Production Deployment Requirements
 
+**🚨 UPDATED November 30, 2025 - CV-2025-005 Remediation 🚨**
+
 **CRITICAL (Must Have):**
 ```bash
-# Replay protection
+# ⚠️ CRITICAL: Container Replay Protection (CV-2025-005)
+# BoltDB is DEPRECATED for containerized deployments
+# Redis is MANDATORY for Kubernetes/Docker production use
+
+# Replay protection - REDIS REQUIRED
 export GAUTH_REPLAY_STORE_TYPE=redis
-export GAUTH_REDIS_ADDR=redis-cluster:6379
+export REDIS_HOST=redis-cluster.default.svc.cluster.local
+export REDIS_PORT=6379
+export REDIS_PASSWORD=your-secure-password
 export GAUTH_REPLAY_FAIL_CLOSED=1
 export GAUTH_ALLOW_MISSING_JTI=0
+
+# ❌ DO NOT USE BoltDB in containers
+# If you must use BoltDB (development/testing ONLY):
+#   1. Use persistent volume (not /tmp or emptyDir)
+#   2. Set GAUTH_ALLOW_UNSAFE_BOLTDB=1 (UNSAFE for production)
+#   3. Single instance only (no horizontal scaling)
 
 # Delegation limits
 export GAUTH_MAX_DELEGATION_DEPTH=5
@@ -201,6 +215,10 @@ export GAUTH_METRICS_ENABLED=1
 - Enable audit logging with retention policy
 - Implement rate limiting per endpoint
 - Configure TLS 1.3 for all connections
+
+**MIGRATION REQUIRED:**
+- 📚 See [REPLAY_STORE_MIGRATION_GUIDE.md](REPLAY_STORE_MIGRATION_GUIDE.md) for BoltDB → Redis migration
+- 🔒 See [SECURITY_AUDIT_CRITICAL_REVIEW.md](SECURITY_AUDIT_CRITICAL_REVIEW.md) for full vulnerability details
 
 ---
 
