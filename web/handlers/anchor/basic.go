@@ -11,8 +11,8 @@ import (
 	"os"
 	"time"
 
-	anchorpkg "github.com/mauriciomferz/Gauth_go/pkg/anchor"
 	"github.com/gin-gonic/gin"
+	anchorpkg "github.com/mauriciomferz/Gauth_go/pkg/anchor"
 )
 
 // SignedAnchorWrapper duplicated from web package to avoid import cycle.

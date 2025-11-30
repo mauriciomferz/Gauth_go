@@ -44,16 +44,16 @@ type APIKeyStore interface {
 
 // APIKey represents an API key with its metadata
 type APIKey struct {
-	ID          string
-	HashedKey   string
-	Name        string
-	UserID      string
-	Scopes      []string
-	RateLimit   int  // requests per second
-	Enabled     bool
-	ExpiresAt   *time.Time
-	CreatedAt   time.Time
-	LastUsedAt  *time.Time
+	ID         string
+	HashedKey  string
+	Name       string
+	UserID     string
+	Scopes     []string
+	RateLimit  int // requests per second
+	Enabled    bool
+	ExpiresAt  *time.Time
+	CreatedAt  time.Time
+	LastUsedAt *time.Time
 }
 
 // NewRateLimitMiddleware creates a new rate limiting middleware
@@ -142,17 +142,17 @@ func (m *RateLimitMiddleware) extractAPIKey(r *http.Request) string {
 	if strings.HasPrefix(authHeader, "Bearer ") {
 		return strings.TrimPrefix(authHeader, "Bearer ")
 	}
-	
+
 	// Check X-API-Key header
 	if apiKey := r.Header.Get("X-API-Key"); apiKey != "" {
 		return apiKey
 	}
-	
+
 	// Check query parameter (less secure, for backward compatibility)
 	if apiKey := r.URL.Query().Get("api_key"); apiKey != "" {
 		return apiKey
 	}
-	
+
 	return ""
 }
 
@@ -165,19 +165,19 @@ func (m *RateLimitMiddleware) extractIP(r *http.Request) string {
 			return strings.TrimSpace(ips[0])
 		}
 	}
-	
+
 	// Check X-Real-IP header
 	if xri := r.Header.Get("X-Real-IP"); xri != "" {
 		return xri
 	}
-	
+
 	// Fall back to RemoteAddr
 	ip := r.RemoteAddr
 	// Remove port if present
 	if idx := strings.LastIndex(ip, ":"); idx != -1 {
 		ip = ip[:idx]
 	}
-	
+
 	return ip
 }
 
@@ -200,7 +200,7 @@ func (m *RateLimitMiddleware) RegisterRoutes(r *mux.Router, keyManager *APIKeyMa
 	// Rate limiting endpoints
 	r.HandleFunc("/api/v1/admin/ratelimit/stats/{key}", m.handleGetStats).Methods("GET")
 	r.HandleFunc("/api/v1/admin/ratelimit/reset/{key}", m.handleReset).Methods("POST")
-	
+
 	// API Key management endpoints
 	r.HandleFunc("/api/v1/admin/apikeys", keyManager.handleCreateAPIKey).Methods("POST")
 	r.HandleFunc("/api/v1/admin/apikeys", keyManager.handleListAPIKeys).Methods("GET")
@@ -214,13 +214,13 @@ func (m *RateLimitMiddleware) RegisterRoutes(r *mux.Router, keyManager *APIKeyMa
 func (m *RateLimitMiddleware) handleGetStats(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["key"]
-	
+
 	stats := m.limiter.GetStats(key)
 	if stats == nil {
 		m.respondError(w, http.StatusNotFound, "key_not_found", "Rate limit key not found")
 		return
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(w, `{"key":"%s","requests_allowed":%d,"requests_denied":%d,"reset_at":"%s"}`,
 		key, stats.RequestsAllowed, stats.RequestsDenied, stats.ResetAt.Format(time.RFC3339))
@@ -230,10 +230,10 @@ func (m *RateLimitMiddleware) handleGetStats(w http.ResponseWriter, r *http.Requ
 func (m *RateLimitMiddleware) handleReset(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["key"]
-	
+
 	// This would need to be implemented in your RateLimiter interface
 	// For now, just return success
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(w, `{"message":"Rate limit reset for key: %s"}`, key)
 }

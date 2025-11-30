@@ -25,10 +25,10 @@ func NewAPIKeyManager(store APIKeyStore) *APIKeyManager {
 
 // CreateAPIKeyRequest represents a request to create a new API key
 type CreateAPIKeyRequest struct {
-	Name      string    `json:"name"`
-	UserID    string    `json:"user_id"`
-	Scopes    []string  `json:"scopes"`
-	RateLimit int       `json:"rate_limit"` // requests per second
+	Name      string     `json:"name"`
+	UserID    string     `json:"user_id"`
+	Scopes    []string   `json:"scopes"`
+	RateLimit int        `json:"rate_limit"` // requests per second
 	ExpiresAt *time.Time `json:"expires_at,omitempty"`
 }
 
@@ -53,7 +53,7 @@ func (m *APIKeyManager) handleCreateAPIKey(w http.ResponseWriter, r *http.Reques
 		respondJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_request", "message": err.Error()})
 		return
 	}
-	
+
 	// Validate request
 	if req.Name == "" {
 		respondJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_request", "message": "name is required"})
@@ -66,14 +66,14 @@ func (m *APIKeyManager) handleCreateAPIKey(w http.ResponseWriter, r *http.Reques
 	if req.RateLimit <= 0 {
 		req.RateLimit = 100 // default to 100 requests per second
 	}
-	
+
 	// Generate API key
 	key, err := generateAPIKey()
 	if err != nil {
 		respondJSON(w, http.StatusInternalServerError, map[string]string{"error": "generation_failed", "message": err.Error()})
 		return
 	}
-	
+
 	// Create API key record
 	apiKey := &APIKey{
 		ID:        generateKeyID(),
@@ -86,13 +86,13 @@ func (m *APIKeyManager) handleCreateAPIKey(w http.ResponseWriter, r *http.Reques
 		ExpiresAt: req.ExpiresAt,
 		CreatedAt: time.Now(),
 	}
-	
+
 	// Save to store
 	if err := m.store.CreateKey(r.Context(), apiKey); err != nil {
 		respondJSON(w, http.StatusInternalServerError, map[string]string{"error": "storage_failed", "message": err.Error()})
 		return
 	}
-	
+
 	// Return response with unhashed key (only time it's visible)
 	response := &APIKeyResponse{
 		ID:        apiKey.ID,
@@ -105,20 +105,20 @@ func (m *APIKeyManager) handleCreateAPIKey(w http.ResponseWriter, r *http.Reques
 		ExpiresAt: apiKey.ExpiresAt,
 		CreatedAt: apiKey.CreatedAt,
 	}
-	
+
 	respondJSON(w, http.StatusCreated, response)
 }
 
 // handleListAPIKeys lists all API keys
 func (m *APIKeyManager) handleListAPIKeys(w http.ResponseWriter, r *http.Request) {
 	userID := r.URL.Query().Get("user_id")
-	
+
 	keys, err := m.store.ListKeys(r.Context(), userID)
 	if err != nil {
 		respondJSON(w, http.StatusInternalServerError, map[string]string{"error": "list_failed", "message": err.Error()})
 		return
 	}
-	
+
 	responses := make([]*APIKeyResponse, len(keys))
 	for i, key := range keys {
 		responses[i] = &APIKeyResponse{
@@ -133,7 +133,7 @@ func (m *APIKeyManager) handleListAPIKeys(w http.ResponseWriter, r *http.Request
 			LastUsedAt: key.LastUsedAt,
 		}
 	}
-	
+
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"keys":  responses,
 		"total": len(responses),
@@ -144,13 +144,13 @@ func (m *APIKeyManager) handleListAPIKeys(w http.ResponseWriter, r *http.Request
 func (m *APIKeyManager) handleGetAPIKey(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	keyID := vars["id"]
-	
+
 	key, err := m.store.GetKeyByID(r.Context(), keyID)
 	if err != nil {
 		respondJSON(w, http.StatusNotFound, map[string]string{"error": "key_not_found", "message": "API key not found"})
 		return
 	}
-	
+
 	response := &APIKeyResponse{
 		ID:         key.ID,
 		Name:       key.Name,
@@ -162,7 +162,7 @@ func (m *APIKeyManager) handleGetAPIKey(w http.ResponseWriter, r *http.Request) 
 		CreatedAt:  key.CreatedAt,
 		LastUsedAt: key.LastUsedAt,
 	}
-	
+
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -179,20 +179,20 @@ type UpdateAPIKeyRequest struct {
 func (m *APIKeyManager) handleUpdateAPIKey(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	keyID := vars["id"]
-	
+
 	var req UpdateAPIKeyRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		respondJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_request", "message": err.Error()})
 		return
 	}
-	
+
 	// Get existing key
 	key, err := m.store.GetKeyByID(r.Context(), keyID)
 	if err != nil {
 		respondJSON(w, http.StatusNotFound, map[string]string{"error": "key_not_found", "message": "API key not found"})
 		return
 	}
-	
+
 	// Update fields
 	if req.Name != nil {
 		key.Name = *req.Name
@@ -209,13 +209,13 @@ func (m *APIKeyManager) handleUpdateAPIKey(w http.ResponseWriter, r *http.Reques
 	if req.ExpiresAt != nil {
 		key.ExpiresAt = req.ExpiresAt
 	}
-	
+
 	// Save updated key
 	if err := m.store.UpdateKey(r.Context(), key); err != nil {
 		respondJSON(w, http.StatusInternalServerError, map[string]string{"error": "update_failed", "message": err.Error()})
 		return
 	}
-	
+
 	response := &APIKeyResponse{
 		ID:         key.ID,
 		Name:       key.Name,
@@ -227,7 +227,7 @@ func (m *APIKeyManager) handleUpdateAPIKey(w http.ResponseWriter, r *http.Reques
 		CreatedAt:  key.CreatedAt,
 		LastUsedAt: key.LastUsedAt,
 	}
-	
+
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -235,12 +235,12 @@ func (m *APIKeyManager) handleUpdateAPIKey(w http.ResponseWriter, r *http.Reques
 func (m *APIKeyManager) handleDeleteAPIKey(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	keyID := vars["id"]
-	
+
 	if err := m.store.DeleteKey(r.Context(), keyID); err != nil {
 		respondJSON(w, http.StatusInternalServerError, map[string]string{"error": "delete_failed", "message": err.Error()})
 		return
 	}
-	
+
 	respondJSON(w, http.StatusOK, map[string]string{"message": "API key deleted successfully"})
 }
 
@@ -248,30 +248,30 @@ func (m *APIKeyManager) handleDeleteAPIKey(w http.ResponseWriter, r *http.Reques
 func (m *APIKeyManager) handleRegenerateAPIKey(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	keyID := vars["id"]
-	
+
 	// Get existing key
 	key, err := m.store.GetKeyByID(r.Context(), keyID)
 	if err != nil {
 		respondJSON(w, http.StatusNotFound, map[string]string{"error": "key_not_found", "message": "API key not found"})
 		return
 	}
-	
+
 	// Generate new key
 	newKey, err := generateAPIKey()
 	if err != nil {
 		respondJSON(w, http.StatusInternalServerError, map[string]string{"error": "generation_failed", "message": err.Error()})
 		return
 	}
-	
+
 	// Update hashed key
 	key.HashedKey = HashAPIKey(newKey)
-	
+
 	// Save updated key
 	if err := m.store.UpdateKey(r.Context(), key); err != nil {
 		respondJSON(w, http.StatusInternalServerError, map[string]string{"error": "update_failed", "message": err.Error()})
 		return
 	}
-	
+
 	// Return response with new unhashed key (only time it's visible)
 	response := &APIKeyResponse{
 		ID:         key.ID,
@@ -285,7 +285,7 @@ func (m *APIKeyManager) handleRegenerateAPIKey(w http.ResponseWriter, r *http.Re
 		CreatedAt:  key.CreatedAt,
 		LastUsedAt: key.LastUsedAt,
 	}
-	
+
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -311,5 +311,3 @@ func respondJSON(w http.ResponseWriter, status int, data interface{}) {
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(data) // Ignore error; response already committed
 }
-
-

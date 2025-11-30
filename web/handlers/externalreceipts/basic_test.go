@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	anchorint "github.com/mauriciomferz/Gauth_go/internal/anchor"
 	externalreceipts "github.com/mauriciomferz/Gauth_go/web/handlers/externalreceipts"
-	"github.com/gin-gonic/gin"
 )
 
 // Clean test implementation replacing corrupted content.

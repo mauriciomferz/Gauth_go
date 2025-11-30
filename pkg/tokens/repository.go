@@ -45,13 +45,13 @@ type Token struct {
 
 // BlacklistEntry represents a blacklisted token
 type BlacklistEntry struct {
-	ID         string    `json:"id"`
-	TokenID    string    `json:"tokenId"`
-	TenantID   string    `json:"tenantId"`
-	Reason     *string   `json:"reason"`
-	RevokedAt  time.Time `json:"revokedAt"`
-	RevokedBy  *string   `json:"revokedBy"`
-	ExpiresAt  time.Time `json:"expiresAt"`
+	ID        string    `json:"id"`
+	TokenID   string    `json:"tokenId"`
+	TenantID  string    `json:"tenantId"`
+	Reason    *string   `json:"reason"`
+	RevokedAt time.Time `json:"revokedAt"`
+	RevokedBy *string   `json:"revokedBy"`
+	ExpiresAt time.Time `json:"expiresAt"`
 }
 
 // TokenFilters for querying tokens
@@ -319,8 +319,8 @@ func (r *Repository) GetTokenMetrics(ctx context.Context, tenantID string) (map[
 	`
 
 	var metrics struct {
-		Total, Active, Expired, Revoked          int
-		Access, Refresh, APIKey, TokensLast24h   int
+		Total, Active, Expired, Revoked        int
+		Access, Refresh, APIKey, TokensLast24h int
 	}
 
 	err := r.db.QueryRow(ctx, query, tenantID).Scan(
