@@ -11,6 +11,10 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	statusPending = "pending"
+)
+
 // PostgreSQLDualControlService implements DualControlService using PostgreSQL
 type PostgreSQLDualControlService struct {
 	db *sql.DB
@@ -32,7 +36,7 @@ func (s *PostgreSQLDualControlService) RequestApproval(
 	
 	approval.CreatedAt = time.Now().UTC()
 	approval.UpdatedAt = time.Now().UTC()
-	approval.Status = "pending"
+	approval.Status = statusPending
 	
 	// Set expiration if not provided (default 24 hours)
 	if approval.ExpiresAt == nil {
@@ -85,7 +89,7 @@ func (s *PostgreSQLDualControlService) ApproveAction(
 		return err
 	}
 	
-	if approval.Status != "pending" {
+	if approval.Status != statusPending {
 		return fmt.Errorf("approval already finalized with status: %s", approval.Status)
 	}
 	
@@ -114,7 +118,7 @@ func (s *PostgreSQLDualControlService) ApproveAction(
 	
 	now := time.Now().UTC()
 	var decisionFinalizedAt *time.Time
-	if newStatus != "pending" {
+	if newStatus != statusPending {
 		decisionFinalizedAt = &now
 	}
 	
@@ -145,7 +149,7 @@ func (s *PostgreSQLDualControlService) RejectAction(
 		return err
 	}
 	
-	if approval.Status != "pending" {
+	if approval.Status != statusPending {
 		return fmt.Errorf("approval already finalized with status: %s", approval.Status)
 	}
 	
@@ -160,7 +164,7 @@ func (s *PostgreSQLDualControlService) RejectAction(
 	approval.RejectedBy = append(approval.RejectedBy, record)
 	
 	// Check if rejection threshold met (any rejection can reject for "all" threshold)
-	newStatus := "pending"
+	newStatus := statusPending
 	if approval.ApprovalThreshold == "all" {
 		newStatus = "rejected"
 	} else if len(approval.RejectedBy) > approval.RequiredApprovers/2 {
@@ -174,7 +178,7 @@ func (s *PostgreSQLDualControlService) RejectAction(
 	
 	now := time.Now().UTC()
 	var decisionFinalizedAt *time.Time
-	if newStatus != "pending" {
+	if newStatus != statusPending {
 		decisionFinalizedAt = &now
 	}
 	

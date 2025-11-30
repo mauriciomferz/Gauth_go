@@ -13,6 +13,10 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
 
+const (
+	adminActor = "admin"
+)
+
 // PoAHandler manages Power of Attorney operations for the admin portal
 type PoAHandler struct {
 	repo       *poa.Repository
@@ -311,7 +315,7 @@ func (h *PoAHandler) RevokePoA(c *gin.Context) {
 	
 	revokedBy := c.GetString("user_id")
 	if revokedBy == "" {
-		revokedBy = "admin"
+		revokedBy = adminActor
 	}
 	
 	type RevokeRequest struct {
@@ -322,7 +326,7 @@ func (h *PoAHandler) RevokePoA(c *gin.Context) {
 	
 	reason := req.Reason
 	if reason == "" {
-		reason = "Revoked by admin"
+		reason = "Revoked by " + adminActor
 	}
 
 	err := h.repo.RevokePoA(c.Request.Context(), tenantID, poaID, revokedBy, reason)
@@ -350,7 +354,7 @@ func (h *PoAHandler) ApprovePoA(c *gin.Context) {
 	poaID := c.Param("id")
 	approvedBy := c.GetString("user_id")
 	if approvedBy == "" {
-		approvedBy = "admin"
+		approvedBy = adminActor
 	}
 
 	err := h.repo.ApprovePoA(c.Request.Context(), tenantID, poaID, approvedBy)
@@ -389,7 +393,7 @@ func (h *PoAHandler) RejectPoA(c *gin.Context) {
 
 	rejectedBy := c.GetString("user_id")
 	if rejectedBy == "" {
-		rejectedBy = "admin"
+		rejectedBy = adminActor
 	}
 
 	err := h.repo.RejectPoA(c.Request.Context(), tenantID, poaID, rejectedBy, req.Reason)

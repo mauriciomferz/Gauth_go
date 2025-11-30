@@ -11,6 +11,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	testPrincipalAddr = "principal-address"
+)
+
 func setupOptimisticTest(t *testing.T) (*OptimisticRevocation, *miniredis.Miniredis) {
 	// Create in-memory Redis
 	mr, err := miniredis.Run()
@@ -47,7 +51,7 @@ func TestOptimisticRevocation_MarkPendingRevocation(t *testing.T) {
 
 	ctx := context.Background()
 	poaID := "test-poa-123"
-	principal := "principal-address"
+	principal := testPrincipalAddr
 	reason := "Suspicious activity detected"
 	collateral := uint64(2e18) // 2 ETH
 
@@ -86,7 +90,7 @@ func TestOptimisticRevocation_InsufficientCollateral(t *testing.T) {
 
 	ctx := context.Background()
 	poaID := "test-poa-456"
-	principal := "principal-address"
+	principal := testPrincipalAddr
 	reason := "Test"
 	collateral := uint64(5e17) // 0.5 ETH (below 1 ETH minimum)
 
@@ -103,7 +107,7 @@ func TestOptimisticRevocation_FinalizeRevocation(t *testing.T) {
 
 	ctx := context.Background()
 	poaID := "test-poa-789"
-	principal := "principal-address"
+	principal := testPrincipalAddr
 	reason := "Confirmed malicious behavior"
 	collateral := uint64(3e18) // 3 ETH
 

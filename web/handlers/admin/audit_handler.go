@@ -12,6 +12,10 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+const (
+	statusActive = "active"
+)
+
 // AuditHandler manages audit trail operations for the admin portal
 type AuditHandler struct {
 	repo          *audit.Repository
@@ -597,7 +601,7 @@ func (h *AuditHandler) ListSIEMIntegrations(c *gin.Context) {
 			Name:       db.IntegrationName,
 			Type:       db.SIEMType,
 			Endpoint:   db.EndpointURL,
-			Enabled:    db.Status == "active",
+			Enabled:    db.Status == statusActive,
 			Format:     db.Format,
 			EventsSent: int(db.EventsSent),
 			LastSync:   lastSync,
@@ -735,14 +739,14 @@ func (h *AuditHandler) GetAuditMetrics(c *gin.Context) {
 		activeCount := 0
 		totalEventsSent := int64(0)
 		for _, siem := range siemIntegrations {
-			if siem.Status == "active" {
+			if siem.Status == statusActive {
 				activeCount++
 			}
 			totalEventsSent += siem.EventsSent
 		}
 		metrics["siem_integrations"] = map[string]interface{}{
 			"total":       len(siemIntegrations),
-			"active":      activeCount,
+			statusActive:  activeCount,
 			"events_sent": totalEventsSent,
 		}
 	}

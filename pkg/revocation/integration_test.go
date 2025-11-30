@@ -13,6 +13,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	testPrincipalID = "test-principal"
+)
+
 // End-to-End Integration Tests
 // Tests complete workflows across all revocation systems
 
@@ -111,7 +115,7 @@ func TestE2E_TwoPhaseToCircuitBreaker(t *testing.T) {
 
 	ctx := context.Background()
 	poaID := "test-poa-integrated"
-	principal := "test-principal"
+	principal := testPrincipalID
 
 	// Phase 1: Disable using two-phase
 	t.Log("Step 1: Disabling PoA using two-phase revocation")
@@ -255,8 +259,8 @@ func TestE2E_RecoveryFromPartialFailures(t *testing.T) {
 	defer env.Cleanup()
 
 	ctx := context.Background()
-	poaID := "test-poa-recovery"
-	principal := "test-principal"
+	poaID := "test-poa-recovery-123"
+	principal := testPrincipalID
 
 	// Step 1: Start a two-phase disable
 	t.Log("Step 1: Starting two-phase disable")
@@ -271,7 +275,7 @@ func TestE2E_RecoveryFromPartialFailures(t *testing.T) {
 	// Step 3: Try operations during failure (should fail gracefully)
 	t.Log("Step 3: Attempting operations during failure")
 	// Try a new operation that requires Redis (not just cached state)
-	err = env.TwoPhaseRevocation.DisablePoA(ctx, "test-poa-failure", "test-principal", "should-fail")
+	err = env.TwoPhaseRevocation.DisablePoA(ctx, "test-poa-failure", testPrincipalID, "should-fail")
 	assert.Error(t, err, "Should fail when Redis is down")
 	t.Logf("✓ Expected error during outage: %v", err)
 

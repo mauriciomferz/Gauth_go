@@ -8,6 +8,15 @@ import (
 	"strings"
 )
 
+const (
+	// Risk level constants for action sets
+	RiskHigh       = "high"
+	RiskMediumHigh = "medium-high"
+	RiskMedium     = "medium"
+	RiskMediumLow  = "medium-low"
+	RiskLow        = "low"
+)
+
 // TransactionType represents financial/commercial transaction types
 // per RFC-0115 Section B.4.1
 type TransactionType string
@@ -403,22 +412,22 @@ func (aas *AuthorizedActionSet) IsNonPhysicalActionAuthorized(npa ActionTypeNonP
 func (aas *AuthorizedActionSet) GetRiskLevel() string {
 	// High risk if physical actions or financial transactions allowed
 	if len(aas.PhysicalActions) > 0 || aas.AllowAllPhysicalActions {
-		return "high"
+		return RiskHigh
 	}
 	if len(aas.Transactions) > 0 || aas.AllowAllTransactions {
-		return "medium-high"
+		return RiskMediumHigh
 	}
 	// Medium risk for strategic/legal decisions
 	for _, dt := range aas.Decisions {
 		if dt == DecisionStrategic || dt == DecisionLegal || dt == DecisionFinancial {
-			return "medium"
+			return RiskMedium
 		}
 	}
 	// Low-medium for non-physical actions only
 	if len(aas.NonPhysicalActions) > 0 || aas.AllowAllNonPhysicalActions {
-		return "medium-low"
+		return RiskMediumLow
 	}
-	return "low"
+	return RiskLow
 }
 
 // String returns human-readable representation

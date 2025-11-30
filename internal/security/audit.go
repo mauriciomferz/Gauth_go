@@ -12,6 +12,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	severityWarning = "warning"
+)
+
 // AuditEvent represents a security audit event
 type AuditEvent struct {
 	Timestamp    time.Time              `json:"timestamp"`
@@ -198,7 +202,7 @@ func AuditMiddleware(logger *AuditLogger) gin.HandlerFunc {
 				}
 				event.Details["security_event"] = secEvent
 				event.EventType = "security_event"
-				event.Severity = "warning"
+				event.Severity = severityWarning
 			}
 			
 			// Add rate limit details
@@ -207,7 +211,7 @@ func AuditMiddleware(logger *AuditLogger) gin.HandlerFunc {
 					event.Details = make(map[string]interface{})
 				}
 				event.Details["rate_limited"] = true
-				event.Severity = "warning"
+				event.Severity = severityWarning
 			}
 			
 			logger.LogEvent(event)
