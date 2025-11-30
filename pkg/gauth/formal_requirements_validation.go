@@ -588,7 +588,7 @@ func (v *FormalRequirementsValidator) validateSingleIdentityDocument(
 	} else {
 		// Basic validation without external service (using available fields)
 		result.DocumentAuthentic = doc.DocumentNumber != ""
-		result.SecurityFeatureOK = doc.VerificationData != nil && len(doc.VerificationData) > 0
+		result.SecurityFeatureOK = len(doc.VerificationData) > 0
 		result.IssuingAuthValid = doc.IssuingAuthority != ""
 		result.Warnings = append(result.Warnings, "ID verification service not configured - basic checks only")
 	}

@@ -288,7 +288,7 @@ func (h *OIDCHandler) CreateOIDCProvider(c *gin.Context) {
 	}
 
 	// Set defaults
-	if req.Scopes == nil || len(req.Scopes) == 0 {
+	if len(req.Scopes) == 0 {
 		req.Scopes = []string{"openid", "profile", "email"}
 	}
 	if req.ClaimsMapping == nil {

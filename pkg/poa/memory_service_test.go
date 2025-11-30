@@ -599,7 +599,7 @@ func TestCreateDelegationAttestation(t *testing.T) {
 			delegatedTo: "user_105",
 			scope:       nil,
 			validate: func(t *testing.T, d *Delegation) {
-				if d.Scope != nil && len(d.Scope) > 0 {
+				if len(d.Scope) > 0 {
 					t.Errorf("Scope should be nil or empty, got %v", d.Scope)
 				}
 			},
@@ -705,7 +705,7 @@ func TestCreateAttestation(t *testing.T) {
 			attestedBy: "attester_003",
 			evidence:   nil,
 			validate: func(t *testing.T, a *Attestation) {
-				if a.Evidence != nil && len(a.Evidence) > 0 {
+				if len(a.Evidence) > 0 {
 					t.Errorf("Evidence should be nil or empty, got %v", a.Evidence)
 				}
 			},

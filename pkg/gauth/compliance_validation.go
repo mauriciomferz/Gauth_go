@@ -614,7 +614,7 @@ func (v *ComplianceValidator) validateRestrictions(
 	result *RequestComplianceResult,
 ) error {
 	// Validate power restrictions if present
-	if request.Restrictions != nil && len(request.Restrictions) > 0 {
+	if len(request.Restrictions) > 0 {
 		// Check each restriction is properly formed
 		for _, restriction := range request.Restrictions {
 			if restriction.RestrictionType == "" {
@@ -806,7 +806,7 @@ func (v *ComplianceValidator) validateGrantRestrictions(
 	grant *ExtendedAuthorizationGrant,
 	result *GrantComplianceResult,
 ) error {
-	if grant.Restrictions != nil && len(grant.Restrictions) > 0 {
+	if len(grant.Restrictions) > 0 {
 		result.Checks["restrictions"] = true
 	} else {
 		result.Checks["restrictions"] = false

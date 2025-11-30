@@ -380,8 +380,8 @@ func TestGenerateRefreshToken_ValidUser(t *testing.T) {
 func TestGenerateAccessToken_DifferentUsers(t *testing.T) {
 	auth := NewAuthenticator(nil)
 
-	adminUser, _ := auth.users["admin"]
-	regularUser, _ := auth.users["user"]
+	adminUser := auth.users["admin"]
+	regularUser := auth.users["user"]
 
 	adminToken, err1 := auth.generateAccessToken(adminUser)
 	userToken, err2 := auth.generateAccessToken(regularUser)
@@ -408,8 +408,8 @@ func TestGenerateAccessToken_DifferentUsers(t *testing.T) {
 func TestGenerateRefreshToken_DifferentUsers(t *testing.T) {
 	auth := NewAuthenticator(nil)
 
-	adminUser, _ := auth.users["admin"]
-	regularUser, _ := auth.users["user"]
+	adminUser := auth.users["admin"]
+	regularUser := auth.users["user"]
 
 	adminToken, err1 := auth.generateRefreshToken(adminUser)
 	userToken, err2 := auth.generateRefreshToken(regularUser)

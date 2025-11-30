@@ -92,7 +92,7 @@ func (e *JSONMetricsExporter) RecordCounter(name string, value int64, labels map
 
 	key := e.metricKey(name, labels)
 	e.counters[key] += value
-	if labels != nil && len(labels) > 0 {
+	if len(labels) > 0 {
 		e.labels[key] = labels
 	}
 }
@@ -104,7 +104,7 @@ func (e *JSONMetricsExporter) RecordGauge(name string, value float64, labels map
 
 	key := e.metricKey(name, labels)
 	e.gauges[key] = value
-	if labels != nil && len(labels) > 0 {
+	if len(labels) > 0 {
 		e.labels[key] = labels
 	}
 }
@@ -139,7 +139,7 @@ func (e *JSONMetricsExporter) RecordHistogram(name string, value float64, labels
 	// Update buckets
 	e.updateHistogramBuckets(hist, value)
 
-	if labels != nil && len(labels) > 0 {
+	if len(labels) > 0 {
 		e.labels[key] = labels
 	}
 }
@@ -296,7 +296,7 @@ func (e *JSONMetricsExporter) GetMetricCount() int {
 
 // metricKey generates a unique key for a metric with labels
 func (e *JSONMetricsExporter) metricKey(name string, labels map[string]string) string {
-	if labels == nil || len(labels) == 0 {
+	if len(labels) == 0 {
 		return name
 	}
 
