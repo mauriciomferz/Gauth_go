@@ -11,8 +11,8 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/authz"
 	cr "github.com/mauriciomferz/Gauth_go/pkg/crypto"
-	"github.com/mauriciomferz/Gauth_go/pkg/rfc"
 	gauth_rfc_001 "github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
+	"github.com/mauriciomferz/Gauth_go/pkg/rfc"
 )
 
 // simpleAllowAuthorizer always allows

@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/web"
 	"github.com/gin-gonic/gin"
+	"github.com/mauriciomferz/Gauth_go/web"
 )
 
 // TestCapabilityAnchorPrometheusIntegrityGauge ensures the custom Prometheus endpoint surfaces the receipt chain integrity gauge HELP/TYPE even when unconfigured.

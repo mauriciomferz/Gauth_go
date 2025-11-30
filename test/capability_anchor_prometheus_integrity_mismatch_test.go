@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/mauriciomferz/Gauth_go/internal/notary"
 	"github.com/mauriciomferz/Gauth_go/web"
-	"github.com/gin-gonic/gin"
 )
 
 // TestCapabilityAnchorPrometheusIntegrityMismatch simulates a corruption in the receipt chain file
