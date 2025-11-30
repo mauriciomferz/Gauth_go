@@ -469,7 +469,7 @@ func TestCleanup(t *testing.T) {
 
 	// Generate nonces
 	for i := 0; i < 10; i++ {
-		dm.GenerateNonce()
+		_, _ = dm.GenerateNonce()
 	}
 
 	// Add used JTIs

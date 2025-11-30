@@ -133,7 +133,7 @@ func TestPropertyCircuitBreakerPreventsCascadingFailures(t *testing.T) {
 
 	// Trigger rate limit (more transactions than allowed)
 	for i := 0; i < 15; i++ {
-		cb.RecordTransaction(ctx, poaID, 100000000000000000, true) // 0.1 ETH per tx
+		_ = cb.RecordTransaction(ctx, poaID, 100000000000000000, true) // 0.1 ETH per tx
 	}
 
 	// Circuit should be open

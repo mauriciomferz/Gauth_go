@@ -219,7 +219,7 @@ func TestValidatorRegistry_Invoke(t *testing.T) {
 
 	t.Run("invoke validator without timeout", func(t *testing.T) {
 		vr := NewValidatorRegistry()
-		vr.Register("no-timeout-validator", func(req Request, policy Policy) error {
+		_ = vr.Register("no-timeout-validator", func(req Request, policy Policy) error {
 			time.Sleep(10 * time.Millisecond)
 			return nil
 		}) // No timeout set
@@ -243,7 +243,7 @@ func TestValidatorRegistry_Snapshot(t *testing.T) {
 
 	t.Run("snapshot with one validator - no invocations", func(t *testing.T) {
 		vr := NewValidatorRegistry()
-		vr.Register("test-validator", func(req Request, policy Policy) error {
+		_ = vr.Register("test-validator", func(req Request, policy Policy) error {
 			return nil
 		}, WithDescription("Test validator"), WithVersion("1.0.0"), WithTags("tag1", "tag2"))
 
@@ -271,7 +271,7 @@ func TestValidatorRegistry_Snapshot(t *testing.T) {
 	t.Run("snapshot with invocations and failures", func(t *testing.T) {
 		vr := NewValidatorRegistry()
 		callCount := 0
-		vr.Register("success-fail-validator", func(req Request, policy Policy) error {
+		_ = vr.Register("success-fail-validator", func(req Request, policy Policy) error {
 			callCount++
 			if callCount%2 == 0 {
 				return errors.New("fail")
@@ -337,7 +337,7 @@ func TestValidatorRegistry_Snapshot(t *testing.T) {
 
 		// Invoke a few times to populate histogram
 		for i := 0; i < 3; i++ {
-			vr.Invoke("latency-validator", Request{}, Policy{})
+			_ = vr.Invoke("latency-validator", Request{}, Policy{})
 		}
 
 		snapshot := vr.Snapshot()
@@ -398,7 +398,7 @@ func TestValidatorRegistry_Concurrency(t *testing.T) {
 	for i := 0; i < goroutines; i++ {
 		go func() {
 			for j := 0; j < invocationsPerGoroutine; j++ {
-				vr.Invoke("concurrent-validator", Request{}, Policy{})
+				_ = vr.Invoke("concurrent-validator", Request{}, Policy{})
 			}
 			done <- true
 		}()

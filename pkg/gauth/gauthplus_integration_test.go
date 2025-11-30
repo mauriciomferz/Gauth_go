@@ -588,10 +588,10 @@ func setupTestDB(t *testing.T) (*sql.DB, func()) {
 
 	cleanup := func() {
 		// Clean up test data
-		db.Exec("DELETE FROM successor_activations WHERE poa_id::text LIKE '550e8400%'")
-		db.Exec("DELETE FROM ai_delegations WHERE source_poa_id::text LIKE '550e8400%'")
-		db.Exec("DELETE FROM ai_capability_assessments WHERE agent_id LIKE 'agent-%'")
-		db.Exec("DELETE FROM fiduciary_duty_violations WHERE poa_id::text LIKE '550e8400%'")
+		_, _ = db.Exec("DELETE FROM successor_activations WHERE poa_id::text LIKE '550e8400%'")
+		_, _ = db.Exec("DELETE FROM ai_delegations WHERE source_poa_id::text LIKE '550e8400%'")
+		_, _ = db.Exec("DELETE FROM ai_capability_assessments WHERE agent_id LIKE 'agent-%'")
+		_, _ = db.Exec("DELETE FROM fiduciary_duty_violations WHERE poa_id::text LIKE '550e8400%'")
 		db.Close()
 	}
 

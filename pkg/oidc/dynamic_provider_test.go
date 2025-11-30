@@ -100,7 +100,7 @@ func TestDynamicProviderService_RegisterWithDiscovery(t *testing.T) {
 				ResponseTypesSupported: []string{"code"},
 			}
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(discoveryDoc)
+			_ = json.NewEncoder(w).Encode(discoveryDoc)
 		} else {
 			http.NotFound(w, r)
 		}

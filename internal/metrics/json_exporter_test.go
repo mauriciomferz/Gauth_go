@@ -421,7 +421,7 @@ func TestMetricsTimestamp(t *testing.T) {
 
 	data, _ := exporter.ExportJSON()
 	var response JSONMetricsResponse
-	json.Unmarshal(data, &response)
+	_ = json.Unmarshal(data, &response)
 
 	after := time.Now()
 

@@ -26,8 +26,8 @@ func BenchmarkJWEIntegration_FullCycle(b *testing.B) {
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	privateKeyPath := filepath.Join(tmpDir, "private.pem")
 	publicKeyPath := filepath.Join(tmpDir, "public.pem")
-	SaveRSAPrivateKey(privateKey, privateKeyPath)
-	SaveRSAPublicKey(&privateKey.PublicKey, publicKeyPath)
+	_ = SaveRSAPrivateKey(privateKey, privateKeyPath)
+	_ = SaveRSAPublicKey(&privateKey.PublicKey, publicKeyPath)
 
 	jweConfig := ProductionJWEConfig(publicKeyPath, privateKeyPath, "bench-key")
 	jweService, _ := NewJWEService(jweConfig)
@@ -54,8 +54,8 @@ func BenchmarkJWEIntegration_EncryptOnly(b *testing.B) {
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	privateKeyPath := filepath.Join(tmpDir, "private.pem")
 	publicKeyPath := filepath.Join(tmpDir, "public.pem")
-	SaveRSAPrivateKey(privateKey, privateKeyPath)
-	SaveRSAPublicKey(&privateKey.PublicKey, publicKeyPath)
+	_ = SaveRSAPrivateKey(privateKey, privateKeyPath)
+	_ = SaveRSAPublicKey(&privateKey.PublicKey, publicKeyPath)
 
 	jweConfig := ProductionJWEConfig(publicKeyPath, privateKeyPath, "bench-key")
 	jweService, _ := NewJWEService(jweConfig)

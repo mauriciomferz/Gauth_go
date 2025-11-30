@@ -191,7 +191,7 @@ func TestInMemoryJWKSFetcher_GetKey_ServerError(t *testing.T) {
 func TestInMemoryJWKSFetcher_GetKey_InvalidJSON(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte("invalid json"))
+		_, _ = w.Write([]byte("invalid json"))
 	}))
 	defer server.Close()
 
@@ -389,7 +389,7 @@ func TestExternalTokenValidator_ValidateToken_Success(t *testing.T) {
 	validator := NewExternalTokenValidator(jwksFetcher, discoveryCache)
 
 	// Override issuer for testing
-	discoveryCache.Set(issuer, discoveryDoc, time.Hour)
+	_ = discoveryCache.Set(issuer, discoveryDoc, time.Hour)
 
 	// Validate token
 	ctx := context.Background()
@@ -444,7 +444,7 @@ func TestExternalTokenValidator_ValidateToken_ExpiredToken(t *testing.T) {
 
 	jwksFetcher := NewInMemoryJWKSFetcher(time.Hour)
 	discoveryCache := NewInMemoryDiscoveryCache(WithDefaultTTL(time.Hour))
-	discoveryCache.Set(issuer, discoveryDoc, time.Hour)
+	_ = discoveryCache.Set(issuer, discoveryDoc, time.Hour)
 	validator := NewExternalTokenValidator(jwksFetcher, discoveryCache)
 
 	// Validate expired token
@@ -493,7 +493,7 @@ func TestExternalTokenValidator_ValidateToken_InvalidIssuer(t *testing.T) {
 
 	jwksFetcher := NewInMemoryJWKSFetcher(time.Hour)
 	discoveryCache := NewInMemoryDiscoveryCache(WithDefaultTTL(time.Hour))
-	discoveryCache.Set(expectedIssuer, discoveryDoc, time.Hour)
+	_ = discoveryCache.Set(expectedIssuer, discoveryDoc, time.Hour)
 	validator := NewExternalTokenValidator(jwksFetcher, discoveryCache)
 
 	// Validate token

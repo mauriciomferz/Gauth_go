@@ -72,7 +72,7 @@ func TestInMemoryAuditLogger_CircularBuffer(t *testing.T) {
 			Target:     "target",
 			Authorized: true,
 		}
-		logger.Log(ctx, entry)
+		_ = logger.Log(ctx, entry)
 	}
 
 	entries := logger.GetAllEntries()
@@ -109,7 +109,7 @@ func TestInMemoryAuditLogger_Query(t *testing.T) {
 	}
 
 	for _, entry := range entries {
-		logger.Log(ctx, entry)
+		_ = logger.Log(ctx, entry)
 	}
 
 	t.Run("query by agent ID", func(t *testing.T) {
@@ -328,7 +328,7 @@ func TestFileAuditLogger_Close(t *testing.T) {
 		Operation:  "test",
 		Authorized: true,
 	}
-	logger.Log(ctx, entry)
+	_ = logger.Log(ctx, entry)
 
 	// Close should flush buffer
 	err := logger.Close()

@@ -215,7 +215,7 @@ func TestDeviceAuthorizationService_PollToken_SlowDown(t *testing.T) {
 	}
 
 	// First poll
-	service.PollToken(context.Background(), tokenReq)
+	_, _ = service.PollToken(context.Background(), tokenReq)
 
 	// Immediate second poll (should trigger slow_down)
 	_, err = service.PollToken(context.Background(), tokenReq)
@@ -441,7 +441,7 @@ func TestDeviceAuthorizationService_MaxPollAttempts(t *testing.T) {
 	// Poll until max attempts exceeded
 	for i := 0; i < config.MaxPollAttempts; i++ {
 		time.Sleep(config.PollingInterval)
-		service.PollToken(context.Background(), tokenReq)
+		_, _ = service.PollToken(context.Background(), tokenReq)
 	}
 
 	// Next poll should fail with error

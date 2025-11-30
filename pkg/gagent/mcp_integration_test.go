@@ -542,9 +542,9 @@ func TestMCPAgent_AuditLogging(t *testing.T) {
 	ctx := context.Background()
 
 	// Perform several operations
-	agent.ReadResource(ctx, "file:///test1.txt")
-	agent.CallTool(ctx, "calculator", map[string]interface{}{"x": 1})
-	agent.GetPrompt(ctx, "greeting", map[string]string{})
+	_, _ = agent.ReadResource(ctx, "file:///test1.txt")
+	_, _ = agent.CallTool(ctx, "calculator", map[string]interface{}{"x": 1})
+	_, _ = agent.GetPrompt(ctx, "greeting", map[string]string{})
 
 	// Check audit logs
 	entries := auditLogger.GetAllEntries()

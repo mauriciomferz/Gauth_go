@@ -44,7 +44,7 @@ func TestTokenBucketLimiter_Refill(t *testing.T) {
 
 	// Exhaust bucket
 	for i := 0; i < 5; i++ {
-		limiter.Allow(ctx, "test-key")
+		_, _ = _, _ = limiter.Allow(ctx, "test-key")
 	}
 
 	// Should be denied immediately
@@ -102,7 +102,7 @@ func TestTokenBucketLimiter_MultipleKeys(t *testing.T) {
 
 	// Exhaust first key
 	for i := 0; i < 5; i++ {
-		limiter.Allow(ctx, "key1")
+		_, _ = limiter.Allow(ctx, "key1")
 	}
 
 	// First key should be denied
@@ -129,7 +129,7 @@ func TestTokenBucketLimiter_Reset(t *testing.T) {
 
 	// Exhaust bucket
 	for i := 0; i < 5; i++ {
-		limiter.Allow(ctx, "test-key")
+		_, _ = limiter.Allow(ctx, "test-key")
 	}
 
 	// Should be denied
@@ -530,7 +530,7 @@ func TestSlidingWindowLimiter_EmptyWindow(t *testing.T) {
 	ctx := context.Background()
 
 	// Reset to ensure empty
-	limiter.Reset(ctx, "test-key")
+	_ = _ = limiter.Reset(ctx, "test-key")
 
 	// Should allow up to limit
 	for i := 0; i < 5; i++ {

@@ -92,7 +92,7 @@ func TestInMemoryStorage_RefreshTokenExpiration(t *testing.T) {
 		IssuedAt:     time.Now().Add(-48 * time.Hour),
 		ExpiresAt:    time.Now().Add(-24 * time.Hour),
 	}
-	storage.StoreRefreshToken(ctx, expiredToken)
+	_ = storage.StoreRefreshToken(ctx, expiredToken)
 
 	// Create valid token
 	validToken := &RefreshTokenEntry{
@@ -102,7 +102,7 @@ func TestInMemoryStorage_RefreshTokenExpiration(t *testing.T) {
 		IssuedAt:     time.Now(),
 		ExpiresAt:    time.Now().Add(24 * time.Hour),
 	}
-	storage.StoreRefreshToken(ctx, validToken)
+	_ = storage.StoreRefreshToken(ctx, validToken)
 
 	// Cleanup expired tokens
 	count, err := storage.CleanupExpiredRefreshTokens(ctx)
@@ -166,7 +166,7 @@ func TestInMemoryStorage_RevokedTokens(t *testing.T) {
 		RevokedAt: time.Now().Add(-48 * time.Hour),
 		ExpiresAt: time.Now().Add(-24 * time.Hour),
 	}
-	storage.StoreRevokedToken(ctx, expiredRevocation)
+	_ = storage.StoreRevokedToken(ctx, expiredRevocation)
 
 	count, err := storage.CleanupExpiredRevocations(ctx)
 	if err != nil {
@@ -266,7 +266,7 @@ func TestInMemoryStorage_DeviceCodeCleanup(t *testing.T) {
 		IssuedAt:   time.Now().Add(-30 * time.Minute),
 		ExpiresAt:  time.Now().Add(-15 * time.Minute),
 	}
-	storage.StoreDeviceCode(ctx, expiredEntry)
+	_ = storage.StoreDeviceCode(ctx, expiredEntry)
 
 	// Create valid device code
 	validEntry := &DeviceCodeEntry{
@@ -276,7 +276,7 @@ func TestInMemoryStorage_DeviceCodeCleanup(t *testing.T) {
 		IssuedAt:   time.Now(),
 		ExpiresAt:  time.Now().Add(15 * time.Minute),
 	}
-	storage.StoreDeviceCode(ctx, validEntry)
+	_ = storage.StoreDeviceCode(ctx, validEntry)
 
 	// Cleanup
 	count, err := storage.CleanupExpiredDeviceCodes(ctx)
@@ -383,7 +383,7 @@ func TestInMemoryStorage_PARCleanup(t *testing.T) {
 		CreatedAt:  time.Now().Add(-10 * time.Minute),
 		ExpiresAt:  time.Now().Add(-5 * time.Minute),
 	}
-	storage.StorePARRequest(ctx, expiredEntry.RequestURI, expiredEntry)
+	_ = storage.StorePARRequest(ctx, expiredEntry.RequestURI, expiredEntry)
 
 	// Create valid PAR request
 	validEntry := &RequestURIEntry{
@@ -393,7 +393,7 @@ func TestInMemoryStorage_PARCleanup(t *testing.T) {
 		CreatedAt:  time.Now(),
 		ExpiresAt:  time.Now().Add(5 * time.Minute),
 	}
-	storage.StorePARRequest(ctx, validEntry.RequestURI, validEntry)
+	_ = storage.StorePARRequest(ctx, validEntry.RequestURI, validEntry)
 
 	// Cleanup
 	count, err := storage.CleanupExpiredPARRequests(ctx)
@@ -453,9 +453,9 @@ func TestInMemoryStorage_Concurrent(t *testing.T) {
 				IssuedAt:     time.Now(),
 				ExpiresAt:    time.Now().Add(24 * time.Hour),
 			}
-			storage.StoreRefreshToken(ctx, token)
-			storage.GetRefreshToken(ctx, token.RefreshToken)
-			storage.DeleteRefreshToken(ctx, token.RefreshToken)
+			_ = storage.StoreRefreshToken(ctx, token)
+			_ = storage.GetRefreshToken(ctx, token.RefreshToken)
+			_ = storage.DeleteRefreshToken(ctx, token.RefreshToken)
 			done <- true
 		}(i)
 	}
@@ -545,7 +545,7 @@ func TestInMemoryStorage_DeviceCodeUserCodeMapping(t *testing.T) {
 		IssuedAt:   time.Now(),
 		ExpiresAt:  time.Now().Add(15 * time.Minute),
 	}
-	storage.StoreDeviceCode(ctx, entry)
+	_ = storage.StoreDeviceCode(ctx, entry)
 
 	// Verify both lookups work
 	byDevice, err := storage.GetDeviceCodeByDeviceCode(ctx, "device-123")
@@ -566,7 +566,7 @@ func TestInMemoryStorage_DeviceCodeUserCodeMapping(t *testing.T) {
 	}
 
 	// Delete and verify both removed
-	storage.DeleteDeviceCode(ctx, "device-123")
+	_ = storage.DeleteDeviceCode(ctx, "device-123")
 
 	_, err = storage.GetDeviceCodeByDeviceCode(ctx, "device-123")
 	if err == nil {

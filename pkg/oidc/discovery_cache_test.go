@@ -261,7 +261,7 @@ func TestInMemoryDiscoveryCache_FetchFromProvider(t *testing.T) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("ETag", "\"test-etag\"")
-		json.NewEncoder(w).Encode(mockDoc)
+		_ = json.NewEncoder(w).Encode(mockDoc)
 	}))
 	defer mockServer.Close()
 
@@ -315,7 +315,7 @@ func TestInMemoryDiscoveryCache_StaleDataOnError(t *testing.T) {
 		if requestCount == 1 {
 			// First request succeeds
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(mockDoc)
+			_ = json.NewEncoder(w).Encode(mockDoc)
 		} else {
 			// Subsequent requests fail
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)

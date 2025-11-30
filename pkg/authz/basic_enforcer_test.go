@@ -326,7 +326,7 @@ func TestBasicEnforcer_Evaluate_PrefixWildcard(t *testing.T) {
 	enforcer := NewBasicEnforcer()
 
 	// Add policy with prefix wildcard
-	enforcer.AddPolicy(ctx, &Policy{
+	_ = enforcer.AddPolicy(ctx, &Policy{
 		ID:       "docs-access",
 		Subject:  "user:*",
 		Resource: "/documents/*",
@@ -371,7 +371,7 @@ func TestBasicEnforcer_Authorize_NewInterface(t *testing.T) {
 	ctx := context.Background()
 	enforcer := NewBasicEnforcer()
 
-	enforcer.AddPolicy(ctx, &Policy{
+	_ = enforcer.AddPolicy(ctx, &Policy{
 		ID:       "policy1",
 		Subject:  "user:123",
 		Resource: "doc:1",
@@ -404,7 +404,7 @@ func TestBasicEnforcer_Authorize_LegacyInterface(t *testing.T) {
 	ctx := context.Background()
 	enforcer := NewBasicEnforcer()
 
-	enforcer.AddPolicy(ctx, &Policy{
+	_ = enforcer.AddPolicy(ctx, &Policy{
 		ID:       "policy1",
 		Subject:  "user:456",
 		Resource: "file:789",
