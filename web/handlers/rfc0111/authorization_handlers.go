@@ -30,15 +30,15 @@ func NewAuthorizationHandlers(service *gauth.Service, tokenStore gauth.ExtendedT
 // RFC-0111 Steps a-i: Complete RFC-compliant authorization flow
 func (h *AuthorizationHandlers) RequestToken(c *gin.Context) {
 	var req struct {
-		ClientID         string                 `json:\"client_id\" binding:\"required\"`
-		ClientType       string                 `json:\"client_type,omitempty\"`
-		ClientVersion    string                 `json:\"client_version,omitempty\"`
-		SubscriptionID   string                 `json:\"subscription_id\" binding:\"required\"`
-		ResourceOwnerID  string                 `json:\"resource_owner_id\" binding:\"required\"`
-		PoACredentialRef string                 `json:\"poa_credential_ref\" binding:\"required\"`
-		Scope            string                 `json:\"scope\" binding:\"required\"`
-		Jurisdiction     string                 `json:\"jurisdiction,omitempty\"` // ISO 3166-1 alpha-2 country code (e.g., \"US\", \"DE\") or ISO 3166-2 subdivision (e.g., \"US-CA\", \"DE-BY\")
-		Context          map[string]interface{} `json:\"context,omitempty\"`
+		ClientID         string                 `json:"client_id" binding:"required"`
+		ClientType       string                 `json:"client_type,omitempty"`
+		ClientVersion    string                 `json:"client_version,omitempty"`
+		SubscriptionID   string                 `json:"subscription_id" binding:"required"`
+		ResourceOwnerID  string                 `json:"resource_owner_id" binding:"required"`
+		PoACredentialRef string                 `json:"poa_credential_ref" binding:"required"`
+		Scope            string                 `json:"scope" binding:"required"`
+		Jurisdiction     string                 `json:"jurisdiction,omitempty"` // ISO 3166-1 alpha-2 country code (e.g., "US", "DE") or ISO 3166-2 subdivision (e.g., "US-CA", "DE-BY"))
+		Context          map[string]interface{} `json:"context,omitempty"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
