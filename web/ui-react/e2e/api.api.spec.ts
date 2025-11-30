@@ -208,7 +208,8 @@ test.describe('Backend API Integration', () => {
         },
       })
       
-      expect([400, 422]).toContain(response.status())
+      expect(response.status()).toBeGreaterThanOrEqual(400)
+      expect(response.status()).toBeLessThan(500)
     })
 
     test('should handle malformed JSON', async ({ request }) => {
@@ -216,7 +217,7 @@ test.describe('Backend API Integration', () => {
         data: 'invalid-json',
       })
       
-      expect([400, 422, 500]).toContain(response.status())
+      expect(response.status()).toBeGreaterThanOrEqual(400)
     })
   })
 

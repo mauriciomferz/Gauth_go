@@ -37,7 +37,7 @@ test.describe.skip('PoA Page (Power of Attorney)', () => {
 
 test.describe('E2E Testing Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/e2e-testing')
+    await page.goto('/e2e')
   })
 
   test('should display test controls', async ({ page }) => {
