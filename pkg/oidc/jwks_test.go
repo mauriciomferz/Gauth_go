@@ -364,7 +364,7 @@ func TestExternalTokenValidator_ValidateToken_Success(t *testing.T) {
 
 	// Setup server
 	jwks := createJWKSFromRSAKey(&privateKey.PublicKey, kid)
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	jwksServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(jwks)
 	}))
@@ -373,7 +373,7 @@ func TestExternalTokenValidator_ValidateToken_Success(t *testing.T) {
 	// Setup discovery server
 	discoveryDoc := &OIDCConfiguration{
 		Issuer:  issuer,
-		JWKSURI: jwksServer.URL,
+		JWKSUri: jwksServer.URL,
 	}
 	discoveryServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
