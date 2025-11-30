@@ -197,9 +197,19 @@ jobs:
       
       - name: Install Playwright browsers
         working-directory: web/ui-react
-        run: npx playwright install --with-deps ${{ matrix.browser }}
+        run: |
+          # Install chromium for auth setup (always needed) plus the test browser
+          npx playwright install --with-deps chromium
+          if [ "${{ matrix.browser }}" != "chromium" ]; then
+            npx playwright install --with-deps ${{ matrix.browser }}
+          fi
       
       - name: Start backend server
+        env:
+          GAUTH_DEV_INDEX: "1"
+          GAUTH_RFC0111_ENABLED: "1"
+          GAUTH_USE_JWT_LIB: "1"
+          GAUTH_JWT_SIGNING_KEY: "test-secret-key-for-ci"
         run: |
           go run ./cmd/web-server &
           echo $! > backend.pid
@@ -273,9 +283,14 @@ jobs:
       
       - name: Install Playwright
         working-directory: web/ui-react
-        run: npx playwright install --with-deps
+        run: npx playwright install --with-deps chromium
       
       - name: Start backend server
+        env:
+          GAUTH_DEV_INDEX: "1"
+          GAUTH_RFC0111_ENABLED: "1"
+          GAUTH_USE_JWT_LIB: "1"
+          GAUTH_JWT_SIGNING_KEY: "test-secret-key-for-ci"
         run: |
           go run ./cmd/web-server &
           echo $! > backend.pid
@@ -328,6 +343,11 @@ jobs:
           sudo apt-get install k6
       
       - name: Start backend server
+        env:
+          GAUTH_DEV_INDEX: "1"
+          GAUTH_RFC0111_ENABLED: "1"
+          GAUTH_USE_JWT_LIB: "1"
+          GAUTH_JWT_SIGNING_KEY: "test-secret-key-for-ci"
         run: |
           go run ./cmd/web-server &
           echo $! > backend.pid

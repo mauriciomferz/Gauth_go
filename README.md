@@ -519,12 +519,22 @@ npm run test:e2e:ui  # Run E2E tests with UI mode
 
 ## Documentation & Index
 
+### Core Documentation
 - [Gap Matrix](docs/GAP_MATRIX.auto.md) - RFC compliance tracking
 - [API Documentation](api/openapi/gauth-api.yaml) - OpenAPI specification
 - [P*P Architecture User Guide](docs/P_STAR_P_USER_GUIDE.md) - Complete guide to Policy Administration, Decision, Information, Verification, and Enforcement Points
 - [Threat Model](docs/THREAT_MITIGATIONS_MATRIX.yaml) - Security analysis
 - [Architecture](ARCHITECTURE_SOLUTION.md) - System architecture
 - [Docs Index](docs/INDEX.md) - Curated navigation of gap, compliance & performance reports
+
+### Security Enhancements (P1 - Completed Nov 30, 2025)
+- [Wildcard Scope Patterns Guide](docs/WILDCARD_SCOPE_PATTERNS_GUIDE.md) - Pattern matching for complex authorization scenarios
+- [OPA Integration Guide](docs/OPA_INTEGRATION_GUIDE.md) - Enterprise policy management with Open Policy Agent
+- [OPA Integration Examples](examples/opa-integration/) - Production-ready Rego policies (HIPAA, PSD2) and Kubernetes deployment
+- [OAuth 2.0 Migration Study](docs/OAUTH_2_MIGRATION_FEASIBILITY_STUDY.md) - Strategic analysis: GiFo-RFC vs OAuth 2.0 + RFC 8693
+- [P1 Completion Report](docs/P1_SECURITY_ENHANCEMENTS_COMPLETION_REPORT.md) - Summary of all P1 deliverables
+
+### Project Information
 - [Contributing](CONTRIBUTORS.md) - Contribution guidelines
 - [Security](SECURITY.md) - Security policy
 - [Disclaimer](DISCLAIMER.md) - Usage limitations

@@ -424,8 +424,8 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
         │ GAuth Extended Token            │ RFC 8693 Token Exchange
         │ (PoA + Chain)                   │ (service-to-service)
         ↓                                 ↓
-┌───────────────────┐            ┌────────────────────┐
-│  Frontend Service │            │  Backend Service   │
+┌───────────────────┐             ┌────────────────────┐
+│  Frontend Service │             │  Backend Service   │
 │  (Legal AI Agent) │────────────→│  (Data Processing) │
 │                   │ RFC 8693    │                    │
 │  - PoA Validated  │ Exchange    │  - Narrower Scope  │
