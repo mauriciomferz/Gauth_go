@@ -15,6 +15,7 @@ const (
 	GoogleDefaultTrust = "substantial"
 	GoogleProviderID   = "google"
 	GoogleProviderName = "Google"
+trustLevelHigh     = "high"
 )
 
 // GoogleClaimMappings defines how Google OIDC claims map to GAuth claims.
@@ -163,9 +164,9 @@ func (p *GoogleProvider) GetTrustLevel(claims *oidc.IDTokenClaims) string {
 		// Map Google ACR to GAuth trust level
 		switch claims.ACR {
 		case "http://schemas.openid.net/pape/policies/2007/06/multi-factor":
-			return "high" // Multi-factor authentication
+			return trustLevelHigh // Multi-factor authentication
 		case "http://schemas.openid.net/pape/policies/2007/06/phishing-resistant":
-			return "high" // Phishing-resistant authentication
+			return trustLevelHigh // Phishing-resistant authentication
 		default:
 			// Unknown ACR, use default
 			return GoogleDefaultTrust
@@ -177,7 +178,7 @@ func (p *GoogleProvider) GetTrustLevel(claims *oidc.IDTokenClaims) string {
 		for _, method := range claims.AMR {
 			switch method {
 			case "mfa", "otp", "sms", "hwk":
-				return "high" // Multi-factor methods
+				return trustLevelHigh // Multi-factor methods
 			}
 		}
 	}

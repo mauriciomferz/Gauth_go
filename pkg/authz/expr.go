@@ -35,6 +35,12 @@ type ExprLimits struct {
 // DefaultExprLimits fallback values.
 var DefaultExprLimits = ExprLimits{MaxTokens: 256, MaxDepth: 32, MaxOps: 1024, MaxIdentifierLength: 64, MaxLiteralLength: 256}
 
+
+// Boolean string constants for token comparison
+const (
+boolTrueString  = "true"
+boolFalseString = "false"
+)
 // token types
 const (
 	tokEOF = iota
@@ -204,7 +210,7 @@ func (l *lexer) readIdentOrKeyword() error {
 	}
 	low := strings.ToLower(id)
 	switch low {
-	case "true", "false":
+	case boolTrueString, boolFalseString:
 		l.add(tokBool, low)
 	case "in":
 		l.add(tokIn, low)
@@ -587,7 +593,7 @@ func (p *parser) parsePrimary(depth int) (node, error) {
 		p.consume()
 		return p.parseMaybeComparison(left, depth+1)
 	case tokBool:
-		left := &literalNode{val: t.lit == "true"}
+		left := &literalNode{val: t.lit == boolTrueString}
 		p.consume()
 		return p.parseMaybeComparison(left, depth+1)
 	default:
@@ -610,7 +616,7 @@ func (p *parser) parseMaybeComparison(left node, depth int) (node, error) {
 		case tokNumber:
 			right = &literalNode{val: rightTok.lit}
 		case tokBool:
-			right = &literalNode{val: rightTok.lit == "true"}
+			right = &literalNode{val: rightTok.lit == boolTrueString}
 		default:
 			return nil, fmt.Errorf("invalid right operand")
 		}
@@ -633,7 +639,7 @@ func (p *parser) parseMaybeComparison(left node, depth int) (node, error) {
 			case tokNumber:
 				elem = &literalNode{val: ct.lit}
 			case tokBool:
-				elem = &literalNode{val: ct.lit == "true"}
+				elem = &literalNode{val: ct.lit == boolTrueString}
 			default:
 				return nil, fmt.Errorf("invalid in-list element")
 			}
