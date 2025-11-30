@@ -47,9 +47,9 @@ func JWEConfigFromEnv() (*JWEConfig, error) {
 
 	// Parse GAUTH_JWE_ALGORITHM
 	if envAlgorithm := os.Getenv("GAUTH_JWE_ALGORITHM"); envAlgorithm != "" {
-		algorithm := strings.ToUpper(envAlgorithm)
-		if algorithm != "RSA-OAEP-256" && algorithm != "A256KW" {
-			return nil, fmt.Errorf("unsupported GAUTH_JWE_ALGORITHM: %s (supported: RSA-OAEP-256, A256KW)", algorithm)
+	algorithm := strings.ToUpper(envAlgorithm)
+	if algorithm != algorithmRSAOAEP256 && algorithm != "A256KW" {
+		return nil, fmt.Errorf("unsupported GAUTH_JWE_ALGORITHM: %s (supported: RSA-OAEP-256, A256KW)", algorithm)
 		}
 		config.Algorithm = algorithm
 	}
@@ -134,11 +134,11 @@ func ValidateEnvironment() []string {
 	// Check algorithm
 	algorithm := os.Getenv("GAUTH_JWE_ALGORITHM")
 	if algorithm == "" {
-		algorithm = "RSA-OAEP-256" // default
+		algorithm = algorithmRSAOAEP256 // default
 	}
 
 	// For RSA algorithms, check key paths
-	if algorithm == "RSA-OAEP-256" || algorithm == "" {
+	if algorithm == algorithmRSAOAEP256 || algorithm == "" {
 		publicKey := os.Getenv("GAUTH_JWE_PUBLIC_KEY")
 		if publicKey == "" {
 			errors = append(errors, "GAUTH_JWE_PUBLIC_KEY not set (required for RSA-OAEP-256)")

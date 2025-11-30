@@ -328,7 +328,7 @@ func (pep *PowerEnforcementPoint) validateScope(
 
 	// Check based on action type
 	switch request.ActionType {
-	case "transaction":
+	case actionTypeTransaction:
 		// Check if transaction type is authorized
 		found := false
 		for _, tx := range authorizedActions.Transactions {
@@ -347,7 +347,7 @@ func (pep *PowerEnforcementPoint) validateScope(
 			return false, violations
 		}
 
-	case "decision":
+	case actionTypeDecision:
 		// Check if decision type is authorized
 		found := false
 		for _, dec := range authorizedActions.Decisions {
@@ -366,7 +366,7 @@ func (pep *PowerEnforcementPoint) validateScope(
 			return false, violations
 		}
 
-	case "action":
+	case actionTypeAction:
 		// Check if action is authorized
 		// Physical actions require special authorization
 		if request.PhysicalAction {
