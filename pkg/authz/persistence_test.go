@@ -521,7 +521,7 @@ func TestLoadEdgeCases(t *testing.T) {
 		if err := os.Chmod(path, 0o000); err != nil {
 			t.Fatalf("chmod: %v", err)
 		}
-		defer os.Chmod(path, 0o600) // cleanup
+		defer func() { _ = os.Chmod(path, 0o600) }() // cleanup
 
 		store, err := NewFilePolicyStore(path)
 		if err != nil {

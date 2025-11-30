@@ -117,7 +117,7 @@ func TestValidatorRegistry_Invoke(t *testing.T) {
 	t.Run("invoke successful validator", func(t *testing.T) {
 		vr := NewValidatorRegistry()
 		called := false
-		vr.Register("success-validator", func(req Request, policy Policy) error {
+		_ = vr.Register("success-validator", func(req Request, policy Policy) error {
 			called = true
 			return nil
 		})
@@ -133,7 +133,7 @@ func TestValidatorRegistry_Invoke(t *testing.T) {
 
 	t.Run("invoke failing validator", func(t *testing.T) {
 		vr := NewValidatorRegistry()
-		vr.Register("fail-validator", func(req Request, policy Policy) error {
+		_ = vr.Register("fail-validator", func(req Request, policy Policy) error {
 			return errors.New("validation failed")
 		})
 
@@ -281,7 +281,7 @@ func TestValidatorRegistry_Snapshot(t *testing.T) {
 
 		// Invoke 5 times: 3 successes, 2 failures
 		for i := 0; i < 5; i++ {
-			vr.Invoke("success-fail-validator", Request{}, Policy{})
+			_ = vr.Invoke("success-fail-validator", Request{}, Policy{})
 		}
 
 		snapshot := vr.Snapshot()
@@ -309,9 +309,9 @@ func TestValidatorRegistry_Snapshot(t *testing.T) {
 		})
 
 		// Invoke each once
-		vr.Invoke("validator1", Request{}, Policy{})
-		vr.Invoke("validator2", Request{}, Policy{})
-		vr.Invoke("validator3", Request{}, Policy{})
+		_ = vr.Invoke("validator1", Request{}, Policy{})
+		_ = vr.Invoke("validator2", Request{}, Policy{})
+		_ = vr.Invoke("validator3", Request{}, Policy{})
 
 		snapshot := vr.Snapshot()
 		if len(snapshot) != 3 {

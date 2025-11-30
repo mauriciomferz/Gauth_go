@@ -190,7 +190,7 @@ func TestBasicEnforcer_Evaluate_Allow(t *testing.T) {
 	enforcer := NewBasicEnforcer()
 
 	// Add allow policy
-	enforcer.AddPolicy(ctx, &Policy{
+	_ = enforcer.AddPolicy(ctx, &Policy{
 		ID:       "allow-read",
 		Subject:  "user:123",
 		Resource: "document:456",
