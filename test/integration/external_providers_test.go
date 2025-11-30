@@ -10,6 +10,10 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/oidc"
 	"github.com/golang-jwt/jwt/v5"
 )
+const (
+	testProviderGoogle = "google"
+)
+
 
 // TestExternalProvidersIntegration verifies end-to-end integration of external providers
 // with token exchange service.
