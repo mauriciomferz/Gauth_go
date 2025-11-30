@@ -350,7 +350,7 @@ func (pdp *SimplePDP) isActionAuthorized(actionType string, poaDef *poa.PoADefin
 	}
 
 	// Check decision types
-	if actionType == actionTypeDecision {cision {
+	if actionType == actionTypeDecision {
 		return len(authActions.Decisions) > 0
 	}
 

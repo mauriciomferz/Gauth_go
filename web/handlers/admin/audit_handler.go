@@ -769,20 +769,10 @@ func (h *AuditHandler) RegisterRoutes(router *gin.RouterGroup) {
 		audit.GET("/export/:id/download", h.DownloadExport)
 		audit.DELETE("/export/:id", h.DeleteExport)
 
-		// Compliance
-		audit.GET("/compliance", h.GetComplianceReports)
-
-		// Correlation
-		audit.GET("/correlations", h.GetEventCorrelations)
-
 		// SIEM Integration
-		audit.GET("/siem", h.ListSIEMIntegrations)
 		audit.POST("/siem", h.CreateSIEMIntegration)
 		audit.POST("/siem/:id/toggle", h.ToggleSIEMIntegration)
 		audit.DELETE("/siem/:id", h.DeleteSIEMIntegration)
 		audit.POST("/siem/:id/test", h.TestSIEMIntegration)
-
-		// Metrics
-		audit.GET("/metrics", h.GetAuditMetrics)
 	}
 }

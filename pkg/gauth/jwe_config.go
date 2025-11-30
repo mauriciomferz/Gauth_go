@@ -124,7 +124,7 @@ func (c *JWEConfig) Validate() error {
 	}
 
 	// Validate key configuration based on algorithm
-	if c.Algorithm == algorithmRSAOAEP256 {256 {
+	if c.Algorithm == algorithmRSAOAEP256 {
 		if c.PublicKeyPath == "" {
 			return errors.New("PublicKeyPath required for " + algorithmRSAOAEP256 + " algorithm")
 		}
