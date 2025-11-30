@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 )
 
 // CreatePoARequest represents the request to create a Power of Attorney
@@ -16,7 +16,7 @@ type CreatePoARequest struct {
 	Grantee      string            `json:"grantee" binding:"required"`
 	Scope        []string          `json:"scope" binding:"required"`
 	Restrictions map[string]string `json:"restrictions,omitempty"`
-	ValidFrom    string            `json:"valid_from" binding:"required"` // ISO8601
+	ValidFrom    string            `json:"valid_from" binding:"required"`  // ISO8601
 	ValidUntil   string            `json:"valid_until" binding:"required"` // ISO8601
 	AgentType    string            `json:"agent_type,omitempty"`
 	Sector       string            `json:"sector,omitempty"`
@@ -42,27 +42,27 @@ type ValidatePoARequest struct {
 
 // PoAResponse represents a Power of Attorney response
 type PoAResponse struct {
-	Success bool                      `json:"success"`
-	PoA     *gauth_rfc_001.PowerOfAttorney  `json:"poa,omitempty"`
-	Error   string                    `json:"error,omitempty"`
+	Success bool                           `json:"success"`
+	PoA     *gauth_rfc_001.PowerOfAttorney `json:"poa,omitempty"`
+	Error   string                         `json:"error,omitempty"`
 }
 
 // PoAListResponse represents a list of Power of Attorney documents
 type PoAListResponse struct {
-	Success bool                        `json:"success"`
-	PoAs    []*gauth_rfc_001.PowerOfAttorney  `json:"poas,omitempty"`
-	Total   int                         `json:"total"`
-	Error   string                      `json:"error,omitempty"`
+	Success bool                             `json:"success"`
+	PoAs    []*gauth_rfc_001.PowerOfAttorney `json:"poas,omitempty"`
+	Total   int                              `json:"total"`
+	Error   string                           `json:"error,omitempty"`
 }
 
 // PoAValidationResponse represents the validation result
 type PoAValidationResponse struct {
-	Success   bool                     `json:"success"`
-	Valid     bool                     `json:"valid"`
+	Success   bool                           `json:"success"`
+	Valid     bool                           `json:"valid"`
 	PoA       *gauth_rfc_001.PowerOfAttorney `json:"poa,omitempty"`
-	Reason    string                   `json:"reason,omitempty"`
-	Timestamp time.Time                `json:"timestamp"`
-	Error     string                   `json:"error,omitempty"`
+	Reason    string                         `json:"reason,omitempty"`
+	Timestamp time.Time                      `json:"timestamp"`
+	Error     string                         `json:"error,omitempty"`
 }
 
 // PoAHandler provides HTTP handlers for Power of Attorney CRUD operations
@@ -82,27 +82,29 @@ func NewPoAHandler() *PoAHandler {
 // POST /api/v1/beta/poa
 //
 // Request Body:
-//   {
-//     "grantor": "entity-123",
-//     "grantee": "person-456",
-//     "scope": ["read", "write", "delete"],
-//     "valid_from": "2025-01-01T00:00:00Z",
-//     "valid_until": "2026-01-01T00:00:00Z",
-//     "jurisdiction": "AT"
-//   }
+//
+//	{
+//	  "grantor": "entity-123",
+//	  "grantee": "person-456",
+//	  "scope": ["read", "write", "delete"],
+//	  "valid_from": "2025-01-01T00:00:00Z",
+//	  "valid_until": "2026-01-01T00:00:00Z",
+//	  "jurisdiction": "AT"
+//	}
 //
 // Success Response (201 Created):
-//   {
-//     "success": true,
-//     "poa": {
-//       "id": "uuid",
-//       "grantor": "entity-123",
-//       "grantee": "person-456",
-//       "scope": ["read", "write", "delete"],
-//       "status": "active",
-//       ...
-//     }
-//   }
+//
+//	{
+//	  "success": true,
+//	  "poa": {
+//	    "id": "uuid",
+//	    "grantor": "entity-123",
+//	    "grantee": "person-456",
+//	    "scope": ["read", "write", "delete"],
+//	    "status": "active",
+//	    ...
+//	  }
+//	}
 func (h *PoAHandler) HandleCreate(c *gin.Context) {
 	var req CreatePoARequest
 
@@ -168,16 +170,18 @@ func (h *PoAHandler) HandleCreate(c *gin.Context) {
 // GET /api/v1/beta/poa/:id
 //
 // Success Response (200 OK):
-//   {
-//     "success": true,
-//     "poa": { ... }
-//   }
+//
+//	{
+//	  "success": true,
+//	  "poa": { ... }
+//	}
 //
 // Error Response (404 Not Found):
-//   {
-//     "success": false,
-//     "error": "PoA not found"
-//   }
+//
+//	{
+//	  "success": false,
+//	  "error": "PoA not found"
+//	}
 func (h *PoAHandler) HandleGet(c *gin.Context) {
 	poaID := c.Param("id")
 
@@ -201,11 +205,12 @@ func (h *PoAHandler) HandleGet(c *gin.Context) {
 // GET /api/v1/beta/poa?grantor=xxx&grantee=yyy&status=active
 //
 // Success Response (200 OK):
-//   {
-//     "success": true,
-//     "poas": [...],
-//     "total": 5
-//   }
+//
+//	{
+//	  "success": true,
+//	  "poas": [...],
+//	  "total": 5
+//	}
 func (h *PoAHandler) HandleList(c *gin.Context) {
 	grantor := c.Query("grantor")
 	grantee := c.Query("grantee")
@@ -240,17 +245,19 @@ func (h *PoAHandler) HandleList(c *gin.Context) {
 // PUT /api/v1/beta/poa/:id
 //
 // Request Body:
-//   {
-//     "scope": ["read", "write"],
-//     "valid_until": "2027-01-01T00:00:00Z",
-//     "status": "suspended"
-//   }
+//
+//	{
+//	  "scope": ["read", "write"],
+//	  "valid_until": "2027-01-01T00:00:00Z",
+//	  "status": "suspended"
+//	}
 //
 // Success Response (200 OK):
-//   {
-//     "success": true,
-//     "poa": { ... }
-//   }
+//
+//	{
+//	  "success": true,
+//	  "poa": { ... }
+//	}
 func (h *PoAHandler) HandleUpdate(c *gin.Context) {
 	poaID := c.Param("id")
 
@@ -307,10 +314,11 @@ func (h *PoAHandler) HandleUpdate(c *gin.Context) {
 // DELETE /api/v1/beta/poa/:id
 //
 // Success Response (200 OK):
-//   {
-//     "success": true,
-//     "poa": { ... }
-//   }
+//
+//	{
+//	  "success": true,
+//	  "poa": { ... }
+//	}
 func (h *PoAHandler) HandleDelete(c *gin.Context) {
 	poaID := c.Param("id")
 
@@ -341,27 +349,30 @@ func (h *PoAHandler) HandleDelete(c *gin.Context) {
 // POST /api/v1/beta/poa/:id/validate
 //
 // Request Body:
-//   {
-//     "action": "read",
-//     "context": "resource-789",
-//     "timestamp": "2025-11-15T19:00:00Z"
-//   }
+//
+//	{
+//	  "action": "read",
+//	  "context": "resource-789",
+//	  "timestamp": "2025-11-15T19:00:00Z"
+//	}
 //
 // Success Response (200 OK):
-//   {
-//     "success": true,
-//     "valid": true,
-//     "poa": { ... },
-//     "timestamp": "2025-11-15T19:00:00Z"
-//   }
+//
+//	{
+//	  "success": true,
+//	  "valid": true,
+//	  "poa": { ... },
+//	  "timestamp": "2025-11-15T19:00:00Z"
+//	}
 //
 // Validation Failure (200 OK):
-//   {
-//     "success": true,
-//     "valid": false,
-//     "reason": "PoA expired",
-//     "timestamp": "2025-11-15T19:00:00Z"
-//   }
+//
+//	{
+//	  "success": true,
+//	  "valid": false,
+//	  "reason": "PoA expired",
+//	  "timestamp": "2025-11-15T19:00:00Z"
+//	}
 func (h *PoAHandler) HandleValidate(c *gin.Context) {
 	poaID := c.Param("id")
 

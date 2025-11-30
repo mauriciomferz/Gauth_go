@@ -240,7 +240,7 @@ func TestDebugEndpointsBlocked(t *testing.T) {
 		// Note: dev key will still fail even in dev mode
 		// This is intentional - weak keys are never acceptable
 		err := validator.ValidateAll()
-		
+
 		// Should fail due to weak key, not dev settings
 		if err != nil && containsAny(err.Error(), []string{"DEV_INDEX", "DEV_MODE"}) {
 			t.Error("Dev settings should be allowed in development mode")
@@ -251,9 +251,9 @@ func TestDebugEndpointsBlocked(t *testing.T) {
 // TestProductionModeDetection validates mode detection logic
 func TestProductionModeDetection(t *testing.T) {
 	tests := []struct {
-		name        string
-		envVars     map[string]string
-		expectProd  bool
+		name       string
+		envVars    map[string]string
+		expectProd bool
 	}{
 		{
 			name: "GAUTH_ENV=production",
