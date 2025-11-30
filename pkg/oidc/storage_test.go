@@ -454,7 +454,7 @@ func TestInMemoryStorage_Concurrent(t *testing.T) {
 				ExpiresAt:    time.Now().Add(24 * time.Hour),
 			}
 			_ = storage.StoreRefreshToken(ctx, token)
-			_ = storage.GetRefreshToken(ctx, token.RefreshToken)
+			_, _ = storage.GetRefreshToken(ctx, token.RefreshToken)
 			_ = storage.DeleteRefreshToken(ctx, token.RefreshToken)
 			done <- true
 		}(i)
@@ -481,7 +481,7 @@ func TestInMemoryStorage_MultipleUsers(t *testing.T) {
 			IssuedAt:     time.Now(),
 			ExpiresAt:    time.Now().Add(24 * time.Hour),
 		}
-		storage.StoreRefreshToken(ctx, token)
+		_ = storage.StoreRefreshToken(ctx, token)
 	}
 
 	// Verify each user only sees their own tokens
@@ -514,7 +514,7 @@ func TestInMemoryStorage_MultipleClients(t *testing.T) {
 			IssuedAt:     time.Now(),
 			ExpiresAt:    time.Now().Add(24 * time.Hour),
 		}
-		storage.StoreRefreshToken(ctx, token)
+		_ = storage.StoreRefreshToken(ctx, token)
 	}
 
 	// Verify each client only sees their own tokens

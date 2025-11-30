@@ -435,7 +435,7 @@ func TestBasicEnforcer_AuthorizeWithParams(t *testing.T) {
 	ctx := context.Background()
 	enforcer := NewBasicEnforcer()
 
-	enforcer.AddPolicy(ctx, &Policy{
+	_ = enforcer.AddPolicy(ctx, &Policy{
 		ID:       "policy1",
 		Subject:  "service:api",
 		Resource: "database:users",
@@ -487,14 +487,14 @@ func TestBasicEnforcer_FirstMatchWins(t *testing.T) {
 	enforcer := NewBasicEnforcer()
 
 	// Add multiple policies that could match
-	enforcer.AddPolicy(ctx, &Policy{
+	_ = enforcer.AddPolicy(ctx, &Policy{
 		ID:       "allow-policy",
 		Subject:  "user:*",
 		Resource: "doc:*",
 		Actions:  []string{"*"},
 		Effect:   Allow,
 	})
-	enforcer.AddPolicy(ctx, &Policy{
+	_ = enforcer.AddPolicy(ctx, &Policy{
 		ID:       "deny-policy",
 		Subject:  "user:*",
 		Resource: "doc:*",

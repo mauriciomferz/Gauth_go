@@ -30,7 +30,7 @@ func TestInMemoryJWKSFetcher_GetKey_Success(t *testing.T) {
 	// Create mock server
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(jwks)
+		_ = json.NewEncoder(w).Encode(jwks)
 	}))
 	defer server.Close()
 
@@ -66,7 +66,7 @@ func TestInMemoryJWKSFetcher_GetKey_Caching(t *testing.T) {
 		privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 		jwks := createJWKSFromRSAKey(&privateKey.PublicKey, "test-kid")
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(jwks)
+		_ = json.NewEncoder(w).Encode(jwks)
 	}))
 	defer server.Close()
 
@@ -102,7 +102,7 @@ func TestInMemoryJWKSFetcher_GetKey_CacheExpiration(t *testing.T) {
 		privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 		jwks := createJWKSFromRSAKey(&privateKey.PublicKey, "test-kid")
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(jwks)
+		_ = json.NewEncoder(w).Encode(jwks)
 	}))
 	defer server.Close()
 
@@ -140,7 +140,7 @@ func TestInMemoryJWKSFetcher_GetKey_KeyNotFound(t *testing.T) {
 		privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 		jwks := createJWKSFromRSAKey(&privateKey.PublicKey, "test-kid-1")
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(jwks)
+		_ = json.NewEncoder(w).Encode(jwks)
 	}))
 	defer server.Close()
 
@@ -212,7 +212,7 @@ func TestInMemoryJWKSFetcher_RefreshKeys(t *testing.T) {
 		kid := fmt.Sprintf("test-kid-v%d", keyVersion)
 		jwks := createJWKSFromRSAKey(&privateKey.PublicKey, kid)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(jwks)
+		_ = json.NewEncoder(w).Encode(jwks)
 	}))
 	defer server.Close()
 
@@ -256,7 +256,7 @@ func TestInMemoryJWKSFetcher_ClearCache(t *testing.T) {
 		privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 		jwks := createJWKSFromRSAKey(&privateKey.PublicKey, "test-kid")
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(jwks)
+		_ = json.NewEncoder(w).Encode(jwks)
 	}))
 	defer server.Close()
 
@@ -304,7 +304,7 @@ func TestInMemoryJWKSFetcher_MultipleKeys(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(jwks)
+		_ = json.NewEncoder(w).Encode(jwks)
 	}))
 	defer server.Close()
 
@@ -362,22 +362,22 @@ func TestExternalTokenValidator_ValidateToken_Success(t *testing.T) {
 		t.Fatalf("Failed to sign token: %v", err)
 	}
 
-	// Setup JWKS server
+	// Setup server
 	jwks := createJWKSFromRSAKey(&privateKey.PublicKey, kid)
-	jwksServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(jwks)
+		_ = json.NewEncoder(w).Encode(jwks)
 	}))
 	defer jwksServer.Close()
 
 	// Setup discovery server
 	discoveryDoc := &OIDCConfiguration{
 		Issuer:  issuer,
-		JWKSUri: jwksServer.URL,
+		JWKSURI: jwksServer.URL,
 	}
 	discoveryServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(discoveryDoc)
+		_ = json.NewEncoder(w).Encode(discoveryDoc)
 	}))
 	defer discoveryServer.Close()
 
@@ -542,7 +542,7 @@ func TestExternalTokenValidator_ValidateToken_InvalidAudience(t *testing.T) {
 
 	jwksFetcher := NewInMemoryJWKSFetcher(time.Hour)
 	discoveryCache := NewInMemoryDiscoveryCache(WithDefaultTTL(time.Hour))
-	discoveryCache.Set(issuer, discoveryDoc, time.Hour)
+	_ = discoveryCache.Set(issuer, discoveryDoc, time.Hour)
 	validator := NewExternalTokenValidator(jwksFetcher, discoveryCache)
 
 	// Validate token
@@ -582,7 +582,7 @@ func TestExternalTokenValidator_ValidateToken_MissingKid(t *testing.T) {
 
 	jwksFetcher := NewInMemoryJWKSFetcher(time.Hour)
 	discoveryCache := NewInMemoryDiscoveryCache(WithDefaultTTL(time.Hour))
-	discoveryCache.Set(issuer, discoveryDoc, time.Hour)
+	_ = discoveryCache.Set(issuer, discoveryDoc, time.Hour)
 	validator := NewExternalTokenValidator(jwksFetcher, discoveryCache)
 
 	// Validate token

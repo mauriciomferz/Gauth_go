@@ -421,7 +421,7 @@ func TestDynamicProviderService_RefreshDiscovery(t *testing.T) {
 				JwksURI:       serverURL + fmt.Sprintf("/jwks-v%d", callCount),
 			}
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(discoveryDoc)
+			_ = json.NewEncoder(w).Encode(discoveryDoc)
 		}
 	}))
 	defer server.Close()

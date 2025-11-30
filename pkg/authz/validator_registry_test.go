@@ -298,13 +298,13 @@ func TestValidatorRegistry_Snapshot(t *testing.T) {
 
 	t.Run("snapshot with multiple validators", func(t *testing.T) {
 		vr := NewValidatorRegistry()
-		vr.Register("validator1", func(req Request, policy Policy) error {
+		_ = vr.Register("validator1", func(req Request, policy Policy) error {
 			return nil
 		})
-		vr.Register("validator2", func(req Request, policy Policy) error {
+		_ = vr.Register("validator2", func(req Request, policy Policy) error {
 			return errors.New("fail")
 		})
-		vr.Register("validator3", func(req Request, policy Policy) error {
+		_ = vr.Register("validator3", func(req Request, policy Policy) error {
 			return nil
 		})
 
@@ -330,7 +330,7 @@ func TestValidatorRegistry_Snapshot(t *testing.T) {
 
 	t.Run("snapshot with latency histogram", func(t *testing.T) {
 		vr := NewValidatorRegistry()
-		vr.Register("latency-validator", func(req Request, policy Policy) error {
+		_ = vr.Register("latency-validator", func(req Request, policy Policy) error {
 			time.Sleep(1 * time.Millisecond)
 			return nil
 		})
@@ -355,7 +355,7 @@ func TestValidatorRegistry_Metadata(t *testing.T) {
 	vr := NewValidatorRegistry()
 
 	// Register validator with all metadata
-	vr.Register("full-metadata", func(req Request, policy Policy) error {
+	_ = vr.Register("full-metadata", func(req Request, policy Policy) error {
 		return nil
 	}, WithDescription("Full metadata validator"), WithVersion("3.1.4"), WithTags("tag-a", "tag-b", "tag-c"))
 
@@ -385,7 +385,7 @@ func TestValidatorRegistry_Metadata(t *testing.T) {
 // TestValidatorRegistry_Concurrency tests concurrent access
 func TestValidatorRegistry_Concurrency(t *testing.T) {
 	vr := NewValidatorRegistry()
-	vr.Register("concurrent-validator", func(req Request, policy Policy) error {
+	_ = vr.Register("concurrent-validator", func(req Request, policy Policy) error {
 		time.Sleep(1 * time.Millisecond)
 		return nil
 	})

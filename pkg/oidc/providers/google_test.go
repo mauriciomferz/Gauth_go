@@ -182,7 +182,7 @@ func TestGoogleProvider_GetDiscoveryDocument(t *testing.T) {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(mockDiscovery)
+		_ = json.NewEncoder(w).Encode(mockDiscovery)
 	}))
 	defer mockServer.Close()
 
