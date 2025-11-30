@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+const (
+	testUserID = "test-user"
+)
+
 // TestNewProperJWTService_ValidParameters verifies JWT service creation
 func TestNewProperJWTService_ValidParameters(t *testing.T) {
 	issuer := "test-issuer"
