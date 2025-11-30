@@ -17,7 +17,25 @@ type Repository struct {
 
 // NewRepository creates a new PoA repository
 func NewRepository(db *pgxpool.Pool) *Repository {
-	return &Repository{db: db}
+	return &Repository{
+		db:          db,
+		authChecker: nil, // Authorization checking disabled by default for backward compatibility
+	}
+}
+
+// SetAuthorizationChecker enables privilege escalation protection by validating
+// that the grantor (principal) actually holds the permissions being delegated.
+//
+// SECURITY RECOMMENDATION: Enable this in production to prevent CVE-2025-GAUTH-005.
+// Without this, a user with "Editor" role can delegate "Admin" permissions if they
+// can forge a valid signature (e.g., compromised key, social engineering).
+//
+// Example:
+//   repo := NewRepository(db)
+//   authChecker := NewDefaultAuthorizationChecker(repo)
+//   repo.SetAuthorizationChecker(authChecker)
+func (r *Repository) SetAuthorizationChecker(checker AuthorizationChecker) {
+	r.authChecker = checker
 }
 
 // PoARecord represents a power of attorney delegation in the database
@@ -291,7 +309,17 @@ func (r *Repository) RejectPoA(ctx context.Context, tenantID, poaID, rejectedBy,
 	return nil
 }
 
-// ValidatePoA checks if a representative can perform an action for a grantor
+// ValidatePoA checks if a representative can perform an action for a grantor.
+// 
+// Security Enhancement (CVE-2025-GAUTH-005): Now performs TWO-LEVEL validation:
+//  1. Database check: PoA exists, is active, contains requested action (EXISTING)
+//  2. Authorization check: Grantor actually holds permissions being delegated (NEW)
+//
+// This prevents privilege escalation attacks where a delegate requests scopes
+// beyond what the principal (grantor) actually possesses in the system.
+//
+// To enable authorization checking, inject an AuthorizationChecker via SetAuthorizationChecker().
+// If no checker is configured, only database validation is performed (legacy behavior).
 func (r *Repository) ValidatePoA(ctx context.Context, tenantID, grantorID, representativeID, action, resource string) (*PoARecord, bool, string) {
 	query := `
 		SELECT 
@@ -329,6 +357,32 @@ func (r *Repository) ValidatePoA(ctx context.Context, tenantID, grantorID, repre
 	if err != nil {
 		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return nil, false, fmt.Sprintf("Error validating PoA: %v", err)
+	}
+	
+	// SECURITY FIX: Verify grantor actually holds the permissions being delegated
+	// This prevents privilege escalation where a delegate requests scopes beyond
+	// what the principal possesses (e.g., "Editor" delegating "Admin" rights)
+	if r.authChecker != nil {
+		valid, unauthorized, err := ValidateScopeAuthorization(
+			ctx,
+			r.authChecker,
+			tenantID,
+			grantorID,
+			poa.Actions, // All actions in the PoA must be authorized
+		)
+		
+		if err != nil {
+			// Fail-closed: Authorization check failure = reject
+			fmt.Printf("[POA-SECURITY] Authorization check failed for grantor=%s: %v\n", grantorID, err)
+			return nil, false, fmt.Sprintf("Authorization verification failed: %v", err)
+		}
+		
+		if !valid {
+			// Privilege escalation detected
+			fmt.Printf("[POA-SECURITY] Privilege escalation blocked: grantor=%s lacks permissions %v\n", 
+				grantorID, unauthorized)
+			return nil, false, fmt.Sprintf("Grantor does not hold required permissions: %v", unauthorized)
+		}
 	}
 	
 	return &poa, true, "Valid Power of Attorney found"
