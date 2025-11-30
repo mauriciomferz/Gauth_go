@@ -30,6 +30,7 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: '1.25'
+        cache: false
 
     - name: Start Redis for benchmarks
       uses: supercharge/redis-github-action@1.7.0
@@ -90,7 +91,7 @@ jobs:
         path: benchmark-results.txt
         retention-days: 30
 
-  benchmark-comparison:
+  compare:
     name: Compare with Baseline
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
@@ -102,6 +103,7 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: '1.25'
+        cache: false
 
     - name: Start Redis
       uses: supercharge/redis-github-action@1.7.0
@@ -190,6 +192,7 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: '1.25'
+        cache: false
 
     - name: Start Redis
       uses: supercharge/redis-github-action@1.7.0
