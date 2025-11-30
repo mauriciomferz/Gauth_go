@@ -13,6 +13,12 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
 
+const (
+	actionTypeTransaction = "transaction"
+	actionTypeDecision    = "decision"
+	actionTypeAction      = "action"
+)
+
 // ProductionPEPAuditLogger provides thread-safe audit logging with observability integration
 type ProductionPEPAuditLogger struct {
 	mu           sync.RWMutex
@@ -339,17 +345,17 @@ func (pdp *SimplePDP) isActionAuthorized(actionType string, poaDef *poa.PoADefin
 	authActions := poaDef.Authorization.AuthorizedActions
 
 	// Check transaction types
-	if actionType == "transaction" {
+	if actionType == actionTypeTransaction {
 		return len(authActions.Transactions) > 0
 	}
 
 	// Check decision types
-	if actionType == "decision" {
+	if actionType == actionTypeDecision {cision {
 		return len(authActions.Decisions) > 0
 	}
 
 	// Check action types
-	if actionType == "action" {
+	if actionType == actionTypeAction {
 		physicalCount := len(authActions.PhysicalActions)
 		nonPhysicalCount := len(authActions.NonPhysicalActions)
 		return physicalCount > 0 || nonPhysicalCount > 0

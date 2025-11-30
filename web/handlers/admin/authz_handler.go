@@ -263,7 +263,7 @@ func (h *AuthorizationHandler) UpdatePolicy(c *gin.Context) {
 	pr.Resources = req.Resources
 	pr.Effect = req.Effect
 	pr.Conditions = conditions
-	pr.Status = "active" // Activate on update
+	pr.Status = statusActive // Activate on update
 
 	if err := h.repo.UpdatePolicy(c.Request.Context(), pr); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update policy"})
@@ -274,7 +274,7 @@ func (h *AuthorizationHandler) UpdatePolicy(c *gin.Context) {
 		ID:          pr.ID,
 		Name:        req.Name,
 		Description: req.Description,
-		Status:      "active",
+		Status:      statusActive,
 		Effect:      req.Effect,
 		Actions:     req.Actions,
 		Resources:   req.Resources,

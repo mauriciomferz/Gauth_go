@@ -13,6 +13,10 @@ import (
 	"time"
 )
 
+const (
+	algorithmRSAOAEP256 = "RSA-OAEP-256"
+)
+
 // JWEConfig defines configuration for JWE token encryption
 type JWEConfig struct {
 	// Enabled controls whether JWE encryption is active
@@ -85,7 +89,7 @@ func DevelopmentJWEConfig() *JWEConfig {
 func ProductionJWEConfig(publicKeyPath, privateKeyPath, keyID string) *JWEConfig {
 	return &JWEConfig{
 		Enabled:         true,
-		Algorithm:       "RSA-OAEP-256",
+		Algorithm:       algorithmRSAOAEP256,
 		Encryption:      "A256GCM",
 		PublicKeyPath:   publicKeyPath,
 		PrivateKeyPath:  privateKeyPath,
@@ -110,7 +114,7 @@ func (c *JWEConfig) Validate() error {
 	}
 
 	// Validate algorithm
-	if c.Algorithm != "RSA-OAEP-256" && c.Algorithm != "A256KW" {
+	if c.Algorithm != algorithmRSAOAEP256 && c.Algorithm != "A256KW" {
 		return fmt.Errorf("unsupported JWE algorithm: %s (supported: RSA-OAEP-256, A256KW)", c.Algorithm)
 	}
 
@@ -120,12 +124,12 @@ func (c *JWEConfig) Validate() error {
 	}
 
 	// Validate key configuration based on algorithm
-	if c.Algorithm == "RSA-OAEP-256" {
+	if c.Algorithm == algorithmRSAOAEP256 {256 {
 		if c.PublicKeyPath == "" {
-			return errors.New("PublicKeyPath required for RSA-OAEP-256 algorithm")
+			return errors.New("PublicKeyPath required for " + algorithmRSAOAEP256 + " algorithm")
 		}
 		if c.PrivateKeyPath == "" {
-			return errors.New("PrivateKeyPath required for RSA-OAEP-256 algorithm")
+			return errors.New("PrivateKeyPath required for " + algorithmRSAOAEP256 + " algorithm")
 		}
 		// Check files exist
 		if _, err := os.Stat(c.PublicKeyPath); err != nil {

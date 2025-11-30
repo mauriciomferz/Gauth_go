@@ -157,7 +157,7 @@ func TestE2E_OptimisticWithCircuitBreaker(t *testing.T) {
 
 	ctx := context.Background()
 	poaID := "test-poa-optimistic-cb"
-	principal := "test-principal"
+	principal := testPrincipalID
 	collateral := uint64(5000)
 
 	// Step 1: Mark as pending using optimistic revocation
@@ -316,7 +316,7 @@ func TestE2E_CrossSystemConsistency(t *testing.T) {
 
 	ctx := context.Background()
 	poaID := "test-poa-consistency"
-	principal := "test-principal"
+	principal := testPrincipalID
 
 	// Create state in all systems
 	t.Log("Step 1: Creating state across all systems")
@@ -379,7 +379,7 @@ func TestE2E_CompleteRevocationWorkflow(t *testing.T) {
 
 	ctx := context.Background()
 	poaID := "test-poa-complete-workflow"
-	principal := "test-principal"
+	principal := testPrincipalID
 
 	t.Log("=== Complete Revocation Workflow Test ===")
 
@@ -493,7 +493,7 @@ func TestE2E_OptimisticRevocationWithChallenge(t *testing.T) {
 
 	ctx := context.Background()
 	poaID := "test-poa-optimistic-challenge"
-	principal := "test-principal"
+	principal := testPrincipalID
 	collateral := uint64(10000)
 
 	t.Log("=== Optimistic Revocation with Challenge Test ===")
@@ -541,7 +541,7 @@ func TestE2E_DataPersistenceAcrossRestarts(t *testing.T) {
 
 	ctx := context.Background()
 	poaID := "test-poa-persistence"
-	principal := "test-principal"
+	principal := testPrincipalID
 
 	t.Log("Phase 1: Creating state")
 	

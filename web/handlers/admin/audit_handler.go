@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	statusActive = "active"
+	statusActive    = "active"
+	defaultTenantID = "default-tenant"
 )
 
 // AuditHandler manages audit trail operations for the admin portal
@@ -133,7 +134,7 @@ func (h *AuditHandler) ListAuditEvents(c *gin.Context) {
 	// Get tenant ID from context (set by auth middleware)
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant" // Fallback for development
+		tenantID = defaultTenantID // Fallback for development
 	}
 
 	// Parse query parameters
@@ -237,10 +238,10 @@ func getFrameworkStandard(framework string) string {
 
 // GetComplianceReports returns compliance status for various frameworks
 // GET /api/admin/audit/compliance
-func (h *AuditHandler) GetComplianceReports(c *gin.Context) {
+func (h *AuditHandler) CreateExportJob(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 
 	dbReports, err := h.repo.ListComplianceReports(c.Request.Context(), tenantID)
@@ -289,10 +290,10 @@ func (h *AuditHandler) GetComplianceReports(c *gin.Context) {
 
 // GetEventCorrelations returns correlated event patterns
 // GET /api/admin/audit/correlations
-func (h *AuditHandler) GetEventCorrelations(c *gin.Context) {
+func (h *AuditHandler) GetRetentionPolicy(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 
 	dbPatterns, err := h.repo.ListCorrelationPatterns(c.Request.Context(), tenantID)
@@ -571,10 +572,10 @@ func (h *AuditHandler) parseDateRange(dateRange string) (time.Time, time.Time, e
 
 // ListSIEMIntegrations returns all SIEM integrations
 // GET /api/admin/audit/siem
-func (h *AuditHandler) ListSIEMIntegrations(c *gin.Context) {
+func (h *AuditHandler) ListExportJobs(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 
 	dbIntegrations, err := h.repo.ListSIEMIntegrations(c.Request.Context(), tenantID)
@@ -721,10 +722,10 @@ func (h *AuditHandler) TestSIEMIntegration(c *gin.Context) {
 
 // GetAuditMetrics returns audit trail metrics
 // GET /api/admin/audit/metrics
-func (h *AuditHandler) GetAuditMetrics(c *gin.Context) {
+func (h *AuditHandler) GetExportJob(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
-		tenantID = "default-tenant"
+		tenantID = defaultTenantID
 	}
 
 	metrics, err := h.repo.GetAuditMetrics(c.Request.Context(), tenantID)

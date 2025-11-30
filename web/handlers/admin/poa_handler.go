@@ -14,7 +14,8 @@ import (
 )
 
 const (
-	adminActor = "admin"
+	adminActor     = "admin"
+	statusRevoked  = "revoked"
 )
 
 // PoAHandler manages Power of Attorney operations for the admin portal
@@ -115,7 +116,7 @@ func (h *PoAHandler) ListPoAs(c *gin.Context) {
 		approvalStatus := "approved"
 		if record.Status == "pending" {
 			approvalStatus = "pending_approval"
-		} else if record.Status == "revoked" {
+		} else if record.Status == statusRevoked {
 			approvalStatus = "rejected"
 		}
 		
@@ -263,7 +264,7 @@ func (h *PoAHandler) GetPoA(c *gin.Context) {
 	approvalStatus := "approved"
 	if record.Status == "pending" {
 		approvalStatus = "pending_approval"
-	} else if record.Status == "revoked" {
+	} else if record.Status == statusRevoked {
 		approvalStatus = "rejected"
 	}
 

@@ -150,7 +150,7 @@ func TestOptimisticRevocation_ChallengeRevocation(t *testing.T) {
 
 	ctx := context.Background()
 	poaID := "test-poa-challenge"
-	principal := "principal-address"
+	principal := testPrincipalAddr
 	reason := "Potentially malicious (disputed)"
 	collateral := uint64(2e18) // 2 ETH
 	challenger := "validator-address"
@@ -194,7 +194,7 @@ func TestOptimisticRevocation_ChallengeWindowExpired(t *testing.T) {
 
 	ctx := context.Background()
 	poaID := "test-poa-expired"
-	principal := "principal-address"
+	principal := testPrincipalAddr
 	reason := "Test expiration"
 	collateral := uint64(1e18)
 
@@ -222,7 +222,7 @@ func TestOptimisticRevocation_AutoFinalize(t *testing.T) {
 
 	ctx := context.Background()
 	poaID := "test-poa-auto"
-	principal := "principal-address"
+	principal := testPrincipalAddr
 	reason := "Auto-finalize test"
 	collateral := uint64(1e18)
 
@@ -252,7 +252,7 @@ func TestOptimisticRevocation_CannotFinalizeAfterChallenge(t *testing.T) {
 
 	ctx := context.Background()
 	poaID := "test-poa-challenge-first"
-	principal := "principal-address"
+	principal := testPrincipalAddr
 	reason := "Test challenge before finalize"
 	collateral := uint64(2e18)
 
