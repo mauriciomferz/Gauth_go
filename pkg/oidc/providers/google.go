@@ -15,7 +15,6 @@ const (
 	GoogleDefaultTrust = "substantial"
 	GoogleProviderID   = "google"
 	GoogleProviderName = "Google"
-trustLevelHigh     = "high"
 )
 
 // GoogleClaimMappings defines how Google OIDC claims map to GAuth claims.
