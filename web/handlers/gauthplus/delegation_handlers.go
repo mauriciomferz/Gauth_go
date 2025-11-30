@@ -3,8 +3,8 @@ package gauthplus
 import (
 	"net/http"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
 	"github.com/gin-gonic/gin"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
 )
 
 // DelegationHandlers handles HTTP requests for delegation management
@@ -198,8 +198,8 @@ func (h *DelegationHandlers) CheckMaxDepth(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"success":       true,
+		"success":        true,
 		"depth_exceeded": exceeded,
-		"current_depth": req.CurrentDepth,
+		"current_depth":  req.CurrentDepth,
 	})
 }

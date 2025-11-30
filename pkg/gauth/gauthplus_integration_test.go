@@ -540,7 +540,7 @@ func TestGAuthPlusIntegration_ComplianceValidator(t *testing.T) {
 	chainValidator := createMockChainValidator()
 	complianceValidator := gauth.NewComplianceValidator(chainValidator, nil, nil)
 	gauthPlusValidator := createTestGAuthPlusValidator(db)
-	
+
 	complianceValidator.SetGAuthPlusValidator(gauthPlusValidator)
 	complianceValidator.SetEnforceGAuthPlus(true)
 
@@ -551,13 +551,13 @@ func TestGAuthPlusIntegration_ComplianceValidator(t *testing.T) {
 			AuthorizationRequest: &gauth.AuthorizationRequest{
 				ClientID: "test-client",
 			},
-			PowerOfAttorney: createTestPoADefinition("agent-001"),
+			PowerOfAttorney:  createTestPoADefinition("agent-001"),
 			RequestedActions: []string{"read"},
-			RequestTime: time.Now(),
+			RequestTime:      time.Now(),
 		}
 
 		result, err := complianceValidator.ValidateRequestCompliance(ctx, request)
-		
+
 		if err != nil {
 			t.Logf("Validation error (expected in test): %v", err)
 		}

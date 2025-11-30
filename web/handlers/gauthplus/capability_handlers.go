@@ -3,8 +3,8 @@ package gauthplus
 import (
 	"net/http"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
 	"github.com/gin-gonic/gin"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
 )
 
 // CapabilityHandlers handles HTTP requests for capability assessment
@@ -24,7 +24,7 @@ type CreateAssessmentRequest struct {
 
 // CheckCapabilityMatchRequest represents the request to check capability match
 type CheckCapabilityMatchRequest struct {
-	AgentID      string                           `json:"agent_id" binding:"required"`
+	AgentID      string                            `json:"agent_id" binding:"required"`
 	Requirements *gauthplus.CapabilityRequirements `json:"requirements" binding:"required"`
 }
 
