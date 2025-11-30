@@ -241,7 +241,7 @@ func TestCircuitBreaker_ResetMetrics(t *testing.T) {
 
 	// Record some transactions
 	for i := 0; i < 5; i++ {
-		cb.RecordTransaction(ctx, poaID, 1e18, true)
+		_ = cb.RecordTransaction(ctx, poaID, 1e18, true) // Test setup
 	}
 
 	// Verify metrics exist
@@ -303,7 +303,7 @@ func TestCircuitBreaker_HalfOpenFailure(t *testing.T) {
 
 	// Trigger suspension
 	for i := 0; i < 11; i++ {
-		cb.RecordTransaction(ctx, poaID, 1e17, true)
+		_ = cb.RecordTransaction(ctx, poaID, 1e17, true) // Test setup
 	}
 
 	// Wait for suspension to expire
@@ -349,7 +349,7 @@ func TestCircuitBreaker_MultiplePoAs(t *testing.T) {
 		}
 
 		for i := 0; i < txCount; i++ {
-			cb.RecordTransaction(ctx, poaID, 1e17, true)
+			_ = cb.RecordTransaction(ctx, poaID, 1e17, true) // Test setup
 		}
 	}
 

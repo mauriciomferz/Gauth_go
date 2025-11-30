@@ -318,7 +318,7 @@ func (h *PoAHandler) RevokePoA(c *gin.Context) {
 		Reason string `json:"reason"`
 	}
 	var req RevokeRequest
-	c.ShouldBindJSON(&req)
+	_ = c.ShouldBindJSON(&req) // Optional request body; use defaults if malformed
 	
 	reason := req.Reason
 	if reason == "" {

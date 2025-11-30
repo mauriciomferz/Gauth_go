@@ -135,7 +135,7 @@ func (t *StdioTransport) Close() error {
 		return err
 	case <-context.Background().Done():
 		// Timeout - force kill
-		t.cmd.Process.Kill()
+		_ = t.cmd.Process.Kill() // Best effort cleanup
 		t.stdout.Close()
 		t.stderr.Close()
 		return fmt.Errorf("MCP server process did not exit gracefully")

@@ -168,7 +168,7 @@ func (h *MetricsHandler) getComponentHealth(ctx context.Context) []ComponentHeal
 			dbStatus = "unhealthy"
 		} else {
 			// Get request count from database
-			h.db.QueryRow(ctx, "SELECT COUNT(*) FROM audit_events").Scan(&dbRequests)
+			_ = h.db.QueryRow(ctx, "SELECT COUNT(*) FROM audit_events").Scan(&dbRequests) // Best effort metrics
 		}
 		
 		uptimePercent := "99.9%"
@@ -204,7 +204,7 @@ func (h *MetricsHandler) getComponentHealth(ctx context.Context) []ComponentHeal
 	// Check Token Service
 	tokenRequests := int64(0)
 	if h.db != nil {
-		h.db.QueryRow(ctx, "SELECT COUNT(*) FROM tokens").Scan(&tokenRequests)
+		_ = h.db.QueryRow(ctx, "SELECT COUNT(*) FROM tokens").Scan(&tokenRequests) // Best effort metrics
 		
 		components = append(components, ComponentHealth{
 			Name:     "Token Service",
@@ -217,7 +217,7 @@ func (h *MetricsHandler) getComponentHealth(ctx context.Context) []ComponentHeal
 	// Check Event System
 	eventRequests := int64(0)
 	if h.db != nil {
-		h.db.QueryRow(ctx, "SELECT COUNT(*) FROM events").Scan(&eventRequests)
+		_ = h.db.QueryRow(ctx, "SELECT COUNT(*) FROM events").Scan(&eventRequests) // Best effort metrics
 		
 		components = append(components, ComponentHealth{
 			Name:     "Event System",

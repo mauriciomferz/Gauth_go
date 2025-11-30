@@ -121,9 +121,9 @@ func (t *WebSocketTransport) connectWithRetry(ctx context.Context, attempt int) 
 	
 	// Configure connection
 	conn.SetReadLimit(maxMessageSize)
-	conn.SetReadDeadline(time.Now().Add(pongWait))
+	_ = conn.SetReadDeadline(time.Now().Add(pongWait)) // Best effort deadline
 	conn.SetPongHandler(func(string) error {
-		conn.SetReadDeadline(time.Now().Add(pongWait))
+		_ = conn.SetReadDeadline(time.Now().Add(pongWait)) // Best effort deadline
 		return nil
 	})
 	
@@ -288,8 +288,8 @@ func (t *WebSocketTransport) Close() error {
 	t.connMu.Lock()
 	if t.conn != nil {
 		// Send close message
-		t.conn.SetWriteDeadline(time.Now().Add(writeWait))
-		t.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+		_ = t.conn.SetWriteDeadline(time.Now().Add(writeWait)) // Best effort deadline
+		_ = t.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "")) // Best effort close
 		t.conn.Close()
 		t.conn = nil
 	}

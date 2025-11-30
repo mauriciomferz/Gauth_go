@@ -228,7 +228,7 @@ func (a *MCPAgent) logAudit(ctx context.Context, operation, target string, autho
 			Decision:    reason,
 			TokenScopes: a.token.Scope,
 		}
-		a.auditLogger.Log(ctx, entry)
+		_ = a.auditLogger.Log(ctx, entry) // Best effort logging
 	}
 }
 
@@ -247,7 +247,7 @@ func (a *MCPAgent) logAuditSuccess(ctx context.Context, operation, target string
 			Duration:    duration,
 			TokenScopes: a.token.Scope,
 		}
-		a.auditLogger.Log(ctx, entry)
+		_ = a.auditLogger.Log(ctx, entry) // Best effort logging
 	}
 }
 

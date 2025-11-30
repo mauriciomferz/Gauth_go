@@ -227,7 +227,7 @@ func TestBasicEnforcer_Evaluate_Deny(t *testing.T) {
 	enforcer := NewBasicEnforcer()
 
 	// Add deny policy
-	enforcer.AddPolicy(ctx, &Policy{
+	_ = enforcer.AddPolicy(ctx, &Policy{ // Test setup
 		ID:       "deny-delete",
 		Subject:  "user:789",
 		Resource: "system:config",
@@ -261,7 +261,7 @@ func TestBasicEnforcer_Evaluate_NoMatch(t *testing.T) {
 	enforcer := NewBasicEnforcer()
 
 	// Add policy
-	enforcer.AddPolicy(ctx, &Policy{
+	_ = enforcer.AddPolicy(ctx, &Policy{ // Test setup
 		ID:       "policy1",
 		Subject:  "user:123",
 		Resource: "document:456",
@@ -295,7 +295,7 @@ func TestBasicEnforcer_Evaluate_WildcardAction(t *testing.T) {
 	enforcer := NewBasicEnforcer()
 
 	// Add policy with wildcard action
-	enforcer.AddPolicy(ctx, &Policy{
+	_ = enforcer.AddPolicy(ctx, &Policy{ // Test setup
 		ID:       "wildcard-actions",
 		Subject:  "admin:*",
 		Resource: "system:*",

@@ -348,7 +348,7 @@ func (h *TokenHandler) RevokeToken(c *gin.Context) {
 	var req struct {
 		Reason string `json:"reason"`
 	}
-	c.ShouldBindJSON(&req)
+	_ = c.ShouldBindJSON(&req) // Optional request body; use defaults if malformed
 
 	revokedBy := c.GetString("user_id")
 	if revokedBy == "" {
@@ -393,7 +393,7 @@ func (h *TokenHandler) RevokeToken(c *gin.Context) {
 		ttl := time.Until(dbToken.ExpiresAt)
 		if ttl > 0 && ttl < 24*time.Hour {
 			key := fmt.Sprintf("blacklist:%s:%s", tenantID, tokenID)
-			h.redis.Set(c.Request.Context(), key, reason, ttl)
+			_ = h.redis.Set(c.Request.Context(), key, reason, ttl) // Best effort cache; core revocation in DB
 		}
 	}
 
@@ -465,7 +465,7 @@ func (h *TokenHandler) RefreshToken(c *gin.Context) {
 	}
 
 	// Update old token usage
-	h.repo.UpdateLastUsed(c.Request.Context(), tenantID, tokenID)
+	_ = h.repo.UpdateLastUsed(c.Request.Context(), tenantID, tokenID) // Best effort tracking
 
 	c.JSON(http.StatusOK, TokenResponse{
 		Token:     tokenString,

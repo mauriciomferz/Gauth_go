@@ -162,7 +162,7 @@ func TestValidatorRegistry_Invoke(t *testing.T) {
 		var capturedReq Request
 		var capturedPolicy Policy
 
-		vr.Register("data-validator", func(req Request, policy Policy) error {
+		_ = vr.Register("data-validator", func(req Request, policy Policy) error { // Test setup
 			capturedReq = req
 			capturedPolicy = policy
 			return nil
@@ -190,7 +190,7 @@ func TestValidatorRegistry_Invoke(t *testing.T) {
 
 	t.Run("invoke validator with timeout - success", func(t *testing.T) {
 		vr := NewValidatorRegistry()
-		vr.Register("fast-validator", func(req Request, policy Policy) error {
+		_ = vr.Register("fast-validator", func(req Request, policy Policy) error { // Test setup
 			time.Sleep(10 * time.Millisecond)
 			return nil
 		}, WithTimeout(100*time.Millisecond))
@@ -203,7 +203,7 @@ func TestValidatorRegistry_Invoke(t *testing.T) {
 
 	t.Run("invoke validator with timeout - timeout occurs", func(t *testing.T) {
 		vr := NewValidatorRegistry()
-		vr.Register("slow-validator", func(req Request, policy Policy) error {
+		_ = vr.Register("slow-validator", func(req Request, policy Policy) error { // Test setup
 			time.Sleep(200 * time.Millisecond)
 			return nil
 		}, WithTimeout(50*time.Millisecond))
