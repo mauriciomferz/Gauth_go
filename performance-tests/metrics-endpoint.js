@@ -35,14 +35,17 @@ export default function () {
   
   const checkResult = check(res, {
     'status is 200': (r) => r.status === 200,
-    'contains Prometheus format': (r) => r.body.includes('# HELP') && r.body.includes('# TYPE'),
+    'contains Prometheus format': (r) => r.body && r.body.includes('# HELP') && r.body.includes('# TYPE'),
     'response time < 800ms': (r) => r.timings.duration < 800,
-    'response size reasonable': (r) => r.body.length < 1000000, // Less than 1MB
+    'response size reasonable': (r) => r.body && r.body.length < 1000000, // Less than 1MB
   });
   
   errorRate.add(!checkResult);
   metricsFetchDuration.add(res.timings.duration);
-  metricsSize.add(res.body.length);
+  
+  if (res.body) {
+    metricsSize.add(res.body.length);
+  }
   
   if (checkResult) {
     successfulFetches.add(1);
