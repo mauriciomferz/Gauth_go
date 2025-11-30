@@ -79,12 +79,12 @@ func NewExportService(repo *Repository, exportDir string) *ExportService {
 	if exportDir == "" {
 		exportDir = "/tmp/gauth-audit-exports"
 	}
-	
+
 	// Create export directory if it doesn't exist
 	if err := os.MkdirAll(exportDir, 0755); err != nil {
 		// Log error but continue - exports will fail later
 	}
-	
+
 	return &ExportService{
 		repo:      repo,
 		exportDir: exportDir,
@@ -103,14 +103,14 @@ func (s *ExportService) CreateExportJob(ctx context.Context, tenantID string, fo
 		CreatedAt:  time.Now(),
 		ExpiresAt:  time.Now().Add(24 * time.Hour), // Exports expire after 24 hours
 	}
-	
+
 	s.mu.Lock()
 	s.jobs[job.ID] = job
 	s.mu.Unlock()
-	
+
 	// Start async export
 	go s.processExport(ctx, job, filter)
-	
+
 	return job, nil
 }
 
@@ -118,12 +118,12 @@ func (s *ExportService) CreateExportJob(ctx context.Context, tenantID string, fo
 func (s *ExportService) GetExportJob(jobID string) (*ExportJob, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	
+
 	job, exists := s.jobs[jobID]
 	if !exists {
 		return nil, fmt.Errorf("export job not found")
 	}
-	
+
 	return job, nil
 }
 
@@ -131,17 +131,17 @@ func (s *ExportService) GetExportJob(jobID string) (*ExportJob, error) {
 func (s *ExportService) DeleteExportJob(jobID string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	job, exists := s.jobs[jobID]
 	if !exists {
 		return fmt.Errorf("export job not found")
 	}
-	
+
 	// Delete file if it exists
 	if job.FilePath != "" {
 		_ = os.Remove(job.FilePath)
 	}
-	
+
 	delete(s.jobs, jobID)
 	return nil
 }
@@ -150,7 +150,7 @@ func (s *ExportService) DeleteExportJob(jobID string) error {
 func (s *ExportService) CleanupExpiredJobs() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	now := time.Now()
 	for jobID, job := range s.jobs {
 		if now.After(job.ExpiresAt) {
@@ -165,7 +165,7 @@ func (s *ExportService) CleanupExpiredJobs() {
 // processExport processes an export job asynchronously
 func (s *ExportService) processExport(ctx context.Context, job *ExportJob, filter ExportFilter) {
 	s.updateJobStatus(job.ID, ExportStatusProcessing, "")
-	
+
 	// Convert ExportFilter to EventFilters
 	repoFilter := EventFilters{
 		TenantID:     job.TenantID,
@@ -180,16 +180,16 @@ func (s *ExportService) processExport(ctx context.Context, job *ExportJob, filte
 		Limit:        filter.Limit,
 		Offset:       filter.Offset,
 	}
-	
+
 	// Query audit events
 	events, _, err := s.repo.ListEvents(ctx, repoFilter)
 	if err != nil {
 		s.updateJobStatus(job.ID, ExportStatusFailed, fmt.Sprintf("failed to query events: %v", err))
 		return
 	}
-	
+
 	job.TotalEvents = len(events)
-	
+
 	// Generate filename
 	ext := string(job.Format)
 	if job.Compressed {
@@ -197,7 +197,7 @@ func (s *ExportService) processExport(ctx context.Context, job *ExportJob, filte
 	}
 	filename := fmt.Sprintf("audit-export-%s-%s.%s", job.ID, time.Now().Format("20060102-150405"), ext)
 	filePath := filepath.Join(s.exportDir, filename)
-	
+
 	// Create file
 	file, err := os.Create(filePath)
 	if err != nil {
@@ -205,17 +205,17 @@ func (s *ExportService) processExport(ctx context.Context, job *ExportJob, filte
 		return
 	}
 	defer file.Close()
-	
+
 	var writer io.Writer = file
 	var gzipWriter *gzip.Writer
-	
+
 	// Add gzip compression if requested
 	if job.Compressed {
 		gzipWriter = gzip.NewWriter(file)
 		writer = gzipWriter
 		defer gzipWriter.Close()
 	}
-	
+
 	// Export based on format
 	switch job.Format {
 	case ExportFormatJSON:
@@ -229,13 +229,13 @@ func (s *ExportService) processExport(ctx context.Context, job *ExportJob, filte
 	default:
 		err = fmt.Errorf("unsupported format: %s", job.Format)
 	}
-	
+
 	if err != nil {
 		s.updateJobStatus(job.ID, ExportStatusFailed, fmt.Sprintf("export failed: %v", err))
 		_ = os.Remove(filePath)
 		return
 	}
-	
+
 	// Flush gzip writer
 	if gzipWriter != nil {
 		if err := gzipWriter.Close(); err != nil {
@@ -244,14 +244,14 @@ func (s *ExportService) processExport(ctx context.Context, job *ExportJob, filte
 			return
 		}
 	}
-	
+
 	// Get file size
 	info, err := file.Stat()
 	if err != nil {
 		s.updateJobStatus(job.ID, ExportStatusFailed, fmt.Sprintf("failed to stat file: %v", err))
 		return
 	}
-	
+
 	// Update job
 	s.mu.Lock()
 	job.FilePath = filePath
@@ -266,7 +266,7 @@ func (s *ExportService) processExport(ctx context.Context, job *ExportJob, filte
 func (s *ExportService) updateJobStatus(jobID string, status ExportStatus, errorMsg string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	if job, exists := s.jobs[jobID]; exists {
 		job.Status = status
 		job.Error = errorMsg
@@ -281,7 +281,7 @@ func (s *ExportService) updateJobStatus(jobID string, status ExportStatus, error
 func (s *ExportService) exportJSON(w io.Writer, events []AuditEvent) error {
 	encoder := json.NewEncoder(w)
 	encoder.SetIndent("", "  ")
-	
+
 	return encoder.Encode(map[string]interface{}{
 		"exported_at": time.Now().Format(time.RFC3339),
 		"total":       len(events),
@@ -293,23 +293,23 @@ func (s *ExportService) exportJSON(w io.Writer, events []AuditEvent) error {
 func (s *ExportService) exportCSV(w io.Writer, events []AuditEvent) error {
 	writer := csv.NewWriter(w)
 	defer writer.Flush()
-	
+
 	// Write header
 	header := []string{
-		"ID", "Timestamp", "TenantID", "UserID", "Action", "ResourceID", 
+		"ID", "Timestamp", "TenantID", "UserID", "Action", "ResourceID",
 		"ResourceType", "Status", "Category", "Severity", "IPAddress", "UserAgent",
 	}
 	if err := writer.Write(header); err != nil {
 		return err
 	}
-	
+
 	// Write events
 	for _, event := range events {
 		userAgent := ""
 		if event.UserAgent != nil {
 			userAgent = *event.UserAgent
 		}
-		
+
 		record := []string{
 			event.ID,
 			event.Timestamp.Format(time.RFC3339),
@@ -328,7 +328,7 @@ func (s *ExportService) exportCSV(w io.Writer, events []AuditEvent) error {
 			return err
 		}
 	}
-	
+
 	return nil
 }
 
@@ -337,7 +337,7 @@ func (s *ExportService) exportSyslog(w io.Writer, events []AuditEvent) error {
 	for _, event := range events {
 		// Map severity to syslog priority
 		priority := s.severityToPriority(event.Severity)
-		
+
 		// Format: <priority>version timestamp hostname app-name procid msgid structured-data message
 		line := fmt.Sprintf("<%d>1 %s gauth-audit - - - [tenant=\"%s\" user=\"%s\" action=\"%s\" resource=\"%s\" status=\"%s\"] %s\n",
 			priority,
@@ -349,12 +349,12 @@ func (s *ExportService) exportSyslog(w io.Writer, events []AuditEvent) error {
 			event.Status,
 			event.Action,
 		)
-		
+
 		if _, err := w.Write([]byte(line)); err != nil {
 			return err
 		}
 	}
-	
+
 	return nil
 }
 
@@ -374,12 +374,12 @@ func (s *ExportService) exportCEF(w io.Writer, events []AuditEvent) error {
 			event.Status,
 			event.Category,
 		)
-		
+
 		if _, err := w.Write([]byte(line)); err != nil {
 			return err
 		}
 	}
-	
+
 	return nil
 }
 

@@ -25,58 +25,58 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 
 // AuditEvent represents an audit event from the database
 type AuditEvent struct {
-	ID            string                 `json:"id"`
-	TenantID      string                 `json:"tenantId"`
-	Timestamp     time.Time              `json:"timestamp"`
-	EventType     string                 `json:"eventType"`
-	Category      string                 `json:"category"`
-	Severity      string                 `json:"severity"`
-	UserID        string                 `json:"userId"`
-	UserName      string                 `json:"userName"`
-	UserRole      string                 `json:"userRole"`
-	Action        string                 `json:"action"`
-	ResourceType  string                 `json:"resourceType"`
-	ResourceID    string                 `json:"resourceId"`
-	ResourceName  string                 `json:"resourceName"`
-	Status        string                 `json:"status"`
-	StatusCode    *int                   `json:"statusCode"`
-	ErrorMessage  *string                `json:"errorMessage"`
-	IPAddress     string                 `json:"ipAddress"`
-	UserAgent     *string                `json:"userAgent"`
-	RequestID     *string                `json:"requestId"`
-	SessionID     *string                `json:"sessionId"`
-	CorrelationID *string                `json:"correlationId"`
-	BeforeState   map[string]interface{} `json:"beforeState"`
-	AfterState    map[string]interface{} `json:"afterState"`
-	Changes       map[string]interface{} `json:"changes"`
-	Framework     *string                `json:"complianceFramework"`
-	RiskLevel     *string                `json:"riskLevel"`
-	RequiresReview bool                  `json:"requiresReview"`
-	ReviewedAt    *time.Time             `json:"reviewedAt"`
-	ReviewedBy    *string                `json:"reviewedBy"`
-	Hash          string                 `json:"hash"`
-	PreviousHash  *string                `json:"previousHash"`
+	ID             string                 `json:"id"`
+	TenantID       string                 `json:"tenantId"`
+	Timestamp      time.Time              `json:"timestamp"`
+	EventType      string                 `json:"eventType"`
+	Category       string                 `json:"category"`
+	Severity       string                 `json:"severity"`
+	UserID         string                 `json:"userId"`
+	UserName       string                 `json:"userName"`
+	UserRole       string                 `json:"userRole"`
+	Action         string                 `json:"action"`
+	ResourceType   string                 `json:"resourceType"`
+	ResourceID     string                 `json:"resourceId"`
+	ResourceName   string                 `json:"resourceName"`
+	Status         string                 `json:"status"`
+	StatusCode     *int                   `json:"statusCode"`
+	ErrorMessage   *string                `json:"errorMessage"`
+	IPAddress      string                 `json:"ipAddress"`
+	UserAgent      *string                `json:"userAgent"`
+	RequestID      *string                `json:"requestId"`
+	SessionID      *string                `json:"sessionId"`
+	CorrelationID  *string                `json:"correlationId"`
+	BeforeState    map[string]interface{} `json:"beforeState"`
+	AfterState     map[string]interface{} `json:"afterState"`
+	Changes        map[string]interface{} `json:"changes"`
+	Framework      *string                `json:"complianceFramework"`
+	RiskLevel      *string                `json:"riskLevel"`
+	RequiresReview bool                   `json:"requiresReview"`
+	ReviewedAt     *time.Time             `json:"reviewedAt"`
+	ReviewedBy     *string                `json:"reviewedBy"`
+	Hash           string                 `json:"hash"`
+	PreviousHash   *string                `json:"previousHash"`
 }
 
 // ComplianceReport represents a compliance framework report
 type ComplianceReport struct {
-	ID                  string                 `json:"id"`
-	TenantID            string                 `json:"tenantId"`
-	ReportName          string                 `json:"reportName"`
-	Framework           string                 `json:"framework"`
-	PeriodStart         time.Time              `json:"periodStart"`
-	PeriodEnd           time.Time              `json:"periodEnd"`
-	TotalEvents         int                    `json:"totalEvents"`
-	CompliantEvents     int                    `json:"compliantEvents"`
-	NonCompliantEvents  int                    `json:"nonCompliantEvents"`
-	CriticalViolations  int                    `json:"criticalViolations"`
-	Status              string                 `json:"status"`
-	GeneratedAt         time.Time              `json:"generatedAt"`
-	GeneratedBy         string                 `json:"generatedBy"`
-	Summary             *string                `json:"summary"`
-	Recommendations     []string               `json:"recommendations"`
-	Violations          map[string]interface{} `json:"violations"`
-	ReportData          map[string]interface{} `json:"reportData"`
+	ID                 string                 `json:"id"`
+	TenantID           string                 `json:"tenantId"`
+	ReportName         string                 `json:"reportName"`
+	Framework          string                 `json:"framework"`
+	PeriodStart        time.Time              `json:"periodStart"`
+	PeriodEnd          time.Time              `json:"periodEnd"`
+	TotalEvents        int                    `json:"totalEvents"`
+	CompliantEvents    int                    `json:"compliantEvents"`
+	NonCompliantEvents int                    `json:"nonCompliantEvents"`
+	CriticalViolations int                    `json:"criticalViolations"`
+	Status             string                 `json:"status"`
+	GeneratedAt        time.Time              `json:"generatedAt"`
+	GeneratedBy        string                 `json:"generatedBy"`
+	Summary            *string                `json:"summary"`
+	Recommendations    []string               `json:"recommendations"`
+	Violations         map[string]interface{} `json:"violations"`
+	ReportData         map[string]interface{} `json:"reportData"`
 }
 
 // EventCorrelationPattern represents a correlation pattern
@@ -100,39 +100,39 @@ type EventCorrelationPattern struct {
 
 // SIEMIntegration represents a SIEM integration
 type SIEMIntegration struct {
-	ID                string     `json:"id"`
-	TenantID          string     `json:"tenantId"`
-	IntegrationName   string     `json:"integrationName"`
-	SIEMType          string     `json:"siemType"`
-	Status            string     `json:"status"`
-	EndpointURL       string     `json:"endpointUrl"`
-	AuthType          *string    `json:"authType"`
-	APIKey            *string    `json:"apiKey"`
-	Format            string     `json:"format"`
-	BatchSize         int        `json:"batchSize"`
-	FlushIntervalSec  int        `json:"flushIntervalSeconds"`
-	EventTypes        []string   `json:"eventTypes"`
-	MinSeverity       *string    `json:"minSeverity"`
-	EventsSent        int64      `json:"eventsSent"`
-	LastSyncAt        *time.Time `json:"lastSyncAt"`
-	LastError         *string    `json:"lastError"`
-	LastErrorAt       *time.Time `json:"lastErrorAt"`
-	CreatedAt         time.Time  `json:"createdAt"`
+	ID               string     `json:"id"`
+	TenantID         string     `json:"tenantId"`
+	IntegrationName  string     `json:"integrationName"`
+	SIEMType         string     `json:"siemType"`
+	Status           string     `json:"status"`
+	EndpointURL      string     `json:"endpointUrl"`
+	AuthType         *string    `json:"authType"`
+	APIKey           *string    `json:"apiKey"`
+	Format           string     `json:"format"`
+	BatchSize        int        `json:"batchSize"`
+	FlushIntervalSec int        `json:"flushIntervalSeconds"`
+	EventTypes       []string   `json:"eventTypes"`
+	MinSeverity      *string    `json:"minSeverity"`
+	EventsSent       int64      `json:"eventsSent"`
+	LastSyncAt       *time.Time `json:"lastSyncAt"`
+	LastError        *string    `json:"lastError"`
+	LastErrorAt      *time.Time `json:"lastErrorAt"`
+	CreatedAt        time.Time  `json:"createdAt"`
 }
 
 // EventFilters represents query filters for audit events
 type EventFilters struct {
-	TenantID      string
-	Category      string
-	Severity      string
-	UserID        string
-	Action        string
-	Status        string
-	ResourceType  string
-	StartTime     *time.Time
-	EndTime       *time.Time
-	Limit         int
-	Offset        int
+	TenantID     string
+	Category     string
+	Severity     string
+	UserID       string
+	Action       string
+	Status       string
+	ResourceType string
+	StartTime    *time.Time
+	EndTime      *time.Time
+	Limit        int
+	Offset       int
 }
 
 // ListEvents retrieves audit events with filtering
@@ -744,9 +744,9 @@ func (r *Repository) GetAuditMetrics(ctx context.Context, tenantID string) (map[
 	`
 
 	var metrics struct {
-		Total, Auth, Authz, Token, Admin, System                       int
-		Critical, High, Medium, Low, Info                              int
-		Success, Failure, Error                                        int
+		Total, Auth, Authz, Token, Admin, System int
+		Critical, High, Medium, Low, Info        int
+		Success, Failure, Error                  int
 	}
 
 	err := r.db.QueryRow(ctx, query, tenantID).Scan(
