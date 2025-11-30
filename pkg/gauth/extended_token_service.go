@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
 
 // ExtendedTokenService provides RFC-0111 compliant extended token operations
@@ -42,7 +42,7 @@ func NewExtendedTokenService(
 	// Generate a signing key if not provided
 	// In production, this should be loaded from secure configuration
 	signingKey := make([]byte, 32)
-	rand.Read(signingKey)
+	_, _ = rand.Read(signingKey) // crypto/rand.Read always succeeds on supported platforms
 
 	return &ExtendedTokenService{
 		chainValidator:      chainValidator,

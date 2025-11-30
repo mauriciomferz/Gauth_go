@@ -87,7 +87,7 @@ func (h *VerificationHandler) PublicVerifyPoA(w http.ResponseWriter, r *http.Req
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Cache-Control", "public, max-age=300")
-	json.NewEncoder(w).Encode(publicResult)
+	_ = json.NewEncoder(w).Encode(publicResult) // Ignore error; response already committed
 }
 
 // PublicCheckStatus handles GET /api/v1/public/verify/status/{poa_id}
@@ -130,7 +130,7 @@ func (h *VerificationHandler) PublicCheckStatus(w http.ResponseWriter, r *http.R
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Cache-Control", "public, max-age=60")
-	json.NewEncoder(w).Encode(statusResponse)
+	_ = json.NewEncoder(w).Encode(statusResponse) // Ignore error; response already committed
 }
 
 // HealthCheck provides health status of verification service
@@ -148,7 +148,7 @@ func (h *VerificationHandler) HealthCheck(w http.ResponseWriter, r *http.Request
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(health)
+	_ = json.NewEncoder(w).Encode(health) // Ignore error; response already committed
 }
 
 // RegisterRoutes registers all verification routes

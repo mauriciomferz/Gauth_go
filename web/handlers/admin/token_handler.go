@@ -9,10 +9,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/redis"
-	"github.com/mauriciomferz/Gauth_go/pkg/tokens"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/mauriciomferz/Gauth_go/pkg/redis"
+	"github.com/mauriciomferz/Gauth_go/pkg/tokens"
 )
 
 // TokenHandler manages token operations for the admin portal
@@ -93,7 +93,7 @@ func (h *TokenHandler) CreateToken(c *gin.Context) {
 
 	// Generate token
 	tokenBytes := make([]byte, 64)
-	rand.Read(tokenBytes)
+	_, _ = rand.Read(tokenBytes) // crypto/rand.Read always succeeds on supported platforms
 	tokenString := base64.URLEncoding.EncodeToString(tokenBytes)
 
 	issuedAt := time.Now()
@@ -442,7 +442,7 @@ func (h *TokenHandler) RefreshToken(c *gin.Context) {
 
 	// Generate new access token
 	tokenBytes := make([]byte, 64)
-	rand.Read(tokenBytes)
+	_, _ = rand.Read(tokenBytes) // crypto/rand.Read always succeeds on supported platforms
 	tokenString := base64.URLEncoding.EncodeToString(tokenBytes)
 
 	newToken := &tokens.Token{

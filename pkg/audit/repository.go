@@ -458,13 +458,13 @@ func (r *Repository) ListComplianceReports(ctx context.Context, tenantID string)
 
 		// Unmarshal JSONB fields
 		if recommendations != nil {
-			json.Unmarshal(recommendations, &report.Recommendations)
+			_ = json.Unmarshal(recommendations, &report.Recommendations) // Tolerate partial data
 		}
 		if violations != nil {
-			json.Unmarshal(violations, &report.Violations)
+			_ = json.Unmarshal(violations, &report.Violations) // Tolerate partial data
 		}
 		if reportData != nil {
-			json.Unmarshal(reportData, &report.ReportData)
+			_ = json.Unmarshal(reportData, &report.ReportData) // Tolerate partial data
 		}
 
 		reports = append(reports, report)

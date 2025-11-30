@@ -148,7 +148,7 @@ func (s *DisclosureService) ListActiveAuthorizations(
 	}
 
 	// Log disclosure access
-	s.auditLogger.LogDisclosureAccess(ctx, &AuditEntry{
+	_ = s.auditLogger.LogDisclosureAccess(ctx, &AuditEntry{
 		Timestamp: time.Now(),
 		Action:    "list_authorizations",
 		Actor:     request.ResourceOwnerID,
@@ -157,7 +157,7 @@ func (s *DisclosureService) ListActiveAuthorizations(
 			"count":  len(summaries),
 			"status": request.Status,
 		},
-	})
+	}) // Best effort logging; don't fail operation on logging error
 
 	return &ListActiveAuthorizationsResponse{
 		Authorizations: summaries,
@@ -208,7 +208,7 @@ func (s *DisclosureService) GetAuthorizationDetail(
 	}
 
 	// Log disclosure access
-	s.auditLogger.LogDisclosureAccess(ctx, &AuditEntry{
+	_ = s.auditLogger.LogDisclosureAccess(ctx, &AuditEntry{
 		Timestamp: time.Now(),
 		Action:    "get_authorization_detail",
 		Actor:     resourceOwnerID,
@@ -216,7 +216,7 @@ func (s *DisclosureService) GetAuthorizationDetail(
 		Details: map[string]interface{}{
 			"authorization_id": authorizationID,
 		},
-	})
+	}) // Best effort logging; don't fail operation on logging error
 
 	return detail, nil
 }
@@ -285,7 +285,7 @@ func (s *DisclosureService) RevokeAuthorization(
 	}
 
 	// Log revocation
-	s.auditLogger.LogRevocation(ctx, &AuditEntry{
+	_ = s.auditLogger.LogRevocation(ctx, &AuditEntry{
 		Timestamp: revokedAt,
 		Action:    "revoke_authorization",
 		Actor:     request.ResourceOwnerID,
@@ -295,7 +295,7 @@ func (s *DisclosureService) RevokeAuthorization(
 			"reason":           request.Reason,
 			"revoked_by":       request.RevokedBy,
 		},
-	})
+	}) // Best effort logging; don't fail operation on logging error
 
 	return &RevokeAuthorizationResponse{
 		AuthorizationID: request.AuthorizationID,
@@ -338,7 +338,7 @@ func (s *DisclosureService) GetAuditTrail(
 	}
 
 	// Log disclosure access
-	s.auditLogger.LogDisclosureAccess(ctx, &AuditEntry{
+	_ = s.auditLogger.LogDisclosureAccess(ctx, &AuditEntry{
 		Timestamp: time.Now(),
 		Action:    "get_audit_trail",
 		Actor:     resourceOwnerID,
@@ -348,7 +348,7 @@ func (s *DisclosureService) GetAuditTrail(
 			"entry_count":      len(entries),
 			"from_date":        fromDate,
 		},
-	})
+	}) // Best effort logging; don't fail operation on logging error
 
 	return entries, nil
 }
