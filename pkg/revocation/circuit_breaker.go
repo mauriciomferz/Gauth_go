@@ -72,7 +72,7 @@ type CircuitBreakerMetrics struct {
 // CircuitBreaker implements circuit breaker pattern with rate limiting
 // Automatically suspends PoAs that exhibit suspicious behavior patterns
 type CircuitBreaker struct {
-	redis              *redis.ClusterClient
+	redis              redis.UniversalClient  // Supports both regular and cluster clients
 	logger             Logger
 	config             *RateLimitConfig
 	metrics            sync.Map                // poaID → *CircuitBreakerMetrics

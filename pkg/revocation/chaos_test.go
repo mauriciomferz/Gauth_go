@@ -22,8 +22,9 @@ func setupTwoPhaseTest(t *testing.T) (*TwoPhaseRevocation, *miniredis.Miniredis)
 	mr, err := miniredis.Run()
 	require.NoError(t, err)
 
-	redisClient := redis.NewClusterClient(&redis.ClusterOptions{
-		Addrs: []string{mr.Addr()},
+	// Create Redis client (use regular client for miniredis, not cluster client)
+	redisClient := redis.NewClient(&redis.Options{
+		Addr: mr.Addr(),
 	})
 
 	logger := NewSimpleLogger("TEST")

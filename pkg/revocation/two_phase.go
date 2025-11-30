@@ -42,7 +42,7 @@ type PoAState struct {
 // the Principal time to cancel if the disable was accidental.
 type TwoPhaseRevocation struct {
 	oracle         *EmergencyRevocationOracle
-	redis          *redis.ClusterClient
+	redis          redis.UniversalClient  // Supports both regular and cluster clients
 	logger         Logger
 	disableTimeout time.Duration // How long before auto-revoke (default: 30 seconds)
 	states         sync.Map      // poaID → *PoAState (local cache)
