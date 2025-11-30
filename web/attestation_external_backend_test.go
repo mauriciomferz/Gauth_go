@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -22,7 +23,7 @@ func TestAttestationExternalRedisBackend(t *testing.T) {
 		t.Skipf("redis unavailable: %v", err)
 	}
 	defer backend.Close()
-	nonce := "redis-nonce-test-1"
+	nonce := fmt.Sprintf("redis-nonce-test-%d", time.Now().UnixNano())
 	seen, _ := backend.Seen(nonce)
 	if seen {
 		t.Fatalf("expected nonce unseen initially")
