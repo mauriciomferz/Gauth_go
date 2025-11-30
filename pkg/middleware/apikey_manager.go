@@ -301,7 +301,7 @@ func generateAPIKey() (string, error) {
 // generateKeyID generates a unique key ID
 func generateKeyID() string {
 	b := make([]byte, 16)
-	rand.Read(b)
+	_, _ = rand.Read(b) // crypto/rand.Read always succeeds on supported platforms
 	return fmt.Sprintf("key_%x", b)
 }
 
@@ -309,7 +309,7 @@ func generateKeyID() string {
 func respondJSON(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(data)
+	_ = json.NewEncoder(w).Encode(data) // Ignore error; response already committed
 }
 
 

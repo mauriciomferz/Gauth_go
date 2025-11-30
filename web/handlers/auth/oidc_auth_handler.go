@@ -292,7 +292,7 @@ func (h *OIDCAuthHandler) Callback(c *gin.Context) {
 		session.PKCEEnabled,
 	)
 	if err != nil {
-		h.db.Exec(ctx, `UPDATE oidc_auth_sessions SET status = 'failed', updated_at = NOW() WHERE id = $1`, session.ID)
+		_, _ = h.db.Exec(ctx, `UPDATE oidc_auth_sessions SET status = 'failed', updated_at = NOW() WHERE id = $1`, session.ID) // Best effort; already in error path
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Token exchange failed", "details": err.Error()})
 		return
 	}
@@ -300,7 +300,7 @@ func (h *OIDCAuthHandler) Callback(c *gin.Context) {
 	// Validate ID token
 	claims, err := h.validateIDToken(tokenResp.IDToken, session.ClientID, session.Nonce)
 	if err != nil {
-		h.db.Exec(ctx, `UPDATE oidc_auth_sessions SET status = 'failed', updated_at = NOW() WHERE id = $1`, session.ID)
+		_, _ = h.db.Exec(ctx, `UPDATE oidc_auth_sessions SET status = 'failed', updated_at = NOW() WHERE id = $1`, session.ID) // Best effort; already in error path
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ID token validation failed", "details": err.Error()})
 		return
 	}
@@ -341,7 +341,7 @@ func (h *OIDCAuthHandler) Callback(c *gin.Context) {
 	}
 
 	// Update session with user_id
-	h.db.Exec(ctx, `UPDATE oidc_auth_sessions SET user_id = $1 WHERE id = $2`, userID, session.ID)
+	_, _ = h.db.Exec(ctx, `UPDATE oidc_auth_sessions SET user_id = $1 WHERE id = $2`, userID, session.ID) // Best effort; core operation succeeded
 
 	// Return success response
 	c.JSON(http.StatusOK, gin.H{
@@ -393,13 +393,13 @@ func (h *OIDCAuthHandler) isValidRedirectURI(uri string, allowed []string) bool 
 
 func (h *OIDCAuthHandler) generateRandomString(length int) string {
 	b := make([]byte, length)
-	rand.Read(b)
+	_, _ = rand.Read(b) // crypto/rand.Read always succeeds on supported platforms
 	return base64.RawURLEncoding.EncodeToString(b)[:length]
 }
 
 func (h *OIDCAuthHandler) generateCodeVerifier() string {
 	b := make([]byte, 32)
-	rand.Read(b)
+	_, _ = rand.Read(b) // crypto/rand.Read always succeeds on supported platforms
 	return base64.RawURLEncoding.EncodeToString(b)
 }
 

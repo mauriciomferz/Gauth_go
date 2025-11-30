@@ -167,7 +167,7 @@ func (m *Migrator) SeedData(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }() // Ignore rollback error; will be committed on success
 
 	// Seed subscribers
 	if err := m.seedSubscribers(ctx, tx); err != nil {
@@ -300,7 +300,7 @@ func (m *Migrator) ClearData(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }() // Ignore rollback error; will be committed on success
 	
 	for _, table := range tables {
 		query := fmt.Sprintf("TRUNCATE TABLE %s CASCADE", table)

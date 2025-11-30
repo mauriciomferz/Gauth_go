@@ -51,7 +51,7 @@ func (h *VerificationHandler) VerifyPoA(w http.ResponseWriter, r *http.Request) 
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	_ = json.NewEncoder(w).Encode(result) // Ignore error; response already committed
 }
 
 // PublicVerifyPoA handles GET /api/v1/public/verify/poa/{poa_id}
@@ -172,11 +172,11 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, err := json.Marshal(payload)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf(`{"error": "Failed to marshal response: %v"}`, err)))
+		_, _ = w.Write([]byte(fmt.Sprintf(`{"error": "Failed to marshal response: %v"}`, err))) // Ignore write error; already in error handler
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	w.Write(response)
+	_, _ = w.Write(response) // Ignore write error; response already committed
 }
