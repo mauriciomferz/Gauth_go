@@ -245,15 +245,6 @@ curl http://localhost:8080/api/v1/gauthplus/successors/active/00000000-0000-0000
 
 ---
 
-**Next Steps**: See [Getting Started Guide](docs/GETTING_STARTED.md) for detailed configuration
-
-# Discovery endpoint
-curl http://localhost:8080/.well-known/gauth-configuration
-
-# GAuth+ successor status (example)
-curl http://localhost:8080/api/v1/gauthplus/successors/active/00000000-0000-0000-0000-000000000001
-\`\`\`
-
 ## 📚 Documentation
 
 ### Essential Guides
@@ -280,38 +271,104 @@ curl http://localhost:8080/api/v1/gauthplus/successors/active/00000000-0000-0000
 - **[Code Style](docs/CODE_STYLE.md)** - Coding standards
 - **[Changelog](CHANGELOG.md)** - Version history
 
-## 🔧 Configuration
+## �� Configuration
 
 ### Environment Variables
-\`\`\`bash
-# Core Settings
-GAUTH_RFC0111_ENABLED=1              # Enable RFC-0111 compliance
-GAUTH_GAUTHPLUS_ENABLED=1            # Enable GAuth+ features
-GAUTH_USE_JWT_LIB=1                  # Use JWT library
-GAUTH_DEV_INDEX=1                    # Enable development mode
 
-# Database
+Configure GAuth using environment variables. Create a `.env` file or export them in your shell.
+
+#### Core Settings
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `GAUTH_RFC0111_ENABLED` | `0` | Enable RFC-0111 compliance mode |
+| `GAUTH_GAUTHPLUS_ENABLED` | `0` | Enable GAuth+ advanced features |
+| `GAUTH_USE_JWT_LIB` | `0` | Use JWT token library |
+| `GAUTH_DEV_INDEX` | `0` | Enable development mode with debug endpoints |
+
+#### Database Configuration
+
+| Variable | Example | Description |
+|----------|---------|-------------|
+| `DB_HOST` | `localhost` | PostgreSQL host address |
+| `DB_PORT` | `5432` | PostgreSQL port |
+| `DB_USER` | `gauth_admin` | Database username |
+| `DB_PASSWORD` | `***` | Database password (use secrets manager in production) |
+| `DB_NAME` | `gauth` | Database name |
+| `DB_SSLMODE` | `require` | SSL mode (`disable`, `require`, `verify-ca`, `verify-full`) |
+
+> ⚠️ **Production**: Always use `DB_SSLMODE=require` or higher in production environments
+
+#### Security Settings
+
+| Variable | Example | Description |
+|----------|---------|-------------|
+| `GAUTH_JWT_SIGNING_KEY` | `***` | JWT signing key (min 32 chars, use secrets manager) |
+| `JWT_SECRET` | `***` | Additional JWT secret for legacy support |
+
+> 🔒 **Security**: Never commit secrets to version control. Use environment-specific secret management.
+
+#### Optional: Redis Cache
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `REDIS_HOST` | `localhost` | Redis host address |
+| `REDIS_PORT` | `6379` | Redis port |
+| `REDIS_PASSWORD` | - | Redis password (if authentication enabled) |
+
+#### Example Configuration
+
+**Development** (`.env.development`)
+```bash
+GAUTH_RFC0111_ENABLED=1
+GAUTH_GAUTHPLUS_ENABLED=1
+GAUTH_USE_JWT_LIB=1
+GAUTH_DEV_INDEX=1
 DB_HOST=localhost
 DB_PORT=5432
 DB_USER=gauth_admin
-DB_PASSWORD=your-secure-password
+DB_PASSWORD=gauth_dev_password
 DB_NAME=gauth
-DB_SSLMODE=require                   # Use in production
+DB_SSLMODE=disable
+GAUTH_JWT_SIGNING_KEY=dev-secret-change-in-production
+```
 
-# Security
-GAUTH_JWT_SIGNING_KEY=change-this-in-production
-JWT_SECRET=your-jwt-secret
-
-# Optional: Redis
-REDIS_HOST=localhost
-REDIS_PORT=6379
-\`\`\`
+**Production** (`.env.production`)
+```bash
+GAUTH_RFC0111_ENABLED=1
+GAUTH_GAUTHPLUS_ENABLED=1
+GAUTH_USE_JWT_LIB=1
+GAUTH_DEV_INDEX=0
+DB_HOST=${DB_HOST}
+DB_PORT=5432
+DB_USER=${DB_USER}
+DB_PASSWORD=${DB_PASSWORD}
+DB_NAME=gauth
+DB_SSLMODE=require
+GAUTH_JWT_SIGNING_KEY=${VAULT_JWT_KEY}
+```
 
 ### VS Code Tasks
-The project includes pre-configured VS Code tasks:
-- **Start GAuth Backend with JWT** - Full backend with database
-- **Start Vite Dev Server** - React frontend development
-- **Start GAuth With Admin Handlers** - Backend with admin APIs
+
+The project includes pre-configured tasks in `.vscode/tasks.json`:
+
+| Task Name | Purpose | Environment |
+|-----------|---------|-------------|
+| **Start GAuth Backend with JWT** | Full backend server with database | Development |
+| **Start Vite Dev Server** | React frontend development server | Development |
+| **Start GAuth With Admin Handlers** | Backend with admin API endpoints | Development |
+
+**Usage**: `Cmd+Shift+P` → `Tasks: Run Task` → Select task
+
+### Configuration Files
+
+| File | Purpose |
+|------|---------|
+| `.env.development` | Local development settings |
+| `.env.production` | Production environment template |
+| `.env.staging` | Staging environment settings |
+| `config/` | YAML configuration files for advanced settings |
+
 
 ## 🧪 Testing
 
