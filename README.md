@@ -14,7 +14,10 @@ owners: core-maintainers
 > **🚀 BETA-READY** - Comprehensive security audit, extensive testing (689+ test cases), complete documentation. Suitable for testing and evaluation.
 > **Last Updated:** 2025-11-19 (📚 Documentation refresh, architecture updates, configuration accuracy improvements)
 
-**✨ Latest Updates (Nov 29, 2025):**
+**✨ Latest Updates (Dec 1, 2025):**
+- **🚀 GAuth+ Features Activated:** All 27 advanced authorization endpoints now operational (Successor Management, Delegation Chains, Dual Control, Fiduciary Duty, AI Capabilities)
+- **⚙️ Easy Activation:** Set `GAUTH_GAUTHPLUS_ENABLED=1` to enable all GAuth+ features (now included in default dev tasks)
+- **📊 Production Ready:** 5 advanced features with database persistence, caching, and advisory/enforcement modes
 - **🔐 Enhanced Auth API:** Refresh token support with 7-day expiration, improved JWT flow with userId, username, and role claims
 - **📚 API Documentation:** Comprehensive API_REFERENCE.md with all authentication and MCP endpoints documented
 - **✅ All Tests Passing:** 76 revocation race tests passing with race detector enabled (26.4s runtime)
@@ -32,8 +35,12 @@ A complete Go implementation of the GAuth authorization framework (RFC 0111/0115
 
 > **Quick Dev Start**
 > ```bash
-> # Backend (IMPORTANT: Set GAUTH_RFC0111_ENABLED=1 for Phase 2A endpoints)
-> GAUTH_DEV_INDEX=1 GAUTH_RFC0111_ENABLED=1 GAUTH_USE_JWT_LIB=1 go run ./cmd/web-server
+> # Backend (with GAuth+ features enabled)
+> GAUTH_DEV_INDEX=1 GAUTH_RFC0111_ENABLED=1 GAUTH_USE_JWT_LIB=1 GAUTH_GAUTHPLUS_ENABLED=1 \
+>   DB_HOST=localhost DB_PORT=5432 DB_USER=gauth_admin \
+>   DB_PASSWORD=gauth_dev_password DB_NAME=gauth DB_SSLMODE=disable \
+>   GAUTH_JWT_SIGNING_KEY=dev-secret-change-in-production \
+>   go run ./cmd/web-server
 > # Frontend (React)
 > cd web/ui-react && npm install && npm run dev
 > ```
@@ -47,7 +54,7 @@ A complete Go implementation of the GAuth authorization framework (RFC 0111/0115
 >   - **Default:** http://localhost:8080/api/docs
 > - 📋 **OpenAPI Spec:** http://localhost:8080/api/openapi/gauth.yaml
 >
-> **Features:** RFC-0111 8-step subscription wizard, Login with MFA (refresh tokens), MCP server management, 11 Phase 2A backend endpoints (PVP, Registry, PoA)
+> **Features:** RFC-0111 8-step subscription wizard, Login with MFA (refresh tokens), MCP server management, 11 Phase 2A backend endpoints (PVP, Registry, PoA), **27 GAuth+ advanced authorization endpoints** (Successor, Delegation, Dual Control, Fiduciary, Capabilities)
 > 
 > **📖 API Reference:** See [API_REFERENCE.md](API_REFERENCE.md) for complete API documentation with examples
 
@@ -228,6 +235,7 @@ A modern **React + TypeScript** web interface showcasing all GAuth capabilities 
 - **Policy Decision Point (PDP)** - Advanced policy evaluation engine with ABAC/RBAC
 - **Multi-signature Support** - Threshold signatures for delegation chains
 - **Revocation Transparency** - Merkle tree-based revocation with inclusion proofs
+- **🆕 GAuth+ Advanced Features** - 27 endpoints for AI governance (Successor Management, Delegation Chains, Dual Control Approvals, Fiduciary Duty Monitoring, AI Capability Assessments)
 
 ### Security & Cryptography
 - **Multi-Algorithm Support** - EdDSA, ECDSA (P-256/P-384/P-521), RSA
@@ -452,6 +460,7 @@ GAUTH_CORS_ALLOW=http://localhost:3000,http://localhost:5173  # Development orig
 # Feature Flags
 GAUTH_DEV_INDEX=1            # Enable development index page
 GAUTH_RFC0111_ENABLED=1      # Enable RFC-0111 subscription endpoints (required for Phase 2A)
+GAUTH_GAUTHPLUS_ENABLED=1    # Enable GAuth+ advanced features (27 endpoints)
 GAUTH_USE_JWT_LIB=1          # Use JWT library for token operations
 GAUTH_BETA=1                 # Enable beta features
 

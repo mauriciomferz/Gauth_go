@@ -1,8 +1,17 @@
 # GAuth+ Authorization Chain Integration
 
-> **RFC-0111 compliant AI authorization with advanced governance features**
+> **✅ OPERATIONAL (December 1, 2025)** - RFC-0111 compliant AI authorization with advanced governance features
+
+**Status**: All 27 endpoints now active and serving requests. Set `GAUTH_GAUTHPLUS_ENABLED=1` to enable.
 
 GAuth+ extends the GAuth RFC-0111 implementation with five advanced authorization features designed for AI agent governance: successor management, delegation chains, dual control, capability assessment, and fiduciary duty enforcement.
+
+**Quick Verification**:
+```bash
+curl http://localhost:8080/api/v1/gauthplus/successors/active/00000000-0000-0000-0000-000000000001
+curl http://localhost:8080/api/v1/gauthplus/dual-control/approvals/pending
+curl http://localhost:8080/api/v1/gauthplus/fiduciary/violations
+```
 
 ## Quick Start
 
