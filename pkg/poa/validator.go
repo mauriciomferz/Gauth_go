@@ -72,15 +72,11 @@ func (m *DefaultAuditMetrics) RecordValidation(poA *PowerOfAttorney, warnings []
 	// TODO: Implement real metrics recording
 }
 
-type DefaultCBORCodec struct{}
 
-func (c *DefaultCBORCodec) Encode(poA *PowerOfAttorney) ([]byte, error) {
-	return EncodeCBOR(poA)
-}
+// DefaultCBORCodec is an alias for CanonicalCBORCodec.
+// Use CanonicalCBORCodec directly for CBOR encoding/decoding.
+type DefaultCBORCodec = CanonicalCBORCodec
 
-func (c *DefaultCBORCodec) Decode(data []byte) (*PowerOfAttorney, error) {
-	return DecodeCBOR(data)
-}
 
 type DefaultRawPOAExposer struct{}
 
