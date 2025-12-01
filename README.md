@@ -97,18 +97,20 @@ A complete Go implementation of the **GAuth authorization framework (GiFo-RFC-01
 - **Admin APIs**: User management, policy configuration, system monitoring
 
 **Package Structure** (\`pkg/\`)
-\`\`\`
-├── gauth/          # Core authorization engine (RFC-0111/0115)
-├── gauthplus/      # Advanced features (AI governance, fiduciary duty)
-├── authz/          # Policy Decision Point (PDP) with ABAC/RBAC
-├── crypto/         # Multi-algorithm signing (Ed25519, ES256, ES384, RS256)
-├── token/          # JWT/PASETO token service with refresh support
-├── revocation/     # Revocation transparency with Merkle trees
-├── audit/          # Immutable audit ledger with external anchoring
-├── mcp/            # Model Context Protocol server management
-├── compliance/     # Legal framework validators (GDPR, CCPA, HIPAA)
-├── verification/   # 18-country identity verification system
-└── database/       # PostgreSQL repositories and migrations
+
+| Package | Description |
+|---------|-------------|
+| `gauth/` | Core authorization engine (RFC-0111/0115) |
+| `gauthplus/` | Advanced features (AI governance, fiduciary duty) |
+| `authz/` | Policy Decision Point (PDP) with ABAC/RBAC |
+| `crypto/` | Multi-algorithm signing (Ed25519, ES256, ES384, RS256) |
+| `token/` | JWT/PASETO token service with refresh support |
+| `revocation/` | Revocation transparency with Merkle trees |
+| `audit/` | Immutable audit ledger with external anchoring |
+| `mcp/` | Model Context Protocol server management |
+| `compliance/` | Legal framework validators (GDPR, CCPA, HIPAA) |
+| `verification/` | 18-country identity verification system |
+| `database/` | PostgreSQL repositories and migrations |
 \`\`\`
 
 **Frontend** (\`web/ui-react/\`)
