@@ -8,6 +8,7 @@
 
 - [Authentication](#authentication)
 - [Model Context Protocol (MCP)](#model-context-protocol-mcp)
+- [GAuth+ Advanced Features](#gauth-advanced-features)
 - [Admin APIs](#admin-apis)
 - [Revocation APIs](#revocation-apis)
 - [Authorization APIs](#authorization-apis)
@@ -388,6 +389,226 @@ Content-Type: application/json
   "message": "File not found: /Users/data/config.json"
 }
 ```
+
+---
+
+## GAuth+ Advanced Features
+
+**Status**: ✅ Operational (December 1, 2025)  
+**Activation**: Set `GAUTH_GAUTHPLUS_ENABLED=1` environment variable  
+**Total Endpoints**: 27 across 5 feature domains
+
+### Successor Management (4 endpoints)
+
+AI agent takeover scenarios when primary agents fail or are decommissioned.
+
+#### Get Active Successor
+```http
+GET /api/v1/gauthplus/successors/active/:poaID
+```
+
+**Response (200 OK)**:
+```json
+{
+  "active_successor": {
+    "id": "63e0521c-b8ec-4ef7-921b-ebb11ce8de5e",
+    "poa_id": "00000000-0000-0000-0000-000000000001",
+    "primary_agent_id": "ai-agent-001",
+    "successor_agent_id": "ai-agent-backup",
+    "activation_reason": "unavailable",
+    "activated_at": "2025-11-26T01:52:56.641309Z",
+    "status": "active"
+  }
+}
+```
+
+#### Get Successor History
+```http
+GET /api/v1/gauthplus/successors/history/:poaID
+```
+
+**Response (200 OK)**:
+```json
+{
+  "count": 1,
+  "history": [
+    {
+      "id": "63e0521c-b8ec-4ef7-921b-ebb11ce8de5e",
+      "poa_id": "00000000-0000-0000-0000-000000000001",
+      "primary_agent_id": "ai-agent-001",
+      "successor_agent_id": "ai-agent-backup",
+      "activation_reason": "unavailable",
+      "activated_at": "2025-11-26T01:52:56.641309Z",
+      "status": "active"
+    }
+  ],
+  "success": true
+}
+```
+
+### Delegation Chains (5 endpoints)
+
+AI-to-AI delegations with depth limits and policy validation.
+
+#### Get Delegation Chain
+```http
+GET /api/v1/gauthplus/delegations/chain/:agentID
+```
+
+**Response (200 OK)**:
+```json
+{
+  "chain": null,
+  "depth": 0,
+  "success": true
+}
+```
+
+### Dual Control Approvals (6 endpoints)
+
+Multi-approver workflows with threshold logic (all/majority/quorum/weighted).
+
+#### List Pending Approvals
+```http
+GET /api/v1/gauthplus/dual-control/approvals/pending
+```
+
+**Response (200 OK)**:
+```json
+{
+  "approvals": [
+    {
+      "id": "a008ebb5-bac8-47e2-9a5b-b8534de3c11a",
+      "poa_id": "00000000-0000-0000-0000-000000000001",
+      "requested_by": "ai-agent-001",
+      "required_approvers": 2,
+      "approval_threshold": "all",
+      "status": "pending",
+      "expires_at": "2025-12-31T23:59:59Z"
+    }
+  ]
+}
+```
+
+#### Get Approval Status
+```http
+GET /api/v1/gauthplus/dual-control/approvals/:id/status
+```
+
+**Response (200 OK)**:
+```json
+{
+  "status": "pending",
+  "approved_count": 0,
+  "rejected_count": 0,
+  "required_approvers": 2,
+  "threshold": "all",
+  "can_finalize": false
+}
+```
+
+### Fiduciary Duty Monitoring (4 endpoints)
+
+Track violations of transparency, loyalty, prudence, and accountability duties.
+
+#### List Violations
+```http
+GET /api/v1/gauthplus/fiduciary/violations
+```
+
+**Response (200 OK)**:
+```json
+{
+  "count": 15,
+  "success": true,
+  "violations": [
+    {
+      "id": "966da0c9-be5d-4da6-8ad3-3c57b8c76235",
+      "poa_id": "00000000-0000-0000-0000-000000000001",
+      "agent_id": "ai-agent-001",
+      "duty_type": "loyalty",
+      "violation_description": "Conflict of interest detected",
+      "severity": "major",
+      "resolution_status": "open"
+    }
+  ]
+}
+```
+
+#### Get Violations by Severity
+```http
+GET /api/v1/gauthplus/fiduciary/violations/by-severity?severity=critical
+```
+
+### AI Capability Assessments (6 endpoints)
+
+Capability level evaluations (L0-L5) with certification management.
+
+#### Get Latest Assessment
+```http
+GET /api/v1/gauthplus/capabilities/assessments/:agentID
+```
+
+**Response (200 OK)**:
+```json
+{
+  "agent_id": "ai-agent-001",
+  "assessment": {
+    "id": "assessment-001",
+    "agent_id": "ai-agent-001",
+    "assessed_by": "human-supervisor-001",
+    "valid_until": "2026-06-01T00:00:00Z",
+    "overall_level": "L3",
+    "certification_status": "active"
+  },
+  "success": true
+}
+```
+
+#### List Certifications
+```http
+GET /api/v1/gauthplus/capabilities/certifications/:agentID
+```
+
+**Response (200 OK)**:
+```json
+{
+  "certifications": [
+    {
+      "id": "cert-001",
+      "agent_id": "ai-agent-001",
+      "capability_level": "L3",
+      "granted_by": "supervisor-001",
+      "granted_at": "2025-06-01T00:00:00Z",
+      "expires_at": "2026-06-01T00:00:00Z",
+      "status": "active"
+    }
+  ]
+}
+```
+
+### Enforcement Modes
+
+GAuth+ supports multiple enforcement modes controlled by environment variables:
+
+- **ADVISORY** (default): Logs warnings, allows requests
+- **STRICT**: Blocks requests on violations (`GAUTH_GAUTHPLUS_ENFORCE=1`)
+- **CUSTOM**: Selective enforcement
+  - `GAUTH_GAUTHPLUS_ENFORCE_CAPABILITIES=1`
+  - `GAUTH_GAUTHPLUS_ENFORCE_DUAL_CONTROL=1`
+  - `GAUTH_GAUTHPLUS_ENFORCE_FIDUCIARY=1`
+
+### Complete Endpoint List
+
+| Feature | Endpoints | Description |
+|---------|-----------|-------------|
+| **Successor Management** | 4 | Activate/deactivate, get active, list history |
+| **Delegation Chains** | 5 | Create, revoke, validate, get chain, check depth |
+| **Dual Control** | 6 | Request approval, approve/reject, status, pending, query |
+| **Fiduciary Duty** | 4 | Record violation, resolve, list all, filter by severity |
+| **Capability Assessment** | 6 | Assess, certify, revoke, get latest, list certs, query |
+
+See [GAUTHPLUS_ENDPOINTS_ACTIVATION_REPORT.md](GAUTHPLUS_ENDPOINTS_ACTIVATION_REPORT.md) for detailed documentation.
 
 ---
 
