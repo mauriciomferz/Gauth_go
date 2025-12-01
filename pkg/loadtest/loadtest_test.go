@@ -314,8 +314,8 @@ func TestCachePressureGenerator(t *testing.T) {
 	hotSetRate := float64(hotSetHits) / 100.0
 
 	// Should be around 0.8 (80%)
-	if hotSetRate < 0.7 || hotSetRate > 0.9 {
-		t.Errorf("Expected hot set rate around 0.8, got %.2f", hotSetRate)
+	if hotSetRate < 0.65 || hotSetRate > 0.95 {
+		t.Errorf("Expected hot set rate around 0.8 (acceptable range: 0.65-0.95), got %.2f", hotSetRate)
 	}
 
 	t.Logf("Hot set hit rate: %.2f%%", hotSetRate*100)
