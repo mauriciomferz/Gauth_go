@@ -165,55 +165,87 @@ A complete Go implementation of the **GAuth authorization framework (GiFo-RFC-01
 ## 📦 Quick Start
 
 ### Prerequisites
-- **Go**: 1.21 or later
-- **PostgreSQL**: 15+ 
-- **Redis**: 7+ (optional, for caching)
-- **Node.js**: 18+ (for frontend development)
 
-### 1. Clone and Setup Database
-\`\`\`bash
+| Requirement | Version | Purpose |
+|-------------|---------|---------|
+| **Go** | 1.21+ | Backend runtime |
+| **PostgreSQL** | 15+ | Primary database |
+| **Redis** | 7+ | Caching (optional) |
+| **Node.js** | 18+ | Frontend development |
+
+### Installation Steps
+
+#### Step 1: Clone Repository
+
+```bash
 git clone https://github.com/mauriciomferz/Gauth_go.git
 cd Gauth_go
+```
 
+#### Step 2: Setup Database
+
+```bash
 # Start PostgreSQL with Docker
 docker-compose -f docker-compose.database.yml up -d
 
 # Run migrations
 ./setup-database.sh
-\`\`\`
+```
 
-### 2. Start the Backend
-\`\`\`bash
-# Using VS Code tasks (recommended)
-# Press Cmd+Shift+P -> "Tasks: Run Task" -> "Start GAuth Backend with JWT"
+> ✅ **Database Ready**: PostgreSQL running on `localhost:5432`
 
-# Or manually with environment variables
-GAUTH_RFC0111_ENABLED=1 \\
-GAUTH_GAUTHPLUS_ENABLED=1 \\
-DB_HOST=localhost \\
-DB_PORT=5432 \\
-DB_USER=gauth_admin \\
-DB_PASSWORD=gauth_dev_password \\
-DB_NAME=gauth \\
-GAUTH_JWT_SIGNING_KEY=dev-secret-change-in-production \\
+#### Step 3: Start Backend
+
+**Option A: Using VS Code Tasks** (Recommended)
+```
+Press Cmd+Shift+P → "Tasks: Run Task" → "Start GAuth Backend with JWT"
+```
+
+**Option B: Manual Start**
+```bash
+GAUTH_RFC0111_ENABLED=1 \
+GAUTH_GAUTHPLUS_ENABLED=1 \
+DB_HOST=localhost \
+DB_PORT=5432 \
+DB_USER=gauth_admin \
+DB_PASSWORD=gauth_dev_password \
+DB_NAME=gauth \
+GAUTH_JWT_SIGNING_KEY=dev-secret-change-in-production \
 go run ./cmd/web-server
-\`\`\`
+```
 
-Server starts on \`http://localhost:8080\`
+> 🚀 **Backend Running**: http://localhost:8080
 
-### 3. Start the Frontend (Optional)
-\`\`\`bash
+#### Step 4: Start Frontend (Optional)
+
+```bash
 cd web/ui-react
 npm install
 npm run dev
-\`\`\`
+```
 
-Frontend starts on \`http://localhost:5173\`
+> 🎨 **Frontend Running**: http://localhost:5173
 
-### 4. Quick Test
-\`\`\`bash
+### Quick Verification
+
+Test your installation with these commands:
+
+```bash
 # Health check
 curl http://localhost:8080/api/v1/health
+
+# Discovery endpoint
+curl http://localhost:8080/.well-known/gauth-configuration
+
+# GAuth+ feature example
+curl http://localhost:8080/api/v1/gauthplus/successors/active/00000000-0000-0000-0000-000000000001
+```
+
+**Expected Response**: JSON with `{"status": "ok"}` for health check
+
+---
+
+**Next Steps**: See [Getting Started Guide](docs/GETTING_STARTED.md) for detailed configuration
 
 # Discovery endpoint
 curl http://localhost:8080/.well-known/gauth-configuration
