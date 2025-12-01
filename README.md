@@ -372,28 +372,46 @@ The project includes pre-configured tasks in `.vscode/tasks.json`:
 
 ## 🧪 Testing
 
-\`\`\`bash
-# Run all tests
-go test ./...
+### Running Tests
 
-# Run with race detector
-go test -race ./...
+| Test Type | Command | Description |
+|-----------|---------|-------------|
+| All Tests | `go test ./...` | Run complete test suite across all packages |
+| Race Detection | `go test -race ./...` | Run tests with race condition detection |
+| Specific Package | `go test -v ./pkg/gauth` | Run tests for a specific package with verbose output |
+| Coverage Report | `go test -cover ./...` | Generate test coverage report |
+| Benchmarks | `go test -bench=. ./pkg/authz` | Run performance benchmarks |
 
-# Run specific package
-go test -v ./pkg/gauth
+### Test Suite Statistics
 
-# Run with coverage
-go test -cover ./...
+| Metric | Value |
+|--------|-------|
+| Total Test Cases | 689+ |
+| Packages Tested | 66 |
+| Integration Tests | 100+ |
+| Race Detection | ✅ Enabled |
 
-# Performance benchmarks
-go test -bench=. ./pkg/authz
-\`\`\`
+### Test Categories
 
-**Test Statistics**:
-- 689+ test cases
-- 66 packages tested
-- 100+ integration tests
-- Race condition testing enabled
+- **Unit Tests**: Core functionality and business logic validation
+- **Integration Tests**: Component interaction and end-to-end workflows
+- **RFC Compliance Tests**: GiFo-RFC-0111/0115 conformance validation
+- **Performance Tests**: Benchmarks for authorization decisions and policy evaluation
+- **Security Tests**: Cryptographic operations and token validation
+
+### Test Organization
+
+```bash
+# Run tests by category
+go test ./pkg/gauth/...        # Core authorization tests
+go test ./pkg/gauthplus/...    # GAuth+ successor tests
+go test ./pkg/authz/...        # Policy engine tests
+go test ./pkg/crypto/...       # Cryptographic tests
+go test ./pkg/compliance/...   # RFC compliance tests
+```
+
+> 💡 **Tip**: Use `-v` flag for verbose output and `-count=1` to disable test caching during development.
+
 
 ## 📊 Monitoring & Observability
 
@@ -406,33 +424,114 @@ go test -bench=. ./pkg/authz
 ### Supported Collectors
 - **Prometheus** - Primary metrics collection
 - **OpenTelemetry** - Distributed tracing
-- **StatsD** - Alternative metrics backend
-
-### Monitoring Features
-- Decision metrics with action/resource/reason taxonomy
-- Revocation transparency metrics
-- Key rotation audit trails
-- Policy evaluation provenance
-- Latency histograms with SLO support
 
 ## 🚢 Deployment
 
-### Docker
-\`\`\`bash
-# Build image
-docker build -t gauth:latest .
+### Docker Deployment
 
-# Run with Docker Compose
-docker-compose up -d
-\`\`\`
+#### Quick Start
 
-### Kubernetes
-\`\`\`bash
-# Deploy to staging
+| Step | Command | Description |
+|------|---------|-------------|
+| Build Image | `docker build -t gauth:latest .` | Build production Docker image |
+| Run Container | `docker run -p 8080:8080 gauth:latest` | Run standalone container |
+| Docker Compose | `docker-compose up -d` | Start full stack with database |
+
+#### Available Docker Compose Profiles
+
+| Profile | File | Purpose |
+|---------|------|---------|
+| Development | `docker-compose.yml` | Full stack with hot-reload |
+| Production | `docker-compose.production.yml` | Optimized production deployment |
+| Database Only | `docker-compose.database.yml` | PostgreSQL for local development |
+
+### Kubernetes Deployment
+
+#### Deployment Commands
+
+```bash
+# Deploy to staging environment
 kubectl apply -f k8s/staging/
+
+# Deploy to production environment
+kubectl apply -f k8s/production/
 
 # Deploy monitoring stack
 kubectl apply -f k8s-monitoring-stack.yaml
+
+# Verify deployment status
+kubectl rollout status deployment/gauth
+```
+
+#### Kubernetes Resources
+
+| Resource | Location | Description |
+|----------|----------|-------------|
+| Deployments | `k8s/staging/` | Application deployment manifests |
+| Services | `k8s/production/` | Service definitions and load balancers |
+| ConfigMaps | `k8s/configmaps/` | Configuration data |
+| Secrets | `k8s/secrets/` | Sensitive configuration (use sealed secrets) |
+| Monitoring | `k8s-monitoring-stack.yaml` | Prometheus, Grafana, and alerting |
+
+### Production Readiness Checklist
+
+#### Security
+
+- [ ] Generate and configure strong JWT signing keys (min 256-bit)
+- [ ] Enable PostgreSQL SSL mode (`DB_SSLMODE=require` or higher)
+- [ ] Integrate external secret management (HashiCorp Vault, AWS KMS, Azure Key Vault)
+- [ ] Rotate secrets regularly using automated processes
+- [ ] Review and apply `SECURITY.md` security guidelines
+- [ ] Enable HTTPS/TLS for all external endpoints
+- [ ] Configure secure CORS policies
+
+#### Database
+
+- [ ] Set up PostgreSQL automated backups (daily minimum)
+- [ ] Configure point-in-time recovery (PITR)
+- [ ] Test database restore procedures
+- [ ] Enable connection pooling (e.g., PgBouncer)
+- [ ] Monitor database performance and set up alerts
+- [ ] Configure replication for high availability
+
+#### Monitoring & Operations
+
+- [ ] Deploy Prometheus for metrics collection
+- [ ] Configure Grafana dashboards for GAuth metrics
+- [ ] Set up log aggregation (ELK, Splunk, or CloudWatch)
+- [ ] Configure alerting rules for critical metrics
+- [ ] Enable distributed tracing with OpenTelemetry
+- [ ] Set up synthetic monitoring for health checks
+- [ ] Document runbooks for common operational scenarios
+
+#### Reliability
+
+- [ ] Test disaster recovery procedures (RPO/RTO targets)
+- [ ] Configure horizontal pod autoscaling (HPA) in Kubernetes
+- [ ] Set up health checks and readiness probes
+- [ ] Implement circuit breakers for external dependencies
+- [ ] Configure rate limiting and throttling
+- [ ] Test failover scenarios
+- [ ] Establish SLO/SLA targets and measure compliance
+
+### Environment Variables for Production
+
+Refer to the **🔧 Configuration** section for complete environment variable documentation. Critical production settings:
+
+- `GAUTH_RFC0111_ENABLED=1` - Enable RFC-0111 compliance mode
+- `DB_SSLMODE=require` - Force SSL/TLS for database connections
+- `GAUTH_JWT_SIGNING_KEY` - Strong signing key (never commit to version control)
+- `REDIS_HOST` - Redis cache host for session management (optional but recommended)
+
+### Deployment Guides
+
+For detailed deployment instructions, see:
+- **Docker**: `DEPLOYMENT_GUIDE.md`
+- **Kubernetes**: `docs/kubernetes-deployment.md`
+- **Production**: `docs/production-deployment.md`
+- **Security**: `SECURITY.md`
+
+
 \`\`\`
 
 ### Production Checklist
