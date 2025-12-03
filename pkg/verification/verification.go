@@ -160,22 +160,23 @@ func FetchConsistency(client HTTPClient, base string, start int) (*ConsistencyRe
 	return &cr, nil
 }
 
-// LoadJWKS imports published Ed25519 public keys into a new ephemeral manager (replaces global for verification scope).
-func LoadJWKS(client HTTPClient, base string) error {
+// LoadJWKS imports published Ed25519 public keys into a new ephemeral manager.
+// Returns the manager for explicit use instead of setting global state.
+func LoadJWKS(client HTTPClient, base string) (*crypto.Manager, error) {
 	url := fmt.Sprintf("%s/.well-known/jwks.json", base)
 	b, err := httpRead(client, url)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	var jwks struct {
 		Keys []map[string]any `json:"keys"`
 	}
 	if err := json.Unmarshal(b, &jwks); err != nil {
-		return err
+		return nil, err
 	}
 	km, kmErr := crypto.NewManager(30 * time.Minute)
 	if kmErr != nil {
-		return wrap("key_manager_init", "failed to initialize key manager", kmErr)
+		return nil, wrap("key_manager_init", "failed to initialize key manager", kmErr)
 	}
 	for _, k := range jwks.Keys {
 		kty, _ := k["kty"].(string)
@@ -188,14 +189,15 @@ func LoadJWKS(client HTTPClient, base string) error {
 			}
 			pub, decErr := base64.RawURLEncoding.DecodeString(x)
 			if decErr != nil {
-				return wrap("jwks_decode", "failed to decode ed25519 key", decErr)
+				return nil, wrap("jwks_decode", "failed to decode ed25519 key", decErr)
 			}
 			// ImportPublic has no return; best-effort insertion.
 			km.ImportPublic(kid, pub, time.Now().Add(30*time.Minute))
 		}
 	}
+	// Set global for backward compatibility with code that relies on it
 	crypto.GlobalEdDSARegistry = km
-	return nil
+	return km, nil
 }
 
 // ConvertSignedTreeHead builds delegation.SignedTreeHead from API JSON structure.
@@ -224,8 +226,8 @@ func VerifyInclusion(eventHash string, proof *MerkleProofResponse) (bool, error)
 }
 
 // VerifySTHMultiSig verifies multi-sig / single signature depending on threshold.
-func VerifySTHMultiSig(sth *delegation.SignedTreeHead) error {
-	return delegation.VerifyTreeHeadMultiSig(sth)
+func VerifySTHMultiSig(sth *delegation.SignedTreeHead, km *crypto.Manager) error {
+	return delegation.VerifyTreeHeadMultiSig(sth, km)
 }
 
 // VerifyConsistency validates append-only proof given complete event hash list.
@@ -274,11 +276,12 @@ func VerifyAll(client HTTPClient, base, targetHash string) error {
 			return wrap("sth_unmarshal", "failed to parse signed tree head", err)
 		}
 		if sthJSON.MerkleRoot != "" {
-			if err := LoadJWKS(client, base); err != nil {
+			km, err := LoadJWKS(client, base)
+			if err != nil {
 				return wrap("jwks_load", "failed to load jwks", err)
 			}
 			sth := ConvertSignedTreeHead(&sthJSON)
-			if err := VerifySTHMultiSig(sth); err != nil {
+			if err := VerifySTHMultiSig(sth, km); err != nil {
 				return wrap("sth_verify", err.Error(), err)
 			}
 		}

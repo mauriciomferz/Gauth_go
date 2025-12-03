@@ -58,7 +58,8 @@ func TestVerifyRotationSummary_Success(t *testing.T) {
 	}))
 	defer srv.Close()
 	// Load JWKS then verify
-	if err := LoadJWKS(srv.Client(), srv.URL); err != nil {
+	_, err := LoadJWKS(srv.Client(), srv.URL)
+	if err != nil {
 		t.Fatalf("load jwks: %v", err)
 	}
 	res, err := VerifyRotationSummary(srv.Client(), srv.URL)
@@ -109,7 +110,8 @@ func TestVerifyRotationSummary_BadSignature(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	if err := LoadJWKS(srv.Client(), srv.URL); err != nil {
+	_, err := LoadJWKS(srv.Client(), srv.URL)
+	if err != nil {
 		t.Fatalf("load jwks: %v", err)
 	}
 	res, err := VerifyRotationSummary(srv.Client(), srv.URL)
