@@ -21,8 +21,11 @@ func TestNewPowerAdministrationPoint(t *testing.T) {
 	assert.Equal(t, "Test PAP", pap.Name)
 	assert.Equal(t, "Test power administration point", pap.Description)
 	assert.NotZero(t, pap.CreatedAt)
-	assert.NotNil(t, pap.policyStore)
-	assert.Empty(t, pap.policyStore)
+	assert.NotNil(t, pap.store)
+	// Verify store is empty by counting policies
+	count, err := pap.store.Count(context.Background(), nil)
+	assert.NoError(t, err)
+	assert.Equal(t, 0, count)
 }
 
 // TestPAP_CreatePolicy tests policy creation
