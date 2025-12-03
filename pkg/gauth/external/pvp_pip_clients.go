@@ -180,16 +180,21 @@ type PIPClientConfig struct {
 type PIPClient struct {
 	config     *PIPClientConfig
 	httpClient *http.Client
-	cache      map[string]*cachedPolicy // Simple cache, use Redis in production
+	store      gauth.PIPPolicyStore
 }
 
-type cachedPolicy struct {
-	policy    *gauth.PowerOfAttorneyPolicy
-	expiresAt time.Time
+// PIPClientOption allows configuring the PIP client
+type PIPClientOption func(*PIPClient)
+
+// WithPolicyStore sets the policy store for the PIP client
+func WithPolicyStore(store gauth.PIPPolicyStore) PIPClientOption {
+	return func(c *PIPClient) {
+		c.store = store
+	}
 }
 
 // NewPIPClient creates a new PIP client
-func NewPIPClient(config *PIPClientConfig) *PIPClient {
+func NewPIPClient(config *PIPClientConfig, opts ...PIPClientOption) *PIPClient {
 	if config.Timeout == 0 {
 		config.Timeout = 30 * time.Second
 	}
@@ -206,13 +211,24 @@ func NewPIPClient(config *PIPClientConfig) *PIPClient {
 		config.CacheTTL = 5 * time.Minute
 	}
 
-	return &PIPClient{
+	client := &PIPClient{
 		config: config,
 		httpClient: &http.Client{
 			Timeout: config.Timeout,
 		},
-		cache: make(map[string]*cachedPolicy),
 	}
+
+	// Apply options
+	for _, opt := range opts {
+		opt(client)
+	}
+
+	// Default to in-memory store if not set
+	if client.store == nil {
+		client.store = gauth.NewInMemoryPIPPolicyStore()
+	}
+
+	return client
 }
 
 // GetPolicy retrieves policy information from PIP
@@ -222,7 +238,7 @@ func (c *PIPClient) GetPolicy(
 ) (*gauth.PowerOfAttorneyPolicy, error) {
 	// Check cache first
 	if c.config.CacheEnabled {
-		if cached := c.getFromCache(request); cached != nil {
+		if cached, err := c.store.Get(ctx, request.PolicyID); err == nil {
 			return cached, nil
 		}
 	}
@@ -246,7 +262,7 @@ func (c *PIPClient) GetPolicy(
 			if err == nil {
 				// Cache successful result
 				if c.config.CacheEnabled {
-					c.putInCache(request, policy)
+					_ = c.store.Set(ctx, request.PolicyID, policy, c.config.CacheTTL)
 				}
 				return nil
 			}
@@ -303,28 +319,7 @@ func (c *PIPClient) attemptGetPolicy(
 	}, nil
 }
 
-// getFromCache retrieves policy from cache
-func (c *PIPClient) getFromCache(request *gauth.PolicyRequest) *gauth.PowerOfAttorneyPolicy {
-	cached, exists := c.cache[request.PolicyID]
-	if !exists {
-		return nil
-	}
-
-	if time.Now().After(cached.expiresAt) {
-		delete(c.cache, request.PolicyID)
-		return nil
-	}
-
-	return cached.policy
-}
-
-// putInCache stores policy in cache
-func (c *PIPClient) putInCache(request *gauth.PolicyRequest, policy *gauth.PowerOfAttorneyPolicy) {
-	c.cache[request.PolicyID] = &cachedPolicy{
-		policy:    policy,
-		expiresAt: time.Now().Add(c.config.CacheTTL),
-	}
-}
+// Helper methods for cache access are no longer needed as they are handled by PolicyStore
 
 // isClientError determines if an error is a client error (4xx) that shouldn't be retried
 func isClientError(err error) bool {

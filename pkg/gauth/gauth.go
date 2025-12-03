@@ -11,17 +11,16 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
-	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/mauriciomferz/Gauth_go/internal/config"
 	"github.com/mauriciomferz/Gauth_go/internal/crypto"
 	"github.com/mauriciomferz/Gauth_go/internal/observability"
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 // Metrics defines the minimal instrumentation surface for the basic GAuth token service.
@@ -53,6 +52,9 @@ type Config struct {
 	AccessTokenExpiry time.Duration
 	RateLimit         interface{} // Placeholder for rate limit config
 	Audience          []string    // Accepted audiences (optional)
+
+	// Centralized App Config
+	AppConfig *config.Config
 }
 
 // AuthorizationRequest represents an authorization request
@@ -162,17 +164,19 @@ type Restriction struct {
 
 // Service represents the main GAuth service
 type Service struct {
-	config     Config
-	signingKey []byte // legacy HMAC key
-	keyMode    string // hmac | eddsa
-	keyMgr     *crypto.Manager
-	metrics    Metrics
-	strictAuth bool
-	seenJTI    map[string]time.Time // simple in-memory uniqueness tracking
-	replay     ReplayStore          // optional external replay persistence
-	jtiTTL     time.Duration
-	jtiMu      sync.Mutex
-	violations *observability.ViolationCounters
+	config         Config
+	signingKey     []byte // legacy HMAC key
+	keyMode        string // hmac | eddsa
+	keyMgr         *crypto.Manager
+	metrics        Metrics
+	strictAuth     bool
+	seenJTI        map[string]time.Time // simple in-memory uniqueness tracking
+	replay         ReplayStore          // optional external replay persistence
+	jtiTTL         time.Duration
+	jtiMu          sync.Mutex
+	violations     *observability.ViolationCounters
+	validator      TokenSignatureValidator
+	claimValidator *CommonClaimValidator // optional external replay persistence
 
 	// RFC-0111 compliance components
 	protocolOrchestrator  *ProtocolOrchestrator
@@ -298,18 +302,26 @@ func WithDurableReplayFromEnv() Option {
 }
 
 // New creates a new Service instance with optional functional options.
-func New(config Config, opts ...Option) (*Service, error) {
-	mode := os.Getenv("GAUTH_TOKEN_SIG_MODE")
+func New(cfg Config, opts ...Option) (*Service, error) {
+	// Ensure AppConfig is loaded if not provided
+	if cfg.AppConfig == nil {
+		var err error
+		cfg.AppConfig, err = config.Load()
+		if err != nil {
+			return nil, fmt.Errorf("failed to load app config: %w", err)
+		}
+	}
+
+	mode := cfg.AppConfig.TokenSigMode
 	if mode == "" {
 		mode = sigModeHMAC
 	}
-	ttl := 10 * time.Minute
-	if v := os.Getenv("GAUTH_JTI_TTL_SEC"); v != "" {
-		if n, err := strconv.Atoi(v); err == nil && n > 0 {
-			ttl = time.Duration(n) * time.Second
-		}
+	ttl := time.Duration(cfg.AppConfig.JTITTLSeconds) * time.Second
+	if ttl == 0 {
+		ttl = 10 * time.Minute
 	}
-	svc := &Service{config: config, metrics: NoopMetrics, keyMode: mode, seenJTI: map[string]time.Time{}, jtiTTL: ttl, violations: observability.NewViolationCounters()}
+
+	svc := &Service{config: cfg, metrics: NoopMetrics, keyMode: mode, seenJTI: map[string]time.Time{}, jtiTTL: ttl, violations: observability.NewViolationCounters()}
 	for _, opt := range opts {
 		if opt != nil {
 			if err := opt(svc); err != nil {
@@ -318,11 +330,9 @@ func New(config Config, opts ...Option) (*Service, error) {
 		}
 	}
 	if svc.keyMode == sigModeEdDSA {
-		rotHours := 24
-		if v := os.Getenv("GAUTH_KEY_ROTATION_HOURS"); v != "" {
-			if n, err := strconv.Atoi(v); err == nil && n > 0 {
-				rotHours = n
-			}
+		rotHours := cfg.AppConfig.KeyRotationHours
+		if rotHours <= 0 {
+			rotHours = 24
 		}
 		km, err := crypto.NewManager(time.Duration(rotHours) * time.Hour)
 		if err != nil {
@@ -330,23 +340,47 @@ func New(config Config, opts ...Option) (*Service, error) {
 		}
 		svc.keyMgr = km
 		crypto.RegisterGlobalEdDSAManager(km)
-		return svc, nil
-	}
-	keyMaterial := config.SigningKey
-	if svc.strictAuth {
-		if keyMaterial == "" || len(keyMaterial) < 32 {
-			return nil, ErrStrictAuthKeyRequired
-		}
 	} else {
-		if keyMaterial == "" {
-			keyMaterial = config.ClientSecret
+		keyMaterial := cfg.SigningKey
+		if svc.strictAuth {
+			if keyMaterial == "" || len(keyMaterial) < 32 {
+				return nil, ErrStrictAuthKeyRequired
+			}
+		} else {
+			if keyMaterial == "" {
+				keyMaterial = cfg.ClientSecret
+			}
+			if len(keyMaterial) < 32 {
+				keyMaterial += strings.Repeat("0", 32-len(keyMaterial))
+			}
 		}
-		if len(keyMaterial) < 32 {
-			keyMaterial += strings.Repeat("0", 32-len(keyMaterial))
-		}
+		svc.signingKey = []byte(keyMaterial)
 	}
-	svc.signingKey = []byte(keyMaterial)
+
+	// Initialize token validator and claim validator
+	svc.claimValidator = NewCommonClaimValidator(cfg, svc.replay, svc.metrics, svc.jtiTTL, svc.violations)
+	svc.validator = svc.selectValidator()
+
 	return svc, nil
+}
+
+// selectValidator chooses the appropriate token validator based on configuration
+func (svc *Service) selectValidator() TokenSignatureValidator {
+	strictParsing := false
+	if svc.config.AppConfig != nil {
+		strictParsing = svc.config.AppConfig.StrictJSONParsing
+	}
+
+	if svc.config.AppConfig != nil && svc.config.AppConfig.UseJWTLib {
+		alg := svc.config.AppConfig.JWTAlg
+		return NewJWTLibValidator(svc.signingKey, alg)
+	}
+
+	if svc.keyMode == sigModeEdDSA {
+		return NewEdDSAValidator(svc.keyMgr, strictParsing)
+	}
+
+	return NewHMACValidator(svc.signingKey, strictParsing)
 }
 
 // InitiateAuthorization initiates an authorization flow
@@ -365,7 +399,7 @@ func (g *Service) InitiateAuthorization(req AuthorizationRequest) (*Authorizatio
 // Set GAUTH_LEGACY_OAUTH_MODE=1 to use legacy OAuth-only mode
 func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
 	// Check if legacy OAuth mode is enabled
-	if os.Getenv("GAUTH_LEGACY_OAUTH_MODE") == "1" {
+	if g.config.AppConfig.LegacyOAuthMode {
 		return g.RequestTokenLegacy(req)
 	}
 
@@ -436,7 +470,7 @@ func (g *Service) RequestTokenLegacy(req TokenRequest) (*TokenResponse, error) {
 		}
 		return &TokenResponse{Token: tok, Scope: req.Scope, ValidUntil: expiry}, nil
 	}
-	if os.Getenv("GAUTH_USE_JWT_LIB") == "1" {
+	if g.config.AppConfig.UseJWTLib {
 		claims := jwt.MapClaims{
 			"sub":   g.config.ClientID,
 			"scope": strings.Join(req.Scope, " "),
@@ -449,11 +483,11 @@ func (g *Service) RequestTokenLegacy(req TokenRequest) (*TokenResponse, error) {
 		if audClaim != nil {
 			claims["aud"] = audClaim
 		}
-		kid := os.Getenv("GAUTH_JWT_KID")
+		kid := g.config.AppConfig.JWTKeyID
 		if kid == "" {
 			kid = defaultDemoKey
 		}
-		alg := os.Getenv("GAUTH_JWT_ALG")
+		alg := g.config.AppConfig.JWTAlg
 		if alg == "" {
 			alg = jwtAlgHS256
 		}
@@ -525,308 +559,28 @@ func (g *Service) GetSubscriptionManager() *SubscriptionFlowManager {
 //
 //nolint:gocyclo // Token validation with comprehensive security checks
 func (g *Service) ValidateToken(token string) (*TokenValidationResult, error) {
-	if g == nil || (len(g.signingKey) == 0 && g.keyMode != sigModeEdDSA) {
-		failMetric(g, observability.SigInvalid)
+	if g == nil {
 		return nil, ErrInvalidToken
 	}
 	if token == "" {
 		failMetric(g, observability.MissingClaim)
 		return nil, ErrInvalidToken
 	}
-	if g.keyMode == sigModeEdDSA {
-		parts := strings.Split(token, ".")
-		if len(parts) != 3 {
-			failMetric(g, observability.SigInvalid)
-			return nil, ErrInvalidToken
-		}
-		headBytes, hErr := base64.RawURLEncoding.DecodeString(parts[0])
-		if hErr != nil {
-			failMetric(g, observability.SigInvalid)
-			return nil, ErrInvalidToken
-		}
-		var head map[string]any
-		// Secure JSON parsing (P2.11 sec1.item3): Feature-gated with GAUTH_STRICT_JSON_PARSING=1
-		// Provides depth limits, size validation, UTF-8 validation to prevent DOS attacks
-		if os.Getenv("GAUTH_STRICT_JSON_PARSING") == "1" {
-			parser := DefaultSecureParser()
-			if uErr := parser.ParseSecure(headBytes, &head); uErr != nil {
-				failMetric(g, observability.SigInvalid)
-				return nil, ErrInvalidToken
-			}
-		} else {
-			// Default: standard json.Unmarshal for backward compatibility
-			if uErr := json.Unmarshal(headBytes, &head); uErr != nil {
-				failMetric(g, observability.SigInvalid)
-				return nil, ErrInvalidToken
-			}
-		}
-		algVal, okAlg := head["alg"].(string)
-		kidVal, okKid := head["kid"].(string)
-		if !okAlg || !okKid || algVal != edDSAAlgConst || kidVal == "" {
-			failMetric(g, observability.SigInvalid)
-			return nil, ErrInvalidToken
-		}
-		unsigned := parts[0] + "." + parts[1]
-		sigBytes, sigErr := base64.RawURLEncoding.DecodeString(parts[2])
-		if sigErr != nil {
-			failMetric(g, observability.SigInvalid)
-			return nil, ErrInvalidToken
-		}
-		if g.keyMgr == nil {
-			failMetric(g, observability.SigInvalid)
-			return nil, ErrInvalidToken
-		}
-		if vErr := g.keyMgr.ValidateSignature(kidVal, []byte(unsigned), sigBytes); vErr != nil {
-			failMetric(g, observability.SigInvalid)
-			return nil, ErrInvalidToken
-		}
-		payloadBytes, err := base64.RawURLEncoding.DecodeString(parts[1])
-		if err != nil {
-			failMetric(g, observability.SigInvalid)
-			return nil, ErrInvalidToken
-		}
-		var claims map[string]any
-		// Secure JSON parsing (P2.11 sec1.item3): Feature-gated with GAUTH_STRICT_JSON_PARSING=1
-		if os.Getenv("GAUTH_STRICT_JSON_PARSING") == "1" {
-			parser := DefaultSecureParser()
-			if err := parser.ParseSecure(payloadBytes, &claims); err != nil {
-				failMetric(g, observability.SigInvalid)
-				return nil, ErrInvalidToken
-			}
-		} else {
-			// Default: standard json.Unmarshal for backward compatibility
-			if err := json.Unmarshal(payloadBytes, &claims); err != nil {
-				failMetric(g, observability.SigInvalid)
-				return nil, ErrInvalidToken
-			}
-		}
-		if exp, ok := claims["exp"].(float64); ok && time.Now().Unix() > int64(exp) {
-			failMetric(g, observability.Expired)
-			return nil, ErrTokenExpired
-		}
-		if nbf, ok := claims["nbf"].(float64); ok && time.Now().Unix() < int64(nbf) {
-			failMetric(g, observability.NotYetValid)
-			return nil, ErrInvalidToken
-		}
-		if iss, ok := claims["iss"].(string); ok && iss != "" && g.config.AuthServerURL != "" && iss != g.config.AuthServerURL {
-			failMetric(g, observability.IssuerMismatch)
-			return nil, ErrInvalidToken
-		}
-		if jti, ok := claims["jti"].(string); ok {
-			if jti == "" {
-				failMetric(g, observability.MissingClaim)
-				return nil, ErrInvalidToken
-			}
-			if g.replay != nil {
-				if err := g.replay.CheckAndStore(jti); err != nil {
-					failMetric(g, observability.ReplayDetected)
-					return nil, ErrInvalidToken
-				}
-			} else {
-				if g.isReplay(jti) {
-					failMetric(g, observability.ReplayDetected)
-					return nil, ErrInvalidToken
-				}
-				g.storeJTI(jti)
-			}
-		} else {
-			failMetric(g, observability.MissingClaim)
-			return nil, ErrInvalidToken
-		}
-		if audVal, ok := claims["aud"]; ok {
-			if !audClaimMatches(audVal, g.config.Audience) {
-				failMetric(g, observability.AudienceMismatch)
-				return nil, ErrInvalidToken
-			}
-		}
-		scopeStr, okScope := claims["scope"].(string)
-		clientID, okSub := claims["sub"].(string)
-		if !okScope {
-			scopeStr = ""
-		}
-		if !okSub || clientID == "" {
-			clientID = unknownClientID
-		}
-		var scopes []string
-		if scopeStr != "" {
-			scopes = strings.Split(scopeStr, " ")
-		}
-		if g.metrics != nil {
-			g.metrics.IncTokenValidations()
-		}
-		return &TokenValidationResult{ClientID: clientID, Scope: scopes, Valid: true}, nil
-	}
-	if os.Getenv("GAUTH_USE_JWT_LIB") == "1" {
-		parsed, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
-			expectedAlg := os.Getenv("GAUTH_JWT_ALG")
-			if expectedAlg == "" {
-				expectedAlg = "HS256"
-			}
-			if t.Method.Alg() != expectedAlg {
-				return nil, fmt.Errorf("unexpected alg %s", t.Method.Alg())
-			}
-			return g.signingKey, nil
-		})
-		if err != nil || !parsed.Valid {
-			if g.metrics != nil {
-				g.metrics.IncTokenValidationFailures()
-			}
-			return nil, ErrInvalidToken
-		}
-		claims, ok := parsed.Claims.(jwt.MapClaims)
-		if !ok {
-			if g.metrics != nil {
-				g.metrics.IncTokenValidationFailures()
-			}
-			return nil, ErrInvalidToken
-		}
-		expF, okExp := claims["exp"].(float64)
-		if okExp && time.Now().Unix() > int64(expF) {
-			failMetric(g, observability.Expired)
-			return nil, ErrTokenExpired
-		}
-		if nbf, ok := claims["nbf"].(float64); ok && time.Now().Unix() < int64(nbf) {
-			failMetric(g, observability.NotYetValid)
-			return nil, ErrInvalidToken
-		}
-		if iss, ok := claims["iss"].(string); ok && iss != "" && g.config.AuthServerURL != "" && iss != g.config.AuthServerURL {
-			failMetric(g, observability.IssuerMismatch)
-			return nil, ErrInvalidToken
-		}
-		if jti, ok := claims["jti"].(string); ok {
-			if jti == "" {
-				failMetric(g, observability.MissingClaim)
-				return nil, ErrInvalidToken
-			}
-			if g.replay != nil {
-				if err := g.replay.CheckAndStore(jti); err != nil {
-					failMetric(g, observability.ReplayDetected)
-					return nil, ErrInvalidToken
-				}
-			} else {
-				if g.isReplay(jti) {
-					failMetric(g, observability.ReplayDetected)
-					return nil, ErrInvalidToken
-				}
-				g.storeJTI(jti)
-			}
-		} else {
-			failMetric(g, observability.MissingClaim)
-			return nil, ErrInvalidToken
-		}
-		if audVal, ok := claims["aud"]; ok {
-			if !audClaimMatches(audVal, g.config.Audience) {
-				failMetric(g, observability.AudienceMismatch)
-				return nil, ErrInvalidToken
-			}
-		}
-		scopeStr, okScope := claims["scope"].(string)
-		clientID, okSub := claims["sub"].(string)
-		if !okScope {
-			scopeStr = ""
-		}
-		if !okSub || clientID == "" {
-			clientID = unknownClientID
-		}
-		var scopes []string
-		if scopeStr != "" {
-			scopes = strings.Split(scopeStr, " ")
-		}
-		if g.metrics != nil {
-			g.metrics.IncTokenValidations()
-		}
-		return &TokenValidationResult{ClientID: clientID, Scope: scopes, Valid: true}, nil
-	}
-	parts := strings.Split(token, ".")
-	if len(parts) != 3 {
-		if g.metrics != nil {
-			g.metrics.IncTokenValidationFailures()
-		}
-		return nil, ErrInvalidToken
-	}
-	unsigned := parts[0] + "." + parts[1]
-	mac := hmac.New(sha256.New, g.signingKey)
-	mac.Write([]byte(unsigned))
-	expected := mac.Sum(nil)
-	got, err := base64.RawURLEncoding.DecodeString(parts[2])
-	if err != nil {
+	if g.validator == nil {
 		failMetric(g, observability.SigInvalid)
 		return nil, ErrInvalidToken
 	}
-	if !hmac.Equal(expected, got) {
-		failMetric(g, observability.SigInvalid)
-		return nil, ErrInvalidToken
-	}
-	// Decode and unmarshal payload JSON
-	payloadBytes, err := base64.RawURLEncoding.DecodeString(parts[1])
-	if err != nil {
-		failMetric(g, observability.SigInvalid)
-		return nil, ErrInvalidToken
-	}
-	var claims map[string]any
-	if err := json.Unmarshal(payloadBytes, &claims); err != nil {
-		failMetric(g, observability.SigInvalid)
-		return nil, ErrInvalidToken
-	}
-	// exp check
-	if exp, ok := claims["exp"].(float64); ok && time.Now().Unix() > int64(exp) {
-		failMetric(g, observability.Expired)
-		return nil, ErrTokenExpired
-	}
-	if nbf, ok := claims["nbf"].(float64); ok && time.Now().Unix() < int64(nbf) {
-		failMetric(g, observability.NotYetValid)
-		return nil, ErrInvalidToken
-	}
-	if iss, ok := claims["iss"].(string); ok && iss != "" && g.config.AuthServerURL != "" && iss != g.config.AuthServerURL {
-		failMetric(g, observability.IssuerMismatch)
-		return nil, ErrInvalidToken
-	}
-	if jti, ok := claims["jti"].(string); ok {
-		if jti == "" {
-			failMetric(g, observability.MissingClaim)
-			return nil, ErrInvalidToken
-		}
-		if g.replay != nil {
-			if err := g.replay.CheckAndStore(jti); err != nil {
-				failMetric(g, observability.ReplayDetected)
-				return nil, ErrInvalidToken
-			}
-		} else {
-			if g.isReplay(jti) {
-				failMetric(g, observability.ReplayDetected)
-				return nil, ErrInvalidToken
-			}
-			g.storeJTI(jti)
-		}
-	} else {
-		failMetric(g, observability.MissingClaim)
-		return nil, ErrInvalidToken
-	}
-	if audVal, ok := claims["aud"]; ok {
-		if !audClaimMatches(audVal, g.config.Audience) {
-			failMetric(g, observability.AudienceMismatch)
-			return nil, ErrInvalidToken
-		}
-	}
-	scopeStr, okScope := claims["scope"].(string)
-	clientID, okSub := claims["sub"].(string)
-	if !okScope {
-		scopeStr = ""
-	}
-	if !okSub || clientID == "" {
-		clientID = unknownClientID
-	}
-	var scopes []string
-	if scopeStr != "" {
-		scopes = strings.Split(scopeStr, " ")
-	}
-	if g.metrics != nil {
-		g.metrics.IncTokenValidations()
-	}
-	return &TokenValidationResult{ClientID: clientID, Scope: scopes, Valid: true}, nil
-}
 
-// Close closes the Service and cleans up resources
+	// Validate signature and extract claims using selected strategy
+	claims, err := g.validator.ValidateSignature(token)
+	if err != nil {
+		failMetric(g, observability.SigInvalid)
+		return nil, err
+	}
+
+	// Validate common claims
+	return g.claimValidator.ValidateClaims(claims)
+}
 func (g *Service) Close() error {
 	// In a real implementation, this might close database connections, stop goroutines, etc.
 	return nil
@@ -1099,24 +853,34 @@ var _ GAuth = (*Service)(nil)
 
 // PowerAdministrationPoint represents a power administration point
 type PowerAdministrationPoint struct {
-	GAuth          GAuth
-	ID             string                          `json:"id"`
-	Name           string                          `json:"name"`
-	Description    string                          `json:"description"`
-	CreatedAt      time.Time                       `json:"created_at"`
-	policyStore    map[string]*AuthorizationPolicy // In-memory store (replace with DB in production)
-	policyStoreMux sync.RWMutex                    // Protect concurrent access
-	policyIDCounter int64                           // Atomic counter for unique policy IDs
+	GAuth           GAuth
+	ID              string      `json:"id"`
+	Name            string      `json:"name"`
+	Description     string      `json:"description"`
+	CreatedAt       time.Time   `json:"created_at"`
+	store           PolicyStore // Pluggable policy storage backend
+	policyIDCounter int64       // Atomic counter for unique policy IDs
 }
 
-// NewPowerAdministrationPoint creates a new power administration point
+// NewPowerAdministrationPoint creates a new power administration point with in-memory storage
 func NewPowerAdministrationPoint(id, name, description string) *PowerAdministrationPoint {
 	return &PowerAdministrationPoint{
 		ID:          id,
 		Name:        name,
 		Description: description,
 		CreatedAt:   time.Now(),
-		policyStore: make(map[string]*AuthorizationPolicy),
+		store:       NewInMemoryPolicyStore(),
+	}
+}
+
+// NewPowerAdministrationPointWithStore creates a new power administration point with a custom policy store
+func NewPowerAdministrationPointWithStore(id, name, description string, store PolicyStore) *PowerAdministrationPoint {
+	return &PowerAdministrationPoint{
+		ID:          id,
+		Name:        name,
+		Description: description,
+		CreatedAt:   time.Now(),
+		store:       store,
 	}
 }
 
@@ -1177,25 +941,17 @@ func (p *PowerAdministrationPoint) CreatePolicy(ctx context.Context, request *Po
 		Metadata:         request.Metadata,
 	}
 
-	// Store policy
-	p.policyStoreMux.Lock()
-	p.policyStore[policyID] = policy
-	p.policyStoreMux.Unlock()
+	// Store policy using the policy store interface
+	if err := p.store.Create(ctx, policy); err != nil {
+		return nil, fmt.Errorf("failed to create policy: %w", err)
+	}
 
 	return policy, nil
 }
 
 // GetPolicy retrieves a policy by ID
 func (p *PowerAdministrationPoint) GetPolicy(ctx context.Context, policyID string) (*AuthorizationPolicy, error) {
-	p.policyStoreMux.RLock()
-	defer p.policyStoreMux.RUnlock()
-
-	policy, exists := p.policyStore[policyID]
-	if !exists {
-		return nil, fmt.Errorf("policy not found: %s", policyID)
-	}
-
-	return policy, nil
+	return p.store.Get(ctx, policyID)
 }
 
 // UpdatePolicy updates an existing policy
@@ -1204,12 +960,10 @@ func (p *PowerAdministrationPoint) UpdatePolicy(ctx context.Context, request *Po
 		return nil, fmt.Errorf("policy update request cannot be nil")
 	}
 
-	p.policyStoreMux.Lock()
-	defer p.policyStoreMux.Unlock()
-
-	policy, exists := p.policyStore[request.PolicyID]
-	if !exists {
-		return nil, fmt.Errorf("policy not found: %s", request.PolicyID)
+	// Get the existing policy
+	policy, err := p.store.Get(ctx, request.PolicyID)
+	if err != nil {
+		return nil, err
 	}
 
 	// Only allow updates to draft or suspended policies
@@ -1247,17 +1001,19 @@ func (p *PowerAdministrationPoint) UpdatePolicy(ctx context.Context, request *Po
 	policy.UpdatedAt = time.Now()
 	policy.ChangeLog = request.ChangeLog
 
+	// Save updated policy
+	if err := p.store.Update(ctx, policy); err != nil {
+		return nil, fmt.Errorf("failed to update policy: %w", err)
+	}
+
 	return policy, nil
 }
 
 // ActivatePolicy activates a draft policy
 func (p *PowerAdministrationPoint) ActivatePolicy(ctx context.Context, policyID, approvedBy string) error {
-	p.policyStoreMux.Lock()
-	defer p.policyStoreMux.Unlock()
-
-	policy, exists := p.policyStore[policyID]
-	if !exists {
-		return fmt.Errorf("policy not found: %s", policyID)
+	policy, err := p.store.Get(ctx, policyID)
+	if err != nil {
+		return err
 	}
 
 	if policy.Status != PolicyStatusDraft {
@@ -1278,17 +1034,14 @@ func (p *PowerAdministrationPoint) ActivatePolicy(ctx context.Context, policyID,
 	}
 	policy.Metadata["approved_by"] = approvedBy
 
-	return nil
+	return p.store.Update(ctx, policy)
 }
 
 // SuspendPolicy temporarily suspends an active policy
 func (p *PowerAdministrationPoint) SuspendPolicy(ctx context.Context, policyID, reason string) error {
-	p.policyStoreMux.Lock()
-	defer p.policyStoreMux.Unlock()
-
-	policy, exists := p.policyStore[policyID]
-	if !exists {
-		return fmt.Errorf("policy not found: %s", policyID)
+	policy, err := p.store.Get(ctx, policyID)
+	if err != nil {
+		return err
 	}
 
 	if policy.Status != PolicyStatusActive {
@@ -1303,17 +1056,14 @@ func (p *PowerAdministrationPoint) SuspendPolicy(ctx context.Context, policyID, 
 	policy.Metadata["suspension_reason"] = reason
 	policy.Metadata["suspended_at"] = time.Now()
 
-	return nil
+	return p.store.Update(ctx, policy)
 }
 
 // RevokePolicy permanently revokes a policy
 func (p *PowerAdministrationPoint) RevokePolicy(ctx context.Context, policyID, reason string) error {
-	p.policyStoreMux.Lock()
-	defer p.policyStoreMux.Unlock()
-
-	policy, exists := p.policyStore[policyID]
-	if !exists {
-		return fmt.Errorf("policy not found: %s", policyID)
+	policy, err := p.store.Get(ctx, policyID)
+	if err != nil {
+		return err
 	}
 
 	if policy.Status == PolicyStatusRevoked {
@@ -1330,17 +1080,14 @@ func (p *PowerAdministrationPoint) RevokePolicy(ctx context.Context, policyID, r
 	policy.Metadata["revocation_reason"] = reason
 	policy.Metadata["revoked_at"] = now
 
-	return nil
+	return p.store.Update(ctx, policy)
 }
 
 // DeletePolicy deletes a policy (only draft or revoked policies)
 func (p *PowerAdministrationPoint) DeletePolicy(ctx context.Context, policyID string) error {
-	p.policyStoreMux.Lock()
-	defer p.policyStoreMux.Unlock()
-
-	policy, exists := p.policyStore[policyID]
-	if !exists {
-		return fmt.Errorf("policy not found: %s", policyID)
+	policy, err := p.store.Get(ctx, policyID)
+	if err != nil {
+		return err
 	}
 
 	// Only allow deletion of draft or revoked policies
@@ -1348,55 +1095,24 @@ func (p *PowerAdministrationPoint) DeletePolicy(ctx context.Context, policyID st
 		return fmt.Errorf("cannot delete policy in status: %s (only draft or revoked)", policy.Status)
 	}
 
-	delete(p.policyStore, policyID)
-	return nil
+	return p.store.Delete(ctx, policyID)
 }
 
 // SearchPolicies searches for policies based on criteria
 func (p *PowerAdministrationPoint) SearchPolicies(ctx context.Context, criteria *PolicySearchCriteria) ([]*AuthorizationPolicy, error) {
-	p.policyStoreMux.RLock()
-	defer p.policyStoreMux.RUnlock()
-
-	var results []*AuthorizationPolicy
-
-	for _, policy := range p.policyStore {
-		if p.matchesCriteria(policy, criteria) {
-			results = append(results, policy)
-		}
-	}
-
-	// Apply limit if specified
-	if criteria != nil && criteria.Limit > 0 && len(results) > criteria.Limit {
-		results = results[:criteria.Limit]
-	}
-
-	return results, nil
+	return p.store.Search(ctx, criteria)
 }
 
 // ListPolicies lists all policies (optionally filtered by status)
 func (p *PowerAdministrationPoint) ListPolicies(ctx context.Context, status *PolicyStatus) ([]*AuthorizationPolicy, error) {
-	p.policyStoreMux.RLock()
-	defer p.policyStoreMux.RUnlock()
-
-	var results []*AuthorizationPolicy
-
-	for _, policy := range p.policyStore {
-		if status == nil || policy.Status == *status {
-			results = append(results, policy)
-		}
-	}
-
-	return results, nil
+	return p.store.List(ctx, status)
 }
 
 // ValidatePolicy validates a policy's configuration
 func (p *PowerAdministrationPoint) ValidatePolicy(ctx context.Context, policyID string) (*PolicyValidationResult, error) {
-	p.policyStoreMux.RLock()
-	policy, exists := p.policyStore[policyID]
-	p.policyStoreMux.RUnlock()
-
-	if !exists {
-		return nil, fmt.Errorf("policy not found: %s", policyID)
+	policy, err := p.store.Get(ctx, policyID)
+	if err != nil {
+		return nil, err
 	}
 
 	result := &PolicyValidationResult{
@@ -1425,11 +1141,14 @@ type PAPAggregateStatistics struct {
 
 // GetPolicyStatistics returns aggregate statistics about all policies
 func (p *PowerAdministrationPoint) GetPolicyStatistics(ctx context.Context) (*PAPAggregateStatistics, error) {
-	p.policyStoreMux.RLock()
-	defer p.policyStoreMux.RUnlock()
+	// Get all policies
+	allPolicies, err := p.store.List(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve policies: %w", err)
+	}
 
 	stats := &PAPAggregateStatistics{
-		TotalPolicies:     len(p.policyStore),
+		TotalPolicies:     len(allPolicies),
 		ActivePolicies:    0,
 		DraftPolicies:     0,
 		SuspendedPolicies: 0,
@@ -1440,7 +1159,7 @@ func (p *PowerAdministrationPoint) GetPolicyStatistics(ctx context.Context) (*PA
 
 	now := time.Now()
 
-	for _, policy := range p.policyStore {
+	for _, policy := range allPolicies {
 		// Count by status
 		switch policy.Status {
 		case PolicyStatusActive:
@@ -1504,80 +1223,4 @@ func (p *PowerAdministrationPoint) validatePolicy(policy *AuthorizationPolicy) e
 	}
 
 	return nil
-}
-
-// matchesCriteria checks if a policy matches search criteria
-func (p *PowerAdministrationPoint) matchesCriteria(policy *AuthorizationPolicy, criteria *PolicySearchCriteria) bool {
-	if criteria == nil {
-		return true
-	}
-
-	// Filter by policy type
-	if len(criteria.PolicyTypes) > 0 {
-		found := false
-		for _, pt := range criteria.PolicyTypes {
-			if policy.PolicyType == pt {
-				found = true
-				break
-			}
-		}
-		if !found {
-			return false
-		}
-	}
-
-	// Filter by status
-	if len(criteria.Statuses) > 0 {
-		found := false
-		for _, s := range criteria.Statuses {
-			if policy.Status == s {
-				found = true
-				break
-			}
-		}
-		if !found {
-			return false
-		}
-	}
-
-	// Filter by client owner
-	if criteria.ClientOwner != "" && policy.ClientOwner != criteria.ClientOwner {
-		return false
-	}
-
-	// Filter by owners authorizer
-	if criteria.OwnersAuthorizer != "" && policy.OwnersAuthorizer != criteria.OwnersAuthorizer {
-		return false
-	}
-
-	// Filter by tags
-	if len(criteria.Tags) > 0 {
-		hasAllTags := true
-		for _, tag := range criteria.Tags {
-			found := false
-			for _, policyTag := range policy.Tags {
-				if policyTag == tag {
-					found = true
-					break
-				}
-			}
-			if !found {
-				hasAllTags = false
-				break
-			}
-		}
-		if !hasAllTags {
-			return false
-		}
-	}
-
-	// Filter by created date range
-	if criteria.CreatedAfter != nil && policy.CreatedAt.Before(*criteria.CreatedAfter) {
-		return false
-	}
-	if criteria.CreatedBefore != nil && policy.CreatedAt.After(*criteria.CreatedBefore) {
-		return false
-	}
-
-	return true
 }
