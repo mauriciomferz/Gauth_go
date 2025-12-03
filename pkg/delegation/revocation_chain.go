@@ -63,9 +63,20 @@ func validateReason(r string) string {
 // RevocationChain now maintains optional Signed Tree Head snapshots (Phase 4).
 // treeHeads is append-only history of signed roots for audit / persistence.
 type RevocationChain struct {
-	events    []RevocationEvent
-	merkle    *MerkleTree
-	treeHeads []*SignedTreeHead
+	events     []RevocationEvent
+	merkle     *MerkleTree
+	treeHeads  []*SignedTreeHead
+	keyManager *crypto.Manager
+}
+
+// Option configures the RevocationChain
+type Option func(*RevocationChain)
+
+// WithKeyManager injects a crypto manager for signing operations
+func WithKeyManager(km *crypto.Manager) Option {
+	return func(c *RevocationChain) {
+		c.keyManager = km
+	}
 }
 
 // OnRevocationAppended is an optional callback invoked after a revocation event is successfully appended.
@@ -73,8 +84,16 @@ type RevocationChain struct {
 var OnRevocationAppended func(ev RevocationEvent, chainLen int, aggregateHash string)
 
 // NewRevocationChain constructs an empty chain.
-func NewRevocationChain() *RevocationChain {
-	return &RevocationChain{events: make([]RevocationEvent, 0), merkle: NewMerkleTree(), treeHeads: make([]*SignedTreeHead, 0)}
+func NewRevocationChain(opts ...Option) *RevocationChain {
+	c := &RevocationChain{
+		events:    make([]RevocationEvent, 0),
+		merkle:    NewMerkleTree(),
+		treeHeads: make([]*SignedTreeHead, 0),
+	}
+	for _, opt := range opts {
+		opt(c)
+	}
+	return c
 }
 
 // Append adds a new revocation event computing linkage and hash integrity.
@@ -97,7 +116,11 @@ func (c *RevocationChain) Append(e RevocationEvent) (RevocationEvent, error) {
 	e.Hash = h
 	// Optional signing (Phase 2): if EdDSA manager active, sign canonical bytes of event excluding Signature fields.
 	// We perform signing after computing the hash to bind both raw fields and computed linkage hash.
-	if km := crypto.GlobalEdDSARegistry; km != nil {
+	km := c.keyManager
+	if km == nil {
+		km = crypto.GlobalEdDSARegistry // Fallback to global for backward compatibility
+	}
+	if km != nil {
 		if ak := km.Active(); ak != nil {
 			payload, perr := signableBytes(e)
 			if perr == nil {
@@ -146,7 +169,10 @@ func (c *RevocationChain) Verify() error {
 		}
 		// Signature verification (if present). We treat absence as acceptable (legacy mode), but if present must verify.
 		if e.Signature != "" {
-			km := crypto.GlobalEdDSARegistry
+			km := c.keyManager
+			if km == nil {
+				km = crypto.GlobalEdDSARegistry // Fallback to global
+			}
 			if km == nil {
 				return fmt.Errorf("signature present but no key manager available at %d", i)
 			}
@@ -409,7 +435,11 @@ func (c *RevocationChain) SignTreeHead() (*SignedTreeHead, error) {
 		sth.Version = 2
 		sth.Threshold = threshold
 	}
-	if km := crypto.GlobalEdDSARegistry; km != nil {
+	km := c.keyManager
+	if km == nil {
+		km = crypto.GlobalEdDSARegistry // Fallback to global
+	}
+	if km != nil {
 		keys := km.ListCurrent()
 		// Compute total available weights (or count fallback)
 		availableTotal := 0
@@ -453,7 +483,7 @@ func (c *RevocationChain) SignTreeHead() (*SignedTreeHead, error) {
 }
 
 // VerifyTreeHeadSignature verifies the first signature on a tree head (multi-sig expansion later).
-func VerifyTreeHeadSignature(sth *SignedTreeHead) error {
+func VerifyTreeHeadSignature(sth *SignedTreeHead, km *crypto.Manager) error {
 	if sth == nil {
 		return errors.New("nil_sth")
 	}
@@ -461,7 +491,9 @@ func VerifyTreeHeadSignature(sth *SignedTreeHead) error {
 		return errors.New("no_signatures")
 	}
 	sigEntry := sth.Signatures[0]
-	km := crypto.GlobalEdDSARegistry
+	if km == nil {
+		km = crypto.GlobalEdDSARegistry // Fallback to global
+	}
 	if km == nil {
 		return errors.New("no_key_manager")
 	}
@@ -480,18 +512,20 @@ func VerifyTreeHeadSignature(sth *SignedTreeHead) error {
 }
 
 // VerifyTreeHeadMultiSig checks cumulative weights (or signature count fallback) against threshold.
-func VerifyTreeHeadMultiSig(sth *SignedTreeHead) error {
+func VerifyTreeHeadMultiSig(sth *SignedTreeHead, km *crypto.Manager) error {
 	if sth == nil {
 		return errors.New("nil_sth")
 	}
 	if sth.Threshold <= 1 { // fallback to single signature verification
-		return VerifyTreeHeadSignature(sth)
+		return VerifyTreeHeadSignature(sth, km)
 	}
 	if len(sth.Signatures) == 0 {
 		return errors.New("no_signatures")
 	}
 	// First verify each signature cryptographically.
-	km := crypto.GlobalEdDSARegistry
+	if km == nil {
+		km = crypto.GlobalEdDSARegistry // Fallback to global
+	}
 	if km == nil {
 		return errors.New("no_key_manager")
 	}
@@ -553,10 +587,14 @@ func (c *RevocationChain) LoadSignedTreeHeads(path string) error {
 		}
 		// Choose verification path
 		var verr error
+		km := c.keyManager
+		if km == nil {
+			km = crypto.GlobalEdDSARegistry
+		}
 		if sth.Threshold > 1 {
-			verr = VerifyTreeHeadMultiSig(sth)
+			verr = VerifyTreeHeadMultiSig(sth, km)
 		} else {
-			verr = VerifyTreeHeadSignature(sth)
+			verr = VerifyTreeHeadSignature(sth, km)
 		}
 		if verr == nil {
 			valid = append(valid, sth)

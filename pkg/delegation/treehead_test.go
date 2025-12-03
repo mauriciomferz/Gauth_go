@@ -53,12 +53,12 @@ func TestVerifyTreeHeadSignature(t *testing.T) {
 	if err != nil {
 		t.Fatalf("sign error: %v", err)
 	}
-	if err := VerifyTreeHeadSignature(sth); err != nil {
+	if err := VerifyTreeHeadSignature(sth, km); err != nil {
 		t.Fatalf("verify signature failed: %v", err)
 	}
 	// Tamper merkle root
 	sth.MerkleRoot = deadbeefValue
-	if err := VerifyTreeHeadSignature(sth); err == nil {
+	if err := VerifyTreeHeadSignature(sth, km); err == nil {
 		t.Fatalf("expected failure after tamper")
 	}
 }

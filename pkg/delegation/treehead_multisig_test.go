@@ -42,7 +42,7 @@ func TestMultiSignatureTreeHeadThreshold(t *testing.T) {
 	if len(sth.Signatures) < 2 {
 		t.Fatalf("expected >=2 signatures, got %d", len(sth.Signatures))
 	}
-	if err := VerifyTreeHeadMultiSig(sth); err != nil {
+	if err := VerifyTreeHeadMultiSig(sth, km); err != nil {
 		t.Fatalf("multi-sig verification failed: %v", err)
 	}
 }
@@ -85,7 +85,7 @@ func TestMultiSignatureTreeHeadWeights(t *testing.T) {
 	if sth.SatisfiedWeight < 3 {
 		t.Fatalf("satisfied weight insufficient: %d", sth.SatisfiedWeight)
 	}
-	if err := VerifyTreeHeadMultiSig(sth); err != nil {
+	if err := VerifyTreeHeadMultiSig(sth, km); err != nil {
 		t.Fatalf("verification failed: %v", err)
 	}
 }

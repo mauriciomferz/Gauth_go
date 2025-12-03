@@ -41,7 +41,7 @@ func TestMultiSignatureTreeHeadUnknownKid(t *testing.T) {
 	// Introduce unknown kid by modifying first signature's Kid to a value not in manager.
 	sth.Signatures[0].Kid = "unknown-kid-xyz"
 	// Attempt multi-sig verification – should fail at signature validation.
-	if err := VerifyTreeHeadMultiSig(sth); err == nil {
+	if err = VerifyTreeHeadMultiSig(sth, km); err == nil {
 		t.Fatalf("expected verification failure for unknown kid, got success")
 	}
 }
