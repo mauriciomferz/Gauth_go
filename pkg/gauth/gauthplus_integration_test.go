@@ -395,7 +395,8 @@ func TestGAuthPlusIntegration_FiduciaryViolations(t *testing.T) {
 
 	fiduciaryService := gauthplus.NewPostgreSQLFiduciaryDutyService(db)
 	validator := createTestGAuthPlusValidator(db)
-	validator.SetEnforceFiduciary(true) // Enable fiduciary enforcement
+	validator.SetEnforceFiduciary(true)     // Enable fiduciary enforcement
+	validator.SetEnforceCapabilities(false) // Disable capability enforcement for this test
 
 	ctx := context.Background()
 	poaID := "550e8400-e29b-41d4-a716-446655440004" // Valid UUID
@@ -411,7 +412,7 @@ func TestGAuthPlusIntegration_FiduciaryViolations(t *testing.T) {
 		}
 
 		if !result.Valid {
-			t.Errorf("Expected valid with no violations, got: %s", result.FailureReason)
+			t.Fatalf("Expected valid with no violations, got: %s", result.FailureReason)
 		}
 
 		if result.FiduciaryCheck.HasViolations {
@@ -550,11 +551,13 @@ func TestGAuthPlusIntegration_ComplianceValidator(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("RequestValidationWithGAuthPlus", func(t *testing.T) {
+		agentID := "550e8400-e29b-41d4-a716-446655440001" // Valid UUID
 		request := &gauth.ExtendedAuthorizationRequest{
 			AuthorizationRequest: &gauth.AuthorizationRequest{
 				ClientID: "test-client",
+				Scopes:   []string{"read", "write"},
 			},
-			PowerOfAttorney:  createTestPoADefinition("agent-001"),
+			PowerOfAttorney:  createTestPoADefinition(agentID),
 			RequestedActions: []string{"read"},
 			RequestTime:      time.Now(),
 		}

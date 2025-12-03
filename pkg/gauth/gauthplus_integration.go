@@ -15,14 +15,14 @@ import (
 
 // GAuthPlusValidator validates GAuth+ policies during authorization
 type GAuthPlusValidator struct {
-	successorService     *gauthplus.PostgreSQLSuccessorService
-	delegationService    gauthplus.DelegationService  // Use interface for caching support
-	dualControlService   *gauthplus.PostgreSQLDualControlService
-	fiduciaryService     *gauthplus.PostgreSQLFiduciaryDutyService
-	capabilityService    gauthplus.CapabilityAssessmentService  // Use interface for caching support
-	enforceCapabilities  bool
-	enforceDualControl   bool
-	enforceFiduciary     bool
+	successorService    *gauthplus.PostgreSQLSuccessorService
+	delegationService   gauthplus.DelegationService // Use interface for caching support
+	dualControlService  *gauthplus.PostgreSQLDualControlService
+	fiduciaryService    *gauthplus.PostgreSQLFiduciaryDutyService
+	capabilityService   gauthplus.CapabilityAssessmentService // Use interface for caching support
+	enforceCapabilities bool
+	enforceDualControl  bool
+	enforceFiduciary    bool
 }
 
 // NewGAuthPlusValidator creates a new GAuth+ validator
@@ -35,77 +35,77 @@ func NewGAuthPlusValidator(
 	capabilityService gauthplus.CapabilityAssessmentService,
 ) *GAuthPlusValidator {
 	return &GAuthPlusValidator{
-		successorService:     successorService,
-		delegationService:    delegationService,
-		dualControlService:   dualControlService,
-		fiduciaryService:     fiduciaryService,
-		capabilityService:    capabilityService,
-		enforceCapabilities:  true,
-		enforceDualControl:   true,
-		enforceFiduciary:     true,
+		successorService:    successorService,
+		delegationService:   delegationService,
+		dualControlService:  dualControlService,
+		fiduciaryService:    fiduciaryService,
+		capabilityService:   capabilityService,
+		enforceCapabilities: true,
+		enforceDualControl:  true,
+		enforceFiduciary:    true,
 	}
 }
 
 // GAuthPlusValidationResult contains results from GAuth+ validation
 type GAuthPlusValidationResult struct {
-	Valid                 bool                                 `json:"valid"`
-	SuccessorCheck        *SuccessorCheckResult                `json:"successor_check,omitempty"`
-	DelegationCheck       *DelegationCheckResult               `json:"delegation_check,omitempty"`
-	DualControlCheck      *DualControlCheckResult              `json:"dual_control_check,omitempty"`
-	CapabilityCheck       *CapabilityCheckResult               `json:"capability_check,omitempty"`
-	FiduciaryCheck        *FiduciaryCheckResult                `json:"fiduciary_check,omitempty"`
-	Warnings              []string                             `json:"warnings,omitempty"`
-	FailureReason         string                               `json:"failure_reason,omitempty"`
+	Valid            bool                    `json:"valid"`
+	SuccessorCheck   *SuccessorCheckResult   `json:"successor_check,omitempty"`
+	DelegationCheck  *DelegationCheckResult  `json:"delegation_check,omitempty"`
+	DualControlCheck *DualControlCheckResult `json:"dual_control_check,omitempty"`
+	CapabilityCheck  *CapabilityCheckResult  `json:"capability_check,omitempty"`
+	FiduciaryCheck   *FiduciaryCheckResult   `json:"fiduciary_check,omitempty"`
+	Warnings         []string                `json:"warnings,omitempty"`
+	FailureReason    string                  `json:"failure_reason,omitempty"`
 }
 
 // SuccessorCheckResult contains successor validation results
 type SuccessorCheckResult struct {
-	CheckPerformed       bool                              `json:"check_performed"`
-	SuccessorActive      bool                              `json:"successor_active"`
-	ActiveSuccessor      *gauthplus.SuccessorActivation    `json:"active_successor,omitempty"`
-	EffectiveAgentID     string                            `json:"effective_agent_id"` // primary or successor
+	CheckPerformed   bool                           `json:"check_performed"`
+	SuccessorActive  bool                           `json:"successor_active"`
+	ActiveSuccessor  *gauthplus.SuccessorActivation `json:"active_successor,omitempty"`
+	EffectiveAgentID string                         `json:"effective_agent_id"` // primary or successor
 }
 
 // DelegationCheckResult contains delegation validation results
 type DelegationCheckResult struct {
-	CheckPerformed        bool                       `json:"check_performed"`
-	DelegationValid       bool                       `json:"delegation_valid"`
-	CurrentDepth          int                        `json:"current_depth"`
-	MaxAllowedDepth       int                        `json:"max_allowed_depth"`
-	DelegationChain       []*gauthplus.AIDelegation  `json:"delegation_chain,omitempty"`
-	DepthExceeded         bool                       `json:"depth_exceeded"`
-	Warnings              []string                   `json:"warnings,omitempty"`
+	CheckPerformed  bool                      `json:"check_performed"`
+	DelegationValid bool                      `json:"delegation_valid"`
+	CurrentDepth    int                       `json:"current_depth"`
+	MaxAllowedDepth int                       `json:"max_allowed_depth"`
+	DelegationChain []*gauthplus.AIDelegation `json:"delegation_chain,omitempty"`
+	DepthExceeded   bool                      `json:"depth_exceeded"`
+	Warnings        []string                  `json:"warnings,omitempty"`
 }
 
 // DualControlCheckResult contains dual control validation results
 type DualControlCheckResult struct {
-	CheckPerformed        bool                              `json:"check_performed"`
-	RequiresApproval      bool                              `json:"requires_approval"`
-	ApprovalObtained      bool                              `json:"approval_obtained"`
-	PendingApproval       *gauthplus.DualControlApproval    `json:"pending_approval,omitempty"`
-	ApprovedAction        *gauthplus.DualControlApproval    `json:"approved_action,omitempty"`
-	RequiredApprovers     int                               `json:"required_approvers"`
-	CurrentApprovers      int                               `json:"current_approvers"`
+	CheckPerformed    bool                           `json:"check_performed"`
+	RequiresApproval  bool                           `json:"requires_approval"`
+	ApprovalObtained  bool                           `json:"approval_obtained"`
+	PendingApproval   *gauthplus.DualControlApproval `json:"pending_approval,omitempty"`
+	ApprovedAction    *gauthplus.DualControlApproval `json:"approved_action,omitempty"`
+	RequiredApprovers int                            `json:"required_approvers"`
+	CurrentApprovers  int                            `json:"current_approvers"`
 }
 
 // CapabilityCheckResult contains capability assessment results
 type CapabilityCheckResult struct {
-	CheckPerformed        bool                                   `json:"check_performed"`
-	CapabilityMet         bool                                   `json:"capability_met"`
-	LatestAssessment      *gauthplus.AICapabilityAssessment      `json:"latest_assessment,omitempty"`
-	RequiredLevel         string                                 `json:"required_level,omitempty"`
-	ActualLevel           string                                 `json:"actual_level,omitempty"`
-	DomainMatches         map[string]bool                        `json:"domain_matches,omitempty"`
-	AssessmentExpired     bool                                   `json:"assessment_expired"`
+	CheckPerformed    bool                              `json:"check_performed"`
+	CapabilityMet     bool                              `json:"capability_met"`
+	LatestAssessment  *gauthplus.AICapabilityAssessment `json:"latest_assessment,omitempty"`
+	RequiredLevel     string                            `json:"required_level,omitempty"`
+	ActualLevel       string                            `json:"actual_level,omitempty"`
+	DomainMatches     map[string]bool                   `json:"domain_matches,omitempty"`
+	AssessmentExpired bool                              `json:"assessment_expired"`
 }
 
 // FiduciaryCheckResult contains fiduciary duty validation results
 type FiduciaryCheckResult struct {
-	CheckPerformed        bool                              `json:"check_performed"`
-	HasViolations         bool                              `json:"has_violations"`
-	UnresolvedViolations  []*gauthplus.FiduciaryDutyViolation   `json:"unresolved_violations,omitempty"`
-	CriticalViolations    int                               `json:"critical_violations"`
-	BlockingAction        bool                              `json:"blocking_action"` // whether violations block authorization
+	CheckPerformed       bool                                `json:"check_performed"`
+	HasViolations        bool                                `json:"has_violations"`
+	UnresolvedViolations []*gauthplus.FiduciaryDutyViolation `json:"unresolved_violations,omitempty"`
+	CriticalViolations   int                                 `json:"critical_violations"`
+	BlockingAction       bool                                `json:"blocking_action"` // whether violations block authorization
 }
 
 // ValidatePoAWithGAuthPlus performs comprehensive GAuth+ validation for a PoA
@@ -119,7 +119,7 @@ func (v *GAuthPlusValidator) ValidatePoAWithGAuthPlus(
 	actionType string,
 ) (*GAuthPlusValidationResult, error) {
 	result := &GAuthPlusValidationResult{
-		Valid: true,
+		Valid:    true,
 		Warnings: []string{},
 	}
 
@@ -129,13 +129,13 @@ func (v *GAuthPlusValidator) ValidatePoAWithGAuthPlus(
 		return nil, fmt.Errorf("successor check failed: %w", err)
 	}
 	result.SuccessorCheck = successorResult
-	
+
 	// If successor is active, use successor agent ID for subsequent checks
 	effectiveAgentID := agentID
 	if successorResult.SuccessorActive {
 		effectiveAgentID = successorResult.ActiveSuccessor.SuccessorAgentID
-		result.Warnings = append(result.Warnings, 
-			fmt.Sprintf("Successor AI %s is active, taking over from primary AI %s", 
+		result.Warnings = append(result.Warnings,
+			fmt.Sprintf("Successor AI %s is active, taking over from primary AI %s",
 				effectiveAgentID, agentID))
 	}
 
@@ -145,10 +145,10 @@ func (v *GAuthPlusValidator) ValidatePoAWithGAuthPlus(
 		return nil, fmt.Errorf("delegation check failed: %w", err)
 	}
 	result.DelegationCheck = delegationResult
-	
+
 	if delegationResult.DepthExceeded {
 		result.Valid = false
-		result.FailureReason = fmt.Sprintf("delegation depth %d exceeds maximum %d", 
+		result.FailureReason = fmt.Sprintf("delegation depth %d exceeds maximum %d",
 			delegationResult.CurrentDepth, delegationResult.MaxAllowedDepth)
 		return result, nil
 	}
@@ -160,7 +160,7 @@ func (v *GAuthPlusValidator) ValidatePoAWithGAuthPlus(
 			return nil, fmt.Errorf("dual control check failed: %w", err)
 		}
 		result.DualControlCheck = dualControlResult
-		
+
 		if dualControlResult.RequiresApproval && !dualControlResult.ApprovalObtained {
 			result.Valid = false
 			result.FailureReason = fmt.Sprintf("action %s requires dual control approval but none obtained", actionType)
@@ -175,13 +175,13 @@ func (v *GAuthPlusValidator) ValidatePoAWithGAuthPlus(
 			return nil, fmt.Errorf("capability check failed: %w", err)
 		}
 		result.CapabilityCheck = capabilityResult
-		
+
 		if !capabilityResult.CapabilityMet {
 			result.Valid = false
 			result.FailureReason = fmt.Sprintf("agent %s does not meet capability requirements", effectiveAgentID)
 			return result, nil
 		}
-		
+
 		if capabilityResult.AssessmentExpired {
 			result.Warnings = append(result.Warnings, "capability assessment is expired, re-assessment recommended")
 		}
@@ -194,17 +194,17 @@ func (v *GAuthPlusValidator) ValidatePoAWithGAuthPlus(
 			return nil, fmt.Errorf("fiduciary check failed: %w", err)
 		}
 		result.FiduciaryCheck = fiduciaryResult
-		
+
 		if fiduciaryResult.BlockingAction {
 			result.Valid = false
-			result.FailureReason = fmt.Sprintf("agent has %d critical unresolved fiduciary violations", 
+			result.FailureReason = fmt.Sprintf("agent has %d critical unresolved fiduciary violations",
 				fiduciaryResult.CriticalViolations)
 			return result, nil
 		}
-		
+
 		if fiduciaryResult.HasViolations {
-			result.Warnings = append(result.Warnings, 
-				fmt.Sprintf("agent has %d unresolved fiduciary violations", 
+			result.Warnings = append(result.Warnings,
+				fmt.Sprintf("agent has %d unresolved fiduciary violations",
 					len(fiduciaryResult.UnresolvedViolations)))
 		}
 	}
@@ -261,10 +261,10 @@ func (v *GAuthPlusValidator) checkDelegationChain(
 	}()
 
 	result := &DelegationCheckResult{
-		CheckPerformed:   true,
-		DelegationValid:  true,
-		DelegationChain:  []*gauthplus.AIDelegation{},
-		Warnings:         []string{},
+		CheckPerformed:  true,
+		DelegationValid: true,
+		DelegationChain: []*gauthplus.AIDelegation{},
+		Warnings:        []string{},
 	}
 
 	if v.delegationService == nil {
@@ -280,7 +280,7 @@ func (v *GAuthPlusValidator) checkDelegationChain(
 
 	result.DelegationChain = chain
 	result.CurrentDepth = len(chain)
-	
+
 	// Record delegation depth metric
 	if len(chain) > 0 {
 		metrics.RecordGAuthPlusDelegationDepth(len(chain))
@@ -289,13 +289,13 @@ func (v *GAuthPlusValidator) checkDelegationChain(
 	// Check max depth from first delegation (if any)
 	if len(chain) > 0 {
 		result.MaxAllowedDepth = chain[0].MaxAllowedDepth
-		
+
 		// Validate depth - CheckMaxDepthExceeded takes sourceAgentID and currentDepth
 		depthExceeded, err := v.delegationService.CheckMaxDepthExceeded(ctx, agentID, len(chain))
 		if err != nil {
 			return nil, err
 		}
-		
+
 		result.DepthExceeded = depthExceeded
 		if depthExceeded {
 			result.DelegationValid = false
@@ -305,15 +305,15 @@ func (v *GAuthPlusValidator) checkDelegationChain(
 		// ValidateDelegation needs sourceAgentID, targetAgentID, scope, depth
 		for i, delegation := range chain {
 			err := v.delegationService.ValidateDelegation(
-				ctx, 
-				delegation.SourceAgentID, 
+				ctx,
+				delegation.SourceAgentID,
 				delegation.TargetAgentID,
 				delegation.DelegatedScope,
 				delegation.DelegationDepth,
 			)
 			if err != nil {
 				result.DelegationValid = false
-				result.Warnings = append(result.Warnings, 
+				result.Warnings = append(result.Warnings,
 					fmt.Sprintf("delegation %d invalid: %s", i, err.Error()))
 			}
 		}
@@ -346,14 +346,14 @@ func (v *GAuthPlusValidator) checkDualControlRequirements(
 	if err != nil {
 		return nil, fmt.Errorf("failed to query dual control approvals: %w", err)
 	}
-	
+
 	// Analyze approval status
 	result.RequiresApproval = false
 	result.ApprovalObtained = false
-	
+
 	if len(approvals) > 0 {
 		result.RequiresApproval = true
-		
+
 		// Check if we have any approved, non-expired approvals
 		now := time.Now().UTC()
 		for _, approval := range approvals {
@@ -384,9 +384,9 @@ func (v *GAuthPlusValidator) checkCapabilityRequirements(
 	poaDef *poa.PoADefinition,
 ) (*CapabilityCheckResult, error) {
 	result := &CapabilityCheckResult{
-		CheckPerformed:   true,
-		CapabilityMet:    true,
-		DomainMatches:    make(map[string]bool),
+		CheckPerformed:    true,
+		CapabilityMet:     true,
+		DomainMatches:     make(map[string]bool),
 		AssessmentExpired: false,
 	}
 
@@ -465,7 +465,7 @@ func (v *GAuthPlusValidator) checkFiduciaryDuties(
 			result.UnresolvedViolations = append(result.UnresolvedViolations, violation)
 		}
 	}
-	
+
 	result.HasViolations = len(result.UnresolvedViolations) > 0
 
 	// Count critical violations
