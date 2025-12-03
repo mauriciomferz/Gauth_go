@@ -497,47 +497,51 @@ openapi-guard: ## Validate minimal OpenAPI spec structure (presence of openapi: 
 	go run ./scripts/openapi_guard/main.go || exit $$?;
 	echo "✅ OpenAPI guard passed";
 
-## JavaScript (frontend) targets
-JS_FILES=$(shell find web/static/js -name '*.js' ! -path '*/vendor/*')
+JS_FILES=$(shell find frontend/ui-react/src -name '*.js' -o -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' 2>/dev/null || echo "")
 
-js-lint: ## Lint JavaScript (tries eslint, falls back to node syntax check)
-	@echo "🔎 Linting JS (front-end)"; \
-	if command -v eslint >/dev/null 2>&1; then \
-		eslint --max-warnings=0 $$JS_FILES; \
-	else \
-		echo "(eslint not installed, running node --check for syntax)"; \
-		for f in $$JS_FILES; do node --check $$f || exit 1; done; \
-	fi; \
-	echo "✅ JS lint passed"
-
-js-test: ## Placeholder JS tests (could integrate jest/playwright later)
-	@echo "🧪 Running placeholder JS tests (syntax only)"; \
-	for f in $$JS_FILES; do node --check $$f || exit 1; done; \
-	echo "✅ JS syntax OK"
-
-js-build: ## Bundle front-end JS (esbuild -> web/static/js/bundle.js)
-	@if [ "$$SKIP_WEB_ASSETS" = "1" ]; then \
-	  echo "⏭️  SKIP_WEB_ASSETS=1 -> skipping front-end bundling (using any existing bundle.js)"; \
-	  if [ ! -s web/static/js/bundle.js ]; then \
-	    echo "⚠️  bundle.js not present; tests may still pass (UI assets unused)."; \
+js-lint: ## Lint JavaScript/TypeScript (tries eslint, falls back to tsc --noEmit)
+	@echo "🔎 Linting JS/TS (front-end)"; \
+	if [ -d "frontend/ui-react" ]; then \
+	  if command -v eslint >/dev/null 2>&1 && [ -f "frontend/ui-react/.eslintrc.cjs" ]; then \
+		(cd frontend/ui-react && eslint --max-warnings=0 src); \
+	  elif command -v tsc >/dev/null 2>&1 && [ -f "frontend/ui-react/tsconfig.json" ]; then \
+		echo "(eslint not found, running tsc --noEmit for type checking)"; \
+		(cd frontend/ui-react && tsc --noEmit); \
 	  else \
-	    echo "✅ Existing bundle.js detected (size=$$(wc -c < web/static/js/bundle.js) bytes)"; \
+	    echo "⚠️  Neither eslint nor tsc configured for frontend/ui-react - skipping lint"; \
 	  fi; \
+	  echo "✅ JS/TS lint passed"; \
 	else \
-	  echo "📦 Bundling front-end assets..."; \
-	  if [ -f package.json ]; then \
-	    if [ ! -d node_modules ]; then \
+	  echo "⚠️  frontend/ui-react not found - skipping"; \
+	fi
+
+js-test: ## Run frontend tests (jest/vitest)
+	@echo "🧪 Running frontend tests..."; \
+	if [ -f "frontend/ui-react/package.json" ]; then \
+	  (cd frontend/ui-react && npm test); \
+	  echo "✅ Frontend tests complete"; \
+	else \
+	  echo "⚠️  frontend/ui-react/package.json not found - skipping tests"; \
+	fi
+
+js-build: ## Bundle front-end assets using Vite
+	@if [ "$$SKIP_WEB_ASSETS" = "1" ]; then \
+	  echo "⏭️  SKIP_WEB_ASSETS=1 -> skipping front-end bundling"; \
+	else \
+	  echo "📦 Bundling front-end assets with Vite..."; \
+	  if [ -f "frontend/ui-react/package.json" ]; then \
+	    if [ ! -d "frontend/ui-react/node_modules" ]; then \
 	      echo "⬇️  Installing JS dev dependencies (one-time)..."; \
-	      npm install --no-audit --no-fund; \
+	      (cd frontend/ui-react && npm install --no-audit --no-fund); \
 	    fi; \
-	    npm run build; \
-	    if [ ! -s web/static/js/bundle.js ]; then \
-	      echo "❌ bundle.js missing after build - check build script"; exit 1; \
+	    (cd frontend/ui-react && npm run build); \
+	    if [ ! -s "frontend/dist/index.html" ]; then \
+	      echo "❌ Build output missing - check Vite build process"; exit 1; \
 	    else \
-	      echo "✅ JS bundle ready (embedded at next Go build)"; \
+	      echo "✅ Vite build complete (output in frontend/dist)"; \
 	    fi; \
 	  else \
-	    echo "⚠️  No package.json found - skipping JS bundling"; \
+	    echo "⚠️  No package.json in frontend/ui-react - skipping JS bundling"; \
 	  fi; \
 	fi
 

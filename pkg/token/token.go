@@ -505,14 +505,19 @@ func (v *blacklistValidator) Validate(_ context.Context, token *Token) error {
 	return nil
 }
 
-type signatureValidator struct{}
+type signatureValidator struct {
+	registry *ValidatorRegistry
+}
 
-func (v *signatureValidator) Validate(_ context.Context, token *Token) error {
-	// Simulate signature check: fail if Value is empty or looks like a dummy
-	if token.Value == "" || token.Value == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." {
-		return &ValidationError{Code: "invalid_signature", Message: "Token signature invalid"}
+func (v *signatureValidator) Validate(ctx context.Context, token *Token) error {
+	if v.registry == nil {
+		// Fallback to old behavior if no registry is configured
+		if token.Value == "" || token.Value == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." {
+			return &ValidationError{Code: "invalid_signature", Message: "Token signature invalid"}
+		}
+		return nil
 	}
-	return nil
+	return v.registry.Validate(ctx, token.Value)
 }
 
 func NewValidationChain(config ValidationConfig) *DefaultValidationChain {

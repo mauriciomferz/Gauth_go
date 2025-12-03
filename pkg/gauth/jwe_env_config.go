@@ -10,6 +10,7 @@ import (
 )
 
 // JWEConfigFromEnv creates JWE configuration from environment variables
+// Deprecated: Use internal/config.Load() instead.
 // Supports the following environment variables:
 //
 // GAUTH_JWE_ENABLED - Enable/disable JWE encryption (default: true)
@@ -47,9 +48,9 @@ func JWEConfigFromEnv() (*JWEConfig, error) {
 
 	// Parse GAUTH_JWE_ALGORITHM
 	if envAlgorithm := os.Getenv("GAUTH_JWE_ALGORITHM"); envAlgorithm != "" {
-	algorithm := strings.ToUpper(envAlgorithm)
-	if algorithm != algorithmRSAOAEP256 && algorithm != "A256KW" {
-		return nil, fmt.Errorf("unsupported GAUTH_JWE_ALGORITHM: %s (supported: RSA-OAEP-256, A256KW)", algorithm)
+		algorithm := strings.ToUpper(envAlgorithm)
+		if algorithm != algorithmRSAOAEP256 && algorithm != "A256KW" {
+			return nil, fmt.Errorf("unsupported GAUTH_JWE_ALGORITHM: %s (supported: RSA-OAEP-256, A256KW)", algorithm)
 		}
 		config.Algorithm = algorithm
 	}

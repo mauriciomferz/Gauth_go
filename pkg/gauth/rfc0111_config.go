@@ -47,7 +47,7 @@ type RFC0111Components struct {
 
 // InitRFC0111FromEnv initializes RFC-0111 components based on environment variables.
 // This is a convenience function for web server integration.
-//
+// Deprecated: Use internal/config.Load() and explicit initialization instead.
 // Environment variables:
 //   - GAUTH_RFC0111_ENABLED: Set to "1" to enable RFC-0111 functionality
 //   - GAUTH_RFC0111_USE_MOCKS: Set to "1" to use mock external services (default)

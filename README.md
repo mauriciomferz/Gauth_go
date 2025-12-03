@@ -53,9 +53,16 @@ While GAuth is not an OAuth 2.0 server, the [OAuth 2.0 Migration Feasibility Stu
 ---
 
 > **🚀 BETA-READY** - Comprehensive security audit, extensive testing (689+ test cases), complete documentation. Suitable for testing and evaluation.
-> **Last Updated:** 2025-12-01 (✅ 100% RFC compliance, OAuth 2.0 clarification, test stability improvements)
+> **Last Updated:** 2025-12-03 (📁 Directory reorganization, PolicyStore interface implementation)
 
-**✨ Latest Updates (Dec 1, 2025):**
+**✨ Latest Updates (Dec 3, 2025):**
+- **🔐 Enhanced Signature Validation**: New extensible validator registry supports multiple concurrent signature algorithms (HS256, RS256, ES256) with detailed logging and Prometheus metrics.
+- **📁 Directory Reorganization:** Frontend moved to `frontend/`, integration tests to `test/integration/` for better organization
+- **🗄️ PolicyStore Interface:** Pluggable policy storage with in-memory and PostgreSQL implementations for production scalability
+- **♻️ Cleaner Architecture:** Separation of concerns - backend (web/), frontend (frontend/), tests (test/)
+- **📚 Migration Guide:** Comprehensive [DIRECTORY_REORGANIZATION.md](DIRECTORY_REORGANIZATION.md) documentation
+
+**Previous Updates (Dec 1, 2025):**
 - **✅ 100% RFC Compliance:** Achieved 45/45 RFC-0111/0115 conformance requirements (updated gap-matrix badge)
 - **🔍 OAuth 2.0 Clarification:** Added comprehensive distinction - GAuth implements GiFo-RFC-0111/0115, NOT OAuth 2.0 RFC 6749
 - **🧪 Test Stability:** Fixed probabilistic test tolerance in TestCachePressureGenerator for reliable CI builds
@@ -113,7 +120,7 @@ A complete Go implementation of the **GAuth authorization framework (GiFo-RFC-01
 | `database/` | PostgreSQL repositories and migrations |
 \`\`\`
 
-**Frontend** (\`web/ui-react/\`)
+**Frontend** (\`frontend/ui-react/\`)
 - React 18 + TypeScript admin portal
 - Material-UI components  
 - Real-time WebSocket updates
@@ -124,6 +131,7 @@ A complete Go implementation of the **GAuth authorization framework (GiFo-RFC-01
 - **Caching**: Redis for session and policy caching
 - **Monitoring**: Prometheus metrics, OpenTelemetry tracing
 - **CI/CD**: GitHub Actions with automated testing and deployment
+- **Policy Storage**: Pluggable storage interface (in-memory for dev, PostgreSQL for production)
 
 ## 🚀 Key Features
 

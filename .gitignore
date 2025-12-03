@@ -183,3 +183,7 @@ build/*-server
 # Documentation artifacts
 CSP_FIXES.md
 web-server
+
+# Build artifacts and backups
+*.bak
+*.bak[0-9]*
