@@ -213,7 +213,7 @@ func TestVerifyMultiSig_EdgeCases(t *testing.T) {
 			if tt.skip {
 				t.Skip(tt.skipReason)
 			}
-			valid, satisfied, threshold := VerifyMultiSig(tt.poa)
+			valid, satisfied, threshold := VerifyMultiSig(tt.poa, nil)
 			if valid != tt.wantValid {
 				t.Errorf("VerifyMultiSig() valid = %v, want %v", valid, tt.wantValid)
 			}

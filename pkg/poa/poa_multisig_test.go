@@ -56,7 +56,7 @@ func TestPoAMultiSigThresholdSatisfied(t *testing.T) {
 	if len(poaObj.Signatures) != 2 || len(poaObj.SignerKids) != 2 {
 		t.Fatalf("expected 2 signatures, got %d", len(poaObj.Signatures))
 	}
-	vcount, satisfied, req := VerifyMultiSig(poaObj)
+	vcount, satisfied, req := VerifyMultiSig(poaObj, internalCrypto.GlobalEdDSARegistry)
 	if vcount != 2 || !satisfied || req != 2 {
 		t.Fatalf("multisig verify mismatch valid=%d satisfied=%v req=%d", vcount, satisfied, req)
 	}
@@ -86,7 +86,7 @@ func TestPoAMultiSigThresholdUnsatisfied(t *testing.T) {
 	if err != nil {
 		t.Fatalf("issue: %v", err)
 	}
-	vcount, satisfied, req := VerifyMultiSig(poaObj)
+	vcount, satisfied, req := VerifyMultiSig(poaObj, internalCrypto.GlobalEdDSARegistry)
 	if vcount >= req || satisfied || req != 3 {
 		t.Fatalf("expected unsatisfied threshold vcount=%d req=%d satisfied=%v", vcount, req, satisfied)
 	}
@@ -111,7 +111,7 @@ func TestPoAMultiSigTamperSignature(t *testing.T) {
 	}
 	// Tamper first signature
 	poaObj.Signatures[0] = poaObj.Signatures[0][:10] + "AAAA" + poaObj.Signatures[0][10:]
-	vcount, satisfied, _ := VerifyMultiSig(poaObj)
+	vcount, satisfied, _ := VerifyMultiSig(poaObj, internalCrypto.GlobalEdDSARegistry)
 	if vcount != 0 || satisfied {
 		t.Fatalf("tamper should invalidate signature valid=%d satisfied=%v", vcount, satisfied)
 	}

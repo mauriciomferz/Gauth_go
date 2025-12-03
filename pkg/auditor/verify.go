@@ -1,14 +1,15 @@
 package auditor
 
 import (
+	"github.com/mauriciomferz/Gauth_go/internal/crypto"
 	poa "github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
 
 // VerifyPOA performs digest and signature threshold verification returning a summary map.
-func VerifyPOA(doc *poa.ProofOfAuthorization) map[string]any {
+func VerifyPOA(doc *poa.ProofOfAuthorization, km *crypto.Manager) map[string]any {
 	canon := poa.CanonicalDigest(doc)
 	digestValid := (doc != nil && doc.Digest != "" && doc.Digest == canon)
-	validSigs, thresholdMet, required := poa.VerifyMultiSig(doc)
+	validSigs, thresholdMet, required := poa.VerifyMultiSig(doc, km)
 	return map[string]any{
 		"digest_valid":       digestValid,
 		"provided_digest":    doc.Digest,

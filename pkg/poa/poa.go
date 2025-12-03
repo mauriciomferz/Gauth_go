@@ -911,18 +911,33 @@ type Service interface {
 	List(ctx context.Context, subject string) ([]*ProofOfAuthorization, error)
 }
 
-// MemoryService implements the PoA service using in-memory storage
+// MemoryService implements Service using in-memory storage
 type MemoryService struct {
-	proofs  map[string]*ProofOfAuthorization
-	revoked map[string]bool
+	proofs     map[string]*ProofOfAuthorization
+	revoked    map[string]bool
+	keyManager *internalCrypto.Manager
+}
+
+// Option configures the MemoryService
+type Option func(*MemoryService)
+
+// WithKeyManager injects a crypto manager
+func WithKeyManager(km *internalCrypto.Manager) Option {
+	return func(s *MemoryService) {
+		s.keyManager = km
+	}
 }
 
 // NewMemoryService creates a new memory-based PoA service
-func NewMemoryService() *MemoryService {
-	return &MemoryService{
+func NewMemoryService(opts ...Option) *MemoryService {
+	s := &MemoryService{
 		proofs:  make(map[string]*ProofOfAuthorization),
 		revoked: make(map[string]bool),
 	}
+	for _, opt := range opts {
+		opt(s)
+	}
+	return s
 }
 
 // Issue issues a new proof of authorization
@@ -983,7 +998,11 @@ func (s *MemoryService) Issue(ctx context.Context, req *Request) (*ProofOfAuthor
 			}
 		}
 		// Fallback to active key if no explicit list
-		if len(kids) == 0 && internalCrypto.GlobalEdDSARegistry != nil {
+		if len(kids) == 0 && s.keyManager != nil {
+			if ak := s.keyManager.Active(); ak != nil {
+				kids = []string{ak.ID}
+			}
+		} else if len(kids) == 0 && internalCrypto.GlobalEdDSARegistry != nil {
 			if ak := internalCrypto.GlobalEdDSARegistry.Active(); ak != nil {
 				kids = []string{ak.ID}
 			}
@@ -1002,10 +1021,18 @@ func (s *MemoryService) Issue(ctx context.Context, req *Request) (*ProofOfAuthor
 		poa.SigMode = "eddsa"
 		msg := buildPoASigningPayload(poa)
 		for _, kid := range kids {
-			if internalCrypto.GlobalEdDSARegistry == nil {
-				continue
+			var k *internalCrypto.Key
+
+			// Try injected manager first
+			if s.keyManager != nil {
+				k = s.keyManager.FindByID(kid)
 			}
-			k := internalCrypto.GlobalEdDSARegistry.FindByID(kid)
+
+			// Fallback to global registry
+			if k == nil && internalCrypto.GlobalEdDSARegistry != nil {
+				k = internalCrypto.GlobalEdDSARegistry.FindByID(kid)
+			}
+
 			if k == nil || len(k.Private) != ed25519.PrivateKeySize {
 				continue
 			}
@@ -1241,7 +1268,7 @@ func buildPoASigningPayload(p *ProofOfAuthorization) []byte {
 
 // VerifyMultiSig validates all signatures present and evaluates threshold satisfaction.
 // Returns (validSignatures, satisfied, requiredThreshold).
-func VerifyMultiSig(p *ProofOfAuthorization) (int, bool, int) {
+func VerifyMultiSig(p *ProofOfAuthorization, km *internalCrypto.Manager) (int, bool, int) {
 	if p == nil || len(p.Signatures) == 0 || len(p.SignerKids) == 0 || p.Threshold <= 0 {
 		return 0, false, p.Threshold
 	}
@@ -1252,11 +1279,22 @@ func VerifyMultiSig(p *ProofOfAuthorization) (int, bool, int) {
 			break
 		}
 		kid := p.SignerKids[i]
-		k := internalCrypto.GlobalEdDSARegistry
+
+		var k *internalCrypto.Key
+		if km != nil {
+			k = km.FindByID(kid)
+		}
+
+		// Fallback to global registry if not found and no manager provided
+		if k == nil && internalCrypto.GlobalEdDSARegistry != nil {
+			k = internalCrypto.GlobalEdDSARegistry.FindByID(kid)
+		}
+
 		if k == nil {
 			continue
 		}
-		mkey := k.FindByID(kid)
+
+		mkey := k
 		if mkey == nil {
 			continue
 		}

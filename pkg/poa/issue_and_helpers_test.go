@@ -561,7 +561,7 @@ func TestVerifyMultiSig(t *testing.T) {
 				t.Skip("Skipping test due to known bug in VerifyMultiSig (nil pointer dereference)")
 				return
 			}
-			valid, satisfied, threshold := VerifyMultiSig(tt.poa)
+			valid, satisfied, threshold := VerifyMultiSig(tt.poa, nil)
 
 			if valid != tt.wantValid {
 				t.Errorf("VerifyMultiSig() valid = %v, want %v", valid, tt.wantValid)
@@ -616,7 +616,7 @@ func TestVerifyMultiSig_WithValidSignature(t *testing.T) {
 	poa.Signatures = []string{base64.RawStdEncoding.EncodeToString(sig)}
 
 	// Verify
-	valid, satisfied, threshold := VerifyMultiSig(poa)
+	valid, satisfied, threshold := VerifyMultiSig(poa, internalCrypto.GlobalEdDSARegistry)
 
 	if valid != 1 {
 		t.Errorf("VerifyMultiSig() valid = %v, want 1", valid)
@@ -680,7 +680,7 @@ func TestVerifyMultiSig_MultipleSignatures(t *testing.T) {
 	}
 
 	// Verify
-	valid, satisfied, threshold := VerifyMultiSig(poa)
+	valid, satisfied, threshold := VerifyMultiSig(poa, internalCrypto.GlobalEdDSARegistry)
 
 	if valid != 3 {
 		t.Errorf("VerifyMultiSig() valid = %v, want 3", valid)
@@ -742,7 +742,7 @@ func TestVerifyMultiSig_InsufficientSignatures(t *testing.T) {
 	}
 
 	// Verify
-	valid, satisfied, threshold := VerifyMultiSig(poa)
+	valid, satisfied, threshold := VerifyMultiSig(poa, internalCrypto.GlobalEdDSARegistry)
 
 	if valid != 2 {
 		t.Errorf("VerifyMultiSig() valid = %v, want 2", valid)
