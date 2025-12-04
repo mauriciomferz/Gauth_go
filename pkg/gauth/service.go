@@ -265,19 +265,22 @@ func New(cfg Config, opts ...Option) (*Service, error) {
 }
 
 // selectValidator chooses the appropriate token validator based on configuration
+// Priority order: EdDSA (explicit env var) > JWTLib (config flag) > HMAC (default)
 func (svc *Service) selectValidator() TokenSignatureValidator {
 	strictParsing := false
 	if svc.config.AppConfig != nil {
 		strictParsing = svc.config.AppConfig.StrictJSONParsing
 	}
 
+	// EdDSA mode takes highest priority (explicitly set via GAUTH_TOKEN_SIG_MODE env var)
+	if svc.keyMode == sigModeEdDSA {
+		return NewEdDSAValidator(svc.keyMgr, strictParsing)
+	}
+
+	// JWTLib is a config flag that can be used for HMAC tokens
 	if svc.config.AppConfig != nil && svc.config.AppConfig.UseJWTLib {
 		alg := svc.config.AppConfig.JWTAlg
 		return NewJWTLibValidator(svc.signingKey, alg)
-	}
-
-	if svc.keyMode == sigModeEdDSA {
-		return NewEdDSAValidator(svc.keyMgr, strictParsing)
 	}
 
 	return NewHMACValidator(svc.signingKey, strictParsing)
@@ -362,7 +365,8 @@ func (g *Service) RequestTokenLegacy(req TokenRequest) (*TokenResponse, error) {
 		hEnc := base64.RawURLEncoding.EncodeToString(hb)
 		pEnc := base64.RawURLEncoding.EncodeToString(pb)
 		unsigned := hEnc + "." + pEnc
-		sig := ed25519.Sign(g.keyMgr.Active().Private, []byte(unsigned))
+		activeKey := g.keyMgr.Active()
+		sig := ed25519.Sign(activeKey.Private, []byte(unsigned))
 		sEnc := base64.RawURLEncoding.EncodeToString(sig)
 		tok := unsigned + "." + sEnc
 		if g.metrics != nil {
