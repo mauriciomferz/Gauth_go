@@ -68,7 +68,12 @@ type testSigner struct {
 
 func (s *testSigner) KeyID() string                   { return s.keyID }
 func (s *testSigner) Algorithm() string               { return cr.AlgoEd25519 }
+func (s *testSigner) Public() []byte                  { return s.priv.Public().(ed25519.PublicKey) }
 func (s *testSigner) Sign(msg []byte) ([]byte, error) { return ed25519.Sign(s.priv, msg), nil }
+func (s *testSigner) Verify(msg, sig []byte) bool {
+	pub := s.priv.Public().(ed25519.PublicKey)
+	return ed25519.Verify(pub, msg, sig)
+}
 
 func genKey(t *testing.T) (priv ed25519.PrivateKey, pub ed25519.PublicKey, keyID string) {
 	pub, priv, err := ed25519.GenerateKey(rand.Reader)

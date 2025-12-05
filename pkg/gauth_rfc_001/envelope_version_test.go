@@ -148,7 +148,6 @@ func TestEnvelopeAdoptionRatioGauge(t *testing.T) {
 	}
 }
 
-// TestEnvelopeDigestMismatchCounter creates a synthetic mismatch by tampering signature digest before verification.
 // simpleSigner implements crypto.Signer subset for tests (ed25519 only)
 type simpleSigner struct {
 	priv ed25519.PrivateKey
@@ -158,6 +157,11 @@ type simpleSigner struct {
 func (s *simpleSigner) Sign(msg []byte) ([]byte, error) { return ed25519.Sign(s.priv, msg), nil }
 func (s *simpleSigner) KeyID() string                   { return s.kid }
 func (s *simpleSigner) Algorithm() string               { return cr.AlgoEd25519 }
+func (s *simpleSigner) Public() []byte                  { return s.priv.Public().(ed25519.PublicKey) }
+func (s *simpleSigner) Verify(msg, sig []byte) bool {
+	pub := s.priv.Public().(ed25519.PublicKey)
+	return ed25519.Verify(pub, msg, sig)
+}
 
 func TestEnvelopeDigestMismatchCounter(t *testing.T) {
 	mem := metrics.NewMemory()
