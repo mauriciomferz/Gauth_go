@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	cryptoInt "github.com/mauriciomferz/Gauth_go/internal/crypto"
+	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/gin-gonic/gin"
 )
 

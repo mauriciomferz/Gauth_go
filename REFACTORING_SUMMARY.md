@@ -16,10 +16,12 @@ Split `gauth.go` (1,227 lines) into 5 focused files:
 - `resource_server.go` - ResourceServer
 - `service.go` - Core service (662 lines, 46% reduction)
 
-### Phase 3a: Dependency Injection ✅
-- Added `WithKeyManager` option for crypto.Manager injection
-- Removed global state registration from Service
-- Improved testability and reduced coupling
+### Phase 3b: Broader Dependency Injection ✅
+- Updated `pkg/poa` to accept `crypto.Manager`
+- Updated `pkg/delegation` to accept `crypto.Manager`
+- Updated `pkg/verification` to accept `crypto.Manager`
+- Maintained backward compatibility via fallback to global registry
+- Verified all tests pass for refactored packages
 
 ## Key Improvements
 
@@ -167,18 +169,16 @@ func main() {
 ✅ **Backwards Compatible** - Existing code continues to work  
 ✅ **Cleaner Code** - Single-responsibility files  
 
-## Next Steps (Phase 3b)
+## Next Steps (Phase 3c)
 
-To fully eliminate global state across the codebase:
+To further improve the codebase architecture:
 
-1. Update `pkg/poa` to accept `*Manager` parameter
-2. Update `pkg/delegation` to accept `*Manager` parameter
-3. Update `pkg/verification` to accept `*Manager` parameter
-4. Deprecate `crypto.GlobalEdDSARegistry` with warnings
-5. Create migration tooling for external packages
+1. **Interface Segregation**: Split large interfaces into smaller, more focused ones.
+2. **Module Extraction**: Extract `pkg/poa` and `crypto` logic into independent modules.
+3. **Deprecation**: Officially deprecate `crypto.GlobalEdDSARegistry`.
 
 **Estimated effort:** 1-2 weeks  
-**Impact:** Medium-High (requires API changes)
+**Impact:** Medium (architectural cleanup)
 
 ## Testing
 

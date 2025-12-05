@@ -10,17 +10,11 @@ import (
 	"fmt"
 	"sort"
 	"sync"
+	"time"
 )
 
 // Package crypto provides signing & verification abstractions for Milestone 2B.
 // Initial implementation targets Ed25519; future milestones may add threshold / multi-sig.
-
-// Signer produces digital signatures over message digests or direct messages.
-type Signer interface {
-	KeyID() string
-	Algorithm() string
-	Sign(msg []byte) ([]byte, error)
-}
 
 // Verifier checks signatures and returns error if invalid.
 type Verifier interface {
@@ -47,18 +41,6 @@ type KMS interface {
 	ListKeys() ([]KeyMetadata, error) // metadata enumeration
 }
 
-// KeyMetadata captures descriptive information about a managed key.
-type KeyMetadata struct {
-	ID        string `json:"id"`
-	Algorithm string `json:"algorithm"`
-	CreatedAt int64  `json:"created_at_unix"`
-	Active    bool   `json:"active"`
-}
-
-const (
-	AlgoEd25519 = "ed25519"
-)
-
 // ErrUnknownKey indicates a key id was not found.
 var ErrUnknownKey = errors.New("crypto: unknown key id")
 
@@ -72,10 +54,14 @@ type ed25519Signer struct {
 
 func (s *ed25519Signer) KeyID() string     { return s.keyID }
 func (s *ed25519Signer) Algorithm() string { return s.algo }
+func (s *ed25519Signer) Public() []byte    { return append([]byte(nil), s.pub...) }
 func (s *ed25519Signer) Sign(msg []byte) ([]byte, error) {
 	// ed25519 signs the raw message; upstream caller should supply canonical digest if desired.
 	sig := ed25519.Sign(s.priv, msg)
 	return sig, nil
+}
+func (s *ed25519Signer) Verify(msg, sig []byte) bool {
+	return len(s.pub) == ed25519.PublicKeySize && ed25519.Verify(s.pub, msg, sig)
 }
 
 // (Verifier implementation is provided indirectly via InMemoryKeyProvider.VerifyWith for now.)
@@ -147,7 +133,7 @@ func (p *InMemoryKeyProvider) ListKeys() ([]KeyMetadata, error) {
 	defer p.mu.RUnlock()
 	var out []KeyMetadata
 	for id := range p.publics {
-		km := KeyMetadata{ID: id, Algorithm: AlgoEd25519, CreatedAt: 0, Active: p.active != nil && p.active.keyID == id}
+		km := KeyMetadata{ID: id, Algorithm: AlgoEd25519, CreatedAt: time.Time{}, Active: p.active != nil && p.active.keyID == id}
 		out = append(out, km)
 	}
 	return out, nil

@@ -5,7 +5,7 @@ package verification
 import (
 	"crypto/ed25519"
 
-	cryptoInt "github.com/mauriciomferz/Gauth_go/internal/crypto"
+	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 func findPublicKey(kid string) *publicKeyWrapper {

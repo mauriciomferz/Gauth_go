@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	cryptoInt "github.com/mauriciomferz/Gauth_go/internal/crypto"
+	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
 	"github.com/mauriciomferz/Gauth_go/pkg/verification"
 )

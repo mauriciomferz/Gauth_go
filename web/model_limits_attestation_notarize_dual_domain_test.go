@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	internalCrypto "github.com/mauriciomferz/Gauth_go/internal/crypto"
+	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	internalNotary "github.com/mauriciomferz/Gauth_go/internal/notary"
 )
 

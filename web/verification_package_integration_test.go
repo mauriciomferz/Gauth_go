@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/crypto"
+	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
 	"github.com/mauriciomferz/Gauth_go/pkg/verification"
 )

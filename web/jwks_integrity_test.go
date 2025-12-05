@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/crypto"
+	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 // TestJWKSDiscoveryMetadata verifies discovery includes jwks_etag & jwks_last_rotated when JWT enabled.

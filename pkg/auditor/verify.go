@@ -1,7 +1,7 @@
 package auditor
 
 import (
-	"github.com/mauriciomferz/Gauth_go/internal/crypto"
+	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	poa "github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
 

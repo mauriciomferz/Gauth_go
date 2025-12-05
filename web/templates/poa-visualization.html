@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PoA Visualization - GAuth</title>
+    <meta name="description" content="Interactive 3D visualization of Power of Attorney relationships and delegation chains in GAuth">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🔐</text></svg>">
+    <link rel="stylesheet" href="/static/css/poa-viz.css">
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+        "three/": "https://cdn.jsdelivr.net/npm/three@0.169.0/"
+      }
+    }
+    </script>
+    <style>
+        /* Modern enhancements matching React webapp */
+        .viz-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10,10,10,.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(102,126,234,.3);
+            padding: 16px 24px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .viz-header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .viz-header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .viz-header-btn {
+            padding: 8px 16px;
+            background: rgba(102,126,234,.2);
+            border: 1px solid rgba(102,126,234,.4);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all .2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .viz-header-btn:hover {
+            background: rgba(102,126,234,.3);
+            border-color: rgba(102,126,234,.6);
+            transform: translateY(-1px);
+        }
+        .viz-toast {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: rgba(16,185,129,.95);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.3);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(400px);
+            transition: all .3s ease;
+        }
+        .viz-toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .viz-toast.error {
+            background: rgba(239,68,68,.95);
+        }
+        .poa-visualization-container {
+            padding-top: 64px;
+        }
+    </style>
+</head>
+<body>
+    <div class="viz-header">
+        <h1>🔐 PoA Visualization</h1>
+        <div class="viz-header-actions">
+            <a href="/protocol-flow" class="viz-header-btn">
+                <span>🚀</span>
+                <span>Protocol Flow</span>
+            </a>
+            <a href="/" class="viz-header-btn">
+                <span>🏠</span>
+                <span>Home</span>
+            </a>
+            <button id="fullscreenBtn" class="viz-header-btn">
+                <span>⛶</span>
+                <span>Fullscreen</span>
+            </button>
+        </div>
+    </div>
+    
+    <div id="toast" class="viz-toast"></div>
+    
+    <div class="poa-visualization-container">
+        <div class="viz-grid-bg"></div>
+        <div class="viz-scanline"></div>
+        <div id="vizCanvas" class="poa-viz-canvas"></div>
+        
+        <div class="viz-control-panel">
+            <h2>⚙️ Control Panel</h2>
+            
+            <div class="viz-control-group">
+                <label for="vizMode">🎯 Visualization Mode</label>
+                <select id="vizMode">
+                    <option value="graph">PoA Graph</option>
+                    <option value="protocol">Protocol Steps</option>
+                </select>
+            </div>
+            
+            <div id="graphControls" class="viz-control-group">
+                <label for="graphType">Graph Type / Pattern</label>
+                <select id="graphType">
+                    <option value="cascade">Cascade Revocation</option>
+                    <option value="delegation-chain">Delegation Chain</option>
+                    <option value="multisig">Multi-Signature PoA</option>
+                    <option value="jurisdiction">Jurisdiction Boundaries</option>
+                    <option value="revocation">Revocation States</option>
+                    <option value="full-pattern">All Patterns Combined</option>
+                    <optgroup label="GAuth Protocol Flow">
+                        <option value="protocol-subscription">Subscription Flow</option>
+                        <option value="protocol-matching">Matching Flow</option>
+                        <option value="protocol-request">Subset/Request Flow</option>
+                        <option value="protocol-enforcement">Enforcement Flow</option>
+                        <option value="protocol-verification">Verification Flow</option>
+                        <option value="protocol-full">Complete Protocol Flow</option>
+                    </optgroup>
+                </select>
+            </div>
+            
+            <div id="protocolControls" class="viz-control-group" style="display:none">
+                <label for="protocolStep">Protocol Step</label>
+                <select id="protocolStep">
+                    <option value="subscription">Subscription</option>
+                    <option value="matching">Matching</option>
+                    <option value="request">Subset/Request</option>
+                    <option value="enforcement">Enforcement</option>
+                    <option value="verification">Verification</option>
+                    <option value="complete">Complete Flow</option>
+                </select>
+            </div>
+            
+            <div class="viz-btn-group">
+                <button class="viz-btn" id="loadBtn">▶️ Load</button>
+                <button class="viz-btn viz-btn-secondary" id="clearBtn">🗑️ Clear</button>
+            </div>
+            
+            <div class="viz-btn-group" style="margin-top:10px">
+                <button class="viz-btn viz-btn-secondary" id="rotateBtn">🔄 Rotate</button>
+                <button class="viz-btn viz-btn-secondary" id="resetBtn">↻ Reset</button>
+            </div>
+            
+            <div class="viz-btn-group" style="margin-top:10px">
+                <button class="viz-btn viz-btn-secondary" id="screenshotBtn">📸 Screenshot</button>
+                <button class="viz-btn viz-btn-secondary" id="exportBtn">💾 Export</button>
+            </div>
+        </div>
+        
+        <div class="viz-stats-panel">
+            <h3>📊 Statistics</h3>
+            <div class="viz-stat-item">
+                <span class="viz-stat-label">🔵 Total Nodes</span>
+                <span class="viz-stat-value" id="statTotalNodes">0</span>
+            </div>
+            <div class="viz-stat-item">
+                <span class="viz-stat-label">🔗 Total Edges</span>
+                <span class="viz-stat-value" id="statTotalEdges">0</span>
+            </div>
+            <div class="viz-stat-item">
+                <span class="viz-stat-label">✅ Active</span>
+                <span class="viz-stat-value active" id="statActiveNodes">0</span>
+            </div>
+            <div class="viz-stat-item">
+                <span class="viz-stat-label">⏳ Pending</span>
+                <span class="viz-stat-value pending" id="statPendingNodes">0</span>
+            </div>
+            <div class="viz-stat-item">
+                <span class="viz-stat-label">❌ Revoked</span>
+                <span class="viz-stat-value error" id="statRevokedNodes">0</span>
+            </div>
+            <div class="viz-stat-item" style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1)">
+                <span class="viz-stat-label">🎨 Render Time</span>
+                <span class="viz-stat-value" id="statRenderTime">0ms</span>
+            </div>
+        </div>
+        
+        <div class="viz-legend">
+            <h4>Legend</h4>
+            <div class="viz-legend-item">
+                <div class="viz-legend-color" style="background:#10b981"></div>
+                <span class="viz-legend-text">Active / Authorized</span>
+            </div>
+            <div class="viz-legend-item">
+                <div class="viz-legend-color" style="background:#f59e0b"></div>
+                <span class="viz-legend-text">Pending / Processing</span>
+            </div>
+            <div class="viz-legend-item">
+                <div class="viz-legend-color" style="background:#ef4444"></div>
+                <span class="viz-legend-text">Revoked / Error</span>
+            </div>
+            <div class="viz-legend-item">
+                <div class="viz-legend-color" style="background:#667eea"></div>
+                <span class="viz-legend-text">Authorization Edge</span>
+            </div>
+            <div class="viz-legend-item">
+                <div class="viz-legend-color" style="background:#10b981"></div>
+                <span class="viz-legend-text">Request Edge</span>
+            </div>
+        </div>
+        
+        <div class="viz-info-panel" id="infoPanel">
+            <button class="viz-info-close" id="closeInfo">×</button>
+            <h4 id="infoTitle">Welcome</h4>
+            <p id="infoDescription">This visualization demonstrates Power of Attorney relationships in 3D space. Select a mode and click Load to begin.</p>
+        </div>
+        
+        <div class="viz-loading" id="loadingIndicator" style="display:none">
+            <div class="viz-loading-spinner"></div>
+            <div class="viz-loading-text">Loading visualization...</div>
+        </div>
+    </div>
+    
+    <script type="module" src="/static/js/pages/poa-visualization-init.js"></script>
+    <script src="/static/js/pages/poa-visualization-enhancements.js"></script>
+    <script src="/static/js/pages/poa-visualization-diagnostics.js"></script>
+</body>
+</html>

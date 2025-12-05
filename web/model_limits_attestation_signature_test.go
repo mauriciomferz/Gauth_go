@@ -10,7 +10,7 @@ import (
 	"os"
 	"testing"
 
-	internalCrypto "github.com/mauriciomferz/Gauth_go/internal/crypto"
+	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 // TestModelLimitsAttestationSignature verifies optional signing of the attestation payload.

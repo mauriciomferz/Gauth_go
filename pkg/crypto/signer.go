@@ -10,6 +10,7 @@ import (
 	"crypto/ed25519"
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"math/big"
 )
@@ -21,8 +22,11 @@ const (
 
 // Signer exposes a unified interface across supported algorithms.
 // Sign may return error if operating in verify-only (no private key).
+// Signer exposes a unified interface across supported algorithms.
+// Sign may return error if operating in verify-only (no private key).
 type Signer interface {
-	Algo() string
+	KeyID() string
+	Algorithm() string
 	Public() []byte
 	Sign(msg []byte) ([]byte, error)
 	Verify(msg, sig []byte) bool
@@ -30,19 +34,24 @@ type Signer interface {
 
 // -------------------- Ed25519 --------------------
 type Ed25519Signer struct {
-	priv ed25519.PrivateKey // optional
-	pub  ed25519.PublicKey
+	keyID string
+	priv  ed25519.PrivateKey // optional
+	pub   ed25519.PublicKey
 }
 
 func NewEd25519Signer(priv ed25519.PrivateKey, pub ed25519.PublicKey) *Ed25519Signer {
 	if pub == nil && len(priv) == ed25519.PrivateKeySize {
 		pub = priv.Public().(ed25519.PublicKey)
 	}
-	return &Ed25519Signer{priv: priv, pub: pub}
+	// Derive KeyID if not provided (simple hash of public key)
+	h := sha256.Sum256(pub)
+	keyID := hex.EncodeToString(h[:6])
+	return &Ed25519Signer{keyID: keyID, priv: priv, pub: pub}
 }
 
-func (s *Ed25519Signer) Algo() string   { return AlgoEd25519 }
-func (s *Ed25519Signer) Public() []byte { return append([]byte(nil), s.pub...) }
+func (s *Ed25519Signer) KeyID() string     { return s.keyID }
+func (s *Ed25519Signer) Algorithm() string { return AlgoEd25519 }
+func (s *Ed25519Signer) Public() []byte    { return append([]byte(nil), s.pub...) }
 func (s *Ed25519Signer) Sign(msg []byte) ([]byte, error) {
 	if len(s.priv) != ed25519.PrivateKeySize {
 		return nil, errors.New("ed25519_signer_no_private")
@@ -61,7 +70,13 @@ type RotatingEd25519Signer struct {
 	M *Manager
 }
 
-func (s *RotatingEd25519Signer) Algo() string { return AlgoEd25519 }
+func (s *RotatingEd25519Signer) KeyID() string {
+	if s == nil || s.M == nil || s.M.Active() == nil {
+		return ""
+	}
+	return s.M.Active().ID
+}
+func (s *RotatingEd25519Signer) Algorithm() string { return AlgoEd25519 }
 func (s *RotatingEd25519Signer) Public() []byte {
 	if s == nil || s.M == nil || s.M.Active() == nil {
 		return nil
@@ -82,14 +97,6 @@ func (s *RotatingEd25519Signer) Verify(msg, sig []byte) bool {
 	return ed25519.Verify(k.Public, msg, sig)
 }
 
-// KeyID returns the active key identifier; not part of Signer interface to avoid widening existing contract.
-func (s *RotatingEd25519Signer) KeyID() string {
-	if s == nil || s.M == nil || s.M.Active() == nil {
-		return ""
-	}
-	return s.M.Active().ID
-}
-
 // GlobalRotatingSigner returns a Signer backed by GlobalEdDSARegistry if available.
 func GlobalRotatingSigner() Signer {
 	if GlobalEdDSARegistry == nil {
@@ -100,18 +107,30 @@ func GlobalRotatingSigner() Signer {
 
 // -------------------- ECDSA (P-256 only Phase 1) --------------------
 type ECDSASigner struct {
-	priv *ecdsa.PrivateKey // optional
-	pub  *ecdsa.PublicKey
+	keyID string
+	priv  *ecdsa.PrivateKey // optional
+	pub   *ecdsa.PublicKey
 }
 
 func NewP256Signer(priv *ecdsa.PrivateKey, pub *ecdsa.PublicKey) *ECDSASigner {
 	if pub == nil && priv != nil {
 		pub = &priv.PublicKey
 	}
-	return &ECDSASigner{priv: priv, pub: pub}
+	// Derive KeyID
+	// Uncompressed form: 0x04 || X || Y (32 bytes each for P-256)
+	byteLen := (pub.Curve.Params().BitSize + 7) / 8
+	uncompressed := make([]byte, 1+2*byteLen)
+	uncompressed[0] = 0x04
+	pub.X.FillBytes(uncompressed[1 : 1+byteLen])
+	pub.Y.FillBytes(uncompressed[1+byteLen:])
+	h := sha256.Sum256(uncompressed)
+	keyID := hex.EncodeToString(h[:6])
+
+	return &ECDSASigner{keyID: keyID, priv: priv, pub: pub}
 }
 
-func (s *ECDSASigner) Algo() string { return "ECDSA-P256" }
+func (s *ECDSASigner) KeyID() string     { return s.keyID }
+func (s *ECDSASigner) Algorithm() string { return "ECDSA-P256" }
 func (s *ECDSASigner) Public() []byte {
 	if s.pub == nil {
 		return nil
@@ -119,7 +138,7 @@ func (s *ECDSASigner) Public() []byte {
 	// Uncompressed form: 0x04 || X || Y (32 bytes each for P-256)
 	byteLen := (s.pub.Curve.Params().BitSize + 7) / 8
 	ret := make([]byte, 1+2*byteLen)
-	ret[0] = 0x04 // uncompressed point
+	ret[0] = 0x04
 	s.pub.X.FillBytes(ret[1 : 1+byteLen])
 	s.pub.Y.FillBytes(ret[1+byteLen:])
 	return ret
@@ -166,7 +185,8 @@ func NewBLSSigner(priv *BLSKey) *BLSSigner {
 	return &BLSSigner{priv: priv}
 }
 
-func (s *BLSSigner) Algo() string { return "BLS12-381" }
+func (s *BLSSigner) KeyID() string     { return "" } // BLS implementation missing KeyID for now
+func (s *BLSSigner) Algorithm() string { return "BLS12-381" }
 func (s *BLSSigner) Public() []byte {
 	if s.priv != nil {
 		return s.priv.Public.Serialize()

@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/crypto"
+	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 // RevocationEvent represents a revocation of a previously issued Delegation.

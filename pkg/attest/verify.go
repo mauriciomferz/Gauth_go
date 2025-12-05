@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/crypto"
+	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 // Domain separation prefix identical to signing path for model limits attestation.

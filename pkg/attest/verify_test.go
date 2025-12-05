@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	internalcrypto "github.com/mauriciomferz/Gauth_go/internal/crypto"
+	internalcrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 const testSnapshotHash = "sha256:demo"

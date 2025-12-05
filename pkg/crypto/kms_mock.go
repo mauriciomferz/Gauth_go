@@ -104,7 +104,7 @@ func (m *MockKMS) ListKeys() ([]KeyMetadata, error) {
 	out := make([]KeyMetadata, 0, len(m.publics))
 	for id, pub := range m.publics {
 		_ = pub
-		out = append(out, KeyMetadata{ID: id, Algorithm: AlgoEd25519, CreatedAt: m.created[id].Unix(), Active: m.active != nil && m.active.keyID == id})
+		out = append(out, KeyMetadata{ID: id, Algorithm: AlgoEd25519, CreatedAt: m.created[id], Active: m.active != nil && m.active.keyID == id})
 	}
 	return out, nil
 }

@@ -17,7 +17,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/mauriciomferz/Gauth_go/internal/config"
-	"github.com/mauriciomferz/Gauth_go/internal/crypto"
+	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/internal/observability"
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 )

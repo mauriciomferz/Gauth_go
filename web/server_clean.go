@@ -45,7 +45,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	anchorint "github.com/mauriciomferz/Gauth_go/internal/anchor"
 	"github.com/mauriciomferz/Gauth_go/internal/capability"
-	"github.com/mauriciomferz/Gauth_go/internal/crypto"
+	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/internal/limits"
 	"github.com/mauriciomferz/Gauth_go/internal/metrics"
 	"github.com/mauriciomferz/Gauth_go/internal/notary"

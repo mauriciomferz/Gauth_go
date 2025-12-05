@@ -20,7 +20,7 @@ import (
 	"sync"
 	"time"
 
-	cryptoReg "github.com/mauriciomferz/Gauth_go/internal/crypto"
+	cryptoReg "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/internal/notary"
 	auditor "github.com/mauriciomferz/Gauth_go/pkg/auditor"
 	"github.com/mauriciomferz/Gauth_go/pkg/delegation"

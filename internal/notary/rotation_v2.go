@@ -22,7 +22,7 @@ import (
 	"strings"
 	"time"
 
-	cryptoreg "github.com/mauriciomferz/Gauth_go/internal/crypto"
+	cryptoreg "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 
 	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"

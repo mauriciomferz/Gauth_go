@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/Gauth_go/internal/capability"
-	cryptopkg "github.com/mauriciomferz/Gauth_go/internal/crypto"
+	cryptopkg "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	metrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
 )
 

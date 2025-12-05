@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	icrypto "github.com/mauriciomferz/Gauth_go/internal/crypto"
+	icrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/authz"
 )

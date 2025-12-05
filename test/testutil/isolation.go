@@ -4,7 +4,7 @@ import (
 	"os"
 	"time"
 
-	internalCrypto "github.com/mauriciomferz/Gauth_go/internal/crypto"
+	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 // UnsetCryptoEnv clears environment variables that can mutate global crypto or signing behavior

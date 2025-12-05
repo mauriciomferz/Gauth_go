@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/Gauth_go/internal/capability"
-	cryptoint "github.com/mauriciomferz/Gauth_go/internal/crypto"
+	cryptoint "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/internal/metrics"
 	"github.com/gin-gonic/gin"
 )

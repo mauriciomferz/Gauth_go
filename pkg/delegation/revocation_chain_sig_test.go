@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/crypto"
+	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 // helper to init a short-lived manager (1h TTL) and assign to global registry.

@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	internalCrypto "github.com/mauriciomferz/Gauth_go/internal/crypto"
+	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/pkg/errors"
 )
 

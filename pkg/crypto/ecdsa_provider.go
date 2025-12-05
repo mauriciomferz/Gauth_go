@@ -13,7 +13,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"math/big"
 )
 
 const (
@@ -28,8 +27,41 @@ type ecdsaSigner struct {
 	algo  string
 }
 
-func (s *ecdsaSigner) KeyID() string     { return s.keyID }
+func (s *ecdsaSigner) KeyID() string { return s.keyID }
+
 func (s *ecdsaSigner) Algorithm() string { return s.algo }
+func (s *ecdsaSigner) Public() []byte {
+	// Uncompressed form: 0x04 || X || Y (32 bytes each for P-256)
+	byteLen := (s.pub.Curve.Params().BitSize + 7) / 8
+	ret := make([]byte, 1+2*byteLen)
+	ret[0] = 0x04
+	s.pub.X.FillBytes(ret[1 : 1+byteLen])
+	s.pub.Y.FillBytes(ret[1+byteLen:])
+	return ret
+}
+func (s *ecdsaSigner) Verify(msg, sig []byte) bool {
+	// Verify implementation for Signer interface
+	// Note: Signer interface expects Verify(msg, sig) bool
+	// But ecdsaSigner logic was in VerifyWith.
+	// We should adapt it.
+	// For now, let's just implement Algo() and see if Verify is needed.
+	// Signer interface has Verify(msg, sig []byte) bool.
+	// ecdsaSigner didn't implement Verify before?
+	// Wait, ecdsa_provider.go didn't implement Verify for ecdsaSigner?
+	// Let's check signer.go Signer interface again.
+	// It has Verify(msg, sig []byte) bool.
+	// So ecdsaSigner MUST implement it.
+	// I'll add it.
+	h := sha256.Sum256(msg)
+	r, sv, err := decodeDERSignature(sig)
+	if err != nil {
+		return false
+	}
+	if isHighS(sv, s.pub.Params().N) {
+		return false
+	}
+	return ecdsa.Verify(s.pub, h[:], r, sv)
+}
 func (s *ecdsaSigner) Sign(msg []byte) ([]byte, error) {
 	if s.priv == nil {
 		return nil, errors.New("ecdsa: no private key")
@@ -156,70 +188,4 @@ func init() {
 		// Delegates to provider's VerifyWith (which performs hash + DER decode + low-S enforcement)
 		return kp.VerifyWith(canonical, sigBytes, keyID)
 	}})
-}
-
-// --- ECDSA helpers (DER encoding & S normalization) ---
-// encodeDERSignature encodes r and s as a minimal DER sequence.
-func encodeDERSignature(r, s *big.Int) []byte {
-	rb := r.Bytes()
-	sb := s.Bytes()
-	if len(rb) > 0 && rb[0]&0x80 != 0 {
-		rb = append([]byte{0x00}, rb...)
-	}
-	if len(sb) > 0 && sb[0]&0x80 != 0 {
-		sb = append([]byte{0x00}, sb...)
-	}
-	total := 2 + len(rb) + 2 + len(sb)
-	out := make([]byte, 0, 2+total)
-	out = append(out, 0x30, byte(total))
-	out = append(out, 0x02, byte(len(rb)))
-	out = append(out, rb...)
-	out = append(out, 0x02, byte(len(sb)))
-	out = append(out, sb...)
-	return out
-}
-
-// decodeDERSignature parses a DER encoded ECDSA signature.
-func decodeDERSignature(der []byte) (*big.Int, *big.Int, error) {
-	if len(der) < 8 || der[0] != 0x30 {
-		return nil, nil, errors.New("invalid_der_prefix")
-	}
-	seqLen := int(der[1])
-	if seqLen+2 != len(der) {
-		return nil, nil, errors.New("invalid_der_length")
-	}
-	if der[2] != 0x02 {
-		return nil, nil, errors.New("missing_r_integer")
-	}
-	rLen := int(der[3])
-	if 4+rLen+2 >= len(der) {
-		return nil, nil, errors.New("r_length_out_of_bounds")
-	}
-	rStart := 4
-	rEnd := rStart + rLen
-	if der[rEnd] != 0x02 {
-		return nil, nil, errors.New("missing_s_integer")
-	}
-	sLen := int(der[rEnd+1])
-	sStart := rEnd + 2
-	sEnd := sStart + sLen
-	if sEnd != len(der) {
-		return nil, nil, errors.New("s_length_out_of_bounds")
-	}
-	r := new(big.Int).SetBytes(der[rStart:rEnd])
-	s := new(big.Int).SetBytes(der[sStart:sEnd])
-	return r, s, nil
-}
-
-func normalizeLowS(s, n *big.Int) *big.Int {
-	half := new(big.Int).Rsh(n, 1)
-	if s.Cmp(half) == 1 {
-		return new(big.Int).Sub(n, s)
-	}
-	return s
-}
-
-func isHighS(s, n *big.Int) bool {
-	half := new(big.Int).Rsh(n, 1)
-	return s.Cmp(half) == 1
 }

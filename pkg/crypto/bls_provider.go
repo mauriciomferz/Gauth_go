@@ -22,12 +22,22 @@ type blsSigner struct {
 
 func (s *blsSigner) KeyID() string     { return s.keyID }
 func (s *blsSigner) Algorithm() string { return AlgoBLS12381 }
+func (s *blsSigner) Public() []byte {
+	return s.pub.Serialize()
+}
 func (s *blsSigner) Sign(msg []byte) ([]byte, error) {
 	if !s.havePriv {
 		return nil, errors.New("bls signer: no private key")
 	}
 	sig := s.priv.SignByte(msg)
 	return sig.Serialize(), nil
+}
+func (s *blsSigner) Verify(msg, sig []byte) bool {
+	var sigObj blsbin.Sign
+	if err := sigObj.Deserialize(sig); err != nil {
+		return false
+	}
+	return sigObj.VerifyByte(&s.pub, msg)
 }
 
 // InMemoryBLSProvider stores one active key and public key map.

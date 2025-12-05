@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Cache Test - NEW VERSION</title>
+</head>
+<body style="background: #000; color: #0f0; font-family: monospace; padding: 40px;">
+    <h1>🔧 CACHE TEST PAGE</h1>
+    <p style="font-size: 24px;">If you can see this page, your browser CAN load new content from the server.</p>
+    
+    <h2>Test Results:</h2>
+    <div id="results" style="font-size: 18px; background: #222; padding: 20px; margin: 20px 0;">
+        <p>✅ This page loaded successfully!</p>
+        <p>✅ Server is responding to requests</p>
+        <p>✅ Your browser CAN fetch new content</p>
+    </div>
+    
+    <h2>The Problem:</h2>
+    <p>Firefox has the main page (index.html) LOCKED in cache.</p>
+    
+    <h2>Nuclear Solution:</h2>
+    <ol style="font-size: 16px; line-height: 1.8;">
+        <li>In Firefox, type in address bar: <code style="background: #444; padding: 4px;">about:preferences#privacy</code></li>
+        <li>Scroll to "Cookies and Site Data"</li>
+        <li>Click "Clear Data..."</li>
+        <li>Check both boxes (Cookies AND Cached Web Content)</li>
+        <li>Click "Clear"</li>
+        <li>Close this tab</li>
+        <li>Visit: <code style="background: #444; padding: 4px;">http://localhost:8080</code></li>
+    </ol>
+    
+    <p style="margin-top: 40px; color: #f90;">Generated at: <span id="time"></span></p>
+    
+    <script>
+        document.getElementById('time').textContent = new Date().toISOString();
+        console.log('✅ Test page loaded at:', new Date().toISOString());
+    </script>
+</body>
+</html>

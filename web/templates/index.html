@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAuth - The Open-Source Platform for AI Control and Secure IDs</title>
+    <meta name="description" content="Security beyond High Assurance. The premier platform for AI agent governance and DNA-based identity verification. 95% RFC-0111 & RFC-0115 compliant.">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🔐</text></svg>">
+    <style>
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5568d3;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --bg-dark: #0a0a0a;
+            --bg-darker: #050505;
+            --bg-card: #1a1a1a;
+            --bg-card-hover: #252525;
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --text-muted: #718096;
+            --border: rgba(102, 126, 234, 0.2);
+            --glow: rgba(102, 126, 234, 0.4);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Animated Background */
+        .bg-animated {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: radial-gradient(ellipse at top, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                        radial-gradient(ellipse at bottom, rgba(118, 75, 162, 0.15) 0%, transparent 50%);
+        }
+        
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(102, 126, 234, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(102, 126, 234, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 0;
+            animation: gridMove 30s linear infinite;
+        }
+        
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0;
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .logo-icon {
+            font-size: 32px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .logo-text {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+        
+        .cta-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--glow);
+        }
+
+        /* Main Content */
+        .content {
+            position: relative;
+            z-index: 1;
+            padding-top: 100px;
+        }
+
+        /* Hero Section */
+        .hero {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 100px 40px;
+            text-align: center;
+        }
+        
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 50px;
+            font-size: 14px;
+            margin-bottom: 30px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .hero-badge-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        .hero h1 {
+            font-size: 72px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #ffffff 0%, var(--primary) 50%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-subtitle {
+            font-size: 24px;
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+        
+        .hero-cta-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 60px;
+        }
+        
+        .cta-primary {
+            padding: 18px 40px;
+            font-size: 18px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .cta-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px var(--glow);
+        }
+        
+        .cta-secondary {
+            padding: 18px 40px;
+            font-size: 18px;
+            background: transparent;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            color: var(--primary);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .cta-secondary:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-3px);
+        }
+        
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        /* Problem Section */
+        .section {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 100px 40px;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+        
+        .section-tag {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 20px;
+            font-size: 14px;
+            color: #f87171;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .section-title {
+            font-size: 56px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffffff 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .section-subtitle {
+            font-size: 20px;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+        }
+        
+        .problem-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            transition: all 0.3s ease;
+        }
+        
+        .problem-card:hover {
+            transform: translateY(-5px);
+            border-color: #ef4444;
+            box-shadow: 0 20px 40px rgba(239, 68, 68, 0.2);
+        }
+        
+        .problem-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .problem-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #f87171;
+        }
+        
+        .problem-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .problem-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        .problem-list li::before {
+            content: '⚠️';
+            position: absolute;
+            left: 0;
+        }
+
+        /* Solution Section */
+        .solution-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+        
+        .solution-card {
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(102, 126, 234, 0.05) 100%);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .solution-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+        
+        .solution-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px var(--glow);
+        }
+        
+        .solution-icon {
+            font-size: 56px;
+            margin-bottom: 20px;
+        }
+        
+        .solution-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .solution-description {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+        
+        .solution-features {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .solution-features li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+            color: var(--text-secondary);
+        }
+        
+        .solution-features li::before {
+            content: '✅';
+            position: absolute;
+            left: 0;
+        }
+
+        /* Features Section */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            background: var(--bg-card-hover);
+        }
+        
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .feature-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .feature-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Technical Section */
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+        
+        .tech-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            transition: all 0.3s ease;
+        }
+        
+        .tech-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px var(--glow);
+        }
+        
+        .tech-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .tech-content {
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+        
+        .tech-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        
+        .tech-list li {
+            padding: 12px 0;
+            padding-left: 35px;
+            position: relative;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .tech-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .tech-list li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 80px 60px;
+            text-align: center;
+            margin: 100px 40px;
+        }
+        
+        .cta-section h2 {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+        
+        .cta-section p {
+            font-size: 20px;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Footer */
+        footer {
+            position: relative;
+            z-index: 10;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px 40px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .footer-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        .footer-column h4 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+        
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-block;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary);
+            text-decoration: underline;
+            transform: translateX(3px);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .tech-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 48px;
+            }
+            
+            .hero-subtitle {
+                font-size: 18px;
+            }
+            
+            .section-title {
+                font-size: 36px;
+            }
+            
+            .problem-grid,
+            .solution-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .cta-section {
+                padding: 60px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animated"></div>
+    <div class="bg-grid"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo-section">
+                <span class="logo-icon">🔐</span>
+                <span class="logo-text">GAuth</span>
+            </div>
+            <div class="nav-links">
+                <a href="#problem" class="nav-link">Challenge</a>
+                <a href="#solution" class="nav-link">Solution</a>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#technical" class="nav-link">Technical</a>
+                <a href="/gauth1.html" class="cta-button">Launch Dashboard →</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="content">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-badge">
+                <span class="hero-badge-dot"></span>
+                <span>✨ 95% RFC-0111 & RFC-0115 Compliant • Security Beyond High Assurance</span>
+            </div>
+            
+            <h1>The Open-Source Platform<br>for AI Control and Secure IDs</h1>
+            
+            <p class="hero-subtitle">
+                Next-level biometrics and practical AI governance. The premier platform enabling security beyond LoA4 through DNA-based identity verification and comprehensive agent control.
+            </p>
+            
+            <div class="hero-cta-group">
+                <a href="/protocol-flow" class="cta-primary">🚀 Explore Protocol Flow</a>
+                <a href="/poa-visualization" class="cta-secondary">🗺️ View 3D Visualization</a>
+            </div>
+            
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-number">95%</div>
+                    <div class="stat-label">RFC Compliance</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">30</div>
+                    <div class="stat-label">Protocol Substeps</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100 Trillion</div>
+                    <div class="stat-label">Identity Accuracy</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">689+</div>
+                    <div class="stat-label">Test Cases</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Problem Section -->
+        <section id="problem" class="section">
+            <div class="section-header">
+                <span class="section-tag">🚨 THE CHALLENGE</span>
+                <h2 class="section-title">USD 10 Trillion Problem</h2>
+                <p class="section-subtitle">
+                    Cybercrime costs approach $10 trillion, doubling since 2015, driven by AI challenges and identity vulnerabilities
+                </p>
+            </div>
+            
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="problem-icon">🔓</div>
+                    <h3 class="problem-title">The Identity Challenge</h3>
+                    <ul class="problem-list">
+                        <li>Fake identities due to weak biometrics (fingerprint, facial recognition, iris)</li>
+                        <li>Cybercrime through deepfakes, face swapping, synthetic identities, spam and robocalls</li>
+                        <li>Future EUDI Wallet scales weak biometrics, risking "super-hack"</li>
+                        <li>60% of cyber-threats are identity-based, doubling in 2024</li>
+                    </ul>
+                </div>
+                
+                <div class="problem-card">
+                    <div class="problem-icon">🤖</div>
+                    <h3 class="problem-title">The Agent Control Challenge</h3>
+                    <ul class="problem-list">
+                        <li>Unguided AI due to lack of governance (limited to ethical principles, system access)</li>
+                        <li>Legal risks from organizational faults and trust damages</li>
+                        <li>Lack of AI control facilitates scams like fake identities and prompt injections</li>
+                        <li>Human-in-the-loop limits 50% of work that could be automated by agents</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Solution Section -->
+        <section id="solution" class="section">
+            <div class="section-header">
+                <span class="section-tag" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: #10b981;">✅ THE SOLUTION</span>
+                <h2 class="section-title">Three-Layer Security Architecture</h2>
+                <p class="section-subtitle">
+                    GAuth provides the premier operating system for secure identities and agent control along the user lifecycle
+                </p>
+            </div>
+            
+            <div class="solution-grid">
+                <div class="solution-card">
+                    <div class="solution-icon">🧬</div>
+                    <h3 class="solution-title">Gimel ID - Secure Identity</h3>
+                    <p class="solution-description">
+                        Next-level secure biometrics based on DNA data while maintaining data privacy. Patent pending.
+                    </p>
+                    <ul class="solution-features">
+                        <li>Verify human identity</li>
+                        <li>Globally prove personhood</li>
+                        <li>Authenticate as human</li>
+                        <li>1 in 100 trillion accuracy</li>
+                    </ul>
+                </div>
+                
+                <div class="solution-card">
+                    <div class="solution-icon">🌍</div>
+                    <h3 class="solution-title">Global Identity Network</h3>
+                    <p class="solution-description">
+                        First and only AI-based identity proof among up to 8 billion individuals with continuous risk monitoring.
+                    </p>
+                    <ul class="solution-features">
+                        <li>DefconG continuous monitoring</li>
+                        <li>Global collision testing</li>
+                        <li>Identity service provider integration</li>
+                        <li>Trust services leverage</li>
+                    </ul>
+                </div>
+                
+                <div class="solution-card">
+                    <div class="solution-icon">🤖</div>
+                    <h3 class="solution-title">G-Agent - AI Control</h3>
+                    <p class="solution-description">
+                        First and only practical AI governance solution based on open-source protocol (GAuth). Patent pending.
+                    </p>
+                    <ul class="solution-features">
+                        <li>Authorize agent/robot</li>
+                        <li>Legitimate as agent/robot</li>
+                        <li>Power of Attorney delegation</li>
+                        <li>Continuous compliance monitoring</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="section">
+            <div class="section-header">
+                <span class="section-tag" style="background: rgba(102, 126, 234, 0.1); border-color: rgba(102, 126, 234, 0.3); color: #667eea;">⚡ KEY FEATURES</span>
+                <h2 class="section-title">Enterprise-Grade Capabilities</h2>
+                <p class="section-subtitle">
+                    Built on proven security practices with comprehensive compliance and enforcement
+                </p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3 class="feature-title">Rule-Based Enforcement</h3>
+                    <p class="feature-description">Deterministic, signature-like verification ensuring requests are PoA subsets</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3 class="feature-title">AI-Based Enforcement</h3>
+                    <p class="feature-description">Anomaly-focused compliance covering implied authority and trained behaviors</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📋</div>
+                    <h3 class="feature-title">PoA Disclosure</h3>
+                    <p class="feature-description">Legal mechanism mitigating residual risks through relying party verification</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3 class="feature-title">Self-Sovereign Identity</h3>
+                    <p class="feature-description">Decentralized ID with no Agent Naming Service, ensuring true autonomy</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">⚖️</div>
+                    <h3 class="feature-title">Law of Agency</h3>
+                    <p class="feature-description">Comprehensive PoA definitions with business ownership and accountability</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3 class="feature-title">Least Privilege</h3>
+                    <p class="feature-description">Zero-trust architecture with minimal permissions and continuous validation</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Compliance Tracking</h3>
+                    <p class="feature-description">Real-time monitoring with audit trails and quality assurance</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3 class="feature-title">Global Scalability</h3>
+                    <p class="feature-description">AI control beyond Human-in-the-Loop, leveraging full autonomous potential</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technical Section -->
+        <section id="technical" class="section">
+            <div class="section-header">
+                <span class="section-tag" style="background: rgba(249, 115, 22, 0.1); border-color: rgba(249, 115, 22, 0.3); color: #fb923c;">🔬 TECHNICAL</span>
+                <h2 class="section-title">Protocol Implementation</h2>
+                <p class="section-subtitle">
+                    95% RFC-0111 & RFC-0115 compliant with enhanced 30-substep protocol flow
+                </p>
+            </div>
+            
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h3 class="tech-title">
+                        <span>📡</span>
+                        Enhanced Protocol Flow
+                    </h3>
+                    <div class="tech-content">
+                        <ul class="tech-list">
+                            <li><strong>Subscription (3 substeps):</strong> Registration, configuration, credentials</li>
+                            <li><strong>Matching (7 substeps):</strong> PoA validation, AI capabilities, jurisdiction, policies, authorization chain, commercial register, formal requirements</li>
+                            <li><strong>Subset/Request (7 substeps):</strong> Auth request, scope selection, request compliance, PIP query, PDP decision, extended token generation, grant compliance</li>
+                            <li><strong>Enforcement (4 substeps):</strong> Supply PEP, demand PEP, disclosure, audit logging</li>
+                            <li><strong>Verification (6 substeps):</strong> Extended token validation, signature verification, revocation check, PVP identity, authorization chain verify, formal requirements verify</li>
+                            <li><strong>Audit (3 substeps):</strong> Event logging, compliance check, report generation</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="tech-card">
+                    <h3 class="tech-title">
+                        <span>🛡️</span>
+                        Security Architecture
+                    </h3>
+                    <div class="tech-content">
+                        <ul class="tech-list">
+                            <li><strong>P*P Architecture:</strong> PEP (Policy Enforcement Point), PDP (Policy Decision Point), PIP (Policy Information Point), PVP (Policy Verification Point)</li>
+                            <li><strong>Extended JWT Tokens:</strong> Enhanced claims with authorization chain metadata</li>
+                            <li><strong>Authorization Chain:</strong> Comprehensive validation of delegation hierarchies</li>
+                            <li><strong>Commercial Register:</strong> Verified entity authentication and validation</li>
+                            <li><strong>Formal Requirements:</strong> Legal and regulatory compliance validation</li>
+                            <li><strong>Zero Known CVEs:</strong> All dependencies current and secure</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Demos CTA -->
+        <div class="cta-section">
+            <h2>Experience GAuth in Action</h2>
+            <p>Explore our interactive visualizations and see the protocol flow in real-time</p>
+            <div class="hero-cta-group">
+                <a href="/protocol-flow" class="cta-primary">🚀 Protocol Flow Navigator</a>
+                <a href="/poa-visualization" class="cta-secondary">🗺️ 3D PoA Visualization</a>
+                <a href="/gauth1.html" class="cta-secondary">📊 Dashboard & Metrics</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <span style="font-size: 32px;">🔐</span>
+                    <span class="logo-text">GAuth</span>
+                </div>
+                <p class="footer-description">
+                    The open-source platform for AI control and secure IDs. Security beyond high assurance through DNA-based biometrics and practical AI governance.
+                </p>
+            </div>
+            
+            <div class="footer-column">
+                <h4>Product</h4>
+                <ul class="footer-links">
+                    <li><a href="/protocol-flow">Protocol Flow</a></li>
+                    <li><a href="/poa-visualization">PoA Visualization</a></li>
+                    <li><a href="/gauth1.html">Dashboard</a></li>
+                    <li><a href="/openapi.yaml">API Documentation</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h4>Resources</h4>
+                <ul class="footer-links">
+                    <li><a href="https://github.com/mauriciomferz/Gauth_go" target="_blank" rel="noopener">GitHub Repository</a></li>
+                    <li><a href="/api/v1/audit/logs">Audit Logs</a></li>
+                    <li><a href="/api/v1/discovery">API Discovery</a></li>
+                    <li><a href="https://gimel.foundation" target="_blank" rel="noopener">Gimel Foundation</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h4>Compliance</h4>
+                <ul class="footer-links">
+                    <li><a href="https://gimelfoundation.com/gifo-rfcs/#rfc-0111" target="_blank" rel="noopener">RFC-0111 Compliant</a></li>
+                    <li><a href="https://gimelfoundation.com/gifo-rfcs/#rfc-0115" target="_blank" rel="noopener">RFC-0115 Ready</a></li>
+                    <li><a href="https://gdpr.eu/" target="_blank" rel="noopener">GDPR Compatible</a></li>
+                    <li><a href="https://digital-strategy.ec.europa.eu/en/policies/eidas-regulation" target="_blank" rel="noopener">eIDAS 2.0 Aligned</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 GAuth • Gimel Technologies • Open-Source Platform for AI Control and Secure IDs</p>
+            <p style="margin-top: 10px; font-size: 12px;">95% RFC-0111 & RFC-0115 Compliant • Security Beyond LoA4 • Patent Pending Technologies</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Console branding
+        console.log('%c🔐 GAuth Platform', 'font-size: 24px; font-weight: bold; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;');
+        console.log('%c95% RFC-0111 & RFC-0115 Compliant', 'font-size: 14px; color: #10b981; font-weight: bold;');
+        console.log('%cSecurity Beyond High Assurance (LoA4+)', 'font-size: 12px; color: #667eea;');
+        console.log('%c\nExplore:\n• /protocol-flow - Interactive protocol visualization\n• /poa-visualization - 3D PoA relationships\n• /gauth1.html - Full dashboard', 'font-size: 11px; color: #a0aec0;');
+    </script>
+</body>
+</html>
