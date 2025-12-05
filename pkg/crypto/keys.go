@@ -658,3 +658,34 @@ func (m *Manager) loadFromDisk() error {
 	}
 	return nil
 }
+
+// -------------------- KeyProvider Implementation --------------------
+
+// ActiveSigner returns a Signer for the currently active key.
+func (m *Manager) ActiveSigner() (Signer, error) {
+	k := m.Active()
+	if k == nil {
+		return nil, errors.New("no active key")
+	}
+	// Create a signer that implements the full Signer interface
+	return &ed25519Signer{
+		keyID: k.ID,
+		priv:  k.Private,
+		pub:   k.Public,
+		algo:  k.Alg,
+	}, nil
+}
+
+// PublicKey returns the public key bytes and algorithm for a given key ID.
+func (m *Manager) PublicKey(keyID string) ([]byte, string, error) {
+	k := m.FindByID(keyID)
+	if k == nil {
+		return nil, "", errors.New("unknown key")
+	}
+	return k.Public, k.Alg, nil
+}
+
+// VerifyWith verifies a signature using a specific key ID.
+func (m *Manager) VerifyWith(msg, sig []byte, keyID string) error {
+	return m.ValidateSignature(keyID, msg, sig)
+}

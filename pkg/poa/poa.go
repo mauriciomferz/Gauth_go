@@ -4,7 +4,6 @@ package poa
 
 import (
 	"context"
-	"crypto/ed25519"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
@@ -913,18 +912,18 @@ type Service interface {
 
 // MemoryService implements Service using in-memory storage
 type MemoryService struct {
-	proofs     map[string]*ProofOfAuthorization
-	revoked    map[string]bool
-	keyManager *internalCrypto.Manager
+	proofs      map[string]*ProofOfAuthorization
+	revoked     map[string]bool
+	keyProvider internalCrypto.KeyProvider
 }
 
 // Option configures the MemoryService
 type Option func(*MemoryService)
 
-// WithKeyManager injects a crypto manager
-func WithKeyManager(km *internalCrypto.Manager) Option {
+// WithKeyProvider injects a crypto key provider
+func WithKeyProvider(kp internalCrypto.KeyProvider) Option {
 	return func(s *MemoryService) {
-		s.keyManager = km
+		s.keyProvider = kp
 	}
 }
 
@@ -983,9 +982,9 @@ func (s *MemoryService) Issue(ctx context.Context, req *Request) (*ProofOfAuthor
 	// Compute canonical digest (after all core fields populated)
 	poa.Digest = CanonicalDigest(poa)
 
-	// Optional multi-signature issuance using EdDSA registry (demo). Controlled via env:
+	// Optional multi-signature issuance using KeyProvider (demo). Controlled via env:
 	// GAUTH_POA_MULTISIG_KIDS=<kid1,kid2,...> GAUTH_POA_MULTISIG_THRESHOLD=<n>
-	// If kids not set but registry available, uses active key only when GAUTH_POA_MULTISIG_SIGN=1.
+	// If kids not set but provider available, uses active key only when GAUTH_POA_MULTISIG_SIGN=1.
 	if os.Getenv("GAUTH_POA_MULTISIG_SIGN") == "1" {
 		kidsRaw := os.Getenv("GAUTH_POA_MULTISIG_KIDS")
 		var kids []string
@@ -998,15 +997,12 @@ func (s *MemoryService) Issue(ctx context.Context, req *Request) (*ProofOfAuthor
 			}
 		}
 		// Fallback to active key if no explicit list
-		if len(kids) == 0 && s.keyManager != nil {
-			if ak := s.keyManager.Active(); ak != nil {
-				kids = []string{ak.ID}
-			}
-		} else if len(kids) == 0 && internalCrypto.GlobalEdDSARegistry != nil {
-			if ak := internalCrypto.GlobalEdDSARegistry.Active(); ak != nil {
-				kids = []string{ak.ID}
+		if len(kids) == 0 && s.keyProvider != nil {
+			if signer, err := s.keyProvider.ActiveSigner(); err == nil && signer != nil {
+				kids = []string{signer.KeyID()}
 			}
 		}
+
 		th := 0
 		if rawTh := os.Getenv("GAUTH_POA_MULTISIG_THRESHOLD"); rawTh != "" {
 			if v, err := strconv.Atoi(rawTh); err == nil && v >= 0 {
@@ -1021,24 +1017,27 @@ func (s *MemoryService) Issue(ctx context.Context, req *Request) (*ProofOfAuthor
 		poa.SigMode = "eddsa"
 		msg := buildPoASigningPayload(poa)
 		for _, kid := range kids {
-			var k *internalCrypto.Key
-
-			// Try injected manager first
-			if s.keyManager != nil {
-				k = s.keyManager.FindByID(kid)
-			}
-
-			// Fallback to global registry
-			if k == nil && internalCrypto.GlobalEdDSARegistry != nil {
-				k = internalCrypto.GlobalEdDSARegistry.FindByID(kid)
-			}
-
-			if k == nil || len(k.Private) != ed25519.PrivateKeySize {
+			if s.keyProvider == nil {
 				continue
 			}
-			// Sign
-			sig := ed25519.Sign(k.Private, msg)
-			poa.Signatures = append(poa.Signatures, base64.RawStdEncoding.EncodeToString(sig))
+
+			// In a real implementation, we would need a way to get a Signer for a specific KeyID.
+			// The current KeyProvider interface only exposes ActiveSigner().
+			// For this demo refactor, we will only sign if the requested kid matches the active signer.
+			// To fully support multi-sig with historical keys, KeyProvider would need Signer(keyID).
+			// For now, we check against active signer.
+
+			signer, err := s.keyProvider.ActiveSigner()
+			if err != nil || signer == nil {
+				continue
+			}
+
+			if signer.KeyID() == kid {
+				sig, err := signer.Sign(msg)
+				if err == nil {
+					poa.Signatures = append(poa.Signatures, base64.RawStdEncoding.EncodeToString(sig))
+				}
+			}
 		}
 	}
 
@@ -1268,7 +1267,7 @@ func buildPoASigningPayload(p *ProofOfAuthorization) []byte {
 
 // VerifyMultiSig validates all signatures present and evaluates threshold satisfaction.
 // Returns (validSignatures, satisfied, requiredThreshold).
-func VerifyMultiSig(p *ProofOfAuthorization, km *internalCrypto.Manager) (int, bool, int) {
+func VerifyMultiSig(p *ProofOfAuthorization, kp internalCrypto.KeyProvider) (int, bool, int) {
 	if p == nil || len(p.Signatures) == 0 || len(p.SignerKids) == 0 || p.Threshold <= 0 {
 		return 0, false, p.Threshold
 	}
@@ -1280,29 +1279,16 @@ func VerifyMultiSig(p *ProofOfAuthorization, km *internalCrypto.Manager) (int, b
 		}
 		kid := p.SignerKids[i]
 
-		var k *internalCrypto.Key
-		if km != nil {
-			k = km.FindByID(kid)
-		}
-
-		// Fallback to global registry if not found and no manager provided
-		if k == nil && internalCrypto.GlobalEdDSARegistry != nil {
-			k = internalCrypto.GlobalEdDSARegistry.FindByID(kid)
-		}
-
-		if k == nil {
+		if kp == nil {
 			continue
 		}
 
-		mkey := k
-		if mkey == nil {
-			continue
-		}
 		sigBytes, err := base64.RawStdEncoding.DecodeString(sigB64)
-		if err != nil || len(sigBytes) != ed25519.SignatureSize {
+		if err != nil {
 			continue
 		}
-		if ed25519.Verify(mkey.Public, msg, sigBytes) {
+
+		if err := kp.VerifyWith(msg, sigBytes, kid); err == nil {
 			valid++
 		}
 	}

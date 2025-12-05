@@ -23,12 +23,13 @@ func TestMemoryService_WithKeyManager(t *testing.T) {
 	}
 	keyID := activeKey.ID
 
-	// Create service with injected manager
-	svc := NewMemoryService(WithKeyManager(km))
-
-	// Verify manager is set
-	if svc.keyManager != km {
-		t.Error("key manager not injected correctly")
+	// Create service	// Test injection
+	svc := NewMemoryService(WithKeyProvider(km))
+	if svc == nil {
+		t.Fatal("NewMemoryService returned nil")
+	}
+	if svc.keyProvider != km {
+		t.Error("key provider not injected correctly")
 	}
 
 	// Issue a POA (should use injected manager)
