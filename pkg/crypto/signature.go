@@ -22,13 +22,6 @@ type Verifier interface {
 	Verify(msg, sig []byte, keyID string) error
 }
 
-// KeyProvider returns the active signer and allows lookup of public keys by ID.
-type KeyProvider interface {
-	ActiveSigner() (Signer, error)
-	PublicKey(keyID string) (keyBytes []byte, algo string, err error)
-	VerifyWith(msg, sig []byte, keyID string) error
-}
-
 // KMS abstracts a key management system capable of returning an active signer,
 // looking up public keys, listing metadata, and performing rotation. This allows
 // future Vault/HSM/backing service integration without changing higher layers.

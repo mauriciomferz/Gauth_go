@@ -206,7 +206,14 @@ func (m *MultiTenantKeyManager) TriggerRotation(tenant string, force bool, reaso
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	store := m.GetTenantStore(tenant)
+	// Access stores directly since we hold the lock
+	var store KeyStore
+	if s, exists := m.stores[tenant]; exists {
+		store = s
+	} else {
+		store = m.defaultStore
+	}
+
 	if store == nil {
 		return fmt.Errorf("no store configured for tenant %s", tenant)
 	}
@@ -288,7 +295,7 @@ func (m *MultiTenantKeyManager) IsHealthy() bool {
 func (m *MultiTenantKeyManager) GetTenantStore(tenant string) KeyStore {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	if store, exists := m.stores[tenant]; exists {
 		return store
 	}
@@ -318,7 +325,7 @@ func (ts *TenantScheduler) run() {
 	ts.ticker = time.NewTicker(ts.policy.Interval)
 	ticker := ts.ticker
 	ts.mu.Unlock()
-	
+
 	defer func() {
 		ts.mu.Lock()
 		if ts.ticker != nil {

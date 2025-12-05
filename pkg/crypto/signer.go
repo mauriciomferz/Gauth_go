@@ -20,16 +20,30 @@ const (
 	AlgoEd25519 = "Ed25519"
 )
 
-// Signer exposes a unified interface across supported algorithms.
-// Sign may return error if operating in verify-only (no private key).
-// Signer exposes a unified interface across supported algorithms.
-// Sign may return error if operating in verify-only (no private key).
-type Signer interface {
+// SignerCore defines the minimal signing capability.
+type SignerCore interface {
+	Sign(msg []byte) ([]byte, error)
+}
+
+// SignerVerifier defines the signature verification capability.
+type SignerVerifier interface {
+	Verify(msg, sig []byte) bool
+}
+
+// SignerKeyInfo defines key metadata accessors.
+type SignerKeyInfo interface {
 	KeyID() string
 	Algorithm() string
 	Public() []byte
-	Sign(msg []byte) ([]byte, error)
-	Verify(msg, sig []byte) bool
+}
+
+// Signer exposes a unified interface across supported algorithms.
+// It composes SignerCore, SignerVerifier, and SignerKeyInfo.
+// Sign may return error if operating in verify-only (no private key).
+type Signer interface {
+	SignerCore
+	SignerVerifier
+	SignerKeyInfo
 }
 
 // -------------------- Ed25519 --------------------
