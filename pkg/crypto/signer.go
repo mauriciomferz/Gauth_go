@@ -111,13 +111,7 @@ func (s *RotatingEd25519Signer) Verify(msg, sig []byte) bool {
 	return ed25519.Verify(k.Public, msg, sig)
 }
 
-// GlobalRotatingSigner returns a Signer backed by GlobalEdDSARegistry if available.
-func GlobalRotatingSigner() Signer {
-	if GlobalEdDSARegistry == nil {
-		return nil
-	}
-	return &RotatingEd25519Signer{M: GlobalEdDSARegistry}
-}
+// GlobalRotatingSigner Removed.
 
 // -------------------- ECDSA (P-256 only Phase 1) --------------------
 type ECDSASigner struct {

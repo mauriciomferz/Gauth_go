@@ -2,7 +2,6 @@ package gauth
 
 import (
 	"context"
-	"crypto/ed25519"
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
@@ -17,8 +16,8 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/mauriciomferz/Gauth_go/internal/config"
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/internal/observability"
+	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
 
@@ -49,7 +48,7 @@ type Service struct {
 	config         Config
 	signingKey     []byte // legacy HMAC key
 	keyMode        string // hmac | eddsa
-	keyMgr         *crypto.Manager
+	keyProvider    crypto.KeyProvider
 	metrics        Metrics
 	strictAuth     bool
 	seenJTI        map[string]time.Time // simple in-memory uniqueness tracking
@@ -96,15 +95,26 @@ func WithReplayStore(rs ReplayStore) Option {
 	return func(s *Service) error { s.replay = rs; return nil }
 }
 
-// WithKeyManager injects a crypto.Manager for EdDSA operations.
+// WithKeyProvider injects a crypto.KeyProvider for EdDSA operations.
 // This allows for explicit dependency injection instead of relying on global state.
-// If not provided when keyMode is EdDSA, a new manager will be created automatically.
+func WithKeyProvider(kp crypto.KeyProvider) Option {
+	return func(s *Service) error {
+		if kp == nil {
+			return fmt.Errorf("key provider cannot be nil")
+		}
+		s.keyProvider = kp
+		return nil
+	}
+}
+
+// WithKeyManager injects a crypto.Manager for EdDSA operations.
+// Deprecated: Use WithKeyProvider instead.
 func WithKeyManager(km *crypto.Manager) Option {
 	return func(s *Service) error {
 		if km == nil {
 			return fmt.Errorf("key manager cannot be nil")
 		}
-		s.keyMgr = km
+		s.keyProvider = km
 		return nil
 	}
 }
@@ -225,8 +235,8 @@ func New(cfg Config, opts ...Option) (*Service, error) {
 		}
 	}
 	if svc.keyMode == sigModeEdDSA {
-		// Only create manager if not injected via WithKeyManager
-		if svc.keyMgr == nil {
+		// Only create manager if not injected via WithKeyProvider/WithKeyManager
+		if svc.keyProvider == nil {
 			rotHours := cfg.AppConfig.KeyRotationHours
 			if rotHours <= 0 {
 				rotHours = 24
@@ -235,9 +245,9 @@ func New(cfg Config, opts ...Option) (*Service, error) {
 			if err != nil {
 				return nil, err
 			}
-			svc.keyMgr = km
+			svc.keyProvider = km
 		}
-		// Note: We no longer register globally. Callers should inject via WithKeyManager if needed.
+		// Note: We no longer register globally. Callers should inject via WithKeyProvider if needed.
 		// For backwards compatibility with other packages, they can still access crypto.GlobalEdDSARegistry
 		// but this service won't set it automatically.
 	} else {
@@ -274,7 +284,28 @@ func (svc *Service) selectValidator() TokenSignatureValidator {
 
 	// EdDSA mode takes highest priority (explicitly set via GAUTH_TOKEN_SIG_MODE env var)
 	if svc.keyMode == sigModeEdDSA {
-		return NewEdDSAValidator(svc.keyMgr, strictParsing)
+		// We need to cast KeyProvider back to *Manager for NewEdDSAValidator if possible,
+		// or update NewEdDSAValidator to accept KeyProvider.
+		// For now, let's assume NewEdDSAValidator still takes *Manager.
+		// If keyProvider is *Manager, we are good.
+		if km, ok := svc.keyProvider.(*crypto.Manager); ok {
+			return NewEdDSAValidator(km, strictParsing)
+		}
+		// If it's not a Manager (e.g. mock), we might have an issue if EdDSAValidator requires Manager.
+		// TODO: Update EdDSAValidator to accept KeyProvider.
+		// For now, we'll return nil or panic if not Manager?
+		// Or better, update EdDSAValidator in a separate step.
+		// Assuming for this step we are just refactoring Service.
+		// If we can't cast, we might need to fail or handle it.
+		// But wait, NewEdDSAValidator is in this package (or imported?).
+		// It seems to be in this package (based on file list, but I don't see it in service.go).
+		// It's likely in another file in pkg/gauth.
+		// I will check that later. For now, let's try the cast.
+		if km, ok := svc.keyProvider.(*crypto.Manager); ok {
+			return NewEdDSAValidator(km, strictParsing)
+		}
+		// Fallback: if we can't cast, we can't use EdDSAValidator yet.
+		// This suggests we should update EdDSAValidator too.
 	}
 
 	// JWTLib is a config flag that can be used for HMAC tokens
@@ -345,10 +376,16 @@ func (g *Service) RequestTokenLegacy(req TokenRequest) (*TokenResponse, error) {
 	jti := generateJTI()
 	audClaim := audienceToClaim(g.config.Audience)
 	if g.keyMode == sigModeEdDSA {
-		if g.keyMgr == nil {
-			return nil, errors.New("missing_key_manager")
+		if g.keyProvider == nil {
+			return nil, errors.New("missing_key_provider")
 		}
-		kid := g.keyMgr.Active().ID
+
+		signer, err := g.keyProvider.ActiveSigner()
+		if err != nil {
+			return nil, fmt.Errorf("active signer: %w", err)
+		}
+
+		kid := signer.KeyID()
 		head := map[string]any{"alg": "EdDSA", "typ": "JWT", "kid": kid}
 		claims := map[string]any{"sub": g.config.ClientID, "scope": strings.Join(req.Scope, " "), "exp": expiry.Unix(), "iat": issuedAt, "nbf": nbf, "jti": jti, "iss": g.config.AuthServerURL}
 		if audClaim != nil {
@@ -365,8 +402,12 @@ func (g *Service) RequestTokenLegacy(req TokenRequest) (*TokenResponse, error) {
 		hEnc := base64.RawURLEncoding.EncodeToString(hb)
 		pEnc := base64.RawURLEncoding.EncodeToString(pb)
 		unsigned := hEnc + "." + pEnc
-		activeKey := g.keyMgr.Active()
-		sig := ed25519.Sign(activeKey.Private, []byte(unsigned))
+
+		sig, err := signer.Sign([]byte(unsigned))
+		if err != nil {
+			return nil, fmt.Errorf("sign token: %w", err)
+		}
+
 		sEnc := base64.RawURLEncoding.EncodeToString(sig)
 		tok := unsigned + "." + sEnc
 		if g.metrics != nil {

@@ -49,6 +49,9 @@ func (s *ed25519Signer) KeyID() string     { return s.keyID }
 func (s *ed25519Signer) Algorithm() string { return s.algo }
 func (s *ed25519Signer) Public() []byte    { return append([]byte(nil), s.pub...) }
 func (s *ed25519Signer) Sign(msg []byte) ([]byte, error) {
+	if len(s.priv) != ed25519.PrivateKeySize {
+		return nil, errors.New("ed25519: bad private key length")
+	}
 	// ed25519 signs the raw message; upstream caller should supply canonical digest if desired.
 	sig := ed25519.Sign(s.priv, msg)
 	return sig, nil

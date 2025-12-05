@@ -20,16 +20,13 @@ func main() {
 		fmt.Println("GAUTH_TOKEN_SIG_MODE != eddsa (no rotation performed)")
 		return
 	}
-	km := crypto.GlobalEdDSARegistry
-	if km == nil {
-		fmt.Println("GlobalEdDSARegistry empty: initializing transient manager")
-		manager, err := crypto.NewManager(24 * time.Hour)
-		if err != nil {
-			fmt.Println("manager init error:", err)
-			os.Exit(1)
-		}
-		crypto.RegisterGlobalEdDSAManager(manager)
-		km = manager
+	// In a standalone tool, the global registry is always nil initially.
+	// We must initialize a manager backed by the persistence path to affect shared state.
+	fmt.Println("Initializing manager for rotation")
+	km, err := crypto.NewManager(24 * time.Hour)
+	if err != nil {
+		fmt.Println("manager init error:", err)
+		os.Exit(1)
 	}
 	old := km.Active().ID
 	k, err := km.Rotate()

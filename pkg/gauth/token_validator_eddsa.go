@@ -11,14 +11,14 @@ import (
 // EdDSAValidator validates tokens using EdDSA (Ed25519) signature
 // Implements TokenSignatureValidator interface
 type EdDSAValidator struct {
-	keyMgr        *crypto.Manager
+	keyProvider   crypto.KeyProvider
 	strictParsing bool
 }
 
 // NewEdDSAValidator creates a new EdDSA validator
-func NewEdDSAValidator(keyMgr *crypto.Manager, strictParsing bool) *EdDSAValidator {
+func NewEdDSAValidator(kp crypto.KeyProvider, strictParsing bool) *EdDSAValidator {
 	return &EdDSAValidator{
-		keyMgr:        keyMgr,
+		keyProvider:   kp,
 		strictParsing: strictParsing,
 	}
 }
@@ -62,11 +62,11 @@ func (v *EdDSAValidator) ValidateSignature(token string) (map[string]any, error)
 		return nil, ErrInvalidToken
 	}
 
-	if v.keyMgr == nil {
+	if v.keyProvider == nil {
 		return nil, ErrInvalidToken
 	}
 
-	if vErr := v.keyMgr.ValidateSignature(kidVal, []byte(unsigned), sigBytes); vErr != nil {
+	if vErr := v.keyProvider.VerifyWith([]byte(unsigned), sigBytes, kidVal); vErr != nil {
 		return nil, ErrInvalidToken
 	}
 

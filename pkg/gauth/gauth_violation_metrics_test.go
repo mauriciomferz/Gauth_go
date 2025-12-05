@@ -1,7 +1,6 @@
 package gauth
 
 import (
-	"crypto/ed25519"
 	"encoding/base64"
 	"encoding/json"
 	"os"
@@ -80,8 +79,9 @@ func TestViolationCounters(t *testing.T) {
 	newPayload, _ := json.Marshal(claims)
 	newPayloadSeg := base64.RawURLEncoding.EncodeToString(newPayload)
 	unsignedMissing := parts[0] + "." + newPayloadSeg
-	// Sign with original key (access via svc.keyMgr)
-	sigMissing := ed25519.Sign(svc.keyMgr.Active().Private, []byte(unsignedMissing))
+	// Sign with original key (access via svc.keyProvider)
+	signer, _ := svc.keyProvider.ActiveSigner()
+	sigMissing, _ := signer.Sign([]byte(unsignedMissing))
 	missingTok := unsignedMissing + "." + base64.RawURLEncoding.EncodeToString(sigMissing)
 	if _, err := svc.ValidateToken(missingTok); err == nil {
 		t.Fatalf("expected missing claim validation failure")

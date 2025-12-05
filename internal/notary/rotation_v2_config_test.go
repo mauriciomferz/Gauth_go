@@ -23,7 +23,7 @@ func TestLoadWeightsConfigValid(t *testing.T) {
 	if cfg.ThresholdWeight != 3 {
 		t.Fatalf("threshold mismatch")
 	}
-	art, err := BuildArtifactFromConfig(cfg, "prev", time.Unix(0, 0))
+	art, err := BuildArtifactFromConfig(cfg, "prev", time.Unix(0, 0), nil)
 	if err != nil {
 		t.Fatalf("artifact: %v", err)
 	}

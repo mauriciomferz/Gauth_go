@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 func TestEdDSATokenIssueAndValidate(t *testing.T) {
@@ -98,12 +100,16 @@ func TestEdDSARotatedOldKeyStillValidUntilExpiry(t *testing.T) {
 	if err != nil {
 		t.Fatalf("request error: %v", err)
 	}
-	activeKid := svc.keyMgr.Active().ID
+	km, ok := svc.keyProvider.(*crypto.Manager)
+	if !ok {
+		t.Fatalf("key provider is not a manager")
+	}
+	activeKid := km.Active().ID
 	// Rotate key
-	if _, err := svc.keyMgr.Rotate(); err != nil {
+	if _, err := km.Rotate(); err != nil {
 		t.Fatalf("rotate error: %v", err)
 	}
-	if svc.keyMgr.Active().ID == activeKid {
+	if km.Active().ID == activeKid {
 		t.Fatalf("rotation did not change active key")
 	}
 	// Token signed with previous key should still validate (history retention)

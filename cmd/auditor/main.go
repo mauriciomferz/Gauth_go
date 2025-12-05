@@ -20,9 +20,9 @@ import (
 	"sync"
 	"time"
 
-	cryptoReg "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/internal/notary"
 	auditor "github.com/mauriciomferz/Gauth_go/pkg/auditor"
+	cryptoReg "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
 	poa "github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
@@ -38,6 +38,20 @@ type AuditorResult struct {
 }
 
 var httpClient = &http.Client{Timeout: 10 * time.Second}
+var (
+	localManager     *cryptoReg.Manager
+	localManagerOnce sync.Once
+)
+
+func getVerifier() *cryptoReg.Manager {
+	localManagerOnce.Do(func() {
+		km, err := cryptoReg.NewManager(24 * time.Hour)
+		if err == nil {
+			localManager = km
+		}
+	})
+	return localManager
+}
 
 func main() {
 	baseURL := flag.String("base-url", "http://localhost:8080", "Base URL of running GAuth server")
@@ -164,7 +178,7 @@ func auditRotation(base string) (interface{}, error) {
 	if err2 := json.Unmarshal(body, &sum); err2 != nil {
 		return nil, fmt.Errorf("decode_rotation_summary: %w", err)
 	}
-	reg := cryptoReg.GlobalEdDSARegistry
+	reg := getVerifier()
 	if reg == nil {
 		return nil, errors.New("eddsa_registry_unavailable")
 	}
@@ -288,7 +302,7 @@ func verifyAttestation(att *Attestation) map[string]interface{} {
 		result["reason"] = "fields_missing"
 		return result
 	}
-	reg := cryptoReg.GlobalEdDSARegistry
+	reg := getVerifier()
 	if reg == nil {
 		result["valid"] = false
 		result["reason"] = "registry_unavailable"
@@ -542,7 +556,9 @@ func auditLocalPOA(path string) (interface{}, error) {
 }
 
 // verifyPOA performs digest and signature threshold verification.
-func verifyPOA(doc *poa.ProofOfAuthorization) map[string]interface{} { return auditor.VerifyPOA(doc) }
+func verifyPOA(doc *poa.ProofOfAuthorization) map[string]interface{} {
+	return auditor.VerifyPOA(doc, getVerifier())
+}
 
 // httpGet helper.
 func httpGet(url string) ([]byte, error) {

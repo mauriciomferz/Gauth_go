@@ -6,9 +6,10 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"time"
 
-	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/internal/notary"
+	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 type verifyOutput struct {
@@ -39,8 +40,10 @@ func main() {
 	entries := led.Entries()
 	// Build pub resolver from global registry (active + historical)
 	pubs := map[string]ed25519.PublicKey{}
-	if internalCrypto.GlobalEdDSARegistry != nil {
-		for _, k := range internalCrypto.GlobalEdDSARegistry.ListCurrent() {
+	// Initialize manager to load keys from persistence (ignore ttl)
+	km, _ := internalCrypto.NewManager(24 * time.Hour)
+	if km != nil {
+		for _, k := range km.ListCurrent() {
 			if len(k.Public) == ed25519.PublicKeySize {
 				kid := fmt.Sprintf("ed25519:%x", k.Public[:8])
 				pubs[kid] = k.Public

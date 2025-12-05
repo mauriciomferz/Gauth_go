@@ -22,8 +22,6 @@ import (
 	"strings"
 	"time"
 
-	cryptoreg "github.com/mauriciomferz/Gauth_go/pkg/crypto"
-
 	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
@@ -73,21 +71,7 @@ var (
 	rotationV2EmbeddedKeyCount       = promauto.NewGauge(prom.GaugeOpts{Name: "gauth_rotation_v2_embedded_public_key_count", Help: "Count of embedded public keys in latest artifact."})
 )
 
-// cryptoGlobalEdDSAResolve abstracts global registry for embedding without direct import loops.
-// Assigned at init time from crypto package if available.
-var cryptoGlobalEdDSAResolve func(id string) ed25519.PublicKey
-
-func init() {
-	if cryptoreg.GlobalEdDSARegistry != nil {
-		cryptoGlobalEdDSAResolve = func(id string) ed25519.PublicKey {
-			k := cryptoreg.GlobalEdDSARegistry.FindByID(id)
-			if k == nil {
-				return nil
-			}
-			return k.Public
-		}
-	}
-}
+// cryptoGlobalEdDSAResolve removed in favor of injected resolver.
 
 // EncodeECDSAP256Uncompressed encodes an ECDSA P-256 public key into base64url of the uncompressed
 // point (0x04 || X || Y) with X and Y left-padded to 32 bytes. Returns empty string on invalid input.
@@ -337,7 +321,7 @@ func LoadWeightsConfig(path string) (*WeightsConfig, error) {
 }
 
 // BuildArtifactFromConfig produces an artifact (without signatures) and exports metrics.
-func BuildArtifactFromConfig(cfg *WeightsConfig, prevHash string, now time.Time) (WeightedRotationArtifact, error) {
+func BuildArtifactFromConfig(cfg *WeightsConfig, prevHash string, now time.Time, resolver func(string) ed25519.PublicKey) (WeightedRotationArtifact, error) {
 	if cfg == nil {
 		return WeightedRotationArtifact{}, errors.New("config nil")
 	}
@@ -352,8 +336,8 @@ func BuildArtifactFromConfig(cfg *WeightsConfig, prevHash string, now time.Time)
 			algUpper := strings.ToUpper(s.Alg)
 			switch algUpper {
 			case "ED25519":
-				if cryptoGlobalEdDSAResolve != nil {
-					if pk := cryptoGlobalEdDSAResolve(s.ID); len(pk) == ed25519.PublicKeySize {
+				if resolver != nil {
+					if pk := resolver(s.ID); len(pk) == ed25519.PublicKeySize {
 						signer.Public = base64.RawURLEncoding.EncodeToString(pk)
 						embeddedCount++
 					}
