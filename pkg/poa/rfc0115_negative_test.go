@@ -3,6 +3,8 @@ package poa
 import (
 	"testing"
 	"time"
+
+	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
 )
 
 // Helper to build minimal valid PoADefinition we can then mutate for negative cases.
@@ -10,8 +12,8 @@ func minimalValidDefinition() PoADefinition {
 	start := time.Now()
 	end := start.Add(24 * time.Hour)
 	return PoADefinition{
-		Parties:       Parties{Principal: Principal{Type: PrincipalTypeOrganization, Identity: "org-123"}, AuthorizedClient: AuthorizedClient{Type: string(ClientTypeLLM), Identity: "client-xyz", Version: "v1", OperationalStatus: string(OperationalStatusActive)}},
-		Authorization: AuthorizationScope{ApplicableSectors: []IndustrySector{{Code: SectorInfoCommunication, Description: "Information and Communication", Authorized: true}}, ApplicableRegions: []GeographicScope{{Type: GeoTypeNational, Identifier: "US"}}, AuthorizedActions: AuthorizedActions{Transactions: []TransactionType{TransactionLoan}}},
+		Parties:       Parties{Principal: Principal{Type: PrincipalTypeOrganization, Identity: "org-123"}, AuthorizedClient: AuthorizedClient{Type: string(ClientType("LLM")), Identity: "client-xyz", Version: "v1", OperationalStatus: string(OperationalStatus("active"))}},
+		Authorization: AuthorizationScope{ApplicableSectors: []IndustrySector{{Code: taxonomy.SectorInfoCommunication, Description: "Information and Communication", Authorized: true}}, ApplicableRegions: []GeographicScope{{Type: GeoTypeNational, Identifier: "US"}}, AuthorizedActions: AuthorizedActions{Transactions: []taxonomy.TransactionType{taxonomy.TransactionLoan}}},
 		Requirements:  Requirements{ValidityPeriod: ValidityPeriod{StartTime: start, EndTime: end}},
 	}
 }

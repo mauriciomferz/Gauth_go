@@ -100,12 +100,7 @@ func TestVerifyMultiSig_WithInjectedManager(t *testing.T) {
 		t.Errorf("expected threshold 1, got %d", threshold)
 	}
 
-	// Verify with nil manager (should fail or fallback to global if set)
-	// Ensure global is nil for this test
-	oldGlobal := internalCrypto.GlobalEdDSARegistry
-	internalCrypto.GlobalEdDSARegistry = nil
-	defer func() { internalCrypto.GlobalEdDSARegistry = oldGlobal }()
-
+	// Verify with nil manager (should fail)
 	valid, satisfied, _ = VerifyMultiSig(poa, nil)
 	if valid != 0 {
 		t.Errorf("expected 0 valid signatures with nil manager, got %d", valid)

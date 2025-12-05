@@ -1,19 +1,22 @@
-package poa
+package poa_test
 
 import (
 	"testing"
 	"time"
+
+	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
 )
 
 // TestPoADefinition_CompleteValidation tests full PoA definition validation
 func TestPoADefinition_CompleteValidation(t *testing.T) {
 	t.Run("Valid complete PoA definition", func(t *testing.T) {
-		def := PoADefinition{
-			Parties: Parties{
-				Principal: Principal{
-					Type:     PrincipalTypeOrganization,
+		def := poa.PoADefinition{
+			Parties: poa.Parties{
+				Principal: poa.Principal{
+					Type:     poa.PrincipalTypeOrganization,
 					Identity: "DE:HRB:12345",
-					Organization: &Organization{
+					Organization: &poa.Organization{
 						Type:                "GmbH",
 						Name:                "Tech Solutions GmbH",
 						RegisterEntry:       "HRB12345",
@@ -21,10 +24,10 @@ func TestPoADefinition_CompleteValidation(t *testing.T) {
 						RegisteredAuthority: true,
 					},
 				},
-				Representative: &Representative{
+				Representative: &poa.Representative{
 					Identity:          "AI-OPS-GmbH",
-					LegalRelationship: RelationshipOwner,
-					RegistrationInfo: &RegistrationInfo{
+					LegalRelationship: poa.RelationshipOwner,
+					RegistrationInfo: &poa.RegistrationInfo{
 						RegisteredName:        "AI Operations GmbH",
 						RegistrationNumber:    "HRB67890",
 						RegisteringAuthority:  "Amtsgericht München",
@@ -35,7 +38,7 @@ func TestPoADefinition_CompleteValidation(t *testing.T) {
 						CommercialRegister:    true,
 						PowerOfAttorneyOnFile: true,
 					},
-					AuthorizationChain: []AuthorizationLink{
+					AuthorizationChain: []poa.AuthorizationLink{
 						{
 							FromParty:     "Tech Solutions GmbH",
 							ToParty:       "AI Operations GmbH",
@@ -47,12 +50,12 @@ func TestPoADefinition_CompleteValidation(t *testing.T) {
 							SubDelegation: true,
 						},
 					},
-					ContactInformation: &ContactInformation{
+					ContactInformation: &poa.ContactInformation{
 						PrimaryContact:    "John Smith",
 						Email:             "contact@ai-ops.example.com",
 						Phone:             "+49-89-12345678",
 						PreferredLanguage: "en",
-						Address: &Address{
+						Address: &poa.Address{
 							Street:     "Hauptstraße 123",
 							City:       "München",
 							State:      "Bayern",
@@ -61,13 +64,13 @@ func TestPoADefinition_CompleteValidation(t *testing.T) {
 						},
 					},
 				},
-				AuthorizedClient: AuthorizedClient{
-					TypeEnum:        ClientTypeLLM,
+				AuthorizedClient: poa.AuthorizedClient{
+					TypeEnum:        poa.ClientTypeLLM,
 					Identity:        "gpt-4-client-001",
 					Version:         "4.0",
-					StatusEnum:      OperationalStatusActive,
-					CapabilityLevel: CapabilityL3,
-					ModelAttributes: &ModelAttributes{
+					StatusEnum:      poa.OperationalStatusActive,
+					CapabilityLevel: poa.CapabilityL3,
+					ModelAttributes: &poa.ModelAttributes{
 						Architecture:     "transformer",
 						ParameterCount:   1750000000000,
 						Modalities:       []string{"text", "code"},
@@ -76,53 +79,53 @@ func TestPoADefinition_CompleteValidation(t *testing.T) {
 					},
 				},
 			},
-			Authorization: AuthorizationScope{
-				AuthorizationType: AuthorizationType{
-					RepresentationType: RepresentationSole,
-					SignatureType:      SignatureSingle,
+			Authorization: poa.AuthorizationScope{
+				AuthorizationType: poa.AuthorizationType{
+					RepresentationType: poa.RepresentationSole,
+					SignatureType:      poa.SignatureSingle,
 					SubProxyAuthority:  false,
 					Restrictions:       []string{"no_financial_transactions_above_10000_EUR"},
 				},
-				ApplicableSectors: []IndustrySector{
+				ApplicableSectors: []taxonomy.IndustrySector{
 					{
-						Code:        SectorInfoCommunication,
+						Code:        taxonomy.SectorInfoCommunication,
 						Description: "Information and Communication",
 						Authorized:  true,
 					},
 					{
-						Code:        SectorProfessionalScience,
+						Code:        taxonomy.SectorProfessionalScience,
 						Description: "Professional, Scientific and Technical Activities",
 						Authorized:  true,
 					},
 				},
-				ApplicableRegions: []GeographicScope{
+				ApplicableRegions: []poa.GeographicScope{
 					{
-						Type:       GeoTypeNational,
+						Type:       poa.GeoTypeNational,
 						Identifier: "DE",
 						Name:       "Germany",
 					},
 					{
-						Type:       GeoTypeNational,
+						Type:       poa.GeoTypeNational,
 						Identifier: "FR",
 						Name:       "France",
 					},
 				},
-				AuthorizedActions: AuthorizedActions{
-					Transactions: []TransactionType{
-						TransactionPurchase,
-						TransactionPayment,
+				AuthorizedActions: poa.AuthorizedActions{
+					Transactions: []taxonomy.TransactionType{
+						taxonomy.TransactionPurchase,
+						taxonomy.TransactionPayment,
 					},
-					Decisions: []DecisionType{
-						DecisionOperational,
+					Decisions: []taxonomy.DecisionType{
+						taxonomy.DecisionOperational,
 					},
-					NonPhysicalActions: []ActionTypeNonPhysical{
-						ActionNonPhysicalResearching,
-						ActionNonPhysicalDataAggregation,
+					NonPhysicalActions: []taxonomy.ActionTypeNonPhysical{
+						taxonomy.ActionNonPhysicalResearching,
+						taxonomy.ActionNonPhysicalDataAggregation,
 					},
 				},
 			},
-			Requirements: Requirements{
-				ValidityPeriod: ValidityPeriod{
+			Requirements: poa.Requirements{
+				ValidityPeriod: poa.ValidityPeriod{
 					StartTime: time.Now().Add(-24 * time.Hour),
 					EndTime:   time.Now().Add(365 * 24 * time.Hour),
 					TerminationConditions: []string{
@@ -130,18 +133,18 @@ func TestPoADefinition_CompleteValidation(t *testing.T) {
 						"expiration",
 					},
 				},
-				FormalRequirements: FormalRequirements{
+				FormalRequirements: poa.FormalRequirements{
 					NotarialCertification:  true,
 					IDVerificationRequired: true,
 					DigitalSignatures:      true,
 				},
-				SecurityCompliance: SecurityCompliance{
+				SecurityCompliance: poa.SecurityCompliance{
 					CommunicationProtocols: []string{"TLS 1.3", "mTLS"},
 					SecurityProperties:     []string{"end-to-end-encryption", "audit-logging"},
 					ComplianceInfo:         []string{"GDPR", "NIS2"},
 					UpdateMechanism:        "automated",
 				},
-				JurisdictionLaw: JurisdictionLaw{
+				JurisdictionLaw: poa.JurisdictionLaw{
 					Language:            "de",
 					GoverningLaw:        "German Commercial Code (HGB)",
 					PlaceOfJurisdiction: "München, Germany",
@@ -149,47 +152,47 @@ func TestPoADefinition_CompleteValidation(t *testing.T) {
 			},
 		}
 
-		err := ValidatePoADefinition(def)
+		err := poa.ValidatePoADefinition(def)
 		if err != nil {
 			t.Errorf("ValidatePoADefinition() error = %v, want nil", err)
 		}
 	})
 
 	t.Run("Missing principal identity", func(t *testing.T) {
-		def := PoADefinition{
-			Parties: Parties{
-				Principal:        Principal{Identity: "", Type: PrincipalTypeOrganization},
-				AuthorizedClient: AuthorizedClient{Identity: "client-1", TypeEnum: ClientTypeLLM},
+		def := poa.PoADefinition{
+			Parties: poa.Parties{
+				Principal:        poa.Principal{Identity: "", Type: poa.PrincipalTypeOrganization},
+				AuthorizedClient: poa.AuthorizedClient{Identity: "client-1", TypeEnum: taxonomy.ClientTypeLLM},
 			},
-			Requirements: Requirements{
-				ValidityPeriod: ValidityPeriod{
+			Requirements: poa.Requirements{
+				ValidityPeriod: poa.ValidityPeriod{
 					StartTime: time.Now(),
 					EndTime:   time.Now().Add(time.Hour),
 				},
 			},
 		}
 
-		err := ValidatePoADefinition(def)
+		err := poa.ValidatePoADefinition(def)
 		if err == nil {
 			t.Error("ValidatePoADefinition() expected error for missing principal identity, got nil")
 		}
 	})
 
 	t.Run("Missing authorized client identity", func(t *testing.T) {
-		def := PoADefinition{
-			Parties: Parties{
-				Principal:        Principal{Identity: "principal-1", Type: PrincipalTypeOrganization},
-				AuthorizedClient: AuthorizedClient{Identity: "", TypeEnum: ClientTypeLLM},
+		def := poa.PoADefinition{
+			Parties: poa.Parties{
+				Principal:        poa.Principal{Identity: "principal-1", Type: poa.PrincipalTypeOrganization},
+				AuthorizedClient: poa.AuthorizedClient{Identity: "", TypeEnum: taxonomy.ClientTypeLLM},
 			},
-			Requirements: Requirements{
-				ValidityPeriod: ValidityPeriod{
+			Requirements: poa.Requirements{
+				ValidityPeriod: poa.ValidityPeriod{
 					StartTime: time.Now(),
 					EndTime:   time.Now().Add(time.Hour),
 				},
 			},
 		}
 
-		err := ValidatePoADefinition(def)
+		err := poa.ValidatePoADefinition(def)
 		if err == nil {
 			t.Error("ValidatePoADefinition() expected error for missing client identity, got nil")
 		}
@@ -197,20 +200,20 @@ func TestPoADefinition_CompleteValidation(t *testing.T) {
 
 	t.Run("Invalid validity period (end before start)", func(t *testing.T) {
 		now := time.Now()
-		def := PoADefinition{
-			Parties: Parties{
-				Principal:        Principal{Identity: "principal-1", Type: PrincipalTypeOrganization},
-				AuthorizedClient: AuthorizedClient{Identity: "client-1", TypeEnum: ClientTypeLLM},
+		def := poa.PoADefinition{
+			Parties: poa.Parties{
+				Principal:        poa.Principal{Identity: "principal-1", Type: poa.PrincipalTypeOrganization},
+				AuthorizedClient: poa.AuthorizedClient{Identity: "client-1", TypeEnum: taxonomy.ClientTypeLLM},
 			},
-			Requirements: Requirements{
-				ValidityPeriod: ValidityPeriod{
+			Requirements: poa.Requirements{
+				ValidityPeriod: poa.ValidityPeriod{
 					StartTime: now,
 					EndTime:   now.Add(-time.Hour),
 				},
 			},
 		}
 
-		err := ValidatePoADefinition(def)
+		err := poa.ValidatePoADefinition(def)
 		if err == nil {
 			t.Error("ValidatePoADefinition() expected error for invalid validity period, got nil")
 		}
@@ -220,10 +223,10 @@ func TestPoADefinition_CompleteValidation(t *testing.T) {
 // TestRepresentative_Validation tests representative validation
 func TestRepresentative_Validation(t *testing.T) {
 	t.Run("Valid representative with full information", func(t *testing.T) {
-		rep := &Representative{
+		rep := &poa.Representative{
 			Identity:          "AI-Operator-123",
-			LegalRelationship: RelationshipOwner,
-			RegistrationInfo: &RegistrationInfo{
+			LegalRelationship: poa.RelationshipOwner,
+			RegistrationInfo: &poa.RegistrationInfo{
 				RegisteredName:        "AI Operator GmbH",
 				RegistrationNumber:    "HRB12345",
 				RegisteringAuthority:  "Amtsgericht Berlin",
@@ -233,7 +236,7 @@ func TestRepresentative_Validation(t *testing.T) {
 				CommercialRegister:    true,
 				PowerOfAttorneyOnFile: true,
 			},
-			AuthorizationChain: []AuthorizationLink{
+			AuthorizationChain: []poa.AuthorizationLink{
 				{
 					FromParty:     "Principal Corp",
 					ToParty:       "AI Operator GmbH",
@@ -243,7 +246,7 @@ func TestRepresentative_Validation(t *testing.T) {
 					SubDelegation: false,
 				},
 			},
-			ContactInformation: &ContactInformation{
+			ContactInformation: &poa.ContactInformation{
 				PrimaryContact: "Jane Doe",
 				Email:          "contact@ai-operator.example.com",
 				Phone:          "+49-30-12345678",
@@ -257,9 +260,9 @@ func TestRepresentative_Validation(t *testing.T) {
 	})
 
 	t.Run("Missing identity", func(t *testing.T) {
-		rep := &Representative{
+		rep := &poa.Representative{
 			Identity:          "",
-			LegalRelationship: RelationshipOwner,
+			LegalRelationship: poa.RelationshipOwner,
 		}
 
 		err := rep.Validate()
@@ -269,7 +272,7 @@ func TestRepresentative_Validation(t *testing.T) {
 	})
 
 	t.Run("Invalid legal relationship", func(t *testing.T) {
-		rep := &Representative{
+		rep := &poa.Representative{
 			Identity:          "AI-Operator-123",
 			LegalRelationship: "InvalidRelationship",
 		}
@@ -281,10 +284,10 @@ func TestRepresentative_Validation(t *testing.T) {
 	})
 
 	t.Run("Missing registration info fields", func(t *testing.T) {
-		rep := &Representative{
+		rep := &poa.Representative{
 			Identity:          "AI-Operator-123",
-			LegalRelationship: RelationshipOwner,
-			RegistrationInfo: &RegistrationInfo{
+			LegalRelationship: poa.RelationshipOwner,
+			RegistrationInfo: &poa.RegistrationInfo{
 				RegisteredName:     "AI Operator GmbH",
 				RegistrationNumber: "", // Missing
 				Jurisdiction:       "DE",
@@ -298,10 +301,10 @@ func TestRepresentative_Validation(t *testing.T) {
 	})
 
 	t.Run("Invalid authorization chain link", func(t *testing.T) {
-		rep := &Representative{
+		rep := &poa.Representative{
 			Identity:          "AI-Operator-123",
-			LegalRelationship: RelationshipOwner,
-			AuthorizationChain: []AuthorizationLink{
+			LegalRelationship: poa.RelationshipOwner,
+			AuthorizationChain: []poa.AuthorizationLink{
 				{
 					FromParty:   "Principal",
 					ToParty:     "", // Missing
@@ -318,10 +321,10 @@ func TestRepresentative_Validation(t *testing.T) {
 	})
 
 	t.Run("Missing contact information fields", func(t *testing.T) {
-		rep := &Representative{
+		rep := &poa.Representative{
 			Identity:          "AI-Operator-123",
-			LegalRelationship: RelationshipOwner,
-			ContactInformation: &ContactInformation{
+			LegalRelationship: poa.RelationshipOwner,
+			ContactInformation: &poa.ContactInformation{
 				PrimaryContact: "", // Missing
 				Email:          "test@example.com",
 			},
@@ -354,7 +357,7 @@ func TestAuthorizationChain_Validation(t *testing.T) {
 			},
 		}
 
-		err := ValidateAuthorizationChain(chain)
+		err := poa.ValidateAuthorizationChain(chain)
 		if err != nil {
 			t.Errorf("ValidateAuthorizationChain() error = %v, want nil", err)
 		}
@@ -363,7 +366,7 @@ func TestAuthorizationChain_Validation(t *testing.T) {
 	t.Run("Empty chain is valid", func(t *testing.T) {
 		chain := []AuthorizationLink{}
 
-		err := ValidateAuthorizationChain(chain)
+		err := poa.ValidateAuthorizationChain(chain)
 		if err != nil {
 			t.Errorf("ValidateAuthorizationChain() error = %v, want nil for empty chain", err)
 		}
@@ -387,7 +390,7 @@ func TestAuthorizationChain_Validation(t *testing.T) {
 			},
 		}
 
-		err := ValidateAuthorizationChain(chain)
+		err := poa.ValidateAuthorizationChain(chain)
 		if err == nil {
 			t.Error("ValidateAuthorizationChain() expected error for broken chain, got nil")
 		}
@@ -411,7 +414,7 @@ func TestAuthorizationChain_Validation(t *testing.T) {
 			},
 		}
 
-		err := ValidateAuthorizationChain(chain)
+		err := poa.ValidateAuthorizationChain(chain)
 		if err == nil {
 			t.Error("ValidateAuthorizationChain() expected error for unauthorized sub-delegation, got nil")
 		}
@@ -421,7 +424,7 @@ func TestAuthorizationChain_Validation(t *testing.T) {
 // TestGeographicScope_Validation tests geographic scope validation
 func TestGeographicScope_Validation(t *testing.T) {
 	t.Run("Valid global scope", func(t *testing.T) {
-		scope := &GeographicScope{
+		scope := &poa.GeographicScope{
 			Type: GeoTypeGlobal,
 			Name: "Global",
 		}
@@ -433,7 +436,7 @@ func TestGeographicScope_Validation(t *testing.T) {
 	})
 
 	t.Run("Valid national scope (Germany)", func(t *testing.T) {
-		scope := &GeographicScope{
+		scope := &poa.GeographicScope{
 			Type:       GeoTypeNational,
 			Identifier: "DE",
 			Name:       "Germany",
@@ -446,7 +449,7 @@ func TestGeographicScope_Validation(t *testing.T) {
 	})
 
 	t.Run("Valid subnational scope (Bavaria)", func(t *testing.T) {
-		scope := &GeographicScope{
+		scope := &poa.GeographicScope{
 			Type:       GeoTypeSubnational,
 			Identifier: "DE-BY",
 			Name:       "Bavaria",
@@ -459,7 +462,7 @@ func TestGeographicScope_Validation(t *testing.T) {
 	})
 
 	t.Run("Invalid geographic type", func(t *testing.T) {
-		scope := &GeographicScope{
+		scope := &poa.GeographicScope{
 			Type:       "InvalidType",
 			Identifier: "DE",
 		}
@@ -471,7 +474,7 @@ func TestGeographicScope_Validation(t *testing.T) {
 	})
 
 	t.Run("Missing identifier for national scope", func(t *testing.T) {
-		scope := &GeographicScope{
+		scope := &poa.GeographicScope{
 			Type:       GeoTypeNational,
 			Identifier: "",
 		}
@@ -483,7 +486,7 @@ func TestGeographicScope_Validation(t *testing.T) {
 	})
 
 	t.Run("Invalid ISO 3166-1 format", func(t *testing.T) {
-		scope := &GeographicScope{
+		scope := &poa.GeographicScope{
 			Type:       GeoTypeNational,
 			Identifier: "DEU", // Should be 2 chars
 		}
@@ -495,7 +498,7 @@ func TestGeographicScope_Validation(t *testing.T) {
 	})
 
 	t.Run("Lowercase country code", func(t *testing.T) {
-		scope := &GeographicScope{
+		scope := &poa.GeographicScope{
 			Type:       GeoTypeNational,
 			Identifier: "de", // Should be uppercase
 		}
@@ -507,7 +510,7 @@ func TestGeographicScope_Validation(t *testing.T) {
 	})
 
 	t.Run("Invalid ISO 3166-2 format", func(t *testing.T) {
-		scope := &GeographicScope{
+		scope := &poa.GeographicScope{
 			Type:       GeoTypeSubnational,
 			Identifier: "DEBY", // Missing hyphen
 		}
@@ -522,40 +525,40 @@ func TestGeographicScope_Validation(t *testing.T) {
 // TestGeographicScope_IsAuthorizedInRegion tests regional authorization
 func TestGeographicScope_IsAuthorizedInRegion(t *testing.T) {
 	t.Run("Global scope authorizes all regions", func(t *testing.T) {
-		scopes := []GeographicScope{
+		scopes := []poa.GeographicScope{
 			{Type: GeoTypeGlobal, Name: "Global"},
 		}
 
-		if !IsAuthorizedInRegion(scopes, "DE") {
+		if !poa.IsAuthorizedInRegion(scopes, "DE") {
 			t.Error("Expected global scope to authorize DE")
 		}
-		if !IsAuthorizedInRegion(scopes, "US") {
+		if !poa.IsAuthorizedInRegion(scopes, "US") {
 			t.Error("Expected global scope to authorize US")
 		}
-		if !IsAuthorizedInRegion(scopes, "JP") {
+		if !poa.IsAuthorizedInRegion(scopes, "JP") {
 			t.Error("Expected global scope to authorize JP")
 		}
 	})
 
 	t.Run("National scope exact match", func(t *testing.T) {
-		scopes := []GeographicScope{
+		scopes := []poa.GeographicScope{
 			{Type: GeoTypeNational, Identifier: "DE", Name: "Germany"},
 			{Type: GeoTypeNational, Identifier: "FR", Name: "France"},
 		}
 
-		if !IsAuthorizedInRegion(scopes, "DE") {
+		if !poa.IsAuthorizedInRegion(scopes, "DE") {
 			t.Error("Expected DE to be authorized")
 		}
-		if !IsAuthorizedInRegion(scopes, "FR") {
+		if !poa.IsAuthorizedInRegion(scopes, "FR") {
 			t.Error("Expected FR to be authorized")
 		}
-		if IsAuthorizedInRegion(scopes, "GB") {
+		if poa.IsAuthorizedInRegion(scopes, "GB") {
 			t.Error("Expected GB to NOT be authorized")
 		}
 	})
 
 	t.Run("Subnational scope with subdivisions", func(t *testing.T) {
-		scopes := []GeographicScope{
+		scopes := []poa.GeographicScope{
 			{
 				Type:                GeoTypeNational,
 				Identifier:          "DE",
@@ -563,23 +566,23 @@ func TestGeographicScope_IsAuthorizedInRegion(t *testing.T) {
 			},
 		}
 
-		if !IsAuthorizedInRegion(scopes, "DE") {
+		if !poa.IsAuthorizedInRegion(scopes, "DE") {
 			t.Error("Expected DE to be authorized")
 		}
-		if !IsAuthorizedInRegion(scopes, "DE-BY") {
+		if !poa.IsAuthorizedInRegion(scopes, "DE-BY") {
 			t.Error("Expected DE-BY to be authorized (subdivision)")
 		}
-		if !IsAuthorizedInRegion(scopes, "DE-NW") {
+		if !poa.IsAuthorizedInRegion(scopes, "DE-NW") {
 			t.Error("Expected DE-NW to be authorized (subdivision)")
 		}
 	})
 
 	t.Run("No matching scope", func(t *testing.T) {
-		scopes := []GeographicScope{
+		scopes := []poa.GeographicScope{
 			{Type: GeoTypeNational, Identifier: "FR", Name: "France"},
 		}
 
-		if IsAuthorizedInRegion(scopes, "DE") {
+		if poa.IsAuthorizedInRegion(scopes, "DE") {
 			t.Error("Expected DE to NOT be authorized")
 		}
 	})
@@ -588,8 +591,8 @@ func TestGeographicScope_IsAuthorizedInRegion(t *testing.T) {
 // TestAuthorizedClient_Validations tests authorized client helper methods
 func TestAuthorizedClient_Validations(t *testing.T) {
 	t.Run("CanOperate with active status", func(t *testing.T) {
-		client := &AuthorizedClient{
-			StatusEnum: OperationalStatusActive,
+		client := &poa.AuthorizedClient{
+			StatusEnum: poa.OperationalStatusActive,
 		}
 
 		if !client.CanOperate() {
@@ -598,8 +601,8 @@ func TestAuthorizedClient_Validations(t *testing.T) {
 	})
 
 	t.Run("CanOperate with testing status", func(t *testing.T) {
-		client := &AuthorizedClient{
-			StatusEnum: OperationalStatusTesting,
+		client := &poa.AuthorizedClient{
+			StatusEnum: poa.OperationalStatusTesting,
 		}
 
 		if !client.CanOperate() {
@@ -608,8 +611,8 @@ func TestAuthorizedClient_Validations(t *testing.T) {
 	})
 
 	t.Run("Cannot operate when revoked", func(t *testing.T) {
-		client := &AuthorizedClient{
-			StatusEnum: OperationalStatusRevoked,
+		client := &poa.AuthorizedClient{
+			StatusEnum: poa.OperationalStatusRevoked,
 		}
 
 		if client.CanOperate() {
@@ -618,8 +621,8 @@ func TestAuthorizedClient_Validations(t *testing.T) {
 	})
 
 	t.Run("Cannot operate when suspended", func(t *testing.T) {
-		client := &AuthorizedClient{
-			StatusEnum: OperationalStatusSuspended,
+		client := &poa.AuthorizedClient{
+			StatusEnum: poa.OperationalStatusSuspended,
 		}
 
 		if client.CanOperate() {
@@ -628,8 +631,8 @@ func TestAuthorizedClient_Validations(t *testing.T) {
 	})
 
 	t.Run("IsPhysicalSystem for humanoid robot", func(t *testing.T) {
-		client := &AuthorizedClient{
-			TypeEnum: ClientTypeHumanoidRobot,
+		client := &poa.AuthorizedClient{
+			TypeEnum: poa.ClientTypeHumanoidRobot,
 		}
 
 		if !client.IsPhysicalSystem() {
@@ -638,8 +641,8 @@ func TestAuthorizedClient_Validations(t *testing.T) {
 	})
 
 	t.Run("IsPhysicalSystem for robotic system", func(t *testing.T) {
-		client := &AuthorizedClient{
-			TypeEnum: ClientTypeRoboticSystem,
+		client := &poa.AuthorizedClient{
+			TypeEnum: poa.ClientTypeRoboticSystem,
 		}
 
 		if !client.IsPhysicalSystem() {
@@ -648,8 +651,8 @@ func TestAuthorizedClient_Validations(t *testing.T) {
 	})
 
 	t.Run("IsDigitalSystem for LLM", func(t *testing.T) {
-		client := &AuthorizedClient{
-			TypeEnum: ClientTypeLLM,
+		client := &poa.AuthorizedClient{
+			TypeEnum: poa.ClientTypeLLM,
 		}
 
 		if !client.IsDigitalSystem() {
@@ -661,8 +664,8 @@ func TestAuthorizedClient_Validations(t *testing.T) {
 	})
 
 	t.Run("RequiresTeamCoordination for agentic AI", func(t *testing.T) {
-		client := &AuthorizedClient{
-			TypeEnum: ClientTypeAgenticAI,
+		client := &poa.AuthorizedClient{
+			TypeEnum: poa.ClientTypeAgenticAI,
 		}
 
 		if !client.RequiresTeamCoordination() {
@@ -671,9 +674,9 @@ func TestAuthorizedClient_Validations(t *testing.T) {
 	})
 
 	t.Run("GetRiskLevel for high automation physical system", func(t *testing.T) {
-		client := &AuthorizedClient{
-			TypeEnum:        ClientTypeHumanoidRobot,
-			CapabilityLevel: CapabilityL5,
+		client := &poa.AuthorizedClient{
+			TypeEnum:        poa.ClientTypeHumanoidRobot,
+			CapabilityLevel: poa.CapabilityL5,
 		}
 
 		risk := client.GetRiskLevel()
@@ -685,18 +688,18 @@ func TestAuthorizedClient_Validations(t *testing.T) {
 
 // TestClientType_Validation tests client type validation
 func TestClientType_Validation(t *testing.T) {
-	validTypes := []ClientType{
-		ClientTypeLLM,
-		ClientTypeDigitalAgent,
-		ClientTypeAgenticAI,
-		ClientTypeHumanoidRobot,
-		ClientTypeRoboticSystem,
-		ClientTypeOther,
+	validTypes := []poa.ClientType{
+		poa.ClientTypeLLM,
+		poa.ClientTypeDigitalAgent,
+		poa.ClientTypeAgenticAI,
+		poa.ClientTypeHumanoidRobot,
+		poa.ClientTypeRoboticSystem,
+		poa.ClientTypeOther,
 	}
 
 	for _, ct := range validTypes {
 		t.Run(string(ct), func(t *testing.T) {
-			err := ValidateClientType(ct)
+			err := poa.ValidateClientType(ct)
 			if err != nil {
 				t.Errorf("ValidateClientType(%s) error = %v, want nil", ct, err)
 			}
@@ -704,7 +707,7 @@ func TestClientType_Validation(t *testing.T) {
 	}
 
 	t.Run("Invalid client type", func(t *testing.T) {
-		err := ValidateClientType("InvalidType")
+		err := poa.ValidateClientType("InvalidType")
 		if err == nil {
 			t.Error("ValidateClientType() expected error for invalid type, got nil")
 		}
@@ -713,18 +716,18 @@ func TestClientType_Validation(t *testing.T) {
 
 // TestOperationalStatus_Validation tests operational status validation
 func TestOperationalStatus_Validation(t *testing.T) {
-	validStatuses := []OperationalStatus{
-		OperationalStatusActive,
-		OperationalStatusSuspended,
-		OperationalStatusRevoked,
-		OperationalStatusMaintenance,
-		OperationalStatusTesting,
-		OperationalStatusDecommissioned,
+	validStatuses := []poa.OperationalStatus{
+		poa.OperationalStatusActive,
+		poa.OperationalStatusSuspended,
+		poa.OperationalStatusRevoked,
+		poa.OperationalStatusMaintenance,
+		poa.OperationalStatusTesting,
+		poa.OperationalStatusDecommissioned,
 	}
 
 	for _, status := range validStatuses {
 		t.Run(string(status), func(t *testing.T) {
-			err := ValidateOperationalStatus(status)
+			err := poa.ValidateOperationalStatus(status)
 			if err != nil {
 				t.Errorf("ValidateOperationalStatus(%s) error = %v, want nil", status, err)
 			}
@@ -732,7 +735,7 @@ func TestOperationalStatus_Validation(t *testing.T) {
 	}
 
 	t.Run("Invalid operational status", func(t *testing.T) {
-		err := ValidateOperationalStatus("InvalidStatus")
+		err := poa.ValidateOperationalStatus("InvalidStatus")
 		if err == nil {
 			t.Error("ValidateOperationalStatus() expected error for invalid status, got nil")
 		}
@@ -741,18 +744,18 @@ func TestOperationalStatus_Validation(t *testing.T) {
 
 // TestCapabilityLevel_Validation tests capability level validation
 func TestCapabilityLevel_Validation(t *testing.T) {
-	validLevels := []CapabilityLevel{
-		CapabilityL0,
-		CapabilityL1,
-		CapabilityL2,
-		CapabilityL3,
-		CapabilityL4,
-		CapabilityL5,
+	validLevels := []poa.CapabilityLevel{
+		poa.CapabilityL0,
+		poa.CapabilityL1,
+		poa.CapabilityL2,
+		poa.CapabilityL3,
+		poa.CapabilityL4,
+		poa.CapabilityL5,
 	}
 
 	for _, level := range validLevels {
 		t.Run(string(level), func(t *testing.T) {
-			err := ValidateCapabilityLevel(level)
+			err := poa.ValidateCapabilityLevel(level)
 			if err != nil {
 				t.Errorf("ValidateCapabilityLevel(%s) error = %v, want nil", level, err)
 			}
@@ -760,14 +763,14 @@ func TestCapabilityLevel_Validation(t *testing.T) {
 	}
 
 	t.Run("Empty capability level is valid (optional)", func(t *testing.T) {
-		err := ValidateCapabilityLevel("")
+		err := poa.ValidateCapabilityLevel("")
 		if err != nil {
 			t.Error("ValidateCapabilityLevel(\"\") expected nil for empty level, got error")
 		}
 	})
 
 	t.Run("Invalid capability level", func(t *testing.T) {
-		err := ValidateCapabilityLevel("InvalidLevel")
+		err := poa.ValidateCapabilityLevel("InvalidLevel")
 		if err == nil {
 			t.Error("ValidateCapabilityLevel() expected error for invalid level, got nil")
 		}
@@ -776,21 +779,21 @@ func TestCapabilityLevel_Validation(t *testing.T) {
 
 // TestLegalRelationship_Validation tests legal relationship validation
 func TestLegalRelationship_Validation(t *testing.T) {
-	validRelationships := []LegalRelationship{
-		RelationshipOwner,
-		RelationshipOperator,
-		RelationshipLicensee,
-		RelationshipContractor,
-		RelationshipServiceProvider,
-		RelationshipManufacturer,
-		RelationshipDistributor,
-		RelationshipAgent,
-		RelationshipOther,
+	validRelationships := []poa.LegalRelationship{
+		poa.RelationshipOwner,
+		poa.RelationshipOperator,
+		poa.RelationshipLicensee,
+		poa.RelationshipContractor,
+		poa.RelationshipServiceProvider,
+		poa.RelationshipManufacturer,
+		poa.RelationshipDistributor,
+		poa.RelationshipAgent,
+		poa.RelationshipOther,
 	}
 
 	for _, lr := range validRelationships {
 		t.Run(string(lr), func(t *testing.T) {
-			err := ValidateLegalRelationship(lr)
+			err := poa.ValidateLegalRelationship(lr)
 			if err != nil {
 				t.Errorf("ValidateLegalRelationship(%s) error = %v, want nil", lr, err)
 			}
@@ -798,7 +801,7 @@ func TestLegalRelationship_Validation(t *testing.T) {
 	}
 
 	t.Run("Invalid legal relationship", func(t *testing.T) {
-		err := ValidateLegalRelationship("InvalidRelationship")
+		err := poa.ValidateLegalRelationship("InvalidRelationship")
 		if err == nil {
 			t.Error("ValidateLegalRelationship() expected error for invalid relationship, got nil")
 		}
@@ -810,67 +813,67 @@ func TestValidityPeriod_TemporalConstraints(t *testing.T) {
 	now := time.Now()
 
 	t.Run("Valid future validity period", func(t *testing.T) {
-		vp := ValidityPeriod{
+		vp := poa.ValidityPeriod{
 			StartTime: now,
 			EndTime:   now.Add(365 * 24 * time.Hour),
 		}
 
 		// Create a minimal PoA definition to test validity period
-		def := PoADefinition{
-			Parties: Parties{
-				Principal:        Principal{Identity: "test-principal", Type: PrincipalTypeOrganization},
-				AuthorizedClient: AuthorizedClient{Identity: "test-client", TypeEnum: ClientTypeLLM},
+		def := poa.PoADefinition{
+			Parties: poa.Parties{
+				Principal:        poa.Principal{Identity: "test-principal", Type: poa.PrincipalTypeOrganization},
+				AuthorizedClient: poa.AuthorizedClient{Identity: "test-client", TypeEnum: poa.ClientTypeLLM},
 			},
-			Requirements: Requirements{
+			Requirements: poa.Requirements{
 				ValidityPeriod: vp,
 			},
 		}
 
-		err := ValidatePoADefinition(def)
+		err := poa.ValidatePoADefinition(def)
 		if err != nil {
 			t.Errorf("Expected valid future period, got error: %v", err)
 		}
 	})
 
 	t.Run("Valid past start with future end", func(t *testing.T) {
-		vp := ValidityPeriod{
+		vp := poa.ValidityPeriod{
 			StartTime: now.Add(-30 * 24 * time.Hour),
 			EndTime:   now.Add(30 * 24 * time.Hour),
 		}
 
-		def := PoADefinition{
-			Parties: Parties{
-				Principal:        Principal{Identity: "test-principal", Type: PrincipalTypeOrganization},
-				AuthorizedClient: AuthorizedClient{Identity: "test-client", TypeEnum: ClientTypeLLM},
+		def := poa.PoADefinition{
+			Parties: poa.Parties{
+				Principal:        poa.Principal{Identity: "test-principal", Type: poa.PrincipalTypeOrganization},
+				AuthorizedClient: poa.AuthorizedClient{Identity: "test-client", TypeEnum: poa.ClientTypeLLM},
 			},
-			Requirements: Requirements{
+			Requirements: poa.Requirements{
 				ValidityPeriod: vp,
 			},
 		}
 
-		err := ValidatePoADefinition(def)
+		err := poa.ValidatePoADefinition(def)
 		if err != nil {
 			t.Errorf("Expected valid period with past start, got error: %v", err)
 		}
 	})
 
 	t.Run("Invalid: end before start", func(t *testing.T) {
-		vp := ValidityPeriod{
+		vp := poa.ValidityPeriod{
 			StartTime: now,
 			EndTime:   now.Add(-24 * time.Hour),
 		}
 
-		def := PoADefinition{
-			Parties: Parties{
-				Principal:        Principal{Identity: "test-principal", Type: PrincipalTypeOrganization},
-				AuthorizedClient: AuthorizedClient{Identity: "test-client", TypeEnum: ClientTypeLLM},
+		def := poa.PoADefinition{
+			Parties: poa.Parties{
+				Principal:        poa.Principal{Identity: "test-principal", Type: poa.PrincipalTypeOrganization},
+				AuthorizedClient: poa.AuthorizedClient{Identity: "test-client", TypeEnum: poa.ClientTypeLLM},
 			},
-			Requirements: Requirements{
+			Requirements: poa.Requirements{
 				ValidityPeriod: vp,
 			},
 		}
 
-		err := ValidatePoADefinition(def)
+		err := poa.ValidatePoADefinition(def)
 		if err == nil {
 			t.Error("Expected error for end before start, got nil")
 		}
@@ -879,14 +882,14 @@ func TestValidityPeriod_TemporalConstraints(t *testing.T) {
 
 // BenchmarkValidatePoADefinition benchmarks PoA validation
 func BenchmarkValidatePoADefinition(b *testing.B) {
-	def := PoADefinition{
-		Parties: Parties{
-			Principal: Principal{
-				Type:     PrincipalTypeOrganization,
+	def := poa.PoADefinition{
+		Parties: poa.Parties{
+			Principal: poa.Principal{
+				Type:     poa.PrincipalTypeOrganization,
 				Identity: "DE:HRB:12345",
 			},
-			AuthorizedClient: AuthorizedClient{
-				TypeEnum: ClientTypeLLM,
+			AuthorizedClient: poa.AuthorizedClient{
+				TypeEnum: poa.ClientTypeLLM,
 				Identity: "client-001",
 			},
 		},

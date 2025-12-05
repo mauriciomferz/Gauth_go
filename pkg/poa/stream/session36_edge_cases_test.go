@@ -1,9 +1,11 @@
-package poa
+package stream
 
 import (
 	"context"
 	"strings"
 	"testing"
+
+	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
 
 // TestEncodeRawPOAChain_LargeItems tests encoding of large items
@@ -219,10 +221,10 @@ func TestMarshalCBORItem_Comprehensive(t *testing.T) {
 // TestMemoryService_ContextVariations tests various context scenarios
 func TestMemoryService_ContextVariations(t *testing.T) {
 	ctx := context.Background()
-	svc := NewMemoryService()
+	svc := poa.NewMemoryService()
 
 	t.Run("Empty context map", func(t *testing.T) {
-		req := &Request{
+		req := &poa.Request{
 			Subject:  "user_001",
 			Resource: "resource_001",
 			Action:   "read",
@@ -239,7 +241,7 @@ func TestMemoryService_ContextVariations(t *testing.T) {
 	})
 
 	t.Run("Nil context", func(t *testing.T) {
-		req := &Request{
+		req := &poa.Request{
 			Subject:  "user_002",
 			Resource: "resource_002",
 			Action:   "write",
@@ -256,7 +258,7 @@ func TestMemoryService_ContextVariations(t *testing.T) {
 	})
 
 	t.Run("Context with nested structures", func(t *testing.T) {
-		req := &Request{
+		req := &poa.Request{
 			Subject:  "user_003",
 			Resource: "resource_003",
 			Action:   "execute",
@@ -278,7 +280,7 @@ func TestMemoryService_ContextVariations(t *testing.T) {
 	})
 
 	t.Run("Multiple scopes", func(t *testing.T) {
-		req := &Request{
+		req := &poa.Request{
 			Subject:  "user_004",
 			Resource: "resource_004",
 			Action:   "manage",
@@ -298,7 +300,7 @@ func TestMemoryService_ContextVariations(t *testing.T) {
 	})
 
 	t.Run("Empty scope array", func(t *testing.T) {
-		req := &Request{
+		req := &poa.Request{
 			Subject:  "user_005",
 			Resource: "resource_005",
 			Action:   "read",

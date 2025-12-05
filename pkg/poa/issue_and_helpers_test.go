@@ -583,11 +583,6 @@ func TestVerifyMultiSig_WithValidSignature(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create manager: %v", err)
 	}
-	internalCrypto.GlobalEdDSARegistry = km
-	defer func() {
-		internalCrypto.GlobalEdDSARegistry = nil
-	}()
-
 	// Get active key
 	activeKey := km.Active()
 	if activeKey == nil {
@@ -616,7 +611,7 @@ func TestVerifyMultiSig_WithValidSignature(t *testing.T) {
 	poa.Signatures = []string{base64.RawStdEncoding.EncodeToString(sig)}
 
 	// Verify
-	valid, satisfied, threshold := VerifyMultiSig(poa, internalCrypto.GlobalEdDSARegistry)
+	valid, satisfied, threshold := VerifyMultiSig(poa, km)
 
 	if valid != 1 {
 		t.Errorf("VerifyMultiSig() valid = %v, want 1", valid)
@@ -642,11 +637,6 @@ func TestVerifyMultiSig_MultipleSignatures(t *testing.T) {
 			t.Fatalf("rotate %d: %v", i+1, err)
 		}
 	}
-	internalCrypto.GlobalEdDSARegistry = km
-	defer func() {
-		internalCrypto.GlobalEdDSARegistry = nil
-	}()
-
 	// Get available keys
 	keys := km.ListCurrent()
 	if len(keys) < 3 {
@@ -680,7 +670,7 @@ func TestVerifyMultiSig_MultipleSignatures(t *testing.T) {
 	}
 
 	// Verify
-	valid, satisfied, threshold := VerifyMultiSig(poa, internalCrypto.GlobalEdDSARegistry)
+	valid, satisfied, threshold := VerifyMultiSig(poa, km)
 
 	if valid != 3 {
 		t.Errorf("VerifyMultiSig() valid = %v, want 3", valid)
@@ -704,11 +694,6 @@ func TestVerifyMultiSig_InsufficientSignatures(t *testing.T) {
 	if _, err := km.Rotate(); err != nil {
 		t.Fatalf("rotate: %v", err)
 	}
-	internalCrypto.GlobalEdDSARegistry = km
-	defer func() {
-		internalCrypto.GlobalEdDSARegistry = nil
-	}()
-
 	// Get available keys
 	keys := km.ListCurrent()
 	if len(keys) < 2 {
@@ -742,7 +727,7 @@ func TestVerifyMultiSig_InsufficientSignatures(t *testing.T) {
 	}
 
 	// Verify
-	valid, satisfied, threshold := VerifyMultiSig(poa, internalCrypto.GlobalEdDSARegistry)
+	valid, satisfied, threshold := VerifyMultiSig(poa, km)
 
 	if valid != 2 {
 		t.Errorf("VerifyMultiSig() valid = %v, want 2", valid)

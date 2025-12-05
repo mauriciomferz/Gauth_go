@@ -17,6 +17,7 @@ import (
 
 	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/pkg/errors"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
 )
 
 // Simplified local POA status constants (legacy compatibility subset)
@@ -196,7 +197,7 @@ func (ac *AuthorizedClient) GetRiskLevel() string {
 		case CapabilityL3:
 			return "medium-high"
 		case CapabilityL1, CapabilityL2:
-			return string(RiskMedium)
+			return string(taxonomy.RiskMedium)
 		default:
 			return "low"
 		}
@@ -205,7 +206,7 @@ func (ac *AuthorizedClient) GetRiskLevel() string {
 	case CapabilityL5:
 		return "medium-high"
 	case CapabilityL4:
-		return string(RiskMedium)
+		return string(taxonomy.RiskMedium)
 	case CapabilityL2, CapabilityL3:
 		return "medium-low"
 	default:
@@ -288,7 +289,7 @@ func (ac *AuthorizedClient) Validate() error {
 
 type AuthorizationScope struct {
 	AuthorizationType AuthorizationType
-	ApplicableSectors []IndustrySector // RFC-0115 B.2 Industry Sector (uses full struct from sector_taxonomy.go)
+	ApplicableSectors []taxonomy.IndustrySector // RFC-0115 B.2 Industry Sector (uses full struct from sector_taxonomy.go)
 	ApplicableRegions []GeographicScope
 	AuthorizedActions AuthorizedActions
 }
@@ -412,17 +413,26 @@ func IsAuthorizedInRegion(scopes []GeographicScope, checkRegion string) bool {
 }
 
 type AuthorizedActions struct {
-	Transactions       []TransactionType       // RFC-0115 B.4.1 Transaction types
-	Decisions          []DecisionType          // RFC-0115 B.4.2 Decision types
-	PhysicalActions    []ActionTypePhysical    // RFC-0115 B.4.3 Physical action types
-	NonPhysicalActions []ActionTypeNonPhysical // RFC-0115 B.4.4 Non-physical action types
+	Transactions       []taxonomy.TransactionType       // RFC-0115 B.4.1 Transaction types
+	Decisions          []taxonomy.DecisionType          // RFC-0115 B.4.2 Decision types
+	PhysicalActions    []taxonomy.ActionTypePhysical    // RFC-0115 B.4.3 Physical action types
+	NonPhysicalActions []taxonomy.ActionTypeNonPhysical // RFC-0115 B.4.4 Non-physical action types
 }
 
 // Legacy type aliases for backward compatibility
 type (
-	Transaction       = TransactionType
-	Decision          = DecisionType
-	NonPhysicalAction = ActionTypeNonPhysical
+	Transaction           = taxonomy.TransactionType
+	TransactionType       = taxonomy.TransactionType
+	Decision              = taxonomy.DecisionType
+	DecisionType          = taxonomy.DecisionType
+	NonPhysicalAction     = taxonomy.ActionTypeNonPhysical
+	ActionTypeNonPhysical = taxonomy.ActionTypeNonPhysical
+	ActionTypePhysical    = taxonomy.ActionTypePhysical
+
+	SectorScope = taxonomy.SectorScope
+	// AuthorizedActionSet refers to the taxonomy struct with allow_all flags
+	AuthorizedActionSet = taxonomy.AuthorizedActionSet
+	IndustrySector      = taxonomy.IndustrySector
 )
 
 type Requirements struct {
@@ -735,18 +745,18 @@ const (
 
 // Helper functions to create IndustrySector instances for demo compatibility
 var (
-	DemoSectorInfoComm = IndustrySector{
-		Code:        SectorInfoCommunication,
+	DemoSectorInfoComm = taxonomy.IndustrySector{
+		Code:        taxonomy.SectorInfoCommunication,
 		Description: "Information and Communication",
 		Authorized:  true,
 	}
-	DemoSectorProfessional = IndustrySector{
-		Code:        SectorProfessionalScience,
+	DemoSectorProfessional = taxonomy.IndustrySector{
+		Code:        taxonomy.SectorProfessionalScience,
 		Description: "Professional, Scientific and Technical Activities",
 		Authorized:  true,
 	}
-	DemoSectorFinancial = IndustrySector{
-		Code:        SectorFinanceInsurance,
+	DemoSectorFinancial = taxonomy.IndustrySector{
+		Code:        taxonomy.SectorFinanceInsurance,
 		Description: "Financial and Insurance Activities",
 		Authorized:  true,
 	}
@@ -847,9 +857,9 @@ type ProofOfAuthorization struct {
 	// PoADefinitionID links to the RFC-0115 PoA definition used for this authorization
 	PoADefinitionID string `json:"poa_definition_id,omitempty"`
 	// SectorScopeRef references authorized industry sectors per RFC-0115 B.2
-	SectorScopeRef *SectorScope `json:"sector_scope_ref,omitempty"`
+	SectorScopeRef *taxonomy.SectorScope `json:"sector_scope_ref,omitempty"`
 	// AuthorizedActionsRef references authorized action types per RFC-0115 B.4
-	AuthorizedActionsRef *AuthorizedActionSet `json:"authorized_actions_ref,omitempty"`
+	AuthorizedActionsRef *taxonomy.AuthorizedActionSet `json:"authorized_actions_ref,omitempty"`
 	// PowerLimitRefs references power limitations per RFC-0115 C.2
 	PowerLimitRefs *PowerLimitSet `json:"power_limit_refs,omitempty"`
 	// ObligationRefs references rights and obligations per RFC-0115 C.3
@@ -1094,7 +1104,7 @@ func ValidateRFC0115Token(poa *ProofOfAuthorization) error {
 		}
 		// Validate each sector
 		for i, sector := range poa.SectorScopeRef.Sectors {
-			if err := ValidateSectorCode(sector.Code); err != nil {
+			if err := taxonomy.ValidateSectorCode(sector.Code); err != nil {
 				return fmt.Errorf("sector scope sector %d: %w", i, err)
 			}
 		}

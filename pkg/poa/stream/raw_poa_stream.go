@@ -1,4 +1,4 @@
-package poa
+package stream
 
 // Task 8: RawPOA & CBOR Stream
 // Implements canonical RawPOA serialization and streaming CBOR decoding with incremental hashing.

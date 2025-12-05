@@ -1,4 +1,4 @@
-package poa
+package stream
 
 import (
 	"bytes"

@@ -3,6 +3,8 @@ package poa
 import (
 	"testing"
 	"time"
+
+	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
 )
 
 // TestPoADefinition_CompleteValidation tests full PoA definition validation
@@ -83,14 +85,14 @@ func TestPoADefinition_CompleteValidation(t *testing.T) {
 					SubProxyAuthority:  false,
 					Restrictions:       []string{"no_financial_transactions_above_10000_EUR"},
 				},
-				ApplicableSectors: []IndustrySector{
+				ApplicableSectors: []taxonomy.IndustrySector{
 					{
-						Code:        SectorInfoCommunication,
+						Code:        taxonomy.SectorInfoCommunication,
 						Description: "Information and Communication",
 						Authorized:  true,
 					},
 					{
-						Code:        SectorProfessionalScience,
+						Code:        taxonomy.SectorProfessionalScience,
 						Description: "Professional, Scientific and Technical Activities",
 						Authorized:  true,
 					},
@@ -108,16 +110,16 @@ func TestPoADefinition_CompleteValidation(t *testing.T) {
 					},
 				},
 				AuthorizedActions: AuthorizedActions{
-					Transactions: []TransactionType{
-						TransactionPurchase,
-						TransactionPayment,
+					Transactions: []taxonomy.TransactionType{
+						taxonomy.TransactionPurchase,
+						taxonomy.TransactionPayment,
 					},
-					Decisions: []DecisionType{
-						DecisionOperational,
+					Decisions: []taxonomy.DecisionType{
+						taxonomy.DecisionOperational,
 					},
-					NonPhysicalActions: []ActionTypeNonPhysical{
-						ActionNonPhysicalResearching,
-						ActionNonPhysicalDataAggregation,
+					NonPhysicalActions: []taxonomy.ActionTypeNonPhysical{
+						taxonomy.ActionNonPhysicalResearching,
+						taxonomy.ActionNonPhysicalDataAggregation,
 					},
 				},
 			},

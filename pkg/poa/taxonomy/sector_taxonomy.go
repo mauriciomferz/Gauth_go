@@ -1,5 +1,5 @@
 // Package poa provides Power-of-Attorney functionality including sector taxonomy
-package poa
+package taxonomy
 
 import "fmt"
 

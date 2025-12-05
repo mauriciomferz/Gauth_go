@@ -4,7 +4,7 @@
 // - Compliance checking and validation
 // - Hierarchical action relationships
 // - Action scope and impact analysis
-package poa
+package taxonomy
 
 import (
 	"fmt"
