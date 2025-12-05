@@ -162,7 +162,7 @@ func TestPoADefinition_CompleteValidation(t *testing.T) {
 		def := poa.PoADefinition{
 			Parties: poa.Parties{
 				Principal:        poa.Principal{Identity: "", Type: poa.PrincipalTypeOrganization},
-				AuthorizedClient: poa.AuthorizedClient{Identity: "client-1", TypeEnum: taxonomy.ClientTypeLLM},
+				AuthorizedClient: poa.AuthorizedClient{Identity: "client-1", TypeEnum: poa.ClientTypeLLM},
 			},
 			Requirements: poa.Requirements{
 				ValidityPeriod: poa.ValidityPeriod{
@@ -182,7 +182,7 @@ func TestPoADefinition_CompleteValidation(t *testing.T) {
 		def := poa.PoADefinition{
 			Parties: poa.Parties{
 				Principal:        poa.Principal{Identity: "principal-1", Type: poa.PrincipalTypeOrganization},
-				AuthorizedClient: poa.AuthorizedClient{Identity: "", TypeEnum: taxonomy.ClientTypeLLM},
+				AuthorizedClient: poa.AuthorizedClient{Identity: "", TypeEnum: poa.ClientTypeLLM},
 			},
 			Requirements: poa.Requirements{
 				ValidityPeriod: poa.ValidityPeriod{
@@ -203,7 +203,7 @@ func TestPoADefinition_CompleteValidation(t *testing.T) {
 		def := poa.PoADefinition{
 			Parties: poa.Parties{
 				Principal:        poa.Principal{Identity: "principal-1", Type: poa.PrincipalTypeOrganization},
-				AuthorizedClient: poa.AuthorizedClient{Identity: "client-1", TypeEnum: taxonomy.ClientTypeLLM},
+				AuthorizedClient: poa.AuthorizedClient{Identity: "client-1", TypeEnum: poa.ClientTypeLLM},
 			},
 			Requirements: poa.Requirements{
 				ValidityPeriod: poa.ValidityPeriod{
@@ -340,7 +340,7 @@ func TestRepresentative_Validation(t *testing.T) {
 // TestAuthorizationChain_Validation tests authorization chain validation
 func TestAuthorizationChain_Validation(t *testing.T) {
 	t.Run("Valid continuous chain", func(t *testing.T) {
-		chain := []AuthorizationLink{
+		chain := []poa.AuthorizationLink{
 			{
 				FromParty:     "PartyA",
 				ToParty:       "PartyB",
@@ -364,7 +364,7 @@ func TestAuthorizationChain_Validation(t *testing.T) {
 	})
 
 	t.Run("Empty chain is valid", func(t *testing.T) {
-		chain := []AuthorizationLink{}
+		chain := []poa.AuthorizationLink{}
 
 		err := poa.ValidateAuthorizationChain(chain)
 		if err != nil {
@@ -373,7 +373,7 @@ func TestAuthorizationChain_Validation(t *testing.T) {
 	})
 
 	t.Run("Broken chain continuity", func(t *testing.T) {
-		chain := []AuthorizationLink{
+		chain := []poa.AuthorizationLink{
 			{
 				FromParty:     "PartyA",
 				ToParty:       "PartyB",
@@ -397,7 +397,7 @@ func TestAuthorizationChain_Validation(t *testing.T) {
 	})
 
 	t.Run("Unauthorized sub-delegation", func(t *testing.T) {
-		chain := []AuthorizationLink{
+		chain := []poa.AuthorizationLink{
 			{
 				FromParty:     "PartyA",
 				ToParty:       "PartyB",
@@ -425,7 +425,7 @@ func TestAuthorizationChain_Validation(t *testing.T) {
 func TestGeographicScope_Validation(t *testing.T) {
 	t.Run("Valid global scope", func(t *testing.T) {
 		scope := &poa.GeographicScope{
-			Type: GeoTypeGlobal,
+			Type: poa.GeoTypeGlobal,
 			Name: "Global",
 		}
 
@@ -437,7 +437,7 @@ func TestGeographicScope_Validation(t *testing.T) {
 
 	t.Run("Valid national scope (Germany)", func(t *testing.T) {
 		scope := &poa.GeographicScope{
-			Type:       GeoTypeNational,
+			Type:       poa.GeoTypeNational,
 			Identifier: "DE",
 			Name:       "Germany",
 		}
@@ -450,7 +450,7 @@ func TestGeographicScope_Validation(t *testing.T) {
 
 	t.Run("Valid subnational scope (Bavaria)", func(t *testing.T) {
 		scope := &poa.GeographicScope{
-			Type:       GeoTypeSubnational,
+			Type:       poa.GeoTypeSubnational,
 			Identifier: "DE-BY",
 			Name:       "Bavaria",
 		}
@@ -475,7 +475,7 @@ func TestGeographicScope_Validation(t *testing.T) {
 
 	t.Run("Missing identifier for national scope", func(t *testing.T) {
 		scope := &poa.GeographicScope{
-			Type:       GeoTypeNational,
+			Type:       poa.GeoTypeNational,
 			Identifier: "",
 		}
 
@@ -487,7 +487,7 @@ func TestGeographicScope_Validation(t *testing.T) {
 
 	t.Run("Invalid ISO 3166-1 format", func(t *testing.T) {
 		scope := &poa.GeographicScope{
-			Type:       GeoTypeNational,
+			Type:       poa.GeoTypeNational,
 			Identifier: "DEU", // Should be 2 chars
 		}
 
@@ -499,7 +499,7 @@ func TestGeographicScope_Validation(t *testing.T) {
 
 	t.Run("Lowercase country code", func(t *testing.T) {
 		scope := &poa.GeographicScope{
-			Type:       GeoTypeNational,
+			Type:       poa.GeoTypeNational,
 			Identifier: "de", // Should be uppercase
 		}
 
@@ -511,7 +511,7 @@ func TestGeographicScope_Validation(t *testing.T) {
 
 	t.Run("Invalid ISO 3166-2 format", func(t *testing.T) {
 		scope := &poa.GeographicScope{
-			Type:       GeoTypeSubnational,
+			Type:       poa.GeoTypeSubnational,
 			Identifier: "DEBY", // Missing hyphen
 		}
 
@@ -526,7 +526,7 @@ func TestGeographicScope_Validation(t *testing.T) {
 func TestGeographicScope_IsAuthorizedInRegion(t *testing.T) {
 	t.Run("Global scope authorizes all regions", func(t *testing.T) {
 		scopes := []poa.GeographicScope{
-			{Type: GeoTypeGlobal, Name: "Global"},
+			{Type: poa.GeoTypeGlobal, Name: "Global"},
 		}
 
 		if !poa.IsAuthorizedInRegion(scopes, "DE") {
@@ -542,8 +542,8 @@ func TestGeographicScope_IsAuthorizedInRegion(t *testing.T) {
 
 	t.Run("National scope exact match", func(t *testing.T) {
 		scopes := []poa.GeographicScope{
-			{Type: GeoTypeNational, Identifier: "DE", Name: "Germany"},
-			{Type: GeoTypeNational, Identifier: "FR", Name: "France"},
+			{Type: poa.GeoTypeNational, Identifier: "DE", Name: "Germany"},
+			{Type: poa.GeoTypeNational, Identifier: "FR", Name: "France"},
 		}
 
 		if !poa.IsAuthorizedInRegion(scopes, "DE") {
@@ -560,7 +560,7 @@ func TestGeographicScope_IsAuthorizedInRegion(t *testing.T) {
 	t.Run("Subnational scope with subdivisions", func(t *testing.T) {
 		scopes := []poa.GeographicScope{
 			{
-				Type:                GeoTypeNational,
+				Type:                poa.GeoTypeNational,
 				Identifier:          "DE",
 				IncludeSubdivisions: true,
 			},
@@ -579,7 +579,7 @@ func TestGeographicScope_IsAuthorizedInRegion(t *testing.T) {
 
 	t.Run("No matching scope", func(t *testing.T) {
 		scopes := []poa.GeographicScope{
-			{Type: GeoTypeNational, Identifier: "FR", Name: "France"},
+			{Type: poa.GeoTypeNational, Identifier: "FR", Name: "France"},
 		}
 
 		if poa.IsAuthorizedInRegion(scopes, "DE") {
@@ -893,8 +893,8 @@ func BenchmarkValidatePoADefinition(b *testing.B) {
 				Identity: "client-001",
 			},
 		},
-		Requirements: Requirements{
-			ValidityPeriod: ValidityPeriod{
+		Requirements: poa.Requirements{
+			ValidityPeriod: poa.ValidityPeriod{
 				StartTime: time.Now(),
 				EndTime:   time.Now().Add(365 * 24 * time.Hour),
 			},
@@ -903,21 +903,21 @@ func BenchmarkValidatePoADefinition(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_ = ValidatePoADefinition(def)
+		_ = poa.ValidatePoADefinition(def)
 	}
 }
 
 // BenchmarkRepresentativeValidate benchmarks representative validation
 func BenchmarkRepresentativeValidate(b *testing.B) {
-	rep := &Representative{
+	rep := &poa.Representative{
 		Identity:          "AI-Operator-123",
-		LegalRelationship: RelationshipOwner,
-		RegistrationInfo: &RegistrationInfo{
+		LegalRelationship: poa.RelationshipOwner,
+		RegistrationInfo: &poa.RegistrationInfo{
 			RegisteredName:     "AI Operator GmbH",
 			RegistrationNumber: "HRB12345",
 			Jurisdiction:       "DE",
 		},
-		ContactInformation: &ContactInformation{
+		ContactInformation: &poa.ContactInformation{
 			PrimaryContact: "Contact Name",
 			Email:          "contact@example.com",
 		},
@@ -931,7 +931,7 @@ func BenchmarkRepresentativeValidate(b *testing.B) {
 
 // BenchmarkValidateAuthorizationChain benchmarks authorization chain validation
 func BenchmarkValidateAuthorizationChain(b *testing.B) {
-	chain := []AuthorizationLink{
+	chain := []poa.AuthorizationLink{
 		{
 			FromParty:     "PartyA",
 			ToParty:       "PartyB",
@@ -950,14 +950,14 @@ func BenchmarkValidateAuthorizationChain(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_ = ValidateAuthorizationChain(chain)
+		_ = poa.ValidateAuthorizationChain(chain)
 	}
 }
 
 // BenchmarkGeographicScopeValidate benchmarks geographic scope validation
 func BenchmarkGeographicScopeValidate(b *testing.B) {
-	scope := &GeographicScope{
-		Type:       GeoTypeNational,
+	scope := &poa.GeographicScope{
+		Type:       poa.GeoTypeNational,
 		Identifier: "DE",
 		Name:       "Germany",
 	}

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
 )
 
 // TestGeographicScopeValidation_Success tests successful validation when jurisdiction is authorized
@@ -30,8 +31,8 @@ func TestGeographicScopeValidation_Success(t *testing.T) {
 				},
 			},
 			AuthorizedActions: poa.AuthorizedActions{
-				NonPhysicalActions: []poa.ActionTypeNonPhysical{
-					poa.ActionNonPhysicalAnalyzing,
+				NonPhysicalActions: []taxonomy.ActionTypeNonPhysical{
+					taxonomy.ActionNonPhysicalAnalyzing,
 				},
 			},
 		},
@@ -56,8 +57,8 @@ func TestGeographicScopeValidation_Success(t *testing.T) {
 
 	// Validate
 	result := &RequestComplianceResult{
-		Valid:   true,
-		Checks:  make(map[string]bool),
+		Valid:    true,
+		Checks:   make(map[string]bool),
 		Warnings: []string{},
 	}
 
@@ -92,8 +93,8 @@ func TestGeographicScopeValidation_Failure(t *testing.T) {
 				},
 			},
 			AuthorizedActions: poa.AuthorizedActions{
-				NonPhysicalActions: []poa.ActionTypeNonPhysical{
-					poa.ActionNonPhysicalAnalyzing,
+				NonPhysicalActions: []taxonomy.ActionTypeNonPhysical{
+					taxonomy.ActionNonPhysicalAnalyzing,
 				},
 			},
 		},
@@ -118,8 +119,8 @@ func TestGeographicScopeValidation_Failure(t *testing.T) {
 
 	// Validate
 	result := &RequestComplianceResult{
-		Valid:   true,
-		Checks:  make(map[string]bool),
+		Valid:    true,
+		Checks:   make(map[string]bool),
 		Warnings: []string{},
 	}
 
@@ -159,8 +160,8 @@ func TestGeographicScopeValidation_GlobalScope(t *testing.T) {
 				},
 			},
 			AuthorizedActions: poa.AuthorizedActions{
-				NonPhysicalActions: []poa.ActionTypeNonPhysical{
-					poa.ActionNonPhysicalAnalyzing,
+				NonPhysicalActions: []taxonomy.ActionTypeNonPhysical{
+					taxonomy.ActionNonPhysicalAnalyzing,
 				},
 			},
 		},
@@ -187,8 +188,8 @@ func TestGeographicScopeValidation_GlobalScope(t *testing.T) {
 		}
 
 		result := &RequestComplianceResult{
-			Valid:   true,
-			Checks:  make(map[string]bool),
+			Valid:    true,
+			Checks:   make(map[string]bool),
 			Warnings: []string{},
 		}
 
@@ -219,8 +220,8 @@ func TestGeographicScopeValidation_NoScopeStrict(t *testing.T) {
 		Authorization: poa.AuthorizationScope{
 			ApplicableRegions: []poa.GeographicScope{}, // Empty!
 			AuthorizedActions: poa.AuthorizedActions{
-				NonPhysicalActions: []poa.ActionTypeNonPhysical{
-					poa.ActionNonPhysicalAnalyzing,
+				NonPhysicalActions: []taxonomy.ActionTypeNonPhysical{
+					taxonomy.ActionNonPhysicalAnalyzing,
 				},
 			},
 		},
@@ -243,8 +244,8 @@ func TestGeographicScopeValidation_NoScopeStrict(t *testing.T) {
 	}
 
 	result := &RequestComplianceResult{
-		Valid:   true,
-		Checks:  make(map[string]bool),
+		Valid:    true,
+		Checks:   make(map[string]bool),
 		Warnings: []string{},
 	}
 
@@ -280,8 +281,8 @@ func TestGeographicScopeValidation_MultipleRegions(t *testing.T) {
 				{Type: poa.GeoTypeNational, Identifier: "IT", Name: "Italy"},
 			},
 			AuthorizedActions: poa.AuthorizedActions{
-				NonPhysicalActions: []poa.ActionTypeNonPhysical{
-					poa.ActionNonPhysicalAnalyzing,
+				NonPhysicalActions: []taxonomy.ActionTypeNonPhysical{
+					taxonomy.ActionNonPhysicalAnalyzing,
 				},
 			},
 		},
@@ -307,8 +308,8 @@ func TestGeographicScopeValidation_MultipleRegions(t *testing.T) {
 		}
 
 		result := &RequestComplianceResult{
-			Valid:   true,
-			Checks:  make(map[string]bool),
+			Valid:    true,
+			Checks:   make(map[string]bool),
 			Warnings: []string{},
 		}
 
@@ -330,8 +331,8 @@ func TestGeographicScopeValidation_MultipleRegions(t *testing.T) {
 	}
 
 	result := &RequestComplianceResult{
-		Valid:   true,
-		Checks:  make(map[string]bool),
+		Valid:    true,
+		Checks:   make(map[string]bool),
 		Warnings: []string{},
 	}
 
@@ -363,8 +364,8 @@ func TestGeographicScopeValidation_SubdivisionSupport(t *testing.T) {
 				},
 			},
 			AuthorizedActions: poa.AuthorizedActions{
-				NonPhysicalActions: []poa.ActionTypeNonPhysical{
-					poa.ActionNonPhysicalAnalyzing,
+				NonPhysicalActions: []taxonomy.ActionTypeNonPhysical{
+					taxonomy.ActionNonPhysicalAnalyzing,
 				},
 			},
 		},
@@ -391,8 +392,8 @@ func TestGeographicScopeValidation_SubdivisionSupport(t *testing.T) {
 		}
 
 		result := &RequestComplianceResult{
-			Valid:   true,
-			Checks:  make(map[string]bool),
+			Valid:    true,
+			Checks:   make(map[string]bool),
 			Warnings: []string{},
 		}
 

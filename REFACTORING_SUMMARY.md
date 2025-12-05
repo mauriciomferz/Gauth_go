@@ -30,7 +30,9 @@ Split `gauth.go` (1,227 lines) into 5 focused files:
 - Patched `web` package to fully remove `GlobalEdDSARegistry`
 - Fixed algorithm constant mismatch in `pkg/gauth_rfc_001`
 - Refactored `pkg/revocation` integration tests to be white-box for better isolation
-- Verified full suite stability
+- Resolved integration test build failures by cleaning up duplicate tests and fixing import paths
+- Fixed `test/load` runtime failure by updating authorization policies for load testing
+- Verified full suite stability (including `test/load` and `test/integration`)
 
 ## Key Improvements
 

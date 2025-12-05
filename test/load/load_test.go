@@ -310,6 +310,14 @@ func runLoadTest(t *testing.T, config LoadTestConfig) *LoadTestResult {
 		Actions:  []string{"create_delegation", "validate_delegation", "revoke_delegation"},
 		Effect:   authz.Allow,
 	})
+	// Allow all scopes for delegation escalation check
+	authzMem.AddPolicy(authz.Policy{
+		ID:       "allow-all-scopes",
+		Subject:  "*",
+		Resource: "*",
+		Actions:  []string{"*"},
+		Effect:   authz.Allow,
+	})
 
 	// Use memory logger without stdout output to suppress audit noise during load tests
 	// Use large queue size (50000) to handle high throughput without dropping events

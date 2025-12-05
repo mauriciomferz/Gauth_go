@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
 )
 
 // TestAuthorizationChainValidation tests the authorization chain validator
@@ -158,8 +159,8 @@ func TestUnifiedPIP(t *testing.T) {
 			},
 			Authorization: poa.AuthorizationScope{
 				AuthorizedActions: poa.AuthorizedActions{
-					NonPhysicalActions: []poa.ActionTypeNonPhysical{
-						poa.ActionNonPhysicalResearching,
+					NonPhysicalActions: []taxonomy.ActionTypeNonPhysical{
+						taxonomy.ActionNonPhysicalResearching,
 					},
 				},
 			},
@@ -216,16 +217,16 @@ func TestActionTaxonomy(t *testing.T) {
 	// Test action set validation
 	t.Run("ValidateActionSet", func(t *testing.T) {
 		actionSet := &poa.AuthorizedActionSet{
-			Transactions: []poa.TransactionType{
-				poa.TransactionPurchase,
-				poa.TransactionPayment,
+			Transactions: []taxonomy.TransactionType{
+				taxonomy.TransactionPurchase,
+				taxonomy.TransactionPayment,
 			},
-			Decisions: []poa.DecisionType{
-				poa.DecisionOperational,
+			Decisions: []taxonomy.DecisionType{
+				taxonomy.DecisionOperational,
 			},
-			NonPhysicalActions: []poa.ActionTypeNonPhysical{
-				poa.ActionNonPhysicalResearching,
-				poa.ActionNonPhysicalAnalyzing,
+			NonPhysicalActions: []taxonomy.ActionTypeNonPhysical{
+				taxonomy.ActionNonPhysicalResearching,
+				taxonomy.ActionNonPhysicalAnalyzing,
 			},
 		}
 
@@ -240,18 +241,18 @@ func TestActionTaxonomy(t *testing.T) {
 	// Test comprehensive taxonomy report
 	t.Run("GenerateTaxonomyReport", func(t *testing.T) {
 		actionSet := &poa.AuthorizedActionSet{
-			Transactions: []poa.TransactionType{
-				poa.TransactionPurchase,
+			Transactions: []taxonomy.TransactionType{
+				taxonomy.TransactionPurchase,
 			},
-			Decisions: []poa.DecisionType{
-				poa.DecisionOperational,
+			Decisions: []taxonomy.DecisionType{
+				taxonomy.DecisionOperational,
 			},
-			NonPhysicalActions: []poa.ActionTypeNonPhysical{
-				poa.ActionNonPhysicalResearching,
+			NonPhysicalActions: []taxonomy.ActionTypeNonPhysical{
+				taxonomy.ActionNonPhysicalResearching,
 			},
 		}
 
-		report, err := poa.GenerateComprehensiveTaxonomyReport(actionSet)
+		report, err := taxonomy.GenerateComprehensiveTaxonomyReport(actionSet)
 		if err != nil {
 			t.Fatalf("Failed to generate report: %v", err)
 		}
@@ -269,16 +270,16 @@ func TestActionTaxonomy(t *testing.T) {
 
 	// Test transaction metadata
 	t.Run("GetTransactionMetadata", func(t *testing.T) {
-		meta, err := poa.GetTransactionMetadata(poa.TransactionPurchase)
+		meta, err := taxonomy.GetTransactionMetadata(taxonomy.TransactionPurchase)
 		if err != nil {
 			t.Fatalf("Failed to get metadata: %v", err)
 		}
 
-		if meta.Type != poa.TransactionPurchase {
+		if meta.Type != taxonomy.TransactionPurchase {
 			t.Errorf("Expected TransactionPurchase, got %v", meta.Type)
 		}
 
-		if meta.Category != poa.CategoryFinancial {
+		if meta.Category != taxonomy.CategoryFinancial {
 			t.Errorf("Expected CategoryFinancial, got %v", meta.Category)
 		}
 
@@ -292,8 +293,8 @@ func TestActionTaxonomy(t *testing.T) {
 	// Test action compatibility check
 	t.Run("ActionCompatibilityCheck", func(t *testing.T) {
 		actionSet := &poa.AuthorizedActionSet{
-			NonPhysicalActions: []poa.ActionTypeNonPhysical{
-				poa.ActionNonPhysicalResearching,
+			NonPhysicalActions: []taxonomy.ActionTypeNonPhysical{
+				taxonomy.ActionNonPhysicalResearching,
 			},
 		}
 

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -23,18 +24,18 @@ func TestDisclosureService_TokenToSummary_ExtractsGrantedActions(t *testing.T) {
 			PowerOfAttorney: &poa.PoADefinition{
 				Authorization: poa.AuthorizationScope{
 					AuthorizedActions: poa.AuthorizedActions{
-						Transactions: []poa.TransactionType{
-							poa.TransactionPurchase,
-							poa.TransactionPayment,
+						Transactions: []taxonomy.TransactionType{
+							taxonomy.TransactionPurchase,
+							taxonomy.TransactionPayment,
 						},
-						Decisions: []poa.DecisionType{
-							poa.DecisionFinancial,
+						Decisions: []taxonomy.DecisionType{
+							taxonomy.DecisionFinancial,
 						},
-						PhysicalActions: []poa.ActionTypePhysical{
-							poa.ActionPhysicalTransport,
+						PhysicalActions: []taxonomy.ActionTypePhysical{
+							taxonomy.ActionPhysicalTransport,
 						},
-						NonPhysicalActions: []poa.ActionTypeNonPhysical{
-							poa.ActionNonPhysicalAnalyzing,
+						NonPhysicalActions: []taxonomy.ActionTypeNonPhysical{
+							taxonomy.ActionNonPhysicalAnalyzing,
 						},
 					},
 				},
@@ -54,11 +55,11 @@ func TestDisclosureService_TokenToSummary_ExtractsGrantedActions(t *testing.T) {
 
 		// Verify granted actions were extracted
 		assert.Len(t, summary.GrantedActions, 5)
-		assert.Contains(t, summary.GrantedActions, string(poa.TransactionPurchase))
-		assert.Contains(t, summary.GrantedActions, string(poa.TransactionPayment))
-		assert.Contains(t, summary.GrantedActions, string(poa.DecisionFinancial))
-		assert.Contains(t, summary.GrantedActions, string(poa.ActionPhysicalTransport))
-		assert.Contains(t, summary.GrantedActions, string(poa.ActionNonPhysicalAnalyzing))
+		assert.Contains(t, summary.GrantedActions, string(taxonomy.TransactionPurchase))
+		assert.Contains(t, summary.GrantedActions, string(taxonomy.TransactionPayment))
+		assert.Contains(t, summary.GrantedActions, string(taxonomy.DecisionFinancial))
+		assert.Contains(t, summary.GrantedActions, string(taxonomy.ActionPhysicalTransport))
+		assert.Contains(t, summary.GrantedActions, string(taxonomy.ActionNonPhysicalAnalyzing))
 	})
 
 	t.Run("returns empty actions when PoA is nil", func(t *testing.T) {

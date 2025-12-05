@@ -136,6 +136,19 @@ chore(cleanup): remove remaining global registry usage in web tests
 Refactoring complete. GlobalEdDSARegistry removed.
 ```
 
+### Commit 6: Integration & Load Test Fixes
+```
+fix(tests): resolve integration and load test failures
+
+- Fix import paths in pkg/pip and pkg/gauth tests
+- Fix undefined references in poa and replay integration tests
+- Remove stale duplicate integration tests in test/integration/pkg/{auth,gauth,gagent}
+- Add wildard policy to load test to fix scope escalation error
+- Update REFACTORING_SUMMARY.md with final verification details
+
+All tests including test/load now pass.
+```
+
 ## Git Commands
 
 ```bash

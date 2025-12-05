@@ -7,6 +7,7 @@ import (
 
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
 	"github.com/mauriciomferz/Gauth_go/pkg/registry"
 	"github.com/mauriciomferz/Gauth_go/pkg/verification"
 )
@@ -221,12 +222,12 @@ func TestDefaultPIP_ValidateAuthorization(t *testing.T) {
 
 		// Set authorized actions
 		actions := &poa.AuthorizedActions{
-			Transactions: []poa.TransactionType{
-				poa.TransactionPayment,
-				poa.TransactionPurchase,
+			Transactions: []taxonomy.TransactionType{
+				taxonomy.TransactionPayment,
+				taxonomy.TransactionPurchase,
 			},
-			Decisions: []poa.DecisionType{
-				poa.DecisionFinancial,
+			Decisions: []taxonomy.DecisionType{
+				taxonomy.DecisionFinancial,
 			},
 		}
 		pip.cache.authorizedActions[clientID] = &cachedActions{
@@ -236,7 +237,7 @@ func TestDefaultPIP_ValidateAuthorization(t *testing.T) {
 
 		req := &AuthorizationValidationRequest{
 			ClientID:  clientID,
-			Action:    string(poa.TransactionPayment),
+			Action:    string(taxonomy.TransactionPayment),
 			Resource:  "account-456",
 			Timestamp: time.Now(),
 		}
@@ -273,8 +274,8 @@ func TestDefaultPIP_ValidateAuthorization(t *testing.T) {
 
 		// Set limited authorized actions
 		actions := &poa.AuthorizedActions{
-			Transactions: []poa.TransactionType{
-				poa.TransactionPayment,
+			Transactions: []taxonomy.TransactionType{
+				taxonomy.TransactionPayment,
 			},
 		}
 		pip.cache.authorizedActions[clientID] = &cachedActions{
@@ -284,7 +285,7 @@ func TestDefaultPIP_ValidateAuthorization(t *testing.T) {
 
 		req := &AuthorizationValidationRequest{
 			ClientID:  clientID,
-			Action:    string(poa.TransactionLoan), // Not authorized
+			Action:    string(taxonomy.TransactionLoan), // Not authorized
 			Resource:  "account-789",
 			Timestamp: time.Now(),
 		}
@@ -304,7 +305,7 @@ func TestDefaultPIP_ValidateAuthorization(t *testing.T) {
 
 		req := &AuthorizationValidationRequest{
 			ClientID:  "unknown-client",
-			Action:    string(poa.TransactionPayment),
+			Action:    string(taxonomy.TransactionPayment),
 			Resource:  "account-999",
 			Timestamp: time.Now(),
 		}
@@ -495,7 +496,7 @@ func TestAuthorizationCache_Invalidate(t *testing.T) {
 
 		// Add authorized actions
 		actions := &poa.AuthorizedActions{
-			Transactions: []poa.TransactionType{poa.TransactionPayment},
+			Transactions: []taxonomy.TransactionType{taxonomy.TransactionPayment},
 		}
 		cache.authorizedActions[clientID] = &cachedActions{
 			data:      actions,
@@ -566,68 +567,68 @@ func TestDefaultPIP_ActionAuthorization(t *testing.T) {
 
 	t.Run("Transaction action is authorized", func(t *testing.T) {
 		actions := &poa.AuthorizedActions{
-			Transactions: []poa.TransactionType{
-				poa.TransactionPayment,
-				poa.TransactionPurchase,
+			Transactions: []taxonomy.TransactionType{
+				taxonomy.TransactionPayment,
+				taxonomy.TransactionPurchase,
 			},
 		}
 
-		if !pip.isActionAuthorized(string(poa.TransactionPayment), actions) {
+		if !pip.isActionAuthorized(string(taxonomy.TransactionPayment), actions) {
 			t.Error("TransactionPayment should be authorized")
 		}
 
-		if !pip.isActionAuthorized(string(poa.TransactionPurchase), actions) {
+		if !pip.isActionAuthorized(string(taxonomy.TransactionPurchase), actions) {
 			t.Error("TransactionPurchase should be authorized")
 		}
 	})
 
 	t.Run("Decision action is authorized", func(t *testing.T) {
 		actions := &poa.AuthorizedActions{
-			Decisions: []poa.DecisionType{
-				poa.DecisionFinancial,
-				poa.DecisionStrategic,
+			Decisions: []taxonomy.DecisionType{
+				taxonomy.DecisionFinancial,
+				taxonomy.DecisionStrategic,
 			},
 		}
 
-		if !pip.isActionAuthorized(string(poa.DecisionFinancial), actions) {
+		if !pip.isActionAuthorized(string(taxonomy.DecisionFinancial), actions) {
 			t.Error("DecisionFinancial should be authorized")
 		}
 	})
 
 	t.Run("Non-physical action is authorized", func(t *testing.T) {
 		actions := &poa.AuthorizedActions{
-			NonPhysicalActions: []poa.ActionTypeNonPhysical{
-				poa.ActionNonPhysicalDataAggregation,
-				poa.ActionNonPhysicalVisualization,
+			NonPhysicalActions: []taxonomy.ActionTypeNonPhysical{
+				taxonomy.ActionNonPhysicalDataAggregation,
+				taxonomy.ActionNonPhysicalVisualization,
 			},
 		}
 
-		if !pip.isActionAuthorized(string(poa.ActionNonPhysicalDataAggregation), actions) {
+		if !pip.isActionAuthorized(string(taxonomy.ActionNonPhysicalDataAggregation), actions) {
 			t.Error("NonPhysical DataAggregation should be authorized")
 		}
 	})
 
 	t.Run("Physical action is authorized", func(t *testing.T) {
 		actions := &poa.AuthorizedActions{
-			PhysicalActions: []poa.ActionTypePhysical{
-				poa.ActionPhysicalManufacturing,
-				poa.ActionPhysicalAssembly,
+			PhysicalActions: []taxonomy.ActionTypePhysical{
+				taxonomy.ActionPhysicalManufacturing,
+				taxonomy.ActionPhysicalAssembly,
 			},
 		}
 
-		if !pip.isActionAuthorized(string(poa.ActionPhysicalManufacturing), actions) {
+		if !pip.isActionAuthorized(string(taxonomy.ActionPhysicalManufacturing), actions) {
 			t.Error("PhysicalManufacturing should be authorized")
 		}
 	})
 
 	t.Run("Unauthorized action returns false", func(t *testing.T) {
 		actions := &poa.AuthorizedActions{
-			Transactions: []poa.TransactionType{
-				poa.TransactionPayment,
+			Transactions: []taxonomy.TransactionType{
+				taxonomy.TransactionPayment,
 			},
 		}
 
-		if pip.isActionAuthorized(string(poa.TransactionLoan), actions) {
+		if pip.isActionAuthorized(string(taxonomy.TransactionLoan), actions) {
 			t.Error("TransactionLoan should not be authorized")
 		}
 	})
@@ -670,18 +671,18 @@ func TestDefaultPIP_SectorAuthorization(t *testing.T) {
 	t.Run("Authorized in specific sector", func(t *testing.T) {
 		sectors := []poa.IndustrySector{
 			{
-				Code:        poa.SectorFinanceInsurance,
+				Code:        taxonomy.SectorFinanceInsurance,
 				Description: "Financial Services",
 				Authorized:  true,
 			},
 			{
-				Code:        poa.SectorHealthSocialWork,
+				Code:        taxonomy.SectorHealthSocialWork,
 				Description: "Healthcare",
 				Authorized:  true,
 			},
 		}
 
-		if !pip.isSectorAuthorized(string(poa.SectorFinanceInsurance), sectors) {
+		if !pip.isSectorAuthorized(string(taxonomy.SectorFinanceInsurance), sectors) {
 			t.Error("Financial Services sector should be authorized")
 		}
 
@@ -693,18 +694,18 @@ func TestDefaultPIP_SectorAuthorization(t *testing.T) {
 	t.Run("Not authorized in non-authorized sector", func(t *testing.T) {
 		sectors := []poa.IndustrySector{
 			{
-				Code:        poa.SectorFinanceInsurance,
+				Code:        taxonomy.SectorFinanceInsurance,
 				Description: "Financial Services",
 				Authorized:  true,
 			},
 			{
-				Code:        poa.SectorManufacturing,
+				Code:        taxonomy.SectorManufacturing,
 				Description: "Manufacturing",
 				Authorized:  false, // Not authorized
 			},
 		}
 
-		if pip.isSectorAuthorized(string(poa.SectorManufacturing), sectors) {
+		if pip.isSectorAuthorized(string(taxonomy.SectorManufacturing), sectors) {
 			t.Error("Manufacturing sector should not be authorized")
 		}
 	})
@@ -712,7 +713,7 @@ func TestDefaultPIP_SectorAuthorization(t *testing.T) {
 	t.Run("Unknown sector returns false", func(t *testing.T) {
 		sectors := []poa.IndustrySector{
 			{
-				Code:       poa.SectorFinanceInsurance,
+				Code:       taxonomy.SectorFinanceInsurance,
 				Authorized: true,
 			},
 		}
@@ -798,7 +799,9 @@ func BenchmarkDefaultPIP_ValidateAuthorization(b *testing.B) {
 	pip.cache.SetAuthorizationChain(clientID, chain)
 
 	actions := &poa.AuthorizedActions{
-		Transactions: []poa.TransactionType{poa.TransactionPayment},
+		Transactions: []taxonomy.TransactionType{
+			taxonomy.TransactionPayment,
+		},
 	}
 	pip.cache.authorizedActions[clientID] = &cachedActions{
 		data:      actions,
@@ -807,7 +810,7 @@ func BenchmarkDefaultPIP_ValidateAuthorization(b *testing.B) {
 
 	req := &AuthorizationValidationRequest{
 		ClientID:  clientID,
-		Action:    string(poa.TransactionPayment),
+		Action:    string(taxonomy.TransactionPayment),
 		Resource:  "account",
 		Timestamp: time.Now(),
 	}
