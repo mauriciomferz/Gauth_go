@@ -10,8 +10,8 @@ import (
 )
 
 // helper to seed revocation chain with n events
-func seedChain(n int) *RevocationChain {
-	c := NewRevocationChain()
+func seedChain(n int, opts ...Option) *RevocationChain {
+	c := NewRevocationChain(opts...)
 	for i := 0; i < n; i++ {
 		id := time.Now().UTC().Format("150405.000000") + string(rune('a'+(i%26))) + "-" + string(rune('A'+(i%26)))
 		_, _ = c.Append(RevocationEvent{ID: id, DelegationID: id})
@@ -103,8 +103,7 @@ func TestConsistencyProofV2WithKeyManager(t *testing.T) {
 	if err != nil {
 		t.Fatalf("km init: %v", err)
 	}
-	cryptoInt.GlobalEdDSARegistry = km
-	chain := seedChain(4)
+	chain := seedChain(4, WithKeyProvider(km))
 	if _, err2 := chain.SignTreeHead(); err2 != nil {
 		t.Fatalf("sign 1: %v", err2)
 	}

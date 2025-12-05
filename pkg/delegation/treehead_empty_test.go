@@ -17,9 +17,7 @@ func TestSignTreeHeadEmptyChain(t *testing.T) {
 	if err != nil {
 		t.Fatalf("km init: %v", err)
 	}
-	crypto.GlobalEdDSARegistry = km
-
-	rc := NewRevocationChain()
+	rc := NewRevocationChain(WithKeyProvider(km))
 	// sanity: no events
 	if len(rc.Events()) != 0 {
 		t.Fatalf("expected zero events")

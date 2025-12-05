@@ -15,7 +15,8 @@ func TestRevocationAutoSignDuplicateSuppression(t *testing.T) {
 	os.Setenv("GAUTH_TOKEN_SIG_MODE", sigModeEdDSA)
 	defer os.Unsetenv("GAUTH_TOKEN_SIG_MODE")
 
-	s := NewBetaServer("")
+	km, _ := crypto.NewManager(24 * time.Hour)
+	s := NewBetaServer("", WithKeyProvider(km))
 	t.Cleanup(func() { s.Shutdown() })
 	// Append a single revocation event so auto-sign logic is eligible.
 	ev := delegation.RevocationEvent{ID: "rev-test-1", DelegationID: "del1", Reason: string(delegation.RevocationReasonUserRequest)}
@@ -27,10 +28,7 @@ func TestRevocationAutoSignDuplicateSuppression(t *testing.T) {
 	firstHeads := s.revocationChain.TreeHeads()
 	initialHeadCount := len(firstHeads)
 
-	if crypto.GlobalEdDSARegistry == nil {
-		t.Fatalf("expected key manager initialized")
-	}
-	if _, err := crypto.GlobalEdDSARegistry.Rotate(); err != nil {
+	if _, err := km.Rotate(); err != nil {
 		t.Fatalf("rotate 1: %v", err)
 	}
 	// Allow async callback to run (OnKeyRotated executes inline within Rotate, so minimal sleep)
@@ -41,7 +39,7 @@ func TestRevocationAutoSignDuplicateSuppression(t *testing.T) {
 	}
 
 	// Second rotation without new revocation events should be suppressed by duplicate detection.
-	if _, err := crypto.GlobalEdDSARegistry.Rotate(); err != nil {
+	if _, err := km.Rotate(); err != nil {
 		t.Fatalf("rotate 2: %v", err)
 	}
 	time.Sleep(10 * time.Millisecond)

@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	cryptoReg "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	auditor "github.com/mauriciomferz/Gauth_go/pkg/auditor"
+	cryptoReg "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	poa "github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
 
@@ -30,11 +30,16 @@ func buildSigningPayload(p *poa.ProofOfAuthorization) []byte {
 }
 
 func TestAuditorVerifyPOA(t *testing.T) {
-	reg := cryptoReg.GlobalEdDSARegistry
-	if reg == nil || reg.Active() == nil {
-		t.Skip("eddsa registry not initialized; skip auditor poa test")
+	// Create local key manager
+	km, err := cryptoReg.NewManager(time.Hour)
+	if err != nil {
+		t.Fatalf("failed to create key manager: %v", err)
 	}
-	ak := reg.Active()
+	ak := km.Active()
+	if ak == nil {
+		t.Fatalf("no active key")
+	}
+
 	poaDoc := &poa.ProofOfAuthorization{
 		ID:        "poa_demo_1",
 		Subject:   "alice",
@@ -52,7 +57,8 @@ func TestAuditorVerifyPOA(t *testing.T) {
 	sig := ed25519.Sign(ak.Private, msg)
 	poaDoc.Signatures = []string{base64.RawStdEncoding.EncodeToString(sig)}
 
-	res := auditor.VerifyPOA(poaDoc)
+	// Pass local manager to VerifyPOA
+	res := auditor.VerifyPOA(poaDoc, km)
 	if !res["digest_valid"].(bool) {
 		t.Fatalf("expected digest_valid true")
 	}

@@ -21,13 +21,9 @@ func TestRevocationAnchoring(t *testing.T) {
 		os.Unsetenv("GAUTH_ANCHOR_REVOCATIONS")
 		os.Unsetenv("GAUTH_TOKEN_SIG_MODE")
 	}()
-	s := NewBetaServer("")
+	km, _ := crypto.NewManager(time.Hour)
+	s := NewBetaServer("", WithKeyProvider(km))
 	t.Cleanup(func() { s.Shutdown() })
-	// Key manager should be initialized already in server init; if not, force it.
-	if crypto.GlobalEdDSARegistry == nil {
-		km, _ := crypto.NewManager(time.Hour)
-		crypto.GlobalEdDSARegistry = km
-	}
 	// Append a revocation event via chain directly (simpler than hitting revoke endpoint)
 	if s.revocationChain == nil {
 		t.Fatalf("revocation chain expected")

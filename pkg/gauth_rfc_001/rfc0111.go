@@ -19,6 +19,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/google/uuid"
 	"github.com/mauriciomferz/Gauth_go/internal/metrics"
 	"github.com/mauriciomferz/Gauth_go/internal/observability"
 	"github.com/mauriciomferz/Gauth_go/pkg/attest"
@@ -30,10 +31,9 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/ledger"
 	"github.com/mauriciomferz/Gauth_go/pkg/pdp"
-	poaPkg "github.com/mauriciomferz/Gauth_go/pkg/poa"
+	streamPkg "github.com/mauriciomferz/Gauth_go/pkg/poa/stream"
 	"github.com/mauriciomferz/Gauth_go/pkg/rfc"
 	"github.com/mauriciomferz/Gauth_go/pkg/token"
-	"github.com/google/uuid"
 	"github.com/o1egl/paseto"
 )
 
@@ -325,7 +325,7 @@ type ThresholdValidation struct {
 // Reusable constants (reduce duplication and goconst warnings)
 const (
 	poaVersionV1 = "poa/v1"
-	algEd25519   = "ed25519"
+	algEd25519   = "Ed25519"
 	// Digest mismatch classification reasons (used in envelope & signature verification metrics)
 	reasonDomainConflict  = "domain_conflict"
 	reasonTamperSuspected = "tamper_suspected"
@@ -824,6 +824,7 @@ func WithLedger(l ledger.Store) Option {
 // SECURITY DEFAULTS:
 //   - failClosedReplay: true (revocation/replay checks fail-closed on store errors)
 //   - strictConstraints: false (unknown constraints ignored for backward compatibility)
+//
 // Use WithReplayFailOpen() to opt into fail-open behavior (reduces security, increases availability)
 // Use WithStrictConstraintValidation() to reject unknown constraints (increases security)
 func NewService(auditLogger *audit.MemoryLogger, authorizer authz.Authorizer, opts ...Option) *Service {
@@ -1371,7 +1372,7 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 			sessionUser = sStr
 		}
 	}
-	
+
 	// DEFENSIVE CHECK: sessionUser MUST be populated by secure middleware
 	// If empty, the integration is misconfigured (missing mTLS/DPoP/OAuth2 middleware)
 	if sessionUser == "" {
@@ -1381,7 +1382,7 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 		return nil, rfc.New(rfc.ErrConfiguration,
 			"sessionUser not found in context - integration error: ctxKeySubject must be populated by authentication middleware (mTLS, DPoP, OAuth2)")
 	}
-	
+
 	// CRITICAL: Enforce holder-of-key binding (session user MUST match PoA grantee)
 	if err := s.EnforceAgentSessionBinding(ctx, poa, sessionUser); err != nil {
 		return nil, err
@@ -1667,9 +1668,9 @@ type Service struct {
 	dailyAmounts   map[string]float64 // key: delegationID|YYYY-MM-DD cumulative requested amount
 	dailyAmountsMu sync.Mutex
 	// Phase 2 Security Enhancements (Critical/High Vulnerabilities)
-	atomicCounterStore         *AtomicCounterStore         // Redis-backed atomic constraint enforcement (TOCTOU mitigation)
-	delegationChainValidator   *DelegationChainValidator   // Transitive delegation chain validation
-	revocationBlacklistStore   *RevocationBlacklistStore   // Real-time revocation status checking (zombie token mitigation)
+	atomicCounterStore       *AtomicCounterStore       // Redis-backed atomic constraint enforcement (TOCTOU mitigation)
+	delegationChainValidator *DelegationChainValidator // Transitive delegation chain validation
+	revocationBlacklistStore *RevocationBlacklistStore // Real-time revocation status checking (zombie token mitigation)
 }
 
 // AttachEvidenceHashes appends new evidence hash(es) to a POA ensuring uniqueness and basic validation.
@@ -2671,7 +2672,7 @@ func (s *Service) InitiateRevocation(ctx context.Context, req RevocationRequest)
 	poa.Status = POAStatusSuspended // place into suspended during pending revocation (prevents usage)
 	poa.UpdatedAt = s.nowFn()
 	_ = s.repo.Update(poa)
-	
+
 	// Phase 2 Enhancement: Add to revocation blacklist during suspension (defense in depth)
 	// Even though status is suspended, this provides immediate propagation to all servers
 	if s.revocationBlacklistStore != nil {
@@ -2681,7 +2682,7 @@ func (s *Service) InitiateRevocation(ctx context.Context, req RevocationRequest)
 			}
 		}
 	}
-	
+
 	//nolint:gocyclo // Revocation approval with state transitions
 	if s.metrics != nil {
 		s.metrics.IncRevocationWorkflowInitiated()
@@ -2808,7 +2809,7 @@ func (s *Service) finalizeRevocation(poa *PowerOfAttorney) error {
 	}
 	poa.UpdatedAt = now
 	_ = s.repo.Update(poa)
-	
+
 	// Phase 2 Enhancement: Add to revocation blacklist for immediate propagation
 	// Prevents zombie tokens (reduces vulnerability window from 55min to 1-2ms)
 	if s.revocationBlacklistStore != nil {
@@ -2823,7 +2824,7 @@ func (s *Service) finalizeRevocation(poa *PowerOfAttorney) error {
 			}
 		}
 	}
-	
+
 	return nil
 }
 
@@ -3225,12 +3226,12 @@ func (s *Service) validateDelegationEx(ctx context.Context, poaID, grantee strin
 		"max_daily_amount": true,
 		"currency":         true,
 	}
-	
+
 	for rk, rv := range poa.Restrictions {
 		if knownConstraints[rk] {
 			continue // Already handled above
 		}
-		
+
 		// Check if caller provided metadata for this constraint
 		if vctx.Metadata != nil {
 			if provided, ok := vctx.Metadata[rk]; ok {
@@ -3243,7 +3244,7 @@ func (s *Service) validateDelegationEx(ctx context.Context, poaID, grantee strin
 				continue
 			}
 		}
-		
+
 		// Constraint NOT provided by caller
 		// In strict mode: REJECT (unknown constraint cannot be validated)
 		// In permissive mode: IGNORE (assume caller doesn't support this constraint)
@@ -3317,7 +3318,7 @@ func (s *Service) validateGrantorScopes(ctx context.Context, grantor string, req
 		for _, action := range perm.Actions {
 			grantorScopesMap[action] = struct{}{}
 		}
-		
+
 		// If resource has wildcard, add it as a scope pattern for validation
 		if strings.Contains(perm.Resource, "*") {
 			grantorScopesMap[perm.Resource] = struct{}{}
@@ -4256,26 +4257,26 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 		if embedChain {
 			// Hash algorithm negotiation (default sha256). Supported: sha256, blake2b256, sha3_256.
 			algoName := strings.ToLower(os.Getenv("GAUTH_RAW_POA_CHAIN_HASH_ALGO"))
-			var algo = poaPkg.RawPOAHashSHA256
+			var algo = streamPkg.RawPOAHashSHA256
 			switch algoName {
 			case "blake2b256":
-				algo = poaPkg.RawPOAHashBLAKE2b256
+				algo = streamPkg.RawPOAHashBLAKE2b256
 			case "sha3_256":
-				algo = poaPkg.RawPOAHashSHA3_256
+				algo = streamPkg.RawPOAHashSHA3_256
 			}
 			// Build minimal chain snapshot (single item) representing this issuance.
 			// Clamp timestamp to <=255 to satisfy minimal CBOR encoder integer encoding (supports <256 path).
-			item := poaPkg.RawPOAItem{ID: poa.ID, Issuer: poa.Grantor, Subject: poa.Grantee, Timestamp: now.Unix() % 256, Algo: algEd25519}
+			item := streamPkg.RawPOAItem{ID: poa.ID, Issuer: poa.Grantor, Subject: poa.Grantee, Timestamp: now.Unix() % 256, Algo: algEd25519}
 			if poa.Signature != nil && poa.Signature.SigBase64 != "" {
 				if sigBytes, decErr := base64.StdEncoding.DecodeString(poa.Signature.SigBase64); decErr == nil {
 					item.Signature = sigBytes
 				}
 			}
-			chainBytes, cErr := poaPkg.EncodeRawPOAChain([]poaPkg.RawPOAItem{item})
+			chainBytes, cErr := streamPkg.EncodeRawPOAChain([]streamPkg.RawPOAItem{item})
 			if cErr == nil {
 				if len(chainBytes) <= maxRaw {
 					// Compute chain hash + algo via streaming decode (single item continuity trivial).
-					if chainDec, decErr := poaPkg.DecodeRawPOAStreamWith(bytes.NewReader(chainBytes), poaPkg.DefaultStreamLimits, algo, false); decErr == nil {
+					if chainDec, decErr := streamPkg.DecodeRawPOAStreamWith(bytes.NewReader(chainBytes), streamPkg.DefaultStreamLimits, algo, false); decErr == nil {
 						rawPOAChainAlgo = chainDec.HashAlgo.String()
 					}
 					rawPOAChain = base64.StdEncoding.EncodeToString(chainBytes)

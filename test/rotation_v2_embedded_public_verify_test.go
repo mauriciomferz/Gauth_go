@@ -31,7 +31,7 @@ func TestRotationV2EmbeddedPublicKeyVerification(t *testing.T) {
 
 	// Build initial artifact (no public keys yet because global resolver must supply them).
 	// We will manually embed public keys to simulate server embedding to avoid dependency on global registry state.
-	art, err := notary.BuildArtifactFromConfig(cfg, "", time.Now())
+	art, err := notary.BuildArtifactFromConfig(cfg, "", time.Now(), nil)
 	if err != nil {
 		t.Fatalf("artifact build: %v", err)
 	}

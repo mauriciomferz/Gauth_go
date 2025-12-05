@@ -63,19 +63,27 @@ func validateReason(r string) string {
 // RevocationChain now maintains optional Signed Tree Head snapshots (Phase 4).
 // treeHeads is append-only history of signed roots for audit / persistence.
 type RevocationChain struct {
-	events     []RevocationEvent
-	merkle     *MerkleTree
-	treeHeads  []*SignedTreeHead
-	keyManager *crypto.Manager
+	events      []RevocationEvent
+	merkle      *MerkleTree
+	treeHeads   []*SignedTreeHead
+	keyProvider crypto.KeyProvider
 }
 
 // Option configures the RevocationChain
 type Option func(*RevocationChain)
 
+// WithKeyProvider injects a crypto provider for signing operations
+func WithKeyProvider(kp crypto.KeyProvider) Option {
+	return func(c *RevocationChain) {
+		c.keyProvider = kp
+	}
+}
+
 // WithKeyManager injects a crypto manager for signing operations
+// Deprecated: Use WithKeyProvider instead
 func WithKeyManager(km *crypto.Manager) Option {
 	return func(c *RevocationChain) {
-		c.keyManager = km
+		c.keyProvider = km
 	}
 }
 
@@ -114,19 +122,18 @@ func (c *RevocationChain) Append(e RevocationEvent) (RevocationEvent, error) {
 		return RevocationEvent{}, err
 	}
 	e.Hash = h
-	// Optional signing (Phase 2): if EdDSA manager active, sign canonical bytes of event excluding Signature fields.
+	// Optional signing (Phase 2): if key provider active, sign canonical bytes of event excluding Signature fields.
 	// We perform signing after computing the hash to bind both raw fields and computed linkage hash.
-	km := c.keyManager
-	if km == nil {
-		km = crypto.GlobalEdDSARegistry // Fallback to global for backward compatibility
-	}
-	if km != nil {
-		if ak := km.Active(); ak != nil {
+	kp := c.keyProvider
+	if kp != nil {
+		if signer, err := kp.ActiveSigner(); err == nil {
 			payload, perr := signableBytes(e)
 			if perr == nil {
-				sig := ed25519.Sign(ak.Private, payload)
-				e.SigKid = ak.ID
-				e.Signature = base64.RawURLEncoding.EncodeToString(sig)
+				sig, serr := signer.Sign(payload)
+				if serr == nil {
+					e.SigKid = signer.KeyID()
+					e.Signature = base64.RawURLEncoding.EncodeToString(sig)
+				}
 			}
 		}
 	}
@@ -169,12 +176,12 @@ func (c *RevocationChain) Verify() error {
 		}
 		// Signature verification (if present). We treat absence as acceptable (legacy mode), but if present must verify.
 		if e.Signature != "" {
-			km := c.keyManager
-			if km == nil {
-				km = crypto.GlobalEdDSARegistry // Fallback to global
+			kp := c.keyProvider
+			if kp == nil {
+				// No key provider available
 			}
-			if km == nil {
-				return fmt.Errorf("signature present but no key manager available at %d", i)
+			if kp == nil {
+				return fmt.Errorf("signature present but no key provider available at %d", i)
 			}
 			payload, perr := signableBytes(e)
 			if perr != nil {
@@ -184,7 +191,7 @@ func (c *RevocationChain) Verify() error {
 			if derr != nil {
 				return fmt.Errorf("invalid base64 signature at %d", i)
 			}
-			if err := km.ValidateSignature(e.SigKid, payload, sigBytes); err != nil {
+			if err := kp.VerifyWith(payload, sigBytes, e.SigKid); err != nil {
 				return fmt.Errorf("signature verification failed at %d: %v", i, err)
 			}
 		}
@@ -388,18 +395,13 @@ func (c *RevocationChain) TreeHeads() []*SignedTreeHead {
 	return out
 }
 
-// SignTreeHead creates and signs a new tree head snapshot using the active EdDSA key manager (if available).
-// If key manager unavailable, returns unsigned tree head (Signatures slice empty) – still useful for anchoring.
+// SignTreeHead creates and signs a new tree head snapshot using the active EdDSA key provider (if available).
+// If key provider unavailable, returns unsigned tree head (Signatures slice empty) – still useful for anchoring.
 func (c *RevocationChain) SignTreeHead() (*SignedTreeHead, error) {
 	if c == nil {
 		return nil, errors.New("nil_chain")
 	}
 	// If there are no revocation events yet, suppress creation of a SignedTreeHead.
-	// Previously we would emit an empty tree head (chain_length=0, empty merkle root). This led to
-	// confusing logs and, in some callback scenarios, index-out-of-range panics in higher level
-	// logic that assumed at least one event existed when a rotation occurred. Returning (nil,nil)
-	// makes callers explicit about handling the empty-chain case while remaining backward
-	// compatible for code paths already checking for nil.
 	if len(c.events) == 0 {
 		return nil, nil
 	}
@@ -435,41 +437,61 @@ func (c *RevocationChain) SignTreeHead() (*SignedTreeHead, error) {
 		sth.Version = 2
 		sth.Threshold = threshold
 	}
-	km := c.keyManager
-	if km == nil {
-		km = crypto.GlobalEdDSARegistry // Fallback to global
-	}
-	if km != nil {
-		keys := km.ListCurrent()
-		// Compute total available weights (or count fallback)
-		availableTotal := 0
-		for _, k := range keys {
-			if len(weightsMap) > 0 {
-				availableTotal += weightsMap[k.ID]
-			} else {
-				availableTotal++
-			}
-		}
-		sth.WeightsTotal = availableTotal
-		// Sign sequentially until threshold satisfied (or include all if threshold unreachable)
-		cumulative := 0
-		for _, k := range keys {
-			payload, err := signableTreeHeadBytes(sth)
-			if err != nil {
-				return nil, err
-			}
-			sig := ed25519.Sign(k.Private, payload)
-			w := 1
-			if len(weightsMap) > 0 {
-				if weightsMap[k.ID] > 0 {
-					w = weightsMap[k.ID]
+	kp := c.keyProvider
+	if kp != nil {
+		// For multi-sig, we need to access multiple keys.
+		// KeyProvider interface currently only exposes ActiveSigner() and VerifyWith().
+		// It doesn't expose ListCurrent().
+		// If kp is a *crypto.Manager, we can cast it.
+		// If not, we can only sign with ActiveSigner.
+
+		if km, ok := kp.(*crypto.Manager); ok {
+			keys := km.ListCurrent()
+			// Compute total available weights (or count fallback)
+			availableTotal := 0
+			for _, k := range keys {
+				if len(weightsMap) > 0 {
+					availableTotal += weightsMap[k.ID]
+				} else {
+					availableTotal++
 				}
 			}
-			sth.Signatures = append(sth.Signatures, TreeHeadSignature{Kid: k.ID, Alg: "EdDSA", Sig: base64.RawURLEncoding.EncodeToString(sig), Weight: w})
-			cumulative += w
-			sth.SatisfiedWeight = cumulative
-			if threshold > 1 && cumulative >= threshold {
-				break
+			sth.WeightsTotal = availableTotal
+			// Sign sequentially until threshold satisfied (or include all if threshold unreachable)
+			cumulative := 0
+			for _, k := range keys {
+				payload, err := signableTreeHeadBytes(sth)
+				if err != nil {
+					return nil, err
+				}
+				sig := ed25519.Sign(k.Private, payload)
+				w := 1
+				if len(weightsMap) > 0 {
+					if weightsMap[k.ID] > 0 {
+						w = weightsMap[k.ID]
+					}
+				}
+				sth.Signatures = append(sth.Signatures, TreeHeadSignature{Kid: k.ID, Alg: "EdDSA", Sig: base64.RawURLEncoding.EncodeToString(sig), Weight: w})
+				cumulative += w
+				sth.SatisfiedWeight = cumulative
+				if threshold > 1 && cumulative >= threshold {
+					break
+				}
+			}
+		} else {
+			// Generic KeyProvider path - only single signature supported for now
+			signer, err := kp.ActiveSigner()
+			if err == nil {
+				payload, err := signableTreeHeadBytes(sth)
+				if err != nil {
+					return nil, err
+				}
+				sig, err := signer.Sign(payload)
+				if err == nil {
+					sth.Signatures = append(sth.Signatures, TreeHeadSignature{Kid: signer.KeyID(), Alg: "EdDSA", Sig: base64.RawURLEncoding.EncodeToString(sig), Weight: 1})
+					sth.SatisfiedWeight = 1
+					sth.WeightsTotal = 1 // Unknown total, assume 1
+				}
 			}
 		}
 		// If threshold wasn't met (e.g., not enough keys), still return sth but caller verification will fail.
@@ -483,7 +505,7 @@ func (c *RevocationChain) SignTreeHead() (*SignedTreeHead, error) {
 }
 
 // VerifyTreeHeadSignature verifies the first signature on a tree head (multi-sig expansion later).
-func VerifyTreeHeadSignature(sth *SignedTreeHead, km *crypto.Manager) error {
+func VerifyTreeHeadSignature(sth *SignedTreeHead, kp crypto.KeyProvider) error {
 	if sth == nil {
 		return errors.New("nil_sth")
 	}
@@ -491,11 +513,9 @@ func VerifyTreeHeadSignature(sth *SignedTreeHead, km *crypto.Manager) error {
 		return errors.New("no_signatures")
 	}
 	sigEntry := sth.Signatures[0]
-	if km == nil {
-		km = crypto.GlobalEdDSARegistry // Fallback to global
-	}
-	if km == nil {
-		return errors.New("no_key_manager")
+
+	if kp == nil {
+		return errors.New("no_key_provider")
 	}
 	payload, err := signableTreeHeadBytes(sth)
 	if err != nil {
@@ -505,29 +525,27 @@ func VerifyTreeHeadSignature(sth *SignedTreeHead, km *crypto.Manager) error {
 	if err != nil {
 		return fmt.Errorf("sig_decode: %w", err)
 	}
-	if err := km.ValidateSignature(sigEntry.Kid, payload, sigBytes); err != nil {
+	if err := kp.VerifyWith(payload, sigBytes, sigEntry.Kid); err != nil {
 		return fmt.Errorf("signature_invalid: %w", err)
 	}
 	return nil
 }
 
 // VerifyTreeHeadMultiSig checks cumulative weights (or signature count fallback) against threshold.
-func VerifyTreeHeadMultiSig(sth *SignedTreeHead, km *crypto.Manager) error {
+func VerifyTreeHeadMultiSig(sth *SignedTreeHead, kp crypto.KeyProvider) error {
 	if sth == nil {
 		return errors.New("nil_sth")
 	}
 	if sth.Threshold <= 1 { // fallback to single signature verification
-		return VerifyTreeHeadSignature(sth, km)
+		return VerifyTreeHeadSignature(sth, kp)
 	}
 	if len(sth.Signatures) == 0 {
 		return errors.New("no_signatures")
 	}
 	// First verify each signature cryptographically.
-	if km == nil {
-		km = crypto.GlobalEdDSARegistry // Fallback to global
-	}
-	if km == nil {
-		return errors.New("no_key_manager")
+
+	if kp == nil {
+		return errors.New("no_key_provider")
 	}
 	payload, err := signableTreeHeadBytes(sth)
 	if err != nil {
@@ -539,7 +557,7 @@ func VerifyTreeHeadMultiSig(sth *SignedTreeHead, km *crypto.Manager) error {
 		if derr != nil {
 			return fmt.Errorf("sig_decode_%d: %v", i, derr)
 		}
-		if err := km.ValidateSignature(sigEntry.Kid, payload, sigBytes); err != nil {
+		if err := kp.VerifyWith(payload, sigBytes, sigEntry.Kid); err != nil {
 			return fmt.Errorf("signature_invalid_%d: %v", i, err)
 		}
 		w := sigEntry.Weight
@@ -587,14 +605,11 @@ func (c *RevocationChain) LoadSignedTreeHeads(path string) error {
 		}
 		// Choose verification path
 		var verr error
-		km := c.keyManager
-		if km == nil {
-			km = crypto.GlobalEdDSARegistry
-		}
+		kp := c.keyProvider
 		if sth.Threshold > 1 {
-			verr = VerifyTreeHeadMultiSig(sth, km)
+			verr = VerifyTreeHeadMultiSig(sth, kp)
 		} else {
-			verr = VerifyTreeHeadSignature(sth, km)
+			verr = VerifyTreeHeadSignature(sth, kp)
 		}
 		if verr == nil {
 			valid = append(valid, sth)

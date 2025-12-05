@@ -50,7 +50,7 @@ func TestRotationV2MixedAlgVerification(t *testing.T) {
 		}{
 			{ID: "ed1", Alg: "ED25519", Weight: 30}, {ID: "ec1", Alg: "ECDSA-P256", Weight: 40},
 		}, AlgorithmSuite: []string{"ed25519", "ecdsa-p256"}}
-	art, err := notary.BuildArtifactFromConfig(cfg, "", time.Now())
+	art, err := notary.BuildArtifactFromConfig(cfg, "", time.Now(), nil)
 	if err != nil {
 		t.Fatalf("artifact build: %v", err)
 	}
@@ -88,7 +88,7 @@ func TestRotationV2MixedAlgFailure(t *testing.T) {
 		}{
 			{ID: "ed1", Alg: "ED25519", Weight: 30}, {ID: "ec1", Alg: "ECDSA-P256", Weight: 20},
 		}, AlgorithmSuite: []string{"ed25519", "ecdsa-p256"}}
-	art, err := notary.BuildArtifactFromConfig(cfg, "", time.Now())
+	art, err := notary.BuildArtifactFromConfig(cfg, "", time.Now(), nil)
 	if err != nil {
 		t.Fatalf("artifact build: %v", err)
 	}

@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
+	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 // TestRotationSummary_LegacySingleSignature verifies legacy single-sign path when multisig disabled.
@@ -36,8 +36,7 @@ func TestRotationSummary_LegacySingleSignature(t *testing.T) {
 	}
 	// Key manager single active key only (no rotate)
 	m, _ := cryptoInt.NewManager(1 * time.Hour)
-	cryptoInt.GlobalEdDSARegistry = m
-	s := NewBetaServer("")
+	s := NewBetaServer("", WithKeyProvider(m))
 	t.Cleanup(func() { s.Shutdown() })
 	s.rotationLedger = led
 	w := httptest.NewRecorder()

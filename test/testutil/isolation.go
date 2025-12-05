@@ -2,9 +2,6 @@ package testutil
 
 import (
 	"os"
-	"time"
-
-	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 // UnsetCryptoEnv clears environment variables that can mutate global crypto or signing behavior
@@ -28,17 +25,3 @@ func UnsetCryptoEnv() {
 		_ = os.Unsetenv(k)
 	}
 }
-
-// FreshKeyManager replaces the global EdDSA registry with a new manager instance.
-// Use before tests needing clean signing state.
-func FreshKeyManager(ttl time.Duration) error {
-	m, err := internalCrypto.NewManager(ttl)
-	if err != nil {
-		return err
-	}
-	internalCrypto.GlobalEdDSARegistry = m
-	return nil
-}
-
-// DisableKeyRegistry sets the global registry to nil for negative tests.
-func DisableKeyRegistry() { internalCrypto.GlobalEdDSARegistry = nil }

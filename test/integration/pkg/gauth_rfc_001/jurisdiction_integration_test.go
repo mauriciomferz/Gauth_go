@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	rfc "github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
+
 	"github.com/mauriciomferz/Gauth_go/internal/jurisdiction"
 	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/authz"
@@ -22,12 +24,12 @@ func (a *allowAllJurisdictionAuthorizer) GetPermissions(ctx context.Context, sub
 }
 
 // jurisdictionTestService creates a test service with jurisdiction enforcement enabled.
-func jurisdictionTestService() *Service {
+func jurisdictionTestService() *rfc.Service {
 	logger := audit.NewMemoryLogger(nil)
 	authorizer := &allowAllJurisdictionAuthorizer{}
 	integration := jurisdiction.NewServerIntegration()
 
-	return NewService(logger, authorizer, WithJurisdictionEnforcement(integration))
+	return rfc.NewService(logger, authorizer, rfc.WithJurisdictionEnforcement(integration))
 }
 
 // TestJurisdictionIntegration_Disabled verifies that jurisdiction enforcement is disabled by default.
@@ -36,10 +38,10 @@ func TestJurisdictionIntegration_Disabled(t *testing.T) {
 	authorizer := &allowAllJurisdictionAuthorizer{}
 
 	// Service WITHOUT jurisdiction enforcement (default behavior)
-	svc := NewService(logger, authorizer)
+	svc := rfc.NewService(logger, authorizer)
 
 	// Create delegation without any jurisdiction claims - should succeed
-	req := DelegationRequest{
+	req := rfc.DelegationRequest{
 		Grantor:  "alice@example.com",
 		Grantee:  "bob@example.com",
 		Scope:    []string{"read", "write"},
@@ -62,7 +64,7 @@ func TestJurisdictionIntegration_EUGDPRConsent(t *testing.T) {
 	ctx := WithSubject(context.Background(), "bob@example.com")
 
 	// Test 1: EU jurisdiction with GDPR consent - ALLOW
-	reqWithConsent := DelegationRequest{
+	reqWithConsent := rfc.DelegationRequest{
 		Grantor:  "alice@eubank.com",
 		Grantee:  "bob@eubank.com",
 		Scope:    []string{"gdpr_data_processing"},
@@ -83,7 +85,7 @@ func TestJurisdictionIntegration_EUGDPRConsent(t *testing.T) {
 	}
 
 	// Test 2: EU jurisdiction WITHOUT GDPR consent - DENY
-	reqWithoutConsent := DelegationRequest{
+	reqWithoutConsent := rfc.DelegationRequest{
 		Grantor:  "alice@eubank.com",
 		Grantee:  "bob@eubank.com",
 		Scope:    []string{"gdpr_data_processing"},
@@ -111,7 +113,7 @@ func TestJurisdictionIntegration_USCCPAOptOut(t *testing.T) {
 	ctx := WithSubject(context.Background(), "bob@example.com")
 
 	// Test 1: US jurisdiction without CCPA opt-out - ALLOW
-	reqNoOptOut := DelegationRequest{
+	reqNoOptOut := rfc.DelegationRequest{
 		Grantor:  "alice@usbank.com",
 		Grantee:  "bob@usbank.com",
 		Scope:    []string{"ccpa_data_processing"},
@@ -132,7 +134,7 @@ func TestJurisdictionIntegration_USCCPAOptOut(t *testing.T) {
 	}
 
 	// Test 2: US jurisdiction WITH CCPA opt-out - DENY
-	reqWithOptOut := DelegationRequest{
+	reqWithOptOut := rfc.DelegationRequest{
 		Grantor:  "alice@usbank.com",
 		Grantee:  "bob@usbank.com",
 		Scope:    []string{"ccpa_data_processing"},
@@ -156,7 +158,7 @@ func TestJurisdictionIntegration_CrossBorderDataTransfer(t *testing.T) {
 	ctx := WithSubject(context.Background(), "bob@example.com")
 
 	// Test 1: EU to UK cross-border transfer (adequacy country) - ALLOW
-	reqEUtoUK := DelegationRequest{
+	reqEUtoUK := rfc.DelegationRequest{
 		Grantor:  "alice@eubank.com",
 		Grantee:  "bob@ukbank.com",
 		Scope:    []string{"personal_data_transfer"},
@@ -177,7 +179,7 @@ func TestJurisdictionIntegration_CrossBorderDataTransfer(t *testing.T) {
 	}
 
 	// Test 2: EU to US cross-border transfer (NOT adequacy country) - DENY
-	reqEUtoUS := DelegationRequest{
+	reqEUtoUS := rfc.DelegationRequest{
 		Grantor:  "alice@eubank.com",
 		Grantee:  "bob@usbank.com",
 		Scope:    []string{"personal_data_transfer"},
@@ -201,7 +203,7 @@ func TestJurisdictionIntegration_DataResidency(t *testing.T) {
 	ctx := WithSubject(context.Background(), "bob@example.com")
 
 	// Test 1: EU personal data staying in EU - ALLOW
-	reqResidencyOK := DelegationRequest{
+	reqResidencyOK := rfc.DelegationRequest{
 		Grantor:  "alice@eubank.com",
 		Grantee:  "bob@eubank.com",
 		Scope:    []string{"data_export"},
@@ -223,7 +225,7 @@ func TestJurisdictionIntegration_DataResidency(t *testing.T) {
 	}
 
 	// Test 2: EU personal data leaving EU - DENY
-	reqResidencyViolation := DelegationRequest{
+	reqResidencyViolation := rfc.DelegationRequest{
 		Grantor:  "alice@eubank.com",
 		Grantee:  "bob@usbank.com",
 		Scope:    []string{"data_export"},
@@ -248,7 +250,7 @@ func TestJurisdictionIntegration_BlockedActions(t *testing.T) {
 	ctx := WithSubject(context.Background(), "bob@example.com")
 
 	// Test 1: EU blocked action "unrestricted_data_export" - DENY
-	reqBlockedAction := DelegationRequest{
+	reqBlockedAction := rfc.DelegationRequest{
 		Grantor:  "alice@eubank.com",
 		Grantee:  "bob@eubank.com",
 		Scope:    []string{"unrestricted_data_export"}, // Blocked in EU
@@ -265,7 +267,7 @@ func TestJurisdictionIntegration_BlockedActions(t *testing.T) {
 	}
 
 	// Test 2: Allowed action in EU - ALLOW
-	reqAllowedAction := DelegationRequest{
+	reqAllowedAction := rfc.DelegationRequest{
 		Grantor:  "alice@eubank.com",
 		Grantee:  "bob@eubank.com",
 		Scope:    []string{"read", "write"}, // Standard actions, not blocked
@@ -291,7 +293,7 @@ func TestJurisdictionIntegration_VerifyTokenEnforcement(t *testing.T) {
 	ctx := WithSubject(context.Background(), "bob@eubank.com")
 
 	// Create a delegation with EU jurisdiction
-	req := DelegationRequest{
+	req := rfc.DelegationRequest{
 		Grantor:  "alice@eubank.com",
 		Grantee:  "bob@eubank.com",
 		Scope:    []string{"read"},
@@ -326,27 +328,27 @@ func TestJurisdictionIntegration_VerifyTokenEnforcement(t *testing.T) {
 // TestExtractJurisdictionFromPOA tests jurisdiction extraction helper.
 func TestExtractJurisdictionFromPOA(t *testing.T) {
 	// Test 1: Jurisdiction from Jurisdiction field
-	poa1 := &PowerOfAttorney{
+	poa1 := &rfc.PowerOfAttorney{
 		Jurisdiction: "EU",
 	}
-	jur1 := ExtractJurisdictionFromPOA(poa1)
+	jur1 := rfc.ExtractJurisdictionFromPOA(poa1)
 	if jur1 != "EU" {
 		t.Errorf("Expected EU, got %s", jur1)
 	}
 
 	// Test 2: Jurisdiction from Restrictions map (US normalized)
-	poa2 := &PowerOfAttorney{
+	poa2 := &rfc.PowerOfAttorney{
 		Restrictions: map[string]string{
 			"jurisdiction": "US",
 		},
 	}
-	jur2 := ExtractJurisdictionFromPOA(poa2)
+	jur2 := rfc.ExtractJurisdictionFromPOA(poa2)
 	if jur2 != "US" { // ExtractJurisdictionFromClaims may normalize or return as-is
 		t.Logf("Got jurisdiction: %s (expected US or UNITED_STATES)", jur2)
 	}
 
 	// Test 3: Default jurisdiction (nil PoA)
-	jur3 := ExtractJurisdictionFromPOA(nil)
+	jur3 := rfc.ExtractJurisdictionFromPOA(nil)
 	if jur3 != "UNITED_STATES" && jur3 != "US" { // Accept either format
 		t.Errorf("Expected UNITED_STATES or US (default), got %s", jur3)
 	}
@@ -358,7 +360,7 @@ func TestValidateJurisdictionCompliance(t *testing.T) {
 	ctx := WithSubject(context.Background(), "bob@example.com")
 
 	// Test 1: Valid action in jurisdiction
-	poa1 := &PowerOfAttorney{
+	poa1 := &rfc.PowerOfAttorney{
 		Jurisdiction: "US",
 		Scope:        []string{"read"},
 	}
@@ -368,7 +370,7 @@ func TestValidateJurisdictionCompliance(t *testing.T) {
 	}
 
 	// Test 2: Blocked action in jurisdiction
-	poa2 := &PowerOfAttorney{
+	poa2 := &rfc.PowerOfAttorney{
 		Jurisdiction: "EU",
 		Scope:        []string{"unrestricted_data_export"},
 	}

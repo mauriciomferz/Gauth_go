@@ -16,8 +16,6 @@ import (
 
 func TestVerificationPackageEndToEnd(t *testing.T) {
 	os.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
-	s := NewBetaServer("")
-	t.Cleanup(func() { s.Shutdown() })
 	km, err := crypto.NewManager(time.Hour)
 	if err != nil {
 		t.Fatalf("km init: %v", err)
@@ -25,9 +23,10 @@ func TestVerificationPackageEndToEnd(t *testing.T) {
 	if _, err := km.Rotate(); err != nil {
 		t.Fatalf("rotate: %v", err)
 	}
-	crypto.GlobalEdDSARegistry = km
-	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "2")
-	rc := delegation.NewRevocationChain()
+	s := NewBetaServer("", WithKeyProvider(km))
+	t.Cleanup(func() { s.Shutdown() })
+	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "1")
+	rc := delegation.NewRevocationChain(delegation.WithKeyProvider(km))
 	for i := 0; i < 4; i++ {
 		_, _ = rc.Append(delegation.RevocationEvent{ID: "rev-vpkg-int-" + time.Now().Format("150405") + string(rune('a'+i)), DelegationID: "del-vpkg"})
 		time.Sleep(2 * time.Millisecond)
@@ -39,7 +38,9 @@ func TestVerificationPackageEndToEnd(t *testing.T) {
 	ts := httptest.NewServer(s.router)
 	defer ts.Close()
 	client := ts.Client()
-	if err := verification.VerifyAll(client, ts.URL, ""); err != nil {
+	events := rc.Events()
+	lastHash := events[len(events)-1].Hash
+	if err := verification.VerifyAll(client, ts.URL, lastHash); err != nil {
 		t.Fatalf("VerifyAll error: %v", err)
 	}
 }

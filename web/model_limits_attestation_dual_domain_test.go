@@ -32,12 +32,13 @@ func TestModelLimitsAttestationDualDomainSignature(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMIT_ANCHOR_INTERVAL", "1")
 	os.Setenv("GAUTH_MODEL_LIMITS_STRICT_UNKNOWN", "1")
 
-	srv := NewBetaServer("")
+	m, _ := internalCrypto.NewManager(time.Hour)
+	srv := NewBetaServer("", WithKeyProvider(m))
 	t.Cleanup(func() { srv.Shutdown() })
-	if internalCrypto.GlobalEdDSARegistry == nil || internalCrypto.GlobalEdDSARegistry.Active() == nil {
+	if m.Active() == nil {
 		t.Fatalf("expected eddsa registry active")
 	}
-	active := internalCrypto.GlobalEdDSARegistry.Active()
+	active := m.Active()
 
 	// Produce some audit events (exceed) to ensure snapshot not empty
 	for i := 0; i < 2; i++ {

@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
@@ -30,12 +31,14 @@ func TestModelLimitsAttestationSignature(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMIT_ANCHOR_INTERVAL", "1")
 	os.Setenv("GAUTH_MODEL_LIMITS_STRICT_UNKNOWN", "1")
 
-	srv := NewBetaServer("")
+	// Create explicit key manager for test
+	km, _ := internalCrypto.NewManager(24 * time.Hour)
+	srv := NewBetaServer("", WithKeyProvider(km))
 	t.Cleanup(func() { srv.Shutdown() })
-	if internalCrypto.GlobalEdDSARegistry == nil || internalCrypto.GlobalEdDSARegistry.Active() == nil {
-		t.Fatalf("expected active eddsa registry")
+	if km.Active() == nil {
+		t.Fatalf("expected active eddsa key")
 	}
-	active := internalCrypto.GlobalEdDSARegistry.Active()
+	active := km.Active()
 	pub := active.Public
 	kid := active.ID
 

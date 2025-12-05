@@ -45,7 +45,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	anchorint "github.com/mauriciomferz/Gauth_go/internal/anchor"
 	"github.com/mauriciomferz/Gauth_go/internal/capability"
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/internal/limits"
 	"github.com/mauriciomferz/Gauth_go/internal/metrics"
 	"github.com/mauriciomferz/Gauth_go/internal/notary"
@@ -56,6 +55,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/authz"
 	"github.com/mauriciomferz/Gauth_go/pkg/cache"
 	cacheConfig "github.com/mauriciomferz/Gauth_go/pkg/config"
+	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	cryptopkg "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/pkg/database"
 	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
@@ -278,6 +278,7 @@ func jwtError(c *gin.Context, code, detail string) {
 type BetaServer struct {
 	router           *gin.Engine
 	start            time.Time
+	keyProvider      crypto.KeyProvider
 	poaTotalRequests int
 	// legacyAliasHits counts invocations of deprecated /api/governance/lifecycle_timeline for deprecation timing.
 	legacyAliasHits uint64
@@ -977,15 +978,38 @@ func (s *BetaServer) SemanticAnomalyStats() (ewmaEntries int, scoreEntries int) 
 	return len(s.semanticEWMA), len(s.semanticScores)
 }
 
+// getKeyManager returns the underlying *crypto.Manager if available, nil otherwise.
+// This is used for operations that require direct access to Manager methods like ListCurrent().
+func (s *BetaServer) getKeyManager() *crypto.Manager {
+	if s.keyProvider != nil {
+		if km, ok := s.keyProvider.(*crypto.Manager); ok {
+			return km
+		}
+	}
+	return nil
+}
+
+// getKeyProvider returns the key provider, falling back to global if none injected.
+// Deprecated: Use s.keyProvider directly where possible.
+func (s *BetaServer) getKeyProvider() crypto.KeyProvider {
+	if s.keyProvider != nil {
+		return s.keyProvider
+	}
+	return nil
+}
+
 // rotationV2LocalResolver implements notary.PublicKeyResolver for rotation V2 verification using a map of Ed25519 publics.
-type rotationV2LocalResolver struct{ m map[string]ed25519.PublicKey }
+type rotationV2LocalResolver struct {
+	m  map[string]ed25519.PublicKey
+	km *crypto.Manager
+}
 
 func (lr rotationV2LocalResolver) FindByID(id string) *notary.PublicKeyRecord {
 	if pk, ok := lr.m[id]; ok {
 		return &notary.PublicKeyRecord{Ed25519: pk}
 	}
-	if crypto.GlobalEdDSARegistry != nil { // fallback to global registry if available
-		if k := crypto.GlobalEdDSARegistry.FindByID(id); k != nil {
+	if lr.km != nil {
+		if k := lr.km.FindByID(id); k != nil {
 			return &notary.PublicKeyRecord{Ed25519: k.Public}
 		}
 	}
@@ -1030,7 +1054,16 @@ func (s *BetaServer) buildAndOptionallySignRotationV2() (notary.WeightedRotation
 	}
 	// Previous hash chaining (purely local, not persisted across process restarts).
 	prev := s.rotationLastV2Hash
-	art, err := notary.BuildArtifactFromConfig(cfg, prev, time.Now())
+	var resolver func(string) ed25519.PublicKey
+	if km := s.getKeyManager(); km != nil {
+		resolver = func(id string) ed25519.PublicKey {
+			if k := km.FindByID(id); k != nil {
+				return k.Public
+			}
+			return nil
+		}
+	}
+	art, err := notary.BuildArtifactFromConfig(cfg, prev, time.Now(), resolver)
 	if err != nil {
 		return notary.WeightedRotationArtifact{}, 0, nil, nil, err
 	}
@@ -1090,7 +1123,7 @@ func (s *BetaServer) buildAndOptionallySignRotationV2() (notary.WeightedRotation
 			pubMap[id] = ed25519.PublicKey(pk[32:])
 		}
 	}
-	verified, perAlg, failures := notary.VerifyArtifactSignatures(&art, rotationV2LocalResolver{m: pubMap})
+	verified, perAlg, failures := notary.VerifyArtifactSignatures(&art, rotationV2LocalResolver{m: pubMap, km: s.getKeyManager()})
 	// Update last hash for chaining only after successful build
 	s.rotationLastV2Hash = art.CanonicalDigest
 	return art, verified, perAlg, failures, nil
@@ -2117,43 +2150,45 @@ func (s *BetaServer) maybeAugmentAndSignAttestation(att modelLimitsAttestation) 
 			}
 		}
 	}
-	if os.Getenv("GAUTH_MODEL_LIMIT_ATTEST_SIGN") == "1" && crypto.GlobalEdDSARegistry != nil {
-		if active := crypto.GlobalEdDSARegistry.Active(); active != nil && len(active.Private) == ed25519.PrivateKeySize {
-			// Inject per-attestation nonce if absent (raw base64, 16 bytes) to prevent replay of identical payloads.
-			if att.Nonce == "" {
-				var nb [16]byte
-				_, _ = crand.Read(nb[:])
-				att.Nonce = base64.RawStdEncoding.EncodeToString(nb[:])
-			}
-			unsigned := att
-			unsigned.Signature = ""
-			unsigned.SigKid = ""
-			unsigned.SigMode = ""
-			unsigned.DomainSignature = ""
-			unsigned.DomainPrefix = ""
-			if raw, jerr := json.Marshal(unsigned); jerr == nil {
-				// Default primary domain prefix constant
-				primaryPrefix := "GAUTH_MODEL_LIMIT_ATTEST:"
-				// Secondary override prefix (if set and different) for dual-domain signature emission
-				extraPrefix := os.Getenv("GAUTH_ATTEST_DOMAIN_PREFIX")
-				if extraPrefix == primaryPrefix { // avoid duplicate
-					extraPrefix = ""
+	if os.Getenv("GAUTH_MODEL_LIMIT_ATTEST_SIGN") == "1" {
+		if km := s.getKeyManager(); km != nil {
+			if active := km.Active(); active != nil && len(active.Private) == ed25519.PrivateKeySize {
+				// Inject per-attestation nonce if absent (raw base64, 16 bytes) to prevent replay of identical payloads.
+				if att.Nonce == "" {
+					var nb [16]byte
+					_, _ = crand.Read(nb[:])
+					att.Nonce = base64.RawStdEncoding.EncodeToString(nb[:])
 				}
-				// Primary signature (always domain-prefixed with primaryPrefix)
-				primaryMsg := append([]byte(primaryPrefix), raw...)
-				primarySig := ed25519.Sign(active.Private, primaryMsg)
-				att.Signature = base64.RawStdEncoding.EncodeToString(primarySig)
-				att.SigKid = active.ID
-				att.SigMode = sigModeEdDSA
-				// Optional secondary domain signature if extraPrefix provided
-				if extraPrefix != "" {
-					secondaryMsg := append([]byte(extraPrefix), raw...)
-					secondarySig := ed25519.Sign(active.Private, secondaryMsg)
-					att.DomainSignature = base64.RawStdEncoding.EncodeToString(secondarySig)
-					att.DomainPrefix = extraPrefix
-				} else {
-					att.DomainSignature = ""
-					att.DomainPrefix = ""
+				unsigned := att
+				unsigned.Signature = ""
+				unsigned.SigKid = ""
+				unsigned.SigMode = ""
+				unsigned.DomainSignature = ""
+				unsigned.DomainPrefix = ""
+				if raw, jerr := json.Marshal(unsigned); jerr == nil {
+					// Default primary domain prefix constant
+					primaryPrefix := "GAUTH_MODEL_LIMIT_ATTEST:"
+					// Secondary override prefix (if set and different) for dual-domain signature emission
+					extraPrefix := os.Getenv("GAUTH_ATTEST_DOMAIN_PREFIX")
+					if extraPrefix == primaryPrefix { // avoid duplicate
+						extraPrefix = ""
+					}
+					// Primary signature (always domain-prefixed with primaryPrefix)
+					primaryMsg := append([]byte(primaryPrefix), raw...)
+					primarySig := ed25519.Sign(active.Private, primaryMsg)
+					att.Signature = base64.RawStdEncoding.EncodeToString(primarySig)
+					att.SigKid = active.ID
+					att.SigMode = sigModeEdDSA
+					// Optional secondary domain signature if extraPrefix provided
+					if extraPrefix != "" {
+						secondaryMsg := append([]byte(extraPrefix), raw...)
+						secondarySig := ed25519.Sign(active.Private, secondaryMsg)
+						att.DomainSignature = base64.RawStdEncoding.EncodeToString(secondarySig)
+						att.DomainPrefix = extraPrefix
+					} else {
+						att.DomainSignature = ""
+						att.DomainPrefix = ""
+					}
 				}
 			}
 		}
@@ -2249,11 +2284,12 @@ func (s *BetaServer) apiModelLimitsAttestationStream(c *gin.Context) {
 // apiModelLimitsAttestationKeys returns active + historical Ed25519 public keys for attestation verification.
 // Response shape: {"success":true,"keys":[{"kid":"..","public_b64":".."}]}
 func (s *BetaServer) apiModelLimitsAttestationKeys(c *gin.Context) {
-	if crypto.GlobalEdDSARegistry == nil {
+	km := s.getKeyManager()
+	if km == nil {
 		c.JSON(200, gin.H{"success": true, "keys": []any{}})
 		return
 	}
-	keys := crypto.GlobalEdDSARegistry.ListCurrent()
+	keys := km.ListCurrent()
 	out := make([]map[string]any, 0, len(keys))
 	for _, k := range keys {
 		if len(k.Public) == ed25519.PublicKeySize {
@@ -2322,11 +2358,12 @@ func (s *BetaServer) apiModelLimitsAttestationVerify(c *gin.Context) {
 		c.JSON(200, gin.H{"success": true, "valid": false, "error": "missing_signature_fields"})
 		return
 	}
-	if crypto.GlobalEdDSARegistry == nil {
+	km := s.getKeyManager()
+	if km == nil {
 		c.JSON(200, gin.H{"success": true, "valid": false, "error": "no_key_registry"})
 		return
 	}
-	key := crypto.GlobalEdDSARegistry.FindByID(att.SigKid)
+	key := km.FindByID(att.SigKid)
 	if key == nil {
 		c.JSON(200, gin.H{"success": true, "valid": false, "error": "unknown_kid"})
 		return
@@ -3117,8 +3154,8 @@ func corsMiddleware() gin.HandlerFunc {
 // NewBetaServer creates a new BetaServer instance.
 // NewBetaServer constructs a server using the default in-memory metrics adapter.
 // For tests or advanced instrumentation provide a custom metrics implementation via NewBetaServerWithMetrics.
-func NewBetaServer(port string) *BetaServer {
-	return NewBetaServerWithMetrics(port, nil)
+func NewBetaServer(port string, opts ...BetaServerOption) *BetaServer {
+	return NewBetaServerWithMetrics(port, nil, opts...)
 }
 
 // NewBetaServerWithMetrics constructs a BetaServer instance allowing a custom metrics adapter to be injected
@@ -3127,7 +3164,7 @@ func NewBetaServer(port string) *BetaServer {
 //
 //nolint:gocyclo // Server initialization with metrics and components
 //nolint:gocyclo // Server initialization with metrics and components
-func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
+func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServerOption) *BetaServer {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	// Enable CORS with allow-list support (GAUTH_CORS_ALLOW env).
@@ -3160,7 +3197,39 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 			}
 		}
 	}
-	s := &BetaServer{router: r, start: time.Now(), jobs: NewJobManager(200), audit: NewAuditLog(500), events: NewEventHub(500), tokens: NewTokenStore(500), port: port, policyRL: newSimpleRateLimiter(20, time.Minute), replayStore: NewReplayNonceStore(5 * time.Minute), delegationStatus: make(map[string]string), metrics: memoryMetrics, lifecycleEvents: make(map[string][]*LifecycleEvent), lifecycleCap: 250, violationHistoryCap: 400, semanticHistoryCap: 300, requiredActionCaps: map[string][]string{"transaction:execute": {"cap.transfer"}, "transaction:pay": {"cap.transfer"}, "transaction:issue": {"cap.issue"}, "delegation:create": {"cap.delegation.create"}, "delegation:revoke": {"cap.delegation.revoke"}}, stopCh: make(chan struct{}), modelLimits: make(map[string]int), attestStreamSubs: make(map[chan modelLimitsAttestation]struct{}), attestStreamCounts: make(map[string]uint64), protocolFlowManager: NewProtocolFlowManager()}
+	s := &BetaServer{
+		router:              r,
+		start:               time.Now(),
+		jobs:                NewJobManager(200),
+		audit:               NewAuditLog(500),
+		events:              NewEventHub(500),
+		tokens:              NewTokenStore(500),
+		port:                port,
+		policyRL:            newSimpleRateLimiter(20, time.Minute),
+		replayStore:         NewReplayNonceStore(5 * time.Minute),
+		delegationStatus:    make(map[string]string),
+		metrics:             memoryMetrics,
+		lifecycleEvents:     make(map[string][]*LifecycleEvent),
+		lifecycleCap:        250,
+		violationHistoryCap: 400,
+		semanticHistoryCap:  300,
+		requiredActionCaps: map[string][]string{
+			"transaction:execute": {"cap.transfer"},
+			"transaction:pay":     {"cap.transfer"},
+			"transaction:issue":   {"cap.issue"},
+			"delegation:create":   {"cap.delegation.create"},
+			"delegation:revoke":   {"cap.delegation.revoke"},
+		},
+		stopCh:              make(chan struct{}),
+		modelLimits:         make(map[string]int),
+		attestStreamSubs:    make(map[chan modelLimitsAttestation]struct{}),
+		attestStreamCounts:  make(map[string]uint64),
+		protocolFlowManager: NewProtocolFlowManager(),
+		keyProvider:         nil, // default to nil; expected to be injected or initialized via options
+	}
+	for _, opt := range opts {
+		opt(s)
+	}
 	// Defer semantic diagnostics integrity endpoint registration to initUIRevamp (invoked immediately below)
 	s.initUIRevamp()
 	// Register composite authorization endpoints (demo) for tests expecting activation flow.
@@ -3603,8 +3672,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 				c.Next()
 			})
 
-
-		// Authentication handler (must be registered first)
+			// Authentication handler (must be registered first)
 			jwtSecret := os.Getenv("GAUTH_JWT_SIGNING_KEY")
 			if jwtSecret == "" {
 				jwtSecret = "dev-secret-change-in-production"
@@ -3657,41 +3725,41 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 			apiKeyHandler := adminHandlers.NewAPIKeyHandler(dbPool)
 			apiKeyHandler.RegisterRoutes(adminGroup)
 
-		// Security settings handler
-		securityHandler := adminHandlers.NewSecurityHandler(dbPool)
-		securityHandler.RegisterRoutes(adminGroup)
+			// Security settings handler
+			securityHandler := adminHandlers.NewSecurityHandler(dbPool)
+			securityHandler.RegisterRoutes(adminGroup)
 
-		// Cache management handler
-		cacheConf := cacheConfig.LoadCacheConfig()
-		if err := cacheConfig.ValidateCacheConfig(cacheConf); err != nil {
-			log.Printf("[WARNING] Invalid cache configuration: %v - using memory cache fallback", err)
-			cacheConf.Type = "memory"
-		}
-		cacheInstance := cache.NewCacheWithFallback(cacheConf)
-		defer cacheInstance.Close()
-		
-		// Set cache on PoA handler
-		poaHandler.SetCache(cacheInstance)
-		
-		cacheHandler := adminHandlers.NewCacheHandler(cacheInstance)
-		cacheHandler.RegisterRoutes(adminGroup)
+			// Cache management handler
+			cacheConf := cacheConfig.LoadCacheConfig()
+			if err := cacheConfig.ValidateCacheConfig(cacheConf); err != nil {
+				log.Printf("[WARNING] Invalid cache configuration: %v - using memory cache fallback", err)
+				cacheConf.Type = "memory"
+			}
+			cacheInstance := cache.NewCacheWithFallback(cacheConf)
+			defer cacheInstance.Close()
 
-		// OIDC providers handler
-		oidcHandler := adminHandlers.NewOIDCHandler(dbPool)
-		oidcHandler.RegisterRoutes(adminGroup)		// Policy Templates handler
-		policyTemplatesHandler := adminHandlers.NewPolicyTemplatesHandler(dbPool)
-		adminGroup.GET("/policy-templates", policyTemplatesHandler.ListPolicyTemplates)
-		adminGroup.GET("/policy-templates/:id", policyTemplatesHandler.GetPolicyTemplate)
-		adminGroup.POST("/policy-templates", policyTemplatesHandler.CreatePolicyTemplate)
-		adminGroup.PUT("/policy-templates/:id", policyTemplatesHandler.UpdatePolicyTemplate)
-		adminGroup.POST("/policy-templates/:id/clone", policyTemplatesHandler.ClonePolicyTemplate)
-		adminGroup.DELETE("/policy-templates/:id", policyTemplatesHandler.DeletePolicyTemplate)
+			// Set cache on PoA handler
+			poaHandler.SetCache(cacheInstance)
 
-		// GAuth+ enhanced authorization handler
-		gauthPlusHandler := adminHandlers.NewGAuthPlusHandler(dbPool)
-		gauthPlusHandler.RegisterRoutes(adminGroup)
+			cacheHandler := adminHandlers.NewCacheHandler(cacheInstance)
+			cacheHandler.RegisterRoutes(adminGroup)
 
-		fmt.Fprintln(os.Stderr, "[admin] handlers registered: auth, poa, resilience, events, authz, config, tokens, metrics, audit, subscribers, revocation, api-keys, security, cache, oidc, policy-templates, gauthplus (17 total)")			// OIDC authentication flow handler
+			// OIDC providers handler
+			oidcHandler := adminHandlers.NewOIDCHandler(dbPool)
+			oidcHandler.RegisterRoutes(adminGroup) // Policy Templates handler
+			policyTemplatesHandler := adminHandlers.NewPolicyTemplatesHandler(dbPool)
+			adminGroup.GET("/policy-templates", policyTemplatesHandler.ListPolicyTemplates)
+			adminGroup.GET("/policy-templates/:id", policyTemplatesHandler.GetPolicyTemplate)
+			adminGroup.POST("/policy-templates", policyTemplatesHandler.CreatePolicyTemplate)
+			adminGroup.PUT("/policy-templates/:id", policyTemplatesHandler.UpdatePolicyTemplate)
+			adminGroup.POST("/policy-templates/:id/clone", policyTemplatesHandler.ClonePolicyTemplate)
+			adminGroup.DELETE("/policy-templates/:id", policyTemplatesHandler.DeletePolicyTemplate)
+
+			// GAuth+ enhanced authorization handler
+			gauthPlusHandler := adminHandlers.NewGAuthPlusHandler(dbPool)
+			gauthPlusHandler.RegisterRoutes(adminGroup)
+
+			fmt.Fprintln(os.Stderr, "[admin] handlers registered: auth, poa, resilience, events, authz, config, tokens, metrics, audit, subscribers, revocation, api-keys, security, cache, oidc, policy-templates, gauthplus (17 total)") // OIDC authentication flow handler
 			oidcAuthHandler := authHandlers.NewOIDCAuthHandler(dbPool)
 			authGroup := r.Group("/auth")
 			oidcAuthHandler.RegisterRoutes(authGroup)
@@ -3702,7 +3770,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 		fmt.Fprintln(os.Stderr, "[WARNING] DB_HOST not configured - running in DEVELOPMENT mode")
 		fmt.Fprintln(os.Stderr, "[DEV] Admin authentication endpoint available (database-free mode)")
 		fmt.Fprintln(os.Stderr, "[DEV] Other admin endpoints require database - set DB_HOST to enable")
-		
+
 		adminGroup := r.Group("/api/admin")
 		adminGroup.Use(func(c *gin.Context) {
 			tenantID := c.GetHeader("X-Tenant-ID")
@@ -3714,7 +3782,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 			}
 			c.Next()
 		})
-		
+
 		jwtSecret := os.Getenv("GAUTH_JWT_SIGNING_KEY")
 		if jwtSecret == "" {
 			jwtSecret = "dev-secret-change-in-production"
@@ -4179,22 +4247,28 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics) *BetaServer {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[crypto] eddsa manager init failed: %v\n", err)
 		} else {
-			crypto.GlobalEdDSARegistry = km
+			// Set both the global (for backward compat) and server's keyProvider
+			// GlobalEdDSARegistry assignment removed. use s.keyProvider/s.getKeyManager() exclusively.
+			if s.keyProvider == nil {
+				s.keyProvider = km
+			}
 			fmt.Fprintf(os.Stderr, "[crypto] eddsa manager initialized ttl=%dh persist=%v\n", ttlHours, os.Getenv("GAUTH_EDDSA_PERSIST_PATH") != "")
 		}
 		// Optional automatic rotation loop if GAUTH_EDDSA_AUTO_ROTATE_MIN set (minimum 5 minutes)
 		if rv := os.Getenv("GAUTH_EDDSA_AUTO_ROTATE_MIN"); rv != "" {
-			if mins, err := strconv.Atoi(rv); err == nil && mins >= 5 && crypto.GlobalEdDSARegistry != nil {
-				go func() {
-					for {
-						time.Sleep(time.Duration(mins) * time.Minute)
-						if _, err := crypto.GlobalEdDSARegistry.Rotate(); err != nil {
-							fmt.Fprintf(os.Stderr, "[crypto] auto-rotate error: %v\n", err)
-						} else {
-							fmt.Fprintln(os.Stderr, "[crypto] auto-rotated eddsa key")
+			if mins, err := strconv.Atoi(rv); err == nil && mins >= 5 {
+				if km := s.getKeyManager(); km != nil {
+					go func() {
+						for {
+							time.Sleep(time.Duration(mins) * time.Minute)
+							if _, err := km.Rotate(); err != nil {
+								fmt.Fprintf(os.Stderr, "[crypto] auto-rotate error: %v\n", err)
+							} else {
+								fmt.Fprintln(os.Stderr, "[crypto] auto-rotated eddsa key")
+							}
 						}
-					}
-				}()
+					}()
+				}
 			}
 		}
 	}
@@ -4683,15 +4757,17 @@ func (s *BetaServer) loadCapabilitiesFromFile(path string) error {
 			var signed *SignedAnchorWrapper
 			if jerr == nil {
 				// Optional signature: if EdDSA manager present and GAUTH_CAP_ANCHOR_SIGN=1
-				if os.Getenv("GAUTH_CAP_ANCHOR_SIGN") == "1" && crypto.GlobalEdDSARegistry != nil {
-					if active := crypto.GlobalEdDSARegistry.Active(); active != nil && len(active.Private) == ed25519.PrivateKeySize {
-						// Sign original artifact bytes (data). Avoid remarshal before signing.
-						signedBytes := make([]byte, len(data))
-						copy(signedBytes, data)
-						sig := ed25519.Sign(active.Private, signedBytes)
-						wrapper := SignedAnchorWrapper{Artifact: signedBytes, Kid: active.ID, Signature: base64.RawStdEncoding.EncodeToString(sig), Mode: sigModeEdDSA}
-						data, _ = json.Marshal(wrapper) // final emitted bytes are wrapper JSON
-						signed = &wrapper
+				if os.Getenv("GAUTH_CAP_ANCHOR_SIGN") == "1" {
+					if km := s.getKeyManager(); km != nil {
+						if active := km.Active(); active != nil && len(active.Private) == ed25519.PrivateKeySize {
+							// Sign original artifact bytes (data). Avoid remarshal before signing.
+							signedBytes := make([]byte, len(data))
+							copy(signedBytes, data)
+							sig := ed25519.Sign(active.Private, signedBytes)
+							wrapper := SignedAnchorWrapper{Artifact: signedBytes, Kid: active.ID, Signature: base64.RawStdEncoding.EncodeToString(sig), Mode: sigModeEdDSA}
+							data, _ = json.Marshal(wrapper) // final emitted bytes are wrapper JSON
+							signed = &wrapper
+						}
 					}
 				}
 				if wErr := os.WriteFile(s.capAnchorFilePath, data, 0o600); wErr != nil {
@@ -5740,11 +5816,12 @@ func (s *BetaServer) apiCapabilityAnchorPrometheus(c *gin.Context) {
 // to verify capability anchoring signatures and other EdDSA-signed artifacts. Response:
 // { success: bool, configured: bool, kid: string, public_key: string } where public_key is base64 (raw 32 bytes).
 func (s *BetaServer) apiEdDSAPublicKey(c *gin.Context) {
-	if os.Getenv("GAUTH_TOKEN_SIG_MODE") != sigModeEdDSA || crypto.GlobalEdDSARegistry == nil {
+	km := s.getKeyManager()
+	if os.Getenv("GAUTH_TOKEN_SIG_MODE") != sigModeEdDSA || km == nil {
 		c.JSON(200, gin.H{"success": true, "configured": false})
 		return
 	}
-	active := crypto.GlobalEdDSARegistry.Active()
+	active := km.Active()
 	if active == nil || len(active.Public) != ed25519.PublicKeySize {
 		c.JSON(200, gin.H{"success": true, "configured": false})
 		return
@@ -5870,8 +5947,8 @@ func (s *BetaServer) routes() {
 		var oldPubs []ed25519.PublicKey
 		var newPubs []ed25519.PublicKey
 		kidPubCache := map[string]ed25519.PublicKey{}
-		if crypto.GlobalEdDSARegistry != nil {
-			for _, k := range crypto.GlobalEdDSARegistry.ListCurrent() {
+		if km := s.getKeyManager(); km != nil {
+			for _, k := range km.ListCurrent() {
 				if k == nil || len(k.Public) != ed25519.PublicKeySize {
 					continue
 				}
@@ -5983,12 +6060,19 @@ func (s *BetaServer) routes() {
 		}
 		sum := notary.BuildRotationSummary(concrete)
 		// Multi-signature augmentation: append signatures for each active key when multisig enabled.
-		if multisig && crypto.GlobalEdDSARegistry != nil {
-			keys := crypto.GlobalEdDSARegistry.ListCurrent()
-			for _, k := range keys {
-				if k != nil && len(k.Private) == ed25519.PrivateKeySize {
-					// Use the key's canonical ID published in JWKS for kid to ensure client-side verification resolves key.
-					_ = notary.AppendSignatureToSummary(&sum, k.Private, k.ID)
+		// Use s.keyProvider if available, fallback to global for backward compatibility.
+		kp := s.keyProvider
+		if kp == nil {
+			kp = s.getKeyManager()
+		}
+		if multisig {
+			if km, ok := kp.(*crypto.Manager); ok && km != nil {
+				keys := km.ListCurrent()
+				for _, k := range keys {
+					if k != nil && len(k.Private) == ed25519.PrivateKeySize {
+						// Use the key's canonical ID published in JWKS for kid to ensure client-side verification resolves key.
+						_ = notary.AppendSignatureToSummary(&sum, k.Private, k.ID)
+					}
 				}
 			}
 			// Set threshold & satisfied weight fields
@@ -6000,13 +6084,18 @@ func (s *BetaServer) routes() {
 			}
 		}
 		// Optional signature when EdDSA manager active and GAUTH_ROTATIONS_SIGN=1
-		if os.Getenv("GAUTH_ROTATIONS_SIGN") == "1" && crypto.GlobalEdDSARegistry != nil {
-			ak := crypto.GlobalEdDSARegistry.Active()
-			if ak != nil && len(ak.Private) == ed25519.PrivateKeySize {
-				// Use canonical key ID for single-signature legacy fields
-				_ = notary.SignRotationSummary(&sum, ak.Private, ak.ID)
+		if os.Getenv("GAUTH_ROTATIONS_SIGN") == "1" {
+			if km, ok := kp.(*crypto.Manager); ok && km != nil {
+				ak := km.Active()
+				if ak != nil && len(ak.Private) == ed25519.PrivateKeySize {
+					// Use canonical key ID for single-signature legacy fields
+					_ = notary.SignRotationSummary(&sum, ak.Private, ak.ID)
+				} else {
+					// Signing required but active key invalid -> rotation_signature_missing
+					c.JSON(400, gin.H{"success": false, "code": "rotation_signature_missing", "rfc": "rfc120:rotation_signature"})
+					return
+				}
 			} else {
-				// Signing required but active key invalid -> rotation_signature_missing
 				c.JSON(400, gin.H{"success": false, "code": "rotation_signature_missing", "rfc": "rfc120:rotation_signature"})
 				return
 			}
@@ -6224,7 +6313,7 @@ func (s *BetaServer) routes() {
 		if jwtSecret == "" {
 			jwtSecret = devSecretDemo
 		}
-		
+
 		gauthService, err := gauth.New(
 			gauth.Config{
 				ClientID:          "rfc0111-demo",
@@ -6378,10 +6467,12 @@ func (s *BetaServer) routes() {
 				// Each rotation descriptor carries two signatures (old/new) in test setup; approximate satisfied weight = entries * 2.
 				satisfied = len(s.rotationLedger.Entries()) * 2
 			}
-			if os.Getenv("GAUTH_ROTATIONS_SIGN") == "1" && crypto.GlobalEdDSARegistry != nil {
-				keys := crypto.GlobalEdDSARegistry.ListCurrent()
-				if len(keys) > satisfied {
-					satisfied = len(keys)
+			if os.Getenv("GAUTH_ROTATIONS_SIGN") == "1" {
+				if km := s.getKeyManager(); km != nil {
+					keys := km.ListCurrent()
+					if len(keys) > satisfied {
+						satisfied = len(keys)
+					}
 				}
 			}
 			// In tests, GAUTH_ROTATIONS_THRESHOLD may exceed combined descriptors and key count; ensure unsatisfied triggers 400.
@@ -6519,7 +6610,7 @@ func (s *BetaServer) routes() {
 					eddsaRotationHours = n
 				}
 			}
-			if km := crypto.GlobalEdDSARegistry; km != nil {
+			if km := s.getKeyManager(); km != nil {
 				for _, k := range km.ListCurrent() {
 					eddsaKeys = append(eddsaKeys, gin.H{"kid": k.ID, "expires_at": k.ExpiresAt.Format(time.RFC3339)})
 				}
@@ -6853,7 +6944,7 @@ func (s *BetaServer) routes() {
 		}
 		// EdDSA publication (OKP JWK). We derive key list from in-memory manager via global accessor.
 		if mode == sigModeEdDSA {
-			if km := crypto.GlobalEdDSARegistry; km != nil {
+			if km := s.getKeyManager(); km != nil {
 				for _, k := range km.ListCurrent() {
 					jwk := gin.H{
 						"kty":        "OKP",
@@ -6901,7 +6992,7 @@ func (s *BetaServer) routes() {
 		}
 		// RFC0115 deprecation warning: Signal clients when keys are deprecated (past deprecated_after but before sunset_after)
 		if mode == sigModeEdDSA {
-			if km := crypto.GlobalEdDSARegistry; km != nil {
+			if km := s.getKeyManager(); km != nil {
 				now := time.Now().UTC()
 				var deprecatedKids []string
 				for _, k := range km.ListCurrent() {
@@ -7377,7 +7468,7 @@ func (s *BetaServer) routes() {
 			c.JSON(403, gin.H{"success": false, "message": "forbidden"})
 			return
 		}
-		if crypto.GlobalEdDSARegistry == nil {
+		if s.getKeyManager() == nil {
 			c.JSON(400, gin.H{"success": false, "message": "eddsa manager unavailable"})
 			return
 		}
@@ -7387,14 +7478,15 @@ func (s *BetaServer) routes() {
 			count = 1
 		}
 		performed := 0
+		km := s.getKeyManager()
 		for i := 0; i < count; i++ {
-			if _, err := crypto.GlobalEdDSARegistry.Rotate(); err == nil {
+			if _, err := km.Rotate(); err == nil {
 				performed++
 			} else {
 				fmt.Fprintf(os.Stderr, "[crypto-rotate] rotate error: %v\n", err)
 			}
 		}
-		keys := crypto.GlobalEdDSARegistry.ListCurrent()
+		keys := km.ListCurrent()
 		keySummaries := make([]gin.H, 0, len(keys))
 		for _, k := range keys {
 			keySummaries = append(keySummaries, gin.H{"kid": k.ID, "created_at": k.CreatedAt.Format(time.RFC3339), "expires_at": k.ExpiresAt.Format(time.RFC3339)})
@@ -7431,11 +7523,12 @@ func (s *BetaServer) routes() {
 	// Public EdDSA keys (active + history) for client-side verification of tree head signatures.
 	// GET /api/v1/crypto/eddsa/keys
 	s.router.GET("/api/v1/crypto/eddsa/keys", func(c *gin.Context) {
-		if crypto.GlobalEdDSARegistry == nil {
+		km := s.getKeyManager()
+		if km == nil {
 			c.JSON(200, gin.H{"success": true, "keys": []any{}})
 			return
 		}
-		keys := crypto.GlobalEdDSARegistry.ListCurrent()
+		keys := km.ListCurrent()
 		out := make([]gin.H, 0, len(keys))
 		for _, k := range keys {
 			out = append(out, gin.H{"kid": k.ID, "public_b64": base64.RawStdEncoding.EncodeToString(k.Public)})
@@ -7674,7 +7767,8 @@ func (s *BetaServer) routes() {
 			c.JSON(403, gin.H{"success": false, "message": "forbidden"})
 			return
 		}
-		if crypto.GlobalEdDSARegistry == nil {
+		km := s.getKeyManager()
+		if km == nil {
 			c.JSON(400, gin.H{"success": false, "message": "eddsa manager unavailable"})
 			return
 		}
@@ -7722,7 +7816,7 @@ func (s *BetaServer) routes() {
 				break
 			}
 			// Rotate and loop
-			if _, err := crypto.GlobalEdDSARegistry.Rotate(); err != nil {
+			if _, err := km.Rotate(); err != nil {
 				fmt.Fprintf(os.Stderr, "[ensure-threshold] rotate error: %v\n", err)
 				break
 			}
@@ -7799,10 +7893,10 @@ func (s *BetaServer) routes() {
 			nonce = base64.StdEncoding.EncodeToString(nonceBytes)
 			c.Set("csp-nonce", nonce)
 		}
-		
+
 		// Override with strict CSP (no unsafe-inline for scripts)
 		cspPolicy := fmt.Sprintf("default-src 'self'; script-src 'self' 'nonce-%s' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://cdn.jsdelivr.net; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'", nonce)
-		
+
 		if os.Getenv("GAUTH_DEV_INDEX") == "1" {
 			if wd, err := os.Getwd(); err == nil {
 				path := wd + "/web/templates/poa-visualization.html"
@@ -7928,7 +8022,7 @@ func (s *BetaServer) routes() {
 	// Serve Swagger UI for API documentation
 	if !s.routeRegistered("/api/docs") {
 		s.router.GET("/api/docs", func(c *gin.Context) {
-		html := `<!DOCTYPE html>
+			html := `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8078,7 +8172,7 @@ func (s *BetaServer) routes() {
 	s.router.GET("/static/js/app.js", func(c *gin.Context) { c.Data(200, "application/javascript; charset=utf-8", embeddedAppJS) })
 	s.router.GET("/static/js/log_stream_panel.js", func(c *gin.Context) { c.Data(200, "application/javascript; charset=utf-8", embeddedLogStreamJS) })
 	s.router.GET("/static/js/aria-tabs.js", func(c *gin.Context) { c.Data(200, "application/javascript; charset=utf-8", embeddedAriaTabsJS) })
-	
+
 	// Always serve visualization page scripts from disk if present (outside dev gating to avoid 404/mime mismatch)
 	s.router.GET("/static/js/pages/:file", func(c *gin.Context) {
 		name := c.Param("file")
@@ -8093,7 +8187,9 @@ func (s *BetaServer) routes() {
 			p := wd
 			for i := 0; i < 3; i++ { // up to 3 parent levels
 				pp := filepath.Dir(p)
-				if pp == p { break }
+				if pp == p {
+					break
+				}
 				roots = append(roots, pp)
 				p = pp
 			}
@@ -8105,7 +8201,9 @@ func (s *BetaServer) routes() {
 		seen := map[string]struct{}{}
 		var tried []string
 		for _, r := range roots {
-			if _, ok := seen[r]; ok { continue }
+			if _, ok := seen[r]; ok {
+				continue
+			}
 			seen[r] = struct{}{}
 			full := filepath.Join(r, "web", "static", "js", "pages", name)
 			tried = append(tried, full)
@@ -8149,7 +8247,9 @@ func (s *BetaServer) routes() {
 			p := wd
 			for i := 0; i < 3; i++ {
 				pp := filepath.Dir(p)
-				if pp == p { break }
+				if pp == p {
+					break
+				}
 				roots = append(roots, pp)
 				p = pp
 			}
@@ -8160,7 +8260,12 @@ func (s *BetaServer) routes() {
 		}
 		seen := map[string]struct{}{}
 		var uniqueRoots []string
-		for _, r := range roots { if _, ok := seen[r]; !ok { uniqueRoots = append(uniqueRoots, r); seen[r]=struct{}{} } }
+		for _, r := range roots {
+			if _, ok := seen[r]; !ok {
+				uniqueRoots = append(uniqueRoots, r)
+				seen[r] = struct{}{}
+			}
+		}
 		results := make([]map[string]interface{}, 0, len(assetNames))
 		for _, an := range assetNames {
 			found := false
@@ -8184,7 +8289,7 @@ func (s *BetaServer) routes() {
 		c.Header("Expires", "0")
 		c.JSON(200, gin.H{"roots": uniqueRoots, "assets": results})
 	})
-	
+
 	// Import map explicit route (same rationale)
 	s.router.GET("/static/js/importmap.json", func(c *gin.Context) {
 		if wd, err := os.Getwd(); err == nil {
@@ -8229,10 +8334,20 @@ func (s *BetaServer) routes() {
 				}
 				// Attempt same resolution logic as GET but omit body
 				roots := []string{}
-				if wd, err := os.Getwd(); err == nil { roots = append(roots, wd) }
-				if ex, err := os.Executable(); err == nil { roots = append(roots, filepath.Dir(ex)) }
-				seen := map[string]struct{}{}; unique := []string{}
-				for _, r := range roots { if _, ok := seen[r]; !ok { unique = append(unique, r); seen[r]=struct{}{} } }
+				if wd, err := os.Getwd(); err == nil {
+					roots = append(roots, wd)
+				}
+				if ex, err := os.Executable(); err == nil {
+					roots = append(roots, filepath.Dir(ex))
+				}
+				seen := map[string]struct{}{}
+				unique := []string{}
+				for _, r := range roots {
+					if _, ok := seen[r]; !ok {
+						unique = append(unique, r)
+						seen[r] = struct{}{}
+					}
+				}
 				var found bool
 				for _, r := range unique {
 					candidate := filepath.Join(r, "web", "static", "js", "pages", name)
@@ -8256,7 +8371,6 @@ func (s *BetaServer) routes() {
 			})
 
 			// (Pages route moved outside dev gating for reliability)
-
 
 			// Also serve all CSS files from disk
 			cssPath := wd + "/web/static/css"
@@ -11749,8 +11863,8 @@ func (s *BetaServer) Run() error {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		// Stop EdDSA rotation scheduler if active BEFORE shutting down server
-		if crypto.GlobalEdDSARegistry != nil {
-			crypto.GlobalEdDSARegistry.Stop()
+		if km := s.getKeyManager(); km != nil {
+			km.Stop()
 		}
 		return srv.Shutdown(ctx)
 

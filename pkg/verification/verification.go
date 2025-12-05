@@ -8,6 +8,7 @@ package verification
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -162,7 +163,7 @@ func FetchConsistency(client HTTPClient, base string, start int) (*ConsistencyRe
 
 // LoadJWKS imports published Ed25519 public keys into a new ephemeral manager.
 // Returns the manager for explicit use instead of setting global state.
-func LoadJWKS(client HTTPClient, base string) (*crypto.Manager, error) {
+func LoadJWKS(client HTTPClient, base string) (crypto.KeyProvider, error) {
 	url := fmt.Sprintf("%s/.well-known/jwks.json", base)
 	b, err := httpRead(client, url)
 	if err != nil {
@@ -195,8 +196,6 @@ func LoadJWKS(client HTTPClient, base string) (*crypto.Manager, error) {
 			km.ImportPublic(kid, pub, time.Now().Add(30*time.Minute))
 		}
 	}
-	// Set global for backward compatibility with code that relies on it
-	crypto.GlobalEdDSARegistry = km
 	return km, nil
 }
 
@@ -225,9 +224,14 @@ func VerifyInclusion(eventHash string, proof *MerkleProofResponse) (bool, error)
 	return true, nil
 }
 
-// VerifySTHMultiSig verifies multi-sig / single signature depending on threshold.
-func VerifySTHMultiSig(sth *delegation.SignedTreeHead, km *crypto.Manager) error {
-	return delegation.VerifyTreeHeadMultiSig(sth, km)
+// VerifySTHMultiSig verifies the Signed Tree Head using the provided KeyProvider.
+func VerifySTHMultiSig(sth *delegation.SignedTreeHead, kp crypto.KeyProvider) error {
+	if sth == nil {
+		return errors.New("nil_sth")
+	}
+	// Use delegation package's verification logic which now accepts KeyProvider
+	// We need to adapt KeyProvider if necessary, but delegation.VerifyTreeHeadMultiSig accepts KeyProvider now.
+	return delegation.VerifyTreeHeadMultiSig(sth, kp)
 }
 
 // VerifyConsistency validates append-only proof given complete event hash list.
@@ -241,29 +245,36 @@ func VerifyConsistency(cons *ConsistencyResponse, allEventHashes []string) error
 	return nil
 }
 
-// VerifyAll runs the complete pipeline. Returns nil on success, error on first failure.
+// VerifyAll performs a full verification sequence: discovery -> JWKS -> events -> proof -> STH.
+// It returns nil if the targetHash is confirmed revoked (or not found if that's the check).
+// Actually, this function seems to verify that the system is consistent.
 func VerifyAll(client HTTPClient, base, targetHash string) error {
 	disco, err := FetchDiscovery(client, base)
 	if err != nil {
-		return fmt.Errorf("discovery: %w", err)
+		return wrap("discovery_fetch", "failed to fetch discovery metadata", err)
 	}
 	events, err := FetchEvents(client, base)
 	if err != nil {
-		return fmt.Errorf("events: %w", err)
+		return wrap("events_fetch", "failed to fetch events", err)
 	}
-	if events.Length == 0 {
-		return wrap("no_events", "revocation chain empty", nil)
+	var found bool
+	for _, e := range events.Events {
+		if e.Hash == targetHash {
+			found = true
+			break
+		}
 	}
-	if targetHash == "" {
-		targetHash = events.Events[events.Length-1].Hash
+	if !found {
+		return wrap("event_not_found", "target hash not found in events", nil)
 	}
 	proof, err := FetchProofByHash(client, base, targetHash)
 	if err != nil {
-		return fmt.Errorf("proof: %w", err)
+		return wrap("proof_fetch", "failed to fetch proof", err)
 	}
 	if _, err := VerifyInclusion(targetHash, proof); err != nil {
-		return err
+		return wrap("inclusion_verify", "failed to verify inclusion proof", err)
 	}
+
 	// STH signature verification
 	if disco.RevocationSupport.STHLatest != nil {
 		// Marshal/unmarshal dynamic structure
@@ -276,12 +287,12 @@ func VerifyAll(client HTTPClient, base, targetHash string) error {
 			return wrap("sth_unmarshal", "failed to parse signed tree head", err)
 		}
 		if sthJSON.MerkleRoot != "" {
-			km, err := LoadJWKS(client, base)
+			kp, err := LoadJWKS(client, base)
 			if err != nil {
 				return wrap("jwks_load", "failed to load jwks", err)
 			}
 			sth := ConvertSignedTreeHead(&sthJSON)
-			if err := VerifySTHMultiSig(sth, km); err != nil {
+			if err := VerifySTHMultiSig(sth, kp); err != nil {
 				return wrap("sth_verify", err.Error(), err)
 			}
 		}

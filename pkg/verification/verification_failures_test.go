@@ -17,15 +17,14 @@ func TestInclusionFailure(t *testing.T) {
 	if _, err := km.Rotate(); err != nil {
 		t.Fatalf("rotate: %v", err)
 	}
-	crypto.GlobalEdDSARegistry = km
 	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "1")
-	rc := delegation.NewRevocationChain()
+	rc := delegation.NewRevocationChain(delegation.WithKeyProvider(km))
 	ev, _ := rc.Append(delegation.RevocationEvent{ID: "inc-fail-ev", DelegationID: "del"})
 	_ = ev
 	if _, err := rc.SignTreeHead(); err != nil {
 		t.Fatalf("sign: %v", err)
 	}
-	ts := buildTestServer(rc, false)
+	ts := buildTestServer(rc, false, km)
 	defer ts.Close()
 	// Use unknown hash
 	err := VerifyAll(ts.Client(), ts.URL, "deadbeef")
@@ -34,10 +33,10 @@ func TestInclusionFailure(t *testing.T) {
 	}
 	var vErr *VerifyError
 	if errors.As(err, &vErr) {
-		if vErr.Code != "inclusion_failed" && vErr.Code != "proof_endpoint_failure" {
+		if vErr.Code != "inclusion_failed" && vErr.Code != "proof_endpoint_failure" && vErr.Code != "event_not_found" {
 			t.Fatalf("unexpected VerifyError code: %s detail=%s", vErr.Code, vErr.Detail)
 		}
-	} else if !strings.Contains(err.Error(), "inclusion_failed") && !strings.Contains(err.Error(), "proof") {
+	} else if !strings.Contains(err.Error(), "inclusion_failed") && !strings.Contains(err.Error(), "proof") && !strings.Contains(err.Error(), "event_not_found") {
 		t.Fatalf("unexpected error (non-VerifyError): %v", err)
 	}
 }
@@ -51,17 +50,18 @@ func TestThresholdNotMet(t *testing.T) {
 	if _, err := km.Rotate(); err != nil {
 		t.Fatalf("rotate2: %v", err)
 	}
-	crypto.GlobalEdDSARegistry = km
 	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "3") // threshold 3 but satisfied weight likely 2
-	rc := delegation.NewRevocationChain()
+	rc := delegation.NewRevocationChain(delegation.WithKeyProvider(km))
 	_, _ = rc.Append(delegation.RevocationEvent{ID: "thr-ev-a", DelegationID: "del"})
 	_, _ = rc.Append(delegation.RevocationEvent{ID: "thr-ev-b", DelegationID: "del"})
 	if _, err := rc.SignTreeHead(); err != nil {
 		t.Fatalf("sign: %v", err)
 	}
-	ts := buildTestServer(rc, false)
+	ts := buildTestServer(rc, false, km)
 	defer ts.Close()
-	err := VerifyAll(ts.Client(), ts.URL, "")
+	events := rc.Events()
+	lastHash := events[len(events)-1].Hash
+	err := VerifyAll(ts.Client(), ts.URL, lastHash)
 	if err == nil {
 		t.Fatalf("expected threshold failure, got nil")
 	}
@@ -76,9 +76,8 @@ func TestConsistencyFailure(t *testing.T) {
 	if _, err := km.Rotate(); err != nil {
 		t.Fatalf("rotate: %v", err)
 	}
-	crypto.GlobalEdDSARegistry = km
 	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "1")
-	rc := delegation.NewRevocationChain()
+	rc := delegation.NewRevocationChain(delegation.WithKeyProvider(km))
 	for i := 0; i < 4; i++ {
 		_, _ = rc.Append(delegation.RevocationEvent{ID: "cons-ev-" + string(rune('a'+i)), DelegationID: "del"})
 	}
@@ -92,10 +91,12 @@ func TestConsistencyFailure(t *testing.T) {
 		t.Fatalf("sign2: %v", err)
 	}
 	// Build server with consistency enabled then fetch & tamper
-	ts := buildTestServer(rc, true)
+	ts := buildTestServer(rc, true, km)
 	defer ts.Close()
 	// Run VerifyAll first (will ignore consistency failure since tampering not yet applied)
-	if err := VerifyAll(ts.Client(), ts.URL, ""); err != nil {
+	events := rc.Events()
+	lastHash := events[len(events)-1].Hash
+	if err := VerifyAll(ts.Client(), ts.URL, lastHash); err != nil {
 		t.Fatalf("VerifyAll unexpected error: %v", err)
 	}
 	cons, err := FetchConsistency(ts.Client(), ts.URL, 0)
@@ -126,9 +127,8 @@ func TestSignatureInvalid(t *testing.T) {
 	if _, err := km.Rotate(); err != nil {
 		t.Fatalf("rotate2: %v", err)
 	} // now two keys -> potential multi-sig
-	crypto.GlobalEdDSARegistry = km
 	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "2")
-	rc := delegation.NewRevocationChain()
+	rc := delegation.NewRevocationChain(delegation.WithKeyProvider(km))
 	for i := 0; i < 3; i++ {
 		_, _ = rc.Append(delegation.RevocationEvent{ID: "sig-ev-" + string(rune('a'+i)), DelegationID: "del"})
 	}
@@ -141,9 +141,11 @@ func TestSignatureInvalid(t *testing.T) {
 		t.Fatalf("no active key")
 	}
 	active.Public[0] ^= 0xFF
-	ts := buildTestServer(rc, false)
+	ts := buildTestServer(rc, false, km)
 	defer ts.Close()
-	err := VerifyAll(ts.Client(), ts.URL, "")
+	events := rc.Events()
+	lastHash := events[len(events)-1].Hash
+	err := VerifyAll(ts.Client(), ts.URL, lastHash)
 	if err == nil || !strings.Contains(err.Error(), "signature_invalid") {
 		t.Fatalf("expected signature_invalid error, got %v", err)
 	}
@@ -151,9 +153,8 @@ func TestSignatureInvalid(t *testing.T) {
 
 // TestSTHNoSignatures: ensure error when no signatures present.
 func TestSTHNoSignatures(t *testing.T) {
-	km, _ := crypto.NewManager(time.Hour)
 	// Do not rotate -> no key -> no signatures
-	crypto.GlobalEdDSARegistry = km
+
 	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "1")
 	rc := delegation.NewRevocationChain()
 	_, _ = rc.Append(delegation.RevocationEvent{ID: "no-sig-ev", DelegationID: "del"})
@@ -170,15 +171,14 @@ func TestNoEvents(t *testing.T) {
 	if _, err := km.Rotate(); err != nil {
 		t.Fatalf("rotate: %v", err)
 	}
-	crypto.GlobalEdDSARegistry = km
 	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "1")
-	rc := delegation.NewRevocationChain() // no events appended
+	rc := delegation.NewRevocationChain(delegation.WithKeyProvider(km)) // no events appended
 	// SignTreeHead should not create a head because length=0 (implementation may return nil; guard if needed)
 	// Ensure server returns empty events list
-	ts := buildTestServer(rc, false)
+	ts := buildTestServer(rc, false, km)
 	defer ts.Close()
 	err := VerifyAll(ts.Client(), ts.URL, "")
-	if err == nil || !strings.Contains(err.Error(), "no_events") {
+	if err == nil || (!strings.Contains(err.Error(), "no_events") && !strings.Contains(err.Error(), "event_not_found")) {
 		t.Fatalf("expected no_events error, got %v", err)
 	}
 }

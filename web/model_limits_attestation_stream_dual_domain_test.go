@@ -35,12 +35,13 @@ func TestModelLimitsAttestationStreamDualDomainSignature(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMIT_ANCHOR_PATH", anchorFile.Name())
 	os.Setenv("GAUTH_MODEL_LIMIT_ANCHOR_INTERVAL", "1")
 
-	srv := NewBetaServer("")
+	km, _ := internalCrypto.NewManager(1 * time.Hour)
+	srv := NewBetaServer("", WithKeyProvider(km))
 	t.Cleanup(func() { srv.Shutdown() })
-	if internalCrypto.GlobalEdDSARegistry == nil || internalCrypto.GlobalEdDSARegistry.Active() == nil {
-		t.Fatalf("expected eddsa registry active")
+	if km.Active() == nil {
+		t.Fatalf("expected eddsa key active")
 	}
-	active := internalCrypto.GlobalEdDSARegistry.Active()
+	active := km.Active()
 
 	// Generate a couple exceed events before streaming so snapshot/audit not empty
 	for i := 0; i < 2; i++ {

@@ -7,23 +7,21 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
-	"github.com/gin-gonic/gin"
 )
 
 // buildTestServer constructs a minimal BetaServer with revocation chain and key manager.
 func buildTestServer(t *testing.T) *BetaServer {
 	t.Helper()
 	gin.SetMode(gin.TestMode)
-	s := NewBetaServer("")
-	t.Cleanup(func() { s.Shutdown() })
 	// Attach a fresh key manager (1h TTL) for signatures.
 	km, err := crypto.NewManager(time.Hour)
 	if err != nil {
 		t.Fatalf("km init: %v", err)
 	}
-	crypto.GlobalEdDSARegistry = km
+	s := NewBetaServer("", WithKeyProvider(km))
 	// Initialize revocation chain with two events.
 	rc := delegation.NewRevocationChain()
 	_, _ = rc.Append(delegation.RevocationEvent{ID: "rev-1", DelegationID: "del-1"})
@@ -72,7 +70,7 @@ func TestRevocationVerifyEndpoint(t *testing.T) {
 func TestRevocationVerifyEndpointAfterKeyLoss(t *testing.T) {
 	s := buildTestServer(t)
 	// Remove manager (simulate unknown kid scenario) and call endpoint again
-	crypto.GlobalEdDSARegistry = nil
+	s.keyProvider = nil
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/token/revocation/verify", nil)
 	s.router.ServeHTTP(w, req)

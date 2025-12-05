@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
 )
 
 func main() {
@@ -27,9 +28,9 @@ func main() {
 		},
 		Authorization: poa.AuthorizationScope{
 			AuthorizationType: poa.AuthorizationType{RepresentationType: poa.RepresentationSole, SubProxyAuthority: false, SignatureType: poa.SignatureSingle},
-			ApplicableSectors: []poa.IndustrySector{poa.DemoSectorInfoComm},
+			ApplicableSectors: []poa.IndustrySector{{Code: taxonomy.SectorInfoCommunication, Description: "Information and Communication", Authorized: true}},
 			ApplicableRegions: []poa.GeographicScope{{Type: poa.GeoTypeNational, Identifier: "DE"}},
-			AuthorizedActions: poa.AuthorizedActions{Transactions: []poa.TransactionType{poa.TransactionLoan}, Decisions: []poa.DecisionType{poa.DecisionFinancial}, NonPhysicalActions: []poa.ActionTypeNonPhysical{poa.ActionNonPhysicalResearching}},
+			AuthorizedActions: poa.AuthorizedActions{Transactions: []poa.TransactionType{taxonomy.TransactionLoan}, Decisions: []poa.DecisionType{taxonomy.DecisionFinancial}, NonPhysicalActions: []poa.ActionTypeNonPhysical{taxonomy.ActionNonPhysicalResearching}},
 		},
 		Requirements: poa.Requirements{ValidityPeriod: poa.ValidityPeriod{StartTime: time.Now().UTC(), EndTime: time.Now().UTC().Add(24 * time.Hour)}},
 	}

@@ -1,7 +1,6 @@
 package attest
 
 import (
-	"crypto/ed25519"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
@@ -10,8 +9,8 @@ import (
 	"os"
 	"time"
 
-	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/internal/notary"
+	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 const (
@@ -22,10 +21,32 @@ const (
 // Extraction target for logic currently embedded in web/server_clean.go (RB7).
 // It intentionally avoids importing web types to prevent cycles; callers supply/consume
 // simple DTO structs (canonical JSON already prepared).
-type AttestationService struct{}
+// AttestationService provides construction + signing helpers for model limits attestation.
+// Extraction target for logic currently embedded in web/server_clean.go (RB7).
+// It intentionally avoids importing web types to prevent cycles; callers supply/consume
+// simple DTO structs (canonical JSON already prepared).
+type AttestationService struct {
+	keyProvider internalCrypto.KeyProvider
+}
+
+// Option configures the AttestationService
+type Option func(*AttestationService)
+
+// WithKeyProvider injects a crypto provider for signing operations
+func WithKeyProvider(kp internalCrypto.KeyProvider) Option {
+	return func(s *AttestationService) {
+		s.keyProvider = kp
+	}
+}
 
 // NewAttestationService constructs a new service (future: inject replay store, notarizer, tracer).
-func NewAttestationService() *AttestationService { return &AttestationService{} }
+func NewAttestationService(opts ...Option) *AttestationService {
+	s := &AttestationService{}
+	for _, opt := range opts {
+		opt(s)
+	}
+	return s
+}
 
 // BuildUnsigned attaches snapshot metadata & nonce; caller provides base struct pointer with fields populated.
 // Returns canonical JSON bytes ready for signing.
@@ -40,12 +61,30 @@ func (s *AttestationService) BuildUnsigned(canonicalJSON []byte, nonce string) (
 // SignDomainSeparated performs domain-separated signing of raw canonical JSON bytes with provided prefix.
 // Public method to allow direct usage without intermediate struct binding.
 func (s *AttestationService) SignDomainSeparated(prefix string, raw []byte) ([]byte, string, error) {
-	return SignDomainSeparated(prefix, raw)
+	kp := s.keyProvider
+
+	if kp == nil {
+		return nil, "", errors.New("no_key_provider")
+	}
+	signer, err := kp.ActiveSigner()
+	if err != nil {
+		return nil, "", err
+	}
+	msg := append([]byte(prefix), raw...)
+	sig, err := signer.Sign(msg)
+	if err != nil {
+		return nil, "", err
+	}
+	return sig, signer.KeyID(), nil
 }
 
 // SignDomainSeparatedB64 returns base64 signature form.
 func (s *AttestationService) SignDomainSeparatedB64(prefix string, raw []byte) (string, string, error) {
-	return SignDomainSeparatedB64(prefix, raw)
+	sig, kid, err := s.SignDomainSeparated(prefix, raw)
+	if err != nil {
+		return "", "", err
+	}
+	return base64.RawStdEncoding.EncodeToString(sig), kid, nil
 }
 
 // StampNotarization placeholder performing external notarization (future injection).
@@ -95,52 +134,37 @@ func (s *AttestationService) NotarizeAndSignModelLimits(unsignedJSON []byte, sna
 	if !enableSigning {
 		return res, nil
 	}
-	// Prefer agile global rotating signer (RB6). Falls back to direct registry access for backward compatibility.
-	signer := internalCrypto.GlobalRotatingSigner()
-	// KeyID accessor (optional) for rotating signer.
-	type keyIDProvider interface{ KeyID() string }
+
+	kp := s.keyProvider
+
+	if kp == nil {
+		return res, errors.New("no_key_provider")
+	}
+
+	signer, err := kp.ActiveSigner()
+	if err != nil {
+		return res, err
+	}
+
 	primaryPrefix := AttestationDomainPrefix
-	if signer != nil {
-		msg := append([]byte(primaryPrefix), unsignedJSON...)
-		sigBytes, err := signer.Sign(msg)
-		if err == nil && len(sigBytes) > 0 {
-			res.Signature = base64.RawStdEncoding.EncodeToString(sigBytes)
-			if kidp, ok := signer.(keyIDProvider); ok {
-				res.SigKid = kidp.KeyID()
-			}
-			res.SigMode = sigModeEdDSA // agility retains eddsa label for now
-		}
-		// Optional dual domain signature.
-		if dp := os.Getenv("GAUTH_ATTEST_DOMAIN_PREFIX"); dp != "" && len(sigBytes) > 0 {
-			dmsg := append([]byte(dp), unsignedJSON...)
-			if dsig, derr := signer.Sign(dmsg); derr == nil && len(dsig) > 0 {
-				res.DomainSignature = base64.RawStdEncoding.EncodeToString(dsig)
-				res.DomainPrefix = dp
-			}
-		}
-		// If signer failed to produce signature fall through to legacy path for clarity.
-		if res.Signature != "" {
-			return res, nil
-		}
+	msg := append([]byte(primaryPrefix), unsignedJSON...)
+	sigBytes, err := signer.Sign(msg)
+	if err != nil {
+		return res, err
 	}
-	// Legacy direct registry path.
-	if internalCrypto.GlobalEdDSARegistry == nil || internalCrypto.GlobalEdDSARegistry.Active() == nil {
-		return res, errors.New("no_active_key")
+	if len(sigBytes) > 0 {
+		res.Signature = base64.RawStdEncoding.EncodeToString(sigBytes)
+		res.SigKid = signer.KeyID()
+		res.SigMode = sigModeEdDSA
 	}
-	active := internalCrypto.GlobalEdDSARegistry.Active()
-	if len(active.Private) != ed25519.PrivateKeySize {
-		return res, errors.New("no_private_material")
-	}
-	primaryMsg := append([]byte(primaryPrefix), unsignedJSON...)
-	primarySig := ed25519.Sign(active.Private, primaryMsg)
-	res.Signature = base64.RawStdEncoding.EncodeToString(primarySig)
-	res.SigKid = active.ID
-	res.SigMode = sigModeEdDSA
-	if dp := os.Getenv("GAUTH_ATTEST_DOMAIN_PREFIX"); dp != "" {
-		dualMsg := append([]byte(dp), unsignedJSON...)
-		dsig := ed25519.Sign(active.Private, dualMsg)
-		res.DomainSignature = base64.RawStdEncoding.EncodeToString(dsig)
-		res.DomainPrefix = dp
+
+	// Optional dual domain signature.
+	if dp := os.Getenv("GAUTH_ATTEST_DOMAIN_PREFIX"); dp != "" && len(sigBytes) > 0 {
+		dmsg := append([]byte(dp), unsignedJSON...)
+		if dsig, derr := signer.Sign(dmsg); derr == nil && len(dsig) > 0 {
+			res.DomainSignature = base64.RawStdEncoding.EncodeToString(dsig)
+			res.DomainPrefix = dp
+		}
 	}
 	return res, nil
 }
@@ -183,33 +207,4 @@ func randomNonce(n int) string {
 	return string(b)
 }
 
-// SignAttestation performs domain-separated signing of a model limits attestation using global signer agility.
-// If global signer unavailable, falls back to direct ed25519 using active registry key.
-// Returns a mutated copy with signature fields populated.
-// SignDomainSeparated signs raw canonical JSON bytes with provided domain prefix.
-// Returns signature bytes and active key id. Base64 encoding left to caller for flexibility.
-func SignDomainSeparated(prefix string, raw []byte) ([]byte, string, error) {
-	if internalCrypto.GlobalEdDSARegistry == nil || internalCrypto.GlobalEdDSARegistry.Active() == nil {
-		return nil, "", errors.New("no_active_key")
-	}
-	active := internalCrypto.GlobalEdDSARegistry.Active()
-	if len(active.Private) != ed25519.PrivateKeySize {
-		return nil, "", errors.New("no_private_material")
-	}
-	msg := append([]byte(prefix), raw...)
-	if sig, err := internalCrypto.SignWithGlobal(msg); err == nil {
-		return sig, active.ID, nil
-	}
-	// Fallback direct signature
-	sig := ed25519.Sign(active.Private, msg)
-	return sig, active.ID, nil
-}
-
-// SignDomainSeparatedB64 helper returning base64 raw url encoded signature string.
-func SignDomainSeparatedB64(prefix string, raw []byte) (string, string, error) {
-	sig, kid, err := SignDomainSeparated(prefix, raw)
-	if err != nil {
-		return "", "", err
-	}
-	return base64.RawStdEncoding.EncodeToString(sig), kid, nil
-}
+// Deprecated functions removed.

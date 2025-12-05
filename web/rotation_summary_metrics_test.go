@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
+	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 // TestRotationSummaryMetrics ensures new metrics for summary generation & anchoring are exposed.
@@ -24,10 +24,8 @@ func TestRotationSummaryMetrics(t *testing.T) {
 	// Reset any leaked multisig or threshold settings & global key state from previous tests.
 	os.Unsetenv("GAUTH_ROTATIONS_MULTISIG")
 	os.Unsetenv("GAUTH_ROTATIONS_THRESHOLD")
-	if m, _ := cryptoInt.NewManager(24 * time.Hour); m != nil {
-		cryptoInt.GlobalEdDSARegistry = m
-	}
-	srv := NewBetaServer("0")
+	m, _ := cryptoInt.NewManager(24 * time.Hour)
+	srv := NewBetaServer("0", WithKeyProvider(m))
 	t.Cleanup(func() { srv.Shutdown() })
 	led, ok := srv.rotationLedger.(*notary.RotationLedger)
 	if !ok {

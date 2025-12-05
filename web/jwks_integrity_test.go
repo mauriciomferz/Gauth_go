@@ -114,15 +114,14 @@ func TestJWKSDeprecationMetadata(t *testing.T) {
 	defer os.Unsetenv("GAUTH_TOKEN_SIG_MODE")
 	defer os.Unsetenv("GAUTH_EDDSA_AUTO_ROTATE")
 	// Create server first (initializes crypto manager with 24h TTL)
-	s := NewBetaServer("0")
-	t.Cleanup(func() { s.Shutdown() })
 	// Replace with short-TTL manager to trigger deprecation
 	ttl := 10 * time.Second
 	km, err := crypto.NewManager(ttl)
 	if err != nil {
 		t.Fatalf("crypto.NewManager: %v", err)
 	}
-	crypto.GlobalEdDSARegistry = km
+	s := NewBetaServer("0", WithKeyProvider(km))
+	t.Cleanup(func() { s.Shutdown() })
 	// Wait for deprecation (80% of 10s = 8s, add 1s buffer)
 	time.Sleep(9 * time.Second)
 	w := httptest.NewRecorder()
@@ -170,15 +169,14 @@ func TestJWKSDeprecationWarningHeader(t *testing.T) {
 	defer os.Unsetenv("GAUTH_TOKEN_SIG_MODE")
 	defer os.Unsetenv("GAUTH_EDDSA_AUTO_ROTATE")
 	// Create server first
-	s := NewBetaServer("0")
-	t.Cleanup(func() { s.Shutdown() })
 	// Replace with short-TTL manager
 	ttl := 10 * time.Second
 	km, err := crypto.NewManager(ttl)
 	if err != nil {
 		t.Fatalf("crypto.NewManager: %v", err)
 	}
-	crypto.GlobalEdDSARegistry = km
+	s := NewBetaServer("0", WithKeyProvider(km))
+	t.Cleanup(func() { s.Shutdown() })
 	// Wait for deprecation (80% of 10s = 8s, add 1s buffer)
 	time.Sleep(9 * time.Second)
 	w := httptest.NewRecorder()
@@ -215,8 +213,7 @@ func TestJWKSNoWarningWhenNoDeprecation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("crypto.NewManager: %v", err)
 	}
-	crypto.GlobalEdDSARegistry = km
-	s := NewBetaServer("0")
+	s := NewBetaServer("0", WithKeyProvider(km))
 	t.Cleanup(func() { s.Shutdown() })
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/.well-known/jwks.json", nil)

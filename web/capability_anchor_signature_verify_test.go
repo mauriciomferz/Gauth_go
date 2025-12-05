@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/web/testutil"
@@ -38,16 +39,17 @@ func TestCapabilityAnchorEndpointSignatureVerification(t *testing.T) {
 	t.Setenv("GAUTH_DISABLE_BG_POLLS", "1")
 	t.Setenv("GAUTH_SKIP_SMOKETEST", "1")
 
-	srv := NewBetaServer(":0")
-	t.Cleanup(func() { srv.Shutdown() })
-	// Capture active key immediately after server creation.
+	// Create manager with active key
+	m, _ := internalCrypto.NewManager(1 * time.Hour)
+	ak := m.Active()
 	var pub ed25519.PublicKey
 	var kid string
-	if internalCrypto.GlobalEdDSARegistry != nil && internalCrypto.GlobalEdDSARegistry.Active() != nil {
-		a := internalCrypto.GlobalEdDSARegistry.Active()
-		pub = a.Public
-		kid = a.ID
+	if ak != nil {
+		pub = ak.Public
+		kid = ak.ID
 	}
+	srv := NewBetaServer(":0", WithKeyProvider(m))
+	t.Cleanup(func() { srv.Shutdown() })
 	_ = performRequest(srv.router, "POST", "/api/v1/beta/capabilities/reload")
 
 	// Fetch endpoint material

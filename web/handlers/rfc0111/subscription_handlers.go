@@ -19,6 +19,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
 )
 
 // SubscriptionHandlers encapsulates RFC-0111 subscription API handlers.
@@ -354,8 +355,8 @@ func (h *SubscriptionHandlers) ExecuteStepV(c *gin.Context) {
 		Authorization: poa.AuthorizationScope{
 			AuthorizedActions: poa.AuthorizedActions{
 				NonPhysicalActions: []poa.ActionTypeNonPhysical{
-					poa.ActionNonPhysicalAnalyzing,
-					poa.ActionNonPhysicalDocumenting,
+					taxonomy.ActionNonPhysicalAnalyzing,
+					taxonomy.ActionNonPhysicalDocumenting,
 				},
 			},
 		},

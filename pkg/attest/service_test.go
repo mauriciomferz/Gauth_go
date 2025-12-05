@@ -4,29 +4,30 @@ import (
 	"crypto/ed25519"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"os"
 	"testing"
 	"time"
 
-	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/internal/notary"
-	testutil "github.com/mauriciomferz/Gauth_go/test/testutil"
+	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 // helper to setup fresh key state each test
-func prepKeys(t *testing.T) {
-	testutil.UnsetCryptoEnv()
-	if err := testutil.FreshKeyManager(1 * time.Hour); err != nil {
+func createKeyManager(t *testing.T) *internalCrypto.Manager {
+	km, err := internalCrypto.NewManager(1 * time.Hour)
+	if err != nil {
 		t.Fatalf("fresh key manager: %v", err)
 	}
-	if internalCrypto.GlobalEdDSARegistry == nil || internalCrypto.GlobalEdDSARegistry.Active() == nil {
+	if km.Active() == nil {
 		t.Fatalf("expected active key")
 	}
+	return km
 }
 
 func TestBuildUnsignedGeneratesNonce(t *testing.T) {
-	prepKeys(t)
-	svc := NewAttestationService()
+	km := createKeyManager(t)
+	svc := NewAttestationService(WithKeyProvider(km))
 	raw := []byte(`{"demo":true}`)
 	_, nonce1 := svc.BuildUnsigned(raw, "")
 	_, nonce2 := svc.BuildUnsigned(raw, "")
@@ -44,8 +45,8 @@ func TestBuildUnsignedGeneratesNonce(t *testing.T) {
 }
 
 func TestSignDomainSeparatedAndVerify(t *testing.T) {
-	prepKeys(t)
-	svc := NewAttestationService()
+	km := createKeyManager(t)
+	svc := NewAttestationService(WithKeyProvider(km))
 	raw := []byte(`{"x":1}`)
 	prefix := "GAUTH_ATTEST:"
 	sig, kid, err := svc.SignDomainSeparated(prefix, raw)
@@ -55,7 +56,7 @@ func TestSignDomainSeparatedAndVerify(t *testing.T) {
 	if kid == "" {
 		t.Fatalf("kid empty")
 	}
-	active := internalCrypto.GlobalEdDSARegistry.Active()
+	active := km.Active()
 	if active == nil || len(active.Public) != ed25519.PublicKeySize {
 		t.Fatalf("active public invalid")
 	}
@@ -66,8 +67,8 @@ func TestSignDomainSeparatedAndVerify(t *testing.T) {
 }
 
 func TestSignDomainSeparatedB64(t *testing.T) {
-	prepKeys(t)
-	svc := NewAttestationService()
+	km := createKeyManager(t)
+	svc := NewAttestationService(WithKeyProvider(km))
 	raw := []byte(`{"y":2}`)
 	prefix := "ATTEST:"
 	b64, kid, err := svc.SignDomainSeparatedB64(prefix, raw)
@@ -81,7 +82,7 @@ func TestSignDomainSeparatedB64(t *testing.T) {
 	if decErr != nil {
 		t.Fatalf("decode err: %v", decErr)
 	}
-	active := internalCrypto.GlobalEdDSARegistry.Active()
+	active := km.Active()
 	msg := append([]byte(prefix), raw...)
 	if !ed25519.Verify(active.Public, msg, sigBytes) {
 		t.Fatalf("b64 signature fails verify")
@@ -92,8 +93,8 @@ func TestSignDomainSeparatedB64(t *testing.T) {
 }
 
 func TestNotarizeAndSignModelLimits_WithNotarizationAndSigning(t *testing.T) {
-	prepKeys(t)
-	svc := NewAttestationService()
+	km := createKeyManager(t)
+	svc := NewAttestationService(WithKeyProvider(km))
 	// unsigned JSON canonical
 	unsigned := []byte(`{"limits":{"max_tokens":100}}`)
 	snapshotHash := "sha256:abcd" // arbitrary non-empty
@@ -117,7 +118,7 @@ func TestNotarizeAndSignModelLimits_WithNotarizationAndSigning(t *testing.T) {
 	if decErr != nil {
 		t.Fatalf("sig decode: %v", decErr)
 	}
-	active := internalCrypto.GlobalEdDSARegistry.Active()
+	active := km.Active()
 	if active == nil {
 		t.Fatalf("active nil")
 	}
@@ -127,11 +128,17 @@ func TestNotarizeAndSignModelLimits_WithNotarizationAndSigning(t *testing.T) {
 	}
 }
 
+type mockKeyProvider struct{}
+
+func (m *mockKeyProvider) ActiveSigner() (internalCrypto.Signer, error) {
+	return nil, errors.New("no active key")
+}
+func (m *mockKeyProvider) PublicKey(keyID string) ([]byte, string, error) { return nil, "", nil }
+func (m *mockKeyProvider) VerifyWith(msg, sig []byte, keyID string) error { return nil }
+
 func TestNotarizeAndSignModelLimits_NoKey(t *testing.T) {
-	// disable registry
-	testutil.UnsetCryptoEnv()
-	testutil.DisableKeyRegistry()
-	svc := NewAttestationService()
+	// Use mock provider that returns error
+	svc := NewAttestationService(WithKeyProvider(&mockKeyProvider{}))
 	unsigned := []byte(`{"limits":{"max_tokens":50}}`)
 	mem := notary.NewMemory()
 	res, err := svc.NotarizeAndSignModelLimits(unsigned, "sha256:z", "a", "b", true, true, mem)
@@ -144,14 +151,15 @@ func TestNotarizeAndSignModelLimits_NoKey(t *testing.T) {
 }
 
 func TestNotarizeAndSignModelLimits_NoPrivateMaterial(t *testing.T) {
-	prepKeys(t)
+	km := createKeyManager(t)
 	// Corrupt private key length
-	active := internalCrypto.GlobalEdDSARegistry.Active()
+	active := km.Active()
 	if active == nil {
 		t.Fatalf("active nil")
 	}
 	active.Private = active.Private[:10] // truncate to trigger error path
-	svc := NewAttestationService()
+
+	svc := NewAttestationService(WithKeyProvider(km))
 	unsigned := []byte(`{"limits":{"max_tokens":10}}`)
 	mem := notary.NewMemory()
 	_, err := svc.NotarizeAndSignModelLimits(unsigned, "sha256:q", "a", "b", false, true, mem)
@@ -161,10 +169,10 @@ func TestNotarizeAndSignModelLimits_NoPrivateMaterial(t *testing.T) {
 }
 
 func TestNotarizeAndSignModelLimits_DomainPrefixDualSignature(t *testing.T) {
-	prepKeys(t)
+	km := createKeyManager(t)
 	os.Setenv("GAUTH_ATTEST_DOMAIN_PREFIX", "GAUTH_ATTEST:")
 	defer os.Unsetenv("GAUTH_ATTEST_DOMAIN_PREFIX")
-	svc := NewAttestationService()
+	svc := NewAttestationService(WithKeyProvider(km))
 	unsigned := []byte(`{"limits":{"max_tokens":77}}`)
 	mem := notary.NewMemory()
 	res, err := svc.NotarizeAndSignModelLimits(unsigned, "sha256:zz", "a", "b", false, true, mem)
@@ -182,7 +190,7 @@ func TestNotarizeAndSignModelLimits_DomainPrefixDualSignature(t *testing.T) {
 	}
 	rawBytes, _ := base64.RawStdEncoding.DecodeString(res.Signature)
 	domBytes, _ := base64.RawStdEncoding.DecodeString(res.DomainSignature)
-	active := internalCrypto.GlobalEdDSARegistry.Active()
+	active := km.Active()
 	prefixed := append([]byte(AttestationDomainPrefix), unsigned...)
 	if !ed25519.Verify(active.Public, prefixed, rawBytes) {
 		t.Fatalf("primary signature verify fail (domain prefix)")

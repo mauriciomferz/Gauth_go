@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
 )
 
 // AuthorizationHandlers encapsulates RFC-0111 authorization API handlers.
@@ -225,23 +226,23 @@ func parseBasicScope(scopeString string) *poa.AuthorizationScope {
 	}
 
 	// Map OAuth scopes to RFC-0111 non-physical actions (use predefined constants)
-	var nonPhysicalActions []poa.ActionTypeNonPhysical
+	var nonPhysicalActions []taxonomy.ActionTypeNonPhysical
 	for _, s := range scopes {
 		switch strings.ToLower(s) {
 		case "read":
-			nonPhysicalActions = append(nonPhysicalActions, poa.ActionNonPhysicalAnalyzing)
+			nonPhysicalActions = append(nonPhysicalActions, taxonomy.ActionNonPhysicalAnalyzing)
 		case "write":
-			nonPhysicalActions = append(nonPhysicalActions, poa.ActionNonPhysicalDocumenting)
+			nonPhysicalActions = append(nonPhysicalActions, taxonomy.ActionNonPhysicalDocumenting)
 		case "delete":
-			nonPhysicalActions = append(nonPhysicalActions, poa.ActionNonPhysicalApproving)
+			nonPhysicalActions = append(nonPhysicalActions, taxonomy.ActionNonPhysicalApproving)
 		case "admin":
-			nonPhysicalActions = append(nonPhysicalActions, poa.ActionNonPhysicalApproving)
+			nonPhysicalActions = append(nonPhysicalActions, taxonomy.ActionNonPhysicalApproving)
 		}
 	}
 
 	// If no recognized scopes, add analyzing as a safe default
 	if len(nonPhysicalActions) == 0 {
-		nonPhysicalActions = append(nonPhysicalActions, poa.ActionNonPhysicalAnalyzing)
+		nonPhysicalActions = append(nonPhysicalActions, taxonomy.ActionNonPhysicalAnalyzing)
 	}
 
 	scope := &poa.AuthorizationScope{
@@ -251,13 +252,13 @@ func parseBasicScope(scopeString string) *poa.AuthorizationScope {
 			SubProxyAuthority:  false,
 			SignatureType:      "qualified",
 		},
-		ApplicableSectors: []poa.IndustrySector{},
+		ApplicableSectors: []taxonomy.IndustrySector{},
 		ApplicableRegions: []poa.GeographicScope{},
 		AuthorizedActions: poa.AuthorizedActions{
-			Transactions:       []poa.TransactionType{},
-			Decisions:          []poa.DecisionType{},
-			PhysicalActions:    []poa.ActionTypePhysical{},
-			NonPhysicalActions: nonPhysicalActions,
+			Transactions:       []taxonomy.TransactionType{},
+			Decisions:          []taxonomy.DecisionType{},
+			PhysicalActions:    []taxonomy.ActionTypePhysical{},
+			NonPhysicalActions: []taxonomy.ActionTypeNonPhysical{},
 		},
 	}
 

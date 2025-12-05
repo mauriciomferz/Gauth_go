@@ -15,7 +15,9 @@ import (
 
 // buildTestServer constructs an HTTP test server exposing the subset of revocation endpoints
 // needed by verification tests (discovery, verify, proof, jwks, optional consistency via enableConsistency flag).
-func buildTestServer(rc *delegation.RevocationChain, enableConsistency bool) *httptest.Server {
+func buildTestServer(rc *delegation.RevocationChain, enableConsistency bool, kp interface {
+	Active() *crypto.Key
+}) *httptest.Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/.well-known/gauth-configuration", func(w http.ResponseWriter, r *http.Request) {
 		sth := rc.LatestTreeHead()
@@ -74,10 +76,9 @@ func buildTestServer(rc *delegation.RevocationChain, enableConsistency bool) *ht
 		writeJSON(w, map[string]any{"success": true, "target": hash, "merkle_root": root, "proof": proof})
 	})
 	mux.HandleFunc("/.well-known/jwks.json", func(w http.ResponseWriter, r *http.Request) {
-		km := crypto.GlobalEdDSARegistry
 		keys := []map[string]any{}
-		if km != nil && km.Active() != nil {
-			k := km.Active()
+		if kp != nil && kp.Active() != nil {
+			k := kp.Active()
 			keys = append(keys, map[string]any{
 				"kty": "OKP",
 				"crv": "Ed25519",

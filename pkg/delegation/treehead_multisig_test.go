@@ -20,11 +20,9 @@ func TestMultiSignatureTreeHeadThreshold(t *testing.T) {
 	if _, err2 := km.Rotate(); err2 != nil {
 		t.Fatalf("rotate2: %v", err)
 	}
-	cryptoInt.GlobalEdDSARegistry = km
-	// Configure threshold=2 and weights mapping assigning weight 1 for each key (implicit) or explicit mapping
+	// Configure threshold=2
 	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "2")
-	// weights optional; rely on count fallback
-	chain := NewRevocationChain()
+	chain := NewRevocationChain(WithKeyProvider(km))
 	// Append some events
 	for i := 0; i < 3; i++ {
 		if _, err2 := chain.Append(RevocationEvent{ID: "rev-" + time.Now().Format("150405") + string(rune('a'+i)), DelegationID: "del-"}); err != nil {
@@ -59,8 +57,7 @@ func TestMultiSignatureTreeHeadWeights(t *testing.T) {
 	if _, err2 := km.Rotate(); err2 != nil {
 		t.Fatalf("rotate2: %v", err)
 	}
-	cryptoInt.GlobalEdDSARegistry = km
-	// Build weights mapping giving first key weight 2 others weight 1; threshold 3 should be satisfied with first+second.
+	// Build weights mapping
 	keys := km.ListCurrent()
 	if len(keys) < 2 {
 		t.Fatalf("need at least two keys")
@@ -68,7 +65,7 @@ func TestMultiSignatureTreeHeadWeights(t *testing.T) {
 	wEnv := keys[0].ID + "=2," + keys[1].ID + "=1"
 	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "3")
 	os.Setenv("GAUTH_MULTI_SIG_WEIGHTS", wEnv)
-	chain := NewRevocationChain()
+	chain := NewRevocationChain(WithKeyProvider(km))
 	if _, err2 := chain.Append(RevocationEvent{ID: "rev-x", DelegationID: "del-x"}); err != nil {
 		t.Fatalf("append: %v", err2)
 	}

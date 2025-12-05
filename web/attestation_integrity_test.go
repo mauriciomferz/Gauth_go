@@ -11,15 +11,13 @@ import (
 	"testing"
 	"time"
 
-	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/gin-gonic/gin"
+	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 // TestAttestationIntegrity_Success verifies successful verification path with valid Ed25519 signature.
 func TestAttestationIntegrity_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	s := NewBetaServer("")
-	t.Cleanup(func() { s.Shutdown() })
 	// Register ephemeral key into global registry for test
 	pub, priv, _ := ed25519.GenerateKey(nil)
 	// Construct temporary manager with single active key if Manager type exposes a simple constructor; fall back to manual minimal struct if not.
@@ -30,7 +28,8 @@ func TestAttestationIntegrity_Success(t *testing.T) {
 		ak.Public = pub
 		ak.ID = "test-key"
 	}
-	cryptoInt.GlobalEdDSARegistry = m
+	s := NewBetaServer("", WithKeyProvider(m))
+	t.Cleanup(func() { s.Shutdown() })
 	// Build unsigned portion
 	payload := struct {
 		Success    bool   `json:"success"`
@@ -113,8 +112,6 @@ func TestAttestationIntegrity_Success(t *testing.T) {
 // TestAttestationIntegrity_SignatureInvalid exercises invalid signature path with RFC tagged error.
 func TestAttestationIntegrity_SignatureInvalid(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	s := NewBetaServer("")
-	t.Cleanup(func() { s.Shutdown() })
 	pub, priv, _ := ed25519.GenerateKey(nil)
 	m2, _ := cryptoInt.NewManager(1 * time.Hour)
 	if ak := m2.Active(); ak != nil {
@@ -122,7 +119,8 @@ func TestAttestationIntegrity_SignatureInvalid(t *testing.T) {
 		ak.Public = pub
 		ak.ID = "test-key2"
 	}
-	cryptoInt.GlobalEdDSARegistry = m2
+	s := NewBetaServer("", WithKeyProvider(m2))
+	t.Cleanup(func() { s.Shutdown() })
 	unsigned := struct {
 		Success    bool   `json:"success"`
 		Configured bool   `json:"configured"`

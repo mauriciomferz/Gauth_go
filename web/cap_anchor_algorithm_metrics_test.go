@@ -55,7 +55,7 @@ func TestCapabilityAnchorAlgorithmMetrics(t *testing.T) {
 	}
 	// Registered algorithms (from crypto/signature registry) should be attributed.
 	// We lower-case the names in emission; ensure expected algorithms present.
-	expectedPresent := map[string]bool{"ed25519": false, "ecdsa-p256": false}
+	expectedPresent := map[string]bool{"Ed25519": false, "ecdsa-p256": false}
 	for _, info := range cryptopkg.ListAlgorithms() { // sanity registry iteration
 		if _, ok := expectedPresent[info.Name]; ok {
 			if algCounts[info.Name] == 0 {

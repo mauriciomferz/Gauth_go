@@ -24,10 +24,9 @@ func TestMultiSignatureTreeHeadUnknownKid(t *testing.T) {
 	if _, err2 := km.Rotate(); err2 != nil {
 		t.Fatalf("rotate2: %v", err2)
 	}
-	cryptoInt.GlobalEdDSARegistry = km
 	// Threshold requires 2 signatures (count fallback) – will be met initially.
 	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "2")
-	chain := NewRevocationChain()
+	chain := NewRevocationChain(WithKeyProvider(km))
 	if _, err2 := chain.Append(RevocationEvent{ID: "rev-neg-1", DelegationID: "del-neg"}); err2 != nil {
 		t.Fatalf("append: %v", err2)
 	}

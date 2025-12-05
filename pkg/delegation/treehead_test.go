@@ -16,8 +16,7 @@ func TestSignTreeHeadBasic(t *testing.T) {
 	if err != nil {
 		t.Fatalf("km init: %v", err)
 	}
-	crypto.GlobalEdDSARegistry = km
-	rc := NewRevocationChain()
+	rc := NewRevocationChain(WithKeyProvider(km))
 	// Append a couple events to make non-empty merkle root
 	_, _ = rc.Append(RevocationEvent{ID: "r1", DelegationID: "d1"})
 	_, _ = rc.Append(RevocationEvent{ID: "r2", DelegationID: "d2"})
@@ -46,8 +45,7 @@ func TestVerifyTreeHeadSignature(t *testing.T) {
 	if err != nil {
 		t.Fatalf("km init: %v", err)
 	}
-	crypto.GlobalEdDSARegistry = km
-	rc := NewRevocationChain()
+	rc := NewRevocationChain(WithKeyProvider(km))
 	_, _ = rc.Append(RevocationEvent{ID: "ra", DelegationID: "da"})
 	sth, err := rc.SignTreeHead()
 	if err != nil {
@@ -69,8 +67,7 @@ func TestConsistencyProof(t *testing.T) {
 	if err != nil {
 		t.Fatalf("km init: %v", err)
 	}
-	crypto.GlobalEdDSARegistry = km
-	rc := NewRevocationChain()
+	rc := NewRevocationChain(WithKeyProvider(km))
 	// append initial events
 	for i := 1; i <= 3; i++ {
 		_, _ = rc.Append(RevocationEvent{ID: fmt.Sprintf("e%d", i), DelegationID: fmt.Sprintf("d%d", i)})

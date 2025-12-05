@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
 )
 
 func main() {
@@ -125,9 +126,9 @@ func createExamplePoADefinition() *poa.PoADefinition {
 				SignatureType:      poa.SignatureSingle,
 			},
 			ApplicableSectors: []poa.IndustrySector{
-				poa.DemoSectorInfoComm,
-				poa.DemoSectorProfessional,
-				poa.DemoSectorFinancial,
+				poa.IndustrySector{Code: taxonomy.SectorInfoCommunication, Description: "InfoComm", Authorized: true},
+				poa.IndustrySector{Code: taxonomy.SectorProfessionalScience, Description: "Professional", Authorized: true},
+				poa.IndustrySector{Code: taxonomy.SectorFinanceInsurance, Description: "Financial", Authorized: true},
 			},
 			ApplicableRegions: []poa.GeographicScope{
 				{Type: poa.GeoTypeNational, Identifier: "DE"}, // Germany
@@ -135,17 +136,17 @@ func createExamplePoADefinition() *poa.PoADefinition {
 			},
 			AuthorizedActions: poa.AuthorizedActions{
 				Transactions: []poa.TransactionType{
-					poa.TransactionLoan,
-					poa.TransactionPurchase,
+					taxonomy.TransactionLoan,
+					taxonomy.TransactionPurchase,
 				},
 				Decisions: []poa.DecisionType{
-					poa.DecisionFinancial,
-					poa.DecisionStrategic,
-					poa.DecisionInfoSharing,
+					taxonomy.DecisionFinancial,
+					taxonomy.DecisionStrategic,
+					taxonomy.DecisionInfoSharing,
 				},
 				NonPhysicalActions: []poa.ActionTypeNonPhysical{
-					poa.ActionNonPhysicalResearching,
-					poa.ActionNonPhysicalBrainstorming,
+					taxonomy.ActionNonPhysicalResearching,
+					taxonomy.ActionNonPhysicalBrainstorming,
 				},
 			},
 		},

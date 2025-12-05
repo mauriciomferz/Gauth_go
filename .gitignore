@@ -90,7 +90,7 @@ comprehensive
 distributed
 gateway
 key_rotation
-ledger-verify
+# ledger-verify
 microservices
 multisig-bench
 professional_interfaces_demo
@@ -98,11 +98,11 @@ gauth_rfc_001_protocol_flow
 rfc_0115_poa_definition
 rfc_functional_test
 rfc_implementation_demo
-rotate-key
-struct_demo
+# rotate-key
+# struct_demo
 type_safe_usage
-verify
-verify-manifest
+# verify
+# verify-manifest
 
 # Temporary files
 *.tmp

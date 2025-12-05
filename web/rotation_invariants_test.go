@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
+	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 // helper to write a malformed ledger file (continuity gap)
@@ -130,8 +130,7 @@ func TestRotationSummary_SignatureMissing(t *testing.T) {
 		ak.Private = priv3[:10]
 		ak.ID = "test-rot-kid"
 	}
-	cryptoInt.GlobalEdDSARegistry = m
-	s := NewBetaServer("")
+	s := NewBetaServer("", WithKeyProvider(m))
 	t.Cleanup(func() { s.Shutdown() })
 	s.rotationLedger = led
 	w := httptest.NewRecorder()
@@ -185,8 +184,7 @@ func TestRotationSummary_SignatureValid(t *testing.T) {
 		ak.Private = priv3
 		ak.ID = "rot-valid"
 	}
-	cryptoInt.GlobalEdDSARegistry = m
-	s := NewBetaServer("")
+	s := NewBetaServer("", WithKeyProvider(m))
 	t.Cleanup(func() { s.Shutdown() })
 	s.rotationLedger = led
 	w := httptest.NewRecorder()

@@ -14,6 +14,7 @@ import (
 
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
 )
 
 func main() {
@@ -43,7 +44,7 @@ func main() {
 
 	privateKeyPath := filepath.Join(tmpDir, "private.pem")
 	publicKeyPath := filepath.Join(tmpDir, "public.pem")
-	
+
 	gauth.SaveRSAPrivateKey(privateKey, privateKeyPath)
 	gauth.SaveRSAPublicKey(publicKey, publicKeyPath)
 
@@ -88,7 +89,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to encode token: %v", err)
 	}
-	
+
 	if !gauth.IsJWE(encodedToken) {
 		log.Fatal("ERROR: Token is not JWE format!")
 	}
@@ -140,14 +141,14 @@ func createSampleTokenRequest() *gauth.ExtendedTokenRequest {
 	// Adapt to current poa.PoADefinition struct: Parties + Authorization + Requirements.
 	samplePoA := &poa.PoADefinition{
 		Parties: poa.Parties{
-			Principal: poa.Principal{Type: "Organization", Identity: "company-abc-123", Organization: &poa.Organization{Name: "Company ABC Ltd.", RegisterEntry: "HRB 12345", ManagingDirector: "Jane Smith", RegisteredAuthority: true}},
-			Representative: &poa.Representative{Identity: "john-doe-456", LegalRelationship: poa.RelationshipOwner},
+			Principal:        poa.Principal{Type: "Organization", Identity: "company-abc-123", Organization: &poa.Organization{Name: "Company ABC Ltd.", RegisterEntry: "HRB 12345", ManagingDirector: "Jane Smith", RegisteredAuthority: true}},
+			Representative:   &poa.Representative{Identity: "john-doe-456", LegalRelationship: poa.RelationshipOwner},
 			AuthorizedClient: poa.AuthorizedClient{Identity: "client-789", Type: "AI"},
 		},
 		Authorization: poa.AuthorizationScope{
 			AuthorizedActions: poa.AuthorizedActions{
-				Transactions: []poa.TransactionType{poa.TransactionLoan},
-				NonPhysicalActions: []poa.ActionTypeNonPhysical{poa.ActionNonPhysicalResearching},
+				Transactions:       []poa.TransactionType{taxonomy.TransactionLoan},
+				NonPhysicalActions: []poa.ActionTypeNonPhysical{taxonomy.ActionNonPhysicalResearching},
 			},
 			ApplicableRegions: []poa.GeographicScope{{Type: poa.GeoTypeNational, Identifier: "DE"}},
 		},
@@ -177,7 +178,7 @@ func createSampleTokenRequest() *gauth.ExtendedTokenRequest {
 		Scope:              []string{"read:accounts", "write:payments"},
 		PowerOfAttorney:    samplePoA,
 		AuthorizationChain: chain,
-		LegalFramework: &gauth.LegalFrameworkInfo{Jurisdiction: "DE"},
+		LegalFramework:     &gauth.LegalFrameworkInfo{Jurisdiction: "DE"},
 	}
 }
 

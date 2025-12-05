@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
+	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 // TestRotationSummaryEndpointAnchoring verifies anchoring only occurs once for same head hash when GAUTH_ANCHOR_ROTATIONS=1.
@@ -27,11 +27,9 @@ func TestRotationSummaryEndpointAnchoring(t *testing.T) {
 	// Ensure isolation from previous tests that may have mutated global registry or multisig env.
 	os.Unsetenv("GAUTH_ROTATIONS_MULTISIG")
 	os.Unsetenv("GAUTH_ROTATIONS_THRESHOLD")
-	if m, _ := cryptoInt.NewManager(24 * time.Hour); m != nil {
-		cryptoInt.GlobalEdDSARegistry = m
-	}
+	m, _ := cryptoInt.NewManager(24 * time.Hour)
 	// Initialize server
-	srv := NewBetaServer("0")
+	srv := NewBetaServer("0", WithKeyProvider(m))
 	t.Cleanup(func() { srv.Shutdown() })
 	// Append two descriptors through ledger directly (simulate rotation activity).
 	led, ok := srv.rotationLedger.(*notary.RotationLedger)

@@ -22,12 +22,12 @@ const (
 
 // IntegrationTestEnv provides a complete test environment with all systems
 type IntegrationTestEnv struct {
-	MiniRedis           *miniredis.Miniredis
-	RedisClient         *redis.ClusterClient
-	CircuitBreaker      *CircuitBreaker
-	TwoPhaseRevocation  *TwoPhaseRevocation
+	MiniRedis            *miniredis.Miniredis
+	RedisClient          *redis.ClusterClient
+	CircuitBreaker       *CircuitBreaker
+	TwoPhaseRevocation   *TwoPhaseRevocation
 	OptimisticRevocation *OptimisticRevocation
-	Logger              Logger
+	Logger               Logger
 }
 
 func setupIntegrationEnv(t *testing.T) *IntegrationTestEnv {
@@ -39,7 +39,7 @@ func setupIntegrationEnv(t *testing.T) *IntegrationTestEnv {
 	})
 
 	logger := NewSimpleLogger("INTEGRATION")
-	
+
 	oracle, err := NewEmergencyOracle([]string{mr.Addr()}, logger)
 	require.NoError(t, err)
 
@@ -60,11 +60,11 @@ func setupIntegrationEnv(t *testing.T) *IntegrationTestEnv {
 	}
 
 	tpr := &TwoPhaseRevocation{
-		redis:          redisClient,
-		logger:         logger,
-		oracle:         oracle,
-		disableTimeout: 30 * time.Second,
-		states:         sync.Map{},
+		redis:            redisClient,
+		logger:           logger,
+		oracle:           oracle,
+		disableTimeout:   30 * time.Second,
+		states:           sync.Map{},
 		autoRevokeTimers: make(map[string]*time.Timer),
 	}
 
@@ -80,12 +80,12 @@ func setupIntegrationEnv(t *testing.T) *IntegrationTestEnv {
 	}
 
 	return &IntegrationTestEnv{
-		MiniRedis:           mr,
-		RedisClient:         redisClient,
-		CircuitBreaker:      cb,
-		TwoPhaseRevocation:  tpr,
+		MiniRedis:            mr,
+		RedisClient:          redisClient,
+		CircuitBreaker:       cb,
+		TwoPhaseRevocation:   tpr,
 		OptimisticRevocation: opt,
-		Logger:              logger,
+		Logger:               logger,
 	}
 }
 
@@ -241,7 +241,7 @@ func TestE2E_ConcurrentPrincipalsRevokingSamePoA(t *testing.T) {
 
 	// At least one should succeed, others may fail with "already disabled"
 	assert.Greater(t, successes, 0, "At least one principal should successfully disable")
-	
+
 	// Verify final state is consistent
 	state, err := env.TwoPhaseRevocation.GetPoAState(ctx, poaID)
 	require.NoError(t, err)
@@ -356,7 +356,7 @@ func TestE2E_CrossSystemConsistency(t *testing.T) {
 
 	// Step 3: Verify isolation - operations on one PoA don't affect others
 	t.Log("Step 3: Verifying isolation between systems")
-	
+
 	// Revoke in two-phase
 	err = env.TwoPhaseRevocation.RevokePoA(ctx, poaID, "final-revoke")
 	require.NoError(t, err)
@@ -389,7 +389,7 @@ func TestE2E_CompleteRevocationWorkflow(t *testing.T) {
 		err := env.CircuitBreaker.RecordTransaction(ctx, poaID, 1000, true)
 		require.NoError(t, err)
 	}
-	
+
 	allowed, msg, err := env.CircuitBreaker.IsPoAAllowed(ctx, poaID)
 	require.NoError(t, err)
 	assert.True(t, allowed)
@@ -544,7 +544,7 @@ func TestE2E_DataPersistenceAcrossRestarts(t *testing.T) {
 	principal := testPrincipalID
 
 	t.Log("Phase 1: Creating state")
-	
+
 	// Create state in two-phase
 	err := env.TwoPhaseRevocation.DisablePoA(ctx, poaID, principal, "persistence-test")
 	require.NoError(t, err)
@@ -595,11 +595,11 @@ func TestE2E_DataPersistenceAcrossRestarts(t *testing.T) {
 	}
 
 	env.TwoPhaseRevocation = &TwoPhaseRevocation{
-		redis:          newRedisClient,
-		logger:         logger,
-		oracle:         oracle,
-		disableTimeout: 30 * time.Second,
-		states:         sync.Map{},
+		redis:            newRedisClient,
+		logger:           logger,
+		oracle:           oracle,
+		disableTimeout:   30 * time.Second,
+		states:           sync.Map{},
 		autoRevokeTimers: make(map[string]*time.Timer),
 	}
 

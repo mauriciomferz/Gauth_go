@@ -24,9 +24,12 @@ type minimalAttestationUnsigned struct {
 }
 
 func TestAuditorAttestationSignature(t *testing.T) {
-	reg := cryptoReg.GlobalEdDSARegistry
-	if reg == nil || reg.Active() == nil {
-		t.Skip("eddsa registry not initialized")
+	reg, err := cryptoReg.NewManager(time.Hour)
+	if err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+	if reg.Active() == nil {
+		t.Skip("active key nil")
 	}
 	ak := reg.Active()
 	unsigned := minimalAttestationUnsigned{Success: true, Configured: true, Nonce: "nonce123"}

@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
+	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/pkg/verification"
 )
 
@@ -47,10 +47,12 @@ func TestRotationSummary_MultiSignatureInvalidSignature(t *testing.T) {
 	// Key manager with two keys for multisig
 	m, _ := cryptoInt.NewManager(1 * time.Hour)
 	if _, err := m.Rotate(); err != nil {
-		t.Fatalf("manager rotate: %v", err)
+		t.Fatalf("manager rotate1: %v", err)
 	}
-	cryptoInt.GlobalEdDSARegistry = m
-	s := NewBetaServer("")
+	if _, err := m.Rotate(); err != nil {
+		t.Fatalf("manager rotate2: %v", err)
+	}
+	s := NewBetaServer("", WithKeyProvider(m))
 	t.Cleanup(func() { s.Shutdown() })
 	s.rotationLedger = led
 	w := httptest.NewRecorder()
@@ -71,7 +73,7 @@ func TestRotationSummary_MultiSignatureInvalidSignature(t *testing.T) {
 	}
 	// Tamper first signature bytes (truncate or replace) -> verification should fail
 	apiResp.Summary.Signatures[0].Signature = "AAAA"
-	err := verification.VerifyRotationSummarySignature(apiResp.Summary)
+	err := verification.VerifyRotationSummarySignature(apiResp.Summary, m)
 	if err == nil || !strings.Contains(err.Error(), "signature_invalid") {
 		t.Fatalf("expected signature_invalid error, got=%v", err)
 	}

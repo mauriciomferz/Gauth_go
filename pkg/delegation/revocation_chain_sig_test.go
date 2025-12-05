@@ -13,13 +13,13 @@ func initTestManager(t *testing.T) *crypto.Manager {
 	if err != nil {
 		t.Fatalf("manager init: %v", err)
 	}
-	crypto.GlobalEdDSARegistry = km
+
 	return km
 }
 
 func TestRevocationChainSigningAndVerification(t *testing.T) {
-	initTestManager(t)
-	rc := NewRevocationChain()
+	km := initTestManager(t)
+	rc := NewRevocationChain(WithKeyProvider(km))
 	e1, err := rc.Append(RevocationEvent{ID: "rev-1", DelegationID: "del-1"})
 	if err != nil {
 		t.Fatalf("append e1: %v", err)
@@ -33,8 +33,8 @@ func TestRevocationChainSigningAndVerification(t *testing.T) {
 }
 
 func TestRevocationChainSignatureTamper(t *testing.T) {
-	initTestManager(t)
-	rc := NewRevocationChain()
+	km := initTestManager(t)
+	rc := NewRevocationChain(WithKeyProvider(km))
 	_, _ = rc.Append(RevocationEvent{ID: "rev-1", DelegationID: "del-1"})
 	_, _ = rc.Append(RevocationEvent{ID: "rev-2", DelegationID: "del-2"})
 	// Tamper with second event delegation id (changes hash => signature invalid)
@@ -45,8 +45,8 @@ func TestRevocationChainSignatureTamper(t *testing.T) {
 }
 
 func TestRevocationChainSignatureRemoval(t *testing.T) {
-	initTestManager(t)
-	rc := NewRevocationChain()
+	km := initTestManager(t)
+	rc := NewRevocationChain(WithKeyProvider(km))
 	_, _ = rc.Append(RevocationEvent{ID: "rev-1", DelegationID: "del-1"})
 	// Remove signature fields (legacy mode) should still verify for hash chain but event loses signature validation.
 	rc.events[0].Signature = ""
@@ -64,7 +64,7 @@ func TestRevocationChainSignatureRemoval(t *testing.T) {
 // Unknown kid verification should fail when the signing key is removed from the registry.
 func TestRevocationChainUnknownKid(t *testing.T) {
 	km := initTestManager(t)
-	rc := NewRevocationChain()
+	rc := NewRevocationChain(WithKeyProvider(km))
 	ev, err := rc.Append(RevocationEvent{ID: "rev-1", DelegationID: "del-1"})
 	if err != nil {
 		t.Fatalf("append: %v", err)
@@ -72,11 +72,11 @@ func TestRevocationChainUnknownKid(t *testing.T) {
 	if ev.Signature == "" {
 		t.Fatalf("expected signature present")
 	}
-	// Simulate key loss: remove the global manager entirely so verification cannot locate kid.
-	crypto.GlobalEdDSARegistry = nil
-	if err := rc.Verify(); err == nil {
+	// Simulate key loss: use a new fresh manager avoiding the original key
+	kmClean, _ := crypto.NewManager(time.Hour)
+	rcClean := NewRevocationChain(WithKeyProvider(kmClean))
+	rcClean.events = rc.events
+	if err := rcClean.Verify(); err == nil {
 		t.Fatalf("expected verification failure without key for kid %s", ev.SigKid)
 	}
-	// Restore original manager for other tests.
-	crypto.GlobalEdDSARegistry = km
 }

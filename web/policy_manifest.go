@@ -4,7 +4,6 @@ package web
 // Exposes /api/v1/policy/manifest returning a signed, hash-addressed snapshot of capability governance.
 
 import (
-	"crypto/ed25519"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
@@ -15,10 +14,9 @@ import (
 	"sort"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/capability"
-	cryptoint "github.com/mauriciomferz/Gauth_go/pkg/crypto"
-	"github.com/mauriciomferz/Gauth_go/internal/metrics"
 	"github.com/gin-gonic/gin"
+	"github.com/mauriciomferz/Gauth_go/internal/capability"
+	"github.com/mauriciomferz/Gauth_go/internal/metrics"
 )
 
 // manifestCanonical represents the unsigned core used for hashing & signature (excludes generated_at & signature fields).
@@ -110,15 +108,17 @@ func (s *BetaServer) registerPolicyManifest() {
 			respondError(c, 500, "manifest_build_failed", "build_failed", "policy manifest build failed", "rfc111:policy_manifest", err.Error())
 			return
 		}
-		// Signing prerequisites
-		if os.Getenv("GAUTH_TOKEN_SIG_MODE") != sigModeEdDSA || cryptoint.GlobalEdDSARegistry == nil || cryptoint.GlobalEdDSARegistry.Active() == nil || len(cryptoint.GlobalEdDSARegistry.Active().Private) != ed25519.PrivateKeySize {
+		// Signing prerequisites - use s.keyProvider if available, fallback to global
+		kp := s.keyProvider
+
+		if os.Getenv("GAUTH_TOKEN_SIG_MODE") != sigModeEdDSA || kp == nil {
 			respondError(c, 500, "signing_unavailable", "signing_unavailable", "active eddsa key unavailable", "rfc111:policy_manifest", nil)
 			return
 		}
 		// RB6: use signer interface for agility
-		signer := cryptoint.GlobalRotatingSigner()
-		if signer == nil {
-			respondError(c, 500, "signing_unavailable", "signing_unavailable", "active eddsa key unavailable", "rfc111:policy_manifest", "no signer")
+		signer, sErr := kp.ActiveSigner()
+		if sErr != nil {
+			respondError(c, 500, "signing_unavailable", "signing_unavailable", "active eddsa key unavailable", "rfc111:policy_manifest", sErr.Error())
 			return
 		}
 		msg := append([]byte("GAUTH_POLICY_MANIFEST:"), raw...)

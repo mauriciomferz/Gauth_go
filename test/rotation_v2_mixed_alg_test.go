@@ -30,7 +30,7 @@ func TestRotationV2MixedAlgorithmsConfigDefaultAlg(t *testing.T) {
 		}{
 			{ID: "s1", Alg: "ED25519", Weight: 30}, {ID: "s2", Alg: "ED25519", Weight: 20},
 		}, AlgorithmSuite: []string{"ed25519"}}
-	art, err := notary.BuildArtifactFromConfig(cfg, "", time.Now())
+	art, err := notary.BuildArtifactFromConfig(cfg, "", time.Now(), nil)
 	if err != nil {
 		t.Fatalf("build artifact: %v", err)
 	}

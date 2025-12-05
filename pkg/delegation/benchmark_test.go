@@ -41,8 +41,7 @@ func BenchmarkMerkleGenerateProof(b *testing.B) {
 // BenchmarkSignTreeHeadSingleSig benchmarks signing a tree head for a chain with pre-populated events.
 func BenchmarkSignTreeHeadSingleSig(b *testing.B) {
 	km, _ := cryptoInt.NewManager(24 * time.Hour)
-	cryptoInt.GlobalEdDSARegistry = km
-	chain := NewRevocationChain()
+	chain := NewRevocationChain(WithKeyProvider(km))
 	for i := 0; i < 1500; i++ {
 		_, _ = chain.Append(RevocationEvent{ID: randomHex(8), DelegationID: randomHex(6)})
 	}
@@ -55,8 +54,7 @@ func BenchmarkSignTreeHeadSingleSig(b *testing.B) {
 // BenchmarkGenerateConsistencyProof benchmarks generating a consistency proof between an older and current tree head.
 func BenchmarkGenerateConsistencyProof(b *testing.B) {
 	km, _ := cryptoInt.NewManager(24 * time.Hour)
-	cryptoInt.GlobalEdDSARegistry = km
-	chain := NewRevocationChain()
+	chain := NewRevocationChain(WithKeyProvider(km))
 	// Build initial events and sign first tree head
 	for i := 0; i < 1000; i++ {
 		_, _ = chain.Append(RevocationEvent{ID: randomHex(8), DelegationID: randomHex(6)})

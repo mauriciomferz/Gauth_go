@@ -9,6 +9,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
 )
 
 // TestGAuthPlusIntegration_SuccessorTakeover tests successor AI activation
@@ -678,9 +679,9 @@ func createTestPoADefinition(agentID string) *poa.PoADefinition {
 		},
 		Authorization: poa.AuthorizationScope{
 			AuthorizedActions: poa.AuthorizedActions{
-				Transactions: []poa.TransactionType{
-					poa.TransactionPayment,
-					poa.TransactionPurchase,
+				Transactions: []taxonomy.TransactionType{
+					taxonomy.TransactionPayment,
+					taxonomy.TransactionPurchase,
 				},
 			},
 		},

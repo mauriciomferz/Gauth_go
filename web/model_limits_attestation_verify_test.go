@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
@@ -27,9 +28,10 @@ func TestModelLimitsAttestationVerify(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMIT_ANCHOR_PATH", anchorFile.Name())
 	os.Setenv("GAUTH_MODEL_LIMIT_ANCHOR_INTERVAL", "1")
 
-	srv := NewBetaServer("")
+	km, _ := internalCrypto.NewManager(24 * time.Hour)
+	srv := NewBetaServer("", WithKeyProvider(km))
 	t.Cleanup(func() { srv.Shutdown() })
-	if internalCrypto.GlobalEdDSARegistry == nil || internalCrypto.GlobalEdDSARegistry.Active() == nil {
+	if km.Active() == nil {
 		t.Fatalf("eddsa registry inactive")
 	}
 
@@ -128,9 +130,10 @@ func TestModelLimitsAttestationVerify(t *testing.T) {
 func TestModelLimitsAttestationKeys(t *testing.T) {
 	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
 	t.Setenv("GAUTH_MODEL_LIMIT_ATTEST_SIGN", "1")
-	srv := NewBetaServer("")
+	km, _ := internalCrypto.NewManager(24 * time.Hour)
+	srv := NewBetaServer("", WithKeyProvider(km))
 	t.Cleanup(func() { srv.Shutdown() })
-	if internalCrypto.GlobalEdDSARegistry == nil || internalCrypto.GlobalEdDSARegistry.Active() == nil {
+	if km.Active() == nil {
 		t.Fatalf("eddsa registry inactive")
 	}
 	w := httptest.NewRecorder()

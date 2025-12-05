@@ -15,18 +15,19 @@ func TestVerifyAllSuccess(t *testing.T) {
 	if _, err := km.Rotate(); err != nil {
 		t.Fatalf("rotate: %v", err)
 	}
-	crypto.GlobalEdDSARegistry = km
 	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "1")
-	rc := delegation.NewRevocationChain()
+	rc := delegation.NewRevocationChain(delegation.WithKeyProvider(km))
 	for i := 0; i < 3; i++ {
 		_, _ = rc.Append(delegation.RevocationEvent{ID: "succ-" + time.Now().Format("150405") + string(rune('a'+i)), DelegationID: "del"})
 	}
 	if _, err := rc.SignTreeHead(); err != nil {
 		t.Fatalf("sign: %v", err)
 	}
-	ts := buildTestServer(rc, true)
+	ts := buildTestServer(rc, true, km)
 	defer ts.Close()
-	if err := VerifyAll(ts.Client(), ts.URL, ""); err != nil {
+	events := rc.Events()
+	lastHash := events[len(events)-1].Hash
+	if err := VerifyAll(ts.Client(), ts.URL, lastHash); err != nil {
 		t.Fatalf("VerifyAll returned error: %v", err)
 	}
 }

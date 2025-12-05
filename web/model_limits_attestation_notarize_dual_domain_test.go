@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	internalNotary "github.com/mauriciomferz/Gauth_go/internal/notary"
+	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 // TestModelLimitsAttestationNotarizeDualDomain ensures notarization receipt is included in the signed payload
@@ -34,14 +34,15 @@ func TestModelLimitsAttestationNotarizeDualDomain(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMIT_ANCHOR_PATH", anchorFile.Name())
 	os.Setenv("GAUTH_MODEL_LIMIT_ANCHOR_INTERVAL", "1")
 
-	srv := NewBetaServer("")
+	km, _ := internalCrypto.NewManager(24 * time.Hour)
+	srv := NewBetaServer("", WithKeyProvider(km))
 	t.Cleanup(func() { srv.Shutdown() })
 	// Wire in-memory notarizer so apiModelLimitsAttestation path includes receipt.
 	srv.notarizer = internalNotary.NewMemory()
-	if internalCrypto.GlobalEdDSARegistry == nil || internalCrypto.GlobalEdDSARegistry.Active() == nil {
+	if km.Active() == nil {
 		t.Fatalf("expected eddsa registry active")
 	}
-	active := internalCrypto.GlobalEdDSARegistry.Active()
+	active := km.Active()
 
 	// Produce some audit events so audit chain head not empty
 	for i := 0; i < 2; i++ {

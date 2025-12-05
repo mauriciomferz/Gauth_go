@@ -32,7 +32,7 @@ func TestRotationV2EmbeddedECDSAPublicKeyVerification(t *testing.T) {
 		}{
 			{ID: "edA", Alg: "ED25519", Weight: 4}, {ID: "ecA", Alg: "ECDSA-P256", Weight: 5},
 		}, AlgorithmSuite: []string{"ed25519", "ecdsa-p256"}}
-	art, err := notary.BuildArtifactFromConfig(cfg, "", time.Now())
+	art, err := notary.BuildArtifactFromConfig(cfg, "", time.Now(), nil)
 	if err != nil {
 		t.Fatalf("artifact build: %v", err)
 	}
@@ -56,7 +56,7 @@ func TestRotationV2EmbeddedECDSAPublicKeyVerification(t *testing.T) {
 	}
 	os.Setenv("GAUTH_ROTATIONS_V2_ECDSA_KEYS", "ecA:"+encoded)
 	// Rebuild artifact to trigger embedding paths.
-	art2, err := notary.BuildArtifactFromConfig(cfg, "", time.Now())
+	art2, err := notary.BuildArtifactFromConfig(cfg, "", time.Now(), nil)
 	if err != nil {
 		t.Fatalf("artifact rebuild: %v", err)
 	}

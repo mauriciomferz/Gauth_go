@@ -8,17 +8,16 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
-	"github.com/gin-gonic/gin"
 )
 
 // buildMultiSigServer sets up a BetaServer with multi-sig environment, several events, and a signed tree head history.
-func buildMultiSigServer(t *testing.T) *BetaServer {
+// buildMultiSigServer sets up a BetaServer with multi-sig environment, several events, and a signed tree head history.
+func buildMultiSigServer(t *testing.T) (*BetaServer, crypto.KeyProvider) {
 	t.Helper()
 	gin.SetMode(gin.TestMode)
-	s := NewBetaServer("")
-	t.Cleanup(func() { s.Shutdown() })
 	km, err := crypto.NewManager(time.Hour)
 	if err != nil {
 		t.Fatalf("km init: %v", err)
@@ -30,10 +29,13 @@ func buildMultiSigServer(t *testing.T) *BetaServer {
 	if _, err := km.Rotate(); err != nil {
 		t.Fatalf("rotate2: %v", err)
 	}
-	crypto.GlobalEdDSARegistry = km
+
+	s := NewBetaServer("", WithKeyProvider(km))
+	t.Cleanup(func() { s.Shutdown() })
+
 	// Configure multi-sig threshold environment (count fallback, threshold 2)
 	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "2")
-	rc := delegation.NewRevocationChain()
+	rc := delegation.NewRevocationChain(delegation.WithKeyProvider(km))
 	// Append several events
 	for i := 0; i < 5; i++ {
 		_, _ = rc.Append(delegation.RevocationEvent{ID: "rev-int-" + time.Now().Format("150405") + string(rune('a'+i)), DelegationID: "del-int"})
@@ -48,11 +50,11 @@ func buildMultiSigServer(t *testing.T) *BetaServer {
 		t.Fatalf("sign head 2: %v", err)
 	}
 	s.revocationChain = rc
-	return s
+	return s, km
 }
 
 func TestRevocationTransparencyIntegration(t *testing.T) {
-	s := buildMultiSigServer(t)
+	s, kp := buildMultiSigServer(t)
 	// 1. Discovery
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/.well-known/gauth-configuration", nil)
@@ -147,7 +149,7 @@ func TestRevocationTransparencyIntegration(t *testing.T) {
 	if err := json.Unmarshal(payload, &libSTH); err != nil {
 		t.Fatalf("sth unmarshal: %v", err)
 	}
-	if err := delegation.VerifyTreeHeadMultiSig(&libSTH); err != nil {
+	if err := delegation.VerifyTreeHeadMultiSig(&libSTH, kp); err != nil {
 		t.Fatalf("library multi-sig verify failed: %v", err)
 	}
 }

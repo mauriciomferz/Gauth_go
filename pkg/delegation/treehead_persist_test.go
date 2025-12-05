@@ -21,8 +21,7 @@ func TestSignedTreeHeadPersistence(t *testing.T) {
 	if err != nil {
 		t.Fatalf("manager: %v", err)
 	}
-	cryptoInt.GlobalEdDSARegistry = km
-	chain := NewRevocationChain()
+	chain := NewRevocationChain(WithKeyProvider(km))
 	// Append an event and sign tree head (auto-save expected)
 	if _, err2 := chain.Append(RevocationEvent{ID: "rev-a", DelegationID: "del-a"}); err2 != nil {
 		t.Fatalf("append: %v", err2)
@@ -36,7 +35,7 @@ func TestSignedTreeHeadPersistence(t *testing.T) {
 		t.Fatalf("expected persisted file non-empty")
 	}
 	// New chain instance loads from file
-	chain2 := NewRevocationChain()
+	chain2 := NewRevocationChain(WithKeyProvider(km))
 	if err := chain2.LoadSignedTreeHeads(tmpFile.Name()); err != nil {
 		t.Fatalf("load: %v", err)
 	}
@@ -61,8 +60,7 @@ func TestSignedTreeHeadPersistenceMultiSig(t *testing.T) {
 	if _, err := km.Rotate(); err != nil {
 		t.Fatalf("rotate1: %v", err)
 	}
-	cryptoInt.GlobalEdDSARegistry = km
-	chain := NewRevocationChain()
+	chain := NewRevocationChain(WithKeyProvider(km))
 	if _, err := chain.Append(RevocationEvent{ID: "rev-x", DelegationID: "del-x"}); err != nil {
 		t.Fatalf("append: %v", err)
 	}
@@ -70,7 +68,7 @@ func TestSignedTreeHeadPersistenceMultiSig(t *testing.T) {
 		t.Fatalf("sign: %v", err)
 	}
 	// Load and verify multi-sig properties
-	chain2 := NewRevocationChain()
+	chain2 := NewRevocationChain(WithKeyProvider(km))
 	if err := chain2.LoadSignedTreeHeads(tmpFile.Name()); err != nil {
 		t.Fatalf("load: %v", err)
 	}

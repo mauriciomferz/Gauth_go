@@ -37,12 +37,13 @@ func TestModelLimitsAttestationNotarization(t *testing.T) {
 	os.Setenv("GAUTH_MODEL_LIMIT_SURGE_FACTOR", "1.0") // make trigger easier
 	os.Setenv("GAUTH_MODEL_LIMIT_SURGE_MIN_EVENTS", "1")
 
-	srv := NewBetaServer("")
+	m, _ := internalCrypto.NewManager(time.Hour)
+	srv := NewBetaServer("", WithKeyProvider(m))
 	t.Cleanup(func() { srv.Shutdown() })
-	if internalCrypto.GlobalEdDSARegistry == nil || internalCrypto.GlobalEdDSARegistry.Active() == nil {
+	if m.Active() == nil {
 		t.Fatalf("expected eddsa registry active")
 	}
-	active := internalCrypto.GlobalEdDSARegistry.Active()
+	active := m.Active()
 
 	// Generate multiple exceed events across small time to raise counts.
 	for i := 0; i < 6; i++ {

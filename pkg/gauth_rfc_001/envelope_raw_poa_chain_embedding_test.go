@@ -10,9 +10,10 @@ import (
 	"github.com/mauriciomferz/Gauth_go/internal/metrics"
 	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/authz"
-	poaPkg "github.com/mauriciomferz/Gauth_go/pkg/poa"
+	streamPkg "github.com/mauriciomferz/Gauth_go/pkg/poa/stream"
 	"github.com/mauriciomferz/Gauth_go/pkg/token"
 	"github.com/o1egl/paseto"
+	"github.com/stretchr/testify/require"
 )
 
 // TestRawPOAChainEmbeddingEnabled verifies RawPOAChain is populated when feature flags enabled.
@@ -46,14 +47,13 @@ func TestRawPOAChainEmbeddingEnabled(t *testing.T) {
 	if decErr != nil {
 		t.Fatalf("base64 decode: %v", decErr)
 	}
-	chain, cErr := poaPkg.DecodeRawPOAStreamWith(bytes.NewReader(chainBytes), poaPkg.DefaultStreamLimits, poaPkg.RawPOAHashSHA256, false)
-	if cErr != nil {
-		t.Fatalf("decode chain: %v", cErr)
+	// Verify that the chain can be decoded
+	decoded, err := streamPkg.DecodeRawPOAStreamWith(bytes.NewReader(chainBytes), streamPkg.DefaultStreamLimits, streamPkg.RawPOAHashSHA256, false)
+	require.NoError(t, err)
+	if len(decoded.Items) != 1 {
+		t.Fatalf("expected 1 item, got %d", len(decoded.Items))
 	}
-	if len(chain.Items) != 1 {
-		t.Fatalf("expected 1 item, got %d", len(chain.Items))
-	}
-	if chain.Items[0].Issuer != "g1" || chain.Items[0].Subject != "u1" {
+	if decoded.Items[0].Issuer != "g1" || decoded.Items[0].Subject != "u1" {
 		t.Fatalf("unexpected item fields")
 	}
 }

@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
+	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 // TestRotationSummary_MultiSignature ensures multi-signature mode emits multiple signatures and threshold fields.
@@ -48,8 +48,7 @@ func TestRotationSummary_MultiSignature(t *testing.T) {
 	if _, err := m.Rotate(); err != nil {
 		t.Fatalf("manager rotate: %v", err)
 	}
-	cryptoInt.GlobalEdDSARegistry = m
-	s := NewBetaServer("")
+	s := NewBetaServer("", WithKeyProvider(m))
 	t.Cleanup(func() { s.Shutdown() })
 	s.rotationLedger = led
 	w := httptest.NewRecorder()

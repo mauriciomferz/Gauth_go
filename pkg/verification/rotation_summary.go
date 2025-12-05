@@ -6,7 +6,6 @@ package verification
 // verification workflow plus granular building blocks.
 
 import (
-	"crypto/ed25519"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -62,9 +61,15 @@ func FetchRotationSummary(client HTTPClient, base string) (*RotationSummaryAPI, 
 
 // VerifyRotationSummarySignature verifies EdDSA signature using any matching public key loaded via JWKS.
 // Returns nil if valid; otherwise error with reason.
-func VerifyRotationSummarySignature(sum *RotationSummary) error {
+func VerifyRotationSummarySignature(sum *RotationSummary, kp interface {
+	PublicKey(string) ([]byte, string, error)
+	VerifyWith([]byte, []byte, string) error
+}) error {
 	if sum == nil {
 		return errors.New("summary_nil")
+	}
+	if kp == nil {
+		return errors.New("key_provider_nil")
 	}
 	// Prefer multi-signature verification if slice populated; require at least one signature.
 	if len(sum.Signatures) > 0 {
@@ -83,16 +88,9 @@ func VerifyRotationSummarySignature(sum *RotationSummary) error {
 			if err != nil {
 				return errors.New("signature_decode_error")
 			}
-			if cryptoReg := getGlobalRegistry(); cryptoReg != nil {
-				pub := cryptoReg.FindByID(sigEntry.Kid)
-				if pub == nil {
-					return errors.New("kid_not_found")
-				}
-				if !ed25519.Verify(pub.Public, msg, sigBytes) {
-					return errors.New("signature_invalid")
-				}
-			} else {
-				return errors.New("eddsa_registry_unavailable")
+
+			if err := kp.VerifyWith(msg, sigBytes, sigEntry.Kid); err != nil {
+				return errors.New("signature_invalid")
 			}
 		}
 		// Optionally enforce threshold satisfaction
@@ -107,45 +105,22 @@ func VerifyRotationSummarySignature(sum *RotationSummary) error {
 	if sum.Mode != "" && sum.Mode != "EdDSA" {
 		return fmt.Errorf("mode_unsupported:%s", sum.Mode)
 	}
-	// Use global registry
-	if cryptoReg := getGlobalRegistry(); cryptoReg != nil { // indirection for testability
-		pub := cryptoReg.FindByID(sum.Kid)
-		if pub == nil {
-			return errors.New("kid_not_found")
-		}
-		enc, err := canonicalRotationSummaryPayload(sum)
-		if err != nil {
-			return fmt.Errorf("serialization_error:%w", err)
-		}
-		msg := append([]byte("GAUTH_ROTATION_SUMMARY:"), enc...)
-		sig, err := base64.RawURLEncoding.DecodeString(sum.Signature)
-		if err != nil {
-			return errors.New("signature_decode_error")
-		}
-		if !ed25519.Verify(pub.Public, msg, sig) {
-			return errors.New("signature_invalid")
-		}
-		return nil
+
+	enc, err := canonicalRotationSummaryPayload(sum)
+	if err != nil {
+		return fmt.Errorf("serialization_error:%w", err)
 	}
-	return errors.New("eddsa_registry_unavailable")
+	msg := append([]byte("GAUTH_ROTATION_SUMMARY:"), enc...)
+	sig, err := base64.RawURLEncoding.DecodeString(sum.Signature)
+	if err != nil {
+		return errors.New("signature_decode_error")
+	}
+
+	if err := kp.VerifyWith(msg, sig, sum.Kid); err != nil {
+		return errors.New("signature_invalid")
+	}
+	return nil
 }
-
-// getGlobalRegistry abstracts access to the global EdDSA registry (for tests we can override).
-var getGlobalRegistry = func() eddsaKeyFinder { return globalKeyFinder{} }
-
-// eddsaKeyFinder minimal interface exposing FindByID.
-type eddsaKeyFinder interface {
-	FindByID(string) *publicKeyWrapper
-}
-
-// publicKeyWrapper provides the public key necessary (embedded in underlying manager key object).
-type publicKeyWrapper struct{ Public ed25519.PublicKey }
-
-// globalKeyFinder adapts internal/crypto global registry without importing it directly here
-// to keep surface minimal (avoid cyclic import). We use a tiny shim defined in verification_shim.go.
-type globalKeyFinder struct{}
-
-func (globalKeyFinder) FindByID(kid string) *publicKeyWrapper { return findPublicKey(kid) }
 
 // RotationSummaryVerifyResult aggregates verification checks for convenience.
 type RotationSummaryVerifyResult struct {
@@ -156,7 +131,10 @@ type RotationSummaryVerifyResult struct {
 }
 
 // VerifyRotationSummary end-to-end: fetch summary, ensure JWKS loaded (caller should invoke LoadJWKS first), verify signature.
-func VerifyRotationSummary(client HTTPClient, base string) (*RotationSummaryVerifyResult, error) {
+func VerifyRotationSummary(client HTTPClient, base string, kp interface {
+	PublicKey(string) ([]byte, string, error)
+	VerifyWith([]byte, []byte, string) error
+}) (*RotationSummaryVerifyResult, error) {
 	apiSum, err := FetchRotationSummary(client, base)
 	if err != nil {
 		return nil, err
@@ -166,7 +144,7 @@ func VerifyRotationSummary(client HTTPClient, base string) (*RotationSummaryVeri
 		if t, perr := time.Parse(time.RFC3339Nano, apiSum.Summary.GeneratedAt); perr == nil {
 			res.AgeSeconds = time.Since(t).Seconds()
 		}
-		if err := VerifyRotationSummarySignature(apiSum.Summary); err != nil {
+		if err := VerifyRotationSummarySignature(apiSum.Summary, kp); err != nil {
 			res.SignatureValid = false
 			res.SignatureError = err.Error()
 		} else {

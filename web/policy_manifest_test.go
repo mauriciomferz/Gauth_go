@@ -12,28 +12,30 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/Gauth_go/internal/capability"
-	cryptopkg "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	metrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	cryptopkg "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 // prepareEdDSAKey ensures an active EdDSA key exists for signing tests.
-func prepareEdDSAKey(t *testing.T) {
+// prepareEdDSAKey ensures an active EdDSA key exists for signing tests.
+func prepareEdDSAKey(t *testing.T) *cryptopkg.Manager {
 	t.Helper()
 	os.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
-	if cryptopkg.GlobalEdDSARegistry == nil || cryptopkg.GlobalEdDSARegistry.Active() == nil {
-		km, err := cryptopkg.NewManager(24 * time.Hour)
-		if err != nil {
-			t.Fatalf("new manager: %v", err)
-		}
-		cryptopkg.RegisterGlobalEdDSAManager(km)
+	km, err := cryptopkg.NewManager(24 * time.Hour)
+	if err != nil {
+		t.Fatalf("new manager: %v", err)
 	}
+	if _, err := km.Rotate(); err != nil {
+		t.Fatalf("rotate: %v", err)
+	}
+	return km
 }
 
 func TestPolicyManifestDeterministic(t *testing.T) {
-	prepareEdDSAKey(t)
+	km := prepareEdDSAKey(t)
 	// Seed capability registry
 	capability.Reset([]capability.Capability{{ID: "cap.transfer", Version: "v1", Stable: true}, {ID: "cap.issue", Version: "v1", Stable: true}})
-	srv := NewBetaServer(":0")
+	srv := NewBetaServer(":0", WithKeyProvider(km))
 	t.Cleanup(func() { srv.Shutdown() })
 	// First request
 	w := httptest.NewRecorder()
@@ -83,9 +85,9 @@ func TestPolicyManifestDeterministic(t *testing.T) {
 }
 
 func TestPolicyManifestSignatureVerifyAndTamper(t *testing.T) {
-	prepareEdDSAKey(t)
+	km := prepareEdDSAKey(t)
 	capability.Reset([]capability.Capability{{ID: "cap.transfer", Version: "v1", Stable: true}})
-	srv := NewBetaServer(":0")
+	srv := NewBetaServer(":0", WithKeyProvider(km))
 	t.Cleanup(func() { srv.Shutdown() })
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/api/v1/policy/manifest", nil)
@@ -156,8 +158,10 @@ func TestPolicyManifestSignatureVerifyAndTamper(t *testing.T) {
 		t.Fatalf("manifest_hash mismatch recomputed=%s stored=%s", recomputedHash, hashStr)
 	}
 	sigBytes, _ := base64.RawURLEncoding.DecodeString(sigB64)
-	reg := cryptopkg.GlobalEdDSARegistry
-	key := reg.FindByID(kid)
+	key := km.FindByID(kid)
+	if key == nil {
+		t.Fatalf("key not found for kid=%s", kid)
+	}
 	msg := append([]byte("GAUTH_POLICY_MANIFEST:"), raw...)
 	if !ed25519.Verify(key.Public, msg, sigBytes) {
 		t.Fatalf("signature verify failed")
@@ -182,10 +186,7 @@ func TestPolicyManifestSigningUnavailable(t *testing.T) {
 	orig := os.Getenv("GAUTH_TOKEN_SIG_MODE")
 	os.Setenv("GAUTH_TOKEN_SIG_MODE", "hs256")
 	defer os.Setenv("GAUTH_TOKEN_SIG_MODE", orig)
-	// Clear global registry reference (save & restore)
-	saved := cryptopkg.GlobalEdDSARegistry
-	cryptopkg.GlobalEdDSARegistry = nil
-	defer func() { cryptopkg.GlobalEdDSARegistry = saved }()
+	// No key provider passed
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	w := httptest.NewRecorder()
@@ -211,9 +212,9 @@ func TestPolicyManifestSigningUnavailable(t *testing.T) {
 
 // TestPolicyManifestETagMismatch ensures a different If-None-Match value does not suppress body.
 func TestPolicyManifestETagMismatch(t *testing.T) {
-	prepareEdDSAKey(t)
+	km := prepareEdDSAKey(t)
 	capability.Reset([]capability.Capability{{ID: "cap.transfer", Version: "v1", Stable: true}})
-	srv := NewBetaServer(":0")
+	srv := NewBetaServer(":0", WithKeyProvider(km))
 	t.Cleanup(func() { srv.Shutdown() })
 	// First request to get real ETag
 	w1 := httptest.NewRecorder()
@@ -254,9 +255,9 @@ func TestPolicyManifestETagMismatch(t *testing.T) {
 // TestPolicyManifestSignerInterface ensures the rotating signer produces identical
 // signature bytes to direct ed25519 signing over the domain-separated canonical payload.
 func TestPolicyManifestSignerInterface(t *testing.T) {
-	prepareEdDSAKey(t)
+	km := prepareEdDSAKey(t)
 	capability.Reset([]capability.Capability{{ID: "cap.transfer", Version: "v1", Stable: true}})
-	srv := NewBetaServer(":0")
+	srv := NewBetaServer(":0", WithKeyProvider(km))
 	t.Cleanup(func() { srv.Shutdown() })
 	canon, raw, _, err := srv.buildPolicyManifest()
 	if err != nil {
@@ -265,15 +266,15 @@ func TestPolicyManifestSignerInterface(t *testing.T) {
 	if len(canon.Capabilities) == 0 {
 		t.Fatalf("expected capabilities in canonical")
 	}
-	active := cryptopkg.GlobalEdDSARegistry.Active()
+	active := km.Active()
 	if active == nil || len(active.Private) != ed25519.PrivateKeySize {
 		t.Fatalf("active key missing")
 	}
 	msg := append([]byte("GAUTH_POLICY_MANIFEST:"), raw...)
 	sigDirect := ed25519.Sign(active.Private, msg)
-	signer := cryptopkg.GlobalRotatingSigner()
-	if signer == nil {
-		t.Fatalf("global rotating signer nil")
+	signer, err := km.ActiveSigner()
+	if err != nil {
+		t.Fatalf("ActiveSigner error: %v", err)
 	}
 	sigIface, err := signer.Sign(msg)
 	if err != nil {
