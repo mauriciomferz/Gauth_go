@@ -187,3 +187,8 @@ web-server
 # Build artifacts and backups
 *.bak
 *.bak[0-9]*
+
+# Local binaries and test output
+bin/
+test_output*.txt
+

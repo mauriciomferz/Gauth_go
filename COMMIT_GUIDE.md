@@ -2,7 +2,7 @@
 
 ## Summary of Changes
 
-Successfully completed Phases 1, 2, and 3a of the planned Gauth refactoring:
+Successfully completed Phases 1, 2, 3, and 4 of the planned Gauth refactoring:
 
 ### Phase 2: Package Restructuring
 **Deleted:**
@@ -24,6 +24,37 @@ Successfully completed Phases 1, 2, and 3a of the planned Gauth refactoring:
 - `pkg/gauth/gauthplus_integration_test.go` - Fixed test setup issues
 
 **Result:** Removed global crypto state from gauth package, improved testability
+
+### Phase 4: Full Global State Removal
+**Deleted:**
+- `pkg/crypto/eddsa_registry.go` - Removed global registry
+- `pkg/crypto/agility.go` - Removed global legacy helpers
+
+**Modified:**
+- `pkg/delegation` - Full dependency injection
+- `pkg/poa` - Full dependency injection
+- `web` - Full dependency injection
+- `cmd/*` - Updated CLI tools to use local managers
+
+**Result:** Complete removal of `GlobalEdDSARegistry` and `GlobalRotatingSigner` from the codebase. Zero global mutable state in crypto package.
+
+### Phase 5: pkg/poa Modularization
+**Created:**
+- `pkg/poa/taxonomy/*.go` - Extracted taxonomy definitions (Action/Sector types)
+- `pkg/poa/stream/*.go` - Extracted streaming logic
+
+**Modified:**
+- `pkg/poa/poa.go` - Cleaned up, delegation to subpackages
+- Consumer packages (`pkg/gauth`, `web`, `examples`) - Updated import paths
+
+**Result:** Improved modularity and reduced coupling in the POA package.
+
+### Phase 6: Final Verification & Web Cleanup
+**Modified:**
+- `web/*` - Refactored remaining tests to inject `KeyProvider`
+- `pkg/gauth_rfc_001/rfc0111.go` - Fixed algorithm constant mismatch
+
+**Result:** Verified complete removal of global state and full test suite stability.
 
 ### Documentation
 **Created:**
@@ -80,6 +111,29 @@ Add REFACTORING_SUMMARY.md documenting:
 - Usage examples for new WithKeyManager option
 - Migration guide from global state
 - Benefits and improvements
+```
+
+### Commit 4: pkg/poa Modularization
+```
+refactor(poa): extract taxonomy and stream subpackages
+
+- Move action/sector definitions to pkg/poa/taxonomy
+- Move raw stream logic to pkg/poa/stream
+- Update imports in pkg/gauth, web, and examples
+- Preserve backward compatibility via type aliases in pkg/poa
+
+This reduces the size of the main poa package and clarifies dependencies.
+```
+
+### Commit 5: Final Cleanup
+```
+chore(cleanup): remove remaining global registry usage in web tests
+
+- Update web package tests to use injected KeyProvider
+- Fix algorithm constant mismatch in pkg/gauth_rfc_001
+- Verify all tests pass
+
+Refactoring complete. GlobalEdDSARegistry removed.
 ```
 
 ## Git Commands
@@ -154,11 +208,9 @@ rm test_output.txt
 
 ## What's Next
 
-**Optional Future Work (Phase 3b):**
-- Extend dependency injection to `pkg/poa`, `pkg/delegation`, `pkg/verification`
-- Deprecate `crypto.GlobalEdDSARegistry` completely  
-- Create migration tooling for external packages
-- Estimated effort: 1-2 weeks
+**Future Work:**
+- Monitor for regression in dependency injection patterns.
+- Further modularization of `pkg/verification`.
 
 **Current State:**
 The codebase is in an excellent state with:

@@ -16,12 +16,21 @@ Split `gauth.go` (1,227 lines) into 5 focused files:
 - `resource_server.go` - ResourceServer
 - `service.go` - Core service (662 lines, 46% reduction)
 
-### Phase 3b: Broader Dependency Injection ✅
-- Updated `pkg/poa` to accept `crypto.Manager`
-- Updated `pkg/delegation` to accept `crypto.Manager`
-- Updated `pkg/verification` to accept `crypto.Manager`
-- Maintained backward compatibility via fallback to global registry
+### Phase 3b, 3c, 4: Full Codebase Refactoring & Cleanup ✅
+- Updated `pkg/gauth`, `pkg/poa`, `pkg/delegation`, `pkg/verification`, `pkg/attest`, `web`, `cmd` to accept `crypto.Manager`
+- Completely removed `GlobalEdDSARegistry` and `GlobalRotatingSigner` from `pkg/crypto`
+- Cleaned up deprecated usage in all packages
 - Verified all tests pass for refactored packages
+
+### Phase 5: pkg/poa Modularization ✅
+- Extracted `taxonomy` and `stream` subpackages to reduce `pkg/poa` complexity
+- Updated all consumers to clear circular dependencies and improve maintainability
+
+### Phase 6: Final Verification & Web Package Cleanup ✅
+- Patched `web` package to fully remove `GlobalEdDSARegistry`
+- Fixed algorithm constant mismatch in `pkg/gauth_rfc_001`
+- Refactored `pkg/revocation` integration tests to be white-box for better isolation
+- Verified full suite stability
 
 ## Key Improvements
 
@@ -169,16 +178,15 @@ func main() {
 ✅ **Backwards Compatible** - Existing code continues to work  
 ✅ **Cleaner Code** - Single-responsibility files  
 
-## Next Steps (Phase 3c)
+## Next Steps
 
-To further improve the codebase architecture:
+Codebase refactoring is complete. The system is now fully using dependency injection for cryptographic operations.
 
-1. **Interface Segregation**: Split large interfaces into smaller, more focused ones.
-2. **Module Extraction**: Extract `pkg/poa` and `crypto` logic into independent modules.
-3. **Deprecation**: Officially deprecate `crypto.GlobalEdDSARegistry`.
+**Maintenance:**
+- Monitor for any legacy patterns re-emerging (should be caught by linter/review)
+- Continue to split large packages if needed (e.g., `pkg/verification` could be further modularized)
 
-**Estimated effort:** 1-2 weeks  
-**Impact:** Medium (architectural cleanup)
+**Impact:** High (Architectural integrity and testability improved significantly)
 
 ## Testing
 
