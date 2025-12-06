@@ -6,8 +6,8 @@ import (
 	"crypto/rsa"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/oidc"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/mauriciomferz/Gauth_go/pkg/oidc"
 )
 
 // Helper function to create a test Okta provider
@@ -97,7 +97,7 @@ func TestNewOktaProvider(t *testing.T) {
 				IDTokenService: &oidc.IDTokenService{},
 			},
 			expectError: true,
-			errorMsg:    "Okta domain is required",
+			errorMsg:    "okta domain is required",
 		},
 		{
 			name: "Missing client ID",
