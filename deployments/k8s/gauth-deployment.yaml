@@ -88,7 +88,7 @@ spec:
         - name: GAUTH_ETH_RPC_URL
           value: "https://sepolia.infura.io/v3/YOUR-PROJECT-ID" # Replace with actual RPC URL
         - name: GAUTH_ETH_CONTRACT_ADDRESS
-          value: "" # Replace with deployed contract address
+          value: "0xD8AeB2e81C8b9A8b136519d737eba220fE5b9D59" # PoARegistry on Sepolia
         - name: GAUTH_ETH_PRIVATE_KEY
           valueFrom:
             secretKeyRef:
