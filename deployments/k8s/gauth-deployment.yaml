@@ -41,6 +41,7 @@ type: Opaque
 data:
   vault-token: ZGV2LXJvb3QtdG9rZW4=  # base64 encoded 'dev-root-token'
   jwt-signing-key: ""  # Add actual base64 encoded signing key
+  eth-private-key: ""  # Add actual base64 encoded private key
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -84,6 +85,15 @@ spec:
             secretKeyRef:
               name: gauth-secrets
               key: jwt-signing-key
+        - name: GAUTH_ETH_RPC_URL
+          value: "https://sepolia.infura.io/v3/YOUR-PROJECT-ID" # Replace with actual RPC URL
+        - name: GAUTH_ETH_CONTRACT_ADDRESS
+          value: "" # Replace with deployed contract address
+        - name: GAUTH_ETH_PRIVATE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: gauth-secrets
+              key: eth-private-key
         volumeMounts:
         - name: config-volume
           mountPath: /etc/gauth

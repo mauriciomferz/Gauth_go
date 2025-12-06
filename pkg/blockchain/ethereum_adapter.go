@@ -61,23 +61,23 @@ type EthereumAdapter struct {
 
 // EthereumConfig holds Ethereum adapter configuration
 type EthereumConfig struct {
-	RPCURL           string        `json:"rpc_url"`
-	PrivateKey       string        `json:"private_key"`
-	ContractAddress  string        `json:"contract_address"`
-	ChainID          int64         `json:"chain_id"`
-	GasLimit         uint64        `json:"gas_limit"`
-	GasPrice         *big.Int      `json:"gas_price"`
-	MaxGasPrice      *big.Int      `json:"max_gas_price"`
-	ConfirmBlocks    int           `json:"confirm_blocks"`
-	TxTimeout        time.Duration `json:"tx_timeout"`
-	NetworkName      string        `json:"network_name"` // "ethereum", "polygon", "sepolia"
+	RPCURL          string        `json:"rpc_url"`
+	PrivateKey      string        `json:"private_key"`
+	ContractAddress string        `json:"contract_address"`
+	ChainID         int64         `json:"chain_id"`
+	GasLimit        uint64        `json:"gas_limit"`
+	GasPrice        *big.Int      `json:"gas_price"`
+	MaxGasPrice     *big.Int      `json:"max_gas_price"`
+	ConfirmBlocks   int           `json:"confirm_blocks"`
+	TxTimeout       time.Duration `json:"tx_timeout"`
+	NetworkName     string        `json:"network_name"` // "ethereum", "polygon", "sepolia"
 }
 
 // PoARegistryContract wraps the smart contract ABI
 type PoARegistryContract struct {
-	abi      abi.ABI
-	address  common.Address
-	client   *ethclient.Client
+	abi     abi.ABI
+	address common.Address
+	client  *ethclient.Client
 }
 
 // TransactionStatus represents blockchain transaction status
@@ -372,7 +372,7 @@ func (e *EthereumAdapter) GetPublicVerificationURL(poaID string) string {
 // ListPoAsByIssuer lists all PoAs issued by a principal
 func (e *EthereumAdapter) ListPoAsByIssuer(ctx context.Context, issuerID string) ([]*BlockchainPoARecord, error) {
 	issuerHash := e.hashString(issuerID)
-	
+
 	data, err := e.contract.abi.Pack("getPoAsByIssuer", issuerHash)
 	if err != nil {
 		return nil, fmt.Errorf("failed to pack call data: %w", err)
@@ -409,7 +409,7 @@ func (e *EthereumAdapter) ListPoAsByIssuer(ctx context.Context, issuerID string)
 // ListPoAsByGrantee lists all PoAs granted to a representative
 func (e *EthereumAdapter) ListPoAsByGrantee(ctx context.Context, granteeID string) ([]*BlockchainPoARecord, error) {
 	granteeHash := e.hashString(granteeID)
-	
+
 	data, err := e.contract.abi.Pack("getPoAsByGrantee", granteeHash)
 	if err != nil {
 		return nil, fmt.Errorf("failed to pack call data: %w", err)
@@ -487,7 +487,7 @@ func (e *EthereumAdapter) GetBlockchainHeight(ctx context.Context) (int64, error
 // GetTransactionStatus returns the status of a transaction
 func (e *EthereumAdapter) GetTransactionStatus(ctx context.Context, txHash string) (*TransactionStatus, error) {
 	hash := common.HexToHash(txHash)
-	
+
 	receipt, err := e.client.TransactionReceipt(ctx, hash)
 	if err != nil {
 		// Transaction might be pending
@@ -591,6 +591,15 @@ func (e *EthereumAdapter) hashString(s string) [32]byte {
 // Close closes the Ethereum client connection
 func (e *EthereumAdapter) Close() {
 	e.client.Close()
+}
+
+// HealthCheck checks if the Ethereum client is connected
+func (e *EthereumAdapter) HealthCheck(ctx context.Context) error {
+	_, err := e.client.ChainID(ctx)
+	if err != nil {
+		return fmt.Errorf("ethereum client health check failed: %w", err)
+	}
+	return nil
 }
 
 // PoARegistryABI is the ABI for the PoA Registry smart contract

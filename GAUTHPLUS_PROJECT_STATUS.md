@@ -56,19 +56,19 @@ Breakdown by Category:
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│                    GAuth+ Architecture                        │
+│                    GAuth+ Architecture                       │
 ├──────────────────────────────────────────────────────────────┤
-│                                                               │
+│                                                              │
 │  REST API (27 endpoints)                                     │
-│       │                                                       │
+│       │                                                      │
 │       ├─── Power of Attorney Service                         │
-│       │     ├─── Basic PoA CRUD                             │
+│       │     ├─── Basic PoA CRUD                              │
 │       │     ├─── Successor Designation                       │
 │       │     ├─── Delegation Chains                           │
 │       │     ├─── Dual Control                                │
 │       │     ├─── Capability-Based Access                     │
 │       │     └─── Fiduciary Responsibility                    │
-│       │                                                       │
+│       │                                                      │
 │       ├─── Verification Service (8 methods)                  │
 │       │     ├─── PoA Verification                            │
 │       │     ├─── Scope Validation                            │
@@ -78,7 +78,7 @@ Breakdown by Category:
 │       │     ├─── Authorization Chain                         │
 │       │     ├─── Attestation Verification                    │
 │       │     └─── Comprehensive Reports                       │
-│       │                                                       │
+│       │                                                      │
 │       ├─── Blockchain Sync Service                           │
 │       │     ├─── Dual-Write (DB + Blockchain)                │
 │       │     ├─── 3 Sync Modes (immediate/async/batch)        │
@@ -86,7 +86,7 @@ Breakdown by Category:
 │       │     ├─── Retry Logic (3 attempts)                    │
 │       │     ├─── Confirmation Tracking (12 blocks)           │
 │       │     └─── Consistency Checker (15min intervals)       │
-│       │                                                       │
+│       │                                                      │
 │       └─── Public Verification API (10 endpoints)            │
 │             ├─── PoA Verification (no auth)                  │
 │             ├─── Quick Status Check                          │
@@ -95,11 +95,11 @@ Breakdown by Category:
 │             ├─── Agent Powers Lookup                         │
 │             ├─── Issuer/Grantee Listings                     │
 │             └─── Blockchain Explorer Links                   │
-│                                                               │
+│                                                              │
 ├──────────────────────────────────────────────────────────────┤
-│                     Data Layer                                │
+│                     Data Layer                               │
 ├──────────────────────────────────────────────────────────────┤
-│                                                               │
+│                                                              │
 │  PostgreSQL 15+ Database                                     │
 │    ├─── 10 Migrations (complete)                             │
 │    ├─── 15+ Tables                                           │
@@ -115,15 +115,15 @@ Breakdown by Category:
 │    │     ├─── dual_control_requirements                      │
 │    │     ├─── capabilities                                   │
 │    │     └─── fiduciary_responsibilities                     │
-│    │                                                          │
+│    │                                                         │
 │    ├─── Helper Functions (4)                                 │
 │    ├─── Views (2)                                            │
 │    └─── Triggers (automatic version history)                 │
-│                                                               │
+│                                                              │
 ├──────────────────────────────────────────────────────────────┤
-│                 Blockchain Layer                              │
+│                 Blockchain Layer                             │
 ├──────────────────────────────────────────────────────────────┤
-│                                                               │
+│                                                              │
 │  Ethereum Adapter                                            │
 │    ├─── Smart Contract ABI Binding                           │
 │    ├─── Transaction Signing (EIP-155)                        │
@@ -133,7 +133,7 @@ Breakdown by Category:
 │    │     ├─── Polygon                                        │
 │    │     └─── Sepolia Testnet                                │
 │    └─── Privacy-Preserving (hashed IDs)                      │
-│                                                               │
+│                                                              │
 │  Smart Contract (Solidity 0.8.20)                            │
 │    ├─── PoA Registry                                         │
 │    │     ├─── registerPoA()                                  │
@@ -142,29 +142,29 @@ Breakdown by Category:
 │    │     ├─── getPoA()                                       │
 │    │     ├─── getPoAsByIssuer()                              │
 │    │     └─── getPoAsByGrantee()                             │
-│    │                                                          │
+│    │                                                         │
 │    └─── AI Agent Commercial Register                         │
 │          ├─── registerAIAgent()                              │
 │          ├─── linkPoAToAgent()                               │
 │          └─── getAIAgentPowers()                             │
-│                                                               │
+│                                                              │
 ├──────────────────────────────────────────────────────────────┤
-│              Monitoring & Observability                       │
+│              Monitoring & Observability                      │
 ├──────────────────────────────────────────────────────────────┤
-│                                                               │
+│                                                              │
 │  Prometheus Metrics                                          │
 │    ├─── GAuth+ Operations (30+ metrics)                      │
 │    ├─── Blockchain Operations (6 metrics)                    │
 │    ├─── Public Verification API (2 metrics)                  │
 │    └─── Sync Service (6 metrics)                             │
-│                                                               │
+│                                                              │
 │  Grafana Dashboards (2)                                      │
 │    ├─── GAuth+ Monitoring (12 panels)                        │
 │    └─── Blockchain Monitoring (10 panels)                    │
-│                                                               │
+│                                                              │
 │  AlertManager                                                │
 │    └─── Custom alerts for critical metrics                   │
-│                                                               │
+│                                                              │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -616,5 +616,5 @@ The remaining 8 points primarily involve external integrations (identity provide
 
 ---
 
-**Last Updated:** November 26, 2025  
-**Next Review:** December 3, 2025
+**Last Updated:** December 6, 2025
+**Next Review:** December 13, 2025

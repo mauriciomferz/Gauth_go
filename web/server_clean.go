@@ -53,6 +53,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	authpkg "github.com/mauriciomferz/Gauth_go/pkg/auth"
 	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	"github.com/mauriciomferz/Gauth_go/pkg/blockchain"
 	"github.com/mauriciomferz/Gauth_go/pkg/cache"
 	"github.com/mauriciomferz/Gauth_go/pkg/common"
 	cacheConfig "github.com/mauriciomferz/Gauth_go/pkg/config"
@@ -565,6 +566,10 @@ type BetaServer struct {
 	mcpConnectionManager *mcp.ConnectionManager
 	// Database connection pool (optional, for persistent audit logging and deep health checks)
 	db *database.DB
+
+	// Blockchain components (Active if GAUTH_ETH_RPC_URL is set)
+	blockchainRegistry blockchain.BlockchainRegistry
+	syncService        blockchain.SyncService
 }
 
 // apiCryptoAlgorithms returns a static list of supported crypto algorithms.
@@ -3248,6 +3253,57 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		if db, err := database.NewDB(dbCfg); err == nil {
 			s.db = db
 			fmt.Printf("Database connected: %s\n", host)
+
+			// Initialize Blockchain Components if configured
+			if ethRPC := os.Getenv("GAUTH_ETH_RPC_URL"); ethRPC != "" {
+				ethKey := os.Getenv("GAUTH_ETH_PRIVATE_KEY")
+				// We allow empty private key for read-only mode if needed, but warnings usually apply
+
+				ethConfig := &blockchain.EthereumConfig{
+					RPCURL:          ethRPC,
+					PrivateKey:      ethKey,
+					ContractAddress: os.Getenv("GAUTH_ETH_CONTRACT_ADDRESS"),
+					NetworkName:     "sepolia", // defaulting to sepolia for this phase
+					ChainID:         11155111,  // Sepolia ChainID
+					GasLimit:        3000000,
+				}
+
+				adapter, err := blockchain.NewEthereumAdapter(ethConfig)
+				if err != nil {
+					fmt.Printf("Warning: Failed to initialize Ethereum Adapter: %v\n", err)
+				} else {
+					s.blockchainRegistry = adapter
+					fmt.Println("Blockchain Adapter initialized (Ethereum/Sepolia)")
+
+					// Initialize Sync Service
+					poaStore := blockchain.NewPostgresPoAStore(s.db)
+					hashingService := blockchain.NewSimpleHashingService()
+					// IPFS service is optional/nil for now
+
+					syncConfig := blockchain.DefaultSyncConfig()
+					// Override sync config from env if needed
+					if mode := os.Getenv("GAUTH_SYNC_MODE"); mode != "" {
+						syncConfig.SyncMode = mode
+					}
+
+					s.syncService = blockchain.NewBlockchainSyncService(
+						adapter,
+						poaStore,
+						hashingService,
+						nil, // ipfsService
+						syncConfig,
+					)
+
+					// Start Sync Service
+					// Note: Background context used for long-running service
+					if err := s.syncService.Start(context.Background()); err != nil {
+						fmt.Printf("Warning: Failed to start Blockchain Sync Service: %v\n", err)
+					} else {
+						fmt.Println("Blockchain Sync Service started")
+					}
+				}
+			}
+
 			// Wire up audit logger
 			repo := audit.NewRepository(db.Pool)
 			// Type assertion or wrapper needed for metrics?

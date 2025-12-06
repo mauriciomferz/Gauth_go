@@ -631,7 +631,6 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
             schema:
               $ref: '#/components/schemas/CompositeAuthorizationArtifact'
             examples:
@@ -667,6 +666,131 @@ paths:
         '409': { $ref: '#/components/responses/Conflict' }
         '429': { $ref: '#/components/responses/RateLimited' }
         '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/beta/health:
+    get:
+      summary: Deep health check
+      tags: [validation]
+      operationId: getBetaHealth
+      description: |
+        Performs deep verification of subsystem connectivity including Database, Redis, and MCP managers.
+        Returns detailed status map.
+      responses:
+        '200':
+          description: Health status
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+
+  /api/v1/beta/capabilities/diff:
+    get:
+      summary: Capabilities Diff
+      tags: [capability]
+      operationId: getCapabilityDiff
+      description: |
+        Computes added, removed, and modified capabilities relative to an optional baseline hash.
+      parameters:
+        - in: query
+          name: since
+          schema: { type: string }
+          description: Baseline hash to compare against. If omitted, returns current hash as baseline.
+      responses:
+        '200':
+          description: Diff result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  base_hash: { type: string }
+                  current_hash: { type: string }
+                  added: { type: array, items: { type: object } }
+                  removed: { type: array, items: { type: object } }
+                  modified: { type: array, items: { type: object } }
+        '404':
+          description: Baseline version not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: false }
+                  error: { type: string, example: "version_not_found" }
+
+  /api/v1/beta/metrics/lifecycle:
+    get:
+      summary: Lifecycle Metrics
+      tags: [learning]
+      operationId: getLifecycleMetrics
+      description: |
+        Surfaces high-level lifecycle counters (token & delegation transitions and failures) plus multi-signature weight failures.
+      responses:
+        '200':
+          description: Lifecycle metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  metrics:
+                    type: object
+                    properties:
+                      delegation_status_transitions: { type: integer }
+                      delegation_status_transition_failures: { type: integer }
+                      token_status_transitions: { type: integer }
+                      token_status_transition_failures: { type: integer }
+                      multi_signature_weight_failures: { type: integer }
+                      lifecycle_latency_p99_ns: { type: integer }
+
+  /api/v1/beta/lifecycle/timeline:
+    get:
+      summary: Lifecycle Timeline
+      tags: [learning]
+      operationId: getLifecycleTimeline
+      description: |
+        Returns lifecycle events filtered by entity type, id, outcome, reason, or time.
+      parameters:
+        - in: query
+          name: entity_type
+          schema: { type: string }
+        - in: query
+          name: entity_id
+          schema: { type: string }
+        - in: query
+          name: outcome
+          schema: { type: string }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 100 }
+      responses:
+        '200':
+          description: Timeline events
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  count: { type: integer }
+                  next_cursor: { type: string }
+                  events:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        entity_type: { type: string }
+                        entity_id: { type: string }
+                        old_status: { type: string }
+                        new_status: { type: string }
+                        outcome: { type: string }
+                        reason: { type: string }
+                        latency_ns: { type: integer }
+                        at: { type: string, format: date-time }
   /api/v1/poa/prepare:
     post:
       summary: Prepare draft PoA (multi-signature pre-image)

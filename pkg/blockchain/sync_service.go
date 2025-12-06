@@ -50,51 +50,51 @@ var (
 
 // BlockchainSyncService implements dual-write pattern for PostgreSQL + Blockchain
 type BlockchainSyncService struct {
-	registry          BlockchainRegistry
-	poaStore          PoAStore
-	hashingService    HashingService
-	ipfsService       IPFSService
-	eventListeners    []EventListener
-	
+	registry       BlockchainRegistry
+	poaStore       PoAStore
+	hashingService HashingService
+	ipfsService    IPFSService
+	eventListeners []EventListener
+
 	// Sync state
-	mu                sync.RWMutex
-	lastBlockSynced   int64
-	pendingSyncs      map[string]*PendingSync
-	failedSyncs       map[string]*FailedSync
-	
+	mu              sync.RWMutex
+	lastBlockSynced int64
+	pendingSyncs    map[string]*PendingSync
+	failedSyncs     map[string]*FailedSync
+
 	// Configuration
-	config            *SyncConfig
-	
+	config *SyncConfig
+
 	// Channels for async operations
-	syncQueue         chan *SyncJob
-	resultQueue       chan *SyncResult
-	stopCh            chan struct{}
-	wg                sync.WaitGroup
+	syncQueue   chan *SyncJob
+	resultQueue chan *SyncResult
+	stopCh      chan struct{}
+	wg          sync.WaitGroup
 }
 
 // SyncConfig holds configuration for the sync service
 type SyncConfig struct {
-	Enabled              bool          `json:"enabled"`
-	SyncMode             string        `json:"sync_mode"` // "immediate", "batch", "async"
-	BatchSize            int           `json:"batch_size"`
-	BatchInterval        time.Duration `json:"batch_interval"`
-	WorkerCount          int           `json:"worker_count"`
-	RetryAttempts        int           `json:"retry_attempts"`
-	RetryDelay           time.Duration `json:"retry_delay"`
-	ConsistencyCheckInt  time.Duration `json:"consistency_check_interval"`
-	MaxPendingSyncs      int           `json:"max_pending_syncs"`
-	ConfirmationBlocks   int           `json:"confirmation_blocks"`
+	Enabled             bool          `json:"enabled"`
+	SyncMode            string        `json:"sync_mode"` // "immediate", "batch", "async"
+	BatchSize           int           `json:"batch_size"`
+	BatchInterval       time.Duration `json:"batch_interval"`
+	WorkerCount         int           `json:"worker_count"`
+	RetryAttempts       int           `json:"retry_attempts"`
+	RetryDelay          time.Duration `json:"retry_delay"`
+	ConsistencyCheckInt time.Duration `json:"consistency_check_interval"`
+	MaxPendingSyncs     int           `json:"max_pending_syncs"`
+	ConfirmationBlocks  int           `json:"confirmation_blocks"`
 }
 
 // PendingSync represents a sync operation waiting for confirmation
 type PendingSync struct {
-	PoAID           string
-	Operation       string // "register", "revoke", "update"
-	TxHash          string
-	SubmittedAt     time.Time
-	Confirmations   int
+	PoAID            string
+	Operation        string // "register", "revoke", "update"
+	TxHash           string
+	SubmittedAt      time.Time
+	Confirmations    int
 	RequiredConfirms int
-	Retries         int
+	Retries          int
 }
 
 // FailedSync represents a failed sync operation
@@ -203,6 +203,18 @@ func (s *BlockchainSyncService) Stop() {
 	s.wg.Wait()
 }
 
+// SyncToBlockchain syncs pending changes to blockchain (batch mode)
+func (s *BlockchainSyncService) SyncToBlockchain(ctx context.Context) error {
+	// Not implemented for now (using async/immediate mode mainly)
+	return nil
+}
+
+// SyncFromBlockchain syncs changes from blockchain to local DB
+func (s *BlockchainSyncService) SyncFromBlockchain(ctx context.Context, fromBlock int64) error {
+	// Not implemented for now
+	return nil
+}
+
 // SyncPoARegistration syncs a PoA registration to blockchain
 func (s *BlockchainSyncService) SyncPoARegistration(ctx context.Context, poa *EnhancedPoA) error {
 	if !s.config.Enabled {
@@ -269,12 +281,12 @@ func (s *BlockchainSyncService) SyncPoARevocation(ctx context.Context, poaID str
 // syncImmediate performs immediate synchronous sync
 func (s *BlockchainSyncService) syncImmediate(ctx context.Context, job *SyncJob) error {
 	result := s.processJob(ctx, job)
-	
+
 	if result.Success {
 		syncOperationsTotal.WithLabelValues(job.Operation, "success").Inc()
 		return nil
 	}
-	
+
 	syncOperationsTotal.WithLabelValues(job.Operation, "failure").Inc()
 	return result.Error
 }
@@ -327,7 +339,7 @@ func (s *BlockchainSyncService) processJob(ctx context.Context, job *SyncJob) *S
 		result.TxHash = txHash
 		result.Success = err == nil
 		result.Error = err
-		
+
 	case "revoke":
 		revokedBy := job.Metadata["revoked_by"].(string)
 		reason := job.Metadata["reason"].(string)
@@ -335,14 +347,14 @@ func (s *BlockchainSyncService) processJob(ctx context.Context, job *SyncJob) *S
 		result.TxHash = txHash
 		result.Success = err == nil
 		result.Error = err
-		
+
 	case "update":
 		status := job.Metadata["status"].(string)
 		txHash, err := s.registry.UpdatePoAStatus(ctx, job.PoAID, status)
 		result.TxHash = txHash
 		result.Success = err == nil
 		result.Error = err
-		
+
 	default:
 		result.Success = false
 		result.Error = fmt.Errorf("unknown operation: %s", job.Operation)
@@ -436,10 +448,10 @@ func (s *BlockchainSyncService) handleSyncResult(result *SyncResult) {
 			RequiredConfirms: s.config.ConfirmationBlocks,
 			Retries:          0,
 		}
-		
+
 		// Remove from failed if it was there
 		delete(s.failedSyncs, result.PoAID)
-		
+
 		syncOperationsTotal.WithLabelValues(result.Operation, "success").Inc()
 	} else {
 		// Add to failed syncs
@@ -453,11 +465,11 @@ func (s *BlockchainSyncService) handleSyncResult(result *SyncResult) {
 			}
 			s.failedSyncs[result.PoAID] = failed
 		}
-		
+
 		failed.Error = result.Error.Error()
 		failed.Attempts++
 		failed.LastAttempt = time.Now()
-		
+
 		syncOperationsTotal.WithLabelValues(result.Operation, "failure").Inc()
 	}
 }
@@ -465,7 +477,7 @@ func (s *BlockchainSyncService) handleSyncResult(result *SyncResult) {
 // confirmationTracker tracks transaction confirmations
 func (s *BlockchainSyncService) confirmationTracker(ctx context.Context) {
 	defer s.wg.Done()
-	
+
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
 
@@ -504,7 +516,7 @@ func (s *BlockchainSyncService) checkConfirmations(ctx context.Context) {
 // consistencyChecker periodically checks database-blockchain consistency
 func (s *BlockchainSyncService) consistencyChecker(ctx context.Context) {
 	defer s.wg.Done()
-	
+
 	ticker := time.NewTicker(s.config.ConsistencyCheckInt)
 	defer ticker.Stop()
 
@@ -520,7 +532,7 @@ func (s *BlockchainSyncService) consistencyChecker(ctx context.Context) {
 				consistencyCheckTotal.WithLabelValues("error").Inc()
 				continue
 			}
-			
+
 			if report.InconsistentPoAs > 0 {
 				consistencyCheckTotal.WithLabelValues("inconsistent").Inc()
 			} else {
@@ -533,8 +545,8 @@ func (s *BlockchainSyncService) consistencyChecker(ctx context.Context) {
 // CheckConsistency verifies database and blockchain are in sync
 func (s *BlockchainSyncService) CheckConsistency(ctx context.Context) (*ConsistencyReport, error) {
 	report := &ConsistencyReport{
-		CheckedAt:        time.Now(),
-		Inconsistencies:  []InconsistencyDetail{},
+		CheckedAt:       time.Now(),
+		Inconsistencies: []InconsistencyDetail{},
 	}
 
 	// This would be implemented with actual database queries

@@ -16,25 +16,25 @@ type PoAStore interface {
 
 // EnhancedPoA represents the enhanced Power of Attorney structure
 type EnhancedPoA struct {
-	ID               string                 `json:"id"`
-	IssuerID         string                 `json:"issuer_id"`
-	GranteeID        string                 `json:"grantee_id"`
-	SuccessorID      *string                `json:"successor_id,omitempty"`
-	StructuredScope  interface{}            `json:"structured_scope"`
-	Restrictions     interface{}            `json:"restrictions"`
-	Attestations     interface{}            `json:"attestations"`
-	VersionNumber    int                    `json:"version_number"`
-	VersionHistory   interface{}            `json:"version_history"`
-	Status           string                 `json:"status"`
-	ValidFrom        time.Time              `json:"valid_from"`
-	ValidUntil       time.Time              `json:"valid_until"`
-	RevokedAt        *time.Time             `json:"revoked_at,omitempty"`
-	RevokedBy        *string                `json:"revoked_by,omitempty"`
-	RevocationReason *string                `json:"revocation_reason,omitempty"`
-	BlockchainTxHash *string                `json:"blockchain_tx_hash,omitempty"`
-	BlockchainBlock  *int64                 `json:"blockchain_block,omitempty"`
-	CreatedAt        time.Time              `json:"created_at"`
-	UpdatedAt        time.Time              `json:"updated_at"`
+	ID               string      `json:"id"`
+	IssuerID         string      `json:"issuer_id"`
+	GranteeID        string      `json:"grantee_id"`
+	SuccessorID      *string     `json:"successor_id,omitempty"`
+	StructuredScope  interface{} `json:"structured_scope"`
+	Restrictions     interface{} `json:"restrictions"`
+	Attestations     interface{} `json:"attestations"`
+	VersionNumber    int         `json:"version_number"`
+	VersionHistory   interface{} `json:"version_history"`
+	Status           string      `json:"status"`
+	ValidFrom        time.Time   `json:"valid_from"`
+	ValidUntil       time.Time   `json:"valid_until"`
+	RevokedAt        *time.Time  `json:"revoked_at,omitempty"`
+	RevokedBy        *string     `json:"revoked_by,omitempty"`
+	RevocationReason *string     `json:"revocation_reason,omitempty"`
+	BlockchainTxHash *string     `json:"blockchain_tx_hash,omitempty"`
+	BlockchainBlock  *int64      `json:"blockchain_block,omitempty"`
+	CreatedAt        time.Time   `json:"created_at"`
+	UpdatedAt        time.Time   `json:"updated_at"`
 }
 
 // PoARecord represents minimal PoA data stored on blockchain
@@ -53,23 +53,23 @@ type PoARecord struct {
 
 // BlockchainPoARecord represents full PoA data from blockchain
 type BlockchainPoARecord struct {
-	ID                string    `json:"id"`
-	IssuerIDHash      string    `json:"issuer_id_hash"`
-	GranteeIDHash     string    `json:"grantee_id_hash"`
-	ScopeHash         string    `json:"scope_hash"`
-	AttestationHash   string    `json:"attestation_hash"`
-	MetadataHash      string    `json:"metadata_hash"`
-	MetadataURI       string    `json:"metadata_uri"`
-	ValidFrom         time.Time `json:"valid_from"`
-	ValidUntil        time.Time `json:"valid_until"`
-	Status            string    `json:"status"`
-	RegisteredAt      time.Time `json:"registered_at"`
-	Revoked           bool      `json:"revoked"`
-	RevokedAt         time.Time `json:"revoked_at,omitempty"`
-	RevokedByHash     string    `json:"revoked_by_hash,omitempty"`
-	RevocationReason  string    `json:"revocation_reason,omitempty"`
-	TxHash            string    `json:"tx_hash"`
-	BlockNumber       int64     `json:"block_number"`
+	ID               string    `json:"id"`
+	IssuerIDHash     string    `json:"issuer_id_hash"`
+	GranteeIDHash    string    `json:"grantee_id_hash"`
+	ScopeHash        string    `json:"scope_hash"`
+	AttestationHash  string    `json:"attestation_hash"`
+	MetadataHash     string    `json:"metadata_hash"`
+	MetadataURI      string    `json:"metadata_uri"`
+	ValidFrom        time.Time `json:"valid_from"`
+	ValidUntil       time.Time `json:"valid_until"`
+	Status           string    `json:"status"`
+	RegisteredAt     time.Time `json:"registered_at"`
+	Revoked          bool      `json:"revoked"`
+	RevokedAt        time.Time `json:"revoked_at,omitempty"`
+	RevokedByHash    string    `json:"revoked_by_hash,omitempty"`
+	RevocationReason string    `json:"revocation_reason,omitempty"`
+	TxHash           string    `json:"tx_hash"`
+	BlockNumber      int64     `json:"block_number"`
 }
 
 // VerificationProof represents cryptographic proof of verification
@@ -108,48 +108,48 @@ type RegistrationCertificate struct {
 
 // AIAgentPowersSummary represents summary of AI agent powers
 type AIAgentPowersSummary struct {
-	AgentID          string                 `json:"agent_id"`
-	TotalPoAs        int                    `json:"total_poas"`
-	ActivePoAs       int                    `json:"active_poas"`
-	RevokedPoAs      int                    `json:"revoked_poas"`
-	AuthorizedActions []string              `json:"authorized_actions"`
-	Restrictions     map[string]interface{} `json:"restrictions"`
-	LastUpdated      time.Time              `json:"last_updated"`
+	AgentID           string                 `json:"agent_id"`
+	TotalPoAs         int                    `json:"total_poas"`
+	ActivePoAs        int                    `json:"active_poas"`
+	RevokedPoAs       int                    `json:"revoked_poas"`
+	AuthorizedActions []string               `json:"authorized_actions"`
+	Restrictions      map[string]interface{} `json:"restrictions"`
+	LastUpdated       time.Time              `json:"last_updated"`
 }
 
 // PublicVerificationResult represents public verification result
 type PublicVerificationResult struct {
-	PoAID            string                 `json:"poa_id"`
-	Verified         bool                   `json:"verified"`
-	Active           bool                   `json:"active"`
-	IssuerIDHash     string                 `json:"issuer_id_hash"`
-	GranteeIDHash    string                 `json:"grantee_id_hash"`
-	ValidFrom        time.Time              `json:"valid_from"`
-	ValidUntil       time.Time              `json:"valid_until"`
-	Status           string                 `json:"status"`
-	VerificationProof *VerificationProof    `json:"verification_proof"`
-	VerifiedAt       time.Time              `json:"verified_at"`
-	BlockchainURL    string                 `json:"blockchain_url"`
+	PoAID             string             `json:"poa_id"`
+	Verified          bool               `json:"verified"`
+	Active            bool               `json:"active"`
+	IssuerIDHash      string             `json:"issuer_id_hash"`
+	GranteeIDHash     string             `json:"grantee_id_hash"`
+	ValidFrom         time.Time          `json:"valid_from"`
+	ValidUntil        time.Time          `json:"valid_until"`
+	Status            string             `json:"status"`
+	VerificationProof *VerificationProof `json:"verification_proof"`
+	VerifiedAt        time.Time          `json:"verified_at"`
+	BlockchainURL     string             `json:"blockchain_url"`
 }
 
 // ConsistencyReport represents blockchain-database consistency check result
 type ConsistencyReport struct {
-	CheckedAt           time.Time              `json:"checked_at"`
-	TotalPoAs           int                    `json:"total_poas"`
-	ConsistentPoAs      int                    `json:"consistent_poas"`
-	InconsistentPoAs    int                    `json:"inconsistent_poas"`
-	MissingOnBlockchain int                    `json:"missing_on_blockchain"`
-	MissingInDatabase   int                    `json:"missing_in_database"`
-	Inconsistencies     []InconsistencyDetail  `json:"inconsistencies"`
+	CheckedAt           time.Time             `json:"checked_at"`
+	TotalPoAs           int                   `json:"total_poas"`
+	ConsistentPoAs      int                   `json:"consistent_poas"`
+	InconsistentPoAs    int                   `json:"inconsistent_poas"`
+	MissingOnBlockchain int                   `json:"missing_on_blockchain"`
+	MissingInDatabase   int                   `json:"missing_in_database"`
+	Inconsistencies     []InconsistencyDetail `json:"inconsistencies"`
 }
 
 // InconsistencyDetail represents a specific inconsistency
 type InconsistencyDetail struct {
-	PoAID           string                 `json:"poa_id"`
-	InconsistencyType string               `json:"inconsistency_type"` // "missing_blockchain", "missing_db", "hash_mismatch", "status_mismatch"
-	DatabaseValue   interface{}            `json:"database_value"`
-	BlockchainValue interface{}            `json:"blockchain_value"`
-	DetectedAt      time.Time              `json:"detected_at"`
+	PoAID             string      `json:"poa_id"`
+	InconsistencyType string      `json:"inconsistency_type"` // "missing_blockchain", "missing_db", "hash_mismatch", "status_mismatch"
+	DatabaseValue     interface{} `json:"database_value"`
+	BlockchainValue   interface{} `json:"blockchain_value"`
+	DetectedAt        time.Time   `json:"detected_at"`
 }
 
 // SyncStatus represents current synchronization status
@@ -179,13 +179,17 @@ type SyncService interface {
 	SyncToBlockchain(ctx context.Context) error
 	SyncFromBlockchain(ctx context.Context, fromBlock int64) error
 	CheckConsistency(ctx context.Context) (*ConsistencyReport, error)
-	
+
 	// Status and monitoring
 	GetSyncStatus(ctx context.Context) (*SyncStatus, error)
-	
+
 	// PoA specific sync
 	SyncPoARegistration(ctx context.Context, poa *EnhancedPoA) error
 	SyncPoARevocation(ctx context.Context, poaID string, revokedBy string, reason string) error
+
+	// Lifecycle
+	Start(ctx context.Context) error
+	Stop()
 }
 
 // HashingService defines the interface for cryptographic hashing
@@ -342,4 +346,8 @@ func (m *MockBlockchainRegistry) GetTransactionStatus(ctx context.Context, txHas
 		Confirmations: 12,
 		BlockNumber:   1000000,
 	}, nil
+}
+
+func (m *MockBlockchainRegistry) HealthCheck(ctx context.Context) error {
+	return nil
 }
