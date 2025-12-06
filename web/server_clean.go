@@ -58,7 +58,6 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/common"
 	cacheConfig "github.com/mauriciomferz/Gauth_go/pkg/config"
 	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
-	cryptopkg "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/pkg/database"
 	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
@@ -4976,7 +4975,7 @@ func (s *BetaServer) loadCapabilitiesFromFile(path string) error {
 					// Per-algorithm emission attribution: increment for every registered algorithm.
 					// This decouples anchor artifact contents (may only be EdDSA signed) from algorithm registry agility.
 					if algRec, ok := s.metrics.(interface{ IncCapabilityAnchorAlgorithm(string) }); ok {
-						for _, info := range cryptopkg.ListAlgorithms() {
+						for _, info := range crypto.ListAlgorithms() {
 							if info.Name == "" {
 								continue
 							}

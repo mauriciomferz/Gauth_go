@@ -47,11 +47,11 @@ func NewBoltReplayStore(path string, ttl time.Duration) (*BoltReplayStore, error
 		// Allow bypass for development/testing ONLY
 		if os.Getenv("GAUTH_ALLOW_UNSAFE_BOLTDB") != "1" {
 			if err := security.ValidatePathForPersistence(path, "replay protection"); err != nil {
-				return nil, fmt.Errorf("BoltDB SECURITY VIOLATION (CV-2025-005): %w\n\n"+
-					"CRITICAL: BoltDB is DEPRECATED for production use in containers.\n"+
-					"Use Redis (recommended) or PostgreSQL for distributed replay protection.\n\n"+
-					"For development/testing ONLY, set GAUTH_ALLOW_UNSAFE_BOLTDB=1 to bypass.\n"+
-					"See REPLAY_STORE_MIGRATION_GUIDE.md for migration instructions.", err)
+				return nil, fmt.Errorf("BoltDB SECURITY VIOLATION (CV-2025-005): %w - "+
+					"BoltDB is DEPRECATED for production use in containers, "+
+					"use Redis (recommended) or PostgreSQL for distributed replay protection, "+
+					"for development/testing ONLY, set GAUTH_ALLOW_UNSAFE_BOLTDB=1 to bypass, "+
+					"see REPLAY_STORE_MIGRATION_GUIDE.md for migration instructions", err)
 			}
 		} else {
 			// Log warning when bypass is used
