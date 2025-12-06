@@ -4,6 +4,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/mauriciomferz/Gauth_go/pkg/metrics"
 	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
@@ -42,23 +43,12 @@ var (
 		Name: "gauth_rotation_summary_anchor_total",
 		Help: "Rotation summary anchoring attempts labeled by result (anchored|skipped|error)",
 	}, []string{"result"})
-	rotationSummaryChainLength = promauto.NewGauge(prom.GaugeOpts{
-		Name: "gauth_rotation_summary_chain_length",
-		Help: "Latest rotation ledger chain length observed when serving summary",
-	})
-	rotationSummaryHeadAgeSeconds = promauto.NewGauge(prom.GaugeOpts{
-		Name: "gauth_rotation_summary_head_age_seconds",
-		Help: "Age in seconds of the rotation summary (now - generated_at)",
-	})
-	rotationSummaryLastAnchorAgeSeconds = promauto.NewGauge(prom.GaugeOpts{
-		Name: "gauth_rotation_summary_last_anchor_age_seconds",
-		Help: "Age in seconds since the last successful rotation summary anchor (now - last_anchor_time)",
-	})
-	rotationSignatureVerifyLatency = promauto.NewHistogram(prom.HistogramOpts{
-		Name:    "gauth_rotation_signature_verify_latency_seconds",
-		Help:    "Latency of individual rotation summary signature verification operations",
-		Buckets: prom.DefBuckets,
-	})
+
+	// rotationSummaryChainLength -> metrics.RotationChainLength
+	// rotationSummaryHeadAgeSeconds -> metrics.RotationHeadAge
+	// rotationSummaryLastAnchorAgeSeconds -> metrics.RotationLastAnchorAge
+	// rotationSignatureVerifyLatency -> metrics.RotationSignatureVerifyLatency
+
 	rotationSignatureVerifyFailures = promauto.NewCounterVec(prom.CounterOpts{
 		Name: "gauth_rotation_signature_verify_failures_total",
 		Help: "Total failed rotation signature verifications labeled by reason",
@@ -91,9 +81,9 @@ func RecordRotationSummary(start time.Time, sum *RotationSummary, anchored bool,
 	}
 	rotationSummaryCounter.WithLabelValues(outcome).Inc()
 	if sum != nil {
-		rotationSummaryChainLength.Set(float64(sum.ChainLength))
+		metrics.RotationChainLength.Set(float64(sum.ChainLength))
 		if ts, perr := time.Parse(time.RFC3339Nano, sum.GeneratedAt); perr == nil {
-			rotationSummaryHeadAgeSeconds.Set(time.Since(ts).Seconds())
+			metrics.RotationHeadAge.Set(time.Since(ts).Seconds())
 		}
 	}
 	if anchorAttempted {
@@ -111,6 +101,6 @@ func RecordRotationSummary(start time.Time, sum *RotationSummary, anchored bool,
 	// update last anchor age gauge if we have a recorded anchor
 	if ts := lastAnchorUnixNano.Load(); ts > 0 {
 		anchorTime := time.Unix(0, ts)
-		rotationSummaryLastAnchorAgeSeconds.Set(time.Since(anchorTime).Seconds())
+		metrics.RotationLastAnchorAge.Set(time.Since(anchorTime).Seconds())
 	}
 }

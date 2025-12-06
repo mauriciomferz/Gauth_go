@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/mauriciomferz/Gauth_go/pkg/metrics"
 )
 
 // Rotation summary mode constants.
@@ -288,49 +290,49 @@ func VerifyRotationSummary(sum *RotationSummary, pub ed25519.PublicKey) (bool, s
 	start := time.Now()
 	if sum == nil {
 		rotationSignatureVerifyFailures.WithLabelValues(reasonSummaryNil).Inc()
-		rotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
+		metrics.RotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
 		return false, reasonSummaryNil
 	}
 	if sum.Signature == "" {
 		rotationSignatureVerifyFailures.WithLabelValues(reasonMissingSignature).Inc()
-		rotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
+		metrics.RotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
 		return false, reasonMissingSignature
 	}
 	if sum.Mode != "" && sum.Mode != rotationModeEdDSA {
 		rotationSignatureVerifyFailures.WithLabelValues(reasonModeUnsupported).Inc()
-		rotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
+		metrics.RotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
 		return false, reasonModeUnsupported
 	}
 	if len(pub) != ed25519.PublicKeySize {
 		rotationSignatureVerifyFailures.WithLabelValues(reasonPublicKeyInvalid).Inc()
-		rotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
+		metrics.RotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
 		return false, reasonPublicKeyInvalid
 	}
 	derivedKid := fmt.Sprintf("ed25519:%x", pub[:8])
 	if sum.Kid != "" && sum.Kid != derivedKid {
 		rotationSignatureVerifyFailures.WithLabelValues(reasonKidMismatch).Inc()
-		rotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
+		metrics.RotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
 		return false, reasonKidMismatch
 	}
 	enc, err := canonicalRotationSummaryPayload(sum)
 	if err != nil {
 		rotationSignatureVerifyFailures.WithLabelValues(reasonSerializationFail).Inc()
-		rotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
+		metrics.RotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
 		return false, reasonSerializationFail
 	}
 	msg := append([]byte("GAUTH_ROTATION_SUMMARY:"), enc...)
 	sigBytes, err := base64.RawURLEncoding.DecodeString(sum.Signature)
 	if err != nil {
 		rotationSignatureVerifyFailures.WithLabelValues(reasonSignatureInvalid).Inc()
-		rotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
+		metrics.RotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
 		return false, reasonSignatureInvalid
 	}
 	if !ed25519.Verify(pub, msg, sigBytes) {
 		rotationSignatureVerifyFailures.WithLabelValues(reasonSignatureInvalid).Inc()
-		rotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
+		metrics.RotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
 		return false, reasonSignatureInvalid
 	}
-	rotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
+	metrics.RotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
 	return true, ""
 }
 

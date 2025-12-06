@@ -66,9 +66,11 @@ var (
 	rotationV2VerifiedWeightByAlg    = promauto.NewGaugeVec(prom.GaugeOpts{Name: "gauth_rotation_v2_verified_weight_alg", Help: "Verified weight contributed per algorithm."}, []string{"alg"})
 	rotationV2SignatureFailuresByAlg = promauto.NewCounterVec(prom.CounterOpts{Name: "gauth_rotation_v2_signature_failures_by_alg_total", Help: "Signature verification failures partitioned by algorithm and reason."}, []string{"alg", "reason"})
 	RotationV2ChainStarts            = promauto.NewCounter(prom.CounterOpts{Name: "gauth_rotation_v2_chain_starts_total", Help: "Number of times a rotation V2 chain started (empty previous hash)."})
-	RotationV2ContinuityUpdates      = promauto.NewCounter(prom.CounterOpts{Name: "gauth_rotation_v2_continuity_updates_total", Help: "Number of continuity updates (previous hash advanced)."})
-	rotationV2PublicKeysEmbedded     = promauto.NewCounter(prom.CounterOpts{Name: "gauth_rotation_v2_public_keys_embedded_total", Help: "Total artifacts where public key embedding flag enabled."})
-	rotationV2EmbeddedKeyCount       = promauto.NewGauge(prom.GaugeOpts{Name: "gauth_rotation_v2_embedded_public_key_count", Help: "Count of embedded public keys in latest artifact."})
+
+	// RotationV2ContinuityUpdates -> metrics.RotationContinuityUpdatesTotal
+
+	rotationV2PublicKeysEmbedded = promauto.NewCounter(prom.CounterOpts{Name: "gauth_rotation_v2_public_keys_embedded_total", Help: "Total artifacts where public key embedding flag enabled."})
+	rotationV2EmbeddedKeyCount   = promauto.NewGauge(prom.GaugeOpts{Name: "gauth_rotation_v2_embedded_public_key_count", Help: "Count of embedded public keys in latest artifact."})
 )
 
 // cryptoGlobalEdDSAResolve removed in favor of injected resolver.
