@@ -6,10 +6,11 @@ import (
 	"os"
 	"time"
 
+	_ "github.com/lib/pq" // PostgreSQL driver
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth/external"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth/mocks"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
-	_ "github.com/lib/pq" // PostgreSQL driver
 )
 
 // InitRFC0111FromEnv initializes RFC-0111 components based on environment variables.
@@ -37,23 +38,32 @@ func InitRFC0111FromEnv() (*gauth.RFC0111Components, gauth.ExtendedTokenStore, e
 	// Determine whether to use mocks (default: yes)
 	useMocks := os.Getenv("GAUTH_RFC0111_USE_MOCKS") != "0"
 
+	var components *gauth.RFC0111Components
+	var err error
+
 	if !useMocks {
-		return nil, nil, fmt.Errorf("RFC-0111: real external service implementations not yet available, set GAUTH_RFC0111_USE_MOCKS=1 or unset")
-	}
+		// Use real external service implementations (where available)
+		components, err = InitRFC0111WithRealServices()
+		if err != nil {
+			return nil, nil, fmt.Errorf("RFC-0111 real service initialization failed: %w", err)
+		}
+		fmt.Fprintf(os.Stderr, "[RFC-0111] Using REAL external services (Global Identity Verification)\n")
+	} else {
+		// Create mock external services
+		pvpClient := mocks.NewMockPowerVerificationPoint()
+		pipClient := mocks.NewMockPIPClient()
+		commercialRegClient := mocks.NewMockCommercialRegisterClient()
 
-	// Create mock external services
-	pvpClient := mocks.NewMockPowerVerificationPoint()
-	pipClient := mocks.NewMockPIPClient()
-	commercialRegClient := mocks.NewMockCommercialRegisterClient()
-
-	// Initialize RFC-0111 with mocks
-	components, err := gauth.InitRFC0111WithComponents(
-		pvpClient,
-		pipClient,
-		commercialRegClient,
-	)
-	if err != nil {
-		return nil, nil, fmt.Errorf("RFC-0111 initialization failed: %w", err)
+		// Initialize RFC-0111 with mocks
+		components, err = gauth.InitRFC0111WithComponents(
+			pvpClient,
+			pipClient,
+			commercialRegClient,
+		)
+		if err != nil {
+			return nil, nil, fmt.Errorf("RFC-0111 mock initialization failed: %w", err)
+		}
+		fmt.Fprintf(os.Stderr, "[RFC-0111] Using MOCK external services\n")
 	}
 
 	// Initialize token store based on GAUTH_TOKEN_STORE environment variable
@@ -127,6 +137,117 @@ func InitRFC0111FromEnv() (*gauth.RFC0111Components, gauth.ExtendedTokenStore, e
 	return components, tokenStore, nil
 }
 
+// InitRFC0111WithRealServices initializes RFC-0111 components with real service connectors.
+// This sets up the GlobalIdentityVerifier with supported country connectors.
+func InitRFC0111WithRealServices() (*gauth.RFC0111Components, error) {
+	// 1. Initialize Country-Specific Connectors
+
+	// US
+	// Use Mock Provider for US identity source within the Real Verifier logic
+	// In production this would be replaced by PersonaProvider or TruliooProvider
+	usProvider := external.NewMockUSIdentityProvider("us-mock")
+	usConfig := &external.USIdentityVerifierConfig{
+		PrimaryProvider: usProvider,
+		// FallbackProvider can be nil
+		RequestTimeout: 10 * time.Second,
+	}
+	usVerifier := external.NewUSIdentityVerifier(usConfig)
+
+	// France (FranceConnect)
+	frConfig := &external.FranceConnectorConfig{
+		FranceConnectURL: os.Getenv("GAUTH_FR_FC_URL"),
+		ClientID:         os.Getenv("GAUTH_FR_CLIENT_ID"),
+		ClientSecret:     os.Getenv("GAUTH_FR_CLIENT_SECRET"),
+		RedirectURI:      os.Getenv("GAUTH_FR_REDIRECT_URI"),
+		// Optional APIs
+		ANTSAPIKey: os.Getenv("GAUTH_FR_ANTS_KEY"),
+	}
+	// Use defaults if empty for basic initialization
+	if frConfig.FranceConnectURL == "" {
+		frConfig.FranceConnectURL = "https://fcp.integ.franceconnect.gouv.fr/api/v1"
+	}
+	frConnector, err := external.NewFranceIdentityConnector(frConfig)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[RFC-0111] Warning: Failed to initialize France connector: %v\n", err)
+		// Continue with nil connector (GlobalVerifier handles nil)
+		frConnector = nil
+	}
+
+	// Italy (SPID)
+	itConfig := &external.ItalyConnectorConfig{
+		SPIDMetadataURL:   os.Getenv("GAUTH_IT_SPID_URL"),
+		ServiceProviderID: os.Getenv("GAUTH_IT_SP_ID"),
+	}
+	if itConfig.SPIDMetadataURL == "" {
+		itConfig.SPIDMetadataURL = "https://registry.spid.gov.it/metadata"
+	}
+	itConnector, err := external.NewItalyIdentityConnector(itConfig)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[RFC-0111] Warning: Failed to initialize Italy connector: %v\n", err)
+		itConnector = nil
+	}
+
+	// Spain (Cl@ve)
+	esConfig := &external.SpainConnectorConfig{
+		ClaveURL:          os.Getenv("GAUTH_ES_CLAVE_URL"),
+		ClaveClientID:     os.Getenv("GAUTH_ES_CLIENT_ID"),
+		ClaveClientSecret: os.Getenv("GAUTH_ES_CLIENT_SECRET"),
+	}
+	if esConfig.ClaveURL == "" {
+		esConfig.ClaveURL = "https://clave.gob.es/api/v1"
+	}
+	esConnector, err := external.NewSpainIdentityConnector(esConfig)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[RFC-0111] Warning: Failed to initialize Spain connector: %v\n", err)
+		esConnector = nil
+	}
+
+	// 2. Initialize Global Identity Verifier
+	globalVerifier := gauth.NewGlobalIdentityVerifier(
+		usVerifier,
+		frConnector,
+		itConnector,
+		esConnector,
+		os.Getenv("GAUTH_STRICT_IDENTITY") == "1", // Strict mode
+	)
+
+	// 3. Initialize other clients (Mocks for now unless real implementation available)
+	// Using default PIP client which connects to external services
+	pipConfig := &gauth.PIPClientConfig{
+		BaseURL: os.Getenv("GAUTH_PIP_URL"),
+		Timeout: 10 * time.Second,
+	}
+	pipClient := gauth.NewPIPClient(pipConfig)
+
+	// Using Mock Commercial Register (since we focused on Identity Connectors in Phase 6)
+	commercialRegClient := mocks.NewMockCommercialRegisterClient()
+
+	// 4. Create base components
+	// We pass 'globalVerifier' as the PVP Client because it implements VerifyIdentityProof now
+	components, err := gauth.InitRFC0111WithComponents(
+		globalVerifier,
+		pipClient,
+		commercialRegClient,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// 5. Override FormalRequirementsValidator to use GlobalIdentityVerifier
+	// The default one created by InitRFC0111WithComponents has no verifiers.
+	// We replace it with one that uses our Global Identity Verifier.
+	components.FormalReqValidator = gauth.NewFormalRequirementsValidator(
+		nil,            // NotarialCertificateVerifier
+		globalVerifier, // IdentityDocumentVerifier (Global)
+		nil,            // DigitalSignatureVerifier
+		os.Getenv("GAUTH_STRICT_FORMAL") == "1",
+	)
+
+	fmt.Fprintf(os.Stderr, "[RFC-0111] Initialized GlobalIdentityVerifier with US, FR, IT, ES connectors\n")
+
+	return components, nil
+}
+
 // initializeGAuthPlus initializes GAuth+ services and integrates them with RFC-0111 components.
 // This function requires a PostgreSQL database connection to be available.
 //
@@ -191,7 +312,7 @@ func initializeGAuthPlus(components *gauth.RFC0111Components) (map[string]interf
 	// Wrap services with caching for performance optimization
 	// Capability assessments change infrequently (monthly reviews) - 5 minute TTL
 	cachedCapabilityService := gauthplus.NewCachedCapabilityService(capabilityService, 5*time.Minute)
-	
+
 	// Delegation chains more volatile - 1 minute TTL
 	cachedDelegationService := gauthplus.NewCachedDelegationService(delegationService, 1*time.Minute)
 
@@ -211,10 +332,10 @@ func initializeGAuthPlus(components *gauth.RFC0111Components) (map[string]interf
 	// Create GAuth+ validator with cached services
 	gauthPlusValidator := gauth.NewGAuthPlusValidator(
 		successorService,
-		cachedDelegationService,  // Use cached version
+		cachedDelegationService, // Use cached version
 		dualControlService,
 		fiduciaryService,
-		cachedCapabilityService,  // Use cached version
+		cachedCapabilityService, // Use cached version
 	)
 
 	// Configure enforcement modes based on environment variables

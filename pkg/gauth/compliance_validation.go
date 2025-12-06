@@ -274,21 +274,21 @@ func (v *ComplianceValidator) ValidateGrantCompliance(
 		agentID := grant.PowerOfAttorney.Parties.AuthorizedClient.Identity
 		// Note: PoADefinition doesn't have ID field, using agent identity as placeholder
 		poaID := agentID // TODO: Get actual PoA ID from grant metadata
-		
+
 		// Create a temporary request result for GAuth+ validation
 		grantResult := &RequestComplianceResult{
 			Valid:    true,
 			Checks:   make(map[string]bool),
 			Warnings: make([]string, 0),
 		}
-		
+
 		if err := v.validatePoAWithGAuthPlus(ctx, poaID, grant.PowerOfAttorney, agentID, actionType, grantResult); err != nil {
 			result.Valid = false
 			result.FailureReason = fmt.Sprintf("GAuth+ validation failed: %v", err)
 			result.GAuthPlusValidation = grantResult.GAuthPlusValidation
 			return result, err
 		}
-		
+
 		// Transfer GAuth+ validation results to grant result
 		result.GAuthPlusValidation = grantResult.GAuthPlusValidation
 		result.Warnings = append(result.Warnings, grantResult.Warnings...)
@@ -481,7 +481,7 @@ func (v *ComplianceValidator) validateGeographicScope(
 	if !poa.IsAuthorizedInRegion(applicableRegions, request.Jurisdiction) {
 		result.Checks["geographic_scope"] = false
 		return &GAuthError{
-			Code:    "geographic_scope_violation",
+			Code: "geographic_scope_violation",
 			Message: fmt.Sprintf("Operation in jurisdiction '%s' is not authorized by PoA. Authorized regions: %v",
 				request.Jurisdiction, formatRegions(applicableRegions)),
 		}
@@ -816,24 +816,24 @@ func (v *ComplianceValidator) validateGrantRestrictions(
 
 // RequestComplianceResult represents request compliance validation result
 type RequestComplianceResult struct {
-	Valid               bool                        `json:"valid"`
-	ValidationTime      time.Time                   `json:"validation_time"`
-	Checks              map[string]bool             `json:"checks"`
-	ChainValidation     *ChainValidationResult      `json:"chain_validation,omitempty"`
-	GAuthPlusValidation *GAuthPlusValidationResult  `json:"gauthplus_validation,omitempty"`
-	FailureReason       string                      `json:"failure_reason,omitempty"`
-	Warnings            []string                    `json:"warnings,omitempty"`
+	Valid               bool                       `json:"valid"`
+	ValidationTime      time.Time                  `json:"validation_time"`
+	Checks              map[string]bool            `json:"checks"`
+	ChainValidation     *ChainValidationResult     `json:"chain_validation,omitempty"`
+	GAuthPlusValidation *GAuthPlusValidationResult `json:"gauthplus_validation,omitempty"`
+	FailureReason       string                     `json:"failure_reason,omitempty"`
+	Warnings            []string                   `json:"warnings,omitempty"`
 }
 
 // GrantComplianceResult represents grant compliance validation result
 type GrantComplianceResult struct {
-	Valid               bool                        `json:"valid"`
-	ValidationTime      time.Time                   `json:"validation_time"`
-	Checks              map[string]bool             `json:"checks"`
-	ChainValidation     *ChainValidationResult      `json:"chain_validation,omitempty"`
-	GAuthPlusValidation *GAuthPlusValidationResult  `json:"gauthplus_validation,omitempty"`
-	FailureReason       string                      `json:"failure_reason,omitempty"`
-	Warnings            []string                    `json:"warnings,omitempty"`
+	Valid               bool                       `json:"valid"`
+	ValidationTime      time.Time                  `json:"validation_time"`
+	Checks              map[string]bool            `json:"checks"`
+	ChainValidation     *ChainValidationResult     `json:"chain_validation,omitempty"`
+	GAuthPlusValidation *GAuthPlusValidationResult `json:"gauthplus_validation,omitempty"`
+	FailureReason       string                     `json:"failure_reason,omitempty"`
+	Warnings            []string                   `json:"warnings,omitempty"`
 }
 
 // PIPClient interface for Power Information Point

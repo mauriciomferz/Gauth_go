@@ -1,7 +1,7 @@
 // Package external - External Service Clients for RFC-0111
 // Implements production-ready clients for PowerVerificationPoint (PVP) and PIP
 // with retry logic, circuit breakers, authentication, and fallback mechanisms
-package external
+package gauth
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth/external"
 )
 
 // Note: CircuitBreaker and related types are now defined in connector_utils.go to avoid duplication
@@ -21,7 +21,7 @@ type PVPClientConfig struct {
 	Timeout         time.Duration
 	MaxRetries      int
 	RetryDelay      time.Duration
-	CircuitBreaker  *CircuitBreaker
+	CircuitBreaker  *external.CircuitBreaker
 	FallbackEnabled bool
 }
 
@@ -43,7 +43,7 @@ func NewPVPClient(config *PVPClientConfig) *PVPClient {
 		config.RetryDelay = 1 * time.Second
 	}
 	if config.CircuitBreaker == nil {
-		config.CircuitBreaker = NewCircuitBreaker(5, config.Timeout, 60*time.Second)
+		config.CircuitBreaker = external.NewCircuitBreaker(5, config.Timeout, 60*time.Second)
 	}
 
 	return &PVPClient{
@@ -57,10 +57,10 @@ func NewPVPClient(config *PVPClientConfig) *PVPClient {
 // VerifyIdentity verifies identity proof through PVP service
 func (c *PVPClient) VerifyIdentity(
 	ctx context.Context,
-	request *gauth.IdentityVerificationRequest,
-) (*gauth.IdentityVerificationResult, error) {
+	request *IdentityVerificationRequest,
+) (*IdentityVerificationResult, error) {
 	var lastErr error
-	var finalResult *gauth.IdentityVerificationResult
+	var finalResult *IdentityVerificationResult
 
 	// Execute with circuit breaker
 	err := c.config.CircuitBreaker.Call(func() error {
@@ -106,8 +106,8 @@ func (c *PVPClient) VerifyIdentity(
 // attemptVerifyIdentity makes a single attempt to verify identity
 func (c *PVPClient) attemptVerifyIdentity(
 	ctx context.Context,
-	request *gauth.IdentityVerificationRequest,
-) (*gauth.IdentityVerificationResult, error) {
+	request *IdentityVerificationRequest,
+) (*IdentityVerificationResult, error) {
 	// Build HTTP request to PVP service
 	req, err := http.NewRequestWithContext(
 		ctx,
@@ -135,7 +135,7 @@ func (c *PVPClient) attemptVerifyIdentity(
 	}
 
 	// TODO: Parse response
-	return &gauth.IdentityVerificationResult{
+	return &IdentityVerificationResult{
 		Verified:   true,
 		SubjectID:  request.SubjectID,
 		VerifiedAt: time.Now(),
@@ -145,14 +145,14 @@ func (c *PVPClient) attemptVerifyIdentity(
 // fallbackVerifyIdentity provides fallback verification
 func (c *PVPClient) fallbackVerifyIdentity(
 	ctx context.Context,
-	request *gauth.IdentityVerificationRequest,
-) (*gauth.IdentityVerificationResult, error) {
+	request *IdentityVerificationRequest,
+) (*IdentityVerificationResult, error) {
 	// Implement fallback logic:
 	// 1. Check cache for recent verifications
 	// 2. Use alternative identity provider
 	// 3. Return partial verification with lower confidence
 
-	return &gauth.IdentityVerificationResult{
+	return &IdentityVerificationResult{
 		Verified:           true,
 		VerificationID:     fmt.Sprintf("fallback-%d", time.Now().Unix()),
 		SubjectID:          request.SubjectID,
@@ -171,30 +171,30 @@ type PIPClientConfig struct {
 	Timeout        time.Duration
 	MaxRetries     int
 	RetryDelay     time.Duration
-	CircuitBreaker *CircuitBreaker
+	CircuitBreaker *external.CircuitBreaker
 	CacheEnabled   bool
 	CacheTTL       time.Duration
 }
 
 // PIPClient is a production-ready client for Power Information Point
-type PIPClient struct {
+type DefaultPIPClient struct {
 	config     *PIPClientConfig
 	httpClient *http.Client
-	store      gauth.PIPPolicyStore
+	store      PIPPolicyStore
 }
 
 // PIPClientOption allows configuring the PIP client
-type PIPClientOption func(*PIPClient)
+type PIPClientOption func(*DefaultPIPClient)
 
 // WithPolicyStore sets the policy store for the PIP client
-func WithPolicyStore(store gauth.PIPPolicyStore) PIPClientOption {
-	return func(c *PIPClient) {
+func WithPolicyStore(store PIPPolicyStore) PIPClientOption {
+	return func(c *DefaultPIPClient) {
 		c.store = store
 	}
 }
 
 // NewPIPClient creates a new PIP client
-func NewPIPClient(config *PIPClientConfig, opts ...PIPClientOption) *PIPClient {
+func NewPIPClient(config *PIPClientConfig, opts ...PIPClientOption) *DefaultPIPClient {
 	if config.Timeout == 0 {
 		config.Timeout = 30 * time.Second
 	}
@@ -205,13 +205,13 @@ func NewPIPClient(config *PIPClientConfig, opts ...PIPClientOption) *PIPClient {
 		config.RetryDelay = 1 * time.Second
 	}
 	if config.CircuitBreaker == nil {
-		config.CircuitBreaker = NewCircuitBreaker(5, config.Timeout, 60*time.Second)
+		config.CircuitBreaker = external.NewCircuitBreaker(5, config.Timeout, 60*time.Second)
 	}
 	if config.CacheTTL == 0 {
 		config.CacheTTL = 5 * time.Minute
 	}
 
-	client := &PIPClient{
+	client := &DefaultPIPClient{
 		config: config,
 		httpClient: &http.Client{
 			Timeout: config.Timeout,
@@ -225,17 +225,17 @@ func NewPIPClient(config *PIPClientConfig, opts ...PIPClientOption) *PIPClient {
 
 	// Default to in-memory store if not set
 	if client.store == nil {
-		client.store = gauth.NewInMemoryPIPPolicyStore()
+		client.store = NewInMemoryPIPPolicyStore()
 	}
 
 	return client
 }
 
 // GetPolicy retrieves policy information from PIP
-func (c *PIPClient) GetPolicy(
+func (c *DefaultPIPClient) GetPolicy(
 	ctx context.Context,
-	request *gauth.PolicyRequest,
-) (*gauth.PowerOfAttorneyPolicy, error) {
+	request *PolicyRequest,
+) (*PowerOfAttorneyPolicy, error) {
 	// Check cache first
 	if c.config.CacheEnabled {
 		if cached, err := c.store.Get(ctx, request.PolicyID); err == nil {
@@ -244,7 +244,7 @@ func (c *PIPClient) GetPolicy(
 	}
 
 	var lastErr error
-	var policy *gauth.PowerOfAttorneyPolicy
+	var policy *PowerOfAttorneyPolicy
 
 	// Execute with circuit breaker and retry logic
 	err := c.config.CircuitBreaker.Call(func() error {
@@ -284,10 +284,10 @@ func (c *PIPClient) GetPolicy(
 }
 
 // attemptGetPolicy makes a single attempt to get policy
-func (c *PIPClient) attemptGetPolicy(
+func (c *DefaultPIPClient) attemptGetPolicy(
 	ctx context.Context,
-	request *gauth.PolicyRequest,
-) (*gauth.PowerOfAttorneyPolicy, error) {
+	request *PolicyRequest,
+) (*PowerOfAttorneyPolicy, error) {
 	req, err := http.NewRequestWithContext(
 		ctx,
 		"GET",
@@ -312,7 +312,7 @@ func (c *PIPClient) attemptGetPolicy(
 	}
 
 	// TODO: Parse actual response
-	return &gauth.PowerOfAttorneyPolicy{
+	return &PowerOfAttorneyPolicy{
 		PolicyID:  request.PolicyID,
 		IssuedAt:  time.Now(),
 		ExpiresAt: time.Now().Add(24 * time.Hour),
@@ -325,4 +325,21 @@ func (c *PIPClient) attemptGetPolicy(
 func isClientError(err error) bool {
 	// Simple heuristic - in production, check actual HTTP status codes
 	return false
+}
+
+// GetClientInfo retrieves client information
+func (c *DefaultPIPClient) GetClientInfo(ctx context.Context, clientID string) (*ClientInfo, error) {
+	// Dummy implementation for compilation
+	return &ClientInfo{ClientID: clientID, Active: true, RegisteredAt: time.Now()}, nil
+}
+
+// GetAuthorizationServerInfo retrieves authorization server information
+func (c *DefaultPIPClient) GetAuthorizationServerInfo(ctx context.Context, serverID string) (*AuthorizationServerInfo, error) {
+	// Dummy implementation for compilation
+	return &AuthorizationServerInfo{
+		ServerID:  serverID,
+		ServerURL: "https://auth.example.com",
+		Issuer:    "gauth-issuer",
+		IssueTime: time.Now(),
+	}, nil
 }

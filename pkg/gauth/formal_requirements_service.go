@@ -780,6 +780,60 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 		LegalReferences: []string{"Powers of Attorney Act (Provincial)"},
 	}
 
+	// France (FR)
+	s.jurisdictionReqs["FR"] = &JurisdictionRequirement{
+		Jurisdiction:         "FR",
+		RequiresNotarization: true,                 // Certain acts (notaries)
+		RequiredDocuments:    []string{"passport"}, // Simplified, CNI is also valid
+		MinimumIDLevel:       "substantial",        // eIDAS level
+		MaxValueWithoutBoard: 100000.0,
+		RequiredSignatures:   1,
+		AcceptedIDTypes:      []string{"passport", "cni", "residence_permit"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Notaire_De_France"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Code civil"},
+	}
+
+	// Italy (IT)
+	s.jurisdictionReqs["IT"] = &JurisdictionRequirement{
+		Jurisdiction:         "IT",
+		RequiresNotarization: true,               // Procura speciale requires notary for some acts
+		RequiredDocuments:    []string{"tax_id"}, // Codice Fiscale is ubiquitous
+		MinimumIDLevel:       "substantial",      // SPID Level 2
+		MaxValueWithoutBoard: 100000.0,
+		RequiredSignatures:   1,
+		AcceptedIDTypes:      []string{"passport", "cie", "tax_id"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Notaio_Italiano"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Codice Civile"},
+	}
+
+	// Spain (ES)
+	s.jurisdictionReqs["ES"] = &JurisdictionRequirement{
+		Jurisdiction:         "ES",
+		RequiresNotarization: true,                    // Poder notarial
+		RequiredDocuments:    []string{"national_id"}, // DNI/NIE
+		MinimumIDLevel:       "substantial",           // Cl@ve
+		MaxValueWithoutBoard: 100000.0,
+		RequiredSignatures:   1,
+		AcceptedIDTypes:      []string{"passport", "national_id", "dni", "nie"},
+		NotaryRequirements: &NotaryRequirements{
+			Required:            true,
+			RequiresApostille:   false,
+			AcceptedAuthorities: []string{"Notario_Espana"},
+			MaxCertificateAge:   365 * 24 * time.Hour,
+		},
+		LegalReferences: []string{"Código Civil"},
+	}
+
 	// Australia (AU)
 	s.jurisdictionReqs["AU"] = &JurisdictionRequirement{
 		Jurisdiction:         "AU",
