@@ -2897,6 +2897,1287 @@ paths:
                   success: { type: boolean }
                   session_id: { type: string }
 
+  # ===== ADMIN AUTH =====
+  /api/admin/auth/login:
+    post:
+      summary: Admin login
+      tags: [validation]
+      operationId: postAdminAuthLogin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  requiresMFA: { type: boolean }
+
+  /api/admin/auth/verify-mfa:
+    post:
+      summary: Admin MFA verification
+      tags: [validation]
+      operationId: postAdminAuthVerifyMFA
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code: { type: string }
+      responses:
+        '200':
+          description: MFA verified
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  token: { type: string }
+
+  # ===== DOCS =====
+  /api/docs:
+    get:
+      summary: API documentation index
+      tags: [discovery]
+      operationId: getApiDocs
+      responses:
+        '200':
+          description: Documentation index
+          content:
+            text/html:
+              schema: { type: string }
+
+  /api/docs/:
+    get:
+      summary: API documentation index (trailing slash)
+      tags: [discovery]
+      operationId: getApiDocsSlash
+      responses:
+        '200':
+          description: Documentation index
+          content:
+            text/html:
+              schema: { type: string }
+
+  /api/docs/openapi.yaml:
+    get:
+      summary: OpenAPI spec (YAML)
+      tags: [discovery]
+      operationId: getApiDocsOpenAPIYaml
+      responses:
+        '200':
+          description: OpenAPI specification
+          content:
+            application/x-yaml:
+              schema: { type: string }
+
+  /api/docs/openapi.yml:
+    get:
+      summary: OpenAPI spec (YML)
+      tags: [discovery]
+      operationId: getApiDocsOpenAPIYml
+      responses:
+        '200':
+          description: OpenAPI specification
+          content:
+            application/x-yaml:
+              schema: { type: string }
+
+  /api/docs/redoc:
+    get:
+      summary: ReDoc documentation
+      tags: [discovery]
+      operationId: getApiDocsRedoc
+      responses:
+        '200':
+          description: ReDoc UI
+          content:
+            text/html:
+              schema: { type: string }
+
+  /api/docs/spec:
+    get:
+      summary: API specification
+      tags: [discovery]
+      operationId: getApiDocsSpec
+      responses:
+        '200':
+          description: API spec
+          content:
+            application/json:
+              schema: { type: object }
+
+  /api/docs/swagger:
+    get:
+      summary: Swagger UI
+      tags: [discovery]
+      operationId: getApiDocsSwagger
+      responses:
+        '200':
+          description: Swagger UI
+          content:
+            text/html:
+              schema: { type: string }
+
+  /api/governance/lifecycle_timeline:
+    get:
+      summary: Governance lifecycle timeline
+      tags: [learning]
+      operationId: getGovernanceLifecycleTimeline
+      responses:
+        '200':
+          description: Timeline data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/openapi/gauth.yaml:
+    get:
+      summary: GAuth OpenAPI spec
+      tags: [discovery]
+      operationId: getOpenAPIGauthYaml
+      responses:
+        '200':
+          description: OpenAPI specification
+          content:
+            application/x-yaml:
+              schema: { type: string }
+
+  /api/v1/.well-known/gauth:
+    get:
+      summary: GAuth well-known config
+      tags: [discovery]
+      operationId: getWellKnownGauth
+      responses:
+        '200':
+          description: GAuth configuration
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/audit/capabilities:
+    get:
+      summary: Audit capabilities
+      tags: [audit]
+      operationId: getAuditCapabilities
+      responses:
+        '200':
+          description: Audit capability list
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/beta/audit:
+    get:
+      summary: Beta audit logs
+      tags: [audit]
+      operationId: getBetaAudit
+      responses:
+        '200':
+          description: Audit entries
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/beta/authz/metrics/prometheus:
+    get:
+      summary: Authz metrics (Prometheus)
+      tags: [policy]
+      operationId: getBetaAuthzMetricsPrometheus
+      responses:
+        '200':
+          description: Prometheus metrics
+          content:
+            text/plain:
+              schema: { type: string }
+
+  # ===== BETA CAPABILITIES ANCHOR =====
+  /api/v1/beta/capabilities/anchor/external/receipt:
+    get:
+      summary: Get external anchor receipt
+      tags: [capability]
+      operationId: getBetaCapabilitiesAnchorExternalReceipt
+      responses:
+        '200':
+          description: Receipt data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/beta/capabilities/anchor/external/receipts:
+    get:
+      summary: List external anchor receipts
+      tags: [capability]
+      operationId: getBetaCapabilitiesAnchorExternalReceipts
+      responses:
+        '200':
+          description: Receipt list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  receipts: { type: array, items: { type: object } }
+
+  /api/v1/beta/capabilities/anchor/external/receipts/latest:
+    get:
+      summary: Get latest external anchor receipt
+      tags: [capability]
+      operationId: getBetaCapabilitiesAnchorExternalReceiptsLatest
+      responses:
+        '200':
+          description: Latest receipt
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/beta/capabilities/anchor/material:
+    get:
+      summary: Get anchor material
+      tags: [capability]
+      operationId: getBetaCapabilitiesAnchorMaterial
+      responses:
+        '200':
+          description: Anchor material
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/beta/capabilities/anchor/status:
+    get:
+      summary: Get anchor status
+      tags: [capability]
+      operationId: getBetaCapabilitiesAnchorStatus
+      responses:
+        '200':
+          description: Anchor status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+
+  /api/v1/beta/capabilities/audit/anchor:
+    get:
+      summary: Audit capability anchor
+      tags: [capability]
+      operationId: getBetaCapabilitiesAuditAnchor
+      responses:
+        '200':
+          description: Audit anchor data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/beta/capabilities/audit/verify:
+    post:
+      summary: Verify capability audit
+      tags: [capability]
+      operationId: postBetaCapabilitiesAuditVerify
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid: { type: boolean }
+
+  /api/v1/beta/delegation/status/update:
+    post:
+      summary: Update delegation status
+      tags: [poa]
+      operationId: postBetaDelegationStatusUpdate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                delegation_id: { type: string }
+                status: { type: string }
+      responses:
+        '200':
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+
+  /api/v1/beta/examples/composite/export/csv:
+    get:
+      summary: Export examples as CSV
+      tags: [learning]
+      operationId: getBetaExamplesCompositeExportCSV
+      responses:
+        '200':
+          description: CSV export
+          content:
+            text/csv:
+              schema: { type: string }
+
+  /api/v1/beta/examples/composite/export/json:
+    get:
+      summary: Export examples as JSON
+      tags: [learning]
+      operationId: getBetaExamplesCompositeExportJSON
+      responses:
+        '200':
+          description: JSON export
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/beta/examples/run/jobs/{id}/cancel:
+    post:
+      summary: Cancel example job
+      tags: [learning]
+      operationId: postBetaExamplesRunJobCancel
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Job ID
+      responses:
+        '200':
+          description: Job cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+
+  # ===== BETA METRICS =====
+  /api/v1/beta/metrics/poa/semantics:
+    get:
+      summary: PoA semantics metrics
+      tags: [learning]
+      operationId: getBetaMetricsPOASemantics
+      responses:
+        '200':
+          description: Semantics metrics
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/beta/metrics/poa/semantics/prometheus:
+    get:
+      summary: PoA semantics metrics (Prometheus)
+      tags: [learning]
+      operationId: getBetaMetricsPOASemanticsPrometheus
+      responses:
+        '200':
+          description: Prometheus metrics
+          content:
+            text/plain:
+              schema: { type: string }
+
+  /api/v1/beta/metrics/poa/semantics/verify:
+    post:
+      summary: Verify PoA semantics
+      tags: [learning]
+      operationId: postBetaMetricsPOASemanticsVerify
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid: { type: boolean }
+
+  /api/v1/beta/metrics/revocation/auto-sign/prometheus:
+    get:
+      summary: Revocation auto-sign metrics (Prometheus)
+      tags: [revocation]
+      operationId: getBetaMetricsRevocationAutoSignPrometheus
+      responses:
+        '200':
+          description: Prometheus metrics
+          content:
+            text/plain:
+              schema: { type: string }
+
+  /api/v1/beta/metrics/violations/prometheus:
+    get:
+      summary: Violations metrics (Prometheus)
+      tags: [learning]
+      operationId: getBetaMetricsViolationsPrometheus
+      responses:
+        '200':
+          description: Prometheus metrics
+          content:
+            text/plain:
+              schema: { type: string }
+
+  /api/v1/beta/metrics/violations/verify:
+    post:
+      summary: Verify violations metrics
+      tags: [learning]
+      operationId: postBetaMetricsViolationsVerify
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid: { type: boolean }
+
+  /api/v1/beta/policy/audit-consistency:
+    get:
+      summary: Policy audit consistency
+      tags: [policy]
+      operationId: getBetaPolicyAuditConsistency
+      responses:
+        '200':
+          description: Consistency status
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/beta/policy/head/policies:
+    get:
+      summary: Get head policies
+      tags: [policy]
+      operationId: getBetaPolicyHeadPolicies
+      responses:
+        '200':
+          description: Head policies
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  policies: { type: array, items: { type: object } }
+
+  /api/v1/beta/policy/metrics/prometheus:
+    get:
+      summary: Policy metrics (Prometheus)
+      tags: [policy]
+      operationId: getBetaPolicyMetricsPrometheus
+      responses:
+        '200':
+          description: Prometheus metrics
+          content:
+            text/plain:
+              schema: { type: string }
+
+  /api/v1/beta/policy/provenance:
+    get:
+      summary: Policy provenance
+      tags: [policy]
+      operationId: getBetaPolicyProvenance
+      responses:
+        '200':
+          description: Provenance data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/beta/throttle/demoAction:
+    post:
+      summary: Throttle demo action
+      tags: [learning]
+      operationId: postBetaThrottleDemoAction
+      responses:
+        '200':
+          description: Throttle result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  allowed: { type: boolean }
+
+  # ===== REMAINING ROUTES =====
+  /api/v1/capabilities/diff:
+    get:
+      summary: Capabilities diff
+      tags: [capability]
+      operationId: getCapabilitiesDiff
+      responses:
+        '200':
+          description: Diff data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/crypto/ensure-threshold:
+    post:
+      summary: Ensure crypto threshold
+      tags: [crypto]
+      operationId: postCryptoEnsureThreshold
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Threshold result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+
+  /api/v1/delegation/status/update:
+    post:
+      summary: Update delegation status
+      tags: [poa]
+      operationId: postDelegationStatusUpdate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                delegation_id: { type: string }
+                status: { type: string }
+      responses:
+        '200':
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+
+  /api/v1/experimental/{action}:
+    get:
+      summary: Experimental action (GET)
+      tags: [learning]
+      operationId: getExperimentalAction
+      parameters:
+        - in: path
+          name: action
+          required: true
+          schema: { type: string }
+          description: Action name
+      responses:
+        '200':
+          description: Action result
+          content:
+            application/json:
+              schema:
+                type: object
+    post:
+      summary: Experimental action (POST)
+      tags: [learning]
+      operationId: postExperimentalAction
+      parameters:
+        - in: path
+          name: action
+          required: true
+          schema: { type: string }
+          description: Action name
+      responses:
+        '200':
+          description: Action result
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/gauth/action:
+    post:
+      summary: GAuth action
+      tags: [learning]
+      operationId: postGauthAction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Action result
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/gauth/auth/mfa/verify:
+    post:
+      summary: Verify MFA
+      tags: [validation]
+      operationId: postGauthAuthMFAVerify
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code: { type: string }
+      responses:
+        '200':
+          description: MFA verified
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+
+  /api/v1/gauth/mcp/servers/{id}/resources/read:
+    post:
+      summary: Read MCP resource
+      tags: [discovery]
+      operationId: postMCPServerResourcesRead
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Server ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                uri: { type: string }
+      responses:
+        '200':
+          description: Resource content
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/marketing/poa:
+    get:
+      summary: Marketing PoA info
+      tags: [learning]
+      operationId: getMarketingPOA
+      responses:
+        '200':
+          description: Marketing data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/model/limits/attestation/keys:
+    get:
+      summary: Model limits attestation keys
+      tags: [attestation]
+      operationId: getModelLimitsAttestationKeys
+      responses:
+        '200':
+          description: Key list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  keys: { type: array, items: { type: object } }
+
+  /api/v1/model/limits/attestation/stream:
+    get:
+      summary: Model limits attestation stream
+      tags: [attestation]
+      operationId: getModelLimitsAttestationStream
+      responses:
+        '200':
+          description: SSE stream
+
+  /api/v1/model/limits/audit/anchor/verify:
+    post:
+      summary: Verify model limits audit anchor
+      tags: [attestation]
+      operationId: postModelLimitsAuditAnchorVerify
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid: { type: boolean }
+
+  /api/v1/model/limits/audit/verify:
+    post:
+      summary: Verify model limits audit
+      tags: [attestation]
+      operationId: postModelLimitsAuditVerify
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid: { type: boolean }
+
+  /api/v1/openapi:
+    get:
+      summary: OpenAPI spec
+      tags: [discovery]
+      operationId: getOpenAPI
+      responses:
+        '200':
+          description: OpenAPI specification
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/openapi/governance:
+    get:
+      summary: Governance OpenAPI spec
+      tags: [discovery]
+      operationId: getOpenAPIGovernance
+      responses:
+        '200':
+          description: Governance specification
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/openapi/governance.yaml:
+    get:
+      summary: Governance OpenAPI spec (YAML)
+      tags: [discovery]
+      operationId: getOpenAPIGovernanceYaml
+      responses:
+        '200':
+          description: Governance specification
+          content:
+            application/x-yaml:
+              schema: { type: string }
+
+  /api/v1/pap/metrics:
+    get:
+      summary: PAP metrics
+      tags: [policy]
+      operationId: getPAPMetrics
+      responses:
+        '200':
+          description: PAP metrics
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/pap/policies/{id}/revoke:
+    post:
+      summary: Revoke policy
+      tags: [policy]
+      operationId: postPAPPolicyRevoke
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Policy ID
+      responses:
+        '200':
+          description: Policy revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+
+  /api/v1/patterns/load/{action}:
+    post:
+      summary: Load pattern
+      tags: [patterns]
+      operationId: postPatternsLoad
+      parameters:
+        - in: path
+          name: action
+          required: true
+          schema: { type: string }
+          description: Pattern action
+      responses:
+        '200':
+          description: Pattern loaded
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/patterns/simulate/{action}:
+    post:
+      summary: Simulate pattern
+      tags: [patterns]
+      operationId: postPatternsSimulate
+      parameters:
+        - in: path
+          name: action
+          required: true
+          schema: { type: string }
+          description: Pattern action
+      responses:
+        '200':
+          description: Simulation result
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/patterns/test/{action}:
+    post:
+      summary: Test pattern
+      tags: [patterns]
+      operationId: postPatternsTest
+      parameters:
+        - in: path
+          name: action
+          required: true
+          schema: { type: string }
+          description: Pattern action
+      responses:
+        '200':
+          description: Test result
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/pdp/evaluate/{id}:
+    post:
+      summary: Evaluate PDP by ID
+      tags: [policy]
+      operationId: postPDPEvaluate
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Evaluation ID
+      responses:
+        '200':
+          description: Evaluation result
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/pep/test/demand:
+    post:
+      summary: PEP demand test
+      tags: [policy]
+      operationId: postPEPTestDemand
+      responses:
+        '200':
+          description: Test result
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/pep/test/supply:
+    post:
+      summary: PEP supply test
+      tags: [policy]
+      operationId: postPEPTestSupply
+      responses:
+        '200':
+          description: Test result
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/protocol/flow/sessions/{id}/steps/{stepId}/status:
+    get:
+      summary: Get step status
+      tags: [learning]
+      operationId: getProtocolFlowSessionStepStatus
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Session ID
+        - in: path
+          name: stepId
+          required: true
+          schema: { type: string }
+          description: Step ID
+      responses:
+        '200':
+          description: Step status
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/protocol/flow/sessions/{id}/steps/{stepId}/substeps/{substepId}/complete:
+    post:
+      summary: Complete substep
+      tags: [learning]
+      operationId: postProtocolFlowSessionSubstepComplete
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Session ID
+        - in: path
+          name: stepId
+          required: true
+          schema: { type: string }
+          description: Step ID
+        - in: path
+          name: substepId
+          required: true
+          schema: { type: string }
+          description: Substep ID
+      responses:
+        '200':
+          description: Substep completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+
+  /api/v1/token/create-demo:
+    post:
+      summary: Create demo token
+      tags: [validation]
+      operationId: postTokenCreateDemo
+      responses:
+        '200':
+          description: Demo token created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  token: { type: object }
+
+  /api/v1/token/revocation/audit_consistency:
+    get:
+      summary: Token revocation audit consistency
+      tags: [revocation]
+      operationId: getTokenRevocationAuditConsistency
+      responses:
+        '200':
+          description: Consistency status
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/token/revocation/consistency_v2:
+    get:
+      summary: Token revocation consistency V2
+      tags: [revocation]
+      operationId: getTokenRevocationConsistencyV2
+      responses:
+        '200':
+          description: V2 consistency
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/token/revocation/debug:
+    get:
+      summary: Token revocation debug
+      tags: [revocation]
+      operationId: getTokenRevocationDebug
+      responses:
+        '200':
+          description: Debug info
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/validation/{action}:
+    get:
+      summary: Validation action (GET)
+      tags: [validation]
+      operationId: getValidationAction
+      parameters:
+        - in: path
+          name: action
+          required: true
+          schema: { type: string }
+          description: Action name
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                type: object
+    post:
+      summary: Validation action (POST)
+      tags: [validation]
+      operationId: postValidationAction
+      parameters:
+        - in: path
+          name: action
+          required: true
+          schema: { type: string }
+          description: Action name
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/visualization/demo/complex-graph:
+    get:
+      summary: Complex graph demo
+      tags: [learning]
+      operationId: getVisualizationDemoComplexGraph
+      responses:
+        '200':
+          description: Demo graph data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/visualization/poa/graphs/{id}/nodes/position:
+    put:
+      summary: Update node positions
+      tags: [learning]
+      operationId: putVisualizationPoAGraphNodesPosition
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Graph ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Positions updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+
+  /api/v1/visualization/poa/graphs/{id}/nodes/{node_id}/status:
+    get:
+      summary: Get node status
+      tags: [learning]
+      operationId: getVisualizationPoAGraphNodeStatus
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Graph ID
+        - in: path
+          name: node_id
+          required: true
+          schema: { type: string }
+          description: Node ID
+      responses:
+        '200':
+          description: Node status
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/visualization/protocol/matching:
+    get:
+      summary: Protocol matching visualization
+      tags: [learning]
+      operationId: getVisualizationProtocolMatching
+      responses:
+        '200':
+          description: Matching data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/visualization/protocol/request:
+    post:
+      summary: Request protocol visualization
+      tags: [learning]
+      operationId: postVisualizationProtocolRequest
+      responses:
+        '200':
+          description: Request result
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/visualization/protocol/subscription:
+    get:
+      summary: Protocol subscription visualization
+      tags: [learning]
+      operationId: getVisualizationProtocolSubscription
+      responses:
+        '200':
+          description: Subscription data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /openapi.yaml:
+    get:
+      summary: OpenAPI spec (root)
+      tags: [discovery]
+      operationId: getRootOpenAPIYaml
+      responses:
+        '200':
+          description: OpenAPI specification
+          content:
+            application/x-yaml:
+              schema: { type: string }
+
+  # ===== WILDCARD ROUTES =====
+  "/api/v1/experimental/*action":
+    get:
+      summary: Experimental wildcard (GET)
+      tags: [learning]
+      operationId: getExperimentalWildcard
+      responses:
+        '200':
+          description: Result
+          content:
+            application/json:
+              schema:
+                type: object
+    post:
+      summary: Experimental wildcard (POST)
+      tags: [learning]
+      operationId: postExperimentalWildcard
+      responses:
+        '200':
+          description: Result
+          content:
+            application/json:
+              schema:
+                type: object
+
+  "/api/v1/patterns/load/*action":
+    post:
+      summary: Load pattern wildcard
+      tags: [patterns]
+      operationId: postPatternsLoadWildcard
+      responses:
+        '200':
+          description: Pattern loaded
+          content:
+            application/json:
+              schema:
+                type: object
+
+  "/api/v1/patterns/simulate/*action":
+    post:
+      summary: Simulate pattern wildcard
+      tags: [patterns]
+      operationId: postPatternsSimulateWildcard
+      responses:
+        '200':
+          description: Simulation result
+          content:
+            application/json:
+              schema:
+                type: object
+
+  "/api/v1/patterns/test/*action":
+    post:
+      summary: Test pattern wildcard
+      tags: [patterns]
+      operationId: postPatternsTestWildcard
+      responses:
+        '200':
+          description: Test result
+          content:
+            application/json:
+              schema:
+                type: object
+
+  "/api/v1/validation/*action":
+    get:
+      summary: Validation wildcard (GET)
+      tags: [validation]
+      operationId: getValidationWildcard
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                type: object
+    post:
+      summary: Validation wildcard (POST)
+      tags: [validation]
+      operationId: postValidationWildcard
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                type: object
+
   /api/v1/poa/prepare:
     post:
       summary: Prepare draft PoA (multi-signature pre-image)
