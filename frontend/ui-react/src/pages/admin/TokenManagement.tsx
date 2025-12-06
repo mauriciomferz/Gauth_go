@@ -113,12 +113,12 @@ interface Token {
 export default function TokenManagement() {
   const classes = useStyles();
   const [selectedTab, setSelectedTab] = useState<string>('overview');
-  const [tokens, setTokens] = useState<Token[]>([]);
+  const [tokenList, setTokenList] = useState<Token[]>([]);
   const [loading, setLoading] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [validateDialogOpen, setValidateDialogOpen] = useState(false);
+
   const [createdToken, setCreatedToken] = useState<string>('');
-  
+
   // Form states
   const [subscriberId, setSubscriberId] = useState('');
   const [tokenType, setTokenType] = useState('access');
@@ -140,7 +140,7 @@ export default function TokenManagement() {
       });
       if (response.ok) {
         const data = await response.json();
-        setTokens(data.tokens || []);
+        setTokenList(data.tokens || []);
       }
     } catch (error) {
       console.error('Failed to fetch tokens:', error);
@@ -332,9 +332,9 @@ export default function TokenManagement() {
     }),
   ];
 
-  const activeTokens = tokens.filter(t => t.status === 'active').length;
-  const expiredTokens = tokens.filter(t => t.status === 'expired').length;
-  const revokedTokens = tokens.filter(t => t.status === 'revoked').length;
+  const activeTokens = tokenList.filter(t => t.status === 'active').length;
+  const expiredTokens = tokenList.filter(t => t.status === 'expired').length;
+  const revokedTokens = tokenList.filter(t => t.status === 'revoked').length;
 
   return (
     <div className={classes.container}>
@@ -452,7 +452,7 @@ export default function TokenManagement() {
 
         <Card className={classes.card}>
           <Text className={classes.metricValue}>
-            {tokens.length}
+            {tokenList.length}
           </Text>
           <Text className={classes.metricLabel}>Total Tokens</Text>
         </Card>
@@ -468,85 +468,85 @@ export default function TokenManagement() {
 
         {selectedTab === 'overview' && (
           <div style={{ marginTop: '24px' }}>
-            <DataGrid items={tokens} columns={columns} sortable resizableColumns>
-                <DataGridHeader>
-                  <DataGridRow>
-                    {({ renderHeaderCell }) => (
-                      <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
+            <DataGrid items={tokenList} columns={columns} sortable resizableColumns>
+              <DataGridHeader>
+                <DataGridRow>
+                  {({ renderHeaderCell }) => (
+                    <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
+                  )}
+                </DataGridRow>
+              </DataGridHeader>
+              <DataGridBody<Token>>
+                {({ item, rowId }) => (
+                  <DataGridRow<Token> key={rowId}>
+                    {({ renderCell }) => (
+                      <DataGridCell>{renderCell(item)}</DataGridCell>
                     )}
                   </DataGridRow>
-                </DataGridHeader>
-                <DataGridBody<Token>>
-                  {({ item, rowId }) => (
-                    <DataGridRow<Token> key={rowId}>
-                      {({ renderCell }) => (
-                        <DataGridCell>{renderCell(item)}</DataGridCell>
-                      )}
-                    </DataGridRow>
-                  )}
-                </DataGridBody>
-              </DataGrid>
-            </div>
-          )}
+                )}
+              </DataGridBody>
+            </DataGrid>
+          </div>
+        )}
 
         {selectedTab === 'validate' && (
           <div style={{ marginTop: '24px' }} className={classes.form}>
-              <Field label="Token to Validate">
-                <Textarea
-                  value={validateTokenInput}
-                  onChange={(e) => setValidateTokenInput(e.target.value)}
-                  placeholder="Paste JWT token here..."
-                  rows={6}
-                />
-              </Field>
+            <Field label="Token to Validate">
+              <Textarea
+                value={validateTokenInput}
+                onChange={(e) => setValidateTokenInput(e.target.value)}
+                placeholder="Paste JWT token here..."
+                rows={6}
+              />
+            </Field>
 
-              <Button
-                appearance="primary"
-                icon={<Shield24Regular />}
-                onClick={handleValidateToken}
-                disabled={loading || !validateTokenInput}
-              >
-                {loading ? 'Validating...' : 'Validate Token'}
-              </Button>
+            <Button
+              appearance="primary"
+              icon={<Shield24Regular />}
+              onClick={handleValidateToken}
+              disabled={loading || !validateTokenInput}
+            >
+              {loading ? 'Validating...' : 'Validate Token'}
+            </Button>
 
-              {validationResult && (
-                <MessageBar intent={validationResult.valid ? 'success' : 'error'}>
-                  <MessageBarBody>
-                    {validationResult.valid ? (
-                      <div>
-                        <Text weight="semibold">Token is valid</Text>
-                        <div style={{ marginTop: '12px' }}>
-                          <Text size={200}>Subscriber: {validationResult.subscriberId}</Text><br />
-                          <Text size={200}>Type: {validationResult.type}</Text><br />
-                          <Text size={200}>Expires: {new Date(validationResult.expiresAt).toLocaleString()}</Text>
-                        </div>
+            {validationResult && (
+              <MessageBar intent={validationResult.valid ? 'success' : 'error'}>
+                <MessageBarBody>
+                  {validationResult.valid ? (
+                    <div>
+                      <Text weight="semibold">Token is valid</Text>
+                      <div style={{ marginTop: '12px' }}>
+                        <Text size={200}>Subscriber: {validationResult.subscriberId}</Text><br />
+                        <Text size={200}>Type: {validationResult.type}</Text><br />
+                        <Text size={200}>Expires: {new Date(validationResult.expiresAt).toLocaleString()}</Text>
                       </div>
-                    ) : (
-                      <Text weight="semibold">Token is invalid: {validationResult.error}</Text>
-                    )}
-                  </MessageBarBody>
-                </MessageBar>
-              )}
-            </div>
-          )}
+                    </div>
+                  ) : (
+                    <Text weight="semibold">Token is invalid: {validationResult.error}</Text>
+                  )}
+                </MessageBarBody>
+              </MessageBar>
+            )}
+          </div>
+        )}
 
-          {selectedTab === 'search' && (
-            <div style={{ marginTop: '24px' }} className={classes.form}>
-              <div className={classes.twoColumn}>
-                <Field label="Subscriber ID">
-                  <Input placeholder="Search by subscriber..." />
-                </Field>
-                <Field label="Status">
-                  <Dropdown placeholder="All statuses">
-                    <Option value="active">Active</Option>
-                    <Option value="expired">Expired</Option>
-                    <Option value="revoked">Revoked</Option>
-                  </Dropdown>
-                </Field>
-              </div>
-              <Button appearance="primary">Search Tokens</Button>
+        {selectedTab === 'search' && (
+          <div style={{ marginTop: '24px' }} className={classes.form}>
+            <div className={classes.twoColumn}>
+              <Field label="Subscriber ID">
+                <Input placeholder="Search by subscriber..." />
+              </Field>
+              <Field label="Status">
+                <Dropdown placeholder="All statuses">
+                  <Option value="active">Active</Option>
+                  <Option value="expired">Expired</Option>
+                  <Option value="revoked">Revoked</Option>
+                </Dropdown>
+              </Field>
             </div>
-          )}
+            <Button appearance="primary">Search Tokens</Button>
+          </div>
+        )}
       </Card>
     </div>
   );

@@ -535,10 +535,10 @@ js-build: ## Bundle front-end assets using Vite
 	      (cd frontend/ui-react && npm install --no-audit --no-fund); \
 	    fi; \
 	    (cd frontend/ui-react && npm run build); \
-	    if [ ! -s "frontend/dist/index.html" ]; then \
+	    if [ ! -s "frontend/ui-react/dist/index.html" ]; then \
 	      echo "❌ Build output missing - check Vite build process"; exit 1; \
 	    else \
-	      echo "✅ Vite build complete (output in frontend/dist)"; \
+	      echo "✅ Vite build complete (output in frontend/ui-react/dist)"; \
 	    fi; \
 	  else \
 	    echo "⚠️  No package.json in frontend/ui-react - skipping JS bundling"; \

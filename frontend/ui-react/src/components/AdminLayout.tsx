@@ -17,7 +17,7 @@ import {
   Tooltip,
 } from '@fluentui/react-components';
 import {
-  Navigation24Regular,
+
   Home24Regular,
   DataArea24Regular,
   PeopleTeam24Regular,
@@ -283,9 +283,8 @@ export default function AdminLayout() {
       <div className={classes.root}>
         {/* Sidebar */}
         <div
-          className={`${classes.sidebar} ${
-            sidebarExpanded ? classes.sidebarExpanded : classes.sidebarCollapsed
-          }`}
+          className={`${classes.sidebar} ${sidebarExpanded ? classes.sidebarExpanded : classes.sidebarCollapsed
+            }`}
         >
           <div className={classes.sidebarHeader}>
             <div className={classes.logo}>🛡️</div>
@@ -295,19 +294,11 @@ export default function AdminLayout() {
           </div>
 
           <nav className={classes.nav}>
-            {navItems.map((item) => (
-              <Tooltip
-                key={item.id}
-                content={item.label}
-                relationship="label"
-                positioning="after"
-                withArrow
-                disabled={sidebarExpanded}
-              >
+            {navItems.map((item) => {
+              const navButton = (
                 <button
-                  className={`${classes.navItem} ${
-                    isActive(item.path) ? classes.navItemActive : ''
-                  }`}
+                  className={`${classes.navItem} ${isActive(item.path) ? classes.navItemActive : ''
+                    }`}
                   onClick={() => navigate(item.path)}
                 >
                   <span className={classes.navIcon}>{item.icon}</span>
@@ -315,8 +306,22 @@ export default function AdminLayout() {
                     <span className={classes.navText}>{item.label}</span>
                   )}
                 </button>
-              </Tooltip>
-            ))}
+              );
+
+              return sidebarExpanded ? (
+                <div key={item.id}>{navButton}</div>
+              ) : (
+                <Tooltip
+                  key={item.id}
+                  content={item.label}
+                  relationship="label"
+                  positioning="after"
+                  withArrow
+                >
+                  {navButton}
+                </Tooltip>
+              );
+            })}
           </nav>
 
           <Button

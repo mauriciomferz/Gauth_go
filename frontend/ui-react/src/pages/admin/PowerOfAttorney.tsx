@@ -31,7 +31,7 @@ import {
   DialogActions,
   DialogContent,
   Checkbox,
-  Label,
+
   ProgressBar,
 } from '@fluentui/react-components';
 import {
@@ -39,11 +39,11 @@ import {
   Add24Regular,
   Eye24Regular,
   Edit24Regular,
-  Delete24Regular,
+
   CheckmarkCircle24Regular,
   DismissCircle24Regular,
   Clock24Regular,
-  Location24Regular,
+
   Shield24Regular,
 } from '@fluentui/react-icons';
 
@@ -285,8 +285,8 @@ export default function PowerOfAttorney() {
   ];
 
   // Use the new hooks
-  const { data: poaData, loading: poaLoading, refetch } = usePowerOfAttorneyList();
-  const { createPoA, deletePoA, loading: mutationLoading } = usePoAMutations();
+  const { data: poaData, refetch } = usePowerOfAttorneyList();
+  const { createPoA, deletePoA } = usePoAMutations();
 
   // Update local state when data changes
   useEffect(() => {
@@ -560,10 +560,10 @@ export default function PowerOfAttorney() {
           <div className={classes.form}>
             <Text weight="semibold" size={400}>Approval Workflow</Text>
             <Text size={300}>Configure approval requirements for this PoA</Text>
-            
+
             <Checkbox
               checked={formData.requiresApproval}
-              onChange={(e, data) => setFormData({ ...formData, requiresApproval: data.checked as boolean })}
+              onChange={(_, data) => setFormData({ ...formData, requiresApproval: data.checked as boolean })}
               label="Require approval before activation"
             />
 
@@ -773,8 +773,8 @@ export default function PowerOfAttorney() {
       renderCell: (item) => (
         <TableCellLayout>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <Button 
-              size="small" 
+            <Button
+              size="small"
               icon={<Eye24Regular />}
               onClick={() => handleViewPoA(item.id)}
               title="View Details"
@@ -832,17 +832,15 @@ export default function PowerOfAttorney() {
                     {steps.map((step, index) => (
                       <div key={step.id} className={classes.stepItem}>
                         <div
-                          className={`${classes.stepCircle} ${
-                            index < currentStep ? classes.stepCircleCompleted :
+                          className={`${classes.stepCircle} ${index < currentStep ? classes.stepCircleCompleted :
                             index === currentStep ? classes.stepCircleActive : ''
-                          }`}
+                            }`}
                         >
                           {index < currentStep ? <CheckmarkCircle24Regular /> : step.icon}
                         </div>
                         <Text
-                          className={`${classes.stepLabel} ${
-                            index === currentStep ? classes.stepLabelActive : ''
-                          }`}
+                          className={`${classes.stepLabel} ${index === currentStep ? classes.stepLabelActive : ''
+                            }`}
                         >
                           {step.label}
                         </Text>
@@ -935,32 +933,32 @@ export default function PowerOfAttorney() {
         </TabList>
 
         <div style={{ marginTop: '24px' }}>
-            <DataGrid
-              items={selectedTab === 'overview' ? poaList :
-                selectedTab === 'active' ? poaList.filter(p => p.status === 'active') :
+          <DataGrid
+            items={selectedTab === 'overview' ? poaList :
+              selectedTab === 'active' ? poaList.filter(p => p.status === 'active') :
                 poaList.filter(p => p.status === 'pending')}
-              columns={columns}
-              sortable
-              resizableColumns
-            >
-              <DataGridHeader>
-                <DataGridRow>
-                  {({ renderHeaderCell }) => (
-                    <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
+            columns={columns}
+            sortable
+            resizableColumns
+          >
+            <DataGridHeader>
+              <DataGridRow>
+                {({ renderHeaderCell }) => (
+                  <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
+                )}
+              </DataGridRow>
+            </DataGridHeader>
+            <DataGridBody<PoA>>
+              {({ item, rowId }) => (
+                <DataGridRow<PoA> key={rowId}>
+                  {({ renderCell }) => (
+                    <DataGridCell>{renderCell(item)}</DataGridCell>
                   )}
                 </DataGridRow>
-              </DataGridHeader>
-              <DataGridBody<PoA>>
-                {({ item, rowId }) => (
-                  <DataGridRow<PoA> key={rowId}>
-                    {({ renderCell }) => (
-                      <DataGridCell>{renderCell(item)}</DataGridCell>
-                    )}
-                  </DataGridRow>
-                )}
-              </DataGridBody>
-            </DataGrid>
-          </div>
+              )}
+            </DataGridBody>
+          </DataGrid>
+        </div>
       </Card>
     </div>
   );

@@ -1,18 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   makeStyles,
   shorthands,
   tokens,
   Button,
   Dialog,
-  DialogTrigger,
   DialogSurface,
   DialogTitle,
   DialogBody,
   DialogActions,
   DialogContent,
   Input,
-  Label,
   Field,
   Dropdown,
   Option,
@@ -37,6 +35,7 @@ import {
   MenuItem,
   MessageBar,
   MessageBarBody,
+  MessageBarActions,
   Spinner,
 } from '@fluentui/react-components';
 import {
@@ -171,7 +170,7 @@ export default function OIDCProviders() {
     try {
       setLoading(true);
       const response = await fetch(`http://localhost:8080/api/admin/oidc-providers?tenant_id=${tenantId}`);
-      
+
       if (!response.ok) {
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
@@ -183,7 +182,7 @@ export default function OIDCProviders() {
           throw new Error(`Server error: ${response.status}`);
         }
       }
-      
+
       const data = await response.json();
       setProviders(data.providers || []);
       setError(null);
@@ -485,14 +484,16 @@ export default function OIDCProviders() {
       </div>
 
       {error && (
-        <MessageBar intent="error" onDismiss={() => setError(null)}>
+        <MessageBar intent="error">
           <MessageBarBody>{error}</MessageBarBody>
+          <MessageBarActions containerAction={<Button appearance="transparent" icon={<Dismiss24Regular />} onClick={() => setError(null)} />} />
         </MessageBar>
       )}
 
       {success && (
-        <MessageBar intent="success" onDismiss={() => setSuccess(null)}>
+        <MessageBar intent="success">
           <MessageBarBody>{success}</MessageBarBody>
+          <MessageBarActions containerAction={<Button appearance="transparent" icon={<Dismiss24Regular />} onClick={() => setSuccess(null)} />} />
         </MessageBar>
       )}
 

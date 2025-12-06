@@ -32,8 +32,7 @@ import {
   DialogContent,
   MessageBar,
   MessageBarBody,
-  Switch,
-  Label,
+
 } from '@fluentui/react-components';
 import {
   ShieldTask24Regular,
@@ -48,7 +47,6 @@ import {
 } from '@fluentui/react-icons';
 
 // Import admin API hooks
-import { useAuthorizationPolicies, useAuthzMutations } from '../../hooks/useAdminApi';
 import { addTenantParam } from '../../utils/tenant';
 
 const useStyles = makeStyles({
@@ -353,7 +351,7 @@ export default function AuthorizationEngine() {
           return;
         }
       }
-      
+
       const response = await fetch(addTenantParam('/api/admin/authz/simulate'), {
         method: 'POST',
         headers: {
@@ -413,7 +411,7 @@ export default function AuthorizationEngine() {
 
   const handleDeleteAttribute = async (id: string) => {
     if (!confirm('Are you sure you want to delete this attribute?')) return;
-    
+
     try {
       const response = await fetch(addTenantParam(`/api/admin/authz/attributes/${id}`), {
         method: 'DELETE',
@@ -559,9 +557,9 @@ export default function AuthorizationEngine() {
     createTableColumn<Decision>({
       columnId: 'action',
       renderHeaderCell: () => 'Action',
-      renderCell: (item) => (
+      renderCell: (_) => (
         <TableCellLayout>
-          <Text>{item.action}</Text>
+          <Button size="small" icon={<Eye24Regular />} />
         </TableCellLayout>
       ),
     }),
@@ -661,355 +659,354 @@ export default function AuthorizationEngine() {
 
         {/* PAP - Policy Administration Point */}
         {selectedTab === 'pap' && (
-            <div style={{ marginTop: '24px' }}>
-              <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between' }}>
-                <Text weight="semibold" size={400}>Policy Management</Text>
-                <Dialog open={policyDialogOpen} onOpenChange={(_, data) => {
-                  setPolicyDialogOpen(data.open);
-                  if (!data.open) resetPolicyForm();
-                }}>
-                  <DialogTrigger>
-                    <Button appearance="primary" icon={<DocumentAdd24Regular />}>
-                      Create Policy
-                    </Button>
-                  </DialogTrigger>
-                  <DialogSurface style={{ maxWidth: '800px' }}>
-                    <DialogBody>
-                      <DialogTitle>{selectedPolicy ? 'Edit Policy' : 'Create New Policy'}</DialogTitle>
-                      <DialogContent>
-                        <div className={classes.form}>
-                          <Field label="Policy Name" required>
-                            <Input
-                              value={policyName}
-                              onChange={(e) => setPolicyName(e.target.value)}
-                              placeholder="read-documents-policy"
-                            />
-                          </Field>
+          <div style={{ marginTop: '24px' }}>
+            <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between' }}>
+              <Text weight="semibold" size={400}>Policy Management</Text>
+              <Dialog open={policyDialogOpen} onOpenChange={(_, data) => {
+                setPolicyDialogOpen(data.open);
+                if (!data.open) resetPolicyForm();
+              }}>
+                <DialogTrigger>
+                  <Button appearance="primary" icon={<DocumentAdd24Regular />}>
+                    Create Policy
+                  </Button>
+                </DialogTrigger>
+                <DialogSurface style={{ maxWidth: '800px' }}>
+                  <DialogBody>
+                    <DialogTitle>{selectedPolicy ? 'Edit Policy' : 'Create New Policy'}</DialogTitle>
+                    <DialogContent>
+                      <div className={classes.form}>
+                        <Field label="Policy Name" required>
+                          <Input
+                            value={policyName}
+                            onChange={(e) => setPolicyName(e.target.value)}
+                            placeholder="read-documents-policy"
+                          />
+                        </Field>
 
-                          <Field label="Description">
-                            <Input
-                              value={policyDescription}
-                              onChange={(e) => setPolicyDescription(e.target.value)}
-                              placeholder="Allow users to read documents"
-                            />
-                          </Field>
+                        <Field label="Description">
+                          <Input
+                            value={policyDescription}
+                            onChange={(e) => setPolicyDescription(e.target.value)}
+                            placeholder="Allow users to read documents"
+                          />
+                        </Field>
 
-                          <Field label="Effect">
-                            <Dropdown
-                              value={policyEffect}
-                              onOptionSelect={(_, data) => setPolicyEffect(data.optionValue as string)}
-                            >
-                              <Option value="allow">Allow</Option>
-                              <Option value="deny">Deny</Option>
-                            </Dropdown>
-                          </Field>
+                        <Field label="Effect">
+                          <Dropdown
+                            value={policyEffect}
+                            onOptionSelect={(_, data) => setPolicyEffect(data.optionValue as string)}
+                          >
+                            <Option value="allow">Allow</Option>
+                            <Option value="deny">Deny</Option>
+                          </Dropdown>
+                        </Field>
 
-                          <Field label="Actions (comma-separated)">
-                            <Input
-                              value={policyActions}
-                              onChange={(e) => setPolicyActions(e.target.value)}
-                              placeholder="read, list, download"
-                            />
-                          </Field>
+                        <Field label="Actions (comma-separated)">
+                          <Input
+                            value={policyActions}
+                            onChange={(e) => setPolicyActions(e.target.value)}
+                            placeholder="read, list, download"
+                          />
+                        </Field>
 
-                          <Field label="Resources (comma-separated)">
-                            <Input
-                              value={policyResources}
-                              onChange={(e) => setPolicyResources(e.target.value)}
-                              placeholder="document:*, file:/docs/*"
-                            />
-                          </Field>
+                        <Field label="Resources (comma-separated)">
+                          <Input
+                            value={policyResources}
+                            onChange={(e) => setPolicyResources(e.target.value)}
+                            placeholder="document:*, file:/docs/*"
+                          />
+                        </Field>
 
-                          <Field label="Conditions (JSON)">
-                            <Textarea
-                              value={policyConditions}
-                              onChange={(e) => setPolicyConditions(e.target.value)}
-                              placeholder='{"ip": "10.0.0.0/8", "time": "09:00-17:00"}'
-                              rows={4}
-                            />
-                          </Field>
-                        </div>
-                      </DialogContent>
-                      <DialogActions>
-                        <Button appearance="secondary" onClick={() => {
-                          setPolicyDialogOpen(false);
-                          resetPolicyForm();
-                        }}>
-                          Cancel
-                        </Button>
-                        <Button
-                          appearance="primary"
-                          onClick={selectedPolicy ? handleUpdatePolicy : handleCreatePolicy}
-                          disabled={loading || !policyName}
-                        >
-                          {loading ? 'Saving...' : (selectedPolicy ? 'Update Policy' : 'Create Policy')}
-                        </Button>
-                      </DialogActions>
-                    </DialogBody>
-                  </DialogSurface>
-                </Dialog>
-              </div>
+                        <Field label="Conditions (JSON)">
+                          <Textarea
+                            value={policyConditions}
+                            onChange={(e) => setPolicyConditions(e.target.value)}
+                            placeholder='{"ip": "10.0.0.0/8", "time": "09:00-17:00"}'
+                            rows={4}
+                          />
+                        </Field>
+                      </div>
+                    </DialogContent>
+                    <DialogActions>
+                      <Button appearance="secondary" onClick={() => {
+                        setPolicyDialogOpen(false);
+                        resetPolicyForm();
+                      }}>
+                        Cancel
+                      </Button>
+                      <Button
+                        appearance="primary"
+                        onClick={selectedPolicy ? handleUpdatePolicy : handleCreatePolicy}
+                        disabled={loading || !policyName}
+                      >
+                        {loading ? 'Saving...' : (selectedPolicy ? 'Update Policy' : 'Create Policy')}
+                      </Button>
+                    </DialogActions>
+                  </DialogBody>
+                </DialogSurface>
+              </Dialog>
+            </div>
 
-              {policies.length === 0 ? (
-                <MessageBar intent="info">
-                  <MessageBarBody>
-                    No policies configured. Click "Create Policy" to add your first authorization policy.
-                  </MessageBarBody>
-                </MessageBar>
-              ) : (
-                <DataGrid items={policies} columns={policyColumns} sortable resizableColumns>
-                  <DataGridHeader>
-                    <DataGridRow>
-                      {({ renderHeaderCell }) => (
-                        <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
+            {policies.length === 0 ? (
+              <MessageBar intent="info">
+                <MessageBarBody>
+                  No policies configured. Click "Create Policy" to add your first authorization policy.
+                </MessageBarBody>
+              </MessageBar>
+            ) : (
+              <DataGrid items={policies} columns={policyColumns} sortable resizableColumns>
+                <DataGridHeader>
+                  <DataGridRow>
+                    {({ renderHeaderCell }) => (
+                      <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
+                    )}
+                  </DataGridRow>
+                </DataGridHeader>
+                <DataGridBody<Policy>>
+                  {({ item, rowId }) => (
+                    <DataGridRow<Policy> key={rowId}>
+                      {({ renderCell }) => (
+                        <DataGridCell>{renderCell(item)}</DataGridCell>
                       )}
                     </DataGridRow>
-                  </DataGridHeader>
-                  <DataGridBody<Policy>>
-                    {({ item, rowId }) => (
-                      <DataGridRow<Policy> key={rowId}>
-                        {({ renderCell }) => (
-                          <DataGridCell>{renderCell(item)}</DataGridCell>
-                        )}
-                      </DataGridRow>
-                    )}
-                  </DataGridBody>
-                </DataGrid>
-              )}
-            </div>
-          )}
+                  )}
+                </DataGridBody>
+              </DataGrid>
+            )}
+          </div>
+        )}
 
-          {/* PIP - Policy Information Point */}
-          {selectedTab === 'pip' && (
-            <div style={{ marginTop: '24px' }}>
-              <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text weight="semibold" size={400}>Attribute Sources</Text>
-                <Dialog open={attributeDialogOpen} onOpenChange={(_, data) => {
-                  setAttributeDialogOpen(data.open);
-                  if (!data.open) resetAttributeForm();
-                }}>
-                  <DialogTrigger>
-                    <Button appearance="primary" icon={<DocumentAdd24Regular />}>
-                      Add Attribute
-                    </Button>
-                  </DialogTrigger>
-                  <DialogSurface>
-                    <DialogBody>
-                      <DialogTitle>Add New Attribute</DialogTitle>
-                      <DialogContent>
-                        <div className={classes.form}>
-                          <Field label="Source" required>
-                            <Input
-                              value={attrSource}
-                              onChange={(e) => setAttrSource(e.target.value)}
-                              placeholder="user_profile, network, device"
-                            />
-                          </Field>
-                          <Field label="Key" required>
-                            <Input
-                              value={attrKey}
-                              onChange={(e) => setAttrKey(e.target.value)}
-                              placeholder="department, ip_range, device_id"
-                            />
-                          </Field>
-                          <Field label="Value" required>
-                            <Input
-                              value={attrValue}
-                              onChange={(e) => setAttrValue(e.target.value)}
-                              placeholder="engineering, 10.0.0.0/8"
-                            />
-                          </Field>
-                          <Field label="Type">
-                            <Dropdown
-                              placeholder="Select type"
-                              value={attrType}
-                              selectedOptions={[attrType]}
-                              onOptionSelect={(_, data) => setAttrType(data.optionValue as string)}
-                            >
-                              <Option value="string">String</Option>
-                              <Option value="number">Number</Option>
-                              <Option value="boolean">Boolean</Option>
-                              <Option value="json">JSON</Option>
-                            </Dropdown>
-                          </Field>
-                        </div>
-                      </DialogContent>
-                      <DialogActions>
-                        <Button appearance="secondary" onClick={() => setAttributeDialogOpen(false)}>
-                          Cancel
-                        </Button>
-                        <Button
-                          appearance="primary"
-                          onClick={handleCreateAttribute}
-                          disabled={loading || !attrSource || !attrKey || !attrValue}
-                        >
-                          {loading ? 'Creating...' : 'Create Attribute'}
-                        </Button>
-                      </DialogActions>
-                    </DialogBody>
-                  </DialogSurface>
-                </Dialog>
-              </div>
-              {attributes.length === 0 ? (
-                <MessageBar intent="info">
-                  <MessageBarBody>
-                    No attributes configured yet. Add attribute sources to enrich policy decisions.
-                  </MessageBarBody>
-                </MessageBar>
-              ) : (
-                <div className={classes.attributeList}>
-                  {attributes.map((attr) => (
-                    <div key={attr.id} className={classes.attributeItem}>
-                      <div style={{ flex: 1 }}>
-                        <Text weight="semibold">{attr.key}</Text>
-                        <Text size={200} style={{ color: tokens.colorNeutralForeground3, display: 'block' }}>
-                          Source: {attr.source} | Type: {attr.type} | Value: {attr.value}
-                        </Text>
-                        <Text size={100} style={{ color: tokens.colorNeutralForeground4, display: 'block' }}>
-                          Updated: {new Date(attr.lastUpdated).toLocaleString()}
-                        </Text>
+        {/* PIP - Policy Information Point */}
+        {selectedTab === 'pip' && (
+          <div style={{ marginTop: '24px' }}>
+            <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text weight="semibold" size={400}>Attribute Sources</Text>
+              <Dialog open={attributeDialogOpen} onOpenChange={(_, data) => {
+                setAttributeDialogOpen(data.open);
+                if (!data.open) resetAttributeForm();
+              }}>
+                <DialogTrigger>
+                  <Button appearance="primary" icon={<DocumentAdd24Regular />}>
+                    Add Attribute
+                  </Button>
+                </DialogTrigger>
+                <DialogSurface>
+                  <DialogBody>
+                    <DialogTitle>Add New Attribute</DialogTitle>
+                    <DialogContent>
+                      <div className={classes.form}>
+                        <Field label="Source" required>
+                          <Input
+                            value={attrSource}
+                            onChange={(e) => setAttrSource(e.target.value)}
+                            placeholder="user_profile, network, device"
+                          />
+                        </Field>
+                        <Field label="Key" required>
+                          <Input
+                            value={attrKey}
+                            onChange={(e) => setAttrKey(e.target.value)}
+                            placeholder="department, ip_range, device_id"
+                          />
+                        </Field>
+                        <Field label="Value" required>
+                          <Input
+                            value={attrValue}
+                            onChange={(e) => setAttrValue(e.target.value)}
+                            placeholder="engineering, 10.0.0.0/8"
+                          />
+                        </Field>
+                        <Field label="Type">
+                          <Dropdown
+                            placeholder="Select type"
+                            value={attrType}
+                            selectedOptions={[attrType]}
+                            onOptionSelect={(_, data) => setAttrType(data.optionValue as string)}
+                          >
+                            <Option value="string">String</Option>
+                            <Option value="number">Number</Option>
+                            <Option value="boolean">Boolean</Option>
+                            <Option value="json">JSON</Option>
+                          </Dropdown>
+                        </Field>
                       </div>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <Button 
-                          size="small" 
-                          icon={<Edit24Regular />}
-                          onClick={() => {
-                            setAttrSource(attr.source);
-                            setAttrKey(attr.key);
-                            setAttrValue(attr.value);
-                            setAttrType(attr.type);
-                            setAttributeDialogOpen(true);
-                          }}
-                        >
-                          Edit
-                        </Button>
-                        <Button 
-                          size="small" 
-                          icon={<Delete24Regular />}
-                          onClick={() => handleDeleteAttribute(attr.id)}
-                        >
-                          Delete
-                        </Button>
-                      </div>
+                    </DialogContent>
+                    <DialogActions>
+                      <Button appearance="secondary" onClick={() => setAttributeDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button
+                        appearance="primary"
+                        onClick={handleCreateAttribute}
+                        disabled={loading || !attrSource || !attrKey || !attrValue}
+                      >
+                        {loading ? 'Creating...' : 'Create Attribute'}
+                      </Button>
+                    </DialogActions>
+                  </DialogBody>
+                </DialogSurface>
+              </Dialog>
+            </div>
+            {attributes.length === 0 ? (
+              <MessageBar intent="info">
+                <MessageBarBody>
+                  No attributes configured yet. Add attribute sources to enrich policy decisions.
+                </MessageBarBody>
+              </MessageBar>
+            ) : (
+              <div className={classes.attributeList}>
+                {attributes.map((attr) => (
+                  <div key={attr.id} className={classes.attributeItem}>
+                    <div style={{ flex: 1 }}>
+                      <Text weight="semibold">{attr.key}</Text>
+                      <Text size={200} style={{ color: tokens.colorNeutralForeground3, display: 'block' }}>
+                        Source: {attr.source} | Type: {attr.type} | Value: {attr.value}
+                      </Text>
+                      <Text size={100} style={{ color: tokens.colorNeutralForeground4, display: 'block' }}>
+                        Updated: {new Date(attr.lastUpdated).toLocaleString()}
+                      </Text>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* PDP - Policy Decision Point */}
-          {selectedTab === 'pdp' && (
-            <div style={{ marginTop: '24px' }} className={classes.form}>
-              <Text weight="semibold" size={400}>Decision Simulator</Text>
-              <Text size={300}>Test authorization decisions with different inputs</Text>
-
-              <Field label="Subject" required>
-                <Input
-                  value={simSubject}
-                  onChange={(e) => setSimSubject(e.target.value)}
-                  placeholder="user:john.doe@example.com"
-                />
-              </Field>
-
-              <Field label="Action" required>
-                <Input
-                  value={simAction}
-                  onChange={(e) => setSimAction(e.target.value)}
-                  placeholder="read"
-                />
-              </Field>
-
-              <Field label="Resource" required>
-                <Input
-                  value={simResource}
-                  onChange={(e) => setSimResource(e.target.value)}
-                  placeholder="document:12345"
-                />
-              </Field>
-
-              <Field label="Context (JSON)">
-                <Textarea
-                  value={simContext}
-                  onChange={(e) => setSimContext(e.target.value)}
-                  placeholder='{"ip": "10.0.1.5", "department": "engineering"}'
-                  rows={4}
-                />
-              </Field>
-
-              <Button
-                appearance="primary"
-                icon={<PlayCircle24Regular />}
-                onClick={handleSimulateDecision}
-                disabled={loading || !simSubject || !simAction || !simResource}
-              >
-                {loading ? 'Evaluating...' : 'Simulate Decision'}
-              </Button>
-
-              {simulationResult && (
-                <div className={`${classes.decisionResult} ${
-                  simulationResult.decision === 'allow' ? classes.decisionAllow : classes.decisionDeny
-                }`}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                    {simulationResult.decision === 'allow' ? (
-                      <CheckmarkCircle24Regular style={{ fontSize: '32px', color: tokens.colorPaletteGreenForeground1 }} />
-                    ) : (
-                      <DismissCircle24Regular style={{ fontSize: '32px', color: tokens.colorPaletteRedForeground1 }} />
-                    )}
-                    <div>
-                      <Text weight="bold" size={500}>
-                        Decision: {simulationResult.decision.toUpperCase()}
-                      </Text>
-                      <Text size={300} style={{ display: 'block' }}>
-                        Policy Applied: {simulationResult.policyName || 'Default Deny'}
-                      </Text>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <Button
+                        size="small"
+                        icon={<Edit24Regular />}
+                        onClick={() => {
+                          setAttrSource(attr.source);
+                          setAttrKey(attr.key);
+                          setAttrValue(attr.value);
+                          setAttrType(attr.type);
+                          setAttributeDialogOpen(true);
+                        }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="small"
+                        icon={<Delete24Regular />}
+                        onClick={() => handleDeleteAttribute(attr.id)}
+                      >
+                        Delete
+                      </Button>
                     </div>
                   </div>
-                  <Text size={200}>Evaluation Time: {simulationResult.duration || 0}ms</Text>
-                  {simulationResult.reason && (
-                    <Text size={200} style={{ display: 'block', marginTop: '8px' }}>
-                      Reason: {simulationResult.reason}
-                    </Text>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
-          {/* PEP - Policy Enforcement Point */}
-          {selectedTab === 'pep' && (
-            <div style={{ marginTop: '24px' }}>
-              <Text weight="semibold" size={400} style={{ marginBottom: '16px', display: 'block' }}>
-                Enforcement Decision Log
-              </Text>
-              {decisions.length === 0 ? (
-                <MessageBar intent="info">
-                  <MessageBarBody>
-                    No enforcement decisions logged yet. Use the PDP simulator to test authorization decisions, or decisions will appear here as they occur in the system.
-                  </MessageBarBody>
-                </MessageBar>
-              ) : (
-                <DataGrid items={decisions} columns={decisionColumns} sortable resizableColumns>
-                  <DataGridHeader>
-                    <DataGridRow>
-                      {({ renderHeaderCell }) => (
-                        <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
+        {/* PDP - Policy Decision Point */}
+        {selectedTab === 'pdp' && (
+          <div style={{ marginTop: '24px' }} className={classes.form}>
+            <Text weight="semibold" size={400}>Decision Simulator</Text>
+            <Text size={300}>Test authorization decisions with different inputs</Text>
+
+            <Field label="Subject" required>
+              <Input
+                value={simSubject}
+                onChange={(e) => setSimSubject(e.target.value)}
+                placeholder="user:john.doe@example.com"
+              />
+            </Field>
+
+            <Field label="Action" required>
+              <Input
+                value={simAction}
+                onChange={(e) => setSimAction(e.target.value)}
+                placeholder="read"
+              />
+            </Field>
+
+            <Field label="Resource" required>
+              <Input
+                value={simResource}
+                onChange={(e) => setSimResource(e.target.value)}
+                placeholder="document:12345"
+              />
+            </Field>
+
+            <Field label="Context (JSON)">
+              <Textarea
+                value={simContext}
+                onChange={(e) => setSimContext(e.target.value)}
+                placeholder='{"ip": "10.0.1.5", "department": "engineering"}'
+                rows={4}
+              />
+            </Field>
+
+            <Button
+              appearance="primary"
+              icon={<PlayCircle24Regular />}
+              onClick={handleSimulateDecision}
+              disabled={loading || !simSubject || !simAction || !simResource}
+            >
+              {loading ? 'Evaluating...' : 'Simulate Decision'}
+            </Button>
+
+            {simulationResult && (
+              <div className={`${classes.decisionResult} ${simulationResult.decision === 'allow' ? classes.decisionAllow : classes.decisionDeny
+                }`}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                  {simulationResult.decision === 'allow' ? (
+                    <CheckmarkCircle24Regular style={{ fontSize: '32px', color: tokens.colorPaletteGreenForeground1 }} />
+                  ) : (
+                    <DismissCircle24Regular style={{ fontSize: '32px', color: tokens.colorPaletteRedForeground1 }} />
+                  )}
+                  <div>
+                    <Text weight="bold" size={500}>
+                      Decision: {simulationResult.decision.toUpperCase()}
+                    </Text>
+                    <Text size={300} style={{ display: 'block' }}>
+                      Policy Applied: {simulationResult.policyName || 'Default Deny'}
+                    </Text>
+                  </div>
+                </div>
+                <Text size={200}>Evaluation Time: {simulationResult.duration || 0}ms</Text>
+                {simulationResult.reason && (
+                  <Text size={200} style={{ display: 'block', marginTop: '8px' }}>
+                    Reason: {simulationResult.reason}
+                  </Text>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* PEP - Policy Enforcement Point */}
+        {selectedTab === 'pep' && (
+          <div style={{ marginTop: '24px' }}>
+            <Text weight="semibold" size={400} style={{ marginBottom: '16px', display: 'block' }}>
+              Enforcement Decision Log
+            </Text>
+            {decisions.length === 0 ? (
+              <MessageBar intent="info">
+                <MessageBarBody>
+                  No enforcement decisions logged yet. Use the PDP simulator to test authorization decisions, or decisions will appear here as they occur in the system.
+                </MessageBarBody>
+              </MessageBar>
+            ) : (
+              <DataGrid items={decisions} columns={decisionColumns} sortable resizableColumns>
+                <DataGridHeader>
+                  <DataGridRow>
+                    {({ renderHeaderCell }) => (
+                      <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
+                    )}
+                  </DataGridRow>
+                </DataGridHeader>
+                <DataGridBody<Decision>>
+                  {({ item, rowId }) => (
+                    <DataGridRow<Decision> key={rowId}>
+                      {({ renderCell }) => (
+                        <DataGridCell>{renderCell(item)}</DataGridCell>
                       )}
                     </DataGridRow>
-                  </DataGridHeader>
-                  <DataGridBody<Decision>>
-                    {({ item, rowId }) => (
-                      <DataGridRow<Decision> key={rowId}>
-                        {({ renderCell }) => (
-                          <DataGridCell>{renderCell(item)}</DataGridCell>
-                        )}
-                      </DataGridRow>
-                    )}
-                  </DataGridBody>
-                </DataGrid>
-              )}
-            </div>
-          )}
+                  )}
+                </DataGridBody>
+              </DataGrid>
+            )}
+          </div>
+        )}
       </Card>
     </div>
   );

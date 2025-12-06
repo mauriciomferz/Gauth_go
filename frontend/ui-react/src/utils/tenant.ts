@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 // Tenant management utility for admin handlers
 // Handles tenant ID storage and retrieval for multi-tenant API calls
 
@@ -9,14 +10,14 @@ export const getTenantId = (): string => {
   // Try to get from localStorage first
   const storedTenant = localStorage.getItem('tenant_id');
   if (storedTenant) return storedTenant;
-  
+
   // Try to get from environment variable
   const envTenant = import.meta.env.VITE_DEFAULT_TENANT_ID;
   if (envTenant) {
     localStorage.setItem('tenant_id', envTenant);
     return envTenant;
   }
-  
+
   // Default tenant for development
   const defaultTenant = 'test-tenant-1';
   localStorage.setItem('tenant_id', defaultTenant);

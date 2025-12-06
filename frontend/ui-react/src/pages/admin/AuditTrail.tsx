@@ -29,23 +29,18 @@ import {
   DataGridCell,
   TableColumnDefinition,
   createTableColumn,
-  MessageBar,
-  MessageBarBody,
   ProgressBar,
-  Textarea,
-  Field,
 } from '@fluentui/react-components'
 import {
   DocumentBulletList24Regular,
   Shield24Regular,
   Link24Regular,
   CheckmarkCircle24Regular,
-  Download24Regular,
+  ArrowDownload24Regular,
   Settings24Regular,
   Play24Regular,
   Stop24Regular,
   Filter24Regular,
-  ArrowExport24Regular,
   Eye24Regular,
   DocumentSearch24Regular,
 } from '@fluentui/react-icons'
@@ -276,7 +271,7 @@ export default function AuditTrail() {
   const [correlations, setCorrelations] = useState<EventCorrelation[]>([])
 
   // Verification state
-  const [verifications, setVerifications] = useState<TamperVerification[]>([])
+  const [verifications] = useState<TamperVerification[]>([])
   const [verifyEventId, setVerifyEventId] = useState('')
   const [verificationResult, setVerificationResult] = useState<TamperVerification | null>(null)
 
@@ -368,7 +363,7 @@ export default function AuditTrail() {
 
   const handleVerifyEvent = async () => {
     if (!verifyEventId) return
-    
+
     try {
       const response = await fetch(`/api/admin/audit/verify/${verifyEventId}`)
       const data = await response.json()
@@ -489,7 +484,7 @@ export default function AuditTrail() {
   }
 
   const getSIEMStatusBadge = (status: string) => {
-    const colorMap: Record<string, 'success' | 'danger' | 'warning'> = {
+    const colorMap: Record<string, 'success' | 'danger' | 'warning' | 'subtle'> = {
       active: 'success',
       inactive: 'subtle',
       error: 'danger',
@@ -576,7 +571,7 @@ export default function AuditTrail() {
         <div style={{ display: 'flex', gap: tokens.spacingHorizontalM }}>
           <Dialog open={exportDialogOpen} onOpenChange={(_, data) => setExportDialogOpen(data.open)}>
             <DialogTrigger>
-              <Button appearance="primary" icon={<Download24Regular />}>Export</Button>
+              <Button appearance="primary" icon={<ArrowDownload24Regular />}>Export</Button>
             </DialogTrigger>
             <DialogSurface>
               <DialogBody>

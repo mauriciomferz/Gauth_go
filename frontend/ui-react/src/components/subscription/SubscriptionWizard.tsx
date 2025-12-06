@@ -92,6 +92,9 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
 
   const executeStepI = async () => {
     const response = await apiClient.createSubscription({
+      client_id: formData.clientId,
+      requested_scope: formData.scope,
+      // @ts-ignore - Extra fields for demo
       owners_authorizer_id: 'director-001',
       identity_proof_request: {
         subject_id: 'director-001',
@@ -100,8 +103,8 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
         proof_data: { verified: true, eidas_level: 'high' },
         required_level: 'high'
       }
-    })
-    
+    } as any)
+
     setState(prev => ({
       ...prev,
       subscriptionId: response.subscription_id,
@@ -114,7 +117,7 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
       commercial_register_ref: 'HRB-12345-DE',
       jurisdiction: 'DE'
     })
-    
+
     setState(prev => ({ ...prev, currentStep: 3 }))
   }
 
@@ -126,7 +129,7 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
       proof_data: { verified: true, eidas_level: 'high' },
       required_level: 'high'
     })
-    
+
     setState(prev => ({ ...prev, currentStep: 4 }))
   }
 
@@ -147,7 +150,7 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
           verification_method: 'eIDAS',
           scope_of_authority: ['client_registration'],
           valid_from: now,
-          valid_until: new Date(Date.now() + 365*24*60*60*1000).toISOString(),
+          valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'active',
           legal_basis: {
             basis_type: 'company_law',
@@ -167,7 +170,7 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
           verification_method: 'eIDAS',
           scope_of_authority: ['ai_system_operation'],
           valid_from: now,
-          valid_until: new Date(Date.now() + 365*24*60*60*1000).toISOString(),
+          valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'active',
           legal_basis: {
             basis_type: 'power_of_attorney',
@@ -185,7 +188,7 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
           identity_verified: true,
           scope_of_authority: ['resource_access'],
           valid_from: now,
-          valid_until: new Date(Date.now() + 365*24*60*60*1000).toISOString(),
+          valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'active',
           legal_basis: {
             basis_type: 'contractual',
@@ -194,7 +197,7 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
         }
       }
     })
-    
+
     setState(prev => ({ ...prev, currentStep: 5 }))
   }
 
@@ -230,7 +233,7 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
       enable_identity_sharing: true,
       enable_prompting: false
     })
-    
+
     setState(prev => ({ ...prev, currentStep: 6 }))
   }
 
@@ -242,7 +245,7 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
       proof_data: { verified: true, eidas_level: 'high' },
       required_level: 'high'
     })
-    
+
     setState(prev => ({ ...prev, currentStep: 7 }))
   }
 
@@ -263,7 +266,7 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
           verification_method: 'eIDAS',
           scope_of_authority: ['resource_authorization'],
           valid_from: now,
-          valid_until: new Date(Date.now() + 365*24*60*60*1000).toISOString(),
+          valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'active',
           legal_basis: {
             basis_type: 'company_law',
@@ -283,7 +286,7 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
           verification_method: 'eIDAS',
           scope_of_authority: ['resource_management'],
           valid_from: now,
-          valid_until: new Date(Date.now() + 365*24*60*60*1000).toISOString(),
+          valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'active',
           legal_basis: {
             basis_type: 'power_of_attorney',
@@ -301,7 +304,7 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
           identity_verified: true,
           scope_of_authority: ['data_access'],
           valid_from: now,
-          valid_until: new Date(Date.now() + 365*24*60*60*1000).toISOString(),
+          valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'active',
           legal_basis: {
             basis_type: 'contractual',
@@ -310,7 +313,7 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
         }
       }
     })
-    
+
     setState(prev => ({ ...prev, currentStep: 8 }))
   }
 
@@ -326,10 +329,10 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
         verified_at: new Date().toISOString()
       }
     })
-    
+
     const token = response.token || response.access_token
     setState(prev => ({ ...prev, token }))
-    
+
     if (token) {
       onComplete(token)
     }
@@ -344,21 +347,19 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
             {steps.map((step, index) => (
               <div key={step.number} className="flex items-center">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
-                    step.number < state.currentStep
-                      ? 'bg-green-500 text-white'
-                      : step.number === state.currentStep
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${step.number < state.currentStep
+                    ? 'bg-green-500 text-white'
+                    : step.number === state.currentStep
                       ? 'bg-blue-500 text-white'
                       : 'bg-gray-300 text-gray-600'
-                  }`}
+                    }`}
                 >
                   {step.number < state.currentStep ? '✓' : step.number}
                 </div>
                 {index < steps.length - 1 && (
                   <div
-                    className={`w-12 h-1 ${
-                      step.number < state.currentStep ? 'bg-green-500' : 'bg-gray-300'
-                    }`}
+                    className={`w-12 h-1 ${step.number < state.currentStep ? 'bg-green-500' : 'bg-gray-300'
+                      }`}
                   />
                 )}
               </div>

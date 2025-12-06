@@ -1,36 +1,20 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   makeStyles,
   shorthands,
   tokens,
-  Title3,
   Card,
   Button,
   Text,
-  Badge,
   Input,
-  Label,
-  Textarea,
-  Dialog,
-  DialogTrigger,
-  DialogSurface,
-  DialogTitle,
-  DialogBody,
-  DialogActions,
-  DialogContent,
+
   Tab,
   TabList,
-  DataGrid,
-  DataGridHeader,
-  DataGridRow,
-  DataGridHeaderCell,
-  DataGridBody,
-  DataGridCell,
-  createTableColumn,
-  TableCellLayout,
-  TableColumnDefinition,
-  ProgressBar,
   Spinner,
+  Title3,
+  Badge,
+  Textarea,
 } from '@fluentui/react-components';
 import {
   CheckmarkCircle24Regular,
@@ -441,7 +425,7 @@ const RevocationTransparency: React.FC = () => {
 
   const handleGenerateProof = async () => {
     if (!proofTokenId.trim()) return;
-    
+
     try {
       setLoading(true);
       const response = await fetch('/api/admin/revocation/generate-proof', {
@@ -482,7 +466,7 @@ const RevocationTransparency: React.FC = () => {
   const handleDownloadProof = (proof: MerkleProof) => {
     const dataStr = JSON.stringify(proof, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-    const exportFileDefaultName = `merkle-proof-${proof.tokenId}.json`;
+    const exportFileDefaultName = `merkle - proof - ${proof.tokenId}.json`;
 
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
@@ -500,8 +484,8 @@ const RevocationTransparency: React.FC = () => {
       <div className={styles.treeContainer}>
         {nodesByLevel.map((levelNodes, levelIndex) => (
           <div key={levelIndex} className={styles.treeLevel}>
-            {levelNodes.map((node, nodeIndex) => (
-              <div key={`${node.level}-${node.position}`} className={styles.treeNode}>
+            {levelNodes.map((node, _nodeIndex) => (
+              <div key={`${node.level} -${node.position} `} className={styles.treeNode}>
                 <div
                   className={styles.nodeBox}
                   onClick={() => setSelectedNode(node)}
@@ -509,15 +493,15 @@ const RevocationTransparency: React.FC = () => {
                     backgroundColor: node.isLeaf
                       ? tokens.colorPaletteGreenBackground2
                       : node.level === 0
-                      ? tokens.colorPaletteBlueBorder2
-                      : tokens.colorBrandBackground2,
+                        ? tokens.colorBrandStroke2
+                        : tokens.colorBrandBackground2,
                   }}
                 >
                   <Text className={styles.nodeHash}>
                     {node.hash.substring(0, 8)}...
                   </Text>
                   <Text className={styles.nodeLevel}>
-                    {node.isLeaf ? 'Leaf' : node.level === 0 ? 'Root' : `Level ${node.level}`}
+                    {node.isLeaf ? 'Leaf' : node.level === 0 ? 'Root' : `Level ${node.level} `}
                   </Text>
                 </div>
               </div>
@@ -740,7 +724,7 @@ const RevocationTransparency: React.FC = () => {
                         <div className={styles.stepNumber}>{index + 1}</div>
                         <div className={styles.stepContent}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Badge color={step.position === 'left' ? 'info' : 'warning'}>
+                            <Badge color={step.position === 'left' ? 'informative' : 'warning'}>
                               {step.position.toUpperCase()}
                             </Badge>
                             <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>sibling</Text>
@@ -769,7 +753,7 @@ const RevocationTransparency: React.FC = () => {
               <Textarea
                 placeholder="Paste Merkle proof JSON here..."
                 value={verificationInput}
-                onChange={(e) => setVerificationInput(e.target.value)}
+                onChange={(_, data) => setVerificationInput(data.value)}
                 style={{ flex: 1, minHeight: '200px' }}
               />
             </div>
@@ -786,9 +770,8 @@ const RevocationTransparency: React.FC = () => {
 
             {verificationResult && (
               <div
-                className={`${styles.verificationResult} ${
-                  verificationResult.valid ? styles.verificationSuccess : styles.verificationFailure
-                }`}
+                className={`${styles.verificationResult} ${verificationResult.valid ? styles.verificationSuccess : styles.verificationFailure
+                  } `}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
                   {verificationResult.valid ? (
@@ -925,7 +908,7 @@ const RevocationTransparency: React.FC = () => {
                     <div style={{ display: 'flex', gap: '12px' }}>
                       <Text className={styles.logTimestamp}>[{entry.index}]</Text>
                       <Text className={styles.logTimestamp}>{entry.timestamp}</Text>
-                      <Badge color={entry.operation === 'append' ? 'success' : 'info'}>
+                      <Badge color={entry.operation === 'append' ? 'success' : 'informative'}>
                         {entry.operation.toUpperCase()}
                       </Badge>
                     </div>

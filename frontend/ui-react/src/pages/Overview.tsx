@@ -2,7 +2,7 @@ import { CheckCircle, Zap, Shield, TrendingUp, Activity } from 'lucide-react'
 import { StatCard } from '../components/Card'
 import { Card } from '../components/Card'
 import { useState, useEffect } from 'react'
-import { apiClient } from '../lib/api'
+
 
 export default function Overview() {
   const [backendStatus, setBackendStatus] = useState<'checking' | 'healthy' | 'error'>('checking')
@@ -14,7 +14,7 @@ export default function Overview() {
         // Check backend by calling a real endpoint
         const response = await fetch('/api/admin/metrics/system?tenant_id=test-tenant-1')
         if (response.ok) {
-          const data = await response.json()
+          await response.json()
           setBackendStatus('healthy')
           // Calculate uptime from memory stats or use default
           setBackendUptime('5d 12h')
@@ -51,16 +51,14 @@ export default function Overview() {
           </p>
           <span className="text-gray-300 dark:text-gray-600">•</span>
           <div className="flex items-center gap-2">
-            <Activity className={`h-4 w-4 ${
-              backendStatus === 'healthy' ? 'text-success-500 animate-pulse' : 
-              backendStatus === 'error' ? 'text-error-500' : 
-              'text-gray-400 animate-spin'
-            }`} />
-            <span className={`text-sm font-medium ${
-              backendStatus === 'healthy' ? 'text-success-600 dark:text-success-400' : 
-              backendStatus === 'error' ? 'text-error-600 dark:text-error-400' : 
-              'text-gray-500'
-            }`}>
+            <Activity className={`h-4 w-4 ${backendStatus === 'healthy' ? 'text-success-500 animate-pulse' :
+                backendStatus === 'error' ? 'text-error-500' :
+                  'text-gray-400 animate-spin'
+              }`} />
+            <span className={`text-sm font-medium ${backendStatus === 'healthy' ? 'text-success-600 dark:text-success-400' :
+                backendStatus === 'error' ? 'text-error-600 dark:text-error-400' :
+                  'text-gray-500'
+              }`}>
               Backend {backendStatus === 'checking' ? 'Checking...' : backendStatus}
               {backendStatus === 'healthy' && backendUptime && ` (${backendUptime})`}
             </span>

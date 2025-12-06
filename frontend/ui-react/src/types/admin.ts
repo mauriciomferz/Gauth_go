@@ -81,8 +81,10 @@ export interface RateLimiter {
   limit: number;
   window: number; // seconds
   burst?: number;
-  currentUsage: number;
-  resetTime: string; // ISO8601
+  current: number;
+  throttled: number;
+  totalRequests: number;
+  resetTime?: string; // ISO8601
 }
 
 export interface RateLimiterListResponse {
@@ -108,6 +110,9 @@ export interface RetryPolicy {
   baseDelay: number; // milliseconds
   maxDelay: number; // milliseconds
   jitter: boolean;
+  totalRetries: number;
+  successfulRetries: number;
+  failedRetries: number;
 }
 
 export interface RetryPolicyListResponse {
@@ -134,6 +139,8 @@ export interface Bulkhead {
   timeout: number; // milliseconds
   currentConcurrency: number;
   queuedRequests: number;
+  rejectedRequests: number;
+  completedRequests: number;
 }
 
 export interface BulkheadListResponse {
@@ -165,11 +172,12 @@ export interface EventListResponse {
 
 export interface EventType {
   id: string;
-  name: string;
+  type: string;
   description: string;
   category: string;
   severity: 'info' | 'warning' | 'error' | 'critical';
   schema?: Record<string, any>;
+  count: number;
 }
 
 export interface EventTypeListResponse {
@@ -180,11 +188,14 @@ export interface EventTypeListResponse {
 export interface EventHandler {
   id: string;
   name: string;
-  eventType: string;
+  eventTypes: string[];
   endpoint: string;
   method: 'POST' | 'PUT' | 'PATCH';
   enabled: boolean;
   retryPolicy?: string;
+  successRate?: number;
+  lastTriggered?: string;
+  timeout?: number;
 }
 
 export interface EventHandlerListResponse {

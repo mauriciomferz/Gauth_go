@@ -23,14 +23,6 @@ import {
   Option,
   Slider,
   Switch,
-  DataGrid,
-  DataGridBody,
-  DataGridRow,
-  DataGridHeader,
-  DataGridHeaderCell,
-  DataGridCell,
-  TableColumnDefinition,
-  createTableColumn,
   MessageBar,
   MessageBarBody,
   ProgressBar,
@@ -47,12 +39,11 @@ import {
   CheckmarkCircle24Filled,
   DismissCircle24Filled,
   Warning24Filled,
-  Play24Regular,
-  Stop24Regular,
 } from '@fluentui/react-icons'
 
 // Import admin API hooks
 import { useCircuitBreakers, useRateLimiters, useRetryPolicies, useResilienceMutations } from '../../hooks/useAdminApi'
+import type { CircuitBreaker, RateLimiter, RetryPolicy, Bulkhead } from '../../types/admin'
 
 const useStyles = makeStyles({
   container: {
@@ -194,59 +185,14 @@ const useStyles = makeStyles({
   },
 })
 
-interface CircuitBreaker {
+interface CompositePattern {
   id: string
   name: string
-  service: string
-  state: 'closed' | 'open' | 'half-open'
-  failureThreshold: number
-  successThreshold: number
-  timeout: number
-  failures: number
-  successes: number
-  lastStateChange: string
-  totalRequests: number
-  failureRate: number
-}
-
-interface RateLimiter {
-  id: string
-  name: string
-  resource: string
-  algorithm: 'token-bucket' | 'leaky-bucket' | 'fixed-window' | 'sliding-window'
-  limit: number
-  window: number
-  burst?: number
-  current: number
-  throttled: number
-  totalRequests: number
-}
-
-interface RetryPolicy {
-  id: string
-  name: string
-  operation: string
-  strategy: 'fixed' | 'exponential' | 'fibonacci' | 'linear'
-  maxAttempts: number
-  baseDelay: number
-  maxDelay: number
-  jitter: boolean
-  totalRetries: number
-  successfulRetries: number
-  failedRetries: number
-}
-
-interface Bulkhead {
-  id: string
-  name: string
-  service: string
-  maxConcurrency: number
-  maxQueueSize: number
-  currentConcurrency: number
-  queuedRequests: number
-  rejectedRequests: number
-  completedRequests: number
-  timeout: number
+  description: string
+  patterns: string[]
+  services: string[]
+  enabled: boolean
+  appliedCount: number
 }
 
 interface CompositePattern {
@@ -346,14 +292,7 @@ export default function ResiliencePatterns() {
     setLoading(cbLoading || rlLoading || rpLoading)
   }, [cbLoading, rlLoading, rpLoading])
 
-  const fetchAllData = async () => {
-    setLoading(true)
-    try {
-      await Promise.all([refetchCbs(), refetchRls(), refetchRps()])
-    } finally {
-      setLoading(false)
-    }
-  }
+
 
   const fetchBulkheads = async () => {
     try {
@@ -1327,7 +1266,7 @@ export default function ResiliencePatterns() {
                           />
                         </div>
                         <Text size={200}>{cp.description}</Text>
-                        
+
                         <div style={{ marginTop: tokens.spacingVerticalM }}>
                           <Text size={200} weight="semibold">Patterns:</Text>
                           <div className={styles.patternsList}>

@@ -13,7 +13,7 @@ import {
   Field,
   Dropdown,
   Option,
-  Textarea,
+
   DataGrid,
   DataGridBody,
   DataGridRow,
@@ -32,7 +32,7 @@ import {
   DialogContent,
   Checkbox,
   Switch,
-  Label,
+
 } from '@fluentui/react-components';
 import {
   Alert24Regular,
@@ -48,7 +48,8 @@ import {
 
 // Import admin API hooks
 import { useEvents, useEventTypes } from '../../hooks/useAdminApi';
-import { apiPost, apiDelete } from '../../utils/api';
+import type { Event, EventType, EventHandler } from '../../types/admin';
+
 import { addTenantParam } from '../../utils/tenant';
 
 const useStyles = makeStyles({
@@ -147,37 +148,7 @@ const useStyles = makeStyles({
   },
 });
 
-interface Event {
-  id: string;
-  type: string;
-  category: string;
-  timestamp: string;
-  source: string;
-  severity: string;
-  data: any;
-  metadata: any;
-}
 
-interface EventHandler {
-  id: string;
-  name: string;
-  eventTypes: string[];
-  endpoint: string;
-  method: string;
-  enabled: boolean;
-  retryPolicy: string;
-  timeout: number;
-  lastTriggered?: string;
-  successRate: number;
-}
-
-interface EventType {
-  type: string;
-  category: string;
-  description: string;
-  schema: string;
-  count: number;
-}
 
 export default function EventSystem() {
   const classes = useStyles();
@@ -404,7 +375,7 @@ export default function EventSystem() {
     createTableColumn<Event>({
       columnId: 'actions',
       renderHeaderCell: () => 'Actions',
-      renderCell: (item) => (
+      renderCell: (_) => (
         <TableCellLayout>
           <Button size="small" icon={<Eye24Regular />} />
         </TableCellLayout>
@@ -414,8 +385,8 @@ export default function EventSystem() {
 
   const totalEvents = eventTypes.reduce((sum, et) => sum + et.count, 0);
   const enabledHandlers = handlers.filter(h => h.enabled).length;
-  const avgSuccessRate = handlers.length > 0 
-    ? Math.round(handlers.reduce((sum, h) => sum + h.successRate, 0) / handlers.length)
+  const avgSuccessRate = handlers.length > 0
+    ? Math.round(handlers.reduce((sum, h) => sum + (h.successRate || 0), 0) / handlers.length)
     : 0;
 
   return (
@@ -564,166 +535,166 @@ export default function EventSystem() {
           <Tab value="handlers" icon={<Filter24Regular />}>Handlers</Tab>
         </TabList>
 
-          {/* Event Types Dashboard */}
-          {selectedTab === 'dashboard' && (
-            <div style={{ marginTop: '24px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-                {eventTypes.map((eventType) => (
-                  <Card key={eventType.type} style={{ padding: '16px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
-                      <div>
-                        <Text weight="semibold" size={400}>{eventType.type}</Text>
-                        {getCategoryBadge(eventType.category)}
-                      </div>
-                      <Text weight="bold" size={500}>{eventType.count.toLocaleString()}</Text>
+        {/* Event Types Dashboard */}
+        {selectedTab === 'dashboard' && (
+          <div style={{ marginTop: '24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+              {eventTypes.map((eventType) => (
+                <Card key={eventType.type} style={{ padding: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
+                    <div>
+                      <Text weight="semibold" size={400}>{eventType.type}</Text>
+                      {getCategoryBadge(eventType.category)}
                     </div>
-                    <Text size={200} style={{ color: tokens.colorNeutralForeground3, marginBottom: '8px' }}>
-                      {eventType.description}
-                    </Text>
-                    <Text size={100} style={{ fontFamily: 'monospace', color: tokens.colorNeutralForeground3 }}>
-                      Schema: {eventType.schema}
-                    </Text>
-                  </Card>
-                ))}
-              </div>
+                    <Text weight="bold" size={500}>{eventType.count.toLocaleString()}</Text>
+                  </div>
+                  <Text size={200} style={{ color: tokens.colorNeutralForeground3, marginBottom: '8px' }}>
+                    {eventType.description}
+                  </Text>
+                  <Text size={100} style={{ fontFamily: 'monospace', color: tokens.colorNeutralForeground3 }}>
+                    Schema: {eventType.schema}
+                  </Text>
+                </Card>
+              ))}
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Live Event Stream */}
-          {selectedTab === 'stream' && (
-            <div style={{ marginTop: '24px' }}>
-              <div className={classes.filterPanel}>
-                <Button
-                  appearance={streaming ? 'primary' : 'secondary'}
-                  icon={streaming ? <Pause24Regular /> : <Play24Regular />}
-                  onClick={() => setStreaming(!streaming)}
-                >
-                  {streaming ? 'Pause Stream' : 'Start Stream'}
-                </Button>
+        {/* Live Event Stream */}
+        {selectedTab === 'stream' && (
+          <div style={{ marginTop: '24px' }}>
+            <div className={classes.filterPanel}>
+              <Button
+                appearance={streaming ? 'primary' : 'secondary'}
+                icon={streaming ? <Pause24Regular /> : <Play24Regular />}
+                onClick={() => setStreaming(!streaming)}
+              >
+                {streaming ? 'Pause Stream' : 'Start Stream'}
+              </Button>
 
-                <Dropdown
-                  placeholder="Category"
-                  value={filterCategory}
-                  onOptionSelect={(_, data) => setFilterCategory(data.optionValue as string)}
-                >
-                  <Option value="all">All Categories</Option>
-                  <Option value="auth">Auth</Option>
-                  <Option value="audit">Audit</Option>
-                  <Option value="token">Token</Option>
-                  <Option value="system">System</Option>
-                </Dropdown>
+              <Dropdown
+                placeholder="Category"
+                value={filterCategory}
+                onOptionSelect={(_, data) => setFilterCategory(data.optionValue as string)}
+              >
+                <Option value="all">All Categories</Option>
+                <Option value="auth">Auth</Option>
+                <Option value="audit">Audit</Option>
+                <Option value="token">Token</Option>
+                <Option value="system">System</Option>
+              </Dropdown>
 
-                <Dropdown
-                  placeholder="Severity"
-                  value={filterSeverity}
-                  onOptionSelect={(_, data) => setFilterSeverity(data.optionValue as string)}
-                >
-                  <Option value="all">All Severities</Option>
-                  <Option value="critical">Critical</Option>
-                  <Option value="error">Error</Option>
-                  <Option value="warning">Warning</Option>
-                  <Option value="info">Info</Option>
-                  <Option value="debug">Debug</Option>
-                </Dropdown>
+              <Dropdown
+                placeholder="Severity"
+                value={filterSeverity}
+                onOptionSelect={(_, data) => setFilterSeverity(data.optionValue as string)}
+              >
+                <Option value="all">All Severities</Option>
+                <Option value="critical">Critical</Option>
+                <Option value="error">Error</Option>
+                <Option value="warning">Warning</Option>
+                <Option value="info">Info</Option>
+                <Option value="debug">Debug</Option>
+              </Dropdown>
 
-                <Input
-                  placeholder="Filter by source..."
-                  value={filterSource}
-                  onChange={(e) => setFilterSource(e.target.value)}
-                  style={{ minWidth: '200px' }}
-                />
-              </div>
+              <Input
+                placeholder="Filter by source..."
+                value={filterSource}
+                onChange={(e) => setFilterSource(e.target.value)}
+                style={{ minWidth: '200px' }}
+              />
+            </div>
 
-              <DataGrid items={filteredEvents} columns={eventColumns} sortable resizableColumns>
-                <DataGridHeader>
-                  <DataGridRow>
-                    {({ renderHeaderCell }) => (
-                      <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
+            <DataGrid items={filteredEvents} columns={eventColumns} sortable resizableColumns>
+              <DataGridHeader>
+                <DataGridRow>
+                  {({ renderHeaderCell }) => (
+                    <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
+                  )}
+                </DataGridRow>
+              </DataGridHeader>
+              <DataGridBody<Event>>
+                {({ item, rowId }) => (
+                  <DataGridRow<Event> key={rowId}>
+                    {({ renderCell }) => (
+                      <DataGridCell>{renderCell(item)}</DataGridCell>
                     )}
                   </DataGridRow>
-                </DataGridHeader>
-                <DataGridBody<Event>>
-                  {({ item, rowId }) => (
-                    <DataGridRow<Event> key={rowId}>
-                      {({ renderCell }) => (
-                        <DataGridCell>{renderCell(item)}</DataGridCell>
-                      )}
-                    </DataGridRow>
-                  )}
-                </DataGridBody>
-              </DataGrid>
-            </div>
-          )}
+                )}
+              </DataGridBody>
+            </DataGrid>
+          </div>
+        )}
 
-          {/* Handlers Registry */}
-          {selectedTab === 'handlers' && (
-            <div style={{ marginTop: '24px' }}>
-              {handlers.map((handler) => (
-                <div key={handler.id} className={classes.handlerCard}>
-                  <div className={classes.handlerHeader}>
-                    <div>
-                      <Text weight="semibold" size={400}>{handler.name}</Text>
-                      <Text size={200} style={{ color: tokens.colorNeutralForeground3, display: 'block' }}>
-                        {handler.method} {handler.endpoint}
-                      </Text>
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      <Badge appearance="filled" color={handler.enabled ? 'success' : 'danger'}>
-                        {handler.enabled ? 'Enabled' : 'Disabled'}
-                      </Badge>
-                      <Switch
-                        checked={handler.enabled}
-                        onChange={(_, data) => handleToggleHandler(handler.id, data.checked)}
-                      />
-                      <Button size="small" icon={<Edit24Regular />} />
-                      <Button size="small" icon={<Delete24Regular />} onClick={() => handleDeleteHandler(handler.id)} />
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginTop: '12px' }}>
-                    <div>
-                      <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>Event Types</Text>
-                      <Text weight="semibold">{handler.eventTypes.length}</Text>
-                    </div>
-                    <div>
-                      <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>Timeout</Text>
-                      <Text weight="semibold">{handler.timeout}ms</Text>
-                    </div>
-                    <div>
-                      <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>Retry Policy</Text>
-                      <Text weight="semibold">{handler.retryPolicy}</Text>
-                    </div>
-                    <div>
-                      <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>Success Rate</Text>
-                      <Text weight="semibold" style={{ color: handler.successRate > 90 ? tokens.colorPaletteGreenForeground1 : tokens.colorPaletteRedForeground1 }}>
-                        {handler.successRate}%
-                      </Text>
-                    </div>
-                  </div>
-
-                  <div style={{ marginTop: '8px' }}>
-                    <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-                      Subscribed to: {handler.eventTypes.join(', ')}
+        {/* Handlers Registry */}
+        {selectedTab === 'handlers' && (
+          <div style={{ marginTop: '24px' }}>
+            {handlers.map((handler) => (
+              <div key={handler.id} className={classes.handlerCard}>
+                <div className={classes.handlerHeader}>
+                  <div>
+                    <Text weight="semibold" size={400}>{handler.name}</Text>
+                    <Text size={200} style={{ color: tokens.colorNeutralForeground3, display: 'block' }}>
+                      {handler.method} {handler.endpoint}
                     </Text>
                   </div>
-
-                  {handler.lastTriggered && (
-                    <Text size={200} style={{ color: tokens.colorNeutralForeground3, marginTop: '8px' }}>
-                      Last triggered: {new Date(handler.lastTriggered).toLocaleString()}
-                    </Text>
-                  )}
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <Badge appearance="filled" color={handler.enabled ? 'success' : 'danger'}>
+                      {handler.enabled ? 'Enabled' : 'Disabled'}
+                    </Badge>
+                    <Switch
+                      checked={handler.enabled}
+                      onChange={(_: React.ChangeEvent<HTMLInputElement>, data: { checked: boolean }) => handleToggleHandler(handler.id, data.checked)}
+                    />
+                    <Button size="small" icon={<Edit24Regular />} />
+                    <Button size="small" icon={<Delete24Regular />} onClick={() => handleDeleteHandler(handler.id)} />
+                  </div>
                 </div>
-              ))}
 
-              {handlers.length === 0 && (
-                <div style={{ textAlign: 'center', padding: '40px' }}>
-                  <Text size={400} style={{ color: tokens.colorNeutralForeground3 }}>
-                    No event handlers configured. Click "Add Handler" to create one.
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginTop: '12px' }}>
+                  <div>
+                    <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>Event Types</Text>
+                    <Text weight="semibold">{handler.eventTypes.length}</Text>
+                  </div>
+                  <div>
+                    <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>Timeout</Text>
+                    <Text weight="semibold">{handler.timeout}ms</Text>
+                  </div>
+                  <div>
+                    <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>Retry Policy</Text>
+                    <Text weight="semibold">{handler.retryPolicy}</Text>
+                  </div>
+                  <div>
+                    <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>Success Rate</Text>
+                    <Text weight="semibold" style={{ color: (handler.successRate || 0) > 90 ? tokens.colorPaletteGreenForeground1 : tokens.colorPaletteRedForeground1 }}>
+                      {(handler.successRate || 0)}%
+                    </Text>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: '8px' }}>
+                  <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                    Subscribed to: {handler.eventTypes.join(', ')}
                   </Text>
                 </div>
-              )}
-            </div>
-          )}
+
+                {handler.lastTriggered && (
+                  <Text size={200} style={{ color: tokens.colorNeutralForeground3, marginTop: '8px' }}>
+                    Last triggered: {new Date(handler.lastTriggered).toLocaleString()}
+                  </Text>
+                )}
+              </div>
+            ))}
+
+            {handlers.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '40px' }}>
+                <Text size={400} style={{ color: tokens.colorNeutralForeground3 }}>
+                  No event handlers configured. Click "Add Handler" to create one.
+                </Text>
+              </div>
+            )}
+          </div>
+        )}
       </Card>
     </div>
   );

@@ -16,7 +16,7 @@ import {
   Option,
   Switch,
   Dialog,
-  DialogTrigger,
+
   DialogSurface,
   DialogTitle,
   DialogBody,
@@ -24,15 +24,6 @@ import {
   DialogContent,
   Tab,
   TabList,
-  DataGrid,
-  DataGridHeader,
-  DataGridRow,
-  DataGridHeaderCell,
-  DataGridBody,
-  DataGridCell,
-  createTableColumn,
-  TableCellLayout,
-  TableColumnDefinition,
   ProgressBar,
   Spinner,
 } from '@fluentui/react-components';
@@ -44,7 +35,7 @@ import {
   CheckmarkCircle24Regular,
   DismissCircle24Regular,
   History24Regular,
-  CloudSync24Regular,
+
   Settings24Regular,
   Code24Regular,
   Database24Regular,
@@ -52,7 +43,7 @@ import {
 } from '@fluentui/react-icons';
 
 // Import admin API hooks
-import { useConfigVariables, useFeatureFlags, useConfigMutations } from '../../hooks/useAdminApi';
+
 
 const useStyles = makeStyles({
   root: {
@@ -765,12 +756,12 @@ const ConfigurationManager: React.FC = () => {
   };
 
   const getTypeBadge = (type: string) => {
-    const colors: Record<string, 'success' | 'danger' | 'warning' | 'info'> = {
-      manual: 'info',
+    const colors: Record<string, 'success' | 'danger' | 'warning' | 'informative'> = {
+      manual: 'informative',
       auto: 'success',
       rollback: 'warning',
     };
-    return <Badge color={colors[type] || 'info'}>{type}</Badge>;
+    return <Badge color={colors[type] || 'informative'}>{type}</Badge>;
   };
 
   const renderDiffLine = (line: string, index: number) => {
@@ -872,7 +863,7 @@ const ConfigurationManager: React.FC = () => {
                   <div className={styles.variableInfo}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <Text className={styles.variableName}>{variable.key}</Text>
-                      <Badge color={variable.sensitive ? 'danger' : 'info'}>{variable.type}</Badge>
+                      <Badge color={variable.sensitive ? 'danger' : 'informative'}>{variable.type}</Badge>
                       {variable.sensitive && <Badge color="warning">SENSITIVE</Badge>}
                     </div>
                     <Text className={styles.variableValue}>
@@ -1262,7 +1253,7 @@ const ConfigurationManager: React.FC = () => {
                   <div className={styles.flagInfo}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <Text className={styles.flagName}>{flag.name}</Text>
-                      <Badge color={flag.type === 'boolean' ? 'info' : flag.type === 'percentage' ? 'warning' : 'success'}>
+                      <Badge color={flag.type === 'boolean' ? 'informative' : flag.type === 'percentage' ? 'warning' : 'success'}>
                         {flag.type}
                       </Badge>
                       {flag.enabled ? (
@@ -1292,8 +1283,8 @@ const ConfigurationManager: React.FC = () => {
                   {flag.type === 'percentage' && (
                     <div className={styles.metric}>
                       <Text className={styles.metricLabel}>Rollout</Text>
-                      <ProgressBar value={flag.percentage / 100} max={1} />
-                      <Text className={styles.metricValue}>{flag.percentage}%</Text>
+                      <ProgressBar value={(flag.percentage || 0) / 100} max={1} />
+                      <Text className={styles.metricValue}>{flag.percentage || 0}%</Text>
                     </div>
                   )}
                   {flag.type === 'targeting' && flag.targetTenants && (
