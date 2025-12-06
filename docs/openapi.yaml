@@ -4226,6 +4226,7 @@ paths:
           name: id
           required: true
           schema: { type: string }
+          description: PoA identifier
       requestBody:
         required: true
         content:
@@ -4250,6 +4251,7 @@ paths:
           name: id
           required: true
           schema: { type: string }
+          description: PoA identifier
       responses:
         '200': { $ref: '#/components/responses/PoAOk' }
         '400': { $ref: '#/components/responses/BadRequest' }
@@ -4267,6 +4269,7 @@ paths:
           name: id
           required: true
           schema: { type: string }
+          description: PoA identifier
       responses:
         '200': { $ref: '#/components/responses/PoAOk' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -4283,6 +4286,7 @@ paths:
           name: id
           required: true
           schema: { type: string }
+          description: PoA identifier
       requestBody:
         required: true
         content:
@@ -4333,6 +4337,7 @@ paths:
             name: id
             required: true
             schema: { type: string }
+            description: PoA identifier
         requestBody:
           required: true
           content:
@@ -4357,6 +4362,7 @@ paths:
             name: id
             required: true
             schema: { type: string }
+            description: PoA identifier
         requestBody:
           required: true
           content:
@@ -4381,6 +4387,7 @@ paths:
           name: id
           required: true
           schema: { type: string }
+          description: PoA identifier
       responses:
         '200': { $ref: '#/components/responses/PoAOk' }
         '400': { $ref: '#/components/responses/BadRequest' }
@@ -4399,6 +4406,7 @@ paths:
           name: id
           required: true
           schema: { type: string }
+          description: PoA identifier
       responses:
         '200': { $ref: '#/components/responses/PoAOk' }
         '400': { $ref: '#/components/responses/BadRequest' }
@@ -4418,6 +4426,7 @@ paths:
           name: id
           required: true
           schema: { type: string }
+          description: PoA identifier
       responses:
         '201': { $ref: '#/components/responses/PoATokenOk' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -4477,6 +4486,7 @@ paths:
           name: index
           required: true
           schema: { type: integer }
+          description: Audit ledger entry index
       responses:
         '200': { $ref: '#/components/responses/AuditLedgerEntryOk' }
         '404': { $ref: '#/components/responses/NotFound' }
