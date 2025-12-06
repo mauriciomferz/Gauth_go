@@ -7,6 +7,20 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+)
+
+// regexCacheOps tracks cache operations for observability
+var regexCacheOps = promauto.NewCounterVec(
+	prometheus.CounterOpts{
+		Namespace: "gauth",
+		Subsystem: "expr",
+		Name:      "regex_cache_ops_total",
+		Help:      "Regex cache operations (hit, miss, evict)",
+	},
+	[]string{"operation"},
 )
 
 // Eval evaluates a boolean expression against attributes and current time.
@@ -204,7 +218,11 @@ func evalRegexMatch(clause string, attrs map[string]string) (bool, error) {
 	rgx, ok := regexCache.compiled[pat]
 	regexCache.RUnlock()
 
-	if !ok {
+	if ok {
+		regexCacheOps.WithLabelValues("hit").Inc()
+	} else {
+		regexCacheOps.WithLabelValues("miss").Inc()
+
 		// Compile and cache with write lock
 		compiled, err := regexp.Compile(pat)
 		if err != nil {
@@ -221,6 +239,7 @@ func evalRegexMatch(clause string, attrs map[string]string) (bool, error) {
 				oldest := regexCache.order[0]
 				delete(regexCache.compiled, oldest)
 				regexCache.order = regexCache.order[1:]
+				regexCacheOps.WithLabelValues("evict").Inc()
 			}
 			regexCache.compiled[pat] = compiled
 			regexCache.order = append(regexCache.order, pat)
