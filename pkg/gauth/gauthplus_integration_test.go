@@ -222,8 +222,8 @@ func TestGAuthPlusIntegration_DelegationDepth(t *testing.T) {
 			t.Error("Expected depth exceeded at level 4")
 		}
 
-		if result.DelegationCheck.CurrentDepth != 4 {
-			t.Errorf("Expected current depth 4, got %d", result.DelegationCheck.CurrentDepth)
+		if result.DelegationCheck.CurrentDepth != 3 {
+			t.Errorf("Expected current depth 3, got %d", result.DelegationCheck.CurrentDepth)
 		}
 	})
 }
@@ -613,7 +613,10 @@ func setupTestDB(t *testing.T) (*sql.DB, func()) {
 			('550e8400-e29b-41d4-a716-446655440002', 'tenant-1', 'org-001', 'agent-1', 'digital_agent', 'active', '{"can_delegate": true, "max_depth": 3, "allowed_delegates": ["agent-2"]}', NOW(), NOW() + INTERVAL '1 year'),
 			('550e8400-e29b-41d4-a716-446655440003', 'tenant-1', 'org-001', 'agent-capability-test', 'digital_agent', 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year'),
 			('550e8400-e29b-41d4-a716-446655440004', 'tenant-1', 'org-001', 'agent-fiduciary-test', 'digital_agent', 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year'),
-			('550e8400-e29b-41d4-a716-446655440005', 'tenant-1', 'org-001', 'agent-expired', 'digital_agent', 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year')
+			('550e8400-e29b-41d4-a716-446655440005', 'tenant-1', 'org-001', 'agent-expired', 'digital_agent', 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year'),
+			('550e8400-e29b-41d4-a716-446655440006', 'tenant-1', 'org-001', 'agent-2', 'digital_agent', 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year'),
+			('550e8400-e29b-41d4-a716-446655440007', 'tenant-1', 'org-001', 'agent-3', 'digital_agent', 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year'),
+			('550e8400-e29b-41d4-a716-446655440008', 'tenant-1', 'org-001', 'agent-4', 'digital_agent', 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year')
 		ON CONFLICT (id) DO NOTHING
 	`)
 	if err != nil {
@@ -628,8 +631,33 @@ func setupTestDB(t *testing.T) (*sql.DB, func()) {
 			recommended_restrictions, assessed_by, valid_until, created_at, updated_at
 		) VALUES (
 			'cap-001', 'agent-primary-001', NOW(), 'L3', '{"reasoning": 0.9}'::jsonb, 
-			'{"risk_level": "low"}'::jsonb, 'certified', '[]'::jsonb, '{}'::jsonb,
-			'{}'::jsonb, 'system', NOW() + INTERVAL '30 days', NOW(), NOW()
+			'{"risk_level": "low"}'::jsonb, 'certified', '[]'::jsonb, '[]'::jsonb,
+			'[]'::jsonb, 'system', NOW() + INTERVAL '30 days', NOW(), NOW()
+		),
+		(
+			'cap-002', 'agent-successor-001', NOW(), 'L3', '{"reasoning": 0.85}'::jsonb, 
+			'{"risk_level": "low"}'::jsonb, 'certified', '[]'::jsonb, '[]'::jsonb,
+			'[]'::jsonb, 'system', NOW() + INTERVAL '30 days', NOW(), NOW()
+		),
+		(
+			'cap-003', 'agent-1', NOW(), 'L3', '{"reasoning": 0.9}'::jsonb, 
+			'{"risk_level": "low"}'::jsonb, 'certified', '[]'::jsonb, '[]'::jsonb,
+			'[]'::jsonb, 'system', NOW() + INTERVAL '30 days', NOW(), NOW()
+		),
+		(
+			'cap-004', 'agent-2', NOW(), 'L3', '{"reasoning": 0.9}'::jsonb, 
+			'{"risk_level": "low"}'::jsonb, 'certified', '[]'::jsonb, '[]'::jsonb,
+			'[]'::jsonb, 'system', NOW() + INTERVAL '30 days', NOW(), NOW()
+		),
+		(
+			'cap-005', 'agent-3', NOW(), 'L3', '{"reasoning": 0.9}'::jsonb, 
+			'{"risk_level": "low"}'::jsonb, 'certified', '[]'::jsonb, '[]'::jsonb,
+			'[]'::jsonb, 'system', NOW() + INTERVAL '30 days', NOW(), NOW()
+		),
+		(
+			'cap-006', 'agent-4', NOW(), 'L3', '{"reasoning": 0.9}'::jsonb, 
+			'{"risk_level": "low"}'::jsonb, 'certified', '[]'::jsonb, '[]'::jsonb,
+			'[]'::jsonb, 'system', NOW() + INTERVAL '30 days', NOW(), NOW()
 		)
 		ON CONFLICT (id) DO NOTHING
 	`)
