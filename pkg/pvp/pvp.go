@@ -1,6 +1,4 @@
-// Package verification - Power Verification Point (PVP) implementation
-// RFC-0111 Step VII: Identity Verification Chain
-package verification
+package pvp
 
 import (
 	"context"
