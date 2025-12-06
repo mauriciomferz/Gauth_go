@@ -162,6 +162,23 @@ var (
 		[]string{"result"},
 	)
 
+	// Policy Metrics
+	PolicyDecisionsTotal = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "gauth_policy_decisions_total",
+			Help: "Total number of policy decisions made",
+		},
+		[]string{"policy_id", "effect"},
+	)
+
+	PolicyEvaluationDuration = promauto.NewHistogram(
+		prometheus.HistogramOpts{
+			Name:    "gauth_policy_evaluation_duration_seconds",
+			Help:    "Duration of policy evaluation in seconds",
+			Buckets: []float64{.0001, .0005, .001, .005, .01, .025, .05},
+		},
+	)
+
 	// System Health Metrics
 	HTTPRequestsTotal = promauto.NewCounterVec(
 		prometheus.CounterOpts{
@@ -334,6 +351,43 @@ var (
 			Help: "Total number of fiduciary duty violations",
 		},
 		[]string{"duty_type", "severity"},
+	)
+
+	// Rotation Business Metrics
+	RotationSignatureVerifyLatency = promauto.NewHistogram(
+		prometheus.HistogramOpts{
+			Name:    "gauth_rotation_signature_verify_latency_seconds",
+			Help:    "Latency of rotation signature verification",
+			Buckets: []float64{.001, .005, .01, .025, .05, .1, .25, .5},
+		},
+	)
+
+	RotationContinuityUpdatesTotal = promauto.NewCounter(
+		prometheus.CounterOpts{
+			Name: "gauth_rotation_v2_continuity_updates_total",
+			Help: "Total number of rotation continuity updates",
+		},
+	)
+
+	RotationChainLength = promauto.NewGauge(
+		prometheus.GaugeOpts{
+			Name: "gauth_rotation_summary_chain_length",
+			Help: "Length of the rotation chain",
+		},
+	)
+
+	RotationHeadAge = promauto.NewGauge(
+		prometheus.GaugeOpts{
+			Name: "gauth_rotation_summary_head_age_seconds",
+			Help: "Age of the rotation chain head in seconds",
+		},
+	)
+
+	RotationLastAnchorAge = promauto.NewGauge(
+		prometheus.GaugeOpts{
+			Name: "gauth_rotation_summary_last_anchor_age_seconds",
+			Help: "Age of the last rotation anchor in seconds",
+		},
 	)
 )
 

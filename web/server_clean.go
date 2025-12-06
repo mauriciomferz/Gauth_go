@@ -54,6 +54,7 @@ import (
 	authpkg "github.com/mauriciomferz/Gauth_go/pkg/auth"
 	"github.com/mauriciomferz/Gauth_go/pkg/authz"
 	"github.com/mauriciomferz/Gauth_go/pkg/cache"
+	"github.com/mauriciomferz/Gauth_go/pkg/common"
 	cacheConfig "github.com/mauriciomferz/Gauth_go/pkg/config"
 	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	cryptopkg "github.com/mauriciomferz/Gauth_go/pkg/crypto"
@@ -562,6 +563,8 @@ type BetaServer struct {
 	rotationV2LastHash string
 	// MCP connection manager for Phase 2B MCP Integration
 	mcpConnectionManager *mcp.ConnectionManager
+	// Database connection pool (optional, for persistent audit logging and deep health checks)
+	db *database.DB
 }
 
 // apiCryptoAlgorithms returns a static list of supported crypto algorithms.
@@ -3230,6 +3233,34 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	for _, opt := range opts {
 		opt(s)
 	}
+
+	// Initialize Database ... (rest of the block is fine, just confirming context)
+	if host := os.Getenv("GAUTH_DB_HOST"); host != "" {
+		port := atoiDefault(os.Getenv("GAUTH_DB_PORT"), 5432)
+		dbCfg := &database.Config{
+			Host:     host,
+			Port:     port,
+			User:     os.Getenv("GAUTH_DB_USER"),
+			Password: os.Getenv("GAUTH_DB_PASSWORD"),
+			Database: os.Getenv("GAUTH_DB_NAME"),
+			SSLMode:  os.Getenv("GAUTH_DB_SSL_MODE"),
+		}
+		if db, err := database.NewDB(dbCfg); err == nil {
+			s.db = db
+			fmt.Printf("Database connected: %s\n", host)
+			// Wire up audit logger
+			repo := audit.NewRepository(db.Pool)
+			// Type assertion or wrapper needed for metrics?
+			// DatabaseLogger takes common.Logger. s.metrics isn't common.Logger.
+			// basic logger for errors
+			l := common.NewSimpleLogger()
+			dbLogger := audit.NewDatabaseLogger(repo, l)
+			s.audit.SetDatabaseLogger(dbLogger)
+		} else {
+			fmt.Printf("Failed to connect to database: %v\n", err)
+		}
+	}
+
 	// Defer semantic diagnostics integrity endpoint registration to initUIRevamp (invoked immediately below)
 	s.initUIRevamp()
 	// Register composite authorization endpoints (demo) for tests expecting activation flow.
@@ -10122,9 +10153,17 @@ func escapeSSEData(s string) string {
 }
 
 func (s *BetaServer) health(c *gin.Context) {
+	checks := s.DeepHealthCheck(c.Request.Context())
 	uptime := time.Since(s.start).String()
 	c.JSON(200, gin.H{
-		"success": true,
+		"success":   true,
+		"status":    "healthy",
+		"version":   "1.0.0-beta",
+		"features":  []string{"health", "info", "ping", "examples", "poa", "audit", "events", "token"},
+		"uptime":    uptime,
+		"checks":    checks,
+		"timestamp": time.Now().Format(time.RFC3339),
+		// Legacy data object for backward compatibility
 		"data": gin.H{
 			"uptime":    uptime,
 			"status":    "healthy",
@@ -10442,6 +10481,8 @@ type AuditLog struct {
 	buffer []*AuditEntry
 	// subscribers for SSE streaming
 	subs map[chan *AuditEntry]struct{}
+	// database logger for persistence
+	dbLogger *audit.DatabaseLogger
 }
 
 func NewAuditLog(capacity int) *AuditLog {
@@ -10465,6 +10506,33 @@ func (l *AuditLog) Append(e *AuditEntry) {
 		default:
 		} // non-blocking
 	}
+
+	// persist to database if logger configured
+	if l.dbLogger != nil {
+		// Map AuditEntry to audit.AuditEvent (handled by Log method via type switch logic I added)
+		// Wait, Log accepts *AuditEvent or *Event.
+		// I need to map it here OR update generic Log.
+		// Let's map it here to be safe and explicit.
+		evt := &audit.AuditEvent{
+			ID:        e.ID,
+			Timestamp: e.At,
+
+			UserID:     e.Actor, // Assuming generic string mapping
+			Action:     e.Action,
+			ResourceID: e.Resource,
+			Status:     e.Outcome,
+			Severity:   "info",
+			TenantID:   "default",
+		}
+		// Log async
+		_ = l.dbLogger.Log(context.Background(), evt)
+	}
+}
+
+func (l *AuditLog) SetDatabaseLogger(dl *audit.DatabaseLogger) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.dbLogger = dl
 }
 
 func (l *AuditLog) List(limit int) []*AuditEntry {
