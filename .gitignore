@@ -72,7 +72,8 @@ demo_cascade
 demo_cascade_build
 demo_executable
 gauth-original-demo
-gauth-server-cmd
+gauth-server
+!cmd/web-server/main.go
 gauth-web-server
 main
 basic
