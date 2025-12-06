@@ -8,8 +8,8 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
+	"github.com/mauriciomferz/Gauth_go/pkg/pvp"
 	"github.com/mauriciomferz/Gauth_go/pkg/registry"
-	"github.com/mauriciomferz/Gauth_go/pkg/verification"
 )
 
 // TestDefaultPIP_VerifyCommercialRegister tests commercial register verification integration
@@ -112,12 +112,12 @@ func TestDefaultPIP_VerifyIdentityChain(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("Valid identity chain verification", func(t *testing.T) {
-		pvp := verification.NewDefaultPVP("https://example.com/trust-list")
-		pip := NewDefaultPIP(nil, nil, pvp, 5*time.Minute)
+		pvpClient := pvp.NewDefaultPVP("https://example.com/trust-list")
+		pip := NewDefaultPIP(nil, nil, pvpClient, 5*time.Minute)
 
-		req := &verification.IdentityChainVerificationRequest{
+		req := &pvp.IdentityChainVerificationRequest{
 			PowerOfAttorney: "poa-test-123",
-			ResourceOwner: &verification.IdentityCredential{
+			ResourceOwner: &pvp.IdentityCredential{
 				ID:                 "resource-owner-1",
 				Type:               "natural_person",
 				Name:               "Dr. Max Mustermann",
@@ -132,7 +132,7 @@ func TestDefaultPIP_VerifyIdentityChain(t *testing.T) {
 				IssuedAt:  time.Now().Add(-30 * 24 * time.Hour),
 				ExpiresAt: time.Now().Add(335 * 24 * time.Hour),
 			},
-			ClientOwner: &verification.IdentityCredential{
+			ClientOwner: &pvp.IdentityCredential{
 				ID:                 "client-owner-1",
 				Type:               "legal_person",
 				Name:               "Test Technologies GmbH",
@@ -146,7 +146,7 @@ func TestDefaultPIP_VerifyIdentityChain(t *testing.T) {
 				},
 				IssuedAt: time.Now().Add(-60 * 24 * time.Hour),
 			},
-			Client: &verification.ClientIdentity{
+			Client: &pvp.ClientIdentity{
 				ClientID:         "ai-client-123",
 				ClientName:       "Test AI Assistant",
 				PublicKey:        "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA\n-----END PUBLIC KEY-----",
@@ -174,17 +174,17 @@ func TestDefaultPIP_VerifyIdentityChain(t *testing.T) {
 	})
 
 	t.Run("Missing resource owner", func(t *testing.T) {
-		pvp := verification.NewDefaultPVP("https://example.com/trust-list")
-		pip := NewDefaultPIP(nil, nil, pvp, 5*time.Minute)
+		pvpClient := pvp.NewDefaultPVP("https://example.com/trust-list")
+		pip := NewDefaultPIP(nil, nil, pvpClient, 5*time.Minute)
 
-		req := &verification.IdentityChainVerificationRequest{
+		req := &pvp.IdentityChainVerificationRequest{
 			ResourceOwner: nil,
-			ClientOwner: &verification.IdentityCredential{
+			ClientOwner: &pvp.IdentityCredential{
 				ID:   "client-owner-1",
 				Type: "legal_person",
 				Name: "Test GmbH",
 			},
-			Client: &verification.ClientIdentity{
+			Client: &pvp.ClientIdentity{
 				ClientID:   "ai-client-123",
 				ClientName: "Test AI",
 			},

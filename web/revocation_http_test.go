@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,7 +24,7 @@ func buildTestServer(t *testing.T) *BetaServer {
 	}
 	s := NewBetaServer("", WithKeyProvider(km))
 	// Initialize revocation chain with two events.
-	rc := delegation.NewRevocationChain()
+	rc := delegation.NewRevocationChain(delegation.WithKeyProvider(km))
 	_, _ = rc.Append(delegation.RevocationEvent{ID: "rev-1", DelegationID: "del-1"})
 	_, _ = rc.Append(delegation.RevocationEvent{ID: "rev-2", DelegationID: "del-2"})
 	s.revocationChain = rc
@@ -67,16 +68,62 @@ func TestRevocationVerifyEndpoint(t *testing.T) {
 	}
 }
 
+// ControllableKeyProvider wraps a KeyProvider to simulate key loss.
+type ControllableKeyProvider struct {
+	Delegate crypto.KeyProvider
+	Enabled  bool
+}
+
+func (c *ControllableKeyProvider) ActiveSigner() (crypto.Signer, error) {
+	if !c.Enabled {
+		return nil, errors.New("key provider disabled")
+	}
+	return c.Delegate.ActiveSigner()
+}
+
+func (c *ControllableKeyProvider) PublicKey(keyID string) ([]byte, string, error) {
+	if !c.Enabled {
+		return nil, "", errors.New("key provider disabled")
+	}
+	return c.Delegate.PublicKey(keyID)
+}
+
+func (c *ControllableKeyProvider) VerifyWith(msg, sig []byte, keyID string) error {
+	if !c.Enabled {
+		return errors.New("key provider disabled")
+	}
+	return c.Delegate.VerifyWith(msg, sig, keyID)
+}
+
 func TestRevocationVerifyEndpointAfterKeyLoss(t *testing.T) {
-	s := buildTestServer(t)
-	// Remove manager (simulate unknown kid scenario) and call endpoint again
-	s.keyProvider = nil
+	gin.SetMode(gin.TestMode)
+	// Init real key manager
+	km, err := crypto.NewManager(time.Hour)
+	if err != nil {
+		t.Fatalf("km init: %v", err)
+	}
+	// Wrap it
+	ckp := &ControllableKeyProvider{Delegate: km, Enabled: true}
+
+	// Create server with wrapper
+	s := NewBetaServer("", WithKeyProvider(ckp))
+
+	// Create chain with wrapper (so events get signed)
+	rc := delegation.NewRevocationChain(delegation.WithKeyProvider(ckp))
+	_, _ = rc.Append(delegation.RevocationEvent{ID: "rev-1", DelegationID: "del-1"})
+	_, _ = rc.Append(delegation.RevocationEvent{ID: "rev-2", DelegationID: "del-2"})
+	s.revocationChain = rc
+
+	// Now simulate key loss
+	ckp.Enabled = false
+
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/token/revocation/verify", nil)
 	s.router.ServeHTTP(w, req)
 	if w.Code != 200 {
 		t.Fatalf("expected 200 got %d", w.Code)
 	}
+
 	// Global chain verification should fail; endpoint sets verified false and includes verification_error.
 	var body map[string]any
 	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {

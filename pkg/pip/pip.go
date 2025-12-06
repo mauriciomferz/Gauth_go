@@ -10,8 +10,8 @@ import (
 
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/Gauth_go/pkg/pvp"
 	"github.com/mauriciomferz/Gauth_go/pkg/registry"
-	"github.com/mauriciomferz/Gauth_go/pkg/verification"
 )
 
 // PowerInformationPoint (PIP) consolidates authorization data from multiple sources
@@ -38,10 +38,10 @@ type PowerInformationPoint interface {
 	VerifyCommercialRegister(ctx context.Context, registrationNumber, jurisdiction string) (*registry.RegistrationVerificationResult, error)
 
 	// VerifyIdentityChain verifies complete identity verification chain
-	VerifyIdentityChain(ctx context.Context, req *verification.IdentityChainVerificationRequest) (*verification.IdentityChainVerificationResult, error)
+	VerifyIdentityChain(ctx context.Context, req *pvp.IdentityChainVerificationRequest) (*pvp.IdentityChainVerificationResult, error)
 
 	// GetTrustServiceProvider retrieves TSP information
-	GetTrustServiceProvider(ctx context.Context, tspID string) (*verification.TSPVerificationResult, error)
+	GetTrustServiceProvider(ctx context.Context, tspID string) (*pvp.TSPVerificationResult, error)
 
 	// GetAuthorizedActions retrieves authorized actions for a client
 	GetAuthorizedActions(ctx context.Context, clientID string) (*poa.AuthorizedActions, error)
@@ -103,7 +103,7 @@ type DefaultPIP struct {
 	// Data sources
 	poaService         poa.Service
 	commercialRegister registry.CommercialRegisterService
-	pvp                verification.PowerVerificationPoint
+	pvp                pvp.PowerVerificationPoint
 
 	// Caching
 	cache    *AuthorizationCache
@@ -120,7 +120,7 @@ type DefaultPIP struct {
 func NewDefaultPIP(
 	poaService poa.Service,
 	commercialRegister registry.CommercialRegisterService,
-	pvp verification.PowerVerificationPoint,
+	pvp pvp.PowerVerificationPoint,
 	cacheTTL time.Duration,
 ) *DefaultPIP {
 	return &DefaultPIP{
@@ -231,7 +231,7 @@ func (pip *DefaultPIP) VerifyCommercialRegister(ctx context.Context, registratio
 }
 
 // VerifyIdentityChain verifies complete identity verification chain
-func (pip *DefaultPIP) VerifyIdentityChain(ctx context.Context, req *verification.IdentityChainVerificationRequest) (*verification.IdentityChainVerificationResult, error) {
+func (pip *DefaultPIP) VerifyIdentityChain(ctx context.Context, req *pvp.IdentityChainVerificationRequest) (*pvp.IdentityChainVerificationResult, error) {
 	// Delegate to PVP
 	result, err := pip.pvp.VerifyIdentityChain(ctx, req)
 	if err != nil {
@@ -242,7 +242,7 @@ func (pip *DefaultPIP) VerifyIdentityChain(ctx context.Context, req *verificatio
 }
 
 // GetTrustServiceProvider retrieves TSP information
-func (pip *DefaultPIP) GetTrustServiceProvider(ctx context.Context, tspID string) (*verification.TSPVerificationResult, error) {
+func (pip *DefaultPIP) GetTrustServiceProvider(ctx context.Context, tspID string) (*pvp.TSPVerificationResult, error) {
 	// Check cache
 	if cached := pip.cache.GetTSP(tspID); cached != nil {
 		pip.recordCacheHit()
@@ -522,7 +522,7 @@ type cachedCommercialReg struct {
 }
 
 type cachedTSP struct {
-	data      *verification.TSPVerificationResult
+	data      *pvp.TSPVerificationResult
 	timestamp time.Time
 }
 
@@ -636,7 +636,7 @@ func (c *AuthorizationCache) SetCommercialRegisterVerification(key string, resul
 	c.evictIfNeeded()
 }
 
-func (c *AuthorizationCache) GetTSP(tspID string) *verification.TSPVerificationResult {
+func (c *AuthorizationCache) GetTSP(tspID string) *pvp.TSPVerificationResult {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 

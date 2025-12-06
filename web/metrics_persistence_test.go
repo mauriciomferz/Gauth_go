@@ -16,7 +16,7 @@ func TestMetricsPersistence(t *testing.T) {
 	}
 	path := tmpFile.Name()
 	tmpFile.Close()
-	os.Setenv("GAUTH_METRICS_PERSIST_PATH", path)
+	t.Setenv("GAUTH_METRICS_PERSIST_PATH", path)
 	srv := NewBetaServer("")
 	t.Cleanup(func() { srv.Shutdown() })
 
@@ -69,7 +69,7 @@ func TestMetricsPersistence(t *testing.T) {
 	srv2 := NewBetaServer("")
 	t.Cleanup(func() { srv2.Shutdown() })
 	// Force same path again
-	os.Setenv("GAUTH_METRICS_PERSIST_PATH", path)
+	t.Setenv("GAUTH_METRICS_PERSIST_PATH", path)
 	// Manually enable persistence load (since env read occurred earlier in constructor)
 	if mm2, ok2 := srv2.metrics.(*metrics.Memory); ok2 {
 		if err := mm2.EnablePersistence(path); err != nil {

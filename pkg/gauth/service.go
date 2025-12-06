@@ -284,28 +284,7 @@ func (svc *Service) selectValidator() TokenSignatureValidator {
 
 	// EdDSA mode takes highest priority (explicitly set via GAUTH_TOKEN_SIG_MODE env var)
 	if svc.keyMode == sigModeEdDSA {
-		// We need to cast KeyProvider back to *Manager for NewEdDSAValidator if possible,
-		// or update NewEdDSAValidator to accept KeyProvider.
-		// For now, let's assume NewEdDSAValidator still takes *Manager.
-		// If keyProvider is *Manager, we are good.
-		if km, ok := svc.keyProvider.(*crypto.Manager); ok {
-			return NewEdDSAValidator(km, strictParsing)
-		}
-		// If it's not a Manager (e.g. mock), we might have an issue if EdDSAValidator requires Manager.
-		// TODO: Update EdDSAValidator to accept KeyProvider.
-		// For now, we'll return nil or panic if not Manager?
-		// Or better, update EdDSAValidator in a separate step.
-		// Assuming for this step we are just refactoring Service.
-		// If we can't cast, we might need to fail or handle it.
-		// But wait, NewEdDSAValidator is in this package (or imported?).
-		// It seems to be in this package (based on file list, but I don't see it in service.go).
-		// It's likely in another file in pkg/gauth.
-		// I will check that later. For now, let's try the cast.
-		if km, ok := svc.keyProvider.(*crypto.Manager); ok {
-			return NewEdDSAValidator(km, strictParsing)
-		}
-		// Fallback: if we can't cast, we can't use EdDSAValidator yet.
-		// This suggests we should update EdDSAValidator too.
+		return NewEdDSAValidator(svc.keyProvider, strictParsing)
 	}
 
 	// JWTLib is a config flag that can be used for HMAC tokens
