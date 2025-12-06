@@ -164,7 +164,7 @@ func TestDisclosureService_ComplianceViolationsRetrieval(t *testing.T) {
 			complianceTracker: mockTracker,
 		}
 
-		violations := service.getComplianceViolations(nil, "unknown-token")
+		violations := service.getComplianceViolations(context.Background(), "unknown-token")
 		assert.Empty(t, violations)
 	})
 
@@ -179,7 +179,7 @@ func TestDisclosureService_ComplianceViolationsRetrieval(t *testing.T) {
 			complianceTracker: mockTracker,
 		}
 
-		violations := service.getComplianceViolations(nil, "inactive-token")
+		violations := service.getComplianceViolations(context.Background(), "inactive-token")
 		assert.Empty(t, violations)
 	})
 }

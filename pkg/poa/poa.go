@@ -1092,52 +1092,73 @@ func ValidateRFC0115Token(poa *ProofOfAuthorization) error {
 		return fmt.Errorf("PoA token is nil")
 	}
 
-	// If RFC-0115 fields are present, validate them
-	if poa.ComplianceVersion != "" && !strings.HasPrefix(poa.ComplianceVersion, "RFC-0115") {
-		return fmt.Errorf("invalid compliance version: %s", poa.ComplianceVersion)
+	if err := validateComplianceVersion(poa.ComplianceVersion); err != nil {
+		return err
 	}
 
-	// Validate sector scope if present
-	if poa.SectorScopeRef != nil {
-		if len(poa.SectorScopeRef.Sectors) == 0 && !poa.SectorScopeRef.AllSectors {
+	if err := validateSectorScope(poa.SectorScopeRef); err != nil {
+		return err
+	}
+
+	if err := validateTokenReferences(poa); err != nil {
+		return err
+	}
+
+	if err := validatePoAParties(poa); err != nil {
+		return err
+	}
+
+	return validatePoAGeographicScope(poa.GeographicScopeRef)
+}
+
+func validateComplianceVersion(version string) error {
+	if version != "" && !strings.HasPrefix(version, "RFC-0115") {
+		return fmt.Errorf("invalid compliance version: %s", version)
+	}
+	return nil
+}
+
+func validateSectorScope(scope *taxonomy.SectorScope) error {
+	if scope != nil {
+		if len(scope.Sectors) == 0 && !scope.AllSectors {
 			return fmt.Errorf("sector scope must specify at least one sector or allow all sectors")
 		}
-		// Validate each sector
-		for i, sector := range poa.SectorScopeRef.Sectors {
+		for i, sector := range scope.Sectors {
 			if err := taxonomy.ValidateSectorCode(sector.Code); err != nil {
 				return fmt.Errorf("sector scope sector %d: %w", i, err)
 			}
 		}
 	}
+	return nil
+}
 
-	// Validate authorized actions if present
+func validateTokenReferences(poa *ProofOfAuthorization) error {
 	if poa.AuthorizedActionsRef != nil {
 		if err := poa.AuthorizedActionsRef.Validate(); err != nil {
 			return fmt.Errorf("authorized actions validation: %w", err)
 		}
 	}
 
-	// Validate power limits if present
 	if poa.PowerLimitRefs != nil {
 		if err := poa.PowerLimitRefs.Validate(); err != nil {
 			return fmt.Errorf("power limits validation: %w", err)
 		}
 	}
 
-	// Validate obligations if present
 	if poa.ObligationRefs != nil {
 		if err := poa.ObligationRefs.Validate(); err != nil {
 			return fmt.Errorf("obligations validation: %w", err)
 		}
 	}
+	return nil
+}
 
-	// Validate client type info if present
+func validatePoAParties(poa *ProofOfAuthorization) error {
 	if poa.ClientTypeInfo != nil {
 		if err := poa.ClientTypeInfo.Validate(); err != nil {
 			return fmt.Errorf("client type info validation: %w", err)
 		}
 
-		// Cross-validate actions with client capabilities
 		if poa.AuthorizedActionsRef != nil {
 			if err := ActionCompatibilityCheck(poa.AuthorizedActionsRef, poa.ClientTypeInfo); err != nil {
 				return fmt.Errorf("action/client compatibility: %w", err)
@@ -1145,27 +1166,26 @@ func ValidateRFC0115Token(poa *ProofOfAuthorization) error {
 		}
 	}
 
-	// Validate representative info if present
 	if poa.RepresentativeInfo != nil {
 		if err := poa.RepresentativeInfo.Validate(); err != nil {
 			return fmt.Errorf("representative info validation: %w", err)
 		}
 
-		// Validate authorization chain
 		if err := ValidateAuthorizationChain(poa.RepresentativeInfo.AuthorizationChain); err != nil {
 			return fmt.Errorf("authorization chain validation: %w", err)
 		}
 	}
+	return nil
+}
 
-	// Validate geographic scope if present
-	if len(poa.GeographicScopeRef) > 0 {
-		for i, geo := range poa.GeographicScopeRef {
+func validatePoAGeographicScope(scopes []GeographicScope) error {
+	if len(scopes) > 0 {
+		for i, geo := range scopes {
 			if geo.Type == "" || geo.Identifier == "" {
 				return fmt.Errorf("geographic scope %d: type and identifier required", i)
 			}
 		}
 	}
-
 	return nil
 }
 

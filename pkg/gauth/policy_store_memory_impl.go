@@ -114,89 +114,14 @@ func (s *InMemoryPolicyStore) Search(ctx context.Context, criteria *PolicySearch
 	s.policies.Range(func(key, value interface{}) bool {
 		policy := value.(*AuthorizationPolicy)
 
-		// Apply filters
-		if criteria != nil {
-			// Filter by PolicyTypes
-			if len(criteria.PolicyTypes) > 0 {
-				found := false
-				for _, pt := range criteria.PolicyTypes {
-					if policy.PolicyType == pt {
-						found = true
-						break
-					}
-				}
-				if !found {
-					return true
-				}
+		if s.matchesCriteria(policy, criteria) {
+			var copy *AuthorizationPolicy
+			copy, err = deepCopy(policy)
+			if err != nil {
+				return false
 			}
-
-			// Filter by Statuses
-			if len(criteria.Statuses) > 0 {
-				found := false
-				for _, st := range criteria.Statuses {
-					if policy.Status == st {
-						found = true
-						break
-					}
-				}
-				if !found {
-					return true
-				}
-			}
-
-			// Filter by ClientOwner
-			if criteria.ClientOwner != "" && policy.ClientOwner != criteria.ClientOwner {
-				return true
-			}
-
-			// Filter by OwnersAuthorizer
-			if criteria.OwnersAuthorizer != "" && policy.OwnersAuthorizer != criteria.OwnersAuthorizer {
-				return true
-			}
-
-			// Filter by Tags
-			if len(criteria.Tags) > 0 {
-				for _, tag := range criteria.Tags {
-					found := false
-					for _, pt := range policy.Tags {
-						if pt == tag {
-							found = true
-							break
-						}
-					}
-					if !found {
-						return true
-					}
-				}
-			}
-
-			// Filter by SearchText (name or description)
-			if criteria.SearchText != "" {
-				contains := func(s, substr string) bool {
-					return strings.Contains(strings.ToLower(s), strings.ToLower(substr))
-				}
-				if !contains(policy.PolicyName, criteria.SearchText) && !contains(policy.Description, criteria.SearchText) {
-					return true
-				}
-			}
-
-			// Filter by CreatedAfter
-			if criteria.CreatedAfter != nil && !policy.CreatedAt.After(*criteria.CreatedAfter) {
-				return true
-			}
-
-			// Filter by CreatedBefore
-			if criteria.CreatedBefore != nil && !policy.CreatedAt.Before(*criteria.CreatedBefore) {
-				return true
-			}
+			policies = append(policies, copy)
 		}
-
-		var copy *AuthorizationPolicy
-		copy, err = deepCopy(policy)
-		if err != nil {
-			return false
-		}
-		policies = append(policies, copy)
 		return true
 	})
 
@@ -204,20 +129,98 @@ func (s *InMemoryPolicyStore) Search(ctx context.Context, criteria *PolicySearch
 		return nil, err
 	}
 
-	// Apply Limit and Offset (simple implementation)
-	if criteria != nil {
-		if criteria.Offset > 0 {
-			if criteria.Offset >= len(policies) {
-				return []*AuthorizationPolicy{}, nil
+	return s.applyPagination(policies, criteria), nil
+}
+
+func (s *InMemoryPolicyStore) matchesCriteria(policy *AuthorizationPolicy, criteria *PolicySearchCriteria) bool {
+	if criteria == nil {
+		return true
+	}
+
+	if len(criteria.PolicyTypes) > 0 {
+		found := false
+		for _, pt := range criteria.PolicyTypes {
+			if policy.PolicyType == pt {
+				found = true
+				break
 			}
-			policies = policies[criteria.Offset:]
 		}
-		if criteria.Limit > 0 && criteria.Limit < len(policies) {
-			policies = policies[:criteria.Limit]
+		if !found {
+			return false
 		}
 	}
 
-	return policies, nil
+	if len(criteria.Statuses) > 0 {
+		found := false
+		for _, st := range criteria.Statuses {
+			if policy.Status == st {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+
+	if criteria.ClientOwner != "" && policy.ClientOwner != criteria.ClientOwner {
+		return false
+	}
+
+	if criteria.OwnersAuthorizer != "" && policy.OwnersAuthorizer != criteria.OwnersAuthorizer {
+		return false
+	}
+
+	if len(criteria.Tags) > 0 {
+		for _, tag := range criteria.Tags {
+			found := false
+			for _, pt := range policy.Tags {
+				if pt == tag {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return false
+			}
+		}
+	}
+
+	if criteria.SearchText != "" {
+		contains := func(s, substr string) bool {
+			return strings.Contains(strings.ToLower(s), strings.ToLower(substr))
+		}
+		if !contains(policy.PolicyName, criteria.SearchText) && !contains(policy.Description, criteria.SearchText) {
+			return false
+		}
+	}
+
+	if criteria.CreatedAfter != nil && !policy.CreatedAt.After(*criteria.CreatedAfter) {
+		return false
+	}
+
+	if criteria.CreatedBefore != nil && !policy.CreatedAt.Before(*criteria.CreatedBefore) {
+		return false
+	}
+
+	return true
+}
+
+func (s *InMemoryPolicyStore) applyPagination(policies []*AuthorizationPolicy, criteria *PolicySearchCriteria) []*AuthorizationPolicy {
+	if criteria == nil {
+		return policies
+	}
+
+	if criteria.Offset > 0 {
+		if criteria.Offset >= len(policies) {
+			return []*AuthorizationPolicy{}
+		}
+		policies = policies[criteria.Offset:]
+	}
+	if criteria.Limit > 0 && criteria.Limit < len(policies) {
+		policies = policies[:criteria.Limit]
+	}
+	return policies
 }
 
 // Exists checks if a policy with the given ID exists

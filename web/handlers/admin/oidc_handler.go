@@ -24,49 +24,49 @@ func NewOIDCHandler(db *pgxpool.Pool) *OIDCHandler {
 
 // OIDCProvider represents an OpenID Connect provider configuration
 type OIDCProvider struct {
-	ID                       string    `json:"id"`
-	TenantID                 string    `json:"tenantId"`
-	ProviderName             string    `json:"providerName"`
-	ProviderType             string    `json:"providerType"`
-	DisplayName              string    `json:"displayName"`
-	IssuerURL                string    `json:"issuerUrl"`
-	AuthorizationEndpoint    *string   `json:"authorizationEndpoint"`
-	TokenEndpoint            *string   `json:"tokenEndpoint"`
-	UserinfoEndpoint         *string   `json:"userinfoEndpoint"`
-	JwksURI                  *string   `json:"jwksUri"`
-	EndSessionEndpoint       *string   `json:"endSessionEndpoint"`
-	ClientID                 string    `json:"clientId"`
-	ClientSecret             *string   `json:"clientSecret,omitempty"`
-	Scopes                   []string  `json:"scopes"`
-	ClaimsMapping            map[string]interface{} `json:"claimsMapping"`
-	RedirectURIs             []string  `json:"redirectUris"`
-	PostLogoutRedirectURIs   []string  `json:"postLogoutRedirectUris"`
-	ValidateIssuer           bool      `json:"validateIssuer"`
-	ValidateAudience         bool      `json:"validateAudience"`
-	ValidateSignature        bool      `json:"validateSignature"`
-	ClockSkewSeconds         int       `json:"clockSkewSeconds"`
-	AutoProvisionUsers       bool      `json:"autoProvisionUsers"`
-	UserAttributeMapping     map[string]interface{} `json:"userAttributeMapping"`
-	DefaultRole              *string   `json:"defaultRole"`
-	PKCEEnabled              bool      `json:"pkceEnabled"`
-	ResponseType             string    `json:"responseType"`
-	ResponseMode             string    `json:"responseMode"`
-	Prompt                   *string   `json:"prompt"`
-	MaxAge                   *int      `json:"maxAge"`
-	AzureTenantID            *string   `json:"azureTenantId"`
-	AzureResource            *string   `json:"azureResource"`
-	AdditionalParams         map[string]interface{} `json:"additionalParams"`
-	Status                   string    `json:"status"`
-	IsDefault                bool      `json:"isDefault"`
-	Priority                 int       `json:"priority"`
-	CreatedBy                string    `json:"createdBy"`
-	CreatedAt                time.Time `json:"createdAt"`
-	UpdatedAt                time.Time `json:"updatedAt"`
-	UpdatedBy                *string   `json:"updatedBy"`
-	LastSyncAt               *time.Time `json:"lastSyncAt"`
-	ConfigValid              bool      `json:"configValid"`
-	ValidationErrors         []string  `json:"validationErrors"`
-	LastValidatedAt          *time.Time `json:"lastValidatedAt"`
+	ID                     string                 `json:"id"`
+	TenantID               string                 `json:"tenantId"`
+	ProviderName           string                 `json:"providerName"`
+	ProviderType           string                 `json:"providerType"`
+	DisplayName            string                 `json:"displayName"`
+	IssuerURL              string                 `json:"issuerUrl"`
+	AuthorizationEndpoint  *string                `json:"authorizationEndpoint"`
+	TokenEndpoint          *string                `json:"tokenEndpoint"`
+	UserinfoEndpoint       *string                `json:"userinfoEndpoint"`
+	JwksURI                *string                `json:"jwksUri"`
+	EndSessionEndpoint     *string                `json:"endSessionEndpoint"`
+	ClientID               string                 `json:"clientId"`
+	ClientSecret           *string                `json:"clientSecret,omitempty"`
+	Scopes                 []string               `json:"scopes"`
+	ClaimsMapping          map[string]interface{} `json:"claimsMapping"`
+	RedirectURIs           []string               `json:"redirectUris"`
+	PostLogoutRedirectURIs []string               `json:"postLogoutRedirectUris"`
+	ValidateIssuer         bool                   `json:"validateIssuer"`
+	ValidateAudience       bool                   `json:"validateAudience"`
+	ValidateSignature      bool                   `json:"validateSignature"`
+	ClockSkewSeconds       int                    `json:"clockSkewSeconds"`
+	AutoProvisionUsers     bool                   `json:"autoProvisionUsers"`
+	UserAttributeMapping   map[string]interface{} `json:"userAttributeMapping"`
+	DefaultRole            *string                `json:"defaultRole"`
+	PKCEEnabled            bool                   `json:"pkceEnabled"`
+	ResponseType           string                 `json:"responseType"`
+	ResponseMode           string                 `json:"responseMode"`
+	Prompt                 *string                `json:"prompt"`
+	MaxAge                 *int                   `json:"maxAge"`
+	AzureTenantID          *string                `json:"azureTenantId"`
+	AzureResource          *string                `json:"azureResource"`
+	AdditionalParams       map[string]interface{} `json:"additionalParams"`
+	Status                 string                 `json:"status"`
+	IsDefault              bool                   `json:"isDefault"`
+	Priority               int                    `json:"priority"`
+	CreatedBy              string                 `json:"createdBy"`
+	CreatedAt              time.Time              `json:"createdAt"`
+	UpdatedAt              time.Time              `json:"updatedAt"`
+	UpdatedBy              *string                `json:"updatedBy"`
+	LastSyncAt             *time.Time             `json:"lastSyncAt"`
+	ConfigValid            bool                   `json:"configValid"`
+	ValidationErrors       []string               `json:"validationErrors"`
+	LastValidatedAt        *time.Time             `json:"lastValidatedAt"`
 }
 
 // CreateOIDCProviderRequest represents a request to create an OIDC provider
@@ -415,175 +415,12 @@ func (h *OIDCHandler) UpdateOIDCProvider(c *gin.Context) {
 
 	ctx := c.Request.Context()
 
-	// Build dynamic update query
-	query := `UPDATE oidc_providers SET `
-	params := []interface{}{}
-	paramIndex := 1
+	query, params := h.buildOIDCProviderUpdateQuery(&req, tenantID, providerID)
 
-	if req.DisplayName != nil {
-		query += fmt.Sprintf("display_name = $%d, ", paramIndex)
-		params = append(params, *req.DisplayName)
-		paramIndex++
-	}
-	if req.IssuerURL != nil {
-		query += fmt.Sprintf("issuer_url = $%d, ", paramIndex)
-		params = append(params, *req.IssuerURL)
-		paramIndex++
-	}
-	if req.AuthorizationEndpoint != nil {
-		query += fmt.Sprintf("authorization_endpoint = $%d, ", paramIndex)
-		params = append(params, *req.AuthorizationEndpoint)
-		paramIndex++
-	}
-	if req.TokenEndpoint != nil {
-		query += fmt.Sprintf("token_endpoint = $%d, ", paramIndex)
-		params = append(params, *req.TokenEndpoint)
-		paramIndex++
-	}
-	if req.UserinfoEndpoint != nil {
-		query += fmt.Sprintf("userinfo_endpoint = $%d, ", paramIndex)
-		params = append(params, *req.UserinfoEndpoint)
-		paramIndex++
-	}
-	if req.JwksURI != nil {
-		query += fmt.Sprintf("jwks_uri = $%d, ", paramIndex)
-		params = append(params, *req.JwksURI)
-		paramIndex++
-	}
-	if req.EndSessionEndpoint != nil {
-		query += fmt.Sprintf("end_session_endpoint = $%d, ", paramIndex)
-		params = append(params, *req.EndSessionEndpoint)
-		paramIndex++
-	}
-	if req.ClientID != nil {
-		query += fmt.Sprintf("client_id = $%d, ", paramIndex)
-		params = append(params, *req.ClientID)
-		paramIndex++
-	}
-	if req.ClientSecret != nil {
-		query += fmt.Sprintf("client_secret = $%d, ", paramIndex)
-		params = append(params, *req.ClientSecret)
-		paramIndex++
-	}
-	if req.Scopes != nil {
-		query += fmt.Sprintf("scopes = $%d, ", paramIndex)
-		params = append(params, req.Scopes)
-		paramIndex++
-	}
-	if req.ClaimsMapping != nil {
-		query += fmt.Sprintf("claims_mapping = $%d, ", paramIndex)
-		params = append(params, req.ClaimsMapping)
-		paramIndex++
-	}
-	if req.RedirectURIs != nil {
-		query += fmt.Sprintf("redirect_uris = $%d, ", paramIndex)
-		params = append(params, req.RedirectURIs)
-		paramIndex++
-	}
-	if req.PostLogoutRedirectURIs != nil {
-		query += fmt.Sprintf("post_logout_redirect_uris = $%d, ", paramIndex)
-		params = append(params, req.PostLogoutRedirectURIs)
-		paramIndex++
-	}
-	if req.ValidateIssuer != nil {
-		query += fmt.Sprintf("validate_issuer = $%d, ", paramIndex)
-		params = append(params, *req.ValidateIssuer)
-		paramIndex++
-	}
-	if req.ValidateAudience != nil {
-		query += fmt.Sprintf("validate_audience = $%d, ", paramIndex)
-		params = append(params, *req.ValidateAudience)
-		paramIndex++
-	}
-	if req.ValidateSignature != nil {
-		query += fmt.Sprintf("validate_signature = $%d, ", paramIndex)
-		params = append(params, *req.ValidateSignature)
-		paramIndex++
-	}
-	if req.ClockSkewSeconds != nil {
-		query += fmt.Sprintf("clock_skew_seconds = $%d, ", paramIndex)
-		params = append(params, *req.ClockSkewSeconds)
-		paramIndex++
-	}
-	if req.AutoProvisionUsers != nil {
-		query += fmt.Sprintf("auto_provision_users = $%d, ", paramIndex)
-		params = append(params, *req.AutoProvisionUsers)
-		paramIndex++
-	}
-	if req.UserAttributeMapping != nil {
-		query += fmt.Sprintf("user_attribute_mapping = $%d, ", paramIndex)
-		params = append(params, req.UserAttributeMapping)
-		paramIndex++
-	}
-	if req.DefaultRole != nil {
-		query += fmt.Sprintf("default_role = $%d, ", paramIndex)
-		params = append(params, *req.DefaultRole)
-		paramIndex++
-	}
-	if req.PKCEEnabled != nil {
-		query += fmt.Sprintf("pkce_enabled = $%d, ", paramIndex)
-		params = append(params, *req.PKCEEnabled)
-		paramIndex++
-	}
-	if req.ResponseType != nil {
-		query += fmt.Sprintf("response_type = $%d, ", paramIndex)
-		params = append(params, *req.ResponseType)
-		paramIndex++
-	}
-	if req.ResponseMode != nil {
-		query += fmt.Sprintf("response_mode = $%d, ", paramIndex)
-		params = append(params, *req.ResponseMode)
-		paramIndex++
-	}
-	if req.Prompt != nil {
-		query += fmt.Sprintf("prompt = $%d, ", paramIndex)
-		params = append(params, *req.Prompt)
-		paramIndex++
-	}
-	if req.MaxAge != nil {
-		query += fmt.Sprintf("max_age = $%d, ", paramIndex)
-		params = append(params, *req.MaxAge)
-		paramIndex++
-	}
-	if req.AzureTenantID != nil {
-		query += fmt.Sprintf("azure_tenant_id = $%d, ", paramIndex)
-		params = append(params, *req.AzureTenantID)
-		paramIndex++
-	}
-	if req.AzureResource != nil {
-		query += fmt.Sprintf("azure_resource = $%d, ", paramIndex)
-		params = append(params, *req.AzureResource)
-		paramIndex++
-	}
-	if req.AdditionalParams != nil {
-		query += fmt.Sprintf("additional_params = $%d, ", paramIndex)
-		params = append(params, req.AdditionalParams)
-		paramIndex++
-	}
-	if req.Status != nil {
-		query += fmt.Sprintf("status = $%d, ", paramIndex)
-		params = append(params, *req.Status)
-		paramIndex++
-	}
-	if req.IsDefault != nil {
-		query += fmt.Sprintf("is_default = $%d, ", paramIndex)
-		params = append(params, *req.IsDefault)
-		paramIndex++
-	}
-	if req.Priority != nil {
-		query += fmt.Sprintf("priority = $%d, ", paramIndex)
-		params = append(params, *req.Priority)
-		paramIndex++
-	}
-
-	if len(params) == 0 {
+	if len(params) == 0 { // Should not happen with build function logic but good for safety
 		c.JSON(http.StatusBadRequest, gin.H{"error": "No fields to update"})
 		return
 	}
-
-	// Add updated_by and WHERE clause
-	query += fmt.Sprintf("updated_by = $%d, updated_at = CURRENT_TIMESTAMP WHERE id = $%d AND tenant_id = $%d", paramIndex, paramIndex+1, paramIndex+2)
-	params = append(params, "admin", providerID, tenantID)
 
 	result, err := h.db.Exec(ctx, query, params...)
 	if err != nil {
@@ -597,6 +434,213 @@ func (h *OIDCHandler) UpdateOIDCProvider(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Provider updated successfully"})
+}
+
+func (h *OIDCHandler) buildOIDCProviderUpdateQuery(req *UpdateOIDCProviderRequest, tenantID, providerID string) (string, []interface{}) {
+	query := `UPDATE oidc_providers SET `
+	params := []interface{}{}
+	paramIndex := 1
+
+	query, params, paramIndex = h.appendBasicInfoUpdates(query, params, paramIndex, req)
+	query, params, paramIndex = h.appendEndpointUpdates(query, params, paramIndex, req)
+	query, params, paramIndex = h.appendClientConfigUpdates(query, params, paramIndex, req)
+	query, params, paramIndex = h.appendValidationConfigUpdates(query, params, paramIndex, req)
+	query, params, paramIndex = h.appendFlowConfigUpdates(query, params, paramIndex, req)
+	query, params, paramIndex = h.appendAzureConfigUpdates(query, params, paramIndex, req)
+	query, params, paramIndex = h.appendMiscConfigUpdates(query, params, paramIndex, req)
+
+	if len(params) == 0 {
+		return "", params
+	}
+
+	// Add updated_by and WHERE clause
+	query += fmt.Sprintf("updated_by = $%d, updated_at = CURRENT_TIMESTAMP WHERE id = $%d AND tenant_id = $%d", paramIndex, paramIndex+1, paramIndex+2)
+	params = append(params, "admin", providerID, tenantID)
+
+	return query, params
+}
+
+func (h *OIDCHandler) appendBasicInfoUpdates(query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest) (string, []interface{}, int) {
+	if req.DisplayName != nil {
+		query += fmt.Sprintf("display_name = $%d, ", idx)
+		params = append(params, *req.DisplayName)
+		idx++
+	}
+	if req.IssuerURL != nil {
+		query += fmt.Sprintf("issuer_url = $%d, ", idx)
+		params = append(params, *req.IssuerURL)
+		idx++
+	}
+	return query, params, idx
+}
+
+func (h *OIDCHandler) appendEndpointUpdates(query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest) (string, []interface{}, int) {
+	if req.AuthorizationEndpoint != nil {
+		query += fmt.Sprintf("authorization_endpoint = $%d, ", idx)
+		params = append(params, *req.AuthorizationEndpoint)
+		idx++
+	}
+	if req.TokenEndpoint != nil {
+		query += fmt.Sprintf("token_endpoint = $%d, ", idx)
+		params = append(params, *req.TokenEndpoint)
+		idx++
+	}
+	if req.UserinfoEndpoint != nil {
+		query += fmt.Sprintf("userinfo_endpoint = $%d, ", idx)
+		params = append(params, *req.UserinfoEndpoint)
+		idx++
+	}
+	if req.JwksURI != nil {
+		query += fmt.Sprintf("jwks_uri = $%d, ", idx)
+		params = append(params, *req.JwksURI)
+		idx++
+	}
+	if req.EndSessionEndpoint != nil {
+		query += fmt.Sprintf("end_session_endpoint = $%d, ", idx)
+		params = append(params, *req.EndSessionEndpoint)
+		idx++
+	}
+	return query, params, idx
+}
+
+func (h *OIDCHandler) appendClientConfigUpdates(query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest) (string, []interface{}, int) {
+	if req.ClientID != nil {
+		query += fmt.Sprintf("client_id = $%d, ", idx)
+		params = append(params, *req.ClientID)
+		idx++
+	}
+	if req.ClientSecret != nil {
+		query += fmt.Sprintf("client_secret = $%d, ", idx)
+		params = append(params, *req.ClientSecret)
+		idx++
+	}
+	if req.Scopes != nil {
+		query += fmt.Sprintf("scopes = $%d, ", idx)
+		params = append(params, req.Scopes)
+		idx++
+	}
+	if req.ClaimsMapping != nil {
+		query += fmt.Sprintf("claims_mapping = $%d, ", idx)
+		params = append(params, req.ClaimsMapping)
+		idx++
+	}
+	if req.RedirectURIs != nil {
+		query += fmt.Sprintf("redirect_uris = $%d, ", idx)
+		params = append(params, req.RedirectURIs)
+		idx++
+	}
+	if req.PostLogoutRedirectURIs != nil {
+		query += fmt.Sprintf("post_logout_redirect_uris = $%d, ", idx)
+		params = append(params, req.PostLogoutRedirectURIs)
+		idx++
+	}
+	return query, params, idx
+}
+
+func (h *OIDCHandler) appendValidationConfigUpdates(query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest) (string, []interface{}, int) {
+	if req.ValidateIssuer != nil {
+		query += fmt.Sprintf("validate_issuer = $%d, ", idx)
+		params = append(params, *req.ValidateIssuer)
+		idx++
+	}
+	if req.ValidateAudience != nil {
+		query += fmt.Sprintf("validate_audience = $%d, ", idx)
+		params = append(params, *req.ValidateAudience)
+		idx++
+	}
+	if req.ValidateSignature != nil {
+		query += fmt.Sprintf("validate_signature = $%d, ", idx)
+		params = append(params, *req.ValidateSignature)
+		idx++
+	}
+	if req.ClockSkewSeconds != nil {
+		query += fmt.Sprintf("clock_skew_seconds = $%d, ", idx)
+		params = append(params, *req.ClockSkewSeconds)
+		idx++
+	}
+	return query, params, idx
+}
+
+func (h *OIDCHandler) appendFlowConfigUpdates(query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest) (string, []interface{}, int) {
+	if req.AutoProvisionUsers != nil {
+		query += fmt.Sprintf("auto_provision_users = $%d, ", idx)
+		params = append(params, *req.AutoProvisionUsers)
+		idx++
+	}
+	if req.UserAttributeMapping != nil {
+		query += fmt.Sprintf("user_attribute_mapping = $%d, ", idx)
+		params = append(params, req.UserAttributeMapping)
+		idx++
+	}
+	if req.DefaultRole != nil {
+		query += fmt.Sprintf("default_role = $%d, ", idx)
+		params = append(params, *req.DefaultRole)
+		idx++
+	}
+	if req.PKCEEnabled != nil {
+		query += fmt.Sprintf("pkce_enabled = $%d, ", idx)
+		params = append(params, *req.PKCEEnabled)
+		idx++
+	}
+	if req.ResponseType != nil {
+		query += fmt.Sprintf("response_type = $%d, ", idx)
+		params = append(params, *req.ResponseType)
+		idx++
+	}
+	if req.ResponseMode != nil {
+		query += fmt.Sprintf("response_mode = $%d, ", idx)
+		params = append(params, *req.ResponseMode)
+		idx++
+	}
+	if req.Prompt != nil {
+		query += fmt.Sprintf("prompt = $%d, ", idx)
+		params = append(params, *req.Prompt)
+		idx++
+	}
+	if req.MaxAge != nil {
+		query += fmt.Sprintf("max_age = $%d, ", idx)
+		params = append(params, *req.MaxAge)
+		idx++
+	}
+	return query, params, idx
+}
+
+func (h *OIDCHandler) appendAzureConfigUpdates(query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest) (string, []interface{}, int) {
+	if req.AzureTenantID != nil {
+		query += fmt.Sprintf("azure_tenant_id = $%d, ", idx)
+		params = append(params, *req.AzureTenantID)
+		idx++
+	}
+	if req.AzureResource != nil {
+		query += fmt.Sprintf("azure_resource = $%d, ", idx)
+		params = append(params, *req.AzureResource)
+		idx++
+	}
+	return query, params, idx
+}
+
+func (h *OIDCHandler) appendMiscConfigUpdates(query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest) (string, []interface{}, int) {
+	if req.AdditionalParams != nil {
+		query += fmt.Sprintf("additional_params = $%d, ", idx)
+		params = append(params, req.AdditionalParams)
+		idx++
+	}
+	if req.Status != nil {
+		query += fmt.Sprintf("status = $%d, ", idx)
+		params = append(params, *req.Status)
+		idx++
+	}
+	if req.IsDefault != nil {
+		query += fmt.Sprintf("is_default = $%d, ", idx)
+		params = append(params, *req.IsDefault)
+		idx++
+	}
+	if req.Priority != nil {
+		query += fmt.Sprintf("priority = $%d, ", idx)
+		params = append(params, *req.Priority)
+		idx++
+	}
+	return query, params, idx
 }
 
 // DeleteOIDCProvider deletes an OIDC provider
@@ -639,7 +683,7 @@ func (h *OIDCHandler) TestOIDCProvider(c *gin.Context) {
 	// Get provider details
 	ctx := c.Request.Context()
 	query := `SELECT issuer_url, client_id FROM oidc_providers WHERE id = $1 AND tenant_id = $2`
-	
+
 	var issuerURL, clientID string
 	err := h.db.QueryRow(ctx, query, providerID, tenantID).Scan(&issuerURL, &clientID)
 	if err != nil {
@@ -671,18 +715,18 @@ func (h *OIDCHandler) TestOIDCProvider(c *gin.Context) {
 
 // OIDCDiscoveryDocument represents the OIDC discovery response
 type OIDCDiscoveryDocument struct {
-	Issuer                            string   `json:"issuer"`
-	AuthorizationEndpoint             string   `json:"authorization_endpoint"`
-	TokenEndpoint                     string   `json:"token_endpoint"`
-	UserinfoEndpoint                  string   `json:"userinfo_endpoint"`
-	JwksURI                           string   `json:"jwks_uri"`
-	EndSessionEndpoint                string   `json:"end_session_endpoint"`
-	ResponseTypesSupported            []string `json:"response_types_supported"`
-	SubjectTypesSupported             []string `json:"subject_types_supported"`
-	IDTokenSigningAlgValuesSupported  []string `json:"id_token_signing_alg_values_supported"`
-	ScopesSupported                   []string `json:"scopes_supported"`
-	ClaimsSupported                   []string `json:"claims_supported"`
-	CodeChallengeMethodsSupported     []string `json:"code_challenge_methods_supported"`
+	Issuer                           string   `json:"issuer"`
+	AuthorizationEndpoint            string   `json:"authorization_endpoint"`
+	TokenEndpoint                    string   `json:"token_endpoint"`
+	UserinfoEndpoint                 string   `json:"userinfo_endpoint"`
+	JwksURI                          string   `json:"jwks_uri"`
+	EndSessionEndpoint               string   `json:"end_session_endpoint"`
+	ResponseTypesSupported           []string `json:"response_types_supported"`
+	SubjectTypesSupported            []string `json:"subject_types_supported"`
+	IDTokenSigningAlgValuesSupported []string `json:"id_token_signing_alg_values_supported"`
+	ScopesSupported                  []string `json:"scopes_supported"`
+	ClaimsSupported                  []string `json:"claims_supported"`
+	CodeChallengeMethodsSupported    []string `json:"code_challenge_methods_supported"`
 }
 
 // discoverOIDCProvider performs OIDC discovery for a provider
@@ -698,7 +742,7 @@ func (h *OIDCHandler) discoverOIDCProvider(issuerURL string) (map[string]interfa
 	client := &http.Client{
 		Timeout: 10 * time.Second,
 	}
-	
+
 	resp, err := client.Get(discoveryURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch discovery document: %w", err)
@@ -752,10 +796,10 @@ func (h *OIDCHandler) discoverOIDCProvider(issuerURL string) (map[string]interfa
 			"endSession":    discovery.EndSessionEndpoint,
 		},
 		"capabilities": map[string]interface{}{
-			"responseTypes":        discovery.ResponseTypesSupported,
-			"scopes":               discovery.ScopesSupported,
-			"pkceSupported":        len(discovery.CodeChallengeMethodsSupported) > 0,
-			"pkceMethod":           discovery.CodeChallengeMethodsSupported,
+			"responseTypes": discovery.ResponseTypesSupported,
+			"scopes":        discovery.ScopesSupported,
+			"pkceSupported": len(discovery.CodeChallengeMethodsSupported) > 0,
+			"pkceMethod":    discovery.CodeChallengeMethodsSupported,
 		},
 		"jwks": "valid",
 	}, nil

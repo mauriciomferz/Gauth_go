@@ -227,6 +227,18 @@ func (er *EnhancedRepresentative) Validate() error {
 		return fmt.Errorf("legal relationship: %w", err)
 	}
 
+	if err := er.validateAuthorizationProof(); err != nil {
+		return err
+	}
+
+	if err := er.validateTypeSpecificRules(); err != nil {
+		return err
+	}
+
+	return er.validateOptionalDetails()
+}
+
+func (er *EnhancedRepresentative) validateAuthorizationProof() error {
 	if er.AuthorizationProof == nil {
 		return fmt.Errorf("authorization proof required")
 	}
@@ -238,8 +250,10 @@ func (er *EnhancedRepresentative) Validate() error {
 	if er.AuthorizationProof.IsExpired() {
 		return fmt.Errorf("authorization proof has expired")
 	}
+	return nil
+}
 
-	// Type-specific validation
+func (er *EnhancedRepresentative) validateTypeSpecificRules() error {
 	switch er.Type {
 	case RepTypeOwnersAuthorizer:
 		// Owner's Authorizer must have commercial register proof or statutory appointment
@@ -272,7 +286,10 @@ func (er *EnhancedRepresentative) Validate() error {
 			return fmt.Errorf("delegate must have delegation agreement, power of attorney, or employment contract")
 		}
 	}
+	return nil
+}
 
+func (er *EnhancedRepresentative) validateOptionalDetails() error {
 	// Validate registration info if present
 	if er.RegistrationInfo != nil {
 		if er.RegistrationInfo.RegisteredName == "" {

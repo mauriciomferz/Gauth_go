@@ -54,19 +54,19 @@ type TokenResponse struct {
 
 // IDTokenClaims represents the parsed ID token claims
 type IDTokenClaims struct {
-	Issuer         string   `json:"iss"`
-	Subject        string   `json:"sub"`
-	Audience       string   `json:"aud"`
-	Expiration     int64    `json:"exp"`
-	IssuedAt       int64    `json:"iat"`
-	Nonce          string   `json:"nonce,omitempty"`
-	Email          string   `json:"email,omitempty"`
-	EmailVerified  bool     `json:"email_verified,omitempty"`
-	Name           string   `json:"name,omitempty"`
-	GivenName      string   `json:"given_name,omitempty"`
-	FamilyName     string   `json:"family_name,omitempty"`
-	Picture        string   `json:"picture,omitempty"`
-	Groups         []string `json:"groups,omitempty"`
+	Issuer        string   `json:"iss"`
+	Subject       string   `json:"sub"`
+	Audience      string   `json:"aud"`
+	Expiration    int64    `json:"exp"`
+	IssuedAt      int64    `json:"iat"`
+	Nonce         string   `json:"nonce,omitempty"`
+	Email         string   `json:"email,omitempty"`
+	EmailVerified bool     `json:"email_verified,omitempty"`
+	Name          string   `json:"name,omitempty"`
+	GivenName     string   `json:"given_name,omitempty"`
+	FamilyName    string   `json:"family_name,omitempty"`
+	Picture       string   `json:"picture,omitempty"`
+	Groups        []string `json:"groups,omitempty"`
 }
 
 // Authorize initiates the OIDC authorization code flow
@@ -475,17 +475,55 @@ func (h *OIDCAuthHandler) validateIDToken(idToken, clientID, nonce string) (*IDT
 	return &claims, nil
 }
 
+type provisioningConfig struct {
+	AutoProvisionUsers bool
+	AttributeMapping   map[string]interface{}
+	DefaultRole        *string
+	ProviderName       string
+}
+
 func (h *OIDCAuthHandler) provisionUser(c *gin.Context, providerID, tenantID string, claims *IDTokenClaims) (string, error) {
 	ctx := c.Request.Context()
-	
+
 	// Check if user mapping already exists
+	userID, found, err := h.checkAndUpdateExistingUser(ctx, providerID, tenantID, claims.Subject, c.Writer)
+	if found {
+		return userID, nil
+	}
+
+	// Fetch provider configuration
+	config, err := h.fetchProvisioningConfig(ctx, providerID, tenantID)
+	if err != nil {
+		return "", err
+	}
+
+	if !config.AutoProvisionUsers {
+		return "", fmt.Errorf("user not found and auto-provisioning is disabled for provider %s", config.ProviderName)
+	}
+
+	// Prepare user attributes
+	attributes := h.mapUserAttributes(claims, config.AttributeMapping)
+
+	// Create new user mapping
+	userID, err = h.createUserMapping(ctx, tenantID, providerID, claims.Subject, attributes)
+	if err != nil {
+		return "", err
+	}
+
+	// Post-provisioning actions (roles, groups)
+	h.postProvisioningActions(c, ctx, userID, tenantID, providerID, config, claims.Groups)
+
+	return userID, nil
+}
+
+func (h *OIDCAuthHandler) checkAndUpdateExistingUser(ctx context.Context, providerID, tenantID, subject string, w http.ResponseWriter) (string, bool, error) {
 	query := `
 		SELECT user_id, last_login_at FROM oidc_user_mappings 
 		WHERE provider_id = $1 AND tenant_id = $2 AND provider_user_id = $3 AND status = 'active'
 	`
 	var userID string
 	var lastLogin time.Time
-	err := h.db.QueryRow(ctx, query, providerID, tenantID, claims.Subject).Scan(&userID, &lastLogin)
+	err := h.db.QueryRow(ctx, query, providerID, tenantID, subject).Scan(&userID, &lastLogin)
 	if err == nil {
 		// User exists - update last login
 		updateQuery := `
@@ -496,13 +534,18 @@ func (h *OIDCAuthHandler) provisionUser(c *gin.Context, providerID, tenantID str
 		_, err = h.db.Exec(ctx, updateQuery, time.Now(), time.Now(), userID, providerID)
 		if err != nil {
 			// Log error but don't fail - user can still proceed
-			fmt.Fprintf(c.Writer, "[WARN] Failed to update last login: %v\n", err)
+			// Using fmt.Fprintf to writer as in original code, though context logger would be better
+			if w != nil {
+				fmt.Fprintf(w, "[WARN] Failed to update last login: %v\n", err)
+			}
 		}
-		return userID, nil
+		return userID, true, nil
 	}
+	return "", false, err
+}
 
-	// Get provider configuration for auto-provisioning settings
-	providerQuery := `
+func (h *OIDCAuthHandler) fetchProvisioningConfig(ctx context.Context, providerID, tenantID string) (*provisioningConfig, error) {
+	query := `
 		SELECT 
 			auto_provision_users, user_attribute_mapping, default_role, provider_name
 		FROM oidc_providers 
@@ -512,63 +555,59 @@ func (h *OIDCAuthHandler) provisionUser(c *gin.Context, providerID, tenantID str
 	var attributeMapping map[string]interface{}
 	var defaultRole *string
 	var providerName string
-	
-	err = h.db.QueryRow(ctx, providerQuery, providerID, tenantID).Scan(
+
+	err := h.db.QueryRow(ctx, query, providerID, tenantID).Scan(
 		&autoProvision,
 		&attributeMapping,
 		&defaultRole,
 		&providerName,
 	)
 	if err != nil {
-		return "", fmt.Errorf("failed to fetch provider config: %w", err)
+		return nil, fmt.Errorf("failed to fetch provider config: %w", err)
 	}
 
-	// Check if auto-provisioning is enabled
-	if autoProvision == nil || !*autoProvision {
-		return "", fmt.Errorf("user not found and auto-provisioning is disabled for provider %s", providerName)
-	}
+	return &provisioningConfig{
+		AutoProvisionUsers: autoProvision != nil && *autoProvision,
+		AttributeMapping:   attributeMapping,
+		DefaultRole:        defaultRole,
+		ProviderName:       providerName,
+	}, nil
+}
 
-	// Create new user mapping with attribute mapping
-	userID = uuid.New().String()
-	mappingID := uuid.New().String()
-	
-	// Apply attribute mapping
+type userAttributes struct {
+	DisplayName string
+	Email       string
+}
+
+func (h *OIDCAuthHandler) mapUserAttributes(claims *IDTokenClaims, mapping map[string]interface{}) userAttributes {
 	displayName := claims.Name
 	email := claims.Email
 	givenName := claims.GivenName
 	familyName := claims.FamilyName
-	
-	if attributeMapping != nil {
-		// Map email
-		if emailMap, ok := attributeMapping["email"].(string); ok && emailMap != "" {
+
+	if mapping != nil {
+		if emailMap, ok := mapping["email"].(string); ok && emailMap != "" {
 			if mappedEmail := h.extractClaimValue(claims, emailMap); mappedEmail != "" {
 				email = mappedEmail
 			}
 		}
-		
-		// Map display name
-		if nameMap, ok := attributeMapping["name"].(string); ok && nameMap != "" {
+		if nameMap, ok := mapping["name"].(string); ok && nameMap != "" {
 			if mappedName := h.extractClaimValue(claims, nameMap); mappedName != "" {
 				displayName = mappedName
 			}
 		}
-		
-		// Map given name
-		if givenMap, ok := attributeMapping["given_name"].(string); ok && givenMap != "" {
+		if givenMap, ok := mapping["given_name"].(string); ok && givenMap != "" {
 			if mappedGiven := h.extractClaimValue(claims, givenMap); mappedGiven != "" {
 				givenName = mappedGiven
 			}
 		}
-		
-		// Map family name
-		if familyMap, ok := attributeMapping["family_name"].(string); ok && familyMap != "" {
+		if familyMap, ok := mapping["family_name"].(string); ok && familyMap != "" {
 			if mappedFamily := h.extractClaimValue(claims, familyMap); mappedFamily != "" {
 				familyName = mappedFamily
 			}
 		}
 	}
-	
-	// Construct full display name if not provided
+
 	if displayName == "" {
 		if givenName != "" && familyName != "" {
 			displayName = givenName + " " + familyName
@@ -580,26 +619,35 @@ func (h *OIDCAuthHandler) provisionUser(c *gin.Context, providerID, tenantID str
 			displayName = claims.Subject
 		}
 	}
-	
-	// Validate required fields
-	if email == "" {
+
+	return userAttributes{
+		DisplayName: displayName,
+		Email:       email,
+	}
+}
+
+func (h *OIDCAuthHandler) createUserMapping(ctx context.Context, tenantID, providerID, subject string, attrs userAttributes) (string, error) {
+	if attrs.Email == "" {
 		return "", fmt.Errorf("email is required for user provisioning but not provided in claims")
 	}
-	
+
+	userID := uuid.New().String()
+	mappingID := uuid.New().String()
+
 	insertQuery := `
 		INSERT INTO oidc_user_mappings (
 			id, tenant_id, provider_id, user_id, provider_user_id,
 			email, display_name, status, created_at, updated_at, last_login_at
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 	`
-	_, err = h.db.Exec(ctx, insertQuery,
+	_, err := h.db.Exec(ctx, insertQuery,
 		mappingID,
 		tenantID,
 		providerID,
 		userID,
-		claims.Subject,
-		email,
-		displayName,
+		subject,
+		attrs.Email,
+		attrs.DisplayName,
 		"active",
 		time.Now(),
 		time.Now(),
@@ -608,26 +656,23 @@ func (h *OIDCAuthHandler) provisionUser(c *gin.Context, providerID, tenantID str
 	if err != nil {
 		return "", fmt.Errorf("failed to create user mapping: %w", err)
 	}
+	return userID, nil
+}
 
-	// Assign default role if specified
-	if defaultRole != nil && *defaultRole != "" {
-		err = h.assignDefaultRole(ctx, userID, tenantID, *defaultRole)
+func (h *OIDCAuthHandler) postProvisioningActions(c *gin.Context, ctx context.Context, userID, tenantID, providerID string, config *provisioningConfig, groups []string) {
+	if config.DefaultRole != nil && *config.DefaultRole != "" {
+		err := h.assignDefaultRole(ctx, userID, tenantID, *config.DefaultRole)
 		if err != nil {
-			// Log error but don't fail provisioning
 			fmt.Fprintf(c.Writer, "[WARN] Failed to assign default role: %v\n", err)
 		}
 	}
-	
-	// Process group memberships if available
-	if len(claims.Groups) > 0 {
-		err = h.syncGroupMemberships(ctx, userID, tenantID, providerID, claims.Groups)
+
+	if len(groups) > 0 {
+		err := h.syncGroupMemberships(ctx, userID, tenantID, providerID, groups)
 		if err != nil {
-			// Log error but don't fail provisioning
 			fmt.Fprintf(c.Writer, "[WARN] Failed to sync group memberships: %v\n", err)
 		}
 	}
-
-	return userID, nil
 }
 
 // extractClaimValue extracts a value from claims using a path (supports nested fields)

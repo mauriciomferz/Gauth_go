@@ -31,33 +31,8 @@ func TestMemoryService_Issue(t *testing.T) {
 				Action:   "read",
 				Scope:    []string{"read", "list"},
 			},
-			wantErr: false,
-			validate: func(t *testing.T, poa *ProofOfAuthorization) {
-				if poa.Subject != "user_001" {
-					t.Errorf("Subject = %v, want user_001", poa.Subject)
-				}
-				if poa.Resource != "resource_001" {
-					t.Errorf("Resource = %v, want resource_001", poa.Resource)
-				}
-				if poa.Action != "read" {
-					t.Errorf("Action = %v, want read", poa.Action)
-				}
-				if poa.Issuer != "gauth-poa-service" {
-					t.Errorf("Issuer = %v, want gauth-poa-service", poa.Issuer)
-				}
-				if len(poa.Scope) != 2 {
-					t.Errorf("Scope length = %v, want 2", len(poa.Scope))
-				}
-				if poa.ID == "" {
-					t.Error("ID should not be empty")
-				}
-				if poa.Digest == "" {
-					t.Error("Digest should not be empty")
-				}
-				if poa.Attestation == nil {
-					t.Error("Attestation should not be nil")
-				}
-			},
+			wantErr:  false,
+			validate: validateBasicPoA,
 		},
 		{
 			name: "Invalid - missing subject",
@@ -99,24 +74,8 @@ func TestMemoryService_Issue(t *testing.T) {
 					Constraints: []string{"time-limited"},
 				},
 			},
-			wantErr: false,
-			validate: func(t *testing.T, poa *ProofOfAuthorization) {
-				if poa.Delegation == nil {
-					t.Fatal("Delegation should not be nil")
-				}
-				if poa.Delegation.DelegatedBy != "admin" {
-					t.Errorf("DelegatedBy = %v, want admin", poa.Delegation.DelegatedBy)
-				}
-				if poa.Delegation.DelegatedTo != "user_002" {
-					t.Errorf("DelegatedTo = %v, want user_002", poa.Delegation.DelegatedTo)
-				}
-				if !poa.Delegation.Revocable {
-					t.Error("Delegation should be revocable")
-				}
-				if len(poa.Delegation.Scope) != 1 {
-					t.Errorf("Delegation scope length = %v, want 1", len(poa.Delegation.Scope))
-				}
-			},
+			wantErr:  false,
+			validate: validateDelegationPoA,
 		},
 		{
 			name: "Valid with context metadata",
@@ -129,15 +88,8 @@ func TestMemoryService_Issue(t *testing.T) {
 					"timestamp": "2025-01-01",
 				},
 			},
-			wantErr: false,
-			validate: func(t *testing.T, poa *ProofOfAuthorization) {
-				if poa.Metadata == nil {
-					t.Fatal("Metadata should not be nil")
-				}
-				if len(poa.Metadata) != 2 {
-					t.Errorf("Metadata length = %v, want 2", len(poa.Metadata))
-				}
-			},
+			wantErr:  false,
+			validate: validateMetadataPoA,
 		},
 		{
 			name: "Valid with empty scope",
@@ -165,7 +117,6 @@ func TestMemoryService_Issue(t *testing.T) {
 			wantErr: false,
 			validate: func(t *testing.T, poa *ProofOfAuthorization) {
 				// Nil scope is acceptable
-				_ = poa
 			},
 		},
 	}
@@ -182,7 +133,7 @@ func TestMemoryService_Issue(t *testing.T) {
 
 			if tt.wantErr {
 				if err != nil && tt.errSubstr != "" {
-					if !substringCheck(err.Error(), tt.errSubstr) {
+					if !strings.Contains(err.Error(), tt.errSubstr) {
 						t.Errorf("Issue() error = %v, want substring %v", err, tt.errSubstr)
 					}
 				}
@@ -202,6 +153,60 @@ func TestMemoryService_Issue(t *testing.T) {
 				t.Error("Issue() did not store POA in service")
 			}
 		})
+	}
+}
+
+func validateBasicPoA(t *testing.T, poa *ProofOfAuthorization) {
+	if poa.Subject != "user_001" {
+		t.Errorf("Subject = %v, want user_001", poa.Subject)
+	}
+	if poa.Resource != "resource_001" {
+		t.Errorf("Resource = %v, want resource_001", poa.Resource)
+	}
+	if poa.Action != "read" {
+		t.Errorf("Action = %v, want read", poa.Action)
+	}
+	if poa.Issuer != "gauth-poa-service" {
+		t.Errorf("Issuer = %v, want gauth-poa-service", poa.Issuer)
+	}
+	if len(poa.Scope) != 2 {
+		t.Errorf("Scope length = %v, want 2", len(poa.Scope))
+	}
+	if poa.ID == "" {
+		t.Error("ID should not be empty")
+	}
+	if poa.Digest == "" {
+		t.Error("Digest should not be empty")
+	}
+	if poa.Attestation == nil {
+		t.Error("Attestation should not be nil")
+	}
+}
+
+func validateDelegationPoA(t *testing.T, poa *ProofOfAuthorization) {
+	if poa.Delegation == nil {
+		t.Fatal("Delegation should not be nil")
+	}
+	if poa.Delegation.DelegatedBy != "admin" {
+		t.Errorf("DelegatedBy = %v, want admin", poa.Delegation.DelegatedBy)
+	}
+	if poa.Delegation.DelegatedTo != "user_002" {
+		t.Errorf("DelegatedTo = %v, want user_002", poa.Delegation.DelegatedTo)
+	}
+	if !poa.Delegation.Revocable {
+		t.Error("Delegation should be revocable")
+	}
+	if len(poa.Delegation.Scope) != 1 {
+		t.Errorf("Delegation scope length = %v, want 1", len(poa.Delegation.Scope))
+	}
+}
+
+func validateMetadataPoA(t *testing.T, poa *ProofOfAuthorization) {
+	if poa.Metadata == nil {
+		t.Fatal("Metadata should not be nil")
+	}
+	if len(poa.Metadata) != 2 {
+		t.Errorf("Metadata length = %v, want 2", len(poa.Metadata))
 	}
 }
 

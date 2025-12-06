@@ -418,6 +418,32 @@ func (s *DatabasePolicyStore) List(ctx context.Context, status *PolicyStatus) ([
 
 // Search finds policies matching the given criteria
 func (s *DatabasePolicyStore) Search(ctx context.Context, criteria *PolicySearchCriteria) ([]*AuthorizationPolicy, error) {
+	query, args := s.buildSearchQuery(criteria)
+
+	rows, err := s.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to search policies: %w", err)
+	}
+	defer rows.Close()
+
+	var policies []*AuthorizationPolicy
+
+	for rows.Next() {
+		policy, err := s.scanPolicyRows(rows)
+		if err != nil {
+			return nil, err
+		}
+		policies = append(policies, policy)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating policies: %w", err)
+	}
+
+	return policies, nil
+}
+
+func (s *DatabasePolicyStore) buildSearchQuery(criteria *PolicySearchCriteria) (string, []interface{}) {
 	query := `
 		SELECT policy_id, policy_type, policy_version, policy_name, description,
 			   status, created_by, owners_authorizer, client_owner, organization_id,
@@ -432,7 +458,6 @@ func (s *DatabasePolicyStore) Search(ctx context.Context, criteria *PolicySearch
 	argCount := 1
 
 	if criteria != nil {
-		// Handle PolicyTypes array
 		if len(criteria.PolicyTypes) > 0 {
 			query += fmt.Sprintf(" AND policy_type = ANY($%d)", argCount)
 			policyTypes := make([]string, len(criteria.PolicyTypes))
@@ -442,7 +467,6 @@ func (s *DatabasePolicyStore) Search(ctx context.Context, criteria *PolicySearch
 			args = append(args, policyTypes)
 			argCount++
 		}
-		// Handle Statuses array
 		if len(criteria.Statuses) > 0 {
 			query += fmt.Sprintf(" AND status = ANY($%d)", argCount)
 			statuses := make([]string, len(criteria.Statuses))
@@ -468,13 +492,11 @@ func (s *DatabasePolicyStore) Search(ctx context.Context, criteria *PolicySearch
 			args = append(args, searchPattern, searchPattern)
 			argCount += 2
 		}
-		// Handle Tags array
 		if len(criteria.Tags) > 0 {
 			query += fmt.Sprintf(" AND tags ?& $%d", argCount)
 			args = append(args, criteria.Tags)
 			argCount++
 		}
-		// Handle date ranges
 		if !criteria.CreatedAfter.IsZero() {
 			query += fmt.Sprintf(" AND created_at >= $%d", argCount)
 			args = append(args, criteria.CreatedAfter)
@@ -494,68 +516,55 @@ func (s *DatabasePolicyStore) Search(ctx context.Context, criteria *PolicySearch
 		args = append(args, criteria.Limit)
 	}
 
-	rows, err := s.db.QueryContext(ctx, query, args...)
+	return query, args
+}
+
+func (s *DatabasePolicyStore) scanPolicyRows(rows *sql.Rows) (*AuthorizationPolicy, error) {
+	policy := &AuthorizationPolicy{}
+	var policyRulesJSON, scopeJSON, restrictionsJSON, poaTemplateJSON, tagsJSON, metadataJSON []byte
+
+	err := rows.Scan(
+		&policy.PolicyID, &policy.PolicyType, &policy.PolicyVersion, &policy.PolicyName, &policy.Description,
+		&policy.Status, &policy.CreatedBy, &policy.OwnersAuthorizer, &policy.ClientOwner, &policy.OrganizationID,
+		&policyRulesJSON, &scopeJSON, &restrictionsJSON, &poaTemplateJSON,
+		&policy.CreatedAt, &policy.UpdatedAt, &policy.ActivatedAt, &policy.ExpiresAt, &policy.RevokedAt,
+		&policy.PreviousVersion, &policy.ChangeLog, &policy.EnforcementCount, &policy.LastEnforcedAt,
+		&tagsJSON, &metadataJSON,
+	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to search policies: %w", err)
-	}
-	defer rows.Close()
-
-	var policies []*AuthorizationPolicy
-
-	for rows.Next() {
-		policy := &AuthorizationPolicy{}
-		var policyRulesJSON, scopeJSON, restrictionsJSON, poaTemplateJSON, tagsJSON, metadataJSON []byte
-
-		err := rows.Scan(
-			&policy.PolicyID, &policy.PolicyType, &policy.PolicyVersion, &policy.PolicyName, &policy.Description,
-			&policy.Status, &policy.CreatedBy, &policy.OwnersAuthorizer, &policy.ClientOwner, &policy.OrganizationID,
-			&policyRulesJSON, &scopeJSON, &restrictionsJSON, &poaTemplateJSON,
-			&policy.CreatedAt, &policy.UpdatedAt, &policy.ActivatedAt, &policy.ExpiresAt, &policy.RevokedAt,
-			&policy.PreviousVersion, &policy.ChangeLog, &policy.EnforcementCount, &policy.LastEnforcedAt,
-			&tagsJSON, &metadataJSON,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scan policy: %w", err)
-		}
-
-		// Unmarshal JSON fields
-		if err := json.Unmarshal(policyRulesJSON, &policy.PolicyRules); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal policy rules: %w", err)
-		}
-		if len(scopeJSON) > 0 {
-			if err := json.Unmarshal(scopeJSON, &policy.Scope); err != nil {
-				return nil, fmt.Errorf("failed to unmarshal scope: %w", err)
-			}
-		}
-		if len(restrictionsJSON) > 0 {
-			if err := json.Unmarshal(restrictionsJSON, &policy.Restrictions); err != nil {
-				return nil, fmt.Errorf("failed to unmarshal restrictions: %w", err)
-			}
-		}
-		if len(poaTemplateJSON) > 0 {
-			if err := json.Unmarshal(poaTemplateJSON, &policy.PoATemplate); err != nil {
-				return nil, fmt.Errorf("failed to unmarshal PoA template: %w", err)
-			}
-		}
-		if len(tagsJSON) > 0 {
-			if err := json.Unmarshal(tagsJSON, &policy.Tags); err != nil {
-				return nil, fmt.Errorf("failed to unmarshal tags: %w", err)
-			}
-		}
-		if len(metadataJSON) > 0 {
-			if err := json.Unmarshal(metadataJSON, &policy.Metadata); err != nil {
-				return nil, fmt.Errorf("failed to unmarshal metadata: %w", err)
-			}
-		}
-
-		policies = append(policies, policy)
+		return nil, fmt.Errorf("failed to scan policy: %w", err)
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating policies: %w", err)
+	if err := json.Unmarshal(policyRulesJSON, &policy.PolicyRules); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal policy rules: %w", err)
+	}
+	if len(scopeJSON) > 0 {
+		if err := json.Unmarshal(scopeJSON, &policy.Scope); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal scope: %w", err)
+		}
+	}
+	if len(restrictionsJSON) > 0 {
+		if err := json.Unmarshal(restrictionsJSON, &policy.Restrictions); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal restrictions: %w", err)
+		}
+	}
+	if len(poaTemplateJSON) > 0 {
+		if err := json.Unmarshal(poaTemplateJSON, &policy.PoATemplate); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal PoA template: %w", err)
+		}
+	}
+	if len(tagsJSON) > 0 {
+		if err := json.Unmarshal(tagsJSON, &policy.Tags); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal tags: %w", err)
+		}
+	}
+	if len(metadataJSON) > 0 {
+		if err := json.Unmarshal(metadataJSON, &policy.Metadata); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal metadata: %w", err)
+		}
 	}
 
-	return policies, nil
+	return policy, nil
 }
 
 // Exists checks if a policy with the given ID exists

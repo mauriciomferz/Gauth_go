@@ -23,101 +23,101 @@ func NewSecurityHandler(db *pgxpool.Pool) *SecurityHandler {
 
 // SecuritySettings represents comprehensive security configuration
 type SecuritySettings struct {
-	ID                          string     `json:"id"`
-	TenantID                    string     `json:"tenantId"`
-	
+	ID       string `json:"id"`
+	TenantID string `json:"tenantId"`
+
 	// MFA Settings
-	MFAEnabled                  bool       `json:"mfaEnabled"`
-	MFAMethods                  []string   `json:"mfaMethods"`
-	MFARequiredForAdmin         bool       `json:"mfaRequiredForAdmin"`
-	MFAGracePeriodHours         int        `json:"mfaGracePeriodHours"`
-	
+	MFAEnabled          bool     `json:"mfaEnabled"`
+	MFAMethods          []string `json:"mfaMethods"`
+	MFARequiredForAdmin bool     `json:"mfaRequiredForAdmin"`
+	MFAGracePeriodHours int      `json:"mfaGracePeriodHours"`
+
 	// IP Whitelisting
-	IPWhitelistEnabled          bool       `json:"ipWhitelistEnabled"`
-	IPWhitelist                 []string   `json:"ipWhitelist"`
-	IPWhitelistMode             string     `json:"ipWhitelistMode"`
-	
+	IPWhitelistEnabled bool     `json:"ipWhitelistEnabled"`
+	IPWhitelist        []string `json:"ipWhitelist"`
+	IPWhitelistMode    string   `json:"ipWhitelistMode"`
+
 	// Token Expiration
-	AccessTokenTTLMinutes       int        `json:"accessTokenTtlMinutes"`
-	RefreshTokenTTLDays         int        `json:"refreshTokenTtlDays"`
-	IDTokenTTLMinutes           int        `json:"idTokenTtlMinutes"`
-	APIKeyDefaultTTLDays        int        `json:"apiKeyDefaultTtlDays"`
-	AllowTokenRefresh           bool       `json:"allowTokenRefresh"`
-	MaxTokenLifetimeDays        int        `json:"maxTokenLifetimeDays"`
-	
+	AccessTokenTTLMinutes int  `json:"accessTokenTtlMinutes"`
+	RefreshTokenTTLDays   int  `json:"refreshTokenTtlDays"`
+	IDTokenTTLMinutes     int  `json:"idTokenTtlMinutes"`
+	APIKeyDefaultTTLDays  int  `json:"apiKeyDefaultTtlDays"`
+	AllowTokenRefresh     bool `json:"allowTokenRefresh"`
+	MaxTokenLifetimeDays  int  `json:"maxTokenLifetimeDays"`
+
 	// Session Management
-	SessionTimeoutMinutes       int        `json:"sessionTimeoutMinutes"`
-	SessionIdleTimeoutMinutes   int        `json:"sessionIdleTimeoutMinutes"`
-	MaxConcurrentSessions       int        `json:"maxConcurrentSessions"`
-	SessionPinningEnabled       bool       `json:"sessionPinningEnabled"`
-	ForceLogoutOnPasswordChange bool       `json:"forceLogoutOnPasswordChange"`
-	
+	SessionTimeoutMinutes       int  `json:"sessionTimeoutMinutes"`
+	SessionIdleTimeoutMinutes   int  `json:"sessionIdleTimeoutMinutes"`
+	MaxConcurrentSessions       int  `json:"maxConcurrentSessions"`
+	SessionPinningEnabled       bool `json:"sessionPinningEnabled"`
+	ForceLogoutOnPasswordChange bool `json:"forceLogoutOnPasswordChange"`
+
 	// Password Policy
-	PasswordMinLength           int        `json:"passwordMinLength"`
-	PasswordRequireUppercase    bool       `json:"passwordRequireUppercase"`
-	PasswordRequireLowercase    bool       `json:"passwordRequireLowercase"`
-	PasswordRequireNumbers      bool       `json:"passwordRequireNumbers"`
-	PasswordRequireSpecialChars bool       `json:"passwordRequireSpecialChars"`
-	PasswordExpiryDays          int        `json:"passwordExpiryDays"`
-	PasswordHistoryCount        int        `json:"passwordHistoryCount"`
-	
+	PasswordMinLength           int  `json:"passwordMinLength"`
+	PasswordRequireUppercase    bool `json:"passwordRequireUppercase"`
+	PasswordRequireLowercase    bool `json:"passwordRequireLowercase"`
+	PasswordRequireNumbers      bool `json:"passwordRequireNumbers"`
+	PasswordRequireSpecialChars bool `json:"passwordRequireSpecialChars"`
+	PasswordExpiryDays          int  `json:"passwordExpiryDays"`
+	PasswordHistoryCount        int  `json:"passwordHistoryCount"`
+
 	// Login Security
-	MaxLoginAttempts            int        `json:"maxLoginAttempts"`
-	LockoutDurationMinutes      int        `json:"lockoutDurationMinutes"`
-	SuspiciousActivityDetection bool       `json:"suspiciousActivityDetection"`
-	
+	MaxLoginAttempts            int  `json:"maxLoginAttempts"`
+	LockoutDurationMinutes      int  `json:"lockoutDurationMinutes"`
+	SuspiciousActivityDetection bool `json:"suspiciousActivityDetection"`
+
 	// Advanced Security
-	RequireHTTPS                bool       `json:"requireHttps"`
-	CORSAllowedOrigins          []string   `json:"corsAllowedOrigins"`
-	CSRFProtectionEnabled       bool       `json:"csrfProtectionEnabled"`
-	RateLimitingEnabled         bool       `json:"rateLimitingEnabled"`
-	
+	RequireHTTPS          bool     `json:"requireHttps"`
+	CORSAllowedOrigins    []string `json:"corsAllowedOrigins"`
+	CSRFProtectionEnabled bool     `json:"csrfProtectionEnabled"`
+	RateLimitingEnabled   bool     `json:"rateLimitingEnabled"`
+
 	// Audit and Compliance
-	AuditAllRequests            bool       `json:"auditAllRequests"`
-	LogPIIAccess                bool       `json:"logPiiAccess"`
-	DataRetentionDays           int        `json:"dataRetentionDays"`
-	
+	AuditAllRequests  bool `json:"auditAllRequests"`
+	LogPIIAccess      bool `json:"logPiiAccess"`
+	DataRetentionDays int  `json:"dataRetentionDays"`
+
 	// Notifications
-	NotifyOnNewDevice           bool       `json:"notifyOnNewDevice"`
-	NotifyOnSuspiciousLogin     bool       `json:"notifyOnSuspiciousLogin"`
-	NotifyOnAPIKeyUsage         bool       `json:"notifyOnApiKeyUsage"`
-	SecurityContactEmail        string     `json:"securityContactEmail"`
-	
+	NotifyOnNewDevice       bool   `json:"notifyOnNewDevice"`
+	NotifyOnSuspiciousLogin bool   `json:"notifyOnSuspiciousLogin"`
+	NotifyOnAPIKeyUsage     bool   `json:"notifyOnApiKeyUsage"`
+	SecurityContactEmail    string `json:"securityContactEmail"`
+
 	// Metadata
-	CreatedAt                   time.Time  `json:"createdAt"`
-	UpdatedAt                   time.Time  `json:"updatedAt"`
-	UpdatedBy                   *string    `json:"updatedBy"`
-	LastReviewedAt              *time.Time `json:"lastReviewedAt"`
+	CreatedAt      time.Time  `json:"createdAt"`
+	UpdatedAt      time.Time  `json:"updatedAt"`
+	UpdatedBy      *string    `json:"updatedBy"`
+	LastReviewedAt *time.Time `json:"lastReviewedAt"`
 }
 
 // UpdateSecuritySettingsRequest represents security settings update request
 type UpdateSecuritySettingsRequest struct {
 	// MFA Settings
-	MFAEnabled          *bool     `json:"mfaEnabled"`
-	MFAMethods          []string  `json:"mfaMethods"`
-	MFARequiredForAdmin *bool     `json:"mfaRequiredForAdmin"`
-	MFAGracePeriodHours *int      `json:"mfaGracePeriodHours"`
-	
+	MFAEnabled          *bool    `json:"mfaEnabled"`
+	MFAMethods          []string `json:"mfaMethods"`
+	MFARequiredForAdmin *bool    `json:"mfaRequiredForAdmin"`
+	MFAGracePeriodHours *int     `json:"mfaGracePeriodHours"`
+
 	// IP Whitelisting
-	IPWhitelistEnabled  *bool     `json:"ipWhitelistEnabled"`
-	IPWhitelist         []string  `json:"ipWhitelist"`
-	IPWhitelistMode     *string   `json:"ipWhitelistMode"`
-	
+	IPWhitelistEnabled *bool    `json:"ipWhitelistEnabled"`
+	IPWhitelist        []string `json:"ipWhitelist"`
+	IPWhitelistMode    *string  `json:"ipWhitelistMode"`
+
 	// Token Expiration
-	AccessTokenTTLMinutes *int   `json:"accessTokenTtlMinutes"`
-	RefreshTokenTTLDays   *int   `json:"refreshTokenTtlDays"`
-	IDTokenTTLMinutes     *int   `json:"idTokenTtlMinutes"`
-	APIKeyDefaultTTLDays  *int   `json:"apiKeyDefaultTtlDays"`
-	AllowTokenRefresh     *bool  `json:"allowTokenRefresh"`
-	MaxTokenLifetimeDays  *int   `json:"maxTokenLifetimeDays"`
-	
+	AccessTokenTTLMinutes *int  `json:"accessTokenTtlMinutes"`
+	RefreshTokenTTLDays   *int  `json:"refreshTokenTtlDays"`
+	IDTokenTTLMinutes     *int  `json:"idTokenTtlMinutes"`
+	APIKeyDefaultTTLDays  *int  `json:"apiKeyDefaultTtlDays"`
+	AllowTokenRefresh     *bool `json:"allowTokenRefresh"`
+	MaxTokenLifetimeDays  *int  `json:"maxTokenLifetimeDays"`
+
 	// Session Management
 	SessionTimeoutMinutes       *int  `json:"sessionTimeoutMinutes"`
 	SessionIdleTimeoutMinutes   *int  `json:"sessionIdleTimeoutMinutes"`
 	MaxConcurrentSessions       *int  `json:"maxConcurrentSessions"`
 	SessionPinningEnabled       *bool `json:"sessionPinningEnabled"`
 	ForceLogoutOnPasswordChange *bool `json:"forceLogoutOnPasswordChange"`
-	
+
 	// Password Policy
 	PasswordMinLength           *int  `json:"passwordMinLength"`
 	PasswordRequireUppercase    *bool `json:"passwordRequireUppercase"`
@@ -126,29 +126,29 @@ type UpdateSecuritySettingsRequest struct {
 	PasswordRequireSpecialChars *bool `json:"passwordRequireSpecialChars"`
 	PasswordExpiryDays          *int  `json:"passwordExpiryDays"`
 	PasswordHistoryCount        *int  `json:"passwordHistoryCount"`
-	
+
 	// Login Security
 	MaxLoginAttempts            *int  `json:"maxLoginAttempts"`
 	LockoutDurationMinutes      *int  `json:"lockoutDurationMinutes"`
 	SuspiciousActivityDetection *bool `json:"suspiciousActivityDetection"`
-	
+
 	// Advanced Security
-	RequireHTTPS            *bool    `json:"requireHttps"`
-	CORSAllowedOrigins      []string `json:"corsAllowedOrigins"`
-	CSRFProtectionEnabled   *bool    `json:"csrfProtectionEnabled"`
-	RateLimitingEnabled     *bool    `json:"rateLimitingEnabled"`
-	
+	RequireHTTPS          *bool    `json:"requireHttps"`
+	CORSAllowedOrigins    []string `json:"corsAllowedOrigins"`
+	CSRFProtectionEnabled *bool    `json:"csrfProtectionEnabled"`
+	RateLimitingEnabled   *bool    `json:"rateLimitingEnabled"`
+
 	// Audit and Compliance
 	AuditAllRequests  *bool `json:"auditAllRequests"`
 	LogPIIAccess      *bool `json:"logPiiAccess"`
 	DataRetentionDays *int  `json:"dataRetentionDays"`
-	
+
 	// Notifications
 	NotifyOnNewDevice       *bool   `json:"notifyOnNewDevice"`
 	NotifyOnSuspiciousLogin *bool   `json:"notifyOnSuspiciousLogin"`
 	NotifyOnAPIKeyUsage     *bool   `json:"notifyOnApiKeyUsage"`
 	SecurityContactEmail    *string `json:"securityContactEmail"`
-	
+
 	// Metadata
 	UpdatedBy *string `json:"updatedBy"`
 }
@@ -223,7 +223,7 @@ func (h *SecurityHandler) GetSecuritySettings(c *gin.Context) {
 func (h *SecurityHandler) createDefaultSecuritySettings(c *gin.Context, tenantID string) SecuritySettings {
 	id := uuid.New()
 	ctx := c.Request.Context()
-	
+
 	query := `
 		INSERT INTO security_settings (
 			id, tenant_id, security_contact_email, updated_by
@@ -246,7 +246,7 @@ func (h *SecurityHandler) createDefaultSecuritySettings(c *gin.Context, tenantID
 			security_contact_email,
 			created_at, updated_at, updated_by, last_reviewed_at
 	`
-	
+
 	var settings SecuritySettings
 	_ = h.db.QueryRow(ctx, query, id, tenantID, "security@"+tenantID, "system").Scan( // Best effort; will return defaults on error
 		&settings.ID, &settings.TenantID,
@@ -266,7 +266,7 @@ func (h *SecurityHandler) createDefaultSecuritySettings(c *gin.Context, tenantID
 		&settings.SecurityContactEmail,
 		&settings.CreatedAt, &settings.UpdatedAt, &settings.UpdatedBy, &settings.LastReviewedAt,
 	)
-	
+
 	return settings
 }
 
@@ -286,235 +286,7 @@ func (h *SecurityHandler) UpdateSecuritySettings(c *gin.Context) {
 
 	ctx := c.Request.Context()
 
-	// Build dynamic update query
-	query := `UPDATE security_settings SET `
-	params := []interface{}{}
-	paramIndex := 1
-
-	// MFA Settings
-	if req.MFAEnabled != nil {
-		query += fmt.Sprintf("mfa_enabled = $%d, ", paramIndex)
-		params = append(params, *req.MFAEnabled)
-		paramIndex++
-	}
-	if req.MFAMethods != nil {
-		query += fmt.Sprintf("mfa_methods = $%d, ", paramIndex)
-		params = append(params, req.MFAMethods)
-		paramIndex++
-	}
-	if req.MFARequiredForAdmin != nil {
-		query += fmt.Sprintf("mfa_required_for_admin = $%d, ", paramIndex)
-		params = append(params, *req.MFARequiredForAdmin)
-		paramIndex++
-	}
-	if req.MFAGracePeriodHours != nil {
-		query += fmt.Sprintf("mfa_grace_period_hours = $%d, ", paramIndex)
-		params = append(params, *req.MFAGracePeriodHours)
-		paramIndex++
-	}
-
-	// IP Whitelisting
-	if req.IPWhitelistEnabled != nil {
-		query += fmt.Sprintf("ip_whitelist_enabled = $%d, ", paramIndex)
-		params = append(params, *req.IPWhitelistEnabled)
-		paramIndex++
-	}
-	if req.IPWhitelist != nil {
-		query += fmt.Sprintf("ip_whitelist = $%d, ", paramIndex)
-		params = append(params, req.IPWhitelist)
-		paramIndex++
-	}
-	if req.IPWhitelistMode != nil {
-		query += fmt.Sprintf("ip_whitelist_mode = $%d, ", paramIndex)
-		params = append(params, *req.IPWhitelistMode)
-		paramIndex++
-	}
-
-	// Token Expiration
-	if req.AccessTokenTTLMinutes != nil {
-		query += fmt.Sprintf("access_token_ttl_minutes = $%d, ", paramIndex)
-		params = append(params, *req.AccessTokenTTLMinutes)
-		paramIndex++
-	}
-	if req.RefreshTokenTTLDays != nil {
-		query += fmt.Sprintf("refresh_token_ttl_days = $%d, ", paramIndex)
-		params = append(params, *req.RefreshTokenTTLDays)
-		paramIndex++
-	}
-	if req.IDTokenTTLMinutes != nil {
-		query += fmt.Sprintf("id_token_ttl_minutes = $%d, ", paramIndex)
-		params = append(params, *req.IDTokenTTLMinutes)
-		paramIndex++
-	}
-	if req.APIKeyDefaultTTLDays != nil {
-		query += fmt.Sprintf("api_key_default_ttl_days = $%d, ", paramIndex)
-		params = append(params, *req.APIKeyDefaultTTLDays)
-		paramIndex++
-	}
-	if req.AllowTokenRefresh != nil {
-		query += fmt.Sprintf("allow_token_refresh = $%d, ", paramIndex)
-		params = append(params, *req.AllowTokenRefresh)
-		paramIndex++
-	}
-	if req.MaxTokenLifetimeDays != nil {
-		query += fmt.Sprintf("max_token_lifetime_days = $%d, ", paramIndex)
-		params = append(params, *req.MaxTokenLifetimeDays)
-		paramIndex++
-	}
-
-	// Session Management
-	if req.SessionTimeoutMinutes != nil {
-		query += fmt.Sprintf("session_timeout_minutes = $%d, ", paramIndex)
-		params = append(params, *req.SessionTimeoutMinutes)
-		paramIndex++
-	}
-	if req.SessionIdleTimeoutMinutes != nil {
-		query += fmt.Sprintf("session_idle_timeout_minutes = $%d, ", paramIndex)
-		params = append(params, *req.SessionIdleTimeoutMinutes)
-		paramIndex++
-	}
-	if req.MaxConcurrentSessions != nil {
-		query += fmt.Sprintf("max_concurrent_sessions = $%d, ", paramIndex)
-		params = append(params, *req.MaxConcurrentSessions)
-		paramIndex++
-	}
-	if req.SessionPinningEnabled != nil {
-		query += fmt.Sprintf("session_pinning_enabled = $%d, ", paramIndex)
-		params = append(params, *req.SessionPinningEnabled)
-		paramIndex++
-	}
-	if req.ForceLogoutOnPasswordChange != nil {
-		query += fmt.Sprintf("force_logout_on_password_change = $%d, ", paramIndex)
-		params = append(params, *req.ForceLogoutOnPasswordChange)
-		paramIndex++
-	}
-
-	// Password Policy
-	if req.PasswordMinLength != nil {
-		query += fmt.Sprintf("password_min_length = $%d, ", paramIndex)
-		params = append(params, *req.PasswordMinLength)
-		paramIndex++
-	}
-	if req.PasswordRequireUppercase != nil {
-		query += fmt.Sprintf("password_require_uppercase = $%d, ", paramIndex)
-		params = append(params, *req.PasswordRequireUppercase)
-		paramIndex++
-	}
-	if req.PasswordRequireLowercase != nil {
-		query += fmt.Sprintf("password_require_lowercase = $%d, ", paramIndex)
-		params = append(params, *req.PasswordRequireLowercase)
-		paramIndex++
-	}
-	if req.PasswordRequireNumbers != nil {
-		query += fmt.Sprintf("password_require_numbers = $%d, ", paramIndex)
-		params = append(params, *req.PasswordRequireNumbers)
-		paramIndex++
-	}
-	if req.PasswordRequireSpecialChars != nil {
-		query += fmt.Sprintf("password_require_special_chars = $%d, ", paramIndex)
-		params = append(params, *req.PasswordRequireSpecialChars)
-		paramIndex++
-	}
-	if req.PasswordExpiryDays != nil {
-		query += fmt.Sprintf("password_expiry_days = $%d, ", paramIndex)
-		params = append(params, *req.PasswordExpiryDays)
-		paramIndex++
-	}
-	if req.PasswordHistoryCount != nil {
-		query += fmt.Sprintf("password_history_count = $%d, ", paramIndex)
-		params = append(params, *req.PasswordHistoryCount)
-		paramIndex++
-	}
-
-	// Login Security
-	if req.MaxLoginAttempts != nil {
-		query += fmt.Sprintf("max_login_attempts = $%d, ", paramIndex)
-		params = append(params, *req.MaxLoginAttempts)
-		paramIndex++
-	}
-	if req.LockoutDurationMinutes != nil {
-		query += fmt.Sprintf("lockout_duration_minutes = $%d, ", paramIndex)
-		params = append(params, *req.LockoutDurationMinutes)
-		paramIndex++
-	}
-	if req.SuspiciousActivityDetection != nil {
-		query += fmt.Sprintf("suspicious_activity_detection = $%d, ", paramIndex)
-		params = append(params, *req.SuspiciousActivityDetection)
-		paramIndex++
-	}
-
-	// Advanced Security
-	if req.RequireHTTPS != nil {
-		query += fmt.Sprintf("require_https = $%d, ", paramIndex)
-		params = append(params, *req.RequireHTTPS)
-		paramIndex++
-	}
-	if req.CORSAllowedOrigins != nil {
-		query += fmt.Sprintf("cors_allowed_origins = $%d, ", paramIndex)
-		params = append(params, req.CORSAllowedOrigins)
-		paramIndex++
-	}
-	if req.CSRFProtectionEnabled != nil {
-		query += fmt.Sprintf("csrf_protection_enabled = $%d, ", paramIndex)
-		params = append(params, *req.CSRFProtectionEnabled)
-		paramIndex++
-	}
-	if req.RateLimitingEnabled != nil {
-		query += fmt.Sprintf("rate_limiting_enabled = $%d, ", paramIndex)
-		params = append(params, *req.RateLimitingEnabled)
-		paramIndex++
-	}
-
-	// Audit and Compliance
-	if req.AuditAllRequests != nil {
-		query += fmt.Sprintf("audit_all_requests = $%d, ", paramIndex)
-		params = append(params, *req.AuditAllRequests)
-		paramIndex++
-	}
-	if req.LogPIIAccess != nil {
-		query += fmt.Sprintf("log_pii_access = $%d, ", paramIndex)
-		params = append(params, *req.LogPIIAccess)
-		paramIndex++
-	}
-	if req.DataRetentionDays != nil {
-		query += fmt.Sprintf("data_retention_days = $%d, ", paramIndex)
-		params = append(params, *req.DataRetentionDays)
-		paramIndex++
-	}
-
-	// Notifications
-	if req.NotifyOnNewDevice != nil {
-		query += fmt.Sprintf("notify_on_new_device = $%d, ", paramIndex)
-		params = append(params, *req.NotifyOnNewDevice)
-		paramIndex++
-	}
-	if req.NotifyOnSuspiciousLogin != nil {
-		query += fmt.Sprintf("notify_on_suspicious_login = $%d, ", paramIndex)
-		params = append(params, *req.NotifyOnSuspiciousLogin)
-		paramIndex++
-	}
-	if req.NotifyOnAPIKeyUsage != nil {
-		query += fmt.Sprintf("notify_on_api_key_usage = $%d, ", paramIndex)
-		params = append(params, *req.NotifyOnAPIKeyUsage)
-		paramIndex++
-	}
-	if req.SecurityContactEmail != nil {
-		query += fmt.Sprintf("security_contact_email = $%d, ", paramIndex)
-		params = append(params, *req.SecurityContactEmail)
-		paramIndex++
-	}
-
-	// Updated by
-	if req.UpdatedBy != nil {
-		query += fmt.Sprintf("updated_by = $%d, ", paramIndex)
-		params = append(params, *req.UpdatedBy)
-		paramIndex++
-	}
-
-	// Remove trailing comma and add WHERE clause
-	query = query[:len(query)-2]
-	query += fmt.Sprintf(" WHERE tenant_id = $%d RETURNING id", paramIndex)
-	params = append(params, tenantID)
+	query, params := h.buildSecuritySettingsUpdateQuery(&req, tenantID)
 
 	var returnedID string
 	err := h.db.QueryRow(ctx, query, params...).Scan(&returnedID)
@@ -532,6 +304,270 @@ func (h *SecurityHandler) UpdateSecuritySettings(c *gin.Context) {
 		"message": "Security settings updated successfully",
 		"id":      returnedID,
 	})
+}
+
+func (h *SecurityHandler) buildSecuritySettingsUpdateQuery(req *UpdateSecuritySettingsRequest, tenantID string) (string, []interface{}) {
+	query := `UPDATE security_settings SET `
+	params := []interface{}{}
+	paramIndex := 1
+
+	query, params, paramIndex = h.appendMFAUpdates(query, params, paramIndex, req)
+	query, params, paramIndex = h.appendIPUpdates(query, params, paramIndex, req)
+	query, params, paramIndex = h.appendTokenUpdates(query, params, paramIndex, req)
+	query, params, paramIndex = h.appendSessionUpdates(query, params, paramIndex, req)
+	query, params, paramIndex = h.appendPasswordUpdates(query, params, paramIndex, req)
+	query, params, paramIndex = h.appendLoginSecurityUpdates(query, params, paramIndex, req)
+	query, params, paramIndex = h.appendAdvancedSecurityUpdates(query, params, paramIndex, req)
+	query, params, paramIndex = h.appendAuditUpdates(query, params, paramIndex, req)
+	query, params, paramIndex = h.appendNotificationUpdates(query, params, paramIndex, req)
+
+	// Updated by
+	if req.UpdatedBy != nil {
+		query += fmt.Sprintf("updated_by = $%d, ", paramIndex)
+		params = append(params, *req.UpdatedBy)
+		paramIndex++
+	}
+
+	// Remove trailing comma and add WHERE clause
+	if len(params) > 0 { // Only strip if we added something
+		query = query[:len(query)-2]
+	}
+
+	query += fmt.Sprintf(" WHERE tenant_id = $%d RETURNING id", paramIndex)
+	params = append(params, tenantID)
+
+	return query, params
+}
+
+func (h *SecurityHandler) appendMFAUpdates(query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest) (string, []interface{}, int) {
+	if req.MFAEnabled != nil {
+		query += fmt.Sprintf("mfa_enabled = $%d, ", idx)
+		params = append(params, *req.MFAEnabled)
+		idx++
+	}
+	if req.MFAMethods != nil {
+		query += fmt.Sprintf("mfa_methods = $%d, ", idx)
+		params = append(params, req.MFAMethods)
+		idx++
+	}
+	if req.MFARequiredForAdmin != nil {
+		query += fmt.Sprintf("mfa_required_for_admin = $%d, ", idx)
+		params = append(params, *req.MFARequiredForAdmin)
+		idx++
+	}
+	if req.MFAGracePeriodHours != nil {
+		query += fmt.Sprintf("mfa_grace_period_hours = $%d, ", idx)
+		params = append(params, *req.MFAGracePeriodHours)
+		idx++
+	}
+	return query, params, idx
+}
+
+func (h *SecurityHandler) appendIPUpdates(query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest) (string, []interface{}, int) {
+	if req.IPWhitelistEnabled != nil {
+		query += fmt.Sprintf("ip_whitelist_enabled = $%d, ", idx)
+		params = append(params, *req.IPWhitelistEnabled)
+		idx++
+	}
+	if req.IPWhitelist != nil {
+		query += fmt.Sprintf("ip_whitelist = $%d, ", idx)
+		params = append(params, req.IPWhitelist)
+		idx++
+	}
+	if req.IPWhitelistMode != nil {
+		query += fmt.Sprintf("ip_whitelist_mode = $%d, ", idx)
+		params = append(params, *req.IPWhitelistMode)
+		idx++
+	}
+	return query, params, idx
+}
+
+func (h *SecurityHandler) appendTokenUpdates(query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest) (string, []interface{}, int) {
+	if req.AccessTokenTTLMinutes != nil {
+		query += fmt.Sprintf("access_token_ttl_minutes = $%d, ", idx)
+		params = append(params, *req.AccessTokenTTLMinutes)
+		idx++
+	}
+	if req.RefreshTokenTTLDays != nil {
+		query += fmt.Sprintf("refresh_token_ttl_days = $%d, ", idx)
+		params = append(params, *req.RefreshTokenTTLDays)
+		idx++
+	}
+	if req.IDTokenTTLMinutes != nil {
+		query += fmt.Sprintf("id_token_ttl_minutes = $%d, ", idx)
+		params = append(params, *req.IDTokenTTLMinutes)
+		idx++
+	}
+	if req.APIKeyDefaultTTLDays != nil {
+		query += fmt.Sprintf("api_key_default_ttl_days = $%d, ", idx)
+		params = append(params, *req.APIKeyDefaultTTLDays)
+		idx++
+	}
+	if req.AllowTokenRefresh != nil {
+		query += fmt.Sprintf("allow_token_refresh = $%d, ", idx)
+		params = append(params, *req.AllowTokenRefresh)
+		idx++
+	}
+	if req.MaxTokenLifetimeDays != nil {
+		query += fmt.Sprintf("max_token_lifetime_days = $%d, ", idx)
+		params = append(params, *req.MaxTokenLifetimeDays)
+		idx++
+	}
+	return query, params, idx
+}
+
+func (h *SecurityHandler) appendSessionUpdates(query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest) (string, []interface{}, int) {
+	if req.SessionTimeoutMinutes != nil {
+		query += fmt.Sprintf("session_timeout_minutes = $%d, ", idx)
+		params = append(params, *req.SessionTimeoutMinutes)
+		idx++
+	}
+	if req.SessionIdleTimeoutMinutes != nil {
+		query += fmt.Sprintf("session_idle_timeout_minutes = $%d, ", idx)
+		params = append(params, *req.SessionIdleTimeoutMinutes)
+		idx++
+	}
+	if req.MaxConcurrentSessions != nil {
+		query += fmt.Sprintf("max_concurrent_sessions = $%d, ", idx)
+		params = append(params, *req.MaxConcurrentSessions)
+		idx++
+	}
+	if req.SessionPinningEnabled != nil {
+		query += fmt.Sprintf("session_pinning_enabled = $%d, ", idx)
+		params = append(params, *req.SessionPinningEnabled)
+		idx++
+	}
+	if req.ForceLogoutOnPasswordChange != nil {
+		query += fmt.Sprintf("force_logout_on_password_change = $%d, ", idx)
+		params = append(params, *req.ForceLogoutOnPasswordChange)
+		idx++
+	}
+	return query, params, idx
+}
+
+func (h *SecurityHandler) appendPasswordUpdates(query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest) (string, []interface{}, int) {
+	if req.PasswordMinLength != nil {
+		query += fmt.Sprintf("password_min_length = $%d, ", idx)
+		params = append(params, *req.PasswordMinLength)
+		idx++
+	}
+	if req.PasswordRequireUppercase != nil {
+		query += fmt.Sprintf("password_require_uppercase = $%d, ", idx)
+		params = append(params, *req.PasswordRequireUppercase)
+		idx++
+	}
+	if req.PasswordRequireLowercase != nil {
+		query += fmt.Sprintf("password_require_lowercase = $%d, ", idx)
+		params = append(params, *req.PasswordRequireLowercase)
+		idx++
+	}
+	if req.PasswordRequireNumbers != nil {
+		query += fmt.Sprintf("password_require_numbers = $%d, ", idx)
+		params = append(params, *req.PasswordRequireNumbers)
+		idx++
+	}
+	if req.PasswordRequireSpecialChars != nil {
+		query += fmt.Sprintf("password_require_special_chars = $%d, ", idx)
+		params = append(params, *req.PasswordRequireSpecialChars)
+		idx++
+	}
+	if req.PasswordExpiryDays != nil {
+		query += fmt.Sprintf("password_expiry_days = $%d, ", idx)
+		params = append(params, *req.PasswordExpiryDays)
+		idx++
+	}
+	if req.PasswordHistoryCount != nil {
+		query += fmt.Sprintf("password_history_count = $%d, ", idx)
+		params = append(params, *req.PasswordHistoryCount)
+		idx++
+	}
+	return query, params, idx
+}
+
+func (h *SecurityHandler) appendLoginSecurityUpdates(query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest) (string, []interface{}, int) {
+	if req.MaxLoginAttempts != nil {
+		query += fmt.Sprintf("max_login_attempts = $%d, ", idx)
+		params = append(params, *req.MaxLoginAttempts)
+		idx++
+	}
+	if req.LockoutDurationMinutes != nil {
+		query += fmt.Sprintf("lockout_duration_minutes = $%d, ", idx)
+		params = append(params, *req.LockoutDurationMinutes)
+		idx++
+	}
+	if req.SuspiciousActivityDetection != nil {
+		query += fmt.Sprintf("suspicious_activity_detection = $%d, ", idx)
+		params = append(params, *req.SuspiciousActivityDetection)
+		idx++
+	}
+	return query, params, idx
+}
+
+func (h *SecurityHandler) appendAdvancedSecurityUpdates(query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest) (string, []interface{}, int) {
+	if req.RequireHTTPS != nil {
+		query += fmt.Sprintf("require_https = $%d, ", idx)
+		params = append(params, *req.RequireHTTPS)
+		idx++
+	}
+	if req.CORSAllowedOrigins != nil {
+		query += fmt.Sprintf("cors_allowed_origins = $%d, ", idx)
+		params = append(params, req.CORSAllowedOrigins)
+		idx++
+	}
+	if req.CSRFProtectionEnabled != nil {
+		query += fmt.Sprintf("csrf_protection_enabled = $%d, ", idx)
+		params = append(params, *req.CSRFProtectionEnabled)
+		idx++
+	}
+	if req.RateLimitingEnabled != nil {
+		query += fmt.Sprintf("rate_limiting_enabled = $%d, ", idx)
+		params = append(params, *req.RateLimitingEnabled)
+		idx++
+	}
+	return query, params, idx
+}
+
+func (h *SecurityHandler) appendAuditUpdates(query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest) (string, []interface{}, int) {
+	if req.AuditAllRequests != nil {
+		query += fmt.Sprintf("audit_all_requests = $%d, ", idx)
+		params = append(params, *req.AuditAllRequests)
+		idx++
+	}
+	if req.LogPIIAccess != nil {
+		query += fmt.Sprintf("log_pii_access = $%d, ", idx)
+		params = append(params, *req.LogPIIAccess)
+		idx++
+	}
+	if req.DataRetentionDays != nil {
+		query += fmt.Sprintf("data_retention_days = $%d, ", idx)
+		params = append(params, *req.DataRetentionDays)
+		idx++
+	}
+	return query, params, idx
+}
+
+func (h *SecurityHandler) appendNotificationUpdates(query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest) (string, []interface{}, int) {
+	if req.NotifyOnNewDevice != nil {
+		query += fmt.Sprintf("notify_on_new_device = $%d, ", idx)
+		params = append(params, *req.NotifyOnNewDevice)
+		idx++
+	}
+	if req.NotifyOnSuspiciousLogin != nil {
+		query += fmt.Sprintf("notify_on_suspicious_login = $%d, ", idx)
+		params = append(params, *req.NotifyOnSuspiciousLogin)
+		idx++
+	}
+	if req.NotifyOnAPIKeyUsage != nil {
+		query += fmt.Sprintf("notify_on_api_key_usage = $%d, ", idx)
+		params = append(params, *req.NotifyOnAPIKeyUsage)
+		idx++
+	}
+	if req.SecurityContactEmail != nil {
+		query += fmt.Sprintf("security_contact_email = $%d, ", idx)
+		params = append(params, *req.SecurityContactEmail)
+		idx++
+	}
+	return query, params, idx
 }
 
 // ResetToDefaults resets security settings to default values
@@ -552,7 +588,7 @@ func (h *SecurityHandler) ResetToDefaults(c *gin.Context) {
 	}
 
 	defaultSettings := h.createDefaultSecuritySettings(c, tenantID)
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"message":  "Security settings reset to defaults",
 		"settings": defaultSettings,
