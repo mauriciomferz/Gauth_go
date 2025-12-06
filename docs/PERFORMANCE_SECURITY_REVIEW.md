@@ -103,10 +103,58 @@ GAUTH_CORS_ALLOW=https://your-frontend.com,https://admin.your-domain.com
 
 ---
 
+## Secret Rotation Review
+
+### Infrastructure Status: ✅ Comprehensive
+
+**Location**: `pkg/crypto/keystore.go`, `pkg/crypto/rotation_api.go`
+
+### RotationPolicy Configuration
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `Enabled` | Auto-rotation on/off | configurable |
+| `Interval` | Base rotation interval | tenant-specific |
+| `Jitter` | Random variance (prevents thundering herd) | optional |
+| `MaxKeyAge` | Maximum key lifetime | optional |
+| `GracePeriod` | Old key validity after rotation | optional |
+| `Backend` | Storage backend | "vault", "kms", "file", "memory" |
+
+### API Endpoints (`KeyRotationAPI`)
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/keys/rotation/status` | GET | Overall rotation status |
+| `/keys/rotation/status/:tenant` | GET | Tenant rotation status |
+| `/keys/rotation/policy/:tenant` | GET | Get tenant policy |
+| `/keys/rotation/policy/:tenant` | PUT | Update tenant policy |
+| `/keys/rotation/trigger/:tenant` | POST | Manual rotation trigger |
+| `/keys/rotation/health` | GET | Health check |
+
+### Multi-Tenant Support
+- Per-tenant rotation policies
+- Per-tenant key stores
+- Tenant isolation enforced
+
+### Rotation States
+- `idle` → `pending` → `generating` → `in_progress` → `completed`
+- `failed` state for error handling with `last_error` tracking
+
+### Audit Trail
+- `RotationEvent` captures: timestamp, tenant, type (scheduled/manual/emergency), old/new key IDs
+
+### Recommendations
+1. ✅ **Infrastructure complete** - No code changes needed
+2. ⚠️ Ensure `Enabled=true` in production for critical tenants
+3. ⚠️ Configure appropriate `MaxKeyAge` (e.g., 90 days for compliance)
+4. ⚠️ Use `vault` or `kms` backend in production (not `memory` or `file`)
+
+---
+
 ## Next Steps
 
 1. [x] Add LRU eviction to `regexCache` ✅ (Implemented)
 2. [ ] Implement Redis-backed rate limiting
 3. [x] Add cache hit/miss Prometheus metrics ✅ (Implemented)
 4. [x] Security audit of CORS and TLS settings ✅ (Completed)
-5. [ ] Review secret rotation automation
+5. [x] Review secret rotation automation ✅ (Reviewed)
