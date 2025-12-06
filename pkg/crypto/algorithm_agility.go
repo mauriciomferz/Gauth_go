@@ -28,25 +28,31 @@ const (
 	AlgorithmECDSAP256 = "ES256" // RFC 7518 - ECDSA with P-256 and SHA-256
 )
 
-// SignatureAlgorithm defines the interface for cryptographic signature operations.
-// Implementations must provide key generation, signing, and verification for
-// specific algorithm types.
-type SignatureAlgorithm interface {
+// AlgorithmSignerVerifier provides core signing and verification operations for algorithm providers.
+// Consumers that only need to sign or verify should depend on this interface.
+type AlgorithmSignerVerifier interface {
 	// Sign generates a signature over the provided message using the private key
 	Sign(privateKey interface{}, message []byte) ([]byte, error)
 
 	// Verify checks the signature against the message using the public key
 	Verify(publicKey interface{}, message, signature []byte) error
 
-	// KeyType returns the expected Go type for private keys (e.g., "ed25519.PrivateKey")
-	KeyType() string
-
 	// AlgorithmID returns the IANA JOSE algorithm identifier (e.g., "EdDSA", "PS256", "ES256")
 	AlgorithmID() string
+}
 
+// KeyFactory generates new key pairs for a specific algorithm.
+type KeyFactory interface {
 	// GenerateKey creates a new key pair for this algorithm
 	GenerateKey() (privateKey interface{}, publicKey interface{}, err error)
 
+	// KeyType returns the expected Go type for private keys (e.g., "ed25519.PrivateKey")
+	KeyType() string
+}
+
+// KeySerializer handles PEM encoding and decoding of keys.
+// JWKS endpoints and key export features should depend on this interface.
+type KeySerializer interface {
 	// MarshalPrivateKey encodes the private key to PEM format
 	MarshalPrivateKey(privateKey interface{}) ([]byte, error)
 
@@ -58,6 +64,19 @@ type SignatureAlgorithm interface {
 
 	// UnmarshalPublicKey decodes a public key from PEM format
 	UnmarshalPublicKey(pemData []byte) (interface{}, error)
+}
+
+// SignatureAlgorithm defines the complete interface for cryptographic signature operations.
+// Implementations must provide key generation, signing, and verification for
+// specific algorithm types.
+//
+// SignatureAlgorithm composes the segregated interfaces for backward compatibility.
+// Consumers should prefer depending on the smaller interfaces when full
+// functionality is not required.
+type SignatureAlgorithm interface {
+	AlgorithmSignerVerifier
+	KeyFactory
+	KeySerializer
 }
 
 // Ed25519Provider implements SignatureAlgorithm for Ed25519 (EdDSA).

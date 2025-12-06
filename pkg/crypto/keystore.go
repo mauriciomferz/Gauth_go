@@ -7,14 +7,16 @@ import (
 	"time"
 )
 
-// KeyStore defines the interface for secure key storage backends.
-// This abstraction enables integration with various secure storage systems
-// including HashiCorp Vault, cloud KMS services, HSMs, and file-based storage.
-type KeyStore interface {
+// KeyGenerator creates new key pairs.
+// Implementations should store generated keys securely.
+type KeyGenerator interface {
 	// Generate creates a new key pair and stores it securely.
 	// Returns the key ID and any error encountered.
 	Generate(ctx context.Context, tenant string) (keyID string, err error)
+}
 
+// KeyLifecycle manages key state transitions (activation, archival, deletion).
+type KeyLifecycle interface {
 	// Activate marks a key as the active signing key for a tenant.
 	// This operation should be atomic to prevent signing windows.
 	Activate(ctx context.Context, tenant, keyID string) error
@@ -23,6 +25,13 @@ type KeyStore interface {
 	// Archived keys should remain accessible for signature verification during grace periods.
 	Archive(ctx context.Context, tenant, keyID string) error
 
+	// Delete permanently removes a key (use with extreme caution).
+	Delete(ctx context.Context, tenant, keyID string) error
+}
+
+// KeyReader retrieves keys and key metadata.
+// Consumers that only need read access should depend on this interface.
+type KeyReader interface {
 	// GetActive retrieves the currently active key for a tenant.
 	GetActive(ctx context.Context, tenant string) (*Key, error)
 
@@ -31,12 +40,26 @@ type KeyStore interface {
 
 	// ListKeys returns all keys (active + archived) for a tenant.
 	ListKeys(ctx context.Context, tenant string) ([]*Key, error)
+}
 
-	// Delete permanently removes a key (use with extreme caution).
-	Delete(ctx context.Context, tenant, keyID string) error
-
+// KeyStoreHealth provides health check capabilities.
+type KeyStoreHealth interface {
 	// Health checks the connectivity and status of the key store backend.
 	Health(ctx context.Context) error
+}
+
+// KeyStore defines the complete interface for secure key storage backends.
+// This abstraction enables integration with various secure storage systems
+// including HashiCorp Vault, cloud KMS services, HSMs, and file-based storage.
+//
+// KeyStore composes the segregated interfaces for backward compatibility.
+// Consumers should prefer depending on the smaller interfaces when full
+// functionality is not required.
+type KeyStore interface {
+	KeyGenerator
+	KeyLifecycle
+	KeyReader
+	KeyStoreHealth
 }
 
 // RotationPolicy defines the rules and schedule for key rotation.

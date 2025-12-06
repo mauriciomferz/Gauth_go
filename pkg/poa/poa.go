@@ -16,7 +16,6 @@ import (
 	"time"
 
 	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
-	"github.com/mauriciomferz/Gauth_go/pkg/errors"
 	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
 )
 
@@ -952,7 +951,7 @@ func NewMemoryService(opts ...Option) *MemoryService {
 // Issue issues a new proof of authorization
 func (s *MemoryService) Issue(ctx context.Context, req *Request) (*ProofOfAuthorization, error) {
 	if req.Subject == "" || req.Resource == "" || req.Action == "" {
-		return nil, errors.New(errors.ErrCodeValidation, "subject, resource, and action are required")
+		return nil, NewError(ErrCodeValidation, "subject, resource, and action are required")
 	}
 
 	poa := &ProofOfAuthorization{
@@ -1058,29 +1057,29 @@ func (s *MemoryService) Issue(ctx context.Context, req *Request) (*ProofOfAuthor
 // Validate validates a proof of authorization
 func (s *MemoryService) Validate(ctx context.Context, poa *ProofOfAuthorization) error {
 	if poa == nil {
-		return errors.New(errors.ErrCodeValidation, "PoA is required")
+		return NewError(ErrCodeValidation, "PoA is required")
 	}
 
 	// Check if revoked
 	if s.revoked[poa.ID] {
-		return errors.New(errors.ErrCodeUnauthorized, "PoA has been revoked")
+		return NewError(ErrCodeUnauthorized, "PoA has been revoked")
 	}
 
 	// Check expiration
 	if time.Now().After(poa.ExpiresAt) {
-		return errors.New(errors.ErrCodeExpiredToken, "PoA has expired")
+		return NewError(ErrCodeExpiredToken, "PoA has expired")
 	}
 
 	// Validate delegation if present
 	if poa.Delegation != nil {
 		if time.Now().After(poa.Delegation.ExpiresAt) {
-			return errors.New(errors.ErrCodeExpiredToken, "delegation has expired")
+			return NewError(ErrCodeExpiredToken, "delegation has expired")
 		}
 	}
 
 	// RFC-0115 Extended Validation
 	if err := ValidateRFC0115Token(poa); err != nil {
-		return errors.New(errors.ErrCodeValidation, fmt.Sprintf("RFC-0115 validation failed: %v", err))
+		return NewError(ErrCodeValidation, fmt.Sprintf("RFC-0115 validation failed: %v", err))
 	}
 
 	return nil
@@ -1192,7 +1191,7 @@ func validatePoAGeographicScope(scopes []GeographicScope) error {
 // Revoke revokes a proof of authorization
 func (s *MemoryService) Revoke(ctx context.Context, poaID string) error {
 	if _, exists := s.proofs[poaID]; !exists {
-		return errors.New(errors.ErrCodeNotFound, "PoA not found")
+		return NewError(ErrCodeNotFound, "PoA not found")
 	}
 
 	s.revoked[poaID] = true
