@@ -276,24 +276,24 @@ func New(cfg Config, opts ...Option) (*Service, error) {
 
 // selectValidator chooses the appropriate token validator based on configuration
 // Priority order: EdDSA (explicit env var) > JWTLib (config flag) > HMAC (default)
-func (svc *Service) selectValidator() TokenSignatureValidator {
+func (g *Service) selectValidator() TokenSignatureValidator {
 	strictParsing := false
-	if svc.config.AppConfig != nil {
-		strictParsing = svc.config.AppConfig.StrictJSONParsing
+	if g.config.AppConfig != nil {
+		strictParsing = g.config.AppConfig.StrictJSONParsing
 	}
 
 	// EdDSA mode takes highest priority (explicitly set via GAUTH_TOKEN_SIG_MODE env var)
-	if svc.keyMode == sigModeEdDSA {
-		return NewEdDSAValidator(svc.keyProvider, strictParsing)
+	if g.keyMode == sigModeEdDSA {
+		return NewEdDSAValidator(g.keyProvider, strictParsing)
 	}
 
 	// JWTLib is a config flag that can be used for HMAC tokens
-	if svc.config.AppConfig != nil && svc.config.AppConfig.UseJWTLib {
-		alg := svc.config.AppConfig.JWTAlg
-		return NewJWTLibValidator(svc.signingKey, alg)
+	if g.config.AppConfig != nil && g.config.AppConfig.UseJWTLib {
+		alg := g.config.AppConfig.JWTAlg
+		return NewJWTLibValidator(g.signingKey, alg)
 	}
 
-	return NewHMACValidator(svc.signingKey, strictParsing)
+	return NewHMACValidator(g.signingKey, strictParsing)
 }
 
 // InitiateAuthorization initiates an authorization flow

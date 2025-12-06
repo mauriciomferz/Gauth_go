@@ -52,7 +52,7 @@ type OktaProviderConfig struct {
 // NewOktaProvider creates a new Okta OIDC provider.
 func NewOktaProvider(cfg OktaProviderConfig) (*OktaProvider, error) {
 	if cfg.Domain == "" {
-		return nil, fmt.Errorf("Okta domain is required")
+		return nil, fmt.Errorf("okta domain is required")
 	}
 
 	if cfg.ClientID == "" {
