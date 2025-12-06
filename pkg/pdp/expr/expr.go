@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -83,9 +84,15 @@ func parsePrimary(s string, attrs map[string]string, now time.Time) (bool, error
 }
 
 var regexCache = struct {
-	// very small cache; production would use LRU with eviction metrics
+	sync.RWMutex
 	compiled map[string]*regexp.Regexp
-}{compiled: map[string]*regexp.Regexp{}}
+	order    []string // LRU order: oldest at front
+	maxSize  int
+}{
+	compiled: make(map[string]*regexp.Regexp),
+	order:    make([]string, 0, 100),
+	maxSize:  100,
+}
 
 func evalClause(clause string, attrs map[string]string, now time.Time) (bool, error) {
 	// Dispatch to specific evaluators based on clause type
@@ -179,7 +186,7 @@ func evalContains(clause string, attrs map[string]string) (bool, error) {
 	return strings.Contains(val, sub), nil
 }
 
-// evalRegexMatch handles regex_match(key,'^pat$') with safety caps
+// evalRegexMatch handles regex_match(key,'^pat$') with safety caps and LRU caching
 func evalRegexMatch(clause string, attrs map[string]string) (bool, error) {
 	inner := clause[len("regex_match(") : len(clause)-1]
 	parts := splitCSV(inner)
@@ -191,15 +198,37 @@ func evalRegexMatch(clause string, attrs map[string]string) (bool, error) {
 	if len(pat) > 256 {
 		return false, fmt.Errorf("regex pattern too long")
 	}
+
+	// Try read lock first for cache hit
+	regexCache.RLock()
 	rgx, ok := regexCache.compiled[pat]
+	regexCache.RUnlock()
+
 	if !ok {
+		// Compile and cache with write lock
 		compiled, err := regexp.Compile(pat)
 		if err != nil {
 			return false, fmt.Errorf("regex compile error: %v", err)
 		}
-		regexCache.compiled[pat] = compiled
-		rgx = compiled
+
+		regexCache.Lock()
+		// Double-check after acquiring write lock
+		if existing, exists := regexCache.compiled[pat]; exists {
+			rgx = existing
+		} else {
+			// Evict oldest if at capacity
+			if len(regexCache.order) >= regexCache.maxSize {
+				oldest := regexCache.order[0]
+				delete(regexCache.compiled, oldest)
+				regexCache.order = regexCache.order[1:]
+			}
+			regexCache.compiled[pat] = compiled
+			regexCache.order = append(regexCache.order, pat)
+			rgx = compiled
+		}
+		regexCache.Unlock()
 	}
+
 	return rgx.MatchString(attrs[key]), nil
 }
 
