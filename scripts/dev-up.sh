@@ -7,7 +7,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
 BACKEND_PORT="${GAUTH_PORT:-8080}"
-UI_DIR="web/ui-react"
+UI_DIR="frontend/ui-react"
 UI_PORT="${VITE_PORT:-3000}"
 
 echo "📁 Root: $ROOT_DIR"

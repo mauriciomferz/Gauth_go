@@ -115,8 +115,8 @@ echo ""
 echo "3. API Client File Check"
 echo "------------------------"
 
-API_CLIENT="web/ui-react/src/lib/gauthplus-api.ts"
-MAIN_PAGE="web/ui-react/src/pages/admin/GAuthPlus.tsx"
+API_CLIENT="frontend/ui-react/src/lib/gauthplus-api.ts"
+MAIN_PAGE="frontend/ui-react/src/pages/admin/GAuthPlus.tsx"
 
 echo -n "Checking API client... "
 if [ -f "$API_CLIENT" ]; then
@@ -138,11 +138,11 @@ fi
 
 # Check panel components
 PANELS=(
-    "web/ui-react/src/components/gauthplus/SuccessorPanel.tsx"
-    "web/ui-react/src/components/gauthplus/DelegationPanel.tsx"
-    "web/ui-react/src/components/gauthplus/DualControlPanel.tsx"
-    "web/ui-react/src/components/gauthplus/CapabilityPanel.tsx"
-    "web/ui-react/src/components/gauthplus/FiduciaryPanel.tsx"
+    "frontend/ui-react/src/components/gauthplus/SuccessorPanel.tsx"
+    "frontend/ui-react/src/components/gauthplus/DelegationPanel.tsx"
+    "frontend/ui-react/src/components/gauthplus/DualControlPanel.tsx"
+    "frontend/ui-react/src/components/gauthplus/CapabilityPanel.tsx"
+    "frontend/ui-react/src/components/gauthplus/FiduciaryPanel.tsx"
 )
 
 echo -n "Checking panel components... "

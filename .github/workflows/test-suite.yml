@@ -180,7 +180,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-e2e-${{ hashFiles('web/ui-react/package-lock.json') }}
+          key: ${{ runner.os }}-node-e2e-${{ hashFiles('frontend/ui-react/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-e2e-
             ${{ runner.os }}-node-
@@ -192,11 +192,11 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
       
       - name: Install dependencies
-        working-directory: web/ui-react
+        working-directory: frontend/ui-react
         run: npm ci
       
       - name: Install Playwright browsers
-        working-directory: web/ui-react
+        working-directory: frontend/ui-react
         run: |
           # Install chromium for auth setup (always needed) plus the test browser
           npx playwright install --with-deps chromium
@@ -217,7 +217,7 @@ jobs:
           timeout 120 bash -c 'until curl -f http://localhost:8080/api/v1/beta/health 2>/dev/null; do sleep 3; done' || echo "Backend health check timeout"
       
       - name: Run E2E tests
-        working-directory: web/ui-react
+        working-directory: frontend/ui-react
         run: npx playwright test --project=${{ matrix.browser }}
         continue-on-error: true
         env:
@@ -229,8 +229,8 @@ jobs:
         with:
           name: playwright-results-${{ matrix.browser }}
           path: |
-            web/ui-react/playwright-report/
-            web/ui-react/test-results/
+            frontend/ui-react/playwright-report/
+            frontend/ui-react/test-results/
           retention-days: 30
       
       - name: Upload videos
@@ -238,7 +238,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-videos-${{ matrix.browser }}
-          path: web/ui-react/test-results/**/*.webm
+          path: frontend/ui-react/test-results/**/*.webm
           retention-days: 7
       
       - name: Stop backend
@@ -266,7 +266,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-api-${{ hashFiles('web/ui-react/package-lock.json') }}
+          key: ${{ runner.os }}-node-api-${{ hashFiles('frontend/ui-react/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-api-
             ${{ runner.os }}-node-
@@ -278,11 +278,11 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
       
       - name: Install dependencies
-        working-directory: web/ui-react
+        working-directory: frontend/ui-react
         run: npm ci
       
       - name: Install Playwright
-        working-directory: web/ui-react
+        working-directory: frontend/ui-react
         run: npx playwright install --with-deps chromium
       
       - name: Start backend server
@@ -297,7 +297,7 @@ jobs:
           timeout 120 bash -c 'until curl -f http://localhost:8080/api/v1/beta/health 2>/dev/null; do sleep 3; done' || echo "Backend health check timeout"
       
       - name: Run API tests
-        working-directory: web/ui-react
+        working-directory: frontend/ui-react
         run: npx playwright test --project=api e2e/api.api.spec.ts
         continue-on-error: true
         env:
@@ -309,8 +309,8 @@ jobs:
         with:
           name: api-test-results
           path: |
-            web/ui-react/playwright-report/
-            web/ui-react/test-results/
+            frontend/ui-react/playwright-report/
+            frontend/ui-react/test-results/
           retention-days: 30
       
       - name: Stop backend

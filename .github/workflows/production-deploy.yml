@@ -65,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: web/ui-react
+        working-directory: frontend/ui-react
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -75,7 +75,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: web/ui-react/package-lock.json
+          cache-dependency-path: frontend/ui-react/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -93,7 +93,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frontend-dist
-          path: web/ui-react/dist
+          path: frontend/ui-react/dist
           retention-days: 7
 
   # Build Docker images
@@ -149,8 +149,8 @@ jobs:
         if: matrix.component == 'frontend'
         uses: docker/build-push-action@v5
         with:
-          context: ./web/ui-react
-          file: ./web/ui-react/Dockerfile.production
+          context: ./frontend/ui-react
+          file: ./frontend/ui-react/Dockerfile.production
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

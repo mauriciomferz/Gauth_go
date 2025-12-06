@@ -52,7 +52,7 @@ services:
   # Frontend Service (Nginx serving static build)
   frontend:
     build:
-      context: ./web/ui-react
+      context: ./frontend/ui-react
       dockerfile: Dockerfile.production
     container_name: gauth-frontend-prod
     restart: unless-stopped
