@@ -59,7 +59,7 @@ GAUTH_PDP_CACHE_TTL=5m      # Entry lifetime
 
 ## Next Steps
 
-1. [ ] Add LRU eviction to `regexCache`
+1. [x] Add LRU eviction to `regexCache` ✅ (Implemented)
 2. [ ] Implement Redis-backed rate limiting
 3. [ ] Add cache hit/miss Prometheus metrics
 4. [ ] Security audit of CORS and TLS settings
