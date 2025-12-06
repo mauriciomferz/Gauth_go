@@ -154,10 +154,11 @@ jobs:
       
       - name: Upload coverage
         uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: backend-coverage
           path: coverage.html
-          retention-days: 30
+          retention-days: 7
 
   # E2E Tests with Playwright
   e2e-tests:
@@ -226,16 +227,18 @@ jobs:
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: playwright-results-${{ matrix.browser }}
           path: |
             frontend/ui-react/playwright-report/
             frontend/ui-react/test-results/
-          retention-days: 30
+          retention-days: 7
       
       - name: Upload videos
         if: failure()
         uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: playwright-videos-${{ matrix.browser }}
           path: frontend/ui-react/test-results/**/*.webm
@@ -306,12 +309,13 @@ jobs:
       - name: Upload API test results
         if: always()
         uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: api-test-results
           path: |
             frontend/ui-react/playwright-report/
             frontend/ui-react/test-results/
-          retention-days: 30
+          retention-days: 7
       
       - name: Stop backend
         if: always()
@@ -377,10 +381,11 @@ jobs:
       - name: Upload performance results
         if: always()
         uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: performance-test-results
           path: performance-tests/results/
-          retention-days: 30
+          retention-days: 7
       
       - name: Stop backend
         if: always()
