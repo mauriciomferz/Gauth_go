@@ -44,6 +44,9 @@ func setupTwoPhaseTest(t *testing.T) (*TwoPhaseRevocation, *miniredis.Miniredis)
 
 // TestChaos_RedisConnectionLoss tests behavior when Redis connection is lost
 func TestChaos_RedisConnectionLoss(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping chaos test in short mode")
+	}
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
 	defer cb.Close()
@@ -71,6 +74,9 @@ func TestChaos_RedisConnectionLoss(t *testing.T) {
 
 // TestChaos_ConcurrentRevocations tests concurrent revocation requests on same PoA
 func TestChaos_ConcurrentRevocations(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping chaos test in short mode")
+	}
 	tpr, mr := setupTwoPhaseTest(t)
 	defer mr.Close()
 	defer tpr.Close()
@@ -105,6 +111,9 @@ func TestChaos_ConcurrentRevocations(t *testing.T) {
 
 // TestChaos_MemoryPressure tests behavior under memory pressure
 func TestChaos_MemoryPressure(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping chaos test in short mode")
+	}
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
 	defer cb.Close()
@@ -139,6 +148,9 @@ func TestChaos_MemoryPressure(t *testing.T) {
 
 // TestChaos_RapidStateTransitions tests rapid state changes
 func TestChaos_RapidStateTransitions(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping chaos test in short mode")
+	}
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
 	defer cb.Close()
@@ -184,6 +196,9 @@ func TestChaos_RapidStateTransitions(t *testing.T) {
 
 // TestChaos_OptimisticCollateralRace tests concurrent collateral operations
 func TestChaos_OptimisticCollateralRace(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping chaos test in short mode")
+	}
 	opt, mr := setupOptimisticTest(t)
 	defer mr.Close()
 	defer opt.Close()
@@ -242,6 +257,9 @@ func TestChaos_OptimisticCollateralRace(t *testing.T) {
 
 // TestChaos_PanicRecovery tests that goroutines recover from panics
 func TestChaos_PanicRecovery(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping chaos test in short mode")
+	}
 	opt, mr := setupOptimisticTest(t)
 	defer mr.Close()
 
@@ -267,6 +285,9 @@ func TestChaos_PanicRecovery(t *testing.T) {
 
 // TestChaos_HighConcurrency tests system under high concurrent load
 func TestChaos_HighConcurrency(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping chaos test in short mode")
+	}
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
 	defer cb.Close()
@@ -305,6 +326,9 @@ func TestChaos_HighConcurrency(t *testing.T) {
 
 // TestChaos_InvalidInputs tests system handles invalid inputs gracefully
 func TestChaos_InvalidInputs(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping chaos test in short mode")
+	}
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
 	defer cb.Close()
@@ -340,6 +364,9 @@ func TestChaos_InvalidInputs(t *testing.T) {
 
 // TestChaos_StaleMetrics tests handling of stale cached metrics
 func TestChaos_StaleMetrics(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping chaos test in short mode")
+	}
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
 	defer cb.Close()
@@ -364,6 +391,9 @@ func TestChaos_StaleMetrics(t *testing.T) {
 
 // TestChaos_NetworkPartition simulates network partition scenarios
 func TestChaos_NetworkPartition(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping chaos test in short mode")
+	}
 	cb, mr := setupCircuitBreakerTest(t)
 	defer cb.Close()
 
@@ -389,6 +419,9 @@ func TestChaos_NetworkPartition(t *testing.T) {
 
 // TestChaos_ContextCancellation tests proper handling of context cancellation
 func TestChaos_ContextCancellation(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping chaos test in short mode")
+	}
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
 	defer cb.Close()
@@ -411,6 +444,9 @@ func TestChaos_ContextCancellation(t *testing.T) {
 
 // TestChaos_ZeroValues tests handling of zero config values
 func TestChaos_ZeroValues(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping chaos test in short mode")
+	}
 	mr, err := miniredis.Run()
 	require.NoError(t, err)
 	defer mr.Close()
@@ -451,6 +487,9 @@ func TestChaos_ZeroValues(t *testing.T) {
 
 // TestChaos_ErrorPropagation tests error handling throughout the stack
 func TestChaos_ErrorPropagation(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping chaos test in short mode")
+	}
 	tpr, mr := setupTwoPhaseTest(t)
 	defer mr.Close()
 	defer tpr.Close()
@@ -466,6 +505,9 @@ func TestChaos_ErrorPropagation(t *testing.T) {
 
 // TestChaos_DeadlockPrevention tests for potential deadlocks
 func TestChaos_DeadlockPrevention(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping chaos test in short mode")
+	}
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
 
@@ -506,6 +548,9 @@ func TestChaos_DeadlockPrevention(t *testing.T) {
 
 // TestChaos_ConcurrentDisableCancel tests concurrent disable and cancel operations
 func TestChaos_ConcurrentDisableCancel(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping chaos test in short mode")
+	}
 	tpr, mr := setupTwoPhaseTest(t)
 	defer mr.Close()
 	defer tpr.Close()
@@ -562,6 +607,9 @@ func TestChaos_ConcurrentDisableCancel(t *testing.T) {
 
 // TestChaos_MassiveParallelLoad tests system under massive parallel load
 func TestChaos_MassiveParallelLoad(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping chaos test in short mode")
+	}
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
 	defer cb.Close()
