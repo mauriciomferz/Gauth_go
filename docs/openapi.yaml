@@ -791,6 +791,2112 @@ paths:
                         reason: { type: string }
                         latency_ns: { type: integer }
                         at: { type: string, format: date-time }
+
+  /api/v1/token/create:
+    post:
+      summary: Create access token
+      tags: [validation]
+      operationId: postTokenCreate
+      description: |
+        Issues a new access token with optional TTL and metadata.
+        If GAUTH_USE_JWT_LIB=1, also returns a signed JWT in the response.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ttl_seconds:
+                  type: integer
+                  description: Token time-to-live in seconds.
+                meta:
+                  type: object
+                  description: Arbitrary metadata to attach to the token.
+                nonce:
+                  type: string
+                  description: Optional client-provided nonce for replay protection.
+      responses:
+        '201':
+          description: Token created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  token:
+                    type: object
+                    properties:
+                      id: { type: string }
+                      value: { type: string }
+                      expires_at: { type: string, format: date-time }
+                  jwt: { type: string, description: Signed JWT (if enabled) }
+        '403':
+          description: Capability denied
+        '409':
+          description: Nonce replay detected
+        '500':
+          description: Internal error
+
+  /api/v1/token/validate:
+    post:
+      summary: Validate access token
+      tags: [validation]
+      operationId: postTokenValidate
+      description: |
+        Validates a token and returns its status and claims.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:
+                  type: string
+                  description: The token value or JWT to validate.
+                token_id:
+                  type: string
+                  description: Alternative lookup by token ID.
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  valid: { type: boolean }
+                  reason: { type: string }
+                  claims: { type: object }
+        '400':
+          description: Invalid request
+
+  /api/v1/token/revoke:
+    post:
+      summary: Revoke access token
+      tags: [validation]
+      operationId: postTokenRevoke
+      description: |
+        Revokes an active token, making it invalid for future use.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token_id]
+              properties:
+                token_id:
+                  type: string
+                  description: ID of the token to revoke.
+                reason:
+                  type: string
+                  description: Optional revocation reason.
+      responses:
+        '200':
+          description: Token revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  revoked_at: { type: string, format: date-time }
+        '404':
+          description: Token not found
+
+  /api/v1/token/introspect:
+    post:
+      summary: Introspect token
+      tags: [validation]
+      operationId: postTokenIntrospect
+      description: |
+        Returns detailed token metadata and status (RFC 7662 compatible).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:
+                  type: string
+                  description: The token value to introspect.
+      responses:
+        '200':
+          description: Introspection result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  active: { type: boolean }
+                  sub: { type: string }
+                  scope: { type: string }
+                  exp: { type: integer }
+                  iat: { type: integer }
+                  iss: { type: string }
+                  jti: { type: string }
+
+  /api/v1/gauth/auth/login/init:
+    post:
+      summary: Initiate login
+      tags: [validation]
+      operationId: postLoginInit
+      description: |
+        First step of 2-factor authentication. Validates username/password
+        and returns MFA challenge if credentials are valid.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                  description: User's username or email.
+                password:
+                  type: string
+                  description: User's password.
+      responses:
+        '200':
+          description: Login initiated - MFA required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  userId: { type: string }
+                  requiresMFA: { type: boolean }
+                  mfaMethods:
+                    type: array
+                    items: { type: string }
+                  sessionChallenge: { type: string }
+        '400':
+          description: Invalid request format
+        '401':
+          description: Invalid credentials
+
+  /api/v1/gauth/auth/login/mfa:
+    post:
+      summary: Verify MFA and get JWT
+      tags: [validation]
+      operationId: postLoginMFA
+      description: |
+        Second step of 2-factor authentication. Verifies MFA code
+        and issues JWT access and refresh tokens.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [challengeId, code, method]
+              properties:
+                challengeId:
+                  type: string
+                  description: Session challenge from login/init.
+                code:
+                  type: string
+                  description: MFA verification code.
+                method:
+                  type: string
+                  description: MFA method (totp, sms, email).
+      responses:
+        '200':
+          description: MFA verified - tokens issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  token: { type: string }
+                  refreshToken: { type: string }
+                  expiresAt: { type: string, format: date-time }
+                  tokenType: { type: string }
+        '400':
+          description: Invalid request format
+        '401':
+          description: Invalid MFA code
+
+  /.well-known/gauth-configuration:
+    get:
+      summary: GAuth configuration discovery
+      tags: [discovery]
+      operationId: getGAuthConfiguration
+      description: |
+        Returns GAuth server configuration including supported algorithms,
+        endpoints, and capabilities (similar to OAuth .well-known).
+      responses:
+        '200':
+          description: Server configuration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  issuer: { type: string }
+                  token_endpoint: { type: string }
+                  introspection_endpoint: { type: string }
+                  revocation_endpoint: { type: string }
+                  jwks_uri: { type: string }
+                  supported_algorithms:
+                    type: array
+                    items: { type: string }
+
+  /.well-known/jwks.json:
+    get:
+      summary: JSON Web Key Set
+      tags: [discovery]
+      operationId: getJWKS
+      description: |
+        Returns the server's public keys in JWK Set format for JWT verification.
+      responses:
+        '200':
+          description: JWK Set
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  keys:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        kty: { type: string }
+                        use: { type: string }
+                        kid: { type: string }
+                        alg: { type: string }
+                        n: { type: string }
+                        e: { type: string }
+
+  /api/v1/gauth/mcp/health:
+    get:
+      summary: MCP subsystem health
+      tags: [discovery]
+      operationId: getMCPHealth
+      description: Returns health status of MCP (Model Context Protocol) subsystem.
+      responses:
+        '200':
+          description: MCP health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  status: { type: string }
+                  active_connections: { type: integer }
+
+  /api/v1/gauth/mcp/servers:
+    get:
+      summary: List MCP servers
+      tags: [discovery]
+      operationId: getMCPServers
+      description: Returns list of registered MCP servers.
+      responses:
+        '200':
+          description: Server list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  servers:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        name: { type: string }
+                        status: { type: string }
+
+  /api/v1/gauth/mcp/servers/{id}:
+    get:
+      summary: Get MCP server details
+      tags: [discovery]
+      operationId: getMCPServer
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: MCP server ID
+      responses:
+        '200':
+          description: Server details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  server: { type: object }
+        '404':
+          description: Server not found
+
+  /api/v1/gauth/mcp/servers/{id}/tools:
+    get:
+      summary: List MCP server tools
+      tags: [discovery]
+      operationId: getMCPServerTools
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: MCP server ID
+      responses:
+        '200':
+          description: Available tools
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  tools:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name: { type: string }
+                        description: { type: string }
+
+  /api/v1/gauth/mcp/servers/{id}/tools/call:
+    post:
+      summary: Call MCP tool
+      tags: [discovery]
+      operationId: postMCPToolCall
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: MCP server ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tool_name]
+              properties:
+                tool_name: { type: string }
+                arguments: { type: object }
+      responses:
+        '200':
+          description: Tool call result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  result: { type: object }
+        '400':
+          description: Invalid request
+        '404':
+          description: Server or tool not found
+
+  /api/v1/beta/authz/evaluate:
+    post:
+      summary: Evaluate authorization request
+      tags: [policy]
+      operationId: postAuthzEvaluate
+      description: Evaluates an authorization request against active policies.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subject: { type: string }
+                action: { type: string }
+                resource: { type: string }
+                context: { type: object }
+      responses:
+        '200':
+          description: Authorization decision
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  allowed: { type: boolean }
+                  decision_id: { type: string }
+                  reason: { type: string }
+
+  /api/v1/beta/policy/evaluate:
+    post:
+      summary: Evaluate policy
+      tags: [policy]
+      operationId: postPolicyEvaluate
+      description: Evaluates a specific policy against a request context.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                policy_id: { type: string }
+                input: { type: object }
+      responses:
+        '200':
+          description: Policy evaluation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  result: { type: boolean }
+                  details: { type: object }
+
+  /api/v1/pdp/decision:
+    post:
+      summary: Policy Decision Point
+      tags: [policy]
+      operationId: postPDPDecision
+      description: Central policy decision endpoint for authorization requests.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [subject, action, resource]
+              properties:
+                subject: { type: string }
+                action: { type: string }
+                resource: { type: string }
+      responses:
+        '200':
+          description: Decision result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  allowed: { type: boolean }
+                  reason: { type: string }
+
+  /api/v1/pep/enforce:
+    post:
+      summary: Policy Enforcement Point
+      tags: [policy]
+      operationId: postPEPEnforce
+      description: Enforces policy decision and records outcome.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                poa_id: { type: string }
+                action: { type: string }
+                resource: { type: string }
+      responses:
+        '200':
+          description: Enforcement result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  allowed: { type: boolean }
+                  recorded_at: { type: string, format: date-time }
+
+  /api/v1/delegation/create:
+    post:
+      summary: Create delegation
+      tags: [poa]
+      operationId: postDelegationCreate
+      description: Creates a new delegation relationship.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                grantor_id: { type: string }
+                grantee_id: { type: string }
+                scope: { type: array, items: { type: string } }
+                valid_until: { type: string, format: date-time }
+      responses:
+        '201':
+          description: Delegation created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  delegation_id: { type: string }
+        '400':
+          description: Invalid request
+
+  /api/v1/delegation/revoke:
+    post:
+      summary: Revoke delegation
+      tags: [poa]
+      operationId: postDelegationRevoke
+      description: Revokes an existing delegation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [delegation_id]
+              properties:
+                delegation_id: { type: string }
+                reason: { type: string }
+      responses:
+        '200':
+          description: Delegation revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  revoked_at: { type: string, format: date-time }
+        '404':
+          description: Delegation not found
+
+  /api/v1/crypto/eddsa/keys:
+    get:
+      summary: List EdDSA keys
+      tags: [crypto]
+      operationId: getEdDSAKeys
+      description: Returns registered EdDSA public keys for signature verification.
+      responses:
+        '200':
+          description: Key list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  keys:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        kid: { type: string }
+                        public_key_b64: { type: string }
+                        created_at: { type: string, format: date-time }
+
+  /api/v1/crypto/rotate:
+    post:
+      summary: Rotate cryptographic keys
+      tags: [crypto]
+      operationId: postCryptoRotate
+      description: Initiates key rotation for specified key set.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key_set_id: { type: string }
+                algorithm: { type: string }
+      responses:
+        '200':
+          description: Rotation initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  new_kid: { type: string }
+                  rotated_at: { type: string, format: date-time }
+
+  # ===== AUDIT APIs =====
+  /api/v1/audit/logs:
+    get:
+      summary: List audit logs
+      tags: [audit]
+      operationId: getAuditLogs
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer, default: 100 }
+        - in: query
+          name: offset
+          schema: { type: integer, default: 0 }
+      responses:
+        '200':
+          description: Audit log entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  entries: { type: array, items: { type: object } }
+                  total: { type: integer }
+
+  /api/v1/audit/record:
+    post:
+      summary: Record audit event
+      tags: [audit]
+      operationId: postAuditRecord
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event_type: { type: string }
+                actor: { type: string }
+                resource: { type: string }
+                action: { type: string }
+      responses:
+        '201':
+          description: Event recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  event_id: { type: string }
+
+  /api/v1/audit/stream:
+    get:
+      summary: Stream audit events (SSE)
+      tags: [audit]
+      operationId: getAuditStream
+      responses:
+        '200':
+          description: SSE stream of audit events
+
+  # ===== BETA CAPABILITIES =====
+  /api/v1/beta/capabilities:
+    get:
+      summary: List capabilities
+      tags: [capability]
+      operationId: getBetaCapabilities
+      responses:
+        '200':
+          description: Capability list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  capabilities: { type: array, items: { type: object } }
+
+  /api/v1/beta/capabilities/reload:
+    post:
+      summary: Reload capability registry
+      tags: [capability]
+      operationId: postCapabilitiesReload
+      responses:
+        '200':
+          description: Registry reloaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  count: { type: integer }
+
+  /api/v1/beta/info:
+    get:
+      summary: Beta server info
+      tags: [discovery]
+      operationId: getBetaInfo
+      responses:
+        '200':
+          description: Server information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version: { type: string }
+                  build: { type: string }
+                  uptime_seconds: { type: integer }
+
+  /api/v1/beta/ping:
+    get:
+      summary: Health ping
+      tags: [discovery]
+      operationId: getBetaPing
+      responses:
+        '200':
+          description: Pong response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  timestamp: { type: string, format: date-time }
+
+  # ===== BETA METRICS =====
+  /api/v1/beta/metrics/decisions:
+    get:
+      summary: Decision metrics
+      tags: [learning]
+      operationId: getBetaMetricsDecisions
+      responses:
+        '200':
+          description: Decision statistics
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/beta/metrics/violations:
+    get:
+      summary: Violation metrics
+      tags: [learning]
+      operationId: getBetaMetricsViolations
+      responses:
+        '200':
+          description: Violation statistics
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/beta/metrics/prometheus:
+    get:
+      summary: Prometheus metrics
+      tags: [learning]
+      operationId: getBetaMetricsPrometheus
+      responses:
+        '200':
+          description: Prometheus format metrics
+          content:
+            text/plain:
+              schema: { type: string }
+
+  # ===== BETA POLICY =====
+  /api/v1/beta/policy/bundles:
+    get:
+      summary: List policy bundles
+      tags: [policy]
+      operationId: getBetaPolicyBundles
+      responses:
+        '200':
+          description: Policy bundle list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  bundles: { type: array, items: { type: object } }
+    post:
+      summary: Upload policy bundle
+      tags: [policy]
+      operationId: postBetaPolicyBundles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Bundle uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  hash: { type: string }
+
+  /api/v1/beta/policy/bundles/{hash}:
+    get:
+      summary: Get policy bundle by hash
+      tags: [policy]
+      operationId: getBetaPolicyBundle
+      parameters:
+        - in: path
+          name: hash
+          required: true
+          schema: { type: string }
+          description: Bundle hash
+      responses:
+        '200':
+          description: Policy bundle
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Bundle not found
+
+  /api/v1/beta/policy/chain:
+    get:
+      summary: Policy chain history
+      tags: [policy]
+      operationId: getBetaPolicyChain
+      responses:
+        '200':
+          description: Chain entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  chain: { type: array, items: { type: object } }
+
+  # ===== PAP (Policy Administration Point) =====
+  /api/v1/pap/policies:
+    get:
+      summary: List policies
+      tags: [policy]
+      operationId: getPAPPolicies
+      responses:
+        '200':
+          description: Policy list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  policies: { type: array, items: { type: object } }
+    post:
+      summary: Create policy
+      tags: [policy]
+      operationId: postPAPPolicy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Policy created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  policy_id: { type: string }
+
+  /api/v1/pap/policies/{id}:
+    get:
+      summary: Get policy by ID
+      tags: [policy]
+      operationId: getPAPPolicy
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Policy ID
+      responses:
+        '200':
+          description: Policy details
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Policy not found
+    delete:
+      summary: Delete policy
+      tags: [policy]
+      operationId: deletePAPPolicy
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Policy ID
+      responses:
+        '200':
+          description: Policy deleted
+        '404':
+          description: Policy not found
+
+  /api/v1/pap/policies/{id}/activate:
+    post:
+      summary: Activate policy
+      tags: [policy]
+      operationId: postPAPPolicyActivate
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Policy ID
+      responses:
+        '200':
+          description: Policy activated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+
+  /api/v1/pap/policies/{id}/suspend:
+    post:
+      summary: Suspend policy
+      tags: [policy]
+      operationId: postPAPPolicySuspend
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Policy ID
+      responses:
+        '200':
+          description: Policy suspended
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+
+  # ===== TOKEN REVOCATION =====
+  /api/v1/token/metrics:
+    get:
+      summary: Token metrics
+      tags: [validation]
+      operationId: getTokenMetrics
+      responses:
+        '200':
+          description: Token statistics
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/token/status/update:
+    post:
+      summary: Update token status
+      tags: [validation]
+      operationId: postTokenStatusUpdate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token_id: { type: string }
+                status: { type: string }
+                reason: { type: string }
+      responses:
+        '200':
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+
+  /api/v1/token/revocation/verify:
+    post:
+      summary: Verify token revocation
+      tags: [revocation]
+      operationId: postTokenRevocationVerify
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token_id: { type: string }
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  revoked: { type: boolean }
+                  revoked_at: { type: string, format: date-time }
+
+  # ===== DISCOVERY =====
+  /api/v1/discovery:
+    get:
+      summary: API discovery
+      tags: [discovery]
+      operationId: getDiscovery
+      responses:
+        '200':
+          description: Discovery document
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Discovery' }
+
+  /api/v1/compliance/check:
+    post:
+      summary: Compliance check
+      tags: [compliance]
+      operationId: postComplianceCheck
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Compliance result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  compliant: { type: boolean }
+                  issues: { type: array, items: { type: string } }
+
+  # ===== VISUALIZATION =====
+  /api/v1/visualization/poa/graphs:
+    get:
+      summary: List PoA graphs
+      tags: [learning]
+      operationId: getVisualizationPoAGraphs
+      responses:
+        '200':
+          description: Graph list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  graphs: { type: array, items: { type: object } }
+
+  /api/v1/visualization/poa/graphs/{id}:
+    get:
+      summary: Get PoA graph
+      tags: [learning]
+      operationId: getVisualizationPoAGraph
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Graph ID
+      responses:
+        '200':
+          description: Graph data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/visualization/poa/graphs/{id}/nodes:
+    get:
+      summary: Get graph nodes
+      tags: [learning]
+      operationId: getVisualizationPoAGraphNodes
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Graph ID
+      responses:
+        '200':
+          description: Node list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nodes: { type: array, items: { type: object } }
+
+  /api/v1/visualization/poa/graphs/{id}/edges:
+    get:
+      summary: Get graph edges
+      tags: [learning]
+      operationId: getVisualizationPoAGraphEdges
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Graph ID
+      responses:
+        '200':
+          description: Edge list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  edges: { type: array, items: { type: object } }
+
+  # ===== AUTH EXTENSIONS =====
+  /api/v1/gauth/auth/logout:
+    post:
+      summary: Logout
+      tags: [validation]
+      operationId: postAuthLogout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token: { type: string }
+      responses:
+        '200':
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+
+  /api/v1/gauth/auth/token/refresh:
+    post:
+      summary: Refresh token
+      tags: [validation]
+      operationId: postAuthTokenRefresh
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken: { type: string }
+      responses:
+        '200':
+          description: New tokens
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  token: { type: string }
+                  refreshToken: { type: string }
+                  expiresAt: { type: string, format: date-time }
+        '401':
+          description: Invalid refresh token
+
+  # ===== BETA DELEGATION =====
+  /api/v1/beta/delegation/create:
+    post:
+      summary: Create beta delegation
+      tags: [poa]
+      operationId: postBetaDelegationCreate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Delegation created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  id: { type: string }
+
+  /api/v1/beta/delegation/revoke:
+    post:
+      summary: Revoke beta delegation
+      tags: [poa]
+      operationId: postBetaDelegationRevoke
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                delegation_id: { type: string }
+      responses:
+        '200':
+          description: Delegation revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+
+  /api/v1/beta/delegations/graph:
+    get:
+      summary: Get delegation graph
+      tags: [poa]
+      operationId: getBetaDelegationsGraph
+      responses:
+        '200':
+          description: Delegation graph
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DelegationGraph' }
+
+  # ===== ROTATIONS =====
+  /api/v1/beta/rotations/summary:
+    get:
+      summary: Get rotation summary
+      tags: [rotation]
+      operationId: getBetaRotationsSummary
+      responses:
+        '200':
+          description: Rotation summary
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RotationSummary' }
+
+  /api/v1/beta/rotations/summary/v2:
+    get:
+      summary: Get rotation summary V2
+      tags: [rotation]
+      operationId: getBetaRotationsSummaryV2
+      responses:
+        '200':
+          description: V2 rotation artifact
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RotationSummaryV2Response' }
+
+  /api/v1/beta/rotations/verification:
+    post:
+      summary: Verify rotation signatures
+      tags: [rotation]
+      operationId: postBetaRotationsVerification
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  verified: { type: boolean }
+
+  # ===== NOTARIZATION =====
+  /api/v1/beta/notarization/receipts:
+    get:
+      summary: List notarization receipts
+      tags: [attestation]
+      operationId: getBetaNotarizationReceipts
+      responses:
+        '200':
+          description: Receipt list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  receipts: { type: array, items: { type: object } }
+
+  /api/v1/beta/notarization/receipts/latest:
+    get:
+      summary: Get latest notarization receipt
+      tags: [attestation]
+      operationId: getBetaNotarizationReceiptsLatest
+      responses:
+        '200':
+          description: Latest receipt
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/beta/notarization/receipts/verify:
+    post:
+      summary: Verify notarization receipt
+      tags: [attestation]
+      operationId: postBetaNotarizationReceiptsVerify
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid: { type: boolean }
+
+  # ===== CAPABILITIES ANCHOR =====
+  /api/v1/beta/capabilities/anchor:
+    get:
+      summary: Get capability anchor
+      tags: [capability]
+      operationId: getBetaCapabilitiesAnchor
+      responses:
+        '200':
+          description: Anchor data
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CapabilityAnchor' }
+
+  /api/v1/beta/capabilities/anchor/latest:
+    get:
+      summary: Get latest capability anchor
+      tags: [capability]
+      operationId: getBetaCapabilitiesAnchorLatest
+      responses:
+        '200':
+          description: Latest anchor
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CapabilityAnchor' }
+
+  /api/v1/beta/capabilities/negotiate:
+    post:
+      summary: Negotiate capabilities
+      tags: [capability]
+      operationId: postBetaCapabilitiesNegotiate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Negotiation result
+          content:
+            application/json:
+              schema:
+                type: object
+
+  # ===== EVENTS =====
+  /api/v1/events/emit:
+    post:
+      summary: Emit event
+      tags: [audit]
+      operationId: postEventsEmit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type: { type: string }
+                data: { type: object }
+      responses:
+        '200':
+          description: Event emitted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  event_id: { type: string }
+
+  /api/v1/events/stream:
+    get:
+      summary: Stream events (SSE)
+      tags: [audit]
+      operationId: getEventsStream
+      responses:
+        '200':
+          description: SSE event stream
+
+  # ===== MCP EXTENSIONS =====
+  /api/v1/gauth/mcp/servers/{id}/status:
+    get:
+      summary: MCP server status
+      tags: [discovery]
+      operationId: getMCPServerStatus
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: MCP server ID
+      responses:
+        '200':
+          description: Server status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+                  last_heartbeat: { type: string, format: date-time }
+
+  /api/v1/gauth/mcp/servers/{id}/resources:
+    get:
+      summary: List MCP server resources
+      tags: [discovery]
+      operationId: getMCPServerResources
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: MCP server ID
+      responses:
+        '200':
+          description: Resource list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resources: { type: array, items: { type: object } }
+
+  # ===== BETA KEYS =====
+  /api/v1/beta/keys/eddsa:
+    get:
+      summary: List EdDSA keys (beta)
+      tags: [crypto]
+      operationId: getBetaKeysEdDSA
+      responses:
+        '200':
+          description: Key list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  keys: { type: array, items: { type: object } }
+
+  # ===== PoA REVOCATION WORKFLOW =====
+  /api/v1/poa/{id}/revocation/initiate:
+    post:
+      summary: Initiate PoA revocation
+      tags: [poa]
+      operationId: postPoARevocationInitiate
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: PoA ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: { type: string }
+      responses:
+        '200':
+          description: Revocation initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  workflow_id: { type: string }
+
+  /api/v1/poa/{id}/revocation/approve:
+    post:
+      summary: Approve PoA revocation
+      tags: [poa]
+      operationId: postPoARevocationApprove
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: PoA ID
+      responses:
+        '200':
+          description: Revocation approved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+
+  /api/v1/poa/{id}/revocation/cancel:
+    post:
+      summary: Cancel PoA revocation
+      tags: [poa]
+      operationId: postPoARevocationCancel
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: PoA ID
+      responses:
+        '200':
+          description: Revocation cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+
+  # ===== PROTOCOL FLOW SESSIONS =====
+  /api/v1/protocol/flow/sessions:
+    get:
+      summary: List protocol flow sessions
+      tags: [learning]
+      operationId: getProtocolFlowSessions
+      responses:
+        '200':
+          description: Session list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  sessions: { type: array, items: { type: object } }
+    post:
+      summary: Create protocol flow session
+      tags: [learning]
+      operationId: postProtocolFlowSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  session_id: { type: string }
+
+  /api/v1/protocol/flow/sessions/{id}:
+    get:
+      summary: Get protocol flow session
+      tags: [learning]
+      operationId: getProtocolFlowSession
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Session ID
+      responses:
+        '200':
+          description: Session details
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Session not found
+
+  /api/v1/protocol/flow/sessions/{id}/navigate:
+    post:
+      summary: Navigate protocol flow
+      tags: [learning]
+      operationId: postProtocolFlowSessionNavigate
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Session ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action: { type: string }
+      responses:
+        '200':
+          description: Navigation result
+          content:
+            application/json:
+              schema:
+                type: object
+
+  # ===== MODEL LIMITS =====
+  /api/v1/model/limits/snapshot:
+    get:
+      summary: Get model limits snapshot
+      tags: [attestation]
+      operationId: getModelLimitsSnapshot
+      responses:
+        '200':
+          description: Limits snapshot
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/model/validate:
+    post:
+      summary: Validate model
+      tags: [attestation]
+      operationId: postModelValidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid: { type: boolean }
+                  errors: { type: array, items: { type: string } }
+
+  # ===== BETA EXAMPLES =====
+  /api/v1/beta/examples/catalog:
+    get:
+      summary: List example catalog
+      tags: [learning]
+      operationId: getBetaExamplesCatalog
+      responses:
+        '200':
+          description: Example catalog
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  examples: { type: array, items: { type: object } }
+
+  /api/v1/beta/examples/run:
+    post:
+      summary: Run example
+      tags: [learning]
+      operationId: postBetaExamplesRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                example_id: { type: string }
+      responses:
+        '200':
+          description: Example executed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  job_id: { type: string }
+
+  /api/v1/beta/examples/run/jobs:
+    get:
+      summary: List example jobs
+      tags: [learning]
+      operationId: getBetaExamplesRunJobs
+      responses:
+        '200':
+          description: Job list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobs: { type: array, items: { type: object } }
+
+  /api/v1/beta/examples/run/{id}/status:
+    get:
+      summary: Get example job status
+      tags: [learning]
+      operationId: getBetaExamplesRunStatus
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Job ID
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+                  progress: { type: integer }
+
+  /api/v1/beta/examples/run/{id}/logs:
+    get:
+      summary: Get example job logs
+      tags: [learning]
+      operationId: getBetaExamplesRunLogs
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Job ID
+      responses:
+        '200':
+          description: Job logs
+          content:
+            text/plain:
+              schema: { type: string }
+
+  # ===== BETA POLICY EXTENSIONS =====
+  /api/v1/beta/policy/metrics:
+    get:
+      summary: Get policy metrics
+      tags: [policy]
+      operationId: getBetaPolicyMetrics
+      responses:
+        '200':
+          description: Policy metrics
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/beta/policy/timeline:
+    get:
+      summary: Get policy timeline
+      tags: [policy]
+      operationId: getBetaPolicyTimeline
+      responses:
+        '200':
+          description: Policy timeline
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events: { type: array, items: { type: object } }
+
+  /api/v1/beta/policy/rollback:
+    post:
+      summary: Rollback policy
+      tags: [policy]
+      operationId: postBetaPolicyRollback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                target_hash: { type: string }
+      responses:
+        '200':
+          description: Rollback complete
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+
+  /api/v1/beta/policy/diff:
+    get:
+      summary: Get policy diff
+      tags: [policy]
+      operationId: getBetaPolicyDiff
+      parameters:
+        - in: query
+          name: from_hash
+          schema: { type: string }
+        - in: query
+          name: to_hash
+          schema: { type: string }
+      responses:
+        '200':
+          description: Policy diff
+          content:
+            application/json:
+              schema:
+                type: object
+
+  # ===== BETA METRICS EXTENSIONS =====
+  /api/v1/beta/metrics/latency:
+    get:
+      summary: Get latency metrics
+      tags: [learning]
+      operationId: getBetaMetricsLatency
+      responses:
+        '200':
+          description: Latency statistics
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/beta/authz/metrics:
+    get:
+      summary: Get authz metrics
+      tags: [policy]
+      operationId: getBetaAuthzMetrics
+      responses:
+        '200':
+          description: Authorization metrics
+          content:
+            application/json:
+              schema:
+                type: object
+
+  # ===== PDP/PEP EXTENSIONS =====
+  /api/v1/pdp/metrics:
+    get:
+      summary: Get PDP metrics
+      tags: [policy]
+      operationId: getPDPMetrics
+      responses:
+        '200':
+          description: PDP metrics
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/pdp/decisions/recent:
+    get:
+      summary: Get recent PDP decisions
+      tags: [policy]
+      operationId: getPDPDecisionsRecent
+      responses:
+        '200':
+          description: Recent decisions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  decisions: { type: array, items: { type: object } }
+
+  /api/v1/pep/metrics:
+    get:
+      summary: Get PEP metrics
+      tags: [policy]
+      operationId: getPEPMetrics
+      responses:
+        '200':
+          description: PEP metrics
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/pep/violations/recent:
+    get:
+      summary: Get recent PEP violations
+      tags: [policy]
+      operationId: getPEPViolationsRecent
+      responses:
+        '200':
+          description: Recent violations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  violations: { type: array, items: { type: object } }
+
+  # ===== PoA EXTENSIONS =====
+  /api/v1/poa/authorize:
+    post:
+      summary: Authorize PoA action
+      tags: [poa]
+      operationId: postPoAAuthorize
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                poa_id: { type: string }
+                action: { type: string }
+      responses:
+        '200':
+          description: Authorization result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  allowed: { type: boolean }
+
+  /api/v1/poa/metrics:
+    get:
+      summary: Get PoA metrics
+      tags: [poa]
+      operationId: getPoAMetrics
+      responses:
+        '200':
+          description: PoA metrics
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/beta/poa/{id}/evidence:
+    get:
+      summary: Get PoA evidence
+      tags: [poa]
+      operationId: getBetaPoAEvidence
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: PoA ID
+      responses:
+        '200':
+          description: Evidence data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  # ===== TOKEN REVOCATION EXTENSIONS =====
+  /api/v1/token/revocation/root:
+    get:
+      summary: Get revocation root
+      tags: [revocation]
+      operationId: getTokenRevocationRoot
+      responses:
+        '200':
+          description: Revocation root
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RevocationHead' }
+
+  /api/v1/token/revocation/seed:
+    post:
+      summary: Seed revocation data
+      tags: [revocation]
+      operationId: postTokenRevocationSeed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Seed complete
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+
+  # ===== DIAGNOSTICS =====
+  /api/v1/diagnostics/limits:
+    get:
+      summary: Get system limits
+      tags: [discovery]
+      operationId: getDiagnosticsLimits
+      responses:
+        '200':
+          description: System limits
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/diagnostics/semantic:
+    get:
+      summary: Get semantic diagnostics
+      tags: [discovery]
+      operationId: getDiagnosticsSemantic
+      responses:
+        '200':
+          description: Semantic diagnostics
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/errors/catalog:
+    get:
+      summary: Get error catalog
+      tags: [discovery]
+      operationId: getErrorsCatalog
+      responses:
+        '200':
+          description: Error catalog
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors: { type: array, items: { type: object } }
+
+  /api/v1/learning/start:
+    post:
+      summary: Start learning session
+      tags: [learning]
+      operationId: postLearningStart
+      responses:
+        '200':
+          description: Learning started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  session_id: { type: string }
+
   /api/v1/poa/prepare:
     post:
       summary: Prepare draft PoA (multi-signature pre-image)
@@ -871,7 +2977,7 @@ paths:
         '500': { $ref: '#/components/responses/InternalError' }
   /api/v1/poa/{id}:
     get:
-        '409': { $ref: '#/components/responses/Conflict' }
+
       summary: Retrieve PoA artifact by id
       tags: [poa]
       operationId: getPoA
@@ -1882,7 +3988,8 @@ components:
           schema:
             $ref: '#/components/schemas/CompositeAuthorizationResponse'
     Conflict:
-      description: Resource state conflict. Possible reasons include:
+      description: |
+        Resource state conflict. Possible reasons include:
         - overlapping_validity_window
         - hash_mismatch
         - signature_replay_detected (duplicate canonical digest + signer key id)
