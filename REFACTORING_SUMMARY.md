@@ -39,6 +39,7 @@ Split `gauth.go` (1,227 lines) into 5 focused files:
 - Extracted helper functions to improve readability and maintainability.
 - Resolved all linter flagged complexity issues.
 - Fixed `nil Context` usage in `pkg/gauth` tests.
+- Fixed CI/CD workflows and scripts referencing stale `web/ui-react` path (updated to `frontend/ui-react`).
 
 ## Key Improvements
 
