@@ -151,37 +151,11 @@ func ValidatePathForPersistence(path string, purpose string) error {
 	// In containers, check for ephemeral paths
 	if IsEphemeralPath(path) {
 		return fmt.Errorf(
-			"UNSAFE PERSISTENT STORAGE: %s path '%s' is in ephemeral storage in %s container.\n\n"+
-				"PROBLEM: This path will be WIPED on container restart, causing:\n"+
-				"  - Loss of all %s data\n"+
-				"  - Security vulnerabilities (replay attacks possible after restart)\n"+
-				"  - Data corruption on pod rescheduling\n\n"+
-				"REMEDIATION:\n"+
-				"  Option 1 (RECOMMENDED): Use distributed storage (Redis, PostgreSQL, etc.)\n"+
-				"  Option 2: Mount persistent volume:\n"+
-				"    Kubernetes: Use PersistentVolumeClaim (PVC)\n"+
-				"    Docker: Use named volume or bind mount to host path\n"+
-				"  Option 3: Use /data or /mnt directory with persistent volume\n\n"+
-				"EXAMPLE Kubernetes PVC:\n"+
-				"  apiVersion: v1\n"+
-				"  kind: PersistentVolumeClaim\n"+
-				"  metadata:\n"+
-				"    name: gauth-replay-store\n"+
-				"  spec:\n"+
-				"    accessModes:\n"+
-				"      - ReadWriteOnce\n"+
-				"    resources:\n"+
-				"      requests:\n"+
-				"        storage: 1Gi\n\n"+
-				"  # Mount in Pod:\n"+
-				"  volumeMounts:\n"+
-				"    - name: replay-store\n"+
-				"      mountPath: /data\n"+
-				"  volumes:\n"+
-				"    - name: replay-store\n"+
-				"      persistentVolumeClaim:\n"+
-				"        claimName: gauth-replay-store\n\n"+
-				"See REPLAY_STORE_MIGRATION_GUIDE.md for complete instructions.",
+			"unsafe persistent storage: %s path '%s' is in ephemeral storage in %s container - "+
+				"this path will be WIPED on container restart, causing loss of all %s data, "+
+				"security vulnerabilities (replay attacks possible after restart), and data corruption on pod rescheduling - "+
+				"use distributed storage (Redis, PostgreSQL), mount a persistent volume (PVC), or use /data directory with persistent volume "+
+				"(see REPLAY_STORE_MIGRATION_GUIDE.md for complete instructions)",
 			purpose, path, env, purpose)
 	}
 

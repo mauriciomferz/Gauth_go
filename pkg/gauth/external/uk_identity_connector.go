@@ -81,41 +81,41 @@ type UKPassportVerificationRequest struct {
 	Nationality    string    `json:"nationality" validate:"required"`
 	IssueDate      time.Time `json:"issue_date" validate:"required"`
 	ExpiryDate     time.Time `json:"expiry_date" validate:"required"`
-	
+
 	// Optional biometric data
-	MRZData        string `json:"mrz_data,omitempty"`        // Machine Readable Zone
-	ChipData       []byte `json:"chip_data,omitempty"`       // RFID chip data
-	PhotoImage     []byte `json:"photo_image,omitempty"`     // Passport photo
-	
+	MRZData    string `json:"mrz_data,omitempty"`    // Machine Readable Zone
+	ChipData   []byte `json:"chip_data,omitempty"`   // RFID chip data
+	PhotoImage []byte `json:"photo_image,omitempty"` // Passport photo
+
 	// Verification level
-	VerifyLevel    UKVerifyAssuranceLevel `json:"verify_level" validate:"required"`
-	
+	VerifyLevel UKVerifyAssuranceLevel `json:"verify_level" validate:"required"`
+
 	// Metadata
-	RequestID      string    `json:"request_id"`
-	Timestamp      time.Time `json:"timestamp"`
+	RequestID string    `json:"request_id"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 // UKDrivingLicenceRequest represents a UK driving licence verification request
 type UKDrivingLicenceRequest struct {
 	// Driving licence details
-	LicenceNumber  string               `json:"licence_number" validate:"required,len=16"`
-	LicenceType    UKDrivingLicenceType `json:"licence_type" validate:"required"`
-	Surname        string               `json:"surname" validate:"required"`
-	GivenNames     string               `json:"given_names" validate:"required"`
-	DateOfBirth    time.Time            `json:"date_of_birth" validate:"required"`
-	IssueDate      time.Time            `json:"issue_date" validate:"required"`
-	ExpiryDate     time.Time            `json:"expiry_date" validate:"required"`
-	IssueNumber    string               `json:"issue_number" validate:"required"` // 2-digit issue number
-	
+	LicenceNumber string               `json:"licence_number" validate:"required,len=16"`
+	LicenceType   UKDrivingLicenceType `json:"licence_type" validate:"required"`
+	Surname       string               `json:"surname" validate:"required"`
+	GivenNames    string               `json:"given_names" validate:"required"`
+	DateOfBirth   time.Time            `json:"date_of_birth" validate:"required"`
+	IssueDate     time.Time            `json:"issue_date" validate:"required"`
+	ExpiryDate    time.Time            `json:"expiry_date" validate:"required"`
+	IssueNumber   string               `json:"issue_number" validate:"required"` // 2-digit issue number
+
 	// Address
-	Address        *UKAddress `json:"address,omitempty"`
-	
+	Address *UKAddress `json:"address,omitempty"`
+
 	// Optional verification
-	DVLACheckCode  string `json:"dvla_check_code,omitempty"` // 8-character check code from DVLA
-	
+	DVLACheckCode string `json:"dvla_check_code,omitempty"` // 8-character check code from DVLA
+
 	// Metadata
-	RequestID      string    `json:"request_id"`
-	Timestamp      time.Time `json:"timestamp"`
+	RequestID string    `json:"request_id"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 // UKGovVerifyRequest represents a GOV.UK Verify authentication request
@@ -123,68 +123,68 @@ type UKGovVerifyRequest struct {
 	// Service provider details
 	ServiceEntityID string                 `json:"service_entity_id" validate:"required"`
 	RequestedLOA    UKVerifyAssuranceLevel `json:"requested_loa" validate:"required"`
-	
+
 	// Identity attributes to verify
 	VerifyAttributes []string `json:"verify_attributes" validate:"required,min=1"`
-	
+
 	// Matching dataset (for matching service)
 	MatchingDataset *UKMatchingDataset `json:"matching_dataset,omitempty"`
-	
+
 	// Metadata
-	RequestID       string    `json:"request_id"`
-	Timestamp       time.Time `json:"timestamp"`
+	RequestID string    `json:"request_id"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 // UKMatchingDataset contains attributes for GOV.UK Verify matching
 type UKMatchingDataset struct {
-	Surname     string    `json:"surname"`
-	FirstName   string    `json:"first_name"`
-	DateOfBirth time.Time `json:"date_of_birth"`
-	Gender      string    `json:"gender,omitempty"`
+	Surname     string     `json:"surname"`
+	FirstName   string     `json:"first_name"`
+	DateOfBirth time.Time  `json:"date_of_birth"`
+	Gender      string     `json:"gender,omitempty"`
 	Address     *UKAddress `json:"address,omitempty"`
 }
 
 // UKRightToWorkRequest represents a right to work verification request
 type UKRightToWorkRequest struct {
 	// Personal details
-	Surname        string    `json:"surname" validate:"required"`
-	GivenNames     string    `json:"given_names" validate:"required"`
-	DateOfBirth    time.Time `json:"date_of_birth" validate:"required"`
-	Nationality    string    `json:"nationality" validate:"required"`
-	
+	Surname     string    `json:"surname" validate:"required"`
+	GivenNames  string    `json:"given_names" validate:"required"`
+	DateOfBirth time.Time `json:"date_of_birth" validate:"required"`
+	Nationality string    `json:"nationality" validate:"required"`
+
 	// Document details
 	DocumentType   UKDocumentType `json:"document_type" validate:"required"`
 	DocumentNumber string         `json:"document_number" validate:"required"`
-	
+
 	// Employer details
-	EmployerName   string `json:"employer_name" validate:"required"`
-	EmployerRef    string `json:"employer_ref,omitempty"` // HMRC employer reference
-	
+	EmployerName string `json:"employer_name" validate:"required"`
+	EmployerRef  string `json:"employer_ref,omitempty"` // HMRC employer reference
+
 	// Metadata
-	RequestID      string    `json:"request_id"`
-	Timestamp      time.Time `json:"timestamp"`
+	RequestID string    `json:"request_id"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 // UKDBSCheckRequest represents a DBS (Disclosure and Barring Service) check request
 type UKDBSCheckRequest struct {
 	// Personal details
-	Surname        string    `json:"surname" validate:"required"`
-	GivenNames     string    `json:"given_names" validate:"required"`
-	DateOfBirth    time.Time `json:"date_of_birth" validate:"required"`
-	
+	Surname     string    `json:"surname" validate:"required"`
+	GivenNames  string    `json:"given_names" validate:"required"`
+	DateOfBirth time.Time `json:"date_of_birth" validate:"required"`
+
 	// Address history (last 5 years required)
 	AddressHistory []*UKAddress `json:"address_history" validate:"required,min=1"`
-	
+
 	// Check level
-	CheckLevel     UKDBSCheckLevel `json:"check_level" validate:"required"`
-	
+	CheckLevel UKDBSCheckLevel `json:"check_level" validate:"required"`
+
 	// Position details (for Enhanced DBS)
 	PositionAppliedFor string `json:"position_applied_for,omitempty"`
 	WorkforceType      string `json:"workforce_type,omitempty"` // e.g., "child", "adult", "both"
-	
+
 	// Metadata
-	RequestID      string    `json:"request_id"`
-	Timestamp      time.Time `json:"timestamp"`
+	RequestID string    `json:"request_id"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 // =============================================================================
@@ -194,69 +194,69 @@ type UKDBSCheckRequest struct {
 // UKIdentityVerificationResult represents the result of UK identity verification
 type UKIdentityVerificationResult struct {
 	// Verification status
-	Verified          bool                   `json:"verified"`
-	VerifyLevel       UKVerifyAssuranceLevel `json:"verify_level"`
-	ConfidenceScore   float64                `json:"confidence_score"` // 0.0 to 1.0
-	
+	Verified        bool                   `json:"verified"`
+	VerifyLevel     UKVerifyAssuranceLevel `json:"verify_level"`
+	ConfidenceScore float64                `json:"confidence_score"` // 0.0 to 1.0
+
 	// Document details
-	DocumentType      UKDocumentType `json:"document_type"`
-	DocumentNumber    string         `json:"document_number"`
-	DocumentValid     bool           `json:"document_valid"`
-	DocumentExpired   bool           `json:"document_expired"`
-	
+	DocumentType    UKDocumentType `json:"document_type"`
+	DocumentNumber  string         `json:"document_number"`
+	DocumentValid   bool           `json:"document_valid"`
+	DocumentExpired bool           `json:"document_expired"`
+
 	// Identity attributes
-	Attributes        *UKIdentityAttributes `json:"attributes,omitempty"`
-	
+	Attributes *UKIdentityAttributes `json:"attributes,omitempty"`
+
 	// GOV.UK Verify specific
-	VerifyPID         string `json:"verify_pid,omitempty"`         // Persistent Identifier
-	IdentityProvider  string `json:"identity_provider,omitempty"`  // IdP name
-	
+	VerifyPID        string `json:"verify_pid,omitempty"`        // Persistent Identifier
+	IdentityProvider string `json:"identity_provider,omitempty"` // IdP name
+
 	// Verification checks
-	Checks            *UKVerificationChecks `json:"checks"`
-	
+	Checks *UKVerificationChecks `json:"checks"`
+
 	// Right to work (if applicable)
-	RightToWork       *UKRightToWorkResult `json:"right_to_work,omitempty"`
-	
+	RightToWork *UKRightToWorkResult `json:"right_to_work,omitempty"`
+
 	// DBS check (if applicable)
-	DBSCheck          *UKDBSCheckResult `json:"dbs_check,omitempty"`
-	
+	DBSCheck *UKDBSCheckResult `json:"dbs_check,omitempty"`
+
 	// Warnings and errors
-	Warnings          []string            `json:"warnings,omitempty"`
-	Errors            []VerificationError `json:"errors,omitempty"`
-	
+	Warnings []string            `json:"warnings,omitempty"`
+	Errors   []VerificationError `json:"errors,omitempty"`
+
 	// Metadata
-	RequestID            string    `json:"request_id"`
+	RequestID             string    `json:"request_id"`
 	VerificationTimestamp time.Time `json:"verification_timestamp"`
-	ProcessingTimeMs     int64     `json:"processing_time_ms"`
+	ProcessingTimeMs      int64     `json:"processing_time_ms"`
 }
 
 // UKIdentityAttributes contains verified identity data
 type UKIdentityAttributes struct {
-	Surname         string     `json:"surname"`
-	GivenNames      string     `json:"given_names"`
-	DateOfBirth     time.Time  `json:"date_of_birth"`
-	Gender          string     `json:"gender,omitempty"`
-	Nationality     string     `json:"nationality,omitempty"`
-	PlaceOfBirth    string     `json:"place_of_birth,omitempty"`
-	
+	Surname      string    `json:"surname"`
+	GivenNames   string    `json:"given_names"`
+	DateOfBirth  time.Time `json:"date_of_birth"`
+	Gender       string    `json:"gender,omitempty"`
+	Nationality  string    `json:"nationality,omitempty"`
+	PlaceOfBirth string    `json:"place_of_birth,omitempty"`
+
 	// Address
-	CurrentAddress  *UKAddress   `json:"current_address,omitempty"`
-	AddressHistory  []*UKAddress `json:"address_history,omitempty"`
-	
+	CurrentAddress *UKAddress   `json:"current_address,omitempty"`
+	AddressHistory []*UKAddress `json:"address_history,omitempty"`
+
 	// National Insurance Number (if authorized)
-	NINNumber       string `json:"nin_number,omitempty"`
+	NINNumber string `json:"nin_number,omitempty"`
 }
 
 // UKAddress represents a UK address
 type UKAddress struct {
-	Line1       string    `json:"line1"`
-	Line2       string    `json:"line2,omitempty"`
-	City        string    `json:"city"`
-	County      string    `json:"county,omitempty"`
-	Postcode    string    `json:"postcode"`
-	Country     string    `json:"country"` // Should be "GB"
-	FromDate    time.Time `json:"from_date,omitempty"`
-	ToDate      time.Time `json:"to_date,omitempty"`
+	Line1    string    `json:"line1"`
+	Line2    string    `json:"line2,omitempty"`
+	City     string    `json:"city"`
+	County   string    `json:"county,omitempty"`
+	Postcode string    `json:"postcode"`
+	Country  string    `json:"country"` // Should be "GB"
+	FromDate time.Time `json:"from_date,omitempty"`
+	ToDate   time.Time `json:"to_date,omitempty"`
 }
 
 // UKVerificationChecks contains UK-specific verification results
@@ -266,35 +266,35 @@ type UKVerificationChecks struct {
 	DocumentExpiry       bool `json:"document_expiry"`
 	MRZValid             bool `json:"mrz_valid"`
 	ChipValid            bool `json:"chip_valid"`
-	
+
 	// Identity checks
-	NameMatch            bool `json:"name_match"`
-	DateOfBirthMatch     bool `json:"date_of_birth_match"`
-	AddressMatch         bool `json:"address_match"`
-	
+	NameMatch        bool `json:"name_match"`
+	DateOfBirthMatch bool `json:"date_of_birth_match"`
+	AddressMatch     bool `json:"address_match"`
+
 	// DVLA checks (for driving licence)
-	DVLAVerified         bool   `json:"dvla_verified"`
-	DVLAStatus           string `json:"dvla_status,omitempty"`
-	
+	DVLAVerified bool   `json:"dvla_verified"`
+	DVLAStatus   string `json:"dvla_status,omitempty"`
+
 	// GOV.UK Verify checks
-	VerifyAuthenticated  bool   `json:"verify_authenticated"`
-	VerifyMatched        bool   `json:"verify_matched"`
-	MatchingScore        float64 `json:"matching_score"`
-	
+	VerifyAuthenticated bool    `json:"verify_authenticated"`
+	VerifyMatched       bool    `json:"verify_matched"`
+	MatchingScore       float64 `json:"matching_score"`
+
 	// Biometric checks
-	PhotoMatch           bool   `json:"photo_match"`
-	LivenessCheck        bool   `json:"liveness_check"`
+	PhotoMatch    bool `json:"photo_match"`
+	LivenessCheck bool `json:"liveness_check"`
 }
 
 // UKRightToWorkResult contains right to work verification result
 type UKRightToWorkResult struct {
-	Status              UKRightToWorkStatus `json:"status"`
-	HasRightToWork      bool                `json:"has_right_to_work"`
-	Restrictions        []string            `json:"restrictions,omitempty"`
-	ValidUntil          *time.Time          `json:"valid_until,omitempty"`
-	ShareCode           string              `json:"share_code,omitempty"` // Immigration status share code
-	EmployerChecklist   []string            `json:"employer_checklist,omitempty"`
-	DocumentsRequired   []string            `json:"documents_required,omitempty"`
+	Status            UKRightToWorkStatus `json:"status"`
+	HasRightToWork    bool                `json:"has_right_to_work"`
+	Restrictions      []string            `json:"restrictions,omitempty"`
+	ValidUntil        *time.Time          `json:"valid_until,omitempty"`
+	ShareCode         string              `json:"share_code,omitempty"` // Immigration status share code
+	EmployerChecklist []string            `json:"employer_checklist,omitempty"`
+	DocumentsRequired []string            `json:"documents_required,omitempty"`
 }
 
 // UKDBSCheckResult contains DBS check result
@@ -316,49 +316,49 @@ type UKDBSCheckResult struct {
 // UKIdentityConnectorConfig contains configuration for UK identity connector
 type UKIdentityConnectorConfig struct {
 	// GOV.UK Verify configuration
-	VerifyEnabled       bool   `json:"verify_enabled"`
-	VerifyHubURL        string `json:"verify_hub_url"`        // SAML Hub URL
-	VerifyEntityID      string `json:"verify_entity_id"`      // Service Provider Entity ID
-	VerifyMetadataURL   string `json:"verify_metadata_url"`
-	VerifySigningCert   *x509.Certificate `json:"-"`
+	VerifyEnabled        bool              `json:"verify_enabled"`
+	VerifyHubURL         string            `json:"verify_hub_url"`   // SAML Hub URL
+	VerifyEntityID       string            `json:"verify_entity_id"` // Service Provider Entity ID
+	VerifyMetadataURL    string            `json:"verify_metadata_url"`
+	VerifySigningCert    *x509.Certificate `json:"-"`
 	VerifyEncryptionCert *x509.Certificate `json:"-"`
-	
+
 	// DVLA integration
-	DVLAEnabled         bool   `json:"dvla_enabled"`
-	DVLAURL             string `json:"dvla_url"`
-	DVLAAPIKey          string `json:"dvla_api_key"`
-	
+	DVLAEnabled bool   `json:"dvla_enabled"`
+	DVLAURL     string `json:"dvla_url"`
+	DVLAAPIKey  string `json:"dvla_api_key"`
+
 	// DBS integration
-	DBSEnabled          bool   `json:"dbs_enabled"`
-	DBSURL              string `json:"dbs_url"`
-	DBSAPIKey           string `json:"dbs_api_key"`
-	
+	DBSEnabled bool   `json:"dbs_enabled"`
+	DBSURL     string `json:"dbs_url"`
+	DBSAPIKey  string `json:"dbs_api_key"`
+
 	// Home Office integration (Right to Work)
-	HomeOfficeEnabled   bool   `json:"home_office_enabled"`
-	HomeOfficeURL       string `json:"home_office_url"`
-	HomeOfficeAPIKey    string `json:"home_office_api_key"`
-	
+	HomeOfficeEnabled bool   `json:"home_office_enabled"`
+	HomeOfficeURL     string `json:"home_office_url"`
+	HomeOfficeAPIKey  string `json:"home_office_api_key"`
+
 	// Security settings
-	MinimumLOA          UKVerifyAssuranceLevel `json:"minimum_loa"`
-	RequireBiometric    bool                   `json:"require_biometric"`
-	
+	MinimumLOA       UKVerifyAssuranceLevel `json:"minimum_loa"`
+	RequireBiometric bool                   `json:"require_biometric"`
+
 	// Circuit breaker
-	CircuitBreaker      *CircuitBreaker `json:"-"`
-	
+	CircuitBreaker *CircuitBreaker `json:"-"`
+
 	// Retry configuration
-	MaxRetries          int           `json:"max_retries"`
-	RetryDelay          time.Duration `json:"retry_delay"`
-	BackoffMultiplier   float64       `json:"backoff_multiplier"`
-	
+	MaxRetries        int           `json:"max_retries"`
+	RetryDelay        time.Duration `json:"retry_delay"`
+	BackoffMultiplier float64       `json:"backoff_multiplier"`
+
 	// Caching
-	CacheEnabled        bool          `json:"cache_enabled"`
-	CacheTTL            time.Duration `json:"cache_ttl"`
-	
+	CacheEnabled bool          `json:"cache_enabled"`
+	CacheTTL     time.Duration `json:"cache_ttl"`
+
 	// Timeouts
-	RequestTimeout      time.Duration `json:"request_timeout"`
-	
+	RequestTimeout time.Duration `json:"request_timeout"`
+
 	// Validation
-	StrictValidation    bool `json:"strict_validation"`
+	StrictValidation bool `json:"strict_validation"`
 }
 
 // UKIdentityConnector handles UK identity verification
@@ -379,7 +379,7 @@ func NewUKIdentityConnector(config *UKIdentityConnectorConfig) (*UKIdentityConne
 	if config == nil {
 		return nil, errors.New("config cannot be nil")
 	}
-	
+
 	// Set defaults
 	if config.MaxRetries == 0 {
 		config.MaxRetries = 3
@@ -399,36 +399,36 @@ func NewUKIdentityConnector(config *UKIdentityConnectorConfig) (*UKIdentityConne
 	if config.MinimumLOA == "" {
 		config.MinimumLOA = UKVerifyLOA2
 	}
-	
+
 	connector := &UKIdentityConnector{
 		config:    config,
 		validator: validator.New(),
 		cache:     make(map[string]*cachedUKVerification),
 	}
-	
+
 	// Register custom validators
 	_ = connector.validator.RegisterValidation("uk_postcode", validateUKPostcode) // Registration failures are acceptable; fallback to standard validation
 	_ = connector.validator.RegisterValidation("uk_driving_licence", validateUKDrivingLicence)
 	_ = connector.validator.RegisterValidation("uk_passport", validateUKPassport)
-	
+
 	return connector, nil
 }
 
 // VerifyPassport verifies a UK passport
 func (c *UKIdentityConnector) VerifyPassport(ctx context.Context, req *UKPassportVerificationRequest) (*UKIdentityVerificationResult, error) {
 	startTime := time.Now()
-	
+
 	// Validate request
 	if err := c.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Check LOA requirement
 	if !c.isLOASufficient(req.VerifyLevel) {
 		return nil, fmt.Errorf("requested LOA '%s' is below minimum required LOA '%s'",
 			req.VerifyLevel, c.config.MinimumLOA)
 	}
-	
+
 	// Check cache
 	if c.config.CacheEnabled {
 		cacheKey := c.generateCacheKey("passport", req.PassportNumber, req.RequestID)
@@ -436,33 +436,33 @@ func (c *UKIdentityConnector) VerifyPassport(ctx context.Context, req *UKPasspor
 			return cached, nil
 		}
 	}
-	
+
 	// Perform verification
 	result, err := c.performPassportVerification(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Set processing time
 	result.ProcessingTimeMs = time.Since(startTime).Milliseconds()
-	
+
 	// Cache result
 	if c.config.CacheEnabled && result.Verified {
 		c.addToCache(c.generateCacheKey("passport", req.PassportNumber, req.RequestID), result)
 	}
-	
+
 	return result, nil
 }
 
 // VerifyDrivingLicence verifies a UK driving licence
 func (c *UKIdentityConnector) VerifyDrivingLicence(ctx context.Context, req *UKDrivingLicenceRequest) (*UKIdentityVerificationResult, error) {
 	startTime := time.Now()
-	
+
 	// Validate request
 	if err := c.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Check cache
 	if c.config.CacheEnabled {
 		cacheKey := c.generateCacheKey("dl", req.LicenceNumber, req.RequestID)
@@ -470,21 +470,21 @@ func (c *UKIdentityConnector) VerifyDrivingLicence(ctx context.Context, req *UKD
 			return cached, nil
 		}
 	}
-	
+
 	// Perform verification
 	result, err := c.performDrivingLicenceVerification(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Set processing time
 	result.ProcessingTimeMs = time.Since(startTime).Milliseconds()
-	
+
 	// Cache result
 	if c.config.CacheEnabled && result.Verified {
 		c.addToCache(c.generateCacheKey("dl", req.LicenceNumber, req.RequestID), result)
 	}
-	
+
 	return result, nil
 }
 
@@ -493,43 +493,43 @@ func (c *UKIdentityConnector) VerifyGovUKIdentity(ctx context.Context, req *UKGo
 	if !c.config.VerifyEnabled {
 		return nil, errors.New("GOV.UK Verify is not enabled")
 	}
-	
+
 	startTime := time.Now()
-	
+
 	// Validate request
 	if err := c.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Perform GOV.UK Verify authentication
 	result, err := c.performGovVerify(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Set processing time
 	result.ProcessingTimeMs = time.Since(startTime).Milliseconds()
-	
+
 	return result, nil
 }
 
 // VerifyRightToWork checks right to work in the UK
 func (c *UKIdentityConnector) VerifyRightToWork(ctx context.Context, req *UKRightToWorkRequest) (*UKRightToWorkResult, error) {
 	if !c.config.HomeOfficeEnabled {
-		return nil, errors.New("Home Office Right to Work service is not enabled")
+		return nil, errors.New("home Office Right to Work service is not enabled")
 	}
-	
+
 	// Validate request
 	if err := c.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Perform right to work check
 	result, err := c.performRightToWorkCheck(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return result, nil
 }
 
@@ -538,18 +538,18 @@ func (c *UKIdentityConnector) RequestDBSCheck(ctx context.Context, req *UKDBSChe
 	if !c.config.DBSEnabled {
 		return nil, errors.New("DBS service is not enabled")
 	}
-	
+
 	// Validate request
 	if err := c.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Initiate DBS check
 	result, err := c.performDBSCheck(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return result, nil
 }
 
@@ -566,11 +566,11 @@ func (c *UKIdentityConnector) performPassportVerification(ctx context.Context, r
 		DocumentNumber:        req.PassportNumber,
 		Checks:                &UKVerificationChecks{},
 	}
-	
+
 	// Check document expiry
 	result.DocumentExpired = time.Now().After(req.ExpiryDate)
 	result.DocumentValid = !result.DocumentExpired
-	
+
 	// Verify passport format
 	if !validateUKPassportNumber(req.PassportNumber) {
 		result.Errors = append(result.Errors, VerificationError{
@@ -578,17 +578,17 @@ func (c *UKIdentityConnector) performPassportVerification(ctx context.Context, r
 			Message: "Invalid UK passport number format",
 		})
 	}
-	
+
 	// Verify MRZ if provided
 	if req.MRZData != "" {
 		result.Checks.MRZValid = c.verifyMRZ(req.MRZData, req.PassportNumber)
 	}
-	
+
 	// Verify chip data if provided
 	if len(req.ChipData) > 0 {
 		result.Checks.ChipValid = true // Placeholder - would verify RFID chip
 	}
-	
+
 	// Build attributes
 	result.Attributes = &UKIdentityAttributes{
 		Surname:     req.Surname,
@@ -597,13 +597,13 @@ func (c *UKIdentityConnector) performPassportVerification(ctx context.Context, r
 		Gender:      req.Gender,
 		Nationality: req.Nationality,
 	}
-	
+
 	// Calculate confidence score
 	result.ConfidenceScore = c.calculateConfidenceScore(result)
-	
+
 	// Determine verification success
 	result.Verified = result.DocumentValid && len(result.Errors) == 0
-	
+
 	return result, nil
 }
 
@@ -615,11 +615,11 @@ func (c *UKIdentityConnector) performDrivingLicenceVerification(ctx context.Cont
 		DocumentNumber:        req.LicenceNumber,
 		Checks:                &UKVerificationChecks{},
 	}
-	
+
 	// Check document expiry
 	result.DocumentExpired = time.Now().After(req.ExpiryDate)
 	result.DocumentValid = !result.DocumentExpired
-	
+
 	// Verify licence format
 	if !validateUKDrivingLicenceNumber(req.LicenceNumber) {
 		result.Errors = append(result.Errors, VerificationError{
@@ -627,7 +627,7 @@ func (c *UKIdentityConnector) performDrivingLicenceVerification(ctx context.Cont
 			Message: "Invalid UK driving licence number format",
 		})
 	}
-	
+
 	// DVLA verification if enabled
 	if c.config.DVLAEnabled {
 		dvlaValid, err := c.verifyWithDVLA(ctx, req)
@@ -638,7 +638,7 @@ func (c *UKIdentityConnector) performDrivingLicenceVerification(ctx context.Cont
 			result.Checks.DVLAStatus = "verified"
 		}
 	}
-	
+
 	// Build attributes
 	result.Attributes = &UKIdentityAttributes{
 		Surname:     req.Surname,
@@ -648,13 +648,13 @@ func (c *UKIdentityConnector) performDrivingLicenceVerification(ctx context.Cont
 	if req.Address != nil {
 		result.Attributes.CurrentAddress = req.Address
 	}
-	
+
 	// Calculate confidence score
 	result.ConfidenceScore = c.calculateConfidenceScore(result)
-	
+
 	// Determine verification success
 	result.Verified = result.DocumentValid && len(result.Errors) == 0
-	
+
 	return result, nil
 }
 
@@ -705,13 +705,13 @@ func (c *UKIdentityConnector) verifyMRZ(mrzData, passportNumber string) bool {
 func (c *UKIdentityConnector) calculateConfidenceScore(result *UKIdentityVerificationResult) float64 {
 	score := 0.0
 	maxScore := 0.0
-	
+
 	// Document validity
 	maxScore += 0.3
 	if result.DocumentValid {
 		score += 0.3
 	}
-	
+
 	// Checks
 	if result.Checks != nil {
 		maxScore += 0.4
@@ -722,17 +722,17 @@ func (c *UKIdentityConnector) calculateConfidenceScore(result *UKIdentityVerific
 			score += 0.2
 		}
 	}
-	
+
 	// Attributes presence
 	maxScore += 0.3
 	if result.Attributes != nil {
 		score += 0.3
 	}
-	
+
 	if maxScore == 0 {
 		return 0.0
 	}
-	
+
 	return score / maxScore
 }
 
@@ -743,7 +743,7 @@ func (c *UKIdentityConnector) isLOASufficient(requested UKVerifyAssuranceLevel) 
 		UKVerifyLOA3: 3,
 		UKVerifyLOA4: 4,
 	}
-	
+
 	return levels[requested] >= levels[c.config.MinimumLOA]
 }
 
@@ -756,12 +756,12 @@ func (c *UKIdentityConnector) getFromCache(key string) *UKIdentityVerificationRe
 	if !exists {
 		return nil
 	}
-	
+
 	if time.Since(cached.Timestamp) > c.config.CacheTTL {
 		delete(c.cache, key)
 		return nil
 	}
-	
+
 	return cached.Result
 }
 

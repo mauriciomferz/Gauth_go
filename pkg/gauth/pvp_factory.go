@@ -27,7 +27,7 @@ func (f *PVPFactory) CreatePVP() (PowerVerificationPoint, error) {
 	if f.productionMode && (provider == "" || provider == "mock") {
 		return nil, fmt.Errorf(
 			"production mode requires real identity verification provider. " +
-			"Set GAUTH_PVP_PROVIDER to one of: stripe, veriff, idemia, onfido, jumio")
+				"Set GAUTH_PVP_PROVIDER to one of: stripe, veriff, idemia, onfido, jumio")
 	}
 
 	switch provider {
@@ -60,8 +60,7 @@ func (f *PVPFactory) createStripePVP() (PowerVerificationPoint, error) {
 	}
 
 	// TODO: Implement real Stripe Identity integration
-	return nil, fmt.Errorf("Stripe Identity PVP integration not yet implemented. " +
-		"See: https://stripe.com/docs/identity")
+	return nil, fmt.Errorf("stripe Identity PVP integration not yet implemented, see https://stripe.com/docs/identity")
 }
 
 // createVeriffPVP creates Veriff verification client
@@ -74,8 +73,7 @@ func (f *PVPFactory) createVeriffPVP() (PowerVerificationPoint, error) {
 	}
 
 	// TODO: Implement real Veriff integration
-	return nil, fmt.Errorf("Veriff PVP integration not yet implemented. " +
-		"See: https://developers.veriff.com/")
+	return nil, fmt.Errorf("veriff PVP integration not yet implemented, see https://developers.veriff.com/")
 }
 
 // createIdemiaPVP creates Idemia verification client
@@ -86,8 +84,7 @@ func (f *PVPFactory) createIdemiaPVP() (PowerVerificationPoint, error) {
 	}
 
 	// TODO: Implement real Idemia integration
-	return nil, fmt.Errorf("Idemia PVP integration not yet implemented. " +
-		"See: https://www.idemia.com/identity-verification")
+	return nil, fmt.Errorf("idemia PVP integration not yet implemented, see https://www.idemia.com/identity-verification")
 }
 
 // createOnfidoPVP creates Onfido verification client
@@ -98,8 +95,7 @@ func (f *PVPFactory) createOnfidoPVP() (PowerVerificationPoint, error) {
 	}
 
 	// TODO: Implement real Onfido integration
-	return nil, fmt.Errorf("Onfido PVP integration not yet implemented. " +
-		"See: https://documentation.onfido.com/")
+	return nil, fmt.Errorf("onfido PVP integration not yet implemented, see https://documentation.onfido.com/")
 }
 
 // createJumioPVP creates Jumio verification client
@@ -112,8 +108,7 @@ func (f *PVPFactory) createJumioPVP() (PowerVerificationPoint, error) {
 	}
 
 	// TODO: Implement real Jumio integration
-	return nil, fmt.Errorf("Jumio PVP integration not yet implemented. " +
-		"See: https://www.jumio.com/developers/")
+	return nil, fmt.Errorf("jumio PVP integration not yet implemented, see https://www.jumio.com/developers/")
 }
 
 // MockPVPWithWarning wraps mock PVP with production warning
