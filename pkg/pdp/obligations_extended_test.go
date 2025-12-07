@@ -339,3 +339,43 @@ func (m *mockObligationHandler) Execute(ctx context.Context, obligationID string
 	m.executed = true
 	return nil
 }
+
+type mockRateLimitChecker struct {
+	shouldAllow bool
+	err         error
+	calledKey   string
+}
+
+func (m *mockRateLimitChecker) Allow(ctx context.Context, key string) (bool, error) {
+	m.calledKey = key
+	return m.shouldAllow, m.err
+}
+
+// TestExtendedObligationExecutor_RateLimitHandler_WithChecker verifies integration with external checker.
+func TestExtendedObligationExecutor_RateLimitHandler_WithChecker(t *testing.T) {
+	mockChecker := &mockRateLimitChecker{shouldAllow: true}
+	handler := NewRateLimitObligationHandler(0, 0, mockChecker)
+
+	exec := NewExtendedObligationExecutor()
+	exec.RegisterHandler(handler)
+
+	ctx := context.Background()
+	results := exec.Execute(ctx, []string{"rate_limit:api_user_123"})
+
+	if len(results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(results))
+	}
+	if !results[0].Success {
+		t.Errorf("expected success with allow=true, got failure: %v", results[0].Error)
+	}
+	if mockChecker.calledKey != "api_user_123" {
+		t.Errorf("expected called key 'api_user_123', got '%s'", mockChecker.calledKey)
+	}
+
+	// Test denied case
+	mockChecker.shouldAllow = false
+	results = exec.Execute(ctx, []string{"rate_limit:spammer"})
+	if results[0].Success {
+		t.Error("expected failure with allow=false, got success")
+	}
+}

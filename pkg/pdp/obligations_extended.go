@@ -189,7 +189,7 @@ func NewExtendedObligationExecutor(opts ...ExtendedExecutorOption) *ExtendedObli
 		exec.RegisterHandler(&NotifyObligationHandler{})
 	}
 	if _, exists := exec.handlers["rate_limit"]; !exists {
-		exec.RegisterHandler(&RateLimitObligationHandler{})
+		exec.RegisterHandler(NewRateLimitObligationHandler(0, 0, nil))
 	}
 
 	return exec
@@ -311,14 +311,82 @@ func (h *NotifyObligationHandler) Execute(ctx context.Context, obligationID stri
 	return nil
 }
 
-// RateLimitObligationHandler enforces rate limits (stub for external rate limiter).
-type RateLimitObligationHandler struct{}
+// RateLimitObligationHandler enforces rate limits with in-memory or Redis backend.
+type RateLimitObligationHandler struct {
+	mu      sync.RWMutex
+	limits  map[string]*rateLimitEntry // in-memory fallback
+	checker RateLimitChecker           // optional external checker (e.g., Redis)
+	limit   int                        // default limit (configurable)
+	window  time.Duration              // default window (configurable)
+}
+
+// rateLimitEntry tracks rate limit state for in-memory implementation
+type rateLimitEntry struct {
+	count       int
+	windowStart time.Time
+}
+
+// RateLimitChecker allows injection of external rate limit backends (e.g., Redis)
+type RateLimitChecker interface {
+	Allow(ctx context.Context, key string) (bool, error)
+}
+
+// NewRateLimitObligationHandler creates a rate limit handler with configurable backend.
+func NewRateLimitObligationHandler(limit int, window time.Duration, checker RateLimitChecker) *RateLimitObligationHandler {
+	if limit <= 0 {
+		limit = 100 // default 100 requests
+	}
+	if window <= 0 {
+		window = time.Minute // default 1 minute window
+	}
+	return &RateLimitObligationHandler{
+		limits:  make(map[string]*rateLimitEntry),
+		checker: checker,
+		limit:   limit,
+		window:  window,
+	}
+}
 
 func (h *RateLimitObligationHandler) Type() string { return "rate_limit" }
 
 func (h *RateLimitObligationHandler) Execute(ctx context.Context, obligationID string, params map[string]string) error {
-	// TODO: Check rate limit from external store (Redis, in-memory)
-	log.Printf("[Obligation:RateLimit] Rate limit check: %s, params: %v", obligationID, params)
+	// Extract key from params or use obligationID as key
+	key := obligationID
+	if k, ok := params["key"]; ok && k != "" {
+		key = k
+	}
+
+	// Use external checker if configured (e.g., Redis)
+	if h.checker != nil {
+		allowed, err := h.checker.Allow(ctx, key)
+		if err != nil {
+			log.Printf("[Obligation:RateLimit] External checker error: %v, falling back to allow", err)
+			return nil // Fail open on backend errors
+		}
+		if !allowed {
+			return fmt.Errorf("rate limit exceeded for key: %s", key)
+		}
+		return nil
+	}
+
+	// In-memory fallback implementation
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	entry, exists := h.limits[key]
+	now := time.Now()
+
+	if !exists || now.Sub(entry.windowStart) > h.window {
+		// New window
+		h.limits[key] = &rateLimitEntry{count: 1, windowStart: now}
+		return nil
+	}
+
+	if entry.count >= h.limit {
+		return fmt.Errorf("rate limit exceeded: %d requests in %s for key: %s", h.limit, h.window, key)
+	}
+
+	entry.count++
 	return nil
 }
 
