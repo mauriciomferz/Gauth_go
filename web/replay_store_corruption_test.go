@@ -7,6 +7,7 @@ import (
 	"time"
 
 	metricsPkg "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	"github.com/mauriciomferz/Gauth_go/web/handlers/token"
 )
 
 // TestReplayNonceStore_CorruptionRecovery ensures malformed WAL lines are skipped and counted.
@@ -29,7 +30,7 @@ func TestReplayNonceStore_CorruptionRecovery(t *testing.T) {
 
 	os.Setenv("GAUTH_REPLAY_WAL", walPath)
 	memMetrics := metricsPkg.NewMemory()
-	store := NewReplayNonceStoreWithMetrics(10*time.Minute, memMetrics)
+	store := token.NewReplayNonceStoreWithMetrics(10*time.Minute, memMetrics)
 
 	// Base64 keys decoded by WAL recovery will be stored as raw bytes; our test used plain base64 of strings.
 	// We inserted keys: nonce_cor1_key and nonce_cor2_key (encoded). Validate they are seen.

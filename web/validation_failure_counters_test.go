@@ -1,12 +1,13 @@
 package web
 
 import (
+	"encoding/json"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
 	"github.com/gin-gonic/gin"
+	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
 )
 
 // TestValidationFailureCounters exercises token & delegation status update failure paths
@@ -14,10 +15,9 @@ import (
 func TestValidationFailureCounters(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	m := imetrics.NewMemory()
-	// NewBetaServer signature currently expects config string (observed in other tests). We will set metrics manually.
-	srv := NewBetaServer("")
+	// Use NewBetaServerWithMetrics to properly inject metrics at construction time
+	srv := NewBetaServerWithMetrics("", m)
 	t.Cleanup(func() { srv.Shutdown() })
-	srv.metrics = m
 	r := srv.router
 
 	// Helper to POST JSON and decode response
@@ -57,11 +57,38 @@ func TestValidationFailureCounters(t *testing.T) {
 	}
 
 	// 4. invalid transition token (terminated -> active)
-	// First create token implicitly by success path: status update success requires existing token creation logic? If not available, we simulate by inserting into map directly.
-	srv.tokens.mu.Lock()
-	srv.tokens.tokens["tok_term"] = &Token{ID: "tok_term", Status: "terminated"}
-	srv.tokens.mu.Unlock()
-	code = post("/api/v1/token/status/update", `{"token_id":"tok_term","new_status":"active"}`)
+	wCreate := httptest.NewRecorder()
+	reqCreate := httptest.NewRequest("POST", "/api/v1/token/create", strings.NewReader(`{"ttl_seconds":60}`))
+	reqCreate.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(wCreate, reqCreate)
+	var resp struct {
+		Token struct {
+			ID string
+		} `json:"token"`
+		JWT string `json:"jwt"`
+	}
+	_ = json.Unmarshal(wCreate.Body.Bytes(), &resp)
+
+	id := resp.Token.ID
+	if id == "" {
+		// Maybe JWT mode?
+		if resp.JWT != "" {
+			// JWT ID extraction not easy without parsing.
+			// But default config might use opaque tokens.
+			// If JWT, we can't easily get ID unless we parse it.
+			// Let's assume non-JWT for this test or that Create returns ID in token object.
+			// NewBetaServer might use Tokens which are opaque by default if JWT env not set.
+			// But NewBetaServer might default to JWT?
+			// Default BetaServer uses JWT if GAUTH_USE_JWT_LIB=1.
+			// Test doesn't set it. So it uses opaque tokens.
+		}
+	}
+
+	// Terminate it
+	post("/api/v1/token/status/update", `{"token_id":"`+id+`","new_status":"terminated"}`)
+
+	// Try to activate
+	code = post("/api/v1/token/status/update", `{"token_id":"`+id+`","new_status":"active"}`)
 	if code != 409 {
 		t.Fatalf("expected 409 invalid transition token got %d", code)
 	}

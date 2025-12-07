@@ -40,9 +40,11 @@ func TestAttestationStreamInitial(t *testing.T) {
 	found := false
 	for time.Now().Before(deadline) && scan.Scan() {
 		line := scan.Text()
-		if strings.HasPrefix(line, "event: attestation") {
+		t.Logf("Received line: %q", line)
+		if strings.HasPrefix(line, "event: attestation") || strings.HasPrefix(line, "event:attestation") {
 			if scan.Scan() { // data line
 				dataLine := scan.Text()
+				t.Logf("Received data: %q", dataLine)
 				if strings.Contains(dataLine, "\"snapshot\"") && strings.Contains(dataLine, "\"hash\"") {
 					found = true
 					break

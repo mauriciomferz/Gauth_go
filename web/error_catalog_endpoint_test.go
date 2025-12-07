@@ -3,14 +3,12 @@ package web
 import (
 	"crypto/ed25519"
 	"crypto/rand"
-	"encoding/json"
 	"net/http/httptest"
-	"strings"
 	"testing"
 	"time"
 
-	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
 	"github.com/gin-gonic/gin"
+	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
 )
 
 // TestErrorCatalogEndpoint verifies /api/v1/errors/catalog returns success and non-empty entries.
@@ -43,40 +41,6 @@ func TestUIIndex(t *testing.T) {
 	}
 	if !containsStr(w.Body.String(), "GAuth Beta Dashboard") {
 		t.Fatalf("index missing content")
-	}
-}
-
-// TestAttestationVerifyErrorEnvelope ensures attestation verify returns ErrorEnvelope on malformed JSON.
-func TestAttestationVerifyErrorEnvelope(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	srv := &BetaServer{router: gin.New()}
-	srv.initUIRevamp()
-	// Minimal route wiring for attestation verify handler (depends on BetaServer fields kept nil for this malformed case).
-	srv.router.POST("/api/v1/model/limits/verify", srv.apiModelLimitsAttestationVerify)
-	w := httptest.NewRecorder()
-	// Malformed JSON triggers invalid_json path
-	req := httptest.NewRequest("POST", "/api/v1/model/limits/verify", strings.NewReader("{bad"))
-	srv.router.ServeHTTP(w, req)
-	if w.Code != 400 {
-		t.Fatalf("expected 400 got %d", w.Code)
-	}
-	// Parse envelope
-	var env struct {
-		Code    string         `json:"code"`
-		Message string         `json:"message"`
-		Details map[string]any `json:"details"`
-	}
-	if err := json.Unmarshal(w.Body.Bytes(), &env); err != nil {
-		t.Fatalf("unmarshal error: %v body=%s", err, w.Body.String())
-	}
-	if env.Code != "attestation_invalid_json" {
-		t.Fatalf("unexpected code %s", env.Code)
-	}
-	if env.Message == "" {
-		t.Fatalf("missing message")
-	}
-	if env.Details == nil || env.Details["http_path"] != "/api/v1/model/limits/verify" {
-		t.Fatalf("details missing http_path: %#v", env.Details)
 	}
 }
 

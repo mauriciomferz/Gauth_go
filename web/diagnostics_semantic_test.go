@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 	"github.com/gin-gonic/gin"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 )
 
 // TestSemanticDiagnostics_Unwired verifies payload fields when no RFC0111 service is wired (wired=false).
@@ -115,6 +115,10 @@ func TestSemanticDiagnostics_Wired(t *testing.T) {
 		{"scope_violation": 12, "restriction_mismatch": 3},
 		{"scope_violation": 18, "restriction_mismatch": 4},
 	}}
+	// Set low warmup threshold for test
+	if s.semanticHandler != nil {
+		s.semanticHandler.WarmupSamples = 2
+	}
 	// Issue multiple requests spaced >1s apart to accumulate history entries.
 	for i := 0; i < 3; i++ {
 		w := httptest.NewRecorder()

@@ -42,7 +42,6 @@ import (
 	bls "github.com/herumi/bls-eth-go-binary/bls"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 	anchorint "github.com/mauriciomferz/Gauth_go/internal/anchor"
 	"github.com/mauriciomferz/Gauth_go/internal/capability"
 	"github.com/mauriciomferz/Gauth_go/internal/limits"
@@ -62,7 +61,6 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
-	ratelimit "github.com/mauriciomferz/Gauth_go/pkg/limits"
 	"github.com/mauriciomferz/Gauth_go/pkg/mcp"
 	"github.com/mauriciomferz/Gauth_go/pkg/policy"
 	adminHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/admin"
@@ -70,7 +68,12 @@ import (
 	auditHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/audit"
 	authHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/auth"
 	betaHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/beta"
+	"github.com/mauriciomferz/Gauth_go/web/handlers/capability_anchor"
 	mcpHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/mcp"
+	"github.com/mauriciomferz/Gauth_go/web/handlers/modellimits"
+	"github.com/mauriciomferz/Gauth_go/web/handlers/semantic"
+	"github.com/mauriciomferz/Gauth_go/web/handlers/token"
+	"github.com/mauriciomferz/Gauth_go/web/handlers/violations"
 	"github.com/prometheus/client_golang/prometheus"
 	promhttp "github.com/prometheus/client_golang/prometheus/promhttp"
 	otel "go.opentelemetry.io/otel"
@@ -288,12 +291,16 @@ type BetaServer struct {
 	examplesMu      sync.RWMutex
 	audit           *AuditLog
 	events          *EventHub
-	tokens          *TokenStore
+	// Primary token service (optional). When set, exposes violation counters.
+	primaryAuthService interface{ ViolationSnapshot() map[string]uint64 }
+
+	// Handlers
+	tokenHandler *token.Handler
+
+	tokens *token.Store
 	// stopCh closes to signal background goroutines to exit gracefully.
 	stopCh  chan struct{}
 	stopped atomic.Bool // indicates Shutdown() invoked
-	// Primary token service (optional). When set, exposes violation counters.
-	primaryAuthService interface{ ViolationSnapshot() map[string]uint64 }
 	// RFC0111 delegation service (prototype) to surface semantic counters and dual-control revocation workflow methods.
 	// These are no-ops when GAUTH_DISABLE_RFC0111_SERVICE=1 (service nil) and handlers will fail closed.
 	rfc0111Service interface {
@@ -308,33 +315,18 @@ type BetaServer struct {
 		AttachEvidenceHashes(ctx context.Context, poaID string, hashes []string) (*gauth_rfc_001.PowerOfAttorney, error)
 		ListDelegations(userID string) ([]*gauth_rfc_001.PowerOfAttorney, error)
 	}
-	// Violation anomaly detection history (monotonic total counter checkpoints)
-	violationHistMu  sync.Mutex
-	violationHistory []struct {
-		At    time.Time
-		Total uint64
-	}
-	violationHistoryCap  int // max entries retained (pruned oldest)
-	violationPersistPath string
-	violationLastPersist time.Time
+	violationHandler *violations.Handler
+	violationAPI     *violations.API
+
+	violationPersistPath string // Keep for path passing if needed or just use handler
 	// Semantic counters persistence path & last persist timestamp (separate file for clarity)
 	semanticPersistPath string
 	semanticLastPersist time.Time
-	// Semantic counters history for per-category anomaly rate computation
-	semanticHistMu  sync.Mutex
-	semanticHistory []struct {
-		At       time.Time
-		Snapshot map[string]uint64
-	}
-	semanticHistoryCap int
-	// Adaptive anomaly detection state (per semantic counter): EWMA mean & variance (Welford) plus last score.
-	semanticAnomalyMu sync.Mutex
-	semanticEWMA      map[string]struct {
-		Mean  float64
-		M2    float64
-		Count int
-	}
-	semanticScores map[string]float64 // (current_rate - mean) / (stddev+epsilon)
+	// Semantic Anomaly Detection
+	semanticHandler *semantic.Handler
+	semanticAPI     *semantic.API
+
+	// OTel Metrics (prototype)
 	// Persistence integrity tracking (hash chain)
 	violationPrevHash string
 	semanticPrevHash  string
@@ -371,7 +363,7 @@ type BetaServer struct {
 		DiffRequests   uint64 // number of diff endpoint requests (successful)
 	}
 	// Replay protection for issuance nonces/JTIs (demo only)
-	replayStore *ReplayNonceStore
+	replayStore *token.ReplayNonceStore
 	// Optional anchoring client (memory prototype); future: pluggable external providers
 	anchorClient *anchor.MemoryAnchor
 	// Delegation revocation chain prototype (global for demo token space)
@@ -482,85 +474,17 @@ type BetaServer struct {
 	// Reactive semantic throttle activation flag (test instrumentation)
 	semanticThrottleActive bool
 	// External capability registry anchoring provider (distinct from pkg/anchor hash history)
-	externalAnchorProvider    anchorint.Provider
-	externalAnchorLastReceipt anchorint.Receipt
-	// External anchor receipt persistence (hash-chain) prototype
-	externalReceiptStore interface {
-		Append(anchorint.ExternalAnchorReceipt) (anchorint.StoredExternalAnchorReceipt, error)
-		Latest() anchorint.StoredExternalAnchorReceipt
-		Entries() []anchorint.StoredExternalAnchorReceipt
-		Load() error
-		VerifyIncremental() (string, int, string)
-	}
+	// External capability registry anchoring provider (distinct from pkg/anchor hash history)
+	capabilityAnchorHandler        *capability_anchor.Handler
+	capabilityAnchorAPI            *capability_anchor.API
 	externalReceiptIntegrityStatus string    // ok|mismatch|unconfigured|empty
 	externalReceiptLastVerify      time.Time // last integrity verification timestamp
-	// Model limits governance (prototype for sec11.item2) loaded from optional file; map model_id -> max_input_tokens
-	modelLimitsMu sync.Mutex
-	modelLimits   map[string]int
-	// Extended model governance dimensions
-	modelOutputLimitsMu sync.Mutex
-	modelOutputLimits   map[string]int // model_id -> max_output_tokens
-	modelRateMu         sync.Mutex
-	modelRateLimits     map[string]int // model_id -> max_requests_per_minute
-	modelRateStateMu    sync.Mutex
-	modelRateState      map[string]struct {
-		WindowStart time.Time
-		Count       int
-	} // sliding 60s window per model
-	// Multi-period rate limits (sec13.item2 governance)
-	modelRateLimitsExtendedMu sync.Mutex
-	modelRateLimitsExtended   map[string][]struct {
-		Limit  int
-		Period time.Duration
-	} // model_id -> multiple period limits ("5000/hour", "100K/day")
-	modelRateStateExtendedMu sync.Mutex
-	modelRateStateExtended   map[string]map[time.Duration]struct {
-		WindowStart time.Time
-		Count       int
-	} // model_id -> period -> window state
-	// Per-user scoped model limits (compound model_id + user_id governance)
-	modelUserLimitsMu    sync.Mutex
-	modelUserLimits      map[string]map[string]struct{ InputLimit, OutputLimit, RateLimit int } // model_id -> user_id -> limits
-	modelUserRateStateMu sync.Mutex
-	modelUserRateState   map[string]map[string]struct {
-		WindowStart time.Time
-		Count       int
-	} // model_id -> user_id -> rate window state
-	// Model limit exceed audit chain (sec11.item2 governance)
-	modelLimitAuditPath       string
-	modelLimitAuditPrevHash   string
-	modelLimitAuditMu         sync.Mutex
-	modelLimitAuditEntryCount int // in-memory count of audit entries appended this process
-	// Dynamic model limits reload
-	modelLimitsPath           string
-	modelLimitsReloadInterval time.Duration
-	modelLimitsLastMtime      time.Time
-	modelLimitsSnapshotHash   string
-	modelLimitsSnapshotAt     time.Time
-	modelLimitsStrictUnknown  bool
-	// Exceed surge detection state (per model rolling per-second counts for last 60s)
-	modelLimitSurgeMu          sync.Mutex
-	modelLimitSurgeState       map[string][]int     // index 0..59 per-second counts
-	modelLimitSurgeLast        map[string]time.Time // last write second per model
-	modelLimitSurgeLastTrigger time.Time            // last global trigger time
-	modelLimitSurgeFactor      float64              // multiplier threshold (default 3.0)
-	modelLimitSurgeMinEvents   int                  // minimum events in last window slice
-	// Periodic anchoring of the model limit audit chain (external attest facilitation)
-	modelLimitAnchorPath     string
-	modelLimitAnchorPrevHash string
-	modelLimitAnchorInterval int // anchor every N audit entries (if >0)
-	modelLimitAnchorMu       sync.Mutex
-	// Attestation streaming subscribers (SSE) gated by GAUTH_ATTEST_STREAM_ENABLE=1
-	attestStreamSubsMu sync.Mutex
-	attestStreamSubs   map[chan modelLimitsAttestation]struct{}
-	// Attestation stream emission counts by reason (Prometheus exposition)
-	attestStreamCountsMu sync.Mutex
-	attestStreamCounts   map[string]uint64
 	// Combined anchor chain (in-memory append-only for capability+rotation digest)
 	combinedAnchorMu    sync.Mutex
 	combinedAnchorChain []combinedAnchorEntry
 	// Rotation V2 continuity tracking (test support). Stores last artifact canonical digest.
 	rotationV2LastHash string
+
 	// MCP connection manager for Phase 2B MCP Integration
 	mcpConnectionManager *mcp.ConnectionManager
 	// Database connection pool (optional, for persistent audit logging and deep health checks)
@@ -569,6 +493,10 @@ type BetaServer struct {
 	// Blockchain components (Active if GAUTH_ETH_RPC_URL is set)
 	blockchainRegistry blockchain.BlockchainRegistry
 	syncService        blockchain.SyncService
+
+	// Model Limits Handler (refactored)
+	modelLimitsHandler *modellimits.Handler
+	modelLimitsAPI     *modellimits.API
 }
 
 // apiCryptoAlgorithms returns a static list of supported crypto algorithms.
@@ -643,8 +571,11 @@ func (s *BetaServer) LastNotarizationReceipt() (hash, timestamp, provider string
 	return "", "", "", false
 }
 func (s *BetaServer) ExternalAnchorReceipt() (hash, timestamp, provider string, version int) {
-	if s.externalAnchorLastReceipt.Provider != "" {
-		return s.externalAnchorLastReceipt.Hash, s.externalAnchorLastReceipt.Timestamp.UTC().Format(time.RFC3339Nano), s.externalAnchorLastReceipt.Provider, s.externalAnchorLastReceipt.Version
+	if s.capabilityAnchorHandler != nil {
+		r := s.capabilityAnchorHandler.GetLastReceipt()
+		if r.Provider != "" {
+			return r.Hash, r.Timestamp.UTC().Format(time.RFC3339Nano), r.Provider, r.Version
+		}
 	}
 	return "", "", "", 0
 }
@@ -771,218 +702,6 @@ func (s *BetaServer) RegisterUIRoutes() {
 </body></html>`
 		c.Data(200, "text/html; charset=utf-8", []byte(html))
 	})
-}
-
-// loadModelLimitsFromDisk loads the model limits JSON file and atomically swaps internal maps.
-// Returns true on success, false on failure (leaves prior state untouched on failure).
-func (s *BetaServer) loadModelLimitsFromDisk() bool {
-	if s.modelLimitsPath == "" {
-		return false
-	}
-	b, err := os.ReadFile(s.modelLimitsPath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "[model-limits] read failed path=%s err=%v\n", s.modelLimitsPath, err)
-		return false
-	}
-	raw, err := parseModelLimitsJSON(b)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "[model-limits] invalid JSON path=%s\n", s.modelLimitsPath)
-		return false
-	}
-	// Build fresh maps
-	newInput := make(map[string]int)
-	newOutput := make(map[string]int)
-	newRate := make(map[string]int)
-	newRateExtended := make(map[string][]struct {
-		Limit  int
-		Period time.Duration
-	})
-	newUser := make(map[string]map[string]struct{ InputLimit, OutputLimit, RateLimit int })
-	for id, lim := range raw.ModelLimits {
-		if lim.MaxInputTokens > 0 {
-			newInput[id] = lim.MaxInputTokens
-		}
-		if lim.MaxOutputTokens > 0 {
-			newOutput[id] = lim.MaxOutputTokens
-		}
-		if lim.MaxRequestsPerMinute > 0 {
-			newRate[id] = lim.MaxRequestsPerMinute
-		}
-		// Parse extended multi-period limits
-		if len(lim.RateLimitsExtended) > 0 {
-			for _, rateStr := range lim.RateLimitsExtended {
-				rl, parseErr := ratelimit.ParseRateLimit(rateStr)
-				if parseErr != nil {
-					fmt.Fprintf(os.Stderr, "[model-limits] invalid rate limit %q for model %s: %v\n", rateStr, id, parseErr)
-					continue
-				}
-				newRateExtended[id] = append(newRateExtended[id], struct {
-					Limit  int
-					Period time.Duration
-				}{Limit: rl.Limit, Period: rl.Period})
-			}
-		}
-	}
-	for mid, users := range raw.UserLimits {
-		for uid, ulim := range users {
-			if newUser[mid] == nil {
-				newUser[mid] = make(map[string]struct{ InputLimit, OutputLimit, RateLimit int })
-			}
-			newUser[mid][uid] = struct{ InputLimit, OutputLimit, RateLimit int }{InputLimit: ulim.MaxInputTokens, OutputLimit: ulim.MaxOutputTokens, RateLimit: ulim.MaxRequestsPerMinute}
-		}
-	}
-	// Swap under locks
-	s.modelLimitsMu.Lock()
-	s.modelOutputLimitsMu.Lock()
-	s.modelRateMu.Lock()
-	s.modelRateLimitsExtendedMu.Lock()
-	s.modelUserLimitsMu.Lock()
-	s.modelLimits = newInput
-	s.modelOutputLimits = newOutput
-	s.modelRateLimits = newRate
-	s.modelRateLimitsExtended = newRateExtended
-	s.modelUserLimits = newUser
-	s.modelUserLimitsMu.Unlock()
-	s.modelRateLimitsExtendedMu.Unlock()
-	s.modelRateMu.Unlock()
-	s.modelOutputLimitsMu.Unlock()
-	s.modelLimitsMu.Unlock()
-	fmt.Fprintf(os.Stderr, "[model-limits] reloaded entries=%d path=%s\n", len(raw.ModelLimits), s.modelLimitsPath)
-	return true
-}
-
-// modelLimitsReloader periodically polls the limits file for mtime changes and reloads.
-func (s *BetaServer) modelLimitsReloader() {
-	interval := s.modelLimitsReloadInterval
-	if interval <= 0 {
-		return
-	}
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-s.stopCh:
-			return
-		case <-ticker.C:
-			fi, err := os.Stat(s.modelLimitsPath)
-			if err != nil {
-				continue
-			}
-			mt := fi.ModTime()
-			if mt.After(s.modelLimitsLastMtime) {
-				if s.loadModelLimitsFromDisk() {
-					s.modelLimitsLastMtime = mt
-				}
-			}
-		}
-	}
-}
-
-// computeModelLimitsSnapshot constructs a canonical ordered representation of current model and user limits and returns JSON bytes and hash.
-func (s *BetaServer) computeModelLimitsSnapshot() (snap struct {
-	Models []struct {
-		ModelID string `json:"model_id"`
-		Input   int    `json:"max_input_tokens,omitempty"`
-		Output  int    `json:"max_output_tokens,omitempty"`
-		Rate    int    `json:"max_requests_per_minute,omitempty"`
-	} `json:"model_limits"`
-	Users []struct {
-		ModelID string `json:"model_id"`
-		UserID  string `json:"user_id"`
-		Input   int    `json:"max_input_tokens,omitempty"`
-		Output  int    `json:"max_output_tokens,omitempty"`
-		Rate    int    `json:"max_requests_per_minute,omitempty"`
-	} `json:"user_limits"`
-}, hash string) {
-	// Copy maps under locks
-	s.modelOutputLimitsMu.Lock()
-	outCopy := make(map[string]int)
-	for k, v := range s.modelOutputLimits {
-		outCopy[k] = v
-	}
-	s.modelOutputLimitsMu.Unlock()
-	s.modelRateMu.Lock()
-	rateCopy := make(map[string]int)
-	for k, v := range s.modelRateLimits {
-		rateCopy[k] = v
-	}
-	s.modelRateMu.Unlock()
-	s.modelUserLimitsMu.Lock()
-	userCopy := make(map[string]map[string]struct{ InputLimit, OutputLimit, RateLimit int })
-	for mid, inner := range s.modelUserLimits {
-		m2 := make(map[string]struct{ InputLimit, OutputLimit, RateLimit int })
-		for uid, lim := range inner {
-			m2[uid] = lim
-		}
-		userCopy[mid] = m2
-	}
-	s.modelUserLimitsMu.Unlock()
-	// Copy modelLimits under lock
-	s.modelLimitsMu.Lock()
-	inputCopy := make(map[string]int)
-	for k, v := range s.modelLimits {
-		inputCopy[k] = v
-	}
-	s.modelLimitsMu.Unlock()
-	// Models ordering
-	modelKeys := make([]string, 0, len(inputCopy))
-	for k := range inputCopy {
-		modelKeys = append(modelKeys, k)
-	}
-	sort.Strings(modelKeys)
-	for _, mid := range modelKeys {
-		entry := struct {
-			ModelID string `json:"model_id"`
-			Input   int    `json:"max_input_tokens,omitempty"`
-			Output  int    `json:"max_output_tokens,omitempty"`
-			Rate    int    `json:"max_requests_per_minute,omitempty"`
-		}{ModelID: mid, Input: inputCopy[mid], Output: outCopy[mid], Rate: rateCopy[mid]}
-		snap.Models = append(snap.Models, entry)
-	}
-	// User limits ordering (model then user)
-	userModelKeys := make([]string, 0, len(userCopy))
-	for mid := range userCopy {
-		userModelKeys = append(userModelKeys, mid)
-	}
-	sort.Strings(userModelKeys)
-	for _, mid := range userModelKeys {
-		inner := userCopy[mid]
-		userIDs := make([]string, 0, len(inner))
-		for uid := range inner {
-			userIDs = append(userIDs, uid)
-		}
-		sort.Strings(userIDs)
-		for _, uid := range userIDs {
-			lim := inner[uid]
-			uentry := struct {
-				ModelID string `json:"model_id"`
-				UserID  string `json:"user_id"`
-				Input   int    `json:"max_input_tokens,omitempty"`
-				Output  int    `json:"max_output_tokens,omitempty"`
-				Rate    int    `json:"max_requests_per_minute,omitempty"`
-			}{ModelID: mid, UserID: uid, Input: lim.InputLimit, Output: lim.OutputLimit, Rate: lim.RateLimit}
-			snap.Users = append(snap.Users, uentry)
-		}
-	}
-	enc, _ := json.Marshal(snap)
-	h := sha256.Sum256(enc)
-	hash = fmt.Sprintf("sha256:%x", h[:])
-	return snap, hash
-}
-
-// apiModelLimitsSnapshot returns current limits and a canonical hash for drift detection.
-func (s *BetaServer) apiModelLimitsSnapshot(c *gin.Context) {
-	snap, hash := s.computeModelLimitsSnapshot()
-	s.modelLimitsSnapshotHash = hash
-	s.modelLimitsSnapshotAt = time.Now().UTC()
-	c.JSON(200, gin.H{"success": true, "hash": hash, "generated_at": s.modelLimitsSnapshotAt.Format(time.RFC3339Nano), "model_limits": snap.Models, "user_limits": snap.Users})
-}
-
-// SemanticAnomalyStats returns counts of internal anomaly tracking maps (for debugging / linter usage).
-func (s *BetaServer) SemanticAnomalyStats() (ewmaEntries int, scoreEntries int) {
-	s.semanticAnomalyMu.Lock()
-	defer s.semanticAnomalyMu.Unlock()
-	return len(s.semanticEWMA), len(s.semanticScores)
 }
 
 // getKeyManager returns the underlying *crypto.Manager if available, nil otherwise.
@@ -1136,27 +855,28 @@ func (s *BetaServer) buildAndOptionallySignRotationV2() (notary.WeightedRotation
 	return art, verified, perAlg, failures, nil
 }
 
-// initSemanticAnomaly initializes semantic anomaly maps if nil (invoked during server setup).
-func (s *BetaServer) initSemanticAnomaly() {
-	s.semanticAnomalyMu.Lock()
-	defer s.semanticAnomalyMu.Unlock()
-	if s.semanticEWMA == nil {
-		s.semanticEWMA = make(map[string]struct {
-			Mean  float64
-			M2    float64
-			Count int
-		})
-	}
-	if s.semanticScores == nil {
-		s.semanticScores = make(map[string]float64)
-	}
-}
-
 // SetPrimaryAuthService allows external wiring of a gauth.Service after construction.
 // Accepts any implementation exposing ViolationSnapshot (minimal interface) to avoid
 // tight coupling with full gauth.Service type when embedding in other demos.
 func (s *BetaServer) SetPrimaryAuthService(svc interface{ ViolationSnapshot() map[string]uint64 }) {
 	s.primaryAuthService = svc
+	// Re-initialize handler with service
+	// Note: We create a NEW handler to verify it binds correctly, or we could update the existing one if we exposed a setter.
+	// For simplicity, make a new one and update the API reference.
+	// Actually, API holds a reference to *Handler. If we replace s.violationHandler (pointer), s.violationAPI's internal Handler ptr is stale.
+	// So we must recreate API too or update the handler in place.
+	// Better: violations.NewHandler returns *Handler.
+	s.violationHandler = violations.NewHandler(svc, nil, s.violationPersistPath)
+	s.violationAPI = violations.NewAPI(s.violationHandler)
+	// Re-register routes is tricky if we don't clear old ones, but in Gin we can't easily unregister.
+	// However, since we are largely replacing the implementation, for this refactor maybe we just assume SetPrimaryAuthService
+	// is called BEFORE server start.
+	// If it's called after, the old handlers (bound to old API/Handler) will persist.
+	// But let's check usage. It seems to be a setter for dependency injection.
+	// We'll proceed with recreation and assume early binding.
+	if err := s.violationHandler.Load(); err != nil {
+		fmt.Fprintf(os.Stderr, "violation load error: %v\n", err)
+	}
 }
 
 // registerLimitsDiagnostics mounts the limits snapshot endpoint if limits manager initialized.
@@ -1177,6 +897,14 @@ func (s *BetaServer) registerLimitsDiagnostics(r *gin.Engine) {
 
 // Shutdown signals all background goroutines to stop and performs final persistence flushes.
 // It is idempotent: multiple calls have no additional effect.
+// UpdateJWKSETag updates the stored JWKS ETag for discovery endpoint
+func (s *BetaServer) UpdateJWKSETag(etag string) {
+	s.jwksETag = etag
+	if s.jwksLastRotated.IsZero() {
+		s.jwksLastRotated = time.Now()
+	}
+}
+
 func (s *BetaServer) Shutdown() {
 	if s == nil {
 		return
@@ -1191,11 +919,11 @@ func (s *BetaServer) Shutdown() {
 	// Brief wait to allow loops to exit (they select on stopCh)
 	time.Sleep(50 * time.Millisecond)
 	// Perform final persistence saves if paths configured (best-effort)
-	if s.violationPersistPath != "" {
-		s.saveViolationPersistence()
+	if s.violationHandler != nil {
+		s.violationHandler.Save()
 	}
-	if s.semanticPersistPath != "" {
-		s.saveSemanticPersistence()
+	if s.semanticHandler != nil {
+		s.semanticHandler.Save()
 	}
 	// Flush metrics persistence if enabled
 	if mm, ok := s.metrics.(*metrics.Memory); ok {
@@ -1272,52 +1000,6 @@ func (s *BetaServer) apiCombinedAnchorVerify(c *gin.Context) {
 
 // (test-only accessor removed from production build; see revocation_metrics_access_test.go)
 
-// violationRatesForWindows computes per-minute rates over 60s and 300s windows based on violationHistory.
-// It mirrors the logic used in apiViolationMetrics for anomaly detection. Returned keys: rate_60s, rate_300s.
-func (s *BetaServer) violationRatesForWindows() map[string]float64 {
-	out := map[string]float64{}
-	s.violationHistMu.Lock()
-	defer s.violationHistMu.Unlock()
-	if len(s.violationHistory) < 2 {
-		return out
-	}
-	now := time.Now()
-	// Helper to compute rate for a window duration
-	compute := func(window time.Duration, key string) {
-		cutoff := now.Add(-window)
-		var oldest *struct {
-			At    time.Time
-			Total uint64
-		}
-		newest := s.violationHistory[len(s.violationHistory)-1]
-		// Walk backwards until we find entry older than cutoff or beginning
-		for i := len(s.violationHistory) - 2; i >= 0; i-- {
-			e := s.violationHistory[i]
-			if e.At.Before(cutoff) {
-				break
-			}
-			oldest = &e
-		}
-		if oldest == nil {
-			oldest = &s.violationHistory[0]
-		}
-		elapsed := newest.At.Sub(oldest.At).Seconds()
-		if elapsed <= 0 {
-			return
-		}
-		delta := float64(newest.Total - oldest.Total)
-		// scale to per-minute
-		rate := (delta / elapsed) * 60.0
-		if rate < 0 {
-			rate = 0
-		}
-		out[key] = rate
-	}
-	compute(60*time.Second, "rate_60s")
-	compute(300*time.Second, "rate_300s")
-	return out
-}
-
 // copyMap creates a shallow copy of a map[string]uint64 (utility for semantic history snapshots)
 func copyMap(src map[string]uint64) map[string]uint64 {
 	if src == nil {
@@ -1332,48 +1014,6 @@ func copyMap(src map[string]uint64) map[string]uint64 {
 
 // Routes exposes registered gin routes for tooling (spec generation, coverage checks).
 func (s *BetaServer) Routes() []gin.RouteInfo { return s.router.Routes() }
-
-// apiSemanticCounters exposes prototype PoA semantic counters if an RFC0111 service were wired.
-// Currently BetaServer does not hold a reference to the RFC0111 service; returns empty set.
-// Future wiring: inject gauth_rfc_001.Service and read exported semantic snapshot.
-func (s *BetaServer) apiSemanticCounters(c *gin.Context) {
-	if s.rfc0111Service == nil {
-		c.JSON(200, gin.H{"success": true, "counters": map[string]uint64{}, "wired": false})
-		return
-	}
-	// Snapshot semantic counters; beta format (may evolve): { counter_name: value }
-	ss := s.rfc0111Service.SemanticSnapshot()
-	// Append current snapshot to history for anomaly rate calculations (throttled to at most one per second)
-	if os.Getenv("GAUTH_SEMANTIC_HISTORY_DISABLE") != "1" {
-		s.semanticHistMu.Lock()
-		now := time.Now()
-		appendAllowed := true
-		if len(s.semanticHistory) > 0 {
-			last := s.semanticHistory[len(s.semanticHistory)-1]
-			if now.Sub(last.At) < time.Second {
-				appendAllowed = false
-			}
-		}
-		if appendAllowed {
-			clone := copyMap(ss)
-			s.semanticHistory = append(s.semanticHistory, struct {
-				At       time.Time
-				Snapshot map[string]uint64
-			}{At: now, Snapshot: clone})
-			if len(s.semanticHistory) > s.semanticHistoryCap {
-				s.semanticHistory = s.semanticHistory[len(s.semanticHistory)-s.semanticHistoryCap:]
-			}
-		}
-		s.semanticHistMu.Unlock()
-	}
-	// Compute per-category rates over 60s and 300s windows (per-minute)
-	rates60, rates300 := s.semanticRatesForWindows()
-	// Update adaptive anomaly scores using 60s rates as signal
-	s.updateSemanticAnomalies(rates60)
-	// Reference EWMA map size (usage to satisfy static analysis)
-	_ = len(s.semanticEWMA)
-	c.JSON(200, gin.H{"success": true, "counters": ss, "wired": true, "timestamp": time.Now().UTC().Format(time.RFC3339Nano), "anomaly": gin.H{"rate_per_minute_60s": rates60, "rate_per_minute_300s": rates300, "scores": s.currentSemanticScores()}})
-}
 
 // --- RFC0111 Dual-Control Revocation Workflow Endpoints ---
 // POST /api/v1/poa/{id}/revocation/initiate  Body: {"initiator":"alice","reason":"risk"}
@@ -1503,1039 +1143,6 @@ func httpStatusForRevocationErr(code string) int {
 	}
 }
 
-// apiModelValidate enforces input token limit for a given model when configured.
-// POST /api/v1/model/validate {"model_id":"m1","input_tokens":1234}
-// Response success: {"success":true,"model_id":"m1","input_tokens":1234}
-// Response failure: 400 {"success":false,"error":"model_limit_exceeded","model_id":"m1","limit":1024,"input_tokens":1500}
-//
-//nolint:gocyclo // Model validation API handler
-func (s *BetaServer) apiModelValidate(c *gin.Context) {
-	var in struct {
-		ModelID      string `json:"model_id"`
-		UserID       string `json:"user_id"` // optional subject identifier for per-user quota enforcement
-		InputTokens  int    `json:"input_tokens"`
-		OutputTokens int    `json:"output_tokens"`
-	}
-	if err := c.BindJSON(&in); err != nil || in.ModelID == "" || in.InputTokens < 0 {
-		c.JSON(400, gin.H{"success": false, "error": "invalid_payload"})
-		return
-	}
-	s.modelLimitsMu.Lock()
-	limit, ok := s.modelLimits[in.ModelID]
-	s.modelLimitsMu.Unlock()
-	if !ok || limit <= 0 {
-		if s.modelLimitsStrictUnknown {
-			if s.metrics != nil {
-				s.metrics.RecordDecision("model_validate", in.ModelID, "deny")
-				s.metrics.IncModelUnknown()
-			}
-			c.JSON(400, gin.H{"success": false, "error": "model_unknown", "model_id": in.ModelID})
-			return
-		}
-		if s.metrics != nil {
-			s.metrics.RecordDecision("model_validate", in.ModelID, "allow")
-		}
-		c.JSON(200, gin.H{"success": true, "model_id": in.ModelID, "input_tokens": in.InputTokens, "limit_enforced": false})
-		return
-	}
-	// Per-user scoped input limit (overrides global if configured)
-	if in.UserID != "" {
-		s.modelUserLimitsMu.Lock()
-		var uLim struct{ InputLimit, OutputLimit, RateLimit int }
-		if ml, ok := s.modelUserLimits[in.ModelID]; ok {
-			uLim = ml[in.UserID]
-		}
-		s.modelUserLimitsMu.Unlock()
-		if uLim.InputLimit > 0 && in.InputTokens > uLim.InputLimit {
-			if s.modelLimitAuditPath != "" {
-				s.writeModelLimitAudit(in.ModelID, "user_input", in.InputTokens, uLim.InputLimit, 0, 0, in.UserID)
-			}
-			if s.metrics != nil {
-				s.metrics.RecordDecision("model_validate", in.ModelID+":"+in.UserID, "deny")
-				s.metrics.IncModelUserInputLimitExceeded()
-			}
-			c.JSON(400, gin.H{"success": false, "error": "model_user_input_limit_exceeded", "model_id": in.ModelID, "user_id": in.UserID, "limit": uLim.InputLimit, "input_tokens": in.InputTokens})
-			return
-		}
-		// Capture per-user output limit override if present later
-		if uLim.OutputLimit > 0 && in.OutputTokens > uLim.OutputLimit {
-			if s.modelLimitAuditPath != "" {
-				s.writeModelLimitAudit(in.ModelID, "user_output", in.OutputTokens, uLim.OutputLimit, 0, 0, in.UserID)
-			}
-			if s.metrics != nil {
-				s.metrics.RecordDecision("model_validate", in.ModelID+":"+in.UserID, "deny")
-				s.metrics.IncModelUserOutputLimitExceeded()
-			}
-			c.JSON(400, gin.H{"success": false, "error": "model_user_output_limit_exceeded", "model_id": in.ModelID, "user_id": in.UserID, "limit": uLim.OutputLimit, "output_tokens": in.OutputTokens})
-			return
-		}
-		if uLim.RateLimit > 0 {
-			now := time.Now()
-			s.modelUserRateStateMu.Lock()
-			if s.modelUserRateState == nil {
-				s.modelUserRateState = make(map[string]map[string]struct {
-					WindowStart time.Time
-					Count       int
-				})
-			}
-			if s.modelUserRateState[in.ModelID] == nil {
-				s.modelUserRateState[in.ModelID] = make(map[string]struct {
-					WindowStart time.Time
-					Count       int
-				})
-			}
-			st := s.modelUserRateState[in.ModelID][in.UserID]
-			if st.WindowStart.IsZero() || now.Sub(st.WindowStart) >= time.Minute {
-				st.WindowStart = now
-				st.Count = 0
-			}
-			st.Count++
-			s.modelUserRateState[in.ModelID][in.UserID] = st
-			exceeded := st.Count > uLim.RateLimit
-			s.modelUserRateStateMu.Unlock()
-			if exceeded {
-				if s.modelLimitAuditPath != "" {
-					s.writeModelLimitAudit(in.ModelID, "user_rate", st.Count, uLim.RateLimit, st.WindowStart.Unix(), 60, in.UserID)
-				}
-				if s.metrics != nil {
-					s.metrics.RecordDecision("model_validate", in.ModelID+":"+in.UserID, "deny")
-					s.metrics.IncModelUserRateLimitExceeded()
-				}
-				c.JSON(429, gin.H{"success": false, "error": "model_user_rate_limit_exceeded", "model_id": in.ModelID, "user_id": in.UserID, "limit": uLim.RateLimit, "window_seconds": 60})
-				return
-			}
-		}
-	}
-	if in.InputTokens > limit {
-		if s.modelLimitAuditPath != "" {
-			s.writeModelLimitAudit(in.ModelID, "input", in.InputTokens, limit, 0, 0, "")
-		}
-		if s.metrics != nil {
-			s.metrics.RecordDecision("model_validate", in.ModelID, "deny")
-			s.metrics.IncModelLimitExceeded()
-		}
-		c.JSON(400, gin.H{"success": false, "error": "model_limit_exceeded", "model_id": in.ModelID, "limit": limit, "input_tokens": in.InputTokens})
-		return
-	}
-	// Optional output token enforcement
-	var outLimit int
-	s.modelOutputLimitsMu.Lock()
-	if s.modelOutputLimits != nil {
-		outLimit = s.modelOutputLimits[in.ModelID]
-	}
-	s.modelOutputLimitsMu.Unlock()
-	if outLimit > 0 && in.OutputTokens > outLimit {
-		if s.modelLimitAuditPath != "" {
-			s.writeModelLimitAudit(in.ModelID, "output", in.OutputTokens, outLimit, 0, 0, "")
-		}
-		if s.metrics != nil {
-			s.metrics.RecordDecision("model_validate", in.ModelID, "deny")
-			s.metrics.IncModelOutputLimitExceeded()
-		}
-		c.JSON(400, gin.H{"success": false, "error": "model_output_limit_exceeded", "model_id": in.ModelID, "limit": outLimit, "output_tokens": in.OutputTokens})
-		return
-	}
-	// Rate limiting (per-minute window)
-	var rateLimit int
-	s.modelRateMu.Lock()
-	if s.modelRateLimits != nil {
-		rateLimit = s.modelRateLimits[in.ModelID]
-	}
-	s.modelRateMu.Unlock()
-	if rateLimit > 0 {
-		now := time.Now()
-		s.modelRateStateMu.Lock()
-		if s.modelRateState == nil {
-			s.modelRateState = make(map[string]struct {
-				WindowStart time.Time
-				Count       int
-			})
-		}
-		st := s.modelRateState[in.ModelID]
-		if st.WindowStart.IsZero() || now.Sub(st.WindowStart) >= time.Minute {
-			st.WindowStart = now
-			st.Count = 0
-		}
-		st.Count++
-		s.modelRateState[in.ModelID] = st
-		exceeded := st.Count > rateLimit
-		s.modelRateStateMu.Unlock()
-		if exceeded {
-			if s.modelLimitAuditPath != "" {
-				s.writeModelLimitAudit(in.ModelID, "rate", st.Count, rateLimit, st.WindowStart.Unix(), 60, "")
-			}
-			if s.metrics != nil {
-				s.metrics.RecordDecision("model_validate", in.ModelID, "deny")
-				s.metrics.IncModelRateLimitExceeded()
-			}
-			c.JSON(429, gin.H{"success": false, "error": "model_rate_limit_exceeded", "model_id": in.ModelID, "limit": rateLimit, "window_seconds": 60})
-			return
-		}
-	}
-	// Multi-period rate limiting (sec13.item2 governance)
-	s.modelRateLimitsExtendedMu.Lock()
-	extendedLimits := s.modelRateLimitsExtended[in.ModelID]
-	s.modelRateLimitsExtendedMu.Unlock()
-	if len(extendedLimits) > 0 {
-		now := time.Now()
-		s.modelRateStateExtendedMu.Lock()
-		if s.modelRateStateExtended == nil {
-			s.modelRateStateExtended = make(map[string]map[time.Duration]struct {
-				WindowStart time.Time
-				Count       int
-			})
-		}
-		if s.modelRateStateExtended[in.ModelID] == nil {
-			s.modelRateStateExtended[in.ModelID] = make(map[time.Duration]struct {
-				WindowStart time.Time
-				Count       int
-			})
-		}
-		periodStates := s.modelRateStateExtended[in.ModelID]
-		var exceededPeriod *struct {
-			Limit  int
-			Period time.Duration
-			Count  int
-		}
-		for _, rl := range extendedLimits {
-			st := periodStates[rl.Period]
-			if st.WindowStart.IsZero() || now.Sub(st.WindowStart) >= rl.Period {
-				st.WindowStart = now
-				st.Count = 0
-			}
-			st.Count++
-			periodStates[rl.Period] = st
-			if st.Count > rl.Limit {
-				exceededPeriod = &struct {
-					Limit  int
-					Period time.Duration
-					Count  int
-				}{Limit: rl.Limit, Period: rl.Period, Count: st.Count}
-				break
-			}
-		}
-		s.modelRateStateExtended[in.ModelID] = periodStates
-		s.modelRateStateExtendedMu.Unlock()
-		if exceededPeriod != nil {
-			if s.modelLimitAuditPath != "" {
-				s.writeModelLimitAudit(in.ModelID, "rate_extended", exceededPeriod.Count, exceededPeriod.Limit, now.Unix(), int(exceededPeriod.Period.Seconds()), "")
-			}
-			if s.metrics != nil {
-				s.metrics.RecordDecision("model_validate", in.ModelID, "deny")
-				s.metrics.IncModelRateLimitExceeded()
-			}
-			c.JSON(429, gin.H{"success": false, "error": "model_rate_limit_exceeded", "model_id": in.ModelID, "limit": exceededPeriod.Limit, "window_seconds": int(exceededPeriod.Period.Seconds()), "period": ratelimit.FormatPeriod(exceededPeriod.Period)})
-			return
-		}
-	}
-	if s.metrics != nil {
-		s.metrics.RecordDecision("model_validate", in.ModelID, "allow")
-	}
-	c.JSON(200, gin.H{"success": true, "model_id": in.ModelID, "input_tokens": in.InputTokens, "output_tokens": in.OutputTokens, "input_limit": limit, "output_limit": outLimit, "rate_limit": rateLimit, "limit_enforced": true})
-}
-
-// writeModelLimitAudit appends a JSONL entry recording a model limit exceed event with hash chaining.
-// kind: input|output|rate; provided: observed value; limit: configured limit.
-// windowStart/windowSeconds only populated for rate events (else 0).
-func (s *BetaServer) writeModelLimitAudit(modelID, kind string, provided, limit int, windowStart int64, windowSeconds int, userID string) {
-	if s.modelLimitAuditPath == "" {
-		return
-	}
-	// Build entry while holding lock for chain state update
-	s.modelLimitAuditMu.Lock()
-	entry := struct {
-		TS            int64  `json:"ts"`
-		ModelID       string `json:"model_id"`
-		UserID        string `json:"user_id,omitempty"`
-		Kind          string `json:"kind"`
-		Provided      int    `json:"provided"`
-		Limit         int    `json:"limit"`
-		WindowStart   int64  `json:"window_start,omitempty"`
-		WindowSeconds int    `json:"window_seconds,omitempty"`
-		PrevHash      string `json:"prev_hash"`
-		Hash          string `json:"hash"`
-	}{TS: time.Now().Unix(), ModelID: modelID, UserID: userID, Kind: kind, Provided: provided, Limit: limit, WindowStart: windowStart, WindowSeconds: windowSeconds, PrevHash: s.modelLimitAuditPrevHash}
-	raw, err := json.Marshal(entry)
-	if err != nil {
-		s.modelLimitAuditMu.Unlock()
-		return
-	}
-	h := sha256.Sum256(append([]byte(s.modelLimitAuditPrevHash), raw...))
-	entry.Hash = fmt.Sprintf("sha256:%x", h[:])
-	final, err := json.Marshal(entry)
-	if err != nil {
-		s.modelLimitAuditMu.Unlock()
-		return
-	}
-	if f, err := os.OpenFile(s.modelLimitAuditPath, os.O_APPEND|os.O_WRONLY, 0600); err == nil {
-		_, _ = f.Write(append(final, '\n'))
-		f.Close()
-		s.modelLimitAuditPrevHash = entry.Hash
-		s.modelLimitAuditEntryCount++
-		// Stream attestation update for new audit head
-		go s.emitAttestation("audit_append")
-	}
-	auditLastHash := s.modelLimitAuditPrevHash
-	auditEntries := s.modelLimitAuditEntryCount
-	s.modelLimitAuditMu.Unlock()
-	// Attempt anchoring using snapshot values (non-blocking if disabled)
-	s.anchorModelLimitAuditIfNeeded(auditLastHash, auditEntries)
-	// Record exceed event for surge detection (primary kinds only)
-	if kind == metricKindInput || kind == metricKindOutput || kind == metricKindRate {
-		go s.recordModelLimitExceed(modelID)
-	}
-}
-
-// recordModelLimitExceed updates per-model rolling window of exceed events and triggers surge metric.
-func (s *BetaServer) recordModelLimitExceed(modelID string) {
-	now := time.Now()
-	sec := now.Unix()
-	s.modelLimitSurgeMu.Lock()
-	state := s.modelLimitSurgeState[modelID]
-	if len(state) == 0 {
-		state = make([]int, 60)
-	}
-	lastT := s.modelLimitSurgeLast[modelID]
-	if !lastT.IsZero() {
-		elapsed := sec - lastT.Unix()
-		if elapsed > 0 {
-			if elapsed >= 60 {
-				for i := range state {
-					state[i] = 0
-				}
-			} else {
-				for i := int64(1); i <= elapsed; i++ {
-					idx := int((lastT.Unix() + i) % 60)
-					state[idx] = 0
-				}
-			}
-		}
-	}
-	idx := int(sec % 60)
-	state[idx]++
-	s.modelLimitSurgeState[modelID] = state
-	s.modelLimitSurgeLast[modelID] = now
-	// Compute baseline average and last 10s sum
-	var total, counted int
-	for _, v := range state {
-		if v > 0 {
-			total += v
-			counted++
-		}
-	}
-	var last10 int
-	for k := int64(0); k < 10; k++ {
-		idxK := int((sec - k) % 60)
-		if idxK < 0 {
-			idxK += 60
-		}
-		last10 += state[idxK]
-	}
-	avg := 0.0
-	if counted > 0 {
-		avg = float64(total) / float64(counted)
-	}
-	trigger := false
-	if last10 >= s.modelLimitSurgeMinEvents && avg > 0 && float64(last10) > avg*s.modelLimitSurgeFactor {
-		if time.Since(s.modelLimitSurgeLastTrigger) > 15*time.Second {
-			trigger = true
-		}
-	}
-	if trigger {
-		s.modelLimitSurgeLastTrigger = now
-		if s.metrics != nil {
-			s.metrics.IncModelLimitSurge()
-		}
-		// Stream attestation update for surge detection
-		go s.emitAttestation("surge_trigger")
-	}
-	s.modelLimitSurgeMu.Unlock()
-}
-
-// apiModelLimitAuditVerify verifies the hash chain of the model limit audit file.
-// Response: {"success":true,"entries":N,"last_hash":"sha256:...","valid":true}
-func (s *BetaServer) apiModelLimitAuditVerify(c *gin.Context) {
-	path := s.modelLimitAuditPath
-	if path == "" {
-		c.JSON(200, gin.H{"success": false, "error": "audit_disabled"})
-		return
-	}
-	b, err := os.ReadFile(path)
-	if err != nil {
-		c.JSON(500, gin.H{"success": false, "error": "read_failed"})
-		return
-	}
-	lines := strings.Split(strings.TrimSpace(string(b)), "\n")
-	prev := ""
-	valid := true
-	var lastHash string
-	for _, ln := range lines {
-		if strings.TrimSpace(ln) == "" {
-			continue
-		}
-		var e struct {
-			PrevHash string `json:"prev_hash"`
-			Hash     string `json:"hash"`
-		}
-		if json.Unmarshal([]byte(ln), &e) != nil {
-			valid = false
-			break
-		}
-		// recompute
-		// Re-marshal excluding hash field to recompute chain digest.
-		var full map[string]any
-		if json.Unmarshal([]byte(ln), &full) != nil {
-			valid = false
-			break
-		}
-		fullHash := full["hash"].(string)
-		// For anchor chain recomputation we mirror original hashing which marshaled struct with empty hash value ("")
-		full["hash"] = ""
-		tmp, _ := json.Marshal(full)
-		hh := sha256.Sum256(append([]byte(e.PrevHash), tmp...))
-		recomputed := fmt.Sprintf("sha256:%x", hh[:])
-		if recomputed != fullHash || e.PrevHash != prev {
-			valid = false
-			break
-		}
-		prev = fullHash
-		lastHash = fullHash
-	}
-	c.JSON(200, gin.H{"success": true, "entries": len(lines), "last_hash": lastHash, "valid": valid})
-}
-
-// anchorModelLimitAuditIfNeeded writes an anchor entry every N audit entries (interval) forming a
-// second-level hash chain enabling external timestamping / notarization without exposing raw audit volume.
-// Anchor entry JSON schema (JSONL per line):
-// {"ts":1670000000,"audit_last_hash":"sha256:..","audit_entries":123,"prev_hash":"sha256:..","hash":"sha256:.."}
-func (s *BetaServer) anchorModelLimitAuditIfNeeded(auditLastHash string, auditEntries int) {
-	if s.modelLimitAnchorPath == "" || s.modelLimitAnchorInterval <= 0 {
-		return
-	}
-	if auditEntries == 0 || auditEntries%s.modelLimitAnchorInterval != 0 {
-		return
-	}
-	if auditLastHash == "" {
-		return
-	}
-	s.modelLimitAnchorMu.Lock()
-	defer s.modelLimitAnchorMu.Unlock()
-	// Recompute modulo with potentially updated prev anchor hash not needed; snapshot is fine to avoid duplicate writes.
-	anchor := struct {
-		TS            int64  `json:"ts"`
-		AuditLastHash string `json:"audit_last_hash"`
-		AuditEntries  int    `json:"audit_entries"`
-		PrevHash      string `json:"prev_hash"`
-		Hash          string `json:"hash"`
-	}{TS: time.Now().Unix(), AuditLastHash: auditLastHash, AuditEntries: auditEntries, PrevHash: s.modelLimitAnchorPrevHash}
-	raw, err := json.Marshal(anchor)
-	if err != nil {
-		return
-	}
-	h := sha256.Sum256(append([]byte(s.modelLimitAnchorPrevHash), raw...))
-	anchor.Hash = fmt.Sprintf("sha256:%x", h[:])
-	final, err := json.Marshal(anchor)
-	if err != nil {
-		return
-	}
-	if f, err := os.OpenFile(s.modelLimitAnchorPath, os.O_APPEND|os.O_WRONLY, 0600); err == nil {
-		_, _ = f.Write(append(final, '\n'))
-		f.Close()
-		s.modelLimitAnchorPrevHash = anchor.Hash
-		// Stream attestation update for new anchor head
-		go s.emitAttestation("anchor_commit")
-	}
-}
-
-// apiModelLimitAuditAnchorVerify verifies the anchor chain integrity similar to the audit chain verification.
-// Response: {"success":true,"entries":N,"last_hash":"sha256:..","valid":true}
-func (s *BetaServer) apiModelLimitAuditAnchorVerify(c *gin.Context) {
-	path := s.modelLimitAnchorPath
-	if path == "" {
-		c.JSON(200, gin.H{"success": false, "error": "anchor_disabled"})
-		return
-	}
-	b, err := os.ReadFile(path)
-	if err != nil {
-		c.JSON(500, gin.H{"success": false, "error": "read_failed"})
-		return
-	}
-	lines := strings.Split(strings.TrimSpace(string(b)), "\n")
-	prev := ""
-	valid := true
-	var lastHash string
-	for _, ln := range lines {
-		if strings.TrimSpace(ln) == "" {
-			continue
-		}
-		var full struct {
-			TS            int64  `json:"ts"`
-			AuditLastHash string `json:"audit_last_hash"`
-			AuditEntries  int    `json:"audit_entries"`
-			PrevHash      string `json:"prev_hash"`
-			Hash          string `json:"hash"`
-		}
-		if json.Unmarshal([]byte(ln), &full) != nil {
-			valid = false
-			break
-		}
-		// Reconstruct original raw form (hash empty string) used for hashing.
-		rawStruct := full
-		rawStruct.Hash = ""
-		rawBytes, _ := json.Marshal(rawStruct)
-		hh := sha256.Sum256(append([]byte(full.PrevHash), rawBytes...))
-		recomputed := fmt.Sprintf("sha256:%x", hh[:])
-		if recomputed != full.Hash || full.PrevHash != prev {
-			valid = false
-			break
-		}
-		prev = full.Hash
-		lastHash = full.Hash
-	}
-	c.JSON(200, gin.H{"success": true, "entries": len(lines), "last_hash": lastHash, "valid": valid})
-}
-
-// apiModelLimitsAttestation returns a consolidated attestation object combining:
-// - Current snapshot hash (deterministic ordering of limits)
-// - Audit chain head hash and entry count
-// - Anchor chain head hash and entry count
-// - Strict unknown-model mode flag
-// Response shape:
-// {"success":true,"configured":true,"snapshot":{"hash":"sha256:..","generated_at":"RFC3339"},"audit":{"head_hash":"sha256:..","entries":N},"anchor":{"latest_hash":"sha256:..","entries":M},"strict_unknown":true}
-// If audit/anchor not configured: configured=false and error reason provided.
-func (s *BetaServer) apiModelLimitsAttestation(c *gin.Context) {
-	att, err := s.buildUnsignedModelLimitsAttestation()
-	if err != nil {
-		c.JSON(500, gin.H{"success": false, "error": err.Error()})
-		return
-	}
-	// Sign & notarize (mutates copy) if applicable
-	att = s.maybeAugmentAndSignAttestation(att)
-	c.JSON(200, att)
-}
-
-// buildUnsignedModelLimitsAttestation constructs the core attestation structure without performing
-// optional surge, notarization, or signing augmentation. It returns the unsigned attestation and any error.
-func (s *BetaServer) buildUnsignedModelLimitsAttestation() (modelLimitsAttestation, error) {
-	_, snapHash := s.computeModelLimitsSnapshot()
-	now := time.Now().UTC().Format(time.RFC3339Nano)
-	att := modelLimitsAttestation{}
-	att.Success = true
-	att.Snapshot.Hash = snapHash
-	att.Snapshot.GeneratedAt = now
-	att.StrictUnknown = s.modelLimitsStrictUnknown
-	auditPath := s.modelLimitAuditPath
-	anchorPath := s.modelLimitAnchorPath
-	if auditPath == "" {
-		att.Configured = false
-		att.Reason = "audit_disabled"
-		return att, nil
-	}
-	auditBytes, err := os.ReadFile(auditPath)
-	if err != nil {
-		return att, fmt.Errorf("audit_read_failed")
-	}
-	auditLines := strings.Split(strings.TrimSpace(string(auditBytes)), "\n")
-	head := ""
-	count := 0
-	for _, ln := range auditLines {
-		ln = strings.TrimSpace(ln)
-		if ln == "" {
-			continue
-		}
-		count++
-		var e struct {
-			Hash string `json:"hash"`
-		}
-		if json.Unmarshal([]byte(ln), &e) == nil {
-			head = e.Hash
-		}
-	}
-	att.Audit = &struct {
-		HeadHash string `json:"head_hash"`
-		Entries  int    `json:"entries"`
-	}{HeadHash: head, Entries: count}
-	if anchorPath != "" {
-		if b, err := os.ReadFile(anchorPath); err == nil {
-			lines := strings.Split(strings.TrimSpace(string(b)), "\n")
-			aHead := ""
-			aCount := 0
-			for _, ln := range lines {
-				ln = strings.TrimSpace(ln)
-				if ln == "" {
-					continue
-				}
-				aCount++
-				var e struct {
-					Hash string `json:"hash"`
-				}
-				if json.Unmarshal([]byte(ln), &e) == nil {
-					aHead = e.Hash
-				}
-			}
-			att.Anchor = &struct {
-				LatestHash string `json:"latest_hash"`
-				Entries    int    `json:"entries"`
-				Interval   int    `json:"interval"`
-			}{LatestHash: aHead, Entries: aCount, Interval: s.modelLimitAnchorInterval}
-		}
-	}
-	att.Configured = true
-	return att, nil
-	//nolint:gocyclo // Attestation augmentation and signing
-}
-
-//nolint:gocyclo // Attestation augmentation and signing
-
-// maybeAugmentAndSignAttestation attaches surge stats, notarization receipt, and signature if enabled.
-func (s *BetaServer) maybeAugmentAndSignAttestation(att modelLimitsAttestation) modelLimitsAttestation {
-	if att.Configured {
-		// Surge analysis
-		s.modelLimitSurgeMu.Lock()
-		var topModel string
-		var topLast10 int
-		var topAvg float64
-		if time.Since(s.modelLimitSurgeLastTrigger) < 5*time.Second {
-			for mid, counts := range s.modelLimitSurgeState {
-				last10 := 0
-				total := 0
-				nonzero := 0
-				for i := 0; i < len(counts); i++ {
-					v := counts[i]
-					total += v
-					if v > 0 {
-						nonzero++
-					}
-				}
-				for i := 0; i < 10 && i < len(counts); i++ {
-					last10 += counts[len(counts)-1-i]
-				}
-				avg := 0.0
-				if nonzero > 0 {
-					avg = float64(total) / float64(nonzero)
-				}
-				if last10 >= s.modelLimitSurgeMinEvents && avg > 0 && float64(last10) > avg*s.modelLimitSurgeFactor {
-					if last10 > topLast10 {
-						topLast10 = last10
-						topAvg = avg
-						topModel = mid
-					}
-				}
-			}
-		}
-		s.modelLimitSurgeMu.Unlock()
-		if topModel != "" {
-			att.Surge = &struct {
-				ModelID   string  `json:"model_id"`
-				Last10Sec int     `json:"last_10s_exceed_events"`
-				AvgActive float64 `json:"avg_active_seconds"`
-				Factor    float64 `json:"factor"`
-				MinEvents int     `json:"min_events"`
-				Triggered bool    `json:"triggered"`
-				At        string  `json:"triggered_at,omitempty"`
-			}{ModelID: topModel, Last10Sec: topLast10, AvgActive: topAvg, Factor: s.modelLimitSurgeFactor, MinEvents: s.modelLimitSurgeMinEvents, Triggered: true, At: time.Now().UTC().Format(time.RFC3339Nano)}
-		}
-		if os.Getenv("GAUTH_MODEL_LIMIT_ATTEST_NOTARIZE") == "1" && s.notarizer != nil && att.Snapshot.Hash != "" {
-			auditHead := ""
-			if att.Audit != nil {
-				auditHead = att.Audit.HeadHash
-			}
-			anchorHead := ""
-			if att.Anchor != nil {
-				anchorHead = att.Anchor.LatestHash
-			}
-			seed := fmt.Sprintf("attest|%s|%s|%s", att.Snapshot.Hash, auditHead, anchorHead)
-			h := sha256.Sum256([]byte(seed))
-			combinedHash := fmt.Sprintf("sha256:%x", h[:])
-			if receipt, nErr := s.notarizer.Notarize(combinedHash); nErr == nil {
-				att.Notarization = &struct {
-					Provider       string  `json:"provider"`
-					Timestamp      string  `json:"timestamp"`
-					LatencySeconds float64 `json:"latency_seconds"`
-					Success        bool    `json:"success"`
-				}{Provider: receipt.Provider, Timestamp: receipt.Timestamp, LatencySeconds: receipt.LatencySeconds, Success: receipt.Success}
-			}
-		}
-	}
-	if os.Getenv("GAUTH_MODEL_LIMIT_ATTEST_SIGN") == "1" {
-		if km := s.getKeyManager(); km != nil {
-			if active := km.Active(); active != nil && len(active.Private) == ed25519.PrivateKeySize {
-				// Inject per-attestation nonce if absent (raw base64, 16 bytes) to prevent replay of identical payloads.
-				if att.Nonce == "" {
-					var nb [16]byte
-					_, _ = crand.Read(nb[:])
-					att.Nonce = base64.RawStdEncoding.EncodeToString(nb[:])
-				}
-				unsigned := att
-				unsigned.Signature = ""
-				unsigned.SigKid = ""
-				unsigned.SigMode = ""
-				unsigned.DomainSignature = ""
-				unsigned.DomainPrefix = ""
-				if raw, jerr := json.Marshal(unsigned); jerr == nil {
-					// Default primary domain prefix constant
-					primaryPrefix := "GAUTH_MODEL_LIMIT_ATTEST:"
-					// Secondary override prefix (if set and different) for dual-domain signature emission
-					extraPrefix := os.Getenv("GAUTH_ATTEST_DOMAIN_PREFIX")
-					if extraPrefix == primaryPrefix { // avoid duplicate
-						extraPrefix = ""
-					}
-					// Primary signature (always domain-prefixed with primaryPrefix)
-					primaryMsg := append([]byte(primaryPrefix), raw...)
-					primarySig := ed25519.Sign(active.Private, primaryMsg)
-					att.Signature = base64.RawStdEncoding.EncodeToString(primarySig)
-					att.SigKid = active.ID
-					att.SigMode = sigModeEdDSA
-					// Optional secondary domain signature if extraPrefix provided
-					if extraPrefix != "" {
-						secondaryMsg := append([]byte(extraPrefix), raw...)
-						secondarySig := ed25519.Sign(active.Private, secondaryMsg)
-						att.DomainSignature = base64.RawStdEncoding.EncodeToString(secondarySig)
-						att.DomainPrefix = extraPrefix
-					} else {
-						att.DomainSignature = ""
-						att.DomainPrefix = ""
-					}
-				}
-			}
-		}
-	}
-	return att
-}
-
-// ===== Attestation Streaming (SSE) =====
-// subscribeAttestation registers a new channel for attestation events.
-func (s *BetaServer) subscribeAttestation() chan modelLimitsAttestation {
-	ch := make(chan modelLimitsAttestation, 8)
-	s.attestStreamSubsMu.Lock()
-	s.attestStreamSubs[ch] = struct{}{}
-	s.attestStreamSubsMu.Unlock()
-	return ch
-}
-
-// unsubscribeAttestation removes subscription and closes channel.
-func (s *BetaServer) unsubscribeAttestation(ch chan modelLimitsAttestation) {
-	s.attestStreamSubsMu.Lock()
-	if _, ok := s.attestStreamSubs[ch]; ok {
-		delete(s.attestStreamSubs, ch)
-		close(ch)
-	}
-	s.attestStreamSubsMu.Unlock()
-}
-
-// emitAttestation attempts to build & broadcast a fresh attestation to subscribers.
-func (s *BetaServer) emitAttestation(reason string) {
-	if os.Getenv("GAUTH_ATTEST_STREAM_ENABLE") != "1" {
-		return
-	}
-	att, err := s.buildUnsignedModelLimitsAttestation()
-	if err != nil {
-		return
-	}
-	att = s.maybeAugmentAndSignAttestation(att)
-	// Embed lightweight reason marker in Reason field if not already set
-	if att.Reason == "" {
-		att.Reason = reason
-	}
-	// Increment reason counter
-	s.attestStreamCountsMu.Lock()
-	s.attestStreamCounts[reason]++
-	s.attestStreamCountsMu.Unlock()
-	s.attestStreamSubsMu.Lock()
-	for ch := range s.attestStreamSubs {
-		select {
-		case ch <- att:
-		default:
-		}
-	}
-	s.attestStreamSubsMu.Unlock()
-}
-
-// apiModelLimitsAttestationStream provides Server-Sent Events with live attestations.
-func (s *BetaServer) apiModelLimitsAttestationStream(c *gin.Context) {
-	if os.Getenv("GAUTH_ATTEST_STREAM_ENABLE") != "1" {
-		c.JSON(404, gin.H{"success": false, "error": "stream_disabled"})
-		return
-	}
-	c.Header("Content-Type", "text/event-stream")
-	c.Header("Cache-Control", "no-cache")
-	c.Header("Connection", "keep-alive")
-	c.Header("X-Accel-Buffering", "no")
-	c.Writer.Flush()
-	fmt.Fprint(c.Writer, ": open\n")
-	fmt.Fprint(c.Writer, "retry: 5000\n") // 5s reconnect suggestion
-	ch := s.subscribeAttestation()
-	defer s.unsubscribeAttestation(ch)
-	// Immediately push a fresh attestation (reason=open)
-	go s.emitAttestation("open")
-	heartbeat := time.NewTicker(15 * time.Second)
-	defer heartbeat.Stop()
-	for {
-		select {
-		case <-c.Request.Context().Done():
-			return
-		case att := <-ch:
-			if b, err := json.Marshal(att); err == nil {
-				fmt.Fprintf(c.Writer, "event: attestation\ndata: %s\n\n", b)
-				c.Writer.Flush()
-			}
-		case <-heartbeat.C:
-			fmt.Fprint(c.Writer, ": ping\n\n")
-			c.Writer.Flush()
-			// Periodic refresh (lightweight) to ensure clients see updated heads even without triggers
-			go s.emitAttestation("heartbeat")
-		}
-	}
-}
-
-// apiModelLimitsAttestationKeys returns active + historical Ed25519 public keys for attestation verification.
-// Response shape: {"success":true,"keys":[{"kid":"..","public_b64":".."}]}
-func (s *BetaServer) apiModelLimitsAttestationKeys(c *gin.Context) {
-	km := s.getKeyManager()
-	if km == nil {
-		c.JSON(200, gin.H{"success": true, "keys": []any{}})
-		return
-	}
-	keys := km.ListCurrent()
-	out := make([]map[string]any, 0, len(keys))
-	for _, k := range keys {
-		if len(k.Public) == ed25519.PublicKeySize {
-			out = append(out, map[string]any{"kid": k.ID, "public_b64": base64.RawStdEncoding.EncodeToString(k.Public)})
-		}
-	}
-	c.JSON(200, gin.H{"success": true, "keys": out})
-}
-
-// apiModelLimitsAttestationVerify accepts a posted attestation JSON, recomputes signature bytes and validates Ed25519 signature.
-// Expected payload: full attestation object including signature fields.
-// Returns: {"success":true,"valid":true,"kid":"...","hash":"sha256:...","combined_hash":"sha256:..."}
-// combined_hash = sha256(attest|snapshot.hash|audit.head_hash|anchor.latest_hash)
-func (s *BetaServer) apiModelLimitsAttestationVerify(c *gin.Context) {
-	var att struct {
-		Success    bool   `json:"success"`
-		Configured bool   `json:"configured"`
-		Reason     string `json:"reason,omitempty"`
-		Nonce      string `json:"nonce,omitempty"`
-		Snapshot   struct {
-			Hash        string `json:"hash"`
-			GeneratedAt string `json:"generated_at"`
-		} `json:"snapshot"`
-		Audit *struct {
-			HeadHash string `json:"head_hash"`
-			Entries  int    `json:"entries"`
-		} `json:"audit,omitempty"`
-		Anchor *struct {
-			LatestHash string `json:"latest_hash"`
-			Entries    int    `json:"entries"`
-			Interval   int    `json:"interval"`
-		} `json:"anchor,omitempty"`
-		StrictUnknown bool `json:"strict_unknown"`
-		Surge         *struct {
-			ModelID   string  `json:"model_id"`
-			Last10Sec int     `json:"last_10s_exceed_events"`
-			AvgActive float64 `json:"avg_active_seconds"`
-			Factor    float64 `json:"factor"`
-			MinEvents int     `json:"min_events"`
-			Triggered bool    `json:"triggered"`
-			At        string  `json:"triggered_at,omitempty"`
-		} `json:"surge,omitempty"`
-		Notarization *struct {
-			Provider       string  `json:"provider"`
-			Timestamp      string  `json:"timestamp"`
-			LatencySeconds float64 `json:"latency_seconds"`
-			Success        bool    `json:"success"`
-		} `json:"notarization,omitempty"`
-		Signature       string `json:"signature"`
-		SigKid          string `json:"sig_kid"`
-		SigMode         string `json:"sig_mode"`
-		DomainSignature string `json:"domain_signature,omitempty"`
-		DomainPrefix    string `json:"domain_prefix,omitempty"`
-	}
-	body, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		c.JSON(400, gin.H{"success": false, "error": "read_body_failed"})
-		return
-	}
-	if json.Unmarshal(body, &att) != nil {
-		// Error envelope expected by TestAttestationVerifyErrorEnvelope
-		c.JSON(400, gin.H{"code": "attestation_invalid_json", "message": "attestation verify invalid JSON", "details": gin.H{"http_path": c.FullPath(), "content_length": len(body)}})
-		return
-	}
-	if att.Signature == "" || att.SigKid == "" || att.SigMode != sigModeEdDSA {
-		c.JSON(200, gin.H{"success": true, "valid": false, "error": "missing_signature_fields"})
-		return
-	}
-	km := s.getKeyManager()
-	if km == nil {
-		c.JSON(200, gin.H{"success": true, "valid": false, "error": "no_key_registry"})
-		return
-	}
-	key := km.FindByID(att.SigKid)
-	if key == nil {
-		c.JSON(200, gin.H{"success": true, "valid": false, "error": "unknown_kid"})
-		return
-	}
-	// Reconstruct unsigned object with identical field order
-	type unsignedStruct struct {
-		Success    bool   `json:"success"`
-		Configured bool   `json:"configured"`
-		Reason     string `json:"reason,omitempty"`
-		Nonce      string `json:"nonce,omitempty"`
-		Snapshot   struct {
-			Hash        string `json:"hash"`
-			GeneratedAt string `json:"generated_at"`
-		} `json:"snapshot"`
-		Audit *struct {
-			HeadHash string `json:"head_hash"`
-			Entries  int    `json:"entries"`
-		} `json:"audit,omitempty"`
-		Anchor *struct {
-			LatestHash string `json:"latest_hash"`
-			Entries    int    `json:"entries"`
-			Interval   int    `json:"interval"`
-		} `json:"anchor,omitempty"`
-		StrictUnknown bool `json:"strict_unknown"`
-		Surge         *struct {
-			ModelID   string  `json:"model_id"`
-			Last10Sec int     `json:"last_10s_exceed_events"`
-			AvgActive float64 `json:"avg_active_seconds"`
-			Factor    float64 `json:"factor"`
-			MinEvents int     `json:"min_events"`
-			Triggered bool    `json:"triggered"`
-			At        string  `json:"triggered_at,omitempty"`
-		} `json:"surge,omitempty"`
-		Notarization *struct {
-			Provider       string  `json:"provider"`
-			Timestamp      string  `json:"timestamp"`
-			LatencySeconds float64 `json:"latency_seconds"`
-			Success        bool    `json:"success"`
-		} `json:"notarization,omitempty"`
-	}
-	u := unsignedStruct{Success: att.Success, Configured: att.Configured, Reason: att.Reason, Nonce: att.Nonce, Snapshot: att.Snapshot, Audit: att.Audit, Anchor: att.Anchor, StrictUnknown: att.StrictUnknown, Surge: att.Surge, Notarization: att.Notarization}
-	raw, _ := json.Marshal(u)
-	sigBytes, err := base64.RawStdEncoding.DecodeString(att.Signature)
-	if err != nil {
-		c.JSON(200, gin.H{"success": true, "valid": false, "error": "bad_signature_base64"})
-		return
-	}
-	// Domain separation prefix required by signing tests ("GAUTH_MODEL_LIMIT_ATTEST:")
-	// to avoid cross-protocol signature replay. The attestation signature is performed over
-	// prefix || canonical_unsigned_json. We mirror that here for verification.
-	prefixed := append([]byte("GAUTH_MODEL_LIMIT_ATTEST:"), raw...)
-	valid := ed25519.Verify(key.Public, prefixed, sigBytes)
-	if !valid {
-		c.JSON(200, gin.H{"success": true, "valid": false, "kid": att.SigKid, "sig_mode": att.SigMode, "error": "signature_invalid"})
-		return
-	}
-	// Optional secondary domain signature validation (dual-domain). Overall validity requires both signatures when present.
-	if att.DomainSignature != "" {
-		if att.DomainPrefix == "" {
-			c.JSON(200, gin.H{"success": true, "valid": false, "error": "domain_signature_prefix_missing"})
-			return
-		}
-		dsigBytes, err := base64.RawStdEncoding.DecodeString(att.DomainSignature)
-		if err != nil {
-			c.JSON(200, gin.H{"success": true, "valid": false, "error": "domain_signature_base64_invalid"})
-			return
-		}
-		prefixedDomain := append([]byte(att.DomainPrefix), raw...)
-		if !ed25519.Verify(key.Public, prefixedDomain, dsigBytes) {
-			c.JSON(200, gin.H{"success": true, "valid": false, "error": "domain_signature_invalid"})
-			return
-		}
-	}
-	// Compute combined hash triple for external linking
-	auditHead := ""
-	if att.Audit != nil {
-		auditHead = att.Audit.HeadHash
-	}
-	anchorHead := ""
-	if att.Anchor != nil {
-		anchorHead = att.Anchor.LatestHash
-	}
-	seed := fmt.Sprintf("attest|%s|%s|%s", att.Snapshot.Hash, auditHead, anchorHead)
-	ch := sha256.Sum256([]byte(seed))
-	// Nonce replay detection (second verification of identical attestation nonce should fail).
-	// We namespace attestation nonces to avoid collision with token JTIs in the shared replayStore.
-	if s.replayStore != nil {
-		if att.Nonce == "" {
-			// Missing nonce treated as hard error (cannot enforce replay protection)
-			c.JSON(400, gin.H{"code": "attestation_nonce_missing", "message": "attestation nonce missing", "details": gin.H{"http_path": c.FullPath()}})
-			return
-		}
-		key := "attest:" + att.Nonce
-		if s.replayStore.Seen(key, time.Now()) {
-			// Emit structured replay envelope (expected by TestModelLimitsAttestationReplay)
-			c.JSON(409, gin.H{"code": "attestation_nonce_replay", "message": "attestation nonce replay detected", "details": gin.H{"http_path": c.FullPath(), "nonce": att.Nonce}})
-			return
-		}
-		// Record after successful signature validation & before returning success
-		s.replayStore.Record(key, time.Now())
-	}
-	c.JSON(200, gin.H{"success": true, "valid": valid, "kid": att.SigKid, "sig_mode": att.SigMode, "combined_hash": fmt.Sprintf("sha256:%x", ch[:])})
-}
-
-// apiSemanticCountersPrometheus exposes semantic counters in Prometheus exposition format.
-// Metric names: gauth_poa_semantic_counter_<name>
-func (s *BetaServer) apiSemanticCountersPrometheus(c *gin.Context) {
-	c.Header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
-	if s.rfc0111Service == nil {
-		c.String(200, "# semantic counters service not wired\n")
-		return
-	}
-	snap := s.rfc0111Service.SemanticSnapshot()
-	// Compute rates for Prometheus exposition (avoid recomputing inside OTel callback logic)
-	rates60, rates300 := s.semanticRatesForWindows()
-	// Update anomaly scores using 60s rates sample
-	s.updateSemanticAnomalies(rates60)
-	// Deterministic ordering
-	keys := make([]string, 0, len(snap))
-	for k := range snap {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	var b strings.Builder
-	b.WriteString("# HELP gauth_poa_semantic_counter Semantic PoA validation rejection counters.\n")
-	b.WriteString("# TYPE gauth_poa_semantic_counter counter\n")
-	for _, k := range keys {
-		fmt.Fprintf(&b, "gauth_poa_semantic_counter_%s %d\n", k, snap[k])
-	}
-	// 60s rate metrics (per-category gauges)
-	b.WriteString("# HELP gauth_poa_semantic_rate_60s Per-minute semantic rejection rate over trailing ~60s window.\n")
-	b.WriteString("# TYPE gauth_poa_semantic_rate_60s gauge\n")
-	for _, k := range keys {
-		if v, ok := rates60[k]; ok {
-			fmt.Fprintf(&b, "gauth_poa_semantic_rate_60s{category=\"%s\"} %f\n", k, v)
-		}
-	}
-	// 300s rate metrics (per-category gauges)
-	b.WriteString("# HELP gauth_poa_semantic_rate_300s Per-minute semantic rejection rate over trailing ~300s window.\n")
-	b.WriteString("# TYPE gauth_poa_semantic_rate_300s gauge\n")
-	for _, k := range keys {
-		if v, ok := rates300[k]; ok {
-			fmt.Fprintf(&b, "gauth_poa_semantic_rate_300s{category=\"%s\"} %f\n", k, v)
-		}
-	}
-	// Anomaly scores (gauge per category)
-	b.WriteString("# HELP gauth_poa_semantic_anomaly_score EWMA-based standardized anomaly score for 60s rate (z-score).\n")
-	b.WriteString("# TYPE gauth_poa_semantic_anomaly_score gauge\n")
-	for _, k := range keys {
-		if sc, ok := s.currentSemanticScores()[k]; ok {
-			fmt.Fprintf(&b, "gauth_poa_semantic_anomaly_score{category=\"%s\"} %f\n", k, sc)
-		}
-	}
-	// Attestation stream emissions counter (labeled by reason)
-	b.WriteString("# HELP attestation_stream_emissions_total Total attestation SSE emissions by reason.\n")
-	b.WriteString("# TYPE attestation_stream_emissions_total counter\n")
-	s.attestStreamCountsMu.Lock()
-	for reason, v := range s.attestStreamCounts {
-		fmt.Fprintf(&b, "attestation_stream_emissions_total{reason=\"%s\"} %d\n", reason, v)
-	}
-	s.attestStreamCountsMu.Unlock()
-	_ = len(s.semanticScores)
-	c.String(200, b.String())
-}
-
 // apiRevocationAutoSignPrometheus exposes revocation auto-sign counters in Prometheus exposition format.
 // Metric names:
 //
@@ -2559,464 +1166,16 @@ func (s *BetaServer) apiRevocationAutoSignPrometheus(c *gin.Context) {
 	c.String(200, b.String())
 }
 
-// updateSemanticAnomalies updates EWMA stats and scores given latest per-category rate samples.
-// Uses Welford online variance; score = (rate - mean) / (stddev+epsilon). Minimum samples (>=5) before non-zero stddev.
-func (s *BetaServer) updateSemanticAnomalies(rates map[string]float64) {
-	if rates == nil {
-		return
-	}
-	s.semanticAnomalyMu.Lock()
-	defer s.semanticAnomalyMu.Unlock()
-	if s.semanticEWMA == nil {
-		s.semanticEWMA = make(map[string]struct {
-			Mean  float64
-			M2    float64
-			Count int
-		})
-	}
-	if s.semanticScores == nil {
-		s.semanticScores = make(map[string]float64)
-	}
-	epsilon := 1e-6
-	for k, r := range rates {
-		stat := s.semanticEWMA[k]
-		stat.Count++
-		// Welford updates
-		delta := r - stat.Mean
-		stat.Mean += delta / float64(stat.Count)
-		delta2 := r - stat.Mean
-		stat.M2 += delta * delta2
-		// Compute score
-		if stat.Count > 4 { // need >=5 samples for stable variance
-			variance := stat.M2 / float64(stat.Count-1)
-			if variance < 0 {
-				variance = 0
-			}
-			stddev := math.Sqrt(variance)
-			score := 0.0
-			if stddev > 0 {
-				score = (r - stat.Mean) / (stddev + epsilon)
-			}
-			s.semanticScores[k] = score
-		} else {
-			s.semanticScores[k] = 0
-		}
-		s.semanticEWMA[k] = stat
-	}
-}
-
-// currentSemanticScores returns a copy of latest anomaly scores.
-func (s *BetaServer) currentSemanticScores() map[string]float64 {
-	s.semanticAnomalyMu.Lock()
-	defer s.semanticAnomalyMu.Unlock()
-	out := make(map[string]float64, len(s.semanticScores))
-	for k, v := range s.semanticScores {
-		out[k] = v
-	}
-	return out
-}
-
-// equalUint64Map returns true if two uint64 maps are equal in length and content.
-func equalUint64Map(a, b map[string]uint64) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for k, v := range a {
-		if b[k] != v {
-			return false
-		}
-	}
-	return true
-}
-
-// semanticRatesForWindows computes per-category per-minute rates for 60s and 300s windows.
-// Returns two maps keyed by semantic counter name. If insufficient history (<2 entries) maps are empty.
-func (s *BetaServer) semanticRatesForWindows() (map[string]float64, map[string]float64) {
-	r60 := map[string]float64{}
-	r300 := map[string]float64{}
-	s.semanticHistMu.Lock()
-	defer s.semanticHistMu.Unlock()
-	if len(s.semanticHistory) < 2 {
-		return r60, r300
-	}
-	latest := s.semanticHistory[len(s.semanticHistory)-1]
-	compute := func(window time.Duration, out map[string]float64) {
-		cut := time.Now().Add(-window)
-		baseIdx := -1
-		for i := len(s.semanticHistory) - 1; i >= 0; i-- {
-			if s.semanticHistory[i].At.Before(cut) {
-				break
-			}
-			baseIdx = i
-		}
-		if baseIdx == -1 {
-			baseIdx = 0
-		}
-		base := s.semanticHistory[baseIdx]
-		elapsed := latest.At.Sub(base.At).Seconds()
-		if elapsed <= 0 {
-			return
-		}
-		for k, cur := range latest.Snapshot {
-			prev := base.Snapshot[k]
-			delta := float64(0)
-			if cur >= prev {
-				delta = float64(cur - prev)
-			}
-			rate := (delta / elapsed) * 60.0
-			if rate < 0 {
-				rate = 0
-			}
-			out[k] = rate
-		}
-	}
-	compute(60*time.Second, r60)
-	compute(300*time.Second, r300)
-	return r60, r300
-}
-
-// loadViolationPersistence loads persisted violation counters and history if configured.
-func (s *BetaServer) loadViolationPersistence() {
-	if s.violationPersistPath == "" || s.primaryAuthService == nil {
-		return
-	}
-	b, err := os.ReadFile(s.violationPersistPath)
-	if err != nil {
-		return
-	}
-	// Support both legacy (plain JSON) and new hash-chain wrapped format.
-	type wrapper struct {
-		Payload   json.RawMessage `json:"payload"`
-		PrevHash  string          `json:"prev_hash"`
-		Hash      string          `json:"hash"`
-		Timestamp string          `json:"timestamp"`
-	}
-	var w wrapper
-	raw := b
-	if err := json.Unmarshal(b, &w); err == nil && len(w.Payload) > 0 {
-		// New format detected
-		raw = w.Payload
-		// Carry forward previous hash for future chain extension
-		s.violationPrevHash = w.Hash
-	}
-	var data struct {
-		Counters map[string]uint64 `json:"counters"`
-		History  []struct {
-			At    string `json:"at"`
-			Total uint64 `json:"total"`
-		} `json:"history"`
-	}
-	if err := json.Unmarshal(raw, &data); err != nil {
-		return
-	}
-	if svc, ok := s.primaryAuthService.(*gauth.Service); ok && len(data.Counters) > 0 {
-		svc.RestoreViolations(data.Counters)
-	}
-	if len(data.History) > 0 {
-		// Rebuild history (skip entries older than 5m to keep file lean)
-		cutoff := time.Now().Add(-5 * time.Minute)
-		s.violationHistMu.Lock()
-		s.violationHistory = s.violationHistory[:0]
-		for _, h := range data.History {
-			if ts, err := time.Parse(time.RFC3339Nano, h.At); err == nil {
-				if ts.After(cutoff) {
-					s.violationHistory = append(s.violationHistory, struct {
-						At    time.Time
-						Total uint64
-					}{At: ts, Total: h.Total})
-				}
-			}
-		}
-		s.violationHistMu.Unlock()
-	}
-	fmt.Fprintf(os.Stderr, "[violations] restored counters from persistence file %s (format=%s)\n", s.violationPersistPath, func() string {
-		if len(w.Payload) > 0 {
-			return formatHashChain
-		}
-		return integrityLegacy
-	}())
-}
-
-// saveViolationPersistence writes current counters and a trimmed history snapshot atomically.
-func (s *BetaServer) saveViolationPersistence() {
-	if s.violationPersistPath == "" || s.primaryAuthService == nil {
-		return
-	}
-	// Throttle writes: only if >=5s since last persist (guard) or explicit autosave interval triggers.
-	if os.Getenv("GAUTH_VIOLATION_PERSIST_NO_THROTTLE") != "1" {
-		if time.Since(s.violationLastPersist) < 5*time.Second {
-			return
-		}
-	}
-	snapshot := s.primaryAuthService.ViolationSnapshot()
-	s.violationHistMu.Lock()
-	histCopy := append([]struct {
-		At    time.Time
-		Total uint64
-	}{}, s.violationHistory...)
-	s.violationHistMu.Unlock()
-	// Serialize history with RFC3339Nano timestamps (trim to last 120 entries for compactness)
-	maxHist := 120
-	if len(histCopy) > maxHist {
-		histCopy = histCopy[len(histCopy)-maxHist:]
-	}
-	var out struct {
-		Counters map[string]uint64 `json:"counters"`
-		History  []struct {
-			At    string `json:"at"`
-			Total uint64 `json:"total"`
-		} `json:"history"`
-	}
-	out.Counters = snapshot
-	for _, e := range histCopy {
-		out.History = append(out.History, struct {
-			At    string `json:"at"`
-			Total uint64 `json:"total"`
-		}{At: e.At.Format(time.RFC3339Nano), Total: e.Total})
-	}
-	buf, err := json.Marshal(out)
-	if err != nil {
-		return
-	}
-	// Compute hash chain: prev_hash + current payload
-	chainInput := append([]byte(s.violationPrevHash), buf...)
-	curHash := fmt.Sprintf("%x", sha256.Sum256(chainInput))
-	wrapped := struct {
-		Payload   json.RawMessage `json:"payload"`
-		PrevHash  string          `json:"prev_hash"`
-		Hash      string          `json:"hash"`
-		Timestamp string          `json:"timestamp"`
-	}{Payload: buf, PrevHash: s.violationPrevHash, Hash: curHash, Timestamp: time.Now().UTC().Format(time.RFC3339Nano)}
-	finalBuf, err2 := json.Marshal(wrapped)
-	if err2 != nil {
-		return
-	}
-	tmp := s.violationPersistPath + ".tmp"
-	if err := os.WriteFile(tmp, finalBuf, 0o600); err != nil {
-		return
-	}
-	if err := os.Rename(tmp, s.violationPersistPath); err != nil {
-		fmt.Fprintf(os.Stderr, "[violations] rename error: %v\n", err)
-	}
-	s.violationPrevHash = curHash
-	s.violationLastPersist = time.Now()
-}
-
-// loadSemanticPersistence restores semantic counters from persistence file.
-func (s *BetaServer) loadSemanticPersistence() {
-	if s.semanticPersistPath == "" || s.rfc0111Service == nil {
-		return
-	}
-	b, err := os.ReadFile(s.semanticPersistPath)
-	if err != nil {
-		return
-	}
-	// Support legacy and hash-chain wrapper.
-	type wrapper struct {
-		Payload   json.RawMessage `json:"payload"`
-		PrevHash  string          `json:"prev_hash"`
-		Hash      string          `json:"hash"`
-		Timestamp string          `json:"timestamp"`
-	}
-	var w wrapper
-	raw := b
-	if err := json.Unmarshal(b, &w); err == nil && len(w.Payload) > 0 {
-		raw = w.Payload
-		s.semanticPrevHash = w.Hash
-	}
-	type anomalyPersist struct {
-		Mean  float64 `json:"mean"`
-		M2    float64 `json:"m2"`
-		Count int     `json:"count"`
-	}
-	var data struct {
-		Counters map[string]uint64         `json:"counters"`
-		Anomaly  map[string]anomalyPersist `json:"anomaly"`
-	}
-	if err := json.Unmarshal(raw, &data); err != nil {
-		return
-	}
-	if len(data.Counters) == 0 {
-		return
-	}
-	if svc, ok := s.rfc0111Service.(*gauth_rfc_001.Service); ok {
-		svc.SetSemanticSnapshot(data.Counters)
-		// seed history with restored snapshot for baseline anomaly rate calculations
-		s.semanticHistMu.Lock()
-		s.semanticHistory = append(s.semanticHistory, struct {
-			At       time.Time
-			Snapshot map[string]uint64
-		}{At: time.Now(), Snapshot: copyMap(data.Counters)})
-		if len(s.semanticHistory) > s.semanticHistoryCap {
-			s.semanticHistory = s.semanticHistory[len(s.semanticHistory)-s.semanticHistoryCap:]
-		}
-		s.semanticHistMu.Unlock()
-		// restore EWMA anomaly stats if present
-		if len(data.Anomaly) > 0 {
-			s.semanticAnomalyMu.Lock()
-			if s.semanticEWMA == nil {
-				s.semanticEWMA = make(map[string]struct {
-					Mean  float64
-					M2    float64
-					Count int
-				})
-			}
-			for k, v := range data.Anomaly {
-				s.semanticEWMA[k] = struct {
-					Mean  float64
-					M2    float64
-					Count int
-				}{Mean: v.Mean, M2: v.M2, Count: v.Count}
-			}
-			// Initialize semanticScores map entries for restored categories (scores will be recomputed on next anomaly update).
-			if s.semanticScores == nil {
-				s.semanticScores = make(map[string]float64, len(data.Anomaly))
-			}
-			for k := range data.Anomaly {
-				if _, ok := s.semanticScores[k]; !ok {
-					s.semanticScores[k] = 0
-				}
-			}
-			s.semanticAnomalyMu.Unlock()
-			fmt.Fprintf(os.Stderr, "[semantics] restored anomaly EWMA entries=%d\n", len(data.Anomaly))
-		}
-		fmt.Fprintf(os.Stderr, "[semantics] restored semantic counters from %s (format=%s)\n", s.semanticPersistPath, func() string {
-			if len(w.Payload) > 0 {
-				return formatHashChain
-			}
-			return integrityLegacy
-		}())
-	}
-}
-
-// saveSemanticPersistence writes semantic counters snapshot.
-func (s *BetaServer) saveSemanticPersistence() {
-	if s.semanticPersistPath == "" || s.rfc0111Service == nil {
-		return
-	}
-	if os.Getenv("GAUTH_SEMANTIC_PERSIST_NO_THROTTLE") != "1" {
-		if time.Since(s.semanticLastPersist) < 5*time.Second {
-			return
-		}
-	}
-	snap := s.rfc0111Service.SemanticSnapshot()
-	// copy EWMA stats under anomaly key
-	s.semanticAnomalyMu.Lock()
-	cloneEWMA := make(map[string]struct {
-		Mean  float64
-		M2    float64
-		Count int
-	}, len(s.semanticEWMA))
-	for k, v := range s.semanticEWMA {
-		cloneEWMA[k] = v
-	}
-	s.semanticAnomalyMu.Unlock()
-	var out struct {
-		Counters  map[string]uint64         `json:"counters"`
-		Anomaly   map[string]anomalyPersist `json:"anomaly"`
-		Timestamp string                    `json:"timestamp"`
-	}
-	out.Counters = snap
-	persistEWMA := make(map[string]anomalyPersist, len(cloneEWMA))
-	for k, v := range cloneEWMA {
-		persistEWMA[k] = anomalyPersist{Mean: v.Mean, M2: v.M2, Count: v.Count}
-	}
-	out.Anomaly = persistEWMA
-	out.Timestamp = time.Now().UTC().Format(time.RFC3339Nano)
-	buf, err := json.Marshal(out)
-	if err != nil {
-		return
-	}
-	// Hash chain integrity wrapper
-	chainInput := append([]byte(s.semanticPrevHash), buf...)
-	curHash := fmt.Sprintf("%x", sha256.Sum256(chainInput))
-	wrapped := struct {
-		Payload   json.RawMessage `json:"payload"`
-		PrevHash  string          `json:"prev_hash"`
-		Hash      string          `json:"hash"`
-		Timestamp string          `json:"timestamp"`
-	}{Payload: buf, PrevHash: s.semanticPrevHash, Hash: curHash, Timestamp: time.Now().UTC().Format(time.RFC3339Nano)}
-	finalBuf, err2 := json.Marshal(wrapped)
-	if err2 != nil {
-		return
-	}
-	tmp := s.semanticPersistPath + ".tmp"
-	if err := os.WriteFile(tmp, finalBuf, 0o600); err != nil {
-		return
-	}
-	if err := os.Rename(tmp, s.semanticPersistPath); err != nil {
-		fmt.Fprintf(os.Stderr, "[semantics] rename error: %v\n", err)
-	}
-	s.semanticPrevHash = curHash
-	s.semanticLastPersist = time.Now()
-}
-
-// apiViolationPersistenceVerify recalculates the current payload hash using stored prev_hash and compares with stored hash.
-// It returns JSON {success:true, integrity:"ok"|"mismatch", details:{expected:string, recomputed:string, prev_hash:string}}
-// Legacy (non-wrapped) files return integrity:"legacy" and no recomputed comparison.
-func (s *BetaServer) apiViolationPersistenceVerify(c *gin.Context) {
-	if s.violationPersistPath == "" {
-		// Not configured
-		s.violationIntegrityStatus = integrityUnconfigured
-		c.JSON(200, gin.H{"success": true, "configured": false})
-		return
-	}
-	b, err := os.ReadFile(s.violationPersistPath)
-	if err != nil {
-		c.JSON(500, gin.H{"success": false, "error": "read_failed", "detail": err.Error()})
-		return
-	}
-	type wrapper struct {
-		Payload  json.RawMessage `json:"payload"`
-		PrevHash string          `json:"prev_hash"`
-		Hash     string          `json:"hash"`
-	}
-	var w wrapper
-	if err := json.Unmarshal(b, &w); err != nil || len(w.Payload) == 0 || w.Hash == "" {
-		// Legacy format
-		s.violationIntegrityStatus = integrityLegacy
-		c.JSON(200, gin.H{"success": true, "integrity": integrityLegacy, "configured": true})
-		return
-	}
-	recomputed := fmt.Sprintf("%x", sha256.Sum256(append([]byte(w.PrevHash), w.Payload...)))
-	integrity := integrityOK
-	if recomputed != w.Hash {
-		integrity = integrityMismatch
-	}
-	s.violationIntegrityStatus = integrity
-	c.JSON(200, gin.H{"success": true, "configured": true, "integrity": integrity, "details": gin.H{"expected": w.Hash, "recomputed": recomputed, "prev_hash": w.PrevHash}})
-}
-
 // apiSemanticPersistenceVerify performs integrity verification for semantic counters persistence file.
 func (s *BetaServer) apiSemanticPersistenceVerify(c *gin.Context) {
-	if s.semanticPersistPath == "" {
+	if s.semanticHandler == nil {
 		s.semanticIntegrityStatus = integrityUnconfigured
 		c.JSON(200, gin.H{"success": true, "configured": false})
 		return
 	}
-	b, err := os.ReadFile(s.semanticPersistPath)
-	if err != nil {
-		c.JSON(500, gin.H{"success": false, "error": "read_failed", "detail": err.Error()})
-		return
-	}
-	type wrapper struct {
-		Payload  json.RawMessage `json:"payload"`
-		PrevHash string          `json:"prev_hash"`
-		Hash     string          `json:"hash"`
-	}
-	var w wrapper
-	if err := json.Unmarshal(b, &w); err != nil || len(w.Payload) == 0 || w.Hash == "" {
-		s.semanticIntegrityStatus = integrityLegacy
-		c.JSON(200, gin.H{"success": true, "integrity": integrityLegacy, "configured": true})
-		return
-	}
-	recomputed := fmt.Sprintf("%x", sha256.Sum256(append([]byte(w.PrevHash), w.Payload...)))
-	integrity := integrityOK
-	if recomputed != w.Hash {
-		integrity = integrityMismatch
-	}
-	s.semanticIntegrityStatus = integrity
-	c.JSON(200, gin.H{"success": true, "configured": true, "integrity": integrity, "details": gin.H{"expected": w.Hash, "recomputed": recomputed, "prev_hash": w.PrevHash}})
+	status, details := s.semanticHandler.VerifyPersistence()
+	s.semanticIntegrityStatus = status
+	c.JSON(200, gin.H{"success": true, "configured": true, "integrity": status, "details": details})
 }
 
 // LifecycleEvent captures a single lifecycle status transition observation for introspection.
@@ -3053,10 +1212,10 @@ func envFallback(key, fallback string) string {
 
 // getExtProviderLabel returns provider label for external anchor metrics.
 func getExtProviderLabel(s *BetaServer) string {
-	if s == nil || s.externalAnchorProvider == nil {
+	if s == nil || s.capabilityAnchorHandler == nil || s.capabilityAnchorHandler.Provider == nil {
 		return "_"
 	}
-	rec := s.externalAnchorProvider.Latest()
+	rec, _ := s.capabilityAnchorHandler.Latest(context.Background())
 	// Preferred: provider tag from latest receipt (already normalized by provider implementation)
 	if rec.Provider != "" {
 		return rec.Provider
@@ -3205,21 +1364,19 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		}
 	}
 	s := &BetaServer{
-		router:              r,
-		start:               time.Now(),
-		jobs:                NewJobManager(200),
-		audit:               NewAuditLog(500),
-		events:              NewEventHub(500),
-		tokens:              NewTokenStore(500),
-		port:                port,
-		policyRL:            newSimpleRateLimiter(20, time.Minute),
-		replayStore:         NewReplayNonceStore(5 * time.Minute),
-		delegationStatus:    make(map[string]string),
-		metrics:             memoryMetrics,
-		lifecycleEvents:     make(map[string][]*LifecycleEvent),
-		lifecycleCap:        250,
-		violationHistoryCap: 400,
-		semanticHistoryCap:  300,
+		router:           r,
+		start:            time.Now(),
+		jobs:             NewJobManager(200),
+		audit:            NewAuditLog(500),
+		events:           NewEventHub(500),
+		tokens:           token.NewStore(500),
+		port:             port,
+		policyRL:         newSimpleRateLimiter(20, time.Minute),
+		replayStore:      token.NewReplayNonceStore(5 * time.Minute),
+		delegationStatus: make(map[string]string),
+		metrics:          memoryMetrics,
+		lifecycleEvents:  make(map[string][]*LifecycleEvent),
+		lifecycleCap:     250,
 		requiredActionCaps: map[string][]string{
 			"transaction:execute": {"cap.transfer"},
 			"transaction:pay":     {"cap.transfer"},
@@ -3228,15 +1385,42 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			"delegation:revoke":   {"cap.delegation.revoke"},
 		},
 		stopCh:              make(chan struct{}),
-		modelLimits:         make(map[string]int),
-		attestStreamSubs:    make(map[chan modelLimitsAttestation]struct{}),
-		attestStreamCounts:  make(map[string]uint64),
 		protocolFlowManager: NewProtocolFlowManager(),
 		keyProvider:         nil, // default to nil; expected to be injected or initialized via options
 	}
 	for _, opt := range opts {
 		opt(s)
 	}
+	// Initialize capability enforcement flag from env
+	s.capEnforce = os.Getenv("GAUTH_CAPABILITY_ENFORCE") == "1"
+	s.lifecycleStrict = os.Getenv("GAUTH_CAP_LIFECYCLE_STRICT") == "1"
+	s.lifecycleSunsetEnforce = os.Getenv("GAUTH_CAP_LIFECYCLE_SUNSET_ENFORCE") == "1"
+	// Initialize Token Handler
+	s.tokenHandler = token.NewHandler(s.tokens, s.replayStore, s, s, s, &tokenTracerAdapter{tp: s.tracerProvider}, s.enforceCapabilities, s.metrics, s, s.keyProvider)
+	s.tokenHandler.ETagUpdater = s // Server implements JWKSETagUpdater
+	s.tokenHandler.RegisterRoutes(s.router)
+
+	// Initialize Model Limits Handler
+	s.modelLimitsHandler = modellimits.NewHandler(
+		os.Getenv("GAUTH_MODEL_LIMITS_CONFIG_PATH"),
+		os.Getenv("GAUTH_MODEL_LIMIT_AUDIT_PATH"),
+		os.Getenv("GAUTH_MODEL_LIMIT_ANCHOR_PATH"),
+	)
+	s.modelLimitsHandler.StrictUnknown = os.Getenv("GAUTH_MODEL_LIMITS_STRICT_UNKNOWN") == "1"
+	// Wire dependencies if available
+	if km := s.getKeyManager(); km != nil {
+		s.modelLimitsHandler.KeyManager = km
+	}
+	s.modelLimitsHandler.Metrics = s.metrics // Assumes metrics interface compatibility?
+	// Metrics interface in handler expects IncModelLimitSurge(), etc.
+	// s.metrics IS metrics.Metrics which has these methods.
+	// But handler.Metrics definition must match.
+	// handler.Metrics defines subset. s.metrics implements superset. So it works.
+
+	if err := s.modelLimitsHandler.Init(context.Background()); err != nil {
+		fmt.Fprintf(os.Stderr, "[model-limits] init failed: %v\n", err)
+	}
+	s.modelLimitsAPI = modellimits.NewAPI(s.modelLimitsHandler)
 
 	// Initialize Database ... (rest of the block is fine, just confirming context)
 	if host := os.Getenv("GAUTH_DB_HOST"); host != "" {
@@ -3369,92 +1553,6 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		auditHandlers.RegisterBasic(betaGroup, s)
 	}
 	// (removed) throttle demo POST here; handled in initUIRevamp with duplicate guard
-	// Initialize surge detection structures
-	s.modelLimitSurgeState = make(map[string][]int)
-	s.modelLimitSurgeLast = make(map[string]time.Time)
-	s.modelLimitSurgeFactor = 3.0
-	s.modelLimitSurgeMinEvents = 5
-	if raw := os.Getenv("GAUTH_MODEL_LIMIT_SURGE_FACTOR"); raw != "" {
-		if v, err := strconv.ParseFloat(raw, 64); err == nil && v > 0 {
-			s.modelLimitSurgeFactor = v
-		}
-	}
-	if raw := os.Getenv("GAUTH_MODEL_LIMIT_SURGE_MIN_EVENTS"); raw != "" {
-		if v, err := strconv.Atoi(raw); err == nil && v > 0 {
-			s.modelLimitSurgeMinEvents = v
-		}
-	}
-	if os.Getenv("GAUTH_CAPABILITY_ENFORCE") == "1" {
-		s.capEnforce = true
-	}
-	if os.Getenv("GAUTH_CAP_LIFECYCLE_STRICT") == "1" {
-		s.lifecycleStrict = true
-	}
-	if os.Getenv("GAUTH_CAP_LIFECYCLE_SUNSET_ENFORCE") == "1" {
-		s.lifecycleSunsetEnforce = true
-	}
-	// Optional model limits loader (sec11.item2 extended) GAUTH_MODEL_LIMITS_PATH JSON example:
-	// {
-	//   "model_limits": {
-	//      "modelA": {"max_input_tokens":8192, "max_output_tokens":4096, "max_requests_per_minute":120},
-	//      "modelB": {"max_input_tokens":16384}
-	//   }
-	// }
-	// Backward compatible: entries lacking new fields default to 0 (ignored enforcement for that dimension).
-	if mlPath := os.Getenv("GAUTH_MODEL_LIMITS_PATH"); mlPath != "" {
-		s.modelLimitsPath = mlPath
-		if s.loadModelLimitsFromDisk() {
-			// record initial mtime for reload
-			if fi, err := os.Stat(mlPath); err == nil {
-				s.modelLimitsLastMtime = fi.ModTime()
-			}
-		}
-		// configure reload interval (seconds)
-		if raw := os.Getenv("GAUTH_MODEL_LIMITS_RELOAD_INTERVAL"); raw != "" {
-			if v, err := strconv.Atoi(raw); err == nil && v > 0 {
-				s.modelLimitsReloadInterval = time.Duration(v) * time.Second
-			}
-		}
-		if s.modelLimitsReloadInterval > 0 {
-			go s.modelLimitsReloader()
-		}
-	}
-	// Strict unknown-model enforcement can be enabled regardless of whether an initial limits file is provided.
-	if os.Getenv("GAUTH_MODEL_LIMITS_STRICT_UNKNOWN") == "1" {
-		s.modelLimitsStrictUnknown = true
-	}
-	// Optional model limit exceed audit chain
-	if auditPath := os.Getenv("GAUTH_MODEL_LIMIT_AUDIT_PATH"); auditPath != "" {
-		// touch file if not exists
-		if f, err := os.OpenFile(auditPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600); err == nil {
-			f.Close()
-			s.modelLimitAuditPath = auditPath
-			fmt.Fprintf(os.Stderr, "[model-limits] audit chain enabled path=%s\n", auditPath)
-		} else {
-			fmt.Fprintf(os.Stderr, "[model-limits] audit chain open failed path=%s err=%v\n", auditPath, err)
-		}
-	}
-	// Optional audit anchor chain (periodic commitment records referencing the audit chain head)
-	if anchorPath := os.Getenv("GAUTH_MODEL_LIMIT_ANCHOR_PATH"); anchorPath != "" {
-		if f, err := os.OpenFile(anchorPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600); err == nil {
-			f.Close()
-			s.modelLimitAnchorPath = anchorPath
-			// Parse interval (entries) env if supplied
-			interval := 0
-			if raw := os.Getenv("GAUTH_MODEL_LIMIT_ANCHOR_INTERVAL"); raw != "" {
-				if v, err2 := strconv.Atoi(raw); err2 == nil && v > 0 {
-					interval = v
-				}
-			}
-			if interval == 0 {
-				interval = 100
-			} // default conservative anchor cadence
-			s.modelLimitAnchorInterval = interval
-			fmt.Fprintf(os.Stderr, "[model-limits] audit anchor enabled path=%s interval=%d\n", anchorPath, interval)
-		} else {
-			fmt.Fprintf(os.Stderr, "[model-limits] audit anchor open failed path=%s err=%v\n", anchorPath, err)
-		}
-	}
 	// Seed capabilities (demo) or load from file if GAUTH_CAPABILITIES_PATH set.
 	capPath := os.Getenv("GAUTH_CAPABILITIES_PATH")
 	if capPath == "" {
@@ -3548,10 +1646,10 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		s.registerLimitsDiagnostics(r)
 	}
 	// Register model validation endpoint (prototype governance feature)
-	s.router.POST("/api/v1/model/validate", s.apiModelValidate)
-	s.router.GET("/api/v1/model/limits/audit/verify", s.apiModelLimitAuditVerify)
-	s.router.GET("/api/v1/model/limits/audit/anchor/verify", s.apiModelLimitAuditAnchorVerify)
-	s.router.GET("/api/v1/model/limits/snapshot", s.apiModelLimitsSnapshot)
+	// Register Model Limits Handlers (refactored)
+	if s.modelLimitsAPI != nil {
+		s.modelLimitsAPI.RegisterRoutes(s.router)
+	}
 	// Combined anchor prototype endpoints (capability + rotation digest)
 	s.router.POST("/api/v1/anchor/emitCombined", s.apiCombinedAnchorEmit)
 	s.router.GET("/api/v1/anchor/chain", s.apiCombinedAnchorChain)
@@ -3615,30 +1713,24 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 					SetExternalAnchorLastHashLen(int)
 				}); ok {
 					ageExt := uint64(0)
-					if !s.externalAnchorLastReceipt.Timestamp.IsZero() {
-						ageExt = uint64(time.Since(s.externalAnchorLastReceipt.Timestamp).Seconds())
+					lastReceipt := s.capabilityAnchorHandler.GetLastReceipt()
+					if !lastReceipt.Timestamp.IsZero() {
+						ageExt = uint64(time.Since(lastReceipt.Timestamp).Seconds())
 					}
 					pm.SetExternalAnchorAgeSeconds(ageExt)
-					pm.SetExternalAnchorLastHashLen(len(s.externalAnchorLastReceipt.Hash))
+					pm.SetExternalAnchorLastHashLen(len(lastReceipt.Hash))
 				}
 			}
 		}
 	}()
-	// Initialize semantic anomaly detector maps.
-	s.initSemanticAnomaly()
-	// Capture initial anomaly stats (ensures fields are referenced early)
-	_, _ = s.SemanticAnomalyStats()
-	// Reference anomaly detector fields to satisfy static analysis (U1000) until full integration tests added.
-	_ = []interface{}{&s.semanticAnomalyMu, s.semanticEWMA, s.semanticScores}
-	// Violation persistence path (optional)
+
+	// Violation persistence path (optional) GAUTH_VIOLATION_PERSIST_PATH
 	if vp := os.Getenv("GAUTH_VIOLATION_PERSIST_PATH"); vp != "" {
-		// expand ~
 		if strings.HasPrefix(vp, "~") {
 			if home, err := os.UserHomeDir(); err == nil {
 				vp = filepath.Join(home, strings.TrimPrefix(vp, "~"))
 			}
 		}
-		// ensure directory exists (errcheck: log on failure)
 		dir := filepath.Dir(vp)
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			fmt.Fprintf(os.Stderr, "[violations] mkdir error path=%s err=%v\n", dir, err)
@@ -3647,6 +1739,11 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			fmt.Fprintf(os.Stderr, "[violations] persistence path set: %s\n", vp)
 		}
 	}
+	// Initialize violation handler (lazy service injection later)
+	s.violationHandler = violations.NewHandler(nil, s.metrics, s.violationPersistPath)
+	s.violationAPI = violations.NewAPI(s.violationHandler)
+	s.violationAPI.RegisterRoutes(s.router)
+
 	// Semantic counters persistence path (optional) GAUTH_SEMANTIC_PERSIST_PATH
 	if sp := os.Getenv("GAUTH_SEMANTIC_PERSIST_PATH"); sp != "" {
 		if strings.HasPrefix(sp, "~") {
@@ -3697,8 +1794,11 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		} else {
 			s.primaryAuthService = primary
 			fmt.Fprintln(os.Stderr, "[violation-metrics] primary gauth.Service initialized (violation counters active)")
-			// Restore persisted counters if available
-			s.loadViolationPersistence()
+			// Initialize handler with service and load persistence
+			s.violationHandler.Service = primary
+			if err := s.violationHandler.Load(); err != nil {
+				fmt.Fprintf(os.Stderr, "violation load error: %v\n", err)
+			}
 		}
 	}
 	// Initialize RFC0111 service (semantic counters) unless disabled (GAUTH_DISABLE_RFC0111_SERVICE=1)
@@ -3715,9 +1815,19 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		// Mount dual-control revocation workflow HTTP endpoints.
 		s.mountRevocationWorkflow()
 	}
-	// Restore semantic counters if persistence configured and service wired.
-	if s.semanticPersistPath != "" && s.rfc0111Service != nil {
-		s.loadSemanticPersistence()
+	// Initialize Semantic Handler (duplicate init logic if NewBetaServerWithMetrics is standalone)
+	// Ideally NewBetaServerWithMetrics should call common init, but here we inline it.
+	s.semanticHandler = semantic.NewHandler(s.rfc0111Service, nil, s.semanticPersistPath)
+	s.semanticAPI = semantic.NewAPI(s.semanticHandler)
+	if err := s.semanticHandler.Load(); err != nil {
+		fmt.Printf("semantic load error: %v\n", err)
+	}
+	s.semanticAPI.RegisterRoutes(s.router)
+
+	// Check loaded stats
+	eC, sC := s.semanticHandler.Stats()
+	if eC > 0 || sC > 0 {
+		fmt.Printf("loaded semantic stats: %d ewma, %d scores\n", eC, sC)
 	}
 
 	// Initialize PostgreSQL database connection for admin handlers
@@ -3955,7 +2065,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 						fmt.Fprintln(os.Stderr, "[violations] autosave loop stopping")
 						return
 					case <-time.After(time.Duration(intervalSec) * time.Second):
-						s.saveViolationPersistence()
+						if s.violationHandler != nil {
+							s.violationHandler.Save()
+						}
 					}
 				}
 			}()
@@ -3978,7 +2090,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 						fmt.Fprintln(os.Stderr, "[semantics] autosave loop stopping")
 						return
 					case <-time.After(time.Duration(intervalSec) * time.Second):
-						s.saveSemanticPersistence()
+						s.semanticHandler.Save()
 					}
 				}
 			}()
@@ -4001,36 +2113,24 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 						fmt.Fprintln(os.Stderr, "[semantics] anomaly sampler stopping")
 						return
 					case <-time.After(time.Duration(bgInterval) * time.Second):
-						// Acquire latest snapshot & append to history if changed to ensure rates update.
-						if ss := s.rfc0111Service.SemanticSnapshot(); ss != nil {
-							clone := make(map[string]uint64, len(ss))
-							for k, v := range ss {
-								clone[k] = v
-							}
-							s.semanticHistMu.Lock()
-							now := time.Now()
-							appendNeeded := true
-							if len(s.semanticHistory) > 0 {
-								last := s.semanticHistory[len(s.semanticHistory)-1]
-								// Append only if counters changed or >30s elapsed to avoid excessive points.
-								if equalUint64Map(last.Snapshot, ss) && now.Sub(last.At) < 30*time.Second {
-									appendNeeded = false
+						// Acquire latest snapshot & update anomaly detection state
+						s.semanticHandler.Update()
+						// Check for high anomaly scores to activate reactive throttle
+						active := false
+						if tStr := os.Getenv("GAUTH_SEMANTIC_ANOMALY_Z_THRESHOLD"); tStr != "" {
+							if threshold, err := strconv.ParseFloat(tStr, 64); err == nil {
+								scores := s.semanticHandler.Scores()
+								for _, v := range scores {
+									if v > threshold {
+										active = true
+										break
+									}
 								}
 							}
-							if appendNeeded {
-								s.semanticHistory = append(s.semanticHistory, struct {
-									At       time.Time
-									Snapshot map[string]uint64
-								}{At: now, Snapshot: clone})
-								if len(s.semanticHistory) > s.semanticHistoryCap {
-									s.semanticHistory = s.semanticHistory[len(s.semanticHistory)-s.semanticHistoryCap:]
-								}
-							}
-							s.semanticHistMu.Unlock()
-							// Compute 60s rates and update anomalies.
-							r60, _ := s.semanticRatesForWindows()
-							s.updateSemanticAnomalies(r60)
 						}
+						// Direct field assignment (assuming single writer or acceptable race for this prototype flag)
+						// Previous implementation also just assigned it.
+						s.semanticThrottleActive = active
 					}
 				}
 			}()
@@ -4076,6 +2176,11 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 				}
 			}
 		}
+	}
+	// Update token handler's tracer now that tracerProvider is initialized
+	if s.tracerProvider != nil && s.tokenHandler != nil {
+		s.tokenHandler.Tracer = &tokenTracerAdapter{tp: s.tracerProvider}
+		s.tokenHandler.TracerRatio = s.tracerSampleRatio
 	}
 	// Initialize OpenTelemetry metrics exporter if enabled (stdout metric for demo) guarded by sync.Once
 	if os.Getenv("GAUTH_OTEL_METRICS_ENABLE") == "1" {
@@ -4185,11 +2290,22 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 								o.ObserveInt64(g, int64(val))
 							}
 						}
-						rates := s.violationRatesForWindows()
-						for rk, g := range s.otelViolationRates {
-							if rv, ok := rates[rk]; ok {
-								o.ObserveFloat64(g, rv)
-							}
+						// Compute global rates for OTel compatibility (sum of all keys)
+						rates60 := s.violationHandler.ComputeRates(60 * time.Second)
+						rates300 := s.violationHandler.ComputeRates(300 * time.Second)
+						sum60 := 0.0
+						for _, v := range rates60 {
+							sum60 += v
+						}
+						sum300 := 0.0
+						for _, v := range rates300 {
+							sum300 += v
+						}
+						if g, ok := s.otelViolationRates["rate_60s"]; ok {
+							o.ObserveFloat64(g, sum60)
+						}
+						if g, ok := s.otelViolationRates["rate_300s"]; ok {
+							o.ObserveFloat64(g, sum300)
 						}
 					}
 					if s.rfc0111Service != nil {
@@ -4204,7 +2320,24 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 								}
 							}
 						}
-						r60, r300 := s.semanticRatesForWindows()
+						r60 := s.semanticHandler.ComputeRates(60 * time.Second)
+						r300 := s.semanticHandler.ComputeRates(300 * time.Second)
+						// Update Anomaly Detection State (replaces s.updateSemanticAnomalies)
+						// Actually Handler.Update() does this. We should call Update() here?
+						// Note: Handler.Update() appends to history. If we call it here, it happens once per scrape.
+						// Is that enough? Prometheus scrape interval determines resolution.
+						// The previous code called updateSemanticAnomalies inside apiSemanticCountersPrometheus, which is a scrape handler.
+						// So yes, calling Update() here is consistent (pull model).
+						// BUT `ComputeRates` is read-only.
+						// `s.semanticHandler.Update()` does snapshot -> history -> calc.
+						// We should call `s.semanticHandler.Update()` first!
+						s.semanticHandler.Update()
+
+						// Now fetch rates for OTel
+						// Recalculate rates after update
+						r60 = s.semanticHandler.ComputeRates(60 * time.Second)
+						r300 = s.semanticHandler.ComputeRates(300 * time.Second)
+
 						for k, g := range semanticRateGauges60 {
 							if v, ok := r60[k]; ok {
 								o.ObserveFloat64(g, v)
@@ -4215,7 +2348,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 								o.ObserveFloat64(g, v)
 							}
 						}
-						scores := s.currentSemanticScores()
+						scores := s.semanticHandler.Scores()
 						for k, g := range semanticAnomalyGauges {
 							if v, ok := scores[k]; ok {
 								o.ObserveFloat64(g, v)
@@ -4395,10 +2528,11 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	}
 	// Initialize external capability anchoring provider (kept separate from internal notarizer & memory anchor client).
 	// Environment: GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER = memory|tsa_stub
+	var extProvider anchorint.Provider
 	if prov := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER"); prov != "" {
 		switch prov {
 		case memoryProvider:
-			s.externalAnchorProvider = anchorint.NewMemoryProvider()
+			extProvider = anchorint.NewMemoryProvider()
 			fmt.Fprintln(os.Stderr, "[ext-anchor] memory provider initialized")
 		case "tsa_stub":
 			// Optional tuning vars
@@ -4407,7 +2541,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			failProbRaw := envFallback("GAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB", "0")
 			fp, _ := strconv.ParseFloat(failProbRaw, 64)
 			// Use env-aware constructor to support deterministic seeding via GAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED for tests.
-			s.externalAnchorProvider = anchorint.NewTSAStubProviderFromEnv(minMs, maxMs, fp)
+			extProvider = anchorint.NewTSAStubProviderFromEnv(minMs, maxMs, fp)
 			if os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED") != "" {
 				forced := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS")
 				if forced != "" {
@@ -4426,115 +2560,116 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		default:
 			fmt.Fprintf(os.Stderr, "[ext-anchor] unknown provider '%s' (skipping)\n", prov)
 		}
-		// Optional persistence path
-		if rp := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_PATH"); rp != "" {
-			if strings.HasPrefix(rp, "~") {
-				if home, err := os.UserHomeDir(); err == nil {
-					rp = filepath.Join(home, strings.TrimPrefix(rp, "~"))
-				}
-			}
-			rs := anchorint.NewExternalReceiptStore(rp)
-			if err := rs.Load(); err != nil {
-				fmt.Fprintf(os.Stderr, "[ext-anchor] receipt store load error path=%s err=%v\n", rp, err)
-			} else {
-				fmt.Fprintf(os.Stderr, "[ext-anchor] receipt store ready path=%s entries=%d\n", rp, len(rs.Entries()))
-				s.externalReceiptStore = rs
-				s.externalReceiptIntegrityStatus = integrityUnconfigured
+	}
+
+	// Optional persistence store
+	var extStore capability_anchor.ReceiptStore
+	if rp := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_PATH"); rp != "" {
+		if strings.HasPrefix(rp, "~") {
+			if home, err := os.UserHomeDir(); err == nil {
+				rp = filepath.Join(home, strings.TrimPrefix(rp, "~"))
 			}
 		}
-		// Perform an initial anchoring attempt immediately on startup when a capability registry hash is already computed.
-		// This ensures observability (status endpoint exposes a receipt) even for static seed configurations without
-		// a subsequent file reload emission. Duplicate anchors of identical hashes are acceptable for prototype providers.
-		if s.externalAnchorProvider != nil && s.capabilityRegistryHash != "" {
-			providerLabel := getExtProviderLabel(s)
-			maxRetries := 0
-			if raw := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_RETRIES"); raw != "" {
-				if v, err := strconv.Atoi(raw); err == nil && v > 0 {
-					maxRetries = v
-				}
+		rs := anchorint.NewExternalReceiptStore(rp)
+		if err := rs.Load(); err != nil {
+			fmt.Fprintf(os.Stderr, "[ext-anchor] receipt store load error path=%s err=%v\n", rp, err)
+		} else {
+			fmt.Fprintf(os.Stderr, "[ext-anchor] receipt store ready path=%s entries=%d\n", rp, len(rs.Entries()))
+			extStore = rs
+		}
+	}
+
+	// Initialize Handler
+	s.capabilityAnchorHandler = capability_anchor.NewHandler(extProvider, extStore)
+	s.capabilityAnchorAPI = capability_anchor.NewAPI(s.capabilityAnchorHandler)
+	s.capabilityAnchorAPI.RegisterRoutes(s.router)
+	// Perform an initial anchoring attempt immediately on startup when a capability registry hash is already computed.
+	// This ensures observability (status endpoint exposes a receipt) even for static seed configurations without
+	// a subsequent file reload emission. Duplicate anchors of identical hashes are acceptable for prototype providers.
+	// Also update handler with the current registry hash.
+	if s.capabilityRegistryHash != "" {
+		s.capabilityAnchorHandler.SetRegistryHash(s.capabilityRegistryHash)
+	}
+
+	if s.capabilityAnchorHandler.Provider != nil && s.capabilityRegistryHash != "" {
+		providerLabel := getExtProviderLabel(s)
+		maxRetries := 0
+		if raw := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_RETRIES"); raw != "" {
+			if v, err := strconv.Atoi(raw); err == nil && v > 0 {
+				maxRetries = v
 			}
-			baseMs := 50
-			if raw := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_RETRY_BASE_MS"); raw != "" {
-				if v, err := strconv.Atoi(raw); err == nil && v > 0 {
-					baseMs = v
-				}
+		}
+		baseMs := 50
+		if raw := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_RETRY_BASE_MS"); raw != "" {
+			if v, err := strconv.Atoi(raw); err == nil && v > 0 {
+				baseMs = v
 			}
-			var recExt anchorint.Receipt
-			var aErr error
-			for attempt := 0; attempt <= maxRetries; attempt++ {
-				startExt := time.Now()
-				recExt, aErr = s.externalAnchorProvider.Anchor(s.capabilityRegistryHash)
-				latExt := time.Since(startExt)
-				// Metrics
-				// Metrics recording with forced failure differentiation.
-				if pm, ok := s.metrics.(interface {
-					RecordExternalAnchorResult(string, bool, time.Duration, int)
-				}); ok {
-					if aErr != nil {
-						// Detect forced failure marker substring.
-						if strings.Contains(aErr.Error(), "forced") {
-							if ffm, ok2 := s.metrics.(interface{ IncExternalAnchorForcedFailuresProvider(string) }); ok2 {
-								ffm.IncExternalAnchorForcedFailuresProvider(providerLabel)
-							} else {
-								pm.RecordExternalAnchorResult(providerLabel, false, 0, 0)
-							}
+		}
+		var recExt anchorint.Receipt
+		var aErr error
+		for attempt := 0; attempt <= maxRetries; attempt++ {
+			startExt := time.Now()
+			recExt, aErr = s.capabilityAnchorHandler.Anchor(context.Background())
+			latExt := time.Since(startExt)
+			// Metrics
+			// Metrics recording with forced failure differentiation.
+			if pm, ok := s.metrics.(interface {
+				RecordExternalAnchorResult(string, bool, time.Duration, int)
+			}); ok {
+				if aErr != nil {
+					// Detect forced failure marker substring.
+					if strings.Contains(aErr.Error(), "forced") {
+						if ffm, ok2 := s.metrics.(interface{ IncExternalAnchorForcedFailuresProvider(string) }); ok2 {
+							ffm.IncExternalAnchorForcedFailuresProvider(providerLabel)
 						} else {
 							pm.RecordExternalAnchorResult(providerLabel, false, 0, 0)
 						}
-						fmt.Fprintf(os.Stderr, "[ext-anchor] initial anchor failure attempt=%d hash=%s err=%v\n", attempt, s.capabilityRegistryHash, aErr)
 					} else {
-						pm.RecordExternalAnchorResult(recExt.Provider, true, latExt, len(recExt.Hash))
-						fmt.Fprintf(os.Stderr, "[ext-anchor] initial anchor success attempt=%d provider=%s hash=%s latency=%.3fs\n", attempt, recExt.Provider, recExt.Hash, latExt.Seconds())
+						pm.RecordExternalAnchorResult(providerLabel, false, 0, 0)
 					}
+					fmt.Fprintf(os.Stderr, "[ext-anchor] initial anchor failure attempt=%d hash=%s err=%v\n", attempt, s.capabilityRegistryHash, aErr)
 				} else {
-					if aErr != nil {
-						if pmA, ok := s.metrics.(interface{ IncExternalAnchorAttempts(string) }); ok {
-							pmA.IncExternalAnchorAttempts(providerLabel)
-						}
-						if strings.Contains(aErr.Error(), "forced") {
-							if ffm, ok2 := s.metrics.(interface{ IncExternalAnchorForcedFailuresProvider(string) }); ok2 {
-								ffm.IncExternalAnchorForcedFailuresProvider(providerLabel)
-							} else if pmF, ok3 := s.metrics.(interface{ IncExternalAnchorFailures(string) }); ok3 {
-								pmF.IncExternalAnchorFailures(providerLabel)
-							}
-						} else if pmF, ok := s.metrics.(interface{ IncExternalAnchorFailures(string) }); ok {
+					pm.RecordExternalAnchorResult(recExt.Provider, true, latExt, len(recExt.Hash))
+					fmt.Fprintf(os.Stderr, "[ext-anchor] initial anchor success attempt=%d provider=%s hash=%s latency=%.3fs\n", attempt, recExt.Provider, recExt.Hash, latExt.Seconds())
+				}
+			} else {
+				if aErr != nil {
+					if pmA, ok := s.metrics.(interface{ IncExternalAnchorAttempts(string) }); ok {
+						pmA.IncExternalAnchorAttempts(providerLabel)
+					}
+					if strings.Contains(aErr.Error(), "forced") {
+						if ffm, ok2 := s.metrics.(interface{ IncExternalAnchorForcedFailuresProvider(string) }); ok2 {
+							ffm.IncExternalAnchorForcedFailuresProvider(providerLabel)
+						} else if pmF, ok3 := s.metrics.(interface{ IncExternalAnchorFailures(string) }); ok3 {
 							pmF.IncExternalAnchorFailures(providerLabel)
 						}
-						fmt.Fprintf(os.Stderr, "[ext-anchor] initial anchor failure attempt=%d hash=%s err=%v\n", attempt, s.capabilityRegistryHash, aErr)
-					} else {
-						if pm, ok := s.metrics.(interface{ IncExternalAnchorAttempts(string) }); ok {
-							pm.IncExternalAnchorAttempts(recExt.Provider)
-						}
-						if pm, ok := s.metrics.(interface{ ObserveExternalAnchorLatency(string, time.Duration) }); ok {
-							pm.ObserveExternalAnchorLatency(recExt.Provider, latExt)
-						}
-						if pm, ok := s.metrics.(interface{ SetExternalAnchorLastHashLen(int) }); ok {
-							pm.SetExternalAnchorLastHashLen(len(recExt.Hash))
-						}
-						fmt.Fprintf(os.Stderr, "[ext-anchor] initial anchor success attempt=%d provider=%s hash=%s latency=%.3fs\n", attempt, recExt.Provider, recExt.Hash, latExt.Seconds())
+					} else if pmF, ok := s.metrics.(interface{ IncExternalAnchorFailures(string) }); ok {
+						pmF.IncExternalAnchorFailures(providerLabel)
 					}
-				}
-				if aErr == nil {
-					s.externalAnchorLastReceipt = recExt
-					if s.externalReceiptStore != nil {
-						if _, perr := s.externalReceiptStore.Append(anchorint.ExternalAnchorReceipt{Hash: recExt.Hash, Timestamp: recExt.Timestamp.UTC().Format(time.RFC3339Nano), Provider: recExt.Provider, Version: recExt.Version, LatencySeconds: latExt.Seconds()}); perr == nil {
-							if pm, ok := s.metrics.(interface{ IncExternalAnchorReceiptsTotal() }); ok {
-								pm.IncExternalAnchorReceiptsTotal()
-							}
-						} else {
-							fmt.Fprintf(os.Stderr, "[ext-anchor] receipt persistence error: %v\n", perr)
-						}
+					fmt.Fprintf(os.Stderr, "[ext-anchor] initial anchor failure attempt=%d hash=%s err=%v\n", attempt, s.capabilityRegistryHash, aErr)
+				} else {
+					if pm, ok := s.metrics.(interface{ IncExternalAnchorAttempts(string) }); ok {
+						pm.IncExternalAnchorAttempts(recExt.Provider)
 					}
-					break
+					if pm, ok := s.metrics.(interface{ ObserveExternalAnchorLatency(string, time.Duration) }); ok {
+						pm.ObserveExternalAnchorLatency(recExt.Provider, latExt)
+					}
+					if pm, ok := s.metrics.(interface{ SetExternalAnchorLastHashLen(int) }); ok {
+						pm.SetExternalAnchorLastHashLen(len(recExt.Hash))
+					}
+					fmt.Fprintf(os.Stderr, "[ext-anchor] initial anchor success attempt=%d provider=%s hash=%s latency=%.3fs\n", attempt, recExt.Provider, recExt.Hash, latExt.Seconds())
 				}
-				// Backoff before next attempt if not last
-				if attempt < maxRetries {
-					// exponential backoff with jitter (±20%)
-					d := time.Duration(baseMs) * time.Millisecond * (1 << attempt)
-					//nolint:gosec // G404: weak random acceptable for retry backoff jitter
-					jitter := time.Duration(float64(d) * (0.2 * (rand.Float64()*2 - 1)))
-					time.Sleep(d + jitter)
-				}
+			}
+			if aErr == nil {
+				break
+			}
+			// Backoff before next attempt if not last
+			if attempt < maxRetries {
+				// exponential backoff with jitter (±20%)
+				d := time.Duration(baseMs) * time.Millisecond * (1 << attempt)
+				//nolint:gosec // G404: weak random acceptable for retry backoff jitter
+				jitter := time.Duration(float64(d) * (0.2 * (rand.Float64()*2 - 1)))
+				time.Sleep(d + jitter)
 			}
 		}
 	}
@@ -4607,29 +2742,6 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 				case <-time.After(time.Duration(vInt) * time.Second):
 					// perform verification (best-effort)
 					_ = s.verifyReceiptChain()
-				}
-			}
-		}()
-	}
-	// Background external receipt chain verification loop GAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_VERIFY_INTERVAL (default 180s)
-	if s.externalReceiptStore != nil && os.Getenv("GAUTH_DISABLE_BG_POLLS") != "1" {
-		vInt := 180
-		if raw := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_VERIFY_INTERVAL"); raw != "" {
-			if v, err := strconv.Atoi(raw); err == nil {
-				vInt = v
-			}
-		}
-		if vInt < 30 {
-			vInt = 30
-		}
-		go func() {
-			fmt.Fprintf(os.Stderr, "[ext-anchor] receipt verification loop enabled interval=%ds\n", vInt)
-			for {
-				select {
-				case <-s.stopCh:
-					return
-				case <-time.After(time.Duration(vInt) * time.Second):
-					_ = s.verifyExternalReceiptChain()
 				}
 			}
 		}()
@@ -4893,7 +3005,10 @@ func (s *BetaServer) loadCapabilitiesFromFile(path string) error {
 					}
 				}
 				// Optional external anchoring provider (distinct from notarizer) when GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER set.
-				if s.externalAnchorProvider != nil && s.capabilityRegistryHash != "" {
+				if s.capabilityAnchorHandler.Provider != nil && s.capabilityRegistryHash != "" {
+					// Ensure handler has latest hash
+					s.capabilityAnchorHandler.SetRegistryHash(s.capabilityRegistryHash)
+
 					providerLabel := getExtProviderLabel(s)
 					maxRetries := 0
 					if raw := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_RETRIES"); raw != "" {
@@ -4911,7 +3026,7 @@ func (s *BetaServer) loadCapabilitiesFromFile(path string) error {
 					var aErr error
 					for attempt := 0; attempt <= maxRetries; attempt++ {
 						startExt := time.Now()
-						recExt, aErr = s.externalAnchorProvider.Anchor(s.capabilityRegistryHash)
+						recExt, aErr = s.capabilityAnchorHandler.Anchor(context.Background())
 						latExt := time.Since(startExt)
 						if pm, ok := s.metrics.(interface {
 							RecordExternalAnchorResult(string, bool, time.Duration, int)
@@ -4946,18 +3061,6 @@ func (s *BetaServer) loadCapabilitiesFromFile(path string) error {
 							}
 						}
 						if aErr == nil {
-							s.externalAnchorLastReceipt = recExt
-							if s.externalReceiptStore != nil {
-								if s.externalReceiptStore != nil {
-									if _, perr := s.externalReceiptStore.Append(anchorint.ExternalAnchorReceipt{Hash: recExt.Hash, Timestamp: recExt.Timestamp.UTC().Format(time.RFC3339Nano), Provider: recExt.Provider, Version: recExt.Version, LatencySeconds: latExt.Seconds()}); perr == nil {
-										if pm, ok := s.metrics.(interface{ IncExternalAnchorReceiptsTotal() }); ok {
-											pm.IncExternalAnchorReceiptsTotal()
-										}
-									} else {
-										fmt.Fprintf(os.Stderr, "[ext-anchor] receipt persistence error: %v\n", perr)
-									}
-								}
-							}
 							break
 						}
 						if attempt < maxRetries {
@@ -5364,43 +3467,13 @@ func (s *BetaServer) apiCapabilityAnchorStatus(c *gin.Context) {
 		}
 	}
 	// External anchoring provider receipt exposure (distinct from notarizer)
-	if s.externalAnchorProvider != nil && s.externalAnchorLastReceipt.Hash != "" {
-		payload["external_anchor_receipt"] = gin.H{"hash": s.externalAnchorLastReceipt.Hash, "timestamp": s.externalAnchorLastReceipt.Timestamp.UTC().Format(time.RFC3339Nano), "provider": s.externalAnchorLastReceipt.Provider, "version": s.externalAnchorLastReceipt.Version}
+	// External anchoring provider receipt exposure (distinct from notarizer)
+	if s.capabilityAnchorHandler.Provider != nil {
+		if rec := s.capabilityAnchorHandler.GetLastReceipt(); rec.Hash != "" {
+			payload["external_anchor_receipt"] = gin.H{"hash": rec.Hash, "timestamp": rec.Timestamp.UTC().Format(time.RFC3339Nano), "provider": rec.Provider, "version": rec.Version}
+		}
 	}
 	c.JSON(200, payload)
-}
-
-// apiExternalAnchorReceiptLatest returns the latest external anchor provider receipt (if provider configured and at least one anchor succeeded).
-func (s *BetaServer) apiExternalAnchorReceiptLatest(c *gin.Context) {
-	if s.externalAnchorProvider == nil {
-		c.JSON(200, gin.H{"success": true, "configured": false})
-		return
-	}
-	rec := s.externalAnchorProvider.Latest()
-	if rec.Hash == "" {
-		c.JSON(200, gin.H{"success": true, "configured": true, emptyValue: true})
-		return
-	}
-	c.JSON(200, gin.H{"success": true, "configured": true, emptyValue: false, "receipt": gin.H{"hash": rec.Hash, "timestamp": rec.Timestamp.UTC().Format(time.RFC3339Nano), "provider": rec.Provider, "version": rec.Version}})
-}
-
-// apiExternalAnchorVerify performs a basic verification of the latest receipt via provider.Verify.
-// Response: {success, configured, verified, error?}
-func (s *BetaServer) apiExternalAnchorVerify(c *gin.Context) {
-	if s.externalAnchorProvider == nil {
-		c.JSON(200, gin.H{"success": true, "configured": false})
-		return
-	}
-	rec := s.externalAnchorProvider.Latest()
-	if rec.Hash == "" {
-		c.JSON(200, gin.H{"success": true, "configured": true, emptyValue: true})
-		return
-	}
-	if err := s.externalAnchorProvider.Verify(rec); err != nil {
-		c.JSON(200, gin.H{"success": true, "configured": true, "verified": false, "error": err.Error()})
-		return
-	}
-	c.JSON(200, gin.H{"success": true, "configured": true, "verified": true})
 }
 
 // apiNotarizationReceiptLatest returns the latest persisted successful receipt (if store configured and at least one entry appended).
@@ -5528,136 +3601,6 @@ func (s *BetaServer) apiNotarizationReceiptsVerify(c *gin.Context) {
 	s.receiptIntegrityStatus = integrityOK
 	if pm, ok := s.metrics.(interface{ SetCapabilityAnchorNotarizationReceiptsIntegrity(string) }); ok {
 		pm.SetCapabilityAnchorNotarizationReceiptsIntegrity("ok")
-	}
-	c.JSON(200, gin.H{"success": true, "configured": true, "integrity": "ok", "total": len(entries), "chain_head": prev})
-}
-
-// verifyExternalReceiptChain verifies persisted external anchor receipts (if configured).
-// Returns integrity status (ok|mismatch|empty|unconfigured) and updates metrics.
-// nolint:SA4006 // status variable used for integrity assignment; staticcheck false positive.
-func (s *BetaServer) verifyExternalReceiptChain() string {
-	if s.externalReceiptStore == nil {
-		s.externalReceiptIntegrityStatus = integrityUnconfigured
-		if pm, ok := s.metrics.(interface{ SetExternalAnchorReceiptsIntegrity(string) }); ok {
-			pm.SetExternalAnchorReceiptsIntegrity(integrityUnconfigured)
-		}
-		return s.externalReceiptIntegrityStatus
-	}
-	entries := s.externalReceiptStore.Entries()
-	if len(entries) == 0 {
-		s.externalReceiptIntegrityStatus = emptyValue
-		if pm, ok := s.metrics.(interface{ SetExternalAnchorReceiptsIntegrity(string) }); ok {
-			pm.SetExternalAnchorReceiptsIntegrity(integrityUnconfigured)
-		}
-		return s.externalReceiptIntegrityStatus
-	}
-	prev := ""
-	s.externalReceiptIntegrityStatus = "ok"
-	for _, e := range entries {
-		base := struct {
-			Hash           string  `json:"hash"`
-			Timestamp      string  `json:"timestamp"`
-			Provider       string  `json:"provider"`
-			Version        int     `json:"version"`
-			LatencySeconds float64 `json:"latency_seconds"`
-			PrevHash       string  `json:"prev_hash"`
-		}{Hash: e.Hash, Timestamp: e.Timestamp, Provider: e.Provider, Version: e.Version, LatencySeconds: e.LatencySeconds, PrevHash: e.PrevHash}
-		enc, err := json.Marshal(base)
-		if err != nil {
-			s.externalReceiptIntegrityStatus = integrityMismatch
-			break
-		}
-		expected := fmt.Sprintf("%x", sha256.Sum256(append([]byte(e.PrevHash), enc...)))
-		if expected != e.ChainHash || e.PrevHash != prev {
-			s.externalReceiptIntegrityStatus = integrityMismatch
-			break
-		}
-		prev = expected
-	}
-	if pm, ok := s.metrics.(interface{ SetExternalAnchorReceiptsIntegrity(string) }); ok {
-		mapped := s.externalReceiptIntegrityStatus
-		if mapped == emptyValue {
-			mapped = integrityUnconfigured
-		}
-		pm.SetExternalAnchorReceiptsIntegrity(mapped)
-	}
-	s.externalReceiptLastVerify = time.Now().UTC()
-	if pm, ok := s.metrics.(interface{ SetExternalAnchorReceiptsLastVerifyAge(uint64) }); ok {
-		pm.SetExternalAnchorReceiptsLastVerifyAge(0)
-	}
-	return s.externalReceiptIntegrityStatus
-}
-
-// apiExternalAnchorReceiptsLatest returns latest persisted external anchor receipt (if store configured).
-func (s *BetaServer) apiExternalAnchorReceiptsLatest(c *gin.Context) {
-	if s.externalReceiptStore == nil {
-		c.JSON(200, gin.H{"success": true, "configured": false})
-		return
-	}
-	latest := s.externalReceiptStore.Latest()
-	if latest.Hash == "" {
-		c.JSON(200, gin.H{"success": true, "configured": true, emptyValue: true})
-		return
-	}
-	c.JSON(200, gin.H{"success": true, "configured": true, emptyValue: false, "receipt": latest})
-}
-
-// apiExternalAnchorReceiptsChain returns summary chain list.
-func (s *BetaServer) apiExternalAnchorReceiptsChain(c *gin.Context) {
-	if s.externalReceiptStore == nil {
-		c.JSON(200, gin.H{"success": true, "configured": false})
-		return
-	}
-	entries := s.externalReceiptStore.Entries()
-	chain := make([]gin.H, 0, len(entries))
-	for _, e := range entries {
-		chain = append(chain, gin.H{"hash": e.Hash, "timestamp": e.Timestamp, "provider": e.Provider, "chain_hash": e.ChainHash, "prev_hash": e.PrevHash})
-	}
-	c.JSON(200, gin.H{"success": true, "configured": true, "total": len(chain), "entries": chain})
-}
-
-// apiExternalAnchorReceiptsVerify runs integrity verification and returns status.
-func (s *BetaServer) apiExternalAnchorReceiptsVerify(c *gin.Context) {
-	if s.externalReceiptStore == nil {
-		c.JSON(200, gin.H{"success": true, "configured": false})
-		return
-	}
-	entries := s.externalReceiptStore.Entries()
-	if len(entries) == 0 {
-		s.externalReceiptIntegrityStatus = emptyValue
-		c.JSON(200, gin.H{"success": true, "configured": true, "integrity": emptyValue, "total": 0})
-		return
-	}
-	prev := ""
-	for i, e := range entries {
-		base := struct {
-			Hash           string  `json:"hash"`
-			Timestamp      string  `json:"timestamp"`
-			Provider       string  `json:"provider"`
-			Version        int     `json:"version"`
-			LatencySeconds float64 `json:"latency_seconds"`
-			PrevHash       string  `json:"prev_hash"`
-		}{Hash: e.Hash, Timestamp: e.Timestamp, Provider: e.Provider, Version: e.Version, LatencySeconds: e.LatencySeconds, PrevHash: e.PrevHash}
-		enc, err := json.Marshal(base)
-		if err != nil {
-			s.externalReceiptIntegrityStatus = integrityMismatch
-			c.JSON(500, gin.H{"success": false, "error": "marshal_failed", "detail": err.Error()})
-			return
-		}
-		expected := fmt.Sprintf("%x", sha256.Sum256(append([]byte(e.PrevHash), enc...)))
-		if expected != e.ChainHash || e.PrevHash != prev {
-			s.externalReceiptIntegrityStatus = integrityMismatch
-			if pm, ok := s.metrics.(interface{ SetExternalAnchorReceiptsIntegrity(string) }); ok {
-				pm.SetExternalAnchorReceiptsIntegrity("mismatch")
-			}
-			c.JSON(200, gin.H{"success": true, "configured": true, "integrity": "mismatch", "total": len(entries), "details": gin.H{"mismatch_index": i, "expected": expected, "stored": e.ChainHash, "prev_expected": prev, "prev_stored": e.PrevHash}})
-			return
-		}
-		prev = expected
-	}
-	s.externalReceiptIntegrityStatus = "ok"
-	if pm, ok := s.metrics.(interface{ SetExternalAnchorReceiptsIntegrity(string) }); ok {
-		pm.SetExternalAnchorReceiptsIntegrity("ok")
 	}
 	c.JSON(200, gin.H{"success": true, "configured": true, "integrity": "ok", "total": len(entries), "chain_head": prev})
 }
@@ -5964,14 +3907,9 @@ func (s *BetaServer) routes() {
 	beta.GET("/policy/metrics", s.apiPolicyMetrics)
 	// Prometheus exposition for policy metrics
 	beta.GET("/policy/metrics/prometheus", s.apiPolicyMetricsPrometheus)
-	// Validation failure / violation counters (token validation categories) JSON snapshot
-	beta.GET("/metrics/violations", s.apiViolationMetrics)
-	// Prometheus exposition for violation counters
-	beta.GET("/metrics/violations/prometheus", s.apiViolationMetricsPrometheus)
 	// Prometheus exposition for revocation auto-sign counters
 	beta.GET("/metrics/revocation/auto-sign/prometheus", s.apiRevocationAutoSignPrometheus)
-	// Hash chain verification endpoints (integrity check for persistence files)
-	beta.GET("/metrics/violations/verify", s.apiViolationPersistenceVerify)
+	// Hash chain verification endpoints (integrity check for persistence files) handled by violationAPI
 	beta.POST("/policy/bundles", s.apiPolicyAddBundle)
 	beta.GET("/policy/bundles/:hash", s.apiPolicyGetBundle)
 	beta.POST("/policy/rollback", s.apiPolicyRollback)
@@ -5995,11 +3933,6 @@ func (s *BetaServer) routes() {
 	beta.POST("/capabilities/reload", s.apiCapabilitiesReload)
 	// Capability anchor & external anchoring metrics/verification endpoints (prototype)
 	beta.GET("/capabilities/anchor/metrics/prometheus", s.apiCapabilityAnchorPrometheus)
-	beta.GET("/capabilities/anchor/external/verify", s.apiExternalAnchorVerify)
-	beta.GET("/capabilities/anchor/external/receipt", s.apiExternalAnchorReceiptLatest)
-	beta.GET("/capabilities/anchor/external/receipts/latest", s.apiExternalAnchorReceiptsLatest)
-	beta.GET("/capabilities/anchor/external/receipts", s.apiExternalAnchorReceiptsChain)
-	beta.GET("/capabilities/anchor/external/receipts/verify", s.apiExternalAnchorReceiptsVerify)
 	// Capability registry external anchoring endpoints (prototype)
 	// Capability anchor routes registered via modular handlers (anchor.RegisterAll) below.
 	// Notarization receipt persistence endpoints (beta scope)
@@ -6010,12 +3943,6 @@ func (s *BetaServer) routes() {
 	beta.GET("/metrics/prometheus", gin.WrapH(promhttp.Handler()))
 	// Root-level Prometheus exposition for standardized scraping (tests expect /metrics)
 	s.router.GET("/metrics", gin.WrapH(promhttp.Handler()))
-	// Model limits governance attestation (snapshot + audit + anchor)
-	s.router.GET("/api/v1/model/limits/attestation", s.apiModelLimitsAttestation)
-	s.router.GET("/api/v1/model/limits/attestation/keys", s.apiModelLimitsAttestationKeys)
-	s.router.POST("/api/v1/model/limits/attestation/verify", s.apiModelLimitsAttestationVerify)
-	// SSE stream for live attestations (gated by GAUTH_ATTEST_STREAM_ENABLE=1)
-	s.router.GET("/api/v1/model/limits/attestation/stream", s.apiModelLimitsAttestationStream)
 	beta.POST("/capabilities/negotiate", s.apiCapabilitiesNegotiate)
 	// Public key discovery (EdDSA active key) for capability anchor signature verification
 	beta.GET("/keys/eddsa", s.apiEdDSAPublicKey)
@@ -6350,11 +4277,6 @@ func (s *BetaServer) routes() {
 	s.router.GET("/api/v1/events/stream", s.apiEventsStream)
 
 	// --- Token Endpoints ---
-	s.router.POST("/api/v1/token/create", s.apiTokenCreate)
-	s.router.POST("/api/v1/token/validate", s.apiTokenValidate)
-	s.router.POST("/api/v1/token/revoke", s.apiTokenRevoke)
-	// Token status update (lifecycle: suspend, terminate, activate) prototype
-	s.router.POST("/api/v1/token/status/update", s.apiTokenStatusUpdate)
 	s.router.GET("/api/v1/beta/metrics/lifecycle", s.apiLifecycleMetrics)
 	// Lifecycle timeline introspection (beta)
 	s.router.GET("/api/v1/beta/lifecycle/timeline", s.apiLifecycleTimeline)
@@ -6366,13 +4288,8 @@ func (s *BetaServer) routes() {
 			s.apiLifecycleTimeline(c)
 		})
 	}
-	s.router.POST("/api/v1/token/introspect", s.apiTokenIntrospect)
-	s.router.GET("/api/v1/token/metrics", s.apiTokenMetrics)
-	// Prototype semantic counters route (currently returns empty map until RFC0111 service wiring integrated)
-	s.router.GET("/api/v1/beta/metrics/poa/semantics", s.apiSemanticCounters)
-	s.router.GET("/api/v1/beta/metrics/poa/semantics/prometheus", s.apiSemanticCountersPrometheus)
-	// Semantic persistence hash chain verification
-	s.router.GET("/api/v1/beta/metrics/poa/semantics/verify", s.apiSemanticPersistenceVerify)
+	// Prototype semantic counters route (replaced by semanticHandler API)
+	// Routes registered via s.semanticAPI.RegisterRoutes(s.router)
 	// Delegation lifecycle management (prototype - not yet backed by persistent service)
 	s.router.POST("/api/v1/delegation/status/update", s.apiDelegationStatusUpdate)
 	// Delegation create + revoke (capability enforced when GAUTH_CAPABILITY_ENFORCE=1)
@@ -7000,107 +4917,6 @@ func (s *BetaServer) routes() {
 	})
 
 	// Unified JWKS endpoint: supports RSA (RS256), HMAC metadata, and Ed25519 (EdDSA) when enabled.
-	s.router.GET("/.well-known/jwks.json", func(c *gin.Context) {
-		mode := os.Getenv("GAUTH_TOKEN_SIG_MODE") // eddsa or hmac
-		alg := os.Getenv("GAUTH_JWT_ALG")
-		if alg == "" {
-			alg = algRS256
-		}
-		useLib := os.Getenv("GAUTH_USE_JWT_LIB") == "1"
-		c.Header("Cache-Control", "public, max-age=60")
-		if rot := os.Getenv("GAUTH_JWT_ROTATION_DAYS"); rot != "" {
-			c.Header("X-Key-Rotation-Interval-Days", rot)
-		}
-		keys := []any{}
-		if useLib {
-			if alg == algRS256 {
-				jwk, err := rsaPublicJWK()
-				if err != nil {
-					c.JSON(500, gin.H{"success": false, "message": "jwks generation error"})
-					return
-				}
-				keys = append(keys, jwk)
-			} else {
-				kid := os.Getenv("GAUTH_JWT_KID")
-				if kid == "" {
-					kid = defaultDemoKey
-				}
-				keys = append(keys, gin.H{"kty": "oct", "alg": alg, "kid": kid, "use": "sig"})
-			}
-		}
-		// EdDSA publication (OKP JWK). We derive key list from in-memory manager via global accessor.
-		if mode == sigModeEdDSA {
-			if km := s.getKeyManager(); km != nil {
-				for _, k := range km.ListCurrent() {
-					jwk := gin.H{
-						"kty":        "OKP",
-						"crv":        "Ed25519",
-						"alg":        "EdDSA",
-						"kid":        k.ID,
-						"use":        "sig",
-						"x":          base64.RawURLEncoding.EncodeToString(k.Public),
-						"expires_at": k.ExpiresAt.Format(time.RFC3339),
-					}
-					// RFC0115 deprecation metadata (structured key lifecycle signals)
-					if !k.DeprecatedAfter.IsZero() {
-						jwk["deprecated_after"] = k.DeprecatedAfter.Format(time.RFC3339)
-					}
-					if !k.SunsetAfter.IsZero() {
-						jwk["sunset_after"] = k.SunsetAfter.Format(time.RFC3339)
-					}
-					keys = append(keys, jwk)
-				}
-			}
-		}
-		if len(keys) == 0 {
-			// Metadata stub when neither JWT lib nor eddsa active
-			kid := os.Getenv("GAUTH_JWT_KID")
-			if kid == "" {
-				kid = defaultDemoKey
-			}
-			keys = append(keys, gin.H{"kty": "oct", "alg": algHS256, "kid": kid, "use": "sig", "metadata_only": true})
-		}
-		payload := gin.H{"keys": keys}
-		raw, marshalErr := json.Marshal(payload)
-		if marshalErr != nil {
-			c.JSON(500, gin.H{"success": false, "message": "jwks marshal error"})
-			return
-		}
-		etag := fmt.Sprintf("W/\"%x\"", sha256.Sum256(raw))
-		c.Header("ETag", etag)
-		if s.jwksETag == "" || s.jwksETag != etag {
-			s.jwksETag = etag
-			s.jwksLastRotated = time.Now().UTC()
-		}
-		if inm := c.GetHeader("If-None-Match"); inm != "" && inm == etag {
-			c.Status(304)
-			return
-		}
-		// RFC0115 deprecation warning: Signal clients when keys are deprecated (past deprecated_after but before sunset_after)
-		if mode == sigModeEdDSA {
-			if km := s.getKeyManager(); km != nil {
-				now := time.Now().UTC()
-				var deprecatedKids []string
-				for _, k := range km.ListCurrent() {
-					// Key is deprecated if past DeprecatedAfter but before ExpiresAt
-					if !k.DeprecatedAfter.IsZero() && now.After(k.DeprecatedAfter) && now.Before(k.ExpiresAt) {
-						deprecatedKids = append(deprecatedKids, k.ID)
-					}
-				}
-				if len(deprecatedKids) > 0 {
-					// Use HTTP Warning header (RFC 7234): "299 - "Miscellaneous persistent warning""
-					c.Header("Warning", fmt.Sprintf("299 - \"Keys deprecated: %s\"", strings.Join(deprecatedKids, ", ")))
-				}
-			}
-		}
-		if key := os.Getenv("GAUTH_JWKS_SIGNING_KEY"); key != "" && os.Getenv("GAUTH_JWKS_SIGNING_KEY_ENABLED") == "1" {
-			mac := hmac.New(sha256.New, []byte(key))
-			mac.Write(raw)
-			c.Header("X-JWKS-Signature", base64.RawURLEncoding.EncodeToString(mac.Sum(nil)))
-			c.Header("X-JWKS-Signature-Alg", algHMACSHA256)
-		}
-		c.JSON(200, payload)
-	})
 
 	// Revocation chain head endpoint (placeholder; will wire into real revocation chain subsystem later)
 	s.router.GET("/api/v1/token/revocation/head", func(c *gin.Context) {
@@ -9145,224 +6961,6 @@ func (s *BetaServer) apiPolicyMetricsPrometheus(c *gin.Context) {
 	c.String(200, b.String())
 }
 
-// apiViolationMetrics exposes token validation failure counters (categorical) as JSON.
-// Response schema:
-//
-//	{
-//	  "success": true,
-//	  "timestamp": "RFC3339Nano",
-//	  "counters": {"sig_invalid":0,...},
-//	  "total": <sum>,
-//	  "categories": ["sig_invalid",...]
-//	}
-//
-// Categories mirror internal observability.ViolationCounters snapshot keys.
-func (s *BetaServer) apiViolationMetrics(c *gin.Context) {
-	// Ensure all category keys present even if service not yet initialized.
-	snapshot := map[string]uint64{"sig_invalid": 0, "expired": 0, "not_yet_valid": 0, "issuer_mismatch": 0, "replay_detected": 0, "audience_mismatch": 0, "missing_claim": 0, "unknown": 0, "capability_denied": 0}
-	if s.primaryAuthService != nil {
-		for k, v := range s.primaryAuthService.ViolationSnapshot() {
-			snapshot[k] = v
-		}
-	}
-	var total uint64
-	for _, v := range snapshot {
-		total += v
-	}
-	// Rolling window anomaly detection (aggregate only). We compute per-minute rates for last 60s & 300s.
-	now := time.Now()
-	var rate60, rate300 float64
-	var delta60, delta300 uint64
-	var window60Dur, window300Dur time.Duration
-	// Acquire history snapshot
-	s.violationHistMu.Lock()
-	hist := append([]struct {
-		At    time.Time
-		Total uint64
-	}{}, s.violationHistory...)
-	s.violationHistMu.Unlock()
-	// Helper to compute rate
-	compute := func(window time.Duration) (rate float64, delta uint64, dur time.Duration) {
-		if len(hist) == 0 {
-			return 0, 0, window
-		}
-		cut := now.Add(-window)
-		// find earliest entry after cut; if none use oldest
-		var base struct {
-			At    time.Time
-			Total uint64
-		}
-		found := false
-		for _, e := range hist {
-			if !e.At.Before(cut) {
-				base = e
-				found = true
-				break
-			}
-		}
-		if !found {
-			base = hist[0]
-		}
-		delta = 0
-		if total >= base.Total {
-			delta = total - base.Total
-		}
-		dur = now.Sub(base.At)
-		if dur <= 0 {
-			dur = window
-		}
-		minutes := dur.Minutes()
-		if minutes < 0.25 {
-			minutes = 0.25
-		} // stabilize early tiny windows
-		rate = float64(delta) / minutes
-		return rate, delta, dur
-	}
-	rate60, delta60, window60Dur = compute(60 * time.Second)
-	rate300, delta300, window300Dur = compute(300 * time.Second)
-	threshold := 100.0 // default surge threshold per minute
-	if raw := os.Getenv("GAUTH_VIOLATION_SURGE_THRESHOLD"); raw != "" {
-		if v, err := strconv.Atoi(raw); err == nil && v > 0 {
-			threshold = float64(v)
-		}
-	}
-	surge := rate60 > threshold
-	categories := []string{"sig_invalid", "expired", "not_yet_valid", "issuer_mismatch", "replay_detected", "audience_mismatch", "missing_claim", "unknown", "capability_denied"}
-	c.JSON(200, gin.H{
-		"success":    true,
-		"timestamp":  time.Now().UTC().Format(time.RFC3339Nano),
-		"counters":   snapshot,
-		"total":      total,
-		"categories": categories,
-		"anomaly": gin.H{
-			"rate_per_minute_60s":        rate60,
-			"rate_per_minute_300s":       rate300,
-			"delta_60s":                  delta60,
-			"delta_300s":                 delta300,
-			"window_60s_seconds":         int(window60Dur.Seconds()),
-			"window_300s_seconds":        int(window300Dur.Seconds()),
-			"surge_60s":                  surge,
-			"surge_threshold_per_minute": threshold,
-		},
-	})
-}
-
-// apiViolationMetricsPrometheus exposes violation counters in Prometheus text format.
-// Metric names use gauth_validation_<category>_total naming convention.
-func (s *BetaServer) apiViolationMetricsPrometheus(c *gin.Context) {
-	snapshot := map[string]uint64{"sig_invalid": 0, "expired": 0, "not_yet_valid": 0, "issuer_mismatch": 0, "replay_detected": 0, "audience_mismatch": 0, "missing_claim": 0, "unknown": 0, "capability_denied": 0}
-	if s.primaryAuthService != nil {
-		for k, v := range s.primaryAuthService.ViolationSnapshot() {
-			snapshot[k] = v
-		}
-	}
-	c.Header("Content-Type", "text/plain; version=0.0.4")
-	var b strings.Builder
-	b.WriteString("# HELP gauth_validation_total Total token validation failure events across all categories\n")
-	b.WriteString("# TYPE gauth_validation_total counter\n")
-	var total uint64
-	for _, v := range snapshot {
-		total += v
-	}
-	b.WriteString(fmt.Sprintf("gauth_validation_total %d\n", total))
-	// Individual category counters
-	b.WriteString("# HELP gauth_validation_category_token_failures Token validation failures by category\n")
-	b.WriteString("# TYPE gauth_validation_category_token_failures counter\n")
-	ordered := []string{"sig_invalid", "expired", "not_yet_valid", "issuer_mismatch", "replay_detected", "audience_mismatch", "missing_claim", "unknown", "capability_denied"}
-	for _, cat := range ordered {
-		b.WriteString(fmt.Sprintf("gauth_validation_%s_total %d\n", cat, snapshot[cat]))
-	}
-	// Anomaly metrics (rate over windows + surge flag). Uses history maintained during validation calls.
-	now := time.Now()
-	s.violationHistMu.Lock()
-	hist := append([]struct {
-		At    time.Time
-		Total uint64
-	}{}, s.violationHistory...)
-	s.violationHistMu.Unlock()
-	compute := func(window time.Duration) (rate float64) {
-		if len(hist) == 0 {
-			return 0
-		}
-		cut := now.Add(-window)
-		var base struct {
-			At    time.Time
-			Total uint64
-		}
-		found := false
-		for _, e := range hist {
-			if !e.At.Before(cut) {
-				base = e
-				found = true
-				break
-			}
-		}
-		if !found {
-			base = hist[0]
-		}
-		delta := uint64(0)
-		if total >= base.Total {
-			delta = total - base.Total
-		}
-		dur := now.Sub(base.At)
-		if dur <= 0 {
-			dur = window
-		}
-		minutes := dur.Minutes()
-		if minutes < 0.25 {
-			minutes = 0.25
-		}
-		return float64(delta) / minutes
-	}
-	rate60 := compute(60 * time.Second)
-	rate300 := compute(300 * time.Second)
-	threshold := 100.0
-	if raw := os.Getenv("GAUTH_VIOLATION_SURGE_THRESHOLD"); raw != "" {
-		if v, err := strconv.Atoi(raw); err == nil && v > 0 {
-			threshold = float64(v)
-		}
-	}
-	surge := 0
-	if rate60 > threshold {
-		surge = 1
-	}
-	b.WriteString("# HELP gauth_validation_rate_per_minute_60s Approximate failure events per minute over last 60s\n")
-	b.WriteString("# TYPE gauth_validation_rate_per_minute_60s gauge\n")
-	b.WriteString(fmt.Sprintf("gauth_validation_rate_per_minute_60s %.2f\n", rate60))
-	b.WriteString("# HELP gauth_validation_rate_per_minute_300s Approximate failure events per minute over last 300s\n")
-	b.WriteString("# TYPE gauth_validation_rate_per_minute_300s gauge\n")
-	b.WriteString(fmt.Sprintf("gauth_validation_rate_per_minute_300s %.2f\n", rate300))
-	b.WriteString("# HELP gauth_validation_surge_60s Surge indicator (1 if 60s rate exceeds threshold)\n")
-	b.WriteString("# TYPE gauth_validation_surge_60s gauge\n")
-	b.WriteString(fmt.Sprintf("gauth_validation_surge_60s %d\n", surge))
-	b.WriteString("# HELP gauth_validation_surge_threshold_per_minute Configured surge threshold per minute\n")
-	b.WriteString("# TYPE gauth_validation_surge_threshold_per_minute gauge\n")
-	b.WriteString(fmt.Sprintf("gauth_validation_surge_threshold_per_minute %.2f\n", threshold))
-	// Persistence integrity status gauges (violation & semantic). Mapping: ok=1 mismatch=0 legacy=-1 unconfigured=-2
-	mapIntegrity := func(status string) int {
-		switch status {
-		case integrityOK:
-			return 1
-		case integrityMismatch:
-			return 0
-		case integrityLegacy:
-			return -1
-		case integrityUnconfigured:
-			return -2
-		default:
-			return -2
-		}
-	}
-	b.WriteString("# HELP gauth_persistence_integrity_violation Current integrity status of violation persistence file (ok=1 mismatch=0 legacy=-1 unconfigured=-2)\n")
-	b.WriteString("# TYPE gauth_persistence_integrity_violation gauge\n")
-	b.WriteString(fmt.Sprintf("gauth_persistence_integrity_violation %d\n", mapIntegrity(s.violationIntegrityStatus)))
-	b.WriteString("# HELP gauth_persistence_integrity_semantic Current integrity status of semantic persistence file (ok=1 mismatch=0 legacy=-1 unconfigured=-2)\n")
-	b.WriteString("# TYPE gauth_persistence_integrity_semantic gauge\n")
-	b.WriteString(fmt.Sprintf("gauth_persistence_integrity_semantic %d\n", mapIntegrity(s.semanticIntegrityStatus)))
-	c.String(200, b.String())
-}
-
-// apiPolicyAddBundle appends a new bundle (hash computed server-side) provided list of policies.
 func (s *BetaServer) apiPolicyAddBundle(c *gin.Context) {
 	// Auth token enforcement (optional)
 	adminToken := os.Getenv("GAUTH_POLICY_ADMIN_TOKEN")
@@ -10875,461 +8473,6 @@ func (s *BetaServer) apiEventsStream(c *gin.Context) {
 	}
 }
 
-// ===================== TOKEN STORE IMPLEMENTATION =====================
-const (
-	TokenStatusNotFound       = "not_found"
-	TokenStatusValid          = "valid"
-	TokenStatusAlreadyRevoked = "already_revoked"
-	TokenStatusRevoked        = "revoked"
-)
-
-type Token struct {
-	ID        string     `json:"id"`
-	Value     string     `json:"token"`
-	CreatedAt time.Time  `json:"created_at"`
-	ExpiresAt time.Time  `json:"expires_at"`
-	RevokedAt *time.Time `json:"revoked_at,omitempty"`
-	Meta      any        `json:"meta,omitempty"`
-	Status    string     `json:"status,omitempty"` // active, suspended, terminated
-}
-
-type TokenStore struct {
-	mu        sync.RWMutex
-	cap       int
-	tokens    map[string]*Token
-	valueIdx  map[string]string // token value -> id
-	created   int
-	validated int
-	revoked   int
-}
-
-func NewTokenStore(capacity int) *TokenStore {
-	if capacity <= 0 {
-		capacity = 200
-	}
-	return &TokenStore{cap: capacity, tokens: make(map[string]*Token), valueIdx: make(map[string]string)}
-}
-
-func (ts *TokenStore) Create(ttlSeconds int, meta any) *Token {
-	if ttlSeconds <= 0 {
-		ttlSeconds = 300
-	}
-	t := &Token{ID: randomNonce(10), Value: randomNonce(24), CreatedAt: time.Now(), ExpiresAt: time.Now().Add(time.Duration(ttlSeconds) * time.Second), Meta: meta, Status: "active"}
-	ts.mu.Lock()
-	if len(ts.tokens) >= ts.cap { // simple eviction: drop oldest arbitrary (first range)
-		for k, v := range ts.tokens {
-			delete(ts.valueIdx, v.Value)
-			delete(ts.tokens, k)
-			break
-		}
-	}
-	ts.tokens[t.ID] = t
-	ts.valueIdx[t.Value] = t.ID
-	ts.created++
-	ts.mu.Unlock()
-	return t
-}
-
-func (ts *TokenStore) lookupNoLock(idOrVal string) (*Token, bool) {
-	if idOrVal == "" {
-		return nil, false
-	}
-	if t, ok := ts.tokens[idOrVal]; ok {
-		return t, true
-	}
-	if id, ok := ts.valueIdx[idOrVal]; ok {
-		if t, ok2 := ts.tokens[id]; ok2 {
-			return t, true
-		}
-	}
-	return nil, false
-}
-
-func (ts *TokenStore) Validate(idOrVal string) (string, *Token) {
-	ts.mu.RLock()
-	t, ok := ts.lookupNoLock(idOrVal)
-	if !ok {
-		ts.mu.RUnlock()
-		return TokenStatusNotFound, nil
-	}
-	now := time.Now()
-	if t.RevokedAt != nil || t.Status == statusTerminated {
-		ts.mu.RUnlock()
-		return TokenStatusRevoked, t
-	}
-	if t.Status == statusSuspended {
-		ts.mu.RUnlock()
-		return statusSuspended, t
-	}
-	if now.After(t.ExpiresAt) {
-		ts.mu.RUnlock()
-		return "expired", t
-	}
-	ts.mu.RUnlock()
-	ts.mu.Lock()
-	ts.validated++
-	ts.mu.Unlock()
-	return TokenStatusValid, t
-}
-
-func (ts *TokenStore) Revoke(id string) string {
-	ts.mu.Lock()
-	defer ts.mu.Unlock()
-	t, ok := ts.tokens[id]
-	if !ok {
-		return TokenStatusNotFound
-	}
-	if t.RevokedAt != nil {
-		return TokenStatusAlreadyRevoked
-	}
-	now := time.Now()
-	t.RevokedAt = &now
-	ts.revoked++
-	return TokenStatusRevoked
-}
-
-func (ts *TokenStore) Metrics() gin.H {
-	ts.mu.RLock()
-	defer ts.mu.RUnlock()
-	return gin.H{"created": ts.created, "validated": ts.validated, "revoked": ts.revoked, "total": len(ts.tokens)}
-}
-
-// --- Token API Handlers ---
-func (s *BetaServer) apiTokenCreate(c *gin.Context) {
-	// Tracing span (token.issue)
-	var span *tracing.Span
-	//nolint:gosec // G404: weak random acceptable for trace sampling decision
-	if s.tracerProvider != nil && (s.tracerSampleRatio <= 0 || rand.Float64() < s.tracerSampleRatio) {
-		_, span = s.tracerProvider.StartSpan(c.Request.Context(), "token.issue")
-	}
-	var req struct {
-		TTL   int    `json:"ttl_seconds"`
-		Meta  any    `json:"meta"`
-		Nonce string `json:"nonce"`
-	}
-	_ = c.ShouldBindJSON(&req)
-	// Capability enforcement (demo): require capability for token creation if action mapped.
-	claimsCaps := map[string]any{}
-	if raw := c.GetHeader("X-Capabilities"); raw != "" { // comma separated list header for demo
-		parts := strings.Split(raw, ",")
-		for i := range parts {
-			parts[i] = strings.TrimSpace(parts[i])
-		}
-		claimsCaps["cap"] = parts
-	}
-	allowed, missing := s.enforceCapabilities("transaction:issue", claimsCaps)
-	if !allowed {
-		// Increment violation counter if wired primary auth service exposes snapshot map
-		if svc, ok := s.primaryAuthService.(*gauth.Service); ok {
-			// naive increment via internal counter map if present
-			if vm := svc.ViolationSnapshot(); vm != nil {
-				vm["capability_denied"]++
-			}
-		}
-		c.JSON(403, gin.H{"success": false, "error": "capability_denied", "missing": missing})
-		return
-	}
-	// Simple replay protection: generate issuance nonce; reject if seen recently.
-	// Client-provided nonce (optional). When GAUTH_REPLAY_STRICT=1 enforce uniqueness.
-	issueNonce := req.Nonce
-	if issueNonce == "" {
-		issueNonce = randomNonce(12)
-	}
-	if s.replayStore != nil {
-		now := time.Now()
-		strict := os.Getenv("GAUTH_REPLAY_STRICT") == "1"
-		if s.replayStore.Seen(issueNonce, now) {
-			// Strict mode returns specific error code nonce_reused (legacy tests expect this)
-			code := "replay"
-			detail := "issuance nonce reused"
-			if strict {
-				code = "nonce_reused"
-			}
-			c.JSON(409, gin.H{"success": false, "error": code, "detail": detail})
-			return
-		}
-		s.replayStore.RecordWithEvict(issueNonce, now)
-	}
-	tok := s.tokens.Create(req.TTL, req.Meta)
-	// Feature-flag JWT issuance (adds 'jwt' field alongside legacy id/value)
-	var signedJWT string
-	if os.Getenv("GAUTH_USE_JWT_LIB") == "1" {
-		alg := os.Getenv("GAUTH_JWT_ALG")
-		if alg == "" {
-			alg = algRS256
-		}
-		method := jwt.GetSigningMethod(alg)
-		if method == nil {
-			c.JSON(500, gin.H{"success": false, "message": "unsupported jwt alg"})
-			return
-		}
-		kid := os.Getenv("GAUTH_JWT_KID")
-		if kid == "" {
-			kid = demoRSAKid
-		}
-		var signingKey interface{}
-		if alg == algRS256 {
-			pk, err := loadOrGenerateRSAKey()
-			if err != nil {
-				c.JSON(500, gin.H{"success": false, "message": "rsa key error"})
-				return
-			}
-			signingKey = pk
-		} else {
-			secret := os.Getenv("GAUTH_JWT_SECRET")
-			if secret == "" {
-				secret = devSecretDemo
-			}
-			signingKey = []byte(secret)
-		}
-		exp := time.Now().Add(time.Duration(req.TTL) * time.Second)
-		jti := randomNonce(18)
-		claims := jwt.MapClaims{"sub": "demo-client", "scope": "legacy-token-store", "exp": exp.Unix(), "iat": time.Now().Unix(), "iss": os.Getenv("GAUTH_ISSUER")}
-		claims["jti"] = jti
-		j := jwt.NewWithClaims(method, claims)
-		j.Header["kid"] = kid
-		signed, err := j.SignedString(signingKey)
-		if err != nil {
-			c.JSON(500, gin.H{"success": false, "message": "jwt signing failed"})
-			return
-		}
-		signedJWT = signed
-	}
-	// Ensure audit log exists (tests may construct BetaServer manually without NewBetaServer)
-	if s.audit == nil {
-		s.audit = NewAuditLog(500)
-	}
-	s.audit.Append(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: "api", Action: "token_create", Resource: tok.ID + ":" + issueNonce, Outcome: "success"})
-	if s.events == nil {
-		s.events = NewEventHub(200)
-	}
-	s.events.Emit(&Event{ID: randomNonce(6), At: time.Now(), Type: "token_created", Data: gin.H{"id": tok.ID}})
-	resp := gin.H{"success": true, "token": tok}
-	if signedJWT != "" {
-		//nolint:gocyclo // Token validation API handler
-		resp["jwt"] = signedJWT
-	}
-	if span != nil {
-		span.SetTag("ttl_req", req.TTL)
-		span.SetTag("token_id", tok.ID)
-		span.SetTag("outcome", "success")
-		span.End()
-		//nolint:gocyclo // Token validation API handler
-	}
-	c.JSON(201, resp)
-}
-
-func (s *BetaServer) apiTokenValidate(c *gin.Context) {
-	// Tracing span (token.validate)
-	var span *tracing.Span
-	//nolint:gosec // G404: weak random acceptable for trace sampling decision
-	if s.tracerProvider != nil && (s.tracerSampleRatio <= 0 || rand.Float64() < s.tracerSampleRatio) {
-		_, span = s.tracerProvider.StartSpan(c.Request.Context(), "token.validate")
-	}
-	var req struct {
-		Token   string `json:"token"`
-		TokenID string `json:"token_id"`
-	}
-	if c.ShouldBindJSON(&req) != nil {
-		c.JSON(400, gin.H{"success": false, "message": "invalid payload"})
-		return
-	}
-	// Optional structured JWT validation path when GAUTH_USE_JWT_LIB=1 and token resembles JWT (has two dots)
-	tokenStr := req.Token
-	if tokenStr == "" {
-		tokenStr = req.TokenID
-	}
-	// Feed token into primaryAuthService (if wired) to record violation counters.
-	// We invoke regardless of empty token to ensure missing_claim increments.
-	if svc, ok := s.primaryAuthService.(*gauth.Service); ok {
-		if _, vErr := svc.ValidateToken(tokenStr); vErr != nil {
-			// We intentionally proceed; validation side-effects (counters) may occur even on error.
-			fmt.Fprintf(os.Stderr, "[validate] token validation error (ignored for counters): %v\n", vErr)
-		}
-	}
-	if os.Getenv("GAUTH_USE_JWT_LIB") == "1" && strings.Count(tokenStr, ".") == 2 {
-		alg := os.Getenv("GAUTH_JWT_ALG")
-		if alg == "" {
-			alg = algRS256
-		}
-		// Decode header first to extract declared alg for normalized errors.
-		parts := strings.Split(tokenStr, ".")
-		var declaredAlg string
-		if len(parts) == 3 {
-			if hdrBytes, err := base64.RawURLEncoding.DecodeString(parts[0]); err == nil {
-				var hdr map[string]any
-				_ = json.Unmarshal(hdrBytes, &hdr)
-				if v, ok := hdr["alg"].(string); ok {
-					declaredAlg = v
-				}
-			}
-		}
-		// Clock skew leeway
-		leeway := time.Duration(0)
-		if raw := os.Getenv("GAUTH_JWT_CLOCK_SKEW_SECONDS"); raw != "" {
-			if v, err := strconv.Atoi(raw); err == nil && v > 0 {
-				leeway = time.Duration(v) * time.Second
-			}
-		}
-		parser := jwt.NewParser(jwt.WithValidMethods([]string{alg}), jwt.WithLeeway(leeway))
-		// Track actual header alg for normalized error taxonomy.
-		var headerAlg string
-		parsed, err := parser.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
-			headerAlg = t.Method.Alg()
-			if headerAlg != alg {
-				return nil, errors.New(ErrInvalidAlgorithm)
-			}
-			if alg == algRS256 {
-				pk, err := loadOrGenerateRSAKey()
-				if err != nil {
-					return nil, err
-				}
-				return pk.Public(), nil
-			}
-			// HMAC fallback
-			secret := os.Getenv("GAUTH_JWT_SECRET")
-			if secret == "" {
-				secret = devSecretDemo
-			}
-			return []byte(secret), nil
-		})
-		if err != nil {
-			errMsg := err.Error()
-			code := ErrMalformedToken
-			// Distinguish expired vs malformed using jwt error classification
-			if errors.Is(err, jwt.ErrTokenExpired) || strings.Contains(errMsg, "token is expired") {
-				code = ErrTokenExpired
-			}
-			// Detect algorithm mismatch before generic signature failures and normalize detail.
-			if strings.Contains(errMsg, ErrInvalidAlgorithm) ||
-				(strings.Contains(errMsg, "signing method") && strings.Contains(errMsg, "invalid")) ||
-				strings.Contains(errMsg, "invalid signing method") {
-				code = ErrInvalidAlgorithm
-				// Normalize detail: invalid_algorithm: header alg <got> rejected (expected <expected>)
-				if headerAlg == "" {
-					if declaredAlg != "" {
-						headerAlg = declaredAlg
-					} else {
-						headerAlg = "unknown"
-					}
-				}
-				errMsg = "invalid_algorithm: header alg " + headerAlg + " rejected (expected " + alg + ")"
-			} else if strings.Contains(errMsg, "signature") {
-				code = ErrInvalidSignature
-			}
-			jwtError(c, code, errMsg)
-			return
-		}
-		if !parsed.Valid {
-			jwtError(c, ErrInvalidSignature, "token invalid")
-			return
-		}
-		if claims, ok := parsed.Claims.(jwt.MapClaims); ok {
-			// Clock skew tolerance
-			skewSecs := 0
-			if raw := os.Getenv("GAUTH_JWT_CLOCK_SKEW_SECONDS"); raw != "" {
-				if v, err := strconv.Atoi(raw); err == nil && v >= 0 {
-					skewSecs = v
-				}
-			}
-			if expRaw, ok2 := claims["exp"].(float64); ok2 {
-				expTime := time.Unix(int64(expRaw), 0)
-				if time.Now().After(expTime.Add(time.Duration(skewSecs) * time.Second)) {
-					jwtError(c, ErrTokenExpired, "expired")
-					return
-				}
-			}
-			// Replay / JTI strict mode
-			strict := os.Getenv("GAUTH_REPLAY_STRICT") == "1"
-			jtiVal, hasJTI := claims["jti"].(string)
-			if strict && (!hasJTI || jtiVal == "") {
-				jwtError(c, ErrMalformedToken, "missing jti (strict mode)")
-				return
-			}
-			if hasJTI && jtiVal != "" && s.replayStore != nil {
-				if s.replayStore.Seen(jtiVal, time.Now()) {
-					// Specialized replay taxonomy (distinct from generic jwtError). Test expectations:
-					// status=401 code=token_replay_detected error=replay_detected rfc_ref=rfc111:replay_protection
-					c.JSON(401, gin.H{"success": false, "code": "token_replay_detected", "error": "replay_detected", "rfc_ref": "rfc111:replay_protection", "detail": "replay detected (jti duplicate)"})
-					if span != nil {
-						span.SetTag("status", "replay_detected")
-						span.SetTag("outcome", "replay")
-						span.End()
-					}
-					return
-				}
-				// Record JTI post validation to lock future replays
-				s.replayStore.Record(jtiVal, time.Now())
-			}
-		}
-		if span != nil {
-			span.SetTag("status", statusValidJWT)
-			span.SetTag("outcome", "success")
-			span.End()
-		}
-		c.JSON(200, gin.H{"success": true, "status": statusValidJWT})
-		return
-	}
-	id := req.TokenID
-	if id == "" {
-		id = req.Token
-	}
-	status, tok := s.tokens.Validate(id)
-	s.audit.Append(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: "api", Action: "token_validate", Resource: id, Outcome: status})
-	if span != nil {
-		span.SetTag("status", status)
-		span.SetTag("outcome", "success")
-		span.End()
-	}
-	c.JSON(200, gin.H{"success": status == "valid", "status": status, "token": tok})
-	// After validation attempt, record violation counters total for anomaly detection history.
-	if s.primaryAuthService != nil {
-		snapshot := s.primaryAuthService.ViolationSnapshot()
-		var total uint64
-		for _, v := range snapshot {
-			total += v
-		}
-		s.violationHistMu.Lock()
-		cutoff := time.Now().Add(-5 * time.Minute)
-		// prune old entries and append new
-		buf := s.violationHistory[:0]
-		for _, e := range s.violationHistory {
-			if e.At.After(cutoff) {
-				buf = append(buf, e)
-			}
-		}
-		buf = append(buf, struct {
-			At    time.Time
-			Total uint64
-		}{At: time.Now(), Total: total})
-		if len(buf) > s.violationHistoryCap {
-			buf = buf[len(buf)-s.violationHistoryCap:]
-		}
-		s.violationHistory = buf
-		s.violationHistMu.Unlock()
-		// Persistence throttled save
-		s.saveViolationPersistence()
-	}
-}
-
-func (s *BetaServer) apiTokenRevoke(c *gin.Context) {
-	var req struct {
-		TokenID string `json:"token_id"`
-	}
-	if c.ShouldBindJSON(&req) != nil || req.TokenID == "" {
-		c.JSON(400, gin.H{"success": false, "message": "missing token_id"})
-		return
-	}
-	status := s.tokens.Revoke(req.TokenID)
-	s.audit.Append(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: "api", Action: "token_revoke", Resource: req.TokenID, Outcome: status})
-	s.events.Emit(&Event{ID: randomNonce(6), At: time.Now(), Type: "token_revoked", Data: gin.H{"id": req.TokenID, "outcome": status}})
-	c.JSON(200, gin.H{"success": status == TokenStatusRevoked || status == TokenStatusAlreadyRevoked, "status": status})
-}
-
-func (s *BetaServer) apiTokenMetrics(c *gin.Context) {
-	c.JSON(200, gin.H{"success": true, "metrics": s.tokens.Metrics()})
-}
-
 // apiLifecycleMetrics surfaces high-level lifecycle counters (token & delegation
 // transitions and failures) plus multi-signature weight failures for quick
 // dashboarding without scraping full Prometheus exposition. Intended for
@@ -11382,139 +8525,6 @@ func (s *BetaServer) apiLifecycleMetrics(c *gin.Context) {
 // Payload: {"token_id":"...","new_status":"active|suspended|terminated"}
 //
 //nolint:gocyclo // Token status update handler
-func (s *BetaServer) apiTokenStatusUpdate(c *gin.Context) {
-	start := time.Now()
-	var span *tracing.Span
-	if s.tracerProvider != nil {
-		_, span = s.tracerProvider.StartSpan(context.Background(), "token_status_update")
-	}
-	var req struct {
-		TokenID   string `json:"token_id"`
-		NewStatus string `json:"new_status"`
-	}
-	if c.ShouldBindJSON(&req) != nil || req.TokenID == "" || req.NewStatus == "" {
-		if s.metrics != nil {
-			s.metrics.IncTokenStatusTransitionFailures()
-			s.metrics.RecordLifecycleTransition("token", "_", "_", "failure")
-		}
-		if mm, ok := s.metrics.(*metrics.Memory); ok {
-			mm.IncInvalidPayloadFailure()
-		}
-		c.JSON(400, gin.H{"success": false, "message": "invalid payload", "reason": "invalid_payload"})
-		return
-	}
-	if req.NewStatus != statusActive && req.NewStatus != statusSuspended && req.NewStatus != statusTerminated && req.NewStatus != statusPartiallyRevoked {
-		if s.metrics != nil {
-			s.metrics.IncTokenStatusTransitionFailures()
-			s.metrics.RecordLifecycleTransition("token", "_", req.NewStatus, "failure")
-		}
-		if mm, ok := s.metrics.(*metrics.Memory); ok {
-			mm.IncUnsupportedStatusFailure()
-		}
-		c.JSON(400, gin.H{"success": false, "message": "unsupported status", "reason": "unsupported_status"})
-		return
-	}
-	s.tokens.mu.Lock()
-	tok, ok := s.tokens.tokens[req.TokenID]
-	if !ok {
-		s.tokens.mu.Unlock()
-		if s.metrics != nil {
-			s.metrics.IncTokenStatusTransitionFailures()
-			s.metrics.RecordLifecycleTransition("token", "_", req.NewStatus, "failure")
-		}
-		if mm, ok2 := s.metrics.(*metrics.Memory); ok2 {
-			mm.IncNotFoundFailure()
-		}
-		if span != nil {
-			span.SetTag("outcome", "failure")
-			span.SetTag("reason", "not_found")
-			span.End()
-		}
-		c.JSON(404, gin.H{"success": false, "message": "token not found", "reason": "not_found"})
-		return
-	}
-	old := tok.Status
-	if old == statusTerminated && req.NewStatus != statusTerminated {
-		if s.metrics != nil {
-			s.metrics.IncTokenStatusTransitionFailures()
-			s.metrics.RecordLifecycleTransition("token", old, req.NewStatus, "failure")
-		}
-		if mm, ok := s.metrics.(*metrics.Memory); ok {
-			mm.IncInvalidTransitionFailure()
-		}
-		s.tokens.mu.Unlock()
-		if span != nil {
-			span.SetTag("outcome", "failure")
-			span.SetTag("reason", "invalid_transition")
-			span.End()
-		}
-		c.JSON(409, gin.H{"success": false, "message": "terminated tokens cannot transition", "reason": "invalid_transition"})
-		return
-	}
-	if old == req.NewStatus {
-		// Enhanced taxonomy: detect maintenance window or rate limiting via env toggles (demo logic)
-		reason := changeReasonNoop
-		if os.Getenv("GAUTH_MAINTENANCE_WINDOW") == "1" {
-			reason = reasonMaintenance
-		}
-		if os.Getenv("GAUTH_RATE_LIMITED") == "1" {
-			reason = reasonRateLimited
-		}
-		if s.metrics != nil {
-			s.metrics.IncTokenStatusTransitions()
-			s.metrics.RecordDecision("token_status_update", "token:"+tok.ID, tok.Status)
-			s.metrics.RecordDecisionWithReason("token_status_update", "token:"+tok.ID, tok.Status, reason)
-			s.metrics.RecordLifecycleTransition("token", old, req.NewStatus, "noop")
-			s.metrics.ObserveLifecycleTransitionLatency("token", "noop", time.Since(start))
-		}
-		s.tokens.mu.Unlock()
-		// Record lifecycle event
-		lat := time.Since(start).Nanoseconds()
-		s.appendLifecycleEvent(&LifecycleEvent{ID: randomNonce(6), EntityType: "token", EntityID: tok.ID, OldStatus: old, NewStatus: tok.Status, Outcome: "noop", Reason: reason, LatencyNS: lat, At: time.Now()})
-		if span != nil {
-			span.SetTag("outcome", "noop")
-			span.SetTag("token_id", tok.ID)
-			span.SetTag("old_status", old)
-			span.SetTag("new_status", tok.Status)
-			span.SetTag("reason", reason)
-			span.End()
-		}
-		c.JSON(200, gin.H{"success": true, "token_id": tok.ID, "old_status": old, "new_status": tok.Status, "no_change": true, "reason": reason})
-		return
-	}
-	tok.Status = req.NewStatus
-	s.tokens.mu.Unlock()
-	// Audit log
-	s.audit.Append(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: "api", Action: "token_status_update", Resource: tok.ID, Outcome: "success", Meta: gin.H{"old": old, "new": tok.Status, "reason": "status_change"}})
-	// Emit lifecycle change event with reason metadata
-	s.events.Emit(&Event{ID: randomNonce(6), At: time.Now(), Type: "token_status_changed", Data: gin.H{"token_id": tok.ID, "old_status": old, "new_status": tok.Status, "reason": "status_change"}})
-	changeReason := changeReasonStatus
-	if os.Getenv("GAUTH_POLICY_VIOLATION") == "1" {
-		changeReason = reasonPolicyViolation
-	}
-	if s.metrics != nil {
-		s.metrics.IncTokenStatusTransitions()
-		s.metrics.RecordDecision("token_status_update", "token:"+tok.ID, tok.Status)
-		s.metrics.RecordDecisionWithReason("token_status_update", "token:"+tok.ID, tok.Status, changeReason)
-		s.metrics.RecordLifecycleTransition("token", old, tok.Status, "success")
-		s.metrics.ObserveLifecycleTransitionLatency("token", "success", time.Since(start))
-	}
-	// Record lifecycle event
-	lat := time.Since(start).Nanoseconds()
-	s.appendLifecycleEvent(&LifecycleEvent{ID: randomNonce(6), EntityType: "token", EntityID: tok.ID, OldStatus: old, NewStatus: tok.Status, Outcome: "success", Reason: changeReason, LatencyNS: lat, At: time.Now()})
-	if span != nil {
-		//nolint:gocyclo // Delegation status update handler
-		span.SetTag("outcome", "success")
-		span.SetTag("token_id", tok.ID)
-		span.SetTag("old_status", old)
-		span.SetTag("new_status", tok.Status)
-		span.SetTag("reason", changeReason)
-		span.SetTag("latency_ns", time.Since(start).Nanoseconds())
-		span.End()
-	}
-	c.JSON(200, gin.H{"success": true, "token_id": tok.ID, "old_status": old, "new_status": tok.Status, "reason": changeReason})
-	//nolint:gocyclo // Delegation status update handler
-}
 
 // apiDelegationStatusUpdate prototype (no persistent RFC0111 service wiring yet).
 // Payload: {"delegation_id":"poa_x","new_status":"active|suspended|terminated"}
@@ -11870,69 +8880,58 @@ func (s *BetaServer) apiLifecycleTimeline(c *gin.Context) {
 	c.JSON(200, gin.H{"success": true, "events": results, "count": len(results), "next_cursor": nextCursor})
 }
 
-// apiTokenIntrospect returns metadata about a provided token (JWT or internal demo token).
-// Request schema: {"token":"..."} or {"token_id":"..."}
-// Response (JWT example): {success:true, type:"jwt", header:{alg,kid}, claims:{...}, expires_at:"RFC3339", revoked:false, multi_signature: {...}}
-// Internal token example: {success:true, type:"internal", token:{...}, status:"valid", revoked:false}
-func (s *BetaServer) apiTokenIntrospect(c *gin.Context) {
-	var req struct {
-		Token   string `json:"token"`
-		TokenID string `json:"token_id"`
-	}
-	if c.ShouldBindJSON(&req) != nil {
-		c.JSON(400, gin.H{"success": false, "message": "invalid payload"})
+// --- Adapter methods for token.Handler interfaces ---
+
+func (s *BetaServer) LogAction(actor, action, resource, outcome string) {
+	if s.audit == nil {
 		return
 	}
-	tokenStr := req.Token
-	if tokenStr == "" {
-		tokenStr = req.TokenID
-	}
-	if tokenStr == "" {
-		c.JSON(400, gin.H{"success": false, "message": "missing token"})
+	s.audit.Append(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: actor, Action: action, Resource: resource, Outcome: outcome})
+}
+
+func (s *BetaServer) EmitTokenCreated(id string) {
+	if s.events == nil {
 		return
 	}
-	// Multi-signature summary placeholder (future: actual verification reuse)
-	ms := gin.H{"supported": false}
-	if os.Getenv("GAUTH_MULTI_SIG_THRESHOLD") != "" {
-		ms["supported"] = true
-	}
-	// JWT path
-	if os.Getenv("GAUTH_USE_JWT_LIB") == "1" && strings.Count(tokenStr, ".") == 2 {
-		parts := strings.Split(tokenStr, ".")
-		var header map[string]any
-		if hb, err := base64.RawURLEncoding.DecodeString(parts[0]); err == nil {
-			if uErr := json.Unmarshal(hb, &header); uErr != nil {
-				fmt.Fprintf(os.Stderr, "[introspect] header unmarshal error: %v\n", uErr)
-			}
-		}
-		var claims map[string]any
-		// Parse without validating signature to allow introspection on expired/invalid tokens (mark validity separately)
-		parsed, _, err := new(jwt.Parser).ParseUnverified(tokenStr, jwt.MapClaims{})
-		if err == nil {
-			if mc, ok := parsed.Claims.(jwt.MapClaims); ok {
-				claims = map[string]any{}
-				for k, v := range mc {
-					claims[k] = v
-				}
-			}
-		}
-		// Determine expiration
-		var expRFC string
-		var expired bool
-		if claims != nil {
-			if expRaw, ok := claims["exp"].(float64); ok {
-				et := time.Unix(int64(expRaw), 0)
-				expRFC = et.UTC().Format(time.RFC3339)
-				expired = time.Now().After(et)
-			}
-		}
-		c.JSON(200, gin.H{"success": true, "type": "jwt", "header": header, "claims": claims, "expires_at": expRFC, "expired": expired, "revoked": false, "multi_signature": ms})
+	s.events.Emit(&Event{ID: randomNonce(6), At: time.Now(), Type: "token_created", Data: gin.H{"id": id}})
+}
+
+func (s *BetaServer) EmitTokenStatusChanged(id, old, new, reason string) {
+	if s.events == nil {
 		return
 	}
-	// Internal token lookup
-	status, tok := s.tokens.Validate(tokenStr)
-	revoked := status == TokenStatusRevoked || status == "already_revoked"
-	c.JSON(200, gin.H{"success": true, "type": "internal", "status": status, "token": tok, "revoked": revoked, "multi_signature": ms})
+	s.events.Emit(&Event{ID: randomNonce(6), At: time.Now(), Type: "token_status_changed", Data: gin.H{"token_id": id, "old_status": old, "new_status": new, "reason": reason}})
+}
+
+func (s *BetaServer) ValidateToken(t string) (any, error) {
+	if svc, ok := s.primaryAuthService.(*gauth.Service); ok {
+		return svc.ValidateToken(t)
+	}
+	return nil, nil
+}
+
+func (s *BetaServer) ViolationSnapshot() map[string]uint64 {
+	if s.primaryAuthService != nil {
+		return s.primaryAuthService.ViolationSnapshot()
+	}
+	return nil
+}
+
+func (s *BetaServer) RecordEvent(entityType, entityID, oldStatus, newStatus, outcome, reason string, latencyNS int64) {
+	s.appendLifecycleEvent(&LifecycleEvent{ID: randomNonce(6), EntityType: entityType, EntityID: entityID, OldStatus: oldStatus, NewStatus: newStatus, Outcome: outcome, Reason: reason, LatencyNS: latencyNS, At: time.Now()})
+}
+
+// tracer adapter
+type tokenTracerAdapter struct {
+	tp *tracing.TracerProvider
+}
+
+func (t *tokenTracerAdapter) StartSpan(ctx context.Context, name string) (context.Context, token.Span) {
+	if t.tp == nil {
+		return ctx, nil
+	}
+	c, s := t.tp.StartSpan(ctx, name)
+	return c, s
 }
 
 // Run starts an HTTP server and blocks until a termination signal is received.
@@ -12158,84 +9157,58 @@ func (s *BetaServer) initUIRevamp() {
 					"timestamp":          time.Now().Format(time.RFC3339Nano),
 					"history":            []map[string]any{},
 					"anomaly":            anomaly,
-					"integrity_status":   "unconfigured",
-					"history_window_cap": s.semanticHistoryCap,
-					"prev_hash":          "",
+					"integrity_status":   integrityUnconfigured,
+					"history_window_cap": 3600, // Hardcoded in Handler
+					"prev_hash":          "",   // Logic moved to Handler/Verify? Handler Verify returns status/details
 					"current_hash":       "",
 					"success":            true,
 				})
 				return
 			}
-			// Wired path: gather snapshot from service if present
-			var counters map[string]uint64
-			if s.rfc0111Service != nil {
-				counters = s.rfc0111Service.SemanticSnapshot()
-			} else {
-				counters = map[string]uint64{}
+			// Wired path: delegate to handler
+			if s.semanticHandler == nil {
+				// Should not happen if wired
+				c.JSON(500, gin.H{"error": "handler_missing"})
+				return
 			}
-			// Append to history (retain cap)
-			s.semanticHistMu.Lock()
-			s.semanticHistory = append(s.semanticHistory, struct {
-				At       time.Time
-				Snapshot map[string]uint64
-			}{At: time.Now(), Snapshot: counters})
-			if s.semanticHistoryCap > 0 && len(s.semanticHistory) > s.semanticHistoryCap {
-				// drop oldest excess
-				over := len(s.semanticHistory) - s.semanticHistoryCap
-				s.semanticHistory = s.semanticHistory[over:]
-			}
-			// Build JSON history representation
-			historyJSON := make([]map[string]any, 0, len(s.semanticHistory))
-			for _, h := range s.semanticHistory {
+			// Update state (snapshot -> history)
+			// This diagnostic endpoint forces an update (side-effect) similar to Prometheus scrape
+			s.semanticHandler.Update()
+
+			// Build history JSON
+			hist := s.semanticHandler.History()
+			historyJSON := make([]map[string]any, 0, len(hist))
+			for _, h := range hist {
 				entry := map[string]any{"timestamp": h.At.Format(time.RFC3339Nano)}
 				for k, v := range h.Snapshot {
 					entry[k] = v
 				}
 				historyJSON = append(historyJSON, entry)
 			}
-			// Hash chain evolution (deterministic seed: count + first key/value)
-			seed := fmt.Sprintf("%d|%d", len(s.semanticHistory), len(counters))
-			for k, v := range counters {
-				seed = seed + "|" + k + "=" + fmt.Sprintf("%d", v)
-				break // only first element for determinism; snapshot iteration order undefined but break early
+
+			// Verify integrity
+			status, details := s.semanticHandler.VerifyPersistence()
+			s.semanticIntegrityStatus = status
+			// Anomaly map (scores: reuse real scores)
+			scores := s.semanticHandler.Scores()
+			anomaly := map[string]any{
+				"rate_per_minute_60s": s.semanticHandler.ComputeRates(60 * time.Second),
+				"scores":              scores,
 			}
-			sum := sha256.Sum256([]byte(seed))
-			currentHash := "sha256:" + hex.EncodeToString(sum[:8])
-			prevHash := s.semanticPrevHash
-			if prevHash == "" { // first evolution baseline
-				s.semanticIntegrityStatus = "baseline"
-			} else if prevHash != currentHash {
-				s.semanticIntegrityStatus = "ok" // treat any change as integrity ok for tests
+			var counters map[string]uint64
+			if len(hist) > 0 {
+				counters = hist[len(hist)-1].Snapshot
+			} else {
+				counters = map[string]uint64{}
 			}
-			// Persistence-based mismatch detection: if persisted previous hash (from prior call) differs from in-memory prevHash mark mismatch
-			if path := os.Getenv("GAUTH_SEMANTIC_INTEGRITY_PERSIST_PATH"); path != "" {
-				if data, err := os.ReadFile(path); err == nil {
-					persistedPrev := strings.TrimSpace(string(data))
-					if persistedPrev != "" && prevHash != "" && persistedPrev != prevHash {
-						s.semanticIntegrityStatus = integrityMismatch
-					}
-				}
-			}
-			s.semanticPrevHash = currentHash
-			// Persist current hash for next request comparison (ignore write errors)
-			if path := os.Getenv("GAUTH_SEMANTIC_INTEGRITY_PERSIST_PATH"); path != "" {
-				_ = os.WriteFile(path, []byte(currentHash), 0o600)
-			}
-			s.semanticHistMu.Unlock()
-			// Anomaly map (scores: reuse counters as dummy values)
-			scores := map[string]any{}
-			for k, v := range counters {
-				scores[k] = float64(v)
-			}
-			anomaly := map[string]any{"rate_per_minute_60s": map[string]float64{}, "scores": scores}
 			c.JSON(http.StatusOK, gin.H{
 				"wired":            true,
 				"counters":         counters,
 				"history":          historyJSON,
 				"anomaly":          anomaly,
 				"integrity_status": s.semanticIntegrityStatus,
-				"prev_hash":        prevHash,
-				"current_hash":     currentHash,
+				"prev_hash":        details["prev_hash"],
+				"current_hash":     details["recomputed"],
 				"success":          true,
 			})
 		})

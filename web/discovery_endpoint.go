@@ -55,7 +55,7 @@ func (s *BetaServer) registerRB3Discovery() {
 		}
 		// Replay strict mode if durable WAL configured for token issuance replay store.
 		replayStrict := false
-		if s.replayStore != nil && s.replayStore.wal != nil { // same-package access permitted
+		if s.replayStore != nil && s.replayStore.IsDurable() { // check via exported method
 			replayStrict = true
 		}
 		// Capability registry hash (file-backed only)

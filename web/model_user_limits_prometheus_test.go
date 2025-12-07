@@ -26,7 +26,7 @@ func TestModelUserLimitsPrometheusExposition(t *testing.T) {
 	f.Close()
 	// Set path env before server init so loader picks it up.
 	// Use short rate limit for alice to guarantee a rate exceed quickly.
-	t.Setenv("GAUTH_MODEL_LIMITS_PATH", f.Name())
+	t.Setenv("GAUTH_MODEL_LIMITS_CONFIG_PATH", f.Name())
 	// Enable Prometheus exposition endpoint (already active by default on /api/v1/beta/metrics/prometheus)
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })

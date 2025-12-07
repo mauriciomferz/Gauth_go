@@ -2,26 +2,31 @@ package web
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/mauriciomferz/Gauth_go/web/handlers/token"
 )
 
 // TestAttestationReplayPersistenceRestart verifies that an attestation nonce recorded in a durable store
 // is still detected as a replay after a simulated restart (store re-instantiated from WAL).
-func TestAttestationReplayPersistenceRestart(t *testing.T) {
-	walPath := t.TempDir() + "/attest_replay.wal"
+func TestAttestationReplayPersistence(t *testing.T) {
+	// Durable store with WAL
+	dir := t.TempDir()
+	walPath := filepath.Join(dir, "attest.wal")
 	// First store: record nonce
-	store1 := NewReplayNonceStoreWithConfig(30*time.Minute, 0, walPath, nil)
+	store := token.NewReplayNonceStoreWithConfig(10*time.Minute, 100, walPath, nil)
 	nonce := "persist-nonce-123"
-	if store1.Seen(nonce, time.Now()) {
+	if store.Seen(nonce, time.Now()) {
 		t.Fatalf("nonce should not be seen initially")
 	}
-	store1.Record(nonce, time.Now())
-	if !store1.Seen(nonce, time.Now()) {
+	store.Record(nonce, time.Now())
+	if !store.Seen(nonce, time.Now()) {
 		t.Fatalf("nonce should be seen after record")
 	}
 	// Simulate process restart by creating new store reading same WAL path.
-	store2 := NewReplayNonceStoreWithConfig(30*time.Minute, 0, walPath, nil)
+	store2 := token.NewReplayNonceStoreWithConfig(10*time.Minute, 100, walPath, nil)
 	if !store2.Seen(nonce, time.Now()) {
 		t.Fatalf("restarted store should detect replay nonce")
 	}

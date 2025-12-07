@@ -26,7 +26,7 @@ func TestViolationPersistence(t *testing.T) {
 		srv.router.ServeHTTP(w, req)
 	}
 	// Force save
-	srv.saveViolationPersistence()
+	srv.violationHandler.Save()
 	// Read file
 	data, err := os.ReadFile(persistFile)
 	if err != nil {

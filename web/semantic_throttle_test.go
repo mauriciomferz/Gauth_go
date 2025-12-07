@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 	"time"
 )
@@ -16,24 +17,16 @@ func TestSemanticReactiveThrottle(t *testing.T) {
 	t.Cleanup(func() { s.Shutdown() })
 	// Synthetically vary semantic history snapshots to generate changing per-category rates.
 	// We directly manipulate semanticHistory before requesting diagnostics to accumulate EWMA samples.
-	base := time.Now().Add(-40 * time.Second)
-	for i := 0; i < 6; i++ {
-		s.semanticHistMu.Lock()
-		// Build snapshot with one counter increasing non-linearly.
-		//nolint:gosec // G115: test code, small loop counter values
-		snap := map[string]uint64{"scope_violation": uint64(i*i + i)}
-		s.semanticHistory = append(s.semanticHistory, struct {
-			At       time.Time
-			Snapshot map[string]uint64
-		}{At: base.Add(time.Duration(i) * 5 * time.Second), Snapshot: snap})
-		s.semanticHistMu.Unlock()
+	// Trigger semantic counters via authorize endpoint (empty payload leads to some defaults). Provide mismatching scopes.
+	for i := 0; i < 3; i++ {
 		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("GET", "/api/v1/diagnostics/semantic", http.NoBody)
+		req := httptest.NewRequest("POST", "/api/v1/poa/authorize", strings.NewReader(`{"delegation":{"scope":["a"],"requested_scope":["b"],"amount_limit":1,"requested_amount":5}}`))
+		req.Header.Set("Content-Type", "application/json")
 		s.router.ServeHTTP(w, req)
-		if w.Code != http.StatusOK {
-			t.Fatalf("diag status %d", w.Code)
-		}
 		time.Sleep(5 * time.Millisecond)
+	}
+	if err := s.semanticHandler.Save(); err != nil {
+		t.Fatalf("save semantic failed: %v", err)
 	}
 	// Force activation (simulate anomaly exceed) for demo action denial.
 	s.semanticThrottleActive = true

@@ -7,16 +7,17 @@ import (
 	"time"
 
 	replaypkg "github.com/mauriciomferz/Gauth_go/pkg/replay"
+	"github.com/mauriciomferz/Gauth_go/web/handlers/token"
 )
 
 // BenchmarkAttestationReplay compares memory vs redis latency (best-effort, skips if redis unavailable).
-func BenchmarkAttestationReplay(b *testing.B) {
-	mem := NewReplayNonceStore(10 * time.Minute)
+func BenchmarkReplayNonceStore(b *testing.B) {
+	s := token.NewReplayNonceStore(5 * time.Minute)
 	b.Run("memory_record_seen", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			k := "m-" + strconv.Itoa(i)
-			mem.Record(k, time.Now())
-			_ = mem.Seen(k, time.Now())
+			s.Record(k, time.Now())
+			_ = s.Seen(k, time.Now())
 		}
 	})
 	addr := os.Getenv("GAUTH_ATTEST_REDIS_ADDR")

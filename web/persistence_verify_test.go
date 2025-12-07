@@ -25,7 +25,7 @@ func TestViolationPersistenceVerify(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		srv.router.ServeHTTP(w, req)
 	}
-	srv.saveViolationPersistence()
+	srv.violationHandler.Save()
 	// Verify OK
 	wv := httptest.NewRecorder()
 	rv := httptest.NewRequest("GET", "/api/v1/beta/metrics/violations/verify", nil)
@@ -106,6 +106,10 @@ func TestViolationPersistenceVerify(t *testing.T) {
 
 func TestSemanticPersistenceVerify(t *testing.T) {
 	dir := t.TempDir()
+	// The original 'path' variable declaration is removed as per instruction.
+	// The 'path' variable is still needed for os.Setenv and srv.semanticHandler.Save.
+	// Assuming the instruction meant to remove an *unused* base, but 'path' is used.
+	// Re-adding the path declaration to ensure the code remains syntactically correct and functional.
 	path := filepath.Join(dir, "semantic.json")
 	os.Setenv("GAUTH_SEMANTIC_PERSIST_PATH", path)
 	os.Setenv("GAUTH_SEMANTIC_PERSIST_NO_THROTTLE", "1")
@@ -121,7 +125,9 @@ func TestSemanticPersistenceVerify(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		srv.router.ServeHTTP(w, req)
 	}
-	srv.saveSemanticPersistence()
+	if err := srv.semanticHandler.Save(); err != nil {
+		t.Fatalf("save semantic failed: %v", err)
+	}
 	ws := httptest.NewRecorder()
 	rs := httptest.NewRequest("GET", "/api/v1/beta/metrics/poa/semantics/verify", nil)
 	srv.router.ServeHTTP(ws, rs)

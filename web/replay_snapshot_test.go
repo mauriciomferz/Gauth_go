@@ -5,14 +5,16 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/mauriciomferz/Gauth_go/web/handlers/token"
 )
 
 // TestReplaySnapshotAndCompact verifies snapshot file creation, WAL rotation, and recovery continuity.
 func TestReplaySnapshotAndCompact(t *testing.T) {
 	dir := t.TempDir()
-	walPath := filepath.Join(dir, "replay.wal")
-	store := NewReplayNonceStoreWithConfig(30*time.Minute, 0, walPath, nil)
-	if store.wal == nil {
+	path := filepath.Join(dir, "replay.wal")
+	store := token.NewReplayNonceStoreWithConfig(10*time.Minute, 100, path, nil)
+	if !store.IsDurable() {
 		t.Fatalf("expected wal backing store")
 	}
 	// Insert entries
@@ -22,7 +24,7 @@ func TestReplaySnapshotAndCompact(t *testing.T) {
 		time.Sleep(5 * time.Millisecond)
 	}
 	// Stat WAL size before
-	infoBefore, err := os.Stat(walPath)
+	infoBefore, err := os.Stat(path)
 	if err != nil {
 		t.Fatalf("stat before: %v", err)
 	}
@@ -30,7 +32,7 @@ func TestReplaySnapshotAndCompact(t *testing.T) {
 		t.Fatalf("snapshot+compact: %v", err2)
 	}
 	// Ensure snapshot file exists
-	snapInfo, err := os.Stat(walPath + ".snapshot")
+	snapInfo, err := os.Stat(path + ".snapshot")
 	if err != nil {
 		t.Fatalf("snapshot file missing: %v", err)
 	}
@@ -38,7 +40,7 @@ func TestReplaySnapshotAndCompact(t *testing.T) {
 		t.Fatalf("snapshot file empty")
 	}
 	// WAL after rotation
-	infoAfter, err := os.Stat(walPath)
+	infoAfter, err := os.Stat(path)
 	if err != nil {
 		t.Fatalf("stat after: %v", err)
 	}
@@ -46,10 +48,10 @@ func TestReplaySnapshotAndCompact(t *testing.T) {
 		t.Fatalf("unexpected WAL growth after compaction")
 	}
 	// Close and reopen to test recovery
-	if err := store.wal.Close(); err != nil {
+	if err := store.Close(); err != nil {
 		t.Fatalf("close wal: %v", err)
 	}
-	store2 := NewReplayNonceStoreWithConfig(30*time.Minute, 0, walPath, nil)
+	store2 := token.NewReplayNonceStoreWithConfig(30*time.Minute, 0, path, nil)
 	// Non-deterministic key generation above; ensure at least one recovered by scanning seen map size > 0
 	if store2.Size() == 0 {
 		t.Fatalf("expected entries recovered; size=0")

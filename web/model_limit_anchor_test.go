@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 // TestModelLimitAuditAnchoring ensures periodic anchor entries are created and the chain verifies.
@@ -34,7 +35,7 @@ func TestModelLimitAuditAnchoring(t *testing.T) {
 		t.Fatalf("temp anchor: %v", err)
 	}
 	anchorFile.Close()
-	os.Setenv("GAUTH_MODEL_LIMITS_PATH", limitsFile.Name())
+	os.Setenv("GAUTH_MODEL_LIMITS_CONFIG_PATH", limitsFile.Name())
 	os.Setenv("GAUTH_MODEL_LIMIT_AUDIT_PATH", auditFile.Name())
 	os.Setenv("GAUTH_MODEL_LIMIT_ANCHOR_PATH", anchorFile.Name())
 	os.Setenv("GAUTH_MODEL_LIMIT_ANCHOR_INTERVAL", "2") // anchor every 2 audit entries
@@ -60,6 +61,9 @@ func TestModelLimitAuditAnchoring(t *testing.T) {
 	// Two exceeds -> two audit entries -> one anchor
 	exceed()
 	exceed()
+
+	// Wait for async anchor
+	time.Sleep(100 * time.Millisecond)
 
 	// Read anchor file
 	data, err := os.ReadFile(anchorFile.Name())

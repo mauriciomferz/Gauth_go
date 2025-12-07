@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,8 +14,8 @@ import (
 func TestTokenCreateClientNonceReplay(t *testing.T) {
 	os.Setenv("GAUTH_REPLAY_STRICT", "1")
 	gin.SetMode(gin.TestMode)
-	s := &BetaServer{router: gin.New(), tokens: NewTokenStore(200), replayStore: NewReplayNonceStore(2 * time.Minute), capEnforce: false}
-	s.router.POST("/api/v1/token/create", s.apiTokenCreate)
+	s := NewBetaServer(":0")
+	t.Cleanup(func() { s.Shutdown() })
 	nonce := "demo-nonce-1"
 	body1, _ := json.Marshal(map[string]interface{}{"ttl_seconds": 60, "nonce": nonce})
 	req1 := httptest.NewRequest("POST", "/api/v1/token/create", bytes.NewReader(body1))

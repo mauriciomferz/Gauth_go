@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/mauriciomferz/Gauth_go/web/handlers/token"
 )
 
 // TestJWTDiscoveryAlgorithms ensures discovery endpoint reflects JWT algorithms when feature flag enabled.
@@ -138,7 +139,7 @@ func TestJWTValidateExpired(t *testing.T) {
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Manually build extremely short-lived token (1 second) using server's RSA key helper.
-	pk, err := loadOrGenerateRSAKey()
+	pk, err := token.LoadOrGenerateRSAKey()
 	if err != nil {
 		t.Fatalf("rsa key: %v", err)
 	}
@@ -235,7 +236,7 @@ func TestJWTMissingJTIStrict(t *testing.T) {
 	os.Setenv("GAUTH_REPLAY_STRICT", "1")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
-	pk, err := loadOrGenerateRSAKey()
+	pk, err := token.LoadOrGenerateRSAKey()
 	if err != nil {
 		t.Fatalf("rsa key: %v", err)
 	}
@@ -301,7 +302,7 @@ func TestJWTClockSkewTolerance(t *testing.T) {
 	os.Setenv("GAUTH_JWT_CLOCK_SKEW_SECONDS", "30")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
-	pk, err := loadOrGenerateRSAKey()
+	pk, err := token.LoadOrGenerateRSAKey()
 	if err != nil {
 		t.Fatalf("rsa key: %v", err)
 	}
@@ -328,7 +329,7 @@ func TestJWTNearExpiration(t *testing.T) {
 	os.Setenv("GAUTH_JWT_CLOCK_SKEW_SECONDS", "2")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
-	pk, err := loadOrGenerateRSAKey()
+	pk, err := token.LoadOrGenerateRSAKey()
 	if err != nil {
 		t.Fatalf("rsa key: %v", err)
 	}

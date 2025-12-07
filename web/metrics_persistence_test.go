@@ -46,11 +46,8 @@ func TestMetricsPersistence(t *testing.T) {
 	_ = doPOST(t, srv, "/api/v1/token/status/update", `{}`)                                                          // invalid payload
 	_ = doPOST(t, srv, "/api/v1/token/status/update", `{"token_id":"`+createResp.Token.ID+`","new_status":"bogus"}`) // unsupported
 	// terminated transition invalid: set status then attempt invalid change
-	srv.tokens.mu.Lock()
-	if tok, okTok := srv.tokens.tokens[createResp.Token.ID]; okTok {
-		tok.Status = statusTerminated
-	}
-	srv.tokens.mu.Unlock()
+	// terminated transition invalid: set status then attempt invalid change
+	_ = doPOST(t, srv, "/api/v1/token/status/update", `{"token_id":"`+createResp.Token.ID+`","new_status":"terminated"}`)
 	_ = doPOST(t, srv, "/api/v1/token/status/update", `{"token_id":"`+createResp.Token.ID+`","new_status":"active"}`) // invalid transition
 	// Persist explicitly (simulate shutdown)
 	if mm, ok := srv.metrics.(*metrics.Memory); ok {

@@ -13,6 +13,10 @@ func TestViolationAnomalyMetrics(t *testing.T) {
 	srv := NewBetaServer("8082")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Generate several invalid validation attempts (empty token triggers missing_claim)
+	// First, establish baseline
+	w0 := httptest.NewRecorder()
+	srv.router.ServeHTTP(w0, httptest.NewRequest("GET", "/api/v1/beta/metrics/violations", nil))
+
 	for i := 0; i < 15; i++ {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("POST", "/api/v1/token/validate", strings.NewReader(`{"token":""}`))

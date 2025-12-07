@@ -28,7 +28,7 @@ func TestExternalAnchorReceiptPersistence(t *testing.T) {
 
 	srv := NewBetaServer("0")
 	t.Cleanup(func() { srv.Shutdown() })
-	if srv.externalReceiptStore == nil {
+	if srv.capabilityAnchorHandler == nil || srv.capabilityAnchorHandler.Store == nil {
 		t.Fatalf("expected external receipt store configured")
 	}
 	// Force capability hash for periodic emission path by calling anchor again (memory provider anchors each time).
@@ -36,16 +36,16 @@ func TestExternalAnchorReceiptPersistence(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 
 	// Trigger a second anchor emission by simulating capability hash available.
-	if srv.externalAnchorProvider == nil {
+	if srv.capabilityAnchorHandler.Provider == nil {
 		t.Fatalf("provider nil")
 	}
-	_, _ = srv.externalAnchorProvider.Anchor("dummy-hash-second")
+	_, _ = srv.capabilityAnchorHandler.Provider.Anchor("dummy-hash-second")
 	// Append manually to persistence to simulate provider success (memory provider already anchored initial)
-	if srv.externalReceiptStore.Latest().Hash == "" {
+	if srv.capabilityAnchorHandler.Store.Latest().Hash == "" {
 		// Try appending initial if not captured
-		latest := srv.externalAnchorProvider.Latest()
+		latest := srv.capabilityAnchorHandler.Provider.Latest()
 		if latest.Hash != "" {
-			_, _ = srv.externalReceiptStore.Append(anchorx.ExternalAnchorReceipt{Hash: latest.Hash, Timestamp: latest.Timestamp.UTC().Format(time.RFC3339Nano), Provider: latest.Provider, Version: latest.Version, LatencySeconds: 0})
+			_, _ = srv.capabilityAnchorHandler.Store.Append(anchorx.ExternalAnchorReceipt{Hash: latest.Hash, Timestamp: latest.Timestamp.UTC().Format(time.RFC3339Nano), Provider: latest.Provider, Version: latest.Version, LatencySeconds: 0})
 		}
 	}
 
@@ -121,7 +121,7 @@ func TestExternalAnchorReceiptPersistence(t *testing.T) {
 			t.Fatalf("rewrite tampered: %v", err)
 		}
 		// Reload store
-		if err := srv.externalReceiptStore.Load(); err != nil {
+		if err := srv.capabilityAnchorHandler.Store.Load(); err != nil {
 			t.Fatalf("reload store: %v", err)
 		}
 		wVer := httptest.NewRecorder()
