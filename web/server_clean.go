@@ -68,6 +68,7 @@ import (
 	authHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/auth"
 	betaHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/beta"
 	"github.com/mauriciomferz/Gauth_go/web/handlers/capability_anchor"
+	eventsHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/events"
 	mcpHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/mcp"
 	"github.com/mauriciomferz/Gauth_go/web/handlers/modellimits"
 	notaryHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/notary"
@@ -286,12 +287,13 @@ type BetaServer struct {
 	keyProvider      crypto.KeyProvider
 	poaTotalRequests int
 	// legacyAliasHits counts invocations of deprecated /api/governance/lifecycle_timeline for deprecation timing.
-	legacyAliasHits uint64
-	examples        []*ExampleMeta
-	jobs            *JobManager
-	examplesMu      sync.RWMutex
-	audit           *AuditLog
-	events          *EventHub
+	legacyAliasHits  uint64
+	examples         []*ExampleMeta
+	jobs             *JobManager
+	examplesMu       sync.RWMutex
+	audit            *AuditLog
+	events           *EventHub
+	eventsHubAdapter *eventsHandlers.Hub // New events hub for extracted handlers
 	// Primary token service (optional). When set, exposes violation counters.
 	primaryAuthService interface{ ViolationSnapshot() map[string]uint64 }
 
@@ -1317,6 +1319,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		jobs:             NewJobManager(200),
 		audit:            NewAuditLog(500),
 		events:           NewEventHub(500),
+		eventsHubAdapter: eventsHandlers.NewHub(500),
 		tokens:           token.NewStore(500),
 		port:             port,
 		replayStore:      token.NewReplayNonceStore(5 * time.Minute),
@@ -4087,9 +4090,9 @@ func (s *BetaServer) routes() {
 	auditAPI := auditHandlers.NewAPI(s.audit, randomNonce)
 	auditAPI.RegisterRoutes(s.router)
 
-	// --- Event System Endpoints ---
-	s.router.POST("/api/v1/events/emit", s.apiEventsEmit)
-	s.router.GET("/api/v1/events/stream", s.apiEventsStream)
+	// --- Event System Endpoints (extracted to handlers/events) ---
+	eventsAPI := eventsHandlers.NewAPI(s.eventsHubAdapter, randomNonce)
+	eventsAPI.RegisterRoutes(s.router)
 
 	// --- Token Endpoints ---
 	s.router.GET("/api/v1/beta/metrics/lifecycle", s.apiLifecycleMetrics)
@@ -7415,53 +7418,7 @@ func (h *EventHub) Unsubscribe(ch chan *Event) {
 	close(ch)
 }
 
-func (s *BetaServer) apiEventsEmit(c *gin.Context) {
-	var req struct {
-		Type string `json:"type"`
-		Data any    `json:"data"`
-	}
-	if err := c.ShouldBindJSON(&req); err != nil || req.Type == "" {
-		c.JSON(400, gin.H{"success": false, "message": "invalid payload"})
-		return
-	}
-	e := &Event{ID: randomNonce(6), At: time.Now(), Type: req.Type, Data: req.Data}
-	s.events.Emit(e)
-	c.JSON(201, gin.H{"success": true, "event": e})
-}
-
-func (s *BetaServer) apiEventsStream(c *gin.Context) {
-	c.Header("Content-Type", "text/event-stream")
-	c.Header("Cache-Control", "no-cache")
-	c.Header("Connection", "keep-alive")
-	c.Header("X-Accel-Buffering", "no")
-	ch := s.events.Subscribe()
-	defer s.events.Unsubscribe(ch)
-	// Send snapshot
-	snapshot := s.events.List(20)
-	for _, e := range snapshot {
-		if b, err := json.Marshal(e); err == nil {
-			fmt.Fprintf(c.Writer, "event: event\ndata: %s\n\n", b)
-		}
-	}
-	fmt.Fprint(c.Writer, "event: open\ndata: {\"ok\":true}\n\n")
-	c.Writer.Flush()
-	heartbeat := time.NewTicker(10 * time.Second)
-	defer heartbeat.Stop()
-	for {
-		select {
-		case <-c.Request.Context().Done():
-			return
-		case e := <-ch:
-			if b, err := json.Marshal(e); err == nil {
-				fmt.Fprintf(c.Writer, "event: event\ndata: %s\n\n", b)
-				c.Writer.Flush()
-			}
-		case <-heartbeat.C:
-			fmt.Fprint(c.Writer, ": ping\n\n")
-			c.Writer.Flush()
-		}
-	}
-}
+// Events HTTP handlers removed - now handled by web/handlers/events/api.go
 
 // apiLifecycleMetrics surfaces high-level lifecycle counters (token & delegation
 // transitions and failures) plus multi-signature weight failures for quick
