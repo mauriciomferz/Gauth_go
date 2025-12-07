@@ -3,7 +3,7 @@
 title: GAuth 1.0 Architecture Documentation
 category: architecture
 status: active
-lastUpdated: 2025-11-12
+lastUpdated: 2025-12-07
 owners: architecture-team
 source: manual-curation
 refreshCadence: quarterly
@@ -11,7 +11,7 @@ refreshCadence: quarterly
 # GAuth 1.0 - Architecture Documentation
 
 **Version**: 1.0  
-**Last Updated**: November 9, 2025  
+**Last Updated**: December 7, 2025  
 **Status**: Production Ready
 
 ---
@@ -20,12 +20,13 @@ refreshCadence: quarterly
 
 1. [Overview](#overview)
 2. [System Architecture](#system-architecture)
-3. [Core Components](#core-components)
-4. [Data Flow](#data-flow)
-5. [Security Architecture](#security-architecture)
-6. [Scalability & Performance](#scalability--performance)
-7. [Deployment Models](#deployment-models)
-8. [Integration Patterns](#integration-patterns)
+3. [Web Handler Architecture](#web-handler-architecture)
+4. [Core Components](#core-components)
+5. [Data Flow](#data-flow)
+6. [Security Architecture](#security-architecture)
+7. [Scalability & Performance](#scalability--performance)
+8. [Deployment Models](#deployment-models)
+9. [Integration Patterns](#integration-patterns)
 
 ---
 
@@ -141,6 +142,107 @@ GAuth 1.0 is a comprehensive authorization framework implementing RFC 0111 (Core
 - **Audit Ledger**: Cryptographic audit trail
 
 ---
+
+## Web Handler Architecture
+
+The web server (`web/server_clean.go`) has been modularized into dedicated handler packages for better separation of concerns, testability, and maintainability.
+
+### Handler Package Structure
+
+```
+web/handlers/
+├── admin/          # Admin portal authentication
+├── anchor/         # External anchoring operations
+├── audit/          # Audit trail API (entries, capabilities, stream)
+├── auth/           # Frontend authentication endpoints
+├── beta/           # Beta feature handlers
+├── capability_anchor/ # Capability registry anchoring
+├── events/         # Event pub/sub system (emit, stream)
+├── mcp/            # Model Context Protocol handlers
+├── modellimits/    # Model usage limits and quotas
+├── notary/         # Notarization receipts and combined anchors
+├── policy/         # Policy CRUD, chain, bundles, provenance
+├── semantic/       # Semantic anomaly detection
+├── token/          # Token store and JWKS endpoints
+└── violations/     # Violation tracking and metrics
+```
+
+### Handler Interface Pattern
+
+Each handler package follows a consistent pattern:
+
+```go
+// 1. Define dependencies via interfaces (for testability)
+type Deps interface {
+    GetStore() StoreProvider
+    GetMetrics() MetricsProvider
+}
+
+// 2. Create handler struct
+type Handler struct {
+    deps Deps
+    // ... fields
+}
+
+// 3. Constructor
+func NewHandler(deps Deps) *Handler {
+    return &Handler{deps: deps}
+}
+
+// 4. Route registration
+func (h *Handler) RegisterRoutes(r *gin.Engine) {
+    r.GET("/api/v1/resource", h.List)
+    r.POST("/api/v1/resource", h.Create)
+}
+
+// 5. HTTP handlers
+func (h *Handler) List(c *gin.Context) { ... }
+func (h *Handler) Create(c *gin.Context) { ... }
+```
+
+### Key Handler Packages
+
+#### Policy Handler (`web/handlers/policy`)
+- **18 API methods** for policy management
+- Chain-based version control with cryptographic hashes
+- Bundle management (add, rollback, provenance)
+- Prometheus metrics exposition
+
+#### Audit Handler (`web/handlers/audit`)
+- **5 API methods** for audit trail access
+- `Entry` and `Provider` interfaces for abstraction
+- SSE streaming for real-time audit events
+- CSV export with pagination
+
+#### Notary Handler (`web/handlers/notary`)
+- **6 API methods** for notarization
+- Combined anchor emission (capability + rotation digest)
+- Receipt chain integrity verification
+- Interface-based metrics delegation
+
+#### Events Handler (`web/handlers/events`)
+- **2 API methods** for event system
+- In-memory pub/sub with `Hub` type
+- SSE streaming for real-time events
+- `HubProvider` interface for compatibility
+
+### Metrics Integration
+
+Handlers integrate with the metrics system via interface assertions:
+
+```go
+// Adapter pattern for metrics
+type notaryMetricsAdapter struct {
+    m metrics.Metrics
+}
+
+func (a *notaryMetricsAdapter) IncCombinedAnchorEmitted() {
+    if inc, ok := a.m.(interface{ IncCombinedAnchorEmitted() }); ok {
+        inc.IncCombinedAnchorEmitted()
+    }
+}
+```
+
 
 ## Core Components
 
