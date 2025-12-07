@@ -69,6 +69,7 @@ import (
 	betaHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/beta"
 	"github.com/mauriciomferz/Gauth_go/web/handlers/capability_anchor"
 	eventsHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/events"
+	lifecycleHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/lifecycle"
 	mcpHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/mcp"
 	"github.com/mauriciomferz/Gauth_go/web/handlers/modellimits"
 	notaryHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/notary"
@@ -4094,18 +4095,18 @@ func (s *BetaServer) routes() {
 	eventsAPI := eventsHandlers.NewAPI(s.eventsHubAdapter, randomNonce)
 	eventsAPI.RegisterRoutes(s.router)
 
-	// --- Token Endpoints ---
-	s.router.GET("/api/v1/beta/metrics/lifecycle", s.apiLifecycleMetrics)
-	// Lifecycle timeline introspection (beta)
-	s.router.GET("/api/v1/beta/lifecycle/timeline", s.apiLifecycleTimeline)
-	// Legacy governance alias retained for backward compatibility; can be disabled via GAUTH_DISABLE_LEGACY_GOVERNANCE_ALIAS=1
+	// --- Lifecycle Endpoints (extracted to handlers/lifecycle) ---
+	lifecycleAPI := lifecycleHandlers.NewAPI(&lifecycleMetricsAdapter{s: s}, &lifecycleEventAdapter{s: s})
+	lifecycleAPI.RegisterRoutes(s.router)
+	// Legacy governance alias retained for backward compatibility
 	if os.Getenv("GAUTH_DISABLE_LEGACY_GOVERNANCE_ALIAS") != "1" {
 		s.router.GET("/api/governance/lifecycle_timeline", func(c *gin.Context) {
 			fmt.Fprintln(os.Stderr, "[deprecate] /api/governance/lifecycle_timeline invoked; migrate to /api/v1/beta/lifecycle/timeline")
 			atomic.AddUint64(&s.legacyAliasHits, 1)
-			s.apiLifecycleTimeline(c)
+			lifecycleAPI.Timeline(c)
 		})
 	}
+
 	// Prototype semantic counters route (replaced by semanticHandler API)
 	// Routes registered via s.semanticAPI.RegisterRoutes(s.router)
 	// Delegation lifecycle management (prototype - not yet backed by persistent service)
@@ -7420,46 +7421,7 @@ func (h *EventHub) Unsubscribe(ch chan *Event) {
 
 // Events HTTP handlers removed - now handled by web/handlers/events/api.go
 
-// apiLifecycleMetrics surfaces high-level lifecycle counters (token & delegation
-// transitions and failures) plus multi-signature weight failures for quick
-// dashboarding without scraping full Prometheus exposition. Intended for
-// lightweight diagnostics in beta mode.
-func (s *BetaServer) apiLifecycleMetrics(c *gin.Context) {
-	// If metrics is nil return empty structure
-	if s.metrics == nil {
-		c.JSON(200, gin.H{"success": true, "metrics": gin.H{"available": false}})
-		return
-	}
-	// Attempt Memory snapshot if underlying collector is *metrics.Memory
-	type memoryLike interface{ SnapshotEx() metrics.SnapshotStruct }
-	var lifecycle gin.H
-	if ml, ok := s.metrics.(memoryLike); ok {
-		snap := ml.SnapshotEx()
-		lifecycle = gin.H{
-			"delegation_status_transitions":         snap.DelegationStatusTransitions,
-			"delegation_status_transition_failures": snap.DelegationStatusTransitionFailures,
-			"token_status_transitions":              snap.TokenStatusTransitions,
-			"token_status_transition_failures":      snap.TokenStatusTransitionFailures,
-			"multi_signature_weight_failures":       snap.MultiSignatureWeightFailures,
-			"lifecycle_breakdown":                   snap.LifecycleBreakdown,
-			"decision_breakdown":                    snap.DecisionBreakdown,
-			"decision_reason_breakdown":             snap.DecisionReasonBreakdown,
-			"lifecycle_latency_totals_ns":           snap.LifecycleLatencyTotals,
-			"lifecycle_latency_counts":              snap.LifecycleLatencyCounts,
-			"lifecycle_latency_max_ns":              snap.LifecycleLatencyMax,
-			"lifecycle_latency_p50_ns":              snap.LifecycleLatencyP50,
-			"lifecycle_latency_p90_ns":              snap.LifecycleLatencyP90,
-			"lifecycle_latency_p99_ns":              snap.LifecycleLatencyP99,
-			"last_persist_unix":                     snap.LastPersistUnix,
-			"legacy_alias_hits":                     atomic.LoadUint64(&s.legacyAliasHits),
-		}
-		//nolint:gocyclo // Token status update handler
-	} else {
-		// Fallback: expose presence only (Prometheus metrics scraped externally)
-		lifecycle = gin.H{"available": true}
-	}
-	c.JSON(200, gin.H{"success": true, "metrics": lifecycle})
-}
+// Lifecycle HTTP handlers removed - now handled by web/handlers/lifecycle/api.go
 
 // apiTokenStatusUpdate updates lifecycle status of a demo internal token.
 // Allowed transitions:
@@ -7706,127 +7668,6 @@ func (s *BetaServer) appendLifecycleEvent(ev *LifecycleEvent) {
 	s.lifecycleMu.Unlock()
 }
 
-// apiLifecycleTimeline returns lifecycle events filtered by query params:
-// entity_type (token|delegation, optional), entity_id (optional), since (unix seconds, optional), outcome, reason, limit (<=250 default 100).
-func (s *BetaServer) apiLifecycleTimeline(c *gin.Context) {
-	entityType := c.Query("entity_type") // optional
-	entityID := c.Query("entity_id")     // optional
-	sinceStr := c.Query("since")
-	outcome := c.Query("outcome") // optional
-	reason := c.Query("reason")   // optional
-	limitStr := c.Query("limit")
-	cursor := c.Query("cursor") // event ID cursor (exclusive)
-	limit := 100
-	if limitStr != "" {
-		if v, err := strconv.Atoi(limitStr); err == nil && v > 0 && v <= 250 {
-			limit = v
-		}
-	}
-	var since time.Time
-	if sinceStr != "" {
-		if sec, err := strconv.ParseInt(sinceStr, 10, 64); err == nil {
-			since = time.Unix(sec, 0)
-		}
-	}
-	results := make([]*LifecycleEvent, 0, limit)
-	var nextCursor string
-	s.lifecycleMu.RLock()
-	if entityID != "" && entityType != "" { // single buffer
-		key := entityType + ":" + entityID
-		if buf, ok := s.lifecycleEvents[key]; ok {
-			startIdx := len(buf) - 1
-			if cursor != "" {
-				for i := len(buf) - 1; i >= 0; i-- {
-					if buf[i].ID == cursor {
-						startIdx = i - 1
-						break
-					}
-				}
-			}
-			for i := startIdx; i >= 0 && len(results) < limit; i-- {
-				ev := buf[i]
-				if !since.IsZero() && ev.At.Before(since) {
-					continue
-				}
-				if outcome != "" && ev.Outcome != outcome {
-					continue
-				}
-				if reason != "" && ev.Reason != reason {
-					continue
-				}
-				results = append(results, ev)
-			}
-		}
-	} else { // all buffers
-		for _, buf := range s.lifecycleEvents {
-			startIdx := len(buf) - 1
-			if cursor != "" {
-				for i := len(buf) - 1; i >= 0; i-- {
-					if buf[i].ID == cursor {
-						startIdx = i - 1
-						break
-					}
-				}
-			}
-			for i := startIdx; i >= 0 && len(results) < limit; i-- {
-				ev := buf[i]
-				if entityType != "" && ev.EntityType != entityType {
-					continue
-				}
-				if entityID != "" && ev.EntityID != entityID {
-					continue
-				}
-				if !since.IsZero() && ev.At.Before(since) {
-					continue
-				}
-				if outcome != "" && ev.Outcome != outcome {
-					continue
-				}
-				if reason != "" && ev.Reason != reason {
-					continue
-				}
-				results = append(results, ev)
-			}
-			if len(results) >= limit {
-				break
-			}
-		}
-	}
-	s.lifecycleMu.RUnlock()
-	if len(results) > 0 {
-		nextCursor = results[len(results)-1].ID
-	}
-	// CSV export support via query or Accept header
-	wantsCSV := func() bool {
-		if strings.EqualFold(c.Query("format"), "csv") {
-			return true
-		}
-		accept := c.GetHeader("Accept")
-		if accept == "" {
-			return false
-		}
-		for _, part := range strings.Split(accept, ",") {
-			p := strings.ToLower(strings.TrimSpace(strings.Split(part, ";")[0]))
-			if p == contentTypeTextCSV || p == contentTypeCSV {
-				return true
-			}
-		}
-		return false
-	}()
-	if wantsCSV {
-		b := &strings.Builder{}
-		b.WriteString("entity_type,entity_id,old_status,new_status,outcome,reason,latency_ns,at\n")
-		for _, ev := range results {
-			b.WriteString(fmt.Sprintf("%s,%s,%s,%s,%s,%s,%d,%s\n", ev.EntityType, ev.EntityID, ev.OldStatus, ev.NewStatus, ev.Outcome, ev.Reason, ev.LatencyNS, ev.At.Format(time.RFC3339)))
-		}
-		c.Header("Content-Type", "text/csv; charset=utf-8")
-		c.Header("Cache-Control", "no-store")
-		c.String(200, b.String())
-		return
-	}
-	c.JSON(200, gin.H{"success": true, "events": results, "count": len(results), "next_cursor": nextCursor})
-}
-
 // --- Adapter methods for token.Handler interfaces ---
 
 func (s *BetaServer) LogAction(actor, action, resource, outcome string) {
@@ -7901,6 +7742,135 @@ func (a *notaryMetricsAdapter) IncCombinedAnchorFailures() {
 func (a *notaryMetricsAdapter) SetReceiptIntegrityStatus(status string) {
 	if pm, ok := a.m.(interface{ SetCapabilityAnchorNotarizationReceiptsIntegrity(string) }); ok {
 		pm.SetCapabilityAnchorNotarizationReceiptsIntegrity(status)
+	}
+}
+
+// ===== Lifecycle Handler Adapters =====
+
+// lifecycleMetricsAdapter implements lifecycleHandlers.MetricsProvider
+type lifecycleMetricsAdapter struct {
+	s *BetaServer
+}
+
+func (a *lifecycleMetricsAdapter) GetLifecycleSnapshot() *lifecycleHandlers.MetricsSnapshot {
+	if a.s.metrics == nil {
+		return nil
+	}
+	type memoryLike interface{ SnapshotEx() metrics.SnapshotStruct }
+	ml, ok := a.s.metrics.(memoryLike)
+	if !ok {
+		return nil
+	}
+	snap := ml.SnapshotEx()
+	return &lifecycleHandlers.MetricsSnapshot{
+		DelegationStatusTransitions:        snap.DelegationStatusTransitions,
+		DelegationStatusTransitionFailures: snap.DelegationStatusTransitionFailures,
+		TokenStatusTransitions:             snap.TokenStatusTransitions,
+		TokenStatusTransitionFailures:      snap.TokenStatusTransitionFailures,
+		MultiSignatureWeightFailures:       snap.MultiSignatureWeightFailures,
+		LifecycleBreakdown:                 snap.LifecycleBreakdown,
+		DecisionBreakdown:                  snap.DecisionBreakdown,
+		DecisionReasonBreakdown:            snap.DecisionReasonBreakdown,
+		LifecycleLatencyTotals:             snap.LifecycleLatencyTotals,
+		LifecycleLatencyCounts:             snap.LifecycleLatencyCounts,
+		LifecycleLatencyMax:                snap.LifecycleLatencyMax,
+		LifecycleLatencyP50:                snap.LifecycleLatencyP50,
+		LifecycleLatencyP90:                snap.LifecycleLatencyP90,
+		LifecycleLatencyP99:                snap.LifecycleLatencyP99,
+		LastPersistUnix:                    snap.LastPersistUnix,
+		LegacyAliasHits:                    atomic.LoadUint64(&a.s.legacyAliasHits),
+	}
+}
+
+// lifecycleEventAdapter implements lifecycleHandlers.EventProvider
+type lifecycleEventAdapter struct {
+	s *BetaServer
+}
+
+func (a *lifecycleEventAdapter) ListEvents(filter lifecycleHandlers.EventFilter) ([]*lifecycleHandlers.Event, string) {
+	results := make([]*lifecycleHandlers.Event, 0, filter.Limit)
+	var nextCursor string
+	a.s.lifecycleMu.RLock()
+	defer a.s.lifecycleMu.RUnlock()
+
+	if filter.EntityID != "" && filter.EntityType != "" {
+		key := filter.EntityType + ":" + filter.EntityID
+		if buf, ok := a.s.lifecycleEvents[key]; ok {
+			startIdx := len(buf) - 1
+			if filter.Cursor != "" {
+				for i := len(buf) - 1; i >= 0; i-- {
+					if buf[i].ID == filter.Cursor {
+						startIdx = i - 1
+						break
+					}
+				}
+			}
+			for i := startIdx; i >= 0 && len(results) < filter.Limit; i-- {
+				ev := buf[i]
+				if !filter.Since.IsZero() && ev.At.Before(filter.Since) {
+					continue
+				}
+				if filter.Outcome != "" && ev.Outcome != filter.Outcome {
+					continue
+				}
+				if filter.Reason != "" && ev.Reason != filter.Reason {
+					continue
+				}
+				results = append(results, a.convertEvent(ev))
+			}
+		}
+	} else {
+		for _, buf := range a.s.lifecycleEvents {
+			startIdx := len(buf) - 1
+			if filter.Cursor != "" {
+				for i := len(buf) - 1; i >= 0; i-- {
+					if buf[i].ID == filter.Cursor {
+						startIdx = i - 1
+						break
+					}
+				}
+			}
+			for i := startIdx; i >= 0 && len(results) < filter.Limit; i-- {
+				ev := buf[i]
+				if filter.EntityType != "" && ev.EntityType != filter.EntityType {
+					continue
+				}
+				if filter.EntityID != "" && ev.EntityID != filter.EntityID {
+					continue
+				}
+				if !filter.Since.IsZero() && ev.At.Before(filter.Since) {
+					continue
+				}
+				if filter.Outcome != "" && ev.Outcome != filter.Outcome {
+					continue
+				}
+				if filter.Reason != "" && ev.Reason != filter.Reason {
+					continue
+				}
+				results = append(results, a.convertEvent(ev))
+			}
+			if len(results) >= filter.Limit {
+				break
+			}
+		}
+	}
+	if len(results) > 0 {
+		nextCursor = results[len(results)-1].ID
+	}
+	return results, nextCursor
+}
+
+func (a *lifecycleEventAdapter) convertEvent(ev *LifecycleEvent) *lifecycleHandlers.Event {
+	return &lifecycleHandlers.Event{
+		ID:         ev.ID,
+		EntityType: ev.EntityType,
+		EntityID:   ev.EntityID,
+		OldStatus:  ev.OldStatus,
+		NewStatus:  ev.NewStatus,
+		Outcome:    ev.Outcome,
+		Reason:     ev.Reason,
+		LatencyNS:  ev.LatencyNS,
+		At:         ev.At,
 	}
 }
 
