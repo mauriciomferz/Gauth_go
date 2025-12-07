@@ -136,6 +136,7 @@ test_results.txt
 internal/crypto/test_recovery.json
 web/test_ext_anchor_receipts.json
 temp_cover.out
+web/smoketest/tmp/
 
 # macOS system files
 .DS_Store
