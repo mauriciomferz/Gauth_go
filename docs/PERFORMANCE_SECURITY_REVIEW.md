@@ -154,7 +154,7 @@ GAUTH_CORS_ALLOW=https://your-frontend.com,https://admin.your-domain.com
 ## Next Steps
 
 1. [x] Add LRU eviction to `regexCache` ✅ (Implemented)
-2. [ ] Implement Redis-backed rate limiting
+2. [x] Implement Redis-backed rate limiting ✅ (Ready for Integration)
 3. [x] Add cache hit/miss Prometheus metrics ✅ (Implemented)
 4. [x] Security audit of CORS and TLS settings ✅ (Completed)
 5. [x] Review secret rotation automation ✅ (Reviewed)
