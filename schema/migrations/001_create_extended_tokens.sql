@@ -21,9 +21,9 @@ CREATE TABLE IF NOT EXISTS extended_tokens (
     owners_authorizer JSONB,
     resource_owner JSONB,
     legal_framework JSONB NOT NULL,
-    restrictions         | jsonb                    |           |          | 
- issued_by            | jsonb                    |           |          | 
- verification_proof   | jsonb                    |           | not null |
+    restrictions JSONB,
+    issued_by JSONB,
+    verification_proof JSONB NOT NULL,
     
     -- Request Context
     request_id VARCHAR(255),
