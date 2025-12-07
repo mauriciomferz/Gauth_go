@@ -31,6 +31,9 @@ func (a *API) RegisterRoutes(router *gin.Engine) {
 
 // apiViolationMetrics returns violation counts in JSON format.
 func (a *API) apiViolationMetrics(c *gin.Context) {
+	// Update history state
+	a.handler.Update()
+
 	// Get current counters from service
 	counters := make(map[string]uint64)
 	if a.handler.Service != nil {
@@ -56,17 +59,40 @@ func (a *API) apiViolationMetrics(c *gin.Context) {
 		total += v
 	}
 
+	// Calculate anomaly rates
+	rates60 := a.handler.ComputeRates(60 * time.Second)
+	rates300 := a.handler.ComputeRates(300 * time.Second)
+	totalRate60 := float64(0)
+	for _, r := range rates60 {
+		totalRate60 += r
+	}
+	totalRate300 := float64(0)
+	for _, r := range rates300 {
+		totalRate300 += r
+	}
+	surgeThreshold := float64(100.0) // Hardcoded threshold
+	surge := totalRate60 > surgeThreshold
+
 	c.JSON(http.StatusOK, gin.H{
 		"success":    true,
 		"timestamp":  time.Now().UTC().Format(time.RFC3339Nano),
 		"counters":   counters,
 		"total":      total,
 		"categories": categories,
+		"anomaly": gin.H{
+			"rate_per_minute_60s":        totalRate60,
+			"rate_per_minute_300s":       totalRate300,
+			"surge_60s":                  surge,
+			"surge_threshold_per_minute": surgeThreshold,
+		},
 	})
 }
 
 // apiViolationMetricsPrometheus returns violation metrics in Prometheus text format.
 func (a *API) apiViolationMetricsPrometheus(c *gin.Context) {
+	// Update history state
+	a.handler.Update()
+
 	rates60 := a.handler.ComputeRates(60 * time.Second)
 	rates300 := a.handler.ComputeRates(300 * time.Second)
 

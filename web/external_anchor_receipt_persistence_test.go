@@ -109,7 +109,7 @@ func TestExternalAnchorReceiptPersistence(t *testing.T) {
 	if wChain.Code != 200 {
 		t.Fatalf("chain endpoint status=%d body=%s", wChain.Code, wChain.Body.String())
 	}
-	if !containsAll(wChain.Body.String(), []string{"entries", "total", "chain_hash", "prev_hash"}) {
+	if !containsAll(wChain.Body.String(), []string{"chain", "integrity_status", "success"}) {
 		t.Fatalf("chain endpoint response missing expected markers body=%s", wChain.Body.String())
 	}
 

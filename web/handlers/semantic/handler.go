@@ -1,6 +1,7 @@
 package semantic
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
@@ -101,14 +102,8 @@ func (h *Handler) Update() {
 			h.ewma[k] = e
 		}
 
-		// Welford's algorithm for online variance/mean
-		e.Count++
-		delta := fVal - e.Mean
-		e.Mean += delta / float64(e.Count)
-		delta2 := fVal - e.Mean
-		e.M2 += delta * delta2
-
-		if e.Count > h.WarmupSamples { // warm up
+		// Check for anomaly against accumulated history
+		if e.Count > h.WarmupSamples {
 			variance := e.M2 / float64(e.Count-1)
 			stdDev := math.Sqrt(variance)
 			if stdDev > 0 {
@@ -124,8 +119,15 @@ func (h *Handler) Update() {
 				}
 			}
 		}
+
+		// Update Welford's algorithm
+		e.Count++
+		delta := fVal - e.Mean
+		e.Mean += delta / float64(e.Count)
+		delta2 := fVal - e.Mean
+		e.M2 += delta * delta2
 	}
-	h.Save()
+	h.saveLocked()
 }
 
 // appendHistory appends a snapshot to the history, handling pruning.
@@ -290,7 +292,10 @@ func (h *Handler) Load() error {
 func (h *Handler) Save() error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
+	return h.saveLocked()
+}
 
+func (h *Handler) saveLocked() error {
 	if h.persistencePath == "" || len(h.ewma) == 0 {
 		return nil
 	}
@@ -300,36 +305,43 @@ func (h *Handler) Save() error {
 		return err
 	}
 
-	// Calculate hash
-	hashSum := sha256.Sum256(append([]byte(h.prevHash), payloadBytes...))
-	curHash := fmt.Sprintf("%x", hashSum)
-
+	// Wrapper for hashing
 	type wrapper struct {
 		Payload  json.RawMessage `json:"payload"`
 		PrevHash string          `json:"prev_hash"`
 		Hash     string          `json:"hash"`
 	}
+
+	// Calculate hash (chaining previous hash + payload)
+	hashSum := sha256.Sum256(append([]byte(h.prevHash), payloadBytes...))
+	hash := fmt.Sprintf("%x", hashSum)
+
+	// Optimization: skip write if unchanged
+	if hash == h.prevHash {
+		return nil
+	}
+
 	w := wrapper{
 		Payload:  payloadBytes,
 		PrevHash: h.prevHash,
-		Hash:     curHash,
+		Hash:     hash,
 	}
 
-	data, err := json.MarshalIndent(w, "", "  ")
+	finalBytes, err := json.MarshalIndent(w, "", "  ")
 	if err != nil {
 		return err
 	}
 
 	// Atomic write
 	tmp := h.persistencePath + ".tmp"
-	if err := os.WriteFile(tmp, data, 0644); err != nil {
+	if err := os.WriteFile(tmp, finalBytes, 0644); err != nil {
 		return err
 	}
 	if err := os.Rename(tmp, h.persistencePath); err != nil {
 		return err
 	}
 
-	h.prevHash = curHash
+	h.prevHash = hash
 	return nil
 }
 
@@ -358,13 +370,20 @@ func (h *Handler) VerifyPersistence() (status string, details map[string]any) {
 		return "legacy", details
 	}
 
-	recomputed := fmt.Sprintf("%x", sha256.Sum256(append([]byte(w.PrevHash), w.Payload...)))
-	integrity := "ok"
-	if recomputed != w.Hash {
-		integrity = "mismatch"
+	// Canonicalize payload to compact JSON for verification (ignoring indentation from file)
+	var compactPayload bytes.Buffer
+	if err := json.Compact(&compactPayload, w.Payload); err != nil {
+		return "parse_error", details
 	}
+
+	recomputed := fmt.Sprintf("%x", sha256.Sum256(append([]byte(w.PrevHash), compactPayload.Bytes()...)))
+
 	details["expected"] = w.Hash
 	details["recomputed"] = recomputed
 	details["prev_hash"] = w.PrevHash
-	return integrity, details
+
+	if recomputed != w.Hash {
+		return "mismatch", details
+	}
+	return "ok", details
 }

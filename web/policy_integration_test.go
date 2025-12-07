@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	policyHandler "github.com/mauriciomferz/Gauth_go/web/handlers/policy"
 )
 
 const (
@@ -57,18 +59,18 @@ func TestPolicyLifecycleIntegration(t *testing.T) {
 		Chain    []string `json:"chain"`
 		Verified bool     `json:"verified"`
 	}
-	performJSON(t, srv, http.MethodGet, "/api/v1/beta/policy/provenance", "", nil, &prov, 200)
+	performJSON(t, srv, http.MethodGet, "/api/v1/policy/provenance", "", nil, &prov, 200)
 	if len(prov.Chain) != 0 || prov.HeadHash != "" {
 		t.Fatalf("expected empty chain, got %+v", prov)
 	}
 
 	// 2. unauthorized submission (missing header)
 	var unauthResp map[string]any
-	performJSON(t, srv, http.MethodPost, "/api/v1/beta/policy/bundles", `{"id":"b1","policies":[]}`, nil, &unauthResp, 401)
+	performJSON(t, srv, http.MethodPost, "/api/v1/policy/bundles", `{"id":"b1","policies":[]}`, nil, &unauthResp, 401)
 
 	// 3. invalid bundle (empty policies) with auth header
 	var invalid map[string]any
-	performJSON(t, srv, http.MethodPost, "/api/v1/beta/policy/bundles", `{"id":"b1","policies":[]}`, map[string]string{"X-Admin-Token": "test-admin"}, &invalid, 400)
+	performJSON(t, srv, http.MethodPost, "/api/v1/policy/bundles", `{"id":"b1","policies":[]}`, map[string]string{"X-Admin-Token": "test-admin"}, &invalid, 400)
 	msg, ok := invalid["message"].(string)
 	if !ok || !strings.Contains(msg, "at least one policy") {
 		t.Fatalf("unexpected validation message: %v", invalid)
@@ -82,7 +84,7 @@ func TestPolicyLifecycleIntegration(t *testing.T) {
 		Chain      []string `json:"chain"`
 		Verified   bool     `json:"verified"`
 	}
-	performJSON(t, srv, http.MethodPost, "/api/v1/beta/policy/bundles", bundleBody, map[string]string{"X-Admin-Token": "test-admin"}, &addResp, 201)
+	performJSON(t, srv, http.MethodPost, "/api/v1/policy/bundles", bundleBody, map[string]string{"X-Admin-Token": "test-admin"}, &addResp, 201)
 	if !addResp.Success || addResp.BundleHash == "" || len(addResp.Chain) != 1 {
 		t.Fatalf("unexpected add response: %+v", addResp)
 	}
@@ -95,7 +97,7 @@ func TestPolicyLifecycleIntegration(t *testing.T) {
 		Chain    []string `json:"chain"`
 		Verified bool     `json:"verified"`
 	}
-	performJSON(t, srv, http.MethodGet, "/api/v1/beta/policy/provenance", "", nil, &prov2, 200)
+	performJSON(t, srv, http.MethodGet, "/api/v1/policy/provenance", "", nil, &prov2, 200)
 	if prov2.HeadHash != headHash || len(prov2.Chain) != 1 {
 		t.Fatalf("unexpected provenance after add: %+v", prov2)
 	}
@@ -109,7 +111,7 @@ func TestPolicyLifecycleIntegration(t *testing.T) {
 			PrevHash string `json:"prev_hash"`
 		} `json:"bundle"`
 	}
-	performJSON(t, srv, http.MethodGet, "/api/v1/beta/policy/bundles/"+headHash, "", nil, &getBundle, 200)
+	performJSON(t, srv, http.MethodGet, "/api/v1/policy/bundles/"+headHash, "", nil, &getBundle, 200)
 	if getBundle.Bundle.Hash != headHash || getBundle.Bundle.ID != "b1" {
 		t.Fatalf("unexpected get bundle: %+v", getBundle)
 	}
@@ -122,7 +124,7 @@ func TestPolicyLifecycleIntegration(t *testing.T) {
 		BundleHash string `json:"bundle_hash"`
 		ChainHead  string `json:"chain_head"`
 	}
-	performJSON(t, srv, http.MethodPost, "/api/v1/beta/policy/evaluate", evalBody, nil, &evalResp, 200)
+	performJSON(t, srv, http.MethodPost, "/api/v1/policy/evaluate", evalBody, nil, &evalResp, 200)
 	if !evalResp.Allow || evalResp.BundleHash != headHash || evalResp.ChainHead != headHash {
 		t.Fatalf("unexpected eval allow resp: %+v", evalResp)
 	}
@@ -134,7 +136,7 @@ func TestPolicyLifecycleIntegration(t *testing.T) {
 		Deny    bool     `json:"deny"`
 		Matched []string `json:"matched"`
 	}
-	performJSON(t, srv, http.MethodPost, "/api/v1/beta/policy/evaluate", evalBodyMissing, nil, &evalRespMissing, 200)
+	performJSON(t, srv, http.MethodPost, "/api/v1/policy/evaluate", evalBodyMissing, nil, &evalRespMissing, 200)
 	if evalRespMissing.Allow || len(evalRespMissing.Matched) != 0 {
 		t.Fatalf("expected deny (no match) missing attrs: %+v", evalRespMissing)
 	}
@@ -145,7 +147,7 @@ func TestPolicyLifecycleIntegration(t *testing.T) {
 		BundleHash string   `json:"bundle_hash"`
 		Chain      []string `json:"chain"`
 	}
-	performJSON(t, srv, http.MethodPost, "/api/v1/beta/policy/bundles", denyBody, map[string]string{"X-Admin-Token": "test-admin"}, &denyAdd, 201)
+	performJSON(t, srv, http.MethodPost, "/api/v1/policy/bundles", denyBody, map[string]string{"X-Admin-Token": "test-admin"}, &denyAdd, 201)
 	if len(denyAdd.Chain) != 2 {
 		t.Fatalf("expected chain length 2, got %+v", denyAdd)
 	}
@@ -155,7 +157,7 @@ func TestPolicyLifecycleIntegration(t *testing.T) {
 		Allow bool `json:"allow"`
 		Deny  bool `json:"deny"`
 	}
-	performJSON(t, srv, http.MethodPost, "/api/v1/beta/policy/evaluate", evalBody, nil, &evalRespD, 200)
+	performJSON(t, srv, http.MethodPost, "/api/v1/policy/evaluate", evalBody, nil, &evalRespD, 200)
 	if evalRespD.Allow || !evalRespD.Deny {
 		t.Fatalf("expected deny after second bundle, got %+v", evalRespD)
 	}
@@ -182,11 +184,11 @@ func TestPolicyLifecycleIntegration(t *testing.T) {
 	}
 
 	// 10. exercise rate limit quickly (override limiter to small window)
-	srv.policyRL = newSimpleRateLimiter(1, time.Minute) // allow only one submission
+	srv.policyHandler.RateLimiter = policyHandler.NewSimpleRateLimiter(1, time.Minute) // allow only one submission
 	var rlAdd map[string]any
-	performJSON(t, srv, http.MethodPost, "/api/v1/beta/policy/bundles", denyBody, map[string]string{"X-Admin-Token": "test-admin"}, &rlAdd, 201) // first ok in new limiter
+	performJSON(t, srv, http.MethodPost, "/api/v1/policy/bundles", denyBody, map[string]string{"X-Admin-Token": "test-admin"}, &rlAdd, 201) // first ok in new limiter
 	var rlHit map[string]any
-	performJSON(t, srv, http.MethodPost, "/api/v1/beta/policy/bundles", denyBody, map[string]string{"X-Admin-Token": "test-admin"}, &rlHit, 429)
+	performJSON(t, srv, http.MethodPost, "/api/v1/policy/bundles", denyBody, map[string]string{"X-Admin-Token": "test-admin"}, &rlHit, 429)
 	rlMsg, ok := rlHit["message"].(string)
 	if !ok || rlMsg != "rate limit exceeded" {
 		t.Fatalf("expected rate limit exceeded, got %+v", rlHit)
@@ -194,20 +196,16 @@ func TestPolicyLifecycleIntegration(t *testing.T) {
 
 	// 10b. simulate window reset by advancing time (replace slot reset manually for test determinism)
 	// Directly mutate internal slot for IP (since we know requests come from 192.0.2.1 style default 'ClientIP' -> empty translates to '::1' / '127.0.0.1'). We'll try both.
-	srv.policyRL.mu.Lock()
-	for _, slot := range srv.policyRL.slots {
-		slot.reset = time.Now().Add(-time.Second)
-	}
-	srv.policyRL.mu.Unlock()
+	srv.policyHandler.RateLimiter.ForceReset()
 	var rlAfterReset map[string]any
-	performJSON(t, srv, http.MethodPost, "/api/v1/beta/policy/bundles", denyBody, map[string]string{"X-Admin-Token": "test-admin"}, &rlAfterReset, 201)
+	performJSON(t, srv, http.MethodPost, "/api/v1/policy/bundles", denyBody, map[string]string{"X-Admin-Token": "test-admin"}, &rlAfterReset, 201)
 
 	// 11. malformed JSON (reset limiter first to avoid 429 masking 400)
-	srv.policyRL = newSimpleRateLimiter(10, time.Minute)
+	srv.policyHandler.RateLimiter = policyHandler.NewSimpleRateLimiter(10, time.Minute)
 	var malformed map[string]any
-	performJSON(t, srv, http.MethodPost, "/api/v1/beta/policy/bundles", `{"id":"oops"`, map[string]string{"X-Admin-Token": "test-admin"}, &malformed, 400)
+	performJSON(t, srv, http.MethodPost, "/api/v1/policy/bundles", `{"id":"oops"`, map[string]string{"X-Admin-Token": "test-admin"}, &malformed, 400)
 
 	// 12. missing required field (no id key) -> validation failure (still under fresh limiter)
 	var missing map[string]any
-	performJSON(t, srv, http.MethodPost, "/api/v1/beta/policy/bundles", `{"policies":[{"id":"pX","subjects":["a"],"rules":[{"actions":["x"],"resources":["r"],"effect":"allow"}]}]}`, map[string]string{"X-Admin-Token": "test-admin"}, &missing, 400)
+	performJSON(t, srv, http.MethodPost, "/api/v1/policy/bundles", `{"policies":[{"id":"pX","subjects":["a"],"rules":[{"actions":["x"],"resources":["r"],"effect":"allow"}]}]}`, map[string]string{"X-Admin-Token": "test-admin"}, &missing, 400)
 }

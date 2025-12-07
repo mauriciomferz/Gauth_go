@@ -1,0 +1,61 @@
+=== RUN   TestSemanticPersistenceVerify
+[semantics] persistence path set: /var/folders/3w/y2ll_2816z1_0ngl68c9nq3w0000gn/T/TestSemanticPersistenceVerify2920192122/001/semantic.json
+[violation-metrics] primary gauth.Service initialized (violation counters active)
+[rfc0111] service initialized (semantic counters active)
+[WARNING] DB_HOST not configured - running in DEVELOPMENT mode
+[DEV] Admin authentication endpoint available (database-free mode)
+[DEV] Other admin endpoints require database - set DB_HOST to enable
+[DEV] Auth handler registered: POST /api/admin/auth/login
+[DEV] Test credentials: admin@example.com / password
+[mcp] Model Context Protocol handler registered at /api/v1/gauth/mcp/*
+[auth] Frontend authentication endpoints registered at /api/v1/gauth/auth/*
+[auth]   POST /api/v1/gauth/auth/login/init (Initiate login)
+[auth]   POST /api/v1/gauth/auth/login/mfa (Verify MFA and get JWT)
+2025/12/07 18:47:43 [revocation] Revocation system disabled (set GAUTH_REVOCATION_ENABLED=1 to enable)
+[revocation] Production revocation system disabled
+[revocation] Set GAUTH_REVOCATION_ENABLED=1 and configure Redis to enable
+[policy-seed] seeded bundle id=demo-initial hash=10b42a400f722ef26b071e1962e911a3c1199bd01023aa48ca0100b028926144 policies=2
+[GIN] 2025/12/07 - 18:47:43 | 400 |     155.542µs |       192.0.2.1 | POST     "/api/v1/poa/authorize"
+[GIN] 2025/12/07 - 18:47:43 | 400 |       5.791µs |       192.0.2.1 | POST     "/api/v1/poa/authorize"
+[GIN] 2025/12/07 - 18:47:43 | 400 |       3.417µs |       192.0.2.1 | POST     "/api/v1/poa/authorize"
+    persistence_verify_test.go:142: prometheus missing semantic integrity gauge: # HELP gauth_validation_total Total validation checks
+        # TYPE gauth_validation_total counter
+        gauth_validation_total 0
+        # HELP gauth_validation_sig_invalid_total Total sig_invalid violations
+        # TYPE gauth_validation_sig_invalid_total counter
+        gauth_validation_sig_invalid_total 0
+        # HELP gauth_validation_expired_total Total expired violations
+        # TYPE gauth_validation_expired_total counter
+        gauth_validation_expired_total 0
+        # HELP gauth_validation_not_yet_valid_total Total not_yet_valid violations
+        # TYPE gauth_validation_not_yet_valid_total counter
+        gauth_validation_not_yet_valid_total 0
+        # HELP gauth_validation_issuer_mismatch_total Total issuer_mismatch violations
+        # TYPE gauth_validation_issuer_mismatch_total counter
+        gauth_validation_issuer_mismatch_total 0
+        # HELP gauth_validation_replay_detected_total Total replay_detected violations
+        # TYPE gauth_validation_replay_detected_total counter
+        gauth_validation_replay_detected_total 0
+        # HELP gauth_validation_audience_mismatch_total Total audience_mismatch violations
+        # TYPE gauth_validation_audience_mismatch_total counter
+        gauth_validation_audience_mismatch_total 0
+        # HELP gauth_validation_missing_claim_total Total missing_claim violations
+        # TYPE gauth_validation_missing_claim_total counter
+        gauth_validation_missing_claim_total 0
+        # HELP gauth_validation_unknown_total Total unknown violations
+        # TYPE gauth_validation_unknown_total counter
+        gauth_validation_unknown_total 0
+        # HELP gauth_validation_capability_denied_total Total capability_denied violations
+        # TYPE gauth_validation_capability_denied_total counter
+        gauth_validation_capability_denied_total 0
+        # HELP gauth_violations_rate_60s Per-second rate of violations over last 60s
+        # TYPE gauth_violations_rate_60s gauge
+        # HELP gauth_violations_rate_300s Per-second rate of violations over last 300s
+        # TYPE gauth_violations_rate_300s gauge
+        # HELP gauth_persistence_integrity_violation Violation persistence integrity check (1=ok, 0=mismatch/fail)
+        # TYPE gauth_persistence_integrity_violation gauge
+        gauth_persistence_integrity_violation 0
+--- FAIL: TestSemanticPersistenceVerify (0.05s)
+FAIL
+FAIL	github.com/mauriciomferz/Gauth_go/web	1.027s
+FAIL

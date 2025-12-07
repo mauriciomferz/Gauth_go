@@ -17,7 +17,7 @@ func TestPolicyProvenanceTamperDetection(t *testing.T) {
 
 	// helper to POST bundle
 	post := func(body string, want int) {
-		req := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/bundles", bytesReader(body))
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/policy/bundles", bytesReader(body))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("X-Admin-Token", "adm")
 		w := httptest.NewRecorder()
@@ -33,7 +33,7 @@ func TestPolicyProvenanceTamperDetection(t *testing.T) {
 
 	// Sanity: provenance verified true
 	prov := func() (verified bool, verr string) {
-		req := httptest.NewRequest(http.MethodGet, "/api/v1/beta/policy/provenance", nil)
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/policy/provenance", nil)
 		w := httptest.NewRecorder()
 		srv.router.ServeHTTP(w, req)
 		if w.Code != 200 {
@@ -53,7 +53,7 @@ func TestPolicyProvenanceTamperDetection(t *testing.T) {
 	}
 
 	// Tamper: break prev hash link of second bundle
-	if srv.policyRegistry == nil || len(srv.policyRegistry.ChainHashes()) < 2 {
+	if srv.policyHandler.Registry == nil || len(srv.policyHandler.Registry.ChainHashes()) < 2 {
 		t.Fatalf("expected at least 2 bundles")
 	}
 	// Access underlying registry via reflection of known field; we can mutate by retrieving head then altering PrevHash
@@ -61,7 +61,7 @@ func TestPolicyProvenanceTamperDetection(t *testing.T) {
 	// Directly tamper: modify PrevHash of second bundle (unsafe test-only access)
 	// NOTE: registry.bundles is unexported; we can't reach it directly from here without adding a helper.
 	// Instead we exploit that we can alter the head bundle Hash to break link by reassigning Hash field (accessible via pointer returned by Head()).
-	head := srv.policyRegistry.Head()
+	head := srv.policyHandler.Registry.Head()
 	if head == nil {
 		t.Fatalf("expected head bundle")
 	}

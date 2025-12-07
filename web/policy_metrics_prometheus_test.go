@@ -20,7 +20,7 @@ func TestPolicyMetricsPrometheus(t *testing.T) {
 	}
 	for i, body := range payloads {
 		rec := httptest.NewRecorder()
-		req, _ := http.NewRequest("POST", "/api/v1/beta/policy/evaluate", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/api/v1/policy/evaluate", bytes.NewBufferString(body))
 		req.Header.Set("Content-Type", "application/json")
 		bs.router.ServeHTTP(rec, req)
 		if rec.Code != 200 {
@@ -30,7 +30,7 @@ func TestPolicyMetricsPrometheus(t *testing.T) {
 	}
 	// Fetch Prometheus metrics
 	recM := httptest.NewRecorder()
-	reqM, _ := http.NewRequest("GET", "/api/v1/beta/policy/metrics/prometheus", nil)
+	reqM, _ := http.NewRequest("GET", "/api/v1/policy/metrics/prometheus", nil)
 	bs.router.ServeHTTP(recM, reqM)
 	if recM.Code != 200 {
 		t.Fatalf("prometheus metrics endpoint code=%d body=%s", recM.Code, recM.Body.String())

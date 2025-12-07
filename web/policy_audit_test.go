@@ -24,7 +24,7 @@ func TestPolicyRollbackAudit(t *testing.T) {
 	s := newTestServer(t)
 	// Append two bundles to have rollback target
 	b1 := `{"id":"audit-b1","policies":[{"id":"p1","subjects":["a"],"rules":[{"actions":["x"],"resources":["r"],"effect":"allow"}]}]}`
-	r1 := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/bundles", bytes.NewBufferString(b1))
+	r1 := httptest.NewRequest(http.MethodPost, "/api/v1/policy/bundles", bytes.NewBufferString(b1))
 	r1.Header.Set("X-Admin-Token", "test-admin")
 	w1 := httptest.NewRecorder()
 	s.router.ServeHTTP(w1, r1)
@@ -33,7 +33,7 @@ func TestPolicyRollbackAudit(t *testing.T) {
 	}
 
 	b2 := `{"id":"audit-b2","policies":[{"id":"p2","subjects":["a"],"rules":[{"actions":["y"],"resources":["r"],"effect":"allow"}]}]}`
-	r2 := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/bundles", bytes.NewBufferString(b2))
+	r2 := httptest.NewRequest(http.MethodPost, "/api/v1/policy/bundles", bytes.NewBufferString(b2))
 	r2.Header.Set("X-Admin-Token", "test-admin")
 	w2 := httptest.NewRecorder()
 	s.router.ServeHTTP(w2, r2)
@@ -42,7 +42,7 @@ func TestPolicyRollbackAudit(t *testing.T) {
 	}
 
 	// Get active version
-	tReq := httptest.NewRequest(http.MethodGet, "/api/v1/beta/policy/timeline", nil)
+	tReq := httptest.NewRequest(http.MethodGet, "/api/v1/policy/timeline", nil)
 	tResp := httptest.NewRecorder()
 	s.router.ServeHTTP(tResp, tReq)
 	if tResp.Code != 200 {
@@ -60,7 +60,7 @@ func TestPolicyRollbackAudit(t *testing.T) {
 
 	target := tl.ActiveVersion - 1
 	// Perform rollback (with token)
-	rbReq := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/rollback?version="+strconv.Itoa(target), nil)
+	rbReq := httptest.NewRequest(http.MethodPost, "/api/v1/policy/rollback?version="+strconv.Itoa(target), nil)
 	rbReq.Header.Set("X-Admin-Token", "test-admin")
 	rbResp := httptest.NewRecorder()
 	s.router.ServeHTTP(rbResp, rbReq)

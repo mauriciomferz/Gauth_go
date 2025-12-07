@@ -12,7 +12,7 @@ func TestPolicyChainEndpoint(t *testing.T) {
 	bs := NewBetaServer("")
 	t.Cleanup(func() { bs.Shutdown() })
 	rec := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/api/v1/beta/policy/chain?offset=0&limit=10", nil)
+	req, _ := http.NewRequest("GET", "/api/v1/policy/chain?offset=0&limit=10", nil)
 	bs.router.ServeHTTP(rec, req)
 	if rec.Code != 200 {
 		b := rec.Body.String()

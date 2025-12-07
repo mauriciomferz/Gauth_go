@@ -14,7 +14,7 @@ func TestPolicyTimelineRollback(t *testing.T) {
 	// Seed two bundles via append endpoint (requires admin token header when configured; tests use test server with token?)
 	// Provide minimal valid bundles.
 	b1 := `{"id":"b1","policies":[{"id":"p1","subjects":["a"],"rules":[{"actions":["x"],"resources":["r"],"effect":"allow"}]}]}`
-	req1 := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/bundles", bytes.NewBufferString(b1))
+	req1 := httptest.NewRequest(http.MethodPost, "/api/v1/policy/bundles", bytes.NewBufferString(b1))
 	req1.Header.Set("X-Admin-Token", "test-admin")
 	w1 := httptest.NewRecorder()
 	srv.router.ServeHTTP(w1, req1)
@@ -23,7 +23,7 @@ func TestPolicyTimelineRollback(t *testing.T) {
 	}
 
 	b2 := `{"id":"b2","policies":[{"id":"p2","subjects":["a"],"rules":[{"actions":["x"],"resources":["r"],"effect":"allow"}]}]}`
-	req2 := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/bundles", bytes.NewBufferString(b2))
+	req2 := httptest.NewRequest(http.MethodPost, "/api/v1/policy/bundles", bytes.NewBufferString(b2))
 	req2.Header.Set("X-Admin-Token", "test-admin")
 	w2 := httptest.NewRecorder()
 	srv.router.ServeHTTP(w2, req2)
@@ -32,7 +32,7 @@ func TestPolicyTimelineRollback(t *testing.T) {
 	}
 
 	// Rollback to version 1
-	rb := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/rollback?version=1", nil)
+	rb := httptest.NewRequest(http.MethodPost, "/api/v1/policy/rollback?version=1", nil)
 	rb.Header.Set("X-Admin-Token", "test-admin")
 	wrb := httptest.NewRecorder()
 	srv.router.ServeHTTP(wrb, rb)
@@ -41,7 +41,7 @@ func TestPolicyTimelineRollback(t *testing.T) {
 	}
 
 	// Fetch timeline
-	reqT := httptest.NewRequest(http.MethodGet, "/api/v1/beta/policy/timeline", nil)
+	reqT := httptest.NewRequest(http.MethodGet, "/api/v1/policy/timeline", nil)
 	wT := httptest.NewRecorder()
 	srv.router.ServeHTTP(wT, reqT)
 	if wT.Code != 200 {

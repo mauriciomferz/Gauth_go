@@ -11,7 +11,7 @@ func TestPolicyProvenanceEndpoint(t *testing.T) {
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/api/v1/beta/policy/provenance", nil)
+	req := httptest.NewRequest("GET", "/api/v1/policy/provenance", nil)
 	srv.router.ServeHTTP(w, req)
 	if w.Code != 200 {
 		t.Fatalf("status %d", w.Code)
@@ -34,7 +34,7 @@ func TestPolicyProvenanceUnknownHash(t *testing.T) {
 	t.Cleanup(func() { srv.Shutdown() })
 	// Force empty registry scenario (if seeding disabled this remains empty); request with hash param
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/api/v1/beta/policy/provenance?hash=nonexistentdeadbeef", nil)
+	req := httptest.NewRequest("GET", "/api/v1/policy/provenance?hash=nonexistentdeadbeef", nil)
 	srv.router.ServeHTTP(w, req)
 	if w.Code != 200 {
 		t.Fatalf("status %d", w.Code)

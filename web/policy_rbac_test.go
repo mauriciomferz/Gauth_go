@@ -25,7 +25,7 @@ func TestPolicyRollbackRBAC(t *testing.T) {
 	s := newTestServer(t)
 	// Append two bundles to have rollback target > head
 	b1 := `{"id":"rbac-b1","policies":[{"id":"p1","subjects":["a"],"rules":[{"actions":["x"],"resources":["r"],"effect":"allow"}]}]}`
-	r1 := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/bundles", bytes.NewBufferString(b1))
+	r1 := httptest.NewRequest(http.MethodPost, "/api/v1/policy/bundles", bytes.NewBufferString(b1))
 	r1.Header.Set("X-Admin-Token", "test-admin")
 	w1 := httptest.NewRecorder()
 	s.router.ServeHTTP(w1, r1)
@@ -34,7 +34,7 @@ func TestPolicyRollbackRBAC(t *testing.T) {
 	}
 
 	b2 := `{"id":"rbac-b2","policies":[{"id":"p2","subjects":["a"],"rules":[{"actions":["y"],"resources":["r"],"effect":"allow"}]}]}`
-	r2 := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/bundles", bytes.NewBufferString(b2))
+	r2 := httptest.NewRequest(http.MethodPost, "/api/v1/policy/bundles", bytes.NewBufferString(b2))
 	r2.Header.Set("X-Admin-Token", "test-admin")
 	w2 := httptest.NewRecorder()
 	s.router.ServeHTTP(w2, r2)
@@ -43,7 +43,7 @@ func TestPolicyRollbackRBAC(t *testing.T) {
 	}
 
 	// Determine current active version from timeline
-	tReq := httptest.NewRequest(http.MethodGet, "/api/v1/beta/policy/timeline", nil)
+	tReq := httptest.NewRequest(http.MethodGet, "/api/v1/policy/timeline", nil)
 	tResp := httptest.NewRecorder()
 	s.router.ServeHTTP(tResp, tReq)
 	if tResp.Code != 200 {
@@ -64,7 +64,7 @@ func TestPolicyRollbackRBAC(t *testing.T) {
 
 	// Attempt rollback without token (target previous version)
 	target := tl.ActiveVersion - 1
-	rbReqNo := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/rollback?version="+intToStr(target), nil)
+	rbReqNo := httptest.NewRequest(http.MethodPost, "/api/v1/policy/rollback?version="+intToStr(target), nil)
 	rbRespNo := httptest.NewRecorder()
 	s.router.ServeHTTP(rbRespNo, rbReqNo)
 	if rbRespNo.Code != 403 {
@@ -72,7 +72,7 @@ func TestPolicyRollbackRBAC(t *testing.T) {
 	}
 
 	// Attempt rollback with admin token
-	rbReq := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/rollback?version="+intToStr(target), nil)
+	rbReq := httptest.NewRequest(http.MethodPost, "/api/v1/policy/rollback?version="+intToStr(target), nil)
 	rbReq.Header.Set("X-Admin-Token", "test-admin")
 	rbResp := httptest.NewRecorder()
 	s.router.ServeHTTP(rbResp, rbReq)
@@ -81,7 +81,7 @@ func TestPolicyRollbackRBAC(t *testing.T) {
 	}
 
 	// Verify active version decreased
-	tReq2 := httptest.NewRequest(http.MethodGet, "/api/v1/beta/policy/timeline", nil)
+	tReq2 := httptest.NewRequest(http.MethodGet, "/api/v1/policy/timeline", nil)
 	tResp2 := httptest.NewRecorder()
 	s.router.ServeHTTP(tResp2, tReq2)
 	var tl2 struct {

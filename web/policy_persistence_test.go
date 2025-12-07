@@ -24,7 +24,7 @@ func TestPolicyPersistenceRoundTrip(t *testing.T) {
 
 	// First server: append two bundles
 	s1 := newTestServer(t)
-	r1 := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/bundles", bytes.NewBufferString(testutil.PolicyBundleB1V1))
+	r1 := httptest.NewRequest(http.MethodPost, "/api/v1/policy/bundles", bytes.NewBufferString(testutil.PolicyBundleB1V1))
 	r1.Header.Set("X-Admin-Token", "test-admin")
 	w1 := httptest.NewRecorder()
 	s1.router.ServeHTTP(w1, r1)
@@ -32,7 +32,7 @@ func TestPolicyPersistenceRoundTrip(t *testing.T) {
 		t.Fatalf("append1 status %d body=%s", w1.Code, w1.Body.String())
 	}
 
-	r2 := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/bundles", bytes.NewBufferString(testutil.PolicyBundleB2V1))
+	r2 := httptest.NewRequest(http.MethodPost, "/api/v1/policy/bundles", bytes.NewBufferString(testutil.PolicyBundleB2V1))
 	r2.Header.Set("X-Admin-Token", "test-admin")
 	w2 := httptest.NewRecorder()
 	s1.router.ServeHTTP(w2, r2)
@@ -41,10 +41,9 @@ func TestPolicyPersistenceRoundTrip(t *testing.T) {
 	}
 
 	// Force an explicit save to ensure content flushed (handler should already do this, but double-ensure for test stability)
-	if s1.policyPersistPath != "" {
-		if saveErr := savePolicyChainToFile(s1.policyPersistPath, s1.policyRegistry); saveErr != nil {
-			t.Fatalf("explicit save failed: %v", saveErr)
-		}
+	// Force an explicit save to ensure content flushed (handler should already do this, but double-ensure for test stability)
+	if err := s1.policyHandler.SaveState(); err != nil {
+		t.Fatalf("explicit save failed: %v", err)
 	}
 
 	// Ensure file exists and non-empty
@@ -55,7 +54,7 @@ func TestPolicyPersistenceRoundTrip(t *testing.T) {
 
 	// Second server (fresh) should load file and expose both versions via timeline
 	s2 := newTestServer(t)
-	reqT := httptest.NewRequest(http.MethodGet, "/api/v1/beta/policy/timeline", nil)
+	reqT := httptest.NewRequest(http.MethodGet, "/api/v1/policy/timeline", nil)
 	wT := httptest.NewRecorder()
 	s2.router.ServeHTTP(wT, reqT)
 	if wT.Code != 200 {

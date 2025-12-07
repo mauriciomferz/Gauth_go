@@ -12,7 +12,7 @@ func TestPolicyHeadPolicies(t *testing.T) {
 	bs := NewBetaServer("")
 	t.Cleanup(func() { bs.Shutdown() })
 	rec := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/api/v1/beta/policy/head/policies", nil)
+	req, _ := http.NewRequest("GET", "/api/v1/policy/head/policies", nil)
 	bs.router.ServeHTTP(rec, req)
 	if rec.Code != 200 {
 		t.Fatalf("expected 200, got %d body=%s", rec.Code, rec.Body.String())

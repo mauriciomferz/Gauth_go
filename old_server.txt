@@ -20,6 +20,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -70,8 +71,6 @@ import (
 	"github.com/mauriciomferz/Gauth_go/web/handlers/capability_anchor"
 	mcpHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/mcp"
 	"github.com/mauriciomferz/Gauth_go/web/handlers/modellimits"
-	notaryHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/notary"
-	policyHandler "github.com/mauriciomferz/Gauth_go/web/handlers/policy"
 	"github.com/mauriciomferz/Gauth_go/web/handlers/semantic"
 	"github.com/mauriciomferz/Gauth_go/web/handlers/token"
 	"github.com/mauriciomferz/Gauth_go/web/handlers/violations"
@@ -340,12 +339,29 @@ type BetaServer struct {
 	delegationStatusMu sync.RWMutex
 	delegationStatus   map[string]string // active | suspended | terminated
 	port               string            // bound address (":8080" style)
-	// Policy Handler (Refactored)
-	policyHandler *policyHandler.Handler
-	policyAPI     *policyHandler.API
-
+	// Experimental policy engine provenance (optional; initialized lazily)
+	policyRegistry    *policy.Registry
+	policyEngine      *policy.ChainEngine
+	policyRL          *simpleRateLimiter
+	policyPersistPath string // file path for policy chain persistence (env POLICY_CHAIN_STATE_PATH)
 	// Embedded MemoryAuthorizer for advanced metrics exposure & demo evaluation
 	authorizer *authz.MemoryAuthorizer
+	// Policy evaluation metrics (lightweight counters)
+	policyMetrics struct {
+		Total          uint64
+		Allow          uint64
+		Deny           uint64
+		LastReason     string
+		LastAt         time.Time
+		LastMatched    int
+		LastDeniedBy   int
+		LatencyBuckets map[int64]*uint64 // upper bound ns -> *count (atomic)
+		P99LatencyNS   int64
+		Revisions      uint64 // total appended bundles (monotonic)
+		ActiveVersion  int    // current effective bundle version (after rollback)
+		RollbackCount  uint64 // number of successful rollback operations
+		DiffRequests   uint64 // number of diff endpoint requests (successful)
+	}
 	// Replay protection for issuance nonces/JTIs (demo only)
 	replayStore *token.ReplayNonceStore
 	// Optional anchoring client (memory prototype); future: pluggable external providers
@@ -518,21 +534,6 @@ func (s *BetaServer) CapabilityAnchorEnabled() bool {
 func (s *BetaServer) CapabilityRegistryHash() string        { return s.capabilityRegistryHash }
 func (s *BetaServer) CapabilityPrevRegistryHash() string    { return s.capabilityPrevRegistryHash }
 func (s *BetaServer) CapabilityRegistryChangeAt() time.Time { return s.capabilityRegistryChangeAt }
-
-// ===== Notary Handler Deps Interface Implementations =====
-func (s *BetaServer) GetCapabilityRegistryHash() string { return s.capabilityRegistryHash }
-func (s *BetaServer) GetRotationLedgerHeadHash() string {
-	if s.rotationLedger == nil {
-		return ""
-	}
-	return s.rotationLedger.HeadHash()
-}
-func (s *BetaServer) GetReceiptStore() notaryHandlers.ReceiptStoreProvider {
-	if s.receiptStore == nil {
-		return nil
-	}
-	return s.receiptStore
-}
 
 // AnchorClient returns underlying anchor client (memory prototype).
 func (s *BetaServer) AnchorClient() interface {
@@ -944,7 +945,58 @@ func (s *BetaServer) Shutdown() {
 	}
 }
 
-// Combined anchor methods removed - now handled by web/handlers/notary/api.go
+// apiCombinedAnchorEmit emits a combined capability+rotation digest and records metrics.
+// Digest = sha256(capabilityRegistryHash + ":" + rotationHead)
+func (s *BetaServer) apiCombinedAnchorEmit(c *gin.Context) {
+	if s.capabilityRegistryHash == "" { // capability hash required
+		c.JSON(404, gin.H{"success": false, "error": "capability_hash_unset"})
+		return
+	}
+	rotationHead := ""
+	if s.rotationLedger != nil {
+		rotationHead = s.rotationLedger.HeadHash()
+	}
+	combo := s.capabilityRegistryHash + ":" + rotationHead
+	dig := sha256.Sum256([]byte(combo))
+	hexDigest := hex.EncodeToString(dig[:])
+	entry := combinedAnchorEntry{Digest: hexDigest, Capability: s.capabilityRegistryHash, RotationHead: rotationHead, EmittedAt: time.Now().UTC()}
+	s.combinedAnchorMu.Lock()
+	s.combinedAnchorChain = append(s.combinedAnchorChain, entry)
+	s.combinedAnchorMu.Unlock()
+	if inc, ok := s.metrics.(interface{ IncCombinedAnchorEmitted() }); ok {
+		inc.IncCombinedAnchorEmitted()
+	}
+	c.JSON(200, gin.H{"success": true, "combined_hash": hexDigest, "rotation_head": rotationHead})
+}
+
+// apiCombinedAnchorChain returns the in-memory chain entries.
+func (s *BetaServer) apiCombinedAnchorChain(c *gin.Context) {
+	s.combinedAnchorMu.Lock()
+	out := make([]combinedAnchorEntry, len(s.combinedAnchorChain))
+	copy(out, s.combinedAnchorChain)
+	s.combinedAnchorMu.Unlock()
+	c.JSON(200, gin.H{"success": true, "entries": out})
+}
+
+// apiCombinedAnchorVerify recomputes each digest and reports status.
+func (s *BetaServer) apiCombinedAnchorVerify(c *gin.Context) {
+	s.combinedAnchorMu.Lock()
+	chainCopy := make([]combinedAnchorEntry, len(s.combinedAnchorChain))
+	copy(chainCopy, s.combinedAnchorChain)
+	s.combinedAnchorMu.Unlock()
+	for _, e := range chainCopy {
+		combo := e.Capability + ":" + e.RotationHead
+		dig := sha256.Sum256([]byte(combo))
+		if hex.EncodeToString(dig[:]) != e.Digest {
+			if inc, ok := s.metrics.(interface{ IncCombinedAnchorFailures() }); ok {
+				inc.IncCombinedAnchorFailures()
+			}
+			c.JSON(200, gin.H{"success": true, "status": "mismatch"})
+			return
+		}
+	}
+	c.JSON(200, gin.H{"success": true, "status": "ok"})
+}
 
 // (test-only accessor removed from production build; see revocation_metrics_access_test.go)
 
@@ -1319,6 +1371,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		events:           NewEventHub(500),
 		tokens:           token.NewStore(500),
 		port:             port,
+		policyRL:         newSimpleRateLimiter(20, time.Minute),
 		replayStore:      token.NewReplayNonceStore(5 * time.Minute),
 		delegationStatus: make(map[string]string),
 		metrics:          memoryMetrics,
@@ -1346,12 +1399,6 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	s.tokenHandler = token.NewHandler(s.tokens, s.replayStore, s, s, s, &tokenTracerAdapter{tp: s.tracerProvider}, s.enforceCapabilities, s.metrics, s, s.keyProvider)
 	s.tokenHandler.ETagUpdater = s // Server implements JWKSETagUpdater
 	s.tokenHandler.RegisterRoutes(s.router)
-
-	// Initialize Policy Handler
-	s.policyHandler = policyHandler.NewHandler(os.Getenv("POLICY_CHAIN_STATE_PATH"), s.metrics)
-	s.policyHandler.EnsureInitialized()
-	s.policyAPI = &policyHandler.API{Handler: s.policyHandler, Auditor: &policyAuditorAdapter{log: s.audit}}
-	s.policyAPI.RegisterRoutes(s.router)
 
 	// Initialize Model Limits Handler
 	s.modelLimitsHandler = modellimits.NewHandler(
@@ -1603,10 +1650,10 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	if s.modelLimitsAPI != nil {
 		s.modelLimitsAPI.RegisterRoutes(s.router)
 	}
-	// Combined anchor and notarization endpoints (extracted to handlers/notary)
-	notaryMetrics := &notaryMetricsAdapter{m: s.metrics}
-	notaryHandler := notaryHandlers.NewHandler(s, notaryMetrics)
-	notaryHandler.RegisterRoutes(s.router)
+	// Combined anchor prototype endpoints (capability + rotation digest)
+	s.router.POST("/api/v1/anchor/emitCombined", s.apiCombinedAnchorEmit)
+	s.router.GET("/api/v1/anchor/chain", s.apiCombinedAnchorChain)
+	s.router.GET("/api/v1/anchor/verifyChain", s.apiCombinedAnchorVerify)
 	// RB3 Discovery endpoint (cacheable config snapshot)
 	s.registerRB3Discovery()
 	// RB4 Signed Policy Manifest endpoint (hash-addressed snapshot + signature)
@@ -1975,6 +2022,32 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		fmt.Fprintln(os.Stderr, "[revocation] Set GAUTH_REVOCATION_ENABLED=1 and configure Redis to enable")
 	}
 
+	// Policy chain persistence path (optional) POLICY_CHAIN_STATE_PATH
+	if pp := os.Getenv("POLICY_CHAIN_STATE_PATH"); pp != "" {
+		if strings.HasPrefix(pp, "~") {
+			if home, err := os.UserHomeDir(); err == nil {
+				pp = filepath.Join(home, strings.TrimPrefix(pp, "~"))
+			}
+		}
+		dir := filepath.Dir(pp)
+		if err := os.MkdirAll(dir, 0o755); err == nil {
+			s.policyPersistPath = pp
+		} else {
+			fmt.Fprintf(os.Stderr, "[policy] persist mkdir failed path=%s err=%v\n", dir, err)
+		}
+	}
+	// Load persisted policy chain if path set
+	if s.policyPersistPath != "" {
+		if reg, err := loadPolicyChainFromFile(s.policyPersistPath); err == nil {
+			if reg != nil {
+				s.policyRegistry = reg
+				s.policyEngine = policy.NewChainEngine(s.policyRegistry)
+				fmt.Fprintf(os.Stderr, "[policy] chain restored bundles=%d active_version=%d\n", len(s.policyRegistry.ChainHashes()), s.policyRegistry.ActiveVersion())
+			}
+		} else {
+			fmt.Fprintf(os.Stderr, "[policy] restore failed path=%s err=%v\n", s.policyPersistPath, err)
+		}
+	}
 	// Violation persistence autosave loop (optional) (disabled if GAUTH_DISABLE_BG_POLLS=1)
 	if s.violationPersistPath != "" && os.Getenv("GAUTH_DISABLE_BG_POLLS") != "1" {
 		intervalSec := 0
@@ -2674,33 +2747,47 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		}()
 	}
 	// Initialize latency buckets (ns upper bounds similar to authorizer histogram) with atomic counters
+	s.policyMetrics.LatencyBuckets = map[int64]*uint64{1000: new(uint64), 5000: new(uint64), 10000: new(uint64), 20000: new(uint64), 50000: new(uint64), 100000: new(uint64), 250000: new(uint64), 500000: new(uint64), 1000000: new(uint64), 2500000: new(uint64), 5000000: new(uint64), 10000000: new(uint64)}
+	// Initialize embedded authorizer with sample policies demonstrating latest features.
+	s.authorizer = authz.NewMemoryAuthorizer()
+	s.authorizer.EnableCaching(30 * time.Second)
+	s.authorizer.SetRegexCacheTTL(5 * time.Minute)
+	// Sample policies (allow finance read, deny secret classification via regex, role-based admin override)
+	s.authorizer.AddPolicy(authz.Policy{ID: "allow-finance-read", Subject: "alice@example.com", Resource: "report:finance", Actions: []string{"read"}, Effect: authz.Allow, Conditions: []authz.Condition{{Key: "department", Operator: "equals", Values: []string{"finance"}}}, Metadata: map[string]string{"demo": "true"}})
+	s.authorizer.AddPolicy(authz.Policy{ID: "deny-secret", Subject: "*", Resource: "secret:*", Actions: []string{"read", "write"}, Effect: authz.Deny, Conditions: []authz.Condition{{Key: "classification", Operator: "regex", Values: []string{"^secret(-internal)?$"}}}, Metadata: map[string]string{"demo": "true"}})
+	s.authorizer.AddPolicy(authz.Policy{ID: "allow-admin-any", Subject: "*", Resource: "*", Actions: []string{"*"}, Effect: authz.Allow, Roles: []string{"admin"}, Metadata: map[string]string{"demo": "true"}})
+	s.authorizer.AssignRoles("admin@example.com", "admin")
+
 	// --- Demo Policy Chain Seeding ---
 	// Skip seeding if a registry was already restored from persistence (bundles present).
-	if os.Getenv("GAUTH_SEED_POLICY") != "0" {
-		s.policyHandler.EnsureInitialized()
-		if len(s.policyHandler.Registry.ChainHashes()) == 0 {
-			// Allow alice read finance report. Allow write only when department == finance and classification == public.
-			bundle := policy.Bundle{ID: "demo-initial", Policies: []policy.Policy{{
-				ID:       "finance-report-access",
-				Subjects: []string{"alice@example.com"},
-				Rules: []policy.Rule{
-					{Actions: []string{"read"}, Resources: []string{"report:finance"}, Effect: policy.Allow},
-					{Actions: []string{"write"}, Resources: []string{"report:finance"}, Expr: "department=='finance' && classification=='public'", Effect: policy.Allow},
-				},
-			}, {
-				ID:       "deny-secret-classification",
-				Subjects: []string{"*"},
-				Rules:    []policy.Rule{{Actions: []string{"read", "write"}, Resources: []string{"*"}, Expr: "classification=='secret'", Effect: policy.Deny}},
-			}}}
-
-			if _, err := s.policyHandler.Registry.AddBundle(bundle); err == nil {
-				if verr := s.policyHandler.Registry.VerifyChain(); verr != nil {
-					fmt.Fprintf(os.Stderr, "[policy-seed] verification warning: %v\n", verr)
-				}
-				fmt.Fprintf(os.Stderr, "[policy-seed] seeded bundle id=%s hash=%s policies=%d\n", bundle.ID, s.policyHandler.Registry.Head().Hash, len(bundle.Policies))
-			} else {
-				fmt.Fprintf(os.Stderr, "[policy-seed] failed to seed demo bundle: %v\n", err)
+	// By default, seed an initial policy bundle so /api/v1/beta/policy/evaluate produces
+	// meaningful decisions instead of the neutral "no policy bundles" reason. Disable by setting
+	// GAUTH_SEED_POLICY=0. The seeded bundle intentionally mirrors some authorizer rules for clarity.
+	if os.Getenv("GAUTH_SEED_POLICY") != "0" && (s.policyRegistry == nil || len(s.policyRegistry.ChainHashes()) == 0) {
+		reg := policy.NewRegistry()
+		engine := policy.NewChainEngine(reg)
+		// Allow alice read finance report. Allow write only when department == finance and classification == public.
+		bundle := policy.Bundle{ID: "demo-initial", Policies: []policy.Policy{{
+			ID:       "finance-report-access",
+			Subjects: []string{"alice@example.com"},
+			Rules: []policy.Rule{
+				{Actions: []string{"read"}, Resources: []string{"report:finance"}, Effect: policy.Allow},
+				{Actions: []string{"write"}, Resources: []string{"report:finance"}, Expr: "department=='finance' && classification=='public'", Effect: policy.Allow},
+			},
+		}, {
+			ID:       "deny-secret-classification",
+			Subjects: []string{"*"},
+			Rules:    []policy.Rule{{Actions: []string{"read", "write"}, Resources: []string{"*"}, Expr: "classification=='secret'", Effect: policy.Deny}},
+		}}}
+		if _, err := reg.AddBundle(bundle); err == nil {
+			if verr := reg.VerifyChain(); verr != nil {
+				fmt.Fprintf(os.Stderr, "[policy-seed] verification warning: %v\n", verr)
 			}
+			s.policyRegistry = reg
+			s.policyEngine = engine
+			fmt.Fprintf(os.Stderr, "[policy-seed] seeded bundle id=%s hash=%s policies=%d\n", bundle.ID, reg.Head().Hash, len(bundle.Policies))
+		} else {
+			fmt.Fprintf(os.Stderr, "[policy-seed] failed to seed demo bundle: %v\n", err)
 		}
 	} else {
 		fmt.Fprintf(os.Stderr, "[policy-seed] GAUTH_SEED_POLICY=0 (skipping demo bundle seeding)\n")
@@ -3389,7 +3476,33 @@ func (s *BetaServer) apiCapabilityAnchorStatus(c *gin.Context) {
 	c.JSON(200, payload)
 }
 
-// Notarization HTTP handlers removed - now handled by web/handlers/notary/api.go
+// apiNotarizationReceiptLatest returns the latest persisted successful receipt (if store configured and at least one entry appended).
+func (s *BetaServer) apiNotarizationReceiptLatest(c *gin.Context) {
+	if s.receiptStore == nil {
+		c.JSON(200, gin.H{"success": true, "configured": false})
+		return
+	}
+	latest := s.receiptStore.Latest()
+	if latest.Timestamp == "" {
+		c.JSON(200, gin.H{"success": true, "configured": true, emptyValue: true})
+		return
+	}
+	c.JSON(200, gin.H{"success": true, "configured": true, emptyValue: false, "receipt": latest})
+}
+
+// apiNotarizationReceiptsChain returns a lightweight summary of the receipt chain (hashes only) for integrity verification tooling.
+func (s *BetaServer) apiNotarizationReceiptsChain(c *gin.Context) {
+	if s.receiptStore == nil {
+		c.JSON(200, gin.H{"success": true, "configured": false})
+		return
+	}
+	entries := s.receiptStore.Entries()
+	chain := make([]gin.H, 0, len(entries))
+	for _, e := range entries {
+		chain = append(chain, gin.H{"hash": e.Hash, "timestamp": e.Timestamp, "provider": e.Provider, "chain_hash": e.ChainHash, "prev_hash": e.PrevHash})
+	}
+	c.JSON(200, gin.H{"success": true, "configured": true, "total": len(chain), "entries": chain})
+}
 
 // verifyReceiptChain recomputes chain_hash for each stored receipt and sets receiptIntegrityStatus.
 // Returns integrity status string (ok|mismatch|empty|unconfigured).
@@ -3442,6 +3555,54 @@ func (s *BetaServer) verifyReceiptChain() string {
 		pm.SetCapabilityAnchorNotarizationReceiptsIntegrity(mapped)
 	}
 	return s.receiptIntegrityStatus
+}
+
+// apiNotarizationReceiptsVerify exposes integrity verification result for receipt chain.
+// Response: { success, configured, integrity, total, details:{mismatch_index?, expected?, recomputed?} }
+func (s *BetaServer) apiNotarizationReceiptsVerify(c *gin.Context) {
+	if s.receiptStore == nil {
+		c.JSON(200, gin.H{"success": true, "configured": false})
+		return
+	}
+	entries := s.receiptStore.Entries()
+	if len(entries) == 0 {
+		s.receiptIntegrityStatus = emptyValue
+		c.JSON(200, gin.H{"success": true, "configured": true, "integrity": emptyValue, "total": 0})
+		return
+	}
+	prev := ""
+	for i, e := range entries {
+		tmp := struct {
+			Hash           string  `json:"hash"`
+			Timestamp      string  `json:"timestamp"`
+			Provider       string  `json:"provider"`
+			Version        int     `json:"version"`
+			Success        bool    `json:"success"`
+			LatencySeconds float64 `json:"latency_seconds"`
+			PrevHash       string  `json:"prev_hash"`
+		}{Hash: e.Hash, Timestamp: e.Timestamp, Provider: e.Provider, Version: e.Version, Success: e.Success, LatencySeconds: e.LatencySeconds, PrevHash: e.PrevHash}
+		enc, err := json.Marshal(tmp)
+		if err != nil {
+			s.receiptIntegrityStatus = integrityMismatch
+			c.JSON(500, gin.H{"success": false, "error": "marshal_failed", "detail": err.Error()})
+			return
+		}
+		expected := fmt.Sprintf("%x", sha256.Sum256(append([]byte(e.PrevHash), enc...)))
+		if expected != e.ChainHash || e.PrevHash != prev {
+			s.receiptIntegrityStatus = integrityMismatch
+			if pm, ok := s.metrics.(interface{ SetCapabilityAnchorNotarizationReceiptsIntegrity(string) }); ok {
+				pm.SetCapabilityAnchorNotarizationReceiptsIntegrity("mismatch")
+			}
+			c.JSON(200, gin.H{"success": true, "configured": true, "integrity": "mismatch", "total": len(entries), "details": gin.H{"mismatch_index": i, "expected": expected, "stored": e.ChainHash, "prev_expected": prev, "prev_stored": e.PrevHash}})
+			return
+		}
+		prev = expected
+	}
+	s.receiptIntegrityStatus = integrityOK
+	if pm, ok := s.metrics.(interface{ SetCapabilityAnchorNotarizationReceiptsIntegrity(string) }); ok {
+		pm.SetCapabilityAnchorNotarizationReceiptsIntegrity("ok")
+	}
+	c.JSON(200, gin.H{"success": true, "configured": true, "integrity": "ok", "total": len(entries), "chain_head": prev})
 }
 
 // apiCapabilityAnchorPrometheus emits capability anchoring counters & freshness gauges in Prometheus exposition format.
@@ -3736,14 +3897,33 @@ func (s *BetaServer) routes() {
 	beta.GET("/examples/run/jobs", s.examplesRunJobs)
 	beta.POST("/examples/run/jobs/:id/cancel", s.examplesRunCancel)
 
+	// Experimental policy provenance endpoint: returns chain head hash and verification status.
+	beta.GET("/policy/provenance", s.apiPolicyProvenance)
+	// Chain pagination endpoint (experimental)
+	beta.GET("/policy/chain", s.apiPolicyChain)
+	// Head policies listing (new)
+	beta.GET("/policy/head/policies", s.apiPolicyHeadPolicies)
+	// Policy evaluation metrics snapshot
+	beta.GET("/policy/metrics", s.apiPolicyMetrics)
+	// Prometheus exposition for policy metrics
+	beta.GET("/policy/metrics/prometheus", s.apiPolicyMetricsPrometheus)
 	// Prometheus exposition for revocation auto-sign counters
 	beta.GET("/metrics/revocation/auto-sign/prometheus", s.apiRevocationAutoSignPrometheus)
 	// Hash chain verification endpoints (integrity check for persistence files) handled by violationAPI
+	beta.POST("/policy/bundles", s.apiPolicyAddBundle)
+	beta.GET("/policy/bundles/:hash", s.apiPolicyGetBundle)
+	beta.POST("/policy/rollback", s.apiPolicyRollback)
+	beta.POST("/policy/evaluate", s.apiPolicyEvaluate)
+	// Policy diff endpoint (from_version -> to_version). Query params: from, to. Defaults: from=active, to=head.
+	beta.GET("/policy/diff", s.apiPolicyDiff)
 	// Capability diff endpoint (added/removed/modified vs baseline hash) prototype
 	s.router.GET("/api/v1/capabilities/diff", s.apiCapabilityDiff)
 	// Compact timeline endpoint (versions + short hashes + created times)
-	// Audit log entries endpoint - handled by auditHandlers.API.RegisterRoutes()
+	beta.GET("/policy/timeline", s.apiPolicyTimeline)
+	// Audit log entries endpoint (returns recent in-memory audit entries)
+	beta.GET("/audit", s.apiAuditEntries)
 	// Audit-policy consistency endpoint
+	beta.GET("/policy/audit-consistency", s.apiPolicyAuditConsistency)
 
 	// --- Authorization Metrics & Evaluation (embedded MemoryAuthorizer) ---
 	beta.GET("/authz/metrics", s.apiAuthzMetrics)
@@ -3755,7 +3935,10 @@ func (s *BetaServer) routes() {
 	beta.GET("/capabilities/anchor/metrics/prometheus", s.apiCapabilityAnchorPrometheus)
 	// Capability registry external anchoring endpoints (prototype)
 	// Capability anchor routes registered via modular handlers (anchor.RegisterAll) below.
-	// Notarization receipt persistence endpoints - handled by notaryHandlers.RegisterRoutes()
+	// Notarization receipt persistence endpoints (beta scope)
+	beta.GET("/notarization/receipts/latest", s.apiNotarizationReceiptLatest)
+	beta.GET("/notarization/receipts", s.apiNotarizationReceiptsChain)
+	beta.GET("/notarization/receipts/verify", s.apiNotarizationReceiptsVerify)
 	// Generic Prometheus exposition for all registered collectors (when Prometheus adapter is used)
 	beta.GET("/metrics/prometheus", gin.WrapH(promhttp.Handler()))
 	// Root-level Prometheus exposition for standardized scraping (tests expect /metrics)
@@ -4083,9 +4266,11 @@ func (s *BetaServer) routes() {
 	// --- PoA Visualization Endpoints (Item 3) ---
 	SetupVisualizationRoutes(s.router)
 
-	// --- Audit Trail Endpoints (extracted to handlers/audit) ---
-	auditAPI := auditHandlers.NewAPI(s.audit, randomNonce)
-	auditAPI.RegisterRoutes(s.router)
+	// --- Audit Trail Endpoints ---
+	s.router.GET("/api/v1/audit/logs", s.apiAuditList)
+	s.router.GET("/api/v1/audit/capabilities", s.apiAuditCapabilities)
+	s.router.POST("/api/v1/audit/record", s.apiAuditRecord)
+	s.router.GET("/api/v1/audit/stream", s.apiAuditStream)
 
 	// --- Event System Endpoints ---
 	s.router.POST("/api/v1/events/emit", s.apiEventsEmit)
@@ -6413,7 +6598,75 @@ func (s *BetaServer) apiDelegationRevoke(c *gin.Context) {
 	c.JSON(200, gin.H{"success": true, "delegation_id": in.DelegationID, "status": statusTerminated})
 }
 
-// Audit handlers removed - now handled by web/handlers/audit/api.go
+// apiAuditCapabilities exports capability enforcement related audit entries (create/revoke + denials)
+// Supports pagination via opaque cursor (index in filtered list) and limit.
+// Query params:
+//
+//	limit  (int >0) default 50, max 500
+//	cursor (string) opaque index (base10) of next item to start from; omitted or invalid => 0
+//	outcome (string) filter by outcome
+//	action  (string) filter by action
+//
+// Response fields: entries, count, next_cursor, has_more, total_filtered
+func (s *BetaServer) apiAuditCapabilities(c *gin.Context) {
+	if s.audit == nil {
+		c.JSON(200, gin.H{"success": true, "entries": []any{}, "count": 0, "has_more": false})
+		return
+	}
+	// Parse limit
+	limit := 50
+	if lStr := c.Query("limit"); lStr != "" {
+		if v, err := strconv.Atoi(lStr); err == nil && v > 0 {
+			limit = v
+		}
+	}
+	if limit > 500 {
+		limit = 500
+	}
+	// Parse cursor
+	cursor := 0
+	if cStr := c.Query("cursor"); cStr != "" {
+		if v, err := strconv.Atoi(cStr); err == nil && v >= 0 {
+			cursor = v
+		}
+	}
+	outcomeFilter := c.Query("outcome")
+	actionFilter := c.Query("action")
+	entries := s.audit.List(0) // all (chronological append order)
+	// Build filtered slice first for deterministic pagination independent of live mutations mid-page.
+	filtered := make([]*AuditEntry, 0, len(entries))
+	for _, e := range entries {
+		if e.Action != actionDelegationCreate && e.Action != actionDelegationRevoke && e.Action != actionCapabilityEnforce {
+			continue
+		}
+		if outcomeFilter != "" && e.Outcome != outcomeFilter {
+			continue
+		}
+		if actionFilter != "" && e.Action != actionFilter {
+			continue
+		}
+		filtered = append(filtered, e)
+	}
+	total := len(filtered)
+	if cursor > total {
+		cursor = total
+	} // clamp
+	end := cursor + limit
+	if end > total {
+		end = total
+	}
+	page := filtered[cursor:end]
+	out := make([]gin.H, 0, len(page))
+	for _, e := range page {
+		out = append(out, gin.H{"id": e.ID, "at": e.At.UTC().Format(time.RFC3339Nano), "actor": e.Actor, "action": e.Action, "outcome": e.Outcome, "meta": e.Meta})
+	}
+	nextCursor := ""
+	hasMore := end < total
+	if hasMore {
+		nextCursor = strconv.Itoa(end)
+	}
+	c.JSON(200, gin.H{"success": true, "entries": out, "count": len(out), "next_cursor": nextCursor, "has_more": hasMore, "total_filtered": total})
+}
 
 // applyBundleSubstitution performs production asset placeholder substitution.
 // It is intentionally conservative: only runs when GAUTH_ENV=prod.
@@ -6525,6 +6778,601 @@ func min(a, b int) int {
 	return b
 }
 
+// apiPolicyProvenance returns current policy bundle chain head and verification status.
+func (s *BetaServer) apiPolicyProvenance(c *gin.Context) {
+	// Lazy init registry if not present (empty chain)
+	if s.policyRegistry == nil {
+		s.policyRegistry = policy.NewRegistry()
+		s.policyEngine = policy.NewChainEngine(s.policyRegistry)
+	}
+	head := s.policyRegistry.Head()
+	var headHash string
+	if head != nil {
+		headHash = head.Hash
+	}
+	verified := true
+	var verr string
+	if err := s.policyRegistry.VerifyChain(); err != nil {
+		verified = false
+		verr = err.Error()
+	}
+	// Optional hash query parameter: if provided and not found in chain, treat as unverified provenance.
+	qh := strings.TrimSpace(c.Query("hash"))
+	if qh != "" {
+		found := false
+		for _, h := range s.policyRegistry.ChainHashes() {
+			if h == qh {
+				found = true
+				break
+			}
+		}
+		if !found { // Hash not part of chain; override verified status but keep success true for transport success.
+			verified = false
+			if verr == "" {
+				verr = "hash_not_found"
+			}
+		}
+	}
+	c.JSON(200, gin.H{
+		"success":            true,
+		"head_hash":          headHash,
+		"chain":              s.policyRegistry.ChainHashes(),
+		"verified":           verified,
+		"verification_error": verr,
+		"queried_hash":       qh,
+		"length":             len(s.policyRegistry.ChainHashes()),
+	})
+}
+
+// apiPolicyHeadPolicies returns the policies from the current head bundle (empty list if none).
+func (s *BetaServer) apiPolicyHeadPolicies(c *gin.Context) {
+	if s.policyRegistry == nil {
+		c.JSON(200, gin.H{"success": true, "head_hash": "", "policies": []policy.Policy{}, "count": 0})
+		return
+	}
+	head := s.policyRegistry.Head()
+	if head == nil {
+		c.JSON(200, gin.H{"success": true, "head_hash": "", "policies": []policy.Policy{}, "count": 0})
+		return
+	}
+	// Defensive copy (policies already value type, but avoid accidental mutation by clients later)
+	pols := make([]policy.Policy, len(head.Policies))
+	copy(pols, head.Policies)
+	c.JSON(200, gin.H{"success": true, "head_hash": head.Hash, "policies": pols, "count": len(pols)})
+}
+
+// apiPolicyMetrics returns current evaluation counters for the chain engine.
+func (s *BetaServer) apiPolicyMetrics(c *gin.Context) {
+	pm := s.policyMetrics
+	// Build latency histogram map[string]uint64 for JSON (string keys for consistency)
+	latHist := make(map[string]uint64, len(pm.LatencyBuckets))
+	for ub, ptr := range pm.LatencyBuckets {
+		latHist[fmt.Sprintf("%d", ub)] = atomic.LoadUint64(ptr)
+	}
+	c.JSON(200, gin.H{
+		"success":           true,
+		"total":             pm.Total,
+		"allow":             pm.Allow,
+		"deny":              pm.Deny,
+		"last_reason":       pm.LastReason,
+		"last_at":           pm.LastAt.Format(time.RFC3339Nano),
+		"last_matched":      pm.LastMatched,
+		"last_denied_by":    pm.LastDeniedBy,
+		"latency_histogram": latHist,
+		"p99_latency_ns":    pm.P99LatencyNS,
+		"revisions":         pm.Revisions,
+		"active_version":    pm.ActiveVersion,
+		"rollback_count":    pm.RollbackCount,
+		"diff_requests":     pm.DiffRequests,
+	})
+}
+
+// apiPolicyMetricsPrometheus exposes policy metrics in Prometheus text format.
+func (s *BetaServer) apiPolicyMetricsPrometheus(c *gin.Context) {
+	pm := s.policyMetrics
+	c.Header("Content-Type", "text/plain; version=0.0.4")
+	var b strings.Builder
+	b.WriteString("# HELP gauth_policy_evaluations_total Total policy evaluations\n")
+	b.WriteString("# TYPE gauth_policy_evaluations_total counter\n")
+	b.WriteString(fmt.Sprintf("gauth_policy_evaluations_total %d\n", pm.Total))
+	b.WriteString("# HELP gauth_policy_evaluations_allow_total Total allow decisions\n")
+	b.WriteString("# TYPE gauth_policy_evaluations_allow_total counter\n")
+	b.WriteString(fmt.Sprintf("gauth_policy_evaluations_allow_total %d\n", pm.Allow))
+	b.WriteString("# HELP gauth_policy_evaluations_deny_total Total deny decisions\n")
+	b.WriteString("# TYPE gauth_policy_evaluations_deny_total counter\n")
+	b.WriteString(fmt.Sprintf("gauth_policy_evaluations_deny_total %d\n", pm.Deny))
+	// Policy revision governance metrics
+	b.WriteString("# HELP gauth_policy_revisions_total Total appended policy bundle revisions\n")
+	b.WriteString("# TYPE gauth_policy_revisions_total counter\n")
+	b.WriteString(fmt.Sprintf("gauth_policy_revisions_total %d\n", pm.Revisions))
+	b.WriteString("# HELP gauth_policy_active_version Current effective policy bundle version (rollback aware)\n")
+	b.WriteString("# TYPE gauth_policy_active_version gauge\n")
+	b.WriteString(fmt.Sprintf("gauth_policy_active_version %d\n", pm.ActiveVersion))
+	// Governance operational counters
+	b.WriteString("# HELP gauth_policy_rollback_total Total successful policy rollback operations\n")
+	b.WriteString("# TYPE gauth_policy_rollback_total counter\n")
+	b.WriteString(fmt.Sprintf("gauth_policy_rollback_total %d\n", pm.RollbackCount))
+	b.WriteString("# HELP gauth_policy_diff_requests_total Total successful diff requests\n")
+	b.WriteString("# TYPE gauth_policy_diff_requests_total counter\n")
+	b.WriteString(fmt.Sprintf("gauth_policy_diff_requests_total %d\n", pm.DiffRequests))
+	// Authorization / semantic violation counters (if metrics Memory available)
+	if mm, ok := s.metrics.(*metrics.Memory); ok {
+		b.WriteString("# HELP gauth_scope_violations_total Scope validation violations\n")
+		b.WriteString("# TYPE gauth_scope_violations_total counter\n")
+		b.WriteString(fmt.Sprintf("gauth_scope_violations_total %d\n", mm.ScopeViolations()))
+		b.WriteString("# HELP gauth_restriction_violations_total Restriction validation violations\n")
+		b.WriteString("# TYPE gauth_restriction_violations_total counter\n")
+		b.WriteString(fmt.Sprintf("gauth_restriction_violations_total %d\n", mm.RestrictionViolations()))
+		b.WriteString("# HELP gauth_unauthorized_decisions_total Unauthorized authorization decisions (policy deny)\n")
+		b.WriteString("# TYPE gauth_unauthorized_decisions_total counter\n")
+		b.WriteString(fmt.Sprintf("gauth_unauthorized_decisions_total %d\n", mm.UnauthorizedDecisions()))
+		b.WriteString("# HELP gauth_expired_delegations_total Expired delegations encountered\n")
+		b.WriteString("# TYPE gauth_expired_delegations_total counter\n")
+		b.WriteString(fmt.Sprintf("gauth_expired_delegations_total %d\n", mm.ExpiredDelegations()))
+		b.WriteString("# HELP gauth_revoked_delegations_total Revoked delegations encountered\n")
+		b.WriteString("# TYPE gauth_revoked_delegations_total counter\n")
+		b.WriteString(fmt.Sprintf("gauth_revoked_delegations_total %d\n", mm.RevokedDelegations()))
+	}
+	// Validation failure reason counters from *metrics.Memory if available
+	if mm, ok := s.metrics.(*metrics.Memory); ok {
+		b.WriteString("# HELP gauth_validation_invalid_payload_total Validation failures due to invalid payload\n")
+		b.WriteString("# TYPE gauth_validation_invalid_payload_total counter\n")
+		b.WriteString(fmt.Sprintf("gauth_validation_invalid_payload_total %d\n", mm.InvalidPayloadFailures()))
+		b.WriteString("# HELP gauth_validation_unsupported_status_total Validation failures due to unsupported status values\n")
+		b.WriteString("# TYPE gauth_validation_unsupported_status_total counter\n")
+		b.WriteString(fmt.Sprintf("gauth_validation_unsupported_status_total %d\n", mm.UnsupportedStatusFailures()))
+		b.WriteString("# HELP gauth_validation_invalid_transition_total Validation failures due to invalid lifecycle transitions\n")
+		b.WriteString("# TYPE gauth_validation_invalid_transition_total counter\n")
+		b.WriteString(fmt.Sprintf("gauth_validation_invalid_transition_total %d\n", mm.InvalidTransitionFailures()))
+		b.WriteString("# HELP gauth_validation_not_found_total Validation failures due to missing entities\n")
+		b.WriteString("# TYPE gauth_validation_not_found_total counter\n")
+		b.WriteString(fmt.Sprintf("gauth_validation_not_found_total %d\n", mm.NotFoundFailures()))
+	}
+	// Histogram exposition: cumulative buckets + _count + _sum (approximate sum using midpoint heuristic)
+	b.WriteString("# HELP gauth_policy_eval_latency_ns Evaluation latency distribution (ns)\n")
+	b.WriteString("# TYPE gauth_policy_eval_latency_ns histogram\n")
+	var bounds []int64
+	for ub := range pm.LatencyBuckets {
+		bounds = append(bounds, ub)
+	}
+	sort.Slice(bounds, func(i, j int) bool { return bounds[i] < bounds[j] })
+	var cumulative uint64
+	var approxSum uint64
+	var prevBound int64
+	for i, ub := range bounds {
+		cnt := atomic.LoadUint64(pm.LatencyBuckets[ub])
+		cumulative += cnt
+		// midpoint approximation between previous bound (exclusive) and current bound (inclusive)
+		low := prevBound
+		if i == 0 {
+			//nolint:gosec // G115: histogram calculation, segmentMid bounded
+			low = 0
+		}
+		segmentMid := (low + ub) / 2
+		approxSum += uint64(segmentMid) * cnt //nolint:gosec // G115: histogram
+		b.WriteString(fmt.Sprintf("gauth_policy_eval_latency_ns_bucket{le=\"%d\"} %d\n", ub, cumulative))
+		prevBound = ub
+	}
+	// Add +Inf bucket (required by Prometheus exposition). We treat last cumulative as final; no observations beyond last bucket.
+	b.WriteString(fmt.Sprintf("gauth_policy_eval_latency_ns_bucket{le=\"+Inf\"} %d\n", cumulative))
+	b.WriteString(fmt.Sprintf("gauth_policy_eval_latency_ns_count %d\n", cumulative))
+	b.WriteString(fmt.Sprintf("gauth_policy_eval_latency_ns_sum %d\n", approxSum))
+	b.WriteString(fmt.Sprintf("gauth_policy_eval_latency_ns_p99 %d\n", pm.P99LatencyNS))
+	c.String(200, b.String())
+}
+
+func (s *BetaServer) apiPolicyAddBundle(c *gin.Context) {
+	// Auth token enforcement (optional)
+	adminToken := os.Getenv("GAUTH_POLICY_ADMIN_TOKEN")
+	if adminToken != "" && c.GetHeader("X-Admin-Token") != adminToken {
+		c.JSON(401, gin.H{"success": false, "message": "unauthorized"})
+		return
+	}
+	// Rate limit
+	if s.policyRL != nil && !s.policyRL.Allow(c.ClientIP()) {
+		c.JSON(429, gin.H{"success": false, "message": "rate limit exceeded"})
+		return
+	}
+	var req struct {
+		ID       string          `json:"id"`
+		Policies []policy.Policy `json:"policies"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"success": false, "message": "invalid payload"})
+		return
+	}
+	if s.policyRegistry == nil {
+		s.policyRegistry = policy.NewRegistry()
+		s.policyEngine = policy.NewChainEngine(s.policyRegistry)
+	}
+	// Validate
+	if err := policy.ValidateBundle(policy.Bundle{ID: req.ID, Policies: req.Policies}); err != nil {
+		c.JSON(400, gin.H{"success": false, "message": err.Error()})
+		return
+	}
+	b, err := s.policyRegistry.AddBundle(policy.Bundle{ID: req.ID, Policies: req.Policies})
+	if err != nil {
+		c.JSON(500, gin.H{"success": false, "message": err.Error()})
+		return
+	}
+	// Metrics: revisions increment + active version update
+	s.policyMetrics.Revisions++
+	s.policyMetrics.ActiveVersion = b.Version
+	vErr := s.policyRegistry.VerifyChain()
+	head := s.policyRegistry.Head()
+	var vmsg string
+	verified := true
+	if vErr != nil {
+		verified = false
+		vmsg = vErr.Error()
+	}
+	c.JSON(201, gin.H{"success": true, "bundle_hash": b.Hash, "head_hash": head.Hash, "policy_version": b.Version, "verified": verified, "verification_error": vmsg, "chain": s.policyRegistry.ChainHashes()})
+}
+
+// apiPolicyEvaluate evaluates a request against current head and returns provenance.
+func (s *BetaServer) apiPolicyEvaluate(c *gin.Context) {
+	if s.policyRegistry == nil {
+		s.policyRegistry = policy.NewRegistry()
+		s.policyEngine = policy.NewChainEngine(s.policyRegistry)
+	}
+	var req struct {
+		Subject  string            `json:"subject"`
+		Action   string            `json:"action"`
+		Resource string            `json:"resource"`
+		Attrs    map[string]string `json:"attrs"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"success": false, "message": "invalid payload"})
+		return
+	}
+	start := time.Now()
+	dec, err := s.policyEngine.Evaluate(c.Request.Context(), policy.EvalRequest{Subject: req.Subject, Action: req.Action, Resource: req.Resource, Attrs: req.Attrs})
+	elapsedNS := time.Since(start).Nanoseconds()
+	if err != nil {
+		c.JSON(500, gin.H{"success": false, "message": err.Error()})
+		return
+	}
+	// Metrics update (no locks; single-process demo). For high concurrency, add atomics.
+	s.policyMetrics.Total++
+	if dec.Allow {
+		s.policyMetrics.Allow++
+	} else {
+		s.policyMetrics.Deny++
+	}
+	s.policyMetrics.LastReason = dec.Reason
+	s.policyMetrics.LastAt = time.Now().UTC()
+	s.policyMetrics.LastMatched = len(dec.Matched)
+	s.policyMetrics.LastDeniedBy = len(dec.DeniedBy)
+	// Histogram bucket assignment (first bucket whose upper bound >= elapsed)
+	for ub := range s.policyMetrics.LatencyBuckets {
+		if elapsedNS <= ub {
+			atomic.AddUint64(s.policyMetrics.LatencyBuckets[ub], 1)
+			break
+		}
+	}
+	// Refined p99: interpolate within bucket when crossing threshold.
+	totalCounts := uint64(0)
+	for _, ptr := range s.policyMetrics.LatencyBuckets {
+		totalCounts += atomic.LoadUint64(ptr)
+	}
+	if totalCounts > 0 {
+		threshold := float64(totalCounts) * 0.99
+		var cumulative float64
+		var prevCumulative float64
+		var prevBound int64
+		// deterministic order: collect bounds then sort
+		var bounds []int64
+		for ub := range s.policyMetrics.LatencyBuckets {
+			bounds = append(bounds, ub)
+		}
+		sort.Slice(bounds, func(i, j int) bool { return bounds[i] < bounds[j] })
+		for _, ub := range bounds {
+			cnt := float64(atomic.LoadUint64(s.policyMetrics.LatencyBuckets[ub]))
+			prevCumulative = cumulative
+			cumulative += cnt
+			if cumulative >= threshold {
+				// Linear interpolate inside this bucket using fraction of counts needed
+				needed := threshold - prevCumulative
+				frac := 0.0
+				if cnt > 0 {
+					frac = needed / cnt
+				}
+				low := prevBound
+				if low < 0 {
+					low = 0
+				}
+				// Interpolated value between low and ub
+				interp := float64(low) + (float64(ub-low) * frac)
+				s.policyMetrics.P99LatencyNS = int64(interp)
+				break
+			}
+			prevBound = ub
+		}
+	}
+	// Emit audit provenance entry
+	s.audit.Append(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: "policy_evaluator", Action: "evaluate", Resource: req.Resource, Outcome: map[bool]string{true: "allow", false: "deny"}[dec.Allow], Meta: map[string]string{"bundle_hash": dec.BundleHash, "chain_head": dec.ChainHead, "subject": req.Subject, "action": req.Action}})
+	c.JSON(200, gin.H{"success": true, "allow": dec.Allow, "deny": dec.Deny, "reason": dec.Reason, "matched": dec.Matched, "denied_by": dec.DeniedBy, "bundle_hash": dec.BundleHash, "chain_head": dec.ChainHead, "policy_version": dec.PolicyVersion})
+}
+
+// apiPolicyGetBundle returns bundle by hash.
+func (s *BetaServer) apiPolicyGetBundle(c *gin.Context) {
+	if s.policyRegistry == nil {
+		c.JSON(404, gin.H{"success": false, "message": "no bundles"})
+		return
+	}
+	hash := c.Param("hash")
+	b := s.policyRegistry.FindByHash(hash)
+	if b == nil {
+		c.JSON(404, gin.H{"success": false, "message": "bundle not found"})
+		return
+	}
+	c.JSON(200, gin.H{"success": true, "bundle": b})
+}
+
+// apiPolicyChain returns paginated chain hashes with total length and verification state.
+func (s *BetaServer) apiPolicyChain(c *gin.Context) {
+	if s.policyRegistry == nil { // empty chain
+		c.JSON(200, gin.H{"success": true, "head_hash": "", "hashes": []string{}, "offset": 0, "limit": 0, "returned": 0, "total": 0, "verified": true})
+		return
+	}
+	// Parse offset & limit; default limit 50
+	offStr := c.Query("offset")
+	limStr := c.Query("limit")
+	offset, limit := 0, 50
+	if offStr != "" {
+		if n, err := strconv.Atoi(offStr); err == nil && n >= 0 {
+			offset = n
+		}
+	}
+	if limStr != "" {
+		if n, err := strconv.Atoi(limStr); err == nil && n > 0 {
+			limit = n
+		}
+	}
+	hashes := s.policyRegistry.ChainHashes()
+	total := len(hashes)
+	if offset > total {
+		offset = total
+	}
+	end := offset + limit
+	if end > total {
+		end = total
+	}
+	slice := hashes[offset:end]
+	head := s.policyRegistry.Head()
+	var headHash string
+	if head != nil {
+		headHash = head.Hash
+	}
+	verified := true
+	verr := ""
+	if err := s.policyRegistry.VerifyChain(); err != nil {
+		verified = false
+		verr = err.Error()
+	}
+	// Include versions aligned with hashes for introspection
+	versions := make([]int, len(slice))
+	if len(slice) > 0 {
+		// Build map hash->version
+		for _, b := range s.policyRegistry.ChainWithVersions() {
+			// struct literal has fields Version, Hash
+			for i, h := range slice {
+				if h == b.Hash {
+					versions[i] = b.Version
+				}
+			}
+		}
+	}
+	c.JSON(200, gin.H{"success": true, "head_hash": headHash, "hashes": slice, "versions": versions, "offset": offset, "limit": limit, "returned": len(slice), "total": total, "verified": verified, "verification_error": verr, "active_version": s.policyMetrics.ActiveVersion})
+}
+
+// apiPolicyRollback switches active head to a historical version without mutating chain.
+func (s *BetaServer) apiPolicyRollback(c *gin.Context) {
+	if s.policyRegistry == nil {
+		c.JSON(400, gin.H{"success": false, "message": "no policy chain"})
+		return
+	}
+	// RBAC: require admin token header present (future: validate value against store)
+	adminTok := strings.TrimSpace(c.GetHeader("X-Admin-Token"))
+	if adminTok == "" {
+		c.JSON(403, gin.H{"success": false, "message": "admin token required"})
+		return
+	}
+	verStr := c.Query("version")
+	if verStr == "" {
+		c.JSON(400, gin.H{"success": false, "message": "version required"})
+		return
+	}
+	ver, err := strconv.Atoi(verStr)
+	if err != nil || ver <= 0 {
+		c.JSON(400, gin.H{"success": false, "message": "invalid version"})
+		return
+	}
+	prevActive := s.policyRegistry.ActiveVersion()
+	if err := s.policyRegistry.Rollback(ver); err != nil {
+		c.JSON(404, gin.H{"success": false, "message": err.Error()})
+		return
+	}
+	// Metrics: increment rollback counter
+	s.policyMetrics.RollbackCount++
+	// Update active version metric to reflect rollback
+	s.policyMetrics.ActiveVersion = s.policyRegistry.ActiveVersion()
+	head := s.policyRegistry.Head()
+	verified := true
+	verr := ""
+	if err := s.policyRegistry.VerifyChain(); err != nil {
+		verified = false
+		verr = err.Error()
+	}
+	// Persist chain state after rollback (best-effort)
+	if s.policyPersistPath != "" {
+		if perr := savePolicyChainToFile(s.policyPersistPath, s.policyRegistry); perr != nil {
+			fmt.Fprintf(os.Stderr, "[policy-persist] rollback persist failed: %v\n", perr)
+		}
+	}
+	// Audit event
+	if s.audit != nil {
+		meta := map[string]string{"target_version": fmt.Sprintf("%d", ver), "previous_active_version": fmt.Sprintf("%d", prevActive), "head_hash": head.Hash}
+		s.audit.Append(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: "policy_admin", Action: "rollback", Resource: "policy_chain", Outcome: "success", Meta: meta})
+	}
+	c.JSON(200, gin.H{"success": true, "active_version": s.policyMetrics.ActiveVersion, "head_hash": head.Hash, "verified": verified, "verification_error": verr})
+}
+
+// apiAuditEntries returns in-memory audit entries.
+func (s *BetaServer) apiAuditEntries(c *gin.Context) {
+	if s.audit == nil {
+		c.JSON(200, gin.H{"success": true, "entries": []interface{}{}, "total": 0})
+		return
+	}
+	// Use List with high limit to return all buffered entries (bounded by cap)
+	raw := s.audit.List(0)
+	out := make([]gin.H, 0, len(raw))
+	for _, e := range raw {
+		out = append(out, gin.H{
+			"id":       e.ID,
+			"at":       e.At.Format(time.RFC3339),
+			"actor":    e.Actor,
+			"action":   e.Action,
+			"resource": e.Resource,
+			"outcome":  e.Outcome,
+			"meta":     e.Meta,
+		})
+	}
+	c.JSON(200, gin.H{"success": true, "entries": out, "total": len(out)})
+}
+
+// apiPolicyDiff returns diff summary between two versions. Query params: from, to (ints). Defaults: from=active_version, to=head_version.
+func (s *BetaServer) apiPolicyDiff(c *gin.Context) {
+	if s.policyRegistry == nil {
+		c.JSON(400, gin.H{"success": false, "message": "no policy chain"})
+		return
+	}
+	fromStr := c.Query("from")
+	toStr := c.Query("to")
+	from, to := 0, 0
+	if fromStr != "" {
+		if v, err := strconv.Atoi(fromStr); err == nil {
+			from = v
+		}
+	}
+	if toStr != "" {
+		if v, err := strconv.Atoi(toStr); err == nil {
+			to = v
+		}
+	}
+	diff, err := s.policyRegistry.Diff(from, to)
+	if err != nil {
+		c.JSON(400, gin.H{"success": false, "message": err.Error()})
+		return
+	}
+	// Metrics: count successful diff requests
+	s.policyMetrics.DiffRequests++
+	c.JSON(200, gin.H{"success": true, "diff": diff})
+}
+
+// apiPolicyTimeline returns a compact list of all bundle versions with creation time, short hash, and active markers.
+// Response shape: { success: true, total: N, active_version: int, rolled_back: bool, timeline: [ { version, hash, short_hash, created, active } ] }
+func (s *BetaServer) apiPolicyTimeline(c *gin.Context) {
+	if s.policyRegistry == nil {
+		c.JSON(200, gin.H{"success": true, "total": 0, "timeline": []any{}, "active_version": 0})
+		return
+	}
+	activeVer := s.policyRegistry.ActiveVersion()
+	head := s.policyRegistry.Head()
+	rolledBack := false
+	if head != nil && len(s.policyRegistry.ChainHashes()) > 0 {
+		// rolled back when active version != last bundle version
+		last := s.policyRegistry.ChainWithVersions()
+		if len(last) > 0 {
+			latest := last[len(last)-1].Version
+			if activeVer != latest {
+				rolledBack = true
+			}
+		}
+	}
+	// Build timeline slice using hash->created map helper
+	timeline := make([]map[string]any, 0, len(s.policyRegistry.ChainWithVersions()))
+	cTimes := s.policyRegistryCreatedTimes()
+	for i, vw := range s.policyRegistry.ChainWithVersions() {
+		hash := vw.Hash
+		created := cTimes[vw.Hash]
+		short := hash
+		if len(short) > 8 {
+			short = short[:8]
+		}
+		timeline = append(timeline, map[string]any{
+			"version":    vw.Version,
+			"hash":       hash,
+			"short_hash": short,
+			"created":    created.Format(time.RFC3339),
+			"active":     vw.Version == activeVer,
+		})
+		_ = i // silence unused variable warning
+	}
+	c.JSON(200, gin.H{"success": true, "total": len(timeline), "timeline": timeline, "active_version": activeVer, "rolled_back": rolledBack})
+}
+
+// policyRegistryCreatedTimes extracts a map hash->created time from registry bundles (helper for timeline endpoint).
+func (s *BetaServer) policyRegistryCreatedTimes() map[string]time.Time {
+	out := map[string]time.Time{}
+	if s.policyRegistry == nil {
+		return out
+	}
+	// Access internal slice via exported ChainWithVersions is insufficient; use reflection as a hack fallback.
+	// However we know BetaServer holds *policy.Registry with unexported field 'bundles'; we add method here since same package cannot access policy internals.
+	// Instead, rely on policyRegistry.FindByHash for each hash.
+	for _, vw := range s.policyRegistry.ChainWithVersions() {
+		if b := s.policyRegistry.FindByHash(vw.Hash); b != nil {
+			out[vw.Hash] = b.Created
+		}
+	}
+	return out
+}
+
+// apiPolicyAuditConsistency verifies the most recent policy evaluation audit entry matches current head hash.
+func (s *BetaServer) apiPolicyAuditConsistency(c *gin.Context) {
+	if s.policyRegistry == nil {
+		c.JSON(200, gin.H{"success": true, "evaluations": 0, "consistent": true, "message": "no policy chain"})
+		return
+	}
+	// Find latest audit entry with action == actionEvaluate and meta containing chain_head
+	entries := s.audit.List(0) // all
+	var latest *AuditEntry
+	for i := len(entries) - 1; i >= 0; i-- { // reverse scan
+		e := entries[i]
+		if e.Action == actionEvaluate {
+			latest = e
+			break
+		}
+	}
+	if latest == nil {
+		c.JSON(200, gin.H{"success": true, "evaluations": 0, "consistent": true, "message": "no evaluations"})
+		return
+	}
+	// Extract chain_head from meta
+	var loggedHead string
+	switch m := latest.Meta.(type) {
+	case map[string]string:
+		loggedHead = m["chain_head"]
+	case map[string]any:
+		if v, ok := m["chain_head"]; ok {
+			loggedHead, _ = v.(string)
+		}
+	}
+	current := ""
+	if head := s.policyRegistry.Head(); head != nil {
+		current = head.Hash
+	}
+	consistent := (loggedHead == current)
+	verified := true
+	verr := ""
+	if err := s.policyRegistry.VerifyChain(); err != nil {
+		verified = false
+		verr = err.Error()
+	}
+	c.JSON(200, gin.H{"success": true, "evaluations": 1, "latest_evaluation_id": latest.ID, "logged_chain_head": loggedHead, "current_chain_head": current, "consistent": consistent, "chain_verified": verified, "verification_error": verr})
+}
+
 // apiAuthzMetrics exposes MemoryAuthorizer metrics snapshot as JSON for UI dashboard.
 func (s *BetaServer) apiAuthzMetrics(c *gin.Context) {
 	if s.authorizer == nil {
@@ -6533,6 +7381,99 @@ func (s *BetaServer) apiAuthzMetrics(c *gin.Context) {
 	}
 	snap := s.authorizer.GetMetricsSnapshot()
 	c.JSON(200, gin.H{"success": true, "metrics": snap, "timestamp": time.Now().Format(time.RFC3339)})
+}
+
+// ---- Policy Chain Persistence Helpers (prototype) ----
+// Format: {"bundles":[{...},{...}]} storing Bundle fields except headOverride state (rollback not persisted intentionally).
+type policyChainPersist struct {
+	Bundles  []policy.Bundle `json:"bundles"`
+	Checksum string          `json:"checksum"` // sha256 hex of canonical bundles array JSON (without this wrapper)
+}
+
+func savePolicyChainToFile(path string, reg *policy.Registry) error {
+	if reg == nil {
+		return errors.New("nil registry")
+	}
+	pc := policyChainPersist{Bundles: []policy.Bundle{}}
+	for _, h := range reg.ChainHashes() {
+		if b := reg.FindByHash(h); b != nil {
+			pc.Bundles = append(pc.Bundles, *b)
+		}
+	}
+	// Compute checksum over canonical bundle slice JSON (exclude checksum field)
+	rawBundles, err := json.Marshal(pc.Bundles)
+	if err != nil {
+		return err
+	}
+	sum := sha256.Sum256(rawBundles)
+	pc.Checksum = fmt.Sprintf("%x", sum[:])
+	enc, err := json.Marshal(pc)
+	if err != nil {
+		return err
+	}
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, enc, 0o600); err != nil {
+		return err
+	}
+	// Optional fsync for durability
+	if f, err := os.OpenFile(tmp, os.O_RDWR, 0); err == nil {
+		if syncErr := f.Sync(); syncErr != nil {
+			fmt.Fprintf(os.Stderr, "[policy-persist] fsync failed: %v\n", syncErr)
+		}
+		if closeErr := f.Close(); closeErr != nil {
+			fmt.Fprintf(os.Stderr, "[policy-persist] close failed: %v\n", closeErr)
+		}
+	}
+	return os.Rename(tmp, path)
+}
+
+func loadPolicyChainFromFile(path string) (*policy.Registry, error) {
+	b, err := os.ReadFile(path)
+	if err != nil { // If file does not exist just return empty registry
+		if errors.Is(err, os.ErrNotExist) {
+			return policy.NewRegistry(), nil
+		}
+		return nil, err
+	}
+	// Treat empty file as empty registry (graceful first-run or truncated file scenario)
+	if len(b) == 0 {
+		return policy.NewRegistry(), nil
+	}
+	var pc policyChainPersist
+	if err := json.Unmarshal(b, &pc); err != nil {
+		// If file appears partially written (invalid JSON) return error to surface corruption
+		return nil, err
+	}
+	// Verify checksum if present
+	if pc.Checksum != "" {
+		rawBundles, err := json.Marshal(pc.Bundles)
+		if err != nil {
+			return nil, fmt.Errorf("checksum marshal: %w", err)
+		}
+		sum := sha256.Sum256(rawBundles)
+		calc := fmt.Sprintf("%x", sum[:])
+		if calc != pc.Checksum {
+			return nil, fmt.Errorf("policy persistence checksum mismatch")
+		}
+	}
+	reg := policy.NewRegistry()
+	// Rebuild by appending bundles preserving version continuity; AddBundle will recompute hashes.
+	for _, stored := range pc.Bundles {
+		// Ensure version monotonic retention
+		_, err := reg.AddBundle(policy.Bundle{ID: stored.ID, Version: stored.Version, Policies: stored.Policies})
+		if err != nil {
+			return nil, fmt.Errorf("reappend error: %w", err)
+		}
+	}
+	// Continuity verification: versions must be strictly increasing starting at 1
+	expected := 1
+	for _, b := range reg.ChainWithVersions() {
+		if b.Version != expected {
+			return nil, fmt.Errorf("policy persistence continuity break expected=%d got=%d", expected, b.Version)
+		}
+		expected++
+	}
+	return reg, nil
 }
 
 // apiDecisionMetrics exposes labeled decision counts and reason counts from in-memory metrics collector.
@@ -6664,31 +7605,44 @@ func (s *BetaServer) apiAuthzEvaluate(c *gin.Context) {
 	if req.Context == nil {
 		req.Context = make(map[string]string)
 	}
-
-	// Prefer Policy Handler (Phase 5: Extraction)
-	if s.policyHandler != nil {
-		pReq := policy.EvalRequest{
-			Subject:  req.Subject,
-			Action:   req.Action,
-			Resource: req.Resource,
-			Attrs:    req.Context,
-			Now:      time.Now().UTC(),
-		}
-		dec, err := s.policyHandler.Evaluate(c.Request.Context(), pReq)
-		if err == nil {
-			c.JSON(200, gin.H{"success": true, "decision": dec})
-			return
-		}
-		// If error (e.g. engine not initialized), fallthrough to legacy authorizer
-		fmt.Printf("[apiAuthzEvaluate] policy handler error: %v\n", err)
-	}
-
 	dec, err := s.authorizer.Authorize(c.Request.Context(), authz.Request{Subject: req.Subject, Resource: req.Resource, Action: req.Action, Context: req.Context})
 	if err != nil {
 		c.JSON(500, gin.H{"success": false, "message": err.Error()})
 		return
 	}
 	c.JSON(200, gin.H{"success": true, "decision": dec})
+}
+
+// --- Simple Rate Limiter ---
+type simpleRateLimiter struct {
+	limit  int
+	window time.Duration
+	mu     sync.Mutex
+	slots  map[string]*rlSlot
+}
+type rlSlot struct {
+	count int
+	reset time.Time
+}
+
+func newSimpleRateLimiter(limit int, window time.Duration) *simpleRateLimiter {
+	return &simpleRateLimiter{limit: limit, window: window, slots: make(map[string]*rlSlot)}
+}
+
+func (rl *simpleRateLimiter) Allow(key string) bool {
+	rl.mu.Lock()
+	defer rl.mu.Unlock()
+	s := rl.slots[key]
+	now := time.Now()
+	if s == nil || now.After(s.reset) {
+		s = &rlSlot{count: 0, reset: now.Add(rl.window)}
+		rl.slots[key] = s
+	}
+	if s.count >= rl.limit {
+		return false
+	}
+	s.count++
+	return true
 }
 
 // examplesCatalog returns the list of examples.
@@ -7174,15 +8128,6 @@ type AuditEntry struct {
 	Meta     any       `json:"meta,omitempty"`
 }
 
-// Entry interface getters for audit.Entry compatibility
-func (e *AuditEntry) GetID() string       { return e.ID }
-func (e *AuditEntry) GetAt() time.Time    { return e.At }
-func (e *AuditEntry) GetActor() string    { return e.Actor }
-func (e *AuditEntry) GetAction() string   { return e.Action }
-func (e *AuditEntry) GetResource() string { return e.Resource }
-func (e *AuditEntry) GetOutcome() string  { return e.Outcome }
-func (e *AuditEntry) GetMeta() any        { return e.Meta }
-
 type AuditLog struct {
 	mu     sync.RWMutex
 	cap    int
@@ -7310,45 +8255,110 @@ func (l *AuditLog) Unsubscribe(ch chan *AuditEntry) {
 	close(ch)
 }
 
-// Provider interface adapters for audit.Provider compatibility
-func (l *AuditLog) ListEntries(limit int) []auditHandlers.Entry {
-	raw := l.List(limit)
-	result := make([]auditHandlers.Entry, len(raw))
-	for i, e := range raw {
-		result[i] = e
+func (s *BetaServer) apiAuditRecord(c *gin.Context) {
+	var req struct {
+		Actor    string `json:"actor"`
+		Action   string `json:"action"`
+		Resource string `json:"resource"`
+		Outcome  string `json:"outcome"`
+		Meta     any    `json:"meta"`
 	}
-	return result
-}
-
-func (l *AuditLog) ListEntriesAfter(cursor string, limit int) ([]auditHandlers.Entry, string) {
-	raw, next := l.ListAfter(cursor, limit)
-	result := make([]auditHandlers.Entry, len(raw))
-	for i, e := range raw {
-		result[i] = e
+	if err := c.ShouldBindJSON(&req); err != nil || req.Action == "" {
+		c.JSON(400, gin.H{"success": false, "message": "invalid payload"})
+		return
 	}
-	return result, next
+	e := &AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: req.Actor, Action: req.Action, Resource: req.Resource, Outcome: req.Outcome, Meta: req.Meta}
+	s.audit.Append(e)
+	c.JSON(201, gin.H{"success": true, "entry": e})
 }
 
-func (l *AuditLog) AppendEntry(id string, at time.Time, actor, action, resource, outcome string, meta any) {
-	e := &AuditEntry{ID: id, At: at, Actor: actor, Action: action, Resource: resource, Outcome: outcome, Meta: meta}
-	l.Append(e)
-}
-
-func (l *AuditLog) SubscribeEntries() chan auditHandlers.Entry {
-	raw := l.Subscribe()
-	typed := make(chan auditHandlers.Entry, 32)
-	go func() {
-		for e := range raw {
-			typed <- e
+func (s *BetaServer) apiAuditList(c *gin.Context) {
+	limit := 0
+	if v := c.Query("limit"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			limit = n
 		}
-		close(typed)
+	}
+	cursor := c.Query("cursor")
+	var entries []*AuditEntry
+	var nextCursor string
+	if cursor != "" {
+		entries, nextCursor = s.audit.ListAfter(cursor, limit)
+	} else {
+		entries = s.audit.List(limit)
+		if len(entries) > 0 {
+			nextCursor = entries[len(entries)-1].ID
+		}
+	}
+	wantsCSV := func() bool {
+		if strings.EqualFold(c.Query("format"), "csv") {
+			return true
+		}
+		accept := c.GetHeader("Accept")
+		if accept == "" {
+			return false
+		}
+		for _, part := range strings.Split(accept, ",") {
+			p := strings.ToLower(strings.TrimSpace(strings.Split(part, ";")[0]))
+			if p == contentTypeTextCSV || p == contentTypeCSV {
+				return true
+			}
+		}
+		return false
 	}()
-	return typed
+	if wantsCSV {
+		b := &strings.Builder{}
+		b.WriteString("id,at,actor,action,resource,outcome,reason\n")
+		for _, e := range entries {
+			// Attempt to extract reason from meta if meta is object with key reason (best effort)
+			reason := ""
+			if m, ok := e.Meta.(map[string]any); ok {
+				if rv, ok2 := m["reason"].(string); ok2 {
+					reason = rv
+				}
+			}
+			b.WriteString(fmt.Sprintf("%s,%s,%s,%s,%s,%s,%s\n", e.ID, e.At.Format(time.RFC3339), e.Actor, e.Action, e.Resource, e.Outcome, reason))
+		}
+		c.Header("Content-Type", "text/csv; charset=utf-8")
+		c.Header("Cache-Control", "no-store")
+		c.String(200, b.String())
+		return
+	}
+	c.JSON(200, gin.H{"success": true, "count": len(entries), "entries": entries, "next_cursor": nextCursor})
 }
 
-func (l *AuditLog) UnsubscribeEntries(ch chan auditHandlers.Entry) {
-	// We can't directly map back to the raw channel, so we close this one
-	// and let the goroutine in SubscribeEntries handle cleanup
+func (s *BetaServer) apiAuditStream(c *gin.Context) {
+	c.Header("Content-Type", "text/event-stream")
+	c.Header("Cache-Control", "no-cache")
+	c.Header("Connection", "keep-alive")
+	c.Header("X-Accel-Buffering", "no")
+	ch := s.audit.Subscribe()
+	defer s.audit.Unsubscribe(ch)
+	// Send recent history snapshot (last 20)
+	history := s.audit.List(20)
+	for _, e := range history {
+		if b, err := json.Marshal(e); err == nil {
+			fmt.Fprintf(c.Writer, "event: audit\ndata: %s\n\n", b)
+		}
+	}
+	fmt.Fprint(c.Writer, "event: open\ndata: {\"ok\":true}\n\n")
+	c.Writer.Flush()
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-c.Request.Context().Done():
+			return
+		case e := <-ch:
+			if b, err := json.Marshal(e); err == nil {
+				fmt.Fprintf(c.Writer, "event: audit\ndata: %s\n\n", b)
+				c.Writer.Flush()
+			}
+		case <-ticker.C:
+			fmt.Fprint(c.Writer, ": ping\n\n")
+			c.Writer.Flush()
+		}
+	}
 }
 
 // ===================== EVENT HUB IMPLEMENTATION =====================
@@ -7922,29 +8932,6 @@ func (t *tokenTracerAdapter) StartSpan(ctx context.Context, name string) (contex
 	}
 	c, s := t.tp.StartSpan(ctx, name)
 	return c, s
-}
-
-// notaryMetricsAdapter implements notaryHandlers.Metrics by wrapping metrics.Metrics.
-type notaryMetricsAdapter struct {
-	m metrics.Metrics
-}
-
-func (a *notaryMetricsAdapter) IncCombinedAnchorEmitted() {
-	if inc, ok := a.m.(interface{ IncCombinedAnchorEmitted() }); ok {
-		inc.IncCombinedAnchorEmitted()
-	}
-}
-
-func (a *notaryMetricsAdapter) IncCombinedAnchorFailures() {
-	if inc, ok := a.m.(interface{ IncCombinedAnchorFailures() }); ok {
-		inc.IncCombinedAnchorFailures()
-	}
-}
-
-func (a *notaryMetricsAdapter) SetReceiptIntegrityStatus(status string) {
-	if pm, ok := a.m.(interface{ SetCapabilityAnchorNotarizationReceiptsIntegrity(string) }); ok {
-		pm.SetCapabilityAnchorNotarizationReceiptsIntegrity(status)
-	}
 }
 
 // Run starts an HTTP server and blocks until a termination signal is received.

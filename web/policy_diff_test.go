@@ -14,7 +14,7 @@ func TestPolicyDiffClassification(t *testing.T) {
 	s := newTestServer(t)
 	// Append base bundle (policy p1 allow)
 	b1 := `{"id":"b1","policies":[{"id":"p1","subjects":["alice"],"rules":[{"actions":["read"],"resources":["doc"],"effect":"allow"}]}]}`
-	r1 := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/bundles", bytes.NewBufferString(b1))
+	r1 := httptest.NewRequest(http.MethodPost, "/api/v1/policy/bundles", bytes.NewBufferString(b1))
 	r1.Header.Set("X-Admin-Token", "test-admin")
 	w1 := httptest.NewRecorder()
 	s.router.ServeHTTP(w1, r1)
@@ -34,7 +34,7 @@ func TestPolicyDiffClassification(t *testing.T) {
 
 	// Append second bundle with modified p1 and added p2
 	b2 := `{"id":"b2","policies":[{"id":"p1","subjects":["alice"],"rules":[{"actions":["read"],"resources":["doc2"],"effect":"allow"}]},{"id":"p2","subjects":["bob"],"rules":[{"actions":["write"],"resources":["doc"],"effect":"deny"}]}]}`
-	r2 := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/bundles", bytes.NewBufferString(b2))
+	r2 := httptest.NewRequest(http.MethodPost, "/api/v1/policy/bundles", bytes.NewBufferString(b2))
 	r2.Header.Set("X-Admin-Token", "test-admin")
 	w2 := httptest.NewRecorder()
 	s.router.ServeHTTP(w2, r2)
@@ -55,7 +55,7 @@ func TestPolicyDiffClassification(t *testing.T) {
 	// Diff using actual recorded versions (robust whether seed bundle exists or not)
 	fromVer := out1.PolicyVersion
 	toVer := out2.PolicyVersion
-	diffReq := httptest.NewRequest(http.MethodGet, "/api/v1/beta/policy/diff?from="+itoa(fromVer)+"&to="+itoa(toVer), nil)
+	diffReq := httptest.NewRequest(http.MethodGet, "/api/v1/policy/diff?from="+itoa(fromVer)+"&to="+itoa(toVer), nil)
 	wDiff := httptest.NewRecorder()
 	s.router.ServeHTTP(wDiff, diffReq)
 	if wDiff.Code != 200 {
@@ -104,7 +104,7 @@ func TestPolicyDiffClassification(t *testing.T) {
 	}
 
 	// Negative identical version diff should error
-	badReq := httptest.NewRequest(http.MethodGet, "/api/v1/beta/policy/diff?from="+itoa(toVer)+"&to="+itoa(toVer), nil)
+	badReq := httptest.NewRequest(http.MethodGet, "/api/v1/policy/diff?from="+itoa(toVer)+"&to="+itoa(toVer), nil)
 	wBad := httptest.NewRecorder()
 	s.router.ServeHTTP(wBad, badReq)
 	if wBad.Code == 200 {

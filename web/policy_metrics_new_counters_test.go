@@ -20,7 +20,7 @@ func TestPolicyMetricsNewCounters(t *testing.T) {
 	for i := 0; i < 2; i++ {
 		body := `{"id":"b` + fmt.Sprintf("%d", i+1) + `","policies":[{"id":"p` + fmt.Sprintf("%d", i+1) + `","subjects":["sub"],"rules":[{"actions":["act"],"resources":["res"],"effect":"allow"}]}]}`
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("POST", "/api/v1/beta/policy/bundles", bytes.NewBufferString(body))
+		req := httptest.NewRequest("POST", "/api/v1/policy/bundles", bytes.NewBufferString(body))
 		req.Header.Set("Content-Type", "application/json")
 		srv.router.ServeHTTP(w, req)
 		if w.Code != 201 {
@@ -40,14 +40,14 @@ func TestPolicyMetricsNewCounters(t *testing.T) {
 	}
 	// Perform a diff request (from active to head) - defaults handled by endpoint.
 	// diff between version[0] and version[1]
-	diffPath := fmt.Sprintf("/api/v1/beta/policy/diff?from=%d&to=%d", versions[0], versions[1])
+	diffPath := fmt.Sprintf("/api/v1/policy/diff?from=%d&to=%d", versions[0], versions[1])
 	wDiff := PerformRequest(srv, "GET", diffPath)
 	if wDiff.Code != 200 {
 		t.Fatalf("diff request failed: status=%d body=%s", wDiff.Code, wDiff.Body.String())
 	}
 	// Perform a rollback to version 1 (requires admin token header).
 	wRbRec := httptest.NewRecorder()
-	rbReq := httptest.NewRequest("POST", "/api/v1/beta/policy/rollback?version=1", nil)
+	rbReq := httptest.NewRequest("POST", "/api/v1/policy/rollback?version=1", nil)
 	rbReq.Header.Set("X-Admin-Token", "test-admin")
 	srv.router.ServeHTTP(wRbRec, rbReq)
 	wRb := wRbRec
@@ -55,7 +55,7 @@ func TestPolicyMetricsNewCounters(t *testing.T) {
 		t.Fatalf("rollback failed: status=%d body=%s", wRb.Code, wRb.Body.String())
 	}
 	// Fetch JSON metrics and verify counters
-	wMetrics := PerformRequest(srv, "GET", "/api/v1/beta/policy/metrics")
+	wMetrics := PerformRequest(srv, "GET", "/api/v1/policy/metrics")
 	if wMetrics.Code != 200 {
 		t.Fatalf("metrics fetch failed: %d", wMetrics.Code)
 	}
@@ -77,7 +77,7 @@ func TestPolicyMetricsNewCounters(t *testing.T) {
 		t.Fatalf("expected diff_requests=1 got %d", js.DiffRequests)
 	}
 	// Fetch Prometheus metrics and check presence of lines
-	wProm := PerformRequest(srv, "GET", "/api/v1/beta/policy/metrics/prometheus")
+	wProm := PerformRequest(srv, "GET", "/api/v1/policy/metrics/prometheus")
 	if wProm.Code != 200 {
 		t.Fatalf("prometheus metrics fetch failed: %d", wProm.Code)
 	}

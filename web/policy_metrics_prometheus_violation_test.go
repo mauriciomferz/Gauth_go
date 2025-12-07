@@ -22,7 +22,7 @@ func TestPolicyMetricsPrometheusViolationCounters(t *testing.T) {
 		mm.IncRevoked()
 	}
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/api/v1/beta/policy/metrics/prometheus", nil)
+	req := httptest.NewRequest("GET", "/api/v1/policy/metrics/prometheus", nil)
 	srv.router.ServeHTTP(w, req)
 	if w.Code != 200 {
 		t.Fatalf("expected 200 got %d", w.Code)

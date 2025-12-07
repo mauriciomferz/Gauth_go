@@ -27,6 +27,8 @@ func TestViolationAnomalyMetrics(t *testing.T) {
 		}
 		time.Sleep(10 * time.Millisecond) // spread out timestamps slightly
 	}
+	// Sleep to ensure history throttle (1s) allows a new snapshot
+	time.Sleep(1100 * time.Millisecond)
 	// Query violation metrics endpoint
 	w2 := httptest.NewRecorder()
 	req2 := httptest.NewRequest("GET", "/api/v1/beta/metrics/violations", nil)

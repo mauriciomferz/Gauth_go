@@ -92,6 +92,18 @@ func (a *API) HandlePrometheus(c *gin.Context) {
 		}
 	}
 
+	// Expose integrity status
+	status, _ := a.Handler.VerifyPersistence()
+	if status != "unconfigured" {
+		val := 0
+		if status == "ok" {
+			val = 1
+		}
+		sb.WriteString("\n# HELP gauth_persistence_integrity_semantic Semantic persistence integrity check (1=ok, 0=mismatch/fail)\n")
+		sb.WriteString("# TYPE gauth_persistence_integrity_semantic gauge\n")
+		sb.WriteString(fmt.Sprintf("gauth_persistence_integrity_semantic %d\n", val))
+	}
+
 	c.String(200, sb.String())
 }
 
@@ -106,11 +118,14 @@ func (a *API) HandleVerify(c *gin.Context) {
 		return
 	}
 
+	// VerifyPersistence called
+	integrity, _ := a.Handler.VerifyPersistence()
+
 	ewma, scores := a.Handler.Stats()
 	c.JSON(200, gin.H{
 		"success":   true,
 		"status":    "ok",
-		"integrity": "ok",
+		"integrity": integrity,
 		"stats": gin.H{
 			"ewma_entries":     ewma,
 			"active_anomalies": scores,

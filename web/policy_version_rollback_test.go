@@ -18,7 +18,7 @@ func TestPolicyVersionAndRollback(t *testing.T) {
 	append := func(id string, policies []policy.Policy) (hash string, version int) {
 		payload := map[string]any{"id": id, "policies": policies}
 		b, _ := json.Marshal(payload)
-		req := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/bundles", bytes.NewBuffer(b))
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/policy/bundles", bytes.NewBuffer(b))
 		req.Header.Set("X-Admin-Token", "test-admin")
 		resp := httptest.NewRecorder()
 		bs.router.ServeHTTP(resp, req)
@@ -53,7 +53,7 @@ func TestPolicyVersionAndRollback(t *testing.T) {
 	}
 
 	// Rollback to version 2 (requires admin token header)
-	reqRB := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/rollback?version=2", nil)
+	reqRB := httptest.NewRequest(http.MethodPost, "/api/v1/policy/rollback?version=2", nil)
 	reqRB.Header.Set("X-Admin-Token", "test-admin")
 	respRB := httptest.NewRecorder()
 	bs.router.ServeHTTP(respRB, reqRB)
@@ -73,7 +73,7 @@ func TestPolicyVersionAndRollback(t *testing.T) {
 
 	// Evaluate after rollback; expect policy_version=2
 	evalPayload := []byte(`{"subject":"alice","action":"read","resource":"doc"}`)
-	reqEval := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/evaluate", bytes.NewBuffer(evalPayload))
+	reqEval := httptest.NewRequest(http.MethodPost, "/api/v1/policy/evaluate", bytes.NewBuffer(evalPayload))
 	respEval := httptest.NewRecorder()
 	bs.router.ServeHTTP(respEval, reqEval)
 	if respEval.Code != 200 {
@@ -99,7 +99,7 @@ func TestPolicyVersionAndRollback(t *testing.T) {
 	if v4 != 4 {
 		t.Fatalf("expected version 4 got %d", v4)
 	}
-	reqEval2 := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/evaluate", bytes.NewBuffer(evalPayload))
+	reqEval2 := httptest.NewRequest(http.MethodPost, "/api/v1/policy/evaluate", bytes.NewBuffer(evalPayload))
 	respEval2 := httptest.NewRecorder()
 	bs.router.ServeHTTP(respEval2, reqEval2)
 	var evalResp2 struct {

@@ -16,7 +16,7 @@ func TestPolicyMetricsEndpoint(t *testing.T) {
 	// Allow case: alice read report:finance
 	allowReqBody := `{"subject":"alice@example.com","action":"read","resource":"report:finance","attrs":{}}`
 	rec1 := httptest.NewRecorder()
-	req1, _ := http.NewRequest("POST", "/api/v1/beta/policy/evaluate", bytes.NewBufferString(allowReqBody))
+	req1, _ := http.NewRequest("POST", "/api/v1/policy/evaluate", bytes.NewBufferString(allowReqBody))
 	req1.Header.Set("Content-Type", "application/json")
 	bs.router.ServeHTTP(rec1, req1)
 	if rec1.Code != 200 {
@@ -25,7 +25,7 @@ func TestPolicyMetricsEndpoint(t *testing.T) {
 	// Deny case: classification secret triggers deny-secret-classification
 	denyReqBody := `{"subject":"alice@example.com","action":"write","resource":"report:finance","attrs":{"classification":"secret"}}`
 	rec2 := httptest.NewRecorder()
-	req2, _ := http.NewRequest("POST", "/api/v1/beta/policy/evaluate", bytes.NewBufferString(denyReqBody))
+	req2, _ := http.NewRequest("POST", "/api/v1/policy/evaluate", bytes.NewBufferString(denyReqBody))
 	req2.Header.Set("Content-Type", "application/json")
 	bs.router.ServeHTTP(rec2, req2)
 	if rec2.Code != 200 {
@@ -33,7 +33,7 @@ func TestPolicyMetricsEndpoint(t *testing.T) {
 	}
 	// Fetch metrics
 	recM := httptest.NewRecorder()
-	reqM, _ := http.NewRequest("GET", "/api/v1/beta/policy/metrics", nil)
+	reqM, _ := http.NewRequest("GET", "/api/v1/policy/metrics", nil)
 	bs.router.ServeHTTP(recM, reqM)
 	if recM.Code != 200 {
 		t.Fatalf("metrics endpoint code=%d body=%s", recM.Code, recM.Body.String())

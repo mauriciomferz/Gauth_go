@@ -71,7 +71,7 @@ func TestOpenAPISpecCriticalPaths(t *testing.T) {
 		"/api/v1/token/validate",
 		"/api/v1/token/revoke",
 		"/api/v1/token/status/update",
-		"/api/v1/beta/policy/evaluate",
+		"/api/v1/policy/evaluate",
 		"/api/v1/audit/record",
 	}
 	for _, p := range critical {

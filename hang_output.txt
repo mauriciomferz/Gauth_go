@@ -1,0 +1,97 @@
+=== RUN   TestSemanticDiagnostics_Wired
+[violation-metrics] primary gauth.Service initialized (violation counters active)
+[rfc0111] service initialized (semantic counters active)
+[WARNING] DB_HOST not configured - running in DEVELOPMENT mode
+[DEV] Admin authentication endpoint available (database-free mode)
+[DEV] Other admin endpoints require database - set DB_HOST to enable
+[DEV] Auth handler registered: POST /api/admin/auth/login
+[DEV] Test credentials: admin@example.com / password
+[mcp] Model Context Protocol handler registered at /api/v1/gauth/mcp/*
+[auth] Frontend authentication endpoints registered at /api/v1/gauth/auth/*
+[auth]   POST /api/v1/gauth/auth/login/init (Initiate login)
+[auth]   POST /api/v1/gauth/auth/login/mfa (Verify MFA and get JWT)
+2025/12/07 18:24:49 [revocation] Revocation system disabled (set GAUTH_REVOCATION_ENABLED=1 to enable)
+[revocation] Production revocation system disabled
+[revocation] Set GAUTH_REVOCATION_ENABLED=1 and configure Redis to enable
+[policy-seed] seeded bundle id=demo-initial hash=71b73ebb8d0fb42479385dffdc3fd1a8f2c38bc20e48bb8b87f611e944f6d42e policies=2
+panic: test timed out after 10s
+	running tests:
+		TestSemanticDiagnostics_Wired (10s)
+
+goroutine 128 [running]:
+testing.(*M).startAlarm.func1()
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:2682 +0x2b0
+created by time.goFunc
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/time/sleep.go:215 +0x38
+
+goroutine 1 [chan receive]:
+testing.(*T).Run(0x14000102380, {0x10605893c?, 0x14000249b38?}, 0x1069f0038)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:2005 +0x378
+testing.runTests.func1(0x14000102380)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:2477 +0x38
+testing.tRunner(0x14000102380, 0x14000249c68)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:1934 +0xc8
+testing.runTests(0x1400011a480, {0x1078a0ec0, 0x119, 0x119}, {0x140001108c0?, 0x7?, 0x1078aa380?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:2475 +0x3b8
+testing.(*M).Run(0x140001363c0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:2337 +0x530
+main.main()
+	_testmain.go:615 +0x80
+
+goroutine 90 [select]:
+github.com/mauriciomferz/Gauth_go/internal/limits.InitFromEnv.func1()
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/limits/manager.go:87 +0x84
+created by github.com/mauriciomferz/Gauth_go/internal/limits.InitFromEnv in goroutine 1
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/limits/manager.go:84 +0x354
+
+goroutine 91 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x30?, 0x60?, 0x14000059788?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140007b6000)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+github.com/mauriciomferz/Gauth_go/web/handlers/semantic.(*Handler).Save(0x140007b6000)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/semantic/handler.go:291 +0x80
+github.com/mauriciomferz/Gauth_go/web/handlers/semantic.(*Handler).Update(0x140007b6000)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/semantic/handler.go:128 +0x2e0
+github.com/mauriciomferz/Gauth_go/web.(*BetaServer).initUIRevamp.func4(0x140000e8200)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go:8409 +0x148
+github.com/gin-gonic/gin.(*Context).Next(0x140000e8200)
+	/Users/mauricio.fernandez_fernandezsiemens.co/go/pkg/mod/github.com/gin-gonic/gin@v1.11.0/context.go:192 +0x68
+github.com/mauriciomferz/Gauth_go/web.corsMiddleware.func1(0x140000e8200)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go:1299 +0x18c
+github.com/gin-gonic/gin.(*Context).Next(0x140000e8200)
+	/Users/mauricio.fernandez_fernandezsiemens.co/go/pkg/mod/github.com/gin-gonic/gin@v1.11.0/context.go:192 +0x68
+github.com/gin-gonic/gin.(*Engine).handleHTTPRequest(0x1400012c340, 0x140000e8200)
+	/Users/mauricio.fernandez_fernandezsiemens.co/go/pkg/mod/github.com/gin-gonic/gin@v1.11.0/gin.go:689 +0x314
+github.com/gin-gonic/gin.(*Engine).ServeHTTP(0x1400012c340, {0x106a11450, 0x140000bcc80}, 0x14000000500)
+	/Users/mauricio.fernandez_fernandezsiemens.co/go/pkg/mod/github.com/gin-gonic/gin@v1.11.0/gin.go:643 +0x154
+github.com/mauriciomferz/Gauth_go/web.TestSemanticDiagnostics_Wired(0x14000102540)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/diagnostics_semantic_test.go:126 +0x398
+testing.tRunner(0x14000102540, 0x1069f0038)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:1934 +0xc8
+created by testing.(*T).Run in goroutine 1
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:1997 +0x364
+
+goroutine 92 [select]:
+github.com/mauriciomferz/Gauth_go/web/handlers/modellimits.(*Handler).reloader(0x140001028c0, {0x106a148c8, 0x1078d59c0})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/modellimits/handler.go:169 +0xa8
+created by github.com/mauriciomferz/Gauth_go/web/handlers/modellimits.(*Handler).Init in goroutine 91
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/modellimits/handler.go:160 +0x88
+
+goroutine 93 [select]:
+github.com/mauriciomferz/Gauth_go/web.NewBetaServerWithMetrics.func5()
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go:1669 +0xa0
+created by github.com/mauriciomferz/Gauth_go/web.NewBetaServerWithMetrics in goroutine 91
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go:1665 +0x27e4
+
+goroutine 121 [select]:
+github.com/mauriciomferz/Gauth_go/pkg/audit.(*MemoryLogger).processEvents(0x1400013c480)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:136 +0x9c
+created by github.com/mauriciomferz/Gauth_go/pkg/audit.NewMemoryLoggerWithQueueSize in goroutine 91
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:127 +0x140
+FAIL	github.com/mauriciomferz/Gauth_go/web	10.886s
+FAIL

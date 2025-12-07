@@ -27,7 +27,7 @@ func TestPolicyChainPaginationAndConsistency(t *testing.T) {
 			}},
 		}
 		body, _ := json.Marshal(payload)
-		req := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/bundles", bytesReader(string(body)))
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/policy/bundles", bytesReader(string(body)))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 		srv.router.ServeHTTP(w, req)
@@ -36,7 +36,7 @@ func TestPolicyChainPaginationAndConsistency(t *testing.T) {
 		}
 	}
 	// Page 1: offset 0 limit 2
-	req1 := httptest.NewRequest(http.MethodGet, "/api/v1/beta/policy/chain?offset=0&limit=2", nil)
+	req1 := httptest.NewRequest(http.MethodGet, "/api/v1/policy/chain?offset=0&limit=2", nil)
 	w1 := httptest.NewRecorder()
 	srv.router.ServeHTTP(w1, req1)
 	if w1.Code != 200 {
@@ -60,7 +60,7 @@ func TestPolicyChainPaginationAndConsistency(t *testing.T) {
 		t.Fatalf("expected 2 hashes, got %d", len(page1.Hashes))
 	}
 	// Page 2: offset 2 limit 2
-	req2 := httptest.NewRequest(http.MethodGet, "/api/v1/beta/policy/chain?offset=2&limit=2", nil)
+	req2 := httptest.NewRequest(http.MethodGet, "/api/v1/policy/chain?offset=2&limit=2", nil)
 	w2 := httptest.NewRecorder()
 	srv.router.ServeHTTP(w2, req2)
 	if w2.Code != 200 {
@@ -79,7 +79,7 @@ func TestPolicyChainPaginationAndConsistency(t *testing.T) {
 		t.Fatalf("unexpected page2 %+v", page2)
 	}
 	// Page 3: offset beyond tail
-	req3 := httptest.NewRequest(http.MethodGet, "/api/v1/beta/policy/chain?offset=10&limit=2", nil)
+	req3 := httptest.NewRequest(http.MethodGet, "/api/v1/policy/chain?offset=10&limit=2", nil)
 	w3 := httptest.NewRecorder()
 	srv.router.ServeHTTP(w3, req3)
 	if w3.Code != 200 {
@@ -94,7 +94,7 @@ func TestPolicyChainPaginationAndConsistency(t *testing.T) {
 	}
 
 	// Perform a policy evaluation to create audit evaluation entry
-	reqEval := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/evaluate", bytesReader(evalPayloadMinimal))
+	reqEval := httptest.NewRequest(http.MethodPost, "/api/v1/policy/evaluate", bytesReader(evalPayloadMinimal))
 	wEval := httptest.NewRecorder()
 	srv.router.ServeHTTP(wEval, reqEval)
 	if wEval.Code != 200 {
@@ -102,7 +102,7 @@ func TestPolicyChainPaginationAndConsistency(t *testing.T) {
 	}
 
 	// Consistency endpoint should be consistent
-	reqCons := httptest.NewRequest(http.MethodGet, "/api/v1/beta/policy/audit-consistency", nil)
+	reqCons := httptest.NewRequest(http.MethodGet, "/api/v1/policy/audit-consistency", nil)
 	wCons := httptest.NewRecorder()
 	srv.router.ServeHTTP(wCons, reqCons)
 	if wCons.Code != 200 {
@@ -126,14 +126,14 @@ func TestPolicyAuditConsistencyStale(t *testing.T) {
 	srv := NewTestServerNoSeed(t)
 	// Add first bundle and evaluate
 	b1 := `{"id":"b1","policies":[{"id":"p1","subjects":["u"],"rules":[{"actions":["a"],"resources":["r"],"effect":"allow"}]}]}`
-	req1 := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/bundles", bytesReader(b1))
+	req1 := httptest.NewRequest(http.MethodPost, "/api/v1/policy/bundles", bytesReader(b1))
 	req1.Header.Set("Content-Type", "application/json")
 	w1 := httptest.NewRecorder()
 	srv.router.ServeHTTP(w1, req1)
 	if w1.Code != 201 {
 		t.Fatalf("add b1 status %d", w1.Code)
 	}
-	reqEval := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/evaluate", bytesReader(evalPayloadMinimal))
+	reqEval := httptest.NewRequest(http.MethodPost, "/api/v1/policy/evaluate", bytesReader(evalPayloadMinimal))
 	reqEval.Header.Set("Content-Type", "application/json")
 	wEval := httptest.NewRecorder()
 	srv.router.ServeHTTP(wEval, reqEval)
@@ -142,7 +142,7 @@ func TestPolicyAuditConsistencyStale(t *testing.T) {
 	}
 	// Add second bundle (new head)
 	b2 := `{"id":"b2","policies":[{"id":"p2","subjects":["u"],"rules":[{"actions":["a"],"resources":["r"],"effect":"allow"}]}]}`
-	req2 := httptest.NewRequest(http.MethodPost, "/api/v1/beta/policy/bundles", bytesReader(b2))
+	req2 := httptest.NewRequest(http.MethodPost, "/api/v1/policy/bundles", bytesReader(b2))
 	req2.Header.Set("Content-Type", "application/json")
 	w2 := httptest.NewRecorder()
 	srv.router.ServeHTTP(w2, req2)
@@ -150,7 +150,7 @@ func TestPolicyAuditConsistencyStale(t *testing.T) {
 		t.Fatalf("add b2 status %d", w2.Code)
 	}
 	// Consistency should now be false (logged head from evaluation != current head)
-	reqC := httptest.NewRequest(http.MethodGet, "/api/v1/beta/policy/audit-consistency", nil)
+	reqC := httptest.NewRequest(http.MethodGet, "/api/v1/policy/audit-consistency", nil)
 	wC := httptest.NewRecorder()
 	srv.router.ServeHTTP(wC, reqC)
 	if wC.Code != 200 {

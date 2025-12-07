@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 // (Removed unused readJSONBody helper; parsing done inline in tests.)
@@ -118,13 +119,26 @@ func TestSemanticPersistenceVerify(t *testing.T) {
 	if srv.rfc0111Service == nil {
 		t.Fatalf("semantic service not initialized")
 	}
-	// Trigger semantic counters via authorize endpoint (empty payload leads to some defaults). Provide mismatching scopes.
-	for i := 0; i < 3; i++ {
-		w := httptest.NewRecorder()
-		req := httptest.NewRequest("POST", "/api/v1/poa/authorize", strings.NewReader(`{"delegation":{"scope":["a"],"requested_scope":["b"],"amount_limit":1,"requested_amount":5}}`))
-		req.Header.Set("Content-Type", "application/json")
-		srv.router.ServeHTTP(w, req)
+	// Inject mock service to ensure counters are present for persistence test
+	mockSvc := &mockRFC0111Service{
+		snapshots: []map[string]uint64{
+			{"scope_violation": 10},
+			{"scope_violation": 20}, // subsequent calls get subsequent snapshots
+			{"scope_violation": 30},
+			{"scope_violation": 40},
+		},
 	}
+	srv.rfc0111Service = mockSvc
+	srv.semanticHandler.Service = mockSvc
+	// Ensure we have some data
+	srv.semanticHandler.Update()
+	time.Sleep(1100 * time.Millisecond)
+	srv.semanticHandler.Update()
+	time.Sleep(1100 * time.Millisecond)
+	srv.semanticHandler.Update()
+
+	ewmaCount, _ := srv.semanticHandler.Stats()
+	t.Logf("DEBUG: Post-Update EWMA count: %d MockIdx: %d", ewmaCount, mockSvc.idx)
 	if err := srv.semanticHandler.Save(); err != nil {
 		t.Fatalf("save semantic failed: %v", err)
 	}
@@ -134,9 +148,13 @@ func TestSemanticPersistenceVerify(t *testing.T) {
 	if !strings.Contains(ws.Body.String(), "integrity") {
 		t.Fatalf("semantic verify missing integrity: %s", ws.Body.String())
 	}
+	t.Logf("Semantic Verify Body: %s", ws.Body.String())
+	if strings.Contains(ws.Body.String(), "\"mismatch\"") {
+		t.Fatalf("Semantic verify returned mismatch pre-tamper: %s", ws.Body.String())
+	}
 	// Prometheus: semantic integrity gauge should not show mismatch yet
 	ms1 := httptest.NewRecorder()
-	msr1 := httptest.NewRequest("GET", "/api/v1/beta/metrics/violations/prometheus", nil)
+	msr1 := httptest.NewRequest("GET", "/api/v1/beta/metrics/poa/semantics/prometheus", nil)
 	srv.router.ServeHTTP(ms1, msr1)
 	if !strings.Contains(ms1.Body.String(), "gauth_persistence_integrity_semantic") {
 		t.Fatalf("prometheus missing semantic integrity gauge: %s", ms1.Body.String())
@@ -161,17 +179,27 @@ func TestSemanticPersistenceVerify(t *testing.T) {
 	if len(wrapper2.Payload) == 0 {
 		t.Fatalf("empty payload in semantic wrapper")
 	}
-	var inner struct {
-		Counters  map[string]uint64 `json:"counters"`
-		Timestamp string            `json:"timestamp"`
-	}
+	// Payload structure is map[string]*Welford (or similar struct)
+	var inner map[string]any
 	if innerErr2 := json.Unmarshal(wrapper2.Payload, &inner); innerErr2 != nil {
 		t.Fatalf("unmarshal inner semantic payload: %v raw=%s", innerErr2, string(wrapper2.Payload))
 	}
-	if inner.Counters == nil {
-		inner.Counters = map[string]uint64{}
+	// We want to mutate payload content to change hash, but keep wrapper.Hash same.
+	// We can adds a dummy key or modify existing.
+	// Modify one entry if exists, or add one.
+	if entry, ok := inner["scope_violation"]; ok {
+		// modify it (it is a map/object)
+		if eMap, ok := entry.(map[string]any); ok {
+			eMap["mean"] = 99999.0
+			inner["scope_violation"] = eMap
+		} else {
+			// Fallback
+			inner["tampered"] = "true"
+		}
+	} else {
+		inner["tampered"] = 123
 	}
-	inner.Counters["scope_violation"]++
+
 	mutatedPayload, marshalErr2 := json.Marshal(inner)
 	if marshalErr2 != nil {
 		t.Fatalf("marshal mutated inner semantic payload: %v", marshalErr2)
@@ -192,7 +220,7 @@ func TestSemanticPersistenceVerify(t *testing.T) {
 	}
 	// Prometheus gauge should now reflect mismatch
 	ms2 := httptest.NewRecorder()
-	msr2 := httptest.NewRequest("GET", "/api/v1/beta/metrics/violations/prometheus", nil)
+	msr2 := httptest.NewRequest("GET", "/api/v1/beta/metrics/poa/semantics/prometheus", nil)
 	srv.router.ServeHTTP(ms2, msr2)
 	if !strings.Contains(ms2.Body.String(), "gauth_persistence_integrity_semantic 0") {
 		t.Fatalf("expected semantic integrity gauge=0 after tamper got: %s", ms2.Body.String())

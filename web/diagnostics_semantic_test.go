@@ -107,20 +107,31 @@ func (m *mockRFC0111Service) SemanticSnapshot() map[string]uint64 {
 // TestSemanticDiagnostics_Wired verifies populated counters, history growth, non-empty anomaly score and hash chain fields.
 func TestSemanticDiagnostics_Wired(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	persistFile := t.TempDir() + "/semantic_counters.json"
+	t.Setenv("GAUTH_SEMANTIC_PERSIST_PATH", persistFile)
 	s := NewBetaServer("")
 	t.Cleanup(func() { s.Shutdown() })
-	// Inject mock service with evolving counters to force rate changes.
-	s.rfc0111Service = &mockRFC0111Service{snapshots: []map[string]uint64{
-		{"scope_violation": 10, "restriction_mismatch": 3},
-		{"scope_violation": 12, "restriction_mismatch": 3},
-		{"scope_violation": 18, "restriction_mismatch": 4},
+	// Inject mock service with stable history then a massive spike to trigger anomaly.
+	// Needs enough history to establish low variance, then a spike.
+	mockSvc := &mockRFC0111Service{snapshots: []map[string]uint64{
+		{"scope_violation": 100, "restriction_mismatch": 10},
+		{"scope_violation": 200, "restriction_mismatch": 20}, // Rate ~10/0.1s in theory but here 1s sleep
+		{"scope_violation": 305, "restriction_mismatch": 30}, // Slight jitter
+		{"scope_violation": 400, "restriction_mismatch": 40},
+		{"scope_violation": 505, "restriction_mismatch": 50},
+		{"scope_violation": 150000, "restriction_mismatch": 6000}, // SPIKE
 	}}
+	s.rfc0111Service = mockSvc
+	if s.semanticHandler != nil {
+		s.semanticHandler.Service = mockSvc
+	}
 	// Set low warmup threshold for test
 	if s.semanticHandler != nil {
-		s.semanticHandler.WarmupSamples = 2
+		s.semanticHandler.WarmupSamples = 3
 	}
-	// Issue multiple requests spaced >1s apart to accumulate history entries.
-	for i := 0; i < 3; i++ {
+	// Issue multiple requests to build history and hit the spike.
+	// We iterate len-1 times, last one is the final verification.
+	for i := 0; i < len(mockSvc.snapshots)-1; i++ {
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest("GET", "/api/v1/diagnostics/semantic", nil)
 		s.router.ServeHTTP(w, req)
@@ -161,10 +172,10 @@ func TestSemanticDiagnostics_Wired(t *testing.T) {
 	if len(scores) == 0 {
 		t.Fatalf("expected anomaly scores non-empty: %+v", body.Anomaly)
 	}
-	if body.PrevHash == "" || body.CurrentHash == "" || body.PrevHash == body.CurrentHash {
-		t.Fatalf("hash chain not evolving: prev=%s current=%s", body.PrevHash, body.CurrentHash)
-	}
 	if body.IntegrityStatus != "ok" {
 		t.Fatalf("expected integrity_status ok got %s", body.IntegrityStatus)
+	}
+	if body.PrevHash == "" || body.CurrentHash == "" || body.PrevHash == body.CurrentHash {
+		t.Fatalf("hash chain not evolving: prev=%s current=%s", body.PrevHash, body.CurrentHash)
 	}
 }
