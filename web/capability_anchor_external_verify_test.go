@@ -12,7 +12,7 @@ func TestExternalAnchorVerifySuccess(t *testing.T) {
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Allow initial anchor
-	time.Sleep(30 * time.Millisecond)
+	time.Sleep(250 * time.Millisecond)
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/api/v1/beta/capabilities/anchor/external/verify", nil)
 	srv.router.ServeHTTP(rec, req)
@@ -32,7 +32,7 @@ func TestExternalAnchorVerifyFailure(t *testing.T) {
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Give stub time to attempt initial anchor (should fail) then request verify.
-	time.Sleep(40 * time.Millisecond)
+	time.Sleep(250 * time.Millisecond)
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/api/v1/beta/capabilities/anchor/external/verify", nil)
 	srv.router.ServeHTTP(rec, req)

@@ -32,10 +32,10 @@ func TestCapabilityNegotiationStrictLifecycle(t *testing.T) {
 		SchemaVersion  int                     `json:"schema_version"`
 		Capabilities   []capability.Capability `json:"capabilities"`
 		ActionMappings map[string][]string     `json:"action_mappings"`
-	}{SchemaVersion: 1, Capabilities: sorted, ActionMappings: srv.requiredActionCaps}
+	}{SchemaVersion: 1, Capabilities: sorted, ActionMappings: srv.capabilitiesHandler.GetActionMappings()}
 	enc, _ := json.Marshal(canon)
 	h := sha256.Sum256(enc)
-	srv.capabilityRegistryHash = fmt.Sprintf("sha256:%x", h[:])
+	srv.capabilitiesHandler.RegistryHash = fmt.Sprintf("sha256:%x", h[:])
 
 	// Client requests versions including the deprecated capability.
 	reqBody := map[string]any{"client_versions": map[string][]string{"cap.deprecated.demo": {"1.0"}}}
@@ -81,10 +81,10 @@ func TestCapabilityNegotiationNonStrictLifecycle(t *testing.T) {
 		SchemaVersion  int                     `json:"schema_version"`
 		Capabilities   []capability.Capability `json:"capabilities"`
 		ActionMappings map[string][]string     `json:"action_mappings"`
-	}{SchemaVersion: 1, Capabilities: sorted, ActionMappings: srv.requiredActionCaps}
+	}{SchemaVersion: 1, Capabilities: sorted, ActionMappings: srv.capabilitiesHandler.GetActionMappings()}
 	enc, _ := json.Marshal(canon)
 	h := sha256.Sum256(enc)
-	srv.capabilityRegistryHash = fmt.Sprintf("sha256:%x", h[:])
+	srv.capabilitiesHandler.RegistryHash = fmt.Sprintf("sha256:%x", h[:])
 
 	reqBody := map[string]any{"client_versions": map[string][]string{"cap.deprecated.demo2": {"1.0"}}}
 	resp := doPost(srv, "/api/v1/beta/capabilities/negotiate", reqBody)

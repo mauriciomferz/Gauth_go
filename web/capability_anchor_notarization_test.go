@@ -44,7 +44,8 @@ func TestCapabilityAnchorNotarizationMetrics(t *testing.T) {
 	if srv.notarizer == nil {
 		t.Fatalf("notarizer nil")
 	}
-	receipt, err := srv.notarizer.Notarize(srv.capabilityRegistryHash)
+	// Simulate notarization explicitly
+	receipt, err := srv.notarizer.Notarize(srv.GetCapabilityRegistryHash())
 	if err != nil {
 		t.Fatalf("notarize manual err: %v", err)
 	}

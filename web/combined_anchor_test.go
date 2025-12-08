@@ -3,6 +3,7 @@ package web
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"net/http/httptest"
 	"os"
 	"strings"
@@ -22,7 +23,11 @@ func TestCombinedAnchorEmission(t *testing.T) {
 	srv := NewBetaServerWithMetrics(":0", mem)
 	t.Cleanup(func() { srv.Shutdown() })
 	// Seed capability registry hash directly (prototype placeholder).
-	srv.capabilityRegistryHash = "deadbeefcafecafe"
+	h, err := hex.DecodeString("deadbeefcafecafe")
+	if err != nil {
+		t.Fatalf("failed to decode hex string: %v", err)
+	}
+	srv.capabilitiesHandler.RegistryHash = fmt.Sprintf("sha256:%x", h)
 
 	// First emission
 	w := httptest.NewRecorder()
@@ -31,7 +36,8 @@ func TestCombinedAnchorEmission(t *testing.T) {
 	if w.Code != 200 {
 		t.Fatalf("expected 200 emission status got %d body=%s", w.Code, w.Body.String())
 	}
-	combo := srv.capabilityRegistryHash + ":" + "" // rotation head empty
+
+	combo := srv.GetCapabilityRegistryHash() + ":" + "" // rotation head empty
 	expDigest := sha256.Sum256([]byte(combo))
 	expHex := hex.EncodeToString(expDigest[:])
 
@@ -73,6 +79,3 @@ func TestCombinedAnchorEmission(t *testing.T) {
 	}
 	_ = os.Remove(tmpFile)
 }
-
-// containsSubstring simple helper (avoid pulling extra deps)
-// (helpers removed; using strings.Contains)

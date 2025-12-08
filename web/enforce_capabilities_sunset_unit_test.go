@@ -17,10 +17,13 @@ func TestEnforceCapabilitiesSunsetUnit(t *testing.T) {
 	srv := NewBetaServer("")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Override required action mapping directly
-	srv.requiredActionCaps["delegation:create"] = []string{"cap.unit.sunset"}
+	// Use handler method to set action mapping
+	// mappings := srv.capabilitiesHandler.GetActionMappings()
+	// mappings["test:sunset"] = []string{"cap.unit.sunset"}
+	srv.capabilitiesHandler.ActionMappings["test:sunset"] = []string{"cap.unit.sunset"}
 	// Claims provide the capability (which should be denied due to sunset)
 	claims := map[string]any{"cap": []string{"cap.unit.sunset"}}
-	allowed, missing := srv.enforceCapabilities("delegation:create", claims)
+	allowed, missing := srv.enforceCapabilities("test:sunset", claims)
 	if allowed {
 		t.Fatalf("expected enforcement denial after sunset; got allowed=true")
 	}

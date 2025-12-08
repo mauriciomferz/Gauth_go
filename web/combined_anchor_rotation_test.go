@@ -3,6 +3,7 @@ package web
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"net/http/httptest"
 	"os"
 	"strings"
@@ -28,7 +29,8 @@ func TestCombinedAnchorEmissionWithRotation(t *testing.T) {
 	srv := NewBetaServerWithMetrics(":0", mem)
 	t.Cleanup(func() { srv.Shutdown() })
 	// Seed capability hash
-	srv.capabilityRegistryHash = "feedfacecafedead"
+	h, _ := hex.DecodeString("feedfacecafedead")
+	srv.capabilitiesHandler.RegistryHash = fmt.Sprintf("sha256:%x", h)
 	// Append a rotation descriptor to ledger directly (simulate key rotation event)
 	if srv.rotationLedger == nil {
 		t.Fatalf("rotation ledger not initialized")
@@ -57,7 +59,7 @@ func TestCombinedAnchorEmissionWithRotation(t *testing.T) {
 		t.Fatalf("response missing rotation_head %s body=%s", rotHead, body)
 	}
 	// Validate digest matches cap:rotHead
-	combo := srv.capabilityRegistryHash + ":" + rotHead
+	combo := srv.GetCapabilityRegistryHash() + ":" + rotHead
 	exp := sha256.Sum256([]byte(combo))
 	expHex := hex.EncodeToString(exp[:])
 	if !strings.Contains(body, expHex) {

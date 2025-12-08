@@ -155,12 +155,16 @@ web/handlers/
 ├── anchor/         # External anchoring operations
 ├── audit/          # Audit trail API (entries, capabilities, stream)
 ├── auth/           # Frontend authentication endpoints
+├── authz/          # Authorization API (evaluation, metrics, decisions)
 ├── beta/           # Beta feature handlers
 ├── capability_anchor/ # Capability registry anchoring
-├── events/         # Event pub/sub system (emit, stream)
+├── delegation/       # Delegation lifecycle/status handlers
+├── events/           # Server-Sent Events (SSE) hub & stream handlers
+├── lifecycle/        # Lifecycle event adapters & transition logic
 ├── mcp/            # Model Context Protocol handlers
 ├── modellimits/    # Model usage limits and quotas
 ├── notary/         # Notarization receipts and combined anchors
+├── poa/            # Power of Attorney authorization
 ├── policy/         # Policy CRUD, chain, bundles, provenance
 ├── semantic/       # Semantic anomaly detection
 ├── token/          # Token store and JWKS endpoints

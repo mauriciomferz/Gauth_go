@@ -13,10 +13,13 @@ func TestCapabilityAuditChainAnchoring(t *testing.T) {
 	t.Setenv("GAUTH_CAP_AUDIT_PERSIST_PATH", t.TempDir()+"/cap_audit_tip.json")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
+	prev := srv.CapAuditPrevHash()
 	// Produce at least one audit chained event
 	_ = doPost(srv, "/api/v1/delegation/create", map[string]any{"delegation_id": "a1", "subject": "alice", "delegate": "bob", "claims": map[string]any{"cap": []string{"cap.delegation.create"}}})
-	if srv.capAuditPrevHash == "" {
-		t.Fatalf("expected chain tip after delegation_create")
+	// Verify anchor call
+	// Verify chain tip advanced
+	if srv.CapAuditPrevHash() == prev {
+		t.Fatal("expected chain tip")
 	}
 	resp := doPost(srv, "/api/v1/beta/capabilities/audit/anchor", nil)
 	if resp.Code != 200 {
@@ -29,7 +32,7 @@ func TestCapabilityAuditChainAnchoring(t *testing.T) {
 	if !doc["success"].(bool) {
 		t.Fatalf("success=false")
 	}
-	if doc["chain_tip"].(string) != srv.capAuditPrevHash {
+	if doc["chain_tip"].(string) != srv.CapAuditPrevHash() {
 		t.Fatalf("chain_tip mismatch")
 	}
 	if doc["hash"].(string) == "" {

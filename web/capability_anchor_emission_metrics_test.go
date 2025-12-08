@@ -11,6 +11,7 @@ import (
 
 	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
 	"github.com/mauriciomferz/Gauth_go/pkg/anchor"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 // TestCapabilityAnchorEmissionMetrics verifies emission interval histogram & jitter gauge exposition logic
@@ -18,7 +19,11 @@ import (
 func TestCapabilityAnchorEmissionMetrics(t *testing.T) {
 	t.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", t.TempDir()+"/anchor.json")
 	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "5ms")
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111"})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{
+		Namespace: "gauth",
+		Subsystem: "rfc0111",
+		Registry:  prometheus.NewRegistry(),
+	})
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Enable anchoring endpoints
@@ -40,7 +45,7 @@ func TestCapabilityAnchorEmissionMetrics(t *testing.T) {
 		}{Dummy: i}
 		enc, _ := json.Marshal(payload)
 		h := sha256.Sum256(enc)
-		srv.capabilityRegistryHash = fmt.Sprintf("sha256:%x", h[:])
+		srv.capabilitiesHandler.RegistryHash = fmt.Sprintf("sha256:%x", h[:])
 		// Anchor via POST endpoint (will emit artifact if interval elapsed).
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("POST", "/api/v1/beta/capabilities/anchor", nil)
@@ -56,15 +61,21 @@ func TestCapabilityAnchorEmissionMetrics(t *testing.T) {
 	srv.router.ServeHTTP(rec, req)
 	body := rec.Body.String()
 
+	// Force anchor emission
+	// If registry hash is empty, something is wrong
+	if srv.GetCapabilityRegistryHash() == "" {
+		t.Fatalf("expected registry hash")
+	}
+
 	// Basic presence checks.
-	if !regexp.MustCompile(`capability_anchor_emission_jitter_seconds`).MatchString(body) {
+	if !regexp.MustCompile(`gauth_rfc0111_capability_anchor_emission_jitter_seconds`).MatchString(body) {
 		t.Fatalf("expected jitter gauge line in body:\n%s", body)
 	}
-	if !regexp.MustCompile(`capability_anchor_age_seconds`).MatchString(body) {
+	if !regexp.MustCompile(`gauth_rfc0111_capability_anchor_age_seconds`).MatchString(body) {
 		t.Fatalf("expected age gauge line in body")
 	}
 	// Jitter should be >0 after varied intervals (non-zero stddev). Accept small floating value.
-	if m := regexp.MustCompile(`gauth_capability_anchor_emission_jitter_seconds ([0-9E.e+-]+)`).FindStringSubmatch(body); len(m) == 2 {
+	if m := regexp.MustCompile(`gauth_rfc0111_capability_anchor_emission_jitter_seconds ([0-9E.e+-]+)`).FindStringSubmatch(body); len(m) == 2 {
 		// Accept presence; do not assert non-zero to avoid flakiness on CI timing.
 	} else {
 		t.Fatalf("did not find jitter metric line")

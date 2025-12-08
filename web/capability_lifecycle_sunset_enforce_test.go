@@ -25,7 +25,16 @@ func TestCapabilitySunsetEnforcement(t *testing.T) {
 	capability.Register(capability.Capability{ID: "cap.sunset.demo", Version: "1.0", Stable: false, SunsetAfter: past})
 
 	// Attempt delegation create requiring a capability that is sunset (simulate mapping)
-	srv.requiredActionCaps["delegation:create"] = []string{"cap.sunset.demo"}
+	// Use handler method to set action mapping (using internal field)
+	// mappings := srv.capabilitiesHandler.GetActionMappings()
+	// mappings["delegation:create"] = []string{"cap.sunset.demo"}
+	srv.capabilitiesHandler.ActionMappings["delegation:create"] = []string{"cap.sunset.demo"}
+	// We need to re-set it back to handler because GetActionMappings returns a copy/reference?
+	// It relies on internal map. If GetActionMappings returns reference to map, modifying it works.
+	// Check GetActionMappings implementation: returns map[string][]string.
+	// If it returns the map directly, modifying it works.
+	// Assuming it returns the map directly as it was `srv.requiredActionCaps`.
+
 	body := map[string]any{"delegation_id": "d1", "subject": "alice", "delegate": "bob", "claims": map[string]any{"cap": []string{"cap.sunset.demo"}}}
 	// Local inline POST helper with timeout context to avoid potential hangs
 	b, _ := json.Marshal(body)
@@ -52,7 +61,7 @@ func TestCapabilitySunsetEnforcement(t *testing.T) {
 	found := false
 	for _, e := range entries {
 		m, _ := e.(map[string]any)
-		if m["action"] == "capability_enforce" {
+		if m["action"] == "capability:enforce" {
 			meta, _ := m["meta"].(map[string]any)
 			if meta != nil {
 				if lc, ok := meta["lifecycle"].([]any); ok {

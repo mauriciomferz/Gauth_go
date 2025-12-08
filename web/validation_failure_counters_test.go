@@ -117,9 +117,8 @@ func TestValidationFailureCounters(t *testing.T) {
 
 	// 7. invalid transition delegation: terminated -> active
 	// initialize terminated
-	srv.delegationStatusMu.Lock()
-	srv.delegationStatus["del_term"] = "terminated"
-	srv.delegationStatusMu.Unlock()
+	// Initialize to terminated via API
+	post("/api/v1/delegation/status/update", `{"delegation_id":"del_term","new_status":"terminated"}`)
 	code = post("/api/v1/delegation/status/update", `{"delegation_id":"del_term","new_status":"active"}`)
 	if code != 409 {
 		t.Fatalf("expected 409 invalid transition delegation got %d", code)

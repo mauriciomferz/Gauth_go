@@ -46,7 +46,7 @@ func TestNotarizationReceiptPersistence(t *testing.T) {
 	// NOTE: During NewBetaServer initialization the capability file is loaded BEFORE the notarizer & receiptStore are initialized.
 	// Therefore the first anchor emission + notarization occurs without persistence (receiptStore still nil).
 	// We trigger a second capability reload (after waiting >= write interval and mutating the file) to ensure persistence occurs.
-	if srv.capabilityRegistryHash == "" {
+	if srv.GetCapabilityRegistryHash() == "" {
 		t.Fatalf("expected capabilityRegistryHash to be set")
 	}
 	// First attempt: file should not yet exist.
@@ -58,7 +58,7 @@ func TestNotarizationReceiptPersistence(t *testing.T) {
 	if err := os.WriteFile(capFile, []byte(testutil.CapTransferIssueV1), 0o600); err != nil {
 		t.Fatalf("update capabilities file: %v", err)
 	}
-	if err := srv.loadCapabilitiesFromFile(capFile); err != nil {
+	if err := srv.capabilitiesHandler.LoadFromFile(capFile); err != nil {
 		t.Fatalf("reload capabilities for second emission: %v", err)
 	}
 	// Now receipts file should exist.
@@ -138,8 +138,8 @@ func TestNotarizationReceiptPersistence(t *testing.T) {
 	if err2 := os.WriteFile(capFile, []byte(testutil.CapTransferIssueDelegationCreateV1), 0o600); err2 != nil {
 		t.Fatalf("update capabilities file third emission: %v", err2)
 	}
-	if err2 := srv.loadCapabilitiesFromFile(capFile); err2 != nil {
-		t.Fatalf("reload capabilities third emission: %v", err2)
+	if err := srv.capabilitiesHandler.LoadFromFile(capFile); err != nil {
+		t.Fatalf("reload capabilities third emission: %v", err)
 	}
 	b3, err := os.ReadFile(receiptPath)
 	if err != nil {

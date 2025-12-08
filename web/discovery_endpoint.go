@@ -58,13 +58,13 @@ func (s *BetaServer) registerRB3Discovery() {
 		if s.replayStore != nil && s.replayStore.IsDurable() { // check via exported method
 			replayStrict = true
 		}
-		// Capability registry hash (file-backed only)
-		capHash := s.capabilityRegistryHash
 		// Rotation ledger head hash (optional)
 		rotHead := ""
 		if s.rotationLedger != nil {
 			rotHead = s.rotationLedger.HeadHash()
 		}
+		// Capability registry hash
+		capHash := s.GetCapabilityRegistryHash()
 		// Core payload excluding generated_at for ETag computation.
 		// Max delegation depth (RB12) dynamic env inspection each request; empty or invalid => omitted / 0.
 		var maxDepthVal any

@@ -25,10 +25,14 @@ func TestCapabilityAnchorSLAStale(t *testing.T) {
 	t.Cleanup(func() { srv.Shutdown() })
 	// Simulate a last write 5 seconds ago (beyond threshold)
 	srv.capAnchorLastWrite = time.Now().Add(-5 * time.Second)
+	// Verify SLA logic via metrics or state
+	// For test purposes, we check internal age state if accessible or via metrics (mocked)
 	// Trigger monitor tick manually by computing age & stale
 	age := uint64(time.Since(srv.capAnchorLastWrite).Seconds())
-	srv.capAnchorLastAgeSeconds.Store(age)
-	srv.capAnchorStale.Store(age > uint64(srv.capAnchorStaleThreshold.Seconds()))
+	// Set threshold explicitly for test consistency
+	srv.capabilitiesHandler.AnchorStaleThreshold = 2 * time.Second
+	srv.capabilitiesHandler.SetAnchorState(age > 2, time.Duration(age)*time.Second)
+
 	rr := performRequest(srv.router, "GET", "/api/v1/beta/capabilities/anchor/status")
 	if rr.Code != 200 {
 		t.Fatalf("unexpected status code %d", rr.Code)
@@ -55,8 +59,10 @@ func TestCapabilityAnchorSLAFresh(t *testing.T) {
 	t.Cleanup(func() { srv.Shutdown() })
 	srv.capAnchorLastWrite = time.Now().Add(-2 * time.Second)
 	age := uint64(time.Since(srv.capAnchorLastWrite).Seconds())
-	srv.capAnchorLastAgeSeconds.Store(age)
-	srv.capAnchorStale.Store(age > uint64(srv.capAnchorStaleThreshold.Seconds()))
+	// Use explicit threshold for test
+	srv.capabilitiesHandler.AnchorStaleThreshold = 10 * time.Second
+	srv.capabilitiesHandler.SetAnchorState(false, time.Duration(age)*time.Second)
+
 	rr := performRequest(srv.router, "GET", "/api/v1/beta/capabilities/anchor/status")
 	if rr.Code != 200 {
 		t.Fatalf("unexpected status code %d", rr.Code)

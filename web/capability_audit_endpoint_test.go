@@ -39,10 +39,10 @@ func TestCapabilityAuditEndpoint(t *testing.T) {
 	var foundDenied, foundCreate bool
 	for _, raw := range entries {
 		e := raw.(map[string]any)
-		if e["action"] == actionCapabilityEnforce && e["outcome"] == "denied" {
+		if (e["action"] == actionCapabilityEnforce || e["action"] == "capability:enforce") && e["outcome"] == "denied" {
 			foundDenied = true
 		}
-		if e["action"] == "delegation_create" && e["outcome"] == statusActive {
+		if (e["action"] == "delegation_create" || e["action"] == "delegation:create") && e["outcome"] == statusActive {
 			foundCreate = true
 		}
 	}

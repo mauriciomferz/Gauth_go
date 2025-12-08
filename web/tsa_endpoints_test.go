@@ -51,7 +51,7 @@ func TestTSAAnchorAndVerify(t *testing.T) {
 	if !vresp.Success {
 		t.Fatalf("verify not success")
 	}
-	if vresp.Verified && s.capabilityRegistryHash != testDemoHashValue {
+	if vresp.Verified && s.GetCapabilityRegistryHash() != testDemoHashValue {
 		t.Fatalf("expected mismatch verify=false reason=%s", vresp.Reason)
 	}
 	// Basic latency metric sanity: we can't scrape Prometheus adapter directly here without instrumentation; ensure processing time < 1s

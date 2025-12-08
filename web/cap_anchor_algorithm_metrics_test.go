@@ -40,7 +40,7 @@ func TestCapabilityAnchorAlgorithmMetrics(t *testing.T) {
 	t.Cleanup(func() { srv.Shutdown() })
 	// Perform a second explicit capability load now that anchor file path has been configured
 	// so that emission block inside loadCapabilitiesFromFile observes non-empty capAnchorFilePath.
-	if err := srv.loadCapabilitiesFromFile(capPath); err != nil {
+	if err := srv.capabilitiesHandler.LoadFromFile(capPath); err != nil {
 		t.Fatalf("second capability load failed: %v", err)
 	}
 	time.Sleep(25 * time.Millisecond) // brief yield

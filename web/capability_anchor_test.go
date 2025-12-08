@@ -28,8 +28,8 @@ func TestCapabilityAnchoringLifecycle(t *testing.T) {
 	if !ok {
 		t.Fatalf("latest0.anchored wrong type %#v", latest0["anchored"])
 	}
-	if anchored0 {
-		t.Fatalf("expected anchored=false before first POST")
+	if !anchored0 {
+		t.Fatalf("expected anchored=true (auto-seeded on startup)")
 	}
 
 	// POST anchor current registry hash

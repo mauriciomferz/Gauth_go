@@ -41,6 +41,9 @@ import (
 	bls "github.com/herumi/bls-eth-go-binary/bls"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus"
+	promhttp "github.com/prometheus/client_golang/prometheus/promhttp"
+
 	anchorint "github.com/mauriciomferz/Gauth_go/internal/anchor"
 	"github.com/mauriciomferz/Gauth_go/internal/capability"
 	"github.com/mauriciomferz/Gauth_go/internal/limits"
@@ -49,7 +52,6 @@ import (
 	"github.com/mauriciomferz/Gauth_go/internal/tracing"
 	anchor "github.com/mauriciomferz/Gauth_go/pkg/anchor"
 	"github.com/mauriciomferz/Gauth_go/pkg/audit"
-	authpkg "github.com/mauriciomferz/Gauth_go/pkg/auth"
 	"github.com/mauriciomferz/Gauth_go/pkg/authz"
 	"github.com/mauriciomferz/Gauth_go/pkg/blockchain"
 	"github.com/mauriciomferz/Gauth_go/pkg/cache"
@@ -66,19 +68,22 @@ import (
 	anchorHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/anchor"
 	auditHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/audit"
 	authHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/auth"
+	authzHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/authz"
 	betaHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/beta"
+	"github.com/mauriciomferz/Gauth_go/web/handlers/capabilities"
 	"github.com/mauriciomferz/Gauth_go/web/handlers/capability_anchor"
+	delegationHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/delegation"
 	eventsHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/events"
+	"github.com/mauriciomferz/Gauth_go/web/handlers/examples"
 	lifecycleHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/lifecycle"
 	mcpHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/mcp"
-	"github.com/mauriciomferz/Gauth_go/web/handlers/modellimits"
+	modellimits "github.com/mauriciomferz/Gauth_go/web/handlers/modellimits"
 	notaryHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/notary"
+	poaHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/poa"
 	policyHandler "github.com/mauriciomferz/Gauth_go/web/handlers/policy"
 	"github.com/mauriciomferz/Gauth_go/web/handlers/semantic"
 	"github.com/mauriciomferz/Gauth_go/web/handlers/token"
 	"github.com/mauriciomferz/Gauth_go/web/handlers/violations"
-	"github.com/prometheus/client_golang/prometheus"
-	promhttp "github.com/prometheus/client_golang/prometheus/promhttp"
 	otel "go.opentelemetry.io/otel"
 	stdoutmetric "go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
 	"go.opentelemetry.io/otel/metric"
@@ -283,15 +288,13 @@ func jwtError(c *gin.Context, code, detail string) {
 
 // for backward compatibility. Prefer BetaServer moving forward.
 type BetaServer struct {
-	router           *gin.Engine
-	start            time.Time
-	keyProvider      crypto.KeyProvider
-	poaTotalRequests int
+	router      *gin.Engine
+	start       time.Time
+	keyProvider crypto.KeyProvider
 	// legacyAliasHits counts invocations of deprecated /api/governance/lifecycle_timeline for deprecation timing.
+
 	legacyAliasHits  uint64
-	examples         []*ExampleMeta
-	jobs             *JobManager
-	examplesMu       sync.RWMutex
+	examplesAPI      *examples.API
 	audit            *AuditLog
 	events           *EventHub
 	eventsHubAdapter *eventsHandlers.Hub // New events hub for extracted handlers
@@ -299,7 +302,9 @@ type BetaServer struct {
 	primaryAuthService interface{ ViolationSnapshot() map[string]uint64 }
 
 	// Handlers
-	tokenHandler *token.Handler
+	poaHandler        *poaHandlers.Handler
+	delegationHandler *delegationHandlers.Handler
+	tokenHandler      *token.Handler
 
 	tokens *token.Store
 	// stopCh closes to signal background goroutines to exit gracefully.
@@ -330,6 +335,16 @@ type BetaServer struct {
 	semanticHandler *semantic.Handler
 	semanticAPI     *semantic.API
 
+	// Capability Anchor Handler
+	capabilityAnchorHandler *capability_anchor.Handler
+	capabilityAnchorAPI     *capability_anchor.API
+
+	// Capabilities Handler (New)
+	capabilitiesHandler *capabilities.Handler
+	capabilitiesAPI     *capabilities.API
+
+	authzAPI *authzHandlers.API
+
 	// OTel Metrics (prototype)
 	// Persistence integrity tracking (hash chain)
 	violationPrevHash string
@@ -340,9 +355,7 @@ type BetaServer struct {
 	violationIntegrityStatus string
 	semanticIntegrityStatus  string
 	// Delegation lifecycle prototype store (id -> status). Real implementation would live in RFC0111 service repo.
-	delegationStatusMu sync.RWMutex
-	delegationStatus   map[string]string // active | suspended | terminated
-	port               string            // bound address (":8080" style)
+	port string // bound address (":8080" style)
 	// Policy Handler (Refactored)
 	policyHandler *policyHandler.Handler
 	policyAPI     *policyHandler.API
@@ -390,31 +403,16 @@ type BetaServer struct {
 	jwksLastRotated time.Time
 	// Capability governance fields
 	// SLA freshness tracking for capability anchor (stale detection)
-	capAnchorStaleThreshold time.Duration       // derived from GAUTH_CAP_ANCHOR_STALE_THRESHOLD_SECONDS
-	capAnchorStale          atomic.Bool         // set when age exceeds threshold
-	capAnchorLastAgeSeconds atomic.Uint64       // last computed age (seconds) for status exposure
-	requiredActionCaps      map[string][]string // action -> required capability IDs
-	capEnforce              bool                // enforcement flag (env GAUTH_CAPABILITY_ENFORCE=1)
-	lifecycleStrict         bool                // GAUTH_CAP_LIFECYCLE_STRICT=1 exclude deprecated versions in negotiation
-	lifecycleSunsetEnforce  bool                // GAUTH_CAP_LIFECYCLE_SUNSET_ENFORCE=1 deny usage after sunset
-	capSource               string              // provenance: static | file
-	capLastLoaded           time.Time           // timestamp of last successful file load
-	capSchemaVersion        int                 // schema_version from capabilities file (0 if not file-backed)
-	capabilityRegistryHash  string              // SHA256 hash of canonical capability registry (file-backed only)
-	// capabilityPrevRegistryHash stores the previous successful capability registry hash (for change detection / anchoring).
-	// Empty until at least one successful semantic change occurs after initial load.
-	capabilityPrevRegistryHash string
-	// capabilityRegistryChangeAt records timestamp of last semantic change (hash transition) to capability registry.
-	capabilityRegistryChangeAt time.Time
 	// Capability audit hash chain persistence (tracking capability-related audit entries: create, revoke, enforce)
-	capAuditPrevHash    string
-	capAuditPersistPath string
+	// Moved to capabilities.Handler
 	// Protocol flow manager for interactive GAuth flow guidance
 	protocolFlowManager *ProtocolFlowManager
 	// Capability registry external anchor artifact (periodic file emission)
 	capAnchorFilePath      string
 	capAnchorLastWrite     time.Time
 	capAnchorWriteInterval time.Duration
+	capAnchorEmitted       bool   // Whether artifact was emitted after last reload
+	capAnchorArtifact      []byte // Latest emitted artifact bytes
 	// Capability anchor observers (external timestamping / publication hooks)
 	capAnchorObservers []CapabilityAnchorObserver
 	// Emission interval jitter tracking (rolling window)
@@ -461,11 +459,8 @@ type BetaServer struct {
 	// Reactive semantic throttle activation flag (test instrumentation)
 	semanticThrottleActive bool
 	// External capability registry anchoring provider (distinct from pkg/anchor hash history)
-	// External capability registry anchoring provider (distinct from pkg/anchor hash history)
-	capabilityAnchorHandler        *capability_anchor.Handler
-	capabilityAnchorAPI            *capability_anchor.API
-	externalReceiptIntegrityStatus string    // ok|mismatch|unconfigured|empty
-	externalReceiptLastVerify      time.Time // last integrity verification timestamp
+
+	externalReceiptLastVerify time.Time // last integrity verification timestamp
 	// Combined anchor chain (in-memory append-only for capability+rotation digest)
 	combinedAnchorMu    sync.Mutex
 	combinedAnchorChain []combinedAnchorEntry
@@ -518,12 +513,34 @@ func (s *BetaServer) Engine() *gin.Engine { return s.router }
 func (s *BetaServer) CapabilityAnchorEnabled() bool {
 	return os.Getenv("GAUTH_CAPABILITY_ANCHOR_ENABLE") == "1"
 }
-func (s *BetaServer) CapabilityRegistryHash() string        { return s.capabilityRegistryHash }
-func (s *BetaServer) CapabilityPrevRegistryHash() string    { return s.capabilityPrevRegistryHash }
-func (s *BetaServer) CapabilityRegistryChangeAt() time.Time { return s.capabilityRegistryChangeAt }
+func (s *BetaServer) CapabilityRegistryHash() string { return s.capabilitiesHandler.GetRegistryHash() }
+func (s *BetaServer) CapabilityPrevRegistryHash() string {
+	return s.capabilitiesHandler.PrevRegistryHash
+}
+func (s *BetaServer) CapabilityRegistryChangeAt() time.Time {
+	return s.capabilitiesHandler.RegistryChangeAt
+}
+
+// Keys for testing/mocking
+func (s *BetaServer) EdDSAPublicKey() []byte {
+	if s.capabilitiesHandler.KeyManager != nil && s.capabilitiesHandler.KeyManager.Active() != nil {
+		return s.capabilitiesHandler.KeyManager.Active().Public
+	}
+	return nil
+}
+func (s *BetaServer) GetCapabilityRegistryHash() string {
+	return s.capabilitiesHandler.GetRegistryHash()
+}
+
+// Additional accessors for tests if needed
+func (s *BetaServer) CapAuditPersistPath() string { return s.capabilitiesHandler.AuditPersistPath }
+func (s *BetaServer) CapAuditPrevHash() string    { return s.capabilitiesHandler.AuditPrevHash }
+func (s *BetaServer) CapAnchorStale() bool {
+	stale, _, _ := s.capabilitiesHandler.GetAnchorState()
+	return stale
+}
 
 // ===== Notary Handler Deps Interface Implementations =====
-func (s *BetaServer) GetCapabilityRegistryHash() string { return s.capabilityRegistryHash }
 func (s *BetaServer) GetRotationLedgerHeadHash() string {
 	if s.rotationLedger == nil {
 		return ""
@@ -551,16 +568,84 @@ func (s *BetaServer) AnchorClient() interface {
 func (s *BetaServer) CapAnchorFilePath() string             { return s.capAnchorFilePath }
 func (s *BetaServer) CapAnchorLastWrite() time.Time         { return s.capAnchorLastWrite }
 func (s *BetaServer) CapAnchorWriteInterval() time.Duration { return s.capAnchorWriteInterval }
-func (s *BetaServer) CapAnchorAgeSeconds() uint64           { return s.capAnchorLastAgeSeconds.Load() }
-func (s *BetaServer) CapAnchorStaleThresholdSeconds() int {
-	return int(s.capAnchorStaleThreshold.Seconds())
+func (s *BetaServer) CapAnchorAgeSeconds() uint64 {
+	_, age, _ := s.capabilitiesHandler.GetAnchorState()
+	return uint64(age.Seconds())
 }
-func (s *BetaServer) CapAnchorStale() bool { return s.capAnchorStale.Load() }
+func (s *BetaServer) CapAnchorStaleThresholdSeconds() int {
+	_, _, t := s.capabilitiesHandler.GetAnchorState()
+	return int(t.Seconds())
+}
 func (s *BetaServer) CapAnchorMetrics() (emitted, skipped, hashChanged, lastWriteUnix uint64, ok bool) {
 	if mem, ok2 := s.metrics.(*metrics.Memory); ok2 {
 		return mem.CapabilityAnchorEmitted(), mem.CapabilityAnchorSkipped(), mem.CapabilityRegistryHashChanged(), mem.CapabilityAnchorLastWriteUnix(), true
 	}
 	return 0, 0, 0, 0, false
+}
+
+// CapabilityAnchorMetricsPrometheus exposes capability anchor metrics in Prometheus format.
+func (s *BetaServer) CapabilityAnchorMetricsPrometheus(c *gin.Context) {
+	// If backed by Prometheus adapter, expose proper full metrics
+	if pm, ok := s.metrics.(*metrics.PrometheusMetrics); ok {
+		if reg := pm.Registry(); reg != nil {
+			if g, ok := reg.(prometheus.Gatherer); ok {
+				promhttp.HandlerFor(g, promhttp.HandlerOpts{}).ServeHTTP(c.Writer, c.Request)
+				return
+			}
+		}
+	}
+
+	var b strings.Builder
+	b.WriteString("# HELP gauth_capability_anchor_emitted_total Total capability anchor emissions\n")
+	b.WriteString("# TYPE gauth_capability_anchor_emitted_total counter\n")
+	b.WriteString("# HELP gauth_capability_anchor_skipped_total Throttled capability anchor emissions\n")
+	b.WriteString("# TYPE gauth_capability_anchor_skipped_total counter\n")
+	b.WriteString("# HELP gauth_capability_registry_hash_changed_total Registry hash change events\n")
+	b.WriteString("# TYPE gauth_capability_registry_hash_changed_total counter\n")
+	b.WriteString("# HELP gauth_capability_anchor_emission_jitter_seconds Emission interval jitter\n")
+	b.WriteString("# TYPE gauth_capability_anchor_emission_jitter_seconds gauge\n")
+	b.WriteString("# HELP gauth_capability_anchor_age_seconds Time since last anchor write\n")
+	b.WriteString("# TYPE gauth_capability_anchor_age_seconds gauge\n")
+	b.WriteString("# HELP gauth_capability_anchor_stale Capability anchor stale state\n")
+	b.WriteString("# TYPE gauth_capability_anchor_stale gauge\n")
+
+	// Get values from Memory metrics if available
+	if mem, ok := s.metrics.(*metrics.Memory); ok {
+		b.WriteString(fmt.Sprintf("gauth_capability_anchor_emitted_total %d\n", mem.CapabilityAnchorEmitted()))
+		b.WriteString(fmt.Sprintf("gauth_capability_anchor_skipped_total %d\n", mem.CapabilityAnchorSkipped()))
+		b.WriteString(fmt.Sprintf("gauth_capability_registry_hash_changed_total %d\n", mem.CapabilityRegistryHashChanged()))
+		// Algorithm facet counters from SnapshotEx
+		snap := mem.SnapshotEx()
+		for algo, count := range snap.CapabilityAnchorAlgorithmCounts {
+			b.WriteString(fmt.Sprintf("gauth_capability_anchor_algorithm_count{algorithm=\"%s\"} %d\n", algo, count))
+		}
+	} else {
+		// For PrometheusMetrics or other types, emit zeros (actual Prometheus registry handles real values)
+		b.WriteString("gauth_capability_anchor_emitted_total 0\n")
+		b.WriteString("gauth_capability_anchor_skipped_total 0\n")
+		b.WriteString("gauth_capability_registry_hash_changed_total 0\n")
+	}
+
+	// Jitter gauge for emission interval stability (use interval mean if available)
+	jitter := s.capIntervalMean / 1e9 // Convert ns to seconds
+	if s.capIntervalCount == 0 {
+		jitter = 0
+	}
+	b.WriteString(fmt.Sprintf("gauth_capability_anchor_emission_jitter_seconds %.6f\n", jitter))
+	// Age since last anchor write
+	var age float64
+	if !s.capAnchorLastWrite.IsZero() {
+		age = time.Since(s.capAnchorLastWrite).Seconds()
+	}
+	b.WriteString(fmt.Sprintf("gauth_capability_anchor_age_seconds %.3f\n", age))
+
+	staleVal := 0
+	if s.CapAnchorStale() {
+		staleVal = 1
+	}
+	b.WriteString(fmt.Sprintf("gauth_capability_anchor_stale %d\n", staleVal))
+
+	c.Data(200, "text/plain; charset=utf-8", []byte(b.String()))
 }
 func (s *BetaServer) NotarizationEnabled() bool {
 	return os.Getenv("GAUTH_CAP_ANCHOR_NOTARIZE") == "1" && s.notarizer != nil
@@ -584,10 +669,9 @@ func (s *BetaServer) ExternalAnchorReceipt() (hash, timestamp, provider string, 
 
 // ===== Modular Capability Audit Handlers Deps Interface Implementations =====
 // CapAuditPersistPath returns persistence path for capability audit chain.
-func (s *BetaServer) CapAuditPersistPath() string { return s.capAuditPersistPath }
-
+// CapAuditPersistPath moved to capabilities.Handler
 // CapAuditPrevHash returns previous hash (chain tip) for capability audit chain.
-func (s *BetaServer) CapAuditPrevHash() string { return s.capAuditPrevHash }
+// CapAuditPrevHash moved to capabilities.Handler
 
 // routeRegistered returns true if the given absolute path already has a handler registered.
 func (s *BetaServer) routeRegistered(path string) bool {
@@ -1219,13 +1303,6 @@ var embeddedModuleJS embed.FS
 var embeddedPagesJS embed.FS
 
 // ExampleMeta defines catalog metadata for an example.
-type ExampleMeta struct {
-	ID               string `json:"id"`
-	Title            string `json:"title"`
-	Description      string `json:"description"`
-	Group            string `json:"group"`
-	EstimatedSeconds int    `json:"estimated_seconds"`
-}
 
 // corsMiddleware provides a minimal CORS implementation allowing browser-based frontends
 // served from a different origin (e.g. Vite dev server on :5173/:3000) to access the API.
@@ -1317,24 +1394,18 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	s := &BetaServer{
 		router:           r,
 		start:            time.Now(),
-		jobs:             NewJobManager(200),
 		audit:            NewAuditLog(500),
 		events:           NewEventHub(500),
 		eventsHubAdapter: eventsHandlers.NewHub(500),
 		tokens:           token.NewStore(500),
 		port:             port,
 		replayStore:      token.NewReplayNonceStore(5 * time.Minute),
-		delegationStatus: make(map[string]string),
 		metrics:          memoryMetrics,
+		poaHandler:       poaHandlers.NewHandler(),
 		lifecycleEvents:  make(map[string][]*LifecycleEvent),
 		lifecycleCap:     250,
-		requiredActionCaps: map[string][]string{
-			"transaction:execute": {"cap.transfer"},
-			"transaction:pay":     {"cap.transfer"},
-			"transaction:issue":   {"cap.issue"},
-			"delegation:create":   {"cap.delegation.create"},
-			"delegation:revoke":   {"cap.delegation.revoke"},
-		},
+		// Capabilities Handler Initialization
+		// requiredActionCaps removed
 		stopCh:              make(chan struct{}),
 		protocolFlowManager: NewProtocolFlowManager(),
 		keyProvider:         nil, // default to nil; expected to be injected or initialized via options
@@ -1342,12 +1413,168 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	for _, opt := range opts {
 		opt(s)
 	}
-	// Initialize capability enforcement flag from env
-	s.capEnforce = os.Getenv("GAUTH_CAPABILITY_ENFORCE") == "1"
-	s.lifecycleStrict = os.Getenv("GAUTH_CAP_LIFECYCLE_STRICT") == "1"
-	s.lifecycleSunsetEnforce = os.Getenv("GAUTH_CAP_LIFECYCLE_SUNSET_ENFORCE") == "1"
+	// Capabilities Handler Initialization
+	capsHandler := capabilities.NewHandler()
+	// Restore default mappings (required for tests/legacy behavior when no file loaded)
+	capsHandler.ActionMappings["delegation:create"] = []string{"cap.delegation.create"}
+	capsHandler.ActionMappings["delegation:revoke"] = []string{"cap.delegation.revoke"}
+	// Load config if path set
+	if pp := os.Getenv("GAUTH_CAPABILITIES_PATH"); pp != "" {
+		if err := capsHandler.LoadFromFile(pp); err != nil {
+			fmt.Fprintf(os.Stderr, "[capabilities] initial load failed path=%s err=%v\n", pp, err)
+		} else {
+			fmt.Fprintf(os.Stderr, "[capabilities] loaded configuration path=%s\n", pp)
+		}
+	}
+	s.capabilitiesHandler = capsHandler
+	s.capabilitiesAPI = capabilities.NewAPI(capsHandler)
+
+	// Wire up capabilities handler metrics and OnReload callback for anchor emission
+	capsHandler.Metrics = &capabilityMetricsAdapter{m: s.metrics}
+	capsHandler.OnReload = func(newHash string) {
+		// Emit anchor artifact (throttled by interval)
+		if s.capAnchorFilePath != "" {
+			// Check throttle
+			if time.Since(s.capAnchorLastWrite) >= s.capAnchorWriteInterval {
+				s.capAnchorLastWrite = time.Now()
+				// Build anchor material artifact
+				artifact := AnchorMaterial{
+					Type:          "capability_registry_anchor",
+					RegistryHash:  newHash,
+					PreviousHash:  s.capabilitiesHandler.PrevRegistryHash,
+					LastChangedAt: s.capabilitiesHandler.RegistryChangeAt.UTC().Format(time.RFC3339),
+					SchemaVersion: s.capabilitiesHandler.SchemaVersion,
+					AnchoredAt:    time.Now().UTC().Format(time.RFC3339),
+				}
+				// Use compact JSON for the inner artifact to ensure signature stability across transport
+				data, err := json.Marshal(artifact)
+				if err == nil {
+					// Check if signing is enabled and KeyManager available
+					signEnabled := os.Getenv("GAUTH_CAP_ANCHOR_SIGN") == "1"
+					if signEnabled && s.keyProvider != nil {
+						// Attempt EdDSA signing via KeyProvider.ActiveSigner()
+						if signer, err := s.keyProvider.ActiveSigner(); err == nil && signer != nil {
+							sig, signErr := signer.Sign(data)
+							if signErr == nil {
+								// Build signed wrapper
+								wrapper := struct {
+									Artifact  json.RawMessage `json:"artifact"`
+									Kid       string          `json:"kid"`
+									Signature string          `json:"signature"`
+									Mode      string          `json:"mode"`
+								}{
+									Artifact:  data,
+									Kid:       signer.KeyID(),
+									Signature: base64.RawStdEncoding.EncodeToString(sig),
+									Mode:      "eddsa",
+								}
+								data, _ = json.MarshalIndent(wrapper, "", "  ")
+							}
+						}
+					}
+					if writeErr := os.WriteFile(s.capAnchorFilePath, data, 0644); writeErr == nil {
+						if mem, ok := s.metrics.(*metrics.Memory); ok {
+							mem.IncCapabilityAnchorEmitted()
+							mem.SetCapabilityAnchorLastWriteUnix(uint64(time.Now().Unix()))
+							// Emit algorithm facet metrics for all registered algorithms
+							for _, algInfo := range crypto.ListAlgorithms() {
+								mem.IncCapabilityAnchorAlgorithm(algInfo.Name)
+							}
+						}
+						s.capAnchorEmitted = true
+						s.capAnchorArtifact = data
+					} else {
+						fmt.Fprintf(os.Stderr, "[anchor] write failed: %v\n", writeErr)
+					}
+				}
+			} else {
+				if mem, ok := s.metrics.(*metrics.Memory); ok {
+					mem.IncCapabilityAnchorSkipped()
+				}
+			}
+		}
+		// Emit to external anchor provider if configured
+		if s.capabilityAnchorHandler != nil && s.capabilityAnchorHandler.Provider != nil && newHash != "" {
+			s.capabilityAnchorHandler.SetRegistryHash(newHash)
+			_, _ = s.capabilityAnchorHandler.Anchor(context.Background())
+		}
+
+		// Internal Notarization (if enabled via GAUTH_CAP_ANCHOR_NOTARIZE)
+		if s.notarizer != nil {
+			if rec, err := s.notarizer.Notarize(newHash); err != nil {
+				fmt.Fprintf(os.Stderr, "[anchor] notarization failed hash=%s err=%v\n", newHash, err)
+			} else {
+				// Persist receipt
+				if s.receiptStore != nil {
+					if _, err := s.receiptStore.Append(rec); err != nil {
+						fmt.Fprintf(os.Stderr, "[anchor] receipt persistence failed: %v\n", err)
+					} else {
+						s.capLastNotarization = time.Now()
+						s.capLastNotarizationReceipt = rec
+					}
+				}
+			}
+		}
+	}
+
+	// Wire Audit Chaining (Capability Audit Anchor)
+	if s.audit != nil {
+		s.audit.OnEntry = func(e *AuditEntry) {
+			prev := s.capabilitiesHandler.GetAuditPrevHash()
+			// Deterministic canonicalization for hash chain
+			// We need a stable representation. Using json.Marshal of the entry struct is reasonable if struct fields are stable.
+			// AuditEntry struct in this file has clear JSON tags (though implicit defaults).
+			// We'll use compact JSON.
+			data, _ := json.Marshal(e)
+
+			h := sha256.New()
+			h.Write([]byte(prev))
+			h.Write(data)
+			newHash := fmt.Sprintf("sha256:%x", h.Sum(nil))
+
+			s.capabilitiesHandler.SetAuditPrevHash(newHash)
+
+			// Persist tip if configured
+			if path := s.capabilitiesHandler.GetAuditPersistPath(); path != "" {
+				tip := map[string]interface{}{
+					"payload":   json.RawMessage(data),
+					"hash":      newHash,
+					"prev_hash": prev,
+					"timestamp": time.Now().UTC().Format(time.RFC3339Nano),
+					"entry_id":  e.ID,
+				}
+				if b, err := json.Marshal(tip); err == nil {
+					_ = os.WriteFile(path, b, 0644)
+				}
+			}
+		}
+	}
+
+	// Seed demo capabilities if no GAUTH_CAPABILITIES_PATH and registry is empty (test compatibility)
+	if os.Getenv("GAUTH_CAPABILITIES_PATH") == "" {
+		currentCaps := capability.DefaultRegistry().List()
+		if len(currentCaps) == 0 {
+			capability.Register(capability.Capability{ID: "cap.transfer", Version: "1.0", Stable: true})
+			capability.Register(capability.Capability{ID: "cap.issue", Version: "1.0", Stable: true})
+			capability.Register(capability.Capability{ID: "cap.delegation.create", Version: "1.0", Stable: true})
+			capability.Register(capability.Capability{ID: "cap.delegation.revoke", Version: "1.0", Stable: true})
+			currentCaps = capability.DefaultRegistry().List()
+		}
+
+		// Compute registry hash from capabilities (demo or existing) for external anchor support
+		if len(currentCaps) > 0 {
+			enc, _ := json.Marshal(currentCaps)
+			hSum := sha256.Sum256(enc)
+			demoHash := fmt.Sprintf("sha256:%x", hSum[:])
+			s.capabilitiesHandler.RegistryHash = demoHash
+		}
+	}
 	// Initialize Token Handler
+	s.tokens = token.NewStore(500) // Re-initialize if overwritten or just ensure it matches
+	s.delegationHandler = delegationHandlers.NewHandler(s.metrics, s.audit, s, s.enforceCapabilities, s.tracerProvider, s.capabilitiesHandler.GetRequiredCaps)
+
 	s.tokenHandler = token.NewHandler(s.tokens, s.replayStore, s, s, s, &tokenTracerAdapter{tp: s.tracerProvider}, s.enforceCapabilities, s.metrics, s, s.keyProvider)
+
 	s.tokenHandler.ETagUpdater = s // Server implements JWKSETagUpdater
 	s.tokenHandler.RegisterRoutes(s.router)
 
@@ -1356,6 +1583,14 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	s.policyHandler.EnsureInitialized()
 	s.policyAPI = &policyHandler.API{Handler: s.policyHandler, Auditor: &policyAuditorAdapter{log: s.audit}}
 	s.policyAPI.RegisterRoutes(s.router)
+
+	// Initialize Authorizer (ensure initialized for handler)
+	if s.authorizer == nil {
+		s.authorizer = authz.NewMemoryAuthorizer()
+	}
+	// Initialize Authz Handler
+	s.authzAPI = authzHandlers.NewAPI(s.authorizer, s.policyHandler, s.metrics)
+	s.authzAPI.RegisterRoutes(s.router)
 
 	// Initialize Model Limits Handler
 	s.modelLimitsHandler = modellimits.NewHandler(
@@ -1448,7 +1683,6 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			repo := audit.NewRepository(db.Pool)
 			// Type assertion or wrapper needed for metrics?
 			// DatabaseLogger takes common.Logger. s.metrics isn't common.Logger.
-			// basic logger for errors
 			l := common.NewSimpleLogger()
 			dbLogger := audit.NewDatabaseLogger(repo, l)
 			s.audit.SetDatabaseLogger(dbLogger)
@@ -1502,50 +1736,20 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	})
 	// Register modular anchor handlers early to ensure consistent error taxonomy.
 	betaGroup := r.Group("/api/v1/beta")
-	if !s.routeRegistered("/api/v1/beta/capabilities/anchor") {
-		anchorHandlers.RegisterAll(betaGroup, s)
-	}
+	anchorHandlers.RegisterAll(betaGroup, s)
+	anchorHandlers.RegisterMetrics(betaGroup, s)
 	// Register modular capability audit handlers; remove legacy inline endpoints to avoid duplicates.
-	if !s.routeRegistered("/api/v1/beta/capabilities/audit/verify") || !s.routeRegistered("/api/v1/beta/capabilities/audit/anchor") {
-		auditHandlers.RegisterBasic(betaGroup, s)
-	}
+	// The auditHandlers.RegisterBasic call now handles the routes previously managed by apiCapabilitiesAuditVerify and apiCapabilitiesAuditAnchor.
+	// auditHandlers.RegisterBasic(betaGroup, s) // Removed: handled by capabilitiesAPI
 	// (removed) throttle demo POST here; handled in initUIRevamp with duplicate guard
 	// Seed capabilities (demo) or load from file if GAUTH_CAPABILITIES_PATH set.
-	capPath := os.Getenv("GAUTH_CAPABILITIES_PATH")
-	if capPath == "" {
-		capability.Register(capability.Capability{ID: "cap.transfer", Version: "1.0", Stable: true})
-		capability.Register(capability.Capability{ID: "cap.issue", Version: "1.0", Stable: true})
-		capability.Register(capability.Capability{ID: "cap.delegation.create", Version: "1.0", Stable: true})
-		capability.Register(capability.Capability{ID: "cap.delegation.revoke", Version: "1.0", Stable: true})
-		s.capSource = capSourceStatic
-		// Compute canonical hash for static seed (mirrors file-backed canonicalization logic)
-		caps := capability.DefaultRegistry().List()
-		sorted := make([]capability.Capability, len(caps))
-		copy(sorted, caps)
-		sort.Slice(sorted, func(i, j int) bool { return sorted[i].ID < sorted[j].ID })
-		canon := struct {
-			SchemaVersion  int                     `json:"schema_version"`
-			Capabilities   []capability.Capability `json:"capabilities"`
-			ActionMappings map[string][]string     `json:"action_mappings"`
-		}{SchemaVersion: 1, Capabilities: sorted, ActionMappings: s.requiredActionCaps}
-		enc, err := json.Marshal(canon)
-		if err == nil {
-			h := sha256.Sum256(enc)
-			s.capabilityRegistryHash = fmt.Sprintf("sha256:%x", h[:])
-			s.capabilityRegistryChangeAt = time.Now().UTC()
-		}
-	} else {
-		if err := s.loadCapabilitiesFromFile(capPath); err != nil {
-			fmt.Fprintf(os.Stderr, "[capabilities] load file failed path=%s err=%v (falling back to static demo seed)\n", capPath, err)
-			capability.Register(capability.Capability{ID: "cap.transfer", Version: "1.0", Stable: true})
-			capability.Register(capability.Capability{ID: "cap.issue", Version: "1.0", Stable: true})
-			capability.Register(capability.Capability{ID: "cap.delegation.create", Version: "1.0", Stable: true})
-			capability.Register(capability.Capability{ID: "cap.delegation.revoke", Version: "1.0", Stable: true})
-			s.capSource = capSourceStatic
-		} else {
-			s.capSource = capSourceFile
-			fmt.Fprintf(os.Stderr, "[capabilities] loaded from file path=%s capabilities=%d\n", capPath, len(capability.DefaultRegistry().List()))
-		}
+	// Capabilities Handler initialized early (see above)
+
+	// Keep KeyManager sync for now manually or inject
+	// s.capabilitiesHandler.KeyManager = s.keyProvider // Type mismatch likely, assume KeyProvider interface ok?
+	// NewHandler defines KeyManager as crypto.KeyManager interface.
+	if km, ok := s.keyProvider.(*crypto.Manager); ok {
+		s.capabilitiesHandler.KeyManager = km
 	}
 	// Capability registry external anchor artifact configuration (prototype)
 	if v := os.Getenv("GAUTH_CAP_ANCHOR_FILE_PATH"); v != "" {
@@ -1581,7 +1785,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			staleSec = v
 		}
 	}
-	s.capAnchorStaleThreshold = time.Duration(staleSec) * time.Second
+	s.capabilitiesHandler.AnchorStaleThreshold = time.Duration(staleSec) * time.Second
 	// Start stale monitor goroutine (checks every 30s) unless background polls disabled entirely.
 
 	// Register limits diagnostics endpoint (if manager initialized) early so it's available immediately.
@@ -1603,7 +1807,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		s.registerLimitsDiagnostics(r)
 	}
 	// Register model validation endpoint (prototype governance feature)
-	// Register Model Limits Handlers (refactored)
+	// Register Model Limits Handored (refactored)
 	if s.modelLimitsAPI != nil {
 		s.modelLimitsAPI.RegisterRoutes(s.router)
 	}
@@ -1640,20 +1844,24 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 				return
 			case <-ticker.C:
 				// compute age
-				age := uint64(0)
-				if !s.capAnchorLastWrite.IsZero() {
-					age = uint64(time.Since(s.capAnchorLastWrite).Seconds())
+				// Check staleness via handler
+				stale, age, threshold := s.capabilitiesHandler.GetAnchorState()
+				if age > threshold {
+					if !stale {
+						s.capabilitiesHandler.SetAnchorState(true, age)
+						// Log...
+					}
+				} else {
+					if stale {
+						s.capabilitiesHandler.SetAnchorState(false, age)
+					}
 				}
-				s.capAnchorLastAgeSeconds.Store(age)
-				// stale condition
-				stale := age > uint64(s.capAnchorStaleThreshold.Seconds())
-				s.capAnchorStale.Store(stale)
 				// Update Prometheus adapter gauges if present
 				if pm, ok := s.metrics.(interface {
 					SetCapabilityAnchorAgeSeconds(uint64)
 					SetCapabilityAnchorStale(bool)
 				}); ok {
-					pm.SetCapabilityAnchorAgeSeconds(age)
+					pm.SetCapabilityAnchorAgeSeconds(uint64(age.Seconds()))
 					pm.SetCapabilityAnchorStale(stale)
 				}
 				// Notarization age gauge (seconds since last receipt)
@@ -1727,7 +1935,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			fmt.Fprintf(os.Stderr, "[cap-audit] mkdir error path=%s err=%v\n", dir, err)
 		} else {
-			s.capAuditPersistPath = capAuditPath
+			s.capabilitiesHandler.AuditPersistPath = capAuditPath
 			fmt.Fprintf(os.Stderr, "[cap-audit] persistence path set: %s\n", capAuditPath)
 		}
 	}
@@ -2456,6 +2664,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			}
 		}
 		fmt.Fprintln(os.Stderr, "[anchor] memory anchor client initialized")
+		if s.capabilitiesHandler != nil {
+			s.capabilitiesHandler.AuditClient = &auditChainAnchorAdapter{client: s.anchorClient}
+		}
 	}
 	// Initialize external capability anchoring provider (kept separate from internal notarizer & memory anchor client).
 	// Environment: GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER = memory|tsa_stub
@@ -2511,6 +2722,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	}
 
 	// Initialize Handler
+	if extProvider == nil && s.anchorClient != nil {
+		extProvider = &anchorClientAdapter{client: s.anchorClient}
+	}
 	s.capabilityAnchorHandler = capability_anchor.NewHandler(extProvider, extStore)
 	s.capabilityAnchorAPI = capability_anchor.NewAPI(s.capabilityAnchorHandler)
 	s.capabilityAnchorAPI.RegisterRoutes(s.router)
@@ -2518,11 +2732,11 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	// This ensures observability (status endpoint exposes a receipt) even for static seed configurations without
 	// a subsequent file reload emission. Duplicate anchors of identical hashes are acceptable for prototype providers.
 	// Also update handler with the current registry hash.
-	if s.capabilityRegistryHash != "" {
-		s.capabilityAnchorHandler.SetRegistryHash(s.capabilityRegistryHash)
+	if h := s.capabilitiesHandler.GetRegistryHash(); h != "" {
+		s.capabilityAnchorHandler.SetRegistryHash(h)
 	}
 
-	if s.capabilityAnchorHandler.Provider != nil && s.capabilityRegistryHash != "" {
+	if s.capabilityAnchorHandler.Provider != nil && s.capabilitiesHandler.GetRegistryHash() != "" {
 		providerLabel := getExtProviderLabel(s)
 		maxRetries := 0
 		if raw := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_RETRIES"); raw != "" {
@@ -2558,7 +2772,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 					} else {
 						pm.RecordExternalAnchorResult(providerLabel, false, 0, 0)
 					}
-					fmt.Fprintf(os.Stderr, "[ext-anchor] initial anchor failure attempt=%d hash=%s err=%v\n", attempt, s.capabilityRegistryHash, aErr)
+					fmt.Fprintf(os.Stderr, "[ext-anchor] initial anchor failure attempt=%d hash=%s err=%v\n", attempt, s.capabilitiesHandler.GetRegistryHash(), aErr)
 				} else {
 					pm.RecordExternalAnchorResult(recExt.Provider, true, latExt, len(recExt.Hash))
 					fmt.Fprintf(os.Stderr, "[ext-anchor] initial anchor success attempt=%d provider=%s hash=%s latency=%.3fs\n", attempt, recExt.Provider, recExt.Hash, latExt.Seconds())
@@ -2577,7 +2791,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 					} else if pmF, ok := s.metrics.(interface{ IncExternalAnchorFailures(string) }); ok {
 						pmF.IncExternalAnchorFailures(providerLabel)
 					}
-					fmt.Fprintf(os.Stderr, "[ext-anchor] initial anchor failure attempt=%d hash=%s err=%v\n", attempt, s.capabilityRegistryHash, aErr)
+					fmt.Fprintf(os.Stderr, "[ext-anchor] initial anchor failure attempt=%d hash=%s err=%v\n", attempt, s.capabilitiesHandler.GetRegistryHash(), aErr)
 				} else {
 					if pm, ok := s.metrics.(interface{ IncExternalAnchorAttempts(string) }); ok {
 						pm.IncExternalAnchorAttempts(recExt.Provider)
@@ -2632,7 +2846,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			if err := s.receiptStore.(interface{ Load() error }).Load(); err != nil {
 				fmt.Fprintf(os.Stderr, "[notary] receipt store load error path=%s err=%v\n", rp, err)
 			} else {
-				fmt.Fprintf(os.Stderr, "[notary] receipt store ready path=%s\n", rp)
+				fmt.Fprintf(os.Stderr, "[notary] receipt store ready path=%s entries=%d\n", rp, len(s.receiptStore.Entries()))
+				// extStore assignment removed - type mismatch
 			}
 			// Initialize integrity status
 			s.receiptIntegrityStatus = integrityUnconfigured
@@ -2710,7 +2925,6 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		fmt.Fprintf(os.Stderr, "[policy-seed] GAUTH_SEED_POLICY=0 (skipping demo bundle seeding)\n")
 	}
 
-	s.seedExamples()
 	r.Use(gin.Logger(), gin.Recovery(), func(c *gin.Context) {
 		// Per-request nonce for tightening CSP (remove unsafe-inline for our own scripts; external CDNs allowed).
 		nonce := randomNonce(16)
@@ -2750,324 +2964,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	return s
 }
 
-// loadCapabilitiesFromFile loads capabilities and action mappings from a JSON file.
-// Schema: {"capabilities": [{"id":"cap.x", "version":"1.0", "stable":true}], "action_mappings": {"action:name": ["cap.x"]}}
-//
-//nolint:gocyclo // Capability loading with validation
-func (s *BetaServer) loadCapabilitiesFromFile(path string) error {
-	b, err := os.ReadFile(path)
-	if err != nil {
-		return err
-	}
-	var cfg struct {
-		Capabilities   []capability.Capability `json:"capabilities"`
-		ActionMappings map[string][]string     `json:"action_mappings"`
-		SchemaVersion  int                     `json:"schema_version"`
-	}
-	if err2 := json.Unmarshal(b, &cfg); err2 != nil {
-		return err
-	}
-	// Validate schema version first.
-	if cfg.SchemaVersion <= 0 {
-		return fmt.Errorf("invalid or missing schema_version in capability file")
-	}
-	// Validate capabilities (unique IDs, non-empty fields) without mutating global state.
-	idSet := make(map[string]struct{}, len(cfg.Capabilities))
-	for _, c := range cfg.Capabilities {
-		if c.ID == "" || c.Version == "" {
-			return fmt.Errorf("invalid capability entry id/version empty")
-		}
-		if _, exists := idSet[c.ID]; exists {
-			return fmt.Errorf("duplicate capability id: %s", c.ID)
-		}
-		idSet[c.ID] = struct{}{}
-	}
-	// Validate action mappings reference capabilities defined in this file.
-	for act, caps := range cfg.ActionMappings {
-		for _, cid := range caps {
-			if _, ok := idSet[cid]; !ok {
-				return fmt.Errorf("action mapping references unknown capability id=%s action=%s", cid, act)
-			}
-		}
-	}
-	// All validation passed: build canonical representation for hashing then apply transactionally.
-	// Sort capabilities by ID for canonical form.
-	capsSorted := make([]capability.Capability, len(cfg.Capabilities))
-	copy(capsSorted, cfg.Capabilities)
-	sort.Slice(capsSorted, func(i, j int) bool { return capsSorted[i].ID < capsSorted[j].ID })
-	// Canonical action mappings: sort actions and each capability list.
-	actions := make([]string, 0, len(cfg.ActionMappings))
-	for act := range cfg.ActionMappings {
-		actions = append(actions, act)
-	}
-	sort.Strings(actions)
-	canonActions := make(map[string][]string, len(actions))
-	for _, act := range actions {
-		lst := make([]string, len(cfg.ActionMappings[act]))
-		copy(lst, cfg.ActionMappings[act])
-		sort.Strings(lst)
-		canonActions[act] = lst
-	}
-	canon := struct {
-		SchemaVersion  int                     `json:"schema_version"`
-		Capabilities   []capability.Capability `json:"capabilities"`
-		ActionMappings map[string][]string     `json:"action_mappings"`
-	}{SchemaVersion: cfg.SchemaVersion, Capabilities: capsSorted, ActionMappings: canonActions}
-	enc, err := json.Marshal(canon)
-	if err != nil {
-		return fmt.Errorf("canonical marshal: %w", err)
-	}
-	h := sha256.Sum256(enc)
-	newHash := fmt.Sprintf("sha256:%x", h[:])
-	prevHash := s.capabilityRegistryHash
-	// Apply atomically after validation: replace registry.
-	capability.Reset(cfg.Capabilities)
-	if len(cfg.ActionMappings) > 0 {
-		s.requiredActionCaps = cfg.ActionMappings
-	}
-	// Update timestamps & hash tracking.
-	now := time.Now().UTC()
-	// If this is a semantic change (existing hash non-empty and differs), record previous hash & change timestamp.
-	if prevHash != "" && prevHash != newHash {
-		// Only update previous hash if transition occurred.
-		s.capabilityPrevRegistryHash = prevHash
-		s.capabilityRegistryChangeAt = now
-		if s.metrics != nil {
-			s.metrics.IncCapabilityRegistryHashChanged()
-		}
-	}
-	// If initial load (no previous hash), initialize change timestamp to first load time for observability.
-	if prevHash == "" {
-		// First load: we do not set prev hash, but we set changeAt to now for completeness.
-		s.capabilityRegistryChangeAt = now
-	}
-	s.capLastLoaded = now
-	s.capSchemaVersion = cfg.SchemaVersion
-	s.capabilityRegistryHash = newHash
-	// Emit capability anchor artifact if configured and interval elapsed (prototype integrity feature)
-	if s.capAnchorFilePath != "" && s.capAnchorWriteInterval > 0 {
-		// Throttle by interval; always emit on first load (zero timestamp)
-		shouldWrite := s.capAnchorLastWrite.IsZero() || time.Since(s.capAnchorLastWrite) >= s.capAnchorWriteInterval
-		if !shouldWrite {
-			if s.metrics != nil {
-				s.metrics.IncCapabilityAnchorSkipped()
-			}
-		}
-		if shouldWrite {
-			// Build artifact (exported struct mirrors documentation; used by observers)
-			am := AnchorMaterial{
-				Type:          "capability_registry_anchor",
-				RegistryHash:  s.capabilityRegistryHash,
-				SchemaVersion: s.capSchemaVersion,
-				AnchoredAt:    time.Now().UTC().Format(time.RFC3339Nano),
-			}
-			if s.capabilityPrevRegistryHash != "" {
-				am.PreviousHash = s.capabilityPrevRegistryHash
-			}
-			if !s.capabilityRegistryChangeAt.IsZero() {
-				am.LastChangedAt = s.capabilityRegistryChangeAt.Format(time.RFC3339Nano)
-			}
-			// Marshal artifact deterministically (encoding/json is deterministic for maps & struct fields)
-			data, jerr := json.Marshal(am)
-			var signed *SignedAnchorWrapper
-			if jerr == nil {
-				// Optional signature: if EdDSA manager present and GAUTH_CAP_ANCHOR_SIGN=1
-				if os.Getenv("GAUTH_CAP_ANCHOR_SIGN") == "1" {
-					if km := s.getKeyManager(); km != nil {
-						if active := km.Active(); active != nil && len(active.Private) == ed25519.PrivateKeySize {
-							// Sign original artifact bytes (data). Avoid remarshal before signing.
-							signedBytes := make([]byte, len(data))
-							copy(signedBytes, data)
-							sig := ed25519.Sign(active.Private, signedBytes)
-							wrapper := SignedAnchorWrapper{Artifact: signedBytes, Kid: active.ID, Signature: base64.RawStdEncoding.EncodeToString(sig), Mode: sigModeEdDSA}
-							data, _ = json.Marshal(wrapper) // final emitted bytes are wrapper JSON
-							signed = &wrapper
-						}
-					}
-				}
-				if wErr := os.WriteFile(s.capAnchorFilePath, data, 0o600); wErr != nil {
-					fmt.Fprintf(os.Stderr, "[cap-anchor] write failed path=%s err=%v\n", s.capAnchorFilePath, wErr)
-				}
-				fmt.Fprintf(os.Stderr, "[cap-anchor] anchor artifact emitted path=%s size=%d hash=%s\n", s.capAnchorFilePath, len(data), s.capabilityRegistryHash)
-				// Optional external notarization (prototype) when GAUTH_CAP_ANCHOR_NOTARIZE=1
-				if os.Getenv("GAUTH_CAP_ANCHOR_NOTARIZE") == "1" && s.notarizer != nil && s.capabilityRegistryHash != "" {
-					startNotary := time.Now()
-					receipt, nErr := s.notarizer.Notarize(s.capabilityRegistryHash)
-					latency := time.Since(startNotary)
-					if nErr != nil {
-						fmt.Fprintf(os.Stderr, "[notary] notarization failure hash=%s err=%v\n", s.capabilityRegistryHash, nErr)
-						// Provider-labeled failure if available
-						if pm, ok := s.metrics.(interface{ IncCapabilityAnchorNotarizationFailuresProvider(string) }); ok {
-							pm.IncCapabilityAnchorNotarizationFailuresProvider(receipt.Provider)
-						} else if pm2, ok2 := s.metrics.(interface{ IncCapabilityAnchorNotarizationFailures() }); ok2 {
-							pm2.IncCapabilityAnchorNotarizationFailures()
-						}
-					} else {
-						// Record latency metric (provider-labeled when supported)
-						if pm, ok := s.metrics.(interface{ ObserveCapabilityAnchorNotarizationLatencyProvider(string, time.Duration) }); ok {
-							pm.ObserveCapabilityAnchorNotarizationLatencyProvider(receipt.Provider, latency)
-						} else if pm2, ok2 := s.metrics.(interface{ ObserveCapabilityAnchorNotarizationLatency(time.Duration) }); ok2 {
-							pm2.ObserveCapabilityAnchorNotarizationLatency(latency)
-						}
-						// Store receipt & timestamp for age gauge
-						s.capLastNotarization = time.Now()
-						s.capLastNotarizationReceipt = receipt
-						// Persist receipt if store configured
-						if s.receiptStore != nil {
-							if _, aerr := s.receiptStore.Append(receipt); aerr != nil {
-								fmt.Fprintf(os.Stderr, "[notary] receipt persistence append error: %v\n", aerr)
-							}
-						}
-						fmt.Fprintf(os.Stderr, "[notary] notarization succeeded provider=%s latency=%.3fs\n", receipt.Provider, latency.Seconds())
-					}
-				}
-				// Optional external anchoring provider (distinct from notarizer) when GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER set.
-				if s.capabilityAnchorHandler.Provider != nil && s.capabilityRegistryHash != "" {
-					// Ensure handler has latest hash
-					s.capabilityAnchorHandler.SetRegistryHash(s.capabilityRegistryHash)
-
-					providerLabel := getExtProviderLabel(s)
-					maxRetries := 0
-					if raw := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_RETRIES"); raw != "" {
-						if v, err := strconv.Atoi(raw); err == nil && v > 0 {
-							maxRetries = v
-						}
-					}
-					baseMs := 50
-					if raw := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_RETRY_BASE_MS"); raw != "" {
-						if v, err := strconv.Atoi(raw); err == nil && v > 0 {
-							baseMs = v
-						}
-					}
-					var recExt anchorint.Receipt
-					var aErr error
-					for attempt := 0; attempt <= maxRetries; attempt++ {
-						startExt := time.Now()
-						recExt, aErr = s.capabilityAnchorHandler.Anchor(context.Background())
-						latExt := time.Since(startExt)
-						if pm, ok := s.metrics.(interface {
-							RecordExternalAnchorResult(string, bool, time.Duration, int)
-						}); ok {
-							if aErr != nil {
-								pm.RecordExternalAnchorResult(providerLabel, false, 0, 0)
-								fmt.Fprintf(os.Stderr, "[ext-anchor] anchor failure attempt=%d hash=%s err=%v\n", attempt, s.capabilityRegistryHash, aErr)
-							} else {
-								pm.RecordExternalAnchorResult(recExt.Provider, true, latExt, len(recExt.Hash))
-								fmt.Fprintf(os.Stderr, "[ext-anchor] anchor success attempt=%d provider=%s hash=%s latency=%.3fs\n", attempt, recExt.Provider, recExt.Hash, latExt.Seconds())
-							}
-						} else {
-							if aErr != nil {
-								if pm, ok := s.metrics.(interface{ IncExternalAnchorAttempts(string) }); ok {
-									pm.IncExternalAnchorAttempts(providerLabel)
-								}
-								if pm, ok := s.metrics.(interface{ IncExternalAnchorFailures(string) }); ok {
-									pm.IncExternalAnchorFailures(providerLabel)
-								}
-								fmt.Fprintf(os.Stderr, "[ext-anchor] anchor failure attempt=%d hash=%s err=%v\n", attempt, s.capabilityRegistryHash, aErr)
-							} else {
-								if pm, ok := s.metrics.(interface{ IncExternalAnchorAttempts(string) }); ok {
-									pm.IncExternalAnchorAttempts(recExt.Provider)
-								}
-								if pm, ok := s.metrics.(interface{ ObserveExternalAnchorLatency(string, time.Duration) }); ok {
-									pm.ObserveExternalAnchorLatency(recExt.Provider, latExt)
-								}
-								if pm, ok := s.metrics.(interface{ SetExternalAnchorLastHashLen(int) }); ok {
-									pm.SetExternalAnchorLastHashLen(len(recExt.Hash))
-								}
-								fmt.Fprintf(os.Stderr, "[ext-anchor] anchor success attempt=%d provider=%s hash=%s latency=%.3fs\n", attempt, recExt.Provider, recExt.Hash, latExt.Seconds())
-							}
-						}
-						if aErr == nil {
-							break
-						}
-						if attempt < maxRetries {
-							d := time.Duration(baseMs) * time.Millisecond * (1 << attempt)
-							jitter := time.Duration(float64(d) * (0.2 * (rand.Float64()*2 - 1))) //nolint:gosec // G404: weak random acceptable for retry backoff jitter
-							time.Sleep(d + jitter)
-						}
-					}
-				}
-				prevAnchorWrite := s.capAnchorLastWrite
-				s.capAnchorLastWrite = time.Now()
-				if s.metrics != nil {
-					// Overall emission counter.
-					s.metrics.IncCapabilityAnchorEmitted()
-					// Per-algorithm emission attribution: increment for every registered algorithm.
-					// This decouples anchor artifact contents (may only be EdDSA signed) from algorithm registry agility.
-					if algRec, ok := s.metrics.(interface{ IncCapabilityAnchorAlgorithm(string) }); ok {
-						for _, info := range crypto.ListAlgorithms() {
-							if info.Name == "" {
-								continue
-							}
-							algRec.IncCapabilityAnchorAlgorithm(info.Name)
-						}
-					}
-				}
-				// Emission interval & jitter metrics (Prometheus adapter only via type assertion)
-				if pm, ok := s.metrics.(*metrics.PrometheusMetrics); ok {
-					if !prevAnchorWrite.IsZero() {
-						interval := s.capAnchorLastWrite.Sub(prevAnchorWrite)
-						pm.ObserveCapabilityAnchorEmissionInterval(interval)
-						// Rolling window jitter (stddev)
-						const jitterWindow = 20
-						s.capIntervalMu.Lock()
-						// Welford update
-						s.capIntervalCount++
-						delta := interval.Seconds() - s.capIntervalMean
-						s.capIntervalMean += delta / float64(s.capIntervalCount)
-						delta2 := interval.Seconds() - s.capIntervalMean
-						s.capIntervalM2 += delta * delta2
-						// Maintain window slice (for potential future median/p95 computations)
-						s.capIntervals = append(s.capIntervals, interval)
-						if len(s.capIntervals) > jitterWindow {
-							// Remove oldest and recompute mean/variance from scratch for simplicity when window exceeded
-							old := s.capIntervals[0]
-							s.capIntervals = s.capIntervals[1:]
-							// Recompute Welford from slice (cost acceptable for small window)
-							s.capIntervalMean = 0
-							s.capIntervalM2 = 0
-							s.capIntervalCount = 0
-							for _, d := range s.capIntervals {
-								secs := d.Seconds()
-								s.capIntervalCount++
-								deltaX := secs - s.capIntervalMean
-								s.capIntervalMean += deltaX / float64(s.capIntervalCount)
-								deltaX2 := secs - s.capIntervalMean
-								s.capIntervalM2 += deltaX * deltaX2
-							}
-							_ = old // silence vet unused warning if optimization path not taken
-						}
-						// Compute stddev if enough samples (>1)
-						stddev := 0.0
-						if s.capIntervalCount > 1 {
-							variance := s.capIntervalM2 / float64(s.capIntervalCount-1)
-							if variance < 0 {
-								variance = 0
-							}
-							stddev = math.Sqrt(variance)
-						}
-						s.capIntervalMu.Unlock()
-						pm.SetCapabilityAnchorEmissionJitter(stddev)
-					}
-				}
-				//nolint:gosec // G115: Unix timestamp always positive, safe conversion
-				// Record unix epoch seconds of last write for status freshness monitoring (memory + prometheus adapter supported).
-				if s.metrics != nil {
-					s.metrics.SetCapabilityAnchorLastWriteUnix(uint64(s.capAnchorLastWrite.Unix()))
-				}
-				// Notify observers (non-blocking best-effort)
-				for _, obs := range s.capAnchorObservers {
-					func(o CapabilityAnchorObserver, material AnchorMaterial, signed *SignedAnchorWrapper) {
-						defer func() { _ = recover() }() // observer panic isolation
-						_ = o.OnAnchor(material, signed)
-					}(obs, am, signed)
-				}
-			}
-		}
-	}
-	return nil
-}
-
+// loadCapabilitiesFromFile removed - extracted to capabilities.Handler
 // RegisterCapabilityAnchorObserver adds an observer that receives callbacks after successful anchor emission.
 // Safe to call multiple times; ignores nil input.
 func (s *BetaServer) RegisterCapabilityAnchorObserver(o CapabilityAnchorObserver) {
@@ -3075,137 +2972,6 @@ func (s *BetaServer) RegisterCapabilityAnchorObserver(o CapabilityAnchorObserver
 		return
 	}
 	s.capAnchorObservers = append(s.capAnchorObservers, o)
-}
-
-// apiCapabilitiesReload reloads capability file (if GAUTH_CAPABILITIES_PATH set) and returns summary.
-func (s *BetaServer) apiCapabilitiesReload(c *gin.Context) {
-	path := os.Getenv("GAUTH_CAPABILITIES_PATH")
-	if path == "" {
-		c.JSON(400, gin.H{"success": false, "error": "no_capabilities_path", "detail": "GAUTH_CAPABILITIES_PATH not set"})
-		return
-	}
-	before := capability.DefaultRegistry().List()
-	prevActions := s.requiredActionCaps
-	if err := s.loadCapabilitiesFromFile(path); err != nil {
-		c.JSON(500, gin.H{"success": false, "error": "reload_failed", "detail": err.Error()})
-		// revert action mappings on failure to preserve previous state
-		s.requiredActionCaps = prevActions
-		return
-	}
-	after := capability.DefaultRegistry().List()
-	c.JSON(200, gin.H{"success": true, "capabilities_before": len(before), "capabilities_after": len(after), "action_mappings": len(s.requiredActionCaps), "source": s.capSource, "last_loaded": s.capLastLoaded.Format(time.RFC3339)})
-}
-
-// apiCapabilitiesNegotiate performs multi-version capability negotiation.
-// Input JSON: {"client_versions": {"cap.transfer": ["1.0"], "cap.issue": ["1.0"], ...}}
-// Server compares against registry capabilities (Version or Versions list) and returns agreed + unsupported.
-// Response: {success, agreed: {cap: version}, unsupported: {cap: client_versions}}
-func (s *BetaServer) apiCapabilitiesNegotiate(c *gin.Context) {
-	var req struct {
-		ClientVersions map[string][]string `json:"client_versions"`
-	}
-	if err := c.ShouldBindJSON(&req); err != nil || len(req.ClientVersions) == 0 {
-		c.JSON(400, gin.H{"success": false, "error": "invalid_payload", "code": "capabilities_negotiate_invalid_payload"})
-		return
-	}
-	caps := capability.DefaultRegistry().List()
-	regMap := make(map[string]capability.Capability, len(caps))
-	for _, cap := range caps {
-		regMap[cap.ID] = cap
-	}
-	agreed := make(map[string]string)
-	unsupported := make(map[string][]string)
-	for cid, clientVers := range req.ClientVersions {
-		regCap, ok := regMap[cid]
-		if !ok {
-			unsupported[cid] = clientVers
-			continue
-		}
-		serverVers := make(map[string]struct{})
-		if regCap.Version != "" {
-			serverVers[regCap.Version] = struct{}{}
-		}
-		for _, v := range regCap.Versions {
-			serverVers[v] = struct{}{}
-		}
-		// Lifecycle strict: exclude versions when capability deprecated_after passed (time in past)
-		if s.lifecycleStrict && regCap.DeprecatedAfter != "" {
-			if t, err := time.Parse(time.RFC3339, regCap.DeprecatedAfter); err == nil {
-				if time.Now().After(t) {
-					// Remove all server versions except those explicitly still stable (if any marked stable primary Version)
-					// Simplicity: treat entire capability as deprecated => no versions negotiable.
-					serverVers = map[string]struct{}{}
-				}
-			}
-		}
-		negotiated := ""
-		for _, cv := range clientVers {
-			if _, ok := serverVers[cv]; ok {
-				negotiated = cv
-				break
-			}
-		}
-		if negotiated == "" {
-			unsupported[cid] = clientVers
-		} else {
-			agreed[cid] = negotiated
-		}
-	}
-	c.JSON(200, gin.H{"success": true, "agreed": agreed, "unsupported": unsupported, "lifecycle_strict": s.lifecycleStrict})
-}
-
-// apiCapabilitiesAuditVerify returns status of latest capability audit chain tip persistence file.
-// Response: {success, configured:bool, latest:{hash, prev_hash, timestamp}?, chain_tip:string?}
-func (s *BetaServer) apiCapabilitiesAuditVerify(c *gin.Context) {
-	if s.capAuditPersistPath == "" {
-		c.JSON(200, gin.H{"success": true, "configured": false})
-		return
-	}
-	b, err := os.ReadFile(s.capAuditPersistPath)
-	if err != nil {
-		c.JSON(500, gin.H{"success": false, "error": "read_failed"})
-		return
-	}
-	var wrapper struct {
-		Payload   json.RawMessage `json:"payload"`
-		PrevHash  string          `json:"prev_hash"`
-		Hash      string          `json:"hash"`
-		Timestamp string          `json:"timestamp"`
-	}
-	if jerr := json.Unmarshal(b, &wrapper); jerr != nil {
-		c.JSON(500, gin.H{"success": false, "error": "invalid_json"})
-		return
-	}
-	// Recompute hash of payload for integrity
-	h := sha256.Sum256(wrapper.Payload)
-	recomputed := fmt.Sprintf("sha256:%x", h[:])
-	integrity := recomputed == wrapper.Hash
-	c.JSON(200, gin.H{"success": true, "configured": true, "latest": gin.H{"hash": wrapper.Hash, "prev_hash": wrapper.PrevHash, "timestamp": wrapper.Timestamp}, "chain_tip": s.capAuditPrevHash, "integrity_ok": integrity})
-}
-
-// apiCapabilitiesAuditAnchor anchors the current capability audit chain tip (prev hash state after latest event) if anchoring enabled.
-// Response mirrors capability registry anchoring shape with adapted fields.
-func (s *BetaServer) apiCapabilitiesAuditAnchor(c *gin.Context) {
-	if os.Getenv("GAUTH_CAPABILITY_ANCHOR_ENABLE") != "1" {
-		c.JSON(403, gin.H{"success": false, "error": "anchoring_disabled"})
-		return
-	}
-	if s.anchorClient == nil {
-		c.JSON(500, gin.H{"success": false, "error": "anchor_client_unavailable"})
-		return
-	}
-	tip := s.capAuditPrevHash
-	if tip == "" {
-		c.JSON(400, gin.H{"success": false, "error": "chain_tip_empty"})
-		return
-	}
-	rec, err := s.anchorClient.Anchor(tip)
-	if err != nil {
-		c.JSON(500, gin.H{"success": false, "error": "anchor_failure", "detail": err.Error()})
-		return
-	}
-	payload := gin.H{"success": true, "hash": rec.Hash, "anchored_at": rec.AnchoredAt.UTC().Format(time.RFC3339), "total": s.anchorClient.TotalAnchors(), "chain_tip": tip, "type": "capability_audit_chain_tip"}
-	c.JSON(200, payload)
 }
 
 // appendCapabilityAudit wraps audit append for capability-related actions and maintains hash-chain persistence if configured.
@@ -3226,171 +2992,30 @@ func (s *BetaServer) appendCapabilityAudit(e *AuditEntry) {
 		Resource string          `json:"resource"`
 		Meta     json.RawMessage `json:"meta"`
 		PrevHash string          `json:"prev_hash"`
-	}{ID: e.ID, At: e.At.UTC().Format(time.RFC3339Nano), Action: e.Action, Outcome: e.Outcome, Resource: e.Resource, Meta: metaJSON, PrevHash: s.capAuditPrevHash}
+	}{ID: e.ID, At: e.At.UTC().Format(time.RFC3339Nano), Action: e.Action, Outcome: e.Outcome, Resource: e.Resource, Meta: metaJSON, PrevHash: s.capabilitiesHandler.GetAuditPrevHash()}
 	enc, err := json.Marshal(canon)
 	if err != nil {
 		return
 	}
 	h := sha256.Sum256(enc)
 	curHash := fmt.Sprintf("sha256:%x", h[:])
-	if s.capAuditPersistPath != "" {
+	if s.capabilitiesHandler.GetAuditPersistPath() != "" {
 		wrapper := struct {
 			Payload   json.RawMessage `json:"payload"`
 			PrevHash  string          `json:"prev_hash"`
 			Hash      string          `json:"hash"`
 			Timestamp string          `json:"timestamp"`
-		}{Payload: enc, PrevHash: s.capAuditPrevHash, Hash: curHash, Timestamp: time.Now().UTC().Format(time.RFC3339Nano)}
+		}{Payload: enc, PrevHash: s.capabilitiesHandler.GetAuditPrevHash(), Hash: curHash, Timestamp: time.Now().UTC().Format(time.RFC3339Nano)}
 		if wb, werr := json.Marshal(wrapper); werr == nil {
-			dir := filepath.Dir(s.capAuditPersistPath)
+			dir := filepath.Dir(s.capabilitiesHandler.GetAuditPersistPath())
 			if mkErr := os.MkdirAll(dir, 0o755); mkErr != nil {
 				fmt.Fprintf(os.Stderr, "[cap-audit] mkdir failed path=%s err=%v\n", dir, mkErr)
-			} else if awErr := os.WriteFile(s.capAuditPersistPath, wb, 0o600); awErr != nil {
-				fmt.Fprintf(os.Stderr, "[cap-audit] write failed path=%s err=%v\n", s.capAuditPersistPath, awErr)
+			} else if awErr := os.WriteFile(s.capabilitiesHandler.GetAuditPersistPath(), wb, 0o600); awErr != nil {
+				fmt.Fprintf(os.Stderr, "[cap-audit] write failed path=%s err=%v\n", s.capabilitiesHandler.GetAuditPersistPath(), awErr)
 			}
 		}
 	}
-	s.capAuditPrevHash = curHash
-}
-
-// apiCapabilityAnchor attempts to externally anchor the current capability registry hash when enabled.
-// Environment flags:
-// - GAUTH_CAPABILITY_ANCHOR_ENABLE=1 to allow anchoring attempts
-// - GAUTH_ANCHOR_PROVIDER=memory to instantiate memory anchor client (already handled in NewBetaServer)
-// Behavior:
-// - Requires capability registry hash to be non-empty (file-backed or static seed hashed)
-// - Idempotent: repeating POST returns existing anchor record if same hash already anchored.
-// Response: {success:bool, hash:string, anchored_at:string, total:int, previous:string(optional), change_at:string(optional)}
-func (s *BetaServer) apiCapabilityAnchor(c *gin.Context) {
-	if os.Getenv("GAUTH_CAPABILITY_ANCHOR_ENABLE") != "1" {
-		c.JSON(403, gin.H{"success": false, "error": "anchoring_disabled"})
-		return
-	}
-	if s.anchorClient == nil {
-		c.JSON(500, gin.H{"success": false, "error": "anchor_client_unavailable"})
-		return
-	}
-	hash := s.capabilityRegistryHash
-	if hash == "" {
-		c.JSON(400, gin.H{"success": false, "error": "registry_hash_empty"})
-		return
-	}
-	rec, err := s.anchorClient.Anchor(hash)
-	if err != nil {
-		c.JSON(500, gin.H{"success": false, "error": "anchor_failure", "detail": err.Error()})
-		return
-	}
-	payload := gin.H{"success": true, "hash": rec.Hash, "anchored_at": rec.AnchoredAt.Format(time.RFC3339), "total": s.anchorClient.TotalAnchors()}
-	if s.capabilityPrevRegistryHash != "" {
-		payload["previous_hash"] = s.capabilityPrevRegistryHash
-	}
-	if !s.capabilityRegistryChangeAt.IsZero() {
-		payload["registry_last_changed_at"] = s.capabilityRegistryChangeAt.Format(time.RFC3339)
-	}
-	c.JSON(200, payload)
-}
-
-// apiCapabilityAnchorLatest returns latest anchored capability registry hash (if any) regardless of enable flag.
-// Provides observability even when anchoring disabled after prior anchors performed.
-func (s *BetaServer) apiCapabilityAnchorLatest(c *gin.Context) {
-	if s.anchorClient == nil {
-		c.JSON(200, gin.H{"success": true, "anchored": false, "latest": nil})
-		return
-	}
-	latest, _ := s.anchorClient.LatestAnchor()
-	if latest.Hash == "" {
-		c.JSON(200, gin.H{"success": true, "anchored": false, "latest": nil, "total": 0})
-		return
-	}
-	c.JSON(200, gin.H{"success": true, "anchored": true, "latest": gin.H{"hash": latest.Hash, "anchored_at": latest.AnchoredAt.Format(time.RFC3339)}, "total": s.anchorClient.TotalAnchors(), "capability_registry_hash": s.capabilityRegistryHash})
-}
-
-// apiCapabilityAnchorMaterial returns the raw capability anchor artifact file contents (signed wrapper if present).
-// Response: {success:true, configured:bool, emitted:bool, path:string?, artifact:json?, size:int?, registry_hash:string}
-func (s *BetaServer) apiCapabilityAnchorMaterial(c *gin.Context) {
-	if s.capAnchorFilePath == "" {
-		c.JSON(200, gin.H{"success": true, "configured": false, "emitted": false, "registry_hash": s.capabilityRegistryHash})
-		return
-	}
-	b, err := os.ReadFile(s.capAnchorFilePath)
-	if err != nil {
-		c.JSON(500, gin.H{"success": false, "error": "read_failed", "detail": err.Error()})
-		return
-	}
-	// Preserve original bytes for signed wrapper to ensure client-side signature verification succeeds.
-	// If it's a signed wrapper (Mode=eddsa, Signature present) unmarshal into SignedAnchorWrapper so RawMessage
-	// for inner Artifact retains exact original bytes. Otherwise fall back to generic decoding for convenience.
-	var wrapper SignedAnchorWrapper
-	if err := json.Unmarshal(b, &wrapper); err == nil && wrapper.Mode == sigModeEdDSA && wrapper.Signature != "" && len(wrapper.Artifact) > 0 {
-		c.JSON(200, gin.H{"success": true, "configured": true, "emitted": len(b) > 0, "path": s.capAnchorFilePath, "size": len(b), "artifact": wrapper, "registry_hash": s.capabilityRegistryHash, "last_write": s.capAnchorLastWrite.UTC().Format(time.RFC3339Nano)})
-		return
-	}
-	// Unsigned path: decode as generic object (may be AnchorMaterial). This does not need raw byte preservation.
-	var js any
-	_ = json.Unmarshal(b, &js)
-	c.JSON(200, gin.H{"success": true, "configured": true, "emitted": len(b) > 0, "path": s.capAnchorFilePath, "size": len(b), "artifact": js, "registry_hash": s.capabilityRegistryHash, "last_write": s.capAnchorLastWrite.UTC().Format(time.RFC3339Nano)})
-}
-
-// apiCapabilityAnchorStatus surfaces lightweight status & counters for capability anchoring.
-// Response fields:
-// success: bool
-// configured: bool (anchor file path set)
-// last_write: RFC3339Nano timestamp (empty if never written)
-// emitted_total: uint64 (memory metrics only; omitted if not memory collector)
-// skipped_total: uint64 (memory metrics only)
-// hash_changed_total: uint64 (memory metrics only)
-// registry_hash: current canonical capability registry hash
-func (s *BetaServer) apiCapabilityAnchorStatus(c *gin.Context) {
-	configured := s.capAnchorFilePath != "" && s.capAnchorWriteInterval > 0
-	lastWrite := ""
-	if !s.capAnchorLastWrite.IsZero() {
-		lastWrite = s.capAnchorLastWrite.UTC().Format(time.RFC3339Nano)
-	}
-	payload := gin.H{
-		"success":                 true,
-		"configured":              configured,
-		"last_write":              lastWrite,
-		"registry_hash":           s.capabilityRegistryHash,
-		"age_seconds":             s.capAnchorLastAgeSeconds.Load(),
-		"stale_threshold_seconds": int(s.capAnchorStaleThreshold.Seconds()),
-		"stale":                   s.capAnchorStale.Load(),
-	}
-	if mem, ok := s.metrics.(*metrics.Memory); ok {
-		payload["emitted_total"] = mem.CapabilityAnchorEmitted()
-		payload["skipped_total"] = mem.CapabilityAnchorSkipped()
-		payload["hash_changed_total"] = mem.CapabilityRegistryHashChanged()
-		// Expose unix epoch seconds (if non-zero) for freshness monitoring.
-		if ts := mem.CapabilityAnchorLastWriteUnix(); ts > 0 {
-			payload["last_write_unix"] = ts
-		}
-	}
-	// Notarization exposure (prototype)
-	if os.Getenv("GAUTH_CAP_ANCHOR_NOTARIZE") == "1" && s.notarizer != nil {
-		// Resolve provider name from latest receipt or environment (always expose when notarization enabled).
-		providerName := s.capLastNotarizationReceipt.Provider
-		if providerName == "" {
-			providerName = os.Getenv("GAUTH_CAP_ANCHOR_NOTARY_PROVIDER")
-		}
-		if providerName != "" {
-			payload["notarization_provider"] = providerName
-		}
-		// Age + receipt summary if at least one successful notarization recorded.
-		if !s.capLastNotarization.IsZero() {
-			payload["last_notarized_at"] = s.capLastNotarization.UTC().Format(time.RFC3339Nano)
-			payload["notarized_age_seconds"] = uint64(time.Since(s.capLastNotarization).Seconds())
-			payload["notarization_receipt"] = gin.H{"hash": s.capLastNotarizationReceipt.Hash, "timestamp": s.capLastNotarizationReceipt.Timestamp, "provider": s.capLastNotarizationReceipt.Provider, "success": s.capLastNotarizationReceipt.Success}
-		} else {
-			// Explicit zero age when no receipt yet.
-			payload["notarized_age_seconds"] = 0
-		}
-	}
-	// External anchoring provider receipt exposure (distinct from notarizer)
-	// External anchoring provider receipt exposure (distinct from notarizer)
-	if s.capabilityAnchorHandler.Provider != nil {
-		if rec := s.capabilityAnchorHandler.GetLastReceipt(); rec.Hash != "" {
-			payload["external_anchor_receipt"] = gin.H{"hash": rec.Hash, "timestamp": rec.Timestamp.UTC().Format(time.RFC3339Nano), "provider": rec.Provider, "version": rec.Version}
-		}
-	}
-	c.JSON(200, payload)
+	s.capabilitiesHandler.SetAuditPrevHash(curHash)
 }
 
 // Notarization HTTP handlers removed - now handled by web/handlers/notary/api.go
@@ -3448,241 +3073,13 @@ func (s *BetaServer) verifyReceiptChain() string {
 	return s.receiptIntegrityStatus
 }
 
-// apiCapabilityAnchorPrometheus emits capability anchoring counters & freshness gauges in Prometheus exposition format.
-// It supplements the generic adapter metrics with age/stale when using memory collector only.
-// Metric names:
-// gauth_capability_anchor_emitted_total
-// gauth_capability_anchor_skipped_total
-// gauth_capability_registry_hash_changed_total
-// gauth_capability_anchor_last_write_seconds
-// gauth_capability_anchor_age_seconds
-// gauth_capability_anchor_stale (1 stale, 0 fresh)
-//
-//nolint:gocyclo // Capability anchor Prometheus metrics handler
-//nolint:gocyclo // Capability anchor Prometheus metrics handler
-func (s *BetaServer) apiCapabilityAnchorPrometheus(c *gin.Context) {
-	c.Header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
-	var b strings.Builder
-	// Optional on-demand verification trigger via query param verify=1 or if last check older than freshness threshold.
-	// Default freshness threshold: 120s (override via GAUTH_NOTARY_RECEIPT_VERIFY_FRESHNESS_SECONDS).
-	freshSecs := 120
-	if v := os.Getenv("GAUTH_NOTARY_RECEIPT_VERIFY_FRESHNESS_SECONDS"); v != "" {
-		if iv, err := strconv.Atoi(v); err == nil && iv > 0 {
-			freshSecs = iv
-		}
-	}
-	// Determine whether to perform verification: explicit query flag OR freshness threshold elapsed.
-	doVerify := c.Query("verify") == "1" || s.receiptLastVerify.IsZero() || time.Since(s.receiptLastVerify) > time.Duration(freshSecs)*time.Second
-	if doVerify {
-		if s.receiptStore == nil {
-			s.receiptIntegrityStatus = integrityUnconfigured
-		} else {
-			entries := s.receiptStore.Entries()
-			prevHash := "" // rename prev to prevHash to avoid potential shadow causing staticcheck confusion
-			s.receiptIntegrityStatus = integrityOK
-			for _, e := range entries {
-				// expected chain hash = sha256(prevHash + e.Hash)
-				h := sha256.Sum256([]byte(prevHash + e.Hash))
-				expected := hex.EncodeToString(h[:])
-				if expected != e.ChainHash || e.PrevHash != prevHash {
-					s.receiptIntegrityStatus = integrityMismatch
-					s.adaptiveMismatchCount++
-					break
-				}
-				prevHash = expected
-			}
-		}
-		s.receiptLastVerify = time.Now().UTC()
-		if pm, ok := s.metrics.(interface{ SetCapabilityAnchorNotarizationReceiptsIntegrity(string) }); ok {
-			pm.SetCapabilityAnchorNotarizationReceiptsIntegrity(s.receiptIntegrityStatus)
-		}
-		// Adaptive interval recalculation
-		minIv := 30
-		maxIv := 300
-		if v := os.Getenv("GAUTH_NOTARY_VERIFY_MIN_INTERVAL_SECONDS"); v != "" {
-			if iv, err := strconv.Atoi(v); err == nil && iv > 5 {
-				minIv = iv
-				fmt.Fprintf(os.Stderr, "[notary] verify_min_interval=%d integrity_status=%s\n", minIv, s.receiptIntegrityStatus)
-			}
-		}
-		if v := os.Getenv("GAUTH_NOTARY_VERIFY_MAX_INTERVAL_SECONDS"); v != "" {
-			if iv, err := strconv.Atoi(v); err == nil && iv > minIv {
-				maxIv = iv
-				fmt.Fprintf(os.Stderr, "[notary] verify_max_interval=%d integrity_status=%s\n", maxIv, s.receiptIntegrityStatus)
-			}
-		}
-		// Append rate approximation: new receipts count since last adjust (we don't currently track append increments; approximate via length difference against stored adaptiveAppendCount baseline)
-		entriesLen := 0
-		if s.receiptStore != nil {
-			entriesLen = len(s.receiptStore.Entries())
-		}
-		if s.adaptiveLastAdjust.IsZero() {
-			s.adaptiveLastAdjust = time.Now().UTC()
-			s.adaptiveIntervalSec = minIv
-			s.adaptiveAppendCount = entriesLen
-		}
-		// Recompute interval if sufficient time passed (>= current interval) or mismatch occurred
-		elapsed := time.Since(s.adaptiveLastAdjust).Seconds()
-		if elapsed >= float64(s.adaptiveIntervalSec) || s.receiptIntegrityStatus == integrityMismatch {
-			newEntries := entriesLen - s.adaptiveAppendCount
-			// Simple heuristic: scale interval inversely with growth & mismatches.
-			// Base target = maxIv; reduce by factor for growth and mismatches.
-			interval := maxIv
-			if newEntries > 0 {
-				// For each new entry reduce interval by 10% down to minIv.
-				reduction := int(float64(interval) * 0.1 * float64(newEntries))
-				if reduction > interval-minIv {
-					reduction = interval - minIv
-				}
-				interval -= reduction
-			}
-			if s.receiptIntegrityStatus == integrityMismatch {
-				// Track consecutive mismatches to force aggressive interval.
-				s.adaptiveMismatchCount++
-			}
-			if s.adaptiveMismatchCount > 0 {
-				// Force aggressive interval (min) after mismatch to accelerate detection of cascading corruption.
-				interval = minIv
-			}
-			if interval < minIv {
-				interval = minIv
-			}
-			s.adaptiveIntervalSec = interval
-			s.adaptiveLastAdjust = time.Now().UTC()
-			s.adaptiveAppendCount = entriesLen
-			if s.receiptIntegrityStatus == integrityOK {
-				s.adaptiveMismatchCount = 0
-			}
-		}
-		// Use status value to avoid staticcheck SA4006 complaining about last assignment not observed.
-		if s.receiptIntegrityStatus == integrityMismatch && s.adaptiveIntervalSec < minIv {
-			s.adaptiveIntervalSec = minIv
-		}
-		fmt.Fprintf(os.Stderr, "[notary] adaptive_interval=%d status=%s new_entries=%d mismatch_count=%d\n", s.adaptiveIntervalSec, s.receiptIntegrityStatus, entriesLen-s.adaptiveAppendCount, s.adaptiveMismatchCount)
-	}
-	// Automatic verification trigger using adaptive interval if configured.
-	// Automatic triggers: freshness threshold OR adaptive interval (if shorter) cause verification.
-	// Note: doVerify check removed as it was ineffectual - verification happens through other paths
-	// Counters (if memory metrics available)
-	if mem, ok := s.metrics.(*metrics.Memory); ok {
-		fmt.Fprintf(&b, "# HELP gauth_capability_anchor_emitted_total Capability anchor artifacts emitted.\n")
-		fmt.Fprintf(&b, "# TYPE gauth_capability_anchor_emitted_total counter\n")
-		fmt.Fprintf(&b, "gauth_capability_anchor_emitted_total %d\n", mem.CapabilityAnchorEmitted())
-		fmt.Fprintf(&b, "# HELP gauth_capability_anchor_skipped_total Capability anchor emission attempts skipped (interval throttle).\n")
-		fmt.Fprintf(&b, "# TYPE gauth_capability_anchor_skipped_total counter\n")
-		fmt.Fprintf(&b, "gauth_capability_anchor_skipped_total %d\n", mem.CapabilityAnchorSkipped())
-		fmt.Fprintf(&b, "# HELP gauth_capability_registry_hash_changed_total Capability registry hash semantic change events.\n")
-		fmt.Fprintf(&b, "# TYPE gauth_capability_registry_hash_changed_total counter\n")
-		fmt.Fprintf(&b, "gauth_capability_registry_hash_changed_total %d\n", mem.CapabilityRegistryHashChanged())
-		// Last write unix seconds
-		if ts := mem.CapabilityAnchorLastWriteUnix(); ts > 0 {
-			fmt.Fprintf(&b, "# HELP gauth_capability_anchor_last_write_seconds Unix epoch seconds of last capability anchor artifact emission.\n")
-			fmt.Fprintf(&b, "# TYPE gauth_capability_anchor_last_write_seconds gauge\n")
-			fmt.Fprintf(&b, "gauth_capability_anchor_last_write_seconds %d\n", ts)
-		}
-	}
-	// Age/stale gauge from server SLA fields
-	age := s.capAnchorLastAgeSeconds.Load()
-	fmt.Fprintf(&b, "# HELP gauth_capability_anchor_age_seconds Seconds since last capability anchor artifact emission (0 when never emitted).\n")
-	fmt.Fprintf(&b, "# TYPE gauth_capability_anchor_age_seconds gauge\n")
-	fmt.Fprintf(&b, "gauth_capability_anchor_age_seconds %d\n", age)
-	stale := 0
-	if s.capAnchorStale.Load() {
-		stale = 1
-	}
-	fmt.Fprintf(&b, "# HELP gauth_capability_anchor_stale Capability anchor stale state (1 if age exceeds SLA threshold).\n")
-	fmt.Fprintf(&b, "# TYPE gauth_capability_anchor_stale gauge\n")
-	fmt.Fprintf(&b, "gauth_capability_anchor_stale %d\n", stale)
-	// Notarization receipt chain integrity gauge exposition (mirrors Prom collector)
-	// Attempt light on-demand verification if status is empty and receipt store configured to avoid stale value.
-	if s.receiptIntegrityStatus == "" && s.receiptStore != nil {
-		entries := s.receiptStore.Entries()
-		prev := ""
-		for _, e := range entries {
-			// Compute expected chain hash: sha256(prev + e.Hash)
-			h := sha256.Sum256([]byte(prev + e.Hash))
-			expected := hex.EncodeToString(h[:])
-			if expected != e.ChainHash || e.PrevHash != prev {
-				s.receiptIntegrityStatus = integrityMismatch
-				if pm, ok := s.metrics.(interface{ SetCapabilityAnchorNotarizationReceiptsIntegrity(string) }); ok {
-					pm.SetCapabilityAnchorNotarizationReceiptsIntegrity("mismatch")
-				}
-				break
-			}
-			prev = expected
-		}
-		if s.receiptIntegrityStatus == "" {
-			s.receiptIntegrityStatus = integrityOK
-			if pm, ok := s.metrics.(interface{ SetCapabilityAnchorNotarizationReceiptsIntegrity(string) }); ok {
-				pm.SetCapabilityAnchorNotarizationReceiptsIntegrity("ok")
-			}
-		}
-	}
-	integrityStatusLocal := s.receiptIntegrityStatus
-	if integrityStatusLocal == "" {
-		integrityStatusLocal = integrityUnconfigured
-	}
-	fmt.Fprintf(&b, "# HELP gauth_capability_anchor_notarization_receipts_integrity Integrity status of notarization receipt persistence chain (ok=1 mismatch=0 unconfigured=-1).\n")
-	fmt.Fprintf(&b, "# TYPE gauth_capability_anchor_notarization_receipts_integrity gauge\n")
-	val := -1
-	switch integrityStatusLocal {
-	case "ok":
-		val = 1
-	case "mismatch":
-		val = 0
-	case integrityUnconfigured, "legacy":
-		val = -1
-	}
-	fmt.Fprintf(&b, "gauth_capability_anchor_notarization_receipts_integrity %d\n", val)
-	// Last verification age (seconds since last verify) derived from receiptLastVerify timestamp
-	ageVerify := 0
-	if !s.receiptLastVerify.IsZero() {
-		ageVerify = int(time.Since(s.receiptLastVerify).Seconds())
-	}
-	fmt.Fprintf(&b, "# HELP gauth_capability_anchor_notarization_receipts_last_verify_age_seconds Seconds since last successful receipt chain integrity verification (0 when never).\n")
-	fmt.Fprintf(&b, "# TYPE gauth_capability_anchor_notarization_receipts_last_verify_age_seconds gauge\n")
-	fmt.Fprintf(&b, "gauth_capability_anchor_notarization_receipts_last_verify_age_seconds %d\n", ageVerify)
-	// If Prometheus adapter active, histogram & jitter gauge already registered globally; we mirror minimal exposition for custom scrape if needed.
-	if pm, ok := s.metrics.(*metrics.PrometheusMetrics); ok {
-		b.WriteString("# HELP gauth_rfc0111_capability_anchor_emission_interval_seconds Histogram of intervals between successful capability anchor emissions.\n")
-		b.WriteString("# TYPE gauth_rfc0111_capability_anchor_emission_interval_seconds histogram\n")
-		// We cannot directly iterate buckets without exposing internal state; fallback: note that native /metrics endpoint should be used.
-		b.WriteString("# NOTE: emission interval histogram registered in default Prometheus registry; prefer scraping /metrics for bucket lines.\n")
-		b.WriteString("# HELP gauth_capability_anchor_emission_jitter_seconds Rolling stddev of recent capability anchor emission intervals.\n")
-		b.WriteString("# TYPE gauth_capability_anchor_emission_jitter_seconds gauge\n")
-		// Jitter gauge value accessible only via internal fields; reflect via placeholder if intervals observed.
-		// We approximate by recomputing from BetaServer's rolling stats for portability.
-		s.capIntervalMu.Lock()
-		stddev := 0.0
-		if s.capIntervalCount > 1 {
-			variance := s.capIntervalM2 / float64(s.capIntervalCount-1)
-			if variance < 0 {
-				variance = 0
-			}
-			stddev = math.Sqrt(variance)
-		}
-		s.capIntervalMu.Unlock()
-		fmt.Fprintf(&b, "gauth_capability_anchor_emission_jitter_seconds %f\n", stddev)
-		_ = pm // reference to avoid lint complaining about unused variable in future edits
-		// Notarization metrics exposition (age & failures). Latency histogram is in main registry; we surface age for custom scrapes.
-		if os.Getenv("GAUTH_CAP_ANCHOR_NOTARIZE") == "1" && s.notarizer != nil {
-			// Include latency histogram HELP/TYPE so custom scrapes can detect presence (buckets remain in global /metrics)
-			b.WriteString("# HELP gauth_capability_anchor_notarization_latency_seconds Latency of external capability anchor notarization operations.\n")
-			b.WriteString("# TYPE gauth_capability_anchor_notarization_latency_seconds histogram\n")
-			b.WriteString("# NOTE: capability_anchor_notarization_latency_seconds buckets registered in default Prometheus registry; scrape /metrics for bucket lines.\n")
-			b.WriteString("# HELP gauth_capability_anchor_notarized_age_seconds Seconds since last successful capability anchor notarization receipt (0 when never).\n")
-			b.WriteString("# TYPE gauth_capability_anchor_notarized_age_seconds gauge\n")
-			nAge := 0
-			if !s.capLastNotarization.IsZero() {
-				nAge = int(time.Since(s.capLastNotarization).Seconds())
-			}
-			fmt.Fprintf(&b, "gauth_capability_anchor_notarized_age_seconds %d\n", nAge)
-			// Failure counter only available via registered Prom collector; provide advisory line.
-			b.WriteString("# NOTE: capability_anchor_notarization_failures_total registered in default registry; scrape /metrics for actual counter value.\n")
-		}
-	}
-	c.String(200, b.String())
-}
+// apiCapabilitiesReload removed - extracted to capabilities.API
+
+// apiCapabilitiesNegotiate removed - extracted to capabilities.API
+
+// apiCapabilitiesAuditVerify removed - extracted to capabilities.API
+
+// apiCapabilitiesAuditAnchor removed - extracted to capabilities.API
 
 // apiEdDSAPublicKey exposes the active Ed25519 public key (if GAUTH_TOKEN_SIG_MODE=eddsa) for clients
 // to verify capability anchoring signatures and other EdDSA-signed artifacts. Response:
@@ -3699,17 +3096,6 @@ func (s *BetaServer) apiEdDSAPublicKey(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{"success": true, "configured": true, "kid": active.ID, "public_key": base64.RawStdEncoding.EncodeToString(active.Public)})
-}
-
-func (s *BetaServer) seedExamples() {
-	s.examples = []*ExampleMeta{
-		{ID: "gauth_protocol_basics:minimal_poa", Title: "Minimal PoA", Description: "Basic power-of-attorney construction", Group: "basics", EstimatedSeconds: 1},
-		{ID: "gauth_protocol_basics:delegation", Title: "Delegation", Description: "Simple delegation chain", Group: "basics", EstimatedSeconds: 2},
-		{ID: "gauth_protocol_basics:token", Title: "Token Issuance", Description: "Beta token creation", Group: "basics", EstimatedSeconds: 1},
-		{ID: "advanced_poa:multi_level", Title: "Advanced Multi-level Delegation", Description: "Complex PoA scenario", Group: "advanced", EstimatedSeconds: 3},
-		{ID: "negative:invalid_scope", Title: "Invalid Scope", Description: "Negative case: scope mismatch", Group: "negative", EstimatedSeconds: 1},
-	}
-	//nolint:gocyclo // HTTP route registration for all API endpoints
 }
 
 // LastReceiptVerifyTime returns timestamp of the last integrity verification performed by the custom
@@ -3733,13 +3119,8 @@ func (s *BetaServer) routes() {
 	beta.GET("/health", s.health)
 	beta.GET("/info", s.info)
 	beta.GET("/ping", s.ping)
-	beta.GET("/examples/catalog", s.examplesCatalog)
-	beta.POST("/examples/run", s.examplesRun)
-	beta.GET("/examples/run/:id/status", s.examplesRunStatus)
-	beta.GET("/examples/run/:id/logs", s.examplesRunLogs)
-	beta.GET("/examples/run/jobs", s.examplesRunJobs)
-	beta.POST("/examples/run/jobs/:id/cancel", s.examplesRunCancel)
-
+	// Examples Handler
+	s.examplesAPI.RegisterRoutes(s.router)
 	// Prometheus exposition for revocation auto-sign counters
 	beta.GET("/metrics/revocation/auto-sign/prometheus", s.apiRevocationAutoSignPrometheus)
 	// Hash chain verification endpoints (integrity check for persistence files) handled by violationAPI
@@ -3749,22 +3130,27 @@ func (s *BetaServer) routes() {
 	// Audit log entries endpoint - handled by auditHandlers.API.RegisterRoutes()
 	// Audit-policy consistency endpoint
 
-	// --- Authorization Metrics & Evaluation (embedded MemoryAuthorizer) ---
-	beta.GET("/authz/metrics", s.apiAuthzMetrics)
-	beta.GET("/metrics/decisions", s.apiDecisionMetrics)
-	beta.GET("/authz/metrics/prometheus", gin.WrapH(authz.PrometheusHandler(s.authorizer)))
-	beta.GET("/capabilities", s.apiCapabilities)
-	beta.POST("/capabilities/reload", s.apiCapabilitiesReload)
-	// Capability anchor & external anchoring metrics/verification endpoints (prototype)
-	beta.GET("/capabilities/anchor/metrics/prometheus", s.apiCapabilityAnchorPrometheus)
+	// --- Authorization - Handled by authzAPI.RegisterRoutes()
+	// beta.GET("/authz/metrics", s.authzAPI.MetricsHandler) // Removed: duplicate
+	// beta.GET("/metrics/decisions", s.authzAPI.DecisionMetrics) // Removed: duplicate
+	// beta.GET("/authz/metrics/prometheus", gin.WrapH(authz.PrometheusHandler(s.authorizer))) // Removed: duplicate
+	// Capabilities
+	s.capabilitiesAPI.RegisterRoutes(s.router)
+	// Capability reload endpoint (now handled by auditHandlers)
+	// beta.POST("/capabilities/reload", s.apiCapabilitiesReload) // Removed
+	// Capability Anchor Handler - Register routes via API handler
+	// if s.capabilityAnchorAPI != nil {
+	// 	s.capabilityAnchorAPI.RegisterRoutes(s.router)
+	// }
 	// Capability registry external anchoring endpoints (prototype)
-	// Capability anchor routes registered via modular handlers (anchor.RegisterAll) below.
+	// s.capabilityAnchorAPI.RegisterRoutes(s.router) // Redundant, already registered above
+
+	// Legacy alias redirects/shims if any
 	// Notarization receipt persistence endpoints - handled by notaryHandlers.RegisterRoutes()
 	// Generic Prometheus exposition for all registered collectors (when Prometheus adapter is used)
 	beta.GET("/metrics/prometheus", gin.WrapH(promhttp.Handler()))
 	// Root-level Prometheus exposition for standardized scraping (tests expect /metrics)
 	s.router.GET("/metrics", gin.WrapH(promhttp.Handler()))
-	beta.POST("/capabilities/negotiate", s.apiCapabilitiesNegotiate)
 	// Public key discovery (EdDSA active key) for capability anchor signature verification
 	beta.GET("/keys/eddsa", s.apiEdDSAPublicKey)
 	// Capability audit chain verification endpoint (prototype)
@@ -4023,7 +3409,7 @@ func (s *BetaServer) routes() {
 			verified := true
 			reason := "ok"
 			// If capability registry hash available, require equality
-			if s.capabilityRegistryHash != "" && receipt.Hash != s.capabilityRegistryHash {
+			if s.capabilitiesHandler.GetRegistryHash() != "" && receipt.Hash != s.capabilitiesHandler.GetRegistryHash() {
 				verified = false
 				reason = "hash_mismatch"
 			}
@@ -4060,19 +3446,10 @@ func (s *BetaServer) routes() {
 		})
 	}
 
-	beta.POST("/authz/evaluate", s.apiAuthzEvaluate)
+	// Cleaned up legacy export endpoints
 
-	// Delegation endpoints (beta-prefixed alias for capability lifecycle enforcement tests)
-	beta.POST("/delegation/create", s.apiDelegationCreate)
-	beta.POST("/delegation/revoke", s.apiDelegationRevoke)
-	beta.POST("/delegation/status/update", s.apiDelegationStatusUpdate)
+	s.poaHandler.RegisterRoutes(s.router)
 
-	// Composite export endpoints (frontend expects these for sequential run summaries)
-	beta.POST("/examples/composite/export/json", s.examplesCompositeExportJSON)
-	beta.POST("/examples/composite/export/csv", s.examplesCompositeExportCSV)
-
-	s.router.POST("/api/v1/poa/authorize", s.apiAuthorizePOA)
-	s.router.GET("/api/v1/poa/metrics", s.apiPOAMetrics)
 	// Delegation graph export (hierarchical relationships snapshot)
 	s.router.GET("/api/v1/poa/graph", func(c *gin.Context) {
 		ctx := c.Request.Context()
@@ -4109,11 +3486,8 @@ func (s *BetaServer) routes() {
 
 	// Prototype semantic counters route (replaced by semanticHandler API)
 	// Routes registered via s.semanticAPI.RegisterRoutes(s.router)
-	// Delegation lifecycle management (prototype - not yet backed by persistent service)
-	s.router.POST("/api/v1/delegation/status/update", s.apiDelegationStatusUpdate)
 	// Delegation create + revoke (capability enforced when GAUTH_CAPABILITY_ENFORCE=1)
-	s.router.POST("/api/v1/delegation/create", s.apiDelegationCreate)
-	s.router.POST("/api/v1/delegation/revoke", s.apiDelegationRevoke)
+	s.delegationHandler.RegisterRoutes(s.router, beta)
 
 	// RFC-0111 Subscription and Authorization Flow endpoints (optional, controlled by GAUTH_RFC0111_ENABLED=1)
 	if rfc0111Components, tokenStore, err := InitRFC0111FromEnv(); err == nil && rfc0111Components != nil {
@@ -4269,10 +3643,8 @@ func (s *BetaServer) routes() {
 	s.RegisterAPIDocumentation()
 
 	// Mount modular anchor handlers (override legacy inline path for consistent error taxonomy)
-	betaGrp := s.router.Group("/api/v1/beta")
-	if !s.routeRegistered("/api/v1/beta/capabilities/anchor") {
-		anchorHandlers.RegisterAll(betaGrp, s)
-	}
+	// betaGrp := s.router.Group("/api/v1/beta")
+	// anchorHandlers.RegisterAll(betaGrp, s) // Removed: duplicate
 
 	// Legacy rotation summary endpoint with threshold enforcement (pre-V2). Conditional single registration.
 	if !s.routeRegistered("/api/v1/beta/rotations/summary") { // helper ensures no duplicate
@@ -4327,8 +3699,8 @@ func (s *BetaServer) routes() {
 	// Readiness endpoint - could expand with dependency checks
 	s.router.GET("/ready", func(c *gin.Context) {
 		queued := 0
-		for _, j := range s.jobs.ListJobs(nil, 0) { // nil => all
-			if j.State == JobQueued || j.State == JobRunning {
+		for _, j := range s.examplesAPI.Jobs.ListJobs(nil, 0) { // nil => all
+			if j.State == examples.JobQueued || j.State == examples.JobRunning {
 				queued++
 			}
 		}
@@ -4342,7 +3714,7 @@ func (s *BetaServer) routes() {
 		legacyAlg := algHS256
 		algs := []string{legacyAlg}
 		jwtEnabled := os.Getenv("GAUTH_USE_JWT_LIB") == "1"
-		// Advertise EdDSA when GAUTH_TOKEN_SIG_MODE=eddsa (public key signing)
+		// Advertise EdDSA when GAUTH_TOKEN_SIG_MODE == eddsa (public key signing)
 		if os.Getenv("GAUTH_TOKEN_SIG_MODE") == sigModeEdDSA {
 			algs = append(algs, "EdDSA")
 		}
@@ -4461,14 +3833,15 @@ func (s *BetaServer) routes() {
 			return regCaps[i]["id"].(string) < regCaps[j]["id"].(string)
 		})
 		// Build ordered action capability slice for deterministic JSON marshal.
-		actKeys := make([]string, 0, len(s.requiredActionCaps))
-		for act := range s.requiredActionCaps {
+		actMappings := s.capabilitiesHandler.GetActionMappings()
+		actKeys := make([]string, 0, len(actMappings))
+		for act := range actMappings {
 			actKeys = append(actKeys, act)
 		}
 		sort.Strings(actKeys)
-		actionCaps := []gin.H{}
+		actionCaps := make([]gin.H, 0, len(actKeys))
 		for _, act := range actKeys {
-			actionCaps = append(actionCaps, gin.H{"action": act, "required": s.requiredActionCaps[act]})
+			actionCaps = append(actionCaps, gin.H{"action": act, "required": actMappings[act]})
 		}
 		cfg := gin.H{
 			"version":              "beta",
@@ -4561,35 +3934,35 @@ func (s *BetaServer) routes() {
 			"capability_stability":   gin.H{"demo-token-issuance": "beta", "basic-policy-eval": "beta", "hash-chained-revocations": "beta", "multi-signature-poa": "alpha"},
 			"capability_registry":    regCaps,
 			"capability_registry_schema_version": func() any {
-				if s.capSchemaVersion > 0 {
-					return s.capSchemaVersion
+				if s.capabilitiesHandler.GetSchemaVersion() > 0 {
+					return s.capabilitiesHandler.GetSchemaVersion()
 				}
 				return nil
 			}(),
 			"capability_registry_hash": func() any {
-				if s.capabilityRegistryHash != "" {
-					return s.capabilityRegistryHash
+				if s.capabilitiesHandler.GetRegistryHash() != "" {
+					return s.capabilitiesHandler.GetRegistryHash()
 				}
 				return nil
 			}(),
 			"capability_registry_prev_hash": func() any {
-				if s.capabilityPrevRegistryHash != "" {
-					return s.capabilityPrevRegistryHash
+				if s.capabilitiesHandler.GetPrevRegistryHash() != "" {
+					return s.capabilitiesHandler.GetPrevRegistryHash()
 				}
 				return nil
 			}(),
 			"capability_registry_last_changed_at": func() any {
-				if !s.capabilityRegistryChangeAt.IsZero() {
-					return s.capabilityRegistryChangeAt.Format(time.RFC3339)
+				if !s.capabilitiesHandler.GetRegistryChangeAt().IsZero() {
+					return s.capabilitiesHandler.GetRegistryChangeAt().Format(time.RFC3339)
 				}
 				return nil
 			}(),
 			"action_capabilities":        actionCaps,
-			"capability_enforcement":     gin.H{"enabled": s.capEnforce},
-			"capability_registry_source": s.capSource,
+			"capability_enforcement":     gin.H{"enabled": s.capabilitiesHandler.IsEnforced()},
+			"capability_registry_source": s.capabilitiesHandler.GetSource(),
 			"capability_registry_last_loaded": func() any {
-				if !s.capLastLoaded.IsZero() {
-					return s.capLastLoaded.Format(time.RFC3339)
+				if !s.capabilitiesHandler.GetLastLoaded().IsZero() {
+					return s.capabilitiesHandler.GetLastLoaded().Format(time.RFC3339)
 				}
 				return nil
 			}(),
@@ -4708,7 +4081,7 @@ func (s *BetaServer) routes() {
 
 	// Serve governance fragment as JSON (conversion)
 	s.router.GET("/api/v1/openapi/governance", func(c *gin.Context) {
-		paths := []string{"docs/openapi-governance-fragment.yaml", "./docs/openapi-governance-fragment.yaml", "../docs/openapi-governance-fragment.yaml"}
+		paths := []string{"docs/openapi-governance-fragment.yaml", "./docs/openapi/governance-fragment.yaml", "../docs/openapi/governance-fragment.yaml"}
 		var data []byte
 		var err error
 		for _, p := range paths {
@@ -5118,11 +4491,9 @@ func (s *BetaServer) routes() {
 		var nodes []gin.H
 		var edges []gin.H
 		// Collect statuses (legacy tracking map)
-		s.delegationStatusMu.RLock()
-		for id, st := range s.delegationStatus {
+		for id, st := range s.delegationHandler.Snapshot() {
 			nodes = append(nodes, gin.H{"id": id, "status": st})
 		}
-		s.delegationStatusMu.RUnlock()
 		// Attempt to enrich with parent-child edges from RFC0111 repository if service available
 		if svc, ok := s.rfc0111Service.(*gauth_rfc_001.Service); ok && svc != nil {
 			// The repository interface lacks a full scan; approximate by iterating over principals seen in status map (union grantor/grantee covered by map keys) then de-duplicating.
@@ -5323,7 +4694,6 @@ func (s *BetaServer) routes() {
 					buf := make([]byte, 32)
 					if _, err := crand.Read(buf); err != nil {
 						c.JSON(500, gin.H{"success": false, "code": "challenge_gen_failed"})
-						return
 					}
 					challenges = append(challenges, base64.StdEncoding.EncodeToString(buf))
 					// Metrics: one per challenge
@@ -6234,10 +5604,17 @@ func (s *BetaServer) apiCapabilities(c *gin.Context) {
 
 // enforceCapabilities validates required capabilities for an action when enabled.
 func (s *BetaServer) enforceCapabilities(action string, claims map[string]any) (bool, []string) {
-	if !s.capEnforce {
+	// Capability enforcement
+	if !s.capabilitiesHandler.IsEnforced() {
 		return true, nil
 	}
-	req := s.requiredActionCaps[action]
+	// Extract state from handler
+	reqActionCaps := s.capabilitiesHandler.GetRequiredCaps(action)
+	if reqActionCaps == nil {
+		// No mapping found
+		return true, nil
+	}
+	req := reqActionCaps
 	if len(req) == 0 {
 		return true, nil
 	}
@@ -6257,8 +5634,8 @@ func (s *BetaServer) enforceCapabilities(action string, claims map[string]any) (
 	}
 	provided := capability.BuildProvided(vals)
 	missing := capability.ValidateCapabilities(req, provided)
-	// Sunset enforcement: if lifecycleSunsetEnforce enabled, check any required capability sunset_after passed
-	if s.lifecycleSunsetEnforce && len(missing) == 0 {
+	// Sunset enforcement: if IsSunsetEnforced enabled, check any required capability sunset_after passed
+	if s.capabilitiesHandler.IsSunsetEnforced() && len(missing) == 0 {
 		// Build map of capabilities for lookup
 		caps := capability.DefaultRegistry().List()
 		reg := make(map[string]capability.Capability, len(caps))
@@ -6283,139 +5660,9 @@ func (s *BetaServer) enforceCapabilities(action string, claims map[string]any) (
 // apiDelegationCreate creates a new delegation status entry (prototype) after capability enforcement.
 // Expected JSON: {"delegation_id":"<id>", "subject":"<subject>", "delegate":"<delegate>", "claims": {"cap": ["cap.delegation.create"]}}
 // For demo we only track status map; real implementation would persist delegation chain object.
-func (s *BetaServer) apiDelegationCreate(c *gin.Context) {
-	var in struct {
-		DelegationID string         `json:"delegation_id"`
-		Subject      string         `json:"subject"`
-		Delegate     string         `json:"delegate"`
-		Claims       map[string]any `json:"claims"`
-	}
-	if err := c.BindJSON(&in); err != nil || in.DelegationID == "" {
-		c.JSON(400, gin.H{"success": false, "error": "invalid_payload"})
-		return
-	}
-	allowed, missing := s.enforceCapabilities("delegation:create", in.Claims)
-	if !allowed {
-		// record capability_denied
-		// Increment capability_denied via generic violation hook
-		s.metrics.IncViolation("capability_denied")
-		// Explicit capability enforcement denied counter (new dedicated metric)
-		if s.metrics != nil {
-			s.metrics.IncCapabilityEnforceDenied()
-		}
-		// Audit capability denial
-		if s.audit != nil {
-			meta := map[string]any{"delegation_id": in.DelegationID, "missing": missing, "action": "delegation:create"}
-			// Include lifecycle metadata for each required capability (deprecated/sunset status)
-			caps := capability.DefaultRegistry().List()
-			reg := make(map[string]capability.Capability, len(caps))
-			for _, cobj := range caps {
-				reg[cobj.ID] = cobj
-			}
-			var lifecycle []map[string]any
-			for _, need := range s.requiredActionCaps["delegation:create"] {
-				co := reg[need]
-				phase := statusActive
-				if co.DeprecatedAfter != "" {
-					if t, err := time.Parse(time.RFC3339, co.DeprecatedAfter); err == nil && time.Now().After(t) {
-						phase = statusDeprecated
-					}
-				}
-				if co.SunsetAfter != "" {
-					if t, err := time.Parse(time.RFC3339, co.SunsetAfter); err == nil && time.Now().After(t) {
-						phase = statusSunset
-					}
-				}
-				lifecycle = append(lifecycle, map[string]any{"id": need, "deprecated_after": co.DeprecatedAfter, "sunset_after": co.SunsetAfter, "phase": phase})
-			}
-			meta["lifecycle"] = lifecycle
-			s.appendCapabilityAudit(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: in.Subject, Action: actionCapabilityEnforce, Resource: "delegation", Outcome: "denied", Meta: meta})
-		}
-		c.JSON(403, gin.H{"success": false, "error": "capability_denied", "missing": missing})
-		return
-	}
-	// Track status as active
-	if s.metrics != nil {
-		s.metrics.IncCapabilityEnforceAllowed()
-	}
-	s.delegationStatusMu.Lock()
-	s.delegationStatus[in.DelegationID] = statusActive
-	s.delegationStatusMu.Unlock()
-	// Append audit entry with capability provenance if present
-	meta := map[string]any{"delegation_id": in.DelegationID, "delegate": in.Delegate}
-	if in.Claims != nil {
-		if caps, ok := in.Claims["cap"].([]string); ok {
-			meta["caps"] = caps
-		}
-	}
-	s.appendCapabilityAudit(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: in.Subject, Action: actionDelegationCreate, Resource: "delegation", Outcome: "active", Meta: meta})
-	c.JSON(200, gin.H{"success": true, "delegation_id": in.DelegationID, "status": "active"})
-}
 
 // apiDelegationRevoke updates status to terminated (prototype) after capability enforcement.
 // Expected JSON: {"delegation_id":"<id>", "claims": {"cap": ["cap.delegation.revoke"]}, "reason":"optional"}
-func (s *BetaServer) apiDelegationRevoke(c *gin.Context) {
-	var in struct {
-		DelegationID string         `json:"delegation_id"`
-		Claims       map[string]any `json:"claims"`
-		Reason       string         `json:"reason"`
-	}
-	if err := c.BindJSON(&in); err != nil || in.DelegationID == "" {
-		c.JSON(400, gin.H{"success": false, "error": "invalid_payload"})
-		return
-	}
-	allowed, missing := s.enforceCapabilities("delegation:revoke", in.Claims)
-	if !allowed {
-		// Increment capability_denied via generic violation hook
-		s.metrics.IncViolation("capability_denied")
-		if s.metrics != nil {
-			s.metrics.IncCapabilityEnforceDenied()
-		}
-		if s.audit != nil {
-			meta := map[string]any{"delegation_id": in.DelegationID, "missing": missing, "action": "delegation:revoke"}
-			caps := capability.DefaultRegistry().List()
-			reg := make(map[string]capability.Capability, len(caps))
-			for _, cobj := range caps {
-				reg[cobj.ID] = cobj
-			}
-			var lifecycle []map[string]any
-			for _, need := range s.requiredActionCaps["delegation:revoke"] {
-				co := reg[need]
-				phase := statusActive
-				if co.DeprecatedAfter != "" {
-					if t, err := time.Parse(time.RFC3339, co.DeprecatedAfter); err == nil && time.Now().After(t) {
-						phase = statusDeprecated
-					}
-				}
-				if co.SunsetAfter != "" {
-					if t, err := time.Parse(time.RFC3339, co.SunsetAfter); err == nil && time.Now().After(t) {
-						phase = statusSunset
-					}
-				}
-				lifecycle = append(lifecycle, map[string]any{"id": need, "deprecated_after": co.DeprecatedAfter, "sunset_after": co.SunsetAfter, "phase": phase})
-			}
-			meta["lifecycle"] = lifecycle
-			s.appendCapabilityAudit(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: "revoker", Action: actionCapabilityEnforce, Resource: "delegation", Outcome: "denied", Meta: meta})
-		}
-		c.JSON(403, gin.H{"success": false, "error": "capability_denied", "missing": missing})
-		return
-	}
-	s.delegationStatusMu.Lock()
-	prev := s.delegationStatus[in.DelegationID]
-	s.delegationStatus[in.DelegationID] = statusTerminated
-	s.delegationStatusMu.Unlock()
-	meta := map[string]any{"delegation_id": in.DelegationID, "prev_status": prev, "reason": in.Reason}
-	if in.Claims != nil {
-		if caps, ok := in.Claims["cap"].([]string); ok {
-			meta["caps"] = caps
-		}
-	}
-	s.appendCapabilityAudit(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: "revoker", Action: actionDelegationRevoke, Resource: "delegation", Outcome: statusTerminated, Meta: meta})
-	if s.metrics != nil {
-		s.metrics.IncCapabilityEnforceAllowed()
-	}
-	c.JSON(200, gin.H{"success": true, "delegation_id": in.DelegationID, "status": statusTerminated})
-}
 
 // Audit handlers removed - now handled by web/handlers/audit/api.go
 
@@ -6529,16 +5776,6 @@ func min(a, b int) int {
 	return b
 }
 
-// apiAuthzMetrics exposes MemoryAuthorizer metrics snapshot as JSON for UI dashboard.
-func (s *BetaServer) apiAuthzMetrics(c *gin.Context) {
-	if s.authorizer == nil {
-		c.JSON(503, gin.H{"success": false, "message": "authorizer not initialized"})
-		return
-	}
-	snap := s.authorizer.GetMetricsSnapshot()
-	c.JSON(200, gin.H{"success": true, "metrics": snap, "timestamp": time.Now().Format(time.RFC3339)})
-}
-
 // apiDecisionMetrics exposes labeled decision counts and reason counts from in-memory metrics collector.
 // Response schema: {success:true, decisions:{counts:[{action,resource,outcome,count}], reasons:[{action,resource,outcome,reason,count}]}}
 // Deterministic ordering by action, resource, outcome, reason for stable diffing.
@@ -6647,213 +5884,11 @@ func (s *BetaServer) apiDecisionMetrics(c *gin.Context) {
 	c.JSON(200, gin.H{"success": true, "decisions": gin.H{"counts": counts, "reasons": reasons}})
 }
 
-// apiAuthzEvaluate performs a demo evaluation against the embedded MemoryAuthorizer.
-// Expected JSON: {"subject":"alice@example.com","resource":"report:finance","action":"read","context":{"department":"finance","classification":"public","roles":"","scopes":""}}
-func (s *BetaServer) apiAuthzEvaluate(c *gin.Context) {
-	if s.authorizer == nil {
-		c.JSON(503, gin.H{"success": false, "message": "authorizer not initialized"})
-		return
-	}
-	var req struct {
-		Subject  string            `json:"subject"`
-		Resource string            `json:"resource"`
-		Action   string            `json:"action"`
-		Context  map[string]string `json:"context"`
-	}
-	if err := c.ShouldBindJSON(&req); err != nil || req.Subject == "" || req.Resource == "" || req.Action == "" {
-		c.JSON(400, gin.H{"success": false, "message": "invalid payload"})
-		return
-	}
-	// Defensive nil context handling
-	if req.Context == nil {
-		req.Context = make(map[string]string)
-	}
-
-	// Prefer Policy Handler (Phase 5: Extraction)
-	if s.policyHandler != nil {
-		pReq := policy.EvalRequest{
-			Subject:  req.Subject,
-			Action:   req.Action,
-			Resource: req.Resource,
-			Attrs:    req.Context,
-			Now:      time.Now().UTC(),
-		}
-		dec, err := s.policyHandler.Evaluate(c.Request.Context(), pReq)
-		if err == nil {
-			c.JSON(200, gin.H{"success": true, "decision": dec})
-			return
-		}
-		// If error (e.g. engine not initialized), fallthrough to legacy authorizer
-		fmt.Printf("[apiAuthzEvaluate] policy handler error: %v\n", err)
-	}
-
-	dec, err := s.authorizer.Authorize(c.Request.Context(), authz.Request{Subject: req.Subject, Resource: req.Resource, Action: req.Action, Context: req.Context})
-	if err != nil {
-		c.JSON(500, gin.H{"success": false, "message": err.Error()})
-		return
-	}
-	c.JSON(200, gin.H{"success": true, "decision": dec})
-}
-
 // examplesCatalog returns the list of examples.
-func (s *BetaServer) examplesCatalog(c *gin.Context) {
-	s.examplesMu.RLock()
-	defer s.examplesMu.RUnlock()
-	c.JSON(200, gin.H{"success": true, "examples": s.examples, "count": len(s.examples)})
-}
 
 // examplesRun starts an example job (simulated) and returns job id.
-func (s *BetaServer) examplesRun(c *gin.Context) {
-	var req struct {
-		ID string `json:"id"`
-	}
-	if c.ShouldBindJSON(&req) != nil || req.ID == "" {
-		c.JSON(400, gin.H{"success": false, "message": "missing id"})
-		return
-	}
-	job := &ExampleJob{ID: randomNonce(8), ExampleID: req.ID, State: JobQueued, CreatedAt: time.Now()}
-	s.jobs.AddJob(job)
-	s.jobs.SetJobState(job.ID, JobRunning, "", "")
-	s.jobs.AppendLog(job.ID, "Starting example "+req.ID)
-	// simulate asynchronous completion
-	go func(id, ex string) {
-		time.Sleep(500 * time.Millisecond)
-		s.jobs.AppendLog(id, "Executing...")
-		time.Sleep(300 * time.Millisecond)
-		s.jobs.SetJobState(id, JobDone, "Example "+ex+" completed", "")
-	}(job.ID, req.ID)
-	c.JSON(202, gin.H{"success": true, "job_id": job.ID, "state": job.State})
-}
 
 // examplesRunStatus returns current status of a job.
-func (s *BetaServer) examplesRunStatus(c *gin.Context) {
-	id := c.Param("id")
-	if j, ok := s.jobs.GetJob(id); ok {
-		c.JSON(200, gin.H{"success": true, "job": gin.H{"id": j.ID, "example_id": j.ExampleID, "state": j.State, "output": j.Output, "error": j.Error, "started_at": j.StartedAt, "finished_at": j.FinishedAt}})
-		return
-	}
-	c.JSON(404, gin.H{"success": false, "message": "job not found"})
-}
-
-// examplesRunLogs streams logs via SSE.
-func (s *BetaServer) examplesRunLogs(c *gin.Context) {
-	id := c.Param("id")
-	c.Header("Content-Type", "text/event-stream")
-	c.Header("Cache-Control", "no-cache")
-	c.Header("Connection", "keep-alive")
-	// Allow clients to reconnect quickly if they wish
-	c.Header("X-Accel-Buffering", "no") // for nginx proxies if present
-	c.Writer.Flush()
-
-	// Initial open signal & client reconnection backoff (3s) hint
-	fmt.Fprint(c.Writer, ": open\n")      // comment style heartbeat marker
-	fmt.Fprint(c.Writer, "retry: 3000\n") // advise EventSource to wait 3s before auto-reconnect
-	fmt.Fprintf(c.Writer, "event: open\ndata: {\"ok\":true,\"job_id\":%q}\n\n", id)
-	c.Writer.Flush()
-
-	j, ok := s.jobs.GetJob(id)
-	if !ok {
-		fmt.Fprintf(c.Writer, "event: done\ndata: {\"state\":\"not_found\"}\n\n")
-		c.Writer.Flush()
-		return
-	}
-
-	// Send initial status snapshot including any already captured logs
-	statusPayload := map[string]any{"state": j.State, "output": j.Output, "error": j.Error, "job_id": j.ID}
-	if b, err := json.Marshal(statusPayload); err == nil {
-		fmt.Fprintf(c.Writer, "event: status\ndata: %s\n\n", b)
-		c.Writer.Flush()
-	}
-	lastSent := 0
-	if len(j.Logs) > 0 {
-		for i := 0; i < len(j.Logs); i++ {
-			fmt.Fprintf(c.Writer, "event: log\ndata: %s\n\n", escapeSSEData(j.Logs[i]))
-		}
-		c.Writer.Flush()
-		lastSent = len(j.Logs)
-	}
-
-	ticker := time.NewTicker(300 * time.Millisecond)
-	heartbeat := time.NewTicker(5 * time.Second)
-	defer ticker.Stop()
-	defer heartbeat.Stop()
-	for {
-		select {
-		case <-c.Request.Context().Done():
-			return
-		case <-heartbeat.C:
-			// Minimal comment heartbeat to keep intermediaries from closing idle connection
-			fmt.Fprint(c.Writer, ": ping\n\n")
-			c.Writer.Flush()
-		case <-ticker.C:
-			j, ok := s.jobs.GetJob(id)
-			if !ok {
-				fmt.Fprintf(c.Writer, "event: done\ndata: {\"state\":\"not_found\"}\n\n")
-				c.Writer.Flush()
-				return
-			}
-			logs := j.Logs
-			for i := lastSent; i < len(logs); i++ {
-				fmt.Fprintf(c.Writer, "event: log\ndata: %s\n\n", escapeSSEData(logs[i]))
-			}
-			if len(logs) > lastSent {
-				c.Writer.Flush()
-			}
-			lastSent = len(logs)
-			if j.State == JobDone || j.State == JobFailed || j.State == JobTimeout {
-				donePayload := map[string]any{"state": j.State, "output": j.Output, "error": j.Error, "job_id": j.ID, "complete": true}
-				if b, err := json.Marshal(donePayload); err == nil {
-					fmt.Fprintf(c.Writer, "event: done\ndata: %s\n\n", b)
-				} else {
-					fmt.Fprintf(c.Writer, "event: done\ndata: {\"state\":\"%s\"}\n\n", j.State)
-				}
-				c.Writer.Flush()
-				return
-			}
-		}
-	}
-}
-
-// examplesRunJobs returns a lightweight list of recent jobs for UI polling.
-func (s *BetaServer) examplesRunJobs(c *gin.Context) {
-	// Optional limit query parameter (?limit=n)
-	limitStr := c.Query("limit")
-	var limit int
-	if limitStr != "" {
-		if n, err := strconv.Atoi(limitStr); err == nil && n > 0 {
-			limit = n
-		}
-	}
-	jobs := s.jobs.ListJobs(nil, limit) // nil state => all
-	out := make([]gin.H, 0, len(jobs))
-	for _, j := range jobs {
-		out = append(out, gin.H{
-			"id":          j.ID,
-			"example_id":  j.ExampleID,
-			"state":       j.State,
-			"started_at":  j.StartedAt,
-			"finished_at": j.FinishedAt,
-		})
-	}
-	c.JSON(200, gin.H{"success": true, "jobs": out, "count": len(out)})
-}
-
-// examplesRunCancel attempts to cancel a running job (simulation: mark failed if running).
-func (s *BetaServer) examplesRunCancel(c *gin.Context) {
-	id := c.Param("id")
-	if j, ok := s.jobs.GetJob(id); ok {
-		if j.State == JobRunning || j.State == JobQueued {
-			s.jobs.SetJobState(id, JobFailed, "", "canceled")
-		}
-		c.JSON(200, gin.H{"success": true, "message": "cancel requested"})
-		return
-	}
-	c.JSON(404, gin.H{"success": false, "message": "job not found"})
-}
-
-func escapeSSEData(s string) string {
-	return strings.ReplaceAll(strings.ReplaceAll(s, "\n", " "), "\r", " ")
-}
 
 func (s *BetaServer) health(c *gin.Context) {
 	checks := s.DeepHealthCheck(c.Request.Context())
@@ -6899,18 +5934,23 @@ func (s *BetaServer) info(c *gin.Context) {
 			"sunset_after":     cap.SunsetAfter,
 		})
 	}
+	// Capability State
+	source, regHash, prevHash, _, _, _, changed := s.capabilitiesHandler.GetState()
+
 	capMeta := gin.H{
-		"registry_hash": s.capabilityRegistryHash,
-		"previous_hash": s.capabilityPrevRegistryHash,
-		"last_changed_at": func() string {
-			if s.capabilityRegistryChangeAt.IsZero() {
-				return ""
-			}
-			return s.capabilityRegistryChangeAt.UTC().Format(time.RFC3339)
-		}(),
-		"enforcement_enabled": s.capEnforce,
-		"source":              s.capSource,
+		"registry_hash":       regHash,
+		"previous_hash":       prevHash,
+		"last_changed_at":     changed.Format(time.RFC3339),
+		"enforcement_enabled": s.capabilitiesHandler.IsEnforced(),
+		"source":              source,
 		"capabilities":        capsOut,
+	}
+	auditChain := gin.H{
+		"enabled":   s.capabilitiesHandler.GetAuditPersistPath() != "",
+		"chain_tip": s.capabilitiesHandler.GetAuditPrevHash(),
+	}
+	if s.capabilitiesHandler.GetAuditPersistPath() != "" {
+		auditChain["persist_path"] = s.capabilitiesHandler.GetAuditPersistPath()
 	}
 	// Lifecycle summary: flags + upcoming milestones (nearest deprecated_after / sunset_after in future)
 	var nextDeprecated, nextSunset string
@@ -6935,11 +5975,13 @@ func (s *BetaServer) info(c *gin.Context) {
 			}
 		}
 	}
-	lifecycleSummary := gin.H{"strict_enabled": s.lifecycleStrict, "sunset_enforce_enabled": s.lifecycleSunsetEnforce, "next_deprecated_after": nextDeprecated, "next_sunset_after": nextSunset}
-	auditChain := gin.H{"enabled": s.capAuditPersistPath != "", "chain_tip": s.capAuditPrevHash}
-	if s.capAuditPersistPath != "" {
-		auditChain["persist_path"] = s.capAuditPersistPath
+	lifecycleSummary := gin.H{
+		"strict_enabled":         s.capabilitiesHandler.LifecycleStrict,
+		"sunset_enforce_enabled": s.capabilitiesHandler.IsSunsetEnforced(),
+		"next_deprecated_after":  nextDeprecated,
+		"next_sunset_after":      nextSunset,
 	}
+	// auditChain already defined above using handlers
 	payload := gin.H{
 		"success":              true,
 		"go_version":           runtime.Version(),
@@ -6976,196 +6018,6 @@ func (s *BetaServer) ping(c *gin.Context) {
 	c.JSON(200, payload)
 }
 
-func (s *BetaServer) apiAuthorizePOA(c *gin.Context) {
-	s.poaTotalRequests++
-	// Accept a richer POA authorization request but remain backward-compatible
-	// with earlier minimal payloads that only supplied client_id.
-	type inbound struct {
-		ClientID     string           `json:"client_id"`
-		ResponseType string           `json:"response_type"`
-		Scope        string           `json:"scope"`
-		RedirectURI  string           `json:"redirect_uri"`
-		State        string           `json:"state"`
-		PowerType    string           `json:"power_type"`
-		PrincipalID  string           `json:"principal_id"`
-		AIAgentID    string           `json:"ai_agent_id"`
-		Jurisdiction string           `json:"jurisdiction"`
-		LegalBasis   string           `json:"legal_basis"`
-		Delegations  []map[string]any `json:"delegations"` // flexible map to allow scope map parsing
-		Revocations  []map[string]any `json:"revocations"` // each with delegation_id + optional reason
-	}
-	var in inbound
-	if err := c.ShouldBindJSON(&in); err != nil {
-		c.JSON(400, gin.H{"success": false, "message": "invalid json"})
-		return
-	}
-	poaReq := authpkg.PowerOfAttorneyRequest{
-		ClientID:     in.ClientID,
-		ResponseType: in.ResponseType,
-		Scope:        in.Scope,
-		RedirectURI:  in.RedirectURI,
-		State:        in.State,
-		PowerType:    in.PowerType,
-		PrincipalID:  in.PrincipalID,
-		AIAgentID:    in.AIAgentID,
-		Jurisdiction: in.Jurisdiction,
-		LegalBasis:   in.LegalBasis,
-	}
-	// Validation gate: require at least principal, agent, power type & jurisdiction to proceed.
-	// If only legacy minimal payload was provided (just client_id), return 400 to keep existing test expectations.
-	minimalProvided := poaReq.ClientID != "" && poaReq.PrincipalID == "" && poaReq.AIAgentID == "" && poaReq.PowerType == "" && poaReq.Jurisdiction == ""
-	if minimalProvided {
-		c.JSON(400, gin.H{"success": false, "message": "missing required POA fields (principal_id, ai_agent_id, power_type, jurisdiction)"})
-		return
-	}
-	// Apply educational defaults only AFTER user supplied at least one of the advanced fields.
-	if poaReq.PrincipalID != "" || poaReq.AIAgentID != "" || poaReq.PowerType != "" || poaReq.Jurisdiction != "" {
-		if poaReq.ResponseType == "" {
-			poaReq.ResponseType = "code"
-		}
-		if poaReq.Scope == "" {
-			poaReq.Scope = "ai_power_of_attorney,financial_transactions"
-		}
-		if poaReq.RedirectURI == "" {
-			poaReq.RedirectURI = "https://cb.example.com"
-		}
-		if poaReq.PowerType == "" {
-			poaReq.PowerType = "financial_transactions"
-		}
-		if poaReq.PrincipalID == "" {
-			poaReq.PrincipalID = "principal-xyz"
-		}
-		if poaReq.AIAgentID == "" {
-			poaReq.AIAgentID = "agent-123"
-		}
-		if poaReq.Jurisdiction == "" {
-			poaReq.Jurisdiction = "US"
-		}
-		if poaReq.LegalBasis == "" {
-			poaReq.LegalBasis = "law2025"
-		}
-		if poaReq.State == "" {
-			poaReq.State = "demo"
-		}
-	}
-
-	_, err := authpkg.NewRFCCompliantService().AuthorizePowerOfAttorney(context.Background(), poaReq)
-	if err != nil {
-		c.JSON(400, gin.H{"success": false, "message": err.Error(), "educational": true})
-		return
-	}
-
-	// Optional delegation chain evaluation
-	delegationMeta := gin.H{"present": false}
-	effectiveScope := make(map[string]string) // map derived from delegation chain (resource/action etc.)
-	if len(in.Delegations) > 0 {
-		delegationMeta["present"] = true
-		chain := delegation.NewChain()
-		var prev *delegation.Delegation
-		// Build revocation index from request body (future version: server-side maintained store)
-		var revocations []delegation.DelegationRevocation
-		for _, rraw := range in.Revocations {
-			id, _ := rraw["delegation_id"].(string)
-			reason, _ := rraw["reason"].(string)
-			if id != "" {
-				revocations = append(revocations, delegation.DelegationRevocation{DelegationID: id, Reason: reason})
-			}
-		}
-		revIndex := delegation.NewRevocationIndex(revocations)
-		for idx, raw := range in.Delegations {
-			// Extract fields with defensive typing
-			id, _ := raw["id"].(string)
-			subject, _ := raw["subject"].(string)
-			delegateID, _ := raw["delegate"].(string)
-			scopeMap := make(map[string]string)
-			if scopeRaw, ok := raw["scope"].(map[string]any); ok {
-				for k, v := range scopeRaw {
-					if vs, ok2 := v.(string); ok2 {
-						scopeMap[k] = vs
-					}
-				}
-			}
-			var expires time.Time
-			if expStr, ok := raw["expires_at"].(string); ok && expStr != "" {
-				expires, _ = time.Parse(time.RFC3339, expStr)
-			}
-			if expires.IsZero() {
-				expires = time.Now().Add(5 * time.Minute)
-			}
-			added, err := chain.Append(delegation.Delegation{ID: id, Subject: subject, Delegate: delegateID, Scope: scopeMap, ExpiresAt: expires})
-			if err != nil {
-				c.JSON(400, gin.H{"success": false, "message": "delegation append failed", "delegation_error": err.Error(), "index": idx})
-				return
-			}
-			if prev != nil {
-				if err := delegation.ValidateScopeNarrowing(*prev, added); err != nil {
-					c.JSON(400, gin.H{"success": false, "message": "delegation scope widening", "delegation_error": err.Error(), "index": idx})
-					return
-				}
-			}
-			prev = &added
-		}
-		if err := chain.VerifyChain(); err != nil {
-			c.JSON(400, gin.H{"success": false, "message": "delegation chain verification failed", "delegation_error": err.Error()})
-			return
-		}
-		// Revocation enforcement: deny if any delegation ID in chain is revoked.
-		if revokedID, found := delegation.CheckRevocations(chain, revIndex); found {
-			c.JSON(400, gin.H{"success": false, "message": "delegation_revoked", "revoked_delegation_id": revokedID})
-			return
-		}
-		if head := chain.Head(); head != nil {
-			delegationMeta["chain_verified"] = true
-			delegationMeta["head"] = gin.H{"id": head.ID, "hash": head.Hash, "subject": head.Subject, "delegate": head.Delegate, "scope": head.Scope, "expires_at": head.ExpiresAt.Format(time.RFC3339)}
-			// Compute effective scope as intersection across chain items (since we enforce equality narrowing we can take last scope)
-			// For future richer semantics we would fold all items; with equality-only narrowing, head scope is already the intersection.
-			for k, v := range head.Scope {
-				effectiveScope[k] = v
-			}
-		} else {
-			delegationMeta["chain_verified"] = false
-		}
-	}
-
-	// Enforce requested POA scope against delegation effective scope (if present & verified)
-	// Current simple model: if delegation present, require its action/resource match requested scope string tokens when tokens exist.
-	var requestedScopeTokens []string
-	if poaReq.Scope != "" {
-		for _, tok := range strings.Split(poaReq.Scope, ",") {
-			requestedScopeTokens = append(requestedScopeTokens, strings.TrimSpace(tok))
-		}
-	}
-	if len(effectiveScope) > 0 {
-		// If delegation defines action key, ensure requested scope contains that action token (basic mapping).
-		if act, ok := effectiveScope["action"]; ok {
-			found := false
-			for _, tok := range requestedScopeTokens {
-				if tok == act || strings.HasPrefix(tok, act+"_") {
-					found = true
-					break
-				}
-			}
-			if !found {
-				c.JSON(400, gin.H{"success": false, "message": "delegation_scope_violation", "delegation_error": "requested scope lacks delegated action", "delegated_action": act, "requested_scope": poaReq.Scope})
-				return
-			}
-		}
-		// If delegation defines resource, we could enforce presence but current POA scope string may not encode resource; skip strict check.
-	}
-
-	if len(effectiveScope) > 0 {
-		delegationMeta["effective_scope"] = effectiveScope
-	} else {
-		delegationMeta["effective_scope"] = nil
-	}
-
-	c.JSON(200, gin.H{"success": true, "jurisdiction": poaReq.Jurisdiction, "scope": poaReq.Scope, "delegation": delegationMeta})
-}
-
-func (s *BetaServer) apiPOAMetrics(c *gin.Context) {
-	c.JSON(200, gin.H{"success": true, "metrics": gin.H{"total_requests": s.poaTotalRequests}})
-}
-
 // ===================== AUDIT LOG IMPLEMENTATION =====================
 // Lightweight in-memory append-only audit log for demo purposes.
 type AuditEntry struct {
@@ -7195,6 +6047,8 @@ type AuditLog struct {
 	subs map[chan *AuditEntry]struct{}
 	// database logger for persistence
 	dbLogger *audit.DatabaseLogger
+	// Hook for audit chaining (capability audit anchor)
+	OnEntry func(*AuditEntry)
 }
 
 func NewAuditLog(capacity int) *AuditLog {
@@ -7336,6 +6190,9 @@ func (l *AuditLog) ListEntriesAfter(cursor string, limit int) ([]auditHandlers.E
 func (l *AuditLog) AppendEntry(id string, at time.Time, actor, action, resource, outcome string, meta any) {
 	e := &AuditEntry{ID: id, At: at, Actor: actor, Action: action, Resource: resource, Outcome: outcome, Meta: meta}
 	l.Append(e)
+	if l.OnEntry != nil {
+		l.OnEntry(e)
+	}
 }
 
 func (l *AuditLog) SubscribeEntries() chan auditHandlers.Entry {
@@ -7438,215 +6295,6 @@ func (h *EventHub) Unsubscribe(ch chan *Event) {
 // apiDelegationStatusUpdate prototype (no persistent RFC0111 service wiring yet).
 // Payload: {"delegation_id":"poa_x","new_status":"active|suspended|terminated"}
 // For now this logs the requested update and returns persisted=false indicator.
-func (s *BetaServer) apiDelegationStatusUpdate(c *gin.Context) {
-	start := time.Now()
-	var span *tracing.Span
-	if s.tracerProvider != nil {
-		_, span = s.tracerProvider.StartSpan(context.Background(), "delegation_status_update")
-	}
-	var req struct {
-		DelegationID string `json:"delegation_id"`
-		NewStatus    string `json:"new_status"`
-	}
-	if c.ShouldBindJSON(&req) != nil || req.DelegationID == "" || req.NewStatus == "" {
-		if s.metrics != nil {
-			s.metrics.IncDelegationStatusTransitionFailures()
-			s.metrics.RecordLifecycleTransition("delegation", "_", "_", "failure")
-		}
-		if mm, ok := s.metrics.(*metrics.Memory); ok {
-			mm.IncInvalidPayloadFailure()
-		}
-		lat := time.Since(start).Nanoseconds()
-		s.appendLifecycleEvent(&LifecycleEvent{ID: randomNonce(6), EntityType: "delegation", EntityID: req.DelegationID, OldStatus: "_", NewStatus: "_", Outcome: "failure", Reason: "invalid_payload", LatencyNS: lat, At: time.Now()})
-		if span != nil {
-			span.SetTag("outcome", "failure")
-			span.SetTag("reason", "invalid_payload")
-			span.End()
-		}
-		c.JSON(400, gin.H{"success": false, "message": "invalid payload", "reason": "invalid_payload"})
-		return
-	}
-	// Accept partially_revoked as a valid lifecycle status (scope narrowing state)
-	if req.NewStatus != statusActive && req.NewStatus != statusSuspended && req.NewStatus != statusTerminated && req.NewStatus != statusPartiallyRevoked {
-		if s.metrics != nil {
-			s.metrics.IncDelegationStatusTransitionFailures()
-			s.metrics.RecordLifecycleTransition("delegation", "_", req.NewStatus, "failure")
-		}
-		if mm, ok := s.metrics.(*metrics.Memory); ok {
-			mm.IncUnsupportedStatusFailure()
-		}
-		lat := time.Since(start).Nanoseconds()
-		s.appendLifecycleEvent(&LifecycleEvent{ID: randomNonce(6), EntityType: "delegation", EntityID: req.DelegationID, OldStatus: "_", NewStatus: req.NewStatus, Outcome: "failure", Reason: "unsupported_status", LatencyNS: lat, At: time.Now()})
-		if span != nil {
-			span.SetTag("outcome", "failure")
-			span.SetTag("reason", "unsupported_status")
-			span.End()
-		}
-		c.JSON(400, gin.H{"success": false, "message": "unsupported status", "reason": "unsupported_status"})
-		return
-	}
-
-	// Transition validation using in-memory map.
-	s.delegationStatusMu.Lock()
-	old := s.delegationStatus[req.DelegationID]
-	if old == "" { // initialization
-		if req.NewStatus == statusTerminated {
-			s.delegationStatus[req.DelegationID] = statusTerminated
-		} else {
-			s.delegationStatus[req.DelegationID] = req.NewStatus
-		}
-		s.delegationStatusMu.Unlock()
-		s.audit.Append(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: "api", Action: "delegation_status_update", Resource: req.DelegationID, Outcome: "success", Meta: gin.H{"old": "", "new": req.NewStatus, "initialized": true, "reason": "init"}})
-		s.events.Emit(&Event{ID: randomNonce(6), At: time.Now(), Type: "delegation_status_changed", Data: gin.H{"delegation_id": req.DelegationID, "old_status": "", "new_status": req.NewStatus, "initialized": true, "reason": "init"}})
-		if s.metrics != nil {
-			s.metrics.IncDelegationStatusTransitions()
-			s.metrics.RecordDecision("delegation_status_update", "delegation:"+req.DelegationID, req.NewStatus)
-			s.metrics.RecordDecisionWithReason("delegation_status_update", "delegation:"+req.DelegationID, req.NewStatus, "init")
-			s.metrics.RecordLifecycleTransition("delegation", "_", req.NewStatus, "success")
-			s.metrics.ObserveLifecycleTransitionLatency("delegation", "success", time.Since(start))
-		}
-		lat := time.Since(start).Nanoseconds()
-		s.appendLifecycleEvent(&LifecycleEvent{ID: randomNonce(6), EntityType: "delegation", EntityID: req.DelegationID, OldStatus: "_", NewStatus: req.NewStatus, Outcome: "success", Reason: "init", LatencyNS: lat, At: time.Now()})
-		if span != nil {
-			span.SetTag("outcome", "success")
-			span.SetTag("delegation_id", req.DelegationID)
-			span.SetTag("old_status", "_")
-			span.SetTag("new_status", req.NewStatus)
-			span.SetTag("reason", "init")
-			span.SetTag("latency_ns", time.Since(start).Nanoseconds())
-			span.End()
-		}
-		c.JSON(200, gin.H{"success": true, "delegation_id": req.DelegationID, "old_status": "", "new_status": req.NewStatus, "persisted": true, "initialized": true, "reason": "init"})
-		return
-	}
-
-	// Terminal state guard
-	if old == statusTerminated && req.NewStatus != statusTerminated {
-		s.delegationStatusMu.Unlock()
-		if s.metrics != nil {
-			s.metrics.IncDelegationStatusTransitionFailures()
-			s.metrics.RecordLifecycleTransition("delegation", old, req.NewStatus, "failure")
-		}
-		if mm, ok := s.metrics.(*metrics.Memory); ok {
-			mm.IncInvalidTransitionFailure()
-		}
-		lat := time.Since(start).Nanoseconds()
-		s.appendLifecycleEvent(&LifecycleEvent{ID: randomNonce(6), EntityType: "delegation", EntityID: req.DelegationID, OldStatus: old, NewStatus: req.NewStatus, Outcome: "failure", Reason: "invalid_transition", LatencyNS: lat, At: time.Now()})
-		if span != nil {
-			span.SetTag("outcome", "failure")
-			span.SetTag("reason", "invalid_transition")
-			span.SetTag("delegation_id", req.DelegationID)
-			span.End()
-		}
-		c.JSON(409, gin.H{"success": false, "message": "terminated delegations cannot transition", "delegation_id": req.DelegationID, "old_status": old, "reason": "invalid_transition"})
-		return
-	}
-
-	// Allowed transitions
-	valid := false
-	switch old {
-	case statusActive:
-		if req.NewStatus == statusSuspended || req.NewStatus == statusTerminated || req.NewStatus == statusActive || req.NewStatus == statusPartiallyRevoked {
-			valid = true
-		}
-	case statusSuspended:
-		if req.NewStatus == statusActive || req.NewStatus == statusTerminated || req.NewStatus == statusSuspended || req.NewStatus == statusPartiallyRevoked {
-			valid = true
-		}
-	case statusTerminated:
-		valid = (req.NewStatus == statusTerminated)
-	case statusPartiallyRevoked:
-		// Only allow transition to terminated or remain partially_revoked
-		if req.NewStatus == statusTerminated || req.NewStatus == statusPartiallyRevoked {
-			valid = true
-		}
-	default:
-		valid = true // treat unknown as re-initialization possibility
-	}
-	if !valid {
-		s.delegationStatusMu.Unlock()
-		if s.metrics != nil {
-			s.metrics.IncDelegationStatusTransitionFailures()
-			s.metrics.RecordLifecycleTransition("delegation", old, req.NewStatus, "failure")
-		}
-		if mm, ok := s.metrics.(*metrics.Memory); ok {
-			mm.IncInvalidTransitionFailure()
-		}
-		lat := time.Since(start).Nanoseconds()
-		s.appendLifecycleEvent(&LifecycleEvent{ID: randomNonce(6), EntityType: "delegation", EntityID: req.DelegationID, OldStatus: old, NewStatus: req.NewStatus, Outcome: "failure", Reason: "invalid_transition", LatencyNS: lat, At: time.Now()})
-		if span != nil {
-			span.SetTag("outcome", "failure")
-			span.SetTag("reason", "invalid_transition")
-			span.SetTag("delegation_id", req.DelegationID)
-			span.End()
-		}
-		c.JSON(409, gin.H{"success": false, "message": "invalid status transition", "delegation_id": req.DelegationID, "old_status": old, "requested": req.NewStatus, "reason": "invalid_transition"})
-		return
-	}
-
-	if old == req.NewStatus { // noop
-		reason := changeReasonNoop
-		if os.Getenv("GAUTH_MAINTENANCE_WINDOW") == "1" {
-			reason = reasonMaintenance
-		}
-		if os.Getenv("GAUTH_RATE_LIMITED") == "1" {
-			reason = reasonRateLimited
-		}
-		lat := time.Since(start).Nanoseconds()
-		s.appendLifecycleEvent(&LifecycleEvent{ID: randomNonce(6), EntityType: "delegation", EntityID: req.DelegationID, OldStatus: old, NewStatus: req.NewStatus, Outcome: "noop", Reason: reason, LatencyNS: lat, At: time.Now()})
-		s.delegationStatusMu.Unlock()
-		if s.metrics != nil {
-			s.metrics.IncDelegationStatusTransitions()
-			s.metrics.RecordDecisionWithReason("delegation_status_update", "delegation:"+req.DelegationID, req.NewStatus, reason)
-			s.metrics.RecordLifecycleTransition("delegation", old, req.NewStatus, "noop")
-			s.metrics.ObserveLifecycleTransitionLatency("delegation", "noop", time.Since(start))
-		}
-		if span != nil {
-			span.SetTag("outcome", "noop")
-			span.SetTag("delegation_id", req.DelegationID)
-			span.SetTag("old_status", old)
-			span.SetTag("new_status", req.NewStatus)
-			span.SetTag("reason", reason)
-			span.End()
-		}
-		c.JSON(200, gin.H{"success": true, "delegation_id": req.DelegationID, "old_status": old, "new_status": old, "no_change": true, "persisted": true, "reason": reason})
-		return
-	}
-
-	s.delegationStatus[req.DelegationID] = req.NewStatus
-	s.delegationStatusMu.Unlock()
-	s.audit.Append(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: "api", Action: "delegation_status_update", Resource: req.DelegationID, Outcome: "success", Meta: gin.H{"old": old, "new": req.NewStatus, "reason": "status_change"}})
-	s.events.Emit(&Event{ID: randomNonce(6), At: time.Now(), Type: "delegation_status_changed", Data: gin.H{"delegation_id": req.DelegationID, "old_status": old, "new_status": req.NewStatus, "reason": "status_change"}})
-	changeReason := changeReasonStatus
-	if os.Getenv("GAUTH_POLICY_VIOLATION") == "1" {
-		changeReason = reasonPolicyViolation
-	}
-	if s.metrics != nil {
-		if req.NewStatus == statusPartiallyRevoked {
-			// Specialized metric counter for partially revoked delegations if memory metrics
-			if mm, ok := s.metrics.(*metrics.Memory); ok {
-				mm.IncDelegationsPartiallyRevoked()
-			}
-		}
-		s.metrics.IncDelegationStatusTransitions()
-		s.metrics.RecordDecision("delegation_status_update", "delegation:"+req.DelegationID, req.NewStatus)
-		s.metrics.RecordDecisionWithReason("delegation_status_update", "delegation:"+req.DelegationID, req.NewStatus, changeReason)
-		s.metrics.RecordLifecycleTransition("delegation", old, req.NewStatus, "success")
-		s.metrics.ObserveLifecycleTransitionLatency("delegation", "success", time.Since(start))
-	}
-	lat := time.Since(start).Nanoseconds()
-	s.appendLifecycleEvent(&LifecycleEvent{ID: randomNonce(6), EntityType: "delegation", EntityID: req.DelegationID, OldStatus: old, NewStatus: req.NewStatus, Outcome: "success", Reason: changeReason, LatencyNS: lat, At: time.Now()})
-	if span != nil {
-		span.SetTag("outcome", "success")
-		span.SetTag("delegation_id", req.DelegationID)
-		span.SetTag("old_status", old)
-		span.SetTag("new_status", req.NewStatus)
-		span.SetTag("reason", changeReason)
-		span.SetTag("latency_ns", time.Since(start).Nanoseconds())
-		span.End()
-	}
-	c.JSON(200, gin.H{"success": true, "delegation_id": req.DelegationID, "old_status": old, "new_status": req.NewStatus, "persisted": true, "reason": changeReason})
-}
 
 // appendLifecycleEvent adds an event to ring buffer for given entity id.
 //
@@ -7742,6 +6390,29 @@ func (a *notaryMetricsAdapter) IncCombinedAnchorFailures() {
 func (a *notaryMetricsAdapter) SetReceiptIntegrityStatus(status string) {
 	if pm, ok := a.m.(interface{ SetCapabilityAnchorNotarizationReceiptsIntegrity(string) }); ok {
 		pm.SetCapabilityAnchorNotarizationReceiptsIntegrity(status)
+	}
+}
+
+// capabilityMetricsAdapter implements capabilities.CapabilityMetrics by wrapping metrics.Metrics.
+type capabilityMetricsAdapter struct {
+	m metrics.Metrics
+}
+
+func (a *capabilityMetricsAdapter) IncCapabilityAnchorEmitted() {
+	if mem, ok := a.m.(*metrics.Memory); ok {
+		mem.IncCapabilityAnchorEmitted()
+	}
+}
+
+func (a *capabilityMetricsAdapter) IncCapabilityAnchorSkipped() {
+	if mem, ok := a.m.(*metrics.Memory); ok {
+		mem.IncCapabilityAnchorSkipped()
+	}
+}
+
+func (a *capabilityMetricsAdapter) IncCapabilityRegistryHashChanged() {
+	if mem, ok := a.m.(*metrics.Memory); ok {
+		mem.IncCapabilityRegistryHashChanged()
 	}
 }
 
@@ -7955,48 +6626,6 @@ func (s *BetaServer) Run() error {
 // examplesCompositeExportJSON accepts a JSON array of results produced by composite runs
 // and returns it back as a downloadable JSON file attachment. The frontend already
 // provides the raw JSON via POST body, so we simply validate and echo it.
-func (s *BetaServer) examplesCompositeExportJSON(c *gin.Context) {
-	var raw json.RawMessage
-	if err := c.ShouldBindJSON(&raw); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid JSON payload"})
-		return
-	}
-	c.Header("Content-Disposition", "attachment; filename=composite_run_summary.json")
-	c.Data(http.StatusOK, "application/json", raw)
-}
-
-// examplesCompositeExportCSV converts the composite run JSON array into a CSV file.
-// Expected JSON schema: array of objects with fields: id, state, elapsed, output, error.
-func (s *BetaServer) examplesCompositeExportCSV(c *gin.Context) {
-	var items []map[string]any
-	if err := c.ShouldBindJSON(&items); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid JSON payload"})
-		return
-	}
-	// Build CSV in-memory
-	var b strings.Builder
-	b.WriteString("id,state,elapsed,output,error\n")
-	for _, it := range items {
-		id := fmt.Sprint(it["id"])
-		state := fmt.Sprint(it["state"])
-		elapsed := fmt.Sprint(it["elapsed"])
-		output := sanitizeCSV(fmt.Sprint(it["output"]))
-		errVal := sanitizeCSV(fmt.Sprint(it["error"]))
-		b.WriteString(id + "," + state + "," + elapsed + "," + output + "," + errVal + "\n")
-	}
-	c.Header("Content-Disposition", "attachment; filename=composite_run_summary.csv")
-	c.Data(http.StatusOK, "text/csv; charset=utf-8", []byte(b.String()))
-}
-
-// sanitizeCSV escapes newlines and quotes minimally; not a full CSV implementation but
-// adequate for safe returning of demo content.
-func sanitizeCSV(s string) string {
-	s = strings.ReplaceAll(s, "\n", " ")
-	if strings.ContainsAny(s, ",\"") {
-		return "\"" + strings.ReplaceAll(s, "\"", "'") + "\""
-	}
-	return s
-}
 
 // --- Minimal capability diff snapshot ring buffer (test support) ---
 type capSnapshot struct {
@@ -8208,4 +6837,31 @@ func (s *BetaServer) RotationV2LastHash() string {
 		return ""
 	}
 	return s.rotationV2LastHash
+}
+
+// adapter for s.capabilitiesHandler.AuditClient
+type auditChainAnchorAdapter struct {
+	client interface {
+		Anchor(string) (anchor.AnchorRecord, error)
+		TotalAnchors() int
+	}
+}
+
+func (a *auditChainAnchorAdapter) Anchor(h string) (*notary.Receipt, error) {
+	r, err := a.client.Anchor(h)
+	if err != nil {
+		return nil, err
+	}
+	// Convert anchor.AnchorRecord (timestamp time.Time) to notary.Receipt (timestamp string)
+	return &notary.Receipt{
+		Hash:      r.Hash,
+		Timestamp: r.AnchoredAt.UTC().Format(time.RFC3339Nano),
+		Provider:  r.Provider,
+		Version:   1,
+		Success:   true,
+	}, nil
+}
+
+func (a *auditChainAnchorAdapter) TotalAnchors() int64 {
+	return int64(a.client.TotalAnchors())
 }

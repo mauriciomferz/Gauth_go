@@ -2,7 +2,6 @@ package web
 
 import (
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -13,11 +12,11 @@ import (
 
 // TestCapabilityAnchorNotarizationProviderMetrics ensures provider-labeled metrics are recorded.
 func TestCapabilityAnchorNotarizationProviderMetrics(t *testing.T) {
-	os.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")
-	os.Setenv("GAUTH_CAP_ANCHOR_NOTARY_PROVIDER", capSourceExternal)
-	os.Setenv("GAUTH_NOTARY_STUB_MIN_LATENCY_MS", "1")
-	os.Setenv("GAUTH_NOTARY_STUB_MAX_LATENCY_MS", "2")
-	os.Setenv("GAUTH_NOTARY_STUB_FAIL_PROB", "0")
+	t.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")
+	t.Setenv("GAUTH_CAP_ANCHOR_NOTARY_PROVIDER", capSourceExternal)
+	t.Setenv("GAUTH_NOTARY_STUB_MIN_LATENCY_MS", "1")
+	t.Setenv("GAUTH_NOTARY_STUB_MAX_LATENCY_MS", "2")
+	t.Setenv("GAUTH_NOTARY_STUB_FAIL_PROB", "0")
 	srv := NewBetaServer("0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Replace default memory metrics with Prometheus adapter to access provider-labeled methods.
@@ -26,12 +25,12 @@ func TestCapabilityAnchorNotarizationProviderMetrics(t *testing.T) {
 	if srv.notarizer == nil {
 		t.Fatalf("expected notarizer initialized")
 	}
-	if srv.capabilityRegistryHash == "" {
+	if srv.GetCapabilityRegistryHash() == "" {
 		t.Fatalf("expected capabilityRegistryHash set")
 	}
 	// Perform explicit notarization to ensure metrics observation.
 	start := time.Now()
-	receipt, err := srv.notarizer.Notarize(srv.capabilityRegistryHash)
+	receipt, err := srv.notarizer.Notarize(srv.GetCapabilityRegistryHash())
 	if err != nil {
 		t.Fatalf("notarize error: %v", err)
 	}
@@ -58,11 +57,11 @@ func TestCapabilityAnchorNotarizationProviderMetrics(t *testing.T) {
 		t.Fatalf("unexpected provider: %s", receipt.Provider)
 	}
 	// Trigger a failure to exercise provider-labeled failures vector.
-	os.Setenv("GAUTH_NOTARY_STUB_FAIL_PROB", "1") // force failure next attempt
+	t.Setenv("GAUTH_NOTARY_STUB_FAIL_PROB", "1") // force failure next attempt
 	// Recreate stub to pick up new env configuration.
 	_, _ = srv.notarizer.(interface{ Latest() interface{} }) // type hint to ensure interface compatibility
 	srv.notarizer = notary.NewExternalStub()
-	_, err2 := srv.notarizer.Notarize(srv.capabilityRegistryHash)
+	_, err2 := srv.notarizer.Notarize(srv.GetCapabilityRegistryHash())
 	if err2 == nil {
 		t.Fatalf("expected forced failure after reinitializing stub with fail prob=1")
 	}

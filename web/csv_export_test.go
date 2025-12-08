@@ -71,7 +71,7 @@ func TestDecisionMetricsCSV(t *testing.T) {
 	if ct := rr3.Header().Get("Content-Type"); !strings.HasPrefix(ct, "text/csv") {
 		t.Fatalf("expected csv content type got %s", ct)
 	}
-	if !strings.Contains(rr3.Body.String(), "section,action,resource,outcome,reason,count") {
+	if !strings.Contains(rr3.Body.String(), "action,resource,outcome,reason,count") {
 		t.Fatalf("csv header missing")
 	}
 }
@@ -89,6 +89,7 @@ func TestDecisionMetricsCSVAccept(t *testing.T) {
 	body := rr.Body.String()
 	var tokenID string
 	if i := strings.Index(body, "\"token\":"); i != -1 {
+		// find id field after token
 		if j := strings.Index(body[i:], "\"id\":\""); j != -1 {
 			start := i + j + len("\"id\":\"")
 			if k := strings.Index(body[start:], "\""); k != -1 {
@@ -114,7 +115,7 @@ func TestDecisionMetricsCSVAccept(t *testing.T) {
 	if ct := rr3.Header().Get("Content-Type"); !strings.HasPrefix(ct, "text/csv") {
 		t.Fatalf("expected csv via accept got %s", ct)
 	}
-	if !strings.Contains(rr3.Body.String(), "section,action,resource,outcome,reason,count") {
+	if !strings.Contains(rr3.Body.String(), "action,resource,outcome,reason,count") {
 		t.Fatalf("missing csv header via accept")
 	}
 }

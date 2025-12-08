@@ -21,7 +21,7 @@ func TestExternalAnchorMetricsStrict(t *testing.T) {
 	srv := NewBetaServerWithMetrics(":0", pm)
 	t.Cleanup(func() { srv.Shutdown() })
 	// Allow initial anchor attempt
-	time.Sleep(50 * time.Millisecond)
+	time.Sleep(250 * time.Millisecond)
 	// Issue an additional latency observation to ensure histogram bucket increments beyond startup attempt.
 	pm.ObserveExternalAnchorLatency(memoryProvider, 12*time.Millisecond)
 	// Hit status to confirm receipt

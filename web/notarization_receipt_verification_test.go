@@ -33,7 +33,7 @@ func TestNotarizationReceiptVerification(t *testing.T) {
 	if err := os.WriteFile(capFile, []byte(testutil.CapTransferIssueV1), 0o600); err != nil {
 		t.Fatalf("write caps2: %v", err)
 	}
-	if err := srv.loadCapabilitiesFromFile(capFile); err != nil {
+	if err := srv.capabilitiesHandler.LoadFromFile(capFile); err != nil {
 		t.Fatalf("reload caps2: %v", err)
 	}
 

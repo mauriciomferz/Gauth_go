@@ -117,7 +117,7 @@ func (a *API) Capabilities(c *gin.Context) {
 
 	// Get all entries and filter
 	all := a.Provider.ListEntries(0)
-	capActions := []string{"capability_create", "capability_revoke", "capability_denied", "capability_enforce", "delegation_create", "delegation_revoke"}
+	capActions := []string{"capability_create", "capability_revoke", "capability_denied", "capability_enforce", "delegation_create", "delegation_revoke", "capability:enforce", "delegation:create", "delegation:revoke"}
 
 	var filtered []Entry
 	for _, e := range all {

@@ -63,15 +63,16 @@ func (s *BetaServer) buildPolicyManifest() (manifestCanonical, []byte, string, e
 		}
 		mcaps = append(mcaps, entry)
 	}
-	// Action matrix from requiredActionCaps
-	actKeys := make([]string, 0, len(s.requiredActionCaps))
-	for k := range s.requiredActionCaps {
+	// Action matrix from capabilitiesHandler
+	actionMappings := s.capabilitiesHandler.GetActionMappings()
+	actKeys := make([]string, 0, len(actionMappings))
+	for k := range actionMappings {
 		actKeys = append(actKeys, k)
 	}
 	sort.Strings(actKeys)
 	actions := make([]manifestAction, 0, len(actKeys))
 	for _, a := range actKeys {
-		req := append([]string{}, s.requiredActionCaps[a]...)
+		req := append([]string{}, actionMappings[a]...)
 		sort.Strings(req)
 		actions = append(actions, manifestAction{Action: a, Required: req})
 	}
@@ -80,11 +81,11 @@ func (s *BetaServer) buildPolicyManifest() (manifestCanonical, []byte, string, e
 		SchemaVersion:    1,
 		Capabilities:     mcaps,
 		ActionMatrix:     actions,
-		RegistryHash:     s.capabilityRegistryHash,
-		RegistryPrevHash: s.capabilityPrevRegistryHash,
+		RegistryHash:     s.GetCapabilityRegistryHash(),
+		RegistryPrevHash: s.CapabilityPrevRegistryHash(),
 		RegistryLastChangedAt: func() string {
-			if !s.capabilityRegistryChangeAt.IsZero() {
-				return s.capabilityRegistryChangeAt.Format(time.RFC3339)
+			if !s.CapabilityRegistryChangeAt().IsZero() {
+				return s.CapabilityRegistryChangeAt().Format(time.RFC3339)
 			}
 			return ""
 		}(),

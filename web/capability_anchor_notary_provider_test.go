@@ -22,26 +22,31 @@ func TestCapabilityAnchorNotaryProviderSelection(t *testing.T) {
 	}
 	// Force capability reload to trigger anchor emission and notarization attempt.
 	// Use static capabilities path unset -> initial load already performed; we simulate by invoking loadCapabilitiesFromFile only if path set.
-	// Instead we directly call loadCapabilitiesFromFile if env is provided; here rely on initial load then simulate notarize call if registry hash exists.
-	if srv.capabilityRegistryHash == "" {
+	// Instead we directly call loadCapabilitiesFromFile if env is provided; here rely on initial load then simulate notarize call	// Verify registry hash matches
+	if srv.GetCapabilityRegistryHash() == "" {
 		t.Fatalf("expected capabilityRegistryHash to be set")
 	}
 	// Simulate notarization explicitly (provider already set) to obtain receipt.
-	receipt, err := srv.notarizer.Notarize(srv.capabilityRegistryHash)
+	rec, err := srv.notarizer.Notarize(srv.GetCapabilityRegistryHash())
 	if err != nil {
 		t.Fatalf("unexpected notarize error: %v", err)
 	}
-	if receipt.Provider != "external_stub" && receipt.Provider != os.Getenv("GAUTH_NOTARY_STUB_PROVIDER_NAME") {
-		t.Fatalf("unexpected provider: %s", receipt.Provider)
+	if rec.Provider != "external_stub" && rec.Provider != os.Getenv("GAUTH_NOTARY_STUB_PROVIDER_NAME") {
+		t.Fatalf("unexpected provider: %s", rec.Provider)
 	}
-	if receipt.Hash != srv.capabilityRegistryHash {
-		t.Fatalf("receipt hash mismatch: got %s want %s", receipt.Hash, srv.capabilityRegistryHash)
+	// Verify registry hash matches
+	h := srv.GetCapabilityRegistryHash()
+	if h == "" {
+		t.Fatal("registry hash empty")
 	}
-	if receipt.LatencySeconds <= 0 {
+	if rec.Hash != h {
+		t.Fatalf("receipt hash mismatch got %s want %s", rec.Hash, h)
+	}
+	if rec.LatencySeconds <= 0 {
 		t.Fatalf("expected positive latency seconds")
 	}
 	// Age gauge will update in background stale monitor loop; wait a short bound and ensure timestamp parse.
-	if _, err := time.Parse(time.RFC3339Nano, receipt.Timestamp); err != nil {
+	if _, err := time.Parse(time.RFC3339Nano, rec.Timestamp); err != nil {
 		t.Fatalf("invalid timestamp format: %v", err)
 	}
 }
