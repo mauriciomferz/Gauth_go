@@ -12,8 +12,8 @@ import (
 
 // TestJWKSDiscoveryMetadata verifies discovery includes jwks_etag & jwks_last_rotated when JWT enabled.
 func TestJWKSDiscoveryMetadata(t *testing.T) {
-	os.Setenv("GAUTH_USE_JWT_LIB", "1")
-	os.Setenv("GAUTH_JWT_ALG", "RS256")
+	t.Setenv("GAUTH_USE_JWT_LIB", "1")
+	t.Setenv("GAUTH_JWT_ALG", "RS256")
 	s := NewBetaServer("0")
 	t.Cleanup(func() { s.Shutdown() })
 	// First fetch JWKS to initialize metadata
@@ -51,8 +51,8 @@ func TestJWKSDiscoveryMetadata(t *testing.T) {
 
 // TestJWKSConditionalETag ensures JWKS endpoint honors If-None-Match and 304.
 func TestJWKSConditionalETag(t *testing.T) {
-	os.Setenv("GAUTH_USE_JWT_LIB", "1")
-	os.Setenv("GAUTH_JWT_ALG", "RS256")
+	t.Setenv("GAUTH_USE_JWT_LIB", "1")
+	t.Setenv("GAUTH_JWT_ALG", "RS256")
 	s := NewBetaServer("0")
 	t.Cleanup(func() { s.Shutdown() })
 	w1 := httptest.NewRecorder()
@@ -77,8 +77,8 @@ func TestJWKSConditionalETag(t *testing.T) {
 
 // TestJWKSOptionalSignature verifies signature headers appear only when enabled.
 func TestJWKSOptionalSignature(t *testing.T) {
-	os.Setenv("GAUTH_USE_JWT_LIB", "1")
-	os.Setenv("GAUTH_JWT_ALG", "RS256")
+	t.Setenv("GAUTH_USE_JWT_LIB", "1")
+	t.Setenv("GAUTH_JWT_ALG", "RS256")
 	// Disabled path
 	s := NewBetaServer("0")
 	t.Cleanup(func() { s.Shutdown() })
@@ -89,8 +89,8 @@ func TestJWKSOptionalSignature(t *testing.T) {
 		t.Fatalf("signature should be absent when disabled")
 	}
 	// Enabled path
-	os.Setenv("GAUTH_JWKS_SIGNING_KEY", "jwks-demo-secret")
-	os.Setenv("GAUTH_JWKS_SIGNING_KEY_ENABLED", "1")
+	t.Setenv("GAUTH_JWKS_SIGNING_KEY", "jwks-demo-secret")
+	t.Setenv("GAUTH_JWKS_SIGNING_KEY_ENABLED", "1")
 	s2 := NewBetaServer("0")
 	t.Cleanup(func() { s2.Shutdown() })
 	w2 := httptest.NewRecorder()
@@ -109,8 +109,8 @@ func TestJWKSDeprecationMetadata(t *testing.T) {
 	// Clean environment first to avoid pollution from other tests
 	os.Unsetenv("GAUTH_USE_JWT_LIB")
 	os.Unsetenv("GAUTH_JWT_ALG")
-	os.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
-	os.Setenv("GAUTH_EDDSA_AUTO_ROTATE", "0") // Disable auto-rotation for stable test
+	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
+	t.Setenv("GAUTH_EDDSA_AUTO_ROTATE", "0") // Disable auto-rotation for stable test
 	defer os.Unsetenv("GAUTH_TOKEN_SIG_MODE")
 	defer os.Unsetenv("GAUTH_EDDSA_AUTO_ROTATE")
 	// Create server first (initializes crypto manager with 24h TTL)
@@ -164,8 +164,8 @@ func TestJWKSDeprecationWarningHeader(t *testing.T) {
 	// Clean environment first
 	os.Unsetenv("GAUTH_USE_JWT_LIB")
 	os.Unsetenv("GAUTH_JWT_ALG")
-	os.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
-	os.Setenv("GAUTH_EDDSA_AUTO_ROTATE", "0")
+	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
+	t.Setenv("GAUTH_EDDSA_AUTO_ROTATE", "0")
 	defer os.Unsetenv("GAUTH_TOKEN_SIG_MODE")
 	defer os.Unsetenv("GAUTH_EDDSA_AUTO_ROTATE")
 	// Create server first
@@ -205,8 +205,8 @@ func TestJWKSDeprecationWarningHeader(t *testing.T) {
 
 // TestJWKSNoWarningWhenNoDeprecation verifies no Warning header when keys are fresh.
 func TestJWKSNoWarningWhenNoDeprecation(t *testing.T) {
-	os.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
-	os.Setenv("GAUTH_EDDSA_AUTO_ROTATE", "0")
+	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
+	t.Setenv("GAUTH_EDDSA_AUTO_ROTATE", "0")
 	// Create manager with long TTL (no deprecation)
 	ttl := 24 * time.Hour
 	km, err := crypto.NewManager(ttl)

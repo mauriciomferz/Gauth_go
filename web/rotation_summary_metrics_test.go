@@ -16,11 +16,11 @@ import (
 // TestRotationSummaryMetrics ensures new metrics for summary generation & anchoring are exposed.
 func TestRotationSummaryMetrics(t *testing.T) {
 	dir := t.TempDir()
-	os.Setenv("GAUTH_ROTATION_LEDGER_PATH", dir+"/ledger.json")
-	os.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")
-	os.Setenv("GAUTH_ANCHOR_ROTATIONS", "1")
-	os.Setenv("GAUTH_ROTATIONS_SIGN", "1")
-	os.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
+	t.Setenv("GAUTH_ROTATION_LEDGER_PATH", dir+"/ledger.json")
+	t.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")
+	t.Setenv("GAUTH_ANCHOR_ROTATIONS", "1")
+	t.Setenv("GAUTH_ROTATIONS_SIGN", "1")
+	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
 	// Reset any leaked multisig or threshold settings & global key state from previous tests.
 	os.Unsetenv("GAUTH_ROTATIONS_MULTISIG")
 	os.Unsetenv("GAUTH_ROTATIONS_THRESHOLD")

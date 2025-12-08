@@ -48,7 +48,7 @@ func TestWellKnownDiscovery(t *testing.T) {
 func TestDiscoveryExactKeys(t *testing.T) {
 	// Scenario 1: Neither JWT library nor EdDSA mode active -> jwks_uri should be empty.
 	os.Unsetenv("GAUTH_USE_JWT_LIB")
-	os.Setenv("GAUTH_TOKEN_SIG_MODE", "hmac") // force legacy HMAC to ensure JWKS suppression
+	t.Setenv("GAUTH_TOKEN_SIG_MODE", "hmac") // force legacy HMAC to ensure JWKS suppression
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
@@ -73,8 +73,8 @@ func TestDiscoveryExactKeys(t *testing.T) {
 	}
 
 	// Scenario 2: Enable JWT library -> jwks_uri populated.
-	os.Setenv("GAUTH_USE_JWT_LIB", "1")
-	os.Setenv("GAUTH_JWT_KID", "demo-key")
+	t.Setenv("GAUTH_USE_JWT_LIB", "1")
+	t.Setenv("GAUTH_JWT_KID", "demo-key")
 	srv2 := NewBetaServer(":0")
 	t.Cleanup(func() { srv2.Shutdown() })
 	w2 := performRequest(srv2.router, "GET", "/.well-known/gauth-configuration")
@@ -88,7 +88,7 @@ func TestDiscoveryExactKeys(t *testing.T) {
 
 	// Scenario 3: Disable JWT but enable EdDSA -> jwks_uri populated (new behavior after EdDSA introduction).
 	os.Unsetenv("GAUTH_USE_JWT_LIB")
-	os.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
+	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
 	srv3 := NewBetaServer(":0")
 	t.Cleanup(func() { srv3.Shutdown() })
 	w3 := performRequest(srv3.router, "GET", "/.well-known/gauth-configuration")
@@ -103,7 +103,7 @@ func TestDiscoveryExactKeys(t *testing.T) {
 
 // TestDiscoveryAnchoringFields ensures anchoring fields populate when memory anchor enabled.
 func TestDiscoveryAnchoringFields(t *testing.T) {
-	os.Setenv("GAUTH_ANCHOR_PROVIDER", "memory")
+	t.Setenv("GAUTH_ANCHOR_PROVIDER", "memory")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
@@ -130,8 +130,8 @@ func TestDiscoveryAnchoringFields(t *testing.T) {
 }
 
 func TestDiscoveryMultiSigWeights(t *testing.T) {
-	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "5")
-	os.Setenv("GAUTH_MULTI_SIG_WEIGHTS", "signerA=3,signerB=2")
+	t.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "5")
+	t.Setenv("GAUTH_MULTI_SIG_WEIGHTS", "signerA=3,signerB=2")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
@@ -156,8 +156,8 @@ func TestDiscoveryMultiSigWeights(t *testing.T) {
 }
 
 func TestDiscoveryMultiSigWeightsInvalid(t *testing.T) {
-	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "5")
-	os.Setenv("GAUTH_MULTI_SIG_WEIGHTS", "signerA=2,signerB=2") // total 4 < threshold 5
+	t.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "5")
+	t.Setenv("GAUTH_MULTI_SIG_WEIGHTS", "signerA=2,signerB=2") // total 4 < threshold 5
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")

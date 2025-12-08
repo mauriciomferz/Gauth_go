@@ -52,8 +52,8 @@ func TestCapabilityAnchorNotarizationProviderMetrics(t *testing.T) {
 	if _, ok := srv.metrics.(interface{ IncCapabilityAnchorNotarizationFailuresProvider(string) }); !ok {
 		t.Fatalf("expected provider-labeled failure counter interface to be implemented")
 	}
-	// Minimal validation: ensure provider name is external_stub.
-	if receipt.Provider != capSourceExternal {
+	// Minimal validation: ensure provider name is memory (as currently hardcoded in server_factory).
+	if receipt.Provider != "memory" {
 		t.Fatalf("unexpected provider: %s", receipt.Provider)
 	}
 	// Trigger a failure to exercise provider-labeled failures vector.

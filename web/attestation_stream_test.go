@@ -11,16 +11,16 @@ import (
 
 // TestAttestationStreamInitial ensures the SSE endpoint returns an attestation event with a snapshot hash.
 func TestAttestationStreamInitial(t *testing.T) {
-	os.Setenv("GAUTH_ATTEST_STREAM_ENABLE", "1")
-	os.Setenv("GAUTH_MODEL_LIMIT_ATTEST_SIGN", "0")
-	os.Setenv("GAUTH_MODEL_LIMIT_ATTEST_NOTARIZE", "0")
+	t.Setenv("GAUTH_ATTEST_STREAM_ENABLE", "1")
+	t.Setenv("GAUTH_MODEL_LIMIT_ATTEST_SIGN", "0")
+	t.Setenv("GAUTH_MODEL_LIMIT_ATTEST_NOTARIZE", "0")
 	auditFile, err := os.CreateTemp(t.TempDir(), "audit-*.jsonl")
 	if err != nil {
 		t.Fatalf("audit temp: %v", err)
 	}
 	_, _ = auditFile.WriteString("{\"hash\":\"h1\"}\n")
 	_ = auditFile.Close()
-	os.Setenv("GAUTH_MODEL_LIMIT_AUDIT_PATH", auditFile.Name())
+	t.Setenv("GAUTH_MODEL_LIMIT_AUDIT_PATH", auditFile.Name())
 	ts := NewBetaServer("0")
 	t.Cleanup(func() { ts.Shutdown() })
 	live := httptest.NewServer(ts.router)

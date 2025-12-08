@@ -12,10 +12,10 @@ func TestStrictMalformedManifest(t *testing.T) {
 	bs := &BetaServer{}
 	origEnv := os.Getenv("GAUTH_ENV")
 	origStrict := os.Getenv("GAUTH_STRICT_ASSETS")
-	defer os.Setenv("GAUTH_ENV", origEnv)
-	defer os.Setenv("GAUTH_STRICT_ASSETS", origStrict)
-	os.Setenv("GAUTH_ENV", "prod")
-	os.Setenv("GAUTH_STRICT_ASSETS", "1")
+	defer t.Setenv("GAUTH_ENV", origEnv)
+	defer t.Setenv("GAUTH_STRICT_ASSETS", origStrict)
+	t.Setenv("GAUTH_ENV", "prod")
+	t.Setenv("GAUTH_STRICT_ASSETS", "1")
 	manifestDir := filepath.Join("web", "static", "js")
 	if err := os.MkdirAll(manifestDir, 0o755); err != nil {
 		t.Fatalf("mkdir: %v", err)
@@ -42,10 +42,10 @@ func TestStrictMissingFieldsManifest(t *testing.T) {
 	bs := &BetaServer{}
 	origEnv := os.Getenv("GAUTH_ENV")
 	origStrict := os.Getenv("GAUTH_STRICT_ASSETS")
-	defer os.Setenv("GAUTH_ENV", origEnv)
-	defer os.Setenv("GAUTH_STRICT_ASSETS", origStrict)
-	os.Setenv("GAUTH_ENV", "prod")
-	os.Setenv("GAUTH_STRICT_ASSETS", "1")
+	defer t.Setenv("GAUTH_ENV", origEnv)
+	defer t.Setenv("GAUTH_STRICT_ASSETS", origStrict)
+	t.Setenv("GAUTH_ENV", "prod")
+	t.Setenv("GAUTH_STRICT_ASSETS", "1")
 	manifestDir := filepath.Join("web", "static", "js")
 	if err := os.MkdirAll(manifestDir, 0o755); err != nil {
 		t.Fatalf("mkdir: %v", err)

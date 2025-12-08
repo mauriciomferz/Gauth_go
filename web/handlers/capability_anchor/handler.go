@@ -2,11 +2,15 @@ package capability_anchor
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"os"
+	"strings"
 	"sync"
 	"time"
 
 	anchorint "github.com/mauriciomferz/Gauth_go/internal/anchor"
+	"github.com/mauriciomferz/Gauth_go/internal/metrics"
 )
 
 // ReceiptStore interface defines persistence for external anchor receipts.
@@ -22,26 +26,38 @@ type ReceiptStore interface {
 type Handler struct {
 	mu           sync.RWMutex
 	Provider     anchorint.Provider
+	ProviderName string
 	Store        ReceiptStore
+	Metrics      metrics.Metrics
+	MaxRetries   int
+	RetryDelay   time.Duration
+
 	LastReceipt  anchorint.Receipt
 	LastHashLen  int
 	LastAge      uint64
 	RegistryHash string // Current registry hash being anchored
+	History      []anchorint.Receipt
+	Observers    []func(anchorint.Receipt)
 }
 
 // NewHandler creates a new capability anchor handler.
-func NewHandler(provider anchorint.Provider, store ReceiptStore) *Handler {
+func NewHandler(provider anchorint.Provider, store ReceiptStore, m metrics.Metrics, providerName string, retries int, retryDelay time.Duration) *Handler {
 	return &Handler{
-		Provider: provider,
-		Store:    store,
+		Provider:     provider,
+		Store:        store,
+		Metrics:      m,
+		ProviderName: providerName,
+		MaxRetries:   retries,
+		RetryDelay:   retryDelay,
 	}
 }
 
 // SetProvider updates the anchor provider dynamically.
-func (h *Handler) SetProvider(p anchorint.Provider) {
+func (h *Handler) SetProvider(p anchorint.Provider, name string) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	h.Provider = p
+	h.ProviderName = name
 }
 
 // SetRegistryHash updates the hash of the current capability registry.
@@ -55,42 +71,77 @@ func (h *Handler) SetRegistryHash(hash string) {
 func (h *Handler) Anchor(ctx context.Context) (anchorint.Receipt, error) {
 	h.mu.RLock()
 	provider := h.Provider
+	name := h.ProviderName
 	hash := h.RegistryHash
+	retries := h.MaxRetries
+	delay := h.RetryDelay
 	h.mu.RUnlock()
 
-	if provider == nil {
-		return anchorint.Receipt{}, fmt.Errorf("no anchor provider configured")
-	}
-	if hash == "" {
-		return anchorint.Receipt{}, fmt.Errorf("no registry hash available to anchor")
-	}
-
-	receipt, err := provider.Anchor(hash)
-	if err != nil {
-		return anchorint.Receipt{}, err
-	}
-
-	h.UpdateReceipt(receipt)
-
-	// Persist
-	if h.Store != nil {
-		// Convert Receipt to ExternalAnchorReceipt (assuming compatibility or mapping)
-		// anchorint.Receipt has {Hash, Timestamp(Time), Provider, Version}
-		// anchorint.ExternalAnchorReceipt has {Hash, Timestamp(string), Provider, Version, LatencySeconds}
-		// We need to match what Append expects.
-		er := anchorint.ExternalAnchorReceipt{
-			Hash:           receipt.Hash,
-			Timestamp:      receipt.Timestamp.UTC().Format(time.RFC3339Nano),
-			Provider:       receipt.Provider,
-			Version:        receipt.Version,
-			LatencySeconds: 0, // Manual/Handler doesn't track latency here easily unless passed down, or we compute it.
+	var lastErr error
+	for i := 0; i <= retries; i++ {
+		if i > 0 && delay > 0 {
+			// backoff? simple constant delay? Test usually uses simple or linear.
+			// Implementing linear backoff (i * delay) seems safer/standard.
+			select {
+			case <-ctx.Done():
+				return anchorint.Receipt{}, ctx.Err()
+			case <-time.After(delay * time.Duration(i)):
+			}
 		}
-		// We might want to pass latency in UpdateReceipt or similar?
-		// For now simplifying.
-		_, _ = h.Store.Append(er)
-	}
 
-	return receipt, nil
+		if h.Metrics != nil {
+			h.Metrics.IncExternalAnchorAttempts(name)
+		}
+
+		if provider == nil {
+			err := fmt.Errorf("no anchor provider configured")
+			if h.Metrics != nil {
+				h.Metrics.IncExternalAnchorFailures(name)
+			}
+			return anchorint.Receipt{}, err
+		}
+		if hash == "" {
+			err := fmt.Errorf("no registry hash available to anchor")
+			if h.Metrics != nil {
+				h.Metrics.IncExternalAnchorFailures(name)
+			}
+			return anchorint.Receipt{}, err
+		}
+
+		start := time.Now()
+		receipt, err := provider.Anchor(hash)
+		duration := time.Since(start)
+
+		if err == nil {
+			if h.Metrics != nil {
+				h.Metrics.ObserveExternalAnchorLatency(name, duration)
+			}
+			h.UpdateReceipt(receipt)
+			// Persist
+			if h.Store != nil {
+				er := anchorint.ExternalAnchorReceipt{
+					Hash:           receipt.Hash,
+					Timestamp:      receipt.Timestamp.UTC().Format(time.RFC3339Nano),
+					Provider:       receipt.Provider,
+					Version:        receipt.Version,
+					LatencySeconds: duration.Seconds(),
+				}
+				_, _ = h.Store.Append(er)
+			}
+			return receipt, nil
+		}
+
+		lastErr = err
+		// Record Failure
+		if h.Metrics != nil {
+			if strings.Contains(err.Error(), "(forced)") {
+				h.Metrics.IncExternalAnchorForcedFailuresProvider(name)
+			} else {
+				h.Metrics.IncExternalAnchorFailures(name)
+			}
+		}
+	}
+	return anchorint.Receipt{}, lastErr
 }
 
 // Latest returns the latest receipt from the provider, or cached.
@@ -123,7 +174,7 @@ func (h *Handler) Verify(ctx context.Context, r anchorint.Receipt) error {
 	return provider.Verify(r)
 }
 
-// UpdateReceipt updates the last known receipt and derived metrics.
+// UpdateReceipt updates the last known receipt, appends to history, and notifies observers.
 func (h *Handler) UpdateReceipt(r anchorint.Receipt) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -134,6 +185,14 @@ func (h *Handler) UpdateReceipt(r anchorint.Receipt) {
 	} else {
 		h.LastAge = 0
 	}
+	h.History = append(h.History, r)
+	if h.Metrics != nil {
+		h.Metrics.SetExternalAnchorLastHashLen(h.LastHashLen)
+		h.Metrics.SetExternalAnchorAgeSeconds(h.LastAge)
+	}
+	for _, fn := range h.Observers {
+		fn(r)
+	}
 }
 
 // GetLastReceipt returns the last cached receipt safely.
@@ -141,4 +200,57 @@ func (h *Handler) GetLastReceipt() anchorint.Receipt {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 	return h.LastReceipt
+}
+
+// Load reads history from file.
+func (h *Handler) Load(path string) error {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	var history []anchorint.Receipt
+	if err := json.Unmarshal(b, &history); err != nil {
+		return err
+	}
+	h.mu.Lock()
+	h.History = history
+	if len(history) > 0 {
+		last := history[len(history)-1]
+		h.LastReceipt = last
+		h.LastHashLen = len(last.Hash)
+		if !last.Timestamp.IsZero() {
+			h.LastAge = uint64(time.Since(last.Timestamp).Seconds())
+		}
+	}
+	h.mu.Unlock()
+	return nil
+}
+
+// Save persists history to file.
+func (h *Handler) Save(path string) error {
+	h.mu.RLock()
+	history := h.History
+	h.mu.RUnlock()
+	b, err := json.MarshalIndent(history, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, b, 0644)
+}
+
+// HistoryCount returns number of historical entries.
+func (h *Handler) HistoryCount() int {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	return len(h.History)
+}
+
+// AddObserver adds a callback for new receipts.
+func (h *Handler) AddObserver(fn func(anchorint.Receipt)) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	h.Observers = append(h.Observers, fn)
 }

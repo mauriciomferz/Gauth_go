@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 
@@ -18,8 +17,8 @@ func TestRotationsVerificationEndpoint(t *testing.T) {
 	// Prepare temp receipt file
 	dir := t.TempDir()
 	path := dir + "/receipts.jsonl"
-	os.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")
-	os.Setenv("GAUTH_NOTARY_RECEIPT_PERSIST_PATH", path)
+	t.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")
+	t.Setenv("GAUTH_NOTARY_RECEIPT_PERSIST_PATH", path)
 	// Initialize server (will load empty store)
 	srv := NewBetaServer("0")
 	t.Cleanup(func() { srv.Shutdown() })
@@ -34,8 +33,8 @@ func TestRotationsVerificationEndpoint(t *testing.T) {
 	if !ok {
 		t.Fatalf("receipt store type assertion failed")
 	}
-	os.Setenv("GAUTH_DISABLE_BG_POLLS", "1")
-	os.Setenv("GAUTH_SEED_POLICY", "0")
+	t.Setenv("GAUTH_DISABLE_BG_POLLS", "1")
+	t.Setenv("GAUTH_SEED_POLICY", "0")
 	_, o1Priv, _ := ed25519.GenerateKey(rand.Reader)
 	_, o2Priv, _ := ed25519.GenerateKey(rand.Reader)
 	// First descriptor

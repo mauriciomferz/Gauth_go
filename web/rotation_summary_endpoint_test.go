@@ -17,13 +17,13 @@ import (
 func TestRotationSummaryEndpointAnchoring(t *testing.T) {
 	dir := t.TempDir()
 	ledgerPath := dir + "/ledger.json"
-	os.Setenv("GAUTH_ROTATION_LEDGER_PATH", ledgerPath)
-	os.Setenv("GAUTH_ANCHOR_ROTATIONS", "1")
-	os.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")  // ensure notarizer & ledger initialization path executes
-	os.Setenv("GAUTH_ANCHOR_PROVIDER", "memory") // initialize memory anchor client
+	t.Setenv("GAUTH_ROTATION_LEDGER_PATH", ledgerPath)
+	t.Setenv("GAUTH_ANCHOR_ROTATIONS", "1")
+	t.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")  // ensure notarizer & ledger initialization path executes
+	t.Setenv("GAUTH_ANCHOR_PROVIDER", "memory") // initialize memory anchor client
 	// Enable signing to exercise signature path (optional)
-	os.Setenv("GAUTH_ROTATIONS_SIGN", "1")
-	os.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
+	t.Setenv("GAUTH_ROTATIONS_SIGN", "1")
+	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
 	// Ensure isolation from previous tests that may have mutated global registry or multisig env.
 	os.Unsetenv("GAUTH_ROTATIONS_MULTISIG")
 	os.Unsetenv("GAUTH_ROTATIONS_THRESHOLD")

@@ -10,8 +10,8 @@ import (
 func TestNonProdNoSubstitution(t *testing.T) {
 	bs := &BetaServer{}
 	orig := os.Getenv("GAUTH_ENV")
-	defer os.Setenv("GAUTH_ENV", orig)
-	os.Setenv("GAUTH_ENV", "dev")
+	defer t.Setenv("GAUTH_ENV", orig)
+	t.Setenv("GAUTH_ENV", "dev")
 	page := []byte(`<script src="/static/js/__APP_BUNDLE__" integrity="__APP_SRI__"></script>`)
 	out := string(bs.applyBundleSubstitution(page))
 	if !strings.Contains(out, "__APP_BUNDLE__") || !strings.Contains(out, "__APP_SRI__") {

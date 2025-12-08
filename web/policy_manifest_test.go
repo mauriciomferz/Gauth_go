@@ -20,7 +20,7 @@ import (
 // prepareEdDSAKey ensures an active EdDSA key exists for signing tests.
 func prepareEdDSAKey(t *testing.T) *cryptopkg.Manager {
 	t.Helper()
-	os.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
+	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
 	km, err := cryptopkg.NewManager(24 * time.Hour)
 	if err != nil {
 		t.Fatalf("new manager: %v", err)
@@ -184,8 +184,8 @@ func TestPolicyManifestSignatureVerifyAndTamper(t *testing.T) {
 func TestPolicyManifestSigningUnavailable(t *testing.T) {
 	// Force non-EdDSA mode
 	orig := os.Getenv("GAUTH_TOKEN_SIG_MODE")
-	os.Setenv("GAUTH_TOKEN_SIG_MODE", "hs256")
-	defer os.Setenv("GAUTH_TOKEN_SIG_MODE", orig)
+	t.Setenv("GAUTH_TOKEN_SIG_MODE", "hs256")
+	defer t.Setenv("GAUTH_TOKEN_SIG_MODE", orig)
 	// No key provider passed
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })

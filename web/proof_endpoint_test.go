@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	delegation "github.com/mauriciomferz/Gauth_go/pkg/delegation"
 	"github.com/gin-gonic/gin"
+	delegation "github.com/mauriciomferz/Gauth_go/pkg/delegation"
 )
 
 // helper to create beta server with revocation events appended

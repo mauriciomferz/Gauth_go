@@ -19,7 +19,7 @@ func TestPolicyRollbackRBAC(t *testing.T) {
 	}
 	path := tmpFile.Name()
 	tmpFile.Close()
-	os.Setenv("POLICY_CHAIN_STATE_PATH", path)
+	t.Setenv("POLICY_CHAIN_STATE_PATH", path)
 	defer os.Unsetenv("POLICY_CHAIN_STATE_PATH")
 
 	s := newTestServer(t)

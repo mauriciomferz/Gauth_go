@@ -49,9 +49,10 @@ func TestNotarizationReceiptPersistence(t *testing.T) {
 	if srv.GetCapabilityRegistryHash() == "" {
 		t.Fatalf("expected capabilityRegistryHash to be set")
 	}
-	// First attempt: file should not yet exist.
-	if _, err := os.ReadFile(receiptPath); err == nil {
-		t.Fatalf("unexpected receipts file present before second emission")
+	// First attempt: file SHOULD exist because Initial Load occurs AFTER receiptStore initialization,
+	// so startup anchor (via OnReload) persists the first receipt.
+	if _, err := os.ReadFile(receiptPath); err != nil {
+		t.Fatalf("expected receipts file to be present after initialization: %v", err)
 	}
 	// Wait > interval then modify capabilities to force hash change and second emission.
 	time.Sleep(1100 * time.Millisecond)

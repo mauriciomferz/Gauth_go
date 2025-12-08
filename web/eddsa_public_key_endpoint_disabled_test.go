@@ -8,7 +8,7 @@ import (
 // TestEdDSAPublicKeyEndpointDisabled ensures endpoint returns configured=false when EdDSA mode not enabled.
 func TestEdDSAPublicKeyEndpointDisabled(t *testing.T) {
 	// Explicitly force non-EdDSA mode to avoid leakage from previous tests that may have set it.
-	// Some other package tests use os.Setenv without unset, so we defensively override here.
+	// Some other package tests use t.Setenv without unset, so we defensively override here.
 	t.Setenv("GAUTH_TOKEN_SIG_MODE", "hmac")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })

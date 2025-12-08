@@ -230,6 +230,12 @@ func (h *Handler) Stats() (ewmaEntries int, scoreEntries int) {
 	return len(h.ewma), len(h.scores)
 }
 
+// Count returns the number of loaded/stored entries for persistence logging.
+func (h *Handler) Count() int {
+	ewma, _ := h.Stats()
+	return ewma
+}
+
 // Scores returns a copy of current anomaly Z-scores.
 func (h *Handler) Scores() map[string]float64 {
 	h.mu.Lock()

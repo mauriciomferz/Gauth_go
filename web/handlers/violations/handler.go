@@ -144,6 +144,11 @@ func (h *Handler) Stats() int {
 	return len(h.history)
 }
 
+// Count returns the number of loaded/stored entries for persistence logging.
+func (h *Handler) Count() int {
+	return h.Stats()
+}
+
 // History returns a copy of history (for verification/UI).
 func (h *Handler) History() []SnapshotEntry {
 	h.mu.Lock()

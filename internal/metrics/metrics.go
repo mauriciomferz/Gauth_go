@@ -99,9 +99,18 @@ type Metrics interface {
 	IncCombinedAnchorEmitted()
 	IncCombinedAnchorFailures()
 	IncAnchorFailures()
+	// IncExternalAnchorAttempts increments external anchor attempts, labeled by provider.
+	IncExternalAnchorAttempts(provider string)
+	// IncExternalAnchorFailures increments external anchor failures, labeled by provider.
+	IncExternalAnchorFailures(provider string)
 	// IncExternalAnchorForcedFailures increments counter of failures explicitly forced via GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS
 	// distinguishing deterministic test harness failures from probabilistic model failures.
 	IncExternalAnchorForcedFailures()
+	IncExternalAnchorForcedFailuresProvider(provider string)
+	// ObserveExternalAnchorLatency records latency of external anchoring operations, labeled by provider.
+	ObserveExternalAnchorLatency(provider string, d time.Duration)
+	SetExternalAnchorLastHashLen(n int)
+	SetExternalAnchorAgeSeconds(age uint64)
 	// Obligations / advice execution metrics
 	IncObligationsExecuted()
 	IncObligationsFailed()
@@ -315,7 +324,13 @@ func (n noop) IncAnchorAttempts()                                               
 func (n noop) IncCombinedAnchorEmitted()                                                     {}
 func (n noop) IncCombinedAnchorFailures()                                                    {}
 func (n noop) IncAnchorFailures()                                                            {}
+func (n noop) IncExternalAnchorAttempts(provider string)                                     {}
+func (n noop) IncExternalAnchorFailures(provider string)                                     {}
 func (n noop) IncExternalAnchorForcedFailures()                                              {}
+func (n noop) IncExternalAnchorForcedFailuresProvider(provider string)                       {}
+func (n noop) ObserveExternalAnchorLatency(provider string, d time.Duration)                 {}
+func (n noop) SetExternalAnchorLastHashLen(len int)                                          {}
+func (n noop) SetExternalAnchorAgeSeconds(age uint64)                                        {}
 func (n noop) IncObligationsExecuted()                                                       {}
 func (n noop) IncObligationsFailed()                                                         {}
 func (n noop) ObserveObligationLatency(d time.Duration)                                      {}
@@ -470,6 +485,8 @@ type Memory struct {
 	combinedAnchorEmitted            uint64
 	combinedAnchorFailures           uint64
 	anchorFailures                   uint64
+	externalAnchorAttempts           uint64
+	externalAnchorFailures           uint64
 	externalAnchorForcedFailures     uint64 // forced initial failures (deterministic override)
 	obligationsExecuted              uint64 // successful obligation/advice executions
 	obligationsFailed                uint64 // failed obligation/advice executions
@@ -966,7 +983,6 @@ func (m *Memory) IncDelegationsCreated() {
 }
 
 // Replay metrics increments
-func (m *Memory) IncReplayHits()        { atomic.AddUint64(&m.replayHits, 1) }
 func (m *Memory) IncReplayMisses()      { atomic.AddUint64(&m.replayMisses, 1) }
 func (m *Memory) IncReplayStoreErrors() { atomic.AddUint64(&m.replayStoreErrors, 1) }
 func (m *Memory) ObserveReplayStoreLatency(d time.Duration) {
@@ -1236,9 +1252,24 @@ func (m *Memory) IncAnchorAttempts()         { atomic.AddUint64(&m.anchorAttempt
 func (m *Memory) IncCombinedAnchorEmitted()  { atomic.AddUint64(&m.combinedAnchorEmitted, 1) }
 func (m *Memory) IncCombinedAnchorFailures() { atomic.AddUint64(&m.combinedAnchorFailures, 1) }
 func (m *Memory) IncAnchorFailures()         { atomic.AddUint64(&m.anchorFailures, 1) }
+func (m *Memory) IncExternalAnchorAttempts(provider string) {
+	atomic.AddUint64(&m.externalAnchorAttempts, 1)
+}
+func (m *Memory) IncExternalAnchorFailures(provider string) {
+	atomic.AddUint64(&m.externalAnchorFailures, 1)
+}
+func (m *Memory) IncReplayHits() { atomic.AddUint64(&m.replayHits, 1) }
 func (m *Memory) IncExternalAnchorForcedFailures() {
 	atomic.AddUint64(&m.externalAnchorForcedFailures, 1)
 }
+func (m *Memory) IncExternalAnchorForcedFailuresProvider(provider string) {
+	atomic.AddUint64(&m.externalAnchorForcedFailures, 1) // Memory implementation ignores label for now
+	atomic.AddUint64(&m.externalAnchorFailures, 1)
+}
+func (m *Memory) ObserveExternalAnchorLatency(provider string, d time.Duration) {} // Noop in Memory for now
+func (m *Memory) SetExternalAnchorLastHashLen(n int)                            {}
+func (m *Memory) SetExternalAnchorAgeSeconds(age uint64)                        {}
+
 func (m *Memory) IncObligationsExecuted() { atomic.AddUint64(&m.obligationsExecuted, 1) }
 func (m *Memory) IncObligationsFailed()   { atomic.AddUint64(&m.obligationsFailed, 1) }
 func (m *Memory) ObserveObligationLatency(d time.Duration) {

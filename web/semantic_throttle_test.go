@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -12,7 +11,7 @@ import (
 
 // TestSemanticReactiveThrottle verifies throttle activation denies demo action when z-score threshold configured very low.
 func TestSemanticReactiveThrottle(t *testing.T) {
-	os.Setenv("GAUTH_SEMANTIC_ANOMALY_Z_THRESHOLD", "0.0") // treat any >=0 score as exceed
+	t.Setenv("GAUTH_SEMANTIC_ANOMALY_Z_THRESHOLD", "0.0") // treat any >=0 score as exceed
 	s := NewBetaServer("")
 	t.Cleanup(func() { s.Shutdown() })
 	// Synthetically vary semantic history snapshots to generate changing per-category rates.

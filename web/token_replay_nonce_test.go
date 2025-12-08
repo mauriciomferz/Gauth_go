@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -12,7 +11,7 @@ import (
 
 // TestTokenCreateClientNonceReplay verifies strict nonce reuse rejection.
 func TestTokenCreateClientNonceReplay(t *testing.T) {
-	os.Setenv("GAUTH_REPLAY_STRICT", "1")
+	t.Setenv("GAUTH_REPLAY_STRICT", "1")
 	gin.SetMode(gin.TestMode)
 	s := NewBetaServer(":0")
 	t.Cleanup(func() { s.Shutdown() })

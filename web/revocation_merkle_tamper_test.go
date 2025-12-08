@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	delegation "github.com/mauriciomferz/Gauth_go/pkg/delegation"
 	"github.com/gin-gonic/gin"
+	delegation "github.com/mauriciomferz/Gauth_go/pkg/delegation"
 )
 
 // TestRevocationMerkleProofTamperDetection ensures that altering any sibling digest

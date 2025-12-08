@@ -28,7 +28,7 @@ func TestReplayNonceStore_CorruptionRecovery(t *testing.T) {
 	_, _ = fmt.Fprintf(f, `{"Op":"Record","Key":"bm9uY2VfY29yMl9rZXk=","Value":null,"TS":%d}`+"\n", now+1)
 	_ = f.Close()
 
-	os.Setenv("GAUTH_REPLAY_WAL", walPath)
+	t.Setenv("GAUTH_REPLAY_WAL", walPath)
 	memMetrics := metricsPkg.NewMemory()
 	store := token.NewReplayNonceStoreWithMetrics(10*time.Minute, memMetrics)
 

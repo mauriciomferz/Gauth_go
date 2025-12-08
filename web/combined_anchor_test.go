@@ -17,8 +17,8 @@ func TestCombinedAnchorEmission(t *testing.T) {
 	// Configure receipt store path (temp file) and seed capability hash via environment.
 	tmpFile := "test_ext_anchor_receipts.json"
 	_ = os.Remove(tmpFile)
-	os.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_PATH", tmpFile)
-	os.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory") // ensure provider initialization triggers receipt store setup
+	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_PATH", tmpFile)
+	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory") // ensure provider initialization triggers receipt store setup
 	mem := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics(":0", mem)
 	t.Cleanup(func() { srv.Shutdown() })

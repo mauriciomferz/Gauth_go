@@ -228,6 +228,20 @@ func (h *Handler) GetAuditPersistPath() string {
 	return h.AuditPersistPath
 }
 
+// SetAuditPersistPath sets the audit persistence path.
+func (h *Handler) SetAuditPersistPath(path string) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	h.AuditPersistPath = path
+}
+
+// SetAnchorClient sets the anchor client for audit operations.
+func (h *Handler) SetAnchorClient(client AnchorClient) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	h.AuditClient = client
+}
+
 // GetAuditPrevHash returns the previous audit hash.
 func (h *Handler) GetAuditPrevHash() string {
 	h.mu.RLock()

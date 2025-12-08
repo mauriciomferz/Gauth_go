@@ -4,10 +4,13 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 func TestDiscoveryConditionalETag(t *testing.T) {
 	bs := NewTestServerNoSeed(t)
+	// Wait for async startup anchor to complete
+	time.Sleep(100 * time.Millisecond)
 	// First request to get ETag
 	r1 := httptest.NewRecorder()
 	req1, _ := http.NewRequest("GET", "/.well-known/gauth-configuration", nil)

@@ -15,7 +15,7 @@ import (
 
 // TestRotationSummary_LegacySingleSignature verifies legacy single-sign path when multisig disabled.
 func TestRotationSummary_LegacySingleSignature(t *testing.T) {
-	os.Setenv("GAUTH_ROTATIONS_SIGN", "1")
+	t.Setenv("GAUTH_ROTATIONS_SIGN", "1")
 	os.Unsetenv("GAUTH_ROTATIONS_MULTISIG")
 	os.Unsetenv("GAUTH_ROTATIONS_THRESHOLD")
 	tmp := t.TempDir()

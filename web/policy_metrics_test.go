@@ -6,12 +6,37 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/mauriciomferz/Gauth_go/pkg/policy"
 )
 
 // TestPolicyMetricsEndpoint verifies counters increment after evaluations.
 func TestPolicyMetricsEndpoint(t *testing.T) {
 	bs := NewBetaServer("")
 	t.Cleanup(func() { bs.Shutdown() })
+
+	// Inject a policy to allow the first request:
+	// Subject: alice@example.com, Action: read, Resource: report:finance
+	if bs.policyHandler != nil && bs.policyHandler.Registry != nil {
+		p := policy.Policy{
+			ID:       "allow-alice",
+			Subjects: []string{"alice@example.com"},
+			Rules: []policy.Rule{
+				{
+					Actions:   []string{"read"},
+					Resources: []string{"report:finance"},
+					Effect:    policy.Allow,
+				},
+			},
+		}
+		b := policy.Bundle{
+			ID:       "test-bundle",
+			Policies: []policy.Policy{p},
+		}
+		if _, err := bs.policyHandler.Registry.AddBundle(b); err != nil {
+			t.Fatalf("failed to add test policy bundle: %v", err)
+		}
+	}
 	// Perform two evaluations (one allow, one deny if possible)
 	// Allow case: alice read report:finance
 	allowReqBody := `{"subject":"alice@example.com","action":"read","resource":"report:finance","attrs":{}}`

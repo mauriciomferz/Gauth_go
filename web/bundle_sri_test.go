@@ -10,8 +10,8 @@ import (
 func TestApplyBundleSubstitutionSRI(t *testing.T) {
 	bs := &BetaServer{}
 	origEnv := os.Getenv("GAUTH_ENV")
-	defer os.Setenv("GAUTH_ENV", origEnv)
-	os.Setenv("GAUTH_ENV", "prod")
+	defer t.Setenv("GAUTH_ENV", origEnv)
+	t.Setenv("GAUTH_ENV", "prod")
 	manifestDir := filepath.Join("web", "static", "js")
 	if err := os.MkdirAll(manifestDir, 0o755); err != nil {
 		t.Fatalf("mkdir: %v", err)

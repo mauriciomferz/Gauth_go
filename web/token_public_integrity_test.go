@@ -4,14 +4,13 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 )
 
 func TestTokenIntegrityPublicRS256(t *testing.T) {
-	os.Setenv("GAUTH_USE_JWT_LIB", "1")
-	os.Setenv("GAUTH_JWT_ALG", "RS256")
+	t.Setenv("GAUTH_USE_JWT_LIB", "1")
+	t.Setenv("GAUTH_JWT_ALG", "RS256")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Issue token

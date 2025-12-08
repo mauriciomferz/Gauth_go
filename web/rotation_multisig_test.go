@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 	"time"
 
@@ -15,9 +14,9 @@ import (
 
 // TestRotationSummary_MultiSignature ensures multi-signature mode emits multiple signatures and threshold fields.
 func TestRotationSummary_MultiSignature(t *testing.T) {
-	os.Setenv("GAUTH_ROTATIONS_SIGN", "1")
-	os.Setenv("GAUTH_ROTATIONS_MULTISIG", "1")
-	os.Setenv("GAUTH_ROTATIONS_THRESHOLD", "2")
+	t.Setenv("GAUTH_ROTATIONS_SIGN", "1")
+	t.Setenv("GAUTH_ROTATIONS_MULTISIG", "1")
+	t.Setenv("GAUTH_ROTATIONS_THRESHOLD", "2")
 	tmp := t.TempDir()
 	ledgerPath := tmp + "/ledger-ms.json"
 	led := notary.NewRotationLedger(ledgerPath)

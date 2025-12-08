@@ -2,7 +2,6 @@ package web
 
 import (
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -10,7 +9,7 @@ import (
 
 // TestSemanticRatesPrometheus ensures semantic rate metrics are exposed in Prometheus format.
 func TestSemanticRatesPrometheus(t *testing.T) {
-	os.Setenv("GAUTH_SEMANTIC_PERSIST_PATH", "") // disable persistence interference
+	t.Setenv("GAUTH_SEMANTIC_PERSIST_PATH", "") // disable persistence interference
 	srv := NewBetaServer("8123")
 	t.Cleanup(func() { srv.Shutdown() })
 	if srv.rfc0111Service == nil {

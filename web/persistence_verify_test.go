@@ -15,8 +15,8 @@ import (
 func TestViolationPersistenceVerify(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "violations.json")
-	os.Setenv("GAUTH_VIOLATION_PERSIST_PATH", path)
-	os.Setenv("GAUTH_VIOLATION_PERSIST_NO_THROTTLE", "1")
+	t.Setenv("GAUTH_VIOLATION_PERSIST_PATH", path)
+	t.Setenv("GAUTH_VIOLATION_PERSIST_NO_THROTTLE", "1")
 	srv := NewBetaServer("8131")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Trigger some violations
@@ -108,12 +108,12 @@ func TestViolationPersistenceVerify(t *testing.T) {
 func TestSemanticPersistenceVerify(t *testing.T) {
 	dir := t.TempDir()
 	// The original 'path' variable declaration is removed as per instruction.
-	// The 'path' variable is still needed for os.Setenv and srv.semanticHandler.Save.
+	// The 'path' variable is still needed for t.Setenv and srv.semanticHandler.Save.
 	// Assuming the instruction meant to remove an *unused* base, but 'path' is used.
 	// Re-adding the path declaration to ensure the code remains syntactically correct and functional.
 	path := filepath.Join(dir, "semantic.json")
-	os.Setenv("GAUTH_SEMANTIC_PERSIST_PATH", path)
-	os.Setenv("GAUTH_SEMANTIC_PERSIST_NO_THROTTLE", "1")
+	t.Setenv("GAUTH_SEMANTIC_PERSIST_PATH", path)
+	t.Setenv("GAUTH_SEMANTIC_PERSIST_NO_THROTTLE", "1")
 	srv := NewBetaServer("8132")
 	t.Cleanup(func() { srv.Shutdown() })
 	if srv.rfc0111Service == nil {

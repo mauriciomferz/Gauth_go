@@ -17,8 +17,8 @@ func TestModelLimitAuditChain(t *testing.T) {
 	limitsFile.Close()
 	auditFile, _ := os.CreateTemp(t.TempDir(), "audit.jsonl")
 	auditFile.Close()
-	os.Setenv("GAUTH_MODEL_LIMITS_CONFIG_PATH", limitsFile.Name())
-	os.Setenv("GAUTH_MODEL_LIMIT_AUDIT_PATH", auditFile.Name())
+	t.Setenv("GAUTH_MODEL_LIMITS_CONFIG_PATH", limitsFile.Name())
+	t.Setenv("GAUTH_MODEL_LIMIT_AUDIT_PATH", auditFile.Name())
 	bs := NewBetaServer("")
 	t.Cleanup(func() { bs.Shutdown() })
 	// exceed input

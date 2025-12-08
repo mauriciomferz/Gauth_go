@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -17,9 +16,9 @@ import (
 
 // TestRotationSummary_MultiSignatureInvalidSignature ensures tampering one signature causes verification failure.
 func TestRotationSummary_MultiSignatureInvalidSignature(t *testing.T) {
-	os.Setenv("GAUTH_ROTATIONS_SIGN", "1")
-	os.Setenv("GAUTH_ROTATIONS_MULTISIG", "1")
-	os.Setenv("GAUTH_ROTATIONS_THRESHOLD", "2")
+	t.Setenv("GAUTH_ROTATIONS_SIGN", "1")
+	t.Setenv("GAUTH_ROTATIONS_MULTISIG", "1")
+	t.Setenv("GAUTH_ROTATIONS_THRESHOLD", "2")
 	tmp := t.TempDir()
 	ledgerPath := tmp + "/ledger-invalidsig.json"
 	led := notary.NewRotationLedger(ledgerPath)

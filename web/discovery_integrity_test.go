@@ -5,10 +5,13 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 func TestDiscoveryETagPresent(t *testing.T) {
 	bs := NewTestServerNoSeed(t)
+	// Wait for async startup anchor to complete
+	time.Sleep(100 * time.Millisecond)
 	rr := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/.well-known/gauth-configuration", nil)
 	bs.router.ServeHTTP(rr, req)

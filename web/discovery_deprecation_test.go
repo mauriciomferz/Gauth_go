@@ -3,13 +3,12 @@ package web
 import (
 	"encoding/json"
 	"net/http/httptest"
-	"os"
 	"testing"
 )
 
 func TestDiscoveryDeprecationMetadata(t *testing.T) {
-	os.Setenv("GAUTH_DEPRECATED_AFTER", "2025-12-31T00:00:00Z")
-	os.Setenv("GAUTH_SUNSET_AFTER", "2026-06-30T00:00:00Z")
+	t.Setenv("GAUTH_DEPRECATED_AFTER", "2025-12-31T00:00:00Z")
+	t.Setenv("GAUTH_SUNSET_AFTER", "2026-06-30T00:00:00Z")
 	s := NewBetaServer("0")
 	t.Cleanup(func() { s.Shutdown() })
 	w := httptest.NewRecorder()

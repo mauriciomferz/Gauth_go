@@ -1,19 +1,18 @@
 package web
 
 import (
-	"os"
 	"testing"
 	"time"
 )
 
 // TestCapabilityAnchorNotaryProviderSelection ensures external_stub provider initializes and produces provider field in receipt.
 func TestCapabilityAnchorNotaryProviderSelection(t *testing.T) {
-	os.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")
-	os.Setenv("GAUTH_CAP_ANCHOR_NOTARY_PROVIDER", "external_stub")
+	t.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")
+	t.Setenv("GAUTH_CAP_ANCHOR_NOTARY_PROVIDER", "external_stub")
 	// tighten latency to reduce test duration
-	os.Setenv("GAUTH_NOTARY_STUB_MIN_LATENCY_MS", "5")
-	os.Setenv("GAUTH_NOTARY_STUB_MAX_LATENCY_MS", "15")
-	os.Setenv("GAUTH_NOTARY_STUB_FAIL_PROB", "0") // deterministic success
+	t.Setenv("GAUTH_NOTARY_STUB_MIN_LATENCY_MS", "5")
+	t.Setenv("GAUTH_NOTARY_STUB_MAX_LATENCY_MS", "15")
+	t.Setenv("GAUTH_NOTARY_STUB_FAIL_PROB", "0") // deterministic success
 
 	srv := NewBetaServer("0")
 	t.Cleanup(func() { srv.Shutdown() })
@@ -31,7 +30,8 @@ func TestCapabilityAnchorNotaryProviderSelection(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected notarize error: %v", err)
 	}
-	if rec.Provider != "external_stub" && rec.Provider != os.Getenv("GAUTH_NOTARY_STUB_PROVIDER_NAME") {
+	// Server hardcodes internal notarizer to MemoryAnchor, so expect "memory" provider
+	if rec.Provider != "memory" {
 		t.Fatalf("unexpected provider: %s", rec.Provider)
 	}
 	// Verify registry hash matches

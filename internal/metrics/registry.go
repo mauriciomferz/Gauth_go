@@ -480,8 +480,32 @@ func (reg *CollectorRegistry) IncAnchorFailures() {
 	reg.dispatch(func(c MetricsCollector) { c.IncAnchorFailures() })
 }
 
+func (reg *CollectorRegistry) IncExternalAnchorAttempts(provider string) {
+	reg.dispatch(func(c MetricsCollector) { c.IncExternalAnchorAttempts(provider) })
+}
+
+func (reg *CollectorRegistry) IncExternalAnchorFailures(provider string) {
+	reg.dispatch(func(c MetricsCollector) { c.IncExternalAnchorFailures(provider) })
+}
+
 func (reg *CollectorRegistry) IncExternalAnchorForcedFailures() {
 	reg.dispatch(func(c MetricsCollector) { c.IncExternalAnchorForcedFailures() })
+}
+
+func (reg *CollectorRegistry) IncExternalAnchorForcedFailuresProvider(provider string) {
+	reg.dispatch(func(c MetricsCollector) { c.IncExternalAnchorForcedFailuresProvider(provider) })
+}
+
+func (reg *CollectorRegistry) ObserveExternalAnchorLatency(provider string, d time.Duration) {
+	reg.dispatch(func(c MetricsCollector) { c.ObserveExternalAnchorLatency(provider, d) })
+}
+
+func (reg *CollectorRegistry) SetExternalAnchorLastHashLen(n int) {
+	reg.dispatch(func(c MetricsCollector) { c.SetExternalAnchorLastHashLen(n) })
+}
+
+func (reg *CollectorRegistry) SetExternalAnchorAgeSeconds(age uint64) {
+	reg.dispatch(func(c MetricsCollector) { c.SetExternalAnchorAgeSeconds(age) })
 }
 
 func (reg *CollectorRegistry) IncObligationsExecuted() {

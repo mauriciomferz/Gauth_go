@@ -2,7 +2,6 @@ package web
 
 import (
 	"net/http/httptest"
-	"os"
 	"testing"
 	"time"
 
@@ -15,7 +14,7 @@ import (
 // (no adapter needed; httptest.Client implements http.Get method and fits interface)
 
 func TestVerificationPackageEndToEnd(t *testing.T) {
-	os.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
+	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
 	km, err := crypto.NewManager(time.Hour)
 	if err != nil {
 		t.Fatalf("km init: %v", err)
@@ -25,7 +24,7 @@ func TestVerificationPackageEndToEnd(t *testing.T) {
 	}
 	s := NewBetaServer("", WithKeyProvider(km))
 	t.Cleanup(func() { s.Shutdown() })
-	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "1")
+	t.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "1")
 	rc := delegation.NewRevocationChain(delegation.WithKeyProvider(km))
 	for i := 0; i < 4; i++ {
 		_, _ = rc.Append(delegation.RevocationEvent{ID: "rev-vpkg-int-" + time.Now().Format("150405") + string(rune('a'+i)), DelegationID: "del-vpkg"})

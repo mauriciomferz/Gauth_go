@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/mauriciomferz/Gauth_go/pkg/anchor"
 	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
-	"github.com/gin-gonic/gin"
 )
 
 // buildTestServerMinimal constructs a BetaServer with routes initialized for testing new endpoints.
@@ -96,12 +96,16 @@ func TestRevocationAnchorEmit_NoAnchorClient(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/api/v1/anchor/revocation/emit", nil)
 	s.router.ServeHTTP(w, req)
-	if w.Code != http.StatusInternalServerError {
-		t.Fatalf("expected 500 got %d body=%s", w.Code, w.Body.String())
+	// Anchor client is now initialized by default, so expect success
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200 got %d body=%s", w.Code, w.Body.String())
 	}
-	var body struct{ Code string }
+	var body struct {
+		Success bool   `json:"success"`
+		Hash    string `json:"hash"`
+	}
 	_ = json.Unmarshal(w.Body.Bytes(), &body)
-	if body.Code != "revocation_anchor_client_unavailable" {
-		t.Fatalf("expected code revocation_anchor_client_unavailable got %s", body.Code)
+	if !body.Success || body.Hash == "" {
+		t.Fatalf("expected success with hash, got body=%s", w.Body.String())
 	}
 }

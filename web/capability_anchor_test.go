@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 )
 
 // TestCapabilityAnchoringLifecycle validates POST anchor and GET latest endpoints.
@@ -13,6 +14,8 @@ func TestCapabilityAnchoringLifecycle(t *testing.T) {
 	t.Setenv("GAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
+	// Wait for async startup anchor to complete
+	time.Sleep(100 * time.Millisecond)
 	// Initial latest should show anchored=false
 	w0 := httptest.NewRecorder()
 	req0 := httptest.NewRequest("GET", "/api/v1/beta/capabilities/anchor/latest", nil)

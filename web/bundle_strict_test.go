@@ -12,10 +12,10 @@ func TestStrictAssetsPlaceholder(t *testing.T) {
 	bs := &BetaServer{}
 	origEnv := os.Getenv("GAUTH_ENV")
 	origStrict := os.Getenv("GAUTH_STRICT_ASSETS")
-	defer os.Setenv("GAUTH_ENV", origEnv)
-	defer os.Setenv("GAUTH_STRICT_ASSETS", origStrict)
-	os.Setenv("GAUTH_ENV", "prod")
-	os.Setenv("GAUTH_STRICT_ASSETS", "1")
+	defer t.Setenv("GAUTH_ENV", origEnv)
+	defer t.Setenv("GAUTH_STRICT_ASSETS", origStrict)
+	t.Setenv("GAUTH_ENV", "prod")
+	t.Setenv("GAUTH_STRICT_ASSETS", "1")
 	page := []byte(`<script src="/static/js/__APP_BUNDLE__"></script>`)
 	out := string(bs.applyBundleSubstitution(page))
 	if !strings.Contains(out, "__APP_BUNDLE__") {

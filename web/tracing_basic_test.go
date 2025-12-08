@@ -10,8 +10,8 @@ import (
 
 // TestTracingEnabledEmitsSpans ensures token.issue and token.validate spans appear when tracing enabled.
 func TestTracingEnabledEmitsSpans(t *testing.T) {
-	os.Setenv("GAUTH_TRACING_ENABLED", "1")
-	os.Setenv("GAUTH_TRACING_SAMPLE_RATIO", "1")
+	t.Setenv("GAUTH_TRACING_ENABLED", "1")
+	t.Setenv("GAUTH_TRACING_SAMPLE_RATIO", "1")
 	defer func() {
 		os.Unsetenv("GAUTH_TRACING_ENABLED")
 		os.Unsetenv("GAUTH_TRACING_SAMPLE_RATIO")
@@ -95,8 +95,8 @@ func TestTracingDisabledNoSpans(t *testing.T) {
 
 // TestTracingSampleRatioZeroEmitsSpans ensures ratio=0 (always sample by implementation) still records spans.
 func TestTracingSampleRatioZeroEmitsSpans(t *testing.T) {
-	os.Setenv("GAUTH_TRACING_ENABLED", "1")
-	os.Setenv("GAUTH_TRACING_SAMPLE_RATIO", "0")
+	t.Setenv("GAUTH_TRACING_ENABLED", "1")
+	t.Setenv("GAUTH_TRACING_SAMPLE_RATIO", "0")
 	defer func() {
 		os.Unsetenv("GAUTH_TRACING_ENABLED")
 		os.Unsetenv("GAUTH_TRACING_SAMPLE_RATIO")
@@ -139,8 +139,8 @@ func TestTracingSampleRatioZeroEmitsSpans(t *testing.T) {
 // TestTracingSampleRatioMidApproximatelySamples verifies probabilistic sampling at ratio=0.5.
 // It asserts that some (not all) operations generate spans, reducing flakiness by using bounds.
 func TestTracingSampleRatioMidApproximatelySamples(t *testing.T) {
-	os.Setenv("GAUTH_TRACING_ENABLED", "1")
-	os.Setenv("GAUTH_TRACING_SAMPLE_RATIO", "0.5")
+	t.Setenv("GAUTH_TRACING_ENABLED", "1")
+	t.Setenv("GAUTH_TRACING_SAMPLE_RATIO", "0.5")
 	defer func() {
 		os.Unsetenv("GAUTH_TRACING_ENABLED")
 		os.Unsetenv("GAUTH_TRACING_SAMPLE_RATIO")

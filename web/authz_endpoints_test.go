@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/mauriciomferz/Gauth_go/pkg/policy"
 )
 
 // TestAuthzMetricsEndpoint ensures metrics JSON shape is returned.
@@ -36,6 +38,29 @@ func TestAuthzMetricsEndpoint(t *testing.T) {
 func TestAuthzEvaluateEndpoint(t *testing.T) {
 	srv := NewBetaServer("")
 	t.Cleanup(func() { srv.Shutdown() })
+
+	// Inject test policy to allow alice@example.com to read report:finance
+	if srv.policyHandler != nil && srv.policyHandler.Registry != nil {
+		p := policy.Policy{
+			ID:       "allow-alice-authz",
+			Subjects: []string{"alice@example.com"},
+			Rules: []policy.Rule{
+				{
+					Actions:   []string{"read"},
+					Resources: []string{"report:finance"},
+					Effect:    policy.Allow,
+				},
+			},
+		}
+		b := policy.Bundle{
+			ID:       "authz-test-bundle",
+			Policies: []policy.Policy{p},
+		}
+		if _, err := srv.policyHandler.Registry.AddBundle(b); err != nil {
+			t.Fatalf("failed to add test policy bundle: %v", err)
+		}
+	}
+
 	body := map[string]any{"subject": "alice@example.com", "resource": "report:finance", "action": "read", "context": map[string]string{"department": "finance"}}
 	b, _ := json.Marshal(body)
 	w := httptest.NewRecorder()

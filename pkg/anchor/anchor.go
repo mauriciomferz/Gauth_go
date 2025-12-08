@@ -144,7 +144,7 @@ func (m *MemoryAnchor) Anchor(hash string) (AnchorRecord, error) {
 	if rec, ok := m.records[hash]; ok {
 		return rec, nil // idempotent
 	}
-	rec := AnchorRecord{Hash: hash, AnchoredAt: time.Now().UTC()}
+	rec := AnchorRecord{Hash: hash, AnchoredAt: time.Now().UTC(), Provider: "memory"}
 	m.records[hash] = rec
 	m.order = append(m.order, hash)
 	if err := m.save(); err != nil {

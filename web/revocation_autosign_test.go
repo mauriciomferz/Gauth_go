@@ -12,7 +12,7 @@ import (
 // TestRevocationAutoSignDuplicateSuppression ensures that rotating keys twice without
 // adding new revocation events does not emit a second identical SignedTreeHead.
 func TestRevocationAutoSignDuplicateSuppression(t *testing.T) {
-	os.Setenv("GAUTH_TOKEN_SIG_MODE", sigModeEdDSA)
+	t.Setenv("GAUTH_TOKEN_SIG_MODE", sigModeEdDSA)
 	defer os.Unsetenv("GAUTH_TOKEN_SIG_MODE")
 
 	km, _ := crypto.NewManager(24 * time.Hour)

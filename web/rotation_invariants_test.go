@@ -61,7 +61,7 @@ func TestRotationSummary_ContinuityGap(t *testing.T) {
 	if err := writeContinuityGapLedger(ledgerPath); err != nil {
 		t.Fatalf("write ledger: %v", err)
 	}
-	os.Setenv("GAUTH_ROTATION_LEDGER_PATH", ledgerPath)
+	t.Setenv("GAUTH_ROTATION_LEDGER_PATH", ledgerPath)
 	s := NewBetaServer("")
 	t.Cleanup(func() { s.Shutdown() })
 	// Directly attach ledger to server (env path initialization not triggered in tests reliably)
@@ -121,8 +121,8 @@ func TestRotationSummary_SignatureMissing(t *testing.T) {
 		t.Fatalf("append r2: %v", err)
 	}
 	// Require signing but sabotage active key by providing wrong private length so signing branch won't attach signature.
-	os.Setenv("GAUTH_ROTATION_LEDGER_PATH", ledgerPath)
-	os.Setenv("GAUTH_ROTATIONS_SIGN", "1")
+	t.Setenv("GAUTH_ROTATION_LEDGER_PATH", ledgerPath)
+	t.Setenv("GAUTH_ROTATIONS_SIGN", "1")
 	m, _ := cryptoInt.NewManager(1 * time.Hour)
 	if ak := m.Active(); ak != nil {
 		ak.Public = pub3
@@ -176,8 +176,8 @@ func TestRotationSummary_SignatureValid(t *testing.T) {
 	if _, err := led.AppendDescriptor(r2); err != nil {
 		t.Fatalf("append r2: %v", err)
 	}
-	os.Setenv("GAUTH_ROTATION_LEDGER_PATH", ledgerPath)
-	os.Setenv("GAUTH_ROTATIONS_SIGN", "1")
+	t.Setenv("GAUTH_ROTATION_LEDGER_PATH", ledgerPath)
+	t.Setenv("GAUTH_ROTATIONS_SIGN", "1")
 	m, _ := cryptoInt.NewManager(1 * time.Hour)
 	if ak := m.Active(); ak != nil {
 		ak.Public = pub3

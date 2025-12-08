@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strconv"
 	"strings"
 	"testing"
@@ -17,8 +16,8 @@ import (
 
 // TestJWTDiscoveryAlgorithms ensures discovery endpoint reflects JWT algorithms when feature flag enabled.
 func TestJWTDiscoveryAlgorithms(t *testing.T) {
-	os.Setenv("GAUTH_USE_JWT_LIB", "1")
-	os.Setenv("GAUTH_JWT_ALG", "RS256")
+	t.Setenv("GAUTH_USE_JWT_LIB", "1")
+	t.Setenv("GAUTH_JWT_ALG", "RS256")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
@@ -49,9 +48,9 @@ func TestJWTDiscoveryAlgorithms(t *testing.T) {
 
 // TestJWTIssuance verifies /api/v1/token/create issues a JWT formatted token when flag enabled.
 func TestJWTIssuance(t *testing.T) {
-	os.Setenv("GAUTH_USE_JWT_LIB", "1")
-	os.Setenv("GAUTH_JWT_ALG", "RS256")
-	os.Setenv("GAUTH_JWT_KID", demoRSAKid)
+	t.Setenv("GAUTH_USE_JWT_LIB", "1")
+	t.Setenv("GAUTH_JWT_ALG", "RS256")
+	t.Setenv("GAUTH_JWT_KID", demoRSAKid)
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Issue token
@@ -94,9 +93,9 @@ func doValidate(s *BetaServer, token string) *httptest.ResponseRecorder {
 
 // TestJWTValidatePositive ensures a freshly issued RS256 JWT validates.
 func TestJWTValidatePositive(t *testing.T) {
-	os.Setenv("GAUTH_USE_JWT_LIB", "1")
-	os.Setenv("GAUTH_JWT_ALG", "RS256")
-	os.Setenv("GAUTH_JWT_KID", demoRSAKid)
+	t.Setenv("GAUTH_USE_JWT_LIB", "1")
+	t.Setenv("GAUTH_JWT_ALG", "RS256")
+	t.Setenv("GAUTH_JWT_KID", demoRSAKid)
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// issue
@@ -133,9 +132,9 @@ func TestJWTValidatePositive(t *testing.T) {
 
 // TestJWTValidateExpired issues a short-lived token and validates after expiry.
 func TestJWTValidateExpired(t *testing.T) {
-	os.Setenv("GAUTH_USE_JWT_LIB", "1")
-	os.Setenv("GAUTH_JWT_ALG", "RS256")
-	os.Setenv("GAUTH_JWT_KID", demoRSAKid)
+	t.Setenv("GAUTH_USE_JWT_LIB", "1")
+	t.Setenv("GAUTH_JWT_ALG", "RS256")
+	t.Setenv("GAUTH_JWT_KID", demoRSAKid)
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Manually build extremely short-lived token (1 second) using server's RSA key helper.
@@ -163,9 +162,9 @@ func TestJWTValidateExpired(t *testing.T) {
 
 // TestJWTValidateTampered modifies signature to force invalid_signature.
 func TestJWTValidateTampered(t *testing.T) {
-	os.Setenv("GAUTH_USE_JWT_LIB", "1")
-	os.Setenv("GAUTH_JWT_ALG", "RS256")
-	os.Setenv("GAUTH_JWT_KID", demoRSAKid)
+	t.Setenv("GAUTH_USE_JWT_LIB", "1")
+	t.Setenv("GAUTH_JWT_ALG", "RS256")
+	t.Setenv("GAUTH_JWT_KID", demoRSAKid)
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// issue
@@ -192,9 +191,9 @@ func TestJWTValidateTampered(t *testing.T) {
 
 // TestJWTValidateAlgMismatch rewrites header alg to HS256 while keeping RS256 signature.
 func TestJWTValidateAlgMismatch(t *testing.T) {
-	os.Setenv("GAUTH_USE_JWT_LIB", "1")
-	os.Setenv("GAUTH_JWT_ALG", "RS256")
-	os.Setenv("GAUTH_JWT_KID", demoRSAKid)
+	t.Setenv("GAUTH_USE_JWT_LIB", "1")
+	t.Setenv("GAUTH_JWT_ALG", "RS256")
+	t.Setenv("GAUTH_JWT_KID", demoRSAKid)
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// issue
@@ -230,10 +229,10 @@ func TestJWTValidateAlgMismatch(t *testing.T) {
 
 // TestJWTMissingJTIStrict ensures strict replay mode rejects tokens without jti claim.
 func TestJWTMissingJTIStrict(t *testing.T) {
-	os.Setenv("GAUTH_USE_JWT_LIB", "1")
-	os.Setenv("GAUTH_JWT_ALG", "RS256")
-	os.Setenv("GAUTH_JWT_KID", demoRSAKid)
-	os.Setenv("GAUTH_REPLAY_STRICT", "1")
+	t.Setenv("GAUTH_USE_JWT_LIB", "1")
+	t.Setenv("GAUTH_JWT_ALG", "RS256")
+	t.Setenv("GAUTH_JWT_KID", demoRSAKid)
+	t.Setenv("GAUTH_REPLAY_STRICT", "1")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	pk, err := token.LoadOrGenerateRSAKey()
@@ -258,9 +257,9 @@ func TestJWTMissingJTIStrict(t *testing.T) {
 
 // TestJWTDuplicateJTIReplay ensures replay detection on second validation attempt of same token.
 func TestJWTDuplicateJTIReplay(t *testing.T) {
-	os.Setenv("GAUTH_USE_JWT_LIB", "1")
-	os.Setenv("GAUTH_JWT_ALG", "RS256")
-	os.Setenv("GAUTH_JWT_KID", demoRSAKid)
+	t.Setenv("GAUTH_USE_JWT_LIB", "1")
+	t.Setenv("GAUTH_JWT_ALG", "RS256")
+	t.Setenv("GAUTH_JWT_KID", demoRSAKid)
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Issue standard token via API (will include jti)
@@ -296,10 +295,10 @@ func TestJWTDuplicateJTIReplay(t *testing.T) {
 
 // TestJWTClockSkewTolerance validates that exp slightly in past within skew window still accepted.
 func TestJWTClockSkewTolerance(t *testing.T) {
-	os.Setenv("GAUTH_USE_JWT_LIB", "1")
-	os.Setenv("GAUTH_JWT_ALG", "RS256")
-	os.Setenv("GAUTH_JWT_KID", demoRSAKid)
-	os.Setenv("GAUTH_JWT_CLOCK_SKEW_SECONDS", "30")
+	t.Setenv("GAUTH_USE_JWT_LIB", "1")
+	t.Setenv("GAUTH_JWT_ALG", "RS256")
+	t.Setenv("GAUTH_JWT_KID", demoRSAKid)
+	t.Setenv("GAUTH_JWT_CLOCK_SKEW_SECONDS", "30")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	pk, err := token.LoadOrGenerateRSAKey()
@@ -323,10 +322,10 @@ func TestJWTClockSkewTolerance(t *testing.T) {
 
 // TestJWTNearExpiration ensures token just inside expiration passes while just outside fails.
 func TestJWTNearExpiration(t *testing.T) {
-	os.Setenv("GAUTH_USE_JWT_LIB", "1")
-	os.Setenv("GAUTH_JWT_ALG", "RS256")
-	os.Setenv("GAUTH_JWT_KID", demoRSAKid)
-	os.Setenv("GAUTH_JWT_CLOCK_SKEW_SECONDS", "2")
+	t.Setenv("GAUTH_USE_JWT_LIB", "1")
+	t.Setenv("GAUTH_JWT_ALG", "RS256")
+	t.Setenv("GAUTH_JWT_KID", demoRSAKid)
+	t.Setenv("GAUTH_JWT_CLOCK_SKEW_SECONDS", "2")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	pk, err := token.LoadOrGenerateRSAKey()

@@ -49,7 +49,7 @@ func (s *MockStore) VerifyIncremental() (string, int, string)         { return "
 
 func TestAnchorHandlerFlow(t *testing.T) {
 	mock := &MockProvider{LastHash: "initial"}
-	h := NewHandler(mock, &MockStore{})
+	h := NewHandler(mock, &MockStore{}, nil, "mock", 0, 0)
 	h.SetRegistryHash("test-hash-123")
 
 	ctx := context.Background()
@@ -74,7 +74,7 @@ func TestAnchorHandlerFlow(t *testing.T) {
 }
 
 func TestNoProvider(t *testing.T) {
-	h := NewHandler(nil, nil)
+	h := NewHandler(nil, nil, nil, "", 0, 0)
 	ctx := context.Background()
 	_, err := h.Anchor(ctx)
 	if err == nil {

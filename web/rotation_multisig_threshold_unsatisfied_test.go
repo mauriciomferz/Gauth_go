@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 	"time"
 
@@ -15,9 +14,9 @@ import (
 
 // TestRotationSummary_MultiSignatureThresholdUnsatisfied expects error when threshold exceeds signatures.
 func TestRotationSummary_MultiSignatureThresholdUnsatisfied(t *testing.T) {
-	os.Setenv("GAUTH_ROTATIONS_SIGN", "1")
-	os.Setenv("GAUTH_ROTATIONS_MULTISIG", "1")
-	os.Setenv("GAUTH_ROTATIONS_THRESHOLD", "5") // deliberately higher than available signatures
+	t.Setenv("GAUTH_ROTATIONS_SIGN", "1")
+	t.Setenv("GAUTH_ROTATIONS_MULTISIG", "1")
+	t.Setenv("GAUTH_ROTATIONS_THRESHOLD", "5") // deliberately higher than available signatures
 	tmp := t.TempDir()
 	ledgerPath := tmp + "/ledger-ms-unsat.json"
 	led := notary.NewRotationLedger(ledgerPath)

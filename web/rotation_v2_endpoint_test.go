@@ -29,9 +29,9 @@ func TestRotationV2Endpoint(t *testing.T) {
 		t.Fatalf("write cfg: %v", err)
 	}
 	tmpFile.Close()
-	os.Setenv("GAUTH_ROTATIONS_V2_CONFIG", tmpFile.Name())
-	os.Setenv("GAUTH_ROTATIONS_V2_SIGN", "1")
-	os.Setenv("GAUTH_ROTATIONS_V2_EMBED_PUBS", "1")
+	t.Setenv("GAUTH_ROTATIONS_V2_CONFIG", tmpFile.Name())
+	t.Setenv("GAUTH_ROTATIONS_V2_SIGN", "1")
+	t.Setenv("GAUTH_ROTATIONS_V2_EMBED_PUBS", "1")
 	defer func() {
 		os.Unsetenv("GAUTH_ROTATIONS_V2_CONFIG")
 		os.Unsetenv("GAUTH_ROTATIONS_V2_SIGN")

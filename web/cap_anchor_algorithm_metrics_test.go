@@ -22,11 +22,11 @@ func TestCapabilityAnchorAlgorithmMetrics(t *testing.T) {
 	}
 	anchorPath := filepath.Join(tmp, "anchor_artifact.json")
 	// Environment configuration required for anchor emission & signing
-	os.Setenv("GAUTH_CAPABILITIES_PATH", capPath)
-	os.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", anchorPath)
-	os.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m") // minimum accepted
-	os.Setenv("GAUTH_EDDSA_TTL_HOURS", "24")           // enable key manager
-	os.Setenv("GAUTH_CAP_ANCHOR_SIGN", "1")            // enable signing path
+	t.Setenv("GAUTH_CAPABILITIES_PATH", capPath)
+	t.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", anchorPath)
+	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m") // minimum accepted
+	t.Setenv("GAUTH_EDDSA_TTL_HOURS", "24")           // enable key manager
+	t.Setenv("GAUTH_CAP_ANCHOR_SIGN", "1")            // enable signing path
 	// Ensure cleanup
 	t.Cleanup(func() {
 		os.Unsetenv("GAUTH_CAPABILITIES_PATH")
