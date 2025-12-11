@@ -1,28 +1,86 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Box,
-    Typography,
+    makeStyles,
+    tokens,
     Card,
-    CardContent,
+    CardHeader,
     Button,
-    TextField,
-    Grid,
-    Chip,
-    Alert,
-    CircularProgress,
+    Input,
+    Text,
+    Badge,
+    Spinner,
     Table,
     TableBody,
     TableCell,
-    TableContainer,
-    TableHead,
+    TableHeader,
+    TableHeaderCell,
     TableRow,
-    Paper,
-    IconButton,
     Tooltip,
-} from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+} from '@fluentui/react-components';
+import {
+    ArrowSync24Regular,
+    Delete24Regular,
+    Copy24Regular,
+    Key24Regular,
+} from '@fluentui/react-icons';
+
+const useStyles = makeStyles({
+    container: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '24px',
+        padding: '24px',
+    },
+    card: {
+        padding: '20px',
+    },
+    header: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '16px',
+    },
+    grid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '16px',
+    },
+    formRow: {
+        display: 'flex',
+        gap: '12px',
+        alignItems: 'flex-end',
+        flexWrap: 'wrap',
+    },
+    inputGroup: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '4px',
+        flex: 1,
+        minWidth: '150px',
+    },
+    badges: {
+        display: 'flex',
+        gap: '8px',
+        flexWrap: 'wrap',
+    },
+    tokenCode: {
+        fontFamily: 'monospace',
+        fontSize: '12px',
+        backgroundColor: tokens.colorNeutralBackground3,
+        padding: '4px 8px',
+        borderRadius: '4px',
+    },
+    actions: {
+        display: 'flex',
+        gap: '4px',
+    },
+    error: {
+        color: tokens.colorPaletteRedForeground1,
+        padding: '12px',
+        backgroundColor: tokens.colorPaletteRedBackground1,
+        borderRadius: '4px',
+    },
+});
 
 interface GNAPDiscovery {
     grant_request_endpoint: string;
@@ -37,14 +95,11 @@ interface GNAPToken {
 }
 
 interface GNAPGrant {
-    continue?: {
-        uri: string;
-        access_token?: { value: string };
-    };
     access_token?: GNAPToken;
 }
 
 const GNAP: React.FC = () => {
+    const classes = useStyles();
     const [discovery, setDiscovery] = useState<GNAPDiscovery | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -101,153 +156,141 @@ const GNAP: React.FC = () => {
         navigator.clipboard.writeText(text);
     };
 
-    const revokeToken = async (tokenValue: string) => {
-        // TODO: Implement token revocation
+    const revokeToken = (tokenValue: string) => {
         setGrants(prev => prev.filter(g => g.access_token?.value !== tokenValue));
     };
 
     return (
-        <Box sx={{ p: 3 }}>
-            <Typography variant="h4" gutterBottom>
-                GNAP Grant Management
-            </Typography>
-            <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                RFC 9635 - Grant Negotiation and Authorization Protocol
-            </Typography>
+        <div className={classes.container}>
+            <div>
+                <Text size={700} weight="bold">GNAP Grant Management</Text>
+                <Text size={300} style={{ display: 'block', color: tokens.colorNeutralForeground3 }}>
+                    RFC 9635 - Grant Negotiation and Authorization Protocol
+                </Text>
+            </div>
 
-            {/* Discovery Info */}
-            <Card sx={{ mb: 3 }}>
-                <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                        <Typography variant="h6">Authorization Server Discovery</Typography>
-                        <IconButton onClick={fetchDiscovery} size="small">
-                            <RefreshIcon />
-                        </IconButton>
-                    </Box>
-                    {discovery ? (
-                        <Grid container spacing={2}>
-                            <Grid item xs={12}>
-                                <Typography variant="body2" color="text.secondary">Grant Endpoint</Typography>
-                                <Typography variant="body1">{discovery.grant_request_endpoint}</Typography>
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <Typography variant="body2" color="text.secondary">Interaction Modes</Typography>
-                                <Box sx={{ mt: 1 }}>
-                                    {discovery.interaction_start_modes_supported?.map(mode => (
-                                        <Chip key={mode} label={mode} size="small" sx={{ mr: 0.5, mb: 0.5 }} />
-                                    ))}
-                                </Box>
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <Typography variant="body2" color="text.secondary">Key Proofs</Typography>
-                                <Box sx={{ mt: 1 }}>
-                                    {discovery.key_proofs_supported?.map(proof => (
-                                        <Chip key={proof} label={proof} size="small" color="primary" sx={{ mr: 0.5 }} />
-                                    ))}
-                                </Box>
-                            </Grid>
-                        </Grid>
-                    ) : (
-                        <Typography color="text.secondary">Loading discovery...</Typography>
-                    )}
-                </CardContent>
+            {/* Discovery Card */}
+            <Card className={classes.card}>
+                <div className={classes.header}>
+                    <Text size={500} weight="semibold">Authorization Server Discovery</Text>
+                    <Button icon={<ArrowSync24Regular />} appearance="subtle" onClick={fetchDiscovery} />
+                </div>
+                {discovery ? (
+                    <div className={classes.grid}>
+                        <div>
+                            <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>Grant Endpoint</Text>
+                            <Text block>{discovery.grant_request_endpoint}</Text>
+                        </div>
+                        <div>
+                            <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>Interaction Modes</Text>
+                            <div className={classes.badges}>
+                                {discovery.interaction_start_modes_supported?.map(mode => (
+                                    <Badge key={mode} appearance="outline">{mode}</Badge>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>Key Proofs</Text>
+                            <div className={classes.badges}>
+                                {discovery.key_proofs_supported?.map(proof => (
+                                    <Badge key={proof} color="brand">{proof}</Badge>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <Spinner size="small" label="Loading discovery..." />
+                )}
             </Card>
 
-            {/* Request Grant Form */}
-            <Card sx={{ mb: 3 }}>
-                <CardContent>
-                    <Typography variant="h6" gutterBottom>Request New Grant</Typography>
-                    <Grid container spacing={2} alignItems="center">
-                        <Grid item xs={12} sm={3}>
-                            <TextField
-                                fullWidth
-                                label="Access Type"
-                                value={accessType}
-                                onChange={(e) => setAccessType(e.target.value)}
-                                size="small"
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                fullWidth
-                                label="Actions (comma-separated)"
-                                value={accessActions}
-                                onChange={(e) => setAccessActions(e.target.value)}
-                                size="small"
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={3}>
-                            <Button
-                                variant="contained"
-                                fullWidth
-                                onClick={requestGrant}
-                                disabled={loading}
-                            >
-                                {loading ? <CircularProgress size={20} /> : 'Request Grant'}
-                            </Button>
-                        </Grid>
-                    </Grid>
-                    {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-                </CardContent>
+            {/* Request Grant Card */}
+            <Card className={classes.card}>
+                <Text size={500} weight="semibold" block style={{ marginBottom: '16px' }}>
+                    Request New Grant
+                </Text>
+                <div className={classes.formRow}>
+                    <div className={classes.inputGroup}>
+                        <Text size={200}>Access Type</Text>
+                        <Input
+                            value={accessType}
+                            onChange={(e, data) => setAccessType(data.value)}
+                        />
+                    </div>
+                    <div className={classes.inputGroup} style={{ flex: 2 }}>
+                        <Text size={200}>Actions (comma-separated)</Text>
+                        <Input
+                            value={accessActions}
+                            onChange={(e, data) => setAccessActions(data.value)}
+                        />
+                    </div>
+                    <Button
+                        appearance="primary"
+                        icon={<Key24Regular />}
+                        onClick={requestGrant}
+                        disabled={loading}
+                    >
+                        {loading ? <Spinner size="tiny" /> : 'Request Grant'}
+                    </Button>
+                </div>
+                {error && <div className={classes.error} style={{ marginTop: '12px' }}>{error}</div>}
             </Card>
 
-            {/* Active Tokens */}
-            <Card>
-                <CardContent>
-                    <Typography variant="h6" gutterBottom>Issued Tokens</Typography>
-                    {grants.length === 0 ? (
-                        <Typography color="text.secondary">No tokens issued yet</Typography>
-                    ) : (
-                        <TableContainer component={Paper} variant="outlined">
-                            <Table size="small">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Token</TableCell>
-                                        <TableCell>Expires In</TableCell>
-                                        <TableCell>Issued At</TableCell>
-                                        <TableCell align="right">Actions</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {grants.map((grant, idx) => grant.access_token && (
-                                        <TableRow key={idx}>
-                                            <TableCell>
-                                                <code style={{ fontSize: '0.8rem' }}>
-                                                    {grant.access_token.value.substring(0, 20)}...
-                                                </code>
-                                                <Tooltip title="Copy token">
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={() => copyToClipboard(grant.access_token!.value)}
-                                                    >
-                                                        <ContentCopyIcon fontSize="small" />
-                                                    </IconButton>
-                                                </Tooltip>
-                                            </TableCell>
-                                            <TableCell>{grant.access_token.expires_in}s</TableCell>
-                                            <TableCell>
-                                                {new Date(grant.access_token.issued_at).toLocaleTimeString()}
-                                            </TableCell>
-                                            <TableCell align="right">
-                                                <Tooltip title="Revoke token">
-                                                    <IconButton
-                                                        size="small"
-                                                        color="error"
-                                                        onClick={() => revokeToken(grant.access_token!.value)}
-                                                    >
-                                                        <DeleteIcon fontSize="small" />
-                                                    </IconButton>
-                                                </Tooltip>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    )}
-                </CardContent>
+            {/* Tokens Card */}
+            <Card className={classes.card}>
+                <Text size={500} weight="semibold" block style={{ marginBottom: '16px' }}>
+                    Issued Tokens
+                </Text>
+                {grants.length === 0 ? (
+                    <Text style={{ color: tokens.colorNeutralForeground3 }}>No tokens issued yet</Text>
+                ) : (
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHeaderCell>Token</TableHeaderCell>
+                                <TableHeaderCell>Expires In</TableHeaderCell>
+                                <TableHeaderCell>Issued At</TableHeaderCell>
+                                <TableHeaderCell>Actions</TableHeaderCell>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {grants.map((grant, idx) => grant.access_token && (
+                                <TableRow key={idx}>
+                                    <TableCell>
+                                        <span className={classes.tokenCode}>
+                                            {grant.access_token.value.substring(0, 20)}...
+                                        </span>
+                                    </TableCell>
+                                    <TableCell>{grant.access_token.expires_in}s</TableCell>
+                                    <TableCell>
+                                        {new Date(grant.access_token.issued_at).toLocaleTimeString()}
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className={classes.actions}>
+                                            <Tooltip content="Copy token" relationship="label">
+                                                <Button
+                                                    icon={<Copy24Regular />}
+                                                    appearance="subtle"
+                                                    size="small"
+                                                    onClick={() => copyToClipboard(grant.access_token!.value)}
+                                                />
+                                            </Tooltip>
+                                            <Tooltip content="Revoke token" relationship="label">
+                                                <Button
+                                                    icon={<Delete24Regular />}
+                                                    appearance="subtle"
+                                                    size="small"
+                                                    onClick={() => revokeToken(grant.access_token!.value)}
+                                                />
+                                            </Tooltip>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                )}
             </Card>
-        </Box>
+        </div>
     );
 };
 
