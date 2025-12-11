@@ -48,6 +48,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
 	gnapPkg "github.com/mauriciomferz/Gauth_go/pkg/gnap"
 	"github.com/mauriciomferz/Gauth_go/pkg/mcp"
+	a2aHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/a2a"
 	adminHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/admin"
 	anchorHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/anchor"
 	authHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/auth"
@@ -609,6 +610,11 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	deviceStore := devicePkg.NewMemoryDeviceCodeStore()
 	deviceHandler := deviceHandlers.NewHandler(deviceStore)
 	deviceHandler.RegisterRoutes(s.router)
+
+	// A2A Profile (Draft)
+	a2aHandler := a2aHandlers.NewHandler()
+	a2aHandler.RegisterRoutes(s.router)
+
 	log.Println("[gnap] RFC 9635 GNAP endpoints registered at /gnap/*")
 
 	// Protocol Flow API endpoints (Item 2: Protocol Flow Navigation)

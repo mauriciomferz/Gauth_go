@@ -130,3 +130,20 @@ Implementation lines (approximate):
 - `web/handlers/device` implements protocol endpoints.
 - `web/server_factory.go` integrates handlers.
 - `web/templates/device_verify.html` provides user interface.
+
+---
+
+## A2A Authorization Profile (Draft)
+
+| Section | Feature | Conformance | Implementation Notes |
+| :--- | :--- | :--- | :--- |
+| **Draft** | Agent Identity | ✅ Full | `pkg/a2a.AgentIdentity` |
+| **Draft** | Call Chain | ✅ Full | `pkg/a2a.A2ACallContext`, `CallHop` |
+| **Draft** | Chain Integrity | ✅ Full | Hash-linked hops with `ComputeHash` |
+| **Draft** | Transaction Token | ✅ Full | `POST /a2a/token` issues linked tokens |
+
+**Implementation Status:**
+- `pkg/a2a` implements chain builder and validation logic.
+- `web/handlers/a2a` implements token issuance and verification endpoints.
+- Implements "Agent-to-Agent Authorization" patterns for AI workflows.
+
