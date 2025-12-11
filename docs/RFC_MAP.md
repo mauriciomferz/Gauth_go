@@ -85,5 +85,32 @@ Implementation lines (approximate):
 3. Merkle or incremental accumulator for efficient partial proofs - **Implemented (Verified)**.
 4. Clause ID replacement with official RFC section numbering once authoritative text ingested.
 5. End-to-end provenance query combining delegation chain + revocation chain signed proofs - **Implemented (Verified)**.
+6. GNAP Integration (RFC 9635) - **Implemented (Verified)**.
+
+---
+
+## RFC 9635 (GNAP - Grant Negotiation and Authorization Protocol)
+| Clause ID | Title | Implementation Symbols | Tests | Status | Notes |
+|-----------|-------|------------------------|-------|--------|-------|
+| RFC9635-§3 | Grant Request | `pkg/gnap.GrantRequest`, `web/handlers/gnap.GrantRequest` | pkg/gnap/gnap_test.go | Implemented | Full grant request handling |
+| RFC9635-§4 | Grant Response | `pkg/gnap.GrantResponse`, `GrantState`, `AccessToken` | pkg/gnap/gnap_test.go | Implemented | Response construction with continuation |
+| RFC9635-§5 | Grant Continuation | `web/handlers/gnap.Continue`, `ContinueUpdate`, `ContinueCancel` | pkg/gnap/gnap_test.go | Implemented | Full continuation lifecycle |
+| RFC9635-§6 | Token Management | `pkg/gnap.TokenStore`, `TokenRotate`, `TokenRevoke` | pkg/gnap/gnap_test.go | Implemented | Rotation and revocation |
+| RFC9635-§7.3 | HTTP Signature Binding | `pkg/gnap/httpsig.Signer`, `Verifier` | pkg/gnap/httpsig/signer_test.go | Implemented | Ed25519, ECDSA, RSA support |
+| RFC9635-§9 | AS Discovery | `DiscoveryResponse`, `/.well-known/gnap-as-rs` | (manual test) | Implemented | Metadata endpoint |
+
+### GNAP Implementation Artifacts
+- Core Types: `pkg/gnap/types.go`
+- Grant Store: `pkg/gnap/store.go` (in-memory)
+- Token Store: `pkg/gnap/token_store.go` (in-memory)
+- Interaction: `pkg/gnap/interaction.go`
+- HTTP Signatures: `pkg/gnap/httpsig/signer.go`
+- HTTP Handlers: `web/handlers/gnap/handler.go`
+- Client Example: `examples/gnap_client/`
+
+### GAuth Extensions to GNAP
+- `PowerOfAttorneyRef` - Links GNAP grants to PoA credentials
+- `AuthorizationChain` - Recursive delegation attestation per RFC 0111
+- `ComplianceLevel` - Policy compliance attestation
 
 ---
