@@ -26,35 +26,35 @@ func NewAPIKeyHandler(db *pgxpool.Pool) *APIKeyHandler {
 
 // APIKey represents an API key
 type APIKey struct {
-	ID               string    `json:"id"`
-	TenantID         string    `json:"tenantId"`
-	KeyName          string    `json:"keyName"`
-	KeyPrefix        string    `json:"keyPrefix"`
-	Description      string    `json:"description"`
-	Scopes           []string  `json:"scopes"`
-	Status           string    `json:"status"`
-	CreatedBy        string    `json:"createdBy"`
-	CreatedAt        time.Time `json:"createdAt"`
+	ID               string     `json:"id"`
+	TenantID         string     `json:"tenantId"`
+	KeyName          string     `json:"keyName"`
+	KeyPrefix        string     `json:"keyPrefix"`
+	Description      string     `json:"description"`
+	Scopes           []string   `json:"scopes"`
+	Status           string     `json:"status"`
+	CreatedBy        string     `json:"createdBy"`
+	CreatedAt        time.Time  `json:"createdAt"`
 	ExpiresAt        *time.Time `json:"expiresAt"`
 	LastUsedAt       *time.Time `json:"lastUsedAt"`
 	RevokedAt        *time.Time `json:"revokedAt"`
 	RevokedBy        *string    `json:"revokedBy"`
 	RevocationReason *string    `json:"revocationReason"`
-	TotalRequests    int64     `json:"totalRequests"`
-	RateLimitPerMin  int       `json:"rateLimitPerMinute"`
-	RateLimitPerHour int       `json:"rateLimitPerHour"`
+	TotalRequests    int64      `json:"totalRequests"`
+	RateLimitPerMin  int        `json:"rateLimitPerMinute"`
+	RateLimitPerHour int        `json:"rateLimitPerHour"`
 }
 
 // CreateAPIKeyRequest represents API key creation request
 type CreateAPIKeyRequest struct {
-	TenantID         string    `json:"tenantId" binding:"required"`
-	KeyName          string    `json:"keyName" binding:"required"`
-	Description      string    `json:"description"`
-	Scopes           []string  `json:"scopes" binding:"required"`
+	TenantID         string     `json:"tenantId" binding:"required"`
+	KeyName          string     `json:"keyName" binding:"required"`
+	Description      string     `json:"description"`
+	Scopes           []string   `json:"scopes" binding:"required"`
 	ExpiresAt        *time.Time `json:"expiresAt"`
-	RateLimitPerMin  int       `json:"rateLimitPerMinute"`
-	RateLimitPerHour int       `json:"rateLimitPerHour"`
-	CreatedBy        string    `json:"createdBy" binding:"required"`
+	RateLimitPerMin  int        `json:"rateLimitPerMinute"`
+	RateLimitPerHour int        `json:"rateLimitPerHour"`
+	CreatedBy        string     `json:"createdBy" binding:"required"`
 }
 
 // CreateAPIKeyResponse represents API key creation response
@@ -74,13 +74,13 @@ func generateAPIKey() (string, string, error) {
 
 	// Encode to base64
 	fullKey := base64.URLEncoding.EncodeToString(bytes)
-	
+
 	// Add prefix for identification
 	prefixedKey := fmt.Sprintf("gauth_sk_%s", fullKey)
-	
+
 	// Extract first 16 chars for display prefix
 	keyPrefix := prefixedKey[:16]
-	
+
 	return prefixedKey, keyPrefix, nil
 }
 
@@ -99,6 +99,11 @@ func (h *APIKeyHandler) CreateAPIKey(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
+
+	if h.db == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database not available"})
+		return
+	}
 
 	// Generate new API key
 	secretKey, keyPrefix, err := generateAPIKey()
@@ -174,6 +179,14 @@ func (h *APIKeyHandler) ListAPIKeys(c *gin.Context) {
 
 	ctx := c.Request.Context()
 
+	if h.db == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"apiKeys": []APIKey{},
+			"total":   0,
+		})
+		return
+	}
+
 	query := `
 		SELECT 
 			id, tenant_id, key_name, key_prefix, description, 
@@ -224,6 +237,11 @@ func (h *APIKeyHandler) GetAPIKey(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
+
+	if h.db == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "API key not found (database unavailable)"})
+		return
+	}
 
 	query := `
 		SELECT 
@@ -278,6 +296,11 @@ func (h *APIKeyHandler) RevokeAPIKey(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
+
+	if h.db == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database not available"})
+		return
+	}
 
 	query := `
 		UPDATE api_keys
@@ -337,6 +360,11 @@ func (h *APIKeyHandler) UpdateAPIKey(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
+
+	if h.db == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database not available"})
+		return
+	}
 
 	// Build dynamic update query
 	query := `UPDATE api_keys SET `
@@ -409,6 +437,17 @@ func (h *APIKeyHandler) GetAPIKeyUsage(c *gin.Context) {
 
 	ctx := c.Request.Context()
 
+	if h.db == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"totalRequests":      0,
+			"successfulRequests": 0,
+			"failedRequests":     0,
+			"avgResponseTime":    0,
+			"lastUsed":           nil,
+		})
+		return
+	}
+
 	query := `
 		SELECT 
 			COUNT(*) as total_requests,
@@ -421,10 +460,10 @@ func (h *APIKeyHandler) GetAPIKeyUsage(c *gin.Context) {
 	`
 
 	var stats struct {
-		TotalRequests      int64     `json:"totalRequests"`
-		SuccessfulRequests int64     `json:"successfulRequests"`
-		FailedRequests     int64     `json:"failedRequests"`
-		AvgResponseTime    float64   `json:"avgResponseTime"`
+		TotalRequests      int64      `json:"totalRequests"`
+		SuccessfulRequests int64      `json:"successfulRequests"`
+		FailedRequests     int64      `json:"failedRequests"`
+		AvgResponseTime    float64    `json:"avgResponseTime"`
 		LastUsed           *time.Time `json:"lastUsed"`
 	}
 

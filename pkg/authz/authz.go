@@ -218,6 +218,7 @@ type MemoryAuthorizer struct {
 		IncObligationsFailed()
 		IncMandatoryObligationFailures()
 		ObserveObligationLatency(d time.Duration)
+		RecordDecision(action, resource, decision string, duration time.Duration)
 	} // minimal metrics subset
 	validatorRegistry *ValidatorRegistry
 }
@@ -272,6 +273,7 @@ func (ma *MemoryAuthorizer) SetMetricsProvider(mp interface {
 	IncObligationsFailed()
 	IncMandatoryObligationFailures()
 	ObserveObligationLatency(d time.Duration)
+	RecordDecision(action, resource, decision string, duration time.Duration)
 }) {
 	ma.metricsProvider = mp
 }
@@ -596,7 +598,15 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 				dec.Metadata["cache_hit"] = metadataCacheHitTrue
 				atomic.AddUint64(&ma.metricDecisions, 1)
 				atomic.AddUint64(&ma.metricCacheHits, 1)
-				ma.recordLatency(time.Since(start))
+				dur := time.Since(start)
+				ma.recordLatency(dur)
+				if ma.metricsProvider != nil {
+					outcome := "deny"
+					if dec.Allow {
+						outcome = "allow"
+					}
+					ma.metricsProvider.RecordDecision(request.Action, "resource", outcome, dur)
+				}
 				return dec, nil
 			}
 			ma.decisionCache.MarkStale(lruKey)
@@ -625,7 +635,15 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 				d.Metadata = metaCopy
 				atomic.AddUint64(&ma.metricDecisions, 1)
 				atomic.AddUint64(&ma.metricCacheHits, 1)
-				ma.recordLatency(time.Since(start))
+				dur := time.Since(start)
+				ma.recordLatency(dur)
+				if ma.metricsProvider != nil {
+					outcome := "deny"
+					if d.Allow {
+						outcome = "allow"
+					}
+					ma.metricsProvider.RecordDecision(request.Action, "resource", outcome, dur)
+				}
 				return d, nil
 			}
 			// expired
@@ -651,6 +669,13 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 			if ma.combining == FirstApplicable { // legacy shortcut
 				dec := ma.buildDecisionFromPolicy(request, policy, start)
 				ma.annotateConflict(&dec, denyList, allowList)
+				if ma.metricsProvider != nil {
+					outcome := "deny"
+					if dec.Allow {
+						outcome = "allow"
+					}
+					ma.metricsProvider.RecordDecision(request.Action, "resource", outcome, time.Since(start))
+				}
 				return dec, nil
 			}
 		}
@@ -662,27 +687,62 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 				dec := ma.buildDecisionFromPolicy(request, denyList[0], start)
 				ma.executePostDecision(&dec, denyList[0], request)
 				ma.annotateConflict(&dec, denyList, allowList)
+				if ma.metricsProvider != nil {
+					outcome := "deny"
+					if dec.Allow {
+						outcome = "allow"
+					}
+					ma.metricsProvider.RecordDecision(request.Action, "resource", outcome, time.Since(start))
+				}
 				return dec, nil
 			}
 			dec := ma.buildDecisionFromPolicy(request, allowList[0], start)
 			ma.executePostDecision(&dec, allowList[0], request)
 			ma.annotateConflict(&dec, denyList, allowList)
+			if ma.metricsProvider != nil {
+				outcome := "deny"
+				if dec.Allow {
+					outcome = "allow"
+				}
+				ma.metricsProvider.RecordDecision(request.Action, "resource", outcome, time.Since(start))
+			}
 			return dec, nil
 		case PermitOverrides:
 			if len(allowList) > 0 {
 				dec := ma.buildDecisionFromPolicy(request, allowList[0], start)
 				ma.executePostDecision(&dec, allowList[0], request)
 				ma.annotateConflict(&dec, denyList, allowList)
+				if ma.metricsProvider != nil {
+					outcome := "deny"
+					if dec.Allow {
+						outcome = "allow"
+					}
+					ma.metricsProvider.RecordDecision(request.Action, "resource", outcome, time.Since(start))
+				}
 				return dec, nil
 			}
 			dec := ma.buildDecisionFromPolicy(request, denyList[0], start)
 			ma.executePostDecision(&dec, denyList[0], request)
 			ma.annotateConflict(&dec, denyList, allowList)
+			if ma.metricsProvider != nil {
+				outcome := "deny"
+				if dec.Allow {
+					outcome = "allow"
+				}
+				ma.metricsProvider.RecordDecision(request.Action, "resource", outcome, time.Since(start))
+			}
 			return dec, nil
 		default: // fallback first matched
 			dec := ma.buildDecisionFromPolicy(request, matched[0], start)
 			ma.executePostDecision(&dec, matched[0], request)
 			ma.annotateConflict(&dec, denyList, allowList)
+			if ma.metricsProvider != nil {
+				outcome := "deny"
+				if dec.Allow {
+					outcome = "allow"
+				}
+				ma.metricsProvider.RecordDecision(request.Action, "resource", outcome, time.Since(start))
+			}
 			return dec, nil
 		}
 	}
@@ -700,7 +760,15 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 	}
 	atomic.AddUint64(&ma.metricDecisions, 1)
 	atomic.AddUint64(&ma.metricCacheMisses, 1)
-	ma.recordLatency(time.Since(start))
+	dur := time.Since(start)
+	ma.recordLatency(dur)
+	if ma.metricsProvider != nil {
+		outcome := "deny"
+		if dec.Allow {
+			outcome = "allow"
+		}
+		ma.metricsProvider.RecordDecision(request.Action, "resource", outcome, dur)
+	}
 	return dec, nil
 }
 

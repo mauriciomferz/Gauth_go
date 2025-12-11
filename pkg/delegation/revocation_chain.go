@@ -63,10 +63,16 @@ func validateReason(r string) string {
 // RevocationChain now maintains optional Signed Tree Head snapshots (Phase 4).
 // treeHeads is append-only history of signed roots for audit / persistence.
 type RevocationChain struct {
-	events      []RevocationEvent
-	merkle      *MerkleTree
-	treeHeads   []*SignedTreeHead
-	keyProvider crypto.KeyProvider
+	events         []RevocationEvent
+	merkle         *MerkleTree
+	treeHeads      []*SignedTreeHead
+	keyProvider    crypto.KeyProvider
+	anchorObserver RevocationAnchorObserver
+}
+
+// RevocationAnchorObserver receives callbacks when a SignedTreeHead is generated.
+type RevocationAnchorObserver interface {
+	OnRevocationAnchor(sth *SignedTreeHead) error
 }
 
 // Option configures the RevocationChain
@@ -84,6 +90,13 @@ func WithKeyProvider(kp crypto.KeyProvider) Option {
 func WithKeyManager(km *crypto.Manager) Option {
 	return func(c *RevocationChain) {
 		c.keyProvider = km
+	}
+}
+
+// WithAnchorObserver injects an observer for external anchoring
+func WithAnchorObserver(o RevocationAnchorObserver) Option {
+	return func(c *RevocationChain) {
+		c.anchorObserver = o
 	}
 }
 
@@ -498,9 +511,20 @@ func (c *RevocationChain) SignTreeHead() (*SignedTreeHead, error) {
 	}
 	c.treeHeads = append(c.treeHeads, sth)
 	// Optional persistence
+	// Optional persistence
 	if p := os.Getenv("GAUTH_STH_PERSIST_PATH"); p != "" {
 		_ = c.SaveSignedTreeHeads(p) // best-effort; ignore error (log could be added later)
 	}
+
+	// External Anchor Observer Hook
+	if c.anchorObserver != nil {
+		if err := c.anchorObserver.OnRevocationAnchor(sth); err != nil {
+			// Log error but don't fail the operation (observer failure shouldn't block internal signing)
+			// In a stricter mode, we might want to return error.
+			// fmt.Printf("anchor observer error: %v\n", err)
+		}
+	}
+
 	return sth, nil
 }
 

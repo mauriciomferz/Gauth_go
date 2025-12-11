@@ -1,0 +1,258 @@
+package gnap
+
+import (
+	"crypto/rand"
+	"encoding/hex"
+	"errors"
+	"sync"
+	"time"
+)
+
+// GrantStore manages grant lifecycle and persistence.
+type GrantStore interface {
+	// Create stores a new grant request
+	Create(req *GrantRequest) (*Grant, error)
+
+	// Get retrieves a grant by ID
+	Get(id string) (*Grant, error)
+
+	// Update modifies an existing grant
+	Update(g *Grant) error
+
+	// Delete removes a grant
+	Delete(id string) error
+
+	// ListByClient returns grants for a client instance
+	ListByClient(instanceID string) ([]*Grant, error)
+}
+
+// Grant represents a grant in progress or completed.
+type Grant struct {
+	// ID is the unique grant identifier
+	ID string `json:"grant_id"`
+
+	// State is the current grant state
+	State GrantState `json:"state"`
+
+	// Request is the original grant request
+	Request *GrantRequest `json:"request"`
+
+	// Response is the current response (updated as grant progresses)
+	Response *GrantResponse `json:"response,omitempty"`
+
+	// ContinueToken for continuation requests
+	ContinueToken string `json:"continue_token,omitempty"`
+
+	// ContinueURI for continuation endpoint
+	ContinueURI string `json:"continue_uri,omitempty"`
+
+	// InteractRef from interaction callback
+	InteractRef string `json:"interact_ref,omitempty"`
+
+	// InteractNonce for hash verification
+	InteractNonce string `json:"interact_nonce,omitempty"`
+
+	// ClientInstanceID assigned to client
+	ClientInstanceID string `json:"client_instance_id,omitempty"`
+
+	// CreatedAt timestamp
+	CreatedAt time.Time `json:"created_at"`
+
+	// UpdatedAt timestamp
+	UpdatedAt time.Time `json:"updated_at"`
+
+	// ExpiresAt for grant timeout
+	ExpiresAt time.Time `json:"expires_at,omitempty"`
+
+	// --- GAuth Extensions ---
+
+	// PoAID if linked to Power of Attorney
+	PoAID string `json:"poa_id,omitempty"`
+
+	// SubscriptionID if linked to GAuth subscription
+	SubscriptionID string `json:"subscription_id,omitempty"`
+}
+
+// MemoryGrantStore implements GrantStore in-memory.
+type MemoryGrantStore struct {
+	mu       sync.RWMutex
+	grants   map[string]*Grant
+	byClient map[string][]string // instance_id -> grant_ids
+}
+
+// NewMemoryGrantStore creates an in-memory grant store.
+func NewMemoryGrantStore() *MemoryGrantStore {
+	return &MemoryGrantStore{
+		grants:   make(map[string]*Grant),
+		byClient: make(map[string][]string),
+	}
+}
+
+// Create stores a new grant request.
+func (s *MemoryGrantStore) Create(req *GrantRequest) (*Grant, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	id := generateID("gnt_")
+	now := time.Now().UTC()
+
+	g := &Grant{
+		ID:        id,
+		State:     GrantStateProcessing,
+		Request:   req,
+		CreatedAt: now,
+		UpdatedAt: now,
+		ExpiresAt: now.Add(10 * time.Minute), // Default TTL
+	}
+
+	// Generate continuation token
+	g.ContinueToken = generateID("cnt_")
+
+	// Link to client if available
+	if req.Client != nil && req.Client.InstanceID != "" {
+		g.ClientInstanceID = req.Client.InstanceID
+		s.byClient[g.ClientInstanceID] = append(s.byClient[g.ClientInstanceID], g.ID)
+	}
+
+	// Link to GAuth subscription if present
+	if req.SubscriptionID != "" {
+		g.SubscriptionID = req.SubscriptionID
+	}
+
+	s.grants[id] = g
+	return g, nil
+}
+
+// Get retrieves a grant by ID.
+func (s *MemoryGrantStore) Get(id string) (*Grant, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	g, ok := s.grants[id]
+	if !ok {
+		return nil, errors.New("grant not found")
+	}
+
+	// Check expiration
+	if !g.ExpiresAt.IsZero() && time.Now().After(g.ExpiresAt) {
+		return nil, errors.New("grant expired")
+	}
+
+	return g, nil
+}
+
+// Update modifies an existing grant.
+func (s *MemoryGrantStore) Update(g *Grant) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if _, ok := s.grants[g.ID]; !ok {
+		return errors.New("grant not found")
+	}
+
+	g.UpdatedAt = time.Now().UTC()
+	s.grants[g.ID] = g
+	return nil
+}
+
+// Delete removes a grant.
+func (s *MemoryGrantStore) Delete(id string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	g, ok := s.grants[id]
+	if !ok {
+		return errors.New("grant not found")
+	}
+
+	// Remove from client index
+	if g.ClientInstanceID != "" {
+		ids := s.byClient[g.ClientInstanceID]
+		for i, gid := range ids {
+			if gid == id {
+				s.byClient[g.ClientInstanceID] = append(ids[:i], ids[i+1:]...)
+				break
+			}
+		}
+	}
+
+	delete(s.grants, id)
+	return nil
+}
+
+// ListByClient returns grants for a client instance.
+func (s *MemoryGrantStore) ListByClient(instanceID string) ([]*Grant, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	ids := s.byClient[instanceID]
+	result := make([]*Grant, 0, len(ids))
+	for _, id := range ids {
+		if g, ok := s.grants[id]; ok {
+			result = append(result, g)
+		}
+	}
+	return result, nil
+}
+
+// GetByContinueToken finds grant by continuation token.
+func (s *MemoryGrantStore) GetByContinueToken(token string) (*Grant, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	for _, g := range s.grants {
+		if g.ContinueToken == token {
+			if !g.ExpiresAt.IsZero() && time.Now().After(g.ExpiresAt) {
+				return nil, errors.New("grant expired")
+			}
+			return g, nil
+		}
+	}
+	return nil, errors.New("grant not found")
+}
+
+// GenerateID creates a random prefixed ID.
+func GenerateID(prefix string) string {
+	b := make([]byte, 16)
+	_, _ = rand.Read(b)
+	return prefix + hex.EncodeToString(b)
+}
+
+// generateID is an alias for internal use.
+var generateID = GenerateID
+
+// --- State Transitions ---
+
+// Transition validates and applies a state transition.
+func (g *Grant) Transition(newState GrantState) error {
+	valid := false
+	switch g.State {
+	case GrantStateProcessing:
+		valid = newState == GrantStatePending || newState == GrantStateApproved || newState == GrantStateDenied
+	case GrantStatePending:
+		valid = newState == GrantStateApproved || newState == GrantStateDenied
+	case GrantStateApproved:
+		valid = newState == GrantStateFinalized
+	case GrantStateFinalized, GrantStateDenied:
+		// Terminal states
+		valid = false
+	}
+
+	if !valid {
+		return errors.New("invalid state transition")
+	}
+
+	g.State = newState
+	g.UpdatedAt = time.Now().UTC()
+	return nil
+}
+
+// IsTerminal returns true if grant is in a terminal state.
+func (g *Grant) IsTerminal() bool {
+	return g.State == GrantStateFinalized || g.State == GrantStateDenied
+}
+
+// CanContinue returns true if grant accepts continuation requests.
+func (g *Grant) CanContinue() bool {
+	return g.State == GrantStateProcessing || g.State == GrantStatePending || g.State == GrantStateApproved
+}

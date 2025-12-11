@@ -5,7 +5,7 @@
 # ============================================================================
 # Stage 1: Builder - Compile Go application with CGO support
 # ============================================================================
-FROM golang:1.25-alpine AS builder
+FROM golang:1.24-alpine AS builder
 
 # Install build dependencies for CGO and BLS library
 RUN apk add --no-cache \
@@ -14,7 +14,9 @@ RUN apk add --no-cache \
     musl-dev \
     git \
     make \
-    ca-certificates
+    ca-certificates \
+    pkgconf \
+    linux-headers
 
 # Set working directory
 WORKDIR /build
@@ -33,8 +35,6 @@ COPY . .
 # Target linux/amd64 for Kubernetes compatibility
 RUN echo "=== Building GAuth web-server with CGO support ===" && \
     CGO_ENABLED=1 \
-    GOOS=linux \
-    GOARCH=amd64 \
     go build -v \
     -ldflags="-w -s" \
     -o /build/web-server \
@@ -50,7 +50,7 @@ RUN echo "=== Verifying binary ===" && \
 # ============================================================================
 # Stage 2: Runtime - Minimal Alpine image with runtime dependencies
 # ============================================================================
-FROM alpine:3.19
+FROM alpine:3.19 AS runtime
 
 # Install runtime dependencies for CGO-compiled binaries
 RUN apk add --no-cache \

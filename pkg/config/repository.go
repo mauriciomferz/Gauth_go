@@ -41,6 +41,10 @@ type ConfigVariableRecord struct {
 
 // ListVariables retrieves all configuration variables for a tenant
 func (r *Repository) ListVariables(ctx context.Context, tenantID string) ([]ConfigVariableRecord, error) {
+	if r.db == nil {
+		return []ConfigVariableRecord{}, nil
+	}
+
 	query := `
 		SELECT id, tenant_id, variable_key, variable_value, variable_type, scope,
 		       description, is_sensitive, is_encrypted, category,
@@ -75,6 +79,10 @@ func (r *Repository) ListVariables(ctx context.Context, tenantID string) ([]Conf
 
 // CreateVariable creates a new configuration variable
 func (r *Repository) CreateVariable(ctx context.Context, variable ConfigVariableRecord) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
+
 	query := `
 		INSERT INTO config_variables (
 			tenant_id, variable_key, variable_value, variable_type, scope,
@@ -97,6 +105,10 @@ func (r *Repository) CreateVariable(ctx context.Context, variable ConfigVariable
 
 // UpdateVariable updates an existing configuration variable
 func (r *Repository) UpdateVariable(ctx context.Context, tenantID, key string, variable ConfigVariableRecord) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
+
 	query := `
 		UPDATE config_variables
 		SET variable_value = $1, variable_type = $2, description = $3,
@@ -121,6 +133,10 @@ func (r *Repository) UpdateVariable(ctx context.Context, tenantID, key string, v
 
 // DeleteVariable deletes a configuration variable
 func (r *Repository) DeleteVariable(ctx context.Context, tenantID, key string) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
+
 	query := `DELETE FROM config_variables WHERE tenant_id = $1 AND variable_key = $2`
 
 	result, err := r.db.Exec(ctx, query, tenantID, key)
@@ -157,6 +173,10 @@ type ConfigFileRecord struct {
 
 // GetConfigFile retrieves the latest version of a configuration file
 func (r *Repository) GetConfigFile(ctx context.Context, tenantID, fileName, format string) (*ConfigFileRecord, error) {
+	if r.db == nil {
+		return nil, fmt.Errorf("database not available")
+	}
+
 	query := `
 		SELECT id, tenant_id, file_name, file_format, file_content,
 		       description, checksum, size_bytes, version,
@@ -182,6 +202,10 @@ func (r *Repository) GetConfigFile(ctx context.Context, tenantID, fileName, form
 
 // CreateConfigFile creates a new version of a configuration file
 func (r *Repository) CreateConfigFile(ctx context.Context, file ConfigFileRecord) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
+
 	// Get the latest version for this file
 	versionQuery := `
 		SELECT COALESCE(MAX(version), 0) + 1
@@ -215,6 +239,10 @@ func (r *Repository) CreateConfigFile(ctx context.Context, file ConfigFileRecord
 
 // ListConfigVersions retrieves all versions of configuration files for a tenant
 func (r *Repository) ListConfigVersions(ctx context.Context, tenantID string) ([]ConfigFileRecord, error) {
+	if r.db == nil {
+		return []ConfigFileRecord{}, nil
+	}
+
 	query := `
 		SELECT id, tenant_id, file_name, file_format, file_content,
 		       description, checksum, size_bytes, version,
@@ -250,6 +278,10 @@ func (r *Repository) ListConfigVersions(ctx context.Context, tenantID string) ([
 
 // GetConfigVersion retrieves a specific version of a configuration file
 func (r *Repository) GetConfigVersion(ctx context.Context, tenantID, versionID string) (*ConfigFileRecord, error) {
+	if r.db == nil {
+		return nil, fmt.Errorf("database not available")
+	}
+
 	query := `
 		SELECT id, tenant_id, file_name, file_format, file_content,
 		       description, checksum, size_bytes, version,
@@ -277,21 +309,25 @@ func (r *Repository) GetConfigVersion(ctx context.Context, tenantID, versionID s
 
 // ServiceConfigRecord represents a service configuration in the database
 type ServiceConfigRecord struct {
-	ID             string
-	TenantID       *string
-	ServiceName    string
-	ConfigVersion  string
-	Status         string
-	ConfigData     string // JSONB stored as string
-	Environment    *string
-	DeployedAt     *time.Time
-	LastReloadAt   *time.Time
+	ID              string
+	TenantID        *string
+	ServiceName     string
+	ConfigVersion   string
+	Status          string
+	ConfigData      string // JSONB stored as string
+	Environment     *string
+	DeployedAt      *time.Time
+	LastReloadAt    *time.Time
 	RequiresRestart bool
-	CreatedAt      time.Time
+	CreatedAt       time.Time
 }
 
 // ListServiceConfigs retrieves all service configurations
 func (r *Repository) ListServiceConfigs(ctx context.Context, tenantID string) ([]ServiceConfigRecord, error) {
+	if r.db == nil {
+		return []ServiceConfigRecord{}, nil
+	}
+
 	query := `
 		SELECT DISTINCT ON (service_name)
 		       id, tenant_id, service_name, config_version, status,
@@ -327,6 +363,10 @@ func (r *Repository) ListServiceConfigs(ctx context.Context, tenantID string) ([
 
 // UpdateServiceReload updates the last reload timestamp for a service
 func (r *Repository) UpdateServiceReload(ctx context.Context, tenantID, serviceName string) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
+
 	query := `
 		UPDATE service_configs
 		SET last_reload_at = CURRENT_TIMESTAMP, status = 'active'
@@ -367,6 +407,10 @@ type TenantOverrideRecord struct {
 
 // ListTenantOverrides retrieves all tenant configuration overrides
 func (r *Repository) ListTenantOverrides(ctx context.Context, tenantID string) ([]TenantOverrideRecord, error) {
+	if r.db == nil {
+		return []TenantOverrideRecord{}, nil
+	}
+
 	query := `
 		SELECT id, tenant_id, config_key, override_value, override_type,
 		       enabled, priority, created_at, updated_at, created_by
@@ -399,6 +443,10 @@ func (r *Repository) ListTenantOverrides(ctx context.Context, tenantID string) (
 
 // CreateTenantOverride creates a new tenant configuration override
 func (r *Repository) CreateTenantOverride(ctx context.Context, override TenantOverrideRecord) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
+
 	query := `
 		INSERT INTO tenant_config_overrides (
 			tenant_id, config_key, override_value, override_type, created_by
@@ -418,6 +466,10 @@ func (r *Repository) CreateTenantOverride(ctx context.Context, override TenantOv
 
 // ToggleTenantOverride enables or disables a tenant override
 func (r *Repository) ToggleTenantOverride(ctx context.Context, tenantID, overrideID string, enabled bool) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
+
 	query := `
 		UPDATE tenant_config_overrides
 		SET enabled = $1, updated_at = CURRENT_TIMESTAMP
@@ -438,6 +490,10 @@ func (r *Repository) ToggleTenantOverride(ctx context.Context, tenantID, overrid
 
 // DeleteTenantOverride deletes a tenant configuration override
 func (r *Repository) DeleteTenantOverride(ctx context.Context, tenantID, overrideID string) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
+
 	query := `DELETE FROM tenant_config_overrides WHERE tenant_id = $1 AND id = $2`
 
 	result, err := r.db.Exec(ctx, query, tenantID, overrideID)
@@ -458,23 +514,27 @@ func (r *Repository) DeleteTenantOverride(ctx context.Context, tenantID, overrid
 
 // FeatureFlagRecord represents a feature flag in the database
 type FeatureFlagRecord struct {
-	ID                 string
-	TenantID           *string
-	FlagKey            string
-	FlagName           string
-	Description        *string
-	Enabled            bool
-	RolloutPercentage  int
-	TargetingRules     *string // JSONB stored as string
-	Category           *string
-	Tags               []string
-	CreatedAt          time.Time
-	UpdatedAt          time.Time
-	UpdatedBy          *string
+	ID                string
+	TenantID          *string
+	FlagKey           string
+	FlagName          string
+	Description       *string
+	Enabled           bool
+	RolloutPercentage int
+	TargetingRules    *string // JSONB stored as string
+	Category          *string
+	Tags              []string
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+	UpdatedBy         *string
 }
 
 // ListFeatureFlags retrieves all feature flags for a tenant
 func (r *Repository) ListFeatureFlags(ctx context.Context, tenantID string) ([]FeatureFlagRecord, error) {
+	if r.db == nil {
+		return []FeatureFlagRecord{}, nil
+	}
+
 	query := `
 		SELECT id, tenant_id, flag_key, flag_name, description, enabled,
 		       rollout_percentage, targeting_rules::text, category, tags,
@@ -509,6 +569,10 @@ func (r *Repository) ListFeatureFlags(ctx context.Context, tenantID string) ([]F
 
 // CreateFeatureFlag creates a new feature flag
 func (r *Repository) CreateFeatureFlag(ctx context.Context, flag FeatureFlagRecord) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
+
 	query := `
 		INSERT INTO feature_flags (
 			tenant_id, flag_key, flag_name, description, enabled,
@@ -530,6 +594,10 @@ func (r *Repository) CreateFeatureFlag(ctx context.Context, flag FeatureFlagReco
 
 // ToggleFeatureFlag enables or disables a feature flag
 func (r *Repository) ToggleFeatureFlag(ctx context.Context, tenantID, flagID string, enabled bool) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
+
 	query := `
 		UPDATE feature_flags
 		SET enabled = $1, updated_at = CURRENT_TIMESTAMP
@@ -550,6 +618,10 @@ func (r *Repository) ToggleFeatureFlag(ctx context.Context, tenantID, flagID str
 
 // DeleteFeatureFlag deletes a feature flag
 func (r *Repository) DeleteFeatureFlag(ctx context.Context, tenantID, flagID string) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
+
 	query := `DELETE FROM feature_flags WHERE (tenant_id = $1 OR tenant_id IS NULL) AND id = $2`
 
 	result, err := r.db.Exec(ctx, query, tenantID, flagID)

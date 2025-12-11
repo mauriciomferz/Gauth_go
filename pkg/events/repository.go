@@ -20,17 +20,17 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 
 // EventTypeRecord represents an event type definition in the database
 type EventTypeRecord struct {
-	ID             string
-	TenantID       string
-	EventType      string
-	Category       string
-	Description    string
-	Severity       string
-	Schema         string
-	RetentionDays  int
-	IsSystemEvent  bool
-	Count          int // Event count (computed)
-	CreatedAt      time.Time
+	ID            string
+	TenantID      string
+	EventType     string
+	Category      string
+	Description   string
+	Severity      string
+	Schema        string
+	RetentionDays int
+	IsSystemEvent bool
+	Count         int // Event count (computed)
+	CreatedAt     time.Time
 }
 
 // EventRecord represents a system event in the database
@@ -57,34 +57,34 @@ type EventRecord struct {
 
 // EventHandlerRecord represents an event handler configuration in the database
 type EventHandlerRecord struct {
-	ID              string
-	TenantID        string
-	HandlerName     string
-	EventType       string
-	HandlerType     string
-	Status          string
-	EndpointURL     *string
-	HTTPMethod      *string
-	Headers         map[string]interface{}
-	RetryConfig     map[string]interface{}
-	TimeoutSeconds  int
-	SuccessCount    int
-	FailureCount    int
-	LastSuccessAt   *time.Time
-	LastFailureAt   *time.Time
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
+	ID             string
+	TenantID       string
+	HandlerName    string
+	EventType      string
+	HandlerType    string
+	Status         string
+	EndpointURL    *string
+	HTTPMethod     *string
+	Headers        map[string]interface{}
+	RetryConfig    map[string]interface{}
+	TimeoutSeconds int
+	SuccessCount   int
+	FailureCount   int
+	LastSuccessAt  *time.Time
+	LastFailureAt  *time.Time
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
 // EventStats represents aggregate statistics for event system
 type EventStats struct {
-	TotalEvents      int64
-	EventsToday      int64
-	EventsThisHour   int64
-	ByCategory       map[string]int64
-	BySeverity       map[string]int64
-	TopEventTypes    []EventTypeCount
-	HandlerStats     HandlerStats
+	TotalEvents    int64
+	EventsToday    int64
+	EventsThisHour int64
+	ByCategory     map[string]int64
+	BySeverity     map[string]int64
+	TopEventTypes  []EventTypeCount
+	HandlerStats   HandlerStats
 }
 
 // EventTypeCount represents count for a specific event type
@@ -95,15 +95,19 @@ type EventTypeCount struct {
 
 // HandlerStats represents handler statistics
 type HandlerStats struct {
-	TotalHandlers    int
-	EnabledHandlers  int
-	DisabledHandlers int
-	TotalInvocations int64
+	TotalHandlers      int
+	EnabledHandlers    int
+	DisabledHandlers   int
+	TotalInvocations   int64
 	AverageSuccessRate float64
 }
 
 // ListEventTypes returns all event types for a tenant with event counts
 func (r *Repository) ListEventTypes(ctx context.Context, tenantID string) ([]EventTypeRecord, error) {
+	if r.db == nil {
+		// Return empty list in degraded mode
+		return []EventTypeRecord{}, nil
+	}
 	query := `
 		SELECT 
 			et.id, et.tenant_id, et.event_type, et.category, et.description,
@@ -147,6 +151,9 @@ func (r *Repository) ListEventTypes(ctx context.Context, tenantID string) ([]Eve
 
 // ListEvents returns recent events with optional filtering
 func (r *Repository) ListEvents(ctx context.Context, tenantID string, filters EventFilters) ([]EventRecord, error) {
+	if r.db == nil {
+		return []EventRecord{}, nil
+	}
 	query := `
 		SELECT 
 			id, tenant_id, event_type, category, severity, timestamp,
@@ -240,6 +247,9 @@ type EventFilters struct {
 
 // ListHandlers returns all event handlers for a tenant
 func (r *Repository) ListHandlers(ctx context.Context, tenantID string) ([]EventHandlerRecord, error) {
+	if r.db == nil {
+		return []EventHandlerRecord{}, nil
+	}
 	query := `
 		SELECT 
 			id, tenant_id, handler_name, event_type, 
@@ -262,7 +272,7 @@ func (r *Repository) ListHandlers(ctx context.Context, tenantID string) ([]Event
 		var endpoint, method string
 		var retryCount int
 		var enabled bool
-		
+
 		err := rows.Scan(
 			&h.ID, &h.TenantID, &h.HandlerName, &h.EventType,
 			&endpoint, &method, &h.Headers, &h.TimeoutSeconds, &retryCount, &enabled,
@@ -280,12 +290,12 @@ func (r *Repository) ListHandlers(ctx context.Context, tenantID string) ([]Event
 			h.Status = "inactive"
 		}
 		h.HandlerType = "webhook" // default type
-		
+
 		// Set retry config from retry_count
 		h.RetryConfig = map[string]interface{}{
 			"max_retries": retryCount,
 		}
-		
+
 		// Initialize counters (no stats in current table)
 		h.SuccessCount = 0
 		h.FailureCount = 0
@@ -298,6 +308,9 @@ func (r *Repository) ListHandlers(ctx context.Context, tenantID string) ([]Event
 
 // CreateHandler creates a new event handler
 func (r *Repository) CreateHandler(ctx context.Context, h *EventHandlerRecord) error {
+	if r.db == nil {
+		return fmt.Errorf("database unavailable")
+	}
 	query := `
 		INSERT INTO event_handlers (
 			tenant_id, handler_name, event_type,
@@ -309,7 +322,7 @@ func (r *Repository) CreateHandler(ctx context.Context, h *EventHandlerRecord) e
 	var endpoint, method string
 	var retryCount int
 	var enabled bool
-	
+
 	if h.EndpointURL != nil {
 		endpoint = *h.EndpointURL
 	}
@@ -317,7 +330,7 @@ func (r *Repository) CreateHandler(ctx context.Context, h *EventHandlerRecord) e
 		method = *h.HTTPMethod
 	}
 	enabled = (h.Status == "active")
-	
+
 	// Extract retry count from retry config
 	if h.RetryConfig != nil {
 		if maxRetries, ok := h.RetryConfig["max_retries"].(int); ok {
@@ -343,8 +356,11 @@ func (r *Repository) CreateHandler(ctx context.Context, h *EventHandlerRecord) e
 
 // UpdateHandlerStatus updates the status (enabled/disabled) of an event handler
 func (r *Repository) UpdateHandlerStatus(ctx context.Context, tenantID, handlerID, status string) error {
+	if r.db == nil {
+		return fmt.Errorf("database unavailable")
+	}
 	enabled := (status == "active")
-	
+
 	query := `
 		UPDATE event_handlers
 		SET enabled = $1, updated_at = CURRENT_TIMESTAMP
@@ -365,6 +381,9 @@ func (r *Repository) UpdateHandlerStatus(ctx context.Context, tenantID, handlerI
 
 // DeleteHandler removes an event handler
 func (r *Repository) DeleteHandler(ctx context.Context, tenantID, handlerID string) error {
+	if r.db == nil {
+		return fmt.Errorf("database unavailable")
+	}
 	query := `DELETE FROM event_handlers WHERE tenant_id = $1 AND id = $2`
 
 	result, err := r.db.Exec(ctx, query, tenantID, handlerID)
@@ -381,6 +400,14 @@ func (r *Repository) DeleteHandler(ctx context.Context, tenantID, handlerID stri
 
 // GetEventMetrics returns aggregate metrics for the event system
 func (r *Repository) GetEventMetrics(ctx context.Context, tenantID string) (*EventStats, error) {
+	if r.db == nil {
+		return &EventStats{
+			ByCategory:    make(map[string]int64),
+			BySeverity:    make(map[string]int64),
+			TopEventTypes: []EventTypeCount{},
+			HandlerStats:  HandlerStats{},
+		}, nil
+	}
 	// Get total events and time-based counts
 	timeQuery := `
 		WITH stats AS (
@@ -502,6 +529,9 @@ func (r *Repository) GetEventMetrics(ctx context.Context, tenantID string) (*Eve
 
 // UpdateHandlerStats updates success/failure counts for a handler
 func (r *Repository) UpdateHandlerStats(ctx context.Context, tenantID, handlerID string, success bool) error {
+	if r.db == nil {
+		return nil // No-op in degraded mode
+	}
 	var query string
 	if success {
 		query = `

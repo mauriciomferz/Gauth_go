@@ -78,9 +78,29 @@ func (a *API) Provenance(c *gin.Context) {
 		verified = false
 		verr = err.Error()
 	}
+
+	// Capture Revocation Snapshot (Roadmap Item 5)
+	var revocationSnapshot interface{}
+	if a.Handler.RevocationChain != nil {
+		revocationSnapshot = a.Handler.RevocationChain.LatestTreeHead()
+	}
+
 	// Optional hash query parameter
 	qh := strings.TrimSpace(c.Query("hash"))
 	if qh != "" {
+		// Validate hash format (SHA-256 hex)
+		if len(qh) != 64 {
+			c.JSON(400, gin.H{"success": false, "message": "invalid hash format: length must be 64"})
+			return
+		}
+		// Check hex chars
+		for _, r := range qh {
+			if !((r >= '0' && r <= '9') || (r >= 'a' && r <= 'f') || (r >= 'A' && r <= 'F')) {
+				c.JSON(400, gin.H{"success": false, "message": "invalid hash format: must be hex"})
+				return
+			}
+		}
+
 		found := false
 		for _, h := range a.Handler.Registry.ChainHashes() {
 			if h == qh {
@@ -96,13 +116,14 @@ func (a *API) Provenance(c *gin.Context) {
 		}
 	}
 	c.JSON(200, gin.H{
-		"success":            true,
-		"head_hash":          headHash,
-		"chain":              a.Handler.Registry.ChainHashes(),
-		"verified":           verified,
-		"verification_error": verr,
-		"queried_hash":       qh,
-		"length":             len(a.Handler.Registry.ChainHashes()),
+		"success":             true,
+		"head_hash":           headHash,
+		"chain":               a.Handler.Registry.ChainHashes(),
+		"verified":            verified,
+		"verification_error":  verr,
+		"queried_hash":        qh,
+		"length":              len(a.Handler.Registry.ChainHashes()),
+		"revocation_snapshot": revocationSnapshot,
 	})
 }
 

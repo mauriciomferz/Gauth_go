@@ -5,7 +5,7 @@ package main
 // Conformance CI script: parses docs/RFC_MAP.md and ensures that for each row with Status of
 // Implemented or Partial, at least one referenced test file exists in the repository.
 // Exit non-zero if gaps detected, printing a machine-readable summary.
-// Usage: go run scripts/conformance_ci.go
+// Usage: go build -o conformance scripts/conformance_ci.go && ./conformance
 
 import (
 	"bufio"
@@ -64,6 +64,9 @@ func RunConformance(args []string) (int, error) {
 				// split by whitespace or comma
 				for _, part := range strings.Split(testsCell, ",") {
 					p := strings.TrimSpace(part)
+					p = strings.Trim(p, "`")
+					p = strings.Trim(p, "\"")
+					p = strings.Trim(p, "'")
 					if p != "" {
 						tests = append(tests, p)
 					}
@@ -458,4 +461,12 @@ func levenshteinBounded(a, b string, max int) int {
 		return -1
 	}
 	return prev[lb]
+}
+
+func main() {
+	exitCode, err := RunConformance(os.Args[1:])
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+	}
+	os.Exit(exitCode)
 }

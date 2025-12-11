@@ -7,16 +7,21 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/Gauth_go/internal/metrics"
+	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
 	"github.com/mauriciomferz/Gauth_go/pkg/policy"
 )
 
 type Handler struct {
-	Registry    *policy.Registry
-	Engine      *policy.ChainEngine
-	RateLimiter *SimpleRateLimiter
-	Metrics     *Metrics
-	Config      Config
-	PromMetrics metrics.Metrics // For Prometheus integration
+	Registry        *policy.Registry
+	Engine          *policy.ChainEngine
+	RateLimiter     *SimpleRateLimiter
+	Metrics         *Metrics
+	Config          Config
+	PromMetrics     metrics.Metrics // For Prometheus integration
+	RevocationChain interface {
+		IsDelegationRevoked(id, hash string) bool
+		LatestTreeHead() *delegation.SignedTreeHead
+	}
 }
 
 func NewHandler(persistPath string, m metrics.Metrics) *Handler {

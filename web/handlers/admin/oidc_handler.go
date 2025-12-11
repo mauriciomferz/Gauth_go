@@ -153,6 +153,14 @@ func (h *OIDCHandler) ListOIDCProviders(c *gin.Context) {
 		return
 	}
 
+	if h.db == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"providers": []OIDCProvider{},
+			"total":     0,
+		})
+		return
+	}
+
 	ctx := c.Request.Context()
 	query := `
 		SELECT 
@@ -220,6 +228,11 @@ func (h *OIDCHandler) GetOIDCProvider(c *gin.Context) {
 		}
 	}
 
+	if h.db == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Database not available"})
+		return
+	}
+
 	ctx := c.Request.Context()
 	query := `
 		SELECT 
@@ -278,6 +291,11 @@ func (h *OIDCHandler) CreateOIDCProvider(c *gin.Context) {
 	}
 	if tenantID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id is required"})
+		return
+	}
+
+	if h.db == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database not available"})
 		return
 	}
 
@@ -405,6 +423,11 @@ func (h *OIDCHandler) UpdateOIDCProvider(c *gin.Context) {
 		if val, exists := c.Get("tenant_id"); exists {
 			tenantID, _ = val.(string)
 		}
+	}
+
+	if h.db == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database not available"})
+		return
 	}
 
 	var req UpdateOIDCProviderRequest
@@ -653,6 +676,11 @@ func (h *OIDCHandler) DeleteOIDCProvider(c *gin.Context) {
 		}
 	}
 
+	if h.db == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database not available"})
+		return
+	}
+
 	ctx := c.Request.Context()
 	query := `DELETE FROM oidc_providers WHERE id = $1 AND tenant_id = $2`
 
@@ -678,6 +706,11 @@ func (h *OIDCHandler) TestOIDCProvider(c *gin.Context) {
 		if val, exists := c.Get("tenant_id"); exists {
 			tenantID, _ = val.(string)
 		}
+	}
+
+	if h.db == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database not available"})
+		return
 	}
 
 	// Get provider details

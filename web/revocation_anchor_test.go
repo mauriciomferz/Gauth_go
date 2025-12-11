@@ -1,56 +1,76 @@
 package web
 
 import (
-	"net/http"
-	"net/http/httptest"
+	"encoding/json"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
 )
 
-// TestRevocationAnchoring ensures audit meta includes anchor fields when enabled.
-func TestRevocationAnchoring(t *testing.T) {
-	t.Skip("Skipping: Revocation anchoring loop not yet migrated to server_factory.go (GAUTH_ANCHOR_REVOCATIONS logic)")
-	t.Setenv("GAUTH_ANCHOR_PROVIDER", "memory")
-	t.Setenv("GAUTH_ANCHOR_REVOCATIONS", "1")
-	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
-	km, _ := crypto.NewManager(time.Hour)
-	s := NewBetaServer("", WithKeyProvider(km))
-	t.Cleanup(func() { s.Shutdown() })
-	// Append a revocation event via chain directly (simpler than hitting revoke endpoint)
-	if s.revocationChain == nil {
-		t.Fatalf("revocation chain expected")
+func TestRevocationAnchoringPersistence(t *testing.T) {
+	// 1. Setup temporary persistence file
+	tmpDir := t.TempDir()
+	persistPath := filepath.Join(tmpDir, "anchor.json")
+
+	// 2. Configure server with anchor persistence enabled
+	t.Setenv("GAUTH_ANCHOR_PERSIST_PATH", persistPath)
+	t.Setenv("GAUTH_REVOCATION_ENABLED", "1")
+	t.Setenv("GAUTH_DISABLE_BG_POLLS", "1")
+
+	// Start server (initializes anchor client and hooks)
+	srv := NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
+
+	// Wait for async initialization if any (though NewBetaServer is synchronous for anchor init)
+
+	// Ensure anchor client initialized
+	initialCount := srv.anchorClient.TotalAnchors()
+	t.Logf("Initial anchors: %d", initialCount)
+
+	// 3. Trigger a revocation hook via direct append
+	// (Simulates a successful revocation event handled by the system)
+	ev := delegation.RevocationEvent{
+		ID:           "rev-test-anchor-1",
+		DelegationID: "del-123",
+		Reason:       "compromise",
+		RevokedAt:    time.Now().UTC(),
 	}
-	_, err := s.revocationChain.Append(delegation.RevocationEvent{ID: "rev-anchor-1", DelegationID: "d-1"})
+
+	if _, err := srv.revocationChain.Append(ev); err != nil {
+		t.Fatalf("Append failed: %v", err)
+	}
+
+	// 5. Verify persistence file contains our hash
+	// We iterate all anchors because startup capability anchor might race with us.
+	content, err := os.ReadFile(persistPath)
 	if err != nil {
-		t.Fatalf("append: %v", err)
+		t.Fatalf("failed to read persist file: %v", err)
 	}
-	// Query audit logs endpoint
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/api/v1/audit/logs", nil)
-	s.router.ServeHTTP(w, req)
-	if w.Code != 200 {
-		t.Fatalf("expected 200 got %d", w.Code)
-	}
-	body := w.Body.String()
-	if !(containsString(body, "anchor_hash") && containsString(body, "revocation_hash")) {
-		t.Fatalf("expected anchor_hash & revocation_hash in audit log body: %s", body)
-	}
-}
 
-// containsString is a small helper to avoid importing strings repeatedly.
-func containsString(s, sub string) bool {
-	return len(s) >= len(sub) && (func() bool { return indexOf(s, sub) >= 0 })()
-}
+	var diskData struct {
+		Anchors []struct {
+			Hash       string    `json:"hash"`
+			AnchoredAt time.Time `json:"anchored_at"`
+		} `json:"anchors"`
+	}
+	if err := json.Unmarshal(content, &diskData); err != nil {
+		t.Fatalf("failed to parse persist file: %v", err)
+	}
 
-// indexOf naive search (avoid strings.Contains to keep minimal imports for this test file).
-func indexOf(haystack, needle string) int {
-	for i := 0; i+len(needle) <= len(haystack); i++ {
-		if haystack[i:i+len(needle)] == needle {
-			return i
+	targetHash := srv.revocationChain.AggregateHash()
+	found := false
+	for _, a := range diskData.Anchors {
+		if a.Hash == targetHash {
+			found = true
+			break
 		}
 	}
-	return -1
+	if !found {
+		t.Errorf("revocation aggregate hash %s not found in persistence file (found %d anchors)", targetHash, len(diskData.Anchors))
+	} else {
+		t.Logf("Successfully verified anchor %s in persistence file", targetHash)
+	}
 }

@@ -44,29 +44,26 @@ RUN apk add --no-cache \
     ca-certificates \
     tzdata
 
-# Create non-root user
-RUN addgroup -g 101 nginx-app && \
-    adduser -D -u 101 -G nginx-app nginx-app
+# Copy nginx config
+COPY nginx.conf /etc/nginx/nginx.conf
+RUN cat /etc/nginx/nginx.conf
 
-# Copy built assets from builder
+# Copy build artifacts
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy custom nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
-
-# Create cache and runtime directories
+# Create cache and runtime directories with correct permissions for nginx user
 RUN mkdir -p /var/cache/nginx /var/run/nginx && \
-    chown -R nginx-app:nginx-app /usr/share/nginx/html /var/cache/nginx /var/run/nginx /var/log/nginx
+    chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/run/nginx /var/log/nginx
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
+    CMD wget --quiet --tries=1 --spider http://localhost:8080/health || exit 1
 
 # Expose port
-EXPOSE 80
+EXPOSE 8080
 
 # Switch to non-root user
-USER nginx-app
+USER nginx
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]

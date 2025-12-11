@@ -262,6 +262,22 @@ func (s *ExtendedTokenService) EncodeExtendedToken(
 		}
 	}
 
+	// Serialize IssuedBy
+	if token.IssuedBy != nil {
+		issuerJSON, err := json.Marshal(token.IssuedBy)
+		if err == nil {
+			claims["issued_by"] = string(issuerJSON)
+		}
+	}
+
+	// Serialize VerificationProof
+	if token.VerificationProof != nil {
+		proofJSON, err := json.Marshal(token.VerificationProof)
+		if err == nil {
+			claims["verification_proof"] = string(proofJSON)
+		}
+	}
+
 	// Create JWT token
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
@@ -560,6 +576,22 @@ func (s *ExtendedTokenService) parseExtendedToken(
 					token.LegalFramework.ApplicableLaws[i] = str
 				}
 			}
+		}
+	}
+
+	// Extract VerificationProof
+	if proofStr, ok := claims["verification_proof"].(string); ok && proofStr != "" {
+		var proof IdentityVerificationChain
+		if err := json.Unmarshal([]byte(proofStr), &proof); err == nil {
+			token.VerificationProof = &proof
+		}
+	}
+
+	// Extract IssuedBy
+	if issuerStr, ok := claims["issued_by"].(string); ok && issuerStr != "" {
+		var issuer AuthorizationServerInfo
+		if err := json.Unmarshal([]byte(issuerStr), &issuer); err == nil {
+			token.IssuedBy = &issuer
 		}
 	}
 

@@ -606,17 +606,17 @@ func setupTestDB(t *testing.T) (*sql.DB, func()) {
 	// Insert test data for PoA
 	_, err = db.Exec(`
 		INSERT INTO power_of_attorney (
-			id, tenant_id, grantor_id, representative_id, representative_type, 
-			status, delegation_policy, valid_from, valid_until
+			id, tenant_id, poa_name, grantor_id, grantor_name, representative_id, representative_name, representative_type, 
+			scope_type, actions, status, delegation_policy, valid_from, valid_until
 		) VALUES 
-			('550e8400-e29b-41d4-a716-446655440001', 'tenant-1', 'org-001', 'agent-primary-001', 'digital_agent', 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year'),
-			('550e8400-e29b-41d4-a716-446655440002', 'tenant-1', 'org-001', 'agent-1', 'digital_agent', 'active', '{"can_delegate": true, "max_depth": 3, "allowed_delegates": ["agent-2"]}', NOW(), NOW() + INTERVAL '1 year'),
-			('550e8400-e29b-41d4-a716-446655440003', 'tenant-1', 'org-001', 'agent-capability-test', 'digital_agent', 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year'),
-			('550e8400-e29b-41d4-a716-446655440004', 'tenant-1', 'org-001', 'agent-fiduciary-test', 'digital_agent', 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year'),
-			('550e8400-e29b-41d4-a716-446655440005', 'tenant-1', 'org-001', 'agent-expired', 'digital_agent', 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year'),
-			('550e8400-e29b-41d4-a716-446655440006', 'tenant-1', 'org-001', 'agent-2', 'digital_agent', 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year'),
-			('550e8400-e29b-41d4-a716-446655440007', 'tenant-1', 'org-001', 'agent-3', 'digital_agent', 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year'),
-			('550e8400-e29b-41d4-a716-446655440008', 'tenant-1', 'org-001', 'agent-4', 'digital_agent', 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year')
+			('550e8400-e29b-41d4-a716-446655440001', 'tenant-1', 'PoA 1', 'org-001', 'Grantor Org', 'agent-primary-001', 'Primary Agent', 'digital_agent', 'full', ARRAY['read', 'execute'], 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year'),
+			('550e8400-e29b-41d4-a716-446655440002', 'tenant-1', 'PoA 2', 'org-001', 'Grantor Org', 'agent-1', 'Agent 1', 'digital_agent', 'full', ARRAY['read', 'execute'], 'active', '{"can_delegate": true, "max_depth": 3, "allowed_delegates": ["agent-2"]}', NOW(), NOW() + INTERVAL '1 year'),
+			('550e8400-e29b-41d4-a716-446655440003', 'tenant-1', 'PoA 3', 'org-001', 'Grantor Org', 'agent-capability-test', 'Capability Agent', 'digital_agent', 'full', ARRAY['read', 'execute'], 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year'),
+			('550e8400-e29b-41d4-a716-446655440004', 'tenant-1', 'PoA 4', 'org-001', 'Grantor Org', 'agent-fiduciary-test', 'Fiduciary Agent', 'digital_agent', 'full', ARRAY['read', 'execute'], 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year'),
+			('550e8400-e29b-41d4-a716-446655440005', 'tenant-1', 'PoA 5', 'org-001', 'Grantor Org', 'agent-expired', 'Expired Agent', 'digital_agent', 'full', ARRAY['read', 'execute'], 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year'),
+			('550e8400-e29b-41d4-a716-446655440006', 'tenant-1', 'PoA 6', 'org-001', 'Grantor Org', 'agent-2', 'Agent 2', 'digital_agent', 'full', ARRAY['read', 'execute'], 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year'),
+			('550e8400-e29b-41d4-a716-446655440007', 'tenant-1', 'PoA 7', 'org-001', 'Grantor Org', 'agent-3', 'Agent 3', 'digital_agent', 'full', ARRAY['read', 'execute'], 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year'),
+			('550e8400-e29b-41d4-a716-446655440008', 'tenant-1', 'PoA 8', 'org-001', 'Grantor Org', 'agent-4', 'Agent 4', 'digital_agent', 'full', ARRAY['read', 'execute'], 'active', '{"can_delegate": true, "max_depth": 3}', NOW(), NOW() + INTERVAL '1 year')
 		ON CONFLICT (id) DO NOTHING
 	`)
 	if err != nil {
@@ -630,32 +630,32 @@ func setupTestDB(t *testing.T) (*sql.DB, func()) {
 			risk_profile, certification_status, certifications, limitations, 
 			recommended_restrictions, assessed_by, valid_until, created_at, updated_at
 		) VALUES (
-			'cap-001', 'agent-primary-001', NOW(), 'L3', '{"reasoning": 0.9}'::jsonb, 
+			'550e8400-e29b-41d4-a716-446655440011', 'agent-primary-001', NOW(), 'L3', '{"reasoning": 0.9}'::jsonb, 
 			'{"risk_level": "low"}'::jsonb, 'certified', '[]'::jsonb, '[]'::jsonb,
 			'[]'::jsonb, 'system', NOW() + INTERVAL '30 days', NOW(), NOW()
 		),
 		(
-			'cap-002', 'agent-successor-001', NOW(), 'L3', '{"reasoning": 0.85}'::jsonb, 
+			'550e8400-e29b-41d4-a716-446655440012', 'agent-successor-001', NOW(), 'L3', '{"reasoning": 0.85}'::jsonb, 
 			'{"risk_level": "low"}'::jsonb, 'certified', '[]'::jsonb, '[]'::jsonb,
 			'[]'::jsonb, 'system', NOW() + INTERVAL '30 days', NOW(), NOW()
 		),
 		(
-			'cap-003', 'agent-1', NOW(), 'L3', '{"reasoning": 0.9}'::jsonb, 
+			'550e8400-e29b-41d4-a716-446655440013', 'agent-1', NOW(), 'L3', '{"reasoning": 0.9}'::jsonb, 
 			'{"risk_level": "low"}'::jsonb, 'certified', '[]'::jsonb, '[]'::jsonb,
 			'[]'::jsonb, 'system', NOW() + INTERVAL '30 days', NOW(), NOW()
 		),
 		(
-			'cap-004', 'agent-2', NOW(), 'L3', '{"reasoning": 0.9}'::jsonb, 
+			'550e8400-e29b-41d4-a716-446655440014', 'agent-2', NOW(), 'L3', '{"reasoning": 0.9}'::jsonb, 
 			'{"risk_level": "low"}'::jsonb, 'certified', '[]'::jsonb, '[]'::jsonb,
 			'[]'::jsonb, 'system', NOW() + INTERVAL '30 days', NOW(), NOW()
 		),
 		(
-			'cap-005', 'agent-3', NOW(), 'L3', '{"reasoning": 0.9}'::jsonb, 
+			'550e8400-e29b-41d4-a716-446655440015', 'agent-3', NOW(), 'L3', '{"reasoning": 0.9}'::jsonb, 
 			'{"risk_level": "low"}'::jsonb, 'certified', '[]'::jsonb, '[]'::jsonb,
 			'[]'::jsonb, 'system', NOW() + INTERVAL '30 days', NOW(), NOW()
 		),
 		(
-			'cap-006', 'agent-4', NOW(), 'L3', '{"reasoning": 0.9}'::jsonb, 
+			'550e8400-e29b-41d4-a716-446655440016', 'agent-4', NOW(), 'L3', '{"reasoning": 0.9}'::jsonb, 
 			'{"risk_level": "low"}'::jsonb, 'certified', '[]'::jsonb, '[]'::jsonb,
 			'[]'::jsonb, 'system', NOW() + INTERVAL '30 days', NOW(), NOW()
 		)

@@ -42,6 +42,7 @@ type Manager struct {
 	mu          sync.RWMutex
 	active      *Key
 	history     []*Key // previous keys retained until expiry
+	archived    []*Key // expired keys retained for verification
 	ttl         time.Duration
 	persistPath string        // optional persistence path for key material (private keys base64 encoded)
 	stopCh      chan struct{} // for scheduler shutdown (not yet exposed)
@@ -171,11 +172,13 @@ func (m *Manager) rotateLocked() error {
 		m.history = append(m.history, prev)
 	}
 	m.active = k
-	// prune expired history
+	// prune expired history to archive
 	var kept []*Key
 	for _, hk := range m.history {
 		if time.Now().Before(hk.ExpiresAt) {
 			kept = append(kept, hk)
+		} else {
+			m.archived = append(m.archived, hk)
 		}
 	}
 	m.history = kept
@@ -427,6 +430,11 @@ func (m *Manager) FindByID(id string) *Key {
 			return k
 		}
 	}
+	for _, k := range m.archived {
+		if k.ID == id {
+			return k
+		}
+	}
 	return nil
 }
 
@@ -513,6 +521,7 @@ type persistenceRecord struct {
 	TTLHours int        `json:"ttl_hours"`
 	Active   *diskKey   `json:"active"`
 	History  []*diskKey `json:"history"`
+	Archived []*diskKey `json:"archived,omitempty"`
 }
 type diskKey struct {
 	ID              string `json:"kid"`
@@ -568,6 +577,24 @@ func (m *Manager) saveLocked() error {
 		}
 		rec.History = append(rec.History, dk)
 	}
+	for _, ak := range m.archived {
+		dk := &diskKey{
+			ID:         ak.ID,
+			CreatedAt:  ak.CreatedAt.Format(time.RFC3339),
+			ExpiresAt:  ak.ExpiresAt.Format(time.RFC3339),
+			PrivateB64: base64.RawStdEncoding.EncodeToString(ak.Private),
+			PublicB64:  base64.RawStdEncoding.EncodeToString(ak.Public),
+			Alg:        ak.Alg,
+			Use:        ak.Use,
+		}
+		if !ak.DeprecatedAfter.IsZero() {
+			dk.DeprecatedAfter = ak.DeprecatedAfter.Format(time.RFC3339)
+		}
+		if !ak.SunsetAfter.IsZero() {
+			dk.SunsetAfter = ak.SunsetAfter.Format(time.RFC3339)
+		}
+		rec.Archived = append(rec.Archived, dk)
+	}
 	data, err := json.MarshalIndent(rec, "", "  ")
 	if err != nil {
 		return err
@@ -588,6 +615,7 @@ func (m *Manager) loadFromDisk() error {
 	// Reconstruct keys
 	var active *Key
 	var history []*Key
+	var archived []*Key
 	now := time.Now().UTC()
 	parseKey := func(dk *diskKey) (*Key, error) {
 		pubBytes, err := base64.RawStdEncoding.DecodeString(dk.PublicB64)
@@ -635,14 +663,25 @@ func (m *Manager) loadFromDisk() error {
 		}
 	}
 	for _, dk := range rec.History {
-		if hk, err := parseKey(dk); err == nil && now.Before(hk.ExpiresAt) {
-			history = append(history, hk)
+		if hk, err := parseKey(dk); err == nil {
+			if now.Before(hk.ExpiresAt) {
+				history = append(history, hk)
+			} else {
+				// Migrate expired history to archive on load
+				archived = append(archived, hk)
+			}
+		}
+	}
+	for _, dk := range rec.Archived {
+		if ak, err := parseKey(dk); err == nil {
+			archived = append(archived, ak)
 		}
 	}
 	// Assign under lock
 	m.mu.Lock()
 	m.active = active
 	m.history = history
+	m.archived = archived
 	// restore ttl if file includes it and >0
 	if rec.TTLHours > 0 {
 		m.ttl = time.Duration(rec.TTLHours) * time.Hour

@@ -40,24 +40,24 @@ func NewMetricsHandler(registry *prometheus.Registry, db *pgxpool.Pool) *Metrics
 // Flattened structure with metrics at top level for dashboard compatibility
 type SystemMetricsResponse struct {
 	// Core Metrics (top-level for dashboard)
-	TotalRequests    int64   `json:"totalRequests"`
-	Uptime           int64   `json:"uptime"` // in seconds
-	AvgLatency       float64 `json:"avgLatency"`
-	P95Latency       float64 `json:"p95Latency"`
-	P99Latency       float64 `json:"p99Latency"`
-	ErrorCount       int64   `json:"errorCount"`
-	ErrorRate        float64 `json:"errorRate"`
-	
+	TotalRequests int64   `json:"totalRequests"`
+	Uptime        int64   `json:"uptime"` // in seconds
+	AvgLatency    float64 `json:"avgLatency"`
+	P95Latency    float64 `json:"p95Latency"`
+	P99Latency    float64 `json:"p99Latency"`
+	ErrorCount    int64   `json:"errorCount"`
+	ErrorRate     float64 `json:"errorRate"`
+
 	// Cache Metrics
-	CacheHitRate     float64 `json:"cacheHitRate"`
-	CacheSize        int64   `json:"cacheSize"`
-	CacheEvictions   int64   `json:"cacheEvictions"`
-	AvgTTL           float64 `json:"avgTTL"`
-	
+	CacheHitRate   float64 `json:"cacheHitRate"`
+	CacheSize      int64   `json:"cacheSize"`
+	CacheEvictions int64   `json:"cacheEvictions"`
+	AvgTTL         float64 `json:"avgTTL"`
+
 	// System Metrics
 	MemoryUsage      int64   `json:"memoryUsage"`
 	CompressionRatio float64 `json:"compressionRatio"`
-	
+
 	// Component Status
 	ComponentHealth    []ComponentHealth   `json:"componentHealth"`
 	PerformanceHistory []PerformanceMetric `json:"performanceHistory"`
@@ -101,13 +101,13 @@ func (h *MetricsHandler) collectSystemMetrics(ctx context.Context) (SystemMetric
 	// Get real memory stats
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
-	
+
 	// Get database stats if available
 	var dbStats struct {
 		TotalRequests int64
 		ErrorCount    int64
 	}
-	
+
 	if h.db != nil {
 		// Query audit events for request count
 		err := h.db.QueryRow(ctx, `
@@ -116,7 +116,7 @@ func (h *MetricsHandler) collectSystemMetrics(ctx context.Context) (SystemMetric
 				COUNT(CASE WHEN result = 'failure' THEN 1 END) as errors
 			FROM audit_events
 		`).Scan(&dbStats.TotalRequests, &dbStats.ErrorCount)
-		
+
 		if err != nil {
 			// Fallback to in-memory counter
 			dbStats.TotalRequests = h.reqCounter.total
@@ -126,31 +126,36 @@ func (h *MetricsHandler) collectSystemMetrics(ctx context.Context) (SystemMetric
 		dbStats.TotalRequests = h.reqCounter.total
 		dbStats.ErrorCount = h.reqCounter.errors
 	}
-	
+
 	// Calculate error rate
 	errorRate := 0.0
 	if dbStats.TotalRequests > 0 {
 		errorRate = float64(dbStats.ErrorCount) / float64(dbStats.TotalRequests)
 	}
-	
+
 	// Get database connection pool stats
-	poolStats := h.db.Stat()
-	
+	var cacheSize, cacheEvicted int64
+	if h.db != nil {
+		poolStats := h.db.Stat()
+		cacheSize = int64(poolStats.AcquiredConns())
+		cacheEvicted = int64(poolStats.EmptyAcquireCount())
+	}
+
 	// Calculate uptime in seconds
 	uptime := int64(time.Since(h.startTime).Seconds())
-	
+
 	return SystemMetricsResponse{
 		TotalRequests:    dbStats.TotalRequests,
 		Uptime:           uptime,
-		AvgLatency:       45.3,  // TODO: Implement real latency tracking
+		AvgLatency:       45.3, // TODO: Implement real latency tracking
 		P95Latency:       125.8,
 		P99Latency:       256.4,
 		ErrorCount:       dbStats.ErrorCount,
 		ErrorRate:        errorRate,
-		CacheHitRate:     0.892,          // TODO: Implement cache hit tracking
-		CacheSize:        int64(poolStats.AcquiredConns()),
+		CacheHitRate:     0.892, // TODO: Implement cache hit tracking
+		CacheSize:        cacheSize,
 		MemoryUsage:      int64(m.Alloc), // Current allocated memory
-		CacheEvictions:   int64(poolStats.EmptyAcquireCount()),
+		CacheEvictions:   cacheEvicted,
 		AvgTTL:           3600,
 		CompressionRatio: 2.4,
 	}, nil
@@ -158,7 +163,7 @@ func (h *MetricsHandler) collectSystemMetrics(ctx context.Context) (SystemMetric
 
 func (h *MetricsHandler) getComponentHealth(ctx context.Context) []ComponentHealth {
 	components := []ComponentHealth{}
-	
+
 	// Check Database health
 	dbStatus := "healthy"
 	dbRequests := int64(0)
@@ -170,12 +175,12 @@ func (h *MetricsHandler) getComponentHealth(ctx context.Context) []ComponentHeal
 			// Get request count from database
 			_ = h.db.QueryRow(ctx, "SELECT COUNT(*) FROM audit_events").Scan(&dbRequests) // Best effort metrics
 		}
-		
+
 		uptimePercent := "99.9%"
 		if dbStatus == "unhealthy" {
 			uptimePercent = "0%"
 		}
-		
+
 		components = append(components, ComponentHealth{
 			Name:     "Database",
 			Status:   dbStatus,
@@ -183,7 +188,7 @@ func (h *MetricsHandler) getComponentHealth(ctx context.Context) []ComponentHeal
 			Requests: dbRequests,
 		})
 	}
-	
+
 	// Check Authorization Engine
 	authzRequests := int64(0)
 	authzStatus := "healthy"
@@ -192,7 +197,7 @@ func (h *MetricsHandler) getComponentHealth(ctx context.Context) []ComponentHeal
 		if err != nil {
 			authzStatus = "degraded"
 		}
-		
+
 		components = append(components, ComponentHealth{
 			Name:     "Authorization Engine",
 			Status:   authzStatus,
@@ -200,12 +205,12 @@ func (h *MetricsHandler) getComponentHealth(ctx context.Context) []ComponentHeal
 			Requests: authzRequests,
 		})
 	}
-	
+
 	// Check Token Service
 	tokenRequests := int64(0)
 	if h.db != nil {
 		_ = h.db.QueryRow(ctx, "SELECT COUNT(*) FROM tokens").Scan(&tokenRequests) // Best effort metrics
-		
+
 		components = append(components, ComponentHealth{
 			Name:     "Token Service",
 			Status:   "healthy",
@@ -213,12 +218,12 @@ func (h *MetricsHandler) getComponentHealth(ctx context.Context) []ComponentHeal
 			Requests: tokenRequests,
 		})
 	}
-	
+
 	// Check Event System
 	eventRequests := int64(0)
 	if h.db != nil {
 		_ = h.db.QueryRow(ctx, "SELECT COUNT(*) FROM events").Scan(&eventRequests) // Best effort metrics
-		
+
 		components = append(components, ComponentHealth{
 			Name:     "Event System",
 			Status:   "healthy",
@@ -226,7 +231,7 @@ func (h *MetricsHandler) getComponentHealth(ctx context.Context) []ComponentHeal
 			Requests: eventRequests,
 		})
 	}
-	
+
 	return components
 }
 
@@ -354,15 +359,15 @@ func (h *MetricsHandler) GetSemanticCounters(c *gin.Context) {
 
 func (h *MetricsHandler) getSemanticCounters(ctx context.Context) SemanticCounters {
 	counters := SemanticCounters{
-		AvgResolutionTime:           45.3,
-		SuccessRate:                 0.975,
-		CacheHitRate:                0.943,
+		AvgResolutionTime: 45.3,
+		SuccessRate:       0.975,
+		CacheHitRate:      0.943,
 	}
-	
+
 	if h.db != nil {
 		// Get real anchor validation counts from audit events
 		var validations, resolutions, failed int64
-		
+
 		_ = h.db.QueryRow(ctx, `
 			SELECT 
 				COUNT(CASE WHEN action = 'validate_anchor' THEN 1 END) as validations,
@@ -370,23 +375,23 @@ func (h *MetricsHandler) getSemanticCounters(ctx context.Context) SemanticCounte
 				COUNT(CASE WHEN action = 'validate_anchor' AND result = 'failure' THEN 1 END) as failed
 			FROM audit_events
 		`).Scan(&validations, &resolutions, &failed) // Best effort metrics
-		
+
 		counters.CapabilityAnchorValidations = validations
 		counters.CapabilityAnchorResolutions = resolutions
 		counters.FailedValidations = failed
-		
+
 		// Get active anchors count
 		var active, cached int64
 		_ = h.db.QueryRow(ctx, "SELECT COUNT(*) FROM authorization_policies WHERE status = 'active'").Scan(&active) // Best effort metrics
 		counters.ActiveAnchors = active
 		counters.CachedAnchors = cached
-		
+
 		// Recalculate success rate
 		if validations > 0 {
 			counters.SuccessRate = float64(validations-failed) / float64(validations)
 		}
 	}
-	
+
 	return counters
 }
 

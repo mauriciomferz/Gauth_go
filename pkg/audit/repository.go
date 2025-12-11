@@ -137,6 +137,9 @@ type EventFilters struct {
 
 // ListEvents retrieves audit events with filtering
 func (r *Repository) ListEvents(ctx context.Context, filters EventFilters) ([]AuditEvent, int, error) {
+	if r.db == nil {
+		return nil, 0, nil
+	}
 	query := `
 		SELECT 
 			id, tenant_id, timestamp, event_type, category, severity,
@@ -260,6 +263,9 @@ func (r *Repository) ListEvents(ctx context.Context, filters EventFilters) ([]Au
 
 // CreateEvent inserts a new audit event
 func (r *Repository) CreateEvent(ctx context.Context, evt *AuditEvent) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	// Get previous hash for chain
 	var previousHash *string
 	err := r.db.QueryRow(ctx,
@@ -316,6 +322,9 @@ func (r *Repository) CreateEvent(ctx context.Context, evt *AuditEvent) error {
 
 // CreateEventsBulk inserts multiple audit events in a batch
 func (r *Repository) CreateEventsBulk(ctx context.Context, events []*AuditEvent) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	if len(events) == 0 {
 		return nil
 	}
@@ -391,6 +400,9 @@ func (r *Repository) CreateEventsBulk(ctx context.Context, events []*AuditEvent)
 
 // VerifyHashChain verifies the integrity of the audit event hash chain
 func (r *Repository) VerifyHashChain(ctx context.Context, tenantID string, eventID string) (bool, error) {
+	if r.db == nil {
+		return false, fmt.Errorf("database not available")
+	}
 	query := `
 		SELECT id, tenant_id, timestamp, user_id, action, resource_id, hash, previous_hash
 		FROM audit_events
@@ -426,6 +438,9 @@ func (r *Repository) VerifyHashChain(ctx context.Context, tenantID string, event
 
 // ListComplianceReports retrieves compliance reports
 func (r *Repository) ListComplianceReports(ctx context.Context, tenantID string) ([]ComplianceReport, error) {
+	if r.db == nil {
+		return []ComplianceReport{}, nil
+	}
 	query := `
 		SELECT 
 			id, tenant_id, report_name, framework, period_start, period_end,
@@ -475,6 +490,9 @@ func (r *Repository) ListComplianceReports(ctx context.Context, tenantID string)
 
 // GenerateComplianceReport generates a new compliance report
 func (r *Repository) GenerateComplianceReport(ctx context.Context, tenantID, framework string, periodStart, periodEnd time.Time, generatedBy string) (*ComplianceReport, error) {
+	if r.db == nil {
+		return nil, fmt.Errorf("database not available")
+	}
 	// Query events for the period
 	query := `
 		SELECT COUNT(*) as total,
@@ -549,6 +567,9 @@ func (r *Repository) GenerateComplianceReport(ctx context.Context, tenantID, fra
 
 // ListCorrelationPatterns retrieves event correlation patterns
 func (r *Repository) ListCorrelationPatterns(ctx context.Context, tenantID string) ([]EventCorrelationPattern, error) {
+	if r.db == nil {
+		return []EventCorrelationPattern{}, nil
+	}
 	query := `
 		SELECT 
 			id, tenant_id, pattern_name, pattern_type, description,
@@ -594,6 +615,9 @@ func (r *Repository) ListCorrelationPatterns(ctx context.Context, tenantID strin
 
 // CreateCorrelationPattern creates a new correlation pattern
 func (r *Repository) CreateCorrelationPattern(ctx context.Context, pattern *EventCorrelationPattern) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	conditions, _ := json.Marshal(pattern.Conditions)
 
 	query := `
@@ -620,6 +644,9 @@ func (r *Repository) CreateCorrelationPattern(ctx context.Context, pattern *Even
 
 // ListSIEMIntegrations retrieves SIEM integrations
 func (r *Repository) ListSIEMIntegrations(ctx context.Context, tenantID string) ([]SIEMIntegration, error) {
+	if r.db == nil {
+		return []SIEMIntegration{}, nil
+	}
 	query := `
 		SELECT 
 			id, tenant_id, integration_name, siem_type, status,
@@ -659,6 +686,9 @@ func (r *Repository) ListSIEMIntegrations(ctx context.Context, tenantID string) 
 
 // CreateSIEMIntegration creates a new SIEM integration
 func (r *Repository) CreateSIEMIntegration(ctx context.Context, integration *SIEMIntegration) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := `
 		INSERT INTO siem_integrations (
 			tenant_id, integration_name, siem_type, status,
@@ -683,6 +713,9 @@ func (r *Repository) CreateSIEMIntegration(ctx context.Context, integration *SIE
 
 // UpdateSIEMIntegration updates a SIEM integration
 func (r *Repository) UpdateSIEMIntegration(ctx context.Context, integration *SIEMIntegration) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := `
 		UPDATE siem_integrations SET
 			integration_name = $3, status = $4, endpoint_url = $5,
@@ -707,6 +740,9 @@ func (r *Repository) UpdateSIEMIntegration(ctx context.Context, integration *SIE
 
 // DeleteSIEMIntegration deletes a SIEM integration
 func (r *Repository) DeleteSIEMIntegration(ctx context.Context, tenantID, integrationID string) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := "DELETE FROM siem_integrations WHERE tenant_id = $1 AND id = $2"
 
 	result, err := r.db.Exec(ctx, query, tenantID, integrationID)
@@ -723,6 +759,20 @@ func (r *Repository) DeleteSIEMIntegration(ctx context.Context, tenantID, integr
 
 // GetAuditMetrics retrieves audit trail metrics
 func (r *Repository) GetAuditMetrics(ctx context.Context, tenantID string) (map[string]interface{}, error) {
+	if r.db == nil {
+		return map[string]interface{}{
+			"total_events": 0,
+			"events_by_category": map[string]int{
+				"auth": 0, "authz": 0, "token": 0, "admin": 0, "system": 0,
+			},
+			"events_by_severity": map[string]int{
+				"critical": 0, "high": 0, "medium": 0, "low": 0, "info": 0,
+			},
+			"events_by_status": map[string]int{
+				"success": 0, "failure": 0, "error": 0,
+			},
+		}, nil
+	}
 	query := `
 		SELECT 
 			COUNT(*) as total_events,

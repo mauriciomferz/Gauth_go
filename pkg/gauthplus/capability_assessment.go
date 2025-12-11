@@ -26,33 +26,37 @@ func (s *PostgreSQLCapabilityAssessmentService) CreateAssessment(
 	ctx context.Context,
 	assessment *AICapabilityAssessment,
 ) error {
+	if s.db == nil {
+		return fmt.Errorf("database not available")
+	}
+
 	if assessment.ID == "" {
 		assessment.ID = uuid.New().String()
 	}
-	
+
 	assessment.CreatedAt = time.Now().UTC()
 	assessment.UpdatedAt = time.Now().UTC()
-	
+
 	domainScoresJSON, err := json.Marshal(assessment.DomainScores)
 	if err != nil {
 		return fmt.Errorf("failed to marshal domain_scores: %w", err)
 	}
-	
+
 	riskProfileJSON, err := json.Marshal(assessment.RiskProfile)
 	if err != nil {
 		return fmt.Errorf("failed to marshal risk_profile: %w", err)
 	}
-	
+
 	limitationsJSON, err := json.Marshal(assessment.Limitations)
 	if err != nil {
 		return fmt.Errorf("failed to marshal limitations: %w", err)
 	}
-	
+
 	certificationsJSON, err := json.Marshal(assessment.Certifications)
 	if err != nil {
 		return fmt.Errorf("failed to marshal certifications: %w", err)
 	}
-	
+
 	_, err = s.db.ExecContext(ctx, `
 		INSERT INTO ai_capability_assessments (
 			id, agent_id, assessed_by, assessment_date,
@@ -64,11 +68,11 @@ func (s *PostgreSQLCapabilityAssessmentService) CreateAssessment(
 		riskProfileJSON, limitationsJSON, certificationsJSON,
 		assessment.ValidUntil, assessment.Notes, assessment.CreatedAt,
 		assessment.UpdatedAt)
-	
+
 	if err != nil {
 		return fmt.Errorf("failed to create assessment: %w", err)
 	}
-	
+
 	return nil
 }
 
@@ -77,10 +81,14 @@ func (s *PostgreSQLCapabilityAssessmentService) GetLatestAssessment(
 	ctx context.Context,
 	agentID string,
 ) (*AICapabilityAssessment, error) {
+	if s.db == nil {
+		return nil, nil // No assessment found
+	}
+
 	assessment := &AICapabilityAssessment{}
 	var domainScoresJSON, riskProfileJSON, limitationsJSON, certificationsJSON []byte
 	var notes sql.NullString
-	
+
 	err := s.db.QueryRowContext(ctx, `
 		SELECT id, agent_id, assessed_by, assessment_date,
 		       overall_level, domain_scores, risk_profile, limitations,
@@ -97,34 +105,34 @@ func (s *PostgreSQLCapabilityAssessmentService) GetLatestAssessment(
 		&certificationsJSON, &assessment.ValidUntil, &notes,
 		&assessment.CreatedAt, &assessment.UpdatedAt,
 	)
-	
+
 	if err == sql.ErrNoRows {
 		return nil, nil // No assessment found
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get latest assessment: %w", err)
 	}
-	
+
 	if err := json.Unmarshal(domainScoresJSON, &assessment.DomainScores); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal domain_scores: %w", err)
 	}
-	
+
 	if err := json.Unmarshal(riskProfileJSON, &assessment.RiskProfile); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal risk_profile: %w", err)
 	}
-	
+
 	if err := json.Unmarshal(limitationsJSON, &assessment.Limitations); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal limitations: %w", err)
 	}
-	
+
 	if err := json.Unmarshal(certificationsJSON, &assessment.Certifications); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal certifications: %w", err)
 	}
-	
+
 	if notes.Valid {
 		assessment.Notes = notes.String
 	}
-	
+
 	return assessment, nil
 }
 
@@ -133,6 +141,10 @@ func (s *PostgreSQLCapabilityAssessmentService) GetAssessmentHistory(
 	ctx context.Context,
 	agentID string,
 ) ([]*AICapabilityAssessment, error) {
+	if s.db == nil {
+		return []*AICapabilityAssessment{}, nil
+	}
+
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT id, agent_id, assessed_by, assessment_date,
 		       overall_level, domain_scores, risk_profile, limitations,
@@ -141,18 +153,18 @@ func (s *PostgreSQLCapabilityAssessmentService) GetAssessmentHistory(
 		WHERE agent_id = $1
 		ORDER BY assessment_date DESC
 	`, agentID)
-	
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to get assessment history: %w", err)
 	}
 	defer rows.Close()
-	
+
 	var assessments []*AICapabilityAssessment
 	for rows.Next() {
 		assessment := &AICapabilityAssessment{}
 		var domainScoresJSON, riskProfileJSON, limitationsJSON, certificationsJSON []byte
 		var notes sql.NullString
-		
+
 		err := rows.Scan(
 			&assessment.ID, &assessment.AgentID, &assessment.AssessedBy,
 			&assessment.AssessmentDate, &assessment.OverallLevel,
@@ -163,30 +175,30 @@ func (s *PostgreSQLCapabilityAssessmentService) GetAssessmentHistory(
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan assessment: %w", err)
 		}
-		
+
 		if err := json.Unmarshal(domainScoresJSON, &assessment.DomainScores); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal domain_scores: %w", err)
 		}
-		
+
 		if err := json.Unmarshal(riskProfileJSON, &assessment.RiskProfile); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal risk_profile: %w", err)
 		}
-		
+
 		if err := json.Unmarshal(limitationsJSON, &assessment.Limitations); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal limitations: %w", err)
 		}
-		
+
 		if err := json.Unmarshal(certificationsJSON, &assessment.Certifications); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal certifications: %w", err)
 		}
-		
+
 		if notes.Valid {
 			assessment.Notes = notes.String
 		}
-		
+
 		assessments = append(assessments, assessment)
 	}
-	
+
 	return assessments, rows.Err()
 }
 
@@ -200,27 +212,27 @@ func (s *PostgreSQLCapabilityAssessmentService) CheckCapabilityMatch(
 	if err != nil {
 		return false, nil, fmt.Errorf("failed to get assessment: %w", err)
 	}
-	
+
 	if assessment == nil {
 		return false, []string{"No capability assessment found for agent"}, nil
 	}
-	
+
 	// Check expiration
 	if !assessment.ValidUntil.IsZero() && time.Now().UTC().After(assessment.ValidUntil) {
 		return false, []string{"Capability assessment expired"}, nil
 	}
-	
+
 	// Collect all reasons for mismatch
 	var reasons []string
-	
+
 	// Check minimum overall level
 	levelOrder := map[string]int{
 		"L0": 0, "L1": 1, "L2": 2, "L3": 3, "L4": 4, "L5": 5,
 	}
-	
+
 	assessmentLevel := levelOrder[assessment.OverallLevel]
 	requiredLevel := levelOrder[requirements.MinimumLevel]
-	
+
 	if assessmentLevel < requiredLevel {
 		reasons = append(reasons, fmt.Sprintf(
 			"Agent level %s below required %s",
@@ -228,7 +240,7 @@ func (s *PostgreSQLCapabilityAssessmentService) CheckCapabilityMatch(
 			requirements.MinimumLevel,
 		))
 	}
-	
+
 	// Check domain-specific requirements
 	for domain, minScore := range requirements.DomainScores {
 		actualScore, exists := assessment.DomainScores[domain]
@@ -241,7 +253,7 @@ func (s *PostgreSQLCapabilityAssessmentService) CheckCapabilityMatch(
 			))
 		}
 	}
-	
+
 	// Check risk thresholds
 	for riskType, maxThreshold := range requirements.RiskThresholds {
 		actualRiskInterface, exists := assessment.RiskProfile[riskType]
@@ -263,23 +275,23 @@ func (s *PostgreSQLCapabilityAssessmentService) CheckCapabilityMatch(
 			))
 		}
 	}
-	
+
 	// Check required certifications
 	assessmentCertSet := make(map[string]bool)
 	for _, cert := range assessment.Certifications {
 		assessmentCertSet[cert] = true
 	}
-	
+
 	for _, requiredCert := range requirements.RequiredCertifications {
 		if !assessmentCertSet[requiredCert] {
 			reasons = append(reasons, fmt.Sprintf("Agent missing certification: %s", requiredCert))
 		}
 	}
-	
+
 	if len(reasons) > 0 {
 		return false, reasons, nil
 	}
-	
+
 	return true, []string{"Agent meets all capability requirements"}, nil
 }
 
@@ -287,6 +299,10 @@ func (s *PostgreSQLCapabilityAssessmentService) CheckCapabilityMatch(
 func (s *PostgreSQLCapabilityAssessmentService) GetExpiringAssessments(
 	ctx context.Context, daysUntilExpiry int,
 ) ([]*AICapabilityAssessment, error) {
+	if s.db == nil {
+		return []*AICapabilityAssessment{}, nil
+	}
+
 	query := `
 		SELECT id, agent_id, assessment_date, overall_level,
 			   domain_scores, risk_profile, limitations, certifications,
@@ -352,14 +368,14 @@ func CalculateOverallLevel(domainScores map[string]float64) string {
 	if len(domainScores) == 0 {
 		return "L0"
 	}
-	
+
 	// Calculate average score
 	total := 0.0
 	for _, score := range domainScores {
 		total += score
 	}
 	avg := total / float64(len(domainScores))
-	
+
 	// Map average to level
 	if avg >= 0.95 {
 		return "L5"

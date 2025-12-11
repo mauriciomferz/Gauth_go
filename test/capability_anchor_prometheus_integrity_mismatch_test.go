@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
+	"unsafe"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mauriciomferz/Gauth_go/internal/notary"
@@ -84,7 +86,7 @@ func TestCapabilityAnchorPrometheusIntegrityMismatch(t *testing.T) {
 	// Since receiptStore is unexported, we simulate by setting environment variables and reassigning via reflection if needed.
 	// Simpler: leverage existing field through a helper if available; else use unsafe (avoid). For test, we expose minimal hook in BetaServer if missing.
 	// Fallback: use reflection.
-	setReceiptStoreViaReflection(t, srv, rs2)
+	reflectSet(t, srv, rs2)
 
 	// First scrape with verify=1 to force computation.
 	w := web.PerformRequest(srv, "GET", "/api/v1/beta/capabilities/anchor/metrics/prometheus?verify=1")
@@ -109,10 +111,16 @@ func TestCapabilityAnchorPrometheusIntegrityMismatch(t *testing.T) {
 // randomTestHash returns a deterministic pseudo hash for index i.
 func randomTestHash(i int) string { return strings.Repeat("a", 62) + strconv.Itoa(i) }
 
-// setReceiptStoreViaReflection assigns the receipt store to the unexported field on BetaServer.
-func setReceiptStoreViaReflection(t *testing.T, srv *web.BetaServer, rs interface{}) {
+// reflectSet assigns the receipt store to the unexported field on BetaServer.
+func reflectSet(t *testing.T, srv *web.BetaServer, rs interface{}) {
 	t.Helper()
 	// Use reflection to set private field receiptStore.
-	// This avoids changing production code just for test injection.
-	importReflectSet(t, srv, rs)
+	v := reflect.ValueOf(srv).Elem()
+	f := v.FieldByName("receiptStore")
+	if !f.IsValid() {
+		t.Fatalf("BetaServer has no field receiptStore")
+	}
+	// reflect.Value.Set() only works on exported fields unless we use unsafe
+	rf := reflect.NewAt(f.Type(), unsafe.Pointer(f.UnsafeAddr())).Elem()
+	rf.Set(reflect.ValueOf(rs))
 }

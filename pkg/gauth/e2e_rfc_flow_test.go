@@ -1,4 +1,4 @@
-//go:build ignore
+//go:build e2e
 
 // Package gauth - End-to-End RFC Flow Tests
 // This file contains comprehensive E2E tests for RFC-0111 and RFC-0115 authorization flows
@@ -17,10 +17,12 @@ import (
 	"crypto/ed25519"
 	"crypto/rand"
 	"crypto/x509"
+	"math/big"
 	"testing"
 	"time"
 
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
 )
 
 // TestE2E_CompleteAuthorizationFlow tests the complete RFC-0111 authorization flow
@@ -136,6 +138,19 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 			t.Fatalf("Failed to register authorization chain: %v", err)
 		}
 
+		// Register Authorization Server (Issuer)
+		issuerInfo := &AuthorizationServerInfo{
+			ServerID:   "test-issuer",
+			ServerName: "Test Auth Server",
+			Issuer:     "test-issuer",
+			ServerURL:  "https://auth.example.com",
+			IssueTime:  time.Now(),
+		}
+		err = pip.RegisterAuthorizationServer(issuerInfo)
+		if err != nil {
+			t.Fatalf("Failed to register authorization server: %v", err)
+		}
+
 		t.Logf("✓ All entities registered in PIP successfully")
 	})
 
@@ -145,6 +160,10 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 			AuthorizationRequest: &AuthorizationRequest{
 				ClientID: "test-client-001",
 				Scopes:   []string{"read", "write"},
+			},
+			LegalFramework: &LegalFrameworkInfo{
+				ApplicableLaws: []string{"GAuth-Law-2025"},
+				Jurisdiction:   "DE",
 			},
 			PowerOfAttorney:    poaDef,
 			AuthorizationChain: chain,
@@ -186,14 +205,19 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 			AuthorizationChain: chain,
 			IssuedAt:           time.Now(),
 			ExpiresAt:          time.Now().Add(10 * time.Minute),
+			IssuerID:           "test-issuer",
+			LegalFramework: &LegalFrameworkInfo{
+				ApplicableLaws: []string{"GAuth-Law-2025"},
+				Jurisdiction:   "DE",
+			},
 		}
 
 		result, err := complianceValidator.ValidateGrantCompliance(ctx, grant)
 		if err != nil {
 			t.Fatalf("Failed to validate grant compliance: %v", err)
 		}
-		if !result.Compliant {
-			t.Fatalf("Grant compliance validation failed: %v", result.Issues)
+		if !result.Valid {
+			t.Fatalf("Grant compliance validation failed: %v", result.FailureReason)
 		}
 		t.Logf("✓ Grant compliance validated successfully")
 	})
@@ -201,16 +225,29 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 	// Step 9: Create extended token (RFC-0111 step g)
 	t.Run("Step_g_CreateExtendedToken", func(t *testing.T) {
 		request := &ExtendedTokenRequest{
-			GrantType:             "authorization_code",
-			Code:                  "test-auth-code",
-			RedirectURI:           "https://client.example.com/callback",
-			ClientID:              "test-client-001",
-			CodeVerifier:          "test-verifier",
-			AuthorizationChainRef: chain.ChainIntegrity,
-			PoACredentialRef:      "poa-001",
-			ResourceOwnerID:       "owner-001",
-			RequestedScope:        []string{"read", "write"},
-			RequestedResources:    []string{"resource-001"},
+			GrantID:            "grant-001",
+			Scope:              []string{"read", "write"},
+			AuthorizationChain: chain,
+			// PoACredentialRef replaced by actual definition in this struct version
+			PowerOfAttorney: poaDef,
+			ClientOwnerInfo: &ClientOwnerInfo{
+				OwnerID:   "owner-001",
+				OwnerName: "Test Owner Corp",
+			},
+			OwnersAuthorizerInfo: &OwnersAuthorizerInfo{
+				AuthorizerID:            "authorizer-001",
+				AuthorizerName:          "Test Authorizer Corp",
+				CommercialRegisterEntry: true,
+				IdentityVerified:        true,
+			},
+			ResourceOwnerInfo: &ResourceOwnerInfo{
+				OwnerID: "owner-001",
+			},
+			LegalFramework: &LegalFrameworkInfo{
+				ApplicableLaws: []string{"GAuth-Law-2025"},
+				Jurisdiction:   "DE",
+			},
+			RequestID: "req-001",
 		}
 
 		token, err := tokenService.CreateExtendedToken(ctx, request)
@@ -228,52 +265,59 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 		if token.ExpiresIn <= 0 {
 			t.Error("Token expiry is invalid")
 		}
-		if token.Scope == "" {
+		if len(token.Scope) == 0 {
 			t.Error("Token scope is empty")
 		}
 
 		// Verify extended fields
-		if token.AuthorizationChainValidation == nil {
-			t.Error("Authorization chain validation is missing")
+		if token.AuthorizationChain == nil {
+			t.Error("Authorization chain is missing")
+		} else if !token.AuthorizationChain.ChainValidated {
+			t.Error("Authorization chain should be validated")
 		}
-		if !token.AuthorizationChainValidation.Valid {
-			t.Error("Authorization chain validation should be valid")
+
+		if token.ComplianceLevel != "rfc-0111-compliant" {
+			t.Errorf("Expected compliance level 'rfc-0111-compliant', got '%s'", token.ComplianceLevel)
 		}
-		if token.RequestCompliance == nil {
-			t.Error("Request compliance is missing")
-		}
-		if !token.RequestCompliance.Compliant {
-			t.Error("Request compliance should be compliant")
-		}
-		if token.PoACredential == nil {
+
+		if token.PowerOfAttorney == nil {
 			t.Error("PoA credential is missing")
-		}
-		if token.PowerInformationPoint == nil {
-			t.Error("PIP information is missing")
 		}
 
 		t.Logf("✓ Extended token created successfully")
 		t.Logf("  - Access Token: %s...", token.AccessToken[:20])
 		t.Logf("  - Token Type: %s", token.TokenType)
 		t.Logf("  - Expires In: %d seconds", token.ExpiresIn)
-		t.Logf("  - Chain Valid: %v", token.AuthorizationChainValidation.Valid)
-		t.Logf("  - Request Compliant: %v", token.RequestCompliance.Compliant)
+		t.Logf("  - Chain Valid: %v", token.AuthorizationChain.ChainValidated)
+		t.Logf("  - Compliance Level: %s", token.ComplianceLevel)
 	})
 
 	// Step 10: Validate extended token (RFC-0111 step h)
 	t.Run("Step_h_ValidateExtendedToken", func(t *testing.T) {
 		// First create a token
 		request := &ExtendedTokenRequest{
-			GrantType:             "authorization_code",
-			Code:                  "test-auth-code",
-			RedirectURI:           "https://client.example.com/callback",
-			ClientID:              "test-client-001",
-			CodeVerifier:          "test-verifier",
-			AuthorizationChainRef: chain.ChainIntegrity,
-			PoACredentialRef:      "poa-001",
-			ResourceOwnerID:       "owner-001",
-			RequestedScope:        []string{"read", "write"},
-			RequestedResources:    []string{"resource-001"},
+			GrantID:            "grant-002",
+			Scope:              []string{"read", "write"},
+			AuthorizationChain: chain,
+			PowerOfAttorney:    poaDef,
+			ClientOwnerInfo: &ClientOwnerInfo{
+				OwnerID:   "owner-001",
+				OwnerName: "Test Owner Corp",
+			},
+			OwnersAuthorizerInfo: &OwnersAuthorizerInfo{
+				AuthorizerID:            "authorizer-001",
+				AuthorizerName:          "Test Authorizer Corp",
+				CommercialRegisterEntry: true,
+				IdentityVerified:        true,
+			},
+			ResourceOwnerInfo: &ResourceOwnerInfo{
+				OwnerID: "owner-001",
+			},
+			LegalFramework: &LegalFrameworkInfo{
+				ApplicableLaws: []string{"GAuth-Law-2025"},
+				Jurisdiction:   "DE",
+			},
+			RequestID: "req-002",
 		}
 
 		token, err := tokenService.CreateExtendedToken(ctx, request)
@@ -282,12 +326,18 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 		}
 
 		// Validate the token
-		result, err := tokenService.ValidateExtendedToken(ctx, token.AccessToken)
+		// Use EncodeExtendedToken to get the string, then Validate
+		tokenStr, err := tokenService.EncodeExtendedToken(ctx, token)
+		if err != nil {
+			t.Fatalf("Failed to encode token: %v", err)
+		}
+
+		result, err := tokenService.ValidateExtendedToken(ctx, tokenStr)
 		if err != nil {
 			t.Fatalf("Failed to validate token: %v", err)
 		}
 		if !result.Valid {
-			t.Fatalf("Token validation failed: %v", result.Issues)
+			t.Fatalf("Token validation failed: %v", result.ValidationWarnings)
 		}
 
 		t.Logf("✓ Extended token validated successfully")
@@ -314,33 +364,76 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 // Helper functions for test data creation
 
 func createTestAuthorizationChain(t *testing.T) *AuthorizationChain {
-	// Create authorization chain: Owner's Authorizer → Client Owner → Client
-	return &AuthorizationChain{
-		ChainIntegrity: "chain-integrity-hash-12345",
-		Links: []AuthorizationLink{
-			{
-				FromEntity:    AuthorizationEntity{EntityID: "authorizer-001", EntityType: "OwnersAuthorizer", Name: "Test Authorizer Corp"},
-				ToEntity:      AuthorizationEntity{EntityID: "owner-001", EntityType: "ClientOwner", Name: "Test Owner Corp"},
-				GrantedDate:   time.Now().Add(-90 * 24 * time.Hour),
-				ExpiryDate:    time.Now().Add(270 * 24 * time.Hour),
-				Scope:         []string{"manage_clients", "authorize_actions"},
-				Revocable:     true,
-				SubDelegation: true,
-			},
-			{
-				FromEntity:    AuthorizationEntity{EntityID: "owner-001", EntityType: "ClientOwner", Name: "Test Owner Corp"},
-				ToEntity:      AuthorizationEntity{EntityID: "test-client-001", EntityType: "AuthorizedClient", Name: "Test AI Agent"},
-				GrantedDate:   time.Now().Add(-30 * 24 * time.Hour),
-				ExpiryDate:    time.Now().Add(330 * 24 * time.Hour),
-				Scope:         []string{"read", "write", "execute"},
-				Revocable:     true,
-				SubDelegation: false,
-			},
+	// Create Link 1: Owner's Authorizer (Root)
+	authorizer := &AuthorizationLink{
+		EntityID:           "authorizer-001",
+		EntityType:         "organization",
+		EntityName:         "Test Authorizer Corp",
+		Role:               "authorizer",
+		AuthorizationDate:  time.Now().Add(-90 * 24 * time.Hour),
+		AuthorizationType:  "statutory",
+		StatutoryAuthority: "Statutory Law Section 1", // RFC-0111 Requirement
+		LegalBasis: &LegalBasis{
+			BasisType:    "statutory",
+			Jurisdiction: "DE",
 		},
-		CreatedAt:         time.Now().Add(-30 * 24 * time.Hour),
-		ValidUntil:        time.Now().Add(330 * 24 * time.Hour),
-		ChainStatus:       "active",
-		VerificationProof: "proof-hash-67890",
+		IdentityVerified: true,
+		ScopeOfAuthority: []string{"manage_clients", "authorize_actions"},
+		ValidFrom:        time.Now().Add(-90 * 24 * time.Hour),
+		ValidUntil:       time.Now().Add(500 * 24 * time.Hour),
+		Revocable:        true,
+		Status:           "active",
+	}
+
+	// Create Link 2: Client Owner (Authorized by Authorizer)
+	owner := &AuthorizationLink{
+		EntityID:          "owner-001",
+		EntityType:        "natural_person", // or organization
+		EntityName:        "Test Owner Corp",
+		Role:              "owner",
+		AuthorizedBy:      "authorizer-001",
+		AuthorizationDate: time.Now().Add(-90 * 24 * time.Hour),
+		AuthorizationType: "delegated",
+		LegalBasis: &LegalBasis{
+			BasisType:    "power_of_attorney",
+			Jurisdiction: "DE",
+		},
+		IdentityVerified: true,
+		ScopeOfAuthority: []string{"manage_ai_assets"},
+		ValidFrom:        time.Now().Add(-90 * 24 * time.Hour),
+		ValidUntil:       time.Now().Add(400 * 24 * time.Hour),
+		Revocable:        true,
+		Status:           "active",
+	}
+
+	// Create Link 3: Client (Authorized by Owner)
+	client := &AuthorizationLink{
+		EntityID:          "test-client-001",
+		EntityType:        "ai_system",
+		EntityName:        "Test AI Agent",
+		Role:              "client",
+		AuthorizedBy:      "owner-001",
+		AuthorizationDate: time.Now().Add(-30 * 24 * time.Hour),
+		AuthorizationType: "technical_assignment",
+		LegalBasis: &LegalBasis{
+			BasisType: "technical_configuration",
+		},
+		IdentityVerified: true,
+		ScopeOfAuthority: []string{"read", "write", "execute"},
+		ValidFrom:        time.Now().Add(-30 * 24 * time.Hour),
+		ValidUntil:       time.Now().Add(365 * 24 * time.Hour),
+		Revocable:        true,
+		Status:           "active",
+	}
+
+	return &AuthorizationChain{
+		OwnersAuthorizer: authorizer,
+		ClientOwner:      owner,
+		Client:           client,
+		ChainValidated:   true,
+		ValidationTime:   time.Now(),
+		ChainDepth:       3,
+		ChainIntegrity:   "chain-integrity-hash-12345",
 	}
 }
 
@@ -390,9 +483,9 @@ func createTestPoADefinition(t *testing.T, chain *AuthorizationChain) *poa.PoADe
 		},
 		Authorization: poa.AuthorizationScope{
 			AuthorizedActions: poa.AuthorizedActions{
-				Transactions:       []poa.TransactionType{poa.TransactionPurchase, poa.TransactionPayment},
-				Decisions:          []poa.DecisionType{poa.DecisionOperational},
-				NonPhysicalActions: []poa.ActionTypeNonPhysical{poa.ActionNonPhysicalResearching, poa.ActionNonPhysicalAnalyzing},
+				Transactions:       []taxonomy.TransactionType{taxonomy.TransactionPurchase, taxonomy.TransactionPayment},
+				Decisions:          []taxonomy.DecisionType{taxonomy.DecisionOperational},
+				NonPhysicalActions: []taxonomy.ActionTypeNonPhysical{taxonomy.ActionNonPhysicalResearching, taxonomy.ActionNonPhysicalAnalyzing},
 			},
 		},
 		Requirements: poa.Requirements{
@@ -412,11 +505,13 @@ func createTestPoADefinition(t *testing.T, chain *AuthorizationChain) *poa.PoADe
 func createTestNotarialCertificate() *NotarialCertificate {
 	return &NotarialCertificate{
 		CertificateID:     "notary-cert-001",
+		NotaryID:          "notary-123",
 		NotaryName:        "Test Notary Public",
-		NotaryLicense:     "NOTARY-DE-12345",
+		NotaryLicense:     "LIC-12345",
 		Jurisdiction:      "DE",
-		CertificationDate: time.Now().Add(-30 * 24 * time.Hour),
-		ExpirationDate:    time.Now().Add(330 * 24 * time.Hour),
+		IssuingAuthority:  "Chamber of Notaries",
+		CertificationDate: time.Now(),
+		ExpirationDate:    time.Now().Add(5 * 365 * 24 * time.Hour),
 		NotarySeal:        []byte("seal-data-base64"),
 		ApostilleAttached: false,
 		CertificationType: "PowerOfAttorney",
@@ -447,12 +542,24 @@ func createTestDigitalSignatures() []*DigitalSignature {
 	message := []byte("Test PoA Definition")
 	signature := ed25519.Sign(privKey, message)
 
+	// Create a dummy certificate
+	template := &x509.Certificate{
+		SerialNumber: big.NewInt(1),
+		NotBefore:    time.Now().Add(-1 * time.Hour),
+		NotAfter:     time.Now().Add(1 * time.Hour),
+	}
+	// We don't need a valid x509 cert for the mock verifier unless it parses it,
+	// but the struct field must be non-nil.
+	// However, formal_requirements_validation.go checks IsZero() or nil fields.
+	// Let's use the template as is (since it assumes it's parsed).
+
 	return []*DigitalSignature{
 		{
 			SignatureValue: signature,
 			SignatureAlg:   "Ed25519",
 			Timestamp:      time.Now(),
 			SignerInfo:     "owner-001",
+			Certificate:    template, // Mocked certificate
 		},
 	}
 }
@@ -476,6 +583,7 @@ func (m *mockNotarialVerifier) VerifyNotaryLicense(ctx context.Context, notaryID
 		LicenseNumber: notaryID,
 		Jurisdiction:  jurisdiction,
 		Status:        "active",
+		ExpiryDate:    time.Now().Add(365 * 24 * time.Hour),
 	}, nil
 }
 

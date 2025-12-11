@@ -44,6 +44,38 @@ func FuzzCanonicalPOADigest(f *testing.F) {
 		if d1 != d3 {
 			t.Fatalf("digest changed after mutable field update: %s -> %s", d1, d3)
 		}
+		// 3. Scope Reordering Independence
+		// Create copy with reversed scope - should match digest if canonical sorts it
+		if len(scope) > 1 {
+			poaReorder := *poa
+			// Simple reverse
+			reversed := make([]string, len(scope))
+			for i, v := range scope {
+				reversed[len(scope)-1-i] = v
+			}
+			poaReorder.Scope = reversed
+			dReorder, _, err := CanonicalPOADigest(&poaReorder)
+			if err != nil {
+				t.Fatalf("digest err reorder: %v", err)
+			}
+			if d1 != dReorder {
+				t.Fatalf("Digest changed on Scope reordering. Original: %v, Reversed: %v", scope, reversed)
+			}
+		}
+
+		// 4. Sensitivity (Grantor Change)
+		// Changing Grantor MUST change digest (unless new value collides or is same)
+		if grantor != "evil_actor" {
+			poaSens := *poa
+			poaSens.Grantor = "evil_actor"
+			dSens, _, err := CanonicalPOADigest(&poaSens)
+			if err != nil {
+				t.Fatalf("digest err sens: %v", err)
+			}
+			if d1 == dSens {
+				t.Fatalf("Digest collision on Grantor change")
+			}
+		}
 	})
 }
 

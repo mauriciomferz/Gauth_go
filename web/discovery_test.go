@@ -22,7 +22,7 @@ func TestWellKnownDiscovery(t *testing.T) {
 		t.Fatalf("json decode failed: %v body=%s", err, w.Body.String())
 	}
 	// Required keys (expanded)
-	required := []string{"version", "implementation", "issuer", "token_algorithms", "policy_endpoints", "poa_endpoints", "revocation_endpoints", "revocation_support", "multi_signature_poa", "capabilities", "documentation", "jwks_uri", "introspection_endpoint", "key_rotation", "anchoring"}
+	required := []string{"version", "implementation", "issuer", "token_algorithms", "policy_endpoints", "poa_endpoints", "revocation_endpoints", "revocation_endpoint", "revocation_endpoint_v1", "revocation_support", "multi_signature_poa", "capabilities", "documentation", "jwks_uri", "introspection_endpoint", "key_rotation", "anchoring"}
 	for _, k := range required {
 		if _, ok := payload[k]; !ok {
 			t.Errorf("missing key %s in discovery payload", k)
@@ -59,7 +59,7 @@ func TestDiscoveryExactKeys(t *testing.T) {
 	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
 		t.Fatalf("json: %v", err)
 	}
-	required := []string{"version", "schema_version", "future_version", "deprecated_fields", "implementation", "issuer", "token_algorithms", "policy_endpoints", "poa_endpoints", "audit_endpoints", "revocation_endpoints", "revocation_support", "multi_signature_poa", "capabilities", "documentation", "jwks_uri", "introspection_endpoint", "key_rotation", "anchoring"}
+	required := []string{"version", "schema_version", "future_version", "deprecated_fields", "implementation", "issuer", "token_algorithms", "policy_endpoints", "poa_endpoints", "audit_endpoints", "revocation_endpoints", "revocation_endpoint", "revocation_endpoint_v1", "revocation_support", "multi_signature_poa", "capabilities", "documentation", "jwks_uri", "introspection_endpoint", "key_rotation", "anchoring"}
 	if len(body) < len(required) {
 		t.Fatalf("expected at least %d keys got %d", len(required), len(body))
 	}
@@ -98,6 +98,24 @@ func TestDiscoveryExactKeys(t *testing.T) {
 	}
 	if body3["jwks_uri"] == "" {
 		t.Fatalf("jwks_uri should be populated when eddsa mode enabled")
+	}
+
+	// Scenario 4: GAUTH_ISSUER set -> jwks_uri and revocation endponts prefixed
+	t.Setenv("GAUTH_ISSUER", "https://gauth.example.com")
+	srv4 := NewBetaServer(":0")
+	t.Cleanup(func() { srv4.Shutdown() })
+	w4 := performRequest(srv4.router, "GET", "/.well-known/gauth-configuration")
+	var body4 map[string]any
+	if err := json.Unmarshal(w4.Body.Bytes(), &body4); err != nil {
+		t.Fatalf("json4: %v", err)
+	}
+	jwks := body4["jwks_uri"].(string)
+	if jwks != "https://gauth.example.com/.well-known/jwks.json" {
+		t.Errorf("expected prefixed jwks_uri, got %q", jwks)
+	}
+	rev := body4["revocation_endpoint"].(string)
+	if rev != "https://gauth.example.com/api/v1/token/revoke" {
+		t.Errorf("expected prefixed revocation_endpoint, got %q", rev)
 	}
 }
 

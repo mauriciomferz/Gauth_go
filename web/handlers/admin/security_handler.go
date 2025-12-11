@@ -186,6 +186,11 @@ func (h *SecurityHandler) GetSecuritySettings(c *gin.Context) {
 	`
 
 	var settings SecuritySettings
+	if h.db == nil {
+		// In degraded mode, return default settings
+		c.JSON(http.StatusOK, h.createDefaultSecuritySettings(c, tenantID))
+		return
+	}
 	err := h.db.QueryRow(ctx, query, tenantID).Scan(
 		&settings.ID, &settings.TenantID,
 		&settings.MFAEnabled, &settings.MFAMethods, &settings.MFARequiredForAdmin, &settings.MFAGracePeriodHours,
@@ -248,6 +253,19 @@ func (h *SecurityHandler) createDefaultSecuritySettings(c *gin.Context, tenantID
 	`
 
 	var settings SecuritySettings
+
+	// In degraded mode, just return the defaults without inserting
+	if h.db == nil {
+		settings.ID = id.String()
+		settings.TenantID = tenantID
+		settings.SecurityContactEmail = "security@" + tenantID
+		settings.UpdatedAt = time.Now()
+		updatedBy := "system"
+		settings.UpdatedBy = &updatedBy
+		// Populate other defaults manually or let them be zero-valued/handled by frontend
+		return settings
+	}
+
 	_ = h.db.QueryRow(ctx, query, id, tenantID, "security@"+tenantID, "system").Scan( // Best effort; will return defaults on error
 		&settings.ID, &settings.TenantID,
 		&settings.MFAEnabled, &settings.MFAMethods, &settings.MFARequiredForAdmin, &settings.MFAGracePeriodHours,
@@ -287,6 +305,11 @@ func (h *SecurityHandler) UpdateSecuritySettings(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	query, params := h.buildSecuritySettingsUpdateQuery(&req, tenantID)
+
+	if h.db == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database not available"})
+		return
+	}
 
 	var returnedID string
 	err := h.db.QueryRow(ctx, query, params...).Scan(&returnedID)
@@ -581,6 +604,11 @@ func (h *SecurityHandler) ResetToDefaults(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	// Delete existing settings and recreate with defaults
+	if h.db == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database not available"})
+		return
+	}
+
 	_, err := h.db.Exec(ctx, "DELETE FROM security_settings WHERE tenant_id = $1", tenantID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reset settings"})

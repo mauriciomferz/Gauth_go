@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"time"
@@ -24,7 +25,10 @@ type GAuthPlusHandler struct {
 // NewGAuthPlusHandler creates a new GAuth+ handler
 func NewGAuthPlusHandler(pool *pgxpool.Pool) *GAuthPlusHandler {
 	// Convert pgxpool to database/sql for service compatibility
-	db := stdlib.OpenDBFromPool(pool)
+	var db *sql.DB
+	if pool != nil {
+		db = stdlib.OpenDBFromPool(pool)
+	}
 
 	return &GAuthPlusHandler{
 		successorService:   gauthplus.NewPostgreSQLSuccessorService(db),
@@ -530,7 +534,7 @@ func (h *GAuthPlusHandler) GetLatestAssessment(c *gin.Context) {
 // POST /api/admin/assessments/check-match
 func (h *GAuthPlusHandler) CheckCapabilityMatch(c *gin.Context) {
 	var req struct {
-		AgentID      string                            `json:"agent_id" binding:"required"`
+		AgentID      string                           `json:"agent_id" binding:"required"`
 		Requirements gauthplus.CapabilityRequirements `json:"requirements" binding:"required"`
 	}
 

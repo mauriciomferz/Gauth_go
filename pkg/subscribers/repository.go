@@ -53,7 +53,7 @@ type Subscriber struct {
 	MaxUsers               int
 	MaxTokens              int
 	Metadata               map[string]interface{}
-	
+
 	// Computed fields from aggregations
 	TotalTokens    int64
 	ActiveUsers    int64
@@ -62,15 +62,21 @@ type Subscriber struct {
 
 // SubscriberFilters defines query filters for listing subscribers
 type SubscriberFilters struct {
-	Status   string // active, suspended, pending, disabled
-	Tier     string // free, standard, premium, enterprise
-	Search   string // Search in tenant_name, tenant_id, contact_email
-	Limit    int
-	Offset   int
+	Status string // active, suspended, pending, disabled
+	Tier   string // free, standard, premium, enterprise
+	Search string // Search in tenant_name, tenant_id, contact_email
+	Limit  int
+	Offset int
 }
 
 // CreateSubscriber inserts a new subscriber
 func (r *Repository) CreateSubscriber(ctx context.Context, subscriber *Subscriber) error {
+	if r.db == nil {
+		subscriber.ID = uuid.New()
+		subscriber.CreatedAt = time.Now()
+		subscriber.UpdatedAt = time.Now()
+		return nil
+	}
 	query := `
 		INSERT INTO subscribers (
 			tenant_name, tenant_id, status, tier, created_by,
@@ -109,6 +115,9 @@ func (r *Repository) CreateSubscriber(ctx context.Context, subscriber *Subscribe
 
 // ListSubscribers retrieves subscribers with optional filtering and pagination
 func (r *Repository) ListSubscribers(ctx context.Context, filters SubscriberFilters) ([]Subscriber, int, error) {
+	if r.db == nil {
+		return []Subscriber{}, 0, nil
+	}
 	whereClauses := []string{}
 	args := []interface{}{}
 	argPos := 1
@@ -199,7 +208,7 @@ func (r *Repository) ListSubscribers(ctx context.Context, filters SubscriberFilt
 		if err != nil {
 			return nil, 0, fmt.Errorf("failed to scan subscriber: %w", err)
 		}
-		
+
 		// Handle nullable fields
 		if subscriberID.Valid {
 			s.TenantID = subscriberID.String
@@ -208,7 +217,7 @@ func (r *Repository) ListSubscribers(ctx context.Context, filters SubscriberFilt
 			name := subscriberName.String
 			s.ContactName = &name
 		}
-		
+
 		subscribers = append(subscribers, s)
 	}
 
@@ -217,6 +226,9 @@ func (r *Repository) ListSubscribers(ctx context.Context, filters SubscriberFilt
 
 // GetSubscriber retrieves a single subscriber by ID or tenant_id
 func (r *Repository) GetSubscriber(ctx context.Context, idOrTenantID string) (*Subscriber, error) {
+	if r.db == nil {
+		return nil, sql.ErrNoRows
+	}
 	query := `
 		SELECT 
 			s.id, s.tenant_name, s.tenant_id, s.status, s.tier,
@@ -266,6 +278,9 @@ func (r *Repository) GetSubscriber(ctx context.Context, idOrTenantID string) (*S
 
 // UpdateSubscriber updates subscriber configuration
 func (r *Repository) UpdateSubscriber(ctx context.Context, idOrTenantID string, subscriber *Subscriber) error {
+	if r.db == nil {
+		return sql.ErrNoRows
+	}
 	query := `
 		UPDATE subscribers SET
 			tenant_name = $1,
@@ -321,6 +336,9 @@ func (r *Repository) UpdateSubscriber(ctx context.Context, idOrTenantID string, 
 
 // DeleteSubscriber soft-deletes a subscriber by setting status to 'disabled'
 func (r *Repository) DeleteSubscriber(ctx context.Context, idOrTenantID string) error {
+	if r.db == nil {
+		return sql.ErrNoRows
+	}
 	query := `
 		UPDATE subscribers 
 		SET status = 'disabled', updated_at = NOW()
@@ -341,6 +359,9 @@ func (r *Repository) DeleteSubscriber(ctx context.Context, idOrTenantID string) 
 
 // UpdateKeyMetadata updates key generation metadata for a subscriber
 func (r *Repository) UpdateKeyMetadata(ctx context.Context, tenantID string, keyType, publicKey, privateKeyID string, expiresAt time.Time) error {
+	if r.db == nil {
+		return sql.ErrNoRows
+	}
 	query := `
 		UPDATE subscribers
 		SET 
@@ -367,6 +388,20 @@ func (r *Repository) UpdateKeyMetadata(ctx context.Context, tenantID string, key
 
 // GetSubscriberMetrics retrieves aggregated metrics for a specific subscriber
 func (r *Repository) GetSubscriberMetrics(ctx context.Context, tenantID string) (map[string]interface{}, error) {
+	if r.db == nil {
+		return map[string]interface{}{
+			"tenant_id":      tenantID,
+			"total_tokens":   0,
+			"active_tokens":  0,
+			"revoked_tokens": 0,
+			"total_requests": 0,
+			"last_activity":  nil,
+			"max_users":      0,
+			"max_tokens":     0,
+			"status":         "unknown",
+			"tier":           "unknown",
+		}, nil
+	}
 	// Get token statistics
 	tokenQuery := `
 		SELECT 
@@ -404,16 +439,16 @@ func (r *Repository) GetSubscriberMetrics(ctx context.Context, tenantID string) 
 	}
 
 	metrics := map[string]interface{}{
-		"tenant_id":       tenantID,
-		"total_tokens":    totalTokens,
-		"active_tokens":   activeTokens,
-		"revoked_tokens":  revokedTokens,
-		"total_requests":  totalRequests,
-		"last_activity":   lastActivity,
-		"max_users":       subscriber.MaxUsers,
-		"max_tokens":      subscriber.MaxTokens,
-		"status":          subscriber.Status,
-		"tier":            subscriber.Tier,
+		"tenant_id":      tenantID,
+		"total_tokens":   totalTokens,
+		"active_tokens":  activeTokens,
+		"revoked_tokens": revokedTokens,
+		"total_requests": totalRequests,
+		"last_activity":  lastActivity,
+		"max_users":      subscriber.MaxUsers,
+		"max_tokens":     subscriber.MaxTokens,
+		"status":         subscriber.Status,
+		"tier":           subscriber.Tier,
 	}
 
 	return metrics, nil
@@ -421,6 +456,9 @@ func (r *Repository) GetSubscriberMetrics(ctx context.Context, tenantID string) 
 
 // CheckTenantIDExists checks if a tenant_id is already in use
 func (r *Repository) CheckTenantIDExists(ctx context.Context, tenantID string) (bool, error) {
+	if r.db == nil {
+		return false, nil
+	}
 	var exists bool
 	query := `SELECT EXISTS(SELECT 1 FROM subscribers WHERE tenant_id = $1)`
 	err := r.db.QueryRow(ctx, query, tenantID).Scan(&exists)

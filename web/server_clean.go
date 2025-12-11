@@ -295,6 +295,9 @@ func (s *BetaServer) EdDSAPublicKey() []byte {
 	return nil
 }
 func (s *BetaServer) GetCapabilityRegistryHash() string {
+	if s.capabilitiesHandler == nil {
+		return ""
+	}
 	return s.capabilitiesHandler.GetRegistryHash()
 }
 
@@ -351,6 +354,11 @@ func (s *BetaServer) CapAnchorMetrics() (emitted, skipped, hashChanged, lastWrit
 
 // CapabilityAnchorMetricsPrometheus exposes capability anchor metrics in Prometheus format.
 func (s *BetaServer) CapabilityAnchorMetricsPrometheus(c *gin.Context) {
+	// If supported, trigger verification on demand
+	if c.Query("verify") == "1" {
+		s.verifyReceiptChain()
+	}
+
 	// If backed by Prometheus adapter, expose proper full metrics
 	if pm, ok := s.metrics.(*metrics.PrometheusMetrics); ok {
 		if reg := pm.Registry(); reg != nil {
@@ -410,6 +418,24 @@ func (s *BetaServer) CapabilityAnchorMetricsPrometheus(c *gin.Context) {
 		staleVal = 1
 	}
 	b.WriteString(fmt.Sprintf("gauth_capability_anchor_stale %d\n", staleVal))
+
+	// Integrity status
+	b.WriteString("# HELP gauth_capability_anchor_notarization_receipts_integrity Integrity status of verification chain (1=ok, 0=mismatch, -1=legacy, -2=unconfigured)\n")
+	b.WriteString("# TYPE gauth_capability_anchor_notarization_receipts_integrity gauge\n")
+	integrityVal := -2
+	switch s.receiptIntegrityStatus {
+	case integrityOK:
+		integrityVal = 1
+	case integrityMismatch:
+		integrityVal = 0
+	case integrityLegacy:
+		integrityVal = -1
+	case integrityUnconfigured:
+		integrityVal = -2
+	case emptyValue:
+		integrityVal = -2
+	}
+	b.WriteString(fmt.Sprintf("gauth_capability_anchor_notarization_receipts_integrity %d\n", integrityVal))
 
 	c.Data(200, "text/plain; charset=utf-8", []byte(b.String()))
 }
@@ -1099,6 +1125,9 @@ func (s *BetaServer) appendCapabilityAudit(e *AuditEntry) {
 // Returns integrity status string (ok|mismatch|empty|unconfigured).
 // nolint:SA4006 // status variable used for integrity assignment; staticcheck false positive.
 func (s *BetaServer) verifyReceiptChain() string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.receiptLastVerify = time.Now()
 	if s.receiptStore == nil {
 		s.receiptIntegrityStatus = integrityUnconfigured
 		return s.receiptIntegrityStatus
@@ -1214,11 +1243,12 @@ func (s *BetaServer) routes() {
 	// Capability reload endpoint (now handled by auditHandlers)
 	// beta.POST("/capabilities/reload", s.apiCapabilitiesReload) // Removed
 	// Capability Anchor Handler - Register routes via API handler
+	// Capability Anchor Handler - Register routes via API handler
 	// if s.capabilityAnchorAPI != nil {
 	// 	s.capabilityAnchorAPI.RegisterRoutes(s.router)
 	// }
 	// Capability registry external anchoring endpoints (prototype)
-	// s.capabilityAnchorAPI.RegisterRoutes(s.router) // Redundant, already registered above
+	// Register Prometheus metrics endpoint for anchor
 
 	// Legacy alias redirects/shims if any
 	// Notarization receipt persistence endpoints - handled by notaryHandlers.RegisterRoutes()
@@ -1940,6 +1970,10 @@ func (s *BetaServer) routes() {
 			},
 			"jwks_uri": func() string {
 				if jwtEnabled || os.Getenv("GAUTH_TOKEN_SIG_MODE") == sigModeEdDSA {
+					issuer := os.Getenv("GAUTH_ISSUER")
+					if issuer != "" {
+						return strings.TrimRight(issuer, "/") + "/.well-known/jwks.json"
+					}
 					return "/.well-known/jwks.json"
 				}
 				return ""
@@ -1960,6 +1994,20 @@ func (s *BetaServer) routes() {
 			"poa_endpoints":        []string{"/api/v1/poa/authorize", "/api/v1/poa/metrics"},
 			"audit_endpoints":      []string{"/api/v1/audit/logs", "/api/v1/audit/record"},
 			"revocation_endpoints": []string{"/api/v1/token/revoke", "/api/v1/token/revocation/head"},
+			"revocation_endpoint": func() string {
+				issuer := os.Getenv("GAUTH_ISSUER")
+				if issuer != "" {
+					return strings.TrimRight(issuer, "/") + "/api/v1/token/revoke"
+				}
+				return "/api/v1/token/revoke"
+			}(),
+			"revocation_endpoint_v1": func() string {
+				issuer := os.Getenv("GAUTH_ISSUER")
+				if issuer != "" {
+					return strings.TrimRight(issuer, "/") + "/api/v1/token/revoke"
+				}
+				return "/api/v1/token/revoke"
+			}(),
 			"revocation_support": gin.H{
 				"hash_chain":              true,
 				"external_anchoring":      anchorProvider != "",
@@ -2188,68 +2236,12 @@ func (s *BetaServer) routes() {
 	// Unified JWKS endpoint: supports RSA (RS256), HMAC metadata, and Ed25519 (EdDSA) when enabled.
 
 	// Revocation chain head endpoint (placeholder; will wire into real revocation chain subsystem later)
-	s.router.GET("/api/v1/token/revocation/head", func(c *gin.Context) {
-		chain := s.revocationChain
-		head := ""
-		length := 0
-		aggregate := ""
-		verified := true
-		var latest *delegation.SignedTreeHead
-		if chain != nil {
-			length = len(chain.Events())
-			if length > 0 {
-				evs := chain.Events()
-				head = evs[length-1].Hash
-				aggregate = chain.AggregateHash()
-				if err := chain.Verify(); err != nil {
-					verified = false
-				}
-			}
-			latest = chain.LatestTreeHead()
-		}
-		resp := gin.H{"success": true, "revocation_chain_head": head, "revocation_chain_length": length, "revocation_chain_aggregate": aggregate, "verified": verified, "latest_tree_head": latest}
-		// Optional expansion: include full tree head history when include_tree_heads=1 (development / diagnostics)
-		if c.Query("include_tree_heads") == "1" && chain != nil {
-			resp["tree_heads"] = chain.TreeHeads()
-		}
-		c.JSON(200, resp)
-	})
+	// Revocation chain head endpoint (placeholder; will wire into real revocation chain subsystem later)
+	s.router.GET("/api/v1/token/revocation/head", s.handleRevocationHead)
 
 	// Revocation chain verification & listing endpoint (Phase 2: includes signature status per event)
-	s.router.GET("/api/v1/token/revocation/verify", func(c *gin.Context) {
-		chain := s.revocationChain
-		if chain == nil {
-			c.JSON(200, gin.H{"success": true, "events": []any{}, "length": 0, "verified": true})
-			return
-		}
-		// Build event summaries
-		all := chain.Events()
-		out := make([]gin.H, 0, len(all))
-		verr := chain.Verify()
-		globalVerified := verr == nil
-		for i, e := range all {
-			// Compute signature validity: unsigned => false; if signed but global verification failed => false.
-			var sigError string
-			var sigValid bool
-			switch {
-			case e.Signature == "":
-				sigValid = false
-				sigError = "unsigned"
-			case !globalVerified:
-				sigValid = false
-				sigError = "chain_verification_failed"
-			default:
-				sigValid = true
-			}
-			out = append(out, gin.H{"id": e.ID, "hash": e.Hash, "prev_hash": e.PrevHash, "delegation_id": e.DelegationID, "reason": e.Reason, "revoked_at": e.RevokedAt.Format(time.RFC3339), "signature_present": e.Signature != "", "sig_kid": e.SigKid, "signature_valid": sigValid, "signature_error": sigError, "index": i})
-		}
-		resp := gin.H{"success": true, "events": out, "length": len(out), "verified": globalVerified}
-		if verr != nil {
-			resp["verification_error"] = verr.Error()
-		}
-		resp["aggregate_hash"] = chain.AggregateHash()
-		c.JSON(200, resp)
-	})
+	// Revocation chain verification & listing endpoint (Phase 2: includes signature status per event)
+	s.router.GET("/api/v1/token/revocation/verify", s.handleRevocationVerify)
 
 	// Merkle root endpoint (Phase 3)
 	s.router.GET("/api/v1/token/revocation/root", func(c *gin.Context) {
@@ -4841,3 +4833,66 @@ func (s *BetaServer) RotationV2LastHash() string {
 }
 
 // auditChainAnchorAdapter is now defined in server_types.go
+// handleRevocationHead implements GET /api/v1/token/revocation/head
+func (s *BetaServer) handleRevocationHead(c *gin.Context) {
+	chain := s.revocationChain
+	head := ""
+	length := 0
+	aggregate := ""
+	verified := true
+	var latest *delegation.SignedTreeHead
+	if chain != nil {
+		length = len(chain.Events())
+		if length > 0 {
+			evs := chain.Events()
+			head = evs[length-1].Hash
+			aggregate = chain.AggregateHash()
+			if err := chain.Verify(); err != nil {
+				verified = false
+			}
+		}
+		latest = chain.LatestTreeHead()
+	}
+	resp := gin.H{"success": true, "revocation_chain_head": head, "revocation_chain_length": length, "revocation_chain_aggregate": aggregate, "verified": verified, "latest_tree_head": latest}
+	// Optional expansion: include full tree head history when include_tree_heads=1 (development / diagnostics)
+	if c.Query("include_tree_heads") == "1" && chain != nil {
+		resp["tree_heads"] = chain.TreeHeads()
+	}
+	c.JSON(200, resp)
+}
+
+// handleRevocationVerify implements GET /api/v1/token/revocation/verify
+func (s *BetaServer) handleRevocationVerify(c *gin.Context) {
+	chain := s.revocationChain
+	if chain == nil {
+		c.JSON(200, gin.H{"success": true, "events": []any{}, "length": 0, "verified": true})
+		return
+	}
+	// Build event summaries
+	all := chain.Events()
+	out := make([]gin.H, 0, len(all))
+	verr := chain.Verify()
+	globalVerified := verr == nil
+	for i, e := range all {
+		// Compute signature validity: unsigned => false; if signed but global verification failed => false.
+		var sigError string
+		var sigValid bool
+		switch {
+		case e.Signature == "":
+			sigValid = false
+			sigError = "unsigned"
+		case !globalVerified:
+			sigValid = false
+			sigError = "chain_verification_failed"
+		default:
+			sigValid = true
+		}
+		out = append(out, gin.H{"id": e.ID, "hash": e.Hash, "prev_hash": e.PrevHash, "delegation_id": e.DelegationID, "reason": e.Reason, "revoked_at": e.RevokedAt.Format(time.RFC3339), "signature_present": e.Signature != "", "sig_kid": e.SigKid, "signature_valid": sigValid, "signature_error": sigError, "index": i})
+	}
+	resp := gin.H{"success": true, "events": out, "length": len(out), "verified": globalVerified}
+	if verr != nil {
+		resp["verification_error"] = verr.Error()
+	}
+	resp["aggregate_hash"] = chain.AggregateHash()
+	c.JSON(200, resp)
+}

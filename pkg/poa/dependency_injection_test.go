@@ -101,7 +101,7 @@ func TestVerifyMultiSig_WithInjectedManager(t *testing.T) {
 	}
 
 	// Verify with nil manager (should fail)
-	valid, satisfied, _ = VerifyMultiSig(poa, nil)
+	valid, _, _ = VerifyMultiSig(poa, nil)
 	if valid != 0 {
 		t.Errorf("expected 0 valid signatures with nil manager, got %d", valid)
 	}

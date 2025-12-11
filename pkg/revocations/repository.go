@@ -69,13 +69,13 @@ type Revocation struct {
 
 // RevocationStats holds aggregated statistics
 type RevocationStats struct {
-	TotalRevocations     int
-	VerifiedRevocations  int
-	RevocationsLast24h   int
-	RevocationsLast7d    int
-	LatestBlockHeight    int
-	LatestTreeVersion    int
-	VerificationRate     float64
+	TotalRevocations    int
+	VerifiedRevocations int
+	RevocationsLast24h  int
+	RevocationsLast7d   int
+	LatestBlockHeight   int
+	LatestTreeVersion   int
+	VerificationRate    float64
 }
 
 // CreateMerkleNode inserts a new Merkle tree node
@@ -103,6 +103,9 @@ func (r *Repository) CreateMerkleNode(ctx context.Context, node *MerkleNode) err
 
 // GetMerkleTree retrieves all nodes for a specific tree version
 func (r *Repository) GetMerkleTree(ctx context.Context, tenantID string, treeVersion int) ([]MerkleNode, error) {
+	if r.db == nil {
+		return []MerkleNode{}, nil
+	}
 	query := `
 		SELECT 
 			id, tenant_id, tree_version, node_hash, level, position,
@@ -137,6 +140,9 @@ func (r *Repository) GetMerkleTree(ctx context.Context, tenantID string, treeVer
 
 // GetLatestTreeVersion retrieves the latest tree version for a tenant
 func (r *Repository) GetLatestTreeVersion(ctx context.Context, tenantID string) (int, error) {
+	if r.db == nil {
+		return 0, nil
+	}
 	query := `
 		SELECT COALESCE(MAX(tree_version), 0)
 		FROM merkle_tree_nodes
@@ -153,6 +159,9 @@ func (r *Repository) GetLatestTreeVersion(ctx context.Context, tenantID string) 
 
 // CreateMerkleProof inserts a new Merkle proof
 func (r *Repository) CreateMerkleProof(ctx context.Context, proof *MerkleProof) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := `
 		INSERT INTO merkle_proofs (
 			tenant_id, proof_id, token_id, tree_version,
@@ -174,6 +183,9 @@ func (r *Repository) CreateMerkleProof(ctx context.Context, proof *MerkleProof) 
 
 // GetMerkleProof retrieves a proof by token ID
 func (r *Repository) GetMerkleProof(ctx context.Context, tenantID, tokenID string, treeVersion int) (*MerkleProof, error) {
+	if r.db == nil {
+		return nil, fmt.Errorf("database not available")
+	}
 	query := `
 		SELECT 
 			id, tenant_id, proof_id, token_id, tree_version,
@@ -199,6 +211,9 @@ func (r *Repository) GetMerkleProof(ctx context.Context, tenantID, tokenID strin
 
 // ListMerkleProofs retrieves proofs with pagination
 func (r *Repository) ListMerkleProofs(ctx context.Context, tenantID string, limit, offset int) ([]MerkleProof, int, error) {
+	if r.db == nil {
+		return []MerkleProof{}, 0, nil
+	}
 	// Count total
 	countQuery := `SELECT COUNT(*) FROM merkle_proofs WHERE tenant_id = $1`
 	var total int
@@ -241,6 +256,9 @@ func (r *Repository) ListMerkleProofs(ctx context.Context, tenantID string, limi
 
 // UpdateProofVerification updates the verification status of a proof
 func (r *Repository) UpdateProofVerification(ctx context.Context, proofID string, verified bool) error {
+	if r.db == nil {
+		return nil // No-op, or return an error if preferred: fmt.Errorf("database not available")
+	}
 	query := `
 		UPDATE merkle_proofs
 		SET verified = $1, verified_at = NOW()
@@ -256,6 +274,9 @@ func (r *Repository) UpdateProofVerification(ctx context.Context, proofID string
 
 // CreateRevocation inserts a new revocation entry
 func (r *Repository) CreateRevocation(ctx context.Context, revocation *Revocation) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := `
 		INSERT INTO revocations (
 			tenant_id, token_id, revocation_reason,
@@ -279,6 +300,9 @@ func (r *Repository) CreateRevocation(ctx context.Context, revocation *Revocatio
 
 // ListRevocations retrieves revocations with pagination
 func (r *Repository) ListRevocations(ctx context.Context, tenantID string, limit, offset int) ([]Revocation, int, error) {
+	if r.db == nil {
+		return []Revocation{}, 0, nil
+	}
 	// Count total
 	countQuery := `SELECT COUNT(*) FROM revocations WHERE tenant_id = $1`
 	var total int
@@ -323,6 +347,9 @@ func (r *Repository) ListRevocations(ctx context.Context, tenantID string, limit
 
 // GetRevocation retrieves a single revocation by token ID
 func (r *Repository) GetRevocation(ctx context.Context, tenantID, tokenID string) (*Revocation, error) {
+	if r.db == nil {
+		return nil, fmt.Errorf("database not available")
+	}
 	query := `
 		SELECT 
 			id, tenant_id, token_id, revocation_reason,
@@ -352,6 +379,17 @@ func (r *Repository) GetRevocation(ctx context.Context, tenantID, tokenID string
 
 // GetRevocationStats retrieves aggregated statistics
 func (r *Repository) GetRevocationStats(ctx context.Context, tenantID string) (*RevocationStats, error) {
+	if r.db == nil {
+		return &RevocationStats{
+			TotalRevocations:    0,
+			VerifiedRevocations: 0,
+			RevocationsLast24h:  0,
+			RevocationsLast7d:   0,
+			LatestBlockHeight:   0,
+			LatestTreeVersion:   0,
+			VerificationRate:    0.0,
+		}, nil
+	}
 	query := `
 		SELECT 
 			COUNT(*) AS total_revocations,
@@ -365,7 +403,7 @@ func (r *Repository) GetRevocationStats(ctx context.Context, tenantID string) (*
 
 	var stats RevocationStats
 	var latestBlockHeight, latestTreeVersion sql.NullInt64
-	
+
 	err := r.db.QueryRow(ctx, query, tenantID).Scan(
 		&stats.TotalRevocations,
 		&stats.VerifiedRevocations,

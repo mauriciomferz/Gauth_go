@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/prometheus/client_golang/prometheus"
 	otel "go.opentelemetry.io/otel"
 	stdoutmetric "go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
@@ -43,6 +44,8 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
+	gnapPkg "github.com/mauriciomferz/Gauth_go/pkg/gnap"
 	"github.com/mauriciomferz/Gauth_go/pkg/mcp"
 	adminHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/admin"
 	anchorHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/anchor"
@@ -52,6 +55,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/web/handlers/capability_anchor"
 	delegationHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/delegation"
 	eventsHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/events"
+	gnapHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/gnap"
 	mcpHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/mcp"
 	modellimits "github.com/mauriciomferz/Gauth_go/web/handlers/modellimits"
 	notaryHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/notary"
@@ -305,6 +309,27 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 				}
 			}
 		}
+
+		// Wire Revocation Audit Hook (RFC111-R7)
+		delegation.OnRevocationAppended = func(ev delegation.RevocationEvent, chainLen int, aggregateHash string) {
+			// Capture event in centralized audit log
+			s.audit.Append(&AuditEntry{
+				ID:       randomNonce(8),
+				At:       time.Now().UTC(),
+				Actor:    "system", // Attribution limited in async hook; implicitly system/grantor
+				Action:   "revocation_appended",
+				Resource: "revocation_chain",
+				Outcome:  "success",
+				Meta: map[string]any{
+					"revocation_id":  ev.ID,
+					"delegation_id":  ev.DelegationID,
+					"chain_length":   chainLen,
+					"aggregate_hash": aggregateHash,
+					"event_hash":     ev.Hash,
+					"reason":         ev.Reason,
+				},
+			})
+		}
 	}
 
 	// Seed demo capabilities if no GAUTH_CAPABILITIES_PATH and registry is empty (test compatibility)
@@ -337,6 +362,10 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 
 	// Initialize Policy Handler
 	s.policyHandler = policyHandler.NewHandler(os.Getenv("POLICY_CHAIN_STATE_PATH"), s.metrics)
+	// Inject revocation chain for end-to-end provenance (Roadmap Item 5)
+	if s.revocationChain != nil {
+		s.policyHandler.RevocationChain = s.revocationChain
+	}
 	s.policyHandler.EnsureInitialized()
 	s.policyAPI = &policyHandler.API{Handler: s.policyHandler, Auditor: &policyAuditorAdapter{log: s.audit}}
 	s.policyAPI.RegisterRoutes(s.router)
@@ -565,6 +594,15 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	s.registerPolicyManifest()
 	// Crypto algorithms introspection endpoint required by tests
 	s.router.GET("/api/v1/crypto/algorithms", s.apiCryptoAlgorithms)
+
+	// GNAP (RFC 9635) Grant Negotiation and Authorization Protocol
+	gnapStore := gnapPkg.NewMemoryGrantStore()
+	gnapTokenStore := gnapPkg.NewMemoryTokenStore()
+	gnapBaseURL := envFallback("GAUTH_GNAP_BASE_URL", "http://localhost:8080")
+	gnapHandler := gnapHandlers.NewHandler(gnapStore, gnapBaseURL)
+	gnapHandler.TokenStore = gnapTokenStore
+	gnapHandler.RegisterRoutes(s.router)
+	log.Println("[gnap] RFC 9635 GNAP endpoints registered at /gnap/*")
 
 	// Protocol Flow API endpoints (Item 2: Protocol Flow Navigation)
 	s.router.POST("/api/v1/protocol/flow/sessions", s.apiProtocolFlowCreateSession)
@@ -875,9 +913,18 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			adminGroup.POST("/policy-templates/:id/clone", policyTemplatesHandler.ClonePolicyTemplate)
 			adminGroup.DELETE("/policy-templates/:id", policyTemplatesHandler.DeletePolicyTemplate)
 
-			// GAuth+ enhanced authorization handler
+			// GAuth+ enhanced authorization handler (Admin API)
 			gauthPlusHandler := adminHandlers.NewGAuthPlusHandler(dbPool)
 			gauthPlusHandler.RegisterRoutes(adminGroup)
+
+			// GAuth+ Public API (v1) - Create services sharing the pool
+			gplusDB := stdlib.OpenDBFromPool(dbPool)
+			succSvc := gauthplus.NewPostgreSQLSuccessorService(gplusDB)
+			delSvc := gauthplus.NewPostgreSQLDelegationService(gplusDB)
+			dualSvc := gauthplus.NewPostgreSQLDualControlService(gplusDB)
+			capSvc := gauthplus.NewPostgreSQLCapabilityAssessmentService(gplusDB)
+			fidSvc := gauthplus.NewPostgreSQLFiduciaryDutyService(gplusDB)
+			s.RegisterGAuthPlusEndpoints(succSvc, delSvc, dualSvc, capSvc, fidSvc)
 
 			fmt.Fprintln(os.Stderr, "[admin] handlers registered: auth, poa, resilience, events, authz, config, tokens, metrics, audit, subscribers, revocation, api-keys, security, cache, oidc, policy-templates, gauthplus (17 total)") // OIDC authentication flow handler
 			oidcAuthHandler := authHandlers.NewOIDCAuthHandler(dbPool)
@@ -911,6 +958,110 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		authHandler.RegisterRoutes(adminGroup)
 		fmt.Fprintln(os.Stderr, "[DEV] Auth handler registered: POST /api/admin/auth/login")
 		fmt.Fprintln(os.Stderr, "[DEV] Test credentials: admin@example.com / password")
+
+		// Authorization Handler (Degraded Mode)
+		authzHandler := adminHandlers.NewAuthorizationHandler(nil)
+		authzHandler.RegisterRoutes(adminGroup)
+		fmt.Fprintln(os.Stderr, "[DEV] Authorization handler registered (Degraded Mode: Memory/Empty)")
+
+		// Subscribers Handler (Degraded Mode)
+		subscriberHandler := adminHandlers.NewSubscriberHandler(nil)
+		subscriberHandler.RegisterRoutes(adminGroup)
+		fmt.Fprintln(os.Stderr, "[DEV] Subscribers handler registered (Degraded Mode: Empty)")
+
+		// Metrics Handler (Degraded Mode)
+		// Metrics Handler (Degraded Mode)
+		registry := prometheus.NewRegistry()
+		metricsHandler := adminHandlers.NewMetricsHandler(registry, nil)
+		metricsHandler.RegisterRoutes(adminGroup)
+		fmt.Fprintln(os.Stderr, "[DEV] Metrics handler registered (Degraded Mode: In-Memory Only)")
+
+		// Register remaining handlers with nil DB for Degraded Mode (Empty Data)
+
+		// 1. PoA Handler
+		poaHandler := adminHandlers.NewPoAHandler(nil)
+		poaHandler.RegisterRoutes(adminGroup)
+		// Initialize dummy cache for PoA
+		cacheConf := cacheConfig.LoadCacheConfig()
+		cacheConf.Type = "memory"
+		cacheInstance := cache.NewCacheWithFallback(cacheConf)
+		poaHandler.SetCache(cacheInstance)
+		fmt.Fprintln(os.Stderr, "[DEV] PoA handler registered (Degraded Mode: Empty)")
+
+		// 2. Events Handler
+		eventHandler := adminHandlers.NewEventHandler(nil)
+		eventHandler.RegisterRoutes(adminGroup)
+		fmt.Fprintln(os.Stderr, "[DEV] Events handler registered (Degraded Mode: Empty)")
+
+		// 3. Audit Handler
+		auditHandler := adminHandlers.NewAuditHandler(nil)
+		auditHandler.RegisterRoutes(adminGroup)
+		fmt.Fprintln(os.Stderr, "[DEV] Audit handler registered (Degraded Mode: Empty)")
+
+		// 4. Revocation Handler
+		revocationHandler := adminHandlers.NewRevocationHandler(nil)
+		revocationHandler.RegisterRoutes(adminGroup)
+		fmt.Fprintln(os.Stderr, "[DEV] Revocation handler registered (Degraded Mode: Empty)")
+
+		// 5. OIDC Handler
+		oidcHandler := adminHandlers.NewOIDCHandler(nil)
+		oidcHandler.RegisterRoutes(adminGroup)
+		fmt.Fprintln(os.Stderr, "[DEV] OIDC handler registered (Degraded Mode: Empty)")
+
+		// 6. Policy Templates Handler
+		policyTemplatesHandler := adminHandlers.NewPolicyTemplatesHandler(nil)
+		adminGroup.GET("/policy-templates", policyTemplatesHandler.ListPolicyTemplates) // Manually registered in main block
+		adminGroup.GET("/policy-templates/:id", policyTemplatesHandler.GetPolicyTemplate)
+		adminGroup.POST("/policy-templates", policyTemplatesHandler.CreatePolicyTemplate)
+		adminGroup.PUT("/policy-templates/:id", policyTemplatesHandler.UpdatePolicyTemplate)
+		adminGroup.POST("/policy-templates/:id/clone", policyTemplatesHandler.ClonePolicyTemplate)
+		adminGroup.DELETE("/policy-templates/:id", policyTemplatesHandler.DeletePolicyTemplate)
+		fmt.Fprintln(os.Stderr, "[DEV] Policy Templates handler registered (Degraded Mode: Empty)")
+
+		// 7. GAuthPlus Handler
+		gauthPlusHandler := adminHandlers.NewGAuthPlusHandler(nil)
+		gauthPlusHandler.RegisterRoutes(adminGroup)
+		fmt.Fprintln(os.Stderr, "[DEV] GAuthPlus handler registered (Degraded Mode: Empty)")
+
+		// GAuthPlus Public API (v1) - Degraded Mode
+		succSvc := gauthplus.NewPostgreSQLSuccessorService(nil)
+		delSvc := gauthplus.NewPostgreSQLDelegationService(nil)
+		dualSvc := gauthplus.NewPostgreSQLDualControlService(nil)
+		capSvc := gauthplus.NewPostgreSQLCapabilityAssessmentService(nil)
+		fidSvc := gauthplus.NewPostgreSQLFiduciaryDutyService(nil)
+		s.RegisterGAuthPlusEndpoints(succSvc, delSvc, dualSvc, capSvc, fidSvc)
+		fmt.Fprintln(os.Stderr, "[DEV] GAuthPlus Public API registered (Degraded Mode: Empty)")
+
+		// 8. Resilience Handler
+		resilienceHandler := adminHandlers.NewResilienceHandler(nil)
+		resilienceHandler.RegisterRoutes(adminGroup)
+		fmt.Fprintln(os.Stderr, "[DEV] Resilience handler registered (Degraded Mode: Empty)")
+
+		// 9. Tokens Handler
+		tokenHandler := adminHandlers.NewTokenHandler(nil, nil)
+		tokenHandler.RegisterRoutes(adminGroup)
+		fmt.Fprintln(os.Stderr, "[DEV] Tokens handler registered (Degraded Mode: Empty)")
+
+		// 10. API Keys Handler
+		apiKeyHandler := adminHandlers.NewAPIKeyHandler(nil)
+		apiKeyHandler.RegisterRoutes(adminGroup)
+		fmt.Fprintln(os.Stderr, "[DEV] API Keys handler registered (Degraded Mode: Empty)")
+
+		// 11. Security Handler
+		securityHandler := adminHandlers.NewSecurityHandler(nil)
+		securityHandler.RegisterRoutes(adminGroup)
+		fmt.Fprintln(os.Stderr, "[DEV] Security handler registered (Degraded Mode: Empty)")
+
+		// 12. Config Handler
+		configHandler := adminHandlers.NewConfigHandler(nil)
+		configHandler.RegisterRoutes(adminGroup)
+		fmt.Fprintln(os.Stderr, "[DEV] Config handler registered (Degraded Mode: Empty)")
+
+		// 13. OIDC Auth Handler (Frontend)
+		oidcAuthHandler := authHandlers.NewOIDCAuthHandler(nil)
+		authGroup := r.Group("/auth")
+		oidcAuthHandler.RegisterRoutes(authGroup)
+		fmt.Fprintln(os.Stderr, "[DEV] OIDC Auth handler registered (Degraded Mode: Empty)")
 	}
 
 	// MCP (Model Context Protocol) handler - works with or without database
@@ -1358,19 +1509,55 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			}
 		}
 	}
-	// Wire Audit Chaining (Revocation Audit Hook)
-	if s.revocationChain != nil && s.capabilitiesHandler != nil {
-		// Hook revocation events to audit
-		// This ensures that every revocation event generates an audit entry,
-		// and the audit entry hash is linked back (best effort integration).
-	}
-
 	// Initialize Anchor Client (Memory default)
 	s.anchorClient = anchor.NewMemoryAnchor()
+	// Enable persistence if configured (Roadmap Item 2)
+	if pp := os.Getenv("GAUTH_ANCHOR_PERSIST_PATH"); pp != "" {
+		if err := s.anchorClient.EnablePersistence(pp); err != nil {
+			fmt.Fprintf(os.Stderr, "[anchor] persistence load failed path=%s err=%v\n", pp, err)
+		} else {
+			fmt.Fprintf(os.Stderr, "[anchor] persistence enabled path=%s anchors=%d\n", pp, s.anchorClient.TotalAnchors())
+		}
+	}
 	// Bridge memory anchor to capabilities.AnchorClient interface via adapter
 	if s.capabilitiesHandler != nil {
 		adapter := &auditChainAnchorAdapter{client: s.anchorClient}
 		s.capabilitiesHandler.SetAnchorClient(adapter)
+	}
+
+	// Wire Audit Chaining (Revocation Audit Hook)
+	if s.revocationChain != nil {
+		// Hook revocation events to audit AND external anchor
+		// This ensures that every revocation event generates an audit entry,
+		// and the audit entry hash is linked back.
+		// Additionally, we anchor the aggregate hash to the unified anchor client.
+		delegation.OnRevocationAppended = func(ev delegation.RevocationEvent, chainLen int, aggregateHash string) {
+			// 1. Audit Log (RFC111-R7)
+			if s.audit != nil {
+				s.audit.Append(&AuditEntry{
+					ID:       randomNonce(8),
+					At:       time.Now().UTC(),
+					Actor:    "system",
+					Action:   "revocation_appended",
+					Resource: "revocation_chain",
+					Outcome:  "success",
+					Meta: map[string]any{
+						"revocation_id":  ev.ID,
+						"delegation_id":  ev.DelegationID,
+						"chain_length":   chainLen,
+						"aggregate_hash": aggregateHash,
+						"event_hash":     ev.Hash,
+						"reason":         ev.Reason,
+					},
+				})
+			}
+			// 2. External Anchor (Roadmap Item 2)
+			if s.anchorClient != nil {
+				if _, err := s.anchorClient.Anchor(aggregateHash); err != nil {
+					fmt.Fprintf(os.Stderr, "[revocation] anchor failure hash=%s err=%v\n", aggregateHash, err)
+				}
+			}
+		}
 	}
 
 	// External Capability Anchoring

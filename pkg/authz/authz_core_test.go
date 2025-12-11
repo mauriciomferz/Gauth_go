@@ -464,3 +464,7 @@ func (m *MockMetricsProvider) IncMandatoryObligationFailures() {
 func (m *MockMetricsProvider) ObserveObligationLatency(d time.Duration) {
 	m.ObligationLatencies = append(m.ObligationLatencies, d)
 }
+
+func (m *MockMetricsProvider) RecordDecision(action, resource, decision string, duration time.Duration) {
+	// No-op or record if needed. For now just no-op to satisfy interface.
+}

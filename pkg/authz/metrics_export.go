@@ -5,6 +5,10 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 // PrometheusHandler returns an http.HandlerFunc exposing MemoryAuthorizer metrics
@@ -76,4 +80,69 @@ func PrometheusHandler(ma *MemoryAuthorizer) http.HandlerFunc {
 			fmt.Fprintf(w, "# ERROR write metrics: %v\n", err) // nolint:errcheck
 		}
 	}
+}
+
+// PrometheusMetricsProvider implements the authorizer's metrics interface
+// using the official Prometheus client library with labeled vectors.
+type PrometheusMetricsProvider struct {
+	decisions   *prometheus.CounterVec
+	latency     *prometheus.HistogramVec
+	obligations *prometheus.CounterVec
+	obLatency   prometheus.Histogram
+}
+
+// NewPrometheusMetricsProvider creates a new provider registering metrics in the default registry (or specified one).
+func NewPrometheusMetricsProvider(namespace string) *PrometheusMetricsProvider {
+	if namespace == "" {
+		namespace = "authz"
+	}
+	// Use promauto to auto-register with default registry
+	return &PrometheusMetricsProvider{
+		decisions: promauto.NewCounterVec(prometheus.CounterOpts{
+			Namespace: namespace,
+			Name:      "decisions_total",
+			Help:      "Total authorization decisions by action and outcome",
+		}, []string{"action", "resource_type", "outcome"}),
+		latency: promauto.NewHistogramVec(prometheus.HistogramOpts{
+			Namespace: namespace,
+			Name:      "decision_duration_seconds",
+			Help:      "Authorization decision latency in seconds",
+			Buckets:   prometheus.DefBuckets,
+		}, []string{"action"}),
+		obligations: promauto.NewCounterVec(prometheus.CounterOpts{
+			Namespace: namespace,
+			Name:      "obligations_total",
+			Help:      "Total obligations executed by status",
+		}, []string{"status"}), // executed, failed, mandatory_failed
+		obLatency: promauto.NewHistogram(prometheus.HistogramOpts{
+			Namespace: namespace,
+			Name:      "obligation_duration_seconds",
+			Help:      "Obligation execution latency in seconds",
+			Buckets:   prometheus.DefBuckets,
+		}),
+	}
+}
+
+func (p *PrometheusMetricsProvider) IncObligationsExecuted() {
+	p.obligations.WithLabelValues("executed").Inc()
+}
+
+func (p *PrometheusMetricsProvider) IncObligationsFailed() {
+	p.obligations.WithLabelValues("failed").Inc()
+}
+
+func (p *PrometheusMetricsProvider) IncMandatoryObligationFailures() {
+	p.obligations.WithLabelValues("mandatory_failed").Inc()
+}
+
+func (p *PrometheusMetricsProvider) ObserveObligationLatency(d time.Duration) {
+	p.obLatency.Observe(d.Seconds())
+}
+
+func (p *PrometheusMetricsProvider) RecordDecision(action, resource, decision string, duration time.Duration) {
+	// resource label is tricky if high cardinality (IDs), better use type if available, else literal "resource"
+	// To avoid high cardinality explosion, we default resource to a static string or type if available
+	// For now we trust the caller passed a safe string or use "resource"
+	p.decisions.WithLabelValues(action, resource, decision).Inc()
+	p.latency.WithLabelValues(action).Observe(duration.Seconds())
 }

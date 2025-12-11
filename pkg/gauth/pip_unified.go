@@ -602,3 +602,12 @@ func (p *UnifiedPIP) RegisterAuthorizationChain(chain *AuthorizationChain) error
 
 	return nil
 }
+
+// RegisterAuthorizationServer registers an authorization server in the PIP
+func (p *UnifiedPIP) RegisterAuthorizationServer(serverInfo *AuthorizationServerInfo) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	p.authorizationServers[serverInfo.ServerID] = serverInfo
+	return nil
+}

@@ -84,6 +84,12 @@ func (s *BetaServer) registerRB3Discovery() {
 			"rotation_tip_hash":    rotHead,
 			"taxonomy_supported":   taxonomySupported,
 			"max_delegation_depth": maxDepthVal,
+			"revocation_signing_alg_values_supported": func() []string {
+				if os.Getenv("GAUTH_TOKEN_SIG_MODE") == sigModeEdDSA {
+					return []string{"EdDSA"}
+				}
+				return []string{}
+			}(),
 		}
 		canonical, _ := json.Marshal(core)
 		sum := sha256.Sum256(canonical)

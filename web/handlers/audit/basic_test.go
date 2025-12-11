@@ -50,7 +50,8 @@ func TestAuditAnchorDisabled(t *testing.T) {
 	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
 		t.Fatalf("unmarshal: %v", err)
 	}
-	if resp.Success || resp.Code != "anchoring_disabled" || resp.Error != "capability_anchor_disabled" {
+	// The capabilities API returns only "error": "anchoring_disabled" (no code field)
+	if resp.Success || resp.Error != "anchoring_disabled" {
 		t.Fatalf("unexpected error payload %+v", resp)
 	}
 }

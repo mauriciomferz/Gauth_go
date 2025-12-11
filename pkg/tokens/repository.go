@@ -67,6 +67,9 @@ type TokenFilters struct {
 
 // CreateToken inserts a new token into the database
 func (r *Repository) CreateToken(ctx context.Context, token *Token) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := `
 		INSERT INTO tokens (
 			token_id, tenant_id, token_type, subject, audience, issuer, scope,
@@ -93,6 +96,9 @@ func (r *Repository) CreateToken(ctx context.Context, token *Token) error {
 
 // ListTokens retrieves tokens with filtering and pagination
 func (r *Repository) ListTokens(ctx context.Context, filters TokenFilters) ([]Token, int, error) {
+	if r.db == nil {
+		return []Token{}, 0, nil
+	}
 	// Build dynamic WHERE clause
 	whereClauses := []string{"t.tenant_id = $1"}
 	args := []interface{}{filters.TenantID}
@@ -193,6 +199,9 @@ func (r *Repository) ListTokens(ctx context.Context, filters TokenFilters) ([]To
 
 // GetToken retrieves a single token by token_id
 func (r *Repository) GetToken(ctx context.Context, tenantID, tokenID string) (*Token, error) {
+	if r.db == nil {
+		return nil, fmt.Errorf("database not available")
+	}
 	query := `
 		SELECT 
 			t.id, t.token_id, t.tenant_id, t.token_type, t.subject,
@@ -228,6 +237,9 @@ func (r *Repository) GetToken(ctx context.Context, tenantID, tokenID string) (*T
 
 // RevokeToken marks a token as revoked
 func (r *Repository) RevokeToken(ctx context.Context, tenantID, tokenID, revokedBy, reason string) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := `
 		UPDATE tokens
 		SET revoked_at = NOW(), revoked_by = $3, revocation_reason = $4
@@ -248,6 +260,9 @@ func (r *Repository) RevokeToken(ctx context.Context, tenantID, tokenID, revoked
 
 // AddToBlacklist adds a token to the blacklist (for Redis sync)
 func (r *Repository) AddToBlacklist(ctx context.Context, entry *BlacklistEntry) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := `
 		INSERT INTO token_blacklist (token_id, tenant_id, reason, revoked_at, revoked_by, expires_at)
 		VALUES ($1, $2, $3, $4, $5, $6)
@@ -270,6 +285,9 @@ func (r *Repository) AddToBlacklist(ctx context.Context, entry *BlacklistEntry) 
 
 // IsBlacklisted checks if a token is blacklisted
 func (r *Repository) IsBlacklisted(ctx context.Context, tenantID, tokenID string) (bool, error) {
+	if r.db == nil {
+		return false, nil // Assume safe in degraded mode
+	}
 	query := `
 		SELECT EXISTS(
 			SELECT 1 FROM token_blacklist
@@ -288,6 +306,9 @@ func (r *Repository) IsBlacklisted(ctx context.Context, tenantID, tokenID string
 
 // UpdateLastUsed updates the last_used_at timestamp and increments usage_count
 func (r *Repository) UpdateLastUsed(ctx context.Context, tenantID, tokenID string) error {
+	if r.db == nil {
+		return nil // No-op in degraded mode
+	}
 	query := `
 		UPDATE tokens
 		SET last_used_at = NOW(), usage_count = usage_count + 1
@@ -304,6 +325,23 @@ func (r *Repository) UpdateLastUsed(ctx context.Context, tenantID, tokenID strin
 
 // GetTokenMetrics retrieves aggregated token statistics
 func (r *Repository) GetTokenMetrics(ctx context.Context, tenantID string) (map[string]interface{}, error) {
+	if r.db == nil {
+		// Return empty metrics in degraded mode
+		return map[string]interface{}{
+			"total_tokens":    0,
+			"active_tokens":   0,
+			"expired_tokens":  0,
+			"revoked_tokens":  0,
+			"tokens_per_day":  0,
+			"top_subscribers": []map[string]interface{}{},
+			"token_types": map[string]int{
+				"access":  0,
+				"refresh": 0,
+				"api_key": 0,
+			},
+			"recent_activity": []map[string]interface{}{},
+		}, nil
+	}
 	query := `
 		SELECT
 			COUNT(*) as total_tokens,

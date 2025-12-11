@@ -26,6 +26,7 @@ func NewAPI(h *Handler) *API {
 // RegisterRoutes registers endpoints on the router.
 func (a *API) RegisterRoutes(r *gin.Engine) {
 	beta := r.Group("/api/v1/beta/capabilities")
+	beta.GET("", a.List)
 	beta.POST("/reload", a.Reload)
 	beta.POST("/negotiate", a.Negotiate)
 	beta.GET("/audit/verify", a.AuditVerify)
@@ -33,6 +34,29 @@ func (a *API) RegisterRoutes(r *gin.Engine) {
 
 	// Key endpoint
 	r.GET("/api/v1/beta/keys/eddsa/public", a.EdDSAPublicKey)
+}
+
+// List returns all registered capabilities.
+func (a *API) List(c *gin.Context) {
+	caps := capability.DefaultRegistry().List()
+	hash := a.Handler.GetRegistryHash()
+	prevHash := a.Handler.GetPrevRegistryHash()
+	lastChanged := a.Handler.GetRegistryChangeAt()
+
+	resp := gin.H{
+		"success":      true,
+		"capabilities": caps,
+	}
+	if hash != "" {
+		resp["capability_registry_hash"] = hash
+	}
+	if prevHash != "" {
+		resp["capability_registry_prev_hash"] = prevHash
+	}
+	if !lastChanged.IsZero() {
+		resp["capability_registry_last_changed_at"] = lastChanged.Format(time.RFC3339)
+	}
+	c.JSON(200, resp)
 }
 
 // Reload reloads capability file (if GAUTH_CAPABILITIES_PATH set) and returns summary.

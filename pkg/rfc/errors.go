@@ -1,32 +1,29 @@
 package rfc
 
-import "fmt"
-
-// ErrorCode enumerates machine-readable RFC-related error identifiers.
-type ErrorCode string
-
-const (
-	ErrNotFound                ErrorCode = "not_found"
-	ErrUnauthorized            ErrorCode = "unauthorized"
-	ErrRevoked                 ErrorCode = "revoked"
-	ErrExpired                 ErrorCode = "expired"
-	ErrScopeViolation          ErrorCode = "scope_violation"
-	ErrRestrictionExceeded     ErrorCode = "restriction_exceeded"
-	ErrInvalidRequest          ErrorCode = "invalid_request"
-	ErrIntegrityFailure        ErrorCode = "integrity_failure"
-	ErrInternal                ErrorCode = "internal_error"
-	ErrReplay                  ErrorCode = "replay"
-	ErrDelegationDepthExceeded ErrorCode = "delegation_depth_exceeded"
-	ErrConfiguration           ErrorCode = "configuration_error" // Integration/configuration error (e.g., missing context values)
+import (
+	"github.com/mauriciomferz/Gauth_go/pkg/rfc/errs"
 )
 
-// RFCError wraps an error with a code and message.
-type RFCError struct {
-	Code    ErrorCode `json:"code"`
-	Message string    `json:"message"`
-}
+// Code aliases from errs package
+type ErrorCode = errs.ErrorCode
 
-func (e RFCError) Error() string { return fmt.Sprintf("%s: %s", e.Code, e.Message) }
+const (
+	ErrNotFound                = errs.ErrNotFound
+	ErrUnauthorized            = errs.ErrUnauthorized
+	ErrRevoked                 = errs.ErrRevoked
+	ErrExpired                 = errs.ErrExpired
+	ErrScopeViolation          = errs.ErrScopeViolation
+	ErrRestrictionExceeded     = errs.ErrRestrictionExceeded
+	ErrInvalidRequest          = errs.ErrInvalidRequest
+	ErrIntegrityFailure        = errs.ErrIntegrityFailure
+	ErrInternal                = errs.ErrInternal
+	ErrReplay                  = errs.ErrReplay
+	ErrDelegationDepthExceeded = errs.ErrDelegationDepthExceeded
+	ErrConfiguration           = errs.ErrConfiguration
+)
 
-// New creates an RFCError.
-func New(code ErrorCode, msg string) error { return RFCError{Code: code, Message: msg} }
+// RFCError alias
+type RFCError = errs.RFCError
+
+// New creates an RFCError (convenience wrapper)
+func New(code ErrorCode, msg string) error { return errs.New(code, msg) }

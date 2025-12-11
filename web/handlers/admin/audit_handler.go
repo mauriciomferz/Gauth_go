@@ -27,7 +27,7 @@ type AuditHandler struct {
 func NewAuditHandler(db *pgxpool.Pool) *AuditHandler {
 	repo := audit.NewRepository(db)
 	exportService := audit.NewExportService(repo, "/tmp/gauth-audit-exports")
-	
+
 	// Start cleanup routine for expired exports
 	go func() {
 		ticker := time.NewTicker(1 * time.Hour)
@@ -36,7 +36,7 @@ func NewAuditHandler(db *pgxpool.Pool) *AuditHandler {
 			exportService.CleanupExpiredJobs()
 		}
 	}()
-	
+
 	return &AuditHandler{
 		repo:          repo,
 		exportService: exportService,
@@ -45,17 +45,17 @@ func NewAuditHandler(db *pgxpool.Pool) *AuditHandler {
 
 // AuditEvent represents an audit event
 type AuditEvent struct {
-	ID         string                 `json:"id"`
-	Timestamp  string                 `json:"timestamp"`
-	Actor      string                 `json:"actor"`
-	Action     string                 `json:"action"`
-	Resource   string                 `json:"resource"`
-	Result     string                 `json:"result"` // success, failure, denied
-	IP         string                 `json:"ip"`
-	Category   string                 `json:"category"`
-	Severity   string                 `json:"severity"`
-	TamperProof bool                  `json:"tamperProof"`
-	Metadata   map[string]interface{} `json:"metadata"`
+	ID          string                 `json:"id"`
+	Timestamp   string                 `json:"timestamp"`
+	Actor       string                 `json:"actor"`
+	Action      string                 `json:"action"`
+	Resource    string                 `json:"resource"`
+	Result      string                 `json:"result"` // success, failure, denied
+	IP          string                 `json:"ip"`
+	Category    string                 `json:"category"`
+	Severity    string                 `json:"severity"`
+	TamperProof bool                   `json:"tamperProof"`
+	Metadata    map[string]interface{} `json:"metadata"`
 }
 
 // ComplianceReport represents a compliance framework report
@@ -73,15 +73,15 @@ type ComplianceReport struct {
 
 // EventCorrelation represents a correlated event pattern
 type EventCorrelation struct {
-	ID          string        `json:"id"`
-	Pattern     string        `json:"pattern"`
-	Description string        `json:"description"`
-	Severity    string        `json:"severity"`
-	Events      []AuditEvent  `json:"events"`
-	FirstSeen   string        `json:"firstSeen"`
-	LastSeen    string        `json:"lastSeen"`
-	Occurrences int           `json:"occurrences"`
-	Confidence  int           `json:"confidence"`
+	ID          string       `json:"id"`
+	Pattern     string       `json:"pattern"`
+	Description string       `json:"description"`
+	Severity    string       `json:"severity"`
+	Events      []AuditEvent `json:"events"`
+	FirstSeen   string       `json:"firstSeen"`
+	LastSeen    string       `json:"lastSeen"`
+	Occurrences int          `json:"occurrences"`
+	Confidence  int          `json:"confidence"`
 }
 
 // TamperVerification represents tamper verification result
@@ -143,14 +143,14 @@ func (h *AuditHandler) ListAuditEvents(c *gin.Context) {
 	actor := c.Query("actor")
 	status := c.Query("status")
 	resourceType := c.Query("resourceType")
-	
+
 	limit := 50
 	if limitStr := c.Query("limit"); limitStr != "" {
 		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
 			limit = l
 		}
 	}
-	
+
 	offset := 0
 	if offsetStr := c.Query("offset"); offsetStr != "" {
 		if o, err := strconv.Atoi(offsetStr); err == nil && o >= 0 {
@@ -184,7 +184,7 @@ func (h *AuditHandler) ListAuditEvents(c *gin.Context) {
 		if dbEvt.ResourceID != "" {
 			resource = dbEvt.ResourceType + ":" + dbEvt.ResourceID
 		}
-		
+
 		metadata := map[string]interface{}{}
 		if dbEvt.Changes != nil {
 			metadata["changes"] = dbEvt.Changes
@@ -195,7 +195,7 @@ func (h *AuditHandler) ListAuditEvents(c *gin.Context) {
 		if dbEvt.RequestID != nil {
 			metadata["requestId"] = *dbEvt.RequestID
 		}
-		
+
 		events[i] = AuditEvent{
 			ID:          dbEvt.ID,
 			Timestamp:   dbEvt.Timestamp.Format(time.RFC3339),
@@ -222,13 +222,13 @@ func (h *AuditHandler) ListAuditEvents(c *gin.Context) {
 // getFrameworkStandard returns full name of a compliance framework
 func getFrameworkStandard(framework string) string {
 	standards := map[string]string{
-		"GDPR":       "General Data Protection Regulation",
-		"SOX":        "Sarbanes-Oxley Act",
-		"HIPAA":      "Health Insurance Portability and Accountability Act",
-		"PCI-DSS":    "Payment Card Industry Data Security Standard",
-		"ISO-27001":  "Information Security Management",
-		"SOC2":       "Service Organization Control 2",
-		"NIST":       "National Institute of Standards and Technology",
+		"GDPR":      "General Data Protection Regulation",
+		"SOX":       "Sarbanes-Oxley Act",
+		"HIPAA":     "Health Insurance Portability and Accountability Act",
+		"PCI-DSS":   "Payment Card Industry Data Security Standard",
+		"ISO-27001": "Information Security Management",
+		"SOC2":      "Service Organization Control 2",
+		"NIST":      "National Institute of Standards and Technology",
 	}
 	if standard, ok := standards[framework]; ok {
 		return standard
@@ -238,7 +238,7 @@ func getFrameworkStandard(framework string) string {
 
 // GetComplianceReports returns compliance status for various frameworks
 // GET /api/admin/audit/compliance
-func (h *AuditHandler) CreateExportJob(c *gin.Context) {
+func (h *AuditHandler) GetComplianceReports(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
 		tenantID = defaultTenantID
@@ -257,7 +257,7 @@ func (h *AuditHandler) CreateExportJob(c *gin.Context) {
 		if dbReport.TotalEvents > 0 {
 			coverage = (dbReport.CompliantEvents * 100) / dbReport.TotalEvents
 		}
-		
+
 		status := dbReport.Status
 		if status == "" {
 			if dbReport.CriticalViolations > 0 {
@@ -268,7 +268,7 @@ func (h *AuditHandler) CreateExportJob(c *gin.Context) {
 				status = "compliant"
 			}
 		}
-		
+
 		reports[i] = ComplianceReport{
 			ID:           dbReport.ID,
 			Framework:    dbReport.Framework,
@@ -290,7 +290,7 @@ func (h *AuditHandler) CreateExportJob(c *gin.Context) {
 
 // GetEventCorrelations returns correlated event patterns
 // GET /api/admin/audit/correlations
-func (h *AuditHandler) GetRetentionPolicy(c *gin.Context) {
+func (h *AuditHandler) GetEventCorrelations(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
 		tenantID = defaultTenantID
@@ -310,12 +310,12 @@ func (h *AuditHandler) GetRetentionPolicy(c *gin.Context) {
 		if pattern.LastMatchAt != nil {
 			lastSeen = *pattern.LastMatchAt
 		}
-		
+
 		description := ""
 		if pattern.Description != nil {
 			description = *pattern.Description
 		}
-		
+
 		correlations[i] = EventCorrelation{
 			ID:          pattern.ID,
 			Pattern:     pattern.PatternName,
@@ -376,7 +376,7 @@ func (h *AuditHandler) ExportAuditTrail(c *gin.Context) {
 	if tenantID == "" {
 		tenantID = defaultTenantID
 	}
-	
+
 	var req ExportRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -389,14 +389,14 @@ func (h *AuditHandler) ExportAuditTrail(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("invalid date range: %v", err)})
 		return
 	}
-	
+
 	// Build filter
 	filter := audit.ExportFilter{
 		StartDate: startDate,
 		EndDate:   endDate,
 		Limit:     10000, // Max 10,000 events per export
 	}
-	
+
 	if req.Category != nil {
 		filter.Category = *req.Category
 	}
@@ -412,17 +412,17 @@ func (h *AuditHandler) ExportAuditTrail(c *gin.Context) {
 	if req.ResourceType != nil {
 		filter.ResourceType = *req.ResourceType
 	}
-	
+
 	// Parse format
 	format := audit.ExportFormat(req.Format)
-	
+
 	// Create export job
 	job, err := h.exportService.CreateExportJob(c.Request.Context(), tenantID, format, filter, req.Compressed)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to create export job: %v", err)})
 		return
 	}
-	
+
 	c.JSON(http.StatusAccepted, gin.H{
 		"jobId":     job.ID,
 		"status":    job.Status,
@@ -436,13 +436,13 @@ func (h *AuditHandler) ExportAuditTrail(c *gin.Context) {
 // GET /api/admin/audit/export/:id
 func (h *AuditHandler) GetExportStatus(c *gin.Context) {
 	jobID := c.Param("id")
-	
+
 	job, err := h.exportService.GetExportJob(jobID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "export job not found"})
 		return
 	}
-	
+
 	response := gin.H{
 		"jobId":       job.ID,
 		"status":      job.Status,
@@ -453,15 +453,15 @@ func (h *AuditHandler) GetExportStatus(c *gin.Context) {
 		"createdAt":   job.CreatedAt.Format(time.RFC3339),
 		"expiresAt":   job.ExpiresAt.Format(time.RFC3339),
 	}
-	
+
 	if job.CompletedAt != nil {
 		response["completedAt"] = job.CompletedAt.Format(time.RFC3339)
 	}
-	
+
 	if job.Error != "" {
 		response["error"] = job.Error
 	}
-	
+
 	c.JSON(http.StatusOK, response)
 }
 
@@ -469,22 +469,22 @@ func (h *AuditHandler) GetExportStatus(c *gin.Context) {
 // GET /api/admin/audit/export/:id/download
 func (h *AuditHandler) DownloadExport(c *gin.Context) {
 	jobID := c.Param("id")
-	
+
 	job, err := h.exportService.GetExportJob(jobID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "export job not found"})
 		return
 	}
-	
+
 	if job.Status != audit.ExportStatusCompleted {
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("export not ready (status: %s)", job.Status)})
 		return
 	}
-	
+
 	// Determine content type and filename
 	ext := string(job.Format)
 	contentType := "application/octet-stream"
-	
+
 	switch job.Format {
 	case audit.ExportFormatJSON:
 		contentType = "application/json"
@@ -493,19 +493,19 @@ func (h *AuditHandler) DownloadExport(c *gin.Context) {
 	case audit.ExportFormatSyslog, audit.ExportFormatCEF:
 		contentType = "text/plain"
 	}
-	
+
 	if job.Compressed {
 		ext += ".gz"
 		contentType = "application/gzip"
 	}
-	
+
 	filename := fmt.Sprintf("audit-export-%s.%s", time.Now().Format("20060102-150405"), ext)
-	
+
 	// Set headers
 	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
 	c.Header("Content-Type", contentType)
 	c.Header("Content-Length", fmt.Sprintf("%d", job.FileSize))
-	
+
 	// Stream file
 	c.File(job.FilePath)
 }
@@ -514,12 +514,12 @@ func (h *AuditHandler) DownloadExport(c *gin.Context) {
 // DELETE /api/admin/audit/export/:id
 func (h *AuditHandler) DeleteExport(c *gin.Context) {
 	jobID := c.Param("id")
-	
+
 	if err := h.exportService.DeleteExportJob(jobID); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "export job not found"})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{"message": "export job deleted"})
 }
 
@@ -527,7 +527,7 @@ func (h *AuditHandler) DeleteExport(c *gin.Context) {
 func (h *AuditHandler) parseDateRange(dateRange string) (time.Time, time.Time, error) {
 	now := time.Now()
 	var startDate, endDate time.Time
-	
+
 	switch dateRange {
 	case "last-1h":
 		startDate = now.Add(-1 * time.Hour)
@@ -551,28 +551,28 @@ func (h *AuditHandler) parseDateRange(dateRange string) (time.Time, time.Time, e
 		if len(parts) != 2 {
 			return time.Time{}, time.Time{}, fmt.Errorf("invalid date range format")
 		}
-		
+
 		var err error
 		startDate, err = time.Parse("2006-01-02", strings.TrimSpace(parts[0]))
 		if err != nil {
 			return time.Time{}, time.Time{}, fmt.Errorf("invalid start date: %v", err)
 		}
-		
+
 		endDate, err = time.Parse("2006-01-02", strings.TrimSpace(parts[1]))
 		if err != nil {
 			return time.Time{}, time.Time{}, fmt.Errorf("invalid end date: %v", err)
 		}
-		
+
 		// Set end date to end of day
 		endDate = endDate.Add(24*time.Hour - time.Second)
 	}
-	
+
 	return startDate, endDate, nil
 }
 
 // ListSIEMIntegrations returns all SIEM integrations
 // GET /api/admin/audit/siem
-func (h *AuditHandler) ListExportJobs(c *gin.Context) {
+func (h *AuditHandler) ListSIEMIntegrations(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
 		tenantID = defaultTenantID
@@ -722,7 +722,7 @@ func (h *AuditHandler) TestSIEMIntegration(c *gin.Context) {
 
 // GetAuditMetrics returns audit trail metrics
 // GET /api/admin/audit/metrics
-func (h *AuditHandler) GetExportJob(c *gin.Context) {
+func (h *AuditHandler) GetAuditMetrics(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 	if tenantID == "" {
 		tenantID = defaultTenantID
@@ -762,7 +762,7 @@ func (h *AuditHandler) RegisterRoutes(router *gin.RouterGroup) {
 		// Audit Events
 		audit.GET("/events", h.ListAuditEvents)
 		audit.GET("/verify/:id", h.VerifyEvent)
-		
+
 		// Export endpoints (async export with job tracking)
 		audit.POST("/export", h.ExportAuditTrail)
 		audit.GET("/export/:id", h.GetExportStatus)
@@ -770,9 +770,15 @@ func (h *AuditHandler) RegisterRoutes(router *gin.RouterGroup) {
 		audit.DELETE("/export/:id", h.DeleteExport)
 
 		// SIEM Integration
+		audit.GET("/siem", h.ListSIEMIntegrations)
 		audit.POST("/siem", h.CreateSIEMIntegration)
 		audit.POST("/siem/:id/toggle", h.ToggleSIEMIntegration)
 		audit.DELETE("/siem/:id", h.DeleteSIEMIntegration)
 		audit.POST("/siem/:id/test", h.TestSIEMIntegration)
+
+		// Compliance & Correlations
+		audit.GET("/compliance", h.GetComplianceReports)
+		audit.GET("/correlations", h.GetEventCorrelations)
+		audit.GET("/metrics", h.GetAuditMetrics)
 	}
 }

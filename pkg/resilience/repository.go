@@ -25,28 +25,31 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 
 // CircuitBreaker represents a circuit breaker configuration and state
 type CircuitBreaker struct {
-	ID                      string     `json:"id"`
-	TenantID                string     `json:"tenantId"`
-	BreakerName             string     `json:"breakerName"`
-	ServiceName             string     `json:"serviceName"`
-	State                   string     `json:"state"`
-	FailureThreshold        int        `json:"failureThreshold"`
-	SuccessThreshold        int        `json:"successThreshold"`
-	TimeoutSeconds          int        `json:"timeoutSeconds"`
-	HalfOpenMaxRequests     *int       `json:"halfOpenMaxRequests,omitempty"`
-	FailureCount            int        `json:"failureCount"`
-	SuccessCount            int        `json:"successCount"`
-	ConsecutiveFailures     int        `json:"consecutiveFailures"`
-	ConsecutiveSuccesses    int        `json:"consecutiveSuccesses"`
-	LastFailureTime         *time.Time `json:"lastFailureTime,omitempty"`
-	LastSuccessTime         *time.Time `json:"lastSuccessTime,omitempty"`
-	LastStateChange         time.Time  `json:"lastStateChange"`
-	CreatedAt               time.Time  `json:"createdAt"`
-	UpdatedAt               time.Time  `json:"updatedAt"`
+	ID                   string     `json:"id"`
+	TenantID             string     `json:"tenantId"`
+	BreakerName          string     `json:"breakerName"`
+	ServiceName          string     `json:"serviceName"`
+	State                string     `json:"state"`
+	FailureThreshold     int        `json:"failureThreshold"`
+	SuccessThreshold     int        `json:"successThreshold"`
+	TimeoutSeconds       int        `json:"timeoutSeconds"`
+	HalfOpenMaxRequests  *int       `json:"halfOpenMaxRequests,omitempty"`
+	FailureCount         int        `json:"failureCount"`
+	SuccessCount         int        `json:"successCount"`
+	ConsecutiveFailures  int        `json:"consecutiveFailures"`
+	ConsecutiveSuccesses int        `json:"consecutiveSuccesses"`
+	LastFailureTime      *time.Time `json:"lastFailureTime,omitempty"`
+	LastSuccessTime      *time.Time `json:"lastSuccessTime,omitempty"`
+	LastStateChange      time.Time  `json:"lastStateChange"`
+	CreatedAt            time.Time  `json:"createdAt"`
+	UpdatedAt            time.Time  `json:"updatedAt"`
 }
 
 // CreateCircuitBreaker creates a new circuit breaker
 func (r *Repository) CreateCircuitBreaker(ctx context.Context, cb *CircuitBreaker) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := `
 		INSERT INTO circuit_breakers (
 			tenant_id, breaker_name, service_name, state,
@@ -54,21 +57,24 @@ func (r *Repository) CreateCircuitBreaker(ctx context.Context, cb *CircuitBreake
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		RETURNING id, created_at, updated_at, last_state_change
 	`
-	
+
 	err := r.db.QueryRow(ctx, query,
 		cb.TenantID, cb.BreakerName, cb.ServiceName, cb.State,
 		cb.FailureThreshold, cb.SuccessThreshold, cb.TimeoutSeconds, cb.HalfOpenMaxRequests,
 	).Scan(&cb.ID, &cb.CreatedAt, &cb.UpdatedAt, &cb.LastStateChange)
-	
+
 	if err != nil {
 		return fmt.Errorf("failed to create circuit breaker: %w", err)
 	}
-	
+
 	return nil
 }
 
 // ListCircuitBreakers retrieves all circuit breakers for a tenant
 func (r *Repository) ListCircuitBreakers(ctx context.Context, tenantID string) ([]CircuitBreaker, error) {
+	if r.db == nil {
+		return []CircuitBreaker{}, nil
+	}
 	query := `
 		SELECT 
 			id, tenant_id, breaker_name, service_name, state,
@@ -80,13 +86,13 @@ func (r *Repository) ListCircuitBreakers(ctx context.Context, tenantID string) (
 		WHERE tenant_id = $1
 		ORDER BY breaker_name
 	`
-	
+
 	rows, err := r.db.Query(ctx, query, tenantID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list circuit breakers: %w", err)
 	}
 	defer rows.Close()
-	
+
 	var breakers []CircuitBreaker
 	for rows.Next() {
 		var cb CircuitBreaker
@@ -102,12 +108,15 @@ func (r *Repository) ListCircuitBreakers(ctx context.Context, tenantID string) (
 		}
 		breakers = append(breakers, cb)
 	}
-	
+
 	return breakers, nil
 }
 
 // GetCircuitBreaker retrieves a specific circuit breaker
 func (r *Repository) GetCircuitBreaker(ctx context.Context, tenantID, breakerID string) (*CircuitBreaker, error) {
+	if r.db == nil {
+		return nil, fmt.Errorf("database not available")
+	}
 	query := `
 		SELECT 
 			id, tenant_id, breaker_name, service_name, state,
@@ -118,7 +127,7 @@ func (r *Repository) GetCircuitBreaker(ctx context.Context, tenantID, breakerID 
 		FROM circuit_breakers
 		WHERE tenant_id = $1 AND id = $2
 	`
-	
+
 	var cb CircuitBreaker
 	err := r.db.QueryRow(ctx, query, tenantID, breakerID).Scan(
 		&cb.ID, &cb.TenantID, &cb.BreakerName, &cb.ServiceName, &cb.State,
@@ -127,19 +136,22 @@ func (r *Repository) GetCircuitBreaker(ctx context.Context, tenantID, breakerID 
 		&cb.LastFailureTime, &cb.LastSuccessTime, &cb.LastStateChange,
 		&cb.CreatedAt, &cb.UpdatedAt,
 	)
-	
+
 	if err == pgx.ErrNoRows {
 		return nil, fmt.Errorf("circuit breaker not found")
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get circuit breaker: %w", err)
 	}
-	
+
 	return &cb, nil
 }
 
 // UpdateCircuitBreaker updates circuit breaker configuration
 func (r *Repository) UpdateCircuitBreaker(ctx context.Context, tenantID, breakerID string, failureThreshold, successThreshold, timeoutSeconds int) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := `
 		UPDATE circuit_breakers
 		SET failure_threshold = $3,
@@ -149,22 +161,25 @@ func (r *Repository) UpdateCircuitBreaker(ctx context.Context, tenantID, breaker
 		WHERE tenant_id = $1 AND id = $2
 		RETURNING id
 	`
-	
+
 	var returnedID string
 	err := r.db.QueryRow(ctx, query, tenantID, breakerID, failureThreshold, successThreshold, timeoutSeconds).Scan(&returnedID)
-	
+
 	if err == pgx.ErrNoRows {
 		return fmt.Errorf("circuit breaker not found")
 	}
 	if err != nil {
 		return fmt.Errorf("failed to update circuit breaker: %w", err)
 	}
-	
+
 	return nil
 }
 
 // ResetCircuitBreaker resets a circuit breaker to closed state
 func (r *Repository) ResetCircuitBreaker(ctx context.Context, tenantID, breakerID string) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := `
 		UPDATE circuit_breakers
 		SET state = 'closed',
@@ -177,33 +192,36 @@ func (r *Repository) ResetCircuitBreaker(ctx context.Context, tenantID, breakerI
 		WHERE tenant_id = $1 AND id = $2
 		RETURNING id
 	`
-	
+
 	var returnedID string
 	err := r.db.QueryRow(ctx, query, tenantID, breakerID).Scan(&returnedID)
-	
+
 	if err == pgx.ErrNoRows {
 		return fmt.Errorf("circuit breaker not found")
 	}
 	if err != nil {
 		return fmt.Errorf("failed to reset circuit breaker: %w", err)
 	}
-	
+
 	return nil
 }
 
 // DeleteCircuitBreaker removes a circuit breaker
 func (r *Repository) DeleteCircuitBreaker(ctx context.Context, tenantID, breakerID string) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := `DELETE FROM circuit_breakers WHERE tenant_id = $1 AND id = $2`
-	
+
 	result, err := r.db.Exec(ctx, query, tenantID, breakerID)
 	if err != nil {
 		return fmt.Errorf("failed to delete circuit breaker: %w", err)
 	}
-	
+
 	if result.RowsAffected() == 0 {
 		return fmt.Errorf("circuit breaker not found")
 	}
-	
+
 	return nil
 }
 
@@ -230,6 +248,9 @@ type RateLimiter struct {
 
 // CreateRateLimiter creates a new rate limiter
 func (r *Repository) CreateRateLimiter(ctx context.Context, rl *RateLimiter) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := `
 		INSERT INTO rate_limiters (
 			tenant_id, limiter_name, endpoint, algorithm,
@@ -237,21 +258,24 @@ func (r *Repository) CreateRateLimiter(ctx context.Context, rl *RateLimiter) err
 		) VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id, created_at
 	`
-	
+
 	err := r.db.QueryRow(ctx, query,
 		rl.TenantID, rl.LimiterName, rl.Endpoint, rl.Algorithm,
 		rl.MaxRequests, rl.WindowSeconds, rl.BurstSize,
 	).Scan(&rl.ID, &rl.CreatedAt)
-	
+
 	if err != nil {
 		return fmt.Errorf("failed to create rate limiter: %w", err)
 	}
-	
+
 	return nil
 }
 
 // ListRateLimiters retrieves all rate limiters for a tenant
 func (r *Repository) ListRateLimiters(ctx context.Context, tenantID string) ([]RateLimiter, error) {
+	if r.db == nil {
+		return []RateLimiter{}, nil
+	}
 	query := `
 		SELECT 
 			id, tenant_id, limiter_name, endpoint, algorithm,
@@ -262,13 +286,13 @@ func (r *Repository) ListRateLimiters(ctx context.Context, tenantID string) ([]R
 		WHERE tenant_id = $1
 		ORDER BY limiter_name
 	`
-	
+
 	rows, err := r.db.Query(ctx, query, tenantID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list rate limiters: %w", err)
 	}
 	defer rows.Close()
-	
+
 	var limiters []RateLimiter
 	for rows.Next() {
 		var rl RateLimiter
@@ -283,23 +307,26 @@ func (r *Repository) ListRateLimiters(ctx context.Context, tenantID string) ([]R
 		}
 		limiters = append(limiters, rl)
 	}
-	
+
 	return limiters, nil
 }
 
 // DeleteRateLimiter removes a rate limiter
 func (r *Repository) DeleteRateLimiter(ctx context.Context, tenantID, limiterID string) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := `DELETE FROM rate_limiters WHERE tenant_id = $1 AND id = $2`
-	
+
 	result, err := r.db.Exec(ctx, query, tenantID, limiterID)
 	if err != nil {
 		return fmt.Errorf("failed to delete rate limiter: %w", err)
 	}
-	
+
 	if result.RowsAffected() == 0 {
 		return fmt.Errorf("rate limiter not found")
 	}
-	
+
 	return nil
 }
 
@@ -328,6 +355,9 @@ type RetryPolicy struct {
 
 // CreateRetryPolicy creates a new retry policy
 func (r *Repository) CreateRetryPolicy(ctx context.Context, rp *RetryPolicy) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := `
 		INSERT INTO retry_policies (
 			tenant_id, policy_name, service_name, max_attempts,
@@ -336,22 +366,25 @@ func (r *Repository) CreateRetryPolicy(ctx context.Context, rp *RetryPolicy) err
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 		RETURNING id, created_at
 	`
-	
+
 	err := r.db.QueryRow(ctx, query,
 		rp.TenantID, rp.PolicyName, rp.ServiceName, rp.MaxAttempts,
 		rp.BackoffType, rp.InitialDelayMs, rp.MaxDelayMs, rp.Multiplier,
 		rp.JitterEnabled, rp.RetryableErrors,
 	).Scan(&rp.ID, &rp.CreatedAt)
-	
+
 	if err != nil {
 		return fmt.Errorf("failed to create retry policy: %w", err)
 	}
-	
+
 	return nil
 }
 
 // ListRetryPolicies retrieves all retry policies for a tenant
 func (r *Repository) ListRetryPolicies(ctx context.Context, tenantID string) ([]RetryPolicy, error) {
+	if r.db == nil {
+		return []RetryPolicy{}, nil
+	}
 	query := `
 		SELECT 
 			id, tenant_id, policy_name, service_name, max_attempts,
@@ -363,13 +396,13 @@ func (r *Repository) ListRetryPolicies(ctx context.Context, tenantID string) ([]
 		WHERE tenant_id = $1
 		ORDER BY policy_name
 	`
-	
+
 	rows, err := r.db.Query(ctx, query, tenantID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list retry policies: %w", err)
 	}
 	defer rows.Close()
-	
+
 	var policies []RetryPolicy
 	for rows.Next() {
 		var rp RetryPolicy
@@ -385,23 +418,26 @@ func (r *Repository) ListRetryPolicies(ctx context.Context, tenantID string) ([]
 		}
 		policies = append(policies, rp)
 	}
-	
+
 	return policies, nil
 }
 
 // DeleteRetryPolicy removes a retry policy
 func (r *Repository) DeleteRetryPolicy(ctx context.Context, tenantID, policyID string) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := `DELETE FROM retry_policies WHERE tenant_id = $1 AND id = $2`
-	
+
 	result, err := r.db.Exec(ctx, query, tenantID, policyID)
 	if err != nil {
 		return fmt.Errorf("failed to delete retry policy: %w", err)
 	}
-	
+
 	if result.RowsAffected() == 0 {
 		return fmt.Errorf("retry policy not found")
 	}
-	
+
 	return nil
 }
 
@@ -411,25 +447,28 @@ func (r *Repository) DeleteRetryPolicy(ctx context.Context, tenantID, policyID s
 
 // BulkheadRecord represents a bulkhead configuration stored in the database
 type BulkheadRecord struct {
-	ID              string    `json:"id"`
-	TenantID        string    `json:"tenantId"`
-	BulkheadName    string    `json:"bulkheadName"`
-	ServiceName     string    `json:"serviceName"`
-	MaxConcurrent   int       `json:"maxConcurrent"`
-	MaxQueue        int       `json:"maxQueue"`
-	TimeoutSeconds  int       `json:"timeoutSeconds"`
-	CurrentActive   int       `json:"currentActive"`
-	CurrentQueued   int       `json:"currentQueued"`
-	TotalExecuted   int64     `json:"totalExecuted"`
-	TotalRejected   int64     `json:"totalRejected"`
-	TotalTimeout    int64     `json:"totalTimeout"`
-	PeakConcurrent  int       `json:"peakConcurrent"`
-	CreatedAt       time.Time `json:"createdAt"`
-	UpdatedAt       time.Time `json:"updatedAt"`
+	ID             string    `json:"id"`
+	TenantID       string    `json:"tenantId"`
+	BulkheadName   string    `json:"bulkheadName"`
+	ServiceName    string    `json:"serviceName"`
+	MaxConcurrent  int       `json:"maxConcurrent"`
+	MaxQueue       int       `json:"maxQueue"`
+	TimeoutSeconds int       `json:"timeoutSeconds"`
+	CurrentActive  int       `json:"currentActive"`
+	CurrentQueued  int       `json:"currentQueued"`
+	TotalExecuted  int64     `json:"totalExecuted"`
+	TotalRejected  int64     `json:"totalRejected"`
+	TotalTimeout   int64     `json:"totalTimeout"`
+	PeakConcurrent int       `json:"peakConcurrent"`
+	CreatedAt      time.Time `json:"createdAt"`
+	UpdatedAt      time.Time `json:"updatedAt"`
 }
 
 // CreateBulkhead creates a new bulkhead
 func (r *Repository) CreateBulkhead(ctx context.Context, bh *BulkheadRecord) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := `
 		INSERT INTO bulkheads (
 			tenant_id, bulkhead_name, service_name,
@@ -437,21 +476,24 @@ func (r *Repository) CreateBulkhead(ctx context.Context, bh *BulkheadRecord) err
 		) VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id, created_at, updated_at
 	`
-	
+
 	err := r.db.QueryRow(ctx, query,
 		bh.TenantID, bh.BulkheadName, bh.ServiceName,
 		bh.MaxConcurrent, bh.MaxQueue, bh.TimeoutSeconds,
 	).Scan(&bh.ID, &bh.CreatedAt, &bh.UpdatedAt)
-	
+
 	if err != nil {
 		return fmt.Errorf("failed to create bulkhead: %w", err)
 	}
-	
+
 	return nil
 }
 
 // ListBulkheads retrieves all bulkheads for a tenant
 func (r *Repository) ListBulkheads(ctx context.Context, tenantID string) ([]BulkheadRecord, error) {
+	if r.db == nil {
+		return []BulkheadRecord{}, nil
+	}
 	query := `
 		SELECT 
 			id, tenant_id, bulkhead_name, service_name,
@@ -462,13 +504,13 @@ func (r *Repository) ListBulkheads(ctx context.Context, tenantID string) ([]Bulk
 		WHERE tenant_id = $1
 		ORDER BY bulkhead_name
 	`
-	
+
 	rows, err := r.db.Query(ctx, query, tenantID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list bulkheads: %w", err)
 	}
 	defer rows.Close()
-	
+
 	var bulkheads []BulkheadRecord
 	for rows.Next() {
 		var bh BulkheadRecord
@@ -483,23 +525,26 @@ func (r *Repository) ListBulkheads(ctx context.Context, tenantID string) ([]Bulk
 		}
 		bulkheads = append(bulkheads, bh)
 	}
-	
+
 	return bulkheads, nil
 }
 
 // DeleteBulkhead removes a bulkhead
 func (r *Repository) DeleteBulkhead(ctx context.Context, tenantID, bulkheadID string) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := `DELETE FROM bulkheads WHERE tenant_id = $1 AND id = $2`
-	
+
 	result, err := r.db.Exec(ctx, query, tenantID, bulkheadID)
 	if err != nil {
 		return fmt.Errorf("failed to delete bulkhead: %w", err)
 	}
-	
+
 	if result.RowsAffected() == 0 {
 		return fmt.Errorf("bulkhead not found")
 	}
-	
+
 	return nil
 }
 
@@ -525,10 +570,10 @@ type CircuitBreakerStats struct {
 }
 
 type RateLimiterStats struct {
-	Total          int     `json:"total"`
-	TotalRequests  int64   `json:"totalRequests"`
-	Throttled      int64   `json:"throttled"`
-	ThrottleRate   float64 `json:"throttleRate"`
+	Total         int     `json:"total"`
+	TotalRequests int64   `json:"totalRequests"`
+	Throttled     int64   `json:"throttled"`
+	ThrottleRate  float64 `json:"throttleRate"`
 }
 
 type RetryPolicyStats struct {
@@ -540,18 +585,26 @@ type RetryPolicyStats struct {
 }
 
 type BulkheadStats struct {
-	Total              int     `json:"total"`
-	TotalConcurrency   int     `json:"totalConcurrency"`
-	MaxConcurrency     int     `json:"maxConcurrency"`
-	CompletedRequests  int64   `json:"completedRequests"`
-	RejectedRequests   int64   `json:"rejectedRequests"`
-	AvgUtilization     float64 `json:"avgUtilization"`
+	Total             int     `json:"total"`
+	TotalConcurrency  int     `json:"totalConcurrency"`
+	MaxConcurrency    int     `json:"maxConcurrency"`
+	CompletedRequests int64   `json:"completedRequests"`
+	RejectedRequests  int64   `json:"rejectedRequests"`
+	AvgUtilization    float64 `json:"avgUtilization"`
 }
 
 // GetResilienceStats retrieves aggregate statistics for all resilience patterns
 func (r *Repository) GetResilienceStats(ctx context.Context, tenantID string) (*ResilienceStats, error) {
+	if r.db == nil {
+		return &ResilienceStats{
+			CircuitBreakers: CircuitBreakerStats{},
+			RateLimiters:    RateLimiterStats{},
+			RetryPolicies:   RetryPolicyStats{},
+			Bulkheads:       BulkheadStats{},
+		}, nil
+	}
 	stats := &ResilienceStats{}
-	
+
 	// Circuit breaker stats
 	cbQuery := `
 		SELECT 
@@ -563,7 +616,7 @@ func (r *Repository) GetResilienceStats(ctx context.Context, tenantID string) (*
 		FROM circuit_breakers
 		WHERE tenant_id = $1
 	`
-	
+
 	var totalRequests int64
 	err := r.db.QueryRow(ctx, cbQuery, tenantID).Scan(
 		&stats.CircuitBreakers.Total,
@@ -576,7 +629,7 @@ func (r *Repository) GetResilienceStats(ctx context.Context, tenantID string) (*
 		return nil, fmt.Errorf("failed to get circuit breaker stats: %w", err)
 	}
 	stats.CircuitBreakers.TotalRequests = totalRequests
-	
+
 	// Calculate average failure rate
 	if totalRequests > 0 {
 		var totalFailures int64
@@ -584,7 +637,7 @@ func (r *Repository) GetResilienceStats(ctx context.Context, tenantID string) (*
 			stats.CircuitBreakers.AvgFailureRate = float64(totalFailures) / float64(totalRequests) * 100
 		}
 	}
-	
+
 	// Rate limiter stats
 	rlQuery := `
 		SELECT 
@@ -594,7 +647,7 @@ func (r *Repository) GetResilienceStats(ctx context.Context, tenantID string) (*
 		FROM rate_limiters
 		WHERE tenant_id = $1
 	`
-	
+
 	err = r.db.QueryRow(ctx, rlQuery, tenantID).Scan(
 		&stats.RateLimiters.Total,
 		&stats.RateLimiters.TotalRequests,
@@ -603,11 +656,11 @@ func (r *Repository) GetResilienceStats(ctx context.Context, tenantID string) (*
 	if err != nil {
 		return nil, fmt.Errorf("failed to get rate limiter stats: %w", err)
 	}
-	
+
 	if stats.RateLimiters.TotalRequests > 0 {
 		stats.RateLimiters.ThrottleRate = float64(stats.RateLimiters.Throttled) / float64(stats.RateLimiters.TotalRequests) * 100
 	}
-	
+
 	// Retry policy stats
 	rpQuery := `
 		SELECT 
@@ -618,7 +671,7 @@ func (r *Repository) GetResilienceStats(ctx context.Context, tenantID string) (*
 		FROM retry_policies
 		WHERE tenant_id = $1
 	`
-	
+
 	err = r.db.QueryRow(ctx, rpQuery, tenantID).Scan(
 		&stats.RetryPolicies.Total,
 		&stats.RetryPolicies.TotalRetries,
@@ -628,11 +681,11 @@ func (r *Repository) GetResilienceStats(ctx context.Context, tenantID string) (*
 	if err != nil {
 		return nil, fmt.Errorf("failed to get retry policy stats: %w", err)
 	}
-	
+
 	if stats.RetryPolicies.TotalRetries > 0 {
 		stats.RetryPolicies.SuccessRate = float64(stats.RetryPolicies.SuccessfulRetries) / float64(stats.RetryPolicies.TotalRetries) * 100
 	}
-	
+
 	// Bulkhead stats
 	bhQuery := `
 		SELECT 
@@ -644,7 +697,7 @@ func (r *Repository) GetResilienceStats(ctx context.Context, tenantID string) (*
 		FROM bulkheads
 		WHERE tenant_id = $1
 	`
-	
+
 	err = r.db.QueryRow(ctx, bhQuery, tenantID).Scan(
 		&stats.Bulkheads.Total,
 		&stats.Bulkheads.TotalConcurrency,
@@ -655,10 +708,10 @@ func (r *Repository) GetResilienceStats(ctx context.Context, tenantID string) (*
 	if err != nil {
 		return nil, fmt.Errorf("failed to get bulkhead stats: %w", err)
 	}
-	
+
 	if stats.Bulkheads.MaxConcurrency > 0 {
 		stats.Bulkheads.AvgUtilization = float64(stats.Bulkheads.TotalConcurrency) / float64(stats.Bulkheads.MaxConcurrency) * 100
 	}
-	
+
 	return stats, nil
 }

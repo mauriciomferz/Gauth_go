@@ -108,6 +108,9 @@ type GeographicDistribution struct {
 
 // CreatePoA creates a new power of attorney record
 func (r *Repository) CreatePoA(ctx context.Context, poa *PoARecord) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := `
 		INSERT INTO power_of_attorney (
 			tenant_id, poa_name, grantor_id, grantor_name,
@@ -135,6 +138,9 @@ func (r *Repository) CreatePoA(ctx context.Context, poa *PoARecord) error {
 
 // ListPoAs retrieves all power of attorney records for a tenant with pagination
 func (r *Repository) ListPoAs(ctx context.Context, tenantID string, limit, offset int) ([]PoARecord, int, error) {
+	if r.db == nil {
+		return nil, 0, nil
+	}
 	// Get total count
 	var total int
 	countQuery := `SELECT COUNT(*) FROM power_of_attorney WHERE tenant_id = $1`
@@ -200,6 +206,9 @@ func (r *Repository) ListPoAs(ctx context.Context, tenantID string, limit, offse
 
 // GetPoA retrieves a specific power of attorney record
 func (r *Repository) GetPoA(ctx context.Context, tenantID, poaID string) (*PoARecord, error) {
+	if r.db == nil {
+		return nil, fmt.Errorf("database not available")
+	}
 	query := `
 		SELECT 
 			id, tenant_id, poa_name, grantor_id, grantor_name,
@@ -219,7 +228,7 @@ func (r *Repository) GetPoA(ctx context.Context, tenantID, poaID string) (*PoARe
 		&poa.ScopeType, &poa.Actions, &poa.GeographicRegions,
 		&poa.Status, &poa.CreatedAt, &poa.ApprovedAt, &poa.ApprovedBy,
 		&poa.RevokedAt, &poa.RevokedBy, &poa.RevocationReason,
-		&poa.ValidFrom, &poa.ValidUntil, &poa.Conditions, &poa.Metadata,
+		&poa.ValidFrom, &poa.ValidUntil, &poa.Conditions, &poa.Metadata, &poa.UpdatedAt,
 	)
 
 	if err == pgx.ErrNoRows {
@@ -235,6 +244,9 @@ func (r *Repository) GetPoA(ctx context.Context, tenantID, poaID string) (*PoARe
 
 // RevokePoA revokes a power of attorney
 func (r *Repository) RevokePoA(ctx context.Context, tenantID, poaID, revokedBy, reason string) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := `
 		UPDATE power_of_attorney
 		SET status = 'revoked',
@@ -261,6 +273,9 @@ func (r *Repository) RevokePoA(ctx context.Context, tenantID, poaID, revokedBy, 
 
 // ApprovePoA approves a pending power of attorney
 func (r *Repository) ApprovePoA(ctx context.Context, tenantID, poaID, approvedBy string) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	query := `
 		UPDATE power_of_attorney
 		SET status = 'active',
@@ -286,6 +301,9 @@ func (r *Repository) ApprovePoA(ctx context.Context, tenantID, poaID, approvedBy
 
 // RejectPoA rejects a pending power of attorney
 func (r *Repository) RejectPoA(ctx context.Context, tenantID, poaID, rejectedBy, reason string) error {
+	if r.db == nil {
+		return fmt.Errorf("database not available")
+	}
 	// Store rejection as revocation with reason
 	query := `
 		UPDATE power_of_attorney
@@ -323,6 +341,9 @@ func (r *Repository) RejectPoA(ctx context.Context, tenantID, poaID, rejectedBy,
 // To enable authorization checking, inject an AuthorizationChecker via SetAuthorizationChecker().
 // If no checker is configured, only database validation is performed (legacy behavior).
 func (r *Repository) ValidatePoA(ctx context.Context, tenantID, grantorID, representativeID, action, resource string) (*PoARecord, bool, string) {
+	if r.db == nil {
+		return nil, false, "database unavailable"
+	}
 	query := `
 		SELECT 
 			id, tenant_id, poa_name, grantor_id, grantor_name,

@@ -5,8 +5,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+func NewID() string {
+	return uuid.New().String()
+}
 
 // Repository handles database operations for authorization policies and decisions
 type Repository struct {
@@ -55,25 +60,28 @@ type AttributeRecord struct {
 
 // DecisionRecord represents an authorization decision log in the database
 type DecisionRecord struct {
-	ID                 string
-	TenantID           string
-	Timestamp          time.Time
-	UserID             string
-	Action             string
-	Resource           string
-	Decision           string
-	PolicyID           *string
-	PolicyName         *string
-	IPAddress          *string
-	UserAgent          *string
-	RequestID          *string
-	SessionID          *string
-	Context            map[string]interface{}
-	EvaluationTimeMs   int
+	ID               string
+	TenantID         string
+	Timestamp        time.Time
+	UserID           string
+	Action           string
+	Resource         string
+	Decision         string
+	PolicyID         *string
+	PolicyName       *string
+	IPAddress        *string
+	UserAgent        *string
+	RequestID        *string
+	SessionID        *string
+	Context          map[string]interface{}
+	EvaluationTimeMs int
 }
 
 // ListPolicies returns all policies for a tenant
 func (r *Repository) ListPolicies(ctx context.Context, tenantID string) ([]PolicyRecord, error) {
+	if r.db == nil {
+		return []PolicyRecord{}, nil // Return empty list in Memory Mode
+	}
 	query := `
 		SELECT 
 			id, tenant_id, policy_name, policy_type, version, status,
@@ -109,6 +117,9 @@ func (r *Repository) ListPolicies(ctx context.Context, tenantID string) ([]Polic
 
 // GetPolicy retrieves a specific policy by ID
 func (r *Repository) GetPolicy(ctx context.Context, tenantID, policyID string) (*PolicyRecord, error) {
+	if r.db == nil {
+		return nil, fmt.Errorf("policy not found (memory mode)")
+	}
 	query := `
 		SELECT 
 			id, tenant_id, policy_name, policy_type, version, status,
@@ -133,6 +144,12 @@ func (r *Repository) GetPolicy(ctx context.Context, tenantID, policyID string) (
 
 // CreatePolicy creates a new authorization policy
 func (r *Repository) CreatePolicy(ctx context.Context, p *PolicyRecord) error {
+	if r.db == nil {
+		p.ID = NewID()
+		p.CreatedAt = time.Now()
+		p.UpdatedAt = time.Now()
+		return nil // Pretend success in Memory Mode (Non-persistent)
+	}
 	query := `
 		INSERT INTO authorization_policies (
 			tenant_id, policy_name, policy_type, version, status,
@@ -158,6 +175,9 @@ func (r *Repository) CreatePolicy(ctx context.Context, p *PolicyRecord) error {
 
 // UpdatePolicy updates an existing policy
 func (r *Repository) UpdatePolicy(ctx context.Context, p *PolicyRecord) error {
+	if r.db == nil {
+		return nil // Pretend success
+	}
 	query := `
 		UPDATE authorization_policies
 		SET policy_name = $1, description = $2, rules = $3, conditions = $4,
@@ -186,6 +206,9 @@ func (r *Repository) UpdatePolicy(ctx context.Context, p *PolicyRecord) error {
 
 // DeletePolicy removes a policy
 func (r *Repository) DeletePolicy(ctx context.Context, tenantID, policyID string) error {
+	if r.db == nil {
+		return nil
+	}
 	query := `DELETE FROM authorization_policies WHERE tenant_id = $1 AND id = $2`
 
 	result, err := r.db.Exec(ctx, query, tenantID, policyID)
@@ -202,6 +225,9 @@ func (r *Repository) DeletePolicy(ctx context.Context, tenantID, policyID string
 
 // ListAttributes returns all policy attributes for a tenant
 func (r *Repository) ListAttributes(ctx context.Context, tenantID string) ([]AttributeRecord, error) {
+	if r.db == nil {
+		return []AttributeRecord{}, nil
+	}
 	query := `
 		SELECT 
 			id, tenant_id, attribute_name, attribute_type, source,
@@ -235,6 +261,10 @@ func (r *Repository) ListAttributes(ctx context.Context, tenantID string) ([]Att
 
 // CreateAttribute creates a new policy attribute
 func (r *Repository) CreateAttribute(ctx context.Context, a *AttributeRecord) error {
+	if r.db == nil {
+		a.ID = NewID()
+		return nil
+	}
 	query := `
 		INSERT INTO policy_attributes (
 			tenant_id, attribute_name, attribute_type, source,
@@ -257,6 +287,9 @@ func (r *Repository) CreateAttribute(ctx context.Context, a *AttributeRecord) er
 
 // ListDecisions returns recent authorization decisions
 func (r *Repository) ListDecisions(ctx context.Context, tenantID string, limit int) ([]DecisionRecord, error) {
+	if r.db == nil {
+		return []DecisionRecord{}, nil
+	}
 	if limit <= 0 {
 		limit = 100 // Default limit
 	}
@@ -297,6 +330,9 @@ func (r *Repository) ListDecisions(ctx context.Context, tenantID string, limit i
 
 // LogDecision records an authorization decision
 func (r *Repository) LogDecision(ctx context.Context, d *DecisionRecord) error {
+	if r.db == nil {
+		return nil
+	}
 	query := `
 		INSERT INTO authorization_logs (
 			tenant_id, timestamp, user_id, action, resource, decision,
