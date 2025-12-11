@@ -9,16 +9,23 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mauriciomferz/Gauth_go/pkg/a2a"
+	"github.com/mauriciomferz/Gauth_go/pkg/auth"
 )
 
 // Handler manages A2A operations.
 type Handler struct {
+	authenticator auth.ClientAuthenticator
 	// In a real implementation, would have a store for agents and active chains
 }
 
 // NewHandler creates a new A2A handler.
 func NewHandler() *Handler {
 	return &Handler{}
+}
+
+// SetAuthenticator sets the client authenticator.
+func (h *Handler) SetAuthenticator(a auth.ClientAuthenticator) {
+	h.authenticator = a
 }
 
 // RegisterRoutes registers A2A endpoints.
@@ -30,9 +37,11 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 
 // IssueTokenRequest request body for issuing an A2A token.
 type IssueTokenRequest struct {
-	Audience string              `json:"aud"`
-	Subject  a2a.AgentIdentity   `json:"sub"`
-	Context  *a2a.A2ACallContext `json:"context,omitempty"` // For continuation/chaining
+	Audience            string              `json:"aud"`
+	Subject             a2a.AgentIdentity   `json:"sub"`
+	Context             *a2a.A2ACallContext `json:"context,omitempty"` // For continuation/chaining
+	ClientAssertion     string              `json:"client_assertion,omitempty"`
+	ClientAssertionType string              `json:"client_assertion_type,omitempty"`
 }
 
 // IssueToken handles POST /a2a/token.
@@ -41,6 +50,19 @@ func (h *Handler) IssueToken(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_request", "details": err.Error()})
 		return
+	}
+
+	// RFC 7523 Client Authentication (Agent Authentication)
+	if req.ClientAssertion != "" {
+		if h.authenticator == nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "server_error", "details": "Client authentication not configured"})
+			return
+		}
+		// In A2A, the "Client" is the Agent identified by Subject.ID
+		if err := h.authenticator.Authenticate(req.Subject.ID, req.ClientAssertion, req.ClientAssertionType); err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid_client", "details": err.Error()})
+			return
+		}
 	}
 
 	// Mock logic: Create or extend chain

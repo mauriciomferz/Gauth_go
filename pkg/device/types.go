@@ -64,9 +64,11 @@ func (d *DeviceCode) CanPoll() bool {
 
 // TokenRequest represents a token request for device flow per RFC 8628 §3.4.
 type TokenRequest struct {
-	GrantType  string `json:"grant_type"` // "urn:ietf:params:oauth:grant-type:device_code"
-	DeviceCode string `json:"device_code"`
-	ClientID   string `json:"client_id"`
+	GrantType           string `json:"grant_type"` // "urn:ietf:params:oauth:grant-type:device_code"
+	DeviceCode          string `json:"device_code"`
+	ClientID            string `json:"client_id"`
+	ClientAssertion     string `json:"client_assertion,omitempty"`
+	ClientAssertionType string `json:"client_assertion_type,omitempty"`
 }
 
 // TokenResponse represents a successful token response.

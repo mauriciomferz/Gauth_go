@@ -34,6 +34,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/internal/tracing"
 	"github.com/mauriciomferz/Gauth_go/pkg/anchor"
 	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/auth"
 	"github.com/mauriciomferz/Gauth_go/pkg/authz"
 	"github.com/mauriciomferz/Gauth_go/pkg/blockchain"
 	"github.com/mauriciomferz/Gauth_go/pkg/cache"
@@ -57,6 +58,8 @@ import (
 	"github.com/mauriciomferz/Gauth_go/web/handlers/capability_anchor"
 	delegationHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/delegation"
 	deviceHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/device"
+	grantJWTHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/grant_jwt"
+
 	eventsHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/events"
 	gnapHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/gnap"
 	mcpHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/mcp"
@@ -606,14 +609,27 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	gnapHandler.TokenStore = gnapTokenStore
 	gnapHandler.RegisterRoutes(s.router)
 
+	// RFC 7523 Client Authentication
+	clientKeyStore := auth.NewMemoryKeyStore()
+	clientAuthenticator := &auth.PrivateKeyJWTValidator{
+		KeyProvider: clientKeyStore,
+		TokenURL:    envFallback("GAUTH_TOKEN_ENDPOINT", "http://localhost:8080/device/token"),
+	}
+
 	// RFC 8628 Device Authorization Grant
 	deviceStore := devicePkg.NewMemoryDeviceCodeStore()
 	deviceHandler := deviceHandlers.NewHandler(deviceStore)
+	deviceHandler.SetAuthenticator(clientAuthenticator)
 	deviceHandler.RegisterRoutes(s.router)
 
 	// A2A Profile (Draft)
 	a2aHandler := a2aHandlers.NewHandler()
+	a2aHandler.SetAuthenticator(clientAuthenticator)
 	a2aHandler.RegisterRoutes(s.router)
+
+	// RFC 7523 JWT Bearer Grant ("Identity Assertion")
+	jwtGrantHandler := grantJWTHandlers.NewHandler(clientAuthenticator)
+	jwtGrantHandler.RegisterRoutes(s.router)
 
 	log.Println("[gnap] RFC 9635 GNAP endpoints registered at /gnap/*")
 

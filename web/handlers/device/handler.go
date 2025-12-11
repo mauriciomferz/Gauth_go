@@ -6,12 +6,14 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mauriciomferz/Gauth_go/pkg/auth"
 	"github.com/mauriciomferz/Gauth_go/pkg/device"
 )
 
 // Handler provides HTTP handlers for device authorization.
 type Handler struct {
 	store           device.DeviceCodeStore
+	authenticator   auth.ClientAuthenticator
 	verificationURI string
 	expiresIn       int // Default expiration in seconds
 	interval        int // Default polling interval in seconds
@@ -29,6 +31,11 @@ func NewHandler(store device.DeviceCodeStore) *Handler {
 		expiresIn:       600, // 10 minutes
 		interval:        5,   // 5 seconds
 	}
+}
+
+// SetAuthenticator sets the client authenticator.
+func (h *Handler) SetAuthenticator(a auth.ClientAuthenticator) {
+	h.authenticator = a
 }
 
 // RegisterRoutes registers device authorization routes.
@@ -175,6 +182,24 @@ func (h *Handler) TokenPoll(c *gin.Context) {
 			ErrorDescription: "grant_type must be " + device.DeviceFlowGrantType,
 		})
 		return
+	}
+
+	// RFC 7523 Client Authentication
+	if req.ClientAssertion != "" {
+		if h.authenticator == nil {
+			c.JSON(http.StatusInternalServerError, device.ErrorResponse{
+				Error:            "server_error",
+				ErrorDescription: "Client authentication not configured",
+			})
+			return
+		}
+		if err := h.authenticator.Authenticate(req.ClientID, req.ClientAssertion, req.ClientAssertionType); err != nil {
+			c.JSON(http.StatusUnauthorized, device.ErrorResponse{
+				Error:            "invalid_client",
+				ErrorDescription: "Client authentication failed: " + err.Error(),
+			})
+			return
+		}
 	}
 
 	dc, err := h.store.GetByDeviceCode(req.DeviceCode)
