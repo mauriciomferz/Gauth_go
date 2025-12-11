@@ -29,6 +29,9 @@ func NewHandler(store gnap.GrantStore, baseURL string) *Handler {
 
 // RegisterRoutes adds GNAP endpoints to the router.
 func (h *Handler) RegisterRoutes(r *gin.Engine) {
+	// Discovery endpoint (RFC 9635 §9)
+	r.GET("/.well-known/gnap-as-rs", h.Discovery)
+
 	// Grant transaction endpoint (RFC 9635 §3)
 	r.POST("/gnap/tx", h.GrantRequest)
 
@@ -40,6 +43,28 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 	// Token management (RFC 9635 §6)
 	r.POST("/gnap/token/:id", h.TokenRotate)
 	r.DELETE("/gnap/token/:id", h.TokenRevoke)
+}
+
+// DiscoveryResponse contains AS metadata per RFC 9635 §9.
+type DiscoveryResponse struct {
+	GrantRequestEndpoint string   `json:"grant_request_endpoint"`
+	InteractionStart     []string `json:"interaction_start_modes_supported,omitempty"`
+	InteractionFinish    []string `json:"interaction_finish_modes_supported,omitempty"`
+	KeyProofs            []string `json:"key_proofs_supported,omitempty"`
+	SubjectFormats       []string `json:"subject_formats_supported,omitempty"`
+	Assertions           []string `json:"assertions_supported,omitempty"`
+}
+
+// Discovery handles GET /.well-known/gnap-as-rs (§9).
+func (h *Handler) Discovery(c *gin.Context) {
+	c.JSON(http.StatusOK, DiscoveryResponse{
+		GrantRequestEndpoint: h.BaseURL + "/gnap/tx",
+		InteractionStart:     []string{"redirect", "user_code", "user_code_uri"},
+		InteractionFinish:    []string{"redirect", "push"},
+		KeyProofs:            []string{"httpsig"},
+		SubjectFormats:       []string{"opaque", "email", "iss_sub"},
+		Assertions:           []string{"id_token", "saml2"},
+	})
 }
 
 // GrantRequest handles POST /gnap/tx (§3).
