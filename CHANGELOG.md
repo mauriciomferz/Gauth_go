@@ -9,6 +9,29 @@ owners: release-engineering
 
 The format is inspired by Keep a Changelog and uses date-based sections.
 
+## 2025-12-11
+### Added - GNAP Integration (RFC 9635)
+- **Grant Negotiation**: Full RFC 9635 grant request/response implementation with continuation support
+- **Interaction Modes**: Redirect and user_code interaction patterns with hash verification (§4.2.3)
+- **Token Management**: Token rotation and revocation endpoints
+- **HTTP Message Signatures**: RFC 9421 support for Ed25519, ECDSA, RSA key types
+- **Discovery Endpoint**: `/.well-known/gnap-as-rs` for client configuration
+- **Auth Middleware**: Signature verification and token validation middleware
+- **PoA Bridge**: Link GNAP grants to Power of Attorney credentials
+- **Prometheus Metrics**: 6 metrics for grants, tokens, and signature verification
+- **Audit Logging**: 6 new event types for GNAP operations
+
+### Files Created
+- `pkg/gnap/` - Core types, stores, interaction handling
+- `pkg/gnap/httpsig/` - RFC 9421 HTTP signatures
+- `web/handlers/gnap/` - Endpoints, middleware, metrics, PoA bridge
+- `examples/gnap_client/` - Working client example
+- `docs/GNAP_DEPLOYMENT.md` - Production deployment guide
+
+### Documentation
+- `docs/RFC_MAP.md` updated with RFC 9635 clause mappings
+- `README.md` updated with GNAP features
+
 ## 2025-11-05
 ### Added
 - **Interactive Web Features**: Complete dynamic pattern simulation system with 25+ unique authorization patterns
