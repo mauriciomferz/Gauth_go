@@ -15,6 +15,37 @@ func init() {
 	gin.SetMode(gin.TestMode)
 }
 
+func TestDiscovery(t *testing.T) {
+	store := gnap.NewMemoryGrantStore()
+	handler := NewHandler(store, "http://localhost:8080")
+
+	r := gin.New()
+	handler.RegisterRoutes(r)
+
+	w := httptest.NewRecorder()
+	httpReq := httptest.NewRequest("GET", "/.well-known/gnap-as-rs", nil)
+	r.ServeHTTP(w, httpReq)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected 200, got %d", w.Code)
+	}
+
+	var resp DiscoveryResponse
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("Failed to unmarshal: %v", err)
+	}
+
+	if resp.GrantRequestEndpoint != "http://localhost:8080/gnap/tx" {
+		t.Errorf("Unexpected endpoint: %s", resp.GrantRequestEndpoint)
+	}
+	if len(resp.InteractionStart) == 0 {
+		t.Error("Expected interaction start modes")
+	}
+	if len(resp.KeyProofs) == 0 {
+		t.Error("Expected key proofs")
+	}
+}
+
 func TestGrantRequest_Simple(t *testing.T) {
 	store := gnap.NewMemoryGrantStore()
 	handler := NewHandler(store, "http://localhost:8080")
