@@ -35,6 +35,7 @@ const E2ETesting = lazy(() => import('./pages/E2ETesting'))
 const Metrics = lazy(() => import('./pages/Metrics'))
 const Login = lazy(() => import('./pages/Login'))
 const GNAP = lazy(() => import('./pages/GNAP'))
+const DeviceConnect = lazy(() => import("./pages/DeviceConnect").then(module => ({ default: module.DeviceConnect })));
 
 // Loading fallback component
 function PageLoader() {
@@ -52,6 +53,13 @@ function App() {
         {/* OIDC Authentication Routes */}
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/oidc-login" element={<OIDCLogin />} />
+
+        {/* Device Connect Route */}
+        <Route path="/device/connect" element={
+          <Suspense fallback={<PageLoader />}>
+            <DeviceConnect />
+          </Suspense>
+        } />
 
         {/* Admin Portal Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />

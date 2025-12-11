@@ -28,8 +28,13 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
         },
-        '/gnap': {
-          target: env.VITE_PROXY_TARGET || 'http://localhost:8080',
+        '^/gnap': {
+          target: process.env.VITE_PROXY_TARGET || 'http://localhost:8080',
+          changeOrigin: true,
+          secure: false,
+        },
+        '^/device': {
+          target: process.env.VITE_PROXY_TARGET || 'http://localhost:8080',
           changeOrigin: true,
           secure: false,
         },

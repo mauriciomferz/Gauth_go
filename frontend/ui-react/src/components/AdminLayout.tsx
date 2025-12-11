@@ -35,6 +35,7 @@ import {
   DocumentCheckmark24Regular,
   Shield24Regular,
   Bot24Regular,
+  DeviceMeetingRoom24Regular,
 } from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
@@ -234,6 +235,12 @@ const navItems: NavItem[] = [
     label: 'GNAP Grants',
     icon: <Key24Regular />,
     path: '/admin/gnap',
+  },
+  {
+    id: 'device-connect',
+    label: 'Connect Device',
+    icon: <DeviceMeetingRoom24Regular />,
+    path: '/device/connect',
   },
   {
     id: 'revocation',
