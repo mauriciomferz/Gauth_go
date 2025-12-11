@@ -76,6 +76,14 @@ const (
 	EventTypeTokenRevoke    EventType = "token_revoke"
 	EventTypeResourceAccess EventType = "resource_access"
 	EventTypeError          EventType = "error"
+
+	// GNAP (RFC 9635) audit event types
+	EventTypeGNAPGrantRequest  EventType = "gnap_grant_request"
+	EventTypeGNAPGrantApproved EventType = "gnap_grant_approved"
+	EventTypeGNAPGrantDenied   EventType = "gnap_grant_denied"
+	EventTypeGNAPTokenIssue    EventType = "gnap_token_issue"
+	EventTypeGNAPTokenRotate   EventType = "gnap_token_rotate"
+	EventTypeGNAPTokenRevoke   EventType = "gnap_token_revoke"
 )
 
 // Event represents an audit event

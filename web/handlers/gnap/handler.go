@@ -2,18 +2,26 @@
 package gnap
 
 import (
+	"context"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/gnap"
 )
+
+// AuditLogger interface for logging audit events.
+type AuditLogger interface {
+	Log(ctx context.Context, entry interface{}) error
+}
 
 // Handler manages GNAP grant operations.
 type Handler struct {
 	Store       gnap.GrantStore
 	TokenStore  gnap.TokenStore // Token lifecycle management
+	AuditLogger AuditLogger     // Optional audit logging
 	BaseURL     string          // Base URL for continuation URIs
 	DefaultWait int             // Default wait seconds for polling
 }
@@ -25,6 +33,29 @@ func NewHandler(store gnap.GrantStore, baseURL string) *Handler {
 		BaseURL:     strings.TrimSuffix(baseURL, "/"),
 		DefaultWait: 30,
 	}
+}
+
+// logAudit logs a GNAP audit event if logger is configured.
+func (h *Handler) logAudit(c *gin.Context, eventType audit.EventType, action, result, grantID string, metadata map[string]interface{}) {
+	if h.AuditLogger == nil {
+		return
+	}
+	if metadata == nil {
+		metadata = make(map[string]interface{})
+	}
+	metadata["grant_id"] = grantID
+
+	event := &audit.Event{
+		Type:      eventType,
+		Timestamp: time.Now().UTC(),
+		Action:    action,
+		Result:    result,
+		IPAddress: c.ClientIP(),
+		UserAgent: c.GetHeader("User-Agent"),
+		Metadata:  metadata,
+		Severity:  "info",
+	}
+	_ = h.AuditLogger.Log(c.Request.Context(), event)
 }
 
 // RegisterRoutes adds GNAP endpoints to the router.
