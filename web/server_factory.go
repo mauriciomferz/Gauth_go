@@ -42,6 +42,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/pkg/database"
 	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
+	devicePkg "github.com/mauriciomferz/Gauth_go/pkg/device"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
@@ -54,6 +55,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/web/handlers/capabilities"
 	"github.com/mauriciomferz/Gauth_go/web/handlers/capability_anchor"
 	delegationHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/delegation"
+	deviceHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/device"
 	eventsHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/events"
 	gnapHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/gnap"
 	mcpHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/mcp"
@@ -602,6 +604,11 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	gnapHandler := gnapHandlers.NewHandler(gnapStore, gnapBaseURL)
 	gnapHandler.TokenStore = gnapTokenStore
 	gnapHandler.RegisterRoutes(s.router)
+
+	// RFC 8628 Device Authorization Grant
+	deviceStore := devicePkg.NewMemoryDeviceCodeStore()
+	deviceHandler := deviceHandlers.NewHandler(deviceStore)
+	deviceHandler.RegisterRoutes(s.router)
 	log.Println("[gnap] RFC 9635 GNAP endpoints registered at /gnap/*")
 
 	// Protocol Flow API endpoints (Item 2: Protocol Flow Navigation)

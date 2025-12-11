@@ -114,3 +114,19 @@ Implementation lines (approximate):
 - `ComplianceLevel` - Policy compliance attestation
 
 ---
+
+## RFC 8628: OAuth 2.0 Device Authorization Grant
+
+| Section | Feature | Conformance | Implementation Notes |
+| :--- | :--- | :--- | :--- |
+| **3.1** | Device Authorization Request | ✅ Full | `POST /device/authorize` |
+| **3.2** | Device Authorization Response | ✅ Full | Returns `device_code`, `user_code`, `verification_uri` |
+| **3.3** | User Interaction | ✅ Full | User enters code at `verification_uri` |
+| **3.4** | Device Access Token Request | ✅ Full | `POST /device/token` with polling |
+| **3.5** | Device Access Token Response | ✅ Full | Issues access token on approval |
+
+**Implementation Status:**
+- `pkg/device` implements core types and store.
+- `web/handlers/device` implements protocol endpoints.
+- `web/server_factory.go` integrates handlers.
+- `web/templates/device_verify.html` provides user interface.

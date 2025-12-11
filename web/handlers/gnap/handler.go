@@ -79,6 +79,7 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 // DiscoveryResponse contains AS metadata per RFC 9635 §9.
 type DiscoveryResponse struct {
 	GrantRequestEndpoint string   `json:"grant_request_endpoint"`
+	DeviceAuthEndpoint   string   `json:"device_authorization_endpoint,omitempty"`
 	InteractionStart     []string `json:"interaction_start_modes_supported,omitempty"`
 	InteractionFinish    []string `json:"interaction_finish_modes_supported,omitempty"`
 	KeyProofs            []string `json:"key_proofs_supported,omitempty"`
@@ -90,6 +91,7 @@ type DiscoveryResponse struct {
 func (h *Handler) Discovery(c *gin.Context) {
 	c.JSON(http.StatusOK, DiscoveryResponse{
 		GrantRequestEndpoint: h.BaseURL + "/gnap/tx",
+		DeviceAuthEndpoint:   h.BaseURL + "/device/authorize",
 		InteractionStart:     []string{"redirect", "user_code", "user_code_uri"},
 		InteractionFinish:    []string{"redirect", "push"},
 		KeyProofs:            []string{"httpsig"},
