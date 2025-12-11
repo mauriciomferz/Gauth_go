@@ -34,6 +34,7 @@ const MCP = lazy(() => import('./pages/MCP'))
 const E2ETesting = lazy(() => import('./pages/E2ETesting'))
 const Metrics = lazy(() => import('./pages/Metrics'))
 const Login = lazy(() => import('./pages/Login'))
+const GNAP = lazy(() => import('./pages/GNAP'))
 
 // Loading fallback component
 function PageLoader() {
@@ -69,6 +70,7 @@ function App() {
           <Route path="configuration" element={<ConfigurationManager />} />
           <Route path="oidc-providers" element={<OIDCProviders />} />
           <Route path="gauthplus" element={<GAuthPlus />} />
+          <Route path="gnap" element={<GNAP />} />
           <Route path="performance" element={<div>Performance Page (Coming Soon)</div>} />
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
         </Route>

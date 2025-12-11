@@ -230,6 +230,12 @@ const navItems: NavItem[] = [
     path: '/admin/gauthplus',
   },
   {
+    id: 'gnap',
+    label: 'GNAP Grants',
+    icon: <Key24Regular />,
+    path: '/admin/gnap',
+  },
+  {
     id: 'revocation',
     label: 'Revocation Transparency',
     icon: <Database24Regular />,
