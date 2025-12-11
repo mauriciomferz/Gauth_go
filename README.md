@@ -158,6 +158,14 @@ A complete Go implementation of the **GAuth authorization framework (GiFo-RFC-01
 - ✅ **Capability Assessment**: AI capability level enforcement (L1/L2/L3)
 - ✅ **Fiduciary Duties**: Violation detection and blocking
 
+### GNAP Integration (RFC 9635)
+- ✅ **Grant Negotiation**: Dynamic client-AS grant request/response
+- ✅ **Interaction Modes**: Redirect, user_code, device authorization
+- ✅ **Token Management**: Rotation, revocation, continuation APIs
+- ✅ **HTTP Signatures**: RFC 9421 message signatures (Ed25519, ECDSA, RSA)
+- ✅ **Discovery**: `/.well-known/gnap-as-rs` metadata endpoint
+- ✅ **Audit Logging**: Full audit trail for all GNAP operations
+
 ### Identity & Compliance
 - ✅ **18+ Country Identity Verification**: US, DE, UK, FR, IT, ES, SE, NL, AE, SA, JP, AU, SG, KR, IN, NZ, BR, CA, MX, ZA, NG, KE
 - ✅ **Commercial Register Integration**: Multi-jurisdiction business verification
