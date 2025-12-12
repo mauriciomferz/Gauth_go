@@ -177,7 +177,7 @@ A complete Go implementation of the **GAuth authorization framework (GiFo-RFC-01
 - ✅ **Interactive Documentation**: Swagger UI and ReDoc interfaces
 - ✅ **MCP Integration**: Model Context Protocol for AI agents
 - ✅ **Admin Portal**: Full-featured React frontend
-- ✅ **Development Tools**: Docker Compose, hot reload, seeding scripts
+- ✅ **Development Tools**: Docker Compose, hot reload, seeding scripts, `rfc-verify` tool
 
 ## 📦 Quick Start
 
@@ -236,12 +236,12 @@ go run ./cmd/web-server
 #### Step 4: Start Frontend (Optional)
 
 ```bash
-cd web/ui-react
+cd frontend/ui-react
 npm install
 npm run dev
 ```
 
-> 🎨 **Frontend Running**: http://localhost:5173
+> 🎨 **Frontend Running**: http://localhost:3001
 
 ### Quick Verification
 
@@ -428,6 +428,16 @@ go test ./pkg/compliance/...   # RFC compliance tests
 ```
 
 > 💡 **Tip**: Use `-v` flag for verbose output and `-count=1` to disable test caching during development.
+
+### RFC Conformance Verification
+
+To verify that the codebase strictly adheres to the `RFC_MAP.md` documentation:
+
+```bash
+go run ./cmd/rfc-verify
+```
+
+This tool parses `docs/RFC_MAP.md` and verifies the existence of every cited implementation symbol and test file, preventing documentation drift.
 
 
 ## 📊 Monitoring & Observability
