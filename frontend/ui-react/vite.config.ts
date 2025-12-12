@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
         },
-        '^/device': {
+        '^/device/(authorize|token|verify)': {
           target: process.env.VITE_PROXY_TARGET || 'http://localhost:8080',
           changeOrigin: true,
           secure: false,
