@@ -8,6 +8,7 @@ import (
 
 	"github.com/mauriciomferz/Gauth_go/internal/metrics"
 	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
 // Helper interfaces to avoid circular dependencies with web package
@@ -48,18 +49,19 @@ type CapabilityEnforcer func(action string, claims map[string]any) (bool, []stri
 
 // Handler manages token operations
 type Handler struct {
-	Store       *Store
-	Replay      *ReplayNonceStore
-	Auditor     Auditor
-	Emitter     Emitter
-	PrimaryAuth PrimaryAuth
-	Tracer      Tracer
-	TracerRatio float64
-	CapEnforcer CapabilityEnforcer
-	Metrics     metrics.Metrics
-	Lifecycle   LifecycleRecorder
-	KeyProvider crypto.KeyProvider
-	ETagUpdater JWKSETagUpdater
+	Store        *Store
+	Replay       *ReplayNonceStore
+	Auditor      Auditor
+	Emitter      Emitter
+	PrimaryAuth  PrimaryAuth
+	Tracer       Tracer
+	TracerRatio  float64
+	CapEnforcer  CapabilityEnforcer
+	Metrics      metrics.Metrics
+	Lifecycle    LifecycleRecorder
+	KeyProvider  crypto.KeyProvider
+	ETagUpdater  JWKSETagUpdater
+	GAuthService gauth.GAuth
 
 	// Configs
 	UseJWTLib    bool

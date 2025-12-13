@@ -54,8 +54,8 @@ type AuthorizationSummary struct {
 	ActiveRestrictions []string   `json:"active_restrictions"`
 }
 
-// AuthorizationDetail provides complete view of an authorization
-type AuthorizationDetail struct {
+// AuthorizationDetailResponse provides complete view of an authorization
+type AuthorizationDetailResponse struct {
 	AuthorizationSummary
 	PowerOfAttorney      *poa.PoADefinition         `json:"power_of_attorney"`
 	AuthorizationChain   *AuthorizationChain        `json:"authorization_chain"`
@@ -172,7 +172,7 @@ func (s *DisclosureService) GetAuthorizationDetail(
 	ctx context.Context,
 	authorizationID string,
 	resourceOwnerID string,
-) (*AuthorizationDetail, error) {
+) (*AuthorizationDetailResponse, error) {
 	if authorizationID == "" {
 		return nil, fmt.Errorf("authorization_id is required")
 	}
@@ -195,7 +195,7 @@ func (s *DisclosureService) GetAuthorizationDetail(
 	violations := s.getComplianceViolations(ctx, authorizationID)
 
 	// Build detail
-	detail := &AuthorizationDetail{
+	detail := &AuthorizationDetailResponse{
 		AuthorizationSummary: s.tokenToSummary(token),
 		PowerOfAttorney:      token.PowerOfAttorney,
 		AuthorizationChain:   token.AuthorizationChain,

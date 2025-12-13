@@ -61,6 +61,7 @@ type RFCCompliantAuthorizationRequest struct {
 	RequestedTransaction *TransactionRequest
 	RequestedDecision    *DecisionRequest
 	RequestedAction      *ActionRequest
+	AuthorizationDetails []AuthorizationDetail
 
 	// Power of Attorney reference
 	PoACredentialRef string
@@ -253,6 +254,7 @@ func (o *ProtocolOrchestrator) ExecuteRFCCompliantFlow(
 		ResourceOwnerInfo: &ResourceOwnerInfo{
 			OwnerID: request.ResourceOwnerID,
 		},
+		AuthorizationDetails: request.AuthorizationDetails,
 	}
 
 	extendedToken, err := o.extendedTokenService.CreateExtendedToken(ctx, extendedTokenReq)

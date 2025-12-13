@@ -81,6 +81,11 @@ func (s *PostgresExtendedTokenStore) SaveToken(ctx context.Context, token *Exten
 		return fmt.Errorf("failed to marshal audit trail: %w", err)
 	}
 
+	authDetailsJSON, err := json.Marshal(token.AuthorizationDetails)
+	if err != nil {
+		return fmt.Errorf("failed to marshal authorization details: %w", err)
+	}
+
 	// Map ExtendedToken fields to table columns
 	// Note: compliance_level is required but not in ExtendedToken struct
 	complianceLevel := "rfc-0111-compliant" // default value
@@ -90,12 +95,12 @@ func (s *PostgresExtendedTokenStore) SaveToken(ctx context.Context, token *Exten
 		INSERT INTO extended_tokens (
 			access_token, token_type, expires_in, refresh_token, scope, issued_at,
 			power_of_attorney, authorization_chain, legal_framework, verification_proof,
-			audit_trail, grant_id, compliance_level,
+			audit_trail, grant_id, compliance_level, authorization_details,
 			created_at, use_count
 		) VALUES (
 			$1, $2, $3, $4, $5, $6,
 			$7, $8, $9, $10,
-			$11, $12, $13,
+			$11, $12, $13, $14,
 			NOW(), 0
 		)
 		ON CONFLICT (access_token) DO UPDATE SET
@@ -107,7 +112,8 @@ func (s *PostgresExtendedTokenStore) SaveToken(ctx context.Context, token *Exten
 			authorization_chain = EXCLUDED.authorization_chain,
 			legal_framework = EXCLUDED.legal_framework,
 			verification_proof = EXCLUDED.verification_proof,
-			audit_trail = EXCLUDED.audit_trail
+			audit_trail = EXCLUDED.audit_trail,
+			authorization_details = EXCLUDED.authorization_details
 	`
 
 	_, err = s.db.ExecContext(ctx, query,
@@ -124,6 +130,7 @@ func (s *PostgresExtendedTokenStore) SaveToken(ctx context.Context, token *Exten
 		auditTrailJSON,
 		grantID,
 		complianceLevel,
+		authDetailsJSON,
 	)
 
 	if err != nil {
@@ -139,7 +146,7 @@ func (s *PostgresExtendedTokenStore) GetToken(ctx context.Context, accessToken s
 		SELECT 
 			access_token, token_type, expires_in, refresh_token, scope, issued_at,
 			power_of_attorney, authorization_chain, legal_framework, verification_proof,
-			audit_trail,
+			audit_trail, authorization_details,
 			created_at, revoked_at, last_used_at, use_count
 		FROM extended_tokens
 		WHERE access_token = $1 AND revoked_at IS NULL
@@ -149,7 +156,7 @@ func (s *PostgresExtendedTokenStore) GetToken(ctx context.Context, accessToken s
 	var metadata TokenMetadata
 	var scope []string
 	var poaJSON, authChainJSON, legalFrameworkJSON, verificationProofJSON []byte
-	var auditTrailJSON []byte
+	var auditTrailJSON, authDetailsJSON []byte
 	var revokedAt, lastUsedAt sql.NullTime
 
 	err := s.db.QueryRowContext(ctx, query, accessToken).Scan(
@@ -164,6 +171,7 @@ func (s *PostgresExtendedTokenStore) GetToken(ctx context.Context, accessToken s
 		&legalFrameworkJSON,
 		&verificationProofJSON,
 		&auditTrailJSON,
+		&authDetailsJSON,
 		&metadata.CreatedAt,
 		&revokedAt,
 		&lastUsedAt,
@@ -208,6 +216,12 @@ func (s *PostgresExtendedTokenStore) GetToken(ctx context.Context, accessToken s
 		}
 	}
 
+	if len(authDetailsJSON) > 0 {
+		if err := json.Unmarshal(authDetailsJSON, &token.AuthorizationDetails); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal authorization details: %w", err)
+		}
+	}
+
 	token.Scope = scope
 
 	// Update last used timestamp and use count
@@ -227,7 +241,7 @@ func (s *PostgresExtendedTokenStore) GetTokenByRefreshToken(ctx context.Context,
 		SELECT 
 			access_token, token_type, expires_in, refresh_token, scope, issued_at,
 			power_of_attorney, authorization_chain, legal_framework, verification_proof,
-			audit_trail,
+			audit_trail, authorization_details,
 			created_at, revoked_at, last_used_at, use_count
 		FROM extended_tokens
 		WHERE refresh_token = $1 AND revoked_at IS NULL
@@ -237,7 +251,7 @@ func (s *PostgresExtendedTokenStore) GetTokenByRefreshToken(ctx context.Context,
 	var metadata TokenMetadata
 	var scope []string
 	var poaJSON, authChainJSON, legalFrameworkJSON, verificationProofJSON []byte
-	var auditTrailJSON []byte
+	var auditTrailJSON, authDetailsJSON []byte
 	var revokedAt, lastUsedAt sql.NullTime
 
 	err := s.db.QueryRowContext(ctx, query, refreshToken).Scan(
@@ -252,6 +266,7 @@ func (s *PostgresExtendedTokenStore) GetTokenByRefreshToken(ctx context.Context,
 		&legalFrameworkJSON,
 		&verificationProofJSON,
 		&auditTrailJSON,
+		&authDetailsJSON,
 		&metadata.CreatedAt,
 		&revokedAt,
 		&lastUsedAt,
@@ -293,6 +308,12 @@ func (s *PostgresExtendedTokenStore) GetTokenByRefreshToken(ctx context.Context,
 	if len(auditTrailJSON) > 0 {
 		if err := json.Unmarshal(auditTrailJSON, &token.AuditTrail); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal audit trail: %w", err)
+		}
+	}
+
+	if len(authDetailsJSON) > 0 {
+		if err := json.Unmarshal(authDetailsJSON, &token.AuthorizationDetails); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal authorization details: %w", err)
 		}
 	}
 
@@ -370,7 +391,7 @@ func (s *PostgresExtendedTokenStore) ListTokensByClient(ctx context.Context, cli
 		SELECT 
 			access_token, token_type, expires_in, refresh_token, scope, issued_at,
 			power_of_attorney, authorization_chain, legal_framework, verification_proof,
-			audit_trail
+			audit_trail, authorization_details
 		FROM extended_tokens
 		WHERE client_id = $1 AND revoked_at IS NULL AND expires_at > NOW()
 		ORDER BY created_at DESC
@@ -388,7 +409,7 @@ func (s *PostgresExtendedTokenStore) ListTokensByClient(ctx context.Context, cli
 		var token ExtendedToken
 		var scope []string
 		var poaJSON, authChainJSON, legalFrameworkJSON, verificationProofJSON []byte
-		var auditTrailJSON []byte
+		var auditTrailJSON, authDetailsJSON []byte
 
 		err := rows.Scan(
 			&token.AccessToken,
@@ -402,6 +423,7 @@ func (s *PostgresExtendedTokenStore) ListTokensByClient(ctx context.Context, cli
 			&legalFrameworkJSON,
 			&verificationProofJSON,
 			&auditTrailJSON,
+			&authDetailsJSON,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan token row: %w", err)
@@ -429,6 +451,12 @@ func (s *PostgresExtendedTokenStore) ListTokensByClient(ctx context.Context, cli
 		if len(auditTrailJSON) > 0 {
 			if err := json.Unmarshal(auditTrailJSON, &token.AuditTrail); err != nil {
 				return nil, fmt.Errorf("failed to unmarshal audit trail: %w", err)
+			}
+		}
+
+		if len(authDetailsJSON) > 0 {
+			if err := json.Unmarshal(authDetailsJSON, &token.AuthorizationDetails); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal authorization details: %w", err)
 			}
 		}
 
@@ -451,7 +479,7 @@ func (s *PostgresExtendedTokenStore) ListTokensByResourceOwner(ctx context.Conte
 		SELECT 
 			access_token, token_type, expires_in, refresh_token, scope, issued_at,
 			power_of_attorney, authorization_chain, legal_framework, verification_proof,
-			audit_trail, grant_id, compliance_level
+			audit_trail, grant_id, compliance_level, authorization_details
 		FROM extended_tokens
 		WHERE 
 			revoked_at IS NULL
@@ -470,7 +498,7 @@ func (s *PostgresExtendedTokenStore) ListTokensByResourceOwner(ctx context.Conte
 	for rows.Next() {
 		var token ExtendedToken
 		var scope pq.StringArray
-		var poaJSON, authChainJSON, legalFrameworkJSON, verificationProofJSON, auditTrailJSON []byte
+		var poaJSON, authChainJSON, legalFrameworkJSON, verificationProofJSON, auditTrailJSON, authDetailsJSON []byte
 
 		err := rows.Scan(
 			&token.AccessToken,
@@ -486,6 +514,7 @@ func (s *PostgresExtendedTokenStore) ListTokensByResourceOwner(ctx context.Conte
 			&auditTrailJSON,
 			&token.GrantID,
 			&token.ComplianceLevel,
+			&authDetailsJSON,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan token row: %w", err)
@@ -513,6 +542,12 @@ func (s *PostgresExtendedTokenStore) ListTokensByResourceOwner(ctx context.Conte
 		if len(auditTrailJSON) > 0 {
 			if err := json.Unmarshal(auditTrailJSON, &token.AuditTrail); err != nil {
 				return nil, fmt.Errorf("failed to unmarshal audit trail: %w", err)
+			}
+		}
+
+		if len(authDetailsJSON) > 0 {
+			if err := json.Unmarshal(authDetailsJSON, &token.AuthorizationDetails); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal authorization details: %w", err)
 			}
 		}
 

@@ -1,6 +1,9 @@
 package modellimits
 
-import "sync/atomic"
+import (
+	"sync/atomic"
+	"time"
+)
 
 type mockMetrics struct {
 	unknown                 uint64
@@ -36,6 +39,6 @@ func (m *mockMetrics) IncModelUserRateLimitExceeded() {
 
 func (m *mockMetrics) IncModelLimitSurge() { atomic.AddUint64(&m.surge, 1) }
 
-func (m *mockMetrics) RecordDecision(kind, id, result string) {
+func (m *mockMetrics) RecordDecision(kind, id, result string, d time.Duration) {
 	m.decisions = append(m.decisions, kind+"|"+id+"|"+result)
 }

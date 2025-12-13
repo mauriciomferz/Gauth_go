@@ -327,10 +327,11 @@ func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
 
 	// Convert TokenRequest to RFCCompliantAuthorizationRequest
 	rfcReq := &RFCCompliantAuthorizationRequest{
-		ClientID:       g.config.ClientID,
-		SubscriptionID: req.GrantID, // Use GrantID as subscription reference
-		RequestedScope: convertScopeToAuthorizationScope(req.Scope),
-		Context:        convertContextToMap(req.Context),
+		ClientID:             g.config.ClientID,
+		SubscriptionID:       req.GrantID, // Use GrantID as subscription reference
+		RequestedScope:       convertScopeToAuthorizationScope(req.Scope),
+		Context:              convertContextToMap(req.Context),
+		AuthorizationDetails: req.AuthorizationDetails,
 	}
 
 	// Execute RFC-0111 compliant flow

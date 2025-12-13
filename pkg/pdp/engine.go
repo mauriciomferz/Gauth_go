@@ -403,7 +403,7 @@ func (e *InMemoryEngine) Evaluate(ctx context.Context, req Request) (Decision, e
 		if dec.Allow {
 			out = outcomeAllow
 		}
-		e.externalMetrics.RecordDecision(req.Action, req.Resource, out)
+		e.externalMetrics.RecordDecision(req.Action, req.Resource, out, time.Duration(0))
 		if !dec.Allow {
 			e.externalMetrics.IncUnauthorized()
 		}

@@ -798,6 +798,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			// Initialize handler with service and load persistence
 			// Note: s.violationHandler.Service field needs to be set.
 			// server_clean.go line 1963: s.violationHandler.Service = primary
+			if s.tokenHandler != nil {
+				s.tokenHandler.SetGAuthService(primary)
+			}
 			// Wait, check type compatibility: primary(*gauth.Service) vs ViolationProvider interface.
 			// Assuming it satisfies it.
 			// I need to set the Service field directly since NewHandler usage above passed nil service.

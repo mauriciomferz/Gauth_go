@@ -40,7 +40,7 @@ type Metrics interface {
 	IncModelUserInputLimitExceeded()
 	IncModelUserOutputLimitExceeded()
 	IncModelUserRateLimitExceeded()
-	RecordDecision(kind, id, result string)
+	RecordDecision(kind, id, result string, d time.Duration)
 }
 
 // KeyManager abstracts key operations needed by handler
@@ -306,14 +306,14 @@ func (h *Handler) CheckLimit(modelID, userID string, inputTokens, outputTokens i
 	if !h.knownModels[modelID] {
 		if h.LimitsPath != "" && h.StrictUnknown {
 			if h.Metrics != nil {
-				h.Metrics.RecordDecision("model_validate", modelID, "deny")
+				h.Metrics.RecordDecision("model_validate", modelID, "deny", time.Duration(0))
 				h.Metrics.IncModelUnknown()
 			}
 			return LimitCheckResult{Allowed: false, Error: "model_unknown"}
 		}
 		// If unknown and not strict, allow (but skip logic)
 		if h.Metrics != nil {
-			h.Metrics.RecordDecision("model_validate", modelID, "allow")
+			h.Metrics.RecordDecision("model_validate", modelID, "allow", time.Duration(0))
 		}
 		return LimitCheckResult{Allowed: true, LimitEnforced: false}
 	}
@@ -328,7 +328,7 @@ func (h *Handler) CheckLimit(modelID, userID string, inputTokens, outputTokens i
 		if uLim.InputLimit > 0 && inputTokens > uLim.InputLimit {
 			h.writeAudit(modelID, "user_input", inputTokens, uLim.InputLimit, 0, 0, userID)
 			if h.Metrics != nil {
-				h.Metrics.RecordDecision("model_validate", modelID+":"+userID, "deny")
+				h.Metrics.RecordDecision("model_validate", modelID+":"+userID, "deny", time.Duration(0))
 				h.Metrics.IncModelUserInputLimitExceeded()
 			}
 			return LimitCheckResult{Allowed: false, Error: "model_user_input_limit_exceeded", Limit: uLim.InputLimit}
@@ -337,7 +337,7 @@ func (h *Handler) CheckLimit(modelID, userID string, inputTokens, outputTokens i
 		if uLim.OutputLimit > 0 && outputTokens > uLim.OutputLimit {
 			h.writeAudit(modelID, "user_output", outputTokens, uLim.OutputLimit, 0, 0, userID)
 			if h.Metrics != nil {
-				h.Metrics.RecordDecision("model_validate", modelID+":"+userID, "deny")
+				h.Metrics.RecordDecision("model_validate", modelID+":"+userID, "deny", time.Duration(0))
 				h.Metrics.IncModelUserOutputLimitExceeded()
 			}
 			return LimitCheckResult{Allowed: false, Error: "model_user_output_limit_exceeded", Limit: uLim.OutputLimit}
@@ -362,7 +362,7 @@ func (h *Handler) CheckLimit(modelID, userID string, inputTokens, outputTokens i
 			if st.Count > uLim.RateLimit {
 				h.writeAudit(modelID, "user_rate", st.Count, uLim.RateLimit, st.WindowStart, 60, userID)
 				if h.Metrics != nil {
-					h.Metrics.RecordDecision("model_validate", modelID+":"+userID, "deny")
+					h.Metrics.RecordDecision("model_validate", modelID+":"+userID, "deny", time.Duration(0))
 					h.Metrics.IncModelUserRateLimitExceeded()
 				}
 				return LimitCheckResult{Allowed: false, Error: "model_user_rate_limit_exceeded", Limit: uLim.RateLimit, WindowSeconds: 60}
@@ -375,7 +375,7 @@ func (h *Handler) CheckLimit(modelID, userID string, inputTokens, outputTokens i
 	if hasLimit && limit > 0 && inputTokens > limit {
 		h.writeAudit(modelID, "input", inputTokens, limit, 0, 0, "")
 		if h.Metrics != nil {
-			h.Metrics.RecordDecision("model_validate", modelID, "deny")
+			h.Metrics.RecordDecision("model_validate", modelID, "deny", time.Duration(0))
 			h.Metrics.IncModelLimitExceeded()
 		}
 		return LimitCheckResult{Allowed: false, Error: "model_limit_exceeded", Limit: limit}
@@ -384,7 +384,7 @@ func (h *Handler) CheckLimit(modelID, userID string, inputTokens, outputTokens i
 	if outLimit, ok := h.outputLimits[modelID]; ok && outLimit > 0 && outputTokens > outLimit {
 		h.writeAudit(modelID, "output", outputTokens, outLimit, 0, 0, "")
 		if h.Metrics != nil {
-			h.Metrics.RecordDecision("model_validate", modelID, "deny")
+			h.Metrics.RecordDecision("model_validate", modelID, "deny", time.Duration(0))
 			h.Metrics.IncModelOutputLimitExceeded()
 		}
 		return LimitCheckResult{Allowed: false, Error: "model_output_limit_exceeded", Limit: outLimit}
@@ -407,7 +407,7 @@ func (h *Handler) CheckLimit(modelID, userID string, inputTokens, outputTokens i
 		if st.Count > rateLimit {
 			h.writeAudit(modelID, "rate", st.Count, rateLimit, st.WindowStart, 60, "")
 			if h.Metrics != nil {
-				h.Metrics.RecordDecision("model_validate", modelID, "deny")
+				h.Metrics.RecordDecision("model_validate", modelID, "deny", time.Duration(0))
 				h.Metrics.IncModelRateLimitExceeded()
 			}
 			return LimitCheckResult{Allowed: false, Error: "model_rate_limit_exceeded", Limit: rateLimit, WindowSeconds: 60}
@@ -435,7 +435,7 @@ func (h *Handler) CheckLimit(modelID, userID string, inputTokens, outputTokens i
 			if st.Count > rl.Limit {
 				h.writeAudit(modelID, "rate_extended", st.Count, rl.Limit, time.Now().Unix(), int(rl.Period.Seconds()), "")
 				if h.Metrics != nil {
-					h.Metrics.RecordDecision("model_validate", modelID, "deny")
+					h.Metrics.RecordDecision("model_validate", modelID, "deny", time.Duration(0))
 					h.Metrics.IncModelRateLimitExceeded()
 				}
 				return LimitCheckResult{Allowed: false, Error: "model_rate_limit_exceeded", Limit: rl.Limit, WindowSeconds: int(rl.Period.Seconds()), Period: ratelimit.FormatPeriod(rl.Period)}
@@ -444,7 +444,7 @@ func (h *Handler) CheckLimit(modelID, userID string, inputTokens, outputTokens i
 	}
 
 	if h.Metrics != nil {
-		h.Metrics.RecordDecision("model_validate", modelID, "allow")
+		h.Metrics.RecordDecision("model_validate", modelID, "allow", time.Duration(0))
 	}
 	return LimitCheckResult{Allowed: true, LimitEnforced: true, Limit: limit, RateLimit: h.rateLimits[modelID]}
 }

@@ -24,6 +24,7 @@ type ExtendedTokenService struct {
 	tokenExpiry         time.Duration
 	signingKey          []byte     // HMAC signing key for JWT
 	jweService          JWEService // Optional JWE encryption service
+	rarValidator        *RARValidator
 }
 
 // NewExtendedTokenService creates a new extended token service
@@ -53,6 +54,7 @@ func NewExtendedTokenService(
 		tokenExpiry:         tokenExpiry,
 		signingKey:          signingKey,
 		jweService:          nil, // JWE encryption disabled by default
+		rarValidator:        NewRARValidator(),
 	}
 }
 
@@ -105,6 +107,16 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 
 	if err := poa.ValidatePoADefinition(*request.PowerOfAttorney); err != nil {
 		return nil, fmt.Errorf("PoA validation failed: %w", err)
+	}
+
+	// Step 2b: Validate Authorization Details (RFC 9767)
+	if len(request.AuthorizationDetails) > 0 {
+		if err := s.rarValidator.ValidateAuthorizationDetails(request.PowerOfAttorney, request.AuthorizationDetails); err != nil {
+			return nil, &GAuthError{
+				Code:    "invalid_authorization_details",
+				Message: fmt.Sprintf("RAR validation failed: %v", err),
+			}
+		}
 	}
 
 	// Step 3: Validate client owner information
@@ -187,6 +199,8 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 		// Compliance & audit
 		ComplianceLevel:     "rfc-0111-compliant",
 		JurisdictionContext: request.JurisdictionContext,
+		// RFC 9767
+		AuthorizationDetails: request.AuthorizationDetails,
 		AuditTrail: []AuditEntry{
 			{
 				Timestamp: now,
@@ -275,6 +289,14 @@ func (s *ExtendedTokenService) EncodeExtendedToken(
 		proofJSON, err := json.Marshal(token.VerificationProof)
 		if err == nil {
 			claims["verification_proof"] = string(proofJSON)
+		}
+	}
+
+	// Serialize AuthorizationDetails (RFC 9767)
+	if len(token.AuthorizationDetails) > 0 {
+		rarJSON, err := json.Marshal(token.AuthorizationDetails)
+		if err == nil {
+			claims["authorization_details"] = string(rarJSON)
 		}
 	}
 
@@ -592,6 +614,14 @@ func (s *ExtendedTokenService) parseExtendedToken(
 		var issuer AuthorizationServerInfo
 		if err := json.Unmarshal([]byte(issuerStr), &issuer); err == nil {
 			token.IssuedBy = &issuer
+		}
+	}
+
+	// Extract AuthorizationDetails (RFC 9767)
+	if rarStr, ok := claims["authorization_details"].(string); ok && rarStr != "" {
+		var details []AuthorizationDetail
+		if err := json.Unmarshal([]byte(rarStr), &details); err == nil {
+			token.AuthorizationDetails = details
 		}
 	}
 

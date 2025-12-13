@@ -209,7 +209,7 @@ type Metrics interface {
 	SetDelegationGraphNodeCount(n int) // gauge of current nodes in exported graph
 	// RecordDecision captures an authorization decision with action/resource/outcome labels.
 	// outcome SHOULD be one of: allow, deny, error, success, failure, noop.
-	RecordDecision(action, resource, outcome string)
+	RecordDecision(action, resource, outcome string, d time.Duration)
 	// RecordDecisionWithReason adds a reason label (e.g. status_change, invalid_transition, init, noop).
 	RecordDecisionWithReason(action, resource, outcome, reason string)
 	// RecordLifecycleTransition captures a lifecycle state change with labels.
@@ -371,7 +371,7 @@ func (n noop) IncDelegationStatusTransitions()                                  
 func (n noop) IncDelegationStatusTransitionFailures()                                        {}
 func (n noop) IncTokenStatusTransitions()                                                    {}
 func (n noop) IncTokenStatusTransitionFailures()                                             {}
-func (n noop) RecordDecision(action, resource, outcome string)                               {}
+func (n noop) RecordDecision(action, resource, outcome string, d time.Duration)              {}
 func (n noop) RecordDecisionWithReason(action, resource, outcome, reason string)             {}
 func (n noop) RecordLifecycleTransition(entityType, oldStatus, newStatus, outcome string)    {}
 func (n noop) ObserveLifecycleTransitionLatency(entityType, outcome string, d time.Duration) {}
@@ -1479,7 +1479,7 @@ func (m *Memory) IncTokenStatusTransitionFailures() {
 	atomic.AddUint64(&m.tokenStatusTransitionFailures, 1)
 }
 
-func (m *Memory) RecordDecision(action, resource, outcome string) {
+func (m *Memory) RecordDecision(action, resource, outcome string, d time.Duration) {
 	if action == "" {
 		action = "_"
 	}

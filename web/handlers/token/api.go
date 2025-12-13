@@ -16,6 +16,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/mauriciomferz/Gauth_go/internal/metrics"
 	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
 // Legacy Error Constants
@@ -52,9 +53,40 @@ func (h *Handler) Create(c *gin.Context) {
 		TTL   int    `json:"ttl_seconds"`
 		Meta  any    `json:"meta"`
 		Nonce string `json:"nonce"`
+		// RFC fields
+		GrantID              string                      `json:"grant_id"`
+		Scope                []string                    `json:"scope"`
+		AuthorizationDetails []gauth.AuthorizationDetail `json:"authorization_details"`
 	}
 	_ = c.ShouldBindJSON(&req)
 
+	// RFC 9767 / RFC-0111 Flow Integration
+	if h.GAuthService != nil && (len(req.AuthorizationDetails) > 0 || req.GrantID != "") {
+		tokenReq := gauth.TokenRequest{
+			GrantID:              req.GrantID,
+			Scope:                req.Scope,
+			AuthorizationDetails: req.AuthorizationDetails,
+			Context:              map[string]interface{}{"nonce": req.Nonce, "meta": req.Meta},
+		}
+
+		resp, err := h.GAuthService.RequestToken(tokenReq)
+		if err != nil {
+			c.JSON(400, gin.H{"success": false, "error": "token_request_failed", "detail": err.Error()})
+			return
+		}
+
+		// Return RFC compliant response
+		c.JSON(200, gin.H{
+			"success":      true,
+			"access_token": resp.Token,
+			"scope":        resp.Scope,
+			"expires_in":   int(time.Until(resp.ValidUntil).Seconds()),
+			"token_type":   "Bearer",
+		})
+		return
+	}
+
+	// Legacy Flow
 	// Capability enforcement
 	claimsCaps := map[string]any{}
 	if raw := c.GetHeader("X-Capabilities"); raw != "" {
@@ -391,7 +423,7 @@ func (h *Handler) StatusUpdate(c *gin.Context) {
 
 		if h.Metrics != nil {
 			h.Metrics.IncTokenStatusTransitions()
-			h.Metrics.RecordDecision("token_status_update", "token:"+tok.ID, tok.Status)
+			h.Metrics.RecordDecision("token_status_update", "token:"+tok.ID, tok.Status, time.Duration(0))
 			h.Metrics.RecordDecisionWithReason("token_status_update", "token:"+tok.ID, tok.Status, reason)
 			h.Metrics.RecordLifecycleTransition("token", old, req.NewStatus, "noop")
 			h.Metrics.ObserveLifecycleTransitionLatency("token", "noop", time.Since(start))

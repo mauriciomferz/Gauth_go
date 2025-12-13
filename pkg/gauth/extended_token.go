@@ -47,6 +47,8 @@ type ExtendedToken struct {
 	ComplianceLevel     string               `json:"compliance_level"`
 	AuditTrail          []AuditEntry         `json:"audit_trail,omitempty"`
 	JurisdictionContext *JurisdictionContext `json:"jurisdiction_context"`
+	// RFC 9767 Rich Authorization Requests
+	AuthorizationDetails []AuthorizationDetail `json:"authorization_details,omitempty"`
 }
 
 // AuthorizationChain represents the complete authorization hierarchy
@@ -478,6 +480,9 @@ type ExtendedTokenRequest struct {
 	RequestID            string                `json:"request_id,omitempty"`
 	JurisdictionCode     string                `json:"jurisdiction,omitempty"`
 	JurisdictionContext  *JurisdictionContext  `json:"jurisdiction_context,omitempty"`
+
+	// RFC 9767
+	AuthorizationDetails []AuthorizationDetail `json:"authorization_details,omitempty"`
 }
 
 // ExtendedTokenValidationResult represents RFC-0111 compliant validation result

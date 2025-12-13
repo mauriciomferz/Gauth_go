@@ -497,8 +497,8 @@ func (p *PrometheusCollector) SetDelegationGraphNodeCount(n int) {
 	p.impl.SetDelegationGraphNodeCount(n)
 }
 
-func (p *PrometheusCollector) RecordDecision(action string, resource string, outcome string) {
-	p.impl.RecordDecision(action, resource, outcome)
+func (p *PrometheusCollector) RecordDecision(action string, resource string, outcome string, d time.Duration) {
+	p.impl.RecordDecision(action, resource, outcome, d)
 }
 
 func (p *PrometheusCollector) RecordDecisionWithReason(action string, resource string, outcome string, reason string) {

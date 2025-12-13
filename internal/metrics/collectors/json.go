@@ -568,7 +568,7 @@ func (j *JSONCollector) SetDelegationGraphNodeCount(n int) {
 	j.setGauge("delegation_graph_node_count", n)
 }
 
-func (j *JSONCollector) RecordDecision(action, resource, outcome string) {
+func (j *JSONCollector) RecordDecision(action, resource, outcome string, d time.Duration) {
 	j.incrementCounter(fmt.Sprintf("decision_%s_%s_%s", action, resource, outcome))
 }
 

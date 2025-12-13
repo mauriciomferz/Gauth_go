@@ -668,8 +668,8 @@ func (reg *CollectorRegistry) IncTokenStatusTransitionFailures() {
 	reg.dispatch(func(c MetricsCollector) { c.IncTokenStatusTransitionFailures() })
 }
 
-func (reg *CollectorRegistry) RecordDecision(action string, resource string, outcome string) {
-	reg.dispatch(func(c MetricsCollector) { c.RecordDecision(action, resource, outcome) })
+func (reg *CollectorRegistry) RecordDecision(action string, resource string, outcome string, d time.Duration) {
+	reg.dispatch(func(c MetricsCollector) { c.RecordDecision(action, resource, outcome, d) })
 }
 
 func (reg *CollectorRegistry) RecordDecisionWithReason(action string, resource string, outcome string, reason string) {

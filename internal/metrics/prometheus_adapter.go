@@ -100,14 +100,14 @@ type PrometheusMetrics struct {
 	tokenStatusTransitions             prom.Counter
 	tokenStatusTransitionFailures      prom.Counter
 	// PDP/PEP enforcement and audit metrics
-	pepEnforcements         *prom.CounterVec // labels: allowed (true|false), action_type
-	pepViolations           *prom.CounterVec // labels: violation_type, severity
-	pepEnforcementLatency   prom.Histogram
-	pepAuditBufferEnforcements prom.Gauge
-	pepAuditBufferViolations   prom.Gauge
-	capabilityAnchorEmitted            prom.Counter
-	capabilityAnchorSkipped            prom.Counter
-	capabilityRegistryHashChanged      prom.Counter
+	pepEnforcements               *prom.CounterVec // labels: allowed (true|false), action_type
+	pepViolations                 *prom.CounterVec // labels: violation_type, severity
+	pepEnforcementLatency         prom.Histogram
+	pepAuditBufferEnforcements    prom.Gauge
+	pepAuditBufferViolations      prom.Gauge
+	capabilityAnchorEmitted       prom.Counter
+	capabilityAnchorSkipped       prom.Counter
+	capabilityRegistryHashChanged prom.Counter
 	// Labeled per-algorithm capability anchor emission counter (algorithm label)
 	capabilityAnchorAlgorithmEmitted *prom.CounterVec // labels: algorithm
 	obligationsExecuted              prom.Counter
@@ -768,7 +768,7 @@ func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 		}
 	}
 	pm.capabilityAnchorAlgorithmEmitted = algoVec
-	
+
 	// PDP/PEP enforcement and audit metrics
 	pepEnforcements := prom.NewCounterVec(prom.CounterOpts{
 		Namespace:   opts.Namespace,
@@ -1542,7 +1542,7 @@ func (p *PrometheusMetrics) IncViolation(cat interface{}) {
 	}
 }
 
-func (p *PrometheusMetrics) RecordDecision(action, resource, outcome string) {
+func (p *PrometheusMetrics) RecordDecision(action, resource, outcome string, d time.Duration) {
 	if action == "" {
 		action = "_"
 	}

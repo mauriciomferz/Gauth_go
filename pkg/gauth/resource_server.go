@@ -1,6 +1,8 @@
 package gauth
 
 import (
+	"context"
+	"fmt"
 	"time"
 )
 
@@ -55,4 +57,32 @@ func (rs *ResourceServer) SetRateLimit(args ...interface{}) {
 		_ = args[0]
 	}
 	// Placeholder implementation - store the rate limit config if needed
+}
+
+// ValidateExtendedTokenWithRAR validates an extended token and checks RAR permissions
+func (rs *ResourceServer) ValidateExtendedTokenWithRAR(ctx context.Context, tokenString string, resource string, action string) error {
+	if rs.service == nil || rs.service.protocolOrchestrator == nil || rs.service.protocolOrchestrator.extendedTokenService == nil {
+		return fmt.Errorf("service not fully initialized")
+	}
+
+	ets := rs.service.protocolOrchestrator.extendedTokenService
+
+	// Validate token
+	result, err := ets.ValidateExtendedToken(ctx, tokenString)
+	if err != nil {
+		return fmt.Errorf("invalid token: %w", err)
+	}
+
+	if !result.Valid {
+		return fmt.Errorf("token invalid")
+	}
+
+	// Check RAR
+	details := result.ExtendedToken.AuthorizationDetails
+	if len(details) == 0 {
+		return fmt.Errorf("no authorization details found in token")
+	}
+
+	rarValidator := NewRARValidator()
+	return rarValidator.EvaluateAccess(details, resource, action)
 }

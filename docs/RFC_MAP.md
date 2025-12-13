@@ -163,3 +163,11 @@ Implementation lines (approximate):
 - `web/handlers/device` and `a2a` support the client authentication method.
 
 
+
+## RFC 9767: Rich Authorization Requests (RAR)
+| Clause ID | Title | Implementation Symbols | Tests | Status | Notes |
+|-----------|-------|------------------------|-------|--------|-------|
+| RFC9767-3 | Authorization Details Data Model | `gauth.AuthorizationDetail` | pkg/gauth/rar_validator_test.go | Implemented | Types and JSON serialization |
+| RFC9767-5 | Authorization Request | `RFCCompliantAuthorizationRequest` | web/handlers/token/rfc_integration_test.go | Implemented | 'authorization_details' parameter support |
+| RFC9767-6 | Token Response | `ExtendedToken`, `ExtensionTokenService` | web/handlers/token/rfc_integration_test.go | Implemented | Details persisted in token and JWT |
+| RFC9767-7 | Resource Server Validation | `RARValidator`, `ValidateExtendedTokenWithRAR` | pkg/gauth/resource_server_test.go | Implemented | Enforces PoA scope narrowing |

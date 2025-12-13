@@ -61,6 +61,8 @@ type TokenRequest struct {
 	Scope        []string
 	Restrictions interface{}
 	Context      interface{}
+	// RFC 9767
+	AuthorizationDetails []AuthorizationDetail `json:"authorization_details,omitempty"`
 }
 
 // TokenResponse represents a token response
