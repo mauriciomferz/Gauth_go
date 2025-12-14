@@ -1,6 +1,7 @@
 package modellimits
 
 import (
+	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -15,6 +16,7 @@ type mockMetrics struct {
 	userRateLimitExceeded   uint64
 	surge                   uint64
 	decisions               []string
+	mu                      sync.Mutex
 }
 
 func (m *mockMetrics) IncModelUnknown() { atomic.AddUint64(&m.unknown, 1) }
@@ -40,5 +42,7 @@ func (m *mockMetrics) IncModelUserRateLimitExceeded() {
 func (m *mockMetrics) IncModelLimitSurge() { atomic.AddUint64(&m.surge, 1) }
 
 func (m *mockMetrics) RecordDecision(kind, id, result string, d time.Duration) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.decisions = append(m.decisions, kind+"|"+id+"|"+result)
 }

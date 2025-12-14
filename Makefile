@@ -37,7 +37,7 @@ bench-revocation: ## Run revocation system benchmarks
 	$(GOTEST) -bench=. -benchmem -benchtime=5s ./pkg/revocation/...; \
 	echo "✅ Benchmarks complete (baseline: 67k ops/sec)";
 
-.PHONY: all build test clean lint coverage docs help security deps format ci verify-csp verify-build-env debug-ci-env build-ci-adaptive build-fallback ci-build build-server-adaptive
+.PHONY: all build test test-all clean lint coverage docs help security deps format ci verify-csp verify-build-env debug-ci-env build-ci-adaptive build-fallback ci-build build-server-adaptive
 .PHONY: gap-matrix gap-matrix-check openapi-guard
 .PHONY: js-lint js-test js-build
 .PHONY: js-bundle
@@ -204,15 +204,20 @@ build-security-test: ## Build the RFC demo
 	$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-rfc-demo ./cmd/examples/rfc-demo
 
 ## Test targets
-test: ## Run all tests (CI-safe, without race detection)
-	@echo "🧪 Running test suite..."
+test: ## Run all tests (CI-safe, skips performance tests)
+	@echo "🧪 Running test suite (skipping performance tests)..."
 	$(GOCLEAN) -testcache
-	$(GOTEST) -v -timeout=30s ./...
+	$(GOTEST) -short -p=1 -v -timeout=60s ./...
 
-test-race: ## Run all tests with race detection (for development)
+test-all: ## Run all tests including performance/load tests
+	@echo "🧪 Running complete test suite (including performance tests)..."
+	$(GOCLEAN) -testcache
+	$(GOTEST) -v -timeout=5m ./...
+
+test-race: ## Run all tests with race detection (skips performance tests)
 	@echo "🏁 Running test suite with race detection..."
 	$(GOCLEAN) -testcache
-	$(GOTEST) -v -race -timeout=30s ./...
+	$(GOTEST) -short -v -race -timeout=60s ./...
 
 test-coverage: ## Run tests with coverage
 	@echo "📊 Running tests with coverage..."

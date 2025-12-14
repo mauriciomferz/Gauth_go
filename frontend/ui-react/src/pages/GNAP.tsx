@@ -3,7 +3,6 @@ import {
     makeStyles,
     tokens,
     Card,
-    CardHeader,
     Button,
     Input,
     Text,
@@ -213,14 +212,14 @@ const GNAP: React.FC = () => {
                         <Text size={200}>Access Type</Text>
                         <Input
                             value={accessType}
-                            onChange={(e, data) => setAccessType(data.value)}
+                            onChange={(_, data) => setAccessType(data.value)}
                         />
                     </div>
                     <div className={classes.inputGroup} style={{ flex: 2 }}>
                         <Text size={200}>Actions (comma-separated)</Text>
                         <Input
                             value={accessActions}
-                            onChange={(e, data) => setAccessActions(data.value)}
+                            onChange={(_, data) => setAccessActions(data.value)}
                         />
                     </div>
                     <Button

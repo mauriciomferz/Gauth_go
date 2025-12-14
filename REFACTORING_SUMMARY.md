@@ -46,6 +46,9 @@ Split `gauth.go` (1,227 lines) into 5 focused files:
 - Standardized `RecordDecision` method signature in `Metrics` interface to include `time.Duration` for latency tracking.
 - Resolved `go.mod` dependency issues (`objx`).
 - Verified full regression suite stability (`go test ./...`).
+- **Regression Fixes**:
+    - Resolved race condition in `modellimits` tests by adding Mutex to `mockMetrics`.
+    - Optimized `web` package test latency (reduced from >50s to ~30s) by tuning `TestJWKSDeprecation*` TTLs.
 
 ## Key Improvements
 
