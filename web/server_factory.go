@@ -1055,15 +1055,6 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		gauthPlusHandler.RegisterRoutes(adminGroup)
 		fmt.Fprintln(os.Stderr, "[DEV] GAuthPlus handler registered (Degraded Mode: Empty)")
 
-		// GAuthPlus Public API (v1) - Degraded Mode
-		succSvc := gauthplus.NewPostgreSQLSuccessorService(nil)
-		delSvc := gauthplus.NewPostgreSQLDelegationService(nil)
-		dualSvc := gauthplus.NewPostgreSQLDualControlService(nil)
-		capSvc := gauthplus.NewPostgreSQLCapabilityAssessmentService(nil)
-		fidSvc := gauthplus.NewPostgreSQLFiduciaryDutyService(nil)
-		s.RegisterGAuthPlusEndpoints(succSvc, delSvc, dualSvc, capSvc, fidSvc)
-		fmt.Fprintln(os.Stderr, "[DEV] GAuthPlus Public API registered (Degraded Mode: Empty)")
-
 		// 8. Resilience Handler
 		resilienceHandler := adminHandlers.NewResilienceHandler(nil)
 		resilienceHandler.RegisterRoutes(adminGroup)

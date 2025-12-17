@@ -401,6 +401,15 @@ var gauthPlusServicesGlobal map[string]interface{}
 // InitializeGAuthPlusEndpoints registers GAuth+ management endpoints if services are available.
 // This should be called after the server router is initialized and GAuth+ services are created.
 func (s *BetaServer) InitializeGAuthPlusEndpoints() {
+	if s.gauthPlusInitialized {
+		return // Already initialized
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.gauthPlusInitialized {
+		return // Double-check locking
+	}
+
 	if gauthPlusServicesGlobal == nil {
 		return // GAuth+ not initialized
 	}
@@ -433,4 +442,5 @@ func (s *BetaServer) InitializeGAuthPlusEndpoints() {
 	fmt.Fprintf(os.Stderr, "[GAuth+]   Dual Control: 6 endpoints\n")
 	fmt.Fprintf(os.Stderr, "[GAuth+]   Capability Assessment: 6 endpoints\n")
 	fmt.Fprintf(os.Stderr, "[GAuth+]   Fiduciary Duty: 4 endpoints\n")
+	s.gauthPlusInitialized = true
 }

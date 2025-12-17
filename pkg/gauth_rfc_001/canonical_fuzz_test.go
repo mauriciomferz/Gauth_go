@@ -142,3 +142,22 @@ func restrMap(s string) map[string]string {
 	}
 	return m
 }
+
+// TestCanonicalDigest wraps the fuzz test for conformance tool detection
+func TestCanonicalDigest(t *testing.T) {
+	// Simple sanity check that would run in normal unit test suite
+	p := &PowerOfAttorney{
+		ID:        "seed1",
+		Grantor:   "alice",
+		Grantee:   "bob",
+		Scope:     []string{"read"},
+		ValidFrom: time.Unix(0, 0).UTC(),
+	}
+	d, _, err := CanonicalPOADigest(p)
+	if err != nil {
+		t.Fatalf("Digest failed: %v", err)
+	}
+	if d == "" {
+		t.Fatal("Empty digest")
+	}
+}

@@ -97,7 +97,7 @@ Implementation lines (approximate):
 | RFC9635-§5 | Grant Continuation | `Continue`, `ContinueUpdate`, `ContinueCancel` | pkg/gnap/gnap_test.go | Implemented | Full continuation lifecycle |
 | RFC9635-§6 | Token Management | `pkg/gnap.TokenStore`, `TokenRotate`, `TokenRevoke` | pkg/gnap/gnap_test.go | Implemented | Rotation and revocation |
 | RFC9635-§7.3 | HTTP Signature Binding | `pkg/gnap/httpsig.Signer`, `Verifier` | pkg/gnap/httpsig/signer_test.go | Implemented | Ed25519, ECDSA, RSA support |
-| RFC9635-§9 | AS Discovery | `DiscoveryResponse`, `discovery` | (manual test) | Implemented | Metadata endpoint |
+| RFC9635-§9 | AS Discovery | `DiscoveryResponse`, `discovery` | web/discovery_manual_test.go | Implemented | Metadata endpoint |
 
 ### GNAP Implementation Artifacts
 - Core Types: `pkg/gnap/types.go`
@@ -169,5 +169,6 @@ Implementation lines (approximate):
 |-----------|-------|------------------------|-------|--------|-------|
 | RFC9767-3 | Authorization Details Data Model | `gauth.AuthorizationDetail` | pkg/gauth/rar_validator_test.go | Implemented | Types and JSON serialization |
 | RFC9767-5 | Authorization Request | `RFCCompliantAuthorizationRequest` | web/handlers/token/rfc_integration_test.go | Implemented | 'authorization_details' parameter support |
-| RFC9767-6 | Token Response | `ExtendedToken`, `ExtensionTokenService` | web/handlers/token/rfc_integration_test.go | Implemented | Details persisted in token and JWT |
+| RFC9767-6 | Token Response | `ExtendedToken`, `ExtendedTokenService` | web/handlers/token/rfc_integration_test.go | Implemented | Details persisted in token and JWT |
 | RFC9767-7 | Resource Server Validation | `RARValidator`, `ValidateExtendedTokenWithRAR` | pkg/gauth/resource_server_test.go | Implemented | Enforces PoA scope narrowing |
+```

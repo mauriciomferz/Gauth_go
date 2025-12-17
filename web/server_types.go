@@ -36,10 +36,11 @@ import (
 )
 
 type BetaServer struct {
-	router      *gin.Engine
-	mu          sync.RWMutex
-	start       time.Time
-	keyProvider crypto.KeyProvider
+	router               *gin.Engine
+	mu                   sync.RWMutex
+	gauthPlusInitialized bool
+	start                time.Time
+	keyProvider          crypto.KeyProvider
 	// legacyAliasHits counts invocations of deprecated /api/governance/lifecycle_timeline for deprecation timing.
 
 	legacyAliasHits  uint64

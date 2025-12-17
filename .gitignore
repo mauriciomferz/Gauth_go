@@ -194,3 +194,4 @@ web-server
 bin/
 test_output*.txt
 
+scripts/conformance
