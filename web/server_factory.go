@@ -49,6 +49,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
 	gnapPkg "github.com/mauriciomferz/Gauth_go/pkg/gnap"
 	"github.com/mauriciomferz/Gauth_go/pkg/mcp"
+	"github.com/mauriciomferz/Gauth_go/pkg/redis"
 	a2aHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/a2a"
 	adminHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/admin"
 	anchorHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/anchor"
@@ -184,9 +185,42 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		protocolFlowManager: NewProtocolFlowManager(),
 		keyProvider:         nil, // default to nil; expected to be injected or initialized via options
 	}
+
+	// Redis Initialization
+	redisHost := os.Getenv("REDIS_HOST")
+	if redisHost == "" {
+		redisHost = "localhost"
+	}
+	redisPortStr := os.Getenv("REDIS_PORT")
+	redisPort := 6379
+	if redisPortStr != "" {
+		if v, err := strconv.Atoi(redisPortStr); err == nil {
+			redisPort = v
+		}
+	}
+	redisCfg := &redis.Config{
+		Host: redisHost,
+		Port: redisPort,
+	}
+	if rc, err := redis.NewClient(redisCfg); err == nil {
+		s.redisClient = rc
+	} else {
+		fmt.Fprintf(os.Stderr, "[redis] failed to initialize client: %v\n", err)
+	}
+
 	for _, opt := range opts {
 		opt(s)
 	}
+
+	// Initialize Admin Handlers using injected DB pool and Redis client
+	if s.db != nil && s.redisClient != nil {
+		s.adminTokenHandler = adminHandlers.NewTokenHandler(s.db.Pool, s.redisClient)
+	}
+	if s.db != nil {
+		s.apiKeyHandler = adminHandlers.NewAPIKeyHandler(s.db.Pool)
+		s.resilienceHandler = adminHandlers.NewResilienceHandler(s.db.Pool)
+	}
+
 	// Capabilities Handler Initialization
 	capsHandler := capabilities.NewHandler()
 	// Restore default mappings (required for tests/legacy behavior when no file loaded)

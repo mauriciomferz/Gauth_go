@@ -69,7 +69,7 @@ GAuth 1.0 is a comprehensive authorization framework implementing RFC 0111 (Core
              │   Authorization Requests        │
              ▼                                 ▼
 ┌────────────────────────────────────────────────────────────────┐
-│                     GAuth Core Services                        │
+│                      Core Services                             │
 │                                                                │
 │  ┌──────────────┐  ┌──────────────┐  ┌────────────────┐        │
 │  │   Auth       │  │   Authz      │  │  Delegation    │        │
@@ -83,8 +83,8 @@ GAuth 1.0 is a comprehensive authorization framework implementing RFC 0111 (Core
 │         └─────────────────┴─────────────────┘                  │
 │                           │                                    │
 │  ┌────────────────────────┴─────────────────────────┐          │
-│  │              Core GAuth Engine                   │          │
-│  │              (pkg/gauth)                         │          │
+│  │              Core Auth Engine                    │          │
+│  │              (pkg/auth)                          │          │
 │  │  - POA Token Management (pkg/poa)                │          │
 │  │  - Multi-Signature Validation                    │          │
 │  │  - Revocation Management                         │          │

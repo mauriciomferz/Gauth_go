@@ -340,7 +340,7 @@ func (h *Handler) saveLocked() error {
 
 	// Atomic write
 	tmp := h.persistencePath + ".tmp"
-	if err := os.WriteFile(tmp, finalBytes, 0644); err != nil {
+	if err := os.WriteFile(tmp, finalBytes, 0600); err != nil {
 		return err
 	}
 	if err := os.Rename(tmp, h.persistencePath); err != nil {

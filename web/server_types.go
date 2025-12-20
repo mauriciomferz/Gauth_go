@@ -19,6 +19,8 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 	"github.com/mauriciomferz/Gauth_go/pkg/mcp"
+	"github.com/mauriciomferz/Gauth_go/pkg/redis"
+	"github.com/mauriciomferz/Gauth_go/web/handlers/admin"
 	authzHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/authz"
 	"github.com/mauriciomferz/Gauth_go/web/handlers/capabilities"
 	"github.com/mauriciomferz/Gauth_go/web/handlers/capability_anchor"
@@ -94,6 +96,11 @@ type BetaServer struct {
 	capabilitiesAPI     *capabilities.API
 
 	authzAPI *authzHandlers.API
+
+	// Admin Handlers
+	adminTokenHandler *admin.TokenHandler
+	apiKeyHandler     *admin.APIKeyHandler
+	resilienceHandler *admin.ResilienceHandler
 
 	// OTel Metrics (prototype)
 	// Persistence integrity tracking (hash chain)
@@ -223,6 +230,9 @@ type BetaServer struct {
 	mcpConnectionManager *mcp.ConnectionManager
 	// Database connection pool (optional, for persistent audit logging and deep health checks)
 	db *database.DB
+
+	// Redis client for token blacklist, rate limiting, etc.
+	redisClient *redis.Client
 
 	// Blockchain components (Active if GAUTH_ETH_RPC_URL is set)
 	blockchainRegistry blockchain.BlockchainRegistry

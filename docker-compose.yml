@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL database for RFC-0111 implementation
   postgres:
@@ -16,7 +14,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./schema/migrations:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gauth"]
+      test: [ "CMD-SHELL", "pg_isready -U gauth" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -30,7 +28,7 @@ services:
     ports:
       - "6379:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -47,7 +45,7 @@ services:
       # RFC-0111 Configuration
       GAUTH_RFC0111_ENABLED: "1"
       GAUTH_RFC0111_USE_MOCKS: "1"
-      
+
       # Database Configuration
       DB_HOST: postgres
       DB_PORT: "5432"
@@ -55,11 +53,11 @@ services:
       DB_USER: gauth
       DB_PASSWORD: gauth_dev_password
       DB_SSLMODE: disable
-      
+
       # Redis Configuration (optional)
       REDIS_HOST: redis
       REDIS_PORT: "6379"
-      
+
       # Server Configuration
       PORT: "8080"
       GIN_MODE: release
@@ -73,7 +71,7 @@ services:
     networks:
       - gauth-network
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/api/v1/beta/health"]
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/api/v1/beta/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -92,7 +90,7 @@ services:
     networks:
       - gauth-network
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health" ]
       interval: 30s
       timeout: 3s
       retries: 3

@@ -1223,6 +1223,19 @@ func (s *BetaServer) routes() {
 	beta.GET("/health", s.health)
 	beta.GET("/info", s.info)
 	beta.GET("/ping", s.ping)
+
+	// Admin Routes (New)
+	adminGroup := s.router.Group("/api/admin")
+	if s.adminTokenHandler != nil {
+		s.adminTokenHandler.RegisterRoutes(adminGroup)
+	}
+	if s.apiKeyHandler != nil {
+		s.apiKeyHandler.RegisterRoutes(adminGroup)
+	}
+	if s.resilienceHandler != nil {
+		s.resilienceHandler.RegisterRoutes(adminGroup)
+	}
+
 	// Examples Handler
 	s.examplesAPI.RegisterRoutes(s.router)
 	// Prometheus exposition for revocation auto-sign counters
@@ -1449,6 +1462,7 @@ func (s *BetaServer) routes() {
 			c.JSON(200, gin.H{"success": true, "configured": false, "reason": "rotation_ledger_unavailable"})
 			return
 		}
+		// Admin Routes removed from here
 		art, verified, perAlg, failures, err := s.buildAndOptionallySignRotationV2()
 		if err != nil {
 			c.JSON(500, gin.H{"success": false, "error": "build_failed", "detail": err.Error()})
