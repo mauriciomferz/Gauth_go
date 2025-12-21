@@ -139,7 +139,7 @@ export default function SubscribersList() {
   const fetchSubscribers = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const params = new URLSearchParams({
         tenant_id: 'test-tenant-1', // TODO: Get from auth context
@@ -152,7 +152,7 @@ export default function SubscribersList() {
       }
 
       const response = await fetch(`/api/admin/subscribers?${params.toString()}`);
-      
+
       if (!response.ok) {
         if (response.status === 404) {
           throw new Error('Subscribers endpoint requires database connection');
@@ -224,11 +224,11 @@ export default function SubscribersList() {
     setManagementTab('config');
     setManagementDialogOpen(true);
     setLoadingSettings(true);
-    
+
     // Load security settings
     try {
       const response = await fetch(
-        `http://localhost:8080/api/admin/security-settings?tenant_id=${subscriber.tenantId}`
+        `/api/admin/security-settings?tenant_id=${subscriber.tenantId}`
       );
       if (response.ok) {
         const contentType = response.headers.get('content-type');
@@ -240,11 +240,11 @@ export default function SubscribersList() {
     } catch (error) {
       console.error('Failed to load security settings:', error);
     }
-    
+
     // Load API keys
     try {
       const response = await fetch(
-        `http://localhost:8080/api/admin/api-keys?tenant_id=${subscriber.tenantId}`
+        `/api/admin/api-keys?tenant_id=${subscriber.tenantId}`
       );
       if (response.ok) {
         const contentType = response.headers.get('content-type');
@@ -256,7 +256,7 @@ export default function SubscribersList() {
     } catch (error) {
       console.error('Failed to load API keys:', error);
     }
-    
+
     setLoadingSettings(false);
   };
 
@@ -264,16 +264,16 @@ export default function SubscribersList() {
     if (!confirm(`Are you sure you want to delete subscriber "${subscriber.tenantName}"? This action cannot be undone.`)) {
       return;
     }
-    
+
     try {
       const response = await fetch(`/api/admin/subscribers/${subscriber.id}?tenant_id=test-tenant-1`, {
         method: 'DELETE',
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to delete subscriber');
       }
-      
+
       fetchSubscribers();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete subscriber');
@@ -293,8 +293,8 @@ export default function SubscribersList() {
   return (
     <div className={classes.container}>
       {/* Management Dialog */}
-      <Dialog 
-        open={managementDialogOpen} 
+      <Dialog
+        open={managementDialogOpen}
         onOpenChange={(_, data) => setManagementDialogOpen(data.open)}
       >
         <DialogSurface style={{ maxWidth: '800px', maxHeight: '90vh' }}>
@@ -303,8 +303,8 @@ export default function SubscribersList() {
               Manage Subscriber: {selectedSubscriber?.tenantName}
             </DialogTitle>
             <DialogContent>
-              <TabList 
-                selectedValue={managementTab} 
+              <TabList
+                selectedValue={managementTab}
                 onTabSelect={(_, data) => setManagementTab(data.value as string)}
               >
                 <Tab value="config">Configuration</Tab>
@@ -321,19 +321,19 @@ export default function SubscribersList() {
                     <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '12px' }}>
                       <Text weight="semibold">Tenant ID:</Text>
                       <Text style={{ fontFamily: 'monospace' }}>{selectedSubscriber.tenantId}</Text>
-                      
+
                       <Text weight="semibold">Tenant Name:</Text>
                       <Input value={selectedSubscriber.tenantName} disabled />
-                      
+
                       <Text weight="semibold">Contact Email:</Text>
                       <Input value={selectedSubscriber.contactEmail} disabled />
-                      
+
                       <Text weight="semibold">Status:</Text>
                       <div>{getStatusBadge(selectedSubscriber.status)}</div>
-                      
+
                       <Text weight="semibold">Jurisdiction:</Text>
                       <Text>{selectedSubscriber.jurisdiction || 'Not set'}</Text>
-                      
+
                       <Text weight="semibold">OIDC Provider:</Text>
                       <Text>{selectedSubscriber.oidcProvider || 'Not configured'}</Text>
                     </div>
@@ -358,7 +358,7 @@ export default function SubscribersList() {
                         <Text size={500}>{selectedSubscriber.activeUsers || 0}</Text>
                       </Card>
                     </div>
-                    <Button 
+                    <Button
                       appearance="primary"
                       onClick={() => navigate(`/admin/tokens?tenant_id=${selectedSubscriber.tenantId}`)}
                     >
@@ -375,7 +375,7 @@ export default function SubscribersList() {
                         Audit log viewing will be available soon. Navigate to the Audit Trail page for system-wide logs.
                       </MessageBarBody>
                     </MessageBar>
-                    <Button 
+                    <Button
                       appearance="primary"
                       onClick={() => {
                         setManagementDialogOpen(false);
@@ -408,7 +408,7 @@ export default function SubscribersList() {
                             <Text>{securitySettings.mfaMethods?.join(', ') || 'None configured'}</Text>
                           </div>
                         </Card>
-                        
+
                         {/* IP Whitelisting */}
                         <Card style={{ padding: '16px' }}>
                           <Text weight="semibold" size={400}>IP Whitelisting</Text>
@@ -421,7 +421,7 @@ export default function SubscribersList() {
                             <Text>{securitySettings.ipWhitelist?.join(', ') || 'None'}</Text>
                           </div>
                         </Card>
-                        
+
                         {/* Token Policies */}
                         <Card style={{ padding: '16px' }}>
                           <Text weight="semibold" size={400}>Token Expiration Policies</Text>
@@ -436,7 +436,7 @@ export default function SubscribersList() {
                             <Text>{securitySettings.apiKeyDefaultTtlDays} days</Text>
                           </div>
                         </Card>
-                        
+
                         {/* Session Management */}
                         <Card style={{ padding: '16px' }}>
                           <Text weight="semibold" size={400}>Session Configuration</Text>
@@ -451,7 +451,7 @@ export default function SubscribersList() {
                             <Text>{securitySettings.sessionPinningEnabled ? '✅ Enabled' : '❌ Disabled'}</Text>
                           </div>
                         </Card>
-                        
+
                         <MessageBar intent="success">
                           <MessageBarBody>
                             Security settings loaded successfully. Configuration changes will be available in the next update.
@@ -472,14 +472,14 @@ export default function SubscribersList() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <Text weight="bold" size={400}>API Keys Management</Text>
-                      <Button 
+                      <Button
                         appearance="primary"
                         onClick={async () => {
                           const keyName = prompt('Enter API key name:');
                           if (!keyName) return;
-                          
+
                           try {
-                            const response = await fetch('http://localhost:8080/api/admin/api-keys', {
+                            const response = await fetch('/api/admin/api-keys', {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
                               body: JSON.stringify({
@@ -489,16 +489,16 @@ export default function SubscribersList() {
                                 createdBy: 'admin'
                               })
                             });
-                            
+
                             if (response.ok) {
                               const contentType = response.headers.get('content-type');
                               if (contentType && contentType.includes('application/json')) {
                                 const data = await response.json();
                                 alert(`API Key Created!\n\nKey: ${data.secretKey}\n\nStore this securely - it won't be shown again!`);
-                                
+
                                 // Reload API keys
                                 const listResponse = await fetch(
-                                  `http://localhost:8080/api/admin/api-keys?tenant_id=${selectedSubscriber.tenantId}`
+                                  `/api/admin/api-keys?tenant_id=${selectedSubscriber.tenantId}`
                                 );
                                 if (listResponse.ok) {
                                   const listContentType = listResponse.headers.get('content-type');
@@ -521,7 +521,7 @@ export default function SubscribersList() {
                         + Create New API Key
                       </Button>
                     </div>
-                    
+
                     {loadingSettings ? (
                       <Spinner label="Loading API keys..." />
                     ) : apiKeys.length > 0 ? (
@@ -534,61 +534,61 @@ export default function SubscribersList() {
                                 <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '8px', marginTop: '8px', fontSize: '13px' }}>
                                   <Text>Key Prefix:</Text>
                                   <Text style={{ fontFamily: 'monospace' }}>{key.keyPrefix}...</Text>
-                                  
+
                                   <Text>Status:</Text>
                                   <Badge appearance={key.status === 'active' ? 'tint' : 'filled'} color={key.status === 'active' ? 'success' : 'danger'}>
                                     {key.status}
                                   </Badge>
-                                  
+
                                   <Text>Scopes:</Text>
                                   <Text>{key.scopes?.join(', ')}</Text>
-                                  
+
                                   <Text>Created:</Text>
                                   <Text>{new Date(key.createdAt).toLocaleDateString()}</Text>
-                                  
+
                                   {key.lastUsedAt && (
                                     <>
                                       <Text>Last Used:</Text>
                                       <Text>{new Date(key.lastUsedAt).toLocaleString()}</Text>
                                     </>
                                   )}
-                                  
+
                                   {key.expiresAt && (
                                     <>
                                       <Text>Expires:</Text>
                                       <Text>{new Date(key.expiresAt).toLocaleDateString()}</Text>
                                     </>
                                   )}
-                                  
+
                                   <Text>Total Requests:</Text>
                                   <Text>{key.totalRequests || 0}</Text>
                                 </div>
                               </div>
-                              
+
                               <div style={{ display: 'flex', gap: '8px' }}>
                                 {key.status === 'active' && (
-                                  <Button 
+                                  <Button
                                     appearance="secondary"
                                     size="small"
                                     onClick={async () => {
                                       const reason = prompt('Reason for revocation:');
                                       if (!confirm(`Revoke API key "${key.keyName}"?`)) return;
-                                      
+
                                       try {
                                         const response = await fetch(
-                                          `http://localhost:8080/api/admin/api-keys/${key.id}/revoke?tenant_id=${selectedSubscriber.tenantId}`,
+                                          `/api/admin/api-keys/${key.id}/revoke?tenant_id=${selectedSubscriber.tenantId}`,
                                           {
                                             method: 'POST',
                                             headers: { 'Content-Type': 'application/json' },
                                             body: JSON.stringify({ revokedBy: 'admin', reason })
                                           }
                                         );
-                                        
+
                                         if (response.ok) {
                                           alert('API key revoked successfully');
                                           // Reload API keys
                                           const listResponse = await fetch(
-                                            `http://localhost:8080/api/admin/api-keys?tenant_id=${selectedSubscriber.tenantId}`
+                                            `/api/admin/api-keys?tenant_id=${selectedSubscriber.tenantId}`
                                           );
                                           if (listResponse.ok) {
                                             const contentType = listResponse.headers.get('content-type');
@@ -626,7 +626,7 @@ export default function SubscribersList() {
                         </Text>
                       </Card>
                     )}
-                    
+
                     <MessageBar intent="info">
                       <MessageBarBody>
                         <MessageBarTitle>API Key Management</MessageBarTitle>

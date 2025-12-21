@@ -169,7 +169,7 @@ export default function OIDCProviders() {
   const loadProviders = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8080/api/admin/oidc-providers?tenant_id=${tenantId}`);
+      const response = await fetch(`/api/admin/oidc-providers?tenant_id=${tenantId}`);
 
       if (!response.ok) {
         const contentType = response.headers.get('content-type');
@@ -228,7 +228,7 @@ export default function OIDCProviders() {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/admin/oidc-providers/${providerId}?tenant_id=${tenantId}`,
+        `/api/admin/oidc-providers/${providerId}?tenant_id=${tenantId}`,
         { method: 'DELETE' }
       );
 
@@ -254,7 +254,7 @@ export default function OIDCProviders() {
     try {
       setTestingProvider(providerId);
       const response = await fetch(
-        `http://localhost:8080/api/admin/oidc-providers/${providerId}/test?tenant_id=${tenantId}`,
+        `/api/admin/oidc-providers/${providerId}/test?tenant_id=${tenantId}`,
         { method: 'POST' }
       );
 
@@ -305,8 +305,8 @@ export default function OIDCProviders() {
       };
 
       const url = editingProvider
-        ? `http://localhost:8080/api/admin/oidc-providers/${editingProvider.id}?tenant_id=${tenantId}`
-        : `http://localhost:8080/api/admin/oidc-providers?tenant_id=${tenantId}`;
+        ? `/api/admin/oidc-providers/${editingProvider.id}?tenant_id=${tenantId}`
+        : `/api/admin/oidc-providers?tenant_id=${tenantId}`;
 
       const method = editingProvider ? 'PUT' : 'POST';
 

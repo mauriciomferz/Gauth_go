@@ -47,13 +47,13 @@ export default function OIDCLogin() {
   const fetchProviders = async () => {
     try {
       setLoading(true)
-      const backendUrl = 'http://localhost:8080'
+      const backendUrl = ''
       const response = await fetch(`${backendUrl}/api/admin/oidc-providers`, {
         headers: {
           'X-Tenant-ID': tenantId,
         },
       })
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch providers')
       }
@@ -62,7 +62,7 @@ export default function OIDCLogin() {
       const activeProviders = data.providers?.filter(
         (p: OIDCProvider) => p.status === 'active'
       ) || []
-      
+
       setProviders(activeProviders)
     } catch (err: any) {
       console.error('Failed to fetch OIDC providers:', err)
@@ -74,19 +74,19 @@ export default function OIDCLogin() {
 
   const handleProviderLogin = (providerId: string) => {
     // Backend is on port 8080, frontend is on 3001
-    const backendUrl = 'http://localhost:8080'
+    const backendUrl = ''
     const callbackUrl = `${backendUrl}/auth/callback`
     const authUrl = new URL('/auth/authorize', backendUrl)
-    
+
     authUrl.searchParams.set('provider_id', providerId)
     authUrl.searchParams.set('tenant_id', tenantId)
     authUrl.searchParams.set('redirect_uri', callbackUrl)
-    
+
     console.log('🔐 OIDC Auth URL:', authUrl.toString())
-    
+
     // Store return URL in session storage
     sessionStorage.setItem('auth_return_url', returnUrl)
-    
+
     // Redirect to authorization endpoint
     window.location.href = authUrl.toString()
   }
@@ -130,7 +130,7 @@ export default function OIDCLogin() {
             {providers.map((provider) => {
               const IconComponent = providerIcons[provider.providerType] || Lock
               const colorClass = providerColors[provider.providerType] || 'bg-gray-500'
-              
+
               return (
                 <button
                   key={provider.id}
