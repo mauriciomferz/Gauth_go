@@ -66,7 +66,7 @@ class ApiClient {
     // 7. POST /api/v1/rfc0111/subscriptions/:id/step-vii (Resource Owner Auth)
     // 8. POST /api/v1/rfc0111/subscriptions/:id/step-viii (Resource Server Auth)
     // 9. POST /api/v1/rfc0111/authorize (Request token with subscription + PoA)
-    
+
     // Generate a mock JWT-like token for testing
     const header = btoa(JSON.stringify({ alg: 'RS256', typ: 'JWT', kid: 'demo-key' }))
     const payload = btoa(JSON.stringify({
@@ -80,10 +80,10 @@ class ApiClient {
     }))
     const signature = btoa('demo-signature-' + Math.random().toString(36).substring(7))
     const mockToken = `${header}.${payload}.${signature}`
-    
+
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 500))
-    
+
     return {
       token: mockToken,
       clientId: data.clientId,
@@ -101,7 +101,7 @@ class ApiClient {
     // Use RFC-0111 token validation endpoint
     const response = await this.client.post('/rfc0111/token/validate', { token })
     const data = response.data
-    
+
     // Transform backend response to frontend expected format
     return {
       valid: data.valid || data.success || false,
@@ -113,17 +113,17 @@ class ApiClient {
       error: data.error || data.message || undefined
     }
   }
-  
+
   async revokeToken(token: string): Promise<{ success: boolean }> {
     const response = await this.client.post('/token/revoke', { token })
     return response.data
   }
-  
+
   async introspectToken(token: string): Promise<any> {
     const response = await this.client.post('/token/introspect', { token })
     return response.data
   }
-  
+
   async getTokenMetrics(): Promise<any> {
     const response = await this.client.get('/token/metrics')
     return response.data
@@ -169,7 +169,7 @@ class ApiClient {
       resource: data.geographic || 'default',
       context: data.sector ? { sector: data.sector } : {}
     })
-    
+
     const backendData = response.data
     return {
       authorized: backendData.allowed || backendData.authorized || false,
@@ -190,7 +190,7 @@ class ApiClient {
     const response = await this.client.get('/beta/authz/metrics')
     return response.data
   }
-  
+
   async getDecisionMetrics(): Promise<any> {
     const response = await this.client.get('/token/metrics')
     return response.data
@@ -201,12 +201,12 @@ class ApiClient {
     try {
       const response = await this.client.get('/beta/authz/metrics')
       const metrics = response.data
-      
+
       // Parse cache metrics from backend response
       const hits = metrics.cache_hits || 0
       const misses = metrics.cache_misses || 0
       const total = hits + misses
-      
+
       return {
         hits,
         misses,
@@ -232,7 +232,7 @@ class ApiClient {
     try {
       const response = await this.client.get('/beta/policy/head/policies')
       const policies = response.data.policies || []
-      
+
       return policies.map((p: any) => ({
         id: p.id || p.name,
         name: p.name || 'Unnamed Policy',
@@ -316,7 +316,7 @@ class ApiClient {
     // Mock implementation for PoA creation
     // Generate unique delegation ID
     const delegationId = `del_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    
+
     // Store the delegation for validation later
     const delegation = {
       delegation_id: delegationId,
@@ -329,15 +329,15 @@ class ApiClient {
       status: 'active',
       createdAt: new Date().toISOString()
     }
-    
+
     // Store in session storage for validation
     const stored = sessionStorage.getItem('delegations') || '[]'
     const delegations = JSON.parse(stored)
     delegations.push(delegation)
     sessionStorage.setItem('delegations', JSON.stringify(delegations))
-    
+
     console.log('Created delegation:', delegation)
-    
+
     // Return mock success response
     return {
       success: true,
@@ -371,7 +371,7 @@ class ApiClient {
   async verifyIdentity(data: any): Promise<IdentityVerificationResponse> {
     // Support both old and new (Phase 2A) formats
     const isPhase2AFormat = data.documentType || data.documentNumber;
-    
+
     let requestPayload;
     if (isPhase2AFormat) {
       // Phase 2A format - use directly
@@ -518,7 +518,7 @@ class ApiClient {
     // Support both old and new formats
     const validFrom = data.validFrom || data.restrictions?.temporal?.validFrom || new Date().toISOString();
     const validUntil = data.validUntil || new Date(Date.now() + (data.validityDays || 365) * 24 * 60 * 60 * 1000).toISOString();
-    
+
     const payload: any = {
       grantor: data.grantor,
       grantee: data.grantee || data.representative,
@@ -526,18 +526,18 @@ class ApiClient {
       valid_from: validFrom,
       valid_until: validUntil
     };
-    
+
     // Optional fields - only add if they have simple values
     if (data.jurisdiction || data.geographicScope) {
       payload.jurisdiction = data.jurisdiction || data.geographicScope;
     } else if (data.restrictions?.geographic?.[0]) {
       payload.jurisdiction = data.restrictions.geographic[0];
     }
-    
+
     if (data.agent_type || data.representativeType) {
       payload.agent_type = data.agent_type || data.representativeType;
     }
-    
+
     // Call the real PoA creation endpoint
     const response = await this.client.post('/beta/poa', payload)
 
@@ -561,7 +561,7 @@ class ApiClient {
     let poaId: string;
     let actionToValidate: string;
     let location: string | undefined;
-    
+
     if (typeof poaIdOrData === 'string') {
       // New style: validatePoA(id, action)
       poaId = poaIdOrData;
@@ -572,7 +572,7 @@ class ApiClient {
       actionToValidate = poaIdOrData.action;
       location = poaIdOrData.location;
     }
-    
+
     // Call the real PoA validation endpoint
     const response = await this.client.post(`/beta/poa/${poaId}/validate`, {
       action: actionToValidate,
@@ -580,10 +580,10 @@ class ApiClient {
     })
 
     const validationData = response.data
-    
+
     // Build checks array from validation result
     const checks: ValidationCheck[] = []
-    
+
     if (validationData.valid) {
       checks.push({ check: 'PoA Status', result: 'pass' })
       checks.push({ check: 'Action Authorized', result: 'pass' })
@@ -594,7 +594,7 @@ class ApiClient {
         checks.push({ check: 'Validation Failed', result: validationData.reason })
       }
     }
-    
+
     return {
       valid: validationData.valid,
       poaId: poaId,
@@ -636,11 +636,11 @@ class ApiClient {
       const response = await this.client.get('/beta/metrics/prometheus', {
         headers: { 'Accept': 'text/plain' }
       })
-      
+
       // Parse Prometheus text format to extract key metrics
       const text = response.data
       const metrics = this.parsePrometheusMetrics(text)
-      
+
       return metrics
     } catch (error) {
       console.error('Failed to fetch metrics:', error)
@@ -678,13 +678,13 @@ class ApiClient {
 
     for (const line of lines) {
       if (line.startsWith('#') || !line.trim()) continue
-      
+
       // Extract metric name and value
       const match = line.match(/^(\w+)(?:{[^}]*})?\s+([0-9.e+-]+)/)
       if (match) {
         const [, name, value] = match
         const numValue = parseFloat(value)
-        
+
         // Map Prometheus metrics to our interface
         if (name.includes('request') && name.includes('total')) {
           metrics.requests_total = numValue
@@ -711,7 +711,7 @@ class ApiClient {
       // Health endpoints are at backend root, need direct backend access
       // In dev, backend is at localhost:8080, in prod should use proper backend URL
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const backendUrl = (import.meta as any)?.env?.VITE_BACKEND_URL || 'http://localhost:8080'
+      const backendUrl = (import.meta as any)?.env?.VITE_BACKEND_URL || ''
       const response = await axios.get(`${backendUrl}/healthz`)
       return {
         success: true,
@@ -722,7 +722,7 @@ class ApiClient {
       // Fallback to ready endpoint
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const backendUrl = (import.meta as any)?.env?.VITE_BACKEND_URL || 'http://localhost:8080'
+        const backendUrl = (import.meta as any)?.env?.VITE_BACKEND_URL || ''
         const resp = await axios.get(`${backendUrl}/ready`)
         return {
           success: true,
@@ -1058,7 +1058,7 @@ export interface MetricsResponse {
   cache_hit_rate?: number
   cache_size?: number
   uptime_percent?: number
-  
+
   // Legacy test metrics (for Overview page compatibility)
   testsPassing?: number
   totalTests?: number

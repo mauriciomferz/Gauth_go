@@ -146,12 +146,12 @@ export default function Layout({ children }: LayoutProps) {
               <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Quick Links</h4>
               <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
                 <li>
-                  <a href="http://localhost:8080/api/v1/docs" target="_blank" rel="noopener noreferrer" className="hover:text-primary-500">
+                  <a href="/api/v1/docs" target="_blank" rel="noopener noreferrer" className="hover:text-primary-500">
                     Documentation
                   </a>
                 </li>
                 <li>
-                  <a href="http://localhost:8080/swagger-ui/" target="_blank" rel="noopener noreferrer" className="hover:text-primary-500">
+                  <a href="/swagger-ui/" target="_blank" rel="noopener noreferrer" className="hover:text-primary-500">
                     API Reference
                   </a>
                 </li>
