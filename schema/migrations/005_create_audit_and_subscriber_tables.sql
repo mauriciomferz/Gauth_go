@@ -17,6 +17,10 @@ CREATE TABLE IF NOT EXISTS subscribers (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     created_by VARCHAR(255),
     
+    -- Legacy/Alias Columns (Required by Repository)
+    subscriber_id VARCHAR(255),
+    subscriber_name VARCHAR(255),
+    
     -- OIDC Configuration
     oidc_provider VARCHAR(50),
     oidc_issuer VARCHAR(255),

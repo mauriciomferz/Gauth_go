@@ -93,7 +93,7 @@ services:
     networks:
       - gauth-network
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${GAUTH_DB_USER}" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${GAUTH_DB_USER} -d ${GAUTH_DB_NAME:-gauth_production}" ]
       interval: 10s
       timeout: 5s
       retries: 5
