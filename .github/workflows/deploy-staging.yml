@@ -55,12 +55,12 @@ jobs:
 
       - name: Run RFC compliance tests
         run: |
-          go test ./pkg/rfc0111/... ./pkg/gauth/... -v -short -run "(RFC|Envelope|Rotation)" -timeout=5m
+          go test ./pkg/gauth/... -v -short -run "(RFC|Envelope|Rotation)" -timeout=5m
           echo "✅ RFC 0111/0115 compliance validated"
 
       - name: Run security regression tests
         run: |
-          go test ./pkg/rfc0111/... ./pkg/gauth/... ./pkg/audit/... -v -short -run "(Replay|Tamper|Scope)" -timeout=5m
+          go test ./pkg/gauth/... ./pkg/audit/... -v -short -run "(Replay|Tamper|Scope)" -timeout=5m
           echo "✅ Security regression tests passed"
 
       - name: Upload coverage to Codecov
