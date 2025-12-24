@@ -1,9 +1,9 @@
 # Multi-stage Docker build for GAuth
-# Build stage - REQUIRES Go 1.25.3+ for security patches (CVE fixes)
-FROM golang:1.25.3-alpine AS builder
+# Build stage - REQUIRES Go 1.25.5 for security patches (CVE fixes)
+FROM golang:1.25.5-alpine AS builder
 
 # Install build dependencies
-RUN apk update && apk add --no-cache git ca-certificates tzdata
+RUN apk update && apk add --no-cache git ca-certificates tzdata build-base gcc abuild binutils binutils-doc gcc-doc linux-headers pkgconf
 
 # Set working directory
 WORKDIR /app
@@ -33,9 +33,8 @@ RUN echo "=== Checking source files ===" && \
 
 # Build the applications with verbose output
 RUN echo "=== Starting Go build ===" && \
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v \
-    -ldflags='-w -s -extldflags "-static"' \
-    -a -installsuffix cgo \
+    CGO_ENABLED=1 GOOS=linux go build \
+    -ldflags='-w -s' \
     -o gauth-server ./cmd/gauth-server && \
     echo "=== Build completed successfully ==="
 
@@ -49,7 +48,7 @@ RUN echo "=== Verifying binary ===" && \
 FROM alpine:3.18.4
 
 # Install runtime dependencies
-RUN apk update && apk add --no-cache ca-certificates tzdata wget curl
+RUN apk update && apk add --no-cache ca-certificates tzdata wget curl libstdc++ libgcc
 
 # Create non-root user
 RUN adduser -D -s /bin/sh gauth
@@ -72,7 +71,7 @@ EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
 
 # Default command (can be overridden)
 CMD ["./gauth-server"]
