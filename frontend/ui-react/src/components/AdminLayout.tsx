@@ -255,6 +255,18 @@ const navItems: NavItem[] = [
     path: '/admin/oidc-providers',
   },
   {
+    id: 'saml-providers',
+    label: 'SAML Providers',
+    icon: <ShieldTask24Regular />,
+    path: '/admin/saml-providers',
+  },
+  {
+    id: 'scim-settings',
+    label: 'SCIM User Provisioning',
+    icon: <PeopleTeam24Regular />,
+    path: '/admin/scim-settings',
+  },
+  {
     id: 'configuration',
     label: 'Configuration',
     icon: <Settings24Regular />,
@@ -273,6 +285,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
+  console.log("DEBUG: AdminLayout V2 Loaded");
 
   const userRole = localStorage.getItem('admin_role') || 'admin';
   const userName = localStorage.getItem('admin_username') || 'Admin User';

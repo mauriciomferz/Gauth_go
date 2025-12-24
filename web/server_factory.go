@@ -50,6 +50,7 @@ import (
 	gnapPkg "github.com/mauriciomferz/Gauth_go/pkg/gnap"
 	"github.com/mauriciomferz/Gauth_go/pkg/mcp"
 	"github.com/mauriciomferz/Gauth_go/pkg/redis"
+	"github.com/mauriciomferz/Gauth_go/pkg/scim"
 	a2aHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/a2a"
 	adminHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/admin"
 	anchorHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/anchor"
@@ -61,6 +62,7 @@ import (
 	deviceHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/device"
 	grantJWTHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/grant_jwt"
 
+	"github.com/mauriciomferz/Gauth_go/pkg/saml"
 	eventsHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/events"
 	gnapHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/gnap"
 	mcpHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/mcp"
@@ -666,6 +668,20 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	jwtGrantHandler.RegisterRoutes(s.router)
 
 	log.Println("[gnap] RFC 9635 GNAP endpoints registered at /gnap/*")
+
+	// SAML Reference Implementation
+	// SAML Reference Implementation
+	if s.db != nil {
+		samlHandler := saml.NewHandler(s.db.Pool)
+		apiGroup := s.router.Group("/api/v1")
+		samlHandler.RegisterRoutes(apiGroup)
+		log.Println("[saml] registered endpoints at /api/v1/saml/*")
+
+		// SCIM Reference Implementation
+		scimHandler := scim.NewHandler(s.db.Pool)
+		scimHandler.RegisterRoutes(apiGroup)
+		log.Println("[scim] registered endpoints at /api/v1/scim/v2/*")
+	}
 
 	// Protocol Flow API endpoints (Item 2: Protocol Flow Navigation)
 	s.router.POST("/api/v1/protocol/flow/sessions", s.apiProtocolFlowCreateSession)

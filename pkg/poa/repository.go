@@ -129,7 +129,6 @@ func (r *Repository) CreatePoA(ctx context.Context, poa *PoARecord) error {
 	).Scan(&poa.ID, &poa.CreatedAt)
 
 	if err != nil {
-		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return fmt.Errorf("failed to create PoA: %w", err)
 	}
 
@@ -163,10 +162,8 @@ func (r *Repository) ListPoAs(ctx context.Context, tenantID string, limit, offse
 		LIMIT $2 OFFSET $3
 	`
 
-	fmt.Printf("[POA-DEBUG] About to query with tenant=%s, limit=%d, offset=%d\n", tenantID, limit, offset)
 	rows, err := r.db.Query(ctx, query, tenantID, limit, offset)
 	if err != nil {
-		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return nil, 0, fmt.Errorf("failed to list PoAs: %w", err)
 	}
 	var poas []PoARecord
@@ -182,8 +179,6 @@ func (r *Repository) ListPoAs(ctx context.Context, tenantID string, limit, offse
 			&poa.ValidFrom, &poa.ValidUntil, &conditionsJSON, &metadataJSON, &poa.UpdatedAt,
 		)
 		if err != nil {
-			fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
-			fmt.Printf("[POA-SCAN-ERROR] Failed to scan PoA row: %v\n", err)
 			return nil, 0, fmt.Errorf("failed to scan PoA: %w", err)
 		}
 		if conditionsJSON != nil && len(*conditionsJSON) > 0 {
@@ -235,7 +230,6 @@ func (r *Repository) GetPoA(ctx context.Context, tenantID, poaID string) (*PoARe
 		return nil, fmt.Errorf("PoA not found")
 	}
 	if err != nil {
-		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return nil, fmt.Errorf("failed to get PoA: %w", err)
 	}
 
@@ -264,7 +258,6 @@ func (r *Repository) RevokePoA(ctx context.Context, tenantID, poaID, revokedBy, 
 		return fmt.Errorf("PoA not found or already revoked")
 	}
 	if err != nil {
-		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return fmt.Errorf("failed to revoke PoA: %w", err)
 	}
 
@@ -292,7 +285,6 @@ func (r *Repository) ApprovePoA(ctx context.Context, tenantID, poaID, approvedBy
 		return fmt.Errorf("PoA not found or not in pending status")
 	}
 	if err != nil {
-		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return fmt.Errorf("failed to approve PoA: %w", err)
 	}
 
@@ -322,7 +314,6 @@ func (r *Repository) RejectPoA(ctx context.Context, tenantID, poaID, rejectedBy,
 		return fmt.Errorf("PoA not found or not in pending status")
 	}
 	if err != nil {
-		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return fmt.Errorf("failed to reject PoA: %w", err)
 	}
 
@@ -378,7 +369,6 @@ func (r *Repository) ValidatePoA(ctx context.Context, tenantID, grantorID, repre
 		return nil, false, "No valid Power of Attorney found"
 	}
 	if err != nil {
-		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return nil, false, fmt.Sprintf("Error validating PoA: %v", err)
 	}
 
@@ -435,7 +425,6 @@ func (r *Repository) GetPoAStats(ctx context.Context, tenantID string) (*PoAStat
 		&stats.ActivePoAs, &stats.PendingPoAs, &stats.ExpiredPoAs, &stats.RevokedPoAs, &stats.TotalPoAs,
 	)
 	if err != nil {
-		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return nil, fmt.Errorf("failed to get status counts: %w", err)
 	}
 
@@ -447,10 +436,8 @@ func (r *Repository) GetPoAStats(ctx context.Context, tenantID string) (*PoAStat
 		GROUP BY representative_type
 	`
 
-	fmt.Printf("[POA-DEBUG] About to query with tenant=%s\n", tenantID)
 	rows, err := r.db.Query(ctx, repTypeQuery, tenantID)
 	if err != nil {
-		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return nil, fmt.Errorf("failed to get rep type counts: %w", err)
 	}
 	defer rows.Close()
@@ -479,7 +466,6 @@ func (r *Repository) GetPoAStats(ctx context.Context, tenantID string) (*PoAStat
 
 	rows, err = r.db.Query(ctx, actionsQuery, tenantID)
 	if err != nil {
-		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return nil, fmt.Errorf("failed to get action counts: %w", err)
 	}
 	defer rows.Close()
@@ -506,7 +492,6 @@ func (r *Repository) GetPoAStats(ctx context.Context, tenantID string) (*PoAStat
 
 	rows, err = r.db.Query(ctx, geoQuery, tenantID)
 	if err != nil {
-		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return nil, fmt.Errorf("failed to get geo distribution: %w", err)
 	}
 	defer rows.Close()
@@ -540,7 +525,6 @@ func (r *Repository) CreateTemplate(ctx context.Context, template *PoATemplate) 
 	).Scan(&template.ID, &template.CreatedAt)
 
 	if err != nil {
-		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return fmt.Errorf("failed to create template: %w", err)
 	}
 
@@ -559,14 +543,8 @@ func (r *Repository) ListTemplates(ctx context.Context, tenantID *string) ([]PoA
 		ORDER BY is_system_template DESC, template_name
 	`
 
-	var tenantIDVal string
-	if tenantID != nil {
-		tenantIDVal = *tenantID
-	}
-	fmt.Printf("[POA-DEBUG] About to query with tenant=%s\n", tenantIDVal)
 	rows, err := r.db.Query(ctx, query, tenantID)
 	if err != nil {
-		fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 		return nil, fmt.Errorf("failed to list templates: %w", err)
 	}
 	defer rows.Close()
@@ -580,7 +558,6 @@ func (r *Repository) ListTemplates(ctx context.Context, tenantID *string) ([]PoA
 			&t.CreatedAt, &t.CreatedBy, &t.IsSystemTemplate,
 		)
 		if err != nil {
-			fmt.Printf("[POA-DEBUG] Query failed: %v\n", err)
 			return nil, fmt.Errorf("failed to scan template: %w", err)
 		}
 		templates = append(templates, t)

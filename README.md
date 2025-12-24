@@ -55,7 +55,13 @@ While GAuth is not an OAuth 2.0 server, the [OAuth 2.0 Migration Feasibility Stu
 > **🚀 BETA-READY** - Comprehensive security audit, extensive testing (689+ test cases), complete documentation. Suitable for testing and evaluation.
 > **Last Updated:** 2025-12-03 (📁 Directory reorganization, PolicyStore interface implementation)
 
-**✨ Latest Updates (Dec 3, 2025):**
+**✨ Latest Updates (Dec 24, 2025):**
+- **SAML 2.0 & SCIM 2.0**: Full reference implementation for Identity Provider (SP) and User Provisioning. See [Deployment Report](docs/reports/SAML_SCIM_DEPLOYMENT_REPORT.md).
+- **Admin Dashboard**: Enhanced admin portal with SAML Provider and SCIM Client management.
+- **Infrastructure**: Optimized Docker builds and hardened Redis connectivity.
+- **Verification**: 100% Test Pass Rate (Unit, Integration, Load).
+
+**Previous Updates (Dec 3, 2025):**
 - **🔐 Enhanced Signature Validation**: New extensible validator registry supports multiple concurrent signature algorithms (HS256, RS256, ES256) with detailed logging and Prometheus metrics.
 - **📁 Directory Reorganization:** Frontend moved to `frontend/`, integration tests to `test/integration/` for better organization
 - **🗄️ PolicyStore Interface:** Pluggable policy storage with in-memory and PostgreSQL implementations for production scalability

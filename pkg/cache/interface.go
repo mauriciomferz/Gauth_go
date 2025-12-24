@@ -2,6 +2,8 @@ package cache
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"time"
 )
 
@@ -101,9 +103,17 @@ func (c *Config) GetTTL(cacheType CacheType) time.Duration {
 
 // DefaultConfig returns a default cache configuration
 func DefaultConfig() *Config {
+	host := "localhost"
+	if h := os.Getenv("REDIS_HOST"); h != "" {
+		host = h
+	}
+	port := "6379"
+	if p := os.Getenv("REDIS_PORT"); p != "" {
+		port = p
+	}
 	return &Config{
 		Type:            "redis",
-		RedisURL:        "redis://localhost:6379",
+		RedisURL:        fmt.Sprintf("redis://%s:%s", host, port),
 		RedisPassword:   "",
 		RedisDB:         0,
 		PoolSize:        10,

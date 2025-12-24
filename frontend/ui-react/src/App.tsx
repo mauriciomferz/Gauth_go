@@ -19,6 +19,8 @@ const ConfigurationManager = lazy(() => import('./pages/admin/ConfigurationManag
 const RevocationTransparency = lazy(() => import('./pages/admin/RevocationTransparency'))
 const OIDCProviders = lazy(() => import('./pages/admin/OIDCProviders'))
 const GAuthPlus = lazy(() => import('./pages/admin/GAuthPlus'))
+const SAMLProviders = lazy(() => import('./pages/admin/SAMLProviders'))
+const SCIMSettings = lazy(() => import('./pages/admin/SCIMSettings'))
 const AuthCallback = lazy(() => import('./pages/AuthCallback'))
 const OIDCLogin = lazy(() => import('./pages/OIDCLogin'))
 const Overview = lazy(() => import('./pages/Overview'))
@@ -78,6 +80,8 @@ function App() {
           <Route path="configuration" element={<ConfigurationManager />} />
           <Route path="oidc-providers" element={<OIDCProviders />} />
           <Route path="gauthplus" element={<GAuthPlus />} />
+          <Route path="saml-providers" element={<SAMLProviders />} />
+          <Route path="scim-settings" element={<SCIMSettings />} />
           <Route path="gnap" element={<GNAP />} />
           <Route path="performance" element={<div>Performance Page (Coming Soon)</div>} />
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
