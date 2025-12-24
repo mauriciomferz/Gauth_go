@@ -19,7 +19,7 @@ on:
         type: boolean
 
 env:
-  GO_VERSION: '1.25.4'
+  GO_VERSION: '1.25.5'
   DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
   IMAGE_NAME: gauth
   KUBERNETES_NAMESPACE: gauth-staging
