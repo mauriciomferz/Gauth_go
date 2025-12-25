@@ -186,3 +186,58 @@ func (s *MemorySubscriptionStore) GetStats() map[string]int {
 
 	return stats
 }
+
+// DeleteExpiredSubscriptions removes stale subscriptions
+// Policy:
+// - Pending/Awaiting*: Remove if UpdatedAt > 24 hours ago
+// - Completed: Remove if UpdatedAt > 30 days ago (Audit retention)
+func (s *MemorySubscriptionStore) DeleteExpiredSubscriptions(ctx context.Context) (int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	now := time.Now()
+	expiredCount := 0
+
+	// Thresholds
+	pendingThreshold := now.Add(-24 * time.Hour)
+	completedThreshold := now.Add(-30 * 24 * time.Hour) // 30 days
+
+	for id, sub := range s.subscriptions {
+		shouldDelete := false
+
+		if sub.Status == SubscriptionStatusCompleted {
+			if sub.UpdatedAt.Before(completedThreshold) {
+				shouldDelete = true
+			}
+		} else {
+			// Any non-completed status (Pending, Awaiting*, Failed)
+			if sub.UpdatedAt.Before(pendingThreshold) {
+				shouldDelete = true
+			}
+		}
+
+		if shouldDelete {
+			// Clean up index
+			if sub.ClientAuthorizationGrant != nil {
+				clientID := sub.ClientAuthorizationGrant.ClientID
+				resourceOwnerID := ""
+				if sub.ResourceOwnerIdentity != nil {
+					resourceOwnerID = sub.ResourceOwnerIdentity.SubjectID
+				}
+
+				if s.clientIndex[clientID] != nil {
+					delete(s.clientIndex[clientID], resourceOwnerID)
+					if len(s.clientIndex[clientID]) == 0 {
+						delete(s.clientIndex, clientID)
+					}
+				}
+			}
+
+			// Delete subscription
+			delete(s.subscriptions, id)
+			expiredCount++
+		}
+	}
+
+	return expiredCount, nil
+}

@@ -25,6 +25,9 @@ type SubscriptionStore interface {
 
 	// GetSubscriptionByClient finds an active subscription for a specific client and resource owner
 	GetSubscriptionByClient(ctx context.Context, clientID, resourceOwnerID string) (*Subscription, error)
+
+	// DeleteExpiredSubscriptions removes stale subscriptions (e.g. pending > 24h, completed > 30d)
+	DeleteExpiredSubscriptions(ctx context.Context) (int, error)
 }
 
 // Common errors for subscription store operations

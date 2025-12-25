@@ -367,9 +367,15 @@ func (s *PostgresExtendedTokenStore) IsRevoked(ctx context.Context, accessToken 
 // DeleteExpiredTokens removes all expired tokens from the store
 func (s *PostgresExtendedTokenStore) DeleteExpiredTokens(ctx context.Context) (int, error) {
 	// Use the computed expires_at column for efficient cleanup
+	// Implementing grace periods:
+	// 1. Expired tokens: Delete 1 hour after expiration (to handle clock skew)
+	// 2. Revoked tokens: Delete 24 hours after revocation (to maintain audit trail)
 	query := `
 		DELETE FROM extended_tokens
-		WHERE expires_at < NOW()
+		WHERE 
+			(expires_at < NOW() - INTERVAL '1 hour')
+			OR
+			(revoked_at < NOW() - INTERVAL '24 hours')
 	`
 
 	result, err := s.db.ExecContext(ctx, query)
