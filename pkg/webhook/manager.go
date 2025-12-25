@@ -124,7 +124,7 @@ func (m *Manager) GetWebhook(ctx context.Context, id string) (*Webhook, error) {
 // ListWebhooks lists webhooks with optional filtering
 func (m *Manager) ListWebhooks(ctx context.Context, query *ListWebhooksQuery) ([]Webhook, error) {
 	webhooks := []Webhook{}
-	
+
 	sqlQuery := `
 		SELECT id, name, url, secret, user_id, enabled, events,
 			   retry_count, timeout_seconds, description, headers,

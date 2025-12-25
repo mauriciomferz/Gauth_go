@@ -284,7 +284,7 @@ func (m *Migrator) seedPoATemplates(ctx context.Context, tx *sql.Tx) error {
 // ClearData removes all data from the database (for testing)
 func (m *Migrator) ClearData(ctx context.Context) error {
 	log.Println("WARNING: Clearing all data from database...")
-	
+
 	tables := []string{
 		"merkle_tree_nodes", "merkle_proofs", "revocations", "append_only_log",
 		"config_variables", "config_files", "service_configs", "tenant_config_overrides", "feature_flags",
@@ -295,24 +295,24 @@ func (m *Migrator) ClearData(ctx context.Context) error {
 		"policies", "policy_attributes", "authorization_logs",
 		"subscribers", "tokens", "token_blacklist",
 	}
-	
+
 	tx, err := m.db.BeginTx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
 	defer func() { _ = tx.Rollback() }() // Ignore rollback error; will be committed on success
-	
+
 	for _, table := range tables {
 		query := fmt.Sprintf("TRUNCATE TABLE %s CASCADE", table)
 		if _, err := tx.ExecContext(ctx, query); err != nil {
 			return fmt.Errorf("failed to truncate table %s: %w", table, err)
 		}
 	}
-	
+
 	if err := tx.Commit(); err != nil {
 		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
-	
+
 	log.Println("All data cleared from database")
 	return nil
 }

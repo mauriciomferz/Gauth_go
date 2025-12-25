@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/oidc"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/mauriciomferz/Gauth_go/pkg/oidc"
 )
 
 func setupGoogleTest(t *testing.T) (*GoogleProvider, *rsa.PrivateKey) {

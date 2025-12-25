@@ -258,8 +258,8 @@ func TestValidateSSN_Format(t *testing.T) {
 		expectedError string
 	}{
 		{"Valid SSN", "123456789", true, ""},
-		{"Too Short", "12345678", false, "len"}, // Validator error
-		{"Too Long", "1234567890", false, "len"}, // Validator error
+		{"Too Short", "12345678", false, "len"},          // Validator error
+		{"Too Long", "1234567890", false, "len"},         // Validator error
 		{"Contains Dashes", "123-45-6789", false, "len"}, // Validator error
 		{"Contains Letters", "12345678A", false, "SSN must contain only digits"},
 		{"All Zeros Area", "000123456", false, "SSN cannot contain all zeros"},
@@ -458,10 +458,10 @@ func TestCircuitBreaker_FailureHandling(t *testing.T) {
 	circuitBreaker := NewCircuitBreaker(2, 5*time.Second, 100*time.Millisecond)
 
 	config := &USIdentityVerifierConfig{
-		PrimaryProvider:   failingProvider,
-		MaxRetries:        0, // No retries to speed up test
-		CircuitBreaker:    circuitBreaker,
-		StrictValidation:  false, // Don't fail on format validation
+		PrimaryProvider:  failingProvider,
+		MaxRetries:       0, // No retries to speed up test
+		CircuitBreaker:   circuitBreaker,
+		StrictValidation: false, // Don't fail on format validation
 	}
 
 	verifier := NewUSIdentityVerifier(config)
@@ -550,10 +550,10 @@ func TestFallbackProvider_Success(t *testing.T) {
 	fallbackProvider := NewMockUSIdentityProvider("fallback-success")
 
 	config := &USIdentityVerifierConfig{
-		PrimaryProvider:   failingProvider,
-		FallbackProvider:  fallbackProvider,
-		MaxRetries:        0,
-		StrictValidation:  false,
+		PrimaryProvider:  failingProvider,
+		FallbackProvider: fallbackProvider,
+		MaxRetries:       0,
+		StrictValidation: false,
 	}
 
 	verifier := NewUSIdentityVerifier(config)

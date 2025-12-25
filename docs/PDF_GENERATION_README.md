@@ -1,3 +1,11 @@
+---
+title: Pdf Generation Readme
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # GAuth API Documentation - PDF/HTML Generation
 
 ## ✅ HTML Files Generated Successfully!

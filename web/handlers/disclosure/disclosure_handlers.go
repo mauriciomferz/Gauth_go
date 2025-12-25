@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/gin-gonic/gin"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
 // Handler provides HTTP handlers for disclosure API

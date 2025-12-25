@@ -400,7 +400,7 @@ func (h *OIDCHandler) CreateOIDCProvider(c *gin.Context) {
 		autoProvisionUsers, req.UserAttributeMapping, req.DefaultRole,
 		pkceEnabled, responseType, responseMode, req.Prompt, req.MaxAge,
 		req.AzureTenantID, req.AzureResource, req.AdditionalParams,
-		isDefault, priority, "active", "admin",
+		isDefault, priority, StatusActive, "admin",
 	).Scan(&createdAt, &updatedAt)
 
 	if err != nil {

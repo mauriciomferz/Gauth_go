@@ -1,3 +1,11 @@
+---
+title: Examples
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # GAuth RFC-0115 Examples Documentation
 
 > Last Updated: 2025-10-17

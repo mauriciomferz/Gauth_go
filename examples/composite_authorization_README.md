@@ -1,3 +1,11 @@
+---
+title: Composite Authorization Readme
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Composite Authorization Example
 
 This example (`gauth-plus-authorization.json`) models a rich, multi-layer corporate authorization grant that delegates constrained financial and contractual powers from human executives to an enterprise AI agent under strict governance, dual-control, and audit obligations.

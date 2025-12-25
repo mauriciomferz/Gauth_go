@@ -1,3 +1,11 @@
+---
+title: Hierarchical Digest Design
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Hierarchical Digest Domain Design (Draft)
 
 Date: 2025-10-30

@@ -1,3 +1,11 @@
+---
+title: Abac Function Registry
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # ABAC Function Registry (P0.3)
 
 ## Overview

@@ -1,3 +1,11 @@
+---
+title: Metrics-Obligations
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Obligation Execution Metrics
 
 This document describes the new obligation execution observability primitives added to GAuth.

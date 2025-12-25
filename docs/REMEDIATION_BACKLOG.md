@@ -1,3 +1,11 @@
+---
+title: Remediation Backlog
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Remediation Backlog (Beta Scope)
 
 Source Inputs: `COMPLIANCE_RFC111_RFC115_REPORT.md`, `RISK_REGISTER.md`, `BETA_READINESS_PLAN.md`.

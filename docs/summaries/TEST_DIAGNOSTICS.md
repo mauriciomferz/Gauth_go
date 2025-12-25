@@ -1,3 +1,11 @@
+---
+title: Test Diagnostics
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Testing Notes (Sunset Enforcement)
 
 `TestCapabilitySunsetEnforcement` confirms that a sunset capability is denied (403) and lifecycle audit metadata marks the phase `sunset`.

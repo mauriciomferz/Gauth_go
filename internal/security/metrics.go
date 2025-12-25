@@ -13,31 +13,31 @@ type SecurityMetrics struct {
 	// Rate limiting metrics
 	RateLimitViolations *prometheus.CounterVec
 	DDoSBlocked         prometheus.Counter
-	
+
 	// Authentication metrics
 	AuthenticationAttempts *prometheus.CounterVec
 	AuthenticationFailures prometheus.Counter
-	
+
 	// Input validation metrics
 	SQLInjectionAttempts  prometheus.Counter
 	XSSAttempts           prometheus.Counter
 	PathTraversalAttempts prometheus.Counter
-	
+
 	// CORS metrics
 	CORSRejected prometheus.Counter
-	
+
 	// Token operation metrics
-	TokenCreated           prometheus.Counter
+	TokenCreated            prometheus.Counter
 	TokenValidationFailures prometheus.Counter
-	
+
 	// Audit metrics
 	SecurityEvents         *prometheus.CounterVec
 	CriticalSecurityEvents prometheus.Counter
-	
+
 	// Request metrics by security status
 	SecureRequests   prometheus.Counter
 	InsecureRequests prometheus.Counter
-	
+
 	// Gauge metrics
 	ActiveSessions     prometheus.Gauge
 	RateLimitedClients prometheus.Gauge
@@ -54,7 +54,7 @@ func InitSecurityMetrics() *SecurityMetrics {
 	if !atomic.CompareAndSwapUint32(&metricsInitialized, 0, 1) {
 		return globalSecurityMetrics
 	}
-	
+
 	metrics := &SecurityMetrics{
 		RateLimitViolations: promauto.NewCounterVec(
 			prometheus.CounterOpts{
@@ -63,14 +63,14 @@ func InitSecurityMetrics() *SecurityMetrics {
 			},
 			[]string{"endpoint", "client_ip"},
 		),
-		
+
 		DDoSBlocked: promauto.NewCounter(
 			prometheus.CounterOpts{
 				Name: "gauth_ddos_blocked_total",
 				Help: "Total number of requests blocked by DDoS protection",
 			},
 		),
-		
+
 		AuthenticationAttempts: promauto.NewCounterVec(
 			prometheus.CounterOpts{
 				Name: "gauth_authentication_attempts_total",
@@ -78,56 +78,56 @@ func InitSecurityMetrics() *SecurityMetrics {
 			},
 			[]string{"result"},
 		),
-		
+
 		AuthenticationFailures: promauto.NewCounter(
 			prometheus.CounterOpts{
 				Name: "gauth_authentication_failures_total",
 				Help: "Total number of authentication failures",
 			},
 		),
-		
+
 		SQLInjectionAttempts: promauto.NewCounter(
 			prometheus.CounterOpts{
 				Name: "gauth_sql_injection_attempts_total",
 				Help: "Total number of SQL injection attempts detected",
 			},
 		),
-		
+
 		XSSAttempts: promauto.NewCounter(
 			prometheus.CounterOpts{
 				Name: "gauth_xss_attempts_total",
 				Help: "Total number of XSS attempts detected",
 			},
 		),
-		
+
 		PathTraversalAttempts: promauto.NewCounter(
 			prometheus.CounterOpts{
 				Name: "gauth_path_traversal_attempts_total",
 				Help: "Total number of path traversal attempts detected",
 			},
 		),
-		
+
 		CORSRejected: promauto.NewCounter(
 			prometheus.CounterOpts{
 				Name: "gauth_cors_rejected_total",
 				Help: "Total number of rejected CORS requests",
 			},
 		),
-		
+
 		TokenCreated: promauto.NewCounter(
 			prometheus.CounterOpts{
 				Name: "gauth_token_created_total",
 				Help: "Total number of tokens created",
 			},
 		),
-		
+
 		TokenValidationFailures: promauto.NewCounter(
 			prometheus.CounterOpts{
 				Name: "gauth_token_validation_failures_total",
 				Help: "Total number of token validation failures",
 			},
 		),
-		
+
 		SecurityEvents: promauto.NewCounterVec(
 			prometheus.CounterOpts{
 				Name: "gauth_security_events_total",
@@ -135,35 +135,35 @@ func InitSecurityMetrics() *SecurityMetrics {
 			},
 			[]string{"event_type", "severity"},
 		),
-		
+
 		CriticalSecurityEvents: promauto.NewCounter(
 			prometheus.CounterOpts{
 				Name: "gauth_critical_security_events_total",
 				Help: "Total number of critical security events",
 			},
 		),
-		
+
 		SecureRequests: promauto.NewCounter(
 			prometheus.CounterOpts{
 				Name: "gauth_secure_requests_total",
 				Help: "Total number of secure requests (passed all security checks)",
 			},
 		),
-		
+
 		InsecureRequests: promauto.NewCounter(
 			prometheus.CounterOpts{
 				Name: "gauth_insecure_requests_total",
 				Help: "Total number of insecure requests (failed security checks)",
 			},
 		),
-		
+
 		ActiveSessions: promauto.NewGauge(
 			prometheus.GaugeOpts{
 				Name: "gauth_active_sessions",
 				Help: "Current number of active sessions",
 			},
 		),
-		
+
 		RateLimitedClients: promauto.NewGauge(
 			prometheus.GaugeOpts{
 				Name: "gauth_rate_limited_clients",
@@ -171,7 +171,7 @@ func InitSecurityMetrics() *SecurityMetrics {
 			},
 		),
 	}
-	
+
 	globalSecurityMetrics = metrics
 	return metrics
 }
@@ -247,7 +247,7 @@ func RecordTokenValidationFailure() {
 func RecordSecurityEvent(eventType, severity string) {
 	metrics := GetSecurityMetrics()
 	metrics.SecurityEvents.WithLabelValues(eventType, severity).Inc()
-	
+
 	if severity == "critical" {
 		metrics.CriticalSecurityEvents.Inc()
 	}

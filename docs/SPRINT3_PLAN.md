@@ -1,3 +1,11 @@
+---
+title: Sprint3 Plan
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Sprint 3 Plan (RB5, RB10, RB11)
 
 Scope: Ledger integrity hardening (signed rotation entries), revocation consistency proofs, and operational WAL observability.

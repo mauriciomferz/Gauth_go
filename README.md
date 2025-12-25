@@ -1,7 +1,7 @@
 ---
 title: GAuth 1.0 README
 category: overview
-status: beta-ready
+status: active
 lastUpdated: 2025-12-01
 owners: core-maintainers
 ---

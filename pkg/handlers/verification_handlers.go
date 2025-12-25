@@ -156,7 +156,7 @@ func (h *VerificationHandler) RegisterRoutes(mux *http.ServeMux) {
 	// Public verification endpoints (no auth required)
 	mux.HandleFunc("/api/v1/public/verify/poa/", h.PublicVerifyPoA)
 	mux.HandleFunc("/api/v1/public/verify/status/", h.PublicCheckStatus)
-	
+
 	// Internal verification endpoints
 	mux.HandleFunc("/api/v1/verification/poa", h.VerifyPoA)
 	mux.HandleFunc("/api/v1/verification/health", h.HealthCheck)

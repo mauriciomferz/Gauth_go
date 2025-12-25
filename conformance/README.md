@@ -1,3 +1,11 @@
+---
+title: Readme
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Conformance Harness
 
 Automated, evidence-based verification that the implementation aligns with RFC 0111 and RFC 0115 clauses.

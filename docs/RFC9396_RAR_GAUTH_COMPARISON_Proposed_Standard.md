@@ -1,6 +1,6 @@
 ---
 title: RFC 9396 (Rich Authorization Requests) vs GAuth (RFC 0111/0115)
-category: analysis
+category: guide
 status: active
 lastUpdated: 2025-11-19
 owners: architecture-team
@@ -450,7 +450,7 @@ func (v *ComplianceValidator) ValidateAuthorizationDetails(
 
 ## References
 
-- [RFC 9396 - Rich Authorization Requests](https://datatracker.ietf.org/doc/rfc9767/)
+- [RFC 9396 - Rich Authorization Requests](https://datatracker.ietf.org/doc/rfc9396/)
 - [OAuth 2.0 RFC 6749](https://datatracker.ietf.org/doc/rfc6749/)
 - [GiFo-RFC 0111 - GAuth 1.0 Authorization Framework](Gifo_0111.md)
 - [GAuth Gap Matrix](GAP_MATRIX.auto.md)

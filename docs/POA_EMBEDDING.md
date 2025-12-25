@@ -1,3 +1,11 @@
+---
+title: Poa Embedding
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # PoA Embedding in Token Envelope
 
 **Status**: Implemented (P1.1 High Priority Feature)  

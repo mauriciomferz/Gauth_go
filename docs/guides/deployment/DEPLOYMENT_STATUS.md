@@ -1,3 +1,11 @@
+---
+title: Deployment Status
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Deployment Status - November 29, 2025
 
 ## 🚀 Current Deployment

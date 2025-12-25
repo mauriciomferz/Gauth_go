@@ -1,3 +1,11 @@
+---
+title: Key Rotation Example
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Key Rotation Example (Multi-Tenant)
 
 The example at `examples/key_rotation/main.go` demonstrates:

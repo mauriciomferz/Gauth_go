@@ -49,7 +49,7 @@ func (m *MockGAuthService) Close() error {
 	return nil
 }
 
-func TestRFC9767_CreateToken_RAR(t *testing.T) {
+func TestRFC9396_CreateToken_RAR(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	mockSvc := new(MockGAuthService)
@@ -103,7 +103,9 @@ func TestRFC9767_CreateToken_RAR(t *testing.T) {
 	assert.Equal(t, 200, w.Code)
 
 	var respBody map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &respBody)
+	if err := json.Unmarshal(w.Body.Bytes(), &respBody); err != nil {
+		t.Fatalf("failed to unmarshal response: %v", err)
+	}
 
 	assert.Equal(t, "mock_rfc_token", respBody["access_token"])
 	assert.Equal(t, true, respBody["success"])

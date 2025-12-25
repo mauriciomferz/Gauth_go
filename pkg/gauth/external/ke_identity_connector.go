@@ -26,19 +26,19 @@ type KenyaIdentityConnector struct {
 // KenyaConnectorConfig configuration for Kenyan identity connector
 type KenyaConnectorConfig struct {
 	// IPRS (Integrated Population Registration System) configuration
-	IPRSURL           string `validate:"required,url"`
-	IPRSAPIKey        string `validate:"required"`
-	
+	IPRSURL    string `validate:"required,url"`
+	IPRSAPIKey string `validate:"required"`
+
 	// NTSA (National Transport and Safety Authority) configuration
-	NTSAURL           string `validate:"url"`
-	NTSAAPIKey        string
-	
+	NTSAURL    string `validate:"url"`
+	NTSAAPIKey string
+
 	// Huduma Number configuration
-	HudumaURL         string `validate:"url"`
-	HudumaAPIKey      string
-	
+	HudumaURL    string `validate:"url"`
+	HudumaAPIKey string
+
 	// Timeouts
-	RequestTimeout    time.Duration
+	RequestTimeout time.Duration
 }
 
 // NationalIDRequest National ID validation request
@@ -51,19 +51,19 @@ type NationalIDRequest struct {
 
 // NationalIDResponse National ID validation response
 type NationalIDResponse struct {
-	Valid            bool       `json:"valid"`
-	IDNumber         string     `json:"id_number"`
-	FirstName        string     `json:"first_name"`
-	MiddleName       string     `json:"middle_name,omitempty"`
-	Surname          string     `json:"surname"`
-	DateOfBirth      string     `json:"date_of_birth"`
-	Gender           string     `json:"gender"` // Male, Female
-	PlaceOfBirth     string     `json:"place_of_birth,omitempty"`
-	District         string     `json:"district,omitempty"`
-	Address          *KEAddress `json:"address,omitempty"`
-	SerialNumber     string     `json:"serial_number,omitempty"`
-	DateOfIssue      string     `json:"date_of_issue,omitempty"`
-	Error            string     `json:"error,omitempty"`
+	Valid        bool       `json:"valid"`
+	IDNumber     string     `json:"id_number"`
+	FirstName    string     `json:"first_name"`
+	MiddleName   string     `json:"middle_name,omitempty"`
+	Surname      string     `json:"surname"`
+	DateOfBirth  string     `json:"date_of_birth"`
+	Gender       string     `json:"gender"` // Male, Female
+	PlaceOfBirth string     `json:"place_of_birth,omitempty"`
+	District     string     `json:"district,omitempty"`
+	Address      *KEAddress `json:"address,omitempty"`
+	SerialNumber string     `json:"serial_number,omitempty"`
+	DateOfIssue  string     `json:"date_of_issue,omitempty"`
+	Error        string     `json:"error,omitempty"`
 }
 
 // HudumaNambaRequest Huduma Namba validation request
@@ -91,25 +91,25 @@ type HudumaNambaResponse struct {
 
 // DriverLicenseRequest driver's license validation request
 type KEDriverLicenseRequest struct {
-	LicenseNumber   string `json:"license_number" validate:"required"`
-	FirstName       string `json:"first_name" validate:"required"`
-	Surname         string `json:"surname" validate:"required"`
-	DateOfBirth     string `json:"date_of_birth" validate:"required"`
+	LicenseNumber string `json:"license_number" validate:"required"`
+	FirstName     string `json:"first_name" validate:"required"`
+	Surname       string `json:"surname" validate:"required"`
+	DateOfBirth   string `json:"date_of_birth" validate:"required"`
 }
 
 // DriverLicenseResponse driver's license validation response
 type KEDriverLicenseResponse struct {
-	Valid           bool       `json:"valid"`
-	LicenseNumber   string     `json:"license_number"`
-	FirstName       string     `json:"first_name"`
-	Surname         string     `json:"surname"`
-	DateOfBirth     string     `json:"date_of_birth"`
-	Address         *KEAddress `json:"address,omitempty"`
-	IssueDate       string     `json:"issue_date"`
-	ExpiryDate      string     `json:"expiry_date"`
-	LicenseClass    []string   `json:"license_class"` // A, A1, B, B1, C, C1, D, D1, E, BCE
-	BloodGroup      string     `json:"blood_group,omitempty"`
-	Error           string     `json:"error,omitempty"`
+	Valid         bool       `json:"valid"`
+	LicenseNumber string     `json:"license_number"`
+	FirstName     string     `json:"first_name"`
+	Surname       string     `json:"surname"`
+	DateOfBirth   string     `json:"date_of_birth"`
+	Address       *KEAddress `json:"address,omitempty"`
+	IssueDate     string     `json:"issue_date"`
+	ExpiryDate    string     `json:"expiry_date"`
+	LicenseClass  []string   `json:"license_class"` // A, A1, B, B1, C, C1, D, D1, E, BCE
+	BloodGroup    string     `json:"blood_group,omitempty"`
+	Error         string     `json:"error,omitempty"`
 }
 
 // KEAddress Kenyan address structure
@@ -117,18 +117,18 @@ type KEAddress struct {
 	StreetAddress string `json:"street_address"`
 	Building      string `json:"building,omitempty"`
 	City          string `json:"city"`
-	County        string `json:"county"` // 47 counties
+	County        string `json:"county"`      // 47 counties
 	PostalCode    string `json:"postal_code"` // 5 digits
 	Country       string `json:"country"`
 }
 
 // PassportRequest passport validation request
 type KEPassportRequest struct {
-	PassportNumber  string `json:"passport_number" validate:"required"`
-	Surname         string `json:"surname" validate:"required"`
-	GivenNames      string `json:"given_names" validate:"required"`
-	DateOfBirth     string `json:"date_of_birth" validate:"required"`
-	Nationality     string `json:"nationality" validate:"required"`
+	PassportNumber string `json:"passport_number" validate:"required"`
+	Surname        string `json:"surname" validate:"required"`
+	GivenNames     string `json:"given_names" validate:"required"`
+	DateOfBirth    string `json:"date_of_birth" validate:"required"`
+	Nationality    string `json:"nationality" validate:"required"`
 }
 
 // PassportResponse passport validation response
@@ -155,18 +155,18 @@ func NewKenyaIdentityConnector(config *KenyaConnectorConfig) (*KenyaIdentityConn
 	if err := validate.Struct(config); err != nil {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
-	
+
 	// Set defaults
 	if config.RequestTimeout == 0 {
 		config.RequestTimeout = 30 * time.Second
 	}
-	
+
 	connector := &KenyaIdentityConnector{
 		config:     config,
 		httpClient: &http.Client{Timeout: config.RequestTimeout},
 		validator:  validate,
 	}
-	
+
 	return connector, nil
 }
 
@@ -177,9 +177,9 @@ func (kc *KenyaIdentityConnector) ValidateNationalID(ctx context.Context, req *N
 	if err := kc.validator.Struct(req); err != nil {
 		return &NationalIDResponse{Valid: false, Error: err.Error()}, nil
 	}
-	
+
 	idNumber := strings.TrimSpace(req.IDNumber)
-	
+
 	// Validate format (7-8 digits)
 	if !regexp.MustCompile(`^\d{7,8}$`).MatchString(idNumber) {
 		return &NationalIDResponse{
@@ -187,17 +187,17 @@ func (kc *KenyaIdentityConnector) ValidateNationalID(ctx context.Context, req *N
 			Error: "Invalid National ID format (must be 7-8 digits)",
 		}, nil
 	}
-	
+
 	// In production, this would verify with IPRS database
 	response := &NationalIDResponse{
-		Valid:        true,
-		IDNumber:     idNumber,
-		FirstName:    req.FirstName,
-		Surname:      req.Surname,
-		DateOfBirth:  req.DateOfBirth,
-		DateOfIssue:  "2020-01-15",
+		Valid:       true,
+		IDNumber:    idNumber,
+		FirstName:   req.FirstName,
+		Surname:     req.Surname,
+		DateOfBirth: req.DateOfBirth,
+		DateOfIssue: "2020-01-15",
 	}
-	
+
 	return response, nil
 }
 
@@ -208,9 +208,9 @@ func (kc *KenyaIdentityConnector) ValidateHudumaNamba(ctx context.Context, req *
 	if err := kc.validator.Struct(req); err != nil {
 		return &HudumaNambaResponse{Valid: false, Error: err.Error()}, nil
 	}
-	
+
 	hudumaNamba := strings.ToUpper(strings.TrimSpace(req.HudumaNamba))
-	
+
 	// Validate format (alphanumeric, minimum 8 characters)
 	if !regexp.MustCompile(`^[A-Z0-9]{8,}$`).MatchString(hudumaNamba) {
 		return &HudumaNambaResponse{
@@ -218,7 +218,7 @@ func (kc *KenyaIdentityConnector) ValidateHudumaNamba(ctx context.Context, req *
 			Error: "Invalid Huduma Namba format",
 		}, nil
 	}
-	
+
 	// In production, this would verify with Huduma Kenya database
 	response := &HudumaNambaResponse{
 		Valid:            true,
@@ -228,7 +228,7 @@ func (kc *KenyaIdentityConnector) ValidateHudumaNamba(ctx context.Context, req *
 		DateOfBirth:      req.DateOfBirth,
 		RegistrationDate: "2020-01-15",
 	}
-	
+
 	return response, nil
 }
 
@@ -238,9 +238,9 @@ func (kc *KenyaIdentityConnector) VerifyDriverLicense(ctx context.Context, req *
 	if err := kc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	licenseNumber := strings.ToUpper(strings.TrimSpace(req.LicenseNumber))
-	
+
 	// Validate license number format (variable format)
 	if len(licenseNumber) < 8 {
 		return &KEDriverLicenseResponse{
@@ -248,7 +248,7 @@ func (kc *KenyaIdentityConnector) VerifyDriverLicense(ctx context.Context, req *
 			Error: "Invalid license number format",
 		}, nil
 	}
-	
+
 	// In production, this would verify with NTSA database
 	response := &KEDriverLicenseResponse{
 		Valid:         true,
@@ -260,7 +260,7 @@ func (kc *KenyaIdentityConnector) VerifyDriverLicense(ctx context.Context, req *
 		ExpiryDate:    "2025-01-15",
 		LicenseClass:  []string{"B", "BCE"}, // Light motor vehicles
 	}
-	
+
 	return response, nil
 }
 
@@ -270,9 +270,9 @@ func (kc *KenyaIdentityConnector) VerifyPassport(ctx context.Context, req *KEPas
 	if err := kc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	passportNumber := strings.ToUpper(strings.TrimSpace(req.PassportNumber))
-	
+
 	// Validate passport number format (letter + 7 digits or similar patterns)
 	if !regexp.MustCompile(`^[A-Z]\d{7}$`).MatchString(passportNumber) {
 		return &KEPassportResponse{
@@ -280,7 +280,7 @@ func (kc *KenyaIdentityConnector) VerifyPassport(ctx context.Context, req *KEPas
 			Error: "Invalid passport number format",
 		}, nil
 	}
-	
+
 	// In production, this would verify with Directorate of Immigration Services
 	response := &KEPassportResponse{
 		Valid:            true,
@@ -294,7 +294,7 @@ func (kc *KenyaIdentityConnector) VerifyPassport(ctx context.Context, req *KEPas
 		IssuingAuthority: "Kenya",
 		PassportType:     "Ordinary",
 	}
-	
+
 	return response, nil
 }
 
@@ -310,7 +310,7 @@ func (kc *KenyaIdentityConnector) generateCacheKey(operation string, parts ...st
 func (kc *KenyaIdentityConnector) GetMetrics() map[string]interface{} {
 	kc.mu.RLock()
 	defer kc.mu.RUnlock()
-	
+
 	return map[string]interface{}{
 		"connector": "kenya_identity",
 	}

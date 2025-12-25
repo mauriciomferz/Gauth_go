@@ -4,15 +4,22 @@ import (
 	"testing"
 	"time"
 
+	"github.com/alicebob/miniredis/v2"
 	"github.com/redis/go-redis/v9"
 )
 
 // TestRedisReplayStoreBasic exercises first-seen vs replay using a real Redis if available.
 func TestRedisReplayStoreBasic(t *testing.T) {
-	client := redis.NewClient(&redis.Options{Addr: "127.0.0.1:6379"})
+	mr, err := miniredis.Run()
+	if err != nil {
+		t.Fatalf("failed to start miniredis: %v", err)
+	}
+	defer mr.Close()
+
+	client := redis.NewClient(&redis.Options{Addr: mr.Addr()})
 	rs, err := NewRedisReplayStore(client, "gauthtest", time.Minute)
 	if err != nil {
-		t.Skipf("redis not available: %v", err)
+		t.Fatalf("redis store create error: %v", err)
 	}
 	jti := "test-jti-" + time.Now().Format("150405.000000")
 	seen, err := rs.Seen(jti)

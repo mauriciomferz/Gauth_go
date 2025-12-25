@@ -3,9 +3,9 @@ package web
 import (
 	"time"
 
+	"github.com/gin-gonic/gin"
 	errorscatalog "github.com/mauriciomferz/Gauth_go/internal/errors"
 	gerrs "github.com/mauriciomferz/Gauth_go/pkg/errors"
-	"github.com/gin-gonic/gin"
 )
 
 // ErrorResponse standardizes API error payloads and maps them to RFC references.

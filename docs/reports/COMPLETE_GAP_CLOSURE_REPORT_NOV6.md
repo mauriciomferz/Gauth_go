@@ -1,3 +1,11 @@
+---
+title: Complete Gap Closure Report Nov6
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Complete Gap Closure Summary - November 6, 2025
 
 ## Executive Summary

@@ -14,8 +14,8 @@ import (
 	"net/http"
 	"time"
 
-	anchorint "github.com/mauriciomferz/Gauth_go/internal/anchor"
 	"github.com/gin-gonic/gin"
+	anchorint "github.com/mauriciomferz/Gauth_go/internal/anchor"
 )
 
 const (

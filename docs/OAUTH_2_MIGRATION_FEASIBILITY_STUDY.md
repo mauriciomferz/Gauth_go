@@ -1,10 +1,12 @@
 ---
 title: P1.3 - OAuth 2.0 Migration Feasibility Study
-category: security-analysis
+category: security-assessment
 status: active
 created: 2025-11-30
 priority: P1-HIGH
 compliance: P1-Security-Enhancements
+lastUpdated: 2025-12-25
+owners: [system]
 ---
 
 # OAuth 2.0 Migration Feasibility Study
@@ -836,7 +838,7 @@ func (h *Handlers) HandleTokenExchange(w http.ResponseWriter, r *http.Request) {
 
 - [RFC 6749 - OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
 - [RFC 8693 - OAuth 2.0 Token Exchange](https://datatracker.ietf.org/doc/html/rfc8693)
-- [RFC 9396 - Rich Authorization Requests (RAR)](https://datatracker.ietf.org/doc/html/rfc9767)
+- [RFC 9396 - Rich Authorization Requests (RAR)](https://datatracker.ietf.org/doc/html/rfc9396)
 - [GiFo-RFC-0111 - GAuth 1.0 Authorization Framework](Gifo_0111.md)
 - [GiFo-RFC-0115 - Power-of-Attorney Credential Definition](RFC_ARCHITECTURE.md)
 

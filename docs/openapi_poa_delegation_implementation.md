@@ -1,3 +1,11 @@
+---
+title: Openapi Poa Delegation Implementation
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # OpenAPI 3.1 Specification for PoA & Delegation APIs
 
 > **Status**: ✅ IMPLEMENTED  

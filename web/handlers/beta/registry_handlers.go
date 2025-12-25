@@ -5,15 +5,15 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/gin-gonic/gin"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
 // EntityVerifyRequest represents the request for entity verification
 type EntityVerifyRequest struct {
-	EntityID   string `json:"entity_id" binding:"required"`
-	EntityName string `json:"entity_name" binding:"required"`
-	EntityType string `json:"entity_type" binding:"required"` // corporation, partnership, llc, sole_proprietorship
+	EntityID     string `json:"entity_id" binding:"required"`
+	EntityName   string `json:"entity_name" binding:"required"`
+	EntityType   string `json:"entity_type" binding:"required"`  // corporation, partnership, llc, sole_proprietorship
 	Jurisdiction string `json:"jurisdiction" binding:"required"` // ISO 3166-1 alpha-2 code
 }
 
@@ -26,18 +26,18 @@ type SignatoryVerifyRequest struct {
 
 // EntityVerifyResponse represents the response from entity verification
 type EntityVerifyResponse struct {
-	Success  bool          `json:"success"`
-	Verified bool          `json:"verified"`
+	Success  bool           `json:"success"`
+	Verified bool           `json:"verified"`
 	Entity   *EntityDetails `json:"entity,omitempty"`
-	Error    string        `json:"error,omitempty"`
+	Error    string         `json:"error,omitempty"`
 }
 
 // SignatoryVerifyResponse represents the response from signatory verification
 type SignatoryVerifyResponse struct {
-	Success     bool              `json:"success"`
-	Verified    bool              `json:"verified"`
-	Signatory   *SignatoryDetails `json:"signatory,omitempty"`
-	Error       string            `json:"error,omitempty"`
+	Success   bool              `json:"success"`
+	Verified  bool              `json:"verified"`
+	Signatory *SignatoryDetails `json:"signatory,omitempty"`
+	Error     string            `json:"error,omitempty"`
 }
 
 // EntityDetails contains verified entity information
@@ -53,13 +53,13 @@ type EntityDetails struct {
 
 // SignatoryDetails contains verified signatory information
 type SignatoryDetails struct {
-	EntityID    string    `json:"entity_id"`
-	PersonID    string    `json:"person_id"`
-	Role        string    `json:"role"`
-	Authorized  bool      `json:"authorized"`
-	ValidFrom   time.Time `json:"valid_from"`
-	ValidUntil  *time.Time `json:"valid_until,omitempty"`
-	Authority   string    `json:"authority"`
+	EntityID   string     `json:"entity_id"`
+	PersonID   string     `json:"person_id"`
+	Role       string     `json:"role"`
+	Authorized bool       `json:"authorized"`
+	ValidFrom  time.Time  `json:"valid_from"`
+	ValidUntil *time.Time `json:"valid_until,omitempty"`
+	Authority  string     `json:"authority"`
 }
 
 // RegistryHandler wraps a CommercialRegisterClient for HTTP exposure
@@ -79,27 +79,29 @@ func NewRegistryHandler(registryClient gauth.CommercialRegisterClient) *Registry
 // POST /api/v1/beta/registry/verify-entity
 //
 // Request Body:
-//   {
-//     "entity_id": "12345678",
-//     "entity_name": "Acme Corporation",
-//     "entity_type": "corporation",
-//     "jurisdiction": "US"
-//   }
+//
+//	{
+//	  "entity_id": "12345678",
+//	  "entity_name": "Acme Corporation",
+//	  "entity_type": "corporation",
+//	  "jurisdiction": "US"
+//	}
 //
 // Success Response (200 OK):
-//   {
-//     "success": true,
-//     "verified": true,
-//     "entity": {
-//       "id": "12345678",
-//       "name": "Acme Corporation",
-//       "entity_type": "corporation",
-//       "jurisdiction": "US",
-//       "status": "active",
-//       "registered_at": "2020-01-15T00:00:00Z",
-//       "authority": "Commercial Register"
-//     }
-//   }
+//
+//	{
+//	  "success": true,
+//	  "verified": true,
+//	  "entity": {
+//	    "id": "12345678",
+//	    "name": "Acme Corporation",
+//	    "entity_type": "corporation",
+//	    "jurisdiction": "US",
+//	    "status": "active",
+//	    "registered_at": "2020-01-15T00:00:00Z",
+//	    "authority": "Commercial Register"
+//	  }
+//	}
 func (h *RegistryHandler) HandleVerifyEntity(c *gin.Context) {
 	var req EntityVerifyRequest
 
@@ -160,25 +162,27 @@ func (h *RegistryHandler) HandleVerifyEntity(c *gin.Context) {
 // POST /api/v1/beta/registry/verify-signatory
 //
 // Request Body:
-//   {
-//     "entity_id": "12345678",
-//     "person_id": "uuid-person",
-//     "role": "ceo"
-//   }
+//
+//	{
+//	  "entity_id": "12345678",
+//	  "person_id": "uuid-person",
+//	  "role": "ceo"
+//	}
 //
 // Success Response (200 OK):
-//   {
-//     "success": true,
-//     "verified": true,
-//     "signatory": {
-//       "entity_id": "12345678",
-//       "person_id": "uuid-person",
-//       "role": "ceo",
-//       "authorized": true,
-//       "valid_from": "2023-01-01T00:00:00Z",
-//       "authority": "Commercial Register"
-//     }
-//   }
+//
+//	{
+//	  "success": true,
+//	  "verified": true,
+//	  "signatory": {
+//	    "entity_id": "12345678",
+//	    "person_id": "uuid-person",
+//	    "role": "ceo",
+//	    "authorized": true,
+//	    "valid_from": "2023-01-01T00:00:00Z",
+//	    "authority": "Commercial Register"
+//	  }
+//	}
 func (h *RegistryHandler) HandleVerifySignatory(c *gin.Context) {
 	var req SignatoryVerifyRequest
 

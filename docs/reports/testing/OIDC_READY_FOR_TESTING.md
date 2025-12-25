@@ -1,3 +1,11 @@
+---
+title: Oidc Ready For Testing
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # ✅ OIDC Implementation - Ready for Testing
 
 **Date**: November 24, 2025  

@@ -1,3 +1,11 @@
+---
+title: Jurisdiction Integration
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Jurisdiction-Specific Runtime Enforcement Integration (P1.3)
 
 ## Overview

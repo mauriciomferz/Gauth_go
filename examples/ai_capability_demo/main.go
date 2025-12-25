@@ -21,10 +21,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/mauriciomferz/Gauth_go/examples/ai_capability_demo/ledger"
 	"github.com/mauriciomferz/Gauth_go/internal/ai"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
-	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"

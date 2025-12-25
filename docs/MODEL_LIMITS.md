@@ -1,3 +1,11 @@
+---
+title: Model Limits
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Model Limits Enforcement (sec11.item2)
 
 ## Overview

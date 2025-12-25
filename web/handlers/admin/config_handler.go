@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/config"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/mauriciomferz/Gauth_go/pkg/config"
 )
 
 // ConfigHandler handles configuration management endpoints
@@ -588,7 +588,7 @@ func (h *ConfigHandler) ToggleTenantOverride(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message":    "Override status updated",
 		"overrideId": overrideID,
-		"active":     enabled,
+		StatusActive: enabled,
 	})
 }
 

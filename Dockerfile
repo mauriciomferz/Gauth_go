@@ -20,6 +20,7 @@ RUN echo "=== Downloading Go modules ===" && \
 COPY cmd/ ./cmd/
 COPY pkg/ ./pkg/
 COPY internal/ ./internal/
+COPY web/ ./web/
 
 # Verify dependencies
 RUN echo "=== Verifying Go modules ===" && \

@@ -22,31 +22,31 @@ const (
 
 // SSETransport implements MCP protocol over HTTP Server-Sent Events
 type SSETransport struct {
-	url              string
-	headers          http.Header
-	client           *http.Client
-	
+	url     string
+	headers http.Header
+	client  *http.Client
+
 	// Connection state
-	conn             io.ReadCloser
-	connMu           sync.RWMutex
-	connected        bool
-	reconnecting     bool
-	lastEventID      string
-	
+	conn         io.ReadCloser
+	connMu       sync.RWMutex
+	connected    bool
+	reconnecting bool
+	lastEventID  string
+
 	// Message handling
-	receiveCh        chan []byte
-	errorCh          chan error
-	
+	receiveCh chan []byte
+	errorCh   chan error
+
 	// Lifecycle
-	ctx              context.Context
-	cancel           context.CancelFunc
-	wg               sync.WaitGroup
-	
+	ctx    context.Context
+	cancel context.CancelFunc
+	wg     sync.WaitGroup
+
 	// Callbacks
-	onConnect        func()
-	onDisconnect     func(error)
-	onMessage        func([]byte)
-	
+	onConnect    func()
+	onDisconnect func(error)
+	onMessage    func([]byte)
+
 	// Metrics
 	messagesReceived int64
 	reconnectCount   int
@@ -65,13 +65,13 @@ type sseEvent struct {
 // NewSSETransport creates a new SSE transport
 func NewSSETransport(url string, headers http.Header) *SSETransport {
 	ctx, cancel := context.WithCancel(context.Background())
-	
+
 	if headers == nil {
 		headers = http.Header{}
 	}
 	headers.Set("Accept", "text/event-stream")
 	headers.Set("Cache-Control", "no-cache")
-	
+
 	return &SSETransport{
 		url:       url,
 		headers:   headers,
@@ -97,72 +97,72 @@ func (t *SSETransport) connectWithRetry(ctx context.Context, attempt int) error 
 	}
 	t.reconnecting = true
 	t.connMu.Unlock()
-	
+
 	// Exponential backoff for reconnection
 	if attempt > 0 {
 		delay := sseReconnectDelay * time.Duration(1<<uint(attempt-1))
 		if delay > reconnectMaxDelay {
 			delay = reconnectMaxDelay
 		}
-		
+
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
 		case <-time.After(delay):
 		}
 	}
-	
+
 	// Create HTTP request
 	req, err := http.NewRequestWithContext(ctx, "GET", t.url, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
-	
+
 	// Copy headers
 	for key, values := range t.headers {
 		for _, value := range values {
 			req.Header.Add(key, value)
 		}
 	}
-	
+
 	// Add Last-Event-ID if available (for resume)
 	if t.lastEventID != "" {
 		req.Header.Set("Last-Event-ID", t.lastEventID)
 	}
-	
+
 	// Execute request
 	resp, err := t.client.Do(req)
 	if err != nil {
 		t.lastError = err
 		t.lastErrorTime = time.Now()
-		
+
 		// Retry with exponential backoff
 		if attempt < sseMaxReconnects {
 			return t.connectWithRetry(ctx, attempt+1)
 		}
 		return fmt.Errorf("failed to connect to %s: %w", t.url, err)
 	}
-	
+
 	// Check response status
 	if resp.StatusCode != http.StatusOK {
 		resp.Body.Close()
 		err := fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 		t.lastError = err
 		t.lastErrorTime = time.Now()
-		
+
 		if attempt < sseMaxReconnects {
 			return t.connectWithRetry(ctx, attempt+1)
 		}
 		return err
 	}
-	
+
 	// Verify content type
 	contentType := resp.Header.Get("Content-Type")
 	if !strings.HasPrefix(contentType, "text/event-stream") {
 		resp.Body.Close()
 		return fmt.Errorf("unexpected content type: %s", contentType)
 	}
-	
+
 	t.connMu.Lock()
 	t.conn = resp.Body
 	t.connected = true
@@ -171,16 +171,16 @@ func (t *SSETransport) connectWithRetry(ctx context.Context, attempt int) error 
 		t.reconnectCount++
 	}
 	t.connMu.Unlock()
-	
+
 	// Start goroutine for reading events
 	t.wg.Add(1)
 	go t.readPump()
-	
+
 	// Notify connection established
 	if t.onConnect != nil {
 		t.onConnect()
 	}
-	
+
 	return nil
 }
 
@@ -188,29 +188,29 @@ func (t *SSETransport) connectWithRetry(ctx context.Context, attempt int) error 
 func (t *SSETransport) readPump() {
 	defer t.wg.Done()
 	defer t.handleDisconnect(nil)
-	
+
 	t.connMu.RLock()
 	conn := t.conn
 	t.connMu.RUnlock()
-	
+
 	if conn == nil {
 		return
 	}
-	
+
 	scanner := bufio.NewScanner(conn)
 	scanner.Split(bufio.ScanLines)
-	
+
 	var currentEvent sseEvent
-	
+
 	for scanner.Scan() {
 		select {
 		case <-t.ctx.Done():
 			return
 		default:
 		}
-		
+
 		line := scanner.Text()
-		
+
 		// Empty line indicates end of event
 		if line == "" {
 			if currentEvent.Data != "" {
@@ -219,41 +219,41 @@ func (t *SSETransport) readPump() {
 			currentEvent = sseEvent{}
 			continue
 		}
-		
+
 		// Ignore comments
 		if strings.HasPrefix(line, ":") {
 			continue
 		}
-		
+
 		// Parse field
 		parts := strings.SplitN(line, ":", 2)
 		if len(parts) != 2 {
 			continue
 		}
-		
+
 		field := parts[0]
 		value := strings.TrimPrefix(parts[1], " ")
-		
+
 		switch field {
 		case "id":
 			currentEvent.ID = value
 			t.lastEventID = value
-			
+
 		case "event":
 			currentEvent.Event = value
-			
+
 		case "data":
 			if currentEvent.Data != "" {
 				currentEvent.Data += "\n"
 			}
 			currentEvent.Data += value
-			
+
 		case "retry":
 			// Parse retry time (milliseconds)
 			// Could be used to adjust reconnection delay
 		}
 	}
-	
+
 	if err := scanner.Err(); err != nil {
 		// Use select to avoid panic if channel is closed
 		select {
@@ -271,9 +271,9 @@ func (t *SSETransport) processEvent(event *sseEvent) {
 	case "message", "":
 		// Default event type is "message"
 		data := []byte(event.Data)
-		
+
 		t.messagesReceived++
-		
+
 		// Send raw bytes to receive channel
 		select {
 		case t.receiveCh <- data:
@@ -283,10 +283,10 @@ func (t *SSETransport) processEvent(event *sseEvent) {
 		case <-t.ctx.Done():
 			return
 		}
-		
+
 	case "heartbeat":
 		// Heartbeat event, no action needed
-		
+
 	case "error":
 		// Use select to avoid panic if channel is closed
 		select {
@@ -319,7 +319,7 @@ func (t *SSETransport) Receive(ctx context.Context) ([]byte, error) {
 // Close closes the SSE connection
 func (t *SSETransport) Close() error {
 	t.cancel()
-	
+
 	t.connMu.Lock()
 	if t.conn != nil {
 		t.conn.Close()
@@ -327,14 +327,14 @@ func (t *SSETransport) Close() error {
 	}
 	t.connected = false
 	t.connMu.Unlock()
-	
+
 	// Wait for goroutines to finish
 	t.wg.Wait()
-	
+
 	// Close channels
 	close(t.receiveCh)
 	close(t.errorCh)
-	
+
 	return nil
 }
 
@@ -348,16 +348,16 @@ func (t *SSETransport) handleDisconnect(err error) {
 		t.conn = nil
 	}
 	t.connMu.Unlock()
-	
+
 	if !wasConnected {
 		return
 	}
-	
+
 	// Notify disconnect
 	if t.onDisconnect != nil {
 		t.onDisconnect(err)
 	}
-	
+
 	// Attempt reconnection
 	t.wg.Add(1)
 	go func() {
@@ -399,7 +399,7 @@ func (t *SSETransport) SetOnMessage(fn func([]byte)) {
 func (t *SSETransport) GetMetrics() map[string]interface{} {
 	t.connMu.RLock()
 	defer t.connMu.RUnlock()
-	
+
 	return map[string]interface{}{
 		"connected":         t.connected,
 		"reconnecting":      t.reconnecting,

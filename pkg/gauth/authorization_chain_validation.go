@@ -146,6 +146,11 @@ func (v *AuthorizationChainValidator) ValidateAuthorizationChain(
 		result.Warnings = append(result.Warnings, fmt.Sprintf("Revocation check warning: %v", err))
 	}
 	result.RevocationStatus = revocationResult
+	if revocationResult != nil && revocationResult.Revoked {
+		result.Valid = false
+		result.FailureReason = fmt.Sprintf("Authorization chain revoked: %s (Entity: %s)", revocationResult.Message, revocationResult.RevokedEntity)
+		return result, nil
+	}
 
 	// Step 7: Validate chain continuity
 	if err := v.validateChainContinuity(chain); err != nil {
@@ -800,6 +805,20 @@ func (v *AuthorizationChainValidator) checkChainRevocations(
 		return result, nil
 	}
 
+	// Check owner's authorizer delegation revocation (if applicable)
+	if chain.OwnersAuthorizer.AuthorizationType == "delegated" && chain.OwnersAuthorizer.DelegationID != "" {
+		delegationRevoked, err := v.revocationChecker.IsDelegationRevoked(ctx, chain.OwnersAuthorizer.DelegationID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to check authorizer delegation revocation: %w", err)
+		}
+		result.LinkRevocations["owners_authorizer_delegation"] = delegationRevoked
+		if delegationRevoked {
+			result.Revoked = true
+			result.RevokedEntity = "owners_authorizer_delegation"
+			return result, nil
+		}
+	}
+
 	// Check client owner
 	ownerRevoked, err := v.revocationChecker.IsRevoked(ctx, chain.ClientOwner.EntityID)
 	if err != nil {
@@ -812,6 +831,20 @@ func (v *AuthorizationChainValidator) checkChainRevocations(
 		return result, nil
 	}
 
+	// Check client owner delegation revocation (if applicable)
+	if chain.ClientOwner.AuthorizationType == "delegated" && chain.ClientOwner.DelegationID != "" {
+		delegationRevoked, err := v.revocationChecker.IsDelegationRevoked(ctx, chain.ClientOwner.DelegationID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to check client owner delegation revocation: %w", err)
+		}
+		result.LinkRevocations["client_owner_delegation"] = delegationRevoked
+		if delegationRevoked {
+			result.Revoked = true
+			result.RevokedEntity = "client_owner_delegation"
+			return result, nil
+		}
+	}
+
 	// Check client
 	clientRevoked, err := v.revocationChecker.IsRevoked(ctx, chain.Client.EntityID)
 	if err != nil {
@@ -822,6 +855,20 @@ func (v *AuthorizationChainValidator) checkChainRevocations(
 		result.Revoked = true
 		result.RevokedEntity = "client"
 		return result, nil
+	}
+
+	// Check client delegation revocation (if applicable)
+	if chain.Client.AuthorizationType == "delegated" && chain.Client.DelegationID != "" {
+		delegationRevoked, err := v.revocationChecker.IsDelegationRevoked(ctx, chain.Client.DelegationID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to check client delegation revocation: %w", err)
+		}
+		result.LinkRevocations["client_delegation"] = delegationRevoked
+		if delegationRevoked {
+			result.Revoked = true
+			result.RevokedEntity = "client_delegation"
+			return result, nil
+		}
 	}
 
 	return result, nil

@@ -16,8 +16,8 @@ const (
 	AzureADDefaultTrust   = "substantial"
 	AzureADCommonEndpoint = "https://login.microsoftonline.com/common/v2.0"
 
-trustLevelHigh        = "high"
-trustLevelSubstantial = "substantial"
+	trustLevelHigh        = "high"
+	trustLevelSubstantial = "substantial"
 )
 
 // AzureADClaimMappings defines how Azure AD OIDC claims map to GAuth claims.

@@ -1,3 +1,11 @@
+---
+title: Observability
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 ## Decision Metrics
 ## Tracing (RB9) & Latency Percentiles (NEW)
 The RB9 observability phase introduces lightweight in-repo tracing plus a consolidated latency percentile endpoint.

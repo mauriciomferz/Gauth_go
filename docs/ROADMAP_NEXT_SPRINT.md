@@ -1,3 +1,11 @@
+---
+title: Roadmap Next Sprint
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Next Sprint Roadmap (Target Start: 2025-10-27)
 
 ## Objective

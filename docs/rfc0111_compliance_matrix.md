@@ -1,3 +1,11 @@
+---
+title: Rfc0111 Compliance Matrix
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # RFC 0111 / 0115 Compliance Matrix (Post Remediation: Version & Embedded Weights, Strict Authenticity, Mandatory JTI)
 
 Generated: 2025-10-25

@@ -178,8 +178,8 @@ func TestAttackScenario_RealisticPrivilegeEscalation(t *testing.T) {
 
 	checker := &mockAuthorizationChecker{
 		permissions: map[string][]string{
-			"user-alice": {"read"},                                    // Viewer
-			"user-bob":   {"read", "write", "update"},                 // Editor
+			"user-alice": {"read"},                                                       // Viewer
+			"user-bob":   {"read", "write", "update"},                                    // Editor
 			"user-carol": {"read", "write", "update", "delete", "admin", "manage_users"}, // Admin
 		},
 	}

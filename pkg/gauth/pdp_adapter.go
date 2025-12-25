@@ -304,15 +304,15 @@ func (pdp *SimplePDP) evaluateRequest(request *AuthorizationDecisionRequest) (bo
 			agentID,
 			request.ActionType,
 		)
-		
+
 		if err != nil {
 			return false, fmt.Sprintf("GAuth+ validation error: %v", err)
 		}
-		
+
 		if !gauthPlusResult.Valid {
 			return false, fmt.Sprintf("GAuth+ policy violation: %s", gauthPlusResult.FailureReason)
 		}
-		
+
 		// Log any GAuth+ warnings (successor takeover, capability expiration, etc.)
 		if len(gauthPlusResult.Warnings) > 0 {
 			for _, warning := range gauthPlusResult.Warnings {

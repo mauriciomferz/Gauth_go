@@ -1,3 +1,11 @@
+---
+title: Obligations Advice
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Obligations & Advice Processing (P2.1)
 
 **Status:** ✅ Implemented (P2 Priority)  

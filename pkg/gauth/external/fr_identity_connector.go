@@ -30,15 +30,15 @@ type FranceConnectorConfig struct {
 	ClientID         string `validate:"required"`
 	ClientSecret     string `validate:"required"`
 	RedirectURI      string `validate:"required,url"`
-	
+
 	// ANTS (Agence Nationale des Titres Sécurisés) API
-	ANTSAPIKey  string
-	ANTSAPIURL  string `validate:"url"`
-	
+	ANTSAPIKey string
+	ANTSAPIURL string `validate:"url"`
+
 	// INSEE (Institut National de la Statistique) API
 	INSEEAPIKey string
 	INSEEAPIURL string `validate:"url"`
-	
+
 	// Timeouts
 	RequestTimeout time.Duration
 }
@@ -188,18 +188,18 @@ func NewFranceIdentityConnector(config *FranceConnectorConfig) (*FranceIdentityC
 	if err := validate.Struct(config); err != nil {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
-	
+
 	// Set defaults
 	if config.RequestTimeout == 0 {
 		config.RequestTimeout = 30 * time.Second
 	}
-	
+
 	connector := &FranceIdentityConnector{
 		config:     config,
 		httpClient: &http.Client{Timeout: config.RequestTimeout},
 		validator:  validate,
 	}
-	
+
 	return connector, nil
 }
 
@@ -209,7 +209,7 @@ func (fc *FranceIdentityConnector) AuthenticateFranceConnect(ctx context.Context
 	if err := fc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Build authorization URL (used for redirect in production)
 	_ = fmt.Sprintf("%s/authorize?"+
 		"response_type=code&"+
@@ -226,7 +226,7 @@ func (fc *FranceIdentityConnector) AuthenticateFranceConnect(ctx context.Context
 		req.State,
 		req.Nonce,
 		fc.getEIDASLevel(req.EIDASLevel))
-	
+
 	// In production, this would redirect the user to FranceConnect
 	response := &FranceConnectAuthResponse{
 		Success:    true,
@@ -240,7 +240,7 @@ func (fc *FranceIdentityConnector) AuthenticateFranceConnect(ctx context.Context
 			Gender:     "male",
 		},
 	}
-	
+
 	return response, nil
 }
 
@@ -258,18 +258,18 @@ func (fc *FranceIdentityConnector) ValidateINSEENumber(ctx context.Context, req 
 	if err := fc.validator.Struct(req); err != nil {
 		return &INSEENumberResponse{Valid: false, Error: err.Error()}, nil
 	}
-	
+
 	// Remove spaces and format
 	inseeNumber := strings.ReplaceAll(req.INSEENumber, " ", "")
 	if len(inseeNumber) != 15 {
 		return &INSEENumberResponse{Valid: false, Error: "INSEE number must be 15 digits"}, nil
 	}
-	
+
 	// Validate format (all digits)
 	if !regexp.MustCompile(`^\d{15}$`).MatchString(inseeNumber) {
 		return &INSEENumberResponse{Valid: false, Error: "INSEE number must contain only digits"}, nil
 	}
-	
+
 	// Extract components
 	sex := inseeNumber[0:1]
 	year := inseeNumber[1:3]
@@ -278,36 +278,36 @@ func (fc *FranceIdentityConnector) ValidateINSEENumber(ctx context.Context, req 
 	commune := inseeNumber[7:10]
 	regNumber := inseeNumber[10:13]
 	controlKey := inseeNumber[13:15]
-	
+
 	// Validate sex (1=male, 2=female)
 	if sex != "1" && sex != "2" {
 		return &INSEENumberResponse{Valid: false, Error: "Invalid sex code (must be 1 or 2)"}, nil
 	}
-	
+
 	// Validate month (01-12 or 20-50 for special cases)
 	var monthInt int
 	_, _ = fmt.Sscanf(month, "%d", &monthInt) // Best effort parsing; will be 0 if invalid
 	if (monthInt < 1 || monthInt > 12) && (monthInt < 20 || monthInt > 50) {
 		return &INSEENumberResponse{Valid: false, Error: "Invalid month"}, nil
 	}
-	
+
 	// Calculate control key
 	// Take first 13 digits and compute: 97 - (number mod 97)
 	baseNumber := inseeNumber[0:13]
 	var baseNum int64
 	_, _ = fmt.Sscanf(baseNumber, "%d", &baseNum) // Best effort parsing; will be 0 if invalid
-	
+
 	calculatedKey := 97 - (baseNum % 97)
 	var providedKey int
 	_, _ = fmt.Sscanf(controlKey, "%d", &providedKey) // Best effort parsing; will be 0 if invalid
-	
+
 	if int64(providedKey) != calculatedKey {
 		return &INSEENumberResponse{
 			Valid: false,
 			Error: fmt.Sprintf("Invalid control key (expected %02d, got %s)", calculatedKey, controlKey),
 		}, nil
 	}
-	
+
 	response := &INSEENumberResponse{
 		Valid:              true,
 		INSEENumber:        inseeNumber,
@@ -319,7 +319,7 @@ func (fc *FranceIdentityConnector) ValidateINSEENumber(ctx context.Context, req 
 		RegistrationNumber: regNumber,
 		ControlKey:         controlKey,
 	}
-	
+
 	return response, nil
 }
 
@@ -329,7 +329,7 @@ func (fc *FranceIdentityConnector) VerifyCNI(ctx context.Context, req *CNIVerifi
 	if err := fc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Validate CNI number format (12 characters alphanumeric)
 	if !fc.isValidCNINumber(req.CNINumber) {
 		return &CNIVerificationResponse{
@@ -337,7 +337,7 @@ func (fc *FranceIdentityConnector) VerifyCNI(ctx context.Context, req *CNIVerifi
 			Error: "Invalid CNI number format (must be 12 alphanumeric characters)",
 		}, nil
 	}
-	
+
 	// In production, this would call ANTS API
 	response := &CNIVerificationResponse{
 		Valid:            true,
@@ -350,7 +350,7 @@ func (fc *FranceIdentityConnector) VerifyCNI(ctx context.Context, req *CNIVerifi
 		ChipVerified:     true,
 		Status:           "valid",
 	}
-	
+
 	return response, nil
 }
 
@@ -360,7 +360,7 @@ func (fc *FranceIdentityConnector) VerifyFrenchPassport(ctx context.Context, req
 	if err := fc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Validate passport number format (2 letters + 7 digits)
 	if !fc.isValidFrenchPassportNumber(req.PassportNumber) {
 		return &FrenchPassportResponse{
@@ -368,7 +368,7 @@ func (fc *FranceIdentityConnector) VerifyFrenchPassport(ctx context.Context, req
 			Error: "Invalid passport number format (must be 2 letters + 7 digits, e.g., AB1234567)",
 		}, nil
 	}
-	
+
 	// In production, this would call ANTS API
 	response := &FrenchPassportResponse{
 		Valid:             true,
@@ -382,7 +382,7 @@ func (fc *FranceIdentityConnector) VerifyFrenchPassport(ctx context.Context, req
 		BiometricVerified: true,
 		Status:            "valid",
 	}
-	
+
 	return response, nil
 }
 
@@ -392,7 +392,7 @@ func (fc *FranceIdentityConnector) VerifyCarteVitale(ctx context.Context, req *C
 	if err := fc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Validate INSEE number first
 	inseeReq := &INSEENumberRequest{
 		INSEENumber: req.INSEENumber,
@@ -407,7 +407,7 @@ func (fc *FranceIdentityConnector) VerifyCarteVitale(ctx context.Context, req *C
 			Error: "Invalid INSEE number",
 		}, nil
 	}
-	
+
 	// In production, this would call CNAM API
 	response := &CarteVitaleResponse{
 		Valid:             true,
@@ -418,7 +418,7 @@ func (fc *FranceIdentityConnector) VerifyCarteVitale(ctx context.Context, req *C
 		ValidUntil:        "2030-12-31",
 		OrganismCode:      "CPAM",
 	}
-	
+
 	return response, nil
 }
 
@@ -457,7 +457,7 @@ func (fc *FranceIdentityConnector) generateCacheKey(operation string, parts ...s
 func (fc *FranceIdentityConnector) GetMetrics() map[string]interface{} {
 	fc.mu.RLock()
 	defer fc.mu.RUnlock()
-	
+
 	return map[string]interface{}{
 		"connector": "france_identity",
 	}

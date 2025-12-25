@@ -1,3 +1,11 @@
+---
+title: Merkle Proof
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Revocation Merkle Inclusion Proof
 
 This document explains the structure and verification process of a GAuth revocation inclusion proof artifact.

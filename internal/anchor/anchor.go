@@ -8,7 +8,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
-	"math/rand"
+	"math/rand" //nolint:gosec // Intentionally using math/rand for simulation/latency
 	"os"
 	"strconv"
 	"sync"

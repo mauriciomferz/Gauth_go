@@ -26,12 +26,12 @@ func TestPropertyStateTransitionsAreMonotonic(t *testing.T) {
 
 	// Initial state: active (implicit - no data in Redis)
 	state1, _ := tpr.GetPoAState(ctx, poaID)
-	
+
 	// Transition: active -> disabled
 	err := tpr.DisablePoA(ctx, poaID, "principal", "test")
 	assert.NoError(t, err)
 	state2, _ := tpr.GetPoAState(ctx, poaID)
-	
+
 	// Transition: disabled -> revoked
 	err = tpr.RevokePoA(ctx, poaID, "confirmed")
 	assert.NoError(t, err)
@@ -113,11 +113,11 @@ func TestPropertyCollateralIsConserved(t *testing.T) {
 
 	// Finalize - collateral should be released (not destroyed)
 	time.Sleep(150 * time.Millisecond) // Wait for auto-finalization
-	
+
 	// Property: Collateral is conserved (total before = total after)
 	// In this case, collateral was released back to principal
 	// The system should log the release, maintaining conservation
-	
+
 	t.Logf("✅ Property verified: Collateral conservation (initial: %d Wei)", initialCollateral)
 }
 
@@ -198,7 +198,7 @@ func TestPropertyOptimisticChallengeWindowIsEnforced(t *testing.T) {
 
 	ctx := context.Background()
 	poaID := "property-test-poa-6"
-	
+
 	// Mark as pending
 	err := opt.MarkPendingRevocation(ctx, poaID, "principal", "test", 2e18) // 2 ETH
 	assert.NoError(t, err)
@@ -267,10 +267,10 @@ func TestPropertyConcurrentAccessMaintainsConsistency(t *testing.T) {
 	// Concurrent goroutines recording transactions
 	const numGoroutines = 10
 	const txPerGoroutine = 2
-	
+
 	var wg sync.WaitGroup
 	successCount := atomic.Int32{}
-	
+
 	for i := 0; i < numGoroutines; i++ {
 		wg.Add(1)
 		go func(id int) {
@@ -293,7 +293,7 @@ func TestPropertyConcurrentAccessMaintainsConsistency(t *testing.T) {
 	allowed, msg, err := cb.IsPoAAllowed(ctx, poaID)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, msg, "Circuit breaker should return a valid status message")
-	
+
 	// State should be deterministic based on total transactions
 	expectedSuspended := successCount.Load() > 10
 	if expectedSuspended {
@@ -363,7 +363,7 @@ func TestPropertyEmergencyRevocationIsImmediate(t *testing.T) {
 	startTime := time.Now()
 	err = tpr.RevokePoA(ctx, poaID, "emergency")
 	duration := time.Since(startTime)
-	
+
 	assert.NoError(t, err)
 	assert.Less(t, duration, 1*time.Second, "Emergency revocation should be immediate")
 
@@ -405,4 +405,3 @@ func TestPropertyStateQueriesAreConsistent(t *testing.T) {
 
 	t.Logf("✅ Property verified: State queries are consistent (5 identical results)")
 }
- 

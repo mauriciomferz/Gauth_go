@@ -1,3 +1,11 @@
+---
+title: Post Beta Plan
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Post-Beta Plan (RB12–RB14)
 
 Date: 2025-10-27  

@@ -26,19 +26,19 @@ type NigeriaIdentityConnector struct {
 // NigeriaConnectorConfig configuration for Nigerian identity connector
 type NigeriaConnectorConfig struct {
 	// NIMC (National Identity Management Commission) configuration
-	NIMCURL           string `validate:"required,url"`
-	NIMCAPIKey        string `validate:"required"`
-	
+	NIMCURL    string `validate:"required,url"`
+	NIMCAPIKey string `validate:"required"`
+
 	// BVN (Bank Verification Number) configuration
-	BVNURL            string `validate:"url"`
-	BVNAPIKey         string
-	
+	BVNURL    string `validate:"url"`
+	BVNAPIKey string
+
 	// FRSC (Federal Road Safety Corps) configuration
-	FRSCURL           string `validate:"url"`
-	FRSCAPIKey        string
-	
+	FRSCURL    string `validate:"url"`
+	FRSCAPIKey string
+
 	// Timeouts
-	RequestTimeout    time.Duration
+	RequestTimeout time.Duration
 }
 
 // NINRequest NIN validation request
@@ -60,7 +60,7 @@ type NINResponse struct {
 	Gender           string     `json:"gender"` // Male, Female
 	PlaceOfBirth     string     `json:"place_of_birth,omitempty"`
 	StateOfOrigin    string     `json:"state_of_origin,omitempty"` // 36 states + FCT
-	LGA              string     `json:"lga,omitempty"` // Local Government Area
+	LGA              string     `json:"lga,omitempty"`             // Local Government Area
 	Address          *NGAddress `json:"address,omitempty"`
 	Photo            string     `json:"photo,omitempty"` // Base64 encoded
 	RegistrationDate string     `json:"registration_date,omitempty"`
@@ -100,44 +100,44 @@ type BVNResponse struct {
 
 // DriverLicenseRequest driver's license validation request
 type NGDriverLicenseRequest struct {
-	LicenseNumber   string `json:"license_number" validate:"required"`
-	FirstName       string `json:"first_name" validate:"required"`
-	Surname         string `json:"surname" validate:"required"`
-	DateOfBirth     string `json:"date_of_birth" validate:"required"`
+	LicenseNumber string `json:"license_number" validate:"required"`
+	FirstName     string `json:"first_name" validate:"required"`
+	Surname       string `json:"surname" validate:"required"`
+	DateOfBirth   string `json:"date_of_birth" validate:"required"`
 }
 
 // DriverLicenseResponse driver's license validation response
 type NGDriverLicenseResponse struct {
-	Valid           bool       `json:"valid"`
-	LicenseNumber   string     `json:"license_number"`
-	FirstName       string     `json:"first_name"`
-	Surname         string     `json:"surname"`
-	DateOfBirth     string     `json:"date_of_birth"`
-	Address         *NGAddress `json:"address,omitempty"`
-	IssueDate       string     `json:"issue_date"`
-	ExpiryDate      string     `json:"expiry_date"`
-	LicenseClass    []string   `json:"license_class"` // A, B, C, D, E, F, G, H
-	StateOfIssue    string     `json:"state_of_issue"`
-	Error           string     `json:"error,omitempty"`
+	Valid         bool       `json:"valid"`
+	LicenseNumber string     `json:"license_number"`
+	FirstName     string     `json:"first_name"`
+	Surname       string     `json:"surname"`
+	DateOfBirth   string     `json:"date_of_birth"`
+	Address       *NGAddress `json:"address,omitempty"`
+	IssueDate     string     `json:"issue_date"`
+	ExpiryDate    string     `json:"expiry_date"`
+	LicenseClass  []string   `json:"license_class"` // A, B, C, D, E, F, G, H
+	StateOfIssue  string     `json:"state_of_issue"`
+	Error         string     `json:"error,omitempty"`
 }
 
 // NGAddress Nigerian address structure
 type NGAddress struct {
 	StreetAddress string `json:"street_address"`
 	City          string `json:"city"`
-	LGA           string `json:"lga"` // Local Government Area
-	State         string `json:"state"` // 36 states + FCT
+	LGA           string `json:"lga"`                   // Local Government Area
+	State         string `json:"state"`                 // 36 states + FCT
 	PostalCode    string `json:"postal_code,omitempty"` // 6 digits
 	Country       string `json:"country"`
 }
 
 // PassportRequest passport validation request
 type NGPassportRequest struct {
-	PassportNumber  string `json:"passport_number" validate:"required"`
-	Surname         string `json:"surname" validate:"required"`
-	GivenNames      string `json:"given_names" validate:"required"`
-	DateOfBirth     string `json:"date_of_birth" validate:"required"`
-	Nationality     string `json:"nationality" validate:"required"`
+	PassportNumber string `json:"passport_number" validate:"required"`
+	Surname        string `json:"surname" validate:"required"`
+	GivenNames     string `json:"given_names" validate:"required"`
+	DateOfBirth    string `json:"date_of_birth" validate:"required"`
+	Nationality    string `json:"nationality" validate:"required"`
 }
 
 // PassportResponse passport validation response
@@ -164,18 +164,18 @@ func NewNigeriaIdentityConnector(config *NigeriaConnectorConfig) (*NigeriaIdenti
 	if err := validate.Struct(config); err != nil {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
-	
+
 	// Set defaults
 	if config.RequestTimeout == 0 {
 		config.RequestTimeout = 30 * time.Second
 	}
-	
+
 	connector := &NigeriaIdentityConnector{
 		config:     config,
 		httpClient: &http.Client{Timeout: config.RequestTimeout},
 		validator:  validate,
 	}
-	
+
 	return connector, nil
 }
 
@@ -186,9 +186,9 @@ func (nc *NigeriaIdentityConnector) ValidateNIN(ctx context.Context, req *NINReq
 	if err := nc.validator.Struct(req); err != nil {
 		return &NINResponse{Valid: false, Error: err.Error()}, nil
 	}
-	
+
 	nin := strings.TrimSpace(req.NIN)
-	
+
 	// Validate format (11 digits)
 	if !regexp.MustCompile(`^\d{11}$`).MatchString(nin) {
 		return &NINResponse{
@@ -196,7 +196,7 @@ func (nc *NigeriaIdentityConnector) ValidateNIN(ctx context.Context, req *NINReq
 			Error: "Invalid NIN format (must be 11 digits)",
 		}, nil
 	}
-	
+
 	// In production, this would verify with NIMC database
 	response := &NINResponse{
 		Valid:            true,
@@ -206,7 +206,7 @@ func (nc *NigeriaIdentityConnector) ValidateNIN(ctx context.Context, req *NINReq
 		DateOfBirth:      req.DateOfBirth,
 		RegistrationDate: "2020-01-15",
 	}
-	
+
 	return response, nil
 }
 
@@ -217,9 +217,9 @@ func (nc *NigeriaIdentityConnector) ValidateBVN(ctx context.Context, req *BVNReq
 	if err := nc.validator.Struct(req); err != nil {
 		return &BVNResponse{Valid: false, Error: err.Error()}, nil
 	}
-	
+
 	bvn := strings.TrimSpace(req.BVN)
-	
+
 	// Validate format (11 digits)
 	if !regexp.MustCompile(`^\d{11}$`).MatchString(bvn) {
 		return &BVNResponse{
@@ -227,7 +227,7 @@ func (nc *NigeriaIdentityConnector) ValidateBVN(ctx context.Context, req *BVNReq
 			Error: "Invalid BVN format (must be 11 digits)",
 		}, nil
 	}
-	
+
 	// In production, this would verify with CBN (Central Bank of Nigeria)
 	response := &BVNResponse{
 		Valid:            true,
@@ -239,7 +239,7 @@ func (nc *NigeriaIdentityConnector) ValidateBVN(ctx context.Context, req *BVNReq
 		WatchListed:      false,
 		RegistrationDate: "2020-01-15",
 	}
-	
+
 	return response, nil
 }
 
@@ -249,9 +249,9 @@ func (nc *NigeriaIdentityConnector) VerifyDriverLicense(ctx context.Context, req
 	if err := nc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	licenseNumber := strings.ToUpper(strings.TrimSpace(req.LicenseNumber))
-	
+
 	// Validate license number format (3 letters + 8 digits + 2 letters)
 	if !regexp.MustCompile(`^[A-Z]{3}\d{8}[A-Z]{2}$`).MatchString(licenseNumber) {
 		return &NGDriverLicenseResponse{
@@ -259,7 +259,7 @@ func (nc *NigeriaIdentityConnector) VerifyDriverLicense(ctx context.Context, req
 			Error: "Invalid license number format",
 		}, nil
 	}
-	
+
 	// In production, this would verify with FRSC database
 	response := &NGDriverLicenseResponse{
 		Valid:         true,
@@ -272,7 +272,7 @@ func (nc *NigeriaIdentityConnector) VerifyDriverLicense(ctx context.Context, req
 		LicenseClass:  []string{"B", "C"}, // Private and commercial light vehicles
 		StateOfIssue:  "Lagos",
 	}
-	
+
 	return response, nil
 }
 
@@ -282,9 +282,9 @@ func (nc *NigeriaIdentityConnector) VerifyPassport(ctx context.Context, req *NGP
 	if err := nc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	passportNumber := strings.ToUpper(strings.TrimSpace(req.PassportNumber))
-	
+
 	// Validate passport number format (letter + 8 digits)
 	if !regexp.MustCompile(`^[A-Z]\d{8}$`).MatchString(passportNumber) {
 		return &NGPassportResponse{
@@ -292,7 +292,7 @@ func (nc *NigeriaIdentityConnector) VerifyPassport(ctx context.Context, req *NGP
 			Error: "Invalid passport number format",
 		}, nil
 	}
-	
+
 	// In production, this would verify with Nigeria Immigration Service
 	response := &NGPassportResponse{
 		Valid:            true,
@@ -306,7 +306,7 @@ func (nc *NigeriaIdentityConnector) VerifyPassport(ctx context.Context, req *NGP
 		IssuingAuthority: "Nigeria",
 		PassportType:     "Ordinary",
 	}
-	
+
 	return response, nil
 }
 
@@ -322,7 +322,7 @@ func (nc *NigeriaIdentityConnector) generateCacheKey(operation string, parts ...
 func (nc *NigeriaIdentityConnector) GetMetrics() map[string]interface{} {
 	nc.mu.RLock()
 	defer nc.mu.RUnlock()
-	
+
 	return map[string]interface{}{
 		"connector": "nigeria_identity",
 	}

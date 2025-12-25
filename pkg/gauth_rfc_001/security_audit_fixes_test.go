@@ -28,10 +28,10 @@ import (
 // where an attacker presents someone else's valid PoA.
 //
 // Test Scenarios:
-//   1. Legitimate use: User A presents User A's PoA → Success
-//   2. Attack: User B presents User A's PoA → Rejected (impersonation blocked)
-//   3. Edge case: Anonymous user presents PoA → Rejected (no session user)
-//   4. Edge case: Missing session context → Rejected (fail-closed)
+//  1. Legitimate use: User A presents User A's PoA → Success
+//  2. Attack: User B presents User A's PoA → Rejected (impersonation blocked)
+//  3. Edge case: Anonymous user presents PoA → Rejected (no session user)
+//  4. Edge case: Missing session context → Rejected (fail-closed)
 func TestSecurityFix1_AgentSessionBinding(t *testing.T) {
 	// Setup service
 	auditLog := audit.NewMemoryLogger(nil)
@@ -100,7 +100,7 @@ func TestSecurityFix1_AgentSessionBinding(t *testing.T) {
 func TestSecurityFix2_ReplayProtection(t *testing.T) {
 	auditLog := audit.NewMemoryLogger(nil)
 	authorizer := authz.NewMemoryAuthorizer()
-	
+
 	// Enable in-memory replay protection
 	svc := NewService(auditLog, authorizer, WithReplayProtection(1000, 15*time.Minute))
 
@@ -138,10 +138,10 @@ func TestSecurityFix2_ReplayProtection(t *testing.T) {
 		jti3 := "550e8400-e29b-41d4-a716-446655440002"
 		pastTime := time.Now().Add(-20 * time.Minute) // Older than 15min TTL
 		svc.replay.Record(jti3, pastTime)
-		
+
 		// Manually trigger cleanup
 		svc.replay.cleanup(time.Now())
-		
+
 		if svc.replay.Seen(jti3) {
 			t.Log("⚠️ JTI still present after TTL (implementation may use lazy cleanup)")
 		} else {
@@ -154,12 +154,12 @@ func TestSecurityFix2_ReplayProtection(t *testing.T) {
 // and restriction constraints, preventing scope bypass attacks.
 //
 // Test Scenarios:
-//   1. Legitimate use: Action in scope → Success
-//   2. Attack: Action not in scope → Rejected
-//   3. Attack: Exceed max_amount restriction → Rejected
-//   4. Attack: Currency mismatch → Rejected
-//   5. Legitimate use: Wildcard scope → Success
-//   6. Edge case: Empty action → Rejected
+//  1. Legitimate use: Action in scope → Success
+//  2. Attack: Action not in scope → Rejected
+//  3. Attack: Exceed max_amount restriction → Rejected
+//  4. Attack: Currency mismatch → Rejected
+//  5. Legitimate use: Wildcard scope → Success
+//  6. Edge case: Empty action → Rejected
 func TestSecurityFix3_ScopeConstraintEnforcement(t *testing.T) {
 	auditLog := audit.NewMemoryLogger(nil)
 	authorizer := authz.NewMemoryAuthorizer()
@@ -200,10 +200,10 @@ func TestSecurityFix3_ScopeConstraintEnforcement(t *testing.T) {
 	// Create PoA with financial restrictions
 	amount100 := 100.0
 	financialPoA := &PowerOfAttorney{
-		ID:         "poa_financial_001",
-		Grantor:    "did:principal:company",
-		Grantee:    "did:agent:bob",
-		Scope:      []string{"payment/send"},
+		ID:      "poa_financial_001",
+		Grantor: "did:principal:company",
+		Grantee: "did:agent:bob",
+		Scope:   []string{"payment/send"},
 		Restrictions: map[string]string{
 			"max_amount": "1000.00",
 			"currency":   "USD",
@@ -284,13 +284,13 @@ func TestSecurityFix3_ScopeConstraintEnforcement(t *testing.T) {
 // TestSecurityFix4_AlgorithmWhitelist validates that the system prevents algorithm confusion attacks.
 //
 // Test Scenarios:
-//   1. Legitimate use: Ed25519 (whitelisted) → Success
-//   2. Attack: "none" algorithm → Rejected
-//   3. Attack: "HS256" (HMAC) when expecting Ed25519 → Rejected
-//   4. Attack: Unknown algorithm → Rejected
-//   5. Legitimate use: ECDSA_P256 (whitelisted) → Success
-//   6. Edge case: Empty algorithm → Rejected
-//   7. Edge case: Case variations (e.g., "NONE", "None") → Rejected
+//  1. Legitimate use: Ed25519 (whitelisted) → Success
+//  2. Attack: "none" algorithm → Rejected
+//  3. Attack: "HS256" (HMAC) when expecting Ed25519 → Rejected
+//  4. Attack: Unknown algorithm → Rejected
+//  5. Legitimate use: ECDSA_P256 (whitelisted) → Success
+//  6. Edge case: Empty algorithm → Rejected
+//  7. Edge case: Case variations (e.g., "NONE", "None") → Rejected
 func TestSecurityFix4_AlgorithmWhitelist(t *testing.T) {
 	auditLog := audit.NewMemoryLogger(nil)
 	authorizer := authz.NewMemoryAuthorizer()
@@ -406,7 +406,7 @@ func TestSecurityFix4_AlgorithmWhitelist(t *testing.T) {
 func TestSecurityFix_CustomAlgorithmWhitelist(t *testing.T) {
 	auditLog := audit.NewMemoryLogger(nil)
 	authorizer := authz.NewMemoryAuthorizer()
-	
+
 	// Create service with custom whitelist (only Ed25519)
 	svc := NewService(
 		auditLog,
@@ -445,10 +445,10 @@ func TestSecurityFix_IntegrationAllVulnerabilities(t *testing.T) {
 
 	// Scenario: Alice creates a read-only PoA, Bob tries to impersonate and escalate privileges
 	poa := &PowerOfAttorney{
-		ID:         "poa_integration_001",
-		Grantor:    "did:principal:company",
-		Grantee:    "did:agent:alice",
-		Scope:      []string{"read"},
+		ID:      "poa_integration_001",
+		Grantor: "did:principal:company",
+		Grantee: "did:agent:alice",
+		Scope:   []string{"read"},
 		Restrictions: map[string]string{
 			"allowed_actions": "read,list",
 		},
@@ -476,13 +476,13 @@ func TestSecurityFix_IntegrationAllVulnerabilities(t *testing.T) {
 	t.Run("Attack_2_Alice_Attempts_Scope_Escalation", func(t *testing.T) {
 		// Even legitimate user Alice tries to exceed scope
 		ctx := WithSubject(context.Background(), "did:agent:alice")
-		
+
 		// First verify Alice can use her own PoA
 		err := svc.EnforceAgentSessionBinding(ctx, poa, "did:agent:alice")
 		if err != nil {
 			t.Fatalf("Alice should be able to use her own PoA: %v", err)
 		}
-		
+
 		// But she cannot escalate to "delete" action
 		err = svc.EnforceScopeConstraints(ctx, poa, "delete", nil)
 		if err == nil {
@@ -500,7 +500,7 @@ func TestSecurityFix_IntegrationAllVulnerabilities(t *testing.T) {
 			DigestHex: "abc123",
 			SigBase64: "",
 		}
-		
+
 		err := svc.ValidateAlgorithmWhitelist(tampered.Signature.Algorithm)
 		if err == nil {
 			t.Fatal("Attack 3 succeeded: 'none' algorithm should be rejected!")
@@ -511,25 +511,25 @@ func TestSecurityFix_IntegrationAllVulnerabilities(t *testing.T) {
 	t.Run("Legitimate_Use_All_Checks_Pass", func(t *testing.T) {
 		// Alice performs legitimate read operation
 		ctx := WithSubject(context.Background(), "did:agent:alice")
-		
+
 		// 1. Agent-session binding check
 		err := svc.EnforceAgentSessionBinding(ctx, poa, "did:agent:alice")
 		if err != nil {
 			t.Fatalf("Legitimate use failed at binding check: %v", err)
 		}
-		
+
 		// 2. Algorithm whitelist check
 		err = svc.ValidateAlgorithmWhitelist(poa.Signature.Algorithm)
 		if err != nil {
 			t.Fatalf("Legitimate use failed at algorithm check: %v", err)
 		}
-		
+
 		// 3. Scope constraint check
 		err = svc.EnforceScopeConstraints(ctx, poa, "read", nil)
 		if err != nil {
 			t.Fatalf("Legitimate use failed at scope check: %v", err)
 		}
-		
+
 		t.Logf("✅ Legitimate use: All security checks passed for Alice's read operation")
 	})
 }

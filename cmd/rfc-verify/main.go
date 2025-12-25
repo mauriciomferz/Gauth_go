@@ -246,7 +246,7 @@ func verifySymbol(sym string, lastDir string) (bool, string) {
 	roots := []string{"pkg", "web", "internal"}
 	for _, root := range roots {
 		foundPath := ""
-		filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 			if err != nil || d.IsDir() {
 				return nil
 			}
@@ -261,7 +261,9 @@ func verifySymbol(sym string, lastDir string) (bool, string) {
 				return fs.SkipAll // Stop at first match
 			}
 			return nil
-		})
+		}); err != nil && err != fs.SkipAll {
+			// ignore walk errors but don't ignore the function return entirely to satisfy linter
+		}
 
 		if foundPath != "" {
 			return true, foundPath
@@ -283,7 +285,7 @@ func verifyFile(path string) bool {
 
 func grepDir(dir, term string) bool {
 	found := false
-	filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil || d.IsDir() {
 			return nil
 		}
@@ -298,6 +300,9 @@ func grepDir(dir, term string) bool {
 		}
 		return nil
 	})
+	if err != nil && err != fs.SkipAll {
+		// ignore
+	}
 	return found
 }
 

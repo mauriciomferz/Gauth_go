@@ -35,7 +35,7 @@ func setupOptimisticTest(t *testing.T) (*OptimisticRevocation, *miniredis.Minire
 		redis:            redisClient,
 		logger:           logger,
 		oracle:           oracle,
-		challengeWindow:  5 * time.Second,  // Short window for tests
+		challengeWindow:  5 * time.Second, // Short window for tests
 		mempoolClearTime: 200 * time.Millisecond,
 		minCollateral:    1e18, // 1 ETH
 		shutdown:         make(chan struct{}),

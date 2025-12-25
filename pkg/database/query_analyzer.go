@@ -34,19 +34,19 @@ type QueryPlan struct {
 // ExplainPlan represents the structure of EXPLAIN output
 type ExplainPlan struct {
 	Plan struct {
-		NodeType          string  `json:"Node Type"`
-		RelationName      string  `json:"Relation Name"`
-		Strategy          string  `json:"Strategy"`
-		TotalCost         float64 `json:"Total Cost"`
-		PlanRows          int64   `json:"Plan Rows"`
-		PlanWidth         int     `json:"Plan Width"`
-		ActualTotalTime   float64 `json:"Actual Total Time"`
-		ActualRows        int64   `json:"Actual Rows"`
-		IndexName         string  `json:"Index Name"`
-		SharedHitBlocks   int     `json:"Shared Hit Blocks"`
-		SharedReadBlocks  int     `json:"Shared Read Blocks"`
-		SharedDirtiedBlocks int   `json:"Shared Dirtied Blocks"`
-		Plans             []struct {
+		NodeType            string  `json:"Node Type"`
+		RelationName        string  `json:"Relation Name"`
+		Strategy            string  `json:"Strategy"`
+		TotalCost           float64 `json:"Total Cost"`
+		PlanRows            int64   `json:"Plan Rows"`
+		PlanWidth           int     `json:"Plan Width"`
+		ActualTotalTime     float64 `json:"Actual Total Time"`
+		ActualRows          int64   `json:"Actual Rows"`
+		IndexName           string  `json:"Index Name"`
+		SharedHitBlocks     int     `json:"Shared Hit Blocks"`
+		SharedReadBlocks    int     `json:"Shared Read Blocks"`
+		SharedDirtiedBlocks int     `json:"Shared Dirtied Blocks"`
+		Plans               []struct {
 			NodeType     string `json:"Node Type"`
 			RelationName string `json:"Relation Name"`
 			IndexName    string `json:"Index Name"`
@@ -122,7 +122,7 @@ func (qa *QueryAnalyzer) analyzePlan(explainPlan *ExplainPlan, plan *QueryPlan) 
 	// Check for sequential scans
 	if strings.Contains(explainPlan.Plan.NodeType, "Seq Scan") {
 		plan.Warnings = append(plan.Warnings, "Sequential scan detected - may benefit from an index")
-		plan.Recommendations = append(plan.Recommendations, 
+		plan.Recommendations = append(plan.Recommendations,
 			fmt.Sprintf("Consider adding an index on table '%s'", explainPlan.Plan.RelationName))
 	}
 
@@ -130,52 +130,52 @@ func (qa *QueryAnalyzer) analyzePlan(explainPlan *ExplainPlan, plan *QueryPlan) 
 	if plan.EstimatedRows > 0 && plan.ActualRows > 0 {
 		ratio := float64(plan.EstimatedRows) / float64(plan.ActualRows)
 		if ratio > 10 || ratio < 0.1 {
-			plan.Warnings = append(plan.Warnings, 
-				fmt.Sprintf("Statistics may be outdated (estimated: %d, actual: %d)", 
+			plan.Warnings = append(plan.Warnings,
+				fmt.Sprintf("Statistics may be outdated (estimated: %d, actual: %d)",
 					plan.EstimatedRows, plan.ActualRows))
-			plan.Recommendations = append(plan.Recommendations, 
+			plan.Recommendations = append(plan.Recommendations,
 				"Run ANALYZE on affected tables to update statistics")
 		}
 	}
 
 	// Check for nested loops with large datasets
 	if strings.Contains(explainPlan.Plan.NodeType, "Nested Loop") && plan.ActualRows > 1000 {
-		plan.Warnings = append(plan.Warnings, 
+		plan.Warnings = append(plan.Warnings,
 			"Nested loop on large dataset detected")
-		plan.Recommendations = append(plan.Recommendations, 
+		plan.Recommendations = append(plan.Recommendations,
 			"Consider optimizing JOIN strategy or adding indexes")
 	}
 
 	// Check for high buffer reads (disk I/O)
 	if explainPlan.Plan.SharedReadBlocks > 1000 {
-		plan.Warnings = append(plan.Warnings, 
-			fmt.Sprintf("High disk I/O detected (%d blocks read)", 
+		plan.Warnings = append(plan.Warnings,
+			fmt.Sprintf("High disk I/O detected (%d blocks read)",
 				explainPlan.Plan.SharedReadBlocks))
-		plan.Recommendations = append(plan.Recommendations, 
+		plan.Recommendations = append(plan.Recommendations,
 			"Consider increasing shared_buffers or adding indexes to reduce disk reads")
 	}
 
 	// Check execution time
 	if plan.ExecutionTime > qa.slowQueryThreshold {
-		plan.Warnings = append(plan.Warnings, 
-			fmt.Sprintf("Slow query detected (%v > %v)", 
+		plan.Warnings = append(plan.Warnings,
+			fmt.Sprintf("Slow query detected (%v > %v)",
 				plan.ExecutionTime, qa.slowQueryThreshold))
 	}
 
 	// Check for missing index on WHERE clause
 	queryLower := strings.ToLower(plan.Query)
-	if strings.Contains(queryLower, "where") && 
-	   strings.Contains(explainPlan.Plan.NodeType, "Seq Scan") {
-		plan.Recommendations = append(plan.Recommendations, 
+	if strings.Contains(queryLower, "where") &&
+		strings.Contains(explainPlan.Plan.NodeType, "Seq Scan") {
+		plan.Recommendations = append(plan.Recommendations,
 			"Query contains WHERE clause but uses sequential scan - add index on filter columns")
 	}
 
 	// Check for cartesian product (missing JOIN condition)
-	if strings.Contains(queryLower, "join") && 
-	   explainPlan.Plan.ActualRows > plan.EstimatedRows*10 {
-		plan.Warnings = append(plan.Warnings, 
+	if strings.Contains(queryLower, "join") &&
+		explainPlan.Plan.ActualRows > plan.EstimatedRows*10 {
+		plan.Warnings = append(plan.Warnings,
 			"Possible cartesian product detected - check JOIN conditions")
-		plan.Recommendations = append(plan.Recommendations, 
+		plan.Recommendations = append(plan.Recommendations,
 			"Verify all JOIN clauses have proper ON conditions")
 	}
 }

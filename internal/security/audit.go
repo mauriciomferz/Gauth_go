@@ -38,11 +38,11 @@ type AuditEvent struct {
 
 // AuditLogger manages security audit logging
 type AuditLogger struct {
-	events     []AuditEvent
-	mu         sync.RWMutex
-	maxEvents  int
-	logToFile  bool
-	logFile    *os.File
+	events      []AuditEvent
+	mu          sync.RWMutex
+	maxEvents   int
+	logToFile   bool
+	logFile     *os.File
 	logToStdout bool
 }
 
@@ -56,13 +56,13 @@ func InitAuditLogger() *AuditLogger {
 		maxEvents := getEnvInt("GAUTH_AUDIT_MAX_EVENTS", 10000)
 		logToFile := os.Getenv("GAUTH_AUDIT_LOG_FILE") != ""
 		logToStdout := os.Getenv("GAUTH_AUDIT_LOG_STDOUT") == "1"
-		
+
 		logger := &AuditLogger{
 			events:      make([]AuditEvent, 0, maxEvents),
 			maxEvents:   maxEvents,
 			logToStdout: logToStdout,
 		}
-		
+
 		// Open log file if configured
 		if logToFile {
 			logPath := os.Getenv("GAUTH_AUDIT_LOG_FILE")
@@ -74,10 +74,10 @@ func InitAuditLogger() *AuditLogger {
 				logger.logToFile = true
 			}
 		}
-		
+
 		globalAuditLogger = logger
 	})
-	
+
 	return globalAuditLogger
 }
 
@@ -87,7 +87,7 @@ func (a *AuditLogger) LogEvent(event AuditEvent) {
 	if event.Timestamp.IsZero() {
 		event.Timestamp = time.Now()
 	}
-	
+
 	// Store in memory
 	a.mu.Lock()
 	if len(a.events) >= a.maxEvents {
@@ -96,7 +96,7 @@ func (a *AuditLogger) LogEvent(event AuditEvent) {
 	}
 	a.events = append(a.events, event)
 	a.mu.Unlock()
-	
+
 	// Log to file if configured
 	if a.logToFile && a.logFile != nil {
 		data, err := json.Marshal(event)
@@ -104,7 +104,7 @@ func (a *AuditLogger) LogEvent(event AuditEvent) {
 			fmt.Fprintf(a.logFile, "%s\n", data)
 		}
 	}
-	
+
 	// Log to stdout if configured
 	if a.logToStdout {
 		data, _ := json.MarshalIndent(event, "", "  ")
@@ -116,20 +116,20 @@ func (a *AuditLogger) LogEvent(event AuditEvent) {
 func (a *AuditLogger) GetEvents(limit int) []AuditEvent {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
-	
+
 	if limit <= 0 || limit > len(a.events) {
 		limit = len(a.events)
 	}
-	
+
 	// Return most recent events
 	start := len(a.events) - limit
 	if start < 0 {
 		start = 0
 	}
-	
+
 	result := make([]AuditEvent, limit)
 	copy(result, a.events[start:])
-	
+
 	return result
 }
 
@@ -137,16 +137,16 @@ func (a *AuditLogger) GetEvents(limit int) []AuditEvent {
 func (a *AuditLogger) GetEventsByType(eventType string, limit int) []AuditEvent {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
-	
+
 	result := make([]AuditEvent, 0, limit)
-	
+
 	// Iterate backwards to get most recent first
 	for i := len(a.events) - 1; i >= 0 && len(result) < limit; i-- {
 		if a.events[i].EventType == eventType {
 			result = append(result, a.events[i])
 		}
 	}
-	
+
 	return result
 }
 
@@ -167,16 +167,16 @@ func AuditMiddleware(logger *AuditLogger) gin.HandlerFunc {
 			requestID = generateRequestID()
 			c.Header("X-Request-ID", requestID)
 		}
-		
+
 		// Store request ID in context
 		c.Set("request_id", requestID)
-		
+
 		// Process request
 		c.Next()
-		
+
 		// Calculate response time
 		responseTime := time.Since(startTime).Milliseconds()
-		
+
 		// Determine if this should be audited
 		if shouldAuditRequest(c) {
 			event := AuditEvent{
@@ -194,7 +194,7 @@ func AuditMiddleware(logger *AuditLogger) gin.HandlerFunc {
 				StatusCode:   c.Writer.Status(),
 				ResponseTime: responseTime,
 			}
-			
+
 			// Add security event details if present
 			if secEvent, exists := c.Get("security_event"); exists {
 				if event.Details == nil {
@@ -204,7 +204,7 @@ func AuditMiddleware(logger *AuditLogger) gin.HandlerFunc {
 				event.EventType = "security_event"
 				event.Severity = severityWarning
 			}
-			
+
 			// Add rate limit details
 			if c.GetBool("rate_limited") {
 				if event.Details == nil {
@@ -213,7 +213,7 @@ func AuditMiddleware(logger *AuditLogger) gin.HandlerFunc {
 				event.Details["rate_limited"] = true
 				event.Severity = severityWarning
 			}
-			
+
 			logger.LogEvent(event)
 		}
 	}
@@ -225,12 +225,12 @@ func shouldAuditRequest(c *gin.Context) bool {
 	if c.Writer.Status() >= 400 {
 		return true
 	}
-	
+
 	// Always audit security events
 	if _, exists := c.Get("security_event"); exists {
 		return true
 	}
-	
+
 	// Always audit authentication and sensitive endpoints
 	path := c.Request.URL.Path
 	sensitivePatterns := []string{
@@ -240,19 +240,19 @@ func shouldAuditRequest(c *gin.Context) bool {
 		"/api/v1/beta/audit",
 		"/api/v1/beta/subscriptions",
 	}
-	
+
 	for _, pattern := range sensitivePatterns {
 		if matchesPattern(path, pattern) {
 			return true
 		}
 	}
-	
+
 	// Audit POST, PUT, DELETE operations
 	method := c.Request.Method
 	if method == "POST" || method == "PUT" || method == "DELETE" || method == "PATCH" {
 		return true
 	}
-	
+
 	return false
 }
 
@@ -290,7 +290,7 @@ func LogSecurityEvent(eventType, action, result, message string, details map[str
 	if globalAuditLogger == nil {
 		return
 	}
-	
+
 	event := AuditEvent{
 		Timestamp: time.Now(),
 		EventType: eventType,
@@ -300,7 +300,7 @@ func LogSecurityEvent(eventType, action, result, message string, details map[str
 		Message:   message,
 		Details:   details,
 	}
-	
+
 	globalAuditLogger.LogEvent(event)
 }
 
@@ -309,12 +309,12 @@ func LogAuthenticationAttempt(clientIP, actor, result, message string) {
 	if globalAuditLogger == nil {
 		return
 	}
-	
+
 	severity := "info"
 	if result == "failure" {
 		severity = "warning"
 	}
-	
+
 	event := AuditEvent{
 		Timestamp: time.Now(),
 		EventType: "authentication",
@@ -325,7 +325,7 @@ func LogAuthenticationAttempt(clientIP, actor, result, message string) {
 		Result:    result,
 		Message:   message,
 	}
-	
+
 	globalAuditLogger.LogEvent(event)
 }
 
@@ -334,12 +334,12 @@ func LogTokenOperation(clientIP, actor, operation, result string, details map[st
 	if globalAuditLogger == nil {
 		return
 	}
-	
+
 	severity := "info"
 	if result == "failure" {
 		severity = "warning"
 	}
-	
+
 	event := AuditEvent{
 		Timestamp: time.Now(),
 		EventType: "token_operation",
@@ -350,7 +350,7 @@ func LogTokenOperation(clientIP, actor, operation, result string, details map[st
 		Result:    result,
 		Details:   details,
 	}
-	
+
 	globalAuditLogger.LogEvent(event)
 }
 
@@ -359,7 +359,7 @@ func LogAdministrativeAction(clientIP, actor, action, resource, result string, d
 	if globalAuditLogger == nil {
 		return
 	}
-	
+
 	event := AuditEvent{
 		Timestamp: time.Now(),
 		EventType: "administrative",
@@ -371,7 +371,7 @@ func LogAdministrativeAction(clientIP, actor, action, resource, result string, d
 		Result:    result,
 		Details:   details,
 	}
-	
+
 	globalAuditLogger.LogEvent(event)
 }
 
@@ -380,25 +380,25 @@ func GetAuditSummary() map[string]interface{} {
 	if globalAuditLogger == nil {
 		return nil
 	}
-	
+
 	globalAuditLogger.mu.RLock()
 	defer globalAuditLogger.mu.RUnlock()
-	
+
 	summary := make(map[string]interface{})
 	summary["total_events"] = len(globalAuditLogger.events)
-	
+
 	// Count by event type
 	eventTypes := make(map[string]int)
 	severityCounts := make(map[string]int)
-	
+
 	for _, event := range globalAuditLogger.events {
 		eventTypes[event.EventType]++
 		severityCounts[event.Severity]++
 	}
-	
+
 	summary["event_types"] = eventTypes
 	summary["severity_counts"] = severityCounts
 	summary["max_capacity"] = globalAuditLogger.maxEvents
-	
+
 	return summary
 }

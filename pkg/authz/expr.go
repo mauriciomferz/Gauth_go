@@ -35,12 +35,12 @@ type ExprLimits struct {
 // DefaultExprLimits fallback values.
 var DefaultExprLimits = ExprLimits{MaxTokens: 256, MaxDepth: 32, MaxOps: 1024, MaxIdentifierLength: 64, MaxLiteralLength: 256}
 
-
 // Boolean string constants for token comparison
 const (
-boolTrueString  = "true"
-boolFalseString = "false"
+	boolTrueString  = "true"
+	boolFalseString = "false"
 )
+
 // token types
 const (
 	tokEOF = iota

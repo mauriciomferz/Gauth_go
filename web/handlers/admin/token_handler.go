@@ -101,13 +101,13 @@ func (h *TokenHandler) CreateToken(c *gin.Context) {
 
 	// Create token in database
 	token := &tokens.Token{
-		TokenID:   "tok_" + tokenString[:16],
-		TenantID:  tenantID,
-		TokenType: req.TokenType,
-		Subject:   req.SubscriberID,
-		Scope:     req.Scopes,
-		IssuedAt:  issuedAt,
-		ExpiresAt: expiresAt,
+		TokenID:    "tok_" + tokenString[:16],
+		TenantID:   tenantID,
+		TokenType:  req.TokenType,
+		Subject:    req.SubscriberID,
+		Scope:      req.Scopes,
+		IssuedAt:   issuedAt,
+		ExpiresAt:  expiresAt,
 		UsageCount: 0,
 	}
 
@@ -169,7 +169,7 @@ func (h *TokenHandler) ListTokens(c *gin.Context) {
 	// Convert to response format
 	responseTokens := make([]Token, len(dbTokens))
 	for i, dbToken := range dbTokens {
-		statusStr := "active"
+		statusStr := StatusActive
 		if dbToken.RevokedAt != nil {
 			statusStr = "revoked"
 		} else if dbToken.ExpiresAt.Before(time.Now()) {
@@ -219,7 +219,7 @@ func (h *TokenHandler) GetToken(c *gin.Context) {
 		return
 	}
 
-	statusStr := "active"
+	statusStr := StatusActive
 	if dbToken.RevokedAt != nil {
 		statusStr = "revoked"
 	} else if dbToken.ExpiresAt.Before(time.Now()) {
@@ -534,7 +534,7 @@ func (h *TokenHandler) SearchTokens(c *gin.Context) {
 
 	responseTokens := make([]Token, len(dbTokens))
 	for i, dbToken := range dbTokens {
-		statusStr := "active"
+		statusStr := StatusActive
 		if dbToken.RevokedAt != nil {
 			statusStr = "revoked"
 		} else if dbToken.ExpiresAt.Before(time.Now()) {

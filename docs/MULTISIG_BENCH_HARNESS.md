@@ -1,3 +1,11 @@
+---
+title: Multisig Bench Harness
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Multi-Signature Benchmark Harness (RB14)
 
 Path: `cmd/multisig-bench`

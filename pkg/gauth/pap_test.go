@@ -925,7 +925,7 @@ func TestPAP_ConcurrentAccess(t *testing.T) {
 		wg.Add(1)
 		go func(index int) {
 			defer wg.Done()
-			
+
 			createRequest := &PolicyCreateRequest{
 				PolicyType:       PolicyTypePoA,
 				PolicyName:       fmt.Sprintf("Concurrent Policy %c", 'A'+index),
@@ -957,7 +957,7 @@ func TestPAP_ConcurrentAccess(t *testing.T) {
 	// Verify all policies were created
 	policies, err := pap.ListPolicies(ctx, nil)
 	require.NoError(t, err)
-	
+
 	// Add detailed logging if assertion fails
 	if len(policies) != 10 {
 		t.Logf("Expected 10 policies but got %d", len(policies))

@@ -1,3 +1,11 @@
+---
+title: Readme
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Kubernetes Deployment Guide
 
 This directory contains production-ready Kubernetes manifests for deploying GAuth with OPA sidecar.

@@ -71,10 +71,11 @@ type AuthorizationChain struct {
 
 // AuthorizationLink represents a single link in the authorization chain
 type AuthorizationLink struct {
-	EntityID   string `json:"entity_id"`
-	EntityType string `json:"entity_type"` // "natural_person", "organization", "ai_system"
-	EntityName string `json:"entity_name"`
-	Role       string `json:"role"` // "authorizer", "owner", "client"
+	EntityID     string `json:"entity_id"`
+	DelegationID string `json:"delegation_id,omitempty"`
+	EntityType   string `json:"entity_type"` // "natural_person", "organization", "ai_system"
+	EntityName   string `json:"entity_name"`
+	Role         string `json:"role"` // "authorizer", "owner", "client"
 
 	// Authorization details
 	AuthorizedBy          string    `json:"authorized_by,omitempty"` // Entity ID of parent authorizer

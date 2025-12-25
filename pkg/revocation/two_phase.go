@@ -16,24 +16,24 @@ type PoAStatus string
 const (
 	// PoAStatusActive indicates the PoA is fully operational
 	PoAStatusActive PoAStatus = "ACTIVE"
-	
+
 	// PoAStatusDisabled indicates the PoA is temporarily suspended (reversible)
 	// New transactions are rejected, but the Principal can cancel the disable
 	PoAStatusDisabled PoAStatus = "DISABLED"
-	
+
 	// PoAStatusRevoked indicates the PoA is permanently revoked (irreversible)
 	PoAStatusRevoked PoAStatus = "REVOKED"
 )
 
 // PoAState tracks the current state of a PoA in the two-phase revocation system
 type PoAState struct {
-	PoAID          string    `json:"poa_id"`
-	Status         PoAStatus `json:"status"`
-	DisabledAt     time.Time `json:"disabled_at,omitempty"`
-	RevokedAt      time.Time `json:"revoked_at,omitempty"`
-	DisableReason  string    `json:"disable_reason,omitempty"`
-	RevokeReason   string    `json:"revoke_reason,omitempty"`
-	Principal      string    `json:"principal"`
+	PoAID            string    `json:"poa_id"`
+	Status           PoAStatus `json:"status"`
+	DisabledAt       time.Time `json:"disabled_at,omitempty"`
+	RevokedAt        time.Time `json:"revoked_at,omitempty"`
+	DisableReason    string    `json:"disable_reason,omitempty"`
+	RevokeReason     string    `json:"revoke_reason,omitempty"`
+	Principal        string    `json:"principal"`
 	CancellableUntil time.Time `json:"cancellable_until,omitempty"`
 }
 
@@ -41,12 +41,12 @@ type PoAState struct {
 // This eliminates the TOCTOU vulnerability by immediately blocking new transactions while allowing
 // the Principal time to cancel if the disable was accidental.
 type TwoPhaseRevocation struct {
-	oracle         *EmergencyRevocationOracle
-	redis          redis.UniversalClient  // Supports both regular and cluster clients
-	logger         Logger
-	disableTimeout time.Duration // How long before auto-revoke (default: 30 seconds)
-	states         sync.Map      // poaID → *PoAState (local cache)
-	autoRevokeMu   sync.Mutex    // Protects autoRevokeTimers
+	oracle           *EmergencyRevocationOracle
+	redis            redis.UniversalClient // Supports both regular and cluster clients
+	logger           Logger
+	disableTimeout   time.Duration          // How long before auto-revoke (default: 30 seconds)
+	states           sync.Map               // poaID → *PoAState (local cache)
+	autoRevokeMu     sync.Mutex             // Protects autoRevokeTimers
 	autoRevokeTimers map[string]*time.Timer // poaID → timer for auto-revoke
 }
 
@@ -162,7 +162,7 @@ func (t *TwoPhaseRevocation) DisablePoA(ctx context.Context, poaID, principal, r
 	t.autoRevokeMu.Unlock()
 
 	duration := time.Since(start)
-	t.logger.Infof("✅ Phase 1 complete: PoA %s disabled in %v (cancellable for %v)", 
+	t.logger.Infof("✅ Phase 1 complete: PoA %s disabled in %v (cancellable for %v)",
 		poaID, duration, t.disableTimeout)
 
 	return nil
@@ -359,10 +359,10 @@ func (t *TwoPhaseRevocation) IsPoAUsable(ctx context.Context, poaID string) (boo
 	case PoAStatusActive:
 		return true, "PoA is active", nil
 	case PoAStatusDisabled:
-		return false, fmt.Sprintf("PoA disabled (reason: %s, cancellable until: %v)", 
+		return false, fmt.Sprintf("PoA disabled (reason: %s, cancellable until: %v)",
 			state.DisableReason, state.CancellableUntil), nil
 	case PoAStatusRevoked:
-		return false, fmt.Sprintf("PoA permanently revoked (reason: %s, revoked at: %v)", 
+		return false, fmt.Sprintf("PoA permanently revoked (reason: %s, revoked at: %v)",
 			state.RevokeReason, state.RevokedAt), nil
 	default:
 		return false, fmt.Sprintf("Unknown status: %s", state.Status), nil

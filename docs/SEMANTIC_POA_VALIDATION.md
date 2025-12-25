@@ -1,3 +1,11 @@
+---
+title: Semantic Poa Validation
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Semantic Power of Attorney (PoA) Validation (P0.4)
 
 ## Overview

@@ -1,3 +1,11 @@
+---
+title: Compliance Summary
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # GAuth Compliance Summary
 
 _Last updated: 2025-10-24_

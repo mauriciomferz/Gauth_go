@@ -1,3 +1,11 @@
+---
+title: Security Production Checklist
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # GAuth Server - Production Security Checklist
 
 **CRITICAL**: This checklist MUST be completed before deploying to production. The GAuth server includes development shortcuts that create severe security vulnerabilities if deployed as-is.

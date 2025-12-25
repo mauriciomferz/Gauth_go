@@ -127,7 +127,9 @@ func (h *Handler) Update() {
 		delta2 := fVal - e.Mean
 		e.M2 += delta * delta2
 	}
-	h.saveLocked()
+	if err := h.saveLocked(); err != nil {
+		fmt.Fprintf(os.Stderr, "[semantic] save failed: %v\n", err)
+	}
 }
 
 // appendHistory appends a snapshot to the history, handling pruning.

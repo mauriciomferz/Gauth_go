@@ -58,37 +58,37 @@ func NewTruliooProvider(config *TruliooConfig) *TruliooProvider {
 
 // TruliooVerifyRequest is the request sent to Trulioo API
 type TruliooVerifyRequest struct {
-	AcceptTruliooTermsAndConditions bool                `json:"AcceptTruliooTermsAndConditions"`
-	Demo                            bool                `json:"Demo,omitempty"`
-	CleansedAddress                 bool                `json:"CleansedAddress,omitempty"`
-	ConfigurationName               string              `json:"ConfigurationName"`
-	CountryCode                     string              `json:"CountryCode"`
-	DataFields                      TruliooDataFields   `json:"DataFields"`
+	AcceptTruliooTermsAndConditions bool              `json:"AcceptTruliooTermsAndConditions"`
+	Demo                            bool              `json:"Demo,omitempty"`
+	CleansedAddress                 bool              `json:"CleansedAddress,omitempty"`
+	ConfigurationName               string            `json:"ConfigurationName"`
+	CountryCode                     string            `json:"CountryCode"`
+	DataFields                      TruliooDataFields `json:"DataFields"`
 }
 
 type TruliooDataFields struct {
-	PersonInfo      TruliooPersonInfo      `json:"PersonInfo,omitempty"`
-	Location        TruliooLocation        `json:"Location,omitempty"`
-	Communication   TruliooCommunication   `json:"Communication,omitempty"`
-	Document        TruliooDocument        `json:"Document,omitempty"`
-	NationalIds     []TruliooNationalID    `json:"NationalIds,omitempty"`
+	PersonInfo    TruliooPersonInfo    `json:"PersonInfo,omitempty"`
+	Location      TruliooLocation      `json:"Location,omitempty"`
+	Communication TruliooCommunication `json:"Communication,omitempty"`
+	Document      TruliooDocument      `json:"Document,omitempty"`
+	NationalIds   []TruliooNationalID  `json:"NationalIds,omitempty"`
 }
 
 type TruliooPersonInfo struct {
-	FirstGivenName    string `json:"FirstGivenName,omitempty"`
-	FirstSurName      string `json:"FirstSurName,omitempty"`
-	DayOfBirth        int    `json:"DayOfBirth,omitempty"`
-	MonthOfBirth      int    `json:"MonthOfBirth,omitempty"`
-	YearOfBirth       int    `json:"YearOfBirth,omitempty"`
+	FirstGivenName string `json:"FirstGivenName,omitempty"`
+	FirstSurName   string `json:"FirstSurName,omitempty"`
+	DayOfBirth     int    `json:"DayOfBirth,omitempty"`
+	MonthOfBirth   int    `json:"MonthOfBirth,omitempty"`
+	YearOfBirth    int    `json:"YearOfBirth,omitempty"`
 }
 
 type TruliooLocation struct {
-	BuildingNumber string `json:"BuildingNumber,omitempty"`
-	StreetName     string `json:"StreetName,omitempty"`
-	City           string `json:"City,omitempty"`
+	BuildingNumber    string `json:"BuildingNumber,omitempty"`
+	StreetName        string `json:"StreetName,omitempty"`
+	City              string `json:"City,omitempty"`
 	StateProvinceCode string `json:"StateProvinceCode,omitempty"`
-	PostalCode     string `json:"PostalCode,omitempty"`
-	Country        string `json:"Country,omitempty"`
+	PostalCode        string `json:"PostalCode,omitempty"`
+	Country           string `json:"Country,omitempty"`
 }
 
 type TruliooCommunication struct {
@@ -110,13 +110,13 @@ type TruliooNationalID struct {
 
 // TruliooVerifyResponse is the response from Trulioo API
 type TruliooVerifyResponse struct {
-	TransactionID     string                  `json:"TransactionID"`
-	RecordStatus      string                  `json:"RecordStatus"`
-	MatchStatus       string                  `json:"MatchStatus,omitempty"`
-	Errors            []TruliooError          `json:"Errors,omitempty"`
-	InputFields       TruliooDataFields       `json:"InputFields,omitempty"`
-	Record            TruliooRecord           `json:"Record,omitempty"`
-	CountryCode       string                  `json:"CountryCode"`
+	TransactionID string            `json:"TransactionID"`
+	RecordStatus  string            `json:"RecordStatus"`
+	MatchStatus   string            `json:"MatchStatus,omitempty"`
+	Errors        []TruliooError    `json:"Errors,omitempty"`
+	InputFields   TruliooDataFields `json:"InputFields,omitempty"`
+	Record        TruliooRecord     `json:"Record,omitempty"`
+	CountryCode   string            `json:"CountryCode"`
 }
 
 type TruliooError struct {
@@ -125,17 +125,17 @@ type TruliooError struct {
 }
 
 type TruliooRecord struct {
-	TransactionRecordID string                      `json:"TransactionRecordID"`
-	RecordStatus        string                      `json:"RecordStatus"`
-	DatasourceResults   []TruliooDataSourceResult   `json:"DatasourceResults,omitempty"`
+	TransactionRecordID string                    `json:"TransactionRecordID"`
+	RecordStatus        string                    `json:"RecordStatus"`
+	DatasourceResults   []TruliooDataSourceResult `json:"DatasourceResults,omitempty"`
 }
 
 type TruliooDataSourceResult struct {
-	DatasourceName   string                 `json:"DatasourceName"`
-	DatasourceFields []TruliooFieldResult   `json:"DatasourceFields,omitempty"`
-	AppendedFields   []TruliooFieldResult   `json:"AppendedFields,omitempty"`
-	Errors           []TruliooError         `json:"Errors,omitempty"`
-	FieldGroups      []TruliooFieldGroup    `json:"FieldGroups,omitempty"`
+	DatasourceName   string               `json:"DatasourceName"`
+	DatasourceFields []TruliooFieldResult `json:"DatasourceFields,omitempty"`
+	AppendedFields   []TruliooFieldResult `json:"AppendedFields,omitempty"`
+	Errors           []TruliooError       `json:"Errors,omitempty"`
+	FieldGroups      []TruliooFieldGroup  `json:"FieldGroups,omitempty"`
 }
 
 type TruliooFieldResult struct {
@@ -430,7 +430,7 @@ func (t *TruliooProvider) parseVerificationResponse(
 
 	// Determine verification status
 	verified := truliooResp.RecordStatus == truliooStatusMatch
-	
+
 	// Determine verification level
 	verificationLevel := external.VerificationLevelBasic
 	if verified {
@@ -440,7 +440,7 @@ func (t *TruliooProvider) parseVerificationResponse(
 	// Build verification checks from datasource results
 	checks := &external.VerificationChecks{}
 	confidenceScore := 0.0
-	
+
 	for _, datasource := range truliooResp.Record.DatasourceResults {
 		for _, field := range datasource.DatasourceFields {
 			score := calculateMatchScore(field.Status)

@@ -1,3 +1,11 @@
+---
+title: Saml Scim Deployment Report
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Walkthrough - Deployment Readiness & Admin Handlers
 
 ## Overview

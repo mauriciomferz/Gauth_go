@@ -1,3 +1,11 @@
+---
+title: Security Compliance Guide
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # GAuth Security & Compliance Guide
 
 Comprehensive security implementation and compliance documentation for the GAuth OAuth 2.0 server.

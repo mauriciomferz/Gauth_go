@@ -238,18 +238,18 @@ func (h *EventHandler) ListHandlers(c *gin.Context) {
 				method = *eh.HTTPMethod
 			}
 
-		handlerMap[eh.ID] = &Handler{
-			ID:            eh.ID,
-			Name:          eh.HandlerName,
-			EventTypes:    []string{eh.EventType},
-			Endpoint:      endpoint,
-			Method:        method,
-			Enabled:       eh.Status == statusActive,
-			RetryPolicy:   retryPolicy,
-			Timeout:       eh.TimeoutSeconds * 1000, // Convert to ms
-			LastTriggered: lastTriggered,
-			SuccessRate:   successRate,
-		}
+			handlerMap[eh.ID] = &Handler{
+				ID:            eh.ID,
+				Name:          eh.HandlerName,
+				EventTypes:    []string{eh.EventType},
+				Endpoint:      endpoint,
+				Method:        method,
+				Enabled:       eh.Status == statusActive,
+				RetryPolicy:   retryPolicy,
+				Timeout:       eh.TimeoutSeconds * 1000, // Convert to ms
+				LastTriggered: lastTriggered,
+				SuccessRate:   successRate,
+			}
 		}
 	}
 
@@ -340,7 +340,7 @@ func (h *EventHandler) ToggleHandler(c *gin.Context) {
 		return
 	}
 
-	status := "inactive"
+	status := StatusInactive
 	if req.Enabled {
 		status = statusActive
 	}
@@ -475,7 +475,7 @@ func (h *EventHandler) TestHandler(c *gin.Context) {
 func (h *EventHandler) RegisterRoutes(router *gin.RouterGroup) {
 	events := router.Group("/events")
 	{
-		events.GET("", h.GetEventStream)  // Root endpoint lists events
+		events.GET("", h.GetEventStream) // Root endpoint lists events
 		events.GET("/types", h.ListEventTypes)
 		events.GET("/stream", h.GetEventStream)
 		events.GET("/metrics", h.GetEventMetrics)

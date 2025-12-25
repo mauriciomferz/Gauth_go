@@ -1,3 +1,11 @@
+---
+title: Index
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Documentation Index
 
 > Last Updated: 2025-11-12 (Added STRUCTURE.md, TECH_DEBT.md, Dockerfile.unified, CODEOWNERS reference)

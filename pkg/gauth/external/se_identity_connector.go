@@ -30,12 +30,12 @@ type SwedenConnectorConfig struct {
 	BankIDClientID     string `validate:"required"`
 	BankIDClientSecret string `validate:"required"`
 	BankIDCertPath     string // Path to BankID certificate
-	
+
 	// eIDAS Node configuration
-	EIDASNodeURL       string `validate:"url"`
-	
+	EIDASNodeURL string `validate:"url"`
+
 	// Timeouts
-	RequestTimeout     time.Duration
+	RequestTimeout time.Duration
 }
 
 // BankIDAuthRequest BankID authentication request
@@ -49,43 +49,43 @@ type BankIDAuthRequest struct {
 
 // BankIDAuthResponse BankID authentication response
 type BankIDAuthResponse struct {
-	Success            bool              `json:"success"`
-	OrderRef           string            `json:"order_ref"`
-	AutoStartToken     string            `json:"auto_start_token"`
-	QRStartToken       string            `json:"qr_start_token"`
-	QRStartSecret      string            `json:"qr_start_secret"`
-	Status             string            `json:"status"` // pending, complete, failed
-	HintCode           string            `json:"hint_code,omitempty"`
-	CompletionData     *BankIDCompletion `json:"completion_data,omitempty"`
-	Error              string            `json:"error,omitempty"`
+	Success        bool              `json:"success"`
+	OrderRef       string            `json:"order_ref"`
+	AutoStartToken string            `json:"auto_start_token"`
+	QRStartToken   string            `json:"qr_start_token"`
+	QRStartSecret  string            `json:"qr_start_secret"`
+	Status         string            `json:"status"` // pending, complete, failed
+	HintCode       string            `json:"hint_code,omitempty"`
+	CompletionData *BankIDCompletion `json:"completion_data,omitempty"`
+	Error          string            `json:"error,omitempty"`
 }
 
 // BankIDCompletion completion data from BankID
 type BankIDCompletion struct {
-	User               *BankIDUser       `json:"user"`
-	Device             *BankIDDevice     `json:"device"`
-	Cert               *BankIDCert       `json:"cert"`
-	Signature          string            `json:"signature"`
-	OcspResponse       string            `json:"ocsp_response"`
+	User         *BankIDUser   `json:"user"`
+	Device       *BankIDDevice `json:"device"`
+	Cert         *BankIDCert   `json:"cert"`
+	Signature    string        `json:"signature"`
+	OcspResponse string        `json:"ocsp_response"`
 }
 
 // BankIDUser user information from BankID
 type BankIDUser struct {
-	PersonalNumber     string `json:"personal_number"`
-	Name               string `json:"name"`
-	GivenName          string `json:"given_name"`
-	Surname            string `json:"surname"`
+	PersonalNumber string `json:"personal_number"`
+	Name           string `json:"name"`
+	GivenName      string `json:"given_name"`
+	Surname        string `json:"surname"`
 }
 
 // BankIDDevice device information
 type BankIDDevice struct {
-	IPAddress          string `json:"ip_address"`
+	IPAddress string `json:"ip_address"`
 }
 
 // BankIDCert certificate information
 type BankIDCert struct {
-	NotBefore          string `json:"not_before"`
-	NotAfter           string `json:"not_after"`
+	NotBefore string `json:"not_before"`
+	NotAfter  string `json:"not_after"`
 }
 
 // BankIDSignRequest BankID signing request
@@ -99,20 +99,20 @@ type BankIDSignRequest struct {
 
 // BankIDSignResponse BankID signing response
 type BankIDSignResponse struct {
-	Success            bool              `json:"success"`
-	OrderRef           string            `json:"order_ref"`
-	AutoStartToken     string            `json:"auto_start_token"`
-	QRStartToken       string            `json:"qr_start_token"`
-	QRStartSecret      string            `json:"qr_start_secret"`
-	Status             string            `json:"status"`
-	CompletionData     *BankIDCompletion `json:"completion_data,omitempty"`
-	Error              string            `json:"error,omitempty"`
+	Success        bool              `json:"success"`
+	OrderRef       string            `json:"order_ref"`
+	AutoStartToken string            `json:"auto_start_token"`
+	QRStartToken   string            `json:"qr_start_token"`
+	QRStartSecret  string            `json:"qr_start_secret"`
+	Status         string            `json:"status"`
+	CompletionData *BankIDCompletion `json:"completion_data,omitempty"`
+	Error          string            `json:"error,omitempty"`
 }
 
 // PersonnummerRequest personnummer validation request
 type PersonnummerRequest struct {
-	Personnummer       string `json:"personnummer" validate:"required"`
-	IncludeCentury     bool   `json:"include_century"`
+	Personnummer   string `json:"personnummer" validate:"required"`
+	IncludeCentury bool   `json:"include_century"`
 }
 
 // PersonnummerResponse personnummer validation response
@@ -126,7 +126,7 @@ type PersonnummerResponse struct {
 	BirthNumber        string `json:"birth_number"`
 	CheckDigit         string `json:"check_digit"`
 	Age                int    `json:"age"`
-	Gender             string `json:"gender"` // male, female
+	Gender             string `json:"gender"`              // male, female
 	CoordinationNumber bool   `json:"coordination_number"` // +60 to day for immigrants
 	Error              string `json:"error,omitempty"`
 }
@@ -138,18 +138,18 @@ func NewSwedenIdentityConnector(config *SwedenConnectorConfig) (*SwedenIdentityC
 	if err := validate.Struct(config); err != nil {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
-	
+
 	// Set defaults
 	if config.RequestTimeout == 0 {
 		config.RequestTimeout = 30 * time.Second
 	}
-	
+
 	connector := &SwedenIdentityConnector{
 		config:     config,
 		httpClient: &http.Client{Timeout: config.RequestTimeout},
 		validator:  validate,
 	}
-	
+
 	return connector, nil
 }
 
@@ -159,7 +159,7 @@ func (sc *SwedenIdentityConnector) AuthenticateBankID(ctx context.Context, req *
 	if err := sc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Validate personnummer first
 	pnrReq := &PersonnummerRequest{
 		Personnummer: req.PersonalNumber,
@@ -171,13 +171,13 @@ func (sc *SwedenIdentityConnector) AuthenticateBankID(ctx context.Context, req *
 			Error:   "Invalid personnummer",
 		}, nil
 	}
-	
+
 	// In production, this would:
 	// 1. Call BankID API /auth endpoint
 	// 2. Return orderRef and autoStartToken
 	// 3. Poll /collect endpoint for completion
 	// 4. Validate signature and OCSP response
-	
+
 	// Mock response for demonstration
 	response := &BankIDAuthResponse{
 		Success:        true,
@@ -204,7 +204,7 @@ func (sc *SwedenIdentityConnector) AuthenticateBankID(ctx context.Context, req *
 			OcspResponse: "mock_ocsp",
 		},
 	}
-	
+
 	return response, nil
 }
 
@@ -214,7 +214,7 @@ func (sc *SwedenIdentityConnector) SignWithBankID(ctx context.Context, req *Bank
 	if err := sc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Validate personnummer
 	pnrReq := &PersonnummerRequest{
 		Personnummer: req.PersonalNumber,
@@ -226,13 +226,13 @@ func (sc *SwedenIdentityConnector) SignWithBankID(ctx context.Context, req *Bank
 			Error:   "Invalid personnummer",
 		}, nil
 	}
-	
+
 	// In production, this would:
 	// 1. Call BankID API /sign endpoint
 	// 2. Return orderRef
 	// 3. Poll /collect endpoint for completion
 	// 4. Return signature
-	
+
 	// Mock response for demonstration
 	response := &BankIDSignResponse{
 		Success:        true,
@@ -247,7 +247,7 @@ func (sc *SwedenIdentityConnector) SignWithBankID(ctx context.Context, req *Bank
 			Signature: "mock_signature_" + req.UserVisibleData,
 		},
 	}
-	
+
 	return response, nil
 }
 
@@ -262,12 +262,12 @@ func (sc *SwedenIdentityConnector) ValidatePersonnummer(ctx context.Context, req
 	if err := sc.validator.Struct(req); err != nil {
 		return &PersonnummerResponse{Valid: false, Error: err.Error()}, nil
 	}
-	
+
 	// Remove separators and spaces
 	pnr := strings.ReplaceAll(req.Personnummer, "-", "")
 	pnr = strings.ReplaceAll(pnr, "+", "")
 	pnr = strings.TrimSpace(pnr)
-	
+
 	// Validate length (10 or 12 digits)
 	if len(pnr) != 10 && len(pnr) != 12 {
 		return &PersonnummerResponse{
@@ -275,7 +275,7 @@ func (sc *SwedenIdentityConnector) ValidatePersonnummer(ctx context.Context, req
 			Error: "Personnummer must be 10 or 12 digits",
 		}, nil
 	}
-	
+
 	// Validate all digits
 	if !regexp.MustCompile(`^\d+$`).MatchString(pnr) {
 		return &PersonnummerResponse{
@@ -283,11 +283,11 @@ func (sc *SwedenIdentityConnector) ValidatePersonnummer(ctx context.Context, req
 			Error: "Personnummer must contain only digits",
 		}, nil
 	}
-	
+
 	// Extract components
 	var century, year, month, day, birthNum, checkDigit string
 	var isCoordination bool
-	
+
 	if len(pnr) == 12 {
 		century = pnr[0:2]
 		year = pnr[2:4]
@@ -311,7 +311,7 @@ func (sc *SwedenIdentityConnector) ValidatePersonnummer(ctx context.Context, req
 		birthNum = pnr[6:9]
 		checkDigit = pnr[9:10]
 	}
-	
+
 	// Check for coordination number (day + 60)
 	var dayInt int
 	_, _ = fmt.Sscanf(day, "%d", &dayInt) // Best effort parsing; will be 0 if invalid
@@ -320,7 +320,7 @@ func (sc *SwedenIdentityConnector) ValidatePersonnummer(ctx context.Context, req
 		dayInt -= 60
 		day = fmt.Sprintf("%02d", dayInt)
 	}
-	
+
 	// Validate month (01-12)
 	var monthInt int
 	_, _ = fmt.Sscanf(month, "%d", &monthInt) // Best effort parse
@@ -330,7 +330,7 @@ func (sc *SwedenIdentityConnector) ValidatePersonnummer(ctx context.Context, req
 			Error: "Invalid month",
 		}, nil
 	}
-	
+
 	// Validate day (01-31)
 	if dayInt < 1 || dayInt > 31 {
 		return &PersonnummerResponse{
@@ -338,7 +338,7 @@ func (sc *SwedenIdentityConnector) ValidatePersonnummer(ctx context.Context, req
 			Error: "Invalid day",
 		}, nil
 	}
-	
+
 	// Validate check digit using Luhn algorithm
 	testNumber := year + month + day + birthNum
 	if !sc.validateLuhn(testNumber, checkDigit) {
@@ -347,7 +347,7 @@ func (sc *SwedenIdentityConnector) ValidatePersonnummer(ctx context.Context, req
 			Error: "Invalid check digit",
 		}, nil
 	}
-	
+
 	// Determine gender (odd = male, even = female)
 	var birthNumInt int
 	_, _ = fmt.Sscanf(birthNum, "%d", &birthNumInt) // Best effort parse
@@ -355,11 +355,11 @@ func (sc *SwedenIdentityConnector) ValidatePersonnummer(ctx context.Context, req
 	if birthNumInt%2 == 1 {
 		gender = "male"
 	}
-	
+
 	// Calculate age
 	birthYear, _ := time.Parse("2006", century+year)
 	age := time.Now().Year() - birthYear.Year()
-	
+
 	response := &PersonnummerResponse{
 		Valid:              true,
 		Personnummer:       req.Personnummer,
@@ -373,7 +373,7 @@ func (sc *SwedenIdentityConnector) ValidatePersonnummer(ctx context.Context, req
 		Gender:             gender,
 		CoordinationNumber: isCoordination,
 	}
-	
+
 	return response, nil
 }
 
@@ -393,11 +393,11 @@ func (sc *SwedenIdentityConnector) validateLuhn(number string, checkDigit string
 		}
 		sum += digit
 	}
-	
+
 	// Calculate check digit
 	calculatedCheck := (10 - (sum % 10)) % 10
 	expectedCheck := int(checkDigit[0] - '0')
-	
+
 	return calculatedCheck == expectedCheck
 }
 
@@ -415,7 +415,7 @@ func (sc *SwedenIdentityConnector) generateCacheKey(operation string, parts ...s
 func (sc *SwedenIdentityConnector) GetMetrics() map[string]interface{} {
 	sc.mu.RLock()
 	defer sc.mu.RUnlock()
-	
+
 	return map[string]interface{}{
 		"connector": "sweden_identity",
 	}

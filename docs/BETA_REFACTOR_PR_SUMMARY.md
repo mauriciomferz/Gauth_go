@@ -1,3 +1,11 @@
+---
+title: Beta Refactor Pr Summary
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Beta Refactor Merge (v0.3.0)
 
 > Last Updated: 2025-10-17

@@ -179,7 +179,7 @@ func (a *API) apiExternalAnchorVerify(c *gin.Context) {
 	// Verify chain integrity
 	valid := true
 	var failIndex int = -1
-	var failHash string = ""
+	var failHash = ""
 	if store != nil && !isEmpty {
 		status, idx, hash := store.VerifyIncremental()
 		if status != "ok" {

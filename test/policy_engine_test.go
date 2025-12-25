@@ -35,7 +35,7 @@ func TestPolicyEnginePatterns(t *testing.T) {
 	}
 
 	eng := policy.NewChainEngine(reg)
-	adapter := policy.NewAuthorizerAdapter(eng)
+	adapter := authz.NewAuthorizerAdapter(eng)
 	ctx := context.Background()
 
 	// 1. RBAC allow

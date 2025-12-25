@@ -20,10 +20,10 @@ import (
 	"sort"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/mauriciomferz/Gauth_go/internal/capability"
 	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
 	"github.com/mauriciomferz/Gauth_go/internal/tracing"
-	"github.com/gin-gonic/gin"
 )
 
 // capabilityDiffResponse defines the JSON structure returned by the diff endpoint.

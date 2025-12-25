@@ -101,7 +101,7 @@ func TestStartupValidator_ProductionMode(t *testing.T) {
 		{
 			name: "rate limiting disabled in production",
 			envVars: map[string]string{
-				"GAUTH_JWT_SIGNING_KEY":     "strong-key-12345678901234567890",
+				"GAUTH_JWT_SIGNING_KEY":    "strong-key-12345678901234567890",
 				"GAUTH_RATE_LIMIT_ENABLED": "false",
 			},
 			expectWarning: true,

@@ -1,3 +1,11 @@
+---
+title: Diagram Placeholders
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Architecture & Flow Diagram Placeholders
 
 These Mermaid placeholders outline key flows for the upcoming demo. Replace or refine with actual identifiers once final.

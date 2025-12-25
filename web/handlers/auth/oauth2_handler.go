@@ -212,7 +212,9 @@ func (h *OAuth2Handler) checkCibaStatus(ctx context.Context, id string) (string,
 
 func (h *OAuth2Handler) generateRandomString(length int) string {
 	b := make([]byte, length)
-	rand.Read(b)
+	if _, err := rand.Read(b); err != nil {
+		panic("crypto/rand failed: " + err.Error())
+	}
 	return base64.RawURLEncoding.EncodeToString(b)[:length]
 }
 

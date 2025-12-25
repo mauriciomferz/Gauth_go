@@ -3,8 +3,8 @@ package admin
 import (
 	"net/http"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/cache"
 	"github.com/gin-gonic/gin"
+	"github.com/mauriciomferz/Gauth_go/pkg/cache"
 )
 
 // CacheHandler handles cache-related HTTP requests

@@ -7,7 +7,7 @@ import (
 
 func TestMemoryClient_Anchor(t *testing.T) {
 	client := NewMemoryClient("test-tsa")
-	
+
 	tests := []struct {
 		name    string
 		req     *TimestampRequest

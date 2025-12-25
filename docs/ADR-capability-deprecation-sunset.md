@@ -1,3 +1,11 @@
+---
+title: Adr-Capability-Deprecation-Sunset
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # ADR: Capability Deprecation & Sunset Lifecycle
 
 Date: 2025-10-19

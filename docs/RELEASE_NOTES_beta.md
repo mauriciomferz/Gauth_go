@@ -1,3 +1,11 @@
+---
+title: Release Notes Beta
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # GAuth Beta Release Notes
 
 > Version: Beta (2025-10-26)

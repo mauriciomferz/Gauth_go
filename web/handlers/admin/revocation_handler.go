@@ -557,16 +557,16 @@ func (h *RevocationHandler) GetRevocationMetrics(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"metrics": gin.H{
-			"total_revocations":     stats.TotalRevocations,
-			"verified_revocations":  stats.VerifiedRevocations,
-			"pending_revocations":   stats.TotalRevocations - stats.VerifiedRevocations,
-			"merkle_tree_depth":     maxLevel + 1,
-			"merkle_tree_nodes":     nodeCount,
-			"current_block_height":  stats.LatestBlockHeight,
-			"latest_tree_version":   stats.LatestTreeVersion,
-			"revocations_last_24h":  stats.RevocationsLast24h,
-			"revocations_last_7d":   stats.RevocationsLast7d,
-			"verification_rate":     stats.VerificationRate,
+			"total_revocations":    stats.TotalRevocations,
+			"verified_revocations": stats.VerifiedRevocations,
+			"pending_revocations":  stats.TotalRevocations - stats.VerifiedRevocations,
+			"merkle_tree_depth":    maxLevel + 1,
+			"merkle_tree_nodes":    nodeCount,
+			"current_block_height": stats.LatestBlockHeight,
+			"latest_tree_version":  stats.LatestTreeVersion,
+			"revocations_last_24h": stats.RevocationsLast24h,
+			"revocations_last_7d":  stats.RevocationsLast7d,
+			"verification_rate":    stats.VerificationRate,
 		},
 	})
 }
@@ -582,18 +582,18 @@ func (h *RevocationHandler) RegisterRoutes(router *gin.RouterGroup) {
 	{
 		// Merkle tree operations
 		revocation.GET("/merkle-tree", h.GetMerkleTree)
-		
+
 		// Proof operations
 		revocation.GET("/proofs", h.ListProofs)
 		revocation.POST("/generate-proof", h.GenerateProof)
 		revocation.POST("/verify", h.VerifyProof)
-		
+
 		// Revocation list
 		revocation.GET("/list", h.ListRevocations)
-		
+
 		// Append-only log
 		revocation.GET("/log", h.GetAppendOnlyLog)
-		
+
 		// Metrics
 		revocation.GET("/metrics", h.GetRevocationMetrics)
 	}

@@ -1,172 +1,141 @@
-# ---
-# title: GAuth RFC Gap Matrix
-# category: generated
-# status: active
-# lastUpdated: 2025-11-12
-# owners: tooling
-# generated: true
-# source: gap-matrix-generator
-# refreshCadence: per-compliance-scan
-# tags: [rfc, compliance]
-# ---
 # GAuth RFC Gap Matrix (Generated)
 
-> **Generated:** 2025-11-07T00:00:00Z  
-> **Status:** 🎉 **100% COMPLETE** - All RFC 0111/0115 requirements implemented
+> Generated: 2025-12-25T13:14:14Z
 
-## Overall Progress
+**Drift Detected (9 items)**:
+- Key rotation & lifecycle: CSV(Status=Partial,Priority=P1) != MD(Status=Implemented,Priority=P1)
+- Obligations & advice processing: CSV(Status=Missing,Priority=P2) != MD(Status=Partial,Priority=P2)
+- Policy versioning & rollback: CSV(Status=Missing,Priority=P1) != MD(Status=Implemented,Priority=P1)
+- Joint/collective signature enforcement: CSV(Status=Missing,Priority=P1) != MD(Status=Partial,Priority=P1)
+- Jurisdiction-specific enforcement: CSV(Status=Missing,Priority=P1) != MD(Status=Implemented,Priority=P1)
+- Immutable audit ledger: CSV(Status=Partial,Priority=P0) != MD(Status=Implemented,Priority=P0)
+- Secure secret storage: CSV(Status=Missing,Priority=P0) != MD(Status=Partial,Priority=P0)
+- Well-known discovery endpoints: CSV(Status=Implemented,Priority=P2) != MD(Status=Partial,Priority=P2)
+- Structured numeric limit parsing: CSV(Status=Missing,Priority=P2) != MD(Status=Partial,Priority=P2)
 
-| Priority | Implemented | Total | Percentage |
-|----------|-------------|-------|------------|
-| **P0 (Critical)** | 11 | 11 | **100%** ✅ |
-| **P1 (High)** | 10 | 10 | **100%** ✅ |
-| **P2 (Medium)** | 19 | 19 | **100%** ✅ |
-| **P3 (Low)** | 5 | 5 | **100%** ✅ |
-| **TOTAL** | **45** | **45** | **100.0%** ✅ |
+CI should fail; update docs/GAP_MATRIX.md or artifacts/gap_matrix.csv to reconcile.
 
----
+## Capability Snapshot
+
+| Capability ID | Version | Stable |
+|---------------|---------|--------|
+| cap.transfer | 1.0 | true |
+| cap.issue | 1.0 | true |
+| cap.delegation.create | 1.0 | true |
+| cap.delegation.revoke | 1.0 | true |
+
+Schema Version: 1
 
 ## Cryptographic & Authenticity
 
-| ID | Requirement | Status | Priority | Description |
-|----|-------------|--------|----------|-------------|
-| sec1.item1 | Mandatory POA signature at issuance | ✅ Implemented | P0 | Multi-algorithm support: Ed25519, ES256, ES384, ES512, RS256; signature verification with configurable trust anchors |
-| sec1.item2 | Full JWT/PASETO claims | ✅ Implemented | P0 | Complete JWT/PASETO implementation with all standard claims; TokenResult with verification details |
-| sec1.item3 | Robust JSON parsing | ✅ Implemented | P0 | Secure JSON parsing with property tests and fuzz testing; backward compatibility validation |
-| sec1.item4 | Key rotation | ✅ Implemented | P1 | Multi-tenant key rotation with Vault/KMS integration, automatic scheduling, comprehensive HTTP API |
-| sec1.item5 | Public verifiable token integrity | ✅ Implemented | P0 | Detached signature support with multi-algorithm verification; complete test coverage |
-| sec1.item6 | Canonical digest stability | ✅ Implemented | P2 | Deterministic digest with property/fuzz tests; mutable field exclusion validated |
+| ID | Requirement | Status | Priority | Gap | Evidence |
+|----|-------------|--------|----------|-----|----------|
+| sec1.item1 | Mandatory POA signature at issuance | Implemented | P0 | Need configurable algorithms (Ed25519 only) | docs/GAP_MATRIX.md:12\|pkg/rfc0111/signature_negative_test.go |
+| sec1.item2 | Full JWT/PASETO claims | Partial | P0 | sub,scope,exp,iat,iss,aud,jti,nbf implemented; missing advanced (claims set metadata, structured nested PASETO footer, typ semantic enforcement) | pkg/gauth/gauth.go\|pkg/gauth/gauth_claims_test.go |
+| sec1.item3 | Robust JSON parsing | Partial | P0 | Manual string scanning; property + fuzz tests cover legacy parser for safety | pkg/gauth/gauth.go\|pkg/gauth/gauth_prop_test.go\|pkg/gauth/gauth_fuzz_test.go |
+| sec1.item4 | Key rotation & lifecycle | Partial | P1 | Scheduler + disk persistence implemented (env driven); missing multi-tenant segregation & external HSM integration | internal/crypto/keys.go\|internal/crypto/keys_persist_test.go |
+| sec1.item5 | Public verifiable token integrity | Partial | P0 | Local symmetric only; no detached signature | docs/GAP_MATRIX.md:14 |
+| sec1.item6 | Canonical digest stability fuzzing | Implemented | P2 | Property + fuzz tests validate determinism & mutable field exclusion | docs/GAP_MATRIX.md:15\|pkg/rfc0111/canonical.go\|pkg/rfc0111/canonical_prop_test.go\|pkg/rfc0111/canonical_fuzz_test.go |
 
 ## Authorization Engine
 
-| ID | Requirement | Status | Priority | Description |
-|----|-------------|--------|----------|-------------|
-| sec2.item1 | PDP combining algorithms | ✅ Implemented | P0 | Conflict diagnostics with decision provenance tracking |
-| sec2.item2 | ABAC expression evaluation | ✅ Implemented | P0 | Complete function registry with 40+ functions; extensible architecture |
-| sec2.item3 | Obligations & advice | ✅ Implemented | P2 | Advice emission with executor, dispatch, and metrics integration |
-| sec2.item4 | Policy versioning | ✅ Implemented | P1 | Hash chain with integrity verification; in-memory and persistent backends |
-| sec2.item5 | Distributed PDP | ✅ Implemented | P2 | Cache invalidation with distributed coordination; clustering support |
+| ID | Requirement | Status | Priority | Gap | Evidence |
+|----|-------------|--------|----------|-----|----------|
+| sec2.item1 | PDP combining algorithms | Implemented | P0 | Need richer conflict diagnostics | docs/GAP_MATRIX.md:20 |
+| sec2.item2 | ABAC expression evaluation | Implemented | P0 | No extensible function registry | docs/GAP_MATRIX.md:21 |
+| sec2.item3 | Obligations & advice processing | Missing | P2 | Concept only, not executed | docs/GAP_MATRIX.md:25 |
+| sec2.item4 | Policy versioning & rollback | Missing | P1 | No version metadata | docs/GAP_MATRIX.md:23 |
+| sec2.item5 | Distributed PDP & caching | Missing | P2 | No clustering or cache invalidation | docs/GAP_MATRIX.md:24 |
 
 ## PoA Definition (RFC0115)
 
-| ID | Requirement | Status | Priority | Description |
-|----|-------------|--------|----------|-------------|
-| sec3.item1 | Full semantic validation | ✅ Implemented | P0 | Complete validation: scope, formal requirements, power limits, constraint checking |
-| sec3.item2 | Embed PoA in token | ✅ Implemented | P1 | Full embedding with ScopeItem, validation, constraint rules; TokenResult integration |
-| sec3.item3 | Joint signature enforcement | ✅ Implemented | P1 | Threshold multi-sig, weighted verification, BLS aggregated signatures |
-| sec3.item4 | Conditional evaluation | ✅ Implemented | P2 | Runtime expression evaluation with variables, context, result tracking |
+| ID | Requirement | Status | Priority | Gap | Evidence |
+|----|-------------|--------|----------|-----|----------|
+| sec3.item1 | Full semantic validation | Partial | P0 | AdvancedPoAValidator adds extended rules; lacking warning channel & persistence of daily limits | docs/GAP_MATRIX.md:32\|pkg/rfc0111/validator.go\|pkg/rfc0111/rfc0111.go |
+| sec3.item2 | Embed full PoA in token | Partial | P1 | RawPOA + PoAVersion embedding implemented behind GAUTH_EMBED_FULL_POA with size cap GAUTH_MAX_RAW_POA_BYTES; remaining gaps: verifier exposure helper, CBOR option, streaming for large PoAs, warning channel & audit persistence | docs/GAP_MATRIX.md:33\|pkg/rfc0111/rfc0111.go\|internal/metrics/metrics.go |
+| sec3.item3 | Joint/collective signature enforcement | Missing | P1 | No multi-signer aggregation | docs/GAP_MATRIX.md:33 |
+| sec3.item4 | Conditional/special conditions evaluation | Missing | P2 | No runtime interpreter | docs/GAP_MATRIX.md:34 |
 
 ## Legal / Jurisdiction / Compliance
 
-| ID | Requirement | Status | Priority | Description |
-|----|-------------|--------|----------|-------------|
-| sec4.item1 | Regulatory controls | ✅ Implemented | P1 | LegalFrameworkValidator with GDPR/CCPA/HIPAA/PCI-DSS support; 6 jurisdictions |
-| sec4.item2 | Compliance attestation proof | ✅ Implemented | P2 | Evidence ingestion with dual-backend storage (InMemory/JSONL); 13 comprehensive tests |
-| sec4.item3 | Dispute resolution hooks | ✅ Implemented | P2 | ArbitrationAPI with webhook integration; HMAC-SHA256 signatures |
+| ID | Requirement | Status | Priority | Gap | Evidence |
+|----|-------------|--------|----------|-----|----------|
+| sec4.item1 | Jurisdiction-specific enforcement | Missing | P1 | No runtime branching | docs/GAP_MATRIX.md:40 |
+| sec4.item2 | Compliance attestation proof | Missing | P2 | No evidence ingestion | docs/GAP_MATRIX.md:41 |
+| sec4.item3 | Arbitration / dispute hooks | Missing | P3 | No code path | docs/GAP_MATRIX.md:42 |
 
 ## Persistence & Durability
 
-| ID | Requirement | Status | Priority | Description |
-|----|-------------|--------|----------|-------------|
-| sec5.item1 | Immutable audit ledger | ✅ Implemented | P0 | BoltDB hash chain with external anchor integration; Merkle root verification |
-| sec5.item2 | Delegation storage | ✅ Implemented | P2 | Indexing and pruning with lifecycle management; metrics tracking |
-| sec5.item3 | Revocation anchoring | ✅ Implemented | P2 | External notarization with transparency log integration |
+| ID | Requirement | Status | Priority | Gap | Evidence |
+|----|-------------|--------|----------|-----|----------|
+| sec5.item1 | Immutable audit ledger | Partial | P0 | BoltDB lacks signatures & external anchor | docs/GAP_MATRIX.md:48 |
+| sec5.item2 | Delegation storage durability | Partial | P2 | No indexing or pruning | docs/GAP_MATRIX.md:49 |
+| sec5.item3 | Revocation anchoring | Partial | P2 | No external notarization | docs/GAP_MATRIX.md:50 |
 
 ## Replay & Token Security
 
-| ID | Requirement | Status | Priority | Description |
-|----|-------------|--------|----------|-------------|
-| sec6.item1 | Fail-closed replay mode | ✅ Implemented | P1 | Durable persistence with WAL, eviction policies (TTL/LRU/size-based) |
-| sec6.item2 | JTI format validation | ✅ Implemented | P2 | Clock skew checks with configurable tolerance; format validation |
-| sec6.item3 | Replay persistence recovery | ✅ Implemented | P2 | WAL snapshot with automatic recovery; crash resilience |
+| ID | Requirement | Status | Priority | Gap | Evidence |
+|----|-------------|--------|----------|-----|----------|
+| sec6.item1 | Fail-closed replay mode | Partial | P1 | In-memory JTI map + optional ReplayStore reject duplicates/errors; missing durable persistence & eviction controls | pkg/gauth/gauth.go\|pkg/gauth/gauth_claims_test.go |
+| sec6.item2 | JTI format validation | Implemented | P2 | Need skew checks | docs/GAP_MATRIX.md:56 |
+| sec6.item3 | Replay persistence recovery | Missing | P2 | No WAL snapshot | docs/GAP_MATRIX.md:57 |
 
 ## Observability & Metrics
 
-| ID | Requirement | Status | Priority | Description |
-|----|-------------|--------|----------|-------------|
-| sec7.item1 | Decision metrics | ✅ Implemented | P2 | Labeled counters with action/resource/reason taxonomy; JSON export |
-| sec7.item2 | Metrics export adapter | ✅ Implemented | P3 | Prometheus, StatsD, OpenTelemetry collectors with registry |
-| sec7.item3 | Audit log aggregation | ✅ Implemented | P2 | Multi-backend aggregation with JSONL, chain linkage, retention policies |
-| sec7.item4 | OpenTelemetry tracing | ✅ Implemented | P3 | Distributed tracing with span attributes, context propagation, OTLP export |
+| ID | Requirement | Status | Priority | Gap | Evidence |
+|----|-------------|--------|----------|-----|----------|
+| sec7.item1 | Decision metrics (allow/deny + action/resource labels) | Implemented | P2 | Reason taxonomy limited; no JSON labeled export yet | docs/GAP_MATRIX.md:62\|internal/metrics/prometheus_adapter.go\|docs/OBSERVABILITY.md |
+| sec7.item2 | Metrics export adapter | Partial | P3 | No collector registration | docs/GAP_MATRIX.md:63 |
+| sec7.item3 | Violation & semantic counters (adaptive anomaly) | Implemented | P2 | Counters + per-category 60s/300s rates + adaptive anomaly detector (EWMA + Welford variance) with z-score export via JSON/Prometheus/OTEL; anomaly EWMA state persisted & restored with hash chain verification. Remaining gaps: external anchoring & archival rotation of semantic snapshots, historical rate archive beyond EWMA, surge alert hooks. | internal/observability/violations.go\|pkg/gauth/gauth.go\|pkg/rfc0111/rfc0111.go\|web/server_clean.go\|docs/OBSERVABILITY.md\|web/persistence_verify_test.go\|web/server_anomaly_test.go\|web/server_semantic_persistence_test.go |
+| sec7.item4 | Distributed tracing | Missing | P3 | No span linking | docs/GAP_MATRIX.md:65 |
 
 ## Key & Secret Management
 
-| ID | Requirement | Status | Priority | Description |
-|----|-------------|--------|----------|-------------|
-| sec8.item1 | Secure secret storage | ✅ Implemented | P0 | VaultBackend with production-ready HashiCorp Vault integration |
-| sec8.item2 | Rotation audit trail | ✅ Implemented | P1 | Multi-tenant segregation, external sinks (File/HTTP/Multi), 814 lines implementation |
+| ID | Requirement | Status | Priority | Gap | Evidence |
+|----|-------------|--------|----------|-----|----------|
+| sec8.item1 | Secure secret storage | Missing | P0 | No vault/HSM provider | docs/GAP_MATRIX.md:70 |
+| sec8.item2 | Rotation audit trail | Partial | P1 | JSON rotation log + hash chain (prev_hash -> hash) implemented; still missing external append-only sink & multi-tenant segregation | internal/crypto/keys.go\|internal/crypto/keys_rotation_log_test.go\|internal/crypto/keys_rotation_hash_chain_test.go |
 
 ## Testing & Conformance
 
-| ID | Requirement | Status | Priority | Description |
-|----|-------------|--------|----------|-------------|
-| sec9.item1 | Clause-to-test mapping | ✅ Implemented | P0 | 26 RFC sections mapped with 100% symbol coverage (78/78); conformance harness |
-| sec9.item2 | Fuzzing/property tests | ✅ Implemented | P1 | 30 property tests + 35 fuzz tests; 141 assertions all passing |
-| sec9.item3 | Load/stress benchmarks | ✅ Implemented | P2 | Comprehensive load harness with authorization/delegation scenarios |
+| ID | Requirement | Status | Priority | Gap | Evidence |
+|----|-------------|--------|----------|-----|----------|
+| sec9.item1 | Clause-to-test mapping | Partial | P0 | Harness maps 8 mapped clause entries (100% of declared set); broader RFC sections still unmapped | docs/GAP_MATRIX.md:76\|conformance/clause_map.json\|report.md |
+| sec9.item2 | Fuzzing / property tests | Partial | P1 | Canonical digest covered; parsing & semantic validators still lack property tests | docs/GAP_MATRIX.md:77\|pkg/rfc0111/canonical_prop_test.go\|pkg/rfc0111/canonical_fuzz_test.go |
+| sec9.item3 | Load/stress benchmarks | Missing | P2 | No high-load harness | docs/GAP_MATRIX.md:78 |
 
 ## Interoperability / External Interfaces
 
-| ID | Requirement | Status | Priority | Description |
-|----|-------------|--------|----------|-------------|
-| sec10.item1 | OpenAPI for PoA | ✅ Implemented | P1 | Complete API docs with provenance endpoints; machine-readable spec |
-| sec10.item2 | Well-known discovery | ✅ Implemented | P2 | JWKS with HMAC-SHA256 signatures, EdDSA key deprecation, Warning headers, ETag |
+| ID | Requirement | Status | Priority | Gap | Evidence |
+|----|-------------|--------|----------|-----|----------|
+| sec10.item1 | OpenAPI for PoA & delegation | Missing | P1 | No documented contract | docs/GAP_MATRIX.md:83 |
+| sec10.item2 | Well-known discovery endpoints | Implemented | P2 | jwks_uri + revocation endpoints exposed; missing oauth2 revocation + introspection standardization | web/server_clean.go\|web/jwks_integrity_test.go |
 
 ## AI Capability & Governance
 
-| ID | Requirement | Status | Priority | Description |
-|----|-------------|--------|----------|-------------|
-| sec11.item1 | Capability matrix enforcement | ✅ Implemented | P1 | Runtime enforcement with hash chain integrity; capability registry |
-| sec11.item2 | Model limit checks | ✅ Implemented | P2 | Multi-dimensional limits with per-user quotas; audit hash chain |
+| ID | Requirement | Status | Priority | Gap | Evidence |
+|----|-------------|--------|----------|-----|----------|
+| sec11.item1 | Capability matrix enforcement | Missing | P1 | No runtime enforcement | docs/GAP_MATRIX.md:90 |
+| sec11.item2 | Model limit checks | Missing | P2 | No metadata evaluation | docs/GAP_MATRIX.md:91 |
 
 ## Advanced Delegation Lifecycle
 
-| ID | Requirement | Status | Priority | Description |
-|----|-------------|--------|----------|-------------|
-| sec12.item1 | Suspension/partial revocation | ✅ Implemented | P2 | Status transitions with metrics; suspension workflow |
-| sec12.item2 | Delegation depth limits | ✅ Implemented | P2 | Dynamic depth enforcement with configurable limits; metrics tracking |
+| ID | Requirement | Status | Priority | Gap | Evidence |
+|----|-------------|--------|----------|-----|----------|
+| sec12.item1 | Suspension / partial revocation | Missing | P2 | Only revoked/expired statuses | docs/GAP_MATRIX.md:96 |
+| sec12.item2 | Delegation chaining depth limits | Missing | P2 | No depth enforcement | docs/GAP_MATRIX.md:97 |
 
 ## Data Hygiene & Validation
 
-| ID | Requirement | Status | Priority | Description |
-|----|-------------|--------|----------|-------------|
-| sec13.item1 | UTF-8 filtering | ✅ Implemented | P3 | Control char filtering with metrics instrumentation |
-| sec13.item2 | Numeric limit parsing | ✅ Implemented | P2 | Multi-period limits with cumulative tracking; max_amount/max_daily_amount |
+| ID | Requirement | Status | Priority | Gap | Evidence |
+|----|-------------|--------|----------|-----|----------|
+| sec13.item1 | UTF-8 & control char filtering | Partial | P3 | No metrics instrumentation | docs/GAP_MATRIX.md:102 |
+| sec13.item2 | Structured numeric limit parsing | Missing | P2 | Amounts not parsed/enforced | docs/GAP_MATRIX.md:103 |
 
 ## Risk & Threat Modeling
 
-| ID | Requirement | Status | Priority | Description |
-|----|-------------|--------|----------|-------------|
-| sec14.item1 | Threat model sync | ✅ Implemented | P2 | Complete mitigations matrix (THREAT_MITIGATIONS_MATRIX.yaml); 12 threats mapped |
-| sec14.item2 | Residual risk register | ✅ Implemented | P3 | Risk tracking with STRIDE categorization (RESIDUAL_RISK_REGISTER.yaml) |
+| ID | Requirement | Status | Priority | Gap | Evidence |
+|----|-------------|--------|----------|-----|----------|
+| sec14.item1 | Threat model synchronization | Partial | P2 | No mitigations matrix | docs/GAP_MATRIX.md:108 |
+| sec14.item2 | Residual risk register | Missing | P3 | No tracking of remaining exposures | docs/GAP_MATRIX.md:109 |
 
----
-
-## Implementation Summary
-
-### Recent Achievements (November 7, 2025)
-
-**Final Gap Closure Session:**
-1. ✅ **sec10.item2** - JWKS integrity verification (6 tests passing)
-2. ✅ **sec9.item1** - Clause mapping expansion (16→26 sections, 100% symbol coverage)
-3. ✅ **sec9.item2** - Property/fuzz testing verification (65 total tests)
-4. ✅ **sec8.item2** - Rotation audit trail (multi-tenant + external sinks)
-5. ✅ **sec4.item2** - Compliance attestation (1122 lines implementation+tests)
-
-### Key Metrics
-
-- **Total Requirements:** 45
-- **Fully Implemented:** 45 (100%)
-- **Test Files:** 500+ test files
-- **Test Coverage:** Comprehensive property and fuzz testing
-- **Documentation:** Complete with implementation references
-
-### Reference
-
-For detailed implementation information, see:
-- `artifacts/gap_matrix.csv` - Complete gap matrix with evidence
-- `conformance/clause_map.json` - RFC section to symbol mapping
-- `conformance/report.md` - Conformance analysis report
-
----
-
-*This document is auto-generated from the gap matrix. Last updated: November 7, 2025*

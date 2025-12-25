@@ -19,9 +19,9 @@ import (
 //   - Bob (Agent) delegates to Charlie (Sub-Agent) →  PoA₂: Bob→Charlie (with ParentPOAID = PoA₁.ID)
 //
 // When Charlie presents PoA₂, the current code:
-//   1. Loads PoA₂ (Bob→Charlie)
-//   2. Checks if PoA₂.Grantee (Charlie) == Session.User (Charlie) ✓
-//   3. BUT never validates the parent chain (Alice→Bob)
+//  1. Loads PoA₂ (Bob→Charlie)
+//  2. Checks if PoA₂.Grantee (Charlie) == Session.User (Charlie) ✓
+//  3. BUT never validates the parent chain (Alice→Bob)
 //
 // Attack Scenarios:
 //   - Scenario A (False Negative): Charlie's valid delegation is rejected because code checks root PoA₁.Grantee (Bob) != Charlie
@@ -30,11 +30,11 @@ import (
 //
 // Solution:
 // Validate the full delegation chain from Root Principal to Current Session User:
-//   1. Walk from leaf PoA upward through ParentPOAID references
-//   2. For each link: Verify Link[N].Grantee == Link[N+1].Grantor (transitive trust)
-//   3. Validate scope inheritance: Child scopes must be subset of parent scopes
-//   4. Check status: All ancestors must be Active (not Revoked/Suspended/Expired)
-//   5. Final check: Root PoA must be issued by a trusted Principal
+//  1. Walk from leaf PoA upward through ParentPOAID references
+//  2. For each link: Verify Link[N].Grantee == Link[N+1].Grantor (transitive trust)
+//  3. Validate scope inheritance: Child scopes must be subset of parent scopes
+//  4. Check status: All ancestors must be Active (not Revoked/Suspended/Expired)
+//  5. Final check: Root PoA must be issued by a trusted Principal
 type DelegationChainValidator struct {
 	repo    POARepository
 	nowFn   func() func() time.Time
@@ -43,8 +43,8 @@ type DelegationChainValidator struct {
 
 // ChainValidationResult contains the outcome of chain validation.
 type ChainValidationResult struct {
-	Valid       bool     // Overall chain validity
-	ChainLength int      // Number of hops (0 = root, 1 = direct delegation, 2+ = transitive)
+	Valid       bool // Overall chain validity
+	ChainLength int  // Number of hops (0 = root, 1 = direct delegation, 2+ = transitive)
 	RootPOA     *PowerOfAttorney
 	ChainPath   []*PowerOfAttorney // Ordered from leaf to root
 	Errors      []string           // Specific validation errors encountered

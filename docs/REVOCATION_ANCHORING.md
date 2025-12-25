@@ -1,3 +1,11 @@
+---
+title: Revocation Anchoring
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Revocation Anchoring with RFC 3161 TSA (P2.12 - sec5.item3)
 
 ## Overview

@@ -1,3 +1,11 @@
+---
+title: Terminology Policy
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Terminology Policy (Beta Demonstration)
 
 > Last Updated: 2025-10-17

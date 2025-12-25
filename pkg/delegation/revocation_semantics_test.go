@@ -58,7 +58,9 @@ func TestRevocationSemantics_RFC115_C10(t *testing.T) {
 
 		// Verify revocation of leaf
 		rc := NewRevocationChain()
-		rc.Append(RevocationEvent{ID: "r1", DelegationID: "del-leaf", Reason: "abuse"})
+		if _, err := rc.Append(RevocationEvent{ID: "r1", DelegationID: "del-leaf", Reason: "abuse"}); err != nil {
+			t.Fatalf("failed to append r1: %v", err)
+		}
 
 		if err := ValidateDelegationChainWithRevocations(c, rc); err == nil {
 			t.Error("Expected error for revoked delegation 'del-leaf'")
@@ -70,7 +72,9 @@ func TestRevocationSemantics_RFC115_C10(t *testing.T) {
 
 		// Verify revocation of root (should also fail)
 		rc2 := NewRevocationChain()
-		rc2.Append(RevocationEvent{ID: "r2", DelegationID: "del-root", Reason: "compromise"})
+		if _, err := rc2.Append(RevocationEvent{ID: "r2", DelegationID: "del-root", Reason: "compromise"}); err != nil {
+			t.Fatalf("failed to append r2: %v", err)
+		}
 		if err := ValidateDelegationChainWithRevocations(c, rc2); err == nil {
 			t.Error("Expected error for revoked delegation 'del-root'")
 		}
@@ -79,7 +83,9 @@ func TestRevocationSemantics_RFC115_C10(t *testing.T) {
 	// Let's add a robust test for IsDelegationRevoked with diverse inputs (Hash vs ID)
 
 	rc2 := NewRevocationChain()
-	rc2.Append(RevocationEvent{ID: "r2", DelegationHash: "hash-123", Reason: "superseded"})
+	if _, err := rc2.Append(RevocationEvent{ID: "r2", DelegationHash: "hash-123", Reason: "superseded"}); err != nil {
+		t.Fatalf("failed to append r2: %v", err)
+	}
 
 	if !rc2.IsDelegationRevoked("", "hash-123") {
 		t.Error("Expected revocation by hash")

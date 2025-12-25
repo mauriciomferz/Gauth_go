@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/capability"
 	"github.com/gin-gonic/gin"
+	"github.com/mauriciomferz/Gauth_go/internal/capability"
 )
 
 // BasicDeps abstracts minimal server state required for capability listing & negotiation.

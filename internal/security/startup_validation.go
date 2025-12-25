@@ -280,7 +280,7 @@ func (v *URIValidator) ValidateURI(uri string) error {
 	}
 
 	if !schemeAllowed {
-		return fmt.Errorf("URI scheme '%s' not allowed (allowed: %v) - potential SSRF attack vector", 
+		return fmt.Errorf("URI scheme '%s' not allowed (allowed: %v) - potential SSRF attack vector",
 			parsed.Scheme, v.allowedSchemes)
 	}
 
@@ -323,9 +323,9 @@ func (v *URIValidator) validateHostname(hostname string) error {
 	// Block cloud metadata endpoints
 	if v.blockMetadata {
 		metadataHosts := []string{
-			"169.254.169.254",     // AWS/Azure/GCP metadata
+			"169.254.169.254",          // AWS/Azure/GCP metadata
 			"metadata.google.internal", // GCP
-			"169.254.169.253",     // AWS ECS
+			"169.254.169.253",          // AWS ECS
 		}
 
 		for _, meta := range metadataHosts {
@@ -355,8 +355,8 @@ func isPrivateIP(ip net.IP) bool {
 		"10.0.0.0/8",
 		"172.16.0.0/12",
 		"192.168.0.0/16",
-		"127.0.0.0/8",     // Loopback
-		"169.254.0.0/16",  // Link-local
+		"127.0.0.0/8",    // Loopback
+		"169.254.0.0/16", // Link-local
 	}
 
 	for _, block := range privateIPv4Blocks {

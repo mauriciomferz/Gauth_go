@@ -27,19 +27,19 @@ type CanadaIdentityConnector struct {
 // CanadaConnectorConfig configuration for Canadian identity connector
 type CanadaConnectorConfig struct {
 	// Service Canada configuration
-	ServiceCanadaURL  string `validate:"required,url"`
-	ServiceCanadaKey  string `validate:"required"`
-	
+	ServiceCanadaURL string `validate:"required,url"`
+	ServiceCanadaKey string `validate:"required"`
+
 	// Provincial services configuration
 	ProvincialServicesURL string `validate:"url"`
 	ProvincialAPIKey      string
-	
+
 	// IRCC (Immigration) configuration
-	IRCCURL           string `validate:"url"`
-	IRCCAPIKey        string
-	
+	IRCCURL    string `validate:"url"`
+	IRCCAPIKey string
+
 	// Timeouts
-	RequestTimeout    time.Duration
+	RequestTimeout time.Duration
 }
 
 // SINRequest SIN (Social Insurance Number) validation request
@@ -51,19 +51,19 @@ type SINRequest struct {
 
 // SINResponse SIN validation response
 type SINResponse struct {
-	Valid            bool   `json:"valid"`
-	SIN              string `json:"sin"` // Masked: ***-***-123
-	Type             string `json:"type"` // Permanent, Temporary, Business
-	CheckDigitValid  bool   `json:"check_digit_valid"`
-	Error            string `json:"error,omitempty"`
+	Valid           bool   `json:"valid"`
+	SIN             string `json:"sin"`  // Masked: ***-***-123
+	Type            string `json:"type"` // Permanent, Temporary, Business
+	CheckDigitValid bool   `json:"check_digit_valid"`
+	Error           string `json:"error,omitempty"`
 }
 
 // DriverLicenseRequest driver's license validation request for Canada
 type CADriverLicenseRequest struct {
-	LicenseNumber   string `json:"license_number" validate:"required"`
-	Name            string `json:"name" validate:"required"`
-	DateOfBirth     string `json:"date_of_birth" validate:"required"`
-	Province        string `json:"province" validate:"required,oneof=ON QC BC AB MB SK NS NB NL PE NT YT NU"`
+	LicenseNumber string `json:"license_number" validate:"required"`
+	Name          string `json:"name" validate:"required"`
+	DateOfBirth   string `json:"date_of_birth" validate:"required"`
+	Province      string `json:"province" validate:"required,oneof=ON QC BC AB MB SK NS NB NL PE NT YT NU"`
 }
 
 // DriverLicenseResponse driver's license validation response for Canada
@@ -89,19 +89,19 @@ type CAAddress struct {
 	StreetName   string `json:"street_name"`
 	Unit         string `json:"unit,omitempty"`
 	City         string `json:"city"`
-	Province     string `json:"province"` // 2-letter code
+	Province     string `json:"province"`    // 2-letter code
 	PostalCode   string `json:"postal_code"` // A1A 1A1
 	Country      string `json:"country"`
 }
 
 // CAPassportRequest passport verification request for Canada
 type CAPassportRequest struct {
-	PassportNumber  string `json:"passport_number" validate:"required"`
-	FirstName       string `json:"first_name" validate:"required"`
-	LastName        string `json:"last_name" validate:"required"`
-	DateOfBirth     string `json:"date_of_birth" validate:"required"`
-	Nationality     string `json:"nationality,omitempty"`
-	Gender          string `json:"gender,omitempty"`
+	PassportNumber string `json:"passport_number" validate:"required"`
+	FirstName      string `json:"first_name" validate:"required"`
+	LastName       string `json:"last_name" validate:"required"`
+	DateOfBirth    string `json:"date_of_birth" validate:"required"`
+	Nationality    string `json:"nationality,omitempty"`
+	Gender         string `json:"gender,omitempty"`
 }
 
 // CAPassportResponse passport verification response for Canada
@@ -121,12 +121,12 @@ type CAPassportResponse struct {
 
 // HealthCardRequest provincial health card validation request
 type HealthCardRequest struct {
-	HealthNumber    string `json:"health_number" validate:"required"`
-	Province        string `json:"province" validate:"required,oneof=ON QC BC AB MB SK NS NB NL PE"`
-	VersionCode     string `json:"version_code,omitempty"`
-	LastName        string `json:"last_name" validate:"required"`
-	FirstName       string `json:"first_name" validate:"required"`
-	DateOfBirth     string `json:"date_of_birth" validate:"required"`
+	HealthNumber string `json:"health_number" validate:"required"`
+	Province     string `json:"province" validate:"required,oneof=ON QC BC AB MB SK NS NB NL PE"`
+	VersionCode  string `json:"version_code,omitempty"`
+	LastName     string `json:"last_name" validate:"required"`
+	FirstName    string `json:"first_name" validate:"required"`
+	DateOfBirth  string `json:"date_of_birth" validate:"required"`
 }
 
 // HealthCardResponse health card validation response
@@ -150,18 +150,18 @@ func NewCanadaIdentityConnector(config *CanadaConnectorConfig) (*CanadaIdentityC
 	if err := validate.Struct(config); err != nil {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
-	
+
 	// Set defaults
 	if config.RequestTimeout == 0 {
 		config.RequestTimeout = 30 * time.Second
 	}
-	
+
 	connector := &CanadaIdentityConnector{
 		config:     config,
 		httpClient: &http.Client{Timeout: config.RequestTimeout},
 		validator:  validate,
 	}
-	
+
 	return connector, nil
 }
 
@@ -173,12 +173,12 @@ func (cc *CanadaIdentityConnector) ValidateSIN(ctx context.Context, req *SINRequ
 	if err := cc.validator.Struct(req); err != nil {
 		return &SINResponse{Valid: false, Error: err.Error()}, nil
 	}
-	
+
 	// Remove formatting
 	sin := strings.ReplaceAll(req.SIN, "-", "")
 	sin = strings.ReplaceAll(sin, " ", "")
 	sin = strings.TrimSpace(sin)
-	
+
 	// Validate format (9 digits)
 	if !regexp.MustCompile(`^\d{9}$`).MatchString(sin) {
 		return &SINResponse{
@@ -186,7 +186,7 @@ func (cc *CanadaIdentityConnector) ValidateSIN(ctx context.Context, req *SINRequ
 			Error: "Invalid SIN format (must be 9 digits)",
 		}, nil
 	}
-	
+
 	// Determine SIN type from first digit
 	firstDigit := sin[0]
 	var sinType string
@@ -203,24 +203,24 @@ func (cc *CanadaIdentityConnector) ValidateSIN(ctx context.Context, req *SINRequ
 			Error: "Invalid SIN first digit",
 		}, nil
 	}
-	
+
 	// Validate check digit using Luhn algorithm
 	checkDigitValid := cc.validateSINCheckDigit(sin)
-	
+
 	// Mask SIN
 	maskedSIN := fmt.Sprintf("***-***-%s", sin[6:9])
-	
+
 	response := &SINResponse{
 		Valid:           checkDigitValid,
 		SIN:             maskedSIN,
 		Type:            sinType,
 		CheckDigitValid: checkDigitValid,
 	}
-	
+
 	if !checkDigitValid {
 		response.Error = "Invalid SIN check digit"
 	}
-	
+
 	return response, nil
 }
 
@@ -230,7 +230,7 @@ func (cc *CanadaIdentityConnector) VerifyDriverLicense(ctx context.Context, req 
 	if err := cc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Validate license number format (varies by province)
 	if !cc.validateLicenseFormat(req.LicenseNumber, req.Province) {
 		return &CADriverLicenseResponse{
@@ -238,12 +238,12 @@ func (cc *CanadaIdentityConnector) VerifyDriverLicense(ctx context.Context, req 
 			Error: fmt.Sprintf("Invalid license number format for province %s", req.Province),
 		}, nil
 	}
-	
+
 	// In production, this would:
 	// 1. Verify with provincial motor vehicle department
 	// 2. Check license status and suspensions
 	// 3. Validate demerit points
-	
+
 	// Mock response for demonstration
 	response := &CADriverLicenseResponse{
 		Valid:         true,
@@ -254,7 +254,7 @@ func (cc *CanadaIdentityConnector) VerifyDriverLicense(ctx context.Context, req 
 		ExpiryDate:    "2025-01-15",
 		LicenseClass:  "G", // Full license
 	}
-	
+
 	return response, nil
 }
 
@@ -264,9 +264,9 @@ func (cc *CanadaIdentityConnector) VerifyPassport(ctx context.Context, req *CAPa
 	if err := cc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	passportNumber := strings.ToUpper(strings.TrimSpace(req.PassportNumber))
-	
+
 	// Validate passport number format (2 letters + 6 digits)
 	if !regexp.MustCompile(`^[A-Z]{2}\d{6}$`).MatchString(passportNumber) {
 		return &CAPassportResponse{
@@ -274,7 +274,7 @@ func (cc *CanadaIdentityConnector) VerifyPassport(ctx context.Context, req *CAPa
 			Error: "Invalid passport number format",
 		}, nil
 	}
-	
+
 	// In production, this would verify with IRCC (Immigration, Refugees and Citizenship Canada)
 	response := &CAPassportResponse{
 		Valid:            true,
@@ -288,7 +288,7 @@ func (cc *CanadaIdentityConnector) VerifyPassport(ctx context.Context, req *CAPa
 		ExpiryDate:       "2030-01-15",
 		IssuingAuthority: "Canada",
 	}
-	
+
 	return response, nil
 }
 
@@ -298,7 +298,7 @@ func (cc *CanadaIdentityConnector) VerifyHealthCard(ctx context.Context, req *He
 	if err := cc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Validate health number format (varies by province)
 	if !cc.validateHealthCardFormat(req.HealthNumber, req.Province) {
 		return &HealthCardResponse{
@@ -306,7 +306,7 @@ func (cc *CanadaIdentityConnector) VerifyHealthCard(ctx context.Context, req *He
 			Error: fmt.Sprintf("Invalid health card format for province %s", req.Province),
 		}, nil
 	}
-	
+
 	// In production, this would verify with provincial health ministry
 	response := &HealthCardResponse{
 		Valid:        true,
@@ -317,7 +317,7 @@ func (cc *CanadaIdentityConnector) VerifyHealthCard(ctx context.Context, req *He
 		LastName:     req.LastName,
 		DateOfBirth:  req.DateOfBirth,
 	}
-	
+
 	return response, nil
 }
 
@@ -328,7 +328,7 @@ func (cc *CanadaIdentityConnector) validateSINCheckDigit(sin string) bool {
 	sum := 0
 	for i := 0; i < 9; i++ {
 		digit, _ := strconv.Atoi(string(sin[i]))
-		
+
 		// Double every second digit
 		if i%2 == 1 {
 			digit *= 2
@@ -336,36 +336,36 @@ func (cc *CanadaIdentityConnector) validateSINCheckDigit(sin string) bool {
 				digit -= 9
 			}
 		}
-		
+
 		sum += digit
 	}
-	
+
 	return sum%10 == 0
 }
 
 func (cc *CanadaIdentityConnector) validateLicenseFormat(licenseNumber, province string) bool {
 	// License formats vary by province
 	patterns := map[string]string{
-		"ON": `^[A-Z]\d{14}$`,           // 1 letter + 14 digits
-		"QC": `^[A-Z]\d{13}$`,           // 1 letter + 13 digits
-		"BC": `^\d{7}$`,                 // 7 digits
-		"AB": `^\d{6}-\d{3}$`,           // 6 digits - 3 digits
-		"MB": `^[A-Z0-9]{1,12}$`,        // Alphanumeric, 1-12 chars
-		"SK": `^\d{8}$`,                 // 8 digits
-		"NS": `^[A-Z]{5}\d{9}$`,         // 5 letters + 9 digits
-		"NB": `^\d{7}$`,                 // 7 digits
-		"NL": `^[A-Z]\d{9}$`,            // 1 letter + 9 digits
-		"PE": `^\d{1,6}$`,               // 1-6 digits
-		"NT": `^\d{6}$`,                 // 6 digits
-		"YT": `^\d{6}$`,                 // 6 digits
-		"NU": `^\d{6}$`,                 // 6 digits
+		"ON": `^[A-Z]\d{14}$`,    // 1 letter + 14 digits
+		"QC": `^[A-Z]\d{13}$`,    // 1 letter + 13 digits
+		"BC": `^\d{7}$`,          // 7 digits
+		"AB": `^\d{6}-\d{3}$`,    // 6 digits - 3 digits
+		"MB": `^[A-Z0-9]{1,12}$`, // Alphanumeric, 1-12 chars
+		"SK": `^\d{8}$`,          // 8 digits
+		"NS": `^[A-Z]{5}\d{9}$`,  // 5 letters + 9 digits
+		"NB": `^\d{7}$`,          // 7 digits
+		"NL": `^[A-Z]\d{9}$`,     // 1 letter + 9 digits
+		"PE": `^\d{1,6}$`,        // 1-6 digits
+		"NT": `^\d{6}$`,          // 6 digits
+		"YT": `^\d{6}$`,          // 6 digits
+		"NU": `^\d{6}$`,          // 6 digits
 	}
-	
+
 	pattern, ok := patterns[province]
 	if !ok {
 		return false
 	}
-	
+
 	matched, _ := regexp.MatchString(pattern, licenseNumber)
 	return matched
 }
@@ -373,23 +373,23 @@ func (cc *CanadaIdentityConnector) validateLicenseFormat(licenseNumber, province
 func (cc *CanadaIdentityConnector) validateHealthCardFormat(healthNumber, province string) bool {
 	// Health card formats vary by province
 	patterns := map[string]string{
-		"ON": `^\d{10}$`,                // 10 digits
-		"QC": `^[A-Z]{4}\d{8}$`,         // 4 letters + 8 digits
-		"BC": `^\d{10}$`,                // 10 digits
-		"AB": `^\d{9}$`,                 // 9 digits
-		"MB": `^\d{9}$`,                 // 9 digits
-		"SK": `^\d{9}$`,                 // 9 digits
-		"NS": `^\d{10}$`,                // 10 digits
-		"NB": `^\d{9}$`,                 // 9 digits
-		"NL": `^[A-Z0-9]{12}$`,          // 12 alphanumeric
-		"PE": `^\d{9}$`,                 // 9 digits
+		"ON": `^\d{10}$`,        // 10 digits
+		"QC": `^[A-Z]{4}\d{8}$`, // 4 letters + 8 digits
+		"BC": `^\d{10}$`,        // 10 digits
+		"AB": `^\d{9}$`,         // 9 digits
+		"MB": `^\d{9}$`,         // 9 digits
+		"SK": `^\d{9}$`,         // 9 digits
+		"NS": `^\d{10}$`,        // 10 digits
+		"NB": `^\d{9}$`,         // 9 digits
+		"NL": `^[A-Z0-9]{12}$`,  // 12 alphanumeric
+		"PE": `^\d{9}$`,         // 9 digits
 	}
-	
+
 	pattern, ok := patterns[province]
 	if !ok {
 		return false
 	}
-	
+
 	matched, _ := regexp.MatchString(pattern, healthNumber)
 	return matched
 }
@@ -404,7 +404,7 @@ func (cc *CanadaIdentityConnector) generateCacheKey(operation string, parts ...s
 func (cc *CanadaIdentityConnector) GetMetrics() map[string]interface{} {
 	cc.mu.RLock()
 	defer cc.mu.RUnlock()
-	
+
 	return map[string]interface{}{
 		"connector": "canada_identity",
 	}

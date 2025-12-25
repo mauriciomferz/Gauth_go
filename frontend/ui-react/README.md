@@ -1,3 +1,11 @@
+---
+title: Readme
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # GAuth 1.0 React Dashboard
 
 Modern React-based Single Page Application (SPA) for the GAuth 1.0 RFC-0111/0115 compliant authorization framework.

@@ -1,3 +1,11 @@
+---
+title: Milestone 2b Plan
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Milestone 2B Plan: Cryptographic Authenticity & Advanced Revocation
 
 Status: In Progress (authenticity core implemented)

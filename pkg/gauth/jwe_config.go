@@ -271,7 +271,7 @@ func SaveRSAPublicKey(publicKey *rsa.PublicKey, path string) error {
 		Bytes: publicKeyBytes,
 	}
 
-	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to create public key file: %w", err)
 	}

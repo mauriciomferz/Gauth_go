@@ -80,7 +80,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 // VerifyMFA verifies MFA code (step 2 of 2)
 func (h *AuthHandler) VerifyMFA(c *gin.Context) {
 	var req MFARequest
-	if err := c.ShouldBindJSON(&req); err != nil{
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, MFAResponse{
 			Success: false,
 			Error:   "Invalid request format",
@@ -124,13 +124,13 @@ func (h *AuthHandler) generateToken() (string, string, error) {
 		"exp":     expiresAt.Unix(),
 		"iat":     time.Now().Unix(),
 	}
-	
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(h.jwtSecret))
 	if err != nil {
 		return "", "", err
 	}
-	
+
 	return tokenString, expiresAt.Format(time.RFC3339), nil
 }
 

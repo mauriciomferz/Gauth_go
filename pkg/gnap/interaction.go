@@ -80,7 +80,9 @@ func GenerateUserCode() *UserCodeInfo {
 	// Generate 8 character code (excluding ambiguous chars)
 	const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 	code := make([]byte, 8)
-	rand.Read(code)
+	if _, err := rand.Read(code); err != nil {
+		panic("failed to generate random user code: " + err.Error())
+	}
 	for i := range code {
 		code[i] = chars[code[i]%byte(len(chars))]
 	}

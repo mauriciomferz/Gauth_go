@@ -1,3 +1,11 @@
+---
+title: Errors
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Error Catalog
 
 Central source of truth for public error codes exposed by GAuth APIs. Each code includes HTTP mapping, severity, and remediation guidance. This file is generated / maintained alongside the centralized registry in `internal/errors/catalog.go`.

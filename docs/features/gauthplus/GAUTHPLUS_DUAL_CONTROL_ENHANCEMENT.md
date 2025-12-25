@@ -1,3 +1,11 @@
+---
+title: Gauthplus Dual Control Enhancement
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # GAuth+ Dual Control Enhancement - Completion Report
 
 **Date**: November 26, 2025  

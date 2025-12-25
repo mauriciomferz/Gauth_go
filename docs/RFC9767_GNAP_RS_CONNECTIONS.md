@@ -1,3 +1,11 @@
+---
+title: Rfc9767 Gnap Rs Connections
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # RFC 9767: GNAP Resource Server Connections
 
 **Status**: Implemented (Experimental/Mocked)

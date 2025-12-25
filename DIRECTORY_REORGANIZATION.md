@@ -1,3 +1,11 @@
+---
+title: Directory Reorganization
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Directory Reorganization Guide
 
 This document describes the directory structure reorganization implemented to improve code organization and scalability.

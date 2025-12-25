@@ -1,3 +1,11 @@
+---
+title: Auditor Cli
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Auditor CLI
 
 The Auditor CLI provides offline verification of core transparency and authorization artifacts emitted by a running GAuth server.

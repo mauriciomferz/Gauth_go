@@ -1,3 +1,11 @@
+---
+title: Gap G10 Integration Tests Progress
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Gap G10 Integration Tests - Progress Report
 
 **Date**: November 10, 2025  

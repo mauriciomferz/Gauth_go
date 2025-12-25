@@ -1,3 +1,11 @@
+---
+title: Readme
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Combined RFC-0111 & RFC-0115 Implementation Demo
 
 > Last Updated: 2025-10-17

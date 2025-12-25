@@ -22,7 +22,9 @@ func TestModelLimitsAttestationStreamDualDomainSignature(t *testing.T) {
 	t.Setenv("GAUTH_MODEL_LIMITS_STRICT_UNKNOWN", "1")
 
 	limitsFile, _ := os.CreateTemp(t.TempDir(), "limits_*.json")
-	limitsFile.WriteString(`{"model_limits":{"demo":{"max_input_tokens":5}}}`)
+	if _, err := limitsFile.WriteString(`{"model_limits":{"demo":{"max_input_tokens":5}}}`); err != nil {
+		t.Fatalf("failed to write limits file: %v", err)
+	}
 	limitsFile.Close()
 
 	auditFile, _ := os.CreateTemp(t.TempDir(), "audit_*.jsonl")

@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/oidc"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 // TestOIDCPVPIntegrationWithSubscriptionFlow tests complete OIDC → GAuth integration

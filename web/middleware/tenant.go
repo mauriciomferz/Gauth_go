@@ -10,17 +10,17 @@ func TenantMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Try to get tenant_id from header first (X-Tenant-ID)
 		tenantID := c.GetHeader("X-Tenant-ID")
-		
+
 		// If not in header, try query parameter
 		if tenantID == "" {
 			tenantID = c.Query("tenant_id")
 		}
-		
+
 		// Set in context if found
 		if tenantID != "" {
 			c.Set("tenant_id", tenantID)
 		}
-		
+
 		c.Next()
 	}
 }

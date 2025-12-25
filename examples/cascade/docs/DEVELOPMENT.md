@@ -1,3 +1,11 @@
+---
+title: Development
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Development Guide
 
 > Last Updated: 2025-10-17

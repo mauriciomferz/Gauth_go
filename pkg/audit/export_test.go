@@ -16,12 +16,12 @@ import (
 func TestExportService_FileOperations(t *testing.T) {
 	tmpDir := t.TempDir()
 	service := NewExportService(nil, tmpDir)
-	
+
 	// Test export directory creation
 	if _, err := os.Stat(tmpDir); os.IsNotExist(err) {
 		t.Error("Export directory should exist")
 	}
-	
+
 	if service.exportDir != tmpDir {
 		t.Errorf("Expected exportDir=%s, got %s", tmpDir, service.exportDir)
 	}
@@ -31,7 +31,7 @@ func TestExportService_FileOperations(t *testing.T) {
 func TestExportFormats(t *testing.T) {
 	tmpDir := t.TempDir()
 	service := NewExportService(nil, tmpDir)
-	
+
 	// Create sample events
 	events := []AuditEvent{
 		{
@@ -61,7 +61,7 @@ func TestExportFormats(t *testing.T) {
 			IPAddress:    "192.168.1.2",
 		},
 	}
-	
+
 	// Test JSON export
 	t.Run("JSON Export", func(t *testing.T) {
 		var buf bytes.Buffer
@@ -69,13 +69,13 @@ func TestExportFormats(t *testing.T) {
 		if err != nil {
 			t.Fatalf("JSON export failed: %v", err)
 		}
-		
+
 		// Verify JSON structure
 		var result map[string]interface{}
 		if err := json.Unmarshal(buf.Bytes(), &result); err != nil {
 			t.Fatalf("Invalid JSON output: %v", err)
 		}
-		
+
 		if _, ok := result["exported_at"]; !ok {
 			t.Error("JSON should contain exported_at field")
 		}
@@ -83,7 +83,7 @@ func TestExportFormats(t *testing.T) {
 			t.Errorf("Expected total=2, got %v", result["total"])
 		}
 	})
-	
+
 	// Test CSV export
 	t.Run("CSV Export", func(t *testing.T) {
 		var buf bytes.Buffer
@@ -91,26 +91,26 @@ func TestExportFormats(t *testing.T) {
 		if err != nil {
 			t.Fatalf("CSV export failed: %v", err)
 		}
-		
+
 		// Parse CSV
 		reader := csv.NewReader(&buf)
 		records, err := reader.ReadAll()
 		if err != nil {
 			t.Fatalf("Failed to parse CSV: %v", err)
 		}
-		
+
 		// Check header + 2 data rows
 		if len(records) != 3 {
 			t.Errorf("Expected 3 rows (header + 2 events), got %d", len(records))
 		}
-		
+
 		// Verify header
 		header := records[0]
 		if header[0] != "ID" || header[2] != "TenantID" {
 			t.Error("CSV header incorrect")
 		}
 	})
-	
+
 	// Test Syslog export
 	t.Run("Syslog Export", func(t *testing.T) {
 		var buf bytes.Buffer
@@ -118,7 +118,7 @@ func TestExportFormats(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Syslog export failed: %v", err)
 		}
-		
+
 		content := buf.String()
 		// Check for Syslog format markers
 		if !strings.Contains(content, "gauth-audit") {
@@ -128,7 +128,7 @@ func TestExportFormats(t *testing.T) {
 			t.Error("Syslog should contain action")
 		}
 	})
-	
+
 	// Test CEF export
 	t.Run("CEF Export", func(t *testing.T) {
 		var buf bytes.Buffer
@@ -136,7 +136,7 @@ func TestExportFormats(t *testing.T) {
 		if err != nil {
 			t.Fatalf("CEF export failed: %v", err)
 		}
-		
+
 		content := buf.String()
 		// Check for CEF format markers
 		if !strings.Contains(content, "CEF:0") {
@@ -155,7 +155,7 @@ func TestExportFormats(t *testing.T) {
 func TestCompressionFormats(t *testing.T) {
 	tmpDir := t.TempDir()
 	service := NewExportService(nil, tmpDir)
-	
+
 	events := []AuditEvent{
 		{
 			ID:           "evt-test",
@@ -171,7 +171,7 @@ func TestCompressionFormats(t *testing.T) {
 			IPAddress:    "127.0.0.1",
 		},
 	}
-	
+
 	// Test uncompressed
 	t.Run("Uncompressed", func(t *testing.T) {
 		var buf bytes.Buffer
@@ -179,12 +179,12 @@ func TestCompressionFormats(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Export failed: %v", err)
 		}
-		
+
 		uncompressedSize := buf.Len()
 		if uncompressedSize == 0 {
 			t.Error("Uncompressed data should not be empty")
 		}
-		
+
 		// Test compression
 		var compressedBuf bytes.Buffer
 		gzipWriter := gzip.NewWriter(&compressedBuf)
@@ -193,24 +193,24 @@ func TestCompressionFormats(t *testing.T) {
 			t.Fatalf("Compression failed: %v", err)
 		}
 		gzipWriter.Close()
-		
+
 		compressedSize := compressedBuf.Len()
 		if compressedSize >= uncompressedSize {
 			t.Log("Warning: Compressed size not smaller (data too small to compress effectively)")
 		}
-		
+
 		// Test decompression
 		gzipReader, err := gzip.NewReader(&compressedBuf)
 		if err != nil {
 			t.Fatalf("Decompression failed: %v", err)
 		}
 		defer gzipReader.Close()
-		
+
 		decompressed, err := io.ReadAll(gzipReader)
 		if err != nil {
 			t.Fatalf("Failed to read decompressed data: %v", err)
 		}
-		
+
 		if !bytes.Equal(buf.Bytes(), decompressed) {
 			t.Error("Decompressed data does not match original")
 		}
@@ -221,7 +221,7 @@ func TestCompressionFormats(t *testing.T) {
 func TestSeverityMapping(t *testing.T) {
 	tmpDir := t.TempDir()
 	service := NewExportService(nil, tmpDir)
-	
+
 	tests := []struct {
 		severity         string
 		expectedPriority int
@@ -234,14 +234,14 @@ func TestSeverityMapping(t *testing.T) {
 		{"info", 22, 1},
 		{"unknown", 22, 1},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.severity, func(t *testing.T) {
 			priority := service.severityToPriority(tt.severity)
 			if priority != tt.expectedPriority {
 				t.Errorf("Expected priority %d for %s, got %d", tt.expectedPriority, tt.severity, priority)
 			}
-			
+
 			cef := service.severityToCEF(tt.severity)
 			if cef != tt.expectedCEF {
 				t.Errorf("Expected CEF severity %d for %s, got %d", tt.expectedCEF, tt.severity, cef)
@@ -254,7 +254,7 @@ func TestSeverityMapping(t *testing.T) {
 func TestCEFEscaping(t *testing.T) {
 	tmpDir := t.TempDir()
 	service := NewExportService(nil, tmpDir)
-	
+
 	tests := []struct {
 		input    string
 		expected string
@@ -266,7 +266,7 @@ func TestCEFEscaping(t *testing.T) {
 		{"with\rcarriage", "with\\rcarriage"},
 		{"complex=value\\with\nspecial", "complex\\=value\\\\with\\nspecial"},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
 			result := service.escapeCEF(tt.input)
@@ -281,7 +281,7 @@ func TestCEFEscaping(t *testing.T) {
 func TestExportJobLifecycle(t *testing.T) {
 	tmpDir := t.TempDir()
 	service := NewExportService(nil, tmpDir)
-	
+
 	// Test job creation
 	job := &ExportJob{
 		ID:         "test-job-123",
@@ -292,11 +292,11 @@ func TestExportJobLifecycle(t *testing.T) {
 		CreatedAt:  time.Now(),
 		ExpiresAt:  time.Now().Add(24 * time.Hour),
 	}
-	
+
 	service.mu.Lock()
 	service.jobs[job.ID] = job
 	service.mu.Unlock()
-	
+
 	// Test retrieval
 	t.Run("Get Job", func(t *testing.T) {
 		retrieved, err := service.GetExportJob(job.ID)
@@ -307,7 +307,7 @@ func TestExportJobLifecycle(t *testing.T) {
 			t.Error("Retrieved job ID mismatch")
 		}
 	})
-	
+
 	// Test non-existent job
 	t.Run("Get Non-Existent Job", func(t *testing.T) {
 		_, err := service.GetExportJob("non-existent")
@@ -315,14 +315,14 @@ func TestExportJobLifecycle(t *testing.T) {
 			t.Error("Should return error for non-existent job")
 		}
 	})
-	
+
 	// Test deletion
 	t.Run("Delete Job", func(t *testing.T) {
 		err := service.DeleteExportJob(job.ID)
 		if err != nil {
 			t.Fatalf("Failed to delete job: %v", err)
 		}
-		
+
 		// Verify deletion
 		_, err = service.GetExportJob(job.ID)
 		if err == nil {
@@ -335,7 +335,7 @@ func TestExportJobLifecycle(t *testing.T) {
 func TestCleanupExpiredJobs(t *testing.T) {
 	tmpDir := t.TempDir()
 	service := NewExportService(nil, tmpDir)
-	
+
 	// Add expired job
 	expiredJob := &ExportJob{
 		ID:        "expired-job",
@@ -344,7 +344,7 @@ func TestCleanupExpiredJobs(t *testing.T) {
 		CreatedAt: time.Now().Add(-25 * time.Hour),
 		ExpiresAt: time.Now().Add(-1 * time.Hour), // Already expired
 	}
-	
+
 	// Add current job
 	currentJob := &ExportJob{
 		ID:        "current-job",
@@ -353,21 +353,21 @@ func TestCleanupExpiredJobs(t *testing.T) {
 		CreatedAt: time.Now(),
 		ExpiresAt: time.Now().Add(23 * time.Hour),
 	}
-	
+
 	service.mu.Lock()
 	service.jobs[expiredJob.ID] = expiredJob
 	service.jobs[currentJob.ID] = currentJob
 	service.mu.Unlock()
-	
+
 	// Run cleanup
 	service.CleanupExpiredJobs()
-	
+
 	// Verify expired job is removed
 	service.mu.RLock()
 	_, expiredExists := service.jobs[expiredJob.ID]
 	_, currentExists := service.jobs[currentJob.ID]
 	service.mu.RUnlock()
-	
+
 	if expiredExists {
 		t.Error("Expired job should be removed")
 	}

@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
 // TestNewOIDCPowerVerificationPoint tests OIDC PVP creation

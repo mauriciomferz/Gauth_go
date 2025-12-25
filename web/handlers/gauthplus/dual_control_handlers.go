@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
 	"github.com/gin-gonic/gin"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
 )
 
 // DualControlHandlers handles HTTP requests for dual control approvals
@@ -156,9 +156,9 @@ func (h *DualControlHandlers) GetApprovalStatus(c *gin.Context) {
 	if err != nil {
 		// Check if error is "no rows" which means approval doesn't exist
 		errMsg := err.Error()
-		if errMsg == "sql: no rows in result set" || 
-		   errMsg == "approval not found" ||
-		   strings.Contains(errMsg, "sql: no rows in result set") {
+		if errMsg == "sql: no rows in result set" ||
+			errMsg == "approval not found" ||
+			strings.Contains(errMsg, "sql: no rows in result set") {
 			c.JSON(http.StatusNotFound, gin.H{
 				"success": false,
 				"error":   "not_found",
@@ -166,7 +166,7 @@ func (h *DualControlHandlers) GetApprovalStatus(c *gin.Context) {
 			})
 			return
 		}
-		
+
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"error":   "query_failed",
@@ -185,7 +185,7 @@ func (h *DualControlHandlers) GetApprovalStatus(c *gin.Context) {
 // GetPendingApprovals handles GET /api/v1/gauthplus/dual-control/approvals/pending
 func (h *DualControlHandlers) GetPendingApprovals(c *gin.Context) {
 	approverID := c.Query("approver_id")
-	
+
 	approvals, err := h.service.GetPendingApprovals(c.Request.Context(), approverID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

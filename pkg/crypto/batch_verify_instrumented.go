@@ -10,8 +10,8 @@ import (
 	"math/big"
 	"time"
 
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
 	"github.com/herumi/bls-eth-go-binary/bls"
+	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
 )
 
 // BatchVerifyEd25519Instrumented mirrors BatchVerifyEd25519 but records metrics.

@@ -29,15 +29,15 @@ type ItalyConnectorConfig struct {
 	SPIDMetadataURL   string `validate:"required,url"`
 	SPIDAggregatorURL string `validate:"url"`
 	ServiceProviderID string `validate:"required"`
-	
+
 	// CIE (Carta d'Identità Elettronica) configuration
 	CIEURL          string `validate:"url"`
 	CIEClientID     string
 	CIEClientSecret string
-	
+
 	// eIDAS Node configuration
 	EIDASNodeURL string `validate:"url"`
-	
+
 	// Timeouts
 	RequestTimeout time.Duration
 }
@@ -64,19 +64,19 @@ type SPIDAuthResponse struct {
 
 // SPIDUserInfo user information from SPID
 type SPIDUserInfo struct {
-	SpidCode      string     `json:"spid_code"` // Unique identifier
-	Name          string     `json:"name"`
-	FamilyName    string     `json:"family_name"`
-	FiscalNumber  string     `json:"fiscal_number"` // Codice Fiscale
-	Email         string     `json:"email"`
-	EmailVerified bool       `json:"email_verified"`
-	MobilePhone   string     `json:"mobile_phone"`
-	DateOfBirth   string     `json:"date_of_birth"`
-	Gender        string     `json:"gender"`
-	PlaceOfBirth  string     `json:"place_of_birth"`
-	CountyOfBirth string     `json:"county_of_birth"`
-	Address       *ITAddress `json:"address"`
-	DigitalAddress string    `json:"digital_address"` // PEC (Posta Elettronica Certificata)
+	SpidCode       string     `json:"spid_code"` // Unique identifier
+	Name           string     `json:"name"`
+	FamilyName     string     `json:"family_name"`
+	FiscalNumber   string     `json:"fiscal_number"` // Codice Fiscale
+	Email          string     `json:"email"`
+	EmailVerified  bool       `json:"email_verified"`
+	MobilePhone    string     `json:"mobile_phone"`
+	DateOfBirth    string     `json:"date_of_birth"`
+	Gender         string     `json:"gender"`
+	PlaceOfBirth   string     `json:"place_of_birth"`
+	CountyOfBirth  string     `json:"county_of_birth"`
+	Address        *ITAddress `json:"address"`
+	DigitalAddress string     `json:"digital_address"` // PEC (Posta Elettronica Certificata)
 }
 
 // ITAddress Italian address structure
@@ -103,12 +103,12 @@ type CodiceFiscaleRequest struct {
 type CodiceFiscaleResponse struct {
 	Valid            bool   `json:"valid"`
 	CodiceFiscale    string `json:"codice_fiscale"`
-	LastName         string `json:"last_name"` // First 3 consonants
+	LastName         string `json:"last_name"`  // First 3 consonants
 	FirstName        string `json:"first_name"` // First 3 consonants
 	YearOfBirth      string `json:"year_of_birth"`
 	MonthOfBirth     string `json:"month_of_birth"`
 	DayOfBirth       string `json:"day_of_birth"`
-	Gender           string `json:"gender"` // Encoded in day
+	Gender           string `json:"gender"`         // Encoded in day
 	PlaceOfBirth     string `json:"place_of_birth"` // Cadastral code
 	ControlCharacter string `json:"control_character"`
 	Error            string `json:"error,omitempty"`
@@ -153,18 +153,18 @@ func NewItalyIdentityConnector(config *ItalyConnectorConfig) (*ItalyIdentityConn
 	if err := validate.Struct(config); err != nil {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
-	
+
 	// Set defaults
 	if config.RequestTimeout == 0 {
 		config.RequestTimeout = 30 * time.Second
 	}
-	
+
 	connector := &ItalyIdentityConnector{
 		config:     config,
 		httpClient: &http.Client{Timeout: config.RequestTimeout},
 		validator:  validate,
 	}
-	
+
 	return connector, nil
 }
 
@@ -174,7 +174,7 @@ func (ic *ItalyIdentityConnector) AuthenticateSPID(ctx context.Context, req *SPI
 	if err := ic.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Validate SPID level
 	if req.SPIDLevel != "1" && req.SPIDLevel != "2" && req.SPIDLevel != "3" {
 		return &SPIDAuthResponse{
@@ -182,13 +182,13 @@ func (ic *ItalyIdentityConnector) AuthenticateSPID(ctx context.Context, req *SPI
 			Error:   "Invalid SPID level (must be 1, 2, or 3)",
 		}, nil
 	}
-	
+
 	// In production, this would:
 	// 1. Generate SAML AuthnRequest
 	// 2. Redirect user to SPID identity provider
 	// 3. Receive SAML Response
 	// 4. Validate assertion
-	
+
 	// Mock response for demonstration
 	response := &SPIDAuthResponse{
 		Success:          true,
@@ -206,7 +206,7 @@ func (ic *ItalyIdentityConnector) AuthenticateSPID(ctx context.Context, req *SPI
 		},
 		Attributes: make(map[string]string),
 	}
-	
+
 	return response, nil
 }
 
@@ -224,9 +224,9 @@ func (ic *ItalyIdentityConnector) ValidateCodiceFiscale(ctx context.Context, req
 	if err := ic.validator.Struct(req); err != nil {
 		return &CodiceFiscaleResponse{Valid: false, Error: err.Error()}, nil
 	}
-	
+
 	cf := strings.ToUpper(strings.TrimSpace(req.CodiceFiscale))
-	
+
 	// Validate format (16 alphanumeric characters)
 	if !regexp.MustCompile(`^[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]$`).MatchString(cf) {
 		return &CodiceFiscaleResponse{
@@ -234,7 +234,7 @@ func (ic *ItalyIdentityConnector) ValidateCodiceFiscale(ctx context.Context, req
 			Error: "Invalid Codice Fiscale format (must be 16 alphanumeric characters)",
 		}, nil
 	}
-	
+
 	// Extract components
 	lastName := cf[0:3]
 	firstName := cf[3:6]
@@ -243,7 +243,7 @@ func (ic *ItalyIdentityConnector) ValidateCodiceFiscale(ctx context.Context, req
 	day := cf[9:11]
 	placeCode := cf[11:15]
 	controlChar := cf[15:16]
-	
+
 	// Decode month (A=Jan, B=Feb, ..., T=Dec)
 	monthMap := map[string]string{
 		"A": "01", "B": "02", "C": "03", "D": "04",
@@ -257,7 +257,7 @@ func (ic *ItalyIdentityConnector) ValidateCodiceFiscale(ctx context.Context, req
 			Error: "Invalid month code",
 		}, nil
 	}
-	
+
 	// Decode day and gender
 	// Males: 01-31, Females: 41-71 (day + 40)
 	var dayInt int
@@ -267,14 +267,14 @@ func (ic *ItalyIdentityConnector) ValidateCodiceFiscale(ctx context.Context, req
 		gender = "F"
 		dayInt -= 40
 	}
-	
+
 	if dayInt < 1 || dayInt > 31 {
 		return &CodiceFiscaleResponse{
 			Valid: false,
 			Error: "Invalid day",
 		}, nil
 	}
-	
+
 	// Validate control character
 	calculatedControl := ic.calculateCodiceFiscaleControl(cf[0:15])
 	if controlChar != calculatedControl {
@@ -283,7 +283,7 @@ func (ic *ItalyIdentityConnector) ValidateCodiceFiscale(ctx context.Context, req
 			Error: fmt.Sprintf("Invalid control character (expected %s, got %s)", calculatedControl, controlChar),
 		}, nil
 	}
-	
+
 	response := &CodiceFiscaleResponse{
 		Valid:            true,
 		CodiceFiscale:    cf,
@@ -296,7 +296,7 @@ func (ic *ItalyIdentityConnector) ValidateCodiceFiscale(ctx context.Context, req
 		PlaceOfBirth:     placeCode,
 		ControlCharacter: controlChar,
 	}
-	
+
 	return response, nil
 }
 
@@ -306,13 +306,13 @@ func (ic *ItalyIdentityConnector) AuthenticateCIE(ctx context.Context, req *CIEA
 	if err := ic.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// In production, this would:
 	// 1. Read CIE chip via NFC or mobile app
 	// 2. Verify PIN
 	// 3. Extract certificate and personal data
 	// 4. Validate certificate chain
-	
+
 	// Mock response for demonstration
 	response := &CIEAuthResponse{
 		Success:   true,
@@ -330,7 +330,7 @@ func (ic *ItalyIdentityConnector) AuthenticateCIE(ctx context.Context, req *CIEA
 		},
 		Attributes: make(map[string]string),
 	}
-	
+
 	return response, nil
 }
 
@@ -344,7 +344,7 @@ func (ic *ItalyIdentityConnector) calculateCodiceFiscaleControl(first15 string) 
 		'K': 2, 'L': 4, 'M': 18, 'N': 20, 'O': 11, 'P': 3, 'Q': 6, 'R': 8, 'S': 12, 'T': 14,
 		'U': 16, 'V': 10, 'W': 22, 'X': 25, 'Y': 24, 'Z': 23,
 	}
-	
+
 	// Even position values (0-indexed, so positions 1, 3, 5, ...)
 	evenValues := map[rune]int{
 		'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
@@ -352,7 +352,7 @@ func (ic *ItalyIdentityConnector) calculateCodiceFiscaleControl(first15 string) 
 		'K': 10, 'L': 11, 'M': 12, 'N': 13, 'O': 14, 'P': 15, 'Q': 16, 'R': 17, 'S': 18, 'T': 19,
 		'U': 20, 'V': 21, 'W': 22, 'X': 23, 'Y': 24, 'Z': 25,
 	}
-	
+
 	sum := 0
 	for i, char := range first15 {
 		if i%2 == 0 {
@@ -361,7 +361,7 @@ func (ic *ItalyIdentityConnector) calculateCodiceFiscaleControl(first15 string) 
 			sum += evenValues[char]
 		}
 	}
-	
+
 	// Control character
 	controlChars := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	return string(controlChars[sum%26])
@@ -377,7 +377,7 @@ func (ic *ItalyIdentityConnector) generateCacheKey(operation string, parts ...st
 func (ic *ItalyIdentityConnector) GetMetrics() map[string]interface{} {
 	ic.mu.RLock()
 	defer ic.mu.RUnlock()
-	
+
 	return map[string]interface{}{
 		"connector": "italy_identity",
 	}

@@ -27,20 +27,20 @@ type JapanIdentityConnector struct {
 // JapanConnectorConfig configuration for Japanese identity connector
 type JapanConnectorConfig struct {
 	// My Number Card configuration
-	MyNumberURL       string `validate:"required,url"`
-	MyNumberClientID  string `validate:"required"`
-	MyNumberSecret    string `validate:"required"`
-	
+	MyNumberURL      string `validate:"required,url"`
+	MyNumberClientID string `validate:"required"`
+	MyNumberSecret   string `validate:"required"`
+
 	// JPKI (Japan Public Key Infrastructure) configuration
-	JPKIAuthURL       string `validate:"url"`
-	JPKICertURL       string `validate:"url"`
-	
+	JPKIAuthURL string `validate:"url"`
+	JPKICertURL string `validate:"url"`
+
 	// eKYC API configuration
-	EKYCServiceURL    string `validate:"url"`
-	EKYCAPIKey        string
-	
+	EKYCServiceURL string `validate:"url"`
+	EKYCAPIKey     string
+
 	// Timeouts
-	RequestTimeout    time.Duration
+	RequestTimeout time.Duration
 }
 
 // MyNumberAuthRequest My Number Card authentication request
@@ -54,12 +54,12 @@ type MyNumberAuthRequest struct {
 
 // MyNumberAuthResponse My Number Card authentication response
 type MyNumberAuthResponse struct {
-	Success       bool                 `json:"success"`
-	SessionID     string               `json:"session_id"`
-	UserInfo      *MyNumberUserInfo    `json:"user_info"`
-	Attributes    map[string]string    `json:"attributes"`
-	JPKICert      *JPKICertificate     `json:"jpki_cert,omitempty"`
-	Error         string               `json:"error,omitempty"`
+	Success    bool              `json:"success"`
+	SessionID  string            `json:"session_id"`
+	UserInfo   *MyNumberUserInfo `json:"user_info"`
+	Attributes map[string]string `json:"attributes"`
+	JPKICert   *JPKICertificate  `json:"jpki_cert,omitempty"`
+	Error      string            `json:"error,omitempty"`
 }
 
 // MyNumberUserInfo user information from My Number Card
@@ -96,21 +96,21 @@ type JPAddress struct {
 
 // JPKICertificate JPKI certificate information
 type JPKICertificate struct {
-	Type           string `json:"type"` // "auth" or "sign"
-	SerialNumber   string `json:"serial_number"`
-	IssuerDN       string `json:"issuer_dn"`
-	SubjectDN      string `json:"subject_dn"`
-	NotBefore      string `json:"not_before"`
-	NotAfter       string `json:"not_after"`
-	PublicKey      string `json:"public_key"`
+	Type            string `json:"type"` // "auth" or "sign"
+	SerialNumber    string `json:"serial_number"`
+	IssuerDN        string `json:"issuer_dn"`
+	SubjectDN       string `json:"subject_dn"`
+	NotBefore       string `json:"not_before"`
+	NotAfter        string `json:"not_after"`
+	PublicKey       string `json:"public_key"`
 	CertificateData string `json:"certificate_data"` // Base64 encoded
 }
 
 // IndividualNumberRequest Individual Number (My Number) validation request
 type IndividualNumberRequest struct {
-	IndividualNumber string `json:"individual_number" validate:"required,len=12"`
+	IndividualNumber string  `json:"individual_number" validate:"required,len=12"`
 	Name             *JPName `json:"name"`
-	DateOfBirth      string `json:"date_of_birth"`
+	DateOfBirth      string  `json:"date_of_birth"`
 }
 
 // IndividualNumberResponse Individual Number validation response
@@ -131,40 +131,40 @@ type ResidenceCardRequest struct {
 
 // ResidenceCardResponse residence card validation response
 type ResidenceCardResponse struct {
-	Valid             bool       `json:"valid"`
-	CardNumber        string     `json:"card_number"`
-	Name              *JPName    `json:"name"`
-	Nationality       string     `json:"nationality"`
-	DateOfBirth       string     `json:"date_of_birth"`
-	Gender            string     `json:"gender"`
-	ResidenceStatus   string     `json:"residence_status"`
-	ExpiryDate        string     `json:"expiry_date"`
-	Address           *JPAddress `json:"address"`
-	WorkRestrictions  string     `json:"work_restrictions,omitempty"`
-	Error             string     `json:"error,omitempty"`
+	Valid            bool       `json:"valid"`
+	CardNumber       string     `json:"card_number"`
+	Name             *JPName    `json:"name"`
+	Nationality      string     `json:"nationality"`
+	DateOfBirth      string     `json:"date_of_birth"`
+	Gender           string     `json:"gender"`
+	ResidenceStatus  string     `json:"residence_status"`
+	ExpiryDate       string     `json:"expiry_date"`
+	Address          *JPAddress `json:"address"`
+	WorkRestrictions string     `json:"work_restrictions,omitempty"`
+	Error            string     `json:"error,omitempty"`
 }
 
 // JPDriverLicenseRequest driver's license validation request for Japan
 type JPDriverLicenseRequest struct {
-	LicenseNumber   string `json:"license_number" validate:"required,len=12"`
-	Name            *JPName `json:"name" validate:"required"`
-	DateOfBirth     string `json:"date_of_birth" validate:"required"`
-	IssuingPrefecture string `json:"issuing_prefecture"`
+	LicenseNumber     string  `json:"license_number" validate:"required,len=12"`
+	Name              *JPName `json:"name" validate:"required"`
+	DateOfBirth       string  `json:"date_of_birth" validate:"required"`
+	IssuingPrefecture string  `json:"issuing_prefecture"`
 }
 
 // JPDriverLicenseResponse driver's license validation response for Japan
 type JPDriverLicenseResponse struct {
-	Valid             bool       `json:"valid"`
-	LicenseNumber     string     `json:"license_number"`
-	Name              *JPName    `json:"name"`
-	DateOfBirth       string     `json:"date_of_birth"`
-	Address           *JPAddress `json:"address"`
-	IssueDate         string     `json:"issue_date"`
-	ExpiryDate        string     `json:"expiry_date"`
-	LicenseTypes      []string   `json:"license_types"` // e.g., "普通", "大型", "二輪"
-	Conditions        string     `json:"conditions,omitempty"`
-	IssuingAuthority  string     `json:"issuing_authority"`
-	Error             string     `json:"error,omitempty"`
+	Valid            bool       `json:"valid"`
+	LicenseNumber    string     `json:"license_number"`
+	Name             *JPName    `json:"name"`
+	DateOfBirth      string     `json:"date_of_birth"`
+	Address          *JPAddress `json:"address"`
+	IssueDate        string     `json:"issue_date"`
+	ExpiryDate       string     `json:"expiry_date"`
+	LicenseTypes     []string   `json:"license_types"` // e.g., "普通", "大型", "二輪"
+	Conditions       string     `json:"conditions,omitempty"`
+	IssuingAuthority string     `json:"issuing_authority"`
+	Error            string     `json:"error,omitempty"`
 }
 
 // NewJapanIdentityConnector creates a new Japanese identity connector
@@ -174,18 +174,18 @@ func NewJapanIdentityConnector(config *JapanConnectorConfig) (*JapanIdentityConn
 	if err := validate.Struct(config); err != nil {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
-	
+
 	// Set defaults
 	if config.RequestTimeout == 0 {
 		config.RequestTimeout = 30 * time.Second
 	}
-	
+
 	connector := &JapanIdentityConnector{
 		config:     config,
 		httpClient: &http.Client{Timeout: config.RequestTimeout},
 		validator:  validate,
 	}
-	
+
 	return connector, nil
 }
 
@@ -195,7 +195,7 @@ func (jc *JapanIdentityConnector) AuthenticateMyNumber(ctx context.Context, req 
 	if err := jc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Validate card number format (alphanumeric)
 	if !regexp.MustCompile(`^[A-Z0-9]{8,20}$`).MatchString(req.CardNumber) {
 		return &MyNumberAuthResponse{
@@ -203,7 +203,7 @@ func (jc *JapanIdentityConnector) AuthenticateMyNumber(ctx context.Context, req 
 			Error:   "Invalid card number format",
 		}, nil
 	}
-	
+
 	// Validate PIN (4 digits)
 	if !regexp.MustCompile(`^\d{4}$`).MatchString(req.PIN) {
 		return &MyNumberAuthResponse{
@@ -211,13 +211,13 @@ func (jc *JapanIdentityConnector) AuthenticateMyNumber(ctx context.Context, req 
 			Error:   "Invalid PIN format (must be 4 digits)",
 		}, nil
 	}
-	
+
 	// In production, this would:
 	// 1. Read My Number Card chip via NFC or card reader
 	// 2. Verify PIN
 	// 3. Extract certificate and personal data
 	// 4. Optionally retrieve JPKI certificate
-	
+
 	// Mock response for demonstration
 	response := &MyNumberAuthResponse{
 		Success:   true,
@@ -239,7 +239,7 @@ func (jc *JapanIdentityConnector) AuthenticateMyNumber(ctx context.Context, req 
 		},
 		Attributes: make(map[string]string),
 	}
-	
+
 	if req.UseJPKI {
 		response.JPKICert = &JPKICertificate{
 			Type:         "auth",
@@ -250,7 +250,7 @@ func (jc *JapanIdentityConnector) AuthenticateMyNumber(ctx context.Context, req 
 			NotAfter:     "2030-01-01T00:00:00Z",
 		}
 	}
-	
+
 	return response, nil
 }
 
@@ -261,9 +261,9 @@ func (jc *JapanIdentityConnector) ValidateIndividualNumber(ctx context.Context, 
 	if err := jc.validator.Struct(req); err != nil {
 		return &IndividualNumberResponse{Valid: false, Error: err.Error()}, nil
 	}
-	
+
 	number := strings.TrimSpace(req.IndividualNumber)
-	
+
 	// Validate format (12 digits)
 	if !regexp.MustCompile(`^\d{12}$`).MatchString(number) {
 		return &IndividualNumberResponse{
@@ -271,20 +271,20 @@ func (jc *JapanIdentityConnector) ValidateIndividualNumber(ctx context.Context, 
 			Error: "Invalid Individual Number format (must be 12 digits)",
 		}, nil
 	}
-	
+
 	// Validate check digit (last digit) using modulo 11 algorithm
 	checkDigitValid := jc.validateMyNumberCheckDigit(number)
-	
+
 	response := &IndividualNumberResponse{
 		Valid:            checkDigitValid,
 		IndividualNumber: number,
 		CheckDigitValid:  checkDigitValid,
 	}
-	
+
 	if !checkDigitValid {
 		response.Error = "Invalid check digit"
 	}
-	
+
 	return response, nil
 }
 
@@ -294,7 +294,7 @@ func (jc *JapanIdentityConnector) VerifyResidenceCard(ctx context.Context, req *
 	if err := jc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Validate card number format (2 letters + 8 digits + 1 check letter)
 	if !regexp.MustCompile(`^[A-Z]{2}\d{8}[A-Z]$`).MatchString(req.CardNumber) {
 		return &ResidenceCardResponse{
@@ -302,12 +302,12 @@ func (jc *JapanIdentityConnector) VerifyResidenceCard(ctx context.Context, req *
 			Error: "Invalid residence card number format",
 		}, nil
 	}
-	
+
 	// In production, this would:
 	// 1. Verify card with Immigration Services Agency database
 	// 2. Check residence status and expiry
 	// 3. Validate work restrictions
-	
+
 	// Mock response for demonstration
 	response := &ResidenceCardResponse{
 		Valid:      true,
@@ -323,7 +323,7 @@ func (jc *JapanIdentityConnector) VerifyResidenceCard(ctx context.Context, req *
 		ExpiryDate:       "2028-01-15",
 		WorkRestrictions: "None",
 	}
-	
+
 	return response, nil
 }
 
@@ -333,9 +333,9 @@ func (jc *JapanIdentityConnector) VerifyDriverLicense(ctx context.Context, req *
 	if err := jc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	licenseNumber := strings.TrimSpace(req.LicenseNumber)
-	
+
 	// Validate format (12 digits)
 	if !regexp.MustCompile(`^\d{12}$`).MatchString(licenseNumber) {
 		return &JPDriverLicenseResponse{
@@ -343,26 +343,26 @@ func (jc *JapanIdentityConnector) VerifyDriverLicense(ctx context.Context, req *
 			Error: "Invalid license number format (must be 12 digits)",
 		}, nil
 	}
-	
+
 	// Extract prefecture code (first 2 digits)
 	prefectureCode := licenseNumber[0:2]
-	
+
 	// In production, this would:
 	// 1. Verify with National Police Agency database
 	// 2. Check license status and violations
 	// 3. Validate license types and conditions
-	
+
 	// Mock response for demonstration
 	response := &JPDriverLicenseResponse{
-		Valid:         true,
-		LicenseNumber: licenseNumber,
-		Name:          req.Name,
-		DateOfBirth:   req.DateOfBirth,
-		IssueDate:     "2020-01-15",
-		ExpiryDate:    "2027-01-15",
+		Valid:            true,
+		LicenseNumber:    licenseNumber,
+		Name:             req.Name,
+		DateOfBirth:      req.DateOfBirth,
+		IssueDate:        "2020-01-15",
+		ExpiryDate:       "2027-01-15",
 		IssuingAuthority: fmt.Sprintf("Prefecture %s Public Safety Commission", prefectureCode),
 	}
-	
+
 	return response, nil
 }
 
@@ -373,22 +373,22 @@ func (jc *JapanIdentityConnector) validateMyNumberCheckDigit(number string) bool
 	// P_n = 11 - ((Q_n + 6) % 11)
 	// Where Q_n = Σ(P_i × Q_i) for i = 1 to 11
 	// Q_i values: 6, 5, 4, 3, 2, 7, 6, 5, 4, 3, 2
-	
+
 	weights := []int{6, 5, 4, 3, 2, 7, 6, 5, 4, 3, 2}
 	sum := 0
-	
+
 	for i := 0; i < 11; i++ {
 		digit, _ := strconv.Atoi(string(number[i]))
 		sum += digit * weights[i]
 	}
-	
+
 	calculatedCheck := 11 - ((sum + 6) % 11)
 	if calculatedCheck >= 10 {
 		calculatedCheck = 0
 	}
-	
+
 	actualCheck, _ := strconv.Atoi(string(number[11]))
-	
+
 	return calculatedCheck == actualCheck
 }
 
@@ -402,7 +402,7 @@ func (jc *JapanIdentityConnector) generateCacheKey(operation string, parts ...st
 func (jc *JapanIdentityConnector) GetMetrics() map[string]interface{} {
 	jc.mu.RLock()
 	defer jc.mu.RUnlock()
-	
+
 	return map[string]interface{}{
 		"connector": "japan_identity",
 	}

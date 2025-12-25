@@ -1,3 +1,11 @@
+---
+title: Gnap Deployment
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # GNAP Production Deployment Guide
 
 Deploy GNAP (RFC 9635) in production with this guide.

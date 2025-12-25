@@ -1,3 +1,11 @@
+---
+title: Verification Report
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Admin Handler Integration - Verification Report
 
 **Date**: November 22, 2025  

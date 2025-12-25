@@ -1,5 +1,11 @@
 package poa
 
+import (
+	"time"
+
+	"github.com/mauriciomferz/Gauth_go/pkg/metrics"
+)
+
 // PoAValidator defines the interface for Power of Attorney validation.
 type PoAValidator interface {
 	Validate(poA *PowerOfAttorney) ([]ValidationWarning, error)
@@ -62,21 +68,48 @@ type RawPOAExposer interface {
 type DefaultConditionalInterpreter struct{}
 
 func (i *DefaultConditionalInterpreter) Evaluate(conditions map[string]interface{}, context map[string]interface{}) (bool, error) {
-	// TODO: Implement real conditional logic
+	now := time.Now()
+
+	// Check "valid_from"
+	if val, ok := conditions["valid_from"]; ok {
+		if tStr, ok := val.(string); ok {
+			if t, err := time.Parse(time.RFC3339, tStr); err == nil {
+				if now.Before(t) {
+					return false, nil
+				}
+			}
+		}
+	}
+
+	// Check "valid_until"
+	if val, ok := conditions["valid_until"]; ok {
+		if tStr, ok := val.(string); ok {
+			if t, err := time.Parse(time.RFC3339, tStr); err == nil {
+				if now.After(t) {
+					return false, nil
+				}
+			}
+		}
+	}
+
 	return true, nil
 }
 
 type DefaultAuditMetrics struct{}
 
 func (m *DefaultAuditMetrics) RecordValidation(poA *PowerOfAttorney, warnings []ValidationWarning, err error) {
-	// TODO: Implement real metrics recording
+	result := "success"
+	if err != nil {
+		result = "failure"
+	} else if len(warnings) > 0 {
+		result = "warning"
+	}
+	metrics.PoAValidationsTotal.WithLabelValues(result).Inc()
 }
-
 
 // DefaultCBORCodec is an alias for CanonicalCBORCodec.
 // Use CanonicalCBORCodec directly for CBOR encoding/decoding.
 type DefaultCBORCodec = CanonicalCBORCodec
-
 
 type DefaultRawPOAExposer struct{}
 

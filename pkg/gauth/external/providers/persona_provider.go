@@ -68,23 +68,23 @@ type PersonaVerificationData struct {
 
 type PersonaVerificationAttributes struct {
 	// Document information
-	DocumentType   string                `json:"document-type"`
-	DocumentNumber string                `json:"document-number,omitempty"`
-	FirstName      string                `json:"name-first"`
-	LastName       string                `json:"name-last"`
-	DateOfBirth    string                `json:"birthdate,omitempty"`
-	ExpirationDate string                `json:"expiration-date,omitempty"`
-	IssueDate      string                `json:"issue-date,omitempty"`
-	Country        string                `json:"country-code,omitempty"`
-	State          string                `json:"identification-class,omitempty"` // For DL state
-	
+	DocumentType   string `json:"document-type"`
+	DocumentNumber string `json:"document-number,omitempty"`
+	FirstName      string `json:"name-first"`
+	LastName       string `json:"name-last"`
+	DateOfBirth    string `json:"birthdate,omitempty"`
+	ExpirationDate string `json:"expiration-date,omitempty"`
+	IssueDate      string `json:"issue-date,omitempty"`
+	Country        string `json:"country-code,omitempty"`
+	State          string `json:"identification-class,omitempty"` // For DL state
+
 	// Optional fields
 	Nationality string `json:"nationality,omitempty"`
 	SSN         string `json:"identification-number,omitempty"`
-	
+
 	// Images (base64 encoded)
-	FrontImage string `json:"front-photo,omitempty"`
-	BackImage  string `json:"back-photo,omitempty"`
+	FrontImage  string `json:"front-photo,omitempty"`
+	BackImage   string `json:"back-photo,omitempty"`
 	SelfieImage string `json:"selfie-photo,omitempty"`
 }
 
@@ -94,23 +94,23 @@ type PersonaVerificationResponse struct {
 }
 
 type PersonaVerificationResponseData struct {
-	ID         string                               `json:"id"`
-	Type       string                               `json:"type"`
+	ID         string                                `json:"id"`
+	Type       string                                `json:"type"`
 	Attributes PersonaVerificationResponseAttributes `json:"attributes"`
 }
 
 type PersonaVerificationResponseAttributes struct {
-	Status             string                  `json:"status"`
-	CreatedAt          string                  `json:"created-at"`
-	CompletedAt        string                  `json:"completed-at,omitempty"`
-	Checks             []PersonaCheck          `json:"checks"`
-	Fields             PersonaVerifiedFields   `json:"fields,omitempty"`
-	VerificationScore  float64                 `json:"verification-score,omitempty"`
+	Status            string                `json:"status"`
+	CreatedAt         string                `json:"created-at"`
+	CompletedAt       string                `json:"completed-at,omitempty"`
+	Checks            []PersonaCheck        `json:"checks"`
+	Fields            PersonaVerifiedFields `json:"fields,omitempty"`
+	VerificationScore float64               `json:"verification-score,omitempty"`
 }
 
 type PersonaCheck struct {
-	Name   string `json:"name"`
-	Status string `json:"status"`
+	Name    string   `json:"name"`
+	Status  string   `json:"status"`
 	Reasons []string `json:"reasons,omitempty"`
 }
 
@@ -134,7 +134,7 @@ type PersonaSSNVerificationRequest struct {
 }
 
 type PersonaSSNData struct {
-	Type       string              `json:"type"`
+	Type       string               `json:"type"`
 	Attributes PersonaSSNAttributes `json:"attributes"`
 }
 
@@ -194,14 +194,14 @@ func (p *PersonaProvider) ValidateSSN(ctx context.Context, req *external.SSNVali
 
 	// Convert to SSNValidationResult
 	result := &external.SSNValidationResult{
-		Valid:           personaResp.Data.Attributes.Status == personaStatusPassed,
-		ValidationLevel: req.ValidationLevel,
-		ConfidenceScore: personaResp.Data.Attributes.VerificationScore,
-		FormatValid:     true, // Persona validates format
-		ProviderName:    p.name,
+		Valid:                 personaResp.Data.Attributes.Status == personaStatusPassed,
+		ValidationLevel:       req.ValidationLevel,
+		ConfidenceScore:       personaResp.Data.Attributes.VerificationScore,
+		FormatValid:           true, // Persona validates format
+		ProviderName:          p.name,
 		ProviderTransactionID: personaResp.Data.ID,
-		ProcessingTimeMs: time.Since(startTime).Milliseconds(),
-		ValidationTimestamp: time.Now(),
+		ProcessingTimeMs:      time.Since(startTime).Milliseconds(),
+		ValidationTimestamp:   time.Now(),
 	}
 
 	// Check individual fields

@@ -27,21 +27,21 @@ type KoreaIdentityConnector struct {
 // KoreaConnectorConfig configuration for Korean identity connector
 type KoreaConnectorConfig struct {
 	// i-PIN configuration
-	IPINServiceURL    string `validate:"required,url"`
-	IPINClientID      string `validate:"required"`
-	IPINSecret        string `validate:"required"`
-	
+	IPINServiceURL string `validate:"required,url"`
+	IPINClientID   string `validate:"required"`
+	IPINSecret     string `validate:"required"`
+
 	// PASS (Mobile authentication) configuration
-	PASSServiceURL    string `validate:"url"`
-	PASSClientID      string
-	PASSSecret        string
-	
+	PASSServiceURL string `validate:"url"`
+	PASSClientID   string
+	PASSSecret     string
+
 	// Government24 configuration
-	Gov24URL          string `validate:"url"`
-	Gov24APIKey       string
-	
+	Gov24URL    string `validate:"url"`
+	Gov24APIKey string
+
 	// Timeouts
-	RequestTimeout    time.Duration
+	RequestTimeout time.Duration
 }
 
 // IPINAuthRequest i-PIN authentication request
@@ -64,24 +64,24 @@ type IPINAuthResponse struct {
 
 // IPINUserInfo user information from i-PIN
 type IPINUserInfo struct {
-	IPIN             string      `json:"i_pin"` // Unique identifier
-	CI               string      `json:"ci"` // Connecting Information (88 chars)
-	DI               string      `json:"di"` // Duplication Information (64 chars)
-	Name             string      `json:"name"`
-	NameEnglish      string      `json:"name_english,omitempty"`
-	Gender           string      `json:"gender"`
-	Nationality      string      `json:"nationality"`
-	DateOfBirth      string      `json:"date_of_birth"`
-	MobileNumber     string      `json:"mobile_number"`
-	Email            string      `json:"email"`
-	Address          *KRAddress  `json:"address,omitempty"`
-	IsForeigner      bool        `json:"is_foreigner"`
+	IPIN         string     `json:"i_pin"` // Unique identifier
+	CI           string     `json:"ci"`    // Connecting Information (88 chars)
+	DI           string     `json:"di"`    // Duplication Information (64 chars)
+	Name         string     `json:"name"`
+	NameEnglish  string     `json:"name_english,omitempty"`
+	Gender       string     `json:"gender"`
+	Nationality  string     `json:"nationality"`
+	DateOfBirth  string     `json:"date_of_birth"`
+	MobileNumber string     `json:"mobile_number"`
+	Email        string     `json:"email"`
+	Address      *KRAddress `json:"address,omitempty"`
+	IsForeigner  bool       `json:"is_foreigner"`
 }
 
 // KRAddress Korean address structure
 type KRAddress struct {
 	JibunAddress  string `json:"jibun_address"` // Traditional address
-	RoadAddress   string `json:"road_address"` // New road name address
+	RoadAddress   string `json:"road_address"`  // New road name address
 	PostalCode    string `json:"postal_code"`
 	DetailAddress string `json:"detail_address,omitempty"`
 	ExtraAddress  string `json:"extra_address,omitempty"`
@@ -107,11 +107,11 @@ type RRNResponse struct {
 
 // ARCRequest Alien Registration Card validation request
 type ARCRequest struct {
-	CardNumber      string `json:"card_number" validate:"required,len=13"`
-	Name            string `json:"name" validate:"required"`
-	Nationality     string `json:"nationality" validate:"required"`
-	DateOfBirth     string `json:"date_of_birth"`
-	VisaType        string `json:"visa_type"`
+	CardNumber  string `json:"card_number" validate:"required,len=13"`
+	Name        string `json:"name" validate:"required"`
+	Nationality string `json:"nationality" validate:"required"`
+	DateOfBirth string `json:"date_of_birth"`
+	VisaType    string `json:"visa_type"`
 }
 
 // ARCResponse Alien Registration Card validation response
@@ -151,14 +151,14 @@ type PASSAuthResponse struct {
 
 // PASSUserInfo user information from PASS
 type PASSUserInfo struct {
-	CI               string `json:"ci"` // Connecting Information
-	DI               string `json:"di"` // Duplication Information
-	Name             string `json:"name"`
-	DateOfBirth      string `json:"date_of_birth"`
-	Gender           string `json:"gender"`
-	Nationality      string `json:"nationality"`
-	MobileNumber     string `json:"mobile_number"`
-	TelecomProvider  string `json:"telecom_provider"`
+	CI              string `json:"ci"` // Connecting Information
+	DI              string `json:"di"` // Duplication Information
+	Name            string `json:"name"`
+	DateOfBirth     string `json:"date_of_birth"`
+	Gender          string `json:"gender"`
+	Nationality     string `json:"nationality"`
+	MobileNumber    string `json:"mobile_number"`
+	TelecomProvider string `json:"telecom_provider"`
 }
 
 // NewKoreaIdentityConnector creates a new Korean identity connector
@@ -168,18 +168,18 @@ func NewKoreaIdentityConnector(config *KoreaConnectorConfig) (*KoreaIdentityConn
 	if err := validate.Struct(config); err != nil {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
-	
+
 	// Set defaults
 	if config.RequestTimeout == 0 {
 		config.RequestTimeout = 30 * time.Second
 	}
-	
+
 	connector := &KoreaIdentityConnector{
 		config:     config,
 		httpClient: &http.Client{Timeout: config.RequestTimeout},
 		validator:  validate,
 	}
-	
+
 	return connector, nil
 }
 
@@ -189,13 +189,13 @@ func (kc *KoreaIdentityConnector) AuthenticateIPIN(ctx context.Context, req *IPI
 	if err := kc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// In production, this would:
 	// 1. Redirect to i-PIN service
 	// 2. User authenticates with i-PIN or PASS
 	// 3. Receive CI/DI and personal information
 	// 4. Return verified identity
-	
+
 	// Mock response for demonstration
 	response := &IPINAuthResponse{
 		Success:   true,
@@ -213,7 +213,7 @@ func (kc *KoreaIdentityConnector) AuthenticateIPIN(ctx context.Context, req *IPI
 		},
 		Attributes: make(map[string]string),
 	}
-	
+
 	return response, nil
 }
 
@@ -225,9 +225,9 @@ func (kc *KoreaIdentityConnector) ValidateRRN(ctx context.Context, req *RRNReque
 	if err := kc.validator.Struct(req); err != nil {
 		return &RRNResponse{Valid: false, Error: err.Error()}, nil
 	}
-	
+
 	rrn := strings.ReplaceAll(strings.TrimSpace(req.RRN), "-", "")
-	
+
 	// Validate format (13 digits)
 	if !regexp.MustCompile(`^\d{13}$`).MatchString(rrn) {
 		return &RRNResponse{
@@ -235,14 +235,14 @@ func (kc *KoreaIdentityConnector) ValidateRRN(ctx context.Context, req *RRNReque
 			Error: "Invalid RRN format (must be 13 digits)",
 		}, nil
 	}
-	
+
 	// Extract components
 	year := rrn[0:2]
 	month := rrn[2:4]
 	day := rrn[4:6]
 	genderCode := rrn[6:7]
 	regionCode := rrn[7:11]
-	
+
 	// Determine century and gender
 	var century string
 	var gender string
@@ -263,7 +263,7 @@ func (kc *KoreaIdentityConnector) ValidateRRN(ctx context.Context, req *RRNReque
 			Error: "Invalid gender code",
 		}, nil
 	}
-	
+
 	// Odd: Male, Even: Female
 	genderInt, _ := strconv.Atoi(genderCode)
 	if genderInt%2 == 1 || genderInt == 0 {
@@ -271,13 +271,13 @@ func (kc *KoreaIdentityConnector) ValidateRRN(ctx context.Context, req *RRNReque
 	} else {
 		gender = "F"
 	}
-	
+
 	// Validate check digit
 	checkDigitValid := kc.validateRRNCheckDigit(rrn)
-	
+
 	// Mask RRN for response (show only first 6 digits)
 	maskedRRN := rrn[0:6] + "-*******"
-	
+
 	response := &RRNResponse{
 		Valid:           checkDigitValid,
 		RRN:             maskedRRN,
@@ -286,11 +286,11 @@ func (kc *KoreaIdentityConnector) ValidateRRN(ctx context.Context, req *RRNReque
 		RegionCode:      regionCode,
 		CheckDigitValid: checkDigitValid,
 	}
-	
+
 	if !checkDigitValid {
 		response.Error = "Invalid check digit"
 	}
-	
+
 	return response, nil
 }
 
@@ -300,9 +300,9 @@ func (kc *KoreaIdentityConnector) VerifyARC(ctx context.Context, req *ARCRequest
 	if err := kc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	cardNumber := strings.ReplaceAll(strings.TrimSpace(req.CardNumber), "-", "")
-	
+
 	// Validate format (13 digits, starts with 5-8)
 	if !regexp.MustCompile(`^[5-8]\d{12}$`).MatchString(cardNumber) {
 		return &ARCResponse{
@@ -310,10 +310,10 @@ func (kc *KoreaIdentityConnector) VerifyARC(ctx context.Context, req *ARCRequest
 			Error: "Invalid ARC number format",
 		}, nil
 	}
-	
+
 	// Validate check digit (same algorithm as RRN)
 	checkDigitValid := kc.validateRRNCheckDigit(cardNumber)
-	
+
 	// Extract gender from 7th digit
 	genderCode := cardNumber[6:7]
 	genderInt, _ := strconv.Atoi(genderCode)
@@ -323,10 +323,10 @@ func (kc *KoreaIdentityConnector) VerifyARC(ctx context.Context, req *ARCRequest
 	} else {
 		gender = "F"
 	}
-	
+
 	// Mask card number
 	maskedNumber := cardNumber[0:6] + "-*******"
-	
+
 	// In production, this would verify with Immigration Office database
 	response := &ARCResponse{
 		Valid:           checkDigitValid,
@@ -340,11 +340,11 @@ func (kc *KoreaIdentityConnector) VerifyARC(ctx context.Context, req *ARCRequest
 		ExpiryDate:      "2025-01-15",
 		CheckDigitValid: checkDigitValid,
 	}
-	
+
 	if !checkDigitValid {
 		response.Error = "Invalid check digit"
 	}
-	
+
 	return response, nil
 }
 
@@ -354,12 +354,12 @@ func (kc *KoreaIdentityConnector) AuthenticatePASS(ctx context.Context, req *PAS
 	if err := kc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// In production, this would:
 	// 1. Initiate mobile authentication
 	// 2. User approves on mobile device
 	// 3. Receive CI/DI and verified information
-	
+
 	// Mock response for demonstration
 	response := &PASSAuthResponse{
 		Success:   true,
@@ -376,7 +376,7 @@ func (kc *KoreaIdentityConnector) AuthenticatePASS(ctx context.Context, req *PAS
 		},
 		Attributes: make(map[string]string),
 	}
-	
+
 	return response, nil
 }
 
@@ -387,15 +387,15 @@ func (kc *KoreaIdentityConnector) validateRRNCheckDigit(rrn string) bool {
 	// Weights: 2, 3, 4, 5, 6, 7, 8, 9, 2, 3, 4, 5
 	weights := []int{2, 3, 4, 5, 6, 7, 8, 9, 2, 3, 4, 5}
 	sum := 0
-	
+
 	for i := 0; i < 12; i++ {
 		digit, _ := strconv.Atoi(string(rrn[i]))
 		sum += digit * weights[i]
 	}
-	
+
 	checkDigit := (11 - (sum % 11)) % 10
 	actualCheckDigit, _ := strconv.Atoi(string(rrn[12]))
-	
+
 	return checkDigit == actualCheckDigit
 }
 
@@ -409,7 +409,7 @@ func (kc *KoreaIdentityConnector) generateCacheKey(operation string, parts ...st
 func (kc *KoreaIdentityConnector) GetMetrics() map[string]interface{} {
 	kc.mu.RLock()
 	defer kc.mu.RUnlock()
-	
+
 	return map[string]interface{}{
 		"connector": "korea_identity",
 	}

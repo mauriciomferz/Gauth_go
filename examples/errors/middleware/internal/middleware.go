@@ -8,8 +8,8 @@ import (
 
 	stderrs "errors"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/errors"
 	"github.com/google/uuid"
+	"github.com/mauriciomferz/Gauth_go/pkg/errors"
 )
 
 // AuditHandler serves RFC-compliant advanced audit responses

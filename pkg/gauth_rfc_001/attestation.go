@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/mauriciomferz/Gauth_go/pkg/attest"
 	cr "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/pkg/rfc"
-	"github.com/google/uuid"
 )
 
 // IssueAttestationProof creates and signs a new AttestationProof.

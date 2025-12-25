@@ -1,3 +1,11 @@
+---
+title: Running Server
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Running the Web Server
 
 The `web-server` command must be executed from the repository root (where `go.mod` lives). If you run it from inside the `web/` directory you will see errors like:

@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/gin-gonic/gin"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
 // ============================================================================
@@ -47,13 +47,13 @@ func (s *BetaServer) apiPAPCreatePolicy(c *gin.Context) {
 
 	// Create policy via PAP (placeholder - needs actual PAP integration)
 	policyID := fmt.Sprintf("policy-%d", time.Now().UnixNano())
-	
+
 	c.JSON(http.StatusCreated, gin.H{
-		"policy_id":   policyID,
-		"status":      "active",
-		"created_at":  time.Now().Format(time.RFC3339),
-		"expires_at":  expiresAt,
-		"message":     "Policy created successfully",
+		"policy_id":  policyID,
+		"status":     "active",
+		"created_at": time.Now().Format(time.RFC3339),
+		"expires_at": expiresAt,
+		"message":    "Policy created successfully",
 	})
 }
 
@@ -67,16 +67,16 @@ func (s *BetaServer) apiPAPGetPolicy(c *gin.Context) {
 
 	// Placeholder response
 	c.JSON(http.StatusOK, gin.H{
-		"policy_id":          policyID,
-		"policy_name":        "Sample Policy",
-		"policy_type":        "poa",
-		"status":             "active",
-		"client_owner":       "client-001",
-		"owners_authorizer":  "auth-001",
-		"allowed_actions":    []string{"read", "write"},
-		"countries":          []string{"US", "CA"},
-		"sectors":            []string{"healthcare"},
-		"created_at":         time.Now().Add(-24 * time.Hour).Format(time.RFC3339),
+		"policy_id":         policyID,
+		"policy_name":       "Sample Policy",
+		"policy_type":       "poa",
+		"status":            "active",
+		"client_owner":      "client-001",
+		"owners_authorizer": "auth-001",
+		"allowed_actions":   []string{"read", "write"},
+		"countries":         []string{"US", "CA"},
+		"sectors":           []string{"healthcare"},
+		"created_at":        time.Now().Add(-24 * time.Hour).Format(time.RFC3339),
 	})
 }
 
@@ -143,11 +143,11 @@ func (s *BetaServer) apiPAPDeletePolicy(c *gin.Context) {
 // apiPAPMetrics returns PAP performance metrics
 func (s *BetaServer) apiPAPMetrics(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"total_policies":      42,
-		"active_policies":     35,
-		"suspended_policies":  5,
-		"revoked_policies":    2,
-		"avg_creation_time":   "45ms",
+		"total_policies":     42,
+		"active_policies":    35,
+		"suspended_policies": 5,
+		"revoked_policies":   2,
+		"avg_creation_time":  "45ms",
 	})
 }
 
@@ -158,10 +158,10 @@ func (s *BetaServer) apiPAPMetrics(c *gin.Context) {
 // apiPDPMakeDecision evaluates an authorization decision
 func (s *BetaServer) apiPDPMakeDecision(c *gin.Context) {
 	var req struct {
-		Subject   string            `json:"subject" binding:"required"`
-		Resource  string            `json:"resource" binding:"required"`
-		Action    string            `json:"action" binding:"required"`
-		Context   map[string]string `json:"context"`
+		Subject  string            `json:"subject" binding:"required"`
+		Resource string            `json:"resource" binding:"required"`
+		Action   string            `json:"action" binding:"required"`
+		Context  map[string]string `json:"context"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -178,7 +178,7 @@ func (s *BetaServer) apiPDPMakeDecision(c *gin.Context) {
 	}
 
 	decisionID := fmt.Sprintf("decision-%d", time.Now().UnixNano())
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"decision_id": decisionID,
 		"authorized":  authorized,
@@ -195,11 +195,11 @@ func (s *BetaServer) apiPDPMakeDecision(c *gin.Context) {
 // apiPDPEvaluatePolicy evaluates a specific policy with context
 func (s *BetaServer) apiPDPEvaluatePolicy(c *gin.Context) {
 	policyID := c.Param("id")
-	
+
 	var req struct {
 		Context map[string]interface{} `json:"context"`
 	}
-	
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -208,12 +208,12 @@ func (s *BetaServer) apiPDPEvaluatePolicy(c *gin.Context) {
 	// Simulate policy evaluation
 	result := "pass"
 	details := "Policy conditions satisfied"
-	
+
 	c.JSON(http.StatusOK, gin.H{
-		"policy_id":  policyID,
-		"result":     result,
-		"details":    details,
-		"context":    req.Context,
+		"policy_id":    policyID,
+		"result":       result,
+		"details":      details,
+		"context":      req.Context,
 		"evaluated_at": time.Now().Format(time.RFC3339),
 	})
 }
@@ -240,7 +240,7 @@ func (s *BetaServer) apiPDPRecentDecisions(c *gin.Context) {
 			"timestamp":   time.Now().Add(-3 * time.Minute).Format(time.RFC3339),
 		},
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"decisions": decisions,
 		"total":     len(decisions),
@@ -250,11 +250,11 @@ func (s *BetaServer) apiPDPRecentDecisions(c *gin.Context) {
 // apiPDPMetrics returns PDP performance metrics
 func (s *BetaServer) apiPDPMetrics(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"total_decisions":  1247,
-		"permit_count":     982,
-		"deny_count":       265,
-		"permit_rate":      78.7,
-		"deny_rate":        21.3,
+		"total_decisions":   1247,
+		"permit_count":      982,
+		"deny_count":        265,
+		"permit_rate":       78.7,
+		"deny_rate":         21.3,
 		"avg_response_time": "12ms",
 	})
 }
@@ -282,7 +282,7 @@ func (s *BetaServer) apiPEPEnforce(c *gin.Context) {
 	enforced := true
 	message := "Authorization enforced successfully"
 	violations := []string{}
-	
+
 	if req.Mode == "strict" && req.Action == "delete" {
 		enforced = false
 		message = "Action blocked by policy"
@@ -290,36 +290,36 @@ func (s *BetaServer) apiPEPEnforce(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"enforced":    enforced,
-		"message":     message,
-		"violations":  violations,
-		"action":      req.Action,
-		"mode":        req.Mode,
-		"timestamp":   time.Now().Format(time.RFC3339),
+		"enforced":   enforced,
+		"message":    message,
+		"violations": violations,
+		"action":     req.Action,
+		"mode":       req.Mode,
+		"timestamp":  time.Now().Format(time.RFC3339),
 	})
 }
 
 // apiPEPTestSupplySide tests supply-side enforcement
 func (s *BetaServer) apiPEPTestSupplySide(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"test_type":  "supply-side",
-		"result":     "pass",
-		"checks":     []string{"token_validity", "policy_compliance", "scope_validation"},
-		"passed":     3,
-		"failed":     0,
-		"timestamp":  time.Now().Format(time.RFC3339),
+		"test_type": "supply-side",
+		"result":    "pass",
+		"checks":    []string{"token_validity", "policy_compliance", "scope_validation"},
+		"passed":    3,
+		"failed":    0,
+		"timestamp": time.Now().Format(time.RFC3339),
 	})
 }
 
 // apiPEPTestDemandSide tests demand-side enforcement
 func (s *BetaServer) apiPEPTestDemandSide(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"test_type":  "demand-side",
-		"result":     "pass",
-		"checks":     []string{"resource_authorization", "action_permissions", "context_validation"},
-		"passed":     3,
-		"failed":     0,
-		"timestamp":  time.Now().Format(time.RFC3339),
+		"test_type": "demand-side",
+		"result":    "pass",
+		"checks":    []string{"resource_authorization", "action_permissions", "context_validation"},
+		"passed":    3,
+		"failed":    0,
+		"timestamp": time.Now().Format(time.RFC3339),
 	})
 }
 
@@ -336,7 +336,7 @@ func (s *BetaServer) apiPEPRecentViolations(c *gin.Context) {
 			"timestamp":    time.Now().Add(-10 * time.Minute).Format(time.RFC3339),
 		},
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"violations": violations,
 		"total":      len(violations),
@@ -346,11 +346,11 @@ func (s *BetaServer) apiPEPRecentViolations(c *gin.Context) {
 // apiPEPMetrics returns PEP performance metrics
 func (s *BetaServer) apiPEPMetrics(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"total_enforcements":   3456,
+		"total_enforcements":      3456,
 		"successful_enforcements": 3398,
-		"blocked_actions":      58,
-		"violations_detected":  12,
-		"avg_enforcement_time": "8ms",
+		"blocked_actions":         58,
+		"violations_detected":     12,
+		"avg_enforcement_time":    "8ms",
 	})
 }
 
@@ -400,7 +400,7 @@ func (s *BetaServer) getOrCreatePAP() *gauth.PowerAdministrationPoint {
 	return gauth.NewPowerAdministrationPoint("pap-default", "Default PAP", "Default Policy Administration Point")
 }
 
-// Helper to get or create PDP instance  
+// Helper to get or create PDP instance
 func (s *BetaServer) getOrCreatePDP() *gauth.SimplePDP {
 	// This would be initialized during server startup with PAP integration
 	pap := s.getOrCreatePAP()

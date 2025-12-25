@@ -479,7 +479,9 @@ func (h *Handler) writeAudit(modelID, kind string, provided, limit int, windowSt
 	final, _ := json.Marshal(entry)
 
 	if f, err := os.OpenFile(h.AuditPath, os.O_APPEND|os.O_WRONLY, 0600); err == nil {
-		f.Write(append(final, byte('\n')))
+		if _, err := f.Write(append(final, byte('\n'))); err != nil {
+			fmt.Fprintf(os.Stderr, "[model-limits] audit write failed: %v\n", err)
+		}
 		f.Close()
 		h.auditPrevHash = entry["hash"].(string)
 		h.auditEntryCount++
@@ -597,7 +599,9 @@ func (h *Handler) AnchorAuditIfNeeded() {
 	final, _ := json.Marshal(anchor)
 
 	if f, err := os.OpenFile(h.AnchorPath, os.O_APPEND|os.O_WRONLY, 0600); err == nil {
-		f.Write(append(final, byte('\n')))
+		if _, err := f.Write(append(final, byte('\n'))); err != nil {
+			fmt.Fprintf(os.Stderr, "[model-limits] anchor write failed: %v\n", err)
+		}
 		f.Close()
 		h.anchorPrevHash = anchor["hash"].(string)
 		go h.EmitAttestation("anchor_commit")

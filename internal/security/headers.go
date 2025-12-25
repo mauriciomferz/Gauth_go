@@ -16,20 +16,20 @@ import (
 func SecurityHeadersMiddleware() gin.HandlerFunc {
 	// Load configuration from environment
 	isDevelopment := os.Getenv("GAUTH_ENV") == "development"
-	
+
 	// Content Security Policy
 	csp := buildContentSecurityPolicy(isDevelopment)
-	
+
 	// Allowed frame ancestors (for X-Frame-Options alternative)
 	frameAncestors := os.Getenv("GAUTH_FRAME_ANCESTORS")
 	if frameAncestors == "" {
 		frameAncestors = "'none'" // Default: no framing
 	}
-	
+
 	return func(c *gin.Context) {
 		// Content Security Policy
 		c.Header("Content-Security-Policy", csp)
-		
+
 		// Strict Transport Security (HSTS) - only in production with HTTPS
 		if !isDevelopment && c.Request.TLS != nil {
 			maxAge := os.Getenv("GAUTH_HSTS_MAX_AGE")
@@ -38,42 +38,42 @@ func SecurityHeadersMiddleware() gin.HandlerFunc {
 			}
 			c.Header("Strict-Transport-Security", fmt.Sprintf("max-age=%s; includeSubDomains; preload", maxAge))
 		}
-		
+
 		// X-Frame-Options (defense-in-depth with CSP frame-ancestors)
 		frameOptions := os.Getenv("GAUTH_X_FRAME_OPTIONS")
 		if frameOptions == "" {
 			frameOptions = "DENY" // Default: no framing
 		}
 		c.Header("X-Frame-Options", frameOptions)
-		
+
 		// X-Content-Type-Options
 		c.Header("X-Content-Type-Options", "nosniff")
-		
+
 		// X-XSS-Protection (legacy browsers)
 		c.Header("X-XSS-Protection", "1; mode=block")
-		
+
 		// Referrer Policy
 		referrerPolicy := os.Getenv("GAUTH_REFERRER_POLICY")
 		if referrerPolicy == "" {
 			referrerPolicy = "strict-origin-when-cross-origin"
 		}
 		c.Header("Referrer-Policy", referrerPolicy)
-		
+
 		// Permissions Policy (Feature Policy)
 		permissionsPolicy := buildPermissionsPolicy()
 		c.Header("Permissions-Policy", permissionsPolicy)
-		
+
 		// Remove server identification headers
 		c.Header("Server", "")
 		c.Header("X-Powered-By", "")
-		
+
 		// Cache control for sensitive endpoints
 		if isSecureEndpoint(c.Request.URL.Path) {
 			c.Header("Cache-Control", "no-store, no-cache, must-revalidate, private")
 			c.Header("Pragma", "no-cache")
 			c.Header("Expires", "0")
 		}
-		
+
 		c.Next()
 	}
 }
@@ -95,7 +95,7 @@ func buildContentSecurityPolicy(isDevelopment bool) string {
 		"frame-ancestors 'none'",
 		"upgrade-insecure-requests",
 	}
-	
+
 	// Development mode: allow localhost and webpack dev server
 	if isDevelopment {
 		directives = []string{
@@ -112,13 +112,13 @@ func buildContentSecurityPolicy(isDevelopment bool) string {
 			"frame-ancestors 'self'",
 		}
 	}
-	
+
 	// Allow custom CSP additions via environment
 	customCSP := os.Getenv("GAUTH_CSP_ADDITIONS")
 	if customCSP != "" {
 		directives = append(directives, strings.Split(customCSP, ";")...)
 	}
-	
+
 	return strings.Join(directives, "; ")
 }
 
@@ -136,13 +136,13 @@ func buildPermissionsPolicy() string {
 		"usb=()",
 		"interest-cohort=()", // Disable FLoC
 	}
-	
+
 	// Allow custom permissions via environment
 	customPermissions := os.Getenv("GAUTH_PERMISSIONS_POLICY")
 	if customPermissions != "" {
 		policies = append(policies, strings.Split(customPermissions, ",")...)
 	}
-	
+
 	return strings.Join(policies, ", ")
 }
 
@@ -156,13 +156,13 @@ func isSecureEndpoint(path string) bool {
 		"/api/v1/beta/subscriptions",
 		"/api/v1/beta/pip",
 	}
-	
+
 	for _, pattern := range securePatterns {
 		if strings.HasPrefix(path, pattern) {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -171,7 +171,7 @@ func CORSMiddleware() gin.HandlerFunc {
 	// Load allowed origins from environment
 	allowedOrigins := loadAllowedOrigins()
 	isDevelopment := os.Getenv("GAUTH_ENV") == "development"
-	
+
 	// Allowed methods
 	allowedMethods := []string{
 		http.MethodGet,
@@ -181,7 +181,7 @@ func CORSMiddleware() gin.HandlerFunc {
 		http.MethodDelete,
 		http.MethodOptions,
 	}
-	
+
 	// Allowed headers
 	allowedHeaders := []string{
 		"Content-Type",
@@ -192,7 +192,7 @@ func CORSMiddleware() gin.HandlerFunc {
 		"X-Request-ID",
 		"X-Correlation-ID",
 	}
-	
+
 	// Exposed headers
 	exposedHeaders := []string{
 		"Content-Length",
@@ -202,10 +202,10 @@ func CORSMiddleware() gin.HandlerFunc {
 		"X-RateLimit-Remaining",
 		"X-RateLimit-Reset",
 	}
-	
+
 	return func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
-		
+
 		// Check if origin is allowed
 		if origin != "" && isOriginAllowed(origin, allowedOrigins, isDevelopment) {
 			c.Header("Access-Control-Allow-Origin", origin)
@@ -214,7 +214,7 @@ func CORSMiddleware() gin.HandlerFunc {
 			c.Header("Access-Control-Allow-Headers", strings.Join(allowedHeaders, ", "))
 			c.Header("Access-Control-Expose-Headers", strings.Join(exposedHeaders, ", "))
 			c.Header("Access-Control-Max-Age", "86400") // 24 hours
-			
+
 			// Handle preflight requests
 			if c.Request.Method == http.MethodOptions {
 				c.AbortWithStatus(http.StatusNoContent)
@@ -225,7 +225,7 @@ func CORSMiddleware() gin.HandlerFunc {
 			c.Set("security_event", "cors_rejected")
 			c.Set("rejected_origin", origin)
 		}
-		
+
 		c.Next()
 	}
 }
@@ -242,7 +242,7 @@ func loadAllowedOrigins() []string {
 			"http://127.0.0.1:3001",
 		}
 	}
-	
+
 	// Parse comma-separated origins
 	origins := strings.Split(originsStr, ",")
 	result := make([]string, 0, len(origins))
@@ -252,7 +252,7 @@ func loadAllowedOrigins() []string {
 			result = append(result, trimmed)
 		}
 	}
-	
+
 	return result
 }
 
@@ -264,7 +264,7 @@ func isOriginAllowed(origin string, allowedOrigins []string, isDevelopment bool)
 			return true
 		}
 	}
-	
+
 	// Check exact matches
 	for _, allowed := range allowedOrigins {
 		if allowed == "*" {
@@ -273,7 +273,7 @@ func isOriginAllowed(origin string, allowedOrigins []string, isDevelopment bool)
 		if origin == allowed {
 			return true
 		}
-		
+
 		// Support wildcard subdomains (e.g., *.example.com)
 		if strings.HasPrefix(allowed, "*.") {
 			domain := allowed[2:] // Remove "*."
@@ -282,7 +282,7 @@ func isOriginAllowed(origin string, allowedOrigins []string, isDevelopment bool)
 			}
 		}
 	}
-	
+
 	return false
 }
 
@@ -290,7 +290,7 @@ func isOriginAllowed(origin string, allowedOrigins []string, isDevelopment bool)
 func SecureResponseMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
-		
+
 		// Remove sensitive error details in production
 		if os.Getenv("GAUTH_ENV") != "development" {
 			if c.Writer.Status() >= 500 {
@@ -298,7 +298,7 @@ func SecureResponseMiddleware() gin.HandlerFunc {
 				c.Set("security_event", "internal_error")
 			}
 		}
-		
+
 		// Add security context for monitoring
 		if c.GetBool("rate_limited") {
 			c.Header("X-RateLimit-Blocked", "true")

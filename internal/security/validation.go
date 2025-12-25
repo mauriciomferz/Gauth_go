@@ -23,9 +23,9 @@ func NewInputValidator() *InputValidator {
 	return &InputValidator{
 		maxBodySize: getEnvInt64("GAUTH_MAX_BODY_SIZE", 1024*1024), // 1MB default
 		patterns: map[string]*regexp.Regexp{
-			"sql_injection": regexp.MustCompile(`(?i)(union|select|insert|update|delete|drop|create|alter|exec|script|javascript|<script)`),
+			"sql_injection":  regexp.MustCompile(`(?i)(union|select|insert|update|delete|drop|create|alter|exec|script|javascript|<script)`),
 			"path_traversal": regexp.MustCompile(`\.\./|\.\.\\`),
-			"xss": regexp.MustCompile(`(?i)<script|javascript:|onerror=|onload=`),
+			"xss":            regexp.MustCompile(`(?i)<script|javascript:|onerror=|onload=`),
 		},
 	}
 }
@@ -36,13 +36,13 @@ func InputValidationMiddleware(validator *InputValidator) gin.HandlerFunc {
 		// Validate request body size
 		if c.Request.ContentLength > validator.maxBodySize {
 			c.JSON(http.StatusRequestEntityTooLarge, gin.H{
-				"error": "Request body too large",
+				"error":    "Request body too large",
 				"max_size": validator.maxBodySize,
 			})
 			c.Abort()
 			return
 		}
-		
+
 		// Validate query parameters
 		if !validator.ValidateQueryParams(c) {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -51,7 +51,7 @@ func InputValidationMiddleware(validator *InputValidator) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		
+
 		// Validate headers
 		if !validator.ValidateHeaders(c) {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -60,23 +60,23 @@ func InputValidationMiddleware(validator *InputValidator) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		
+
 		// Sanitize path
 		if validator.ContainsPathTraversal(c.Request.URL.Path) {
 			LogSecurityEvent("path_traversal_attempt", "validate_path", "blocked",
 				"Path traversal attempt detected",
 				map[string]interface{}{
-					"path": c.Request.URL.Path,
+					"path":      c.Request.URL.Path,
 					"client_ip": getClientIP(c),
 				})
-			
+
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": "Invalid path",
 			})
 			c.Abort()
 			return
 		}
-		
+
 		c.Next()
 	}
 }
@@ -94,22 +94,22 @@ func (v *InputValidator) ValidateQueryParams(c *gin.Context) bool {
 				})
 			return false
 		}
-		
+
 		// Check values
 		for _, value := range values {
 			if v.ContainsSQLInjection(value) || v.ContainsXSS(value) {
 				LogSecurityEvent("malicious_query_value", "validate_query", "blocked",
 					"Malicious query value detected",
 					map[string]interface{}{
-						"param_key": key,
+						"param_key":   key,
 						"param_value": value,
-						"client_ip": getClientIP(c),
+						"client_ip":   getClientIP(c),
 					})
 				return false
 			}
 		}
 	}
-	
+
 	return true
 }
 
@@ -117,33 +117,33 @@ func (v *InputValidator) ValidateQueryParams(c *gin.Context) bool {
 func (v *InputValidator) ValidateHeaders(c *gin.Context) bool {
 	// Check for abnormally long headers
 	maxHeaderSize := 8192 // 8KB
-	
+
 	for key, values := range c.Request.Header {
 		for _, value := range values {
 			if len(value) > maxHeaderSize {
 				LogSecurityEvent("oversized_header", "validate_headers", "blocked",
 					"Oversized header detected",
 					map[string]interface{}{
-						"header_key": key,
+						"header_key":  key,
 						"header_size": len(value),
-						"client_ip": getClientIP(c),
+						"client_ip":   getClientIP(c),
 					})
 				return false
 			}
-			
+
 			// Check for XSS in headers
 			if v.ContainsXSS(value) {
 				LogSecurityEvent("xss_in_header", "validate_headers", "blocked",
 					"XSS attempt in header",
 					map[string]interface{}{
 						"header_key": key,
-						"client_ip": getClientIP(c),
+						"client_ip":  getClientIP(c),
 					})
 				return false
 			}
 		}
 	}
-	
+
 	return true
 }
 
@@ -166,24 +166,24 @@ func (v *InputValidator) ContainsPathTraversal(s string) bool {
 func SanitizeString(s string) string {
 	// HTML encode
 	s = html.EscapeString(s)
-	
+
 	// Remove null bytes
 	s = strings.ReplaceAll(s, "\x00", "")
-	
+
 	// Remove control characters
 	s = removeControlCharacters(s)
-	
+
 	return s
 }
 
 // SanitizeJSON sanitizes a JSON map recursively
 func SanitizeJSON(data map[string]interface{}) map[string]interface{} {
 	result := make(map[string]interface{})
-	
+
 	for key, value := range data {
 		// Sanitize key
 		cleanKey := SanitizeString(key)
-		
+
 		// Sanitize value based on type
 		switch v := value.(type) {
 		case string:
@@ -196,14 +196,14 @@ func SanitizeJSON(data map[string]interface{}) map[string]interface{} {
 			result[cleanKey] = v
 		}
 	}
-	
+
 	return result
 }
 
 // sanitizeArray sanitizes an array of interface{} values
 func sanitizeArray(arr []interface{}) []interface{} {
 	result := make([]interface{}, len(arr))
-	
+
 	for i, item := range arr {
 		switch v := item.(type) {
 		case string:
@@ -216,7 +216,7 @@ func sanitizeArray(arr []interface{}) []interface{} {
 			result[i] = v
 		}
 	}
-	
+
 	return result
 }
 
@@ -224,20 +224,20 @@ func sanitizeArray(arr []interface{}) []interface{} {
 func removeControlCharacters(s string) string {
 	var result strings.Builder
 	result.Grow(len(s))
-	
+
 	for _, r := range s {
 		// Keep newline, tab, and carriage return
 		if r == '\n' || r == '\t' || r == '\r' {
 			result.WriteRune(r)
 			continue
 		}
-		
+
 		// Remove other control characters
 		if r >= 32 || r == 127 {
 			result.WriteRune(r)
 		}
 	}
-	
+
 	return result.String()
 }
 
@@ -270,12 +270,12 @@ func ValidateScope(scope string) bool {
 // ValidateJSONKeys validates JSON keys are safe
 func ValidateJSONKeys(data map[string]interface{}) bool {
 	keyRegex := regexp.MustCompile(`^[a-zA-Z0-9_-]{1,64}$`)
-	
+
 	for key := range data {
 		if !keyRegex.MatchString(key) {
 			return false
 		}
-		
+
 		// Recursively check nested objects
 		if nested, ok := data[key].(map[string]interface{}); ok {
 			if !ValidateJSONKeys(nested) {
@@ -283,7 +283,7 @@ func ValidateJSONKeys(data map[string]interface{}) bool {
 			}
 		}
 	}
-	
+
 	return true
 }
 
@@ -295,38 +295,38 @@ func CSRFProtectionMiddleware() gin.HandlerFunc {
 			c.Next()
 			return
 		}
-		
+
 		// Check Origin header
 		origin := c.GetHeader("Origin")
 		referer := c.GetHeader("Referer")
-		
+
 		if origin == "" && referer == "" {
 			// No origin or referer - could be CSRF
 			LogSecurityEvent("csrf_no_origin", "csrf_check", "warning",
 				"Request with no origin or referer",
 				map[string]interface{}{
-					"method": c.Request.Method,
-					"path": c.Request.URL.Path,
+					"method":    c.Request.Method,
+					"path":      c.Request.URL.Path,
 					"client_ip": getClientIP(c),
 				})
 		}
-		
+
 		// In production, verify origin matches allowed origins
 		if origin != "" && !isOriginAllowed(origin, loadAllowedOrigins(), false) {
 			LogSecurityEvent("csrf_invalid_origin", "csrf_check", "blocked",
 				"CSRF attempt with invalid origin",
 				map[string]interface{}{
-					"origin": origin,
+					"origin":    origin,
 					"client_ip": getClientIP(c),
 				})
-			
+
 			c.JSON(http.StatusForbidden, gin.H{
 				"error": "Invalid origin",
 			})
 			c.Abort()
 			return
 		}
-		
+
 		c.Next()
 	}
 }
@@ -337,11 +337,11 @@ func getEnvInt64(key string, defaultValue int64) int64 {
 	if valStr == "" {
 		return defaultValue
 	}
-	
+
 	val, err := strconv.ParseInt(valStr, 10, 64)
 	if err != nil {
 		return defaultValue
 	}
-	
+
 	return val
 }

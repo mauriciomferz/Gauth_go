@@ -1,3 +1,11 @@
+---
+title: Rotation V2 Demo
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Rotation V2 Demo Guide
 
 This guide shows how to exercise the weighted multi‑sig Rotation V2 endpoint (`GET /api/v1/rotation/summary/v2`) locally.

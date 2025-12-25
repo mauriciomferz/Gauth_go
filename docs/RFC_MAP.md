@@ -1,3 +1,11 @@
+---
+title: Rfc Map
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # RFC 0111 / 0115 Clause → Implementation → Test Map
 
 Generated: 2025-10-17
@@ -167,8 +175,8 @@ Implementation lines (approximate):
 ## RFC 9396: Rich Authorization Requests (RAR)
 | Clause ID | Title | Implementation Symbols | Tests | Status | Notes |
 |-----------|-------|------------------------|-------|--------|-------|
-| RFC9767-3 | Authorization Details Data Model | `gauth.AuthorizationDetail` | pkg/gauth/rar_validator_test.go | Implemented | Types and JSON serialization |
-| RFC9767-5 | Authorization Request | `RFCCompliantAuthorizationRequest` | web/handlers/token/rfc_integration_test.go | Implemented | 'authorization_details' parameter support |
-| RFC9767-6 | Token Response | `ExtendedToken`, `ExtendedTokenService` | web/handlers/token/rfc_integration_test.go | Implemented | Details persisted in token and JWT |
-| RFC9767-7 | Resource Server Validation | `RARValidator`, `ValidateExtendedTokenWithRAR` | pkg/gauth/resource_server_test.go | Implemented | Enforces PoA scope narrowing |
+| RFC9396-3 | Authorization Details Data Model | `gauth.AuthorizationDetail` | pkg/gauth/rar_validator_test.go | Implemented | Types and JSON serialization |
+| RFC9396-5 | Authorization Request | `RFCCompliantAuthorizationRequest` | web/handlers/token/rfc_integration_test.go | Implemented | 'authorization_details' parameter support |
+| RFC9396-6 | Token Response | `ExtendedToken`, `ExtendedTokenService` | web/handlers/token/rfc_integration_test.go | Implemented | Details persisted in token and JWT |
+| RFC9396-7 | Resource Server Validation | `RARValidator`, `ValidateExtendedTokenWithRAR` | pkg/gauth/resource_server_test.go | Implemented | Enforces PoA scope narrowing |
 ```

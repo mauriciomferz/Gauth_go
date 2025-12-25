@@ -3,8 +3,8 @@ package gauthplus
 import (
 	"net/http"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
 	"github.com/gin-gonic/gin"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
 )
 
 // SuccessorHandlers handles HTTP requests for successor management

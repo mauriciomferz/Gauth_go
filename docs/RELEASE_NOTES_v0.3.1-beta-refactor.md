@@ -1,3 +1,11 @@
+---
+title: Release Notes V0.3.1-Beta-Refactor
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Release v0.3.1-beta-refactor
 
 > Last Updated: 2025-10-17

@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/mauriciomferz/Gauth_go/examples/ai_capability_demo/ledger"
 	"github.com/mauriciomferz/Gauth_go/internal/ai"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
-	"github.com/gin-gonic/gin"
 )
 
 // Minimal in-memory copies of global objects for isolated test

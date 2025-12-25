@@ -27,20 +27,20 @@ type BrazilIdentityConnector struct {
 // BrazilConnectorConfig configuration for Brazilian identity connector
 type BrazilConnectorConfig struct {
 	// Gov.br configuration
-	GovBrURL          string `validate:"required,url"`
-	GovBrClientID     string `validate:"required"`
-	GovBrSecret       string `validate:"required"`
-	
+	GovBrURL      string `validate:"required,url"`
+	GovBrClientID string `validate:"required"`
+	GovBrSecret   string `validate:"required"`
+
 	// Receita Federal (Federal Revenue) configuration
-	ReceitaURL        string `validate:"url"`
-	ReceitaAPIKey     string
-	
+	ReceitaURL    string `validate:"url"`
+	ReceitaAPIKey string
+
 	// DETRAN (DMV) configuration
-	DETRANURL         string `validate:"url"`
-	DETRANAPIKey      string
-	
+	DETRANURL    string `validate:"url"`
+	DETRANAPIKey string
+
 	// Timeouts
-	RequestTimeout    time.Duration
+	RequestTimeout time.Duration
 }
 
 // GovBrAuthRequest Gov.br authentication request
@@ -64,29 +64,29 @@ type GovBrAuthResponse struct {
 
 // GovBrUserInfo user information from Gov.br
 type GovBrUserInfo struct {
-	Sub             string      `json:"sub"` // Subject identifier
-	CPF             string      `json:"cpf"` // Masked
-	Name            string      `json:"name"`
-	SocialName      string      `json:"social_name,omitempty"` // Nome social
-	DateOfBirth     string      `json:"date_of_birth"`
-	PhoneNumber     string      `json:"phone_number"`
-	PhoneVerified   bool        `json:"phone_verified"`
-	Email           string      `json:"email"`
-	EmailVerified   bool        `json:"email_verified"`
-	Address         *BRAddress  `json:"address,omitempty"`
-	Picture         string      `json:"picture,omitempty"`
+	Sub           string     `json:"sub"` // Subject identifier
+	CPF           string     `json:"cpf"` // Masked
+	Name          string     `json:"name"`
+	SocialName    string     `json:"social_name,omitempty"` // Nome social
+	DateOfBirth   string     `json:"date_of_birth"`
+	PhoneNumber   string     `json:"phone_number"`
+	PhoneVerified bool       `json:"phone_verified"`
+	Email         string     `json:"email"`
+	EmailVerified bool       `json:"email_verified"`
+	Address       *BRAddress `json:"address,omitempty"`
+	Picture       string     `json:"picture,omitempty"`
 }
 
 // BRAddress Brazilian address structure
 type BRAddress struct {
-	Logradouro   string `json:"logradouro"` // Street
-	Numero       string `json:"numero"` // Number
-	Complemento  string `json:"complemento,omitempty"` // Complement
-	Bairro       string `json:"bairro"` // Neighborhood
-	Municipio    string `json:"municipio"` // City
-	UF           string `json:"uf"` // State (2 letters)
-	CEP          string `json:"cep"` // Postal code (12345-678)
-	Pais         string `json:"pais"` // Country
+	Logradouro  string `json:"logradouro"`            // Street
+	Numero      string `json:"numero"`                // Number
+	Complemento string `json:"complemento,omitempty"` // Complement
+	Bairro      string `json:"bairro"`                // Neighborhood
+	Municipio   string `json:"municipio"`             // City
+	UF          string `json:"uf"`                    // State (2 letters)
+	CEP         string `json:"cep"`                   // Postal code (12345-678)
+	Pais        string `json:"pais"`                  // Country
 }
 
 // CPFRequest CPF validation request
@@ -108,11 +108,11 @@ type CPFResponse struct {
 
 // CNHRequest CNH (driver's license) validation request
 type CNHRequest struct {
-	CNHNumber       string `json:"cnh_number" validate:"required,len=11"`
+	CNHNumber          string `json:"cnh_number" validate:"required,len=11"`
 	RegistrationNumber string `json:"registration_number" validate:"required"` // Número de registro
-	SecurityCode    string `json:"security_code"` // Código de segurança
-	Name            string `json:"name" validate:"required"`
-	DateOfBirth     string `json:"date_of_birth" validate:"required"`
+	SecurityCode       string `json:"security_code"`                           // Código de segurança
+	Name               string `json:"name" validate:"required"`
+	DateOfBirth        string `json:"date_of_birth" validate:"required"`
 }
 
 // CNHResponse CNH validation response
@@ -127,8 +127,8 @@ type CNHResponse struct {
 	IssueDate          string     `json:"issue_date"`
 	ExpiryDate         string     `json:"expiry_date"`
 	FirstLicenseDate   string     `json:"first_license_date"`
-	IssuingState       string     `json:"issuing_state"` // UF
-	Status             string     `json:"status"` // Active, Suspended, Expired
+	IssuingState       string     `json:"issuing_state"`    // UF
+	Status             string     `json:"status"`           // Active, Suspended, Expired
 	Points             int        `json:"points,omitempty"` // Demerit points
 	Address            *BRAddress `json:"address,omitempty"`
 	Error              string     `json:"error,omitempty"`
@@ -136,25 +136,25 @@ type CNHResponse struct {
 
 // ECPFRequest e-CPF (digital certificate) request
 type ECPFRequest struct {
-	Certificate     string `json:"certificate" validate:"required"` // Base64 encoded
-	Password        string `json:"password" validate:"required"`
-	ValidateChain   bool   `json:"validate_chain"`
+	Certificate   string `json:"certificate" validate:"required"` // Base64 encoded
+	Password      string `json:"password" validate:"required"`
+	ValidateChain bool   `json:"validate_chain"`
 }
 
 // ECPFResponse e-CPF validation response
 type ECPFResponse struct {
-	Valid            bool              `json:"valid"`
-	CPF              string            `json:"cpf"`
-	Name             string            `json:"name"`
-	Email            string            `json:"email,omitempty"`
-	SerialNumber     string            `json:"serial_number"`
-	IssuerDN         string            `json:"issuer_dn"`
-	SubjectDN        string            `json:"subject_dn"`
-	NotBefore        string            `json:"not_before"`
-	NotAfter         string            `json:"not_after"`
-	CertificateType  string            `json:"certificate_type"` // A1, A3
-	CertificateChain []string          `json:"certificate_chain,omitempty"`
-	Error            string            `json:"error,omitempty"`
+	Valid            bool     `json:"valid"`
+	CPF              string   `json:"cpf"`
+	Name             string   `json:"name"`
+	Email            string   `json:"email,omitempty"`
+	SerialNumber     string   `json:"serial_number"`
+	IssuerDN         string   `json:"issuer_dn"`
+	SubjectDN        string   `json:"subject_dn"`
+	NotBefore        string   `json:"not_before"`
+	NotAfter         string   `json:"not_after"`
+	CertificateType  string   `json:"certificate_type"` // A1, A3
+	CertificateChain []string `json:"certificate_chain,omitempty"`
+	Error            string   `json:"error,omitempty"`
 }
 
 // NewBrazilIdentityConnector creates a new Brazilian identity connector
@@ -164,18 +164,18 @@ func NewBrazilIdentityConnector(config *BrazilConnectorConfig) (*BrazilIdentityC
 	if err := validate.Struct(config); err != nil {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
-	
+
 	// Set defaults
 	if config.RequestTimeout == 0 {
 		config.RequestTimeout = 30 * time.Second
 	}
-	
+
 	connector := &BrazilIdentityConnector{
 		config:     config,
 		httpClient: &http.Client{Timeout: config.RequestTimeout},
 		validator:  validate,
 	}
-	
+
 	return connector, nil
 }
 
@@ -186,7 +186,7 @@ func (bc *BrazilIdentityConnector) AuthenticateGovBr(ctx context.Context, req *G
 	if err := bc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Validate trust level
 	if req.TrustLevel != "1" && req.TrustLevel != "2" && req.TrustLevel != "3" {
 		return &GovBrAuthResponse{
@@ -194,12 +194,12 @@ func (bc *BrazilIdentityConnector) AuthenticateGovBr(ctx context.Context, req *G
 			Error:   "Invalid trust level (must be 1, 2, or 3)",
 		}, nil
 	}
-	
+
 	// In production, this would:
 	// 1. Redirect to Gov.br OAuth 2.0 / OIDC
 	// 2. User authenticates with appropriate method
 	// 3. Receive user claims at requested trust level
-	
+
 	// Mock response for demonstration
 	response := &GovBrAuthResponse{
 		Success:    true,
@@ -215,7 +215,7 @@ func (bc *BrazilIdentityConnector) AuthenticateGovBr(ctx context.Context, req *G
 		},
 		Attributes: make(map[string]string),
 	}
-	
+
 	return response, nil
 }
 
@@ -226,12 +226,12 @@ func (bc *BrazilIdentityConnector) ValidateCPF(ctx context.Context, req *CPFRequ
 	if err := bc.validator.Struct(req); err != nil {
 		return &CPFResponse{Valid: false, Error: err.Error()}, nil
 	}
-	
+
 	// Remove formatting
 	cpf := strings.ReplaceAll(req.CPF, ".", "")
 	cpf = strings.ReplaceAll(cpf, "-", "")
 	cpf = strings.TrimSpace(cpf)
-	
+
 	// Validate format (11 digits)
 	if !regexp.MustCompile(`^\d{11}$`).MatchString(cpf) {
 		return &CPFResponse{
@@ -239,7 +239,7 @@ func (bc *BrazilIdentityConnector) ValidateCPF(ctx context.Context, req *CPFRequ
 			Error: "Invalid CPF format (must be 11 digits)",
 		}, nil
 	}
-	
+
 	// Check for known invalid CPFs (all same digit)
 	// Check common invalid patterns: 00000000000, 11111111111, etc.
 	allSame := true
@@ -256,13 +256,13 @@ func (bc *BrazilIdentityConnector) ValidateCPF(ctx context.Context, req *CPFRequ
 			Error: "Invalid CPF (all digits are the same)",
 		}, nil
 	}
-	
+
 	// Validate check digits
 	checkDigitsValid := bc.validateCPFCheckDigits(cpf)
-	
+
 	// Format CPF
 	formattedCPF := fmt.Sprintf("%s.%s.%s-%s", cpf[0:3], cpf[3:6], cpf[6:9], cpf[9:11])
-	
+
 	response := &CPFResponse{
 		Valid:            checkDigitsValid,
 		CPF:              formattedCPF,
@@ -270,11 +270,11 @@ func (bc *BrazilIdentityConnector) ValidateCPF(ctx context.Context, req *CPFRequ
 		Status:           "Regular",
 		CheckDigitsValid: checkDigitsValid,
 	}
-	
+
 	if !checkDigitsValid {
 		response.Error = "Invalid CPF check digits"
 	}
-	
+
 	return response, nil
 }
 
@@ -284,9 +284,9 @@ func (bc *BrazilIdentityConnector) VerifyCNH(ctx context.Context, req *CNHReques
 	if err := bc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	cnhNumber := strings.TrimSpace(req.CNHNumber)
-	
+
 	// Validate format (11 digits)
 	if !regexp.MustCompile(`^\d{11}$`).MatchString(cnhNumber) {
 		return &CNHResponse{
@@ -294,13 +294,13 @@ func (bc *BrazilIdentityConnector) VerifyCNH(ctx context.Context, req *CNHReques
 			Error: "Invalid CNH number format (must be 11 digits)",
 		}, nil
 	}
-	
+
 	// In production, this would:
 	// 1. Verify with DENATRAN (National Traffic Department)
 	// 2. Check DETRAN state database
 	// 3. Validate security code
 	// 4. Check demerit points
-	
+
 	// Mock response for demonstration
 	response := &CNHResponse{
 		Valid:              true,
@@ -316,7 +316,7 @@ func (bc *BrazilIdentityConnector) VerifyCNH(ctx context.Context, req *CNHReques
 		Status:             "Active",
 		Points:             0,
 	}
-	
+
 	return response, nil
 }
 
@@ -326,14 +326,14 @@ func (bc *BrazilIdentityConnector) VerifyECPF(ctx context.Context, req *ECPFRequ
 	if err := bc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// In production, this would:
 	// 1. Decode certificate from Base64
 	// 2. Verify password
 	// 3. Validate certificate chain (ICP-Brasil)
 	// 4. Check revocation status (LCR/OCSP)
 	// 5. Extract CPF from certificate
-	
+
 	// Mock response for demonstration
 	response := &ECPFResponse{
 		Valid:           true,
@@ -346,7 +346,7 @@ func (bc *BrazilIdentityConnector) VerifyECPF(ctx context.Context, req *ECPFRequ
 		NotAfter:        "2023-01-01T00:00:00Z",
 		CertificateType: "A3",
 	}
-	
+
 	return response, nil
 }
 
@@ -366,12 +366,12 @@ func (bc *BrazilIdentityConnector) validateCPFCheckDigits(cpf string) bool {
 	} else {
 		checkDigit1 = 11 - remainder
 	}
-	
+
 	actualCheckDigit1, _ := strconv.Atoi(string(cpf[9]))
 	if checkDigit1 != actualCheckDigit1 {
 		return false
 	}
-	
+
 	// Calculate second check digit
 	sum = 0
 	for i := 0; i < 10; i++ {
@@ -385,7 +385,7 @@ func (bc *BrazilIdentityConnector) validateCPFCheckDigits(cpf string) bool {
 	} else {
 		checkDigit2 = 11 - remainder
 	}
-	
+
 	actualCheckDigit2, _ := strconv.Atoi(string(cpf[10]))
 	return checkDigit2 == actualCheckDigit2
 }
@@ -400,7 +400,7 @@ func (bc *BrazilIdentityConnector) generateCacheKey(operation string, parts ...s
 func (bc *BrazilIdentityConnector) GetMetrics() map[string]interface{} {
 	bc.mu.RLock()
 	defer bc.mu.RUnlock()
-	
+
 	return map[string]interface{}{
 		"connector": "brazil_identity",
 	}

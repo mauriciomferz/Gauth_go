@@ -1,3 +1,11 @@
+---
+title: Advanced Claims Integration
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Advanced Claims Integration (P2.10 - sec1.item2)
 
 ## Overview

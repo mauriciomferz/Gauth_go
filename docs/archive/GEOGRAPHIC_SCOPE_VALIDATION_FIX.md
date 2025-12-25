@@ -1,3 +1,11 @@
+---
+title: Geographic Scope Validation Fix
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Geographic Scope Validation Fix - Summary Report
 
 ## Issue Description

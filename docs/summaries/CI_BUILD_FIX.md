@@ -1,3 +1,11 @@
+---
+title: Ci Build Fix
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # CI Build Fix Documentation
 
 ## Problem

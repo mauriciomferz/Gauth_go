@@ -26,22 +26,22 @@ type SingaporeIdentityConnector struct {
 // SingaporeConnectorConfig configuration for Singapore identity connector
 type SingaporeConnectorConfig struct {
 	// SingPass configuration
-	SingPassURL       string `validate:"required,url"`
-	SingPassClientID  string `validate:"required"`
-	SingPassSecret    string `validate:"required"`
-	
+	SingPassURL      string `validate:"required,url"`
+	SingPassClientID string `validate:"required"`
+	SingPassSecret   string `validate:"required"`
+
 	// MyInfo configuration
-	MyInfoURL         string `validate:"url"`
-	MyInfoClientID    string
-	MyInfoSecret      string
-	
+	MyInfoURL      string `validate:"url"`
+	MyInfoClientID string
+	MyInfoSecret   string
+
 	// CorpPass configuration
-	CorpPassURL       string `validate:"url"`
-	CorpPassClientID  string
-	CorpPassSecret    string
-	
+	CorpPassURL      string `validate:"url"`
+	CorpPassClientID string
+	CorpPassSecret   string
+
 	// Timeouts
-	RequestTimeout    time.Duration
+	RequestTimeout time.Duration
 }
 
 // SingPassAuthRequest SingPass authentication request
@@ -65,17 +65,17 @@ type SingPassAuthResponse struct {
 
 // SingPassUserInfo user information from SingPass
 type SingPassUserInfo struct {
-	NRIC        string      `json:"nric"` // S/T/F/G prefix + 7 digits + check letter
-	UEN         string      `json:"uen,omitempty"` // For businesses
-	Name        string      `json:"name"`
-	Sex         string      `json:"sex"`
-	Race        string      `json:"race"`
-	Nationality string      `json:"nationality"`
-	DateOfBirth string      `json:"date_of_birth"`
-	Email       string      `json:"email"`
-	MobileNo    string      `json:"mobile_no"`
-	RegAddress  *SGAddress  `json:"reg_address"`
-	MailAddress *SGAddress  `json:"mail_address,omitempty"`
+	NRIC        string     `json:"nric"`          // S/T/F/G prefix + 7 digits + check letter
+	UEN         string     `json:"uen,omitempty"` // For businesses
+	Name        string     `json:"name"`
+	Sex         string     `json:"sex"`
+	Race        string     `json:"race"`
+	Nationality string     `json:"nationality"`
+	DateOfBirth string     `json:"date_of_birth"`
+	Email       string     `json:"email"`
+	MobileNo    string     `json:"mobile_no"`
+	RegAddress  *SGAddress `json:"reg_address"`
+	MailAddress *SGAddress `json:"mail_address,omitempty"`
 }
 
 // SGAddress Singapore address structure
@@ -98,11 +98,11 @@ type NRICRequest struct {
 
 // NRICResponse NRIC/FIN validation response
 type NRICResponse struct {
-	Valid           bool   `json:"valid"`
-	NRIC            string `json:"nric"`
-	Type            string `json:"type"` // "citizen", "pr", "foreigner", "other"
-	CheckLetterValid bool  `json:"check_letter_valid"`
-	Error           string `json:"error,omitempty"`
+	Valid            bool   `json:"valid"`
+	NRIC             string `json:"nric"`
+	Type             string `json:"type"` // "citizen", "pr", "foreigner", "other"
+	CheckLetterValid bool   `json:"check_letter_valid"`
+	Error            string `json:"error,omitempty"`
 }
 
 // MyInfoRequest MyInfo data retrieval request
@@ -131,29 +131,29 @@ type CorpPassAuthRequest struct {
 
 // CorpPassAuthResponse CorpPass authentication response
 type CorpPassAuthResponse struct {
-	Success    bool                 `json:"success"`
-	SessionID  string               `json:"session_id"`
-	EntityInfo *CorpPassEntityInfo  `json:"entity_info"`
-	UserInfo   *CorpPassUserInfo    `json:"user_info"`
-	Attributes map[string]string    `json:"attributes"`
-	Error      string               `json:"error,omitempty"`
+	Success    bool                `json:"success"`
+	SessionID  string              `json:"session_id"`
+	EntityInfo *CorpPassEntityInfo `json:"entity_info"`
+	UserInfo   *CorpPassUserInfo   `json:"user_info"`
+	Attributes map[string]string   `json:"attributes"`
+	Error      string              `json:"error,omitempty"`
 }
 
 // CorpPassEntityInfo entity (company) information from CorpPass
 type CorpPassEntityInfo struct {
-	UEN         string `json:"uen"` // Unique Entity Number
-	EntityName  string `json:"entity_name"`
-	EntityType  string `json:"entity_type"`
-	RegStatus   string `json:"reg_status"`
+	UEN        string `json:"uen"` // Unique Entity Number
+	EntityName string `json:"entity_name"`
+	EntityType string `json:"entity_type"`
+	RegStatus  string `json:"reg_status"`
 }
 
 // CorpPassUserInfo user information from CorpPass
 type CorpPassUserInfo struct {
-	NRIC       string   `json:"nric"`
-	Name       string   `json:"name"`
-	Email      string   `json:"email"`
-	MobileNo   string   `json:"mobile_no"`
-	Roles      []string `json:"roles"` // Corporate roles
+	NRIC     string   `json:"nric"`
+	Name     string   `json:"name"`
+	Email    string   `json:"email"`
+	MobileNo string   `json:"mobile_no"`
+	Roles    []string `json:"roles"` // Corporate roles
 }
 
 // NewSingaporeIdentityConnector creates a new Singapore identity connector
@@ -163,18 +163,18 @@ func NewSingaporeIdentityConnector(config *SingaporeConnectorConfig) (*Singapore
 	if err := validate.Struct(config); err != nil {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
-	
+
 	// Set defaults
 	if config.RequestTimeout == 0 {
 		config.RequestTimeout = 30 * time.Second
 	}
-	
+
 	connector := &SingaporeIdentityConnector{
 		config:     config,
 		httpClient: &http.Client{Timeout: config.RequestTimeout},
 		validator:  validate,
 	}
-	
+
 	return connector, nil
 }
 
@@ -185,7 +185,7 @@ func (sc *SingaporeIdentityConnector) AuthenticateSingPass(ctx context.Context, 
 	if err := sc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Validate auth level
 	if req.AuthLevel != "L0" && req.AuthLevel != "L2" {
 		return &SingPassAuthResponse{
@@ -193,13 +193,13 @@ func (sc *SingaporeIdentityConnector) AuthenticateSingPass(ctx context.Context, 
 			Error:   "Invalid auth level (must be L0 or L2)",
 		}, nil
 	}
-	
+
 	// In production, this would:
 	// 1. Redirect to SingPass login
 	// 2. Perform SAML 2.0 authentication
 	// 3. Receive user attributes
 	// 4. Verify 2FA if L2
-	
+
 	// Mock response for demonstration
 	response := &SingPassAuthResponse{
 		Success:   true,
@@ -217,7 +217,7 @@ func (sc *SingaporeIdentityConnector) AuthenticateSingPass(ctx context.Context, 
 		},
 		Attributes: make(map[string]string),
 	}
-	
+
 	return response, nil
 }
 
@@ -230,9 +230,9 @@ func (sc *SingaporeIdentityConnector) ValidateNRIC(ctx context.Context, req *NRI
 	if err := sc.validator.Struct(req); err != nil {
 		return &NRICResponse{Valid: false, Error: err.Error()}, nil
 	}
-	
+
 	nric := strings.ToUpper(strings.TrimSpace(req.NRIC))
-	
+
 	// Validate format (S/T/F/G/M + 7 digits + check letter)
 	if !regexp.MustCompile(`^[STFGM]\d{7}[A-Z]$`).MatchString(nric) {
 		return &NRICResponse{
@@ -240,7 +240,7 @@ func (sc *SingaporeIdentityConnector) ValidateNRIC(ctx context.Context, req *NRI
 			Error: "Invalid NRIC/FIN format",
 		}, nil
 	}
-	
+
 	// Determine type
 	prefix := string(nric[0])
 	idType := ""
@@ -252,21 +252,21 @@ func (sc *SingaporeIdentityConnector) ValidateNRIC(ctx context.Context, req *NRI
 	case "M":
 		idType = "other"
 	}
-	
+
 	// Validate check letter
 	checkLetterValid := sc.validateNRICCheckLetter(nric)
-	
+
 	response := &NRICResponse{
 		Valid:            checkLetterValid,
 		NRIC:             nric,
 		Type:             idType,
 		CheckLetterValid: checkLetterValid,
 	}
-	
+
 	if !checkLetterValid {
 		response.Error = "Invalid check letter"
 	}
-	
+
 	return response, nil
 }
 
@@ -276,7 +276,7 @@ func (sc *SingaporeIdentityConnector) RetrieveMyInfo(ctx context.Context, req *M
 	if err := sc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Validate UINFIN format
 	if !regexp.MustCompile(`^[STFGM]\d{7}[A-Z]$`).MatchString(req.UINFIN) {
 		return &MyInfoResponse{
@@ -284,26 +284,26 @@ func (sc *SingaporeIdentityConnector) RetrieveMyInfo(ctx context.Context, req *M
 			Error:   "Invalid UINFIN format",
 		}, nil
 	}
-	
+
 	// In production, this would:
 	// 1. Verify authorization code
 	// 2. Retrieve attributes from MyInfo API
 	// 3. Return requested person data
-	
+
 	// Mock response for demonstration
 	response := &MyInfoResponse{
 		Success: true,
 		Data: map[string]interface{}{
-			"uinfin":    req.UINFIN,
-			"name":      "Tan Ah Kow",
-			"sex":       "M",
-			"race":      "Chinese",
-			"dob":       "1990-01-15",
-			"email":     "ahkow@example.sg",
-			"mobileno":  "+6591234567",
+			"uinfin":   req.UINFIN,
+			"name":     "Tan Ah Kow",
+			"sex":      "M",
+			"race":     "Chinese",
+			"dob":      "1990-01-15",
+			"email":    "ahkow@example.sg",
+			"mobileno": "+6591234567",
 		},
 	}
-	
+
 	return response, nil
 }
 
@@ -313,7 +313,7 @@ func (sc *SingaporeIdentityConnector) AuthenticateCorpPass(ctx context.Context, 
 	if err := sc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Validate UEN format (9-10 alphanumeric characters)
 	if !regexp.MustCompile(`^[0-9A-Z]{9,10}$`).MatchString(req.EntityID) {
 		return &CorpPassAuthResponse{
@@ -321,13 +321,13 @@ func (sc *SingaporeIdentityConnector) AuthenticateCorpPass(ctx context.Context, 
 			Error:   "Invalid UEN format",
 		}, nil
 	}
-	
+
 	// In production, this would:
 	// 1. Redirect to CorpPass login
 	// 2. Perform SAML 2.0 authentication
 	// 3. Receive entity and user information
 	// 4. Verify corporate roles
-	
+
 	// Mock response for demonstration
 	response := &CorpPassAuthResponse{
 		Success:   true,
@@ -347,7 +347,7 @@ func (sc *SingaporeIdentityConnector) AuthenticateCorpPass(ctx context.Context, 
 		},
 		Attributes: make(map[string]string),
 	}
-	
+
 	return response, nil
 }
 
@@ -358,16 +358,16 @@ func (sc *SingaporeIdentityConnector) validateNRICCheckLetter(nric string) bool 
 	prefix := nric[0]
 	digits := nric[1:8]
 	checkLetter := nric[8]
-	
+
 	// Weights: 2, 7, 6, 5, 4, 3, 2
 	weights := []int{2, 7, 6, 5, 4, 3, 2}
 	sum := 0
-	
+
 	for i, weight := range weights {
 		digit := int(digits[i] - '0')
 		sum += digit * weight
 	}
-	
+
 	// Different offset for different prefix types
 	var offset int
 	switch prefix {
@@ -376,9 +376,9 @@ func (sc *SingaporeIdentityConnector) validateNRICCheckLetter(nric string) bool 
 	default:
 		offset = 0
 	}
-	
+
 	sum += offset
-	
+
 	// Check letter mapping
 	var checkLetters string
 	switch prefix {
@@ -391,10 +391,10 @@ func (sc *SingaporeIdentityConnector) validateNRICCheckLetter(nric string) bool 
 	default:
 		return false
 	}
-	
+
 	remainder := sum % 11
 	expectedLetter := checkLetters[remainder]
-	
+
 	return checkLetter == byte(expectedLetter)
 }
 
@@ -408,7 +408,7 @@ func (sc *SingaporeIdentityConnector) generateCacheKey(operation string, parts .
 func (sc *SingaporeIdentityConnector) GetMetrics() map[string]interface{} {
 	sc.mu.RLock()
 	defer sc.mu.RUnlock()
-	
+
 	return map[string]interface{}{
 		"connector": "singapore_identity",
 	}

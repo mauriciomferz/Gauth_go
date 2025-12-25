@@ -2,11 +2,21 @@
   "capabilities_schema_version": 1,
   "counts": {
     "conceptual": 0,
-    "implemented": 15,
-    "missing": 12,
+    "implemented": 8,
+    "missing": 19,
     "partial": 16
   },
-  "drift_items": null,
+  "drift_items": [
+    "Key rotation \u0026 lifecycle: CSV(Status=Partial,Priority=P1) != MD(Status=Implemented,Priority=P1)",
+    "Obligations \u0026 advice processing: CSV(Status=Missing,Priority=P2) != MD(Status=Partial,Priority=P2)",
+    "Policy versioning \u0026 rollback: CSV(Status=Missing,Priority=P1) != MD(Status=Implemented,Priority=P1)",
+    "Joint/collective signature enforcement: CSV(Status=Missing,Priority=P1) != MD(Status=Partial,Priority=P1)",
+    "Jurisdiction-specific enforcement: CSV(Status=Missing,Priority=P1) != MD(Status=Implemented,Priority=P1)",
+    "Immutable audit ledger: CSV(Status=Partial,Priority=P0) != MD(Status=Implemented,Priority=P0)",
+    "Secure secret storage: CSV(Status=Missing,Priority=P0) != MD(Status=Partial,Priority=P0)",
+    "Well-known discovery endpoints: CSV(Status=Implemented,Priority=P2) != MD(Status=Partial,Priority=P2)",
+    "Structured numeric limit parsing: CSV(Status=Missing,Priority=P2) != MD(Status=Partial,Priority=P2)"
+  ],
   "entries": [
     {
       "section": "Cryptographic \u0026 Authenticity",
@@ -21,10 +31,10 @@
       "section": "Cryptographic \u0026 Authenticity",
       "id": "sec1.item2",
       "requirement": "Full JWT/PASETO claims",
-      "status": "Implemented",
+      "status": "Partial",
       "priority": "P0",
-      "gap": "TokenResult with claim set metadata; complete JWT/PASETO claims implementation with verification details",
-      "evidence": "pkg/gauth/gauth.go|pkg/gauth/gauth_claims_test.go|pkg/rfc0111/rfc0111.go"
+      "gap": "sub,scope,exp,iat,iss,aud,jti,nbf implemented; missing advanced (claims set metadata, structured nested PASETO footer, typ semantic enforcement)",
+      "evidence": "pkg/gauth/gauth.go|pkg/gauth/gauth_claims_test.go"
     },
     {
       "section": "Cryptographic \u0026 Authenticity",
@@ -39,9 +49,9 @@
       "section": "Cryptographic \u0026 Authenticity",
       "id": "sec1.item4",
       "requirement": "Key rotation \u0026 lifecycle",
-      "status": "Implemented",
+      "status": "Partial",
       "priority": "P1",
-      "gap": "All core functionality implemented including multi-tenant segregation and Vault/KMS backends",
+      "gap": "Scheduler + disk persistence implemented (env driven); missing multi-tenant segregation \u0026 external HSM integration",
       "evidence": "internal/crypto/keys.go|internal/crypto/keys_persist_test.go"
     },
     {
@@ -84,19 +94,19 @@
       "section": "Authorization Engine",
       "id": "sec2.item3",
       "requirement": "Obligations \u0026 advice processing",
-      "status": "Partial",
+      "status": "Missing",
       "priority": "P2",
-      "gap": "Executor skeleton implemented with dispatch and metrics; lacks advice emission semantics",
-      "evidence": "docs/GAP_MATRIX.md:25|pkg/rfc0111/rfc0111.go"
+      "gap": "Concept only, not executed",
+      "evidence": "docs/GAP_MATRIX.md:25"
     },
     {
       "section": "Authorization Engine",
       "id": "sec2.item4",
       "requirement": "Policy versioning \u0026 rollback",
-      "status": "Implemented",
+      "status": "Missing",
       "priority": "P1",
-      "gap": "Complete implementation with in-memory and persistent hash chain with integrity verification",
-      "evidence": "docs/GAP_MATRIX.md:23|web/server_clean.go"
+      "gap": "No version metadata",
+      "evidence": "docs/GAP_MATRIX.md:23"
     },
     {
       "section": "Authorization Engine",
@@ -111,46 +121,46 @@
       "section": "PoA Definition (RFC0115)",
       "id": "sec3.item1",
       "requirement": "Full semantic validation",
-      "status": "Implemented",
+      "status": "Partial",
       "priority": "P0",
-      "gap": "Complete semantic validation with ScopeValidator, FormalValidation, RequirementCheck, and PowerLimit types; scope constraint checking and formal requirement verification",
+      "gap": "AdvancedPoAValidator adds extended rules; lacking warning channel \u0026 persistence of daily limits",
       "evidence": "docs/GAP_MATRIX.md:32|pkg/rfc0111/validator.go|pkg/rfc0111/rfc0111.go"
     },
     {
       "section": "PoA Definition (RFC0115)",
       "id": "sec3.item2",
       "requirement": "Embed full PoA in token",
-      "status": "Implemented",
+      "status": "Partial",
       "priority": "P1",
-      "gap": "Complete embedding with ScopeItem, scope validation, and constraint rules; TokenResult provides unified token operation results with verification details",
+      "gap": "RawPOA + PoAVersion embedding implemented behind GAUTH_EMBED_FULL_POA with size cap GAUTH_MAX_RAW_POA_BYTES; remaining gaps: verifier exposure helper, CBOR option, streaming for large PoAs, warning channel \u0026 audit persistence",
       "evidence": "docs/GAP_MATRIX.md:33|pkg/rfc0111/rfc0111.go|internal/metrics/metrics.go"
     },
     {
       "section": "PoA Definition (RFC0115)",
       "id": "sec3.item3",
       "requirement": "Joint/collective signature enforcement",
-      "status": "Partial",
+      "status": "Missing",
       "priority": "P1",
-      "gap": "Threshold and weighted multi-sig verification implemented with failure counters; missing aggregated signature scheme",
-      "evidence": "docs/GAP_MATRIX.md:33|pkg/rfc0111/rfc0111.go"
+      "gap": "No multi-signer aggregation",
+      "evidence": "docs/GAP_MATRIX.md:33"
     },
     {
       "section": "PoA Definition (RFC0115)",
       "id": "sec3.item4",
       "requirement": "Conditional/special conditions evaluation",
-      "status": "Implemented",
+      "status": "Missing",
       "priority": "P2",
-      "gap": "ConditionalExpression and RuntimeEvaluation types; supports condition evaluation with variables, context, and result tracking",
-      "evidence": "docs/GAP_MATRIX.md:34|pkg/rfc0111/rfc0111.go"
+      "gap": "No runtime interpreter",
+      "evidence": "docs/GAP_MATRIX.md:34"
     },
     {
       "section": "Legal / Jurisdiction / Compliance",
       "id": "sec4.item1",
       "requirement": "Jurisdiction-specific enforcement",
-      "status": "Implemented",
+      "status": "Missing",
       "priority": "P1",
-      "gap": "Comprehensive LegalFrameworkValidator with 6 jurisdictions and compliance rules",
-      "evidence": "docs/GAP_MATRIX.md:40|pkg/compliance/"
+      "gap": "No runtime branching",
+      "evidence": "docs/GAP_MATRIX.md:40"
     },
     {
       "section": "Legal / Jurisdiction / Compliance",
@@ -174,10 +184,10 @@
       "section": "Persistence \u0026 Durability",
       "id": "sec5.item1",
       "requirement": "Immutable audit ledger",
-      "status": "Implemented",
+      "status": "Partial",
       "priority": "P0",
-      "gap": "In-memory and BoltDB persistent hash chain with verification and external anchor integration",
-      "evidence": "docs/GAP_MATRIX.md:48|pkg/ledger/"
+      "gap": "BoltDB lacks signatures \u0026 external anchor",
+      "evidence": "docs/GAP_MATRIX.md:48"
     },
     {
       "section": "Persistence \u0026 Durability",
@@ -264,9 +274,9 @@
       "section": "Key \u0026 Secret Management",
       "id": "sec8.item1",
       "requirement": "Secure secret storage",
-      "status": "Partial",
+      "status": "Missing",
       "priority": "P0",
-      "gap": "Secret provider abstraction with memory and vault stub; missing production-ready backend",
+      "gap": "No vault/HSM provider",
       "evidence": "docs/GAP_MATRIX.md:70"
     },
     {
@@ -318,9 +328,9 @@
       "section": "Interoperability / External Interfaces",
       "id": "sec10.item2",
       "requirement": "Well-known discovery endpoints",
-      "status": "Partial",
+      "status": "Implemented",
       "priority": "P2",
-      "gap": "Enriched discovery with openapi_url and multi-sig metadata; missing JWKS integrity signature",
+      "gap": "jwks_uri + revocation endpoints exposed; missing oauth2 revocation + introspection standardization",
       "evidence": "web/server_clean.go|web/jwks_integrity_test.go"
     },
     {
@@ -372,9 +382,9 @@
       "section": "Data Hygiene \u0026 Validation",
       "id": "sec13.item2",
       "requirement": "Structured numeric limit parsing",
-      "status": "Partial",
+      "status": "Missing",
       "priority": "P2",
-      "gap": "max_amount per action and cumulative max_daily_amount enforced; lacks multi-period limits",
+      "gap": "Amounts not parsed/enforced",
       "evidence": "docs/GAP_MATRIX.md:103"
     },
     {
@@ -396,7 +406,7 @@
       "evidence": "docs/GAP_MATRIX.md:109"
     }
   ],
-  "generated_at": "2025-11-06T21:34:37Z",
+  "generated_at": "2025-12-25T13:14:14Z",
   "schema_version": 1,
   "total": 43
 }

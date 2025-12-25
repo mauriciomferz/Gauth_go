@@ -1,3 +1,11 @@
+---
+title: Gap Fix Summary
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # RFC Compliance Gap Fix Summary
 
 ## Date: November 12, 2025

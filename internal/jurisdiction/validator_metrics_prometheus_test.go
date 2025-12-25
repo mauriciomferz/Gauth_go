@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/compliance"
 	"github.com/gin-gonic/gin"
+	"github.com/mauriciomferz/Gauth_go/pkg/compliance"
 )
 
 // TestValidatorMetricsPrometheus ensures validator metrics Prometheus exposition contains expected core metrics after sample validations.

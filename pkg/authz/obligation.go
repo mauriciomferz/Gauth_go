@@ -1,5 +1,9 @@
 package authz
 
+import (
+	"fmt"
+)
+
 // Obligation represents an action to be performed after a policy decision (e.g., logging, notification, resource update).
 type Obligation struct {
 	ID        string            // Unique identifier
@@ -30,6 +34,11 @@ func (e *DefaultObligationExecutor) Execute(obligation Obligation, context map[s
 }
 
 func (e *DefaultObligationExecutor) PersistAudit(obligation Obligation, context map[string]interface{}, result error) error {
-	// TODO: Persist audit record (to DB, file, etc.)
+	status := "success"
+	if result != nil {
+		status = "failure"
+	}
+	// TODO: Integrate with pkg/audit for durable storage. For now, log to stdout.
+	fmt.Printf("[AUDIT] Obligation %s type=%s status=%s\n", obligation.ID, obligation.Type, status)
 	return nil
 }

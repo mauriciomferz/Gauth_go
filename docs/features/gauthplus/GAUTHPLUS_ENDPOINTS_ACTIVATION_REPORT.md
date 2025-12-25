@@ -1,3 +1,11 @@
+---
+title: Gauthplus Endpoints Activation Report
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # GAuth+ Endpoints Activation Report
 
 **Date:** December 1, 2025  

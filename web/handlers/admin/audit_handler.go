@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	statusActive    = "active"
+	statusActive    = StatusActive
 	defaultTenantID = "default-tenant"
 )
 
@@ -637,7 +637,7 @@ func (h *AuditHandler) CreateSIEMIntegration(c *gin.Context) {
 		SIEMType:        req.Type,
 		EndpointURL:     req.Endpoint,
 		Format:          req.Format,
-		Status:          "active",
+		Status:          StatusActive,
 		EventsSent:      0,
 	}
 
@@ -656,7 +656,7 @@ func (h *AuditHandler) CreateSIEMIntegration(c *gin.Context) {
 		Format:     dbIntegration.Format,
 		EventsSent: 0,
 		LastSync:   dbIntegration.CreatedAt.Format(time.RFC3339),
-		Status:     "active",
+		Status:     StatusActive,
 	}
 
 	c.JSON(http.StatusCreated, integration)

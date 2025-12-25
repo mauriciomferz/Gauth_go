@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	icrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	icrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
 // aggregationTestService constructs a fresh RFC0111 service for aggregation tests

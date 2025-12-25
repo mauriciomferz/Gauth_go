@@ -29,29 +29,29 @@ const (
 type NLAuthenticationLevel string
 
 const (
-	NLAuthLevelBasis       NLAuthenticationLevel = "basis"        // Basic level
-	NLAuthLevelMidden      NLAuthenticationLevel = "midden"       // Middle level
+	NLAuthLevelBasis        NLAuthenticationLevel = "basis"        // Basic level
+	NLAuthLevelMidden       NLAuthenticationLevel = "midden"       // Middle level
 	NLAuthLevelSubstantieel NLAuthenticationLevel = "substantieel" // Substantial level
-	NLAuthLevelHoog        NLAuthenticationLevel = "hoog"         // High level
+	NLAuthLevelHoog         NLAuthenticationLevel = "hoog"         // High level
 )
 
 // NLEIDASLevel represents eIDAS assurance levels for NL
 type NLEIDASLevel string
 
 const (
-	NLEIDASLow        NLEIDASLevel = "low"
+	NLEIDASLow         NLEIDASLevel = "low"
 	NLEIDASSubstantial NLEIDASLevel = "substantial"
-	NLEIDASHigh       NLEIDASLevel = "high"
+	NLEIDASHigh        NLEIDASLevel = "high"
 )
 
 // IDINBankStatus represents iDIN bank verification status
 type IDINBankStatus string
 
 const (
-	IDINStatusVerified   IDINBankStatus = "verified"
-	IDINStatusPending    IDINBankStatus = "pending"
-	IDINStatusFailed     IDINBankStatus = "failed"
-	IDINStatusCancelled  IDINBankStatus = "cancelled"
+	IDINStatusVerified  IDINBankStatus = "verified"
+	IDINStatusPending   IDINBankStatus = "pending"
+	IDINStatusFailed    IDINBankStatus = "failed"
+	IDINStatusCancelled IDINBankStatus = "cancelled"
 )
 
 // =============================================================================
@@ -61,104 +61,104 @@ const (
 // NLDigiDAuthRequest represents a DigiD authentication request
 type NLDigiDAuthRequest struct {
 	// User identification
-	BSN              string                `json:"bsn,omitempty" validate:"omitempty,len=9"` // Burgerservicenummer
-	Username         string                `json:"username,omitempty"`
-	
+	BSN      string `json:"bsn,omitempty" validate:"omitempty,len=9"` // Burgerservicenummer
+	Username string `json:"username,omitempty"`
+
 	// Authentication level
-	RequestedLevel   NLAuthenticationLevel `json:"requested_level" validate:"required"`
-	
+	RequestedLevel NLAuthenticationLevel `json:"requested_level" validate:"required"`
+
 	// Service provider details
-	ServiceID        string                `json:"service_id" validate:"required"`
-	ServiceName      string                `json:"service_name" validate:"required"`
-	
+	ServiceID   string `json:"service_id" validate:"required"`
+	ServiceName string `json:"service_name" validate:"required"`
+
 	// SAML details
-	AssertionConsumerURL string            `json:"assertion_consumer_url" validate:"required,url"`
-	RelayState       string                `json:"relay_state,omitempty"`
-	
+	AssertionConsumerURL string `json:"assertion_consumer_url" validate:"required,url"`
+	RelayState           string `json:"relay_state,omitempty"`
+
 	// Metadata
-	RequestID        string                `json:"request_id"`
-	Timestamp        time.Time             `json:"timestamp"`
+	RequestID string    `json:"request_id"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 // NLBSNValidationRequest represents a BSN validation request
 type NLBSNValidationRequest struct {
-	BSN              string    `json:"bsn" validate:"required,len=9"`
-	FirstName        string    `json:"first_name" validate:"required"`
-	LastName         string    `json:"last_name" validate:"required"`
-	DateOfBirth      time.Time `json:"date_of_birth" validate:"required"`
-	
+	BSN         string    `json:"bsn" validate:"required,len=9"`
+	FirstName   string    `json:"first_name" validate:"required"`
+	LastName    string    `json:"last_name" validate:"required"`
+	DateOfBirth time.Time `json:"date_of_birth" validate:"required"`
+
 	// Optional verification
-	PostalCode       string    `json:"postal_code,omitempty"`
-	HouseNumber      string    `json:"house_number,omitempty"`
-	
+	PostalCode  string `json:"postal_code,omitempty"`
+	HouseNumber string `json:"house_number,omitempty"`
+
 	// Metadata
-	RequestID        string    `json:"request_id"`
-	Timestamp        time.Time `json:"timestamp"`
+	RequestID string    `json:"request_id"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 // NLEIDASAuthRequest represents an eIDAS node authentication request
 type NLEIDASAuthRequest struct {
 	// eIDAS details
-	CitizenCountry   string       `json:"citizen_country" validate:"required,len=2"` // ISO 3166-1 alpha-2
-	RequestedLOA     NLEIDASLevel `json:"requested_loa" validate:"required"`
-	
+	CitizenCountry string       `json:"citizen_country" validate:"required,len=2"` // ISO 3166-1 alpha-2
+	RequestedLOA   NLEIDASLevel `json:"requested_loa" validate:"required"`
+
 	// Requested attributes
-	RequestedAttributes []string  `json:"requested_attributes" validate:"required,min=1"`
-	
+	RequestedAttributes []string `json:"requested_attributes" validate:"required,min=1"`
+
 	// Service provider
-	ServiceProviderID string      `json:"service_provider_id" validate:"required"`
-	
+	ServiceProviderID string `json:"service_provider_id" validate:"required"`
+
 	// Metadata
-	RequestID        string       `json:"request_id"`
-	Timestamp        time.Time    `json:"timestamp"`
+	RequestID string    `json:"request_id"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 // NLIDINVerificationRequest represents an iDIN bank verification request
 type NLIDINVerificationRequest struct {
 	// Bank selection
-	BankID           string   `json:"bank_id,omitempty"` // Optional: pre-select bank
-	
+	BankID string `json:"bank_id,omitempty"` // Optional: pre-select bank
+
 	// Requested attributes
 	RequestAttributes []string `json:"request_attributes" validate:"required,min=1"`
-	
+
 	// Merchant details
-	MerchantID       string   `json:"merchant_id" validate:"required"`
-	MerchantReturnURL string  `json:"merchant_return_url" validate:"required,url"`
-	
+	MerchantID        string `json:"merchant_id" validate:"required"`
+	MerchantReturnURL string `json:"merchant_return_url" validate:"required,url"`
+
 	// Transaction details
-	TransactionID    string   `json:"transaction_id"`
-	ExpirationPeriod string   `json:"expiration_period,omitempty"` // e.g., "PT15M" for 15 minutes
-	
+	TransactionID    string `json:"transaction_id"`
+	ExpirationPeriod string `json:"expiration_period,omitempty"` // e.g., "PT15M" for 15 minutes
+
 	// Metadata
-	RequestID        string    `json:"request_id"`
-	Timestamp        time.Time `json:"timestamp"`
+	RequestID string    `json:"request_id"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 // NLDocumentVerificationRequest represents a Dutch document verification request
 type NLDocumentVerificationRequest struct {
 	// Document details
-	DocumentType     NLDocumentType `json:"document_type" validate:"required"`
-	DocumentNumber   string         `json:"document_number" validate:"required"`
-	
+	DocumentType   NLDocumentType `json:"document_type" validate:"required"`
+	DocumentNumber string         `json:"document_number" validate:"required"`
+
 	// Personal details
-	FirstName        string    `json:"first_name" validate:"required"`
-	LastName         string    `json:"last_name" validate:"required"`
-	DateOfBirth      time.Time `json:"date_of_birth" validate:"required"`
-	Nationality      string    `json:"nationality" validate:"required"`
-	
+	FirstName   string    `json:"first_name" validate:"required"`
+	LastName    string    `json:"last_name" validate:"required"`
+	DateOfBirth time.Time `json:"date_of_birth" validate:"required"`
+	Nationality string    `json:"nationality" validate:"required"`
+
 	// Document dates
-	IssueDate        time.Time `json:"issue_date" validate:"required"`
-	ExpiryDate       time.Time `json:"expiry_date" validate:"required"`
-	
+	IssueDate  time.Time `json:"issue_date" validate:"required"`
+	ExpiryDate time.Time `json:"expiry_date" validate:"required"`
+
 	// Optional BSN
-	BSN              string    `json:"bsn,omitempty" validate:"omitempty,len=9"`
-	
+	BSN string `json:"bsn,omitempty" validate:"omitempty,len=9"`
+
 	// Optional MRZ data
-	MRZData          string    `json:"mrz_data,omitempty"`
-	
+	MRZData string `json:"mrz_data,omitempty"`
+
 	// Metadata
-	RequestID        string    `json:"request_id"`
-	Timestamp        time.Time `json:"timestamp"`
+	RequestID string    `json:"request_id"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 // =============================================================================
@@ -168,119 +168,119 @@ type NLDocumentVerificationRequest struct {
 // NLIdentityVerificationResult represents Dutch identity verification result
 type NLIdentityVerificationResult struct {
 	// Verification status
-	Verified         bool                  `json:"verified"`
-	AuthLevel        NLAuthenticationLevel `json:"auth_level,omitempty"`
-	ConfidenceScore  float64               `json:"confidence_score"`
-	
+	Verified        bool                  `json:"verified"`
+	AuthLevel       NLAuthenticationLevel `json:"auth_level,omitempty"`
+	ConfidenceScore float64               `json:"confidence_score"`
+
 	// Identity attributes
-	BSN              string                `json:"bsn,omitempty"`
-	Attributes       *NLIdentityAttributes `json:"attributes,omitempty"`
-	
+	BSN        string                `json:"bsn,omitempty"`
+	Attributes *NLIdentityAttributes `json:"attributes,omitempty"`
+
 	// DigiD specific
-	DigiDAuthenticated bool                `json:"digid_authenticated"`
-	DigiDLevel       NLAuthenticationLevel `json:"digid_level,omitempty"`
-	
+	DigiDAuthenticated bool                  `json:"digid_authenticated"`
+	DigiDLevel         NLAuthenticationLevel `json:"digid_level,omitempty"`
+
 	// eIDAS specific
-	EIDASAuthenticated bool                `json:"eidas_authenticated"`
-	EIDASLevel       NLEIDASLevel          `json:"eidas_level,omitempty"`
-	EIDASCountry     string                `json:"eidas_country,omitempty"`
-	
+	EIDASAuthenticated bool         `json:"eidas_authenticated"`
+	EIDASLevel         NLEIDASLevel `json:"eidas_level,omitempty"`
+	EIDASCountry       string       `json:"eidas_country,omitempty"`
+
 	// iDIN specific
-	IDINVerified     bool                  `json:"idin_verified"`
-	IDINBankName     string                `json:"idin_bank_name,omitempty"`
-	IDINStatus       IDINBankStatus        `json:"idin_status,omitempty"`
-	
+	IDINVerified bool           `json:"idin_verified"`
+	IDINBankName string         `json:"idin_bank_name,omitempty"`
+	IDINStatus   IDINBankStatus `json:"idin_status,omitempty"`
+
 	// Document verification
-	DocumentValid    bool                  `json:"document_valid"`
-	DocumentType     NLDocumentType        `json:"document_type,omitempty"`
-	DocumentNumber   string                `json:"document_number,omitempty"`
-	
+	DocumentValid  bool           `json:"document_valid"`
+	DocumentType   NLDocumentType `json:"document_type,omitempty"`
+	DocumentNumber string         `json:"document_number,omitempty"`
+
 	// Verification checks
-	Checks           *NLVerificationChecks `json:"checks,omitempty"`
-	
+	Checks *NLVerificationChecks `json:"checks,omitempty"`
+
 	// Warnings and errors
-	Warnings         []string              `json:"warnings,omitempty"`
-	Errors           []VerificationError   `json:"errors,omitempty"`
-	
+	Warnings []string            `json:"warnings,omitempty"`
+	Errors   []VerificationError `json:"errors,omitempty"`
+
 	// Metadata
-	RequestID            string    `json:"request_id"`
+	RequestID             string    `json:"request_id"`
 	VerificationTimestamp time.Time `json:"verification_timestamp"`
-	ProcessingTimeMs     int64     `json:"processing_time_ms"`
+	ProcessingTimeMs      int64     `json:"processing_time_ms"`
 }
 
 // NLIdentityAttributes contains verified Dutch identity data
 type NLIdentityAttributes struct {
 	// Personal details
-	FirstName        string     `json:"first_name"`
-	LastName         string     `json:"last_name"`
-	Initials         string     `json:"initials,omitempty"`
-	Prefix           string     `json:"prefix,omitempty"` // e.g., "van", "de"
-	DateOfBirth      time.Time  `json:"date_of_birth"`
-	Gender           string     `json:"gender,omitempty"`
-	Nationality      string     `json:"nationality,omitempty"`
-	PlaceOfBirth     string     `json:"place_of_birth,omitempty"`
-	CountryOfBirth   string     `json:"country_of_birth,omitempty"`
-	
+	FirstName      string    `json:"first_name"`
+	LastName       string    `json:"last_name"`
+	Initials       string    `json:"initials,omitempty"`
+	Prefix         string    `json:"prefix,omitempty"` // e.g., "van", "de"
+	DateOfBirth    time.Time `json:"date_of_birth"`
+	Gender         string    `json:"gender,omitempty"`
+	Nationality    string    `json:"nationality,omitempty"`
+	PlaceOfBirth   string    `json:"place_of_birth,omitempty"`
+	CountryOfBirth string    `json:"country_of_birth,omitempty"`
+
 	// BSN
-	BSN              string     `json:"bsn,omitempty"`
-	
+	BSN string `json:"bsn,omitempty"`
+
 	// Address (from BRP - Basisregistratie Personen)
-	Address          *NLAddress `json:"address,omitempty"`
-	
+	Address *NLAddress `json:"address,omitempty"`
+
 	// Contact (from iDIN)
-	Email            string     `json:"email,omitempty"`
-	PhoneNumber      string     `json:"phone_number,omitempty"`
-	
+	Email       string `json:"email,omitempty"`
+	PhoneNumber string `json:"phone_number,omitempty"`
+
 	// Bank account (from iDIN)
-	IBAN             string     `json:"iban,omitempty"`
-	BankName         string     `json:"bank_name,omitempty"`
-	
+	IBAN     string `json:"iban,omitempty"`
+	BankName string `json:"bank_name,omitempty"`
+
 	// Document details
-	DocumentNumber   string     `json:"document_number,omitempty"`
-	DocumentType     string     `json:"document_type,omitempty"`
+	DocumentNumber string `json:"document_number,omitempty"`
+	DocumentType   string `json:"document_type,omitempty"`
 }
 
 // NLAddress represents a Dutch address
 type NLAddress struct {
-	Street           string `json:"street"`
-	HouseNumber      string `json:"house_number"`
+	Street            string `json:"street"`
+	HouseNumber       string `json:"house_number"`
 	HouseNumberSuffix string `json:"house_number_suffix,omitempty"`
-	PostalCode       string `json:"postal_code"` // Format: 1234 AB
-	City             string `json:"city"`
-	Municipality     string `json:"municipality,omitempty"`
-	Province         string `json:"province,omitempty"`
-	Country          string `json:"country"` // Should be "NL"
+	PostalCode        string `json:"postal_code"` // Format: 1234 AB
+	City              string `json:"city"`
+	Municipality      string `json:"municipality,omitempty"`
+	Province          string `json:"province,omitempty"`
+	Country           string `json:"country"` // Should be "NL"
 }
 
 // NLVerificationChecks contains Dutch-specific verification checks
 type NLVerificationChecks struct {
 	// BSN validation
-	BSNValid         bool   `json:"bsn_valid"`
-	BSN11Test        bool   `json:"bsn_11_test"` // Elfproef (11-test)
-	
+	BSNValid  bool `json:"bsn_valid"`
+	BSN11Test bool `json:"bsn_11_test"` // Elfproef (11-test)
+
 	// DigiD checks
 	DigiDAuthenticated bool `json:"digid_authenticated"`
-	DigiDLevelMet    bool   `json:"digid_level_met"`
-	SAMLValid        bool   `json:"saml_valid"`
-	
+	DigiDLevelMet      bool `json:"digid_level_met"`
+	SAMLValid          bool `json:"saml_valid"`
+
 	// Document checks
 	DocumentAuthenticity bool `json:"document_authenticity"`
-	DocumentExpiry     bool   `json:"document_expiry"`
-	MRZValid           bool   `json:"mrz_valid"`
-	
+	DocumentExpiry       bool `json:"document_expiry"`
+	MRZValid             bool `json:"mrz_valid"`
+
 	// eIDAS checks
-	EIDASAuthenticated bool   `json:"eidas_authenticated"`
-	EIDASLevelMet      bool   `json:"eidas_level_met"`
-	EIDASNodeValid     bool   `json:"eidas_node_valid"`
-	
+	EIDASAuthenticated bool `json:"eidas_authenticated"`
+	EIDASLevelMet      bool `json:"eidas_level_met"`
+	EIDASNodeValid     bool `json:"eidas_node_valid"`
+
 	// iDIN checks
-	IDINVerified       bool   `json:"idin_verified"`
-	IBANValid          bool   `json:"iban_valid"`
-	BankVerified       bool   `json:"bank_verified"`
-	
+	IDINVerified bool `json:"idin_verified"`
+	IBANValid    bool `json:"iban_valid"`
+	BankVerified bool `json:"bank_verified"`
+
 	// Address checks
-	AddressVerified    bool   `json:"address_verified"`
-	PostalCodeValid    bool   `json:"postal_code_valid"`
+	AddressVerified bool `json:"address_verified"`
+	PostalCodeValid bool `json:"postal_code_valid"`
 }
 
 // =============================================================================
@@ -290,55 +290,55 @@ type NLVerificationChecks struct {
 // NLIdentityConnectorConfig contains configuration for Dutch identity connector
 type NLIdentityConnectorConfig struct {
 	// DigiD configuration
-	DigiDEnabled      bool   `json:"digid_enabled"`
-	DigiDSSOURL       string `json:"digid_sso_url"`       // SAML SSO endpoint
-	DigiDMetadataURL  string `json:"digid_metadata_url"`
-	DigiDEntityID     string `json:"digid_entity_id"`
-	DigiDCertificate  *x509.Certificate `json:"-"`
-	
+	DigiDEnabled     bool              `json:"digid_enabled"`
+	DigiDSSOURL      string            `json:"digid_sso_url"` // SAML SSO endpoint
+	DigiDMetadataURL string            `json:"digid_metadata_url"`
+	DigiDEntityID    string            `json:"digid_entity_id"`
+	DigiDCertificate *x509.Certificate `json:"-"`
+
 	// BSN validation service
 	BSNValidationEnabled bool   `json:"bsn_validation_enabled"`
 	BSNValidationURL     string `json:"bsn_validation_url"`
 	BSNValidationAPIKey  string `json:"bsn_validation_api_key"`
-	
+
 	// eIDAS node configuration
-	EIDASEnabled      bool   `json:"eidas_enabled"`
-	EIDASNodeURL      string `json:"eidas_node_url"`
-	EIDASMetadataURL  string `json:"eidas_metadata_url"`
-	EIDASEntityID     string `json:"eidas_entity_id"`
-	
+	EIDASEnabled     bool   `json:"eidas_enabled"`
+	EIDASNodeURL     string `json:"eidas_node_url"`
+	EIDASMetadataURL string `json:"eidas_metadata_url"`
+	EIDASEntityID    string `json:"eidas_entity_id"`
+
 	// iDIN configuration
-	IDINEnabled       bool   `json:"idin_enabled"`
-	IDINURL           string `json:"idin_url"`
-	IDINMerchantID    string `json:"idin_merchant_id"`
-	IDINMerchantCert  *x509.Certificate `json:"-"`
-	IDINMerchantKey   interface{}       `json:"-"`
-	
+	IDINEnabled      bool              `json:"idin_enabled"`
+	IDINURL          string            `json:"idin_url"`
+	IDINMerchantID   string            `json:"idin_merchant_id"`
+	IDINMerchantCert *x509.Certificate `json:"-"`
+	IDINMerchantKey  interface{}       `json:"-"`
+
 	// Document verification
 	DocumentVerificationEnabled bool   `json:"document_verification_enabled"`
 	DocumentVerificationURL     string `json:"document_verification_url"`
-	
+
 	// Security settings
-	MinimumAuthLevel  NLAuthenticationLevel `json:"minimum_auth_level"`
-	RequireBSN        bool                  `json:"require_bsn"`
-	
+	MinimumAuthLevel NLAuthenticationLevel `json:"minimum_auth_level"`
+	RequireBSN       bool                  `json:"require_bsn"`
+
 	// Circuit breaker
-	CircuitBreaker    *CircuitBreaker `json:"-"`
-	
+	CircuitBreaker *CircuitBreaker `json:"-"`
+
 	// Retry configuration
 	MaxRetries        int           `json:"max_retries"`
 	RetryDelay        time.Duration `json:"retry_delay"`
 	BackoffMultiplier float64       `json:"backoff_multiplier"`
-	
+
 	// Caching
-	CacheEnabled      bool          `json:"cache_enabled"`
-	CacheTTL          time.Duration `json:"cache_ttl"`
-	
+	CacheEnabled bool          `json:"cache_enabled"`
+	CacheTTL     time.Duration `json:"cache_ttl"`
+
 	// Timeouts
-	RequestTimeout    time.Duration `json:"request_timeout"`
-	
+	RequestTimeout time.Duration `json:"request_timeout"`
+
 	// Validation
-	StrictValidation  bool `json:"strict_validation"`
+	StrictValidation bool `json:"strict_validation"`
 }
 
 // =============================================================================
@@ -363,7 +363,7 @@ func NewNLIdentityConnector(config *NLIdentityConnectorConfig) (*NLIdentityConne
 	if config == nil {
 		return nil, errors.New("config cannot be nil")
 	}
-	
+
 	// Set defaults
 	if config.MaxRetries == 0 {
 		config.MaxRetries = 3
@@ -383,18 +383,18 @@ func NewNLIdentityConnector(config *NLIdentityConnectorConfig) (*NLIdentityConne
 	if config.MinimumAuthLevel == "" {
 		config.MinimumAuthLevel = NLAuthLevelMidden
 	}
-	
+
 	connector := &NLIdentityConnector{
 		config:    config,
 		validator: validator.New(),
 		cache:     make(map[string]*cachedNLVerification),
 	}
-	
+
 	// Register custom validators
 	_ = connector.validator.RegisterValidation("nl_bsn", validateBSN) // Registration failures are acceptable; fallback to standard validation
 	_ = connector.validator.RegisterValidation("nl_postal_code", validateNLPostalCode)
 	_ = connector.validator.RegisterValidation("nl_iban", validateNLIBAN)
-	
+
 	return connector, nil
 }
 
@@ -403,20 +403,20 @@ func (c *NLIdentityConnector) AuthenticateDigiD(ctx context.Context, req *NLDigi
 	if !c.config.DigiDEnabled {
 		return nil, errors.New("DigiD authentication is not enabled")
 	}
-	
+
 	startTime := time.Now()
-	
+
 	// Validate request
 	if err := c.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Check authentication level requirement
 	if !c.isAuthLevelSufficient(req.RequestedLevel) {
 		return nil, fmt.Errorf("requested authentication level '%s' is below minimum required level '%s'",
 			req.RequestedLevel, c.config.MinimumAuthLevel)
 	}
-	
+
 	result := &NLIdentityVerificationResult{
 		RequestID:             req.RequestID,
 		VerificationTimestamp: time.Now(),
@@ -424,7 +424,7 @@ func (c *NLIdentityConnector) AuthenticateDigiD(ctx context.Context, req *NLDigi
 		DigiDLevel:            req.RequestedLevel,
 		Checks:                &NLVerificationChecks{},
 	}
-	
+
 	// Perform DigiD authentication (SAML-based)
 	// This would implement SAML 2.0 authentication flow
 	// Placeholder implementation
@@ -437,26 +437,26 @@ func (c *NLIdentityConnector) AuthenticateDigiD(ctx context.Context, req *NLDigi
 		result.ProcessingTimeMs = time.Since(startTime).Milliseconds()
 		return result, err
 	}
-	
+
 	result.DigiDAuthenticated = authenticated
 	result.Verified = authenticated
 	result.Attributes = attrs
 	result.Checks.DigiDAuthenticated = authenticated
 	result.Checks.DigiDLevelMet = true
 	result.Checks.SAMLValid = true
-	
+
 	// Extract BSN from attributes
 	if attrs != nil && attrs.BSN != "" {
 		result.BSN = attrs.BSN
 		result.Checks.BSNValid = validateBSNNumber(attrs.BSN)
 		result.Checks.BSN11Test = result.Checks.BSNValid
 	}
-	
+
 	// Calculate confidence score
 	result.ConfidenceScore = c.calculateConfidenceScore(result)
-	
+
 	result.ProcessingTimeMs = time.Since(startTime).Milliseconds()
-	
+
 	return result, nil
 }
 
@@ -465,25 +465,25 @@ func (c *NLIdentityConnector) ValidateBSN(ctx context.Context, req *NLBSNValidat
 	if !c.config.BSNValidationEnabled {
 		return nil, errors.New("BSN validation is not enabled")
 	}
-	
+
 	startTime := time.Now()
-	
+
 	// Validate request
 	if err := c.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	result := &NLIdentityVerificationResult{
 		RequestID:             req.RequestID,
 		VerificationTimestamp: time.Now(),
 		BSN:                   req.BSN,
 		Checks:                &NLVerificationChecks{},
 	}
-	
+
 	// Validate BSN format and 11-test
 	result.Checks.BSNValid = validateBSNNumber(req.BSN)
 	result.Checks.BSN11Test = result.Checks.BSNValid
-	
+
 	if !result.Checks.BSNValid {
 		result.Errors = append(result.Errors, VerificationError{
 			Code:    "INVALID_BSN",
@@ -493,7 +493,7 @@ func (c *NLIdentityConnector) ValidateBSN(ctx context.Context, req *NLBSNValidat
 		result.ProcessingTimeMs = time.Since(startTime).Milliseconds()
 		return result, nil
 	}
-	
+
 	// Perform BSN validation against BRP (Basisregistratie Personen)
 	// This would integrate with government registry
 	// Placeholder implementation
@@ -504,12 +504,12 @@ func (c *NLIdentityConnector) ValidateBSN(ctx context.Context, req *NLBSNValidat
 		result.Verified = valid
 		result.Attributes = attrs
 	}
-	
+
 	// Calculate confidence score
 	result.ConfidenceScore = c.calculateConfidenceScore(result)
-	
+
 	result.ProcessingTimeMs = time.Since(startTime).Milliseconds()
-	
+
 	return result, nil
 }
 
@@ -518,14 +518,14 @@ func (c *NLIdentityConnector) AuthenticateEIDAS(ctx context.Context, req *NLEIDA
 	if !c.config.EIDASEnabled {
 		return nil, errors.New("eIDAS authentication is not enabled")
 	}
-	
+
 	startTime := time.Now()
-	
+
 	// Validate request
 	if err := c.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	result := &NLIdentityVerificationResult{
 		RequestID:             req.RequestID,
 		VerificationTimestamp: time.Now(),
@@ -534,7 +534,7 @@ func (c *NLIdentityConnector) AuthenticateEIDAS(ctx context.Context, req *NLEIDA
 		EIDASCountry:          req.CitizenCountry,
 		Checks:                &NLVerificationChecks{},
 	}
-	
+
 	// Perform eIDAS authentication via NL eIDAS node
 	// This would implement eIDAS SAML profile
 	// Placeholder implementation
@@ -547,19 +547,19 @@ func (c *NLIdentityConnector) AuthenticateEIDAS(ctx context.Context, req *NLEIDA
 		result.ProcessingTimeMs = time.Since(startTime).Milliseconds()
 		return result, err
 	}
-	
+
 	result.EIDASAuthenticated = authenticated
 	result.Verified = authenticated
 	result.Attributes = attrs
 	result.Checks.EIDASAuthenticated = authenticated
 	result.Checks.EIDASLevelMet = true
 	result.Checks.EIDASNodeValid = true
-	
+
 	// Calculate confidence score
 	result.ConfidenceScore = c.calculateConfidenceScore(result)
-	
+
 	result.ProcessingTimeMs = time.Since(startTime).Milliseconds()
-	
+
 	return result, nil
 }
 
@@ -568,14 +568,14 @@ func (c *NLIdentityConnector) VerifyIDIN(ctx context.Context, req *NLIDINVerific
 	if !c.config.IDINEnabled {
 		return nil, errors.New("iDIN verification is not enabled")
 	}
-	
+
 	startTime := time.Now()
-	
+
 	// Validate request
 	if err := c.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	result := &NLIdentityVerificationResult{
 		RequestID:             req.RequestID,
 		VerificationTimestamp: time.Now(),
@@ -583,7 +583,7 @@ func (c *NLIdentityConnector) VerifyIDIN(ctx context.Context, req *NLIDINVerific
 		IDINStatus:            IDINStatusPending,
 		Checks:                &NLVerificationChecks{},
 	}
-	
+
 	// Perform iDIN verification
 	// This would integrate with iDIN service
 	// Placeholder implementation
@@ -597,7 +597,7 @@ func (c *NLIdentityConnector) VerifyIDIN(ctx context.Context, req *NLIDINVerific
 		result.ProcessingTimeMs = time.Since(startTime).Milliseconds()
 		return result, err
 	}
-	
+
 	result.IDINVerified = verified
 	result.Verified = verified
 	result.Attributes = attrs
@@ -605,29 +605,29 @@ func (c *NLIdentityConnector) VerifyIDIN(ctx context.Context, req *NLIDINVerific
 	result.IDINStatus = IDINStatusVerified
 	result.Checks.IDINVerified = verified
 	result.Checks.BankVerified = verified
-	
+
 	// Validate IBAN if provided
 	if attrs != nil && attrs.IBAN != "" {
 		result.Checks.IBANValid = validateNLIBANNumber(attrs.IBAN)
 	}
-	
+
 	// Calculate confidence score
 	result.ConfidenceScore = c.calculateConfidenceScore(result)
-	
+
 	result.ProcessingTimeMs = time.Since(startTime).Milliseconds()
-	
+
 	return result, nil
 }
 
 // VerifyDocument verifies a Dutch identity document
 func (c *NLIdentityConnector) VerifyDocument(ctx context.Context, req *NLDocumentVerificationRequest) (*NLIdentityVerificationResult, error) {
 	startTime := time.Now()
-	
+
 	// Validate request
 	if err := c.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	result := &NLIdentityVerificationResult{
 		RequestID:             req.RequestID,
 		VerificationTimestamp: time.Now(),
@@ -635,23 +635,23 @@ func (c *NLIdentityConnector) VerifyDocument(ctx context.Context, req *NLDocumen
 		DocumentNumber:        req.DocumentNumber,
 		Checks:                &NLVerificationChecks{},
 	}
-	
+
 	// Check document expiry
 	result.DocumentValid = !time.Now().After(req.ExpiryDate)
 	result.Checks.DocumentExpiry = result.DocumentValid
-	
+
 	// Verify MRZ if provided
 	if req.MRZData != "" {
 		result.Checks.MRZValid = c.verifyMRZ(req.MRZData, req.DocumentNumber)
 	}
-	
+
 	// Validate BSN if provided
 	if req.BSN != "" {
 		result.BSN = req.BSN
 		result.Checks.BSNValid = validateBSNNumber(req.BSN)
 		result.Checks.BSN11Test = result.Checks.BSNValid
 	}
-	
+
 	// Build attributes
 	result.Attributes = &NLIdentityAttributes{
 		FirstName:      req.FirstName,
@@ -662,15 +662,15 @@ func (c *NLIdentityConnector) VerifyDocument(ctx context.Context, req *NLDocumen
 		DocumentType:   string(req.DocumentType),
 		BSN:            req.BSN,
 	}
-	
+
 	// Calculate confidence score
 	result.ConfidenceScore = c.calculateConfidenceScore(result)
-	
+
 	// Determine verification success
 	result.Verified = result.DocumentValid && len(result.Errors) == 0
-	
+
 	result.ProcessingTimeMs = time.Since(startTime).Milliseconds()
-	
+
 	return result, nil
 }
 
@@ -711,58 +711,58 @@ func (c *NLIdentityConnector) verifyMRZ(mrzData, documentNumber string) bool {
 func (c *NLIdentityConnector) calculateConfidenceScore(result *NLIdentityVerificationResult) float64 {
 	score := 0.0
 	maxScore := 0.0
-	
+
 	// DigiD authentication
 	if result.DigiDAuthenticated {
 		maxScore += 0.4
 		score += 0.4
 	}
-	
+
 	// BSN validation
 	if result.Checks != nil && result.Checks.BSNValid {
 		maxScore += 0.2
 		score += 0.2
 	}
-	
+
 	// eIDAS authentication
 	if result.EIDASAuthenticated {
 		maxScore += 0.4
 		score += 0.4
 	}
-	
+
 	// iDIN verification
 	if result.IDINVerified {
 		maxScore += 0.3
 		score += 0.3
 	}
-	
+
 	// Document validity
 	if result.DocumentValid {
 		maxScore += 0.2
 		score += 0.2
 	}
-	
+
 	// Attributes presence
 	if result.Attributes != nil {
 		maxScore += 0.1
 		score += 0.1
 	}
-	
+
 	if maxScore == 0 {
 		return 0.0
 	}
-	
+
 	return score / maxScore
 }
 
 func (c *NLIdentityConnector) isAuthLevelSufficient(requested NLAuthenticationLevel) bool {
 	levels := map[NLAuthenticationLevel]int{
-		NLAuthLevelBasis:       1,
-		NLAuthLevelMidden:      2,
+		NLAuthLevelBasis:        1,
+		NLAuthLevelMidden:       2,
 		NLAuthLevelSubstantieel: 3,
-		NLAuthLevelHoog:        4,
+		NLAuthLevelHoog:         4,
 	}
-	
+
 	return levels[requested] >= levels[c.config.MinimumAuthLevel]
 }
 
@@ -785,14 +785,14 @@ func validateBSNNumber(bsn string) bool {
 	if len(bsn) != 9 {
 		return false
 	}
-	
+
 	// BSN must be numeric
 	for _, c := range bsn {
 		if c < '0' || c > '9' {
 			return false
 		}
 	}
-	
+
 	// 11-test (elfproef)
 	sum := 0
 	for i := 0; i < 8; i++ {
@@ -801,7 +801,7 @@ func validateBSNNumber(bsn string) bool {
 	}
 	lastDigit := int(bsn[8] - '0')
 	sum -= lastDigit
-	
+
 	return sum%11 == 0
 }
 
@@ -827,11 +827,11 @@ func validateNLIBANNumber(iban string) bool {
 	if len(iban) != 18 {
 		return false
 	}
-	
+
 	if iban[0:2] != "NL" {
 		return false
 	}
-	
+
 	// Check if remaining characters are alphanumeric
 	pattern := `^NL\d{2}[A-Z]{4}\d{10}$`
 	matched, _ := regexp.MatchString(pattern, iban)

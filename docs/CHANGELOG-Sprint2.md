@@ -1,3 +1,11 @@
+---
+title: Changelog-Sprint2
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Sprint 2 Consolidated Changelog (RB6–RB9)
 
 Date Range: 2025-10-?? to 2025-10-27

@@ -9,10 +9,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
 const (
 	testAgentID = "agent-1"
 )
-
 
 func setupTestRouter() (*gin.Engine, *APIHandler) {
 	gin.SetMode(gin.TestMode)

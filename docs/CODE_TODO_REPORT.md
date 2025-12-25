@@ -1,3 +1,11 @@
+---
+title: Code Todo Report
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Code TODO / FIXME Report
 
 > Last Updated: 2025-10-17

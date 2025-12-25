@@ -1,3 +1,11 @@
+---
+title: Gimel Siemens 311025 V1.3
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 G imel
 The Open-Source Platform
 for AI Control and Secure IDs

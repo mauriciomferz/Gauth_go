@@ -1,3 +1,11 @@
+---
+title: Readme
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # MCP (Model Context Protocol) Integration
 
 This package implements the Model Context Protocol (MCP) integration for GAuth 1.0, satisfying RFC-0111 building block requirements.

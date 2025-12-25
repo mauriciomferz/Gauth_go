@@ -26,7 +26,9 @@ func TestViolationPersistenceVerify(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		srv.router.ServeHTTP(w, req)
 	}
-	srv.violationHandler.Save()
+	if err := srv.violationHandler.Save(); err != nil {
+		t.Fatalf("save failed: %v", err)
+	}
 	// Verify OK
 	wv := httptest.NewRecorder()
 	rv := httptest.NewRequest("GET", "/api/v1/beta/metrics/violations/verify", nil)

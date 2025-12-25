@@ -1,3 +1,11 @@
+---
+title: Crypto Vectors
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 ## Crypto Interface & Test Vectors (Phase 1)
 
 This document defines the unified `Signer` interface, encoding rules, and canonical test vector guidance for Ed25519, ECDSA (P‑256), and BLS12‑381 used in GAuth.

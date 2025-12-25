@@ -310,7 +310,7 @@ func TestE2E_CompleteMCPWorkflow(t *testing.T) {
 				Command:       "echo",
 			},
 			{
-				ID:   "invalid-2",
+				ID: "invalid-2",
 				// Missing Name
 				TransportType: "stdio",
 				Command:       "echo",
@@ -391,7 +391,7 @@ func TestE2E_AuditLoggerPerformance(t *testing.T) {
 	}
 
 	logDuration := time.Since(startTime)
-	t.Logf("Logged %d entries in %v (%.2f entries/sec)", 
+	t.Logf("Logged %d entries in %v (%.2f entries/sec)",
 		numEntries, logDuration, float64(numEntries)/logDuration.Seconds())
 
 	// Query performance
@@ -483,9 +483,9 @@ func TestE2E_RealWorldScenario(t *testing.T) {
 
 		// Simulate agent operations
 		operations := []struct {
-			server    string
-			operation string
-			target    string
+			server     string
+			operation  string
+			target     string
 			authorized bool
 		}{
 			{"filesystem", "resource_read", "file:///project/data.txt", true},

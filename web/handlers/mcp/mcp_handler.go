@@ -40,7 +40,7 @@ func (h *MCPHandler) RegisterRoutes(r *gin.RouterGroup) {
 func (h *MCPHandler) HealthCheck(c *gin.Context) {
 	serverIDs := h.connManager.ListServers()
 	status := h.connManager.GetConnectionStatus()
-	
+
 	connected := 0
 	disconnected := 0
 	for _, stat := range status {
@@ -50,7 +50,7 @@ func (h *MCPHandler) HealthCheck(c *gin.Context) {
 			disconnected++
 		}
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"status":  "healthy",
@@ -66,7 +66,7 @@ func (h *MCPHandler) HealthCheck(c *gin.Context) {
 // GetServerStatus returns the status of a specific MCP server
 func (h *MCPHandler) GetServerStatus(c *gin.Context) {
 	serverID := c.Param("id")
-	
+
 	if serverID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -75,7 +75,7 @@ func (h *MCPHandler) GetServerStatus(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	config, err := h.connManager.GetServerConfig(serverID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -85,9 +85,9 @@ func (h *MCPHandler) GetServerStatus(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	status := h.connManager.GetConnectionStatus()
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"server": gin.H{
@@ -104,14 +104,14 @@ func (h *MCPHandler) GetServerStatus(c *gin.Context) {
 func (h *MCPHandler) ListServers(c *gin.Context) {
 	serverIDs := h.connManager.ListServers()
 	status := h.connManager.GetConnectionStatus()
-	
+
 	servers := make([]map[string]interface{}, 0, len(serverIDs))
 	for _, id := range serverIDs {
 		config, err := h.connManager.GetServerConfig(id)
 		if err != nil {
 			continue
 		}
-		
+
 		servers = append(servers, map[string]interface{}{
 			"id":             config.ID,
 			"name":           config.Name,
@@ -123,7 +123,7 @@ func (h *MCPHandler) ListServers(c *gin.Context) {
 			"status":         status[id],
 		})
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"servers": servers,
@@ -143,7 +143,7 @@ func (h *MCPHandler) RegisterServer(c *gin.Context) {
 		RequireAuth   bool     `json:"require_auth"`
 		AllowedScopes []string `json:"allowed_scopes"`
 	}
-	
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -152,7 +152,7 @@ func (h *MCPHandler) RegisterServer(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// Validate transport type
 	if req.TransportType != "stdio" && req.TransportType != "http" && req.TransportType != "https" {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -162,7 +162,7 @@ func (h *MCPHandler) RegisterServer(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// Validate stdio transport has command
 	if req.TransportType == "stdio" && req.Command == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -172,7 +172,7 @@ func (h *MCPHandler) RegisterServer(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// Validate http/https transport has URL
 	if (req.TransportType == "http" || req.TransportType == "https") && req.URL == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -182,7 +182,7 @@ func (h *MCPHandler) RegisterServer(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	config := &mcp.ServerConfig{
 		ID:            req.ID,
 		Name:          req.Name,
@@ -194,7 +194,7 @@ func (h *MCPHandler) RegisterServer(c *gin.Context) {
 		RequireAuth:   req.RequireAuth,
 		AllowedScopes: req.AllowedScopes,
 	}
-	
+
 	if err := h.connManager.RegisterServer(config); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -203,17 +203,17 @@ func (h *MCPHandler) RegisterServer(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// Try to connect immediately
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 30*time.Second)
 	defer cancel()
-	
+
 	_, err := h.connManager.GetClient(ctx, req.ID)
 	status := "connected"
 	if err != nil {
 		status = "disconnected"
 	}
-	
+
 	c.JSON(http.StatusCreated, gin.H{
 		"success": true,
 		"server": map[string]interface{}{
@@ -227,7 +227,7 @@ func (h *MCPHandler) RegisterServer(c *gin.Context) {
 // DisconnectServer disconnects and removes an MCP server
 func (h *MCPHandler) DisconnectServer(c *gin.Context) {
 	serverID := c.Param("id")
-	
+
 	if serverID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -236,7 +236,7 @@ func (h *MCPHandler) DisconnectServer(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	if err := h.connManager.UnregisterServer(serverID); err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
 			c.JSON(http.StatusGatewayTimeout, gin.H{
@@ -253,7 +253,7 @@ func (h *MCPHandler) DisconnectServer(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success":   true,
 		"message":   "Server disconnected successfully",
@@ -264,7 +264,7 @@ func (h *MCPHandler) DisconnectServer(c *gin.Context) {
 // ListResources lists all resources available on an MCP server
 func (h *MCPHandler) ListResources(c *gin.Context) {
 	serverID := c.Param("id")
-	
+
 	if serverID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -273,10 +273,10 @@ func (h *MCPHandler) ListResources(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
-	
+
 	client, err := h.connManager.GetClient(ctx, serverID)
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
@@ -294,7 +294,7 @@ func (h *MCPHandler) ListResources(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	resources, err := client.ListResources(ctx)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -305,7 +305,7 @@ func (h *MCPHandler) ListResources(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success":   true,
 		"resources": resources,
@@ -315,11 +315,11 @@ func (h *MCPHandler) ListResources(c *gin.Context) {
 // ReadResource reads the content of a specific resource
 func (h *MCPHandler) ReadResource(c *gin.Context) {
 	serverID := c.Param("id")
-	
+
 	var req struct {
 		URI string `json:"uri" binding:"required"`
 	}
-	
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -328,10 +328,10 @@ func (h *MCPHandler) ReadResource(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
-	
+
 	client, err := h.connManager.GetClient(ctx, serverID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -341,7 +341,7 @@ func (h *MCPHandler) ReadResource(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	content, err := client.ReadResource(ctx, req.URI)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -351,7 +351,7 @@ func (h *MCPHandler) ReadResource(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success":  true,
 		"contents": []interface{}{content},
@@ -361,10 +361,10 @@ func (h *MCPHandler) ReadResource(c *gin.Context) {
 // ListTools lists all tools available on an MCP server
 func (h *MCPHandler) ListTools(c *gin.Context) {
 	serverID := c.Param("id")
-	
+
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
-	
+
 	client, err := h.connManager.GetClient(ctx, serverID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -374,7 +374,7 @@ func (h *MCPHandler) ListTools(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	tools, err := client.ListTools(ctx)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -385,7 +385,7 @@ func (h *MCPHandler) ListTools(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"tools":   tools,
@@ -395,12 +395,12 @@ func (h *MCPHandler) ListTools(c *gin.Context) {
 // CallTool executes a tool on an MCP server
 func (h *MCPHandler) CallTool(c *gin.Context) {
 	serverID := c.Param("id")
-	
+
 	var req struct {
 		Name      string                 `json:"name" binding:"required"`
 		Arguments map[string]interface{} `json:"arguments"`
 	}
-	
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -409,10 +409,10 @@ func (h *MCPHandler) CallTool(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 30*time.Second)
 	defer cancel()
-	
+
 	client, err := h.connManager.GetClient(ctx, serverID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -422,7 +422,7 @@ func (h *MCPHandler) CallTool(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	result, err := client.CallTool(ctx, req.Name, req.Arguments)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -432,7 +432,7 @@ func (h *MCPHandler) CallTool(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"content": result,

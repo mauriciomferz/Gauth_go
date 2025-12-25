@@ -1,3 +1,11 @@
+---
+title: Gauthplus Grafana Dashboard Guide
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # GAuth+ Grafana Dashboard Guide
 
 ## Overview

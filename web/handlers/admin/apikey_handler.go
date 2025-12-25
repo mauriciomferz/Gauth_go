@@ -137,7 +137,7 @@ func (h *APIKeyHandler) CreateAPIKey(c *gin.Context) {
 	var createdAt time.Time
 	err = h.db.QueryRow(ctx, query,
 		id, req.TenantID, req.KeyName, keyPrefix, keyHash,
-		req.Description, req.Scopes, "active", req.CreatedBy, req.ExpiresAt,
+		req.Description, req.Scopes, StatusActive, req.CreatedBy, req.ExpiresAt,
 		req.RateLimitPerMin, req.RateLimitPerHour,
 	).Scan(&createdAt)
 
@@ -153,7 +153,7 @@ func (h *APIKeyHandler) CreateAPIKey(c *gin.Context) {
 		KeyPrefix:        keyPrefix,
 		Description:      req.Description,
 		Scopes:           req.Scopes,
-		Status:           "active",
+		Status:           StatusActive,
 		CreatedBy:        req.CreatedBy,
 		CreatedAt:        createdAt,
 		ExpiresAt:        req.ExpiresAt,

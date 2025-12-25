@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/gin-gonic/gin"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
 // PVPVerifyRequest represents the request payload for PVP identity verification
@@ -24,11 +24,11 @@ type PVPVerifyRequest struct {
 
 // PVPVerifyResponse represents the response from PVP identity verification
 type PVPVerifyResponse struct {
-	Success  bool                     `json:"success"`
-	Verified bool                     `json:"verified"`
-	Person   *PersonDetails           `json:"person,omitempty"`
-	Details  *VerificationDetails     `json:"verification_details,omitempty"`
-	Error    string                   `json:"error,omitempty"`
+	Success  bool                 `json:"success"`
+	Verified bool                 `json:"verified"`
+	Person   *PersonDetails       `json:"person,omitempty"`
+	Details  *VerificationDetails `json:"verification_details,omitempty"`
+	Error    string               `json:"error,omitempty"`
 }
 
 // PersonDetails contains verified person information

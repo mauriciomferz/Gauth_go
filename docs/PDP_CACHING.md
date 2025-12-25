@@ -1,3 +1,11 @@
+---
+title: Pdp Caching
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # PDP Caching (P2.13 - sec2.item5)
 
 ## Overview

@@ -1,3 +1,11 @@
+---
+title: Dev Run Guide
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Development Run Guide
 
 This guide clarifies how to launch key binaries and examples locally.

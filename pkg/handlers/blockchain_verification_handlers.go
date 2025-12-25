@@ -70,23 +70,23 @@ func NewBlockchainVerificationHandler(registry blockchain.BlockchainRegistry, ca
 func (h *BlockchainVerificationHandler) RegisterRoutes(r *mux.Router) {
 	// Public blockchain verification endpoints (no authentication required)
 	publicAPI := r.PathPrefix("/api/v1/public/blockchain").Subrouter()
-	
+
 	// Core verification endpoints
 	publicAPI.HandleFunc("/verify/{poa_id}", h.VerifyPoA).Methods("GET")
 	publicAPI.HandleFunc("/verify/{poa_id}/status", h.GetPoAStatus).Methods("GET")
 	publicAPI.HandleFunc("/verify/{poa_id}/proof", h.GetVerificationProof).Methods("GET")
-	
+
 	// AI Agent verification endpoints
 	publicAPI.HandleFunc("/verify/agent/{agent_id}", h.VerifyAIAgent).Methods("GET")
 	publicAPI.HandleFunc("/verify/agent/{agent_id}/powers", h.GetAIAgentPowers).Methods("GET")
-	
+
 	// Issuer/Grantee lookup endpoints
 	publicAPI.HandleFunc("/issuer/{issuer_id}/poas", h.ListPoAsByIssuer).Methods("GET")
 	publicAPI.HandleFunc("/grantee/{grantee_id}/poas", h.ListPoAsByGrantee).Methods("GET")
-	
+
 	// Blockchain explorer links
 	publicAPI.HandleFunc("/explorer/{poa_id}", h.GetBlockchainExplorerURL).Methods("GET")
-	
+
 	// Health check
 	publicAPI.HandleFunc("/health", h.HealthCheck).Methods("GET")
 }
@@ -138,8 +138,8 @@ func (h *BlockchainVerificationHandler) VerifyPoA(w http.ResponseWriter, r *http
 		VerifiedAt:    time.Now(),
 		BlockchainURL: h.registry.GetPublicVerificationURL(poaID),
 		VerificationProof: &blockchain.VerificationProof{
-			ProofType:        "blockchain",
-			ProofData:        map[string]interface{}{
+			ProofType: "blockchain",
+			ProofData: map[string]interface{}{
 				"tx_hash":      record.TxHash,
 				"block_number": record.BlockNumber,
 				"scope_hash":   record.ScopeHash,
@@ -306,9 +306,9 @@ func (h *BlockchainVerificationHandler) ListPoAsByIssuer(w http.ResponseWriter, 
 	}
 
 	response := map[string]interface{}{
-		"issuer_id":  issuerID,
-		"total":      len(records),
-		"poas":       records,
+		"issuer_id":    issuerID,
+		"total":        len(records),
+		"poas":         records,
 		"retrieved_at": time.Now(),
 	}
 
@@ -334,9 +334,9 @@ func (h *BlockchainVerificationHandler) ListPoAsByGrantee(w http.ResponseWriter,
 	}
 
 	response := map[string]interface{}{
-		"grantee_id": granteeID,
-		"total":      len(records),
-		"poas":       records,
+		"grantee_id":   granteeID,
+		"total":        len(records),
+		"poas":         records,
 		"retrieved_at": time.Now(),
 	}
 
@@ -352,9 +352,9 @@ func (h *BlockchainVerificationHandler) GetBlockchainExplorerURL(w http.Response
 	url := h.registry.GetPublicVerificationURL(poaID)
 
 	response := map[string]interface{}{
-		"poa_id":        poaID,
-		"explorer_url":  url,
-		"can_verify":    true,
+		"poa_id":              poaID,
+		"explorer_url":        url,
+		"can_verify":          true,
 		"verification_method": "Direct blockchain query via explorer",
 	}
 
@@ -366,10 +366,10 @@ func (h *BlockchainVerificationHandler) GetBlockchainExplorerURL(w http.Response
 func (h *BlockchainVerificationHandler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	// In production, this would check blockchain connectivity
 	health := map[string]interface{}{
-		"status":      "healthy",
-		"service":     "blockchain-verification",
+		"status":        "healthy",
+		"service":       "blockchain-verification",
 		"cache_enabled": h.cache.enabled,
-		"timestamp":   time.Now(),
+		"timestamp":     time.Now(),
 	}
 
 	respondJSON(w, http.StatusOK, health)

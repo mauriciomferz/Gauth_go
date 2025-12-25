@@ -1,3 +1,11 @@
+---
+title: Rfc0111 Role Mapping
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # RFC0111 Role Mapping (Beta MVP)
 
 Date: 2025-10-29

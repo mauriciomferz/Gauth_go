@@ -99,9 +99,9 @@ func NewRevocationService(ctx context.Context) *RevocationService {
 	config := &revocation.RateLimitConfig{
 		MaxTxPerMinute:    rateLimit,
 		MaxTxPerHour:      rateLimit * 6,
-		MaxValuePerMinute: 10000000000000000000,     // 10 ETH per minute (10^19 Wei)
-		MaxValuePerHour:   18446744073709551615,     // Max uint64 value (~18.4 ETH per hour due to overflow limitation)
-		MaxFailureRate:    0.1,                      // 10% max failure rate
+		MaxValuePerMinute: 10000000000000000000, // 10 ETH per minute (10^19 Wei)
+		MaxValuePerHour:   18446744073709551615, // Max uint64 value (~18.4 ETH per hour due to overflow limitation)
+		MaxFailureRate:    0.1,                  // 10% max failure rate
 		FailureWindowSecs: 60,
 	}
 

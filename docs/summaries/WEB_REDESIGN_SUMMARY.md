@@ -1,3 +1,11 @@
+---
+title: Web Redesign Summary
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # GAuth Beta Web Interface - Complete Redesign Summary
 
 > Last Updated: 2025-10-17

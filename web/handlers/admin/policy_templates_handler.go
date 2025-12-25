@@ -200,7 +200,7 @@ func (h *PolicyTemplatesHandler) ListPolicyTemplates(c *gin.Context) {
 		}
 
 		_ = json.Unmarshal(policyRulesJSON, &t.PolicyRules) // Tolerate partial data
-		_ = json.Unmarshal(variablesJSON, &t.Variables) // Tolerate partial data
+		_ = json.Unmarshal(variablesJSON, &t.Variables)     // Tolerate partial data
 
 		templates = append(templates, t)
 	}
@@ -268,7 +268,7 @@ func (h *PolicyTemplatesHandler) GetPolicyTemplate(c *gin.Context) {
 	}
 
 	_ = json.Unmarshal(policyRulesJSON, &t.PolicyRules) // Tolerate partial data
-	_ = json.Unmarshal(variablesJSON, &t.Variables) // Tolerate partial data
+	_ = json.Unmarshal(variablesJSON, &t.Variables)     // Tolerate partial data
 
 	c.JSON(http.StatusOK, t)
 }
@@ -400,10 +400,10 @@ func (h *PolicyTemplatesHandler) UpdatePolicyTemplate(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"id":          templateID,
-		"version":     newVersion,
-		"updated_at":  updatedAt,
-		"message":     "Template updated successfully (new version created)",
+		"id":         templateID,
+		"version":    newVersion,
+		"updated_at": updatedAt,
+		"message":    "Template updated successfully (new version created)",
 	})
 }
 
@@ -478,11 +478,11 @@ func (h *PolicyTemplatesHandler) ClonePolicyTemplate(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"id":          newTemplateID,
-		"name":        req.NewName,
-		"created_at":  createdAt,
-		"parent_id":   originalTemplateID,
-		"message":     "Template cloned successfully",
+		"id":         newTemplateID,
+		"name":       req.NewName,
+		"created_at": createdAt,
+		"parent_id":  originalTemplateID,
+		"message":    "Template cloned successfully",
 	})
 }
 

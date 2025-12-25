@@ -73,7 +73,7 @@ func BenchmarkTwoPhaseRevocation_RevokePoA(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		poaID := fmt.Sprintf("poa_revoke_%d", i)
 		poaIDs[i] = poaID
-		
+
 		err := tpr.DisablePoA(ctx, poaID, "0xBenchPrincipal", "Setup for benchmark")
 		if err != nil {
 			b.Fatalf("Setup DisablePoA failed: %v", err)
@@ -136,7 +136,7 @@ func BenchmarkCircuitBreaker_RecordTransaction(b *testing.B) {
 	defer mr.Close()
 
 	logger := NewSimpleLogger("BENCH")
-	
+
 	// Create circuit breaker with default config
 	config := &RateLimitConfig{
 		MaxTxPerMinute:    1000,
@@ -146,15 +146,15 @@ func BenchmarkCircuitBreaker_RecordTransaction(b *testing.B) {
 		MaxFailureRate:    0.1,
 		FailureWindowSecs: 300,
 	}
-	
+
 	cb, err := NewCircuitBreaker([]string{mr.Addr()}, config, logger)
 	if err != nil {
 		b.Fatalf("Failed to create circuit breaker: %v", err)
 	}
 	defer cb.Close()
-	
+
 	ctx := context.Background()
-	
+
 	b.ResetTimer()
 	b.ReportAllocs()
 
@@ -178,7 +178,7 @@ func BenchmarkCircuitBreaker_IsPoAAllowed(b *testing.B) {
 	defer mr.Close()
 
 	logger := NewSimpleLogger("BENCH")
-	
+
 	config := &RateLimitConfig{
 		MaxTxPerMinute:    1000,
 		MaxTxPerHour:      10000,
@@ -187,27 +187,27 @@ func BenchmarkCircuitBreaker_IsPoAAllowed(b *testing.B) {
 		MaxFailureRate:    0.1,
 		FailureWindowSecs: 300,
 	}
-	
+
 	cb, err := NewCircuitBreaker([]string{mr.Addr()}, config, logger)
 	if err != nil {
 		b.Fatalf("Failed to create circuit breaker: %v", err)
 	}
 	defer cb.Close()
-	
+
 	ctx := context.Background()
-	
+
 	// Pre-populate some PoAs
 	for i := 0; i < 10; i++ {
 		poaID := fmt.Sprintf("poa_check_%d", i)
 		_ = cb.RecordTransaction(ctx, poaID, 100, true)
 	}
-	
+
 	b.ResetTimer()
 	b.ReportAllocs()
 
 	for i := 0; i < b.N; i++ {
 		poaID := fmt.Sprintf("poa_check_%d", i%10)
-		
+
 		allowed, _, err := cb.IsPoAAllowed(ctx, poaID)
 		if err != nil {
 			b.Fatalf("IsPoAAllowed failed: %v", err)
@@ -284,7 +284,7 @@ func BenchmarkHighThroughputRevocation(b *testing.B) {
 	b.ReportAllocs()
 
 	start := time.Now()
-	
+
 	for i := 0; i < b.N; i++ {
 		poaID := fmt.Sprintf("poa_throughput_%d", i)
 		principal := "0xThroughputPrincipal"
@@ -298,7 +298,7 @@ func BenchmarkHighThroughputRevocation(b *testing.B) {
 
 	duration := time.Since(start)
 	opsPerSec := float64(b.N) / duration.Seconds()
-	
+
 	// Report custom metrics
 	b.ReportMetric(opsPerSec, "ops/sec")
 	b.ReportMetric(duration.Seconds()/float64(b.N)*1000, "ms/op")

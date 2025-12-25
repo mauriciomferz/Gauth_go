@@ -1,3 +1,11 @@
+---
+title: Web Ui Usage Guide
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # GAuth Web UI Usage Guide
 
 ## ✅ Status: All Pages Operational

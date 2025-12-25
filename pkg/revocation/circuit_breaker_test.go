@@ -27,7 +27,7 @@ func setupCircuitBreakerTest(t *testing.T) (*CircuitBreaker, *miniredis.Miniredi
 		MaxTxPerHour:      100,
 		MaxValuePerMinute: 5000000000000000000,  // 5 ETH per minute
 		MaxValuePerHour:   10000000000000000000, // 10 ETH per hour
-		MaxFailureRate:    0.3,    // 30% max failure rate
+		MaxFailureRate:    0.3,                  // 30% max failure rate
 		FailureWindowSecs: 60,
 	}
 
@@ -336,7 +336,7 @@ func TestCircuitBreaker_MultiplePoAs(t *testing.T) {
 
 	// Record transactions for different PoAs
 	poaIDs := []string{"poa1", "poa2", "poa3"}
-	
+
 	for _, poaID := range poaIDs {
 		// poa1: normal (5 tx)
 		// poa2: rate limit (11 tx)

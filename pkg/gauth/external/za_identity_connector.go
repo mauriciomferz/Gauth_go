@@ -27,15 +27,15 @@ type SouthAfricaIdentityConnector struct {
 // SouthAfricaConnectorConfig configuration for South African identity connector
 type SouthAfricaConnectorConfig struct {
 	// Department of Home Affairs configuration
-	DHA_URL           string `validate:"required,url"`
-	DHA_APIKey        string `validate:"required"`
-	
+	DHA_URL    string `validate:"required,url"`
+	DHA_APIKey string `validate:"required"`
+
 	// NATIS (traffic department) configuration
-	NATISURL          string `validate:"url"`
-	NATISAPIKey       string
-	
+	NATISURL    string `validate:"url"`
+	NATISAPIKey string
+
 	// Timeouts
-	RequestTimeout    time.Duration
+	RequestTimeout time.Duration
 }
 
 // IDNumberRequest ID number validation request
@@ -47,39 +47,39 @@ type IDNumberRequest struct {
 
 // IDNumberResponse ID number validation response
 type IDNumberResponse struct {
-	Valid            bool   `json:"valid"`
-	IDNumber         string `json:"id_number"`
-	DateOfBirth      string `json:"date_of_birth"`
-	Gender           string `json:"gender"` // Male, Female
-	Citizenship      string `json:"citizenship"` // SA Citizen, Permanent Resident
-	CheckDigitValid  bool   `json:"check_digit_valid"`
-	Error            string `json:"error,omitempty"`
+	Valid           bool   `json:"valid"`
+	IDNumber        string `json:"id_number"`
+	DateOfBirth     string `json:"date_of_birth"`
+	Gender          string `json:"gender"`      // Male, Female
+	Citizenship     string `json:"citizenship"` // SA Citizen, Permanent Resident
+	CheckDigitValid bool   `json:"check_digit_valid"`
+	Error           string `json:"error,omitempty"`
 }
 
 // DriverLicenseRequest driver's license validation request
 type ZADriverLicenseRequest struct {
-	LicenseNumber   string `json:"license_number" validate:"required"`
-	IDNumber        string `json:"id_number" validate:"required,len=13"`
-	FirstName       string `json:"first_name" validate:"required"`
-	Surname         string `json:"surname" validate:"required"`
-	DateOfBirth     string `json:"date_of_birth" validate:"required"`
+	LicenseNumber string `json:"license_number" validate:"required"`
+	IDNumber      string `json:"id_number" validate:"required,len=13"`
+	FirstName     string `json:"first_name" validate:"required"`
+	Surname       string `json:"surname" validate:"required"`
+	DateOfBirth   string `json:"date_of_birth" validate:"required"`
 }
 
 // DriverLicenseResponse driver's license validation response
 type ZADriverLicenseResponse struct {
-	Valid           bool       `json:"valid"`
-	LicenseNumber   string     `json:"license_number"`
-	IDNumber        string     `json:"id_number"`
-	FirstName       string     `json:"first_name"`
-	Surname         string     `json:"surname"`
-	DateOfBirth     string     `json:"date_of_birth"`
-	Address         *ZAAddress `json:"address,omitempty"`
-	IssueDate       string     `json:"issue_date"`
-	ExpiryDate      string     `json:"expiry_date"`
-	LicenseCode     []string   `json:"license_code"` // A1, A, B, C1, C, EB, EC1, EC, etc.
-	Restrictions    string     `json:"restrictions,omitempty"`
-	PrDPNumber      string     `json:"prdp_number,omitempty"` // Professional Driving Permit
-	Error           string     `json:"error,omitempty"`
+	Valid         bool       `json:"valid"`
+	LicenseNumber string     `json:"license_number"`
+	IDNumber      string     `json:"id_number"`
+	FirstName     string     `json:"first_name"`
+	Surname       string     `json:"surname"`
+	DateOfBirth   string     `json:"date_of_birth"`
+	Address       *ZAAddress `json:"address,omitempty"`
+	IssueDate     string     `json:"issue_date"`
+	ExpiryDate    string     `json:"expiry_date"`
+	LicenseCode   []string   `json:"license_code"` // A1, A, B, C1, C, EB, EC1, EC, etc.
+	Restrictions  string     `json:"restrictions,omitempty"`
+	PrDPNumber    string     `json:"prdp_number,omitempty"` // Professional Driving Permit
+	Error         string     `json:"error,omitempty"`
 }
 
 // ZAAddress South African address structure
@@ -87,19 +87,19 @@ type ZAAddress struct {
 	StreetAddress string `json:"street_address"`
 	Suburb        string `json:"suburb"`
 	City          string `json:"city"`
-	Province      string `json:"province"` // 9 provinces
+	Province      string `json:"province"`    // 9 provinces
 	PostalCode    string `json:"postal_code"` // 4 digits
 	Country       string `json:"country"`
 }
 
 // PassportRequest passport validation request
 type ZAPassportRequest struct {
-	PassportNumber  string `json:"passport_number" validate:"required"`
-	IDNumber        string `json:"id_number,omitempty"`
-	Surname         string `json:"surname" validate:"required"`
-	FirstName       string `json:"first_name" validate:"required"`
-	DateOfBirth     string `json:"date_of_birth" validate:"required"`
-	Nationality     string `json:"nationality" validate:"required"`
+	PassportNumber string `json:"passport_number" validate:"required"`
+	IDNumber       string `json:"id_number,omitempty"`
+	Surname        string `json:"surname" validate:"required"`
+	FirstName      string `json:"first_name" validate:"required"`
+	DateOfBirth    string `json:"date_of_birth" validate:"required"`
+	Nationality    string `json:"nationality" validate:"required"`
 }
 
 // PassportResponse passport validation response
@@ -126,18 +126,18 @@ func NewSouthAfricaIdentityConnector(config *SouthAfricaConnectorConfig) (*South
 	if err := validate.Struct(config); err != nil {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
-	
+
 	// Set defaults
 	if config.RequestTimeout == 0 {
 		config.RequestTimeout = 30 * time.Second
 	}
-	
+
 	connector := &SouthAfricaIdentityConnector{
 		config:     config,
 		httpClient: &http.Client{Timeout: config.RequestTimeout},
 		validator:  validate,
 	}
-	
+
 	return connector, nil
 }
 
@@ -154,9 +154,9 @@ func (zac *SouthAfricaIdentityConnector) ValidateIDNumber(ctx context.Context, r
 	if err := zac.validator.Struct(req); err != nil {
 		return &IDNumberResponse{Valid: false, Error: err.Error()}, nil
 	}
-	
+
 	idNumber := strings.TrimSpace(req.IDNumber)
-	
+
 	// Validate format (13 digits)
 	if !regexp.MustCompile(`^\d{13}$`).MatchString(idNumber) {
 		return &IDNumberResponse{
@@ -164,14 +164,14 @@ func (zac *SouthAfricaIdentityConnector) ValidateIDNumber(ctx context.Context, r
 			Error: "Invalid ID number format (must be 13 digits)",
 		}, nil
 	}
-	
+
 	// Extract components
 	year := idNumber[0:2]
 	month := idNumber[2:4]
 	day := idNumber[4:6]
 	genderDigit := idNumber[6:10]
 	citizenshipDigit := idNumber[10:11]
-	
+
 	// Determine century
 	yearInt, _ := strconv.Atoi(year)
 	var century string
@@ -180,9 +180,9 @@ func (zac *SouthAfricaIdentityConnector) ValidateIDNumber(ctx context.Context, r
 	} else {
 		century = "19"
 	}
-	
+
 	dateOfBirth := fmt.Sprintf("%s%s-%s-%s", century, year, month, day)
-	
+
 	// Determine gender
 	genderInt, _ := strconv.Atoi(genderDigit)
 	var gender string
@@ -191,16 +191,16 @@ func (zac *SouthAfricaIdentityConnector) ValidateIDNumber(ctx context.Context, r
 	} else {
 		gender = "Male"
 	}
-	
+
 	// Determine citizenship
 	citizenship := "SA Citizen"
 	if citizenshipDigit == "1" {
 		citizenship = "Permanent Resident"
 	}
-	
+
 	// Validate check digit using Luhn algorithm
 	checkDigitValid := zac.validateIDCheckDigit(idNumber)
-	
+
 	response := &IDNumberResponse{
 		Valid:           checkDigitValid,
 		IDNumber:        idNumber,
@@ -209,11 +209,11 @@ func (zac *SouthAfricaIdentityConnector) ValidateIDNumber(ctx context.Context, r
 		Citizenship:     citizenship,
 		CheckDigitValid: checkDigitValid,
 	}
-	
+
 	if !checkDigitValid {
 		response.Error = "Invalid ID number check digit"
 	}
-	
+
 	return response, nil
 }
 
@@ -223,7 +223,7 @@ func (zac *SouthAfricaIdentityConnector) VerifyDriverLicense(ctx context.Context
 	if err := zac.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Validate ID number first
 	if !regexp.MustCompile(`^\d{13}$`).MatchString(req.IDNumber) {
 		return &ZADriverLicenseResponse{
@@ -231,7 +231,7 @@ func (zac *SouthAfricaIdentityConnector) VerifyDriverLicense(ctx context.Context
 			Error: "Invalid ID number format",
 		}, nil
 	}
-	
+
 	// In production, this would verify with NATIS (National Traffic Information System)
 	response := &ZADriverLicenseResponse{
 		Valid:         true,
@@ -244,7 +244,7 @@ func (zac *SouthAfricaIdentityConnector) VerifyDriverLicense(ctx context.Context
 		ExpiryDate:    "2025-01-15",
 		LicenseCode:   []string{"B", "EB"}, // Light motor vehicle
 	}
-	
+
 	return response, nil
 }
 
@@ -254,9 +254,9 @@ func (zac *SouthAfricaIdentityConnector) VerifyPassport(ctx context.Context, req
 	if err := zac.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	passportNumber := strings.ToUpper(strings.TrimSpace(req.PassportNumber))
-	
+
 	// Validate passport number format (letter + 8 digits)
 	if !regexp.MustCompile(`^[A-Z]\d{8}$`).MatchString(passportNumber) {
 		return &ZAPassportResponse{
@@ -264,7 +264,7 @@ func (zac *SouthAfricaIdentityConnector) VerifyPassport(ctx context.Context, req
 			Error: "Invalid passport number format",
 		}, nil
 	}
-	
+
 	// In production, this would verify with Department of Home Affairs
 	response := &ZAPassportResponse{
 		Valid:            true,
@@ -278,7 +278,7 @@ func (zac *SouthAfricaIdentityConnector) VerifyPassport(ctx context.Context, req
 		DateOfExpiry:     "2030-01-15",
 		IssuingAuthority: "South Africa",
 	}
-	
+
 	return response, nil
 }
 
@@ -289,17 +289,17 @@ func (zac *SouthAfricaIdentityConnector) validateIDCheckDigit(idNumber string) b
 	sum := 0
 	for i := 0; i < 13; i++ {
 		digit, _ := strconv.Atoi(string(idNumber[i]))
-		
+
 		if i%2 == 1 {
 			digit *= 2
 			if digit > 9 {
 				digit -= 9
 			}
 		}
-		
+
 		sum += digit
 	}
-	
+
 	return sum%10 == 0
 }
 
@@ -313,7 +313,7 @@ func (zac *SouthAfricaIdentityConnector) generateCacheKey(operation string, part
 func (zac *SouthAfricaIdentityConnector) GetMetrics() map[string]interface{} {
 	zac.mu.RLock()
 	defer zac.mu.RUnlock()
-	
+
 	return map[string]interface{}{
 		"connector": "southafrica_identity",
 	}

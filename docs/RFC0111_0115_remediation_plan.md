@@ -1,3 +1,11 @@
+---
+title: Rfc0111 0115 Remediation Plan
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # RFC0111 & RFC0115 Remediation Plan
 
 Date: 2025-10-20

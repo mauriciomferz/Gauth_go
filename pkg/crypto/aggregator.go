@@ -8,8 +8,8 @@ import (
 	"errors"
 	"time"
 
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
 	bls "github.com/herumi/bls-eth-go-binary/bls"
+	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
 )
 
 type Aggregator interface {

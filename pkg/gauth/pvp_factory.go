@@ -59,8 +59,7 @@ func (f *PVPFactory) createStripePVP() (PowerVerificationPoint, error) {
 		return nil, fmt.Errorf("STRIPE_API_KEY not set - required for Stripe Identity provider")
 	}
 
-	// TODO: Implement real Stripe Identity integration
-	return nil, fmt.Errorf("stripe Identity PVP integration not yet implemented, see https://stripe.com/docs/identity")
+	return NewStripePVPClient(apiKey), nil
 }
 
 // createVeriffPVP creates Veriff verification client
@@ -72,8 +71,7 @@ func (f *PVPFactory) createVeriffPVP() (PowerVerificationPoint, error) {
 		return nil, fmt.Errorf("VERIFF_API_KEY and VERIFF_API_SECRET required for Veriff provider")
 	}
 
-	// TODO: Implement real Veriff integration
-	return nil, fmt.Errorf("veriff PVP integration not yet implemented, see https://developers.veriff.com/")
+	return NewVeriffPVPClient(apiKey, apiSecret), nil
 }
 
 // createIdemiaPVP creates Idemia verification client
@@ -83,8 +81,7 @@ func (f *PVPFactory) createIdemiaPVP() (PowerVerificationPoint, error) {
 		return nil, fmt.Errorf("IDEMIA_API_KEY required for Idemia provider")
 	}
 
-	// TODO: Implement real Idemia integration
-	return nil, fmt.Errorf("idemia PVP integration not yet implemented, see https://www.idemia.com/identity-verification")
+	return NewGenericPVPStub("Idemia", "https://www.idemia.com/identity-verification"), nil
 }
 
 // createOnfidoPVP creates Onfido verification client
@@ -94,8 +91,7 @@ func (f *PVPFactory) createOnfidoPVP() (PowerVerificationPoint, error) {
 		return nil, fmt.Errorf("ONFIDO_API_TOKEN required for Onfido provider")
 	}
 
-	// TODO: Implement real Onfido integration
-	return nil, fmt.Errorf("onfido PVP integration not yet implemented, see https://documentation.onfido.com/")
+	return NewGenericPVPStub("Onfido", "https://documentation.onfido.com/"), nil
 }
 
 // createJumioPVP creates Jumio verification client
@@ -107,8 +103,7 @@ func (f *PVPFactory) createJumioPVP() (PowerVerificationPoint, error) {
 		return nil, fmt.Errorf("JUMIO_API_TOKEN and JUMIO_API_SECRET required for Jumio provider")
 	}
 
-	// TODO: Implement real Jumio integration
-	return nil, fmt.Errorf("jumio PVP integration not yet implemented, see https://www.jumio.com/developers/")
+	return NewGenericPVPStub("Jumio", "https://www.jumio.com/developers/"), nil
 }
 
 // MockPVPWithWarning wraps mock PVP with production warning

@@ -1,3 +1,11 @@
+---
+title: Readme
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # testutil package
 
 Helpers and JSON fixtures supporting web-layer capability & policy tests.

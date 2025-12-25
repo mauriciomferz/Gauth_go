@@ -22,11 +22,11 @@ const (
 // DelegationPolicy defines rules for AI-to-AI delegation
 type DelegationPolicy struct {
 	CanDelegate      bool     `json:"can_delegate"`
-	MaxDepth         int      `json:"max_depth"`          // Maximum delegation chain depth
-	AllowedDelegates []string `json:"allowed_delegates"`  // Whitelist of allowed delegate agent IDs
-	RequiresApproval bool     `json:"requires_approval"`  // Whether delegation needs human approval
-	ScopeRestriction string   `json:"scope_restriction"`  // "maintain", "reduce_only", "none"
-	TimeRestriction  string   `json:"time_restriction"`   // "maintain", "reduce_only", "extend_allowed"
+	MaxDepth         int      `json:"max_depth"`         // Maximum delegation chain depth
+	AllowedDelegates []string `json:"allowed_delegates"` // Whitelist of allowed delegate agent IDs
+	RequiresApproval bool     `json:"requires_approval"` // Whether delegation needs human approval
+	ScopeRestriction string   `json:"scope_restriction"` // "maintain", "reduce_only", "none"
+	TimeRestriction  string   `json:"time_restriction"`  // "maintain", "reduce_only", "extend_allowed"
 }
 
 // FiduciaryDuties represents duties the AI agent must uphold
@@ -42,11 +42,11 @@ type FiduciaryDuties struct {
 
 // CapabilityRequirements specifies required AI capability levels
 type CapabilityRequirements struct {
-	MinimumLevel            string             `json:"minimum_level"`      // "L0" through "L5"
-	DomainScores            map[string]float64 `json:"domain_scores"`      // domain -> min_score (0.0-1.0) (matches service usage)
-	RiskThresholds          map[string]float64 `json:"risk_thresholds"`    // risk category -> threshold (matches service usage)
-	RequiresCert            bool               `json:"requires_cert"`      // Requires formal certification
-	RequiredCertifications  []string           `json:"required_certifications"` // Required certification IDs (matches service usage)
+	MinimumLevel           string             `json:"minimum_level"`           // "L0" through "L5"
+	DomainScores           map[string]float64 `json:"domain_scores"`           // domain -> min_score (0.0-1.0) (matches service usage)
+	RiskThresholds         map[string]float64 `json:"risk_thresholds"`         // risk category -> threshold (matches service usage)
+	RequiresCert           bool               `json:"requires_cert"`           // Requires formal certification
+	RequiredCertifications []string           `json:"required_certifications"` // Required certification IDs (matches service usage)
 }
 
 // SuccessorActivation represents a successor AI taking over
@@ -68,22 +68,22 @@ type SuccessorActivation struct {
 
 // AIDelegation represents an AI-to-AI delegation
 type AIDelegation struct {
-	ID               string                 `json:"id"`
-	SourcePOAID      string                 `json:"source_poa_id"`
-	SourceAgentID    string                 `json:"source_agent_id"`
-	TargetAgentID    string                 `json:"target_agent_id"`
-	DelegatedScope   []string               `json:"delegated_scope"`
-	DelegationDepth  int                    `json:"delegation_depth"`
-	MaxAllowedDepth  int                    `json:"max_allowed_depth"`
-	ValidFrom        time.Time              `json:"valid_from"`
-	ValidUntil       time.Time              `json:"valid_until"`
-	Status           string                 `json:"status"` // active, revoked, expired
-	DelegationPolicy *DelegationPolicy      `json:"delegation_policy,omitempty"`
-	RevokedAt        *time.Time             `json:"revoked_at,omitempty"`
-	RevokedBy        string                 `json:"revoked_by,omitempty"`
-	RevocationReason string                 `json:"revocation_reason,omitempty"`
-	CreatedAt        time.Time              `json:"created_at"`
-	UpdatedAt        time.Time              `json:"updated_at"`
+	ID               string            `json:"id"`
+	SourcePOAID      string            `json:"source_poa_id"`
+	SourceAgentID    string            `json:"source_agent_id"`
+	TargetAgentID    string            `json:"target_agent_id"`
+	DelegatedScope   []string          `json:"delegated_scope"`
+	DelegationDepth  int               `json:"delegation_depth"`
+	MaxAllowedDepth  int               `json:"max_allowed_depth"`
+	ValidFrom        time.Time         `json:"valid_from"`
+	ValidUntil       time.Time         `json:"valid_until"`
+	Status           string            `json:"status"` // active, revoked, expired
+	DelegationPolicy *DelegationPolicy `json:"delegation_policy,omitempty"`
+	RevokedAt        *time.Time        `json:"revoked_at,omitempty"`
+	RevokedBy        string            `json:"revoked_by,omitempty"`
+	RevocationReason string            `json:"revocation_reason,omitempty"`
+	CreatedAt        time.Time         `json:"created_at"`
+	UpdatedAt        time.Time         `json:"updated_at"`
 }
 
 // DualControlApproval represents a second-level approval workflow
@@ -136,22 +136,22 @@ type FiduciaryDutyViolation struct {
 
 // AICapabilityAssessment represents periodic AI capability evaluation
 type AICapabilityAssessment struct {
-	ID                      string             `json:"id"`
-	AgentID                 string             `json:"agent_id"`
-	AssessmentDate          time.Time          `json:"assessment_date"`
-	OverallLevel            string             `json:"overall_level"` // L0 through L5 (matches DB column)
-	DomainScores            map[string]float64 `json:"domain_scores"` // domain -> score (0.0-1.0) (matches DB column)
-	RiskProfile             map[string]interface{} `json:"risk_profile"` // Risk assessment details (matches DB column)
-	CertificationStatus     string             `json:"certification_status"` // uncertified, pending, certified, expired
-	Certifications          []string           `json:"certifications"`
-	Limitations             []string           `json:"limitations,omitempty"`
-	RecommendedRestrictions []string           `json:"recommended_restrictions,omitempty"`
-	AssessedBy              string             `json:"assessed_by"`
-	ValidUntil              time.Time          `json:"valid_until"`
-	Notes                   string             `json:"notes,omitempty"` // Assessment notes (matches DB column)
-	SupersededBy            string             `json:"superseded_by,omitempty"`
-	CreatedAt               time.Time          `json:"created_at"`
-	UpdatedAt               time.Time          `json:"updated_at"`
+	ID                      string                 `json:"id"`
+	AgentID                 string                 `json:"agent_id"`
+	AssessmentDate          time.Time              `json:"assessment_date"`
+	OverallLevel            string                 `json:"overall_level"`        // L0 through L5 (matches DB column)
+	DomainScores            map[string]float64     `json:"domain_scores"`        // domain -> score (0.0-1.0) (matches DB column)
+	RiskProfile             map[string]interface{} `json:"risk_profile"`         // Risk assessment details (matches DB column)
+	CertificationStatus     string                 `json:"certification_status"` // uncertified, pending, certified, expired
+	Certifications          []string               `json:"certifications"`
+	Limitations             []string               `json:"limitations,omitempty"`
+	RecommendedRestrictions []string               `json:"recommended_restrictions,omitempty"`
+	AssessedBy              string                 `json:"assessed_by"`
+	ValidUntil              time.Time              `json:"valid_until"`
+	Notes                   string                 `json:"notes,omitempty"` // Assessment notes (matches DB column)
+	SupersededBy            string                 `json:"superseded_by,omitempty"`
+	CreatedAt               time.Time              `json:"created_at"`
+	UpdatedAt               time.Time              `json:"updated_at"`
 }
 
 // SuccessorManagementService handles successor AI activation and management

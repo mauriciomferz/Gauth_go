@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func TestValidatePoADefinition_Success(t *testing.T) {
+func TestValidatePoADefinitionSuccess(t *testing.T) {
 	def := PoADefinition{
 		Parties: Parties{
 			Principal:        Principal{Identity: "org1", Type: PrincipalTypeOrganization},
@@ -18,7 +18,7 @@ func TestValidatePoADefinition_Success(t *testing.T) {
 	}
 }
 
-func TestValidatePoADefinition_FailPrincipal(t *testing.T) {
+func TestValidatePoADefinitionFailPrincipal(t *testing.T) {
 	def := PoADefinition{
 		Parties: Parties{
 			Principal:        Principal{Identity: "", Type: PrincipalTypeOrganization},
@@ -31,7 +31,7 @@ func TestValidatePoADefinition_FailPrincipal(t *testing.T) {
 	}
 }
 
-func TestValidatePoADefinition_FailAuthorizedClient(t *testing.T) {
+func TestValidatePoADefinitionFailAuthorizedClient(t *testing.T) {
 	def := PoADefinition{
 		Parties: Parties{
 			Principal:        Principal{Identity: "org1", Type: PrincipalTypeOrganization},
@@ -44,7 +44,7 @@ func TestValidatePoADefinition_FailAuthorizedClient(t *testing.T) {
 	}
 }
 
-func TestValidatePoADefinition_FailValidity(t *testing.T) {
+func TestValidatePoADefinitionFailValidity(t *testing.T) {
 	def := PoADefinition{
 		Parties: Parties{
 			Principal:        Principal{Identity: "org1", Type: PrincipalTypeOrganization},

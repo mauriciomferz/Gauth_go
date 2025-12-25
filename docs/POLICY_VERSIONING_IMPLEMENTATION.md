@@ -1,3 +1,11 @@
+---
+title: Policy Versioning Implementation
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Policy Versioning & Rollback Implementation (BETA)
 
 **Status:** ✅ P1 Priority - Complete Implementation  

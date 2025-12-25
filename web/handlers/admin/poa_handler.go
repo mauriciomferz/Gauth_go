@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	adminActor     = "admin"
-	statusRevoked  = "revoked"
+	adminActor    = "admin"
+	statusRevoked = "revoked"
 )
 
 // PoAHandler manages Power of Attorney operations for the admin portal
@@ -88,7 +88,7 @@ func (h *PoAHandler) ListPoAs(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	// Parse pagination parameters
 	limit := 50
 	offset := 0
@@ -102,14 +102,14 @@ func (h *PoAHandler) ListPoAs(c *gin.Context) {
 			offset = parsed
 		}
 	}
-	
+
 	// Get PoAs from database
 	records, total, err := h.repo.ListPoAs(c.Request.Context(), tenantID, limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list PoAs"})
 		return
 	}
-	
+
 	// Convert to response format
 	poas := make([]PowerOfAttorney, len(records))
 	for i, record := range records {
@@ -119,7 +119,7 @@ func (h *PoAHandler) ListPoAs(c *gin.Context) {
 		} else if record.Status == statusRevoked {
 			approvalStatus = "rejected"
 		}
-		
+
 		poas[i] = PowerOfAttorney{
 			ID:                 record.ID,
 			PrincipalID:        record.GrantorID,
@@ -155,7 +155,7 @@ func (h *PoAHandler) CreatePoA(c *gin.Context) {
 		return
 	}
 	fmt.Printf("[POA-CREATE] Tenant ID: %s\n", tenantID)
-	
+
 	var req PoARequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		fmt.Printf("[POA-CREATE] ERROR: Failed to bind JSON: %v\n", err)
@@ -176,7 +176,7 @@ func (h *PoAHandler) CreatePoA(c *gin.Context) {
 		return
 	}
 
-	status := "active"
+	status := StatusActive
 	approvalStatus := "approved"
 	if req.RequiresApproval {
 		status = "pending"
@@ -199,14 +199,14 @@ func (h *PoAHandler) CreatePoA(c *gin.Context) {
 		ValidFrom:          validFrom,
 		ValidUntil:         validUntil,
 	}
-	
+
 	// Set metadata as JSON
 	if req.NotificationEmail != "" {
 		metadataJSON, _ := json.Marshal(map[string]interface{}{"notification_email": req.NotificationEmail})
 		raw := json.RawMessage(metadataJSON)
 		record.Metadata = &raw
 	}
-	
+
 	if err := h.repo.CreatePoA(c.Request.Context(), record); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create PoA"})
 		return
@@ -240,9 +240,9 @@ func (h *PoAHandler) GetPoA(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	poaID := c.Param("id")
-	
+
 	// Try cache first if available
 	if h.cache != nil {
 		cacheKey := h.keyBuilder.PoAKey(poaID)
@@ -254,13 +254,13 @@ func (h *PoAHandler) GetPoA(c *gin.Context) {
 			}
 		}
 	}
-	
+
 	record, err := h.repo.GetPoA(c.Request.Context(), tenantID, poaID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "PoA not found"})
 		return
 	}
-	
+
 	approvalStatus := "approved"
 	if record.Status == "pending" {
 		approvalStatus = "pending_approval"
@@ -304,27 +304,27 @@ func (h *PoAHandler) RevokePoA(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	poaID := c.Param("id")
-	
+
 	// Invalidate cache before revoking
 	if h.cache != nil {
 		pattern := h.keyBuilder.InvalidatePoAPattern(poaID)
 		_ = h.cache.DeletePattern(c.Request.Context(), pattern)
 		_ = h.cache.Delete(c.Request.Context(), h.keyBuilder.PoAKey(poaID))
 	}
-	
+
 	revokedBy := c.GetString("user_id")
 	if revokedBy == "" {
 		revokedBy = adminActor
 	}
-	
+
 	type RevokeRequest struct {
 		Reason string `json:"reason"`
 	}
 	var req RevokeRequest
 	_ = c.ShouldBindJSON(&req) // Optional request body; use defaults if malformed
-	
+
 	reason := req.Reason
 	if reason == "" {
 		reason = "Revoked by " + adminActor
@@ -351,7 +351,7 @@ func (h *PoAHandler) ApprovePoA(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	poaID := c.Param("id")
 	approvedBy := c.GetString("user_id")
 	if approvedBy == "" {
@@ -379,7 +379,7 @@ func (h *PoAHandler) RejectPoA(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	poaID := c.Param("id")
 
 	type RejectRequest struct {
@@ -419,9 +419,9 @@ func (h *PoAHandler) GetPoAHistory(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	poaID := c.Param("id")
-	
+
 	// Verify PoA exists
 	_, err := h.repo.GetPoA(c.Request.Context(), tenantID, poaID)
 	if err != nil {
@@ -455,28 +455,28 @@ func (h *PoAHandler) GetPoAMetrics(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	stats, err := h.repo.GetPoAStats(c.Request.Context(), tenantID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get metrics"})
 		return
 	}
-	
+
 	// Calculate approval rate
 	approvalRate := 0.0
 	if stats.TotalPoAs > 0 {
 		approvalRate = float64(stats.ActivePoAs) / float64(stats.TotalPoAs) * 100
 	}
-	
+
 	metrics := gin.H{
-		"total_poas":    stats.TotalPoAs,
-		"active_poas":   stats.ActivePoAs,
-		"pending_poas":  stats.PendingPoAs,
-		"expired_poas":  stats.ExpiredPoAs,
-		"revoked_poas":  stats.RevokedPoAs,
-		"approval_rate": approvalRate,
-		"by_representative_type": stats.ByRepType,
-		"top_actions": stats.TopActions,
+		"total_poas":              stats.TotalPoAs,
+		"active_poas":             stats.ActivePoAs,
+		"pending_poas":            stats.PendingPoAs,
+		"expired_poas":            stats.ExpiredPoAs,
+		"revoked_poas":            stats.RevokedPoAs,
+		"approval_rate":           approvalRate,
+		"by_representative_type":  stats.ByRepType,
+		"top_actions":             stats.TopActions,
 		"geographic_distribution": stats.GeoDistribution,
 	}
 
@@ -491,7 +491,7 @@ func (h *PoAHandler) ValidatePoA(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	type ValidationRequest struct {
 		PrincipalID      string `json:"principalId" binding:"required"`
 		RepresentativeID string `json:"representativeId" binding:"required"`

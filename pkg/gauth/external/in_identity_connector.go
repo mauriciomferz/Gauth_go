@@ -30,57 +30,57 @@ type IndiaConnectorConfig struct {
 	AadhaarAUA        string `validate:"required"` // Authentication User Agency code
 	AadhaarASA        string `validate:"required"` // Authentication Service Agency code
 	AadhaarLicenseKey string `validate:"required"`
-	
+
 	// DigiLocker configuration
-	DigiLockerURL     string `validate:"url"`
+	DigiLockerURL      string `validate:"url"`
 	DigiLockerClientID string
 	DigiLockerSecret   string
-	
+
 	// e-KYC configuration
-	EKYCServiceURL    string `validate:"url"`
-	EKYCAPIKey        string
-	
+	EKYCServiceURL string `validate:"url"`
+	EKYCAPIKey     string
+
 	// PAN verification
 	PANVerificationURL string `validate:"url"`
 	PANAPIKey          string
-	
+
 	// Timeouts
-	RequestTimeout    time.Duration
+	RequestTimeout time.Duration
 }
 
 // AadhaarAuthRequest Aadhaar authentication request
 type AadhaarAuthRequest struct {
-	AadhaarNumber       string `json:"aadhaar_number" validate:"required,len=12"`
-	AuthType            string `json:"auth_type" validate:"required,oneof=OTP Biometric Iris"`
-	OTP                 string `json:"otp,omitempty"`
-	BiometricData       string `json:"biometric_data,omitempty"` // Base64 encoded
+	AadhaarNumber       string   `json:"aadhaar_number" validate:"required,len=12"`
+	AuthType            string   `json:"auth_type" validate:"required,oneof=OTP Biometric Iris"`
+	OTP                 string   `json:"otp,omitempty"`
+	BiometricData       string   `json:"biometric_data,omitempty"` // Base64 encoded
 	RequestedAttributes []string `json:"requested_attributes" validate:"required,min=1"`
-	Purpose             string `json:"purpose" validate:"required"`
-	Consent             bool   `json:"consent" validate:"required"`
+	Purpose             string   `json:"purpose" validate:"required"`
+	Consent             bool     `json:"consent" validate:"required"`
 }
 
 // AadhaarAuthResponse Aadhaar authentication response
 type AadhaarAuthResponse struct {
-	Success       bool                `json:"success"`
-	TransactionID string              `json:"transaction_id"`
-	Timestamp     string              `json:"timestamp"`
-	UserInfo      *AadhaarUserInfo    `json:"user_info"`
-	ErrorCode     string              `json:"error_code,omitempty"`
-	Error         string              `json:"error,omitempty"`
+	Success       bool             `json:"success"`
+	TransactionID string           `json:"transaction_id"`
+	Timestamp     string           `json:"timestamp"`
+	UserInfo      *AadhaarUserInfo `json:"user_info"`
+	ErrorCode     string           `json:"error_code,omitempty"`
+	Error         string           `json:"error,omitempty"`
 }
 
 // AadhaarUserInfo user information from Aadhaar
 type AadhaarUserInfo struct {
-	AadhaarNumber   string      `json:"aadhaar_number"` // Masked (XXXX-XXXX-1234)
-	Name            string      `json:"name"`
-	DateOfBirth     string      `json:"date_of_birth"`
-	Gender          string      `json:"gender"` // M/F/O (Other)
-	Email           string      `json:"email"`
-	EmailVerified   bool        `json:"email_verified"`
-	Mobile          string      `json:"mobile"`
-	MobileVerified  bool        `json:"mobile_verified"`
-	Address         *INAddress  `json:"address"`
-	Photo           string      `json:"photo,omitempty"` // Base64 encoded
+	AadhaarNumber  string     `json:"aadhaar_number"` // Masked (XXXX-XXXX-1234)
+	Name           string     `json:"name"`
+	DateOfBirth    string     `json:"date_of_birth"`
+	Gender         string     `json:"gender"` // M/F/O (Other)
+	Email          string     `json:"email"`
+	EmailVerified  bool       `json:"email_verified"`
+	Mobile         string     `json:"mobile"`
+	MobileVerified bool       `json:"mobile_verified"`
+	Address        *INAddress `json:"address"`
+	Photo          string     `json:"photo,omitempty"` // Base64 encoded
 }
 
 // INAddress Indian address structure
@@ -112,7 +112,7 @@ type PANResponse struct {
 	PANNumber   string `json:"pan_number"`
 	Name        string `json:"name"`
 	Category    string `json:"category"` // Individual, Company, HUF, etc.
-	Status      string `json:"status"` // Active, Inactive, etc.
+	Status      string `json:"status"`   // Active, Inactive, etc.
 	DateOfBirth string `json:"date_of_birth,omitempty"`
 	Error       string `json:"error,omitempty"`
 }
@@ -126,20 +126,20 @@ type DigiLockerAuthRequest struct {
 
 // DigiLockerAuthResponse DigiLocker authentication response
 type DigiLockerAuthResponse struct {
-	Success    bool                     `json:"success"`
-	SessionID  string                   `json:"session_id"`
-	UserInfo   *DigiLockerUserInfo      `json:"user_info"`
-	Documents  []DigiLockerDocument     `json:"documents"`
-	Error      string                   `json:"error,omitempty"`
+	Success   bool                 `json:"success"`
+	SessionID string               `json:"session_id"`
+	UserInfo  *DigiLockerUserInfo  `json:"user_info"`
+	Documents []DigiLockerDocument `json:"documents"`
+	Error     string               `json:"error,omitempty"`
 }
 
 // DigiLockerUserInfo user information from DigiLocker
 type DigiLockerUserInfo struct {
-	DigiLockerID    string `json:"digilocker_id"`
-	Name            string `json:"name"`
-	DateOfBirth     string `json:"date_of_birth"`
-	Gender          string `json:"gender"`
-	AadhaarNumber   string `json:"aadhaar_number"` // Masked
+	DigiLockerID  string `json:"digilocker_id"`
+	Name          string `json:"name"`
+	DateOfBirth   string `json:"date_of_birth"`
+	Gender        string `json:"gender"`
+	AadhaarNumber string `json:"aadhaar_number"` // Masked
 }
 
 // DigiLockerDocument document from DigiLocker
@@ -176,18 +176,18 @@ func NewIndiaIdentityConnector(config *IndiaConnectorConfig) (*IndiaIdentityConn
 	if err := validate.Struct(config); err != nil {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
-	
+
 	// Set defaults
 	if config.RequestTimeout == 0 {
 		config.RequestTimeout = 30 * time.Second
 	}
-	
+
 	connector := &IndiaIdentityConnector{
 		config:     config,
 		httpClient: &http.Client{Timeout: config.RequestTimeout},
 		validator:  validate,
 	}
-	
+
 	return connector, nil
 }
 
@@ -198,7 +198,7 @@ func (ic *IndiaIdentityConnector) AuthenticateAadhaar(ctx context.Context, req *
 	if err := ic.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Validate Aadhaar number format (12 digits)
 	if !regexp.MustCompile(`^\d{12}$`).MatchString(req.AadhaarNumber) {
 		return &AadhaarAuthResponse{
@@ -206,7 +206,7 @@ func (ic *IndiaIdentityConnector) AuthenticateAadhaar(ctx context.Context, req *
 			Error:   "Invalid Aadhaar number format (must be 12 digits)",
 		}, nil
 	}
-	
+
 	// Validate Aadhaar number check digit (Verhoeff algorithm)
 	if !ic.validateAadhaarCheckDigit(req.AadhaarNumber) {
 		return &AadhaarAuthResponse{
@@ -214,7 +214,7 @@ func (ic *IndiaIdentityConnector) AuthenticateAadhaar(ctx context.Context, req *
 			Error:   "Invalid Aadhaar number check digit",
 		}, nil
 	}
-	
+
 	// Validate consent
 	if !req.Consent {
 		return &AadhaarAuthResponse{
@@ -222,7 +222,7 @@ func (ic *IndiaIdentityConnector) AuthenticateAadhaar(ctx context.Context, req *
 			Error:   "User consent is required for Aadhaar authentication",
 		}, nil
 	}
-	
+
 	// Validate auth type specific data
 	switch req.AuthType {
 	case "OTP":
@@ -240,15 +240,15 @@ func (ic *IndiaIdentityConnector) AuthenticateAadhaar(ctx context.Context, req *
 			}, nil
 		}
 	}
-	
+
 	// In production, this would:
 	// 1. Connect to UIDAI (Unique Identification Authority of India)
 	// 2. Perform authentication via CIDR (Central Identities Data Repository)
 	// 3. Receive demographic and biometric verification result
-	
+
 	// Mask Aadhaar number for response
 	maskedAadhaar := "XXXX-XXXX-" + req.AadhaarNumber[8:]
-	
+
 	// Mock response for demonstration
 	response := &AadhaarAuthResponse{
 		Success:       true,
@@ -265,7 +265,7 @@ func (ic *IndiaIdentityConnector) AuthenticateAadhaar(ctx context.Context, req *
 			MobileVerified: true,
 		},
 	}
-	
+
 	return response, nil
 }
 
@@ -276,9 +276,9 @@ func (ic *IndiaIdentityConnector) ValidatePAN(ctx context.Context, req *PANReque
 	if err := ic.validator.Struct(req); err != nil {
 		return &PANResponse{Valid: false, Error: err.Error()}, nil
 	}
-	
+
 	pan := strings.ToUpper(strings.TrimSpace(req.PANNumber))
-	
+
 	// Validate format (5 letters + 4 digits + 1 letter)
 	if !regexp.MustCompile(`^[A-Z]{5}\d{4}[A-Z]$`).MatchString(pan) {
 		return &PANResponse{
@@ -286,7 +286,7 @@ func (ic *IndiaIdentityConnector) ValidatePAN(ctx context.Context, req *PANReque
 			Error: "Invalid PAN format (must be 5 letters + 4 digits + 1 letter)",
 		}, nil
 	}
-	
+
 	// 4th character indicates PAN holder category
 	category := ""
 	switch pan[3] {
@@ -313,17 +313,17 @@ func (ic *IndiaIdentityConnector) ValidatePAN(ctx context.Context, req *PANReque
 	default:
 		category = "Unknown"
 	}
-	
+
 	// In production, this would verify with Income Tax Department
 	response := &PANResponse{
-		Valid:     true,
-		PANNumber: pan,
-		Name:      req.Name,
-		Category:  category,
-		Status:    "Active",
+		Valid:       true,
+		PANNumber:   pan,
+		Name:        req.Name,
+		Category:    category,
+		Status:      "Active",
 		DateOfBirth: req.DateOfBirth,
 	}
-	
+
 	return response, nil
 }
 
@@ -333,13 +333,13 @@ func (ic *IndiaIdentityConnector) AuthenticateDigiLocker(ctx context.Context, re
 	if err := ic.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// In production, this would:
 	// 1. Redirect to DigiLocker OAuth
 	// 2. User authorizes document access
 	// 3. Retrieve requested documents
 	// 4. Return document URIs and metadata
-	
+
 	// Mock response for demonstration
 	response := &DigiLockerAuthResponse{
 		Success:   true,
@@ -363,7 +363,7 @@ func (ic *IndiaIdentityConnector) AuthenticateDigiLocker(ctx context.Context, re
 			},
 		},
 	}
-	
+
 	return response, nil
 }
 
@@ -373,7 +373,7 @@ func (ic *IndiaIdentityConnector) PerformEKYC(ctx context.Context, req *EKYCRequ
 	if err := ic.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Validate Aadhaar number
 	if !regexp.MustCompile(`^\d{12}$`).MatchString(req.AadhaarNumber) {
 		return &EKYCResponse{
@@ -381,7 +381,7 @@ func (ic *IndiaIdentityConnector) PerformEKYC(ctx context.Context, req *EKYCRequ
 			Error:   "Invalid Aadhaar number format",
 		}, nil
 	}
-	
+
 	// Validate consent
 	if !req.Consent {
 		return &EKYCResponse{
@@ -389,15 +389,15 @@ func (ic *IndiaIdentityConnector) PerformEKYC(ctx context.Context, req *EKYCRequ
 			Error:   "User consent is required for e-KYC",
 		}, nil
 	}
-	
+
 	// In production, this would:
 	// 1. Verify OTP with UIDAI
 	// 2. Retrieve full KYC data (demographics + address + photo)
 	// 3. Return digitally signed e-KYC XML
-	
+
 	// Mask Aadhaar number
 	maskedAadhaar := "XXXX-XXXX-" + req.AadhaarNumber[8:]
-	
+
 	// Mock response for demonstration
 	response := &EKYCResponse{
 		Success:       true,
@@ -423,7 +423,7 @@ func (ic *IndiaIdentityConnector) PerformEKYC(ctx context.Context, req *EKYCRequ
 			},
 		},
 	}
-	
+
 	return response, nil
 }
 
@@ -432,7 +432,7 @@ func (ic *IndiaIdentityConnector) PerformEKYC(ctx context.Context, req *EKYCRequ
 func (ic *IndiaIdentityConnector) validateAadhaarCheckDigit(aadhaar string) bool {
 	// Aadhaar uses Verhoeff algorithm for check digit
 	// This is a simplified validation - production should use full Verhoeff
-	
+
 	// Verhoeff multiplication table
 	d := [][]int{
 		{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
@@ -446,7 +446,7 @@ func (ic *IndiaIdentityConnector) validateAadhaarCheckDigit(aadhaar string) bool
 		{8, 7, 6, 5, 9, 3, 2, 1, 0, 4},
 		{9, 8, 7, 6, 5, 4, 3, 2, 1, 0},
 	}
-	
+
 	// Permutation table
 	p := [][]int{
 		{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
@@ -458,13 +458,13 @@ func (ic *IndiaIdentityConnector) validateAadhaarCheckDigit(aadhaar string) bool
 		{2, 7, 9, 3, 8, 0, 6, 4, 1, 5},
 		{7, 0, 4, 6, 9, 1, 3, 2, 5, 8},
 	}
-	
+
 	c := 0
 	for i := 0; i < len(aadhaar); i++ {
 		digit := int(aadhaar[len(aadhaar)-1-i] - '0')
 		c = d[c][p[i%8][digit]]
 	}
-	
+
 	return c == 0
 }
 
@@ -478,7 +478,7 @@ func (ic *IndiaIdentityConnector) generateCacheKey(operation string, parts ...st
 func (ic *IndiaIdentityConnector) GetMetrics() map[string]interface{} {
 	ic.mu.RLock()
 	defer ic.mu.RUnlock()
-	
+
 	return map[string]interface{}{
 		"connector": "india_identity",
 	}

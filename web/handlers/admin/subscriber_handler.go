@@ -34,10 +34,10 @@ type SubscriberRequest struct {
 	ContactPhone string `json:"contactPhone"`
 
 	// OIDC Configuration
-	OIDCProvider      string `json:"oidcProvider" binding:"required"`
-	OIDCClientID      string `json:"oidcClientId" binding:"required"`
-	OIDCClientSecret  string `json:"oidcClientSecret" binding:"required"`
-	OIDCDiscoveryURL  string `json:"oidcDiscoveryUrl" binding:"required"`
+	OIDCProvider     string `json:"oidcProvider" binding:"required"`
+	OIDCClientID     string `json:"oidcClientId" binding:"required"`
+	OIDCClientSecret string `json:"oidcClientSecret" binding:"required"`
+	OIDCDiscoveryURL string `json:"oidcDiscoveryUrl" binding:"required"`
 
 	// Key Generation
 	KeyAlgorithm        string `json:"keyAlgorithm" binding:"required"`
@@ -70,20 +70,20 @@ type SubscriberRequest struct {
 
 // Subscriber represents a registered tenant
 type Subscriber struct {
-	ID               string    `json:"id"`
-	TenantName       string    `json:"tenantName"`
-	TenantID         string    `json:"tenantId"`
-	ContactEmail     string    `json:"contactEmail"`
-	ContactPhone     string    `json:"contactPhone"`
-	Status           string    `json:"status"` // active, suspended, pending
-	CreatedAt        time.Time `json:"createdAt"`
-	UpdatedAt        time.Time `json:"updatedAt"`
-	LastActivityAt   time.Time `json:"lastActivityAt"`
-	TotalTokens      int64     `json:"totalTokens"`
-	ActiveUsers      int64     `json:"activeUsers"`
-	OIDCProvider     string    `json:"oidcProvider"`
-	Jurisdiction     string    `json:"jurisdiction"`
-	MFARequired      bool      `json:"mfaRequired"`
+	ID             string    `json:"id"`
+	TenantName     string    `json:"tenantName"`
+	TenantID       string    `json:"tenantId"`
+	ContactEmail   string    `json:"contactEmail"`
+	ContactPhone   string    `json:"contactPhone"`
+	Status         string    `json:"status"` // active, suspended, pending
+	CreatedAt      time.Time `json:"createdAt"`
+	UpdatedAt      time.Time `json:"updatedAt"`
+	LastActivityAt time.Time `json:"lastActivityAt"`
+	TotalTokens    int64     `json:"totalTokens"`
+	ActiveUsers    int64     `json:"activeUsers"`
+	OIDCProvider   string    `json:"oidcProvider"`
+	Jurisdiction   string    `json:"jurisdiction"`
+	MFARequired    bool      `json:"mfaRequired"`
 }
 
 // SubscriberListResponse represents paginated subscriber list
@@ -117,21 +117,21 @@ func (h *SubscriberHandler) CreateSubscriber(c *gin.Context) {
 
 	// Create subscriber record
 	subscriber := &subscribers.Subscriber{
-		TenantName:             req.TenantName,
-		TenantID:               req.TenantID,
-		Status:                 "active",
-		Tier:                   "standard",
-		OIDCProvider:           strPtr(req.OIDCProvider),
-		OIDCClientID:           strPtr(req.OIDCClientID),
-		OIDCClientSecret:       strPtr(req.OIDCClientSecret),
-		OIDCDiscoveryURL:       strPtr(req.OIDCDiscoveryURL),
-		KeyType:                strPtr(req.KeyAlgorithm),
-		PolicyTemplate:         strPtr(req.PolicyTemplate),
-		LegalFramework:         strPtr(req.Jurisdiction),
-		ContactEmail:           strPtr(req.ContactEmail),
-		MaxUsers:               100,
-		MaxTokens:              1000,
-		Metadata:               make(map[string]interface{}),
+		TenantName:       req.TenantName,
+		TenantID:         req.TenantID,
+		Status:           StatusActive,
+		Tier:             "standard",
+		OIDCProvider:     strPtr(req.OIDCProvider),
+		OIDCClientID:     strPtr(req.OIDCClientID),
+		OIDCClientSecret: strPtr(req.OIDCClientSecret),
+		OIDCDiscoveryURL: strPtr(req.OIDCDiscoveryURL),
+		KeyType:          strPtr(req.KeyAlgorithm),
+		PolicyTemplate:   strPtr(req.PolicyTemplate),
+		LegalFramework:   strPtr(req.Jurisdiction),
+		ContactEmail:     strPtr(req.ContactEmail),
+		MaxUsers:         100,
+		MaxTokens:        1000,
+		Metadata:         make(map[string]interface{}),
 	}
 
 	// Set notification preferences
@@ -179,7 +179,7 @@ func (h *SubscriberHandler) ListSubscribers(c *gin.Context) {
 	status := c.Query("status")
 	tier := c.Query("tier")
 	search := c.Query("search")
-	
+
 	limitStr := c.DefaultQuery("limit", "10")
 	offsetStr := c.DefaultQuery("offset", "0")
 	pageStr := c.DefaultQuery("page", "1")
@@ -453,8 +453,8 @@ func (h *SubscriberHandler) GetSubscriberMetrics(c *gin.Context) {
 
 	// Add computed fields
 	metrics["subscriberId"] = subscriberID
-	metrics["avgLatency"] = 85.3 // TODO: Calculate from audit events
-	metrics["errorRate"] = 0.0011 // TODO: Calculate from audit events
+	metrics["avgLatency"] = 85.3   // TODO: Calculate from audit events
+	metrics["errorRate"] = 0.0011  // TODO: Calculate from audit events
 	metrics["dataTransferred"] = 0 // TODO: Track data transfer
 
 	c.JSON(http.StatusOK, metrics)

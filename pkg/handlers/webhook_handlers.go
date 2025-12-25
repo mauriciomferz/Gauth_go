@@ -33,11 +33,11 @@ func (h *WebhookHandler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/api/v1/webhooks/{id}", h.DeleteWebhook).Methods("DELETE")
 	r.HandleFunc("/api/v1/webhooks/{id}/regenerate", h.RegenerateSecret).Methods("POST")
 	r.HandleFunc("/api/v1/webhooks/{id}/test", h.TestWebhook).Methods("POST")
-	
+
 	// Delivery tracking routes
 	r.HandleFunc("/api/v1/webhooks/{id}/deliveries", h.ListDeliveries).Methods("GET")
 	r.HandleFunc("/api/v1/webhooks/deliveries/{deliveryId}", h.GetDelivery).Methods("GET")
-	
+
 	// Statistics routes
 	r.HandleFunc("/api/v1/webhooks/{id}/stats", h.GetWebhookStats).Methods("GET")
 }
@@ -292,5 +292,3 @@ func (h *WebhookHandler) GetWebhookStats(w http.ResponseWriter, r *http.Request)
 }
 
 // Helper functions (reuse from existing handlers or define here)
-
-

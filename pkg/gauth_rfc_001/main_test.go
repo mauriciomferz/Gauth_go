@@ -13,7 +13,7 @@ func TestMain(m *testing.M) {
 	// This allows existing tests to continue working without modification
 	// Security vulnerability tests will explicitly set GAUTH_ENFORCE_GRANTOR_SCOPES=1
 	os.Setenv("GAUTH_ENFORCE_GRANTOR_SCOPES", "0")
-	
+
 	exitCode := m.Run()
 	os.Exit(exitCode)
 }

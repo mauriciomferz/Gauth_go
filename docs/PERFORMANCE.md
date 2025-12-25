@@ -1,3 +1,11 @@
+---
+title: Performance
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # GAuth Performance Guide
 
 > Last Updated: 2025-10-17 (post Milestone 2B authenticity instrumentation)

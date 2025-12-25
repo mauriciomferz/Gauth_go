@@ -1,3 +1,11 @@
+---
+title: Phase3 Task9 Handler1 Poa Complete
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Phase 3 Task 9 - Handler 1: Power of Attorney Handler Migration Complete
 
 **Date:** December 2024

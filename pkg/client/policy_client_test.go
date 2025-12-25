@@ -34,7 +34,9 @@ func TestGetProvenance(t *testing.T) {
 				Timestamp:     time.Now(),
 			},
 		}
-		json.NewEncoder(w).Encode(resp)
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			t.Logf("server encode fail: %v", err)
+		}
 	}))
 	defer ts.Close()
 

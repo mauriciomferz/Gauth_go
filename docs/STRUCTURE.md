@@ -1,3 +1,11 @@
+---
+title: Structure
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Project Structure & Organization Guide
 
 This document summarizes the current directory layout and proposes incremental cleanup / consolidation actions for maintainability.

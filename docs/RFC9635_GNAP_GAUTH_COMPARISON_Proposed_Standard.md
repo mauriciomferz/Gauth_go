@@ -1,6 +1,6 @@
 ---
 title: RFC 9635 (GNAP) vs GAuth (RFC 0111/0115) - Comprehensive Comparison
-category: analysis
+category: guide
 status: active
 lastUpdated: 2025-11-19
 owners: architecture-team

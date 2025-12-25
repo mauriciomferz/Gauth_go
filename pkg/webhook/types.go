@@ -44,20 +44,20 @@ const (
 
 // Webhook represents a webhook registration
 type Webhook struct {
-	ID                   string            `json:"id" db:"id"`
-	Name                 string            `json:"name" db:"name"`
-	URL                  string            `json:"url" db:"url"`
-	Secret               string            `json:"-" db:"secret"` // Never expose in JSON
-	UserID               string            `json:"user_id" db:"user_id"`
-	Enabled              bool              `json:"enabled" db:"enabled"`
-	Events               []string          `json:"events" db:"events"`
-	RetryCount           int               `json:"retry_count" db:"retry_count"`
-	Timeout              int               `json:"timeout_seconds" db:"timeout_seconds"`
-	Description          string            `json:"description,omitempty" db:"description"`
-	Headers              map[string]string `json:"headers,omitempty" db:"headers"`
-	CreatedAt            time.Time         `json:"created_at" db:"created_at"`
-	UpdatedAt            time.Time         `json:"updated_at" db:"updated_at"`
-	LastTriggeredAt      *time.Time        `json:"last_triggered_at,omitempty" db:"last_triggered_at"`
+	ID              string            `json:"id" db:"id"`
+	Name            string            `json:"name" db:"name"`
+	URL             string            `json:"url" db:"url"`
+	Secret          string            `json:"-" db:"secret"` // Never expose in JSON
+	UserID          string            `json:"user_id" db:"user_id"`
+	Enabled         bool              `json:"enabled" db:"enabled"`
+	Events          []string          `json:"events" db:"events"`
+	RetryCount      int               `json:"retry_count" db:"retry_count"`
+	Timeout         int               `json:"timeout_seconds" db:"timeout_seconds"`
+	Description     string            `json:"description,omitempty" db:"description"`
+	Headers         map[string]string `json:"headers,omitempty" db:"headers"`
+	CreatedAt       time.Time         `json:"created_at" db:"created_at"`
+	UpdatedAt       time.Time         `json:"updated_at" db:"updated_at"`
+	LastTriggeredAt *time.Time        `json:"last_triggered_at,omitempty" db:"last_triggered_at"`
 }
 
 // WebhookDelivery represents a webhook delivery attempt
@@ -115,20 +115,20 @@ type CreateWebhookRequest struct {
 	Events      []string          `json:"events" binding:"required,min=1"`
 	Description string            `json:"description,omitempty"`
 	Headers     map[string]string `json:"headers,omitempty"`
-	RetryCount  int               `json:"retry_count,omitempty"` // Default: 3
+	RetryCount  int               `json:"retry_count,omitempty"`     // Default: 3
 	Timeout     int               `json:"timeout_seconds,omitempty"` // Default: 30
 }
 
 // UpdateWebhookRequest represents a request to update a webhook
 type UpdateWebhookRequest struct {
-	Name        *string            `json:"name,omitempty"`
-	URL         *string            `json:"url,omitempty"`
-	Events      []string           `json:"events,omitempty"`
-	Enabled     *bool              `json:"enabled,omitempty"`
-	Description *string            `json:"description,omitempty"`
-	Headers     map[string]string  `json:"headers,omitempty"`
-	RetryCount  *int               `json:"retry_count,omitempty"`
-	Timeout     *int               `json:"timeout_seconds,omitempty"`
+	Name        *string           `json:"name,omitempty"`
+	URL         *string           `json:"url,omitempty"`
+	Events      []string          `json:"events,omitempty"`
+	Enabled     *bool             `json:"enabled,omitempty"`
+	Description *string           `json:"description,omitempty"`
+	Headers     map[string]string `json:"headers,omitempty"`
+	RetryCount  *int              `json:"retry_count,omitempty"`
+	Timeout     *int              `json:"timeout_seconds,omitempty"`
 }
 
 // WebhookResponse represents a webhook in API responses (includes secret on creation)

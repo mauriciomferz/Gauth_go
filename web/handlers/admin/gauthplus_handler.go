@@ -119,14 +119,14 @@ func (h *GAuthPlusHandler) GetActiveSuccessor(c *gin.Context) {
 
 	if activation == nil {
 		c.JSON(http.StatusNotFound, gin.H{
-			"active":  false,
-			"message": "No active successor",
+			StatusActive: false,
+			"message":    "No active successor",
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"active":     true,
+		StatusActive: true,
 		"activation": activation,
 	})
 }

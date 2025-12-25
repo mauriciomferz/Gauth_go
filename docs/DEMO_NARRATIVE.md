@@ -1,3 +1,11 @@
+---
+title: Demo Narrative
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Beta Demo Narrative
 
 Goal: Showcase end-to-end governance & integrity for AI agent authorization and transparency under RFC111/RFC115.

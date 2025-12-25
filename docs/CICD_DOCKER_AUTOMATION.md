@@ -1,3 +1,11 @@
+---
+title: Cicd Docker Automation
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # CI/CD Docker Automation Guide
 
 **Date**: November 10, 2025  

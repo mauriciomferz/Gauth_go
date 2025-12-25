@@ -43,22 +43,22 @@ func TestJSONRPCParsing(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var req JSONRPCRequest
 			err := json.Unmarshal([]byte(tt.input), &req)
-			
+
 			if tt.wantError {
 				if err == nil {
 					t.Error("Expected error but got none")
 				}
 				return
 			}
-			
+
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}
-			
+
 			if req.Method != tt.wantMethod {
 				t.Errorf("Expected method '%s', got '%s'", tt.wantMethod, req.Method)
 			}
-			
+
 			if req.ID != tt.wantID {
 				t.Errorf("Expected ID %d, got %d", tt.wantID, req.ID)
 			}
@@ -91,19 +91,19 @@ func TestSSETransportConnect(t *testing.T) {
 
 	// Create SSE transport
 	transport := NewSSETransport(server.URL, nil)
-	
+
 	// Start connection
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
-	
+
 	err := transport.Connect(ctx)
 	if err != nil {
 		t.Fatalf("Failed to connect: %v", err)
 	}
-	
+
 	// Give it time to receive message
 	time.Sleep(200 * time.Millisecond)
-	
+
 	// Close
 	err = transport.Close()
 	if err != nil {
@@ -182,7 +182,7 @@ func TestJSONRPCError(t *testing.T) {
 // Benchmark JSON-RPC parsing
 func BenchmarkJSONRPCParsing(b *testing.B) {
 	input := []byte(`{"jsonrpc":"2.0","id":1,"method":"resources/list","params":{}}`)
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		var req JSONRPCRequest
@@ -201,7 +201,7 @@ func BenchmarkResourceMarshal(b *testing.B) {
 			"size": "100",
 		},
 	}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, _ = json.Marshal(resource)

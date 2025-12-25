@@ -1,3 +1,11 @@
+---
+title: Load Testing
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Load Testing Guide
 
 **P3.1 (sec9.item3)**: Comprehensive load and stress testing framework for GAuth production readiness validation.

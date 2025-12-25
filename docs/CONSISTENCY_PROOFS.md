@@ -1,3 +1,11 @@
+---
+title: Consistency Proofs
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Revocation Consistency Proofs (consistency_v2)
 
 ## Objective

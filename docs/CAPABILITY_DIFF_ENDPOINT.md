@@ -1,3 +1,11 @@
+---
+title: Capability Diff Endpoint
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Capability Diff Endpoint (RB13)
 
 Endpoint: `GET /api/v1/capabilities/diff?since=<hash>`

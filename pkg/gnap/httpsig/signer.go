@@ -329,6 +329,8 @@ func formatComponents(components []string) string {
 // generateNonce creates a random nonce.
 func generateNonce() string {
 	b := make([]byte, 16)
-	rand.Read(b)
+	if _, err := rand.Read(b); err != nil {
+		panic("failed to generate nonce: " + err.Error())
+	}
 	return base64.RawURLEncoding.EncodeToString(b)
 }

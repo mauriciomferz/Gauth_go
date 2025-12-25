@@ -1,3 +1,11 @@
+---
+title: Gap G10 Poa Tests Completion
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Gap G10 Phase 5: PoA Integration Tests - Completion Report
 
 **Date**: November 10, 2025  

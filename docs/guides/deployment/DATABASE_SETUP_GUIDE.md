@@ -1,3 +1,11 @@
+---
+title: Database Setup Guide
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Database Setup Guide - GAuth Admin Handlers
 
 ## Option 1: Docker Setup (Recommended)

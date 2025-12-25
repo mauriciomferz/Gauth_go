@@ -1,3 +1,11 @@
+---
+title: Deprecation Timeline
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Deprecation Timeline (Educational -> Beta Endpoints)
 
 > Last Updated: 2025-10-17

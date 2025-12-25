@@ -49,7 +49,9 @@ func TestDeviceToken_WithClientAssertion(t *testing.T) {
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 	var authResp device.DeviceAuthResponse
-	json.Unmarshal(w.Body.Bytes(), &authResp)
+	if err := json.Unmarshal(w.Body.Bytes(), &authResp); err != nil {
+		t.Fatalf("failed to parse auth response: %v", err)
+	}
 
 	// 2. User Verify (Helper)
 	form := url.Values{}
@@ -74,7 +76,10 @@ func TestDeviceToken_WithClientAssertion(t *testing.T) {
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	token.Header["kid"] = keyID
-	signed, _ := token.SignedString(privateKey)
+	signed, err := token.SignedString(privateKey)
+	if err != nil {
+		t.Fatalf("failed to sign assertion: %v", err)
+	}
 
 	// 4. Token Request with Assertion
 	tokenReq := device.TokenRequest{

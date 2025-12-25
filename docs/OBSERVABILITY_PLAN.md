@@ -1,3 +1,11 @@
+---
+title: Observability Plan
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Observability Enhancement Plan (Phase 1 Beta)
 
 Objective: Achieve actionable visibility for security & governance operations (replay protection, PoA issuance, attestation verification, ledger rotation) while laying groundwork for adaptive anomaly detection.

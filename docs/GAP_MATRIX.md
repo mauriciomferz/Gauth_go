@@ -1,3 +1,11 @@
+---
+title: Gap Matrix
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Update: 2025-10-24 — Cryptographic enhancements
 
 - Aggregated signature support (BLS, batch) integrated in registry and interfaces.

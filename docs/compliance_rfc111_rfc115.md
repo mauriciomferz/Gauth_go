@@ -1,3 +1,11 @@
+---
+title: Compliance Rfc111 Rfc115
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # GAuth RFC111 & RFC115 Compliance Matrix (Beta)
 
 This document inventories implemented features and gaps for RFC111 (core protocol, governance, anchoring, replay & multi-signature) and RFC115 (semantic diagnostics, anomaly detection, integrity chain) strictly from repository evidence.

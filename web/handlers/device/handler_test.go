@@ -113,7 +113,9 @@ func TestDevicePolling_Pending(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	var authResp device.DeviceAuthResponse
-	_ = json.Unmarshal(w.Body.Bytes(), &authResp)
+	if err := json.Unmarshal(w.Body.Bytes(), &authResp); err != nil {
+		t.Fatalf("failed to unmarshal authorize response: %v", err)
+	}
 
 	// 2. Poll immediately (Success -> Polling Wait -> Pending)
 	// Note: In real world, we should respect interval.

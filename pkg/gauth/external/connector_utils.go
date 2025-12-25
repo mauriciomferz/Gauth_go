@@ -41,7 +41,7 @@ func NewCircuitBreaker(maxFailures int, timeout, resetTimeout time.Duration) *Ci
 // Call executes a function with circuit breaker protection
 func (cb *CircuitBreaker) Call(fn func() error) error {
 	cb.mu.Lock()
-	
+
 	// Check if we should transition from Open to Half-Open
 	if cb.state == CircuitBreakerOpen {
 		if time.Since(cb.lastFailTime) > cb.resetTimeout {
@@ -49,39 +49,39 @@ func (cb *CircuitBreaker) Call(fn func() error) error {
 			cb.failures = 0
 		}
 	}
-	
+
 	// Fail fast if circuit is open
 	if cb.state == CircuitBreakerOpen {
 		cb.mu.Unlock()
 		return ErrCircuitBreakerOpen
 	}
-	
+
 	cb.mu.Unlock()
-	
+
 	// Execute the function
 	err := fn()
-	
+
 	cb.mu.Lock()
 	defer cb.mu.Unlock()
-	
+
 	if err != nil {
 		cb.failures++
 		cb.lastFailTime = time.Now()
-		
+
 		// Open circuit if max failures reached
 		if cb.failures >= cb.maxFailures {
 			cb.state = CircuitBreakerOpen
 		}
-		
+
 		return err
 	}
-	
+
 	// Success - reset to closed state
 	if cb.state == CircuitBreakerHalfOpen {
 		cb.state = CircuitBreakerClosed
 	}
 	cb.failures = 0
-	
+
 	return nil
 }
 
@@ -118,10 +118,10 @@ func NewResponseCache(ttl time.Duration) *ResponseCache {
 		cache: make(map[string]*cacheEntry),
 		ttl:   ttl,
 	}
-	
+
 	// Start cleanup goroutine
 	go cache.cleanup()
-	
+
 	return cache
 }
 
@@ -129,17 +129,17 @@ func NewResponseCache(ttl time.Duration) *ResponseCache {
 func (rc *ResponseCache) Get(key string) (interface{}, bool) {
 	rc.mu.RLock()
 	defer rc.mu.RUnlock()
-	
+
 	entry, exists := rc.cache[key]
 	if !exists {
 		return nil, false
 	}
-	
+
 	// Check if entry has expired
 	if time.Since(entry.timestamp) > rc.ttl {
 		return nil, false
 	}
-	
+
 	return entry.data, true
 }
 
@@ -147,7 +147,7 @@ func (rc *ResponseCache) Get(key string) (interface{}, bool) {
 func (rc *ResponseCache) Set(key string, value interface{}) {
 	rc.mu.Lock()
 	defer rc.mu.Unlock()
-	
+
 	rc.cache[key] = &cacheEntry{
 		data:      value,
 		timestamp: time.Now(),
@@ -172,7 +172,7 @@ func (rc *ResponseCache) Clear() {
 func (rc *ResponseCache) cleanup() {
 	ticker := time.NewTicker(rc.ttl)
 	defer ticker.Stop()
-	
+
 	for range ticker.C {
 		rc.mu.Lock()
 		now := time.Now()

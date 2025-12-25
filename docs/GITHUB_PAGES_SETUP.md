@@ -1,3 +1,11 @@
+---
+title: Github Pages Setup
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # GAuth API - GitHub Pages Documentation
 
 GitHub Pages is now set up for your OpenAPI documentation!

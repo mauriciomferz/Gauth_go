@@ -1,3 +1,11 @@
+---
+title: Admin Portal Implementation Status
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # GAuth Admin Portal - Implementation Status
 
 ## Overview

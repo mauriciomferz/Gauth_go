@@ -45,7 +45,7 @@ func TestBrazilCPFValidation(t *testing.T) {
 			}
 
 			resp, err := connector.ValidateCPF(context.Background(), req)
-			
+
 			if tt.wantError && err == nil {
 				t.Error("Expected error but got none")
 			}
@@ -81,7 +81,7 @@ func TestCanadaSINValidation(t *testing.T) {
 		wantValid bool
 		sinType   string
 	}{
-		{"Valid business SIN", "046454286", true, "Business"},  // SINs starting with 0 are Business
+		{"Valid business SIN", "046454286", true, "Business"}, // SINs starting with 0 are Business
 		{"Valid temporary SIN", "900000001", true, "Temporary"},
 		{"Invalid Luhn check", "123456789", false, ""},
 		{"Invalid format - too short", "12345678", false, ""},
@@ -97,7 +97,7 @@ func TestCanadaSINValidation(t *testing.T) {
 			}
 
 			resp, err := connector.ValidateSIN(context.Background(), req)
-			
+
 			if err != nil && tt.wantValid {
 				t.Errorf("Unexpected error: %v", err)
 			}
@@ -147,7 +147,7 @@ func TestMexicoCURPValidation(t *testing.T) {
 			}
 
 			resp, err := connector.ValidateCURP(context.Background(), req)
-			
+
 			if err != nil && tt.wantValid {
 				t.Errorf("Unexpected error: %v", err)
 			}
@@ -174,10 +174,10 @@ func TestSouthAfricaIDValidation(t *testing.T) {
 	defer connector.Close()
 
 	tests := []struct {
-		name       string
-		idNumber   string
-		wantValid  bool
-		wantGender string
+		name        string
+		idNumber    string
+		wantValid   bool
+		wantGender  string
 		wantCitizen string
 	}{
 		{"Valid ID - Male Citizen", "9001085800083", true, "Male", "SA Citizen"},
@@ -194,7 +194,7 @@ func TestSouthAfricaIDValidation(t *testing.T) {
 			}
 
 			resp, err := connector.ValidateIDNumber(context.Background(), req)
-			
+
 			if err != nil && tt.wantValid {
 				t.Errorf("Unexpected error: %v", err)
 			}
@@ -246,7 +246,7 @@ func TestNigeriaNINValidation(t *testing.T) {
 			}
 
 			resp, err := connector.ValidateNIN(context.Background(), req)
-			
+
 			if err != nil && tt.wantValid {
 				t.Errorf("Unexpected error: %v", err)
 			}
@@ -294,7 +294,7 @@ func TestKenyaNationalIDValidation(t *testing.T) {
 			}
 
 			resp, err := connector.ValidateNationalID(context.Background(), req)
-			
+
 			if err != nil && tt.wantValid {
 				t.Errorf("Unexpected error: %v", err)
 			}
@@ -315,17 +315,17 @@ func BenchmarkBrazilCPFValidation(b *testing.B) {
 		DETRANURL:      "https://api.detran.gov.br",
 		RequestTimeout: 30 * time.Second,
 	}
-	
+
 	connector, _ := NewBrazilIdentityConnector(config)
 	defer connector.Close()
-	
+
 	req := &CPFRequest{
 		CPF:  "12345678909",
 		Name: "Test User",
 	}
-	
+
 	ctx := context.Background()
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, _ = connector.ValidateCPF(ctx, req)
@@ -340,18 +340,18 @@ func BenchmarkCanadaSINLuhn(b *testing.B) {
 		IRCCURL:               "https://api.ircc.gc.ca",
 		RequestTimeout:        30 * time.Second,
 	}
-	
+
 	connector, _ := NewCanadaIdentityConnector(config)
 	defer connector.Close()
-	
+
 	req := &SINRequest{
 		SIN:         "046454286",
 		Name:        "John Doe",
 		DateOfBirth: "1990-01-15",
 	}
-	
+
 	ctx := context.Background()
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, _ = connector.ValidateSIN(ctx, req)
@@ -365,17 +365,17 @@ func BenchmarkSouthAfricaIDLuhn(b *testing.B) {
 		NATISURL:       "https://api.natis.gov.za",
 		RequestTimeout: 30 * time.Second,
 	}
-	
+
 	connector, _ := NewSouthAfricaIdentityConnector(config)
 	defer connector.Close()
-	
+
 	req := &IDNumberRequest{
 		IDNumber: "9001085800083",
 		Name:     "Test User",
 	}
-	
+
 	ctx := context.Background()
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, _ = connector.ValidateIDNumber(ctx, req)

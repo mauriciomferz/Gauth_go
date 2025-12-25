@@ -1,3 +1,11 @@
+---
+title: Snapshot Pruning Design
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Snapshot & Pruning Design (Scaffold)
 
 Status: Draft / Scaffold

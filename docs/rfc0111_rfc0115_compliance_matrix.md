@@ -1,3 +1,11 @@
+---
+title: Rfc0111 Rfc0115 Compliance Matrix
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # RFC0111 & RFC0115 Compliance Matrix (Beta MVP Snapshot)
 
 Date: 2025-10-29

@@ -53,6 +53,9 @@ type RevocationChecker interface {
 	// IsRevoked checks if an entity's authorization has been revoked
 	IsRevoked(ctx context.Context, entityID string) (bool, error)
 
+	// IsDelegationRevoked checks if a specific delegation ID has been revoked
+	IsDelegationRevoked(ctx context.Context, delegationID string) (bool, error)
+
 	// GetRevocationInfo retrieves detailed revocation information
 	GetRevocationInfo(ctx context.Context, entityID string) (*RevocationInfo, error)
 

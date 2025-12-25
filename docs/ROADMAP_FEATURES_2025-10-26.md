@@ -1,3 +1,11 @@
+---
+title: Roadmap Features 2025-10-26
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Feature Expansion Roadmap – 2025-10-26
 
 This document sequences implementation for the 12 requested features. Each item lists: Contract, Metrics, Security, Dependencies, and Acceptance Criteria.

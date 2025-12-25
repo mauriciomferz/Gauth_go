@@ -1,3 +1,11 @@
+---
+title: Admin Handlers Test Report
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Admin Handlers Database Integration - Test Results
 
 **Date:** November 22, 2025  

@@ -1,3 +1,11 @@
+---
+title: Replay Protection
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Replay Protection Architecture
 
 This document describes the layered replay protection mechanisms implemented in GAuth for delegation artifacts, tokens, and attestation-like signatures.

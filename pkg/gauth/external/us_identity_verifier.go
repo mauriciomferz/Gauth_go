@@ -48,8 +48,8 @@ const (
 type SSNValidationLevel string
 
 const (
-	SSNValidationLevelBasic        SSNValidationLevel = "basic"        // Format only
-	SSNValidationLevelStandard     SSNValidationLevel = "standard"     // SSN validity
+	SSNValidationLevelBasic         SSNValidationLevel = "basic"         // Format only
+	SSNValidationLevelStandard      SSNValidationLevel = "standard"      // SSN validity
 	SSNValidationLevelComprehensive SSNValidationLevel = "comprehensive" // Full match
 )
 
@@ -93,57 +93,57 @@ const (
 
 // State driver's license number formats (regex patterns)
 var stateDLFormats = map[string]*regexp.Regexp{
-	"AL": regexp.MustCompile(`^\d{1,8}$`),                         // 1-8 digits
-	"AK": regexp.MustCompile(`^\d{1,7}$`),                         // 1-7 digits
-	"AZ": regexp.MustCompile(`^([A-Z]\d{8}|[A-Z]{2}\d{2,5})$`),    // A12345678 OR AB12345
-	"AR": regexp.MustCompile(`^\d{4,9}$`),                         // 4-9 digits
-	"CA": regexp.MustCompile(`^[A-Z]\d{7}$`),                      // A1234567
-	"CO": regexp.MustCompile(`^(\d{9}|[A-Z]{1,2}\d{3,6})$`),       // 123456789 OR AB12345
-	"CT": regexp.MustCompile(`^\d{9}$`),                           // 9 digits
-	"DE": regexp.MustCompile(`^\d{1,7}$`),                         // 1-7 digits
-	"DC": regexp.MustCompile(`^(\d{7}|\d{9})$`),                   // 7 or 9 digits
-	"FL": regexp.MustCompile(`^[A-Z]\d{12}$`),                     // A123456789012
-	"GA": regexp.MustCompile(`^\d{7,9}$`),                         // 7-9 digits
-	"HI": regexp.MustCompile(`^([A-Z]\d{8}|\d{9})$`),              // H12345678 OR 123456789
-	"ID": regexp.MustCompile(`^([A-Z]{2}\d{6}[A-Z]|\d{9})$`),      // AB123456C OR 123456789
-	"IL": regexp.MustCompile(`^[A-Z]\d{11}$`),                     // A12345678901
-	"IN": regexp.MustCompile(`^([A-Z]\d{9}|\d{10})$`),             // A123456789 OR 1234567890
-	"IA": regexp.MustCompile(`^(\d{9}|\d{3}[A-Z]{2}\d{4})$`),      // 123456789 OR 123AB4567
-	"KS": regexp.MustCompile(`^([A-Z]\d{8}|\d{9})$`),              // K12345678 OR 123456789
-	"KY": regexp.MustCompile(`^([A-Z]\d{8}|\d{9})$`),              // A12345678 OR 123456789
-	"LA": regexp.MustCompile(`^\d{1,9}$`),                         // 1-9 digits
-	"ME": regexp.MustCompile(`^\d{7}X?$`),                         // 7 digits + optional X
-	"MD": regexp.MustCompile(`^[A-Z]\d{12}$`),                     // A123456789012
-	"MA": regexp.MustCompile(`^([A-Z]\d{8}|\d{9})$`),              // S12345678 OR 123456789
-	"MI": regexp.MustCompile(`^[A-Z]\d{12}$`),                     // A123456789012
-	"MN": regexp.MustCompile(`^[A-Z]\d{12}$`),                     // A123456789012
-	"MS": regexp.MustCompile(`^\d{9}$`),                           // 9 digits
-	"MO": regexp.MustCompile(`^([A-Z]\d{5,9}|\d{9})$`),            // A123456789 OR 123456789
-	"MT": regexp.MustCompile(`^(\d{9}|\d{13})$`),                  // 9 or 13 digits
-	"NE": regexp.MustCompile(`^[A-Z]\d{3,8}$`),                    // A12345678
-	"NV": regexp.MustCompile(`^(\d{9,10}|X\d{8})$`),               // 123456789 OR X12345678
-	"NH": regexp.MustCompile(`^[A-Z]{3}\d{5}$`),                   // ABC12345
-	"NJ": regexp.MustCompile(`^[A-Z]\d{14}$`),                     // A12345678901234
-	"NM": regexp.MustCompile(`^\d{8,9}$`),                         // 8-9 digits
+	"AL": regexp.MustCompile(`^\d{1,8}$`),                                 // 1-8 digits
+	"AK": regexp.MustCompile(`^\d{1,7}$`),                                 // 1-7 digits
+	"AZ": regexp.MustCompile(`^([A-Z]\d{8}|[A-Z]{2}\d{2,5})$`),            // A12345678 OR AB12345
+	"AR": regexp.MustCompile(`^\d{4,9}$`),                                 // 4-9 digits
+	"CA": regexp.MustCompile(`^[A-Z]\d{7}$`),                              // A1234567
+	"CO": regexp.MustCompile(`^(\d{9}|[A-Z]{1,2}\d{3,6})$`),               // 123456789 OR AB12345
+	"CT": regexp.MustCompile(`^\d{9}$`),                                   // 9 digits
+	"DE": regexp.MustCompile(`^\d{1,7}$`),                                 // 1-7 digits
+	"DC": regexp.MustCompile(`^(\d{7}|\d{9})$`),                           // 7 or 9 digits
+	"FL": regexp.MustCompile(`^[A-Z]\d{12}$`),                             // A123456789012
+	"GA": regexp.MustCompile(`^\d{7,9}$`),                                 // 7-9 digits
+	"HI": regexp.MustCompile(`^([A-Z]\d{8}|\d{9})$`),                      // H12345678 OR 123456789
+	"ID": regexp.MustCompile(`^([A-Z]{2}\d{6}[A-Z]|\d{9})$`),              // AB123456C OR 123456789
+	"IL": regexp.MustCompile(`^[A-Z]\d{11}$`),                             // A12345678901
+	"IN": regexp.MustCompile(`^([A-Z]\d{9}|\d{10})$`),                     // A123456789 OR 1234567890
+	"IA": regexp.MustCompile(`^(\d{9}|\d{3}[A-Z]{2}\d{4})$`),              // 123456789 OR 123AB4567
+	"KS": regexp.MustCompile(`^([A-Z]\d{8}|\d{9})$`),                      // K12345678 OR 123456789
+	"KY": regexp.MustCompile(`^([A-Z]\d{8}|\d{9})$`),                      // A12345678 OR 123456789
+	"LA": regexp.MustCompile(`^\d{1,9}$`),                                 // 1-9 digits
+	"ME": regexp.MustCompile(`^\d{7}X?$`),                                 // 7 digits + optional X
+	"MD": regexp.MustCompile(`^[A-Z]\d{12}$`),                             // A123456789012
+	"MA": regexp.MustCompile(`^([A-Z]\d{8}|\d{9})$`),                      // S12345678 OR 123456789
+	"MI": regexp.MustCompile(`^[A-Z]\d{12}$`),                             // A123456789012
+	"MN": regexp.MustCompile(`^[A-Z]\d{12}$`),                             // A123456789012
+	"MS": regexp.MustCompile(`^\d{9}$`),                                   // 9 digits
+	"MO": regexp.MustCompile(`^([A-Z]\d{5,9}|\d{9})$`),                    // A123456789 OR 123456789
+	"MT": regexp.MustCompile(`^(\d{9}|\d{13})$`),                          // 9 or 13 digits
+	"NE": regexp.MustCompile(`^[A-Z]\d{3,8}$`),                            // A12345678
+	"NV": regexp.MustCompile(`^(\d{9,10}|X\d{8})$`),                       // 123456789 OR X12345678
+	"NH": regexp.MustCompile(`^[A-Z]{3}\d{5}$`),                           // ABC12345
+	"NJ": regexp.MustCompile(`^[A-Z]\d{14}$`),                             // A12345678901234
+	"NM": regexp.MustCompile(`^\d{8,9}$`),                                 // 8-9 digits
 	"NY": regexp.MustCompile(`^([A-Z]\d{7}|[A-Z]\d{18}|\d{8,9}|\d{16})$`), // Multiple formats
-	"NC": regexp.MustCompile(`^\d{1,12}$`),                        // 1-12 digits
-	"ND": regexp.MustCompile(`^([A-Z]{3}\d{6}|\d{9})$`),           // ABC123456 OR 123456789
-	"OH": regexp.MustCompile(`^([A-Z]{2}\d{6}|\d{8})$`),           // AB123456 OR 12345678
-	"OK": regexp.MustCompile(`^([A-Z]\d{9}|\d{9})$`),              // A123456789 OR 123456789
-	"OR": regexp.MustCompile(`^\d{1,9}$`),                         // 1-9 digits
-	"PA": regexp.MustCompile(`^\d{8}$`),                           // 8 digits
-	"RI": regexp.MustCompile(`^(\d{7}|[A-Z]\d{6})$`),              // 1234567 OR A123456
-	"SC": regexp.MustCompile(`^\d{5,11}$`),                        // 5-11 digits
-	"SD": regexp.MustCompile(`^\d{6,10}$`),                        // 6-10 digits
-	"TN": regexp.MustCompile(`^\d{7,9}$`),                         // 7-9 digits
-	"TX": regexp.MustCompile(`^\d{7,8}$`),                         // 7-8 digits
-	"UT": regexp.MustCompile(`^\d{4,10}$`),                        // 4-10 digits
-	"VT": regexp.MustCompile(`^\d{8}|\d{7}A$`),                    // 8 digits OR 7 digits + A
-	"VA": regexp.MustCompile(`^([A-Z]\d{8}|\d{9})$`),              // A12345678 OR 123456789
-	"WA": regexp.MustCompile(`^[A-Z0-9]{12}$`),                    // 12 alphanumeric
-	"WV": regexp.MustCompile(`^[A-Z]{1,2}\d{5,6}$`),               // AB12345
-	"WI": regexp.MustCompile(`^[A-Z]\d{13}$`),                     // A1234567890123
-	"WY": regexp.MustCompile(`^\d{9,10}$`),                        // 9-10 digits
+	"NC": regexp.MustCompile(`^\d{1,12}$`),                                // 1-12 digits
+	"ND": regexp.MustCompile(`^([A-Z]{3}\d{6}|\d{9})$`),                   // ABC123456 OR 123456789
+	"OH": regexp.MustCompile(`^([A-Z]{2}\d{6}|\d{8})$`),                   // AB123456 OR 12345678
+	"OK": regexp.MustCompile(`^([A-Z]\d{9}|\d{9})$`),                      // A123456789 OR 123456789
+	"OR": regexp.MustCompile(`^\d{1,9}$`),                                 // 1-9 digits
+	"PA": regexp.MustCompile(`^\d{8}$`),                                   // 8 digits
+	"RI": regexp.MustCompile(`^(\d{7}|[A-Z]\d{6})$`),                      // 1234567 OR A123456
+	"SC": regexp.MustCompile(`^\d{5,11}$`),                                // 5-11 digits
+	"SD": regexp.MustCompile(`^\d{6,10}$`),                                // 6-10 digits
+	"TN": regexp.MustCompile(`^\d{7,9}$`),                                 // 7-9 digits
+	"TX": regexp.MustCompile(`^\d{7,8}$`),                                 // 7-8 digits
+	"UT": regexp.MustCompile(`^\d{4,10}$`),                                // 4-10 digits
+	"VT": regexp.MustCompile(`^\d{8}|\d{7}A$`),                            // 8 digits OR 7 digits + A
+	"VA": regexp.MustCompile(`^([A-Z]\d{8}|\d{9})$`),                      // A12345678 OR 123456789
+	"WA": regexp.MustCompile(`^[A-Z0-9]{12}$`),                            // 12 alphanumeric
+	"WV": regexp.MustCompile(`^[A-Z]{1,2}\d{5,6}$`),                       // AB12345
+	"WI": regexp.MustCompile(`^[A-Z]\d{13}$`),                             // A1234567890123
+	"WY": regexp.MustCompile(`^\d{9,10}$`),                                // 9-10 digits
 }
 
 // States with enhanced verification capabilities (REAL ID Act compliant)
@@ -277,7 +277,7 @@ type VerificationChecks struct {
 	NameMatch            *CheckResult `json:"name_match"`            // Does name match?
 	DOBMatch             *CheckResult `json:"dob_match"`             // Does DOB match?
 	AddressMatch         *CheckResult `json:"address_match,omitempty"`
-	FaceMatch            *CheckResult `json:"face_match,omitempty"`   // If biometric provided
+	FaceMatch            *CheckResult `json:"face_match,omitempty"` // If biometric provided
 	LivenessCheck        *CheckResult `json:"liveness_check,omitempty"`
 }
 
@@ -317,22 +317,22 @@ type IdentityVerificationResult struct {
 	ProviderTransactionID string `json:"provider_transaction_id"`
 
 	// Metadata
-	RequestID            string    `json:"request_id"`
+	RequestID             string    `json:"request_id"`
 	VerificationTimestamp time.Time `json:"verification_timestamp"`
-	ProcessingTimeMs     int64     `json:"processing_time_ms"`
+	ProcessingTimeMs      int64     `json:"processing_time_ms"`
 }
 
 // NameMatchResult represents the result of a name match check
 type NameMatchResult struct {
-	Matched     bool    `json:"matched"`
-	Score       float64 `json:"score"`       // 0.0 to 1.0
-	Details     string  `json:"details,omitempty"`
+	Matched bool    `json:"matched"`
+	Score   float64 `json:"score"` // 0.0 to 1.0
+	Details string  `json:"details,omitempty"`
 }
 
 // DOBMatchResult represents the result of a date of birth match check
 type DOBMatchResult struct {
-	Matched     bool    `json:"matched"`
-	Details     string  `json:"details,omitempty"`
+	Matched bool   `json:"matched"`
+	Details string `json:"details,omitempty"`
 }
 
 // SSNValidationResult represents the result of SSN validation
@@ -348,10 +348,10 @@ type SSNValidationResult struct {
 	IssuanceYearRange string `json:"issuance_year_range,omitempty"`
 
 	// Validation checks
-	FormatValid  bool            `json:"format_valid"`
-	NotDeceased  bool            `json:"not_deceased"`
-	NameMatch    *NameMatchResult `json:"name_match,omitempty"`
-	DOBMatch     *DOBMatchResult  `json:"dob_match,omitempty"`
+	FormatValid bool             `json:"format_valid"`
+	NotDeceased bool             `json:"not_deceased"`
+	NameMatch   *NameMatchResult `json:"name_match,omitempty"`
+	DOBMatch    *DOBMatchResult  `json:"dob_match,omitempty"`
 
 	// Warnings and errors
 	Warnings []string            `json:"warnings,omitempty"`
@@ -490,7 +490,7 @@ func (v *USIdentityVerifier) VerifyPassport(
 			result, err = v.config.FallbackProvider.VerifyDocument(ctx, req)
 			if err == nil {
 				verificationResult := result.(*IdentityVerificationResult)
-				verificationResult.Warnings = append(verificationResult.Warnings, 
+				verificationResult.Warnings = append(verificationResult.Warnings,
 					"Verified using fallback provider")
 				v.cacheResult(req, verificationResult)
 				return verificationResult, nil

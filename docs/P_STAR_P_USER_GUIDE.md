@@ -1,7 +1,7 @@
 ---
 title: GAuth P*P Architecture User Guide
-category: user-guide
-status: production-ready
+category: guide
+status: active
 lastUpdated: 2025-11-19
 owners: core-maintainers
 ---

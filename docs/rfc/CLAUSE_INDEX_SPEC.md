@@ -1,3 +1,11 @@
+---
+title: Clause Index Spec
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Clause Index JSON Schema (Draft)
 
 Each clause entry object:

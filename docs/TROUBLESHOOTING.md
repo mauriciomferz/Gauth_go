@@ -1,3 +1,11 @@
+---
+title: Troubleshooting
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # GAuth Troubleshooting Guide
 
 > Last Updated: 2025-10-17

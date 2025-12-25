@@ -1,3 +1,11 @@
+---
+title: Rfc Endpoint Mapping
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # RFC Endpoint Mapping
 
 This document correlates HTTP endpoints (from `docs/openapi.yaml` and route registrations) with RFC111 / RFC115 clause references and implementation artifacts.

@@ -1,3 +1,11 @@
+---
+title: Metrics Collector Registry
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Metrics Collector Registry Framework
 
 **P3.2 Implementation (sec7.item2)**: Pluggable metrics collector registry for extensible observability.

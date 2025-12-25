@@ -7,13 +7,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/oidc"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/mauriciomferz/Gauth_go/pkg/oidc"
 )
+
 const (
 	testProviderGoogle = "google"
 )
-
 
 // TestExternalProvidersIntegration verifies end-to-end integration of external providers
 // with token exchange service.

@@ -190,25 +190,29 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	}
 
 	// Redis Initialization
-	redisHost := os.Getenv("REDIS_HOST")
-	if redisHost == "" {
-		redisHost = "localhost"
-	}
-	redisPortStr := os.Getenv("REDIS_PORT")
-	redisPort := 6379
-	if redisPortStr != "" {
-		if v, err := strconv.Atoi(redisPortStr); err == nil {
-			redisPort = v
-		}
-	}
-	redisCfg := &redis.Config{
-		Host: redisHost,
-		Port: redisPort,
-	}
-	if rc, err := redis.NewClient(redisCfg); err == nil {
-		s.redisClient = rc
+	if os.Getenv("GAUTH_SKIP_REDIS") == "1" {
+		fmt.Fprintln(os.Stderr, "[redis] initialization skipped via GAUTH_SKIP_REDIS")
 	} else {
-		fmt.Fprintf(os.Stderr, "[redis] failed to initialize client: %v\n", err)
+		redisHost := os.Getenv("REDIS_HOST")
+		if redisHost == "" {
+			redisHost = "localhost"
+		}
+		redisPortStr := os.Getenv("REDIS_PORT")
+		redisPort := 6379
+		if redisPortStr != "" {
+			if v, err := strconv.Atoi(redisPortStr); err == nil {
+				redisPort = v
+			}
+		}
+		redisCfg := &redis.Config{
+			Host: redisHost,
+			Port: redisPort,
+		}
+		if rc, err := redis.NewClient(redisCfg); err == nil {
+			s.redisClient = rc
+		} else {
+			fmt.Fprintf(os.Stderr, "[redis] failed to initialize client: %v\n", err)
+		}
 	}
 
 	for _, opt := range opts {
@@ -276,7 +280,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 							}
 						}
 					}
-					if writeErr := os.WriteFile(s.capAnchorFilePath, data, 0644); writeErr == nil {
+					if writeErr := os.WriteFile(s.capAnchorFilePath, data, 0600); writeErr == nil {
 						if mem, ok := s.metrics.(*metrics.Memory); ok {
 							mem.IncCapabilityAnchorEmitted()
 							mem.SetCapabilityAnchorLastWriteUnix(uint64(time.Now().Unix()))
@@ -348,7 +352,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 					"entry_id":  e.ID,
 				}
 				if b, err := json.Marshal(tip); err == nil {
-					_ = os.WriteFile(path, b, 0644)
+					_ = os.WriteFile(path, b, 0600)
 				}
 			}
 		}
@@ -1209,7 +1213,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 						return
 					case <-time.After(time.Duration(intervalSec) * time.Second):
 						if s.violationHandler != nil {
-							s.violationHandler.Save()
+							if err := s.violationHandler.Save(); err != nil {
+								fmt.Fprintf(os.Stderr, "[violations] autosave failed: %v\n", err)
+							}
 						}
 					}
 				}
@@ -1233,7 +1239,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 						fmt.Fprintln(os.Stderr, "[semantics] autosave loop stopping")
 						return
 					case <-time.After(time.Duration(intervalSec) * time.Second):
-						s.semanticHandler.Save()
+						if err := s.semanticHandler.Save(); err != nil {
+							fmt.Fprintf(os.Stderr, "[semantics] autosave failed: %v\n", err)
+						}
 					}
 				}
 			}()

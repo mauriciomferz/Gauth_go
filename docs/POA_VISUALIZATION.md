@@ -1,3 +1,11 @@
+---
+title: Poa Visualization
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # PoA Visualization System
 
 Think Machine-inspired 3D visualization for Power of Attorney relationships and protocol flows.

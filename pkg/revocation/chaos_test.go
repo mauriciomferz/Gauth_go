@@ -462,12 +462,12 @@ func TestChaos_ZeroValues(t *testing.T) {
 		redis:  rdb,
 		logger: logger,
 		config: &RateLimitConfig{
-			MaxTxPerMinute:     0, // Zero rate limit
-			MaxTxPerHour:       0,
-			MaxValuePerMinute:  0,
-			MaxValuePerHour:    0,
-			MaxFailureRate:     0,
-			FailureWindowSecs:  0,
+			MaxTxPerMinute:    0, // Zero rate limit
+			MaxTxPerHour:      0,
+			MaxValuePerMinute: 0,
+			MaxValuePerHour:   0,
+			MaxFailureRate:    0,
+			FailureWindowSecs: 0,
 		},
 		suspensionDuration: 5 * time.Minute,
 		recoveryTestCount:  10,

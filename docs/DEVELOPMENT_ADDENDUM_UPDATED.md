@@ -1,3 +1,11 @@
+---
+title: Development Addendum Updated
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Development Addendum (Merged Content Notice)
 
 This expanded addendum has been merged into the canonical `DEVELOPMENT_ADDENDUM.md`. Please consult that file for current engineering notes on:

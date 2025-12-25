@@ -27,19 +27,19 @@ type MexicoIdentityConnector struct {
 // MexicoConnectorConfig configuration for Mexican identity connector
 type MexicoConnectorConfig struct {
 	// RENAPO (birth certificate registry) configuration
-	RENAPOURL         string `validate:"required,url"`
-	RENAPOAPIKey      string `validate:"required"`
-	
+	RENAPOURL    string `validate:"required,url"`
+	RENAPOAPIKey string `validate:"required"`
+
 	// SAT (tax authority) configuration
-	SATURL            string `validate:"url"`
-	SATAPIKey         string
-	
+	SATURL    string `validate:"url"`
+	SATAPIKey string
+
 	// INE (voter registration) configuration
-	INEURL            string `validate:"url"`
-	INEAPIKey         string
-	
+	INEURL    string `validate:"url"`
+	INEAPIKey string
+
 	// Timeouts
-	RequestTimeout    time.Duration
+	RequestTimeout time.Duration
 }
 
 // CURPRequest CURP validation request
@@ -51,81 +51,81 @@ type CURPRequest struct {
 
 // CURPResponse CURP validation response
 type CURPResponse struct {
-	Valid            bool   `json:"valid"`
-	CURP             string `json:"curp"`
-	Name             string `json:"name,omitempty"`
-	Gender           string `json:"gender"` // H (Hombre), M (Mujer)
-	DateOfBirth      string `json:"date_of_birth"`
-	StateOfBirth     string `json:"state_of_birth"` // 2-letter code
-	CheckDigitValid  bool   `json:"check_digit_valid"`
-	Error            string `json:"error,omitempty"`
+	Valid           bool   `json:"valid"`
+	CURP            string `json:"curp"`
+	Name            string `json:"name,omitempty"`
+	Gender          string `json:"gender"` // H (Hombre), M (Mujer)
+	DateOfBirth     string `json:"date_of_birth"`
+	StateOfBirth    string `json:"state_of_birth"` // 2-letter code
+	CheckDigitValid bool   `json:"check_digit_valid"`
+	Error           string `json:"error,omitempty"`
 }
 
 // RFCRequest RFC validation request
 type RFCRequest struct {
-	RFC         string `json:"rfc" validate:"required"`
-	Name        string `json:"name"`
+	RFC          string `json:"rfc" validate:"required"`
+	Name         string `json:"name"`
 	TaxpayerType string `json:"taxpayer_type" validate:"omitempty,oneof=person company"`
 }
 
 // RFCResponse RFC validation response
 type RFCResponse struct {
-	Valid            bool   `json:"valid"`
-	RFC              string `json:"rfc"`
-	Name             string `json:"name,omitempty"`
-	TaxpayerType     string `json:"taxpayer_type"` // Person, Company
-	Status           string `json:"status"` // Active, Inactive, Suspended
-	CheckDigitValid  bool   `json:"check_digit_valid"`
-	Error            string `json:"error,omitempty"`
+	Valid           bool   `json:"valid"`
+	RFC             string `json:"rfc"`
+	Name            string `json:"name,omitempty"`
+	TaxpayerType    string `json:"taxpayer_type"` // Person, Company
+	Status          string `json:"status"`        // Active, Inactive, Suspended
+	CheckDigitValid bool   `json:"check_digit_valid"`
+	Error           string `json:"error,omitempty"`
 }
 
 // INERequest INE (voter ID) validation request
 type INERequest struct {
-	INENumber       string `json:"ine_number" validate:"required"`
-	CIC             string `json:"cic" validate:"required"` // Clave de Identificación del Ciudadano
-	OCR             string `json:"ocr,omitempty"` // Optical Character Recognition code
-	FirstName       string `json:"first_name" validate:"required"`
-	LastName        string `json:"last_name" validate:"required"`
-	DateOfBirth     string `json:"date_of_birth" validate:"required"`
+	INENumber   string `json:"ine_number" validate:"required"`
+	CIC         string `json:"cic" validate:"required"` // Clave de Identificación del Ciudadano
+	OCR         string `json:"ocr,omitempty"`           // Optical Character Recognition code
+	FirstName   string `json:"first_name" validate:"required"`
+	LastName    string `json:"last_name" validate:"required"`
+	DateOfBirth string `json:"date_of_birth" validate:"required"`
 }
 
 // INEResponse INE validation response
 type INEResponse struct {
-	Valid           bool       `json:"valid"`
-	INENumber       string     `json:"ine_number"`
-	CIC             string     `json:"cic"`
-	FirstName       string     `json:"first_name"`
-	LastName        string     `json:"last_name"`
-	CURP            string     `json:"curp,omitempty"`
-	DateOfBirth     string     `json:"date_of_birth"`
-	Gender          string     `json:"gender"`
-	Address         *MXAddress `json:"address,omitempty"`
-	IssueDate       string     `json:"issue_date"`
-	ExpiryDate      string     `json:"expiry_date"`
-	EmissionYear    string     `json:"emission_year"`
-	Section         string     `json:"section,omitempty"` // Sección electoral
-	Error           string     `json:"error,omitempty"`
+	Valid        bool       `json:"valid"`
+	INENumber    string     `json:"ine_number"`
+	CIC          string     `json:"cic"`
+	FirstName    string     `json:"first_name"`
+	LastName     string     `json:"last_name"`
+	CURP         string     `json:"curp,omitempty"`
+	DateOfBirth  string     `json:"date_of_birth"`
+	Gender       string     `json:"gender"`
+	Address      *MXAddress `json:"address,omitempty"`
+	IssueDate    string     `json:"issue_date"`
+	ExpiryDate   string     `json:"expiry_date"`
+	EmissionYear string     `json:"emission_year"`
+	Section      string     `json:"section,omitempty"` // Sección electoral
+	Error        string     `json:"error,omitempty"`
 }
 
 // MXAddress Mexican address structure
 type MXAddress struct {
-	Calle           string `json:"calle"` // Street
-	NumeroExterior  string `json:"numero_exterior"` // Exterior number
-	NumeroInterior  string `json:"numero_interior,omitempty"` // Interior number
-	Colonia         string `json:"colonia"` // Neighborhood
-	Municipio       string `json:"municipio"` // Municipality
-	Estado          string `json:"estado"` // State
-	CodigoPostal    string `json:"codigo_postal"` // Postal code (5 digits)
-	Pais            string `json:"pais"` // Country
+	Calle          string `json:"calle"`                     // Street
+	NumeroExterior string `json:"numero_exterior"`           // Exterior number
+	NumeroInterior string `json:"numero_interior,omitempty"` // Interior number
+	Colonia        string `json:"colonia"`                   // Neighborhood
+	Municipio      string `json:"municipio"`                 // Municipality
+	Estado         string `json:"estado"`                    // State
+	CodigoPostal   string `json:"codigo_postal"`             // Postal code (5 digits)
+	Pais           string `json:"pais"`                      // Country
 }
 
 // PassportRequest passport validation request
 type MXPassportRequest struct {
-	PassportNumber  string `json:"passport_number" validate:"required"`
-	FirstName       string `json:"first_name" validate:"required"`
-	LastName        string `json:"last_name" validate:"required"`
-	DateOfBirth     string `json:"date_of_birth" validate:"required"`
-	Nationality     string `json:"nationality" validate:"required"`
+	PassportNumber string `json:"passport_number" validate:"required"`
+	FirstName      string `json:"first_name" validate:"required"`
+	LastName       string `json:"last_name" validate:"required"`
+	DateOfBirth    string `json:"date_of_birth" validate:"required"`
+	Nationality    string `json:"nationality" validate:"required"`
 }
 
 // PassportResponse passport validation response
@@ -152,18 +152,18 @@ func NewMexicoIdentityConnector(config *MexicoConnectorConfig) (*MexicoIdentityC
 	if err := validate.Struct(config); err != nil {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
-	
+
 	// Set defaults
 	if config.RequestTimeout == 0 {
 		config.RequestTimeout = 30 * time.Second
 	}
-	
+
 	connector := &MexicoIdentityConnector{
 		config:     config,
 		httpClient: &http.Client{Timeout: config.RequestTimeout},
 		validator:  validate,
 	}
-	
+
 	return connector, nil
 }
 
@@ -175,9 +175,9 @@ func (mc *MexicoIdentityConnector) ValidateCURP(ctx context.Context, req *CURPRe
 	if err := mc.validator.Struct(req); err != nil {
 		return &CURPResponse{Valid: false, Error: err.Error()}, nil
 	}
-	
+
 	curp := strings.ToUpper(strings.TrimSpace(req.CURP))
-	
+
 	// Validate format (18 alphanumeric characters)
 	if !regexp.MustCompile(`^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d$`).MatchString(curp) {
 		return &CURPResponse{
@@ -185,7 +185,7 @@ func (mc *MexicoIdentityConnector) ValidateCURP(ctx context.Context, req *CURPRe
 			Error: "Invalid CURP format",
 		}, nil
 	}
-	
+
 	// Extract components
 	// Positions 0-3: First surname letter, first name letter, date
 	year := curp[4:6]
@@ -193,7 +193,7 @@ func (mc *MexicoIdentityConnector) ValidateCURP(ctx context.Context, req *CURPRe
 	day := curp[8:10]
 	gender := string(curp[10]) // H or M
 	state := curp[11:13]
-	
+
 	// Determine century
 	yearInt, _ := strconv.Atoi(year)
 	var century string
@@ -202,12 +202,12 @@ func (mc *MexicoIdentityConnector) ValidateCURP(ctx context.Context, req *CURPRe
 	} else {
 		century = "19"
 	}
-	
+
 	dateOfBirth := fmt.Sprintf("%s%s-%s-%s", century, year, month, day)
-	
+
 	// Validate check digit
 	checkDigitValid := mc.validateCURPCheckDigit(curp)
-	
+
 	response := &CURPResponse{
 		Valid:           checkDigitValid,
 		CURP:            curp,
@@ -217,16 +217,16 @@ func (mc *MexicoIdentityConnector) ValidateCURP(ctx context.Context, req *CURPRe
 		StateOfBirth:    state,
 		CheckDigitValid: checkDigitValid,
 	}
-	
+
 	if !checkDigitValid {
 		response.Error = "Invalid CURP check digit"
 	}
-	
+
 	return response, nil
 }
 
 // ValidateRFC validates Mexican RFC (Registro Federal de Contribuyentes)
-// Formats: 
+// Formats:
 // - Person: 13 characters (AAAA######XXX)
 // - Company: 12 characters (AAA######XXX)
 func (mc *MexicoIdentityConnector) ValidateRFC(ctx context.Context, req *RFCRequest) (*RFCResponse, error) {
@@ -234,13 +234,13 @@ func (mc *MexicoIdentityConnector) ValidateRFC(ctx context.Context, req *RFCRequ
 	if err := mc.validator.Struct(req); err != nil {
 		return &RFCResponse{Valid: false, Error: err.Error()}, nil
 	}
-	
+
 	rfc := strings.ToUpper(strings.TrimSpace(req.RFC))
-	
+
 	// Determine RFC type and validate format
 	var taxpayerType string
 	var checkDigitValid bool
-	
+
 	if len(rfc) == 13 {
 		// Person RFC: 4 letters + 6 digits + 3 alphanumeric
 		if !regexp.MustCompile(`^[A-Z&Ñ]{4}\d{6}[A-Z0-9]{3}$`).MatchString(rfc) {
@@ -267,7 +267,7 @@ func (mc *MexicoIdentityConnector) ValidateRFC(ctx context.Context, req *RFCRequ
 			Error: "Invalid RFC length (must be 12 or 13 characters)",
 		}, nil
 	}
-	
+
 	response := &RFCResponse{
 		Valid:           checkDigitValid,
 		RFC:             rfc,
@@ -276,11 +276,11 @@ func (mc *MexicoIdentityConnector) ValidateRFC(ctx context.Context, req *RFCRequ
 		Status:          "Active",
 		CheckDigitValid: checkDigitValid,
 	}
-	
+
 	if !checkDigitValid {
 		response.Error = "Invalid RFC check digit"
 	}
-	
+
 	return response, nil
 }
 
@@ -290,7 +290,7 @@ func (mc *MexicoIdentityConnector) VerifyINE(ctx context.Context, req *INEReques
 	if err := mc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Validate INE number format (13 digits)
 	if !regexp.MustCompile(`^\d{13}$`).MatchString(req.INENumber) {
 		return &INEResponse{
@@ -298,7 +298,7 @@ func (mc *MexicoIdentityConnector) VerifyINE(ctx context.Context, req *INEReques
 			Error: "Invalid INE number format (must be 13 digits)",
 		}, nil
 	}
-	
+
 	// Validate CIC format (9 digits)
 	if !regexp.MustCompile(`^\d{9}$`).MatchString(req.CIC) {
 		return &INEResponse{
@@ -306,7 +306,7 @@ func (mc *MexicoIdentityConnector) VerifyINE(ctx context.Context, req *INEReques
 			Error: "Invalid CIC format (must be 9 digits)",
 		}, nil
 	}
-	
+
 	// In production, this would verify with INE database
 	response := &INEResponse{
 		Valid:        true,
@@ -319,7 +319,7 @@ func (mc *MexicoIdentityConnector) VerifyINE(ctx context.Context, req *INEReques
 		ExpiryDate:   "2030-01-15",
 		EmissionYear: "2020",
 	}
-	
+
 	return response, nil
 }
 
@@ -329,9 +329,9 @@ func (mc *MexicoIdentityConnector) VerifyPassport(ctx context.Context, req *MXPa
 	if err := mc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	passportNumber := strings.ToUpper(strings.TrimSpace(req.PassportNumber))
-	
+
 	// Validate passport number format (letter + 8 digits)
 	if !regexp.MustCompile(`^[A-Z]\d{8}$`).MatchString(passportNumber) {
 		return &MXPassportResponse{
@@ -339,7 +339,7 @@ func (mc *MexicoIdentityConnector) VerifyPassport(ctx context.Context, req *MXPa
 			Error: "Invalid passport number format",
 		}, nil
 	}
-	
+
 	// In production, this would verify with SRE (Secretaría de Relaciones Exteriores)
 	response := &MXPassportResponse{
 		Valid:            true,
@@ -352,7 +352,7 @@ func (mc *MexicoIdentityConnector) VerifyPassport(ctx context.Context, req *MXPa
 		DateOfExpiry:     "2030-01-15",
 		IssuingAuthority: "México",
 	}
-	
+
 	return response, nil
 }
 
@@ -362,7 +362,7 @@ func (mc *MexicoIdentityConnector) validateCURPCheckDigit(curp string) bool {
 	// CURP check digit calculation
 	checkDigitMap := "0123456789ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"
 	sum := 0
-	
+
 	for i := 0; i < 17; i++ {
 		char := curp[i]
 		var value int
@@ -373,12 +373,12 @@ func (mc *MexicoIdentityConnector) validateCURPCheckDigit(curp string) bool {
 		}
 		sum += value * (18 - i)
 	}
-	
+
 	remainder := sum % 10
 	expectedCheck := (10 - remainder) % 10
-	
+
 	actualCheck, _ := strconv.Atoi(string(curp[17]))
-	
+
 	return expectedCheck == actualCheck
 }
 
@@ -386,10 +386,10 @@ func (mc *MexicoIdentityConnector) validateRFCCheckDigit(rfc string) bool {
 	// RFC check digit calculation
 	checkDigitMap := "0123456789ABCDEFGHIJKLMN&OPQRSTUVWXYZ Ñ"
 	sum := 0
-	
+
 	// Get the base RFC (without check digit)
 	baseRFC := rfc[:len(rfc)-1]
-	
+
 	for i, char := range baseRFC {
 		value := strings.IndexRune(checkDigitMap, char)
 		if value == -1 {
@@ -397,7 +397,7 @@ func (mc *MexicoIdentityConnector) validateRFCCheckDigit(rfc string) bool {
 		}
 		sum += value * (len(baseRFC) + 1 - i)
 	}
-	
+
 	remainder := sum % 11
 	var expectedCheck string
 	if remainder == 0 {
@@ -410,9 +410,9 @@ func (mc *MexicoIdentityConnector) validateRFCCheckDigit(rfc string) bool {
 			expectedCheck = strconv.Itoa(checkValue)
 		}
 	}
-	
+
 	actualCheck := string(rfc[len(rfc)-1])
-	
+
 	return expectedCheck == actualCheck
 }
 
@@ -426,7 +426,7 @@ func (mc *MexicoIdentityConnector) generateCacheKey(operation string, parts ...s
 func (mc *MexicoIdentityConnector) GetMetrics() map[string]interface{} {
 	mc.mu.RLock()
 	defer mc.mu.RUnlock()
-	
+
 	return map[string]interface{}{
 		"connector": "mexico_identity",
 	}

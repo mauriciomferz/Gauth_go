@@ -1,3 +1,11 @@
+---
+title: Readme
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # RFC Source Ingestion (Phase 0)
 
 This directory will hold canonical (or near-canonical) text extracts for RFC 0111 and RFC 0115 sections.

@@ -50,11 +50,11 @@ func FuzzTwoPhaseDisablePoA(f *testing.F) {
 		}
 
 		tpr := &TwoPhaseRevocation{
-			redis:          redisClient,
-			logger:         logger,
-			oracle:         oracle,
-                        autoRevokeTimers: make(map[string]*time.Timer),
-			disableTimeout: 30 * time.Second,
+			redis:            redisClient,
+			logger:           logger,
+			oracle:           oracle,
+			autoRevokeTimers: make(map[string]*time.Timer),
+			disableTimeout:   30 * time.Second,
 		}
 		defer tpr.Close()
 
@@ -63,7 +63,7 @@ func FuzzTwoPhaseDisablePoA(f *testing.F) {
 
 		// Execute with random inputs - should never panic
 		err = tpr.DisablePoA(ctx, poaID, principal, reason)
-		
+
 		// Verify system handles all inputs gracefully (error or success, but no panic)
 		// TwoPhase does not validate empty strings - it accepts all inputs
 		// This is intentional for flexibility in the system
@@ -107,11 +107,11 @@ func FuzzTwoPhaseRevokePoA(f *testing.F) {
 		}
 
 		tpr := &TwoPhaseRevocation{
-			redis:          redisClient,
-			logger:         logger,
-			oracle:         oracle,
-                        autoRevokeTimers: make(map[string]*time.Timer),
-			disableTimeout: 30 * time.Second,
+			redis:            redisClient,
+			logger:           logger,
+			oracle:           oracle,
+			autoRevokeTimers: make(map[string]*time.Timer),
+			disableTimeout:   30 * time.Second,
 		}
 		defer tpr.Close()
 
@@ -147,7 +147,7 @@ func FuzzCircuitBreakerRecordTransaction(f *testing.F) {
 		defer redisClient.Close()
 
 		logger := NewSimpleLogger("FUZZ")
-		
+
 		cb := &CircuitBreaker{
 			redis:  redisClient,
 			logger: logger,
@@ -169,7 +169,7 @@ func FuzzCircuitBreakerRecordTransaction(f *testing.F) {
 
 		// Should handle all inputs gracefully
 		err = cb.RecordTransaction(ctx, poaID, value, success)
-		
+
 		// CircuitBreaker accepts empty poaID - it's defensive and records all transactions
 		// No validation is performed on poaID in RecordTransaction
 		_ = err
@@ -278,9 +278,9 @@ func FuzzOptimisticChallengeRevocation(f *testing.F) {
 
 		// Should handle all inputs gracefully
 		_ = opt.ChallengeRevocation(ctx, poaID, challenger, evidence)
-		
+
 		// Empty fields should be rejected
-		if (poaID == "" || challenger == "" || evidence == "") {
+		if poaID == "" || challenger == "" || evidence == "" {
 			// System should reject empty inputs
 		}
 	})
@@ -317,20 +317,20 @@ func FuzzGetPoAState(f *testing.F) {
 			t.Skip()
 		}
 
-	tpr := &TwoPhaseRevocation{
-		redis:          redisClient,
-		logger:         logger,
-		oracle:         oracle,
-		disableTimeout: 30 * time.Second,
-		autoRevokeTimers: make(map[string]*time.Timer),
-	}
-	defer tpr.Close()
+		tpr := &TwoPhaseRevocation{
+			redis:            redisClient,
+			logger:           logger,
+			oracle:           oracle,
+			disableTimeout:   30 * time.Second,
+			autoRevokeTimers: make(map[string]*time.Timer),
+		}
+		defer tpr.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
 
-	// Should never panic, even with malicious inputs
-	state, err := tpr.GetPoAState(ctx, poaID)		// Empty poaID should return error or nil state
+		// Should never panic, even with malicious inputs
+		state, err := tpr.GetPoAState(ctx, poaID) // Empty poaID should return error or nil state
 		if poaID == "" {
 			if state != nil && err == nil {
 				t.Errorf("Expected error or nil state for empty poaID")
@@ -362,7 +362,7 @@ func FuzzCircuitBreakerCheckTransaction(f *testing.F) {
 		defer redisClient.Close()
 
 		logger := NewSimpleLogger("FUZZ")
-		
+
 		cb := &CircuitBreaker{
 			redis:  redisClient,
 			logger: logger,
@@ -384,7 +384,7 @@ func FuzzCircuitBreakerCheckTransaction(f *testing.F) {
 
 		// Should handle all inputs without panicking
 		allowed, msg, err := cb.IsPoAAllowed(ctx, poaID)
-		
+
 		// Empty poaID should return error or reject
 		if poaID == "" && (allowed || err == nil) {
 			// System should reject empty poaID somehow

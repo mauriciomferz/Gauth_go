@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/resilience"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/mauriciomferz/Gauth_go/pkg/resilience"
 )
 
 // ResilienceHandler manages resilience patterns for the admin portal
@@ -23,47 +23,47 @@ func NewResilienceHandler(db *pgxpool.Pool) *ResilienceHandler {
 
 // CircuitBreaker represents a circuit breaker configuration
 type CircuitBreaker struct {
-	ID                string    `json:"id"`
-	Name              string    `json:"name"`
-	Service           string    `json:"service"`
-	State             string    `json:"state"` // closed, open, half-open
-	FailureThreshold  int       `json:"failureThreshold"`
-	SuccessThreshold  int       `json:"successThreshold"`
-	Timeout           int       `json:"timeout"`
-	Failures          int       `json:"failures"`
-	Successes         int       `json:"successes"`
-	LastStateChange   string    `json:"lastStateChange"`
-	TotalRequests     int       `json:"totalRequests"`
-	FailureRate       float64   `json:"failureRate"`
+	ID               string  `json:"id"`
+	Name             string  `json:"name"`
+	Service          string  `json:"service"`
+	State            string  `json:"state"` // closed, open, half-open
+	FailureThreshold int     `json:"failureThreshold"`
+	SuccessThreshold int     `json:"successThreshold"`
+	Timeout          int     `json:"timeout"`
+	Failures         int     `json:"failures"`
+	Successes        int     `json:"successes"`
+	LastStateChange  string  `json:"lastStateChange"`
+	TotalRequests    int     `json:"totalRequests"`
+	FailureRate      float64 `json:"failureRate"`
 }
 
 // RateLimiter represents a rate limiter configuration
 type RateLimiter struct {
-	ID            string  `json:"id"`
-	Name          string  `json:"name"`
-	Resource      string  `json:"resource"`
-	Algorithm     string  `json:"algorithm"` // token-bucket, leaky-bucket, fixed-window, sliding-window
-	Limit         int     `json:"limit"`
-	Window        int     `json:"window"`
-	Burst         int     `json:"burst,omitempty"`
-	Current       int     `json:"current"`
-	Throttled     int     `json:"throttled"`
-	TotalRequests int     `json:"totalRequests"`
+	ID            string `json:"id"`
+	Name          string `json:"name"`
+	Resource      string `json:"resource"`
+	Algorithm     string `json:"algorithm"` // token-bucket, leaky-bucket, fixed-window, sliding-window
+	Limit         int    `json:"limit"`
+	Window        int    `json:"window"`
+	Burst         int    `json:"burst,omitempty"`
+	Current       int    `json:"current"`
+	Throttled     int    `json:"throttled"`
+	TotalRequests int    `json:"totalRequests"`
 }
 
 // RetryPolicy represents a retry policy configuration
 type RetryPolicy struct {
-	ID                string  `json:"id"`
-	Name              string  `json:"name"`
-	Operation         string  `json:"operation"`
-	Strategy          string  `json:"strategy"` // fixed, exponential, fibonacci, linear
-	MaxAttempts       int     `json:"maxAttempts"`
-	BaseDelay         int     `json:"baseDelay"`
-	MaxDelay          int     `json:"maxDelay"`
-	Jitter            bool    `json:"jitter"`
-	TotalRetries      int     `json:"totalRetries"`
-	SuccessfulRetries int     `json:"successfulRetries"`
-	FailedRetries     int     `json:"failedRetries"`
+	ID                string `json:"id"`
+	Name              string `json:"name"`
+	Operation         string `json:"operation"`
+	Strategy          string `json:"strategy"` // fixed, exponential, fibonacci, linear
+	MaxAttempts       int    `json:"maxAttempts"`
+	BaseDelay         int    `json:"baseDelay"`
+	MaxDelay          int    `json:"maxDelay"`
+	Jitter            bool   `json:"jitter"`
+	TotalRetries      int    `json:"totalRetries"`
+	SuccessfulRetries int    `json:"successfulRetries"`
+	FailedRetries     int    `json:"failedRetries"`
 }
 
 // Bulkhead represents a bulkhead pattern configuration
@@ -146,13 +146,13 @@ func (h *ResilienceHandler) ListCircuitBreakers(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	breakers, err := h.repo.ListCircuitBreakers(c.Request.Context(), tenantID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list circuit breakers"})
 		return
 	}
-	
+
 	// Convert to response format
 	circuitBreakers := make([]CircuitBreaker, len(breakers))
 	for i, b := range breakers {
@@ -161,20 +161,20 @@ func (h *ResilienceHandler) ListCircuitBreakers(c *gin.Context) {
 		if totalReqs > 0 {
 			failureRate = float64(b.FailureCount) / float64(totalReqs) * 100
 		}
-		
+
 		circuitBreakers[i] = CircuitBreaker{
-			ID:                b.ID,
-			Name:              b.BreakerName,
-			Service:           b.ServiceName,
-			State:             b.State,
-			FailureThreshold:  b.FailureThreshold,
-			SuccessThreshold:  b.SuccessThreshold,
-			Timeout:           b.TimeoutSeconds * 1000, // convert to ms
-			Failures:          b.FailureCount,
-			Successes:         b.SuccessCount,
-			LastStateChange:   b.LastStateChange.Format(time.RFC3339),
-			TotalRequests:     totalReqs,
-			FailureRate:       failureRate,
+			ID:               b.ID,
+			Name:             b.BreakerName,
+			Service:          b.ServiceName,
+			State:            b.State,
+			FailureThreshold: b.FailureThreshold,
+			SuccessThreshold: b.SuccessThreshold,
+			Timeout:          b.TimeoutSeconds * 1000, // convert to ms
+			Failures:         b.FailureCount,
+			Successes:        b.SuccessCount,
+			LastStateChange:  b.LastStateChange.Format(time.RFC3339),
+			TotalRequests:    totalReqs,
+			FailureRate:      failureRate,
 		}
 	}
 
@@ -192,7 +192,7 @@ func (h *ResilienceHandler) CreateCircuitBreaker(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	var req CircuitBreakerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -208,25 +208,25 @@ func (h *ResilienceHandler) CreateCircuitBreaker(c *gin.Context) {
 		SuccessThreshold: req.SuccessThreshold,
 		TimeoutSeconds:   req.Timeout / 1000, // convert ms to seconds
 	}
-	
+
 	if err := h.repo.CreateCircuitBreaker(c.Request.Context(), breaker); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create circuit breaker"})
 		return
 	}
 
 	cb := CircuitBreaker{
-		ID:                breaker.ID,
-		Name:              breaker.BreakerName,
-		Service:           breaker.ServiceName,
-		State:             breaker.State,
-		FailureThreshold:  breaker.FailureThreshold,
-		SuccessThreshold:  breaker.SuccessThreshold,
-		Timeout:           req.Timeout,
-		Failures:          0,
-		Successes:         0,
-		LastStateChange:   breaker.CreatedAt.Format(time.RFC3339),
-		TotalRequests:     0,
-		FailureRate:       0.0,
+		ID:               breaker.ID,
+		Name:             breaker.BreakerName,
+		Service:          breaker.ServiceName,
+		State:            breaker.State,
+		FailureThreshold: breaker.FailureThreshold,
+		SuccessThreshold: breaker.SuccessThreshold,
+		Timeout:          req.Timeout,
+		Failures:         0,
+		Successes:        0,
+		LastStateChange:  breaker.CreatedAt.Format(time.RFC3339),
+		TotalRequests:    0,
+		FailureRate:      0.0,
 	}
 
 	c.JSON(http.StatusCreated, cb)
@@ -240,7 +240,7 @@ func (h *ResilienceHandler) UpdateCircuitBreaker(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	cbID := c.Param("id")
 
 	var req CircuitBreakerRequest
@@ -249,13 +249,13 @@ func (h *ResilienceHandler) UpdateCircuitBreaker(c *gin.Context) {
 		return
 	}
 
-	err := h.repo.UpdateCircuitBreaker(c.Request.Context(), tenantID, cbID, 
+	err := h.repo.UpdateCircuitBreaker(c.Request.Context(), tenantID, cbID,
 		req.FailureThreshold, req.SuccessThreshold, req.Timeout/1000)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"id":      cbID,
@@ -271,7 +271,7 @@ func (h *ResilienceHandler) ResetCircuitBreaker(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	cbID := c.Param("id")
 
 	err := h.repo.ResetCircuitBreaker(c.Request.Context(), tenantID, cbID)
@@ -279,7 +279,7 @@ func (h *ResilienceHandler) ResetCircuitBreaker(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"id":      cbID,
@@ -296,7 +296,7 @@ func (h *ResilienceHandler) DeleteCircuitBreaker(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	cbID := c.Param("id")
 
 	err := h.repo.DeleteCircuitBreaker(c.Request.Context(), tenantID, cbID)
@@ -304,7 +304,7 @@ func (h *ResilienceHandler) DeleteCircuitBreaker(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Circuit breaker deleted successfully",
@@ -320,17 +320,17 @@ func (h *ResilienceHandler) ListRateLimiters(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	limiters, err := h.repo.ListRateLimiters(c.Request.Context(), tenantID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list rate limiters"})
 		return
 	}
-	
+
 	rateLimiters := make([]RateLimiter, len(limiters))
 	for i, l := range limiters {
 		current := int(l.AllowedRequests % int64(l.MaxRequests))
-		
+
 		rateLimiters[i] = RateLimiter{
 			ID:            l.ID,
 			Name:          l.LimiterName,
@@ -361,7 +361,7 @@ func (h *ResilienceHandler) CreateRateLimiter(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	var req RateLimiterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -379,7 +379,7 @@ func (h *ResilienceHandler) CreateRateLimiter(c *gin.Context) {
 	} else if algo == "sliding-window" {
 		algo = "sliding_window"
 	}
-	
+
 	limiter := &resilience.RateLimiter{
 		TenantID:      tenantID,
 		LimiterName:   req.Name,
@@ -391,7 +391,7 @@ func (h *ResilienceHandler) CreateRateLimiter(c *gin.Context) {
 	if req.Burst > 0 {
 		limiter.BurstSize = &req.Burst
 	}
-	
+
 	if err := h.repo.CreateRateLimiter(c.Request.Context(), limiter); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create rate limiter"})
 		return
@@ -421,7 +421,7 @@ func (h *ResilienceHandler) DeleteRateLimiter(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	rlID := c.Param("id")
 
 	err := h.repo.DeleteRateLimiter(c.Request.Context(), tenantID, rlID)
@@ -429,7 +429,7 @@ func (h *ResilienceHandler) DeleteRateLimiter(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Rate limiter deleted successfully",
@@ -445,13 +445,13 @@ func (h *ResilienceHandler) ListRetryPolicies(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	policies, err := h.repo.ListRetryPolicies(c.Request.Context(), tenantID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list retry policies"})
 		return
 	}
-	
+
 	retryPolicies := make([]RetryPolicy, len(policies))
 	for i, p := range policies {
 		retryPolicies[i] = RetryPolicy{
@@ -483,7 +483,7 @@ func (h *ResilienceHandler) CreateRetryPolicy(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	var req RetryPolicyRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -501,7 +501,7 @@ func (h *ResilienceHandler) CreateRetryPolicy(c *gin.Context) {
 		Multiplier:     2.0,
 		JitterEnabled:  req.Jitter,
 	}
-	
+
 	if err := h.repo.CreateRetryPolicy(c.Request.Context(), policy); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create retry policy"})
 		return
@@ -532,7 +532,7 @@ func (h *ResilienceHandler) DeleteRetryPolicy(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	rpID := c.Param("id")
 
 	err := h.repo.DeleteRetryPolicy(c.Request.Context(), tenantID, rpID)
@@ -540,7 +540,7 @@ func (h *ResilienceHandler) DeleteRetryPolicy(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Retry policy deleted successfully",
@@ -556,13 +556,13 @@ func (h *ResilienceHandler) ListBulkheads(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	bhs, err := h.repo.ListBulkheads(c.Request.Context(), tenantID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list bulkheads"})
 		return
 	}
-	
+
 	bulkheads := make([]Bulkhead, len(bhs))
 	for i, b := range bhs {
 		bulkheads[i] = Bulkhead{
@@ -593,7 +593,7 @@ func (h *ResilienceHandler) CreateBulkhead(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	var req BulkheadRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -608,7 +608,7 @@ func (h *ResilienceHandler) CreateBulkhead(c *gin.Context) {
 		MaxQueue:       req.MaxQueueSize,
 		TimeoutSeconds: req.Timeout / 1000,
 	}
-	
+
 	if err := h.repo.CreateBulkhead(c.Request.Context(), bulkhead); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create bulkhead"})
 		return
@@ -638,7 +638,7 @@ func (h *ResilienceHandler) DeleteBulkhead(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	bhID := c.Param("id")
 
 	err := h.repo.DeleteBulkhead(c.Request.Context(), tenantID, bhID)
@@ -646,7 +646,7 @@ func (h *ResilienceHandler) DeleteBulkhead(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Bulkhead deleted successfully",
@@ -732,13 +732,13 @@ func (h *ResilienceHandler) GetResilienceMetrics(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "tenant_id required"})
 		return
 	}
-	
+
 	stats, err := h.repo.GetResilienceStats(c.Request.Context(), tenantID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get metrics"})
 		return
 	}
-	
+
 	metrics := gin.H{
 		"circuit_breakers": gin.H{
 			"total":            stats.CircuitBreakers.Total,
@@ -770,9 +770,9 @@ func (h *ResilienceHandler) GetResilienceMetrics(c *gin.Context) {
 			"avg_utilization":    stats.Bulkheads.AvgUtilization,
 		},
 		"composite_patterns": gin.H{
-			"total":   0,
-			"enabled": 0,
-			"disabled": 0,
+			"total":         0,
+			"enabled":       0,
+			"disabled":      0,
 			"total_applied": 0,
 		},
 	}

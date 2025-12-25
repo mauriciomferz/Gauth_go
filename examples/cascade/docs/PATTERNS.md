@@ -1,3 +1,11 @@
+---
+title: Patterns
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Resilience Patterns Guide
 
 > Last Updated: 2025-10-17

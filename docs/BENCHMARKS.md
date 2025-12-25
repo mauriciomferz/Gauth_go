@@ -1,3 +1,11 @@
+---
+title: Benchmarks
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Benchmark Guide
 
 > Last Updated: 2025-10-17

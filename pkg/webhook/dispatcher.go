@@ -88,7 +88,7 @@ func (d *Dispatcher) Dispatch(ctx context.Context, event *Event) error {
 	// Create delivery records and queue jobs
 	for i := range webhooks {
 		webhook := &webhooks[i]
-		
+
 		delivery, err := d.createDelivery(ctx, webhook, event)
 		if err != nil {
 			// Log error but continue with other webhooks
@@ -131,7 +131,7 @@ func (d *Dispatcher) worker(ctx context.Context, id int) {
 // deliverWebhook delivers a webhook to its endpoint
 func (d *Dispatcher) deliverWebhook(ctx context.Context, job *deliveryJob) {
 	startTime := time.Now()
-	
+
 	// Prepare payload
 	payload, err := json.Marshal(job.event)
 	if err != nil {
@@ -396,7 +396,7 @@ func (d *Dispatcher) GetDelivery(ctx context.Context, id string) (*WebhookDelive
 // ListDeliveries lists deliveries with optional filtering
 func (d *Dispatcher) ListDeliveries(ctx context.Context, query *ListDeliveriesQuery) ([]WebhookDelivery, error) {
 	deliveries := []WebhookDelivery{}
-	
+
 	sqlQuery := `
 		SELECT id, webhook_id, event_id, event_type, url, http_method,
 			   headers, payload, status_code, response_body, status,

@@ -1,3 +1,11 @@
+---
+title: Code Style
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Code Style & Linting Standards
 
 > Last Updated: 2025-10-17

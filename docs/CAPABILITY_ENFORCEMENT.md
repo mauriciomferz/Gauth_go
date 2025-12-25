@@ -1,3 +1,11 @@
+---
+title: Capability Enforcement
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Capability Enforcement & Anchoring
 
 This document summarizes the runtime capability matrix governance features: registry loading, action mapping enforcement, lifecycle metadata (deprecated_after / sunset_after), anchoring & notarization, audit chain, and observability metrics.

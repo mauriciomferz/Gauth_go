@@ -1,3 +1,11 @@
+---
+title: Readme
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # GAuth OPA Integration Example
 
 This directory contains working examples of integrating OPA (Open Policy Agent) with GAuth for advanced authorization policies.

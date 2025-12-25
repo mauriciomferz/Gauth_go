@@ -1,3 +1,11 @@
+---
+title: Demo Readiness
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Demo Readiness Checklist (Beta)
 
 This checklist enumerates remaining polish items to ensure a clear, compelling live demonstration of GAuth’s protocol features (RFC111) and semantic diagnostics (RFC115).

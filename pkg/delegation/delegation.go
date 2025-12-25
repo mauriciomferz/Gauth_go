@@ -45,7 +45,8 @@ type Revocation struct {
 	RevokedAt      time.Time `json:"revoked_at"`
 }
 
-// TODO: Implement RevocationChain with hash linkage + Verify, and integrate into authorization path.
+// RevocationChain with hash linkage is implemented in revocation_chain.go.
+// TODO: Integrate RevocationChain into authorization path (ValidationContext).
 
 // Chain maintains ordered delegations.
 type Chain struct{ items []Delegation }

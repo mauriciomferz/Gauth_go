@@ -1,3 +1,11 @@
+---
+title: Frontend Integration Status
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Frontend Integration Status
 
 ## Overview

@@ -1,3 +1,11 @@
+---
+title: Rfc Gap Analysis
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # GAuth-RFC-001 (formerly RFC 111) & GAuth-RFC-002 (formerly RFC 115) Gap Analysis (Beta Snapshot)
 
 Date: 2025-10-26

@@ -1,3 +1,11 @@
+---
+title: Walkthrough
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Walkthrough: Restoring GAuth Backend Schema
 
 The GAuth backend was experiencing 500 Internal Server Errors due to missing database tables and schema mismatches. This walkthrough documents the steps taken to identify, repair, and verify the database schema across all subsystems.

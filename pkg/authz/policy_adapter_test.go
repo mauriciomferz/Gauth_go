@@ -1,16 +1,16 @@
-package policy
+package authz
 
 import (
 	"context"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	"github.com/mauriciomferz/Gauth_go/pkg/policy"
 )
 
 // TestNewAuthorizerAdapter verifies AuthorizerAdapter constructor correctly initializes with provided engine.
 func TestNewAuthorizerAdapter(t *testing.T) {
-	reg := NewRegistry()
-	engine := NewChainEngine(reg)
+	reg := policy.NewRegistry()
+	engine := policy.NewChainEngine(reg)
 	adapter := NewAuthorizerAdapter(engine)
 
 	if adapter == nil {
@@ -24,34 +24,34 @@ func TestNewAuthorizerAdapter(t *testing.T) {
 // TestAuthorizerAdapterAuthorize_Allow verifies Authorize method correctly translates and evaluates allowing requests.
 func TestAuthorizerAdapterAuthorize_Allow(t *testing.T) {
 	// Create a simple bundle that allows "read" on "document:123" for user:alice
-	bundle := Bundle{
+	bundle := policy.Bundle{
 		ID:      "test-bundle-1",
 		Version: 1,
-		Policies: []Policy{
+		Policies: []policy.Policy{
 			{
 				ID:       "policy-allow-alice-read",
 				Subjects: []string{"user:alice"},
-				Rules: []Rule{
+				Rules: []policy.Rule{
 					{
 						Actions:   []string{"read"},
 						Resources: []string{"document:123"}, // Exact match
 						Expr:      "",                       // Always true
-						Effect:    Allow,
+						Effect:    policy.Allow,
 					},
 				},
 			},
 		},
 	}
-	reg := NewRegistry()
+	reg := policy.NewRegistry()
 	_, err := reg.AddBundle(bundle)
 	if err != nil {
 		t.Fatalf("failed to add bundle: %v", err)
 	}
 
-	engine := NewChainEngine(reg)
+	engine := policy.NewChainEngine(reg)
 	adapter := NewAuthorizerAdapter(engine)
 
-	req := authz.Request{
+	req := Request{
 		Subject:  "user:alice",
 		Action:   "read",
 		Resource: "document:123",
@@ -72,34 +72,34 @@ func TestAuthorizerAdapterAuthorize_Allow(t *testing.T) {
 // TestAuthorizerAdapterAuthorize_Deny verifies Authorize method correctly handles deny decisions.
 func TestAuthorizerAdapterAuthorize_Deny(t *testing.T) {
 	// Create a bundle with deny policy
-	bundle := Bundle{
+	bundle := policy.Bundle{
 		ID:      "test-bundle-deny",
 		Version: 1,
-		Policies: []Policy{
+		Policies: []policy.Policy{
 			{
 				ID:       "policy-deny-bob",
 				Subjects: []string{"user:bob"},
-				Rules: []Rule{
+				Rules: []policy.Rule{
 					{
 						Actions:   []string{"delete"},
 						Resources: []string{"document:sensitive"}, // Exact match
 						Expr:      "",
-						Effect:    Deny,
+						Effect:    policy.Deny,
 					},
 				},
 			},
 		},
 	}
-	reg := NewRegistry()
+	reg := policy.NewRegistry()
 	_, err := reg.AddBundle(bundle)
 	if err != nil {
 		t.Fatalf("failed to add bundle: %v", err)
 	}
 
-	engine := NewChainEngine(reg)
+	engine := policy.NewChainEngine(reg)
 	adapter := NewAuthorizerAdapter(engine)
 
-	req := authz.Request{
+	req := Request{
 		Subject:  "user:bob",
 		Action:   "delete",
 		Resource: "document:sensitive",
@@ -120,35 +120,35 @@ func TestAuthorizerAdapterAuthorize_Deny(t *testing.T) {
 // TestAuthorizerAdapterAuthorize_NotApplicable verifies Authorize handles non-matching policies.
 func TestAuthorizerAdapterAuthorize_NotApplicable(t *testing.T) {
 	// Create bundle that doesn't match the request
-	bundle := Bundle{
+	bundle := policy.Bundle{
 		ID:      "test-bundle-mismatch",
 		Version: 1,
-		Policies: []Policy{
+		Policies: []policy.Policy{
 			{
 				ID:       "policy-charlie",
 				Subjects: []string{"user:charlie"},
-				Rules: []Rule{
+				Rules: []policy.Rule{
 					{
 						Actions:   []string{"write"},
 						Resources: []string{"file:report.txt"}, // Exact match
 						Expr:      "",
-						Effect:    Allow,
+						Effect:    policy.Allow,
 					},
 				},
 			},
 		},
 	}
-	reg := NewRegistry()
+	reg := policy.NewRegistry()
 	_, err := reg.AddBundle(bundle)
 	if err != nil {
 		t.Fatalf("failed to add bundle: %v", err)
 	}
 
-	engine := NewChainEngine(reg)
+	engine := policy.NewChainEngine(reg)
 	adapter := NewAuthorizerAdapter(engine)
 
 	// Request from different user/action
-	req := authz.Request{
+	req := Request{
 		Subject:  "user:david",
 		Action:   "read",
 		Resource: "document:public",
@@ -165,11 +165,11 @@ func TestAuthorizerAdapterAuthorize_NotApplicable(t *testing.T) {
 
 // TestAuthorizerAdapterAuthorize_EmptyRegistry verifies Authorize handles empty registry correctly.
 func TestAuthorizerAdapterAuthorize_EmptyRegistry(t *testing.T) {
-	reg := NewRegistry()
-	engine := NewChainEngine(reg)
+	reg := policy.NewRegistry()
+	engine := policy.NewChainEngine(reg)
 	adapter := NewAuthorizerAdapter(engine)
 
-	req := authz.Request{
+	req := Request{
 		Subject:  "user:anyone",
 		Action:   "read",
 		Resource: "document:any",
@@ -187,35 +187,35 @@ func TestAuthorizerAdapterAuthorize_EmptyRegistry(t *testing.T) {
 // TestAuthorizerAdapterAuthorize_ContextAttributes verifies context attributes are passed to evaluation.
 func TestAuthorizerAdapterAuthorize_ContextAttributes(t *testing.T) {
 	// Create bundle with conditional rule based on context
-	bundle := Bundle{
+	bundle := policy.Bundle{
 		ID:      "test-bundle-context",
 		Version: 1,
-		Policies: []Policy{
+		Policies: []policy.Policy{
 			{
 				ID:       "policy-context-aware",
 				Subjects: []string{"user:eve"},
-				Rules: []Rule{
+				Rules: []policy.Rule{
 					{
 						Actions:   []string{"read"},
 						Resources: []string{"document:secret"}, // Exact match
 						Expr:      "ip_address == '192.168.1.1'",
-						Effect:    Allow,
+						Effect:    policy.Allow,
 					},
 				},
 			},
 		},
 	}
-	reg := NewRegistry()
+	reg := policy.NewRegistry()
 	_, err := reg.AddBundle(bundle)
 	if err != nil {
 		t.Fatalf("failed to add bundle: %v", err)
 	}
 
-	engine := NewChainEngine(reg)
+	engine := policy.NewChainEngine(reg)
 	adapter := NewAuthorizerAdapter(engine)
 
 	// Request with matching context
-	req := authz.Request{
+	req := Request{
 		Subject:  "user:eve",
 		Action:   "read",
 		Resource: "document:secret",
@@ -248,46 +248,46 @@ func TestAuthorizerAdapterAuthorize_ContextAttributes(t *testing.T) {
 // TestAuthorizerAdapterAuthorize_DenyOverrides verifies deny-overrides semantics work correctly.
 func TestAuthorizerAdapterAuthorize_DenyOverrides(t *testing.T) {
 	// Create bundle with both allow and deny policies - deny should win
-	bundle := Bundle{
+	bundle := policy.Bundle{
 		ID:      "test-bundle-deny-wins",
 		Version: 1,
-		Policies: []Policy{
+		Policies: []policy.Policy{
 			{
 				ID:       "policy-allow-frank",
 				Subjects: []string{"user:frank"},
-				Rules: []Rule{
+				Rules: []policy.Rule{
 					{
 						Actions:   []string{"read"},
 						Resources: []string{"*"}, // Wildcard
 						Expr:      "",
-						Effect:    Allow,
+						Effect:    policy.Allow,
 					},
 				},
 			},
 			{
 				ID:       "policy-deny-frank-sensitive",
 				Subjects: []string{"user:frank"},
-				Rules: []Rule{
+				Rules: []policy.Rule{
 					{
 						Actions:   []string{"read"},
 						Resources: []string{"document:sensitive"}, // Exact match
 						Expr:      "",
-						Effect:    Deny,
+						Effect:    policy.Deny,
 					},
 				},
 			},
 		},
 	}
-	reg := NewRegistry()
+	reg := policy.NewRegistry()
 	_, err := reg.AddBundle(bundle)
 	if err != nil {
 		t.Fatalf("failed to add bundle: %v", err)
 	}
 
-	engine := NewChainEngine(reg)
+	engine := policy.NewChainEngine(reg)
 	adapter := NewAuthorizerAdapter(engine)
 
-	req := authz.Request{
+	req := Request{
 		Subject:  "user:frank",
 		Action:   "read",
 		Resource: "document:sensitive",

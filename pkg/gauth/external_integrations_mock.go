@@ -373,6 +373,16 @@ func (m *MockRevocationChecker) IsRevoked(
 	return false, nil
 }
 
+func (m *MockRevocationChecker) IsDelegationRevoked(
+	ctx context.Context,
+	delegationID string,
+) (bool, error) {
+	time.Sleep(20 * time.Millisecond)
+	// For now, mocks don't store revoked delegations separately.
+	// We can update this later if we need to test mock scenarios with revoked delegations.
+	return false, nil
+}
+
 func (m *MockRevocationChecker) GetRevocationInfo(
 	ctx context.Context,
 	entityID string,

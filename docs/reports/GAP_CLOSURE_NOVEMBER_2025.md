@@ -1,3 +1,11 @@
+---
+title: Gap Closure November 2025
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Gap Closure Complete - November 6, 2025
 
 ## Executive Summary

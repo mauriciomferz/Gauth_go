@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/web"
 	"github.com/gin-gonic/gin"
+	"github.com/mauriciomferz/Gauth_go/web"
 )
 
 // TestCapabilityAnchorPrometheusVerifyParam ensures verify=1 triggers re-computation even when status already set.

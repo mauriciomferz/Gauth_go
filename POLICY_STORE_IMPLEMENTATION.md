@@ -1,3 +1,11 @@
+---
+title: Policy Store Implementation
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # PolicyStore Interface Implementation
 
 ## Overview

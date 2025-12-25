@@ -1,3 +1,11 @@
+---
+title: Sprint2 Plan
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Sprint 2 Plan (RB6–RB9)
 
 Scope: Refactor & agility (signature abstraction), embedded attestation verifier, HTTP handler modularization, and initial distributed observability (tracing + latency percentiles).

@@ -26,20 +26,20 @@ type AustraliaIdentityConnector struct {
 // AustraliaConnectorConfig configuration for Australian identity connector
 type AustraliaConnectorConfig struct {
 	// myGovID configuration
-	MyGovIDURL        string `validate:"required,url"`
-	MyGovIDClientID   string `validate:"required"`
-	MyGovIDSecret     string `validate:"required"`
-	
+	MyGovIDURL      string `validate:"required,url"`
+	MyGovIDClientID string `validate:"required"`
+	MyGovIDSecret   string `validate:"required"`
+
 	// Document Verification Service (DVS) configuration
-	DVSURL            string `validate:"url"`
-	DVSAccessCode     string
-	
+	DVSURL        string `validate:"url"`
+	DVSAccessCode string
+
 	// Medicare verification
-	MedicareURL       string `validate:"url"`
-	MedicareAPIKey    string
-	
+	MedicareURL    string `validate:"url"`
+	MedicareAPIKey string
+
 	// Timeouts
-	RequestTimeout    time.Duration
+	RequestTimeout time.Duration
 }
 
 // MyGovIDAuthRequest myGovID authentication request
@@ -62,15 +62,15 @@ type MyGovIDAuthResponse struct {
 
 // MyGovIDUserInfo user information from myGovID
 type MyGovIDUserInfo struct {
-	MyGovID       string      `json:"mygov_id"`
-	GivenName     string      `json:"given_name"`
-	FamilyName    string      `json:"family_name"`
-	MiddleName    string      `json:"middle_name,omitempty"`
-	DateOfBirth   string      `json:"date_of_birth"`
-	Email         string      `json:"email"`
-	EmailVerified bool        `json:"email_verified"`
-	PhoneNumber   string      `json:"phone_number"`
-	Address       *AUAddress  `json:"address"`
+	MyGovID       string     `json:"mygov_id"`
+	GivenName     string     `json:"given_name"`
+	FamilyName    string     `json:"family_name"`
+	MiddleName    string     `json:"middle_name,omitempty"`
+	DateOfBirth   string     `json:"date_of_birth"`
+	Email         string     `json:"email"`
+	EmailVerified bool       `json:"email_verified"`
+	PhoneNumber   string     `json:"phone_number"`
+	Address       *AUAddress `json:"address"`
 }
 
 // AUAddress Australian address structure
@@ -84,35 +84,35 @@ type AUAddress struct {
 
 // MedicareCardRequest Medicare card validation request
 type MedicareCardRequest struct {
-	CardNumber      string `json:"card_number" validate:"required,len=10"`
-	IRN             string `json:"irn" validate:"required,len=1"` // Individual Reference Number (1-9)
-	CardColor       string `json:"card_color" validate:"omitempty,oneof=green blue yellow"`
-	FamilyName      string `json:"family_name" validate:"required"`
-	FirstName       string `json:"first_name" validate:"required"`
-	DateOfBirth     string `json:"date_of_birth" validate:"required"`
-	ExpiryDate      string `json:"expiry_date"`
+	CardNumber  string `json:"card_number" validate:"required,len=10"`
+	IRN         string `json:"irn" validate:"required,len=1"` // Individual Reference Number (1-9)
+	CardColor   string `json:"card_color" validate:"omitempty,oneof=green blue yellow"`
+	FamilyName  string `json:"family_name" validate:"required"`
+	FirstName   string `json:"first_name" validate:"required"`
+	DateOfBirth string `json:"date_of_birth" validate:"required"`
+	ExpiryDate  string `json:"expiry_date"`
 }
 
 // MedicareCardResponse Medicare card validation response
 type MedicareCardResponse struct {
-	Valid           bool       `json:"valid"`
-	CardNumber      string     `json:"card_number"`
-	IRN             string     `json:"irn"`
-	CardColor       string     `json:"card_color"`
-	Name            string     `json:"name"`
-	DateOfBirth     string     `json:"date_of_birth"`
-	ExpiryDate      string     `json:"expiry_date"`
-	Address         *AUAddress `json:"address,omitempty"`
-	Error           string     `json:"error,omitempty"`
+	Valid       bool       `json:"valid"`
+	CardNumber  string     `json:"card_number"`
+	IRN         string     `json:"irn"`
+	CardColor   string     `json:"card_color"`
+	Name        string     `json:"name"`
+	DateOfBirth string     `json:"date_of_birth"`
+	ExpiryDate  string     `json:"expiry_date"`
+	Address     *AUAddress `json:"address,omitempty"`
+	Error       string     `json:"error,omitempty"`
 }
 
 // DriverLicenseRequest driver's license validation request for Australia
 type AUDriverLicenseRequest struct {
-	LicenseNumber   string `json:"license_number" validate:"required"`
-	Name            string `json:"name" validate:"required"`
-	DateOfBirth     string `json:"date_of_birth" validate:"required"`
-	State           string `json:"state" validate:"required,oneof=NSW VIC QLD SA WA TAS NT ACT"`
-	CardNumber      string `json:"card_number,omitempty"` // For states that use card numbers
+	LicenseNumber string `json:"license_number" validate:"required"`
+	Name          string `json:"name" validate:"required"`
+	DateOfBirth   string `json:"date_of_birth" validate:"required"`
+	State         string `json:"state" validate:"required,oneof=NSW VIC QLD SA WA TAS NT ACT"`
+	CardNumber    string `json:"card_number,omitempty"` // For states that use card numbers
 }
 
 // DriverLicenseResponse driver's license validation response for Australia
@@ -134,12 +134,12 @@ type AUDriverLicenseResponse struct {
 
 // PassportRequest passport verification request for Australia
 type AUPassportRequest struct {
-	PassportNumber  string `json:"passport_number" validate:"required"`
-	FirstName       string `json:"first_name" validate:"required"`
-	LastName        string `json:"last_name" validate:"required"`
-	DateOfBirth     string `json:"date_of_birth" validate:"required"`
-	Nationality     string `json:"nationality,omitempty"`
-	Gender          string `json:"gender,omitempty"`
+	PassportNumber string `json:"passport_number" validate:"required"`
+	FirstName      string `json:"first_name" validate:"required"`
+	LastName       string `json:"last_name" validate:"required"`
+	DateOfBirth    string `json:"date_of_birth" validate:"required"`
+	Nationality    string `json:"nationality,omitempty"`
+	Gender         string `json:"gender,omitempty"`
 }
 
 // PassportResponse passport verification response for Australia
@@ -164,18 +164,18 @@ func NewAustraliaIdentityConnector(config *AustraliaConnectorConfig) (*Australia
 	if err := validate.Struct(config); err != nil {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
-	
+
 	// Set defaults
 	if config.RequestTimeout == 0 {
 		config.RequestTimeout = 30 * time.Second
 	}
-	
+
 	connector := &AustraliaIdentityConnector{
 		config:     config,
 		httpClient: &http.Client{Timeout: config.RequestTimeout},
 		validator:  validate,
 	}
-	
+
 	return connector, nil
 }
 
@@ -186,7 +186,7 @@ func (ac *AustraliaIdentityConnector) AuthenticateMyGovID(ctx context.Context, r
 	if err := ac.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Validate identity strength
 	validStrengths := map[string]bool{"IP1": true, "IP2": true, "IP3": true}
 	if !validStrengths[req.IdentityStrength] {
@@ -195,13 +195,13 @@ func (ac *AustraliaIdentityConnector) AuthenticateMyGovID(ctx context.Context, r
 			Error:   "Invalid identity strength (must be IP1, IP2, or IP3)",
 		}, nil
 	}
-	
+
 	// In production, this would:
 	// 1. Redirect user to myGovID login
 	// 2. Perform OIDC authentication
 	// 3. Receive identity claims
 	// 4. Verify identity strength
-	
+
 	// Mock response for demonstration
 	response := &MyGovIDAuthResponse{
 		Success:          true,
@@ -217,7 +217,7 @@ func (ac *AustraliaIdentityConnector) AuthenticateMyGovID(ctx context.Context, r
 		},
 		Attributes: make(map[string]string),
 	}
-	
+
 	return response, nil
 }
 
@@ -227,10 +227,10 @@ func (ac *AustraliaIdentityConnector) ValidateMedicareCard(ctx context.Context, 
 	if err := ac.validator.Struct(req); err != nil {
 		return &MedicareCardResponse{Valid: false, Error: err.Error()}, nil
 	}
-	
+
 	cardNumber := strings.TrimSpace(req.CardNumber)
 	irn := strings.TrimSpace(req.IRN)
-	
+
 	// Validate card number format (10 digits)
 	if !regexp.MustCompile(`^\d{10}$`).MatchString(cardNumber) {
 		return &MedicareCardResponse{
@@ -238,7 +238,7 @@ func (ac *AustraliaIdentityConnector) ValidateMedicareCard(ctx context.Context, 
 			Error: "Invalid Medicare card number format (must be 10 digits)",
 		}, nil
 	}
-	
+
 	// Validate IRN (Individual Reference Number: 1-9)
 	if !regexp.MustCompile(`^[1-9]$`).MatchString(irn) {
 		return &MedicareCardResponse{
@@ -246,7 +246,7 @@ func (ac *AustraliaIdentityConnector) ValidateMedicareCard(ctx context.Context, 
 			Error: "Invalid IRN (must be 1-9)",
 		}, nil
 	}
-	
+
 	// Validate card number check digit
 	if !ac.validateMedicareCheckDigit(cardNumber) {
 		return &MedicareCardResponse{
@@ -254,18 +254,18 @@ func (ac *AustraliaIdentityConnector) ValidateMedicareCard(ctx context.Context, 
 			Error: "Invalid Medicare card number check digit",
 		}, nil
 	}
-	
+
 	// In production, this would verify with Services Australia
 	response := &MedicareCardResponse{
-		Valid:      true,
-		CardNumber: cardNumber,
-		IRN:        irn,
-		CardColor:  req.CardColor,
-		Name:       fmt.Sprintf("%s %s", req.FirstName, req.FamilyName),
+		Valid:       true,
+		CardNumber:  cardNumber,
+		IRN:         irn,
+		CardColor:   req.CardColor,
+		Name:        fmt.Sprintf("%s %s", req.FirstName, req.FamilyName),
 		DateOfBirth: req.DateOfBirth,
-		ExpiryDate: req.ExpiryDate,
+		ExpiryDate:  req.ExpiryDate,
 	}
-	
+
 	return response, nil
 }
 
@@ -275,7 +275,7 @@ func (ac *AustraliaIdentityConnector) VerifyDriverLicense(ctx context.Context, r
 	if err := ac.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	// Validate license number format (varies by state)
 	if !ac.validateLicenseNumberFormat(req.LicenseNumber, req.State) {
 		return &AUDriverLicenseResponse{
@@ -283,12 +283,12 @@ func (ac *AustraliaIdentityConnector) VerifyDriverLicense(ctx context.Context, r
 			Error: fmt.Sprintf("Invalid license number format for state %s", req.State),
 		}, nil
 	}
-	
+
 	// In production, this would:
 	// 1. Verify with state transport authority
 	// 2. Check license status and demerit points
 	// 3. Validate license classes
-	
+
 	// Mock response for demonstration
 	response := &AUDriverLicenseResponse{
 		Valid:         true,
@@ -299,7 +299,7 @@ func (ac *AustraliaIdentityConnector) VerifyDriverLicense(ctx context.Context, r
 		ExpiryDate:    "2030-01-15",
 		LicenseClass:  "C", // Car license
 	}
-	
+
 	return response, nil
 }
 
@@ -309,9 +309,9 @@ func (ac *AustraliaIdentityConnector) VerifyPassport(ctx context.Context, req *A
 	if err := ac.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
-	
+
 	passportNumber := strings.ToUpper(strings.TrimSpace(req.PassportNumber))
-	
+
 	// Validate passport number format (1 or 2 letters + 7 digits)
 	if !regexp.MustCompile(`^[A-Z]{1,2}\d{7}$`).MatchString(passportNumber) {
 		return &AUPassportResponse{
@@ -319,7 +319,7 @@ func (ac *AustraliaIdentityConnector) VerifyPassport(ctx context.Context, req *A
 			Error: "Invalid passport number format",
 		}, nil
 	}
-	
+
 	// In production, this would verify with Department of Foreign Affairs and Trade
 	response := &AUPassportResponse{
 		Valid:            true,
@@ -333,7 +333,7 @@ func (ac *AustraliaIdentityConnector) VerifyPassport(ctx context.Context, req *A
 		ExpiryDate:       "2030-01-15",
 		IssuingAuthority: "Commonwealth of Australia",
 	}
-	
+
 	return response, nil
 }
 
@@ -344,36 +344,36 @@ func (ac *AustraliaIdentityConnector) validateMedicareCheckDigit(cardNumber stri
 	// Weights: 1, 3, 7, 9, 1, 3, 7, 9 for first 8 digits
 	weights := []int{1, 3, 7, 9, 1, 3, 7, 9}
 	sum := 0
-	
+
 	for i := 0; i < 8; i++ {
 		digit := int(cardNumber[i] - '0')
 		sum += digit * weights[i]
 	}
-	
+
 	checkDigit := sum % 10
 	actualCheckDigit := int(cardNumber[8] - '0')
-	
+
 	return checkDigit == actualCheckDigit
 }
 
 func (ac *AustraliaIdentityConnector) validateLicenseNumberFormat(licenseNumber, state string) bool {
 	// License number formats vary by state
 	patterns := map[string]string{
-		"NSW": `^\d{8}$`,                    // 8 digits
-		"VIC": `^\d{10}$`,                   // 10 digits
-		"QLD": `^\d{8,9}$`,                  // 8-9 digits
-		"SA":  `^[A-Z]\d{6}$`,               // 1 letter + 6 digits
-		"WA":  `^\d{7}$`,                    // 7 digits
-		"TAS": `^\d{8}$`,                    // 8 digits
-		"NT":  `^\d{6,8}$`,                  // 6-8 digits
-		"ACT": `^[A-Z]{2}\d{6}$`,            // 2 letters + 6 digits
+		"NSW": `^\d{8}$`,         // 8 digits
+		"VIC": `^\d{10}$`,        // 10 digits
+		"QLD": `^\d{8,9}$`,       // 8-9 digits
+		"SA":  `^[A-Z]\d{6}$`,    // 1 letter + 6 digits
+		"WA":  `^\d{7}$`,         // 7 digits
+		"TAS": `^\d{8}$`,         // 8 digits
+		"NT":  `^\d{6,8}$`,       // 6-8 digits
+		"ACT": `^[A-Z]{2}\d{6}$`, // 2 letters + 6 digits
 	}
-	
+
 	pattern, ok := patterns[state]
 	if !ok {
 		return false
 	}
-	
+
 	matched, _ := regexp.MatchString(pattern, licenseNumber)
 	return matched
 }
@@ -388,7 +388,7 @@ func (ac *AustraliaIdentityConnector) generateCacheKey(operation string, parts .
 func (ac *AustraliaIdentityConnector) GetMetrics() map[string]interface{} {
 	ac.mu.RLock()
 	defer ac.mu.RUnlock()
-	
+
 	return map[string]interface{}{
 		"connector": "australia_identity",
 	}

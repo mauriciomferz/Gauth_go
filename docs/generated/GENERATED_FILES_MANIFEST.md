@@ -1,3 +1,11 @@
+---
+title: Generated Files Manifest
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Generated Files Manifest
 
 > Purpose: Track all auto-generated documentation artifacts. Do not edit manually.

@@ -1,3 +1,11 @@
+---
+title: Property Testing
+category: guide
+status: draft
+lastUpdated: 2025-12-25
+owners: [system]
+---
+
 # Property-Based Testing Guide
 
 > **Status**: Implemented for parsing (5/6 tests passing, 2700+ iterations)  

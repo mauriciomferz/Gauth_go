@@ -574,10 +574,10 @@ func (s *BetaServer) RegisterUIRoutes() {
 
 			data, err := staticUI.ReadFile("static_ui/" + path)
 			if err != nil {
-				c.AbortWithError(http.StatusNotFound, err)
+				_ = c.AbortWithError(http.StatusNotFound, err)
 				return
 			}
-			c.Writer.Write(data)
+			_, _ = c.Writer.Write(data)
 		}
 	}
 
