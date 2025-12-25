@@ -4,11 +4,13 @@
 package gauth
 
 import (
+	"context"
 	"encoding/binary"
 	"fmt"
 	"math"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/mauriciomferz/Gauth_go/internal/security"
@@ -27,6 +29,8 @@ type BoltReplayStore struct {
 	db         *bolt.DB
 	bucketName []byte
 	ttl        time.Duration
+	quit       chan struct{}
+	wg         sync.WaitGroup
 }
 
 // NewBoltReplayStore creates a new BoltDB-backed replay store.
@@ -91,9 +95,11 @@ func NewBoltReplayStore(path string, ttl time.Duration) (*BoltReplayStore, error
 		db:         db,
 		bucketName: bucketName,
 		ttl:        ttl,
+		quit:       make(chan struct{}),
 	}
 
 	// Start background cleanup goroutine
+	store.wg.Add(1)
 	go store.cleanupExpired()
 
 	return store, nil
@@ -136,47 +142,80 @@ func (s *BoltReplayStore) CheckAndRecord(jti string) error {
 // cleanupExpired removes expired JTI entries periodically.
 // Runs every 5 minutes to maintain database size.
 func (s *BoltReplayStore) cleanupExpired() {
+	defer s.wg.Done()
 	ticker := time.NewTicker(5 * time.Minute)
 	defer ticker.Stop()
 
-	for range ticker.C {
-		now := time.Now().Unix()
-
-		_ = s.db.Update(func(tx *bolt.Tx) error {
-			bucket := tx.Bucket(s.bucketName)
-			if bucket == nil {
-				return nil
-			}
-
-			// Collect expired keys
-			var expiredKeys [][]byte
-			cursor := bucket.Cursor()
-
-			for k, v := cursor.First(); k != nil; k, v = cursor.Next() {
-				if len(v) >= 8 {
-					// G115 fix: Validate timestamp boundary before uint64→int64 conversion
-					expiryUint := binary.BigEndian.Uint64(v)
-					if expiryUint > math.MaxInt64 {
-						// Timestamp beyond int64 max (year 2262+), treat as far future
-						continue
-					}
-					expiry := int64(expiryUint)
-					if now >= expiry {
-						expiredKeys = append(expiredKeys, append([]byte(nil), k...))
-					}
-				}
-			} // Delete expired entries
-			for _, key := range expiredKeys {
-				_ = bucket.Delete(key)
-			}
-
-			return nil
-		})
+	for {
+		select {
+		case <-ticker.C:
+			// Ignore error in background task
+			_, _ = s.Cleanup(context.Background())
+		case <-s.quit:
+			return
+		}
 	}
 }
 
-// Close closes the BoltDB database.
+// Cleanup manually triggers expiration of stale entries.
+// Returns the number of evicted items.
+// Exposed for maintenance and testing (Bonus 5).
+func (s *BoltReplayStore) Cleanup(ctx context.Context) (int, error) {
+	var evictedCount int
+	now := time.Now().Unix()
+
+	err := s.db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket(s.bucketName)
+		if bucket == nil {
+			return nil
+		}
+
+		// Collect expired keys
+		var expiredKeys [][]byte
+		cursor := bucket.Cursor()
+
+		for k, v := cursor.First(); k != nil; k, v = cursor.Next() {
+			// Check for cancellation
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			default:
+			}
+
+			if len(v) >= 8 {
+				// G115 fix: Validate timestamp boundary before uint64→int64 conversion
+				expiryUint := binary.BigEndian.Uint64(v)
+				if expiryUint > math.MaxInt64 {
+					// Timestamp beyond int64 max (year 2262+), treat as far future
+					continue
+				}
+				expiry := int64(expiryUint)
+				if now >= expiry {
+					expiredKeys = append(expiredKeys, append([]byte(nil), k...))
+				}
+			}
+		}
+
+		// Delete expired entries
+		for _, key := range expiredKeys {
+			if err := bucket.Delete(key); err == nil {
+				evictedCount++
+			}
+		}
+
+		return nil
+	})
+
+	return evictedCount, err
+}
+
+// Close closes the BoltDB database and stops background tasks.
 func (s *BoltReplayStore) Close() error {
+	// Signal background routines to stop
+	close(s.quit)
+	// Wait for them to finish
+	s.wg.Wait()
+
 	if s.db != nil {
 		return s.db.Close()
 	}
