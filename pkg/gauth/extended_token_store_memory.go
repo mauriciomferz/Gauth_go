@@ -156,9 +156,32 @@ func (s *MemoryExtendedTokenStore) DeleteExpiredTokens(ctx context.Context) (int
 	count := 0
 
 	// Find expired tokens
+	// Find expired tokens with grace periods
 	expiredTokens := make([]string, 0)
+	now := time.Now()
+
+	// Grace periods to prevent clock skew issues and retain audit trails
+	const (
+		expiredGracePeriod = 1 * time.Hour
+		revokedGracePeriod = 24 * time.Hour
+	)
+
+	expiredCutoff := now.Add(-expiredGracePeriod)
+	revokedCutoff := now.Add(-revokedGracePeriod)
+
 	for accessToken, stored := range s.tokens {
-		if isTokenExpired(stored.Token) {
+		// 1. Check expiration with grace period
+		expiresAtUnix := stored.Token.IssuedAt.Unix() + stored.Token.ExpiresIn
+		expiresAt := time.Unix(expiresAtUnix, 0)
+		isExpired := expiresAt.Before(expiredCutoff)
+
+		// 2. Check revocation with grace period
+		isRevokedOld := false
+		if stored.Metadata.RevokedAt != nil && stored.Metadata.RevokedAt.Before(revokedCutoff) {
+			isRevokedOld = true
+		}
+
+		if isExpired || isRevokedOld {
 			expiredTokens = append(expiredTokens, accessToken)
 		}
 	}
