@@ -706,6 +706,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	// Learning Lab endpoints for full button functionality
 	s.AddLearningLabEndpoints()
 
+	// Register Static UI Routes (Dashboard & CSP)
+	s.RegisterUIRoutes()
+
 	// P*P Architecture endpoints (PAP, PDP, PEP)
 	s.AddPPPEndpoints()
 

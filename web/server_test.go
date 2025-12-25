@@ -30,7 +30,7 @@ func TestRootServesHTML(t *testing.T) {
 	if ct := w.Header().Get("Content-Type"); !strings.Contains(ct, "text/html") {
 		t.Fatalf("expected html content type, got %s", ct)
 	}
-	if !strings.Contains(w.Body.String(), "GAuth Beta Demo") {
+	if !strings.Contains(w.Body.String(), "GAuth Beta Dashboard") {
 		t.Fatalf("expected body to contain title text")
 	}
 }

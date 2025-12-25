@@ -47,12 +47,12 @@ func TestUISmoke(t *testing.T) {
 		return
 	}
 	checks := map[string]string{
-		"hero title":       "The Open-Source Platform",
-		"compliance badge": "95% RFC-0111 & RFC-0115 Compliant",
-		"stat number":      "Protocol Substeps",
-		"RFC reference":    "RFC-0111",
-		"features section": "Enterprise-Grade",
-		"footer links":     "API Discovery",
+		"page title":       "GAuth Dashboard",
+		"hero title":       "GAuth Beta Dashboard",
+		"revocation panel": "Revocation Head",
+		"rotation panel":   "Rotation Summary",
+		"errors panel":     "Error Catalog",
+		"footer copyright": "© 2025 GAuth Beta",
 	}
 	for label, token := range checks {
 		if !strings.Contains(body, token) {
@@ -60,12 +60,13 @@ func TestUISmoke(t *testing.T) {
 		}
 	}
 
-	// Check for critical structural elements
+	// Check for critical structural elements and panel IDs
 	requiredElements := []string{
 		"<nav",
 		"<footer",
-		"<style>",
-		"<section",
+		`id="revocation"`,
+		`id="rotation"`,
+		`id="capability"`,
 	}
 	for _, elem := range requiredElements {
 		if !strings.Contains(body, elem) {
