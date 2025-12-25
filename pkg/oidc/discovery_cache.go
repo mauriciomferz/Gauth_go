@@ -61,6 +61,8 @@ type InMemoryDiscoveryCache struct {
 	httpClient *http.Client
 	defaultTTL time.Duration
 	maxEntries int
+	quit       chan struct{}
+	wg         sync.WaitGroup
 }
 
 // DiscoveryCacheOption configures the discovery cache.
@@ -94,11 +96,16 @@ func NewInMemoryDiscoveryCache(opts ...DiscoveryCacheOption) *InMemoryDiscoveryC
 		httpClient: &http.Client{Timeout: 10 * time.Second},
 		defaultTTL: 24 * time.Hour,
 		maxEntries: 100,
+		quit:       make(chan struct{}),
 	}
 
 	for _, opt := range opts {
 		opt(cache)
 	}
+
+	// Start cleanup goroutine
+	cache.wg.Add(1)
+	go cache.cleanupExpired()
 
 	return cache
 }
@@ -183,6 +190,37 @@ func (c *InMemoryDiscoveryCache) Clear() error {
 
 	c.cache = make(map[string]*CachedDiscovery)
 	return nil
+}
+
+// Close gracefully stops the background cleanup goroutine.
+// This is essential to prevent goroutine leaks (Bonus 8).
+func (c *InMemoryDiscoveryCache) Close() error {
+	close(c.quit)
+	c.wg.Wait()
+	return nil
+}
+
+// cleanupExpired removes expired entries periodically.
+func (c *InMemoryDiscoveryCache) cleanupExpired() {
+	defer c.wg.Done()
+	ticker := time.NewTicker(2 * time.Minute)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			c.mu.Lock()
+			now := time.Now()
+			for key, entry := range c.cache {
+				if now.After(entry.ExpiresAt) {
+					delete(c.cache, key)
+				}
+			}
+			c.mu.Unlock()
+		case <-c.quit:
+			return
+		}
+	}
 }
 
 // evictOldest removes the oldest cache entry (must be called with lock held).
