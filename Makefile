@@ -544,6 +544,13 @@ js-build: ## Bundle front-end assets using Vite
 	      echo "❌ Build output missing - check Vite build process"; exit 1; \
 	    else \
 	      echo "✅ Vite build complete (output in frontend/ui-react/dist)"; \
+		  echo "🔄 Syncing to backend static assets..."; \
+		  mkdir -p web/static/assets; \
+		  rm -rf web/static/assets/*; \
+		  cp -r frontend/ui-react/dist/assets/* web/static/assets/; \
+		  mkdir -p web/templates; \
+		  cp frontend/ui-react/dist/index.html web/templates/index.html; \
+		  echo "✅ Assets synced to web/static/assets"; \
 	    fi; \
 	  else \
 	    echo "⚠️  No package.json in frontend/ui-react - skipping JS bundling"; \

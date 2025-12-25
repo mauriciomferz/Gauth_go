@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/prometheus/client_golang/prometheus"
 	otel "go.opentelemetry.io/otel"
@@ -667,6 +668,16 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	jwtGrantHandler := grantJWTHandlers.NewHandler(clientAuthenticator)
 	jwtGrantHandler.RegisterRoutes(s.router)
 
+	// OAuth2 Handler (CIBA & Token Exchange)
+	var oauth2DBPool *pgxpool.Pool
+	if s.db != nil {
+		oauth2DBPool = s.db.Pool
+	}
+	oauth2Handler := authHandlers.NewOAuth2Handler(oauth2DBPool, os.Getenv("GAUTH_JWT_SIGNING_KEY"))
+	oauth2Group := s.router.Group("/api/v1/oauth2")
+	oauth2Handler.RegisterRoutes(oauth2Group)
+	log.Println("[oauth2] registered CIBA and Token Exchange endpoints at /api/v1/oauth2/*")
+
 	log.Println("[gnap] RFC 9635 GNAP endpoints registered at /gnap/*")
 
 	// SAML Reference Implementation
@@ -870,7 +881,12 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			s.authorizer = authz.NewMemoryAuthorizer()
 		}
 		// Functional options: enable mandatory signatures when GAUTH_MULTI_SIG_STRICT set (already handled internally by NewService via env).
-		svc := gauth_rfc_001.NewService(memAudit, s.authorizer)
+		rfcOpts := []gauth_rfc_001.Option{}
+		if s.redisClient != nil {
+			// Enable distributed replay protection (GAUTH-VULN-004)
+			rfcOpts = append(rfcOpts, gauth_rfc_001.WithReplayStoreRedis(s.redisClient.GetClient(), "gauth", 5*time.Minute))
+		}
+		svc := gauth_rfc_001.NewService(memAudit, s.authorizer, rfcOpts...)
 		s.rfc0111Service = svc
 		fmt.Fprintln(os.Stderr, "[rfc0111] service initialized (semantic counters active)")
 		// Mount dual-control revocation workflow HTTP endpoints.

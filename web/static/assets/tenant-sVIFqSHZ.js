@@ -1,0 +1,1 @@
+const t=()=>{const t=localStorage.getItem("tenant_id");if(t)return t;const e="test-tenant-1";return localStorage.setItem("tenant_id",e),e},e=e=>{const n=t(),o=e.includes("?")?"&":"?";return`${e}${o}tenant_id=${encodeURIComponent(n)}`};export{e as a,t as g};

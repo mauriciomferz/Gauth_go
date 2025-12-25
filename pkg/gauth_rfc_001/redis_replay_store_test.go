@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 )
 
 // TestRedisReplayStoreBasic exercises first-seen vs replay using a real Redis if available.

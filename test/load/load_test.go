@@ -255,8 +255,9 @@ func TestLoad_EnduranceTest(t *testing.T) {
 	}
 
 	// Assert reasonable throughput for 50 workers
-	if result.OpsPerSecond < 10000 {
-		t.Errorf("Expected throughput >10K ops/sec with 50 workers, got %.2f", result.OpsPerSecond)
+	// Threshold lowered to 3K (from 10K) to account for Redis Replay Protection overhead (GAUTH-VULN-004)
+	if result.OpsPerSecond < 3000 {
+		t.Errorf("Expected throughput >3K ops/sec with 50 workers, got %.2f", result.OpsPerSecond)
 	}
 }
 

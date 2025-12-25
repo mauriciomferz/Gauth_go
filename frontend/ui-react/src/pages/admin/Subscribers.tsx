@@ -18,6 +18,8 @@ import {
   Field,
   Radio,
   RadioGroup,
+  TabList,
+  Tab,
 } from '@fluentui/react-components';
 import {
   PeopleTeam24Regular,
@@ -157,45 +159,53 @@ interface SubscriberFormData {
   tenantId: string;
   contactEmail: string;
   contactPhone: string;
-  
-  // Step 2: OIDC Configuration
+
+  // Step 2: Authentication Configuration
+  authProtocol: 'oidc' | 'saml';
+
+  // OIDC Fields
   oidcProvider: string;
   oidcClientId: string;
   oidcClientSecret: string;
   oidcDiscoveryUrl: string;
-  
+
+  // SAML Fields
+  samlEntityId: string;
+  samlSSOUrl: string;
+  samlCertificate: string;
+
   // Step 3: Key Generation
   keyAlgorithm: string;
   keyRotationInterval: string;
   enableAutoRotation: boolean;
-  
+
   // Step 4: Policy Templates
   policyTemplate: string;
   customPolicies: string;
-  
+
   // Step 5: Legal Framework
   jurisdiction: string;
   complianceFrameworks: string[];
   dataRetention: string;
-  
+
   // Step 6: Security Settings
   mfaRequired: boolean;
   tokenExpiration: string;
   sessionTimeout: string;
   ipWhitelist: string;
-  
+
   // Step 7: Notification Preferences
   emailNotifications: boolean;
   webhookUrl: string;
   notificationEvents: string[];
-  
+
   // Step 8: Review & Confirm
   agreedToTerms: boolean;
 }
 
 const steps = [
   { id: 1, label: 'Basic Info', icon: <Building24Regular /> },
-  { id: 2, label: 'OIDC Config', icon: <Shield24Regular /> },
+  { id: 2, label: 'Auth Config', icon: <Shield24Regular /> },
   { id: 3, label: 'Key Setup', icon: <Key24Regular /> },
   { id: 4, label: 'Policies', icon: <Settings24Regular /> },
   { id: 5, label: 'Legal', icon: <Globe24Regular /> },
@@ -212,10 +222,14 @@ export default function Subscribers() {
     tenantId: '',
     contactEmail: '',
     contactPhone: '',
+    authProtocol: 'oidc',
     oidcProvider: 'custom',
     oidcClientId: '',
     oidcClientSecret: '',
     oidcDiscoveryUrl: '',
+    samlEntityId: '',
+    samlSSOUrl: '',
+    samlCertificate: '',
     keyAlgorithm: 'RS256',
     keyRotationInterval: '90',
     enableAutoRotation: true,
@@ -288,7 +302,7 @@ export default function Subscribers() {
           <div className={classes.form}>
             <Title3>Basic Information</Title3>
             <Text>Provide basic tenant information to get started.</Text>
-            
+
             <Field label="Tenant Name" required>
               <Input
                 value={formData.tenantName}
@@ -296,7 +310,7 @@ export default function Subscribers() {
                 placeholder="ACME Corporation"
               />
             </Field>
-            
+
             <Field label="Tenant ID" required>
               <Input
                 value={formData.tenantId}
@@ -304,7 +318,7 @@ export default function Subscribers() {
                 placeholder="acme-corp-001"
               />
             </Field>
-            
+
             <div className={classes.twoColumn}>
               <Field label="Contact Email" required>
                 <Input
@@ -314,7 +328,7 @@ export default function Subscribers() {
                   placeholder="admin@acme.com"
                 />
               </Field>
-              
+
               <Field label="Contact Phone">
                 <Input
                   type="tel"
@@ -330,46 +344,86 @@ export default function Subscribers() {
       case 2:
         return (
           <div className={classes.form}>
-            <Title3>OIDC Configuration</Title3>
-            <Text>Configure OpenID Connect provider for authentication.</Text>
-            
-            <Field label="OIDC Provider">
-              <Dropdown
-                value={formData.oidcProvider}
-                onOptionSelect={(_, data) => updateFormData('oidcProvider', data.optionValue)}
-              >
-                <Option value="azure">Azure AD</Option>
-                <Option value="google">Google Workspace</Option>
-                <Option value="okta">Okta</Option>
-                <Option value="auth0">Auth0</Option>
-                <Option value="custom">Custom Provider</Option>
-              </Dropdown>
-            </Field>
-            
-            <Field label="Client ID" required>
-              <Input
-                value={formData.oidcClientId}
-                onChange={(e) => updateFormData('oidcClientId', e.target.value)}
-                placeholder="client-id-from-provider"
-              />
-            </Field>
-            
-            <Field label="Client Secret" required>
-              <Input
-                type="password"
-                value={formData.oidcClientSecret}
-                onChange={(e) => updateFormData('oidcClientSecret', e.target.value)}
-                placeholder="client-secret-from-provider"
-              />
-            </Field>
-            
-            <Field label="Discovery URL" required>
-              <Input
-                value={formData.oidcDiscoveryUrl}
-                onChange={(e) => updateFormData('oidcDiscoveryUrl', e.target.value)}
-                placeholder="https://provider.com/.well-known/openid-configuration"
-              />
-            </Field>
+            <Title3>Authentication Configuration</Title3>
+            <Text>Select your preferred authentication protocol and configure provider settings.</Text>
+
+            <TabList
+              selectedValue={formData.authProtocol}
+              onTabSelect={(_, data) => updateFormData('authProtocol', data.value)}
+            >
+              <Tab value="oidc">OpenID Connect (OIDC)</Tab>
+              <Tab value="saml">SAML 2.0</Tab>
+            </TabList>
+
+            {formData.authProtocol === 'oidc' ? (
+              <>
+                <Field label="OIDC Provider">
+                  <Dropdown
+                    value={formData.oidcProvider}
+                    onOptionSelect={(_, data) => updateFormData('oidcProvider', data.optionValue)}
+                  >
+                    <Option value="azure">Azure AD</Option>
+                    <Option value="google">Google Workspace</Option>
+                    <Option value="okta">Okta</Option>
+                    <Option value="auth0">Auth0</Option>
+                    <Option value="custom">Custom Provider</Option>
+                  </Dropdown>
+                </Field>
+
+                <Field label="Client ID" required>
+                  <Input
+                    value={formData.oidcClientId}
+                    onChange={(e) => updateFormData('oidcClientId', e.target.value)}
+                    placeholder="client-id-from-provider"
+                  />
+                </Field>
+
+                <Field label="Client Secret" required>
+                  <Input
+                    type="password"
+                    value={formData.oidcClientSecret}
+                    onChange={(e) => updateFormData('oidcClientSecret', e.target.value)}
+                    placeholder="client-secret-from-provider"
+                  />
+                </Field>
+
+                <Field label="Discovery URL" required>
+                  <Input
+                    value={formData.oidcDiscoveryUrl}
+                    onChange={(e) => updateFormData('oidcDiscoveryUrl', e.target.value)}
+                    placeholder="https://provider.com/.well-known/openid-configuration"
+                  />
+                </Field>
+              </>
+            ) : (
+              <>
+                <Field label="Entity ID (Issuer)" required>
+                  <Input
+                    value={formData.samlEntityId}
+                    onChange={(e) => updateFormData('samlEntityId', e.target.value)}
+                    placeholder="https://idp.example.com/metadata"
+                  />
+                </Field>
+
+                <Field label="SSO Service URL" required>
+                  <Input
+                    value={formData.samlSSOUrl}
+                    onChange={(e) => updateFormData('samlSSOUrl', e.target.value)}
+                    placeholder="https://idp.example.com/sso"
+                  />
+                </Field>
+
+                <Field label="X.509 Certificate" required>
+                  <Textarea
+                    value={formData.samlCertificate}
+                    onChange={(e) => updateFormData('samlCertificate', e.target.value)}
+                    rows={5}
+                    placeholder="-----BEGIN CERTIFICATE-----..."
+                    style={{ fontFamily: 'monospace' }}
+                  />
+                </Field>
+              </>
+            )}
           </div>
         );
 
@@ -378,7 +432,7 @@ export default function Subscribers() {
           <div className={classes.form}>
             <Title3>Key Generation Settings</Title3>
             <Text>Configure cryptographic key generation and rotation policies.</Text>
-            
+
             <Field label="Key Algorithm">
               <RadioGroup
                 value={formData.keyAlgorithm}
@@ -390,7 +444,7 @@ export default function Subscribers() {
                 <Radio value="ES512" label="ES512 (ECDSA P-521)" />
               </RadioGroup>
             </Field>
-            
+
             <Field label="Key Rotation Interval (days)">
               <Input
                 type="number"
@@ -399,7 +453,7 @@ export default function Subscribers() {
                 placeholder="90"
               />
             </Field>
-            
+
             <Checkbox
               checked={formData.enableAutoRotation}
               onChange={(_, data) => updateFormData('enableAutoRotation', data.checked)}
@@ -413,7 +467,7 @@ export default function Subscribers() {
           <div className={classes.form}>
             <Title3>Policy Templates</Title3>
             <Text>Select authorization policy templates and customize as needed.</Text>
-            
+
             <Field label="Policy Template">
               <RadioGroup
                 value={formData.policyTemplate}
@@ -425,7 +479,7 @@ export default function Subscribers() {
                 <Radio value="custom" label="Custom (Define your own)" />
               </RadioGroup>
             </Field>
-            
+
             {formData.policyTemplate === 'custom' && (
               <Field label="Custom Policies (YAML)">
                 <Textarea
@@ -444,7 +498,7 @@ export default function Subscribers() {
           <div className={classes.form}>
             <Title3>Legal Framework</Title3>
             <Text>Configure jurisdiction and compliance requirements.</Text>
-            
+
             <Field label="Jurisdiction">
               <Dropdown
                 value={formData.jurisdiction}
@@ -458,7 +512,7 @@ export default function Subscribers() {
                 <Option value="APAC">Asia-Pacific</Option>
               </Dropdown>
             </Field>
-            
+
             <Field label="Compliance Frameworks">
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <Checkbox
@@ -493,7 +547,7 @@ export default function Subscribers() {
                 />
               </div>
             </Field>
-            
+
             <Field label="Data Retention Period (days)">
               <Input
                 type="number"
@@ -510,13 +564,13 @@ export default function Subscribers() {
           <div className={classes.form}>
             <Title3>Security Settings</Title3>
             <Text>Configure security policies and restrictions.</Text>
-            
+
             <Checkbox
               checked={formData.mfaRequired}
               onChange={(_, data) => updateFormData('mfaRequired', data.checked)}
               label="Require Multi-Factor Authentication (MFA)"
             />
-            
+
             <div className={classes.twoColumn}>
               <Field label="Token Expiration (seconds)">
                 <Input
@@ -526,7 +580,7 @@ export default function Subscribers() {
                   placeholder="3600"
                 />
               </Field>
-              
+
               <Field label="Session Timeout (seconds)">
                 <Input
                   type="number"
@@ -536,7 +590,7 @@ export default function Subscribers() {
                 />
               </Field>
             </div>
-            
+
             <Field label="IP Whitelist (comma-separated)">
               <Textarea
                 value={formData.ipWhitelist}
@@ -553,13 +607,13 @@ export default function Subscribers() {
           <div className={classes.form}>
             <Title3>Notification Preferences</Title3>
             <Text>Configure how you receive system notifications.</Text>
-            
+
             <Checkbox
               checked={formData.emailNotifications}
               onChange={(_, data) => updateFormData('emailNotifications', data.checked)}
               label="Enable email notifications"
             />
-            
+
             <Field label="Webhook URL (optional)">
               <Input
                 value={formData.webhookUrl}
@@ -567,7 +621,7 @@ export default function Subscribers() {
                 placeholder="https://your-domain.com/webhook"
               />
             </Field>
-            
+
             <Field label="Notification Events">
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <Checkbox
@@ -620,14 +674,14 @@ export default function Subscribers() {
           <div className={classes.form}>
             <Title3>Review & Confirm</Title3>
             <Text>Please review your configuration before submitting.</Text>
-            
+
             <MessageBar intent="info">
               <MessageBarBody>
                 <MessageBarTitle>Configuration Summary</MessageBarTitle>
                 Review all settings carefully. You can modify these after creation in the subscriber settings page.
               </MessageBarBody>
             </MessageBar>
-            
+
             <Card style={{ padding: '16px', backgroundColor: tokens.colorNeutralBackground3 }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div>
@@ -639,9 +693,20 @@ export default function Subscribers() {
                   <Text> {formData.contactEmail}</Text>
                 </div>
                 <div>
-                  <Text weight="semibold">OIDC Provider:</Text>
-                  <Text> {formData.oidcProvider}</Text>
+                  <Text weight="semibold">Auth Protocol:</Text>
+                  <Text> {formData.authProtocol.toUpperCase()}</Text>
                 </div>
+                {formData.authProtocol === 'oidc' ? (
+                  <div>
+                    <Text weight="semibold">OIDC Provider:</Text>
+                    <Text> {formData.oidcProvider}</Text>
+                  </div>
+                ) : (
+                  <div>
+                    <Text weight="semibold">Entity ID:</Text>
+                    <Text> {formData.samlEntityId}</Text>
+                  </div>
+                )}
                 <div>
                   <Text weight="semibold">Key Algorithm:</Text>
                   <Text> {formData.keyAlgorithm}</Text>
@@ -660,7 +725,7 @@ export default function Subscribers() {
                 </div>
               </div>
             </Card>
-            
+
             <Checkbox
               checked={formData.agreedToTerms}
               onChange={(_, data) => updateFormData('agreedToTerms', data.checked)}
@@ -718,20 +783,18 @@ export default function Subscribers() {
           {steps.map((step) => (
             <div key={step.id} className={classes.step}>
               <div
-                className={`${classes.stepCircle} ${
-                  step.id === currentStep
+                className={`${classes.stepCircle} ${step.id === currentStep
                     ? classes.stepCircleActive
                     : step.id < currentStep
-                    ? classes.stepCircleCompleted
-                    : ''
-                }`}
+                      ? classes.stepCircleCompleted
+                      : ''
+                  }`}
               >
                 {step.id < currentStep ? <Checkmark24Regular /> : step.id}
               </div>
               <Text
-                className={`${classes.stepLabel} ${
-                  step.id === currentStep ? classes.stepLabelActive : ''
-                }`}
+                className={`${classes.stepLabel} ${step.id === currentStep ? classes.stepLabelActive : ''
+                  }`}
               >
                 {step.label}
               </Text>
@@ -765,7 +828,7 @@ export default function Subscribers() {
           >
             Back
           </Button>
-          
+
           <div style={{ display: 'flex', gap: '12px' }}>
             {currentStep < 8 ? (
               <Button

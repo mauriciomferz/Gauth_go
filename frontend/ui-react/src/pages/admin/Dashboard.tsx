@@ -154,7 +154,7 @@ export default function Dashboard() {
   const fetchDashboardData = async () => {
     try {
       const tenantId = 'test-tenant-1'; // TODO: Get from auth context
-      
+
       // Fetch all data in parallel
       const [metricsResponse, policiesResponse, subscribersResponse] = await Promise.all([
         fetch(`/api/admin/metrics/system?tenant_id=${tenantId}`),
@@ -168,9 +168,9 @@ export default function Dashboard() {
           console.warn('Dashboard: Metrics endpoint returned non-JSON response');
           return;
         }
-        
+
         const metricsData = await metricsResponse.json();
-        
+
         // Get real active policies count from database
         let activePolicies = 0;
         if (policiesResponse.ok) {
@@ -193,12 +193,12 @@ export default function Dashboard() {
 
         // Use metrics data for authorization requests count
         let authorizationRequests = metricsData.totalRequests || 0;
-        
+
         // Calculate system uptime from metrics
         const uptimeSeconds = metricsData.uptime || 0;
         const days = Math.floor(uptimeSeconds / (24 * 60 * 60));
         const hours = Math.floor((uptimeSeconds % (24 * 60 * 60)) / (60 * 60));
-        
+
         setStats({
           activeSubscribers: activeSubscribers,
           totalTokens: authorizationRequests,
@@ -253,7 +253,7 @@ export default function Dashboard() {
       <Card className={classes.welcomeCard}>
         <Title2 className={classes.welcomeTitle}>Admin Dashboard</Title2>
         <Text className={classes.welcomeText}>
-          Welcome to the GAuth Administration Portal. Monitor your authorization system, manage policies, and oversee security operations.
+          Welcome to the AuthAI Administration Portal. Monitor your authorization system, manage policies, and oversee security operations.
         </Text>
       </Card>
 

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/alicebob/miniredis/v2"
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 )
 
 // TestAtomicCounter_ConcurrentCheckAndIncrement validates that the Redis Lua atomic counter
@@ -45,7 +45,10 @@ func TestAtomicCounter_ConcurrentCheckAndIncrement(t *testing.T) {
 	defer redisClient.Close()
 
 	// Create atomic counter store
-	store, err := NewAtomicCounterStore(redisClient, "gauth:test"); if err != nil { t.Fatalf("Failed to create store: %v", err) }
+	store, err := NewAtomicCounterStore(redisClient, "gauth:test")
+	if err != nil {
+		t.Fatalf("Failed to create store: %v", err)
+	}
 
 	ctx := context.Background()
 	key := "test:quota:concurrent"
@@ -120,7 +123,10 @@ func TestAtomicCounter_PartialFillScenario(t *testing.T) {
 	})
 	defer redisClient.Close()
 
-	store, err := NewAtomicCounterStore(redisClient, "gauth:test"); if err != nil { t.Fatalf("Failed to create store: %v", err) }
+	store, err := NewAtomicCounterStore(redisClient, "gauth:test")
+	if err != nil {
+		t.Fatalf("Failed to create store: %v", err)
+	}
 
 	ctx := context.Background()
 	key := "test:quota:partial"
@@ -185,7 +191,10 @@ func TestAtomicCounter_ScriptReloadOnRedisRestart(t *testing.T) {
 	})
 	defer redisClient.Close()
 
-	store, err := NewAtomicCounterStore(redisClient, "gauth:test"); if err != nil { t.Fatalf("Failed to create store: %v", err) }
+	store, err := NewAtomicCounterStore(redisClient, "gauth:test")
+	if err != nil {
+		t.Fatalf("Failed to create store: %v", err)
+	}
 
 	ctx := context.Background()
 	key := "test:quota:reload"
@@ -230,7 +239,10 @@ func TestAtomicCounter_TTLExpiration(t *testing.T) {
 	})
 	defer redisClient.Close()
 
-	store, err := NewAtomicCounterStore(redisClient, "gauth:test"); if err != nil { t.Fatalf("Failed to create store: %v", err) }
+	store, err := NewAtomicCounterStore(redisClient, "gauth:test")
+	if err != nil {
+		t.Fatalf("Failed to create store: %v", err)
+	}
 
 	ctx := context.Background()
 	key := "test:quota:ttl"

@@ -20,6 +20,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -556,36 +557,6 @@ func (s *BetaServer) RegisterUIRoutes() {
 		return
 	}
 
-	// Helper to create a random base64url nonce (16 bytes -> 22 chars).
-	genNonce := func() string {
-		b := make([]byte, 16)
-		if _, err := crand.Read(b); err != nil {
-			// Fallback deterministic (test environments) – still includes 'nonce-' prefix satisfying regex.
-			return "deadbeefdeadbeefdead"
-		}
-		return base64.RawURLEncoding.EncodeToString(b)
-	}
-
-	s.router.GET("/index.html", func(c *gin.Context) {
-		nonce := genNonce()
-		// Minimal CSP: enforce self, nonce for inline scripts, and disallow framing.
-		c.Header("Content-Security-Policy", fmt.Sprintf("default-src 'self'; script-src 'self' 'nonce-%s'; frame-ancestors 'none'", nonce))
-		// Minimal HTML satisfying smoketest element assertions.
-		// Contains: themeToggle button, mobileNavButton button, role=tablist with >=5 data-tab elements,
-		// first tab id=tab-token-demo and aria-selected=true
-		html := `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>GAuth Demo</title></head><body>
-<button id="themeToggle" aria-label="Toggle theme"></button>
-<button id="mobileNavButton" aria-label="Open navigation"></button>
-<div role="tablist">
-  <div id="tab-token-demo" aria-selected="true" data-tab="1">Token Demo</div>
-  <div data-tab="2">Capabilities</div>
-  <div data-tab="3">Anchoring</div>
-  <div data-tab="4">Audit</div>
-  <div data-tab="5">Limits</div>
-</div>
-</body></html>`
-		c.Data(200, "text/html; charset=utf-8", []byte(html))
-	})
 }
 
 // getKeyManager is now defined in server_lifecycle.go
@@ -1019,6 +990,9 @@ var embeddedModuleJS embed.FS
 
 //go:embed static/js/pages/*.js
 var embeddedPagesJS embed.FS
+
+//go:embed static/assets/*
+var embeddedAssets embed.FS
 
 // ExampleMeta defines catalog metadata for an example.
 
@@ -1754,11 +1728,6 @@ func (s *BetaServer) routes() {
 	})
 
 	// Simple root page (rebranded Beta)
-	s.router.GET("/", func(c *gin.Context) {
-		// Add CSP header for security (matching /index.html)
-		c.Header("Content-Security-Policy", "default-src 'self'; frame-ancestors 'none'")
-		c.Data(200, "text/html; charset=utf-8", []byte("<html><body><h1>GAuth Beta Demo</h1><p>Visit <a href='/index.html'>Full Beta UI</a></p></body></html>"))
-	})
 
 	// API Documentation routes (Swagger UI, ReDoc, OpenAPI spec)
 	s.RegisterAPIDocumentation()
@@ -3001,35 +2970,6 @@ func (s *BetaServer) routes() {
 	})
 
 	// Serve index.html. In dev (GAUTH_DEV_INDEX=1) serve from disk to reflect template changes immediately.
-	s.router.GET("/index.html", func(c *gin.Context) {
-		devIdx := os.Getenv("GAUTH_DEV_INDEX")
-		if devIdx == "1" {
-			fmt.Fprintln(os.Stderr, "[debug] /index.html dev mode active (GAUTH_DEV_INDEX=1)")
-		}
-		if os.Getenv("GAUTH_DEV_INDEX") == "1" {
-			if wd, err := os.Getwd(); err == nil {
-				path := wd + "/web/templates/index.html"
-				fmt.Fprintf(os.Stderr, "[debug] attempting disk index read: %s\n", path)
-				if b, err := os.ReadFile(path); err == nil {
-					c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
-					c.Header("Pragma", "no-cache")
-					c.Header("Expires", "0")
-					fmt.Fprintf(os.Stderr, "[debug] serving disk index.html (%d bytes)\n", len(b))
-					serveWithNonce(c, b)
-					return
-				} else {
-					fmt.Fprintf(os.Stderr, "[debug] disk index read failed: %v (falling back to embedded)\n", err)
-				}
-			}
-			// Fall through to embedded if disk read fails
-		}
-		if len(embeddedIndexHTML) == 0 {
-			c.String(500, "index.html not embedded")
-			return
-		}
-		fmt.Fprintf(os.Stderr, "[debug] serving embedded index.html (%d bytes)\n", len(embeddedIndexHTML))
-		serveWithNonce(c, embeddedIndexHTML)
-	})
 
 	// Serve protocol-flow.html (dev mode supports disk reload)
 	protocolFlowHandler := func(c *gin.Context) {
@@ -3346,6 +3286,33 @@ func (s *BetaServer) routes() {
 	s.router.GET("/static/js/app.js", func(c *gin.Context) { c.Data(200, "application/javascript; charset=utf-8", embeddedAppJS) })
 	s.router.GET("/static/js/log_stream_panel.js", func(c *gin.Context) { c.Data(200, "application/javascript; charset=utf-8", embeddedLogStreamJS) })
 	s.router.GET("/static/js/aria-tabs.js", func(c *gin.Context) { c.Data(200, "application/javascript; charset=utf-8", embeddedAriaTabsJS) })
+
+	// Serve Vite assets (hashed filenames) using standard StaticFS
+	// This handles correct path resolution and avoids manual path construction issues.
+	assetsFS, err := fs.Sub(embeddedAssets, "static/assets")
+	if err != nil {
+		panic("invalid static/assets embed: " + err.Error())
+	}
+	s.router.StaticFS("/assets", http.FS(assetsFS))
+
+	// SPA Routes - serve index.html for client-side routing
+	spaHandler := func(c *gin.Context) {
+		c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+		c.Data(200, "text/html; charset=utf-8", embeddedIndexHTML)
+	}
+	s.router.GET("/", spaHandler)
+	s.router.GET("/index.html", spaHandler)
+	s.router.GET("/admin/*filepath", spaHandler)
+	s.router.GET("/mcp", spaHandler)
+
+	// Global SPA fallback for unknown routes (excluding API)
+	s.router.NoRoute(func(c *gin.Context) {
+		if strings.HasPrefix(c.Request.URL.Path, "/api/") {
+			c.JSON(404, gin.H{"error": "not found"})
+			return
+		}
+		spaHandler(c)
+	})
 
 	// Always serve visualization page scripts from disk if present (outside dev gating to avoid 404/mime mismatch)
 	s.router.GET("/static/js/pages/:file", func(c *gin.Context) {

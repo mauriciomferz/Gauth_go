@@ -160,6 +160,17 @@ const useStyles = makeStyles({
     overflow: 'auto',
     padding: '24px',
   },
+  navGroup: {
+    marginBottom: '16px',
+  },
+  navGroupTitle: {
+    padding: '8px 16px 4px',
+    fontSize: '11px',
+    textTransform: 'uppercase',
+    color: tokens.colorNeutralForeground2,
+    fontWeight: 600,
+    letterSpacing: '0.5px',
+  },
 });
 
 interface NavItem {
@@ -169,114 +180,65 @@ interface NavItem {
   path: string;
 }
 
-const navItems: NavItem[] = [
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
+const navGroups: NavGroup[] = [
   {
-    id: 'dashboard',
-    label: 'Dashboard',
-    icon: <Home24Regular />,
-    path: '/admin/dashboard',
+    label: 'Overview',
+    items: [
+      { id: 'dashboard', label: 'Dashboard', icon: <Home24Regular />, path: '/admin/dashboard' },
+      { id: 'performance', label: 'Performance', icon: <Gauge24Regular />, path: '/admin/performance' },
+      { id: 'metrics', label: 'System Metrics', icon: <DataArea24Regular />, path: '/admin/metrics' },
+    ],
   },
   {
-    id: 'metrics',
-    label: 'System Metrics',
-    icon: <DataArea24Regular />,
-    path: '/admin/metrics',
+    label: 'Identity & Access',
+    items: [
+      { id: 'subscribers', label: 'Subscribers', icon: <PeopleTeam24Regular />, path: '/admin/subscribers/list' },
+      { id: 'tokens', label: 'Token Management', icon: <Key24Regular />, path: '/admin/tokens' },
+      { id: 'scim-settings', label: 'SCIM User Provisioning', icon: <PeopleTeam24Regular />, path: '/admin/scim-settings' },
+    ],
   },
   {
-    id: 'subscribers',
-    label: 'Subscribers',
-    icon: <PeopleTeam24Regular />,
-    path: '/admin/subscribers/list',
+    label: 'Federation',
+    items: [
+      { id: 'oidc-providers', label: 'OIDC Providers', icon: <Shield24Regular />, path: '/admin/oidc-providers' },
+      { id: 'saml-providers', label: 'SAML Providers', icon: <ShieldTask24Regular />, path: '/admin/saml-providers' },
+    ],
   },
   {
-    id: 'tokens',
-    label: 'Token Management',
-    icon: <Key24Regular />,
-    path: '/admin/tokens',
+    label: 'Policy',
+    items: [
+      { id: 'authorization', label: 'Authorization Engine', icon: <ShieldTask24Regular />, path: '/admin/authorization' },
+      { id: 'gauthplus', label: 'GAuth+', icon: <Bot24Regular />, path: '/admin/gauthplus' },
+      { id: 'poa', label: 'Power of Attorney', icon: <DocumentCheckmark24Regular />, path: '/admin/poa' },
+      { id: 'gnap', label: 'GNAP Grants', icon: <Key24Regular />, path: '/admin/gnap' },
+    ],
   },
   {
-    id: 'authorization',
-    label: 'Authorization Engine',
-    icon: <ShieldTask24Regular />,
-    path: '/admin/authorization',
+    label: 'Security',
+    items: [
+      { id: 'events', label: 'Event System', icon: <Alert24Regular />, path: '/admin/events' },
+      { id: 'resilience', label: 'Resilience Patterns', icon: <Shield24Regular />, path: '/admin/resilience' },
+      { id: 'audit', label: 'Audit Trail', icon: <DocumentBulletList24Regular />, path: '/admin/audit' },
+      { id: 'revocation', label: 'Revocation Transparency', icon: <Database24Regular />, path: '/admin/revocation' },
+    ],
   },
   {
-    id: 'poa',
-    label: 'Power of Attorney',
-    icon: <DocumentCheckmark24Regular />,
-    path: '/admin/poa',
+    label: 'Tools',
+    items: [
+      { id: 'mcp', label: 'Model Context Protocol', icon: <Bot24Regular />, path: '/admin/mcp' },
+      { id: 'device-connect', label: 'Connect Device', icon: <DeviceMeetingRoom24Regular />, path: '/device/connect' },
+    ],
   },
   {
-    id: 'events',
-    label: 'Event System',
-    icon: <Alert24Regular />,
-    path: '/admin/events',
-  },
-  {
-    id: 'resilience',
-    label: 'Resilience Patterns',
-    icon: <Shield24Regular />,
-    path: '/admin/resilience',
-  },
-  {
-    id: 'audit',
-    label: 'Audit Trail',
-    icon: <DocumentBulletList24Regular />,
-    path: '/admin/audit',
-  },
-  {
-    id: 'gauthplus',
-    label: 'GAuth+',
-    icon: <Bot24Regular />,
-    path: '/admin/gauthplus',
-  },
-  {
-    id: 'gnap',
-    label: 'GNAP Grants',
-    icon: <Key24Regular />,
-    path: '/admin/gnap',
-  },
-  {
-    id: 'device-connect',
-    label: 'Connect Device',
-    icon: <DeviceMeetingRoom24Regular />,
-    path: '/device/connect',
-  },
-  {
-    id: 'revocation',
-    label: 'Revocation Transparency',
-    icon: <Database24Regular />,
-    path: '/admin/revocation',
-  },
-  {
-    id: 'oidc-providers',
-    label: 'OIDC Providers',
-    icon: <Shield24Regular />,
-    path: '/admin/oidc-providers',
-  },
-  {
-    id: 'saml-providers',
-    label: 'SAML Providers',
-    icon: <ShieldTask24Regular />,
-    path: '/admin/saml-providers',
-  },
-  {
-    id: 'scim-settings',
-    label: 'SCIM User Provisioning',
-    icon: <PeopleTeam24Regular />,
-    path: '/admin/scim-settings',
-  },
-  {
-    id: 'configuration',
-    label: 'Configuration',
-    icon: <Settings24Regular />,
-    path: '/admin/configuration',
-  },
-  {
-    id: 'performance',
-    label: 'Performance',
-    icon: <Gauge24Regular />,
-    path: '/admin/performance',
+    label: 'Settings',
+    items: [
+      { id: 'configuration', label: 'Configuration', icon: <Settings24Regular />, path: '/admin/configuration' },
+    ],
   },
 ];
 
@@ -300,8 +262,11 @@ export default function AdminLayout() {
   const isActive = (path: string) => location.pathname === path;
 
   const getCurrentPageTitle = () => {
-    const currentItem = navItems.find((item) => item.path === location.pathname);
-    return currentItem?.label || 'Admin Portal';
+    for (const group of navGroups) {
+      const item = group.items.find((i) => i.path === location.pathname);
+      if (item) return item.label;
+    }
+    return 'AuthAI Admin';
   };
 
   return (
@@ -315,39 +280,47 @@ export default function AdminLayout() {
           <div className={classes.sidebarHeader}>
             <div className={classes.logo}>🛡️</div>
             {sidebarExpanded && (
-              <Text className={classes.sidebarTitle}>GAuth Admin</Text>
+              <Text className={classes.sidebarTitle}>AuthAI Admin</Text>
             )}
           </div>
 
           <nav className={classes.nav}>
-            {navItems.map((item) => {
-              const navButton = (
-                <button
-                  className={`${classes.navItem} ${isActive(item.path) ? classes.navItemActive : ''
-                    }`}
-                  onClick={() => navigate(item.path)}
-                >
-                  <span className={classes.navIcon}>{item.icon}</span>
-                  {sidebarExpanded && (
-                    <span className={classes.navText}>{item.label}</span>
-                  )}
-                </button>
-              );
+            {navGroups.map((group) => (
+              <div key={group.label} className={classes.navGroup}>
+                {sidebarExpanded && (
+                  <div className={classes.navGroupTitle}>{group.label}</div>
+                )}
+                {group.items.map((item) => {
+                  const navButton = (
+                    <button
+                      key={item.id}
+                      className={`${classes.navItem} ${isActive(item.path) ? classes.navItemActive : ''
+                        }`}
+                      onClick={() => navigate(item.path)}
+                    >
+                      <span className={classes.navIcon}>{item.icon}</span>
+                      {sidebarExpanded && (
+                        <span className={classes.navText}>{item.label}</span>
+                      )}
+                    </button>
+                  );
 
-              return sidebarExpanded ? (
-                <div key={item.id}>{navButton}</div>
-              ) : (
-                <Tooltip
-                  key={item.id}
-                  content={item.label}
-                  relationship="label"
-                  positioning="after"
-                  withArrow
-                >
-                  {navButton}
-                </Tooltip>
-              );
-            })}
+                  return sidebarExpanded ? (
+                    navButton
+                  ) : (
+                    <Tooltip
+                      key={item.id}
+                      content={item.label}
+                      relationship="label"
+                      positioning="after"
+                      withArrow
+                    >
+                      {navButton}
+                    </Tooltip>
+                  );
+                })}
+              </div>
+            ))}
           </nav>
 
           <Button

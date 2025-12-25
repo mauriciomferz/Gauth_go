@@ -1,20 +1,57 @@
 import { useState, useEffect } from 'react';
-import { Card, StatCard } from '@/components/Card';
-import { Button } from '@/components/Button';
+import {
+  makeStyles,
+  shorthands,
+  tokens,
+  Button,
+  Card,
+  CardHeader,
+  CardPreview,
+  Caption1,
+  Text,
+  Title2,
+  Title3,
+  Subtitle2, // Added Subtitle2
+  Body1,
+  Input,
+  Label,
+  Field,
+  Textarea,
+  Dropdown,
+  Option,
+  Switch, // Added Switch
+  Dialog,
+  DialogSurface,
+  DialogTitle,
+  DialogBody,
+  DialogActions,
+  DialogContent,
+  DialogTrigger,
+  TabList,
+  Tab,
+  SelectTabData,
+  TabValue,
+  Badge,
+  Spinner,
+  Divider,
+} from '@fluentui/react-components'; // Check if Subtitle2 and Switch are exported, if not use Title3/Text or Checkbox
+import {
+  Server24Regular,
+  PlugConnected24Regular,
+  Wrench24Regular,
+  Add24Regular,
+  Delete24Regular,
+  ArrowRepeatAll24Regular,
+  DocumentText24Regular,
+  Play24Regular,
+  Dismiss24Regular,
+  Desktop24Regular,
+  Globe24Regular,
+  Code24Regular,
+} from '@fluentui/react-icons';
 import { toast } from 'sonner';
-import { 
-  Server, 
-  Plus, 
-  Trash2, 
-  RefreshCw, 
-  FileText, 
-  Wrench, 
-  Activity,
-  CheckCircle,
-  XCircle,
-  Loader2
-} from 'lucide-react';
 
+// --- Types ---
 interface MCPServer {
   id: string;
   name: string;
@@ -50,7 +87,138 @@ interface ToolResultContent {
   text?: string;
 }
 
+// --- Styles ---
+const useStyles = makeStyles({
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('24px'),
+    paddingBottom: '40px',
+  },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  statsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    ...shorthands.gap('16px'),
+  },
+  statCard: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.padding('20px'),
+    height: '100%',
+  },
+  statIcon: {
+    color: tokens.colorBrandForeground1,
+    marginBottom: '12px',
+  },
+  mainContent: {
+    display: 'grid',
+    gridTemplateColumns: '350px 1fr',
+    ...shorthands.gap('24px'),
+    alignItems: 'start',
+    '@media (max-width: 1000px)': {
+      gridTemplateColumns: '1fr',
+    },
+  },
+  serverList: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('12px'),
+    maxHeight: 'calc(100vh - 250px)',
+    overflowY: 'auto',
+  },
+  serverItem: {
+    cursor: 'pointer',
+    ...shorthands.padding('16px'),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    backgroundColor: tokens.colorNeutralBackground1,
+    ':hover': {
+      backgroundColor: tokens.colorNeutralBackground1Hover,
+      borderColor: tokens.colorNeutralStroke1Hover,
+    },
+  },
+  serverItemSelected: {
+    backgroundColor: tokens.colorBrandBackground2,
+    borderColor: tokens.colorBrandStroke1,
+    ':hover': {
+      backgroundColor: tokens.colorBrandBackground2,
+    },
+  },
+  serverItemHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: '8px',
+  },
+  statusBadge: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    fontSize: '12px',
+  },
+  detailsCard: {
+    ...shorthands.padding('24px'),
+    minHeight: '400px',
+  },
+  detailsHeader: {
+    display: 'flex',
+    flexDirection: 'column',
+    marginBottom: '20px',
+  },
+  tabContent: {
+    marginTop: '20px',
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('16px'),
+  },
+  resourceItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    ...shorthands.padding('12px'),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+  },
+  toolItem: {
+    ...shorthands.padding('16px'),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  codeBlock: {
+    fontFamily: 'monospace',
+    backgroundColor: tokens.colorNeutralBackground2,
+    ...shorthands.padding('12px'),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    whiteSpace: 'pre-wrap',
+    fontSize: '12px',
+    maxHeight: '300px',
+    overflowY: 'auto',
+  },
+  formColumn: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+  },
+  row: {
+    display: 'flex',
+    gap: '16px',
+  },
+  dialog: {
+    maxWidth: '600px',
+    width: '100%',
+  }
+});
+
 export default function MCP() {
+  const classes = useStyles();
   const [servers, setServers] = useState<MCPServer[]>([]);
   const [selectedServer, setSelectedServer] = useState<string | null>(null);
   const [resources, setResources] = useState<MCPResource[]>([]);
@@ -59,6 +227,8 @@ export default function MCP() {
   const [showAddServer, setShowAddServer] = useState(false);
   const [resourceContent, setResourceContent] = useState<ResourceContent | null>(null);
   const [toolResult, setToolResult] = useState<{ content: ToolResultContent[] } | null>(null);
+  const [selectedTab, setSelectedTab] = useState<TabValue>('info');
+  const [toolLoading, setToolLoading] = useState(false);
 
   // Form states
   const [serverForm, setServerForm] = useState({
@@ -85,6 +255,9 @@ export default function MCP() {
   useEffect(() => {
     if (selectedServer) {
       loadServerDetails(selectedServer);
+      setResourceContent(null);
+      setToolResult(null);
+      setToolForm({ name: '', arguments: '{}' });
     }
   }, [selectedServer]);
 
@@ -108,11 +281,11 @@ export default function MCP() {
   const loadServerDetails = async (serverId: string) => {
     try {
       const { apiClient } = await import('@/lib/api');
-      
+
       // Load resources
       const resourcesData = await apiClient.listMCPResources(serverId);
       setResources(resourcesData.resources || []);
-      
+
       // Load tools
       const toolsData = await apiClient.listMCPTools(serverId);
       setTools(toolsData.tools || []);
@@ -122,32 +295,32 @@ export default function MCP() {
     }
   };
 
-  const handleRegisterServer = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleRegisterServer = async () => {
     setLoading(true);
-
     try {
       const { apiClient } = await import('@/lib/api');
-      
+
       const serverData = {
         id: serverForm.id,
         name: serverForm.name,
         description: serverForm.description,
         transport_type: serverForm.transport_type,
         command: serverForm.transport_type === 'stdio' ? serverForm.command : undefined,
-        args: serverForm.transport_type === 'stdio' && serverForm.args 
-          ? serverForm.args.split(',').map(a => a.trim()) 
+        args: serverForm.transport_type === 'stdio' && serverForm.args
+          ? serverForm.args.split(',').map(a => a.trim())
           : [],
         url: serverForm.transport_type !== 'stdio' ? serverForm.url : undefined,
         require_auth: serverForm.require_auth,
-        allowed_scopes: serverForm.allowed_scopes 
-          ? serverForm.allowed_scopes.split(',').map(s => s.trim()) 
+        allowed_scopes: serverForm.allowed_scopes
+          ? serverForm.allowed_scopes.split(',').map(s => s.trim())
           : []
       };
 
       await apiClient.registerMCPServer(serverData);
       toast.success('MCP server registered successfully');
       setShowAddServer(false);
+
+      // Reset form
       setServerForm({
         id: '',
         name: '',
@@ -159,6 +332,7 @@ export default function MCP() {
         require_auth: false,
         allowed_scopes: ''
       });
+
       loadServers();
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -168,7 +342,8 @@ export default function MCP() {
     }
   };
 
-  const handleDisconnectServer = async (serverId: string) => {
+  const handleDisconnectServer = async (serverId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!confirm('Are you sure you want to disconnect this server?')) return;
 
     setLoading(true);
@@ -176,6 +351,7 @@ export default function MCP() {
       const { apiClient } = await import('@/lib/api');
       await apiClient.disconnectMCPServer(serverId);
       toast.success('Server disconnected successfully');
+
       if (selectedServer === serverId) {
         setSelectedServer(null);
         setResources([]);
@@ -193,11 +369,11 @@ export default function MCP() {
   const handleReadResource = async (uri: string) => {
     setLoading(true);
     setResourceContent(null);
-    
+
     try {
       const { apiClient } = await import('@/lib/api');
       if (!selectedServer) return;
-      
+
       const data = await apiClient.readMCPResource(selectedServer, uri);
       if (data.contents && data.contents.length > 0) {
         setResourceContent(data.contents[0]);
@@ -211,21 +387,21 @@ export default function MCP() {
     }
   };
 
-  const handleCallTool = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleCallTool = async () => {
+    if (!selectedServer || !toolForm.name) return;
+
+    setToolLoading(true);
     setToolResult(null);
 
     try {
       const { apiClient } = await import('@/lib/api');
-      if (!selectedServer) return;
 
       let args = {};
       try {
-        args = JSON.parse(toolForm.arguments);
+        args = JSON.parse(toolForm.arguments || '{}');
       } catch {
         toast.error('Invalid JSON in arguments');
-        setLoading(false);
+        setToolLoading(false);
         return;
       }
 
@@ -236,7 +412,7 @@ export default function MCP() {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast.error('Failed to call tool: ' + errorMessage);
     } finally {
-      setLoading(false);
+      setToolLoading(false);
     }
   };
 
@@ -244,410 +420,321 @@ export default function MCP() {
   const connectedCount = servers.filter(s => s.status === 'connected').length;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className={classes.container}>
+      {/* Header */}
+      <div className={classes.header}>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Model Context Protocol</h1>
-          <p className="text-gray-600 mt-1">Manage MCP servers and interact with AI model resources and tools</p>
+          <Title2>Model Context Protocol</Title2>
+          <Text block style={{ color: tokens.colorNeutralForeground2, marginTop: '4px' }}>
+            Manage MCP servers and interact with AI model resources and tools
+          </Text>
         </div>
-        <Button onClick={() => setShowAddServer(!showAddServer)} className="flex items-center gap-2">
-          <Plus className="w-4 h-4" />
+        <Button
+          appearance="primary"
+          icon={<Add24Regular />}
+          onClick={() => setShowAddServer(true)}
+        >
           Register Server
         </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard
-          title="Total Servers"
-          value={servers.length}
-          icon={<Server className="w-6 h-6" />}
-          gradient="linear-gradient(to right, rgb(59, 130, 246), rgb(37, 99, 235))"
-        />
-        <StatCard
-          title="Connected"
-          value={connectedCount}
-          icon={<CheckCircle className="w-6 h-6" />}
-          gradient="linear-gradient(to right, rgb(34, 197, 94), rgb(22, 163, 74))"
-        />
-        <StatCard
-          title="Available Tools"
-          value={tools.length}
-          icon={<Wrench className="w-6 h-6" />}
-          gradient="linear-gradient(to right, rgb(168, 85, 247), rgb(147, 51, 234))"
-        />
+      {/* Stats Cards */}
+      <div className={classes.statsGrid}>
+        <Card className={classes.statCard}>
+          <Server24Regular className={classes.statIcon} style={{ fontSize: '32px' }} />
+          <Text size={500} weight="semibold">{servers.length}</Text>
+          <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>Total Servers</Text>
+        </Card>
+        <Card className={classes.statCard}>
+          <PlugConnected24Regular className={classes.statIcon} style={{ fontSize: '32px', color: tokens.colorPaletteGreenForeground1 }} />
+          <Text size={500} weight="semibold">{connectedCount}</Text>
+          <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>Connected Active</Text>
+        </Card>
+        <Card className={classes.statCard}>
+          <Wrench24Regular className={classes.statIcon} style={{ fontSize: '32px', color: tokens.colorPalettePurpleForeground2 }} />
+          <Text size={500} weight="semibold">{tools.length}</Text>
+          <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>Available Tools (Current)</Text>
+        </Card>
       </div>
 
-      {/* Add Server Form */}
-      {showAddServer && (
-        <Card>
-          <h2 className="text-xl font-semibold mb-4">Register MCP Server</h2>
-          <form onSubmit={handleRegisterServer} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Server ID *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={serverForm.id}
-                  onChange={(e) => setServerForm({ ...serverForm, id: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  placeholder="filesystem-server"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={serverForm.name}
-                  onChange={(e) => setServerForm({ ...serverForm, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  placeholder="Filesystem MCP Server"
-                />
-              </div>
-            </div>
+      {/* Main Content */}
+      <div className={classes.mainContent}>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description
-              </label>
-              <input
-                type="text"
-                value={serverForm.description}
-                onChange={(e) => setServerForm({ ...serverForm, description: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                placeholder="Provides file system access"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Transport Type *
-              </label>
-              <select
-                value={serverForm.transport_type}
-                onChange={(e) => setServerForm({ ...serverForm, transport_type: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              >
-                <option value="stdio">Standard I/O (subprocess)</option>
-                <option value="websocket">WebSocket</option>
-                <option value="http-sse">HTTP Server-Sent Events</option>
-              </select>
-            </div>
-
-            {serverForm.transport_type === 'stdio' ? (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Command *
-                  </label>
-                  <input
-                    type="text"
-                    required={serverForm.transport_type === 'stdio'}
-                    value={serverForm.command}
-                    onChange={(e) => setServerForm({ ...serverForm, command: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    placeholder="npx -y @modelcontextprotocol/server-filesystem"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Arguments (comma-separated)
-                  </label>
-                  <input
-                    type="text"
-                    value={serverForm.args}
-                    onChange={(e) => setServerForm({ ...serverForm, args: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    placeholder="/path/to/allowed/directory"
-                  />
-                </div>
-              </>
-            ) : (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  URL *
-                </label>
-                <input
-                  type="text"
-                  required={serverForm.transport_type !== 'stdio'}
-                  value={serverForm.url}
-                  onChange={(e) => setServerForm({ ...serverForm, url: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  placeholder="ws://localhost:8000/mcp or http://localhost:8000/sse"
-                />
-              </div>
-            )}
-
-            <div className="flex items-center gap-4">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={serverForm.require_auth}
-                  onChange={(e) => setServerForm({ ...serverForm, require_auth: e.target.checked })}
-                  className="rounded"
-                />
-                <span className="text-sm text-gray-700">Require Authentication</span>
-              </label>
-            </div>
-
-            <div className="flex gap-2">
-              <Button type="submit" disabled={loading} className="flex items-center gap-2">
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                Register Server
-              </Button>
-              <Button 
-                type="button" 
-                variant="secondary" 
-                onClick={() => setShowAddServer(false)}
-              >
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </Card>
-      )}
-
-      {/* Server List and Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Server List */}
-        <Card className="lg:col-span-1">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Servers</h2>
-            <Button variant="secondary" size="sm" onClick={loadServers} disabled={loading}>
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            </Button>
+        {/* Left Column: Server List */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <Subtitle2>Servers</Subtitle2>
+            <Button appearance="subtle" icon={<ArrowRepeatAll24Regular />} onClick={loadServers} title="Refresh list" />
           </div>
-          {servers.length === 0 ? (
-            <p className="text-gray-500 text-sm">No servers registered. Click "Register Server" to add one.</p>
-          ) : (
-            <div className="space-y-2">
-              {servers.map((server) => (
+
+          <div className={classes.serverList}>
+            {servers.length === 0 ? (
+              <Card className={classes.serverItem}>
+                <Text align="center" style={{ color: tokens.colorNeutralForeground3 }}>No servers registered</Text>
+              </Card>
+            ) : (
+              servers.map(server => (
                 <div
                   key={server.id}
+                  className={`${classes.serverItem} ${selectedServer === server.id ? classes.serverItemSelected : ''}`}
                   onClick={() => setSelectedServer(server.id)}
-                  className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                    selectedServer === server.id
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <Server className="w-4 h-4 text-gray-500" />
-                        <h3 className="font-medium text-sm">{server.name}</h3>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">{server.id}</p>
-                      <div className="flex items-center gap-2 mt-2">
-                        {server.status === 'connected' ? (
-                          <span className="flex items-center gap-1 text-xs text-green-600">
-                            <Activity className="w-3 h-3" />
-                            Connected
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1 text-xs text-gray-500">
-                            <XCircle className="w-3 h-3" />
-                            Disconnected
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                  <div className={classes.serverItemHeader}>
+                    <Text weight="semibold">{server.name}</Text>
                     <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDisconnectServer(server.id);
-                      }}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                      appearance="transparent"
+                      icon={<Delete24Regular />}
+                      size="small"
+                      style={{ color: tokens.colorPaletteRedForeground1 }}
+                      onClick={(e) => handleDisconnectServer(server.id, e)}
+                    />
+                  </div>
+                  <Text size={200} block style={{ marginBottom: '8px', color: tokens.colorNeutralForeground3 }}>{server.id}</Text>
+
+                  <div className={classes.statusBadge}>
+                    {server.status === 'connected' ? (
+                      <Badge color="success" shape="rounded" appearance="tint">Connected</Badge>
+                    ) : (
+                      <Badge color="danger" shape="rounded" appearance="tint">Disconnected</Badge>
+                    )}
+                    <Text size={100} style={{ color: tokens.colorNeutralForeground3 }}>
+                      {server.transport_type}
+                    </Text>
                   </div>
                 </div>
-              ))}
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Right Column: Details */}
+        <Card className={classes.detailsCard}>
+          {selectedServerData ? (
+            <>
+              <div className={classes.detailsHeader}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                  <Title3>{selectedServerData.name}</Title3>
+                  {selectedServerData.status === 'connected' ? (
+                    <Badge color="success" shape="rounded" appearance="filled" icon={<PlugConnected24Regular />}>Connected</Badge>
+                  ) : (
+                    <Badge color="danger" shape="rounded" appearance="filled" icon={<Dismiss24Regular />}>Disconnected</Badge>
+                  )}
+                </div>
+                <Text style={{ color: tokens.colorNeutralForeground2 }}>{selectedServerData.description || 'No description provided'}</Text>
+              </div>
+
+              <TabList selectedValue={selectedTab} onTabSelect={(_, data) => setSelectedTab(data.value)}>
+                <Tab value="info" icon={<Desktop24Regular />}>Info</Tab>
+                <Tab value="resources" icon={<DocumentText24Regular />}>Resources ({resources.length})</Tab>
+                <Tab value="tools" icon={<Wrench24Regular />}>Tools ({tools.length})</Tab>
+              </TabList>
+
+              <div className={classes.tabContent}>
+
+                {/* INFO TAB */}
+                {selectedTab === 'info' && (
+                  <div className={classes.formColumn}>
+                    <Field label="Server ID">
+                      <Input value={selectedServerData.id} readOnly />
+                    </Field>
+                    <div className={classes.row}>
+                      <Field label="Transport Type" style={{ flex: 1 }}>
+                        <Input value={selectedServerData.transport_type} readOnly />
+                      </Field>
+                      <Field label="URL / Command" style={{ flex: 2 }}>
+                        <Input value={selectedServerData.transport_type === 'stdio' ? selectedServerData.command : selectedServerData.url} readOnly style={{ fontFamily: "monospace" }} />
+                      </Field>
+                    </div>
+                    {selectedServerData.args && selectedServerData.args.length > 0 && (
+                      <Field label="Arguments">
+                        <Input value={selectedServerData.args.join(' ')} readOnly style={{ fontFamily: "monospace" }} />
+                      </Field>
+                    )}
+                  </div>
+                )}
+
+                {/* RESOURCES TAB */}
+                {selectedTab === 'resources' && (
+                  <div className={classes.formColumn}>
+                    {resources.length === 0 ? (
+                      <Text style={{ color: tokens.colorNeutralForeground3 }}>No resources exposed by this server.</Text>
+                    ) : (
+                      resources.map(res => (
+                        <div key={res.uri} className={classes.resourceItem}>
+                          <div style={{ overflow: 'hidden' }}>
+                            <Text weight="semibold" block>{res.name}</Text>
+                            <Text size={200} style={{ fontFamily: "monospace", color: tokens.colorNeutralForeground3 }}>{res.uri}</Text>
+                            {res.mime_type && <Badge appearance="outline" size="small" style={{ marginLeft: '8px' }}>{res.mime_type}</Badge>}
+                          </div>
+                          <Button size="small" onClick={() => handleReadResource(res.uri)}>Read</Button>
+                        </div>
+                      ))
+                    )}
+
+                    {loading && <Spinner size="small" label="Loading resource..." />}
+
+                    {resourceContent && (
+                      <div style={{ marginTop: '16px' }}>
+                        <Label weight="semibold">Content: {resourceContent.uri}</Label>
+                        <div className={classes.codeBlock}>
+                          {resourceContent.text || '(No text content)'}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* TOOLS TAB */}
+                {selectedTab === 'tools' && (
+                  <div className={classes.formColumn}>
+                    {/* Tool Selection */}
+                    <Field label="Select Tool">
+                      <Dropdown
+                        placeholder="Select a tool"
+                        onOptionSelect={(_, data) => setToolForm({ ...toolForm, name: data.optionValue || '' })}
+                        value={toolForm.name}
+                      >
+                        {tools.map(t => (
+                          <Option key={t.name} value={t.name} text={t.name}>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                              <Text>{t.name}</Text>
+                              <Caption1 style={{ color: tokens.colorNeutralForeground3 }}>{t.description || 'No description'}</Caption1>
+                            </div>
+                          </Option>
+                        ))}
+                      </Dropdown>
+                    </Field>
+
+                    {toolForm.name && (
+                      <>
+                        <Field label="Arguments (JSON)" hint="Enter arguments as a JSON object">
+                          <Textarea
+                            rows={5}
+                            style={{ fontFamily: "monospace" }}
+                            value={toolForm.arguments}
+                            onChange={(e) => setToolForm({ ...toolForm, arguments: e.target.value })}
+                            style={{ fontFamily: 'monospace' }}
+                          />
+                        </Field>
+                        <Button
+                          appearance="primary"
+                          icon={<Play24Regular />}
+                          onClick={handleCallTool}
+                          disabled={toolLoading}
+                        >
+                          {toolLoading ? 'Executing...' : 'Execute Tool'}
+                        </Button>
+                      </>
+                    )}
+
+                    {toolResult && (
+                      <div style={{ marginTop: '16px' }}>
+                        <Label weight="semibold">Result:</Label>
+                        <div className={classes.codeBlock}>
+                          {JSON.stringify(toolResult.content, null, 2)}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: tokens.colorNeutralForeground3, gap: '16px' }}>
+              <PlugConnected24Regular style={{ fontSize: '48px', opacity: 0.5 }} />
+              <Text>Select a server from the list to view details</Text>
             </div>
           )}
         </Card>
-
-        {/* Server Details */}
-        <div className="lg:col-span-2 space-y-6">
-          {selectedServerData ? (
-            <>
-              <Card>
-                <h2 className="text-xl font-semibold mb-4">Server Details</h2>
-                <div className="space-y-3">
-                  <div>
-                    <span className="text-sm font-medium text-gray-700">Name:</span>
-                    <span className="ml-2 text-sm text-gray-900">{selectedServerData.name}</span>
-                  </div>
-                  {selectedServerData.description && (
-                    <div>
-                      <span className="text-sm font-medium text-gray-700">Description:</span>
-                      <span className="ml-2 text-sm text-gray-900">{selectedServerData.description}</span>
-                    </div>
-                  )}
-                  <div>
-                    <span className="text-sm font-medium text-gray-700">Transport:</span>
-                    <span className="ml-2 text-sm text-gray-900">{selectedServerData.transport_type}</span>
-                  </div>
-                  {selectedServerData.command && (
-                    <div>
-                      <span className="text-sm font-medium text-gray-700">Command:</span>
-                      <span className="ml-2 text-sm text-gray-900 font-mono">{selectedServerData.command}</span>
-                    </div>
-                  )}
-                  <div>
-                    <span className="text-sm font-medium text-gray-700">Status:</span>
-                    <span className={`ml-2 text-sm font-medium ${
-                      selectedServerData.status === 'connected' ? 'text-green-600' : 'text-gray-500'
-                    }`}>
-                      {selectedServerData.status}
-                    </span>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Resources */}
-              <Card>
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  Resources ({resources.length})
-                </h2>
-                {resources.length === 0 ? (
-                  <p className="text-gray-500 text-sm">No resources available</p>
-                ) : (
-                  <div className="space-y-2">
-                    {resources.map((resource) => (
-                      <div
-                        key={resource.uri}
-                        className="p-3 border border-gray-200 rounded-lg hover:border-blue-500 transition-colors"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <h3 className="font-medium text-sm">{resource.name}</h3>
-                            <p className="text-xs text-gray-500 mt-1">{resource.uri}</p>
-                            {resource.description && (
-                              <p className="text-xs text-gray-600 mt-1">{resource.description}</p>
-                            )}
-                          </div>
-                          <Button
-                            size="sm"
-                            onClick={() => handleReadResource(resource.uri)}
-                            disabled={loading}
-                          >
-                            Read
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {resourceContent && (
-                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                    <h3 className="font-medium text-sm mb-2">Resource Content:</h3>
-                    <p className="text-xs text-gray-600 mb-2">URI: {resourceContent.uri}</p>
-                    {resourceContent.mime_type && (
-                      <p className="text-xs text-gray-600 mb-2">Type: {resourceContent.mime_type}</p>
-                    )}
-                    <pre className="text-xs bg-white p-3 rounded border border-gray-200 overflow-auto max-h-64">
-                      {resourceContent.text || '(no text content)'}
-                    </pre>
-                  </div>
-                )}
-              </Card>
-
-              {/* Tools */}
-              <Card>
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <Wrench className="w-5 h-5" />
-                  Tools ({tools.length})
-                </h2>
-                {tools.length === 0 ? (
-                  <p className="text-gray-500 text-sm">No tools available</p>
-                ) : (
-                  <>
-                    <div className="space-y-2 mb-4">
-                      {tools.map((tool) => (
-                        <div
-                          key={tool.name}
-                          className="p-3 border border-gray-200 rounded-lg"
-                        >
-                          <h3 className="font-medium text-sm">{tool.name}</h3>
-                          {tool.description && (
-                            <p className="text-xs text-gray-600 mt-1">{tool.description}</p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                      <h3 className="font-medium text-sm mb-3">Call Tool</h3>
-                      <form onSubmit={handleCallTool} className="space-y-3">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Tool Name
-                          </label>
-                          <select
-                            value={toolForm.name}
-                            onChange={(e) => setToolForm({ ...toolForm, name: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                            required
-                          >
-                            <option value="">Select a tool...</option>
-                            {tools.map((tool) => (
-                              <option key={tool.name} value={tool.name}>
-                                {tool.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Arguments (JSON)
-                          </label>
-                          <textarea
-                            value={toolForm.arguments}
-                            onChange={(e) => setToolForm({ ...toolForm, arguments: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
-                            rows={3}
-                            placeholder='{"param": "value"}'
-                          />
-                        </div>
-                        <Button type="submit" disabled={loading || !toolForm.name}>
-                          {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                          Execute Tool
-                        </Button>
-                      </form>
-
-                      {toolResult && (
-                        <div className="mt-4">
-                          <h4 className="font-medium text-sm mb-2">Tool Result:</h4>
-                          <pre className="text-xs bg-white p-3 rounded border border-gray-200 overflow-auto max-h-64">
-                            {JSON.stringify(toolResult.content, null, 2)}
-                          </pre>
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )}
-              </Card>
-            </>
-          ) : (
-            <Card>
-              <p className="text-gray-500 text-center py-8">
-                Select a server from the list to view details and interact with its resources and tools
-              </p>
-            </Card>
-          )}
-        </div>
       </div>
+
+      {/* Register Server Dialog */}
+      <Dialog open={showAddServer} onOpenChange={(_, data) => setShowAddServer(data.open)}>
+        <DialogSurface className={classes.dialog}>
+          <DialogBody>
+            <DialogTitle>Register New MCP Server</DialogTitle>
+            <DialogContent className={classes.formColumn}>
+              <div className={classes.row}>
+                <Field label="Server ID" required style={{ flex: 1 }}>
+                  <Input
+                    value={serverForm.id}
+                    onChange={(e) => setServerForm({ ...serverForm, id: e.target.value })}
+                    placeholder="my-server"
+                  />
+                </Field>
+                <Field label="Display Name" required style={{ flex: 1 }}>
+                  <Input
+                    value={serverForm.name}
+                    onChange={(e) => setServerForm({ ...serverForm, name: e.target.value })}
+                    placeholder="My Server"
+                  />
+                </Field>
+              </div>
+
+              <Field label="Description">
+                <Input
+                  value={serverForm.description}
+                  onChange={(e) => setServerForm({ ...serverForm, description: e.target.value })}
+                />
+              </Field>
+
+              <Field label="Transport Type" required>
+                <Dropdown
+                  value={serverForm.transport_type === 'stdio' ? 'Standard I/O (Subprocess)' : serverForm.transport_type === 'websocket' ? 'WebSocket' : 'HTTP SSE'}
+                  onOptionSelect={(_, data) => setServerForm({ ...serverForm, transport_type: data.optionValue || 'stdio' })}
+                >
+                  <Option value="stdio">Standard I/O (Subprocess)</Option>
+                  <Option value="websocket">WebSocket</Option>
+                  <Option value="http-sse">HTTP SSE</Option>
+                </Dropdown>
+              </Field>
+
+              {serverForm.transport_type === 'stdio' ? (
+                <>
+                  <Field label="Command" required>
+                    <Input
+                      value={serverForm.command}
+                      onChange={(e) => setServerForm({ ...serverForm, command: e.target.value })}
+                      placeholder="npx -y @modelcontextprotocol/server-filesystem"
+                      style={{ fontFamily: "monospace" }}
+                    />
+                  </Field>
+                  <Field label="Arguments (comma separated)">
+                    <Input
+                      value={serverForm.args}
+                      onChange={(e) => setServerForm({ ...serverForm, args: e.target.value })}
+                      placeholder="/allowed/path"
+                    />
+                  </Field>
+                </>
+              ) : (
+                <Field label="URL" required>
+                  <Input
+                    value={serverForm.url}
+                    onChange={(e) => setServerForm({ ...serverForm, url: e.target.value })}
+                    placeholder="ws://localhost:8080/mcp"
+                  />
+                </Field>
+              )}
+
+              <Switch
+                label="Require Authentication"
+                checked={serverForm.require_auth}
+                onChange={(_, data) => setServerForm({ ...serverForm, require_auth: data.checked })}
+              />
+
+            </DialogContent>
+            <DialogActions>
+              <DialogTrigger disableButtonEnhancement>
+                <Button appearance="secondary">Cancel</Button>
+              </DialogTrigger>
+              <Button appearance="primary" onClick={handleRegisterServer} disabled={loading}>
+                {loading ? 'Registering...' : 'Register'}
+              </Button>
+            </DialogActions>
+          </DialogBody>
+        </DialogSurface>
+      </Dialog>
     </div>
   );
 }

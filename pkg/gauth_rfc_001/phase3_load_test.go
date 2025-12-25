@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/alicebob/miniredis/v2"
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 )
 
 // PHASE 3: Load & Stress Testing
@@ -38,7 +38,7 @@ func Test1_LuaLockThroughput_Reduced(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	targetVUs := 500       // Scaled down from 5000
+	targetVUs := 500 // Scaled down from 5000
 	testDuration := 10 * time.Second
 
 	t.Logf("\n🚀 TEST 1: Lua Lock Throughput Test (Reduced Scale)")
@@ -190,9 +190,9 @@ func Test2_RecursiveChainDepth_8Hops(t *testing.T) {
 
 			for time.Since(startTime) < testDuration {
 				reqStart := time.Now()
-				
+
 				result, err := validator.ValidateChain(ctx, repo.poas["poa-h"], "iris")
-				
+
 				latency := time.Since(reqStart)
 
 				latenciesMux.Lock()
@@ -409,7 +409,7 @@ func calculatePercentiles(latencies []time.Duration) (p50, p95, p99 time.Duratio
 
 	sorted := make([]time.Duration, len(latencies))
 	copy(sorted, latencies)
-	
+
 	// Simple insertion sort
 	for i := 1; i < len(sorted); i++ {
 		key := sorted[i]

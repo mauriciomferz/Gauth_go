@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 )
 
 // RevocationBlacklistStore provides real-time revocation status checking to prevent "zombie tokens".
@@ -14,15 +14,16 @@ import (
 //
 // Problem:
 // Current implementation checks PoA status during token issuance (VerifyToken at T=0), but:
-//   1. Issues short-lived JWT/PASETO access token (valid for 1 hour)
-//   2. If PoA is revoked at T=5min, the access token remains valid until T=60min
-//   3. API middleware validates JWT signature (stateless), NOT underlying PoA status
+//  1. Issues short-lived JWT/PASETO access token (valid for 1 hour)
+//  2. If PoA is revoked at T=5min, the access token remains valid until T=60min
+//  3. API middleware validates JWT signature (stateless), NOT underlying PoA status
 //
 // Attack Scenario:
-//   T=0:    Agent exchanges PoA for Access Token (status check passes)
-//   T=5min: Principal revokes PoA in database
-//   T=10min: Agent uses Access Token to access protected resources
-//   Result: Unauthorized access for 55 minutes after revocation
+//
+//	T=0:    Agent exchanges PoA for Access Token (status check passes)
+//	T=5min: Principal revokes PoA in database
+//	T=10min: Agent uses Access Token to access protected resources
+//	Result: Unauthorized access for 55 minutes after revocation
 //
 // Solution:
 // Maintain a Redis-backed blacklist of revoked PoA IDs with TTL matching longest token lifetime.

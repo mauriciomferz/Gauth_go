@@ -787,27 +787,27 @@ class ApiClient {
 
   // MCP (Model Context Protocol) APIs
   async registerMCPServer(config: MCPServerConfig): Promise<{ success: boolean; server_id: string; message: string }> {
-    const response = await this.client.post('/beta/mcp/servers', config)
+    const response = await this.client.post('/gauth/mcp/servers', config)
     return response.data
   }
 
   async listMCPServers(): Promise<MCPServersResponse> {
-    const response = await this.client.get('/beta/mcp/servers')
+    const response = await this.client.get('/gauth/mcp/servers')
     return response.data
   }
 
   async listMCPResources(serverId: string): Promise<MCPResourcesResponse> {
-    const response = await this.client.get(`/beta/mcp/servers/${serverId}/resources`)
+    const response = await this.client.get(`/gauth/mcp/servers/${serverId}/resources`)
     return response.data
   }
 
   async readMCPResource(serverId: string, uri: string): Promise<MCPResourceReadResponse> {
-    const response = await this.client.post(`/beta/mcp/servers/${serverId}/resources/read`, { uri })
+    const response = await this.client.post(`/gauth/mcp/servers/${serverId}/resources/read`, { uri })
     return response.data
   }
 
   async callMCPTool(serverId: string, name: string, args: Record<string, unknown>): Promise<MCPToolCallResponse> {
-    const response = await this.client.post(`/beta/mcp/servers/${serverId}/tools/call`, {
+    const response = await this.client.post(`/gauth/mcp/servers/${serverId}/tools/call`, {
       name,
       arguments: args
     })
@@ -815,12 +815,12 @@ class ApiClient {
   }
 
   async listMCPTools(serverId: string): Promise<MCPToolsResponse> {
-    const response = await this.client.get(`/beta/mcp/servers/${serverId}/tools`)
+    const response = await this.client.get(`/gauth/mcp/servers/${serverId}/tools`)
     return response.data
   }
 
   async disconnectMCPServer(serverId: string): Promise<{ success: boolean; server_id: string; message: string }> {
-    const response = await this.client.delete(`/beta/mcp/servers/${serverId}`)
+    const response = await this.client.delete(`/gauth/mcp/servers/${serverId}`)
     return response.data
   }
 

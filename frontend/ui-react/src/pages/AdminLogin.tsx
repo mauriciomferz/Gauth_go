@@ -1,15 +1,14 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FluentProvider,
   webLightTheme,
   Card,
-  CardHeader,
   Input,
   Button,
   Text,
   Title1,
-  Subtitle1,
   makeStyles,
   tokens,
   Spinner,
@@ -128,8 +127,8 @@ export default function AdminLogin() {
       const data = await response.json();
       if (data.success && data.requiresMFA) {
         sessionStorage.setItem('mfa_challenge', data.sessionChallenge);
-              setLoginState({ ...loginState, role: data.role });
-              setStep('mfa');
+        setLoginState({ ...loginState, role: data.role });
+        setStep('mfa');
       } else {
         throw new Error('Unexpected login response');
       }
@@ -170,19 +169,19 @@ export default function AdminLogin() {
       }
 
       const data = await response.json();
-      
+
       if (data.success && data.token) {
-              // Store JWT token
-            localStorage.setItem('admin_token', data.token);
-            localStorage.setItem('admin_role', loginState.role || '');
+        // Store JWT token
+        localStorage.setItem('admin_token', data.token);
+        localStorage.setItem('admin_role', loginState.role || '');
         sessionStorage.removeItem('mfa_challenge');
-            
-            setStep('success');
-            
-            // Redirect to admin dashboard
-            setTimeout(() => {
-              navigate('/admin/dashboard');
-            }, 1000);
+
+        setStep('success');
+
+        // Redirect to admin dashboard
+        setTimeout(() => {
+          navigate('/admin/dashboard');
+        }, 1000);
       } else {
         throw new Error('Invalid MFA response');
       }
@@ -310,16 +309,11 @@ export default function AdminLogin() {
     <FluentProvider theme={webLightTheme}>
       <div className={classes.container}>
         <Card className={classes.card}>
-          <CardHeader
-            header={
-              <div className={classes.header}>
-                <div className={classes.logo}>🛡️</div>
-                <Title1>GAuth Admin Portal</Title1>
-                <Subtitle1>Secure Administrator Access</Subtitle1>
-              </div>
-            }
-          />
-          
+          <div className={classes.header}>
+            <Text size={600} weight="semibold">AuthAI Admin</Text>
+            <Text>Sign in to continue</Text>
+          </div>
+
           {error && (
             <MessageBar intent="error" style={{ marginBottom: '20px' }}>
               <MessageBarBody>

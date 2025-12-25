@@ -15,6 +15,9 @@ owners: core-maintainers
 
 **GAuth is a comprehensive authorization framework implementing GiFo-RFC-0111/0115 specifications by the Gimel Foundation.**
 
+> [!IMPORTANT] 
+> **Standard Disclaimer**: The "RFC" designations in this project refer to **Gimel Foundation Requests for Comments** (GiFo-RFC), NOT IETF Internet Standards. GAuth is a distinct authorization framework designed for legal delegation, separate from OAuth 2.0 (RFC 6749).
+
 ### 🔴 NOT an OAuth 2.0 Server
 
 **Important:** GAuth is **NOT** an OAuth 2.0 (RFC 6749) authorization server. While it shares some concepts with OAuth 2.0 (tokens, scopes, delegation), it implements a fundamentally different authorization model designed for **legal Power of Attorney delegation and AI governance**.
@@ -53,7 +56,7 @@ While GAuth is not an OAuth 2.0 server, the [OAuth 2.0 Migration Feasibility Stu
 ---
 
 > **🚀 BETA-READY** - Comprehensive security audit, extensive testing (689+ test cases), complete documentation. Suitable for testing and evaluation.
-> **Last Updated:** 2025-12-03 (📁 Directory reorganization, PolicyStore interface implementation)
+> **Last Updated:** 2025-12-24 (Security Hardening & Audit Response)
 
 **✨ Latest Updates (Dec 24, 2025):**
 - **SAML 2.0 & SCIM 2.0**: Full reference implementation for Identity Provider (SP) and User Provisioning. See [Deployment Report](docs/reports/SAML_SCIM_DEPLOYMENT_REPORT.md).
@@ -69,7 +72,7 @@ While GAuth is not an OAuth 2.0 server, the [OAuth 2.0 Migration Feasibility Stu
 - **📚 Migration Guide:** Comprehensive [DIRECTORY_REORGANIZATION.md](DIRECTORY_REORGANIZATION.md) documentation
 
 **Previous Updates (Dec 1, 2025):**
-- **✅ 100% RFC Compliance:** Achieved 45/45 RFC-0111/0115 conformance requirements (updated gap-matrix badge)
+- **✅ 100% GiFo-RFC Compliance:** Achieved 45/45 GiFo-RFC-0111/0115 conformance requirements (updated gap-matrix badge)
 - **🔍 OAuth 2.0 Clarification:** Added comprehensive distinction - GAuth implements GiFo-RFC-0111/0115, NOT OAuth 2.0 RFC 6749
 - **🧪 Test Stability:** Fixed probabilistic test tolerance in TestCachePressureGenerator for reliable CI builds
 - **🚀 GAuth+ Features Activated:** All 27 advanced authorization endpoints now operational (Successor Management, Delegation Chains, Dual Control, Fiduciary Duty, AI Capabilities)
@@ -91,7 +94,7 @@ A complete Go implementation of the **GAuth authorization framework (GiFo-RFC-01
 - Extended JWT Tokens, PIP Integration, Commercial Register, Updated UI
 ## 🎯 Project Status
 
-- **RFC Compliance**: 45/45 requirements (100%) ✅
+- **GiFo-RFC Compliance**: 45/45 requirements (100%) ✅
 - **Test Coverage**: 689+ test cases across 66 packages
 - **Architecture**: Microservices-ready with PostgreSQL, Redis, monitoring
 - **Frontend**: React-based admin portal with MCP integration
@@ -104,7 +107,7 @@ A complete Go implementation of the **GAuth authorization framework (GiFo-RFC-01
 ### Core Components
 
 **Backend Services** (\`cmd/web-server/\`)
-- **RFC-0111 Authorization Server**: Complete GAuth protocol implementation
+- **GiFo-RFC-0111 Authorization Server**: Complete GAuth protocol implementation
 - **GAuth+ Advanced Features**: AI governance, delegation chains, successor management
 - **Model Context Protocol (MCP)**: AI agent integration layer
 - **Admin APIs**: User management, policy configuration, system monitoring
@@ -113,7 +116,7 @@ A complete Go implementation of the **GAuth authorization framework (GiFo-RFC-01
 
 | Package | Description |
 |---------|-------------|
-| `gauth/` | Core authorization engine (RFC-0111/0115) |
+| `gauth/` | Core authorization engine (GiFo-RFC-0111/0115) |
 | `gauthplus/` | Advanced features (AI governance, fiduciary duty) |
 | `authz/` | Policy Decision Point (PDP) with ABAC/RBAC |
 | `crypto/` | **Public API** - Multi-algorithm signing (Ed25519, ES256, ES384, RS256). Includes `SignatureAlgorithm`, `KeyStore`, `Signer` interfaces with segregated sub-interfaces for fine-grained dependency control. |
@@ -304,7 +307,7 @@ Configure GAuth using environment variables. Create a `.env` file or export them
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `GAUTH_RFC0111_ENABLED` | `0` | Enable RFC-0111 compliance mode |
+| `GAUTH_RFC0111_ENABLED` | `0` | Enable GiFo-RFC-0111 compliance mode |
 | `GAUTH_GAUTHPLUS_ENABLED` | `0` | Enable GAuth+ advanced features |
 | `GAUTH_USE_JWT_LIB` | `0` | Use JWT token library |
 | `GAUTH_DEV_INDEX` | `0` | Enable development mode with debug endpoints |
@@ -418,7 +421,7 @@ The project includes pre-configured tasks in `.vscode/tasks.json`:
 
 - **Unit Tests**: Core functionality and business logic validation
 - **Integration Tests**: Component interaction and end-to-end workflows
-- **RFC Compliance Tests**: GiFo-RFC-0111/0115 conformance validation
+- **GiFo-RFC Compliance Tests**: GiFo-RFC-0111/0115 conformance validation
 - **Performance Tests**: Benchmarks for authorization decisions and policy evaluation
 - **Security Tests**: Cryptographic operations and token validation
 
@@ -551,7 +554,7 @@ kubectl rollout status deployment/gauth
 
 Refer to the **🔧 Configuration** section for complete environment variable documentation. Critical production settings:
 
-- `GAUTH_RFC0111_ENABLED=1` - Enable RFC-0111 compliance mode
+- `GAUTH_RFC0111_ENABLED=1` - Enable GiFo-RFC-0111 compliance mode
 - `DB_SSLMODE=require` - Force SSL/TLS for database connections
 - `GAUTH_JWT_SIGNING_KEY` - Strong signing key (never commit to version control)
 - `REDIS_HOST` - Redis cache host for session management (optional but recommended)

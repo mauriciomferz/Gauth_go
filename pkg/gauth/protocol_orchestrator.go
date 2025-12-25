@@ -192,12 +192,22 @@ func (o *ProtocolOrchestrator) ExecuteRFCCompliantFlow(
 
 	// Extract legal framework from PoA if available
 	var legalFramework *LegalFrameworkInfo
+	var poaCredential *poa.PoADefinition
 	if subscription.ClientAuthorizationGrant != nil && subscription.ClientAuthorizationGrant.PoACredential != nil {
-		jurisdictionLaw := subscription.ClientAuthorizationGrant.PoACredential.Requirements.JurisdictionLaw
+		poaCredential = subscription.ClientAuthorizationGrant.PoACredential
+		jurisdictionLaw := poaCredential.Requirements.JurisdictionLaw
 		legalFramework = &LegalFrameworkInfo{
 			ApplicableLaws:      []string{jurisdictionLaw.GoverningLaw},
 			Jurisdiction:        jurisdictionLaw.PlaceOfJurisdiction,
 			ComplianceFramework: jurisdictionLaw.GoverningLaw,
+		}
+
+		// Ensure requested Authorization Details are consistent with PoA scope (RFC 9767)
+		if len(request.AuthorizationDetails) > 0 {
+			rarValidator := NewRARValidator()
+			if err := rarValidator.ValidateAuthorizationDetails(poaCredential, request.AuthorizationDetails); err != nil {
+				return nil, fmt.Errorf("step (a) validation failed: authorization details not authorized by PoA: %w", err)
+			}
 		}
 	}
 

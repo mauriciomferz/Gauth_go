@@ -83,6 +83,7 @@ function App() {
           <Route path="saml-providers" element={<SAMLProviders />} />
           <Route path="scim-settings" element={<SCIMSettings />} />
           <Route path="gnap" element={<GNAP />} />
+          <Route path="mcp" element={<MCP />} />
           <Route path="performance" element={<div>Performance Page (Coming Soon)</div>} />
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
         </Route>
@@ -98,10 +99,16 @@ function App() {
         <Route path="/pdp" element={<PDP />} />
         <Route path="/pep" element={<PEP />} />
         <Route path="/poa" element={<PoA />} />
-        <Route path="/mcp" element={<MCP />} />
+        {/* MCP moved to Admin Portal */}
         <Route path="/e2e" element={<E2ETesting />} />
         <Route path="/metrics" element={<Metrics />} />
         <Route path="/login" element={<Login />} />
+
+        {/* Handle direct access to /index.html */}
+        <Route path="/index.html" element={<Navigate to="/" replace />} />
+
+        {/* Catch-all redirect for any unknown routes (fixes /index.html blank page) */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
   )

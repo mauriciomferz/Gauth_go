@@ -2,20 +2,31 @@
 package gnap
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/mauriciomferz/Gauth_go/pkg/gnap"
+	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
+
+// PoAProvider defines interface for retrieving PoA records compatibility
+type PoAProvider interface {
+	GetPoA(ctx context.Context, tenantID, poaID string) (*poa.PoARecord, error)
+}
 
 // PoABridge links GNAP grants to Power of Attorney credentials.
 type PoABridge struct {
-	grantStore gnap.GrantStore
+	grantStore  gnap.GrantStore
+	poaProvider PoAProvider
 }
 
 // NewPoABridge creates a new GNAP-PoA bridge.
-func NewPoABridge(store gnap.GrantStore) *PoABridge {
-	return &PoABridge{grantStore: store}
+func NewPoABridge(store gnap.GrantStore, poaProvider PoAProvider) *PoABridge {
+	return &PoABridge{
+		grantStore:  store,
+		poaProvider: poaProvider,
+	}
 }
 
 // GrantWithPoA represents a GNAP grant with associated PoA reference.
@@ -76,6 +87,28 @@ func (b *PoABridge) ValidatePoAAuthority(grantID string) (valid bool, reason str
 		return true, "no_poa_required", nil
 	}
 
-	// TODO: Integrate with pkg/poa validation
+	if b.poaProvider == nil {
+		// If no provider configured (e.g. memory/dev mode), allow but log warning ideally
+		return true, "poa_validation_skipped_no_provider", nil
+	}
+
+	// Assuming a default tenant or deriving from context/grant if available.
+	// For now using "default" tenant as placeholder or we should extract if possible.
+	// In a real scenario, the Grant might have TenantID or we assume single tenant for this specific flow.
+	tenantID := "default"
+
+	record, err := b.poaProvider.GetPoA(context.Background(), tenantID, poaID)
+	if err != nil {
+		return false, "poa_lookup_failed", fmt.Errorf("failed to retrieve PoA %s: %w", poaID, err)
+	}
+
+	if record.Status != "active" {
+		return false, fmt.Sprintf("poa_status_%s", record.Status), nil
+	}
+
+	if time.Now().After(record.ValidUntil) {
+		return false, "poa_expired", nil
+	}
+
 	return true, "poa_valid", nil
 }

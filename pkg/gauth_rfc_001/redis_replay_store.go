@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 )
 
 // RedisReplayStore implements ReplayStore using Redis SETNX + EXPIRE semantics for atomic first-seen tracking.
