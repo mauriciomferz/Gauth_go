@@ -54,7 +54,26 @@ func (s *InMemoryPIPPolicyStore) Set(ctx context.Context, policyID string, polic
 }
 
 // Delete removes a policy from the store
+// Delete removes a policy from the store
 func (s *InMemoryPIPPolicyStore) Delete(ctx context.Context, policyID string) error {
 	s.cache.Delete(policyID)
 	return nil
+}
+
+// Cleanup removes all expired policies from the store
+// This should be called periodically to prevent memory leaks
+func (s *InMemoryPIPPolicyStore) Cleanup(ctx context.Context) (int, error) {
+	count := 0
+	now := time.Now()
+
+	s.cache.Range(func(key, value interface{}) bool {
+		item := value.(*cachedPolicyItem)
+		if now.After(item.expiresAt) {
+			s.cache.Delete(key)
+			count++
+		}
+		return true
+	})
+
+	return count, nil
 }
