@@ -208,3 +208,74 @@ flowchart TD
 
 ---
 Generated diagrams reflect current endpoint & error taxonomy conventions (codes like revocation_chain_empty, delegation_scope_widening). Update as flows evolve.
+
+## GNAP Resource Server Connection (RFC 9767)
+```mermaid
+sequenceDiagram
+    autonumber
+    participant RS as Resource Server
+    participant AS as GAuth AS
+    participant Client
+    
+    Note over RS, AS: Dynamic Registration
+    RS->>AS: POST /gnap/rs/register {name, resource_uris, key}
+    AS-->>RS: 201 Created {instance_id}
+    
+    Note over RS, Client: Token Usage
+    Client->>RS: Request Resource (Authorization: GNAP <token>)
+    
+    Note over RS, AS: Introspection
+    RS->>AS: POST /gnap/rs/introspect {token}
+    AS->>AS: Validate Token & PoA Links
+    AS-->>RS: 200 OK {active: true, access: [...], poa: {...}}
+    RS-->>Client: Resource Data
+```
+
+## OAuth 2.0 CIBA Flow
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Client
+    participant AS as GAuth Authentication Endpoint
+    participant User as User (Authentication Device)
+    
+    Client->>AS: POST /bc-authorize {login_hint, binding_message}
+    AS-->>Client: 200 OK {auth_req_id, interval}
+    
+    par Backchannel Authentication
+        AS->>User: Push Notification / Authentication Request
+        User-->>AS: Approve/Deny
+    and Client Polling
+        loop Until Completed
+            Client->>AS: POST /token {grant_type=ciba, auth_req_id}
+            AS-->>Client: 400 {error: authorization_pending}
+        end
+    end
+    
+    Client->>AS: POST /token {grant_type=ciba, auth_req_id}
+    AS-->>Client: 200 OK {access_token, id_token}
+```
+
+## SAML 2.0 & SCIM 2.0 Architecture
+```mermaid
+flowchart TD
+    subgraph Federated Identity
+        IDP[External IdP]
+    end
+    
+    subgraph GAuth System
+        SP[SAML SP Handler]
+        SCIM[SCIM Handler]
+        UserStore[(User Store)]
+    end
+    
+    subgraph Admin Client
+        AdminUI[AuthAI Admin Portal]
+    end
+
+    IDP -->|SAML Response| SP
+    SP -->|Create/Update Session| UserStore
+    
+    AdminUI -->|Manage Clients| SCIM
+    SCIM -->|Provision Users| UserStore
+```

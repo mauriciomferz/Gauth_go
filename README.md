@@ -110,6 +110,39 @@ A complete Go implementation of the **GAuth authorization framework (GiFo-RFC-01
 
 ## 🏗️ Architecture Overview
 
+```mermaid
+graph TD
+    User[User / Client] -->|HTTPS| LB[Load Balancer / Nginx]
+    
+    subgraph GAuth Cluster
+        LB --> AuthServer[GAuth Core Server]
+        
+        subgraph Modules
+            AuthServer --> SAML[SAML SP]
+            AuthServer --> SCIM[SCIM Handler]
+            AuthServer --> GNAP[GNAP Engine]
+            AuthServer --> OAuth[OAuth2 / CIBA]
+            AuthServer --> MCP[MCP Server]
+        end
+        
+        subgraph Policy Engine
+            AuthServer --> PDP[Policy Decision Point]
+            PDP --> PIP[Policy Info Point]
+        end
+    end
+    
+    subgraph Data Layer
+        AuthServer --> Redis[(Redis Cache)]
+        AuthServer --> PG[(PostgreSQL)]
+    end
+    
+    subgraph External
+        GNAP -->|Introspection| RS[Resource Servers]
+        SAML -->|Fed Auth| IDP[External IdP]
+        AuthServer -->|Anchor| Blockchain[Transparency Ledger]
+    end
+```
+
 ### Core Components
 
 **Backend Services** (\`cmd/web-server/\`)

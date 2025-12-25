@@ -697,7 +697,7 @@ This makes GAuth suitable for **regulated AI systems** requiring both legal auth
 
 ## References
 
-- [RFC 9396 - Rich Authorization Requests](https://datatracker.ietf.org/doc/rfc9767/)
+- [RFC 9396 - Rich Authorization Requests](https://datatracker.ietf.org/doc/rfc9396/)
 - [GiFo-RFC 0111 - GAuth Authorization Framework](../Gifo_0111.md)
 - [GAuth Architecture](../../ARCHITECTURE_SOLUTION.md)
-- [RFC 9396 vs GAuth Comparison](RFC9767_RAR_GAUTH_COMPARISON.md)
+- [RFC 9396 vs GAuth Comparison](RFC9396_RAR_GAUTH_COMPARISON.md)
