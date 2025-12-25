@@ -13,6 +13,7 @@ type TokenRevocationService struct {
 	mu            sync.RWMutex
 	cleanupTicker *time.Ticker
 	stopCleanup   chan struct{}
+	wg            sync.WaitGroup
 }
 
 // RevokedTokenEntry represents a revoked token.
@@ -33,9 +34,32 @@ func NewTokenRevocationService() *TokenRevocationService {
 
 	// Start cleanup goroutine (runs every hour)
 	service.cleanupTicker = time.NewTicker(time.Hour)
+	service.wg.Add(1)
 	go service.cleanupLoop()
 
 	return service
+}
+
+// ...
+
+// cleanupLoop runs periodic cleanup of expired entries.
+func (s *TokenRevocationService) cleanupLoop() {
+	defer s.wg.Done()
+	for {
+		select {
+		case <-s.cleanupTicker.C:
+			s.CleanupExpired()
+		case <-s.stopCleanup:
+			s.cleanupTicker.Stop()
+			return
+		}
+	}
+}
+
+// Stop stops the cleanup goroutine.
+func (s *TokenRevocationService) Stop() {
+	close(s.stopCleanup)
+	s.wg.Wait()
 }
 
 // RevokeToken revokes a token.
@@ -143,30 +167,13 @@ func (s *TokenRevocationService) CleanupExpired() int {
 	return removed
 }
 
-// cleanupLoop runs periodic cleanup of expired entries.
-func (s *TokenRevocationService) cleanupLoop() {
-	for {
-		select {
-		case <-s.cleanupTicker.C:
-			s.CleanupExpired()
-		case <-s.stopCleanup:
-			s.cleanupTicker.Stop()
-			return
-		}
-	}
-}
-
-// Stop stops the cleanup goroutine.
-func (s *TokenRevocationService) Stop() {
-	close(s.stopCleanup)
-}
-
 // RefreshTokenService manages refresh tokens for exchanged tokens.
 type RefreshTokenService struct {
 	refreshTokens map[string]*RefreshTokenEntry
 	mu            sync.RWMutex
 	cleanupTicker *time.Ticker
 	stopCleanup   chan struct{}
+	wg            sync.WaitGroup
 }
 
 // RefreshTokenEntry represents a stored refresh token.
@@ -195,9 +202,32 @@ func NewRefreshTokenService() *RefreshTokenService {
 
 	// Start cleanup goroutine (runs every hour)
 	service.cleanupTicker = time.NewTicker(time.Hour)
+	service.wg.Add(1)
 	go service.cleanupLoop()
 
 	return service
+}
+
+// ...
+
+// cleanupLoop runs periodic cleanup of expired entries.
+func (s *RefreshTokenService) cleanupLoop() {
+	defer s.wg.Done()
+	for {
+		select {
+		case <-s.cleanupTicker.C:
+			s.CleanupExpired()
+		case <-s.stopCleanup:
+			s.cleanupTicker.Stop()
+			return
+		}
+	}
+}
+
+// Stop stops the cleanup goroutine.
+func (s *RefreshTokenService) Stop() {
+	close(s.stopCleanup)
+	s.wg.Wait()
 }
 
 // StoreRefreshToken stores a refresh token.
@@ -280,24 +310,6 @@ func (s *RefreshTokenService) CleanupExpired() int {
 	}
 
 	return removed
-}
-
-// cleanupLoop runs periodic cleanup of expired entries.
-func (s *RefreshTokenService) cleanupLoop() {
-	for {
-		select {
-		case <-s.cleanupTicker.C:
-			s.CleanupExpired()
-		case <-s.stopCleanup:
-			s.cleanupTicker.Stop()
-			return
-		}
-	}
-}
-
-// Stop stops the cleanup goroutine.
-func (s *RefreshTokenService) Stop() {
-	close(s.stopCleanup)
 }
 
 // GetRefreshTokenCount returns the number of stored refresh tokens.

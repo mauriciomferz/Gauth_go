@@ -141,6 +141,7 @@ type DeviceAuthorizationService struct {
 	mu           sync.RWMutex
 	cleanupTimer *time.Ticker
 	stopCleanup  chan struct{}
+	wg           sync.WaitGroup
 }
 
 // NewDeviceAuthorizationService creates a new device authorization service.
@@ -158,6 +159,7 @@ func NewDeviceAuthorizationService(config *DeviceAuthorizationConfig) *DeviceAut
 
 	// Start cleanup goroutine (runs every minute)
 	service.cleanupTimer = time.NewTicker(time.Minute)
+	service.wg.Add(1)
 	go service.cleanupLoop()
 
 	return service
@@ -467,6 +469,7 @@ func (s *DeviceAuthorizationService) generateUserCode() (string, error) {
 
 // cleanupLoop periodically removes expired device codes.
 func (s *DeviceAuthorizationService) cleanupLoop() {
+	defer s.wg.Done()
 	for {
 		select {
 		case <-s.cleanupTimer.C:
@@ -495,6 +498,7 @@ func (s *DeviceAuthorizationService) cleanupExpiredCodes() {
 // Stop stops the cleanup goroutine.
 func (s *DeviceAuthorizationService) Stop() {
 	close(s.stopCleanup)
+	s.wg.Wait()
 }
 
 // DeviceTokenResponse represents the token response for device flow.
