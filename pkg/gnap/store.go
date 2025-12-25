@@ -204,6 +204,49 @@ func (s *MemoryGrantStore) ListByClient(instanceID string) ([]*Grant, error) {
 	return result, nil
 }
 
+// Cleanup removes expired grants and returns the count of removed grants.
+// This should be called periodically to prevent memory leaks.
+func (s *MemoryGrantStore) Cleanup() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	now := time.Now()
+	removed := 0
+	toDelete := []string{}
+
+	// Find expired grants
+	for id, g := range s.grants {
+		if !g.ExpiresAt.IsZero() && now.After(g.ExpiresAt) {
+			toDelete = append(toDelete, id)
+		}
+	}
+
+	// Delete expired grants and update client index
+	for _, id := range toDelete {
+		g := s.grants[id]
+
+		// Remove from client index
+		if g.ClientInstanceID != "" {
+			ids := s.byClient[g.ClientInstanceID]
+			for i, gid := range ids {
+				if gid == id {
+					s.byClient[g.ClientInstanceID] = append(ids[:i], ids[i+1:]...)
+					break
+				}
+			}
+			// Clean up empty client entries
+			if len(s.byClient[g.ClientInstanceID]) == 0 {
+				delete(s.byClient, g.ClientInstanceID)
+			}
+		}
+
+		delete(s.grants, id)
+		removed++
+	}
+
+	return removed
+}
+
 // GetByContinueToken finds grant by continuation token.
 func (s *MemoryGrantStore) GetByContinueToken(token string) (*Grant, error) {
 	s.mu.RLock()
