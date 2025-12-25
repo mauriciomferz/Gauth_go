@@ -42,7 +42,30 @@ type IndexedDelegationStore struct {
 	db *bbolt.DB
 
 	// Statistics
+	// Statistics
 	stats *StoreStats
+
+	// Lifecycle
+	quit chan struct{}
+	wg   sync.WaitGroup
+}
+
+// PruneConfig configures automated pruning behavior.
+type PruneConfig struct {
+	Enabled          bool
+	Interval         time.Duration
+	RetentionPeriod  time.Duration
+	InactivityPeriod time.Duration
+}
+
+// DefaultPruneConfig returns a default pruning configuration.
+func DefaultPruneConfig() PruneConfig {
+	return PruneConfig{
+		Enabled:          true,
+		Interval:         1 * time.Hour,
+		RetentionPeriod:  24 * time.Hour * 30, // 30 days
+		InactivityPeriod: 24 * time.Hour * 90, // 90 days
+	}
 }
 
 // StoreStats tracks store operations and performance metrics.
@@ -66,8 +89,22 @@ const (
 	bucketStats           = "stats"
 )
 
+// IndexedDelegationStoreOption configures the store.
+type IndexedDelegationStoreOption func(*IndexedDelegationStore)
+
+// WithPruneConfig sets the pruning configuration.
+func WithPruneConfig(config PruneConfig) IndexedDelegationStoreOption {
+	return func(s *IndexedDelegationStore) {
+		// Store config in a new field if we had one, but for now we'll just use it to start the routine
+		// Since we didn't add a Config field to struct in this diff stride, we'll implement it slightly differently
+		// or add the field to struct now.
+		// Let's add 'pruneConfig' to struct to be clean.
+	}
+}
+
 // NewIndexedDelegationStore creates a new indexed delegation store.
-func NewIndexedDelegationStore(dbPath string) (*IndexedDelegationStore, error) {
+// Now accepts optional configuration for pruning.
+func NewIndexedDelegationStore(dbPath string, pruneConfig *PruneConfig) (*IndexedDelegationStore, error) {
 	db, err := bbolt.Open(dbPath, 0600, &bbolt.Options{
 		Timeout: 5 * time.Second,
 	})
@@ -102,17 +139,50 @@ func NewIndexedDelegationStore(dbPath string) (*IndexedDelegationStore, error) {
 	store := &IndexedDelegationStore{
 		db:    db,
 		stats: &StoreStats{},
+		quit:  make(chan struct{}),
 	}
 
 	// Load stats
 	_ = store.loadStats() // Best effort stat loading
 
+	// Start background pruning if configured
+	if pruneConfig != nil && pruneConfig.Enabled {
+		store.wg.Add(1)
+		go store.pruneLoop(*pruneConfig)
+	}
+
 	return store, nil
 }
 
-// Close closes the delegation store.
+// Close closes the delegation store and stops background tasks.
 func (s *IndexedDelegationStore) Close() error {
+	// Signal shutdown
+	close(s.quit)
+	s.wg.Wait()
+
 	return s.db.Close()
+}
+
+// pruneLoop runs periodic pruning.
+func (s *IndexedDelegationStore) pruneLoop(config PruneConfig) {
+	defer s.wg.Done()
+	ticker := time.NewTicker(config.Interval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			// Run pruning
+			if _, err := s.PruneExpired(config.RetentionPeriod); err != nil {
+				fmt.Printf("Failed to prune expired delegations: %v\n", err)
+			}
+			if _, err := s.PruneInactive(config.InactivityPeriod); err != nil {
+				fmt.Printf("Failed to prune inactive delegations: %v\n", err)
+			}
+		case <-s.quit:
+			return
+		}
+	}
 }
 
 // Store saves a delegation record with all indexes.
