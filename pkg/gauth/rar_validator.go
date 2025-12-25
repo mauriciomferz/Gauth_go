@@ -203,7 +203,7 @@ func (v *RARValidator) EvaluateAccess(
 		matchLocation := false
 		if len(detail.Locations) == 0 {
 			// If no specific locations in the DETAIL, does it mean "any"?
-			// RFC 9767 says details narrow the scope.
+			// RFC 9396 says details narrow the scope.
 			// Usually locations are specific.
 			// If missing, it might mean "all authorized locations" but we should match against resource.
 			// Let's assume strict matching for now: Detail MUST specify location or it applies to none (or typically "any" if implied by type).

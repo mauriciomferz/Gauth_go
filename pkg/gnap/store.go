@@ -26,6 +26,15 @@ type GrantStore interface {
 	ListByClient(instanceID string) ([]*Grant, error)
 }
 
+// ResourceServerStore manages RS lifecycles (RFC 9767).
+type ResourceServerStore interface {
+	// Register stores a new RS registration
+	Register(rs *ResourceServerRequest) (*ResourceServerResponse, error)
+
+	// Get retrieves an RS by instance ID
+	Get(instanceID string) (*ResourceServerRequest, error)
+}
+
 // Grant represents a grant in progress or completed.
 type Grant struct {
 	// ID is the unique grant identifier
@@ -255,4 +264,51 @@ func (g *Grant) IsTerminal() bool {
 // CanContinue returns true if grant accepts continuation requests.
 func (g *Grant) CanContinue() bool {
 	return g.State == GrantStateProcessing || g.State == GrantStatePending || g.State == GrantStateApproved
+}
+
+// MemoryResourceServerStore implements ResourceServerStore in-memory.
+type MemoryResourceServerStore struct {
+	mu sync.RWMutex
+	rs map[string]*ResourceServerRequest
+}
+
+// NewMemoryResourceServerStore creates a new in-memory RS store.
+func NewMemoryResourceServerStore() *MemoryResourceServerStore {
+	return &MemoryResourceServerStore{
+		rs: make(map[string]*ResourceServerRequest),
+	}
+}
+
+// Register stores a new RS registration.
+func (s *MemoryResourceServerStore) Register(req *ResourceServerRequest) (*ResourceServerResponse, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	instanceID := generateID("rs_")
+	// Copy request to store
+	s.rs[instanceID] = req
+
+	// In a real implementation we would sign/issue a key
+	// For now, return what was requested or generate a new one
+	key := req.Client.Key
+	if key == nil {
+		key = &ClientKey{Proof: ProofHTTPSig}
+	}
+
+	return &ResourceServerResponse{
+		InstanceID: instanceID,
+		Key:        key,
+	}, nil
+}
+
+// Get retrieves an RS by instance ID.
+func (s *MemoryResourceServerStore) Get(instanceID string) (*ResourceServerRequest, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	rs, ok := s.rs[instanceID]
+	if !ok {
+		return nil, errors.New("resource server not found")
+	}
+	return rs, nil
 }

@@ -1,18 +1,18 @@
 ---
-title: GAuth + RFC 9767 (Rich Authorization Requests) Integration Guide
+title: GAuth + RFC 9396 (Rich Authorization Requests) Integration Guide
 category: architecture
 status: proposed
 lastUpdated: 2025-11-19
 owners: architecture-team
 ---
 
-# GAuth + RFC 9767 (Rich Authorization Requests) Integration Guide
+# GAuth + RFC 9396 (Rich Authorization Requests) Integration Guide
 
 ## Purpose
 
-This document provides a practical implementation guide for integrating RFC 9767 (Rich Authorization Requests) into GAuth to combine:
+This document provides a practical implementation guide for integrating RFC 9396 (Rich Authorization Requests) into GAuth to combine:
 - **GAuth**: Legal delegation chains and Power of Attorney framework
-- **RFC 9767**: Fine-grained resource-level permissions
+- **RFC 9396**: Fine-grained resource-level permissions
 
 ---
 
@@ -20,7 +20,7 @@ This document provides a practical implementation guide for integrating RFC 9767
 
 ### Combined Strengths
 
-| Capability | GAuth Provides | RFC 9767 Provides |
+| Capability | GAuth Provides | RFC 9396 Provides |
 |:-----------|:---------------|:------------------|
 | **Legal Authority** | ✅ Power of Attorney | - |
 | **Authorization Chains** | ✅ Multi-level validation | - |
@@ -46,7 +46,7 @@ This document provides a practical implementation guide for integrating RFC 9767
 
 package gauth
 
-// RFC 9767 Authorization Detail
+// RFC 9396 Authorization Detail
 type AuthorizationDetail struct {
     Type        string                 `json:"type"`
     Actions     []string               `json:"actions,omitempty"`
@@ -85,7 +85,7 @@ type RFCCompliantAuthorizationRequest struct {
     RequestedScope   map[string]interface{}
     PoACredentialRef string
     
-    // RFC 9767 extension
+    // RFC 9396 extension
     AuthorizationDetails []AuthorizationDetail `json:"authorization_details,omitempty"`
 }
 ```
@@ -105,7 +105,7 @@ type ExtendedToken struct {
     VerificationProof *VerificationProof
     ComplianceLevel   string
     
-    // RFC 9767 extension
+    // RFC 9396 extension
     AuthorizationDetails []AuthorizationDetail `json:"authorization_details,omitempty"`
 }
 ```
@@ -250,7 +250,7 @@ Client Request
 │ Step (a): Authorization Request         │
 │ • Subscription ID                       │
 │ • Power of Attorney reference           │
-│ • authorization_details (RFC 9767) ←NEW │
+│ • authorization_details (RFC 9396) ←NEW │
 └─────────────────────────────────────────┘
       ↓
 ┌─────────────────────────────────────────┐
@@ -350,7 +350,7 @@ func (rs *ResourceServer) ValidateExtendedToken(
         return err
     }
     
-    // 2. RFC 9767 validation (NEW)
+    // 2. RFC 9396 validation (NEW)
     if len(token.AuthorizationDetails) > 0 {
         if err := rs.validateAuthorizationDetails(
             token.AuthorizationDetails,
@@ -431,7 +431,7 @@ func (rs *ResourceServer) validateAuthorizationDetails(
 
 **Validation**:
 - ✅ GAuth validates legal guardian authority chain
-- ✅ RFC 9767 ensures only authorized data types are accessed
+- ✅ RFC 9396 ensures only authorized data types are accessed
 - ✅ Time-based and content-based constraints enforced
 
 ---
@@ -479,7 +479,7 @@ func (rs *ResourceServer) validateAuthorizationDetails(
 **Validation**:
 - ✅ GAuth validates board authorization chain
 - ✅ Commercial register verification
-- ✅ RFC 9767 ensures amount limits and geographic restrictions
+- ✅ RFC 9396 ensures amount limits and geographic restrictions
 - ✅ Dual approval enforcement
 
 ---
@@ -663,18 +663,18 @@ func TestValidateAuthorizationDetails_UnauthorizedAction(t *testing.T) {
 
 ### For AI Systems
 ✅ Legal authority validation (GAuth)  
-✅ Fine-grained resource control (RFC 9767)  
+✅ Fine-grained resource control (RFC 9396)  
 ✅ Reduced over-privileging  
 ✅ Clear audit trail  
 
 ### For Resource Servers
 ✅ Self-contained tokens (GAuth)  
-✅ Detailed permission validation (RFC 9767)  
+✅ Detailed permission validation (RFC 9396)  
 ✅ No need for scope guessing  
 ✅ Compliance enforcement  
 
 ### For Developers
-✅ Standard OAuth 2.0 extension (RFC 9767)  
+✅ Standard OAuth 2.0 extension (RFC 9396)  
 ✅ Clear authorization semantics  
 ✅ Backward compatible  
 ✅ Enhanced security  
@@ -683,7 +683,7 @@ func TestValidateAuthorizationDetails_UnauthorizedAction(t *testing.T) {
 
 ## Conclusion
 
-Integrating RFC 9767 (Rich Authorization Requests) into GAuth creates **the first authorization framework combining legal delegation chains with fine-grained resource permissions**.
+Integrating RFC 9396 (Rich Authorization Requests) into GAuth creates **the first authorization framework combining legal delegation chains with fine-grained resource permissions**.
 
 **Implementation is straightforward**:
 1. Add `authorization_details` field to token requests
@@ -697,7 +697,7 @@ This makes GAuth suitable for **regulated AI systems** requiring both legal auth
 
 ## References
 
-- [RFC 9767 - Rich Authorization Requests](https://datatracker.ietf.org/doc/rfc9767/)
+- [RFC 9396 - Rich Authorization Requests](https://datatracker.ietf.org/doc/rfc9767/)
 - [GiFo-RFC 0111 - GAuth Authorization Framework](../Gifo_0111.md)
 - [GAuth Architecture](../../ARCHITECTURE_SOLUTION.md)
-- [RFC 9767 vs GAuth Comparison](RFC9767_RAR_GAUTH_COMPARISON.md)
+- [RFC 9396 vs GAuth Comparison](RFC9767_RAR_GAUTH_COMPARISON.md)

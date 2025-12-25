@@ -60,8 +60,9 @@ While GAuth is not an OAuth 2.0 server, the [OAuth 2.0 Migration Feasibility Stu
 
 **✨ Latest Updates (Dec 25, 2025):**
 - **OIDC Advanced Features**: Implemented **Client-Initiated Backchannel Authentication (CIBA)** and **Token Exchange (RFC 8693)**.
-- **Rich Authorization Requests (RAR)**: Added support for RFC 9767 RAR validation against Power of Attorney (PoA), including schema updates.
+- **Rich Authorization Requests (RAR)**: Full support for RFC 9396 (formerly referenced as 9767). Verified against PoA.
 - **GNAP (RFC 9635)**: Verified implementation and enhanced PoA integration (`PoABridge`) with robust tests.
+- **RFC 9767 (RS Connections)**: Initial placeholder documentation created.
 - **SAML 2.0 & SCIM 2.0**: Full reference implementation for Identity Provider (SP) and User Provisioning. See [Deployment Report](docs/reports/SAML_SCIM_DEPLOYMENT_REPORT.md).
 
 **Previous Updates (Dec 24, 2025):**

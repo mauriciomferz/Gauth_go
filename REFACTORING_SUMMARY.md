@@ -41,7 +41,7 @@ Split `gauth.go` (1,227 lines) into 5 focused files:
 - Fixed `nil Context` usage in `pkg/gauth` tests.
 - Fixed CI/CD workflows and scripts referencing stale `web/ui-react` path (updated to `frontend/ui-react`).
 
-### Phase 8: RFC 9767 (RAR) & Metrics Stability ✅
+### Phase 8: RFC 9396 (RAR) & Metrics Stability ✅
 - Implemented Rich Authorization Requests (RAR) support across Data Model, Validator, and Service layers.
 - Standardized `RecordDecision` method signature in `Metrics` interface to include `time.Duration` for latency tracking.
 - Resolved `go.mod` dependency issues (`objx`).

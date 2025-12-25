@@ -836,13 +836,13 @@ func (h *Handlers) HandleTokenExchange(w http.ResponseWriter, r *http.Request) {
 
 - [RFC 6749 - OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
 - [RFC 8693 - OAuth 2.0 Token Exchange](https://datatracker.ietf.org/doc/html/rfc8693)
-- [RFC 9767 - Rich Authorization Requests (RAR)](https://datatracker.ietf.org/doc/html/rfc9767)
+- [RFC 9396 - Rich Authorization Requests (RAR)](https://datatracker.ietf.org/doc/html/rfc9767)
 - [GiFo-RFC-0111 - GAuth 1.0 Authorization Framework](Gifo_0111.md)
 - [GiFo-RFC-0115 - Power-of-Attorney Credential Definition](RFC_ARCHITECTURE.md)
 
 ### GAuth Documentation
 
-- [RFC 9767 vs GAuth Comparison](RFC9767_RAR_GAUTH_COMPARISON_Proposed_Standard.md)
+- [RFC 9396 vs GAuth Comparison](RFC9767_RAR_GAUTH_COMPARISON_Proposed_Standard.md)
 - [P1.1 - Wildcard Scope Patterns](WILDCARD_SCOPE_PATTERNS_GUIDE.md)
 - [P1.2 - OPA Integration Guide](OPA_INTEGRATION_GUIDE.md)
 - [GAuth Architecture](RFC_ARCHITECTURE.md)

@@ -1,6 +1,6 @@
 package gauth
 
-// AuthorizationDetail represents a structured authorization object as per RFC 9767.
+// AuthorizationDetail represents a structured authorization object as per RFC 9396.
 // It allows for fine-grained, resource-specific permissions.
 type AuthorizationDetail struct {
 	// Type of the authorization data (e.g., "payment_initiation", "patient_record_access")
@@ -21,7 +21,7 @@ type AuthorizationDetail struct {
 	// Privileges or roles associated with the access
 	Privileges []string `json:"privileges,omitempty"`
 
-	// InstructedAmount for financial transactions (RFC 9767 example extension)
+	// InstructedAmount for financial transactions (RFC 9396 example extension)
 	InstructedAmount *Amount `json:"instructedAmount,omitempty"`
 
 	// CreditorAccount for payment contexts

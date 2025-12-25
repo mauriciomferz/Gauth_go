@@ -1,26 +1,26 @@
 ---
-title: RFC 9767 (Rich Authorization Requests) vs GAuth (RFC 0111/0115)
+title: RFC 9396 (Rich Authorization Requests) vs GAuth (RFC 0111/0115)
 category: analysis
 status: active
 lastUpdated: 2025-11-19
 owners: architecture-team
 ---
 
-# RFC 9767 (Rich Authorization Requests) vs GAuth (RFC 0111/0115)
+# RFC 9396 (Rich Authorization Requests) vs GAuth (RFC 0111/0115)
 
 ## Executive Summary
 
-**RFC 9767** is an OAuth 2.0 extension that enables **fine-grained, structured authorization requests** using the `authorization_details` parameter.
+**RFC 9396** is an OAuth 2.0 extension that enables **fine-grained, structured authorization requests** using the `authorization_details` parameter.
 
 **GAuth** is a Gimel Foundation framework focused on **legal delegation chains and Power of Attorney** for AI agents.
 
-**Key Finding**: These frameworks address **different aspects** of OAuth 2.0 authorization but are **highly complementary**. GAuth provides the legal framework and authorization chains, while RFC 9767 provides fine-grained resource permissions.
+**Key Finding**: These frameworks address **different aspects** of OAuth 2.0 authorization but are **highly complementary**. GAuth provides the legal framework and authorization chains, while RFC 9396 provides fine-grained resource permissions.
 
 ---
 
-## 1. What is RFC 9767 (RAR)?
+## 1. What is RFC 9396 (RAR)?
 
-**RFC 9767: Rich Authorization Requests**
+**RFC 9396: Rich Authorization Requests**
 - **Purpose**: Extends OAuth 2.0 to support fine-grained, structured authorization requests
 - **Key Addition**: `authorization_details` parameter - JSON array describing specific authorization requirements
 - **Focus**: Resource-centric (what resources, actions, amounts, data types)
@@ -48,7 +48,7 @@ owners: architecture-team
 
 ## 2. High-Level Comparison
 
-| Aspect | **GAuth (RFC 0111/0115)** | **RFC 9767 (RAR)** |
+| Aspect | **GAuth (RFC 0111/0115)** | **RFC 9396 (RAR)** |
 |:-------|:--------------------------|:-------------------|
 | **Primary Focus** | Legal delegation chains & Power of Attorney | Fine-grained resource authorization |
 | **Authorization Model** | Multi-party chains (3+ levels) | Single request with detailed permissions |
@@ -95,7 +95,7 @@ type AuthorizationScope struct {
 }
 ```
 
-#### RFC 9767 - Authorization Details
+#### RFC 9396 - Authorization Details
 
 ```json
 {
@@ -143,7 +143,7 @@ Resource Server (demand-side PEP)
 - Commercial register integration
 - Legal Power of Attorney credentials
 
-#### RFC 9767 - Single-Level Fine-Grained Permissions
+#### RFC 9396 - Single-Level Fine-Grained Permissions
 
 ```
 Resource Owner
@@ -193,7 +193,7 @@ Resource Server validates permissions
 }
 ```
 
-#### RFC 9767 OAuth Token
+#### RFC 9396 OAuth Token
 
 ```json
 {
@@ -220,9 +220,9 @@ Resource Server validates permissions
 
 ## 4. Complementary Nature
 
-### GAuth + RFC 9767 Integration
+### GAuth + RFC 9396 Integration
 
-GAuth could integrate RFC 9767 for richer authorization requests:
+GAuth could integrate RFC 9396 for richer authorization requests:
 
 ```go
 // Enhanced GAuth with RAR support
@@ -231,7 +231,7 @@ type ExtendedTokenRequest struct {
     GrantID         string
     PowerOfAttorney *poa.PoADefinition
     
-    // RFC 9767 integration
+    // RFC 9396 integration
     AuthorizationDetails []AuthorizationDetail `json:"authorization_details"`
 }
 
@@ -262,7 +262,7 @@ type AuthorizationDetail struct {
 - Corporate AI with board authority
 - Financial AI with statutory power
 
-### Use RFC 9767 (RAR) When:
+### Use RFC 9396 (RAR) When:
 
 ✅ **Fine-grained resource permissions** needed (payment amounts, transaction types)  
 ✅ Standard OAuth 2.0 is sufficient  
@@ -307,7 +307,7 @@ An AI diagnostic assistant needs to access specific patient records with legal a
     }
   },
   
-  // RFC 9767: Fine-grained resource permissions
+  // RFC 9396: Fine-grained resource permissions
   "authorization_details": [
     {
       "type": "patient_record_access",
@@ -326,7 +326,7 @@ An AI diagnostic assistant needs to access specific patient records with legal a
 
 **Result**:
 - ✅ **GAuth validates** the legal authority chain (Guardian → Patient → AI)
-- ✅ **RFC 9767 specifies** exactly what data can be accessed and how
+- ✅ **RFC 9396 specifies** exactly what data can be accessed and how
 - ✅ **Combined security**: Legal authority + fine-grained permissions
 
 ---
@@ -351,7 +351,7 @@ type RichAuthorizationRequest struct {
     GrantID         string
     PowerOfAttorney *poa.PoADefinition
     
-    // RFC 9767 integration
+    // RFC 9396 integration
     AuthorizationDetails []AuthorizationDetail `json:"authorization_details"`
 }
 
@@ -369,13 +369,13 @@ type AuthorizationDetail struct {
 **This would make GAuth the first authorization server combining:**
 - Legal delegation chains
 - Power of Attorney validation
-- Fine-grained resource permissions (RFC 9767)
+- Fine-grained resource permissions (RFC 9396)
 
 ---
 
 ## 8. Comparison Summary Table
 
-| Feature | GAuth | RFC 9767 (RAR) | Combined |
+| Feature | GAuth | RFC 9396 (RAR) | Combined |
 |:--------|:------|:---------------|:---------|
 | **Legal Authority** | ✅ Full PoA support | ❌ Not defined | ✅ GAuth provides |
 | **Authorization Chains** | ✅ Multi-level | ❌ Single-level | ✅ GAuth provides |
@@ -435,14 +435,14 @@ func (v *ComplianceValidator) ValidateAuthorizationDetails(
 
 ## 10. Conclusion
 
-**RFC 9767 and GAuth solve different problems but are highly complementary:**
+**RFC 9396 and GAuth solve different problems but are highly complementary:**
 
-- **RFC 9767 (RAR)**: Fine-grained resource permissions within OAuth 2.0
+- **RFC 9396 (RAR)**: Fine-grained resource permissions within OAuth 2.0
 - **GAuth**: Legal delegation chains and Power of Attorney for AI agents
 
 **They are NOT competing** - they work together:
 - GAuth provides the **legal framework** (authorization chains, PoA validation)
-- RFC 9767 provides **fine-grained resource permissions** (specific data types, actions, amounts)
+- RFC 9396 provides **fine-grained resource permissions** (specific data types, actions, amounts)
 
 **Together, they offer unparalleled authorization control for AI systems with legal authority.**
 
@@ -450,7 +450,7 @@ func (v *ComplianceValidator) ValidateAuthorizationDetails(
 
 ## References
 
-- [RFC 9767 - Rich Authorization Requests](https://datatracker.ietf.org/doc/rfc9767/)
+- [RFC 9396 - Rich Authorization Requests](https://datatracker.ietf.org/doc/rfc9767/)
 - [OAuth 2.0 RFC 6749](https://datatracker.ietf.org/doc/rfc6749/)
 - [GiFo-RFC 0111 - GAuth 1.0 Authorization Framework](Gifo_0111.md)
 - [GAuth Gap Matrix](GAP_MATRIX.auto.md)

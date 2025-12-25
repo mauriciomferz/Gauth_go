@@ -109,7 +109,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 		return nil, fmt.Errorf("PoA validation failed: %w", err)
 	}
 
-	// Step 2b: Validate Authorization Details (RFC 9767)
+	// Step 2b: Validate Authorization Details (RFC 9396)
 	if len(request.AuthorizationDetails) > 0 {
 		if err := s.rarValidator.ValidateAuthorizationDetails(request.PowerOfAttorney, request.AuthorizationDetails); err != nil {
 			return nil, &GAuthError{
@@ -199,7 +199,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 		// Compliance & audit
 		ComplianceLevel:     "rfc-0111-compliant",
 		JurisdictionContext: request.JurisdictionContext,
-		// RFC 9767
+		// RFC 9396
 		AuthorizationDetails: request.AuthorizationDetails,
 		AuditTrail: []AuditEntry{
 			{
@@ -292,7 +292,7 @@ func (s *ExtendedTokenService) EncodeExtendedToken(
 		}
 	}
 
-	// Serialize AuthorizationDetails (RFC 9767)
+	// Serialize AuthorizationDetails (RFC 9396)
 	if len(token.AuthorizationDetails) > 0 {
 		rarJSON, err := json.Marshal(token.AuthorizationDetails)
 		if err == nil {
@@ -617,7 +617,7 @@ func (s *ExtendedTokenService) parseExtendedToken(
 		}
 	}
 
-	// Extract AuthorizationDetails (RFC 9767)
+	// Extract AuthorizationDetails (RFC 9396)
 	if rarStr, ok := claims["authorization_details"].(string); ok && rarStr != "" {
 		var details []AuthorizationDetail
 		if err := json.Unmarshal([]byte(rarStr), &details); err == nil {

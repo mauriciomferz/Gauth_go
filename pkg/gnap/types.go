@@ -384,3 +384,50 @@ type Signer interface {
 type Verifier interface {
 	Verify(payload, signature []byte, keyID string) error
 }
+
+// --- RFC 9767 Resource Server Extensions ---
+
+// ResourceServerRequest for dynamic registration (RFC 9767).
+type ResourceServerRequest struct {
+	// Client details (RS acts as client to AS)
+	Client *ClientInstance `json:"client"`
+
+	// Resources managed by this RS
+	Resources []string `json:"resource_uris"`
+
+	// Name for display
+	Name string `json:"name"`
+}
+
+// ResourceServerResponse for registration response.
+type ResourceServerResponse struct {
+	// InstanceID assigned to the RS
+	InstanceID string `json:"instance_id"`
+
+	// Key bound to the RS
+	Key *ClientKey `json:"key"`
+}
+
+// IntrospectionRequest per RFC 9767.
+type IntrospectionRequest struct {
+	// Token to introspect
+	Token string `json:"token"`
+
+	// Specific access rights to check (optional)
+	Access []string `json:"access,omitempty"`
+}
+
+// IntrospectionResponse per RFC 9767.
+type IntrospectionResponse struct {
+	// Active status of the token
+	Active bool `json:"active"`
+
+	// Access rights granted associated with this token
+	Access []AccessRight `json:"access,omitempty"`
+
+	// PoA information (GAuth extension)
+	PoA *PowerOfAttorneyRef `json:"poa,omitempty"`
+
+	// Subject information associated with the token
+	Subject *SubjectInfo `json:"subject,omitempty"`
+}

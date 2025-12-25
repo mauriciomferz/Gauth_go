@@ -164,7 +164,7 @@ Implementation lines (approximate):
 
 
 
-## RFC 9767: Rich Authorization Requests (RAR)
+## RFC 9396: Rich Authorization Requests (RAR)
 | Clause ID | Title | Implementation Symbols | Tests | Status | Notes |
 |-----------|-------|------------------------|-------|--------|-------|
 | RFC9767-3 | Authorization Details Data Model | `gauth.AuthorizationDetail` | pkg/gauth/rar_validator_test.go | Implemented | Types and JSON serialization |

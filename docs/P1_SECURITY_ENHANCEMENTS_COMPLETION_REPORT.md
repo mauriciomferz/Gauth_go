@@ -258,7 +258,7 @@ Comprehensive strategic analysis comparing GiFo-RFC proprietary delegation frame
 
 6. **Strategic Recommendation**
 
-   **PRIMARY FINDING**: GiFo-RFC and OAuth 2.0 + RFC 8693 are **complementary, not competing** (consistent with RFC 9767 analysis).
+   **PRIMARY FINDING**: GiFo-RFC and OAuth 2.0 + RFC 8693 are **complementary, not competing** (consistent with RFC 9396 analysis).
 
    **RECOMMENDATION**: **ADOPT HYBRID APPROACH**
    - Retain GiFo-RFC-0111/0115 as core framework

@@ -20,10 +20,11 @@ type AuditLogger interface {
 // Handler manages GNAP grant operations.
 type Handler struct {
 	Store       gnap.GrantStore
-	TokenStore  gnap.TokenStore // Token lifecycle management
-	AuditLogger AuditLogger     // Optional audit logging
-	BaseURL     string          // Base URL for continuation URIs
-	DefaultWait int             // Default wait seconds for polling
+	TokenStore  gnap.TokenStore          // Token lifecycle management
+	RSStore     gnap.ResourceServerStore // RS lifecycle Management (RFC 9767)
+	AuditLogger AuditLogger              // Optional audit logging
+	BaseURL     string                   // Base URL for continuation URIs
+	DefaultWait int                      // Default wait seconds for polling
 }
 
 // NewHandler creates a GNAP handler.
@@ -74,6 +75,10 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 	// Token management (RFC 9635 §6)
 	r.POST("/gnap/token/:id", h.TokenRotate)
 	r.DELETE("/gnap/token/:id", h.TokenRevoke)
+
+	// Resource Server Connection (RFC 9767)
+	r.POST("/gnap/rs/register", h.RegisterRS)
+	r.POST("/gnap/rs/introspect", h.IntrospectRS)
 }
 
 // DiscoveryResponse contains AS metadata per RFC 9635 §9.

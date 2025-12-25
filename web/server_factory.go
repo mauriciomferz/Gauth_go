@@ -641,9 +641,11 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	// GNAP (RFC 9635) Grant Negotiation and Authorization Protocol
 	gnapStore := gnapPkg.NewMemoryGrantStore()
 	gnapTokenStore := gnapPkg.NewMemoryTokenStore()
+	gnapRSStore := gnapPkg.NewMemoryResourceServerStore() // RFC 9767 Support
 	gnapBaseURL := envFallback("GAUTH_GNAP_BASE_URL", "http://localhost:8080")
 	gnapHandler := gnapHandlers.NewHandler(gnapStore, gnapBaseURL)
 	gnapHandler.TokenStore = gnapTokenStore
+	gnapHandler.RSStore = gnapRSStore
 	gnapHandler.RegisterRoutes(s.router)
 
 	// RFC 7523 Client Authentication

@@ -472,7 +472,7 @@ Resource Server validates chain
 #### GNAP
 - **No standard introspection in core spec**
 - Self-contained tokens preferred
-- Resource Server Connections ([RFC 9767] - if ever published) would add introspection
+- Resource Server Connections ([RFC 9396] - if ever published) would add introspection
 - Token management API (rotate/revoke)
 
 #### GAuth

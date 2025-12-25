@@ -60,7 +60,7 @@ func (h *Handler) Create(c *gin.Context) {
 	}
 	_ = c.ShouldBindJSON(&req)
 
-	// RFC 9767 / RFC-0111 Flow Integration
+	// RFC 9396 / RFC-0111 Flow Integration
 	if h.GAuthService != nil && (len(req.AuthorizationDetails) > 0 || req.GrantID != "") {
 		tokenReq := gauth.TokenRequest{
 			GrantID:              req.GrantID,

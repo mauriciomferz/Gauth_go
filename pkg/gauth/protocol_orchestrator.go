@@ -202,7 +202,7 @@ func (o *ProtocolOrchestrator) ExecuteRFCCompliantFlow(
 			ComplianceFramework: jurisdictionLaw.GoverningLaw,
 		}
 
-		// Ensure requested Authorization Details are consistent with PoA scope (RFC 9767)
+		// Ensure requested Authorization Details are consistent with PoA scope (RFC 9396)
 		if len(request.AuthorizationDetails) > 0 {
 			rarValidator := NewRARValidator()
 			if err := rarValidator.ValidateAuthorizationDetails(poaCredential, request.AuthorizationDetails); err != nil {
