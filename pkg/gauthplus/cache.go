@@ -14,6 +14,8 @@ type CapabilityCache struct {
 	cache map[string]*cacheEntry[*AICapabilityAssessment]
 	ttl   time.Duration
 	mu    sync.RWMutex
+	quit  chan struct{}
+	wg    sync.WaitGroup
 }
 
 // DelegationChainCache provides thread-safe caching for delegation chains
@@ -22,6 +24,8 @@ type DelegationChainCache struct {
 	cache map[string]*cacheEntry[[]*AIDelegation]
 	ttl   time.Duration
 	mu    sync.RWMutex
+	quit  chan struct{}
+	wg    sync.WaitGroup
 }
 
 // cacheEntry wraps cached data with expiration time
@@ -32,18 +36,26 @@ type cacheEntry[T any] struct {
 
 // NewCapabilityCache creates a new capability assessment cache
 func NewCapabilityCache(ttl time.Duration) *CapabilityCache {
-	return &CapabilityCache{
+	c := &CapabilityCache{
 		cache: make(map[string]*cacheEntry[*AICapabilityAssessment]),
 		ttl:   ttl,
+		quit:  make(chan struct{}),
 	}
+	c.wg.Add(1)
+	go c.cleanupLoop()
+	return c
 }
 
 // NewDelegationChainCache creates a new delegation chain cache
 func NewDelegationChainCache(ttl time.Duration) *DelegationChainCache {
-	return &DelegationChainCache{
+	c := &DelegationChainCache{
 		cache: make(map[string]*cacheEntry[[]*AIDelegation]),
 		ttl:   ttl,
+		quit:  make(chan struct{}),
 	}
+	c.wg.Add(1)
+	go c.cleanupLoop()
+	return c
 }
 
 // Get retrieves a capability assessment from cache
@@ -95,6 +107,28 @@ func (c *CapabilityCache) Clear() {
 	c.cache = make(map[string]*cacheEntry[*AICapabilityAssessment])
 }
 
+// Close actively stops background processing
+func (c *CapabilityCache) Close() {
+	close(c.quit)
+	c.wg.Wait()
+}
+
+// cleanupLoop periodically removes expired entries
+func (c *CapabilityCache) cleanupLoop() {
+	defer c.wg.Done()
+	ticker := time.NewTicker(c.ttl / 2) // Check more frequently than ttl to ensure timely eviction
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-c.quit:
+			return
+		case <-ticker.C:
+			c.CleanExpired()
+		}
+	}
+}
+
 // CleanExpired removes expired entries from cache
 func (c *CapabilityCache) CleanExpired() int {
 	c.mu.Lock()
@@ -108,6 +142,10 @@ func (c *CapabilityCache) CleanExpired() int {
 			delete(c.cache, key)
 			removed++
 		}
+	}
+
+	if removed > 0 {
+		metrics.UpdateGAuthPlusCacheSize("capability", len(c.cache))
 	}
 
 	return removed
@@ -179,6 +217,28 @@ func (d *DelegationChainCache) Clear() {
 	d.cache = make(map[string]*cacheEntry[[]*AIDelegation])
 }
 
+// Close actively stops background processing
+func (d *DelegationChainCache) Close() {
+	close(d.quit)
+	d.wg.Wait()
+}
+
+// cleanupLoop periodically removes expired entries
+func (d *DelegationChainCache) cleanupLoop() {
+	defer d.wg.Done()
+	ticker := time.NewTicker(d.ttl / 2)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-d.quit:
+			return
+		case <-ticker.C:
+			d.CleanExpired()
+		}
+	}
+}
+
 // CleanExpired removes expired entries from cache
 func (d *DelegationChainCache) CleanExpired() int {
 	d.mu.Lock()
@@ -192,6 +252,10 @@ func (d *DelegationChainCache) CleanExpired() int {
 			delete(d.cache, key)
 			removed++
 		}
+	}
+
+	if removed > 0 {
+		metrics.UpdateGAuthPlusCacheSize("delegation", len(d.cache))
 	}
 
 	return removed
