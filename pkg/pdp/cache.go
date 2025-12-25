@@ -54,6 +54,9 @@ type PDPCache struct {
 	evictions     uint64
 	expirations   uint64
 	invalidations uint64
+	// Lifecycle
+	quit chan struct{}
+	wg   sync.WaitGroup
 }
 
 // cacheListPayload wraps key, value, and request fields for list element.
@@ -76,12 +79,21 @@ func NewPDPCache(capacity int, ttl time.Duration) *PDPCache {
 	if capacity <= 0 {
 		capacity = 0
 	}
-	return &PDPCache{
+	cache := &PDPCache{
 		capacity: capacity,
 		ttl:      ttl,
 		items:    make(map[string]*list.Element, capacity),
 		order:    list.New(),
+		quit:     make(chan struct{}),
 	}
+
+	// Start background cleanup if TTL is set and cache is enabled
+	if capacity > 0 && ttl > 0 {
+		cache.wg.Add(1)
+		go cache.cleanupLoop()
+	}
+
+	return cache
 }
 
 // NewPDPCacheFromEnv creates cache from environment variables.
@@ -107,6 +119,47 @@ func NewPDPCacheFromEnv() *PDPCache {
 	}
 
 	return NewPDPCache(capacity, ttl)
+}
+
+// Close explicitly stops the background cleanup goroutine.
+// Essential for preventing goroutine leaks in tests or reloads.
+func (c *PDPCache) Close() {
+	if c.capacity == 0 {
+		return
+	}
+
+	select {
+	case <-c.quit:
+		// Already closed
+		return
+	default:
+		// Safe to close
+		close(c.quit)
+		c.wg.Wait()
+	}
+}
+
+// cleanupLoop runs periodically to remove expired entries.
+func (c *PDPCache) cleanupLoop() {
+	defer c.wg.Done()
+
+	// Check randomly within interval to avoid thundering herd if many caches start at once
+	interval := c.ttl / 2
+	if interval < 1*time.Minute {
+		interval = 1 * time.Minute
+	}
+
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			c.CleanupExpired()
+		case <-c.quit:
+			return
+		}
+	}
 }
 
 // makeKey generates a deterministic cache key from request attributes.
