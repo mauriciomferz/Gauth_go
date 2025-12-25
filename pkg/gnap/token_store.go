@@ -173,3 +173,58 @@ func (s *MemoryTokenStore) ListByGrant(grantID string) ([]*IssuedToken, error) {
 	}
 	return result, nil
 }
+
+// Cleanup removes expired and revoked tokens and returns the count of removed tokens.
+// This should be called periodically to prevent memory leaks.
+func (s *MemoryTokenStore) Cleanup() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	now := time.Now()
+	removed := 0
+	toDelete := []string{}
+
+	// Find expired or revoked tokens
+	for value, token := range s.tokens {
+		shouldDelete := false
+
+		// Remove if revoked (and past grace period)
+		if token.Revoked && !token.RevokedAt.IsZero() && now.Sub(token.RevokedAt) > 24*time.Hour {
+			shouldDelete = true
+		}
+
+		// Remove if expired (and past grace period)
+		if !token.ExpiresAt.IsZero() && now.Sub(token.ExpiresAt) > 1*time.Hour {
+			shouldDelete = true
+		}
+
+		if shouldDelete {
+			toDelete = append(toDelete, value)
+		}
+	}
+
+	// Delete tokens and update grant index
+	for _, value := range toDelete {
+		token := s.tokens[value]
+
+		// Remove from grant index
+		if token.GrantID != "" {
+			values := s.byGrant[token.GrantID]
+			for i, v := range values {
+				if v == value {
+					s.byGrant[token.GrantID] = append(values[:i], values[i+1:]...)
+					break
+				}
+			}
+			// Clean up empty grant entries
+			if len(s.byGrant[token.GrantID]) == 0 {
+				delete(s.byGrant, token.GrantID)
+			}
+		}
+
+		delete(s.tokens, value)
+		removed++
+	}
+
+	return removed
+}
