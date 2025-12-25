@@ -58,8 +58,13 @@ While GAuth is not an OAuth 2.0 server, the [OAuth 2.0 Migration Feasibility Stu
 > **🚀 BETA-READY** - Comprehensive security audit, extensive testing (689+ test cases), complete documentation. Suitable for testing and evaluation.
 > **Last Updated:** 2025-12-24 (Security Hardening & Audit Response)
 
-**✨ Latest Updates (Dec 24, 2025):**
+**✨ Latest Updates (Dec 25, 2025):**
+- **OIDC Advanced Features**: Implemented **Client-Initiated Backchannel Authentication (CIBA)** and **Token Exchange (RFC 8693)**.
+- **Rich Authorization Requests (RAR)**: Added support for RFC 9767 RAR validation against Power of Attorney (PoA), including schema updates.
+- **GNAP (RFC 9635)**: Verified implementation and enhanced PoA integration (`PoABridge`) with robust tests.
 - **SAML 2.0 & SCIM 2.0**: Full reference implementation for Identity Provider (SP) and User Provisioning. See [Deployment Report](docs/reports/SAML_SCIM_DEPLOYMENT_REPORT.md).
+
+**Previous Updates (Dec 24, 2025):**
 - **Admin Dashboard**: Enhanced admin portal with SAML Provider and SCIM Client management.
 - **Infrastructure**: Optimized Docker builds and hardened Redis connectivity.
 - **Verification**: 100% Test Pass Rate (Unit, Integration, Load).
