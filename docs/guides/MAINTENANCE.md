@@ -125,6 +125,66 @@ Both suites must pass to preserve end-to-end token semantics.
 | Lint complaining about unused code    | Use `make lint-fix` then rerun `make lint-minimal`.     |
 | Race failures intermittently          | Investigate with `make test-race`; add synchronization. |
 
+## GNAP Store Cleanup
+
+The GNAP implementation includes automatic cleanup for in-memory grant and token stores to prevent memory leaks in production deployments.
+
+### Quick Start
+
+```go
+import "github.com/mauriciomferz/Gauth_go/pkg/gnap"
+
+// Initialize stores
+grantStore := gnap.NewMemoryGrantStore()
+tokenStore := gnap.NewMemoryTokenStore()
+
+// Create cleanup manager (10 minute interval)
+cleanup := gnap.NewCleanupManager(grantStore, tokenStore, 10*time.Minute)
+
+// Start automatic cleanup
+ctx := context.Background()
+cleanup.Start(ctx)
+defer cleanup.Stop()
+
+// Monitor cleanup statistics
+stats := cleanup.Stats()
+log.Printf("Cleaned: %d grants, %d tokens (last: %v)",
+    stats.TotalGrantsCleaned, stats.TotalTokensCleaned, stats.LastCleanup)
+```
+
+### Cleanup Policies
+
+**Grant Cleanup:**
+- Removes grants after `ExpiresAt` time passes
+- Grace period: None (immediate after expiration)
+
+**Token Cleanup:**
+- Expired tokens: Removed 1 hour after `ExpiresAt` (clock skew tolerance)
+- Revoked tokens: Removed 24 hours after `RevokedAt` (audit retention)
+
+### Manual Cleanup
+
+For testing or manual triggering:
+```go
+grantsRemoved, tokensRemoved := cleanup.RunOnce()
+```
+
+### Recommended Settings
+
+| Environment | Interval | Rationale |
+|-------------|----------|-----------|
+| Development | 5 minutes | Fast feedback, lower memory |
+| Production  | 10-15 minutes | Balance between memory and CPU |
+| High-volume | 5 minutes | Prevent memory growth |
+
+### Monitoring
+
+The `CleanupManager` tracks:
+- `TotalGrantsCleaned` - Cumulative count
+- `TotalTokensCleaned` - Cumulative count  
+- `LastCleanup` - Timestamp of last run
+- `Running` - Current state
+
 ## Policy
 
 - No commit should remove required RFC-0111 fields from token flows.
