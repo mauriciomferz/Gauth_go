@@ -40,6 +40,8 @@ type TokenBucketLimiter struct {
 	config  Config
 	buckets map[string]*bucket
 	mutex   sync.RWMutex
+	quit    chan struct{}
+	wg      sync.WaitGroup
 }
 
 type bucket struct {
@@ -50,10 +52,14 @@ type bucket struct {
 
 // NewLimiter creates a new rate limiter
 func NewLimiter(config Config) Limiter {
-	return &TokenBucketLimiter{
+	l := &TokenBucketLimiter{
 		config:  config,
 		buckets: make(map[string]*bucket),
+		quit:    make(chan struct{}),
 	}
+	l.wg.Add(1)
+	go l.cleanupLoop()
+	return l
 }
 
 // Allow checks if a request is allowed
@@ -127,10 +133,38 @@ func (l *TokenBucketLimiter) Reset(key string) {
 
 // Close closes the rate limiter
 func (l *TokenBucketLimiter) Close() error {
+	close(l.quit)
+	l.wg.Wait()
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
 	l.buckets = make(map[string]*bucket)
 	return nil
+}
+
+// cleanupLoop periodically removes expired buckets
+func (l *TokenBucketLimiter) cleanupLoop() {
+	defer l.wg.Done()
+	ticker := time.NewTicker(10 * time.Minute)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-l.quit:
+			return
+		case <-ticker.C:
+			l.mutex.Lock()
+			now := time.Now()
+			for key, b := range l.buckets {
+				b.mutex.Lock()
+				// Remove buckets unused for 1 hour
+				if now.Sub(b.lastRefill) > time.Hour {
+					delete(l.buckets, key)
+				}
+				b.mutex.Unlock()
+			}
+			l.mutex.Unlock()
+		}
+	}
 }
 
 // WrapTokenBucket wraps a function with rate limiting

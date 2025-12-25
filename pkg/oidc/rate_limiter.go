@@ -36,6 +36,8 @@ type TokenBucketLimiter struct {
 	interval time.Duration // Refill interval
 	buckets  map[string]*bucket
 	mu       sync.RWMutex
+	quit     chan struct{}
+	wg       sync.WaitGroup
 }
 
 type bucket struct {
@@ -54,9 +56,11 @@ func NewTokenBucketLimiter(capacity, refill int, interval time.Duration) *TokenB
 		refill:   refill,
 		interval: interval,
 		buckets:  make(map[string]*bucket),
+		quit:     make(chan struct{}),
 	}
 
 	// Start cleanup goroutine to remove old buckets
+	limiter.wg.Add(1)
 	go limiter.cleanupLoop()
 
 	return limiter
@@ -116,26 +120,33 @@ func (l *TokenBucketLimiter) GetLimit() (int, time.Duration) {
 }
 
 func (l *TokenBucketLimiter) Close() error {
-	// No resources to clean up for in-memory implementation
+	close(l.quit)
+	l.wg.Wait()
 	return nil
 }
 
 func (l *TokenBucketLimiter) cleanupLoop() {
+	defer l.wg.Done()
 	ticker := time.NewTicker(5 * time.Minute)
 	defer ticker.Stop()
 
-	for range ticker.C {
-		l.mu.Lock()
-		now := time.Now()
-		for key, b := range l.buckets {
-			b.mu.Lock()
-			// Remove buckets that haven't been used in the last hour
-			if now.Sub(b.lastRefill) > time.Hour {
-				delete(l.buckets, key)
+	for {
+		select {
+		case <-l.quit:
+			return
+		case <-ticker.C:
+			l.mu.Lock()
+			now := time.Now()
+			for key, b := range l.buckets {
+				b.mu.Lock()
+				// Remove buckets that haven't been used in the last hour
+				if now.Sub(b.lastRefill) > time.Hour {
+					delete(l.buckets, key)
+				}
+				b.mu.Unlock()
 			}
-			b.mu.Unlock()
+			l.mu.Unlock()
 		}
-		l.mu.Unlock()
 	}
 }
 
@@ -152,6 +163,8 @@ type SlidingWindowLimiter struct {
 	window   time.Duration // Time window
 	counters map[string]*windowCounter
 	mu       sync.RWMutex
+	quit     chan struct{}
+	wg       sync.WaitGroup
 }
 
 type windowCounter struct {
@@ -165,8 +178,10 @@ func NewSlidingWindowLimiter(limit int, window time.Duration) *SlidingWindowLimi
 		limit:    limit,
 		window:   window,
 		counters: make(map[string]*windowCounter),
+		quit:     make(chan struct{}),
 	}
 
+	limiter.wg.Add(1)
 	go limiter.cleanupLoop()
 
 	return limiter
@@ -231,25 +246,33 @@ func (l *SlidingWindowLimiter) GetLimit() (int, time.Duration) {
 }
 
 func (l *SlidingWindowLimiter) Close() error {
+	close(l.quit)
+	l.wg.Wait()
 	return nil
 }
 
 func (l *SlidingWindowLimiter) cleanupLoop() {
+	defer l.wg.Done()
 	ticker := time.NewTicker(10 * time.Minute)
 	defer ticker.Stop()
 
-	for range ticker.C {
-		l.mu.Lock()
-		now := time.Now()
-		for key, counter := range l.counters {
-			counter.mu.Lock()
-			// Remove counters with no recent requests
-			if len(counter.requests) == 0 || now.Sub(counter.requests[len(counter.requests)-1]) > l.window*2 {
-				delete(l.counters, key)
+	for {
+		select {
+		case <-l.quit:
+			return
+		case <-ticker.C:
+			l.mu.Lock()
+			now := time.Now()
+			for key, counter := range l.counters {
+				counter.mu.Lock()
+				// Remove counters with no recent requests
+				if len(counter.requests) == 0 || now.Sub(counter.requests[len(counter.requests)-1]) > l.window*2 {
+					delete(l.counters, key)
+				}
+				counter.mu.Unlock()
 			}
-			counter.mu.Unlock()
+			l.mu.Unlock()
 		}
-		l.mu.Unlock()
 	}
 }
 
