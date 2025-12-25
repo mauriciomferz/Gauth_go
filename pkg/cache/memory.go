@@ -14,6 +14,8 @@ type MemoryCache struct {
 	config  *Config
 	stats   *Stats
 	statsMu sync.RWMutex
+	quit    chan struct{}
+	wg      sync.WaitGroup
 }
 
 type cacheItem struct {
@@ -30,9 +32,11 @@ func NewMemoryCache(config *Config) *MemoryCache {
 			Hits:   0,
 			Misses: 0,
 		},
+		quit: make(chan struct{}),
 	}
 
 	// Start cleanup goroutine
+	cache.wg.Add(1)
 	go cache.cleanupExpired()
 
 	return cache
@@ -155,8 +159,12 @@ func (m *MemoryCache) GetStats(ctx context.Context) (*Stats, error) {
 	return stats, nil
 }
 
-// Close closes the memory cache (no-op)
+// Close closes the memory cache and stops background cleanup
 func (m *MemoryCache) Close() error {
+	// Signal cleanup goroutine to stop
+	close(m.quit)
+	m.wg.Wait()
+
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -201,17 +209,23 @@ func (m *MemoryCache) evictOne() {
 }
 
 func (m *MemoryCache) cleanupExpired() {
+	defer m.wg.Done()
 	ticker := time.NewTicker(1 * time.Minute)
 	defer ticker.Stop()
 
-	for range ticker.C {
-		m.mu.Lock()
-		now := time.Now()
-		for key, item := range m.items {
-			if now.After(item.expiration) {
-				delete(m.items, key)
+	for {
+		select {
+		case <-ticker.C:
+			m.mu.Lock()
+			now := time.Now()
+			for key, item := range m.items {
+				if now.After(item.expiration) {
+					delete(m.items, key)
+				}
 			}
+			m.mu.Unlock()
+		case <-m.quit:
+			return
 		}
-		m.mu.Unlock()
 	}
 }
