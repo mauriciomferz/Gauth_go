@@ -39,45 +39,45 @@ This document defines the architecture for implementing **sub-second revocation*
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│              Emergency Revocation Flow                           │
+│              Emergency Revocation Flow                          │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
+│                                                                 │
 │  T=0s:  Principal detects rogue AI behavior                     │
-│         ↓                                                        │
-│  T=0.1s: POST /api/v1/poa/{id}/revoke/emergency                │
-│         ↓                                                        │
-│  ┌──────────────────────────────────────────────────────┐      │
-│  │  Emergency Revocation Oracle (Centralized)           │      │
-│  │  - Store revocation in Redis (3-node cluster)        │      │
-│  │  - Broadcast via WebSocket to ALL validators         │      │
-│  │  - Propagation time: <500ms                          │      │
-│  └──────────────────────────────────────────────────────┘      │
-│         ↓                                                        │
+│         ↓                                                       │
+│  T=0.1s: POST /api/v1/poa/{id}/revoke/emergency                 │
+│         ↓                                                       │
+│  ┌──────────────────────────────────────────────────────┐       │
+│  │  Emergency Revocation Oracle (Centralized)           │       │
+│  │  - Store revocation in Redis (3-node cluster)        │       │
+│  │  - Broadcast via WebSocket to ALL validators         │       │
+│  │  - Propagation time: <500ms                          │       │
+│  └──────────────────────────────────────────────────────┘       │
+│         ↓                                                       │
 │  T=0.3s: ALL validators receive revocation (WebSocket push)     │
-│         ↓                                                        │
-│  ┌──────────────────────────────────────────────────────┐      │
-│  │  Validators Update In-Memory Cache                    │      │
-│  │  - Mark PoA as REVOKED (local cache)                 │      │
-│  │  - Reject all subsequent requests immediately        │      │
-│  │  - No database/blockchain lookup needed              │      │
-│  └──────────────────────────────────────────────────────┘      │
-│         ↓                                                        │
+│         ↓                                                       │
+│  ┌──────────────────────────────────────────────────────┐       │
+│  │  Validators Update In-Memory Cache                   │       │
+│  │  - Mark PoA as REVOKED (local cache)                 │       │
+│  │  - Reject all subsequent requests immediately        │       │
+│  │  - No database/blockchain lookup needed              │       │
+│  └──────────────────────────────────────────────────────┘       │
+│         ↓                                                       │
 │  T=0.5s: ✅ REVOCATION EFFECTIVE (AI cannot execute)            │
-│         │                                                        │
+│         │                                                       │
 │         │  [SIMULTANEOUS TRACK]                                 │
-│         ↓                                                        │
-│  ┌──────────────────────────────────────────────────────┐      │
-│  │  Flashbots Private Mempool (Background)              │      │
-│  │  - Submit revocation tx to Flashbots relay           │      │
-│  │  - Transaction HIDDEN from public mempool            │      │
-│  │  - AI cannot detect or front-run                     │      │
-│  └──────────────────────────────────────────────────────┘      │
-│         ↓                                                        │
-│  T=12s: ✅ Blockchain finalization (permanent record)            │
-│                                                                  │
+│         ↓                                                       │
+│  ┌──────────────────────────────────────────────────────┐       │
+│  │  Flashbots Private Mempool (Background)              │       │
+│  │  - Submit revocation tx to Flashbots relay           │       │
+│  │  - Transaction HIDDEN from public mempool            │       │
+│  │  - AI cannot detect or front-run                     │       │
+│  └──────────────────────────────────────────────────────┘       │
+│         ↓                                                       │
+│  T=12s: ✅ Blockchain finalization (permanent record)           │
+│                                                                 │
 │  Result: 0.5s emergency suspension + 12s blockchain finality    │
 │          AI has ZERO time to front-run (sub-second response)    │
-│                                                                  │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -104,47 +104,47 @@ The Emergency Revocation Oracle is a **centralized broadcast system** that provi
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│           Emergency Revocation Oracle Infrastructure             │
+│           Emergency Revocation Oracle Infrastructure            │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ┌──────────────────────────────────────────────────────┐      │
-│  │  Redis Cluster (3 nodes)                             │      │
-│  │  ┌────────────┐  ┌────────────┐  ┌────────────┐    │      │
-│  │  │  Master    │  │  Replica 1 │  │  Replica 2 │    │      │
-│  │  │ us-east-1a │  │ us-east-1b │  │ us-east-1c │    │      │
-│  │  └────────────┘  └────────────┘  └────────────┘    │      │
-│  │                                                       │      │
-│  │  Data Structure:                                     │      │
-│  │  revoked:{poa_id} -> {                               │      │
-│  │    "timestamp": 1732620000,                          │      │
-│  │    "principal": "user_123",                          │      │
-│  │    "reason": "suspicious_activity",                  │      │
-│  │    "ttl": 86400  // 24 hours                         │      │
-│  │  }                                                   │      │
-│  └──────────────────────────────────────────────────────┘      │
+│                                                                 │
+│  ┌──────────────────────────────────────────────────────┐       │
+│  │  Redis Cluster (3 nodes)                             │       │
+│  │  ┌────────────┐  ┌────────────┐  ┌────────────┐      │       │
+│  │  │  Master    │  │  Replica 1 │  │  Replica 2 │      │       │
+│  │  │ us-east-1a │  │ us-east-1b │  │ us-east-1c │      │       │
+│  │  └────────────┘  └────────────┘  └────────────┘      │       │
+│  │                                                      │       │
+│  │  Data Structure:                                     │       │
+│  │  revoked:{poa_id} -> {                               │       │
+│  │    "timestamp": 1732620000,                          │       │
+│  │    "principal": "user_123",                          │       │
+│  │    "reason": "suspicious_activity",                  │       │
+│  │    "ttl": 86400  // 24 hours                         │       │
+│  │  }                                                   │       │ 
+│  └──────────────────────────────────────────────────────┘       │
 │                           │                                     │
 │                           ▼                                     │
-│  ┌──────────────────────────────────────────────────────┐      │
-│  │  Broadcast Service (gRPC/WebSocket)                  │      │
-│  │  - Maintains persistent connections to validators    │      │
-│  │  - Server-sent events (SSE) for HTTP clients         │      │
-│  │  - Pub/Sub for internal microservices                │      │
-│  └──────────────────────────────────────────────────────┘      │
+│  ┌──────────────────────────────────────────────────────┐       │
+│  │  Broadcast Service (gRPC/WebSocket)                  │       │
+│  │  - Maintains persistent connections to validators    │       │
+│  │  - Server-sent events (SSE) for HTTP clients         │       │
+│  │  - Pub/Sub for internal microservices                │       │
+│  └──────────────────────────────────────────────────────┘       │
 │                           │                                     │
 │                           ▼                                     │
-│  ┌──────────────────────────────────────────────────────┐      │
-│  │  Validators (Distributed - 100+ instances)           │      │
-│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐          │      │
-│  │  │ Region 1 │  │ Region 2 │  │ Region 3 │  ...     │      │
-│  │  │ 10 pods  │  │ 10 pods  │  │ 10 pods  │          │      │
-│  │  └──────────┘  └──────────┘  └──────────┘          │      │
-│  │                                                       │      │
-│  │  Each validator:                                     │      │
-│  │  - Subscribes to revocation stream                  │      │
-│  │  - Updates local in-memory cache (<10ms)            │      │
-│  │  - Rejects requests for revoked PoAs                │      │
-│  └──────────────────────────────────────────────────────┘      │
-│                                                                  │
+│  ┌──────────────────────────────────────────────────────┐       │
+│  │  Validators (Distributed - 100+ instances)           │       │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐            │       │
+│  │  │ Region 1 │  │ Region 2 │  │ Region 3 │  ...       │       │
+│  │  │ 10 pods  │  │ 10 pods  │  │ 10 pods  │            │       │
+│  │  └──────────┘  └──────────┘  └──────────┘            │       │
+│  │                                                      │       │
+│  │  Each validator:                                     │       │
+│  │  - Subscribes to revocation stream                   │       │
+│  │  - Updates local in-memory cache (<10ms)             │       │
+│  │  - Rejects requests for revoked PoAs                 │       │
+│  └──────────────────────────────────────────────────────┘       │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -427,52 +427,52 @@ Flashbots is a **private transaction relay** that prevents front-running by hidi
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                Flashbots Private Mempool Flow                    │
+│                Flashbots Private Mempool Flow                   │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ┌──────────────────────────────────────────────────────┐      │
-│  │  1. GAuth Revocation Service                         │      │
-│  │     Creates revocation transaction                    │      │
-│  └──────────────────────────────────────────────────────┘      │
+│                                                                 │
+│  ┌──────────────────────────────────────────────────────┐       │
+│  │  1. GAuth Revocation Service                         │       │
+│  │     Creates revocation transaction                   │       │
+│  └──────────────────────────────────────────────────────┘       │
 │                           │                                     │
 │                           ▼                                     │
-│  ┌──────────────────────────────────────────────────────┐      │
-│  │  2. Flashbots Relay (Private Channel)                │      │
-│  │     Transaction hidden from public mempool           │      │
-│  │     ⚠️ AI agents CANNOT see this transaction         │      │
-│  └──────────────────────────────────────────────────────┘      │
+│  ┌──────────────────────────────────────────────────────┐       │
+│  │  2. Flashbots Relay (Private Channel)                │       │
+│  │     Transaction hidden from public mempool           │       │
+│  │     ⚠️ AI agents CANNOT see this transaction         │       │
+│  └──────────────────────────────────────────────────────┘       │
 │                           │                                     │
 │                           ▼                                     │
-│  ┌──────────────────────────────────────────────────────┐      │
-│  │  3. MEV Searchers (Optional)                         │      │
-│  │     Can submit bundles to include with revocation    │      │
-│  │     (Not used for revocations - we just need privacy)│      │
-│  └──────────────────────────────────────────────────────┘      │
+│  ┌──────────────────────────────────────────────────────┐       │
+│  │  3. MEV Searchers (Optional)                         │       │
+│  │     Can submit bundles to include with revocation    │       │
+│  │     (Not used for revocations - we just need privacy)│       │
+│  └──────────────────────────────────────────────────────┘       │
 │                           │                                     │
 │                           ▼                                     │
-│  ┌──────────────────────────────────────────────────────┐      │
-│  │  4. Block Builders (Validators)                      │      │
-│  │     Include transaction in next block                │      │
-│  │     Guaranteed inclusion (no mempool competition)    │      │
-│  └──────────────────────────────────────────────────────┘      │
+│  ┌──────────────────────────────────────────────────────┐       │
+│  │  4. Block Builders (Validators)                      │       │
+│  │     Include transaction in next block                │       │
+│  │     Guaranteed inclusion (no mempool competition)    │       │
+│  └──────────────────────────────────────────────────────┘       │
 │                           │                                     │
 │                           ▼                                     │
-│  ┌──────────────────────────────────────────────────────┐      │
-│  │  5. Blockchain (Ethereum/BSC/Polygon)                │      │
-│  │     Transaction finalized on-chain                   │      │
-│  │     Permanent immutable record                       │      │
-│  └──────────────────────────────────────────────────────┘      │
-│                                                                  │
+│  ┌──────────────────────────────────────────────────────┐       │
+│  │  5. Blockchain (Ethereum/BSC/Polygon)                │       │
+│  │     Transaction finalized on-chain                   │       │
+│  │     Permanent immutable record                       │       │
+│  └──────────────────────────────────────────────────────┘       │
+│                                                                 │
 │  Timeline:                                                      │
-│  - T=0s:     Revocation submitted to Flashbots                 │
-│  - T=1-12s:  Included in next block (Ethereum: ~12s)           │
-│  - T=12s:    ✅ Finalized on blockchain                        │
-│                                                                  │
+│  - T=0s:     Revocation submitted to Flashbots                  │
+│  - T=1-12s:  Included in next block (Ethereum: ~12s)            │
+│  - T=12s:    ✅ Finalized on blockchain                         │
+│                                                                 │
 │  Security Benefit:                                              │
-│  - AI agent cannot monitor mempool (transaction private)       │
-│  - No front-running opportunity                                │
-│  - Guaranteed inclusion (builders prioritize Flashbots)        │
-│                                                                  │
+│  - AI agent cannot monitor mempool (transaction private)        │
+│  - No front-running opportunity                                 │
+│  - Guaranteed inclusion (builders prioritize Flashbots)         │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -707,43 +707,43 @@ contract GAuthRegistry {
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│         Hybrid Emergency Revocation + Flashbots Flow             │
+│         Hybrid Emergency Revocation + Flashbots Flow            │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
+│                                                                 │
 │  T=0s:  Principal initiates revocation                          │
 │         POST /api/v1/poa/{id}/revoke/emergency                  │
-│         ↓                                                        │
+│         ↓                                                       │
 │         ┌──────────────────────────────────┐                    │
 │         │  PARALLEL EXECUTION              │                    │
-│         │  ┌────────────┐  ┌────────────┐ │                    │
-│         │  │  Track 1   │  │  Track 2   │ │                    │
-│         │  │  Emergency │  │  Flashbots │ │                    │
-│         │  │  Oracle    │  │  Blockchain│ │                    │
-│         │  └─────┬──────┘  └──────┬─────┘ │                    │
+│         │  ┌────────────┐  ┌────────────┐  │                    │
+│         │  │  Track 1   │  │  Track 2   │  │                    │
+│         │  │  Emergency │  │  Flashbots │  │                    │
+│         │  │  Oracle    │  │  Blockchain│  │                    │
+│         │  └─────┬──────┘  └──────┬─────┘  │                    │
 │         └────────┼────────────────┼────────┘                    │
-│                  │                │                              │
-│  ┌───────────────▼─────────────┐  │                            │
-│  │  Track 1: Emergency Oracle  │  │                            │
-│  │  T=0.1s: Store in Redis     │  │                            │
-│  │  T=0.2s: Pub/Sub broadcast  │  │                            │
-│  │  T=0.5s: All validators ACK │  │                            │
-│  │  ✅ REVOCATION EFFECTIVE    │  │                            │
-│  └─────────────────────────────┘  │                            │
-│                                    │                            │
-│  ┌────────────────────────────────▼────────────────────┐       │
-│  │  Track 2: Flashbots Blockchain Finalization         │       │
-│  │  T=0s:   Create revocation transaction              │       │
-│  │  T=0.1s: Sign transaction                           │       │
-│  │  T=0.2s: Submit to Flashbots relay (PRIVATE)        │       │
-│  │  T=1-12s: Miners include in next block              │       │
-│  │  T=12s:  ✅ Blockchain finalization                 │       │
-│  └─────────────────────────────────────────────────────┘       │
-│                                                                  │
+│                  │                │                             │
+│  ┌───────────────▼─────────────┐  │                             │
+│  │  Track 1: Emergency Oracle  │  │                             │
+│  │  T=0.1s: Store in Redis     │  │                             │
+│  │  T=0.2s: Pub/Sub broadcast  │  │                             │
+│  │  T=0.5s: All validators ACK │  │                             │
+│  │  ✅ REVOCATION EFFECTIVE    │  │                             │
+│  └─────────────────────────────┘  │                             │
+│                                   │                             │
+│  ┌────────────────────────────────▼────────────────────┐        │
+│  │  Track 2: Flashbots Blockchain Finalization         │        │
+│  │  T=0s:   Create revocation transaction              │        │
+│  │  T=0.1s: Sign transaction                           │        │
+│  │  T=0.2s: Submit to Flashbots relay (PRIVATE)        │        │
+│  │  T=1-12s: Miners include in next block              │        │
+│  │  T=12s:  ✅ Blockchain finalization                 │        │
+│  └─────────────────────────────────────────────────────┘        │
+│                                                                 │
 │  Result:                                                        │
-│  - 0.5s: Immediate suspension (emergency oracle)               │
-│  - 12s:  Permanent on-chain record (Flashbots)                │
-│  - AI agent has ZERO opportunity to front-run                  │
-│                                                                  │
+│  - 0.5s: Immediate suspension (emergency oracle)                │
+│  - 12s:  Permanent on-chain record (Flashbots)                  │
+│  - AI agent has ZERO opportunity to front-run                   │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 

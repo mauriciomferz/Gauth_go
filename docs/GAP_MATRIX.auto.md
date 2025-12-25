@@ -1,6 +1,6 @@
 # GAuth RFC Gap Matrix (Generated)
 
-> Generated: 2025-12-25T13:14:14Z
+> Generated: 2025-12-25T15:01:14Z
 
 **Drift Detected (9 items)**:
 - Key rotation & lifecycle: CSV(Status=Partial,Priority=P1) != MD(Status=Implemented,Priority=P1)
