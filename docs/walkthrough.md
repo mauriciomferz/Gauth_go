@@ -601,6 +601,22 @@ This walkthrough documents the completed implementation of RFC 7523bis hardening
 - **Issue**: "Edit Profile" and "Change Password" buttons did nothing.
 - **Fix**: Added click handlers to `Profile.tsx` using `sonner` toast notifications to provide robust, non-intrusive user feedback about feature availability in Dev Mode. Replaced unreliable `alert()` calls.
 
+### Runtime Connectivity Fixes (Docker & Migrations)
+- **Issue**: "Live Streaming" and "Audit Trail" features were missing or broken.
+- **Cause**: Server was running in "Degraded Mode" (empty handlers) due to failure to connect to PostgreSQL and Redis.
+    - Docker ports (5432, 6379) were not exposed to localhost.
+    - Database schema was missing in the fresh container.
+- **Fix**:
+    - Used `docker compose up -d --force-recreate` to refresh containers and properly expose ports.
+    - Verified port mapping with `docker port`.
+    - Executed all 14 schema migrations manually via `docker exec -i gauth-postgres psql ...` to initialize the database.
+    - Restarted `web-server` with corrected environment variables (`GAUTH_DB_HOST`, `DB_HOST`, `REDIS_HOST`, etc.).
+- **Verification**:
+    - `GET /api/admin/events/stream` -> **200 OK** (Empty list, non-404).
+    - `GET /api/admin/audit/events` -> **200 OK** (Empty list, non-404).
+    - Confirmed full functionality of "Live Streaming" and "Audit Trail" backend services.
+
+
 ## Durability & Compliance Phase
 
 ### Replay Store Durability (WAL)

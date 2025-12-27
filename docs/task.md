@@ -214,3 +214,8 @@
     - [x] Analyze CI/CD workflows (`ci.yml`, `deploy-staging.yml`)
     - [x] Simulate staging deployment steps
     - [x] Update Gap Matrix with deployment coverage
+- [x] Fix Local Runtime Connectivity
+    - [x] Expose Postgres/Redis ports in Docker
+    - [x] Run initial database migration
+    - [x] Verify Event Stream and Audit endpoints
+
