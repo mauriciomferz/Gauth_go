@@ -144,6 +144,27 @@ func (h *MetricsHandler) collectSystemMetrics(ctx context.Context) (SystemMetric
 	// Calculate uptime in seconds
 	uptime := int64(time.Since(h.startTime).Seconds())
 
+	// In Dev Mode (no DB), simulate dynamic metrics
+	if h.db == nil {
+		// Add some jitter based on current time seconds
+		jitter := float64(time.Now().Unix()%100) / 100.0
+		return SystemMetricsResponse{
+			TotalRequests:    h.reqCounter.total + int64(time.Since(h.startTime).Seconds()*1.5), // Simulate 1.5 req/s
+			Uptime:           uptime,
+			AvgLatency:       45.3 + (jitter * 5),
+			P95Latency:       125.8 + (jitter * 10),
+			P99Latency:       256.4 + (jitter * 20),
+			ErrorCount:       int64(float64(uptime) * 0.01), // Simulate 1% errors
+			ErrorRate:        0.01 + (jitter * 0.005),
+			CacheHitRate:     0.892 + (jitter * 0.05),
+			CacheSize:        cacheSize + int64(jitter*1024*1024),
+			MemoryUsage:      int64(m.Alloc) + int64(jitter*1024*1024*5), // Vary memory usage
+			CacheEvictions:   cacheEvicted + int64(float64(uptime)*0.1),
+			AvgTTL:           3600,
+			CompressionRatio: 2.4 + (jitter * 0.1),
+		}, nil
+	}
+
 	return SystemMetricsResponse{
 		TotalRequests:    dbStats.TotalRequests,
 		Uptime:           uptime,

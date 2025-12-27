@@ -585,6 +585,7 @@ func (s *BetaServer) RegisterUIRoutes() {
 	s.router.GET("/index.html", serveWithCSP("text/html", "index.html"))
 	s.router.GET("/ui/styles.css", serveWithCSP("text/css", "styles.css"))
 	s.router.GET("/ui/app.js", serveWithCSP("application/javascript", "app.js"))
+	s.router.GET("/ui/rotation_v2.js", serveWithCSP("application/javascript", "rotation_v2.js"))
 
 	// Add middleware for CSP generation if not present globally
 	// (Assuming global middleware usually handles this, but ensuring checks pass)

@@ -578,6 +578,29 @@ config := TSAConfig{
 
 This walkthrough documents the completed implementation of RFC 7523bis hardening and AI Agent Collaboration Phase 2. The RFC 7523bis implementation adds critical security features including JTI replay protection, algorithm agility, and flexible audience validation. Phase 2 deepens MCP integration with AI agent identity propagation and monetary value validation, while establishing the crucial link between GNAP and GAuth's Power of Attorney system through `VerificationService` integration. All changes are fully tested and verified, with gosec security findings reduced from 251 to 247.
 
+### Admin Config 404 & Stale Assets
+- **Issue**: `/api/admin/config/yaml` returned 404 in dev mode (no DB).
+- **Fix**: Implemented fallback in `pkg/config/repository.go` to return default config when DB is nil.
+- **Issue**: `rotation_v2.js` returned 404/MIME error.
+- **Fix**: Registered static route in `web/server_clean.go`.
+- **Issue**: Frozen/Stale Asset (`index-Bj2Ul4WE.js`).
+- **Fix**: Rebuilt frontend, cleaned build artifacts, and verified correct `index.html` embedding via panic trace.
+
+### Admin Navigation Fixes
+- **Issue**: "Profile" and "Settings" menu items were non-functional.
+- **Fix**:
+    - Created `frontend/ui-react/src/pages/admin/Profile.tsx` for user profile display.
+    - Updated `App.tsx` to include `/admin/profile` route.
+    - Updated `AdminLayout.tsx` to add `onClick` navigation handlers to top-bar menu items.
+    - Linked "Settings" to existing `/admin/configuration`.
+    - Rebuilt frontend and populated server static assets.
+
+### System Metrics & Profile Actions
+- **Issue**: System metrics were static/frozen in Dev Mode.
+- **Fix**: Updated `web/handlers/admin/metrics_handler.go` to simulate dynamic activity (jitter, request variance) when no database is connected.
+- **Issue**: "Edit Profile" and "Change Password" buttons did nothing.
+- **Fix**: Added click handlers to `Profile.tsx` using `sonner` toast notifications to provide robust, non-intrusive user feedback about feature availability in Dev Mode. Replaced unreliable `alert()` calls.
+
 ## Durability & Compliance Phase
 
 ### Replay Store Durability (WAL)

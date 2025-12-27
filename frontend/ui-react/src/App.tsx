@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { Toaster } from 'sonner'
 import { Spinner } from '@fluentui/react-components'
 import AdminLogin from './pages/AdminLogin'
 import AdminLayout from './components/AdminLayout'
@@ -38,6 +39,7 @@ const Metrics = lazy(() => import('./pages/Metrics'))
 const Login = lazy(() => import('./pages/Login'))
 const GNAP = lazy(() => import('./pages/GNAP'))
 const DeviceConnect = lazy(() => import("./pages/DeviceConnect").then(module => ({ default: module.DeviceConnect })));
+const Profile = lazy(() => import('./pages/admin/Profile'))
 
 // Loading fallback component
 function PageLoader() {
@@ -67,6 +69,7 @@ function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/*" element={<AdminLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="profile" element={<Profile />} />
           <Route path="metrics" element={<SystemMetrics />} />
           <Route path="subscribers" element={<Subscribers />} />
           <Route path="subscribers/list" element={<SubscribersList />} />
@@ -110,6 +113,7 @@ function App() {
         {/* Catch-all redirect for any unknown routes (fixes /index.html blank page) */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <Toaster richColors position="top-right" />
     </Suspense>
   )
 }

@@ -174,6 +174,17 @@
     - [x] Implement rotation policies - DEFERRED (Design in SEMANTIC_SNAPSHOT_DESIGN.md)
     - [x] Add snapshot archival - DEFERRED
     - [x] External anchoring integration - DEFERRED
+- [x] Fix Admin Config 404
+- [x] Fix 404 on `rotation_v2.js`
+- [x] Fix stale asset `index-Bj2Ul4WE.js`
+- [x] Fix Admin Navigation (Profile/Settings)
+    - [x] Create Profile page
+    - [x] wiring up settings to configuration page
+    - [x] Verify navigation
+- [x] Fix System Metrics (Static Values)
+    - [x] Implement simulated dynamic metrics in Dev Mode
+- [x] Fix Profile Actions
+    - [x] Add feedback handlers for Edit/Change Password
 - [x] Verification
     - [x] Test TSA integration
     - [x] Test certificate validation

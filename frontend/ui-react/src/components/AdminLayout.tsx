@@ -355,8 +355,12 @@ export default function AdminLayout() {
                 </MenuTrigger>
                 <MenuPopover>
                   <MenuList>
-                    <MenuItem icon={<PersonAvailable24Regular />}>Profile</MenuItem>
-                    <MenuItem icon={<Settings24Regular />}>Settings</MenuItem>
+                    <MenuItem icon={<PersonAvailable24Regular />} onClick={() => navigate('/admin/profile')}>
+                      Profile
+                    </MenuItem>
+                    <MenuItem icon={<Settings24Regular />} onClick={() => navigate('/admin/configuration')}>
+                      Settings
+                    </MenuItem>
                     <MenuDivider />
                     <MenuItem icon={<SignOut24Regular />} onClick={handleLogout}>
                       Sign Out
