@@ -153,6 +153,7 @@ func (m *mockCollector) IncCapabilityAnchorAlgorithm(algo string)               
 func (m *mockCollector) SetCapabilityAnchorAlgorithmRatio(algo string, ratio float64) {
 }
 func (m *mockCollector) IncCapabilityEnforceAllowed()                                     {}
+func (m *mockCollector) ObserveCapabilityAnchorInterval(d time.Duration)                  {}
 func (m *mockCollector) IncCapabilityEnforceDenied()                                      {}
 func (m *mockCollector) IncPEPEnforcements(allowed bool, actionType string)               {}
 func (m *mockCollector) IncPEPViolations(violationType, severity string)                  {}
@@ -171,6 +172,8 @@ func (m *mockCollector) IncRestrictionViolations()                              
 func (m *mockCollector) IncUnauthorized()                                                 {}
 func (m *mockCollector) IncExpired()                                                      {}
 func (m *mockCollector) IncRevoked()                                                      {}
+func (m *mockCollector) IncMalformedJTI(reason string)                                    {}
+func (m *mockCollector) IncReplayStoreAvailabilityImpact()                                {}
 func (m *mockCollector) IncDelegationStatusTransitions()                                  {}
 func (m *mockCollector) IncDelegationStatusTransitionFailures()                           {}
 func (m *mockCollector) IncTokenStatusTransitions()                                       {}
