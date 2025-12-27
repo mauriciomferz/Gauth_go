@@ -1,8 +1,8 @@
 ---
 title: Gap Matrix
 category: guide
-status: draft
-lastUpdated: 2025-12-27
+status: final
+lastUpdated: 2025-12-28
 owners: [system]
 ---
 
