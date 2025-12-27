@@ -177,6 +177,7 @@
 - [x] Fix Admin Config 404
 - [x] Fix 404 on `rotation_v2.js`
 - [x] Fix stale asset `index-Bj2Ul4WE.js`
+- [x] Fix hardcoded API URL in frontend build
 - [x] Fix Admin Navigation (Profile/Settings)
     - [x] Create Profile page
     - [x] wiring up settings to configuration page
