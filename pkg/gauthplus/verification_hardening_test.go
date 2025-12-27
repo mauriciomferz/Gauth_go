@@ -39,7 +39,8 @@ func TestVerificationService_Hardened(t *testing.T) {
 
 	t.Run("VerifyRepresentativePosition_Success", func(t *testing.T) {
 		// "Dr. Max Mustermann" is in mock register for "HRB 12345" in "DE"
-		res, err := svc.VerifyRepresentativePosition(ctx, "Dr. Max Mustermann", "HRB 12345:DE")
+		// Note: Registry keys normalized to no-space in mock.
+		res, err := svc.VerifyRepresentativePosition(ctx, "Dr. Max Mustermann", "HRB12345:DE")
 		if err != nil {
 			t.Fatalf("Unexpected error: %v", err)
 		}

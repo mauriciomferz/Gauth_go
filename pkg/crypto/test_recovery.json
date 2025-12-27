@@ -1,25 +1,25 @@
 {
   "ttl_hours": 0,
   "active": {
-    "kid": "TT249ceKVns",
-    "created_at": "2025-12-26T23:58:20Z",
-    "expires_at": "2025-12-26T23:58:30Z",
-    "deprecated_after": "2025-12-26T23:58:28Z",
-    "sunset_after": "2025-12-26T23:58:30Z",
-    "private_b64": "N99tQ4iED6MFN1BEGn7CQwjR0h+uCz/gl0Qn/0RJYUVNPbj1x4pWexBFtSyLXzxbbPkzohpYsVAtrmNo3ftu2Q",
-    "public_b64": "TT249ceKVnsQRbUsi188W2z5M6IaWLFQLa5jaN37btk",
+    "kid": "0PMj1v-hJYk",
+    "created_at": "2025-12-27T03:55:59Z",
+    "expires_at": "2025-12-27T03:56:09Z",
+    "deprecated_after": "2025-12-27T03:56:07Z",
+    "sunset_after": "2025-12-27T03:56:09Z",
+    "private_b64": "/9eZoDL06h0k85f5XLApBkFB4NnHthTBl3H7qE7DsIPQ8yPW/6EliY9zFvWJL7kcYLgIcUsU2fJmENQgnFTnLQ",
+    "public_b64": "0PMj1v+hJYmPcxb1iS+5HGC4CHFLFNnyZhDUIJxU5y0",
     "alg": "EdDSA",
     "use": "sig"
   },
   "history": [
     {
-      "kid": "OFMRyBca9qo",
-      "created_at": "2025-12-26T23:58:20Z",
-      "expires_at": "2025-12-26T23:58:30Z",
-      "deprecated_after": "2025-12-26T23:58:28Z",
-      "sunset_after": "2025-12-26T23:58:30Z",
-      "private_b64": "0waKYBZBVCwWNVO2osbUejaoJA3YCzHcsXtjzBTsLaU4UxHIFxr2quT5pMvieQ+JjYFNo+nctQ32gC4L7fgi/g",
-      "public_b64": "OFMRyBca9qrk+aTL4nkPiY2BTaPp3LUN9oAuC+34Iv4",
+      "kid": "3q4ISxcTkAE",
+      "created_at": "2025-12-27T03:55:59Z",
+      "expires_at": "2025-12-27T03:56:09Z",
+      "deprecated_after": "2025-12-27T03:56:07Z",
+      "sunset_after": "2025-12-27T03:56:09Z",
+      "private_b64": "54+jL0ltu1Onepj8I54R3/1cMig1XPstKeWTOEvv5QrerghLFxOQASS+oTAYw6sGykSQ1eQ6kQnP0iH2Db9h4A",
+      "public_b64": "3q4ISxcTkAEkvqEwGMOrBspEkNXkOpEJz9Ih9g2/YeA",
       "alg": "EdDSA",
       "use": "sig"
     }
