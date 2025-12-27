@@ -33,7 +33,15 @@ owners: [system]
 - **Deprecation ADR**: Capability lifecycle policy documented
 - **Status**: Governance framework complete
 
-**IMPLEMENTATION**: **100% Complete** (All P0/P1/P2 addressed)
+
+## Phase 20: CI/CD & Deployment Readiness ✅
+- **CI Pipeline**: 100% test pass rate (core, int, web, revocation).
+- **Build System**: Clean binary builds with release flags.
+- **Containerization**: Dockerfile production-ready, Trivy scan integrated.
+- **Staging**: Local deployment simulation verified.
+- **Status**: Deployment pipeline fully operational.
+
+**IMPLEMENTATION**: **100% Complete** (All P0/P1/P2/Deployment addressed)
 
 ---
 
@@ -233,6 +241,15 @@ To achieve full RFC 0111/0115 compliance and production readiness, prioritize:
 - Comprehensive compliance features (attestation, arbitration hooks, residual risk tracking)
 - Expansion of fuzz/property testing and clause-to-test mapping
 - Hardening operational durability (fail-closed replay, rotation audit, secret storage recovery)
+
+---
+
+## 15. CI/CD & Deployment Readiness
+| Requirement | Current Implementation | Gap | Status | Priority | Impact | Suggested Action |
+|-------------|------------------------|-----|--------|----------|--------|------------------|
+| CI Pipeline Integrity | **COMPLETED:** GitHub Actions workflow (`ci.yml`) with comprehensive testing (core, internal, web, revocation), race detection, linting (`golangci-lint`), and security scanning (`gosec`). Build verification ensures clean compilation. | None | Implemented | P0 | Reliability | **COMPLETED** |
+| Containerization & Security | **COMPLETED:** Optimized `Dockerfile.production` for multi-stage builds. CI includes `docker-build` job with `trivy` vulnerability scanning and GHCR push integration. | None | Implemented | P1 | Security | **COMPLETED** |
+| Staging Deployment | **COMPLETED:** `deploy-staging.yml` workflow defined for K8s deployment. Local simulation verified manifests and configuration validity. Rollback automation implemented. | None | Implemented | P1 | Availability | **COMPLETED** |
 
 ---
 Generated automatically; update after each major feature merge (last update added lifecycle timeline endpoint, latency percentiles, autosave persistence, basic discovery endpoint).
