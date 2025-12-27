@@ -368,7 +368,7 @@ export default function AdminLayout() {
           </div>
 
           {/* Page Content */}
-          <div className={classes.content}>
+          <div className={classes.content} id="main-content">
             <Outlet />
           </div>
         </div>

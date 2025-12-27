@@ -5,21 +5,18 @@ import {
   tokens,
   Button,
   Card,
-  CardHeader,
-  CardPreview,
   Caption1,
   Text,
   Title2,
   Title3,
-  Subtitle2, // Added Subtitle2
-  Body1,
+  Subtitle2,
   Input,
   Label,
   Field,
   Textarea,
   Dropdown,
   Option,
-  Switch, // Added Switch
+  Switch,
   Dialog,
   DialogSurface,
   DialogTitle,
@@ -29,12 +26,10 @@ import {
   DialogTrigger,
   TabList,
   Tab,
-  SelectTabData,
   TabValue,
   Badge,
   Spinner,
-  Divider,
-} from '@fluentui/react-components'; // Check if Subtitle2 and Switch are exported, if not use Title3/Text or Checkbox
+} from '@fluentui/react-components';
 import {
   Server24Regular,
   PlugConnected24Regular,
@@ -46,8 +41,6 @@ import {
   Play24Regular,
   Dismiss24Regular,
   Desktop24Regular,
-  Globe24Regular,
-  Code24Regular,
 } from '@fluentui/react-icons';
 import { toast } from 'sonner';
 
@@ -139,11 +132,13 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorNeutralBackground1,
     ':hover': {
       backgroundColor: tokens.colorNeutralBackground1Hover,
+      // @ts-ignore
       borderColor: tokens.colorNeutralStroke1Hover,
     },
   },
   serverItemSelected: {
     backgroundColor: tokens.colorBrandBackground2,
+    // @ts-ignore
     borderColor: tokens.colorBrandStroke1,
     ':hover': {
       backgroundColor: tokens.colorBrandBackground2,
@@ -610,7 +605,6 @@ export default function MCP() {
                         <Field label="Arguments (JSON)" hint="Enter arguments as a JSON object">
                           <Textarea
                             rows={5}
-                            style={{ fontFamily: "monospace" }}
                             value={toolForm.arguments}
                             onChange={(e) => setToolForm({ ...toolForm, arguments: e.target.value })}
                             style={{ fontFamily: 'monospace' }}
